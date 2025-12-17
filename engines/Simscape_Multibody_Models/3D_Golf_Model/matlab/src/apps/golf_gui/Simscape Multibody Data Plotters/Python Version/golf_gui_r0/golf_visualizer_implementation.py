@@ -808,9 +808,9 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
         azimuth_rad = np.radians(self.camera_azimuth)
         elevation_rad = np.radians(self.camera_elevation)
 
-        x = self.camera_distance * np.cos(elevation_rad) * np.cos(azimuth_rad)
-        y = self.camera_distance * np.sin(elevation_rad)
-        z = self.camera_distance * np.cos(elevation_rad) * np.sin(azimuth_rad)
+        self.camera_distance * np.cos(elevation_rad) * np.cos(azimuth_rad)
+        self.camera_distance * np.sin(elevation_rad)
+        self.camera_distance * np.cos(elevation_rad) * np.sin(azimuth_rad)
 
 
 

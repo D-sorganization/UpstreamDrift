@@ -100,7 +100,7 @@ def generate_four_bar_linkage_xml(
         <body name="crank" pos="0 0 0.5">
             <joint name="crank_joint" type="hinge" axis="0 0 1" damping="0.1"/>
             <geom type="capsule"
-                  fromto="0 0 0  {crank * np.cos(np.pi / 4)} 
+                  fromto="0 0 0  {crank * np.cos(np.pi / 4)}
                          {crank * np.sin(np.pi / 4)} 0"
                   size="0.05" material="crank_mat" mass="0.5"/>
             <geom name="crank_end" type="sphere"
@@ -124,10 +124,10 @@ def generate_four_bar_linkage_xml(
         <!-- Follower link -->
         <body name="follower" pos="{ground} 0 0.5">
             <joint name="follower_joint" type="hinge" axis="0 0 1" damping="0.1"/>
-            <geom type="capsule" 
+            <geom type="capsule"
                   fromto="0 0 0  {-follower * 0.7} {follower * 0.3} 0"
                   size="0.05" material="follower_mat" mass="0.5"/>
-            <geom name="follower_end" type="sphere" 
+            <geom name="follower_end" type="sphere"
                   pos="{-follower * 0.7} {follower * 0.3} 0"
                   size="0.07" rgba="0.5 0 1 1" contype="0" conaffinity="0"/>
         </body>
@@ -190,9 +190,9 @@ def generate_slider_crank_xml(
 
         <!-- Slider guide rail -->
         <geom type="cylinder"
-              fromto="{slider_start if orientation == "horizontal" else 0} 0 
+              fromto="{slider_start if orientation == "horizontal" else 0} 0
                      {1 if orientation == "horizontal" else slider_start}
-                     {slider_end if orientation == "horizontal" else 0} 0 
+                     {slider_end if orientation == "horizontal" else 0} 0
                      {1 if orientation == "horizontal" else slider_end}"
               size="0.04" rgba="0.3 0.3 0.3 1" contype="0" conaffinity="0"/>
 
@@ -364,7 +364,7 @@ def generate_geneva_mechanism_xml(num_slots=6, drive_radius=2.0) -> str:
         <!-- Drive wheel (continuous rotation) -->
         <body name="drive_wheel" pos="0 0 1">
             <joint name="drive_joint" type="hinge" axis="0 0 1" damping="0.5"/>
-            <geom type="cylinder" size="{drive_radius * 0.8} 0.1" 
+            <geom type="cylinder" size="{drive_radius * 0.8} 0.1"
                   material="drive_mat" mass="1.0"/>
             <!-- Drive pin -->
             <geom type="cylinder"
@@ -377,7 +377,8 @@ def generate_geneva_mechanism_xml(num_slots=6, drive_radius=2.0) -> str:
         <!-- Geneva wheel (intermittent rotation) -->
         <body name="geneva_wheel" pos="{drive_radius * 1.5} 0 1">
             <joint name="geneva_joint" type="hinge" axis="0 0 1" damping="1.0"/>
-            <geom type="cylinder" size="{drive_radius} 0.15" material="geneva_mat" mass="2.0"/>
+            <geom type="cylinder" size="{drive_radius} 0.15"
+                  material="geneva_mat" mass="2.0"/>
             <!-- Simplified slot representations as visual markers -->
             <geom type="box" pos="{drive_radius * 0.7} 0 0.16" size="0.15 0.12 0.05"
                   rgba="0.2 0.9 0.2 0.7" contype="0" conaffinity="0"/>
@@ -392,8 +393,8 @@ def generate_geneva_mechanism_xml(num_slots=6, drive_radius=2.0) -> str:
         <!-- Center pivots -->
         <geom name="drive_pivot" type="sphere" pos="0 0 1" size="0.15"
               rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-        <geom name="geneva_pivot" type="sphere" pos="{drive_radius * 1.5} 0 1" size="0.15"
-              rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
+        <geom name="geneva_pivot" type="sphere" pos="{drive_radius * 1.5} 0 1"
+              size="0.15" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
     </worldbody>
 
     <actuator>
@@ -446,7 +447,8 @@ def generate_peaucellier_linkage_xml(scale=1.0) -> str:
 
             <!-- Point B on drive arm -->
             <body name="point_B" pos="{1.5 * scale} 0 0">
-                <geom type="sphere" size="0.08" rgba="1 0.7 0 1" mass="0.2" contype="0" conaffinity="0"/>
+                <geom type="sphere" size="0.08" rgba="1 0.7 0 1" mass="0.2"
+                      contype="0" conaffinity="0"/>
             </body>
         </body>
 
@@ -460,9 +462,11 @@ def generate_peaucellier_linkage_xml(scale=1.0) -> str:
         <!-- Rhombus linkage (simplified representation) -->
         <body name="rhombus_center" pos="{1.2 * scale} 0 1">
             <joint name="rhombus_joint" type="hinge" axis="0 0 1" damping="0.1"/>
-            <geom type="capsule" fromto="{-0.5 * scale} {0.8 * scale} 0  {0.5 * scale} {-0.8 * scale} 0"
+            <geom type="capsule"
+                  fromto="{-0.5 * scale} {0.8 * scale} 0  {0.5 * scale} {-0.8 * scale} 0"
                   size="0.03" material="link_mat" mass="0.3"/>
-            <geom type="capsule" fromto="{-0.5 * scale} {-0.8 * scale} 0  {0.5 * scale} {0.8 * scale} 0"
+            <geom type="capsule"
+                  fromto="{-0.5 * scale} {-0.8 * scale} 0  {0.5 * scale} {0.8 * scale} 0"
                   size="0.03" material="link_mat" mass="0.3"/>
 
             <!-- Tracer point (generates straight line) -->
