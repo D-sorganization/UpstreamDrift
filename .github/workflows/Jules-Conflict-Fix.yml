@@ -1,0 +1,48 @@
+name: Jules Conflict Resolver
+on:
+  workflow_call:
+
+jobs:
+  find-and-fix-conflicts:
+    runs-on: ubuntu-latest
+    if: github.actor != 'jules-bot'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: npm install -g @google/jules
+      - run: jules auth --token ${{ secrets.JULES_API_KEY }}
+
+      - name: Scan for Conflicted PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PRS=$(gh pr list --state open --label "auto-fix" --json number --jq '.[].number')
+
+          if [ -z "$PRS" ]; then
+            exit 0
+          fi
+
+          for PR in $PRS; do
+            STATE=$(gh pr view $PR --json mergeable --jq '.mergeable')
+            
+            if [ "$STATE" == "CONFLICTING" ]; then
+              # FIX: Robustly count comments containing the keyword
+              ATTEMPTS=$(gh pr view $PR --json comments --jq '[.comments[] | select(.body | contains("conflict resolution attempt"))] | length')
+              
+              # Default to 0 if null/empty
+              ATTEMPTS=${ATTEMPTS:-0}
+
+              if [ "$ATTEMPTS" -gt 3 ]; then
+                 echo "Too many attempts ($ATTEMPTS) for PR $PR. Skipping."
+                 continue
+              fi
+
+              jules task fix \
+                --pr $PR \
+                --prompt "Merge conflict detected. Resolve textual conflicts ONLY. 
+                1. Merge 'origin/main'.
+                2. Do NOT change logic or function signatures.
+                3. This is conflict resolution attempt #$((ATTEMPTS+1))."
+            fi
+          done

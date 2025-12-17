@@ -1,0 +1,34 @@
+name: Jules Archivist
+
+on:
+  workflow_call:
+
+# ✅ PERMISSION FIX: Grants access to delete remote branches
+permissions:
+  contents: write
+
+jobs:
+  archive-tasks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cleanup Merged Branches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch list of merged PR branches starting with 'jules/'
+          # Note: We filter by the branch prefix used by your agent
+          BRANCHES=$(gh pr list --state merged --limit 100 --json headRefName --jq '.[] | select(.headRefName | startswith("jules/")) | .headRefName')
+
+          if [ -z "$BRANCHES" ]; then
+            echo "No branches to cleanup."
+            exit 0
+          fi
+
+          for BRANCH in $BRANCHES; do
+            echo "Deleting merged branch: $BRANCH"
+            # Delete remote branch
+            git push origin --delete "$BRANCH" || true
+          done

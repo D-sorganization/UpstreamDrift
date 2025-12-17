@@ -1,0 +1,23 @@
+name: Jules Render Healer
+on:
+  deployment_status:
+    state: [failure]
+
+jobs:
+  fix-deploy:
+    if:
+      github.event.deployment.environment == 'production' && github.event.deployment_status.state ==
+      'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install -g @google/jules
+
+      - name: Heal Deployment
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          DEPLOY_URL: ${{ github.event.deployment_status.target_url }}
+        run: |
+          jules remote new \
+            --repo ${{ github.repository }} \
+            --session "Production deployment failed at $DEPLOY_URL. Analyze the configuration and fix the crash."

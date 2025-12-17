@@ -1,0 +1,92 @@
+name: Jules Documentation Scribe (Worker)
+
+on: workflow_call
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  audit-documentation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2 # We need at least 2 commits to run diff (HEAD and HEAD^)
+
+      - name: Identify Changed Files
+        id: changes
+        run: |
+          # FIX: Compare the immediate last commit (HEAD) with its parent (HEAD^)
+          # This accurately captures "what just changed" in the push
+          FILES=$(git diff --name-only HEAD^ HEAD | grep "\.py$" || true)
+
+          if [ -z "$FILES" ]; then
+            echo "No python files changed. Exiting."
+            echo "files=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Flatten newlines to commas
+          FILES_FLAT=$(echo "$FILES" | tr '\n' ', ')
+          echo "files=$FILES_FLAT" >> $GITHUB_OUTPUT
+
+      - name: Setup Node
+        if: steps.changes.outputs.files != ''
+        uses: actions/setup-node@v4
+        with: { node-version: "20" }
+
+      - name: Install & Auth Jules
+        if: steps.changes.outputs.files != ''
+        run: |
+          npm install -g @google/jules
+          jules auth --token ${{ secrets.JULES_API_KEY }}
+
+      - name: Create Docs Branch
+        if: steps.changes.outputs.files != ''
+        id: branch
+        run: |
+          BRANCH_NAME="docs/update-$(date +%s)"
+          git checkout -b $BRANCH_NAME
+          git push -u origin $BRANCH_NAME
+          echo "name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Dispatch Jules
+        if: steps.changes.outputs.files != ''
+        env:
+          FILES: ${{ steps.changes.outputs.files }}
+          BRANCH: ${{ steps.branch.outputs.name }}
+        run: |
+          jules task fix \
+            --branch $BRANCH \
+            --prompt "The following files were modified: [ $FILES ]. Update Google-style docstrings for CodeWiki. Do not touch READMEs."
+
+      - name: Open PR
+        if: steps.changes.outputs.files != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.branch.outputs.name }}
+        run: |
+          git fetch origin $BRANCH
+
+          # Check if the Jules branch has any actual changes compared to where we started
+          if git diff --quiet HEAD..origin/$BRANCH; then
+            echo "Jules made no changes."
+            git push origin --delete $BRANCH
+          else
+            # 1. Create the PR (Capture the URL)
+            PR_URL=$(gh pr create \
+              --title "docs: update metadata" \
+              --body "Automated docstring updates." \
+              --base main \
+              --head $BRANCH \
+              --label "auto-fix")
+            
+            echo "PR Created: $PR_URL"
+
+            # 2. FORCE READY STATE (Fixes Draft Issue)
+            gh pr ready "$PR_URL" || true
+          fi

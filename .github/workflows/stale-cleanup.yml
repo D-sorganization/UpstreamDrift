@@ -1,0 +1,100 @@
+name: Stale PR/Issue Cleanup
+
+on:
+  schedule:
+    # Run daily at 1am UTC
+    - cron: "0 1 * * *"
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v9
+        with:
+          # Stale configuration
+          days-before-stale: 30
+          days-before-close: 7
+
+          # Stale PR configuration
+          stale-pr-message: |
+            👋 This pull request has been automatically marked as stale because it has not had
+            recent activity for 30 days.
+
+            **It will be closed in 7 days if no further activity occurs.**
+
+            If you're still working on this PR:
+            - Push new commits or comment to remove the stale label
+            - Add the "keep-open" label to prevent auto-closure
+
+            If this PR is blocked:
+            - Explain what's blocking it
+            - Request review from maintainers
+
+            Thank you for your contribution! 🙏
+
+          close-pr-message: |
+            🤖 This pull request has been automatically closed due to inactivity.
+
+            If you'd like to continue this work:
+            - Reopen this PR with a comment explaining the status
+            - Create a new PR referencing this one
+
+            Thank you for your contribution!
+
+          # Stale Issue configuration
+          stale-issue-message: |
+            👋 This issue has been automatically marked as stale because it has not had
+            recent activity for 30 days.
+
+            **It will be closed in 7 days if no further activity occurs.**
+
+            If this issue is still relevant:
+            - Comment with updates or context
+            - Add the "keep-open" label to prevent auto-closure
+
+            If this was resolved:
+            - Close the issue with a comment explaining the resolution
+
+            Thank you! 🙏
+
+          close-issue-message: |
+            🤖 This issue has been automatically closed due to inactivity.
+
+            If this issue is still relevant, please reopen it with:
+            - Current status or context
+            - Steps to reproduce (for bugs)
+            - Use case details (for features)
+
+            Thank you!
+
+          # Labels
+          stale-pr-label: "stale"
+          stale-issue-label: "stale"
+          exempt-pr-labels: "keep-open,in-progress,blocked,urgent,hotfix"
+          exempt-issue-labels: "keep-open,in-progress,blocked,pinned,enhancement"
+          exempt-draft-pr: true
+
+          # Activity configuration
+          exempt-all-pr-assignees: false
+          exempt-all-issue-assignees: false
+
+          # Operations per run (rate limiting)
+          operations-per-run: 100
+
+          # Custom messages for specific labels
+          only-labels: "" # Apply to all unless exempt
+
+          # Remove stale label when activity resumes
+          remove-stale-when-updated: true
+
+          # Debug mode (set to true for testing)
+          debug-only: false
+
+          # Don't close PRs/issues with milestones
+          exempt-all-pr-milestones: true
+          exempt-all-issue-milestones: true
