@@ -479,9 +479,9 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
             (10.0, CameraPreset.DEFAULT),
         ]
 
-        for time, preset in presets_tour:
+        for time_val, preset in presets_tour:
             state = self.camera_controller.presets[preset]
-            self.camera_controller.add_keyframe(time, state)
+            self.camera_controller.add_keyframe(time_val, state)
 
         # Start cinematic playback
         self.camera_controller.start_cinematic_playback(duration=10.0, loop=False)

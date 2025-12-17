@@ -1,6 +1,6 @@
 """Project package init."""
 
-from typing import Any, List
+from typing import Any
 
 # Define stubs first to avoid MyPy redefinition errors
 _C3D_AVAILABLE = False

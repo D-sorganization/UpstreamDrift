@@ -1285,15 +1285,20 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
            ctrllimited="true" ctrlrange="-65 65"/>
 
     <!-- Left Elbow (1 DOF) -->
-    <motor name="l_elbow" joint="left_elbow" gear="60" ctrllimited="true" ctrlrange="-75 75"/>
+    <motor name="l_elbow" joint="left_elbow" gear="60"
+           ctrllimited="true" ctrlrange="-75 75"/>
 
     <!-- Left Wrist (2 DOF) -->
-    <motor name="l_wrist_flex" joint="left_wrist_flexion" gear="25" ctrllimited="true" ctrlrange="-35 35"/>
-    <motor name="l_wrist_dev" joint="left_wrist_deviation" gear="20" ctrllimited="true" ctrlrange="-28 28"/>
+    <motor name="l_wrist_flex" joint="left_wrist_flexion" gear="25"
+           ctrllimited="true" ctrlrange="-35 35"/>
+    <motor name="l_wrist_dev" joint="left_wrist_deviation" gear="20"
+           ctrllimited="true" ctrlrange="-28 28"/>
 
     <!-- Right Scapula (2 DOF) -->
-    <motor name="r_scap_elev" joint="right_scapula_elevation" gear="35" ctrllimited="true" ctrlrange="-40 40"/>
-    <motor name="r_scap_prot" joint="right_scapula_protraction" gear="30" ctrllimited="true" ctrlrange="-35 35"/>
+    <motor name="r_scap_elev" joint="right_scapula_elevation" gear="35"
+           ctrllimited="true" ctrlrange="-40 40"/>
+    <motor name="r_scap_prot" joint="right_scapula_protraction" gear="30"
+           ctrllimited="true" ctrlrange="-35 35"/>
 
     <!-- Right Shoulder (3 DOF) -->
     <motor name="r_shldr_flex" joint="right_shoulder_flexion" gear="70" ctrllimited="true" ctrlrange="-90 90"/>

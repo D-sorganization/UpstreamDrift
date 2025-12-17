@@ -718,22 +718,25 @@ def generate_delta_robot_xml(base_radius=2.0, platform_radius=0.5) -> str:
                 <!-- Forearm 1 (parallel linkage) -->
                 <body name="forearm1a" pos="0 {-0.15} {-arm_length}">
                     <joint name="elbow1a" type="hinge" axis="0 1 0" damping="0.5"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}" size="0.05"
-                          material="forearm_mat" mass="0.5"/>
+                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}"
+                          size="0.05" material="forearm_mat" mass="0.5"/>
                 </body>
                 <body name="forearm1b" pos="0 {0.15} {-arm_length}">
                     <joint name="elbow1b" type="hinge" axis="0 1 0" damping="0.5"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}" size="0.05"
-                          material="forearm_mat" mass="0.5"/>
+                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}"
+                          size="0.05" material="forearm_mat" mass="0.5"/>
                 </body>
             </body>
         </body>
 
         <!-- Arm 2 (120 degrees) -->
-        <body name="base2" pos="{base_radius * np.cos(2 * np.pi / 3)} {base_radius * np.sin(2 * np.pi / 3)} 2">
-            <geom type="sphere" size="0.15" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
+        <body name="base2"
+              pos="{base_radius * np.cos(2 * np.pi / 3)} {base_radius * np.sin(2 * np.pi / 3)} 2">
+            <geom type="sphere" size="0.15" rgba="0.5 0.5 0.5 1"
+                  contype="0" conaffinity="0"/>
             <body name="arm2" pos="0 0 0" euler="0 0 120">
-                <joint name="joint2" type="hinge" axis="0 1 0" range="-120 120" damping="1.0"/>
+                <joint name="joint2" type="hinge" axis="0 1 0" range="-120 120"
+                       damping="1.0"/>
                 <geom type="capsule" fromto="0 0 0  0 0 {-arm_length}" size="0.08"
                       material="arm_mat" mass="1.0"/>
 
