@@ -7,7 +7,6 @@ Fixed for moderngl 5.x compatibility with correct uniform API
 import time
 import traceback
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple, Union
 
 import moderngl as mgl
 import numpy as np
@@ -144,9 +143,9 @@ class GeometryObject:
     vertex_count: int
     index_count: int
     visible: bool = True
-    position: Optional[np.ndarray] = None
-    rotation: Optional[np.ndarray] = None
-    scale: Optional[np.ndarray] = None
+    position: np.ndarray | None = None
+    rotation: np.ndarray | None = None
+    scale: np.ndarray | None = None
 
     def __post_init__(self):
         if self.position is None:
@@ -162,9 +161,9 @@ class GeometryManager:
 
     def __init__(self, ctx: mgl.Context):
         self.ctx = ctx
-        self.geometry_objects: Dict[str, GeometryObject] = {}
-        self.mesh_library: Dict[str, Tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
-        self.programs: Dict[str, mgl.Program] = {}
+        self.geometry_objects: dict[str, GeometryObject] = {}
+        self.mesh_library: dict[str, tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
+        self.programs: dict[str, mgl.Program] = {}
 
         # Initialize standard meshes
         self._create_standard_meshes()
@@ -315,7 +314,7 @@ class GeometryManager:
         name: str,
         position: np.ndarray,
         rotation: np.ndarray,
-        scale: Union[float, np.ndarray],
+        scale: float | np.ndarray,
     ):
         """Update object transformation efficiently"""
         if name not in self.geometry_objects:
@@ -677,7 +676,7 @@ class OpenGLRenderer:
         start: np.ndarray,
         end: np.ndarray,
         radius: float,
-        color: List[float],
+        color: list[float],
         opacity: float,
         program: mgl.Program,
     ):
@@ -745,7 +744,7 @@ class OpenGLRenderer:
         obj_name: str,
         position: np.ndarray,
         radius: float,
-        color: List[float],
+        color: list[float],
         opacity: float,
         program: mgl.Program,
     ):

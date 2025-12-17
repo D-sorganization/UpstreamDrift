@@ -6,6 +6,7 @@ Tests joint transform and motion subspace calculations.
 
 import numpy as np
 import pytest
+
 from src.spatial_algebra.joints import jcalc
 
 

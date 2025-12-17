@@ -224,35 +224,10 @@ class BiomechanicalAnalyzer:
         # We always use MuJoCo's computed values as they are authoritative
         com_pos = self.data.subtree_com[0].copy()  # World body COM
 
-        # Compute COM velocity manually using Jacobians (subtree_linvel doesn't exist in MuJoCo)
-        # Compute COM velocity from body velocities
-        total_mass = 0.0
-        com_vel = np.zeros(3)
-
-        for i in range(self.model.nbody):
-            if i == 0:  # Skip world body
-                continue
-            body_mass = self.model.body_mass[i]
-
-            # Get body velocity using Jacobian
-            # MuJoCo 3.3+ may require reshaped arrays
-            try:
-                jacp = np.zeros((3, self.model.nv))
-                jacr = np.zeros((3, self.model.nv))
-                mujoco.mj_jacBodyCom(self.model, self.data, jacp, jacr, i)
-            except TypeError:
-                # Fallback to flat array approach
-                jacp_flat = np.zeros(3 * self.model.nv)
-                jacr_flat = np.zeros(3 * self.model.nv)
-                mujoco.mj_jacBodyCom(self.model, self.data, jacp_flat, jacr_flat, i)
-                jacp = jacp_flat.reshape(3, self.model.nv)
-            body_vel = jacp @ self.data.qvel
-
-            com_vel += body_mass * body_vel
-            total_mass += body_mass
-
-        if total_mass > 0:
-            com_vel /= total_mass
+        # Compute COM velocity using MuJoCo's subtreeVel
+        # This is much faster than iterating over all bodies and computing Jacobians
+        mujoco.mj_subtreeVel(self.model, self.data)
+        com_vel = self.data.subtree_linvel[0].copy()
 
         return com_pos, com_vel
 

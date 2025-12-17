@@ -7,7 +7,6 @@ Complete integration of all components with enhanced features and error handling
 import logging
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
 
 # Configure logging
 logging.basicConfig(
@@ -79,7 +78,7 @@ class EnhancedGolfVisualizerApp(QApplication):
         self._setup_application_style()
 
         # Main window
-        self.main_window: Optional[EnhancedMainWindow] = None
+        self.main_window: EnhancedMainWindow | None = None
 
         # Performance monitoring
         self.performance_monitor = PerformanceMonitor()
@@ -237,8 +236,8 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
         self.plugin_manager = PluginManager()
 
         # Enhanced status tracking
-        self.analysis_results: Dict = {}
-        self.current_session: Optional[str] = None
+        self.analysis_results: dict = {}
+        self.current_session: str | None = None
 
         self._setup_enhanced_features()
 
@@ -370,7 +369,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
         self.status_timer.timeout.connect(self._update_enhanced_status)
         self.status_timer.start(1000)  # Update every second
 
-    def load_data_files(self, file_paths: List[str]) -> bool:
+    def load_data_files(self, file_paths: list[str]) -> bool:
         """Enhanced data loading with validation and preprocessing"""
         try:
             if len(file_paths) != 3:
@@ -619,10 +618,10 @@ class SessionManager:
     """Manage analysis sessions and data persistence"""
 
     def __init__(self):
-        self.sessions: Dict[str, Dict] = {}
-        self.current_session: Optional[str] = None
+        self.sessions: dict[str, dict] = {}
+        self.current_session: str | None = None
 
-    def create_session(self, data_files: List[str]) -> str:
+    def create_session(self, data_files: list[str]) -> str:
         """Create a new analysis session"""
         import uuid
 
@@ -650,12 +649,12 @@ class SessionManager:
                 json.dump(self.sessions[session_id], f, indent=2, default=str)
             logger.info(f"Session saved: {filepath}")
 
-    def load_session(self, filepath: str) -> Optional[str]:
+    def load_session(self, filepath: str) -> str | None:
         """Load session from file"""
         try:
             import json
 
-            with open(filepath, "r") as f:
+            with open(filepath) as f:
                 session_data = json.load(f)
 
             session_id = session_data["id"]
@@ -671,15 +670,15 @@ class ExportManager:
     """Manage various export functionalities"""
 
     def __init__(self):
-        self.export_queue: List[Dict] = []
+        self.export_queue: list[dict] = []
         self.is_exporting = False
 
-    def export_video(self, frames: List, output_path: str, fps: int = 30):
+    def export_video(self, frames: list, output_path: str, fps: int = 30):
         """Export frames as video"""
         # This would use OpenCV or similar to create video
         logger.info(f"Exporting video: {output_path}")
 
-    def export_data(self, data: Dict, output_path: str, format: str = "csv"):
+    def export_data(self, data: dict, output_path: str, format: str = "csv"):
         """Export analysis data"""
         if format.lower() == "csv":
             import pandas as pd
@@ -688,7 +687,7 @@ class ExportManager:
             df.to_csv(output_path, index=False)
         logger.info(f"Exported data: {output_path}")
 
-    def export_images(self, frames: List, output_dir: str, format: str = "png"):
+    def export_images(self, frames: list, output_dir: str, format: str = "png"):
         """Export frame sequence as images"""
         Path(output_dir).mkdir(parents=True, exist_ok=True)
         # Export logic here
@@ -699,7 +698,7 @@ class PluginManager:
     """Manage plugins and extensions"""
 
     def __init__(self):
-        self.plugins: Dict[str, object] = {}
+        self.plugins: dict[str, object] = {}
         self.plugin_dir = Path("plugins")
 
     def load_plugins(self):

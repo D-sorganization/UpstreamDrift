@@ -104,7 +104,9 @@ class DoublePendulumApp:
 
         # Enable interactive rotation and zoom
         self.canvas = FigureCanvasTkAgg(self.fig, main_frame)
-        self.canvas.get_tk_widget().pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
+        self.canvas.get_tk_widget().pack(
+            side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5)
+        )
 
         # Draw initial empty plot
         self.canvas.draw()
@@ -116,7 +118,9 @@ class DoublePendulumApp:
 
         # Scrollable frame for controls
         canvas_scroll = tk.Canvas(panel_frame, bg="white", highlightthickness=0)
-        scrollbar = tk.Scrollbar(panel_frame, orient="vertical", command=canvas_scroll.yview)
+        scrollbar = tk.Scrollbar(
+            panel_frame, orient="vertical", command=canvas_scroll.yview
+        )
         scrollable_frame = tk.Frame(canvas_scroll, bg="white")
 
         scrollable_frame.bind(
@@ -144,7 +148,9 @@ class DoublePendulumApp:
         self._create_section_header(scrollable_frame, "Initial Conditions", row)
         row += 1
 
-        def labeled_row(label: str, default: str, row: int, tooltip: str = "") -> tk.Entry:
+        def labeled_row(
+            label: str, default: str, row: int, tooltip: str = ""
+        ) -> tk.Entry:
             frame = tk.Frame(scrollable_frame, bg="white")
             frame.grid(row=row, column=0, columnspan=2, sticky="ew", pady=2)
 
@@ -343,11 +349,13 @@ class DoublePendulumApp:
 
         granularity_frame = tk.Frame(scrollable_frame, bg="white")
         granularity_frame.grid(row=row, column=0, columnspan=2, sticky="w", pady=2)
-        tk.Label(granularity_frame, text="Granularity (every N steps):", bg="white").pack(
-            side=tk.LEFT, padx=(20, 5)
-        )
+        tk.Label(
+            granularity_frame, text="Granularity (every N steps):", bg="white"
+        ).pack(side=tk.LEFT, padx=(20, 5))
         self.granularity_var = tk.StringVar(value="1")
-        granularity_entry = tk.Entry(granularity_frame, textvariable=self.granularity_var, width=8)
+        granularity_entry = tk.Entry(
+            granularity_frame, textvariable=self.granularity_var, width=8
+        )
         granularity_entry.pack(side=tk.LEFT)
         granularity_entry.bind("<KeyRelease>", lambda e: self._on_granularity_change())
         row += 1
@@ -572,14 +580,18 @@ class DoublePendulumApp:
             if abs(com_ratio - 0.5) < 0.01:
                 # Close to uniform rod - use standard formula
                 upper_inertia = (
-                    (1.0 / 12.0) * user_inputs.upper_mass_kg * user_inputs.upper_length_m**2
+                    (1.0 / 12.0)
+                    * user_inputs.upper_mass_kg
+                    * user_inputs.upper_length_m**2
                 )
             else:
                 # For non-uniform distribution, use an approximation
                 # Scale the uniform rod inertia based on how far COM is from center
                 # This is an approximation - exact value depends on actual mass distribution
                 uniform_inertia = (
-                    (1.0 / 12.0) * user_inputs.upper_mass_kg * user_inputs.upper_length_m**2
+                    (1.0 / 12.0)
+                    * user_inputs.upper_mass_kg
+                    * user_inputs.upper_length_m**2
                 )
                 # Adjust based on COM position (empirical scaling factor)
                 com_offset_factor = 1.0 + 3.0 * (com_ratio - 0.5) ** 2
@@ -608,7 +620,9 @@ class DoublePendulumApp:
             forcing = compile_forcing_functions(
                 user_inputs.shoulder_expression, user_inputs.wrist_expression
             )
-            self.dynamics = DoublePendulumDynamics(parameters=parameters, forcing_functions=forcing)
+            self.dynamics = DoublePendulumDynamics(
+                parameters=parameters, forcing_functions=forcing
+            )
 
             # Update state with new parameters
             # If simulation is running and angles change, pause to avoid physically
@@ -622,7 +636,9 @@ class DoublePendulumApp:
                 # Check if angles actually changed
                 old_theta1 = math.degrees(self.state.theta1)
                 old_theta2 = math.degrees(self.state.theta2)
-                old_phi = math.degrees(self.state.phi) if hasattr(self.state, "phi") else 0.0
+                old_phi = (
+                    math.degrees(self.state.phi) if hasattr(self.state, "phi") else 0.0
+                )
 
                 angles_changed = (
                     abs(old_theta1 - user_inputs.shoulder_angle_deg) > 0.1
@@ -654,7 +670,11 @@ class DoublePendulumApp:
                     omega1=self.state.omega1,
                     omega2=self.state.omega2,
                     phi=math.radians(user_inputs.out_of_plane_angle_deg),
-                    omega_phi=(self.state.omega_phi if hasattr(self.state, "omega_phi") else 0.0),
+                    omega_phi=(
+                        self.state.omega_phi
+                        if hasattr(self.state, "omega_phi")
+                        else 0.0
+                    ),
                 )
 
             self._draw_pendulum_3d()
@@ -756,7 +776,8 @@ class DoublePendulumApp:
             [
                 math.sin(theta1) * upper.length_m,  # Horizontal component (X)
                 0.0,  # Depth component (Y, initially zero)
-                -math.cos(theta1) * upper.length_m,  # Vertical component (Z, negative = down)
+                -math.cos(theta1)
+                * upper.length_m,  # Vertical component (Z, negative = down)
             ]
         )
         elbow = pivot + upper_vec
@@ -768,7 +789,8 @@ class DoublePendulumApp:
             [
                 math.sin(lower_abs_angle) * lower.length_m,  # Horizontal (X)
                 0.0,  # Depth (Y)
-                -math.cos(lower_abs_angle) * lower.length_m,  # Vertical (Z, negative = down)
+                -math.cos(lower_abs_angle)
+                * lower.length_m,  # Vertical (Z, negative = down)
             ]
         )
         wrist = elbow + lower_vec
@@ -839,7 +861,9 @@ class DoublePendulumApp:
         arc_radius = max_range * 0.2
         arc_x = [pivot[0] + arc_radius * math.sin(t) for t in arc_theta]
         arc_y = [pivot[1]] * arc_points  # Y stays constant
-        arc_z = [pivot[2] - arc_radius * math.cos(t) for t in arc_theta]  # Z is vertical
+        arc_z = [
+            pivot[2] - arc_radius * math.cos(t) for t in arc_theta
+        ]  # Z is vertical
         if len(arc_x) > 1:
             self.ax.plot(arc_x, arc_y, arc_z, "b-", linewidth=2, alpha=0.5)
 
@@ -849,7 +873,9 @@ class DoublePendulumApp:
         gravity_length = max_range * 0.35
 
         # Position gravity arrow at a visible location
-        gravity_start = pivot + np.array([max_range * 0.6, max_range * 0.2, max_range * 0.3])
+        gravity_start = pivot + np.array(
+            [max_range * 0.6, max_range * 0.2, max_range * 0.3]
+        )
 
         # Gravity vector ALWAYS points straight down in world coordinates (negative Z)
         # This is independent of any plane rotation
