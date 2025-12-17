@@ -2047,7 +2047,13 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
 
             def slider_sync_func(value: float) -> None:
                 """Update slider value from dialog control."""
+                slider.blockSignals(True)
                 slider.setValue(int(value))
+                slider.blockSignals(False)
+
+                # Update label in main window if available
+                if actuator_index < len(self.actuator_labels):
+                    self.actuator_labels[actuator_index].setText(f"{value:.0f} Nm")
 
             slider_sync = slider_sync_func
 
@@ -2262,7 +2268,10 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
     def on_actuator_slider_changed(self, actuator_index: int, value: int) -> None:
         """Handle slider change - update constant value and label."""
         if actuator_index < len(self.actuator_constant_inputs):
-            self.actuator_constant_inputs[actuator_index].setValue(float(value))
+            spin = self.actuator_constant_inputs[actuator_index]
+            spin.blockSignals(True)
+            spin.setValue(float(value))
+            spin.blockSignals(False)
         if actuator_index < len(self.actuator_labels):
             self.actuator_labels[actuator_index].setText(f"{value:.0f} Nm")
         # Update control system
@@ -2275,7 +2284,10 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         """Handle constant value input change."""
         # Update slider
         if actuator_index < len(self.actuator_sliders):
-            self.actuator_sliders[actuator_index].setValue(int(value))
+            slider = self.actuator_sliders[actuator_index]
+            slider.blockSignals(True)
+            slider.setValue(int(value))
+            slider.blockSignals(False)
         # Update control system
         control_system = self.sim_widget.get_control_system()
         if control_system is not None:
