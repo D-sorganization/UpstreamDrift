@@ -1181,7 +1181,7 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
                           <body name="hosel" pos="0 0 -0.24" euler="0 0.17 0">
                             <inertial pos="0 0.02 -0.01" mass="0.010"
                                       diaginertia="0.000005 0.000005 0.000002"/>
-                            <geom name="hosel_geom" type="cylinder" 
+                            <geom name="hosel_geom" type="cylinder"
                                   fromto="0 0 0 0 0.035 -0.005"
                                   size="0.008" material="club_head_mat"/>
 
@@ -1241,22 +1241,26 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
     <connect body1="pelvis" body2="left_femur" anchor="-0.12 0 0"/>
     <connect body1="pelvis" body2="right_femur" anchor="0.12 0 0"/>
     <!-- Left hand grips club -->
-    <weld body1="left_hand" body2="club_grip" relpose="0 0 -0.18 1 0 0 0" 
+    <weld body1="left_hand" body2="club_grip" relpose="0 0 -0.18 1 0 0 0"
           active="true"/>
   </equality>
 
   <actuator>
     <!-- Left Leg (3 DOF) -->
-    <motor name="l_ankle_plantar" joint="left_ankle_plantar" gear="40" 
+    <motor name="l_ankle_plantar" joint="left_ankle_plantar" gear="40"
            ctrllimited="true" ctrlrange="-50 50"/>
-    <motor name="l_ankle_invert" joint="left_ankle_inversion" gear="30" 
+    <motor name="l_ankle_invert" joint="left_ankle_inversion" gear="30"
            ctrllimited="true" ctrlrange="-35 35"/>
-    <motor name="l_knee" joint="left_knee" gear="120" ctrllimited="true" ctrlrange="-150 150"/>
+    <motor name="l_knee" joint="left_knee" gear="120" ctrllimited="true"
+           ctrlrange="-150 150"/>
 
     <!-- Right Leg (3 DOF) -->
-    <motor name="r_ankle_plantar" joint="right_ankle_plantar" gear="40" ctrllimited="true" ctrlrange="-50 50"/>
-    <motor name="r_ankle_invert" joint="right_ankle_inversion" gear="30" ctrllimited="true" ctrlrange="-35 35"/>
-    <motor name="r_knee" joint="right_knee" gear="120" ctrllimited="true" ctrlrange="-150 150"/>
+    <motor name="r_ankle_plantar" joint="right_ankle_plantar" gear="40"
+           ctrllimited="true" ctrlrange="-50 50"/>
+    <motor name="r_ankle_invert" joint="right_ankle_inversion" gear="30"
+           ctrllimited="true" ctrlrange="-35 35"/>
+    <motor name="r_knee" joint="right_knee" gear="120" ctrllimited="true"
+           ctrlrange="-150 150"/>
 
     <!-- Spine (3 DOF) -->
     <motor name="spine_lateral" joint="spine_lateral" gear="140" ctrllimited="true" ctrlrange="-120 120"/>
