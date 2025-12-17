@@ -1,0 +1,71 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\diete\Repositories\Golf_Model
+configfile: pytest.ini
+plugins: anyio-4.9.0, cov-7.0.0
+collecting ... collected 1 item
+
+python/tests/test_c3d_viewer_ux.py::test_c3d_viewer_open_file_ux FAILED  [100%]
+
+================================== FAILURES ===================================
+________________________ test_c3d_viewer_open_file_ux _________________________
+
+qapp = <PyQt6.QtWidgets.QApplication object at 0x0000024E15D22670>
+
+    def test_c3d_viewer_open_file_ux(qapp: QApplication) -> None:
+        """
+        Test that opening a file triggers the expected UX behaviors
+        (wait cursor, status bar update).
+        """
+        # Import inside test to avoid ImportError at module level if skip didn't catch it for some reason
+        with patch.dict(sys.modules, {"ezc3d": MagicMock()}):
+            from apps.c3d_viewer import C3DViewerMainWindow
+    
+        window = C3DViewerMainWindow()
+    
+        # We want to verify status bar messages.
+        # QMainWindow.statusBar() returns the QStatusBar widget.
+        real_status_bar = window.statusBar()
+        assert real_status_bar is not None
+    
+        # Use patch.object to spy on showMessage
+        with patch.object(real_status_bar, "showMessage") as mock_show_message:
+    
+            # Mock the file dialog
+            test_path = "/path/to/test.c3d"
+            with patch(
+                "PyQt6.QtWidgets.QFileDialog.getOpenFileName",
+                return_value=(test_path, "C3D files (*.c3d)"),
+            ):
+    
+                # Mock ezc3d
+>               with patch("ezc3d.c3d") as mock_c3d:
+                     ^^^^^^^^^^^^^^^^^^
+
+python\tests\test_c3d_viewer_ux.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+..\..\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:1481: in __enter__
+    self.target = self.getter()
+                  ^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python313\Lib\pkgutil.py:513: in resolve_name
+    mod = importlib.import_module(modname)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python313\Lib\importlib\__init__.py:88: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<frozen importlib._bootstrap>:1387: in _gcd_import
+    ???
+<frozen importlib._bootstrap>:1360: in _find_and_load
+    ???
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+name = 'ezc3d', import_ = <function _gcd_import at 0x0000024E6A0104A0>
+
+>   ???
+E   ModuleNotFoundError: No module named 'ezc3d'
+
+<frozen importlib._bootstrap>:1324: ModuleNotFoundError
+=========================== short test summary info ===========================
+FAILED python/tests/test_c3d_viewer_ux.py::test_c3d_viewer_open_file_ux - ModuleNotFoundError: No module named 'ezc3d'
+============================== 1 failed in 3.34s ==============================

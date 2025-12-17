@@ -1,0 +1,110 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\diete\Repositories\Golf_Model
+configfile: pytest.ini
+plugins: anyio-4.9.0, cov-7.0.0
+collecting ... collected 1 item
+
+python/tests/test_c3d_viewer_ux.py::test_c3d_viewer_open_file_ux FAILED  [100%]
+
+================================== FAILURES ===================================
+________________________ test_c3d_viewer_open_file_ux _________________________
+
+qapp = <PyQt6.QtWidgets.QApplication object at 0x000001847EFF65D0>
+
+    def test_c3d_viewer_open_file_ux(qapp: QApplication) -> None:
+        """
+        Test that opening a file triggers the expected UX behaviors
+        (wait cursor, status bar update).
+        """
+        # Mock ezc3d in sys.modules throughout the test
+        with patch.dict(sys.modules, {"ezc3d": MagicMock()}):
+            from apps.c3d_viewer import C3DViewerMainWindow
+    
+            window = C3DViewerMainWindow()
+    
+            # We want to verify status bar messages.
+            # QMainWindow.statusBar() returns the QStatusBar widget.
+            real_status_bar = window.statusBar()
+            assert real_status_bar is not None
+    
+            # Use patch.object to spy on showMessage
+            with patch.object(real_status_bar, "showMessage") as mock_show_message:
+    
+                # Mock the file dialog
+                test_path = "/path/to/test.c3d"
+                with patch(
+                    "PyQt6.QtWidgets.QFileDialog.getOpenFileName",
+                    return_value=(test_path, "C3D files (*.c3d)"),
+                ):
+    
+                    # Mock ezc3d
+                    # Since ezc3d is mocked in sys.modules, patch("ezc3d.c3d") should work if we target the mock
+                    # But cleaner is to mock the return value of ezc3d.c3d if we knew the structure.
+                    # Since we don't know if patch("ezc3d.c3d") works when ezc3d is a MagicMock in sys.modules
+                    # (it should work if the mock has attributes), let's try.
+                    # Actually, patch string imports the module. sys.modules has it.
+                    with patch("ezc3d.c3d") as mock_c3d:
+                        # Minimal mock data
+                        mock_data = MagicMock()
+                        mock_data.__getitem__.side_effect = lambda k: {
+                            "data": {
+                                "points": MagicMock(shape=(4, 1, 1)),
+                                "analogs": MagicMock(shape=(1, 1, 1)),
+                            },
+                            "parameters": {
+                                "POINT": {
+                                    "LABELS": {"value": []},
+                                    "UNITS": {"value": [""]},
+                                    "RATE": {"value": [1.0]},
+                                },
+                                "ANALOG": {
+                                    "LABELS": {"value": []},
+                                    "RATE": {"value": [1.0]},
+                                    "UNITS": {"value": []},
+                                },
+                                "TRIAL": {},
+                            },
+                        }.get(k, {})
+                        mock_c3d.return_value = mock_data
+    
+                        with patch(
+                            "PyQt6.QtWidgets.QApplication.setOverrideCursor"
+                        ) as mock_set_cursor:
+                            with patch(
+                                "PyQt6.QtWidgets.QApplication.restoreOverrideCursor"
+                            ) as mock_restore_cursor:
+    
+                                window.open_c3d_file()
+    
+                                # Verify basic execution
+                                assert mock_c3d.called
+    
+                                # Verify Cursor UX
+>                               mock_set_cursor.assert_called_once_with(Qt.CursorShape.WaitCursor)
+
+python\tests\test_c3d_viewer_ux.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <MagicMock name='setOverrideCursor' id='1668585571056'>
+args = (<CursorShape.WaitCursor: 3>,), kwargs = {}
+msg = "Expected 'setOverrideCursor' to be called once. Called 2 times.\nCalls: [call(<CursorShape.WaitCursor: 3>), call(<CursorShape.WaitCursor: 3>)]."
+
+    def assert_called_once_with(self, /, *args, **kwargs):
+        """assert that the mock was called exactly once and that that call was
+        with the specified arguments."""
+        if not self.call_count == 1:
+            msg = ("Expected '%s' to be called once. Called %s times.%s"
+                   % (self._mock_name or 'mock',
+                      self.call_count,
+                      self._calls_repr()))
+>           raise AssertionError(msg)
+E           AssertionError: Expected 'setOverrideCursor' to be called once. Called 2 times.
+E           Calls: [call(<CursorShape.WaitCursor: 3>), call(<CursorShape.WaitCursor: 3>)].
+
+..\..\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:990: AssertionError
+=========================== short test summary info ===========================
+FAILED python/tests/test_c3d_viewer_ux.py::test_c3d_viewer_open_file_ux - AssertionError: Expected 'setOverrideCursor' to be called once. Called 2 times.
+Calls: [call(<CursorShape.WaitCursor: 3>), call(<CursorShape.WaitCursor: 3>)].
+============================== 1 failed in 3.40s ==============================

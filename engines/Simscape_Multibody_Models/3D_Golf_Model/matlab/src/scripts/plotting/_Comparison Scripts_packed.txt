@@ -1,0 +1,1692 @@
+%%% MATLAB PROJECT PACKER - v1.0 %%%
+%%% Source Folder Base: C:\Users\diete\MATLAB Drive\Projects\Model Rebuild\Scripts\_Comparison Scripts %%%
+%%% Pack Time: 02-May-2025 09:29:22 %%%
+
+%%% START FILE: MASTER_SCRIPT_ComparisonCharts_3D.m %%%
+cd(matlabdrive);
+cd '3DModel';
+cd 'Scripts/_Comparison Scripts';
+% PauseTime=1;
+
+SCRIPT_701_3D_QUIVER_Comparison_NetForceEquivalentCouple;
+SCRIPT_702_3D_QUIVER_Comparison_NetForce;
+SCRIPT_703_3D_QUIVER_Comparison_EquivalentCouple;
+SCRIPT_704_3D_PLOT_Comparison_ForceAlongHandPath;
+SCRIPT_705_3D_PLOT_Comparison_LinearWork;
+SCRIPT_706_3D_PLOT_Comparison_AngularWork;
+SCRIPT_707_3D_PLOT_Comparison_TotalWork;
+SCRIPT_708_3D_PLOT_Comparison_LinearPower;
+SCRIPT_709_3D_PLOT_Comparison_AngularPower;
+SCRIPT_710_3D_PLOT_Comparison_TotalPower;
+SCRIPT_711_3D_PLOT_Comparison_LinearWorkClubOnly;
+SCRIPT_712_3D_PLOT_Comparison_AngularWorkClubOnly;
+SCRIPT_713_3D_PLOT_Comparison_TotalWorkClubOnly;
+SCRIPT_714_3D_PLOT_Comparison_LinearPowerClubOnly;
+SCRIPT_715_3D_PLOT_Comparison_AngularPowerClubOnly;
+SCRIPT_716_3D_PLOT_Comparison_TotalPowerClubOnly;
+SCRIPT_717_3D_QUIVER_Comparison_LHRHForce;
+SCRIPT_718_3D_QUIVER_Comparison_LHRHLinearImpulse;
+SCRIPT_719_3D_QUIVER_Comparison_LHRHAngularImpulse;
+SCRIPT_720_3D_QUIVER_Comparison_LHRHMomentofForce;
+SCRIPT_721_3D_QUIVER_Comparison_TotalMOFEquivalentCouple;
+SCRIPT_722_3D_QUIVER_Comparison_LHRHSumofMoments;
+SCRIPT_723_3D_QUIVER_Comparison_TotalSumofMoments;
+SCRIPT_724_3D_QUIVER_Comparison_TotalLinearImpulse;
+SCRIPT_725_3D_QUIVER_Comparison_TotalAngularImpulse;
+SCRIPT_726_3D_PLOT_Comparison_ZTCFFractionalWork;
+SCRIPT_727_3D_PLOT_Comparison_DELTAFractionalWork;
+SCRIPT_728_3D_PLOT_Comparison_ZTCFFractionalPower;
+SCRIPT_729_3D_PLOT_Comparison_DeltaFractionalPower;
+SCRIPT_730_3D_QUIVER_Comparison_NetForceandCoupleShaftsAdded;
+SCRIPT_748_3D_PLOT_Comparison_LocalHandForces;
+SCRIPT_751_3D_QUIVER_Comparison_LHRHMOF_BASEvsZTCFvsDELTA;
+SCRIPT_752_3D_QUIVER_Comparison_LHRHMOF_DELTAvsZTCF;
+
+% clear PauseTime;
+
+
+
+%%% END FILE: MASTER_SCRIPT_ComparisonCharts_3D.m %%%
+
+%%% START FILE: SCRIPT_701_3D_QUIVER_Comparison_NetForceEquivalentCouple.m %%%
+%Generate Club Quiver Plot
+figure(701);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.TotalHandForceGlobal(:,1),BASEQ.TotalHandForceGlobal(:,2),BASEQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+NetForceQuiver.AutoScaleFactor=3;
+
+%Generate Equivalent Couple Quiver Plot
+NetCoupleQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.EquivalentMidpointCoupleGlobal(:,1),BASEQ.EquivalentMidpointCoupleGlobal(:,2),BASEQ.EquivalentMidpointCoupleGlobal(:,3));
+NetCoupleQuiver.LineWidth=1;
+NetCoupleQuiver.Color=[.8 .2 0];
+NetCoupleQuiver.MaxHeadSize=0.1;
+NetCoupleQuiver.AutoScaleFactor=3;
+
+%Generate ZTCF Total Force Quiver Plot
+ZTCFNetForceQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.TotalHandForceGlobal(:,1),ZTCFQ.TotalHandForceGlobal(:,2),ZTCFQ.TotalHandForceGlobal(:,3));
+ZTCFNetForceQuiver.LineWidth=1;
+ZTCFNetForceQuiver.Color=[0 0.3 0];
+ZTCFNetForceQuiver.MaxHeadSize=0.1;
+%Correct scaling on Forces so that ZTCF and BASE are scaled the same.
+ZTCFNetForceQuiver.AutoScaleFactor=NetForceQuiver.ScaleFactor/ZTCFNetForceQuiver.ScaleFactor;
+
+%Generate ZTCF Equivalent Couple Quiver Plot
+ZTCFNetCoupleQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.EquivalentMidpointCoupleGlobal(:,1),ZTCFQ.EquivalentMidpointCoupleGlobal(:,2),ZTCFQ.EquivalentMidpointCoupleGlobal(:,3));
+ZTCFNetCoupleQuiver.LineWidth=1;
+ZTCFNetCoupleQuiver.Color=[.5 .5 0];
+ZTCFNetCoupleQuiver.MaxHeadSize=0.1;
+%Correct scaling on Equivalent Couple so that ZTCF and BASE are scaled the same.
+ZTCFNetCoupleQuiver.AutoScaleFactor=NetCoupleQuiver.ScaleFactor/ZTCFNetCoupleQuiver.ScaleFactor;
+
+
+%Add Legend to Plot
+legend('','','','','BASE - Net Force','BASE - Equivalent MP Couple','ZTCF - Net Force','ZTCF - Equivalent MP Couple');
+
+%Add a Title
+title('Net Force and Equivalent MP Couple');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - Net Force and Equivalent MP Couple');
+pause(PauseTime);
+
+%Close Figure
+close(701);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear NetCoupleQuiver;
+clear ZTCFNetForceQuiver;
+clear ZTCFNetCoupleQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_701_3D_QUIVER_Comparison_NetForceEquivalentCouple.m %%%
+
+%%% START FILE: SCRIPT_702_3D_QUIVER_Comparison_NetForce.m %%%
+%Generate Club Quiver Plot
+figure(702);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.TotalHandForceGlobal(:,1),BASEQ.TotalHandForceGlobal(:,2),BASEQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=2;
+NetForceQuiver.Color=[1 0 1];
+NetForceQuiver.MaxHeadSize=0.075;
+NetForceQuiver.AutoScaleFactor=8;
+
+
+%Generate ZTCF Total Force Quiver Plot
+ZTCFNetForceQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.TotalHandForceGlobal(:,1),ZTCFQ.TotalHandForceGlobal(:,2),ZTCFQ.TotalHandForceGlobal(:,3));
+ZTCFNetForceQuiver.LineWidth=2;
+ZTCFNetForceQuiver.Color=[0.07 0.62 1.0];
+ZTCFNetForceQuiver.MaxHeadSize=0.075;
+%Correct scaling on Forces so that ZTCF and BASE are scaled the same.
+ZTCFNetForceQuiver.AutoScaleFactor=NetForceQuiver.ScaleFactor/ZTCFNetForceQuiver.ScaleFactor;
+
+
+%Add Legend to Plot
+legend('','','','','BASE - Net Force','ZTCF - Net Force');
+
+%Add a Title
+title('Net Force');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - Net Force');
+pause(PauseTime);
+
+%Close Figure
+close(702);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear NetCoupleQuiver;
+clear ZTCFNetForceQuiver;
+clear ZTCFNetCoupleQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_702_3D_QUIVER_Comparison_NetForce.m %%%
+
+%%% START FILE: SCRIPT_703_3D_QUIVER_Comparison_EquivalentCouple.m %%%
+%Generate Club Quiver Plot
+figure(703);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Equivalent Couple Quiver Plot
+NetCoupleQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.EquivalentMidpointCoupleGlobal(:,1),BASEQ.EquivalentMidpointCoupleGlobal(:,2),BASEQ.EquivalentMidpointCoupleGlobal(:,3));
+NetCoupleQuiver.LineWidth=1.5;
+NetCoupleQuiver.Color=[0.07 0.62 1.0];
+NetCoupleQuiver.MaxHeadSize=0.05;
+NetCoupleQuiver.AutoScaleFactor=8;
+
+%Generate ZTCF Equivalent Couple Quiver Plot
+ZTCFNetCoupleQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.EquivalentMidpointCoupleGlobal(:,1),ZTCFQ.EquivalentMidpointCoupleGlobal(:,2),ZTCFQ.EquivalentMidpointCoupleGlobal(:,3));
+ZTCFNetCoupleQuiver.LineWidth=1.5;
+ZTCFNetCoupleQuiver.Color=[1.0 0.07 0.65];
+ZTCFNetCoupleQuiver.MaxHeadSize=0.05;
+%Correct scaling on Equivalent Couple so that ZTCF and BASE are scaled the same.
+ZTCFNetCoupleQuiver.AutoScaleFactor=NetCoupleQuiver.ScaleFactor/ZTCFNetCoupleQuiver.ScaleFactor;
+
+
+%Add Legend to Plot
+legend('','','','','BASE - Equivalent MP Couple','ZTCF - Equivalent MP Couple');
+
+%Add a Title
+title('Equivalent MP Couple');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - Equivalent MP Couple');
+pause(PauseTime);
+
+%Close Figure
+close(703);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear NetCoupleQuiver;
+clear ZTCFNetForceQuiver;
+clear ZTCFNetCoupleQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_703_3D_QUIVER_Comparison_EquivalentCouple.m %%%
+
+%%% START FILE: SCRIPT_704_3D_PLOT_Comparison_ForceAlongHandPath.m %%%
+figure(704);
+hold on;
+plot(BASEQ.Time,BASEQ.ForceAlongHandPath,'LineWidth',3);
+plot(ZTCFQ.Time,ZTCFQ.ForceAlongHandPath,'--','LineWidth',3);
+plot(DELTAQ.Time,DELTAQ.ForceAlongHandPath,':','LineWidth',3);
+
+xlabel('Time (s)');
+ylabel('Force (N)');
+grid 'on';
+
+%Add Legend to Plot
+legend('BASE','ZTCF','DELTA');
+legend('Location','southeast');
+
+%Add a Title
+title('Force Along Hand Path');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_Plot - Force Along Hand Path');
+pause(PauseTime);
+
+%Close Figure
+close(704);
+
+%%% END FILE: SCRIPT_704_3D_PLOT_Comparison_ForceAlongHandPath.m %%%
+
+%%% START FILE: SCRIPT_705_3D_PLOT_Comparison_LinearWork.m %%%
+figure(705);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LSLinearWorkonArm);
+plot(BASEQ.Time,BASEQ.RSLinearWorkonArm);
+plot(BASEQ.Time,BASEQ.LELinearWorkonForearm);
+plot(BASEQ.Time,BASEQ.RELinearWorkonForearm);
+plot(BASEQ.Time,BASEQ.LHLinearWorkonClub);
+plot(BASEQ.Time,BASEQ.RHLinearWorkonClub);
+
+plot(ZTCFQ.Time,ZTCFQ.LSLinearWorkonArm,'--');
+plot(ZTCFQ.Time,ZTCFQ.RSLinearWorkonArm,'--');
+plot(ZTCFQ.Time,ZTCFQ.LELinearWorkonForearm,'--');
+plot(ZTCFQ.Time,ZTCFQ.RELinearWorkonForearm,'--');
+plot(ZTCFQ.Time,ZTCFQ.LHLinearWorkonClub,'--');
+plot(ZTCFQ.Time,ZTCFQ.RHLinearWorkonClub,'--');
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Work - BASE','RS Linear Work - BASE','LE Linear Work - BASE','RE Linear Work - BASE','LW Linear Work - BASE','RW Linear Work - BASE','LS Linear Work - ZTCF','RS Linear Work - ZTCF','LE Linear Work - ZTCF','RE Linear Work - ZTCF','LW Linear Work - ZTCF','RW Linear Work - ZTCF');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Work on Distal Segment');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Linear Work on Distal');
+pause(PauseTime);
+
+%Close Figure
+close(705);
+
+%%% END FILE: SCRIPT_705_3D_PLOT_Comparison_LinearWork.m %%%
+
+%%% START FILE: SCRIPT_706_3D_PLOT_Comparison_AngularWork.m %%%
+figure(706);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LSAngularWorkonArm);
+plot(BASEQ.Time,BASEQ.RSAngularWorkonArm);
+plot(BASEQ.Time,BASEQ.LEAngularWorkonForearm);
+plot(BASEQ.Time,BASEQ.REAngularWorkonForearm);
+plot(BASEQ.Time,BASEQ.LHAngularWorkonClub);
+plot(BASEQ.Time,BASEQ.RHAngularWorkonClub);
+
+plot(ZTCFQ.Time,ZTCFQ.LSAngularWorkonArm,'--');
+plot(ZTCFQ.Time,ZTCFQ.RSAngularWorkonArm,'--');
+plot(ZTCFQ.Time,ZTCFQ.LEAngularWorkonForearm,'--');
+plot(ZTCFQ.Time,ZTCFQ.REAngularWorkonForearm,'--');
+plot(ZTCFQ.Time,ZTCFQ.LHAngularWorkonClub,'--');
+plot(ZTCFQ.Time,ZTCFQ.RHAngularWorkonClub,'--');
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Angular Work - BASE','RS Angular Work - BASE','LE Angular Work - BASE','RE Angular Work - BASE','LH Angular Work - BASE','RH Angular Work - BASE','LS Angular Work - ZTCF','RS Angular Work - ZTCF','LE Angular Work - ZTCF','RE Angular Work - ZTCF','LH Angular Work - ZTCF','RH Angular Work - ZTCF');
+legend('Location','southeast');
+
+%Add a Title
+title('Angular Work on Distal Segment');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Angular Work on Distal');
+pause(PauseTime);
+
+%Close Figure
+close(706);
+
+%%% END FILE: SCRIPT_706_3D_PLOT_Comparison_AngularWork.m %%%
+
+%%% START FILE: SCRIPT_707_3D_PLOT_Comparison_TotalWork.m %%%
+figure(707);
+hold on;
+
+plot(BASEQ.Time,BASEQ.TotalLSWork);
+plot(BASEQ.Time,BASEQ.TotalRSWork);
+plot(BASEQ.Time,BASEQ.TotalLEWork);
+plot(BASEQ.Time,BASEQ.TotalREWork);
+plot(BASEQ.Time,BASEQ.TotalLHWork);
+plot(BASEQ.Time,BASEQ.TotalRHWork);
+
+plot(ZTCFQ.Time,ZTCFQ.TotalLSWork,'--');
+plot(ZTCFQ.Time,ZTCFQ.TotalRSWork,'--');
+plot(ZTCFQ.Time,ZTCFQ.TotalLEWork,'--');
+plot(ZTCFQ.Time,ZTCFQ.TotalREWork,'--');
+plot(ZTCFQ.Time,ZTCFQ.TotalLHWork,'--');
+plot(ZTCFQ.Time,ZTCFQ.TotalRHWork,'--');
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Total Work - BASE','RS Total Work - BASE','LE Total Work - BASE','RE Total Work - BASE','LH Total Work - BASE','RH Total Work - BASE','LS Total Work - ZTCF','RS Total Work - ZTCF','LE Total Work - ZTCF','RE Total Work - ZTCF','LH Total Work - ZTCF','RH Total Work - ZTCF');
+legend('Location','southeast');
+
+%Add a Title
+title('Total Work on Distal Segment');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Total Work on Distal');
+pause(PauseTime);
+
+%Close Figure
+close(707);
+
+%%% END FILE: SCRIPT_707_3D_PLOT_Comparison_TotalWork.m %%%
+
+%%% START FILE: SCRIPT_708_3D_PLOT_Comparison_LinearPower.m %%%
+figure(708);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LSonArmLinearPower);
+plot(BASEQ.Time,BASEQ.RSonArmLinearPower);
+plot(BASEQ.Time,BASEQ.LEonForearmLinearPower);
+plot(BASEQ.Time,BASEQ.REonForearmLinearPower);
+plot(BASEQ.Time,BASEQ.LHonClubLinearPower);
+plot(BASEQ.Time,BASEQ.RHonClubLinearPower);
+
+plot(ZTCFQ.Time,ZTCFQ.LSonArmLinearPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.RSonArmLinearPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.LEonForearmLinearPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.REonForearmLinearPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.LHonClubLinearPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.RHonClubLinearPower,'--');
+
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Power - BASE','RS Linear Power - BASE','LE Linear Power - BASE','RE Linear Power - BASE','LH Linear Power - BASE','RH Linear Power - BASE','LS Linear Power - ZTCF','RS Linear Power - ZTCF','LE Linear Power - ZTCF','RE Linear Power - ZTCF','LH Linear Power - ZTCF','RH Linear Power - ZTCF');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Power on Distal Segment');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Linear Power on Distal');
+pause(PauseTime);
+
+%Close Figure
+close(708);
+
+%%% END FILE: SCRIPT_708_3D_PLOT_Comparison_LinearPower.m %%%
+
+%%% START FILE: SCRIPT_709_3D_PLOT_Comparison_AngularPower.m %%%
+figure(709);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LSonArmAngularPower);
+plot(BASEQ.Time,BASEQ.RSonArmAngularPower);
+plot(BASEQ.Time,BASEQ.LEonForearmAngularPower);
+plot(BASEQ.Time,BASEQ.REonForearmAngularPower);
+plot(BASEQ.Time,BASEQ.LHonClubAngularPower);
+plot(BASEQ.Time,BASEQ.RHonClubAngularPower);
+
+plot(ZTCFQ.Time,ZTCFQ.LSonArmAngularPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.RSonArmAngularPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.LEonForearmAngularPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.REonForearmAngularPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.LHonClubAngularPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.RHonClubAngularPower,'--');
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Angular Power - BASE','RS Angular Power - BASE','LE Angular Power - BASE','RE Angular Power - BASE','LH Angular Power - BASE','RH Angular Power - BASE','LS Angular Power - ZTCF','RS Angular Power - ZTCF','LE Angular Power - ZTCF','RE Angular Power - ZTCF','LH Angular Power - ZTCF','RH Angular Power - ZTCF');
+legend('Location','southeast');
+
+%Add a Title
+title('Angular Power on Distal Segment');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Angular Power on Distal');
+pause(PauseTime);
+
+%Close Figure
+close(709);
+
+%%% END FILE: SCRIPT_709_3D_PLOT_Comparison_AngularPower.m %%%
+
+%%% START FILE: SCRIPT_710_3D_PLOT_Comparison_TotalPower.m %%%
+figure(710);
+hold on;
+
+plot(BASEQ.Time,BASEQ.TotalLSPower);
+plot(BASEQ.Time,BASEQ.TotalRSPower);
+plot(BASEQ.Time,BASEQ.TotalLEPower);
+plot(BASEQ.Time,BASEQ.TotalREPower);
+plot(BASEQ.Time,BASEQ.TotalLHPower);
+plot(BASEQ.Time,BASEQ.TotalRHPower);
+
+plot(ZTCFQ.Time,ZTCFQ.TotalLSPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.TotalRSPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.TotalLEPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.TotalREPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.TotalLHPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.TotalRHPower,'--');
+
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Total Power - BASE','RS Total Power - BASE','LE Total Power - BASE','RE Total Power - BASE','LH Total Power - BASE','RH Total Power - BASE','LS Total Power - ZTCF','RS Total Power - ZTCF','LE Total Power - ZTCF','RE Total Power - ZTCF','LH Total Power - ZTCF','RH Total Power - ZTCF');
+legend('Location','southeast');
+
+%Add a Title
+title('Total Power on Distal Segment');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Total Power on Distal');
+pause(PauseTime);
+
+%Close Figure
+close(710);
+
+%%% END FILE: SCRIPT_710_3D_PLOT_Comparison_TotalPower.m %%%
+
+%%% START FILE: SCRIPT_711_3D_PLOT_Comparison_LinearWorkClubOnly.m %%%
+figure(711);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LHLinearWorkonClub);
+plot(BASEQ.Time,BASEQ.RHLinearWorkonClub);
+
+plot(ZTCFQ.Time,ZTCFQ.LHLinearWorkonClub,'--');
+plot(ZTCFQ.Time,ZTCFQ.RHLinearWorkonClub,'--');
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Work - BASE','RH Linear Work - BASE','LH Linear Work - ZTCF','RH Linear Work - ZTCF');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Work on Club');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Linear Work on Club');
+pause(PauseTime);
+
+%Close Figure
+close(711);
+
+%%% END FILE: SCRIPT_711_3D_PLOT_Comparison_LinearWorkClubOnly.m %%%
+
+%%% START FILE: SCRIPT_712_3D_PLOT_Comparison_AngularWorkClubOnly.m %%%
+figure(712);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LHAngularWorkonClub);
+plot(BASEQ.Time,BASEQ.RHAngularWorkonClub);
+
+
+plot(ZTCFQ.Time,ZTCFQ.LHAngularWorkonClub,'--');
+plot(ZTCFQ.Time,ZTCFQ.RHAngularWorkonClub,'--');
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Angular Work - BASE','RH Angular Work - BASE','LH Angular Work - ZTCF','RH Angular Work - ZTCF');
+legend('Location','southeast');
+
+%Add a Title
+title('Angular Work on Club');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Angular Work on Club');
+pause(PauseTime);
+
+%Close Figure
+close(712);
+
+%%% END FILE: SCRIPT_712_3D_PLOT_Comparison_AngularWorkClubOnly.m %%%
+
+%%% START FILE: SCRIPT_713_3D_PLOT_Comparison_TotalWorkClubOnly.m %%%
+figure(713);
+hold on;
+
+plot(BASEQ.Time,BASEQ.TotalLHWork);
+plot(BASEQ.Time,BASEQ.TotalRHWork);
+
+plot(ZTCFQ.Time,ZTCFQ.TotalLHWork,'--');
+plot(ZTCFQ.Time,ZTCFQ.TotalRHWork,'--');
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Total Work - BASE','RH Total Work - BASE','LH Total Work - ZTCF','RH Total Work - ZTCF');
+legend('Location','southeast');
+
+%Add a Title
+title('Total Work Club');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Total Work on Club');
+pause(PauseTime);
+
+%Close Figure
+close(713);
+
+%%% END FILE: SCRIPT_713_3D_PLOT_Comparison_TotalWorkClubOnly.m %%%
+
+%%% START FILE: SCRIPT_714_3D_PLOT_Comparison_LinearPowerClubOnly.m %%%
+figure(714);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LHonClubLinearPower);
+plot(BASEQ.Time,BASEQ.RHonClubLinearPower);
+
+plot(ZTCFQ.Time,ZTCFQ.LHonClubLinearPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.RHonClubLinearPower,'--');
+
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Power - BASE','RH Linear Power - BASE','LH Linear Power - ZTCF','RH Linear Power - ZTCF');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Power on Club');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Linear Power on Club');
+pause(PauseTime);
+
+%Close Figure
+close(714);
+
+%%% END FILE: SCRIPT_714_3D_PLOT_Comparison_LinearPowerClubOnly.m %%%
+
+%%% START FILE: SCRIPT_715_3D_PLOT_Comparison_AngularPowerClubOnly.m %%%
+figure(715);
+hold on;
+
+plot(BASEQ.Time,BASEQ.LHonClubAngularPower);
+plot(BASEQ.Time,BASEQ.RHonClubAngularPower);
+
+plot(ZTCFQ.Time,ZTCFQ.LHonClubAngularPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.RHonClubAngularPower,'--');
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Angular Power - BASE','RH Angular Power - BASE','LH Angular Power - ZTCF','RH Angular Power - ZTCF');
+legend('Location','southeast');
+
+%Add a Title
+title('Angular Power on Club');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Angular Power on Club');
+pause(PauseTime);
+
+%Close Figure
+close(715);
+
+%%% END FILE: SCRIPT_715_3D_PLOT_Comparison_AngularPowerClubOnly.m %%%
+
+%%% START FILE: SCRIPT_716_3D_PLOT_Comparison_TotalPowerClubOnly.m %%%
+figure(716);
+hold on;
+
+plot(BASEQ.Time,BASEQ.TotalLHPower);
+plot(BASEQ.Time,BASEQ.TotalRHPower);
+
+plot(ZTCFQ.Time,ZTCFQ.TotalLHPower,'--');
+plot(ZTCFQ.Time,ZTCFQ.TotalRHPower,'--');
+
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Total Power - BASE','RH Total Power - BASE','LH Total Power - ZTCF','RH Total Power - ZTCF');
+legend('Location','southeast');
+
+%Add a Title
+title('Total Power on Club');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Total Power on Club');
+pause(PauseTime);
+
+%Close Figure
+close(716);
+
+%%% END FILE: SCRIPT_716_3D_PLOT_Comparison_TotalPowerClubOnly.m %%%
+
+%%% START FILE: SCRIPT_717_3D_QUIVER_Comparison_LHRHForce.m %%%
+%Generate Club Quiver Plot
+figure(717);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Left Hand Force Quiver Plot
+LHForceQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.LHonClubFGlobal(:,1),BASEQ.LHonClubFGlobal(:,2),BASEQ.LHonClubFGlobal(:,3));
+LHForceQuiver.LineWidth=1;
+LHForceQuiver.Color=[0 1 0];
+LHForceQuiver.MaxHeadSize=0.1;
+LHForceQuiver.AutoScaleFactor=3;
+
+%Generate Right Hand Force Quiver Plot
+RHForceQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHonClubFGlobal(:,1),BASEQ.RHonClubFGlobal(:,2),BASEQ.RHonClubFGlobal(:,3));
+RHForceQuiver.LineWidth=1;
+RHForceQuiver.Color=[.8 .2 0];
+RHForceQuiver.MaxHeadSize=0.1;
+%Correct scaling on Forces so that ZTCF and BASE are scaled the same.
+RHForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/RHForceQuiver.ScaleFactor;
+
+%Generate ZTCF Left Hand Force Quiver Plot
+ZTCFLHForceQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHonClubFGlobal(:,1),ZTCFQ.LHonClubFGlobal(:,2),ZTCFQ.LHonClubFGlobal(:,3));
+ZTCFLHForceQuiver.LineWidth=1;
+ZTCFLHForceQuiver.Color=[0 0.3 0];
+ZTCFLHForceQuiver.MaxHeadSize=0.1;
+%Correct scaling on Forces so that ZTCF and BASE are scaled the same.
+ZTCFLHForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/ZTCFLHForceQuiver.ScaleFactor;
+
+%Generate ZTCF Right Hand Force Quiver Plot
+ZTCFRHForceQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.RHonClubFGlobal(:,1),ZTCFQ.RHonClubFGlobal(:,2),ZTCFQ.RHonClubFGlobal(:,3));
+ZTCFRHForceQuiver.LineWidth=1;
+ZTCFRHForceQuiver.Color=[.5 .5 0];
+ZTCFRHForceQuiver.MaxHeadSize=0.1;
+%Correct scaling on Equivalent Couple so that ZTCF and BASE are scaled the same.
+ZTCFRHForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/ZTCFRHForceQuiver.ScaleFactor;
+
+
+%Add Legend to Plot
+legend('','','','','BASE - LH Force','BASE - RH Force','ZTCF - LH Force','ZTCF - RH Force');
+
+%Add a Title
+title('LH and RH Force on Club');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - LHRH Force on Club');
+pause(PauseTime);
+
+%Close Figure
+close(717);
+
+%Clear Figure from Workspace
+clear LHForceQuiver;
+clear RHForceQuiver;
+clear ZTCFLHForceQuiver;
+clear ZTCFRHForceQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_717_3D_QUIVER_Comparison_LHRHForce.m %%%
+
+%%% START FILE: SCRIPT_718_3D_QUIVER_Comparison_LHRHLinearImpulse.m %%%
+%Generate Club Quiver Plot
+figure(718);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Left Hand Linear Impulse Quiver Plot
+LHLinearImpulseQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.LHLinearImpulseonClub(:,1),BASEQ.LHLinearImpulseonClub(:,2),BASEQ.LHLinearImpulseonClub(:,3));
+LHLinearImpulseQuiver.LineWidth=1;
+LHLinearImpulseQuiver.Color=[0 1 0];
+LHLinearImpulseQuiver.MaxHeadSize=0.1;
+LHLinearImpulseQuiver.AutoScaleFactor=3;
+
+%Generate Right Hand Linear Impulse Quiver Plot
+RHLinearImpulseQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHLinearImpulseonClub(:,1),BASEQ.RHLinearImpulseonClub(:,2),BASEQ.RHLinearImpulseonClub(:,3));
+RHLinearImpulseQuiver.LineWidth=1;
+RHLinearImpulseQuiver.Color=[.8 .2 0];
+RHLinearImpulseQuiver.MaxHeadSize=0.1;
+%Correct scaling on Linear Impulses so that ZTCF and BASE are scaled the same.
+RHLinearImpulseQuiver.AutoScaleFactor=LHLinearImpulseQuiver.ScaleFactor/RHLinearImpulseQuiver.ScaleFactor;
+
+%Generate ZTCF Left Hand Linear Impulse Quiver Plot
+ZTCFLHLinearImpulseQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHLinearImpulseonClub(:,1),ZTCFQ.LHLinearImpulseonClub(:,2),ZTCFQ.LHLinearImpulseonClub(:,3));
+ZTCFLHLinearImpulseQuiver.LineWidth=1;
+ZTCFLHLinearImpulseQuiver.Color=[0 0.3 0];
+ZTCFLHLinearImpulseQuiver.MaxHeadSize=0.1;
+%Correct scaling on Linear Impulses so that ZTCF and BASE are scaled the same.
+ZTCFLHLinearImpulseQuiver.AutoScaleFactor=LHLinearImpulseQuiver.ScaleFactor/ZTCFLHLinearImpulseQuiver.ScaleFactor;
+
+%Generate ZTCF Right Hand Linear Impulse Quiver Plot
+ZTCFRHLinearImpulseQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.RHLinearImpulseonClub(:,1),ZTCFQ.RHLinearImpulseonClub(:,2),ZTCFQ.RHLinearImpulseonClub(:,3));
+ZTCFRHLinearImpulseQuiver.LineWidth=1;
+ZTCFRHLinearImpulseQuiver.Color=[.5 .5 0];
+ZTCFRHLinearImpulseQuiver.MaxHeadSize=0.1;
+%Correct scaling on Linear Impulse so that ZTCF and BASE are scaled the same.
+ZTCFRHLinearImpulseQuiver.AutoScaleFactor=LHLinearImpulseQuiver.ScaleFactor/ZTCFRHLinearImpulseQuiver.ScaleFactor;
+
+
+%Add Legend to Plot
+legend('','','','','BASE - LH Linear Impulse','BASE - RH Linear Impulse','ZTCF - LH Linear Impulse','ZTCF - RH Linear Impulse');
+
+%Add a Title
+title('LH and RH Linear Impulse on Club');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - LHRH Linear Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(718);
+
+%Clear Figure from Workspace
+clear LHLinearImpulseQuiver;
+clear RHLinearImpulseQuiver;
+clear ZTCFLHLinearImpulseQuiver;
+clear ZTCFRHLinearImpulseQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_718_3D_QUIVER_Comparison_LHRHLinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_719_3D_QUIVER_Comparison_LHRHAngularImpulse.m %%%
+%Generate Club Quiver Plot
+figure(719);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Left Hand Angular Impulse Quiver Plot
+LHAngularImpulseQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.LHAngularImpulseonClub(:,1),BASEQ.LHAngularImpulseonClub(:,2),BASEQ.LHAngularImpulseonClub(:,3));
+LHAngularImpulseQuiver.LineWidth=1;
+LHAngularImpulseQuiver.Color=[0 1 0];
+LHAngularImpulseQuiver.MaxHeadSize=0.1;
+LHAngularImpulseQuiver.AutoScaleFactor=3;
+
+%Generate Right Hand Angular Impulse Quiver Plot
+RHAngularImpulseQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHAngularImpulseonClub(:,1),BASEQ.RHAngularImpulseonClub(:,2),BASEQ.RHAngularImpulseonClub(:,3));
+RHAngularImpulseQuiver.LineWidth=1;
+RHAngularImpulseQuiver.Color=[.8 .2 0];
+RHAngularImpulseQuiver.MaxHeadSize=0.1;
+%Correct scaling on Angular Impulses so that ZTCF and BASE are scaled the same.
+RHAngularImpulseQuiver.AutoScaleFactor=LHAngularImpulseQuiver.ScaleFactor/RHAngularImpulseQuiver.ScaleFactor;
+
+
+%Generate ZTCF Left Hand Angular Impulse Quiver Plot
+ZTCFLHAngularImpulseQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHAngularImpulseonClub(:,1),ZTCFQ.LHAngularImpulseonClub(:,2),ZTCFQ.LHAngularImpulseonClub(:,3));
+ZTCFLHAngularImpulseQuiver.LineWidth=1;
+ZTCFLHAngularImpulseQuiver.Color=[0 0.3 0];
+ZTCFLHAngularImpulseQuiver.MaxHeadSize=0.1;
+%Correct scaling on Angular Impulses so that ZTCF and BASE are scaled the same.
+ZTCFLHAngularImpulseQuiver.AutoScaleFactor=LHAngularImpulseQuiver.ScaleFactor/ZTCFLHAngularImpulseQuiver.ScaleFactor;
+
+%Generate ZTCF Right Hand Angular Impulse Quiver Plot
+ZTCFRHAngularImpulseQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.RHAngularImpulseonClub(:,1),ZTCFQ.RHAngularImpulseonClub(:,2),ZTCFQ.RHAngularImpulseonClub(:,3));
+ZTCFRHAngularImpulseQuiver.LineWidth=1;
+ZTCFRHAngularImpulseQuiver.Color=[.5 .5 0];
+ZTCFRHAngularImpulseQuiver.MaxHeadSize=0.1;
+%Correct scaling on Angular Impulse so that ZTCF and BASE are scaled the same.
+ZTCFRHAngularImpulseQuiver.AutoScaleFactor=LHAngularImpulseQuiver.ScaleFactor/ZTCFRHAngularImpulseQuiver.ScaleFactor;
+
+
+
+%Add Legend to Plot
+legend('','','','','BASE - LH Angular Impulse','BASE - RH Angular Impulse','ZTCF - LH Angular Impulse','ZTCF - RH Angular Impulse');
+
+%Add a Title
+title('LH and RH Angular Impulse on Club');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - LHRH Angular Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(719);
+
+%Clear Figure from Workspace
+clear LHAngularImpulseQuiver;
+clear RHAngularImpulseQuiver;
+clear ZTCFLHAngularImpulseQuiver;
+clear ZTCFRHAngularImpulseQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_719_3D_QUIVER_Comparison_LHRHAngularImpulse.m %%%
+
+%%% START FILE: SCRIPT_720_3D_QUIVER_Comparison_LHRHMomentofForce.m %%%
+%Generate Club Quiver Plot
+figure(720);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Left Hand Moment of Force Quiver Plot
+LHSumofMomentsQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.LHMOFonClubGlobal(:,1),BASEQ.LHMOFonClubGlobal(:,2),BASEQ.LHMOFonClubGlobal(:,3));
+LHSumofMomentsQuiver.LineWidth=1;
+LHSumofMomentsQuiver.Color=[0 1 0];
+LHSumofMomentsQuiver.MaxHeadSize=0.1;
+LHSumofMomentsQuiver.AutoScaleFactor=3;
+
+%Generate Right Hand Moment of Force Quiver Plot
+RHSumofMomentsQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHMOFonClubGlobal(:,1),BASEQ.RHMOFonClubGlobal(:,2),BASEQ.RHMOFonClubGlobal(:,3));
+RHSumofMomentsQuiver.LineWidth=1;
+RHSumofMomentsQuiver.Color=[.8 .2 0];
+RHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Forces so that ZTCF and BASE are scaled the same.
+RHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/RHSumofMomentsQuiver.ScaleFactor;
+
+%Generate ZTCF Left Hand Moment of Force Quiver Plot
+ZTCFLHSumofMomentsQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHMOFonClubGlobal(:,1),ZTCFQ.LHMOFonClubGlobal(:,2),ZTCFQ.LHMOFonClubGlobal(:,3));
+ZTCFLHSumofMomentsQuiver.LineWidth=1;
+ZTCFLHSumofMomentsQuiver.Color=[0 0.3 0];
+ZTCFLHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Forces so that ZTCF and BASE are scaled the same.
+ZTCFLHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/ZTCFLHSumofMomentsQuiver.ScaleFactor;
+
+%Generate ZTCF Right Hand Moment of Force Quiver Plot
+ZTCFRHSumofMomentsQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.RHMOFonClubGlobal(:,1),ZTCFQ.RHMOFonClubGlobal(:,2),ZTCFQ.RHMOFonClubGlobal(:,3));
+ZTCFRHSumofMomentsQuiver.LineWidth=1;
+ZTCFRHSumofMomentsQuiver.Color=[.5 .5 0];
+ZTCFRHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Force so that ZTCF and BASE are scaled the same.
+ZTCFRHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/ZTCFRHSumofMomentsQuiver.ScaleFactor;
+
+
+
+%Add Legend to Plot
+legend('','','','','BASE - LH Moment of Force','BASE - RH Moment of Force','ZTCF - LH Moment of Force','ZTCF - RH Moment of Force');
+
+%Add a Title
+title('LH and RH Moment of Force BASE vs. ZTCF');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - LHRH Moment of Force BASE vs ZTCF');
+pause(PauseTime);
+
+%Close Figure
+close(720);
+
+%Clear Figure from Workspace
+clear LHSumofMomentsQuiver;
+clear RHSumofMomentsQuiver;
+clear ZTCFLHSumofMomentsQuiver;
+clear ZTCFRHSumofMomentsQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_720_3D_QUIVER_Comparison_LHRHMomentofForce.m %%%
+
+%%% START FILE: SCRIPT_721_3D_QUIVER_Comparison_TotalMOFEquivalentCouple.m %%%
+%Generate Club Quiver Plot
+figure(721);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Moment of Force Quiver Plot
+TotalMomentofForceQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.MPMOFonClubGlobal(:,1),BASEQ.MPMOFonClubGlobal(:,2),BASEQ.MPMOFonClubGlobal(:,3));
+TotalMomentofForceQuiver.LineWidth=1;
+TotalMomentofForceQuiver.Color=[0 1 0];
+TotalMomentofForceQuiver.MaxHeadSize=0.1;
+TotalMomentofForceQuiver.AutoScaleFactor=3;
+
+%Generate Equivalent Couple Quiver Plot
+EquivalentCoupleQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.EquivalentMidpointCoupleGlobal(:,1),BASEQ.EquivalentMidpointCoupleGlobal(:,2),BASEQ.EquivalentMidpointCoupleGlobal(:,3));
+EquivalentCoupleQuiver.LineWidth=1;
+EquivalentCoupleQuiver.Color=[.8 .2 0];
+EquivalentCoupleQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Forces so that ZTCF and BASE are scaled the same.
+EquivalentCoupleQuiver.AutoScaleFactor=TotalMomentofForceQuiver.ScaleFactor/EquivalentCoupleQuiver.ScaleFactor;
+
+%Generate ZTCF Total Moment of Force Quiver Plot
+ZTCFTotalMomentofForceQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.MPMOFonClubGlobal(:,1),ZTCFQ.MPMOFonClubGlobal(:,2),ZTCFQ.MPMOFonClubGlobal(:,3));
+ZTCFTotalMomentofForceQuiver.LineWidth=1;
+ZTCFTotalMomentofForceQuiver.Color=[0 0.3 0];
+ZTCFTotalMomentofForceQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Forces so that ZTCF and BASE are scaled the same.
+ZTCFTotalMomentofForceQuiver.AutoScaleFactor=TotalMomentofForceQuiver.ScaleFactor/ZTCFTotalMomentofForceQuiver.ScaleFactor;
+
+%Generate ZTCF Equivalent Couple Quiver Plot
+ZTCFEquivalentCoupleQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.EquivalentMidpointCoupleGlobal(:,1),ZTCFQ.EquivalentMidpointCoupleGlobal(:,2),ZTCFQ.EquivalentMidpointCoupleGlobal(:,3));
+ZTCFEquivalentCoupleQuiver.LineWidth=1;
+ZTCFEquivalentCoupleQuiver.Color=[.5 .5 0];
+ZTCFEquivalentCoupleQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Force so that ZTCF and BASE are scaled the same.
+ZTCFEquivalentCoupleQuiver.AutoScaleFactor=TotalMomentofForceQuiver.ScaleFactor/ZTCFEquivalentCoupleQuiver.ScaleFactor;
+
+
+
+%Add Legend to Plot
+legend('','','','','BASE - Moment of Force','BASE - Equivalent Couple','ZTCF - Moment of Force','ZTCF - Equivalent Couple');
+
+%Add a Title
+title('Total MOF and Equivalent Couple on Club');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - Total MOF and Equivalent Couple');
+pause(PauseTime);
+
+%Close Figure
+close(721);
+
+%Clear Figure from Workspace
+clear TotalMomentofForceQuiver;
+clear EquivalentCoupleQuiver;
+clear ZTCFTotalMomentofForceQuiver;
+clear ZTCFEquivalentCoupleQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_721_3D_QUIVER_Comparison_TotalMOFEquivalentCouple.m %%%
+
+%%% START FILE: SCRIPT_722_3D_QUIVER_Comparison_LHRHSumofMoments.m %%%
+%Generate Club Quiver Plot
+figure(722);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Left H Sum of Moments Quiver Plot
+LHSumofMomentsQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.SumofMomentsLHonClub(:,1),BASEQ.SumofMomentsLHonClub(:,2),BASEQ.SumofMomentsLHonClub(:,3));
+LHSumofMomentsQuiver.LineWidth=1;
+LHSumofMomentsQuiver.Color=[0 1 0];
+LHSumofMomentsQuiver.MaxHeadSize=0.1;
+LHSumofMomentsQuiver.AutoScaleFactor=3;
+
+%Generate Right H Sum of Moments Quiver Plot
+RHSumofMomentsQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.SumofMomentsRHonClub(:,1),BASEQ.SumofMomentsRHonClub(:,2),BASEQ.SumofMomentsRHonClub(:,3));
+RHSumofMomentsQuiver.LineWidth=1;
+RHSumofMomentsQuiver.Color=[.8 .2 0];
+RHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Sum of Momentss so that ZTCF  BASE are scaled the same.
+RHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/RHSumofMomentsQuiver.ScaleFactor;
+
+%Generate ZTCF Left H Sum of Moments Quiver Plot
+ZTCFLHSumofMomentsQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.SumofMomentsLHonClub(:,1),ZTCFQ.SumofMomentsLHonClub(:,2),ZTCFQ.SumofMomentsLHonClub(:,3));
+ZTCFLHSumofMomentsQuiver.LineWidth=1;
+ZTCFLHSumofMomentsQuiver.Color=[0 0.3 0];
+ZTCFLHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Sum of Momentss so that ZTCF  BASE are scaled the same.
+ZTCFLHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/ZTCFLHSumofMomentsQuiver.ScaleFactor;
+
+%Generate ZTCF Right H Sum of Moments Quiver Plot
+ZTCFRHSumofMomentsQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.SumofMomentsRHonClub(:,1),ZTCFQ.SumofMomentsRHonClub(:,2),ZTCFQ.SumofMomentsRHonClub(:,3));
+ZTCFRHSumofMomentsQuiver.LineWidth=1;
+ZTCFRHSumofMomentsQuiver.Color=[.5 .5 0];
+ZTCFRHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Sum of Moments so that ZTCF  BASE are scaled the same.
+ZTCFRHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/ZTCFRHSumofMomentsQuiver.ScaleFactor;
+
+
+
+%Add Legend to Plot
+legend('','','','','BASE - LH Sum of Moments','BASE - RH Sum of Moments','ZTCF - LH Sum of Moments','ZTCF - RH Sum of Moments');
+
+%Add a Title
+title('LH  RH Sum of Moments on Club');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - LHRH Sum of Moments on Club');
+pause(PauseTime);
+
+%Close Figure
+close(722);
+
+%Clear Figure from Workspace
+clear LHSumofMomentsQuiver;
+clear RHSumofMomentsQuiver;
+clear ZTCFLHSumofMomentsQuiver;
+clear ZTCFRHSumofMomentsQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HPath;
+
+%%% END FILE: SCRIPT_722_3D_QUIVER_Comparison_LHRHSumofMoments.m %%%
+
+%%% START FILE: SCRIPT_723_3D_QUIVER_Comparison_TotalSumofMoments.m %%%
+%Generate Club Quiver Plot
+figure(723);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Create Total Sum of Moments Array by Adding LH and RH Sum of Moments
+TotalSumofMoments=BASEQ.SumofMomentsLHonClub+BASEQ.SumofMomentsRHonClub;
+ZTCFTotalSumofMoments=ZTCFQ.SumofMomentsLHonClub+ZTCFQ.SumofMomentsRHonClub;
+
+%Generate Total Hand Sum of Moments Quiver Plot
+SumofMomentsQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),TotalSumofMoments(:,1),TotalSumofMoments(:,2),TotalSumofMoments(:,3));
+SumofMomentsQuiver.LineWidth=1;
+SumofMomentsQuiver.Color=[0 1 0];
+SumofMomentsQuiver.MaxHeadSize=0.1;
+SumofMomentsQuiver.AutoScaleFactor=3;
+
+%Generate ZTCF Total Hand Sum of Moments Quiver Plot
+ZTCFSumofMomentsQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFTotalSumofMoments(:,1),ZTCFTotalSumofMoments(:,2),ZTCFTotalSumofMoments(:,3));
+ZTCFSumofMomentsQuiver.LineWidth=1;
+ZTCFSumofMomentsQuiver.Color=[0 0.3 0];
+ZTCFSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Sum of Momentss so that ZTCF and BASE are scaled the same.
+ZTCFSumofMomentsQuiver.AutoScaleFactor=SumofMomentsQuiver.ScaleFactor/ZTCFSumofMomentsQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','BASE - Total Sum of Moments','ZTCF - Total Sum of Moments');
+
+%Add a Title
+title('Total Sum of Moments on Club');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - Total Sum of Moments on Club');
+pause(PauseTime);
+
+%Close Figure
+close(723);
+
+%Clear Figure from Workspace
+clear SumofMomentsQuiver;
+clear RHSumofMomentsQuiver;
+clear ZTCFSumofMomentsQuiver;
+clear ZTCFRHSumofMomentsQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+clear TotalSumofMoments;
+clear ZTCFTotalSumofMoments;
+
+%%% END FILE: SCRIPT_723_3D_QUIVER_Comparison_TotalSumofMoments.m %%%
+
+%%% START FILE: SCRIPT_724_3D_QUIVER_Comparison_TotalLinearImpulse.m %%%
+%Generate Club Quiver Plot
+figure(724);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Linear Impulse on Club Quiver Plot
+TotalLinearImpulse=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.LinearImpulseonClub(:,1),BASEQ.LinearImpulseonClub(:,2),BASEQ.LinearImpulseonClub(:,3));
+TotalLinearImpulse.LineWidth=1;
+TotalLinearImpulse.Color=[0 1 0];
+TotalLinearImpulse.MaxHeadSize=0.1;
+TotalLinearImpulse.AutoScaleFactor=3;
+
+%Generate ZTCF Total Linear Impulse on Club Quiver Plot
+ZTCFTotalLinearImpulse=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.LinearImpulseonClub(:,1),ZTCFQ.LinearImpulseonClub(:,2),ZTCFQ.LinearImpulseonClub(:,3));
+ZTCFTotalLinearImpulse.LineWidth=1;
+ZTCFTotalLinearImpulse.Color=[0 0.3 0];
+ZTCFTotalLinearImpulse.MaxHeadSize=0.1;
+%Correct scaling on Linear Impulses so that ZTCF and BASE are scaled the same.
+ZTCFTotalLinearImpulse.AutoScaleFactor=TotalLinearImpulse.ScaleFactor/ZTCFTotalLinearImpulse.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','BASE - Total Linear Impulse','ZTCF - Total Linear Impulse');
+
+%Add a Title
+title('Linear Impulse on Club');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - Total Linear Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(724);
+
+%Clear Figure from Workspace
+clear TotalLinearImpulse;
+clear MPSumofMomentsQuiver;
+clear ZTCFTotalLinearImpulse;
+clear ZTCFMPSumofMomentsQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_724_3D_QUIVER_Comparison_TotalLinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_725_3D_QUIVER_Comparison_TotalAngularImpulse.m %%%
+%Generate Club Quiver Plot
+figure(725);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Create Total Angular Impulse Array by Adding LH and RH Angular Impulse
+TotalAngularImpulse=BASEQ.LHAngularImpulseonClub+BASEQ.RHAngularImpulseonClub;
+ZTCFTotalAngularImpulse=ZTCFQ.LHAngularImpulseonClub+ZTCFQ.RHAngularImpulseonClub;
+
+%Generate Total Hand Angular Impulse Quiver Plot
+AngularImpulseQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),TotalAngularImpulse(:,1),TotalAngularImpulse(:,2),TotalAngularImpulse(:,3));
+AngularImpulseQuiver.LineWidth=1;
+AngularImpulseQuiver.Color=[0 1 0];
+AngularImpulseQuiver.MaxHeadSize=0.1;
+AngularImpulseQuiver.AutoScaleFactor=3;
+
+%Generate ZTCF Total Hand Angular Impulse Quiver Plot
+ZTCFAngularImpulseQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFTotalAngularImpulse(:,1),ZTCFTotalAngularImpulse(:,2),ZTCFTotalAngularImpulse(:,3));
+ZTCFAngularImpulseQuiver.LineWidth=1;
+ZTCFAngularImpulseQuiver.Color=[0 0.3 0];
+ZTCFAngularImpulseQuiver.MaxHeadSize=0.1;
+%Correct scaling on Angular Impulses so that ZTCF and BASE are scaled the same.
+ZTCFAngularImpulseQuiver.AutoScaleFactor=AngularImpulseQuiver.ScaleFactor/ZTCFAngularImpulseQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','BASE - Total Impulse','ZTCF - Total Impulse');
+
+%Add a Title
+title('Total Impulse on Club');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - Total Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(725);
+
+%Clear Figure from Workspace
+clear AngularImpulseQuiver;
+clear RHAngularImpulseQuiver;
+clear ZTCFAngularImpulseQuiver;
+clear ZTCFRHAngularImpulseQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+clear TotalAngularImpulse;
+clear ZTCFTotalAngularImpulse;
+
+%%% END FILE: SCRIPT_725_3D_QUIVER_Comparison_TotalAngularImpulse.m %%%
+
+%%% START FILE: SCRIPT_726_3D_PLOT_Comparison_ZTCFFractionalWork.m %%%
+figure(726);
+hold on;
+
+plot(BASEQ.Time,BASEQ.ZTCFQLSFractionalWork);
+plot(BASEQ.Time,BASEQ.ZTCFQRSFractionalWork);
+plot(BASEQ.Time,BASEQ.ZTCFQLEFractionalWork);
+plot(BASEQ.Time,BASEQ.ZTCFQREFractionalWork);
+plot(BASEQ.Time,BASEQ.ZTCFQLHFractionalWork);
+plot(BASEQ.Time,BASEQ.ZTCFQRHFractionalWork);
+ylim([-5 5]);
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Total ZTCF Fractional Work','RS Total ZTCF Fractional Work','LE Total ZTCF Fractional Work','RE Total ZTCF Fractional Work','LH Total ZTCF Fractional Work','RH Total ZTCF Fractional Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Total ZTCF Fractional Work on Distal Segment');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Total ZTCF Fractional Work');
+pause(PauseTime);
+
+%Close Figure
+close(726);
+
+%%% END FILE: SCRIPT_726_3D_PLOT_Comparison_ZTCFFractionalWork.m %%%
+
+%%% START FILE: SCRIPT_727_3D_PLOT_Comparison_DELTAFractionalWork.m %%%
+figure(727);
+hold on;
+
+plot(BASEQ.Time,BASEQ.DELTAQLSFractionalWork);
+plot(BASEQ.Time,BASEQ.DELTAQRSFractionalWork);
+plot(BASEQ.Time,BASEQ.DELTAQLEFractionalWork);
+plot(BASEQ.Time,BASEQ.DELTAQREFractionalWork);
+plot(BASEQ.Time,BASEQ.DELTAQLHFractionalWork);
+plot(BASEQ.Time,BASEQ.DELTAQRHFractionalWork);
+ylim([-5 5]);
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Total DELTA Fractional Work','RS Total DELTA Fractional Work','LE Total DELTA Fractional Work','RE Total DELTA Fractional Work','LH Total DELTA Fractional Work','RH Total DELTA Fractional Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Total DELTA Fractional Work on Distal Segment');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Total DELTA Fractional Work');
+pause(PauseTime);
+
+%Close Figure
+close(727);
+
+%%% END FILE: SCRIPT_727_3D_PLOT_Comparison_DELTAFractionalWork.m %%%
+
+%%% START FILE: SCRIPT_728_3D_PLOT_Comparison_ZTCFFractionalPower.m %%%
+figure(728);
+hold on;
+
+plot(BASEQ.Time,BASEQ.ZTCFQLSFractionalPower);
+plot(BASEQ.Time,BASEQ.ZTCFQRSFractionalPower);
+plot(BASEQ.Time,BASEQ.ZTCFQLEFractionalPower);
+plot(BASEQ.Time,BASEQ.ZTCFQREFractionalPower);
+plot(BASEQ.Time,BASEQ.ZTCFQLHFractionalPower);
+plot(BASEQ.Time,BASEQ.ZTCFQRHFractionalPower);
+ylim([-5 5]);
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Total ZTCF Fractional Power','RS Total ZTCF Fractional Power','LE Total ZTCF Fractional Power','RE Total ZTCF Fractional Power','LW Total ZTCF Fractional Power','RH Total ZTCF Fractional Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Total ZTCF Fractional Power on Distal Segment');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Total ZTCF Fractional Power');
+pause(PauseTime);
+
+%Close Figure
+close(728);
+
+%%% END FILE: SCRIPT_728_3D_PLOT_Comparison_ZTCFFractionalPower.m %%%
+
+%%% START FILE: SCRIPT_729_3D_PLOT_Comparison_DeltaFractionalPower.m %%%
+figure(729);
+hold on;
+
+plot(BASEQ.Time,BASEQ.DELTAQLSFractionalPower);
+plot(BASEQ.Time,BASEQ.DELTAQRSFractionalPower);
+plot(BASEQ.Time,BASEQ.DELTAQLEFractionalPower);
+plot(BASEQ.Time,BASEQ.DELTAQREFractionalPower);
+plot(BASEQ.Time,BASEQ.DELTAQLHFractionalPower);
+plot(BASEQ.Time,BASEQ.DELTAQRHFractionalPower);
+ylim([-5 5]);
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Total DELTA Fractional Power','RS Total DELTA Fractional Power','LE Total DELTA Fractional Power','RE Total DELTA Fractional Power','LH Total DELTA Fractional Power','RH Total DELTA Fractional Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Total DELTA Fractional Power on Distal Segment');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Total DELTA Fractional Power');
+pause(PauseTime);
+
+%Close Figure
+close(729);
+
+%%% END FILE: SCRIPT_729_3D_PLOT_Comparison_DeltaFractionalPower.m %%%
+
+%%% START FILE: SCRIPT_730_3D_QUIVER_Comparison_NetForceandCoupleShaftsAdded.m %%%
+%Generate Club Quiver Plot
+figure(730);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+run SCRIPT_ShaftandGripatMaxCHSandAlphaReversal.m;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.TotalHandForceGlobal(:,1),BASEQ.TotalHandForceGlobal(:,2),BASEQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+NetForceQuiver.AutoScaleFactor=3;
+
+%Generate Equivalent Couple Quiver Plot
+NetCoupleQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),BASEQ.EquivalentMidpointCoupleGlobal(:,1),BASEQ.EquivalentMidpointCoupleGlobal(:,2),BASEQ.EquivalentMidpointCoupleGlobal(:,3));
+NetCoupleQuiver.LineWidth=1;
+NetCoupleQuiver.Color=[.8 .2 0];
+NetCoupleQuiver.MaxHeadSize=0.1;
+NetCoupleQuiver.AutoScaleFactor=3;
+
+%Generate ZTCF Total Force Quiver Plot
+ZTCFNetForceQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.TotalHandForceGlobal(:,1),ZTCFQ.TotalHandForceGlobal(:,2),ZTCFQ.TotalHandForceGlobal(:,3));
+ZTCFNetForceQuiver.LineWidth=1;
+ZTCFNetForceQuiver.Color=[0 0.3 0];
+ZTCFNetForceQuiver.MaxHeadSize=0.1;
+%Correct scaling on Forces so that ZTCF and BASE are scaled the same.
+ZTCFNetForceQuiver.AutoScaleFactor=NetForceQuiver.ScaleFactor/ZTCFNetForceQuiver.ScaleFactor;
+
+%Generate ZTCF Equivalent Couple Quiver Plot
+ZTCFNetCoupleQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.EquivalentMidpointCoupleGlobal(:,1),ZTCFQ.EquivalentMidpointCoupleGlobal(:,2),ZTCFQ.EquivalentMidpointCoupleGlobal(:,3));
+ZTCFNetCoupleQuiver.LineWidth=1;
+ZTCFNetCoupleQuiver.Color=[.5 .5 0];
+ZTCFNetCoupleQuiver.MaxHeadSize=0.1;
+%Correct scaling on Equivalent Couple so that ZTCF and BASE are scaled the same.
+ZTCFNetCoupleQuiver.AutoScaleFactor=NetCoupleQuiver.ScaleFactor/ZTCFNetCoupleQuiver.ScaleFactor;
+
+
+%Add Legend to Plot
+legend('','','','','','','','','BASE - Net Force','BASE - Equivalent MP Couple','ZTCF - Net Force','ZTCF - Equivalent MP Couple');
+
+%Add a Title
+title('Net Force and Equivalent MP Couple');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - Net Force and Equivalent MP Couple Shafts Added');
+pause(PauseTime);
+
+%Close Figure
+close(730);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear NetCoupleQuiver;
+clear ZTCFNetForceQuiver;
+clear ZTCFNetCoupleQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+clear GripAlpha;
+clear GripMaxCHS;
+clear ShaftAlpha;
+clear ShaftMaxCHS;
+
+
+%%% END FILE: SCRIPT_730_3D_QUIVER_Comparison_NetForceandCoupleShaftsAdded.m %%%
+
+%%% START FILE: SCRIPT_748_3D_PLOT_Comparison_LocalHandForces.m %%%
+figure(748);
+hold on;
+
+
+plot(BASEQ.Time(:,1),BASEQ.LHonClubForceLocal(:,1),'LineWidth',3);
+plot(BASEQ.Time(:,1),BASEQ.LHonClubForceLocal(:,2),'LineWidth',3);
+plot(BASEQ.Time(:,1),BASEQ.LHonClubForceLocal(:,3),'LineWidth',3);
+plot(BASEQ.Time(:,1),BASEQ.RHonClubForceLocal(:,1),'LineWidth',3);
+plot(BASEQ.Time(:,1),BASEQ.RHonClubForceLocal(:,2),'LineWidth',3);
+plot(BASEQ.Time(:,1),BASEQ.RHonClubForceLocal(:,3),'LineWidth',3);
+
+plot(ZTCFQ.Time(:,1),ZTCFQ.LHonClubForceLocal(:,1),'LineWidth',3);
+plot(ZTCFQ.Time(:,1),ZTCFQ.LHonClubForceLocal(:,2),'LineWidth',3);
+plot(ZTCFQ.Time(:,1),ZTCFQ.LHonClubForceLocal(:,3),'LineWidth',3);
+plot(ZTCFQ.Time(:,1),ZTCFQ.RHonClubForceLocal(:,1),'LineWidth',3);
+plot(ZTCFQ.Time(:,1),ZTCFQ.RHonClubForceLocal(:,2),'LineWidth',3);
+plot(ZTCFQ.Time(:,1),ZTCFQ.RHonClubForceLocal(:,3),'LineWidth',3);
+
+
+ylabel('Force (N)');
+grid 'on';
+
+%Add Legend to Plot
+legend('BASE Left Wrist X','BASE Left Wrist Y','BASE Left Wrist Z',...
+    'BASE Right Wrist X','BASE Right Wrist Y','BASE Right Wrist Z',...
+    'ZTCF Left Wrist X','ZTCF Left Wrist Y','ZTCF Left Wrist Z',...
+    'ZTCF Right Wrist X','ZTCF Right Wrist Y','ZTCF Right Wrist Z');
+legend('Location','southeast');
+
+%Add a Title
+title('Local Hand Forces on Club');
+subtitle('COMPARISON');
+
+%Save Figure
+savefig('Comparison Charts/COMPARISON_PLOT - Local Hand Forces');
+pause(PauseTime);
+
+%Close Figure
+close(748);
+
+%%% END FILE: SCRIPT_748_3D_PLOT_Comparison_LocalHandForces.m %%%
+
+%%% START FILE: SCRIPT_751_3D_QUIVER_Comparison_LHRHMOF_BASEvsZTCFvsDELTA.m %%%
+%Generate Club Quiver Plot
+figure(751);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Left Hand Moment of Force Quiver Plot
+LHSumofMomentsQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),BASEQ.LHMOFonClubGlobal(:,1),BASEQ.LHMOFonClubGlobal(:,2),BASEQ.LHMOFonClubGlobal(:,3));
+LHSumofMomentsQuiver.LineWidth=1;
+LHSumofMomentsQuiver.Color=[0 1 0];
+LHSumofMomentsQuiver.MaxHeadSize=0.1;
+LHSumofMomentsQuiver.AutoScaleFactor=3;
+
+%Generate Right Hand Moment of Force Quiver Plot
+RHSumofMomentsQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.RHMOFonClubGlobal(:,1),BASEQ.RHMOFonClubGlobal(:,2),BASEQ.RHMOFonClubGlobal(:,3));
+RHSumofMomentsQuiver.LineWidth=1;
+RHSumofMomentsQuiver.Color=[.8 .2 0];
+RHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Forces so that ZTCF and BASE are scaled the same.
+RHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/RHSumofMomentsQuiver.ScaleFactor;
+
+%Generate ZTCF Left Hand Moment of Force Quiver Plot
+ZTCFLHSumofMomentsQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHMOFonClubGlobal(:,1),ZTCFQ.LHMOFonClubGlobal(:,2),ZTCFQ.LHMOFonClubGlobal(:,3));
+ZTCFLHSumofMomentsQuiver.LineWidth=1;
+ZTCFLHSumofMomentsQuiver.Color=[0 0.3 0];
+ZTCFLHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Forces so that BASE, ZTCF, and DELTA are scaled the same.
+ZTCFLHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/ZTCFLHSumofMomentsQuiver.ScaleFactor;
+
+%Generate ZTCF Right Hand Moment of Force Quiver Plot
+ZTCFRHSumofMomentsQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.RHMOFonClubGlobal(:,1),ZTCFQ.RHMOFonClubGlobal(:,2),ZTCFQ.RHMOFonClubGlobal(:,3));
+ZTCFRHSumofMomentsQuiver.LineWidth=1;
+ZTCFRHSumofMomentsQuiver.Color=[.5 .5 0];
+ZTCFRHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Forces so that BASE, ZTCF, and DELTA are scaled the same.
+ZTCFRHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/ZTCFRHSumofMomentsQuiver.ScaleFactor;
+
+%Generate DELTA Left Hand Moment of Force Quiver Plot
+DELTALHSumofMomentsQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),DELTAQ.LHMOFonClubGlobal(:,1),DELTAQ.LHMOFonClubGlobal(:,2),DELTAQ.LHMOFonClubGlobal(:,3));
+DELTALHSumofMomentsQuiver.LineWidth=1;
+DELTALHSumofMomentsQuiver.Color=[0 1 1];
+DELTALHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Forces so that BASE, ZTCF, and DELTA are scaled the same.
+DELTALHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/DELTALHSumofMomentsQuiver.ScaleFactor;
+
+%Generate DELTA Right Hand Moment of Force Quiver Plot
+DELTARHSumofMomentsQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),DELTAQ.RHMOFonClubGlobal(:,1),DELTAQ.RHMOFonClubGlobal(:,2),DELTAQ.RHMOFonClubGlobal(:,3));
+DELTARHSumofMomentsQuiver.LineWidth=1;
+DELTARHSumofMomentsQuiver.Color=[0 .2 .8];
+DELTARHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Forces so that BASE, ZTCF, and DELTA are scaled the same.
+DELTARHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/DELTARHSumofMomentsQuiver.ScaleFactor;
+
+
+%Add Legend to Plot
+legend('','','','','BASE - LH Moment of Force','BASE - RH Moment of Force','ZTCF - LH Moment of Force','ZTCF - RH Moment of Force','DELTA - LH Moment of Force','DELTA - RH Moment of Force');
+
+%Add a Title
+title('LH and RH Moment of Force BASE, ZTCF, and DELTA');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - LHRH Moment of Force BASE vs ZTCF vs DELTA');
+pause(PauseTime);
+
+%Close Figure
+close(751);
+
+%Clear Figure from Workspace
+clear LHSumofMomentsQuiver;
+clear DELTALHSumofMomentsQuiver;
+clear DELTARHSumofMomentsQuiver;
+clear RHSumofMomentsQuiver;
+clear ZTCFLHSumofMomentsQuiver;
+clear ZTCFRHSumofMomentsQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_751_3D_QUIVER_Comparison_LHRHMOF_BASEvsZTCFvsDELTA.m %%%
+
+%%% START FILE: SCRIPT_752_3D_QUIVER_Comparison_LHRHMOF_DELTAvsZTCF.m %%%
+%Generate Club Quiver Plot
+figure(752);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate DELTA Left Hand Moment of Force Quiver Plot
+LHSumofMomentsQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),DELTAQ.LHMOFonClubGlobal(:,1),DELTAQ.LHMOFonClubGlobal(:,2),DELTAQ.LHMOFonClubGlobal(:,3));
+LHSumofMomentsQuiver.LineWidth=1;
+LHSumofMomentsQuiver.Color=[0 1 0];
+LHSumofMomentsQuiver.MaxHeadSize=0.1;
+LHSumofMomentsQuiver.AutoScaleFactor=3;
+
+%Generate DELTA Right Hand Moment of Force Quiver Plot
+RHSumofMomentsQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),DELTAQ.RHMOFonClubGlobal(:,1),DELTAQ.RHMOFonClubGlobal(:,2),DELTAQ.RHMOFonClubGlobal(:,3));
+RHSumofMomentsQuiver.LineWidth=1;
+RHSumofMomentsQuiver.Color=[.8 .2 0];
+RHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Forces so that ZTCF and DELTA are scaled the same.
+RHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/RHSumofMomentsQuiver.ScaleFactor;
+
+%Generate ZTCF Left Hand Moment of Force Quiver Plot
+ZTCFLHSumofMomentsQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHMOFonClubGlobal(:,1),ZTCFQ.LHMOFonClubGlobal(:,2),ZTCFQ.LHMOFonClubGlobal(:,3));
+ZTCFLHSumofMomentsQuiver.LineWidth=1;
+ZTCFLHSumofMomentsQuiver.Color=[0 0.3 0];
+ZTCFLHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Forces so that ZTCF and DELTA are scaled the same.
+ZTCFLHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/ZTCFLHSumofMomentsQuiver.ScaleFactor;
+
+%Generate ZTCF Right Hand Moment of Force Quiver Plot
+ZTCFRHSumofMomentsQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.RHMOFonClubGlobal(:,1),ZTCFQ.RHMOFonClubGlobal(:,2),ZTCFQ.RHMOFonClubGlobal(:,3));
+ZTCFRHSumofMomentsQuiver.LineWidth=1;
+ZTCFRHSumofMomentsQuiver.Color=[.5 .5 0];
+ZTCFRHSumofMomentsQuiver.MaxHeadSize=0.1;
+%Correct scaling on Moment of Force so that ZTCF and DELTA are scaled the same.
+ZTCFRHSumofMomentsQuiver.AutoScaleFactor=LHSumofMomentsQuiver.ScaleFactor/ZTCFRHSumofMomentsQuiver.ScaleFactor;
+
+
+
+%Add Legend to Plot
+legend('','','','','DELTA - LH Moment of Force','DELTA - RH Moment of Force','ZTCF - LH Moment of Force','ZTCF - RH Moment of Force');
+
+%Add a Title
+title('LH and RH Moment of Force DELTA vs. ZTCF');
+subtitle('COMPARISON');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('Comparison Quiver Plots/COMPARISON_Quiver Plot - LHRH Moment of Force Delta vs ZTCF');
+pause(PauseTime);
+
+%Close Figure
+close(752);
+
+%Clear Figure from Workspace
+clear LHSumofMomentsQuiver;
+clear RHSumofMomentsQuiver;
+clear ZTCFLHSumofMomentsQuiver;
+clear ZTCFRHSumofMomentsQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_752_3D_QUIVER_Comparison_LHRHMOF_DELTAvsZTCF.m %%%
+
+%%% START FILE: SCRIPT_QuiverClubCOMDotsBaseData.m %%%
+COMDots=quiver3(BASEQ.ClubCOM(:,1),BASEQ.ClubCOM(:,2),BASEQ.ClubCOM(:,3),BASEQ.ClubCOM(:,1),BASEQ.ClubCOM(:,2),BASEQ.ClubCOM(:,3));
+COMDots.AutoScaleFactor=0.00001;
+COMDots.ShowArrowHead='off';
+COMDots.Marker='o';
+
+%%% END FILE: SCRIPT_QuiverClubCOMDotsBaseData.m %%%
+
+%%% START FILE: SCRIPT_QuiverClubandShaftBaseData.m %%%
+%Reads from a Table named Data in main workspace Generated from the Quivers
+%Plots tab on the main worksheets.
+
+%Generate Shaft Quivers
+Shaft=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.Shaftdx(:,1),BASEQ.Shaftdy(:,1),BASEQ.Shaftdz(:,1),0);
+Shaft.ShowArrowHead='off';		%Turn off arrow heads
+Shaft.LineWidth=1;			    %Adjust line weighting
+Shaft.Color=[0.5 0.5 0.5];		%Set shaft color gray
+hold on;				        %Hold the current plot when you generate new
+
+%Generate Grip Quivers
+Grip=quiver3(BASEQ.Buttx(:,1),BASEQ.Butty(:,1),BASEQ.Buttz(:,1),BASEQ.Gripdx(:,1),BASEQ.Gripdy(:,1),BASEQ.Gripdz(:,1),0);
+Grip.ShowArrowHead='off';
+Grip.LineWidth=1;			    %Set grip line width
+Grip.Color=[0 0 0];			    %Set grip color to black
+
+%Calculate height of table
+H=height(BASEQ);
+
+%Calculate how many rows to copy
+h=H-1;
+
+%Generate Hand Path Quivers
+HandPath=quiver3(BASEQ.MPx(1:h,1),BASEQ.MPy(1:h,1),BASEQ.MPz(1:h,1),BASEQ.MPPx(1:h,1),BASEQ.MPPy(1:h,1),BASEQ.MPPz(1:h,1),0);
+HandPath.ShowArrowHead='off';		%Turn off arrow heads
+HandPath.LineWidth=1;			    %Adjust line weighting
+HandPath.Color=[0 0 0];		        %Set shaft color black
+
+%Generate Club Path Quivers
+ClubPath=quiver3(BASEQ.CHx(1:h,1),BASEQ.CHy(1:h,1),BASEQ.CHz(1:h,1),BASEQ.CHPx(1:h,1),BASEQ.CHPy(1:h,1),BASEQ.CHPz(1:h,1),0);
+ClubPath.ShowArrowHead='off';		%Turn off arrow heads
+ClubPath.LineWidth=1;			    %Adjust line weighting
+ClubPath.Color=[0 0 0];		        %Set shaft color black
+
+% clear Grip;
+% clear Shaft;
+% clear HandPath;
+% clear ClubPath;
+clear h;
+clear H;
+
+%%% END FILE: SCRIPT_QuiverClubandShaftBaseData.m %%%
+
+%%% START FILE: SCRIPT_ShaftandGripatMaxCHSandAlphaReversal.m %%%
+
+%Grip Quiver for Alpha Reversal
+GripAlpha=quiver3(ClubQuiverAlphaReversal.ButtxAlphaReversal,ClubQuiverAlphaReversal.ButtyAlphaReversal,ClubQuiverAlphaReversal.ButtzAlphaReversal,ClubQuiverAlphaReversal.GripdxAlphaReversal,ClubQuiverAlphaReversal.GripdyAlphaReversal,ClubQuiverAlphaReversal.GripdzAlphaReversal,0);
+GripAlpha.ShowArrowHead='off';
+GripAlpha.LineWidth=3;			            %Set grip line width
+GripAlpha.Color=[0 0 0];			        %Set grip color to black
+hold on;
+
+%Shaft Quiver for Alpha Reversal
+ShaftAlpha=quiver3(ClubQuiverAlphaReversal.RHxAlphaReversal,ClubQuiverAlphaReversal.RHyAlphaReversal,ClubQuiverAlphaReversal.RHzAlphaReversal,ClubQuiverAlphaReversal.ShaftdxAlphaReversal,ClubQuiverAlphaReversal.ShaftdyAlphaReversal,ClubQuiverAlphaReversal.ShaftdzAlphaReversal,0);
+ShaftAlpha.ShowArrowHead='off';		        %Turn off arrow heads
+ShaftAlpha.LineWidth=3;			            %Adjust line weighting
+ShaftAlpha.Color=[0.0745 0.6235 1.0000];
+hold on;				                    %Hold the current plot when you generate new
+
+%Grip Quiver for Max CHS
+GripMaxCHS=quiver3(ClubQuiverMaxCHS.ButtxMaxCHS,ClubQuiverMaxCHS.ButtyMaxCHS,ClubQuiverMaxCHS.ButtzMaxCHS,ClubQuiverMaxCHS.GripdxMaxCHS,ClubQuiverMaxCHS.GripdyMaxCHS,ClubQuiverMaxCHS.GripdzMaxCHS,0);
+GripMaxCHS.ShowArrowHead='off';
+GripMaxCHS.LineWidth=3;			            %Set grip line width
+GripMaxCHS.Color=[0 0 0];			        %Set grip color to black
+hold on;
+
+%Shaft Quiver for Max CHS
+ShaftMaxCHS=quiver3(ClubQuiverMaxCHS.RHxMaxCHS,ClubQuiverMaxCHS.RHyMaxCHS,ClubQuiverMaxCHS.RHzMaxCHS,ClubQuiverMaxCHS.ShaftdxMaxCHS,ClubQuiverMaxCHS.ShaftdyMaxCHS,ClubQuiverMaxCHS.ShaftdzMaxCHS,0);
+ShaftMaxCHS.ShowArrowHead='off';		    %Turn off arrow heads
+ShaftMaxCHS.LineWidth=3;			        %Adjust line weighting
+ShaftMaxCHS.Color=[0.9294 0.6941 0.1255];
+
+%Set View
+view(-0.0885,-10.6789);
+
+%%% END FILE: SCRIPT_ShaftandGripatMaxCHSandAlphaReversal.m %%%
+
+%%% END OF PACKED PROJECT %%%

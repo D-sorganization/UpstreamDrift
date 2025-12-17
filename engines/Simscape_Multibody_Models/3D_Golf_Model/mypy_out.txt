@@ -1,0 +1,11 @@
+python\src\apps\c3d_viewer.py:164: error: Item "None" of "QStatusBar | None" has no attribute "showMessage"  [union-attr]
+python\src\apps\c3d_viewer.py:396: error: Item "None" of "QStatusBar | None" has no attribute "showMessage"  [union-attr]
+python\src\apps\c3d_viewer.py:405: error: Item "None" of "QStatusBar | None" has no attribute "showMessage"  [union-attr]
+python\src\apps\c3d_viewer.py:409: error: Item "None" of "QStatusBar | None" has no attribute "showMessage"  [union-attr]
+python\tests\test_c3d_viewer_ux.py:16: error: Function is missing a return type annotation  [no-untyped-def]
+python\tests\test_c3d_viewer_ux.py:23: error: Function is missing a type annotation  [no-untyped-def]
+python\tests\test_c3d_viewer_ux.py:38: error: Cannot assign to a method  [method-assign]
+python\tests\test_c3d_viewer_ux.py:38: error: Item "None" of "QStatusBar | None" has no attribute "showMessage"  [union-attr]
+python\tests\test_c3d_viewer_ux.py:90: error: Item "None" of "QStatusBar | None" has no attribute "showMessage"  [union-attr]
+python\tests\test_c3d_viewer_ux.py:97: error: Item "None" of "QStatusBar | None" has no attribute "showMessage"  [union-attr]
+Found 10 errors in 2 files (checked 16 source files)
