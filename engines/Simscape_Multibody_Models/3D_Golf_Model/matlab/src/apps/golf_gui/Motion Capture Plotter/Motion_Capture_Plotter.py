@@ -1172,7 +1172,7 @@ class MotionCapturePlotter(QMainWindow):
                 )
 
         # Draw joint markers
-        for joint_name, position in joints.items():
+        for _, position in joints.items():
             self.ax.scatter(
                 position[0], position[1], position[2], color="black", s=50, alpha=0.8
             )
