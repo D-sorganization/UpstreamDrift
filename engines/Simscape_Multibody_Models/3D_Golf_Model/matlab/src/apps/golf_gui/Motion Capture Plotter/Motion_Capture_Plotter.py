@@ -405,7 +405,8 @@ class MotionCapturePlotter(QMainWindow):
 
                     # Process data starting from row 3 (actual data starts here)
                     if len(df) > 3:
-                        # Extract position and orientation data for both mid-hands and club head
+                        # Extract position and orientation data for both
+                        # mid-hands and club head
                         data = []
                         for i in range(3, len(df)):
                             row = df.iloc[i]
@@ -421,12 +422,14 @@ class MotionCapturePlotter(QMainWindow):
                                     except (ValueError, TypeError):
                                         return default
 
-                                # Mid-hands data (columns 2-13) - Convert inches to meters
+                                # Mid-hands data (columns 2-13) - Convert inches
+                                # to meters
                                 frame_data = {
                                     "time": safe_float(
                                         row[1], i - 3
                                     ),  # Time is in column 1
-                                    # Mid-hands position (convert inches to meters) and orientation
+                                    # Mid-hands position (convert inches to meters)
+                                    # and orientation
                                     "mid_X": safe_float(row[2])
                                     * 0.0254,  # inches to meters
                                     "mid_Y": safe_float(row[3])

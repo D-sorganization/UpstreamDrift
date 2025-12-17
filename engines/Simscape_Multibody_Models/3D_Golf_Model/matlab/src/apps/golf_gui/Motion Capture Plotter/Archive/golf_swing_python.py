@@ -512,10 +512,12 @@ class GolfSwingAnalyzer:
                 y_norms = np.sqrt(data["Yx"] ** 2 + data["Yy"] ** 2 + data["Yz"] ** 2)
                 print("\nOrientation vector validation:")
                 print(
-                    f"  X-axis norm range: {x_norms.min():.3f} to {x_norms.max():.3f} (should be ~1.0)"
+                    f"  X-axis norm range: {x_norms.min():.3f} to "
+                    f"{x_norms.max():.3f} (should be ~1.0)"
                 )
                 print(
-                    f"  Y-axis norm range: {y_norms.min():.3f} to {y_norms.max():.3f} (should be ~1.0)"
+                    f"  Y-axis norm range: {y_norms.min():.3f} to "
+                    f"{y_norms.max():.3f} (should be ~1.0)"
                 )
 
                 print("=" * 40)
@@ -669,8 +671,10 @@ class GolfSwingAnalyzer:
             # Calculate the range of motion to understand the scale
 
 
-            # The position data seems to be tracking a point on the club (likely near the grip)
-            # For a typical golf swing, the club head should move much more than the grip
+            # The position data seems to be tracking a point on the club
+            # (likely near the grip)
+            # For a typical golf swing, the club head should move much more
+            # than the grip
             # Let's estimate the club length based on typical proportions
 
             # Use the user-defined club length if available
