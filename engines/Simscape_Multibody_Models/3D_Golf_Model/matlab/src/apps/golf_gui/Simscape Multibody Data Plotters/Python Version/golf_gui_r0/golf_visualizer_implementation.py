@@ -194,7 +194,7 @@ class DataProcessor:
         """Safely extract 3D point with fallbacks"""
         try:
             point = dataset[column].iloc[frame_idx]
-            if isinstance(point, (list, np.ndarray)) and len(point) == 3:
+            if isinstance(point, list | np.ndarray) and len(point) == 3:
                 return np.array(point, dtype=np.float32)
         except:
             pass
@@ -206,7 +206,7 @@ class DataProcessor:
         """Safely extract 3D vector with fallbacks"""
         try:
             vector = dataset[column].iloc[frame_idx]
-            if isinstance(vector, (list, np.ndarray)) and len(vector) == 3:
+            if isinstance(vector, list | np.ndarray) and len(vector) == 3:
                 return np.array(vector, dtype=np.float32)
         except:
             pass
@@ -801,7 +801,7 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
         y = self.camera_distance * np.sin(elevation_rad)
         z = self.camera_distance * np.cos(elevation_rad) * np.sin(azimuth_rad)
 
-        camera_pos = self.camera_target + np.array([x, y, z])
+        self.camera_target + np.array([x, y, z])
 
         # Create view matrix (simplified lookAt)
         view_matrix = np.eye(4, dtype=np.float32)
@@ -811,10 +811,8 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
 
     def _calculate_projection_matrix(self) -> np.ndarray:
         """Calculate perspective projection matrix"""
-        aspect_ratio = self.width() / self.height() if self.height() > 0 else 1.0
-        fov = np.radians(45.0)
-        near = 0.1
-        far = 100.0
+        self.width() / self.height() if self.height() > 0 else 1.0
+        np.radians(45.0)
 
         proj_matrix = np.eye(4, dtype=np.float32)
         # ... implementation of perspective projection matrix

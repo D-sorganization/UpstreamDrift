@@ -6,6 +6,7 @@ Complete integration of all components with enhanced features and error handling
 
 import logging
 import sys
+import time
 from pathlib import Path
 
 # Configure logging
@@ -603,7 +604,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
         """Update enhanced status information"""
         if self.gl_widget.frame_processor:
             # Update performance panel with additional info
-            current_time = self.gl_widget.current_frame * 0.001
+            self.gl_widget.current_frame * 0.001
             self.perf_panel.update_render_time(
                 self.gl_widget.performance_stats.frame_time_ms
             )

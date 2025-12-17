@@ -32,7 +32,7 @@ def create_sample_data():
     # Create sample positions (simplified golf swing)
     base_data = []
 
-    for i, t in enumerate(time_vector):
+    for _i, t in enumerate(time_vector):
         # Simple swing motion
         swing_phase = t / 2.0  # 0 to 1
 

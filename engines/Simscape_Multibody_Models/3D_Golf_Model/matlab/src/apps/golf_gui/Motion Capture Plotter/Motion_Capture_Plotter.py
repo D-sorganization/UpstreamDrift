@@ -572,7 +572,7 @@ class MotionCapturePlotter(QMainWindow):
 
             # Process the data into our standard format
             data = []
-            for i, row in df.iterrows():
+            for _i, row in df.iterrows():
                 frame_data = {"time": row["time"]}
 
                 # Add available joint positions
@@ -1443,7 +1443,7 @@ class MotionCapturePlotter(QMainWindow):
             # Update limits (scale the movement)
             x_range = x_lim[1] - x_lim[0]
             y_range = y_lim[1] - y_lim[0]
-            z_range = z_lim[1] - z_lim[0]
+            z_lim[1] - z_lim[0]
 
             pan_scale = 0.01  # Adjust this for panning sensitivity
 

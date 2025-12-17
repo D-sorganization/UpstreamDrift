@@ -486,7 +486,7 @@ def generate_chebyshev_linkage_xml() -> str:
     </visual>
 
     <asset>
-        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3" 
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3"
                  rgb2=".2 .3 .4" width="300" height="300"/>
         <material name="grid" texture="grid" texrepeat="1 1"/>
         <material name="link1_mat" rgba="0.9 0.1 0.1 1"/>
@@ -575,7 +575,7 @@ def generate_pantograph_xml(scale_factor=2.0) -> str:
     </visual>
 
     <asset>
-        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3" 
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3"
                  rgb2=".2 .3 .4" width="300" height="300"/>
         <material name="grid" texture="grid" texrepeat="1 1"/>
         <material name="arm_mat" rgba="0.1 0.7 0.9 1"/>
@@ -665,7 +665,7 @@ def generate_delta_robot_xml(base_radius=2.0, platform_radius=0.5) -> str:
     </visual>
 
     <asset>
-        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3" 
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3"
                  rgb2=".2 .3 .4" width="300" height="300"/>
         <material name="grid" texture="grid" texrepeat="1 1"/>
         <material name="base_mat" rgba="0.3 0.3 0.3 1"/>
@@ -799,7 +799,7 @@ def generate_five_bar_parallel_xml(link_length=1.5) -> str:
     </visual>
 
     <asset>
-        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3" 
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3"
                  rgb2=".2 .3 .4" width="300" height="300"/>
         <material name="grid" texture="grid" texrepeat="1 1"/>
         <material name="link1_mat" rgba="0.9 0.1 0.1 1"/>
@@ -900,7 +900,7 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
     </visual>
 
     <asset>
-        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3" 
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3"
                  rgb2=".2 .3 .4" width="300" height="300"/>
         <material name="grid" texture="grid" texrepeat="1 1"/>
         <material name="base_mat" rgba="0.3 0.3 0.3 1"/>
@@ -1006,28 +1006,28 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
         <!-- Moving platform -->
         <body name="platform" pos="0 0 2.5">
             <freejoint/>
-            <geom type="cylinder" size="{platform_radius} 0.12" 
+            <geom type="cylinder" size="{platform_radius} 0.12"
                   material="platform_mat" mass="2.0"/>
-            <geom type="sphere" pos="0 0 0.2" size="0.15" 
+            <geom type="sphere" pos="0 0 0.2" size="0.15"
                   rgba="1 0.5 0 1" mass="0.5"/>
 
             <!-- Platform attachment points -->
-            <geom type="sphere" 
+            <geom type="sphere"
                   pos="{platform_radius * np.cos(np.pi / 6)} {platform_radius * np.sin(np.pi / 6)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" 
+            <geom type="sphere"
                   pos="{platform_radius * np.cos(np.pi / 2)} {platform_radius * np.sin(np.pi / 2)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" 
+            <geom type="sphere"
                   pos="{platform_radius * np.cos(5 * np.pi / 6)} {platform_radius * np.sin(5 * np.pi / 6)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" 
+            <geom type="sphere"
                   pos="{platform_radius * np.cos(7 * np.pi / 6)} {platform_radius * np.sin(7 * np.pi / 6)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" 
+            <geom type="sphere"
                   pos="{platform_radius * np.cos(3 * np.pi / 2)} {platform_radius * np.sin(3 * np.pi / 2)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" 
+            <geom type="sphere"
                   pos="{platform_radius * np.cos(11 * np.pi / 6)} {platform_radius * np.sin(11 * np.pi / 6)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
         </body>
@@ -1050,17 +1050,17 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
     </equality>
 
     <actuator>
-        <motor name="leg1_motor" joint="leg1_extend" gear="100" 
+        <motor name="leg1_motor" joint="leg1_extend" gear="100"
                ctrllimited="true" ctrlrange="-15 15"/>
-        <motor name="leg2_motor" joint="leg2_extend" gear="100" 
+        <motor name="leg2_motor" joint="leg2_extend" gear="100"
                ctrllimited="true" ctrlrange="-15 15"/>
-        <motor name="leg3_motor" joint="leg3_extend" gear="100" 
+        <motor name="leg3_motor" joint="leg3_extend" gear="100"
                ctrllimited="true" ctrlrange="-15 15"/>
-        <motor name="leg4_motor" joint="leg4_extend" gear="100" 
+        <motor name="leg4_motor" joint="leg4_extend" gear="100"
                ctrllimited="true" ctrlrange="-15 15"/>
-        <motor name="leg5_motor" joint="leg5_extend" gear="100" 
+        <motor name="leg5_motor" joint="leg5_extend" gear="100"
                ctrllimited="true" ctrlrange="-15 15"/>
-        <motor name="leg6_motor" joint="leg6_extend" gear="100" 
+        <motor name="leg6_motor" joint="leg6_extend" gear="100"
                ctrllimited="true" ctrlrange="-15 15"/>
     </actuator>
 </mujoco>
@@ -1083,7 +1083,7 @@ def generate_watt_linkage_xml() -> str:
     </visual>
 
     <asset>
-        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3" 
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3"
                  rgb2=".2 .3 .4" width="300" height="300"/>
         <material name="grid" texture="grid" texrepeat="1 1"/>
         <material name="link_mat" rgba="0.7 0.3 0.1 1"/>
@@ -1116,7 +1116,7 @@ def generate_watt_linkage_xml() -> str:
 
             <!-- Central link attached to left -->
             <body name="central_link" pos="2.0 1.5 0">
-                <joint name="central_left_joint" type="hinge" axis="0 0 1" 
+                <joint name="central_left_joint" type="hinge" axis="0 0 1"
                        damping="0.15"/>
                 <geom type="capsule" fromto="0 0 0  2.0 -0.5 0" size="0.055"
                       rgba="0.1 0.7 0.5 1" mass="0.6"/>
@@ -1146,7 +1146,7 @@ def generate_watt_linkage_xml() -> str:
     </equality>
 
     <actuator>
-        <motor name="left_motor" joint="left_joint" gear="20" 
+        <motor name="left_motor" joint="left_joint" gear="20"
                ctrllimited="true" ctrlrange="-6 6"/>
     </actuator>
 </mujoco>
@@ -1172,7 +1172,7 @@ def generate_oldham_coupling_xml(offset=0.5) -> str:
     </visual>
 
     <asset>
-        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3" 
+        <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3"
                  rgb2=".2 .3 .4" width="300" height="300"/>
         <material name="grid" texture="grid" texrepeat="1 1"/>
         <material name="input_mat" rgba="0.9 0.1 0.1 1"/>
@@ -1220,14 +1220,14 @@ def generate_oldham_coupling_xml(offset=0.5) -> str:
 
     <equality>
         <!-- Simplified coupling constraints -->
-        <weld body1="input_shaft" body2="middle_disc" solref="0.002 1" 
+        <weld body1="input_shaft" body2="middle_disc" solref="0.002 1"
               solimp="0.9 0.95 0.001" relpose="0 0 0.2  1 0 0 0"/>
-        <weld body1="middle_disc" body2="output_shaft" solref="0.002 1" 
+        <weld body1="middle_disc" body2="output_shaft" solref="0.002 1"
               solimp="0.9 0.95 0.001" relpose="{-offset} 0 0.2  1 0 0 0"/>
     </equality>
 
     <actuator>
-        <motor name="input_motor" joint="input_joint" gear="25" 
+        <motor name="input_motor" joint="input_joint" gear="25"
                ctrllimited="true" ctrlrange="-8 8"/>
     </actuator>
 </mujoco>
