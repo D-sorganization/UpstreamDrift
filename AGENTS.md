@@ -180,55 +180,156 @@ If sensitive data is accidentally committed:
 
 ## 🏗️ System Architecture & Agent Roles
 
-**Reference:** [JULES_ARCHITECTURE.md](JULES_ARCHITECTURE.md)
-
 This section defines the active agents within the Jules "Control Tower" Architecture. All agents must operate within their defined scope.
 
-### 1. The Control Tower (Orchestrator)
+### Core Orchestration Agents
+
+#### 1. Jules-Control-Tower (Orchestrator)
 **Role:** Air Traffic Controller
-**Workflow:** `.github/workflows/jules-control-tower.yml`
+**Workflow:** `.github/workflows/Jules-Control-Tower.yml`
 **Responsibilities:**
 -  **Sole Trigger:** The only agent that listens to GitHub events (Push, PR, Schedule).
 -  **Decision Maker:** Analyzes the event context (Triage) and dispatches the appropriate specialized worker.
 -  **Loop Prevention:** Enforces `if: github.actor != 'jules-bot'` to prevent infinite recursion.
 
-### 2. Auto-Repair (Medic)
+#### 2. Jules-Auto-Repair (Medic)
 **Role:** Fixer of Broken Builds
-**Workflow:** `.github/workflows/jules-auto-repair.yml`
+**Workflow:** `.github/workflows/Jules-Auto-Repair.yml`
 **Triggered By:** CI Failure (Standard CI)
 **Capabilities:**
 -  **Read:** CI Failure Logs
 -  **Write:** Fixes to syntax, imports, and simple logic errors.
--  **Constraint:** limited retries (max 2) to prevent "flailing".
+-  **Constraint:** Limited retries (max 2) to prevent "flailing".
 
-### 3. Test-Generator (Architect)
+### Quality Assurance Agents
+
+#### 3. Jules-Test-Generator (Architect)
 **Role:** Quality Assurance Engineer
-**Workflow:** `.github/workflows/jules-test-generator.yml`
+**Workflow:** `.github/workflows/Jules-Test-Generator.yml`
 **Triggered By:** New PR with `.py` changes
 **Capabilities:**
 -  **Write:** New test files in `tests/`.
 -  **Constraint:** Must not modify existing application code, only add tests.
 
-### 4. Doc-Scribe (Librarian)
-**Role:** Documentation Maintainer
-**Workflow:** `.github/workflows/jules-documentation-scribe.yml`
-**Triggered By:** Push to `main`
-**Capabilities:**
--  **Write:** Updates to `docs/` and markdown files.
--  **Mode:** "CodeWiki" - treats the codebase as a living encyclopedia.
-
-### 5. Scientific-Auditor (The Professor)
+#### 4. Jules-Scientific-Auditor (The Professor)
 **Role:** Peer Reviewer
-**Workflow:** `.github/workflows/jules-scientific-auditor.yml`
+**Workflow:** `.github/workflows/Jules-Scientific-Auditor.yml`
 **Triggered By:** Nightly Schedule
 **Capabilities:**
 -  **Read-Only:** CANNOT modify code.
 -  **Output:** Comments on PRs or Issues regarding mathematical correctness and physics fidelity.
 
-### 6. Conflict-Fix (Diplomat)
+#### 5. Jules-Review-Fix (Code Reviewer)
+**Role:** Code Quality Reviewer
+**Workflow:** `.github/workflows/Jules-Review-Fix.yml`
+**Capabilities:**
+-  **Read:** Code changes and PR content
+-  **Write:** Review comments and suggestions
+
+### Documentation & Maintenance Agents
+
+#### 6. Jules-Documentation-Scribe (Librarian)
+**Role:** Documentation Maintainer
+**Workflow:** `.github/workflows/Jules-Documentation-Scribe.yml`
+**Triggered By:** Push to `main`
+**Capabilities:**
+-  **Write:** Updates to `docs/` and markdown files.
+-  **Mode:** "CodeWiki" - treats the codebase as a living encyclopedia.
+
+#### 7. Jules-Archivist (Historian)
+**Role:** Repository Organizer
+**Workflow:** `.github/workflows/Jules-Archivist.yml`
+**Capabilities:**
+-  **Write:** Organizational improvements and file structure optimization
+
+### Specialized Technical Agents
+
+#### 8. Jules-Curie (Data Scientist)
+**Role:** Scientific Computing Specialist
+**Workflow:** `.github/workflows/Jules-Curie.yml`
+**Capabilities:**
+-  **Write:** Scientific computing improvements and data analysis enhancements
+
+#### 9. Jules-Hypatia (Mathematician)
+**Role:** Mathematical Modeling Expert
+**Workflow:** `.github/workflows/Jules-Hypatia.yml`
+**Capabilities:**
+-  **Write:** Mathematical model improvements and algorithm optimizations
+
+#### 10. Jules-Tech-Custodian (System Administrator)
+**Role:** Infrastructure Maintainer
+**Workflow:** `.github/workflows/Jules-Tech-Custodian.yml`
+**Capabilities:**
+-  **Write:** Infrastructure and configuration improvements
+
+### Problem Resolution Agents
+
+#### 11. Jules-Conflict-Fix (Diplomat)
 **Role:** Merge Conflict Resolver
-**Workflow:** `.github/workflows/jules-conflict-fix.yml`
-**Triggered By:** Manual dispatch or specific conflict events (if configured)
+**Workflow:** `.github/workflows/Jules-Conflict-Fix.yml`
+**Triggered By:** Manual dispatch or specific conflict events
 **Capabilities:**
 -  **Write:** Merge resolution commits.
 -  **Constraint:** Prioritizes "Incoming" changes unless specified otherwise.
+
+#### 12. Jules-Hotfix-Creator (Emergency Responder)
+**Role:** Critical Issue Resolver
+**Workflow:** `.github/workflows/Jules-Hotfix-Creator.yml`
+**Capabilities:**
+-  **Write:** Emergency fixes for critical issues
+
+#### 13. Jules-Render-Healer (Graphics Specialist)
+**Role:** Visualization and Rendering Expert
+**Workflow:** `.github/workflows/Jules-Render-Healer.yml`
+**Capabilities:**
+-  **Write:** Graphics, visualization, and rendering improvements
+
+### Supporting Infrastructure
+
+#### Additional Workflows:
+- `agent-metrics-dashboard.yml` - Agent performance monitoring
+- `ci-failure-digest.yml` - CI failure analysis and reporting
+- `ci-standard.yml` - Standard continuous integration
+- `pr-auto-labeler.yml` - Automatic PR labeling
+- `stale-cleanup.yml` - Stale issue and PR cleanup
+
+---
+
+## 🛠️ Quality Control Tools
+
+The repository includes comprehensive quality control tools in the `tools/` directory:
+
+### Core Quality Tools
+
+#### 1. Code Quality Check (`tools/code_quality_check.py`)
+**Purpose:** AI-generated code quality verification
+**Features:**
+- Validates code against project standards
+- Color-coded terminal output for easy issue identification
+- Automated quality checks for development workflow
+
+#### 2. Scientific Auditor (`tools/scientific_auditor.py`)
+**Purpose:** Scientific computation risk analysis
+**Features:**
+- Identifies potential numerical issues (division by zero, etc.)
+- Analyzes mathematical operations for stability
+- Prevents common scientific computing pitfalls
+
+#### 3. MATLAB Quality Check (`tools/matlab_utilities/scripts/matlab_quality_check.py`)
+**Purpose:** MATLAB-specific quality control
+**Features:**
+- Follows project's .cursorrules.md requirements
+- Command-line and CI/CD integration support
+- Comprehensive MATLAB code analysis
+
+### Usage
+```bash
+# General code quality check
+python tools/code_quality_check.py
+
+# Scientific computation audit  
+python tools/scientific_auditor.py
+
+# MATLAB-specific quality check
+python tools/matlab_utilities/scripts/matlab_quality_check.py
+```
