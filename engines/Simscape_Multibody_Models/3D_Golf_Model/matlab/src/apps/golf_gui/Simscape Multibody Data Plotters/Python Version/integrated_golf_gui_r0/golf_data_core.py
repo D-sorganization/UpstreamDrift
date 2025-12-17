@@ -227,7 +227,7 @@ class MatlabDataLoader:
             except Exception as e:
                 raise RuntimeError(
                     f"[ERROR] Failed to load {name} from {filepath}: {e}"
-                )
+                ) from e
 
         # Validate consistency between datasets
         self._validate_dataset_consistency(datasets)

@@ -194,7 +194,7 @@ class MotionDataLoader:
             return {"ProV1": prov1_processed, "Wiffle": wiffle_processed}
 
         except Exception as e:
-            raise RuntimeError(f"Error loading Excel data: {e}")
+            raise RuntimeError(f"Error loading Excel data: {e}") from e
 
     def _process_sheet_data(self, df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
         """Process and clean sheet data"""

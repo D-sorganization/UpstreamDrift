@@ -264,7 +264,7 @@ class GeometryManager:
         except Exception as e:
             print(f"[ERROR] Failed to compile shaders: {e}")
             traceback.print_exc()
-            raise RuntimeError(f"Failed to compile shaders: {e}")
+            raise RuntimeError(f"Failed to compile shaders: {e}") from e
 
     def create_geometry_object(
         self, name: str, mesh_type: str, program_name: str = "simple"
