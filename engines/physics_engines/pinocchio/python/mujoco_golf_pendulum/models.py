@@ -653,7 +653,8 @@ FULL_BODY_GOLF_SWING_XML = rf"""<mujoco model="golf_full_body_swing">
 # ==============================================================================
 # TWO-LINK INCLINED PLANE MODEL WITH UNIVERSAL JOINT AT WRIST
 # ==============================================================================
-TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML = rf"""<mujoco model="two_link_inclined_universal">
+TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML = rf"""<mujoco 
+  model="two_link_inclined_universal">
   <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}"
           integrator="RK4" solver="Newton"/>
 
@@ -875,7 +876,8 @@ GIMBAL_JOINT_DEMO_XML = rf"""<mujoco model="gimbal_joint_demo">
 # ==============================================================================
 # ADVANCED FULL-BODY MODEL WITH SPECIFIED JOINT TYPES
 # ==============================================================================
-ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanical_golf_swing">
+ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco 
+  model="advanced_biomechanical_golf_swing">
   <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}"
           integrator="RK4" solver="Newton" iterations="50"/>
 
@@ -1309,16 +1311,23 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
            ctrllimited="true" ctrlrange="-65 65"/>
 
     <!-- Right Elbow (1 DOF) -->
-    <motor name="r_elbow" joint="right_elbow" gear="60" ctrllimited="true" ctrlrange="-75 75"/>
+    <motor name="r_elbow" joint="right_elbow" gear="60"
+           ctrllimited="true" ctrlrange="-75 75"/>
 
     <!-- Right Wrist (2 DOF) -->
-    <motor name="r_wrist_flex" joint="right_wrist_flexion" gear="25" ctrllimited="true" ctrlrange="-35 35"/>
-    <motor name="r_wrist_dev" joint="right_wrist_deviation" gear="20" ctrllimited="true" ctrlrange="-28 28"/>
+    <motor name="r_wrist_flex" joint="right_wrist_flexion" gear="25"
+           ctrllimited="true" ctrlrange="-35 35"/>
+    <motor name="r_wrist_dev" joint="right_wrist_deviation" gear="20"
+           ctrllimited="true" ctrlrange="-28 28"/>
 
-    <!-- Flexible Shaft (3 DOF) - typically controlled passively, but can be actuated for study -->
-    <motor name="shaft_upper" joint="shaft_flex_upper" gear="2" ctrllimited="true" ctrlrange="-5 5"/>
-    <motor name="shaft_middle" joint="shaft_flex_middle" gear="2" ctrllimited="true" ctrlrange="-5 5"/>
-    <motor name="shaft_tip" joint="shaft_flex_tip" gear="2" ctrllimited="true" ctrlrange="-5 5"/>
+    <!-- Flexible Shaft (3 DOF) - typically controlled passively, 
+         but can be actuated for study -->
+    <motor name="shaft_upper" joint="shaft_flex_upper" gear="2"
+           ctrllimited="true" ctrlrange="-5 5"/>
+    <motor name="shaft_middle" joint="shaft_flex_middle" gear="2"
+           ctrllimited="true" ctrlrange="-5 5"/>
+    <motor name="shaft_tip" joint="shaft_flex_tip" gear="2"
+           ctrllimited="true" ctrlrange="-5 5"/>
   </actuator>
 </mujoco>
 """
@@ -1443,8 +1452,11 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
         f"<!-- {club_type.upper()} - {num_segments} segment flexible shaft -->",
         f'<body name="club_grip" pos="0 0 -0.10" euler="0 -{club_loft:.3f} 0">',
         f'  <inertial pos="0 0 -{grip_length / 2:.4f}" mass="{grip_mass:.4f}"',
-        f'            diaginertia="{grip_mass * grip_length**2 / 12:.8f} {grip_mass * grip_length**2 / 12:.8f} {grip_mass * grip_radius**2 / 2:.8f}"/>',
-        f'  <geom name="grip_geom" type="capsule" fromto="0 0 0 0 0 -{grip_length:.4f}"',
+        f'            diaginertia="{grip_mass * grip_length**2 / 12:.8f} '
+        f'{grip_mass * grip_length**2 / 12:.8f} '
+        f'{grip_mass * grip_radius**2 / 2:.8f}"/>',
+        '  <geom name="grip_geom" type="capsule"',
+        f'        fromto="0 0 0 0 0 -{grip_length:.4f}"',
         f'        size="{grip_radius:.4f}" material="club_grip_mat"/>',
     ]
 
@@ -1473,10 +1485,16 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
         xml_parts.extend(
             [
                 f'{indent}  <joint name="{seg_name}_flex" type="hinge" axis="1 0 0"',
-                f'{indent}         range="-0.{15 + i * 5} 0.{15 + i * 5}" damping="{damping:.2f}" stiffness="{stiffness}" armature="0.001"/>',
-                f'{indent}  <inertial pos="0 0 -{seg_length / 2:.4f}" mass="{seg_mass:.4f}"',
-                f'{indent}            diaginertia="{seg_mass * seg_length**2 / 12:.8f} {seg_mass * seg_length**2 / 12:.8f} {seg_mass * shaft_radius**2 / 2:.8f}"/>',
-                f'{indent}  <geom name="{seg_name}_geom" type="capsule" fromto="0 0 0 0 0 -{seg_length:.4f}"',
+                f'{indent}         range="-0.{15 + i * 5} 0.{15 + i * 5}"',
+                f'{indent}         damping="{damping:.2f}" stiffness="{stiffness}"',
+                f'{indent}         armature="0.001"/>',
+                f'{indent}  <inertial pos="0 0 -{seg_length / 2:.4f}"',
+                f'{indent}            mass="{seg_mass:.4f}"',
+                f'{indent}            diaginertia="{seg_mass * seg_length**2 / 12:.8f} '
+                f'{seg_mass * seg_length**2 / 12:.8f} '
+                f'{seg_mass * shaft_radius**2 / 2:.8f}"/>',
+                f'{indent}  <geom name="{seg_name}_geom" type="capsule"',
+                f'{indent}        fromto="0 0 0 0 0 -{seg_length:.4f}"',
                 f'{indent}        size="{shaft_radius:.4f}" material="club_shaft_mat"/>',
             ],
         )
@@ -1492,17 +1510,21 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
     xml_parts.extend(
         [
             f"\n{indent}<!-- Club Head -->",
-            f'{indent}<body name="hosel" pos="0 0 -{seg_length:.4f}" euler="0 {club_loft:.3f} 0">',
+            f'{indent}<body name="hosel" pos="0 0 -{seg_length:.4f}"',
+            f'{indent}      euler="0 {club_loft:.3f} 0">',
             f'{indent}  <inertial pos="0 0.02 -0.01" mass="0.010"',
             f'{indent}            diaginertia="0.000005 0.000005 0.000002"/>',
-            f'{indent}  <geom name="hosel_geom" type="cylinder" fromto="0 0 0 0 0.030 -0.005"',
+            f'{indent}  <geom name="hosel_geom" type="cylinder"',
+            f'{indent}        fromto="0 0 0 0 0.030 -0.005"',
             f'{indent}        size="0.008" material="club_head_mat"/>',
             f'{indent}  <body name="clubhead" pos="0 0.040 -0.008">',
             f'{indent}    <inertial pos="0 {hs1 / 2:.4f} 0.002" mass="{head_mass:.4f}"',
             f'{indent}              diaginertia="{ixx:.8f} {iyy:.8f} {izz:.8f}"/>',
-            f'{indent}    <geom name="head_body" type="box" size="{hs0:.4f} {hs1:.4f} {hs2:.4f}"',
+            f'{indent}    <geom name="head_body" type="box"',
+            f'{indent}          size="{hs0:.4f} {hs1:.4f} {hs2:.4f}"',
             f'{indent}          pos="0 {hs1:.4f} 0" material="club_head_mat"/>',
-            f'{indent}    <geom name="face" type="box" size="{hs0 + 0.001:.4f} 0.003 {hs2 + 0.001:.4f}"',
+            f'{indent}    <geom name="face" type="box"',
+            f'{indent}          size="{hs0 + 0.001:.4f} 0.003 {hs2 + 0.001:.4f}"',
             f'{indent}          pos="0 {hs1 * 2 + 0.003:.4f} 0" '
             f'rgba="0.85 0.15 0.15 0.9"/>',
             f"{indent}  </body>",

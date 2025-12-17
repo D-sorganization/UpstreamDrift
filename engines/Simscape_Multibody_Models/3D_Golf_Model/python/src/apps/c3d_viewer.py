@@ -422,7 +422,8 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         n_dim, n_points, n_frames = points.shape
         if n_dim != 4:
             raise ValueError(
-                f"Expected 4 dimensions for marker data (x, y, z, residual), got {n_dim}"
+                f"Expected 4 dimensions for marker data (x, y, z, residual), "
+                f"got {n_dim}"
             )
 
         labels_points = c3d_obj["parameters"]["POINT"]["LABELS"]["value"]

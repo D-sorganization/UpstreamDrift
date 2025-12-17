@@ -39,7 +39,8 @@ def analyze_matlab_files():
                         print(f"  {key}: shape {value.shape}, dtype {value.dtype}")
                         if value.ndim == 2 and value.shape[1] > 10:
                             print(
-                                f"    Large dataset: {value.shape[0]} rows, {value.shape[1]} columns"
+                                f"    Large dataset: {value.shape[0]} rows, "
+                                f"{value.shape[1]} columns"
                             )
                             # Show sample of first few columns
                             print("    Sample data (first 3 rows, first 5 cols):")
@@ -66,7 +67,8 @@ def check_signal_bus_structure():
             baseq_data = mat_data["BASEQ"]
             if isinstance(baseq_data, np.ndarray) and baseq_data.ndim == 2:
                 print(
-                    f"BASEQ data: {baseq_data.shape[0]} time points, {baseq_data.shape[1]} signals"
+                    f"BASEQ data: {baseq_data.shape[0]} time points, "
+                    f"{baseq_data.shape[1]} signals"
                 )
 
                 # Check if this looks like signal bus data
@@ -79,7 +81,8 @@ def check_signal_bus_structure():
                     for i in range(min(10, baseq_data.shape[1])):
                         col_data = baseq_data[:, i]
                         print(
-                            f"  Signal {i}: range [{col_data.min():.3f}, {col_data.max():.3f}], mean {col_data.mean():.3f}"
+                            f"  Signal {i}: range [{col_data.min():.3f}, "
+                            f"{col_data.max():.3f}], mean {col_data.mean():.3f}"
                         )
 
                     return True
@@ -121,10 +124,12 @@ def check_required_signals():
                 if key in data:
                     dataset = data[key]
                     print(
-                        f"  {name}: {dataset.shape[0]} time points, {dataset.shape[1]} signals"
+                        f"  {name}: {dataset.shape[0]} time points, "
+                        f"{dataset.shape[1]} signals"
                     )
 
-                    # In signal bus format, signals are columns, so we need to check if we have enough
+                    # In signal bus format, signals are columns,
+                    # so we need to check if we have enough
                     if dataset.shape[1] >= 6:  # At least 6 signals for positions
                         print(f"    ✅ {name} has sufficient signals for GUI")
                     else:
@@ -181,7 +186,8 @@ def main():
         print("2. ✅ All required data files are present and readable")
         print("3. ✅ Signal bus logging is likely being used (many columns)")
         print(
-            "4. 🔧 Consider adding GUI option to disable Simscape Results Explorer for speed"
+            "4. 🔧 Consider adding GUI option to disable Simscape Results "
+            "Explorer for speed"
         )
         print("5. 🧪 Test with a full simulation run to verify all data is captured")
 

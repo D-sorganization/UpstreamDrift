@@ -20,7 +20,8 @@ def test_safe_eval_variables() -> None:
 def test_safe_eval_rejects_imports() -> None:
     """Test that imports are rejected."""
     evaluator = SafeEvaluator()
-    # "import os" is a statement, not an expression. ast.parse(..., mode='eval') raises SyntaxError.
+    # "import os" is a statement, not an expression.
+    # ast.parse(..., mode='eval') raises SyntaxError.
     with pytest.raises(ValueError, match="Invalid syntax"):
         evaluator.validate("import os")
 
@@ -29,10 +30,10 @@ def test_safe_eval_rejects_builtins() -> None:
     """Test that usage of builtins is rejected."""
     evaluator = SafeEvaluator()
     # This involves Attribute access or Call of non-allowed name
-    with pytest.raises(
-        ValueError,
-        match="Disallowed syntax|Only direct function calls|Function .* is not permitted",
-    ):
+    error_pattern = (
+        "Disallowed syntax|Only direct function calls|Function .* is not permitted"
+    )
+    with pytest.raises(ValueError, match=error_pattern):
         evaluator.validate("__import__('os').system('ls')")
 
 
@@ -59,13 +60,12 @@ def test_safe_eval_rejects_complex_nodes() -> None:
 
 
 def test_safe_eval_power_operator() -> None:
-    """Test that the power operator (^) is rejected to prevent confusion with exponentiation."""
+    """Test that the power operator (^) is rejected to prevent confusion."""
     evaluator = SafeEvaluator()
     # Check if we want to allow **
     assert evaluator.evaluate("2**3") == 8.0
 
     # Using ^ should raise a ValueError
-    with pytest.raises(
-        ValueError, match="Use '\\*\\*' for exponentiation instead of '\\^'"
-    ):
+    error_msg = "Use '\\*\\*' for exponentiation instead of '\\^'"
+    with pytest.raises(ValueError, match=error_msg):
         evaluator.evaluate("2^3")

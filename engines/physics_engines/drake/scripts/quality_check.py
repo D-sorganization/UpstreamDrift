@@ -146,7 +146,8 @@ def check_magic_numbers(lines: list[str], filepath: Path) -> list[tuple[int, str
         "quality_check.py",
         "quality-check.py",
         "quality-check-script.py",
-        "matlab_quality_check.py",  # Checks for placeholders, contains patterns it checks for
+        # Checks for placeholders, contains patterns it checks for
+        "matlab_quality_check.py",
     ]
     if filepath.name in excluded_names:
         return issues
@@ -220,7 +221,8 @@ def main() -> None:
         f for f in python_files if not any(part in exclude_dirs for part in f.parts)
     ]
 
-    # Exclude quality check scripts themselves (they contain the patterns they check for)
+    # Exclude quality check scripts themselves
+    # (they contain the patterns they check for)
     # Match exact filenames (with both underscore and hyphen variants)
     excluded_script_names = [
         "quality_check.py",

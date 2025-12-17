@@ -774,7 +774,8 @@ class CameraController(QObject):
 
         self.cameraChanged.emit()
         print(
-            f"📷 Auto-framed data: center={center}, distance={self.current_state.distance:.2f}"
+            f"📷 Auto-framed data: center={center}, "
+            f"distance={self.current_state.distance:.2f}"
         )
 
     def follow_point(self, point: np.ndarray, smooth_factor: float = 0.1):
@@ -939,7 +940,8 @@ if __name__ == "__main__":
         start_spherical, end_spherical, 0.5
     )
     print(
-        f"   Spherical interpolation: {start_spherical} -> {mid_spherical} -> {end_spherical}"
+        f"   Spherical interpolation: {start_spherical} -> "
+        f"{mid_spherical} -> {end_spherical}"
     )
 
     print("\n🎉 Camera system ready for integration!")

@@ -59,9 +59,12 @@ def test_c3d_viewer_open_file_ux(qapp: QApplication) -> None:
                 return_value=(test_path, "C3D files (*.c3d)"),
             ):
                 # Mock ezc3d
-                # Since ezc3d is mocked in sys.modules, patch("ezc3d.c3d") should work if we target the mock
-                # But cleaner is to mock the return value of ezc3d.c3d if we knew the structure.
-                # Since we don't know if patch("ezc3d.c3d") works when ezc3d is a MagicMock in sys.modules
+                # Since ezc3d is mocked in sys.modules, patch("ezc3d.c3d")
+                # should work if we target the mock
+                # But cleaner is to mock the return value of ezc3d.c3d
+                # if we knew the structure.
+                # Since we don't know if patch("ezc3d.c3d") works when ezc3d
+                # is a MagicMock in sys.modules
                 # (it should work if the mock has attributes), let's try.
                 # Actually, patch string imports the module. sys.modules has it.
                 with patch("ezc3d.c3d") as mock_c3d:
@@ -106,7 +109,8 @@ def test_c3d_viewer_open_file_ux(qapp: QApplication) -> None:
                             mock_restore_cursor.assert_called_once()
 
                             # Verify Status Bar UX
-                            # calls: "Loading test.c3d...", "Loaded test.c3d successfully."
+                            # calls: "Loading test.c3d...",
+                            # "Loaded test.c3d successfully."
                             assert mock_show_message.call_count == 2
 
                             filename = os.path.basename(test_path)

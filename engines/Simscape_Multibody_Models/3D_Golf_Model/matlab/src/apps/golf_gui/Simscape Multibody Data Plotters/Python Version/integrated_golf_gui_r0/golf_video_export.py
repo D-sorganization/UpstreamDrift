@@ -182,7 +182,8 @@ class VideoExporter(QObject):
         ]
 
         print(
-            f"   Running ffmpeg with preset '{settings['preset']}', CRF {settings['crf']}"
+            f"   Running ffmpeg with preset '{settings['preset']}', "
+            f"CRF {settings['crf']}"
         )
 
         return subprocess.Popen(

@@ -447,7 +447,8 @@ class MotionCapturePlotter(QMainWindow):
                                     "mid_Zx": safe_float(row[11]),
                                     "mid_Zy": safe_float(row[12]),
                                     "mid_Zz": safe_float(row[13]),
-                                    # Club head position (convert inches to meters) and orientation (columns 14-25)
+                                    # Club head position (convert inches to meters)
+                                    # and orientation (columns 14-25)
                                     "club_X": safe_float(row[14])
                                     * 0.0254,  # inches to meters
                                     "club_Y": safe_float(row[15])
@@ -471,7 +472,8 @@ class MotionCapturePlotter(QMainWindow):
                         if data:
                             self.swing_data[sheet_name] = pd.DataFrame(data)
                             print(
-                                f"Successfully loaded {len(data)} frames for {sheet_name}"
+                                f"Successfully loaded {len(data)} frames "
+                                f"for {sheet_name}"
                             )
                             self.print_data_debug(sheet_name)
 
@@ -500,7 +502,8 @@ class MotionCapturePlotter(QMainWindow):
             # Read the CSV file
             df = pd.read_csv(filename)
             print(
-                f"Successfully loaded CSV with {len(df)} rows and {len(df.columns)} columns"
+                f"Successfully loaded CSV with {len(df)} rows "
+                f"and {len(df.columns)} columns"
             )
             print(
                 f"Time range: {df['time'].min():.3f} to {df['time'].max():.3f} seconds"
@@ -619,7 +622,8 @@ class MotionCapturePlotter(QMainWindow):
                 print(f"\n=== Data Debug for {sheet_name} ===")
                 print(f"Number of frames: {len(data)}")
                 print(
-                    f"Time range: {data['time'].min():.3f} to {data['time'].max():.3f} seconds"
+                    f"Time range: {data['time'].min():.3f} to "
+                    f"{data['time'].max():.3f} seconds"
                 )
                 print("Mid-Hands Position ranges:")
                 print(f"  X: {data['mid_X'].min():.3f} to {data['mid_X'].max():.3f}")
@@ -657,7 +661,8 @@ class MotionCapturePlotter(QMainWindow):
                     "  Original data in inches, converted to meters for visualization"
                 )
                 print(
-                    "  Direction cosines (Xx, Xy, Xz, Yx, Yy, Yz, Zx, Zy, Zz) are unitless"
+                    "  Direction cosines (Xx, Xy, Xz, Yx, Yy, Yz, Zx, Zy, Zz) "
+                    "are unitless"
                 )
                 print("  Motion scaling applied to make visualization clearer")
                 print("=" * 40)
@@ -873,7 +878,8 @@ class MotionCapturePlotter(QMainWindow):
 
             # Calculate face normal (perpendicular to shaft, simplified calculation)
             # For a golf club, the face normal is typically perpendicular to the shaft
-            # We'll assume it points in the direction of the swing (positive Y direction)
+            # We'll assume it points in the direction of the swing
+            # (positive Y direction)
             up_vector = np.array([0, 0, 1])  # Vertical up
             face_normal = np.cross(shaft_direction, up_vector)
             face_normal_length = np.linalg.norm(face_normal)
@@ -1119,7 +1125,8 @@ class MotionCapturePlotter(QMainWindow):
                         alpha=1.0,
                     )
 
-                    # Add a small sphere at the start of the normal for better visibility
+                    # Add a small sphere at the start of the normal
+                    # for better visibility
                     self.ax.scatter(
                         club_head_pos[0],
                         club_head_pos[1],
@@ -1295,8 +1302,12 @@ class MotionCapturePlotter(QMainWindow):
                 motion_frame = motion_data.iloc[self.current_frame]
                 info += "Motion Capture Data:\n"
                 info += f"  Time: {motion_frame['time']:.3f}s\n"
-                info += f"  Mid-Hands: ({motion_frame['mid_X']:.3f}, {motion_frame['mid_Y']:.3f}, {motion_frame['mid_Z']:.3f})\n"
-                info += f"  Club Head: ({motion_frame['club_X']:.3f}, {motion_frame['club_Y']:.3f}, {motion_frame['club_Z']:.3f})\n\n"
+                info += (f"  Mid-Hands: ({motion_frame['mid_X']:.3f}, "
+                         f"{motion_frame['mid_Y']:.3f}, "
+                         f"{motion_frame['mid_Z']:.3f})\n")
+                info += (f"  Club Head: ({motion_frame['club_X']:.3f}, "
+                         f"{motion_frame['club_Y']:.3f}, "
+                         f"{motion_frame['club_Z']:.3f})\n\n")
 
         # Show Simscape data if available
         if self.show_simscape and self.simscape_data:
@@ -1430,7 +1441,8 @@ class MotionCapturePlotter(QMainWindow):
             self.ax.view_init(elev=elev + dy * 0.5, azim=azim + dx * 0.5)
             self.canvas.draw()
             print(
-                f"Rotating: dx={dx}, dy={dy}, new_elev={elev + dy * 0.5}, new_azim={azim + dx * 0.5}"
+                f"Rotating: dx={dx}, dy={dy}, "
+                f"new_elev={elev + dy * 0.5}, new_azim={azim + dx * 0.5}"
             )
 
         elif hasattr(event, "button") and event.button == 3:  # Right click - pan

@@ -410,7 +410,8 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
                 # Update UI
                 self.playback_panel.update_num_frames(self.gl_widget.num_frames)
                 self.statusBar().showMessage(
-                    f"Loaded {self.gl_widget.num_frames} frames from {len(file_paths)} files"
+                    f"Loaded {self.gl_widget.num_frames} frames "
+                    f"from {len(file_paths)} files"
                 )
 
                 logger.info(

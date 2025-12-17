@@ -278,7 +278,10 @@ class MatlabDataLoader:
 
         # Fallback to largest variable (likely the data table)
         largest_var = max(user_vars.keys(), key=lambda k: user_vars[k].nbytes)
-        warnings.warn(f"Using fallback variable '{largest_var}' for {dataset_name}", stacklevel=2)
+        warnings.warn(
+            f"Using fallback variable '{largest_var}' for {dataset_name}",
+            stacklevel=2
+        )
         return largest_var
 
     def _convert_to_dataframe(
@@ -347,7 +350,10 @@ class MatlabDataLoader:
 
             except Exception as e:
                 processed_vectors.append(np.zeros(3, dtype=np.float32))
-                warnings.warn(f"Error processing vector at row {i} in {col_name}: {e}", stacklevel=2)
+                warnings.warn(
+                    f"Error processing vector at row {i} in {col_name}: {e}",
+                    stacklevel=2
+                )
 
         return processed_vectors
 
@@ -380,7 +386,10 @@ class MatlabDataLoader:
                     result[: min(len(flattened), num_rows)] = flattened[:num_rows]
                     return result
         except Exception as e:
-            warnings.warn(f"Error processing scalar column {col_name}: {e}", stacklevel=2)
+            warnings.warn(
+                f"Error processing scalar column {col_name}: {e}",
+                stacklevel=2
+            )
             return np.zeros(num_rows, dtype=np.float32)
 
     def _validate_dataframe(self, df: pd.DataFrame, dataset_name: str):
@@ -406,7 +415,10 @@ class MatlabDataLoader:
                 missing_columns.append(col)
 
         if missing_columns:
-            warnings.warn(f"Missing columns in {dataset_name}: {missing_columns}", stacklevel=2)
+            warnings.warn(
+                f"Missing columns in {dataset_name}: {missing_columns}",
+                stacklevel=2
+            )
 
         if len(df) == 0:
             raise ValueError(f"No data rows in {dataset_name}")
@@ -584,7 +596,8 @@ class FrameProcessor:
                 if isinstance(data, list | tuple):
                     return np.array(data, dtype=np.float32)
                 else:
-                    # For single values, we need to get the corresponding X, Y, Z components
+                    # For single values, we need to get the corresponding
+                    # X, Y, Z components
                     # The column name should indicate which component it is
                     if col_name.endswith("_x") or col_name.endswith("x"):
                         # Get Y and Z components from corresponding columns

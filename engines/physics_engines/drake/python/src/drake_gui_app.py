@@ -106,17 +106,22 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             LOGGER.error(  # noqa: TRY400 - Manual logging preferred over re-raising.
                 "Failed to start Meshcat for Drake visualization.\n"
                 "Common causes:\n"
-                "  - Another Meshcat server is already running on the same port (default: 7000).\n"
+                "  - Another Meshcat server is already running on the same port "
+                "(default: 7000).\n"
                 "  - Network issues or firewall blocking localhost.\n"
                 "  - Meshcat or its dependencies are not installed correctly.\n"
                 "Troubleshooting steps:\n"
-                "  1. Check if another Meshcat process is running and terminate it if necessary.\n"
-                "  2. Verify that your firewall allows connections to localhost:7000.\n"
-                "  3. Ensure all required Python packages are installed (see project README).\n"
+                "  1. Check if another Meshcat process is running and terminate it "
+                "if necessary.\n"
+                "  2. Verify that your firewall allows connections to "
+                "localhost:7000.\n"
+                "  3. Ensure all required Python packages are installed "
+                "(see project README).\n"
                 "Original exception: %s",
                 e,
             )
-            # We don't return here anymore, allowing simulation to run without Meshcat if needed
+            # We don't return here anymore, allowing simulation to run
+            # without Meshcat if needed
             # But let's keep visualizer optional
             self.meshcat = None
 
@@ -317,7 +322,8 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 joint_max = JOINT_ANGLE_MAX_RAD
 
             slider.setToolTip(
-                f"Adjust angle for {joint.name()} (radians, {joint_min:.2f} to {joint_max:.2f})"
+                f"Adjust angle for {joint.name()} (radians, "
+                f"{joint_min:.2f} to {joint_max:.2f})"
             )
 
             # Spinbox
