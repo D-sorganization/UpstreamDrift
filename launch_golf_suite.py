@@ -113,8 +113,8 @@ def show_status():
         "MuJoCo": suite_root / "engines" / "physics_engines" / "mujoco",
         "Drake": suite_root / "engines" / "physics_engines" / "drake", 
         "Pinocchio": suite_root / "engines" / "physics_engines" / "pinocchio",
-        "2D MATLAB": suite_root / "engines" / "matlab_simscape" / "2d_model",
-        "3D MATLAB": suite_root / "engines" / "matlab_simscape" / "3d_biomechanical",
+        "2D MATLAB": suite_root / "engines" / "Simscape_Multibody_Models" / "2D_Golf_Model",
+        "3D MATLAB": suite_root / "engines" / "Simscape_Multibody_Models" / "3D_Golf_Model",
         "Pendulum": suite_root / "engines" / "pendulum_models"
     }
     

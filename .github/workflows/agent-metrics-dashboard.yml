@@ -1,0 +1,200 @@
+name: Agent Metrics Dashboard
+
+on:
+  schedule:
+    # Every Monday at 10am UTC (after CI failure digest)
+    - cron: "0 10 * * 1"
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+  pull-requests: read
+
+jobs:
+  generate-metrics:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Collect Agent Metrics
+        id: metrics
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+            // Initialize counters
+            const metrics = {
+              autoRepair: { runs: 0, success: 0, failed: 0 },
+              testGenerator: { runs: 0, success: 0, failed: 0 },
+              docScribe: { runs: 0, success: 0, failed: 0 },
+              scientificAuditor: { runs: 0, success: 0, failed: 0 },
+              techCustodian: { runs: 0, success: 0, failed: 0 },
+              conflictFix: { runs: 0, success: 0, failed: 0 },
+              hotfixCreator: { runs: 0, success: 0, failed: 0 },
+              archivist: { runs: 0, success: 0, failed: 0 }
+            };
+
+            // Workflow name mapping
+            const workflowMap = {
+              'Jules Auto-Repair (Worker)': 'autoRepair',
+              'Jules Test Generator (Worker)': 'testGenerator',
+              'Jules Documentation Scribe (Worker)': 'docScribe',
+              'Scientific Auditor (Worker)': 'scientificAuditor',
+              'Jules Tech Debt Custodian': 'techCustodian',
+              'Jules Conflict Resolver': 'conflictFix',
+              'Jules Hotfix-Creator (Worker)': 'hotfixCreator',
+              'Jules Archivist': 'archivist'
+            };
+
+            // Get all workflow runs from last week
+            const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              created: `>=${oneWeekAgo.toISOString()}`,
+              per_page: 100
+            });
+
+            // Analyze each agent workflow
+            for (const run of runs.workflow_runs) {
+              const agentKey = workflowMap[run.name];
+              if (!agentKey) continue;
+
+              metrics[agentKey].runs++;
+              if (run.conclusion === 'success') {
+                metrics[agentKey].success++;
+              } else if (run.conclusion === 'failure') {
+                metrics[agentKey].failed++;
+              }
+            }
+
+            // Calculate success rates
+            const formatMetrics = (agent) => {
+              const total = metrics[agent].runs;
+              if (total === 0) return 'No activity';
+              const successRate = ((metrics[agent].success / total) * 100).toFixed(1);
+              return `${metrics[agent].success}/${total} (${successRate}%)`;
+            };
+
+            // Count Jules-created PRs (Fetch up to 500 recent PRs to approximate "all time" for active repos)
+            let allPRs = [];
+            for (let page = 1; page <= 5; page++) {
+              const { data: pagePRs } = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'all',
+                per_page: 100,
+                page: page
+              });
+              if (pagePRs.length === 0) break;
+              allPRs = allPRs.concat(pagePRs);
+            }
+
+            const julesPRs = allPRs.filter(pr =>
+              pr.user?.login === 'jules-bot' ||
+              (pr.title && pr.title.includes('Jules')) ||
+              pr.labels.some(l => l.name === 'auto-fix')
+            );
+
+            const mergedJulesPRs = julesPRs.filter(pr => pr.merged_at);
+            const prSuccessRate = julesPRs.length > 0
+              ? ((mergedJulesPRs.length / julesPRs.length) * 100).toFixed(1)
+              : '0';
+
+            // Generate report
+            const report = `## 🤖 Jules Agent Metrics Dashboard
+
+            **Period:** ${oneWeekAgo.toISOString().split('T')[0]} to ${new Date().toISOString().split('T')[0]}
+
+            ### 📊 Agent Performance Summary
+
+            | Agent | Success Rate | Total Runs | Status |
+            |-------|-------------|------------|--------|
+            | 🔧 **Auto-Repair** | ${formatMetrics('autoRepair')} | ${metrics.autoRepair.runs} | ${metrics.autoRepair.runs > 0 ? '✅' : '💤'} |
+            | 🧪 **Test-Generator** | ${formatMetrics('testGenerator')} | ${metrics.testGenerator.runs} | ${metrics.testGenerator.runs > 0 ? '✅' : '💤'} |
+            | 📝 **Doc-Scribe** | ${formatMetrics('docScribe')} | ${metrics.docScribe.runs} | ${metrics.docScribe.runs > 0 ? '✅' : '💤'} |
+            | 🔬 **Scientific-Auditor** | ${formatMetrics('scientificAuditor')} | ${metrics.scientificAuditor.runs} | ${metrics.scientificAuditor.runs > 0 ? '✅' : '💤'} |
+            | 🧹 **Tech-Custodian** | ${formatMetrics('techCustodian')} | ${metrics.techCustodian.runs} | ${metrics.techCustodian.runs > 0 ? '✅' : '💤'} |
+            | 🤝 **Conflict-Fix** | ${formatMetrics('conflictFix')} | ${metrics.conflictFix.runs} | ${metrics.conflictFix.runs > 0 ? '✅' : '💤'} |
+            | 🚨 **Hotfix-Creator** | ${formatMetrics('hotfixCreator')} | ${metrics.hotfixCreator.runs} | ${metrics.hotfixCreator.runs > 0 ? '🚨' : '✅'} |
+            | 🗂️ **Archivist** | ${formatMetrics('archivist')} | ${metrics.archivist.runs} | ${metrics.archivist.runs > 0 ? '✅' : '💤'} |
+
+            ### 📈 Pull Request Impact
+
+            - **Total Jules PRs (all time):** ${julesPRs.length}
+            - **Merged:** ${mergedJulesPRs.length}
+            - **PR Success Rate:** ${prSuccessRate}%
+            - **Open Jules PRs:** ${julesPRs.filter(pr => pr.state === 'open').length}
+
+            ### 🎯 Key Insights
+
+            ${metrics.autoRepair.runs === 0 ? '✅ **Perfect CI Health**: No Auto-Repair triggers this week!' : ''}
+            ${metrics.hotfixCreator.runs > 0 ? `⚠️ **Protected Branch Failures**: ${metrics.hotfixCreator.runs} hotfix(es) created for main/master` : ''}
+            ${metrics.techCustodian.runs > 0 ? `🧹 **Tech Debt Cleanup**: ${metrics.techCustodian.runs} refactoring PR(s) created` : ''}
+            ${metrics.testGenerator.runs > 0 ? `🧪 **Test Coverage**: ${metrics.testGenerator.runs} test generation run(s)` : ''}
+
+            ### 💡 Recommendations
+
+            ${metrics.autoRepair.failed > 3 ? '- **Auto-Repair** has high failure rate - review prompt effectiveness' : ''}
+            ${metrics.autoRepair.runs > 10 ? '- **High Auto-Repair activity** - consider improving pre-commit hooks' : ''}
+            ${metrics.hotfixCreator.runs > 0 ? '- **Protected branch failures detected** - review main branch protection rules' : ''}
+            ${metrics.testGenerator.runs === 0 ? '- **No test generation** - encourage more test coverage in PRs' : ''}
+
+            ### 📋 Agent Health Status
+
+            - 🟢 **Healthy**: All agents operational
+            - 🟡 **Warning**: Check agents with >20% failure rate
+            - 🔴 **Critical**: Agents with >50% failure rate need attention
+
+            ---
+            *This is an automated weekly metrics report. Data reflects the last 7 days.*
+            `;
+
+            core.setOutput('report', report);
+            core.setOutput('total_activity', Object.values(metrics).reduce((sum, m) => sum + m.runs, 0));
+
+      - name: Create Metrics Issue
+        if: steps.metrics.outputs.total_activity > 0
+        env:
+          REPORT: ${{ steps.metrics.outputs.report }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const report = process.env.REPORT;
+
+            // Check if there's an existing open metrics issue from this week
+            const { data: existingIssues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'agent-metrics',
+              per_page: 5
+            });
+
+            // Close old metrics issues
+            for (const issue of existingIssues) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed'
+              });
+            }
+
+            // Create new metrics issue
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🤖 Agent Metrics Dashboard - ${new Date().toISOString().split('T')[0]}`,
+              body: report,
+              labels: ['agent-metrics', 'report', 'auto-generated']
+            });
+
+            console.log('Created agent metrics dashboard issue');
+
+      - name: No Activity Message
+        if: steps.metrics.outputs.total_activity == 0
+        run: |
+          echo "💤 No agent activity in the last week"

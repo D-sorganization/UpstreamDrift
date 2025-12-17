@@ -1,0 +1,34 @@
+name: Jules Curie (Data Hygiene)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 1 * *" # 1st of every month
+
+jobs:
+  hygiene-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Find Large Files (>10MB)
+        id: large_files
+        run: |
+          find . -type f -size +10M -not -path "./.git/*" > large_files.txt
+          
+      - name: Curie Journal Entry
+        run: |
+          echo "## $(date +'%Y-%m-%d') - Monthly Hygiene Check" >> .jules/curie.md
+          if [ -s large_files.txt ]; then
+            echo "**⚠️ Large Files Detected:**" >> .jules/curie.md
+            cat large_files.txt >> .jules/curie.md
+          else
+            echo "✅ No large files detected." >> .jules/curie.md
+          fi
+          echo "" >> .jules/curie.md
+
+      - name: Commit Journal Updates
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs(curie): monthly hygiene report"
+          file_pattern: ".jules/curie.md"

@@ -1,0 +1,68 @@
+name: Jules Review Responder
+on:
+  pull_request_review:
+    types: [submitted]
+
+jobs:
+  jules-address-feedback:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+      contents: write
+    if: github.event.review.user.login != 'jules-bot'
+
+    steps:
+      - name: Validate Reviewer Permission
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          LOGIN="${{ github.event.review.user.login }}"
+          # Allow trusted quality bots
+          if [[ "$LOGIN" == "Copilot" || "$LOGIN" == "copilot" || "$LOGIN" == "cursor[bot]" || "$LOGIN" == "github-actions[bot]" || "$LOGIN" == "jules-bot" ]]; then
+            echo "Bot $LOGIN is authorized."
+            exit 0
+          fi
+
+          PERM=$(gh api repos/${{ github.repository }}/collaborators/${{ github.event.review.user.login }}/permission --jq '.permission' || echo "none")
+          if [[ "$PERM" != "admin" && "$PERM" != "write" ]]; then
+            echo "Reviewer does not have write access. Ignoring."
+            exit 1 # Fail the step to stop execution safely
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: npm install -g @google/jules
+
+      - name: Compile Feedback
+        id: feedback
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          # FIX: Only get comments from THIS review/user
+          echo "Reviewer: ${{ github.event.review.user.login }}" > feedback.txt
+          echo "Summary: ${{ github.event.review.body }}" >> feedback.txt
+
+          echo -e "\nDetailed Inline Comments:" >> feedback.txt
+          gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews/${{ github.event.review.id }}/comments \
+            --jq '.[] | "- File: " + .path + "\n  Line: " + (.line | tostring) + "\n  Comment: " + .body + "\n"' >> feedback.txt
+
+          if grep -iq "lgtm\|looks good" feedback.txt && [ "${{ github.event.review.state }}" == "APPROVED" ]; then
+             echo "run_repair=false" >> $GITHUB_OUTPUT
+          else
+             echo "run_repair=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Execute Repairs
+        if: steps.feedback.outputs.run_repair == 'true'
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          jules remote new \
+            --repo ${{ github.repository }} \
+            --session "Address code review feedback on PR #$PR_NUMBER: $(cat feedback.txt)" \
+            --pr $PR_NUMBER
