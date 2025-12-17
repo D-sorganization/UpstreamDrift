@@ -74,6 +74,8 @@ def validate_launchers():
         spec = importlib.util.spec_from_file_location(
             "launch_golf_suite", Path(__file__).parent / "launch_golf_suite.py"
         )
+        if spec is None or spec.loader is None:
+            raise ImportError("Could not load spec or loader for launch_golf_suite.py")
         launch_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(launch_module)
         logger.info("  ✅ Main launcher script loads successfully")

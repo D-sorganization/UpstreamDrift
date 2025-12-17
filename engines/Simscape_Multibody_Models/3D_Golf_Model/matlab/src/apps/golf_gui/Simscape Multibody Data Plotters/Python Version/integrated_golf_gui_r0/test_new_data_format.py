@@ -3,7 +3,6 @@
 Quick test to verify the new test data files are compatible with GUI format
 """
 
-
 import numpy as np
 import scipy.io
 
