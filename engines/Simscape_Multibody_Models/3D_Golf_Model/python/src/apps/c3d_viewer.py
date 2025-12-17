@@ -493,7 +493,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             for key, param in c3d_obj["parameters"]["TRIAL"].items():
                 if "value" in param:
                     value = param["value"]
-                    if isinstance(value, (list, tuple, np.ndarray)):
+                    if isinstance(value, list | tuple | np.ndarray):
                         v = ", ".join(str(x) for x in value)
                     else:
                         v = str(value)

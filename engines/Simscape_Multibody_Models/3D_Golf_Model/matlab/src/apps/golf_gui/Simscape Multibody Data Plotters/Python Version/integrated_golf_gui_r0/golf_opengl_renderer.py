@@ -324,7 +324,7 @@ class GeometryManager:
         obj.position = np.array(position, dtype=np.float32)
         obj.rotation = np.array(rotation, dtype=np.float32)
 
-        if isinstance(scale, (int, float)):
+        if isinstance(scale, int | float):
             obj.scale = np.array([scale, scale, scale], dtype=np.float32)
         else:
             obj.scale = np.array(scale, dtype=np.float32)
@@ -631,7 +631,7 @@ class OpenGLRenderer:
             ),
         ]
 
-        for segment_name, start_pos, end_pos, radius, color, is_skin in segments:
+        for segment_name, start_pos, end_pos, radius, color, _is_skin in segments:
             if not render_config.show_body_segments.get(segment_name, True):
                 continue
 

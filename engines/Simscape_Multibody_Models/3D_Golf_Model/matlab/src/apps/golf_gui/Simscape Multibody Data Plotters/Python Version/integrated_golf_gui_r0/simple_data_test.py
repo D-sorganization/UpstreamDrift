@@ -105,14 +105,6 @@ def check_required_signals():
         delta_data = scipy.io.loadmat("DELTAQ.mat")
 
         # Check for required signals (these would be column indices in the data)
-        required_signals = [
-            "CHx",
-            "CHy",
-            "CHz",
-            "MPx",
-            "MPy",
-            "MPz",
-        ]  # Clubhead and Midpoint positions
 
         print("Checking for required signals in each dataset:")
 

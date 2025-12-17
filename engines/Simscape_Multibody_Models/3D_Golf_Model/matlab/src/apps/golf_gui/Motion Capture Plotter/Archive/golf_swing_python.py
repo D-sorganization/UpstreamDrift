@@ -667,7 +667,7 @@ class GolfSwingAnalyzer:
             positions = np.array(
                 [[row["X"], row["Y"], row["Z"]] for _, row in filtered_data.iterrows()]
             )
-            position_range = np.max(positions, axis=0) - np.min(positions, axis=0)
+            np.max(positions, axis=0) - np.min(positions, axis=0)
 
             # The position data seems to be tracking a point on the club (likely near the grip)
             # For a typical golf swing, the club head should move much more than the grip
@@ -815,7 +815,7 @@ class GolfSwingAnalyzer:
             )
 
             force_scale = 0.01  # Scale for visualization
-            force_end = eval_point + dynamics["force"] * force_scale
+            eval_point + dynamics["force"] * force_scale
             self.ax.quiver(
                 eval_point[0],
                 eval_point[1],
@@ -830,7 +830,7 @@ class GolfSwingAnalyzer:
             )
 
             torque_scale = 0.05
-            torque_end = eval_point + dynamics["torque"] * torque_scale
+            eval_point + dynamics["torque"] * torque_scale
             self.ax.quiver(
                 eval_point[0],
                 eval_point[1],
@@ -1028,7 +1028,7 @@ class GolfSwingAnalyzer:
             # Pan the view (adjust limits)
             x_range = self.ax.get_xlim()[1] - self.ax.get_xlim()[0]
             y_range = self.ax.get_ylim()[1] - self.ax.get_ylim()[0]
-            z_range = self.ax.get_zlim()[1] - self.ax.get_zlim()[0]
+            self.ax.get_zlim()[1] - self.ax.get_zlim()[0]
 
             pan_factor = 0.1
             self.ax.set_xlim(self.ax.get_xlim() - dx * x_range * pan_factor)
@@ -1109,7 +1109,7 @@ class GolfSwingAnalyzer:
 
 def main():
     root = tk.Tk()
-    app = GolfSwingAnalyzer(root)
+    GolfSwingAnalyzer(root)
     root.mainloop()
 
 

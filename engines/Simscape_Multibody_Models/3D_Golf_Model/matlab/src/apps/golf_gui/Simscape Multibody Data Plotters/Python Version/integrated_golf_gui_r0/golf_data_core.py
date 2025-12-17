@@ -579,7 +579,7 @@ class FrameProcessor:
         try:
             if col_name in df.columns:
                 data = df.iloc[row_idx][col_name]
-                if isinstance(data, (list, tuple)):
+                if isinstance(data, list | tuple):
                     return np.array(data, dtype=np.float32)
                 else:
                     # For single values, we need to get the corresponding X, Y, Z components

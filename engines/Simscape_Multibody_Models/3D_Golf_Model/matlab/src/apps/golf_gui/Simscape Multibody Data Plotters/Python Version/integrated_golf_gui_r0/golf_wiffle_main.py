@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from golf_gui_application import GolfVisualizerWidget
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QAction, QFont
