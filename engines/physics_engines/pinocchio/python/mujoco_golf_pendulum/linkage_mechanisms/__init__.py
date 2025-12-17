@@ -737,18 +737,18 @@ def generate_delta_robot_xml(base_radius=2.0, platform_radius=0.5) -> str:
             <body name="arm2" pos="0 0 0" euler="0 0 120">
                 <joint name="joint2" type="hinge" axis="0 1 0" range="-120 120"
                        damping="1.0"/>
-                <geom type="capsule" fromto="0 0 0  0 0 {-arm_length}" size="0.08"
-                      material="arm_mat" mass="1.0"/>
+                <geom type="capsule" fromto="0 0 0  0 0 {-arm_length}"
+                      size="0.08" material="arm_mat" mass="1.0"/>
 
                 <body name="forearm2a" pos="0 {-0.15} {-arm_length}">
                     <joint name="elbow2a" type="hinge" axis="0 1 0" damping="0.5"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}" size="0.05"
-                          material="forearm_mat" mass="0.5"/>
+                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}"
+                          size="0.05" material="forearm_mat" mass="0.5"/>
                 </body>
                 <body name="forearm2b" pos="0 {0.15} {-arm_length}">
                     <joint name="elbow2b" type="hinge" axis="0 1 0" damping="0.5"/>
-                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}" size="0.05"
-                          material="forearm_mat" mass="0.5"/>
+                    <geom type="capsule" fromto="0 0 0  0 0 {-forearm_length}"
+                          size="0.05" material="forearm_mat" mass="0.5"/>
                 </body>
             </body>
         </body>
