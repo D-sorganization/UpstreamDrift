@@ -172,7 +172,8 @@ class MotionCaptureLoader:
         if marker_names is None:
             with open(filepath) as f:
                 header = f.readline().strip().split(",")
-                # Extract marker names from column headers (e.g., "LSHO_x", "LSHO_y", "LSHO_z")
+                # Extract marker names from column headers (e.g., "LSHO_x", "LSHO_y",
+                # "LSHO_z")
                 marker_names = []
                 for i in range(1, len(header), 3):
                     marker_name = header[i].rsplit("_", 1)[0]

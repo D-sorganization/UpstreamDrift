@@ -110,7 +110,11 @@ def check_banned_patterns(
     """Check for banned patterns in lines."""
     issues: list[tuple[int, str, str]] = []
     # Skip checking quality check scripts for their own patterns
-    if filepath.name in ("quality_check_script.py", "matlab_quality_check.py", "code_quality_check.py"):
+    if filepath.name in (
+        "quality_check_script.py",
+        "matlab_quality_check.py",
+        "code_quality_check.py",
+    ):
         return issues
 
     for line_num, line in enumerate(lines, 1):
@@ -138,8 +142,13 @@ def check_banned_patterns(
 def check_magic_numbers(lines: list[str], filepath: Path) -> list[tuple[int, str, str]]:
     """Check for magic numbers in lines."""
     issues: list[tuple[int, str, str]] = []
-    # Skip checking quality check scripts for magic numbers (they contain patterns they check for)
-    if filepath.name in ("quality_check_script.py", "matlab_quality_check.py", "code_quality_check.py"):
+    # Skip checking quality check scripts for magic numbers (they contain patterns
+    # they check for)
+    if filepath.name in (
+        "quality_check_script.py",
+        "matlab_quality_check.py",
+        "code_quality_check.py",
+    ):
         return issues
     for line_num, line in enumerate(lines, 1):
         line_content = line[: line.index("#")] if "#" in line else line
@@ -153,7 +162,11 @@ def check_ast_issues(content: str, filepath: Path) -> list[tuple[int, str, str]]
     """Check AST for quality issues."""
     issues: list[tuple[int, str, str]] = []
     # Skip checking quality check scripts for AST issues
-    if filepath.name in ("quality_check_script.py", "matlab_quality_check.py", "code_quality_check.py"):
+    if filepath.name in (
+        "quality_check_script.py",
+        "matlab_quality_check.py",
+        "code_quality_check.py",
+    ):
         return issues
     try:
         tree = ast.parse(content)
@@ -165,10 +178,16 @@ def check_ast_issues(content: str, filepath: Path) -> list[tuple[int, str, str]]
                     )
                 if not node.returns and node.name != "__init__":
                     pass
-                    # Relaxed: We let MyPy handle missing return checks, 
+                    # Relaxed: We let MyPy handle missing return checks,
                     # as this stricter check might block valid quick scripts.
                     # Uncomment to enforce:
-                    # issues.append((node.lineno, f"Function '{node.name}' missing return type hint", ""))
+                    # issues.append(
+                    #     (
+                    #         node.lineno,
+                    #         f"Function '{node.name}' missing return type hint",
+                    #         "",
+                    #     )
+                    # )
     except SyntaxError as e:
         issues.append((0, f"Syntax error: {e}", ""))
     return issues
@@ -212,7 +231,7 @@ def main() -> None:
         ".ipynb_checkpoints",  # Add checkpoint files to exclusion
         ".Trash",  # Add trash files to exclusion
     }
-    
+
     # Filter if scanning directory
     if len(sys.argv) <= 1:
         python_files = [

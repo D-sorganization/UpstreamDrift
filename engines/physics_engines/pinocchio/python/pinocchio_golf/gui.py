@@ -87,7 +87,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.dt = DT_DEFAULT
 
         # Meshcat viewer
-        # Do not open browser automatically; user can open Meshcat URL manually if desired.
+        # Do not open browser automatically; user can open Meshcat URL manually if
+        # desired.
         self.viewer = viz.Visualizer()  # Let it find port
         logger.info("Meshcat URL: %s", self.viewer.url)
 
@@ -266,7 +267,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         if nq_joint != 1:
             # Multi-DOF joints (e.g., spherical) are not supported in the UI.
-            # Such joints are intentionally skipped and will not appear in the kinematic controls.
+            # Such joints are intentionally skipped and will not appear in the
+            # kinematic controls.
             msg = (
                 f"Skipping joint '{joint_name}' (index {i}): "
                 f"{nq_joint} DOFs not supported in kinematic controls."
@@ -438,16 +440,17 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             return
 
         # Visualize joint frames (oMf)
-        # To optimize performance, we create frame objects once and update their transforms
-        # each frame. The Meshcat Python client caches objects, so updating transforms is
-        # efficient for visualization.
+        # To optimize performance, we create frame objects once and update their
+        # transforms each frame. The Meshcat Python client caches objects, so
+        # updating transforms is efficient for visualization.
         for i, frame in enumerate(self.model.frames):
             if frame.name == "universe":
                 continue
 
             # Update transform
             transform = self.data.oMf[i]
-            # Convert Pinocchio SE3 (transform) to a 4x4 homogeneous transformation matrix.
+            # Convert Pinocchio SE3 (transform) to a 4x4 homogeneous transformation
+            # matrix.
             # Pinocchio's SE3.homogeneous property returns a 4x4 matrix representing
             # the pose in the world frame. Meshcat's set_transform expects a 4x4
             # column-major matrix (compatible with this layout).
@@ -465,8 +468,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             # Joint i. Associated body has inertia.
             inertia = self.model.inertias[i]
             joint_transform = self.data.oMi[i]
-            # Compute world-frame COM for each body by transforming the local COM (inertia.lever)
-            # through the joint placement (joint_transform).
+            # Compute world-frame COM for each body by transforming the local COM
+            # (inertia.lever) through the joint placement (joint_transform).
             com_world = joint_transform.act(inertia.lever)
 
             # Update Sphere Position

@@ -17,7 +17,6 @@ try:
         AIR_DENSITY_SEA_LEVEL_KG_M3,
         BUNKER_DEPTH_MM,
         DRIVER_LOFT_DEG,
-        E,
         GOLF_BALL_DIAMETER_M,
         GOLF_BALL_DRAG_COEFFICIENT,
         GOLF_BALL_MASS_KG,
@@ -31,6 +30,7 @@ try:
         ROUGH_HEIGHT_MM,
         SPEED_OF_LIGHT_M_S,
         TEMPERATURE_C,
+        E,
     )
 except ImportError:
     # Fallback for when python/src is directly in path (e.g. via conftest.py)
@@ -38,7 +38,6 @@ except ImportError:
         AIR_DENSITY_SEA_LEVEL_KG_M3,
         BUNKER_DEPTH_MM,
         DRIVER_LOFT_DEG,
-        E,
         GOLF_BALL_DIAMETER_M,
         GOLF_BALL_DRAG_COEFFICIENT,
         GOLF_BALL_MASS_KG,
@@ -52,6 +51,7 @@ except ImportError:
         ROUGH_HEIGHT_MM,
         SPEED_OF_LIGHT_M_S,
         TEMPERATURE_C,
+        E,
     )
 
 

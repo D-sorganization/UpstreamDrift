@@ -68,7 +68,9 @@ class PendulumController(QtWidgets.QWidget):
         self.timer = QtCore.QTimer(self)
         self.timer.timeout.connect(self._on_step)
 
-        self.state_double = DoublePendulumState(theta1=-0.5, theta2=-1.2, omega1=0.0, omega2=0.0)
+        self.state_double = DoublePendulumState(
+            theta1=-0.5, theta2=-1.2, omega1=0.0, omega2=0.0
+        )
         self.state_triple = TriplePendulumState(
             theta1=-0.5, theta2=-0.8, theta3=-0.6, omega1=0.0, omega2=0.0, omega3=0.0
         )
@@ -177,7 +179,9 @@ class PendulumController(QtWidgets.QWidget):
     def _reset(self) -> None:
         self.timer.stop()
         self.time = 0.0
-        self.state_double = DoublePendulumState(theta1=-0.5, theta2=-1.2, omega1=0.0, omega2=0.0)
+        self.state_double = DoublePendulumState(
+            theta1=-0.5, theta2=-1.2, omega1=0.0, omega2=0.0
+        )
         self.state_triple = TriplePendulumState(
             theta1=-0.5, theta2=-0.8, theta3=-0.6, omega1=0.0, omega2=0.0, omega3=0.0
         )
@@ -200,18 +204,24 @@ class PendulumController(QtWidgets.QWidget):
                 )
             else:
                 profiles = self._polynomial_profiles(config.velocity_polynomials[:2])
-                self.state_double = self._apply_inverse_profile_double(self.state_double, profiles)
+                self.state_double = self._apply_inverse_profile_double(
+                    self.state_double, profiles
+                )
             self.time += TIME_STEP
             self._update_plot()
         else:
             if config.forward_mode:
-                torques = tuple(self._safe_eval(expr) for expr in config.torque_expressions)
+                torques = tuple(
+                    self._safe_eval(expr) for expr in config.torque_expressions
+                )
                 self.state_triple = self.triple_dynamics.step(
                     self.time, self.state_triple, TIME_STEP, torques
                 )
             else:
                 profiles = self._polynomial_profiles(config.velocity_polynomials)
-                self.state_triple = self._apply_inverse_profile_triple(self.state_triple, profiles)
+                self.state_triple = self._apply_inverse_profile_triple(
+                    self.state_triple, profiles
+                )
             self.time += TIME_STEP
             self._update_plot()
 
@@ -231,7 +241,9 @@ class PendulumController(QtWidgets.QWidget):
         except Exception:
             return 0.0
 
-    def _polynomial_profiles(self, expressions: tuple[str, ...]) -> tuple[PolynomialProfile, ...]:
+    def _polynomial_profiles(
+        self, expressions: tuple[str, ...]
+    ) -> tuple[PolynomialProfile, ...]:
         profiles = []
         for expr in expressions:
             cleaned = expr.replace(" ", "")
@@ -263,7 +275,9 @@ class PendulumController(QtWidgets.QWidget):
         )
 
         accelerations = (alpha1, alpha2)
-        torques = self.double_dynamics.inverse_dynamics(state_with_profile, accelerations)
+        torques = self.double_dynamics.inverse_dynamics(
+            state_with_profile, accelerations
+        )
         self.double_dynamics.forcing_functions = (
             lambda _t, _s: torques[0],
             lambda _t, _s: torques[1],
@@ -286,8 +300,12 @@ class PendulumController(QtWidgets.QWidget):
             omega2=omega[1],
             omega3=omega[2],
         )
-        torques = self.triple_dynamics.inverse_dynamics(state_with_profile, accelerations)
-        return self.triple_dynamics.step(self.time, state_with_profile, TIME_STEP, torques)
+        torques = self.triple_dynamics.inverse_dynamics(
+            state_with_profile, accelerations
+        )
+        return self.triple_dynamics.step(
+            self.time, state_with_profile, TIME_STEP, torques
+        )
 
     def _update_plot(self) -> None:
         config = self._current_config()
@@ -325,7 +343,9 @@ class PendulumController(QtWidgets.QWidget):
         )
         return np.vstack([shoulder, p1, p2, p3])
 
-    def _point_from_angles(self, angle: float, rotation: np.ndarray, length: float) -> np.ndarray:
+    def _point_from_angles(
+        self, angle: float, rotation: np.ndarray, length: float
+    ) -> np.ndarray:
         local = np.array(
             [
                 length * math.sin(angle),
