@@ -278,7 +278,7 @@ class MatlabDataLoader:
 
         # Fallback to largest variable (likely the data table)
         largest_var = max(user_vars.keys(), key=lambda k: user_vars[k].nbytes)
-        warnings.warn(f"Using fallback variable '{largest_var}' for {dataset_name}")
+        warnings.warn(f"Using fallback variable '{largest_var}' for {dataset_name}", stacklevel=2)
         return largest_var
 
     def _convert_to_dataframe(
@@ -341,12 +341,13 @@ class MatlabDataLoader:
                 else:
                     processed_vectors.append(np.zeros(3, dtype=np.float32))
                     warnings.warn(
-                        f"Invalid vector at row {i} in {col_name}, using zeros"
+                        f"Invalid vector at row {i} in {col_name}, using zeros",
+                        stacklevel=2
                     )
 
             except Exception as e:
                 processed_vectors.append(np.zeros(3, dtype=np.float32))
-                warnings.warn(f"Error processing vector at row {i} in {col_name}: {e}")
+                warnings.warn(f"Error processing vector at row {i} in {col_name}: {e}", stacklevel=2)
 
         return processed_vectors
 
@@ -372,13 +373,14 @@ class MatlabDataLoader:
                     return flattened.astype(np.float32)
                 else:
                     warnings.warn(
-                        f"Dimension mismatch in {col_name}, padding with zeros"
+                        f"Dimension mismatch in {col_name}, padding with zeros",
+                        stacklevel=2
                     )
                     result = np.zeros(num_rows, dtype=np.float32)
                     result[: min(len(flattened), num_rows)] = flattened[:num_rows]
                     return result
         except Exception as e:
-            warnings.warn(f"Error processing scalar column {col_name}: {e}")
+            warnings.warn(f"Error processing scalar column {col_name}: {e}", stacklevel=2)
             return np.zeros(num_rows, dtype=np.float32)
 
     def _validate_dataframe(self, df: pd.DataFrame, dataset_name: str):
@@ -404,7 +406,7 @@ class MatlabDataLoader:
                 missing_columns.append(col)
 
         if missing_columns:
-            warnings.warn(f"Missing columns in {dataset_name}: {missing_columns}")
+            warnings.warn(f"Missing columns in {dataset_name}: {missing_columns}", stacklevel=2)
 
         if len(df) == 0:
             raise ValueError(f"No data rows in {dataset_name}")
@@ -414,7 +416,7 @@ class MatlabDataLoader:
         frame_counts = {name: len(df) for name, df in datasets.items()}
 
         if len(set(frame_counts.values())) > 1:
-            warnings.warn(f"Inconsistent frame counts: {frame_counts}")
+            warnings.warn(f"Inconsistent frame counts: {frame_counts}", stacklevel=2)
 
         min_frames = min(frame_counts.values())
         if min_frames < 2:
