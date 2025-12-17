@@ -25,7 +25,6 @@ def test_imports():
 
     # Test the problematic dependency
     if importlib.util.find_spec("defusedxml") is not None:
-
         print("✓ defusedxml available")
     else:
         print("✗ defusedxml missing")
