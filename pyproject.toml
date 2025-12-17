@@ -10,4 +10,5 @@ disallow_untyped_defs = false
 exclude = [
     "engines/matlab_simscape/",
     "engines/Simscape_Multibody_Models/",
+    "engines/pendulum_models/Pendulum Models/Pendulums_Model/",
 ]
