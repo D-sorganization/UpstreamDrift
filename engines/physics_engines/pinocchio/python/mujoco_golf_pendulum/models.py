@@ -1144,34 +1144,37 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
                     <!-- Shaft Segment 1 (upper) -->
                     <body name="shaft_upper" pos="0 0 -0.28">
                       <joint name="shaft_flex_upper" type="hinge" axis="1 0 0"
-                             range="-0.15 0.15" damping="0.4" stiffness="150" 
+                             range="-0.15 0.15" damping="0.4" stiffness="150"
                              armature="0.001"/>
 
                       <inertial pos="0 0 -0.13" mass="0.045"
                                 diaginertia="0.00006 0.00006 0.000001"/>
-                      <geom name="shaft_upper_geom" type="capsule" 
+                      <geom name="shaft_upper_geom" type="capsule"
                             fromto="0 0 0 0 0 -0.26"
                             size="0.0062" material="club_shaft_mat"/>
 
                       <!-- Shaft Segment 2 (middle) -->
                       <body name="shaft_middle" pos="0 0 -0.26">
                         <joint name="shaft_flex_middle" type="hinge" axis="1 0 0"
-                               range="-0.2 0.2" damping="0.3" stiffness="120" 
+                               range="-0.2 0.2" damping="0.3" stiffness="120"
                                armature="0.001"/>
 
                         <inertial pos="0 0 -0.13" mass="0.055"
                                   diaginertia="0.00007 0.00007 0.000001"/>
-                        <geom name="shaft_middle_geom" type="capsule" fromto="0 0 0 0 0 -0.26"
+                        <geom name="shaft_middle_geom" type="capsule" 
+                              fromto="0 0 0 0 0 -0.26"
                               size="0.0060" material="club_shaft_mat"/>
 
                         <!-- Shaft Segment 3 (lower - tip) -->
                         <body name="shaft_tip" pos="0 0 -0.26">
                           <joint name="shaft_flex_tip" type="hinge" axis="1 0 0"
-                                 range="-0.25 0.25" damping="0.2" stiffness="100" armature="0.001"/>
+                                 range="-0.25 0.25" damping="0.2" stiffness="100" 
+                                 armature="0.001"/>
 
                           <inertial pos="0 0 -0.12" mass="0.058"
                                     diaginertia="0.00008 0.00008 0.000001"/>
-                          <geom name="shaft_tip_geom" type="capsule" fromto="0 0 0 0 0 -0.24"
+                          <geom name="shaft_tip_geom" type="capsule" 
+                                fromto="0 0 0 0 0 -0.24"
                                 size="0.0058" material="club_shaft_mat"/>
 
                           <!-- Hosel and Club Head -->
