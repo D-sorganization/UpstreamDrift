@@ -664,7 +664,8 @@ class WiffleGolfMainWindow(QMainWindow):
             self,
             "About Golf Swing Visualizer",
             "Golf Swing Visualizer - Wiffle_ProV1 Edition\n\n"
-            "Advanced 3D visualization tool for comparing golf ball motion capture data.\n\n"
+            "Advanced 3D visualization tool for comparing golf ball "
+            "motion capture data.\n\n"
             "Features:\n"
             "• Excel data loading and processing\n"
             "• Real-time 3D visualization\n"
