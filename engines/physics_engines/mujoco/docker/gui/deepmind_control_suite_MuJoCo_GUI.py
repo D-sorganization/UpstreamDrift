@@ -994,7 +994,7 @@ class GolfSimulationGUI:
                         result = subprocess.run(
                             ["cmd", "/k", *cmd],
                             cwd=temp_dir,
-                            creationflags=create_new_console,
+                            creationflags=create_new_console,  # type: ignore[call-arg]
                         )
                     else:
                         result = subprocess.run(cmd, cwd=temp_dir, check=True)
@@ -1133,7 +1133,7 @@ class GolfSimulationGUI:
             )
 
             # Use a queue to read stdout non-blocking
-            q = queue.Queue()
+            q: queue.Queue[str | None] = queue.Queue()
 
             def enqueue_output(out, queue) -> None:
                 """Enqueue output from subprocess."""
@@ -1190,9 +1190,10 @@ class GolfSimulationGUI:
             else:
                 self.root.after(0, self.log, f"Process exited with code {rc}")
                 # Try reading stderr
-                err = self.process.stderr.read()
-                if err:
-                    self.root.after(0, self.log, f"ERROR: {err}")
+                if self.process.stderr:
+                    err = self.process.stderr.read()
+                    if err:
+                        self.root.after(0, self.log, f"ERROR: {err}")
                     # Check for specific common errors and provide solutions
                     if "defusedxml" in err:
                         self.root.after(
@@ -1235,7 +1236,7 @@ class GolfSimulationGUI:
         """Open a file with the default application."""
         if self.is_windows:
             if os.path.exists(filepath):
-                os.startfile(filepath)
+                os.startfile(filepath)  # type: ignore[attr-defined]
             else:
                 messagebox.showerror("Error", f"File not found: {filepath}")
         elif os.path.exists(filepath):
