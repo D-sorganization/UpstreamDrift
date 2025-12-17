@@ -23,8 +23,8 @@ def validate_directory_structure():
     
     suite_root = Path(__file__).parent
     expected_dirs = [
-        "engines/matlab_simscape/2d_model",
-        "engines/matlab_simscape/3d_biomechanical", 
+        "engines/Simscape_Multibody_Models/2D_Golf_Model",
+        "engines/Simscape_Multibody_Models/3D_Golf_Model", 
         "engines/physics_engines/mujoco",
         "engines/physics_engines/drake",
         "engines/physics_engines/pinocchio",
@@ -137,8 +137,8 @@ def validate_engine_structure():
         "MuJoCo": "engines/physics_engines/mujoco",
         "Drake": "engines/physics_engines/drake",
         "Pinocchio": "engines/physics_engines/pinocchio",
-        "2D MATLAB": "engines/matlab_simscape/2d_model",
-        "3D MATLAB": "engines/matlab_simscape/3d_biomechanical",
+        "2D MATLAB": "engines/Simscape_Multibody_Models/2D_Golf_Model",
+        "3D MATLAB": "engines/Simscape_Multibody_Models/3D_Golf_Model",
         "Pendulum": "engines/pendulum_models"
     }
     

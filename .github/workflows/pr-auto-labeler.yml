@@ -1,0 +1,104 @@
+name: PR Auto-Labeler
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auto-Label PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+
+            // Get list of changed files
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr.number,
+            });
+
+            const changedFiles = files.map(f => f.filename);
+            const labels = new Set();
+
+            // Language/Component labels
+            if (changedFiles.some(f => f.startsWith('python/'))) {
+              labels.add('python');
+            }
+            if (changedFiles.some(f => f.startsWith('javascript/'))) {
+              labels.add('javascript');
+            }
+            if (changedFiles.some(f => f.startsWith('matlab/'))) {
+              labels.add('matlab');
+            }
+            if (changedFiles.some(f => f.startsWith('arduino/'))) {
+              labels.add('arduino');
+            }
+
+            // Infrastructure labels
+            if (changedFiles.some(f => f.startsWith('.github/workflows/'))) {
+              labels.add('ci/cd');
+            }
+            if (changedFiles.some(f => f.match(/\.(ya?ml|json)$/))) {
+              labels.add('config');
+            }
+
+            // Documentation labels
+            if (changedFiles.some(f => f.match(/\.(md|rst|txt)$/i))) {
+              labels.add('documentation');
+            }
+
+            // Test labels
+            if (changedFiles.some(f => f.includes('/test'))) {
+              labels.add('tests');
+            }
+
+            // Quality/Tooling labels
+            if (changedFiles.some(f => f.startsWith('tools/'))) {
+              labels.add('tooling');
+            }
+            if (changedFiles.some(f => f.match(/^(ruff\.toml|mypy\.ini|\.pre-commit-config\.yaml|pytest\.ini)$/))) {
+              labels.add('quality-control');
+            }
+
+            // Dependencies
+            if (changedFiles.some(f => f.match(/(requirements\.txt|package\.json|environment\.yml)/))) {
+              labels.add('dependencies');
+            }
+
+            // Size labels
+            const totalChanges = files.reduce((sum, f) => sum + f.changes, 0);
+            if (totalChanges > 1000) {
+              labels.add('size/XL');
+            } else if (totalChanges > 500) {
+              labels.add('size/L');
+            } else if (totalChanges > 100) {
+              labels.add('size/M');
+            } else if (totalChanges > 10) {
+              labels.add('size/S');
+            } else {
+              labels.add('size/XS');
+            }
+
+            // Apply labels
+            if (labels.size > 0) {
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: Array.from(labels)
+              });
+
+              console.log(`Applied labels: ${Array.from(labels).join(', ')}`);
+            } else {
+              console.log('No labels to apply');
+            }

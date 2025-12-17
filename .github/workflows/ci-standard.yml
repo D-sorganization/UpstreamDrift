@@ -1,0 +1,138 @@
+name: CI Standard
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install ruff==0.5.0 black==24.4.2 mypy==1.10.0 bandit==1.7.7 pydocstyle==6.3.0
+
+      # Validate that CI tool versions match pre-commit config
+      - name: Check Tool Version Consistency
+        run: |
+          echo "Validating tool versions match .pre-commit-config.yaml..."
+
+          # Check Black version
+          if ! grep -q "rev: 24.4.2" .pre-commit-config.yaml; then
+            echo "::error::Black version mismatch between CI and pre-commit config"
+            exit 1
+          fi
+
+          # Check Ruff version
+          if ! grep -q "rev: v0.5.0" .pre-commit-config.yaml; then
+            echo "::error::Ruff version mismatch between CI and pre-commit config"
+            exit 1
+          fi
+
+          # Check MyPy version
+          if ! grep -q "rev: v1.10.0" .pre-commit-config.yaml; then
+            echo "::error::MyPy version mismatch between CI and pre-commit config"
+            exit 1
+          fi
+
+          echo "✓ All tool versions are consistent"
+
+      # FIX: Less aggressive Ruff (Errors, Warnings, Imports only)
+      - name: Lint
+        run: ruff check .
+
+      # FIX: Enforce Black formatting (88 chars)
+      - name: Check Formatting
+        run: black --check .
+
+      - run: pip install mypy types-PyYAML types-requests
+      - run: pip install -r python/requirements.txt
+      - run: mypy python/src/ --ignore-missing-imports
+
+      # TODO detection now BLOCKING - Jules Auto-Repair will fix
+      - name: Verify No Placeholders
+        run: |
+          if grep -rE "TODO|FIXME" python/src/; then
+             echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
+             exit 1
+          fi
+
+      # FIX: Run Python-based MATLAB Quality Check (Works without License)
+      # Non-blocking, archives results for legacy support
+      - name: MATLAB Quality Check
+        continue-on-error: true
+        run: |
+          python tools/matlab_utilities/scripts/matlab_quality_check.py --output-format text > matlab_quality_report.txt
+          cat matlab_quality_report.txt
+
+      - name: Upload MATLAB Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: matlab-quality-report
+          path: matlab_quality_report.txt
+
+  tests:
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -r python/requirements.txt
+      - run: pytest python/tests/ --cov=python/src --cov-report=xml
+      - uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        if: env.CODECOV_TOKEN != ''
+        with:
+          fail_ci_if_error: true # BLOCKING: Requires CODECOV_TOKEN secret to be configured
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  javascript-tests:
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: Install & Test
+        working-directory: ./javascript
+        run: |
+          npm ci
+          npm run test:coverage
+
+  matlab-tests:
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    if: false
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: matlab-actions/setup-matlab@v2
+      - uses: matlab-actions/run-command@v2
+        with:
+          command: |
+            addpath('matlab');
+            run_all
+
+  arduino-build:
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install platformio
+      - name: Verify Build
+        working-directory: ./arduino
+        run: pio run -e uno

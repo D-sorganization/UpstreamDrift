@@ -1,0 +1,42 @@
+name: Jules Test Generator (Worker)
+on: workflow_call
+
+jobs:
+  generate-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
+
+      - name: Identify New/Modified Files
+        id: files
+        run: |
+          # FIX: Ensure we catch files in src/ or python/ that are NOT tests
+          # Using git diff with explicit path filters is safer than grep
+          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD -- 'src/**/*.py' 'python/**/*.py' ':!tests/*' ':!*test_*.py' || true)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No relevant source files changed."
+            exit 0
+          fi
+
+          # Flatten newlines to commas for the prompt
+          FILES_FLAT=$(echo "$CHANGED_FILES" | tr '\n' ', ')
+          echo "files=$FILES_FLAT" >> $GITHUB_OUTPUT
+
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: npm install -g @google/jules
+
+      - name: Generate Tests
+        if: steps.files.outputs.files != ''
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          FILES: ${{ steps.files.outputs.files }}
+        run: |
+          # Request 3 parallel sessions. Jules will try 3 different testing strategies.
+          jules remote new \
+            --repo ${{ github.repository }} \
+            --session "Generate comprehensive pytest unit tests for: [ $FILES ]. Focus on edge cases." \
+            --branch ${{ github.ref_name }} \
+            --parallel 3
