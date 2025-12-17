@@ -91,8 +91,10 @@ class PolynomialController(BaseController):
                     break
 
             if act_idx >= 0:
-                # Use 60*t - 20*t^3 (truncated Taylor series for sin(t)) to approximate a swing-like torque profile.
-                # Coefficients chosen to mimic sine wave amplitude/timing for a golf swing.
+                # Use 60*t - 20*t^3 (truncated Taylor series for sin(t)) to
+                # approximate a swing-like torque profile.
+                # Coefficients chosen to mimic sine wave amplitude/timing
+                # for a golf swing.
                 self.coeffs[act_idx, 1] = 60.0
                 self.coeffs[act_idx, 3] = -20.0
         except Exception:
