@@ -812,7 +812,7 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
         y = self.camera_distance * np.sin(elevation_rad)
         z = self.camera_distance * np.cos(elevation_rad) * np.sin(azimuth_rad)
 
-        self.camera_target + np.array([x, y, z])
+
 
         # Create view matrix (simplified lookAt)
         view_matrix = np.eye(4, dtype=np.float32)
@@ -822,8 +822,6 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
 
     def _calculate_projection_matrix(self) -> np.ndarray:
         """Calculate perspective projection matrix"""
-        self.width() / self.height() if self.height() > 0 else 1.0
-        np.radians(45.0)
 
         proj_matrix = np.eye(4, dtype=np.float32)
         # ... implementation of perspective projection matrix

@@ -71,8 +71,10 @@ def generate_four_bar_linkage_xml(
 
     <asset>
         <texture name="grid" type="2d" builtin="checker" rgb1=".1 .2 .3"
-                 rgb2=".2 .3 .4" width="300" height="300" mark="edge" markrgb=".2 .3 .4"/>
-        <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance="0.2"/>
+                 rgb2=".2 .3 .4" width="300" height="300" mark="edge"
+                 markrgb=".2 .3 .4"/>
+        <material name="grid" texture="grid" texrepeat="1 1" texuniform="true"
+                  reflectance="0.2"/>
         <material name="crank_mat" rgba="0.9 0.1 0.1 1"/>
         <material name="coupler_mat" rgba="0.1 0.7 0.1 1"/>
         <material name="follower_mat" rgba="0.1 0.1 0.9 1"/>
@@ -98,18 +100,23 @@ def generate_four_bar_linkage_xml(
         <body name="crank" pos="0 0 0.5">
             <joint name="crank_joint" type="hinge" axis="0 0 1" damping="0.1"/>
             <geom type="capsule"
-                  fromto="0 0 0  {crank * np.cos(np.pi / 4)} {crank * np.sin(np.pi / 4)} 0"
+                  fromto="0 0 0  {crank * np.cos(np.pi / 4)} 
+                         {crank * np.sin(np.pi / 4)} 0"
                   size="0.05" material="crank_mat" mass="0.5"/>
             <geom name="crank_end" type="sphere"
                   pos="{crank * np.cos(np.pi / 4)} {crank * np.sin(np.pi / 4)} 0"
                   size="0.07" rgba="1 0.5 0 1" contype="0" conaffinity="0"/>
 
             <!-- Coupler link attached to crank end -->
-            <body name="coupler" pos="{crank * np.cos(np.pi / 4)} {crank * np.sin(np.pi / 4)} 0">
-                <joint name="coupler_crank_joint" type="hinge" axis="0 0 1" damping="0.05"/>
-                <geom type="capsule" fromto="0 0 0  {coupler * 0.7} {coupler * 0.3} 0"
+            <body name="coupler"
+                  pos="{crank * np.cos(np.pi / 4)} {crank * np.sin(np.pi / 4)} 0">
+                <joint name="coupler_crank_joint" type="hinge" axis="0 0 1"
+                       damping="0.05"/>
+                <geom type="capsule"
+                      fromto="0 0 0  {coupler * 0.7} {coupler * 0.3} 0"
                       size="0.05" material="coupler_mat" mass="0.5"/>
-                <geom name="coupler_point" type="sphere" pos="{coupler * 0.35} {coupler * 0.15} 0"
+                <geom name="coupler_point" type="sphere"
+                      pos="{coupler * 0.35} {coupler * 0.15} 0"
                       size="0.06" rgba="1 1 0 1" contype="0" conaffinity="0"/>
             </body>
         </body>
@@ -117,9 +124,11 @@ def generate_four_bar_linkage_xml(
         <!-- Follower link -->
         <body name="follower" pos="{ground} 0 0.5">
             <joint name="follower_joint" type="hinge" axis="0 0 1" damping="0.1"/>
-            <geom type="capsule" fromto="0 0 0  {-follower * 0.7} {follower * 0.3} 0"
+            <geom type="capsule" 
+                  fromto="0 0 0  {-follower * 0.7} {follower * 0.3} 0"
                   size="0.05" material="follower_mat" mass="0.5"/>
-            <geom name="follower_end" type="sphere" pos="{-follower * 0.7} {follower * 0.3} 0"
+            <geom name="follower_end" type="sphere" 
+                  pos="{-follower * 0.7} {follower * 0.3} 0"
                   size="0.07" rgba="0.5 0 1 1" contype="0" conaffinity="0"/>
         </body>
     </worldbody>
@@ -181,8 +190,10 @@ def generate_slider_crank_xml(
 
         <!-- Slider guide rail -->
         <geom type="cylinder"
-              fromto="{slider_start if orientation == "horizontal" else 0} 0 {1 if orientation == "horizontal" else slider_start}
-                      {slider_end if orientation == "horizontal" else 0} 0 {1 if orientation == "horizontal" else slider_end}"
+              fromto="{slider_start if orientation == "horizontal" else 0} 0 
+                     {1 if orientation == "horizontal" else slider_start}
+                     {slider_end if orientation == "horizontal" else 0} 0 
+                     {1 if orientation == "horizontal" else slider_end}"
               size="0.04" rgba="0.3 0.3 0.3 1" contype="0" conaffinity="0"/>
 
         <!-- Crank -->
@@ -353,7 +364,8 @@ def generate_geneva_mechanism_xml(num_slots=6, drive_radius=2.0) -> str:
         <!-- Drive wheel (continuous rotation) -->
         <body name="drive_wheel" pos="0 0 1">
             <joint name="drive_joint" type="hinge" axis="0 0 1" damping="0.5"/>
-            <geom type="cylinder" size="{drive_radius * 0.8} 0.1" material="drive_mat" mass="1.0"/>
+            <geom type="cylinder" size="{drive_radius * 0.8} 0.1" 
+                  material="drive_mat" mass="1.0"/>
             <!-- Drive pin -->
             <geom type="cylinder"
                   fromto="{drive_radius * 0.5} 0 0.11  {drive_radius * 0.5} 0 0.3"
@@ -933,7 +945,8 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
             <!-- Leg 1 -->
             <body name="leg1_lower" pos="{base_radius * np.cos(0)} {base_radius * np.sin(0)} 0.15">
                 <joint name="leg1_base_ball" type="ball" damping="0.5"/>
-                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
+                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05"
+                      material="leg_mat" mass="0.5"/>
 
                 <body name="leg1_upper" pos="0 0 1.2">
                     <joint name="leg1_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
@@ -945,7 +958,8 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
             <!-- Leg 2 -->
             <body name="leg2_lower" pos="{base_radius * np.cos(np.pi / 3)} {base_radius * np.sin(np.pi / 3)} 0.15">
                 <joint name="leg2_base_ball" type="ball" damping="0.5"/>
-                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
+                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05"
+                      material="leg_mat" mass="0.5"/>
 
                 <body name="leg2_upper" pos="0 0 1.2">
                     <joint name="leg2_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
@@ -957,7 +971,8 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
             <!-- Leg 3 -->
             <body name="leg3_lower" pos="{base_radius * np.cos(2 * np.pi / 3)} {base_radius * np.sin(2 * np.pi / 3)} 0.15">
                 <joint name="leg3_base_ball" type="ball" damping="0.5"/>
-                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
+                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05"
+                      material="leg_mat" mass="0.5"/>
 
                 <body name="leg3_upper" pos="0 0 1.2">
                     <joint name="leg3_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
@@ -969,7 +984,8 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
             <!-- Leg 4 -->
             <body name="leg4_lower" pos="{base_radius * np.cos(np.pi)} {base_radius * np.sin(np.pi)} 0.15">
                 <joint name="leg4_base_ball" type="ball" damping="0.5"/>
-                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
+                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05"
+                      material="leg_mat" mass="0.5"/>
 
                 <body name="leg4_upper" pos="0 0 1.2">
                     <joint name="leg4_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
@@ -981,7 +997,8 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
             <!-- Leg 5 -->
             <body name="leg5_lower" pos="{base_radius * np.cos(4 * np.pi / 3)} {base_radius * np.sin(4 * np.pi / 3)} 0.15">
                 <joint name="leg5_base_ball" type="ball" damping="0.5"/>
-                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
+                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05"
+                      material="leg_mat" mass="0.5"/>
 
                 <body name="leg5_upper" pos="0 0 1.2">
                     <joint name="leg5_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
@@ -993,7 +1010,8 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
             <!-- Leg 6 -->
             <body name="leg6_lower" pos="{base_radius * np.cos(5 * np.pi / 3)} {base_radius * np.sin(5 * np.pi / 3)} 0.15">
                 <joint name="leg6_base_ball" type="ball" damping="0.5"/>
-                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
+                <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05"
+                      material="leg_mat" mass="0.5"/>
 
                 <body name="leg6_upper" pos="0 0 1.2">
                     <joint name="leg6_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>

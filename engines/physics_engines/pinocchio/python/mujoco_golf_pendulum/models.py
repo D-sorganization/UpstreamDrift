@@ -1161,19 +1161,19 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
 
                         <inertial pos="0 0 -0.13" mass="0.055"
                                   diaginertia="0.00007 0.00007 0.000001"/>
-                        <geom name="shaft_middle_geom" type="capsule" 
+                        <geom name="shaft_middle_geom" type="capsule"
                               fromto="0 0 0 0 0 -0.26"
                               size="0.0060" material="club_shaft_mat"/>
 
                         <!-- Shaft Segment 3 (lower - tip) -->
                         <body name="shaft_tip" pos="0 0 -0.26">
                           <joint name="shaft_flex_tip" type="hinge" axis="1 0 0"
-                                 range="-0.25 0.25" damping="0.2" stiffness="100" 
+                                 range="-0.25 0.25" damping="0.2" stiffness="100"
                                  armature="0.001"/>
 
                           <inertial pos="0 0 -0.12" mass="0.058"
                                     diaginertia="0.00008 0.00008 0.000001"/>
-                          <geom name="shaft_tip_geom" type="capsule" 
+                          <geom name="shaft_tip_geom" type="capsule"
                                 fromto="0 0 0 0 0 -0.24"
                                 size="0.0058" material="club_shaft_mat"/>
 
@@ -1181,7 +1181,8 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
                           <body name="hosel" pos="0 0 -0.24" euler="0 0.17 0">
                             <inertial pos="0 0.02 -0.01" mass="0.010"
                                       diaginertia="0.000005 0.000005 0.000002"/>
-                            <geom name="hosel_geom" type="cylinder" fromto="0 0 0 0 0.035 -0.005"
+                            <geom name="hosel_geom" type="cylinder" 
+                                  fromto="0 0 0 0 0.035 -0.005"
                                   size="0.008" material="club_head_mat"/>
 
                             <!-- Driver Head -->
@@ -1240,13 +1241,16 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
     <connect body1="pelvis" body2="left_femur" anchor="-0.12 0 0"/>
     <connect body1="pelvis" body2="right_femur" anchor="0.12 0 0"/>
     <!-- Left hand grips club -->
-    <weld body1="left_hand" body2="club_grip" relpose="0 0 -0.18 1 0 0 0" active="true"/>
+    <weld body1="left_hand" body2="club_grip" relpose="0 0 -0.18 1 0 0 0" 
+          active="true"/>
   </equality>
 
   <actuator>
     <!-- Left Leg (3 DOF) -->
-    <motor name="l_ankle_plantar" joint="left_ankle_plantar" gear="40" ctrllimited="true" ctrlrange="-50 50"/>
-    <motor name="l_ankle_invert" joint="left_ankle_inversion" gear="30" ctrllimited="true" ctrlrange="-35 35"/>
+    <motor name="l_ankle_plantar" joint="left_ankle_plantar" gear="40" 
+           ctrllimited="true" ctrlrange="-50 50"/>
+    <motor name="l_ankle_invert" joint="left_ankle_inversion" gear="30" 
+           ctrllimited="true" ctrlrange="-35 35"/>
     <motor name="l_knee" joint="left_knee" gear="120" ctrllimited="true" ctrlrange="-150 150"/>
 
     <!-- Right Leg (3 DOF) -->
