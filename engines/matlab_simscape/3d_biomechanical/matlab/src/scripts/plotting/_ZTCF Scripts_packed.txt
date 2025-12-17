@@ -1,0 +1,2118 @@
+%%% MATLAB PROJECT PACKER - v1.0 %%%
+%%% Source Folder Base: C:\Users\diete\MATLAB Drive\Projects\Model Rebuild\Scripts\_ZTCF Scripts %%%
+%%% Pack Time: 02-May-2025 09:30:39 %%%
+
+%%% START FILE: MASTER_SCRIPT_ZTCFCharts_3D.m %%%
+cd(matlabdrive);
+cd '3DModel';
+cd 'Scripts/_ZTCF Scripts';
+%PauseTime=0;
+
+SCRIPT_301_3D_PLOT_ZTCF_AngularWork;
+SCRIPT_302_3D_PLOT_ZTCF_AngularPower;
+SCRIPT_303_3D_PLOT_ZTCF_LinearPower;
+SCRIPT_304_3D_PLOT_ZTCF_LinearWork;
+SCRIPT_305_3D_PLOT_ZTCF_JointTorqueInputs;
+SCRIPT_306_3D_PLOT_ZTCF_TotalWork;
+SCRIPT_307_3D_PLOT_ZTCF_TotalPower;
+SCRIPT_312_3D_QUIVER_ZTCF_NetForceEquivalentCouple;
+SCRIPT_313_3D_QUIVER_ZTCF_NetForce;
+SCRIPT_314_3D_QUIVER_ZTCF_LHRHForceQuiver;
+SCRIPT_315_3D_QUIVER_ZTCF_LHRHTorque;
+SCRIPT_316_3D_QUIVER_ZTCF_AllTorqueandMoments;
+SCRIPT_317_3D_QUIVER_ZTCF_AllMoments;
+% SCRIPT_318_3D_QUIVER_ZTCF_LeftUpperArmMoments;
+% SCRIPT_319_3D_QUIVER_ZTCF_RightUpperArmMoments;
+% SCRIPT_320_3D_QUIVER_ZTCF_LForearmMoments;
+% SCRIPT_321_3D_QUIVER_ZTCF_RForearmMoments;
+SCRIPT_322_3D_PLOT_ZTCF_ForceAlongHandPath;
+SCRIPT_323_3D_PLOT_ZTCF_CHSandHandSpeed;
+SCRIPT_325_3D_PLOT_ZTCF_LHRHForceAlongHandPath;
+SCRIPT_326_3D_PLOT_ZTCF_LinearImpulse;
+SCRIPT_327_3D_PLOT_ZTCF_LinearWork;
+SCRIPT_328_3D_PLOT_ZTCF_LinearImpulse;
+SCRIPT_329_3D_PLOT_ZTCF_EquivalentCoupleandMOF;
+SCRIPT_330_3D_PLOT_ZTCF_LSWork;
+SCRIPT_331_3D_PLOT_ZTCF_LSPower;
+SCRIPT_332_3D_PLOT_ZTCF_RSWork;
+SCRIPT_333_3D_PLOT_ZTCF_RSPower;
+SCRIPT_334_3D_PLOT_ZTCF_LEWork;
+SCRIPT_335_3D_PLOT_ZTCF_LEPower;
+SCRIPT_336_3D_PLOT_ZTCF_REWork;
+SCRIPT_337_3D_PLOT_ZTCF_REPower;
+SCRIPT_338_3D_PLOT_ZTCF_LHWork;
+SCRIPT_339_3D_PLOT_ZTCF_LHPower;
+SCRIPT_340_3D_PLOT_ZTCF_RHWork;
+SCRIPT_341_3D_PLOT_ZTCF_RHPower;
+SCRIPT_342_3D_QUIVER_ZTCF_LHRHLinearImpulse;
+SCRIPT_343_3D_QUIVER_ZTCF_LHRH_BaseData_AngularImpulse;
+SCRIPT_344_3D_QUIVER_ZTCF_TotalLinearImpulse;
+SCRIPT_345_3D_QUIVER_ZTCF_TotalAngularImpulse;
+SCRIPT_346_3D_QUIVER_ZTCF_NetForceCoupleShaftsAdded;
+SCRIPT_348_3D_PLOT_ZTCF_LocalHandForces;
+SCRIPT_349_3D_QUIVER_ZTCF_LHRHMoments;
+% SCRIPT_350_3D_PLOT_ZTCF_TorqueInputvsTorqueOutput;
+
+%clear PauseTime;
+
+%%% END FILE: MASTER_SCRIPT_ZTCFCharts_3D.m %%%
+
+%%% START FILE: SCRIPT_301_3D_PLOT_ZTCF_AngularWork.m %%%
+figure(301);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.LSAngularWorkonArm);
+plot(ZTCFQ.Time,ZTCFQ.RSAngularWorkonArm);
+plot(ZTCFQ.Time,ZTCFQ.LEAngularWorkonForearm);
+plot(ZTCFQ.Time,ZTCFQ.REAngularWorkonForearm);
+plot(ZTCFQ.Time,ZTCFQ.LHAngularWorkonClub);
+plot(ZTCFQ.Time,ZTCFQ.RHAngularWorkonClub);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Angular Work','RS Angular Work','LE Angular Work','RE Angular Work','LH Angular Work','RH Angular Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Angular Work on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Angular Work');
+pause(PauseTime);
+
+%Close Figure
+close(301);
+
+%%% END FILE: SCRIPT_301_3D_PLOT_ZTCF_AngularWork.m %%%
+
+%%% START FILE: SCRIPT_302_3D_PLOT_ZTCF_AngularPower.m %%%
+figure(302);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.LSonArmAngularPower);
+plot(ZTCFQ.Time,ZTCFQ.RSonArmAngularPower);
+plot(ZTCFQ.Time,ZTCFQ.LEonForearmAngularPower);
+plot(ZTCFQ.Time,ZTCFQ.REonForearmAngularPower);
+plot(ZTCFQ.Time,ZTCFQ.LHonClubAngularPower);
+plot(ZTCFQ.Time,ZTCFQ.RHonClubAngularPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Angular Power','RS Angular Power','LE Angular Power','RE Angular Power','LH Angular Power','RH Angular Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Angular Power on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Angular Power');
+pause(PauseTime);
+
+%Close Figure
+close(302);
+
+%%% END FILE: SCRIPT_302_3D_PLOT_ZTCF_AngularPower.m %%%
+
+%%% START FILE: SCRIPT_303_3D_PLOT_ZTCF_LinearPower.m %%%
+figure(303);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.LSonArmLinearPower);
+plot(ZTCFQ.Time,ZTCFQ.RSonArmLinearPower);
+plot(ZTCFQ.Time,ZTCFQ.LEonForearmLinearPower);
+plot(ZTCFQ.Time,ZTCFQ.REonForearmLinearPower);
+plot(ZTCFQ.Time,ZTCFQ.LHonClubLinearPower);
+plot(ZTCFQ.Time,ZTCFQ.RHonClubLinearPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Power','RS Linear Power','LE Linear Power','RE Linear Power','LH Linear Power','RH Linear Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Power on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Linear Power');
+pause(PauseTime);
+
+%Close Figure
+close(303);
+
+%%% END FILE: SCRIPT_303_3D_PLOT_ZTCF_LinearPower.m %%%
+
+%%% START FILE: SCRIPT_304_3D_PLOT_ZTCF_LinearWork.m %%%
+figure(304);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.LSLinearWorkonArm);
+plot(ZTCFQ.Time,ZTCFQ.RSLinearWorkonArm);
+plot(ZTCFQ.Time,ZTCFQ.LELinearWorkonForearm);
+plot(ZTCFQ.Time,ZTCFQ.RELinearWorkonForearm);
+plot(ZTCFQ.Time,ZTCFQ.LHLinearWorkonClub);
+plot(ZTCFQ.Time,ZTCFQ.RHLinearWorkonClub);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Work','RS Linear Work','LE Linear Work','RE Linear Work','LW Linear Work','RH Linear Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Work on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Linear Work on Distal');
+pause(PauseTime);
+
+%Close Figure
+close(304);
+
+%%% END FILE: SCRIPT_304_3D_PLOT_ZTCF_LinearWork.m %%%
+
+%%% START FILE: SCRIPT_305_3D_PLOT_ZTCF_JointTorqueInputs.m %%%
+figure(305);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.HipTorqueXInput);
+plot(ZTCFQ.Time,ZTCFQ.HipTorqueYInput);
+plot(ZTCFQ.Time,ZTCFQ.HipTorqueZInput);
+plot(ZTCFQ.Time,ZTCFQ.TranslationForceXInput);
+plot(ZTCFQ.Time,ZTCFQ.TranslationForceYInput);
+plot(ZTCFQ.Time,ZTCFQ.TranslationForceZInput);
+plot(ZTCFQ.Time,ZTCFQ.TorsoTorqueInput);
+plot(ZTCFQ.Time,ZTCFQ.SpineTorqueXInput);
+plot(ZTCFQ.Time,ZTCFQ.SpineTorqueYInput);
+plot(ZTCFQ.Time,ZTCFQ.LScapTorqueXInput);
+plot(ZTCFQ.Time,ZTCFQ.LScapTorqueYInput);
+plot(ZTCFQ.Time,ZTCFQ.RScapTorqueXInput);
+plot(ZTCFQ.Time,ZTCFQ.RScapTorqueYInput);
+plot(ZTCFQ.Time,ZTCFQ.LSTorqueXInput);
+plot(ZTCFQ.Time,ZTCFQ.LSTorqueYInput);
+plot(ZTCFQ.Time,ZTCFQ.LSTorqueZInput);
+plot(ZTCFQ.Time,ZTCFQ.RSTorqueXInput);
+plot(ZTCFQ.Time,ZTCFQ.RSTorqueYInput);
+plot(ZTCFQ.Time,ZTCFQ.RSTorqueZInput);
+plot(ZTCFQ.Time,ZTCFQ.LETorqueInput);
+plot(ZTCFQ.Time,ZTCFQ.RETorqueInput);
+plot(ZTCFQ.Time,ZTCFQ.LFTorqueInput);
+plot(ZTCFQ.Time,ZTCFQ.RFTorqueInput);
+plot(ZTCFQ.Time,ZTCFQ.LWTorqueXInput);
+plot(ZTCFQ.Time,ZTCFQ.LWTorqueYInput);
+plot(ZTCFQ.Time,ZTCFQ.RWTorqueXInput);
+plot(ZTCFQ.Time,ZTCFQ.RWTorqueYInput);
+
+ylabel('Torque (Nm)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Hip Torque X','Hip Torque Y','Hip Torque Z','Translation Force X',...
+    'Translation Force Y','Translation Force Z','Torso Torque','Spine Torque X',...
+    'Spine Torque Y','LScap Torque X','Left Scap Torque Y','RScap Torque X',...
+    'RScapTorqueY','LS Torque X','LS Torque Y','LS Torque Z','RS Torque X','RS Torque Y',...
+    'RS Torque Z','LE Torque','RE Torque','LF Torque','RF Torque','LW Torque X',...
+    'LW Torque Y','RW Torque X','RW Torque Y');
+legend('Location','southeast');
+%Add a Title
+title('Joint Torque Inputs');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Joint Torque Inputs');
+pause(PauseTime);
+
+%Close Figure
+close(305);
+
+%%% END FILE: SCRIPT_305_3D_PLOT_ZTCF_JointTorqueInputs.m %%%
+
+%%% START FILE: SCRIPT_306_3D_PLOT_ZTCF_TotalWork.m %%%
+figure(306);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.TotalLSWork);
+plot(ZTCFQ.Time,ZTCFQ.TotalRSWork);
+plot(ZTCFQ.Time,ZTCFQ.TotalLEWork);
+plot(ZTCFQ.Time,ZTCFQ.TotalREWork);
+plot(ZTCFQ.Time,ZTCFQ.TotalLHWork);
+plot(ZTCFQ.Time,ZTCFQ.TotalRHWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Total Work','RS Total Work','LE Total Work','RE Total Work','LH Total Work','RH Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Total Work on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Total Work');
+pause(PauseTime);
+
+%Close Figure
+close(306);
+
+%%% END FILE: SCRIPT_306_3D_PLOT_ZTCF_TotalWork.m %%%
+
+%%% START FILE: SCRIPT_307_3D_PLOT_ZTCF_TotalPower.m %%%
+figure(307);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.TotalLSPower);
+plot(ZTCFQ.Time,ZTCFQ.TotalRSPower);
+plot(ZTCFQ.Time,ZTCFQ.TotalLEPower);
+plot(ZTCFQ.Time,ZTCFQ.TotalREPower);
+plot(ZTCFQ.Time,ZTCFQ.TotalLHPower);
+plot(ZTCFQ.Time,ZTCFQ.TotalRHPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Total Power','RS Total Power','LE Total Power','RE Total Power','LH Total Power','RH Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Total Power on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Total Power');
+pause(PauseTime);
+
+%Close Figure
+close(307);
+
+%%% END FILE: SCRIPT_307_3D_PLOT_ZTCF_TotalPower.m %%%
+
+%%% START FILE: SCRIPT_312_3D_QUIVER_ZTCF_NetForceEquivalentCouple.m %%%
+%Generate Club Quiver Plot
+figure(312);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.TotalHandForceGlobal(:,1),ZTCFQ.TotalHandForceGlobal(:,2),ZTCFQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+NetForceQuiver.AutoScaleFactor=3;
+
+%Generate Equivalent Couple Quiver Plot
+NetCoupleQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.EquivalentMidpointCoupleGlobal(:,1),ZTCFQ.EquivalentMidpointCoupleGlobal(:,2),ZTCFQ.EquivalentMidpointCoupleGlobal(:,3));
+NetCoupleQuiver.LineWidth=1;
+NetCoupleQuiver.Color=[.8 .2 0];
+NetCoupleQuiver.MaxHeadSize=0.1;
+NetCoupleQuiver.AutoScaleFactor=3;
+
+
+%Add Legend to Plot
+legend('','','','','Net Force','Equivalent MP Couple');
+
+%Add a Title
+title('Net Force and Equivalent MP Couple');
+subtitle('ZTCF');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - Net Force and Equivalent MP Couple');
+pause(PauseTime);
+
+%Close Figure
+close(312);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear NetCoupleQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_312_3D_QUIVER_ZTCF_NetForceEquivalentCouple.m %%%
+
+%%% START FILE: SCRIPT_313_3D_QUIVER_ZTCF_NetForce.m %%%
+%Generate Club Quiver Plot
+figure(313);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.TotalHandForceGlobal(:,1),ZTCFQ.TotalHandForceGlobal(:,2),ZTCFQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+NetForceQuiver.AutoScaleFactor=3;
+%Add Legend to Plot
+legend('','','','','Net Force');
+
+%Add a Title
+title('Net Force');
+subtitle('ZTCF');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - Net Force');
+pause(PauseTime);
+
+%Close Figure
+close(313);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_313_3D_QUIVER_ZTCF_NetForce.m %%%
+
+%%% START FILE: SCRIPT_314_3D_QUIVER_ZTCF_LHRHForceQuiver.m %%%
+%Generate Club Quiver Plot
+figure(314);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH Total Force Quiver Plot
+LHForceQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHonClubFGlobal(:,1),ZTCFQ.LHonClubFGlobal(:,2),ZTCFQ.LHonClubFGlobal(:,3));
+LHForceQuiver.LineWidth=1;
+LHForceQuiver.Color=[0 0 1];
+LHForceQuiver.AutoScaleFactor=2;
+LHForceQuiver.MaxHeadSize=0.1;
+
+%Generate RH Total Force Quiver Plot
+RHForceQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.RHonClubFGlobal(:,1),ZTCFQ.RHonClubFGlobal(:,2),ZTCFQ.RHonClubFGlobal(:,3));
+RHForceQuiver.LineWidth=1;
+RHForceQuiver.Color=[1 0 0];
+RHForceQuiver.MaxHeadSize=0.1;
+%Correct scaling so that LH and RH are scaled the same.
+RHForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/RHForceQuiver.ScaleFactor;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.TotalHandForceGlobal(:,1),ZTCFQ.TotalHandForceGlobal(:,2),ZTCFQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+%Correct scaling so that LH and RH are scaled the same.
+NetForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/NetForceQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH Force','RH Force','Net Force');
+
+%Add a Title
+title('Total Force');
+subtitle('ZTCF');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - Hand Forces');
+pause(PauseTime);
+
+%Close Figure
+close(314);
+
+%Clear Figure from Workspace
+clear LHForceQuiver;
+clear RHForceQuiver;
+clear NetForceQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_314_3D_QUIVER_ZTCF_LHRHForceQuiver.m %%%
+
+%%% START FILE: SCRIPT_315_3D_QUIVER_ZTCF_LHRHTorque.m %%%
+%Generate Club Quiver Plot
+figure(315);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH Total Torque Quiver Plot
+LHTorqueQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHonClubTGlobal(:,1),ZTCFQ.LHonClubTGlobal(:,2),ZTCFQ.LHonClubTGlobal(:,3));
+LHTorqueQuiver.LineWidth=1;
+LHTorqueQuiver.Color=[0 0 1];
+LHTorqueQuiver.AutoScaleFactor=2;
+LHTorqueQuiver.MaxHeadSize=0.1;
+
+%Generate RH Total Torque Quiver Plot
+RHTorqueQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.RHonClubTGlobal(:,1),ZTCFQ.RHonClubTGlobal(:,2),ZTCFQ.RHonClubTGlobal(:,3));
+RHTorqueQuiver.LineWidth=1;
+RHTorqueQuiver.Color=[1 0 0];
+RHTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHTorqueQuiver.AutoScaleFactor=LHTorqueQuiver.ScaleFactor/RHTorqueQuiver.ScaleFactor;
+
+%Generate Total Torque Quiver Plot
+NetTorqueQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.TotalHandTorqueGlobal(:,1),ZTCFQ.TotalHandTorqueGlobal(:,2),ZTCFQ.TotalHandTorqueGlobal(:,3));
+NetTorqueQuiver.LineWidth=1;
+NetTorqueQuiver.Color=[0 1 0];
+NetTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+NetTorqueQuiver.AutoScaleFactor=LHTorqueQuiver.ScaleFactor/NetTorqueQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH Torque','RH Torque','Net Torque');
+
+%Add a Title
+title('Total Torque');
+subtitle('ZTCF');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - Hand Torques');
+pause(PauseTime);
+
+%Close Figure
+close(315);
+
+%Clear Figure from Workspace
+clear LHTorqueQuiver;
+clear RHTorqueQuiver;
+clear NetTorqueQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_315_3D_QUIVER_ZTCF_LHRHTorque.m %%%
+
+%%% START FILE: SCRIPT_316_3D_QUIVER_ZTCF_AllTorqueandMoments.m %%%
+%Generate Club Quiver Plot
+figure(316);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH MOF Quiver Plot
+LHMOFQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHMOFonClubGlobal(:,1),ZTCFQ.LHMOFonClubGlobal(:,2),ZTCFQ.LHMOFonClubGlobal(:,3));
+LHMOFQuiver.LineWidth=1;
+LHMOFQuiver.Color=[0 0.5 0];
+LHMOFQuiver.MaxHeadSize=0.1;
+LHMOFQuiver.AutoScaleFactor=4;
+
+%Generate LH Total Torque Quiver Plot
+LHTorqueQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHonClubTGlobal(:,1),ZTCFQ.LHonClubTGlobal(:,2),ZTCFQ.LHonClubTGlobal(:,3));
+LHTorqueQuiver.LineWidth=1;
+LHTorqueQuiver.Color=[0 0 1];
+LHTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+LHTorqueQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/LHTorqueQuiver.ScaleFactor;
+
+%Generate RH MOF Quiver Plot
+RHMOFQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.RHMOFonClubGlobal(:,1),ZTCFQ.RHMOFonClubGlobal(:,2),ZTCFQ.RHMOFonClubGlobal(:,3));
+RHMOFQuiver.LineWidth=1;
+RHMOFQuiver.Color=[0.5 0 0];
+RHMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/RHMOFQuiver.ScaleFactor;
+
+%Generate RH Total Torque Quiver Plot
+RHTorqueQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.RHonClubTGlobal(:,1),ZTCFQ.RHonClubTGlobal(:,2),ZTCFQ.RHonClubTGlobal(:,3));
+RHTorqueQuiver.LineWidth=1;
+RHTorqueQuiver.Color=[1 0 0];
+RHTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHTorqueQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/RHTorqueQuiver.ScaleFactor;
+
+%Generate Total MOF Quiver Plot
+TotalMOFQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.MPMOFonClubGlobal(:,1),ZTCFQ.MPMOFonClubGlobal(:,2),ZTCFQ.MPMOFonClubGlobal(:,3));
+TotalMOFQuiver.LineWidth=1;
+TotalMOFQuiver.Color=[0 0 0.5];
+TotalMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+TotalMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/TotalMOFQuiver.ScaleFactor;
+
+%Generate Total Torque Quiver Plot
+NetTorqueQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.TotalHandTorqueGlobal(:,1),ZTCFQ.TotalHandTorqueGlobal(:,2),ZTCFQ.TotalHandTorqueGlobal(:,3));
+NetTorqueQuiver.LineWidth=1;
+NetTorqueQuiver.Color=[0 1 0];
+NetTorqueQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+NetTorqueQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/NetTorqueQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH MOF','LH Torque','RH MOF','RH Torque','Total MOF','Net Torque');
+
+%Add a Title
+title('All Torques and Moments on Club');
+subtitle('ZTCF');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - Torques and Moments');
+pause(PauseTime);
+
+%Close Figure
+close(316);
+
+
+%Clear Figure from Workspace
+clear LHTorqueQuiver;
+clear RHTorqueQuiver;
+clear NetTorqueQuiver;
+clear LHMOFQuiver;
+clear RHMOFQuiver;
+clear TotalMOFQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_316_3D_QUIVER_ZTCF_AllTorqueandMoments.m %%%
+
+%%% START FILE: SCRIPT_317_3D_QUIVER_ZTCF_AllMoments.m %%%
+%Generate Club Quiver Plot
+figure(317);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH MOF Quiver Plot
+LHMOFQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHMOFonClubGlobal(:,1),ZTCFQ.LHMOFonClubGlobal(:,2),ZTCFQ.LHMOFonClubGlobal(:,3));
+LHMOFQuiver.LineWidth=1;
+LHMOFQuiver.Color=[0 0.5 0];
+LHMOFQuiver.MaxHeadSize=0.1;
+LHMOFQuiver.AutoScaleFactor=2;
+
+%Generate RH MOF Quiver Plot
+RHMOFQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.RHMOFonClubGlobal(:,1),ZTCFQ.RHMOFonClubGlobal(:,2),ZTCFQ.RHMOFonClubGlobal(:,3));
+RHMOFQuiver.LineWidth=1;
+RHMOFQuiver.Color=[0.5 0 0];
+RHMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/RHMOFQuiver.ScaleFactor;
+
+%Generate RH MOF Quiver Plot
+TotalMOFQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.MPMOFonClubGlobal(:,1),ZTCFQ.MPMOFonClubGlobal(:,2),ZTCFQ.MPMOFonClubGlobal(:,3));
+TotalMOFQuiver.LineWidth=1;
+TotalMOFQuiver.Color=[0 0 0.5];
+TotalMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+TotalMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/TotalMOFQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH MOF','RH MOF','Total MOF');
+
+%Add a Title
+title('All Moments of Force on Club');
+subtitle('ZTCF');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - Club Moments of Force');
+pause(PauseTime);
+
+%Close Figure
+close(317);
+
+%Clear Figure from Workspace
+clear LHMOFQuiver;
+clear RHMOFQuiver;
+clear TotalMOFQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_317_3D_QUIVER_ZTCF_AllMoments.m %%%
+
+%%% START FILE: SCRIPT_318_3D_QUIVER_ZTCF_LeftUpperArmMoments.m %%%
+%Generate Club Quiver Plot
+figure(318);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Elbow on Left Upper Arm Total Force Quiver Plot
+LElbowQuiver=quiver3(ZTCFQ.LEx(:,1),ZTCFQ.LEy(:,1),ZTCFQ.LEz(:,1),ZTCFQ.LForearmonLArmFGlobal(:,1),ZTCFQ.LForearmonLArmFGlobal(:,2),ZTCFQ.LForearmonLArmFGlobal(:,3));
+LElbowQuiver.LineWidth=1;
+LElbowQuiver.Color=[0 0 1];
+LElbowQuiver.AutoScaleFactor=2;
+LElbowQuiver.MaxHeadSize=0.1;
+
+%Generate Shoulder on Left Upper Arm Total Force Quiver Plot
+LSForceQuiver=quiver3(ZTCFQ.LSx(:,1),ZTCFQ.LSy(:,1),ZTCFQ.LSz(:,1),ZTCFQ.LSonLArmFGlobal(:,1),ZTCFQ.LSonLArmFGlobal(:,2),ZTCFQ.LSonLArmFGlobal(:,3));
+LSForceQuiver.LineWidth=1;
+LSForceQuiver.Color=[1 0 0];
+LSForceQuiver.MaxHeadSize=0.1;
+LSForceQuiver.AutoScaleFactor=LElbowQuiver.ScaleFactor/LSForceQuiver.ScaleFactor;
+
+%Generate Left Elbow MOF on Left Upper Arm
+LEMOFLArmQuiver=quiver3(ZTCFQ.LEx(:,1),ZTCFQ.LEy(:,1),ZTCFQ.LEz(:,1),ZTCFQ.LElbowonLArmMOFGlobal(:,1),ZTCFQ.LElbowonLArmMOFGlobal(:,2),ZTCFQ.LElbowonLArmMOFGlobal(:,3));
+LEMOFLArmQuiver.LineWidth=1;
+LEMOFLArmQuiver.Color=[0 0.75 0];
+LEMOFLArmQuiver.MaxHeadSize=0.1;
+LEMOFLArmQuiver.AutoScaleFactor=2;
+
+%Generate Left Shoulder MOF on Left Upper Arm
+LSMOFLArm=quiver3(ZTCFQ.LSx(:,1),ZTCFQ.LSy(:,1),ZTCFQ.LSz(:,1),ZTCFQ.LShoulderonLArmMOFGlobal(:,1),ZTCFQ.LShoulderonLArmMOFGlobal(:,2),ZTCFQ.LShoulderonLArmMOFGlobal(:,3));
+LSMOFLArm.LineWidth=1;
+LSMOFLArm.Color=[0 0.5 0];
+LSMOFLArm.MaxHeadSize=0.1;
+LSMOFLArm.AutoScaleFactor=LEMOFLArmQuiver.ScaleFactor/LSMOFLArm.ScaleFactor;
+
+%Generate Left Arm Quivers
+LeftArm=quiver3(ZTCFQ.LSx(:,1),ZTCFQ.LSy(:,1),ZTCFQ.LSz(:,1),ZTCFQ.LeftArmdx(:,1),ZTCFQ.LeftArmdy(:,1),ZTCFQ.LeftArmdz(:,1),0);
+LeftArm.ShowArrowHead='off';
+LeftArm.LineWidth=1;
+LeftArm.Color=[0 0 0];
+
+%Add Legend to Plot
+legend('','','','','LE Force','LS Force','LE MOF','LS MOF','');
+
+%Add a Title
+title('Moments of Force Acting on Left Upper Arm');
+subtitle('ZTCF');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - Left Upper Arm Moments');
+pause(PauseTime);
+
+%Close Figure
+close(318);
+
+%Clear Figure from Workspace
+clear LElbowQuiver;
+clear LSForceQuiver;
+clear LEMOFLArmQuiver;
+clear LSMOFLArm;
+clear LeftArm;
+clear RHForceQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_318_3D_QUIVER_ZTCF_LeftUpperArmMoments.m %%%
+
+%%% START FILE: SCRIPT_319_3D_QUIVER_ZTCF_RightUpperArmMoments.m %%%
+%Generate Club Quiver Plot
+figure(319);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Elbow on Right Upper Arm Total Force Quiver Plot
+RElbowQuiver=quiver3(ZTCFQ.REx(:,1),ZTCFQ.REy(:,1),ZTCFQ.REz(:,1),ZTCFQ.RForearmonRArmFGlobal(:,1),ZTCFQ.RForearmonRArmFGlobal(:,2),ZTCFQ.RForearmonRArmFGlobal(:,3));
+RElbowQuiver.LineWidth=1;
+RElbowQuiver.Color=[0 0 1];
+RElbowQuiver.AutoScaleFactor=2;
+RElbowQuiver.MaxHeadSize=0.1;
+
+%Generate Shoulder on Right Upper Arm Total Force Quiver Plot
+RSForceQuiver=quiver3(ZTCFQ.RSx(:,1),ZTCFQ.RSy(:,1),ZTCFQ.RSz(:,1),ZTCFQ.RSonRArmFGlobal(:,1),ZTCFQ.RSonRArmFGlobal(:,2),ZTCFQ.RSonRArmFGlobal(:,3));
+RSForceQuiver.LineWidth=1;
+RSForceQuiver.Color=[1 0 0];
+RSForceQuiver.MaxHeadSize=0.1;
+RSForceQuiver.AutoScaleFactor=RElbowQuiver.ScaleFactor/RSForceQuiver.ScaleFactor;
+
+%Generate Right Elbow MOF on Right Upper Arm
+REMOFRArmQuiver=quiver3(ZTCFQ.REx(:,1),ZTCFQ.REy(:,1),ZTCFQ.REz(:,1),ZTCFQ.RElbowonRArmMOFGlobal(:,1),ZTCFQ.RElbowonRArmMOFGlobal(:,2),ZTCFQ.RElbowonRArmMOFGlobal(:,3));
+REMOFRArmQuiver.LineWidth=1;
+REMOFRArmQuiver.Color=[0 0.75 0];
+REMOFRArmQuiver.MaxHeadSize=0.1;
+REMOFRArmQuiver.AutoScaleFactor=2;
+
+%Generate Right Shoulder MOF on Right Upper Arm
+RSMOFRArm=quiver3(ZTCFQ.RSx(:,1),ZTCFQ.RSy(:,1),ZTCFQ.RSz(:,1),ZTCFQ.RShoulderonRArmMOFGlobal(:,1),ZTCFQ.RShoulderonRArmMOFGlobal(:,2),ZTCFQ.RShoulderonRArmMOFGlobal(:,3));
+RSMOFRArm.LineWidth=1;
+RSMOFRArm.Color=[0 0.5 0];
+RSMOFRArm.MaxHeadSize=0.1;
+RSMOFRArm.AutoScaleFactor=REMOFRArmQuiver.ScaleFactor/RSMOFRArm.ScaleFactor;
+
+%Generate Right Arm Quivers
+RightArm=quiver3(ZTCFQ.RSx(:,1),ZTCFQ.RSy(:,1),ZTCFQ.RSz(:,1),ZTCFQ.RightArmdx(:,1),ZTCFQ.RightArmdy(:,1),ZTCFQ.RightArmdz(:,1),0);
+RightArm.ShowArrowHead='off';
+RightArm.LineWidth=1;
+RightArm.Color=[0 0 0];
+
+%Add Legend to Plot
+legend('','','','','RE Force','RS Force','RE MOF','RS MOF','');
+
+%Add a Title
+title('Moments of Force Acting on Right Upper Arm');
+subtitle('ZTCF');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - Right Upper Arm Moments');
+pause(PauseTime);
+
+%Close Figure
+close(319);
+
+%Clear Figure from Workspace
+clear RElbowQuiver;
+clear RSForceQuiver;
+clear REMOFRArmQuiver;
+clear RSMOFRArm;
+clear RightArm;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_319_3D_QUIVER_ZTCF_RightUpperArmMoments.m %%%
+
+%%% START FILE: SCRIPT_320_3D_QUIVER_ZTCF_LForearmMoments.m %%%
+%Generate Club Quiver Plot
+figure(320);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Club on LW Total Force Quiver Plot
+LHForceQuiver=quiver3(ZTCFQ.LWx(:,1),ZTCFQ.LWy(:,1),ZTCFQ.LWz(:,1),ZTCFQ.ClubonLWFGlobal(:,1),ZTCFQ.ClubonLWFGlobal(:,2),ZTCFQ.ClubonLWFGlobal(:,3));
+LHForceQuiver.LineWidth=1;
+LHForceQuiver.Color=[0 0 1];
+LHForceQuiver.AutoScaleFactor=2;
+LHForceQuiver.MaxHeadSize=0.1;
+
+%Generate LE Total Force on L Forearm Quiver Plot
+LEForceQuiver=quiver3(ZTCFQ.LEx(:,1),ZTCFQ.LEy(:,1),ZTCFQ.LEz(:,1),ZTCFQ.LArmonLForearmFGlobal(:,1),ZTCFQ.LArmonLForearmFGlobal(:,2),ZTCFQ.LArmonLForearmFGlobal(:,3));
+LEForceQuiver.LineWidth=1;
+LEForceQuiver.Color=[1 0 0];
+LEForceQuiver.MaxHeadSize=0.1;
+LEForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/LEForceQuiver.ScaleFactor;
+
+%Generate Left Elbow MOF on Left Forearm
+LEMOFLForearmQuiver=quiver3(ZTCFQ.LEx(:,1),ZTCFQ.LEy(:,1),ZTCFQ.LEz(:,1),ZTCFQ.LElbowonLForearmMOFGlobal(:,1),ZTCFQ.LElbowonLForearmMOFGlobal(:,2),ZTCFQ.LElbowonLForearmMOFGlobal(:,3));
+LEMOFLForearmQuiver.LineWidth=1;
+LEMOFLForearmQuiver.Color=[0 0.75 0];
+LEMOFLForearmQuiver.MaxHeadSize=0.1;
+LEMOFLForearmQuiver.AutoScaleFactor=2;
+
+%Generate Left Wrist MOF on Left Forearm
+LWristMOFLForearm=quiver3(ZTCFQ.LWx(:,1),ZTCFQ.LWy(:,1),ZTCFQ.LWz(:,1),ZTCFQ.LWristonLForearmMOFGlobal(:,1),ZTCFQ.LWristonLForearmMOFGlobal(:,2),ZTCFQ.LWristonLForearmMOFGlobal(:,3));
+LWristMOFLForearm.LineWidth=1;
+LWristMOFLForearm.Color=[0 0.5 0];
+LWristMOFLForearm.MaxHeadSize=0.1;
+LWristMOFLForearm.AutoScaleFactor=LEMOFLForearmQuiver.ScaleFactor/LWristMOFLForearm.ScaleFactor;
+
+%Generate LeftForearm Quivers
+LeftForearm=quiver3(ZTCFQ.LEx(:,1),ZTCFQ.LEy(:,1),ZTCFQ.LEz(:,1),ZTCFQ.LeftForearmdx(:,1),ZTCFQ.LeftForearmdy(:,1),ZTCFQ.LeftForearmdz(:,1),0);
+LeftForearm.ShowArrowHead='off';
+LeftForearm.LineWidth=1;
+LeftForearm.Color=[0 0 0];
+
+%Add Legend to Plot
+legend('','','','','LH Force','LE Force','LE MOF','LH MOF','');
+
+%Add a Title
+title('Moments of Force Acting on Left Forearm');
+subtitle('ZTCF');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - Left Forearm Moments');
+pause(PauseTime);
+
+%Close Figure
+close(320);
+
+%Clear Figure from Workspace
+clear LHForceQuiver;
+clear LEForceQuiver;
+clear LEMOFLForearmQuiver;
+clear LWristMOFLForearm;
+clear LeftForearm;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_320_3D_QUIVER_ZTCF_LForearmMoments.m %%%
+
+%%% START FILE: SCRIPT_321_3D_QUIVER_ZTCF_RForearmMoments.m %%%
+%Generate Club Quiver Plot
+figure(321);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate RW Total Force Quiver Plot
+RHForceQuiver=quiver3(ZTCFQ.RWx(:,1),ZTCFQ.RWy(:,1),ZTCFQ.RWz(:,1),ZTCFQ.ClubonRWFGlobal(:,1),ZTCFQ.ClubonRWFGlobal(:,2),ZTCFQ.ClubonRWFGlobal(:,3));
+RHForceQuiver.LineWidth=1;
+RHForceQuiver.Color=[0 0 1];
+RHForceQuiver.AutoScaleFactor=2;
+RHForceQuiver.MaxHeadSize=0.1;
+
+%Generate RE Total Force Quiver Plot
+REForceQuiver=quiver3(ZTCFQ.REx(:,1),ZTCFQ.REy(:,1),ZTCFQ.REz(:,1),ZTCFQ.RArmonRForearmFGlobal(:,1),ZTCFQ.RArmonRForearmFGlobal(:,2),ZTCFQ.RArmonRForearmFGlobal(:,3));
+REForceQuiver.LineWidth=1;
+REForceQuiver.Color=[1 0 0];
+REForceQuiver.MaxHeadSize=0.1;
+REForceQuiver.AutoScaleFactor=RHForceQuiver.ScaleFactor/REForceQuiver.ScaleFactor;
+
+%Generate Right Elbow MOF on Right Forearm
+REMOFLForearmQuiver=quiver3(ZTCFQ.REx(:,1),ZTCFQ.REy(:,1),ZTCFQ.REz(:,1),ZTCFQ.RElbowonRForearmMOFGlobal(:,1),ZTCFQ.RElbowonRForearmMOFGlobal(:,2),ZTCFQ.RElbowonRForearmMOFGlobal(:,3));
+REMOFLForearmQuiver.LineWidth=1;
+REMOFLForearmQuiver.Color=[0 0.75 0];
+REMOFLForearmQuiver.MaxHeadSize=0.1;
+REMOFLForearmQuiver.AutoScaleFactor=2;
+
+%Generate Right Wrist MOF on Right Forearm
+RWristMOFLForearm=quiver3(ZTCFQ.RWx(:,1),ZTCFQ.RWy(:,1),ZTCFQ.RWz(:,1),ZTCFQ.RWristonRForearmMOFGlobal(:,1),ZTCFQ.RWristonRForearmMOFGlobal(:,2),ZTCFQ.RWristonRForearmMOFGlobal(:,3));
+RWristMOFLForearm.LineWidth=1;
+RWristMOFLForearm.Color=[0 0.5 0];
+RWristMOFLForearm.MaxHeadSize=0.1;
+RWristMOFLForearm.AutoScaleFactor=REMOFLForearmQuiver.ScaleFactor/RWristMOFLForearm.ScaleFactor;
+
+%Generate Right Forearm Quivers
+RightForearm=quiver3(ZTCFQ.REx(:,1),ZTCFQ.REy(:,1),ZTCFQ.REz(:,1),ZTCFQ.RightForearmdx(:,1),ZTCFQ.RightForearmdy(:,1),ZTCFQ.RightForearmdz(:,1),0);
+RightForearm.ShowArrowHead='off';
+RightForearm.LineWidth=1;
+RightForearm.Color=[0 0 0];
+
+%Add Legend to Plot
+legend('','','','','RH Force','RE Force','RE MOF','RH MOF');
+
+%Add a Title
+title('Moments of Force Acting on Right Forearm');
+subtitle('ZTCF');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - Right Forearm Moments');
+pause(PauseTime);
+
+%Close Figure
+close(321);
+
+%Clear Figure from Workspace
+clear RHForceQuiver;
+clear REForceQuiver;
+clear REMOFLForearmQuiver;
+clear RWristMOFLForearm;
+clear RightForearm;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_321_3D_QUIVER_ZTCF_RForearmMoments.m %%%
+
+%%% START FILE: SCRIPT_322_3D_PLOT_ZTCF_ForceAlongHandPath.m %%%
+figure(322);
+plot(ZTCFQ.Time,ZTCFQ.ForceAlongHandPath);
+xlabel('Time (s)');
+ylabel('Force (N)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Force Along Hand Path');
+legend('Location','southeast');
+
+%Add a Title
+title('Force Along Hand Path');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Force Along Hand Path');
+pause(PauseTime);
+
+%Close Figure
+close(322);
+
+%%% END FILE: SCRIPT_322_3D_PLOT_ZTCF_ForceAlongHandPath.m %%%
+
+%%% START FILE: SCRIPT_323_3D_PLOT_ZTCF_CHSandHandSpeed.m %%%
+figure(323);
+hold on;
+plot(ZTCFQ.Time,ZTCFQ.("CHS (mph)"));
+plot(ZTCFQ.Time,ZTCFQ.("Hand Speed (mph)"));
+xlabel('Time (s)');
+ylabel('Speed (mph)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Clubhead Speed (mph)','Hand Speed (mph)');
+legend('Location','southeast');
+
+%Add a Title
+title('Clubhead and Hand Speed');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - CHS and Hand Speed');
+pause(PauseTime);
+
+%Close Figure
+close(323);
+
+%%% END FILE: SCRIPT_323_3D_PLOT_ZTCF_CHSandHandSpeed.m %%%
+
+%%% START FILE: SCRIPT_325_3D_PLOT_ZTCF_LHRHForceAlongHandPath.m %%%
+figure(325);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.LHForceAlongHandPath);
+plot(ZTCFQ.Time,ZTCFQ.RHForceAlongHandPath);
+plot(ZTCFQ.Time,ZTCFQ.ForceAlongHandPath);
+
+ylabel('Force (N)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Force on Left Hand Path','RH Force on Right Hand Path','Net Force Along MP Hand Path');
+legend('Location','southeast');
+
+%Add a Title
+title('Force Along Hand Path');
+subtitle('ZTCF');
+%subtitle('Left Hand, Right Hand, Total');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Force Along Hand Path - LH RH Total');
+pause(PauseTime);
+
+%Close Figure
+close(325);
+
+%%% END FILE: SCRIPT_325_3D_PLOT_ZTCF_LHRHForceAlongHandPath.m %%%
+
+%%% START FILE: SCRIPT_326_3D_PLOT_ZTCF_LinearImpulse.m %%%
+figure(326);
+plot(ZTCFQ.Time,ZTCFQ.LinearImpulseonClub);
+xlabel('Time (s)');
+ylabel('Impulse (Ns)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Linear Impulse');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Impulse');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Linear Impulse');
+pause(PauseTime);
+
+%Close Figure
+close(326);
+
+%%% END FILE: SCRIPT_326_3D_PLOT_ZTCF_LinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_327_3D_PLOT_ZTCF_LinearWork.m %%%
+figure(327);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.LHLinearWorkonClub);
+plot(ZTCFQ.Time,ZTCFQ.RHLinearWorkonClub);
+plot(ZTCFQ.Time,ZTCFQ.LinearWorkonClub);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Work','RH Linear Work','Net Force Linear Work (midpoint)');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Work');
+subtitle('ZTCF');
+%subtitle('Left Hand, Right Hand, Total');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Linear Work');
+pause(PauseTime);
+
+%Close Figure
+close(327);
+
+%%% END FILE: SCRIPT_327_3D_PLOT_ZTCF_LinearWork.m %%%
+
+%%% START FILE: SCRIPT_328_3D_PLOT_ZTCF_LinearImpulse.m %%%
+figure(328);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.LHLinearImpulseonClub);
+plot(ZTCFQ.Time,ZTCFQ.RHLinearImpulseonClub);
+plot(ZTCFQ.Time,ZTCFQ.LinearImpulseonClub);
+
+ylabel('Linear Impulse (kgm/s)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Impulse','RH Linear Impulse','Net Force Linear Impulse (midpoint)');
+legend('Location','southeast');
+
+%Add a Title
+title('Linear Impulse');
+subtitle('ZTCF');
+%subtitle('Left Hand, Right Hand, Total');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Linear Impulse LH,RH,Total');
+pause(PauseTime);
+
+%Close Figure
+close(328);
+
+%%% END FILE: SCRIPT_328_3D_PLOT_ZTCF_LinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_329_3D_PLOT_ZTCF_EquivalentCoupleandMOF.m %%%
+figure(329);
+hold on;
+
+EQMPLOCAL=ZTCFQ.EquivalentMidpointCoupleLocal(:,3);
+MPMOFLOCAL=ZTCFQ.MPMOFonClubLocal(:,3);
+SUMOFMOMENTSLOCAL=ZTCFQ.SumofMomentsonClubLocal(:,3);
+
+plot(ZTCFQ.Time,EQMPLOCAL);
+plot(ZTCFQ.Time,MPMOFLOCAL);
+plot(ZTCFQ.Time,SUMOFMOMENTSLOCAL);
+
+clear("EQMPLOCAL");
+clear("MPMOFLOCAL");
+clear("SUMOFMOMENTSLOCAL");
+
+ylabel('Torque (Nm)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Equivalent Midpoint Couple','Total Force on Midpoint MOF','Sum of Moments');
+legend('Location','southeast');
+
+%Add a Title
+title('Equivalent Couple, Moment of Force, Sum of Moments');
+subtitle('ZTCF - Grip Reference Frame');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Equivalent Couple and MOF');
+pause(PauseTime);
+
+%Close Figure
+close(329);
+
+%%% END FILE: SCRIPT_329_3D_PLOT_ZTCF_EquivalentCoupleandMOF.m %%%
+
+%%% START FILE: SCRIPT_330_3D_PLOT_ZTCF_LSWork.m %%%
+figure(330);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.LSLinearWorkonArm);
+plot(ZTCFQ.Time,ZTCFQ.LSAngularWorkonArm);
+plot(ZTCFQ.Time,ZTCFQ.TotalLSWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Work','LS Angular Work','LS Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Shoulder Work on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Left Shoulder Work');
+pause(PauseTime);
+
+%Close Figure
+close(330);
+
+%%% END FILE: SCRIPT_330_3D_PLOT_ZTCF_LSWork.m %%%
+
+%%% START FILE: SCRIPT_331_3D_PLOT_ZTCF_LSPower.m %%%
+figure(931);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.LSonArmLinearPower);
+plot(ZTCFQ.Time,ZTCFQ.LSonArmAngularPower);
+plot(ZTCFQ.Time,ZTCFQ.TotalLSPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LS Linear Power','LS Angular Power','LS Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Shoulder Power on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Left Shoulder Power');
+pause(PauseTime);
+
+%Close Figure
+close(931);
+
+%%% END FILE: SCRIPT_331_3D_PLOT_ZTCF_LSPower.m %%%
+
+%%% START FILE: SCRIPT_332_3D_PLOT_ZTCF_RSWork.m %%%
+figure(332);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.RSLinearWorkonArm);
+plot(ZTCFQ.Time,ZTCFQ.RSAngularWorkonArm);
+plot(ZTCFQ.Time,ZTCFQ.TotalRSWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RS Linear Work','RS Angular Work','RS Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Shoulder Work on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Right Shoulder Work');
+pause(PauseTime);
+
+%Close Figure
+close(332);
+
+%%% END FILE: SCRIPT_332_3D_PLOT_ZTCF_RSWork.m %%%
+
+%%% START FILE: SCRIPT_333_3D_PLOT_ZTCF_RSPower.m %%%
+figure(333);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.RSonArmLinearPower);
+plot(ZTCFQ.Time,ZTCFQ.RSonArmAngularPower);
+plot(ZTCFQ.Time,ZTCFQ.TotalRSPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RS Linear Power','RS Angular Power','RS Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Shoulder Power on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Right Shoulder Power');
+pause(PauseTime);
+
+%Close Figure
+close(333);
+
+%%% END FILE: SCRIPT_333_3D_PLOT_ZTCF_RSPower.m %%%
+
+%%% START FILE: SCRIPT_334_3D_PLOT_ZTCF_LEWork.m %%%
+figure(334);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.LELinearWorkonForearm);
+plot(ZTCFQ.Time,ZTCFQ.LEAngularWorkonForearm);
+plot(ZTCFQ.Time,ZTCFQ.TotalLEWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LE Linear Work','LE Angular Work','LE Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Elbow Work on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Left Elbow Work');
+pause(PauseTime);
+
+%Close Figure
+close(334);
+
+%%% END FILE: SCRIPT_334_3D_PLOT_ZTCF_LEWork.m %%%
+
+%%% START FILE: SCRIPT_335_3D_PLOT_ZTCF_LEPower.m %%%
+figure(335);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.LEonForearmLinearPower);
+plot(ZTCFQ.Time,ZTCFQ.LEonForearmAngularPower);
+plot(ZTCFQ.Time,ZTCFQ.TotalLEPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LE Linear Power','LE Angular Power','LE Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Elbow Power on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Left Elbow Power');
+pause(PauseTime);
+
+%Close Figure
+close(335);
+
+%%% END FILE: SCRIPT_335_3D_PLOT_ZTCF_LEPower.m %%%
+
+%%% START FILE: SCRIPT_336_3D_PLOT_ZTCF_REWork.m %%%
+figure(336);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.RELinearWorkonForearm);
+plot(ZTCFQ.Time,ZTCFQ.REAngularWorkonForearm);
+plot(ZTCFQ.Time,ZTCFQ.TotalREWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RE Linear Work','RE Angular Work','RE Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Elbow Work on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Right Elbow Work');
+pause(PauseTime);
+
+%Close Figure
+close(336);
+
+%%% END FILE: SCRIPT_336_3D_PLOT_ZTCF_REWork.m %%%
+
+%%% START FILE: SCRIPT_337_3D_PLOT_ZTCF_REPower.m %%%
+figure(337);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.REonForearmLinearPower);
+plot(ZTCFQ.Time,ZTCFQ.REonForearmAngularPower);
+plot(ZTCFQ.Time,ZTCFQ.TotalREPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RE Linear Power','RE Angular Power','RE Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Elbow Power on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Right Elbow Power');
+pause(PauseTime);
+
+%Close Figure
+close(337);
+
+%%% END FILE: SCRIPT_337_3D_PLOT_ZTCF_REPower.m %%%
+
+%%% START FILE: SCRIPT_338_3D_PLOT_ZTCF_LHWork.m %%%
+figure(338);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.LHLinearWorkonClub);
+plot(ZTCFQ.Time,ZTCFQ.LHAngularWorkonClub);
+plot(ZTCFQ.Time,ZTCFQ.TotalLHWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Work','LH Angular Work','LH Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Wrist Work on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Left Wrist Work');
+pause(PauseTime);
+
+%Close Figure
+close(338);
+
+%%% END FILE: SCRIPT_338_3D_PLOT_ZTCF_LHWork.m %%%
+
+%%% START FILE: SCRIPT_339_3D_PLOT_ZTCF_LHPower.m %%%
+figure(339);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.LHonClubLinearPower);
+plot(ZTCFQ.Time,ZTCFQ.LHonClubAngularPower);
+plot(ZTCFQ.Time,ZTCFQ.TotalLHPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('LH Linear Power','LH Angular Power','LH Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Left Wrist Power on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Left Wrist Power');
+pause(PauseTime);
+
+%Close Figure
+close(339);
+
+%%% END FILE: SCRIPT_339_3D_PLOT_ZTCF_LHPower.m %%%
+
+%%% START FILE: SCRIPT_340_3D_PLOT_ZTCF_RHWork.m %%%
+figure(340);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.RHLinearWorkonClub);
+plot(ZTCFQ.Time,ZTCFQ.RHAngularWorkonClub);
+plot(ZTCFQ.Time,ZTCFQ.TotalRHWork);
+
+ylabel('Work (J)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RH Linear Work','RH Angular Work','RH Total Work');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Wrist Work on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Right Wrist Work');
+pause(PauseTime);
+
+%Close Figure
+close(340);
+
+%%% END FILE: SCRIPT_340_3D_PLOT_ZTCF_RHWork.m %%%
+
+%%% START FILE: SCRIPT_341_3D_PLOT_ZTCF_RHPower.m %%%
+figure(341);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.RHonClubLinearPower);
+plot(ZTCFQ.Time,ZTCFQ.RHonClubAngularPower);
+plot(ZTCFQ.Time,ZTCFQ.TotalRHPower);
+
+ylabel('Power (W)');
+grid 'on';
+
+%Add Legend to Plot
+legend('RH Linear Power','RH Angular Power','RH Total Power');
+legend('Location','southeast');
+
+%Add a Title
+title('Right Wrist Power on Distal Segment');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Right Wrist Power');
+pause(PauseTime);
+
+%Close Figure
+close(341);
+
+%%% END FILE: SCRIPT_341_3D_PLOT_ZTCF_RHPower.m %%%
+
+%%% START FILE: SCRIPT_342_3D_QUIVER_ZTCF_LHRHLinearImpulse.m %%%
+%Generate Club Quiver Plot
+figure(342);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Left Hand Linear Impulse Quiver Plot
+LHLinearImpulseQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHLinearImpulseonClub(:,1),ZTCFQ.LHLinearImpulseonClub(:,2),ZTCFQ.LHLinearImpulseonClub(:,3));
+LHLinearImpulseQuiver.LineWidth=1;
+LHLinearImpulseQuiver.Color=[0 1 0];
+LHLinearImpulseQuiver.MaxHeadSize=0.1;
+LHLinearImpulseQuiver.AutoScaleFactor=3;
+
+%Generate Right Hand Linear Impulse Quiver Plot
+RHLinearImpulseQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.RHLinearImpulseonClub(:,1),ZTCFQ.RHLinearImpulseonClub(:,2),ZTCFQ.RHLinearImpulseonClub(:,3));
+RHLinearImpulseQuiver.LineWidth=1;
+RHLinearImpulseQuiver.Color=[.8 .2 0];
+RHLinearImpulseQuiver.MaxHeadSize=0.1;
+%Correct scaling on Linear Impulses so that LH and RH are scaled the same.
+RHLinearImpulseQuiver.AutoScaleFactor=LHLinearImpulseQuiver.ScaleFactor/RHLinearImpulseQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH Linear Impulse','RH Linear Impulse');
+
+%Add a Title
+title('LH and RH Linear Impulse on Club');
+subtitle('ZTCF');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - LHRH Linear Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(342);
+
+%Clear Figure from Workspace
+clear LHLinearImpulseQuiver;
+clear RHLinearImpulseQuiver;
+clear ZTCFLHLinearImpulseQuiver;
+clear ZTCFRHLinearImpulseQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_342_3D_QUIVER_ZTCF_LHRHLinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_343_3D_QUIVER_ZTCF_LHRH_BaseData_AngularImpulse.m %%%
+%Generate Club Quiver Plot
+figure(343);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Left Hand Angular Impulse Quiver Plot
+LHAngularImpulseQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHAngularImpulseonClub(:,1),ZTCFQ.LHAngularImpulseonClub(:,2),ZTCFQ.LHAngularImpulseonClub(:,3));
+LHAngularImpulseQuiver.LineWidth=1;
+LHAngularImpulseQuiver.Color=[0 1 0];
+LHAngularImpulseQuiver.MaxHeadSize=0.1;
+LHAngularImpulseQuiver.AutoScaleFactor=3;
+
+%Generate Right Hand Angular Impulse Quiver Plot
+RHAngularImpulseQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.RHAngularImpulseonClub(:,1),ZTCFQ.RHAngularImpulseonClub(:,2),ZTCFQ.RHAngularImpulseonClub(:,3));
+RHAngularImpulseQuiver.LineWidth=1;
+RHAngularImpulseQuiver.Color=[.8 .2 0];
+RHAngularImpulseQuiver.MaxHeadSize=0.1;
+%Correct scaling on Angular Impulses so that LH and RH are scaled the same.
+RHAngularImpulseQuiver.AutoScaleFactor=LHAngularImpulseQuiver.ScaleFactor/RHAngularImpulseQuiver.ScaleFactor;
+
+
+%Add Legend to Plot
+legend('','','','','LH Angular Impulse','RH Angular Impulse');
+
+%Add a Title
+title('LH and RH Angular Impulse on Club');
+subtitle('ZTCF');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - LHRH Angular Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(343);
+
+%Clear Figure from Workspace
+clear LHAngularImpulseQuiver;
+clear RHAngularImpulseQuiver;
+clear ZTCFLHAngularImpulseQuiver;
+clear ZTCFRHAngularImpulseQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_343_3D_QUIVER_ZTCF_LHRH_BaseData_AngularImpulse.m %%%
+
+%%% START FILE: SCRIPT_344_3D_QUIVER_ZTCF_TotalLinearImpulse.m %%%
+%Generate Club Quiver Plot
+figure(344);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate Total Linear Impulse on Club Quiver Plot
+TotalLinearImpulse=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.LinearImpulseonClub(:,1),ZTCFQ.LinearImpulseonClub(:,2),ZTCFQ.LinearImpulseonClub(:,3));
+TotalLinearImpulse.LineWidth=1;
+TotalLinearImpulse.Color=[0 1 0];
+TotalLinearImpulse.MaxHeadSize=0.1;
+TotalLinearImpulse.AutoScaleFactor=3;
+
+
+%Add Legend to Plot
+legend('','','','','Total Linear Impulse');
+
+%Add a Title
+title('Total Linear Impulse on Club');
+subtitle('ZTCF');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - Total Linear Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(344);
+
+%Clear Figure from Workspace
+clear TotalLinearImpulse;
+clear MPSumofMomentsQuiver;
+clear ZTCFTotalLinearImpulse;
+clear ZTCFMPSumofMomentsQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_344_3D_QUIVER_ZTCF_TotalLinearImpulse.m %%%
+
+%%% START FILE: SCRIPT_345_3D_QUIVER_ZTCF_TotalAngularImpulse.m %%%
+%Generate Club Quiver Plot
+figure(345);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Create Total Angular Impulse Array by Adding LH and RH Angular Impulse
+TotalAngularImpulse=ZTCFQ.LHAngularImpulseonClub+ZTCFQ.RHAngularImpulseonClub;
+
+%Generate Total Hand Angular Impulse Quiver Plot
+AngularImpulseQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),TotalAngularImpulse(:,1),TotalAngularImpulse(:,2),TotalAngularImpulse(:,3));
+AngularImpulseQuiver.LineWidth=1;
+AngularImpulseQuiver.Color=[0 1 0];
+AngularImpulseQuiver.MaxHeadSize=0.1;
+AngularImpulseQuiver.AutoScaleFactor=3;
+
+%Add Legend to Plot
+legend('','','','','Total Angular Impulse');
+
+%Add a Title
+title('Total Angular Impulse on Club');
+subtitle('ZTCF');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - Total Angular Impulse on Club');
+pause(PauseTime);
+
+%Close Figure
+close(345);
+
+%Clear Figure from Workspace
+clear AngularImpulseQuiver;
+clear RHAngularImpulseQuiver;
+clear ZTCFAngularImpulseQuiver;
+clear ZTCFRHAngularImpulseQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+clear TotalAngularImpulse;
+
+%%% END FILE: SCRIPT_345_3D_QUIVER_ZTCF_TotalAngularImpulse.m %%%
+
+%%% START FILE: SCRIPT_346_3D_QUIVER_ZTCF_NetForceCoupleShaftsAdded.m %%%
+%Generate Club Quiver Plot
+figure(346);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+run SCRIPT_ZTCF_ShaftandGripatMaxCHSandAlphaReversal.m;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.TotalHandForceGlobal(:,1),ZTCFQ.TotalHandForceGlobal(:,2),ZTCFQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+NetForceQuiver.AutoScaleFactor=3;
+
+%Generate Equivalent Couple Quiver Plot
+NetCoupleQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.EquivalentMidpointCoupleGlobal(:,1),ZTCFQ.EquivalentMidpointCoupleGlobal(:,2),ZTCFQ.EquivalentMidpointCoupleGlobal(:,3));
+NetCoupleQuiver.LineWidth=1;
+NetCoupleQuiver.Color=[.8 .2 0];
+NetCoupleQuiver.MaxHeadSize=0.1;
+NetCoupleQuiver.AutoScaleFactor=3;
+
+
+%Add Legend to Plot
+legend('','','','','','','','','Net Force','Equivalent MP Couple');
+
+%Add a Title
+title('Net Force and Equivalent MP Couple');
+subtitle('ZTCF');
+
+%Set View
+view(-0.0885,-10.6789);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - Net Force and Equivalent MP Couple');
+pause(PauseTime);
+
+
+%Close Figure
+close(346);
+
+%Clear Figure from Workspace
+clear NetForceQuiver;
+clear NetCoupleQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+clear GripZTCFAlpha;
+clear GripMaxCHS;
+clear ShaftZTCFAlpha;
+clear ShaftMaxCHS;
+
+%%% END FILE: SCRIPT_346_3D_QUIVER_ZTCF_NetForceCoupleShaftsAdded.m %%%
+
+%%% START FILE: SCRIPT_348_3D_PLOT_ZTCF_LocalHandForces.m %%%
+figure(348);
+hold on;
+
+plot(ZTCFQ.Time(:,1),ZTCFQ.LHonClubForceLocal(:,1));
+plot(ZTCFQ.Time(:,1),ZTCFQ.LHonClubForceLocal(:,2));
+plot(ZTCFQ.Time(:,1),ZTCFQ.LHonClubForceLocal(:,3));
+
+plot(ZTCFQ.Time(:,1),ZTCFQ.RHonClubForceLocal(:,1));
+plot(ZTCFQ.Time(:,1),ZTCFQ.RHonClubForceLocal(:,2));
+plot(ZTCFQ.Time(:,1),ZTCFQ.RHonClubForceLocal(:,3));
+
+
+
+ylabel('Force (N)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Left Hand X','Left Hand Y','Left Hand Z','Right Hand X','Right Hand Y','Right Hand Z');
+legend('Location','southeast');
+
+%Add a Title
+title('Local Hand Forces on Club');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Local Hand Forces');
+pause(PauseTime);
+
+%Close Figure
+close(348);
+
+%%% END FILE: SCRIPT_348_3D_PLOT_ZTCF_LocalHandForces.m %%%
+
+%%% START FILE: SCRIPT_349_3D_QUIVER_ZTCF_LHRHMoments.m %%%
+%Generate Club Quiver Plot
+figure(349);
+run SCRIPT_QuiverClubandShaftBaseData.m;
+
+%Generate LH MOF Quiver Plot
+LHMOFQuiver=quiver3(ZTCFQ.LHx(:,1),ZTCFQ.LHy(:,1),ZTCFQ.LHz(:,1),ZTCFQ.LHMOFonClubGlobal(:,1),ZTCFQ.LHMOFonClubGlobal(:,2),ZTCFQ.LHMOFonClubGlobal(:,3));
+LHMOFQuiver.LineWidth=1;
+LHMOFQuiver.Color=[0 0.5 0];
+LHMOFQuiver.MaxHeadSize=0.1;
+LHMOFQuiver.AutoScaleFactor=10;
+
+%Generate RH MOF Quiver Plot
+RHMOFQuiver=quiver3(ZTCFQ.RHx(:,1),ZTCFQ.RHy(:,1),ZTCFQ.RHz(:,1),ZTCFQ.RHMOFonClubGlobal(:,1),ZTCFQ.RHMOFonClubGlobal(:,2),ZTCFQ.RHMOFonClubGlobal(:,3));
+RHMOFQuiver.LineWidth=1;
+RHMOFQuiver.Color=[0.5 0 0];
+RHMOFQuiver.MaxHeadSize=0.1;
+%Correct scaling so that all are scaled the same.
+RHMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/RHMOFQuiver.ScaleFactor;
+
+%Generate Total MOF Quiver Plot
+% TotalMOFQuiver=quiver3(ZTCFQ.MPx(:,1),ZTCFQ.MPy(:,1),ZTCFQ.MPz(:,1),ZTCFQ.MPMOFonClubGlobal(:,1),ZTCFQ.MPMOFonClubGlobal(:,2),ZTCFQ.MPMOFonClubGlobal(:,3));
+% TotalMOFQuiver.LineWidth=1;
+% TotalMOFQuiver.Color=[0 0 0.5];
+% TotalMOFQuiver.MaxHeadSize=0.1;
+% %Correct scaling so that all are scaled the same.
+% TotalMOFQuiver.AutoScaleFactor=LHMOFQuiver.ScaleFactor/TotalMOFQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH MOF','RH MOF');
+
+%Add a Title
+title('LHRH Moments of Force on Club');
+subtitle('ZTCF');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('ZTCF Quiver Plots/ZTCF_Quiver Plot - LHRH Moments of Force');
+pause(PauseTime);
+
+%Close Figure
+close(349);
+
+%Clear Figure from Workspace
+clear LHMOFQuiver;
+clear RHMOFQuiver;
+clear TotalMOFQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+
+%%% END FILE: SCRIPT_349_3D_QUIVER_ZTCF_LHRHMoments.m %%%
+
+%%% START FILE: SCRIPT_350_3D_PLOT_ZTCF_TorqueInputvsTorqueOutput.m %%%
+figure(350);
+hold on;
+
+plot(ZTCFQ.Time,ZTCFQ.HipConstraintTorqueX);
+plot(ZTCFQ.Time,ZTCFQ.HipConstraintTorqueY);
+plot(ZTCFQ.Time,ZTCFQ.HipConstraintTorqueZ);
+
+plot(ZTCFQ.Time,ZTCFQ.TorsoConstraintTorqueX);
+plot(ZTCFQ.Time,ZTCFQ.TorsoConstraintTorqueY);
+plot(ZTCFQ.Time,ZTCFQ.TorsoConstraintTorqueZ);
+
+plot(ZTCFQ.Time,ZTCFQ.SpineConstraintTorqueX);
+plot(ZTCFQ.Time,ZTCFQ.SpineConstraintTorqueY);
+plot(ZTCFQ.Time,ZTCFQ.SpineConstraintTorqueZ);
+
+plot(ZTCFQ.Time,ZTCFQ.LScapConstraintTorqueX);
+plot(ZTCFQ.Time,ZTCFQ.LScapConstraintTorqueY);
+plot(ZTCFQ.Time,ZTCFQ.LScapConstraintTorqueZ);
+
+plot(ZTCFQ.Time,ZTCFQ.RScapConstraintTorqueX);
+plot(ZTCFQ.Time,ZTCFQ.RScapConstraintTorqueY);
+plot(ZTCFQ.Time,ZTCFQ.RScapConstraintTorqueZ);
+
+plot(ZTCFQ.Time,ZTCFQ.LSConstraintTorqueX);
+plot(ZTCFQ.Time,ZTCFQ.LSConstraintTorqueY);
+plot(ZTCFQ.Time,ZTCFQ.LSConstraintTorqueZ);
+
+plot(ZTCFQ.Time,ZTCFQ.RSConstraintTorqueX);
+plot(ZTCFQ.Time,ZTCFQ.RSConstraintTorqueY);
+plot(ZTCFQ.Time,ZTCFQ.RSConstraintTorqueZ);
+
+plot(ZTCFQ.Time,ZTCFQ.LEConstraintTorqueX);
+plot(ZTCFQ.Time,ZTCFQ.LEConstraintTorqueY);
+plot(ZTCFQ.Time,ZTCFQ.LEConstraintTorqueZ);
+
+plot(ZTCFQ.Time,ZTCFQ.REConstraintTorqueX);
+plot(ZTCFQ.Time,ZTCFQ.REConstraintTorqueY);
+plot(ZTCFQ.Time,ZTCFQ.REConstraintTorqueZ);
+
+
+plot(ZTCFQ.Time,ZTCFQ.LFConstraintTorqueX);
+plot(ZTCFQ.Time,ZTCFQ.LFConstraintTorqueY);
+plot(ZTCFQ.Time,ZTCFQ.LFConstraintTorqueZ);
+
+plot(ZTCFQ.Time,ZTCFQ.RFConstraintTorqueX);
+plot(ZTCFQ.Time,ZTCFQ.RFConstraintTorqueY);
+plot(ZTCFQ.Time,ZTCFQ.RFConstraintTorqueZ);
+
+plot(ZTCFQ.Time,ZTCFQ.LWConstraintTorqueX);
+plot(ZTCFQ.Time,ZTCFQ.LWConstraintTorqueY);
+plot(ZTCFQ.Time,ZTCFQ.LWConstraintTorqueZ);
+
+plot(ZTCFQ.Time,ZTCFQ.RWConstraintTorqueX);
+plot(ZTCFQ.Time,ZTCFQ.RWConstraintTorqueY);
+plot(ZTCFQ.Time,ZTCFQ.RWConstraintTorqueZ);
+
+
+ylabel('Torque (Nm)');
+grid 'on';
+
+%Add Legend to Plot
+legend('Hip Constraint Torque X','Hip Constraint Torque Y','Hip Constraint Torque Z',...
+    'Torso Constraint Torque X','Torso Constraint Torque Y','Torso Constraint Torque Z',...
+    'Spine Constraint Torque X','Spine Constraint Torque Y','Spine Constraint Torque Z',...
+    'LScap Constraint Torque X','LScap Constraint Torque Y','LScap Constraint Torque Z',...
+    'RScap Constraint Torque X','RScap Constraint Torque Y','RScap Constraint Torque Z',...
+    'LS Constraint Torque X','LS Constraint Torque Y','LS Constraint Torque Z',...
+    'RS Constraint Torque X','RS Constraint Torque Y','RS Constraint Torque Z',...
+    'LE Constraint Torque X','LE Constraint Torque Y','LE Constraint Torque Z',...
+    'RE Constraint Torque X','RE Constraint Torque Y','RE Constraint Torque Z',...
+    'LF Constraint Torque X','LF Constraint Torque Y','LF Constraint Torque Z',...
+    'RF Constraint Torque X','RF Constraint Torque Y','RF Constraint Torque Z',...
+    'LW Constraint Torque X','LW Constraint Torque Y','LW Constraint Torque Z',...
+    'RW Constraint Torque X','RW Constraint Torque Y','RW Constraint Torque Z');
+
+legend('Location','southeast');
+
+%Add a Title
+title('Joint Torque Inputs');
+subtitle('ZTCF');
+
+%Save Figure
+savefig('ZTCF Charts/ZTCF_Plot - Joint Torque Inputs');
+pause(PauseTime);
+
+%Close Figure
+close(350);
+
+%%% END FILE: SCRIPT_350_3D_PLOT_ZTCF_TorqueInputvsTorqueOutput.m %%%
+
+%%% START FILE: SCRIPT_QuiverBodyData.m %%%
+%Reads from a Table named ZTCF in main workspace Generated from the Quivers
+%Plots tab on the main worksheets.
+
+%Generate LeftForearm Quivers
+LeftForearm=quiver3(ZTCFQ.LEx(:,1),ZTCFQ.LEy(:,1),ZTCFQ.LEz(:,1),ZTCFQ.LeftForearmdx(:,1),ZTCFQ.LeftForearmdy(:,1),ZTCFQ.LeftForearmdz(:,1),0);
+LeftForearm.ShowArrowHead='off';
+LeftForearm.LineWidth=1;
+LeftForearm.Color=[0 0 0.5];
+hold on;
+
+%Generate Right Forearm Quivers
+RightForearm=quiver3(ZTCFQ.REx(:,1),ZTCFQ.REy(:,1),ZTCFQ.REz(:,1),ZTCFQ.RightForearmdx(:,1),ZTCFQ.RightForearmdy(:,1),ZTCFQ.RightForearmdz(:,1),0);
+RightForearm.ShowArrowHead='off';
+RightForearm.LineWidth=1;
+RightForearm.Color=[0 0.5 0];
+
+%Generate Left Arm Quivers
+LeftArm=quiver3(ZTCFQ.LSx(:,1),ZTCFQ.LSy(:,1),ZTCFQ.LSz(:,1),ZTCFQ.LeftArmdx(:,1),ZTCFQ.LeftArmdy(:,1),ZTCFQ.LeftArmdz(:,1),0);
+LeftArm.ShowArrowHead='off';
+LeftArm.LineWidth=1;
+LeftArm.Color=[0 0 0.5];
+
+%Generate Right Arm Quivers
+RightArm=quiver3(ZTCFQ.RSx(:,1),ZTCFQ.RSy(:,1),ZTCFQ.RSz(:,1),ZTCFQ.RightArmdx(:,1),ZTCFQ.RightArmdy(:,1),ZTCFQ.RightArmdz(:,1),0);
+RightArm.ShowArrowHead='off';
+RightArm.LineWidth=1;
+RightArm.Color=[0 0.5 0];
+
+%Generate Left Shoulder Quivers
+LeftShoulder=quiver3(ZTCFQ.HUBx(:,1),ZTCFQ.HUBy(:,1),ZTCFQ.HUBz(:,1),ZTCFQ.LeftShoulderdx(:,1),ZTCFQ.LeftShoulderdy(:,1),ZTCFQ.LeftShoulderdz(:,1),0);
+LeftShoulder.ShowArrowHead='off';
+LeftShoulder.LineWidth=1;
+LeftShoulder.Color=[0 0 0.5];
+
+%Generate Right Shoulder Quivers
+RightShoulder=quiver3(ZTCFQ.HUBx(:,1),ZTCFQ.HUBy(:,1),ZTCFQ.HUBz(:,1),ZTCFQ.RightShoulderdx(:,1),ZTCFQ.RightShoulderdy(:,1),ZTCF.RightShoulderdz(:,1),0);
+RightShoulder.ShowArrowHead='off';
+RightShoulder.LineWidth=1;
+RightShoulder.Color=[0 0.5 0];
+
+%%% END FILE: SCRIPT_QuiverBodyData.m %%%
+
+%%% START FILE: SCRIPT_QuiverBodyZTCF.m %%%
+%Reads from a Table named ZTCF in main workspace Generated from the Quivers
+%Plots tab on the main worksheets.
+
+%Generate LeftForearm Quivers
+LeftForearm=quiver3(ZTCFQ.LEx(:,1),ZTCFQ.LEy(:,1),ZTCFQ.LEz(:,1),ZTCFQ.LeftForearmdx(:,1),ZTCFQ.LeftForearmdy(:,1),ZTCFQ.LeftForearmdz(:,1),0);
+LeftForearm.ShowArrowHead='off';
+LeftForearm.LineWidth=1;
+LeftForearm.Color=[0 0 0.5];
+hold on;
+
+%Generate Right Forearm Quivers
+RightForearm=quiver3(ZTCFQ.REx(:,1),ZTCFQ.REy(:,1),ZTCFQ.REz(:,1),ZTCFQ.RightForearmdx(:,1),ZTCFQ.RightForearmdy(:,1),ZTCFQ.RightForearmdz(:,1),0);
+RightForearm.ShowArrowHead='off';
+RightForearm.LineWidth=1;
+RightForearm.Color=[0 0.5 0];
+
+%Generate Left Arm Quivers
+LeftArm=quiver3(ZTCFQ.LSx(:,1),ZTCFQ.LSy(:,1),ZTCFQ.LSz(:,1),ZTCFQ.LeftArmdx(:,1),ZTCFQ.LeftArmdy(:,1),ZTCFQ.LeftArmdz(:,1),0);
+LeftArm.ShowArrowHead='off';
+LeftArm.LineWidth=1;
+LeftArm.Color=[0 0 0.5];
+
+%Generate Right Arm Quivers
+RightArm=quiver3(ZTCFQ.RSx(:,1),ZTCFQ.RSy(:,1),ZTCFQ.RSz(:,1),ZTCFQ.RightArmdx(:,1),ZTCFQ.RightArmdy(:,1),ZTCFQ.RightArmdz(:,1),0);
+RightArm.ShowArrowHead='off';
+RightArm.LineWidth=1;
+RightArm.Color=[0 0.5 0];
+
+%Generate Left Shoulder Quivers
+LeftShoulder=quiver3(ZTCFQ.HUBx(:,1),ZTCFQ.HUBy(:,1),ZTCFQ.HUBz(:,1),ZTCFQ.LeftShoulderdx(:,1),ZTCFQ.LeftShoulderdy(:,1),ZTCFQ.LeftShoulderdz(:,1),0);
+LeftShoulder.ShowArrowHead='off';
+LeftShoulder.LineWidth=1;
+LeftShoulder.Color=[0 0 0.5];
+
+%Generate Right Shoulder Quivers
+RightShoulder=quiver3(ZTCFQ.HUBx(:,1),ZTCFQ.HUBy(:,1),ZTCFQ.HUBz(:,1),ZTCFQ.RightShoulderdx(:,1),ZTCFQ.RightShoulderdy(:,1),ZTCFQ.RightShoulderdz(:,1),0);
+RightShoulder.ShowArrowHead='off';
+RightShoulder.LineWidth=1;
+RightShoulder.Color=[0 0.5 0];
+
+%%% END FILE: SCRIPT_QuiverBodyZTCF.m %%%
+
+%%% START FILE: SCRIPT_QuiverClubCOMDotsZTCF.m %%%
+COMDots=quiver3(ZTCFQ.ClubCOM(:,1),ZTCFQ.ClubCOM(:,2),ZTCFQ.ClubCOM(:,3),ZTCFQ.ClubCOM(:,1),ZTCFQ.ClubCOM(:,2),ZTCFQ.ClubCOM(:,3));
+COMDots.AutoScaleFactor=0.00001;
+COMDots.ShowArrowHead='off';
+COMDots.Marker='o';
+
+%%% END FILE: SCRIPT_QuiverClubCOMDotsZTCF.m %%%
+
+%%% START FILE: SCRIPT_QuiverClubandShaftBaseData.m %%%
+%Reads from a Table named Data in main workspace Generated from the Quivers
+%Plots tab on the main worksheets.
+
+%Generate Shaft Quivers
+Shaft=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.Shaftdx(:,1),BASEQ.Shaftdy(:,1),BASEQ.Shaftdz(:,1),0);
+Shaft.ShowArrowHead='off';		%Turn off arrow heads
+Shaft.LineWidth=1;			    %Adjust line weighting
+Shaft.Color=[0.5 0.5 0.5];		%Set shaft color gray
+hold on;				        %Hold the current plot when you generate new
+
+%Generate Grip Quivers
+Grip=quiver3(BASEQ.Buttx(:,1),BASEQ.Butty(:,1),BASEQ.Buttz(:,1),BASEQ.Gripdx(:,1),BASEQ.Gripdy(:,1),BASEQ.Gripdz(:,1),0);
+Grip.ShowArrowHead='off';
+Grip.LineWidth=1;			    %Set grip line width
+Grip.Color=[0 0 0];			    %Set grip color to black
+
+%Calculate height of table
+H=height(BASEQ);
+
+%Calculate how many rows to copy
+h=H-1;
+
+%Generate Hand Path Quivers
+HandPath=quiver3(BASEQ.MPx(1:h,1),BASEQ.MPy(1:h,1),BASEQ.MPz(1:h,1),BASEQ.MPPx(1:h,1),BASEQ.MPPy(1:h,1),BASEQ.MPPz(1:h,1),0);
+HandPath.ShowArrowHead='off';		%Turn off arrow heads
+HandPath.LineWidth=1;			    %Adjust line weighting
+HandPath.Color=[0 0 0];		        %Set shaft color black
+
+%Generate Club Path Quivers
+ClubPath=quiver3(BASEQ.CHx(1:h,1),BASEQ.CHy(1:h,1),BASEQ.CHz(1:h,1),BASEQ.CHPx(1:h,1),BASEQ.CHPy(1:h,1),BASEQ.CHPz(1:h,1),0);
+ClubPath.ShowArrowHead='off';		%Turn off arrow heads
+ClubPath.LineWidth=1;			    %Adjust line weighting
+ClubPath.Color=[0 0 0];		        %Set shaft color black
+
+% clear Grip;
+% clear Shaft;
+% clear HandPath;
+% clear ClubPath;
+clear h;
+clear H;
+
+%%% END FILE: SCRIPT_QuiverClubandShaftBaseData.m %%%
+
+%%% START FILE: SCRIPT_QuiverClubandShaftZTCF.m %%%
+%Reads from a Table named ZTCF in main workspace Generated from the Quivers
+%Plots tab on the main worksheets.
+
+%Generate Shaft Quivers
+Shaft=quiver3(ZTCFQ.RWx(:,1),ZTCFQ.RWy(:,1),ZTCFQ.RWz(:,1),ZTCFQ.Shaftdx(:,1),ZTCFQ.Shaftdy(:,1),ZTCFQ.Shaftdz(:,1),0);
+Shaft.ShowArrowHead='off';		%Turn off arrow heads
+Shaft.LineWidth=1;			    %Adjust line weighting
+Shaft.Color=[0.5 0.5 0.5];		%Set shaft color gray
+hold on;				        %Hold the current plot when you generate new
+
+%Generate Grip Quivers
+Grip=quiver3(ZTCFQ.Buttx(:,1),ZTCFQ.Butty(:,1),ZTCFQ.Buttz(:,1),ZTCFQ.Gripdx(:,1),ZTCFQ.Gripdy(:,1),ZTCFQ.Gripdz(:,1),0);
+Grip.ShowArrowHead='off';
+Grip.LineWidth=1;			    %Set grip line width
+Grip.Color=[0 0 0];			    %Set grip color to black
+
+%Calculate height of table
+H=height(ZTCFQ);
+
+%Calculate how many rows to copy
+h=H-1;
+
+%Generate Hand Path Quivers
+HandPath=quiver3(ZTCFQ.MPx(1:h,1),ZTCFQ.MPy(1:h,1),ZTCFQ.MPz(1:h,1),ZTCFQ.MPPx(1:h,1),ZTCFQ.MPPy(1:h,1),ZTCFQ.MPPz(1:h,1),0);
+HandPath.ShowArrowHead='off';		%Turn off arrow heads
+HandPath.LineWidth=1;			    %Adjust line weighting
+HandPath.Color=[0 0 0];		        %Set shaft color black
+
+%Generate Club Path Quivers
+ClubPath=quiver3(ZTCFQ.CHx(1:h,1),ZTCFQ.CHy(1:h,1),ZTCFQ.CHz(1:h,1),ZTCFQ.CHPx(1:h,1),ZTCFQ.CHPy(1:h,1),ZTCFQ.CHPz(1:h,1),0);
+ClubPath.ShowArrowHead='off';		%Turn off arrow heads
+ClubPath.LineWidth=1;			    %Adjust line weighting
+ClubPath.Color=[0 0 0];		        %Set shaft color black
+
+% clear Grip;
+% clear Shaft;
+% clear HandPath;
+% clear ClubPath;
+clear h;
+clear H;
+
+%%% END FILE: SCRIPT_QuiverClubandShaftZTCF.m %%%
+
+%%% START FILE: SCRIPT_ShaftandGripatMaxCHSandAlphaReversal.m %%%
+
+%Grip Quiver for Alpha Reversal
+GripAlpha=quiver3(ClubQuiverAlphaReversal.ButtxAlphaReversal,ClubQuiverAlphaReversal.ButtyAlphaReversal,ClubQuiverAlphaReversal.ButtzAlphaReversal,ClubQuiverAlphaReversal.GripdxAlphaReversal,ClubQuiverAlphaReversal.GripdyAlphaReversal,ClubQuiverAlphaReversal.GripdzAlphaReversal,0);
+GripAlpha.ShowArrowHead='off';
+GripAlpha.LineWidth=3;			            %Set grip line width
+GripAlpha.Color=[0 0 0];			        %Set grip color to black
+hold on;
+
+%Shaft Quiver for Alpha Reversal
+ShaftAlpha=quiver3(ClubQuiverAlphaReversal.RHxAlphaReversal,ClubQuiverAlphaReversal.RHyAlphaReversal,ClubQuiverAlphaReversal.RHzAlphaReversal,ClubQuiverAlphaReversal.ShaftdxAlphaReversal,ClubQuiverAlphaReversal.ShaftdyAlphaReversal,ClubQuiverAlphaReversal.ShaftdzAlphaReversal,0);
+ShaftAlpha.ShowArrowHead='off';		        %Turn off arrow heads
+ShaftAlpha.LineWidth=3;			            %Adjust line weighting
+ShaftAlpha.Color=[0.0745 0.6235 1.0000];
+hold on;				                    %Hold the current plot when you generate new
+
+%Grip Quiver for Max CHS
+GripMaxCHS=quiver3(ClubQuiverMaxCHS.ButtxMaxCHS,ClubQuiverMaxCHS.ButtyMaxCHS,ClubQuiverMaxCHS.ButtzMaxCHS,ClubQuiverMaxCHS.GripdxMaxCHS,ClubQuiverMaxCHS.GripdyMaxCHS,ClubQuiverMaxCHS.GripdzMaxCHS,0);
+GripMaxCHS.ShowArrowHead='off';
+GripMaxCHS.LineWidth=3;			            %Set grip line width
+GripMaxCHS.Color=[0 0 0];			        %Set grip color to black
+hold on;
+
+%Shaft Quiver for Max CHS
+ShaftMaxCHS=quiver3(ClubQuiverMaxCHS.RHxMaxCHS,ClubQuiverMaxCHS.RHyMaxCHS,ClubQuiverMaxCHS.RHzMaxCHS,ClubQuiverMaxCHS.ShaftdxMaxCHS,ClubQuiverMaxCHS.ShaftdyMaxCHS,ClubQuiverMaxCHS.ShaftdzMaxCHS,0);
+ShaftMaxCHS.ShowArrowHead='off';		    %Turn off arrow heads
+ShaftMaxCHS.LineWidth=3;			        %Adjust line weighting
+ShaftMaxCHS.Color=[0.9294 0.6941 0.1255];
+
+%Set View
+view(-0.0885,-10.6789);
+
+%%% END FILE: SCRIPT_ShaftandGripatMaxCHSandAlphaReversal.m %%%
+
+%%% START FILE: SCRIPT_ZTCF_ShaftandGripatMaxCHSandAlphaReversal.m %%%
+
+%Grip Quiver for ZTCFAlpha Reversal
+GripZTCFAlpha=quiver3(ClubQuiverZTCFAlphaReversal.ButtxZTCFAlphaReversal,ClubQuiverZTCFAlphaReversal.ButtyZTCFAlphaReversal,ClubQuiverZTCFAlphaReversal.ButtzZTCFAlphaReversal,ClubQuiverZTCFAlphaReversal.GripdxZTCFAlphaReversal,ClubQuiverZTCFAlphaReversal.GripdyZTCFAlphaReversal,ClubQuiverZTCFAlphaReversal.GripdzZTCFAlphaReversal,0);
+GripZTCFAlpha.ShowArrowHead='off';
+GripZTCFAlpha.LineWidth=3;			            %Set grip line width
+GripZTCFAlpha.Color=[0 0 0];			        %Set grip color to black
+hold on;
+
+%Shaft Quiver for Alpha Reversal
+ShaftZTCFAlpha=quiver3(ClubQuiverZTCFAlphaReversal.RHxZTCFAlphaReversal,ClubQuiverZTCFAlphaReversal.RHyZTCFAlphaReversal,ClubQuiverZTCFAlphaReversal.RHzZTCFAlphaReversal,ClubQuiverZTCFAlphaReversal.ShaftdxZTCFAlphaReversal,ClubQuiverZTCFAlphaReversal.ShaftdyZTCFAlphaReversal,ClubQuiverZTCFAlphaReversal.ShaftdzZTCFAlphaReversal,0);
+ShaftZTCFAlpha.ShowArrowHead='off';		        %Turn off arrow heads
+ShaftZTCFAlpha.LineWidth=3;			            %Adjust line weighting
+ShaftZTCFAlpha.Color=[0.0745 0.6235 1.0000];
+hold on;				                    %Hold the current plot when you generate new
+
+%Grip Quiver for Max CHS
+GripMaxCHS=quiver3(ClubQuiverMaxCHS.ButtxMaxCHS,ClubQuiverMaxCHS.ButtyMaxCHS,ClubQuiverMaxCHS.ButtzMaxCHS,ClubQuiverMaxCHS.GripdxMaxCHS,ClubQuiverMaxCHS.GripdyMaxCHS,ClubQuiverMaxCHS.GripdzMaxCHS,0);
+GripMaxCHS.ShowArrowHead='off';
+GripMaxCHS.LineWidth=3;			            %Set grip line width
+GripMaxCHS.Color=[0 0 0];			        %Set grip color to black
+hold on;
+
+%Shaft Quiver for Max CHS
+ShaftMaxCHS=quiver3(ClubQuiverMaxCHS.RHxMaxCHS,ClubQuiverMaxCHS.RHyMaxCHS,ClubQuiverMaxCHS.RHzMaxCHS,ClubQuiverMaxCHS.ShaftdxMaxCHS,ClubQuiverMaxCHS.ShaftdyMaxCHS,ClubQuiverMaxCHS.ShaftdzMaxCHS,0);
+ShaftMaxCHS.ShowArrowHead='off';		    %Turn off arrow heads
+ShaftMaxCHS.LineWidth=3;			        %Adjust line weighting
+ShaftMaxCHS.Color=[0.9294 0.6941 0.1255];
+
+%Set View
+view(-0.0885,-10.6789);
+
+%%% END FILE: SCRIPT_ZTCF_ShaftandGripatMaxCHSandAlphaReversal.m %%%
+
+%%% END OF PACKED PROJECT %%%

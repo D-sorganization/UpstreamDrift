@@ -1,0 +1,49 @@
+# ruff.toml
+# Configuration for the Ruff linter
+# Matches standards defined in ci-standard.yml
+
+# Target Python 3.11 (matches your CI environment)
+target-version = "py311"
+line-length = 88  # Matches Black standard (88 chars)
+
+# Exclude generated code and standard noise
+exclude = [
+    ".git",
+    "__pycache__",
+    "build",
+    "dist",
+    "venv",
+    ".env",
+    "node_modules",
+    "*.ipynb",  # Jupyter notebooks often fail standard linting
+    "vendor",
+]
+
+[lint]
+# Enable specific rule sets:
+# E = pycodestyle errors
+# F = Pyflakes (Logic errors)
+# W = pycodestyle warnings
+# I = isort (Import sorting)
+# B = flake8-bugbear (Catches likely bugs/traps)
+# UP = pyupgrade (Modernizes old Python syntax)
+select = ["E", "F", "W", "I", "B", "UP"]
+
+# Ignore:
+# D = pydocstyle (We let the 'Doc-Scribe' agent handle docstrings, so we don't lint them strictly here)
+ignore = ["D"]
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[lint.per-file-ignores]
+# Ignore "unused imports" in __init__.py files (common pattern)
+"__init__.py" = ["F401"]
+# Allow assertions in tests
+"tests/*" = ["S101"]
+# Ignore line length in files with extensive XML strings
+"python/mujoco_golf_pendulum/linkage_mechanisms/__init__.py" = ["E501"]
+
+[lint.isort]
+# Tells Ruff how to group your own code vs. libraries
+known-first-party = ["src", "games", "tools"]

@@ -1,0 +1,57 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+.ipynb_checkpoints/
+.coverage
+*.coverage
+
+# MATLAB/Simulink
+*.asv
+*.m~
+slprj/
+*sldd
+*.slxc
+*.autosave
+*.mex*
+
+# IDE
+*.cursor-chat
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data & Outputs
+data/raw/
+output/**/temp/
+logs/
+*.log
+
+# Binary models/data via LFS
+*.h5
+*.zip
+
+# Personal files
+ProfilePhoto.jpg
+*.jpg
+*.jpeg
+*.png
+!docs/**/*.png
+!docs/**/*.jpg
+!launchers/launchersassets/**/*.png
+!launchers/launchersassets/**/*.jpg
+
+# Cache directories
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Temporary migration files
+*_backup_*/
+temp-worktree/engines/physics_engines/mujoco/vendor/mujoco_menagerie/
