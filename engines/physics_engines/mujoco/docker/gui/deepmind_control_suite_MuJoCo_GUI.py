@@ -970,7 +970,8 @@ class GolfSimulationGUI:
                 dockerfile_content = (
                     "# Add missing dependencies to existing robotics_env\n"
                     "FROM robotics_env:latest\n\n"
-                    "# Install missing dependencies in the existing virtual environment\n"
+                    "# Install missing dependencies in the existing virtual "
+                    "environment\n"
                     'RUN /opt/robotics_env/bin/pip install "defusedxml>=0.7.1" "PyQt6>=6.6.0"\n\n'
                     "# Update PATH to use robotics_env by default\n"
                     'ENV PATH="/opt/robotics_env/bin:$PATH"\n'
