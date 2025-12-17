@@ -6,9 +6,9 @@ Sophisticated camera controls with smooth animations, presets, and cinematic fea
 
 import math
 import time
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 from PyQt6.QtCore import QEasingCurve, QObject, QTimer, pyqtSignal
@@ -88,7 +88,7 @@ class CameraConstraints:
     max_fov: float = 120.0
 
     # Movement limits (world coordinates)
-    position_bounds: Optional[Tuple[np.ndarray, np.ndarray]] = None
+    position_bounds: tuple[np.ndarray, np.ndarray] | None = None
 
 
 # ============================================================================
@@ -131,7 +131,7 @@ class SmoothAnimator:
         start: np.ndarray,
         end: np.ndarray,
         t: float,
-        easing_func: Optional[Callable] = None,
+        easing_func: Callable | None = None,
     ) -> np.ndarray:
         """Interpolate between two vectors with optional easing"""
         if easing_func:
@@ -143,11 +143,11 @@ class SmoothAnimator:
 
     @staticmethod
     def spherical_interpolation(
-        start_spherical: Tuple[float, float, float],
-        end_spherical: Tuple[float, float, float],
+        start_spherical: tuple[float, float, float],
+        end_spherical: tuple[float, float, float],
         t: float,
-        easing_func: Optional[Callable] = None,
-    ) -> Tuple[float, float, float]:
+        easing_func: Callable | None = None,
+    ) -> tuple[float, float, float]:
         """Spherical interpolation for smooth orbit camera movement"""
         if easing_func:
             t = easing_func(np.clip(t, 0.0, 1.0))
@@ -217,7 +217,7 @@ class CameraController(QObject):
         self.velocity_pan = np.array([0.0, 0.0], dtype=np.float32)
 
         # Cinematic features
-        self.keyframes: List[CameraKeyframe] = []
+        self.keyframes: list[CameraKeyframe] = []
         self.cinematic_time = 0.0
         self.cinematic_duration = 10.0
         self.cinematic_loop = False
@@ -292,7 +292,7 @@ class CameraController(QObject):
 
     def _cartesian_to_spherical(
         self, position: np.ndarray
-    ) -> Tuple[float, float, float]:
+    ) -> tuple[float, float, float]:
         """Convert Cartesian position to spherical coordinates"""
         offset = position - self.current_state.target
         distance = np.linalg.norm(offset)
@@ -507,7 +507,7 @@ class CameraController(QObject):
         self,
         target_state: CameraState,
         duration: float = 1.0,
-        easing: Optional[Callable] = None,
+        easing: Callable | None = None,
     ):
         """Animate camera to target state"""
         # Stop any current animation
@@ -605,7 +605,7 @@ class CameraController(QObject):
     def add_keyframe(
         self,
         time: float,
-        state: Optional[CameraState] = None,
+        state: CameraState | None = None,
         easing: QEasingCurve.Type = QEasingCurve.Type.InOutCubic,
     ):
         """Add a keyframe for cinematic animation"""
@@ -634,7 +634,7 @@ class CameraController(QObject):
         print("📷 Cleared all keyframes")
 
     def start_cinematic_playback(
-        self, duration: Optional[float] = None, loop: bool = False
+        self, duration: float | None = None, loop: bool = False
     ):
         """Start cinematic camera playback"""
         if not self.keyframes:
@@ -743,7 +743,7 @@ class CameraController(QObject):
     # AUTO-FRAMING AND SMART FEATURES
     # ========================================================================
 
-    def frame_data(self, data_points: List[np.ndarray], margin: float = 1.5):
+    def frame_data(self, data_points: list[np.ndarray], margin: float = 1.5):
         """Automatically frame camera to view all data points"""
         if not data_points:
             return
@@ -853,7 +853,7 @@ class CameraController(QObject):
         """Reset camera to default position"""
         self.set_preset(CameraPreset.DEFAULT, animate)
 
-    def get_state_dict(self) -> Dict:
+    def get_state_dict(self) -> dict:
         """Get camera state as dictionary for saving"""
         return {
             "position": self.current_state.position.tolist(),
@@ -865,7 +865,7 @@ class CameraController(QObject):
             "mode": self.mode.value,
         }
 
-    def load_state_dict(self, state_dict: Dict, animate: bool = True):
+    def load_state_dict(self, state_dict: dict, animate: bool = True):
         """Load camera state from dictionary"""
         target_state = CameraState()
         target_state.position = np.array(

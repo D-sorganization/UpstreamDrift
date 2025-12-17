@@ -11,25 +11,25 @@ Features:
 """
 
 import subprocess
-import numpy as np
-from pathlib import Path
-from typing import Tuple, Optional
 from dataclasses import dataclass
-from PyQt6.QtCore import QObject, pyqtSignal, QThread
+from pathlib import Path
+
+import numpy as np
+from golf_data_core import RenderConfig
+from PyQt6.QtCore import QObject, QThread, pyqtSignal
 from PyQt6.QtWidgets import (
+    QComboBox,
     QDialog,
-    QVBoxLayout,
+    QFileDialog,
     QHBoxLayout,
     QLabel,
-    QPushButton,
-    QComboBox,
-    QSpinBox,
     QLineEdit,
-    QFileDialog,
-    QProgressDialog,
     QMessageBox,
+    QProgressDialog,
+    QPushButton,
+    QSpinBox,
+    QVBoxLayout,
 )
-from golf_data_core import RenderConfig
 
 
 @dataclass
@@ -38,10 +38,10 @@ class VideoExportConfig:
 
     output_path: str = "golf_swing_export.mp4"
     fps: int = 60
-    resolution: Tuple[int, int] = (1920, 1080)  # Width x Height
+    resolution: tuple[int, int] = (1920, 1080)  # Width x Height
     quality: str = "high"  # 'draft', 'medium', 'high', 'lossless'
     start_frame: int = 0
-    end_frame: Optional[int] = None  # None = all frames
+    end_frame: int | None = None  # None = all frames
 
 
 class VideoExporter(QObject):
@@ -193,7 +193,7 @@ class VideoExporter(QObject):
         )
 
     def _render_frame_to_buffer(
-        self, frame_data, resolution: Tuple[int, int]
+        self, frame_data, resolution: tuple[int, int]
     ) -> np.ndarray:
         """
         Render frame to RGB buffer

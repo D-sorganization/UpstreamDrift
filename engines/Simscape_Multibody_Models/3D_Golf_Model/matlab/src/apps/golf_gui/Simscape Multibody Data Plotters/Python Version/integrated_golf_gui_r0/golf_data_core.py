@@ -8,7 +8,6 @@ import time
 import warnings
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -57,8 +56,8 @@ class FrameData:
     hub: np.ndarray = field(default_factory=lambda: np.zeros(3, dtype=np.float32))
 
     # Force/torque vectors for each dataset
-    forces: Dict[str, np.ndarray] = field(default_factory=dict)
-    torques: Dict[str, np.ndarray] = field(default_factory=dict)
+    forces: dict[str, np.ndarray] = field(default_factory=dict)
+    torques: dict[str, np.ndarray] = field(default_factory=dict)
 
     # Derived properties
     shaft_vector: np.ndarray = field(
@@ -120,13 +119,13 @@ class RenderConfig:
     """Complete rendering configuration with performance optimizations"""
 
     # Visibility toggles
-    show_forces: Dict[str, bool] = field(
+    show_forces: dict[str, bool] = field(
         default_factory=lambda: {"BASEQ": True, "ZTCFQ": True, "DELTAQ": True}
     )
-    show_torques: Dict[str, bool] = field(
+    show_torques: dict[str, bool] = field(
         default_factory=lambda: {"BASEQ": True, "ZTCFQ": True, "DELTAQ": True}
     )
-    show_body_segments: Dict[str, bool] = field(
+    show_body_segments: dict[str, bool] = field(
         default_factory=lambda: {
             "left_forearm": True,
             "left_upper_arm": True,
@@ -183,7 +182,7 @@ class PerformanceStats:
     render_time_ms: float = 0.0
     data_processing_time_ms: float = 0.0
     memory_usage_mb: float = 0.0
-    frame_times: List[float] = field(default_factory=list)
+    frame_times: list[float] = field(default_factory=list)
 
     def update_frame_time(self, frame_time: float):
         """Update frame timing statistics"""
@@ -211,7 +210,7 @@ class MatlabDataLoader:
 
     def load_datasets(
         self, baseq_file: str, ztcfq_file: str, delta_file: str
-    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """Load all three MATLAB datasets with comprehensive error handling"""
         start_time = time.time()
 
@@ -316,7 +315,7 @@ class MatlabDataLoader:
 
     def _process_vector_column(
         self, col_data: np.ndarray, col_name: str, num_rows: int
-    ) -> List[np.ndarray]:
+    ) -> list[np.ndarray]:
         """Process 3D vector columns with comprehensive error handling"""
         processed_vectors = []
 
@@ -410,7 +409,7 @@ class MatlabDataLoader:
         if len(df) == 0:
             raise ValueError(f"No data rows in {dataset_name}")
 
-    def _validate_dataset_consistency(self, datasets: Dict[str, pd.DataFrame]):
+    def _validate_dataset_consistency(self, datasets: dict[str, pd.DataFrame]):
         """Validate that all datasets have consistent frame counts"""
         frame_counts = {name: len(df) for name, df in datasets.items()}
 
@@ -432,7 +431,7 @@ class FrameProcessor:
 
     def __init__(
         self,
-        datasets: Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame],
+        datasets: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame],
         config: RenderConfig,
     ):
         self.baseq_df, self.ztcfq_df, self.deltaq_df = datasets
@@ -445,8 +444,8 @@ class FrameProcessor:
         )
 
         # Data caches
-        self.raw_data_cache: Dict[int, FrameData] = {}
-        self.dynamics_cache: Dict[str, Dict] = {}
+        self.raw_data_cache: dict[int, FrameData] = {}
+        self.dynamics_cache: dict[str, dict] = {}
         self.current_filter = "None"
 
         # Track current frame for UI coordination
@@ -711,7 +710,7 @@ class GeometryUtils:
     @staticmethod
     def create_cylinder_mesh(
         radius: float = 1.0, height: float = 1.0, segments: int = 16
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Create optimized cylinder mesh with normals"""
         vertices = []
         normals = []
@@ -750,7 +749,7 @@ class GeometryUtils:
     @staticmethod
     def create_sphere_mesh(
         radius: float = 1.0, lat_segments: int = 12, lon_segments: int = 16
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Create optimized sphere mesh using UV sphere method"""
         vertices = []
         normals = []
@@ -794,7 +793,7 @@ class GeometryUtils:
         head_radius: float = 0.02,
         head_length: float = 0.2,
         segments: int = 8,
-    ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Create arrow mesh for force/torque visualization"""
         vertices = []
         normals = []
