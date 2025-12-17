@@ -451,7 +451,7 @@ class UnifiedLauncher(tk.Tk):
                 # progress
                 creation_flags = 0
                 if os.name == "nt":
-                    creation_flags = subprocess.CREATE_NEW_CONSOLE
+                    creation_flags = subprocess.CREATE_NEW_CONSOLE  # type: ignore[attr-defined]
 
                 subprocess.run(
                     cmd, cwd=docker_dir, check=True, creationflags=creation_flags
