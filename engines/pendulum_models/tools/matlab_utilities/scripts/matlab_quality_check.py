@@ -76,7 +76,7 @@ class MATLABQualityChecker:
         logger.info("Found %d MATLAB files", len(m_files))
         return True
 
-    def run_matlab_quality_checks(self) -> dict[str, object]:  # noqa: PLR0911
+    def run_matlab_quality_checks(self) -> dict[str, object]:
         """Run MATLAB quality checks using the MATLAB script.
 
         Returns:
@@ -86,14 +86,16 @@ class MATLABQualityChecker:
             # Check if we can run MATLAB from command line
             matlab_script = self.matlab_dir / "matlab_quality_config.m"
             if not matlab_script.exists():
-                # Config script not found - fall back to static analysis (primary use case)
+                # Config script not found - fall back to static analysis (primary use
+                # case)
                 logger.info(
                     "MATLAB quality config script not found, using static analysis",
                 )
                 return self._static_matlab_analysis()
 
             # Try to run MATLAB quality checks
-            # Note: This requires MATLAB to be installed and accessible from command line
+            # Note: This requires MATLAB to be installed and accessible from command
+            # line
             try:
                 # First, try to run the MATLAB script directly if possible
                 return self._run_matlab_script(matlab_script)
@@ -132,8 +134,9 @@ class MATLABQualityChecker:
             for cmd in commands:
                 try:
                     logger.info("Trying command: %s", " ".join(cmd))
-                    # Note: cmd is a controlled list from our code, not user input (S603)
-                    result = subprocess.run(  # noqa: S603
+                    # Note: cmd is a controlled list from our code, not user input
+                    # (S603)
+                    result = subprocess.run(
                         cmd,
                         capture_output=True,
                         text=True,
@@ -195,7 +198,7 @@ class MATLABQualityChecker:
             "passed": len(issues) == 0,
         }
 
-    def _analyze_matlab_file(  # noqa: C901, PLR0912, PLR0915
+    def _analyze_matlab_file(
         self,
         file_path: Path,
     ) -> list[str]:
@@ -227,7 +230,8 @@ class MATLABQualityChecker:
                 if not line_stripped:
                     continue
 
-                # Skip comment-only lines for most checks (but check comments for banned patterns)
+                # Skip comment-only lines for most checks (but check comments for
+                # banned patterns)
                 is_comment = line_stripped.startswith("%")
 
                 # Track function scope by monitoring nesting level
@@ -287,7 +291,8 @@ class MATLABQualityChecker:
 
                     if not has_arguments:
                         issues.append(
-                            f"{file_path.name} (line {i}): Missing arguments validation block",
+                            f"{file_path.name} (line {i}): Missing arguments "
+                            "validation block",
                         )
 
                 # Check for banned patterns (in comments and code)
@@ -335,7 +340,8 @@ class MATLABQualityChecker:
                     )
 
                 # Check for load without output (loads into workspace)
-                # Match both command syntax (load file.mat) and function syntax (load('file.mat'))
+                # Match both command syntax (load file.mat) and function syntax
+                # (load('file.mat'))
                 if (
                     re.search(r"^\s*load\s+\w+", line_stripped)
                     or re.search(r"^\s*load\s*\([^)]+\)", line_stripped)
@@ -347,10 +353,11 @@ class MATLABQualityChecker:
 
                 # Check for magic numbers (but allow common values and known constants)
                 # Matches both integer and floating-point literals (e.g., 3.14, 42, 0.5)
-                # that are not part of scientific notation, array indices, or embedded in words.
-                # Uses lookbehind/lookahead to avoid matching numbers adjacent to dots or
-                # word characters. This helps flag "magic numbers" in code while avoiding
-                # false positives from common patterns.
+                # that are not part of scientific notation, array indices, or embedded
+                # in words.
+                # Uses lookbehind/lookahead to avoid matching numbers adjacent to dots
+                # or word characters. This helps flag "magic numbers" in code while
+                # avoiding false positives from common patterns.
                 magic_number_pattern = r"(?<![.\w])(?:\d+\.\d+|\d+)(?![.\w])"
                 magic_numbers = re.findall(magic_number_pattern, line_stripped)
 
@@ -381,7 +388,8 @@ class MATLABQualityChecker:
                     "0.0001",  # Common tolerances
                 }
 
-                # Known physics constants (should be defined but at least flag with context)
+                # Known physics constants (should be defined but at least flag with
+                # context)
                 # Includes units and sources per coding guidelines
                 known_constants = {
                     "3.14159": "pi constant [dimensionless] - mathematical constant",
@@ -391,9 +399,18 @@ class MATLABQualityChecker:
                     "1.57": "pi/2 constant [dimensionless] - mathematical constant",
                     "0.7854": "pi/4 constant [dimensionless] - mathematical constant",
                     "0.785": "pi/4 constant [dimensionless] - mathematical constant",
-                    "9.81": "gravitational acceleration [m/s²] - approximate standard gravity",
-                    "9.8": "gravitational acceleration [m/s²] - approximate standard gravity",
-                    "9.807": "gravitational acceleration [m/s²] - approximate standard gravity",
+                    "9.81": (
+                        "gravitational acceleration [m/s²] - approximate standard "
+                        "gravity"
+                    ),
+                    "9.8": (
+                        "gravitational acceleration [m/s²] - approximate standard "
+                        "gravity"
+                    ),
+                    "9.807": (
+                        "gravitational acceleration [m/s²] - approximate standard "
+                        "gravity"
+                    ),
                 }
 
                 for num in magic_numbers:
@@ -431,8 +448,8 @@ class MATLABQualityChecker:
                         )
                     elif re.search(r"\bclear\b(?!\s+\w+)", line_stripped):
                         issues.append(
-                            f"{file_path.name} (line {i}): Avoid 'clear' in functions - "
-                            "can clear function variables",
+                            f"{file_path.name} (line {i}): Avoid 'clear' in "
+                            "functions - can clear function variables",
                         )
                     if re.search(r"\bclc\b", line_stripped):
                         issues.append(
@@ -441,18 +458,20 @@ class MATLABQualityChecker:
                         )
                     if re.search(r"\bclose\s+all\b", line_stripped):
                         issues.append(
-                            f"{file_path.name} (line {i}): Avoid 'close all' in functions - "
-                            "closes user's figures",
+                            f"{file_path.name} (line {i}): Avoid 'close all' in "
+                            "functions - closes user's figures",
                         )
 
-                # Check for exist() usage (often code smell, prefer try/catch or validation)
+                # Check for exist() usage (often code smell, prefer try/catch or
+                # validation)
                 if re.search(r"\bexist\s*\(", line_stripped):
                     issues.append(
                         f"{file_path.name} (line {i}): Consider using validation or "
                         "try/catch instead of exist()",
                     )
 
-                # Check for addpath in functions (should be in startup.m or managed externally)
+                # Check for addpath in functions (should be in startup.m or managed
+                # externally)
                 if in_function and re.search(r"\baddpath\s*\(", line_stripped):
                     issues.append(
                         f"{file_path.name} (line {i}): Avoid addpath in functions - "
@@ -506,7 +525,7 @@ class MATLABQualityChecker:
         return self.results
 
 
-def main() -> None:  # noqa: PLR0915
+def main() -> None:
     """Main entry point for the MATLAB quality check script."""
     parser = argparse.ArgumentParser(description="MATLAB Code Quality Checker")
     parser.add_argument("--strict", action="store_true", help="Enable strict mode")
@@ -537,29 +556,30 @@ def main() -> None:  # noqa: PLR0915
 
     # Output results
     if args.output_format == "json":
-        print(json.dumps(results, indent=2, default=str))  # noqa: T201
+        print(json.dumps(results, indent=2, default=str))
     else:
-        print("\n" + "=" * 60)  # noqa: T201
-        print("MATLAB QUALITY CHECK RESULTS")  # noqa: T201
-        print("=" * 60)  # noqa: T201
-        print(f"Timestamp: {results.get('timestamp', 'N/A')}")  # noqa: T201
-        print(f"Total Files: {results.get('total_files', 0)}")  # noqa: T201
-        print(  # noqa: T201
+        print("\n" + "=" * 60)
+        print("MATLAB QUALITY CHECK RESULTS")
+        print("=" * 60)
+        print(f"Timestamp: {results.get('timestamp', 'N/A')}")
+        print(f"Total Files: {results.get('total_files', 0)}")
+        print(
             f"Status: {'PASSED' if results.get('passed', False) else 'FAILED'}",
         )
-        print(f"Summary: {results.get('summary', 'N/A')}")  # noqa: T201
+        print(f"Summary: {results.get('summary', 'N/A')}")
 
         issues_raw = results.get("issues", [])
         issues: list[str] = issues_raw if isinstance(issues_raw, list) else []
         if issues:
-            print(f"\nIssues Found ({len(issues)}):")  # noqa: T201
+            print(f"\nIssues Found ({len(issues)}):")
             for i, issue in enumerate(issues, 1):
-                print(f"  {i}. {issue}")  # noqa: T201
+                print(f"  {i}. {issue}")
 
-        print("\n" + "=" * 60)  # noqa: T201
+        print("\n" + "=" * 60)
 
     # Exit with appropriate code
-    # In strict mode, fail if any issues are found; otherwise fail only if checks didn't pass
+    # In strict mode, fail if any issues are found; otherwise fail only if checks
+    # didn't pass
     passed = bool(results.get("passed", False))
     has_issues = bool(results.get("issues"))
 

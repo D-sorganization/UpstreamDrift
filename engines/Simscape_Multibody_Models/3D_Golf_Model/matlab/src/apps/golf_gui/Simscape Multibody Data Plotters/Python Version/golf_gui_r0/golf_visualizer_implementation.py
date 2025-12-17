@@ -13,7 +13,6 @@ Key Technologies:
 import sys
 import time
 from dataclasses import dataclass
-from typing import Dict, List, Tuple
 
 import moderngl as mgl
 import numpy as np
@@ -49,8 +48,8 @@ class FrameData:
     hub: np.ndarray
 
     # Force/torque vectors for each dataset
-    forces: Dict[str, np.ndarray]  # 'BASEQ', 'ZTCFQ', 'DELTAQ'
-    torques: Dict[str, np.ndarray]
+    forces: dict[str, np.ndarray]  # 'BASEQ', 'ZTCFQ', 'DELTAQ'
+    torques: dict[str, np.ndarray]
 
 
 @dataclass
@@ -58,9 +57,9 @@ class RenderConfig:
     """Complete rendering configuration"""
 
     # Visibility toggles
-    show_forces: Dict[str, bool]
-    show_torques: Dict[str, bool]
-    show_body_segments: Dict[str, bool]
+    show_forces: dict[str, bool]
+    show_torques: dict[str, bool]
+    show_body_segments: dict[str, bool]
     show_club: bool = True
     show_face_normal: bool = True
     show_ground: bool = True
@@ -93,7 +92,7 @@ class DataProcessor:
 
     def load_matlab_data(
         self, baseq_file: str, ztcfq_file: str, delta_file: str
-    ) -> Tuple[np.ndarray, ...]:
+    ) -> tuple[np.ndarray, ...]:
         """Fast MATLAB data loading with error handling"""
         datasets = {}
         files = {"BASEQ": baseq_file, "ZTCFQ": ztcfq_file, "DELTAQ": delta_file}
@@ -131,7 +130,7 @@ class DataProcessor:
         # For now, using regular NumPy approach
         pass
 
-    def extract_frame_data(self, frame_idx: int, datasets: Dict) -> FrameData:
+    def extract_frame_data(self, frame_idx: int, datasets: dict) -> FrameData:
         """Extract and process single frame data efficiently"""
         if frame_idx in self.cache:
             return self.cache[frame_idx]
@@ -530,7 +529,7 @@ class OpenGLRenderer:
         start: np.ndarray,
         end: np.ndarray,
         radius: float,
-        color: List[float],
+        color: list[float],
         opacity: float,
         view_matrix: np.ndarray,
         proj_matrix: np.ndarray,

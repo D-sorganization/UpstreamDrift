@@ -6,6 +6,7 @@ Tests spatial vectors, transformations, and inertia operations.
 
 import numpy as np
 import pytest
+
 from src.spatial_algebra import (
     crf,
     crm,

@@ -60,7 +60,9 @@ except ImportError:
             Raises:
                 RuntimeError: Always raised since Qt backend is not available
             """
-            msg = "MplCanvas requires Qt backend which is not available in headless envs"
+            msg = (
+                "MplCanvas requires Qt backend which is not available in headless envs"
+            )
             raise RuntimeError(msg)
 
 

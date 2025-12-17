@@ -29,9 +29,9 @@ LOGGER = logging.getLogger(__name__)
 SLIDER_TO_RADIAN: typing.Final[float] = (
     0.01  # [rad/slider_unit] Conversion factor from slider integer values to radians
 )
-JOINT_ANGLE_MIN_RAD: typing.Final[float] = (
-    -10.0
-)  # [rad] Minimum joint angle for UI controls (Safety limit)
+JOINT_ANGLE_MIN_RAD: typing.Final[
+    float
+] = -10.0  # [rad] Minimum joint angle for UI controls (Safety limit)
 JOINT_ANGLE_MAX_RAD: typing.Final[float] = (
     10.0  # [rad] Maximum joint angle for UI controls (Safety limit)
 )
@@ -223,7 +223,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         self.btn_reset = QtWidgets.QPushButton("Reset")
         self.btn_reset.setToolTip("Reset the simulation to the initial state (Ctrl+R)")
-        self.btn_reset.setStatusTip("Reset the simulation to the initial state (Ctrl+R)")
+        self.btn_reset.setStatusTip(
+            "Reset the simulation to the initial state (Ctrl+R)"
+        )
         self.btn_reset.setShortcut(QtGui.QKeySequence("Ctrl+R"))
         self.btn_reset.clicked.connect(self._reset_simulation)
         dyn_layout.addWidget(self.btn_reset)
@@ -411,7 +413,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         plant_context = plant.GetMyContextFromRoot(context)
 
         for j_idx, spin in self.spinboxes.items():
-
             joint = plant.get_joint(JointIndex(j_idx))
             if joint.num_positions() == 1:
                 val = joint.GetOnePosition(plant_context)
@@ -503,7 +504,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         # List all bodies
         for i in range(plant.num_bodies()):
-
             body = plant.get_body(BodyIndex(i))
             name = body.name()
             if name == "world":
