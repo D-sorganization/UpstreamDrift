@@ -207,7 +207,7 @@ class DataProcessor:
             point = dataset[column].iloc[frame_idx]
             if isinstance(point, list | np.ndarray) and len(point) == 3:
                 return np.array(point, dtype=np.float32)
-        except:
+        except (TypeError, ValueError, IndexError):
             pass
         return np.array([0.0, 0.0, 0.0], dtype=np.float32)
 
@@ -219,7 +219,7 @@ class DataProcessor:
             vector = dataset[column].iloc[frame_idx]
             if isinstance(vector, list | np.ndarray) and len(vector) == 3:
                 return np.array(vector, dtype=np.float32)
-        except:
+        except (TypeError, ValueError, IndexError):
             pass
         return np.array([0.0, 0.0, 0.0], dtype=np.float32)
 

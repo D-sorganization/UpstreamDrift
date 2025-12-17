@@ -732,7 +732,7 @@ def main():
                 f"An unexpected error occurred:\n{exc_value}\n\n"
                 f"Check golf_visualizer.log for details.",
             )
-        except:
+        except Exception:
             pass
 
     sys.excepthook = handle_exception
