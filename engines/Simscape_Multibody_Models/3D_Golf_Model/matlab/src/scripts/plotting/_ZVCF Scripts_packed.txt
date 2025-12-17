@@ -1,0 +1,260 @@
+%%% MATLAB PROJECT PACKER - v1.0 %%%
+%%% Source Folder Base: C:\Users\diete\MATLAB Drive\Projects\Model Rebuild\Scripts\_ZVCF Scripts %%%
+%%% Pack Time: 02-May-2025 09:30:53 %%%
+
+%%% START FILE: MASTER_SCRIPT_ZVCF_CHARTS_3D.m %%%
+cd(matlabdrive);
+cd '3DModel';
+cd 'Scripts/_ZVCF Scripts';
+% PauseTime=1;
+
+SCRIPT_3D_ZVCF_QUIVER_LHRHForce;
+SCRIPT_3D_ZVCF_QUIVER_LHRHForceDeltaComparison;
+
+% clear PauseTime;
+
+%%% END FILE: MASTER_SCRIPT_ZVCF_CHARTS_3D.m %%%
+
+%%% START FILE: SCRIPT_3D_ZVCF_QUIVER_LHRHForce.m %%%
+%Generate Club Quiver Plot
+figure(814);
+run SCRIPT_QuiverClubandShaftBaseData_3D.m;
+
+%Generate LH Total Force Quiver Plot
+LHForceQuiver=quiver3(ZVCFTableQ.LHx(:,1),ZVCFTableQ.LHy(:,1),ZVCFTableQ.LHz(:,1),ZVCFTableQ.LHonClubFGlobal(:,1),ZVCFTableQ.LHonClubFGlobal(:,2),ZVCFTableQ.LHonClubFGlobal(:,3));
+LHForceQuiver.LineWidth=1;
+LHForceQuiver.Color=[0 0 1];
+LHForceQuiver.AutoScaleFactor=2;
+LHForceQuiver.MaxHeadSize=0.1;
+
+%Generate RH Total Force Quiver Plot
+RHForceQuiver=quiver3(ZVCFTableQ.RHx(:,1),ZVCFTableQ.RHy(:,1),ZVCFTableQ.RHz(:,1),ZVCFTableQ.RHonClubFGlobal(:,1),ZVCFTableQ.RHonClubFGlobal(:,2),ZVCFTableQ.RHonClubFGlobal(:,3));
+RHForceQuiver.LineWidth=1;
+RHForceQuiver.Color=[1 0 0];
+RHForceQuiver.MaxHeadSize=0.1;
+%Correct scaling so that LH and RH are scaled the same.
+RHForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/RHForceQuiver.ScaleFactor;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(ZVCFTableQ.MPx(:,1),ZVCFTableQ.MPy(:,1),ZVCFTableQ.MPz(:,1),ZVCFTableQ.TotalHandForceGlobal(:,1),ZVCFTableQ.TotalHandForceGlobal(:,2),ZVCFTableQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+%Correct scaling so that LH and RH are scaled the same.
+NetForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/NetForceQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','LH Force','RH Force','Net Force');
+
+%Add a Title
+title('Hand Forces');
+subtitle('ZVCF');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('ZVCF Quiver Plots/ZVCF_Quiver Plot - Hand Forces');
+%PauseTime=1;
+pause(PauseTime);
+
+%Close Figure
+close(814);
+
+%Clear Figure from Workspace
+clear LHForceQuiver;
+clear RHForceQuiver;
+clear NetForceQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+clear PauseTime;
+
+%%% END FILE: SCRIPT_3D_ZVCF_QUIVER_LHRHForce.m %%%
+
+%%% START FILE: SCRIPT_3D_ZVCF_QUIVER_LHRHForceDeltaComparison.m %%%
+%Generate Club Quiver Plot
+figure(815);
+run SCRIPT_QuiverClubandShaftBaseData_3D.m;
+
+%Generate LH Total Force Quiver Plot
+LHForceQuiver=quiver3(ZVCFTableQ.LHx(:,1),ZVCFTableQ.LHy(:,1),ZVCFTableQ.LHz(:,1),ZVCFTableQ.LHonClubFGlobal(:,1),ZVCFTableQ.LHonClubFGlobal(:,2),ZVCFTableQ.LHonClubFGlobal(:,3));
+LHForceQuiver.LineWidth=1;
+LHForceQuiver.Color=[0 0 1];
+LHForceQuiver.AutoScaleFactor=2;
+LHForceQuiver.MaxHeadSize=0.1;
+
+%Generate RH Total Force Quiver Plot
+RHForceQuiver=quiver3(ZVCFTableQ.RHx(:,1),ZVCFTableQ.RHy(:,1),ZVCFTableQ.RHz(:,1),ZVCFTableQ.RHonClubFGlobal(:,1),ZVCFTableQ.RHonClubFGlobal(:,2),ZVCFTableQ.RHonClubFGlobal(:,3));
+RHForceQuiver.LineWidth=1;
+RHForceQuiver.Color=[1 0 0];
+RHForceQuiver.MaxHeadSize=0.1;
+%Correct scaling so that LH and RH are scaled the same.
+RHForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/RHForceQuiver.ScaleFactor;
+
+%Generate Total Force Quiver Plot
+NetForceQuiver=quiver3(ZVCFTableQ.MPx(:,1),ZVCFTableQ.MPy(:,1),ZVCFTableQ.MPz(:,1),ZVCFTableQ.TotalHandForceGlobal(:,1),ZVCFTableQ.TotalHandForceGlobal(:,2),ZVCFTableQ.TotalHandForceGlobal(:,3));
+NetForceQuiver.LineWidth=1;
+NetForceQuiver.Color=[0 1 0];
+NetForceQuiver.MaxHeadSize=0.1;
+%Correct scaling so that LH and RH are scaled the same.
+NetForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/NetForceQuiver.ScaleFactor;
+
+%Generate LH Total Force Quiver Plot for Delta
+DeltaLHForceQuiver=quiver3(BASEQ.LHx(:,1),BASEQ.LHy(:,1),BASEQ.LHz(:,1),DELTAQ.LHonClubFGlobal(:,1),DELTAQ.LHonClubFGlobal(:,2),DELTAQ.LHonClubFGlobal(:,3));
+DeltaLHForceQuiver.LineWidth=1;
+DeltaLHForceQuiver.Color=[0 0 0.5];
+DeltaLHForceQuiver.MaxHeadSize=0.1;
+DeltaLHForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/DeltaLHForceQuiver.ScaleFactor;
+
+%Generate RH Total Force Quiver Plot for Delta
+DeltaRHForceQuiver=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),DELTAQ.RHonClubFGlobal(:,1),DELTAQ.RHonClubFGlobal(:,2),DELTAQ.RHonClubFGlobal(:,3));
+DeltaRHForceQuiver.LineWidth=1;
+DeltaRHForceQuiver.Color=[0.5 0 0];
+DeltaRHForceQuiver.MaxHeadSize=0.1;
+%Correct scaling so that LH and RH are scaled the same.
+DeltaRHForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/DeltaRHForceQuiver.ScaleFactor;
+
+%Generate Total Force Quiver Plot for Delta
+DeltaNetForceQuiver=quiver3(BASEQ.MPx(:,1),BASEQ.MPy(:,1),BASEQ.MPz(:,1),DELTAQ.TotalHandForceGlobal(:,1),DELTAQ.TotalHandForceGlobal(:,2),DELTAQ.TotalHandForceGlobal(:,3));
+DeltaNetForceQuiver.LineWidth=1;
+DeltaNetForceQuiver.Color=[0 0.5 0];
+DeltaNetForceQuiver.MaxHeadSize=0.1;
+%Correct scaling so that LH and RH are scaled the same.
+DeltaNetForceQuiver.AutoScaleFactor=LHForceQuiver.ScaleFactor/DeltaNetForceQuiver.ScaleFactor;
+
+%Add Legend to Plot
+legend('','','','','ZVCF LH Force','ZVCF RH Force','ZVCF Net Force','Delta LH Force','Delta RH Force','Delta Net Force');
+
+%Add a Title
+title('Hand Forces');
+subtitle('ZVCF and Delta Comparison');
+
+%Set View
+view(-0.186585735654603,37.199999973925109);
+
+%Save Figure
+savefig('ZVCF Quiver Plots/ZVCF_Quiver Plot - Hand Forces ZVCF Comparison to Delta');
+PauseTime=1;
+pause(PauseTime);
+
+%Close Figure
+close(815);
+
+%Clear Figure from Workspace
+clear LHForceQuiver;
+clear RHForceQuiver;
+clear NetForceQuiver;
+clear DeltaLHForceQuiver;
+clear DeltaRHForceQuiver;
+clear DeltaNetForceQuiver;
+clear Grip;
+clear Shaft;
+clear ClubPath;
+clear HandPath;
+clear PauseTime;
+
+%%% END FILE: SCRIPT_3D_ZVCF_QUIVER_LHRHForceDeltaComparison.m %%%
+
+%%% START FILE: SCRIPT_QuiverClubandShaftBaseData_3D.m %%%
+%Reads from a Table named Data in main workspace Generated from the Quivers
+%Plots tab on the main worksheets.
+
+%Generate Shaft Quivers
+Shaft=quiver3(BASEQ.RHx(:,1),BASEQ.RHy(:,1),BASEQ.RHz(:,1),BASEQ.Shaftdx(:,1),BASEQ.Shaftdy(:,1),BASEQ.Shaftdz(:,1),0);
+Shaft.ShowArrowHead='off';		%Turn off arrow heads
+Shaft.LineWidth=1;			    %Adjust line weighting
+Shaft.Color=[0.5 0.5 0.5];		%Set shaft color gray
+hold on;				        %Hold the current plot when you generate new
+
+%Generate Grip Quivers
+Grip=quiver3(BASEQ.Buttx(:,1),BASEQ.Butty(:,1),BASEQ.Buttz(:,1),BASEQ.Gripdx(:,1),BASEQ.Gripdy(:,1),BASEQ.Gripdz(:,1),0);
+Grip.ShowArrowHead='off';
+Grip.LineWidth=1;			    %Set grip line width
+Grip.Color=[0 0 0];			    %Set grip color to black
+
+%Calculate height of table
+H=height(BASEQ);
+
+%Calculate how many rows to copy
+h=H-1;
+
+%Generate Hand Path Quivers
+HandPath=quiver3(BASEQ.MPx(1:h,1),BASEQ.MPy(1:h,1),BASEQ.MPz(1:h,1),BASEQ.MPPx(1:h,1),BASEQ.MPPy(1:h,1),BASEQ.MPPz(1:h,1),0);
+HandPath.ShowArrowHead='off';		%Turn off arrow heads
+HandPath.LineWidth=1;			    %Adjust line weighting
+HandPath.Color=[0 0 0];		        %Set shaft color black
+
+%Generate Club Path Quivers
+ClubPath=quiver3(BASEQ.CHx(1:h,1),BASEQ.CHy(1:h,1),BASEQ.CHz(1:h,1),BASEQ.CHPx(1:h,1),BASEQ.CHPy(1:h,1),BASEQ.CHPz(1:h,1),0);
+ClubPath.ShowArrowHead='off';		%Turn off arrow heads
+ClubPath.LineWidth=1;			    %Adjust line weighting
+ClubPath.Color=[0 0 0];		        %Set shaft color black
+
+% clear Grip;
+% clear Shaft;
+% clear HandPath;
+% clear ClubPath;
+clear h;
+clear H;
+
+%%% END FILE: SCRIPT_QuiverClubandShaftBaseData_3D.m %%%
+
+%%% START FILE: SCRIPT_ZVCF_QTableGenerate_3D.m %%%
+%SCRIPT_QTableTimeChange
+%Turn off the warning that a directory already exists when you create it.
+warning('off', 'MATLAB:MKDIR:DirectoryExists');
+
+%Create the tables from nontruncated data:
+ZVCFTableQ=ZVCFTable;
+
+%Desired time step:
+TsQ=0.0025;
+
+%Generate duration times for each table:
+ZVCFTableTime=seconds(ZVCFTableQ.Time);
+
+%Create Versions of the Table to Modify
+ZVCFTableTemp=ZVCFTableQ;
+
+%Write duration times into the tables:
+ZVCFTableTemp.('t')=ZVCFTableTime;
+
+%Create a timetable using the duration timnes generated above:
+ZVCFTableTimetableTemp=table2timetable(ZVCFTableTemp,"RowTimes","t");
+
+%Remove the remaining time variable from the Timetable:
+ZVCFTableTimetable=removevars(ZVCFTableTimetableTemp,'Time');
+
+ZVCFTableQUniform=retime(ZVCFTableTimetable,'regular','spline','TimeStep',seconds(TsQ));
+
+%Cleanup a bit
+clear ZVCFTableTimetable;
+clear ZVCFTableTemp;
+clear ZVCFTableTime;
+clear ZVCFTableTimetableTemp;
+
+ZVCFTableQ=timetable2table(ZVCFTableQUniform,"ConvertRowTimes",true);
+ZVCFTableQ=renamevars(ZVCFTableQ,"t","Time");
+
+%Cleanup
+clear ZVCFTableTimetable;
+clear ZVCFTableQUniform;
+clear TsQ;
+
+%Convert the time vector back to normal time rather than duration
+ZVCFTableQTime=seconds(ZVCFTableQ.Time);
+ZVCFTableQ.Time=ZVCFTableQTime;
+
+clear ZVCFTableQTime;
+
+cd(matlabdrive);
+cd '3DModel';
+mkdir 'Tables';
+cd 'Tables/';
+save('ZVCFTableQ.mat',"ZVCFTableQ");
+
+%%% END FILE: SCRIPT_ZVCF_QTableGenerate_3D.m %%%
+
+%%% END OF PACKED PROJECT %%%

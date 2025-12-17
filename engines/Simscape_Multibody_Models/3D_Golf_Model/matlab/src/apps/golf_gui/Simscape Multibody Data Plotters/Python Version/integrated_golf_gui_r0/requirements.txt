@@ -1,0 +1,19 @@
+# Core dependencies
+numpy>=1.20.0
+scipy>=1.8.0
+pandas>=1.3.0
+matplotlib>=3.5.0
+
+# GUI and visualization
+PyQt6>=6.2.0
+moderngl>=5.6.0
+
+# Data processing
+numba>=0.55.0
+
+# Testing and development
+pytest>=6.2.0
+flake8>=4.0.0
+
+# Biomechanics
+filterpy>=1.4.5

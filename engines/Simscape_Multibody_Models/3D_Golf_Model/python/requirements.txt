@@ -1,0 +1,7 @@
+numpy==2.0.1
+pandas==2.2.2
+matplotlib==3.9.0
+scipy==1.13.1
+ezc3d==1.6.3
+pytest==8.2.0
+pyyaml==6.0.1

@@ -1,0 +1,143 @@
+# MATLAB Requirements for Golf_Model Repository
+# =============================================
+
+# Required MATLAB Toolboxes
+# ========================
+# Note: These toolboxes are typically licensed separately
+Parallel_Computing_Toolbox
+Statistics_and_Machine_Learning_Toolbox
+Signal_Processing_Toolbox
+Control_System_Toolbox
+Simscape
+Simulink
+
+# External MATLAB Packages (if using Add-On Explorer)
+# =================================================
+# PackageName==Version
+# MATLAB_Support_Package_for_Arduino==22.2.0
+
+# Required Custom Functions for Core Functionality
+# =============================================
+# Core simulation functions
+initializeLocalCluster.m
+performance_tracker.m
+performance_monitor.m
+performance_analysis.m
+performance_optimizer.m
+performance_optimizer_functions.m
+
+# Data extraction and processing functions
+data_extraction_functions.m
+extractAllSignalsFromBus.m
+extractTimeSeriesData.m
+extractWorkspaceOutputs.m
+extractSimscapeDataRecursive.m
+extractFromCombinedSignalBus.m
+extractLogsoutDataFixed.m
+extractSignalsFromSimOut.m
+extractConstantMatrixData.m
+extractDataFromField.m
+extractDataWithOptions.m
+extractCoefficientsFromTable.m
+extractCombinedSignalBusData.m
+
+# GUI and interface functions
+gui_layout_manager.m
+gui_tab_manager.m
+preview_manager.m
+input_validator.m
+configuration_manager.m
+checkpoint_manager.m
+checkpoint_recovery.m
+
+# Simulation and analysis functions
+simulation_input_preparer.m
+parallel_simulation_manager.m
+runSingleTrial.m
+setModelParameters.m
+setPolynomialCoefficients.m
+calculateJointPowerWork.m
+calculateWorkPowerAndGranularAngularImpulse3D.m
+calculateForceMoments.m
+addModelWorkspaceData.m
+
+# Data processing and utilities
+dataset_compiler.m
+combineDataSources.m
+mergeTables.m
+resampleDataToFrequency.m
+compressData.m
+compare_headers_detailed.m
+generateRandomCoefficients.m
+getPolynomialParameterInfo.m
+getShortenedJointName.m
+getOrCreateParallelPool.m
+
+# Memory and performance monitoring
+memory_monitor.m
+getMemoryUsage.m
+getMemoryInfo.m
+checkHighMemoryUsage.m
+
+# Model and configuration functions
+checkModelConfiguration.m
+check_model_configuration.m
+checkStopRequest.m
+inspect_simscape_hierarchy.m
+traverseSimlogNode.m
+
+# Utility and helper functions
+logMessage.m
+logBatchResult.m
+recordBatchTime.m
+recordPhase.m
+endPhase.m
+restoreWorkspace.m
+logical2str.m
+shouldShowDebug.m
+shouldShowNormal.m
+shouldShowVerbose.m
+verbosity_control.m
+
+# Post-processing and analysis
+PostProcessingModule.m
+processSimulationOutput.m
+prepareSimulationInputsForBatch.m
+
+# Test and validation functions
+test_simple.m
+test_all_functions.m
+test_cluster_function.m
+test_direct_function_call.m
+test_enhanced_calculations.m
+test_granular_angular_impulse.m
+test_granular_calculations_with_checkboxes.m
+test_parallel_pool_fix.m
+test_performance_descriptions.m
+test_performance_interface.m
+test_performance_preferences.m
+test_preallocation_performance.m
+test_performance_descriptions.m
+
+# Performance and optimization
+setup_performance_preferences.m
+Clear_Parallel_Cache.m
+
+# Required Model Files
+# ===================
+# These .slx files are required for the GUI to function
+Model/GolfSwing3D_Kinetic.slx
+Model/PolynomialInputValues.mat
+
+# Required Data Files
+# ==================
+# Configuration and input data files
+python/src/constants.py
+
+# Notes
+# =====
+# 1. Ensure all required .m files are in the MATLAB path
+# 2. The performance tracking system requires the performance_tracker class
+# 3. Parallel computing features require Parallel Computing Toolbox
+# 4. Some functions may have dependencies on specific MATLAB versions
+# 5. Custom functions are organized in the functions/ subdirectory
