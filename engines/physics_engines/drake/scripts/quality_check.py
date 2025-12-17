@@ -229,7 +229,8 @@ def main() -> None:
         "quality_check_script.py",
         "quality-check.py",
         "quality-check-script.py",
-        "matlab_quality_check.py",  # Checks for placeholders, contains patterns it checks for
+        # Checks for placeholders, contains patterns it checks for
+        "matlab_quality_check.py",
     ]
     python_files = [f for f in python_files if f.name not in excluded_script_names]
 

@@ -84,7 +84,8 @@ DURATION = [50, 60, 20, 10, 60]  # ticks per phase
 def get_cmu_joint_names(env) -> list[str]:
     """Retrieve joint names for the CMU model."""
     # This is a best-effort inspection.
-    # If explicit names aren't in named.data, we might need a hardcoded mapping or try to print them.
+    # If explicit names aren't in named.data, we might need a hardcoded
+    # mapping or try to print them.
     try:
         return env.physics.named.data.qpos.axes.row.names
     except Exception:
@@ -143,7 +144,8 @@ def main() -> None:
             # Apply pose to physics
             # Note: qpos includes position (xyz) and orientation (quat) of root at start.
             # We need to be careful not to overwrite the root if we don't want to.
-            # However, for kinematic animation, we can just write to known named joints.
+            # However, for kinematic animation, we can just write to known
+            # named joints.
             # Apply pose directly to qpos
             for joint_name, angle in interpolated.items():
                 try:
