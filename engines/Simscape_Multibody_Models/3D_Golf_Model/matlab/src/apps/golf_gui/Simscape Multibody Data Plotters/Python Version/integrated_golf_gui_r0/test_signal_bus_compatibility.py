@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Test script to check signal bus compatibility with the GUI
-This script will analyze the current MATLAB data structure and test if the GUI can handle it.
+This script will analyze the current MATLAB data structure 
+and test if the GUI can handle it.
 """
 
 import os
@@ -49,7 +50,8 @@ def test_matlab_data_structure():
                         )
                         if value.ndim == 2 and value.shape[1] > 10:
                             print(
-                                f"    Sample columns: {list(range(min(5, value.shape[1])))}"
+                                f"    Sample columns: "
+                                f"{list(range(min(5, value.shape[1])))}"
                             )
                     else:
                         print(f"  {key}: {type(value).__name__}")
@@ -175,7 +177,8 @@ def analyze_signal_bus_structure():
                     for i in range(min(10, baseq_data.shape[1])):
                         col_data = baseq_data[:, i]
                         print(
-                            f"  Column {i}: range [{col_data.min():.3f}, {col_data.max():.3f}], mean {col_data.mean():.3f}"
+                            f"  Column {i}: range [{col_data.min():.3f}, "
+                            f"{col_data.max():.3f}], mean {col_data.mean():.3f}"
                         )
 
         return True
@@ -234,7 +237,8 @@ def main():
         print("Recommendations:")
         print("1. The current data structure appears to be compatible")
         print(
-            "2. Consider adding a GUI option to disable Simscape Results Explorer for speed"
+            "2. Consider adding a GUI option to disable Simscape Results "
+            "Explorer for speed"
         )
         print("3. Test with a full simulation run to verify all data is captured")
     else:

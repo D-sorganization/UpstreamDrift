@@ -441,7 +441,8 @@ class OpenGLRenderer:
         self.geometry_manager.create_geometry_object("ground", "ground", "ground")
 
         print(
-            f"[OK] Created {len(self.geometry_manager.geometry_objects)} geometry objects"
+            f"[OK] Created {len(self.geometry_manager.geometry_objects)} "
+            f"geometry objects"
         )
 
     def set_viewport(self, width: int, height: int):
@@ -834,7 +835,8 @@ class OpenGLRenderer:
         shaft_direction = frame_data.clubhead - frame_data.butt
         shaft_direction = shaft_direction / np.linalg.norm(shaft_direction)
 
-        # Face normal points perpendicular to shaft (this is simplified - real clubs have loft)
+        # Face normal points perpendicular to shaft
+        # (this is simplified - real clubs have loft)
         # For now, assume face points in the direction of swing (perpendicular to shaft)
         face_normal = np.cross(
             shaft_direction, np.array([0, 1, 0])
@@ -912,7 +914,8 @@ if __name__ == "__main__":
         vertex_shader = ShaderLibrary.get_simple_vertex_shader()
         fragment_shader = ShaderLibrary.get_simple_fragment_shader()
         print(
-            f"   Simple shaders: {len(vertex_shader)} + {len(fragment_shader)} characters"
+            f"   Simple shaders: {len(vertex_shader)} + "
+            f"{len(fragment_shader)} characters"
         )
 
         print("[OK] Shader compilation test passed")
