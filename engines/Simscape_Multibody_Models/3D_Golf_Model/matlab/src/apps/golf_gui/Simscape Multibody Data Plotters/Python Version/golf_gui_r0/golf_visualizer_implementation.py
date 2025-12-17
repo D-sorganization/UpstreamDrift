@@ -18,14 +18,20 @@ import moderngl as mgl
 import numpy as np
 import scipy.io
 from numba import jit
-from PyQt6.QtCore import QTimer, pyqtSignal, QThread, Qt
-from PyQt6.QtOpenGL import QOpenGLBuffer, QOpenGLShader, QOpenGLShaderProgram
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QVBoxLayout, QHBoxLayout, QWidget,
-    QDockWidget, QSlider, QLabel, QPushButton, QCheckBox, QComboBox,
-    QSpinBox, QDoubleSpinBox, QGroupBox, QGridLayout, QSplitter,
-    QTextEdit, QProgressBar, QStatusBar, QMenuBar, QToolBar
+    QApplication,
+    QCheckBox,
+    QDockWidget,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+    QSlider,
+    QVBoxLayout,
+    QWidget,
 )
 
 # ============================================================================

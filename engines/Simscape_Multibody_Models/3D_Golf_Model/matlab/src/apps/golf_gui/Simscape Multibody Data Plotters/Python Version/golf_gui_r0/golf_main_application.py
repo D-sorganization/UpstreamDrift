@@ -27,20 +27,12 @@ except ImportError as e:
     print(f"Error: {e}")
     sys.exit(1)
 
-# Import OpenGL with error handling
-try:
-    import moderngl as mgl
-except ImportError as e:
-    print("❌ ModernGL not found. Please install it with: pip install moderngl")
-    print(f"Error: {e}")
-    sys.exit(1)
+# OpenGL will be imported by the renderer modules as needed
 
 # Import core modules with error handling
 try:
     from golf_camera_system import CameraController, CameraMode, CameraPreset
     from golf_data_core import (
-        FrameProcessor,
-        MatlabDataLoader,
         PerformanceStats,
         RenderConfig,
     )

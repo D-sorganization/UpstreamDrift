@@ -352,13 +352,16 @@ class GolfSwingAnalyzerPyQt6(QMainWindow):
                 print("    - Not the full club head motion")
                 print(f"  WARNING: Very small motion range ({pos_range:.3f}m)")
                 print(
-                    "    - For comparison, a golf swing typically has 2-4m of club head motion"
+                    "    - For comparison, a golf swing typically has "
+                    "2-4m of club head motion"
                 )
                 print(
-                    "    - This data appears to track a fixed point, not the full swing arc"
+                    "    - This data appears to track a fixed point, "
+                    "not the full swing arc"
                 )
                 print(
-                    "    - Using standard club length and motion scaling for visualization"
+                    "    - Using standard club length and motion scaling "
+                    "for visualization"
                 )
 
                 print("Orientation vector ranges:")
