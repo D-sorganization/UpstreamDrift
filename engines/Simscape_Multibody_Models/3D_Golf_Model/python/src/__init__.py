@@ -12,8 +12,14 @@ _load_tour_average_reader: Any = None
 try:
     from .c3d_reader import (
         C3DDataReader as _C3DDataReader_imported,
+    )
+    from .c3d_reader import (
         C3DEvent as _C3DEvent_imported,
+    )
+    from .c3d_reader import (
         C3DMetadata as _C3DMetadata_imported,
+    )
+    from .c3d_reader import (
         load_tour_average_reader as _load_tour_average_reader_imported,
     )
 
@@ -33,7 +39,7 @@ C3DEvent = _C3DEvent
 C3DMetadata = _C3DMetadata
 load_tour_average_reader = _load_tour_average_reader
 
-__all__: List[str] = [
+__all__: list[str] = [
     "C3DDataReader",
     "C3DEvent",
     "C3DMetadata",

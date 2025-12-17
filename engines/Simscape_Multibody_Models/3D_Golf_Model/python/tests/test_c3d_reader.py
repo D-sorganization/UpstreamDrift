@@ -11,8 +11,7 @@ import numpy as np
 import numpy.typing as npt
 import pytest
 
-from src.c3d_reader import C3DDataReader, load_tour_average_reader
-from src.c3d_reader import C3DEvent
+from src.c3d_reader import C3DDataReader, C3DEvent, load_tour_average_reader
 
 # Skip tests if ezc3d is not available (e.g., Python 3.9)
 EZC3D_AVAILABLE = importlib.util.find_spec("ezc3d") is not None
