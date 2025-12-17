@@ -1263,13 +1263,18 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
            ctrlrange="-150 150"/>
 
     <!-- Spine (3 DOF) -->
-    <motor name="spine_lateral" joint="spine_lateral" gear="140" ctrllimited="true" ctrlrange="-120 120"/>
-    <motor name="spine_sagittal" joint="spine_sagittal" gear="150" ctrllimited="true" ctrlrange="-130 130"/>
-    <motor name="spine_rotation" joint="spine_rotation" gear="130" ctrllimited="true" ctrlrange="-110 110"/>
+    <motor name="spine_lateral" joint="spine_lateral" gear="140"
+           ctrllimited="true" ctrlrange="-120 120"/>
+    <motor name="spine_sagittal" joint="spine_sagittal" gear="150"
+           ctrllimited="true" ctrlrange="-130 130"/>
+    <motor name="spine_rotation" joint="spine_rotation" gear="130"
+           ctrllimited="true" ctrlrange="-110 110"/>
 
     <!-- Left Scapula (2 DOF) -->
-    <motor name="l_scap_elev" joint="left_scapula_elevation" gear="35" ctrllimited="true" ctrlrange="-40 40"/>
-    <motor name="l_scap_prot" joint="left_scapula_protraction" gear="30" ctrllimited="true" ctrlrange="-35 35"/>
+    <motor name="l_scap_elev" joint="left_scapula_elevation" gear="35"
+           ctrllimited="true" ctrlrange="-40 40"/>
+    <motor name="l_scap_prot" joint="left_scapula_protraction" gear="30"
+           ctrllimited="true" ctrlrange="-35 35"/>
 
     <!-- Left Shoulder (3 DOF) -->
     <motor name="l_shldr_flex" joint="left_shoulder_flexion" gear="70" ctrllimited="true" ctrlrange="-90 90"/>

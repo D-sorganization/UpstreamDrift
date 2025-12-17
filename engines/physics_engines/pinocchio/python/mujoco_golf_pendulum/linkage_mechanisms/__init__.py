@@ -463,10 +463,12 @@ def generate_peaucellier_linkage_xml(scale=1.0) -> str:
         <body name="rhombus_center" pos="{1.2 * scale} 0 1">
             <joint name="rhombus_joint" type="hinge" axis="0 0 1" damping="0.1"/>
             <geom type="capsule"
-                  fromto="{-0.5 * scale} {0.8 * scale} 0  {0.5 * scale} {-0.8 * scale} 0"
+                  fromto="{-0.5 * scale} {0.8 * scale} 0
+                         {0.5 * scale} {-0.8 * scale} 0"
                   size="0.03" material="link_mat" mass="0.3"/>
             <geom type="capsule"
-                  fromto="{-0.5 * scale} {-0.8 * scale} 0  {0.5 * scale} {0.8 * scale} 0"
+                  fromto="{-0.5 * scale} {-0.8 * scale} 0
+                         {0.5 * scale} {0.8 * scale} 0"
                   size="0.03" material="link_mat" mass="0.3"/>
 
             <!-- Tracer point (generates straight line) -->
@@ -479,7 +481,8 @@ def generate_peaucellier_linkage_xml(scale=1.0) -> str:
     </worldbody>
 
     <actuator>
-        <motor name="drive_motor" joint="drive_joint" gear="15" ctrllimited="true" ctrlrange="-5 5"/>
+        <motor name="drive_motor" joint="drive_joint" gear="15"
+               ctrllimited="true" ctrlrange="-5 5"/>
     </actuator>
 </mujoco>
 """
@@ -536,7 +539,8 @@ def generate_chebyshev_linkage_xml() -> str:
 
             <!-- Coupler attached to left crank (2.5 units) -->
             <body name="coupler" pos="1.4 1.4 0">
-                <joint name="coupler_left_joint" type="hinge" axis="0 0 1" damping="0.1"/>
+                <joint name="coupler_left_joint" type="hinge" axis="0 0 1"
+                       damping="0.1"/>
                 <geom type="capsule" fromto="0 0 0  2.0 -0.5 0" size="0.05"
                       material="link2_mat" mass="0.7"/>
 
@@ -625,7 +629,8 @@ def generate_pantograph_xml(scale_factor=2.0) -> str:
             <!-- Second arm segment -->
             <body name="arm2" pos="1.5 1.0 0">
                 <joint name="arm2_joint" type="hinge" axis="0 0 1" damping="0.15"/>
-                <geom type="capsule" fromto="0 0 0  {1.5 * scale_factor} {1.0 * scale_factor} 0"
+                <geom type="capsule"
+                      fromto="0 0 0  {1.5 * scale_factor} {1.0 * scale_factor} 0"
                       size="0.05" material="arm_mat" mass="0.5"/>
 
                 <!-- Output point (scaled) -->
