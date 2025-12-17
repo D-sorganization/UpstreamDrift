@@ -116,7 +116,7 @@ class DataProcessor:
                 datasets[name] = self._extract_dataframe(mat_data[var_name])
                 print(f"✅ Loaded {name}: {len(datasets[name])} frames")
             except Exception as e:
-                raise RuntimeError(f"Failed to load {filepath}: {e}")
+                raise RuntimeError(f"Failed to load {filepath}: {e}") from e
 
         self._calculate_scaling_factors(datasets["BASEQ"])
         return datasets["BASEQ"], datasets["ZTCFQ"], datasets["DELTAQ"]
