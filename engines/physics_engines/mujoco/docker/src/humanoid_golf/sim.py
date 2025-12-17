@@ -177,11 +177,16 @@ class LQRController(BaseController):
         x_targ = np.concatenate([self.qpos_targ, self.qvel_targ])
 
         # Simple error
-        # WARNING: Quaternion subtraction (x_targ - x_curr) is not mathematically correct for 3D rotations
-        # (orientation differences should be computed via quaternion multiplication/inverse).
-        # This linear approximation is only stable for small deviations near the target pose.
-        # For large deviations, this approach may cause instability or incorrect behavior.
-        # NOTE: Implement proper quaternion error computation (e.g. via scipy.spatial.transform.Rotation).
+        # WARNING: Quaternion subtraction (x_targ - x_curr) is not
+        # mathematically correct for 3D rotations
+        # (orientation differences should be computed via quaternion
+        # multiplication/inverse).
+        # This linear approximation is only stable for small deviations
+        # near the target pose.
+        # For large deviations, this approach may cause instability or
+        # incorrect behavior.
+        # NOTE: Implement proper quaternion error computation
+        # (e.g. via scipy.spatial.transform.Rotation).
         err = x_targ - x_curr
 
         return self.K @ err
