@@ -564,7 +564,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
             speed = np.sqrt(vx**2 + vy**2 + vz**2)
             return speed.max()
-        except:
+        except (KeyError, ValueError, IndexError):
             return 0.0
 
     def _calculate_trajectory_difference(self) -> float:
@@ -577,7 +577,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
             rms_diff = np.sqrt(np.mean(diff_x**2 + diff_y**2 + diff_z**2))
             return rms_diff
-        except:
+        except (KeyError, ValueError, IndexError):
             return 0.0
 
     def _update_frame_metrics(self, frame_idx: int):
