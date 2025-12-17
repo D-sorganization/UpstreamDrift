@@ -49,16 +49,16 @@ def library_module(
 
 
 @pytest.fixture()
-def recording_lib(
-    library_module: types.ModuleType, tmp_path: Path
-) -> Any:  # noqa: ANN401
+def recording_lib(library_module: types.ModuleType, tmp_path: Path) -> Any:  # noqa: ANN401
     """Create a temporary recording library."""
     lib_dir = tmp_path / "recordings"
     return library_module.RecordingLibrary(str(lib_dir))
 
 
 def test_add_recording_sanitization(
-    library_module: types.ModuleType, recording_lib: Any, tmp_path: Path  # noqa: ANN401
+    library_module: types.ModuleType,
+    recording_lib: Any,
+    tmp_path: Path,  # noqa: ANN401
 ) -> None:
     """Test that filenames are sanitized when adding recordings."""
     RecordingMetadata = library_module.RecordingMetadata
@@ -109,7 +109,9 @@ def test_delete_recording_security(recording_lib: Any) -> None:  # noqa: ANN401
 
 
 def test_normal_operations(
-    library_module: types.ModuleType, recording_lib: Any, tmp_path: Path  # noqa: ANN401
+    library_module: types.ModuleType,
+    recording_lib: Any,
+    tmp_path: Path,  # noqa: ANN401
 ) -> None:
     """Test normal add/get/delete operations."""
     RecordingMetadata = library_module.RecordingMetadata

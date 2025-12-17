@@ -122,7 +122,7 @@ def main() -> None:
     frames = []
 
     # Current state of joints (starts at 0)
-    current_pose = {}
+    current_pose: dict[str, float] = {}
 
     print("Simulating golf swing...")
 
