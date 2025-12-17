@@ -6,7 +6,7 @@ Handles Excel-based motion capture data and converts to the GUI's expected forma
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Any
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -32,10 +32,10 @@ class MotionDataConfig:
     # Alternative sheets available: GW_ProV11, GW_wiffle (Ground Wood)
 
     # Column mappings for ProV1 data
-    prov1_columns: Optional[Dict[str, str]] = None
+    prov1_columns: dict[str, str] | None = None
 
     # Column mappings for Wiffle data
-    wiffle_columns: Optional[Dict[str, str]] = None
+    wiffle_columns: dict[str, str] | None = None
 
     # Data processing options
     normalize_time: bool = True
@@ -118,11 +118,11 @@ class MotionDataConfig:
 class MotionDataLoader:
     """Loader for motion capture Excel data"""
 
-    def __init__(self, config: Optional[MotionDataConfig] = None):
+    def __init__(self, config: MotionDataConfig | None = None):
         self.config = config or MotionDataConfig()
-        self.data_cache: Dict[str, Any] = {}
+        self.data_cache: dict[str, Any] = {}
 
-    def load_data(self) -> Dict[str, pd.DataFrame]:
+    def load_data(self) -> dict[str, pd.DataFrame]:
         """
         Load Wiffle_ProV1 data from the default Excel file location
 
@@ -147,7 +147,7 @@ class MotionDataLoader:
             "Wiffle_ProV1 Excel file not found in any expected location"
         )
 
-    def load_from_file(self, filepath: str) -> Dict[str, pd.DataFrame]:
+    def load_from_file(self, filepath: str) -> dict[str, pd.DataFrame]:
         """
         Load Wiffle_ProV1 Excel data from a specific file path
 
@@ -159,7 +159,7 @@ class MotionDataLoader:
         """
         return self.load_excel_data(filepath)
 
-    def load_excel_data(self, filepath: str) -> Dict[str, pd.DataFrame]:
+    def load_excel_data(self, filepath: str) -> dict[str, pd.DataFrame]:
         """
         Load Wiffle_ProV1 Excel data and convert to GUI-compatible format
 
@@ -449,8 +449,8 @@ class MotionDataLoader:
         return df
 
     def convert_to_gui_format(
-        self, excel_data: Dict[str, pd.DataFrame]
-    ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        self, excel_data: dict[str, pd.DataFrame]
+    ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """
         Convert Excel data to the format expected by the GUI
 

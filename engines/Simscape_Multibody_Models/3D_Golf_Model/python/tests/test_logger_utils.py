@@ -3,10 +3,9 @@
 import logging
 import random
 
-import numpy as np
-
 # Import handled by conftest.py
 import logger_utils
+import numpy as np
 from logger_utils import get_logger, set_seeds
 
 

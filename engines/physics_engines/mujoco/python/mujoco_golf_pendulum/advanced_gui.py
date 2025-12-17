@@ -1552,7 +1552,9 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
                 # Load from XML string (traditional models)
                 self.sim_widget.load_model_from_xml(config["xml"])
             else:
-                error_msg = f"Model config must have 'xml' or 'xml_path': {config['name']}"
+                error_msg = (
+                    f"Model config must have 'xml' or 'xml_path': {config['name']}"
+                )
                 raise ValueError(error_msg)
         except (FileNotFoundError, ValueError) as e:
             # Show error dialog and fall back to a working model
