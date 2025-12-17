@@ -32,12 +32,10 @@ except ImportError as e:
 # Import core modules with error handling
 try:
     from golf_camera_system import CameraController, CameraMode, CameraPreset
-    from golf_data_core import (
-        PerformanceStats,
-        RenderConfig,
-    )
-    from golf_gui_application import GolfVisualizerMainWindow, GolfVisualizerWidget
-    from golf_opengl_renderer import OpenGLRenderer
+
+    # golf_data_core imports removed - not used in this file
+    from golf_gui_application import GolfVisualizerMainWindow
+    # OpenGLRenderer import removed - not used in this file
 except ImportError as e:
     logger.error(f"Failed to import core modules: {e}")
     print(
