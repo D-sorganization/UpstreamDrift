@@ -106,7 +106,9 @@ def test_add_recording_sanitization(isolated_library, temp_library) -> None:
     source_path.write_text("{}")
 
     metadata = RecordingMetadata(
-        golfer_name="AC/DC", club_type="Iron", filename=""  # Force generation
+        golfer_name="AC/DC",
+        club_type="Iron",
+        filename="",  # Force generation
     )
 
     lib.add_recording(str(source_path), metadata, copy_to_library=True)

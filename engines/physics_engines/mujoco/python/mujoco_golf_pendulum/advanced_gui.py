@@ -1775,7 +1775,10 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         detail_btn = QtWidgets.QPushButton("Edit…")
         detail_btn.setToolTip("Open detailed control options for this actuator")
         detail_btn.clicked.connect(
-            lambda *, i=actuator_index, name=actuator_name, s=slider: self.open_actuator_detail_dialog(
+            lambda *,
+            i=actuator_index,
+            name=actuator_name,
+            s=slider: self.open_actuator_detail_dialog(
                 i,
                 name,
                 slider=s,
@@ -1897,7 +1900,9 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             coeff_spinbox.setDecimals(4)
             coeff_spinbox.setValue(0.0)
             coeff_spinbox.valueChanged.connect(
-                lambda val, idx=i, act_idx=actuator_index: self.on_polynomial_coeff_changed(
+                lambda val,
+                idx=i,
+                act_idx=actuator_index: self.on_polynomial_coeff_changed(
                     act_idx,
                     idx,
                     val,
@@ -2264,7 +2269,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
     def on_actuator_slider_changed(self, actuator_index: int, value: int) -> None:
         """Handle slider change - update constant value and label."""
         if actuator_index < len(self.actuator_constant_inputs):
-            self.actuator_constant_inputs[actuator_index].setValue(float(value))
+            # Bolt: Block signals to prevent feedback loop and precision loss
+            spinbox = self.actuator_constant_inputs[actuator_index]
+            was_blocked = spinbox.blockSignals(True)
+            spinbox.setValue(float(value))
+            spinbox.blockSignals(was_blocked)
         if actuator_index < len(self.actuator_labels):
             self.actuator_labels[actuator_index].setText(f"{value:.0f} Nm")
         # Update control system
@@ -2277,7 +2286,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         """Handle constant value input change."""
         # Update slider
         if actuator_index < len(self.actuator_sliders):
-            self.actuator_sliders[actuator_index].setValue(int(value))
+            # Bolt: Block signals to prevent feedback loop
+            slider = self.actuator_sliders[actuator_index]
+            was_blocked = slider.blockSignals(True)
+            slider.setValue(int(value))
+            slider.blockSignals(was_blocked)
         # Update control system
         control_system = self.sim_widget.get_control_system()
         if control_system is not None:
@@ -3294,9 +3307,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             slider.setValue(slider_val)
 
             slider.valueChanged.connect(
-                lambda v, n=name, mn=min_val, mx=max_val, lbl=val_label: self._on_joint_slider_changed(
-                    n, v, mn, mx, lbl
-                )
+                lambda v,
+                n=name,
+                mn=min_val,
+                mx=max_val,
+                lbl=val_label: self._on_joint_slider_changed(n, v, mn, mx, lbl)
             )
 
             layout.addWidget(slider)
@@ -3308,9 +3323,12 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             spin.setValue(current_val)
 
             spin.valueChanged.connect(
-                lambda v, n=name, mn=min_val, mx=max_val, sl=slider, lbl=val_label: self._on_joint_spin_changed(
-                    n, v, mn, mx, sl, lbl
-                )
+                lambda v,
+                n=name,
+                mn=min_val,
+                mx=max_val,
+                sl=slider,
+                lbl=val_label: self._on_joint_spin_changed(n, v, mn, mx, sl, lbl)
             )
 
             layout.addWidget(spin)
