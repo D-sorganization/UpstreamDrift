@@ -4,16 +4,14 @@ import os
 import subprocess
 import sys
 import threading
-import tkinter as tk
 import time
+import tkinter as tk
 import webbrowser
-from tkinter import ttk, messagebox
+from tkinter import messagebox, ttk
 
 # Config - UPDATED FOR GOLF_MODELING_SUITE
 REPOS_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-ASSETS_DIR = os.path.abspath(
-    os.path.join(os.path.dirname(__file__), "launchersassets")
-)
+ASSETS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "launchersassets"))
 DOCKER_IMAGE_NAME = "robotics_env"
 logger = logging.getLogger(__name__)
 
@@ -345,12 +343,14 @@ class UnifiedLauncher(tk.Tk):
             fg=COLOR_FG,
             font=("Consolas", 9),
             wrap="word",
-            state="disabled"
+            state="disabled",
         )
-        
-        scrollbar = ttk.Scrollbar(log_inner, orient="vertical", command=self.log_text.yview)
+
+        scrollbar = ttk.Scrollbar(
+            log_inner, orient="vertical", command=self.log_text.yview
+        )
         self.log_text.configure(yscrollcommand=scrollbar.set)
-        
+
         self.log_text.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
@@ -359,10 +359,7 @@ class UnifiedLauncher(tk.Tk):
         log_controls.pack(fill="x", padx=10, pady=(0, 10))
 
         btn_clear_log = ttk.Button(
-            log_controls,
-            text="Clear Log",
-            command=self.clear_log,
-            style="TButton"
+            log_controls, text="Clear Log", command=self.clear_log, style="TButton"
         )
         btn_clear_log.pack(side="right")
 
@@ -375,7 +372,7 @@ class UnifiedLauncher(tk.Tk):
     def log(self, msg):
         self.lbl_status.config(text=f" {msg}")
         logger.info(msg)
-        
+
         # Also add to log text area
         self.log_text.config(state="normal")
         timestamp = time.strftime("%H:%M:%S")
@@ -450,7 +447,8 @@ class UnifiedLauncher(tk.Tk):
 
         def run_build():
             try:
-                # Open a new console for build output if on Windows, so user can see progress
+                # Open a new console for build output if on Windows, so user can see
+                # progress
                 creation_flags = 0
                 if os.name == "nt":
                     creation_flags = subprocess.CREATE_NEW_CONSOLE
@@ -487,7 +485,10 @@ class UnifiedLauncher(tk.Tk):
         if not self.docker_available:
             messagebox.showwarning(
                 "Docker Missing",
-                "Docker is not detected or the check is still in progress. Please wait or install Docker.",
+                (
+                    "Docker is not detected or the check is still in progress. "
+                    "Please wait or install Docker."
+                ),
             )
             return
 
@@ -539,10 +540,12 @@ class UnifiedLauncher(tk.Tk):
 
     def _schedule_browser_open(self, host_port):
         """Schedule a browser open for the Meshcat server."""
+
         def open_browser():
             time.sleep(3)
             with contextlib.suppress(Exception):
                 webbrowser.open(f"http://localhost:{host_port}")
+
         threading.Thread(target=open_browser, daemon=True).start()
 
     def _launch_docker_container(self, model_name, abs_repo_path):
@@ -590,18 +593,24 @@ class UnifiedLauncher(tk.Tk):
         if os.name == "nt":
             try:
                 create_new_console = 0x00000010
-                process = subprocess.Popen(["cmd", "/k", *cmd], creationflags=create_new_console)
+                process = subprocess.Popen(
+                    ["cmd", "/k", *cmd], creationflags=create_new_console
+                )
                 self.log(f"Simulation launched in new terminal (PID: {process.pid})")
             except Exception as e:
                 self.log(f"ERROR: Failed to launch simulation: {e}")
-                messagebox.showerror("Launch Error", f"Failed to start simulation:\n{e}")
+                messagebox.showerror(
+                    "Launch Error", f"Failed to start simulation:\n{e}"
+                )
         else:
             try:
                 process = subprocess.Popen(cmd)
                 self.log(f"Simulation launched (PID: {process.pid})")
             except Exception as e:
                 self.log(f"ERROR: Failed to launch simulation: {e}")
-                messagebox.showerror("Launch Error", f"Failed to start simulation:\n{e}")
+                messagebox.showerror(
+                    "Launch Error", f"Failed to start simulation:\n{e}"
+                )
 
 
 if __name__ == "__main__":

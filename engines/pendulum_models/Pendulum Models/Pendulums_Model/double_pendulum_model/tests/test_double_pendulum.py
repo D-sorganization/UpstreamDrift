@@ -42,7 +42,9 @@ def test_control_affine_matches_explicit_dynamics() -> None:
         f[3] + control_matrix[3][0] * control[0] + control_matrix[3][1] * control[1],
     )
     derivatives = dynamics.derivatives(0.0, state)
-    assert all(math.isclose(combined[i], derivatives[i], rel_tol=1e-9) for i in range(4))
+    assert all(
+        math.isclose(combined[i], derivatives[i], rel_tol=1e-9) for i in range(4)
+    )
 
 
 def test_joint_torque_breakdown_reports_components() -> None:
@@ -62,7 +64,8 @@ def test_gravity_projection_respects_plane_inclination() -> None:
     projected = parameters.projected_gravity
     assert math.isclose(
         projected,
-        parameters.gravity_m_s2 * math.cos(math.radians(parameters.plane_inclination_deg)),
+        parameters.gravity_m_s2
+        * math.cos(math.radians(parameters.plane_inclination_deg)),
     )
 
 
@@ -76,7 +79,9 @@ def test_singular_mass_matrix_is_detected() -> None:
     lower_segment = LowerSegmentProperties(
         length_m=0.0, shaft_mass_kg=1.0, clubhead_mass_kg=1.0, shaft_com_ratio=0.5
     )
-    parameters = DoublePendulumParameters(upper_segment=upper_segment, lower_segment=lower_segment)
+    parameters = DoublePendulumParameters(
+        upper_segment=upper_segment, lower_segment=lower_segment
+    )
     dynamics = DoublePendulumDynamics(parameters)
     state = DoublePendulumState(theta1=0.0, theta2=0.0, omega1=0.0, omega2=0.0)
     with pytest.raises(ZeroDivisionError):
