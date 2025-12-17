@@ -177,7 +177,9 @@ def make_cylinder_inertia(mass: float, radius: float, length: float) -> SpatialI
     # The cylinder is aligned with Z axis by default in pydrake's SolidCylinder.
     # Axis argument [0, 0, 1] confirms alignment.
     unit_inertia = UnitInertia.SolidCylinder(
-        radius, length, np.array([0.0, 0.0, 1.0], dtype=np.float64)  # type: ignore[arg-type]
+        radius,
+        length,
+        np.array([0.0, 0.0, 1.0], dtype=np.float64),  # type: ignore[arg-type]
     )
     # Construct SpatialInertia using mass, center of mass at [0, 0, 0], and the unit inertia.
     return SpatialInertia(
@@ -488,7 +490,9 @@ class GolfURDFGenerator:
             # Upper Arm
             ua_len = p.upper_arm.length
             I_ua = UnitInertia.SolidCylinder(
-                p.upper_arm.radius, ua_len, np.array([0.0, 0.0, 1.0], dtype=np.float64)  # type: ignore[arg-type]
+                p.upper_arm.radius,
+                ua_len,
+                np.array([0.0, 0.0, 1.0], dtype=np.float64),  # type: ignore[arg-type]
             )
 
             self.add_link(
@@ -525,7 +529,9 @@ class GolfURDFGenerator:
             # Forearm
             fa_len = p.forearm.length
             I_fa = UnitInertia.SolidCylinder(
-                p.forearm.radius, fa_len, np.array([0.0, 0.0, 1.0], dtype=np.float64)  # type: ignore[arg-type]
+                p.forearm.radius,
+                fa_len,
+                np.array([0.0, 0.0, 1.0], dtype=np.float64),  # type: ignore[arg-type]
             )
             fa_offset = np.array([0.0, 0.0, fa_len / 2.0], dtype=np.float64)  # type: ignore[arg-type]
 
@@ -581,7 +587,9 @@ class GolfURDFGenerator:
         # 6. Club (Attached to Left Hand)
         c_len = p.club.length
         I_club = UnitInertia.SolidCylinder(
-            p.club.radius, c_len, np.array([0.0, 0.0, 1.0], dtype=np.float64)  # type: ignore[arg-type]
+            p.club.radius,
+            c_len,
+            np.array([0.0, 0.0, 1.0], dtype=np.float64),  # type: ignore[arg-type]
         )
         # Grip at butt (start of cylinder in link frame), COM at L/2
         club_com_offset = np.array([0.0, 0.0, c_len / 2.0], dtype=np.float64)  # type: ignore[arg-type]
