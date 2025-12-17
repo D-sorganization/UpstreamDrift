@@ -219,6 +219,17 @@ function draw() {
   ctx.fill();
 }
 
+function updateButtons() {
+  const isRunning = animationId !== null;
+  const isPaused = !isRunning && state.time > 0;
+
+  const startBtn = document.getElementById('start');
+  startBtn.disabled = isRunning;
+  startBtn.textContent = isPaused ? "Resume" : "Start";
+
+  document.getElementById('pause').disabled = !isRunning;
+}
+
 function step() {
   rk4(0.01);
   draw();
@@ -228,13 +239,18 @@ function step() {
 }
 
 function start() {
-  cancelAnimationFrame(animationId);
-  parseInputs();
+  if (animationId) return;
+  if (state.time === 0) parseInputs();
   step();
+  updateButtons();
 }
 
 function pause() {
-  cancelAnimationFrame(animationId);
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+    animationId = null;
+  }
+  updateButtons();
 }
 
 function reset() {
@@ -242,6 +258,7 @@ function reset() {
   parseInputs();
   draw();
   document.getElementById('torques').textContent = 'Torques: --';
+  updateButtons();
 }
 
 ['start', 'pause', 'reset'].forEach(id => document.getElementById(id).addEventListener('click', () => {
