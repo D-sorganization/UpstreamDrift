@@ -72,6 +72,6 @@ python -m dtack.gui.main_window
 
 ## Next Steps
 
-- See [Pinocchio Project Outline](docs/Pinocchio_Project_Outline.md) for full roadmap
-- Check [API Documentation](docs/api/) for detailed API reference
+- See [Pinocchio Project Outline](../Pinocchio_Project_Outline.md) for full roadmap
+- Check [API Documentation](../api/) for detailed API reference
 - Explore examples in `python/examples/`
