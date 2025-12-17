@@ -223,7 +223,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         self.btn_reset = QtWidgets.QPushButton("Reset")
         self.btn_reset.setToolTip("Reset the simulation to the initial state (Ctrl+R)")
-        self.btn_reset.setStatusTip("Reset the simulation to the initial state (Ctrl+R)")
+        self.btn_reset.setStatusTip(
+            "Reset the simulation to the initial state (Ctrl+R)"
+        )
         self.btn_reset.setShortcut(QtGui.QKeySequence("Ctrl+R"))
         self.btn_reset.clicked.connect(self._reset_simulation)
         dyn_layout.addWidget(self.btn_reset)

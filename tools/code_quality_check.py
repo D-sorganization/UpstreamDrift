@@ -142,7 +142,8 @@ def check_banned_patterns(
 def check_magic_numbers(lines: list[str], filepath: Path) -> list[tuple[int, str, str]]:
     """Check for magic numbers in lines."""
     issues: list[tuple[int, str, str]] = []
-    # Skip checking quality check scripts for magic numbers (they contain patterns they check for)
+    # Skip checking quality check scripts for magic numbers (they contain patterns
+    # they check for)
     if filepath.name in (
         "quality_check_script.py",
         "matlab_quality_check.py",
@@ -181,7 +182,11 @@ def check_ast_issues(content: str, filepath: Path) -> list[tuple[int, str, str]]
                     # as this stricter check might block valid quick scripts.
                     # Uncomment to enforce:
                     # issues.append(
-                    #     (node.lineno, f"Function '{node.name}' missing return type hint", "")
+                    #     (
+                    #         node.lineno,
+                    #         f"Function '{node.name}' missing return type hint",
+                    #         "",
+                    #     )
                     # )
     except SyntaxError as e:
         issues.append((0, f"Syntax error: {e}", ""))
@@ -241,12 +246,16 @@ def main() -> None:
 
     # Report
     if all_issues:
-        sys.stderr.write(f"{Colors.FAIL}{Colors.BOLD}❌ Quality check FAILED{Colors.ENDC}\n\n")
+        sys.stderr.write(
+            f"{Colors.FAIL}{Colors.BOLD}❌ Quality check FAILED{Colors.ENDC}\n\n"
+        )
         for filepath, issues in all_issues:
             sys.stderr.write(f"\n{Colors.CYAN}{filepath}:{Colors.ENDC}\n")
             for line_num, message, code in issues:
                 if line_num > 0:
-                    sys.stderr.write(f"  Line {Colors.BOLD}{line_num}{Colors.ENDC}: {message}\n")
+                    sys.stderr.write(
+                        f"  Line {Colors.BOLD}{line_num}{Colors.ENDC}: {message}\n"
+                    )
                     if code:
                         sys.stderr.write(f"    > {Colors.WARNING}{code}{Colors.ENDC}\n")
                 else:

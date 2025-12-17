@@ -6,7 +6,6 @@ Supports multiple data sources including motion capture and future Simulink mode
 
 import sys
 import traceback
-from typing import Tuple, Optional
 from copy import copy
 
 import moderngl as mgl
@@ -18,11 +17,10 @@ from golf_data_core import FrameData, FrameProcessor, RenderConfig
 from golf_opengl_renderer import OpenGLRenderer
 from golf_video_export import VideoExportDialog
 from PyQt6.QtCore import (
-    Qt,
-    QTimer,
+    QEasingCurve,
     QObject,
     QPropertyAnimation,
-    QEasingCurve,
+    Qt,
     pyqtProperty,
     pyqtSignal,
 )
@@ -74,7 +72,7 @@ class SmoothPlaybackController(QObject):
         super().__init__(parent)
 
         # Frame data
-        self.frame_processor: Optional[FrameProcessor] = None
+        self.frame_processor: FrameProcessor | None = None
         self._current_position: float = 0.0
         self._playback_speed: float = 1.0
 
@@ -735,7 +733,7 @@ class GolfVisualizerWidget(QOpenGLWidget):
         return np.array([x, y, z], dtype=np.float32) + self.camera_target
 
     def load_data_from_dataframes(
-        self, dataframes: Tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
+        self, dataframes: tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]
     ):
         """Load data from pandas DataFrames"""
         try:
