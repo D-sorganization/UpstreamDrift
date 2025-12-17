@@ -1277,9 +1277,12 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
            ctrllimited="true" ctrlrange="-35 35"/>
 
     <!-- Left Shoulder (3 DOF) -->
-    <motor name="l_shldr_flex" joint="left_shoulder_flexion" gear="70" ctrllimited="true" ctrlrange="-90 90"/>
-    <motor name="l_shldr_abd" joint="left_shoulder_abduction" gear="70" ctrllimited="true" ctrlrange="-90 90"/>
-    <motor name="l_shldr_rot" joint="left_shoulder_rotation" gear="50" ctrllimited="true" ctrlrange="-65 65"/>
+    <motor name="l_shldr_flex" joint="left_shoulder_flexion" gear="70"
+           ctrllimited="true" ctrlrange="-90 90"/>
+    <motor name="l_shldr_abd" joint="left_shoulder_abduction" gear="70"
+           ctrllimited="true" ctrlrange="-90 90"/>
+    <motor name="l_shldr_rot" joint="left_shoulder_rotation" gear="50"
+           ctrllimited="true" ctrlrange="-65 65"/>
 
     <!-- Left Elbow (1 DOF) -->
     <motor name="l_elbow" joint="left_elbow" gear="60" ctrllimited="true" ctrlrange="-75 75"/>

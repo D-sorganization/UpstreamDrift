@@ -634,7 +634,8 @@ def generate_pantograph_xml(scale_factor=2.0) -> str:
                       size="0.05" material="arm_mat" mass="0.5"/>
 
                 <!-- Output point (scaled) -->
-                <body name="output_point" pos="{0.75 * scale_factor} {0.5 * scale_factor} 0">
+                <body name="output_point"
+                      pos="{0.75 * scale_factor} {0.5 * scale_factor} 0">
                     <geom type="sphere" size="0.15" material="output_mat" mass="0.4"/>
                     <geom type="cylinder" fromto="0 0 0  0 0 0.8" size="0.03"
                           rgba="0.9 0.1 0.1 0.6" contype="0" conaffinity="0"/>
@@ -656,7 +657,8 @@ def generate_pantograph_xml(scale_factor=2.0) -> str:
     </equality>
 
     <actuator>
-        <motor name="arm1_motor" joint="arm1_joint" gear="15" ctrllimited="true" ctrlrange="-5 5"/>
+        <motor name="arm1_motor" joint="arm1_joint" gear="15"
+               ctrllimited="true" ctrlrange="-5 5"/>
     </actuator>
 </mujoco>
 """
@@ -705,9 +707,11 @@ def generate_delta_robot_xml(base_radius=2.0, platform_radius=0.5) -> str:
 
         <!-- Arm 1 (0 degrees) -->
         <body name="base1" pos="{base_radius} 0 2">
-            <geom type="sphere" size="0.15" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
+            <geom type="sphere" size="0.15" rgba="0.5 0.5 0.5 1"
+                  contype="0" conaffinity="0"/>
             <body name="arm1" pos="0 0 0">
-                <joint name="joint1" type="hinge" axis="0 1 0" range="-120 120" damping="1.0"/>
+                <joint name="joint1" type="hinge" axis="0 1 0" range="-120 120"
+                       damping="1.0"/>
                 <geom type="capsule" fromto="0 0 0  0 0 {-arm_length}" size="0.08"
                       material="arm_mat" mass="1.0"/>
 
@@ -791,9 +795,12 @@ def generate_delta_robot_xml(base_radius=2.0, platform_radius=0.5) -> str:
     </equality>
 
     <actuator>
-        <motor name="motor1" joint="joint1" gear="50" ctrllimited="true" ctrlrange="-10 10"/>
-        <motor name="motor2" joint="joint2" gear="50" ctrllimited="true" ctrlrange="-10 10"/>
-        <motor name="motor3" joint="joint3" gear="50" ctrllimited="true" ctrlrange="-10 10"/>
+        <motor name="motor1" joint="joint1" gear="50"
+               ctrllimited="true" ctrlrange="-10 10"/>
+        <motor name="motor2" joint="joint2" gear="50"
+               ctrllimited="true" ctrlrange="-10 10"/>
+        <motor name="motor3" joint="joint3" gear="50"
+               ctrllimited="true" ctrlrange="-10 10"/>
     </actuator>
 </mujoco>
 """
@@ -890,8 +897,10 @@ def generate_five_bar_parallel_xml(link_length=1.5) -> str:
     </equality>
 
     <actuator>
-        <motor name="left_motor" joint="left_joint1" gear="25" ctrllimited="true" ctrlrange="-8 8"/>
-        <motor name="right_motor" joint="right_joint1" gear="25" ctrllimited="true" ctrlrange="-8 8"/>
+        <motor name="left_motor" joint="left_joint1" gear="25"
+               ctrllimited="true" ctrlrange="-8 8"/>
+        <motor name="right_motor" joint="right_joint1" gear="25"
+               ctrllimited="true" ctrlrange="-8 8"/>
     </actuator>
 </mujoco>
 """
