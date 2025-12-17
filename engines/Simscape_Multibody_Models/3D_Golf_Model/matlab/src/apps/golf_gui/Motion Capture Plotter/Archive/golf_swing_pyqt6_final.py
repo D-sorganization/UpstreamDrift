@@ -327,7 +327,8 @@ class GolfSwingAnalyzerPyQt6(QMainWindow):
                 print(f"\n=== Data Debug for {sheet_name} ===")
                 print(f"Number of frames: {len(data)}")
                 print(
-                    f"Time range: {data['time'].min():.3f} to {data['time'].max():.3f} seconds"
+                    f"Time range: {data['time'].min():.3f} to "
+                    f"{data['time'].max():.3f} seconds"
                 )
                 print("Position ranges (meters):")
                 print(f"  X: {data['X'].min():.3f} to {data['X'].max():.3f}")
