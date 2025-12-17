@@ -6,7 +6,7 @@ import logging
 import os
 from collections.abc import Callable
 from pathlib import Path
-from typing import Final
+from typing import Any, Final
 
 import mujoco
 import numpy as np
@@ -876,7 +876,11 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         img = rgb.copy()
 
         # Highlight selected body
-        if self.show_selected_body and self.manipulator.selected_body_id is not None:
+        if (
+            self.show_selected_body
+            and self.manipulator is not None
+            and self.manipulator.selected_body_id is not None
+        ):
             body_pos = self.data.xpos[self.manipulator.selected_body_id].copy()
 
             # Project 3D position to screen
@@ -902,7 +906,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 )
 
         # Highlight constrained bodies
-        if self.show_constraints:
+        if self.show_constraints and self.manipulator is not None:
             for body_id in self.manipulator.get_constrained_bodies():
                 body_pos = self.data.xpos[body_id].copy()
                 screen_pos = self._world_to_screen(body_pos)
@@ -998,7 +1002,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         self.manipulator.enforce_constraints()
 
-    def generate_report(self) -> str | None:
+    def generate_report(self) -> Any | None:
         """Generate a telemetry report for the current simulation."""
 
         if self.telemetry is None:
