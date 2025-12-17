@@ -2262,7 +2262,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
     def on_actuator_slider_changed(self, actuator_index: int, value: int) -> None:
         """Handle slider change - update constant value and label."""
         if actuator_index < len(self.actuator_constant_inputs):
-            self.actuator_constant_inputs[actuator_index].setValue(float(value))
+            # Bolt: Block signals to prevent feedback loop and precision loss
+            spinbox = self.actuator_constant_inputs[actuator_index]
+            was_blocked = spinbox.blockSignals(True)
+            spinbox.setValue(float(value))
+            spinbox.blockSignals(was_blocked)
         if actuator_index < len(self.actuator_labels):
             self.actuator_labels[actuator_index].setText(f"{value:.0f} Nm")
         # Update control system
@@ -2275,7 +2279,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         """Handle constant value input change."""
         # Update slider
         if actuator_index < len(self.actuator_sliders):
-            self.actuator_sliders[actuator_index].setValue(int(value))
+            # Bolt: Block signals to prevent feedback loop
+            slider = self.actuator_sliders[actuator_index]
+            was_blocked = slider.blockSignals(True)
+            slider.setValue(int(value))
+            slider.blockSignals(was_blocked)
         # Update control system
         control_system = self.sim_widget.get_control_system()
         if control_system is not None:
