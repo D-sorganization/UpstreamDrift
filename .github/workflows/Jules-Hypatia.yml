@@ -1,0 +1,45 @@
+name: Jules Hypatia (Librarian)
+
+on:
+  schedule:
+    - cron: "0 0 1 * *" # Run once a month (1st day at midnight)
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  archive-stale-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Identify Stale Documentation
+        id: find_stale
+        run: |
+          # Create archive directory if it doesn't exist
+          mkdir -p archive/docs/jules_logs
+
+          # Find .md files in .jules/ that haven't been touched in 30 days
+          # We exclude 'sentinel.md' or specific journals if they are permanent records
+          find .jules -name "*.md" -mtime +30 -not -name "sentinel.md" -print0 > files_to_move.txt
+
+          if [ -s files_to_move.txt ]; then
+            cat files_to_move.txt | xargs -0 -r -I {} mv {} archive/docs/jules_logs/
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Moved stale files to archive/docs/jules_logs/"
+          else
+            echo "No stale files found."
+          fi
+          # Clean up temp file
+          rm files_to_move.txt
+
+      - name: Commit Archived Files
+        if: steps.find_stale.outputs.has_changes == 'true'
+        run: |
+          git config --global user.name "Jules-Hypatia"
+          git config --global user.email "hypatia@jules.bot"
+          git add archive/docs
+          git add .jules
+          git commit -m "chore(docs): archive stale agent logs > 30 days old"
+          git push

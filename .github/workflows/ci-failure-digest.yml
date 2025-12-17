@@ -1,0 +1,137 @@
+name: Weekly CI Failure Digest
+
+on:
+  schedule:
+    # Every Monday at 9am UTC
+    - cron: "0 9 * * 1"
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  generate-digest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Analyze CI Failures from Last Week
+        id: analyze
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+            // Get all workflow runs from the last week
+            const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              created: `>=${oneWeekAgo.toISOString()}`,
+              per_page: 100
+            });
+
+            // Filter to only CI Standard workflow failures
+            const ciRuns = runs.workflow_runs.filter(run =>
+              run.name === 'CI Standard' && run.conclusion === 'failure'
+            );
+
+            if (ciRuns.length === 0) {
+              console.log('No CI failures in the last week! 🎉');
+              core.setOutput('has_failures', 'false');
+              return;
+            }
+
+            // Analyze failure patterns
+            const failuresByBranch = {};
+            const failuresByJob = {};
+
+            for (const run of ciRuns) {
+              const branch = run.head_branch;
+              failuresByBranch[branch] = (failuresByBranch[branch] || 0) + 1;
+
+              // Get job details
+              const { data: jobs } = await github.rest.actions.listJobsForWorkflowRun({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                run_id: run.id
+              });
+
+              for (const job of jobs.jobs) {
+                if (job.conclusion === 'failure') {
+                  failuresByJob[job.name] = (failuresByJob[job.name] || 0) + 1;
+                }
+              }
+            }
+
+            // Generate report
+            const topBranches = Object.entries(failuresByBranch)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 5)
+              .map(([branch, count]) => `- \`${branch}\`: ${count} failure(s)`)
+              .join('\n');
+
+            const topJobs = Object.entries(failuresByJob)
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 5)
+              .map(([job, count]) => `- **${job}**: ${count} failure(s)`)
+              .join('\n');
+
+            const report = `## 📊 Weekly CI Failure Digest
+
+            **Period:** ${oneWeekAgo.toISOString().split('T')[0]} to ${new Date().toISOString().split('T')[0]}
+            **Total CI Failures:** ${ciRuns.length}
+
+            ### 🔥 Top Failing Branches
+            ${topBranches}
+
+            ### ⚠️ Most Common Failing Jobs
+            ${topJobs}
+
+            ### 📈 Trends
+            _No trend metrics calculated yet._
+
+            ### 🎯 Action Items
+            1. Review branches with multiple failures
+            2. Investigate recurring job failures
+            3. Consider improving Auto-Repair for common patterns
+            4. Update pre-commit hooks if formatting/linting issues dominate
+
+            ### 📋 All Failed Runs
+            ${ciRuns.slice(0, 10).map(run =>
+              `- [${run.head_branch}](${run.html_url}) - ${new Date(run.created_at).toLocaleString()}`
+            ).join('\n')}
+            ${ciRuns.length > 10 ? `\n_... and ${ciRuns.length - 10} more_` : ''}
+
+            ---
+            *This is an automated weekly digest. To disable, remove or modify .github/workflows/ci-failure-digest.yml*
+            `;
+
+            core.setOutput('has_failures', 'true');
+            core.setOutput('report', report);
+            core.setOutput('failure_count', ciRuns.length);
+
+      - name: Create Issue with Digest
+        if: steps.analyze.outputs.has_failures == 'true'
+        env:
+          REPORT: ${{ steps.analyze.outputs.report }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const report = process.env.REPORT;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `📊 Weekly CI Failure Digest - ${new Date().toISOString().split('T')[0]}`,
+              body: report,
+              labels: ['ci/cd', 'report', 'auto-generated']
+            });
+
+            console.log('Created CI failure digest issue');
+
+      - name: Post Success Message
+        if: steps.analyze.outputs.has_failures == 'false'
+        run: |
+          echo "🎉 No CI failures in the last week! Great job team!"

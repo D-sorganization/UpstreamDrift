@@ -1,0 +1,117 @@
+name: Jules Hotfix-Creator (Worker)
+
+# Triggers when CI fails on protected branches (main/master)
+# Creates a hotfix branch, triggers Auto-Repair, and opens urgent PR
+
+on:
+  workflow_call:
+    inputs:
+      run_id:
+        required: true
+        type: string
+      failed_branch:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  create-hotfix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.failed_branch }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: npm install -g @google/jules
+      - run: jules auth --token ${{ secrets.JULES_API_KEY }}
+
+      - name: Create Hotfix Branch
+        id: hotfix
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          HOTFIX_BRANCH="hotfix/ci-fail-${TIMESTAMP}"
+
+          echo "Creating hotfix branch: $HOTFIX_BRANCH"
+          git checkout -b "$HOTFIX_BRANCH"
+          git push -u origin "$HOTFIX_BRANCH"
+
+          echo "branch=$HOTFIX_BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Fetch CI Logs & Auto-Fix
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_RUN_ID: ${{ inputs.run_id }}
+        run: |
+          HOTFIX_BRANCH="${{ steps.hotfix.outputs.branch }}"
+          gh run view $TARGET_RUN_ID --log-failed > logs.txt
+
+          LOG_CONTENT=$(cat logs.txt)
+          PROMPT=$(cat <<EOF
+URGENT: CI failed on protected branch ${{ inputs.failed_branch }}.
+Analyze the logs and create a minimal hotfix:
+1. **Formatting & Linting**: Run 'ruff check . --fix' and 'black .'
+2. **Import Sorting**: Run 'isort --profile black .'
+3. **Type Errors**: Add missing type hints or proper type ignores
+4. **Test Failures**: Fix failing tests (fix implementation, not tests)
+5. **Coverage**: Generate tests if coverage dropped below 80%
+6. **Syntax**: Fix any syntax errors or missing imports
+CRITICAL: This is a hotfix for ${{ inputs.failed_branch }}. Keep changes minimal and focused.
+CI Failure Logs:
+$LOG_CONTENT
+EOF
+)
+          jules task fix --branch "$HOTFIX_BRANCH" --prompt "$PROMPT"
+
+      - name: Create Urgent PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          HOTFIX_BRANCH="${{ steps.hotfix.outputs.branch }}"
+
+          gh pr create \
+            --base "${{ inputs.failed_branch }}" \
+            --head "$HOTFIX_BRANCH" \
+            --title "🚨 Urgent: Fix CI failure on ${{ inputs.failed_branch }}" \
+            --label "urgent,auto-fix,hotfix" \
+            --body "$(cat <<'EOF'
+## 🚨 Automated Hotfix for Protected Branch
+
+**Failed Branch:** \`${{ inputs.failed_branch }}\`
+**CI Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }}
+**Created By:** Jules Hotfix-Creator
+
+### Summary
+CI failed on the protected branch \`${{ inputs.failed_branch }}\`. This automated hotfix attempts to resolve the issues.
+
+### Changes
+Jules Auto-Repair has analyzed the CI failure logs and applied fixes for:
+- Code formatting and linting issues
+- Type checking errors
+- Test failures
+- Coverage gaps
+- Syntax errors
+
+### Review Checklist
+- [ ] Verify all CI checks pass
+- [ ] Review changes are minimal and focused
+- [ ] Confirm no unintended side effects
+- [ ] Merge immediately if changes look correct
+
+### Next Steps
+1. Review the changes in this PR
+2. If acceptable, merge immediately to restore ${{ inputs.failed_branch }}
+3. If issues remain, manually fix and push to this branch
+
+---
+*This is an automated hotfix. Please review carefully before merging.*
+EOF
+)"

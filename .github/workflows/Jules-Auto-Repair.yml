@@ -1,0 +1,68 @@
+name: Jules Auto-Repair (Worker)
+on:
+  workflow_call:
+    inputs:
+      run_id:
+        required: true
+        type: string
+      branch:
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    # Prevent multiple repairs on same branch simultaneously
+    concurrency:
+      group: auto-repair-${{ inputs.branch || github.event.workflow_run.head_branch }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - run: npm install -g @google/jules
+
+      - name: Verify Branch
+        id: verify
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_RUN_ID: ${{ inputs.run_id }}
+        run: |
+          # Get the branch name from the run ID
+          BRANCH=$(gh run view $TARGET_RUN_ID --json headBranch --jq '.headBranch')
+
+          echo "Target branch: $BRANCH"
+
+          # 1. PROTECTED BRANCH GUARD
+          # We cannot auto-repair 'main' or 'master' directly as they are likely protected.
+          if [[ "$BRANCH" == "main" || "$BRANCH" == "master" ]]; then
+            echo "Cannot auto-repair protected branch '$BRANCH'. Exiting."
+            exit 0
+          fi
+
+          # 2. EXISTENCE CHECK
+          # Check if remote branch still exists (it might have been deleted)
+          if ! git ls-remote --exit-code --heads origin "$BRANCH"; then
+            echo "Branch $BRANCH no longer exists. Exiting."
+            exit 0
+          fi
+
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Fetch Logs & Fix
+        if: steps.verify.outputs.branch != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          TARGET_RUN_ID: ${{ inputs.run_id }}
+        run: |
+          BRANCH="${{ steps.verify.outputs.branch }}"
+          gh run view $TARGET_RUN_ID --log-failed > logs.txt
+
+          # New CLI Syntax
+          # We use --repo to target this specific repository context
+          jules remote new \
+            --repo ${{ github.repository }} \
+            --session "CI Failure on branch '$BRANCH'. Fix these errors: $(cat logs.txt)" \
+            --branch "$BRANCH"
