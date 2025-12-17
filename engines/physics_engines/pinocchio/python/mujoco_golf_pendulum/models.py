@@ -30,7 +30,8 @@ CHAOTIC_PENDULUM_XML = rf"""<mujoco model="chaotic_driven_pendulum">
     <!-- Driven base (oscillates horizontally to induce chaos) -->
     <body name="drive_base" pos="0 0 1.0">
       <!-- Horizontal slider for base excitation (x-axis) -->
-      <joint name="base_drive_x" type="slide" axis="1 0 0" limited="false" damping="0.1"/>
+      <joint name="base_drive_x" type="slide" axis="1 0 0" 
+             limited="false" damping="0.1"/>
 
       <!-- Vertical support column -->
       <geom name="support_column" type="cylinder"
@@ -43,7 +44,8 @@ CHAOTIC_PENDULUM_XML = rf"""<mujoco model="chaotic_driven_pendulum">
 
       <!-- Pendulum arm -->
       <body name="pendulum" pos="0 0 0">
-        <joint name="pendulum_hinge" type="hinge" axis="0 1 0" limited="false" damping="0.05"/>
+        <joint name="pendulum_hinge" type="hinge" axis="0 1 0" 
+               limited="false" damping="0.05"/>
 
         <!-- Pendulum rod -->
         <geom name="pendulum_rod" type="capsule"
@@ -297,7 +299,8 @@ UPPER_BODY_GOLF_SWING_XML = rf"""<mujoco model="golf_upper_body_swing">
                     size="0.04 0.02 0.08"
                     rgba="0.9 0.7 0.6 1" mass="0.4"/>
 
-              <!-- Golf club attached to right hand (left hand connects via equality constraint) -->
+              <!-- Golf club attached to right hand 
+                   (left hand connects via equality constraint) -->
               <body name="club" pos="0 0 -0.08" euler="0 -0.3 0">
                 <joint name="club_wrist" type="hinge" axis="0 1 0"
                        range="-1.0 1.0" damping="0.3"/>
@@ -651,7 +654,8 @@ FULL_BODY_GOLF_SWING_XML = rf"""<mujoco model="golf_full_body_swing">
 # TWO-LINK INCLINED PLANE MODEL WITH UNIVERSAL JOINT AT WRIST
 # ==============================================================================
 TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML = rf"""<mujoco model="two_link_inclined_universal">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4" solver="Newton"/>
+  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" 
+          integrator="RK4" solver="Newton"/>
 
   <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
 
@@ -759,7 +763,8 @@ TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML = rf"""<mujoco model="two_link_inclined_un
 # GIMBAL JOINT DEMONSTRATION MODEL
 # ==============================================================================
 GIMBAL_JOINT_DEMO_XML = rf"""<mujoco model="gimbal_joint_demo">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4" solver="Newton"/>
+  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" 
+          integrator="RK4" solver="Newton"/>
 
   <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
 
@@ -871,9 +876,11 @@ GIMBAL_JOINT_DEMO_XML = rf"""<mujoco model="gimbal_joint_demo">
 # ADVANCED FULL-BODY MODEL WITH SPECIFIED JOINT TYPES
 # ==============================================================================
 ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanical_golf_swing">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4" solver="Newton" iterations="50"/>
+  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" 
+          integrator="RK4" solver="Newton" iterations="50"/>
 
-  <compiler angle="radian" coordinate="local" inertiafromgeom="false" balanceinertia="true"/>
+  <compiler angle="radian" coordinate="local" inertiafromgeom="false" 
+            balanceinertia="true"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
@@ -892,10 +899,14 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
     <material name="torso_mat" rgba="0.75 0.55 0.45 1" specular="0.3" shininess="0.2"/>
     <material name="arm_mat" rgba="0.65 0.45 0.35 1" specular="0.3" shininess="0.2"/>
     <material name="leg_mat" rgba="0.55 0.55 0.65 1" specular="0.3" shininess="0.2"/>
-    <material name="scapula_mat" rgba="0.85 0.75 0.65 0.8" specular="0.4" shininess="0.3"/>
-    <material name="club_grip_mat" rgba="0.1 0.1 0.1 1" specular="0.1" shininess="0.05"/>
-    <material name="club_shaft_mat" rgba="0.3 0.3 0.35 1" specular="0.8" shininess="0.6"/>
-    <material name="club_head_mat" rgba="0.15 0.15 0.18 1" specular="0.9" shininess="0.8"/>
+    <material name="scapula_mat" rgba="0.85 0.75 0.65 0.8" 
+              specular="0.4" shininess="0.3"/>
+    <material name="club_grip_mat" rgba="0.1 0.1 0.1 1" 
+              specular="0.1" shininess="0.05"/>
+    <material name="club_shaft_mat" rgba="0.3 0.3 0.35 1" 
+              specular="0.8" shininess="0.6"/>
+    <material name="club_head_mat" rgba="0.15 0.15 0.18 1" 
+              specular="0.9" shininess="0.8"/>
     <material name="ground_mat" rgba="0.35 0.55 0.25 1"/>
   </asset>
 
@@ -1034,7 +1045,8 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
             <geom name="left_scapula_geom" type="box" size="0.06 0.04 0.10"
                   material="scapula_mat"/>
 
-            <!-- LEFT SHOULDER - 3 DOF (flexion/extension, abduction/adduction, rotation) -->
+            <!-- LEFT SHOULDER - 3 DOF 
+                 (flexion/extension, abduction/adduction, rotation) -->
             <body name="left_humerus" pos="-0.08 0 0" euler="0 0 0">
               <joint name="left_shoulder_flexion" type="hinge" axis="0 1 0"
                      range="-1.0 3.0" damping="2.5" armature="0.025"/>
