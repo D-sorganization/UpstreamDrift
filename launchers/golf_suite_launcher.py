@@ -7,11 +7,12 @@ or accessible via `sys.executable`.
 It does NOT use Docker. For Docker support, use `golf_launcher.py`.
 """
 
-import sys
-import subprocess
 import logging
+import subprocess
+import sys
 from pathlib import Path
-from PyQt6 import QtWidgets, QtCore
+
+from PyQt6 import QtCore, QtWidgets
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("GolfSuiteLauncher")
@@ -34,11 +35,15 @@ class GolfLauncher(QtWidgets.QMainWindow):
         # Define paths to the GUI scripts in the new structure
         self.mujoco_path = (
             self.suite_root
-            / "engines/physics_engines/mujoco/python/mujoco_golf_pendulum/advanced_gui.py"
+            / "engines/physics_engines/mujoco/python/mujoco_golf_pendulum"
+            / "advanced_gui.py"
         )
-        self.drake_path = self.suite_root / "engines/physics_engines/drake/python/src/golf_gui.py"
+        self.drake_path = (
+            self.suite_root / "engines/physics_engines/drake/python/src/golf_gui.py"
+        )
         self.pinocchio_path = (
-            self.suite_root / "engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
+            self.suite_root
+            / "engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
         )
 
         self._setup_ui()
@@ -56,7 +61,9 @@ class GolfLauncher(QtWidgets.QMainWindow):
         title.setFont(font)
         layout.addWidget(title)
 
-        subtitle = QtWidgets.QLabel("Launches physics engines using local python environment")
+        subtitle = QtWidgets.QLabel(
+            "Launches physics engines using local python environment"
+        )
         subtitle.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(subtitle)
 
@@ -83,20 +90,24 @@ class GolfLauncher(QtWidgets.QMainWindow):
         # Log area
         log_group = QtWidgets.QGroupBox("Simulation Log")
         log_layout = QtWidgets.QVBoxLayout(log_group)
-        
+
         self.log_text = QtWidgets.QTextEdit()
         self.log_text.setMaximumHeight(120)
         self.log_text.setReadOnly(True)
-        self.log_text.setStyleSheet("background-color: #2b2b2b; color: #ffffff; font-family: 'Consolas', monospace;")
+        self.log_text.setStyleSheet(
+            "background-color: #2b2b2b; "
+            "color: #ffffff; "
+            "font-family: 'Consolas', monospace;"
+        )
         log_layout.addWidget(self.log_text)
-        
+
         log_controls = QtWidgets.QHBoxLayout()
         log_controls.addStretch()
-        
+
         clear_btn = QtWidgets.QPushButton("Clear Log")
         clear_btn.clicked.connect(self.clear_log)
         log_controls.addWidget(clear_btn)
-        
+
         log_layout.addLayout(log_controls)
         layout.addWidget(log_group)
 
@@ -109,9 +120,10 @@ class GolfLauncher(QtWidgets.QMainWindow):
     def log_message(self, message: str) -> None:
         """Add a timestamped message to the log area."""
         import datetime
+
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
         self.log_text.append(f"[{timestamp}] {message}")
-        
+
     def clear_log(self) -> None:
         """Clear the log text area."""
         self.log_text.clear()

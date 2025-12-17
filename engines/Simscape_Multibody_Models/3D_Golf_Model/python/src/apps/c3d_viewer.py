@@ -13,22 +13,19 @@ Dependencies:
     See python/requirements.txt for required packages.
 """
 
-import sys
 import os
+import sys
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any
 
+import ezc3d
 import numpy as np
 import numpy.typing as npt
-import ezc3d
-
-from PyQt6 import QtGui, QtWidgets
-from PyQt6.QtCore import Qt
-
+from matplotlib.axes import Axes
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from matplotlib.axes import Axes
-
+from PyQt6 import QtGui, QtWidgets
+from PyQt6.QtCore import Qt
 
 # ---------------------------------------------------------------------------
 # Data model for C3D content
@@ -39,7 +36,7 @@ from matplotlib.axes import Axes
 class MarkerData:
     name: str
     position: npt.NDArray[np.float64]  # shape (N, 3)
-    residuals: Optional[npt.NDArray[np.float64]] = None
+    residuals: npt.NDArray[np.float64] | None = None
 
 
 @dataclass
@@ -52,19 +49,19 @@ class AnalogData:
 @dataclass
 class C3DDataModel:
     filepath: str
-    markers: Dict[str, MarkerData] = field(default_factory=dict)
-    analog: Dict[str, AnalogData] = field(default_factory=dict)
+    markers: dict[str, MarkerData] = field(default_factory=dict)
+    analog: dict[str, AnalogData] = field(default_factory=dict)
     point_rate: float = 0.0
     analog_rate: float = 0.0
-    point_time: Optional[npt.NDArray[np.float64]] = None
-    analog_time: Optional[npt.NDArray[np.float64]] = None
-    metadata: Dict[str, str] = field(default_factory=dict)
+    point_time: npt.NDArray[np.float64] | None = None
+    analog_time: npt.NDArray[np.float64] | None = None
+    metadata: dict[str, str] = field(default_factory=dict)
 
-    def marker_names(self) -> List[str]:
+    def marker_names(self) -> list[str]:
         """Return list of marker names."""
         return list(self.markers.keys())
 
-    def analog_names(self) -> List[str]:
+    def analog_names(self) -> list[str]:
         """Return list of analog channel names."""
         return list(self.analog.keys())
 
@@ -107,7 +104,7 @@ class MplCanvas(FigureCanvas):
 
 def compute_marker_statistics(
     time: npt.NDArray[np.float64], pos: npt.NDArray[np.float64]
-) -> Dict[str, float]:
+) -> dict[str, float]:
     """
     Compute basic kinematic quantities for a single marker trajectory:
     - total path length
@@ -154,7 +151,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle("C3D Motion Analysis Viewer")
         self.resize(1400, 900)
 
-        self.model: Optional[C3DDataModel] = None
+        self.model: C3DDataModel | None = None
 
         self._create_actions()
         self._create_menus()
@@ -437,7 +434,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         frame_rate = float(c3d_obj["parameters"]["POINT"]["RATE"]["value"][0])
 
         # Build marker dictionary
-        markers: Dict[str, MarkerData] = {}
+        markers: dict[str, MarkerData] = {}
         for i, name in enumerate(labels_points):
             xyz = points[0:3, i, :].T  # (Nframes, 3)
             residuals = points[3, i, :].T  # (Nframes,)

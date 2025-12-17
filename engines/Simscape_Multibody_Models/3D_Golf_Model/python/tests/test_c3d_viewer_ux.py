@@ -1,19 +1,20 @@
-import sys
 import os
+import sys
 import typing
+from unittest.mock import MagicMock, call, patch
+
 import pytest
-from unittest.mock import MagicMock, patch, call
 
 # Gracefully skip if PyQt6 is not installed (e.g. in CI environments)
 try:
-    from PyQt6.QtWidgets import QApplication
-    from PyQt6.QtCore import Qt
+    import matplotlib  # noqa: F401
+    import matplotlib.artist  # noqa: F401
+    import matplotlib.figure  # noqa: F401
 
     # Import dependencies to prevent reloading issues when patching sys.modules
     import numpy  # noqa: F401
-    import matplotlib  # noqa: F401
-    import matplotlib.figure  # noqa: F401
-    import matplotlib.artist  # noqa: F401
+    from PyQt6.QtCore import Qt
+    from PyQt6.QtWidgets import QApplication
 except ImportError:
     pytest.skip(
         "Required packages (PyQt6, matplotlib, numpy) not installed",
@@ -51,14 +52,12 @@ def test_c3d_viewer_open_file_ux(qapp: QApplication) -> None:
 
         # Use patch.object to spy on showMessage
         with patch.object(real_status_bar, "showMessage") as mock_show_message:
-
             # Mock the file dialog
             test_path = "/path/to/test.c3d"
             with patch(
                 "PyQt6.QtWidgets.QFileDialog.getOpenFileName",
                 return_value=(test_path, "C3D files (*.c3d)"),
             ):
-
                 # Mock ezc3d
                 # Since ezc3d is mocked in sys.modules, patch("ezc3d.c3d") should work if we target the mock
                 # But cleaner is to mock the return value of ezc3d.c3d if we knew the structure.
@@ -95,7 +94,6 @@ def test_c3d_viewer_open_file_ux(qapp: QApplication) -> None:
                         with patch(
                             "PyQt6.QtWidgets.QApplication.restoreOverrideCursor"
                         ) as mock_restore_cursor:
-
                             window.open_c3d_file()
 
                             # Verify basic execution

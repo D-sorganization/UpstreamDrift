@@ -114,7 +114,8 @@ class SafeEvaluator:
         """Validates and compiles the expression."""
         parsed = self.validate(expression)
         return typing.cast(
-            "CodeType", compile(parsed, filename="<SafeEvaluator>", mode="eval")  # type: ignore[call-overload]
+            "CodeType",
+            compile(parsed, filename="<SafeEvaluator>", mode="eval"),  # type: ignore[call-overload]
         )
 
     def evaluate_code(

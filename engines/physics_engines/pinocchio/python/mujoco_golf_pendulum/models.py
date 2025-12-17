@@ -1461,7 +1461,8 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
             f'{indent}    <geom name="head_body" type="box" size="{hs0:.4f} {hs1:.4f} {hs2:.4f}"',
             f'{indent}          pos="0 {hs1:.4f} 0" material="club_head_mat"/>',
             f'{indent}    <geom name="face" type="box" size="{hs0 + 0.001:.4f} 0.003 {hs2 + 0.001:.4f}"',
-            f'{indent}          pos="0 {hs1 * 2 + 0.003:.4f} 0" rgba="0.85 0.15 0.15 0.9"/>',
+            f'{indent}          pos="0 {hs1 * 2 + 0.003:.4f} 0" '
+            f'rgba="0.85 0.15 0.15 0.9"/>',
             f"{indent}  </body>",
             f"{indent}</body>",
         ],
@@ -1526,7 +1527,8 @@ def generate_rigid_club_xml(club_type: str = "driver") -> str:
 
   <!-- Shaft (rigid) -->
   <geom name="club_shaft" type="capsule"
-        fromto="0 0 -{grip_length:.4f} 0 0 -{total_length:.4f}" size="{shaft_radius:.4f}"
+        fromto="0 0 -{grip_length:.4f} 0 0 -{total_length:.4f}"
+        size="{shaft_radius:.4f}"
         material="club_shaft_mat" mass="{shaft_mass:.4f}"/>
 
   <!-- Club Head -->

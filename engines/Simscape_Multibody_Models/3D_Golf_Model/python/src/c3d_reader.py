@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, Sequence, cast
+from typing import Any, cast
 
 try:
     import ezc3d
@@ -18,7 +19,7 @@ from .logger_utils import get_logger
 
 logger = get_logger(__name__)
 
-C3DMapping = Dict[str, Any]
+C3DMapping = dict[str, Any]
 
 
 @dataclass(frozen=True)
@@ -288,22 +289,22 @@ class C3DDataReader:
         dataframe = self.analog_dataframe(include_time=include_time)
         return self._export_dataframe(dataframe, output_path, file_format, sanitize)
 
-    def _get_point_parameters(self) -> Dict[str, Any]:
+    def _get_point_parameters(self) -> dict[str, Any]:
         """Get POINT parameters from the C3D file."""
         c3d_data = self._load()
         try:
-            return cast(Dict[str, Any], c3d_data["parameters"]["POINT"])
+            return cast(dict[str, Any], c3d_data["parameters"]["POINT"])
         except KeyError as error:  # pragma: no cover - defensive guard
             raise ValueError(
                 f"POINT parameters missing from C3D file: {self.file_path}"
             ) from error
 
-    def _get_analog_parameters(self) -> Dict[str, Any] | None:
+    def _get_analog_parameters(self) -> dict[str, Any] | None:
         """Get ANALOG parameters from the C3D file, if present."""
         c3d_data = self._load()
         analog_params = c3d_data["parameters"].get("ANALOG")
         return (
-            cast(Dict[str, Any], analog_params) if analog_params is not None else None
+            cast(dict[str, Any], analog_params) if analog_params is not None else None
         )
 
     def _get_analog_details(self) -> tuple[list[str], float | None]:

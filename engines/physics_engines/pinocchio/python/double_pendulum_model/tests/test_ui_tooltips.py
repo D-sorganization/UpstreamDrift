@@ -1,6 +1,6 @@
-import pytest
-from PyQt6.QtWidgets import QApplication
 from double_pendulum_model.ui.pendulum_pyqt_app import PendulumController
+from PyQt6.QtWidgets import QApplication
+
 
 def test_tooltips() -> None:
     qapp = QApplication.instance()

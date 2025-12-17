@@ -62,6 +62,7 @@ def test_specific_imports():
     # Test defusedxml.ElementTree specifically
     try:
         import importlib.util
+
         if importlib.util.find_spec("defusedxml.ElementTree"):
             print("✓ defusedxml.ElementTree available")
         else:
