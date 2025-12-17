@@ -118,9 +118,8 @@ pre-commit run --all-files
 
 - **[Development Guidelines](docs/GUARDRAILS_GUIDELINES.md)** - Repository safety and quality standards
 - **[MATLAB Setup](matlab/SETUP_INSTRUCTIONS.md)** - Detailed MATLAB environment configuration
-- **[MATLAB Linting](docs/MATLAB_LINTING_QUICKSTART.md)** - Code quality tools for MATLAB
+- **[MATLAB Quality Controls](docs/MATLAB_QUALITY_CONTROLS.md)** - Code quality tools for MATLAB
 - **[Performance Tracking](docs/PERFORMANCE_TRACKING_GUIDE.md)** - Monitoring and optimization
-- **[Data Generator Interface](docs/DATA_GENERATOR_INTERFACE_SPEC.md)** - Batch simulation specification
 
 Additional documentation available in the `docs/` directory.
 

@@ -37,7 +37,7 @@ def pkg_mocks() -> dict[str, MagicMock]:
 
 @pytest.fixture(scope="module")
 def library_module(
-    pkg_mocks: dict[str, MagicMock]
+    pkg_mocks: dict[str, MagicMock],
 ) -> Generator[types.ModuleType, None, None]:
     """Import the library module with mocks in place."""
     with patch.dict(sys.modules, pkg_mocks):
