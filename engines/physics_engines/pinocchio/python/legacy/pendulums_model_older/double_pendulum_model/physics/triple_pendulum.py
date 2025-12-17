@@ -95,9 +95,11 @@ class PolynomialProfile:
 
 
 @functools.lru_cache(maxsize=1)
-def _symbolic_triple_functions() -> tuple[
-    Callable[..., np.ndarray], Callable[..., np.ndarray], Callable[..., np.ndarray]
-]:
+def _symbolic_triple_functions() -> (
+    tuple[
+        Callable[..., np.ndarray], Callable[..., np.ndarray], Callable[..., np.ndarray]
+    ]
+):
     theta1, theta2, theta3 = sp.symbols("theta1 theta2 theta3")
     omega1, omega2, omega3 = sp.symbols("omega1 omega2 omega3")
     alpha1, alpha2, alpha3 = sp.symbols("alpha1 alpha2 alpha3")

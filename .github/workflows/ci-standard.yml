@@ -51,13 +51,13 @@ jobs:
         run: black --check .
 
       - run: pip install mypy types-PyYAML types-requests
-      - run: pip install -r python/requirements.txt
-      - run: mypy python/src/ --ignore-missing-imports
+      - run: pip install -r shared/python/requirements.txt
+      - run: mypy .
 
       # TODO detection now BLOCKING - Jules Auto-Repair will fix
       - name: Verify No Placeholders
         run: |
-          if grep -rE "TODO|FIXME" python/src/; then
+          if grep -rE "TODO|FIXME" . --exclude-dir=.git --exclude-dir=.github --exclude-dir=tools --exclude=ci-standard.yml; then
              echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
              exit 1
           fi
@@ -88,8 +88,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: pip install -r python/requirements.txt
-      - run: pytest python/tests/ --cov=python/src --cov-report=xml
+      - run: pip install -r shared/python/requirements.txt
+      - run: pytest .
       - uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -97,42 +97,3 @@ jobs:
         with:
           fail_ci_if_error: true # BLOCKING: Requires CODECOV_TOKEN secret to be configured
           token: ${{ secrets.CODECOV_TOKEN }}
-
-  javascript-tests:
-    needs: quality-gate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: "20" }
-      - name: Install & Test
-        working-directory: ./javascript
-        run: |
-          npm ci
-          npm run test:coverage
-
-  matlab-tests:
-    needs: quality-gate
-    runs-on: ubuntu-latest
-    if: false
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-      - uses: matlab-actions/setup-matlab@v2
-      - uses: matlab-actions/run-command@v2
-        with:
-          command: |
-            addpath('matlab');
-            run_all
-
-  arduino-build:
-    needs: quality-gate
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: "3.11" }
-      - run: pip install platformio
-      - name: Verify Build
-        working-directory: ./arduino
-        run: pio run -e uno

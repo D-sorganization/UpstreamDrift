@@ -10,7 +10,7 @@ import math
 
 # Mathematical constants
 PI: float = math.pi  # Ratio of circumference to diameter
-E: float = math.e    # Euler's number
+E: float = math.e  # Euler's number
 
 # Physical constants - SI units
 GRAVITY_M_S2: float = 9.80665  # [m/s²] Standard gravity, ISO 80000-3:2006
@@ -26,15 +26,14 @@ GOLF_BALL_DRAG_COEFFICIENT: float = 0.25
 # Club specifications
 DRIVER_LOFT_DEG: float = 10.5  # [deg] Typical driver loft angle
 IRON_7_LOFT_DEG: float = 34.0  # [deg] Standard 7-iron loft
-PUTTER_LOFT_DEG: float = 3.0   # [deg] Standard putter loft
+PUTTER_LOFT_DEG: float = 3.0  # [deg] Standard putter loft
 
 # Course conditions
 GREEN_SPEED_STIMP: float = 10.0  # [ft] Fast green speed
-ROUGH_HEIGHT_MM: float = 25.0    # [mm] Medium rough height
-BUNKER_DEPTH_MM: float = 100.0   # [mm] Standard bunker depth
+ROUGH_HEIGHT_MM: float = 25.0  # [mm] Medium rough height
+BUNKER_DEPTH_MM: float = 100.0  # [mm] Standard bunker depth
 
 # Atmospheric conditions
-TEMPERATURE_C: float = 20.0      # [°C] Standard temperature
-PRESSURE_HPA: float = 1013.25    # [hPa] Standard atmospheric pressure
-HUMIDITY_PERCENT: float = 50.0   # [%] Standard relative humidity
-
+TEMPERATURE_C: float = 20.0  # [°C] Standard temperature
+PRESSURE_HPA: float = 1013.25  # [hPa] Standard atmospheric pressure
+HUMIDITY_PERCENT: float = 50.0  # [%] Standard relative humidity

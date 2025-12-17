@@ -1,19 +1,20 @@
-import sys
 import os
+import sys
 import typing
+from unittest.mock import MagicMock, call, patch
+
 import pytest
-from unittest.mock import MagicMock, patch, call
 
 # Gracefully skip if PyQt6 is not installed (e.g. in CI environments)
 try:
-    from PyQt6.QtWidgets import QApplication
-    from PyQt6.QtCore import Qt
+    import matplotlib  # noqa: F401
+    import matplotlib.artist  # noqa: F401
+    import matplotlib.figure  # noqa: F401
 
     # Import dependencies to prevent reloading issues when patching sys.modules
     import numpy  # noqa: F401
-    import matplotlib  # noqa: F401
-    import matplotlib.figure  # noqa: F401
-    import matplotlib.artist  # noqa: F401
+    from PyQt6.QtCore import Qt
+    from PyQt6.QtWidgets import QApplication
 except ImportError:
     pytest.skip(
         "Required packages (PyQt6, matplotlib, numpy) not installed",

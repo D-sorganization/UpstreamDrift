@@ -21,36 +21,9 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
-# Import constants from centralized constants module
-# Add python directory to path to import constants
-_script_dir = Path(__file__).parent
-_project_root = _script_dir.parent.parent.parent
-sys.path.insert(0, str(_project_root / "python"))
-
-try:
-    from mujoco_golf_pendulum.constants import (
-        GRAVITY_STANDARD_M_S2,
-        PI,
-        PI_HALF,
-        PI_QUARTER,
-    )
-except ImportError:
-    # Fallback if constants module is not available
-    import math
-
-    PI = math.pi
-    PI_HALF = math.pi / 2
-    PI_QUARTER = math.pi / 4
-    GRAVITY_STANDARD_M_S2 = 9.80665
-
 # Constants
 MATLAB_SCRIPT_TIMEOUT_SECONDS: int = 300  # 5 minutes - allows time for large codebases
 MIN_DOCSTRING_LENGTH: int = 3  # Minimum length for a valid docstring comment
-
-# Gravity approximation constants (used for checking approximations in code)
-GRAVITY_APPROX_M_S2: float = 981 / 100.0  # Standard gravity approximation [m/s²]
-GRAVITY_APPROX_ALT_M_S2: float = 98.0 / 10.0  # Standard gravity alternative [m/s²]
-GRAVITY_APPROX_ALT2_M_S2: float = 9807 / 1000.0  # Standard gravity alternative [m/s²]
 
 # Set up logging
 logging.basicConfig(
@@ -103,7 +76,7 @@ class MATLABQualityChecker:
         logger.info("Found %d MATLAB files", len(m_files))
         return True
 
-    def run_matlab_quality_checks(self) -> dict[str, object]:  # noqa: PLR0911
+    def run_matlab_quality_checks(self) -> dict[str, object]:
         """Run MATLAB quality checks using the MATLAB script.
 
         Returns:
@@ -113,14 +86,16 @@ class MATLABQualityChecker:
             # Check if we can run MATLAB from command line
             matlab_script = self.matlab_dir / "matlab_quality_config.m"
             if not matlab_script.exists():
-                # Config script not found - use static analysis (primary use case)
+                # Config script not found - fall back to static analysis (primary use
+                # case)
                 logger.info(
                     "MATLAB quality config script not found, using static analysis",
                 )
                 return self._static_matlab_analysis()
 
             # Try to run MATLAB quality checks
-            # Note: Requires MATLAB to be installed and accessible from command line
+            # Note: This requires MATLAB to be installed and accessible from command
+            # line
             try:
                 # First, try to run the MATLAB script directly if possible
                 return self._run_matlab_script(matlab_script)
@@ -160,7 +135,8 @@ class MATLABQualityChecker:
                 try:
                     logger.info("Trying command: %s", " ".join(cmd))
                     # Note: cmd is a controlled list from our code, not user input
-                    result = subprocess.run(  # noqa: S603
+                    # (S603)
+                    result = subprocess.run(
                         cmd,
                         capture_output=True,
                         text=True,
@@ -222,7 +198,7 @@ class MATLABQualityChecker:
             "passed": len(issues) == 0,
         }
 
-    def _analyze_matlab_file(  # noqa: C901, PLR0912, PLR0915
+    def _analyze_matlab_file(
         self,
         file_path: Path,
     ) -> list[str]:
@@ -254,7 +230,8 @@ class MATLABQualityChecker:
                 if not line_stripped:
                     continue
 
-                # Skip comment-only lines (but check comments for banned patterns)
+                # Skip comment-only lines for most checks (but check comments for
+                # banned patterns)
                 is_comment = line_stripped.startswith("%")
 
                 # Track function scope by monitoring nesting level
@@ -320,8 +297,8 @@ class MATLABQualityChecker:
 
                 # Check for banned patterns (in comments and code)
                 banned_patterns = [
-                    (r"\bTO" + "DO\b", "TO" + "DO placeholder found"),
-                    (r"\bFIX" + "ME\b", "FIX" + "ME placeholder found"),
+                    (r"\bTODO\b", "TODO placeholder found"),
+                    (r"\bFIXME\b", "FIXME placeholder found"),
                     (r"\bHACK\b", "HACK comment found"),
                     (r"\bXXX\b", "XXX comment found"),
                     (r"<[A-Z_][A-Z0-9_]*>", "Angle bracket placeholder found"),
@@ -363,7 +340,8 @@ class MATLABQualityChecker:
                     )
 
                 # Check for load without output (loads into workspace)
-                # Match command syntax (load file.mat) and function (load('file.mat'))
+                # Match both command syntax (load file.mat) and function syntax
+                # (load('file.mat'))
                 if (
                     re.search(r"^\s*load\s+\w+", line_stripped)
                     or re.search(r"^\s*load\s*\([^)]+\)", line_stripped)
@@ -373,11 +351,13 @@ class MATLABQualityChecker:
                         "use 'data = load(...)' instead",
                     )
 
-                # Check for magic numbers (allow common values and known constants)
-                # Matches int/float literals (e.g., 3.14, 42, 0.5) not in sci-notation,
-                # array indices, or embedded in words.
-                # Uses lookbehind/lookahead to avoid matching numbers near dots/words.
-                # This flags "magic numbers" while avoiding common false positives.
+                # Check for magic numbers (but allow common values and known constants)
+                # Matches both integer and floating-point literals (e.g., 3.14, 42, 0.5)
+                # that are not part of scientific notation, array indices, or embedded
+                # in words.
+                # Uses lookbehind/lookahead to avoid matching numbers adjacent to dots
+                # or word characters. This helps flag "magic numbers" in code while
+                # avoiding false positives from common patterns.
                 magic_number_pattern = r"(?<![.\w])(?:\d+\.\d+|\d+)(?![.\w])"
                 magic_numbers = re.findall(magic_number_pattern, line_stripped)
 
@@ -408,61 +388,28 @@ class MATLABQualityChecker:
                     "0.0001",  # Common tolerances
                 }
 
-                # Known physics constants (should be defined/flagged with context)
+                # Known physics constants (should be defined but at least flag with
+                # context)
                 # Includes units and sources per coding guidelines
                 known_constants = {
-                    str(PI): (
-                        f"pi constant [dimensionless] - "
-                        f"use math.pi or named constant PI={PI} instead"
+                    "3.14159": "pi constant [dimensionless] - mathematical constant",
+                    "3.1416": "pi constant [dimensionless] - mathematical constant",
+                    "3.14": "pi constant [dimensionless] - mathematical constant",
+                    "1.5708": "pi/2 constant [dimensionless] - mathematical constant",
+                    "1.57": "pi/2 constant [dimensionless] - mathematical constant",
+                    "0.7854": "pi/4 constant [dimensionless] - mathematical constant",
+                    "0.785": "pi/4 constant [dimensionless] - mathematical constant",
+                    "9.81": (
+                        "gravitational acceleration [m/s²] - approximate standard "
+                        "gravity"
                     ),
-                    "3.14"
-                    "159": (
-                        f"pi constant [dimensionless] - "
-                        f"use math.pi or named constant PI={PI} instead"
+                    "9.8": (
+                        "gravitational acceleration [m/s²] - approximate standard "
+                        "gravity"
                     ),
-                    str(round(PI, 4)): (
-                        f"pi constant [dimensionless] - "
-                        f"use math.pi or named constant PI={PI} instead"
-                    ),
-                    str(round(PI, 2)): (
-                        f"pi constant [dimensionless] - "
-                        f"use math.pi or named constant PI={PI} instead"
-                    ),
-                    str(PI_HALF): (
-                        f"pi/2 constant [dimensionless] - "
-                        f"use math.pi/2 or named constant PI_HALF={PI_HALF} instead"
-                    ),
-                    "1.5708": (
-                        f"pi/2 constant [dimensionless] - "
-                        f"use math.pi/2 or named constant PI_HALF={PI_HALF} instead"
-                    ),
-                    "1.57": (
-                        f"pi/2 constant [dimensionless] - "
-                        f"use math.pi/2 or named constant PI_HALF={PI_HALF} instead"
-                    ),
-                    str(PI_QUARTER): (
-                        f"pi/4 constant [dimensionless] - use math.pi/4 or "
-                        f"named constant PI_QUARTER={PI_QUARTER} instead"
-                    ),
-                    "0.7854": (
-                        f"pi/4 constant [dimensionless] - use math.pi/4 or "
-                        f"named constant PI_QUARTER={PI_QUARTER} instead"
-                    ),
-                    "0.785": (
-                        f"pi/4 constant [dimensionless] - use math.pi/4 or "
-                        f"named constant PI_QUARTER={PI_QUARTER} instead"
-                    ),
-                    str(GRAVITY_APPROX_M_S2): (
-                        f"gravitational acceleration [m/s²] - "
-                        f"use GRAVITY_STANDARD_M_S2={GRAVITY_STANDARD_M_S2} instead"
-                    ),
-                    str(GRAVITY_APPROX_ALT_M_S2): (
-                        f"gravitational acceleration [m/s²] - "
-                        f"use GRAVITY_STANDARD_M_S2={GRAVITY_STANDARD_M_S2} instead"
-                    ),
-                    str(GRAVITY_APPROX_ALT2_M_S2): (
-                        f"gravitational acceleration [m/s²] - "
-                        f"use GRAVITY_STANDARD_M_S2={GRAVITY_STANDARD_M_S2} instead"
+                    "9.807": (
+                        "gravitational acceleration [m/s²] - approximate standard "
+                        "gravity"
                     ),
                 }
 
@@ -501,8 +448,8 @@ class MATLABQualityChecker:
                         )
                     elif re.search(r"\bclear\b(?!\s+\w+)", line_stripped):
                         issues.append(
-                            f"{file_path.name} (line {i}): Avoid 'clear' in functions "
-                            "- can clear function variables",
+                            f"{file_path.name} (line {i}): Avoid 'clear' in "
+                            "functions - can clear function variables",
                         )
                     if re.search(r"\bclc\b", line_stripped):
                         issues.append(
@@ -515,14 +462,16 @@ class MATLABQualityChecker:
                             "functions - closes user's figures",
                         )
 
-                # Check for exist() usage (code smell: prefer try/catch or validation)
+                # Check for exist() usage (often code smell, prefer try/catch or
+                # validation)
                 if re.search(r"\bexist\s*\(", line_stripped):
                     issues.append(
                         f"{file_path.name} (line {i}): Consider using validation or "
                         "try/catch instead of exist()",
                     )
 
-                # Check for addpath in functions (should be in startup.m or external)
+                # Check for addpath in functions (should be in startup.m or managed
+                # externally)
                 if in_function and re.search(r"\baddpath\s*\(", line_stripped):
                     issues.append(
                         f"{file_path.name} (line {i}): Avoid addpath in functions - "
@@ -576,7 +525,7 @@ class MATLABQualityChecker:
         return self.results
 
 
-def main() -> None:  # noqa: PLR0915
+def main() -> None:
     """Main entry point for the MATLAB quality check script."""
     parser = argparse.ArgumentParser(description="MATLAB Code Quality Checker")
     parser.add_argument("--strict", action="store_true", help="Enable strict mode")
@@ -607,29 +556,30 @@ def main() -> None:  # noqa: PLR0915
 
     # Output results
     if args.output_format == "json":
-        print(json.dumps(results, indent=2, default=str))  # noqa: T201
+        print(json.dumps(results, indent=2, default=str))
     else:
-        print("\n" + "=" * 60)  # noqa: T201
-        print("MATLAB QUALITY CHECK RESULTS")  # noqa: T201
-        print("=" * 60)  # noqa: T201
-        print(f"Timestamp: {results.get('timestamp', 'N/A')}")  # noqa: T201
-        print(f"Total Files: {results.get('total_files', 0)}")  # noqa: T201
-        print(  # noqa: T201
+        print("\n" + "=" * 60)
+        print("MATLAB QUALITY CHECK RESULTS")
+        print("=" * 60)
+        print(f"Timestamp: {results.get('timestamp', 'N/A')}")
+        print(f"Total Files: {results.get('total_files', 0)}")
+        print(
             f"Status: {'PASSED' if results.get('passed', False) else 'FAILED'}",
         )
-        print(f"Summary: {results.get('summary', 'N/A')}")  # noqa: T201
+        print(f"Summary: {results.get('summary', 'N/A')}")
 
         issues_raw = results.get("issues", [])
         issues: list[str] = issues_raw if isinstance(issues_raw, list) else []
         if issues:
-            print(f"\nIssues Found ({len(issues)}):")  # noqa: T201
+            print(f"\nIssues Found ({len(issues)}):")
             for i, issue in enumerate(issues, 1):
-                print(f"  {i}. {issue}")  # noqa: T201
+                print(f"  {i}. {issue}")
 
-        print("\n" + "=" * 60)  # noqa: T201
+        print("\n" + "=" * 60)
 
     # Exit with appropriate code
-    # In strict mode, fail if issues found; else fail only if checks didn't pass
+    # In strict mode, fail if any issues are found; otherwise fail only if checks
+    # didn't pass
     passed = bool(results.get("passed", False))
     has_issues = bool(results.get("issues"))
 
