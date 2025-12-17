@@ -16,12 +16,14 @@ from __future__ import annotations
 
 import contextlib
 import csv
+import logging
 import math
 import tkinter as tk
 from dataclasses import dataclass
 from datetime import datetime
 
 import numpy as np
+import numpy.typing as npt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
