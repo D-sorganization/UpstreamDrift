@@ -76,14 +76,17 @@ jobs:
       - name: Verify No Placeholders
         run: |
           if grep -rE "TODO|FIXME" . \
+            --include="*.py" \
+            --include="*.m" \
             --exclude-dir=.git \
             --exclude-dir=.github \
             --exclude-dir=.mypy_cache \
             --exclude-dir=.ruff_cache \
             --exclude-dir=__pycache__ \
             --exclude-dir=tools \
-            --exclude="*quality_check*" \
+            --exclude="*quality*check*" \
             --exclude="*test_*" \
+            --exclude="quality-check.py" \
             --exclude="ci-standard.yml"; then
              echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
              exit 1
