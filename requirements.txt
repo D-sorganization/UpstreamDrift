@@ -1,0 +1,40 @@
+# Golf Modeling Suite - Unified Requirements
+# Install with: pip install -r requirements.txt
+# For development: pip install -r requirements.txt -e .[dev,all]
+
+# ============================================================================
+# Core Dependencies (Production)
+# ============================================================================
+-e .
+
+# ============================================================================
+# Development Dependencies
+# ============================================================================
+# Uncomment for development environment:
+# -e .[dev,all]
+
+# ============================================================================
+# Engine-Specific Dependencies
+# ============================================================================
+# For specific engines only, uncomment as needed:
+# -e .[engines]     # Drake, Pinocchio, advanced solvers
+# -e .[analysis]    # OpenCV, ML tools, advanced analysis
+
+# ============================================================================
+# Installation Notes
+# ============================================================================
+# 1. Basic installation (core functionality):
+#    pip install -r requirements.txt
+#
+# 2. Full development setup:
+#    pip install -r requirements.txt -e .[dev,all]
+#
+# 3. Engine-specific setup:
+#    pip install -r requirements.txt -e .[engines]
+#
+# 4. For MATLAB integration, install MATLAB Engine for Python:
+#    cd "matlabroot\extern\engines\python"
+#    python setup.py install
+#
+# 5. For conda environments, some packages may need conda-forge:
+#    conda install -c conda-forge pinocchio drake
