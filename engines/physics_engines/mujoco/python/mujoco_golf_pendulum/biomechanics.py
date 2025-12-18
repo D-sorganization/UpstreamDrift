@@ -7,6 +7,7 @@ derived biomechanical quantities.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 
 import mujoco
@@ -107,6 +108,10 @@ class BiomechanicalAnalyzer:
             self._jacp_flat = None
             self._jacr_flat = None
         except TypeError:
+            # Fallback to flat arrays
+            logging.getLogger(__name__).debug(
+                "MuJoCo version requires flat array format for mj_jacBody"
+            )
             self._use_shaped_jac = False
             self._jacp_flat = np.zeros(3 * self.model.nv)
             self._jacr_flat = np.zeros(3 * self.model.nv)
@@ -167,6 +172,7 @@ class BiomechanicalAnalyzer:
         pos = self.data.xpos[self.club_head_id].copy()
 
         # Get velocity (compute from Jacobian)
+        # Use pre-allocated arrays and pre-determined method
         if self._use_shaped_jac:
             mujoco.mj_jacBody(
                 self.model, self.data, self._jacp, self._jacr, self.club_head_id
