@@ -91,8 +91,10 @@ class PolynomialController(BaseController):
                     break
 
             if act_idx >= 0:
-                # Use 60*t - 20*t^3 (truncated Taylor series for sin(t)) to approximate a swing-like torque profile.
-                # Coefficients chosen to mimic sine wave amplitude/timing for a golf swing.
+                # Use 60*t - 20*t^3 (truncated Taylor series for sin(t)) to
+                # approximate a swing-like torque profile.
+                # Coefficients chosen to mimic sine wave amplitude/timing
+                # for a golf swing.
                 self.coeffs[act_idx, 1] = 60.0
                 self.coeffs[act_idx, 3] = -20.0
         except Exception:
@@ -175,18 +177,23 @@ class LQRController(BaseController):
         x_targ = np.concatenate([self.qpos_targ, self.qvel_targ])
 
         # Simple error
-        # WARNING: Quaternion subtraction (x_targ - x_curr) is not mathematically correct for 3D rotations
-        # (orientation differences should be computed via quaternion multiplication/inverse).
-        # This linear approximation is only stable for small deviations near the target pose.
-        # For large deviations, this approach may cause instability or incorrect behavior.
-        # NOTE: Implement proper quaternion error computation (e.g. via scipy.spatial.transform.Rotation).
+        # WARNING: Quaternion subtraction (x_targ - x_curr) is not
+        # mathematically correct for 3D rotations
+        # (orientation differences should be computed via quaternion
+        # multiplication/inverse).
+        # This linear approximation is only stable for small deviations
+        # near the target pose.
+        # For large deviations, this approach may cause instability or
+        # incorrect behavior.
+        # NOTE: Implement proper quaternion error computation
+        # (e.g. via scipy.spatial.transform.Rotation).
         err = x_targ - x_curr
 
         return self.K @ err
 
 
 class PhysicsEnvWrapper:
-    """Wraps a pure Physics object to satisfy dm_control.viewer's Environment interface."""
+    """Wraps a pure Physics object to satisfy dm_control.viewer's Environment."""
 
     def __init__(self, physics) -> None:
         """Initialize PhysicsEnvWrapper."""
@@ -353,7 +360,8 @@ def run_simulation(
 
             def policy(time_step) -> np.ndarray:
                 """Policy function for the viewer."""
-                # The viewer passes a TimeStep, but we have access to controller/physics externally or via wrapper
+                # The viewer passes a TimeStep, but we have access to controller/physics
+                # externally or via wrapper
                 # We need to return action
                 action = controller.get_action(physics)
                 return action

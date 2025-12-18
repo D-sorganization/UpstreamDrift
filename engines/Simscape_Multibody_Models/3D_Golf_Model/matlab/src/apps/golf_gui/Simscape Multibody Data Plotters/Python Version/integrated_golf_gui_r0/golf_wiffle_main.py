@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 from golf_gui_application import GolfVisualizerWidget
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QAction, QFont
@@ -563,7 +564,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
             speed = np.sqrt(vx**2 + vy**2 + vz**2)
             return speed.max()
-        except:
+        except (KeyError, ValueError, IndexError):
             return 0.0
 
     def _calculate_trajectory_difference(self) -> float:
@@ -576,7 +577,7 @@ class WiffleGolfMainWindow(QMainWindow):
 
             rms_diff = np.sqrt(np.mean(diff_x**2 + diff_y**2 + diff_z**2))
             return rms_diff
-        except:
+        except (KeyError, ValueError, IndexError):
             return 0.0
 
     def _update_frame_metrics(self, frame_idx: int):
@@ -663,7 +664,8 @@ class WiffleGolfMainWindow(QMainWindow):
             self,
             "About Golf Swing Visualizer",
             "Golf Swing Visualizer - Wiffle_ProV1 Edition\n\n"
-            "Advanced 3D visualization tool for comparing golf ball motion capture data.\n\n"
+            "Advanced 3D visualization tool for comparing golf ball "
+            "motion capture data.\n\n"
             "Features:\n"
             "• Excel data loading and processing\n"
             "• Real-time 3D visualization\n"

@@ -1,7 +1,8 @@
-
 import sys
-from PyQt6.QtWidgets import QApplication, QSlider, QDoubleSpinBox, QLabel
+
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QDoubleSpinBox, QLabel, QSlider
+
 
 class MockWindowFix:
     def __init__(self):
@@ -62,8 +63,9 @@ class MockWindowFix:
 
         self.control_system_calls += 1
 
+
 def run_test():
-    app = QApplication(sys.argv + ['-platform', 'offscreen'])
+    _ = QApplication(sys.argv + ["-platform", "offscreen"])
 
     window = MockWindowFix()
 
@@ -75,7 +77,10 @@ def run_test():
 
     print(f"Final Spinbox Value: {final_spinbox_value}")
     print(f"Final Slider Value: {final_slider_value}")
-    print(f"Total Callbacks: Slider={window.slider_calls}, Spinbox={window.spinbox_calls}")
+    print(
+        f"Total Callbacks: Slider={window.slider_calls}, "
+        f"Spinbox={window.spinbox_calls}"
+    )
     print(f"Control System Updates: {window.control_system_calls}")
 
     if final_spinbox_value == 50.5:
@@ -84,9 +89,10 @@ def run_test():
         print("FAIL: Precision lost!")
 
     if window.control_system_calls == 1:
-         print("PASS: Single update.")
+        print("PASS: Single update.")
     else:
-         print(f"FAIL: {window.control_system_calls} updates.")
+        print(f"FAIL: {window.control_system_calls} updates.")
+
 
 if __name__ == "__main__":
     run_test()

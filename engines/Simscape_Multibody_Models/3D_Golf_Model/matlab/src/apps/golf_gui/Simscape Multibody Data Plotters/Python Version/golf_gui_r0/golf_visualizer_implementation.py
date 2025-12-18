@@ -18,10 +18,21 @@ import moderngl as mgl
 import numpy as np
 import scipy.io
 from numba import jit
-from PyQt6.QtCore import *
-from PyQt6.QtOpenGL import *
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
-from PyQt6.QtWidgets import *
+from PyQt6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QDockWidget,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+    QSlider,
+    QVBoxLayout,
+    QWidget,
+)
 
 # ============================================================================
 # HIGH-PERFORMANCE DATA STRUCTURES
@@ -105,7 +116,7 @@ class DataProcessor:
                 datasets[name] = self._extract_dataframe(mat_data[var_name])
                 print(f"✅ Loaded {name}: {len(datasets[name])} frames")
             except Exception as e:
-                raise RuntimeError(f"Failed to load {filepath}: {e}")
+                raise RuntimeError(f"Failed to load {filepath}: {e}") from e
 
         self._calculate_scaling_factors(datasets["BASEQ"])
         return datasets["BASEQ"], datasets["ZTCFQ"], datasets["DELTAQ"]
@@ -194,9 +205,9 @@ class DataProcessor:
         """Safely extract 3D point with fallbacks"""
         try:
             point = dataset[column].iloc[frame_idx]
-            if isinstance(point, (list, np.ndarray)) and len(point) == 3:
+            if isinstance(point, list | np.ndarray) and len(point) == 3:
                 return np.array(point, dtype=np.float32)
-        except:
+        except (TypeError, ValueError, IndexError):
             pass
         return np.array([0.0, 0.0, 0.0], dtype=np.float32)
 
@@ -206,9 +217,9 @@ class DataProcessor:
         """Safely extract 3D vector with fallbacks"""
         try:
             vector = dataset[column].iloc[frame_idx]
-            if isinstance(vector, (list, np.ndarray)) and len(vector) == 3:
+            if isinstance(vector, list | np.ndarray) and len(vector) == 3:
                 return np.array(vector, dtype=np.float32)
-        except:
+        except (TypeError, ValueError, IndexError):
             pass
         return np.array([0.0, 0.0, 0.0], dtype=np.float32)
 
@@ -797,11 +808,9 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
         azimuth_rad = np.radians(self.camera_azimuth)
         elevation_rad = np.radians(self.camera_elevation)
 
-        x = self.camera_distance * np.cos(elevation_rad) * np.cos(azimuth_rad)
-        y = self.camera_distance * np.sin(elevation_rad)
-        z = self.camera_distance * np.cos(elevation_rad) * np.sin(azimuth_rad)
-
-        camera_pos = self.camera_target + np.array([x, y, z])
+        self.camera_distance * np.cos(elevation_rad) * np.cos(azimuth_rad)
+        self.camera_distance * np.sin(elevation_rad)
+        self.camera_distance * np.cos(elevation_rad) * np.sin(azimuth_rad)
 
         # Create view matrix (simplified lookAt)
         view_matrix = np.eye(4, dtype=np.float32)
@@ -811,10 +820,6 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
 
     def _calculate_projection_matrix(self) -> np.ndarray:
         """Calculate perspective projection matrix"""
-        aspect_ratio = self.width() / self.height() if self.height() > 0 else 1.0
-        fov = np.radians(45.0)
-        near = 0.1
-        far = 100.0
 
         proj_matrix = np.eye(4, dtype=np.float32)
         # ... implementation of perspective projection matrix

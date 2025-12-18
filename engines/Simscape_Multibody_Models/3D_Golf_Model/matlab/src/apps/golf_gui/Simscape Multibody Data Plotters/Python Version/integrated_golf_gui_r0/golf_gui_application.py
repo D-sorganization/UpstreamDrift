@@ -805,7 +805,9 @@ class GolfVisualizerWidget(QOpenGLWidget):
         self.camera_distance = max_distance * 2.5
 
         print(
-            f"📷 Camera framed: center={center}, ground_level={self.ground_level:.3f}, distance={self.camera_distance:.2f}"
+            f"📷 Camera framed: center={center}, "
+            f"ground_level={self.ground_level:.3f}, "
+            f"distance={self.camera_distance:.2f}"
         )
 
     def set_face_on_view(self):

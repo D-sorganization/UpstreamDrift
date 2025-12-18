@@ -204,7 +204,7 @@ class RecordingLibrary:
         metadata.filename = filename
         dest_file = self.library_path / metadata.filename
 
-        # Security: Prevent writing if destination is a symlink (to avoid TOCTOU/cache poisoning)
+        # Security: Prevent writing if destination is a symlink (avoid TOCTOU/poisoning)
         if dest_file.is_symlink():
             msg = f"Security violation: Destination '{filename}' is a symbolic link"
             raise ValueError(msg)
@@ -228,11 +228,11 @@ class RecordingLibrary:
             logger.warning(msg)
             raise ValueError(msg)
 
-        # Secure copy: write to temp file then atomic replace to avoid symlink races (TOCTOU)
-        # We write to a .tmp file which we know is created by us, then replace the target.
+        # Secure copy: write to temp file then atomic replace (avoid TOCTOU races)
+        # We write to a .tmp file which we create, then replace the target.
         # If dest_file was swapped to a symlink by an attacker, replace() will overwrite
         # the symlink itself, not the target it points to.
-        # Note: We compare absolute paths to avoid copying if source and dest are the same.
+        # Note: We compare absolute paths to avoid copying if source == dest.
         if dest_file.absolute() != data_path.absolute():
             timestamp_hash = hashlib.md5(str(datetime.now()).encode()).hexdigest()[:8]
             temp_name = f".tmp_{filename}_{timestamp_hash}"
@@ -339,7 +339,7 @@ class RecordingLibrary:
             if metadata:
                 file_path = self.library_path / metadata.filename
 
-                # Security check: Ensure file is within library to prevent path traversal
+                # Security check: Ensure file is within library (prevent traversal)
                 if file_path.exists():
                     try:
                         resolved_file = file_path.resolve()
