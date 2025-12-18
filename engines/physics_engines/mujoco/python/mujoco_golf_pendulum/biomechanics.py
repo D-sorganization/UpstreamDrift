@@ -94,10 +94,10 @@ class BiomechanicalAnalyzer:
         self.prev_time: float = 0.0
 
         # Optimization: Pre-allocate buffers and determine API version for mj_jacBody
-        self._jacp = np.zeros((3, self.model.nv))
-        self._jacr = np.zeros((3, self.model.nv))
-        self._jacp_flat = np.zeros(3 * self.model.nv)
-        self._jacr_flat = np.zeros(3 * self.model.nv)
+        self._jacp = np.empty((3, self.model.nv))
+        self._jacr = np.empty((3, self.model.nv))
+        self._jacp_flat = np.empty(3 * self.model.nv)
+        self._jacr_flat = np.empty(3 * self.model.nv)
 
         # Detect if we can use reshaped arrays (MuJoCo 3.x) or need flat arrays
         try:
