@@ -187,7 +187,7 @@ class PinocchioWrapper:
                     # Find the qpos address for this freejoint
                     qpos_addr = self.model.jnt_qposadr[i]
                     if qpos_addr + 6 < len(q_pin):
-                        # Convert quaternion from MuJoCo [w,x,y,z] to Pinocchio [x,y,z,w]
+                        # Convert quat from MuJoCo [w,x,y,z] to Pinocchio [x,y,z,w]
                         w, x, y, z = (
                             q_pin[qpos_addr + 3],
                             q_pin[qpos_addr + 4],
@@ -215,7 +215,7 @@ class PinocchioWrapper:
                     # Find the qpos address for this freejoint
                     qpos_addr = self.model.jnt_qposadr[i]
                     if qpos_addr + 6 < len(q_mj):
-                        # Convert quaternion from Pinocchio [x,y,z,w] to MuJoCo [w,x,y,z]
+                        # Convert quat from Pinocchio [x,y,z,w] to MuJoCo [w,x,y,z]
                         x, y, z, w = (
                             q_mj[qpos_addr + 3],
                             q_mj[qpos_addr + 4],
@@ -554,7 +554,9 @@ def create_pinocchio_wrapper(
 
     Example:
         >>> import mujoco
-        >>> from mujoco_golf_pendulum.pinocchio_interface import create_pinocchio_wrapper
+        >>> from mujoco_golf_pendulum.pinocchio_interface import (
+        ...     create_pinocchio_wrapper,
+        ... )
         >>> model = mujoco.MjModel.from_xml_string(xml_string)
         >>> data = mujoco.MjData(model)
         >>> wrapper = create_pinocchio_wrapper(model, data)

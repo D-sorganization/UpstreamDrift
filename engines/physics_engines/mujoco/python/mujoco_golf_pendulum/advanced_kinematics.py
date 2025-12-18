@@ -77,12 +77,12 @@ class AdvancedKinematicsAnalyzer:
         # We don't pre-allocate buffers here because compute_body_jacobian returns new arrays
         # Detect if we can use reshaped arrays (MuJoCo 3.x) or need flat arrays
         try:
-            test_jacp = np.empty((3, self.model.nv), dtype=float)
-            test_jacr = np.empty((3, self.model.nv), dtype=float)
+            test_jacp = np.zeros((3, self.model.nv))
+            test_jacr = np.zeros((3, self.model.nv))
             mujoco.mj_jacBody(self.model, self.data, test_jacp, test_jacr, 0)
-            self._use_reshaped_jac = True
+            self._use_shaped_jac = True
         except TypeError:
-            self._use_reshaped_jac = False
+            self._use_shaped_jac = False
 
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern (case-insensitive, partial match)."""
@@ -108,7 +108,7 @@ class AdvancedKinematicsAnalyzer:
         """
         # MuJoCo 3.3+ may require reshaped arrays
         # Optimized for repeated calls: use np.empty (faster) and avoid try-except
-        if self._use_reshaped_jac:
+        if self._use_shaped_jac:
             jacp = np.empty((3, self.model.nv))
             jacr = np.empty((3, self.model.nv))
             mujoco.mj_jacBody(self.model, self.data, jacp, jacr, body_id)

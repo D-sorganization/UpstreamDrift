@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 Detailed analysis of MATLAB data structure
-This script will explore the actual structure of the .mat files to understand the data format.
+This script will explore the actual structure of the .mat files
+to understand the data format.
 """
 
 import os
@@ -35,8 +36,12 @@ def deep_analyze_matlab_file(filename):
                     print(f"  Structured array with fields: {value.dtype.names}")
                     for field_name in value.dtype.names:
                         field_data = value[field_name]
+                        shape_info = (
+                            field_data.shape if hasattr(field_data, "shape") else "N/A"
+                        )
                         print(
-                            f"    {field_name}: {type(field_data)}, shape {field_data.shape if hasattr(field_data, 'shape') else 'N/A'}"
+                            f"    {field_name}: {type(field_data)}, "
+                            f"shape {shape_info}"
                         )
 
                         # If it's an object array, try to explore further
@@ -45,8 +50,12 @@ def deep_analyze_matlab_file(filename):
                         ) and field_data.dtype == np.dtype("O"):
                             print(f"      Object array with {len(field_data)} elements")
                             for i, obj in enumerate(field_data[:3]):  # Show first 3
+                                obj_shape = (
+                                    obj.shape if hasattr(obj, "shape") else "N/A"
+                                )
                                 print(
-                                    f"        Element {i}: {type(obj)}, shape {obj.shape if hasattr(obj, 'shape') else 'N/A'}"
+                                    f"        Element {i}: {type(obj)}, "
+                                    f"shape {obj_shape}"
                                 )
                                 if hasattr(obj, "dtype"):
                                     print(f"        Dtype: {obj.dtype}")
@@ -55,7 +64,8 @@ def deep_analyze_matlab_file(filename):
                     print(f"  Object array with {len(value)} elements")
                     for i, obj in enumerate(value[:3]):  # Show first 3
                         print(
-                            f"    Element {i}: {type(obj)}, shape {obj.shape if hasattr(obj, 'shape') else 'N/A'}"
+                            f"    Element {i}: {type(obj)}, "
+                            f"shape {obj.shape if hasattr(obj, 'shape') else 'N/A'}"
                         )
                         if hasattr(obj, "dtype"):
                             print(f"    Dtype: {obj.dtype}")
@@ -64,7 +74,8 @@ def deep_analyze_matlab_file(filename):
                     print("  Numeric array")
                     if value.size > 0:
                         print(
-                            f"    Min: {value.min()}, Max: {value.max()}, Mean: {value.mean()}"
+                            f"    Min: {value.min()}, Max: {value.max()}, "
+                            f"Mean: {value.mean()}"
                         )
                         if value.ndim <= 2 and value.size <= 20:
                             print(f"    Data: {value}")
@@ -120,7 +131,8 @@ def extract_actual_data(filename):
                                     # Check if this has the expected structure
                                     if obj.shape[0] > 100:  # Many time points
                                         print(
-                                            "        ✅ This appears to be the main dataset!"
+                                            "        ✅ This appears to be "
+                                            "the main dataset!"
                                         )
                                         return obj
 

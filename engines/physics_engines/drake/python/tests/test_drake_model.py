@@ -103,7 +103,8 @@ class TestCylinderInertia:
     def test_make_cylinder_inertia_positive(self) -> None:
         """Test cylinder inertia with positive parameters."""
         # This test requires Drake to be available if we were creating raw objects,
-        # but 'make_cylinder_inertia' returns a SpatialInertia which we import for verification.
+        # but 'make_cylinder_inertia' returns a SpatialInertia which we import
+        # for verification.
         if "pydrake" not in sys.modules:
             pytest.skip("Drake not available")
 

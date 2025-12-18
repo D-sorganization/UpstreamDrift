@@ -93,18 +93,23 @@ class BiomechanicalAnalyzer:
         self.prev_qvel: np.ndarray | None = None
         self.prev_time: float = 0.0
 
-        # Optimization: Pre-allocate buffers and determine API version for mj_jacBody
-        self._jacp = np.empty((3, self.model.nv))
-        self._jacr = np.empty((3, self.model.nv))
-        self._jacp_flat = np.empty(3 * self.model.nv)
-        self._jacr_flat = np.empty(3 * self.model.nv)
+        # Pre-allocate Jacobian buffers to avoid re-allocation every frame
+        self._jacp = np.zeros((3, self.model.nv))
+        self._jacr = np.zeros((3, self.model.nv))
 
-        # Detect if we can use reshaped arrays (MuJoCo 3.x) or need flat arrays
+        # Check if MuJoCo supports shaped arrays (optimization)
+        # MuJoCo 3.3+ may require reshaped arrays, while older versions might work
+        # with both or require flat arrays. We determine the capability once.
         try:
+            # Try with shaped arrays on body 0 (world) which always exists
             mujoco.mj_jacBody(self.model, self.data, self._jacp, self._jacr, 0)
-            self._use_reshaped_jac = True
+            self._use_shaped_jac = True
+            self._jacp_flat = None
+            self._jacr_flat = None
         except TypeError:
-            self._use_reshaped_jac = False
+            self._use_shaped_jac = False
+            self._jacp_flat = np.zeros(3 * self.model.nv)
+            self._jacr_flat = np.zeros(3 * self.model.nv)
 
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern (case-insensitive, partial match)."""
@@ -161,12 +166,12 @@ class BiomechanicalAnalyzer:
         # Get position
         pos = self.data.xpos[self.club_head_id].copy()
 
-        # Get velocity (compute from Jacobian) - Optimized for repeated calls
-        if self._use_reshaped_jac:
+        # Get velocity (compute from Jacobian)
+        if self._use_shaped_jac:
             mujoco.mj_jacBody(
                 self.model, self.data, self._jacp, self._jacr, self.club_head_id
             )
-            vel = self._jacp @ self.data.qvel
+            jacp = self._jacp
         else:
             mujoco.mj_jacBody(
                 self.model,
@@ -175,8 +180,10 @@ class BiomechanicalAnalyzer:
                 self._jacr_flat,
                 self.club_head_id,
             )
-            # Reshape is a view, so it's cheap
-            vel = self._jacp_flat.reshape(3, self.model.nv) @ self.data.qvel
+            # Use reshape to get a view (no copy)
+            jacp = self._jacp_flat.reshape(3, self.model.nv)
+
+        vel = jacp @ self.data.qvel
         speed = float(np.linalg.norm(vel))
 
         return pos, vel, speed
