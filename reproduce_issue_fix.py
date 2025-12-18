@@ -65,7 +65,7 @@ class MockWindowFix:
 
 
 def run_test():
-    app = QApplication(sys.argv + ["-platform", "offscreen"])
+    _ = QApplication(sys.argv + ["-platform", "offscreen"])
 
     window = MockWindowFix()
 

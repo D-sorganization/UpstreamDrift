@@ -259,8 +259,6 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
         self.actuator_control_widgets: list[QtWidgets.QWidget] = (
             []
         )  # Store all control widgets per actuator
-            []
-        )  # Lists of SpinBoxes for polynomial coefficients
         self.simplified_actuator_mode = False
         self.actuator_filter_input: QtWidgets.QLineEdit | None = None
         self._simplified_notice: QtWidgets.QLabel | None = None

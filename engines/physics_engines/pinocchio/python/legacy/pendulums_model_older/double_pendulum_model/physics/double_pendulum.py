@@ -324,9 +324,7 @@ class DoublePendulumDynamics:
         d2 = p.damping_wrist * omega2
         return d1, d2
 
-    def _invert_mass_matrix(
-        self, theta2: float
-    ) -> tuple[
+    def _invert_mass_matrix(self, theta2: float) -> tuple[
         tuple[tuple[float, float], tuple[float, float]],
         tuple[tuple[float, float], tuple[float, float]],
     ]:
