@@ -6,6 +6,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+from functools import partial
 
 try:
     import queue
@@ -699,7 +700,7 @@ class GolfSimulationGUI:
             color_btn = tk.Button(
                 color_row,
                 text="🎨 Pick Color",
-                command=lambda p=part_key: self.pick_color(p),
+                command=partial(self.pick_color, part_key),
                 bg="#0078d4",
                 fg="white",
                 font=("Segoe UI", 9),

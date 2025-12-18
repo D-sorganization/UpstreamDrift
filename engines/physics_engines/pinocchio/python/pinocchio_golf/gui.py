@@ -245,6 +245,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         # Clear layout
         while self.slider_layout.count():
             item = self.slider_layout.takeAt(0)
+            if item is None:
+                break
             widget = item.widget()
             if widget:
                 widget.deleteLater()

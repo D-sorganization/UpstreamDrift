@@ -18,7 +18,7 @@ from .telemetry import TelemetryRecorder
 try:
     import cv2
 except ImportError:  # pragma: no cover - optional dependency
-    cv2 = None
+    cv2 = None  # type: ignore
 
 LOGGER = logging.getLogger(__name__)
 MIN_CAMERA_DEPTH: Final[float] = 0.1

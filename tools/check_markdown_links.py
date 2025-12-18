@@ -5,9 +5,10 @@ import sys
 from pathlib import Path
 from urllib.parse import unquote
 
+
 def check_links(root_dir: Path) -> list[str]:
     errors = []
-    link_pattern = re.compile(r'\[([^\]]*)\]\(([^)]+)\)')
+    link_pattern = re.compile(r"\[([^\]]*)\]\(([^)]+)\)")
 
     for md_file in root_dir.rglob("*.md"):
         # Skip node_modules or similar if any
@@ -39,8 +40,8 @@ def check_links(root_dir: Path) -> list[str]:
                 link_path = link
 
             if not link_path:
-                 # Just an anchor
-                 continue
+                # Just an anchor
+                continue
 
             # Resolve path
             # link is relative to md_file
@@ -56,9 +57,10 @@ def check_links(root_dir: Path) -> list[str]:
                 decoded_link = unquote(link_path)
                 target_decoded = (md_file.parent / decoded_link).resolve()
                 if not target_decoded.exists():
-                     errors.append(f"Broken link in {md_file}: {link} -> {target}")
+                    errors.append(f"Broken link in {md_file}: {link} -> {target}")
 
     return errors
+
 
 if __name__ == "__main__":
     root = Path(".")

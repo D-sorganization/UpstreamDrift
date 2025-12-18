@@ -1,7 +1,8 @@
-
 import sys
-from PyQt6.QtWidgets import QApplication, QSlider, QDoubleSpinBox, QLabel
+
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QApplication, QDoubleSpinBox, QLabel, QSlider
+
 
 # Mocking the window class partially to reproduce the issue
 class MockWindow:
@@ -61,8 +62,9 @@ class MockWindow:
         # Simulate control system update
         self.control_system_calls += 1
 
+
 def run_test():
-    app = QApplication(sys.argv + ['-platform', 'offscreen'])
+    app = QApplication(sys.argv + ["-platform", "offscreen"])
 
     window = MockWindow()
 
@@ -79,7 +81,9 @@ def run_test():
 
     print(f"Final Spinbox Value: {final_spinbox_value}")
     print(f"Final Slider Value: {final_slider_value}")
-    print(f"Total Callbacks: Slider={window.slider_calls}, Spinbox={window.spinbox_calls}")
+    print(
+        f"Total Callbacks: Slider={window.slider_calls}, Spinbox={window.spinbox_calls}"
+    )
     print(f"Control System Updates: {window.control_system_calls}")
 
     if final_spinbox_value != 50.5:
@@ -89,6 +93,7 @@ def run_test():
 
     if window.control_system_calls > 1:
         print("FAIL: Redundant updates detected!")
+
 
 if __name__ == "__main__":
     run_test()

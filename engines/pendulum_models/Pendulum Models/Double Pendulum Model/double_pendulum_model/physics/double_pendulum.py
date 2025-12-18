@@ -262,7 +262,10 @@ class DoublePendulumDynamics:
 
     def _invert_mass_matrix(
         self, theta2: float
-    ) -> tuple[tuple[float, float], tuple[float, float]]:
+    ) -> tuple[
+        tuple[tuple[float, float], tuple[float, float]],
+        tuple[tuple[float, float], tuple[float, float]],
+    ]:
         mass = self.mass_matrix(theta2)
         determinant = mass[0][0] * mass[1][1] - mass[0][1] * mass[1][0]
         if abs(determinant) <= MASS_MATRIX_SINGULAR_TOLERANCE:
@@ -389,9 +392,7 @@ class DoublePendulumDynamics:
         )
 
 
-def compile_forcing_functions(
-    shoulder_expression: str, wrist_expression: str
-) -> tuple[
+def compile_forcing_functions(shoulder_expression: str, wrist_expression: str) -> tuple[
     Callable[[float, DoublePendulumState], float],
     Callable[[float, DoublePendulumState], float],
 ]:
