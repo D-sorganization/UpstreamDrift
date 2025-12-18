@@ -4,6 +4,6 @@
 **Learning:** Bi-directional synchronization between QSlider (int) and QDoubleSpinBox (float) creates a recursive signal loop that degrades performance (3x calls) and causes precision loss due to int casting.
 **Action:** Always use `widget.blockSignals(True)` before programmatically updating a synchronized widget to break the feedback loop.
 
-## 2025-05-23 - MuJoCo API Overhead
-**Learning:** MuJoCo Python bindings (mj_jacBody) may have version-dependent signatures (shaped vs flat arrays). Using try-except in a hot loop to handle this adds significant overhead (~5%), plus allocation overhead.
-**Action:** Detect API capability once in `__init__`, pre-allocate buffers, and use a conditional branch instead of try-except in per-frame methods.
+## 2025-02-23 - MuJoCo Python Bindings API overhead
+**Learning:** The `mj_jacBody` function has different signatures in different MuJoCo versions. Using `try-except` to detect this on every frame adds significant overhead (~30% in tight loops) due to exception handling and allocation. Checking the API once at initialization and pre-allocating buffers (where safe) provides a measurable speedup.
+**Action:** Detect MuJoCo API capabilities in `__init__` and use the optimal path without runtime checks. Pre-allocate NumPy arrays for MuJoCo C-API calls when thread safety allows.

@@ -4,10 +4,12 @@ target-version = ['py311']
 
 [tool.mypy]
 python_version = "3.11"
+explicit_package_bases = true
 ignore_missing_imports = true
 check_untyped_defs = true
 disallow_untyped_defs = false
 exclude = [
     "engines/matlab_simscape/",
     "engines/Simscape_Multibody_Models/",
+    "engines/pendulum_models/Pendulum Models/Pendulums_Model/",
 ]
