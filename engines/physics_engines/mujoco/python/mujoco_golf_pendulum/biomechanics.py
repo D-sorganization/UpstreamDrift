@@ -93,6 +93,19 @@ class BiomechanicalAnalyzer:
         self.prev_qvel: np.ndarray | None = None
         self.prev_time: float = 0.0
 
+        # Optimization: Pre-allocate buffers and determine API version for mj_jacBody
+        self._jacp = np.zeros((3, self.model.nv))
+        self._jacr = np.zeros((3, self.model.nv))
+        self._jacp_flat = np.zeros(3 * self.model.nv)
+        self._jacr_flat = np.zeros(3 * self.model.nv)
+
+        # Detect if we can use reshaped arrays (MuJoCo 3.x) or need flat arrays
+        try:
+            mujoco.mj_jacBody(self.model, self.data, self._jacp, self._jacr, 0)
+            self._use_reshaped_jac = True
+        except TypeError:
+            self._use_reshaped_jac = False
+
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern (case-insensitive, partial match)."""
         for i in range(self.model.nbody):
@@ -148,21 +161,22 @@ class BiomechanicalAnalyzer:
         # Get position
         pos = self.data.xpos[self.club_head_id].copy()
 
-        # Get velocity (compute from Jacobian) - fixed for MuJoCo 3.x API
-        try:
-            jacp = np.zeros((3, self.model.nv))
-            jacr = np.zeros((3, self.model.nv))
-            mujoco.mj_jacBody(self.model, self.data, jacp, jacr, self.club_head_id)
-        except TypeError:
-            # Fallback to flat array approach for older MuJoCo versions
-            jacp_flat = np.zeros(3 * self.model.nv)
-            jacr_flat = np.zeros(3 * self.model.nv)
+        # Get velocity (compute from Jacobian) - Optimized for repeated calls
+        if self._use_reshaped_jac:
             mujoco.mj_jacBody(
-                self.model, self.data, jacp_flat, jacr_flat, self.club_head_id
+                self.model, self.data, self._jacp, self._jacr, self.club_head_id
             )
-            jacp = jacp_flat.reshape(3, self.model.nv)
-
-        vel = jacp @ self.data.qvel
+            vel = self._jacp @ self.data.qvel
+        else:
+            mujoco.mj_jacBody(
+                self.model,
+                self.data,
+                self._jacp_flat,
+                self._jacr_flat,
+                self.club_head_id,
+            )
+            # Reshape is a view, so it's cheap
+            vel = self._jacp_flat.reshape(3, self.model.nv) @ self.data.qvel
         speed = float(np.linalg.norm(vel))
 
         return pos, vel, speed

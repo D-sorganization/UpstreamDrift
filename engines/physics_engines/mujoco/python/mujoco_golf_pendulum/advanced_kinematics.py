@@ -73,6 +73,17 @@ class AdvancedKinematicsAnalyzer:
         self.left_hand_id = self._find_body_id("left_hand")
         self.right_hand_id = self._find_body_id("right_hand")
 
+        # Optimization: Determine API version for mj_jacBody to avoid try-except overhead
+        # We don't pre-allocate buffers here because compute_body_jacobian returns new arrays
+        # Detect if we can use reshaped arrays (MuJoCo 3.x) or need flat arrays
+        try:
+            test_jacp = np.zeros((3, self.model.nv))
+            test_jacr = np.zeros((3, self.model.nv))
+            mujoco.mj_jacBody(self.model, self.data, test_jacp, test_jacr, 0)
+            self._use_reshaped_jac = True
+        except TypeError:
+            self._use_reshaped_jac = False
+
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern (case-insensitive, partial match)."""
         for i in range(self.model.nbody):
@@ -96,14 +107,14 @@ class AdvancedKinematicsAnalyzer:
             Tuple of (position_jacobian [3 x nv], rotation_jacobian [3 x nv])
         """
         # MuJoCo 3.3+ may require reshaped arrays
-        try:
-            jacp = np.zeros((3, self.model.nv))
-            jacr = np.zeros((3, self.model.nv))
+        # Optimized for repeated calls: use np.empty (faster) and avoid try-except
+        if self._use_reshaped_jac:
+            jacp = np.empty((3, self.model.nv))
+            jacr = np.empty((3, self.model.nv))
             mujoco.mj_jacBody(self.model, self.data, jacp, jacr, body_id)
-        except TypeError:
-            # Fallback to flat array approach
-            jacp_flat = np.zeros(3 * self.model.nv)
-            jacr_flat = np.zeros(3 * self.model.nv)
+        else:
+            jacp_flat = np.empty(3 * self.model.nv)
+            jacr_flat = np.empty(3 * self.model.nv)
             mujoco.mj_jacBody(self.model, self.data, jacp_flat, jacr_flat, body_id)
             jacp = jacp_flat.reshape(3, self.model.nv)
             jacr = jacr_flat.reshape(3, self.model.nv)
