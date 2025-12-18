@@ -86,7 +86,7 @@ def crm(v: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     w0, w1, w2 = v[0], v[1], v[2]
     v0, v1, v2 = v[3], v[4], v[5]
 
-    # Performance optimization: manual construction avoids np.block and intermediate arrays
+    # Performance optimization: manual construction avoids np.block and arrays
     res = np.zeros((6, 6), dtype=np.float64)
 
     # Top-left block: skew(w)
@@ -154,7 +154,7 @@ def crf(v: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     w0, w1, w2 = v[0], v[1], v[2]
     v0, v1, v2 = v[3], v[4], v[5]
 
-    # Performance optimization: manual construction avoids np.block and intermediate arrays
+    # Performance optimization: manual construction avoids np.block and arrays
     res = np.zeros((6, 6), dtype=np.float64)
 
     # Top-left block: skew(w)
