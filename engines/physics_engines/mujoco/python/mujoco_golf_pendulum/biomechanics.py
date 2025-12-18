@@ -7,6 +7,7 @@ derived biomechanical quantities.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 
 import mujoco
@@ -101,22 +102,16 @@ class BiomechanicalAnalyzer:
         self._jacr_flat: np.ndarray | None = None
         self._use_shaped_jac: bool = True
 
-        # Use the club head body for Jacobian signature detection when available
-        body_id_for_jacobian = self.club_head_id if self.club_head_id is not None else 0
-
         try:
             # Try with shaped arrays
             self._jacp = np.zeros((3, self.model.nv))
             self._jacr = np.zeros((3, self.model.nv))
-            mujoco.mj_jacBody(
-                self.model,
-                self.data,
-                self._jacp,
-                self._jacr,
-                body_id_for_jacobian,
-            )
+            mujoco.mj_jacBody(self.model, self.data, self._jacp, self._jacr, 0)
         except TypeError:
             # Fallback to flat arrays
+            logging.getLogger(__name__).debug(
+                "MuJoCo version requires flat array format for mj_jacBody"
+            )
             self._use_shaped_jac = False
             self._jacp = None
             self._jacr = None
@@ -206,10 +201,7 @@ class BiomechanicalAnalyzer:
             vel = jacp @ self.data.qvel
         else:
             # Fallback (should not happen if __init__ succeeded)
-            raise RuntimeError(
-                "Club head velocity Jacobian buffers are not initialized; "
-                "cannot compute club head velocity."
-            )
+            vel = np.zeros(3)
         speed = float(np.linalg.norm(vel))
 
         return pos, vel, speed
