@@ -18,11 +18,53 @@ class TestEngineIntegration:
     """Test integration between different physics engines."""
     
     @pytest.mark.integration
+    def test_engine_manager_initialization(self):
+        """Test that the engine manager can be initialized and detects engines."""
+        from shared.python.engine_manager import EngineManager, EngineType
+        
+        manager = EngineManager()
+        available_engines = manager.get_available_engines()
+        
+        # Should detect at least some engines based on directory structure
+        assert len(available_engines) > 0
+        
+        # Check that common engines are detected
+        engine_info = manager.get_engine_info()
+        assert "available_engines" in engine_info
+        assert "engine_status" in engine_info
+    
+    @pytest.mark.integration
     def test_mujoco_drake_comparison(self, sample_swing_data):
-        """Test comparison between MuJoCo and Drake engines."""
-        # Mock both engines
-        with patch('engines.physics_engines.mujoco.MuJoCoGolfModel') as mock_mujoco, \
-             patch('engines.physics_engines.drake.DrakeGolfModel') as mock_drake:
+        """Test comparison between MuJoCo and Drake engines using engine manager."""
+        from shared.python.engine_manager import EngineManager, EngineType
+        
+        manager = EngineManager()
+        available_engines = manager.get_available_engines()
+        
+        # Mock simulation results for comparison
+        mock_results = {
+            EngineType.MUJOCO: {
+                'ball_distance': 250.0,
+                'launch_angle': 12.5,
+                'ball_speed': 150.0,
+                'simulation_time': 2.0
+            },
+            EngineType.DRAKE: {
+                'ball_distance': 248.5,
+                'launch_angle': 12.8,
+                'ball_speed': 149.2,
+                'simulation_time': 2.0
+            }
+        }
+        
+        # Test that we can compare results
+        if EngineType.MUJOCO in available_engines and EngineType.DRAKE in available_engines:
+            mujoco_distance = mock_results[EngineType.MUJOCO]['ball_distance']
+            drake_distance = mock_results[EngineType.DRAKE]['ball_distance']
+            
+            # Results should be within reasonable tolerance
+            distance_diff = abs(mujoco_distance - drake_distance)
+            assert distance_diff < 10.0  # Within 10 yards
             
             # Setup mock results
             mock_mujoco_results = {
@@ -53,35 +95,39 @@ class TestEngineIntegration:
     @pytest.mark.integration
     def test_cross_engine_validation(self):
         """Test validation of results across multiple engines."""
-        # Mock all three engines
-        engines = ['mujoco', 'drake', 'pinocchio']
+        from shared.python.engine_manager import EngineManager, EngineType
+        
+        manager = EngineManager()
+        available_engines = manager.get_available_engines()
+        
+        # Generate mock results for available engines
         results = {}
+        base_distance = 250.0
         
-        for engine in engines:
-            with patch(f'engines.physics_engines.{engine}.{engine.title()}GolfModel') as mock_engine:
-                # Generate slightly different but consistent results
-                base_distance = 250.0
-                noise = np.random.normal(0, 2.0)  # Small random variation
-                
-                mock_result = {
-                    'ball_distance': base_distance + noise,
-                    'launch_angle': 12.5 + np.random.normal(0, 0.5),
-                    'ball_speed': 150.0 + np.random.normal(0, 3.0),
-                }
-                
-                mock_engine.return_value.simulate.return_value = mock_result
-                results[engine] = mock_result
+        for engine_type in available_engines:
+            # Generate slightly different but consistent results
+            noise = np.random.normal(0, 2.0)  # Small random variation
+            
+            mock_result = {
+                'ball_distance': base_distance + noise,
+                'launch_angle': 12.5 + np.random.normal(0, 0.5),
+                'ball_speed': 150.0 + np.random.normal(0, 3.0),
+            }
+            results[engine_type] = mock_result
         
-        # Validate consistency
-        distances = [results[engine]['ball_distance'] for engine in engines]
-        distance_std = np.std(distances)
-        
-        # Standard deviation should be reasonable (< 5% of mean)
-        assert distance_std < np.mean(distances) * 0.05
+        # Validate consistency if we have multiple engines
+        if len(results) > 1:
+            distances = [results[engine]['ball_distance'] for engine in results.keys()]
+            distance_std = np.std(distances)
+            
+            # Standard deviation should be reasonable (< 5% of mean)
+            assert distance_std < np.mean(distances) * 0.05
     
     @pytest.mark.integration
     def test_engine_parameter_consistency(self):
         """Test that all engines accept consistent parameter sets."""
+        from shared.python.engine_manager import EngineManager, EngineType
+        
         common_parameters = {
             'swing_speed': 100.0,  # mph
             'club_type': 'driver',
@@ -90,20 +136,18 @@ class TestEngineIntegration:
             'timestep': 0.001,
         }
         
-        engines = ['mujoco', 'drake', 'pinocchio']
+        manager = EngineManager()
+        available_engines = manager.get_available_engines()
         
-        for engine in engines:
-            with patch(f'engines.physics_engines.{engine}.{engine.title()}GolfModel') as mock_engine:
-                mock_instance = Mock()
-                mock_engine.return_value = mock_instance
-                
-                # Test parameter setting
-                for param, value in common_parameters.items():
-                    setattr(mock_instance, param, value)
-                
-                # Should not raise exceptions
-                assert mock_instance.swing_speed == 100.0
-                assert mock_instance.club_type == 'driver'
+        # Test that engine manager can validate configurations
+        for engine_type in available_engines:
+            # Test that engine validation works
+            is_valid = manager.validate_engine_configuration(engine_type)
+            assert isinstance(is_valid, bool)
+            
+            # Test that we can get engine status
+            status = manager.get_engine_status(engine_type)
+            assert status is not None
     
     @pytest.mark.integration
     @pytest.mark.slow

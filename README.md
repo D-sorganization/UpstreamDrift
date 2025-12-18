@@ -38,7 +38,9 @@ python launchers/golf_suite_launcher.py
 Golf_Modeling_Suite/
 ├── launchers/                    # Unified launch applications
 ├── engines/
-│   ├── matlab_simscape/         # MATLAB/Simulink models
+│   ├── Simscape_Multibody_Models/  # MATLAB/Simulink models
+│   │   ├── 2D_Golf_Model/          # 2D golf swing model
+│   │   └── 3D_Golf_Model/          # 3D biomechanical model
 │   ├── physics_engines/         # Python physics engines (MuJoCo, Drake, Pinocchio)
 │   └── pendulum_models/         # Simplified pendulum models
 ├── shared/                      # Common utilities and resources

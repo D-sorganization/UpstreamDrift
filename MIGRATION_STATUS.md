@@ -19,8 +19,8 @@
 - ✅ All paths updated for new consolidated structure
 
 ### Phase 3: MATLAB Models Migration ✅ COMPLETE
-- ✅ 2D_Golf_Model → engines/matlab_simscape/2d_model/
-- ✅ Golf_Model → engines/matlab_simscape/3d_biomechanical/
+- ✅ 2D_Golf_Model → engines/Simscape_Multibody_Models/2D_Golf_Model/
+- ✅ Golf_Model → engines/Simscape_Multibody_Models/3D_Golf_Model/
 - ✅ All MATLAB files, Simulink models, and documentation preserved
 
 ### Phase 4: Physics Engines Migration ✅ COMPLETE
@@ -62,7 +62,7 @@
 Golf_Modeling_Suite/
 ├── launchers/                    ✅ Complete with assets
 ├── engines/
-│   ├── matlab_simscape/         ✅ 2D and 3D models migrated
+│   ├── Simscape_Multibody_Models/  ✅ 2D and 3D models migrated
 │   ├── physics_engines/         ✅ All 3 engines migrated  
 │   └── pendulum_models/         ✅ Complete migration
 ├── shared/                      ⏳ Ready for consolidation
