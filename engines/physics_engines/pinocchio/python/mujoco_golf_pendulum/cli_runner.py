@@ -56,7 +56,8 @@ def load_model(model_key: str) -> tuple[mujoco.MjModel, mujoco.MjData]:
     if spec is None:
         candidate = _resolve_model_path(model_key)
         if not candidate.exists():
-            msg = f"Unknown model '{model_key}'. Available: {', '.join(sorted(MODEL_SPECS))}"
+            msg = f"Unknown model '{model_key}'. Available: \
+                {', ''.join(sorted(MODEL_SPECS))}"
             raise ValueError(
                 msg,
             )
