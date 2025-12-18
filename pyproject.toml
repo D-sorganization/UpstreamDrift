@@ -43,6 +43,8 @@ dev = [
     "mypy>=1.10.0",
     "pre-commit>=4.0.0",
     "types-PyYAML>=6.0.12.12",
+    "pandas-stubs>=2.0.0",
+    "types-requests>=2.31.0",
 ]
 engines = [
     "drake>=1.22.0,<2.0.0",

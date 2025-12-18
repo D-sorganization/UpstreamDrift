@@ -54,7 +54,7 @@ jobs:
         run: black --check .
         continue-on-error: true
 
-      - run: pip install mypy types-PyYAML types-requests
+      - run: pip install mypy types-PyYAML types-requests pandas-stubs
       
       # Install dependencies using the new unified approach
       - name: Install Python Dependencies
@@ -62,7 +62,7 @@ jobs:
           pip install numpy pandas matplotlib scipy sympy
           pip install pytest pytest-cov pytest-mock
           pip install ruff==0.5.0 black>=24.4.2 mypy>=1.10.0 pre-commit>=4.0.0
-          pip install pyyaml pathlib2 defusedxml types-PyYAML
+          pip install pyyaml pathlib2 defusedxml types-PyYAML pandas-stubs types-requests
           pip install PyQt6 mujoco
         continue-on-error: true
       
