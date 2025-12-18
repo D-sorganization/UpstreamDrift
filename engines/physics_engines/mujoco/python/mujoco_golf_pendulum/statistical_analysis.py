@@ -84,7 +84,7 @@ class StatisticalAnalyzer:
         self.club_head_speed = club_head_speed
         self.club_head_position = club_head_position
 
-        self.dt = np.mean(np.diff(times)) if len(times) > 1 else 0.0
+        self.dt = float(np.mean(np.diff(times))) if len(times) > 1 else 0.0
         self.duration = times[-1] - times[0] if len(times) > 1 else 0.0
 
     def compute_summary_stats(self, data: np.ndarray) -> SummaryStatistics:

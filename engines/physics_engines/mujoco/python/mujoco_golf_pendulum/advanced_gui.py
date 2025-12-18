@@ -261,17 +261,21 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.actuator_groups: list[QtWidgets.QGroupBox] = []
 
         # Advanced control widgets
-        self.actuator_control_types: list[QtWidgets.QComboBox] = []  # ComboBoxes for
-        # control type
-        self.actuator_constant_inputs: list[QtWidgets.QDoubleSpinBox] = []  # SpinBoxes
-        # constant values
+        self.actuator_control_types: list[QtWidgets.QComboBox] = (
+            []
+        )  # ComboBoxes for control type
+        self.actuator_constant_inputs: list[QtWidgets.QDoubleSpinBox] = (
+            []
+        )  # SpinBoxes for constant values
         self.actuator_polynomial_coeffs: list[list[QtWidgets.QDoubleSpinBox]] = (
             []
         )  # Lists of SpinBoxes for polynomial coefficients
-        self.actuator_damping_inputs: list[QtWidgets.QDoubleSpinBox] = []  # SpinBoxes
-        # damping
-        self.actuator_control_widgets: list[QtWidgets.QWidget] = []  # Store all control
-        # widgets per actuator
+        self.actuator_damping_inputs: list[QtWidgets.QDoubleSpinBox] = (
+            []
+        )  # SpinBoxes for damping
+        self.actuator_control_widgets: list[QtWidgets.QWidget] = (
+            []
+        )  # Store all control widgets per actuator
         self.simplified_actuator_mode = False
         self.actuator_filter_input: QtWidgets.QLineEdit | None = None
         self._simplified_notice: QtWidgets.QLabel | None = None
@@ -1898,7 +1902,6 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             coeff_spinbox.setSingleStep(0.1)
             coeff_spinbox.setDecimals(4)
             coeff_spinbox.setValue(0.0)
-
             def _on_coeff_change(val, idx=i, act_idx=actuator_index):
                 self.on_polynomial_coeff_changed(act_idx, idx, val)
 
