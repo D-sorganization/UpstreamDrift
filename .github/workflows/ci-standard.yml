@@ -40,7 +40,7 @@ jobs:
             exit 1
           fi
 
-          echo "✓ All tool versions are consistent"
+          echo "All tool versions are consistent"
 
       # FIX: Less aggressive Ruff (Errors, Warnings, Imports only)
       # TEMPORARY: continue-on-error due to platform-specific linting differences
@@ -56,7 +56,7 @@ jobs:
 
       - run: pip install mypy types-PyYAML types-requests
       
-      # Install dependencies (skip Drake which isn't available on PyPI)
+      # Install dependencies using the new unified approach
       - name: Install Python Dependencies
         run: |
           pip install numpy pandas matplotlib scipy sympy
@@ -123,39 +123,90 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       
-      # Install core dependencies for testing
-      - name: Install Test Dependencies
+      # Install dependencies using the new unified approach
+      - name: Install Dependencies
         run: |
-          pip install numpy pandas matplotlib scipy sympy
-          pip install pytest pytest-cov pytest-mock
-          pip install PyQt6 mujoco
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+          # Install core testing dependencies
+          pip install pytest pytest-cov pytest-mock pytest-xdist
         continue-on-error: true
       
-      # Run tests on specific directories that are properly configured
-      - name: Run Tests
+      # Run comprehensive test suite
+      - name: Run Unit Tests
+        run: |
+          pytest tests/unit/ -v --cov=shared --cov=engines --cov=launchers \
+            --cov-report=xml --cov-report=term-missing \
+            --junit-xml=test-results-unit.xml
+        continue-on-error: true
+      
+      - name: Run Integration Tests
+        run: |
+          pytest tests/integration/ -v -m "not slow" \
+            --cov=shared --cov=engines --cov=launchers --cov-append \
+            --cov-report=xml --cov-report=term-missing \
+            --junit-xml=test-results-integration.xml
+        continue-on-error: true
+      
+      # Run existing engine-specific tests
+      - name: Run Engine Tests
         run: |
           # Test shared Python utilities
           if [ -d "shared/python/tests" ]; then
-            pytest shared/python/tests/ -v
+            pytest shared/python/tests/ -v --cov-append
           fi
           
           # Test pendulum models
           if [ -d "engines/pendulum_models/python/tests" ]; then
-            pytest engines/pendulum_models/python/tests/ -v
+            pytest engines/pendulum_models/python/tests/ -v --cov-append
           fi
           
-          # Test 2D Golf Model
-          if [ -d "engines/Simscape_Multibody_Models/2D_Golf_Model/python/tests" ]; then
-            pytest engines/Simscape_Multibody_Models/2D_Golf_Model/python/tests/ -v
+          # Test 3D Golf Model
+          if [ -d "engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests" ]; then
+            pytest engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/ -v --cov-append
           fi
         continue-on-error: true
       
-      # Upload coverage if available (non-blocking)
-      - uses: codecov/codecov-action@v4
+      # Upload test results
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-${{ matrix.python }}
+          path: |
+            test-results-*.xml
+            coverage.xml
+            htmlcov/
+      
+      # Upload coverage to Codecov
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          file: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        if: env.CODECOV_TOKEN != ''
-        with:
-          fail_ci_if_error: false # Non-blocking: Make optional
-          token: ${{ secrets.CODECOV_TOKEN }}
         continue-on-error: true
+      
+      # Generate coverage report
+      - name: Coverage Report
+        run: |
+          echo "## Test Coverage Report" >> $GITHUB_STEP_SUMMARY
+          python -c "
+          try:
+              import xml.etree.ElementTree as ET
+              tree = ET.parse('coverage.xml')
+              root = tree.getroot()
+              coverage = root.attrib.get('line-rate', '0')
+              coverage_pct = float(coverage) * 100
+              print(f'**Current Coverage: {coverage_pct:.1f}%**')
+              if coverage_pct >= 70:
+                  print('Coverage target met (>=70%)')
+              else:
+                  print(f'Coverage below target (need {70-coverage_pct:.1f}% more)')
+          except:
+              print('Coverage report not available')
+          " >> $GITHUB_STEP_SUMMARY
