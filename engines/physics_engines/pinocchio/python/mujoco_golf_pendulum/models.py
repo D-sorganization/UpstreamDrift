@@ -1495,7 +1495,8 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
                 f'{seg_mass * shaft_radius**2 / 2:.8f}"/>',
                 f'{indent}  <geom name="{seg_name}_geom" type="capsule"',
                 f'{indent}        fromto="0 0 0 0 0 -{seg_length:.4f}"',
-                f'{indent}        size="{shaft_radius:.4f}" material="club_shaft_mat"/>',
+                f'{indent}        size="{shaft_radius:.4f}" \
+                    material="club_shaft_mat"/>',
             ],
         )
 
