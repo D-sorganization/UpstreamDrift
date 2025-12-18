@@ -330,8 +330,8 @@ Will be validated on next push to branch.
 - [MATLAB Unit Testing Framework](https://www.mathworks.com/help/matlab/matlab-unit-test-framework.html)
 - [MATLAB Code Analyzer](https://www.mathworks.com/help/matlab/ref/checkcode.html)
 - [GitHub Actions for MATLAB](https://github.com/matlab-actions)
-- [UNIFIED_CI_APPROACH.md](../UNIFIED_CI_APPROACH.md)
-- [MATLAB_COMPLIANCE.md](../CI_Documentation/MATLAB_COMPLIANCE.md)
+- [UNIFIED_CI_APPROACH.md](UNIFIED_CI_APPROACH.md)
+- [MATLAB_COMPLIANCE.md](CI_Documentation/MATLAB_COMPLIANCE.md)
 
 ## Contact
 

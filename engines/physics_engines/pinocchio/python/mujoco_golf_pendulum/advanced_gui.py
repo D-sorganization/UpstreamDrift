@@ -239,17 +239,22 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
         self._create_manipulation_tab()
 
         # Storage for actuator controls
-        self.actuator_sliders = []
-        self.actuator_labels = []
-        self.actuator_groups = []
+        self.actuator_sliders: list[QtWidgets.QSlider] = []
+        self.actuator_labels: list[QtWidgets.QLabel] = []
+        self.actuator_groups: list[QtWidgets.QGroupBox] = []
 
         # Advanced control widgets
-        self.actuator_control_types = []  # ComboBoxes for control type
-        self.actuator_constant_inputs = []  # SpinBoxes for constant values
-        self.actuator_polynomial_coeffs = []  # Lists of SpinBoxes for polynomial
-        # coefficients
-        self.actuator_damping_inputs = []  # SpinBoxes for damping
-        self.actuator_control_widgets = []  # Store all control widgets per actuator
+        self.actuator_control_types: list[QtWidgets.QComboBox] = []  # ComboBoxes for
+        # control type
+        self.actuator_constant_inputs: list[QtWidgets.QDoubleSpinBox] = []  # SpinBoxes
+        # constant values
+        self.actuator_polynomial_coeffs: list[list[QtWidgets.QDoubleSpinBox]] = (
+            []
+        )  # Lists of SpinBoxes for polynomial coefficients
+        self.actuator_damping_inputs: list[QtWidgets.QDoubleSpinBox] = []  # SpinBoxes
+        # damping
+        self.actuator_control_widgets: list[QtWidgets.QWidget] = []  # Store all control
+        # widgets per actuator
         self.simplified_actuator_mode = False
         self.actuator_filter_input: QtWidgets.QLineEdit | None = None
         self._simplified_notice: QtWidgets.QLabel | None = None
