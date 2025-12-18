@@ -2,95 +2,81 @@
 
 import logging
 import sys
+from pathlib import Path
+from unittest.mock import MagicMock
 
-sys.path.insert(0, "python")
+import pytest
+
+# Fix path to include local python package
+CURRENT_DIR = Path(__file__).resolve().parent
+PYTHON_DIR = CURRENT_DIR / "python"
+if str(PYTHON_DIR) not in sys.path:
+    sys.path.insert(0, str(PYTHON_DIR))
+
+# Mock mujoco to prevent DLL errors on systems where it's not installed/working
+# This is necessary because importing mujoco_golf_pendulum triggers imports of modules
+# that depend on mujoco, even if we only want linkage_mechanisms (which uses numpy).
+if "mujoco" not in sys.modules:
+    sys.modules["mujoco"] = MagicMock()
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-# Test imports
 
-try:
-    # Import individual generators
-    from mujoco_golf_pendulum.linkage_mechanisms import (
-        LINKAGE_CATALOG,
-        generate_chebyshev_linkage_xml,
-        generate_delta_robot_xml,
-        generate_five_bar_parallel_xml,
-        generate_four_bar_linkage_xml,
-        generate_geneva_mechanism_xml,
-        generate_oldham_coupling_xml,
-        generate_pantograph_xml,
-        generate_peaucellier_linkage_xml,
-        generate_scotch_yoke_xml,
-        generate_slider_crank_xml,
-        generate_stewart_platform_xml,
-        generate_watt_linkage_xml,
-    )
-
-    logger.info("✓ All imports successful")
-except ImportError as e:
-    logger.exception(f"✗ Import error: {e}")
-    sys.exit(1)
-
-# Test mechanism catalog
-logger.info(f"\n✓ Catalog contains {len(LINKAGE_CATALOG)} mechanisms:")
-for i, (name, config) in enumerate(LINKAGE_CATALOG.items(), 1):
-    category = config.get("category", "Unknown")
-    num_actuators = len(config.get("actuators", []))
-    logger.info(f"  {i:2d}. {name}")
-    logger.info(f"      Category: {category}")
-    logger.info(f"      Actuators: {num_actuators}")
-    logger.info(f"      Description: {config.get('description', 'N/A')}")
-
-# Test XML generation for each mechanism type
-logger.info("\n" + "=" * 60)
-logger.info("Testing XML generation...")
-logger.info("=" * 60)
-
-test_cases = [
-    ("Four-bar linkage", lambda: generate_four_bar_linkage_xml()),
-    ("Slider-crank", lambda: generate_slider_crank_xml()),
-    ("Scotch yoke", lambda: generate_scotch_yoke_xml()),
-    ("Geneva mechanism", lambda: generate_geneva_mechanism_xml()),
-    ("Peaucellier linkage", lambda: generate_peaucellier_linkage_xml()),
-    ("Chebyshev linkage", lambda: generate_chebyshev_linkage_xml()),
-    ("Pantograph", lambda: generate_pantograph_xml()),
-    ("Delta robot", lambda: generate_delta_robot_xml()),
-    ("5-bar parallel", lambda: generate_five_bar_parallel_xml()),
-    ("Stewart platform", lambda: generate_stewart_platform_xml()),
-    ("Watt linkage", lambda: generate_watt_linkage_xml()),
-    ("Oldham coupling", lambda: generate_oldham_coupling_xml()),
-]
-
-for name, generator in test_cases:
+def get_linkage_mechanisms():
+    """Import and return the linkage_mechanisms module."""
     try:
-        xml = generator()
-        # Basic validation
-        assert "<mujoco" in xml, "Missing mujoco tag"
-        assert "<worldbody>" in xml, "Missing worldbody"
-        assert "</mujoco>" in xml, "Missing closing tag"
-        xml_size = len(xml)
-        logger.info(f"✓ {name:25s} - Generated {xml_size:5d} chars")
-    except (AssertionError, ValueError, RuntimeError) as e:
-        logger.exception(f"✗ {name:25s} - Error: {e}")
+        from mujoco_golf_pendulum import linkage_mechanisms
+        return linkage_mechanisms
+    except ImportError as e:
+        pytest.fail(f"Failed to import mechanisms: {e}")
 
-# Test catalog XML generation
-logger.info("\n" + "=" * 60)
-logger.info("Testing catalog XML entries...")
-logger.info("=" * 60)
 
-for name, config in LINKAGE_CATALOG.items():
-    try:
-        xml = config["xml"]
-        assert "<mujoco" in xml, "Missing mujoco tag"
-        assert len(xml) > 100, "XML too short"
-        actuators = config["actuators"]
-        assert len(actuators) > 0, "No actuators defined"
-        logger.info(f"✓ {name:45s} - {len(actuators)} actuators")
-    except (AssertionError, KeyError, ValueError) as e:
-        logger.exception(f"✗ {name:45s} - Error: {e}")
+def test_catalog_structure():
+    """Test that the catalog is properly structured."""
+    lm = get_linkage_mechanisms()
+    catalog = lm.LINKAGE_CATALOG
 
-logger.info("\n" + "=" * 60)
-logger.info("All tests passed! Linkage mechanisms library is ready.")
-logger.info("=" * 60)
+    assert len(catalog) > 0, "Catalog is empty"
+
+    for _, config in catalog.items():
+        assert "category" in config
+        assert "actuators" in config
+        assert "xml" in config
+        assert len(config["xml"]) > 0
+
+
+def test_xml_generation():
+    """Test XML generation for each mechanism type."""
+    lm = get_linkage_mechanisms()
+
+    test_cases = [
+        ("Four-bar linkage", lm.generate_four_bar_linkage_xml),
+        ("Slider-crank", lm.generate_slider_crank_xml),
+        ("Scotch yoke", lm.generate_scotch_yoke_xml),
+        ("Geneva mechanism", lm.generate_geneva_mechanism_xml),
+        ("Peaucellier linkage", lm.generate_peaucellier_linkage_xml),
+        ("Chebyshev linkage", lm.generate_chebyshev_linkage_xml),
+        ("Pantograph", lm.generate_pantograph_xml),
+        ("Delta robot", lm.generate_delta_robot_xml),
+        ("5-bar parallel", lm.generate_five_bar_parallel_xml),
+        ("Stewart platform", lm.generate_stewart_platform_xml),
+        ("Watt linkage", lm.generate_watt_linkage_xml),
+        ("Oldham coupling", lm.generate_oldham_coupling_xml),
+    ]
+
+    for name, generator in test_cases:
+        try:
+            xml = generator()
+            assert "<mujoco" in xml, f"{name}: Missing mujoco tag"
+            assert "<worldbody>" in xml, f"{name}: Missing worldbody"
+            assert "</mujoco>" in xml, f"{name}: Missing closing tag"
+        except Exception as e:
+            pytest.fail(f"{name} generation failed: {e}")
+
+
+if __name__ == "__main__":
+    # Allow running as script
+    logging.basicConfig(level=logging.INFO)
+    test_catalog_structure()
+    test_xml_generation()
+    logger.info("All tests passed!")

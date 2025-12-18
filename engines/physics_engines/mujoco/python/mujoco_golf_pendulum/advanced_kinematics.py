@@ -73,8 +73,10 @@ class AdvancedKinematicsAnalyzer:
         self.left_hand_id = self._find_body_id("left_hand")
         self.right_hand_id = self._find_body_id("right_hand")
 
-        # Optimization: Determine API version for mj_jacBody to avoid try-except overhead
-        # We don't pre-allocate buffers here because compute_body_jacobian returns new arrays
+        # Optimization: Determine API version for mj_jacBody to avoid try-except
+        # overhead
+        # We don't pre-allocate buffers here because compute_body_jacobian returns
+        # new arrays
         # Detect if we can use reshaped arrays (MuJoCo 3.x) or need flat arrays
         try:
             test_jacp = np.zeros((3, self.model.nv))
