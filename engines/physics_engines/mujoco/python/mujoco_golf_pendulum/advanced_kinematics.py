@@ -77,8 +77,8 @@ class AdvancedKinematicsAnalyzer:
         # We don't pre-allocate buffers here because compute_body_jacobian returns new arrays
         # Detect if we can use reshaped arrays (MuJoCo 3.x) or need flat arrays
         try:
-            test_jacp = np.zeros((3, self.model.nv))
-            test_jacr = np.zeros((3, self.model.nv))
+            test_jacp = np.empty((3, self.model.nv), dtype=float)
+            test_jacr = np.empty((3, self.model.nv), dtype=float)
             mujoco.mj_jacBody(self.model, self.data, test_jacp, test_jacr, 0)
             self._use_reshaped_jac = True
         except TypeError:
