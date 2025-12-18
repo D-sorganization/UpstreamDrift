@@ -93,6 +93,27 @@ class BiomechanicalAnalyzer:
         self.prev_qvel: np.ndarray | None = None
         self.prev_time: float = 0.0
 
+        # Pre-allocate Jacobian arrays to avoid allocation in loop
+        # and detect mj_jacBody signature compatibility
+        self._jacp: np.ndarray | None = None
+        self._jacr: np.ndarray | None = None
+        self._jacp_flat: np.ndarray | None = None
+        self._jacr_flat: np.ndarray | None = None
+        self._use_shaped_jac: bool = True
+
+        try:
+            # Try with shaped arrays
+            self._jacp = np.zeros((3, self.model.nv))
+            self._jacr = np.zeros((3, self.model.nv))
+            mujoco.mj_jacBody(self.model, self.data, self._jacp, self._jacr, 0)
+        except TypeError:
+            # Fallback to flat arrays
+            self._use_shaped_jac = False
+            self._jacp = None
+            self._jacr = None
+            self._jacp_flat = np.zeros(3 * self.model.nv)
+            self._jacr_flat = np.zeros(3 * self.model.nv)
+
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern (case-insensitive, partial match)."""
         for i in range(self.model.nbody):
@@ -148,21 +169,35 @@ class BiomechanicalAnalyzer:
         # Get position
         pos = self.data.xpos[self.club_head_id].copy()
 
-        # Get velocity (compute from Jacobian) - fixed for MuJoCo 3.x API
-        try:
-            jacp = np.zeros((3, self.model.nv))
-            jacr = np.zeros((3, self.model.nv))
-            mujoco.mj_jacBody(self.model, self.data, jacp, jacr, self.club_head_id)
-        except TypeError:
-            # Fallback to flat array approach for older MuJoCo versions
-            jacp_flat = np.zeros(3 * self.model.nv)
-            jacr_flat = np.zeros(3 * self.model.nv)
+        # Get velocity (compute from Jacobian)
+        # Use pre-allocated arrays and pre-determined method
+        if self._use_shaped_jac and self._jacp is not None and self._jacr is not None:
             mujoco.mj_jacBody(
-                self.model, self.data, jacp_flat, jacr_flat, self.club_head_id
+                self.model,
+                self.data,
+                self._jacp,
+                self._jacr,
+                self.club_head_id,
             )
-            jacp = jacp_flat.reshape(3, self.model.nv)
-
-        vel = jacp @ self.data.qvel
+            vel = self._jacp @ self.data.qvel
+        elif (
+            not self._use_shaped_jac
+            and self._jacp_flat is not None
+            and self._jacr_flat is not None
+        ):
+            mujoco.mj_jacBody(
+                self.model,
+                self.data,
+                self._jacp_flat,
+                self._jacr_flat,
+                self.club_head_id,
+            )
+            # Reshape view for multiplication (no copy)
+            jacp = self._jacp_flat.reshape(3, self.model.nv)
+            vel = jacp @ self.data.qvel
+        else:
+            # Fallback (should not happen if __init__ succeeded)
+            vel = np.zeros(3)
         speed = float(np.linalg.norm(vel))
 
         return pos, vel, speed
