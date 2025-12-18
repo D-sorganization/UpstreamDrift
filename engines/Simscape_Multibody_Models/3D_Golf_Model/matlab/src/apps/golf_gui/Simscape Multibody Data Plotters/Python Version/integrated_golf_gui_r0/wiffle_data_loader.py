@@ -194,7 +194,7 @@ class MotionDataLoader:
             return {"ProV1": prov1_processed, "Wiffle": wiffle_processed}
 
         except Exception as e:
-            raise RuntimeError(f"Error loading Excel data: {e}")
+            raise RuntimeError(f"Error loading Excel data: {e}") from e
 
     def _process_sheet_data(self, df: pd.DataFrame, sheet_name: str) -> pd.DataFrame:
         """Process and clean sheet data"""
@@ -203,7 +203,8 @@ class MotionDataLoader:
         # Based on the analysis, the structure is:
         # Row 0: Metadata (ball type, parameters)
         # Row 1: Point labels (Mid-hands, Center of club face)
-        # Row 2: Column headers (Sample #, Time, X, Y, Z, Xx, Xy, Xz, Yx, Yy, Yz, Zx, Zy, Zz)
+        # Row 2: Column headers (Sample #, Time, X, Y, Z, Xx, Xy, Xz,
+        #                        Yx, Yy, Yz, Zx, Zy, Zz)
         # Row 3+: Actual data
 
         if len(df) < 3:
@@ -230,11 +231,14 @@ class MotionDataLoader:
             processed_data["time"] = np.linspace(0, 1, len(data_df))
 
         # Map the actual columns to our expected format
-        # The data has position (X, Y, Z) and orientation (Xx, Xy, Xz, Yx, Yy, Yz, Zx, Zy, Zz) data
-        # We'll use the position data for the clubhead and create reasonable estimates for other body parts
+        # The data has position (X, Y, Z) and orientation
+        # (Xx, Xy, Xz, Yx, Yy, Yz, Zx, Zy, Zz) data
+        # We'll use the position data for the clubhead and create
+        # reasonable estimates for other body parts
 
         # Clubhead position (using X, Y, Z columns)
-        # The data has two sets of position data: columns 2-4 (Mid-hands) and 14-16 (Center of club face)
+        # The data has two sets of position data: columns 2-4 (Mid-hands)
+        # and 14-16 (Center of club face)
         # We'll use the first set (Mid-hands) as the primary position data
 
         # Check for position columns by index (more reliable than name matching)
@@ -251,11 +255,13 @@ class MotionDataLoader:
             )
 
             print(
-                f"[OK] Extracted position data from columns 2-4 (Mid-hands) for {sheet_name}"
+                f"[OK] Extracted position data from columns 2-4 (Mid-hands) "
+                f"for {sheet_name}"
             )
         else:
             print(
-                f"[WARN] Insufficient columns in {sheet_name}, using first 3 numeric columns"
+                f"[WARN] Insufficient columns in {sheet_name}, "
+                f"using first 3 numeric columns"
             )
             numeric_cols = data_df.select_dtypes(include=[np.number]).columns
             if len(numeric_cols) >= 3:
@@ -270,14 +276,16 @@ class MotionDataLoader:
                 )
             else:
                 print(
-                    f"[WARN] Insufficient numeric columns in {sheet_name}, creating dummy data"
+                    f"[WARN] Insufficient numeric columns in {sheet_name}, "
+                    f"creating dummy data"
                 )
                 processed_data["clubhead_x"] = np.linspace(0, 1, len(processed_data))
                 processed_data["clubhead_y"] = np.linspace(0, 1, len(processed_data))
                 processed_data["clubhead_z"] = np.linspace(0, 1, len(processed_data))
 
         # Create reasonable estimates for other body parts based on clubhead position
-        # This is a simplified model - in a real application, you'd want more sophisticated biomechanical modeling
+        # This is a simplified model - in a real application, you'd want
+        # more sophisticated biomechanical modeling
         self._create_body_part_estimates(processed_data, sheet_name)
 
         # Convert to numeric and handle errors
@@ -299,9 +307,11 @@ class MotionDataLoader:
         if self.config.interpolate_missing:
             processed_data = self._interpolate_missing_values(processed_data)
 
+        time_min = processed_data["time"].min()
+        time_max = processed_data["time"].max()
         print(
             f"[OK] Processed {sheet_name}: {processed_data.shape}, "
-            f"time range: [{processed_data['time'].min():.3f}, {processed_data['time'].max():.3f}]"
+            f"time range: [{time_min:.3f}, {time_max:.3f}]"
         )
 
         return processed_data
@@ -311,7 +321,8 @@ class MotionDataLoader:
     ) -> None:
         """Create reasonable estimates for body parts based on clubhead position"""
         # This is a simplified biomechanical model
-        # In a real application, you'd want more sophisticated modeling based on actual motion capture data
+        # In a real application, you'd want more sophisticated modeling
+        # based on actual motion capture data
 
         # Get clubhead position
         ch_x = processed_data["clubhead_x"].values
@@ -372,7 +383,8 @@ class MotionDataLoader:
         processed_data["hub_z"] = ch_z_array + 0.47
 
         print(
-            f"[CALC] Created body part estimates for {sheet_name} based on clubhead position"
+            f"[CALC] Created body part estimates for {sheet_name} "
+            f"based on clubhead position"
         )
 
     def _create_dummy_data(self, num_frames: int) -> pd.DataFrame:
@@ -618,7 +630,8 @@ def main():
         print(f"ProV1 data points: {len(excel_data['ProV1'])}")
         print(f"Wiffle data points: {len(excel_data['Wiffle'])}")
         print(
-            f"Time range: {excel_data['ProV1']['time'].min():.3f} - {excel_data['ProV1']['time'].max():.3f}"
+            f"Time range: {excel_data['ProV1']['time'].min():.3f} - "
+            f"{excel_data['ProV1']['time'].max():.3f}"
         )
 
         print("\n[OK] Wiffle data loader test completed successfully!")

@@ -75,24 +75,30 @@ def analyze_coordinate_system():
 
     print("Mid-hands motion ranges:")
     print(
-        f"  X: {mid_x_range[0]:.3f} to {mid_x_range[1]:.3f} (range: {mid_x_range[1]-mid_x_range[0]:.3f})"
+        f"  X: {mid_x_range[0]:.3f} to {mid_x_range[1]:.3f} "
+        f"(range: {mid_x_range[1]-mid_x_range[0]:.3f})"
     )
     print(
-        f"  Y: {mid_y_range[0]:.3f} to {mid_y_range[1]:.3f} (range: {mid_y_range[1]-mid_y_range[0]:.3f})"
+        f"  Y: {mid_y_range[0]:.3f} to {mid_y_range[1]:.3f} "
+        f"(range: {mid_y_range[1]-mid_y_range[0]:.3f})"
     )
     print(
-        f"  Z: {mid_z_range[0]:.3f} to {mid_z_range[1]:.3f} (range: {mid_z_range[1]-mid_z_range[0]:.3f})"
+        f"  Z: {mid_z_range[0]:.3f} to {mid_z_range[1]:.3f} "
+        f"(range: {mid_z_range[1]-mid_z_range[0]:.3f})"
     )
 
     print("Club head motion ranges:")
     print(
-        f"  X: {club_x_range[0]:.3f} to {club_x_range[1]:.3f} (range: {club_x_range[1]-club_x_range[0]:.3f})"
+        f"  X: {club_x_range[0]:.3f} to {club_x_range[1]:.3f} "
+        f"(range: {club_x_range[1]-club_x_range[0]:.3f})"
     )
     print(
-        f"  Y: {club_y_range[0]:.3f} to {club_y_range[1]:.3f} (range: {club_y_range[1]-club_y_range[0]:.3f})"
+        f"  Y: {club_y_range[0]:.3f} to {club_y_range[1]:.3f} "
+        f"(range: {club_y_range[1]-club_y_range[0]:.3f})"
     )
     print(
-        f"  Z: {club_z_range[0]:.3f} to {club_z_range[1]:.3f} (range: {club_z_range[1]-club_z_range[0]:.3f})"
+        f"  Z: {club_z_range[0]:.3f} to {club_z_range[1]:.3f} "
+        f"(range: {club_z_range[1]-club_z_range[0]:.3f})"
     )
 
     # Determine primary motion direction
@@ -109,12 +115,18 @@ def analyze_coordinate_system():
     ]
 
     print("\nMotion analysis:")
-    print(
-        f"  Mid-hands largest motion: {'X' if mid_motion_ranges[0] == max(mid_motion_ranges) else 'Y' if mid_motion_ranges[1] == max(mid_motion_ranges) else 'Z'}"
+    largest_mid_axis = (
+        "X"
+        if mid_motion_ranges[0] == max(mid_motion_ranges)
+        else "Y" if mid_motion_ranges[1] == max(mid_motion_ranges) else "Z"
     )
-    print(
-        f"  Club head largest motion: {'X' if club_motion_ranges[0] == max(club_motion_ranges) else 'Y' if club_motion_ranges[1] == max(club_motion_ranges) else 'Z'}"
+    largest_club_axis = (
+        "X"
+        if club_motion_ranges[0] == max(club_motion_ranges)
+        else "Y" if club_motion_ranges[1] == max(club_motion_ranges) else "Z"
     )
+    print(f"  Mid-hands largest motion: {largest_mid_axis}")
+    print(f"  Club head largest motion: {largest_club_axis}")
 
     # Check if this looks like a golf swing
     print("\nGolf swing interpretation:")
@@ -127,12 +139,14 @@ def analyze_coordinate_system():
     if max(club_motion_ranges) == club_motion_ranges[0]:  # X direction
         print("  Primary swing motion is in X direction")
         print(
-            "  If X is target line: Face-on view should look at +X, Down-the-line should look at -Y"
+            "  If X is target line: Face-on view should look at +X, "
+            "Down-the-line should look at -Y"
         )
     elif max(club_motion_ranges) == club_motion_ranges[1]:  # Y direction
         print("  Primary swing motion is in Y direction")
         print(
-            "  If Y is target line: Face-on view should look at +Y, Down-the-line should look at -X"
+            "  If Y is target line: Face-on view should look at +Y, "
+            "Down-the-line should look at -X"
         )
     else:  # Z direction
         print("  Primary swing motion is in Z direction (vertical)")
@@ -154,10 +168,12 @@ def analyze_coordinate_system():
     ]:
         print(f"{name} frame (t={frame['time']:.3f}s):")
         print(
-            f"  Mid-hands: X={frame['mid_X']:.3f}, Y={frame['mid_Y']:.3f}, Z={frame['mid_Z']:.3f}"
+            f"  Mid-hands: X={frame['mid_X']:.3f}, Y={frame['mid_Y']:.3f}, "
+            f"Z={frame['mid_Z']:.3f}"
         )
         print(
-            f"  Club head: X={frame['club_X']:.3f}, Y={frame['club_Y']:.3f}, Z={frame['club_Z']:.3f}"
+            f"  Club head: X={frame['club_X']:.3f}, Y={frame['club_Y']:.3f}, "
+            f"Z={frame['club_Z']:.3f}"
         )
 
         # Calculate club direction vector
@@ -175,13 +191,16 @@ def analyze_coordinate_system():
         # Analyze direction cosines for mid-hands
         print("  Mid-hands direction cosines:")
         print(
-            f"    X-axis: [{frame['mid_Xx']:.3f}, {frame['mid_Xy']:.3f}, {frame['mid_Xz']:.3f}]"
+            f"    X-axis: [{frame['mid_Xx']:.3f}, {frame['mid_Xy']:.3f}, "
+            f"{frame['mid_Xz']:.3f}]"
         )
         print(
-            f"    Y-axis: [{frame['mid_Yx']:.3f}, {frame['mid_Yy']:.3f}, {frame['mid_Yz']:.3f}]"
+            f"    Y-axis: [{frame['mid_Yx']:.3f}, {frame['mid_Yy']:.3f}, "
+            f"{frame['mid_Yz']:.3f}]"
         )
         print(
-            f"    Z-axis: [{frame['mid_Zx']:.3f}, {frame['mid_Zy']:.3f}, {frame['mid_Zz']:.3f}]"
+            f"    Z-axis: [{frame['mid_Zx']:.3f}, {frame['mid_Zy']:.3f}, "
+            f"{frame['mid_Zz']:.3f}]"
         )
 
         # Check if direction cosines form a proper rotation matrix
@@ -195,7 +214,8 @@ def analyze_coordinate_system():
         dot_YZ = np.dot(Y_vec, Z_vec)
 
         print(
-            f"    Orthogonality checks (should be ~0): XY={dot_XY:.3f}, XZ={dot_XZ:.3f}, YZ={dot_YZ:.3f}"
+            f"    Orthogonality checks (should be ~0): XY={dot_XY:.3f}, "
+            f"XZ={dot_XZ:.3f}, YZ={dot_YZ:.3f}"
         )
 
         # Check if this is a right-handed coordinate system

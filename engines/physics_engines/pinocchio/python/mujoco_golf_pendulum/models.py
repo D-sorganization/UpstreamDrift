@@ -30,7 +30,8 @@ CHAOTIC_PENDULUM_XML = rf"""<mujoco model="chaotic_driven_pendulum">
     <!-- Driven base (oscillates horizontally to induce chaos) -->
     <body name="drive_base" pos="0 0 1.0">
       <!-- Horizontal slider for base excitation (x-axis) -->
-      <joint name="base_drive_x" type="slide" axis="1 0 0" limited="false" damping="0.1"/>
+      <joint name="base_drive_x" type="slide" axis="1 0 0"
+             limited="false" damping="0.1"/>
 
       <!-- Vertical support column -->
       <geom name="support_column" type="cylinder"
@@ -43,7 +44,8 @@ CHAOTIC_PENDULUM_XML = rf"""<mujoco model="chaotic_driven_pendulum">
 
       <!-- Pendulum arm -->
       <body name="pendulum" pos="0 0 0">
-        <joint name="pendulum_hinge" type="hinge" axis="0 1 0" limited="false" damping="0.05"/>
+        <joint name="pendulum_hinge" type="hinge" axis="0 1 0"
+               limited="false" damping="0.05"/>
 
         <!-- Pendulum rod -->
         <geom name="pendulum_rod" type="capsule"
@@ -297,7 +299,8 @@ UPPER_BODY_GOLF_SWING_XML = rf"""<mujoco model="golf_upper_body_swing">
                     size="0.04 0.02 0.08"
                     rgba="0.9 0.7 0.6 1" mass="0.4"/>
 
-              <!-- Golf club attached to right hand (left hand connects via equality constraint) -->
+              <!-- Golf club attached to right hand
+                   (left hand connects via equality constraint) -->
               <body name="club" pos="0 0 -0.08" euler="0 -0.3 0">
                 <joint name="club_wrist" type="hinge" axis="0 1 0"
                        range="-1.0 1.0" damping="0.3"/>
@@ -650,8 +653,10 @@ FULL_BODY_GOLF_SWING_XML = rf"""<mujoco model="golf_full_body_swing">
 # ==============================================================================
 # TWO-LINK INCLINED PLANE MODEL WITH UNIVERSAL JOINT AT WRIST
 # ==============================================================================
-TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML = rf"""<mujoco model="two_link_inclined_universal">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4" solver="Newton"/>
+TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML = rf"""<mujoco
+  model="two_link_inclined_universal">
+  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}"
+          integrator="RK4" solver="Newton"/>
 
   <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
 
@@ -759,7 +764,8 @@ TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML = rf"""<mujoco model="two_link_inclined_un
 # GIMBAL JOINT DEMONSTRATION MODEL
 # ==============================================================================
 GIMBAL_JOINT_DEMO_XML = rf"""<mujoco model="gimbal_joint_demo">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4" solver="Newton"/>
+  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}"
+          integrator="RK4" solver="Newton"/>
 
   <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
 
@@ -870,10 +876,13 @@ GIMBAL_JOINT_DEMO_XML = rf"""<mujoco model="gimbal_joint_demo">
 # ==============================================================================
 # ADVANCED FULL-BODY MODEL WITH SPECIFIED JOINT TYPES
 # ==============================================================================
-ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanical_golf_swing">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4" solver="Newton" iterations="50"/>
+ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco
+  model="advanced_biomechanical_golf_swing">
+  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}"
+          integrator="RK4" solver="Newton" iterations="50"/>
 
-  <compiler angle="radian" coordinate="local" inertiafromgeom="false" balanceinertia="true"/>
+  <compiler angle="radian" coordinate="local" inertiafromgeom="false"
+            balanceinertia="true"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
@@ -892,10 +901,14 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
     <material name="torso_mat" rgba="0.75 0.55 0.45 1" specular="0.3" shininess="0.2"/>
     <material name="arm_mat" rgba="0.65 0.45 0.35 1" specular="0.3" shininess="0.2"/>
     <material name="leg_mat" rgba="0.55 0.55 0.65 1" specular="0.3" shininess="0.2"/>
-    <material name="scapula_mat" rgba="0.85 0.75 0.65 0.8" specular="0.4" shininess="0.3"/>
-    <material name="club_grip_mat" rgba="0.1 0.1 0.1 1" specular="0.1" shininess="0.05"/>
-    <material name="club_shaft_mat" rgba="0.3 0.3 0.35 1" specular="0.8" shininess="0.6"/>
-    <material name="club_head_mat" rgba="0.15 0.15 0.18 1" specular="0.9" shininess="0.8"/>
+    <material name="scapula_mat" rgba="0.85 0.75 0.65 0.8"
+              specular="0.4" shininess="0.3"/>
+    <material name="club_grip_mat" rgba="0.1 0.1 0.1 1"
+              specular="0.1" shininess="0.05"/>
+    <material name="club_shaft_mat" rgba="0.3 0.3 0.35 1"
+              specular="0.8" shininess="0.6"/>
+    <material name="club_head_mat" rgba="0.15 0.15 0.18 1"
+              specular="0.9" shininess="0.8"/>
     <material name="ground_mat" rgba="0.35 0.55 0.25 1"/>
   </asset>
 
@@ -1034,7 +1047,8 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
             <geom name="left_scapula_geom" type="box" size="0.06 0.04 0.10"
                   material="scapula_mat"/>
 
-            <!-- LEFT SHOULDER - 3 DOF (flexion/extension, abduction/adduction, rotation) -->
+            <!-- LEFT SHOULDER - 3 DOF
+                 (flexion/extension, abduction/adduction, rotation) -->
             <body name="left_humerus" pos="-0.08 0 0" euler="0 0 0">
               <joint name="left_shoulder_flexion" type="hinge" axis="0 1 0"
                      range="-1.0 3.0" damping="2.5" armature="0.025"/>
@@ -1132,38 +1146,45 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
                     <!-- Shaft Segment 1 (upper) -->
                     <body name="shaft_upper" pos="0 0 -0.28">
                       <joint name="shaft_flex_upper" type="hinge" axis="1 0 0"
-                             range="-0.15 0.15" damping="0.4" stiffness="150" armature="0.001"/>
+                             range="-0.15 0.15" damping="0.4" stiffness="150"
+                             armature="0.001"/>
 
                       <inertial pos="0 0 -0.13" mass="0.045"
                                 diaginertia="0.00006 0.00006 0.000001"/>
-                      <geom name="shaft_upper_geom" type="capsule" fromto="0 0 0 0 0 -0.26"
+                      <geom name="shaft_upper_geom" type="capsule"
+                            fromto="0 0 0 0 0 -0.26"
                             size="0.0062" material="club_shaft_mat"/>
 
                       <!-- Shaft Segment 2 (middle) -->
                       <body name="shaft_middle" pos="0 0 -0.26">
                         <joint name="shaft_flex_middle" type="hinge" axis="1 0 0"
-                               range="-0.2 0.2" damping="0.3" stiffness="120" armature="0.001"/>
+                               range="-0.2 0.2" damping="0.3" stiffness="120"
+                               armature="0.001"/>
 
                         <inertial pos="0 0 -0.13" mass="0.055"
                                   diaginertia="0.00007 0.00007 0.000001"/>
-                        <geom name="shaft_middle_geom" type="capsule" fromto="0 0 0 0 0 -0.26"
+                        <geom name="shaft_middle_geom" type="capsule"
+                              fromto="0 0 0 0 0 -0.26"
                               size="0.0060" material="club_shaft_mat"/>
 
                         <!-- Shaft Segment 3 (lower - tip) -->
                         <body name="shaft_tip" pos="0 0 -0.26">
                           <joint name="shaft_flex_tip" type="hinge" axis="1 0 0"
-                                 range="-0.25 0.25" damping="0.2" stiffness="100" armature="0.001"/>
+                                 range="-0.25 0.25" damping="0.2" stiffness="100"
+                                 armature="0.001"/>
 
                           <inertial pos="0 0 -0.12" mass="0.058"
                                     diaginertia="0.00008 0.00008 0.000001"/>
-                          <geom name="shaft_tip_geom" type="capsule" fromto="0 0 0 0 0 -0.24"
+                          <geom name="shaft_tip_geom" type="capsule"
+                                fromto="0 0 0 0 0 -0.24"
                                 size="0.0058" material="club_shaft_mat"/>
 
                           <!-- Hosel and Club Head -->
                           <body name="hosel" pos="0 0 -0.24" euler="0 0.17 0">
                             <inertial pos="0 0.02 -0.01" mass="0.010"
                                       diaginertia="0.000005 0.000005 0.000002"/>
-                            <geom name="hosel_geom" type="cylinder" fromto="0 0 0 0 0.035 -0.005"
+                            <geom name="hosel_geom" type="cylinder"
+                                  fromto="0 0 0 0 0.035 -0.005"
                                   size="0.008" material="club_head_mat"/>
 
                             <!-- Driver Head -->
@@ -1222,61 +1243,91 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco model="advanced_biomechanic
     <connect body1="pelvis" body2="left_femur" anchor="-0.12 0 0"/>
     <connect body1="pelvis" body2="right_femur" anchor="0.12 0 0"/>
     <!-- Left hand grips club -->
-    <weld body1="left_hand" body2="club_grip" relpose="0 0 -0.18 1 0 0 0" active="true"/>
+    <weld body1="left_hand" body2="club_grip" relpose="0 0 -0.18 1 0 0 0"
+          active="true"/>
   </equality>
 
   <actuator>
     <!-- Left Leg (3 DOF) -->
-    <motor name="l_ankle_plantar" joint="left_ankle_plantar" gear="40" ctrllimited="true" ctrlrange="-50 50"/>
-    <motor name="l_ankle_invert" joint="left_ankle_inversion" gear="30" ctrllimited="true" ctrlrange="-35 35"/>
-    <motor name="l_knee" joint="left_knee" gear="120" ctrllimited="true" ctrlrange="-150 150"/>
+    <motor name="l_ankle_plantar" joint="left_ankle_plantar" gear="40"
+           ctrllimited="true" ctrlrange="-50 50"/>
+    <motor name="l_ankle_invert" joint="left_ankle_inversion" gear="30"
+           ctrllimited="true" ctrlrange="-35 35"/>
+    <motor name="l_knee" joint="left_knee" gear="120" ctrllimited="true"
+           ctrlrange="-150 150"/>
 
     <!-- Right Leg (3 DOF) -->
-    <motor name="r_ankle_plantar" joint="right_ankle_plantar" gear="40" ctrllimited="true" ctrlrange="-50 50"/>
-    <motor name="r_ankle_invert" joint="right_ankle_inversion" gear="30" ctrllimited="true" ctrlrange="-35 35"/>
-    <motor name="r_knee" joint="right_knee" gear="120" ctrllimited="true" ctrlrange="-150 150"/>
+    <motor name="r_ankle_plantar" joint="right_ankle_plantar" gear="40"
+           ctrllimited="true" ctrlrange="-50 50"/>
+    <motor name="r_ankle_invert" joint="right_ankle_inversion" gear="30"
+           ctrllimited="true" ctrlrange="-35 35"/>
+    <motor name="r_knee" joint="right_knee" gear="120" ctrllimited="true"
+           ctrlrange="-150 150"/>
 
     <!-- Spine (3 DOF) -->
-    <motor name="spine_lateral" joint="spine_lateral" gear="140" ctrllimited="true" ctrlrange="-120 120"/>
-    <motor name="spine_sagittal" joint="spine_sagittal" gear="150" ctrllimited="true" ctrlrange="-130 130"/>
-    <motor name="spine_rotation" joint="spine_rotation" gear="130" ctrllimited="true" ctrlrange="-110 110"/>
+    <motor name="spine_lateral" joint="spine_lateral" gear="140"
+           ctrllimited="true" ctrlrange="-120 120"/>
+    <motor name="spine_sagittal" joint="spine_sagittal" gear="150"
+           ctrllimited="true" ctrlrange="-130 130"/>
+    <motor name="spine_rotation" joint="spine_rotation" gear="130"
+           ctrllimited="true" ctrlrange="-110 110"/>
 
     <!-- Left Scapula (2 DOF) -->
-    <motor name="l_scap_elev" joint="left_scapula_elevation" gear="35" ctrllimited="true" ctrlrange="-40 40"/>
-    <motor name="l_scap_prot" joint="left_scapula_protraction" gear="30" ctrllimited="true" ctrlrange="-35 35"/>
+    <motor name="l_scap_elev" joint="left_scapula_elevation" gear="35"
+           ctrllimited="true" ctrlrange="-40 40"/>
+    <motor name="l_scap_prot" joint="left_scapula_protraction" gear="30"
+           ctrllimited="true" ctrlrange="-35 35"/>
 
     <!-- Left Shoulder (3 DOF) -->
-    <motor name="l_shldr_flex" joint="left_shoulder_flexion" gear="70" ctrllimited="true" ctrlrange="-90 90"/>
-    <motor name="l_shldr_abd" joint="left_shoulder_abduction" gear="70" ctrllimited="true" ctrlrange="-90 90"/>
-    <motor name="l_shldr_rot" joint="left_shoulder_rotation" gear="50" ctrllimited="true" ctrlrange="-65 65"/>
+    <motor name="l_shldr_flex" joint="left_shoulder_flexion" gear="70"
+           ctrllimited="true" ctrlrange="-90 90"/>
+    <motor name="l_shldr_abd" joint="left_shoulder_abduction" gear="70"
+           ctrllimited="true" ctrlrange="-90 90"/>
+    <motor name="l_shldr_rot" joint="left_shoulder_rotation" gear="50"
+           ctrllimited="true" ctrlrange="-65 65"/>
 
     <!-- Left Elbow (1 DOF) -->
-    <motor name="l_elbow" joint="left_elbow" gear="60" ctrllimited="true" ctrlrange="-75 75"/>
+    <motor name="l_elbow" joint="left_elbow" gear="60"
+           ctrllimited="true" ctrlrange="-75 75"/>
 
     <!-- Left Wrist (2 DOF) -->
-    <motor name="l_wrist_flex" joint="left_wrist_flexion" gear="25" ctrllimited="true" ctrlrange="-35 35"/>
-    <motor name="l_wrist_dev" joint="left_wrist_deviation" gear="20" ctrllimited="true" ctrlrange="-28 28"/>
+    <motor name="l_wrist_flex" joint="left_wrist_flexion" gear="25"
+           ctrllimited="true" ctrlrange="-35 35"/>
+    <motor name="l_wrist_dev" joint="left_wrist_deviation" gear="20"
+           ctrllimited="true" ctrlrange="-28 28"/>
 
     <!-- Right Scapula (2 DOF) -->
-    <motor name="r_scap_elev" joint="right_scapula_elevation" gear="35" ctrllimited="true" ctrlrange="-40 40"/>
-    <motor name="r_scap_prot" joint="right_scapula_protraction" gear="30" ctrllimited="true" ctrlrange="-35 35"/>
+    <motor name="r_scap_elev" joint="right_scapula_elevation" gear="35"
+           ctrllimited="true" ctrlrange="-40 40"/>
+    <motor name="r_scap_prot" joint="right_scapula_protraction" gear="30"
+           ctrllimited="true" ctrlrange="-35 35"/>
 
     <!-- Right Shoulder (3 DOF) -->
-    <motor name="r_shldr_flex" joint="right_shoulder_flexion" gear="70" ctrllimited="true" ctrlrange="-90 90"/>
-    <motor name="r_shldr_abd" joint="right_shoulder_abduction" gear="70" ctrllimited="true" ctrlrange="-90 90"/>
-    <motor name="r_shldr_rot" joint="right_shoulder_rotation" gear="50" ctrllimited="true" ctrlrange="-65 65"/>
+    <motor name="r_shldr_flex" joint="right_shoulder_flexion" gear="70"
+           ctrllimited="true" ctrlrange="-90 90"/>
+    <motor name="r_shldr_abd" joint="right_shoulder_abduction" gear="70"
+           ctrllimited="true" ctrlrange="-90 90"/>
+    <motor name="r_shldr_rot" joint="right_shoulder_rotation" gear="50"
+           ctrllimited="true" ctrlrange="-65 65"/>
 
     <!-- Right Elbow (1 DOF) -->
-    <motor name="r_elbow" joint="right_elbow" gear="60" ctrllimited="true" ctrlrange="-75 75"/>
+    <motor name="r_elbow" joint="right_elbow" gear="60"
+           ctrllimited="true" ctrlrange="-75 75"/>
 
     <!-- Right Wrist (2 DOF) -->
-    <motor name="r_wrist_flex" joint="right_wrist_flexion" gear="25" ctrllimited="true" ctrlrange="-35 35"/>
-    <motor name="r_wrist_dev" joint="right_wrist_deviation" gear="20" ctrllimited="true" ctrlrange="-28 28"/>
+    <motor name="r_wrist_flex" joint="right_wrist_flexion" gear="25"
+           ctrllimited="true" ctrlrange="-35 35"/>
+    <motor name="r_wrist_dev" joint="right_wrist_deviation" gear="20"
+           ctrllimited="true" ctrlrange="-28 28"/>
 
-    <!-- Flexible Shaft (3 DOF) - typically controlled passively, but can be actuated for study -->
-    <motor name="shaft_upper" joint="shaft_flex_upper" gear="2" ctrllimited="true" ctrlrange="-5 5"/>
-    <motor name="shaft_middle" joint="shaft_flex_middle" gear="2" ctrllimited="true" ctrlrange="-5 5"/>
-    <motor name="shaft_tip" joint="shaft_flex_tip" gear="2" ctrllimited="true" ctrlrange="-5 5"/>
+    <!-- Flexible Shaft (3 DOF) - typically controlled passively,
+         but can be actuated for study -->
+    <motor name="shaft_upper" joint="shaft_flex_upper" gear="2"
+           ctrllimited="true" ctrlrange="-5 5"/>
+    <motor name="shaft_middle" joint="shaft_flex_middle" gear="2"
+           ctrllimited="true" ctrlrange="-5 5"/>
+    <motor name="shaft_tip" joint="shaft_flex_tip" gear="2"
+           ctrllimited="true" ctrlrange="-5 5"/>
   </actuator>
 </mujoco>
 """
@@ -1401,8 +1452,11 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
         f"<!-- {club_type.upper()} - {num_segments} segment flexible shaft -->",
         f'<body name="club_grip" pos="0 0 -0.10" euler="0 -{club_loft:.3f} 0">',
         f'  <inertial pos="0 0 -{grip_length / 2:.4f}" mass="{grip_mass:.4f}"',
-        f'            diaginertia="{grip_mass * grip_length**2 / 12:.8f} {grip_mass * grip_length**2 / 12:.8f} {grip_mass * grip_radius**2 / 2:.8f}"/>',
-        f'  <geom name="grip_geom" type="capsule" fromto="0 0 0 0 0 -{grip_length:.4f}"',
+        f'            diaginertia="{grip_mass * grip_length**2 / 12:.8f} '
+        f"{grip_mass * grip_length**2 / 12:.8f} "
+        f'{grip_mass * grip_radius**2 / 2:.8f}"/>',
+        '  <geom name="grip_geom" type="capsule"',
+        f'        fromto="0 0 0 0 0 -{grip_length:.4f}"',
         f'        size="{grip_radius:.4f}" material="club_grip_mat"/>',
     ]
 
@@ -1431,11 +1485,18 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
         xml_parts.extend(
             [
                 f'{indent}  <joint name="{seg_name}_flex" type="hinge" axis="1 0 0"',
-                f'{indent}         range="-0.{15 + i * 5} 0.{15 + i * 5}" damping="{damping:.2f}" stiffness="{stiffness}" armature="0.001"/>',
-                f'{indent}  <inertial pos="0 0 -{seg_length / 2:.4f}" mass="{seg_mass:.4f}"',
-                f'{indent}            diaginertia="{seg_mass * seg_length**2 / 12:.8f} {seg_mass * seg_length**2 / 12:.8f} {seg_mass * shaft_radius**2 / 2:.8f}"/>',
-                f'{indent}  <geom name="{seg_name}_geom" type="capsule" fromto="0 0 0 0 0 -{seg_length:.4f}"',
-                f'{indent}        size="{shaft_radius:.4f}" material="club_shaft_mat"/>',
+                f'{indent}         range="-0.{15 + i * 5} 0.{15 + i * 5}"',
+                f'{indent}         damping="{damping:.2f}" stiffness="{stiffness}"',
+                f'{indent}         armature="0.001"/>',
+                f'{indent}  <inertial pos="0 0 -{seg_length / 2:.4f}"',
+                f'{indent}            mass="{seg_mass:.4f}"',
+                f'{indent}            diaginertia="{seg_mass * seg_length**2 / 12:.8f} '
+                f"{seg_mass * seg_length**2 / 12:.8f} "
+                f'{seg_mass * shaft_radius**2 / 2:.8f}"/>',
+                f'{indent}  <geom name="{seg_name}_geom" type="capsule"',
+                f'{indent}        fromto="0 0 0 0 0 -{seg_length:.4f}"',
+                f'{indent}        size="{shaft_radius:.4f}" \
+                    material="club_shaft_mat"/>',
             ],
         )
 
@@ -1450,17 +1511,21 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
     xml_parts.extend(
         [
             f"\n{indent}<!-- Club Head -->",
-            f'{indent}<body name="hosel" pos="0 0 -{seg_length:.4f}" euler="0 {club_loft:.3f} 0">',
+            f'{indent}<body name="hosel" pos="0 0 -{seg_length:.4f}"',
+            f'{indent}      euler="0 {club_loft:.3f} 0">',
             f'{indent}  <inertial pos="0 0.02 -0.01" mass="0.010"',
             f'{indent}            diaginertia="0.000005 0.000005 0.000002"/>',
-            f'{indent}  <geom name="hosel_geom" type="cylinder" fromto="0 0 0 0 0.030 -0.005"',
+            f'{indent}  <geom name="hosel_geom" type="cylinder"',
+            f'{indent}        fromto="0 0 0 0 0.030 -0.005"',
             f'{indent}        size="0.008" material="club_head_mat"/>',
             f'{indent}  <body name="clubhead" pos="0 0.040 -0.008">',
             f'{indent}    <inertial pos="0 {hs1 / 2:.4f} 0.002" mass="{head_mass:.4f}"',
             f'{indent}              diaginertia="{ixx:.8f} {iyy:.8f} {izz:.8f}"/>',
-            f'{indent}    <geom name="head_body" type="box" size="{hs0:.4f} {hs1:.4f} {hs2:.4f}"',
+            f'{indent}    <geom name="head_body" type="box"',
+            f'{indent}          size="{hs0:.4f} {hs1:.4f} {hs2:.4f}"',
             f'{indent}          pos="0 {hs1:.4f} 0" material="club_head_mat"/>',
-            f'{indent}    <geom name="face" type="box" size="{hs0 + 0.001:.4f} 0.003 {hs2 + 0.001:.4f}"',
+            f'{indent}    <geom name="face" type="box"',
+            f'{indent}          size="{hs0 + 0.001:.4f} 0.003 {hs2 + 0.001:.4f}"',
             f'{indent}          pos="0 {hs1 * 2 + 0.003:.4f} 0" '
             f'rgba="0.85 0.15 0.15 0.9"/>',
             f"{indent}  </body>",

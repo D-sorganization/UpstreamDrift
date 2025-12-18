@@ -970,8 +970,10 @@ class GolfSimulationGUI:
                 dockerfile_content = (
                     "# Add missing dependencies to existing robotics_env\n"
                     "FROM robotics_env:latest\n\n"
-                    "# Install missing dependencies in the existing virtual environment\n"
-                    'RUN /opt/robotics_env/bin/pip install "defusedxml>=0.7.1" "PyQt6>=6.6.0"\n\n'
+                    "# Install missing dependencies in the existing virtual "
+                    "environment\n"
+                    'RUN /opt/robotics_env/bin/pip install "defusedxml>=0.7.1" '
+                    '"PyQt6>=6.6.0"\n\n'
                     "# Update PATH to use robotics_env by default\n"
                     'ENV PATH="/opt/robotics_env/bin:$PATH"\n'
                     'ENV VIRTUAL_ENV="/opt/robotics_env"\n'
@@ -1017,7 +1019,8 @@ class GolfSimulationGUI:
                             "robotics_env",
                             "python",
                             "-c",
-                            "import defusedxml; print('✅ defusedxml confirmed working')",
+                            "import defusedxml; "
+                            "print('✅ defusedxml confirmed working')",
                         ]
                         test_result = subprocess.run(
                             test_cmd, capture_output=True, text=True
@@ -1199,7 +1202,8 @@ class GolfSimulationGUI:
                         self.root.after(
                             0,
                             self.log,
-                            "SOLUTION: Missing defusedxml dependency. Please rebuild Docker image.",
+                            "SOLUTION: Missing defusedxml dependency. "
+                            "Please rebuild Docker image.",
                         )
                         self.root.after(
                             0, self.log, "Run: docker build -t robotics_env ."
@@ -1208,13 +1212,15 @@ class GolfSimulationGUI:
                         self.root.after(
                             0,
                             self.log,
-                            "SOLUTION: Missing Python dependency. Check Dockerfile and rebuild.",
+                            "SOLUTION: Missing Python dependency. "
+                            "Check Dockerfile and rebuild.",
                         )
                     elif "DISPLAY" in err or "X11" in err:
                         self.root.after(
                             0,
                             self.log,
-                            "SOLUTION: X11/Display issue. Try disabling 'Live Interactive View'.",
+                            "SOLUTION: X11/Display issue. "
+                            "Try disabling 'Live Interactive View'.",
                         )
                 self.root.after(0, lambda: self.btn_run.config(state=tk.NORMAL))
                 self.root.after(0, lambda: self.btn_stop.config(state=tk.DISABLED))

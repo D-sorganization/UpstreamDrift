@@ -1,5 +1,6 @@
 # mypy: disable-error-code="no-any-unimported, no-any-return"
-"""Analysis tools for joint constraint forces, torque transmission, and universal joint behavior.
+"""Analysis tools for joint constraint forces, torque transmission,\
+and universal joint behavior.
 
 This module provides tools for analyzing:
 - Constraint forces in universal and gimbal joints
@@ -21,7 +22,8 @@ if TYPE_CHECKING:
 
 
 class UniversalJointAnalyzer:
-    """Analyze universal joint behavior including torque wobble and constraint forces."""
+    """Analyze universal joint behavior including torque wobble\
+    and constraint forces."""
 
     def __init__(self, model: mj.MjModel, data: mj.MjData) -> None:
         """Initialize the analyzer.
@@ -251,7 +253,8 @@ def plot_torque_wobble(
     """Plot torque wobble analysis results.
 
     Args:
-        analysis_results: Results from UniversalJointAnalyzer.analyze_torque_transmission
+        analysis_results: Results from\
+            UniversalJointAnalyzer.analyze_torque_transmission
         save_path: Optional path to save the plot
     """
     _fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8))  # type: ignore[misc]

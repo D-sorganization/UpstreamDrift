@@ -574,7 +574,8 @@ class DoublePendulumApp:
             user_inputs = self._read_inputs()
             # Calculate upper segment inertia about COM
             # For a uniform rod: I = (1/12) * m * L^2 (COM at L/2)
-            # When COM ratio != 0.5, we use an approximation that scales with the COM position
+            # When COM ratio != 0.5, we use an approximation that scales with
+            # the COM position
             # This assumes a mass distribution consistent with the specified COM ratio
             com_ratio = user_inputs.upper_com_ratio
             if abs(com_ratio - 0.5) < 0.01:
@@ -587,7 +588,8 @@ class DoublePendulumApp:
             else:
                 # For non-uniform distribution, use an approximation
                 # Scale the uniform rod inertia based on how far COM is from center
-                # This is an approximation - exact value depends on actual mass distribution
+                # This is an approximation - exact value depends on actual
+                # mass distribution
                 uniform_inertia = (
                     (1.0 / 12.0)
                     * user_inputs.upper_mass_kg
@@ -647,7 +649,8 @@ class DoublePendulumApp:
                 )
 
                 if angles_changed:
-                    # Pause simulation when angles change to maintain physical consistency
+                    # Pause simulation when angles change to maintain
+                    # physical consistency
                     self.running = False
 
             # Only reset velocities if angles changed or if this is initial setup
@@ -737,7 +740,8 @@ class DoublePendulumApp:
         self.torque_label.config(
             text=(
                 f"Applied (Nm): shoulder={torques[0]:.2f}, wrist={torques[1]:.2f}\n"
-                f"Gravity: {breakdown.gravitational[0]:.2f}, {breakdown.gravitational[1]:.2f}\n"
+                f"Gravity: {breakdown.gravitational[0]:.2f}, "
+                f"{breakdown.gravitational[1]:.2f}\n"
                 f"Time: {self.time:.2f}s"
             )
         )
@@ -764,7 +768,8 @@ class DoublePendulumApp:
 
         # Calculate positions in the plane
         # Coordinate system: X=horizontal, Y=depth, Z=vertical (positive Z is up)
-        # theta1: angle of upper segment from vertical (0° = pointing straight down = negative Z)
+        # theta1: angle of upper segment from vertical
+        # (0° = pointing straight down = negative Z)
         # theta2: relative angle of lower segment from upper segment
         theta1 = self.state.theta1
         theta2 = self.state.theta2
@@ -796,7 +801,8 @@ class DoublePendulumApp:
         wrist = elbow + lower_vec
 
         # Apply out-of-plane rotation if not constrained
-        # This rotates around the vertical (Z) axis to create motion in the Y (depth) direction
+        # This rotates around the vertical (Z) axis to create motion
+        # in the Y (depth) direction
         if not self.dynamics.parameters.constrained_to_plane:
             phi = self.state.phi if hasattr(self.state, "phi") else 0.0
             cos_phi = math.cos(phi)
@@ -867,9 +873,11 @@ class DoublePendulumApp:
         if len(arc_x) > 1:
             self.ax.plot(arc_x, arc_y, arc_z, "b-", linewidth=2, alpha=0.5)
 
-        # Draw gravity vector - ALWAYS points straight down in WORLD coordinates
-        # Gravity is independent of plane rotation - it always points in negative Z direction
-        # This is the true direction of gravity in the real world (Z is vertical, positive Z is up)
+        # Draw gravity vector - ALWAYS points straight down in WORLD
+        # coordinates
+        # Gravity is independent of plane rotation - it always points in
+        # negative Z direction. This is the true direction of gravity in the
+        # real world (Z is vertical, positive Z is up)
         gravity_length = max_range * 0.35
 
         # Position gravity arrow at a visible location
@@ -916,7 +924,8 @@ class DoublePendulumApp:
         )
 
         # Draw a reference line showing true vertical (world vertical) from pivot
-        # This helps visualize that gravity is always straight down, even when plane is inclined
+        # This helps visualize that gravity is always straight down,
+        # even when plane is inclined
         world_vertical_start = pivot + np.array([-max_range * 0.5, -max_range * 0.5, 0])
         world_vertical_end = world_vertical_start + np.array([0, 0, -max_range * 0.3])
         self.ax.plot(
