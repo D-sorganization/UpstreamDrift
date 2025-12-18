@@ -101,11 +101,20 @@ class BiomechanicalAnalyzer:
         self._jacr_flat: np.ndarray | None = None
         self._use_shaped_jac: bool = True
 
+        # Use the club head body for Jacobian signature detection when available
+        body_id_for_jacobian = self.club_head_id if self.club_head_id is not None else 0
+
         try:
             # Try with shaped arrays
             self._jacp = np.zeros((3, self.model.nv))
             self._jacr = np.zeros((3, self.model.nv))
-            mujoco.mj_jacBody(self.model, self.data, self._jacp, self._jacr, 0)
+            mujoco.mj_jacBody(
+                self.model,
+                self.data,
+                self._jacp,
+                self._jacr,
+                body_id_for_jacobian,
+            )
         except TypeError:
             # Fallback to flat arrays
             self._use_shaped_jac = False
