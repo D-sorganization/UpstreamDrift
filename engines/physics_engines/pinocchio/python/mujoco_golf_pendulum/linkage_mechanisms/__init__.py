@@ -731,7 +731,7 @@ def generate_delta_robot_xml(base_radius=2.0, platform_radius=0.5) -> str:
 
         <!-- Arm 2 (120 degrees) -->
         <body name="base2"
-              pos="{base_radius * np.cos(2 * np.pi / 3)} 
+              pos="{base_radius * np.cos(2 * np.pi / 3)}
                    {base_radius * np.sin(2 * np.pi / 3)} 2">
             <geom type="sphere" size="0.15" rgba="0.5 0.5 0.5 1"
                   contype="0" conaffinity="0"/>
@@ -756,7 +756,7 @@ def generate_delta_robot_xml(base_radius=2.0, platform_radius=0.5) -> str:
 
         <!-- Arm 3 (240 degrees) -->
         <body name="base3"
-              pos="{base_radius * np.cos(4 * np.pi / 3)} 
+              pos="{base_radius * np.cos(4 * np.pi / 3)}
                    {base_radius * np.sin(4 * np.pi / 3)} 2">
             <geom type="sphere" size="0.15" rgba="0.5 0.5 0.5 1"
                   contype="0" conaffinity="0"/>
@@ -962,23 +962,23 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
                   pos="{base_radius * np.cos(0)} {base_radius * np.sin(0)} 0.15"
                   size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{base_radius * np.cos(np.pi / 3)} 
+                  pos="{base_radius * np.cos(np.pi / 3)}
                        {base_radius * np.sin(np.pi / 3)} 0.15"
                   size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{base_radius * np.cos(2 * np.pi / 3)} 
+                  pos="{base_radius * np.cos(2 * np.pi / 3)}
                        {base_radius * np.sin(2 * np.pi / 3)} 0.15"
                   size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{base_radius * np.cos(np.pi)} 
+                  pos="{base_radius * np.cos(np.pi)}
                        {base_radius * np.sin(np.pi)} 0.15"
                   size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{base_radius * np.cos(4 * np.pi / 3)} 
+                  pos="{base_radius * np.cos(4 * np.pi / 3)}
                        {base_radius * np.sin(4 * np.pi / 3)} 0.15"
                   size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{base_radius * np.cos(5 * np.pi / 3)} 
+                  pos="{base_radius * np.cos(5 * np.pi / 3)}
                        {base_radius * np.sin(5 * np.pi / 3)} 0.15"
                   size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
 
@@ -999,7 +999,7 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
 
             <!-- Leg 2 -->
             <body name="leg2_lower"
-                  pos="{base_radius * np.cos(np.pi / 3)} 
+                  pos="{base_radius * np.cos(np.pi / 3)}
                        {base_radius * np.sin(np.pi / 3)} 0.15">
                 <joint name="leg2_base_ball" type="ball" damping="0.5"/>
                 <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05"
@@ -1015,7 +1015,7 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
 
             <!-- Leg 3 -->
             <body name="leg3_lower"
-                  pos="{base_radius * np.cos(2 * np.pi / 3)} 
+                  pos="{base_radius * np.cos(2 * np.pi / 3)}
                        {base_radius * np.sin(2 * np.pi / 3)} 0.15">
                 <joint name="leg3_base_ball" type="ball" damping="0.5"/>
                 <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05"
@@ -1031,7 +1031,7 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
 
             <!-- Leg 4 -->
             <body name="leg4_lower"
-                  pos="{base_radius * np.cos(np.pi)} 
+                  pos="{base_radius * np.cos(np.pi)}
                        {base_radius * np.sin(np.pi)} 0.15">
                 <joint name="leg4_base_ball" type="ball" damping="0.5"/>
                 <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05"
@@ -1047,7 +1047,7 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
 
             <!-- Leg 5 -->
             <body name="leg5_lower"
-                  pos="{base_radius * np.cos(4 * np.pi / 3)} 
+                  pos="{base_radius * np.cos(4 * np.pi / 3)}
                        {base_radius * np.sin(4 * np.pi / 3)} 0.15">
                 <joint name="leg5_base_ball" type="ball" damping="0.5"/>
                 <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05"
@@ -1063,7 +1063,7 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
 
             <!-- Leg 6 -->
             <body name="leg6_lower"
-                  pos="{base_radius * np.cos(5 * np.pi / 3)} 
+                  pos="{base_radius * np.cos(5 * np.pi / 3)}
                        {base_radius * np.sin(5 * np.pi / 3)} 0.15">
                 <joint name="leg6_base_ball" type="ball" damping="0.5"/>
                 <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05"
@@ -1088,27 +1088,27 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
 
             <!-- Platform attachment points -->
             <geom type="sphere"
-                  pos="{platform_radius * np.cos(np.pi / 6)} 
+                  pos="{platform_radius * np.cos(np.pi / 6)}
                        {platform_radius * np.sin(np.pi / 6)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{platform_radius * np.cos(np.pi / 2)} 
+                  pos="{platform_radius * np.cos(np.pi / 2)}
                        {platform_radius * np.sin(np.pi / 2)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{platform_radius * np.cos(5 * np.pi / 6)} 
+                  pos="{platform_radius * np.cos(5 * np.pi / 6)}
                        {platform_radius * np.sin(5 * np.pi / 6)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{platform_radius * np.cos(7 * np.pi / 6)} 
+                  pos="{platform_radius * np.cos(7 * np.pi / 6)}
                        {platform_radius * np.sin(7 * np.pi / 6)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{platform_radius * np.cos(3 * np.pi / 2)} 
+                  pos="{platform_radius * np.cos(3 * np.pi / 2)}
                        {platform_radius * np.sin(3 * np.pi / 2)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{platform_radius * np.cos(11 * np.pi / 6)} 
+                  pos="{platform_radius * np.cos(11 * np.pi / 6)}
                        {platform_radius * np.sin(11 * np.pi / 6)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
         </body>
@@ -1117,22 +1117,22 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
     <equality>
         <!-- Connect leg tops to platform -->
         <connect body1="leg1_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius * np.cos(np.pi / 6)} 
+                 relpose="{platform_radius * np.cos(np.pi / 6)}
                           {platform_radius * np.sin(np.pi / 6)} -0.12  1 0 0 0"/>
         <connect body1="leg2_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius * np.cos(np.pi / 2)} 
+                 relpose="{platform_radius * np.cos(np.pi / 2)}
                           {platform_radius * np.sin(np.pi / 2)} -0.12  1 0 0 0"/>
         <connect body1="leg3_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius * np.cos(5 * np.pi / 6)} 
+                 relpose="{platform_radius * np.cos(5 * np.pi / 6)}
                           {platform_radius * np.sin(5 * np.pi / 6)} -0.12  1 0 0 0"/>
         <connect body1="leg4_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius * np.cos(7 * np.pi / 6)} 
+                 relpose="{platform_radius * np.cos(7 * np.pi / 6)}
                           {platform_radius * np.sin(7 * np.pi / 6)} -0.12  1 0 0 0"/>
         <connect body1="leg5_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius * np.cos(3 * np.pi / 2)} 
+                 relpose="{platform_radius * np.cos(3 * np.pi / 2)}
                           {platform_radius * np.sin(3 * np.pi / 2)} -0.12  1 0 0 0"/>
         <connect body1="leg6_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius * np.cos(11 * np.pi / 6)} 
+                 relpose="{platform_radius * np.cos(11 * np.pi / 6)}
                           {platform_radius * np.sin(11 * np.pi / 6)} -0.12  1 0 0 0"/>
     </equality>
 

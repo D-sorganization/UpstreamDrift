@@ -304,12 +304,14 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
             "Golf: Chaotic Pendulum (2 DOF) - Forced oscillation demo",
         )
         self.model_descriptions[0] = (
-            "Simple driven pendulum showing chaotic behavior. Great for learning control basics."
+            "Simple driven pendulum showing chaotic behavior. Great for learning "
+            "control basics."
         )
 
         self.model_combo.addItem("Golf: Double Pendulum (2 DOF) - Shoulder + Wrist")
         self.model_descriptions[1] = (
-            "Basic golf swing with shoulder and wrist joints. Simplest realistic swing model."
+            "Basic golf swing with shoulder and wrist joints. Simplest realistic "
+            "swing model."
         )
 
         self.model_combo.addItem(
@@ -321,7 +323,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
 
         self.model_combo.addItem("Golf: Upper Body (10 DOF) - Spine + Both Arms + Club")
         self.model_descriptions[3] = (
-            "Upper body model with spine rotation and both arms. Good balance of complexity."
+            "Upper body model with spine rotation and both arms. Good balance of "
+            "complexity."
         )
 
         self.model_combo.addItem("Golf: Full Body (15 DOF) - Legs + Torso + Arms")

@@ -35,7 +35,7 @@ class SafeEvaluator:
 
     - ast.Expression: Root node for 'eval' mode.
     - ast.BinOp, ast.UnaryOp: Basic arithmetic structure.
-    - ast.Name, ast.Load: Safe variable and function access 
+    - ast.Name, ast.Load: Safe variable and function access
       (validated against allowed lists).
     - ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Pow, ast.Mod: Arithmetic operators.
     - ast.USub, ast.UAdd: Unary operators (negation).

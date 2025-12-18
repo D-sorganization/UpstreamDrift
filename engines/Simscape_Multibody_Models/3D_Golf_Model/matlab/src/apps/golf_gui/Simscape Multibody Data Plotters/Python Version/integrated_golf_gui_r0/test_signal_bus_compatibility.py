@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Test script to check signal bus compatibility with the GUI
-This script will analyze the current MATLAB data structure 
+This script will analyze the current MATLAB data structure
 and test if the GUI can handle it.
 """
 

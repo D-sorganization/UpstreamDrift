@@ -360,7 +360,7 @@ class TestAdvancedController:
         except np.linalg.LinAlgError:
             # Singular matrix is acceptable for some configurations
             pytest.skip(
-                "Singular matrix in operational space control (expected in some configs)"
+                "Singular matrix in operational space control (expected in configs)"
             )
 
     def test_find_body_id(self, model_and_data) -> None:
