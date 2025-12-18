@@ -49,7 +49,9 @@ def library_module(
 
 
 @pytest.fixture()
-def recording_lib(library_module: types.ModuleType, tmp_path: Path) -> Any:  # noqa: ANN401
+def recording_lib(
+    library_module: types.ModuleType, tmp_path: Path
+) -> Any:  # noqa: ANN401
     """Create a temporary recording library."""
     lib_dir = tmp_path / "recordings"
     return library_module.RecordingLibrary(str(lib_dir))

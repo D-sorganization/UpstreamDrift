@@ -41,7 +41,7 @@ class MeshCatViewer:
             ImportError: If MeshCat is not installed
         """
         if not MESHCAT_AVAILABLE:
-            msg = "MeshCat is required but not installed. Install with: pip install meshcat"
+            msg = "MeshCat required but not installed. Install: pip install meshcat"
             raise ImportError(msg)
 
         self.viewer = viz.Visualizer(zmq_url=zmq_url)

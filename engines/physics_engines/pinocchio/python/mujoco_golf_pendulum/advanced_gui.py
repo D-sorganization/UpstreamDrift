@@ -244,20 +244,17 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
         self.actuator_groups: list[QtWidgets.QGroupBox] = []
 
         # Advanced control widgets
-        self.actuator_control_types: list[QtWidgets.QComboBox] = []  # ComboBoxes for control type
-        self.actuator_constant_inputs: list[QtWidgets.QDoubleSpinBox] = []  # SpinBoxes for constant values
+        self.actuator_control_types: list[QtWidgets.QComboBox] = []  # ComboBoxes for
+        # control type
+        self.actuator_constant_inputs: list[QtWidgets.QDoubleSpinBox] = []  # SpinBoxes
+        # constant values
         self.actuator_polynomial_coeffs: list[list[QtWidgets.QDoubleSpinBox]] = (
             []
         )  # Lists of SpinBoxes for polynomial coefficients
-        self.actuator_damping_inputs: list[QtWidgets.QDoubleSpinBox] = []  # SpinBoxes for damping
-        self.actuator_control_widgets: list[QtWidgets.QWidget] = []  # Store all control widgets per actuator
-        self.actuator_control_types = []  # ComboBoxes for control type
-        self.actuator_constant_inputs = []  # SpinBoxes for constant values
-        self.actuator_polynomial_coeffs = (
-            []
-        )  # Lists of SpinBoxes for polynomial coefficients
-        self.actuator_damping_inputs = []  # SpinBoxes for damping
-        self.actuator_control_widgets = []  # Store all control widgets per actuator
+        self.actuator_damping_inputs: list[QtWidgets.QDoubleSpinBox] = []  # SpinBoxes
+        # damping
+        self.actuator_control_widgets: list[QtWidgets.QWidget] = []  # Store all control
+        # widgets per actuator
         self.simplified_actuator_mode = False
         self.actuator_filter_input: QtWidgets.QLineEdit | None = None
         self._simplified_notice: QtWidgets.QLabel | None = None
@@ -311,12 +308,14 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
             "Golf: Chaotic Pendulum (2 DOF) - Forced oscillation demo",
         )
         self.model_descriptions[0] = (
-            "Simple driven pendulum showing chaotic behavior. Great for learning control basics."
+            "Simple driven pendulum showing chaotic behavior. Great for learning "
+            "control basics."
         )
 
         self.model_combo.addItem("Golf: Double Pendulum (2 DOF) - Shoulder + Wrist")
         self.model_descriptions[1] = (
-            "Basic golf swing with shoulder and wrist joints. Simplest realistic swing model."
+            "Basic golf swing with shoulder and wrist joints. Simplest realistic "
+            "swing model."
         )
 
         self.model_combo.addItem(
@@ -328,7 +327,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
 
         self.model_combo.addItem("Golf: Upper Body (10 DOF) - Spine + Both Arms + Club")
         self.model_descriptions[3] = (
-            "Upper body model with spine rotation and both arms. Good balance of complexity."
+            "Upper body model with spine rotation and both arms. Good balance of "
+            "complexity."
         )
 
         self.model_combo.addItem("Golf: Full Body (15 DOF) - Legs + Torso + Arms")
@@ -1422,7 +1422,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
         """Create advanced controls for all actuators with logical grouping.
 
         This method creates control widgets for each actuator in the current model.
-        The actuator_index corresponds directly to the model's actuator indices (0 to model.nu-1).
+        The actuator_index corresponds directly to the model's actuator indices\
+        (0 to model.nu-1).
         """
         groups = self._group_actuators(actuator_names)
         actuator_index = 0
@@ -1659,10 +1660,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
             coeff_spinbox.setDecimals(4)
             coeff_spinbox.setValue(0.0)
             coeff_spinbox.valueChanged.connect(
-                lambda val, idx=i, act_idx=actuator_index: self.on_polynomial_coeff_changed(
-                    act_idx,
-                    idx,
-                    val,
+                lambda val, idx=i, act_idx=actuator_index: (
+                    self.on_polynomial_coeff_changed(act_idx, idx, val)
                 ),
             )
             coeff_spinboxes.append(coeff_spinbox)
@@ -2178,7 +2177,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
             self.sim_widget.set_background_color(sky_color=rgba)
             # Update button color
             self.sky_color_btn.setStyleSheet(
-                f"background-color: rgb({color.red()}, {color.green()}, {color.blue()});",
+                f"background-color: rgb({color.red()}, {color.green()}, \
+                    {color.blue()});",
             )
 
     def on_ground_color_clicked(self) -> None:
@@ -2203,7 +2203,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
             self.sim_widget.set_background_color(ground_color=rgba)
             # Update button color
             self.ground_color_btn.setStyleSheet(
-                f"background-color: rgb({color.red()}, {color.green()}, {color.blue()});",
+                f"background-color: rgb({color.red()}, {color.green()}, \
+                    {color.blue()});",
             )
 
     def on_reset_background(self) -> None:
@@ -2327,7 +2328,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
                 f"Recording: {duration:.2f}s ({num_frames} frames)",
             )
             self.recording_label.setStyleSheet(
-                "background-color: #d62728; color: white; font-weight: bold; padding: 5px;",
+                "background-color: #d62728; color: white; \
+                    font-weight: bold; padding: 5px;",
             )
         else:
             num_frames = recorder.get_num_frames()
@@ -2337,7 +2339,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
                     f"Stopped: {duration:.2f}s ({num_frames} frames)",
                 )
                 self.recording_label.setStyleSheet(
-                    "background-color: #ff7f0e; color: white; font-weight: bold; padding: 5px;",
+                    "background-color: #ff7f0e; color: white; \
+                        font-weight: bold; padding: 5px;",
                 )
             else:
                 self.recording_label.setText("Not recording")

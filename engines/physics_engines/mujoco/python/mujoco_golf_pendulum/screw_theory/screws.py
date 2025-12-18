@@ -90,10 +90,14 @@ def screw_to_transform(
 
     Examples:
         >>> # 90° rotation about z-axis through origin
-        >>> t_transform = screw_to_transform(np.array([0, 0, 1]), np.array([0, 0, 0]), 0, np.pi/2)
+        >>> t_transform = screw_to_transform(
+        ...     np.array([0, 0, 1]), np.array([0, 0, 0]), 0, np.pi/2
+        ... )
 
         >>> # Translation of 1m along x-axis
-        >>> t_transform = screw_to_transform(np.array([1, 0, 0]), np.array([0, 0, 0]), np.inf, 1.0)
+        >>> t_transform = screw_to_transform(
+        ...     np.array([1, 0, 0]), np.array([0, 0, 0]), np.inf, 1.0
+        ... )
     """
     s_screw = screw_axis(axis, point, pitch)
     return exponential_map(s_screw, theta)

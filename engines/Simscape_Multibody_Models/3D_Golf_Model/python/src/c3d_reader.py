@@ -171,7 +171,8 @@ class C3DDataReader:
                 data["time"] = frame_indices / metadata.frame_rate
             else:
                 logger.warning(
-                    "Frame rate is 0. Time column will be omitted despite include_time=True."
+                    "Frame rate is 0. Time column will be omitted "
+                    "despite include_time=True."
                 )
 
         dataframe = pd.DataFrame(data)

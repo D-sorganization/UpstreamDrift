@@ -2,7 +2,8 @@
 Rigid Body Dynamics Module
 
 This module implements algorithms for rigid body dynamics computation,
-including inverse dynamics (RNEA), forward dynamics (ABA), and mass matrix computation (CRBA).
+including inverse dynamics (RNEA), forward dynamics (ABA), and mass matrix
+computation (CRBA).
 
 References:
     Featherstone, R. (2008). Rigid Body Dynamics Algorithms.

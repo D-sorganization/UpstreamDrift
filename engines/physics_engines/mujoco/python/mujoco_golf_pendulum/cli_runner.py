@@ -57,7 +57,8 @@ def load_model(model_key: str) -> tuple[mujoco.MjModel, mujoco.MjData]:
         candidate = _resolve_model_path(model_key)
         if not candidate.exists():
             raise ValueError(
-                f"Unknown model '{model_key}'. Available: {', '.join(sorted(MODEL_SPECS))}",
+                f"Unknown model '{model_key}'. Available: "
+                f"{', '.join(sorted(MODEL_SPECS))}",
             )
         model = mujoco.MjModel.from_xml_path(candidate.as_posix())
     elif spec["mode"] == "xml_string":
