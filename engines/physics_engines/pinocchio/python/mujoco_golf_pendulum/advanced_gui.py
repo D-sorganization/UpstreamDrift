@@ -1650,7 +1650,7 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
         poly_layout.setContentsMargins(10, 5, 5, 5)
 
         poly_label = QtWidgets.QLabel(
-            "Polynomial Coefficients (c₀ + c₁t + c₂t² + ... + c₆t⁶):",
+            "Polynomial Coefficients (c0 + c1*t + c2*t^2 + ... + c6*t^6):",
         )
         poly_label.setStyleSheet("font-weight: bold;")
         poly_layout.addWidget(poly_label)
