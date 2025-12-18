@@ -47,7 +47,7 @@ Golf_Modeling_Suite/
 
 ## Migration Status
 
-This repository is currently under active migration from separate repositories. See [GOLF_MODELING_SUITE_MIGRATION_PLAN.md](../GOLF_MODELING_SUITE_MIGRATION_PLAN.md) for detailed progress.
+This repository is currently under active migration from separate repositories. See [MIGRATION_STATUS.md](MIGRATION_STATUS.md) for detailed progress.
 
 ## License
 
