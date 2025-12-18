@@ -142,7 +142,7 @@ def main() -> None:
             current_pose = interpolated
 
             # Apply pose to physics
-            # Note: qpos includes position (xyz) and orientation (quat) of root at start.
+            # Note: qpos includes position (xyz) and orientation (quat) of root.
             # We need to be careful not to overwrite the root if we don't want to.
             # However, for kinematic animation, we can just write to known
             # named joints.

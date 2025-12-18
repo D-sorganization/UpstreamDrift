@@ -193,7 +193,7 @@ class LQRController(BaseController):
 
 
 class PhysicsEnvWrapper:
-    """Wraps a pure Physics object to satisfy dm_control.viewer's Environment interface."""
+    """Wraps a pure Physics object to satisfy dm_control.viewer's Environment."""
 
     def __init__(self, physics) -> None:
         """Initialize PhysicsEnvWrapper."""
@@ -360,7 +360,8 @@ def run_simulation(
 
             def policy(time_step) -> np.ndarray:
                 """Policy function for the viewer."""
-                # The viewer passes a TimeStep, but we have access to controller/physics externally or via wrapper
+                # The viewer passes a TimeStep, but we have access to controller/physics
+                # externally or via wrapper
                 # We need to return action
                 action = controller.get_action(physics)
                 return action

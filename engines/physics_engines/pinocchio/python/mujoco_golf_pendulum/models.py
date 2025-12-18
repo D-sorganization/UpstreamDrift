@@ -1453,7 +1453,7 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
         f'<body name="club_grip" pos="0 0 -0.10" euler="0 -{club_loft:.3f} 0">',
         f'  <inertial pos="0 0 -{grip_length / 2:.4f}" mass="{grip_mass:.4f}"',
         f'            diaginertia="{grip_mass * grip_length**2 / 12:.8f} '
-        f'{grip_mass * grip_length**2 / 12:.8f} '
+        f"{grip_mass * grip_length**2 / 12:.8f} "
         f'{grip_mass * grip_radius**2 / 2:.8f}"/>',
         '  <geom name="grip_geom" type="capsule"',
         f'        fromto="0 0 0 0 0 -{grip_length:.4f}"',
@@ -1491,7 +1491,7 @@ def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3)
                 f'{indent}  <inertial pos="0 0 -{seg_length / 2:.4f}"',
                 f'{indent}            mass="{seg_mass:.4f}"',
                 f'{indent}            diaginertia="{seg_mass * seg_length**2 / 12:.8f} '
-                f'{seg_mass * seg_length**2 / 12:.8f} '
+                f"{seg_mass * seg_length**2 / 12:.8f} "
                 f'{seg_mass * shaft_radius**2 / 2:.8f}"/>',
                 f'{indent}  <geom name="{seg_name}_geom" type="capsule"',
                 f'{indent}        fromto="0 0 0 0 0 -{seg_length:.4f}"',

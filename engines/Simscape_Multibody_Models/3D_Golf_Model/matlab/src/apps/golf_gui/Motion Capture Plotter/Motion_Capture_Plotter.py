@@ -1302,12 +1302,16 @@ class MotionCapturePlotter(QMainWindow):
                 motion_frame = motion_data.iloc[self.current_frame]
                 info += "Motion Capture Data:\n"
                 info += f"  Time: {motion_frame['time']:.3f}s\n"
-                info += (f"  Mid-Hands: ({motion_frame['mid_X']:.3f}, "
-                         f"{motion_frame['mid_Y']:.3f}, "
-                         f"{motion_frame['mid_Z']:.3f})\n")
-                info += (f"  Club Head: ({motion_frame['club_X']:.3f}, "
-                         f"{motion_frame['club_Y']:.3f}, "
-                         f"{motion_frame['club_Z']:.3f})\n\n")
+                info += (
+                    f"  Mid-Hands: ({motion_frame['mid_X']:.3f}, "
+                    f"{motion_frame['mid_Y']:.3f}, "
+                    f"{motion_frame['mid_Z']:.3f})\n"
+                )
+                info += (
+                    f"  Club Head: ({motion_frame['club_X']:.3f}, "
+                    f"{motion_frame['club_Y']:.3f}, "
+                    f"{motion_frame['club_Z']:.3f})\n\n"
+                )
 
         # Show Simscape data if available
         if self.show_simscape and self.simscape_data:

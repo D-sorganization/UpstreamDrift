@@ -37,7 +37,7 @@ def deep_analyze_matlab_file(filename):
                     for field_name in value.dtype.names:
                         field_data = value[field_name]
                         shape_info = (
-                            field_data.shape if hasattr(field_data, 'shape') else 'N/A'
+                            field_data.shape if hasattr(field_data, "shape") else "N/A"
                         )
                         print(
                             f"    {field_name}: {type(field_data)}, "
@@ -51,7 +51,7 @@ def deep_analyze_matlab_file(filename):
                             print(f"      Object array with {len(field_data)} elements")
                             for i, obj in enumerate(field_data[:3]):  # Show first 3
                                 obj_shape = (
-                                    obj.shape if hasattr(obj, 'shape') else 'N/A'
+                                    obj.shape if hasattr(obj, "shape") else "N/A"
                                 )
                                 print(
                                     f"        Element {i}: {type(obj)}, "

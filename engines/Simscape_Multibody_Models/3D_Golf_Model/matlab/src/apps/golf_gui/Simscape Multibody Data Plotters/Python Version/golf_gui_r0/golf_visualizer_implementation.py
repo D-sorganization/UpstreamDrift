@@ -812,8 +812,6 @@ class ModernGolfVisualizerWidget(QOpenGLWidget):
         self.camera_distance * np.sin(elevation_rad)
         self.camera_distance * np.cos(elevation_rad) * np.sin(azimuth_rad)
 
-
-
         # Create view matrix (simplified lookAt)
         view_matrix = np.eye(4, dtype=np.float32)
         # ... implementation of lookAt matrix calculation
