@@ -347,13 +347,13 @@ class GripModellingTab(QtWidgets.QWidget):
 
         # Connect
         slider.valueChanged.connect(
-            lambda v, s=spin, amin=range_min, amax=range_max, idx=qpos_adr: (
-                self._on_slider(v, s, amin, amax, idx)
+            lambda v, s=spin, amin=range_min, amax=range_max, idx=qpos_adr: self._on_slider(
+                v, s, amin, amax, idx
             )
         )
         spin.valueChanged.connect(
-            lambda v, s=slider, amin=range_min, amax=range_max, idx=qpos_adr: (
-                self._on_spin(v, s, amin, amax, idx)
+            lambda v, s=slider, amin=range_min, amax=range_max, idx=qpos_adr: self._on_spin(
+                v, s, amin, amax, idx
             )
         )
 
