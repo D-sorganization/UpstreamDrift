@@ -653,7 +653,7 @@ FULL_BODY_GOLF_SWING_XML = rf"""<mujoco model="golf_full_body_swing">
 # ==============================================================================
 # TWO-LINK INCLINED PLANE MODEL WITH UNIVERSAL JOINT AT WRIST
 # ==============================================================================
-TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML = rf"""<mujoco 
+TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML = rf"""<mujoco
   model="two_link_inclined_universal">
   <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}"
           integrator="RK4" solver="Newton"/>
@@ -876,7 +876,7 @@ GIMBAL_JOINT_DEMO_XML = rf"""<mujoco model="gimbal_joint_demo">
 # ==============================================================================
 # ADVANCED FULL-BODY MODEL WITH SPECIFIED JOINT TYPES
 # ==============================================================================
-ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco 
+ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco
   model="advanced_biomechanical_golf_swing">
   <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}"
           integrator="RK4" solver="Newton" iterations="50"/>
@@ -1320,7 +1320,7 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""<mujoco
     <motor name="r_wrist_dev" joint="right_wrist_deviation" gear="20"
            ctrllimited="true" ctrlrange="-28 28"/>
 
-    <!-- Flexible Shaft (3 DOF) - typically controlled passively, 
+    <!-- Flexible Shaft (3 DOF) - typically controlled passively,
          but can be actuated for study -->
     <motor name="shaft_upper" joint="shaft_flex_upper" gear="2"
            ctrllimited="true" ctrlrange="-5 5"/>

@@ -24,7 +24,7 @@ class GearsParser:
         - Binary format with mixed ASCII/Wide-char strings.
         - Contains 'Skeleton' header.
         - Contains marker names like 'WaistLeft', 'WaistRight', 'HeadTop'.
-        - Data appears to be float32 or float64 streams interleaved or following headers.
+        - Data appears to be float32 or float64 streams interleaved or following.
 
         Currently this parser is a STUB. Full reverse engineering of the binary
         layout is required, or a vendor DLL.
@@ -45,7 +45,7 @@ class GearsParser:
 
         logger.warning("GearsParser is experimental/stub.")
 
-        # NOTE: (Future Feature) Implement binary parsing based on offsets found in probe.
+        # NOTE: (Future Feature) Implement binary parsing based on offsets found.
         # Structure seems to be: [Len][String: MarkerName] ... [Data]
 
         msg = (

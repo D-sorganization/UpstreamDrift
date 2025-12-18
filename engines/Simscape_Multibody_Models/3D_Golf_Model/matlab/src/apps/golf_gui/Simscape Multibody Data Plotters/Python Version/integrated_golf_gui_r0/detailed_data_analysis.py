@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Detailed analysis of MATLAB data structure
-This script will explore the actual structure of the .mat files 
+This script will explore the actual structure of the .mat files
 to understand the data format.
 """
 

@@ -727,7 +727,7 @@ class DoublePendulumApp:
                 )
 
                 if angles_changed:
-                    # Pause simulation when angles change to maintain physical consistency
+                    # Pause simulation when angles change to maintain consistency
                     self.running = False
 
             # Only reset velocities if angles changed or if this is initial setup
@@ -818,7 +818,8 @@ class DoublePendulumApp:
         self.torque_label.config(
             text=(
                 f"Applied (Nm): shoulder={torques[0]:.2f}, wrist={torques[1]:.2f}\n"
-                f"Gravity: {breakdown.gravitational[0]:.2f}, {breakdown.gravitational[1]:.2f}\n"
+                f"Gravity: {breakdown.gravitational[0]:.2f}, "
+                f"{breakdown.gravitational[1]:.2f}\n"
                 f"Time: {self.time:.2f}s"
             )
         )

@@ -766,7 +766,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         Args:
             sky_color: RGBA tuple/list for sky color (default: None to keep current)
-            ground_color: RGBA tuple/list for ground color (default: None to keep current)
+            ground_color: RGBA tuple/list for ground color (default: None for current)
         """
         if sky_color is not None:
             self.sky_color = np.array(sky_color, dtype=np.float32)
