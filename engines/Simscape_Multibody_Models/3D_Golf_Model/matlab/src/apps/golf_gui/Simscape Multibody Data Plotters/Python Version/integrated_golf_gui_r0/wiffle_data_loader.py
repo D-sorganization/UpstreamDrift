@@ -307,8 +307,8 @@ class MotionDataLoader:
         if self.config.interpolate_missing:
             processed_data = self._interpolate_missing_values(processed_data)
 
-        time_min = processed_data['time'].min()
-        time_max = processed_data['time'].max()
+        time_min = processed_data["time"].min()
+        time_max = processed_data["time"].max()
         print(
             f"[OK] Processed {sheet_name}: {processed_data.shape}, "
             f"time range: [{time_min:.3f}, {time_max:.3f}]"

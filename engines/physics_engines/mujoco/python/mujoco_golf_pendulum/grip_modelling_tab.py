@@ -224,10 +224,14 @@ class GripModellingTab(QtWidgets.QWidget):
         ) and 'name="rh_mocap"' not in xml_content:
             mocap_xml += """
     <body name="rh_mocap" mocap="true" pos="0 0 0">
-        <geom type="box" size="0.02 0.02 0.02" rgba="0 1 0 0.5" contype="0" conaffinity="0"/>
+        <geom type="box" size="0.02 0.02 0.02" rgba="0 1 0 0.5" contype="0"
+              conaffinity="0"/>
     </body>
             """
-            equality_xml += '    <weld body1="rh_mocap" body2="rh_forearm" solref="0.02 1" solimp="0.9 0.95 0.001"/>\n'
+            equality_xml += (
+                '    <weld body1="rh_mocap" body2="rh_forearm" solref="0.02 1" '
+                'solimp="0.9 0.95 0.001"/>\n'
+            )
 
         # Left Hand Mocap (only add if not already present)
         if (
@@ -235,10 +239,14 @@ class GripModellingTab(QtWidgets.QWidget):
         ) and 'name="lh_mocap"' not in xml_content:
             mocap_xml += """
     <body name="lh_mocap" mocap="true" pos="0 0 0">
-        <geom type="box" size="0.02 0.02 0.02" rgba="1 0 0 0.5" contype="0" conaffinity="0"/>
+        <geom type="box" size="0.02 0.02 0.02" rgba="1 0 0 0.5" contype="0"
+              conaffinity="0"/>
     </body>
             """
-            equality_xml += '    <weld body1="lh_mocap" body2="lh_forearm" solref="0.02 1" solimp="0.9 0.95 0.001"/>\n'
+            equality_xml += (
+                '    <weld body1="lh_mocap" body2="lh_forearm" solref="0.02 1" '
+                'solimp="0.9 0.95 0.001"/>\n'
+            )
 
         equality_xml += "  </equality>"
 
@@ -339,8 +347,8 @@ class GripModellingTab(QtWidgets.QWidget):
 
         # Connect
         slider.valueChanged.connect(
-            lambda v, s=spin, amin=range_min, amax=range_max, idx=qpos_adr: self._on_slider(
-                v, s, amin, amax, idx
+            lambda v, s=spin, amin=range_min, amax=range_max, idx=qpos_adr: (
+                self._on_slider(v, s, amin, amax, idx)
             )
         )
         spin.valueChanged.connect(
