@@ -1,4 +1,5 @@
-"""Analysis tools for joint constraint forces, torque transmission, and universal joints.
+"""Analysis tools for joint constraint forces, torque transmission, and universal
+joints.
 
 This module provides tools for analyzing:
 - Constraint forces in universal and gimbal joints
