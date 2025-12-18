@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Analyze Simscape CSV data to identify joint center positions for golf swing visualization.
+Analyze Simscape CSV data to identify joint center positions
+for golf swing visualization.
 """
 
 import pandas as pd

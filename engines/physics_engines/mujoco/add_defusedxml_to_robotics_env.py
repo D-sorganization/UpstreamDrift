@@ -88,7 +88,8 @@ def test_updated_environment():
                 "robotics_env",
                 "python",
                 "-c",
-                "import defusedxml.ElementTree; print('✅ defusedxml.ElementTree available')",
+                "import defusedxml.ElementTree; "
+                "print('✅ defusedxml.ElementTree available')",
             ],
             capture_output=True,
             text=True,

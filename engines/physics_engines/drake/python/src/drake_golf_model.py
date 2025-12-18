@@ -181,7 +181,8 @@ def make_cylinder_inertia(mass: float, radius: float, length: float) -> SpatialI
         length,
         np.array([0.0, 0.0, 1.0], dtype=np.float64),  # type: ignore[arg-type]
     )
-    # Construct SpatialInertia using mass, center of mass at [0, 0, 0], and the unit inertia.
+    # Construct SpatialInertia using mass, center of mass at [0, 0, 0],
+    # and the unit inertia.
     return SpatialInertia(
         mass,
         np.zeros(3, dtype=np.float64),  # type: ignore[arg-type]
@@ -255,9 +256,11 @@ class GolfURDFGenerator:
         unit_inertia: UnitInertia,
         visual_shape_tag: str | None = None,
         visual_params: dict[str, Any] | None = None,
-        com_offset: npt.ArrayLike = np.zeros(3),
+        com_offset: npt.ArrayLike | None = None,
     ) -> ET.Element:
         """Add a link to the model."""
+        if com_offset is None:
+            com_offset = np.zeros(3)
         link = ET.SubElement(self.root, "link", name=name)
 
         # Inertial
@@ -381,7 +384,8 @@ class GolfURDFGenerator:
         I_hub = UnitInertia.SolidBox(hub_dims[0], hub_dims[1], hub_dims[2])
         self.add_link("upper_torso_hub", 5.0, I_hub, "box", {"size": hub_dims})
 
-        # Weld at top of upper spine (+0.25*pts relative to Body, so +0.5*pts relative to Link)
+        # Weld at top of upper spine (+0.25*pts relative to Body,
+        # so +0.5*pts relative to Link)
         self.add_joint(
             "torso_weld",
             "fixed",
@@ -684,11 +688,14 @@ def add_joint_actuators(plant: MultibodyPlant) -> None:
 
 
 def build_golf_swing_diagram(
-    params: GolfModelParams = GolfModelParams(),
+    params: GolfModelParams | None = None,
     urdf_path: str | None = None,
     meshcat: Meshcat | None = None,
 ) -> tuple[Diagram, MultibodyPlant, SceneGraph]:
     """Build the full Drake diagram for the golf swing."""
+    if params is None:
+        params = GolfModelParams()
+
     # Generate URDF
     generator = GolfURDFGenerator(params)
     urdf_content = generator.generate()

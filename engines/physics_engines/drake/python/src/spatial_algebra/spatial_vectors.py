@@ -86,7 +86,7 @@ def crm(v: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     w0, w1, w2 = v[0], v[1], v[2]
     v0, v1, v2 = v[3], v[4], v[5]
 
-    # Performance optimization: manual construction avoids np.block and intermediate arrays
+    # Performance optimization: manual construction avoids np.block and arrays
     res = np.zeros((6, 6), dtype=np.float64)
 
     # Top-left block: skew(w)
@@ -154,7 +154,7 @@ def crf(v: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     w0, w1, w2 = v[0], v[1], v[2]
     v0, v1, v2 = v[3], v[4], v[5]
 
-    # Performance optimization: manual construction avoids np.block and intermediate arrays
+    # Performance optimization: manual construction avoids np.block and arrays
     res = np.zeros((6, 6), dtype=np.float64)
 
     # Top-left block: skew(w)
@@ -229,7 +229,8 @@ def spatial_cross(  # noqa: PLR0915
         raise ValueError(msg)
 
     # Decompose vectors: v = [w; v_lin], u = [u_rot; u_lin]
-    # We use manual cross product calculation for performance (avoiding np.cross overhead)
+    # We use manual cross product calculation for performance
+    # (avoiding np.cross overhead)
     w0, w1, w2 = v[0], v[1], v[2]
     v0, v1, v2 = v[3], v[4], v[5]
     ur0, ur1, ur2 = u[0], u[1], u[2]
@@ -277,6 +278,7 @@ def spatial_cross(  # noqa: PLR0915
         return np.array([rx + vx, ry + vy, rz + vz, wx, wy, wz])
 
     # Runtime check for invalid cross_type
-    # Note: mypy flags this as unreachable due to Literal type, but it's needed for runtime safety
+    # Note: mypy flags this as unreachable due to Literal type,
+    # but it's needed for runtime safety
     msg = f"cross_type must be 'motion' or 'force', got '{cross_type}'"  # type: ignore[unreachable]
     raise ValueError(msg)
