@@ -473,10 +473,13 @@ def _setup_metrics_for_frame(
             "Club Head Speed (mph)": float,
         }
 
-    Club head speed is calculated as the Euclidean norm of the club head's linear velocity.
-    Conversion: 1 m/s = 2.23694 mph (NIST SP 811, 2008, Table 8. Unit conversion factors).
+    Club head speed is calculated as the Euclidean norm of the club\
+    head's linear velocity.
+    Conversion: 1 m/s = 2.23694 mph (NIST SP 811, 2008, Table 8.\
+    Unit conversion factors).
     """
-    # The name of the club head body in the model. This must match the model's definition.
+    # The name of the club head body in the model. This must match\
+    # the model's definition.
     club_head_body_name: Final[str] = "club_head"
     try:
         club_head_id = mj.mj_name2id(model, mj.mjtObj.mjOBJ_BODY, club_head_body_name)
@@ -486,7 +489,8 @@ def _setup_metrics_for_frame(
             club_head_speed_mph = float("nan")
         else:
             # mj.MjData.cvel is (nbody, 6): [linear(3), angular(3)] velocities in global frame
-            # See: https://mujoco.readthedocs.io/en/stable/APIreference.html#mjdata
+            # mj.MjData.cvel is (nbody, 6): [linear(3), angular(3)]\
+            # velocities in global frame
             club_head_cvel = data.cvel[club_head_id]  # shape (6,)
             club_head_linear_vel = club_head_cvel[:3]  # [vx, vy, vz] in m/s
 
