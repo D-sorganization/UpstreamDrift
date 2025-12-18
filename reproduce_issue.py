@@ -64,7 +64,7 @@ class MockWindow:
 
 
 def run_test():
-    _ = QApplication(sys.argv + ["-platform", "offscreen"])
+    app = QApplication(sys.argv + ["-platform", "offscreen"])
 
     window = MockWindow()
 
@@ -82,8 +82,7 @@ def run_test():
     print(f"Final Spinbox Value: {final_spinbox_value}")
     print(f"Final Slider Value: {final_slider_value}")
     print(
-        f"Total Callbacks: Slider={window.slider_calls}, "
-        f"Spinbox={window.spinbox_calls}"
+        f"Total Callbacks: Slider={window.slider_calls}, Spinbox={window.spinbox_calls}"
     )
     print(f"Control System Updates: {window.control_system_calls}")
 

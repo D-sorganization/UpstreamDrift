@@ -7,6 +7,7 @@ derived biomechanical quantities.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass, field
 
 import mujoco
@@ -93,6 +94,28 @@ class BiomechanicalAnalyzer:
         self.prev_qvel: np.ndarray | None = None
         self.prev_time: float = 0.0
 
+        # Pre-allocate Jacobian buffers to avoid re-allocation every frame
+        self._jacp = np.zeros((3, self.model.nv))
+        self._jacr = np.zeros((3, self.model.nv))
+
+        # Check if MuJoCo supports shaped arrays (optimization)
+        # MuJoCo 3.3+ may require reshaped arrays, while older versions might work
+        # with both or require flat arrays. We determine the capability once.
+        try:
+            # Try with shaped arrays on body 0 (world) which always exists
+            mujoco.mj_jacBody(self.model, self.data, self._jacp, self._jacr, 0)
+            self._use_shaped_jac = True
+            self._jacp_flat = None
+            self._jacr_flat = None
+        except TypeError:
+            # Fallback to flat arrays
+            logging.getLogger(__name__).debug(
+                "MuJoCo version requires flat array format for mj_jacBody"
+            )
+            self._use_shaped_jac = False
+            self._jacp_flat = np.zeros(3 * self.model.nv)
+            self._jacr_flat = np.zeros(3 * self.model.nv)
+
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern (case-insensitive, partial match)."""
         for i in range(self.model.nbody):
@@ -148,19 +171,23 @@ class BiomechanicalAnalyzer:
         # Get position
         pos = self.data.xpos[self.club_head_id].copy()
 
-        # Get velocity (compute from Jacobian) - fixed for MuJoCo 3.x API
-        try:
-            jacp = np.zeros((3, self.model.nv))
-            jacr = np.zeros((3, self.model.nv))
-            mujoco.mj_jacBody(self.model, self.data, jacp, jacr, self.club_head_id)
-        except TypeError:
-            # Fallback to flat array approach for older MuJoCo versions
-            jacp_flat = np.zeros(3 * self.model.nv)
-            jacr_flat = np.zeros(3 * self.model.nv)
+        # Get velocity (compute from Jacobian)
+        # Use pre-allocated arrays and pre-determined method
+        if self._use_shaped_jac:
             mujoco.mj_jacBody(
-                self.model, self.data, jacp_flat, jacr_flat, self.club_head_id
+                self.model, self.data, self._jacp, self._jacr, self.club_head_id
             )
-            jacp = jacp_flat.reshape(3, self.model.nv)
+            jacp = self._jacp
+        else:
+            mujoco.mj_jacBody(
+                self.model,
+                self.data,
+                self._jacp_flat,
+                self._jacr_flat,
+                self.club_head_id,
+            )
+            # Use reshape to get a view (no copy)
+            jacp = self._jacp_flat.reshape(3, self.model.nv)
 
         vel = jacp @ self.data.qvel
         speed = float(np.linalg.norm(vel))

@@ -235,6 +235,7 @@ function start() {
 
 function pause() {
   cancelAnimationFrame(animationId);
+  animationId = null;
 }
 
 function reset() {
@@ -247,5 +248,16 @@ function reset() {
 ['start', 'pause', 'reset'].forEach(id => document.getElementById(id).addEventListener('click', () => {
   ({ start, pause, reset })[id]();
 }));
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+
+  if (e.key === ' ' || e.key === 'Spacebar') {
+    e.preventDefault();
+    animationId ? pause() : start();
+  } else if (e.key === 'r' || e.key === 'R') {
+    reset();
+  }
+});
 
 reset();
