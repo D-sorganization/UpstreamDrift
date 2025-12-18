@@ -280,11 +280,13 @@ def _calc_gravity_vector(
     return gravity
 
 
-def _hardcoded_triple_functions() -> tuple[
-    collections.abc.Callable[..., np.ndarray],
-    collections.abc.Callable[..., np.ndarray],
-    collections.abc.Callable[..., np.ndarray],
-]:
+def _hardcoded_triple_functions() -> (
+    tuple[
+        collections.abc.Callable[..., np.ndarray],
+        collections.abc.Callable[..., np.ndarray],
+        collections.abc.Callable[..., np.ndarray],
+    ]
+):
     return _calc_mass_matrix, _calc_bias_vector, _calc_gravity_vector
 
 

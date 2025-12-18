@@ -851,7 +851,8 @@ class URDFImporter:
 
         # Note: Joint origin is handled in _build_mujoco_body where it\
         # sets body position
-        # Joint pos attribute is not used here as URDF joint origin specifies body position
+        # Joint pos attribute is not used here as URDF joint origin
+        # specifies body position
         # Joint pos attribute is not used here as URDF joint origin\
         # specifies body position
         axis = joint.find("axis")

@@ -590,7 +590,8 @@ class DoublePendulumApp:
             else:
                 # For non-uniform distribution, use an approximation
                 # Scale the uniform rod inertia based on how far COM is from center
-                # This is approximation - exact value depends on actual mass distribution
+                # This is approximation - exact value depends on actual mass
+                # distribution
                 uniform_inertia = (
                     (1.0 / 12.0)
                     * user_inputs.upper_mass_kg

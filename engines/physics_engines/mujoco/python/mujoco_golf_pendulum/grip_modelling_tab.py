@@ -299,9 +299,7 @@ class GripModellingTab(QtWidgets.QWidget):
         for i in range(model.njnt):
             self._add_joint_control_row(i, model)
 
-    def _add_joint_control_row(
-        self, i: int, model: mujoco.MjModel
-    ) -> None:  # noqa: PLR0915
+    def _add_joint_control_row(self, i: int, model: mujoco.MjModel) -> None:  # noqa: PLR0915
         """Create a control row for a single joint."""
         if self.sim_widget.data is None:
             return
