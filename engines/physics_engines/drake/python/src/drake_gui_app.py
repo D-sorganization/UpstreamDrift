@@ -29,9 +29,9 @@ LOGGER = logging.getLogger(__name__)
 SLIDER_TO_RADIAN: typing.Final[float] = (
     0.01  # [rad/slider_unit] Conversion factor from slider integer values to radians
 )
-JOINT_ANGLE_MIN_RAD: typing.Final[
-    float
-] = -10.0  # [rad] Minimum joint angle for UI controls (Safety limit)
+JOINT_ANGLE_MIN_RAD: typing.Final[float] = (
+    -10.0
+)  # [rad] Minimum joint angle for UI controls (Safety limit)
 JOINT_ANGLE_MAX_RAD: typing.Final[float] = (
     10.0  # [rad] Maximum joint angle for UI controls (Safety limit)
 )
