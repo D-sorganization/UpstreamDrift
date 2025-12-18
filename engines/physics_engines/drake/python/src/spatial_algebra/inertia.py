@@ -22,8 +22,8 @@ def mcI(
     Construct spatial inertia matrix from mass, COM, and rotational inertia.
 
     The spatial inertia matrix has the form:
-        I_spatial = [ I_com + m·c×·c×ᵀ    m·c× ]
-                    [      m·c×ᵀ          m·I₃ ]
+        I_spatial = [ I_com + m*c_cross*c_cross^T    m*c_cross ]
+                    [      m*c_cross^T               m*I_3     ]
 
     where c is the COM vector and c× is its skew-symmetric matrix.
 
