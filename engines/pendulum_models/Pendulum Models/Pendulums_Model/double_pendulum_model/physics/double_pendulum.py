@@ -106,9 +106,7 @@ class ExpressionFunction:
 
     def _validate_ast(self, node: ast.AST) -> None:
         for child in ast.walk(node):
-            if (
-                type(child) not in self._ALLOWED_NODES
-            ):  # noqa: E721 - type comparison is intentional
+            if type(child) not in self._ALLOWED_NODES:  # noqa: E721 - type comparison is intentional
                 raise ValueError(
                     f"Disallowed syntax in expression: {type(child).__name__}"
                 )
@@ -454,7 +452,9 @@ class DoublePendulumDynamics:
         )
 
 
-def compile_forcing_functions(shoulder_expression: str, wrist_expression: str) -> tuple[
+def compile_forcing_functions(
+    shoulder_expression: str, wrist_expression: str
+) -> tuple[
     Callable[[float, DoublePendulumState], float],
     Callable[[float, DoublePendulumState], float],
 ]:

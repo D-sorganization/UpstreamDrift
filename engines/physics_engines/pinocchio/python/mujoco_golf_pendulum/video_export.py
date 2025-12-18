@@ -488,7 +488,8 @@ def _setup_metrics_for_frame(
             club_head_speed_mps = float("nan")
             club_head_speed_mph = float("nan")
         else:
-            # mj.MjData.cvel is (nbody, 6): [linear(3), angular(3)] velocities in global frame
+            # mj.MjData.cvel is (nbody, 6): [linear(3), angular(3)]
+            # velocities in global frame
             # mj.MjData.cvel is (nbody, 6): [linear(3), angular(3)]\
             # velocities in global frame
             club_head_cvel = data.cvel[club_head_id]  # shape (6,)
