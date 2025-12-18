@@ -244,17 +244,23 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
         self.actuator_groups: list[QtWidgets.QGroupBox] = []
 
         # Advanced control widgets
-        self.actuator_control_types: list[QtWidgets.QComboBox] = []  # ComboBoxes for
-        # control type
-        self.actuator_constant_inputs: list[QtWidgets.QDoubleSpinBox] = []  # SpinBoxes
-        # constant values
+        self.actuator_control_types: list[QtWidgets.QComboBox] = (
+            []
+        )  # ComboBoxes for control type
+        self.actuator_constant_inputs: list[QtWidgets.QDoubleSpinBox] = (
+            []
+        )  # SpinBoxes for constant values
         self.actuator_polynomial_coeffs: list[list[QtWidgets.QDoubleSpinBox]] = (
             []
         )  # Lists of SpinBoxes for polynomial coefficients
-        self.actuator_damping_inputs: list[QtWidgets.QDoubleSpinBox] = []  # SpinBoxes
-        # damping
-        self.actuator_control_widgets: list[QtWidgets.QWidget] = []  # Store all control
-        # widgets per actuator
+        self.actuator_damping_inputs: list[QtWidgets.QDoubleSpinBox] = (
+            []
+        )  # SpinBoxes for damping
+        self.actuator_control_widgets: list[QtWidgets.QWidget] = (
+            []
+        )  # Store all control widgets per actuator
+            []
+        )  # Lists of SpinBoxes for polynomial coefficients
         self.simplified_actuator_mode = False
         self.actuator_filter_input: QtWidgets.QLineEdit | None = None
         self._simplified_notice: QtWidgets.QLabel | None = None
