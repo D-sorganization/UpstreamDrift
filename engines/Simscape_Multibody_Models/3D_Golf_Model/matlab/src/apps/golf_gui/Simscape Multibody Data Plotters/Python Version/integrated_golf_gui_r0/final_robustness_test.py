@@ -59,7 +59,8 @@ def test_data_loading_accuracy():
         deltaq_missing = deltaq.isna().sum().sum()
 
         print(
-            f"Missing values - BASEQ: {baseq_missing}, ZTCFQ: {ztcfq_missing}, DELTAQ: {deltaq_missing}"
+            f"Missing values - BASEQ: {baseq_missing}, "
+            f"ZTCFQ: {ztcfq_missing}, DELTAQ: {deltaq_missing}"
         )
 
         # Check data ranges
@@ -130,7 +131,8 @@ def test_data_consistency():
                 prov1_min, prov1_max = prov1_clubhead_range[col]
                 wiffle_min, wiffle_max = wiffle_clubhead_range[col]
                 print(
-                    f"  {col}: ProV1[{prov1_min:.3f}, {prov1_max:.3f}], Wiffle[{wiffle_min:.3f}, {wiffle_max:.3f}]"
+                    f"  {col}: ProV1[{prov1_min:.3f}, {prov1_max:.3f}], "
+                    f"Wiffle[{wiffle_min:.3f}, {wiffle_max:.3f}]"
                 )
 
         return True
@@ -276,7 +278,8 @@ def generate_final_report():
         print("1. The data loading system is ready for production use")
         print("2. The simplified body part estimation is working as expected")
         print(
-            "3. Consider implementing more sophisticated biomechanical modeling for body parts"
+            "3. Consider implementing more sophisticated biomechanical "
+            "modeling for body parts"
         )
         print("4. The system successfully handles the complex Excel structure")
         print("5. All deprecation warnings have been addressed")

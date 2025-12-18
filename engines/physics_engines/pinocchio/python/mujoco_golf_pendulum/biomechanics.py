@@ -216,7 +216,8 @@ class BiomechanicalAnalyzer:
         # We always use MuJoCo's computed values as they are authoritative
         com_pos = self.data.subtree_com[0].copy()  # World body COM
 
-        # Compute COM velocity manually using Jacobians (subtree_linvel doesn't exist in MuJoCo)
+        # Compute COM velocity manually using Jacobians\
+        # (subtree_linvel doesn't exist in MuJoCo)
         # Compute COM velocity from body velocities
         total_mass = 0.0
         com_vel = np.zeros(3)

@@ -46,7 +46,8 @@ except ImportError:
         """Matplotlib canvas for embedding in PyQt6 (not available in headless mode).
 
         This placeholder class maintains the same signature as the Qt-based MplCanvas
-        to ensure compatibility when Qt is unavailable (e.g., in headless CI environments).
+        to ensure compatibility when Qt is unavailable (e.g., in headless\
+        CI environments).
         """
 
         def __init__(self, width=8, height=6, dpi=100) -> None:
@@ -54,13 +55,16 @@ except ImportError:
 
             Args:
                 width: Figure width in inches (unused, kept for signature compatibility)
-                height: Figure height in inches (unused, kept for signature compatibility)
-                dpi: Dots per inch for rendering (unused, kept for signature compatibility)
+                height: Figure height in inches (unused, kept for signature\
+                    compatibility)
+                dpi: Dots per inch for rendering (unused, kept for signature\
+                    compatibility)
 
             Raises:
                 RuntimeError: Always raised since Qt backend is not available
             """
-            msg = "MplCanvas requires Qt backend which is not available in headless environments"
+            msg = "MplCanvas requires Qt backend which is not available\
+                in headless environments"
             raise RuntimeError(msg)
 
 

@@ -30,10 +30,12 @@ def check_mocapact_installation() -> bool:
         # Check for dist/expert (usually where policies are)
         # Note: MoCapAct usually requires downloading the dataset to use the policies.
         logger.info(
-            "\nNote: To use the full MoCapAct dataset (clips and experts), you need to download it."
+            "\nNote: To use the full MoCapAct dataset (clips and experts), "
+            "you need to download it."
         )
         logger.info(
-            "Run the following python commands to download the dataset (WARNING: Large download):"
+            "Run the following python commands to download the dataset "
+            "(WARNING: Large download):"
         )
         logger.info("  from mocapact.transfer.data import download_dataset")
         logger.info("  download_dataset(target_dir='./data/mocapact')")

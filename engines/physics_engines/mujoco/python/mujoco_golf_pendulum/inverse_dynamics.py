@@ -148,7 +148,7 @@ class InverseDynamicsSolver:
         # Compute Coriolis forces: C(q,q̇)q̇ = Total Bias - Gravity
         coriolis = total_bias - gravity
 
-        # Restore velocity (not strictly needed for result but good for state consistency)
+        # Restore velocity (not strictly needed for result but good for consistency)
         self.data.qvel[:] = qvel_backup
 
         # Inverse dynamics: τ = M q̈ + C q̇ + g - τ_ext
