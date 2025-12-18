@@ -6,6 +6,7 @@ Complete integration of all components with enhanced features and error handling
 
 import logging
 import sys
+import time
 from pathlib import Path
 
 # Configure logging
@@ -26,25 +27,16 @@ except ImportError as e:
     print(f"Error: {e}")
     sys.exit(1)
 
-# Import OpenGL with error handling
-try:
-    import moderngl as mgl
-except ImportError as e:
-    print("❌ ModernGL not found. Please install it with: pip install moderngl")
-    print(f"Error: {e}")
-    sys.exit(1)
+# OpenGL will be imported by the renderer modules as needed
 
 # Import core modules with error handling
 try:
     from golf_camera_system import CameraController, CameraMode, CameraPreset
-    from golf_data_core import (
-        FrameProcessor,
-        MatlabDataLoader,
-        PerformanceStats,
-        RenderConfig,
-    )
-    from golf_gui_application import GolfVisualizerMainWindow, GolfVisualizerWidget
-    from golf_opengl_renderer import OpenGLRenderer
+
+    # golf_data_core imports removed - not used in this file
+    from golf_gui_application import GolfVisualizerMainWindow
+
+    # OpenGLRenderer import removed - not used in this file
 except ImportError as e:
     logger.error(f"Failed to import core modules: {e}")
     print(
@@ -419,7 +411,8 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
                 # Update UI
                 self.playback_panel.update_num_frames(self.gl_widget.num_frames)
                 self.statusBar().showMessage(
-                    f"Loaded {self.gl_widget.num_frames} frames from {len(file_paths)} files"
+                    f"Loaded {self.gl_widget.num_frames} frames "
+                    f"from {len(file_paths)} files"
                 )
 
                 logger.info(
@@ -488,9 +481,9 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
             (10.0, CameraPreset.DEFAULT),
         ]
 
-        for time, preset in presets_tour:
+        for time_val, preset in presets_tour:
             state = self.camera_controller.presets[preset]
-            self.camera_controller.add_keyframe(time, state)
+            self.camera_controller.add_keyframe(time_val, state)
 
         # Start cinematic playback
         self.camera_controller.start_cinematic_playback(duration=10.0, loop=False)
@@ -603,7 +596,6 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
         """Update enhanced status information"""
         if self.gl_widget.frame_processor:
             # Update performance panel with additional info
-            current_time = self.gl_widget.current_frame * 0.001
             self.perf_panel.update_render_time(
                 self.gl_widget.performance_stats.frame_time_ms
             )
@@ -739,7 +731,7 @@ def main():
                 f"An unexpected error occurred:\n{exc_value}\n\n"
                 f"Check golf_visualizer.log for details.",
             )
-        except:
+        except Exception:
             pass
 
     sys.excepthook = handle_exception

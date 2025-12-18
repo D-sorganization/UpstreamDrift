@@ -460,7 +460,8 @@ class GolfSwingAnalyzer:
                 print(f"\n=== Data Debug for {sheet_name} ===")
                 print(f"Number of frames: {len(data)}")
                 print(
-                    f"Time range: {data['time'].min():.3f} to {data['time'].max():.3f} seconds"
+                    f"Time range: {data['time'].min():.3f} to "
+                    f"{data['time'].max():.3f} seconds"
                 )
                 print("Position ranges (meters):")
                 print(f"  X: {data['X'].min():.3f} to {data['X'].max():.3f}")
@@ -486,10 +487,12 @@ class GolfSwingAnalyzer:
                 if total_range < 0.5:
                     print(f"  WARNING: Very small motion range ({total_range:.3f}m)")
                     print(
-                        "    - For comparison, a golf swing typically has 2-4m of club head motion"
+                        "    - For comparison, a golf swing typically has "
+                        "2-4m of club head motion"
                     )
                     print(
-                        "    - This data appears to track a fixed point, not the full swing arc"
+                        "    - This data appears to track a fixed point, "
+                        "not the full swing arc"
                     )
                     print("    - Using standard club length (0.9m) for visualization")
                 else:
@@ -509,10 +512,12 @@ class GolfSwingAnalyzer:
                 y_norms = np.sqrt(data["Yx"] ** 2 + data["Yy"] ** 2 + data["Yz"] ** 2)
                 print("\nOrientation vector validation:")
                 print(
-                    f"  X-axis norm range: {x_norms.min():.3f} to {x_norms.max():.3f} (should be ~1.0)"
+                    f"  X-axis norm range: {x_norms.min():.3f} to "
+                    f"{x_norms.max():.3f} (should be ~1.0)"
                 )
                 print(
-                    f"  Y-axis norm range: {y_norms.min():.3f} to {y_norms.max():.3f} (should be ~1.0)"
+                    f"  Y-axis norm range: {y_norms.min():.3f} to "
+                    f"{y_norms.max():.3f} (should be ~1.0)"
                 )
 
                 print("=" * 40)
@@ -664,13 +669,11 @@ class GolfSwingAnalyzer:
         # the full club length based on typical golf club dimensions
         if len(filtered_data) > 10:
             # Calculate the range of motion to understand the scale
-            positions = np.array(
-                [[row["X"], row["Y"], row["Z"]] for _, row in filtered_data.iterrows()]
-            )
-            position_range = np.max(positions, axis=0) - np.min(positions, axis=0)
 
-            # The position data seems to be tracking a point on the club (likely near the grip)
-            # For a typical golf swing, the club head should move much more than the grip
+            # The position data seems to be tracking a point on the club
+            # (likely near the grip)
+            # For a typical golf swing, the club head should move much more
+            # than the grip
             # Let's estimate the club length based on typical proportions
 
             # Use the user-defined club length if available
@@ -815,7 +818,7 @@ class GolfSwingAnalyzer:
             )
 
             force_scale = 0.01  # Scale for visualization
-            force_end = eval_point + dynamics["force"] * force_scale
+
             self.ax.quiver(
                 eval_point[0],
                 eval_point[1],
@@ -830,7 +833,7 @@ class GolfSwingAnalyzer:
             )
 
             torque_scale = 0.05
-            torque_end = eval_point + dynamics["torque"] * torque_scale
+
             self.ax.quiver(
                 eval_point[0],
                 eval_point[1],
@@ -1028,7 +1031,6 @@ class GolfSwingAnalyzer:
             # Pan the view (adjust limits)
             x_range = self.ax.get_xlim()[1] - self.ax.get_xlim()[0]
             y_range = self.ax.get_ylim()[1] - self.ax.get_ylim()[0]
-            z_range = self.ax.get_zlim()[1] - self.ax.get_zlim()[0]
 
             pan_factor = 0.1
             self.ax.set_xlim(self.ax.get_xlim() - dx * x_range * pan_factor)
@@ -1109,7 +1111,7 @@ class GolfSwingAnalyzer:
 
 def main():
     root = tk.Tk()
-    app = GolfSwingAnalyzer(root)
+    GolfSwingAnalyzer(root)
     root.mainloop()
 
 

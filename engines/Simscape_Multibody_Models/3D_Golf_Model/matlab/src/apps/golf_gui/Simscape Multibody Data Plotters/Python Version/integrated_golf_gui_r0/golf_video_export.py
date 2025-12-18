@@ -182,7 +182,8 @@ class VideoExporter(QObject):
         ]
 
         print(
-            f"   Running ffmpeg with preset '{settings['preset']}', CRF {settings['crf']}"
+            f"   Running ffmpeg with preset '{settings['preset']}', "
+            f"CRF {settings['crf']}"
         )
 
         return subprocess.Popen(
@@ -316,8 +317,7 @@ class VideoExporter(QObject):
         try:
             subprocess.run(
                 ["ffmpeg", "-version"],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                capture_output=True,
                 check=True,
             )
             return True

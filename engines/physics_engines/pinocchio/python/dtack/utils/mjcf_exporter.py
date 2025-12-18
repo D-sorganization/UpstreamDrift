@@ -67,7 +67,8 @@ class MJCFExporter:
         # Worldbody
         lines.append("  <worldbody>")
         lines.append(
-            '    <geom name="floor" type="plane" size="10 10 0.1" rgba="0.8 0.8 0.8 1"/>'
+            '    <geom name="floor" type="plane" size="10 10 0.1" '
+            'rgba="0.8 0.8 0.8 1"/>'
         )
 
         # Root body

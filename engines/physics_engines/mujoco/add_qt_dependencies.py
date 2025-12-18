@@ -84,7 +84,8 @@ def test_qt_environment():
                 "robotics_env",
                 "python",
                 "-c",
-                "from PyQt6 import QtWidgets, QtCore; print('✅ PyQt6 imports successfully')",
+                "from PyQt6 import QtWidgets, QtCore; "
+                "print('✅ PyQt6 imports successfully')",
             ],
             capture_output=True,
             text=True,
@@ -104,7 +105,9 @@ def test_qt_environment():
                 "robotics_env",
                 "python",
                 "-c",
-                "from PyQt6.QtWidgets import QApplication; app = QApplication([]); print('✅ QApplication created successfully')",
+                "from PyQt6.QtWidgets import QApplication; "
+                "app = QApplication([]); "
+                "print('✅ QApplication created successfully')",
             ],
             capture_output=True,
             text=True,

@@ -42,7 +42,7 @@ def test_gui_launch():
     print("🧪 Testing GUI launch...")
 
     try:
-        app = QApplication(sys.argv)
+        QApplication(sys.argv)
 
         # Create main window
         window = GolfVisualizerMainWindow()

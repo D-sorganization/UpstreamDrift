@@ -40,7 +40,8 @@ except ImportError:
             def __getattr__(self, name: str) -> typing.Any:  # noqa: ANN401
                 """Raise ImportError on any attribute access."""
                 msg = (
-                    f"Pinocchio ReferenceFrame is required for '{name}', but is not installed. "
+                    f"Pinocchio ReferenceFrame is required for '{name}', "
+                    "but is not installed. "
                     "Install with: pip install pin"
                 )
                 raise ImportError(msg)

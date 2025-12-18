@@ -35,7 +35,8 @@ class SafeEvaluator:
 
     - ast.Expression: Root node for 'eval' mode.
     - ast.BinOp, ast.UnaryOp: Basic arithmetic structure.
-    - ast.Name, ast.Load: Safe variable and function access (validated against allowed lists).
+    - ast.Name, ast.Load: Safe variable and function access
+      (validated against allowed lists).
     - ast.Add, ast.Sub, ast.Mult, ast.Div, ast.Pow, ast.Mod: Arithmetic operators.
     - ast.USub, ast.UAdd: Unary operators (negation).
     - ast.Call: Function calls (strictly validated against allowed functions).
@@ -98,7 +99,8 @@ class SafeEvaluator:
                     ):
                         raise ValueError(f"Unknown variable '{node.id}'")
                 elif not isinstance(node.ctx, ast.Load):
-                    # Should be caught by node type check (only Load is in ALLOWED_NODES usually)
+                    # Should be caught by node type check
+                    # (only Load is in ALLOWED_NODES usually)
                     # But explicitly:
                     raise ValueError("Variable assignment/store is not allowed")
 

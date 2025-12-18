@@ -5,9 +5,10 @@ import sys
 from pathlib import Path
 from urllib.parse import unquote
 
+
 def check_links(root_dir: Path) -> list[str]:
     errors = []
-    link_pattern = re.compile(r'\[([^\]]*)\]\(([^)]+)\)')
+    link_pattern = re.compile(r"\[([^\]]*)\]\(([^)]+)\)")
 
     for md_file in root_dir.rglob("*.md"):
         # Skip node_modules or similar if any
@@ -21,7 +22,7 @@ def check_links(root_dir: Path) -> list[str]:
             continue
 
         for match in link_pattern.finditer(content):
-            text = match.group(1)
+            _ = match.group(1)  # text
             link = match.group(2)
 
             # Ignore external links
@@ -30,17 +31,17 @@ def check_links(root_dir: Path) -> list[str]:
 
             # Handle anchor links within file (ignored above if strictly #)
             # but if it is filename#anchor
-            anchor = None
+            _ = None  # anchor
             if "#" in link:
                 parts = link.split("#", 1)
                 link_path = parts[0]
-                anchor = parts[1]
+                _ = parts[1]  # anchor
             else:
                 link_path = link
 
             if not link_path:
-                 # Just an anchor
-                 continue
+                # Just an anchor
+                continue
 
             # Resolve path
             # link is relative to md_file
@@ -56,9 +57,10 @@ def check_links(root_dir: Path) -> list[str]:
                 decoded_link = unquote(link_path)
                 target_decoded = (md_file.parent / decoded_link).resolve()
                 if not target_decoded.exists():
-                     errors.append(f"Broken link in {md_file}: {link} -> {target}")
+                    errors.append(f"Broken link in {md_file}: {link} -> {target}")
 
     return errors
+
 
 if __name__ == "__main__":
     root = Path(".")
@@ -67,7 +69,8 @@ if __name__ == "__main__":
         print("Found broken links:")
         for e in errors:
             print(e)
-        # We don't exit 1 to not fail the plan if there are minor broken links we can't fix easily
+        # We don't exit 1 to not fail the plan if there are minor broken links we
+        # can't fix easily
         sys.exit(0)
     else:
         print("No broken links found.")

@@ -20,7 +20,8 @@ from double_pendulum_model.physics.triple_pendulum import (  # noqa: E402
 
 def test_double_pendulum_physics_values() -> None:
     """
-    Verify mass matrix and coriolis terms against analytical derivation for specific parameters.
+        Verify mass matrix and coriolis terms against analytical derivation for
+    specific parameters.
     Parameters:
     m1=1, l1=1, lc1=0.5, Ic1=1/12 -> I_proximal_1 = 1/3
     m2=1, l2=1, lc2=0.5, Ic2=1/12 -> I_proximal_2 = 1/3
