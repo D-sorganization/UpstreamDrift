@@ -1902,6 +1902,7 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             coeff_spinbox.setSingleStep(0.1)
             coeff_spinbox.setDecimals(4)
             coeff_spinbox.setValue(0.0)
+
             def _on_coeff_change(val, idx=i, act_idx=actuator_index):
                 self.on_polynomial_coeff_changed(act_idx, idx, val)
 
