@@ -670,7 +670,6 @@ class GolfSwingAnalyzer:
         if len(filtered_data) > 10:
             # Calculate the range of motion to understand the scale
 
-
             # The position data seems to be tracking a point on the club
             # (likely near the grip)
             # For a typical golf swing, the club head should move much more
@@ -1032,7 +1031,6 @@ class GolfSwingAnalyzer:
             # Pan the view (adjust limits)
             x_range = self.ax.get_xlim()[1] - self.ax.get_xlim()[0]
             y_range = self.ax.get_ylim()[1] - self.ax.get_ylim()[0]
-
 
             pan_factor = 0.1
             self.ax.set_xlim(self.ax.get_xlim() - dx * x_range * pan_factor)

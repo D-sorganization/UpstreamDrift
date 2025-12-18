@@ -67,7 +67,7 @@ class PerformanceOptionsDialog:
         self.simscape_info = ttk.Label(
             main_frame,
             text="✅ Provides ~5% speed improvement\n"
-                 "   Reduces memory usage during simulation",
+            "   Reduces memory usage during simulation",
             foreground="green",
         )
         self.simscape_info.grid(
@@ -122,13 +122,13 @@ class PerformanceOptionsDialog:
         if self.simscape_var.get():
             self.simscape_info.config(
                 text="✅ Provides ~5% speed improvement\n"
-                     "   Reduces memory usage during simulation",
+                "   Reduces memory usage during simulation",
                 foreground="green",
             )
         else:
             self.simscape_info.config(
                 text="⚠️  Simscape Results Explorer enabled\n"
-                     "   May slow down simulation",
+                "   May slow down simulation",
                 foreground="orange",
             )
 

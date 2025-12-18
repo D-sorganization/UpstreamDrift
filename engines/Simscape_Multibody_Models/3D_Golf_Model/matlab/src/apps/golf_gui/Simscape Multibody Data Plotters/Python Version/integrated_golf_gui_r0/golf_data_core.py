@@ -279,8 +279,7 @@ class MatlabDataLoader:
         # Fallback to largest variable (likely the data table)
         largest_var = max(user_vars.keys(), key=lambda k: user_vars[k].nbytes)
         warnings.warn(
-            f"Using fallback variable '{largest_var}' for {dataset_name}",
-            stacklevel=2
+            f"Using fallback variable '{largest_var}' for {dataset_name}", stacklevel=2
         )
         return largest_var
 
@@ -345,14 +344,14 @@ class MatlabDataLoader:
                     processed_vectors.append(np.zeros(3, dtype=np.float32))
                     warnings.warn(
                         f"Invalid vector at row {i} in {col_name}, using zeros",
-                        stacklevel=2
+                        stacklevel=2,
                     )
 
             except Exception as e:
                 processed_vectors.append(np.zeros(3, dtype=np.float32))
                 warnings.warn(
                     f"Error processing vector at row {i} in {col_name}: {e}",
-                    stacklevel=2
+                    stacklevel=2,
                 )
 
         return processed_vectors
@@ -380,15 +379,14 @@ class MatlabDataLoader:
                 else:
                     warnings.warn(
                         f"Dimension mismatch in {col_name}, padding with zeros",
-                        stacklevel=2
+                        stacklevel=2,
                     )
                     result = np.zeros(num_rows, dtype=np.float32)
                     result[: min(len(flattened), num_rows)] = flattened[:num_rows]
                     return result
         except Exception as e:
             warnings.warn(
-                f"Error processing scalar column {col_name}: {e}",
-                stacklevel=2
+                f"Error processing scalar column {col_name}: {e}", stacklevel=2
             )
             return np.zeros(num_rows, dtype=np.float32)
 
@@ -416,8 +414,7 @@ class MatlabDataLoader:
 
         if missing_columns:
             warnings.warn(
-                f"Missing columns in {dataset_name}: {missing_columns}",
-                stacklevel=2
+                f"Missing columns in {dataset_name}: {missing_columns}", stacklevel=2
             )
 
         if len(df) == 0:
