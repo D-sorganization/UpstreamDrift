@@ -1418,7 +1418,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
         """Create advanced controls for all actuators with logical grouping.
 
         This method creates control widgets for each actuator in the current model.
-        The actuator_index corresponds directly to the model's actuator indices (0 to model.nu-1).
+        The actuator_index corresponds directly to the model's actuator indices\
+        (0 to model.nu-1).
         """
         groups = self._group_actuators(actuator_names)
         actuator_index = 0
@@ -1655,7 +1656,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
             coeff_spinbox.setDecimals(4)
             coeff_spinbox.setValue(0.0)
             coeff_spinbox.valueChanged.connect(
-                lambda val, idx=i, act_idx=actuator_index: self.on_polynomial_coeff_changed(
+                lambda val, idx=i, act_idx=actuator_index: \
+                    self.on_polynomial_coeff_changed(
                     act_idx,
                     idx,
                     val,
@@ -2174,7 +2176,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
             self.sim_widget.set_background_color(sky_color=rgba)
             # Update button color
             self.sky_color_btn.setStyleSheet(
-                f"background-color: rgb({color.red()}, {color.green()}, {color.blue()});",
+                f"background-color: rgb({color.red()}, {color.green()}, \
+                    {color.blue()});",
             )
 
     def on_ground_color_clicked(self) -> None:
@@ -2199,7 +2202,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
             self.sim_widget.set_background_color(ground_color=rgba)
             # Update button color
             self.ground_color_btn.setStyleSheet(
-                f"background-color: rgb({color.red()}, {color.green()}, {color.blue()});",
+                f"background-color: rgb({color.red()}, {color.green()}, \
+                    {color.blue()});",
             )
 
     def on_reset_background(self) -> None:
@@ -2323,7 +2327,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
                 f"Recording: {duration:.2f}s ({num_frames} frames)",
             )
             self.recording_label.setStyleSheet(
-                "background-color: #d62728; color: white; font-weight: bold; padding: 5px;",
+                "background-color: #d62728; color: white; \
+                    font-weight: bold; padding: 5px;",
             )
         else:
             num_frames = recorder.get_num_frames()
@@ -2333,7 +2338,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
                     f"Stopped: {duration:.2f}s ({num_frames} frames)",
                 )
                 self.recording_label.setStyleSheet(
-                    "background-color: #ff7f0e; color: white; font-weight: bold; padding: 5px;",
+                    "background-color: #ff7f0e; color: white; \
+                        font-weight: bold; padding: 5px;",
                 )
             else:
                 self.recording_label.setText("Not recording")
