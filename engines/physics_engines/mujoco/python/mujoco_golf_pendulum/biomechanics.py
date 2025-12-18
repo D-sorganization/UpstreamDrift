@@ -197,7 +197,10 @@ class BiomechanicalAnalyzer:
             vel = jacp @ self.data.qvel
         else:
             # Fallback (should not happen if __init__ succeeded)
-            vel = np.zeros(3)
+            raise RuntimeError(
+                "Club head velocity Jacobian buffers are not initialized; "
+                "cannot compute club head velocity."
+            )
         speed = float(np.linalg.norm(vel))
 
         return pos, vel, speed
