@@ -1655,12 +1655,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow):
             coeff_spinbox.setDecimals(4)
             coeff_spinbox.setValue(0.0)
             coeff_spinbox.valueChanged.connect(
-                lambda val,
-                idx=i,
-                act_idx=actuator_index: self.on_polynomial_coeff_changed(
-                    act_idx,
-                    idx,
-                    val,
+                lambda val, idx=i, act_idx=actuator_index: (
+                    self.on_polynomial_coeff_changed(act_idx, idx, val)
                 ),
             )
             coeff_spinboxes.append(coeff_spinbox)
