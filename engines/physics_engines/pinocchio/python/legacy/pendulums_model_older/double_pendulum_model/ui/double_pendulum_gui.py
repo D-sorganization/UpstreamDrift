@@ -16,12 +16,14 @@ from __future__ import annotations
 
 import contextlib
 import csv
+import logging
 import math
 import tkinter as tk
 from dataclasses import dataclass
 from datetime import datetime
 
 import numpy as np
+import numpy.typing as npt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 
@@ -575,7 +577,7 @@ class DoublePendulumApp:
             user_inputs = self._read_inputs()
             # Calculate upper segment inertia about COM
             # For a uniform rod: I = (1/12) * m * L^2 (COM at L/2)
-            # When COM ratio != 0.5, we use an approximation that scales with the COM position
+            # When COM ratio != 0.5, we use approximation that scales with COM position
             # This assumes a mass distribution consistent with the specified COM ratio
             com_ratio = user_inputs.upper_com_ratio
             if abs(com_ratio - 0.5) < 0.01:
@@ -588,7 +590,8 @@ class DoublePendulumApp:
             else:
                 # For non-uniform distribution, use an approximation
                 # Scale the uniform rod inertia based on how far COM is from center
-                # This is an approximation - exact value depends on actual mass distribution
+                # This is approximation - exact value depends on actual mass
+                # distribution
                 uniform_inertia = (
                     (1.0 / 12.0)
                     * user_inputs.upper_mass_kg
@@ -652,7 +655,7 @@ class DoublePendulumApp:
                 )
 
                 if angles_changed:
-                    # Pause simulation when angles change to maintain physical consistency
+                    # Pause simulation when angles change to maintain consistency
                     self.running = False
 
             # Only reset velocities if angles changed or if this is initial setup
@@ -743,7 +746,8 @@ class DoublePendulumApp:
         self.torque_label.config(
             text=(
                 f"Applied (Nm): shoulder={torques[0]:.2f}, wrist={torques[1]:.2f}\n"
-                f"Gravity: {breakdown.gravitational[0]:.2f}, {breakdown.gravitational[1]:.2f}\n"
+                f"Gravity: {breakdown.gravitational[0]:.2f}, "
+                f"{breakdown.gravitational[1]:.2f}\n"
                 f"Time: {self.time:.2f}s"
             )
         )

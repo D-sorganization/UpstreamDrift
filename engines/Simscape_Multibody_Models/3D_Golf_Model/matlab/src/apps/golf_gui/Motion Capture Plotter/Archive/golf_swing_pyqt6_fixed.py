@@ -327,7 +327,8 @@ class GolfSwingAnalyzerPyQt6(QMainWindow):
                 print(f"\n=== Data Debug for {sheet_name} ===")
                 print(f"Number of frames: {len(data)}")
                 print(
-                    f"Time range: {data['time'].min():.3f} to {data['time'].max():.3f} seconds"
+                    f"Time range: {data['time'].min():.3f} to "
+                    f"{data['time'].max():.3f} seconds"
                 )
                 print("Position ranges (meters):")
                 print(f"  X: {data['X'].min():.3f} to {data['X'].max():.3f}")
@@ -351,13 +352,16 @@ class GolfSwingAnalyzerPyQt6(QMainWindow):
                 print("    - Not the full club head motion")
                 print(f"  WARNING: Very small motion range ({pos_range:.3f}m)")
                 print(
-                    "    - For comparison, a golf swing typically has 2-4m of club head motion"
+                    "    - For comparison, a golf swing typically has "
+                    "2-4m of club head motion"
                 )
                 print(
-                    "    - This data appears to track a fixed point, not the full swing arc"
+                    "    - This data appears to track a fixed point, "
+                    "not the full swing arc"
                 )
                 print(
-                    "    - Using standard club length and motion scaling for visualization"
+                    "    - Using standard club length and motion scaling "
+                    "for visualization"
                 )
 
                 print("Orientation vector ranges:")
@@ -373,10 +377,12 @@ class GolfSwingAnalyzerPyQt6(QMainWindow):
                 y_norms = np.sqrt(data["Yx"] ** 2 + data["Yy"] ** 2 + data["Yz"] ** 2)
                 print("Orientation vector validation:")
                 print(
-                    f"  X-axis norm range: {x_norms.min():.3f} to {x_norms.max():.3f} (should be ~1.0)"
+                    f"  X-axis norm range: {x_norms.min():.3f} to "
+                    f"{x_norms.max():.3f} (should be ~1.0)"
                 )
                 print(
-                    f"  Y-axis norm range: {y_norms.min():.3f} to {y_norms.max():.3f} (should be ~1.0)"
+                    f"  Y-axis norm range: {y_norms.min():.3f} to "
+                    f"{y_norms.max():.3f} (should be ~1.0)"
                 )
                 print("=" * 40)
 

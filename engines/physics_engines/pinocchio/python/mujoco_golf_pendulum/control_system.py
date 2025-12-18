@@ -46,7 +46,8 @@ class ActuatorControl:
         Args:
             control_type: Type of control input
             constant_value: Constant torque value (for CONSTANT type)
-            polynomial_coeffs: Coefficients for 6th order polynomial [c0, c1, c2, c3, c4, c5, c6]
+            polynomial_coeffs: Coefficients for 6th order polynomial\
+                [c0, c1, c2, c3, c4, c5, c6]
                               where output = c0 + c1*t + c2*t^2 + ... + c6*t^6
             damping: Damping coefficient (applied as -damping * velocity)
             sine_amplitude: Amplitude for sine wave control
@@ -65,7 +66,8 @@ class ActuatorControl:
         else:
             if len(polynomial_coeffs) != POLYNOMIAL_COEFFS_COUNT:
                 msg = (
-                    f"Polynomial coefficients must have length {POLYNOMIAL_COEFFS_COUNT} "
+                    f"Polynomial coefficients must have length \
+                        {POLYNOMIAL_COEFFS_COUNT} "
                     f"for {POLYNOMIAL_ORDER}th order polynomial"
                 )
                 raise ValueError(
@@ -175,7 +177,8 @@ class ControlSystem:
 
         Args:
             actuator_index: Index of actuator
-            coeffs: Array of POLYNOMIAL_COEFFS_COUNT coefficients [c0, c1, c2, c3, c4, c5, c6]
+            coeffs: Array of POLYNOMIAL_COEFFS_COUNT coefficients\
+                [c0, c1, c2, c3, c4, c5, c6]
         """
         if 0 <= actuator_index < self.num_actuators:
             self.actuator_controls[actuator_index].set_polynomial_coeffs(coeffs)

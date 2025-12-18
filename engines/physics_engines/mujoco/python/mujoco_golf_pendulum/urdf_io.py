@@ -741,7 +741,7 @@ class URDFImporter:
             ixz = inertia_elem.get("ixz", "0.0")
             iyz = inertia_elem.get("iyz", "0.0")
 
-            # Use fullinertia if off-diagonal terms are present, otherwise use diaginertia
+            # Use fullinertia if off-diagonal terms present, else use diaginertia
             has_off_diagonal = (
                 float(ixy) != 0.0 or float(ixz) != 0.0 or float(iyz) != 0.0
             )
@@ -850,8 +850,8 @@ class URDFImporter:
             # Default to hinge for unknown types
             joint_elem.set("type", "hinge")
 
-        # Note: Joint origin is handled in _build_mujoco_body where it sets body position
-        # Joint pos attribute is not used here as URDF joint origin specifies body position
+        # Note: Joint origin is handled in _build_mujoco_body (sets body position)
+        # Joint pos attribute not used here as URDF joint origin specifies body pos
 
         axis = joint.find("axis")
         if axis is not None:

@@ -85,7 +85,7 @@ class TestPhysicalConstants:
         """Test speed of light constant."""
         # Exact by SI definition
         assert SPEED_OF_LIGHT_M_S == 299792458
-        assert isinstance(SPEED_OF_LIGHT_M_S, (int, float))
+        assert isinstance(SPEED_OF_LIGHT_M_S, int | float)
 
     def test_air_density_value(self) -> None:
         """Test air density at sea level."""
@@ -232,7 +232,7 @@ class TestConstantTypes:
             HUMIDITY_PERCENT,
         ]
         for constant in constants:
-            assert isinstance(constant, (int, float))
+            assert isinstance(constant, int | float)
 
     def test_all_constants_are_finite(self) -> None:
         """Test that all constants are finite (not inf or nan)."""

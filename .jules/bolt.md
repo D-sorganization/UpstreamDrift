@@ -5,5 +5,5 @@
 **Action:** Always use `widget.blockSignals(True)` before programmatically updating a synchronized widget to break the feedback loop.
 
 ## 2025-02-23 - MuJoCo Python Bindings API overhead
-**Learning:** The `mj_jacBody` function has different signatures in different MuJoCo versions. Using `try-except` to detect this on every frame adds significant overhead (~30% in tight loops), primarily from exception handling; allocation overhead can be reduced by pre-allocating buffers and is not inherent to the try-except pattern itself. Checking the API once at initialization and pre-allocating buffers (where safe) provides a measurable speedup.
+**Learning:** The `mj_jacBody` function has different signatures in different MuJoCo versions. Using `try-except` to detect this on every frame adds significant overhead (~30% in tight loops) due to exception handling and allocation. Checking the API once at initialization and pre-allocating buffers (where safe) provides a measurable speedup.
 **Action:** Detect MuJoCo API capabilities in `__init__` and use the optimal path without runtime checks. Pre-allocate NumPy arrays for MuJoCo C-API calls when thread safety allows.

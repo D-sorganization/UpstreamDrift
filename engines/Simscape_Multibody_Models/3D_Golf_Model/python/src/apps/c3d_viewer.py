@@ -422,7 +422,8 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         n_dim, n_points, n_frames = points.shape
         if n_dim != 4:
             raise ValueError(
-                f"Expected 4 dimensions for marker data (x, y, z, residual), got {n_dim}"
+                f"Expected 4 dimensions for marker data (x, y, z, residual), "
+                f"got {n_dim}"
             )
 
         labels_points = c3d_obj["parameters"]["POINT"]["LABELS"]["value"]
@@ -493,7 +494,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             for key, param in c3d_obj["parameters"]["TRIAL"].items():
                 if "value" in param:
                     value = param["value"]
-                    if isinstance(value, (list, tuple, np.ndarray)):
+                    if isinstance(value, list | tuple | np.ndarray):
                         v = ", ".join(str(x) for x in value)
                     else:
                         v = str(value)

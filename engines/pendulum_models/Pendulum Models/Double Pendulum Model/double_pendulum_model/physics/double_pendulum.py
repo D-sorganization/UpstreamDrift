@@ -267,7 +267,8 @@ class DoublePendulumDynamics:
         determinant = mass[0][0] * mass[1][1] - mass[0][1] * mass[1][0]
         if abs(determinant) <= MASS_MATRIX_SINGULAR_TOLERANCE:
             raise ZeroDivisionError(
-                "Mass matrix determinant is too close to zero; check pendulum parameters"
+                "Mass matrix determinant is too close to zero; "
+                "check pendulum parameters"
             )
         inv_m = (
             (mass[1][1] / determinant, -mass[0][1] / determinant),
@@ -389,9 +390,7 @@ class DoublePendulumDynamics:
         )
 
 
-def compile_forcing_functions(
-    shoulder_expression: str, wrist_expression: str
-) -> tuple[
+def compile_forcing_functions(shoulder_expression: str, wrist_expression: str) -> tuple[
     Callable[[float, DoublePendulumState], float],
     Callable[[float, DoublePendulumState], float],
 ]:
