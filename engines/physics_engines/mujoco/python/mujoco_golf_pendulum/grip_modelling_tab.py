@@ -291,7 +291,9 @@ class GripModellingTab(QtWidgets.QWidget):
         for i in range(model.njnt):
             self._add_joint_control_row(i, model)
 
-    def _add_joint_control_row(self, i: int, model: mujoco.MjModel) -> None:  # noqa: PLR0915
+    def _add_joint_control_row(
+        self, i: int, model: mujoco.MjModel
+    ) -> None:  # noqa: PLR0915
         """Create a control row for a single joint."""
         if self.sim_widget.data is None:
             return
@@ -337,18 +339,14 @@ class GripModellingTab(QtWidgets.QWidget):
 
         # Connect
         slider.valueChanged.connect(
-            lambda v,
-            s=spin,
-            amin=range_min,
-            amax=range_max,
-            idx=qpos_adr: self._on_slider(v, s, amin, amax, idx)
+            lambda v, s=spin, amin=range_min, amax=range_max, idx=qpos_adr: self._on_slider(
+                v, s, amin, amax, idx
+            )
         )
         spin.valueChanged.connect(
-            lambda v,
-            s=slider,
-            amin=range_min,
-            amax=range_max,
-            idx=qpos_adr: self._on_spin(v, s, amin, amax, idx)
+            lambda v, s=slider, amin=range_min, amax=range_max, idx=qpos_adr: self._on_spin(
+                v, s, amin, amax, idx
+            )
         )
 
         row_layout.addWidget(slider)

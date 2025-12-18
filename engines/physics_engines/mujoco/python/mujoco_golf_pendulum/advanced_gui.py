@@ -261,13 +261,21 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.actuator_groups: list[QtWidgets.QGroupBox] = []
 
         # Advanced control widgets
-        self.actuator_control_types: list[QtWidgets.QComboBox] = []  # ComboBoxes for control type
-        self.actuator_constant_inputs: list[QtWidgets.QDoubleSpinBox] = []  # SpinBoxes for constant values
+        self.actuator_control_types: list[QtWidgets.QComboBox] = (
+            []
+        )  # ComboBoxes for control type
+        self.actuator_constant_inputs: list[QtWidgets.QDoubleSpinBox] = (
+            []
+        )  # SpinBoxes for constant values
         self.actuator_polynomial_coeffs: list[list[QtWidgets.QDoubleSpinBox]] = (
             []
         )  # Lists of SpinBoxes for polynomial coefficients
-        self.actuator_damping_inputs: list[QtWidgets.QDoubleSpinBox] = []  # SpinBoxes for damping
-        self.actuator_control_widgets: list[QtWidgets.QWidget] = []  # Store all control widgets per actuator
+        self.actuator_damping_inputs: list[QtWidgets.QDoubleSpinBox] = (
+            []
+        )  # SpinBoxes for damping
+        self.actuator_control_widgets: list[QtWidgets.QWidget] = (
+            []
+        )  # Store all control widgets per actuator
         self.simplified_actuator_mode = False
         self.actuator_filter_input: QtWidgets.QLineEdit | None = None
         self._simplified_notice: QtWidgets.QLabel | None = None
@@ -1775,10 +1783,7 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         detail_btn = QtWidgets.QPushButton("Edit…")
         detail_btn.setToolTip("Open detailed control options for this actuator")
         detail_btn.clicked.connect(
-            lambda *,
-            i=actuator_index,
-            name=actuator_name,
-            s=slider: self.open_actuator_detail_dialog(
+            lambda *, i=actuator_index, name=actuator_name, s=slider: self.open_actuator_detail_dialog(
                 i,
                 name,
                 slider=s,
@@ -1900,9 +1905,7 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             coeff_spinbox.setDecimals(4)
             coeff_spinbox.setValue(0.0)
             coeff_spinbox.valueChanged.connect(
-                lambda val,
-                idx=i,
-                act_idx=actuator_index: self.on_polynomial_coeff_changed(
+                lambda val, idx=i, act_idx=actuator_index: self.on_polynomial_coeff_changed(
                     act_idx,
                     idx,
                     val,
@@ -3311,11 +3314,9 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             slider.setValue(slider_val)
 
             slider.valueChanged.connect(
-                lambda v,
-                n=name,
-                mn=min_val,
-                mx=max_val,
-                lbl=val_label: self._on_joint_slider_changed(n, v, mn, mx, lbl)
+                lambda v, n=name, mn=min_val, mx=max_val, lbl=val_label: self._on_joint_slider_changed(
+                    n, v, mn, mx, lbl
+                )
             )
 
             layout.addWidget(slider)
@@ -3327,12 +3328,9 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             spin.setValue(current_val)
 
             spin.valueChanged.connect(
-                lambda v,
-                n=name,
-                mn=min_val,
-                mx=max_val,
-                sl=slider,
-                lbl=val_label: self._on_joint_spin_changed(n, v, mn, mx, sl, lbl)
+                lambda v, n=name, mn=min_val, mx=max_val, sl=slider, lbl=val_label: self._on_joint_spin_changed(
+                    n, v, mn, mx, sl, lbl
+                )
             )
 
             layout.addWidget(spin)
