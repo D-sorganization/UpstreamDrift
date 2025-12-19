@@ -467,7 +467,9 @@ class OutputManager:
 
 
 # Convenience functions for backward compatibility
-def save_results(results: Any, filename: str, format_type: str = "csv", engine: str = "mujoco") -> str:
+def save_results(
+    results: Any, filename: str, format_type: str = "csv", engine: str = "mujoco"
+) -> str:
     """Convenience function for saving results."""
     manager = OutputManager()
     return manager.save_simulation_results(
@@ -475,7 +477,9 @@ def save_results(results: Any, filename: str, format_type: str = "csv", engine: 
     )
 
 
-def load_results(filename: str, format_type: str = "csv", engine: str = "mujoco") -> Any:
+def load_results(
+    filename: str, format_type: str = "csv", engine: str = "mujoco"
+) -> Any:
     """Convenience function for loading results."""
     manager = OutputManager()
     return manager.load_simulation_results(filename, OutputFormat(format_type), engine)
