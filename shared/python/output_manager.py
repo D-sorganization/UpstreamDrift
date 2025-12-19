@@ -203,7 +203,7 @@ class OutputManager:
                 }
                 # Use binary mode for pickle - ignore type checking for this line
                 with open(file_path, "wb") as f:  # type: ignore[assignment,arg-type]
-                    pickle.dump(output_data, f)  # type: ignore[arg-type]
+                    pickle.dump(output_data, f)
 
             elif format_type == OutputFormat.PARQUET:
                 if isinstance(results, pd.DataFrame):
@@ -472,9 +472,10 @@ def save_results(
 ) -> str:
     """Convenience function for saving results."""
     manager = OutputManager()
-    return manager.save_simulation_results(
+    path = manager.save_simulation_results(
         results, filename, OutputFormat(format_type), engine
     )
+    return str(path)
 
 
 def load_results(
