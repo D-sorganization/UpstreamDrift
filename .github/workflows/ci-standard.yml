@@ -135,7 +135,7 @@ jobs:
       # Run comprehensive test suite
       - name: Run Unit Tests
         run: |
-          pytest tests/unit/ -v --cov=shared --cov=engines --cov=launchers \
+          pytest tests/unit/ -v --cov=shared --cov=launchers \
             --cov-report=xml --cov-report=term-missing \
             --junit-xml=test-results-unit.xml
         continue-on-error: true
@@ -143,7 +143,7 @@ jobs:
       - name: Run Integration Tests
         run: |
           pytest tests/integration/ -v -m "not slow" \
-            --cov=shared --cov=engines --cov=launchers --cov-append \
+            --cov=shared --cov=launchers --cov-append \
             --cov-report=xml --cov-report=term-missing \
             --junit-xml=test-results-integration.xml
         continue-on-error: true

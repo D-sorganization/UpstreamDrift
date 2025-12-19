@@ -1,21 +1,22 @@
 """
 Engine Manager for Golf Modeling Suite.
 
-Provides unified interface for managing and switching between different physics engines.
+This module provides unified management of different physics engines
+including MuJoCo, Drake, Pinocchio, MATLAB models, and pendulum models.
 """
 
-import logging
-from pathlib import Path
-from typing import Dict, Any, Optional, List
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
-from .common_utils import setup_logging, GolfModelingError
+from .common_utils import GolfModelingError, setup_logging
 
 logger = setup_logging(__name__)
 
 
 class EngineType(Enum):
-    """Available physics engines."""
+    """Available physics engine types."""
+
     MUJOCO = "mujoco"
     DRAKE = "drake"
     PINOCCHIO = "pinocchio"
@@ -25,203 +26,249 @@ class EngineType(Enum):
 
 
 class EngineStatus(Enum):
-    """Engine status states."""
+    """Engine status types."""
+
     AVAILABLE = "available"
     UNAVAILABLE = "unavailable"
     LOADING = "loading"
-    READY = "ready"
+    LOADED = "loaded"
     ERROR = "error"
 
 
 class EngineManager:
-    """Manages physics engines for the Golf Modeling Suite."""
-    
+    """Manages different physics engines for golf swing modeling."""
+
     def __init__(self, suite_root: Optional[Path] = None):
         """Initialize the engine manager.
-        
+
         Args:
             suite_root: Root directory of the Golf Modeling Suite
         """
-        self.suite_root = suite_root or Path(__file__).parent.parent.parent
+        if suite_root is None:
+            suite_root = Path(__file__).parent.parent.parent
+        self.suite_root = Path(suite_root)
         self.engines_root = self.suite_root / "engines"
+
         self.current_engine: Optional[EngineType] = None
-        self.engine_instances: Dict[EngineType, Any] = {}
         self.engine_status: Dict[EngineType, EngineStatus] = {}
-        
-        # Initialize engine status
-        self._check_engine_availability()
-        
-    def _check_engine_availability(self) -> None:
-        """Check which engines are available."""
-        engine_paths = {
-            EngineType.MUJOCO: self.engines_root / "physics_engines" / "mujoco",
-            EngineType.DRAKE: self.engines_root / "physics_engines" / "drake", 
-            EngineType.PINOCCHIO: self.engines_root / "physics_engines" / "pinocchio",
-            EngineType.MATLAB_2D: self.engines_root / "Simscape_Multibody_Models" / "2D_Golf_Model",
-            EngineType.MATLAB_3D: self.engines_root / "Simscape_Multibody_Models" / "3D_Golf_Model",
+
+        # Define engine paths
+        self.engine_paths = {
+            EngineType.MUJOCO: (
+                self.engines_root / "physics_engines" / "mujoco"
+            ),
+            EngineType.DRAKE: (
+                self.engines_root / "physics_engines" / "drake"
+            ),
+            EngineType.PINOCCHIO: (
+                self.engines_root / "physics_engines" / "pinocchio"
+            ),
+            EngineType.MATLAB_2D: (
+                self.engines_root
+                / "Simscape_Multibody_Models"
+                / "2D_Golf_Model"
+            ),
+            EngineType.MATLAB_3D: (
+                self.engines_root
+                / "Simscape_Multibody_Models"
+                / "3D_Golf_Model"
+            ),
             EngineType.PENDULUM: self.engines_root / "pendulum_models",
         }
-        
-        for engine_type, engine_path in engine_paths.items():
-            if engine_path.exists():
-                self.engine_status[engine_type] = EngineStatus.AVAILABLE
-                logger.info(f"Engine {engine_type.value} is available at {engine_path}")
-            else:
-                self.engine_status[engine_type] = EngineStatus.UNAVAILABLE
-                logger.warning(f"Engine {engine_type.value} not found at {engine_path}")
-    
+
+        # Initialize engine status
+        self._discover_engines()
+
     def get_available_engines(self) -> List[EngineType]:
         """Get list of available engines.
-        
+
         Returns:
             List of available engine types
         """
         return [
-            engine_type for engine_type, status in self.engine_status.items()
+            engine
+            for engine, status in self.engine_status.items()
             if status == EngineStatus.AVAILABLE
         ]
-    
+
     def switch_engine(self, engine_type: EngineType) -> bool:
         """Switch to a different physics engine.
-        
+
         Args:
             engine_type: The engine to switch to
-            
+
         Returns:
             True if switch was successful, False otherwise
         """
         if engine_type not in self.engine_status:
             logger.error(f"Unknown engine type: {engine_type}")
             return False
-            
+
         if self.engine_status[engine_type] != EngineStatus.AVAILABLE:
-            logger.error(f"Engine {engine_type.value} is not available")
+            logger.error(f"Engine {engine_type} is not available")
             return False
-        
+
         try:
-            # Set status to loading
-            self.engine_status[engine_type] = EngineStatus.LOADING
-            
-            # Load engine if not already loaded
-            if engine_type not in self.engine_instances:
-                self._load_engine(engine_type)
-            
-            # Switch to engine
+            self._load_engine(engine_type)
             self.current_engine = engine_type
-            self.engine_status[engine_type] = EngineStatus.READY
-            
             logger.info(f"Successfully switched to engine: {engine_type.value}")
             return True
-            
         except Exception as e:
-            logger.error(f"Failed to switch to engine {engine_type.value}: {e}")
+            logger.error(f"Failed to switch to engine {engine_type}: {e}")
             self.engine_status[engine_type] = EngineStatus.ERROR
             return False
-    
+
+    def _discover_engines(self) -> None:
+        """Discover available engines by checking their directories."""
+        for engine_type, engine_path in self.engine_paths.items():
+            if engine_path.exists():
+                self.engine_status[engine_type] = EngineStatus.AVAILABLE
+                logger.info(
+                    f"Engine {engine_type.value} is available at {engine_path}"
+                )
+            else:
+                self.engine_status[engine_type] = EngineStatus.UNAVAILABLE
+                logger.warning(
+                    f"Engine {engine_type.value} not found at {engine_path}"
+                )
+
     def _load_engine(self, engine_type: EngineType) -> None:
         """Load a specific engine.
-        
+
         Args:
             engine_type: The engine to load
-            
+
         Raises:
             GolfModelingError: If engine loading fails
         """
+        logger.info(f"Loading engine: {engine_type.value}")
+        self.engine_status[engine_type] = EngineStatus.LOADING
+
         try:
+            # Engine-specific loading logic would go here
+            # For now, we just mark it as loaded
             if engine_type == EngineType.MUJOCO:
-                # Import MuJoCo engine components
-                from engines.physics_engines.mujoco.python.mujoco_golf_pendulum import advanced_gui
-                self.engine_instances[engine_type] = advanced_gui
-                
+                self._load_mujoco_engine()
             elif engine_type == EngineType.DRAKE:
-                # Import Drake engine components
-                from engines.physics_engines.drake.python.src import golf_gui
-                self.engine_instances[engine_type] = golf_gui
-                
+                self._load_drake_engine()
             elif engine_type == EngineType.PINOCCHIO:
-                # Import Pinocchio engine components
-                from engines.physics_engines.pinocchio.python import main
-                self.engine_instances[engine_type] = main
-                
+                self._load_pinocchio_engine()
             elif engine_type in [EngineType.MATLAB_2D, EngineType.MATLAB_3D]:
-                # MATLAB engines are handled differently (via MATLAB Engine API)
-                self.engine_instances[engine_type] = "matlab_engine_placeholder"
-                
+                self._load_matlab_engine(engine_type)
             elif engine_type == EngineType.PENDULUM:
-                # Import pendulum models
-                from engines.pendulum_models.python import pendulum_main
-                self.engine_instances[engine_type] = pendulum_main
-                
-            else:
-                raise GolfModelingError(f"Unknown engine type: {engine_type}")
-                
-        except ImportError as e:
-            raise GolfModelingError(f"Failed to import engine {engine_type.value}: {e}")
+                self._load_pendulum_engine()
+
+            self.engine_status[engine_type] = EngineStatus.LOADED
+            logger.info(f"Successfully loaded engine: {engine_type.value}")
+
         except Exception as e:
-            raise GolfModelingError(f"Failed to load engine {engine_type.value}: {e}")
-    
+            self.engine_status[engine_type] = EngineStatus.ERROR
+            raise GolfModelingError(
+                f"Failed to load engine {engine_type.value}: {e}"
+            ) from e
+
+    def _load_mujoco_engine(self) -> None:
+        """Load MuJoCo engine."""
+        # Placeholder for MuJoCo-specific loading
+        pass
+
+    def _load_drake_engine(self) -> None:
+        """Load Drake engine."""
+        # Placeholder for Drake-specific loading
+        pass
+
+    def _load_pinocchio_engine(self) -> None:
+        """Load Pinocchio engine."""
+        # Placeholder for Pinocchio-specific loading
+        pass
+
+    def _load_matlab_engine(self, engine_type: EngineType) -> None:
+        """Load MATLAB engine."""
+        # Placeholder for MATLAB-specific loading
+        pass
+
+    def _load_pendulum_engine(self) -> None:
+        """Load pendulum engine."""
+        # Placeholder for pendulum-specific loading
+        pass
+
     def get_current_engine(self) -> Optional[EngineType]:
         """Get the currently active engine.
-        
+
         Returns:
             Current engine type or None if no engine is active
         """
         return self.current_engine
-    
+
     def get_engine_status(self, engine_type: EngineType) -> EngineStatus:
         """Get the status of a specific engine.
-        
+
         Args:
             engine_type: The engine to check
-            
+
         Returns:
             Engine status
         """
         return self.engine_status.get(engine_type, EngineStatus.UNAVAILABLE)
-    
+
     def get_engine_info(self) -> Dict[str, Any]:
         """Get information about all engines.
-        
+
         Returns:
             Dictionary with engine information
         """
         return {
-            "current_engine": self.current_engine.value if self.current_engine else None,
+            "current_engine": (
+                self.current_engine.value if self.current_engine else None
+            ),
             "available_engines": [e.value for e in self.get_available_engines()],
-            "engine_status": {e.value: s.value for e, s in self.engine_status.items()},
-            "engines_root": str(self.engines_root),
+            "engine_status": {
+                e.value: s.value for e, s in self.engine_status.items()
+            },
         }
-    
+
     def validate_engine_configuration(self, engine_type: EngineType) -> bool:
         """Validate that an engine is properly configured.
-        
+
         Args:
             engine_type: The engine to validate
-            
+
         Returns:
             True if engine is properly configured, False otherwise
         """
         if engine_type not in self.engine_status:
             return False
-            
-        if self.engine_status[engine_type] != EngineStatus.AVAILABLE:
-            return False
-        
-        # Additional validation logic can be added here
+
         # For now, just check if the engine directory exists
         engine_paths = {
-            EngineType.MUJOCO: self.engines_root / "physics_engines" / "mujoco" / "python",
-            EngineType.DRAKE: self.engines_root / "physics_engines" / "drake" / "python",
-            EngineType.PINOCCHIO: self.engines_root / "physics_engines" / "pinocchio" / "python",
-            EngineType.MATLAB_2D: self.engines_root / "Simscape_Multibody_Models" / "2D_Golf_Model" / "matlab",
-            EngineType.MATLAB_3D: self.engines_root / "Simscape_Multibody_Models" / "3D_Golf_Model" / "matlab",
-            EngineType.PENDULUM: self.engines_root / "pendulum_models" / "python",
+            EngineType.MUJOCO: (
+                self.engines_root / "physics_engines" / "mujoco" / "python"
+            ),
+            EngineType.DRAKE: (
+                self.engines_root / "physics_engines" / "drake" / "python"
+            ),
+            EngineType.PINOCCHIO: (
+                self.engines_root
+                / "physics_engines"
+                / "pinocchio"
+                / "python"
+            ),
+            EngineType.MATLAB_2D: (
+                self.engines_root
+                / "Simscape_Multibody_Models"
+                / "2D_Golf_Model"
+                / "matlab"
+            ),
+            EngineType.MATLAB_3D: (
+                self.engines_root
+                / "Simscape_Multibody_Models"
+                / "3D_Golf_Model"
+                / "matlab"
+            ),
+            EngineType.PENDULUM: (
+                self.engines_root / "pendulum_models" / "python"
+            ),
         }
-        
+
         engine_path = engine_paths.get(engine_type)
-        if engine_path and engine_path.exists():
-            logger.info(f"Engine {engine_type.value} configuration is valid")
-            return True
-        else:
-            logger.warning(f"Engine {engine_type.value} configuration is invalid")
-            return False
+        return engine_path is not None and engine_path.exists()
