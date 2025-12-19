@@ -291,7 +291,7 @@ class SwingOptimizer:
         # Velocity limits
         if self.constraints.joint_velocity_limits:
 
-            def velocity_constraint(x) -> None:
+            def velocity_constraint(x) -> np.ndarray:
                 """Docstring for velocity_constraint."""
                 trajectory = x.reshape(self.num_knot_points, self.model.nv)
                 dt = self.swing_duration / (self.num_knot_points - 1)
@@ -485,7 +485,7 @@ class SwingOptimizer:
         # Third derivative (jerk)
         jerk = np.diff(accel, axis=0) / dt
 
-        return np.sum(np.abs(jerk))
+        return float(np.sum(np.abs(jerk)))
 
     def optimize_swing_for_speed(
         self,

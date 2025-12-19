@@ -17,7 +17,7 @@ jobs:
         with: { node-version: "20" }
       - run: |
           npm install -g @google/jules
-          pip install ruff==0.5.0
+          pip install ruff==0.14.10
 
       - name: Identify Target File
         id: target

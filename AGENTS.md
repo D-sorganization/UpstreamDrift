@@ -109,6 +109,18 @@ Use **Conventional Commits** format:
 
 ---
 
+## 🚫 Pull Requests & Merging (CRITICAL)
+
+1.  **NO Auto-Merging**:
+    *   Agents **MUST NOT** merge their own Pull Requests.
+    *   Agents **MUST NOT** push directly to protected branches (`main`, `master`).
+    *   All changes must go through a proper Pull Request.
+2.  **Human Approval Required**:
+    *   Merging requires explicit human approval or a command from the USER.
+    *   Exception: Automated maintenance scripts explicitly authorized by the Control Tower workflow.
+
+---
+
 ## 📝 Documentation
 
 - **README.md**: Every project must have a README with Description, Installation, and Usage sections.
