@@ -35,7 +35,12 @@ class TestEngineIntegration:
 
     @pytest.mark.integration
     def test_mujoco_drake_comparison(self):
-        """Test comparison between MuJoCo and Drake engines."""
+        """Test comparison between MuJoCo and Drake engines.
+
+        Note: This test uses mock data to validate the engine comparison logic
+        without requiring actual engine implementations. This approach is sufficient
+        for testing the integration framework and comparison algorithms.
+        """
         manager = EngineManager()
         available_engines = manager.get_available_engines()
 
@@ -76,6 +81,9 @@ class TestEngineIntegration:
         # Mock results for all available engines
         results = {}
         base_distance = 250.0
+
+        # Set random seed for reproducible tests
+        np.random.seed(42)
 
         for engine in available_engines:
             # Generate slightly different but consistent results
