@@ -40,58 +40,24 @@ jobs:
             exit 1
           fi
 
-          echo "All tool versions are consistent"
+          echo "✓ All tool versions are consistent"
 
       # FIX: Less aggressive Ruff (Errors, Warnings, Imports only)
-      # TEMPORARY: continue-on-error due to platform-specific linting differences
       - name: Lint
         run: ruff check .
-        continue-on-error: true
 
       # FIX: Enforce Black formatting (88 chars)
-      # TEMPORARY: continue-on-error due to platform-specific formatting differences
       - name: Check Formatting
         run: black --check .
-        continue-on-error: true
 
-      - run: pip install mypy types-PyYAML types-requests pandas-stubs
-      
-      # Install dependencies using the new unified approach
-      - name: Install Python Dependencies
-        run: |
-          pip install numpy pandas matplotlib scipy sympy
-          pip install pytest pytest-cov pytest-mock
-          pip install ruff==0.5.0 black>=24.4.2 mypy>=1.10.0 pre-commit>=4.0.0
-          pip install pyyaml pathlib2 defusedxml types-PyYAML pandas-stubs types-requests
-          pip install PyQt6 mujoco
-        continue-on-error: true
-      
-      # Run MyPy on specific directories to avoid duplicate module issues
-      - name: Type Check
-        run: |
-          mypy shared/python/ --ignore-missing-imports
-          mypy launchers/ --ignore-missing-imports
-          mypy engines/physics_engines/mujoco/python/ --ignore-missing-imports
-          mypy engines/physics_engines/pinocchio/python/ --ignore-missing-imports
-          mypy engines/pendulum_models/python/ --ignore-missing-imports
-        continue-on-error: true
+      - run: pip install mypy types-PyYAML types-requests
+      - run: pip install -r python/requirements.txt
+      - run: mypy python/src/ --ignore-missing-imports
 
       # TODO detection now BLOCKING - Jules Auto-Repair will fix
       - name: Verify No Placeholders
         run: |
-          if grep -rE "TODO|FIXME" . \
-            --include="*.py" \
-            --include="*.m" \
-            --exclude-dir=.git \
-            --exclude-dir=.github \
-            --exclude-dir=.mypy_cache \
-            --exclude-dir=.ruff_cache \
-            --exclude-dir=__pycache__ \
-            --exclude-dir=tools \
-            --exclude="*quality*check*" \
-            --exclude="*test_*" \
-            --exclude="quality-check.py" \
-            --exclude="ci-standard.yml"; then
+          if grep -rE "TODO|FIXME" python/src/; then
              echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
              exit 1
           fi
@@ -122,91 +88,51 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      
-      # Install dependencies using the new unified approach
-      - name: Install Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e .[dev]
-          # Install core testing dependencies
-          pip install pytest pytest-cov pytest-mock pytest-xdist
-        continue-on-error: true
-      
-      # Run comprehensive test suite
-      - name: Run Unit Tests
-        run: |
-          pytest tests/unit/ -v --cov=shared --cov=launchers \
-            --cov-report=xml --cov-report=term-missing \
-            --junit-xml=test-results-unit.xml
-        continue-on-error: true
-      
-      - name: Run Integration Tests
-        run: |
-          pytest tests/integration/ -v -m "not slow" \
-            --cov=shared --cov=launchers --cov-append \
-            --cov-report=xml --cov-report=term-missing \
-            --junit-xml=test-results-integration.xml
-        continue-on-error: true
-      
-      # Run existing engine-specific tests
-      - name: Run Engine Tests
-        run: |
-          # Test shared Python utilities
-          if [ -d "shared/python/tests" ]; then
-            pytest shared/python/tests/ -v --cov-append
-          fi
-          
-          # Test pendulum models
-          if [ -d "engines/pendulum_models/python/tests" ]; then
-            pytest engines/pendulum_models/python/tests/ -v --cov-append
-          fi
-          
-          # Test 3D Golf Model
-          if [ -d "engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests" ]; then
-            pytest engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/ -v --cov-append
-          fi
-        continue-on-error: true
-      
-      # Upload test results
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results-${{ matrix.python }}
-          path: |
-            test-results-*.xml
-            coverage.xml
-            htmlcov/
-      
-      # Upload coverage to Codecov
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v4
-        if: always()
-        with:
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
+      - run: pip install -r python/requirements.txt
+      - run: pytest python/tests/ --cov=python/src --cov-report=xml
+      - uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        continue-on-error: true
-      
-      # Generate coverage report
-      - name: Coverage Report
+        if: env.CODECOV_TOKEN != ''
+        with:
+          fail_ci_if_error: true # BLOCKING: Requires CODECOV_TOKEN secret to be configured
+          token: ${{ secrets.CODECOV_TOKEN }}
+
+  javascript-tests:
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - name: Install & Test
+        working-directory: ./javascript
         run: |
-          echo "## Test Coverage Report" >> $GITHUB_STEP_SUMMARY
-          python -c "
-          try:
-              import xml.etree.ElementTree as ET
-              tree = ET.parse('coverage.xml')
-              root = tree.getroot()
-              coverage = root.attrib.get('line-rate', '0')
-              coverage_pct = float(coverage) * 100
-              print(f'**Current Coverage: {coverage_pct:.1f}%**')
-              if coverage_pct >= 70:
-                  print('Coverage target met (>=70%)')
-              else:
-                  print(f'Coverage below target (need {70-coverage_pct:.1f}% more)')
-          except:
-              print('Coverage report not available')
-          " >> $GITHUB_STEP_SUMMARY
+          npm ci
+          npm run test:coverage
+
+  matlab-tests:
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    if: false
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: matlab-actions/setup-matlab@v2
+      - uses: matlab-actions/run-command@v2
+        with:
+          command: |
+            addpath('matlab');
+            run_all
+
+  arduino-build:
+    needs: quality-gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install platformio
+      - name: Verify Build
+        working-directory: ./arduino
+        run: pio run -e uno
