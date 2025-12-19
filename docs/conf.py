@@ -4,7 +4,6 @@
 
 import os
 import sys
-from pathlib import Path
 
 # -- Project information -----------------------------------------------------
 project = 'Golf Modeling Suite'
