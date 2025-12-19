@@ -278,7 +278,8 @@ class TestOutputManagerErrors:
         """Test handling of invalid base path."""
         # Use a cross-platform invalid path
         import os
-        if os.name == 'nt':  # Windows
+
+        if os.name == "nt":  # Windows
             invalid_path = "Z:\\invalid\\path\\that\\does\\not\\exist"
         else:  # Unix/Linux
             invalid_path = "/invalid/path/that/does/not/exist"
