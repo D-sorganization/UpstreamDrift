@@ -34,8 +34,9 @@ jobs:
           API_KEY: ${{ secrets.JULES_API_KEY }}
         run: |
           # Example: Just checking if Jules is alive or valid before dispatching expensive workers
+          # Making this truly optional - don't fail the workflow if Jules API is unavailable
           curl -fsS -H "x-goog-api-key: $API_KEY" \
-            https://jules.google/api/v1/health || exit 1
+            https://jules.google/api/v1/health || echo "::warning::Jules API health check failed, continuing anyway."
 
       - name: Analyze Event Context
         id: decide

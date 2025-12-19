@@ -96,7 +96,7 @@ class TestOutputManager:
         output_file = temp_dir / "simulations" / "mujoco" / filename
         assert output_file.exists()
 
-        with open(output_file, "r") as f:
+        with open(output_file) as f:
             loaded_data = json.load(f)
 
         # The saved data is wrapped with metadata, so check the results field
@@ -276,16 +276,22 @@ class TestOutputManagerErrors:
 
     def test_invalid_base_path(self):
         """Test handling of invalid base path."""
-        # On Windows, use an invalid path that will actually cause an error
-        invalid_path = "Z:\\invalid\\path\\that\\does\\not\\exist"
+        # Use a cross-platform invalid path
+        import os
+
+        if os.name == "nt":  # Windows
+            invalid_path = "Z:\\invalid\\path\\that\\does\\not\\exist"
+        else:  # Unix/Linux
+            invalid_path = "/invalid/path/that/does/not/exist"
+
         try:
             manager = OutputManager(invalid_path)
             manager.create_output_structure()
-            # If we get here on Windows, the path was created (which is fine)
-            # Just verify the manager was created
+            # If we get here, the path was created (which is fine)
+            # Just verify the manager was created and has the expected path name
             assert manager.base_path.name == "exist"
         except (OSError, PermissionError, FileNotFoundError):
-            # This is expected behavior
+            # This is expected behavior for truly invalid paths
             pass
 
     def test_save_with_invalid_format(self, temp_dir):
