@@ -200,8 +200,8 @@ class OutputManager:
                     "engine": engine,
                 }
                 # Use binary mode for pickle - mypy is stricter than pickle at runtime
-                with open(file_path, "wb") as f:  # type: ignore[assignment]
-                    pickle.dump(output_data, f)  # type: ignore[arg-type] - binary file handle is correct for pickle
+                with open(file_path, "wb") as f:  # type: ignore
+                    pickle.dump(output_data, f)  # type: ignore
 
             elif format_type == OutputFormat.PARQUET:
                 if isinstance(results, pd.DataFrame):
