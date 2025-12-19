@@ -54,24 +54,14 @@ class EngineManager:
 
         # Define engine paths
         self.engine_paths = {
-            EngineType.MUJOCO: (
-                self.engines_root / "physics_engines" / "mujoco"
-            ),
-            EngineType.DRAKE: (
-                self.engines_root / "physics_engines" / "drake"
-            ),
-            EngineType.PINOCCHIO: (
-                self.engines_root / "physics_engines" / "pinocchio"
-            ),
+            EngineType.MUJOCO: (self.engines_root / "physics_engines" / "mujoco"),
+            EngineType.DRAKE: (self.engines_root / "physics_engines" / "drake"),
+            EngineType.PINOCCHIO: (self.engines_root / "physics_engines" / "pinocchio"),
             EngineType.MATLAB_2D: (
-                self.engines_root
-                / "Simscape_Multibody_Models"
-                / "2D_Golf_Model"
+                self.engines_root / "Simscape_Multibody_Models" / "2D_Golf_Model"
             ),
             EngineType.MATLAB_3D: (
-                self.engines_root
-                / "Simscape_Multibody_Models"
-                / "3D_Golf_Model"
+                self.engines_root / "Simscape_Multibody_Models" / "3D_Golf_Model"
             ),
             EngineType.PENDULUM: self.engines_root / "pendulum_models",
         }
@@ -123,14 +113,10 @@ class EngineManager:
         for engine_type, engine_path in self.engine_paths.items():
             if engine_path.exists():
                 self.engine_status[engine_type] = EngineStatus.AVAILABLE
-                logger.info(
-                    f"Engine {engine_type.value} is available at {engine_path}"
-                )
+                logger.info(f"Engine {engine_type.value} is available at {engine_path}")
             else:
                 self.engine_status[engine_type] = EngineStatus.UNAVAILABLE
-                logger.warning(
-                    f"Engine {engine_type.value} not found at {engine_path}"
-                )
+                logger.warning(f"Engine {engine_type.value} not found at {engine_path}")
 
     def _load_engine(self, engine_type: EngineType) -> None:
         """Load a specific engine.
@@ -222,9 +208,7 @@ class EngineManager:
                 self.current_engine.value if self.current_engine else None
             ),
             "available_engines": [e.value for e in self.get_available_engines()],
-            "engine_status": {
-                e.value: s.value for e, s in self.engine_status.items()
-            },
+            "engine_status": {e.value: s.value for e, s in self.engine_status.items()},
         }
 
     def validate_engine_configuration(self, engine_type: EngineType) -> bool:
@@ -248,10 +232,7 @@ class EngineManager:
                 self.engines_root / "physics_engines" / "drake" / "python"
             ),
             EngineType.PINOCCHIO: (
-                self.engines_root
-                / "physics_engines"
-                / "pinocchio"
-                / "python"
+                self.engines_root / "physics_engines" / "pinocchio" / "python"
             ),
             EngineType.MATLAB_2D: (
                 self.engines_root
@@ -265,9 +246,7 @@ class EngineManager:
                 / "3D_Golf_Model"
                 / "matlab"
             ),
-            EngineType.PENDULUM: (
-                self.engines_root / "pendulum_models" / "python"
-            ),
+            EngineType.PENDULUM: (self.engines_root / "pendulum_models" / "python"),
         }
 
         engine_path = engine_paths.get(engine_type)
