@@ -202,7 +202,7 @@ class OutputManager:
                     "engine": engine,
                 }
                 # Use binary mode for pickle - ignore type checking for this line
-                with open(file_path, "wb") as f:
+                with open(file_path, "wb") as f:  # type: ignore[assignment]
                     pickle.dump(output_data, f)  # type: ignore[arg-type]
 
             elif format_type == OutputFormat.PARQUET:
