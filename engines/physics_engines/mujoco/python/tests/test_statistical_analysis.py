@@ -1,13 +1,18 @@
-import numpy as np
-import pytest
-import sys
-import os
 import importlib.util
+import os
+import sys
+
+import numpy as np
 
 # Import StatisticalAnalyzer directly from file to avoid mujoco dependency
 # Assuming this test file is in engines/physics_engines/mujoco/python/tests/
-# and the source is in engines/physics_engines/mujoco/python/mujoco_golf_pendulum/statistical_analysis.py
-file_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../mujoco_golf_pendulum/statistical_analysis.py'))
+# and the source is in:
+# engines/physics_engines/mujoco/python/mujoco_golf_pendulum/statistical_analysis.py
+file_path = os.path.abspath(
+    os.path.join(
+        os.path.dirname(__file__), "../mujoco_golf_pendulum/statistical_analysis.py"
+    )
+)
 spec = importlib.util.spec_from_file_location("statistical_analysis", file_path)
 statistical_analysis = importlib.util.module_from_spec(spec)
 sys.modules["statistical_analysis"] = statistical_analysis
@@ -15,6 +20,7 @@ spec.loader.exec_module(statistical_analysis)
 
 StatisticalAnalyzer = statistical_analysis.StatisticalAnalyzer
 SummaryStatistics = statistical_analysis.SummaryStatistics
+
 
 def test_compute_summary_stats():
     data = np.array([0, 1, 2, 3, 4, 5, 100], dtype=float)
@@ -24,7 +30,7 @@ def test_compute_summary_stats():
         times=times,
         joint_positions=np.zeros((len(data), 1)),
         joint_velocities=np.zeros((len(data), 1)),
-        joint_torques=np.zeros((len(data), 1))
+        joint_torques=np.zeros((len(data), 1)),
     )
 
     stats = analyzer.compute_summary_stats(data)
@@ -38,6 +44,7 @@ def test_compute_summary_stats():
     assert stats.median == np.median(data)
     assert stats.std == np.std(data)
 
+
 def test_generate_comprehensive_report_consistency():
     N = 100
     nq = 2
@@ -50,7 +57,7 @@ def test_generate_comprehensive_report_consistency():
         times=times,
         joint_positions=joint_positions,
         joint_velocities=np.zeros((N, nq)),
-        joint_torques=np.zeros((N, nq))
+        joint_torques=np.zeros((N, nq)),
     )
 
     report = analyzer.generate_comprehensive_report()
