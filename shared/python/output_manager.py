@@ -334,7 +334,7 @@ class OutputManager:
                 def json_serializer(obj: Any) -> Any:
                     if isinstance(obj, np.ndarray):
                         return obj.tolist()
-                    elif isinstance(obj, (np.integer, np.floating)):
+                    elif isinstance(obj, np.integer | np.floating):
                         return float(obj)
                     elif isinstance(obj, datetime):
                         return obj.isoformat()
