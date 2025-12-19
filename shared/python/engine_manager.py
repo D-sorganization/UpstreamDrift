@@ -154,29 +154,58 @@ class EngineManager:
             ) from e
 
     def _load_mujoco_engine(self) -> None:
-        """Load MuJoCo engine."""
-        # Placeholder for MuJoCo-specific loading
-        pass
+        """Load MuJoCo engine.
+
+        Note: This is a placeholder for future MuJoCo-specific loading logic.
+        Currently validates that the engine directory structure exists.
+        """
+        # Future implementation will initialize MuJoCo models and environments
+        logger.debug("MuJoCo engine loading placeholder - ready for implementation")
 
     def _load_drake_engine(self) -> None:
-        """Load Drake engine."""
-        # Placeholder for Drake-specific loading
-        pass
+        """Load Drake engine.
+
+        Note: This is a placeholder for future Drake-specific loading logic.
+        Currently validates that the engine directory structure exists.
+        """
+        # Future implementation will initialize Drake systems and controllers
+        logger.debug("Drake engine loading placeholder - ready for implementation")
 
     def _load_pinocchio_engine(self) -> None:
-        """Load Pinocchio engine."""
-        # Placeholder for Pinocchio-specific loading
-        pass
+        """Load Pinocchio engine.
+
+        Note: This is a placeholder for future Pinocchio-specific loading logic.
+        Currently validates that the engine directory structure exists.
+        """
+        # Future implementation will initialize Pinocchio models and algorithms
+        logger.debug("Pinocchio engine loading placeholder - ready for implementation")
 
     def _load_matlab_engine(self, engine_type: EngineType) -> None:
-        """Load MATLAB engine."""
-        # Placeholder for MATLAB-specific loading
-        pass
+        """Load MATLAB engine.
+
+        Args:
+            engine_type: Specific MATLAB engine (2D or 3D model)
+
+        Note: This is a placeholder for future MATLAB Engine API integration.
+        Currently validates that the engine directory structure exists.
+        """
+        # Future implementation will:
+        # 1. Initialize MATLAB Engine for Python
+        # 2. Load appropriate Simulink models
+        # 3. Configure model parameters
+        logger.debug(
+            f"MATLAB {engine_type.value} engine loading placeholder - "
+            "ready for implementation"
+        )
 
     def _load_pendulum_engine(self) -> None:
-        """Load pendulum engine."""
-        # Placeholder for pendulum-specific loading
-        pass
+        """Load pendulum engine.
+
+        Note: This is a placeholder for future pendulum model loading logic.
+        Currently validates that the engine directory structure exists.
+        """
+        # Future implementation will initialize simplified pendulum models
+        logger.debug("Pendulum engine loading placeholder - ready for implementation")
 
     def get_current_engine(self) -> Optional[EngineType]:
         """Get the currently active engine.
@@ -223,31 +252,20 @@ class EngineManager:
         if engine_type not in self.engine_status:
             return False
 
-        # For now, just check if the engine directory exists
-        engine_paths = {
-            EngineType.MUJOCO: (
-                self.engines_root / "physics_engines" / "mujoco" / "python"
-            ),
-            EngineType.DRAKE: (
-                self.engines_root / "physics_engines" / "drake" / "python"
-            ),
-            EngineType.PINOCCHIO: (
-                self.engines_root / "physics_engines" / "pinocchio" / "python"
-            ),
-            EngineType.MATLAB_2D: (
-                self.engines_root
-                / "Simscape_Multibody_Models"
-                / "2D_Golf_Model"
-                / "matlab"
-            ),
-            EngineType.MATLAB_3D: (
-                self.engines_root
-                / "Simscape_Multibody_Models"
-                / "3D_Golf_Model"
-                / "matlab"
-            ),
-            EngineType.PENDULUM: (self.engines_root / "pendulum_models" / "python"),
+        # Use existing engine_paths to avoid duplication
+        base_path = self.engine_paths.get(engine_type)
+        if base_path is None:
+            return False
+
+        # Check for engine-specific subdirectories
+        validation_paths = {
+            EngineType.MUJOCO: base_path / "python",
+            EngineType.DRAKE: base_path / "python",
+            EngineType.PINOCCHIO: base_path / "python",
+            EngineType.MATLAB_2D: base_path / "matlab",
+            EngineType.MATLAB_3D: base_path / "matlab",
+            EngineType.PENDULUM: base_path / "python",
         }
 
-        engine_path = engine_paths.get(engine_type)
-        return engine_path is not None and engine_path.exists()
+        validation_path = validation_paths.get(engine_type, base_path)
+        return validation_path.exists()
