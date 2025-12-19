@@ -104,3 +104,16 @@ input:focus-visible {
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
+
+.shortcuts {
+  margin-top: 0.8rem;
+  margin-bottom: 0;
+  font-size: 0.8rem;
+  color: #888;
+  text-align: center;
+}
+
+.shortcuts strong {
+  color: var(--text);
+  font-weight: 600;
+}
