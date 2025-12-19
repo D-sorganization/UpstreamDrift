@@ -97,14 +97,16 @@ class StatisticalAnalyzer:
         """
         min_idx = np.argmin(data)
         max_idx = np.argmax(data)
+        min_val = float(data[min_idx])
+        max_val = float(data[max_idx])
 
         return SummaryStatistics(
             mean=float(np.mean(data)),
             median=float(np.median(data)),
             std=float(np.std(data)),
-            min=float(np.min(data)),
-            max=float(np.max(data)),
-            range=float(np.ptp(data)),
+            min=min_val,
+            max=max_val,
+            range=max_val - min_val,
             min_time=float(self.times[min_idx]),
             max_time=float(self.times[max_idx]),
             rms=float(np.sqrt(np.mean(data**2))),
@@ -496,7 +498,11 @@ class StatisticalAnalyzer:
         # Joint statistics
         report["joints"] = {}
         for i in range(self.joint_positions.shape[1]):
-            min_angle, max_angle, rom = self.compute_range_of_motion(i)
+            # Calculate position stats first to avoid redundant computations
+            # in compute_range_of_motion
+            angles_deg = np.rad2deg(self.joint_positions[:, i])
+            position_stats = self.compute_summary_stats(angles_deg)
+
             velocities = (
                 self.joint_velocities[:, i]
                 if i < self.joint_velocities.shape[1]
@@ -505,13 +511,11 @@ class StatisticalAnalyzer:
 
             joint_stats = {
                 "range_of_motion": {
-                    "min_deg": min_angle,
-                    "max_deg": max_angle,
-                    "rom_deg": rom,
+                    "min_deg": position_stats.min,
+                    "max_deg": position_stats.max,
+                    "rom_deg": position_stats.range,
                 },
-                "position_stats": self.compute_summary_stats(
-                    np.rad2deg(self.joint_positions[:, i]),
-                ).__dict__,
+                "position_stats": position_stats.__dict__,
             }
 
             if velocities is not None:
