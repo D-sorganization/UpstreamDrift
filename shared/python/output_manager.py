@@ -163,7 +163,7 @@ class OutputManager:
 
             elif format_type == OutputFormat.JSON:
                 # Handle numpy arrays in JSON serialization
-                def json_serializer(obj):
+                def json_serializer(obj: Any) -> Any:
                     if isinstance(obj, np.ndarray):
                         return obj.tolist()
                     elif isinstance(obj, np.integer):
@@ -201,7 +201,8 @@ class OutputManager:
                     "timestamp": datetime.now(),
                     "engine": engine,
                 }
-                with open(file_path, "wb") as f:
+                # Use binary mode for pickle - ignore type checking for this line
+                with open(file_path, "wb") as f:  # type: ignore[assignment,arg-type]
                     pickle.dump(output_data, f)  # type: ignore[arg-type]
 
             elif format_type == OutputFormat.PARQUET:
@@ -332,7 +333,7 @@ class OutputManager:
         try:
             if format_type == "json":
 
-                def json_serializer(obj):
+                def json_serializer(obj: Any) -> Any:
                     if isinstance(obj, np.ndarray):
                         return obj.tolist()
                     elif isinstance(obj, np.integer | np.floating):
@@ -466,7 +467,7 @@ class OutputManager:
 
 
 # Convenience functions for backward compatibility
-def save_results(results, filename, format_type="csv", engine="mujoco"):
+def save_results(results: Any, filename: str, format_type: str = "csv", engine: str = "mujoco") -> str:
     """Convenience function for saving results."""
     manager = OutputManager()
     return manager.save_simulation_results(
@@ -474,7 +475,7 @@ def save_results(results, filename, format_type="csv", engine="mujoco"):
     )
 
 
-def load_results(filename, format_type="csv", engine="mujoco"):
+def load_results(filename: str, format_type: str = "csv", engine: str = "mujoco") -> Any:
     """Convenience function for loading results."""
     manager = OutputManager()
     return manager.load_simulation_results(filename, OutputFormat(format_type), engine)
