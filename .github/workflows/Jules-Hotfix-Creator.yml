@@ -55,20 +55,17 @@ jobs:
           gh run view $TARGET_RUN_ID --log-failed > logs.txt
 
           LOG_CONTENT=$(cat logs.txt)
-          PROMPT=$(cat <<EOF
-URGENT: CI failed on protected branch ${{ inputs.failed_branch }}.
-Analyze the logs and create a minimal hotfix:
-1. **Formatting & Linting**: Run 'ruff check . --fix' and 'black .'
-2. **Import Sorting**: Run 'isort --profile black .'
-3. **Type Errors**: Add missing type hints or proper type ignores
-4. **Test Failures**: Fix failing tests (fix implementation, not tests)
-5. **Coverage**: Generate tests if coverage dropped below 80%
-6. **Syntax**: Fix any syntax errors or missing imports
-CRITICAL: This is a hotfix for ${{ inputs.failed_branch }}. Keep changes minimal and focused.
-CI Failure Logs:
-$LOG_CONTENT
-EOF
-)
+          PROMPT="URGENT: CI failed on protected branch ${{ inputs.failed_branch }}.
+          Analyze the logs and create a minimal hotfix:
+          1. **Formatting & Linting**: Run 'ruff check . --fix' and 'black .'
+          2. **Import Sorting**: Run 'isort --profile black .'
+          3. **Type Errors**: Add missing type hints or proper type ignores
+          4. **Test Failures**: Fix failing tests (fix implementation, not tests)
+          5. **Coverage**: Generate tests if coverage dropped below 80%
+          6. **Syntax**: Fix any syntax errors or missing imports
+          CRITICAL: This is a hotfix for ${{ inputs.failed_branch }}. Keep changes minimal and focused.
+          CI Failure Logs:
+          $LOG_CONTENT"
           jules task fix --branch "$HOTFIX_BRANCH" --prompt "$PROMPT"
 
       - name: Create Urgent PR
@@ -82,36 +79,33 @@ EOF
             --head "$HOTFIX_BRANCH" \
             --title "🚨 Urgent: Fix CI failure on ${{ inputs.failed_branch }}" \
             --label "urgent,auto-fix,hotfix" \
-            --body "$(cat <<'EOF'
-## 🚨 Automated Hotfix for Protected Branch
+            --body "## 🚨 Automated Hotfix for Protected Branch
+            
+            **Failed Branch:** \`${{ inputs.failed_branch }}\`
+            **CI Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }}
+            **Created By:** Jules Hotfix-Creator
 
-**Failed Branch:** \`${{ inputs.failed_branch }}\`
-**CI Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }}
-**Created By:** Jules Hotfix-Creator
+            ### Summary
+            CI failed on the protected branch \`${{ inputs.failed_branch }}\`. This automated hotfix attempts to resolve the issues.
 
-### Summary
-CI failed on the protected branch \`${{ inputs.failed_branch }}\`. This automated hotfix attempts to resolve the issues.
+            ### Changes
+            Jules Auto-Repair has analyzed the CI failure logs and applied fixes for:
+            - Code formatting and linting issues
+            - Type checking errors
+            - Test failures
+            - Coverage gaps
+            - Syntax errors
 
-### Changes
-Jules Auto-Repair has analyzed the CI failure logs and applied fixes for:
-- Code formatting and linting issues
-- Type checking errors
-- Test failures
-- Coverage gaps
-- Syntax errors
+            ### Review Checklist
+            - [ ] Verify all CI checks pass
+            - [ ] Review changes are minimal and focused
+            - [ ] Confirm no unintended side effects
+            - [ ] Merge immediately if changes look correct
 
-### Review Checklist
-- [ ] Verify all CI checks pass
-- [ ] Review changes are minimal and focused
-- [ ] Confirm no unintended side effects
-- [ ] Merge immediately if changes look correct
+            ### Next Steps
+            1. Review the changes in this PR
+            2. If acceptable, merge immediately to restore ${{ inputs.failed_branch }}
+            3. If issues remain, manually fix and push to this branch
 
-### Next Steps
-1. Review the changes in this PR
-2. If acceptable, merge immediately to restore ${{ inputs.failed_branch }}
-3. If issues remain, manually fix and push to this branch
-
----
-*This is an automated hotfix. Please review carefully before merging.*
-EOF
-)"
+            ---
+            *This is an automated hotfix. Please review carefully before merging.*"
