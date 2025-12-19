@@ -4,6 +4,7 @@ Integration tests between different physics engines.
 
 import sys
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock
 
 import numpy as np
@@ -153,6 +154,7 @@ class TestEngineIntegration:
             return {"ball_distance": 250.0}
 
         for engine in available_engines:
+
             # Measure performance
             start_time = time.time()
             result = mock_simulate(engine)
@@ -224,7 +226,7 @@ class TestEngineDataFlow:
             mock_instance = Mock()
 
             # Mock consistent output format
-            mock_result = {field: 0.0 for field in expected_fields}
+            mock_result: dict[str, Any] = {field: 0.0 for field in expected_fields}
             mock_result["trajectory_data"] = mock_trajectory
 
             mock_instance.simulate.return_value = mock_result

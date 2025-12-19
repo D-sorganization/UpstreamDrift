@@ -199,9 +199,8 @@ class OutputManager:
                     "timestamp": datetime.now(),
                     "engine": engine,
                 }
-                # Use binary mode for pickle - mypy is stricter than pickle at runtime
-                with open(file_path, "wb") as f:  # type: ignore
-                    pickle.dump(output_data, f)  # type: ignore
+                with open(file_path, "wb") as f_pickle:
+                    pickle.dump(output_data, f_pickle)
 
             elif format_type == OutputFormat.PARQUET:
                 if isinstance(results, pd.DataFrame):

@@ -100,10 +100,10 @@ class Phase1Validator:
             return False
 
         try:
-            import tomllib
+            import tomllib  # type: ignore[no-redef]
         except ImportError:
             try:
-                import tomli as tomllib
+                import tomli as tomllib  # type: ignore[no-redef]
             except ImportError:
                 print("   Warning: Cannot parse TOML (tomllib/tomli not available)")
                 return True  # Assume valid if we can't parse
@@ -331,6 +331,10 @@ class Phase1Validator:
             spec = importlib.util.spec_from_file_location(
                 "output_manager", output_manager_path
             )
+            if spec is None or spec.loader is None:
+                print("   Failed to load output_manager spec")
+                return False
+
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 

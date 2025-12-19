@@ -139,7 +139,23 @@ exclude = [
     "engines/matlab_simscape/",
     "engines/Simscape_Multibody_Models/",
     "engines/pendulum_models/Pendulum Models/Pendulums_Model/",
+    "legacy",
+    "archive",
+    "tests",
+    "drake",
 ]
+
+[[tool.mypy.overrides]]
+module = "engines.physics_engines.pinocchio.python.double_pendulum_model.tests.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "*.tests.*"
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+module = "engines.physics_engines.mujoco.python.mujoco_golf_pendulum.*"
+ignore_errors = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"

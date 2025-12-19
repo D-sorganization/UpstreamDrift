@@ -14,30 +14,7 @@ import pytest
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-try:
-    from shared.python.output_manager import OutputFormat, OutputManager
-except ImportError:
-    # Create a minimal OutputManager for testing if not available
-    class OutputFormat:
-        CSV = "csv"
-        JSON = "json"
-        HDF5 = "hdf5"
-        PICKLE = "pickle"
-
-    class OutputManager:
-        def __init__(self, base_path):
-            self.base_path = Path(base_path)
-
-        def save_simulation_results(
-            self, results, filename, format_type=OutputFormat.CSV
-        ):
-            pass
-
-        def load_simulation_results(self, filename, format_type=OutputFormat.CSV):
-            return {}
-
-        def create_output_structure(self):
-            pass
+from shared.python.output_manager import OutputFormat, OutputManager  # noqa: E402
 
 
 class TestOutputManager:
