@@ -140,19 +140,19 @@ class TestEngineIntegration:
         available_engines = manager.get_available_engines()
         performance_results = {}
 
+        # Mock simulation with realistic timing - moved outside loop to avoid closure issues
+        def mock_simulate(engine_type):
+            # Simulate different performance characteristics
+            if engine_type == EngineType.MUJOCO:
+                time.sleep(0.01)  # Slower but more accurate
+            elif engine_type == EngineType.DRAKE:
+                time.sleep(0.005)  # Medium speed
+            else:  # pinocchio or others
+                time.sleep(0.002)  # Fastest
+
+            return {"ball_distance": 250.0}
+
         for engine in available_engines:
-            # Mock simulation with realistic timing
-            def mock_simulate(engine_type):
-                # Simulate different performance characteristics
-                if engine_type == EngineType.MUJOCO:
-                    time.sleep(0.01)  # Slower but more accurate
-                elif engine_type == EngineType.DRAKE:
-                    time.sleep(0.005)  # Medium speed
-                else:  # pinocchio or others
-                    time.sleep(0.002)  # Fastest
-
-                return {"ball_distance": 250.0}
-
             # Measure performance
             start_time = time.time()
             result = mock_simulate(engine)

@@ -201,9 +201,9 @@ class OutputManager:
                     "timestamp": datetime.now(),
                     "engine": engine,
                 }
-                # Use binary mode for pickle - ignore type checking for this line
+                # Use binary mode for pickle - mypy is stricter than pickle at runtime
                 with open(file_path, "wb") as f:  # type: ignore[assignment]
-                    pickle.dump(output_data, f)  # type: ignore[arg-type]
+                    pickle.dump(output_data, f)  # type: ignore[arg-type] - binary file handle is correct for pickle
 
             elif format_type == OutputFormat.PARQUET:
                 if isinstance(results, pd.DataFrame):
@@ -336,7 +336,7 @@ class OutputManager:
                 def json_serializer(obj: Any) -> Any:
                     if isinstance(obj, np.ndarray):
                         return obj.tolist()
-                    elif isinstance(obj, np.integer | np.floating):
+                    elif isinstance(obj, (np.integer, np.floating)):
                         return float(obj)
                     elif isinstance(obj, datetime):
                         return obj.isoformat()
@@ -451,7 +451,7 @@ class OutputManager:
 
         # Add data to table
         for key, value in data.items():
-            if not isinstance(value, dict | list):
+            if not isinstance(value, (dict, list)):
                 html += f"<tr><td><strong>{key}</strong></td><td>{value}</td></tr>"
 
         html += f"""
