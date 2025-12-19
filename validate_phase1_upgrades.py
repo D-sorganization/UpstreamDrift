@@ -110,7 +110,7 @@ class Phase1Validator:
                 return True  # Assume valid if we can't parse
 
         try:
-            with open(pyproject_path, 'rb') as f:
+            with open(pyproject_path, "rb") as f:
                 config = tomllib.load(f)
 
             # Check required sections
@@ -126,7 +126,7 @@ class Phase1Validator:
 
             missing_sections = []
             for section in required_sections:
-                keys = section.split('.')
+                keys = section.split(".")
                 current = config
                 for key in keys:
                     if key not in current:
@@ -336,17 +336,17 @@ class Phase1Validator:
             spec.loader.exec_module(module)
 
             # Check required classes and methods
-            if not hasattr(module, 'OutputManager'):
+            if not hasattr(module, "OutputManager"):
                 print("   Missing OutputManager class")
                 return False
 
-            manager_class = getattr(module, 'OutputManager')
+            manager_class = getattr(module, "OutputManager")
             required_methods = [
-                'create_output_structure',
-                'save_simulation_results',
-                'load_simulation_results',
-                'get_simulation_list',
-                'export_analysis_report',
+                "create_output_structure",
+                "save_simulation_results",
+                "load_simulation_results",
+                "get_simulation_list",
+                "export_analysis_report",
             ]
 
             missing_methods = []

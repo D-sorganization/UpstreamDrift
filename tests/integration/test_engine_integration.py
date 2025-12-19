@@ -42,17 +42,17 @@ class TestEngineIntegration:
         # Mock simulation results for comparison
         mock_results = {
             EngineType.MUJOCO: {
-                'ball_distance': 250.0,
-                'launch_angle': 12.5,
-                'ball_speed': 150.0,
-                'simulation_time': 2.0
+                "ball_distance": 250.0,
+                "launch_angle": 12.5,
+                "ball_speed": 150.0,
+                "simulation_time": 2.0,
             },
             EngineType.DRAKE: {
-                'ball_distance': 248.5,
-                'launch_angle': 12.8,
-                'ball_speed': 149.2,
-                'simulation_time': 2.0
-            }
+                "ball_distance": 248.5,
+                "launch_angle": 12.8,
+                "ball_speed": 149.2,
+                "simulation_time": 2.0,
+            },
         }
 
         # Test that we can compare results
@@ -60,8 +60,8 @@ class TestEngineIntegration:
             EngineType.MUJOCO in available_engines
             and EngineType.DRAKE in available_engines
         ):
-            mujoco_distance = mock_results[EngineType.MUJOCO]['ball_distance']
-            drake_distance = mock_results[EngineType.DRAKE]['ball_distance']
+            mujoco_distance = mock_results[EngineType.MUJOCO]["ball_distance"]
+            drake_distance = mock_results[EngineType.DRAKE]["ball_distance"]
 
             # Results should be within reasonable tolerance
             distance_diff = abs(mujoco_distance - drake_distance)
@@ -82,14 +82,14 @@ class TestEngineIntegration:
             noise = np.random.normal(0, 2.0)  # Small random variation
 
             results[engine] = {
-                'ball_distance': base_distance + noise,
-                'launch_angle': 12.5 + np.random.normal(0, 0.5),
-                'ball_speed': 150.0 + np.random.normal(0, 3.0),
+                "ball_distance": base_distance + noise,
+                "launch_angle": 12.5 + np.random.normal(0, 0.5),
+                "ball_speed": 150.0 + np.random.normal(0, 3.0),
             }
 
         # Validate consistency if we have multiple engines
         if len(results) > 1:
-            distances = [results[engine]['ball_distance'] for engine in results]
+            distances = [results[engine]["ball_distance"] for engine in results]
             distance_std = np.std(distances)
 
             # Standard deviation should be reasonable (< 5% of mean)
@@ -99,11 +99,11 @@ class TestEngineIntegration:
     def test_engine_parameter_consistency(self):
         """Test that all engines accept consistent parameter sets."""
         common_parameters = {
-            'swing_speed': 100.0,  # mph
-            'club_type': 'driver',
-            'ball_position': [0, 0, 0],
-            'simulation_time': 2.0,
-            'timestep': 0.001,
+            "swing_speed": 100.0,  # mph
+            "club_type": "driver",
+            "ball_position": [0, 0, 0],
+            "simulation_time": 2.0,
+            "timestep": 0.001,
         }
 
         manager = EngineManager()
@@ -120,7 +120,7 @@ class TestEngineIntegration:
 
             # Should not raise exceptions
             assert mock_instance.swing_speed == 100.0
-            assert mock_instance.club_type == 'driver'
+            assert mock_instance.club_type == "driver"
 
     @pytest.mark.integration
     @pytest.mark.slow
@@ -143,7 +143,7 @@ class TestEngineIntegration:
                 else:  # pinocchio or others
                     time.sleep(0.002)  # Fastest
 
-                return {'ball_distance': 250.0}
+                return {"ball_distance": 250.0}
 
             # Measure performance
             start_time = time.time()
@@ -151,8 +151,8 @@ class TestEngineIntegration:
             end_time = time.time()
 
             performance_results[engine] = {
-                'simulation_time': end_time - start_time,
-                'result': result
+                "simulation_time": end_time - start_time,
+                "result": result,
             }
 
         # Verify we have performance data
@@ -160,9 +160,9 @@ class TestEngineIntegration:
 
         # All simulations should complete successfully
         for engine, perf_data in performance_results.items():
-            assert 'simulation_time' in perf_data
-            assert 'result' in perf_data
-            assert perf_data['result']['ball_distance'] == 250.0
+            assert "simulation_time" in perf_data
+            assert "result" in perf_data
+            assert perf_data["result"]["ball_distance"] == 250.0
 
 
 class TestEngineDataFlow:
@@ -176,9 +176,9 @@ class TestEngineDataFlow:
 
         # Mock swing data
         sample_swing_data = {
-            'time': [0.0, 0.1, 0.2, 0.3],
-            'club_angle': [0, 15, 30, 45],
-            'ball_position': [[0, 0, 0], [0.1, 0, 0.1], [0.2, 0, 0.2], [0.3, 0, 0.3]]
+            "time": [0.0, 0.1, 0.2, 0.3],
+            "club_angle": [0, 15, 30, 45],
+            "ball_position": [[0, 0, 0], [0.1, 0, 0.1], [0.2, 0, 0.2], [0.3, 0, 0.3]],
         }
 
         # Test that swing data can be processed by all engines
@@ -199,17 +199,17 @@ class TestEngineDataFlow:
         available_engines = manager.get_available_engines()
 
         expected_fields = [
-            'ball_distance',
-            'launch_angle',
-            'ball_speed',
-            'simulation_time',
-            'trajectory_data'
+            "ball_distance",
+            "launch_angle",
+            "ball_speed",
+            "simulation_time",
+            "trajectory_data",
         ]
 
         # Mock trajectory data
         mock_trajectory = {
-            'time': [0.0, 0.1, 0.2],
-            'position': [[0, 0, 0], [1, 0, 1], [2, 0, 2]]
+            "time": [0.0, 0.1, 0.2],
+            "position": [[0, 0, 0], [1, 0, 1], [2, 0, 2]],
         }
 
         for engine in available_engines:
@@ -217,7 +217,7 @@ class TestEngineDataFlow:
 
             # Mock consistent output format
             mock_result = {field: 0.0 for field in expected_fields}
-            mock_result['trajectory_data'] = mock_trajectory
+            mock_result["trajectory_data"] = mock_trajectory
 
             mock_instance.simulate.return_value = mock_result
 
@@ -256,17 +256,17 @@ class TestEngineConfiguration:
 
         # Mock configuration for each engine
         sample_config = {
-            'engines': {
-                'mujoco': {'timestep': 0.001, 'solver': 'newton'},
-                'drake': {'timestep': 0.001, 'integrator': 'rk4'},
-                'pinocchio': {'timestep': 0.001, 'algorithm': 'rnea'}
+            "engines": {
+                "mujoco": {"timestep": 0.001, "solver": "newton"},
+                "drake": {"timestep": 0.001, "integrator": "rk4"},
+                "pinocchio": {"timestep": 0.001, "algorithm": "rnea"},
             }
         }
 
         for engine in available_engines:
             engine_name = engine.value.lower()
-            if engine_name in sample_config['engines']:
-                engine_config = sample_config['engines'][engine_name]
+            if engine_name in sample_config["engines"]:
+                engine_config = sample_config["engines"][engine_name]
 
                 mock_instance = Mock()
 

@@ -22,26 +22,30 @@ class TestLauncherModule:
         # Test main launch script
         try:
             import launch_golf_suite
-            assert hasattr(launch_golf_suite, 'launch_gui_launcher')
-            assert hasattr(launch_golf_suite, 'launch_local_launcher')
+
+            assert hasattr(launch_golf_suite, "launch_gui_launcher")
+            assert hasattr(launch_golf_suite, "launch_local_launcher")
         except ImportError:
             pytest.skip("Main launcher not available")
 
     def test_launcher_paths_configuration(self):
         """Test launcher path configuration without GUI initialization."""
         # Mock PyQt6 to avoid GUI initialization
-        with patch.dict('sys.modules', {
-            'PyQt6': Mock(),
-            'PyQt6.QtCore': Mock(),
-            'PyQt6.QtWidgets': Mock(),
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "PyQt6": Mock(),
+                "PyQt6.QtCore": Mock(),
+                "PyQt6.QtWidgets": Mock(),
+            },
+        ):
             try:
                 # Import the module
                 import launchers.golf_suite_launcher as launcher_module
 
                 # Test that the module has the expected structure
-                assert hasattr(launcher_module, 'main')
-                assert hasattr(launcher_module, 'GolfLauncher')
+                assert hasattr(launcher_module, "main")
+                assert hasattr(launcher_module, "GolfLauncher")
 
             except ImportError:
                 pytest.skip("Golf suite launcher not available")
@@ -53,11 +57,11 @@ class TestLauncherModule:
 
             # Check for expected functions
             expected_functions = [
-                'launch_gui_launcher',
-                'launch_local_launcher',
-                'launch_mujoco_gui',
-                'launch_drake_gui',
-                'launch_pinocchio_gui'
+                "launch_gui_launcher",
+                "launch_local_launcher",
+                "launch_mujoco_gui",
+                "launch_drake_gui",
+                "launch_pinocchio_gui",
             ]
 
             available_functions = []
@@ -71,14 +75,14 @@ class TestLauncherModule:
         except ImportError:
             pytest.skip("Main launcher not available")
 
-    @patch('sys.argv', ['launch_golf_suite.py', '--help'])
+    @patch("sys.argv", ["launch_golf_suite.py", "--help"])
     def test_main_help_argument(self):
         """Test main function with help argument."""
         try:
             import launch_golf_suite
 
             # Mock argparse to avoid actual help output
-            with patch('argparse.ArgumentParser.parse_args') as mock_parse:
+            with patch("argparse.ArgumentParser.parse_args") as mock_parse:
                 mock_args = Mock()
                 mock_args.help = True
                 mock_parse.return_value = mock_args
@@ -98,7 +102,7 @@ class TestLauncherModule:
             import launch_golf_suite
 
             # Test GUI launcher with missing dependencies
-            with patch('launchers.golf_launcher.UnifiedLauncher') as mock_launcher:
+            with patch("launchers.golf_launcher.UnifiedLauncher") as mock_launcher:
                 mock_launcher.side_effect = ImportError("Module not found")
 
                 result = launch_golf_suite.launch_gui_launcher()
@@ -122,12 +126,7 @@ class TestLauncherUtilities:
         assert project_root.name == "Golf_Modeling_Suite"
 
         # Should be able to find key directories
-        expected_dirs = [
-            "engines",
-            "shared",
-            "launchers",
-            "output"
-        ]
+        expected_dirs = ["engines", "shared", "launchers", "output"]
 
         for dir_name in expected_dirs:
             dir_path = project_root / dir_name
@@ -139,8 +138,13 @@ class TestLauncherUtilities:
 
         # Test MuJoCo path
         mujoco_path = (
-            project_root / "engines" / "physics_engines" / "mujoco" /
-            "python" / "mujoco_golf_pendulum" / "advanced_gui.py"
+            project_root
+            / "engines"
+            / "physics_engines"
+            / "mujoco"
+            / "python"
+            / "mujoco_golf_pendulum"
+            / "advanced_gui.py"
         )
 
         # Path should be constructible (may not exist)
@@ -149,8 +153,13 @@ class TestLauncherUtilities:
 
         # Test Drake path
         drake_path = (
-            project_root / "engines" / "physics_engines" / "drake" /
-            "python" / "src" / "golf_gui.py"
+            project_root
+            / "engines"
+            / "physics_engines"
+            / "drake"
+            / "python"
+            / "src"
+            / "golf_gui.py"
         )
 
         assert isinstance(drake_path, Path)
@@ -186,11 +195,14 @@ class TestLauncherIntegration:
         assert suite_launcher.exists()
 
         # Test that they can be imported (with mocking)
-        with patch.dict('sys.modules', {
-            'PyQt6': Mock(),
-            'PyQt6.QtCore': Mock(),
-            'PyQt6.QtWidgets': Mock(),
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "PyQt6": Mock(),
+                "PyQt6.QtCore": Mock(),
+                "PyQt6.QtWidgets": Mock(),
+            },
+        ):
             try:
                 import launch_golf_suite
                 import launchers.golf_suite_launcher
@@ -223,11 +235,14 @@ class TestLauncherIntegration:
 @pytest.fixture
 def mock_qt_application():
     """Mock Qt application for testing."""
-    with patch.dict('sys.modules', {
-        'PyQt6': Mock(),
-        'PyQt6.QtCore': Mock(),
-        'PyQt6.QtWidgets': Mock(),
-    }):
+    with patch.dict(
+        "sys.modules",
+        {
+            "PyQt6": Mock(),
+            "PyQt6.QtCore": Mock(),
+            "PyQt6.QtWidgets": Mock(),
+        },
+    ):
         mock_app = Mock()
         yield mock_app
 
@@ -235,8 +250,7 @@ def mock_qt_application():
 @pytest.fixture
 def mock_launcher_environment():
     """Mock launcher environment."""
-    with patch.dict(os.environ, {
-        'GOLF_SUITE_HEADLESS': '1',
-        'GOLF_SUITE_TEST_MODE': '1'
-    }):
+    with patch.dict(
+        os.environ, {"GOLF_SUITE_HEADLESS": "1", "GOLF_SUITE_TEST_MODE": "1"}
+    ):
         yield
