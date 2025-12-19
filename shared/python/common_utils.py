@@ -3,7 +3,6 @@
 import logging
 import sys
 from pathlib import Path
-from typing import List, Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -34,7 +33,7 @@ def setup_logging(name: str, level: int = logging.INFO) -> logging.Logger:
     return logger
 
 
-def ensure_output_dir(engine_name: str, subdir: Optional[str] = None) -> Path:
+def ensure_output_dir(engine_name: str, subdir: str | None = None) -> Path:
     """Ensure output directory exists for an engine.
 
     Args:
@@ -54,7 +53,7 @@ def ensure_output_dir(engine_name: str, subdir: Optional[str] = None) -> Path:
     return output_path
 
 
-def load_golf_data(data_path: Union[str, Path]) -> pd.DataFrame:
+def load_golf_data(data_path: str | Path) -> pd.DataFrame:
     """Load golf swing data from various formats.
 
     Args:
@@ -79,7 +78,7 @@ def load_golf_data(data_path: Union[str, Path]) -> pd.DataFrame:
 
 
 def save_golf_data(
-    data: pd.DataFrame, output_path: Union[str, Path], format: str = "csv"
+    data: pd.DataFrame, output_path: str | Path, format: str = "csv"
 ) -> None:
     """Save golf swing data in specified format.
 
@@ -101,7 +100,7 @@ def save_golf_data(
 
 
 def standardize_joint_angles(
-    angles: np.ndarray, angle_names: Optional[List[str]] = None
+    angles: np.ndarray, angle_names: list[str] | None = None
 ) -> pd.DataFrame:
     """Standardize joint angle data across engines.
 
@@ -124,7 +123,7 @@ def standardize_joint_angles(
 def plot_joint_trajectories(
     data: pd.DataFrame,
     title: str = "Joint Trajectories",
-    save_path: Optional[Path] = None,
+    save_path: Path | None = None,
 ) -> plt.Figure:
     """Create standardized joint trajectory plots.
 

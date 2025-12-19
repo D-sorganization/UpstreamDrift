@@ -9,7 +9,7 @@ __author__ = "Golf Modeling Suite Team"
 
 # Common imports for all engines
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import matplotlib.pyplot as plt
 import numpy as np

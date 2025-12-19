@@ -96,7 +96,7 @@ class TestOutputManager:
         output_file = temp_dir / "simulations" / "mujoco" / filename
         assert output_file.exists()
 
-        with open(output_file, "r") as f:
+        with open(output_file) as f:
             loaded_data = json.load(f)
 
         # The saved data is wrapped with metadata, so check the results field

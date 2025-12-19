@@ -11,7 +11,7 @@ import pickle
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -39,7 +39,7 @@ class OutputManager:
     and generating reports across all physics engines.
     """
 
-    def __init__(self, base_path: Optional[Union[str, Path]] = None):
+    def __init__(self, base_path: str | Path | None = None):
         """
         Initialize OutputManager.
 
@@ -112,11 +112,11 @@ class OutputManager:
 
     def save_simulation_results(
         self,
-        results: Union[pd.DataFrame, Dict[str, Any]],
+        results: pd.DataFrame | dict[str, Any],
         filename: str,
         format_type: OutputFormat = OutputFormat.CSV,
         engine: str = "mujoco",
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> Path:
         """
         Save simulation results to file.
@@ -223,7 +223,7 @@ class OutputManager:
         filename: str,
         format_type: OutputFormat = OutputFormat.CSV,
         engine: str = "mujoco",
-    ) -> Union[pd.DataFrame, Dict[str, Any]]:
+    ) -> pd.DataFrame | dict[str, Any]:
         """
         Load simulation results from file.
 
@@ -251,7 +251,7 @@ class OutputManager:
                 return pd.read_csv(file_path)
 
             elif format_type == OutputFormat.JSON:
-                with open(file_path, "r") as f:
+                with open(file_path) as f:
                     data = json.load(f)
                 return data.get("results", data)
 
@@ -270,7 +270,7 @@ class OutputManager:
             logger.error(f"Error loading simulation results: {e}")
             raise
 
-    def get_simulation_list(self, engine: Optional[str] = None) -> List[str]:
+    def get_simulation_list(self, engine: str | None = None) -> list[str]:
         """
         Get list of available simulation files.
 
@@ -307,7 +307,7 @@ class OutputManager:
 
     def export_analysis_report(
         self,
-        analysis_data: Dict[str, Any],
+        analysis_data: dict[str, Any],
         report_name: str,
         format_type: str = "json",
     ) -> Path:
@@ -335,7 +335,7 @@ class OutputManager:
                 def json_serializer(obj):
                     if isinstance(obj, np.ndarray):
                         return obj.tolist()
-                    elif isinstance(obj, (np.integer, np.floating)):
+                    elif isinstance(obj, np.integer | np.floating):
                         return float(obj)
                     elif isinstance(obj, datetime):
                         return obj.isoformat()
@@ -422,7 +422,7 @@ class OutputManager:
         logger.info(f"Cleaned up {cleaned_count} old files")
         return cleaned_count
 
-    def _generate_html_report(self, data: Dict[str, Any], title: str) -> str:
+    def _generate_html_report(self, data: dict[str, Any], title: str) -> str:
         """Generate basic HTML report."""
         timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         html = f"""
@@ -450,19 +450,17 @@ class OutputManager:
 
         # Add data to table
         for key, value in data.items():
-            if not isinstance(value, (dict, list)):
+            if not isinstance(value, dict | list):
                 html += f"<tr><td><strong>{key}</strong></td><td>{value}</td></tr>"
 
-        html += """
+        html += f"""
             </table>
 
             <h2>Detailed Data</h2>
-            <pre>{}</pre>
+            <pre>{json.dumps(data, indent=2, default=str)}</pre>
         </body>
         </html>
-        """.format(
-            json.dumps(data, indent=2, default=str)
-        )
+        """
 
         return html
 
