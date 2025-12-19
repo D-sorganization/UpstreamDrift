@@ -89,6 +89,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: pip install -r requirements.txt
+      - run: pip install -e .[dev]
       - run: pytest tests/ --cov=shared/python --cov-report=xml
       - uses: codecov/codecov-action@v4
         env:
