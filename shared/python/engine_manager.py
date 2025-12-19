@@ -7,7 +7,7 @@ including MuJoCo, Drake, Pinocchio, MATLAB models, and pendulum models.
 
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .common_utils import GolfModelingError, setup_logging
 
@@ -38,7 +38,7 @@ class EngineStatus(Enum):
 class EngineManager:
     """Manages different physics engines for golf swing modeling."""
 
-    def __init__(self, suite_root: Optional[Path] = None):
+    def __init__(self, suite_root: Path | None = None):
         """Initialize the engine manager.
 
         Args:
@@ -49,8 +49,8 @@ class EngineManager:
         self.suite_root = Path(suite_root)
         self.engines_root = self.suite_root / "engines"
 
-        self.current_engine: Optional[EngineType] = None
-        self.engine_status: Dict[EngineType, EngineStatus] = {}
+        self.current_engine: EngineType | None = None
+        self.engine_status: dict[EngineType, EngineStatus] = {}
 
         # Define engine paths
         self.engine_paths = {
@@ -69,7 +69,7 @@ class EngineManager:
         # Initialize engine status
         self._discover_engines()
 
-    def get_available_engines(self) -> List[EngineType]:
+    def get_available_engines(self) -> list[EngineType]:
         """Get list of available engines.
 
         Returns:
@@ -207,7 +207,7 @@ class EngineManager:
         # Future implementation will initialize simplified pendulum models
         logger.debug("Pendulum engine loading placeholder - ready for implementation")
 
-    def get_current_engine(self) -> Optional[EngineType]:
+    def get_current_engine(self) -> EngineType | None:
         """Get the currently active engine.
 
         Returns:
@@ -226,7 +226,7 @@ class EngineManager:
         """
         return self.engine_status.get(engine_type, EngineStatus.UNAVAILABLE)
 
-    def get_engine_info(self) -> Dict[str, Any]:
+    def get_engine_info(self) -> dict[str, Any]:
         """Get information about all engines.
 
         Returns:

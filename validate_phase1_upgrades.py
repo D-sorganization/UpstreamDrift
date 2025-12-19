@@ -9,7 +9,6 @@ are working correctly and provides a comprehensive status report.
 import importlib.util
 import sys
 from pathlib import Path
-from typing import Dict
 
 
 class Phase1Validator:
@@ -20,7 +19,7 @@ class Phase1Validator:
         self.results = {}
         self.errors = []
 
-    def run_validation(self) -> Dict[str, bool]:
+    def run_validation(self) -> dict[str, bool]:
         """Run all validation checks."""
         print("🔍 Validating Phase 1 Comprehensive Upgrades")
         print("=" * 50)
@@ -340,7 +339,7 @@ class Phase1Validator:
                 print("   Missing OutputManager class")
                 return False
 
-            manager_class = getattr(module, "OutputManager")
+            manager_class = module.OutputManager
             required_methods = [
                 "create_output_structure",
                 "save_simulation_results",

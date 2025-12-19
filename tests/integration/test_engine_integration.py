@@ -118,7 +118,7 @@ class TestEngineIntegration:
         available_engines = manager.get_available_engines()
 
         # Test that parameters can be set for each engine
-        for engine in available_engines:
+        for _engine in available_engines:
             # Mock engine instance
             mock_instance = Mock()
 
@@ -140,22 +140,22 @@ class TestEngineIntegration:
         available_engines = manager.get_available_engines()
         performance_results = {}
 
+        # Mock simulation with realistic timing - moved outside loop to avoid closure
+        def mock_simulate(engine_type):
+            # Simulate different performance characteristics
+            if engine_type == EngineType.MUJOCO:
+                time.sleep(0.01)  # Slower but more accurate
+            elif engine_type == EngineType.DRAKE:
+                time.sleep(0.005)  # Medium speed
+            else:  # pinocchio or others
+                time.sleep(0.002)  # Fastest
+
+            return {"ball_distance": 250.0}
+
         for engine in available_engines:
-            # Mock simulation with realistic timing
-            def mock_simulate():
-                # Simulate different performance characteristics
-                if engine == EngineType.MUJOCO:
-                    time.sleep(0.01)  # Slower but more accurate
-                elif engine == EngineType.DRAKE:
-                    time.sleep(0.005)  # Medium speed
-                else:  # pinocchio or others
-                    time.sleep(0.002)  # Fastest
-
-                return {"ball_distance": 250.0}
-
             # Measure performance
             start_time = time.time()
-            result = mock_simulate()
+            result = mock_simulate(engine)
             end_time = time.time()
 
             performance_results[engine] = {
@@ -167,7 +167,7 @@ class TestEngineIntegration:
         assert len(performance_results) > 0
 
         # All simulations should complete successfully
-        for engine, perf_data in performance_results.items():
+        for _engine, perf_data in performance_results.items():
             assert "simulation_time" in perf_data
             assert "result" in perf_data
             assert perf_data["result"]["ball_distance"] == 250.0
@@ -190,7 +190,7 @@ class TestEngineDataFlow:
         }
 
         # Test that swing data can be processed by all engines
-        for engine in available_engines:
+        for _engine in available_engines:
             mock_instance = Mock()
 
             # Test data input
@@ -220,7 +220,7 @@ class TestEngineDataFlow:
             "position": [[0, 0, 0], [1, 0, 1], [2, 0, 2]],
         }
 
-        for engine in available_engines:
+        for _engine in available_engines:
             mock_instance = Mock()
 
             # Mock consistent output format
@@ -241,7 +241,7 @@ class TestEngineDataFlow:
         manager = EngineManager()
         available_engines = manager.get_available_engines()
 
-        for engine in available_engines:
+        for _engine in available_engines:
             mock_instance = Mock()
 
             # Test invalid parameter handling
