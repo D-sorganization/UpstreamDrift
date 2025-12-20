@@ -56,7 +56,7 @@ def export_to_matlab(
 
     try:
         # Convert all data to MATLAB-compatible format
-        matlab_data = {}
+        matlab_data: dict[str, Any] = {}
 
         for key, value in data_dict.items():
             if isinstance(value, np.ndarray):
@@ -357,12 +357,12 @@ def export_recording_all_formats(
 
     if formats is None:
         formats = ["json", "csv", "mat", "hdf5"]
-    base_path = Path(base_path)
+    base_path_obj = Path(base_path)
     results = {}
 
     for fmt in formats:
         try:
-            output_path = base_path.with_suffix(f".{fmt}")
+            output_path = base_path_obj.with_suffix(f".{fmt}")
 
             if fmt == "json":
                 success = export_telemetry_json(str(output_path), data_dict)
@@ -371,7 +371,7 @@ def export_recording_all_formats(
             elif fmt == "mat":
                 success = export_to_matlab(str(output_path), data_dict)
             elif fmt in ["hdf5", "h5"]:
-                output_path = base_path.with_suffix(".h5")
+                output_path = base_path_obj.with_suffix(".h5")
                 success = export_to_hdf5(str(output_path), data_dict)
             elif fmt == "c3d":
                 # C3D needs special handling

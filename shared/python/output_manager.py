@@ -193,14 +193,14 @@ class OutputManager:
                     df.to_hdf(file_path, key="data", mode="w")
 
             elif format_type == OutputFormat.PICKLE:
-                output_data = {
+                pickle_data: dict[str, Any] = {
                     "metadata": metadata or {},
                     "results": results,
                     "timestamp": datetime.now(),
                     "engine": engine,
                 }
                 with open(file_path, "wb") as f_pickle:
-                    pickle.dump(output_data, f_pickle)
+                    pickle.dump(pickle_data, f_pickle)
 
             elif format_type == OutputFormat.PARQUET:
                 if isinstance(results, pd.DataFrame):
@@ -254,7 +254,9 @@ class OutputManager:
                 return data.get("results", data)
 
             elif format_type == OutputFormat.HDF5:
-                return pd.read_hdf(file_path, key="data")
+                # Cast the result to DataFrame as we know we saved a DataFrame
+                import typing
+                return typing.cast(pd.DataFrame, pd.read_hdf(file_path, key="data"))
 
             elif format_type == OutputFormat.PICKLE:
                 with open(file_path, "rb") as f:

@@ -7,31 +7,41 @@ Features:
 - Integrated Help and Documentation.
 """
 
-import sys
+import logging
 import os
 import subprocess
-import logging
+import sys
 import threading
-import typing
-import webbrowser
 import time
+import webbrowser
 from pathlib import Path
 
-from PyQt6.QtCore import (
-    Qt, QThread, pyqtSignal
-)
-from PyQt6.QtGui import (
-    QIcon, QFont, QPixmap
-)
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtGui import QFont, QIcon, QPixmap
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QPushButton, QLabel, QFrame, QGridLayout, QCheckBox,
-    QScrollArea, QMessageBox, QDialog, QComboBox, QTextEdit,
-    QTabWidget
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QFrame,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
 )
 
 # Configure Logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # Constants
@@ -84,10 +94,10 @@ class DockerBuildThread(QThread):
         self.target_stage = target_stage
 
     def run(self):
-        mujoco_path = REPOS_ROOT / MODELS_DICT["MuJoCo (Humanoid)"]
+        mujoco_path = REPOS_ROOT / MODELS_DICT["MuJoCo Humanoid"]
         # Dockerfile is at engines/physics_engines/mujoco/Dockerfile
         docker_context = mujoco_path
-        
+
         if not docker_context.exists():
             self.finished_signal.emit(False, f"Path not found: {docker_context}")
             return
@@ -98,7 +108,7 @@ class DockerBuildThread(QThread):
             "--target", self.target_stage,
             "."
         ]
-        
+
         self.log_signal.emit(f"Starting build for target: {self.target_stage}")
         self.log_signal.emit(f"Context: {docker_context}")
         self.log_signal.emit(f"Command: {' '.join(cmd)}")
@@ -122,7 +132,9 @@ class DockerBuildThread(QThread):
             if process.returncode == 0:
                 self.finished_signal.emit(True, "Build successful.")
             else:
-                self.finished_signal.emit(False, f"Build failed with code {process.returncode}")
+                self.finished_signal.emit(
+                    False, f"Build failed with code {process.returncode}"
+                )
 
         except Exception as e:
             self.finished_signal.emit(False, str(e))
@@ -146,7 +158,10 @@ class EnvironmentDialog(QDialog):
         tab_build = QWidget()
         build_layout = QVBoxLayout(tab_build)
 
-        lbl = QLabel("Rebuild the Docker environment to ensure all dependencies are correct.\nYou can choose a specific target to speed up build time.")
+        lbl = QLabel(
+            "Rebuild the Docker environment to ensure all dependencies are correct.\n"
+            "You can choose a specific target to speed up build time."
+        )
         lbl.setWordWrap(True)
         build_layout.addWidget(lbl)
 
@@ -163,7 +178,9 @@ class EnvironmentDialog(QDialog):
 
         self.console = QTextEdit()
         self.console.setReadOnly(True)
-        self.console.setStyleSheet("background-color: #1e1e1e; color: #00ff00; font-family: Consolas;")
+        self.console.setStyleSheet(
+            "background-color: #1e1e1e; color: #00ff00; font-family: Consolas;"
+        )
         build_layout.addWidget(self.console)
 
         tabs.addTab(tab_build, "Build Docker")
@@ -171,7 +188,7 @@ class EnvironmentDialog(QDialog):
         # --- Dependencies Tab ---
         tab_deps = QWidget()
         dep_layout = QVBoxLayout(tab_deps)
-        
+
         # Determine dependencies text (mocked logic or reading Dockerfile)
         self.txt_deps = QTextEdit()
         self.txt_deps.setReadOnly(True)
@@ -208,7 +225,7 @@ class EnvironmentDialog(QDialog):
         target = self.combo_stage.currentText()
         self.btn_build.setEnabled(False)
         self.console.clear()
-        
+
         self.build_thread = DockerBuildThread(target)
         self.build_thread.log_signal.connect(self.append_log)
         self.build_thread.finished_signal.connect(self.build_finished)
@@ -231,13 +248,13 @@ class HelpDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Golf Suite - Help")
         self.resize(800, 600)
-        
+
         layout = QVBoxLayout(self)
-        
+
         self.text_area = QTextEdit()
         self.text_area.setReadOnly(True)
         layout.addWidget(self.text_area)
-        
+
         # Load help content
         help_path = ASSETS_DIR / "help.md"
         if help_path.exists():
@@ -255,17 +272,17 @@ class GolfLauncher(QMainWindow):
         super().__init__()
         self.setWindowTitle("Golf Modeling Suite")
         self.resize(1400, 900)
-        
+
         # Set Icon
         icon_path = ASSETS_DIR / "golf_icon.png"
         if icon_path.exists():
             self.setWindowIcon(QIcon(str(icon_path)))
-        
+
         # State
         self.docker_available = False
         self.selected_model = None
         self.model_cards = {}
-        
+
         self.init_ui()
         self.check_docker()
 
@@ -279,7 +296,7 @@ class GolfLauncher(QMainWindow):
 
         # --- Top Bar ---
         top_bar = QHBoxLayout()
-        
+
         # Status Indicator
         self.lbl_status = QLabel("Checking Docker...")
         self.lbl_status.setStyleSheet("color: #aaaaaa; font-weight: bold;")
@@ -293,7 +310,7 @@ class GolfLauncher(QMainWindow):
         btn_help = QPushButton("Help")
         btn_help.clicked.connect(self.open_help)
         top_bar.addWidget(btn_help)
-        
+
         main_layout.addLayout(top_bar)
 
         # --- Model Grid ---
@@ -301,14 +318,14 @@ class GolfLauncher(QMainWindow):
         grid_area.setWidgetResizable(True)
         grid_area.setFrameShape(QFrame.Shape.NoFrame)
         grid_area.setStyleSheet("background: transparent;")
-        
+
         grid_widget = QWidget()
         self.grid_layout = QGridLayout(grid_widget)
         self.grid_layout.setSpacing(20)
-        
+
         # Populate Grid
         row, col = 0, 0
-        for name, folder in MODELS_DICT.items():
+        for name, _ in MODELS_DICT.items():
             card = self.create_model_card(name)
             self.model_cards[name] = card
             self.grid_layout.addWidget(card, row, col)
@@ -316,7 +333,7 @@ class GolfLauncher(QMainWindow):
             if col >= GRID_COLUMNS:
                 col = 0
                 row += 1
-                
+
         grid_area.setWidget(grid_widget)
         main_layout.addWidget(grid_area)
 
@@ -331,15 +348,15 @@ class GolfLauncher(QMainWindow):
         self.chk_live = QCheckBox("Live Visualization")
         self.chk_live.setChecked(True)
         self.chk_live.setToolTip("Enable VcXsrv/X11 display")
-        
+
         self.chk_gpu = QCheckBox("GPU Acceleration")
         self.chk_gpu.setChecked(False)
         self.chk_gpu.setToolTip("Requires NVIDIA Container Toolkit")
-        
+
         opts_layout.addWidget(self.chk_live)
         opts_layout.addWidget(self.chk_gpu)
         bottom_layout.addLayout(opts_layout)
-        
+
         bottom_layout.addStretch()
 
         # Launch Button
@@ -366,37 +383,42 @@ class GolfLauncher(QMainWindow):
         card.setObjectName("ModelCard")
         card.setCursor(Qt.CursorShape.PointingHandCursor)
         card.mousePressEvent = lambda e: self.select_model(name)
-        
+
         layout = QVBoxLayout(card)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        
+
         # Image
         img_name = MODEL_IMAGES.get(name)
         img_path = ASSETS_DIR / img_name if img_name else None
-        
+
         lbl_img = QLabel()
         if img_path and img_path.exists():
             pixmap = QPixmap(str(img_path))
-            pixmap = pixmap.scaled(180, 180, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+            pixmap = pixmap.scaled(
+                180,
+                180,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation
+            )
             lbl_img.setPixmap(pixmap)
         else:
             lbl_img.setText("No Image")
             lbl_img.setStyleSheet("color: #666; font-style: italic;")
-            
+
         layout.addWidget(lbl_img)
-        
+
         # Label
         lbl_name = QLabel(name)
         lbl_name.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
         lbl_name.setWordWrap(True)
         lbl_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(lbl_name)
-        
+
         return card
 
     def select_model(self, name):
         self.selected_model = name
-        
+
         # Update Styles
         for model_name, card in self.model_cards.items():
             if model_name == name:
@@ -419,7 +441,7 @@ class GolfLauncher(QMainWindow):
                         background-color: #2d2d30;
                     }
                 """)
-        
+
         self.update_launch_button()
 
     def update_launch_button(self):
@@ -522,7 +544,11 @@ class GolfLauncher(QMainWindow):
         else:
             self.lbl_status.setText("● Docker Not Found")
             self.lbl_status.setStyleSheet("color: #dc3545; font-weight: bold;")
-            QMessageBox.warning(self, "Docker Missing", "Docker is required to run simulations.\nPlease install Docker Desktop.")
+            QMessageBox.warning(
+                self,
+                "Docker Missing",
+                "Docker is required to run simulations.\nPlease install Docker Desktop."
+            )
         self.update_launch_button()
 
     def open_help(self):
@@ -560,7 +586,7 @@ class GolfLauncher(QMainWindow):
         script = abs_repo_path / "python/humanoid_launcher.py"
         if not script.exists():
             raise FileNotFoundError(f"Script not found: {script}")
-        
+
         logger.info(f"Launching Humanoid GUI: {script}")
         subprocess.Popen([sys.executable, str(script)], cwd=script.parent)
 
@@ -571,12 +597,12 @@ class GolfLauncher(QMainWindow):
 
     def _launch_docker_container(self, model_name, abs_repo_path):
         cmd = ["docker", "run", "--rm", "-it"]
-        
+
         # Volumes
         mount_path = str(abs_repo_path).replace("\\", "/")
         cmd.extend(["-v", f"{mount_path}:/workspace"])
         cmd.extend(["-w", "/workspace"])
-        
+
         # Display/X11
         if self.chk_live.isChecked():
             if os.name == "nt":
@@ -589,7 +615,7 @@ class GolfLauncher(QMainWindow):
         # GPU
         if self.chk_gpu.isChecked():
             cmd.append("--gpus=all")
-            
+
         # Network for Meshcat (Drake)
         host_port = None
         if "Drake" in model_name:
@@ -598,25 +624,27 @@ class GolfLauncher(QMainWindow):
              host_port = 7000
 
         cmd.append(DOCKER_IMAGE_NAME)
-        
-        # Entry Command
+
         # Entry Command
         if "Drake" in model_name:
             # Use shell to change dir and run as module for relative imports
             cmd.extend(["sh", "-c", "cd python && python -m src.golf_gui"])
-            
+
             if host_port:
                 self._start_meshcat_browser(host_port)
-                
+
         elif "Pinocchio" in model_name:
-             # Also run from python dir for consistency, though Pinocchio might be script-based
+             # Also run from python dir for consistency,
+             # though Pinocchio might be script-based
              cmd.extend(["sh", "-c", "cd python && python pinocchio_golf/gui.py"])
 
         logger.info(f"Docker Command: {' '.join(cmd)}")
-        
+
         # Launch in Terminal
         if os.name == "nt":
-            subprocess.Popen(["cmd", "/k", *cmd], creationflags=subprocess.CREATE_NEW_CONSOLE)
+            subprocess.Popen(
+                ["cmd", "/k", *cmd], creationflags=subprocess.CREATE_NEW_CONSOLE
+            )
         else:
             subprocess.Popen(cmd)
 
@@ -624,14 +652,14 @@ class GolfLauncher(QMainWindow):
         def open_url():
             time.sleep(3)
             webbrowser.open(f"http://localhost:{port}")
-            
+
         threading.Thread(target=open_url, daemon=True).start()
 
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    
+
     # Global Font
     font = QFont("Segoe UI", 10)
     app.setFont(font)

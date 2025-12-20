@@ -229,7 +229,7 @@ class PhysicsEnvWrapper:
                 """Initialize TimeStep."""
                 self.reward = 0.0
                 self.discount = 1.0
-                self.observation = {}
+                self.observation: dict[str, typing.Any] = {}
                 self.step_type = 1  # MID
 
         return TimeStep()
@@ -244,7 +244,7 @@ class PhysicsEnvWrapper:
                 """Initialize TimeStep."""
                 self.reward = 0.0
                 self.discount = 1.0
-                self.observation = {}
+                self.observation: dict[str, typing.Any] = {}
                 self.step_type = 0  # FIRST
 
         return TimeStep()
@@ -341,6 +341,7 @@ def run_simulation(
                     pass
 
     # 4. Setup Controller
+    controller: BaseController
     if control_mode == "lqr":
         # Calculate height scale (assuming standard 1.56m ref)
         h_scale = target_height / 1.56

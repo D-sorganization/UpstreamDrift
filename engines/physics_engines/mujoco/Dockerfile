@@ -3,7 +3,7 @@
 # ==========================================
 # Stage: Base System Dependencies
 # ==========================================
-FROM ubuntu:22.04 as base
+FROM ubuntu:22.04 AS base
 
 # Prevent interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -74,7 +74,7 @@ RUN pip install \
 # ==========================================
 # Stage: MuJoCo
 # ==========================================
-FROM base as mujoco
+FROM base AS mujoco
 # Install MuJoCo and DeepMind Robotics Tools
 RUN pip install \
     mujoco>=3.0.0 \
@@ -83,12 +83,12 @@ RUN pip install \
 # Optional: Additional MuJoCo playground utilities. Disabled by default because
 # they are experimental and significantly increase image build time and size.
 # To enable these tools, uncomment the line below.
-#    git+https://github.com/google-deepmind/mujoco_playground.git@v0.1.0
+# RUN pip install git+https://github.com/google-deepmind/mujoco_playground.git@v0.1.0
 
 # ==========================================
 # Stage: Pinocchio
 # ==========================================
-FROM base as pinocchio
+FROM base AS pinocchio
 # Install Pinocchio and related advanced robotics/visualization tools
 RUN pip install \
     pin>=2.6.0 \
@@ -99,7 +99,7 @@ RUN pip install \
 # ==========================================
 # Stage: Drake
 # ==========================================
-FROM base as drake
+FROM base AS drake
 # TODO: Implement Drake installation tailored to user needs.
 # Currently, Drake often requires system-specific apt packages or a specific wheel URL.
 # See https://drake.mit.edu/python_bindings.html for details.
@@ -113,7 +113,7 @@ FROM base as drake
 # ==========================================
 # Stage: All (Default)
 # ==========================================
-FROM base as all
+FROM base AS all
 # Combine all dependencies from MuJoCo and Pinocchio stages
 RUN pip install \
     mujoco>=3.0.0 \
