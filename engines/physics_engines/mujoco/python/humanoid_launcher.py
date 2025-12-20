@@ -45,14 +45,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-# Import polynomial generator widget
-try:
-    from mujoco_humanoid_golf.polynomial_generator import PolynomialGeneratorWidget
+# Polynomial generator widget imported lazily to avoid MuJoCo DLL issues
+# Import happens in open_polynomial_generator() only when needed
 
-    HAS_POLYNOMIAL_GENERATOR = True
-except ImportError:
-    HAS_POLYNOMIAL_GENERATOR = False
-    logging.warning("Polynomial generator widget not available")
 
 # Configure logging
 logging.basicConfig(
@@ -264,9 +259,8 @@ class HumanoidLauncher(QMainWindow):
             "background-color: #0078d4; color: white; padding: 8px; font-weight: bold;"
         )
         self.btn_poly_generator.clicked.connect(self.open_polynomial_generator)
-        self.btn_poly_generator.setEnabled(
-            HAS_POLYNOMIAL_GENERATOR and self.config.get("control_mode") == "poly"
-        )
+        # Enable button for poly mode - availability checked when clicked
+        self.btn_poly_generator.setEnabled(self.config.get("control_mode") == "poly")
         settings_layout.addWidget(self.btn_poly_generator, 0, 2)
 
         # Live View
@@ -554,16 +548,30 @@ class HumanoidLauncher(QMainWindow):
     def on_control_mode_changed(self, mode):
         """Handle control mode change to enable/disable polynomial generator button."""
         is_poly_mode = mode == "poly"
-        self.btn_poly_generator.setEnabled(HAS_POLYNOMIAL_GENERATOR and is_poly_mode)
+        self.btn_poly_generator.setEnabled(is_poly_mode)
 
     def open_polynomial_generator(self):
         """Open polynomial generator dialog."""
-        if not HAS_POLYNOMIAL_GENERATOR:
+        # Lazy import to avoid MuJoCo DLL initialization on Windows
+        try:
+            from mujoco_humanoid_golf.polynomial_generator import (
+                PolynomialGeneratorWidget,
+            )
+        except ImportError as e:
             QMessageBox.warning(
                 self,
                 "Polynomial Generator Unavailable",
-                "The polynomial generator widget is not available. "
+                f"The polynomial generator widget is not available.\n\nError: {e}\n\n"
                 "Please ensure mujoco_humanoid_golf.polynomial_generator is installed.",
+            )
+            return
+        except OSError as e:
+            QMessageBox.warning(
+                self,
+                "MuJoCo DLL Error",
+                f"Failed to load MuJoCo library.\n\nError: {e}\n\n"
+                "The polynomial generator requires MuJoCo to be properly installed.\n"
+                "This feature will work inside the Docker container.",
             )
             return
 
