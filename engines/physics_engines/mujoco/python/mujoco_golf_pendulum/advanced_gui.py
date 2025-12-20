@@ -1629,8 +1629,9 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             config = fallback_config  # Use fallback config for the rest of the function
 
         # Verify actuator count matches model
-        if self.sim_widget.model is not None:
-            model_actuator_count = self.sim_widget.model.nu
+        model = self.sim_widget.model
+        if model is not None:
+            model_actuator_count = model.nu
             config_actuator_count = len(config["actuators"])
 
             if model_actuator_count != config_actuator_count:
@@ -1661,17 +1662,19 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         # Verify control system matches model
         if not self.sim_widget.verify_control_system():
             logger.error("Control system does not match model actuator count!")
-            logger.error("Model has %d actuators", self.sim_widget.model.nu)
+            if self.sim_widget.model:
+                logger.error("Model has %d actuators", self.sim_widget.model.nu)
             if self.sim_widget.control_system:
                 logger.error(
                     "Control system has %d actuators",
                     self.sim_widget.control_system.num_actuators,
                 )
         else:
-            logger.debug(
-                "Control system verified: %d actuators",
-                self.sim_widget.model.nu,
-            )
+            if self.sim_widget.model:
+                logger.debug(
+                    "Control system verified: %d actuators",
+                    self.sim_widget.model.nu,
+                )
 
         # Update joint selector for phase diagrams
         self.joint_select_combo.clear()

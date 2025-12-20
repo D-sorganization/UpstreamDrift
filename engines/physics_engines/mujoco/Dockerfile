@@ -100,7 +100,7 @@ RUN pip install \
 # Stage: Drake
 # ==========================================
 FROM base AS drake
-# TODO: Drake installation is currently a placeholder.
+# NOTE: Drake installation is currently a placeholder.
 # Users should add specific installation commands here (e.g. pip install drake)
 # See https://drake.mit.edu/python_bindings.html
 RUN echo "Drake stage is a placeholder"
