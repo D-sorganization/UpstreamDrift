@@ -17,7 +17,17 @@ A DeepMind Control Suite simulation of a humanoid golfer, featuring a custom GUI
 2.  **Python 3** installed on Windows.
 3.  **VcXsrv** (Windows X Server) - **REQUIRED for Live Interactive View**.
     - Install from [SourceForge](https://sourceforge.net/projects/vcxsrv/).
-    - Run `XLaunch`, perform defaults but ensure **"Disable access control"** is CHECKED.
+    - **Important Configuration Steps**:
+      1. Run `XLaunch` from the Start Menu
+      2. Select "Multiple windows" and click Next
+      3. Select "Start no client" and click Next
+      4. **CRITICAL**: Check "Disable access control" (required for Docker)
+      5. Optionally save configuration for future use
+      6. Click Finish to start VcXsrv
+    - **Verify VcXsrv is Running**: Check for the VcXsrv icon in your system tray
+    - **Troubleshooting**: If you get a segmentation fault, ensure VcXsrv is running
+      and "Disable access control" is checked. Alternatively, use Headless Mode
+      (uncheck "Live Interactive View" in the GUI).
 
 ## How to Run (Recommended)
 
