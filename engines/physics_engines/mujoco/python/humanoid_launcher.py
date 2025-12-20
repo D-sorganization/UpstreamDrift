@@ -48,6 +48,7 @@ from PyQt6.QtWidgets import (
 # Import polynomial generator widget
 try:
     from mujoco_humanoid_golf.polynomial_generator import PolynomialGeneratorWidget
+
     HAS_POLYNOMIAL_GENERATOR = True
 except ImportError:
     HAS_POLYNOMIAL_GENERATOR = False
@@ -578,10 +579,22 @@ class HumanoidLauncher(QMainWindow):
 
         # Set available joints (humanoid joint names)
         joints = [
-            "lowerbackrx", "upperbackrx", "rtibiarx", "ltibiarx",
-            "rfemurrx", "lfemurrx", "rfootrx", "lfootrx",
-            "rhumerusrx", "lhumerusrx", "rhumerusrz", "lhumerusrz",
-            "rhumerusry", "lhumerusry", "rradiusrx", "lradiusrx"
+            "lowerbackrx",
+            "upperbackrx",
+            "rtibiarx",
+            "ltibiarx",
+            "rfemurrx",
+            "lfemurrx",
+            "rfootrx",
+            "lfootrx",
+            "rhumerusrx",
+            "lhumerusrx",
+            "rhumerusrz",
+            "lhumerusrz",
+            "rhumerusry",
+            "lhumerusry",
+            "rradiusrx",
+            "lradiusrx",
         ]
         poly_widget.set_joints(joints)
 
@@ -604,7 +617,6 @@ class HumanoidLauncher(QMainWindow):
         layout.addWidget(btn_close)
 
         dialog.exec()
-
 
     def browse_file(self, line_edit, save=False):
         if save:
