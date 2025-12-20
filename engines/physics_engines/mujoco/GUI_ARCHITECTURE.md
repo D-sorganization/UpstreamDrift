@@ -30,13 +30,20 @@ This document provides a comprehensive guide to all GUI applications in the Golf
   - Two-handed grip constraints
   - Enhanced facial features
   - Articulated finger segments
+- ✅ **Polynomial Control Generator** ⭐ NEW
+  - Visual polynomial function generation
+  - Draw trends manually or input equations
+  - Add and manipulate control points
+  - Generate 6th-order polynomials for joint control
+  - Per-joint polynomial configuration
+  - Automatic coefficient saving
 - ✅ **Simulation Modes**
   - Live Interactive View (requires VcXsrv on Windows)
   - Headless Mode (OSMesa rendering, no X11 required)
 - ✅ **Control Systems**
   - PD Controller (default)
   - LQR Controller
-  - Polynomial Controller
+  - Polynomial Controller (with visual generator)
 - ✅ **State Management**
   - Save simulation states to disk
   - Load previous states
@@ -238,6 +245,92 @@ The **Advanced Golf Analysis Window** includes sophisticated interactive manipul
 
 ---
 
+## 📈 Polynomial Control Generator
+
+The **Humanoid Golf Launcher** includes a visual polynomial function generator for creating complex control profiles.
+
+### Overview
+
+**File**: `engines/physics_engines/mujoco/python/mujoco_humanoid_golf/polynomial_generator.py`
+
+**Purpose**: Visual interface for generating 6th-order polynomial functions for joint control without manual coefficient entry.
+
+### Features
+
+- **Visual Drawing**: Draw control trends directly on the graph
+- **Control Points**: Add and manipulate control points with mouse
+- **Equation Input**: Enter mathematical equations (e.g., `sin(t)`, `t**2`)
+- **Curve Manipulation**: Drag points to adjust polynomial shape
+- **Per-Joint Configuration**: Generate different polynomials for each joint
+- **Automatic Fitting**: Generates 6th-order polynomial coefficients automatically
+- **Real-time Preview**: See polynomial curve as you design it
+
+### How to Use
+
+1. **Launch Humanoid Launcher**:
+   ```bash
+   cd engines/physics_engines/mujoco/python
+   python humanoid_launcher.py
+   ```
+
+2. **Select Polynomial Mode**:
+   - Go to "Simulation" tab
+   - Set Control Mode to "poly"
+   - Click "📊 Configure Polynomial" button
+
+3. **Generate Polynomial**:
+   - Select target joint from dropdown
+   - Choose interaction mode:
+     - **Draw**: Click and drag to draw trend
+     - **Points**: Click to add control points
+     - **Equation**: Enter mathematical expression
+   - Click "Fit Polynomial" to generate coefficients
+   - Coefficients are automatically saved to config
+
+4. **Run Simulation**:
+   - Close polynomial generator
+   - Click "RUN SIMULATION"
+   - Simulation uses generated polynomials for control
+
+### Workflow Example
+
+**Creating a Swing Motion**:
+
+1. Select "rhumerusrx" (right shoulder) joint
+2. Draw a smooth curve representing the swing:
+   - Start at 0 (address position)
+   - Rise to peak (backswing)
+   - Drop sharply (downswing)
+   - Level off (follow-through)
+3. Fit polynomial
+4. Repeat for other joints (elbow, wrist, etc.)
+5. Run simulation to see coordinated swing
+
+### Mathematical Background
+
+- **Polynomial Order**: 6th order (7 coefficients: c0 through c6)
+- **Function Form**: `u(t) = c0 + c1*t + c2*t² + c3*t³ + c4*t⁴ + c5*t⁵ + c6*t⁶`
+- **Time Range**: Typically 0 to simulation duration
+- **Fitting Method**: Least squares polynomial regression
+
+### Available Joints
+
+The generator supports all humanoid joints:
+- **Spine**: lowerbackrx, upperbackrx
+- **Legs**: rtibiarx, ltibiarx, rfemurrx, lfemurrx, rfootrx, lfootrx
+- **Arms**: rhumerusrx, lhumerusrx, rhumerusrz, lhumerusrz, rhumerusry, lhumerusry
+- **Forearms**: rradiusrx, lradiusrx
+
+### Tips for Best Results
+
+1. **Start Simple**: Begin with one or two joints
+2. **Smooth Curves**: Avoid sharp discontinuities
+3. **Reasonable Magnitudes**: Keep torques within ±100 Nm
+4. **Test Incrementally**: Generate, test, refine
+5. **Save Configurations**: Use state save/load for good profiles
+
+---
+
 ## 📊 Comparison Matrix
 
 | Feature | Humanoid Launcher | Advanced Analysis | Legacy Tkinter |
@@ -245,6 +338,7 @@ The **Advanced Golf Analysis Window** includes sophisticated interactive manipul
 | **Framework** | PyQt6 | PyQt6 | Tkinter |
 | **Color Customization** | ✅ | ❌ | ✅ |
 | **Height/Weight Scaling** | ✅ | ❌ | ✅ |
+| **Polynomial Generator** | ✅ | ❌ | ❌ |
 | **Interactive Manipulation** | ❌ | ✅ | ❌ |
 | **Multiple Models** | ❌ (Humanoid only) | ✅ | ❌ (Humanoid only) |
 | **Biomechanical Analysis** | ❌ | ✅ | ❌ |
