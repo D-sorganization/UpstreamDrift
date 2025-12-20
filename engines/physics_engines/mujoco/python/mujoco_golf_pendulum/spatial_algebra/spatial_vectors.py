@@ -29,9 +29,7 @@ def skew(v: np.ndarray) -> np.ndarray:
         >>> np.allclose(S @ u, np.cross(v, u))
         True
     """
-    v = np.asarray(v)
-    if v.shape != (3,):
-        v = v.flatten()
+    v = np.asarray(v).ravel()
 
     if v.shape != (3,):
         msg = f"Input must be 3x1 vector, got shape {v.shape}"
@@ -69,9 +67,7 @@ def crm(v: np.ndarray) -> np.ndarray:
         >>> X.shape
         (6, 6)
     """
-    v = np.asarray(v)
-    if v.shape != (6,):
-        v = v.flatten()
+    v = np.asarray(v).ravel()
 
     if v.shape != (6,):
         msg = f"Input must be 6x1 spatial vector, got shape {v.shape}"
@@ -136,9 +132,7 @@ def crf(v: np.ndarray) -> np.ndarray:
         >>> np.allclose(X_crf, -X_crm.T)
         True
     """
-    v = np.asarray(v)
-    if v.shape != (6,):
-        v = v.flatten()
+    v = np.asarray(v).ravel()
 
     if v.shape != (6,):
         msg = f"Input must be 6x1 spatial vector, got shape {v.shape}"
@@ -185,13 +179,8 @@ def cross_motion(v: np.ndarray, m: np.ndarray) -> np.ndarray:
     Returns:
         6x1 spatial vector
     """
-    v = np.asarray(v)
-    if v.shape != (6,):
-        v = v.flatten()
-
-    m = np.asarray(m)
-    if m.shape != (6,):
-        m = m.flatten()
+    v = np.asarray(v).ravel()
+    m = np.asarray(m).ravel()
 
     if v.shape != (6,):
         msg = f"v must be 6x1 spatial vector, got shape {v.shape}"
@@ -231,13 +220,8 @@ def cross_force(v: np.ndarray, f: np.ndarray) -> np.ndarray:
     Returns:
         6x1 spatial vector
     """
-    v = np.asarray(v)
-    if v.shape != (6,):
-        v = v.flatten()
-
-    f = np.asarray(f)
-    if f.shape != (6,):
-        f = f.flatten()
+    v = np.asarray(v).ravel()
+    f = np.asarray(f).ravel()
 
     if v.shape != (6,):
         msg = f"v must be 6x1 spatial vector, got shape {v.shape}"

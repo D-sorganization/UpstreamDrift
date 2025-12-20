@@ -44,7 +44,7 @@ def mci(mass: float, com: np.ndarray, i_com: np.ndarray) -> np.ndarray:
         >>> i_spatial.shape
         (6, 6)
     """
-    com = np.asarray(com).flatten()
+    com = np.asarray(com).ravel()
     i_com = np.asarray(i_com)
 
     if not (isinstance(mass, int | float) and mass > 0):
