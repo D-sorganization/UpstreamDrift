@@ -394,6 +394,20 @@ class SwingOptimizer:
         # Reset simulation
         mujoco.mj_resetData(self.model, self.data)
 
+        # ⚡ Bolt Optimization: Pre-allocate Jacobian arrays to avoid allocation in loop
+        jacp = np.zeros((3, self.model.nv))
+        jacr = np.zeros((3, self.model.nv))
+        jacp_flat = np.zeros(3 * self.model.nv)
+        jacr_flat = np.zeros(3 * self.model.nv)
+        use_flat_jac = False
+
+        if self.club_head_id is not None:
+            try:
+                # Try the 2D array signature first (newer MuJoCo)
+                mujoco.mj_jacBody(self.model, self.data, jacp, jacr, self.club_head_id)
+            except TypeError:
+                use_flat_jac = True
+
         for step in range(num_steps):
             # Set desired position
             self.data.qpos[:] = trajectory_interp[step]
@@ -429,17 +443,7 @@ class SwingOptimizer:
 
             # Club head speed
             if self.club_head_id is not None:
-                # MuJoCo 3.3+ may require reshaped arrays
-                try:
-                    jacp = np.zeros((3, self.model.nv))
-                    jacr = np.zeros((3, self.model.nv))
-                    mujoco.mj_jacBody(
-                        self.model, self.data, jacp, jacr, self.club_head_id
-                    )
-                except TypeError:
-                    # Fallback to flat array approach
-                    jacp_flat = np.zeros(3 * self.model.nv)
-                    jacr_flat = np.zeros(3 * self.model.nv)
+                if use_flat_jac:
                     mujoco.mj_jacBody(
                         self.model,
                         self.data,
@@ -447,7 +451,12 @@ class SwingOptimizer:
                         jacr_flat,
                         self.club_head_id,
                     )
-                    jacp = jacp_flat.reshape(3, self.model.nv)
+                    jacp[:] = jacp_flat.reshape(3, self.model.nv)
+                else:
+                    mujoco.mj_jacBody(
+                        self.model, self.data, jacp, jacr, self.club_head_id
+                    )
+
                 vel = jacp @ self.data.qvel
                 club_speed = np.linalg.norm(vel)
                 club_speeds.append(club_speed)
