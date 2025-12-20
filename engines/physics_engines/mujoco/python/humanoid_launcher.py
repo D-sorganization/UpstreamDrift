@@ -620,6 +620,10 @@ class HumanoidLauncher(QMainWindow):
                 cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
                 cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
+                # Fix pixelated/jumbled display by disabling Qt DPI scaling over X11
+                cmd.extend(["-e", "QT_AUTO_SCREEN_SCALE_FACTOR=0"])
+                cmd.extend(["-e", "QT_SCALE_FACTOR=1"])
+                cmd.extend(["-e", "QT_QPA_PLATFORM=xcb"])
                 # NOTE: LIBGL_ALWAYS_INDIRECT removed - causes segfaults with modern
                 # OpenGL. VcXsrv should work in direct rendering mode.
             else:
@@ -631,15 +635,21 @@ class HumanoidLauncher(QMainWindow):
             cmd.extend(["-e", "MUJOCO_GL=osmesa"])
 
         # Image and Command
-        cmd.extend(
-            [
-                "robotics_env",
-                "/opt/mujoco-env/bin/python",
-                "-u",
-                "-m",
-                "mujoco_humanoid_golf",
-            ]
-        )
+        cmd.extend(["robotics_env", "/opt/mujoco-env/bin/python", "-u", "-m"])
+
+        # Use CLI runner for headless mode, GUI for live view
+        if self.config["live_view"]:
+            # Launch interactive GUI (requires X11)
+            cmd.append("mujoco_humanoid_golf")
+        else:
+            # Launch headless CLI runner
+            cmd.extend([
+                "mujoco_humanoid_golf.cli_runner",
+                "--model", "full_body",  # Use full humanoid model
+                "--duration", "5.0",
+                "--summary",
+                "--output-csv", "/workspace/golf_data.csv",
+            ])
 
         return cmd
 

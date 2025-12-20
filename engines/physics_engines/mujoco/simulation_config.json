@@ -40,7 +40,7 @@
     "height_m": 1.8,
     "weight_percent": 100.0,
     "control_mode": "pd",
-    "live_view": false,
+    "live_view": true,
     "save_state_path": "",
     "load_state_path": "",
     "club_length": 1.0,
