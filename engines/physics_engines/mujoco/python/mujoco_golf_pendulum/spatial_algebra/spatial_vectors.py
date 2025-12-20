@@ -32,10 +32,9 @@ def skew(v: np.ndarray) -> np.ndarray:
     v = np.asarray(v)
     if v.shape != (3,):
         v = v.ravel()  # Optimization: Avoid copy if possible
-
-    if v.shape != (3,):
-        msg = f"Input must be 3x1 vector, got shape {v.shape}"
-        raise ValueError(msg)
+        if v.shape != (3,):
+            msg = f"Input must be 3x1 vector, got shape {v.shape}"
+            raise ValueError(msg)
 
     return np.array([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
 
@@ -72,10 +71,9 @@ def crm(v: np.ndarray) -> np.ndarray:
     v = np.asarray(v)
     if v.shape != (6,):
         v = v.ravel()  # Optimization: Avoid copy if possible
-
-    if v.shape != (6,):
-        msg = f"Input must be 6x1 spatial vector, got shape {v.shape}"
-        raise ValueError(msg)
+        if v.shape != (6,):
+            msg = f"Input must be 6x1 spatial vector, got shape {v.shape}"
+            raise ValueError(msg)
 
     w = v[:3]  # Angular velocity
     vlin = v[3:]  # Linear velocity
@@ -139,10 +137,9 @@ def crf(v: np.ndarray) -> np.ndarray:
     v = np.asarray(v)
     if v.shape != (6,):
         v = v.ravel()  # Optimization: Avoid copy if possible
-
-    if v.shape != (6,):
-        msg = f"Input must be 6x1 spatial vector, got shape {v.shape}"
-        raise ValueError(msg)
+        if v.shape != (6,):
+            msg = f"Input must be 6x1 spatial vector, got shape {v.shape}"
+            raise ValueError(msg)
 
     w = v[:3]  # Angular velocity
     vlin = v[3:]  # Linear velocity
@@ -188,17 +185,16 @@ def cross_motion(v: np.ndarray, m: np.ndarray) -> np.ndarray:
     v = np.asarray(v)
     if v.shape != (6,):
         v = v.ravel()  # Optimization: Avoid copy if possible
+        if v.shape != (6,):
+            msg = f"v must be 6x1 spatial vector, got shape {v.shape}"
+            raise ValueError(msg)
 
     m = np.asarray(m)
     if m.shape != (6,):
         m = m.ravel()  # Optimization: Avoid copy if possible
-
-    if v.shape != (6,):
-        msg = f"v must be 6x1 spatial vector, got shape {v.shape}"
-        raise ValueError(msg)
-    if m.shape != (6,):
-        msg = f"m must be 6x1 spatial vector, got shape {m.shape}"
-        raise ValueError(msg)
+        if m.shape != (6,):
+            msg = f"m must be 6x1 spatial vector, got shape {m.shape}"
+            raise ValueError(msg)
 
     # Unpack components (v = [w; v_lin])
     # Result:
@@ -234,17 +230,16 @@ def cross_force(v: np.ndarray, f: np.ndarray) -> np.ndarray:
     v = np.asarray(v)
     if v.shape != (6,):
         v = v.ravel()  # Optimization: Avoid copy if possible
+        if v.shape != (6,):
+            msg = f"v must be 6x1 spatial vector, got shape {v.shape}"
+            raise ValueError(msg)
 
     f = np.asarray(f)
     if f.shape != (6,):
         f = f.ravel()  # Optimization: Avoid copy if possible
-
-    if v.shape != (6,):
-        msg = f"v must be 6x1 spatial vector, got shape {v.shape}"
-        raise ValueError(msg)
-    if f.shape != (6,):
-        msg = f"f must be 6x1 spatial vector, got shape {f.shape}"
-        raise ValueError(msg)
+        if f.shape != (6,):
+            msg = f"f must be 6x1 spatial vector, got shape {f.shape}"
+            raise ValueError(msg)
 
     # Unpack components (v = [w; v_lin])
     # Result:
