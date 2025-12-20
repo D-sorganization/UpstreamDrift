@@ -33,7 +33,7 @@ class GolfLauncher(QtWidgets.QMainWindow):
         self.repo_root = self.script_dir.parent  # python/ -> root
         self.repos_dir = self.repo_root.parent  # Repositories/
 
-        self.mujoco_path = self.script_dir / "mujoco_golf_pendulum/advanced_gui.py"
+        self.mujoco_path = self.script_dir / "mujoco_humanoid_golf/advanced_gui.py"
         self.drake_path = self.repos_dir / "Drake_Golf_Model/python/src/golf_gui.py"
         self.pinocchio_path = (
             self.repos_dir / "Pinocchio_Golf_Model/python/pinocchio_golf/gui.py"

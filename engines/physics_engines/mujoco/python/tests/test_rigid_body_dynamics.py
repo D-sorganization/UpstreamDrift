@@ -8,11 +8,11 @@ import numpy as np
 import pytest
 
 # Import directly from modules to avoid __init__ imports that require MuJoCo
-from mujoco_golf_pendulum.rigid_body_dynamics.aba import aba
-from mujoco_golf_pendulum.rigid_body_dynamics.crba import crba
-from mujoco_golf_pendulum.rigid_body_dynamics.rnea import rnea
-from mujoco_golf_pendulum.spatial_algebra.inertia import mci
-from mujoco_golf_pendulum.spatial_algebra.transforms import xlt
+from mujoco_humanoid_golf.rigid_body_dynamics.aba import aba
+from mujoco_humanoid_golf.rigid_body_dynamics.crba import crba
+from mujoco_humanoid_golf.rigid_body_dynamics.rnea import rnea
+from mujoco_humanoid_golf.spatial_algebra.inertia import mci
+from mujoco_humanoid_golf.spatial_algebra.transforms import xlt
 
 GRAVITY_M_S2 = 9.81
 

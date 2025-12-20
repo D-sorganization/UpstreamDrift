@@ -7,7 +7,7 @@ This module demonstrates:
 4. Comparing rigid vs flexible club shafts
 
 Run examples with:
-    python -m mujoco_golf_pendulum.examples_joint_analysis
+    python -m mujoco_humanoid_golf.examples_joint_analysis
 """
 
 import os
@@ -15,12 +15,12 @@ import os
 import matplotlib.pyplot as plt
 import mujoco as mj
 import numpy as np
-from mujoco_golf_pendulum.joint_analysis import (
+from mujoco_humanoid_golf.joint_analysis import (
     GimbalJointAnalyzer,
     UniversalJointAnalyzer,
     plot_torque_wobble,
 )
-from mujoco_golf_pendulum.models import (
+from mujoco_humanoid_golf.models import (
     CLUB_CONFIGS,
     GIMBAL_JOINT_DEMO_XML,
     TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML,

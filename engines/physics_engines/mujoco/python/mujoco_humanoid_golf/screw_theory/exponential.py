@@ -3,7 +3,7 @@ Exponential and logarithmic maps between se(3) and SE(3).
 """
 
 import numpy as np
-from mujoco_golf_pendulum.spatial_algebra.spatial_vectors import skew
+from mujoco_humanoid_golf.spatial_algebra.spatial_vectors import skew
 
 
 def exponential_map(S: np.ndarray, theta: float) -> np.ndarray:

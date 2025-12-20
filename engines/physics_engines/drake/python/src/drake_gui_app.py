@@ -1,6 +1,7 @@
 """Drake Golf GUI Application using PyQt6."""
 
 import logging
+import os
 import sys
 import typing
 import webbrowser
@@ -92,14 +93,24 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         """Initialize Drake simulation and Meshcat."""
         try:
             meshcat_params = MeshcatParams()
-            meshcat_params.host = "localhost"
+            # "0.0.0.0" is required for Docker port forwarding
+            meshcat_params.host = os.environ.get("MESHCAT_HOST", "localhost")
             self.meshcat = Meshcat(meshcat_params)
             LOGGER.info("Meshcat available at: %s", self.meshcat.web_url())
 
-            # Open browser automatically (optional, maybe configurable)
-            # Check if meshcat instance is valid before attempting to open url
+            # Open browser automatically only if running locally (not in Docker)
+            # In Docker, the launcher handles opening the browser on the host.
             if self.meshcat:
-                webbrowser.open(self.meshcat.web_url())
+                if "MESHCAT_HOST" not in os.environ:
+                    webbrowser.open(self.meshcat.web_url())
+                else:
+                    LOGGER.info(
+                        "Running in Docker/Headless mode; "
+                        "skipping auto-browser open inside container."
+                    )
+                    LOGGER.info(
+                        "Please access Meshcat from your host browser (e.g., http://localhost:7000)."
+                    )
 
         except Exception as e:
             LOGGER.exception("Failed to start Meshcat")

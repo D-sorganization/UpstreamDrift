@@ -63,6 +63,17 @@ MODEL_IMAGES = {
     "Pinocchio Golf Model": "pinocchio.png",
 }
 
+MODEL_DESCRIPTIONS = {
+    "MuJoCo Humanoid": "Full humanoid simulation including contact forces, "
+    "ground reaction forces (GRF), and advanced biomechanics.",
+    "MuJoCo Dashboard": "Comprehensive GUI dashboard containing multiple "
+    "tab-selectable models of the golf swing (from simple pendulums to full body).",
+    "Drake Golf Model": "Drake-based implementation highlighting control systems, "
+    "trajectory optimization, and robust stabilization patterns.",
+    "Pinocchio Golf Model": "Rigid body dynamics implementation utilizing "
+    "Featherstone's spatial algebra algorithms for efficient computation.",
+}
+
 DOCKER_STAGES = ["all", "mujoco", "pinocchio", "drake", "base"]
 
 
@@ -121,12 +132,17 @@ class DockerBuildThread(QThread):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
+                bufsize=1,  # Line buffered to ensure real-time output
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
 
             # Read output real-time
-            for line in process.stdout:
-                self.log_signal.emit(line.strip())
+            while True:
+                line = process.stdout.readline()
+                if not line and process.poll() is not None:
+                    break
+                if line:
+                    self.log_signal.emit(line.strip())
 
             process.wait()
 
@@ -417,6 +433,15 @@ class GolfLauncher(QMainWindow):
         lbl_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(lbl_name)
 
+        # Description
+        desc_text = MODEL_DESCRIPTIONS.get(name, "")
+        lbl_desc = QLabel(desc_text)
+        lbl_desc.setFont(QFont("Segoe UI", 9))
+        lbl_desc.setStyleSheet("color: #cccccc;")
+        lbl_desc.setWordWrap(True)
+        lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(lbl_desc)
+
         return card
 
     def select_model(self, name):
@@ -611,7 +636,7 @@ class GolfLauncher(QMainWindow):
     def _custom_launch_comprehensive(self, abs_repo_path):
         python_dir = abs_repo_path / "python"
         logger.info(f"Launching Comprehensive GUI from {python_dir}")
-        subprocess.Popen([sys.executable, "-m", "mujoco_golf_pendulum"], cwd=python_dir)
+        subprocess.Popen([sys.executable, "-m", "mujoco_humanoid_golf"], cwd=python_dir)
 
     def _launch_docker_container(self, model_name, abs_repo_path):
         cmd = ["docker", "run", "--rm", "-it"]
@@ -626,6 +651,7 @@ class GolfLauncher(QMainWindow):
             if os.name == "nt":
                 cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
+                cmd.extend(["-e", "LIBGL_ALWAYS_INDIRECT=1"])
             else:
                 cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
                 cmd.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw"])
@@ -646,14 +672,14 @@ class GolfLauncher(QMainWindow):
         # Entry Command
         if "Drake" in model_name:
             # Run as module for relative imports (workdir is now /workspace/python)
-            cmd.extend(["python", "-m", "src.golf_gui"])
+            cmd.extend(["/opt/mujoco-env/bin/python", "-m", "src.golf_gui"])
 
             if host_port:
                 self._start_meshcat_browser(host_port)
 
         elif "Pinocchio" in model_name:
             # Run from python dir
-            cmd.extend(["python", "pinocchio_golf/gui.py"])
+            cmd.extend(["/opt/mujoco-env/bin/python", "pinocchio_golf/gui.py"])
 
         logger.info(f"Docker Command: {' '.join(cmd)}")
 

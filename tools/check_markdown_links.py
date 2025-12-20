@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Check for broken relative links in Markdown files."""
+
 import re
 import sys
 from pathlib import Path

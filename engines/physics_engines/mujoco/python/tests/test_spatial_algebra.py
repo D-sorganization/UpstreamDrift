@@ -6,7 +6,7 @@ Tests spatial vectors, transformations, and inertia operations.
 
 import numpy as np
 import pytest
-from mujoco_golf_pendulum.spatial_algebra import (
+from mujoco_humanoid_golf.spatial_algebra import (
     crf,
     crm,
     inv_xtrans,
