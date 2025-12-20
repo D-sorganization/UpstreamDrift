@@ -7,12 +7,13 @@ and modeling approaches in the Golf Modeling Suite.
 __version__ = "1.0.0"
 __author__ = "Golf Modeling Suite Team"
 
-# Common imports for all engines
-from pathlib import Path
+# Heavy dependencies (matplotlib, numpy, pandas) are NOT imported here
+# to prevent immediate failures when they're not installed.
+# Each module that needs them should import them directly.
+# This allows the launcher to run and provide helpful error messages
+# about missing dependencies only when specific features are used.
 
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
+from pathlib import Path  # Lightweight, always available
 
 # Suite-wide constants
 SUITE_ROOT = Path(__file__).parent.parent.parent
