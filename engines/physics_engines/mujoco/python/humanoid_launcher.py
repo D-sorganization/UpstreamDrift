@@ -620,8 +620,8 @@ class HumanoidLauncher(QMainWindow):
                 cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
                 cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
-                # Help compatibility with VcXsrv
-                cmd.extend(["-e", "LIBGL_ALWAYS_INDIRECT=1"])
+                # NOTE: LIBGL_ALWAYS_INDIRECT removed - causes segfaults with modern
+                # OpenGL. VcXsrv should work in direct rendering mode.
             else:
                 cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
