@@ -56,31 +56,31 @@ def export_to_matlab(
 
     try:
         # Convert all data to MATLAB-compatible format
-        matlab_data: dict[str, Any] = {}
+        output_data: dict[str, Any] = {}
 
         for key, value in data_dict.items():
             if isinstance(value, np.ndarray):
                 # MATLAB uses Fortran (column-major) order
-                matlab_data[key] = np.asarray(value, order="F")
+                output_data[key] = np.asarray(value, order="F")
             elif isinstance(value, list | tuple):
-                matlab_data[key] = np.array(value, order="F")
+                output_data[key] = np.array(value, order="F")
             elif isinstance(value, int | float | str | bool):
-                matlab_data[key] = value
+                output_data[key] = value
             elif isinstance(value, dict):
                 # Nested dict - flatten keys
                 for subkey, subvalue in value.items():
                     flat_key = f"{key}_{subkey}".replace(" ", "_")
                     if isinstance(subvalue, np.ndarray):
-                        matlab_data[flat_key] = np.asarray(subvalue, order="F")
+                        output_data[flat_key] = np.asarray(subvalue, order="F")
                     elif isinstance(subvalue, list | tuple):
-                        matlab_data[flat_key] = np.array(subvalue, order="F")
+                        output_data[flat_key] = np.array(subvalue, order="F")
                     else:
-                        matlab_data[flat_key] = subvalue
+                        output_data[flat_key] = subvalue
 
         # Save to .mat file
         savemat(
             output_path,
-            matlab_data,
+            output_data,
             do_compression=compress,
             format="5",  # MATLAB 5 format (compatible with most versions)
             oned_as="column",  # Save 1D arrays as column vectors

@@ -81,8 +81,8 @@ RUN pip install \
     dm_control>=1.0.14 \
     jax[cuda12_pip]
 # Optional: Additional MuJoCo playground utilities. Disabled by default because
-# they are experimental and significantly increase image build time and size.
-# To enable these tools, uncomment the line below.
+# they significantly increase image build time and size and are not required for
+# most workflows. To enable these tools, remove the '#' from the RUN command below.
 # RUN pip install git+https://github.com/google-deepmind/mujoco_playground.git@v0.1.0
 
 # ==========================================

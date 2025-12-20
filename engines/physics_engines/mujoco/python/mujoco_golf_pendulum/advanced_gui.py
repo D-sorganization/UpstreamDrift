@@ -691,9 +691,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         # Update preset combo in visualization tab
         index = self.camera_combo.findText(preset_name)
         if index >= 0:
-            self.camera_combo.blockSignals(True)
-            self.camera_combo.setCurrentIndex(index)
-            self.camera_combo.blockSignals(False)
+            try:
+                self.camera_combo.blockSignals(True)
+                self.camera_combo.setCurrentIndex(index)
+            finally:
+                self.camera_combo.blockSignals(False)
 
     def _update_model_description(self, index: int) -> None:
         """Update the model description label based on selected model."""

@@ -1,6 +1,7 @@
 """
 Unit tests for basic golf launcher functionality (Docker threads).
 """
+
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
@@ -8,6 +9,7 @@ from unittest.mock import MagicMock, Mock, patch
 # Add the project root to the path for imports
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
+
 
 # Define Dummy Qt classes to avoid inheriting from Mock
 class MockQThread:
@@ -23,8 +25,10 @@ class MockQThread:
     def wait(self):
         pass
 
+
 def mock_pyqt_signal(*args):
     return MagicMock()
+
 
 # Setup sys.modules for PyQt6
 # We need to construct the module structure so imports work
@@ -35,23 +39,42 @@ mock_qt_core.Qt = MagicMock()
 
 mock_qt_widgets = MagicMock()
 
+
 # Define widget mocks
 class MockQWidget:
-    def __init__(self, parent=None): pass
-    def setWindowTitle(self, title): pass
-    def resize(self, w, h): pass
-    def setLayout(self, layout): pass
+    def __init__(self, parent=None):
+        pass
+
+    def setWindowTitle(self, title):
+        pass
+
+    def resize(self, w, h):
+        pass
+
+    def setLayout(self, layout):
+        pass
+
 
 class MockQDialog(MockQWidget):
-    def accept(self): pass
+    def accept(self):
+        pass
+
 
 class MockQTextEdit(MockQWidget):
-    def setReadOnly(self, b): pass
-    def setMarkdown(self, t): pass
+    def setReadOnly(self, b):
+        pass
+
+    def setMarkdown(self, t):
+        pass
+
 
 class MockQVBoxLayout:
-    def __init__(self, parent=None): pass
-    def addWidget(self, w): pass
+    def __init__(self, parent=None):
+        pass
+
+    def addWidget(self, w):
+        pass
+
 
 mock_qt_widgets.QDialog = MockQDialog
 mock_qt_widgets.QTextEdit = MockQTextEdit
@@ -68,7 +91,11 @@ sys.modules["PyQt6.QtWidgets"] = mock_qt_widgets
 # Now we can safely import
 # Note: We must enable import of launchers.golf_launcher
 # We import HelpDialog too
-from launchers.golf_launcher import DockerBuildThread, DockerCheckThread, HelpDialog  # noqa: E402, I001
+from launchers.golf_launcher import (  # noqa: E402, I001
+    DockerBuildThread,
+    DockerCheckThread,
+    HelpDialog,
+)
 
 
 class TestDockerThreads:
@@ -173,4 +200,3 @@ class TestDockerThreads:
         # Verify text was set
         # Since we mocked QTextEdit, we can't easily verify internal state without
         # capturing the instance. But simpler is just ensuring it runs without error.
-

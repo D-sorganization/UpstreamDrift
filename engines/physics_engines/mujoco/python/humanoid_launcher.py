@@ -589,6 +589,11 @@ class HumanoidLauncher(QMainWindow):
         if is_windows:
             drive, tail = os.path.splitdrive(abs_repo_path)
             if drive:
+                # Docker Desktop on Windows often relies on WSL2 backend.
+                # When invoking docker from Windows Python, explicit WSL path conversion
+                # (/mnt/c/...) is sometimes safer for volume mounting than C:/ style,
+                # though modern Docker Desktop handles both.
+                # This logic ensures compatibility.
                 drive_letter = drive[0].lower()
                 rel_path = tail.replace("\\", "/")
                 wsl_path = f"/mnt/{drive_letter}{rel_path}"
@@ -707,8 +712,10 @@ class HumanoidLauncher(QMainWindow):
 
         if platform.system() == "Windows" and hasattr(os, "startfile"):
             os.startfile(str(path))
+        elif platform.system() == "Darwin":
+            subprocess.run(["open", str(path)], check=False)
         else:
-            subprocess.call(["xdg-open", str(path)])
+            subprocess.run(["xdg-open", str(path)], check=False)
 
 
 if __name__ == "__main__":

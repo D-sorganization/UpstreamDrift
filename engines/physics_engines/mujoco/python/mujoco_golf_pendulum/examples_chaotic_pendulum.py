@@ -11,6 +11,8 @@ Run this script to see interactive demonstrations of control principles
 using the chaotic pendulum model.
 """
 
+import abc
+
 import matplotlib.pyplot as plt
 import mujoco
 import numpy as np
@@ -20,7 +22,7 @@ from src.constants import GRAVITY_M_S2
 from .models import CHAOTIC_PENDULUM_XML
 
 
-class ChaoticPendulumController:
+class ChaoticPendulumController(abc.ABC):
     """Base controller class for chaotic pendulum experiments."""
 
     def __init__(self, model, data) -> None:
@@ -63,6 +65,7 @@ class ChaoticPendulumController:
 
         return ke + pe
 
+    @abc.abstractmethod
     def control(self, time: float) -> tuple[float, float]:
         """Calculate control inputs. Should be overridden."""
         return 0.0, 0.0

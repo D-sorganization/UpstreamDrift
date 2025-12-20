@@ -341,7 +341,7 @@ def run_simulation(
                     pass
 
     # 4. Setup Controller
-    controller: BaseController
+    # 4. Setup Controller
     if control_mode == "lqr":
         # Calculate height scale (assuming standard 1.56m ref)
         h_scale = target_height / 1.56
@@ -351,6 +351,8 @@ def run_simulation(
     elif control_mode == "poly":
         controller = PolynomialController(physics)
     else:
+        # Default to PDController for 'pid' or unknown modes,
+        # ensuring controller is always initialized.
         controller = PDController(actuators, TARGET_POSE)
 
     # 5. Run Loop

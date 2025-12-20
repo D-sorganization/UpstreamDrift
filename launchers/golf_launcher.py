@@ -583,10 +583,14 @@ class GolfLauncher(QMainWindow):
 
         # Engine-specific launch logic
         try:
-            if "Humanoid" in model_name:
-                self._custom_launch_humanoid(abs_repo_path)
-            elif "Dashboard" in model_name:
-                self._custom_launch_comprehensive(abs_repo_path)
+            custom_launchers = {
+                "MuJoCo Humanoid": self._custom_launch_humanoid,
+                "MuJoCo Dashboard": self._custom_launch_comprehensive,
+            }
+
+            launcher = custom_launchers.get(model_name)
+            if launcher:
+                launcher(abs_repo_path)
             else:
                 self._launch_docker_container(model_name, abs_repo_path)
         except Exception as e:
@@ -595,7 +599,11 @@ class GolfLauncher(QMainWindow):
     def _custom_launch_humanoid(self, abs_repo_path):
         script = abs_repo_path / "python/humanoid_launcher.py"
         if not script.exists():
-            raise FileNotFoundError(f"Script not found: {script}")
+            raise FileNotFoundError(
+                f"Script not found: {script}. "
+                "Ensure the MuJoCo engine and selected model repository "
+                "are properly installed."
+            )
 
         logger.info(f"Launching Humanoid GUI: {script}")
         subprocess.Popen([sys.executable, str(script)], cwd=script.parent)
@@ -611,7 +619,7 @@ class GolfLauncher(QMainWindow):
         # Volumes
         mount_path = str(abs_repo_path).replace("\\", "/")
         cmd.extend(["-v", f"{mount_path}:/workspace"])
-        cmd.extend(["-w", "/workspace"])
+        cmd.extend(["-w", "/workspace/python"])
 
         # Display/X11
         if self.chk_live.isChecked():
@@ -637,16 +645,15 @@ class GolfLauncher(QMainWindow):
 
         # Entry Command
         if "Drake" in model_name:
-            # Use shell to change dir and run as module for relative imports
-            cmd.extend(["sh", "-c", "cd python && python -m src.golf_gui"])
+            # Run as module for relative imports (workdir is now /workspace/python)
+            cmd.extend(["python", "-m", "src.golf_gui"])
 
             if host_port:
                 self._start_meshcat_browser(host_port)
 
         elif "Pinocchio" in model_name:
-            # Also run from python dir for consistency,
-            # though Pinocchio might be script-based
-            cmd.extend(["sh", "-c", "cd python && python pinocchio_golf/gui.py"])
+            # Run from python dir
+            cmd.extend(["python", "pinocchio_golf/gui.py"])
 
         logger.info(f"Docker Command: {' '.join(cmd)}")
 

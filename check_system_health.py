@@ -42,19 +42,21 @@ def check_docker_image(image_name):
 
 def check_nvidia_docker():
     try:
+        # Check Docker without running a full container
         result = subprocess.run(
-            ["docker", "run", "--rm", "--gpus", "all", "hello-world"],
+            ["docker", "info", "--format", "{{.Runtimes}}"],
             capture_output=True,
             text=True,
         )
-        # We don't necessarily fail if hello-world fails (maybe missing image),
-        # but if returncode is 125/127 it means docker error.
-        # Just checking if --gpus is accepted.
-        if "could not select device driver" in result.stderr:
-            return False, "NVIDIA Container Toolkit might be missing"
-        return True, "GPU support likely available (or not requested)"
-    except Exception:
-        return False, "Docker check failed"
+        if result.returncode == 0:
+            if "nvidia" in result.stdout:
+                return True, "NVIDIA Docker Runtime OK"
+            else:
+                return False, "NVIDIA runtime not active (warning)"
+        else:
+             return False, "Could not query docker info"
+    except Exception as e:
+        return False, f"Docker check failed: {e}"
 
 
 def main():

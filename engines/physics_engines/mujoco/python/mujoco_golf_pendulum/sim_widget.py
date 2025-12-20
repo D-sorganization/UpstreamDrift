@@ -1025,10 +1025,8 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
     # -------- Mouse event handling for interactive manipulation --------
 
-    def mousePressEvent(self, event: QtGui.QMouseEvent | None) -> None:  # type: ignore[override]
+    def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:  # type: ignore[override]
         """Handle mouse press for body selection and camera control."""
-        if event is None:
-            return
         modifiers = event.modifiers()
         button = event.button()
         pos = event.position()
