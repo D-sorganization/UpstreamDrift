@@ -5,7 +5,6 @@ Verifies that all components (Local Python, Docker Images, Libraries)
 are installed and functioning.
 """
 
-
 import subprocess
 import time
 from pathlib import Path

@@ -1041,7 +1041,6 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             button == QtCore.Qt.MouseButton.LeftButton
             and modifiers & QtCore.Qt.KeyboardModifier.ShiftModifier
         ):
-
             x = int(event.position().x())
             y = int(event.position().y())
             self.last_mouse_pos = (x, y)
