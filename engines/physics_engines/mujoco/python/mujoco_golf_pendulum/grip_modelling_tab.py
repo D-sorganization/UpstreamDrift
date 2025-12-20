@@ -208,10 +208,14 @@ class GripModellingTab(QtWidgets.QWidget):
             mass="0.3" condim="4" friction="1 0.5 0.5"/>
     </body>
         """
-            # Insert before </worldbody>
-            xml_content = xml_content.replace(
-                "</worldbody>", f"{cylinder_body}\n  </worldbody>"
-            )
+            # Insert before the last </worldbody>
+            last_worldbody_end = xml_content.rfind("</worldbody>")
+            if last_worldbody_end != -1:
+                xml_content = (
+                    xml_content[:last_worldbody_end]
+                    + f"{cylinder_body}\n  "
+                    + xml_content[last_worldbody_end:]
+                )
 
         # 3. Inject Mocap Bodies and Welds for Hands
         # This allows moving the hands "around in space" using the mocap bodies
@@ -250,10 +254,15 @@ class GripModellingTab(QtWidgets.QWidget):
 
         equality_xml += "  </equality>"
 
-        # Insert Mocap bodies before </worldbody>
-        xml_content = xml_content.replace(
-            "</worldbody>", f"{mocap_xml}\n  </worldbody>"
-        )
+        # Insert Mocap bodies before the last </worldbody>
+        if mocap_xml:
+            last_worldbody_end = xml_content.rfind("</worldbody>")
+            if last_worldbody_end != -1:
+                xml_content = (
+                    xml_content[:last_worldbody_end]
+                    + f"{mocap_xml}\n  "
+                    + xml_content[last_worldbody_end:]
+                )
 
         # Insert Equality section before </mujoco> (or merge if exists)
         if "</equality>" in xml_content:

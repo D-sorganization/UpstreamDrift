@@ -187,7 +187,10 @@ class BiomechanicalAnalyzer:
                 self.club_head_id,
             )
             # Use reshape to get a view (no copy)
-            jacp = self._jacp_flat.reshape(3, self.model.nv)
+            if self._jacp_flat is not None:
+                jacp = self._jacp_flat.reshape(3, self.model.nv)
+            else:
+                jacp = np.zeros((3, self.model.nv))
 
         vel = jacp @ self.data.qvel
         speed = float(np.linalg.norm(vel))

@@ -102,12 +102,22 @@ class TestLauncherModule:
             import launch_golf_suite
 
             # Test GUI launcher with missing dependencies
-            with patch("launchers.golf_launcher.UnifiedLauncher") as mock_launcher:
-                mock_launcher.side_effect = ImportError("Module not found")
+            # We must mock PyQt6 first so the module can be imported by patch
+            with patch.dict(
+                "sys.modules",
+                {
+                    "PyQt6": Mock(),
+                    "PyQt6.QtCore": Mock(),
+                    "PyQt6.QtGui": Mock(),
+                    "PyQt6.QtWidgets": Mock(),
+                },
+            ):
+                with patch("launchers.golf_launcher.GolfLauncher") as mock_launcher:
+                    mock_launcher.side_effect = ImportError("Module not found")
 
-                result = launch_golf_suite.launch_gui_launcher()
-                # Should handle import errors gracefully
-                assert result is False
+                    result = launch_golf_suite.launch_gui_launcher()
+                    # Should handle import errors gracefully
+                    assert result is False
 
         except ImportError:
             pytest.skip("Main launcher not available")
