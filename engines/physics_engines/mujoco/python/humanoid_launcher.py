@@ -729,7 +729,9 @@ class HumanoidLauncher(QMainWindow):
         cmd.extend(["robotics_env", "/opt/mujoco-env/bin/python", "-u"])
 
         # Always use the working humanoid golf simulation that supports customization
-        # This module reads simulation_config.json and applies all GUI settings:
+        # Module path: docker/src/humanoid_golf/sim.py
+        # (separate from mujoco_humanoid_golf package)
+        # This reads simulation_config.json and applies all GUI settings:
         # - Body segment colors (shirt, pants, shoes, skin, eyes, club)
         # - Height and weight scaling
         # - Club parameters (length, mass)
