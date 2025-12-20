@@ -118,6 +118,7 @@ class DockerBuildThread(QThread):
             DOCKER_IMAGE_NAME,
             "--target",
             self.target_stage,
+            "--progress=plain",  # Force unbuffered output for real-time logs
             ".",
         ]
 
@@ -126,6 +127,10 @@ class DockerBuildThread(QThread):
         self.log_signal.emit(f"Command: {' '.join(cmd)}")
 
         try:
+            # Set environment to disable output buffering
+            env = os.environ.copy()
+            env["PYTHONUNBUFFERED"] = "1"
+
             process = subprocess.Popen(
                 cmd,
                 cwd=str(docker_context),
@@ -133,6 +138,7 @@ class DockerBuildThread(QThread):
                 stderr=subprocess.STDOUT,
                 text=True,
                 bufsize=1,  # Line buffered to ensure real-time output
+                env=env,
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
 

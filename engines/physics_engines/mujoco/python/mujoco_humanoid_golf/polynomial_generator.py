@@ -205,9 +205,9 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         self.btn_drag.toggled.connect(partial(self._set_mode, "drag"))
 
         # Matplotlib events
-        self.canvas.mpl_connect("button_press_event", self._on_canvas_click)
-        self.canvas.mpl_connect("button_release_event", self._on_canvas_release)
-        self.canvas.mpl_connect("motion_notify_event", self._on_canvas_motion)
+        self.canvas.mpl_connect("button_press_event", self._on_canvas_click)  # type: ignore[arg-type]
+        self.canvas.mpl_connect("button_release_event", self._on_canvas_release)  # type: ignore[arg-type]
+        self.canvas.mpl_connect("motion_notify_event", self._on_canvas_motion)  # type: ignore[arg-type]
 
     def _set_mode(self, mode: str, checked: bool) -> None:
         """Set the current interaction mode."""
@@ -254,7 +254,11 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
 
     def _on_canvas_click(self, event: matplotlib.backend_bases.MouseEvent) -> None:
         """Handle mouse click events on the canvas."""
-        if event.inaxes != self.canvas.axes:
+        if (
+            event.inaxes != self.canvas.axes
+            or event.xdata is None
+            or event.ydata is None
+        ):
             return
 
         if self.mode == "add_points":
@@ -301,7 +305,11 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
 
     def _on_canvas_motion(self, event: matplotlib.backend_bases.MouseEvent) -> None:
         """Handle mouse motion events."""
-        if event.inaxes != self.canvas.axes:
+        if (
+            event.inaxes != self.canvas.axes
+            or event.xdata is None
+            or event.ydata is None
+        ):
             return
 
         if self.mode == "draw" and event.button == 1:
