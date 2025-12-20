@@ -9,3 +9,7 @@
 ## 2024-06-15 - Shortcut Discoverability in Simulations
 **Learning:** Global keyboard shortcuts (like Space/R) are powerful but invisible. Users often miss them unless they read documentation or hover over buttons.
 **Action:** Always include a persistent, visible legend for essential shortcuts near the controls, not just in tooltips.
+
+## 2024-10-24 - Legacy Web Visualization Accessibility
+**Learning:** Legacy vanilla JS/HTML visualizations in this repo often lack basic accessibility (ARIA labels, focus states) and visual polish (icons) compared to modern frameworks.
+**Action:** Systematically upgrade legacy control panels with SVG icons and ARIA attributes to match modern standards without rewriting the underlying engine logic.

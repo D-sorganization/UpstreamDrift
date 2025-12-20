@@ -69,9 +69,24 @@ button {
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
 }
 
-button:hover {
+button:disabled {
+  background: #3c4c5d;
+  color: #777;
+  cursor: not-allowed;
+  filter: none;
+}
+
+.icon {
+  flex-shrink: 0;
+}
+
+button:not(:disabled):hover {
   filter: brightness(1.1);
 }
 

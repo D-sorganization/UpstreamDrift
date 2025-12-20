@@ -227,15 +227,21 @@ function step() {
   animationId = requestAnimationFrame(step);
 }
 
+function updateButtonStates(isRunning) {
+  document.getElementById('pause').disabled = !isRunning;
+}
+
 function start() {
   cancelAnimationFrame(animationId);
   parseInputs();
   step();
+  updateButtonStates(true);
 }
 
 function pause() {
   cancelAnimationFrame(animationId);
   animationId = null;
+  updateButtonStates(false);
 }
 
 function reset() {
