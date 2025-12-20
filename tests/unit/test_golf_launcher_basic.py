@@ -135,11 +135,28 @@ class TestDockerThreads:
     @patch("subprocess.Popen")
     def test_docker_build_thread_success(self, mock_popen):
         """Test DockerBuildThread success."""
-        # Setup mock process
+        # Setup mock process with file-like stdout
         process_mock = Mock()
-        process_mock.stdout = ["Step 1/5", "Successfully built"]
+
+        # Create a mock file-like object for stdout that behaves like a real file
+        # After the lines are exhausted, readline() should return empty string
+        stdout_lines_iter = iter(["Step 1/5\n", "Successfully built\n", ""])
+
+        def readline_side_effect():
+            try:
+                return next(stdout_lines_iter)
+            except StopIteration:
+                return ""  # After exhausting lines, return empty string
+
+        stdout_mock = Mock()
+        stdout_mock.readline = Mock(side_effect=readline_side_effect)
+
+        process_mock.stdout = stdout_mock
+        # poll() returns None while running, then 0 when done
+        # The loop calls poll() after each readline(), so we need enough None values
+        process_mock.poll = Mock(side_effect=[None, None, 0, 0, 0])
+        process_mock.wait = Mock(return_value=None)
         process_mock.returncode = 0
-        process_mock.wait.return_value = None
 
         mock_popen.return_value = process_mock
 
@@ -163,10 +180,26 @@ class TestDockerThreads:
     @patch("subprocess.Popen")
     def test_docker_build_thread_failure(self, mock_popen):
         """Test DockerBuildThread failure."""
+        # Setup mock process with file-like stdout
         process_mock = Mock()
-        process_mock.stdout = ["Error building"]
+
+        # Create a mock file-like object for stdout that behaves like a real file
+        stdout_lines_iter = iter(["Error building\n", ""])
+
+        def readline_side_effect():
+            try:
+                return next(stdout_lines_iter)
+            except StopIteration:
+                return ""  # After exhausting lines, return empty string
+
+        stdout_mock = Mock()
+        stdout_mock.readline = Mock(side_effect=readline_side_effect)
+
+        process_mock.stdout = stdout_mock
+        # poll() returns None while running, then 1 when done with error
+        process_mock.poll = Mock(side_effect=[None, 1, 1, 1])
+        process_mock.wait = Mock(return_value=None)
         process_mock.returncode = 1
-        process_mock.wait.return_value = None
 
         mock_popen.return_value = process_mock
 
