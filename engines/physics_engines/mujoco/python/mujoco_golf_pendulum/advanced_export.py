@@ -56,31 +56,31 @@ def export_to_matlab(
 
     try:
         # Convert all data to MATLAB-compatible format
-        matlab_data = {}
+        output_data: dict[str, Any] = {}
 
         for key, value in data_dict.items():
             if isinstance(value, np.ndarray):
                 # MATLAB uses Fortran (column-major) order
-                matlab_data[key] = np.asarray(value, order="F")
+                output_data[key] = np.asarray(value, order="F")
             elif isinstance(value, list | tuple):
-                matlab_data[key] = np.array(value, order="F")
+                output_data[key] = np.array(value, order="F")
             elif isinstance(value, int | float | str | bool):
-                matlab_data[key] = value
+                output_data[key] = value
             elif isinstance(value, dict):
                 # Nested dict - flatten keys
                 for subkey, subvalue in value.items():
                     flat_key = f"{key}_{subkey}".replace(" ", "_")
                     if isinstance(subvalue, np.ndarray):
-                        matlab_data[flat_key] = np.asarray(subvalue, order="F")
+                        output_data[flat_key] = np.asarray(subvalue, order="F")
                     elif isinstance(subvalue, list | tuple):
-                        matlab_data[flat_key] = np.array(subvalue, order="F")
+                        output_data[flat_key] = np.array(subvalue, order="F")
                     else:
-                        matlab_data[flat_key] = subvalue
+                        output_data[flat_key] = subvalue
 
         # Save to .mat file
         savemat(
             output_path,
-            matlab_data,
+            output_data,
             do_compression=compress,
             format="5",  # MATLAB 5 format (compatible with most versions)
             oned_as="column",  # Save 1D arrays as column vectors
@@ -357,12 +357,12 @@ def export_recording_all_formats(
 
     if formats is None:
         formats = ["json", "csv", "mat", "hdf5"]
-    base_path = Path(base_path)
+    base_path_obj = Path(base_path)
     results = {}
 
     for fmt in formats:
         try:
-            output_path = base_path.with_suffix(f".{fmt}")
+            output_path = base_path_obj.with_suffix(f".{fmt}")
 
             if fmt == "json":
                 success = export_telemetry_json(str(output_path), data_dict)
@@ -371,7 +371,7 @@ def export_recording_all_formats(
             elif fmt == "mat":
                 success = export_to_matlab(str(output_path), data_dict)
             elif fmt in ["hdf5", "h5"]:
-                output_path = base_path.with_suffix(".h5")
+                output_path = base_path_obj.with_suffix(".h5")
                 success = export_to_hdf5(str(output_path), data_dict)
             elif fmt == "c3d":
                 # C3D needs special handling

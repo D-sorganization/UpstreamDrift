@@ -1,618 +1,685 @@
-import contextlib
+#!/usr/bin/env python3
+"""
+Unified Golf Modeling Suite Launcher (PyQt6)
+Features:
+- Modern UI with rounded corners.
+- Modular Docker Environment Management.
+- Integrated Help and Documentation.
+"""
+
 import logging
 import os
 import subprocess
 import sys
 import threading
 import time
-import tkinter as tk
 import webbrowser
-from tkinter import messagebox, ttk
+from pathlib import Path
 
-# Config - UPDATED FOR GOLF_MODELING_SUITE
-REPOS_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-ASSETS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "launchersassets"))
-DOCKER_IMAGE_NAME = "robotics_env"
+from PyQt6.QtCore import Qt, QThread, pyqtSignal
+from PyQt6.QtGui import QFont, QIcon, QPixmap
+from PyQt6.QtWidgets import (
+    QApplication,
+    QCheckBox,
+    QComboBox,
+    QDialog,
+    QFrame,
+    QGridLayout,
+    QHBoxLayout,
+    QLabel,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QScrollArea,
+    QTabWidget,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
+# Configure Logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
+)
 logger = logging.getLogger(__name__)
 
-# Map display names to folder names - UPDATED PATHS
-MODELS = {
-    "MuJoCo Golf Model": "engines/physics_engines/mujoco",
+# Constants
+REPOS_ROOT = Path(__file__).parent.parent.resolve()
+ASSETS_DIR = Path(__file__).parent / "assets"
+DOCKER_IMAGE_NAME = "robotics_env"
+GRID_COLUMNS = 4
+
+MODELS_DICT = {
+    "MuJoCo Humanoid": "engines/physics_engines/mujoco",
+    "MuJoCo Dashboard": "engines/physics_engines/mujoco",
     "Drake Golf Model": "engines/physics_engines/drake",
     "Pinocchio Golf Model": "engines/physics_engines/pinocchio",
 }
 
-# Map display names to image filenames
 MODEL_IMAGES = {
-    "MuJoCo Golf Model": "mujoco.png",
+    "MuJoCo Humanoid": "mujoco.png",
+    "MuJoCo Dashboard": "mujoco.png",
     "Drake Golf Model": "drake.png",
     "Pinocchio Golf Model": "pinocchio.png",
-    "Playground (Solar System)": "playground.png",
 }
 
-# Theme Colors
-COLOR_BG = "#1E1E1E"
-COLOR_FG = "#FFFFFF"
-COLOR_ACCENT = "#007ACC"
-COLOR_SECONDARY_BG = "#252526"
-COLOR_HOVER = "#3E3E42"
+DOCKER_STAGES = ["all", "mujoco", "pinocchio", "drake", "base"]
 
 
-class ToolTip:
-    """
-    Creates a tooltip for a given widget as the mouse hovers over it.
-    """
+class DockerCheckThread(QThread):
+    result = pyqtSignal(bool)
 
-    def __init__(self, widget: tk.Widget, text: str) -> None:
-        self.widget = widget
-        self.text = text
-        self.tip_window: tk.Toplevel | None = None
-        self.id: str | None = None
-        self.x = self.y = 0
-        self.widget.bind("<Enter>", self.enter)
-        self.widget.bind("<Leave>", self.leave)
-
-    def configure(self, text: str) -> None:
-        self.text = text
-
-    def enter(self, _event=None) -> None:
-        self.schedule()
-
-    def leave(self, _event=None) -> None:
-        self.unschedule()
-        self.hidetip()
-
-    def schedule(self) -> None:
-        self.unschedule()
-        self.id = self.widget.after(500, self.showtip)
-
-    def unschedule(self) -> None:
-        id_ = self.id
-        self.id = None
-        if id_:
-            self.widget.after_cancel(id_)
-
-    def showtip(self, _event=None) -> None:
-        x = y = 0
-        x = self.widget.winfo_rootx() + 20
-        y = self.widget.winfo_rooty() + self.widget.winfo_height() + 5
-
-        self.tip_window = tw = tk.Toplevel(self.widget)
-        tw.wm_overrideredirect(True)  # noqa: FBT003
-        tw.wm_geometry(f"+{x}+{y}")
-
-        label = tk.Label(
-            tw,
-            text=self.text,
-            justify="left",
-            background="#2D2D30",
-            foreground="#E0E0E0",
-            relief="solid",
-            borderwidth=1,
-            font=("Segoe UI", 9),
-        )
-        label.pack(ipadx=5, ipady=3)
-
-    def hidetip(self) -> None:
-        tw = self.tip_window
-        self.tip_window = None
-        if tw:
-            tw.destroy()
-
-
-class UnifiedLauncher(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-        self.title("Golf Modeling Suite - Unified Launcher")
-        self.geometry("900x650")
-        self.configure(bg=COLOR_BG)
-
-        self.docker_available = False  # Track state
-
-        self.style = ttk.Style()
-        self.style.theme_use("clam")  # Use clam for better customizability
-        self.configure_styles()
-
-        self.images = {}  # Keep references to avoid GC
-        self.setup_ui()
-        self.start_check_docker()
-
-    def configure_styles(self):
-        style = self.style
-
-        # General Frame
-        style.configure("TFrame", background=COLOR_BG)
-        style.configure(
-            "TLabelframe", background=COLOR_BG, foreground=COLOR_FG, relief="flat"
-        )
-        style.configure(
-            "TLabelframe.Label",
-            background=COLOR_BG,
-            foreground=COLOR_ACCENT,
-            font=("Segoe UI", 12, "bold"),
-        )
-
-        # Label
-        style.configure(
-            "TLabel", background=COLOR_BG, foreground=COLOR_FG, font=("Segoe UI", 11)
-        )
-
-        # Radiobutton
-        style.configure(
-            "TRadiobutton",
-            background=COLOR_BG,
-            foreground=COLOR_FG,
-            font=("Segoe UI", 11),
-            indicatorbackground=COLOR_BG,
-            indicatorforeground=COLOR_FG,
-            selectcolor=COLOR_SECONDARY_BG,
-        )
-        style.map(
-            "TRadiobutton",
-            background=[("active", COLOR_HOVER)],
-            indicatorcolor=[("selected", COLOR_ACCENT)],
-        )
-
-        # Checkbutton
-        style.configure(
-            "TCheckbutton",
-            background=COLOR_BG,
-            foreground=COLOR_FG,
-            font=("Segoe UI", 11),
-            focuscolor=COLOR_BG,
-        )
-        style.map(
-            "TCheckbutton",
-            background=[("active", COLOR_HOVER)],
-            indicatorcolor=[("selected", COLOR_ACCENT)],
-        )
-
-        # Button
-        style.configure(
-            "TButton",
-            font=("Segoe UI", 11, "bold"),
-            background=COLOR_ACCENT,
-            foreground="#FFFFFF",
-            borderwidth=0,
-            padding=10,
-        )
-        style.map(
-            "TButton",
-            background=[("active", "#005F9E"), ("disabled", "#555555")],
-            foreground=[("disabled", "#AAAAAA")],
-        )
-
-        # Custom styles
-        style.configure(
-            "Title.TLabel", font=("Segoe UI", 24, "bold"), foreground=COLOR_FG
-        )
-        style.configure(
-            "Status.TLabel",
-            background=COLOR_SECONDARY_BG,
-            foreground="#AAAAAA",
-            font=("Segoe UI", 9),
-        )
-
-    def setup_ui(self):
-        # Main Layout
-        main_container = ttk.Frame(self, style="TFrame")
-        main_container.pack(fill="both", expand=True, padx=30, pady=30)
-
-        # Title
-        lbl_title = ttk.Label(
-            main_container, text="Golf Modeling Suite", style="Title.TLabel"
-        )
-        lbl_title.pack(pady=(0, 20), anchor="center")
-
-        # Model Selection Area
-        frame_select = ttk.LabelFrame(main_container, text="Select Physics Engine")
-        frame_select.pack(fill="both", expand=True, pady=10)
-
-        self.var_model = tk.StringVar(value="MuJoCo Golf Model")
-
-        # Create a grid for models
-        grid_frame = ttk.Frame(frame_select)
-        grid_frame.pack(fill="both", expand=True, padx=10, pady=10)
-
-        row = 0
-        col = 0
-        for name in MODELS:
-            # Load Image
-            img_path = os.path.join(ASSETS_DIR, MODEL_IMAGES.get(name, ""))
-            photo = None
-            if os.path.exists(img_path):
-                try:
-                    photo = tk.PhotoImage(file=img_path)
-                    self.images[name] = photo
-                except Exception as e:
-                    logger.warning("Failed to load image for %s: %s", name, e)
-
-            # Card-like container for each option
-            card = tk.Frame(
-                grid_frame,
-                bg=COLOR_SECONDARY_BG,
-                bd=0,
-                highlightthickness=1,
-                highlightbackground="#333",
-            )
-            card.grid(row=row, column=col, padx=10, pady=10, sticky="nsew")
-            grid_frame.columnconfigure(col, weight=1)
-
-            # Content inside card
-            # Image
-            if name in self.images:
-                lbl_img = tk.Label(card, image=self.images[name], bg=COLOR_SECONDARY_BG)
-                lbl_img.pack(side="top", pady=10)
-
-            # Radio selection
-            rb = ttk.Radiobutton(
-                card,
-                text=name,
-                variable=self.var_model,
-                value=name,
-                style="TRadiobutton",
-            )
-            rb.pack(side="top", pady=(0, 10))
-
-            col += 1
-            if col > 1:  # 2 columns
-                col = 0
-                row += 1
-
-        # Options
-        frame_opts = ttk.LabelFrame(main_container, text="Configuration")
-        frame_opts.pack(fill="x", pady=20)
-
-        self.var_live = tk.BooleanVar(value=True)
-        self.var_gpu = tk.BooleanVar(value=False)
-
-        opts_inner = ttk.Frame(frame_opts)
-        opts_inner.pack(padx=10, pady=10)
-
-        cb_live = ttk.Checkbutton(
-            opts_inner,
-            text="Live Visualization (VcXsrv)",
-            variable=self.var_live,
-            style="TCheckbutton",
-        )
-        cb_live.pack(side="left", padx=20)
-        ToolTip(
-            cb_live,
-            "Requires VcXsrv on Windows (automatically handled) or X11 on Linux.",
-        )
-
-        cb_gpu = ttk.Checkbutton(
-            opts_inner,
-            text="GPU Acceleration (NVIDIA)",
-            variable=self.var_gpu,
-            style="TCheckbutton",
-        )
-        cb_gpu.pack(side="left", padx=20)
-        ToolTip(cb_gpu, "Requires NVIDIA Container Toolkit and compatible GPU.")
-
-        # Actions
-        frame_actions = ttk.Frame(main_container)
-        frame_actions.pack(pady=20)
-
-        self.btn_launch = ttk.Button(
-            frame_actions,
-            text="LAUNCH SIMULATION",
-            command=self.launch,
-            style="TButton",
-        )
-        self.btn_launch.pack(side="left", padx=10, ipadx=20)
-        self.tooltip_launch = ToolTip(
-            self.btn_launch,
-            "Start the simulation environment with selected options. (Enter)",
-        )
-
-        self.btn_build = ttk.Button(
-            frame_actions,
-            text="BUILD DOCKER",
-            command=self.build_docker,
-            style="TButton",
-        )
-        self.btn_build.pack(side="left", padx=10)
-        ToolTip(
-            self.btn_build,
-            "Builds the 'robotics_env' Docker image from the MuJoCo engine directory.",
-        )
-
-        btn_quit = ttk.Button(
-            frame_actions, text="QUIT", command=self.destroy, style="TButton"
-        )
-        btn_quit.pack(side="left", padx=10)
-
-        # Keyboard shortcuts
-        self.bind("<Return>", lambda _e: self.launch())
-        self.bind("<Control-q>", lambda _e: self.destroy())
-
-        # Log Area
-        log_frame = ttk.LabelFrame(main_container, text="Simulation Log")
-        log_frame.pack(fill="both", expand=True, pady=(10, 0))
-
-        # Create scrollable text area for logs
-        log_inner = ttk.Frame(log_frame)
-        log_inner.pack(fill="both", expand=True, padx=10, pady=10)
-
-        self.log_text = tk.Text(
-            log_inner,
-            height=8,
-            bg=COLOR_SECONDARY_BG,
-            fg=COLOR_FG,
-            font=("Consolas", 9),
-            wrap="word",
-            state="disabled",
-        )
-
-        scrollbar = ttk.Scrollbar(
-            log_inner, orient="vertical", command=self.log_text.yview
-        )
-        self.log_text.configure(yscrollcommand=scrollbar.set)
-
-        self.log_text.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
-        # Log controls
-        log_controls = ttk.Frame(log_frame)
-        log_controls.pack(fill="x", padx=10, pady=(0, 10))
-
-        btn_clear_log = ttk.Button(
-            log_controls, text="Clear Log", command=self.clear_log, style="TButton"
-        )
-        btn_clear_log.pack(side="right")
-
-        # Status Bar
-        self.lbl_status = ttk.Label(
-            self, text=" Initializing...", style="Status.TLabel", anchor="w"
-        )
-        self.lbl_status.pack(side="bottom", fill="x", ipady=5)
-
-    def log(self, msg):
-        self.lbl_status.config(text=f" {msg}")
-        logger.info(msg)
-
-        # Also add to log text area
-        self.log_text.config(state="normal")
-        timestamp = time.strftime("%H:%M:%S")
-        self.log_text.insert("end", f"[{timestamp}] {msg}\n")
-        self.log_text.see("end")  # Auto-scroll to bottom
-        self.log_text.config(state="disabled")
-
-    def clear_log(self):
-        """Clear the simulation log text area."""
-        self.log_text.config(state="normal")
-        self.log_text.delete("1.0", "end")
-        self.log_text.config(state="disabled")
-        self.log("Log cleared.")
-
-    def start_check_docker(self):
-        # Start in thread to avoid blocking UI startup
-        self.log("Checking Docker...")
-        # Temporarily disable launch until check completes
-        self.btn_launch.config(state="disabled")
-        threading.Thread(target=self._check_docker_thread, daemon=True).start()
-
-    def _check_docker_thread(self):
+    def run(self):
         try:
             subprocess.run(
                 ["docker", "--version"],
                 check=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
-            # Schedule success on main thread
-            self.after(0, self._on_docker_found)
+            self.result.emit(True)
         except (subprocess.CalledProcessError, FileNotFoundError):
-            # Schedule failure on main thread
-            self.after(0, self._on_docker_missing)
+            self.result.emit(False)
 
-    def _on_docker_found(self):
-        self.log("Ready. Docker detected.")
-        self.docker_available = True
-        self.btn_launch.config(state="normal")
-        self.tooltip_launch.configure(
-            "Start the simulation environment with selected options. (Enter)"
-        )
 
-    def _on_docker_missing(self):
-        self.docker_available = False
-        self.log("Error: Docker not found. Please install Docker Desktop.")
-        self.btn_launch.config(state="disabled")
-        self.tooltip_launch.configure(
-            "Docker not found! Please install Docker Desktop to launch."
-        )
+class DockerBuildThread(QThread):
+    log_signal = pyqtSignal(str)
+    finished_signal = pyqtSignal(bool, str)
 
-    def get_repo_path(self, repo_name):
-        # UPDATED: Paths are now relative to Golf_Modeling_Suite root
-        return os.path.join(REPOS_ROOT, repo_name)
+    def __init__(self, target_stage="all"):
+        super().__init__()
+        self.target_stage = target_stage
 
-    def build_docker(self):
-        # Build using the Dockerfile in engines/physics_engines/mujoco/docker
-        mujoco_repo = self.get_repo_path(MODELS["MuJoCo Golf Model"])
-        docker_dir = os.path.join(mujoco_repo, "docker")
+    def run(self):
+        mujoco_path = REPOS_ROOT / MODELS_DICT["MuJoCo Humanoid"]
+        # Dockerfile is at engines/physics_engines/mujoco/Dockerfile
+        docker_context = mujoco_path
 
-        if not os.path.exists(docker_dir):
-            messagebox.showerror("Error", f"Docker context not found at {docker_dir}")
+        if not docker_context.exists():
+            self.finished_signal.emit(False, f"Path not found: {docker_context}")
             return
 
-        cmd = ["docker", "build", "-t", DOCKER_IMAGE_NAME, "."]
+        cmd = [
+            "docker",
+            "build",
+            "-t",
+            DOCKER_IMAGE_NAME,
+            "--target",
+            self.target_stage,
+            ".",
+        ]
 
-        # UI Guards
-        self.btn_launch.config(state="disabled")
-        self.btn_build.config(state="disabled")
-        self.config(cursor="watch")
-        self.log("Building Docker image... (check terminal for details)")
-
-        def run_build():
-            try:
-                # Open a new console for build output if on Windows, so user can see
-                # progress
-                creation_flags = 0
-                if os.name == "nt":
-                    creation_flags = subprocess.CREATE_NEW_CONSOLE  # type: ignore[attr-defined]
-
-                subprocess.run(
-                    cmd, cwd=docker_dir, check=True, creationflags=creation_flags
-                )
-
-                self.after(
-                    0,
-                    lambda: messagebox.showinfo(
-                        "Success", "Docker image built successfully!"
-                    ),
-                )
-                self.after(0, lambda: self.log("Build complete."))
-            except subprocess.CalledProcessError as err:
-                err_msg = str(err)
-                self.after(
-                    0, lambda: messagebox.showerror("Error", f"Build failed: {err_msg}")
-                )
-                self.after(0, lambda: self.log("Build failed."))
-            finally:
-                self.after(0, self._restore_ui_state)
-
-        threading.Thread(target=run_build, daemon=True).start()
-
-    def _restore_ui_state(self):
-        self.config(cursor="")
-        self.btn_build.config(state="normal")
-        if self.docker_available:
-            self.btn_launch.config(state="normal")
-
-    def launch(self):
-        if not self.docker_available:
-            messagebox.showwarning(
-                "Docker Missing",
-                (
-                    "Docker is not detected or the check is still in progress. "
-                    "Please wait or install Docker."
-                ),
-            )
-            return
-
-        model_name = self.var_model.get()
-        repo_dir = MODELS[model_name]
-        abs_repo_path = self.get_repo_path(repo_dir)
-
-        if not os.path.exists(abs_repo_path):
-            messagebox.showerror("Error", f"Engine not found: {abs_repo_path}")
-            return
-
-        if model_name == "MuJoCo Golf Model":
-            self._launch_mujoco_gui(abs_repo_path)
-            return
-
-        self._launch_docker_container(model_name, abs_repo_path)
-
-    def _launch_mujoco_gui(self, abs_repo_path):
-        # UPDATED: MuJoCo GUI path for new structure
-        gui_script = os.path.join(
-            abs_repo_path, "docker", "gui", "deepmind_control_suite_MuJoCo_GUI.py"
-        )
-
-        self.log("Starting MuJoCo GUI simulation...")
-        self.log(f"GUI script path: {gui_script}")
-
-        if not os.path.exists(gui_script):
-            error_msg = f"GUI script not found: {gui_script}"
-            self.log(f"ERROR: {error_msg}")
-            messagebox.showerror("Error", error_msg)
-            return
+        self.log_signal.emit(f"Starting build for target: {self.target_stage}")
+        self.log_signal.emit(f"Context: {docker_context}")
+        self.log_signal.emit(f"Command: {' '.join(cmd)}")
 
         try:
-            # Launch the separate GUI process
             process = subprocess.Popen(
-                [sys.executable, gui_script], cwd=os.path.dirname(gui_script)
+                cmd,
+                cwd=str(docker_context),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
-            self.log(f"MuJoCo GUI launched successfully (PID: {process.pid})")
+
+            # Read output real-time
+            for line in process.stdout:
+                self.log_signal.emit(line.strip())
+
+            process.wait()
+
+            if process.returncode == 0:
+                self.finished_signal.emit(True, "Build successful.")
+            else:
+                self.finished_signal.emit(
+                    False, f"Build failed with code {process.returncode}"
+                )
+
         except Exception as e:
-            error_msg = f"Failed to launch MuJoCo GUI: {e}"
-            self.log(f"ERROR: {error_msg}")
-            messagebox.showerror("Error", error_msg)
+            self.finished_signal.emit(False, str(e))
 
-    def _configure_drake(self, cmd):
-        """Configure Drake specific Docker arguments."""
-        cmd.extend(["-p", "7000-7010:7000-7010"])
-        cmd.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
-        return 7000
 
-    def _schedule_browser_open(self, host_port):
-        """Schedule a browser open for the Meshcat server."""
+class EnvironmentDialog(QDialog):
+    """Dialog to manage Docker environment and view dependencies."""
 
-        def open_browser():
-            time.sleep(3)
-            with contextlib.suppress(Exception):
-                webbrowser.open(f"http://localhost:{host_port}")
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Manage Environment")
+        self.resize(700, 500)
+        self.setup_ui()
 
-        threading.Thread(target=open_browser, daemon=True).start()
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+
+        tabs = QTabWidget()
+        layout.addWidget(tabs)
+
+        # --- Build Tab ---
+        tab_build = QWidget()
+        build_layout = QVBoxLayout(tab_build)
+
+        lbl = QLabel(
+            "Rebuild the Docker environment to ensure all dependencies are correct.\n"
+            "You can choose a specific target to speed up build time."
+        )
+        lbl.setWordWrap(True)
+        build_layout.addWidget(lbl)
+
+        form = QHBoxLayout()
+        form.addWidget(QLabel("Target Stage:"))
+        self.combo_stage = QComboBox()
+        self.combo_stage.addItems(DOCKER_STAGES)
+        form.addWidget(self.combo_stage)
+        build_layout.addLayout(form)
+
+        self.btn_build = QPushButton("Build Environment")
+        self.btn_build.clicked.connect(self.start_build)
+        build_layout.addWidget(self.btn_build)
+
+        self.console = QTextEdit()
+        self.console.setReadOnly(True)
+        self.console.setStyleSheet(
+            "background-color: #1e1e1e; color: #00ff00; font-family: Consolas;"
+        )
+        build_layout.addWidget(self.console)
+
+        tabs.addTab(tab_build, "Build Docker")
+
+        # --- Dependencies Tab ---
+        tab_deps = QWidget()
+        dep_layout = QVBoxLayout(tab_deps)
+
+        # Determine dependencies text (mocked logic or reading Dockerfile)
+        self.txt_deps = QTextEdit()
+        self.txt_deps.setReadOnly(True)
+        self.txt_deps.setHtml(
+            """
+        <h3>Core Dependencies</h3>
+        <ul>
+            <li><b>MuJoCo:</b> Physics Engine (Latest)</li>
+            <li><b>dm_control:</b> DeepMind Control Suite</li>
+            <li><b>NumPy / SciPy:</b> Scientific Computing</li>
+            <li><b>PyQt6:</b> GUI Framework</li>
+        </ul>
+        <h3>Robotics Extensions</h3>
+        <ul>
+            <li><b>Pinocchio:</b> Rigid Body Dynamics</li>
+            <li><b>Pink:</b> Inverse Kinematics</li>
+            <li><b>Drake:</b> Model-based design (Optional)</li>
+            <li><b>Meshcat:</b> Web visualization</li>
+        </ul>
+        <h3>System</h3>
+        <ul>
+            <li><b>OpenGL/EGL:</b> Hardware Accelerated Rendering</li>
+            <li><b>X11:</b> Display Server Support</li>
+        </ul>
+        """
+        )
+        dep_layout.addWidget(self.txt_deps)
+        tabs.addTab(tab_deps, "Dependencies")
+
+        # Buttons
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(self.accept)
+        layout.addWidget(close_btn)
+
+    def start_build(self):
+        target = self.combo_stage.currentText()
+        self.btn_build.setEnabled(False)
+        self.console.clear()
+
+        self.build_thread = DockerBuildThread(target)
+        self.build_thread.log_signal.connect(self.append_log)
+        self.build_thread.finished_signal.connect(self.build_finished)
+        self.build_thread.start()
+
+    def append_log(self, text):
+        self.console.append(text)
+        self.console.moveCursor(self.console.textCursor().MoveOperation.End)
+
+    def build_finished(self, success, msg):
+        self.btn_build.setEnabled(True)
+        if success:
+            QMessageBox.information(self, "Success", msg)
+        else:
+            QMessageBox.critical(self, "Build Failed", msg)
+
+
+class HelpDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Golf Suite - Help")
+        self.resize(800, 600)
+
+        layout = QVBoxLayout(self)
+
+        self.text_area = QTextEdit()
+        self.text_area.setReadOnly(True)
+        layout.addWidget(self.text_area)
+
+        # Load help content
+        help_path = ASSETS_DIR / "help.md"
+        if help_path.exists():
+            self.text_area.setMarkdown(help_path.read_text(encoding="utf-8"))
+        else:
+            self.text_area.setText("Help file not found.")
+
+        btn = QPushButton("Close")
+        btn.clicked.connect(self.accept)
+        layout.addWidget(btn)
+
+
+class GolfLauncher(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Golf Modeling Suite")
+        self.resize(1400, 900)
+
+        # Set Icon
+        icon_path = ASSETS_DIR / "golf_icon.png"
+        if icon_path.exists():
+            self.setWindowIcon(QIcon(str(icon_path)))
+
+        # State
+        self.docker_available = False
+        self.selected_model = None
+        self.model_cards = {}
+
+        self.init_ui()
+        self.check_docker()
+
+    def init_ui(self):
+        # Main Widget
+        central = QWidget()
+        self.setCentralWidget(central)
+        main_layout = QVBoxLayout(central)
+        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(30, 30, 30, 30)
+
+        # --- Top Bar ---
+        top_bar = QHBoxLayout()
+
+        # Status Indicator
+        self.lbl_status = QLabel("Checking Docker...")
+        self.lbl_status.setStyleSheet("color: #aaaaaa; font-weight: bold;")
+        top_bar.addWidget(self.lbl_status)
+        top_bar.addStretch()
+
+        btn_env = QPushButton("Manage Environment")
+        btn_env.clicked.connect(self.open_environment_manager)
+        top_bar.addWidget(btn_env)
+
+        btn_help = QPushButton("Help")
+        btn_help.clicked.connect(self.open_help)
+        top_bar.addWidget(btn_help)
+
+        main_layout.addLayout(top_bar)
+
+        # --- Model Grid ---
+        grid_area = QScrollArea()
+        grid_area.setWidgetResizable(True)
+        grid_area.setFrameShape(QFrame.Shape.NoFrame)
+        grid_area.setStyleSheet("background: transparent;")
+
+        grid_widget = QWidget()
+        self.grid_layout = QGridLayout(grid_widget)
+        self.grid_layout.setSpacing(20)
+
+        # Populate Grid
+        row, col = 0, 0
+        for name, _ in MODELS_DICT.items():
+            card = self.create_model_card(name)
+            self.model_cards[name] = card
+            self.grid_layout.addWidget(card, row, col)
+            col += 1
+            if col >= GRID_COLUMNS:
+                col = 0
+                row += 1
+
+        grid_area.setWidget(grid_widget)
+        main_layout.addWidget(grid_area)
+
+        # --- Configuration & Launch ---
+        bottom_bar = QFrame()
+        bottom_bar.setObjectName("BottomBar")
+        bottom_layout = QHBoxLayout(bottom_bar)
+        bottom_layout.setContentsMargins(20, 20, 20, 20)
+
+        # Options
+        opts_layout = QVBoxLayout()
+        self.chk_live = QCheckBox("Live Visualization")
+        self.chk_live.setChecked(True)
+        self.chk_live.setToolTip("Enable VcXsrv/X11 display")
+
+        self.chk_gpu = QCheckBox("GPU Acceleration")
+        self.chk_gpu.setChecked(False)
+        self.chk_gpu.setToolTip("Requires NVIDIA Container Toolkit")
+
+        opts_layout.addWidget(self.chk_live)
+        opts_layout.addWidget(self.chk_gpu)
+        bottom_layout.addLayout(opts_layout)
+
+        bottom_layout.addStretch()
+
+        # Launch Button
+        self.btn_launch = QPushButton("LAUNCH SIMULATION")
+        self.btn_launch.setObjectName("LaunchButton")
+        self.btn_launch.setFixedHeight(50)
+        self.btn_launch.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
+        self.btn_launch.clicked.connect(self.launch_simulation)
+        self.btn_launch.setEnabled(False)  # Wait for selection and docker
+        bottom_layout.addWidget(self.btn_launch)
+
+        main_layout.addWidget(bottom_bar)
+
+        # --- Styling ---
+        self.apply_styles()
+
+        # Select first model by default
+        self.select_model("MuJoCo Humanoid")
+
+    def create_model_card(self, name):
+        """Creates a clickable card widget."""
+        card = QFrame()
+        card.setObjectName("ModelCard")
+        card.setCursor(Qt.CursorShape.PointingHandCursor)
+        card.mousePressEvent = lambda e: self.select_model(name)
+
+        layout = QVBoxLayout(card)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Image
+        img_name = MODEL_IMAGES.get(name)
+        img_path = ASSETS_DIR / img_name if img_name else None
+
+        lbl_img = QLabel()
+        if img_path and img_path.exists():
+            pixmap = QPixmap(str(img_path))
+            pixmap = pixmap.scaled(
+                180,
+                180,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
+            lbl_img.setPixmap(pixmap)
+        else:
+            lbl_img.setText("No Image")
+            lbl_img.setStyleSheet("color: #666; font-style: italic;")
+
+        layout.addWidget(lbl_img)
+
+        # Label
+        lbl_name = QLabel(name)
+        lbl_name.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
+        lbl_name.setWordWrap(True)
+        lbl_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(lbl_name)
+
+        return card
+
+    def select_model(self, name):
+        self.selected_model = name
+
+        # Update Styles
+        for model_name, card in self.model_cards.items():
+            if model_name == name:
+                card.setStyleSheet(
+                    """
+                    QFrame#ModelCard {
+                        background-color: #333333;
+                        border: 2px solid #007acc;
+                        border-radius: 10px;
+                    }
+                """
+                )
+            else:
+                card.setStyleSheet(
+                    """
+                    QFrame#ModelCard {
+                        background-color: #252526;
+                        border: 1px solid #3e3e42;
+                        border-radius: 10px;
+                    }
+                    QFrame#ModelCard:hover {
+                        border: 1px solid #555555;
+                        background-color: #2d2d30;
+                    }
+                """
+                )
+
+        self.update_launch_button()
+
+    def update_launch_button(self):
+        if self.docker_available and self.selected_model:
+            self.btn_launch.setEnabled(True)
+            self.btn_launch.setText(f"LAUNCH {self.selected_model.upper()}")
+        elif not self.docker_available:
+            self.btn_launch.setEnabled(False)
+            self.btn_launch.setText("DOCKER NOT FOUND")
+        else:
+            self.btn_launch.setEnabled(False)
+            self.btn_launch.setText("SELECT A MODEL")
+
+    def apply_styles(self):
+        self.setStyleSheet(
+            """
+            QMainWindow, QWidget {
+                background-color: #1e1e1e;
+                color: #ffffff;
+                font-family: "Segoe UI";
+            }
+            QPushButton {
+                background-color: #007acc;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                padding: 8px 16px;
+                font-weight: bold;
+            }
+            QPushButton:hover {
+                background-color: #0098ff;
+            }
+            QPushButton:pressed {
+                background-color: #005c99;
+            }
+            QPushButton:disabled {
+                background-color: #444444;
+                color: #888888;
+            }
+            QFrame#BottomBar {
+                background-color: #252526;
+                border-top: 1px solid #3e3e42;
+                border-radius: 0px;
+            }
+            QPushButton#LaunchButton {
+                background-color: #28a745;
+                font-size: 14px;
+            }
+            QPushButton#LaunchButton:hover {
+                background-color: #34ce57;
+            }
+            QCheckBox {
+                color: #dddddd;
+                font-size: 14px;
+            }
+            QCheckBox::indicator {
+                width: 18px;
+                height: 18px;
+                border-radius: 3px;
+                border: 1px solid #666;
+            }
+            QCheckBox::indicator:checked {
+                background-color: #007acc;
+                border-color: #007acc;
+            }
+            QTabWidget::pane {
+                border: 1px solid #3e3e42;
+                border-radius: 5px;
+            }
+            QTabBar::tab {
+                background: #252526;
+                color: #ccc;
+                padding: 10px;
+                margin-right: 2px;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+            }
+            QTabBar::tab:selected {
+                background: #333;
+                color: white;
+                border-bottom: 2px solid #007acc;
+            }
+            QComboBox {
+                background-color: #333;
+                border: 1px solid #555;
+                border-radius: 5px;
+                padding: 5px;
+            }
+        """
+        )
+
+    def check_docker(self):
+        self.check_thread = DockerCheckThread()
+        self.check_thread.result.connect(self.on_docker_check_complete)
+        self.check_thread.start()
+
+    def on_docker_check_complete(self, available):
+        self.docker_available = available
+        if available:
+            self.lbl_status.setText("● System Ready")
+            self.lbl_status.setStyleSheet("color: #28a745; font-weight: bold;")
+        else:
+            self.lbl_status.setText("● Docker Not Found")
+            self.lbl_status.setStyleSheet("color: #dc3545; font-weight: bold;")
+            QMessageBox.warning(
+                self,
+                "Docker Missing",
+                "Docker is required to run simulations.\n"
+                "Please install Docker Desktop.",
+            )
+        self.update_launch_button()
+
+    def open_help(self):
+        dlg = HelpDialog(self)
+        dlg.exec()
+
+    def open_environment_manager(self):
+        dlg = EnvironmentDialog(self)
+        dlg.exec()
+
+    def launch_simulation(self):
+        if not self.selected_model:
+            return
+
+        model_name = self.selected_model
+        repo_rel_path = MODELS_DICT[model_name]
+        abs_repo_path = REPOS_ROOT / repo_rel_path
+
+        if not abs_repo_path.exists():
+            QMessageBox.critical(self, "Error", f"Path not found: {abs_repo_path}")
+            return
+
+        # Engine-specific launch logic
+        try:
+            custom_launchers = {
+                "MuJoCo Humanoid": self._custom_launch_humanoid,
+                "MuJoCo Dashboard": self._custom_launch_comprehensive,
+            }
+
+            launcher = custom_launchers.get(model_name)
+            if launcher:
+                launcher(abs_repo_path)
+            else:
+                self._launch_docker_container(model_name, abs_repo_path)
+        except Exception as e:
+            QMessageBox.critical(self, "Launch Error", str(e))
+
+    def _custom_launch_humanoid(self, abs_repo_path):
+        script = abs_repo_path / "python/humanoid_launcher.py"
+        if not script.exists():
+            raise FileNotFoundError(
+                f"Script not found: {script}. "
+                "Ensure the MuJoCo engine and selected model repository "
+                "are properly installed."
+            )
+
+        logger.info(f"Launching Humanoid GUI: {script}")
+        subprocess.Popen([sys.executable, str(script)], cwd=script.parent)
+
+    def _custom_launch_comprehensive(self, abs_repo_path):
+        python_dir = abs_repo_path / "python"
+        logger.info(f"Launching Comprehensive GUI from {python_dir}")
+        subprocess.Popen([sys.executable, "-m", "mujoco_golf_pendulum"], cwd=python_dir)
 
     def _launch_docker_container(self, model_name, abs_repo_path):
-        # Prepare Docker Command for physics engines
         cmd = ["docker", "run", "--rm", "-it"]
 
-        # Volumes - mount the engine directory to /workspace
-        mount_path = abs_repo_path.replace("\\", "/")
+        # Volumes
+        mount_path = str(abs_repo_path).replace("\\", "/")
         cmd.extend(["-v", f"{mount_path}:/workspace"])
-        cmd.extend(["-w", "/workspace"])
+        cmd.extend(["-w", "/workspace/python"])
 
-        # X11 / Display
-        if self.var_live.get():
+        # Display/X11
+        if self.chk_live.isChecked():
             if os.name == "nt":
                 cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
             else:
                 cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
-                cmd.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw"])  # noqa: S108
+                cmd.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw"])
 
         # GPU
-        if self.var_gpu.get():
+        if self.chk_gpu.isChecked():
             cmd.append("--gpus=all")
 
+        # Network for Meshcat (Drake)
         host_port = None
-        if model_name == "Drake Golf Model":
-            host_port = self._configure_drake(cmd)
+        if "Drake" in model_name:
+            cmd.extend(["-p", "7000-7010:7000-7010"])
+            cmd.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
+            host_port = 7000
 
-        # Image
         cmd.append(DOCKER_IMAGE_NAME)
 
-        # UPDATED: Engine-specific launch commands for new structure
-        if model_name == "Drake Golf Model":
-            cmd.extend(["python", "python/src/golf_gui.py"])
+        # Entry Command
+        if "Drake" in model_name:
+            # Run as module for relative imports (workdir is now /workspace/python)
+            cmd.extend(["python", "-m", "src.golf_gui"])
+
             if host_port:
-                self._schedule_browser_open(host_port)
-        elif model_name == "Pinocchio Golf Model":
-            cmd.extend(["python", "python/pinocchio_golf/gui.py"])
+                self._start_meshcat_browser(host_port)
 
-        # Log the command being executed
-        self.log(f"Starting {model_name} simulation...")
-        self.log(f"Command: {' '.join(cmd)}")
+        elif "Pinocchio" in model_name:
+            # Run from python dir
+            cmd.extend(["python", "pinocchio_golf/gui.py"])
 
-        # Launch in terminal
+        logger.info(f"Docker Command: {' '.join(cmd)}")
+
+        # Launch in Terminal
         if os.name == "nt":
-            try:
-                create_new_console = 0x00000010
-                process = subprocess.Popen(
-                    ["cmd", "/k", *cmd], creationflags=create_new_console
-                )
-                self.log(f"Simulation launched in new terminal (PID: {process.pid})")
-            except Exception as e:
-                self.log(f"ERROR: Failed to launch simulation: {e}")
-                messagebox.showerror(
-                    "Launch Error", f"Failed to start simulation:\n{e}"
-                )
+            subprocess.Popen(
+                ["cmd", "/k", *cmd], creationflags=subprocess.CREATE_NEW_CONSOLE
+            )
         else:
-            try:
-                process = subprocess.Popen(cmd)
-                self.log(f"Simulation launched (PID: {process.pid})")
-            except Exception as e:
-                self.log(f"ERROR: Failed to launch simulation: {e}")
-                messagebox.showerror(
-                    "Launch Error", f"Failed to start simulation:\n{e}"
-                )
+            subprocess.Popen(cmd)
+
+    def _start_meshcat_browser(self, port):
+        def open_url():
+            time.sleep(3)
+            webbrowser.open(f"http://localhost:{port}")
+
+        threading.Thread(target=open_url, daemon=True).start()
 
 
 if __name__ == "__main__":
-    app = UnifiedLauncher()
-    app.mainloop()
+    app = QApplication(sys.argv)
+
+    # Global Font
+    font = QFont("Segoe UI", 10)
+    app.setFont(font)
+
+    window = GolfLauncher()
+    window.show()
+    sys.exit(app.exec())

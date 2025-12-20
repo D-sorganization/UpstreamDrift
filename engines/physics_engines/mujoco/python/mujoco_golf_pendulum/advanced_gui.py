@@ -55,6 +55,35 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.setWindowTitle("Golf Swing Biomechanical Analysis Suite")
         self.resize(1600, 900)
 
+        # Apply Global Stylesheet
+        self.setStyleSheet(
+            """
+            QPushButton {
+                border-radius: 5px;
+                padding: 5px;
+            }
+            QPushButton:hover {
+                border: 1px solid #4a90e2;
+            }
+            QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox {
+                border-radius: 4px;
+                padding: 4px;
+                background-color: #333;
+                color: white;
+            }
+            QGroupBox {
+                border: 1px solid #555;
+                border-radius: 5px;
+                margin-top: 10px;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+            }
+        """
+        )
+
         # Model configurations
         self.model_configs = [
             {
@@ -389,9 +418,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         for mech_name in LINKAGE_CATALOG:
             self.model_combo.addItem(f"Mechanism: {mech_name}")
             mech_config = LINKAGE_CATALOG[mech_name]
-            self.model_descriptions[idx] = mech_config.get(
-                "description",
-                "Mechanical linkage system",
+            self.model_descriptions[idx] = str(
+                mech_config.get(
+                    "description",
+                    "Mechanical linkage system",
+                )
             )
             idx += 1
 
@@ -463,16 +494,19 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.play_pause_btn.setCheckable(True)
         self.play_pause_btn.toggled.connect(self.on_play_pause_toggled)
         self.play_pause_btn.setToolTip("Pause/Resume simulation (Shortcut: Space)")
-        self.play_pause_btn.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause),
-        )
+        style = self.style()
+        if style:
+            self.play_pause_btn.setIcon(
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause),
+            )
 
         self.reset_btn = QtWidgets.QPushButton("Reset")
         self.reset_btn.clicked.connect(self.on_reset_clicked)
         self.reset_btn.setToolTip("Reset simulation to initial state (Shortcut: R)")
-        self.reset_btn.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload),
-        )
+        if style:
+            self.reset_btn.setIcon(
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload),
+            )
 
         self.record_btn = QtWidgets.QPushButton("Start Recording")
         self.record_btn.setCheckable(True)
@@ -657,9 +691,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         # Update preset combo in visualization tab
         index = self.camera_combo.findText(preset_name)
         if index >= 0:
-            self.camera_combo.blockSignals(block=True)
-            self.camera_combo.setCurrentIndex(index)
-            self.camera_combo.blockSignals(block=False)
+            try:
+                self.camera_combo.blockSignals(True)
+                self.camera_combo.setCurrentIndex(index)
+            finally:
+                self.camera_combo.blockSignals(False)
 
     def _update_model_description(self, index: int) -> None:
         """Update the model description label based on selected model."""
@@ -691,8 +727,10 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             count = len(self.actuator_sliders)
             self.actuator_summary_label.setText(f"{count} actuators")
 
-    def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
+    def keyPressEvent(self, event: QtGui.QKeyEvent | None) -> None:  # type: ignore[override]
         """Handle keyboard shortcuts."""
+        if event is None:
+            return
         key = event.key()
 
         # Camera preset shortcuts (1-5)
@@ -705,7 +743,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         }
 
         if key in camera_shortcuts:
-            preset = camera_shortcuts[key]
+            # Enum key lookup issue with Int key
+            preset = camera_shortcuts[key]  # type: ignore[index]
             self._on_quick_camera_clicked(preset)
             return
 
@@ -722,14 +761,21 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         # H key: Toggle help panel
         if key == QtCore.Qt.Key.Key_H:
             # Find the help group and toggle it
-            for i in range(self.tab_widget.widget(0).layout().count()):
-                widget = self.tab_widget.widget(0).layout().itemAt(i).widget()
-                if (
-                    isinstance(widget, QtWidgets.QGroupBox)
-                    and widget.title() == "Quick Start Guide"
-                ):
-                    widget.setChecked(not widget.isChecked())
-                    break
+            tab = self.tab_widget.widget(0)
+            if tab is not None:
+                layout = tab.layout()
+                if layout is not None:
+                    for i in range(layout.count()):
+                        item = layout.itemAt(i)
+                        if item is None:
+                            continue
+                        widget = item.widget()
+                        if (
+                            isinstance(widget, QtWidgets.QGroupBox)
+                            and widget.title() == "Quick Start Guide"
+                        ):
+                            widget.setChecked(not widget.isChecked())
+                            break
             return
 
         super().keyPressEvent(event)
@@ -737,6 +783,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
     def _create_status_bar(self) -> None:
         """Create a status bar showing simulation information."""
         status_bar = self.statusBar()
+        if status_bar is None:
+            return
         status_bar.setStyleSheet(
             """
             QStatusBar {
@@ -1555,10 +1603,10 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         try:
             if "xml_path" in config:
                 # Load from external file (e.g., MyoSuite models)
-                self.sim_widget.load_model_from_file(config["xml_path"])
+                self.sim_widget.load_model_from_file(str(config["xml_path"]))
             elif "xml" in config:
                 # Load from XML string (traditional models)
-                self.sim_widget.load_model_from_xml(config["xml"])
+                self.sim_widget.load_model_from_xml(str(config["xml"]))
             else:
                 error_msg = (
                     f"Model config must have 'xml' or 'xml_path': {config['name']}"
@@ -1577,7 +1625,7 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             # Fall back to double pendulum (index 1)
             self.model_combo.setCurrentIndex(1)
             fallback_config = self.model_configs[1]
-            self.sim_widget.load_model_from_xml(fallback_config["xml"])
+            self.sim_widget.load_model_from_xml(str(fallback_config["xml"]))
             config = fallback_config  # Use fallback config for the rest of the function
 
         # Verify actuator count matches model
@@ -1594,15 +1642,21 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
                 )
 
                 # If config has fewer names, pad with generic names
-                if config_actuator_count < model_actuator_count:
+                if config_actuator_count < model_actuator_count and isinstance(
+                    config["actuators"], list
+                ):
                     for i in range(config_actuator_count, model_actuator_count):
                         config["actuators"].append(f"Actuator {i}")
                 # If config has more names, truncate
-                elif config_actuator_count > model_actuator_count:
+                elif config_actuator_count > model_actuator_count and isinstance(
+                    config["actuators"], list
+                ):
                     config["actuators"] = config["actuators"][:model_actuator_count]
 
         # Create new actuator controls (now guaranteed to match model.nu)
-        self._create_actuator_controls(config["actuators"])
+        actuators = config["actuators"]
+        if isinstance(actuators, list):
+            self._create_actuator_controls(actuators)
 
         # Verify control system matches model
         if not self.sim_widget.verify_control_system():
@@ -2026,9 +2080,10 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         container_layout.addWidget(step_widget)
 
         # Store references to all parameter widgets for showing/hiding
-        control_type_combo.polynomial_widget = poly_widget
-        control_type_combo.sine_widget = sine_widget
-        control_type_combo.step_widget = step_widget
+        # Attach as dynamic attributes using setattr to avoid typing.cast abuse
+        setattr(control_type_combo, "polynomial_widget", poly_widget)  # noqa: B010
+        setattr(control_type_combo, "sine_widget", sine_widget)  # noqa: B010
+        setattr(control_type_combo, "step_widget", step_widget)  # noqa: B010
 
         return container
 
@@ -2208,19 +2263,20 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
 
     def on_play_pause_toggled(self, checked: bool) -> None:
         """Handle play/pause button toggle."""
+        style = self.style()
         if checked:
             self.play_pause_btn.setText("Play")
-            self.play_pause_btn.setIcon(
-                self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay),
-            )
+            if style:
+                self.play_pause_btn.setIcon(
+                    style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay),
+                )
             self.sim_widget.set_running(False)
         else:
             self.play_pause_btn.setText("Pause")
-            self.play_pause_btn.setIcon(
-                self.style().standardIcon(
-                    QtWidgets.QStyle.StandardPixmap.SP_MediaPause
-                ),
-            )
+            if style:
+                self.play_pause_btn.setIcon(
+                    style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause),
+                )
             self.sim_widget.set_running(True)
 
     def on_reset_clicked(self) -> None:
@@ -2882,6 +2938,9 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         model = self.sim_widget.model
         data = self.sim_widget.data
 
+        if model is None or data is None:
+            return
+
         mocap_id = model.body_mocapid[body_id]
 
         if mocap_id != -1:
@@ -2897,9 +2956,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
                 )
         else:
             # Not a mocap body
-            self.statusBar().showMessage(
-                "Manual transform only available for mocap bodies", 3000
-            )
+            status_bar = self.statusBar()
+            if status_bar:
+                status_bar.showMessage(
+                    "Manual transform only available for mocap bodies", 3000
+                )
 
         self.sim_widget._render_once()
 
@@ -2912,6 +2973,9 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         body_id = manipulator.selected_body_id
         model = self.sim_widget.model
         data = self.sim_widget.data
+
+        if model is None or data is None:
+            return
 
         # Determine if the body is controlled by mocap
         mocap_id = model.body_mocapid[body_id]
@@ -3063,7 +3127,9 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.pose_name_input.clear()
 
         logger.info("Pose '%s' saved successfully", pose_name)
-        self.statusBar().showMessage(f"Pose '{pose_name}' saved successfully.", 3000)
+        status_bar = self.statusBar()
+        if status_bar:
+            status_bar.showMessage(f"Pose '{pose_name}' saved successfully.", 3000)
 
     def on_load_pose(self) -> None:
         """Load selected pose from library."""
@@ -3083,10 +3149,12 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         pose_name = current_item.text()
         if manipulator.load_pose(pose_name):
             logger.info("Pose '%s' loaded successfully", pose_name)
-            self.statusBar().showMessage(
-                f"Pose '{pose_name}' loaded successfully.",
-                3000,
-            )
+            status_bar = self.statusBar()
+            if status_bar:
+                status_bar.showMessage(
+                    f"Pose '{pose_name}' loaded successfully.",
+                    3000,
+                )
         else:
             QtWidgets.QMessageBox.warning(
                 self,
@@ -3124,10 +3192,12 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             if manipulator.delete_pose(pose_name):
                 self.update_pose_list()
                 logger.info("Pose '%s' deleted successfully", pose_name)
-                self.statusBar().showMessage(
-                    f"Pose '{pose_name}' deleted successfully.",
-                    3000,
-                )
+                status_bar = self.statusBar()
+                if status_bar:
+                    status_bar.showMessage(
+                        f"Pose '{pose_name}' deleted successfully.",
+                        3000,
+                    )
 
     def on_export_poses(self) -> None:
         """Export pose library to file."""
@@ -3269,8 +3339,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         # Clear existing
         while self.joint_layout.count():
             item = self.joint_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+            if item is None:
+                continue
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
 
         # Initialize storage for cross-referencing
         self.joint_widgets: dict[str, dict[str, QtWidgets.QWidget]] = {}

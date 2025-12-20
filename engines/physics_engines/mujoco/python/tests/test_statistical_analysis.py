@@ -14,6 +14,8 @@ file_path = os.path.abspath(
     )
 )
 spec = importlib.util.spec_from_file_location("statistical_analysis", file_path)
+assert spec is not None
+assert spec.loader is not None
 statistical_analysis = importlib.util.module_from_spec(spec)
 sys.modules["statistical_analysis"] = statistical_analysis
 spec.loader.exec_module(statistical_analysis)

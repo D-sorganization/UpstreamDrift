@@ -158,7 +158,7 @@ def show_status():
 
     print("\nAvailable Engines:")
     for name, path in engines.items():
-        status = "✅" if path.exists() else "❌"
+        status = "[OK]" if path.exists() else "[MISSING]"
         print(f"  {status} {name}: {path}")
 
     # Check launchers
@@ -169,7 +169,7 @@ def show_status():
 
     print("\nLaunchers:")
     for name, path in launchers.items():
-        status = "✅" if path.exists() else "❌"
+        status = "[OK]" if path.exists() else "[MISSING]"
         print(f"  {status} {name}: {path}")
 
     print("\nShared Components:")
@@ -180,7 +180,7 @@ def show_status():
     }
 
     for name, path in shared_components.items():
-        status = "✅" if path.exists() else "❌"
+        status = "[OK]" if path.exists() else "[MISSING]"
         print(f"  {status} {name}: {path}")
 
     print()

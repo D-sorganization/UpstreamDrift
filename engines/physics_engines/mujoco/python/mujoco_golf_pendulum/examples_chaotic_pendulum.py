@@ -11,6 +11,8 @@ Run this script to see interactive demonstrations of control principles
 using the chaotic pendulum model.
 """
 
+import abc
+
 import matplotlib.pyplot as plt
 import mujoco
 import numpy as np
@@ -20,7 +22,7 @@ from src.constants import GRAVITY_M_S2
 from .models import CHAOTIC_PENDULUM_XML
 
 
-class ChaoticPendulumController:
+class ChaoticPendulumController(abc.ABC):
     """Base controller class for chaotic pendulum experiments."""
 
     def __init__(self, model, data) -> None:
@@ -31,7 +33,7 @@ class ChaoticPendulumController:
         self.L = 0.8  # pendulum length
         self.m = 1.0  # bob mass
 
-    def get_state(self) -> None:
+    def get_state(self) -> tuple[float, float, float, float]:
         """Get current pendulum state."""
         x_base = self.data.qpos[0]  # base position
         theta = self.data.qpos[1]  # pendulum angle
@@ -39,7 +41,7 @@ class ChaoticPendulumController:
         theta_dot = self.data.qvel[1]  # angular velocity
         return x_base, theta, x_base_dot, theta_dot
 
-    def compute_energy(self) -> None:
+    def compute_energy(self) -> float:
         """Compute total mechanical energy of pendulum.
 
         For a driven pendulum, the bob's velocity has contributions from both
@@ -63,6 +65,10 @@ class ChaoticPendulumController:
 
         return ke + pe
 
+    @abc.abstractmethod
+    def control(self, time: float) -> tuple[float, float]:
+        """Calculate control inputs. Should be overridden."""
+
     def apply_control(self, base_force, pendulum_torque) -> None:
         """Apply control inputs to the system."""
         self.data.ctrl[0] = base_force
@@ -82,7 +88,7 @@ class FreeOscillationDemo(ChaoticPendulumController):
         mujoco.mj_resetData(self.model, self.data)
         self.data.qpos[1] = self.initial_angle  # Set initial angle
 
-    def control(self, time) -> None:
+    def control(self, time) -> tuple[float, float]:
         """No active control - free oscillation."""
         return 0.0, 0.0
 
@@ -101,7 +107,7 @@ class ResonanceDrivenDemo(ChaoticPendulumController):
         mujoco.mj_resetData(self.model, self.data)
         self.data.qpos[1] = 0.1  # Small initial perturbation
 
-    def control(self, time) -> None:
+    def control(self, time) -> tuple[float, float]:
         """Apply sinusoidal forcing at specified frequency."""
         base_force = self.forcing_amp * np.sin(2 * np.pi * self.forcing_freq * time)
         pendulum_torque = 0.0  # No direct pendulum control
@@ -129,7 +135,7 @@ class PIDStabilizationDemo(ChaoticPendulumController):
         self.integral_error = 0.0
         self.prev_error = 0.0
 
-    def control(self, time) -> None:
+    def control(self, time) -> tuple[float, float]:
         """PID control to stabilize at upright (θ = π)."""
         _, theta, _, _theta_dot = self.get_state()
 
@@ -176,7 +182,7 @@ class SwingUpControlDemo(ChaoticPendulumController):
         mujoco.mj_resetData(self.model, self.data)
         self.data.qpos[1] = 0.0  # Start at bottom
 
-    def control(self, time) -> None:
+    def control(self, time) -> tuple[float, float]:
         """Energy-based swing-up with stabilization."""
         _, theta, _, theta_dot = self.get_state()
 
@@ -228,14 +234,14 @@ class ChaosExplorationDemo(ChaoticPendulumController):
         mujoco.mj_resetData(self.model, self.data)
         self.data.qpos[1] = self.initial_angle
 
-    def control(self, time) -> None:
+    def control(self, time) -> tuple[float, float]:
         """Apply strong forcing to induce chaos."""
         base_force = self.forcing_amp * np.sin(2 * np.pi * self.forcing_freq * time)
         pendulum_torque = 0.0
         return base_force, pendulum_torque
 
 
-def run_simulation(controller, duration=20.0) -> None:
+def run_simulation(controller, duration=20.0) -> dict[str, np.ndarray]:
     """Run simulation with specified controller.
 
     Args:

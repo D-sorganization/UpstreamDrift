@@ -20,7 +20,7 @@ from .telemetry import TelemetryRecorder
 try:
     import cv2
 except ImportError:  # pragma: no cover - optional dependency
-    cv2 = None
+    cv2 = None  # type: ignore
 
 LOGGER = logging.getLogger(__name__)
 MIN_CAMERA_DEPTH: Final[float] = 0.1
@@ -124,7 +124,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.label.setMouseTracking(True)
 
         # Camera manipulation state
-        self.last_mouse_pos = None
+        self.last_mouse_pos: tuple[int, int] | None = None
         self.camera_mode = "rotate"  # "rotate", "translate", "zoom"
         self.is_dragging = False
 
@@ -467,7 +467,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             Note: This assumes 1-DOF joints (hinge/slide) for simplicity of this UI.
             Complex joints (ball/free) might need special handling.
         """
-        if self.model is None:
+        if self.model is None or self.data is None:
             return []
 
         dofs = []
@@ -687,7 +687,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         self._render_once()
 
-    def render(self) -> None:
+    def render(self) -> None:  # type: ignore[override]
         """Render the scene immediately."""
         self._render_once()
 
@@ -816,6 +816,9 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
     def _draw_torque_vectors(self, draw_arrow_func: Callable) -> None:
         """Helper to draw torque vectors."""
+        if self.model is None or self.data is None:
+            return
+
         for i in range(self.model.nu):
             joint_id = self.model.actuator_trnid[i, 0]
             if joint_id < 0 or joint_id >= self.model.njnt:
@@ -836,6 +839,9 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
     def _draw_force_vectors(self, draw_arrow_func: Callable) -> None:
         """Helper to draw force vectors (external and internal)."""
+        if self.data is None or self.model is None:
+            return
+
         # External forces (Green)
         external_forces = self.data.cfrc_ext.reshape(-1, 6)
         for body_id in range(1, self.model.nbody):
@@ -870,6 +876,9 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         """
         if cv2 is None:
             # OpenCV not available, return original image
+            return rgb
+
+        if self.model is None or self.data is None:
             return rgb
 
         # Make a copy to avoid modifying original
@@ -1016,7 +1025,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
     # -------- Mouse event handling for interactive manipulation --------
 
-    def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
+    def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:  # type: ignore[override]
         """Handle mouse press for body selection and camera control."""
         modifiers = event.modifiers()
         button = event.button()
@@ -1032,6 +1041,9 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             button == QtCore.Qt.MouseButton.LeftButton
             and modifiers & QtCore.Qt.KeyboardModifier.ShiftModifier
         ):
+
+            x = int(event.position().x())
+            y = int(event.position().y())
             self.last_mouse_pos = (x, y)
             self.is_dragging = True
             self.camera_mode = "translate"
@@ -1097,8 +1109,10 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         super().mousePressEvent(event)
 
-    def mouseMoveEvent(self, event: QtGui.QMouseEvent) -> None:
+    def mouseMoveEvent(self, event: QtGui.QMouseEvent | None) -> None:  # type: ignore[override]
         """Handle mouse move for dragging bodies or camera."""
+        if event is None:
+            return
         pos = event.position()
         x = int(pos.x())
         y = int(pos.y())
@@ -1161,8 +1175,10 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         super().mouseMoveEvent(event)
 
-    def mouseReleaseEvent(self, event: QtGui.QMouseEvent) -> None:
+    def mouseReleaseEvent(self, event: QtGui.QMouseEvent | None) -> None:  # type: ignore[override]
         """Handle mouse release to end dragging."""
+        if event is None:
+            return
         # End camera manipulation
         if self.is_dragging:
             self.is_dragging = False
@@ -1184,8 +1200,10 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         super().mouseReleaseEvent(event)
 
-    def wheelEvent(self, event: QtGui.QWheelEvent) -> None:
+    def wheelEvent(self, event: QtGui.QWheelEvent | None) -> None:  # type: ignore[override]
         """Handle mouse wheel for camera zoom."""
+        if event is None:
+            return
         if self.camera is not None:
             # Zoom in/out with smooth scaling
             delta = event.angleDelta().y()
@@ -1241,20 +1259,25 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         # Section header
         header = menu.addAction(f"Selected: {body_name}")
-        header.setEnabled(False)
+        if header is not None:
+            header.setEnabled(False)
         menu.addSeparator()
 
         # Toggle Coordinate Frame
         action_frame = menu.addAction("Show Coordinate System")
-        action_frame.setCheckable(True)
-        action_frame.setChecked(body_id in self.visible_frames)
-        action_frame.triggered.connect(lambda: self.toggle_frame_visibility(body_id))
+        if action_frame is not None:
+            action_frame.setCheckable(True)
+            action_frame.setChecked(body_id in self.visible_frames)
+            action_frame.triggered.connect(
+                lambda: self.toggle_frame_visibility(body_id)
+            )
 
         # Toggle Center of Mass
         action_com = menu.addAction("Show Center of Mass")
-        action_com.setCheckable(True)
-        action_com.setChecked(body_id in self.visible_coms)
-        action_com.triggered.connect(lambda: self.toggle_com_visibility(body_id))
+        if action_com is not None:
+            action_com.setCheckable(True)
+            action_com.setChecked(body_id in self.visible_coms)
+            action_com.triggered.connect(lambda: self.toggle_com_visibility(body_id))
 
         menu.exec(global_pos)
 
