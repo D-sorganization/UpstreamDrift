@@ -100,11 +100,10 @@ RUN pip install \
 # Stage: Drake
 # ==========================================
 FROM base AS drake
-# NOTE: Drake installation is currently a placeholder.
-# Users should add specific installation commands here (e.g. pip install drake)
+# Install Drake using pip (official method as of Drake 1.0+)
 # See https://drake.mit.edu/python_bindings.html
-# Install Drake
-RUN pip install drake meshcat
+# Pin version to ensure reproducible builds
+RUN pip install drake>=1.0.0 meshcat>=0.3.0
 
 # ==========================================
 # Stage: All (Default)
@@ -117,9 +116,9 @@ RUN pip install \
     jax[cuda12_pip] \
     pin>=2.6.0 \
     pin-pink \
-    meshcat \
+    meshcat>=0.3.0 \
     qpsolvers \
-    drake
+    drake>=1.0.0
 
 # Set working directory
 WORKDIR /workspace
