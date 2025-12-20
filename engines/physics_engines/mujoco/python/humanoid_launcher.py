@@ -685,6 +685,7 @@ class HumanoidLauncher(QMainWindow):
         self.btn_run.setEnabled(True)
         self.btn_stop.setEnabled(False)
 
+        # Handle segmentation fault with user prompt for headless mode
         if code == 139:
             reply = QMessageBox.question(
                 self,
