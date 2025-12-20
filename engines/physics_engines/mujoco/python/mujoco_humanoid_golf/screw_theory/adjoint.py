@@ -3,7 +3,7 @@ Adjoint transformations for twists and wrenches.
 """
 
 import numpy as np
-from mujoco_golf_pendulum.spatial_algebra.spatial_vectors import skew
+from mujoco_humanoid_golf.spatial_algebra.spatial_vectors import skew
 
 
 def adjoint_transform(T: np.ndarray) -> np.ndarray:

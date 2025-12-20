@@ -41,15 +41,15 @@ def isolated_library() -> Iterator[tuple]:
     with patch.dict(sys.modules, mocks):
         # Locate source file
         repo_root = Path(__file__).resolve().parent.parent
-        lib_path = repo_root / "mujoco_golf_pendulum/recording_library.py"
+        lib_path = repo_root / "mujoco_humanoid_golf/recording_library.py"
 
         if not lib_path.exists():
             lib_path = Path(
-                "python/mujoco_golf_pendulum/recording_library.py"
+                "python/mujoco_humanoid_golf/recording_library.py"
             ).resolve()
 
         # Dynamic import
-        module_name = "mujoco_golf_pendulum.recording_library"
+        module_name = "mujoco_humanoid_golf.recording_library"
         spec = importlib.util.spec_from_file_location(module_name, lib_path)
         if spec is None or spec.loader is None:
             msg = f"Cannot load {module_name} from {lib_path}"
