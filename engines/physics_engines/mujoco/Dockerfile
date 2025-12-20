@@ -80,6 +80,9 @@ RUN pip install \
     mujoco>=3.0.0 \
     dm_control>=1.0.14 \
     jax[cuda12_pip]
+# Optional: Additional MuJoCo playground utilities. Disabled by default because
+# they are experimental and significantly increase image build time and size.
+# To enable these tools, uncomment the line below.
 #    git+https://github.com/google-deepmind/mujoco_playground.git@v0.1.0
 
 # ==========================================
@@ -97,7 +100,11 @@ RUN pip install \
 # Stage: Drake
 # ==========================================
 FROM base as drake
-# Drake installation via pip if available or specific setup
+# TODO: Implement Drake installation tailored to user needs.
+# Currently, Drake often requires system-specific apt packages or a specific wheel URL.
+# See https://drake.mit.edu/python_bindings.html for details.
+# Example: RUN pip install drake
+# For now, this stage inherits base and is ready for customization.
 # NOTE: Drake is a very large package with extensive dependencies.
 # Installing it will significantly increase build time and image size.
 # Uncomment the following line ONLY if you require Drake for your workflow.

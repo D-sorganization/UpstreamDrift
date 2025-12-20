@@ -553,112 +553,74 @@ class HumanoidLauncher(QMainWindow):
         
         cmd = [] 
         
+        # Header
+        header_label = QLabel("Humanoid Golf Simulation")
+        header_label.setFont(QFont("Arial", 16, QFont.Weight.Bold))
+        header_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        main_layout.addWidget(header_label)
+
+    def _setup_settings_group(self, main_layout):
+        group = QGroupBox("Configuration")
+        settings_layout = QGridLayout()
+        group.setLayout(settings_layout)
+        
+        # Scenario
+        settings_layout.addWidget(QLabel("Scenario:"), 0, 0)
+        self.combo_scenario = QComboBox()
+        self.combo_scenario.addItems(["full_swing", "putting", "custom"])
+        self.combo_scenario.currentTextChanged.connect(self._config_changed)
+        settings_layout.addWidget(self.combo_scenario, 0, 1)
+
+        # Control Mode
+        settings_layout.addWidget(QLabel("Control Mode:"), 1, 0)
+        self.combo_control = QComboBox()
+        self.combo_control.addItems(["mocap", "joint_angle"])
+        self.combo_control.currentTextChanged.connect(self._config_changed)
+        settings_layout.addWidget(self.combo_control, 1, 1)
+
+        # Live View
+        self.chk_live = QCheckBox("Live Interactive View (requires X11/VcXsrv)")
+        self.chk_live.setChecked(True)
+        self.chk_live.stateChanged.connect(self._config_changed)
+        settings_layout.addWidget(self.chk_live, 2, 0, 1, 2)
+
+    def get_docker_cmd(self):
+        is_windows = platform.system() == "Windows"
+        
+        # Resolve path for Docker mount
+        abs_repo_path = str(self.repo_path.resolve())
+        
+        cmd = [] 
+        mount_path = abs_repo_path
+
         if is_windows:
-            # Assume WSL2 Docker backend or similar
-            # Convert C:\Users... to /mnt/c/Users... for WSL mounting if needed
-            # BUT, standard Docker Desktop for Windows handles "C:/Users" format fine usually.
-            # The original script used explicit WSL mounting. Let's try to stick to that pattern 
-            # if it was working for the user, OR use standard binding.
-            # Original: drive = self.repo_path[0].lower(); ... /mnt/{drive}...
-            
-            drive = abs_repo_path[0].lower()
-            rel_path = abs_repo_path[2:].replace("\\", "/")
-            wsl_path = f"/mnt/{drive}{rel_path}"
-            
-            cmd = ["wsl", "docker", "run"]
-            mount_path = wsl_path
+            drive, tail = os.path.splitdrive(abs_repo_path)
+            if drive:
+                drive_letter = drive[0].lower()
+                rel_path = tail.replace("\\", "/")
+                wsl_path = f"/mnt/{drive_letter}{rel_path}"
+                cmd = ["wsl", "docker", "run"]
+                mount_path = wsl_path
+            else:
+                logging.warning(
+                    "Repository path '%s' does not start with a drive letter; "
+                    "using absolute path directly for Docker mount.",
+                    abs_repo_path,
+                )
+                cmd = ["docker", "run"]
+                mount_path = abs_repo_path.replace("\\", "/")
         else:
             cmd = ["docker", "run"]
-            mount_path = abs_repo_path
             
         cmd.extend(["--rm", "-v", f"{mount_path}:/workspace", "-w", "/workspace/python"])
-        
-        # Display settings
-        if self.config["live_view"]:
-            if is_windows:
-                 cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
-                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
-                 cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
-            else:
-                 cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
-                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
-                 cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
-                 cmd.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix"])
-        else:
-            cmd.extend(["-e", "MUJOCO_GL=osmesa"])
-            
-        # Image and Command
-        cmd.extend(["robotics_env", "/opt/robotics_env/bin/python", "-u", "-m", "mujoco_golf_pendulum"])
-        
-        return cmd
-
-    def start_simulation(self):
-        self.save_config()
-        self.log("Starting simulation...")
-        
-        cmd = self.get_docker_cmd()
-        
-        self.simulation_thread = SimulationWorker(cmd)
-        self.simulation_thread.log_signal.connect(self.log)
-        self.simulation_thread.finished_signal.connect(self.on_simulation_finished)
-        
-        self.simulation_thread.start()
-        
-        self.btn_run.setEnabled(False)
-        self.btn_stop.setEnabled(True)
-        
-    def stop_simulation(self):
-        if self.simulation_thread:
-            self.log("Stopping simulation...")
-            self.simulation_thread.stop()
-            
-    def on_simulation_finished(self, code, stderr):
-        if code == 0:
-            self.log("Simulation finished successfully.")
-            self.btn_video.setEnabled(True)
-            self.btn_data.setEnabled(True)
-        else:
-            self.log(f"Simulation failed with code {code}.")
-            
-        self.btn_run.setEnabled(True)
-        self.btn_stop.setEnabled(False)
-
-    def rebuild_docker(self):
-        reply = QMessageBox.question(
-            self, "Rebuild Environment", 
-            "This will rebuild the Docker environment. Continue?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-        
-        if reply == QMessageBox.StandardButton.Yes:
-            self.log("Rebuilding Docker environment... (This functionality is simplified here, check terminal)")
-            # In a full impl, we'd replicate the rebuild logic. 
-            # For now, let's just warn it is manual or reuse the worker.
-            
-            docker_dir = self.repo_path / "docker"
-            cmd = ["docker", "build", "-t", "robotics_env", "."]
-            
-            # Start worker for build
-            self.build_thread = SimulationWorker(cmd, cwd=str(docker_dir))
-            self.build_thread.log_signal.connect(self.log)
-            self.build_thread.finished_signal.connect(lambda c, e: self.log(f"Build complete with code {c}"))
-            self.build_thread.start()
-
-    def open_video(self):
-        vid_path = self.repo_path / "humanoid_golf.mp4"
-        self._open_file(vid_path)
-
-    def open_data(self):
-        csv_path = self.repo_path / "golf_data.csv"
-        self._open_file(csv_path)
 
     def _open_file(self, path):
         if not path.exists():
             QMessageBox.warning(self, "Error", f"File not found: {path}")
             return
             
-        if platform.system() == "Windows":
-            os.startfile(path)
+        if platform.system() == "Windows" and hasattr(os, "startfile"):
+            os.startfile(str(path))
         else:
             subprocess.call(["xdg-open", str(path)])
 

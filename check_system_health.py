@@ -4,7 +4,7 @@ Golf Modeling Suite - System Health Check
 Verifies that all components (Local Python, Docker Images, Libraries) are installed and functioning.
 """
 
-import sys
+
 import subprocess
 import os
 import time

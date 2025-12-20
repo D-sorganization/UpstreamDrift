@@ -38,6 +38,7 @@ logger = logging.getLogger(__name__)
 REPOS_ROOT = Path(__file__).parent.parent.resolve()
 ASSETS_DIR = Path(__file__).parent / "assets"
 DOCKER_IMAGE_NAME = "robotics_env"
+GRID_COLUMNS = 4
 
 MODELS_DICT = {
     "MuJoCo Humanoid": "engines/physics_engines/mujoco",
@@ -312,7 +313,7 @@ class GolfLauncher(QMainWindow):
             self.model_cards[name] = card
             self.grid_layout.addWidget(card, row, col)
             col += 1
-            if col > 3:
+            if col >= GRID_COLUMNS:
                 col = 0
                 row += 1
                 
@@ -599,12 +600,17 @@ class GolfLauncher(QMainWindow):
         cmd.append(DOCKER_IMAGE_NAME)
         
         # Entry Command
+        # Entry Command
         if "Drake" in model_name:
-            cmd.extend(["python", "python/src/golf_gui.py"])
+            # Use shell to change dir and run as module for relative imports
+            cmd.extend(["sh", "-c", "cd python && python -m src.golf_gui"])
+            
             if host_port:
-                threading.Thread(target=lambda: (time.sleep(3), webbrowser.open(f"http://localhost:{host_port}")), daemon=True).start()
+                self._start_meshcat_browser(host_port)
+                
         elif "Pinocchio" in model_name:
-             cmd.extend(["python", "python/pinocchio_golf/gui.py"])
+             # Also run from python dir for consistency, though Pinocchio might be script-based
+             cmd.extend(["sh", "-c", "cd python && python pinocchio_golf/gui.py"])
 
         logger.info(f"Docker Command: {' '.join(cmd)}")
         
@@ -613,6 +619,14 @@ class GolfLauncher(QMainWindow):
             subprocess.Popen(["cmd", "/k", *cmd], creationflags=subprocess.CREATE_NEW_CONSOLE)
         else:
             subprocess.Popen(cmd)
+
+    def _start_meshcat_browser(self, port):
+        def open_url():
+            time.sleep(3)
+            webbrowser.open(f"http://localhost:{port}")
+            
+        threading.Thread(target=open_url, daemon=True).start()
+
 
 
 if __name__ == "__main__":
