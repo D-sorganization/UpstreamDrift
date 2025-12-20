@@ -30,9 +30,9 @@ LOGGER = logging.getLogger(__name__)
 SLIDER_TO_RADIAN: typing.Final[float] = (
     0.01  # [rad/slider_unit] Conversion factor from slider integer values to radians
 )
-JOINT_ANGLE_MIN_RAD: typing.Final[float] = (
-    -10.0
-)  # [rad] Minimum joint angle for UI controls (Safety limit)
+JOINT_ANGLE_MIN_RAD: typing.Final[
+    float
+] = -10.0  # [rad] Minimum joint angle for UI controls (Safety limit)
 JOINT_ANGLE_MAX_RAD: typing.Final[float] = (
     10.0  # [rad] Maximum joint angle for UI controls (Safety limit)
 )
@@ -104,8 +104,13 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 if "MESHCAT_HOST" not in os.environ:
                     webbrowser.open(self.meshcat.web_url())
                 else:
-                    LOGGER.info("Running in Docker/Headless mode; skipping auto-browser open inside container.")
-                    LOGGER.info("Please access Meshcat from your host browser (e.g., http://localhost:7000).")
+                    LOGGER.info(
+                        "Running in Docker/Headless mode; "
+                        "skipping auto-browser open inside container."
+                    )
+                    LOGGER.info(
+                        "Please access Meshcat from your host browser (e.g., http://localhost:7000)."
+                    )
 
         except Exception as e:
             LOGGER.exception("Failed to start Meshcat")

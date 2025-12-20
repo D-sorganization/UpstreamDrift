@@ -154,7 +154,6 @@ class TestEngineIntegration:
             return {"ball_distance": 250.0}
 
         for engine in available_engines:
-
             # Measure performance
             start_time = time.time()
             result = mock_simulate(engine)
