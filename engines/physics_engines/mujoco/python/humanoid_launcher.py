@@ -27,6 +27,7 @@ from PyQt6.QtWidgets import (
     QCheckBox,
     QColorDialog,
     QComboBox,
+    QDialog,
     QDoubleSpinBox,
     QFileDialog,
     QGridLayout,
@@ -43,6 +44,14 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+# Import polynomial generator widget
+try:
+    from mujoco_humanoid_golf.polynomial_generator import PolynomialGeneratorWidget
+    HAS_POLYNOMIAL_GENERATOR = True
+except ImportError:
+    HAS_POLYNOMIAL_GENERATOR = False
+    logging.warning("Polynomial generator widget not available")
 
 # Configure logging
 logging.basicConfig(
@@ -71,6 +80,7 @@ DEFAULT_CONFIG = {
     "two_handed": False,
     "enhance_face": False,
     "articulated_fingers": False,
+    "polynomial_coefficients": {},  # Joint name -> [c0, c1, c2, c3, c4, c5, c6]
 }
 
 
@@ -244,12 +254,24 @@ class HumanoidLauncher(QMainWindow):
         self.combo_control = QComboBox()
         self.combo_control.addItems(["pd", "lqr", "poly"])
         self.combo_control.setCurrentText(self.config.get("control_mode", "pd"))
+        self.combo_control.currentTextChanged.connect(self.on_control_mode_changed)
         settings_layout.addWidget(self.combo_control, 0, 1)
+
+        # Polynomial Generator Button (only shown for poly mode)
+        self.btn_poly_generator = QPushButton("📊 Configure Polynomial")
+        self.btn_poly_generator.setStyleSheet(
+            "background-color: #0078d4; color: white; padding: 8px; font-weight: bold;"
+        )
+        self.btn_poly_generator.clicked.connect(self.open_polynomial_generator)
+        self.btn_poly_generator.setEnabled(
+            HAS_POLYNOMIAL_GENERATOR and self.config.get("control_mode") == "poly"
+        )
+        settings_layout.addWidget(self.btn_poly_generator, 0, 2)
 
         # Live View
         self.chk_live = QCheckBox("Live Interactive View (requires X11/VcXsrv)")
         self.chk_live.setChecked(self.config.get("live_view", False))
-        settings_layout.addWidget(self.chk_live, 1, 0, 1, 2)
+        settings_layout.addWidget(self.chk_live, 1, 0, 1, 3)
 
         settings_group.setLayout(settings_layout)
         layout.addWidget(settings_group)
@@ -527,6 +549,62 @@ class HumanoidLauncher(QMainWindow):
             self.config["colors"][key] = new_rgba
             self.set_btn_color(btn, new_rgba)
             self.save_config()
+
+    def on_control_mode_changed(self, mode):
+        """Handle control mode change to enable/disable polynomial generator button."""
+        is_poly_mode = mode == "poly"
+        self.btn_poly_generator.setEnabled(HAS_POLYNOMIAL_GENERATOR and is_poly_mode)
+
+    def open_polynomial_generator(self):
+        """Open polynomial generator dialog."""
+        if not HAS_POLYNOMIAL_GENERATOR:
+            QMessageBox.warning(
+                self,
+                "Polynomial Generator Unavailable",
+                "The polynomial generator widget is not available. "
+                "Please ensure mujoco_humanoid_golf.polynomial_generator is installed.",
+            )
+            return
+
+        # Create dialog
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Polynomial Function Generator")
+        dialog.setMinimumSize(900, 700)
+
+        layout = QVBoxLayout(dialog)
+
+        # Add polynomial generator widget
+        poly_widget = PolynomialGeneratorWidget(dialog)
+
+        # Set available joints (humanoid joint names)
+        joints = [
+            "lowerbackrx", "upperbackrx", "rtibiarx", "ltibiarx",
+            "rfemurrx", "lfemurrx", "rfootrx", "lfootrx",
+            "rhumerusrx", "lhumerusrx", "rhumerusrz", "lhumerusrz",
+            "rhumerusry", "lhumerusry", "rradiusrx", "lradiusrx"
+        ]
+        poly_widget.set_joints(joints)
+
+        # Connect signal to save coefficients
+        def on_polynomial_generated(joint_name, coefficients):
+            """Save generated polynomial coefficients to config."""
+            if "polynomial_coefficients" not in self.config:
+                self.config["polynomial_coefficients"] = {}
+            self.config["polynomial_coefficients"][joint_name] = coefficients
+            self.save_config()
+            self.log(f"Polynomial generated for {joint_name}: {coefficients}")
+
+        poly_widget.polynomial_generated.connect(on_polynomial_generated)
+
+        layout.addWidget(poly_widget)
+
+        # Add close button
+        btn_close = QPushButton("Close")
+        btn_close.clicked.connect(dialog.accept)
+        layout.addWidget(btn_close)
+
+        dialog.exec()
+
 
     def browse_file(self, line_edit, save=False):
         if save:
