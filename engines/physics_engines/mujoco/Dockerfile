@@ -103,7 +103,8 @@ FROM base AS drake
 # NOTE: Drake installation is currently a placeholder.
 # Users should add specific installation commands here (e.g. pip install drake)
 # See https://drake.mit.edu/python_bindings.html
-RUN echo "Drake stage is a placeholder"
+# Install Drake
+RUN pip install drake meshcat
 
 # ==========================================
 # Stage: All (Default)
@@ -117,7 +118,8 @@ RUN pip install \
     pin>=2.6.0 \
     pin-pink \
     meshcat \
-    qpsolvers
+    qpsolvers \
+    drake
 
 # Set working directory
 WORKDIR /workspace

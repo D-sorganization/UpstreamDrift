@@ -13,11 +13,11 @@ def create_minimal_dockerfile():
 FROM robotics_env:latest
 
 # Install missing dependencies in the existing virtual environment
-RUN /opt/robotics_env/bin/pip install "defusedxml>=0.7.1" "PyQt6>=6.6.0"
+RUN /opt/mujoco-env/bin/pip install "defusedxml>=0.7.1" "PyQt6>=6.6.0"
 
 # Update PATH to use robotics_env by default
-ENV PATH="/opt/robotics_env/bin:$PATH"
-ENV VIRTUAL_ENV="/opt/robotics_env"
+ENV PATH="/opt/mujoco-env/bin:$PATH"
+ENV VIRTUAL_ENV="/opt/mujoco-env"
 """
     return dockerfile_content
 

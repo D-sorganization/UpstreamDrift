@@ -35,7 +35,7 @@ ENV QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/x86_64-linux-gnu/qt6/plugins
 ENV QT_QPA_PLATFORM=offscreen
 
 # Install PyQt6 with all components
-RUN /opt/robotics_env/bin/pip install "PyQt6>=6.6.0" "PyQt6-Qt6>=6.6.0"
+RUN /opt/mujoco-env/bin/pip install "PyQt6>=6.6.0" "PyQt6-Qt6>=6.6.0"
 """
     return dockerfile_content
 

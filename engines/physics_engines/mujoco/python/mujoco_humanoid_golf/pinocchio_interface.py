@@ -11,7 +11,7 @@ Pinocchio is used for analytical dynamics computations while MuJoCo handles
 simulation, contacts, and constraints.
 
 Usage:
-    >>> from mujoco_golf_pendulum.pinocchio_interface import PinocchioWrapper
+    >>> from mujoco_humanoid_golf.pinocchio_interface import PinocchioWrapper
     >>> wrapper = PinocchioWrapper(model, data)
     >>> torques = wrapper.compute_inverse_dynamics(q, v, a)
     >>> jacobian = wrapper.compute_end_effector_jacobian(q, "club_head")
@@ -554,7 +554,7 @@ def create_pinocchio_wrapper(
 
     Example:
         >>> import mujoco
-        >>> from mujoco_golf_pendulum.pinocchio_interface import (
+        >>> from mujoco_humanoid_golf.pinocchio_interface import (
         ...     create_pinocchio_wrapper,
         ... )
         >>> model = mujoco.MjModel.from_xml_string(xml_string)

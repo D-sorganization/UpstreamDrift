@@ -973,11 +973,11 @@ class GolfSimulationGUI:
                     "FROM robotics_env:latest\n\n"
                     "# Install missing dependencies in the existing virtual "
                     "environment\n"
-                    'RUN /opt/robotics_env/bin/pip install "defusedxml>=0.7.1" '
+                    'RUN /opt/mujoco-env/bin/pip install "defusedxml>=0.7.1" '
                     '"PyQt6>=6.6.0"\n\n'
                     "# Update PATH to use robotics_env by default\n"
-                    'ENV PATH="/opt/robotics_env/bin:$PATH"\n'
-                    'ENV VIRTUAL_ENV="/opt/robotics_env"\n'
+                    'ENV PATH="/opt/mujoco-env/bin:$PATH"\n'
+                    'ENV VIRTUAL_ENV="/opt/mujoco-env"\n'
                 )
 
                 with tempfile.TemporaryDirectory() as temp_dir:
@@ -1080,10 +1080,10 @@ class GolfSimulationGUI:
             cmd.extend(
                 [
                     "robotics_env",
-                    "/opt/robotics_env/bin/python",
+                    "/opt/mujoco-env/bin/python",
                     "-u",
                     "-m",
-                    "mujoco_golf_pendulum",
+                    "mujoco_humanoid_golf",
                 ]
             )
         else:
@@ -1112,9 +1112,9 @@ class GolfSimulationGUI:
             cmd.extend(
                 [
                     "robotics_env",
-                    "/opt/robotics_env/bin/python",
+                    "/opt/mujoco-env/bin/python",
                     "-m",
-                    "mujoco_golf_pendulum",
+                    "mujoco_humanoid_golf",
                 ]
             )
 

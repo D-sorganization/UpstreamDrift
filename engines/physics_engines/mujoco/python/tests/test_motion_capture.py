@@ -7,8 +7,8 @@ from pathlib import Path
 import mujoco
 import numpy as np
 import pytest
-from mujoco_golf_pendulum.models import DOUBLE_PENDULUM_XML
-from mujoco_golf_pendulum.motion_capture import (
+from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
+from mujoco_humanoid_golf.motion_capture import (
     MarkerSet,
     MotionCaptureFrame,
     MotionCaptureLoader,

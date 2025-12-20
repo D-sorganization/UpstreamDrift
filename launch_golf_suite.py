@@ -63,7 +63,7 @@ def launch_mujoco():
             / "physics_engines"
             / "mujoco"
             / "python"
-            / "mujoco_golf_pendulum"
+            / "mujoco_humanoid_golf"
             / "advanced_gui.py"
         )
         if not mujoco_script.exists():

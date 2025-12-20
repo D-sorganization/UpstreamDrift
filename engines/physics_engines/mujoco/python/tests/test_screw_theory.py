@@ -6,7 +6,7 @@ Tests exponential/logarithmic maps, screw axes, and adjoint transforms.
 
 import numpy as np
 import pytest
-from mujoco_golf_pendulum.screw_theory import (
+from mujoco_humanoid_golf.screw_theory import (
     adjoint_transform,
     exponential_map,
     logarithmic_map,
