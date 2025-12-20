@@ -1,3 +1,4 @@
+# ruff: noqa: E501
 """
 Linkage Mechanisms Library for MuJoCo Physics Exploration
 

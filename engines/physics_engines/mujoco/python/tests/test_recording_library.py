@@ -43,7 +43,7 @@ def library_module(
     with patch.dict(sys.modules, pkg_mocks):
         # Import inside the patch
         # This prevents global pollution of sys.modules for other tests
-        import mujoco_golf_pendulum.recording_library as mod
+        import mujoco_humanoid_golf.recording_library as mod
 
         yield mod
 

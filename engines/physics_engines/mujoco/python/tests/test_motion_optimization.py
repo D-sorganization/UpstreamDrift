@@ -3,8 +3,8 @@
 import mujoco
 import numpy as np
 import pytest
-from mujoco_golf_pendulum.models import DOUBLE_PENDULUM_XML
-from mujoco_golf_pendulum.motion_optimization import (
+from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
+from mujoco_humanoid_golf.motion_optimization import (
     OptimizationConstraints,
     OptimizationObjectives,
     OptimizationResult,

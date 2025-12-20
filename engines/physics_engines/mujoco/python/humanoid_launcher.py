@@ -620,6 +620,8 @@ class HumanoidLauncher(QMainWindow):
                 cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
                 cmd.extend(["-e", "PYOPENGL_PLATFORM=glx"])
+                # Help compatibility with VcXsrv
+                cmd.extend(["-e", "LIBGL_ALWAYS_INDIRECT=1"])
             else:
                 cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
@@ -632,10 +634,10 @@ class HumanoidLauncher(QMainWindow):
         cmd.extend(
             [
                 "robotics_env",
-                "/opt/robotics_env/bin/python",
+                "/opt/mujoco-env/bin/python",
                 "-u",
                 "-m",
-                "mujoco_golf_pendulum",
+                "mujoco_humanoid_golf",
             ]
         )
 
@@ -666,11 +668,42 @@ class HumanoidLauncher(QMainWindow):
             self.log("Simulation finished successfully.")
             self.btn_video.setEnabled(True)
             self.btn_data.setEnabled(True)
+        elif code == 139:
+            self.log(f"Simulation failed with code {code} (Segmentation Fault).")
+            self.log(
+                "⚠️ COMMON CAUSE: X11 Display Server not found or "
+                "configured incorrectly."
+            )
+            self.log("1. Ensure VcXsrv (XLaunch) is running.")
+            self.log("2. Ensure 'Disable access control' is CHECKED in VcXsrv.")
+            self.log(
+                "3. If you don't need the live GUI, uncheck 'Live Interactive View'."
+            )
         else:
             self.log(f"Simulation failed with code {code}.")
 
         self.btn_run.setEnabled(True)
         self.btn_stop.setEnabled(False)
+
+        # Handle segmentation fault with user prompt for headless mode
+        if code == 139:
+            reply = QMessageBox.question(
+                self,
+                "Simulation Crashed (X11 Error)",
+                "The simulation crashed due to a display error "
+                "(Segmentation Fault).\n\n"
+                "This usually means the X11 server (VcXsrv) is not running or "
+                "blocked.\n\n"
+                "Would you like to try running in Headless Mode instead?\n"
+                "(This will disable the live view but still generate video results)",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            )
+
+            if reply == QMessageBox.StandardButton.Yes:
+                self.log("Switching to Headless Mode and retrying...")
+                self.chk_live.setChecked(False)  # Uncheck box
+                # Config is saved automatically in start_simulation
+                self.start_simulation()
 
     def rebuild_docker(self):
         reply = QMessageBox.question(
@@ -741,6 +774,37 @@ if __name__ == "__main__":
             border: 1px solid #555;
             background-color: #333;
             color: white;
+            selection-background-color: #4a90e2;
+        }
+        QComboBox QAbstractItemView {
+            background-color: #333;
+            color: white;
+            selection-background-color: #4a90e2;
+            border: 1px solid #555;
+        }
+        QLabel, QCheckBox, QRadioButton, QGroupBox {
+            color: white;
+        }
+        QCheckBox::indicator {
+            width: 18px;
+            height: 18px;
+            border: 1px solid #777;
+            background: #2b2b2b;
+        }
+        QCheckBox::indicator:checked {
+            background: #4a90e2;
+            border: 1px solid #4a90e2;
+        }
+        QPushButton {
+            color: white; /* Ensure button text is visible */
+            background-color: #444; /* Default dark button bg */
+        }
+        /* Fix QMessageBox readability: prevent white text on white/system background */
+        QMessageBox {
+            background-color: #333; /* Dark background matching app */
+        }
+        QMessageBox QLabel {
+            color: white; /* White text on dark background */
         }
     """
     )

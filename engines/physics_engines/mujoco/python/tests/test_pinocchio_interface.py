@@ -3,8 +3,8 @@
 import mujoco
 import numpy as np
 import pytest
-from mujoco_golf_pendulum.models import DOUBLE_PENDULUM_XML
-from mujoco_golf_pendulum.pinocchio_interface import (
+from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
+from mujoco_humanoid_golf.pinocchio_interface import (
     PINOCCHIO_AVAILABLE,
     PinocchioWrapper,
     create_pinocchio_wrapper,

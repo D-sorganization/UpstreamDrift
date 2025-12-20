@@ -250,7 +250,7 @@ def run_batch(batch_path: Path, base_args: argparse.Namespace) -> None:
 def build_parser() -> argparse.ArgumentParser:
     """Create the CLI argument parser."""
     parser = argparse.ArgumentParser(
-        prog="python -m python.mujoco_golf_pendulum.cli_runner",
+        prog="python -m python.mujoco_humanoid_golf.cli_runner",
         description="Run MuJoCo golf swing simulations without the GUI.",
     )
     parser.add_argument("--model", help="Model key or MJCF path", required=False)

@@ -5,11 +5,11 @@ from __future__ import annotations
 import mujoco
 import numpy as np
 import pytest
-from mujoco_golf_pendulum.interactive_manipulation import (
+from mujoco_humanoid_golf.interactive_manipulation import (
     ConstraintType,
     InteractiveManipulator,
 )
-from mujoco_golf_pendulum.models import DOUBLE_PENDULUM_XML
+from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
 
 
 @pytest.mark.parametrize("body_name", ["shoulder_body", "club_body"])

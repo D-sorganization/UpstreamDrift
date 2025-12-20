@@ -7,10 +7,10 @@ import numpy as np
 # Import StatisticalAnalyzer directly from file to avoid mujoco dependency
 # Assuming this test file is in engines/physics_engines/mujoco/python/tests/
 # and the source is in:
-# engines/physics_engines/mujoco/python/mujoco_golf_pendulum/statistical_analysis.py
+# engines/physics_engines/mujoco/python/mujoco_humanoid_golf/statistical_analysis.py
 file_path = os.path.abspath(
     os.path.join(
-        os.path.dirname(__file__), "../mujoco_golf_pendulum/statistical_analysis.py"
+        os.path.dirname(__file__), "../mujoco_humanoid_golf/statistical_analysis.py"
     )
 )
 spec = importlib.util.spec_from_file_location("statistical_analysis", file_path)
