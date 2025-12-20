@@ -88,7 +88,7 @@ def xlt(r: np.ndarray) -> np.ndarray:
         >>> x_transform.shape
         (6, 6)
     """
-    r = np.asarray(r).flatten()
+    r = np.asarray(r).ravel()
     if r.shape != (3,):
         msg = f"r must be 3x1 vector, got shape {r.shape}"
         raise ValueError(msg)
@@ -143,7 +143,7 @@ def xtrans(e_rot: np.ndarray, r: np.ndarray) -> np.ndarray:
         (6, 6)
     """
     e_rot = np.asarray(e_rot)
-    r = np.asarray(r).flatten()
+    r = np.asarray(r).ravel()
 
     if e_rot.shape != (3, 3):
         msg = f"E must be 3x3 matrix, got shape {e_rot.shape}"
@@ -194,7 +194,7 @@ def inv_xtrans(e_rot: np.ndarray, r: np.ndarray) -> np.ndarray:
         True
     """
     e_rot = np.asarray(e_rot)
-    r = np.asarray(r).flatten()
+    r = np.asarray(r).ravel()
 
     if e_rot.shape != (3, 3):
         msg = f"E must be 3x3 matrix, got shape {e_rot.shape}"
