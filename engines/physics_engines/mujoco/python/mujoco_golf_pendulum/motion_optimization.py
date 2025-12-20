@@ -393,7 +393,7 @@ class SwingOptimizer:
         # Reset simulation
         mujoco.mj_resetData(self.model, self.data)
 
-        # ⚡ Bolt Optimization: Pre-allocate Jacobian arrays to avoid repeated allocation in loop
+        # ⚡ Bolt Optimization: Pre-allocate Jacobian arrays to avoid allocation in loop
         jacp = np.zeros((3, self.model.nv))
         jacr = np.zeros((3, self.model.nv))
         jacp_flat = np.zeros(3 * self.model.nv)
@@ -403,9 +403,7 @@ class SwingOptimizer:
         if self.club_head_id is not None:
             try:
                 # Try the 2D array signature first (newer MuJoCo)
-                mujoco.mj_jacBody(
-                    self.model, self.data, jacp, jacr, self.club_head_id
-                )
+                mujoco.mj_jacBody(self.model, self.data, jacp, jacr, self.club_head_id)
             except TypeError:
                 use_flat_jac = True
 
