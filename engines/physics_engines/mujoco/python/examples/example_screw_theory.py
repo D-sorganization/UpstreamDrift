@@ -5,7 +5,7 @@ Demonstrates screw axes, exponential/logarithmic maps, and adjoint transforms.
 """
 
 import numpy as np
-from mujoco_golf_pendulum.screw_theory import (
+from mujoco_humanoid_golf.screw_theory import (
     adjoint_transform,
     exponential_map,
     logarithmic_map,

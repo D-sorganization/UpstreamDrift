@@ -7,7 +7,7 @@ Computes the joint forces/torques required to produce a given motion.
 from __future__ import annotations
 
 import numpy as np
-from mujoco_golf_pendulum.spatial_algebra import cross_force, cross_motion, jcalc
+from mujoco_humanoid_golf.spatial_algebra import cross_force, cross_motion, jcalc
 
 GRAVITY_M_S2 = 9.81
 

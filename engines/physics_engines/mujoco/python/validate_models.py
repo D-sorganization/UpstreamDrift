@@ -9,7 +9,7 @@ try:
 except ImportError:
     mujoco = None
 
-from mujoco_golf_pendulum.models import (
+from mujoco_humanoid_golf.models import (
     ADVANCED_BIOMECHANICAL_GOLF_SWING_XML,
     DOUBLE_PENDULUM_XML,
     FULL_BODY_GOLF_SWING_XML,

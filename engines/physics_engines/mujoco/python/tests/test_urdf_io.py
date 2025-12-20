@@ -8,8 +8,8 @@ from pathlib import Path
 import mujoco
 import numpy as np
 import pytest
-from mujoco_golf_pendulum.models import DOUBLE_PENDULUM_XML
-from mujoco_golf_pendulum.urdf_io import (
+from mujoco_humanoid_golf.models import DOUBLE_PENDULUM_XML
+from mujoco_humanoid_golf.urdf_io import (
     URDFExporter,
     URDFImporter,
     export_model_to_urdf,

@@ -12,7 +12,7 @@ src_path = Path(__file__).parent.parent / "src"
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
-# Add python/ to PYTHONPATH for mujoco_golf_pendulum imports
+# Add python/ to PYTHONPATH for mujoco_humanoid_golf imports
 python_root = Path(__file__).parent.parent
 if str(python_root) not in sys.path:
     sys.path.insert(0, str(python_root))

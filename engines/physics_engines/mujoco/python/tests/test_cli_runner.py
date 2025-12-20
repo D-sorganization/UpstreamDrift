@@ -10,8 +10,8 @@ import pytest
 if TYPE_CHECKING:
     from pathlib import Path
 
-from mujoco_golf_pendulum import cli_runner
-from mujoco_golf_pendulum.control_system import ControlSystem, ControlType
+from mujoco_humanoid_golf import cli_runner
+from mujoco_humanoid_golf.control_system import ControlSystem, ControlType
 
 
 def test_apply_control_preset_updates_control_system() -> None:

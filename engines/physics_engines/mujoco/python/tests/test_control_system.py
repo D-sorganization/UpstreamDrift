@@ -8,7 +8,7 @@ import numpy as np
 import pytest
 
 # Import directly from module to avoid __init__ imports
-from mujoco_golf_pendulum.control_system import (
+from mujoco_humanoid_golf.control_system import (
     POLYNOMIAL_COEFFS_COUNT,
     ActuatorControl,
     ControlSystem,

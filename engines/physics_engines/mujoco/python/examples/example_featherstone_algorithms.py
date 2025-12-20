@@ -5,8 +5,8 @@ Demonstrates RNEA, CRBA, and ABA algorithms on a simple 2-link planar robot.
 """
 
 import numpy as np
-from mujoco_golf_pendulum.rigid_body_dynamics import aba, crba, rnea
-from mujoco_golf_pendulum.spatial_algebra import mci, xlt
+from mujoco_humanoid_golf.rigid_body_dynamics import aba, crba, rnea
+from mujoco_humanoid_golf.spatial_algebra import mci, xlt
 
 GRAVITY_M_S2 = 9.80665  # Standard gravity constant (m/s²)
 

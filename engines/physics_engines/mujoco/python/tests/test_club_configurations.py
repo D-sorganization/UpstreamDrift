@@ -5,7 +5,7 @@ Tests club specifications and database.
 """
 
 import pytest
-from mujoco_golf_pendulum.club_configurations import (
+from mujoco_humanoid_golf.club_configurations import (
     ClubDatabase,
     ClubSpecification,
     get_recommended_flex,

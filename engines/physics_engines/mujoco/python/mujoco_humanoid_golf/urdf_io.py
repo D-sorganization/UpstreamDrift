@@ -890,7 +890,7 @@ def export_model_to_urdf(
 
     Example:
         >>> import mujoco
-        >>> from mujoco_golf_pendulum.urdf_io import export_model_to_urdf
+        >>> from mujoco_humanoid_golf.urdf_io import export_model_to_urdf
         >>> model = mujoco.MjModel.from_xml_string(xml_string)
         >>> urdf_xml = export_model_to_urdf(model, "robot.urdf")
     """
@@ -917,7 +917,7 @@ def import_urdf_to_mujoco(
         MuJoCo MJCF XML string
 
     Example:
-        >>> from mujoco_golf_pendulum.urdf_io import import_urdf_to_mujoco
+        >>> from mujoco_humanoid_golf.urdf_io import import_urdf_to_mujoco
         >>> import mujoco
         >>> mujoco_xml = import_urdf_to_mujoco("robot.urdf")
         >>> model = mujoco.MjModel.from_xml_string(mujoco_xml)
