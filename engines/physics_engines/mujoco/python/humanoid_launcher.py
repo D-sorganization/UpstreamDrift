@@ -168,7 +168,8 @@ class HumanoidLauncher(QMainWindow):
         self.current_dir = Path(__file__).parent.resolve()
         # engines/physics_engines/mujoco/python -> engines/physics_engines/mujoco
         self.repo_path = self.current_dir.parent
-        self.config_path = self.repo_path / "simulation_config.json"
+        # Save config in docker/src where the humanoid_golf simulation expects it
+        self.config_path = self.repo_path / "docker" / "src" / "simulation_config.json"
 
         # State
         self.config = DEFAULT_CONFIG.copy()
@@ -611,7 +612,7 @@ class HumanoidLauncher(QMainWindow):
             cmd = ["docker", "run"]
 
         cmd.extend(
-            ["--rm", "-v", f"{mount_path}:/workspace", "-w", "/workspace/python"]
+            ["--rm", "-v", f"{mount_path}:/workspace", "-w", "/workspace/docker/src"]
         )
 
         # Display settings
@@ -635,21 +636,17 @@ class HumanoidLauncher(QMainWindow):
             cmd.extend(["-e", "MUJOCO_GL=osmesa"])
 
         # Image and Command
-        cmd.extend(["robotics_env", "/opt/mujoco-env/bin/python", "-u", "-m"])
+        cmd.extend(["robotics_env", "/opt/mujoco-env/bin/python", "-u"])
 
-        # Use CLI runner for headless mode, GUI for live view
-        if self.config["live_view"]:
-            # Launch interactive GUI (requires X11)
-            cmd.append("mujoco_humanoid_golf")
-        else:
-            # Launch headless CLI runner
-            cmd.extend([
-                "mujoco_humanoid_golf.cli_runner",
-                "--model", "full_body",  # Use full humanoid model
-                "--duration", "5.0",
-                "--summary",
-                "--output-csv", "/workspace/golf_data.csv",
-            ])
+        # Always use the working humanoid golf simulation that supports customization
+        # This module reads simulation_config.json and applies all GUI settings:
+        # - Body segment colors (shirt, pants, shoes, skin, eyes, club)
+        # - Height and weight scaling
+        # - Club parameters (length, mass)
+        # - Control mode (PD, LQR, Polynomial)
+        # - State save/load
+        # - Live view vs headless mode
+        cmd.extend(["-m", "humanoid_golf.sim"])
 
         return cmd
 
@@ -741,11 +738,11 @@ class HumanoidLauncher(QMainWindow):
             self.build_thread.start()
 
     def open_video(self):
-        vid_path = self.repo_path / "humanoid_golf.mp4"
+        vid_path = self.repo_path / "docker" / "src" / "humanoid_golf.mp4"
         self._open_file(vid_path)
 
     def open_data(self):
-        csv_path = self.repo_path / "golf_data.csv"
+        csv_path = self.repo_path / "docker" / "src" / "golf_data.csv"
         self._open_file(csv_path)
 
     def _open_file(self, path):
