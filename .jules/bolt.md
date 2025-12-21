@@ -15,3 +15,7 @@
 ## 2025-05-21 - Statistical Analysis Redundant Computations
 **Learning:** `StatisticalAnalyzer` was re-calculating `rad2deg` and `min`/`max` multiple times per joint (once for ROM, once for stats). Optimizing `compute_summary_stats` to reuse indices and `generate_comprehensive_report` to reuse arrays yielded a ~24% speedup.
 **Action:** In data-heavy loops, hoist conversions (like `rad2deg`) out of inner calls and ensure statistical functions return all necessary derived metrics to avoid re-computation.
+
+## 2025-05-21 - MuJoCo MjData Allocation Cost
+**Learning:** Creating `mujoco.MjData(model)` is an expensive operation as it allocates memory for the entire simulation state. In trajectory analysis loops where perturbed state is needed (e.g., for finite differences), re-allocating `MjData` at each step kills performance.
+**Action:** Pre-allocate a scratch `MjData` object in `__init__` and reuse it for temporary calculations (like finite difference perturbations), ensuring proper state resetting or overwriting.
