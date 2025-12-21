@@ -85,6 +85,24 @@ class InverseDynamicsSolver:
         # Check if model has constraints (parallel mechanism)
         self.has_constraints = (model.neq > 0) or self._detect_closed_chains()
 
+        # Optimization: Pre-allocate Jacobian arrays and detect API signature
+        # This avoids try-except overhead in tight loops
+        # (e.g. compute_end_effector_forces)
+        self._use_flat_jacobian = False
+        try:
+            # Test with dummy arrays to check signature
+            # Body 0 (world) is always valid
+            jacp = np.zeros((3, model.nv))
+            jacr = np.zeros((3, model.nv))
+            mujoco.mj_jacBody(model, data, jacp, jacr, 0)
+            self._jacp = jacp
+            self._jacr = jacr
+        except (TypeError, ValueError):
+            # Fallback to flat array approach for older MuJoCo bindings
+            self._use_flat_jacobian = True
+            self._jacp_flat = np.zeros(3 * model.nv)
+            self._jacr_flat = np.zeros(3 * model.nv)
+
     def _detect_closed_chains(self) -> bool:
         """Detect if model has closed kinematic chains.
 
@@ -312,17 +330,19 @@ class InverseDynamicsSolver:
         self.data.qpos[:] = qpos
         mujoco.mj_forward(self.model, self.data)
 
-        # MuJoCo 3.3+ may require reshaped arrays
-        try:
-            jacp = np.zeros((3, self.model.nv))
-            jacr = np.zeros((3, self.model.nv))
-            mujoco.mj_jacBody(self.model, self.data, jacp, jacr, body_id)
-        except TypeError:
-            # Fallback to flat array approach
-            jacp_flat = np.zeros(3 * self.model.nv)
-            jacr_flat = np.zeros(3 * self.model.nv)
-            mujoco.mj_jacBody(self.model, self.data, jacp_flat, jacr_flat, body_id)
-            jacp = jacp_flat.reshape(3, self.model.nv)
+        # Compute Jacobian using pre-allocated arrays and detected API
+        if self._use_flat_jacobian:
+            mujoco.mj_jacBody(
+                self.model,
+                self.data,
+                self._jacp_flat,
+                self._jacr_flat,
+                body_id,
+            )
+            jacp = self._jacp_flat.reshape(3, self.model.nv)
+        else:
+            mujoco.mj_jacBody(self.model, self.data, self._jacp, self._jacr, body_id)
+            jacp = self._jacp
 
         # Map torques to forces: F = (J^T)^{-1} τ
         # Use least-squares for redundant/constrained systems
