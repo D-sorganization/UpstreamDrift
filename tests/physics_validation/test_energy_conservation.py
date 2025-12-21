@@ -98,7 +98,7 @@ def test_pinocchio_energy_check():
     mass = 1.0
     inertia = pinocchio.Inertia.FromSphere(mass, 0.1)
     model.appendBodyToJoint(joint_id, inertia, pinocchio.SE3.Identity())
-    model.addBodyFrame("particle", joint_id, pinocchio.SE3.Identity(), -1)
+    model.addBodyFrame("particle", joint_id, pinocchio.SE3.Identity(), 0)
 
     data = model.createData()
 
@@ -138,8 +138,8 @@ def test_pinocchio_energy_check():
         # Check Energy
         # Note: Symplectic Euler is stable but not perfectly energy conserving
         # It oscillates around the true energy.
-        pinocchio.computeTotalEnergy(model, data, q, v)
-        current_energy = data.kinetic_energy + data.potential_energy
+        pinocchio.computeMechanicalEnergy(model, data, q, v)
+        current_energy = data.mechanical_energy
 
         errors.append(abs(current_energy - initial_energy))
 

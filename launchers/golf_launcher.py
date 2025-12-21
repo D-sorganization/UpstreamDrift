@@ -57,21 +57,31 @@ MODELS_DICT = {
 }
 
 MODEL_IMAGES = {
-    "MuJoCo Humanoid": "mujoco.png",
-    "MuJoCo Dashboard": "mujoco.png",
+    "MuJoCo Humanoid": "mujoco_humanoid.png",
+    "MuJoCo Dashboard": "mujoco_hand.png",
     "Drake Golf Model": "drake.png",
     "Pinocchio Golf Model": "pinocchio.png",
 }
 
 MODEL_DESCRIPTIONS = {
-    "MuJoCo Humanoid": "Full humanoid simulation including contact forces, "
-    "ground reaction forces (GRF), and advanced biomechanics.",
-    "MuJoCo Dashboard": "Comprehensive GUI dashboard containing multiple "
-    "tab-selectable models of the golf swing (from simple pendulums to full body).",
-    "Drake Golf Model": "Drake-based implementation highlighting control systems, "
-    "trajectory optimization, and robust stabilization patterns.",
-    "Pinocchio Golf Model": "Rigid body dynamics implementation utilizing "
-    "Featherstone's spatial algebra algorithms for efficient computation.",
+    "MuJoCo Humanoid": "High-fidelity whole-body biomechanics simulation. Features a "
+    "23-DOF humanoid model with active muscle sites, ground reaction force (GRF) "
+    "visualization, and detailed contact dynamics. Ideal for analyzing kinetic "
+    "chains and joint torque generation during the swing.",
+    "MuJoCo Dashboard": "Interactive research workbench for comparative analysis. "
+    "Switch instantly between double-pendulum, wrist-cocking, and full-body models. "
+    "Includes real-time plots for phase space trajectories, energy conservation "
+    "verification, and parameter tuning sliders.",
+    "Drake Golf Model": "Control-theoretic golf robot focusing on trajectory "
+    "optimization."
+    "Utilizes Drake's rigorous multibody dynamics and constraint solvers to generate "
+    "physically consistent swing paths. Features stabilizing controllers and inverse "
+    "dynamics solvers.",
+    "Pinocchio Golf Model": "Ultra-fast rigid body dynamics engine based on "
+    "Featherstone's spatial algebra."
+    " Specialized for rapid iteration and derivative computation. "
+    "Validates kinematic chains and provides baseline capabilities for trajectory "
+    "optimization algorithms.",
 }
 
 DOCKER_STAGES = ["all", "mujoco", "pinocchio", "drake", "base"]
@@ -417,6 +427,9 @@ class GolfLauncher(QMainWindow):
         img_path = ASSETS_DIR / img_name if img_name else None
 
         lbl_img = QLabel()
+        lbl_img.setFixedSize(200, 200)  # Fixed card thumbnail area: 200x200 matches the model-card layout spec and provides padding around the 180x180 scaled image.
+        lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
         if img_path and img_path.exists():
             pixmap = QPixmap(str(img_path))
             pixmap = pixmap.scaled(
