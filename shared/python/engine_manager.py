@@ -263,7 +263,7 @@ class EngineManager:
             from pydrake.systems.framework import DiagramBuilder
 
             builder = DiagramBuilder()
-            _ = builder.Build()
+            _diagram = builder.Build()
             logger.info("Drake system creation validated")
 
             # 4. Check Meshcat availability (for visualization)
@@ -392,6 +392,8 @@ class EngineManager:
         if self._drake_meshcat is not None:
             try:
                 # Drake Meshcat cleanup if needed
+                # Drake Meshcat auto-cleans on Python exit;
+                # no explicit shutdown required.
                 pass
             except Exception as e:
                 logger.warning(f"Error cleaning up Drake Meshcat: {e}")

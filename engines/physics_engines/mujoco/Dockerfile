@@ -40,7 +40,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user for security
-RUN useradd -m -s /bin/bash developer
+RUN useradd -m -s /bin/bash --no-log-init developer
 
 # Create Python venv for MuJoCo environment
 RUN python3.11 -m venv /opt/mujoco-env && \

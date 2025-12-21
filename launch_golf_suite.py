@@ -51,6 +51,29 @@ def launch_local_launcher():
     return True
 
 
+
+def _validate_and_get_workdir(script_path: Path) -> Path:
+    """Validate script existence and return working directory.
+
+    Args:
+        script_path: Path to the script to launch.
+
+    Returns:
+        Path to the validated working directory (parent of parent).
+
+    Raises:
+        GolfModelingError: If script or workdir does not exist.
+    """
+    if not script_path.exists():
+        raise GolfModelingError(f"Script not found: {script_path}")
+
+    work_dir = script_path.parent.parent
+    if not work_dir.exists():
+        raise GolfModelingError(f"Working directory not found: {work_dir}")
+
+    return work_dir
+
+
 def launch_mujoco():
     """Launch MuJoCo engine directly with validation."""
     try:
@@ -77,13 +100,8 @@ def launch_mujoco():
             / "mujoco_humanoid_golf"
             / "advanced_gui.py"
         )
-        if not mujoco_script.exists():
-            raise GolfModelingError(f"MuJoCo script not found: {mujoco_script}")
 
-        # Verify working directory
-        work_dir = mujoco_script.parent.parent
-        if not work_dir.exists():
-            raise GolfModelingError(f"Working directory not found: {work_dir}")
+        work_dir = _validate_and_get_workdir(mujoco_script)
 
         logger.info("Launching MuJoCo engine...")
         subprocess.run([sys.executable, str(mujoco_script)], cwd=str(work_dir))
@@ -119,13 +137,8 @@ def launch_drake():
             / "src"
             / "golf_gui.py"
         )
-        if not drake_script.exists():
-            raise GolfModelingError(f"Drake script not found: {drake_script}")
 
-        # Verify working directory
-        work_dir = drake_script.parent.parent
-        if not work_dir.exists():
-            raise GolfModelingError(f"Working directory not found: {work_dir}")
+        work_dir = _validate_and_get_workdir(drake_script)
 
         logger.info("Launching Drake engine...")
         subprocess.run([sys.executable, str(drake_script)], cwd=str(work_dir))
@@ -161,13 +174,8 @@ def launch_pinocchio():
             / "pinocchio_golf"
             / "gui.py"
         )
-        if not pinocchio_script.exists():
-            raise GolfModelingError(f"Pinocchio script not found: {pinocchio_script}")
 
-        # Verify working directory
-        work_dir = pinocchio_script.parent.parent
-        if not work_dir.exists():
-            raise GolfModelingError(f"Working directory not found: {work_dir}")
+        work_dir = _validate_and_get_workdir(pinocchio_script)
 
         logger.info("Launching Pinocchio engine...")
         subprocess.run([sys.executable, str(pinocchio_script)], cwd=str(work_dir))

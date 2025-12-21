@@ -109,10 +109,10 @@ class UnifiedLauncher:
         """
         # Try package metadata first (installed package)
         try:
-            from importlib.metadata import version
+            from importlib.metadata import PackageNotFoundError, version
 
             return version("golf-modeling-suite")
-        except Exception:
+        except (PackageNotFoundError, ImportError):
             pass
 
         # Try shared package (development mode)

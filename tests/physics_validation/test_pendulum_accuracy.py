@@ -26,7 +26,8 @@ def test_mujoco_pendulum_accuracy():
     import mujoco
 
     # 1. Model: Simple Pendulum (L=1, m=1)
-    # Hinge joint at particle point? No, standard pendulum model.
+    # 1. Model: Simple Pendulum (L=1, m=1)
+    # Standard pendulum model with point mass at end of massless rod.
     xml = """
     <mujoco>
         <option timestep="0.001" gravity="0 0 -9.81" integrator="RK4"/>
@@ -104,7 +105,8 @@ def test_drake_pendulum_accuracy():
     # Create simple pendulum programmatically
     # Mass = 1.0, Length = 1.0
     # Inertia about pivot = m * L^2 = 1.0
-    # COM at (0, 0, -L) ?? No, usually COM is at -L for point mass.
+    # For a point-mass pendulum, the COM is at (0, 0, -L),
+    # i.e., a distance L below the pivot.
 
     # Add a rigid body for the pendulum
     # SpatialInertia(mass, com, unit_inertia)

@@ -61,8 +61,8 @@ def test_mujoco_ballistic_energy_conservation():
 
         # Velocity magnitude
         # qvel has 6 DOFs for free joint: vx, vy, vz, wx, wy, wz
-        viz = data.qvel[2]
-        velocity = abs(viz)
+        vz = data.qvel[2]
+        velocity = abs(vz)
 
         # Calculate Energy
         current_energy = baseline.total_energy(height, velocity)
@@ -136,7 +136,7 @@ def test_pinocchio_energy_check():
         v = v_next
 
         # Check Energy
-        # Note: Symplectic Euler is stable but not perfectly energy conversing
+        # Note: Symplectic Euler is stable but not perfectly energy conserving
         # It oscillates around the true energy.
         pinocchio.computeTotalEnergy(model, data, q, v)
         current_energy = data.kinetic_energy + data.potential_energy

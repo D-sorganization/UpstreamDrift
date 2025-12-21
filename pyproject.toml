@@ -29,7 +29,7 @@ dependencies = [
     "PyQt6>=6.6.0,<7.0.0",
     "mujoco>=3.2.3,<4.0.0",
     "pyyaml>=6.0.1",
-    "defusedxml>=0.7.1",
+    "defusedxml>=0.7.1,<1.0.0",
 ]
 
 [project.optional-dependencies]

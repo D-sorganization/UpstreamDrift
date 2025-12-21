@@ -123,3 +123,15 @@ def test_cleanup_releases_resources(mock_engine_manager):
     mock_matlab.quit.assert_called_once()
     assert mock_engine_manager._matlab_engine is None
     assert mock_engine_manager._drake_meshcat is None
+
+
+def test_cleanup_handles_exceptions(mock_engine_manager):
+    """Test that cleanup handles exceptions during shutdown."""
+    mock_matlab = MagicMock()
+    mock_matlab.quit.side_effect = Exception("Shutdown error")
+    mock_engine_manager._matlab_engine = mock_matlab
+
+    # Should not raise
+    mock_engine_manager.cleanup()
+
+    assert mock_engine_manager._matlab_engine is None

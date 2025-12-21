@@ -130,17 +130,11 @@ def test_cleanup_integration(output_manager):
     temp_dir.mkdir(parents=True, exist_ok=True)
 
     # Create file
+    # Create file and age it
     f = temp_dir / "test.tmp"
     f.touch()
 
-    # Trick: we can't easily modify mtime backwards in python portably without os.utime
-    # but we can rely on logic: temp files have max_age 1 day.
-    # If we set max_age to -1 days (future), it should delete?
-    # Logic: cutoff = Now - 1 day. File time = Now. File > cutoff ? Yes.
-    # File time < cutoff? No.
-    # So new files are kept.
-
-    # Let's trust the logic inspection or require os.utime
+    # Move import to top-level if possible, but local is fine for test isolation
     import os
     import time
 
