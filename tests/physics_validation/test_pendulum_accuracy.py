@@ -47,7 +47,14 @@ def test_mujoco_pendulum_accuracy():
     data = mujoco.MjData(model)
 
     # 2. Analytical Baseline
-    analytical = AnalyticalPendulum(length=1.0, mass=1.0, g=9.81)
+    # MuJoCo model is a sphere, so it has rotational inertia I = 2/5 * m * r^2
+    # Total inertia about pivot = m * L^2 + 2/5 * m * r^2
+    # m=1.0, L=1.0, r=0.1
+    i_rod = 1.0 * 1.0**2
+    i_sphere = 0.4 * 1.0 * (0.1**2)
+    total_inertia = i_rod + i_sphere  # 1.004
+
+    analytical = AnalyticalPendulum(length=1.0, mass=1.0, g=9.81, inertia=total_inertia)
 
     # 3. Initial Conditions
     # Release from 90 degrees (horizontal)
