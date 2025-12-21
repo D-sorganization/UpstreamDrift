@@ -17,10 +17,12 @@ body {
   display: flex;
   gap: 1rem;
   padding: 1rem;
+  flex-wrap: wrap;
 }
 
 .controls {
   width: 320px;
+  max-width: 100%;
   background: var(--panel);
   padding: 1rem;
   border-radius: 8px;
@@ -118,6 +120,20 @@ input:focus-visible {
   border: 1px solid #202632;
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  max-width: 100%;
+  height: auto;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 .shortcuts {
