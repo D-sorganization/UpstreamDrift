@@ -119,21 +119,28 @@ def test_drake_pendulum_accuracy():
     # About pivot, it is ML^2.
     # Drake requires inertia about COM. For point mass, it's near zero.
     # Let's say it's a small sphere.
-    com = [0, 0, -L]
-    unit_inertia = mut.UnitInertia.PointMass(1.0)  # approx
-    spatial_inertia = mut.SpatialInertia(M, com, unit_inertia)
+    # UnitInertia.PointMass() creates a UnitInertia for a point mass located at
+    # a specific position relative to the body origin.
+    # We want the mass to be concentated at (0, 0, -L).
+    # UnitInertia depends only on geometry (distribution), not mass scale (M).
+    # Its argument is the position of the point mass.
+    com_vector = [0.0, 0.0, -L]
+    unit_inertia = mut.UnitInertia.PointMass(com_vector)
+    spatial_inertia = mut.SpatialInertia(M, com_vector, unit_inertia)
 
     pendulum = plant.AddRigidBody("pendulum", spatial_inertia)
 
     # Add hinge joint
-    plant.AddRevoluteJoint(
+    # Add hinge joint
+    # Use explicit AddJoint for compatibility
+    hinge = mut.RevoluteJoint(
         "pivot",
-        plant.world_body(),
-        [0, 0, 0],  # World frame origin
-        pendulum,
-        [0, 0, 0],  # Pivot at body origin (since we defined COM relative to it)
-        [0, 1, 0],  # Rotate about Y axis
+        plant.world_body().body_frame(),
+        pendulum.body_frame(),
+        [0, 1, 0],  # axis (Y)
+        damping=0.0,
     )
+    plant.AddJoint(hinge)
 
     plant.Finalize()
     diagram = builder.Build()
