@@ -2,6 +2,8 @@
 
 **A unified platform for golf swing analysis across multiple physics engines and modeling approaches**
 
+> ⚠️ **BETA STATUS**: The codebase migration is 95% complete. The architecture and GUI are functional, but **engine loading logic is currently a placeholder**. Multi-engine simulations and engine switching are not yet fully operational. See [MIGRATION_STATUS.md](MIGRATION_STATUS.md) for details.
+
 ## Overview
 
 The Golf Modeling Suite consolidates multiple golf swing modeling implementations into a single, cohesive platform. This repository combines MATLAB Simscape multibody models with Python-based physics engines to provide comprehensive golf swing analysis capabilities.

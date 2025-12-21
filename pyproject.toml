@@ -25,12 +25,11 @@ dependencies = [
     "pandas>=2.2.3,<3.0.0",
     "matplotlib>=3.8.0,<4.0.0",
     "scipy>=1.13.1,<2.0.0",
-    "sympy>=1.12",
+    "sympy>=1.12,<2.0.0",
     "PyQt6>=6.6.0,<7.0.0",
-    "mujoco>=3.2.3",
+    "mujoco>=3.2.3,<4.0.0",
     "pyyaml>=6.0.1",
-    "pathlib2>=2.3.6",
-    "defusedxml>=0.7.1",
+    "defusedxml>=0.7.1,<1.0.0",
 ]
 
 [project.optional-dependencies]
@@ -45,10 +44,14 @@ dev = [
     "types-PyYAML>=6.0.12.12",
     "pandas-stubs>=2.0.0",
     "types-requests>=2.31.0",
+    "sphinx>=7.0.0",
+    "sphinx-rtd-theme>=2.0.0",
+    "sphinx-autodoc-typehints>=2.0.0",
+    "myst-parser>=2.0.0",
 ]
 engines = [
     "drake>=1.22.0,<2.0.0",
-    "pin>=2.6.0",
+    "pin>=2.6.0,<3.0.0",
     "pin-pink>=1.0.0,<4.0.0",
     "qpsolvers>=1.10.0,<5.0.0",
     "osqp>=0.6.0,<2.0.0",

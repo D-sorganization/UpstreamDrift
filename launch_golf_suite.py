@@ -51,13 +51,47 @@ def launch_local_launcher():
     return True
 
 
+def _validate_and_get_workdir(script_path: Path) -> Path:
+    """Validate script existence and return working directory.
+
+    Args:
+        script_path: Path to the script to launch.
+
+    Returns:
+        Path to the validated working directory (parent of parent).
+
+    Raises:
+        GolfModelingError: If script or workdir does not exist.
+    """
+    if not script_path.exists():
+        raise GolfModelingError(f"Script not found: {script_path}")
+
+    work_dir = script_path.parent.parent
+    if not work_dir.exists():
+        raise GolfModelingError(f"Working directory not found: {work_dir}")
+
+    return work_dir
+
+
 def launch_mujoco():
-    """Launch MuJoCo engine directly."""
+    """Launch MuJoCo engine directly with validation."""
     try:
         import subprocess
 
+        from shared.python.engine_manager import EngineManager, EngineType
+
+        suite_root = Path(__file__).parent
+        manager = EngineManager(suite_root)
+
+        # Validate engine is ready
+        probe_result = manager.get_probe_result(EngineType.MUJOCO)
+        if not probe_result.is_available():
+            logger.error(f"MuJoCo not ready:\n{probe_result.diagnostic_message}")
+            logger.info(f"Fix: {probe_result.get_fix_instructions()}")
+            return False
+
         mujoco_script = (
-            Path(__file__).parent
+            suite_root
             / "engines"
             / "physics_engines"
             / "mujoco"
@@ -65,13 +99,11 @@ def launch_mujoco():
             / "mujoco_humanoid_golf"
             / "advanced_gui.py"
         )
-        if not mujoco_script.exists():
-            raise GolfModelingError(f"MuJoCo script not found: {mujoco_script}")
+
+        work_dir = _validate_and_get_workdir(mujoco_script)
 
         logger.info("Launching MuJoCo engine...")
-        subprocess.run(
-            [sys.executable, str(mujoco_script)], cwd=mujoco_script.parent.parent
-        )
+        subprocess.run([sys.executable, str(mujoco_script)], cwd=str(work_dir))
     except Exception as e:
         logger.error(f"Error launching MuJoCo: {e}")
         return False
@@ -79,12 +111,24 @@ def launch_mujoco():
 
 
 def launch_drake():
-    """Launch Drake engine directly."""
+    """Launch Drake engine directly with validation."""
     try:
         import subprocess
 
+        from shared.python.engine_manager import EngineManager, EngineType
+
+        suite_root = Path(__file__).parent
+        manager = EngineManager(suite_root)
+
+        # Validate engine is ready
+        probe_result = manager.get_probe_result(EngineType.DRAKE)
+        if not probe_result.is_available():
+            logger.error(f"Drake not ready:\n{probe_result.diagnostic_message}")
+            logger.info(f"Fix: {probe_result.get_fix_instructions()}")
+            return False
+
         drake_script = (
-            Path(__file__).parent
+            suite_root
             / "engines"
             / "physics_engines"
             / "drake"
@@ -92,13 +136,11 @@ def launch_drake():
             / "src"
             / "golf_gui.py"
         )
-        if not drake_script.exists():
-            raise GolfModelingError(f"Drake script not found: {drake_script}")
+
+        work_dir = _validate_and_get_workdir(drake_script)
 
         logger.info("Launching Drake engine...")
-        subprocess.run(
-            [sys.executable, str(drake_script)], cwd=drake_script.parent.parent
-        )
+        subprocess.run([sys.executable, str(drake_script)], cwd=str(work_dir))
     except Exception as e:
         logger.error(f"Error launching Drake: {e}")
         return False
@@ -106,12 +148,24 @@ def launch_drake():
 
 
 def launch_pinocchio():
-    """Launch Pinocchio engine directly."""
+    """Launch Pinocchio engine directly with validation."""
     try:
         import subprocess
 
+        from shared.python.engine_manager import EngineManager, EngineType
+
+        suite_root = Path(__file__).parent
+        manager = EngineManager(suite_root)
+
+        # Validate engine is ready
+        probe_result = manager.get_probe_result(EngineType.PINOCCHIO)
+        if not probe_result.is_available():
+            logger.error(f"Pinocchio not ready:\n{probe_result.diagnostic_message}")
+            logger.info(f"Fix: {probe_result.get_fix_instructions()}")
+            return False
+
         pinocchio_script = (
-            Path(__file__).parent
+            suite_root
             / "engines"
             / "physics_engines"
             / "pinocchio"
@@ -119,13 +173,11 @@ def launch_pinocchio():
             / "pinocchio_golf"
             / "gui.py"
         )
-        if not pinocchio_script.exists():
-            raise GolfModelingError(f"Pinocchio script not found: {pinocchio_script}")
+
+        work_dir = _validate_and_get_workdir(pinocchio_script)
 
         logger.info("Launching Pinocchio engine...")
-        subprocess.run(
-            [sys.executable, str(pinocchio_script)], cwd=pinocchio_script.parent.parent
-        )
+        subprocess.run([sys.executable, str(pinocchio_script)], cwd=str(work_dir))
     except Exception as e:
         logger.error(f"Error launching Pinocchio: {e}")
         return False

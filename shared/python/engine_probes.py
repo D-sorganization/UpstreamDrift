@@ -90,7 +90,7 @@ class MuJoCoProbe(EngineProbe):
         try:
             import mujoco
 
-            version = mujoco.__version__
+            version = getattr(mujoco, "__version__", "unknown")
         except ImportError:
             return EngineProbeResult(
                 engine_name=self.engine_name,
@@ -172,7 +172,7 @@ class DrakeProbe(EngineProbe):
         try:
             import pydrake
 
-            version = pydrake.__version__
+            version = getattr(pydrake, "__version__", "unknown")
         except ImportError:
             return EngineProbeResult(
                 engine_name=self.engine_name,
@@ -268,7 +268,7 @@ class PinocchioProbe(EngineProbe):
         try:
             import pinocchio
 
-            version = pinocchio.__version__
+            version = getattr(pinocchio, "__version__", "unknown")
         except ImportError:
             return EngineProbeResult(
                 engine_name=self.engine_name,
