@@ -69,6 +69,7 @@ class EngineManager:
         # Initialize engine probes
         from .engine_probes import (
             DrakeProbe,
+            MatlabProbe,
             MuJoCoProbe,
             PendulumProbe,
             PinocchioProbe,
@@ -79,6 +80,8 @@ class EngineManager:
             EngineType.DRAKE: DrakeProbe(self.suite_root),
             EngineType.PINOCCHIO: PinocchioProbe(self.suite_root),
             EngineType.PENDULUM: PendulumProbe(self.suite_root),
+            EngineType.MATLAB_2D: MatlabProbe(self.suite_root, is_3d=False),
+            EngineType.MATLAB_3D: MatlabProbe(self.suite_root, is_3d=True),
         }
         self.probe_results: dict[EngineType, Any] = {}
 

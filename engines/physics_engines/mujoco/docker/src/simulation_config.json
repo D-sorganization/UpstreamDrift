@@ -41,6 +41,7 @@
     "weight_percent": 100.0,
     "control_mode": "poly",
     "live_view": true,
+    "simulation_duration": 3.0,
     "save_state_path": "",
     "load_state_path": "",
     "club_length": 1.0,
@@ -48,5 +49,15 @@
     "two_handed": false,
     "enhance_face": false,
     "articulated_fingers": false,
-    "polynomial_coefficients": {}
+    "polynomial_coefficients": {},
+    "show_contact_forces": true,
+    "show_joint_torques": true,
+    "show_tracers": true,
+    "tracer_bodies": [
+        "pelvis",
+        "torso",
+        "head",
+        "r_hand",
+        "l_hand"
+    ]
 }

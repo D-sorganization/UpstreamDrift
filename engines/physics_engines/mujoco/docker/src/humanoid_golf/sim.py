@@ -352,6 +352,7 @@ def run_simulation(
 
     # 3. Setup Initialization Logic
     def initialize_episode(phys):
+        """Initialize episode state from file or default pose."""
         if load_path:
             load_state(phys, load_path)
         else:
