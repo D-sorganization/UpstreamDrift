@@ -24,12 +24,15 @@ class TestSharedModuleLazyImports:
                 del sys.modules[module]
 
         # Mock the heavy dependencies to fail if imported
-        with patch.dict("sys.modules", {
-            "matplotlib": None,
-            "matplotlib.pyplot": None,
-            "numpy": None,
-            "pandas": None,
-        }):
+        with patch.dict(
+            "sys.modules",
+            {
+                "matplotlib": None,
+                "matplotlib.pyplot": None,
+                "numpy": None,
+                "pandas": None,
+            },
+        ):
             # This should succeed without importing heavy dependencies
             import shared.python  # noqa: F401
 
