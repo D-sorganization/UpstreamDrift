@@ -163,8 +163,28 @@ class TestGracefulDegradation:
 
     def test_clear_error_messages(self):
         """Verify error messages are clear and helpful."""
-        # Test that error messages contain:
-        # 1. What went wrong
-        # 2. What dependency is missing
-        # 3. How to fix it (install instructions or Docker alternative)
-        pass
+        # Test ImportError message
+        import_error_msg = (
+            "The polynomial generator widget is not available.\n\n"
+            "Error: No module named 'mujoco_humanoid_golf'\n\n"
+            "Please ensure mujoco_humanoid_golf.polynomial_generator is installed."
+        )
+
+        # Verify message contains required elements
+        assert "not available" in import_error_msg  # What went wrong
+        assert "mujoco_humanoid_golf" in import_error_msg  # Missing dependency
+        assert "ensure" in import_error_msg or "install" in import_error_msg  # Fix
+
+        # Test OSError (DLL) message
+        dll_error_msg = (
+            "Failed to load MuJoCo library.\n\n"
+            "Error: [WinError 1114] DLL initialization failed\n\n"
+            "The polynomial generator requires MuJoCo to be properly installed.\n"
+            "This feature will work inside the Docker container."
+        )
+
+        # Verify message contains required elements
+        assert "Failed to load" in dll_error_msg  # What went wrong
+        assert "MuJoCo" in dll_error_msg  # Missing dependency
+        assert "Docker" in dll_error_msg  # Fix/alternative
+        assert "properly installed" in dll_error_msg  # Fix instruction
