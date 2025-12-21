@@ -16,6 +16,7 @@ import logging
 import typing
 
 import mujoco
+import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from .advanced_gui_methods import AdvancedGuiMethodsMixin
@@ -35,6 +36,7 @@ from .models import (
     UPPER_BODY_GOLF_SWING_XML,
 )
 from .plotting import GolfSwingPlotter, MplCanvas
+from .polynomial_generator import PolynomialGeneratorWidget
 from .sim_widget import MuJoCoSimWidget
 
 if typing.TYPE_CHECKING:
@@ -1879,14 +1881,35 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             ["Constant", "Polynomial (6th order)", "Sine Wave", "Step Function"],
         )
         control_type_combo.setCurrentIndex(0)  # Default to constant
-        control_type_combo.currentIndexChanged.connect(
-            lambda idx, i=actuator_index: self.on_control_type_changed(i, idx),
+        # Help label for control mode
+        mode_help_label = QtWidgets.QLabel("Applies a constant torque value.")
+        mode_help_label.setStyleSheet(
+            "color: #666; font-size: 9pt; font-style: italic;"
         )
+        mode_help_label.setWordWrap(True)
+
+        def _update_mode_help(idx: int) -> None:
+            descriptions = [
+                "<b>Constant:</b> Applies a fixed torque value permanently.",
+                (
+                    "<b>Polynomial:</b> Time-varying torque defined by "
+                    "P(t) = c0 + c1*t + ... + c6*t^6."
+                ),
+                "<b>Sine Wave:</b> Oscillating torque defined by A * sin(2πft + φ).",
+                "<b>Step Function:</b> Jumps from 0 to 'Value' at specified 'Time'.",
+            ]
+            if 0 <= idx < len(descriptions):
+                mode_help_label.setText(descriptions[idx])
+            self.on_control_type_changed(actuator_index, idx)
+
+        control_type_combo.currentIndexChanged.connect(_update_mode_help)
+
         self.actuator_control_types.append(control_type_combo)
         header_layout.addWidget(QtWidgets.QLabel("Type:"))
         header_layout.addWidget(control_type_combo)
         header_layout.addStretch()
         container_layout.addLayout(header_layout)
+        container_layout.addWidget(mode_help_label)
 
         # Quick constant control (slider + value input)
         quick_control_layout = QtWidgets.QHBoxLayout()
@@ -1943,10 +1966,24 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         poly_layout = QtWidgets.QVBoxLayout(poly_widget)
         poly_layout.setContentsMargins(10, 5, 5, 5)
 
-        poly_label = QtWidgets.QLabel(
-            "Polynomial Coefficients (c0 + c1*t + c2*t^2 + ... + c6*t^6):",
+        # Visual Generator Button
+        vis_gen_layout = QtWidgets.QHBoxLayout()
+        vis_gen_btn = QtWidgets.QPushButton("Open Visual Generator")
+        vis_gen_btn.setToolTip("Visually design the polynomial curve")
+        vis_gen_btn.setStyleSheet("background-color: #2c3e50; color: white;")
+        vis_gen_btn.clicked.connect(
+            lambda checked, i=actuator_index, n=actuator_name: (
+                self.on_open_poly_generator(i, n)
+            )
         )
-        poly_label.setStyleSheet("font-weight: bold;")
+        vis_gen_layout.addWidget(QtWidgets.QLabel("<b>Polynomial Control:</b>"))
+        vis_gen_layout.addStretch()
+        vis_gen_layout.addWidget(vis_gen_btn)
+        poly_layout.addLayout(vis_gen_layout)
+
+        poly_label = QtWidgets.QLabel(
+            "Coefficients (c0 + c1*t + ... + c6*t^6):",
+        )
         poly_layout.addWidget(poly_label)
 
         coeff_spinboxes = []
@@ -2216,6 +2253,54 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
                 groups["Simple Joints"].append(name)
 
         return {k: v for k, v in groups.items() if v}
+
+    def on_open_poly_generator(self, actuator_index: int, actuator_name: str) -> None:
+        """Open the visual polynomial generator for the specified actuator."""
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle(f"Polynomial Generator - {actuator_name}")
+        dialog.resize(1000, 700)
+
+        layout = QtWidgets.QVBoxLayout(dialog)
+        generator = PolynomialGeneratorWidget(dialog)
+        layout.addWidget(generator)
+
+        # Configure generator
+        generator.set_joints([actuator_name])
+        generator.joint_combo.setCurrentText(actuator_name)
+
+        # Load existing coefficients if available
+        # Note: GUI stores c0...c6 (constant term first)
+        # Generator uses c6...c0 (highest order first)
+        if actuator_index < len(self.actuator_polynomial_coeffs):
+            current_coeffs = []
+            for spin in self.actuator_polynomial_coeffs[actuator_index]:
+                current_coeffs.append(spin.value())
+
+            # Reverse to match generator (highest order first)
+            coeffs_highest_first = list(reversed(current_coeffs))
+            generator.polynomial_coeffs = np.array(coeffs_highest_first)
+            generator._display_results()
+            generator._update_plot()
+
+        def on_poly_generated(joint: str, coeffs: list[float]) -> None:
+            # coeffs are highest order first
+            # GUI expects lowest order (constant) first
+            coeffs_lowest_first = list(reversed(coeffs))
+
+            if actuator_index < len(self.actuator_polynomial_coeffs):
+                spinboxes = self.actuator_polynomial_coeffs[actuator_index]
+                for i, val in enumerate(coeffs_lowest_first):
+                    if i < len(spinboxes):
+                        spinboxes[i].setValue(val)
+
+            QtWidgets.QMessageBox.information(
+                dialog,
+                "Applied",
+                "Polynomial coefficients applied successfully!",
+            )
+
+        generator.polynomial_generated.connect(on_poly_generated)
+        dialog.exec()
 
     def _create_slider_control(
         self,

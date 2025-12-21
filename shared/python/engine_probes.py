@@ -392,3 +392,75 @@ class PendulumProbe(EngineProbe):
             diagnostic_message="Pendulum models ready",
             details={"engine_dir": str(engine_dir)},
         )
+
+
+class MatlabProbe(EngineProbe):
+    """Probe for MATLAB engine."""
+
+    def __init__(self, suite_root: Path, is_3d: bool = False) -> None:
+        """Initialize MATLAB probe.
+
+        Args:
+            suite_root: Root directory of the suite
+            is_3d: Whether to probe for 3D model (default: 2D)
+        """
+        name = "MATLAB 3D" if is_3d else "MATLAB 2D"
+        super().__init__(name, suite_root)
+        self.is_3d = is_3d
+
+    def probe(self) -> EngineProbeResult:
+        """Check MATLAB readiness."""
+        missing = []
+        version = None
+
+        # Check for MATLAB engine API
+        try:
+            import matlab.engine  # noqa: F401
+
+            # We can't easily check version without starting the engine,
+            # which is too slow for a probe. Just assume it's there if import works.
+            version = "installed (version check skipped)"
+        except ImportError:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.NOT_INSTALLED,
+                version=None,
+                missing_dependencies=["matlab.engine"],
+                diagnostic_message="MATLAB Engine for Python not installed. "
+                "See README for installation instructions.",
+            )
+
+        # Check for model directory
+        model_type = "3D_Golf_Model" if self.is_3d else "2D_Golf_Model"
+        engine_dir = self.suite_root / "engines" / "Simscape_Multibody_Models" / model_type
+
+        if not engine_dir.exists():
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_ASSETS,
+                version=version,
+                missing_dependencies=["model directory"],
+                diagnostic_message=f"MATLAB model directory not found at {engine_dir}",
+            )
+
+        # Basic check for contents
+        if not any(engine_dir.glob("*.slx")) and not any(engine_dir.glob("*.m")):
+             missing.append("Simulink/MATLAB files")
+
+        if missing:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_ASSETS,
+                version=version,
+                missing_dependencies=missing,
+                diagnostic_message=f"MATLAB model files missing in {engine_dir}",
+            )
+
+        return EngineProbeResult(
+            engine_name=self.engine_name,
+            status=ProbeStatus.AVAILABLE,
+            version=version,
+            missing_dependencies=[],
+            diagnostic_message=f"{self.engine_name} ready",
+            details={"engine_dir": str(engine_dir)},
+        )

@@ -201,8 +201,7 @@ def _show_basic_status():
     """Show basic status (fallback)."""
     suite_root = Path(__file__).parent
 
-    print("\n=== Golf Modeling Suite Status ===")
-    print(f"Suite Root: {suite_root}")
+    lines = ["", "=== Golf Modeling Suite Status ===", f"Suite Root: {suite_root}"]
 
     # Check engines
     engines = {
@@ -220,10 +219,10 @@ def _show_basic_status():
         "Pendulum": suite_root / "engines" / "pendulum_models",
     }
 
-    print("\nAvailable Engines:")
+    lines.append("\nAvailable Engines:")
     for name, path in engines.items():
         status = "[OK]" if path.exists() else "[MISSING]"
-        print(f"  {status} {name}: {path}")
+        lines.append(f"  {status} {name}: {path}")
 
     # Check launchers
     launchers = {
@@ -231,12 +230,12 @@ def _show_basic_status():
         "Local Launcher": suite_root / "launchers" / "golf_suite_launcher.py",
     }
 
-    print("\nLaunchers:")
+    lines.append("\nLaunchers:")
     for name, path in launchers.items():
         status = "[OK]" if path.exists() else "[MISSING]"
-        print(f"  {status} {name}: {path}")
+        lines.append(f"  {status} {name}: {path}")
 
-    print("\nShared Components:")
+    lines.append("\nShared Components:")
     shared_components = {
         "Python Utils": suite_root / "shared" / "python",
         "MATLAB Utils": suite_root / "shared" / "matlab",
@@ -245,9 +244,11 @@ def _show_basic_status():
 
     for name, path in shared_components.items():
         status = "[OK]" if path.exists() else "[MISSING]"
-        print(f"  {status} {name}: {path}")
+        lines.append(f"  {status} {name}: {path}")
 
-    print()
+    # Log the complete report
+    for line in lines:
+        logger.info(line)
 
 
 def main():
