@@ -231,17 +231,24 @@ function updateButtonStates(isRunning) {
   document.getElementById('pause').disabled = !isRunning;
 }
 
+function announce(message) {
+  const region = document.getElementById('status-announcer');
+  if (region) region.textContent = message;
+}
+
 function start() {
   cancelAnimationFrame(animationId);
   parseInputs();
   step();
   updateButtonStates(true);
+  announce('Simulation started');
 }
 
 function pause() {
   cancelAnimationFrame(animationId);
   animationId = null;
   updateButtonStates(false);
+  announce('Simulation paused');
 }
 
 function reset() {
@@ -249,6 +256,7 @@ function reset() {
   parseInputs();
   draw();
   document.getElementById('torques').textContent = 'Torques: --';
+  announce('Simulation reset');
 }
 
 ['start', 'pause', 'reset'].forEach(id => document.getElementById(id).addEventListener('click', () => {
