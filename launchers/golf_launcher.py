@@ -72,12 +72,14 @@ MODEL_DESCRIPTIONS = {
     "Switch instantly between double-pendulum, wrist-cocking, and full-body models. "
     "Includes real-time plots for phase space trajectories, energy conservation "
     "verification, and parameter tuning sliders.",
-    "Drake Golf Model": "Control-theoretic golf robot focusing on trajectory optimization. "
+    "Drake Golf Model": "Control-theoretic golf robot focusing on trajectory "
+    "optimization. "
     "Utilizes Drake's rigorous multibody dynamics and constraint solvers to generate "
     "physically consistent swing paths. Features stabilizing controllers and inverse "
     "dynamics solvers.",
-    "Pinocchio Golf Model": "Ultra-fast rigid body dynamics engine based on Featherstone's "
-    "spatial algebra. Specialized for rapid iteration and derivative computation. "
+    "Pinocchio Golf Model": "Ultra-fast rigid body dynamics engine based on "
+    "Featherstone's spatial algebra. "
+    "Specialized for rapid iteration and derivative computation. "
     "Validates kinematic chains and provides baseline capabilities for trajectory "
     "optimization algorithms.",
 }
@@ -427,7 +429,7 @@ class GolfLauncher(QMainWindow):
         lbl_img = QLabel()
         lbl_img.setFixedSize(200, 200)  # Standardize size
         lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        
+
         if img_path and img_path.exists():
             pixmap = QPixmap(str(img_path))
             pixmap = pixmap.scaled(

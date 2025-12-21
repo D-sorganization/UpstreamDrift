@@ -1,7 +1,6 @@
 """Physics validation for complex (multi-body) models."""
 
 import logging
-import os
 from pathlib import Path
 
 import numpy as np
@@ -44,7 +43,8 @@ def test_pinocchio_golfer_stability():
         pytest.skip(f"Golfer URDF not found at {urdf_path}")
 
     # 2. Load Model
-    # Use just the URDF path; Pinocchio might need package dirs if meshes are referenced.
+    # Use just the URDF path;
+    # Pinocchio might need package dirs if meshes are referenced.
     # Assuming relative paths in URDF are correct or no meshes for basic load.
     try:
         model = pinocchio.buildModelFromUrdf(str(urdf_path))
@@ -115,7 +115,7 @@ def test_mujoco_myoarm_stability():
     # Check for NaNs in qpos or qvel
     assert not np.any(np.isnan(data.qpos)), "MyoArm qpos contains NaNs"
     assert not np.any(np.isnan(data.qvel)), "MyoArm qvel contains NaNs"
-    
+
     # Check bounds (simple sanity check that it hasn't exploded to 1e10)
     # Using a generous threshold
     assert np.all(np.abs(data.qpos) < 1e4), "MyoArm qpos diverged significantly"
