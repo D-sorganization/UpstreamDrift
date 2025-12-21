@@ -1,0 +1,369 @@
+"""Engine readiness probe system.
+
+This module provides infrastructure for checking if physics engines
+are properly installed and ready to use, with actionable diagnostics.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Any
+
+
+class ProbeStatus(Enum):
+    """Status of an engine probe."""
+
+    AVAILABLE = "available"
+    MISSING_BINARY = "missing_binary"
+    MISSING_ASSETS = "missing_assets"
+    VERSION_MISMATCH = "version_mismatch"
+    NOT_INSTALLED = "not_installed"
+    CONFIGURATION_ERROR = "configuration_error"
+
+
+@dataclass
+class EngineProbeResult:
+    """Result of an engine readiness probe."""
+
+    engine_name: str
+    status: ProbeStatus
+    version: str | None
+    missing_dependencies: list[str]
+    diagnostic_message: str
+    details: dict[str, Any] | None = None
+
+    def is_available(self) -> bool:
+        """Check if engine is available for use."""
+        return self.status == ProbeStatus.AVAILABLE
+
+    def get_fix_instructions(self) -> str:
+        """Get instructions for fixing issues."""
+        if self.status == ProbeStatus.NOT_INSTALLED:
+            return f"Install {self.engine_name} dependencies"
+        elif self.status == ProbeStatus.MISSING_BINARY:
+            return f"Install {self.engine_name} binaries"
+        elif self.status == ProbeStatus.MISSING_ASSETS:
+            return f"Install {self.engine_name} assets/models"
+        elif self.status == ProbeStatus.VERSION_MISMATCH:
+            return f"Update {self.engine_name} to compatible version"
+        elif self.status == ProbeStatus.CONFIGURATION_ERROR:
+            return f"Fix {self.engine_name} configuration"
+        return "Engine is available"
+
+
+class EngineProbe:
+    """Base class for engine readiness probes."""
+
+    def __init__(self, engine_name: str, suite_root: Path) -> None:
+        """Initialize engine probe.
+
+        Args:
+            engine_name: Name of the engine
+            suite_root: Root directory of the suite
+        """
+        self.engine_name = engine_name
+        self.suite_root = suite_root
+
+    def probe(self) -> EngineProbeResult:
+        """Check if engine is ready to use.
+
+        Returns:
+            Probe result with status and diagnostics
+        """
+        raise NotImplementedError
+
+
+class MuJoCoProbe(EngineProbe):
+    """Probe for MuJoCo physics engine."""
+
+    def __init__(self, suite_root: Path) -> None:
+        """Initialize MuJoCo probe."""
+        super().__init__("MuJoCo", suite_root)
+
+    def probe(self) -> EngineProbeResult:
+        """Check MuJoCo readiness."""
+        missing = []
+
+        # Check for mujoco package
+        try:
+            import mujoco
+
+            version = mujoco.__version__
+        except ImportError:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.NOT_INSTALLED,
+                version=None,
+                missing_dependencies=["mujoco"],
+                diagnostic_message="MuJoCo Python package not installed. "
+                "Install with: pip install mujoco",
+            )
+        except OSError as e:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_BINARY,
+                version=None,
+                missing_dependencies=["MuJoCo DLLs"],
+                diagnostic_message=f"DLL error: {e}. "
+                "MuJoCo binaries may be missing or incompatible. "
+                "This feature works in Docker.",
+            )
+
+        # Check for engine directory
+        engine_dir = self.suite_root / "engines" / "physics_engines" / "mujoco"
+        if not engine_dir.exists():
+            missing.append("engine directory")
+
+        # Check for Python modules
+        python_dir = engine_dir / "python"
+        if python_dir.exists():
+            # Check for key modules
+            key_modules = ["humanoid_launcher.py", "mujoco_humanoid_golf"]
+            for module in key_modules:
+                if not (python_dir / module).exists():
+                    missing.append(f"module: {module}")
+        else:
+            missing.append("python directory")
+
+        # Check for assets
+        assets_dir = engine_dir / "assets"
+        if assets_dir.exists():
+            # Check for model files
+            models = list(assets_dir.glob("*.xml"))
+            if not models:
+                missing.append("model XML files")
+        else:
+            missing.append("assets directory")
+
+        if missing:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_ASSETS,
+                version=version,
+                missing_dependencies=missing,
+                diagnostic_message=f"MuJoCo {version} installed but missing: "
+                f"{', '.join(missing)}",
+            )
+
+        return EngineProbeResult(
+            engine_name=self.engine_name,
+            status=ProbeStatus.AVAILABLE,
+            version=version,
+            missing_dependencies=[],
+            diagnostic_message=f"MuJoCo {version} ready",
+            details={"engine_dir": str(engine_dir), "assets_dir": str(assets_dir)},
+        )
+
+
+class DrakeProbe(EngineProbe):
+    """Probe for Drake physics engine."""
+
+    def __init__(self, suite_root: Path) -> None:
+        """Initialize Drake probe."""
+        super().__init__("Drake", suite_root)
+
+    def probe(self) -> EngineProbeResult:
+        """Check Drake readiness."""
+        missing = []
+
+        # Check for pydrake package
+        try:
+            import pydrake
+
+            version = pydrake.__version__
+        except ImportError:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.NOT_INSTALLED,
+                version=None,
+                missing_dependencies=["drake"],
+                diagnostic_message="Drake Python package not installed. "
+                "Install with: pip install drake",
+            )
+
+        # Check meshcat port availability
+        import socket
+
+        meshcat_available = False
+        available_port = None
+        for port in range(7000, 7011):
+            try:
+                sock = socket.socket()
+                sock.bind(("localhost", port))
+                sock.close()
+                meshcat_available = True
+                available_port = port
+                break
+            except OSError:
+                continue
+
+        if not meshcat_available:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.CONFIGURATION_ERROR,
+                version=version,
+                missing_dependencies=["meshcat ports 7000-7010"],
+                diagnostic_message=f"Drake {version} installed but meshcat ports "
+                "7000-7010 are all blocked. Close other instances or use Docker.",
+            )
+
+        # Check for engine directory
+        engine_dir = self.suite_root / "engines" / "physics_engines" / "drake"
+        if not engine_dir.exists():
+            missing.append("engine directory")
+
+        # Check for Python modules
+        python_dir = engine_dir / "python"
+        if python_dir.exists():
+            src_dir = python_dir / "src"
+            if src_dir.exists():
+                key_files = ["golf_gui.py"]
+                for file in key_files:
+                    if not (src_dir / file).exists():
+                        missing.append(f"module: {file}")
+            else:
+                missing.append("src directory")
+        else:
+            missing.append("python directory")
+
+        if missing:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_ASSETS,
+                version=version,
+                missing_dependencies=missing,
+                diagnostic_message=f"Drake {version} installed but missing: "
+                f"{', '.join(missing)}",
+            )
+
+        return EngineProbeResult(
+            engine_name=self.engine_name,
+            status=ProbeStatus.AVAILABLE,
+            version=version,
+            missing_dependencies=[],
+            diagnostic_message=(
+                f"Drake {version} ready, meshcat port {available_port} available"
+            ),
+            details={
+                "engine_dir": str(engine_dir),
+                "meshcat_port": available_port,
+            },
+        )
+
+
+class PinocchioProbe(EngineProbe):
+    """Probe for Pinocchio physics engine."""
+
+    def __init__(self, suite_root: Path) -> None:
+        """Initialize Pinocchio probe."""
+        super().__init__("Pinocchio", suite_root)
+
+    def probe(self) -> EngineProbeResult:
+        """Check Pinocchio readiness."""
+        missing = []
+
+        # Check for pinocchio package
+        try:
+            import pinocchio
+
+            version = pinocchio.__version__
+        except ImportError:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.NOT_INSTALLED,
+                version=None,
+                missing_dependencies=["pinocchio"],
+                diagnostic_message="Pinocchio Python package not installed. "
+                "Install with: pip install pin",
+            )
+
+        # Check for engine directory
+        engine_dir = self.suite_root / "engines" / "physics_engines" / "pinocchio"
+        if not engine_dir.exists():
+            missing.append("engine directory")
+
+        # Check for Python modules
+        python_dir = engine_dir / "python"
+        if python_dir.exists():
+            key_dirs = ["pinocchio_golf"]
+            for dir_name in key_dirs:
+                if not (python_dir / dir_name).exists():
+                    missing.append(f"module: {dir_name}")
+        else:
+            missing.append("python directory")
+
+        if missing:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_ASSETS,
+                version=version,
+                missing_dependencies=missing,
+                diagnostic_message=f"Pinocchio {version} installed but missing: "
+                f"{', '.join(missing)}",
+            )
+
+        return EngineProbeResult(
+            engine_name=self.engine_name,
+            status=ProbeStatus.AVAILABLE,
+            version=version,
+            missing_dependencies=[],
+            diagnostic_message=f"Pinocchio {version} ready",
+            details={"engine_dir": str(engine_dir)},
+        )
+
+
+class PendulumProbe(EngineProbe):
+    """Probe for Pendulum models."""
+
+    def __init__(self, suite_root: Path) -> None:
+        """Initialize Pendulum probe."""
+        super().__init__("Pendulum", suite_root)
+
+    def probe(self) -> EngineProbeResult:
+        """Check Pendulum models readiness."""
+        missing = []
+
+        # Check for engine directory
+        engine_dir = self.suite_root / "engines" / "pendulum_models"
+        if not engine_dir.exists():
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_ASSETS,
+                version=None,
+                missing_dependencies=["engine directory"],
+                diagnostic_message="Pendulum models directory not found",
+            )
+
+        # Check for Python modules
+        python_dir = engine_dir / "python"
+        if python_dir.exists():
+            src_dir = python_dir / "src"
+            if src_dir.exists():
+                key_files = ["constants.py", "pendulum_solver.py"]
+                for file in key_files:
+                    if not (src_dir / file).exists():
+                        missing.append(f"module: {file}")
+            else:
+                missing.append("src directory")
+        else:
+            missing.append("python directory")
+
+        if missing:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_ASSETS,
+                version="local",
+                missing_dependencies=missing,
+                diagnostic_message=f"Pendulum models missing: {', '.join(missing)}",
+            )
+
+        return EngineProbeResult(
+            engine_name=self.engine_name,
+            status=ProbeStatus.AVAILABLE,
+            version="local",
+            missing_dependencies=[],
+            diagnostic_message="Pendulum models ready",
+            details={"engine_dir": str(engine_dir)},
+        )

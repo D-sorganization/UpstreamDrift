@@ -66,6 +66,22 @@ class EngineManager:
             EngineType.PENDULUM: self.engines_root / "pendulum_models",
         }
 
+        # Initialize engine probes
+        from .engine_probes import (
+            DrakeProbe,
+            MuJoCoProbe,
+            PendulumProbe,
+            PinocchioProbe,
+        )
+
+        self.probes = {
+            EngineType.MUJOCO: MuJoCoProbe(self.suite_root),
+            EngineType.DRAKE: DrakeProbe(self.suite_root),
+            EngineType.PINOCCHIO: PinocchioProbe(self.suite_root),
+            EngineType.PENDULUM: PendulumProbe(self.suite_root),
+        }
+        self.probe_results = {}
+
         # Initialize engine status
         self._discover_engines()
 
@@ -269,3 +285,71 @@ class EngineManager:
 
         validation_path = validation_paths.get(engine_type, base_path)
         return validation_path.exists()
+
+    def probe_all_engines(self) -> dict:
+        """Probe all engines for detailed readiness checks.
+
+        Returns:
+            Dictionary mapping engine types to probe results
+        """
+
+        for engine_type, probe in self.probes.items():
+            self.probe_results[engine_type] = probe.probe()
+
+        return self.probe_results
+
+    def get_probe_result(self, engine_type: EngineType):
+        """Get probe result for a specific engine.
+
+        Args:
+            engine_type: The engine to get results for
+
+        Returns:
+            Probe result or None if not probed
+        """
+        if not self.probe_results:
+            self.probe_all_engines()
+
+        return self.probe_results.get(engine_type)
+
+    def get_diagnostic_report(self) -> str:
+        """Get human-readable diagnostic report for all engines.
+
+        Returns:
+            Formatted diagnostic report
+        """
+
+        if not self.probe_results:
+            self.probe_all_engines()
+
+        lines = [
+            "",
+            "=" * 70,
+            "Golf Modeling Suite - Engine Readiness Report",
+            "=" * 70,
+            "",
+        ]
+
+        for _engine_type, result in self.probe_results.items():
+            status_icon = "✅" if result.is_available() else "❌"
+            lines.append(f"{status_icon} {result.engine_name.upper()}")
+            lines.append(f"   Status: {result.status.value}")
+
+            if result.version:
+                lines.append(f"   Version: {result.version}")
+
+            if result.missing_dependencies:
+                lines.append(f"   Missing: {', '.join(result.missing_dependencies)}")
+
+            lines.append(f"   {result.diagnostic_message}")
+
+            if not result.is_available():
+                fix = result.get_fix_instructions()
+                lines.append(f"   Fix: {fix}")
+
+            lines.append("")
+
+        lines.append("=" * 70)
+        lines.append("")
+
+        return "\n".join(lines)
