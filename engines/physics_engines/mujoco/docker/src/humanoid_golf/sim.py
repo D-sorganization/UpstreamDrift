@@ -8,7 +8,6 @@ import imageio
 import numpy as np
 
 from . import utils
-from . import visualization
 
 # Check for viewer support
 try:

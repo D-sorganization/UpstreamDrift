@@ -6,8 +6,9 @@ This module provides:
 - Real-time data display
 """
 
-import numpy as np
 from collections import deque
+
+import numpy as np
 
 
 class TrajectoryTracer:
@@ -157,7 +158,6 @@ def add_visualization_overlays(viewer, physics, config, tracer):
         config: Configuration dict
         tracer: TrajectoryTracer instance
     """
-    import mujoco
 
     # Get visualization options
     show_forces = config.get("show_contact_forces", True)
@@ -191,7 +191,7 @@ def add_visualization_overlays(viewer, physics, config, tracer):
                 direction = contact["normal"]
 
                 # End point of arrow
-                end_pos = contact["position"] + direction * arrow_length
+                contact["position"] + direction * arrow_length
 
                 # Note: Actual rendering depends on viewer type
                 # This is the data structure for force visualization
@@ -199,7 +199,7 @@ def add_visualization_overlays(viewer, physics, config, tracer):
 
     # Add joint torque indicators
     if show_torques:
-        torques = visualizer.get_joint_torques()
+        visualizer.get_joint_torques()
         # Torque visualization would show as colored joints or text overlays
         pass
 

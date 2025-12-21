@@ -51,7 +51,7 @@ class PhysicsParameter:
             return False, f"{self.name} is a constant and cannot be changed"
 
         # Type check
-        if not isinstance(new_value, (int, float)):
+        if not isinstance(new_value, int | float):
             return False, f"{self.name} must be numeric"
 
         # Range check
@@ -374,7 +374,7 @@ class PhysicsParameterRegistry:
         for name, param_data in data.items():
             # Only update value if parameter exists
             if name in self.parameters:
-                param = self.parameters[name]
+                self.parameters[name]
                 success, _ = self.set(name, param_data["value"])
                 if success:
                     count += 1

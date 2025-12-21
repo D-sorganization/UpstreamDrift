@@ -90,7 +90,7 @@ class TestEngineProbes:
         assert len(results) > 0
 
         # Each result should have required fields
-        for engine_type, result in results.items():
+        for _engine_type, result in results.items():
             assert result.engine_name is not None
             assert isinstance(result.status, ProbeStatus)
             assert result.diagnostic_message is not None
@@ -290,7 +290,8 @@ class TestOutputManager:
             # Save data
             data = {"time": [0, 1, 2], "angle": [0.0, 0.5, 1.0]}
 
-            # Note: OutputManager may add timestamps, so we can't use deterministic names yet
+            # Note: OutputManager may add timestamps, so we can't use
+            # deterministic names yet
             # This is a known limitation documented in the architecture plan
             path = manager.save_simulation_results(
                 data, "test_sim", format_type=OutputFormat.JSON, engine="test"
