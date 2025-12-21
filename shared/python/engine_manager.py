@@ -80,7 +80,7 @@ class EngineManager:
             EngineType.PINOCCHIO: PinocchioProbe(self.suite_root),
             EngineType.PENDULUM: PendulumProbe(self.suite_root),
         }
-        self.probe_results = {}
+        self.probe_results: dict[EngineType, Any] = {}
 
         # Initialize engine status
         self._discover_engines()
