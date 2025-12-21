@@ -10,7 +10,6 @@ import numpy as np
 from . import utils
 
 # Check for viewer support
-# Check for viewer support
 try:
     from dm_control import viewer
 
@@ -274,7 +273,7 @@ def load_state(physics, filename) -> None:
 
 
 def run_simulation(
-    output_video="humanoid_golf.mp4", output_data="golf_data.csv", duration=8.0
+    output_video="humanoid_golf.mp4", output_data="golf_data.csv", duration=3.0
 ) -> None:
     """Run the golf simulation."""
     # 1. Load Config
@@ -297,6 +296,8 @@ def run_simulation(
     use_viewer = config.get("live_view", False)
     save_path = config.get("save_state_path", "")
     load_path = config.get("load_state_path", "")
+    # Use duration from config if specified, otherwise use function parameter
+    duration = config.get("simulation_duration", duration)
 
     club_params = {
         "length": float(config.get("club_length", 1.0)),

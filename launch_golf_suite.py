@@ -20,19 +20,18 @@ logger = setup_logging(__name__)
 def launch_gui_launcher():
     """Launch the GUI-based unified launcher."""
     try:
-        from launchers.golf_launcher import UnifiedLauncher
+        from launchers.unified_launcher import UnifiedLauncher
 
         logger.info("Starting GUI launcher...")
         app = UnifiedLauncher()
-        app.mainloop()
+        return app.mainloop()
     except ImportError as e:
         logger.error(f"Could not import GUI launcher: {e}")
-        logger.info("Try: pip install tkinter")
+        logger.info("Try: pip install PyQt6")
         return False
     except Exception as e:
         logger.error(f"Error launching GUI: {e}")
         return False
-    return True
 
 
 def launch_local_launcher():
@@ -135,6 +134,19 @@ def launch_pinocchio():
 
 def show_status():
     """Show Golf Modeling Suite status."""
+    try:
+        from launchers.unified_launcher import UnifiedLauncher
+
+        launcher = UnifiedLauncher()
+        launcher.show_status()
+    except Exception as e:
+        # Fallback to basic status if UnifiedLauncher fails
+        logger.warning(f"Could not use UnifiedLauncher for status: {e}")
+        _show_basic_status()
+
+
+def _show_basic_status():
+    """Show basic status (fallback)."""
     suite_root = Path(__file__).parent
 
     print("\n=== Golf Modeling Suite Status ===")

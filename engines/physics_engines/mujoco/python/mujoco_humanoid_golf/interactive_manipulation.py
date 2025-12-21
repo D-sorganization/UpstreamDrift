@@ -453,7 +453,15 @@ class InteractiveManipulator:
                 J_damped += 0.05 * nullspace_motion
 
             # Update with step size
-            q = q + self.ik_step_size * J_damped
+            # Use mj_integratePos to handle nq != nv (quaternion joints)
+            q_new = np.zeros_like(q)
+            mujoco.mj_integratePos(
+                self.model,
+                q_new,
+                J_damped * self.ik_step_size,
+                1.0,
+            )
+            q = q_new
 
             # Clamp to joint limits
             q = self._clamp_joint_limits(q)
