@@ -351,7 +351,6 @@ def customize_visuals(physics, config=None) -> None:
         elif "floor" in name or "ground" in name:
             # Golf Course Green
             physics.model.geom_rgba[i] = [0.1, 0.6, 0.1, 1.0]
-            # Ensure it looks good (check reflection/shininess if possible, but color is main)
         elif any(part in name for part in SHIRT_PARTS):
             physics.model.geom_rgba[i] = colors["shirt"]
         elif any(part in name for part in PANTS_PARTS):

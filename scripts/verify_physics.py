@@ -23,7 +23,7 @@ def run_verification():
     report_lines = []
     report_lines.append("# Physics Verification Report")
     report_lines.append(
-        f"**Date:** {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+        f"**Date:** {datetime.datetime.now(tz=datetime.timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}"
     )
     report_lines.append("")
 

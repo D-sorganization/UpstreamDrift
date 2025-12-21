@@ -238,7 +238,7 @@ function updateButtonStates(isRunning) {
   pauseBtn.disabled = !isRunning;
   startBtn.disabled = isRunning;
 
-  if (!isRunning) {
+  if (!isRunning && startSpan) {
     if (state.time !== 0) {
       startSpan.textContent = 'Resume';
     } else {
