@@ -74,6 +74,7 @@ DEFAULT_CONFIG = {
     "weight_percent": 100.0,
     "control_mode": "pd",
     "live_view": False,
+    "simulation_duration": 3.0,  # Typical golf swing duration in seconds
     "save_state_path": "",
     "load_state_path": "",
     "club_length": 1.0,
@@ -82,6 +83,11 @@ DEFAULT_CONFIG = {
     "enhance_face": False,
     "articulated_fingers": False,
     "polynomial_coefficients": {},  # Joint name -> [c0, c1, c2, c3, c4, c5, c6]
+    # Visualization options
+    "show_contact_forces": True,
+    "show_joint_torques": True,
+    "show_tracers": True,
+    "tracer_bodies": ["pelvis", "torso", "head", "r_hand", "l_hand"],  # Bodies to trace
 }
 
 
