@@ -59,7 +59,7 @@ def validate_launchers():
 
     try:
         # Test GUI launcher
-        from launchers.golf_launcher import UnifiedLauncher
+        from launchers.unified_launcher import UnifiedLauncher
 
         _ = UnifiedLauncher
         logger.info("  ✅ GUI launcher imports successfully")

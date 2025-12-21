@@ -94,6 +94,7 @@ class UnifiedLauncher:
 
         print("\n" + "=" * 60 + "\n")
 
+    def get_version(self) -> str:
         """Get suite version from package metadata.
 
         Returns:
@@ -107,6 +108,7 @@ class UnifiedLauncher:
         # Try package metadata first (installed package)
         try:
             from importlib.metadata import version
+
             return version("golf-modeling-suite")
         except Exception:
             pass
@@ -114,6 +116,7 @@ class UnifiedLauncher:
         # Try shared package (development mode)
         try:
             from shared.python import __version__
+
             return __version__
         except (ImportError, AttributeError):
             pass

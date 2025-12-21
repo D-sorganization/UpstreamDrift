@@ -39,6 +39,9 @@ RUN apt-get update && apt-get install -y \
     libxcb-xkb1 \
     && rm -rf /var/lib/apt/lists/*
 
+# Create non-root user for security
+RUN useradd -m -s /bin/bash developer
+
 # Create Python venv for MuJoCo environment
 RUN python3.11 -m venv /opt/mujoco-env && \
     /opt/mujoco-env/bin/pip install --upgrade pip setuptools wheel
@@ -122,6 +125,9 @@ RUN pip install \
 
 # Set working directory
 WORKDIR /workspace
+
+# Switch to non-root user
+USER developer
 
 # Default command (can be overridden)
 CMD ["/bin/bash"]
