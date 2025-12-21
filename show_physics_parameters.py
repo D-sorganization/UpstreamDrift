@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 # Add shared to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
+sys.path.insert(0, str(Path(__file__).parent / "shared" / "python"))
 
 from physics_parameters import get_registry
 

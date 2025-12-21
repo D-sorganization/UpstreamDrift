@@ -6,12 +6,11 @@ with validation, units, and source citations.
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any
-
-import json
 
 
 class ParameterCategory(Enum):
@@ -36,9 +35,8 @@ class PhysicsParameter:
     source: str
     min_value: float | None = None
     max_value: float | None = None
-    is_constant: bool = (
-        False  # True for values that shouldn't change (e.g., USGA rules)
-    )
+    # True for values that shouldn't change (e.g., USGA rules)
+    is_constant: bool = False
 
     def validate(self, new_value: Any) -> tuple[bool, str]:
         """Validate a new value against constraints.

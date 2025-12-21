@@ -286,7 +286,7 @@ class EngineManager:
         validation_path = validation_paths.get(engine_type, base_path)
         return validation_path.exists()
 
-    def probe_all_engines(self) -> dict:
+    def probe_all_engines(self) -> dict[EngineType, Any]:
         """Probe all engines for detailed readiness checks.
 
         Returns:
@@ -298,7 +298,7 @@ class EngineManager:
 
         return self.probe_results
 
-    def get_probe_result(self, engine_type: EngineType):
+    def get_probe_result(self, engine_type: EngineType) -> Any:
         """Get probe result for a specific engine.
 
         Args:
