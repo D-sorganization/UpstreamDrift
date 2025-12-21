@@ -79,6 +79,25 @@ class KinematicForceAnalyzer:
         self.club_head_id = self._find_body_id("club_head")
         self.club_grip_id = self._find_body_id("club") or self._find_body_id("grip")
 
+        # Optimization: Pre-allocate resources
+        self._perturb_data = mujoco.MjData(model)
+
+        # Detect Jacobian API and pre-allocate buffers
+        self.nv = model.nv
+        try:
+            # Try reshaped API (MuJoCo 3.3+ preferred)
+            jacp_test = np.zeros((3, self.nv))
+            jacr_test = np.zeros((3, self.nv))
+            mujoco.mj_jacBody(model, data, jacp_test, jacr_test, 0)
+            self._use_reshaped_arrays = True
+            self._jacp = np.zeros((3, self.nv))
+            self._jacr = np.zeros((3, self.nv))
+        except TypeError:
+            # Fallback to flat API
+            self._use_reshaped_arrays = False
+            self._jacp = np.zeros(3 * self.nv)
+            self._jacr = np.zeros(3 * self.nv)
+
     def _find_body_id(self, name_pattern: str) -> int | None:
         """Find body ID by name pattern."""
         for i in range(self.model.nbody):
@@ -86,6 +105,32 @@ class KinematicForceAnalyzer:
             if body_name and name_pattern.lower() in body_name.lower():
                 return i
         return None
+
+    def _compute_jacobian(
+        self, body_id: int, data: mujoco.MjData | None = None
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Compute Jacobian for a body using pre-allocated buffers.
+
+        Args:
+            body_id: Body ID
+            data: MuJoCo data (default: self.data)
+
+        Returns:
+            Tuple of (jacp, jacr) as (3, nv) arrays.
+            Note: Returns views into internal buffers or copies depending on usage.
+        """
+        if data is None:
+            data = self.data
+
+        if self._use_reshaped_arrays:
+            mujoco.mj_jacBody(self.model, data, self._jacp, self._jacr, body_id)
+            return self._jacp, self._jacr
+        else:
+            mujoco.mj_jacBody(self.model, data, self._jacp, self._jacr, body_id)
+            return (
+                self._jacp.reshape(3, self.nv),
+                self._jacr.reshape(3, self.nv),
+            )
 
     def compute_coriolis_forces(self, qpos: np.ndarray, qvel: np.ndarray) -> np.ndarray:
         """Compute Coriolis and centrifugal forces.
@@ -260,57 +305,23 @@ class KinematicForceAnalyzer:
         mujoco.mj_forward(self.model, self.data)
 
         # Compute club head Jacobian
-        # MuJoCo 3.3+ may require reshaped arrays
-        try:
-            jacp = np.zeros((3, self.model.nv))
-            jacr = np.zeros((3, self.model.nv))
-            mujoco.mj_jacBody(self.model, self.data, jacp, jacr, self.club_head_id)
-        except TypeError:
-            # Fallback to flat array approach
-            jacp_flat = np.zeros(3 * self.model.nv)
-            jacr_flat = np.zeros(3 * self.model.nv)
-            mujoco.mj_jacBody(
-                self.model, self.data, jacp_flat, jacr_flat, self.club_head_id
-            )
-            jacp = jacp_flat.reshape(3, self.model.nv)
-            jacr = jacr_flat.reshape(3, self.model.nv)
+        jacp, _ = self._compute_jacobian(self.club_head_id)
+        jacp_curr = jacp.copy()  # Save copy as _compute_jacobian reuses buffer
 
         # Jacobian time derivative (approximate)
         epsilon = 1e-6
-        jacp_dot = np.zeros((3, self.model.nv))
+        # jacp_dot = np.zeros((3, self.model.nv)) # Not needed, computed below
 
-        # Compute Jacobian at perturbed state
-        data_copy = mujoco.MjData(self.model)
-        data_copy.qpos[:] = qpos + epsilon * qvel
-        data_copy.qvel[:] = qvel
-        mujoco.mj_forward(self.model, data_copy)
+        # Compute Jacobian at perturbed state using pre-allocated data structure
+        self._perturb_data.qpos[:] = qpos + epsilon * qvel
+        self._perturb_data.qvel[:] = qvel
+        mujoco.mj_forward(self.model, self._perturb_data)
 
-        # MuJoCo 3.3+ may require reshaped arrays
-        try:
-            jacp_perturb = np.zeros((3, self.model.nv))
-            jacr_perturb = np.zeros((3, self.model.nv))
-            mujoco.mj_jacBody(
-                self.model,
-                data_copy,
-                jacp_perturb,
-                jacr_perturb,
-                self.club_head_id,
-            )
-        except TypeError:
-            # Fallback to flat array approach
-            jacp_perturb_flat = np.zeros(3 * self.model.nv)
-            jacr_perturb_flat = np.zeros(3 * self.model.nv)
-            mujoco.mj_jacBody(
-                self.model,
-                data_copy,
-                jacp_perturb_flat,
-                jacr_perturb_flat,
-                self.club_head_id,
-            )
-            jacp_perturb = jacp_perturb_flat.reshape(3, self.model.nv)
-            jacr_perturb = jacr_perturb_flat.reshape(3, self.model.nv)
+        jacp_perturb, _ = self._compute_jacobian(
+            self.club_head_id, data=self._perturb_data
+        )
 
-        jacp_dot = (jacp_perturb - jacp) / epsilon
+        jacp_dot = (jacp_perturb - jacp_curr) / epsilon
 
         # Coriolis force: -2m(Ω × v)
         # In our case: Coriolis contribution to acceleration
@@ -326,7 +337,7 @@ class KinematicForceAnalyzer:
 
         # Total apparent force (from joint-space Coriolis forces)
         joint_coriolis = self.compute_coriolis_forces(qpos, qvel)
-        apparent_force = jacp.T @ joint_coriolis[: self.model.nv]
+        apparent_force = jacp_curr.T @ joint_coriolis[: self.model.nv]
 
         # Approximate centrifugal as component aligned with position
         club_pos = self.data.xpos[self.club_head_id].copy()
@@ -401,18 +412,7 @@ class KinematicForceAnalyzer:
             body_inertia = self.model.body_inertia[i]
 
             # Get body velocity (linear and angular)
-            # MuJoCo 3.3+ may require reshaped arrays
-            try:
-                jacp = np.zeros((3, self.model.nv))
-                jacr = np.zeros((3, self.model.nv))
-                mujoco.mj_jacBody(self.model, self.data, jacp, jacr, i)
-            except TypeError:
-                # Fallback to flat array approach
-                jacp_flat = np.zeros(3 * self.model.nv)
-                jacr_flat = np.zeros(3 * self.model.nv)
-                mujoco.mj_jacBody(self.model, self.data, jacp_flat, jacr_flat, i)
-                jacp = jacp_flat.reshape(3, self.model.nv)
-                jacr = jacr_flat.reshape(3, self.model.nv)
+            jacp, jacr = self._compute_jacobian(i)
 
             v_linear = jacp @ qvel
             omega = jacr @ qvel
@@ -525,18 +525,7 @@ class KinematicForceAnalyzer:
         self.data.qpos[:] = qpos
         mujoco.mj_forward(self.model, self.data)
 
-        # MuJoCo 3.3+ may require reshaped arrays
-        try:
-            jacp = np.zeros((3, self.model.nv))
-            jacr = np.zeros((3, self.model.nv))
-            mujoco.mj_jacBody(self.model, self.data, jacp, jacr, body_id)
-        except TypeError:
-            # Fallback to flat array approach
-            jacp_flat = np.zeros(3 * self.model.nv)
-            jacr_flat = np.zeros(3 * self.model.nv)
-            mujoco.mj_jacBody(self.model, self.data, jacp_flat, jacr_flat, body_id)
-            jacp = jacp_flat.reshape(3, self.model.nv)
-            jacr = jacr_flat.reshape(3, self.model.nv)
+        jacp, _ = self._compute_jacobian(body_id)
 
         # Project Jacobian onto direction
         J_dir = direction @ jacp
@@ -577,18 +566,7 @@ class KinematicForceAnalyzer:
         mujoco.mj_forward(self.model, self.data)
 
         # Body velocity
-        # MuJoCo 3.3+ may require reshaped arrays
-        try:
-            jacp = np.zeros((3, self.model.nv))
-            jacr = np.zeros((3, self.model.nv))
-            mujoco.mj_jacBody(self.model, self.data, jacp, jacr, body_id)
-        except TypeError:
-            # Fallback to flat array approach
-            jacp_flat = np.zeros(3 * self.model.nv)
-            jacr_flat = np.zeros(3 * self.model.nv)
-            mujoco.mj_jacBody(self.model, self.data, jacp_flat, jacr_flat, body_id)
-            jacp = jacp_flat.reshape(3, self.model.nv)
-            jacr = jacr_flat.reshape(3, self.model.nv)
+        jacp, _ = self._compute_jacobian(body_id)
 
         v = jacp @ qvel
 
