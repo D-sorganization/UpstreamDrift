@@ -43,7 +43,8 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
         >>> np.allclose(h_matrix, h_matrix.T)  # Check symmetry
         True
     """
-    q = np.asarray(q).flatten()
+    # Use ravel() to avoid copying data when possible
+    q = np.asarray(q).ravel()
 
     nb = model["NB"]
     if len(q) != nb:

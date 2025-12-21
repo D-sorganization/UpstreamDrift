@@ -225,7 +225,7 @@ class TestEngineDataFlow:
             mock_instance = Mock()
 
             # Mock consistent output format
-            mock_result: dict[str, Any] = {field: 0.0 for field in expected_fields}
+            mock_result: dict[str, Any] = dict.fromkeys(expected_fields, 0.0)
             mock_result["trajectory_data"] = mock_trajectory
 
             mock_instance.simulate.return_value = mock_result
