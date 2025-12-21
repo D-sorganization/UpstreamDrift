@@ -348,6 +348,9 @@ def customize_visuals(physics, config=None) -> None:
             continue
         elif "head" in name or "hand" in name or "finger" in name or "thumb" in name:
             physics.model.geom_rgba[i] = colors["skin"]
+        elif "floor" in name or "ground" in name:
+            # Golf Course Green
+            physics.model.geom_rgba[i] = [0.1, 0.6, 0.1, 1.0]
         elif any(part in name for part in SHIRT_PARTS):
             physics.model.geom_rgba[i] = colors["shirt"]
         elif any(part in name for part in PANTS_PARTS):

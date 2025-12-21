@@ -50,7 +50,7 @@ The generated `PHYSICS_VERIFICATION_REPORT.md` contains three sections:
     -   **Not Installed**: Python package is missing.
 
 2.  **Validation Test Results**:
-    -   **PASSED**: Simulation matches analytical baseline within tolerance (<0.1% energy error).r).
+    -   **PASSED**: Simulation matches analytical baseline within tolerance (<0.1% energy error).
     -   **SKIPPED**: Engine not available.
     -   **FAILED**: Physics violation detected. **Critical:** Do not merge code if this occurs.
 
