@@ -445,7 +445,7 @@ class MatlabProbe(EngineProbe):
 
         # Basic check for contents
         if not any(engine_dir.glob("*.slx")) and not any(engine_dir.glob("*.m")):
-             missing.append("Simulink/MATLAB files")
+            missing.append("Simulink/MATLAB files")
 
         if missing:
             return EngineProbeResult(

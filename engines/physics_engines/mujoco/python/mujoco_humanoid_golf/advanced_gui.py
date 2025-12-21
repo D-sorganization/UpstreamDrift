@@ -1900,7 +1900,15 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             ]
             if 0 <= idx < len(descriptions):
                 mode_help_label.setText(descriptions[idx])
-            self.on_control_type_changed(actuator_index, idx)
+                self.on_control_type_changed(actuator_index, idx)
+            else:
+                logger.warning(
+                    "Received out-of-range control type index %s for actuator %s "
+                    "(available descriptions: %s)",
+                    idx,
+                    actuator_index,
+                    len(descriptions),
+                )
 
         control_type_combo.currentIndexChanged.connect(_update_mode_help)
 

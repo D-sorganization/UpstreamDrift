@@ -3,7 +3,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
 
 import numpy as np
 
@@ -11,7 +10,7 @@ import numpy as np
 @dataclass
 class PoseEstimationResult:
     """Standardized result from a pose estimator."""
-    
+
     joint_angles: dict[str, float]  # Joint name -> angle (radians)
     confidence: float  # 0.0 to 1.0
     timestamp: float
@@ -24,7 +23,7 @@ class PoseEstimator(ABC):
     @abstractmethod
     def load_model(self, model_path: Path | None = None) -> None:
         """Load the estimation model/weights.
-        
+
         Args:
             model_path: Path to model weights, or None for default.
         """
@@ -33,10 +32,10 @@ class PoseEstimator(ABC):
     @abstractmethod
     def estimate_from_image(self, image: np.ndarray) -> PoseEstimationResult:
         """Estimate pose from a single image frame.
-        
+
         Args:
             image: Input image (H, W, C) usually BGR or RGB.
-            
+
         Returns:
             PoseEstimationResult containing joint angles.
         """
@@ -45,10 +44,10 @@ class PoseEstimator(ABC):
     @abstractmethod
     def estimate_from_video(self, video_path: Path) -> list[PoseEstimationResult]:
         """Process an entire video file.
-        
+
         Args:
             video_path: Path to video file.
-            
+
         Returns:
             List of results for each frame.
         """
