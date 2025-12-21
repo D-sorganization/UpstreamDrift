@@ -29,6 +29,9 @@ RUN apt-get update && apt-get install -y \
     x11-apps \
     && rm -rf /var/lib/apt/lists/*
 
+# Create non-root user for security
+RUN useradd -m -s /bin/bash developer
+
 # Install Miniforge for conda
 RUN wget -q https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh \
     && bash Miniforge3-Linux-x86_64.sh -b -p /opt/conda \
@@ -71,6 +74,9 @@ RUN /opt/modeling/bin/pip install \
 
 # Set working directory
 WORKDIR /workspace
+
+# Switch to non-root user
+USER developer
 
 # Default command (can be overridden)
 CMD ["/bin/bash"]

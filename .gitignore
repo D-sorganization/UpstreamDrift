@@ -55,3 +55,10 @@ ProfilePhoto.jpg
 # Temporary migration files
 *_backup_*/
 temp-worktree/engines/physics_engines/mujoco/vendor/mujoco_menagerie/
+
+# Prevent malformed pip artifacts
+=*
+
+# MyPy and coverage output
+mypy_errors.txt
+ruff_errors.json

@@ -59,7 +59,7 @@ def validate_launchers():
 
     try:
         # Test GUI launcher
-        from launchers.golf_launcher import UnifiedLauncher
+        from launchers.unified_launcher import UnifiedLauncher
 
         _ = UnifiedLauncher
         logger.info("  ✅ GUI launcher imports successfully")
@@ -275,7 +275,7 @@ def run_comprehensive_validation():
 
     if passed == total:
         logger.info("🎉 Golf Modeling Suite validation: ALL TESTS PASSED!")
-        logger.info("The suite is ready for use!")
+        logger.info("The suite is ready for development use (Beta)!")
         return True
     else:
         logger.error(f"❌ {total - passed} validation(s) failed")
