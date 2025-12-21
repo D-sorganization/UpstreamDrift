@@ -73,7 +73,7 @@ MODEL_DESCRIPTIONS = {
     "Includes real-time plots for phase space trajectories, energy conservation "
     "verification, and parameter tuning sliders.",
     "Drake Golf Model": "Control-theoretic golf robot focusing on trajectory "
-    "optimization. "
+    "optimization."
     "Utilizes Drake's rigorous multibody dynamics and constraint solvers to generate "
     "physically consistent swing paths. Features stabilizing controllers and inverse "
     "dynamics solvers.",
