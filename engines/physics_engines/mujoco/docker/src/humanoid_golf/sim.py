@@ -191,12 +191,41 @@ class LQRController(BaseController):
         return self.K @ err
 
 
+class TimeStep:
+    """Mock dm_env.TimeStep for viewer compatibility."""
+
+    def __init__(
+        self,
+        step_type,
+        reward=0.0,
+        discount=1.0,
+        observation: typing.Optional[dict[str, typing.Any]] = None,
+    ) -> None:
+        self.step_type = step_type
+        self.reward = reward
+        self.discount = discount
+        self.observation = observation or {}
+
+    def first(self) -> bool:
+        return self.step_type == 0
+
+    def mid(self) -> bool:
+        return self.step_type == 1
+
+    def last(self) -> bool:
+        return self.step_type == 2
+
+    def __getitem__(self, key):
+         return getattr(self, key)
+
+
 class PhysicsEnvWrapper:
     """Wraps a pure Physics object to satisfy dm_control.viewer's Environment."""
 
-    def __init__(self, physics) -> None:
+    def __init__(self, physics, initializer=None) -> None:
         """Initialize PhysicsEnvWrapper."""
         self._physics = physics
+        self._initializer = initializer
 
     @property
     def physics(self) -> typing.Any:
@@ -217,37 +246,18 @@ class PhysicsEnvWrapper:
 
         return Spec((self._physics.model.nu,))
 
-    def step(self, action) -> typing.Any:
+    def step(self, action) -> 'TimeStep':
         """Advance the environment by one step."""
         self._physics.set_control(action)
         self._physics.step()
+        return TimeStep(step_type=1)  # MID
 
-        # Mock TimeStep
-        class TimeStep:
-            def __init__(self) -> None:
-                """Initialize TimeStep."""
-                self.reward = 0.0
-                self.discount = 1.0
-                self.observation: dict[str, typing.Any] = {}
-                self.step_type = 1  # MID
-
-        return TimeStep()
-
-    def reset(self) -> typing.Any:
+    def reset(self) -> 'TimeStep':
         """Reset the environment."""
-
-        # Do NOT reset physics state here, we typically want to keep init state
-        # But viewer expects a reset.
-        class TimeStep:
-            def __init__(self) -> None:
-                """Initialize TimeStep."""
-                self.reward = 0.0
-                self.discount = 1.0
-                self.observation: dict[str, typing.Any] = {}
-                self.step_type = 0  # FIRST
-
-        return TimeStep()
-
+        self._physics.reset()
+        if self._initializer:
+            self._initializer(self._physics)
+        return TimeStep(step_type=0)  # FIRST
 
 def save_state(physics, filename) -> None:
     """Save simulation state to file."""
@@ -270,7 +280,6 @@ def load_state(physics, filename) -> None:
             print(f"State loaded from {filename}")
         except Exception as e:
             print(f"Error loading state: {e}")
-
 
 def run_simulation(
     output_video="humanoid_golf.mp4", output_data="golf_data.csv", duration=3.0
@@ -328,18 +337,22 @@ def run_simulation(
     utils.customize_visuals(physics, config=config)
     actuators = utils.get_actuator_indices(physics)
 
-    # 3. Load Initial State
-    if load_path:
-        load_state(physics, load_path)
-    else:
-        # Initial Pose
-        with physics.reset_context():
-            physics.data.qpos[2] = 1.1 * (target_height / 1.56)
-            for joint, angle in TARGET_POSE.items():
-                try:
-                    physics.named.data.qpos[joint] = angle
-                except KeyError:
-                    pass
+    # 3. Setup Initialization Logic
+    def initialize_episode(phys):
+        if load_path:
+            load_state(phys, load_path)
+        else:
+            # Initial Pose
+            with phys.reset_context():
+                phys.data.qpos[2] = 1.1 * (target_height / 1.56)
+                for joint, angle in TARGET_POSE.items():
+                    try:
+                        phys.named.data.qpos[joint] = angle
+                    except KeyError:
+                        pass
+    
+    # Initialize for checking or headless run
+    initialize_episode(physics)
 
     # 4. Setup Controller
     controller: BaseController
@@ -371,7 +384,7 @@ def run_simulation(
                 return action
 
             # Wrap physics for viewer
-            env_wrapper = PhysicsEnvWrapper(physics)
+            env_wrapper = PhysicsEnvWrapper(physics, initializer=initialize_episode)
             viewer.launch(env_wrapper, policy)
         except Exception as e:
             print(f"Failed to launch viewer: {e}", flush=True)
