@@ -43,10 +43,13 @@ function rotatePoint(point, angleRad, center = pivot) {
   };
 }
 
-function parseInputs() {
+function resetStateFromInputs() {
   state.theta1 = Number(document.getElementById('theta1').value) * Math.PI / 180;
   state.theta2 = Number(document.getElementById('theta2').value) * Math.PI / 180;
   state.omega1 = 0; state.omega2 = 0; state.time = 0;
+}
+
+function updateParamsFromInputs() {
   params.l1 = Number(document.getElementById('l1').value);
   params.l2 = Number(document.getElementById('l2').value);
   params.m1 = Number(document.getElementById('m1').value);
@@ -228,7 +231,20 @@ function step() {
 }
 
 function updateButtonStates(isRunning) {
-  document.getElementById('pause').disabled = !isRunning;
+  const startBtn = document.getElementById('start');
+  const pauseBtn = document.getElementById('pause');
+  const startSpan = startBtn.querySelector('span');
+
+  pauseBtn.disabled = !isRunning;
+  startBtn.disabled = isRunning;
+
+  if (!isRunning) {
+    if (state.time !== 0) {
+      startSpan.textContent = 'Resume';
+    } else {
+      startSpan.textContent = 'Start';
+    }
+  }
 }
 
 function announce(message) {
@@ -238,7 +254,10 @@ function announce(message) {
 
 function start() {
   cancelAnimationFrame(animationId);
-  parseInputs();
+  if (state.time === 0) {
+    resetStateFromInputs();
+  }
+  updateParamsFromInputs();
   step();
   updateButtonStates(true);
   announce('Simulation started');
@@ -253,9 +272,11 @@ function pause() {
 
 function reset() {
   pause();
-  parseInputs();
+  resetStateFromInputs();
+  updateParamsFromInputs();
   draw();
   document.getElementById('torques').textContent = 'Torques: --';
+  updateButtonStates(false);
   announce('Simulation reset');
 }
 
