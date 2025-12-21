@@ -182,7 +182,6 @@ class DrakeProbe(EngineProbe):
         try:
             import pydrake
             version = getattr(pydrake, "__version__", "unknown")
-            
             # Verify core modules
             try:
                 import pydrake.multibody
