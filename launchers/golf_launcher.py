@@ -427,7 +427,9 @@ class GolfLauncher(QMainWindow):
         img_path = ASSETS_DIR / img_name if img_name else None
 
         lbl_img = QLabel()
-        lbl_img.setFixedSize(200, 200)  # Fixed card thumbnail area: 200x200 matches the model-card layout spec and provides padding around the 180x180 scaled image.
+        lbl_img.setFixedSize(
+            200, 200
+        )  # Fixed card thumbnail area: 200x200 matches the model-card layout spec and provides padding around the 180x180 scaled image.
         lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         if img_path and img_path.exists():

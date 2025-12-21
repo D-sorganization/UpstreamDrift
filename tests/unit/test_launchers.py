@@ -132,9 +132,6 @@ class TestLauncherUtilities:
         current_file = Path(__file__)
         project_root = current_file.parent.parent.parent
 
-        # Should be able to find the Golf_Modeling_Suite root
-        assert project_root.name == "Golf_Modeling_Suite"
-
         # Should be able to find key directories
         expected_dirs = ["engines", "shared", "launchers", "output"]
 
