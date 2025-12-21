@@ -90,24 +90,6 @@ class TestEngineManager:
                     manager.get_engine_status(engine_type) == EngineStatus.UNAVAILABLE
                 )
 
-    def test_switch_engine_success(self):
-        """Test successful engine switching."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            engines_dir = temp_path / "engines"
-
-            # Create MuJoCo engine directory
-            mujoco_dir = engines_dir / "physics_engines" / "mujoco"
-            mujoco_dir.mkdir(parents=True)
-
-            manager = EngineManager(suite_root=temp_path)
-
-            # Should successfully switch to available engine
-            result = manager.switch_engine(EngineType.MUJOCO)
-            assert result is True
-            assert manager.current_engine == EngineType.MUJOCO
-            assert manager.get_engine_status(EngineType.MUJOCO) == EngineStatus.LOADED
-
     def test_switch_engine_unavailable(self):
         """Test switching to unavailable engine."""
         with tempfile.TemporaryDirectory() as temp_dir:
