@@ -129,13 +129,21 @@ class MuJoCoProbe(EngineProbe):
 
         # Check for assets
         assets_dir = engine_dir / "assets"
+        myo_sim_dir = engine_dir / "myo_sim"
+
+        valid_assets_dir = None
         if assets_dir.exists():
+            valid_assets_dir = assets_dir
+        elif myo_sim_dir.exists():
+            valid_assets_dir = myo_sim_dir
+
+        if valid_assets_dir:
             # Check for model files
-            models = list(assets_dir.glob("*.xml"))
+            models = list(valid_assets_dir.glob("**/*.xml"))
             if not models:
                 missing.append("model XML files")
         else:
-            missing.append("assets directory")
+            missing.append("assets or myo_sim directory")
 
         if missing:
             return EngineProbeResult(
@@ -153,7 +161,10 @@ class MuJoCoProbe(EngineProbe):
             version=version,
             missing_dependencies=[],
             diagnostic_message=f"MuJoCo {version} ready",
-            details={"engine_dir": str(engine_dir), "assets_dir": str(assets_dir)},
+            details={
+                "engine_dir": str(engine_dir),
+                "assets_dir": str(valid_assets_dir),
+            },
         )
 
 
@@ -173,6 +184,20 @@ class DrakeProbe(EngineProbe):
             import pydrake
 
             version = getattr(pydrake, "__version__", "unknown")
+
+            # Verify core modules
+            try:
+                import pydrake.multibody
+            except ImportError:
+                return EngineProbeResult(
+                    engine_name=self.engine_name,
+                    status=ProbeStatus.MISSING_BINARY,
+                    version=version,
+                    missing_dependencies=["pydrake.multibody"],
+                    diagnostic_message="Drake installed but 'pydrake.multibody' missing. "
+                    "Installation might be corrupted.",
+                )
+
         except ImportError:
             return EngineProbeResult(
                 engine_name=self.engine_name,

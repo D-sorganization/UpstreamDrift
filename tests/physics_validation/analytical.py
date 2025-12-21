@@ -6,10 +6,18 @@ import numpy as np
 class AnalyticalPendulum:
     """Exact solution for a simple pendulum."""
 
-    def __init__(self, length: float = 1.0, mass: float = 1.0, g: float = 9.81):
+    def __init__(
+        self,
+        length: float = 1.0,
+        mass: float = 1.0,
+        g: float = 9.81,
+        inertia: float | None = None,
+    ):
         self.L = length
         self.m = mass
         self.g = g
+        # Default to point mass inertia if not specified
+        self.I = inertia if inertia is not None else (mass * length**2)
 
     def potential_energy(self, theta: float) -> float:
         """Calculate potential energy relative to bottom position.
@@ -24,10 +32,8 @@ class AnalyticalPendulum:
         """Calculate kinetic energy.
 
         KE = 0.5 * I * omega^2
-        I = m * L^2 (point mass)
         """
-        inertia = self.m * self.L**2
-        return 0.5 * inertia * omega**2
+        return 0.5 * self.I * omega**2
 
     def total_energy(self, theta: float, omega: float) -> float:
         """Calculate total mechanical energy."""
