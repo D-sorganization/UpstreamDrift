@@ -93,7 +93,7 @@ class TestNegativeCases:
     def test_set_seeds_negative_value(self) -> None:
         """Test setting seeds with negative value (should work)."""
         # NumPy doesn't accept negative seeds, so we should handle this
-        with pytest.raises(ValueError, match="expected non-negative integer"):
+        with pytest.raises(ValueError, match="expected non-negative integer|Seed must be between"):
             logger_utils.set_seeds(-42)
 
     def test_get_logger_empty_name(self) -> None:

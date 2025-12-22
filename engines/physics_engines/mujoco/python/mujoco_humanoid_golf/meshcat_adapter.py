@@ -1,6 +1,7 @@
 import logging
 import os
 import webbrowser
+from typing import Any
 
 import mujoco
 import numpy as np
@@ -48,7 +49,7 @@ class MuJoCoMeshcatAdapter:
                 port = self.url.split(":")[-1].split("/")[0]
                 host_url = f"http://127.0.0.1:{port}/static/"
                 logger.info(f"Host Meshcat URL: {host_url}")
-            except Exception:
+            except (IndexError, ValueError):
                 pass
 
         self.load_model_geometry()
@@ -136,7 +137,7 @@ class MuJoCoMeshcatAdapter:
         """
         Updates geometry transforms from MuJoCo data.
         """
-        if self.vis is None or data is None:
+        if self.vis is None or data is None or self.model is None:
             return
 
         # Update Geoms
@@ -166,7 +167,7 @@ class MuJoCoMeshcatAdapter:
         """
         Draws force/torque vectors at joints.
         """
-        if self.vis is None:
+        if self.vis is None or self.model is None:
             return
 
         # Clear previous vectors if not showing?
@@ -218,6 +219,9 @@ class MuJoCoMeshcatAdapter:
     def _draw_arrow(
         self, path: str, start: np.ndarray, vec: np.ndarray, color_hex: int
     ):
+        if self.vis is None:
+            return
+
         # Create a Line segment
         end = start + vec
         vertices = np.array([start, end]).T  # 3x2
@@ -229,6 +233,8 @@ class MuJoCoMeshcatAdapter:
             )
         )
 
-    def _rgba_to_hex(self, rgba):
+    def _rgba_to_hex(self, rgba: Any) -> int:
+        if rgba is None:
+            return 0
         r, g, b = (int(c * 255) for c in rgba[:3])
         return (r << 16) + (g << 8) + b

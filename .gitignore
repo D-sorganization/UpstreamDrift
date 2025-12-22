@@ -62,3 +62,4 @@ temp-worktree/engines/physics_engines/mujoco/vendor/mujoco_menagerie/
 # MyPy and coverage output
 mypy_errors.txt
 ruff_errors.json
+coverage.xml
