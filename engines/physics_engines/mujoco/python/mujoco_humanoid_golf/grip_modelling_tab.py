@@ -192,11 +192,6 @@ class GripModellingTab(QtWidgets.QWidget):
                 content = re.sub(r"<mujoco[^>]*>", "", content)
                 content = content.replace("</mujoco>", "")
 
-                # Strip <worldbody> tags to prevent nesting
-                # if included inside another worldbody
-                content = re.sub(r"<worldbody[^>]*>", "", content)
-                content = content.replace("</worldbody>", "")
-
                 # When merging both hands, prefix default class names to avoid
                 # collisions
                 if is_both:
@@ -220,29 +215,42 @@ class GripModellingTab(QtWidgets.QWidget):
                 logger.exception("Failed to process hand file %s", filename)
                 return ""  # Return empty only on catastrophic failure
 
+        extracted_bodies = []
+
+        def process_and_split(filename, body_pattern):
+            content = get_hand_content(filename, body_pattern)
+            # Extract worldbody content
+            bodies_match = re.search(
+                r"<worldbody[^>]*>(.*?)</worldbody>", content, re.DOTALL
+            )
+            if bodies_match:
+                extracted_bodies.append(bodies_match.group(1))
+                # Remove worldbody from content, leaving defaults/assets
+                content = re.sub(
+                    r"<worldbody[^>]*>.*?</worldbody>", "", content, flags=re.DOTALL
+                )
+            return content
+
         if is_both:
-            right_content = get_hand_content("right_hand.xml", "rh_forearm")
-            left_content = get_hand_content("left_hand.xml", "lh_forearm")
+            right_defs = process_and_split("right_hand.xml", "rh_forearm")
+            left_defs = process_and_split("left_hand.xml", "lh_forearm")
+
             xml_content = re.sub(
-                r'<include[^>]*file="right_hand.xml"[^>]*/>', right_content, xml_content
+                r'<include[^>]*file="right_hand.xml"[^>]*/>', right_defs, xml_content
             )
             xml_content = re.sub(
-                r'<include[^>]*file="left_hand.xml"[^>]*/>', left_content, xml_content
+                r'<include[^>]*file="left_hand.xml"[^>]*/>', left_defs, xml_content
             )
         else:
             if 'file="right_hand.xml"' in xml_content:
-                # Determine body name pattern based on file type
-                # For Allegro (wonik_allegro), root link might be 'right_hand'
-                # or similar
-                # For Shadow, it is 'rh_forearm'
                 target_body = "rh_forearm"
                 if "allegro" in str(folder_path).lower():
                     target_body = "right_hand"
 
-                hand_content = get_hand_content("right_hand.xml", target_body)
+                defs = process_and_split("right_hand.xml", target_body)
                 xml_content = re.sub(
                     r'<include[^>]*file="right_hand.xml"[^>]*/>',
-                    hand_content,
+                    defs,
                     xml_content,
                 )
             elif 'file="left_hand.xml"' in xml_content:
@@ -250,12 +258,20 @@ class GripModellingTab(QtWidgets.QWidget):
                 if "allegro" in str(folder_path):
                     target_body = "left_hand"
 
-                hand_content = get_hand_content("left_hand.xml", target_body)
+                defs = process_and_split("left_hand.xml", target_body)
                 xml_content = re.sub(
                     r'<include[^>]*file="left_hand.xml"[^>]*/>',
-                    hand_content,
+                    defs,
                     xml_content,
                 )
+
+        # Inject extracted bodies into the scene's worldbody
+        if extracted_bodies:
+            bodies_str = "\n".join(extracted_bodies)
+            # Insert at the beginning of worldbody
+            xml_content = re.sub(
+                r"(<worldbody[^>]*>)", r"\1\n" + bodies_str, xml_content, count=1
+            )
 
         # Ensure offscreen framebuffer is large enough for renderer
         offscreen_global = '<global offwidth="1920" offheight="1080"/>'
