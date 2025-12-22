@@ -217,8 +217,17 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 self.log_write("Error loading URDF: Failed to build model")
                 return
 
-            self.visual_model = pin.buildVisualModelFromUrdf(fname)
-            self.collision_model = pin.buildCollisionModelFromUrdf(fname)
+            try:
+                self.visual_model = pin.buildGeomFromUrdf(
+                    self.model, fname, pin.GeometryType.VISUAL
+                )
+                self.collision_model = pin.buildGeomFromUrdf(
+                    self.model, fname, pin.GeometryType.COLLISION
+                )
+            except Exception as e:
+                self.log_write(f"Warning: Failed to load geometries: {e}")
+                self.visual_model = None
+                self.collision_model = None
 
             self.data = self.model.createData()
             self.q = pin.neutral(self.model)
