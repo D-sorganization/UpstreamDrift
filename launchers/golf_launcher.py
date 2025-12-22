@@ -764,6 +764,7 @@ class GolfLauncher(QMainWindow):
 
     def _start_meshcat_browser(self, port):
         """Start the meshcat browser."""
+
         def open_url():
             """Open the browser URL."""
             time.sleep(3)
