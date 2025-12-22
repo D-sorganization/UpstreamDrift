@@ -164,6 +164,14 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.chk_coms.toggled.connect(self._toggle_coms)
         vis_layout.addWidget(self.chk_coms)
 
+        self.chk_forces = QtWidgets.QCheckBox("Show Forces")
+        self.chk_forces.toggled.connect(self._toggle_forces)
+        vis_layout.addWidget(self.chk_forces)
+
+        self.chk_torques = QtWidgets.QCheckBox("Show Torques")
+        self.chk_torques.toggled.connect(self._toggle_torques)
+        vis_layout.addWidget(self.chk_torques)
+
         vis_group.setLayout(vis_layout)
         layout.addWidget(vis_group)
 
@@ -462,14 +470,73 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         pin.forwardKinematics(self.model, self.data, self.q)
         pin.updateFramePlacements(self.model, self.data)
 
-        if self.chk_coms.isChecked():
-            pin.centerOfMass(self.model, self.data, self.q)
-
         # Overlays
         if self.chk_frames.isChecked():
             self._draw_frames()
         if self.chk_coms.isChecked():
             self._draw_coms()
+        if self.chk_forces.isChecked() or self.chk_torques.isChecked():
+            self._draw_vectors()
+
+    def _draw_vectors(self) -> None:
+        """Draw force and torque vectors at joints."""
+        if self.model is None or self.data is None or self.viewer is None:
+            return
+
+        # We need accelerations for RNEA to get consistent joint forces.
+        # If in kinematic mode, assume zero v/a.
+        v = self.v if self.v is not None else np.zeros(self.model.nv)
+        # Use ABA to get a if it hasn't been computed recently
+        a = pin.aba(self.model, self.data, self.q, v, np.zeros(self.model.nv))
+
+        # Compute reaction forces via RNEA
+        # self.data.f will contain spatial forces at each joint
+        pin.rnea(self.model, self.data, self.q, v, a)
+
+        FORCE_SCALE = 0.1
+        TORQUE_SCALE = 0.1
+
+        for i in range(1, self.model.njoints):
+            joint_placement = self.data.oMi[i]
+            # f is a spatial force (linear part = forces, angular part = torques)
+            f_local = self.data.f[i]
+
+            # Linear force in world frame
+            f_world = joint_placement.rotation @ f_local.linear
+            # Angular torque in world frame
+            t_world = joint_placement.rotation @ f_local.angular
+
+            joint_name = self.model.names[i]
+
+            # Draw Force
+            if self.chk_forces.isChecked() and np.linalg.norm(f_world) > 1e-3:
+                self._draw_arrow(
+                    f"overlays/forces/{joint_name}",
+                    joint_placement.translation,
+                    f_world * FORCE_SCALE,
+                    0xFF0000,  # Red for force
+                )
+
+            # Draw Torque
+            if self.chk_torques.isChecked() and np.linalg.norm(t_world) > 1e-3:
+                self._draw_arrow(
+                    f"overlays/torques/{joint_name}",
+                    joint_placement.translation,
+                    t_world * TORQUE_SCALE,
+                    0x0000FF,  # Blue for torque
+                )
+
+    def _draw_arrow(
+        self, path: str, start: np.ndarray, vector: np.ndarray, color: int
+    ) -> None:
+        """Helper to draw an arrow in Meshcat."""
+        # Note: Meshcat Arrow might not exist in all versions, using a Line for now
+        # as it is highly compatible. Arrows can be added with Triad or custom mesh.
+        # Simplified: Draw a line from start to start + vector
+        points = np.vstack([start, start + vector]).T.astype(np.float32)
+        self.viewer[path].set_object(
+            g.Line(g.PointsGeometry(points), g.LineBasicMaterial(color=color))
+        )
 
     def _draw_frames(self) -> None:
         if self.model is None or self.data is None or self.viewer is None:
@@ -546,6 +613,20 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                         g.MeshLambertMaterial(color=COM_COLOR),
                     )
             self._update_viewer()
+
+    def _toggle_forces(self, checked: bool) -> None:  # noqa: FBT001
+        if self.viewer is None:
+            return
+        if not checked:
+            self.viewer["overlays/forces"].delete()
+        self._update_viewer()
+
+    def _toggle_torques(self, checked: bool) -> None:  # noqa: FBT001
+        if self.viewer is None:
+            return
+        if not checked:
+            self.viewer["overlays/torques"].delete()
+        self._update_viewer()
 
 
 def main() -> None:
