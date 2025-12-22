@@ -13,9 +13,7 @@ sys.modules["mujoco"] = MagicMock()
 
 # Dynamic import for Plotting
 file_path = os.path.abspath(
-    os.path.join(
-        os.path.dirname(__file__), "../mujoco_humanoid_golf/plotting.py"
-    )
+    os.path.join(os.path.dirname(__file__), "../mujoco_humanoid_golf/plotting.py")
 )
 spec = importlib.util.spec_from_file_location("plotting", file_path)
 assert spec is not None

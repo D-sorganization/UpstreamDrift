@@ -64,6 +64,4 @@ def test_compute_spectral_arc_length_empty():
 
 def test_compute_spectral_arc_length_zero():
     """Test SAL with zero data."""
-    assert (
-        signal_processing.compute_spectral_arc_length(np.zeros(100), 100.0) == 0.0
-    )
+    assert signal_processing.compute_spectral_arc_length(np.zeros(100), 100.0) == 0.0
