@@ -43,10 +43,15 @@ function rotatePoint(point, angleRad, center = pivot) {
   };
 }
 
-function parseInputs() {
+function resetStateFromInputs() {
   state.theta1 = Number(document.getElementById('theta1').value) * Math.PI / 180;
   state.theta2 = Number(document.getElementById('theta2').value) * Math.PI / 180;
-  state.omega1 = 0; state.omega2 = 0; state.time = 0;
+  state.omega1 = 0;
+  state.omega2 = 0;
+  state.time = 0;
+}
+
+function updateParamsFromInputs() {
   params.l1 = Number(document.getElementById('l1').value);
   params.l2 = Number(document.getElementById('l2').value);
   params.m1 = Number(document.getElementById('m1').value);
@@ -224,10 +229,20 @@ function updateButtons() {
   const isPaused = !isRunning && state.time > 0;
 
   const startBtn = document.getElementById('start');
-  startBtn.disabled = isRunning;
-  startBtn.textContent = isPaused ? "Resume" : "Start";
+  const pauseBtn = document.getElementById('pause');
+  const startSpan = startBtn.querySelector('span');
 
-  document.getElementById('pause').disabled = !isRunning;
+  startBtn.disabled = isRunning;
+  pauseBtn.disabled = !isRunning;
+
+  if (startSpan) {
+    startSpan.textContent = isPaused ? "Resume" : "Start";
+  }
+}
+
+function announce(message) {
+  const region = document.getElementById('status-announcer');
+  if (region) region.textContent = message;
 }
 
 function step() {
@@ -240,9 +255,13 @@ function step() {
 
 function start() {
   if (animationId) return;
-  if (state.time === 0) parseInputs();
+  if (state.time === 0) {
+    resetStateFromInputs();
+  }
+  updateParamsFromInputs();
   step();
   updateButtons();
+  announce('Simulation started');
 }
 
 function pause() {
@@ -251,18 +270,34 @@ function pause() {
     animationId = null;
   }
   updateButtons();
+  announce('Simulation paused');
 }
 
 function reset() {
   pause();
-  parseInputs();
+  resetStateFromInputs();
+  updateParamsFromInputs();
   draw();
   document.getElementById('torques').textContent = 'Torques: --';
   updateButtons();
+  announce('Simulation reset');
 }
 
 ['start', 'pause', 'reset'].forEach(id => document.getElementById(id).addEventListener('click', () => {
   ({ start, pause, reset })[id]();
 }));
 
+document.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+
+  if (e.key === ' ' || e.key === 'Spacebar') {
+    e.preventDefault();
+    animationId ? pause() : start();
+  } else if (e.key === 'r' || e.key === 'R') {
+    reset();
+  }
+});
+
+resetStateFromInputs();
+updateParamsFromInputs();
 reset();
