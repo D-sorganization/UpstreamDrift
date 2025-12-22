@@ -1051,6 +1051,16 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
 
         viz_layout.addWidget(bg_group)
 
+        # Meshcat Visualization
+        meshcat_group = QtWidgets.QGroupBox("Web Visualization (Meshcat)")
+        meshcat_layout = QtWidgets.QVBoxLayout(meshcat_group)
+
+        btn_meshcat = QtWidgets.QPushButton("Open Web Visualizer")
+        btn_meshcat.clicked.connect(self.on_open_meshcat)
+        meshcat_layout.addWidget(btn_meshcat)
+
+        viz_layout.addWidget(meshcat_group)
+
         # Force/Torque visualization
         force_group = QtWidgets.QGroupBox("Force & Torque Visualization")
         force_layout = QtWidgets.QVBoxLayout(force_group)
@@ -3534,6 +3544,18 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
                 spin.blockSignals(True)
                 spin.setValue(val)
                 spin.blockSignals(False)
+
+    def on_open_meshcat(self) -> None:
+        """Open the Meshcat visualizer in the default browser."""
+        if (
+            hasattr(self.sim_widget, "meshcat_adapter")
+            and self.sim_widget.meshcat_adapter
+        ):
+            self.sim_widget.meshcat_adapter.open_browser()
+        else:
+            QtWidgets.QMessageBox.warning(
+                self, "Meshcat", "Meshcat adapter not initialized or not available."
+            )
 
     def _on_joint_spin_changed(
         self,

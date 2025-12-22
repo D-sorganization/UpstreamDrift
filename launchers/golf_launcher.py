@@ -418,6 +418,7 @@ class GolfLauncher(QMainWindow):
         card.setObjectName("ModelCard")
         card.setCursor(Qt.CursorShape.PointingHandCursor)
         card.mousePressEvent = lambda e: self.select_model(name)
+        card.mouseDoubleClickEvent = lambda e: self.launch_model_direct(name)
 
         layout = QVBoxLayout(card)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -464,6 +465,12 @@ class GolfLauncher(QMainWindow):
         layout.addWidget(lbl_desc)
 
         return card
+
+    def launch_model_direct(self, name):
+        """Selects and immediately launches the model (for double-click)."""
+        self.select_model(name)
+        if self.btn_launch.isEnabled():
+            self.launch_simulation()
 
     def select_model(self, name):
         self.selected_model = name
@@ -683,7 +690,7 @@ class GolfLauncher(QMainWindow):
 
         # Network for Meshcat (Drake/Pinocchio)
         host_port = None
-        if "Drake" in model_name or "Pinocchio" in model_name:
+        if "Drake" in model_name or "Pinocchio" in model_name or "MuJoCo" in model_name:
             cmd.extend(["-p", "7000-7010:7000-7010"])
             cmd.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
             host_port = 7000
@@ -703,6 +710,12 @@ class GolfLauncher(QMainWindow):
         elif "Pinocchio" in model_name:
             # Run from python dir
             cmd.extend(["/opt/mujoco-env/bin/python", "pinocchio_golf/gui.py"])
+
+            if host_port:
+                logger.info(
+                    f"Pinocchio Meshcat will be available on host port {host_port}"
+                )
+                self._start_meshcat_browser(host_port)
 
         logger.info(f"Final Docker Command: {' '.join(cmd)}")
 
