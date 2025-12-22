@@ -22,7 +22,9 @@ S_PZ = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0])
 S_PZ.flags.writeable = False
 
 
-def jcalc(jtype: str, q: float) -> tuple[np.ndarray, np.ndarray]:  # noqa: PLR0915
+def jcalc(
+    jtype: str, q: float, out: np.ndarray | None = None
+) -> tuple[np.ndarray, np.ndarray]:  # noqa: PLR0915
     """
     Calculate joint transform and motion subspace.
 
@@ -40,6 +42,8 @@ def jcalc(jtype: str, q: float) -> tuple[np.ndarray, np.ndarray]:  # noqa: PLR09
     Args:
         jtype: String specifying joint type
         q: Scalar joint position (radians for revolute, meters for prismatic)
+        out: Optional 6x6 array to store the transform matrix. If None, a new array is
+            created.
 
     Returns:
         Tuple of (xj_transform, s_subspace) where:
@@ -64,10 +68,15 @@ def jcalc(jtype: str, q: float) -> tuple[np.ndarray, np.ndarray]:  # noqa: PLR09
         >>> s_subspace
         array([0., 0., 0., 1., 0., 0.])
     """
+    if out is None:
+        xj_transform = np.zeros((6, 6))
+    else:
+        xj_transform = out
+        xj_transform.fill(0.0)
+
     if jtype == "Rx":  # Revolute about x-axis
         c = np.cos(q)
         s = np.sin(q)
-        xj_transform = np.zeros((6, 6))
         # Top-left 3x3
         xj_transform[0, 0] = 1.0
         xj_transform[1, 1] = c
@@ -85,7 +94,6 @@ def jcalc(jtype: str, q: float) -> tuple[np.ndarray, np.ndarray]:  # noqa: PLR09
     elif jtype == "Ry":  # Revolute about y-axis
         c = np.cos(q)
         s = np.sin(q)
-        xj_transform = np.zeros((6, 6))
         # Top-left 3x3
         xj_transform[0, 0] = c
         xj_transform[0, 2] = s
@@ -103,7 +111,6 @@ def jcalc(jtype: str, q: float) -> tuple[np.ndarray, np.ndarray]:  # noqa: PLR09
     elif jtype == "Rz":  # Revolute about z-axis
         c = np.cos(q)
         s = np.sin(q)
-        xj_transform = np.zeros((6, 6))
         # Top-left 3x3
         xj_transform[0, 0] = c
         xj_transform[0, 1] = -s
@@ -119,21 +126,18 @@ def jcalc(jtype: str, q: float) -> tuple[np.ndarray, np.ndarray]:  # noqa: PLR09
         s_subspace = S_RZ
 
     elif jtype == "Px":  # Prismatic along x-axis
-        xj_transform = np.zeros((6, 6))
         np.fill_diagonal(xj_transform, 1.0)
         xj_transform[4, 2] = q
         xj_transform[5, 1] = -q
         s_subspace = S_PX
 
     elif jtype == "Py":  # Prismatic along y-axis
-        xj_transform = np.zeros((6, 6))
         np.fill_diagonal(xj_transform, 1.0)
         xj_transform[3, 2] = -q
         xj_transform[5, 0] = q
         s_subspace = S_PY
 
     elif jtype == "Pz":  # Prismatic along z-axis
-        xj_transform = np.zeros((6, 6))
         np.fill_diagonal(xj_transform, 1.0)
         xj_transform[3, 1] = q
         xj_transform[4, 0] = -q

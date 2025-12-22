@@ -10,6 +10,8 @@ import numpy as np
 from mujoco_humanoid_golf.spatial_algebra import cross_force, cross_motion, jcalc
 
 GRAVITY_M_S2 = 9.81
+DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -GRAVITY_M_S2])
+DEFAULT_GRAVITY.flags.writeable = False
 
 
 def rnea(  # noqa: PLR0915
@@ -78,20 +80,31 @@ def rnea(  # noqa: PLR0915
         f_ext = np.zeros((6, nb))
 
     # Get gravity vector
-    a_grav = model.get("gravity", np.array([0, 0, 0, 0, 0, -GRAVITY_M_S2]))
+    a_grav = model.get("gravity", DEFAULT_GRAVITY)
 
     # Initialize arrays
     v = np.zeros((6, nb))  # Spatial velocities
     a = np.zeros((6, nb))  # Spatial accelerations
     f = np.zeros((6, nb))  # Spatial forces
     tau = np.zeros(nb)  # Joint torques
-    xup: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Cache transforms
+
+    # OPTIMIZATION: Pre-allocate buffers
+    # Stores transform from parent to i for each body
+    # Using a single 3D array is more cache-friendly than list of arrays
+    xup = np.zeros((nb, 6, 6))
+
+    # Pre-allocate temporary buffers to avoid allocation in loop
+    xj_buf = np.zeros((6, 6))
+    scratch_vec = np.zeros(6)
+    i_v_buf = np.zeros(6)
+
     s_subspace_list: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Cache motion subspaces
 
     # --- Forward pass: kinematics ---
     for i in range(nb):
         # Calculate joint transform and motion subspace
-        xj_transform, s_subspace = jcalc(model["jtype"][i], q[i])
+        # OPTIMIZATION: Use pre-allocated buffer
+        xj_transform, s_subspace = jcalc(model["jtype"][i], q[i], out=xj_buf)
         s_subspace_list[i] = s_subspace
 
         # Joint velocity in joint frame
@@ -102,38 +115,50 @@ def rnea(  # noqa: PLR0915
             # Body i is connected to base
             # Use Xj directly (not Xj * Xtree) per MATLAB reference
             v[:, i] = vj_velocity
-            a[:, i] = xj_transform @ (-a_grav) + s_subspace * qdd[i]
+
+            # Optimized a[:, i] = xj_transform @ (-a_grav) + s_subspace * qdd[i]
+            np.matmul(xj_transform, -a_grav, out=scratch_vec)
+            scratch_vec += s_subspace * qdd[i]
+            a[:, i] = scratch_vec
         else:
             # Body i has a parent
             p = model["parent"][i]
-            xp_transform = (
-                xj_transform @ model["Xtree"][i]
-            )  # Transform from parent to i
-            xup[i] = xp_transform
+
+            # Optimized xp_transform = xj_transform @ model["Xtree"][i]
+            # Write directly to pre-allocated xup buffer
+            np.matmul(xj_transform, model["Xtree"][i], out=xup[i])
 
             # Velocity: transform parent velocity and add joint velocity
-            v[:, i] = xp_transform @ v[:, p] + vj_velocity
+            # Optimized v[:, i] = xup[i] @ v[:, p] + vj_velocity
+            np.matmul(xup[i], v[:, p], out=scratch_vec)
+            scratch_vec += vj_velocity
+            v[:, i] = scratch_vec
 
             # Acceleration: transform parent accel + bias accel + joint accel
-            a[:, i] = (
-                xp_transform @ a[:, p]
-                + s_subspace * qdd[i]
-                + cross_motion(v[:, i], vj_velocity)
-            )
+            # Optimized a[:, i] = (xup[i] @ a[:, p] + ... )
+            np.matmul(xup[i], a[:, p], out=scratch_vec)
+            scratch_vec += s_subspace * qdd[i]
+            scratch_vec += cross_motion(v[:, i], vj_velocity)
+            a[:, i] = scratch_vec
 
     # --- Backward pass: dynamics ---
     for i in range(nb - 1, -1, -1):
         # Newton-Euler equation: f = I*a + v x* I*v - f_ext
-        # Compute body force
-        f_body = (
-            model["I"][i] @ a[:, i]
-            + cross_force(v[:, i], model["I"][i] @ v[:, i])
-            - f_ext[:, i]
-        )
+        # Compute body force using optimized buffers
+        # 1. inertia @ accel
+        np.matmul(model["I"][i], a[:, i], out=scratch_vec)
+        f_body = scratch_vec  # Alias (copy will happen on += next if we aren't careful)
+
+        # 2. inertia @ vel -> i_v_buf
+        np.matmul(model["I"][i], v[:, i], out=i_v_buf)
+
+        # 3. Add Coriolis (cross_force allocates, but we add to buffer)
+        f_body += cross_force(v[:, i], i_v_buf)
+        f_body -= f_ext[:, i]
 
         # Accumulate with any forces already propagated from children
         # (f is initialized to zero, but children may have already propagated forces)
-        f[:, i] = f[:, i] + f_body
+        f[:, i] += f_body
 
         # Project force to joint torque
         s_subspace = s_subspace_list[i]
@@ -142,7 +167,8 @@ def rnea(  # noqa: PLR0915
         # Propagate force to parent
         if model["parent"][i] != -1:
             p = model["parent"][i]
-            xp_transform = xup[i]
-            f[:, p] = f[:, p] + xp_transform.T @ f[:, i]
+            # Optimized f[:, p] = f[:, p] + xup[i].T @ f[:, i]
+            np.matmul(xup[i].T, f[:, i], out=scratch_vec)
+            f[:, p] += scratch_vec
 
     return tau
