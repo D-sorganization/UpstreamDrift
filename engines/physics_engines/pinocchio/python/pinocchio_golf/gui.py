@@ -100,7 +100,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.viewer: viz.Visualizer | None = None
         try:
             # Check standard env var or default to all interfaces for Docker
-            # Note: meshcat-python (depending on version) might bind 127.0.0.1 or 0.0.0.0.
+            # Note: meshcat-python (depending on version) might bind 127.0.0.1
+            # or 0.0.0.0.
             # We remove the invalid 'host' arg to fix the crash.
             self.viewer = viz.Visualizer()
 
