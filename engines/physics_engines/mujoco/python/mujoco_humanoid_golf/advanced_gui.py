@@ -1051,6 +1051,16 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
 
         viz_layout.addWidget(bg_group)
 
+        # Meshcat Visualization
+        meshcat_group = QtWidgets.QGroupBox("Web Visualization (Meshcat)")
+        meshcat_layout = QtWidgets.QVBoxLayout(meshcat_group)
+
+        btn_meshcat = QtWidgets.QPushButton("Open Web Visualizer")
+        btn_meshcat.clicked.connect(self.on_open_meshcat)
+        meshcat_layout.addWidget(btn_meshcat)
+
+        viz_layout.addWidget(meshcat_group)
+
         # Force/Torque visualization
         force_group = QtWidgets.QGroupBox("Force & Torque Visualization")
         force_layout = QtWidgets.QVBoxLayout(force_group)

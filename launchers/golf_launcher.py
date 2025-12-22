@@ -690,7 +690,7 @@ class GolfLauncher(QMainWindow):
 
         # Network for Meshcat (Drake/Pinocchio)
         host_port = None
-        if "Drake" in model_name or "Pinocchio" in model_name:
+        if "Drake" in model_name or "Pinocchio" in model_name or "MuJoCo" in model_name:
             cmd.extend(["-p", "7000-7010:7000-7010"])
             cmd.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
             host_port = 7000

@@ -15,6 +15,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from .biomechanics import BiomechanicalAnalyzer, SwingRecorder
 from .control_system import ControlSystem, ControlType
 from .interactive_manipulation import InteractiveManipulator
+from .meshcat_adapter import MuJoCoMeshcatAdapter
 from .telemetry import TelemetryRecorder
 
 try:
@@ -57,7 +58,17 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.renderer: mujoco.Renderer | None = None
         self.control_vector: np.ndarray | None = None
         self.control_system: ControlSystem | None = None
+        self.control_vector: np.ndarray | None = None
+        self.control_system: ControlSystem | None = None
         self.camera_name = "side"
+
+        # Meshcat integration
+        self.meshcat_adapter: MuJoCoMeshcatAdapter | None = None
+        # Lazy init or direct? Let's init if possible.
+        try:
+            self.meshcat_adapter = MuJoCoMeshcatAdapter(None)
+        except Exception:
+            LOGGER.warning("Could not initialize Meshcat adapter")
 
         self.telemetry: TelemetryRecorder | None = None
 
@@ -203,6 +214,11 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
             # Ensure render once to populate buffer
             self._render_once()
+
+            # Load Meshcat Geometry
+            if self.meshcat_adapter:
+                self.meshcat_adapter.model = self.model
+                self.meshcat_adapter.load_model_geometry()
 
         except Exception:
             LOGGER.exception("Failed to load model from XML")
@@ -740,6 +756,20 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         # Add coordinate frames and centers of mass
         if self.visible_frames or self.visible_coms:
             rgb = self._add_frame_and_com_overlays(rgb)
+
+        # Update Meshcat
+        if self.meshcat_adapter:
+            try:
+                self.meshcat_adapter.update(self.data)
+                self.meshcat_adapter.draw_vectors(
+                    self.data,
+                    self.show_force_vectors,
+                    self.show_torque_vectors,
+                    self.force_scale,
+                    self.torque_scale,
+                )
+            except Exception:
+                pass  # Avoid crashing main loop if meshcat fails
 
         # Convert to QImage / QPixmap
         h, w, _ = rgb.shape
