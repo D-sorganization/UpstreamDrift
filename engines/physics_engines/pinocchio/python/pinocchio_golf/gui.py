@@ -190,6 +190,27 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.chk_torques.toggled.connect(self._toggle_torques)
         vis_layout.addWidget(self.chk_torques)
 
+        # Vector Scales
+        scale_layout = QtWidgets.QVBoxLayout()
+
+        self.spin_force_scale = QtWidgets.QDoubleSpinBox()
+        self.spin_force_scale.setRange(0.01, 10.0)
+        self.spin_force_scale.setSingleStep(0.05)
+        self.spin_force_scale.setValue(0.1)
+        self.spin_force_scale.setPrefix("F Scale: ")
+        self.spin_force_scale.valueChanged.connect(self._update_viewer)
+        scale_layout.addWidget(self.spin_force_scale)
+
+        self.spin_torque_scale = QtWidgets.QDoubleSpinBox()
+        self.spin_torque_scale.setRange(0.01, 10.0)
+        self.spin_torque_scale.setSingleStep(0.05)
+        self.spin_torque_scale.setValue(0.1)
+        self.spin_torque_scale.setPrefix("T Scale: ")
+        self.spin_torque_scale.valueChanged.connect(self._update_viewer)
+        scale_layout.addWidget(self.spin_torque_scale)
+
+        vis_layout.addLayout(scale_layout)
+
         vis_group.setLayout(vis_layout)
         layout.addWidget(vis_group)
 
@@ -511,8 +532,11 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         # self.data.f will contain spatial forces at each joint
         pin.rnea(self.model, self.data, self.q, v, a)
 
-        FORCE_SCALE = 0.1
-        TORQUE_SCALE = 0.1
+        # self.data.f will contain spatial forces at each joint
+        pin.rnea(self.model, self.data, self.q, v, a)
+
+        force_scale = self.spin_force_scale.value()
+        torque_scale = self.spin_torque_scale.value()
 
         for i in range(1, self.model.njoints):
             joint_placement = self.data.oMi[i]
@@ -531,7 +555,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 self._draw_arrow(
                     f"overlays/forces/{joint_name}",
                     joint_placement.translation,
-                    f_world * FORCE_SCALE,
+                    f_world * force_scale,
                     0xFF0000,  # Red for force
                 )
 
@@ -540,7 +564,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 self._draw_arrow(
                     f"overlays/torques/{joint_name}",
                     joint_placement.translation,
-                    t_world * TORQUE_SCALE,
+                    t_world * torque_scale,
                     0x0000FF,  # Blue for torque
                 )
 
