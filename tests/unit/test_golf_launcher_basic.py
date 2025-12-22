@@ -14,15 +14,18 @@ sys.path.insert(0, str(project_root))
 # Define Dummy Qt classes to avoid inheriting from Mock
 class MockQThread:
     def __init__(self, parent=None):
+        """Mock constructor."""
         pass
 
     def start(self):
         self.run()
 
     def run(self):
+        """Mock run."""
         pass
 
     def wait(self):
+        """Mock wait."""
         pass
 
 
@@ -43,39 +46,49 @@ mock_qt_widgets = MagicMock()
 # Define widget mocks
 class MockQWidget:
     def __init__(self, parent=None):
+        """Mock constructor."""
         self._window_title = ""
 
     def setWindowTitle(self, title):
+        """Mock setWindowTitle."""
         self._window_title = title
 
     def windowTitle(self):
+        """Mock windowTitle."""
         return self._window_title
 
     def resize(self, w, h):
+        """Mock resize."""
         pass
 
     def setLayout(self, layout):
+        """Mock setLayout."""
         pass
 
 
 class MockQDialog(MockQWidget):
     def accept(self):
+        """Mock accept."""
         pass
 
 
 class MockQTextEdit(MockQWidget):
     def setReadOnly(self, b):
+        """Mock setReadOnly."""
         pass
 
     def setMarkdown(self, t):
+        """Mock setMarkdown."""
         pass
 
 
 class MockQVBoxLayout:
     def __init__(self, parent=None):
+        """Mock constructor."""
         pass
 
     def addWidget(self, w):
+        """Mock addWidget."""
         pass
 
 

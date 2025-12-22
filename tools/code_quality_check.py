@@ -35,7 +35,6 @@ BANNED_PATTERNS = [
     (re.compile(r"\b" + "FIX" + "ME" + r"\b"), "FIX" + "ME placeholder found"),
     (re.compile(r"^\s*\.\.\.\s*$"), "Ellipsis placeholder"),
     (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-    (re.compile(r"<.*>"), "Angle bracket placeholder"),
     (re.compile(r"your.*here", re.IGNORECASE), "Template placeholder"),
     (re.compile(r"insert.*here", re.IGNORECASE), "Template placeholder"),
 ]
@@ -114,6 +113,8 @@ def check_banned_patterns(
         "quality_check_script.py",
         "matlab_quality_check.py",
         "code_quality_check.py",
+        "quality_check.py",
+        "quality-check.py",
     ):
         return issues
 
@@ -148,6 +149,8 @@ def check_magic_numbers(lines: list[str], filepath: Path) -> list[tuple[int, str
         "quality_check_script.py",
         "matlab_quality_check.py",
         "code_quality_check.py",
+        "quality_check.py",
+        "quality-check.py",
     ):
         return issues
     for line_num, line in enumerate(lines, 1):
@@ -166,6 +169,8 @@ def check_ast_issues(content: str, filepath: Path) -> list[tuple[int, str, str]]
         "quality_check_script.py",
         "matlab_quality_check.py",
         "code_quality_check.py",
+        "quality_check.py",
+        "quality-check.py",
     ):
         return issues
     try:

@@ -1,0 +1,2 @@
+engines/physics_engines/mujoco/python/mujoco_humanoid_golf/meshcat_adapter.py:232: error: Value of type "Any | None" is not indexable  [index]
+Found 1 error in 1 file (checked 144 source files)
