@@ -23,3 +23,7 @@
 ## 2025-05-21 - Python Buffer Reuse Overhead
 **Learning:** In the Recursive Newton-Euler Algorithm (RNEA), pre-allocating buffers to avoid allocating ~50 small (6x6) matrices per step reduced GC pressure but did not improve execution speed (measured ~2% slowdown). The overhead of Python function calls and `np.matmul(..., out=...)` argument processing outweighed the cost of small allocations, which NumPy handles very efficiently.
 **Action:** Prioritize buffer reuse for large arrays or where GC pause is critical. For small, short-lived arrays (like 6x6 spatial transforms), simple allocation might be faster due to lower Python interpreter overhead.
+
+## 2025-05-24 - MuJoCo Gravity Computation
+**Learning:** Computing gravity using `mj_forward` (with velocity zeroed) is slow because it computes full kinematics and inertia. `mj_rne` (Inverse Dynamics) with zero velocity/acceleration yields gravity efficiently (~2.5x faster). However, `mj_rne` assumes the `cvel` (spatial velocity) in `mjData` is consistent with `qvel`. Since we force `qvel=0`, we MUST explicitly zero `cvel` to ensure correctness, otherwise `mj_rne` uses stale velocity data.
+**Action:** When using `mj_rne` for static force computation (like gravity), explicitly zero `data.qvel` AND `data.cvel` to avoid overhead of running kinematic updates while ensuring correct results.
