@@ -530,6 +530,55 @@ class StatisticalAnalyzer:
 
         return report
 
+    def compute_frequency_analysis(
+        self,
+        data: np.ndarray,
+        window: str = "hann",
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Compute frequency analysis (PSD).
+
+        Args:
+            data: Input time series data
+            window: Window function
+
+        Returns:
+            (frequencies, psd_values)
+        """
+        fs = 1.0 / self.dt if self.dt > 0 else 0.0
+        if fs == 0.0:
+            return np.array([]), np.array([])
+
+        try:
+            from shared.python import signal_processing
+
+            return signal_processing.compute_psd(data, fs, window=window)
+        except ImportError:
+            # Fallback if shared module not found
+            from scipy import signal
+
+            freqs, psd = signal.welch(data, fs=fs, window=window)
+            return freqs, psd
+
+    def compute_smoothness_metric(self, data: np.ndarray) -> float:
+        """Compute smoothness metric (Spectral Arc Length).
+
+        Args:
+            data: Velocity profile (or other signal)
+
+        Returns:
+            Smoothness score (negative dimensionless value)
+        """
+        fs = 1.0 / self.dt if self.dt > 0 else 0.0
+        if fs == 0.0:
+            return 0.0
+
+        try:
+            from shared.python import signal_processing
+
+            return signal_processing.compute_spectral_arc_length(data, fs)
+        except ImportError:
+            return 0.0
+
     def export_statistics_csv(
         self,
         filename: str,

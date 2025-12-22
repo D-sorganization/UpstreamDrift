@@ -497,6 +497,139 @@ class GolfSwingPlotter:
         ax.axhline(y=0, color="k", linestyle="-", alpha=0.5)
         fig.tight_layout()
 
+    def plot_frequency_analysis(
+        self,
+        fig: Figure,
+        joint_idx: int = 0,
+        signal_type: str = "velocity",
+    ) -> None:
+        """Plot frequency content (PSD) of a joint signal.
+
+        Args:
+            fig: Matplotlib figure
+            joint_idx: Joint index
+            signal_type: 'position', 'velocity', or 'torque'
+        """
+        if signal_type == "position":
+            _, data = self.recorder.get_time_series("joint_positions")
+            ylabel = "PSD (rad²/Hz)"
+            title = "Joint Position PSD"
+        elif signal_type == "torque":
+            _, data = self.recorder.get_time_series("joint_torques")
+            ylabel = "PSD (Nm²/Hz)"
+            title = "Joint Torque PSD"
+        else:  # velocity
+            _, data = self.recorder.get_time_series("joint_velocities")
+            ylabel = "PSD ((rad/s)²/Hz)"
+            title = "Joint Velocity PSD"
+
+        data = np.asarray(data)
+        if data.ndim < 2 or joint_idx >= data.shape[1]:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        signal_data = data[:, joint_idx]
+
+        # Calculate sampling rate
+        # Assuming consistent time
+        times, _ = self.recorder.get_time_series("joint_positions")
+        if len(times) < 2:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Insufficient data", ha="center", va="center")
+            return
+
+        dt = float(np.mean(np.diff(times)))
+        fs = 1.0 / dt
+
+        try:
+            from shared.python import signal_processing
+
+            freqs, psd = signal_processing.compute_psd(signal_data, fs)
+        except ImportError:
+            # Fallback
+            from scipy import signal
+
+            freqs, psd = signal.welch(signal_data, fs=fs)
+
+        ax = fig.add_subplot(111)
+        ax.semilogy(freqs, psd, color=self.colors["primary"], linewidth=2)
+
+        joint_name = self.get_joint_name(joint_idx)
+        ax.set_title(f"{title}: {joint_name}", fontsize=14, fontweight="bold")
+        ax.set_xlabel("Frequency (Hz)", fontsize=12, fontweight="bold")
+        ax.set_ylabel(ylabel, fontsize=12, fontweight="bold")
+        ax.grid(visible=True, alpha=0.3, which="both", linestyle="--")
+        fig.tight_layout()
+
+    def plot_spectrogram(
+        self,
+        fig: Figure,
+        joint_idx: int = 0,
+        signal_type: str = "velocity",
+    ) -> None:
+        """Plot spectrogram of a joint signal.
+
+        Args:
+            fig: Matplotlib figure
+            joint_idx: Joint index
+            signal_type: 'position', 'velocity', or 'torque'
+        """
+        if signal_type == "position":
+            _, data = self.recorder.get_time_series("joint_positions")
+            title = "Joint Position Spectrogram"
+        elif signal_type == "torque":
+            _, data = self.recorder.get_time_series("joint_torques")
+            title = "Joint Torque Spectrogram"
+        else:  # velocity
+            _, data = self.recorder.get_time_series("joint_velocities")
+            title = "Joint Velocity Spectrogram"
+
+        data = np.asarray(data)
+        if data.ndim < 2 or joint_idx >= data.shape[1]:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        signal_data = data[:, joint_idx]
+
+        # Calculate sampling rate
+        times, _ = self.recorder.get_time_series("joint_positions")
+        if len(times) < 2:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Insufficient data", ha="center", va="center")
+            return
+
+        dt = float(np.mean(np.diff(times)))
+        fs = 1.0 / dt
+
+        try:
+            from shared.python import signal_processing
+
+            f, t, Sxx = signal_processing.compute_spectrogram(signal_data, fs)
+        except ImportError:
+            # Fallback
+            from scipy import signal
+
+            f, t, Sxx = signal.spectrogram(signal_data, fs=fs)
+
+        ax = fig.add_subplot(111)
+        # Use pcolormesh for better visualization
+        pcm = ax.pcolormesh(
+            t, f, 10 * np.log10(Sxx + 1e-10), shading="gouraud", cmap="inferno"
+        )
+
+        joint_name = self.get_joint_name(joint_idx)
+        ax.set_title(f"{title}: {joint_name}", fontsize=14, fontweight="bold")
+        ax.set_ylabel("Frequency (Hz)", fontsize=12, fontweight="bold")
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+
+        # Add colorbar
+        cbar = fig.colorbar(pcm, ax=ax)
+        cbar.set_label("Power Spectral Density (dB)", rotation=270, labelpad=15)
+
+        fig.tight_layout()
+
     def plot_summary_dashboard(self, fig: Figure) -> None:
         """Create a comprehensive dashboard with multiple subplots.
 

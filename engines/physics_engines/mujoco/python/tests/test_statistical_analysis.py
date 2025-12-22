@@ -76,3 +76,43 @@ def test_generate_comprehensive_report_consistency():
     # Check values
     assert np.isclose(pos["min"], 0.0, atol=1e-5)
     assert np.isclose(pos["max"], 180.0, atol=1e-5)
+
+
+def test_frequency_analysis_and_smoothness():
+    N = 1000
+    fs = 1000.0
+    times = np.arange(N) / fs
+    # 50 Hz signal
+    signal_50hz = np.sin(2 * np.pi * 50 * times)
+
+    analyzer = StatisticalAnalyzer(
+        times=times,
+        joint_positions=np.zeros((N, 1)),
+        joint_velocities=np.zeros((N, 1)),
+        joint_torques=np.zeros((N, 1)),
+    )
+
+    # Test frequency analysis
+    freqs, psd = analyzer.compute_frequency_analysis(signal_50hz)
+    assert len(freqs) > 0
+    assert len(psd) > 0
+
+    peak_idx = np.argmax(psd)
+    assert abs(freqs[peak_idx] - 50.0) < 5.0
+
+    # Test smoothness (SAL)
+    # Use Gaussian bell curve (smooth movement) which is typical for SAL testing
+    t_center = 0.5
+    width = 0.05
+    smooth_signal = np.exp(-((times - t_center) ** 2) / (2 * width**2))
+
+    # Smooth signal
+    smoothness = analyzer.compute_smoothness_metric(smooth_signal)
+    assert smoothness < 0  # SAL is always negative
+
+    # Add in-band noise (10Hz < 20Hz cutoff)
+    noisy_signal = smooth_signal + 0.1 * np.sin(2 * np.pi * 10 * times)
+    smoothness_noisy = analyzer.compute_smoothness_metric(noisy_signal)
+
+    # Smoother signal should have higher SAL (closer to 0)
+    assert smoothness > smoothness_noisy
