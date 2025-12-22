@@ -96,6 +96,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         # MuJoCo scene options for vector rendering
         self.scene_option = mujoco.MjvOption()
+        mujoco.mjv_defaultOption(self.scene_option)
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = False
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = False
 
