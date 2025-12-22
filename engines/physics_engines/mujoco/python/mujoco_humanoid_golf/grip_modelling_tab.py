@@ -192,6 +192,11 @@ class GripModellingTab(QtWidgets.QWidget):
                 content = re.sub(r"<mujoco[^>]*>", "", content)
                 content = content.replace("</mujoco>", "")
 
+                # Strip <worldbody> tags to prevent nesting
+                # if included inside another worldbody
+                content = re.sub(r"<worldbody[^>]*>", "", content)
+                content = content.replace("</worldbody>", "")
+
                 # When merging both hands, prefix default class names to avoid
                 # collisions
                 if is_both:
