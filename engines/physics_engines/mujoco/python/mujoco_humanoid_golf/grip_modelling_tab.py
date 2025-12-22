@@ -58,6 +58,18 @@ class GripModellingTab(QtWidgets.QWidget):
         self.control_layout.addWidget(self.combo_hand)
 
         self.control_layout.addSpacing(10)
+
+        # Physics Controls
+        self.control_layout.addWidget(QtWidgets.QLabel("<b>Physics Controls</b>"))
+        self.chk_kinematic = QtWidgets.QCheckBox("Kinematic Mode (Pose Only)")
+        self.chk_kinematic.setToolTip(
+            "Disable physics integration to pose hands without gravity/collisions"
+        )
+        self.chk_kinematic.setChecked(True)  # Default to kinematic for posing
+        self.chk_kinematic.toggled.connect(self._on_kinematic_toggled)
+        self.control_layout.addWidget(self.chk_kinematic)
+
+        self.control_layout.addSpacing(10)
         self.control_layout.addWidget(QtWidgets.QLabel("<b>Joint Controls</b>"))
 
         # Sliders Area
@@ -82,6 +94,12 @@ class GripModellingTab(QtWidgets.QWidget):
 
         # Initial Load
         QtCore.QTimer.singleShot(100, self.load_current_hand_model)
+
+    def _on_kinematic_toggled(self, checked: bool) -> None:
+        """Handle kinematic mode toggle."""
+        if self.sim_widget:
+            mode = "kinematic" if checked else "dynamic"
+            self.sim_widget.set_operating_mode(mode)
 
     def load_current_hand_model(self) -> None:
         """Load the selected hand model with a test cylinder."""
@@ -133,6 +151,9 @@ class GripModellingTab(QtWidgets.QWidget):
         # Rebuild controls
         self.rebuild_joint_controls()
 
+        # Apply initial kinematic state
+        self._on_kinematic_toggled(self.chk_kinematic.isChecked())
+
     def _prepare_scene_xml(
         self, scene_path: Path, folder_path: Path, is_both: bool = False
     ) -> str:
@@ -160,14 +181,39 @@ class GripModellingTab(QtWidgets.QWidget):
                         logger.info("Injecting freejoint into %s", filename)
                         insertion = match.group(1) + "\n      <freejoint/>"
                         content = content.replace(match.group(1), insertion)
+                    else:
+                        logger.warning(
+                            "Could not find body '%s' in %s to inject freejoint",
+                            body_name_pattern,
+                            filename,
+                        )
 
                 # Strip <mujoco> tags to allow embedding
                 content = re.sub(r"<mujoco[^>]*>", "", content)
                 content = content.replace("</mujoco>", "")
+
+                # When merging both hands, prefix default class names to avoid
+                # collisions
+                if is_both:
+                    hand_prefix = "right" if "right" in filename.lower() else "left"
+                    # Find all default class names
+                    class_names = re.findall(r'<default class="([^"]+)">', content)
+                    for class_name in set(class_names):
+                        new_name = f"{hand_prefix}_{class_name}"
+                        # Update definition
+                        content = content.replace(
+                            f'class="{class_name}"', f'class="{new_name}"'
+                        )
+                        # We don't need to update references inside the hand file
+                        # because they are typically local to the <default> block
+                        # or used in geoms/joints within the same subtree.
+                        # However, to be safe, we replace all class="..." strings
+                        # (this is simple but effective for these hand models).
+
                 return content
             except Exception:
                 logger.exception("Failed to process hand file %s", filename)
-                return ""
+                return ""  # Return empty only on catastrophic failure
 
         if is_both:
             right_content = get_hand_content("right_hand.xml", "rh_forearm")
@@ -180,19 +226,54 @@ class GripModellingTab(QtWidgets.QWidget):
             )
         else:
             if 'file="right_hand.xml"' in xml_content:
-                hand_content = get_hand_content("right_hand.xml", "rh_forearm")
+                # Determine body name pattern based on file type
+                # For Allegro (wonik_allegro), root link might be 'right_hand'
+                # or similar
+                # For Shadow, it is 'rh_forearm'
+                target_body = "rh_forearm"
+                if "allegro" in str(folder_path).lower():
+                    target_body = "right_hand"
+
+                hand_content = get_hand_content("right_hand.xml", target_body)
                 xml_content = re.sub(
                     r'<include[^>]*file="right_hand.xml"[^>]*/>',
                     hand_content,
                     xml_content,
                 )
             elif 'file="left_hand.xml"' in xml_content:
-                hand_content = get_hand_content("left_hand.xml", "lh_forearm")
+                target_body = "lh_forearm"
+                if "allegro" in str(folder_path):
+                    target_body = "left_hand"
+
+                hand_content = get_hand_content("left_hand.xml", target_body)
                 xml_content = re.sub(
                     r'<include[^>]*file="left_hand.xml"[^>]*/>',
                     hand_content,
                     xml_content,
                 )
+
+        # Ensure offscreen framebuffer is large enough for renderer
+        offscreen_global = '<global offwidth="1920" offheight="1080"/>'
+        if "<visual>" in xml_content:
+            if "<global" in xml_content:
+                # Update existing global
+                xml_content = re.sub(
+                    r"<global([^>]*)>",
+                    r'<global\1 offwidth="1920" offheight="1080">',
+                    xml_content,
+                )
+            else:
+                # Insert global into visual
+                xml_content = xml_content.replace(
+                    "<visual>",
+                    f"<visual>\n    {offscreen_global}",
+                )
+        else:
+            # Add new visual section
+            xml_content = xml_content.replace(
+                "</mujoco>",
+                f"<visual>\n  {offscreen_global}\n</visual>\n</mujoco>",
+            )
 
         # 2. Inject Cylinder Object (only if not present)
         # Check for both the object name and unique geometry characteristics

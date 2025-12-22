@@ -73,6 +73,76 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         self.drag_start_points: list[tuple[float, float]] = []
         self.mode = "view"  # view, draw, add_points, drag
 
+        # Dark Theme Palette
+        self.setStyleSheet(
+            """
+            QWidget {
+                background-color: #2b2b2b;
+                color: #ffffff;
+                font-family: 'Segoe UI', sans-serif;
+            }
+            QGroupBox {
+                border: 1px solid #444;
+                border-radius: 6px;
+                margin-top: 12px;
+                padding-top: 10px;
+                font-weight: bold;
+                color: #e0e0e0;
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 5px;
+            }
+            QPushButton {
+                background-color: #3d3d3d;
+                border: 1px solid #555;
+                border-radius: 4px;
+                padding: 6px;
+                color: #fff;
+            }
+            QPushButton:hover {
+                background-color: #4d4d4d;
+                border: 1px solid #666;
+            }
+            QPushButton:pressed {
+                background-color: #2b2b2b;
+            }
+            QComboBox, QDoubleSpinBox, QLineEdit {
+                background-color: #1e1e1e;
+                border: 1px solid #555;
+                border-radius: 4px;
+                padding: 4px;
+                color: #fff;
+            }
+            QComboBox::drop-down {
+                border: none;
+            }
+            QTextEdit {
+                background-color: #1e1e1e;
+                border: 1px solid #555;
+                border-radius: 4px;
+                color: #fff;
+            }
+            QRadioButton {
+                color: #e0e0e0;
+            }
+            QLabel {
+                color: #cccccc;
+            }
+            QPushButton#fitBtn {
+                background-color: #2e7d32;
+                color: white;
+                font-weight: bold;
+                border: none;
+                padding: 10px;
+            }
+            QPushButton#fitBtn:hover {
+                background-color: #388e3c;
+            }
+        """
+        )
+
         # UI Setup
         self._setup_ui()
         self._setup_connections()
@@ -146,9 +216,15 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         self.generate_eq_btn.setEnabled(False)
         input_layout.addWidget(self.generate_eq_btn)
 
-        input_layout.addWidget(self.btn_draw)
-        input_layout.addWidget(self.btn_points)
-        input_layout.addWidget(self.btn_drag)
+        input_layout.addSpacing(5)
+        input_layout.addWidget(QtWidgets.QLabel("Interactive Mode:"))
+
+        # Grid for radio buttons
+        radio_layout = QtWidgets.QGridLayout()
+        radio_layout.addWidget(self.btn_draw, 0, 0)
+        radio_layout.addWidget(self.btn_points, 0, 1)
+        radio_layout.addWidget(self.btn_drag, 1, 0, 1, 2)
+        input_layout.addLayout(radio_layout)
 
         left_layout.addWidget(input_group)
 
@@ -158,9 +234,7 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
 
         self.clear_btn = QtWidgets.QPushButton("Clear Points")
         self.fit_btn = QtWidgets.QPushButton("Fit Polynomial (6th Order)")
-        self.fit_btn.setStyleSheet(
-            "font-weight: bold; background-color: #4CAF50; color: white;"
-        )
+        self.fit_btn.setObjectName("fitBtn")
 
         action_layout.addWidget(self.clear_btn)
         action_layout.addWidget(self.fit_btn)
@@ -221,10 +295,17 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
     def _update_plot(self) -> None:
         """Redraw the plot with current data."""
         self.canvas.axes.clear()
-        self.canvas.axes.grid(True)
-        self.canvas.axes.set_title("Joint Function Generator")
-        self.canvas.axes.set_xlabel("Time / Input")
-        self.canvas.axes.set_ylabel("Value")
+        self.canvas.axes.set_facecolor("#1e1e1e")
+        self.canvas.figure.patch.set_facecolor("#2b2b2b")
+        self.canvas.axes.grid(True, color="#444444", linestyle="--", linewidth=0.5)
+
+        self.canvas.axes.set_title("Joint Function Generator", color="white")
+        self.canvas.axes.set_xlabel("Time / Input", color="#aaaaaa")
+        self.canvas.axes.set_ylabel("Value", color="#aaaaaa")
+
+        self.canvas.axes.tick_params(colors="#aaaaaa", which="both")
+        for spine in self.canvas.axes.spines.values():
+            spine.set_edgecolor("#555555")
 
         # Set limits
         self.canvas.axes.set_xlim(self.x_min_spin.value(), self.x_max_spin.value())
@@ -246,7 +327,7 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
             poly_func = np.poly1d(self.polynomial_coeffs)
             y_poly = poly_func(x_range)
             self.canvas.axes.plot(
-                x_range, y_poly, "b-", linewidth=2, label="Polynomial Fit"
+                x_range, y_poly, color="#4da6ff", linewidth=2.5, label="Polynomial Fit"
             )
 
         self.canvas.axes.legend()
