@@ -4,10 +4,13 @@ This module provides a consistent interface for launch_golf_suite.py
 that wraps the PyQt-based GolfLauncher implementation.
 """
 
+import logging
 import sys
 from pathlib import Path
 
 from PyQt6.QtWidgets import QApplication
+
+logger = logging.getLogger(__name__)
 
 
 class UnifiedLauncher:
@@ -38,7 +41,7 @@ class UnifiedLauncher:
         """
         self.launcher.show()
         if self.app is None:
-            print("Error: QApplication failed to initialize.")
+            logger.error("QApplication failed to initialize.")
             return 1
         return self.app.exec()
 
