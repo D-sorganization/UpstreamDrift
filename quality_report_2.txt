@@ -1,0 +1,722 @@
+❌ Quality check FAILED
+
+
+check_system_health.py:
+  Line 13: Function 'print_result' missing docstring
+  Line 19: Function 'check_python_module' missing docstring
+  Line 29: Function 'check_docker_image' missing docstring
+  Line 42: Function 'check_nvidia_docker' missing docstring
+  Line 61: Function 'main' missing docstring
+
+reproduce_issue.py:
+  Line 66: Function 'run_test' missing docstring
+  Line 9: Function '__init__' missing docstring
+  Line 44: Function 'on_actuator_slider_changed' missing docstring
+  Line 54: Function 'on_constant_value_changed' missing docstring
+
+validate_phase1_upgrades.py:
+  Line 17: Function '__init__' missing docstring
+
+reproduce_issue_fix.py:
+  Line 67: Function 'run_test' missing docstring
+  Line 8: Function '__init__' missing docstring
+  Line 40: Function 'on_actuator_slider_changed' missing docstring
+  Line 53: Function 'on_constant_value_changed' missing docstring
+
+tools/scientific_auditor.py:
+  Line 52: Function 'main' missing docstring
+  Line 10: Function 'visit_BinOp' missing docstring
+  Line 26: Function 'visit_Call' missing docstring
+
+tools/check_markdown_links.py:
+  Line 10: Function 'check_links' missing docstring
+
+scripts/verify_physics.py:
+  Line 61: Function '__init__' missing docstring
+  Line 64: Function 'pytest_runtest_logreport' missing docstring
+
+scripts/validate_physics.py:
+  Line 98: Function 'main' missing docstring
+
+launchers/golf_launcher.py:
+  Line 93: Function 'run' missing docstring
+  Line 111: Function '__init__' missing docstring
+  Line 115: Function 'run' missing docstring
+  Line 179: Function '__init__' missing docstring
+  Line 185: Function 'setup_ui' missing docstring
+  Line 260: Function 'start_build' missing docstring
+  Line 270: Function 'append_log' missing docstring
+  Line 274: Function 'build_finished' missing docstring
+  Line 283: Function '__init__' missing docstring
+  Line 307: Function '__init__' missing docstring
+  Line 325: Function 'init_ui' missing docstring
+  Line 475: Function 'select_model' missing docstring
+  Line 507: Function 'update_launch_button' missing docstring
+  Line 518: Function 'apply_styles' missing docstring
+  Line 596: Function 'check_docker' missing docstring
+  Line 601: Function 'on_docker_check_complete' missing docstring
+  Line 617: Function 'open_help' missing docstring
+  Line 621: Function 'open_environment_manager' missing docstring
+  Line 625: Function 'launch_simulation' missing docstring
+  Line 652: Function '_custom_launch_humanoid' missing docstring
+  Line 664: Function '_custom_launch_comprehensive' missing docstring
+  Line 669: Function '_launch_docker_container' missing docstring
+  Line 740: Function '_start_meshcat_browser' missing docstring
+  Line 741: Function 'open_url' missing docstring
+
+launchers/golf_suite_launcher.py:
+  Line 176: Function 'main' missing docstring
+  Line 22: Function '__init__' missing docstring
+  Line 51: Function '_setup_ui' missing docstring
+  Line 132: Function '_launch_script' missing docstring
+  Line 160: Function '_launch_mujoco' missing docstring
+  Line 165: Function '_launch_drake' missing docstring
+  Line 170: Function '_launch_pinocchio' missing docstring
+
+examples/01_basic_simulation.py:
+  Line 60: Define GRAVITY_M_S2 constant
+    > g = 9.81
+
+engines/Simscape_Multibody_Models/2D_Golf_Model/tools/scientific_auditor.py:
+  Line 52: Function 'main' missing docstring
+  Line 10: Function 'visit_BinOp' missing docstring
+  Line 26: Function 'visit_Call' missing docstring
+
+engines/Simscape_Multibody_Models/3D_Golf_Model/tools/scientific_auditor.py:
+  Line 52: Function 'main' missing docstring
+  Line 10: Function 'visit_BinOp' missing docstring
+  Line 26: Function 'visit_Call' missing docstring
+
+engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:
+  Line 136: NotImplementedError placeholder
+    > """Test detection of NotImplementedError."""
+  Line 137: NotImplementedError placeholder
+    > lines = ["def function():\n", "    raise NotImplementedError\n"]
+  Line 142: NotImplementedError placeholder
+    > assert any("NotImplementedError" in issue[1] for issue in issues)
+  Line 174: Template placeholder
+    > "# <your code here>\n",
+  Line 175: Template placeholder
+    > "# <insert logic here>\n",
+  Line 176: Template placeholder
+    > "# your code here\n",
+  Line 255: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 297: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 189: Use math.pi instead of 3.141
+    > lines = ["area = radius * radius * 3.14159\n"]
+  Line 198: Define GRAVITY_M_S2 constant
+    > lines = ["force = mass * 9.8\n"]
+  Line 207: Use math.pi instead of 3.141
+    > lines = ["x = 3.14159\n"]
+
+engines/pendulum_models/tools/scientific_auditor.py:
+  Line 52: Function 'main' missing docstring
+  Line 10: Function 'visit_BinOp' missing docstring
+  Line 26: Function 'visit_Call' missing docstring
+
+engines/pendulum_models/python/double_pendulum.py:
+  Line 40: Define GRAVITY_M_S2 constant
+    > g = 9.81  # gravity
+
+engines/pendulum_models/Pendulum Models/Pendulums_Model/double_pendulum_model/ui/double_pendulum_gui.py:
+  Line 1086: Function 'run_app' missing docstring
+  Line 61: Function '__init__' missing docstring
+  Line 87: Function '_build_ui' missing docstring
+  Line 431: Function '_read_inputs' missing docstring
+  Line 151: Function 'labeled_row' missing docstring
+  Line 407: Function 'on_enter' missing docstring
+  Line 423: Function 'on_leave' missing docstring
+  Line 432: Function 'get_float' missing docstring
+  Line 448: Function 'get_str' missing docstring
+  Line 812: Function 'rotate_out_of_plane' missing docstring
+  Line 828: Function 'rotate_plane' missing docstring
+
+engines/pendulum_models/Pendulum Models/Pendulums_Model/double_pendulum_model/ui/pendulum_pyqt_app.py:
+  Line 371: Function 'run_app' missing docstring
+  Line 38: Function '__init__' missing docstring
+  Line 44: Function '_configure_axes' missing docstring
+  Line 53: Function 'draw_chain' missing docstring
+  Line 62: Function '__init__' missing docstring
+  Line 87: Function '_build_layout' missing docstring
+  Line 154: Function '_current_config' missing docstring
+  Line 172: Function '_start' missing docstring
+  Line 176: Function '_pause' missing docstring
+  Line 179: Function '_reset' missing docstring
+  Line 190: Function '_on_step' missing docstring
+  Line 228: Function '_safe_eval' missing docstring
+  Line 244: Function '_polynomial_profiles' missing docstring
+  Line 260: Function '_apply_inverse_profile_double' missing docstring
+  Line 287: Function '_apply_inverse_profile_triple' missing docstring
+  Line 310: Function '_update_plot' missing docstring
+  Line 318: Function '_points_double' missing docstring
+  Line 331: Function '_points_triple' missing docstring
+  Line 346: Function '_point_from_angles' missing docstring
+  Line 358: Function '_plane_rotation' missing docstring
+
+engines/pendulum_models/Pendulum Models/Pendulums_Model/double_pendulum_model/physics/double_pendulum.py:
+  Line 457: Function 'compile_forcing_functions' missing docstring
+  Line 89: Function '__init__' missing docstring
+  Line 95: Function '__call__' missing docstring
+  Line 107: Function '_validate_ast' missing docstring
+  Line 144: Function 'center_of_mass_distance' missing docstring
+  Line 148: Function 'inertia_about_proximal_joint' missing docstring
+  Line 162: Function 'total_mass' missing docstring
+  Line 166: Function 'center_of_mass_distance' missing docstring
+  Line 174: Function 'inertia_about_com' missing docstring
+  Line 186: Function 'inertia_about_proximal_joint' missing docstring
+  Line 206: Function 'default' missing docstring
+  Line 225: Function 'plane_inclination_rad' missing docstring
+  Line 229: Function 'projected_gravity' missing docstring
+  Line 262: Function '__init__' missing docstring
+  Line 276: Function 'mass_matrix' missing docstring
+  Line 294: Function 'coriolis_vector' missing docstring
+  Line 307: Function 'gravity_vector' missing docstring
+  Line 321: Function 'damping_vector' missing docstring
+  Line 327: Function '_invert_mass_matrix' missing docstring
+  Line 343: Function 'control_affine' missing docstring
+  Line 367: Function 'applied_torques' missing docstring
+  Line 389: Function 'joint_torque_breakdown' missing docstring
+  Line 402: Function 'derivatives' missing docstring
+  Line 414: Function 'step' missing docstring
+  Line 271: Function 'zero_input' missing docstring
+  Line 417: Function 'rk4_increment' missing docstring
+
+engines/pendulum_models/Pendulum Models/Pendulums_Model/double_pendulum_model/physics/triple_pendulum.py:
+  Line 98: Function '_symbolic_triple_functions' missing docstring
+  Line 22: Function 'center_of_mass_distance' missing docstring
+  Line 26: Function 'inertia_about_proximal_joint' missing docstring
+  Line 40: Function 'default' missing docstring
+  Line 62: Function 'gravity' missing docstring
+  Line 88: Function 'omega' missing docstring
+  Line 92: Function 'alpha' missing docstring
+  Line 221: Function '__init__' missing docstring
+  Line 227: Function '_parameter_vector' missing docstring
+  Line 245: Function 'mass_matrix' missing docstring
+  Line 252: Function 'bias_vector' missing docstring
+  Line 262: Function 'forward_dynamics' missing docstring
+  Line 270: Function 'inverse_dynamics' missing docstring
+  Line 278: Function 'joint_torque_breakdown' missing docstring
+  Line 304: Function 'step' missing docstring
+  Line 311: Function 'rk4_increment' missing docstring
+  Line 326: Function 'derivatives' missing docstring
+
+engines/pendulum_models/Pendulum Models/Pendulums_Model/double_pendulum_model/tests/test_double_pendulum.py:
+  Line 21: Function 'test_expression_function_allows_state_variables' missing docstring
+  Line 29: Function 'test_control_affine_matches_explicit_dynamics' missing docstring
+  Line 50: Function 'test_joint_torque_breakdown_reports_components' missing docstring
+  Line 62: Function 'test_gravity_projection_respects_plane_inclination' missing docstring
+  Line 72: Function 'test_singular_mass_matrix_is_detected' missing docstring
+
+engines/pendulum_models/Pendulum Models/Pendulums_Model/double_pendulum_model/tests/test_triple_pendulum.py:
+  Line 11: Function 'test_mass_matrix_positive_definite' missing docstring
+  Line 21: Function 'test_inverse_matches_forward' missing docstring
+
+engines/pendulum_models/Pendulum Models/Double Pendulum Model/double_pendulum_model/ui/double_pendulum_gui.py:
+  Line 1085: Function 'run_app' missing docstring
+  Line 61: Function '__init__' missing docstring
+  Line 87: Function '_build_ui' missing docstring
+  Line 431: Function '_read_inputs' missing docstring
+  Line 151: Function 'labeled_row' missing docstring
+  Line 407: Function 'on_enter' missing docstring
+  Line 423: Function 'on_leave' missing docstring
+  Line 432: Function 'get_float' missing docstring
+  Line 448: Function 'get_str' missing docstring
+  Line 812: Function 'rotate_out_of_plane' missing docstring
+  Line 828: Function 'rotate_plane' missing docstring
+
+engines/pendulum_models/Pendulum Models/Double Pendulum Model/double_pendulum_model/ui/pendulum_pyqt_app.py:
+  Line 365: Function 'run_app' missing docstring
+  Line 39: Function '__init__' missing docstring
+  Line 45: Function '_configure_axes' missing docstring
+  Line 54: Function 'draw_chain' missing docstring
+  Line 63: Function '__init__' missing docstring
+  Line 88: Function '_build_layout' missing docstring
+  Line 155: Function '_current_config' missing docstring
+  Line 173: Function '_start' missing docstring
+  Line 177: Function '_pause' missing docstring
+  Line 180: Function '_reset' missing docstring
+  Line 191: Function '_on_step' missing docstring
+  Line 238: Function '_polynomial_profiles' missing docstring
+  Line 254: Function '_apply_inverse_profile_double' missing docstring
+  Line 281: Function '_apply_inverse_profile_triple' missing docstring
+  Line 304: Function '_update_plot' missing docstring
+  Line 312: Function '_points_double' missing docstring
+  Line 325: Function '_points_triple' missing docstring
+  Line 340: Function '_point_from_angles' missing docstring
+  Line 352: Function '_plane_rotation' missing docstring
+
+engines/pendulum_models/Pendulum Models/Double Pendulum Model/double_pendulum_model/physics/double_pendulum.py:
+  Line 394: Function 'compile_forcing_functions' missing docstring
+  Line 80: Function 'center_of_mass_distance' missing docstring
+  Line 84: Function 'inertia_about_proximal_joint' missing docstring
+  Line 98: Function 'total_mass' missing docstring
+  Line 102: Function 'center_of_mass_distance' missing docstring
+  Line 110: Function 'inertia_about_com' missing docstring
+  Line 122: Function 'inertia_about_proximal_joint' missing docstring
+  Line 142: Function 'default' missing docstring
+  Line 161: Function 'plane_inclination_rad' missing docstring
+  Line 165: Function 'projected_gravity' missing docstring
+  Line 198: Function '__init__' missing docstring
+  Line 212: Function 'mass_matrix' missing docstring
+  Line 230: Function 'coriolis_vector' missing docstring
+  Line 243: Function 'gravity_vector' missing docstring
+  Line 257: Function 'damping_vector' missing docstring
+  Line 263: Function '_invert_mass_matrix' missing docstring
+  Line 280: Function 'control_affine' missing docstring
+  Line 304: Function 'applied_torques' missing docstring
+  Line 326: Function 'joint_torque_breakdown' missing docstring
+  Line 339: Function 'derivatives' missing docstring
+  Line 351: Function 'step' missing docstring
+  Line 207: Function 'zero_input' missing docstring
+  Line 354: Function 'rk4_increment' missing docstring
+
+engines/pendulum_models/Pendulum Models/Double Pendulum Model/double_pendulum_model/physics/triple_pendulum.py:
+  Line 98: Function '_symbolic_triple_functions' missing docstring
+  Line 22: Function 'center_of_mass_distance' missing docstring
+  Line 26: Function 'inertia_about_proximal_joint' missing docstring
+  Line 40: Function 'default' missing docstring
+  Line 62: Function 'gravity' missing docstring
+  Line 88: Function 'omega' missing docstring
+  Line 92: Function 'alpha' missing docstring
+  Line 221: Function '__init__' missing docstring
+  Line 227: Function '_parameter_vector' missing docstring
+  Line 245: Function 'mass_matrix' missing docstring
+  Line 252: Function 'bias_vector' missing docstring
+  Line 262: Function 'forward_dynamics' missing docstring
+  Line 270: Function 'inverse_dynamics' missing docstring
+  Line 278: Function 'joint_torque_breakdown' missing docstring
+  Line 304: Function 'step' missing docstring
+  Line 311: Function 'rk4_increment' missing docstring
+  Line 326: Function 'derivatives' missing docstring
+
+engines/physics_engines/mujoco/head_models.py:
+  Line 11: Define GRAVITY_M_S2 constant
+    > GRAVITY_M_S2 = 9.81
+
+engines/physics_engines/mujoco/create_myo_placeholders.py:
+  Line 18: Define GRAVITY_M_S2 constant
+    > <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>
+  Line 84: Define GRAVITY_M_S2 constant
+    > <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>
+  Line 157: Define GRAVITY_M_S2 constant
+    > <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>
+
+engines/physics_engines/pinocchio/tools/probe_gpcap.py:
+  Line 7: Function 'probe' missing docstring
+
+engines/physics_engines/pinocchio/tools/scientific_auditor.py:
+  Line 52: Function 'main' missing docstring
+  Line 10: Function 'visit_BinOp' missing docstring
+  Line 26: Function 'visit_Call' missing docstring
+
+engines/physics_engines/pinocchio/scripts/verify_pipeline.py:
+  Line 22: Function 'main' missing docstring
+
+engines/physics_engines/pinocchio/python/mujoco_golf_pendulum/models.py:
+  Line 11: Define GRAVITY_M_S2 constant
+    > GRAVITY_M_S2 = 9.81
+
+engines/physics_engines/pinocchio/python/examples/double_pendulum_standalone.py:
+  Line 37: Define GRAVITY_M_S2 constant
+    > g = 9.81  # gravity
+
+engines/physics_engines/pinocchio/python/tests/test_pinocchio_backend.py:
+  Line 17: Function '__init__' missing docstring
+
+engines/physics_engines/pinocchio/python/tests/test_expression_security.py:
+  Line 10: Function 'test_valid_expressions' missing docstring
+  Line 32: Function 'test_attribute_access_blocked' missing docstring
+  Line 41: Function 'test_import_blocked' missing docstring
+  Line 47: Function 'test_call_on_attribute_blocked' missing docstring
+  Line 57: Function 'test_disallowed_syntax_nodes' missing docstring
+  Line 67: Function 'test_unknown_variable' missing docstring
+  Line 72: Function 'test_unknown_function' missing docstring
+
+engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py:
+  Line 144: Function '_setup_ui' missing docstring
+  Line 220: Function 'log_write' missing docstring
+  Line 224: Function '_setup_dynamic_tab' missing docstring
+  Line 239: Function '_setup_kinematic_tab' missing docstring
+  Line 252: Function 'load_urdf' missing docstring
+  Line 324: Function '_build_kinematic_controls' missing docstring
+  Line 345: Function '_add_joint_control_widget' missing docstring
+  Line 423: Function '_on_slider' missing docstring
+  Line 429: Function '_on_spin' missing docstring
+  Line 434: Function '_update_q' missing docstring
+  Line 441: Function '_on_mode_changed' missing docstring
+  Line 454: Function '_toggle_run' missing docstring
+  Line 461: Function '_reset_simulation' missing docstring
+  Line 472: Function '_game_loop' missing docstring
+  Line 496: Function '_update_viewer' missing docstring
+  Line 580: Function '_draw_frames' missing docstring
+  Line 604: Function '_draw_coms' missing docstring
+  Line 623: Function '_toggle_frames' missing docstring
+  Line 641: Function '_toggle_coms' missing docstring
+  Line 656: Function '_toggle_forces' missing docstring
+  Line 663: Function '_toggle_torques' missing docstring
+
+engines/physics_engines/pinocchio/python/pinocchio_golf/torque_fitting.py:
+  Line 31: Function 'evaluate_torque_poly' missing docstring
+  Line 39: Function 'main' missing docstring
+
+engines/physics_engines/pinocchio/python/double_pendulum_model/ui/double_pendulum_gui.py:
+  Line 1142: Function 'run_app' missing docstring
+  Line 92: Function '__init__' missing docstring
+  Line 216: Function '_setup_initial_conditions' missing docstring
+  Line 251: Function '_setup_physical_parameters' missing docstring
+  Line 306: Function '_setup_damping_parameters' missing docstring
+  Line 331: Function '_setup_control_inputs' missing docstring
+  Line 348: Function '_setup_simulation_options' missing docstring
+  Line 420: Function '_setup_data_logging' missing docstring
+  Line 453: Function '_setup_status' missing docstring
+  Line 515: Function '_read_inputs' missing docstring
+  Line 491: Function 'on_enter' missing docstring
+  Line 507: Function 'on_leave' missing docstring
+  Line 516: Function 'get_float' missing docstring
+  Line 532: Function 'get_str' missing docstring
+
+engines/physics_engines/pinocchio/python/double_pendulum_model/ui/validation.py:
+  Line 4: Function 'validate_polynomial_text' missing docstring
+  Line 15: Function 'validate_torque_text' missing docstring
+
+engines/physics_engines/pinocchio/python/double_pendulum_model/ui/pendulum_pyqt_app.py:
+  Line 36: Function '_validate_math_ast' missing docstring
+  Line 492: Function 'run_app' missing docstring
+  Line 84: Function '__init__' missing docstring
+  Line 90: Function '_configure_axes' missing docstring
+  Line 99: Function 'draw_chain' missing docstring
+  Line 108: Function '__init__' missing docstring
+  Line 133: Function '_validate_polynomial_input' missing docstring
+  Line 139: Function '_validate_torque_input' missing docstring
+  Line 143: Function '_set_input_error' missing docstring
+  Line 153: Function '_build_layout' missing docstring
+  Line 166: Function '_build_form' missing docstring
+  Line 218: Function '_add_torque_inputs' missing docstring
+  Line 233: Function '_add_velocity_inputs' missing docstring
+  Line 250: Function '_current_config' missing docstring
+  Line 268: Function '_start' missing docstring
+  Line 272: Function '_pause' missing docstring
+  Line 275: Function '_reset' missing docstring
+  Line 286: Function '_on_step' missing docstring
+  Line 324: Function '_safe_eval' missing docstring
+  Line 343: Function '_polynomial_profiles' missing docstring
+  Line 359: Function '_apply_inverse_profile_double' missing docstring
+  Line 386: Function '_apply_inverse_profile_triple' missing docstring
+  Line 409: Function '_update_plot' missing docstring
+  Line 419: Function '_update_status' missing docstring
+  Line 433: Function '_points_double' missing docstring
+  Line 448: Function '_points_triple' missing docstring
+  Line 465: Function '_point_from_angles' missing docstring
+  Line 477: Function '_plane_rotation' missing docstring
+  Line 422: Function 'fmt' missing docstring
+
+engines/physics_engines/pinocchio/python/double_pendulum_model/physics/double_pendulum.py:
+  Line 466: Function 'compile_forcing_functions' missing docstring
+  Line 97: Function '__init__' missing docstring
+  Line 103: Function '__call__' missing docstring
+  Line 115: Function '_validate_ast' missing docstring
+  Line 149: Function 'center_of_mass_distance' missing docstring
+  Line 153: Function 'inertia_about_proximal_joint' missing docstring
+  Line 167: Function 'total_mass' missing docstring
+  Line 171: Function 'center_of_mass_distance' missing docstring
+  Line 179: Function 'inertia_about_com' missing docstring
+  Line 191: Function 'inertia_about_proximal_joint' missing docstring
+  Line 211: Function 'default' missing docstring
+  Line 230: Function 'plane_inclination_rad' missing docstring
+  Line 234: Function 'projected_gravity' missing docstring
+  Line 267: Function '__init__' missing docstring
+  Line 295: Function 'mass_matrix' missing docstring
+  Line 309: Function 'coriolis_vector' missing docstring
+  Line 321: Function 'gravity_vector' missing docstring
+  Line 335: Function 'damping_vector' missing docstring
+  Line 340: Function '_invert_mass_matrix' missing docstring
+  Line 352: Function 'control_affine' missing docstring
+  Line 376: Function 'applied_torques' missing docstring
+  Line 398: Function 'joint_torque_breakdown' missing docstring
+  Line 411: Function 'derivatives' missing docstring
+  Line 423: Function 'step' missing docstring
+  Line 277: Function 'zero_input' missing docstring
+  Line 426: Function 'rk4_increment' missing docstring
+
+engines/physics_engines/pinocchio/python/double_pendulum_model/physics/triple_pendulum.py:
+  Line 101: Function '_calc_mass_matrix' missing docstring
+  Line 180: Function '_calc_bias_vector' missing docstring
+  Line 247: Function '_calc_gravity_vector' missing docstring
+  Line 283: Function '_hardcoded_triple_functions' missing docstring
+  Line 24: Function 'center_of_mass_distance' missing docstring
+  Line 28: Function 'inertia_about_proximal_joint' missing docstring
+  Line 42: Function 'default' missing docstring
+  Line 66: Function 'gravity' missing docstring
+  Line 92: Function 'omega' missing docstring
+  Line 96: Function 'alpha' missing docstring
+  Line 292: Function '__init__' missing docstring
+  Line 298: Function '_parameter_vector' missing docstring
+  Line 316: Function 'mass_matrix' missing docstring
+  Line 323: Function 'bias_vector' missing docstring
+  Line 333: Function 'forward_dynamics' missing docstring
+  Line 343: Function 'inverse_dynamics' missing docstring
+  Line 353: Function 'joint_torque_breakdown' missing docstring
+  Line 384: Function 'step' missing docstring
+  Line 391: Function 'rk4_increment' missing docstring
+  Line 406: Function 'derivatives' missing docstring
+
+engines/physics_engines/pinocchio/python/double_pendulum_model/tests/test_ui_tooltips.py:
+  Line 5: Function 'test_tooltips' missing docstring
+
+engines/physics_engines/pinocchio/python/double_pendulum_model/tests/test_ui_smoke.py:
+  Line 6: Function 'test_smoke' missing docstring
+
+engines/physics_engines/pinocchio/python/double_pendulum_model/tests/test_double_pendulum.py:
+  Line 21: Function 'test_expression_function_allows_state_variables' missing docstring
+  Line 29: Function 'test_control_affine_matches_explicit_dynamics' missing docstring
+  Line 50: Function 'test_joint_torque_breakdown_reports_components' missing docstring
+  Line 62: Function 'test_gravity_projection_respects_plane_inclination' missing docstring
+  Line 72: Function 'test_singular_mass_matrix_is_detected' missing docstring
+
+engines/physics_engines/pinocchio/python/double_pendulum_model/tests/test_ui_status.py:
+  Line 9: Function 'app' missing docstring
+  Line 16: Function 'test_status_update_double' missing docstring
+  Line 34: Function 'test_status_update_triple' missing docstring
+
+engines/physics_engines/pinocchio/python/double_pendulum_model/tests/test_triple_pendulum.py:
+  Line 10: Function 'test_mass_matrix_positive_definite' missing docstring
+  Line 20: Function 'test_inverse_matches_forward' missing docstring
+
+engines/physics_engines/pinocchio/python/double_pendulum_model/tests/test_validation_logic.py:
+  Line 7: Function 'test_validate_polynomial' missing docstring
+  Line 19: Function 'test_validate_expression' missing docstring
+
+engines/physics_engines/pinocchio/python/mujoco_golf_pendulum/linkage_mechanisms/__init__.py:
+  Line 19: Define GRAVITY_M_S2 constant
+    > GRAVITY_M_S2 = 9.81
+
+engines/physics_engines/pinocchio/python/mujoco_golf_pendulum/rigid_body_dynamics/rnea.py:
+  Line 12: Define GRAVITY_M_S2 constant
+    > GRAVITY_M_S2 = 9.81
+
+engines/physics_engines/pinocchio/python/mujoco_golf_pendulum/rigid_body_dynamics/aba.py:
+  Line 12: Define GRAVITY_M_S2 constant
+    > GRAVITY_M_S2 = 9.81
+
+engines/physics_engines/pinocchio/python/dtack/ik/tasks.py:
+  Line 80: NotImplementedError placeholder
+    > raise NotImplementedError(msg)
+
+engines/physics_engines/pinocchio/python/dtack/utils/mjcf_exporter.py:
+  Line 58: Define GRAVITY_M_S2 constant
+    > '  <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>'
+
+engines/physics_engines/pinocchio/python/dtack/utils/urdf_exporter.py:
+  Line 86: Function '_emit_children' missing docstring
+
+engines/physics_engines/pinocchio/python/dtack/backends/pink_backend.py:
+  Line 67: NotImplementedError placeholder
+    > raise NotImplementedError(msg)
+
+engines/physics_engines/drake/tools/scientific_auditor.py:
+  Line 52: Function 'main' missing docstring
+  Line 10: Function 'visit_BinOp' missing docstring
+  Line 26: Function 'visit_Call' missing docstring
+
+engines/physics_engines/drake/python/src/drake_visualizer.py:
+  Line 26: Function '__init__' missing docstring
+
+engines/physics_engines/drake/python/src/drake_gui_app.py:
+  Line 565: Function 'main' missing docstring
+  Line 59: Function '__init__' missing docstring
+  Line 375: Function '_on_slider_change' missing docstring
+  Line 383: Function '_on_spin_change' missing docstring
+  Line 444: Function '_on_mode_changed' missing docstring
+  Line 469: Function '_toggle_run' missing docstring
+  Line 480: Function '_reset_simulation' missing docstring
+  Line 488: Function '_game_loop' missing docstring
+
+engines/physics_engines/mujoco/tools/scientific_auditor.py:
+  Line 52: Function 'main' missing docstring
+  Line 10: Function 'visit_BinOp' missing docstring
+  Line 26: Function 'visit_Call' missing docstring
+
+engines/physics_engines/mujoco/python/humanoid_launcher.py:
+  Line 95: Function '__init__' missing docstring
+  Line 102: Function 'run' missing docstring
+  Line 143: Function 'stop' missing docstring
+  Line 152: Function '__init__' missing docstring
+  Line 170: Function '__init__' missing docstring
+  Line 196: Function 'setup_ui' missing docstring
+  Line 237: Function 'setup_sim_tab' missing docstring
+  Line 376: Function 'setup_appearance_tab' missing docstring
+  Line 447: Function 'setup_equip_tab' missing docstring
+  Line 515: Function 'setup_log_area' missing docstring
+  Line 540: Function 'log' missing docstring
+  Line 545: Function 'clear_log' missing docstring
+  Line 549: Function 'set_btn_color' missing docstring
+  Line 555: Function 'pick_color' missing docstring
+  Line 678: Function 'browse_file' missing docstring
+  Line 691: Function 'load_config' missing docstring
+  Line 706: Function 'save_config' missing docstring
+  Line 730: Function 'get_docker_cmd' missing docstring
+  Line 802: Function 'start_simulation' missing docstring
+  Line 817: Function 'stop_simulation' missing docstring
+  Line 822: Function 'on_simulation_finished' missing docstring
+  Line 864: Function 'rebuild_docker' missing docstring
+  Line 889: Function 'open_video' missing docstring
+  Line 893: Function 'open_data' missing docstring
+  Line 897: Function '_open_file' missing docstring
+
+engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui_methods.py:
+  Line 66: Function 'set_color_contain' missing docstring
+
+engines/physics_engines/mujoco/python/mujoco_humanoid_golf/models.py:
+  Line 11: Define GRAVITY_M_S2 constant
+    > GRAVITY_M_S2 = 9.81
+
+engines/physics_engines/mujoco/python/mujoco_humanoid_golf/meshcat_adapter.py:
+  Line 23: Function '__init__' missing docstring
+  Line 56: Function 'open_browser' missing docstring
+  Line 225: Function '_draw_arrow' missing docstring
+  Line 242: Function '_rgba_to_hex' missing docstring
+
+engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui.py:
+  Line 1855: Function '_open_detail' missing docstring
+  Line 1901: Function '_update_mode_help' missing docstring
+  Line 2303: Function 'on_poly_generated' missing docstring
+  Line 2018: Function '_on_coeff_change' missing docstring
+  Line 3495: Function '_on_slider_change' missing docstring
+  Line 3508: Function '_on_spin_change' missing docstring
+
+engines/physics_engines/mujoco/python/mujoco_humanoid_golf/grip_modelling_tab.py:
+  Line 168: Function 'get_hand_content' missing docstring
+  Line 220: Function 'extract_worldbody_content' missing docstring
+  Line 460: Function '_on_slider_change' missing docstring
+  Line 465: Function '_on_spin_change' missing docstring
+
+engines/physics_engines/mujoco/python/tests/test_statistical_analysis.py:
+  Line 27: Function 'test_compute_summary_stats' missing docstring
+  Line 50: Function 'test_generate_comprehensive_report_consistency' missing docstring
+
+engines/physics_engines/mujoco/python/tests/test_rigid_body_dynamics.py:
+  Line 17: Define GRAVITY_M_S2 constant
+    > GRAVITY_M_S2 = 9.81
+
+engines/physics_engines/mujoco/python/mujoco_humanoid_golf/linkage_mechanisms/__init__.py:
+  Line 20: Define GRAVITY_M_S2 constant
+    > GRAVITY_M_S2 = 9.81
+
+engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/rnea.py:
+  Line 12: Define GRAVITY_M_S2 constant
+    > GRAVITY_M_S2 = 9.81
+
+engines/physics_engines/mujoco/python/mujoco_humanoid_golf/rigid_body_dynamics/aba.py:
+  Line 12: Define GRAVITY_M_S2 constant
+    > GRAVITY_M_S2 = 9.81
+
+engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py:
+  Line 968: Function 'run_update' missing docstring
+
+engines/physics_engines/mujoco/docker/src/humanoid_golf/visualization.py:
+  Line 198: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 204: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 213: Empty pass statement - consider adding logic or comment
+    > pass
+
+engines/physics_engines/mujoco/docker/src/humanoid_golf/sim.py:
+  Line 197: Function '__init__' missing docstring
+  Line 209: Function 'first' missing docstring
+  Line 212: Function 'mid' missing docstring
+  Line 215: Function 'last' missing docstring
+  Line 218: Function '__getitem__' missing docstring
+
+tests/physics_validation/analytical.py:
+  Line 13: Define GRAVITY_M_S2 constant
+    > g: float = 9.81,
+  Line 46: Define GRAVITY_M_S2 constant
+    > def __init__(self, mass: float = 1.0, g: float = 9.81):
+  Line 9: Function '__init__' missing docstring
+  Line 46: Function '__init__' missing docstring
+
+tests/physics_validation/test_pendulum_accuracy.py:
+  Line 33: Define GRAVITY_M_S2 constant
+    > <option timestep="0.001" gravity="0 0 -9.81" integrator="RK4"/>
+  Line 57: Define GRAVITY_M_S2 constant
+    > analytical = AnalyticalPendulum(length=1.0, mass=1.0, g=9.81, inertia=total_inertia)
+  Line 169: Define GRAVITY_M_S2 constant
+    > analytical = AnalyticalPendulum(length=L, mass=M, g=9.81)
+
+tests/physics_validation/test_energy_conservation.py:
+  Line 32: Define GRAVITY_M_S2 constant
+    > <option timestep="0.001" gravity="0 0 -9.81" integrator="RK4"/>
+  Line 46: Define GRAVITY_M_S2 constant
+    > baseline = AnalyticalBallistic(mass=1.0, g=9.81)
+  Line 119: Define GRAVITY_M_S2 constant
+    > model.gravity = pinocchio.Motion(np.array([0, 0, -9.81, 0, 0, 0]))
+
+tests/integration/test_engine_integration.py:
+  Line 145: Function 'mock_simulate' missing docstring
+
+tests/unit/test_examples.py:
+  Line 17: Function 'load_module' missing docstring
+
+tests/unit/test_lazy_imports.py:
+  Line 162: Empty pass statement - consider adding logic or comment
+    > pass
+
+tests/unit/test_golf_launcher_basic.py:
+  Line 17: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 23: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 26: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 55: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 58: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 63: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 68: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 71: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 76: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 79: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 29: Function 'mock_pyqt_signal' missing docstring
+  Line 16: Function '__init__' missing docstring
+  Line 19: Function 'start' missing docstring
+  Line 22: Function 'run' missing docstring
+  Line 25: Function 'wait' missing docstring
+  Line 45: Function '__init__' missing docstring
+  Line 48: Function 'setWindowTitle' missing docstring
+  Line 51: Function 'windowTitle' missing docstring
+  Line 54: Function 'resize' missing docstring
+  Line 57: Function 'setLayout' missing docstring
+  Line 62: Function 'accept' missing docstring
+  Line 67: Function 'setReadOnly' missing docstring
+  Line 70: Function 'setMarkdown' missing docstring
+  Line 75: Function '__init__' missing docstring
+  Line 78: Function 'addWidget' missing docstring
+  Line 145: Function 'readline_side_effect' missing docstring
+  Line 189: Function 'readline_side_effect' missing docstring
+
+shared/python/output_manager.py:
+  Line 339: Function 'json_serializer' missing docstring
+  Line 166: Function 'json_serializer' missing docstring
+
+shared/python/engine_probes.py:
+  Line 75: NotImplementedError placeholder
+    > raise NotImplementedError
+
+shared/python/pose_estimation/interface.py:
+  Line 30: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 42: Empty pass statement - consider adding logic or comment
+    > pass
+  Line 54: Empty pass statement - consider adding logic or comment
+    > pass
+
+Total issues: 496

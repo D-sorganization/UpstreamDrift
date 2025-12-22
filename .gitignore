@@ -8,6 +8,8 @@ env/
 .ipynb_checkpoints/
 .coverage
 *.coverage
+build/
+dist/
 
 # MATLAB/Simulink
 *.asv

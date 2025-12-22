@@ -57,12 +57,12 @@ def main():
 
     # Simple ballistic trajectory: z = v0*t - 0.5*g*t^2
     v0 = 20.0
-    g = 9.81
+    GRAVITY_M_S2 = 9.81
 
     for i in range(steps):
         t = i * dt
-        z = v0 * t - 0.5 * g * t**2
-        v = v0 - g * t
+        z = v0 * t - 0.5 * GRAVITY_M_S2 * t**2
+        v = v0 - GRAVITY_M_S2 * t
 
         if z < 0:
             z = 0

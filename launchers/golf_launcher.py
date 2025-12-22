@@ -91,6 +91,7 @@ class DockerCheckThread(QThread):
     result = pyqtSignal(bool)
 
     def run(self):
+        """Run docker check."""
         try:
             subprocess.run(
                 ["docker", "--version"],
@@ -109,10 +110,12 @@ class DockerBuildThread(QThread):
     finished_signal = pyqtSignal(bool, str)
 
     def __init__(self, target_stage="all"):
+        """Initialize the build thread."""
         super().__init__()
         self.target_stage = target_stage
 
     def run(self):
+        """Run the docker build command."""
         mujoco_path = REPOS_ROOT / MODELS_DICT["MuJoCo Humanoid"]
         # Dockerfile is at engines/physics_engines/mujoco/Dockerfile
         docker_context = mujoco_path
@@ -183,6 +186,7 @@ class EnvironmentDialog(QDialog):
         self.setup_ui()
 
     def setup_ui(self):
+        """Setup the UI components."""
         layout = QVBoxLayout(self)
 
         tabs = QTabWidget()
@@ -258,6 +262,7 @@ class EnvironmentDialog(QDialog):
         layout.addWidget(close_btn)
 
     def start_build(self):
+        """Start the docker build process."""
         target = self.combo_stage.currentText()
         self.btn_build.setEnabled(False)
         self.console.clear()
@@ -268,10 +273,12 @@ class EnvironmentDialog(QDialog):
         self.build_thread.start()
 
     def append_log(self, text):
+        """Append text to the log console."""
         self.console.append(text)
         self.console.moveCursor(self.console.textCursor().MoveOperation.End)
 
     def build_finished(self, success, msg):
+        """Handle build completion."""
         self.btn_build.setEnabled(True)
         if success:
             QMessageBox.information(self, "Success", msg)
@@ -280,7 +287,10 @@ class EnvironmentDialog(QDialog):
 
 
 class HelpDialog(QDialog):
+    """Dialog to display help documentation."""
+
     def __init__(self, parent=None):
+        """Initialize the help dialog."""
         super().__init__(parent)
         self.setWindowTitle("Golf Suite - Help")
         self.resize(800, 600)
@@ -304,7 +314,10 @@ class HelpDialog(QDialog):
 
 
 class GolfLauncher(QMainWindow):
+    """Main application window for the launcher."""
+
     def __init__(self):
+        """Initialize the main window."""
         super().__init__()
         self.setWindowTitle("Golf Modeling Suite")
         self.resize(1400, 900)
@@ -323,6 +336,7 @@ class GolfLauncher(QMainWindow):
         self.check_docker()
 
     def init_ui(self):
+        """Initialize the user interface."""
         # Main Widget
         central = QWidget()
         self.setCentralWidget(central)
@@ -473,6 +487,7 @@ class GolfLauncher(QMainWindow):
             self.launch_simulation()
 
     def select_model(self, name):
+        """Select a model and update UI."""
         self.selected_model = name
 
         # Update Styles
@@ -505,6 +520,7 @@ class GolfLauncher(QMainWindow):
         self.update_launch_button()
 
     def update_launch_button(self):
+        """Update the launch button state."""
         if self.docker_available and self.selected_model:
             self.btn_launch.setEnabled(True)
             self.btn_launch.setText(f"LAUNCH {self.selected_model.upper()}")
@@ -516,6 +532,7 @@ class GolfLauncher(QMainWindow):
             self.btn_launch.setText("SELECT A MODEL")
 
     def apply_styles(self):
+        """Apply custom stylesheets."""
         self.setStyleSheet(
             """
             QMainWindow, QWidget {
@@ -594,11 +611,13 @@ class GolfLauncher(QMainWindow):
         )
 
     def check_docker(self):
+        """Start the docker check thread."""
         self.check_thread = DockerCheckThread()
         self.check_thread.result.connect(self.on_docker_check_complete)
         self.check_thread.start()
 
     def on_docker_check_complete(self, available):
+        """Handle docker check result."""
         self.docker_available = available
         if available:
             self.lbl_status.setText("● System Ready")
@@ -615,14 +634,17 @@ class GolfLauncher(QMainWindow):
         self.update_launch_button()
 
     def open_help(self):
+        """Open the help dialog."""
         dlg = HelpDialog(self)
         dlg.exec()
 
     def open_environment_manager(self):
+        """Open the environment manager dialog."""
         dlg = EnvironmentDialog(self)
         dlg.exec()
 
     def launch_simulation(self):
+        """Launch the selected simulation."""
         if not self.selected_model:
             return
 
@@ -650,6 +672,7 @@ class GolfLauncher(QMainWindow):
             QMessageBox.critical(self, "Launch Error", str(e))
 
     def _custom_launch_humanoid(self, abs_repo_path):
+        """Launch the humanoid GUI directly."""
         script = abs_repo_path / "python/humanoid_launcher.py"
         if not script.exists():
             raise FileNotFoundError(
@@ -662,11 +685,13 @@ class GolfLauncher(QMainWindow):
         subprocess.Popen([sys.executable, str(script)], cwd=script.parent)
 
     def _custom_launch_comprehensive(self, abs_repo_path):
+        """Launch the comprehensive dashboard directly."""
         python_dir = abs_repo_path / "python"
         logger.info(f"Launching Comprehensive GUI from {python_dir}")
         subprocess.Popen([sys.executable, "-m", "mujoco_humanoid_golf"], cwd=python_dir)
 
     def _launch_docker_container(self, model_name, abs_repo_path):
+        """Launch the simulation in a docker container."""
         cmd = ["docker", "run", "--rm", "-it"]
 
         # Volumes
@@ -738,7 +763,10 @@ class GolfLauncher(QMainWindow):
             subprocess.Popen(cmd)
 
     def _start_meshcat_browser(self, port):
+        """Start the meshcat browser."""
+
         def open_url():
+            """Open the browser URL."""
             time.sleep(3)
             webbrowser.open(f"http://localhost:{port}")
 
