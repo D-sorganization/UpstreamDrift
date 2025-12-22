@@ -9,6 +9,7 @@ import meshcat.geometry as g
 import meshcat.visualizer as viz
 import numpy as np  # noqa: TID253
 import pinocchio as pin
+from pinocchio.visualize import MeshcatVisualizer
 from PyQt6 import QtCore, QtWidgets
 
 # Set up logging
@@ -86,11 +87,16 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.is_running = False
         self.dt = DT_DEFAULT
 
+        # Diagnostics
+        try:
+            logger.info(f"Pinocchio Version: {pin.__version__}")
+        except AttributeError:
+            logger.info("Pinocchio version unknown")
+        logger.info(f"Python Executable: {sys.executable}")
+
         # Meshcat viewer
-        # Do not open browser automatically; user can open Meshcat URL manually if
-        # desired.
-        self.viewer = viz.Visualizer()  # Let it find port
-        logger.info("Meshcat URL: %s", self.viewer.url)
+        self.viz: MeshcatVisualizer | None = None
+        self.viewer = None  # Will be accessed via self.viz.viewer
 
         # Setup UI
         self._setup_ui()
@@ -197,7 +203,19 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             return
 
         try:
+            self.log_write(f"Attempting to load URDF: {fname}")
+
+            # Load Model and Geometries
             self.model = pin.buildModelFromUrdf(fname)
+
+            try:
+                self.collision_model = pin.buildGeomFromUrdf(self.model, fname, pin.GeometryType.COLLISION)
+                self.visual_model = pin.buildGeomFromUrdf(self.model, fname, pin.GeometryType.VISUAL)
+            except Exception as e:
+                self.log_write(f"Warning: Failed to load geometries: {e}")
+                self.collision_model = None
+                self.visual_model = None
+
             if self.model is None:
                 self.log_write("Error loading URDF: Failed to build model")
                 return
@@ -206,11 +224,27 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self.q = pin.neutral(self.model)
             self.v = np.zeros(self.model.nv)
 
-            # Load visual into Meshcat
-            # Careful: meshcat URDF loader is separate from Pinocchio
-            self.viewer["robot"].delete()
-            self.viewer["overlays"].delete()
-            self.viewer["robot"].set_object(g.URDFLoader().load(fname))
+            # Initialize MeshcatVisualizer
+            try:
+                if self.collision_model and self.visual_model:
+                    self.viz = MeshcatVisualizer(self.model, self.collision_model, self.visual_model)
+                    self.viz.initViewer(open=False)
+                    self.viz.loadViewerModel()
+                    self.viewer = self.viz.viewer
+
+                    url = self.viewer.url
+                    self.log_write(f"Meshcat URL: {url}")
+                    logger.info(f"Meshcat URL: {url}")
+                else:
+                    self.log_write("Skipping visualizer init due to missing geometries")
+                    self.viewer = None
+                    self.viz = None
+
+            except Exception as e:
+                self.log_write(f"Visualizer Error: {e}")
+                logger.error(f"Failed to initialize MeshcatVisualizer: {e}")
+                self.viewer = None
+                self.viz = None
 
             self.log_write(f"Loaded URDF: {fname}")
             self.log_write(f"NQ: {self.model.nq}, NV: {self.model.nv}")
@@ -233,6 +267,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         except (ValueError, RuntimeError) as e:
             self.log_write(f"Error loading URDF: {e}")
+            logger.exception("Pinocchio Error")
         except Exception as e:
             # Catch-all for unexpected errors
             self.log_write(f"Unexpected error loading URDF: {e}")
@@ -415,14 +450,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             return
 
         # Update Visuals
-        q_dict = {}
-        for i in range(1, self.model.njoints):
-            j = self.model.joints[i]
-            if j.nq == 1:
-                # Map to joint name, not q index
-                q_dict[self.model.names[i]] = self.q[j.idx_q]
-
-        self.viewer["robot"].set_joint_positions(q_dict)
+        if self.viz:
+            self.viz.display(self.q)
 
         # Kinematics Logic for frames
         pin.forwardKinematics(self.model, self.data, self.q)
@@ -438,7 +467,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self._draw_coms()
 
     def _draw_frames(self) -> None:
-        if self.model is None or self.data is None:
+        if self.model is None or self.data is None or self.viewer is None:
             return
 
         # Visualize joint frames (oMf)
@@ -462,7 +491,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             )
 
     def _draw_coms(self) -> None:
-        if self.model is None or self.data is None:
+        if self.model is None or self.data is None or self.viewer is None:
             return
 
         # Draw Center of Mass for each link
@@ -481,6 +510,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
     # --- Vis Helpers ---
     def _toggle_frames(self, checked: bool) -> None:  # noqa: FBT001
+        if self.viewer is None:
+            return
+
         if not checked:
             self.viewer["overlays/frames"].delete()
         else:
@@ -496,6 +528,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self._update_viewer()
 
     def _toggle_coms(self, checked: bool) -> None:  # noqa: FBT001
+        if self.viewer is None:
+            return
+
         if not checked:
             self.viewer["overlays/coms"].delete()
         else:

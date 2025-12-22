@@ -140,7 +140,8 @@ def launch_drake():
         work_dir = _validate_and_get_workdir(drake_script)
 
         logger.info("Launching Drake engine...")
-        subprocess.run([sys.executable, str(drake_script)], cwd=str(work_dir))
+        # Run as module to support relative imports within the src package
+        subprocess.run([sys.executable, "-m", "src.golf_gui"], cwd=str(work_dir))
     except Exception as e:
         logger.error(f"Error launching Drake: {e}")
         return False
