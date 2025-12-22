@@ -19,3 +19,7 @@
 ## 2025-05-21 - MuJoCo MjData Allocation Cost
 **Learning:** Creating `mujoco.MjData(model)` is an expensive operation as it allocates memory for the entire simulation state. In trajectory analysis loops where perturbed state is needed (e.g., for finite differences), re-allocating `MjData` at each step kills performance.
 **Action:** Pre-allocate a scratch `MjData` object in `__init__` and reuse it for temporary calculations (like finite difference perturbations), ensuring proper state resetting or overwriting.
+
+## 2025-05-24 - MuJoCo Gravity Computation
+**Learning:** Computing gravity using `mj_forward` (with velocity zeroed) is slow because it computes full kinematics and inertia. `mj_rne` (Inverse Dynamics) with zero velocity/acceleration yields gravity efficiently (~2.5x faster). However, `mj_rne` assumes the `cvel` (spatial velocity) in `mjData` is consistent with `qvel`. Since we force `qvel=0`, we MUST explicitly zero `cvel` to ensure correctness, otherwise `mj_rne` uses stale velocity data.
+**Action:** When using `mj_rne` for static force computation (like gravity), explicitly zero `data.qvel` AND `data.cvel` to avoid overhead of running kinematic updates while ensuring correct results.

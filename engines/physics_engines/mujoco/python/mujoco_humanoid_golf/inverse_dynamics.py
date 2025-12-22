@@ -158,10 +158,19 @@ class InverseDynamicsSolver:
         # Compute Gravity g(q) efficiently
         # We need to set velocity to zero to get just gravity.
         # mujoco.mj_forward computes qfrc_bias = g(q) when qvel=0.
+        # OPTIMIZATION: Use mj_rne with qvel=0 instead of full mj_forward.
+        # mj_forward computes everything (kinematics, COM, inertia, etc.) which is slow.
+        # mj_rne only computes inverse dynamics. When qvel=0 and qacc=0,
+        # it returns gravity.
         qvel_backup = self.data.qvel.copy()
         self.data.qvel[:] = 0
-        mujoco.mj_forward(self.model, self.data)
-        gravity = self.data.qfrc_bias.copy()
+        # Explicitly zero out spatial velocity (cvel) to ensure RNE uses correct state
+        # This is much faster than running mj_fwdVelocity or mj_forward
+        self.data.cvel[:] = 0
+
+        gravity = np.zeros(self.model.nv)
+        # flg_acc=0 means ignore qacc (treat as 0)
+        mujoco.mj_rne(self.model, self.data, 0, gravity)
 
         # Compute Coriolis forces: C(q,q̇)q̇ = Total Bias - Gravity
         coriolis = total_bias - gravity
