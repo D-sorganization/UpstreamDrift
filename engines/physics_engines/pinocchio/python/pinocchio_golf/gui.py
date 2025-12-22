@@ -100,7 +100,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.viewer: viz.Visualizer | None = None
         try:
             self.viewer = viz.Visualizer()  # Let it find port
-            logger.info("Meshcat URL: %s", self.viewer.url)
+            url = self.viewer.url() if callable(self.viewer.url) else self.viewer.url
+            logger.info("Meshcat URL: %s", url)
         except (ConnectionError, OSError, RuntimeError) as exc:
             logger.error(f"Failed to initialize Meshcat viewer: {exc}")
             self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
@@ -234,14 +235,18 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self.v = np.zeros(self.model.nv)
 
             # Initialize Pinocchio MeshcatVisualizer
-            self.viewer["robot"].delete()
-            self.viewer["overlays"].delete()
+            if self.viewer is not None:
+                self.viewer["robot"].delete()
+                self.viewer["overlays"].delete()
+            else:
+                self.log_write("Error: Meshcat viewer not initialized")
+                return
 
             self.viz = MeshcatVisualizer(
                 self.model, self.collision_model, self.visual_model
             )
             self.viz.initViewer(viewer=self.viewer, open=False)
-            self.viz.loadViewerModel(root_node_name="robot")
+            self.viz.loadViewerModel()
 
             self.log_write(f"Successfully loaded URDF: {fname}")
             self.log_write(f"NQ: {self.model.nq}, NV: {self.model.nv}")
