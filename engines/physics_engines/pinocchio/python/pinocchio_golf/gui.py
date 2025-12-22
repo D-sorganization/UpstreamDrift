@@ -90,11 +90,23 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.is_running = False
         self.dt = DT_DEFAULT
 
+        # Diagnostics
+        try:
+            logger.info(f"Pinocchio Version: {pin.__version__}")
+        except AttributeError:
+            logger.info("Pinocchio version unknown")
+        logger.info(f"Python Executable: {sys.executable}")
         # Meshcat viewer
         # Do not open browser automatically; user can open Meshcat URL manually if
         # desired.
-        self.viewer = viz.Visualizer()  # Let it find port
-        logger.info("Meshcat URL: %s", self.viewer.url)
+        self.viewer: viz.Visualizer | None = None
+        try:
+            self.viewer = viz.Visualizer()  # Let it find port
+            logger.info("Meshcat URL: %s", self.viewer.url)
+        except Exception as e:
+            logger.error(f"Failed to initialize Meshcat viewer: {e}")
+            self.log_write(f"Error: Failed to initialize Meshcat viewer: {e}")
+            self.log_write("Please ensure meshcat-server is running or try again.")
 
         # Setup UI
         self._setup_ui()
@@ -448,7 +460,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self._draw_coms()
 
     def _draw_frames(self) -> None:
-        if self.model is None or self.data is None:
+        if self.model is None or self.data is None or self.viewer is None:
             return
 
         # Visualize joint frames (oMf)
@@ -472,7 +484,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             )
 
     def _draw_coms(self) -> None:
-        if self.model is None or self.data is None:
+        if self.model is None or self.data is None or self.viewer is None:
             return
 
         # Draw Center of Mass for each link
@@ -491,6 +503,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
     # --- Vis Helpers ---
     def _toggle_frames(self, checked: bool) -> None:  # noqa: FBT001
+        if self.viewer is None:
+            return
+
         if not checked:
             self.viewer["overlays/frames"].delete()
         else:
@@ -506,6 +521,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self._update_viewer()
 
     def _toggle_coms(self, checked: bool) -> None:  # noqa: FBT001
+        if self.viewer is None:
+            return
+
         if not checked:
             self.viewer["overlays/coms"].delete()
         else:
