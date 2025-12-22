@@ -125,11 +125,12 @@ class GolfLauncher(QtWidgets.QMainWindow):
         docker_cmd = [
             "docker", "run", "--rm",
             "-it",
-            # Network for X11 communication
-            "--net=host",  
+            # Port mapping for Meshcat (Standard Port 7000)
+            "-p", "7000:7000",
             # Environment variables
             "-e", "DISPLAY=host.docker.internal:0",
             "-e", "QT_X11_NO_MITSHM=1",
+            "-e", "MESHCAT_HOST=0.0.0.0",  # Bind to all interfaces in container
             # Mount workspace
             "-v", f"{repo_root_host}:/workspace",
             # Image
