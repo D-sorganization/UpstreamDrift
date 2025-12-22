@@ -91,10 +91,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.dt = DT_DEFAULT
 
         # Diagnostics
-        try:
-            logger.info(f"Pinocchio Version: {pin.__version__}")
-        except AttributeError:
-            logger.info("Pinocchio version unknown")
+        pin_version = getattr(pin, "__version__", "unknown")
+        logger.info(f"Pinocchio Version: {pin_version}")
         logger.info(f"Python Executable: {sys.executable}")
         # Meshcat viewer
         # Do not open browser automatically; user can open Meshcat URL manually if
@@ -103,9 +101,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         try:
             self.viewer = viz.Visualizer()  # Let it find port
             logger.info("Meshcat URL: %s", self.viewer.url)
-        except Exception as e:
-            logger.error(f"Failed to initialize Meshcat viewer: {e}")
-            self.log_write(f"Error: Failed to initialize Meshcat viewer: {e}")
+        except (ConnectionError, OSError, RuntimeError) as exc:
+            logger.error(f"Failed to initialize Meshcat viewer: {exc}")
+            self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
             self.log_write("Please ensure meshcat-server is running or try again.")
 
         # Setup UI
