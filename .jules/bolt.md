@@ -19,3 +19,7 @@
 ## 2025-05-21 - MuJoCo MjData Allocation Cost
 **Learning:** Creating `mujoco.MjData(model)` is an expensive operation as it allocates memory for the entire simulation state. In trajectory analysis loops where perturbed state is needed (e.g., for finite differences), re-allocating `MjData` at each step kills performance.
 **Action:** Pre-allocate a scratch `MjData` object in `__init__` and reuse it for temporary calculations (like finite difference perturbations), ensuring proper state resetting or overwriting.
+
+## 2025-05-21 - Python Buffer Reuse Overhead
+**Learning:** In the Recursive Newton-Euler Algorithm (RNEA), pre-allocating buffers to avoid allocating ~50 small (6x6) matrices per step reduced GC pressure but did not improve execution speed (measured ~2% slowdown). The overhead of Python function calls and `np.matmul(..., out=...)` argument processing outweighed the cost of small allocations, which NumPy handles very efficiently.
+**Action:** Prioritize buffer reuse for large arrays or where GC pause is critical. For small, short-lived arrays (like 6x6 spatial transforms), simple allocation might be faster due to lower Python interpreter overhead.
