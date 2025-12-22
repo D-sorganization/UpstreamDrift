@@ -8,6 +8,8 @@ import logging
 import random
 import sys
 
+import numpy as np
+
 try:
     import torch
 
@@ -50,11 +52,7 @@ def set_seeds(seed: int = DEFAULT_SEED) -> None:
 
     """
     random.seed(seed)
-
-    # Import numpy only when needed
-    import numpy as np
-
-    np.random.default_rng(seed)
+    np.random.seed(seed)
 
     # Set PyTorch seeds if PyTorch is available
     if TORCH_AVAILABLE:

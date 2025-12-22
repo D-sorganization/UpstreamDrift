@@ -32,11 +32,18 @@ class TestLauncherIntegration:
         suite_root = Path(__file__).parent.parent.parent
         script = suite_root / "launch_golf_suite.py"
 
+        # Prepare environment with offscreen platform for headless testing
+        import os
+
+        env = os.environ.copy()
+        env["QT_QPA_PLATFORM"] = "offscreen"
+
         result = subprocess.run(
             [sys.executable, str(script), "--status"],
             capture_output=True,
             text=True,
             timeout=10,
+            env=env,
         )
 
         # Should complete successfully
