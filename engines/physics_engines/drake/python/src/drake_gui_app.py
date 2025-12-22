@@ -189,7 +189,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         if self.simulator:
             self.simulator.Initialize()
 
-        diagram.Publish(context)
+        diagram.ForcedPublish(context)
 
         # Sync generic UI controls if needed
         self._sync_kinematic_sliders()
@@ -413,7 +413,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             elif isinstance(joint, PrismaticJoint):
                 joint.set_translation(plant_context, angle)
 
-        diagram.Publish(context)
+        diagram.ForcedPublish(context)
 
         # Update overlays
         if self.visualizer:
@@ -556,7 +556,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         # Refresh kinematics to update frame positions immediately
         if self.operating_mode == "kinematic":
-            diagram.Publish(context)
+            diagram.ForcedPublish(context)
             if self.visualizer:
                 self.visualizer.update_frame_transforms(context)
                 self.visualizer.update_com_transforms(context)

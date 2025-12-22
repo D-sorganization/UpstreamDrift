@@ -693,21 +693,33 @@ class GolfLauncher(QMainWindow):
         # Entry Command
         if "Drake" in model_name:
             # Run as module for relative imports (workdir is now /workspace/python)
-            cmd.extend(["/opt/mujoco-env/bin/python", "-m", "src.golf_gui"])
+            # FIX: Use drake_gui_app instead of the empty golf_gui
+            cmd.extend(["/opt/mujoco-env/bin/python", "-m", "src.drake_gui_app"])
 
             if host_port:
+                logger.info(f"Drake Meshcat will be available on host port {host_port}")
                 self._start_meshcat_browser(host_port)
 
         elif "Pinocchio" in model_name:
             # Run from python dir
             cmd.extend(["/opt/mujoco-env/bin/python", "pinocchio_golf/gui.py"])
 
-        logger.info(f"Docker Command: {' '.join(cmd)}")
+        logger.info(f"Final Docker Command: {' '.join(cmd)}")
 
         # Launch in Terminal
         if os.name == "nt":
+            # Add a diagnostic echo and pause to the terminal so users can see errors
+            diagnostic_cmd = [
+                "cmd",
+                "/k",
+                "echo Launching simulation container... && echo Command: "
+                + " ".join(cmd)
+                + " && "
+                + " ".join(cmd),
+            ]
+            logger.info("Starting new console for simulation...")
             subprocess.Popen(
-                ["cmd", "/k", *cmd], creationflags=subprocess.CREATE_NEW_CONSOLE
+                diagnostic_cmd, creationflags=subprocess.CREATE_NEW_CONSOLE
             )
         else:
             subprocess.Popen(cmd)
