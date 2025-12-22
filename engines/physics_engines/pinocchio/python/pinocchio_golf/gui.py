@@ -99,9 +99,27 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         # desired.
         self.viewer: viz.Visualizer | None = None
         try:
-            self.viewer = viz.Visualizer()  # Let it find port
+            # Check standard env var or default to all interfaces for Docker
+            # Note: meshcat-python (depending on version) might bind 127.0.0.1
+            # or 0.0.0.0.
+            # We remove the invalid 'host' arg to fix the crash.
+            self.viewer = viz.Visualizer()
+
+            # Get the actual port (in case it picked a random one, though usually 7000)
             url = self.viewer.url() if callable(self.viewer.url) else self.viewer.url
-            logger.info("Meshcat URL: %s", url)
+
+            # Log the container-internal URL
+            logger.info("Internal Meshcat URL: %s", url)
+
+            # Log the Host-accessible URL (assuming port forwarding)
+            # Extract port from the internal URL
+            try:
+                port = url.split(":")[-1].split("/")[0]
+                host_url = f"http://127.0.0.1:{port}/static/"
+                logger.info(f"Host Access URL: {host_url}")
+                self.log_write(f"Visualizer available at: {host_url}")
+            except Exception:
+                logger.info("Could not determine host URL from: %s", url)
         except (ConnectionError, OSError, RuntimeError) as exc:
             logger.error(f"Failed to initialize Meshcat viewer: {exc}")
             self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
@@ -171,6 +189,27 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.chk_torques = QtWidgets.QCheckBox("Show Torques")
         self.chk_torques.toggled.connect(self._toggle_torques)
         vis_layout.addWidget(self.chk_torques)
+
+        # Vector Scales
+        scale_layout = QtWidgets.QVBoxLayout()
+
+        self.spin_force_scale = QtWidgets.QDoubleSpinBox()
+        self.spin_force_scale.setRange(0.01, 10.0)
+        self.spin_force_scale.setSingleStep(0.05)
+        self.spin_force_scale.setValue(0.1)
+        self.spin_force_scale.setPrefix("F Scale: ")
+        self.spin_force_scale.valueChanged.connect(self._update_viewer)
+        scale_layout.addWidget(self.spin_force_scale)
+
+        self.spin_torque_scale = QtWidgets.QDoubleSpinBox()
+        self.spin_torque_scale.setRange(0.01, 10.0)
+        self.spin_torque_scale.setSingleStep(0.05)
+        self.spin_torque_scale.setValue(0.1)
+        self.spin_torque_scale.setPrefix("T Scale: ")
+        self.spin_torque_scale.valueChanged.connect(self._update_viewer)
+        scale_layout.addWidget(self.spin_torque_scale)
+
+        vis_layout.addLayout(scale_layout)
 
         vis_group.setLayout(vis_layout)
         layout.addWidget(vis_group)
@@ -493,8 +532,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         # self.data.f will contain spatial forces at each joint
         pin.rnea(self.model, self.data, self.q, v, a)
 
-        FORCE_SCALE = 0.1
-        TORQUE_SCALE = 0.1
+        force_scale = self.spin_force_scale.value()
+        torque_scale = self.spin_torque_scale.value()
 
         for i in range(1, self.model.njoints):
             joint_placement = self.data.oMi[i]
@@ -513,7 +552,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 self._draw_arrow(
                     f"overlays/forces/{joint_name}",
                     joint_placement.translation,
-                    f_world * FORCE_SCALE,
+                    f_world * force_scale,
                     0xFF0000,  # Red for force
                 )
 
@@ -522,7 +561,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 self._draw_arrow(
                     f"overlays/torques/{joint_name}",
                     joint_placement.translation,
-                    t_world * TORQUE_SCALE,
+                    t_world * torque_scale,
                     0x0000FF,  # Blue for torque
                 )
 
@@ -595,7 +634,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                         continue
                     # Triad
                     self.viewer[f"overlays/frames/{frame.name}"].set_object(
-                        g.Triad(scale=0.1)
+                        g.triad(scale=0.1)
                     )
             self._update_viewer()
 

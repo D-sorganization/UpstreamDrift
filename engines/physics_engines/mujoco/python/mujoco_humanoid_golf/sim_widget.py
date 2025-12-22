@@ -15,6 +15,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from .biomechanics import BiomechanicalAnalyzer, SwingRecorder
 from .control_system import ControlSystem, ControlType
 from .interactive_manipulation import InteractiveManipulator
+from .meshcat_adapter import MuJoCoMeshcatAdapter
 from .telemetry import TelemetryRecorder
 
 try:
@@ -59,6 +60,20 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.control_system: ControlSystem | None = None
         self.camera_name = "side"
 
+        # Visual toggles
+        self.show_force_vectors = False
+        self.show_torque_vectors = False
+        self.force_scale = 0.1
+        self.torque_scale = 0.1
+
+        # Meshcat integration
+        self.meshcat_adapter: MuJoCoMeshcatAdapter | None = None
+        # Lazy init or direct? Let's init if possible.
+        try:
+            self.meshcat_adapter = MuJoCoMeshcatAdapter()
+        except Exception:
+            LOGGER.warning("Could not initialize Meshcat adapter")
+
         self.telemetry: TelemetryRecorder | None = None
 
         self.running = True  # start in "playing" mode
@@ -75,13 +90,6 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.camera.elevation = -20.0
         self.camera.distance = 3.0
         self.camera.lookat[:] = [0, 0, 1]
-
-        # Force/torque visualization settings
-        self.show_torque_vectors = False
-        self.show_force_vectors = False
-        self.show_contact_forces = False
-        self.torque_scale = 0.01  # Scale factor for torque arrow length
-        self.force_scale = 0.1  # Scale factor for force arrow length
 
         # Visualization for selected bodies and constraints
         self.show_selected_body = True
@@ -115,7 +123,6 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         # UI: a simple label to show the image
         self.label = QtWidgets.QLabel(self)
-        self.label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(self.label)
@@ -203,6 +210,11 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
             # Ensure render once to populate buffer
             self._render_once()
+
+            # Load Meshcat Geometry
+            if self.meshcat_adapter:
+                self.meshcat_adapter.model = self.model
+                self.meshcat_adapter.load_model_geometry()
 
         except Exception:
             LOGGER.exception("Failed to load model from XML")
@@ -740,6 +752,20 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         # Add coordinate frames and centers of mass
         if self.visible_frames or self.visible_coms:
             rgb = self._add_frame_and_com_overlays(rgb)
+
+        # Update Meshcat
+        if self.meshcat_adapter:
+            try:
+                self.meshcat_adapter.update(self.data)
+                self.meshcat_adapter.draw_vectors(
+                    self.data,
+                    self.show_force_vectors,
+                    self.show_torque_vectors,
+                    self.force_scale,
+                    self.torque_scale,
+                )
+            except Exception:
+                pass  # Avoid crashing main loop if meshcat fails
 
         # Convert to QImage / QPixmap
         h, w, _ = rgb.shape

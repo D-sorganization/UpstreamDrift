@@ -43,3 +43,4 @@ pillow>=10.0.0              # Image processing
 # Note: The PyPI package is named 'pin' (install with `pip install pin`).
 #       The conda-forge package is named 'pinocchio' (install with `conda install -c conda-forge pinocchio`).
 defusedxml>=0.7.1
+meshcat>=0.3.2 # Web visualization
