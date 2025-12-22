@@ -9,6 +9,7 @@ import meshcat.geometry as g
 import meshcat.visualizer as viz
 import numpy as np  # noqa: TID253
 import pinocchio as pin
+from pinocchio.visualize import MeshcatVisualizer
 from PyQt6 import QtCore, QtWidgets
 
 # Set up logging
@@ -75,6 +76,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         # Internal state
         self.model: pin.Model | None = None
         self.data: pin.Data | None = None
+        self.visual_model: pin.VisualModel | None = None
+        self.collision_model: pin.CollisionModel | None = None
+        self.viz: MeshcatVisualizer | None = None
         self.q: np.ndarray | None = None
         self.v: np.ndarray | None = None
 
@@ -197,29 +201,37 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             return
 
         try:
+            # Build models
             self.model = pin.buildModelFromUrdf(fname)
             if self.model is None:
                 self.log_write("Error loading URDF: Failed to build model")
                 return
 
+            self.visual_model = pin.buildVisualModelFromUrdf(fname)
+            self.collision_model = pin.buildCollisionModelFromUrdf(fname)
+
             self.data = self.model.createData()
             self.q = pin.neutral(self.model)
             self.v = np.zeros(self.model.nv)
 
-            # Load visual into Meshcat
-            # Careful: meshcat URDF loader is separate from Pinocchio
+            # Initialize Pinocchio MeshcatVisualizer
             self.viewer["robot"].delete()
             self.viewer["overlays"].delete()
-            self.viewer["robot"].set_object(g.URDFLoader().load(fname))
 
-            self.log_write(f"Loaded URDF: {fname}")
+            self.viz = MeshcatVisualizer(
+                self.model, self.collision_model, self.visual_model
+            )
+            self.viz.initViewer(viewer=self.viewer, open=False)
+            self.viz.loadViewerModel(root_node_name="robot")
+
+            self.log_write(f"Successfully loaded URDF: {fname}")
             self.log_write(f"NQ: {self.model.nq}, NV: {self.model.nv}")
 
             # Rebuild Kinematic Controls
             self._build_kinematic_controls()
             self._sync_kinematic_controls()
 
-            # Init state
+            # Init state display
             self._update_viewer()
 
             # Restore overlays for new model if checkboxes are active
@@ -232,7 +244,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 self.timer.start(int(self.dt * 1000))
 
         except (ValueError, RuntimeError) as e:
-            self.log_write(f"Error loading URDF: {e}")
+            self.log_write(f"Error loading URDF (Pinocchio): {e}")
         except Exception as e:
             # Catch-all for unexpected errors
             self.log_write(f"Unexpected error loading URDF: {e}")
@@ -411,20 +423,18 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self._update_viewer()
 
     def _update_viewer(self) -> None:
-        if self.model is None or self.data is None or self.q is None:
+        if (
+            self.model is None
+            or self.data is None
+            or self.q is None
+            or self.viz is None
+        ):
             return
 
-        # Update Visuals
-        q_dict = {}
-        for i in range(1, self.model.njoints):
-            j = self.model.joints[i]
-            if j.nq == 1:
-                # Map to joint name, not q index
-                q_dict[self.model.names[i]] = self.q[j.idx_q]
+        # Update Visuals via Pinocchio Visualizer
+        self.viz.display(self.q)
 
-        self.viewer["robot"].set_joint_positions(q_dict)
-
-        # Kinematics Logic for frames
+        # Kinematics Logic for frames (needed for custom overlays)
         pin.forwardKinematics(self.model, self.data, self.q)
         pin.updateFramePlacements(self.model, self.data)
 
