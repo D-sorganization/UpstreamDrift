@@ -49,7 +49,17 @@
     "two_handed": false,
     "enhance_face": false,
     "articulated_fingers": false,
-    "polynomial_coefficients": {},
+    "polynomial_coefficients": {
+        "lowerbackrx": [
+            -0.0003477049093795018,
+            0.013038044814800212,
+            -0.17726758699999387,
+            1.0757644686991492,
+            -2.9041966036487796,
+            3.0109860432058553,
+            1.6640295494138317
+        ]
+    },
     "show_contact_forces": true,
     "show_joint_torques": true,
     "show_tracers": true,
