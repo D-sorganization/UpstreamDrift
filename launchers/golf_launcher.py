@@ -336,7 +336,7 @@ class GolfLauncher(QMainWindow):
         for icon_path in icon_candidates:
             if icon_path.exists():
                 self.setWindowIcon(QIcon(str(icon_path)))
-                logger.info(f"Loaded icon: {icon_path.name}")
+                logger.info("Loaded icon: %s", icon_path.name)
                 icon_loaded = True
                 break
 
