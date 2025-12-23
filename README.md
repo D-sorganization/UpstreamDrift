@@ -1,6 +1,8 @@
-# Golf Modeling Suite
+# Golf Modeling Suite 🤖
 
 **A unified platform for golf swing analysis across multiple physics engines and modeling approaches**
+
+![GolfingRobot](GolfingRobot.png)
 
 > ⚠️ **BETA STATUS**: The codebase migration is 95% complete. The architecture and GUI are functional, but **engine loading logic is currently a placeholder**. Multi-engine simulations and engine switching are not yet fully operational. See [MIGRATION_STATUS.md](MIGRATION_STATUS.md) for details.
 
@@ -33,6 +35,15 @@ python launchers/golf_launcher.py
 # Local Python launcher  
 python launchers/golf_suite_launcher.py
 ```
+
+### Desktop Shortcut (Windows)
+Create a desktop shortcut with the new GolfingRobot icon:
+```powershell
+# Run from repository root
+powershell -ExecutionPolicy Bypass -File create_golf_robot_shortcut.ps1
+```
+
+This creates a desktop shortcut that launches the Golf Modeling Suite with the GolfingRobot branding and icon.
 
 ## Repository Structure
 
