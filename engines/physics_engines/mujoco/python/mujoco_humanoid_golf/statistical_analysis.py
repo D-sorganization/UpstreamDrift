@@ -55,6 +55,17 @@ class SwingPhase:
     duration: float
 
 
+@dataclass
+class KinematicSequenceInfo:
+    """Information about the kinematic sequence."""
+
+    segment_name: str
+    peak_velocity: float
+    peak_time: float
+    peak_index: int
+    order_index: int
+
+
 class StatisticalAnalyzer:
     """Comprehensive statistical analysis for golf swing data."""
 
@@ -579,6 +590,103 @@ class StatisticalAnalyzer:
             return signal_processing.compute_spectral_arc_length(data, fs)
         except ImportError:
             return 0.0
+
+    def analyze_kinematic_sequence(
+        self,
+        segment_indices: dict[str, int],
+    ) -> tuple[list[KinematicSequenceInfo], float]:
+        """Analyze the kinematic sequence of the swing.
+
+        The kinematic sequence refers to the proximal-to-distal sequencing of
+        peak rotational velocities (e.g., Pelvis -> Thorax -> Arm -> Club).
+
+        Args:
+            segment_indices: Dictionary mapping segment names to joint indices.
+                             Example: {'Pelvis': 0, 'Thorax': 1, 'Arm': 2}
+
+        Returns:
+            Tuple of:
+            - List of KinematicSequenceInfo objects sorted by peak time
+            - Sequence efficiency score (0.0 to 1.0, 1.0 being perfect order)
+        """
+        sequence_info = []
+
+        # Analyze each segment
+        for segment_name, joint_idx in segment_indices.items():
+            if joint_idx >= self.joint_velocities.shape[1]:
+                continue
+
+            # Get velocity magnitude
+            velocities = np.abs(self.joint_velocities[:, joint_idx])
+
+            # Find peak
+            max_idx = np.argmax(velocities)
+            peak_val = float(velocities[max_idx])
+            peak_time = float(self.times[max_idx])
+
+            sequence_info.append(
+                KinematicSequenceInfo(
+                    segment_name=segment_name,
+                    peak_velocity=peak_val,
+                    peak_time=peak_time,
+                    peak_index=int(max_idx),
+                    order_index=0,  # Will be set later
+                ),
+            )
+
+        # Sort by peak time
+        sequence_info.sort(key=lambda x: x.peak_time)
+
+        # Assign order indices
+        for i, info in enumerate(sequence_info):
+            info.order_index = i
+
+        # Calculate efficiency score
+        # Ideally, the order should match the expected proximal-to-distal order
+        # which is implied by the order of keys in segment_indices
+        # (if it's an OrderedDict or Python 3.7+ dict).
+        # However, since we can't guarantee the input order is the "correct" order,
+        # we'll assume the user provides a list of segments in the expected order.
+        expected_order = list(segment_indices.keys())
+        actual_order = [info.segment_name for info in sequence_info]
+
+        # Calculate Levenshtein distance or simpler match score
+        matches = sum(
+            1 for e, a in zip(expected_order, actual_order, strict=False) if e == a
+        )
+        efficiency_score = matches / len(expected_order) if expected_order else 0.0
+
+        return sequence_info, efficiency_score
+
+    def compute_correlations(
+        self,
+        data_type: str = "velocity",
+    ) -> tuple[np.ndarray, list[str]]:
+        """Compute correlation matrix for joint data.
+
+        Args:
+            data_type: Type of data to correlate ('position', 'velocity', 'torque')
+
+        Returns:
+            Tuple of (correlation_matrix, labels)
+        """
+        if data_type == "position":
+            data = self.joint_positions
+        elif data_type == "torque":
+            data = self.joint_torques
+        else:  # velocity
+            data = self.joint_velocities
+
+        if data.shape[1] == 0:
+            return np.array([]), []
+
+        # Calculate correlation matrix
+        # Transpose so that rows are variables (joints), columns are observations
+        corr_matrix = np.corrcoef(data.T)
+
+        labels = [f"J{i}" for i in range(data.shape[1])]
+
+        return corr_matrix, labels
 
     def export_statistics_csv(
         self,
