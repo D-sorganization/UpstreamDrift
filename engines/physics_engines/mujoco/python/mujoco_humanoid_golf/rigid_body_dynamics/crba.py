@@ -52,44 +52,83 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
         raise ValueError(msg)
 
     # Initialize arrays
-    xup = [np.zeros((6, 6)) for _ in range(nb)]  # Transforms from body to parent
-    s_subspace = [np.zeros(6) for _ in range(nb)]  # Motion subspaces
-    ic_composite = [np.zeros((6, 6)) for _ in range(nb)]  # Composite inertias
+    # OPTIMIZATION: Use list of pre-allocated arrays.
+    # We avoid 3D arrays because accessing arr[i] creates a view, which has overhead.
+    xup = [np.zeros((6, 6)) for _ in range(nb)]
+
+    # Motion subspaces (list of arrays as they can be references to constants)
+    s_subspace = [None] * nb
+
+    # Composite inertias
+    ic_composite = [np.zeros((6, 6)) for _ in range(nb)]
+
     h_matrix = np.zeros((nb, nb))  # Mass matrix
+
+    # Pre-allocate temporary buffers to avoid allocation in loop
+    xj_buf = np.zeros((6, 6))
+    tmp_6x6 = np.zeros((6, 6))
+    f_force = np.zeros(6)
+    scratch_vec = np.zeros(6)
 
     # --- Forward pass: compute transforms and motion subspaces ---
     for i in range(nb):
-        xj_transform, s_subspace[i] = jcalc(model["jtype"][i], q[i])
-        xup[i] = xj_transform @ model["Xtree"][i]
+        # OPTIMIZATION: Use out parameter to avoid allocation
+        xj_transform, s_vec = jcalc(model["jtype"][i], q[i], out=xj_buf)
+        s_subspace[i] = s_vec
+
+        # xup[i] = xj_transform @ model["Xtree"][i]
+        # OPTIMIZATION: Use dot with out (faster than matmul for small 2D arrays)
+        np.dot(xj_transform, model["Xtree"][i], out=xup[i])
 
     # --- Backward pass: compute composite inertias ---
     # Initialize composite inertias with body inertias
     for i in range(nb):
-        ic_composite[i] = model["I"][i].copy()
+        ic_composite[i][:] = model["I"][i]
 
     # Accumulate inertias from children to parents
     for i in range(nb - 1, -1, -1):
         if model["parent"][i] != -1:
             p = model["parent"][i]
             # Transform composite inertia to parent frame and add
-            ic_composite[p] = ic_composite[p] + xup[i].T @ ic_composite[i] @ xup[i]
+            # ic_composite[p] += xup[i].T @ ic_composite[i] @ xup[i]
+
+            # OPTIMIZATION: Break down to minimize allocation using dot
+            # 1. tmp_6x6 = ic_composite[i] @ xup[i]
+            np.dot(ic_composite[i], xup[i], out=tmp_6x6)
+
+            # 2. Add xup[i].T @ tmp_6x6 to ic_composite[p]
+            # Reuse xj_buf as scratch space
+            np.dot(xup[i].T, tmp_6x6, out=xj_buf)
+
+            ic_composite[p] += xj_buf
 
     # --- Compute mass matrix ---
     # H(i,j) represents the coupling between joints i and j
     for i in range(nb):
         # f_force is the force transmitted through joint i due to unit acceleration
         # at joint i, affecting the composite body rooted at i
-        f_force = ic_composite[i] @ s_subspace[i]
-        h_matrix[i, i] = s_subspace[i] @ f_force  # Diagonal element
+
+        # f_force = ic_composite[i] @ s_subspace[i]
+        np.dot(ic_composite[i], s_subspace[i], out=f_force)
+
+        # h_matrix[i, i] = s_subspace[i] @ f_force  # Diagonal element
+        h_matrix[i, i] = np.dot(s_subspace[i], f_force)
 
         # Propagate force up the tree to compute off-diagonal elements
         j = i
         while model["parent"][j] != -1:
             p = model["parent"][j]
-            f_force = xup[j].T @ f_force  # Transform force to parent frame
-            h_matrix[i, p] = s_subspace[p] @ f_force  # Off-diagonal element
-            h_matrix[p, i] = h_matrix[i, p]  # Symmetric
+
+            # f_force = xup[j].T @ f_force  # Transform force to parent frame
+            # OPTIMIZATION: Use scratch buffer
+            np.dot(xup[j].T, f_force, out=scratch_vec)
+            f_force[:] = scratch_vec
+
+            # h_matrix[i, p] = s_subspace[p] @ f_force  # Off-diagonal element
+            val = np.dot(s_subspace[p], f_force)
+            h_matrix[i, p] = val
+            h_matrix[p, i] = val  # Symmetric
             j = p
 
-    # Ensure exact symmetry (numerical precision)
-    return (h_matrix + h_matrix.T) / 2
+    # OPTIMIZATION: Removed expensive (H + H.T) / 2 step.
+    return h_matrix
