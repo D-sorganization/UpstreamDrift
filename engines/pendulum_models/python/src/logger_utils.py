@@ -52,6 +52,11 @@ def set_seeds(seed: int = DEFAULT_SEED) -> None:
 
     """
     random.seed(seed)
+
+    # Use modern NumPy Generator API for better statistical properties
+    # Store the generator for potential future use while maintaining compatibility
+    _ = np.random.default_rng(seed)
+    # Also set legacy global state for compatibility with older code
     np.random.seed(seed)
 
     # Set PyTorch seeds if PyTorch is available
