@@ -5,6 +5,8 @@ Implements joint transformation and motion subspace calculations
 for various joint types.
 """
 
+import math
+
 import numpy as np
 
 # Constants for motion subspaces to avoid reallocation
@@ -75,8 +77,8 @@ def jcalc(
         xj_transform.fill(0.0)
 
     if jtype == "Rx":  # Revolute about x-axis
-        c = np.cos(q)
-        s = np.sin(q)
+        c = math.cos(q)
+        s = math.sin(q)
         # Top-left 3x3
         xj_transform[0, 0] = 1.0
         xj_transform[1, 1] = c
@@ -92,8 +94,8 @@ def jcalc(
         s_subspace = S_RX
 
     elif jtype == "Ry":  # Revolute about y-axis
-        c = np.cos(q)
-        s = np.sin(q)
+        c = math.cos(q)
+        s = math.sin(q)
         # Top-left 3x3
         xj_transform[0, 0] = c
         xj_transform[0, 2] = s
@@ -109,8 +111,8 @@ def jcalc(
         s_subspace = S_RY
 
     elif jtype == "Rz":  # Revolute about z-axis
-        c = np.cos(q)
-        s = np.sin(q)
+        c = math.cos(q)
+        s = math.sin(q)
         # Top-left 3x3
         xj_transform[0, 0] = c
         xj_transform[0, 1] = -s
