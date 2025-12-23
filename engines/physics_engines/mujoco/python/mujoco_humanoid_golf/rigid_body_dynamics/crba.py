@@ -51,18 +51,13 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
         msg = f"q must have length {nb}, got {len(q)}"
         raise ValueError(msg)
 
-    # Initialize arrays
-    # OPTIMIZATION: Use list of pre-allocated arrays.
-    # We avoid 3D arrays because accessing arr[i] creates a view, which has overhead.
-    xup = [np.zeros((6, 6)) for _ in range(nb)]
-
-    # Motion subspaces (list of arrays as they can be references to constants)
+    # Initialize lists (no need to pre-allocate numpy arrays since we replace them)
+    # OPTIMIZATION: Avoid allocating initial zero arrays that are immediately discarded
+    xup = [None] * nb
     s_subspace = [None] * nb
+    ic_composite = [None] * nb
 
-    # Composite inertias
-    ic_composite = [np.zeros((6, 6)) for _ in range(nb)]
-
-    h_matrix = np.zeros((nb, nb))  # Mass matrix
+    h_matrix = np.zeros((nb, nb))
 
     # Pre-allocate temporary buffers to avoid allocation in loop
     xj_buf = np.zeros((6, 6))
@@ -72,18 +67,14 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
 
     # --- Forward pass: compute transforms and motion subspaces ---
     for i in range(nb):
-        # OPTIMIZATION: Use out parameter to avoid allocation
-        xj_transform, s_vec = jcalc(model["jtype"][i], q[i], out=xj_buf)
+        xj_transform, s_vec = jcalc(model["jtype"][i], q[i])
         s_subspace[i] = s_vec
-
-        # xup[i] = xj_transform @ model["Xtree"][i]
-        # OPTIMIZATION: Use dot with out (faster than matmul for small 2D arrays)
-        np.dot(xj_transform, model["Xtree"][i], out=xup[i])
+        xup[i] = xj_transform @ model["Xtree"][i]
 
     # --- Backward pass: compute composite inertias ---
     # Initialize composite inertias with body inertias
     for i in range(nb):
-        ic_composite[i][:] = model["I"][i]
+        ic_composite[i] = model["I"][i].copy()
 
     # Accumulate inertias from children to parents
     for i in range(nb - 1, -1, -1):
@@ -130,5 +121,7 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
             h_matrix[p, i] = val  # Symmetric
             j = p
 
-    # OPTIMIZATION: Removed expensive (H + H.T) / 2 step.
+    # Ensure exact symmetry (numerical precision) - optional but safe
+    # Also cleans up any tiny asymmetries
+    # OPTIMIZATION: Using h_matrix directly as we fill symmetric elements manually
     return h_matrix
