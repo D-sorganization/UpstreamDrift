@@ -49,6 +49,16 @@ function resetStateFromInputs() {
   state.omega1 = 0; state.omega2 = 0; state.time = 0;
 }
 
+function validateExpr(expr) {
+  try {
+    // Check syntax with dummy context keys matching torques()
+    new Function('t', 'theta1', 'theta2', 'omega1', 'omega2', 'Math', `return ${expr};`);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 function updateParamsFromInputs() {
   params.l1 = Number(document.getElementById('l1').value);
   params.l2 = Number(document.getElementById('l2').value);
@@ -58,8 +68,20 @@ function updateParamsFromInputs() {
   params.com1 = Number(document.getElementById('com1').value);
   params.com2 = Number(document.getElementById('com2').value);
   params.plane = Number(document.getElementById('plane').value);
-  params.tau1Expr = document.getElementById('tau1').value || '0';
-  params.tau2Expr = document.getElementById('tau2').value || '0';
+
+  const tau1Input = document.getElementById('tau1');
+  const tau2Input = document.getElementById('tau2');
+
+  [tau1Input, tau2Input].forEach(input => {
+    if (validateExpr(input.value || '0')) {
+      input.classList.remove('error');
+    } else {
+      input.classList.add('error');
+    }
+  });
+
+  params.tau1Expr = tau1Input.value || '0';
+  params.tau2Expr = tau2Input.value || '0';
 }
 
 function safeEval(expr, context) {
@@ -292,6 +314,15 @@ document.addEventListener('keydown', (e) => {
     animationId ? pause() : start();
   } else if (e.key === 'r' || e.key === 'R') {
     reset();
+  }
+});
+
+document.querySelectorAll('.grid input').forEach(input => {
+  if (input.id !== 'theta1' && input.id !== 'theta2') {
+    input.addEventListener('input', () => {
+      updateParamsFromInputs();
+      if (!animationId) draw();
+    });
   }
 });
 
