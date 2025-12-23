@@ -643,15 +643,17 @@ class StatisticalAnalyzer:
 
         # Calculate efficiency score
         # Ideally, the order should match the expected proximal-to-distal order
-        # which is implied by the order of keys in segment_indices (if it's an OrderedDict
-        # or Python 3.7+ dict).
-        # However, since we can't guarantee the input order is the "correct" physical order,
+        # which is implied by the order of keys in segment_indices
+        # (if it's an OrderedDict or Python 3.7+ dict).
+        # However, since we can't guarantee the input order is the "correct" order,
         # we'll assume the user provides a list of segments in the expected order.
         expected_order = list(segment_indices.keys())
         actual_order = [info.segment_name for info in sequence_info]
 
         # Calculate Levenshtein distance or simpler match score
-        matches = sum(1 for e, a in zip(expected_order, actual_order, strict=False) if e == a)
+        matches = sum(
+            1 for e, a in zip(expected_order, actual_order, strict=False) if e == a
+        )
         efficiency_score = matches / len(expected_order) if expected_order else 0.0
 
         return sequence_info, efficiency_score
