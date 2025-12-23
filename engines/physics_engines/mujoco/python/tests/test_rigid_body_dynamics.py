@@ -13,8 +13,7 @@ from mujoco_humanoid_golf.rigid_body_dynamics.crba import crba
 from mujoco_humanoid_golf.rigid_body_dynamics.rnea import rnea
 from mujoco_humanoid_golf.spatial_algebra.inertia import mci
 from mujoco_humanoid_golf.spatial_algebra.transforms import xlt
-
-GRAVITY_M_S2 = 9.81
+from shared.python import constants
 
 
 def create_2link_model() -> dict:
@@ -29,7 +28,7 @@ def create_2link_model() -> dict:
         "jtype": ["Rz", "Rz"],
         # Gravity in -y direction for planar robot rotating about z
         # Spatial vector format: [angular; linear] = [0,0,0; 0,-g,0]
-        "gravity": np.array([0, 0, 0, 0, -GRAVITY_M_S2, 0]),
+        "gravity": np.array([0, 0, 0, 0, -constants.GRAVITY_M_S2, 0]),
     }
 
     # Link parameters
@@ -316,7 +315,7 @@ class TestSingleBodySystem:
             "parent": np.array([-1]),
             "jtype": ["Rz"],
             # Gravity in -y direction for planar robot rotating about z
-            "gravity": np.array([0, 0, 0, 0, -GRAVITY_M_S2, 0]),
+            "gravity": np.array([0, 0, 0, 0, -constants.GRAVITY_M_S2, 0]),
             "Xtree": [np.eye(6)],
             "I": [mci(1.0, np.array([0.5, 0, 0]), np.diag([0, 0, 1.0 * 0.5**2]))],
         }

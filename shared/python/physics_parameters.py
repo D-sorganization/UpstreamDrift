@@ -12,6 +12,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from shared.python import constants
+
 
 class ParameterCategory(Enum):
     """Categories of physics parameters."""
@@ -97,13 +99,13 @@ class PhysicsParameterRegistry:
         self.register(
             PhysicsParameter(
                 name="BALL_MASS",
-                value=0.04593,  # kg
+                value=constants.GOLF_BALL_MASS_KG,
                 unit="kg",
                 category=ParameterCategory.BALL,
                 description="Golf ball mass (USGA maximum)",
                 source="USGA Rules of Golf, Appendix III",
-                min_value=0.04593,
-                max_value=0.04593,
+                min_value=constants.GOLF_BALL_MASS_KG,
+                max_value=constants.GOLF_BALL_MASS_KG,
                 is_constant=True,  # Exact per rules
             )
         )
@@ -111,12 +113,12 @@ class PhysicsParameterRegistry:
         self.register(
             PhysicsParameter(
                 name="BALL_DIAMETER",
-                value=0.04267,  # m (42.67 mm)
+                value=constants.GOLF_BALL_DIAMETER_M,
                 unit="m",
                 category=ParameterCategory.BALL,
                 description="Golf ball diameter (USGA minimum)",
                 source="USGA Rules of Golf, Appendix III",
-                min_value=0.04267,
+                min_value=constants.GOLF_BALL_DIAMETER_M,
                 max_value=0.10,  # Reasonable upper bound
                 is_constant=False,
             )
@@ -183,13 +185,13 @@ class PhysicsParameterRegistry:
         self.register(
             PhysicsParameter(
                 name="GRAVITY",
-                value=9.80665,  # m/s²
+                value=constants.GRAVITY_M_S2,
                 unit="m/s²",
                 category=ParameterCategory.ENVIRONMENT,
                 description="Standard gravity (sea level, 45° latitude)",
                 source="NIST",
-                min_value=9.80665,
-                max_value=9.80665,
+                min_value=constants.GRAVITY_M_S2,
+                max_value=constants.GRAVITY_M_S2,
                 is_constant=True,
             )
         )
@@ -197,7 +199,7 @@ class PhysicsParameterRegistry:
         self.register(
             PhysicsParameter(
                 name="AIR_DENSITY",
-                value=1.225,  # kg/m³
+                value=constants.AIR_DENSITY_SEA_LEVEL_KG_M3,
                 unit="kg/m³",
                 category=ParameterCategory.ENVIRONMENT,
                 description="Air density at sea level, 15°C",
@@ -211,7 +213,7 @@ class PhysicsParameterRegistry:
         self.register(
             PhysicsParameter(
                 name="DRAG_COEFFICIENT",
-                value=0.25,
+                value=constants.GOLF_BALL_DRAG_COEFFICIENT,
                 unit="dimensionless",
                 category=ParameterCategory.BALL,
                 description="Golf ball drag coefficient (typical)",

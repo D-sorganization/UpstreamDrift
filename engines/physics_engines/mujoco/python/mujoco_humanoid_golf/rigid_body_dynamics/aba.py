@@ -8,8 +8,8 @@ from __future__ import annotations
 
 import numpy as np
 from mujoco_humanoid_golf.spatial_algebra import cross_force, cross_motion, jcalc
+from shared.python import constants
 
-GRAVITY_M_S2 = 9.81
 TOLERANCE = 1e-10  # Numerical tolerance to avoid division by zero
 
 
@@ -83,7 +83,7 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         f_ext = np.zeros((6, nb))
 
     # Get gravity vector
-    a_grav = model.get("gravity", np.array([0, 0, 0, 0, 0, -GRAVITY_M_S2]))
+    a_grav = model.get("gravity", np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2]))
 
     # Initialize arrays
     xup: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Transforms from body to parent
