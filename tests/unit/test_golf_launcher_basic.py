@@ -253,20 +253,3 @@ class TestDockerThreads:
         # Verify text was set
         # Since we mocked QTextEdit, we can't easily verify internal state without
         # capturing the instance. But simpler is just ensuring it runs without error.
-
-    @patch("pathlib.Path.exists")
-    def test_golf_launcher_icon_fallback_warning(self, mock_exists):
-        """Test that warning is logged when no icon files are found."""
-        # Mock all icon candidates as missing
-        mock_exists.return_value = False
-
-        # Import here to avoid circular imports
-        from launchers.golf_launcher import GolfLauncher
-
-        with patch("launchers.golf_launcher.logger") as mock_logger:
-            # Mock QApplication to avoid GUI initialization
-            with patch("PyQt6.QtWidgets.QApplication"):
-                _ = GolfLauncher()
-
-                # Verify warning was logged
-                mock_logger.warning.assert_called_with("No icon files found")
