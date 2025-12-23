@@ -12,15 +12,36 @@ $pythonBasePath = Join-Path (Join-Path $env:USERPROFILE "AppData\Local\Programs\
 $pythonExePath = Join-Path $pythonBasePath "python.exe"
 $launcherPath = Join-Path (Join-Path $repoRoot "launchers") "golf_launcher.py"
 
-# Use the new GolfingRobot icon
-$iconPath = Join-Path (Join-Path $repoRoot "launchers\assets") "golf_robot_icon.ico"
+# Use the highest quality GolfingRobot icon (try cropped first, then regular)
+$iconCandidates = @(
+    (Join-Path (Join-Path $repoRoot "launchers\assets") "golf_robot_cropped_icon.ico"),
+    (Join-Path (Join-Path $repoRoot "launchers\assets") "golf_robot_icon.ico"),
+    (Join-Path (Join-Path $repoRoot "launchers\assets") "golf_icon.ico")
+)
+
+$iconPath = $null
+foreach ($candidate in $iconCandidates) {
+    if (Test-Path $candidate) {
+        $iconPath = $candidate
+        Write-Host "Using icon: $iconPath"
+        break
+    }
+}
+
+if (-not $iconPath) {
+    Write-Warning "No icon file found, shortcut will use default icon"
+    $iconPath = ""
+}
 
 # Configure shortcut properties
 $Shortcut.TargetPath = $pythonExePath
 $Shortcut.Arguments = "`"$launcherPath`""
 $Shortcut.WorkingDirectory = $repoRoot
 $Shortcut.Description = "Launch the Golf Modeling Suite with GolfingRobot"
-$Shortcut.IconLocation = $iconPath
+# Set icon if available
+if ($iconPath -and $iconPath -ne "") {
+    $Shortcut.IconLocation = $iconPath
+}
 
 # Save the shortcut
 $Shortcut.Save()
