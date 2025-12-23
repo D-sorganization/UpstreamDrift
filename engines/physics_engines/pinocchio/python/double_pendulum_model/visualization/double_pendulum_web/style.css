@@ -107,6 +107,11 @@ input:focus-visible {
   outline-offset: -1px;
 }
 
+input.error {
+  border-color: #ff6b6b;
+  background: #2a1515;
+}
+
 .readout {
   margin-top: 0.8rem;
   padding: 0.6rem;

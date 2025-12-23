@@ -13,3 +13,7 @@
 ## 2024-10-24 - Legacy Web Visualization Accessibility
 **Learning:** Legacy vanilla JS/HTML visualizations in this repo often lack basic accessibility (ARIA labels, focus states) and visual polish (icons) compared to modern frameworks.
 **Action:** Systematically upgrade legacy control panels with SVG icons and ARIA attributes to match modern standards without rewriting the underlying engine logic.
+
+## 2024-10-25 - Live Parameter Tuning in Physics Simulations
+**Learning:** Users expect immediate feedback when adjusting simulation parameters (mass, length) without restarting the simulation loop. This encourages "playful exploration".
+**Action:** Implement `input` listeners on parameter fields to update the simulation model in real-time, while carefully separating state variables (integrator state) from model parameters.
