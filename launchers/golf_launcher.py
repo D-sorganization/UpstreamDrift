@@ -319,13 +319,29 @@ class GolfLauncher(QMainWindow):
     def __init__(self):
         """Initialize the main window."""
         super().__init__()
-        self.setWindowTitle("Golf Modeling Suite")
+        self.setWindowTitle("Golf Modeling Suite - GolfingRobot")
         self.resize(1400, 900)
 
-        # Set Icon
-        icon_path = ASSETS_DIR / "golf_icon.png"
-        if icon_path.exists():
-            self.setWindowIcon(QIcon(str(icon_path)))
+        # Set Icon - Use Windows-optimized icon for maximum clarity on Windows
+        icon_candidates = [
+            ASSETS_DIR
+            / "golf_robot_windows_optimized.png",  # Windows-optimized (best for Windows)
+            ASSETS_DIR / "golf_robot_ultra_sharp.png",  # Ultra-sharp version
+            ASSETS_DIR / "golf_robot_cropped_icon.png",  # Cropped version
+            ASSETS_DIR / "golf_robot_icon.png",  # High-quality standard
+            ASSETS_DIR / "golf_icon.png",  # Original fallback
+        ]
+
+        icon_loaded = False
+        for icon_path in icon_candidates:
+            if icon_path.exists():
+                self.setWindowIcon(QIcon(str(icon_path)))
+                logger.info("Loaded icon: %s", icon_path.name)
+                icon_loaded = True
+                break
+
+        if not icon_loaded:
+            logger.warning("No icon files found")
 
         # State
         self.docker_available = False
