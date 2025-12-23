@@ -7,8 +7,7 @@ Demonstrates RNEA, CRBA, and ABA algorithms on a simple 2-link planar robot.
 import numpy as np
 from mujoco_humanoid_golf.rigid_body_dynamics import aba, crba, rnea
 from mujoco_humanoid_golf.spatial_algebra import mci, xlt
-
-GRAVITY_M_S2 = 9.80665  # Standard gravity constant (m/s²)
+from shared.python import constants
 
 
 def create_2link_model() -> dict:
@@ -25,7 +24,7 @@ def create_2link_model() -> dict:
         "NB": 2,
         "parent": np.array([-1, 0]),  # -1 means no parent
         "jtype": ["Rz", "Rz"],
-        "gravity": np.array([0, 0, 0, 0, 0, -GRAVITY_M_S2]),
+        "gravity": np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2]),
         "Xtree": [
             np.eye(6),  # Joint 1 at origin
             xlt(np.array([L1, 0, 0])),  # Joint 2 at end of link 1

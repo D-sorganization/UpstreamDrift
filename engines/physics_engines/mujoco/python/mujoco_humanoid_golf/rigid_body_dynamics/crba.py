@@ -95,4 +95,5 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
 
     # Ensure exact symmetry (numerical precision) - optional but safe
     # Also cleans up any tiny asymmetries
-    return (h_matrix + h_matrix.T) / 2
+    # OPTIMIZATION: Using h_matrix directly as we fill symmetric elements manually
+    return h_matrix

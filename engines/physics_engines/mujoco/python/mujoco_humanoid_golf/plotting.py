@@ -740,3 +740,183 @@ class GolfSwingPlotter:
             fontweight="bold",
             y=0.98,
         )
+
+    def plot_kinematic_sequence(
+        self,
+        fig: Figure,
+        segment_indices: dict[str, int],
+    ) -> None:
+        """Plot kinematic sequence (normalized velocities).
+
+        Visualizes proximal-to-distal sequencing.
+
+        Args:
+            fig: Matplotlib figure
+            segment_indices: Map of segment names to joint indices
+        """
+        times, velocities = self.recorder.get_time_series("joint_velocities")
+        # Convert to numpy array if needed
+        velocities = np.asarray(velocities)
+
+        if len(times) == 0 or len(velocities) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data recorded", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        # Plot normalized velocities for each segment
+        colors = [
+            self.colors["primary"],
+            self.colors["secondary"],
+            self.colors["tertiary"],
+            self.colors["quaternary"],
+            self.colors["quinary"],
+        ]
+
+        for i, (name, idx) in enumerate(segment_indices.items()):
+            if idx < velocities.shape[1]:
+                vel = np.abs(velocities[:, idx])
+                # Normalize to peak
+                max_vel = np.max(vel)
+                if max_vel > 0:
+                    vel_norm = vel / max_vel
+                else:
+                    vel_norm = vel
+
+                color = colors[i % len(colors)]
+                ax.plot(times, vel_norm, label=name, color=color, linewidth=2)
+
+                # Mark peak
+                max_t_idx = np.argmax(vel)
+                ax.plot(
+                    times[max_t_idx],
+                    vel_norm[max_t_idx],
+                    "o",
+                    color=color,
+                    markersize=8,
+                )
+
+        ax.set_title("Kinematic Sequence (Normalized)", fontsize=14, fontweight="bold")
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Normalized Velocity", fontsize=12, fontweight="bold")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        fig.tight_layout()
+
+    def plot_3d_phase_space(self, fig: Figure, joint_idx: int = 0) -> None:
+        """Plot 3D phase space (Position vs Velocity vs Acceleration).
+
+        Args:
+            fig: Matplotlib figure
+            joint_idx: Joint index
+        """
+        times, positions = self.recorder.get_time_series("joint_positions")
+        _, velocities = self.recorder.get_time_series("joint_velocities")
+        _, accelerations = self.recorder.get_time_series("joint_accelerations")
+
+        # Convert to numpy arrays
+        positions = np.asarray(positions)
+        velocities = np.asarray(velocities)
+        accelerations = np.asarray(accelerations)
+
+        if (
+            len(times) == 0
+            or positions.ndim < 2
+            or joint_idx >= positions.shape[1]
+            or accelerations.ndim < 2
+        ):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111, projection="3d")
+
+        pos = np.rad2deg(positions[:, joint_idx])
+        vel = np.rad2deg(velocities[:, joint_idx])
+        acc = np.rad2deg(accelerations[:, joint_idx])
+
+        # Color by time
+        sc = ax.scatter(pos, vel, acc, c=times, cmap="viridis", s=20)  # type: ignore[misc]
+        ax.plot(pos, vel, acc, alpha=0.3, color="gray", linewidth=1)
+
+        # Mark start
+        ax.scatter(
+            [pos[0]],
+            [vel[0]],
+            [acc[0]],
+            color="green",
+            s=100,  # type: ignore[misc]
+            marker="o",
+            label="Start",
+        )
+
+        joint_name = self.get_joint_name(joint_idx)
+        ax.set_title(f"3D Phase Space: {joint_name}", fontsize=14, fontweight="bold")
+        ax.set_xlabel("Position (deg)", fontsize=10, fontweight="bold")
+        ax.set_ylabel("Velocity (deg/s)", fontsize=10, fontweight="bold")
+        ax.set_zlabel("Acceleration (deg/s²)", fontsize=10, fontweight="bold")  # type: ignore[attr-defined]
+        plt.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
+        fig.tight_layout()
+
+    def plot_correlation_matrix(
+        self,
+        fig: Figure,
+        data_type: str = "velocity",
+    ) -> None:
+        """Plot correlation matrix between joints.
+
+        Args:
+            fig: Matplotlib figure
+            data_type: 'position', 'velocity', or 'torque'
+        """
+        if data_type == "position":
+            _, data = self.recorder.get_time_series("joint_positions")
+            title = "Joint Position Correlation"
+        elif data_type == "torque":
+            _, data = self.recorder.get_time_series("joint_torques")
+            title = "Joint Torque Correlation"
+        else:
+            _, data = self.recorder.get_time_series("joint_velocities")
+            title = "Joint Velocity Correlation"
+
+        data = np.asarray(data)
+        if len(data) == 0 or data.ndim < 2:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        # Compute correlation
+        corr_matrix = np.corrcoef(data.T)
+
+        ax = fig.add_subplot(111)
+        im = ax.imshow(corr_matrix, cmap="RdBu_r", vmin=-1, vmax=1)
+
+        # Add labels if fewer than 10 joints, otherwise just indices
+        if data.shape[1] <= 10:
+            labels = [self.get_joint_name(i) for i in range(data.shape[1])]
+            ax.set_xticks(np.arange(len(labels)))
+            ax.set_yticks(np.arange(len(labels)))
+            ax.set_xticklabels(labels, rotation=45, ha="right")
+            ax.set_yticklabels(labels)
+        else:
+            ax.set_xlabel("Joint Index")
+            ax.set_ylabel("Joint Index")
+
+        # Add correlation values
+        if data.shape[1] <= 8:
+            for i in range(data.shape[1]):
+                for j in range(data.shape[1]):
+                    ax.text(
+                        j,
+                        i,
+                        f"{corr_matrix[i, j]:.2f}",
+                        ha="center",
+                        va="center",
+                        color="k" if abs(corr_matrix[i, j]) < 0.5 else "w",
+                        fontsize=8,
+                    )
+
+        ax.set_title(title, fontsize=14, fontweight="bold")
+        plt.colorbar(im, ax=ax, label="Correlation Coefficient")
+        fig.tight_layout()

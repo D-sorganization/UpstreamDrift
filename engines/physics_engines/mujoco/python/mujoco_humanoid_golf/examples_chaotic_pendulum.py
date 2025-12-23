@@ -16,8 +16,7 @@ import abc
 import matplotlib.pyplot as plt
 import mujoco
 import numpy as np
-
-from src.constants import GRAVITY_M_S2
+from shared.python import constants
 
 from .models import CHAOTIC_PENDULUM_XML
 
@@ -29,7 +28,7 @@ class ChaoticPendulumController(abc.ABC):
         """Docstring for __init__."""
         self.model = model
         self.data = data
-        self.g = GRAVITY_M_S2
+        self.g = constants.GRAVITY_M_S2
         self.L = 0.8  # pendulum length
         self.m = 1.0  # bob mass
 
