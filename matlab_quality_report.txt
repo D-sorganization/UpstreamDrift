@@ -1,0 +1,12 @@
+2025-12-23 07:38:54,602 - INFO - Starting MATLAB quality checks
+2025-12-23 07:38:54,602 - INFO - MATLAB directory not found: /app/matlab (skipping MATLAB checks)
+
+============================================================
+MATLAB QUALITY CHECK RESULTS
+============================================================
+Timestamp: 2025-12-23T07:38:54.602049+00:00
+Total Files: 0
+Status: PASSED
+Summary: [SKIP] No MATLAB files to check - passed
+
+============================================================
