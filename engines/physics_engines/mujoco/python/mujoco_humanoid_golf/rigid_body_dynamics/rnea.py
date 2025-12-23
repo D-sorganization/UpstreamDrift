@@ -8,9 +8,9 @@ from __future__ import annotations
 
 import numpy as np
 from mujoco_humanoid_golf.spatial_algebra import cross_force, cross_motion, jcalc
+from shared.python import constants
 
-GRAVITY_M_S2 = 9.81
-DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -GRAVITY_M_S2])
+DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
 DEFAULT_GRAVITY.flags.writeable = False
 
 
