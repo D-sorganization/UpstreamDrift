@@ -64,11 +64,15 @@ class TestLauncherIntegration:
 
         from launchers.unified_launcher import UnifiedLauncher
 
-        launcher = UnifiedLauncher()
-
-        # Should not raise exception
-        # Note: This will print to stdout, which is expected
-        launcher.show_status()
+        from unittest.mock import patch
+        
+        # Patch GolfLauncher to avoid instantiation issues (StopIteration from side_effects)
+        with patch("launchers.golf_launcher.GolfLauncher") as mock_launcher_cls:
+            launcher = UnifiedLauncher()
+            
+            # Should not raise exception
+            # Note: This will print to stdout, which is expected
+            launcher.show_status()
 
 
 class TestEngineProbes:
