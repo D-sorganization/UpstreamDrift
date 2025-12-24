@@ -94,6 +94,10 @@ class PinocchioRecorder:
         """Stop recording data."""
         self.is_recording = False
 
+    def get_num_frames(self) -> int:
+        """Get number of recorded frames."""
+        return len(self.frames)
+
     def record_frame(
         self,
         time: float,
@@ -424,7 +428,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self.canvas = MplCanvas(width=5, height=4, dpi=100)
             layout.addWidget(self.canvas)
         except RuntimeError:
-            self.canvas = None
+            self.canvas = None  # type: ignore[assignment]
             layout.addWidget(QtWidgets.QLabel("Plotting requires GUI environment"))
 
         self.main_tabs.addTab(analysis_page, "Analysis")
@@ -483,8 +487,13 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         _, velocities = self.recorder.get_time_series("joint_velocities")
         _, torques = self.recorder.get_time_series("joint_torques")
 
+        # Ensure arrays are numpy arrays for mypy
+        positions_arr = np.asarray(positions)
+        velocities_arr = np.asarray(velocities)
+        torques_arr = np.asarray(torques)
+
         analyzer = StatisticalAnalyzer(
-            times, positions, velocities, torques
+            times, positions_arr, velocities_arr, torques_arr
         )
 
         try:
@@ -1003,6 +1012,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         color: int,
     ) -> None:
         """Draw ellipsoid using Meshcat."""
+        if self.viewer is None:
+            return
+
         path = f"overlays/ellipsoids/{name}"
 
         # Meshcat Sphere scaled
@@ -1072,6 +1084,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self, path: str, start: np.ndarray, vector: np.ndarray, color: int
     ) -> None:
         """Helper to draw an arrow in Meshcat."""
+        if self.viewer is None:
+            return
+
         # Note: Meshcat Arrow might not exist in all versions, using a Line for now
         # as it is highly compatible. Arrows can be added with Triad or custom mesh.
         # Simplified: Draw a line from start to start + vector
