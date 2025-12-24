@@ -97,6 +97,7 @@ def rnea(  # noqa: PLR0915
     xj_buf = np.zeros((6, 6))
     scratch_vec = np.zeros(6)
     i_v_buf = np.zeros(6)
+    cross_buf = np.zeros(6)
 
     s_subspace_list: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Cache motion subspaces
 
@@ -138,7 +139,9 @@ def rnea(  # noqa: PLR0915
             # Optimized a[:, i] = (xup[i] @ a[:, p] + ... )
             np.matmul(xup[i], a[:, p], out=scratch_vec)
             scratch_vec += s_subspace * qdd[i]
-            scratch_vec += cross_motion(v[:, i], vj_velocity)
+            # Optimization: Use pre-allocated buffer for cross product
+            cross_motion(v[:, i], vj_velocity, out=cross_buf)
+            scratch_vec += cross_buf
             a[:, i] = scratch_vec
 
     # --- Backward pass: dynamics ---
@@ -153,7 +156,9 @@ def rnea(  # noqa: PLR0915
         np.matmul(model["I"][i], v[:, i], out=i_v_buf)
 
         # 3. Add Coriolis (cross_force allocates, but we add to buffer)
-        f_body += cross_force(v[:, i], i_v_buf)
+        # Optimization: Use pre-allocated buffer for cross product
+        cross_force(v[:, i], i_v_buf, out=cross_buf)
+        f_body += cross_buf
         f_body -= f_ext[:, i]
 
         # Accumulate with any forces already propagated from children

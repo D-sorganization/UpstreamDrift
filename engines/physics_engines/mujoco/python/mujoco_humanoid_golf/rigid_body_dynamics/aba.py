@@ -97,6 +97,7 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     u = np.zeros(nb)  # tau - S.T @ pA (bias force)
     a = np.zeros((6, nb))  # Spatial accelerations
     qdd = np.zeros(nb)  # Joint accelerations
+    cross_buf = np.zeros(6)  # Optimization: temporary buffer for cross product
 
     # --- Pass 1: Forward kinematics ---
     for i in range(nb):
@@ -111,15 +112,18 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         else:
             p = model["parent"][i]
             v[:, i] = xup[i] @ v[:, p] + vj_velocity
-            c[:, i] = cross_motion(
-                v[:, i], vj_velocity
-            )  # Velocity-product acceleration
+            # Optimization: Use direct assignment to c[:, i]
+            cross_motion(v[:, i], vj_velocity, out=c[:, i])
 
         # Initialize articulated-body inertia with rigid-body inertia
         ia_articulated[i] = model["I"][i].copy()
 
         # Bias force: Coriolis + external forces
-        pa_bias[:, i] = cross_force(v[:, i], model["I"][i] @ v[:, i]) - f_ext[:, i]
+        # pa_bias[:, i] = cross_force(v[:, i], model["I"][i] @ v[:, i]) - f_ext[:, i]
+        # Optimization: Use temporary buffer
+        i_v = model["I"][i] @ v[:, i]
+        cross_force(v[:, i], i_v, out=cross_buf)
+        pa_bias[:, i] = cross_buf - f_ext[:, i]
 
     # --- Pass 2: Backward recursion (articulated-body inertias) ---
     for i in range(nb - 1, -1, -1):
