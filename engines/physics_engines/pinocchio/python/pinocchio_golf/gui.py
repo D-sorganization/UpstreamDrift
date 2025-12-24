@@ -682,13 +682,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.joint_spinboxes = []
         self.joint_names = []
 
-        # Populate all joint names first, so index matching works later.
-        # Pinocchio names include Universe (index 0).
-        # We populate joint_names for joints 1..N.
-        # NOTE: This pre-populates the full list of joint names to ensure
-        # indices align with the physics model (1..N). The loop below
-        # then iterates through these to create widgets, but only for
-        # supported 1-DOF joints.
+        # Populate joint_names for joints 1..N (excluding Universe at index 0).
         self.joint_names = list(self.model.names)[1:]
 
         # Iterate joints (skip universe)
