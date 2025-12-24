@@ -15,6 +15,7 @@ import numpy as np  # noqa: TID253
 import pinocchio as pin
 from pinocchio.visualize import MeshcatVisualizer
 from PyQt6 import QtCore, QtWidgets
+from shared.python.common_utils import get_shared_urdf_path
 
 # Set up logging
 logging.basicConfig(
@@ -158,14 +159,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
     def _scan_urdf_models(self) -> None:
         """Scan shared/urdf for models."""
         try:
-            # Calculate path to shared directory relative to this file
-            # engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py
-            current_file = Path(__file__)
-            # Up 5 levels: pinocchio_golf -> python -> pinocchio -> physics_engines -> engines -> root
-            project_root = current_file.parents[5]
-            urdf_dir = project_root / "shared" / "urdf"
+            urdf_dir = get_shared_urdf_path()
 
-            if urdf_dir.exists():
+            if urdf_dir is not None and urdf_dir.exists():
                 for urdf_file in urdf_dir.glob("*.urdf"):
                     name = urdf_file.stem.replace("_", " ").title()
                     self.available_models.append(
