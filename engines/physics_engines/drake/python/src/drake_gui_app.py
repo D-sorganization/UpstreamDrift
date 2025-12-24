@@ -84,7 +84,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         # Model Management
         self.current_urdf_path: str | None = None
-        self.available_models: list[dict] = [{"name": "Default Golf Model", "path": None}]
+        self.available_models: list[dict] = [
+            {"name": "Default Golf Model", "path": None}
+        ]
         self._scan_urdf_models()
 
         # Initialize Simulation
@@ -114,10 +116,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             if urdf_dir.exists():
                 for urdf_file in urdf_dir.glob("*.urdf"):
                     name = urdf_file.stem.replace("_", " ").title()
-                    self.available_models.append({
-                        "name": f"URDF: {name}",
-                        "path": str(urdf_file)
-                    })
+                    self.available_models.append(
+                        {"name": f"URDF: {name}", "path": str(urdf_file)}
+                    )
         except Exception as e:
             LOGGER.error(f"Failed to scan URDF models: {e}")
 

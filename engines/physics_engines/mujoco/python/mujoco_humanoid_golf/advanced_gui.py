@@ -358,12 +358,14 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             # MuJoCoSimWidget.load_current_model logic handles mismatching actuator counts
             # by padding/truncating, so we can start with an empty list or generic names.
 
-            self.model_configs.append({
-                "name": f"URDF: {name}",
-                "xml_path": str(urdf_file),
-                "actuators": [], # Will be auto-populated if empty/mismatched
-                "description": f"Loaded from {urdf_file.name}",
-            })
+            self.model_configs.append(
+                {
+                    "name": f"URDF: {name}",
+                    "xml_path": str(urdf_file),
+                    "actuators": [],  # Will be auto-populated if empty/mismatched
+                    "description": f"Loaded from {urdf_file.name}",
+                }
+            )
 
         # Auto-load configuration if present (overrides defaults if config found)
         self._load_launch_config()
@@ -478,7 +480,9 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         for i in range(start_urdf_idx, len(self.model_configs)):
             config = self.model_configs[i]
             self.model_combo.addItem(config["name"])
-            self.model_descriptions[idx] = config.get("description", "Imported URDF model")
+            self.model_descriptions[idx] = config.get(
+                "description", "Imported URDF model"
+            )
             idx += 1
 
         self.model_combo.currentIndexChanged.connect(self.on_model_changed)

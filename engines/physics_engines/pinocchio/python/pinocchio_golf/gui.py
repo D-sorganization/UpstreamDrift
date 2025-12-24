@@ -148,16 +148,12 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         if default_urdf.exists():
             # Add default to front of list
-            self.available_models.insert(0, {
-                "name": "Default: Golfer",
-                "path": str(default_urdf)
-            })
+            self.available_models.insert(
+                0, {"name": "Default: Golfer", "path": str(default_urdf)}
+            )
             self.load_urdf(str(default_urdf))
         else:
-            self.available_models.insert(0, {
-                "name": "Select Model...",
-                "path": None
-            })
+            self.available_models.insert(0, {"name": "Select Model...", "path": None})
 
     def _scan_urdf_models(self) -> None:
         """Scan shared/urdf for models."""
@@ -172,10 +168,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             if urdf_dir.exists():
                 for urdf_file in urdf_dir.glob("*.urdf"):
                     name = urdf_file.stem.replace("_", " ").title()
-                    self.available_models.append({
-                        "name": f"URDF: {name}",
-                        "path": str(urdf_file)
-                    })
+                    self.available_models.append(
+                        {"name": f"URDF: {name}", "path": str(urdf_file)}
+                    )
         except Exception as e:
             logger.error(f"Failed to scan URDF models: {e}")
 
