@@ -31,6 +31,7 @@ class SimulationSample:
     actuator_torques: dict[str, float]
     constraint_torques: dict[str, float]
     body_forces: dict[str, np.ndarray]
+    custom_metrics: dict[str, float] = None  # type: ignore[assignment]
 
 
 @dataclass
@@ -68,6 +69,7 @@ class TelemetryRecorder:
         """Initialize the telemetry recorder."""
         self.model = model
         self.samples: list[SimulationSample] = []
+        self._current_custom_metrics: dict[str, float] = {}
 
         # Pre-compute mappings for actuator and joint names to DOF indices.
         self._actuator_dof_map = self._build_actuator_dof_map(model)
@@ -141,6 +143,16 @@ class TelemetryRecorder:
         """Clear captured samples while keeping mappings."""
 
         self.samples.clear()
+        self._current_custom_metrics.clear()
+
+    def add_custom_metric(self, name: str, value: float) -> None:
+        """Add a custom metric to be recorded in the next step.
+
+        Args:
+            name: Metric identifier
+            value: Scalar value
+        """
+        self._current_custom_metrics[name] = float(value)
 
     def record_step(self, data: mujoco.MjData) -> None:
         """Capture telemetry for the current simulation state."""
@@ -157,6 +169,7 @@ class TelemetryRecorder:
             actuator_torques=actuator_torques,
             constraint_torques=constraint_torques,
             body_forces=body_forces,
+            custom_metrics=self._current_custom_metrics.copy(),
         )
         self.samples.append(sample)
 
