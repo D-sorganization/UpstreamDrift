@@ -4,6 +4,7 @@ import logging
 import sys
 import types
 from pathlib import Path
+from typing import Any
 
 try:
     import meshcat.geometry as g
@@ -15,7 +16,10 @@ import numpy as np  # noqa: TID253
 import pinocchio as pin
 from pinocchio.visualize import MeshcatVisualizer
 from PyQt6 import QtCore, QtWidgets
+from shared.python.biomechanics_data import BiomechanicalData
 from shared.python.common_utils import get_shared_urdf_path
+from shared.python.plotting import GolfSwingPlotter, MplCanvas
+from shared.python.statistical_analysis import StatisticalAnalyzer
 
 # Set up logging
 logging.basicConfig(
@@ -69,6 +73,117 @@ class SignalBlocker:
             w.blockSignals(False)  # noqa: FBT003
 
 
+class PinocchioRecorder:
+    """Records time-series data from Pinocchio simulation."""
+
+    def __init__(self) -> None:
+        """Initialize empty recorder."""
+        self.reset()
+
+    def reset(self) -> None:
+        """Clear all recorded data."""
+        self.frames: list[BiomechanicalData] = []
+        self.is_recording = False
+
+    def start_recording(self) -> None:
+        """Start recording data."""
+        self.is_recording = True
+        self.frames = []
+
+    def stop_recording(self) -> None:
+        """Stop recording data."""
+        self.is_recording = False
+
+    def get_num_frames(self) -> int:
+        """Get number of recorded frames."""
+        return len(self.frames)
+
+    def record_frame(
+        self,
+        time: float,
+        q: np.ndarray,
+        v: np.ndarray,
+        tau: np.ndarray | None = None,
+        kinetic_energy: float = 0.0,
+        potential_energy: float = 0.0,
+        club_head_position: np.ndarray | None = None,
+        club_head_velocity: np.ndarray | None = None,
+    ) -> None:
+        """Add a frame of data to the recording.
+
+        Args:
+            time: Current simulation time
+            q: Joint positions
+            v: Joint velocities
+            tau: Joint torques (optional)
+            kinetic_energy: System kinetic energy
+            potential_energy: System potential energy
+            club_head_position: Club head position (3,)
+            club_head_velocity: Club head linear velocity (3,)
+        """
+        if self.is_recording:
+            # Create a BiomechanicalData object
+            # Note: Pinocchio q includes quaternion for floating base (7 for freeflyer)
+            # v is generalized velocity (6 for freeflyer)
+            # Here we just store what we get, analysis might need handling for freeflyer
+
+            # Simple energy calculation if not provided (approximate)
+            total_energy = kinetic_energy + potential_energy
+
+            club_head_speed = 0.0
+            if club_head_velocity is not None:
+                club_head_speed = float(np.linalg.norm(club_head_velocity))
+
+            frame = BiomechanicalData(
+                time=float(time),
+                joint_positions=q.copy(),
+                joint_velocities=v.copy(),
+                joint_torques=tau.copy() if tau is not None else np.zeros_like(v),
+                kinetic_energy=kinetic_energy,
+                potential_energy=potential_energy,
+                total_energy=total_energy,
+                club_head_position=club_head_position,
+                club_head_velocity=club_head_velocity,
+                club_head_speed=club_head_speed
+            )
+            self.frames.append(frame)
+
+    def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
+        """Extract time series for a specific field.
+
+        Args:
+            field_name: Name of the field in BiomechanicalData
+
+        Returns:
+            Tuple of (times, values)
+        """
+        if not self.frames:
+            return np.array([]), np.array([])
+
+        times = np.array([f.time for f in self.frames])
+        values = [getattr(f, field_name) for f in self.frames]
+
+        # Handle None values
+        if all(v is None for v in values):
+            return times, np.array([])
+
+        # Filter out None values
+        valid_indices = [i for i, v in enumerate(values) if v is not None]
+        if not valid_indices:
+            return times, np.array([])
+
+        times = times[valid_indices]
+        values = [values[i] for i in valid_indices]
+
+        # Stack into array
+        try:
+            values_array = np.array(values)
+        except (ValueError, TypeError):
+            return times, values
+
+        return times, values_array
+
+
 class PinocchioGUI(QtWidgets.QMainWindow):
     """Main GUI widget for Pinocchio robot visualization and computation."""
 
@@ -76,7 +191,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         """Initialize the Pinocchio GUI."""
         super().__init__()
         self.setWindowTitle("Pinocchio Golf Model (Dynamics & Kinematics)")
-        self.resize(600, 800)
+        self.resize(800, 900)  # Increased size for analysis tabs
 
         # Internal state
         self.model: pin.Model | None = None
@@ -86,6 +201,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.viz: MeshcatVisualizer | None = None
         self.q: np.ndarray | None = None
         self.v: np.ndarray | None = None
+
+        # Recorder
+        self.recorder = PinocchioRecorder()
+        self.sim_time = 0.0
 
         self.joint_sliders: list[QtWidgets.QSlider] = []
         self.joint_spinboxes: list[QtWidgets.QDoubleSpinBox] = []
@@ -100,24 +219,12 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         logger.info(f"Pinocchio Version: {pin_version}")
         logger.info(f"Python Executable: {sys.executable}")
         # Meshcat viewer
-        # Do not open browser automatically; user can open Meshcat URL manually if
-        # desired.
         self.viewer: viz.Visualizer | None = None
         try:
-            # Check standard env var or default to all interfaces for Docker
-            # Note: meshcat-python (depending on version) might bind 127.0.0.1
-            # or 0.0.0.0.
-            # We remove the invalid 'host' arg to fix the crash.
             self.viewer = viz.Visualizer()
-
-            # Get the actual port (in case it picked a random one, though usually 7000)
             url = self.viewer.url() if callable(self.viewer.url) else self.viewer.url
-
-            # Log the container-internal URL
             logger.info("Internal Meshcat URL: %s", url)
 
-            # Log the Host-accessible URL (assuming port forwarding)
-            # Extract port from the internal URL
             try:
                 port = url.split(":")[-1].split("/")[0]
                 host_url = f"http://127.0.0.1:{port}/static/"
@@ -128,7 +235,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         except (ConnectionError, OSError, RuntimeError) as exc:
             logger.error(f"Failed to initialize Meshcat viewer: {exc}")
             self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
-            self.log_write("Please ensure meshcat-server is running or try again.")
 
         # Setup UI
         self._setup_ui()
@@ -140,7 +246,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         # Timer
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self._game_loop)
-        # Timer will be started after a valid model is loaded
 
         # Try load default model
         default_urdf = (
@@ -148,7 +253,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         ).resolve()
 
         if default_urdf.exists():
-            # Add default to front of list
             self.available_models.insert(
                 0, {"name": "Default: Golfer", "path": str(default_urdf)}
             )
@@ -178,7 +282,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         # 1. Top Bar: Load & Mode
         top_layout = QtWidgets.QHBoxLayout()
 
-        # Model Selector
         self.model_combo = QtWidgets.QComboBox()
         self.model_combo.setMinimumWidth(200)
         self._populate_model_combo()
@@ -199,16 +302,22 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         layout.addLayout(top_layout)
 
-        # 2. Controls Stack
+        # 2. Controls Stack (Main Tabs)
+        self.main_tabs = QtWidgets.QTabWidget()
+        layout.addWidget(self.main_tabs)
+
+        # Tab 1: Control & Simulation
+        sim_tab = QtWidgets.QWidget()
+        sim_layout = QtWidgets.QVBoxLayout(sim_tab)
+
         self.controls_stack = QtWidgets.QStackedWidget()
-        layout.addWidget(self.controls_stack)
+        sim_layout.addWidget(self.controls_stack)
 
         self._setup_dynamic_tab()
         self._setup_kinematic_tab()
 
-        # 3. Visuals & Logs
+        # Visuals & Logs in Sim Tab
         vis_group = QtWidgets.QGroupBox("Visualization")
-        # Changed to VBox to accommodate more controls
         vis_layout = QtWidgets.QVBoxLayout()
 
         # Checkboxes row
@@ -243,7 +352,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         # Vector Scales
         scale_layout = QtWidgets.QHBoxLayout()
-
         self.spin_force_scale = QtWidgets.QDoubleSpinBox()
         self.spin_force_scale.setRange(0.01, 10.0)
         self.spin_force_scale.setSingleStep(0.05)
@@ -259,11 +367,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.spin_torque_scale.setPrefix("T Scale: ")
         self.spin_torque_scale.valueChanged.connect(self._update_viewer)
         scale_layout.addWidget(self.spin_torque_scale)
-
         vis_layout.addLayout(scale_layout)
 
         vis_group.setLayout(vis_layout)
-        layout.addWidget(vis_group)
+        sim_layout.addWidget(vis_group)
 
         # Matrix Analysis Panel
         matrix_group = QtWidgets.QGroupBox("Matrix Analysis")
@@ -271,12 +378,129 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.lbl_cond = QtWidgets.QLabel("--")
         self.lbl_rank = QtWidgets.QLabel("--")
         matrix_layout.addRow("Jacobian Cond:", self.lbl_cond)
-        # Jc rank depends on constraints which might not exist
         matrix_layout.addRow("Mass Matrix Rank:", self.lbl_rank)
-        layout.addWidget(matrix_group)
+        sim_layout.addWidget(matrix_group)
 
         self.log = LogPanel()
-        layout.addWidget(self.log)
+        sim_layout.addWidget(self.log)
+
+        self.main_tabs.addTab(sim_tab, "Simulation")
+
+        # Tab 2: Analysis & Plotting
+        self._setup_analysis_tab()
+
+    def _setup_analysis_tab(self) -> None:
+        """Setup the analysis and plotting tab."""
+        analysis_page = QtWidgets.QWidget()
+        layout = QtWidgets.QVBoxLayout(analysis_page)
+
+        # Controls
+        controls = QtWidgets.QHBoxLayout()
+
+        self.plot_combo = QtWidgets.QComboBox()
+        self.plot_combo.addItems([
+            "Dashboard",
+            "Joint Angles",
+            "Joint Velocities",
+            "Joint Torques",
+            "Energy Analysis",
+            "Kinematic Sequence",
+            "Phase Diagram",
+            "Frequency Analysis (PSD)",
+            "Correlation Matrix"
+        ])
+        controls.addWidget(QtWidgets.QLabel("Plot Type:"))
+        controls.addWidget(self.plot_combo)
+
+        self.btn_plot = QtWidgets.QPushButton("Generate Plot")
+        self.btn_plot.clicked.connect(self._generate_plot)
+        controls.addWidget(self.btn_plot)
+
+        self.btn_export_csv = QtWidgets.QPushButton("Export CSV")
+        self.btn_export_csv.clicked.connect(self._export_statistics)
+        controls.addWidget(self.btn_export_csv)
+
+        controls.addStretch()
+        layout.addLayout(controls)
+
+        # Canvas
+        try:
+            self.canvas = MplCanvas(width=5, height=4, dpi=100)
+            layout.addWidget(self.canvas)
+        except RuntimeError:
+            self.canvas = None  # type: ignore[assignment]
+            layout.addWidget(QtWidgets.QLabel("Plotting requires GUI environment"))
+
+        self.main_tabs.addTab(analysis_page, "Analysis")
+
+    def _generate_plot(self) -> None:
+        """Generate the selected plot."""
+        if self.canvas is None:
+            return
+
+        if self.recorder.get_num_frames() == 0:
+            QtWidgets.QMessageBox.warning(self, "No Data", "No simulation data recorded yet.")
+            return
+
+        self.canvas.fig.clear()
+
+        # Initialize plotter
+        plotter = GolfSwingPlotter(self.recorder, self.joint_names)
+
+        plot_type = self.plot_combo.currentText()
+
+        if plot_type == "Dashboard":
+            plotter.plot_summary_dashboard(self.canvas.fig)
+        elif plot_type == "Joint Angles":
+            plotter.plot_joint_angles(self.canvas.fig)
+        elif plot_type == "Joint Velocities":
+            plotter.plot_joint_velocities(self.canvas.fig)
+        elif plot_type == "Joint Torques":
+            plotter.plot_joint_torques(self.canvas.fig)
+        elif plot_type == "Energy Analysis":
+            plotter.plot_energy_analysis(self.canvas.fig)
+        elif plot_type == "Kinematic Sequence":
+            # Map all joints for now
+            segments = {name: i for i, name in enumerate(self.joint_names)}
+            plotter.plot_kinematic_sequence(self.canvas.fig, segments)
+        elif plot_type == "Phase Diagram":
+            plotter.plot_phase_diagram(self.canvas.fig, joint_idx=0) # First joint by default
+        elif plot_type == "Frequency Analysis (PSD)":
+            plotter.plot_frequency_analysis(self.canvas.fig, joint_idx=0)
+        elif plot_type == "Correlation Matrix":
+            plotter.plot_correlation_matrix(self.canvas.fig)
+
+        self.canvas.draw()
+
+    def _export_statistics(self) -> None:
+        """Export statistical analysis to CSV."""
+        if self.recorder.get_num_frames() == 0:
+            return
+
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Save Statistics", "stats.csv", "CSV Files (*.csv)"
+        )
+        if not filename:
+            return
+
+        times, positions = self.recorder.get_time_series("joint_positions")
+        _, velocities = self.recorder.get_time_series("joint_velocities")
+        _, torques = self.recorder.get_time_series("joint_torques")
+
+        # Ensure arrays are numpy arrays for mypy
+        positions_arr = np.asarray(positions)
+        velocities_arr = np.asarray(velocities)
+        torques_arr = np.asarray(torques)
+
+        analyzer = StatisticalAnalyzer(
+            times, positions_arr, velocities_arr, torques_arr
+        )
+
+        try:
+            analyzer.export_statistics_csv(filename)
+            self.log_write(f"Statistics exported to {filename}")
+        except Exception as e:
+            self.log_write(f"Error exporting statistics: {e}")
 
     def _populate_model_combo(self) -> None:
         """Populate the model dropdown."""
@@ -300,17 +524,44 @@ class PinocchioGUI(QtWidgets.QMainWindow):
     def _setup_dynamic_tab(self) -> None:
         dyn_page = QtWidgets.QWidget()
         dyn_layout = QtWidgets.QVBoxLayout(dyn_page)
+
+        # Run Controls
+        btn_layout = QtWidgets.QHBoxLayout()
         self.btn_run = QtWidgets.QPushButton("Run Simulation")
         self.btn_run.setCheckable(True)
         self.btn_run.clicked.connect(self._toggle_run)
-        dyn_layout.addWidget(self.btn_run)
+        btn_layout.addWidget(self.btn_run)
 
         self.btn_reset = QtWidgets.QPushButton("Reset")
         self.btn_reset.clicked.connect(self._reset_simulation)
-        dyn_layout.addWidget(self.btn_reset)
+        btn_layout.addWidget(self.btn_reset)
+        dyn_layout.addLayout(btn_layout)
+
+        # Recording Controls
+        rec_layout = QtWidgets.QHBoxLayout()
+        self.btn_record = QtWidgets.QPushButton("Record")
+        self.btn_record.setCheckable(True)
+        self.btn_record.setStyleSheet("QPushButton:checked { background-color: #ffcccc; }")
+        self.btn_record.clicked.connect(self._toggle_recording)
+        rec_layout.addWidget(self.btn_record)
+
+        self.lbl_rec_status = QtWidgets.QLabel("Frames: 0")
+        rec_layout.addWidget(self.lbl_rec_status)
+        dyn_layout.addLayout(rec_layout)
 
         dyn_layout.addStretch()
         self.controls_stack.addWidget(dyn_page)
+
+    def _toggle_recording(self) -> None:
+        """Toggle recording state."""
+        if self.btn_record.isChecked():
+            self.recorder.start_recording()
+            self.log_write("Recording started.")
+            self.btn_record.setText("Stop Recording")
+        else:
+            self.recorder.stop_recording()
+            self.log_write(f"Recording stopped. Frames: {self.recorder.get_num_frames()}")
+            self.btn_record.setText("Record")
 
     def _setup_kinematic_tab(self) -> None:
         kin_page = QtWidgets.QWidget()
@@ -356,6 +607,14 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self.data = self.model.createData()
             self.q = pin.neutral(self.model)
             self.v = np.zeros(self.model.nv)
+            self.sim_time = 0.0
+
+            # Reset recorder
+            self.recorder.reset()
+            self.lbl_rec_status.setText("Frames: 0")
+            if self.btn_record.isChecked():
+                self.btn_record.setChecked(False)
+                self.btn_record.setText("Record")
 
             # Initialize Pinocchio MeshcatVisualizer
             if self.viewer is not None:
@@ -414,6 +673,11 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.joint_spinboxes = []
         self.joint_names = []
 
+        # Populate all joint names first, so index matching works later.
+        # Pinocchio names include Universe (index 0).
+        # We populate joint_names for joints 1..N.
+        self.joint_names = list(self.model.names)[1:]
+
         # Iterate joints (skip universe)
         for i in range(1, self.model.njoints):
             self._add_joint_control_widget(i)
@@ -427,9 +691,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         nq_joint = self.model.joints[i].nq
 
         if nq_joint != 1:
-            # Multi-DOF joints (e.g., spherical) are not supported in the UI.
-            # Such joints are intentionally skipped and will not appear in the
-            # kinematic controls.
             msg = (
                 f"Skipping joint '{joint_name}' (index {i}): "
                 f"{nq_joint} DOFs not supported in kinematic controls."
@@ -437,7 +698,18 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self.log_write(msg)
             return
 
-        self.joint_names.append(joint_name)
+        # Note: self.joint_names is already populated in _build_kinematic_controls
+        # so we don't append here anymore, or we should verify logic.
+        # Wait, if we populated it all at once, we don't need to append here.
+        # But we need to ensure the order matches the indices used by Plotter.
+        # Plotter receives full state arrays.
+        # Pinocchio state arrays (v) correspond to 1..NV.
+        # If we have freeflyer, NV starts with 6 DOFs for base.
+        # Joint names list from Pinocchio includes "universe" at 0, "root_joint" at 1, etc.
+        # If we use list(self.model.names)[1:], we get names for joints 1..N.
+
+        # If joint i is supported (1 DOF), we create widget.
+        # If not (e.g. FreeFlyer), we skipped creating widget but name is in list.
 
         row = QtWidgets.QWidget()
         r_layout = QtWidgets.QHBoxLayout(row)
@@ -540,10 +812,18 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.q = pin.neutral(self.model)
         self.v = np.zeros(self.model.nv)
         self.is_running = False
+        self.sim_time = 0.0
         self.btn_run.setText("Run Simulation")
         self.btn_run.setChecked(False)
         self._update_viewer()
         self._sync_kinematic_controls()
+
+        # Reset recording
+        self.recorder.reset()
+        self.lbl_rec_status.setText("Frames: 0")
+        if self.btn_record.isChecked():
+            self.btn_record.setChecked(False)
+            self.btn_record.setText("Record")
 
     def _game_loop(self) -> None:
         if self.model is None or self.data is None or self.q is None or self.v is None:
@@ -555,6 +835,57 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             a = pin.aba(self.model, self.data, self.q, self.v, tau)
             self.v += a * self.dt
             self.q = pin.integrate(self.model, self.q, self.v * self.dt)
+            self.sim_time += self.dt
+
+            # Recording
+            if self.recorder.is_recording:
+                # Compute energies for recording
+                pin.computeKineticEnergy(self.model, self.data, self.q, self.v)
+                pin.computePotentialEnergy(self.model, self.data, self.q)
+
+                # Capture club head data if available
+                # We assume the last body/frame is the club head or end-effector
+                club_head_pos = None
+                club_head_vel = None
+
+                # Find club head body
+                # Heuristic: look for "club" or "head" or take last body
+                club_id = -1
+                for fid in range(self.model.nframes):
+                    name = self.model.frames[fid].name.lower()
+                    if "club" in name or "head" in name:
+                        club_id = fid
+                        break
+
+                if club_id == -1 and self.model.nframes > 0:
+                    club_id = self.model.nframes - 1
+
+                if club_id >= 0:
+                    # Get position and velocity
+                    # Need to update frame placement first (done in update_viewer usually, but needed here)
+                    pin.forwardKinematics(self.model, self.data, self.q, self.v)
+                    pin.updateFramePlacements(self.model, self.data)
+
+                    frame = self.data.oMf[club_id]
+                    club_head_pos = frame.translation.copy()
+
+                    # Velocity
+                    v_frame = pin.getFrameVelocity(
+                        self.model, self.data, club_id, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+                    )
+                    club_head_vel = v_frame.linear.copy()
+
+                self.recorder.record_frame(
+                    time=self.sim_time,
+                    q=self.q,
+                    v=self.v,
+                    tau=tau,
+                    kinetic_energy=self.data.kinetic_energy,
+                    potential_energy=self.data.potential_energy,
+                    club_head_position=club_head_pos,
+                    club_head_velocity=club_head_vel
+                )
+                self.lbl_rec_status.setText(f"Frames: {self.recorder.get_num_frames()}")
 
             self._update_viewer()
 
@@ -681,6 +1012,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         color: int,
     ) -> None:
         """Draw ellipsoid using Meshcat."""
+        if self.viewer is None:
+            return
+
         path = f"overlays/ellipsoids/{name}"
 
         # Meshcat Sphere scaled
@@ -750,6 +1084,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self, path: str, start: np.ndarray, vector: np.ndarray, color: int
     ) -> None:
         """Helper to draw an arrow in Meshcat."""
+        if self.viewer is None:
+            return
+
         # Note: Meshcat Arrow might not exist in all versions, using a Line for now
         # as it is highly compatible. Arrows can be added with Triad or custom mesh.
         # Simplified: Draw a line from start to start + vector
