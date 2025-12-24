@@ -421,8 +421,8 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             min_pos = np.array([np.inf, np.inf, np.inf])
             max_pos = np.array([-np.inf, -np.inf, -np.inf])
 
-            # Check all bodies
-            for i in range(self.model.nbody):
+            # Check all bodies, skipping world body (0)
+            for i in range(1, self.model.nbody):
                 pos = self.data.xpos[i]
                 min_pos = np.minimum(min_pos, pos)
                 max_pos = np.maximum(max_pos, pos)
@@ -431,7 +431,8 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             for i in range(self.model.ngeom):
                 geom_id = i
                 body_id = self.model.geom_bodyid[geom_id]
-                if body_id >= 0:
+                # Skip world body geoms (like huge ground planes)
+                if body_id > 0:
                     geom_pos = self.data.xpos[body_id].copy()
                     geom_size = self.model.geom_size[geom_id]
 
@@ -997,6 +998,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             return rgb
 
         if cv2 is None:
+            LOGGER.warning("OpenCV not installed, cannot draw force/torque overlays.")
             return rgb
 
         img = rgb.copy()
