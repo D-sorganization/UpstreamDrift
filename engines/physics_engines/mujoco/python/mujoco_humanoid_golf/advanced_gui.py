@@ -474,7 +474,7 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
 
         for i in range(start_urdf_idx, len(self.model_configs)):
             config = self.model_configs[i]
-            self.model_combo.addItem(config["name"])
+            self.model_combo.addItem(str(config["name"]))
             self.model_descriptions[idx] = str(
                 config.get("description", "Imported URDF model")
             )

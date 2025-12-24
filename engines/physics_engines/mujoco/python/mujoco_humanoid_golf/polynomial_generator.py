@@ -164,6 +164,8 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         joint_layout = QtWidgets.QVBoxLayout(joint_group)
         self.joint_combo = QtWidgets.QComboBox()
         self.joint_combo.addItems(["Joint 1", "Joint 2", "Joint 3"])  # Defaults
+        self.joint_combo.setToolTip("Select the joint to generate the function for")
+        self.joint_combo.setAccessibleName("Target Joint Selector")
         joint_layout.addWidget(self.joint_combo)
         left_layout.addWidget(joint_group)
 
@@ -195,9 +197,18 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         self.mode_group = QtWidgets.QButtonGroup(self)
 
         self.btn_equation = QtWidgets.QRadioButton("Equation")
+        self.btn_equation.setToolTip("Generate points from a mathematical equation")
+
         self.btn_draw = QtWidgets.QRadioButton("Draw Line")
+        self.btn_draw.setToolTip("Freehand draw a curve on the plot")
+
         self.btn_points = QtWidgets.QRadioButton("Add Points")
+        self.btn_points.setToolTip("Click on the plot to add individual points")
+
         self.btn_drag = QtWidgets.QRadioButton("Drag Trend")
+        self.btn_drag.setToolTip(
+            "Drag the entire curve to shift it vertically/horizontally"
+        )
 
         self.mode_group.addButton(self.btn_equation)
         self.mode_group.addButton(self.btn_draw)
@@ -210,6 +221,7 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         input_layout.addWidget(self.btn_equation)
         self.equation_input = QtWidgets.QLineEdit()
         self.equation_input.setPlaceholderText("e.g. 0.5*x**2 + 2*x")
+        self.equation_input.setAccessibleName("Equation Input")
         self.equation_input.setEnabled(False)
         input_layout.addWidget(self.equation_input)
         self.generate_eq_btn = QtWidgets.QPushButton("Generate from Equation")
@@ -233,8 +245,24 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         action_layout = QtWidgets.QVBoxLayout(action_group)
 
         self.clear_btn = QtWidgets.QPushButton("Clear Points")
+        self.clear_btn.setToolTip("Remove all points and reset the plot")
+        self.clear_btn.setAccessibleName("Clear all points")
+        style = self.style()
+        if style:
+            self.clear_btn.setIcon(
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_TrashIcon)
+            )
+
         self.fit_btn = QtWidgets.QPushButton("Fit Polynomial (6th Order)")
         self.fit_btn.setObjectName("fitBtn")
+        self.fit_btn.setToolTip(
+            "Calculate and plot a 6th-order polynomial fit for the current points"
+        )
+        self.fit_btn.setAccessibleName("Fit polynomial to points")
+        if style:
+            self.fit_btn.setIcon(
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DialogApplyButton)
+            )
 
         action_layout.addWidget(self.clear_btn)
         action_layout.addWidget(self.fit_btn)
