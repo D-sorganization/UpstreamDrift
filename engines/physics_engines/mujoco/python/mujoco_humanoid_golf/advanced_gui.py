@@ -52,7 +52,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
     SIMPLIFIED_ACTUATOR_THRESHOLD: typing.Final[int] = 60
 
     def __init__(self) -> None:
-        """Docstring for __init__."""
+        """Initialize the AdvancedGolfAnalysisWindow.
+
+        Sets up the main window, models, and UI components including
+        controls, visualization, analysis, and plotting tabs.
+        """
         super().__init__()
 
         self.setWindowTitle("Golf Swing Biomechanical Analysis Suite")
@@ -471,8 +475,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         for i in range(start_urdf_idx, len(self.model_configs)):
             config = self.model_configs[i]
             self.model_combo.addItem(config["name"])
-            self.model_descriptions[idx] = config.get(
-                "description", "Imported URDF model"
+            self.model_descriptions[idx] = str(
+                config.get("description", "Imported URDF model")
             )
             idx += 1
 
