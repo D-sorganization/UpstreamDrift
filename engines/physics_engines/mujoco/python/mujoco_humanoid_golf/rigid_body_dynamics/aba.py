@@ -112,8 +112,10 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         else:
             p = model["parent"][i]
             v[:, i] = xup[i] @ v[:, p] + vj_velocity
-            # Optimization: Use direct assignment to c[:, i]
-            cross_motion(v[:, i], vj_velocity, out=c[:, i])
+            # Optimization: Use pre-allocated buffer for cross product
+            cross_motion(
+                v[:, i], vj_velocity, out=c[:, i]
+            )  # Velocity-product acceleration
 
         # Initialize articulated-body inertia with rigid-body inertia
         ia_articulated[i] = model["I"][i].copy()
