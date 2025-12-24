@@ -266,14 +266,21 @@ function step() {
   animationId = requestAnimationFrame(step);
 }
 
+function updateA11yStatus(message) {
+  const status = document.getElementById('a11y-status');
+  if (status) status.textContent = message;
+}
+
 function start() {
   cancelAnimationFrame(animationId);
   parseInputs();
   step();
+  updateA11yStatus('Simulation started');
 }
 
 function pause() {
   cancelAnimationFrame(animationId);
+  updateA11yStatus('Simulation paused');
 }
 
 function reset() {
@@ -281,6 +288,7 @@ function reset() {
   parseInputs();
   draw();
   document.getElementById('torques').textContent = 'Torques: --';
+  updateA11yStatus('Simulation reset to initial state');
 }
 
 ['start', 'pause', 'reset'].forEach(id => document.getElementById(id).addEventListener('click', () => {

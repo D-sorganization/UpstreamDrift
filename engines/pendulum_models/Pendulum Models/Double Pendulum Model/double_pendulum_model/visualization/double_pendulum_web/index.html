@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Driven Double Pendulum Playground</title>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -10,6 +11,9 @@
     <div class="controls">
       <h1>Driven Double Pendulum</h1>
       <p>Control-affine model with user-defined torques on a swing plane.</p>
+
+      <div id="a11y-status" class="visually-hidden" aria-live="polite">Ready</div>
+
       <div class="grid">
         <label>Shoulder angle (deg)<input id="theta1" type="number" value="-45"></label>
         <label>Wrist angle (deg)<input id="theta2" type="number" value="-90"></label>
@@ -23,19 +27,28 @@
           <input id="tau2" type="text" value="0" aria-describedby="tau2-help">
           <div id="tau2-help" class="input-help">Vars: t, theta1, theta2, omega1, omega2</div>
         </label>
-        <label>Upper length (m)<input id="l1" type="number" value="0.75" step="0.01"></label>
-        <label>Upper mass (kg)<input id="m1" type="number" value="7.5" step="0.1"></label>
-        <label>Upper COM ratio<input id="com1" type="number" value="0.45" step="0.01"></label>
-        <label>Lower length (m)<input id="l2" type="number" value="1.0" step="0.01"></label>
-        <label>Shaft mass (kg)<input id="mshaft" type="number" value="0.35" step="0.01"></label>
-        <label>Clubhead mass (kg)<input id="mhead" type="number" value="0.2" step="0.01"></label>
-        <label>Shaft COM ratio<input id="com2" type="number" value="0.43" step="0.01"></label>
+        <label>Upper length (m)<input id="l1" type="number" value="0.75" step="0.01" min="0"></label>
+        <label>Upper mass (kg)<input id="m1" type="number" value="7.5" step="0.1" min="0"></label>
+        <label>Upper COM ratio<input id="com1" type="number" value="0.45" step="0.01" min="0"></label>
+        <label>Lower length (m)<input id="l2" type="number" value="1.0" step="0.01" min="0"></label>
+        <label>Shaft mass (kg)<input id="mshaft" type="number" value="0.35" step="0.01" min="0"></label>
+        <label>Clubhead mass (kg)<input id="mhead" type="number" value="0.2" step="0.01" min="0"></label>
+        <label>Shaft COM ratio<input id="com2" type="number" value="0.43" step="0.01" min="0"></label>
         <label>Plane incline (deg)<input id="plane" type="number" value="35" step="1"></label>
       </div>
       <div class="buttons">
-        <button id="start">Start</button>
-        <button id="pause">Pause</button>
-        <button id="reset">Reset</button>
+        <button id="start" aria-label="Start simulation">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          <span>Start</span>
+        </button>
+        <button id="pause" aria-label="Pause simulation">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          <span>Pause</span>
+        </button>
+        <button id="reset" aria-label="Reset simulation">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
+          <span>Reset</span>
+        </button>
       </div>
       <div class="readout" id="torques">Torques: --</div>
     </div>
