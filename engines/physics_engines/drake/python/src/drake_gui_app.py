@@ -28,8 +28,6 @@ from pydrake.all import (
 )
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-from shared.python.common_utils import get_shared_urdf_path
-
 from .drake_golf_model import GolfModelParams, build_golf_swing_diagram
 from .drake_visualizer import DrakeVisualizer
 from .logger_utils import setup_logging

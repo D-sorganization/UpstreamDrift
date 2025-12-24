@@ -14,12 +14,10 @@ import csv
 import json
 import logging
 import typing
-from pathlib import Path
 
 import mujoco
 import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
-
 from shared.python.common_utils import get_shared_urdf_path
 
 from .advanced_gui_methods import AdvancedGuiMethodsMixin

@@ -16,8 +16,6 @@ import pinocchio as pin
 from pinocchio.visualize import MeshcatVisualizer
 from PyQt6 import QtCore, QtWidgets
 
-from shared.python.common_utils import get_shared_urdf_path
-
 # Set up logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"

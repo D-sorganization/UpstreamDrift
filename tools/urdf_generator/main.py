@@ -158,7 +158,7 @@ class URDFGenerator(QtWidgets.QMainWindow):
     def _add_joint_dialog(self) -> None:
         """Show dialog to add a joint."""
         # Get potential parent/child links
-        link_names = [l["name"] for l in self.links]
+        link_names = [link["name"] for link in self.links]
         if len(link_names) < 2:
             QtWidgets.QMessageBox.warning(
                 self, "Not enough links", "You need at least 2 links to create a joint."
@@ -327,8 +327,8 @@ class URDFGenerator(QtWidgets.QMainWindow):
                             geom_type = "cylinder"
                             cyl = geometry.find("cylinder")
                             r = cyl.attrib.get("radius", "0.1")
-                            l = cyl.attrib.get("length", "0.5")
-                            size = f"{r} {l}"
+                            length_val = cyl.attrib.get("length", "0.5")
+                            size = f"{r} {length_val}"
                         elif geometry.find("sphere") is not None:
                             geom_type = "sphere"
                             size = geometry.find("sphere").attrib.get("radius", "0.1")
