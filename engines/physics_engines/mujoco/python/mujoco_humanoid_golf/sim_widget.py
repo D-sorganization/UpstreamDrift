@@ -12,6 +12,11 @@ import mujoco
 import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+try:
+    import scipy.linalg
+except ImportError:
+    scipy = None  # type: ignore
+
 from .biomechanics import BiomechanicalAnalyzer, SwingRecorder
 from .control_system import ControlSystem, ControlType
 from .interactive_manipulation import InteractiveManipulator
@@ -65,6 +70,10 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.show_torque_vectors = False
         self.force_scale = 0.1
         self.torque_scale = 0.1
+
+        # Ellipsoid Visualization Toggles
+        self.show_mobility_ellipsoid = False
+        self.show_force_ellipsoid = False
 
         # Meshcat integration
         self.meshcat_adapter: MuJoCoMeshcatAdapter | None = None
@@ -635,6 +644,13 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         if scale is not None:
             self.force_scale = scale
 
+    def set_ellipsoid_visualization(
+        self, mobility_enabled: bool, force_enabled: bool
+    ) -> None:
+        """Enable/disable mobility and force ellipsoid visualization."""
+        self.show_mobility_ellipsoid = mobility_enabled
+        self.show_force_ellipsoid = force_enabled
+
     def set_contact_force_visualization(self, enabled: bool) -> None:
         """Enable/disable contact force visualization."""
         self.show_contact_forces = enabled
@@ -648,6 +664,174 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
     def get_analyzer(self) -> BiomechanicalAnalyzer | None:
         """Get the biomechanical analyzer."""
         return self.analyzer
+
+    def get_jacobian_and_rank(self) -> dict[str, Any]:
+        """Compute Jacobian and Constraint Jacobian Rank.
+
+        Returns:
+            Dictionary containing:
+                - jacobian_condition: condition number of end-effector jacobian
+                - constraint_rank: rank of constraint jacobian
+                - nefc: number of active constraints
+        """
+        if self.model is None or self.data is None:
+            return {"jacobian_condition": 0.0, "constraint_rank": 0, "nefc": 0}
+
+        # 1. End Effector Jacobian Condition
+        # Use selected body or last body as EE
+        body_id = self.model.nbody - 1
+        if (
+            self.manipulator
+            and self.manipulator.selected_body_id is not None
+            and self.manipulator.selected_body_id > 0
+        ):
+            body_id = self.manipulator.selected_body_id
+
+        # Allocate Jacobian arrays
+        jacp = np.zeros((3, self.model.nv))
+        jacr = np.zeros((3, self.model.nv))
+
+        mujoco.mj_jacBody(self.model, self.data, jacp, jacr, body_id)
+
+        # Full 6D Jacobian
+        J = np.vstack([jacp, jacr])
+
+        # Condition Number (using singular values)
+        # Handle cases where nv < 6 (underactuated) or J is singular
+        try:
+            s = np.linalg.svd(J, compute_uv=False)
+            cond = s[0] / s[-1] if s[-1] > 1e-9 else float("inf")
+        except Exception:
+            cond = 0.0
+
+        # 2. Constraint Jacobian Rank
+        nefc = self.data.nefc
+        rank = 0
+        if nefc > 0:
+            # Reshape efc_J to (nefc, nv)
+            # data.efc_J is stored as flat array of size (nefc * nv)
+            try:
+                # MuJoCo C-struct usually stores efc_J as row-major flat array
+                Jc = self.data.efc_J.reshape((nefc, self.model.nv))
+                rank = np.linalg.matrix_rank(Jc, tol=1e-5)
+            except Exception:
+                rank = 0
+
+        # Update telemetry if available
+        if self.telemetry:
+            self.telemetry.add_custom_metric("jacobian_cond", cond)
+            self.telemetry.add_custom_metric("constraint_rank", float(rank))
+            self.telemetry.add_custom_metric("nefc", float(nefc))
+
+        return {"jacobian_condition": cond, "constraint_rank": rank, "nefc": nefc}
+
+    def compute_ellipsoids(self) -> None:
+        """Compute and draw Mobility and Force Ellipsoids for selected body."""
+        if (
+            not self.show_mobility_ellipsoid and not self.show_force_ellipsoid
+        ) or self.meshcat_adapter is None:
+            # Ensure cleared if disabled
+            if self.meshcat_adapter:
+                self.meshcat_adapter.clear_ellipsoids()
+            return
+
+        if self.model is None or self.data is None:
+            return
+
+        # Use selected body or last body
+        body_id = self.model.nbody - 1
+        if (
+            self.manipulator
+            and self.manipulator.selected_body_id is not None
+            and self.manipulator.selected_body_id > 0
+        ):
+            body_id = self.manipulator.selected_body_id
+
+        # 1. Get Jacobian (Translation only for 3D ellipsoid visualization usually)
+        # We focus on Translational Mobility/Force for visualization
+        jacp = np.zeros((3, self.model.nv))
+        jacr = np.zeros((3, self.model.nv))
+        mujoco.mj_jacBody(self.model, self.data, jacp, jacr, body_id)
+        J = jacp  # Use translational part (3 x nv)
+
+        # 2. Get Mass Matrix
+        # mj_fullM returns dense M (nv x nv)
+        M = np.zeros((self.model.nv, self.model.nv))
+        mujoco.mj_fullM(self.model, M, self.data.qM)
+
+        # Add damping/regularization to M for invertibility if needed?
+        # M should be PD.
+        try:
+            Minv = np.linalg.inv(M)
+        except np.linalg.LinAlgError:
+            Minv = np.linalg.pinv(M)
+
+        # 3. Compute Core Matrix
+        # Lambda_inv = J * M^-1 * J^T
+        Lambda_inv = J @ Minv @ J.T
+
+        # Mobility Ellipsoid (Dynamic): v^T (J M^-1 J^T)^-1 v <= 1 ??
+        # Actually, usually defined such that axes are singular values of J*M^(-1/2)
+        # Or simply visualize the covariance defined by Lambda_inv?
+        # Let's use the standard definitions:
+        #
+        # Dynamic Manipulability (Velocity) Ellipsoid:
+        # Describes the set of velocities realizable with unit energy/torque?
+        # Core matrix A = (J M^-1 J^T).
+        # The ellipsoid is x^T A^-1 x = 1.
+        # Axes aligned with eigenvectors of A. Lengths = sqrt(eigenvalues of A).
+
+        # Force Ellipsoid:
+        # Core matrix B = (J M^-1 J^T)^-1 = Lambda.
+        # The ellipsoid is f^T B^-1 f = 1 => f^T (J M^-1 J^T) f = 1.
+        # Axes aligned with eigenvectors of B. Lengths = sqrt(eigenvalues of B).
+        # Note: Eigenvalues of B are 1/eigenvalues of A.
+        # So Force axes are sqrt(1/lambda_A) = 1/sqrt(lambda_A).
+        # Force ellipsoid is reciprocal to Velocity ellipsoid.
+
+        try:
+            eigvals, eigvecs = np.linalg.eigh(Lambda_inv)
+            # eigvals are the squares of the axis lengths for the velocity ellipsoid
+            # because the ellipsoid is defined by x^T (V D V^T)^-1 x = 1
+            # The semi-axes are sqrt(eigvals) * eigvecs.
+
+            body_pos = self.data.xpos[body_id]
+
+            if self.show_mobility_ellipsoid:
+                # Radii = sqrt(eigenvalues)
+                radii = np.sqrt(np.maximum(eigvals, 1e-6))
+                # Scale for visibility?
+                radii *= 1.0  # Unit scale?
+
+                # Use Meshcat to draw
+                self.meshcat_adapter.draw_ellipsoid(
+                    "mobility",
+                    body_pos,
+                    eigvecs,  # Rotation matrix (columns are axes)
+                    radii,
+                    color=0x00FF00,  # Green
+                    opacity=0.3,
+                )
+
+            if self.show_force_ellipsoid:
+                # Force ellipsoid radii are reciprocal
+                # Radii = 1 / sqrt(eigenvalues) = 1 / radii_mobility
+                radii_force = 1.0 / np.sqrt(np.maximum(eigvals, 1e-6))
+
+                # Scale for visibility - force ellipsoids can be huge near singularities
+                radii_force = np.clip(radii_force, 0.01, 5.0)
+
+                self.meshcat_adapter.draw_ellipsoid(
+                    "force",
+                    body_pos,
+                    eigvecs,
+                    radii_force,
+                    color=0xFF0000,  # Red
+                    opacity=0.3,
+                )
+
+        except Exception as e:
+            LOGGER.warning(f"Failed to compute ellipsoids: {e}")
 
     # -------- Internal stepping / rendering --------
 
@@ -697,6 +881,9 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 self.recorder.record_frame(bio_data)
 
         self._enforce_interactive_constraints()
+
+        # Compute and visualize ellipsoids (done every frame if enabled)
+        self.compute_ellipsoids()
 
         self._render_once()
 
