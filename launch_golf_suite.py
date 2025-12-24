@@ -186,6 +186,25 @@ def launch_pinocchio():
     return True
 
 
+def launch_urdf_generator():
+    """Launch the Graphic URDF Generator."""
+    try:
+        import subprocess
+
+        suite_root = Path(__file__).parent
+        generator_script = suite_root / "tools" / "urdf_generator" / "main.py"
+
+        work_dir = suite_root
+
+        logger.info("Launching URDF Generator...")
+        # Run as module or script. Running as script is fine here.
+        subprocess.run([sys.executable, str(generator_script)], cwd=str(work_dir))
+    except Exception as e:
+        logger.error(f"Error launching URDF Generator: {e}")
+        return False
+    return True
+
+
 def show_status():
     """Show Golf Modeling Suite status."""
     try:
@@ -263,6 +282,7 @@ Examples:
   python launch_golf_suite.py                    # Launch GUI launcher
   python launch_golf_suite.py --local           # Launch local launcher
   python launch_golf_suite.py --engine mujoco   # Launch MuJoCo directly
+  python launch_golf_suite.py --urdf-generator  # Launch URDF Generator
   python launch_golf_suite.py --status          # Show suite status
         """,
     )
@@ -278,6 +298,10 @@ Examples:
     )
 
     parser.add_argument(
+        "--urdf-generator", action="store_true", help="Launch Graphic URDF Generator"
+    )
+
+    parser.add_argument(
         "--status", action="store_true", help="Show Golf Modeling Suite status"
     )
 
@@ -286,6 +310,8 @@ Examples:
     try:
         if args.status:
             show_status()
+        elif args.urdf_generator:
+            launch_urdf_generator()
         elif args.engine:
             if args.engine == "mujoco":
                 launch_mujoco()

@@ -85,12 +85,28 @@ jobs:
         python: ["3.11"]
     steps:
       - uses: actions/checkout@v4
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libegl1 libgl1 xvfb \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libxcb-xkb1
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
       - run: pip install -r requirements.txt
       - run: pip install -e .[dev]
-      - run: pytest tests/ --cov=shared/python --cov-report=xml
+      - name: Run Tests
+        run: xvfb-run pytest tests/ --cov=shared/python --cov-report=xml
       - uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
@@ -102,7 +118,7 @@ jobs:
   javascript-tests:
     needs: quality-gate
     runs-on: ubuntu-latest
-    if: false  # Disabled - no JavaScript components in this project
+    if: false # Disabled - no JavaScript components in this project
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -130,7 +146,7 @@ jobs:
   arduino-build:
     needs: quality-gate
     runs-on: ubuntu-latest
-    if: false  # Disabled - no Arduino components in this project
+    if: false # Disabled - no Arduino components in this project
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

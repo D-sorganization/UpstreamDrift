@@ -5,17 +5,22 @@ import os
 import sys
 import typing
 import webbrowser
+from pathlib import Path
 
 import numpy as np
 from pydrake.all import (
+    AddMultibodyPlantSceneGraph,
     BodyIndex,
     Context,
     Diagram,
+    DiagramBuilder,
     JacobianWrtVariable,
     JointIndex,
     Meshcat,
     MeshcatParams,
+    MeshcatVisualizer,
     MultibodyPlant,
+    Parser,
     PrismaticJoint,
     RevoluteJoint,
     RigidTransform,
@@ -77,6 +82,13 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.sliders: dict[int, QtWidgets.QSlider] = {}  # type: ignore[no-any-unimported]
         self.spinboxes: dict[int, QtWidgets.QDoubleSpinBox] = {}  # type: ignore[no-any-unimported]
 
+        # Model Management
+        self.current_urdf_path: str | None = None
+        self.available_models: list[dict] = [
+            {"name": "Default Golf Model", "path": None}
+        ]
+        self._scan_urdf_models()
+
         # Initialize Simulation
         self._init_simulation()
 
@@ -91,57 +103,83 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.timer.timeout.connect(self._game_loop)
         self.timer.start(int(self.time_step * MS_PER_SECOND))
 
+    def _scan_urdf_models(self) -> None:
+        """Scan shared/urdf for models."""
+        try:
+            # Calculate path to shared directory relative to this file
+            # engines/physics_engines/drake/python/src/drake_gui_app.py
+            current_file = Path(__file__)
+            # Up 5 levels: src -> python -> drake -> physics_engines -> engines -> root
+            project_root = current_file.parents[5]
+            urdf_dir = project_root / "shared" / "urdf"
+
+            if urdf_dir.exists():
+                for urdf_file in urdf_dir.glob("*.urdf"):
+                    name = urdf_file.stem.replace("_", " ").title()
+                    self.available_models.append(
+                        {"name": f"URDF: {name}", "path": str(urdf_file)}
+                    )
+        except Exception as e:
+            LOGGER.error(f"Failed to scan URDF models: {e}")
+
     def _init_simulation(self) -> None:
         """Initialize Drake simulation and Meshcat."""
-        try:
-            meshcat_params = MeshcatParams()
-            # "0.0.0.0" is required for Docker port forwarding
-            meshcat_params.host = os.environ.get("MESHCAT_HOST", "localhost")
-            self.meshcat = Meshcat(meshcat_params)
-            LOGGER.info("Meshcat available at: %s", self.meshcat.web_url())
+        if self.meshcat is None:
+            try:
+                meshcat_params = MeshcatParams()
+                # "0.0.0.0" is required for Docker port forwarding
+                meshcat_params.host = os.environ.get("MESHCAT_HOST", "localhost")
+                self.meshcat = Meshcat(meshcat_params)
+                LOGGER.info("Meshcat available at: %s", self.meshcat.web_url())
 
-            # Open browser automatically only if running locally (not in Docker)
-            # In Docker, the launcher handles opening the browser on the host.
-            if self.meshcat:
-                if "MESHCAT_HOST" not in os.environ:
-                    webbrowser.open(self.meshcat.web_url())
-                else:
-                    LOGGER.info(
-                        "Running in Docker/Headless mode; "
-                        "skipping auto-browser open inside container."
-                    )
-                    LOGGER.info(
-                        "Please access Meshcat from your host browser (e.g., http://localhost:7000)."
-                    )
+                # Open browser automatically only if running locally (not in Docker)
+                # In Docker, the launcher handles opening the browser on the host.
+                if self.meshcat:
+                    if "MESHCAT_HOST" not in os.environ:
+                        webbrowser.open(self.meshcat.web_url())
+                    else:
+                        LOGGER.info(
+                            "Running in Docker/Headless mode; "
+                            "skipping auto-browser open inside container."
+                        )
+                        LOGGER.info(
+                            "Please access Meshcat from your host browser (e.g., http://localhost:7000)."
+                        )
 
-        except Exception as e:
-            LOGGER.exception("Failed to start Meshcat")
-            LOGGER.error(  # noqa: TRY400 - Manual logging preferred over re-raising.
-                "Failed to start Meshcat for Drake visualization.\n"
-                "Common causes:\n"
-                "  - Another Meshcat server is already running on the same port "
-                "(default: 7000).\n"
-                "  - Network issues or firewall blocking localhost.\n"
-                "  - Meshcat or its dependencies are not installed correctly.\n"
-                "Troubleshooting steps:\n"
-                "  1. Check if another Meshcat process is running and terminate it "
-                "if necessary.\n"
-                "  2. Verify that your firewall allows connections to "
-                "localhost:7000.\n"
-                "  3. Ensure all required Python packages are installed "
-                "(see project README).\n"
-                "Original exception: %s",
-                e,
+            except Exception as e:
+                LOGGER.exception("Failed to start Meshcat")
+                LOGGER.error(  # noqa: TRY400 - Manual logging preferred over re-raising.
+                    "Failed to start Meshcat for Drake visualization.\n"
+                    "Common causes:\n"
+                    "  - Another Meshcat server is already running on the same port "
+                    "(default: 7000).\n"
+                    "  - Network issues or firewall blocking localhost.\n"
+                    "  - Meshcat or its dependencies are not installed correctly.\n"
+                    "Troubleshooting steps:\n"
+                    "  1. Check if another Meshcat process is running and terminate it "
+                    "if necessary.\n"
+                    "  2. Verify that your firewall allows connections to "
+                    "localhost:7000.\n"
+                    "  3. Ensure all required Python packages are installed "
+                    "(see project README).\n"
+                    "Original exception: %s",
+                    e,
+                )
+                # We don't return here anymore, allowing simulation to run
+                # without Meshcat if needed
+                # But let's keep visualizer optional
+                self.meshcat = None
+
+        # Build Diagram
+        if self.current_urdf_path:
+            # Load custom URDF
+            self._build_custom_urdf_diagram(self.current_urdf_path)
+        else:
+            # Load default golf model
+            params = GolfModelParams()
+            self.diagram, self.plant, _ = build_golf_swing_diagram(
+                params, meshcat=self.meshcat
             )
-            # We don't return here anymore, allowing simulation to run
-            # without Meshcat if needed
-            # But let's keep visualizer optional
-            self.meshcat = None
-
-        params = GolfModelParams()
-        self.diagram, self.plant, _ = build_golf_swing_diagram(
-            params, meshcat=self.meshcat
-        )
 
         self.simulator = Simulator(self.diagram)
         self.simulator.set_target_realtime_rate(1.0)
@@ -161,6 +199,20 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         # Initial State
         self._reset_state()
 
+    def _build_custom_urdf_diagram(self, urdf_path: str) -> None:
+        """Build a simple diagram for a custom URDF."""
+        builder = DiagramBuilder()
+        plant, scene_graph = AddMultibodyPlantSceneGraph(builder, time_step=1e-3)
+        parser = Parser(plant)
+        parser.AddModels(urdf_path)
+        plant.Finalize()
+
+        if self.meshcat:
+            MeshcatVisualizer.AddToBuilder(builder, scene_graph, self.meshcat)
+
+        self.plant = plant
+        self.diagram = builder.Build()
+
     def _reset_state(self) -> None:
         """Reset simulation state."""
         plant = self.plant
@@ -173,15 +225,13 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         context.SetTime(0.0)
         plant_context = plant.GetMyContextFromRoot(context)
 
-        # Set default pose (standing)
-        # We need to find the specific joints or bodies.
-        # Just creating a generic reset for now.
-        pelvis = plant.GetBodyByName("pelvis")
-        # In newer Drake, SetFreeBodyPose takes RigidTransform
-
-        plant.SetFreeBodyPose(
-            plant_context, pelvis, RigidTransform([0, 0, INITIAL_PELVIS_HEIGHT_M])
-        )
+        # Set default pose (standing) if 'pelvis' exists (Golf Model)
+        if plant.HasBodyNamed("pelvis"):
+            pelvis = plant.GetBodyByName("pelvis")
+            # In newer Drake, SetFreeBodyPose takes RigidTransform
+            plant.SetFreeBodyPose(
+                plant_context, pelvis, RigidTransform([0, 0, INITIAL_PELVIS_HEIGHT_M])
+            )
 
         # Zero out velocities
         from numpy import zeros
@@ -196,6 +246,28 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         # Sync generic UI controls if needed
         self._sync_kinematic_sliders()
 
+    def _on_model_changed(self, index: int) -> None:
+        """Handle model change."""
+        model_data = self.available_models[index]
+        new_path = model_data["path"]
+
+        if new_path != self.current_urdf_path:
+            self.current_urdf_path = new_path
+
+            # Re-initialize simulation
+            # We need to stop the timer temporarily to avoid thread issues
+            self.timer.stop()
+            try:
+                self._init_simulation()
+                self._build_kinematic_controls()
+                self._sync_kinematic_sliders()
+            except Exception as e:
+                QtWidgets.QMessageBox.critical(self, "Error Loading Model", str(e))
+                # Revert selection? For now just log.
+                LOGGER.error(f"Error loading model: {e}")
+            finally:
+                self.timer.start(int(self.time_step * MS_PER_SECOND))
+
     def _setup_ui(self) -> None:  # noqa: PLR0915
         """Build the PyQt Interface."""
         # ... (implementation same as before, no state access needed here mostly) ...
@@ -204,6 +276,18 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
         layout = QtWidgets.QVBoxLayout(central_widget)
+
+        # 0. Model Selector
+        model_group = QtWidgets.QGroupBox("Model Selection")
+        model_layout = QtWidgets.QHBoxLayout()
+        self.model_combo = QtWidgets.QComboBox()
+        for model in self.available_models:
+            self.model_combo.addItem(model["name"])
+        self.model_combo.currentIndexChanged.connect(self._on_model_changed)
+        model_layout.addWidget(QtWidgets.QLabel("Model:"))
+        model_layout.addWidget(self.model_combo)
+        model_group.setLayout(model_layout)
+        layout.addWidget(model_group)
 
         # 1. Mode Selector
         mode_group = QtWidgets.QGroupBox("Operating Mode")
