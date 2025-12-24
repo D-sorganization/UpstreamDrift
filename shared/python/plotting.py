@@ -515,7 +515,7 @@ class GolfSwingPlotter:
 
         # Separate positive and negative torques
         torques_pos = np.maximum(torques, 0)
-        np.minimum(torques, 0)
+        torques_neg = np.minimum(torques, 0)
 
         if torques.ndim < 2:
             labels = [self.get_joint_name(0)]
@@ -524,6 +524,9 @@ class GolfSwingPlotter:
 
         # Plot positive torques
         ax.stackplot(times, torques_pos.T, labels=labels, alpha=0.7)
+        # Plot negative torques (same colors, no labels to avoid duplicate legend)
+        ax.set_prop_cycle(None)  # Reset color cycle
+        ax.stackplot(times, torques_neg.T, alpha=0.7)
 
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax.set_ylabel("Torque (Nm)", fontsize=12, fontweight="bold")
