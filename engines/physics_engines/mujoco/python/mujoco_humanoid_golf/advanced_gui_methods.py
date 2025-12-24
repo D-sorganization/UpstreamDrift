@@ -91,3 +91,19 @@ class AdvancedGuiMethodsMixin:
             set_color_contain("club", colors["club"])
 
         self.sim_widget._render_once()
+
+    def on_ellipsoid_visualization_changed(self, state: int) -> None:
+        """Handle ellipsoid visualization toggle."""
+        if hasattr(self, "sim_widget"):
+            # Check if mobility ellipsoid checkbox is checked
+            show_mobility = False
+            if hasattr(self, "show_mobility_ellipsoid_cb"):
+                show_mobility = self.show_mobility_ellipsoid_cb.isChecked()
+
+            # Check if force ellipsoid checkbox is checked
+            show_force = False
+            if hasattr(self, "show_force_ellipsoid_cb"):
+                show_force = self.show_force_ellipsoid_cb.isChecked()
+
+            # Update visualization
+            self.sim_widget.set_ellipsoid_visualization(show_mobility, show_force)
