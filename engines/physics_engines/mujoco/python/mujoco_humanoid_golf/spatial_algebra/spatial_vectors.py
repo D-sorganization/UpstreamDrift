@@ -181,7 +181,9 @@ def crf(v: np.ndarray) -> np.ndarray:
     return res
 
 
-def cross_motion(v: np.ndarray, m: np.ndarray) -> np.ndarray:
+def cross_motion(
+    v: np.ndarray, m: np.ndarray, out: np.ndarray | None = None
+) -> np.ndarray:
     """
     Compute spatial cross product v x m efficiently.
 
@@ -190,6 +192,7 @@ def cross_motion(v: np.ndarray, m: np.ndarray) -> np.ndarray:
     Args:
         v: 6x1 spatial motion vector [angular; linear]
         m: 6x1 spatial motion vector
+        out: Optional 6x1 output array to store result. If None, a new array is created.
 
     Returns:
         6x1 spatial vector
@@ -213,7 +216,10 @@ def cross_motion(v: np.ndarray, m: np.ndarray) -> np.ndarray:
     # Optimization: Direct assignment to pre-allocated array is faster than
     # creating a list of values and converting to array (~7% speedup).
     # Use result_type to correctly handle mixed types (e.g., int/float)
-    res = np.empty(6, dtype=np.result_type(v, m))
+    if out is None:
+        res = np.empty(6, dtype=np.result_type(v, m))
+    else:
+        res = out
 
     # Unpack components (v = [w; v_lin])
     # Result:
@@ -233,7 +239,9 @@ def cross_motion(v: np.ndarray, m: np.ndarray) -> np.ndarray:
     return res
 
 
-def cross_force(v: np.ndarray, f: np.ndarray) -> np.ndarray:
+def cross_force(
+    v: np.ndarray, f: np.ndarray, out: np.ndarray | None = None
+) -> np.ndarray:
     """
     Compute spatial force cross product v x* f efficiently.
 
@@ -242,6 +250,7 @@ def cross_force(v: np.ndarray, f: np.ndarray) -> np.ndarray:
     Args:
         v: 6x1 spatial motion vector [angular; linear]
         f: 6x1 spatial force vector [moment; force]
+        out: Optional 6x1 output array to store result. If None, a new array is created.
 
     Returns:
         6x1 spatial vector
@@ -265,7 +274,10 @@ def cross_force(v: np.ndarray, f: np.ndarray) -> np.ndarray:
     # Optimization: Direct assignment to pre-allocated array is faster than
     # creating a list of values and converting to array (~7% speedup).
     # Use result_type to correctly handle mixed types (e.g., int/float)
-    res = np.empty(6, dtype=np.result_type(v, f))
+    if out is None:
+        res = np.empty(6, dtype=np.result_type(v, f))
+    else:
+        res = out
 
     # Unpack components (v = [w; v_lin])
     # Result:
