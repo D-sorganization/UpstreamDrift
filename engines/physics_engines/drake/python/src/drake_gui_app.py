@@ -7,6 +7,7 @@ import typing
 import webbrowser
 
 from pydrake.all import (
+    JacobianWrtVariable,
     BodyIndex,
     Context,
     Diagram,
@@ -20,6 +21,7 @@ from pydrake.all import (
     Simulator,
 )
 from PyQt6 import QtCore, QtGui, QtWidgets
+import numpy as np
 
 from .drake_golf_model import GolfModelParams, build_golf_swing_diagram
 from .drake_visualizer import DrakeVisualizer
@@ -276,8 +278,26 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.btn_overlays.clicked.connect(self._show_overlay_dialog)
         vis_layout.addWidget(self.btn_overlays)
 
+        # Ellipsoid Toggles
+        self.chk_mobility = QtWidgets.QCheckBox("Show Mobility Ellipsoid (Green)")
+        self.chk_mobility.toggled.connect(self._on_visualization_changed)
+        vis_layout.addWidget(self.chk_mobility)
+
+        self.chk_force_ellip = QtWidgets.QCheckBox("Show Force Ellipsoid (Red)")
+        self.chk_force_ellip.toggled.connect(self._on_visualization_changed)
+        vis_layout.addWidget(self.chk_force_ellip)
+
         vis_group.setLayout(vis_layout)
         layout.addWidget(vis_group)
+
+        # Matrix Analysis
+        matrix_group = QtWidgets.QGroupBox("Matrix Analysis")
+        matrix_layout = QtWidgets.QFormLayout(matrix_group)
+        self.lbl_cond = QtWidgets.QLabel("--")
+        self.lbl_rank = QtWidgets.QLabel("--")
+        matrix_layout.addRow("Jacobian Cond:", self.lbl_cond)
+        matrix_layout.addRow("Constraint Rank:", self.lbl_rank)
+        layout.addWidget(matrix_group)
 
         # Status Bar
         self._update_status("Ready")
@@ -419,6 +439,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         if self.visualizer:
             self.visualizer.update_frame_transforms(context)
             self.visualizer.update_com_transforms(context)
+            self._update_ellipsoids()
 
     def _sync_kinematic_sliders(self) -> None:
         """Read current plant state and update sliders."""
@@ -500,6 +521,99 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             if self.visualizer:
                 self.visualizer.update_frame_transforms(context)
                 self.visualizer.update_com_transforms(context)
+                self._update_ellipsoids()
+
+    def _on_visualization_changed(self) -> None:
+        """Handle toggling of visualization options."""
+        if self.visualizer:
+            if not self.chk_mobility.isChecked() and not self.chk_force_ellip.isChecked():
+                self.visualizer.clear_ellipsoids()
+            else:
+                self._update_ellipsoids()
+
+    def _update_ellipsoids(self) -> None:
+        """Compute and draw ellipsoids."""
+        if not (self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked()):
+            return
+
+        if not self.plant or not self.context or not self.visualizer:
+            return
+
+        plant_context = self.plant.GetMyContextFromRoot(self.context)
+
+        # Use end effector (last body?)
+        # For golf, let's look for a body named "clubhead" or "club_body" or just last body.
+        # Fallback to last body if specific ones not found.
+        body_names = ["clubhead", "club_body", "wrist", "hand"]
+        target_body = None
+        for name in body_names:
+            if self.plant.HasBodyNamed(name):
+                target_body = self.plant.GetBodyByName(name)
+                break
+
+        if target_body is None:
+            # Last body
+            target_body = self.plant.get_body(BodyIndex(self.plant.num_bodies() - 1))
+
+        if target_body.name() == "world":
+            return
+
+        # Jacobian
+        # We need Jacobian with respect to velocities (v)
+        frame_W = self.plant.world_frame()
+        frame_B = target_body.body_frame()
+
+        J_spatial = self.plant.CalcJacobianSpatialVelocity(
+            plant_context,
+            JacobianWrtVariable.kV,
+            frame_B,
+            [0,0,0],
+            frame_W,
+            frame_W
+        )
+        # 6 x nv matrix. Top 3 rotational, bottom 3 translational.
+        # Use Translational part for visualization
+        J = J_spatial[3:, :]
+
+        # Mass Matrix
+        M = self.plant.CalcMassMatrix(plant_context)
+
+        try:
+            # Condition Number
+            s = np.linalg.svd(J, compute_uv=False)
+            cond = s[0] / s[-1] if s[-1] > 1e-9 else float("inf")
+            self.lbl_cond.setText(f"{cond:.2f}")
+
+            # Constraint Rank (if any constraints?)
+            # Drake handles constraints differently.
+            # We can show Mass Matrix rank or check if M is singular.
+            rank = np.linalg.matrix_rank(M)
+            self.lbl_rank.setText(f"{rank} / {self.plant.num_velocities()}")
+
+            # Ellipsoid
+            Minv = np.linalg.inv(M)
+            Lambda_inv = J @ Minv @ J.T
+
+            eigvals, eigvecs = np.linalg.eigh(Lambda_inv)
+
+            X_WB = self.plant.EvalBodyPoseInWorld(plant_context, target_body)
+            pos = X_WB.translation()
+
+            if self.chk_mobility.isChecked():
+                radii = np.sqrt(np.maximum(eigvals, 1e-6))
+                self.visualizer.draw_ellipsoid(
+                    "mobility", eigvecs, radii, pos, (0, 1, 0, 0.3)
+                )
+
+            if self.chk_force_ellip.isChecked():
+                radii_f = 1.0 / np.sqrt(np.maximum(eigvals, 1e-6))
+                radii_f = np.clip(radii_f, 0.01, 5.0)
+                self.visualizer.draw_ellipsoid(
+                    "force", eigvecs, radii_f, pos, (1, 0, 0, 0.3)
+                )
+
+        except Exception as e:
+            LOGGER.warning(f"Ellipsoid calc error: {e}")
 
     def _show_overlay_dialog(self) -> None:  # noqa: PLR0915
         """Show dialog to toggle overlays for specific bodies."""
@@ -571,4 +685,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    from pydrake.all import JacobianWrtVariable # Import here for use in method
     main()

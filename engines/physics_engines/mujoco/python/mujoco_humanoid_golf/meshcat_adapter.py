@@ -222,6 +222,55 @@ class MuJoCoMeshcatAdapter:
                     f"overlays/torques/{body_name}", pos, t * torque_scale, 0x0000FF
                 )
 
+    def draw_ellipsoid(
+        self,
+        name: str,
+        position: np.ndarray,
+        rotation: np.ndarray,
+        radii: np.ndarray,
+        color: int = 0x00FF00,
+        opacity: float = 0.3,
+    ):
+        """
+        Draws an ellipsoid at the specified position/orientation.
+
+        Args:
+            name: Unique name for the ellipsoid
+            position: 3D position vector
+            rotation: 3x3 rotation matrix (axes of ellipsoid)
+            radii: Length of principal axes (x, y, z)
+            color: Hex color
+            opacity: Opacity (0-1)
+        """
+        if self.vis is None:
+            return
+
+        # Path for this ellipsoid
+        path = f"overlays/ellipsoids/{name}"
+
+        # Create unit sphere and scale it to radii
+        # Meshcat doesn't have explicit Ellipsoid, so we use Scaled Sphere
+        material = g.MeshPhongMaterial(
+            color=color, opacity=opacity, transparent=True
+        )
+        shape = g.Sphere(radius=1.0)
+
+        # Transformation: T = [Rot | Pos] * Scale
+        # But Meshcat applies scale via object property or transform?
+        # Usually transform matrix can include scale.
+
+        T = np.eye(4)
+        T[:3, :3] = rotation @ np.diag(radii)
+        T[:3, 3] = position
+
+        self.vis[path].set_object(shape, material)
+        self.vis[path].set_transform(T)
+
+    def clear_ellipsoids(self):
+        """Clears all drawn ellipsoids."""
+        if self.vis:
+            self.vis["overlays/ellipsoids"].delete()
+
     def _draw_arrow(
         self, path: str, start: np.ndarray, vec: np.ndarray, color_hex: int
     ):

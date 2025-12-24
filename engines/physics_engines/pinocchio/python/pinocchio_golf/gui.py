@@ -5,8 +5,13 @@ import sys
 import types
 from pathlib import Path
 
-import meshcat.geometry as g
-import meshcat.visualizer as viz
+try:
+    import meshcat.geometry as g
+    import meshcat.visualizer as viz
+    import meshcat.transformations as tf
+except ImportError:
+    pass
+
 import numpy as np  # noqa: TID253
 import pinocchio as pin
 from pinocchio.visualize import MeshcatVisualizer
@@ -172,26 +177,40 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         # 3. Visuals & Logs
         vis_group = QtWidgets.QGroupBox("Visualization")
-        vis_layout = QtWidgets.QHBoxLayout()
+        vis_layout = QtWidgets.QVBoxLayout() # Changed to VBox to accommodate more controls
 
+        # Checkboxes row
+        chk_layout = QtWidgets.QHBoxLayout()
         self.chk_frames = QtWidgets.QCheckBox("Show Frames")
         self.chk_frames.toggled.connect(self._toggle_frames)
-        vis_layout.addWidget(self.chk_frames)
+        chk_layout.addWidget(self.chk_frames)
 
         self.chk_coms = QtWidgets.QCheckBox("Show COMs")
         self.chk_coms.toggled.connect(self._toggle_coms)
-        vis_layout.addWidget(self.chk_coms)
+        chk_layout.addWidget(self.chk_coms)
 
         self.chk_forces = QtWidgets.QCheckBox("Show Forces")
         self.chk_forces.toggled.connect(self._toggle_forces)
-        vis_layout.addWidget(self.chk_forces)
+        chk_layout.addWidget(self.chk_forces)
 
         self.chk_torques = QtWidgets.QCheckBox("Show Torques")
         self.chk_torques.toggled.connect(self._toggle_torques)
-        vis_layout.addWidget(self.chk_torques)
+        chk_layout.addWidget(self.chk_torques)
+        vis_layout.addLayout(chk_layout)
+
+        # Ellipsoids row
+        ellip_layout = QtWidgets.QHBoxLayout()
+        self.chk_mobility = QtWidgets.QCheckBox("Mobility Ellipsoid (Green)")
+        self.chk_mobility.toggled.connect(self._update_viewer)
+        ellip_layout.addWidget(self.chk_mobility)
+
+        self.chk_force_ellip = QtWidgets.QCheckBox("Force Ellipsoid (Red)")
+        self.chk_force_ellip.toggled.connect(self._update_viewer)
+        ellip_layout.addWidget(self.chk_force_ellip)
+        vis_layout.addLayout(ellip_layout)
 
         # Vector Scales
-        scale_layout = QtWidgets.QVBoxLayout()
+        scale_layout = QtWidgets.QHBoxLayout()
 
         self.spin_force_scale = QtWidgets.QDoubleSpinBox()
         self.spin_force_scale.setRange(0.01, 10.0)
@@ -213,6 +232,15 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         vis_group.setLayout(vis_layout)
         layout.addWidget(vis_group)
+
+        # Matrix Analysis Panel
+        matrix_group = QtWidgets.QGroupBox("Matrix Analysis")
+        matrix_layout = QtWidgets.QFormLayout(matrix_group)
+        self.lbl_cond = QtWidgets.QLabel("--")
+        self.lbl_rank = QtWidgets.QLabel("--")
+        matrix_layout.addRow("Jacobian Cond:", self.lbl_cond)
+        matrix_layout.addRow("Mass Matrix Rank:", self.lbl_rank) # Jc rank depends on constraints which might not exist
+        layout.addWidget(matrix_group)
 
         self.log = LogPanel()
         layout.addWidget(self.log)
@@ -475,19 +503,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         if self.operating_mode == "dynamic" and self.is_running:
             # --- Physics integration loop ---
-            # Set joint torques to zero to simulate passive dynamics (no actuation).
-            # This models the system's natural motion under gravity and inertia only.
             tau = np.zeros(self.model.nv)
-
-            # Compute joint accelerations using Articulated-Body Algorithm (ABA).
             a = pin.aba(self.model, self.data, self.q, self.v, tau)
-
-            # Integrate using the semi-implicit (symplectic) Euler method:
-            #   1. Update velocity: v_{n+1} = v_n + a * dt
-            #   2. Update position: q_{n+1} = integrate(q_n, v_{n+1} * dt)
-            # This method is preferred over explicit Euler for mechanical systems
-            # because it provides better energy behavior and stability, especially
-            # for stiff or underactuated systems.
             self.v += a * self.dt
             self.q = pin.integrate(self.model, self.q, self.v * self.dt)
 
@@ -509,6 +526,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         pin.forwardKinematics(self.model, self.data, self.q)
         pin.updateFramePlacements(self.model, self.data)
 
+        # Calculate matrices for analysis
+        self._compute_analysis()
+
         # Overlays
         if self.chk_frames.isChecked():
             self._draw_frames()
@@ -516,6 +536,99 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self._draw_coms()
         if self.chk_forces.isChecked() or self.chk_torques.isChecked():
             self._draw_vectors()
+
+        if self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked():
+            self._draw_ellipsoids()
+        else:
+            if self.viewer:
+                self.viewer["overlays/ellipsoids"].delete()
+
+    def _compute_analysis(self) -> None:
+        """Compute Jacobian and Mass matrix analysis."""
+        if self.model is None or self.data is None or self.q is None:
+            return
+
+        # Compute Jacobian for end-effector (assumed last joint for now)
+        joint_id = self.model.njoints - 1
+
+        # We need to ensure Jacobians are computed.
+        # pin.computeJointJacobians(self.model, self.data, self.q) # Done in update loop via FK? No.
+        pin.computeJointJacobians(self.model, self.data, self.q)
+        J = pin.getJointJacobian(self.model, self.data, joint_id, pin.ReferenceFrame.LOCAL)
+
+        # Condition number
+        try:
+            s = np.linalg.svd(J, compute_uv=False)
+            cond = s[0] / s[-1] if s[-1] > 1e-9 else float("inf")
+            self.lbl_cond.setText(f"{cond:.2f}")
+        except Exception:
+            self.lbl_cond.setText("Error")
+
+        # Mass Matrix Rank
+        M = pin.crba(self.model, self.data, self.q)
+        try:
+            rank = np.linalg.matrix_rank(M)
+            self.lbl_rank.setText(f"{rank} / {self.model.nv}")
+        except Exception:
+            self.lbl_rank.setText("Error")
+
+    def _draw_ellipsoids(self) -> None:
+        """Draw mobility/force ellipsoids at end effector."""
+        if self.model is None or self.data is None or self.viewer is None:
+            return
+
+        # End effector joint
+        joint_id = self.model.njoints - 1
+        joint_pos = self.data.oMi[joint_id].translation
+
+        # Get Jacobian (Translational only for 3D visualization)
+        J_full = pin.getJointJacobian(self.model, self.data, joint_id, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
+        J = J_full[:3, :] # Linear part
+
+        # Mass Matrix
+        M = pin.crba(self.model, self.data, self.q)
+        M_sym = np.triu(M) + np.triu(M, 1).T # Ensure symmetric if using older pin version
+
+        try:
+            Minv = np.linalg.inv(M_sym)
+            Lambda_inv = J @ Minv @ J.T
+
+            # Eigen decomposition
+            eigvals, eigvecs = np.linalg.eigh(Lambda_inv)
+
+            if self.chk_mobility.isChecked():
+                # Radii = sqrt(eigenvalues)
+                radii = np.sqrt(np.maximum(eigvals, 1e-6))
+                self._draw_ellipsoid_meshcat("mobility", joint_pos, eigvecs, radii, 0x00FF00)
+
+            if self.chk_force_ellip.isChecked():
+                # Radii = 1/sqrt(eigenvalues)
+                radii_force = 1.0 / np.sqrt(np.maximum(eigvals, 1e-6))
+                # Clip to reasonable visual size
+                radii_force = np.clip(radii_force, 0.01, 5.0)
+                self._draw_ellipsoid_meshcat("force", joint_pos, eigvecs, radii_force, 0xFF0000)
+
+        except Exception as e:
+            logger.error(f"Ellipsoid computation failed: {e}")
+
+    def _draw_ellipsoid_meshcat(self, name: str, pos: np.ndarray, rot: np.ndarray, radii: np.ndarray, color: int) -> None:
+        """Draw ellipsoid using Meshcat."""
+        path = f"overlays/ellipsoids/{name}"
+
+        # Meshcat Sphere scaled
+        self.viewer[path].set_object(
+            g.Sphere(1.0),
+            g.MeshLambertMaterial(color=color, opacity=0.5, transparent=True)
+        )
+
+        # Transform: [Rot * Diag(radii) | Pos]
+        # Meshcat applies transform to the object.
+        # We need to construct 4x4 matrix
+        T = np.eye(4)
+        T[:3, :3] = rot @ np.diag(radii)
+        T[:3, 3] = pos
+
+        self.viewer[path].set_transform(T)
 
     def _draw_vectors(self) -> None:
         """Draw force and torque vectors at joints."""

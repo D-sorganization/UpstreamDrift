@@ -1108,7 +1108,39 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.show_contacts_cb.stateChanged.connect(self.on_show_contacts_changed)
         force_layout.addWidget(self.show_contacts_cb)
 
+        # Ellipsoids
+        ellipsoid_group = QtWidgets.QGroupBox("Ellipsoids")
+        ellipsoid_layout = QtWidgets.QVBoxLayout(ellipsoid_group)
+        self.show_mobility_ellipsoid_cb = QtWidgets.QCheckBox(
+            "Show Mobility Ellipsoid (Green)"
+        )
+        self.show_mobility_ellipsoid_cb.stateChanged.connect(
+            self.on_ellipsoid_visualization_changed
+        )
+        ellipsoid_layout.addWidget(self.show_mobility_ellipsoid_cb)
+
+        self.show_force_ellipsoid_cb = QtWidgets.QCheckBox(
+            "Show Force Ellipsoid (Red)"
+        )
+        self.show_force_ellipsoid_cb.stateChanged.connect(
+            self.on_ellipsoid_visualization_changed
+        )
+        ellipsoid_layout.addWidget(self.show_force_ellipsoid_cb)
+        viz_layout.addWidget(ellipsoid_group)
+
         viz_layout.addWidget(force_group)
+
+        # Matrix Analysis
+        matrix_group = QtWidgets.QGroupBox("Matrix Analysis")
+        matrix_layout = QtWidgets.QFormLayout(matrix_group)
+        self.jacobian_cond_label = QtWidgets.QLabel("Condition: --")
+        self.constraint_rank_label = QtWidgets.QLabel("Rank: --")
+        self.nefc_label = QtWidgets.QLabel("Constraints: --")
+
+        matrix_layout.addRow("Jacobian Cond:", self.jacobian_cond_label)
+        matrix_layout.addRow("Constraint Rank:", self.constraint_rank_label)
+        matrix_layout.addRow("Active Constraints:", self.nefc_label)
+        viz_layout.addWidget(matrix_group)
 
         # Body Appearance Controls
         appearance_group = QtWidgets.QGroupBox("Body Appearance")

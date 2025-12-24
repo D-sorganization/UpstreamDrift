@@ -12,6 +12,7 @@ from pydrake.all import (
     RotationMatrix,
     Sphere,
 )
+import numpy as np
 
 FRAME_AXIS_LENGTH_M: typing.Final[float] = (
     0.2  # [m] Axle length for frame visualization
@@ -31,6 +32,7 @@ class DrakeVisualizer:
         # Track active visualizations
         self.visible_frames: set[str] = set()
         self.visible_coms: set[str] = set()
+        self.visible_ellipsoids: set[str] = set()
 
     def toggle_frame(self, body_name: str, visible: bool) -> None:  # noqa: FBT001
         """Toggle coordinate frame visualization for a body."""
@@ -114,8 +116,53 @@ class DrakeVisualizer:
                 X_ParentChild=RigidTransform(p_WCom),
             )
 
+    def draw_ellipsoid(
+        self,
+        name: str,
+        rotation_matrix: np.ndarray,
+        radii: np.ndarray,
+        position: np.ndarray,
+        color: tuple[float, float, float, float]
+    ) -> None:
+        """Draw ellipsoid in Meshcat.
+
+        Args:
+            name: Unique identifier.
+            rotation_matrix: 3x3 rotation (axes).
+            radii: Length of semi-axes.
+            position: Center position.
+            color: (r, g, b, alpha)
+        """
+        path = f"{self.prefix}/ellipsoids/{name}"
+
+        # Drake Meshcat supports generic SetObject with scaling in transform
+        # Create a unit sphere
+        self.meshcat.SetObject(path, Sphere(1.0), Rgba(*color))
+
+        # Transform T = [Rot * Scale | Pos]
+        # X_WE = RigidTransform(RotationMatrix(rotation_matrix), position)
+
+        # However, RigidTransform does not support non-uniform scaling (shear).
+        # Meshcat's SetTransform usually takes a 4x4 matrix or RigidTransform.
+        # If Drake's python binding for SetTransform supports numpy array, we can use that.
+        # Otherwise, we might be limited to uniform scaling if using RigidTransform.
+        # Check PyDrake Meshcat SetTransform signature: (path, X_ParentChild) or (path, matrix)
+
+        T = np.eye(4)
+        T[:3, :3] = rotation_matrix @ np.diag(radii)
+        T[:3, 3] = position
+
+        # Pass numpy array directly if supported
+        self.meshcat.SetTransform(path, T)
+        self.visible_ellipsoids.add(name)
+
+    def clear_ellipsoids(self) -> None:
+        self.meshcat.Delete(f"{self.prefix}/ellipsoids")
+        self.visible_ellipsoids.clear()
+
     def clear_all(self) -> None:
         """Clear all overlays."""
         self.meshcat.Delete(self.prefix)
         self.visible_frames.clear()
         self.visible_coms.clear()
+        self.visible_ellipsoids.clear()
