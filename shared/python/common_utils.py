@@ -210,3 +210,37 @@ class DataFormatError(GolfModelingError):
     """Raised when data format is invalid or unsupported."""
 
     pass
+
+
+def get_shared_urdf_path() -> Path | None:
+    """Get the path to the shared URDF directory.
+
+    Returns:
+        Path to shared/urdf directory if found, None otherwise.
+    """
+    # Attempt to locate shared/urdf relative to this file
+    # shared/python/common_utils.py -> shared/python -> shared -> root -> shared/urdf
+    # This logic assumes standard repo structure.
+    try:
+        current_file = Path(__file__).resolve()
+        # Go up to 'shared' dir: common_utils.py (parent) -> python (parent) -> shared (parent)
+        # Note: current_file.parents[0] is 'shared/python'
+        #       current_file.parents[1] is 'shared'
+        shared_dir = current_file.parents[1]
+
+        # Check if we are actually in the shared directory structure
+        if shared_dir.name != "shared":
+            # Fallback: traverse up until we find 'shared' or root
+            for parent in current_file.parents:
+                if (parent / "shared" / "urdf").exists():
+                    return parent / "shared" / "urdf"
+            return None
+
+        urdf_dir = shared_dir / "urdf"
+        if urdf_dir.exists():
+            return urdf_dir
+
+    except Exception:
+        pass
+
+    return None
