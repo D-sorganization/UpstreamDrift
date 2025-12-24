@@ -20,6 +20,8 @@ import mujoco
 import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+from shared.python.common_utils import get_shared_urdf_path
+
 from .advanced_gui_methods import AdvancedGuiMethodsMixin
 from .control_system import ControlSystem, ControlType
 from .grip_modelling_tab import GripModellingTab
@@ -333,20 +335,10 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
 
     def _load_shared_urdfs(self) -> None:
         """Scan shared/urdf directory and add models to config."""
-        # Find shared/urdf relative to this file
-        # This file is in engines/physics_engines/mujoco/python/mujoco_humanoid_golf/
-        # shared is in shared/urdf (from root)
+        urdf_dir = get_shared_urdf_path()
 
-        # Calculate path to shared directory from this file
-        current_file = Path(__file__)
-        # Go up 6 levels to reach root:
-        # mujoco_humanoid_golf -> python -> mujoco -> physics_engines -> engines -> root
-        project_root = current_file.parents[5]
-
-        urdf_dir = project_root / "shared" / "urdf"
-
-        if not urdf_dir.exists():
-            logger.warning(f"Shared URDF directory not found: {urdf_dir}")
+        if urdf_dir is None or not urdf_dir.exists():
+            logger.warning("Shared URDF directory not found")
             return
 
         for urdf_file in urdf_dir.glob("*.urdf"):
