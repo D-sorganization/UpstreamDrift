@@ -31,16 +31,16 @@ jobs:
             const labels = new Set();
 
             // Language/Component labels
-            if (changedFiles.some(f => f.startsWith('python/'))) {
+            if (changedFiles.some(f => f.endsWith('.py'))) {
               labels.add('python');
             }
-            if (changedFiles.some(f => f.startsWith('javascript/'))) {
+            if (changedFiles.some(f => f.endsWith('.js') || f.endsWith('.html'))) {
               labels.add('javascript');
             }
-            if (changedFiles.some(f => f.startsWith('matlab/'))) {
+            if (changedFiles.some(f => f.endsWith('.m') || f.endsWith('.slx'))) {
               labels.add('matlab');
             }
-            if (changedFiles.some(f => f.startsWith('arduino/'))) {
+            if (changedFiles.some(f => f.endsWith('.ino'))) {
               labels.add('arduino');
             }
 

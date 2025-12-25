@@ -219,7 +219,7 @@ def validate_configuration_files():
         ".gitignore",
         "shared/python/requirements.txt",
         "README.md",
-        "MIGRATION_STATUS.md",
+        "docs/plans/migration_status.md",
     ]
 
     for config_file in config_files:
