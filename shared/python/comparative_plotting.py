@@ -5,7 +5,6 @@ Visualizes the differences between two swings using overlays and difference plot
 
 from __future__ import annotations
 
-import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
@@ -82,7 +81,7 @@ class ComparativePlotter:
         # Add correlation stats
         stats_text = f"Correlation: {aligned.correlation:.3f}\nRMS Diff: {aligned.rms_error:.3f}"
         ax1.text(0.02, 0.95, stats_text, transform=ax1.transAxes,
-                 verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+                 verticalalignment='top', bbox={"boxstyle": 'round', "facecolor": 'white', "alpha": 0.8})
 
         # Only use tight_layout if we created the subplots directly on the figure (not passed axis)
         # Here we did create subplots via GridSpec on figure, so it's safeish, but usually handled by caller.

@@ -13,7 +13,7 @@ import numpy as np
 from scipy import interpolate
 
 if TYPE_CHECKING:
-    from shared.python.statistical_analysis import StatisticalAnalyzer
+    pass
 
 
 class RecorderInterface(Protocol):
