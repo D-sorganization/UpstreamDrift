@@ -13,6 +13,14 @@ import subprocess
 import sys
 from pathlib import Path
 
+try:
+    import matplotlib.pyplot as plt
+
+    HAS_MATPLOTLIB = True
+except ImportError:
+    HAS_MATPLOTLIB = False
+import csv
+
 from PyQt6.QtCore import (
     Qt,
     QThread,
@@ -33,6 +41,7 @@ from PyQt6.QtWidgets import (
     QGridLayout,
     QGroupBox,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QMainWindow,
@@ -140,8 +149,6 @@ class SimulationWorker(QThread):
             self.log_signal.emit(f"Error starting process: {e}")
             self.finished_signal.emit(-1, str(e))
 
-    def stop(self):
-        self._is_running = False
         if self.process:
             self.process.terminate()
 
@@ -364,14 +371,25 @@ class HumanoidLauncher(QMainWindow):
         self.btn_data.setEnabled(False)
         self.btn_data.clicked.connect(self.open_data)
 
+        self.btn_plot_iaa = QPushButton("Plot IAA")
+        self.btn_plot_iaa.setEnabled(False)
+        self.btn_plot_iaa.clicked.connect(self.plot_induced_acceleration)
+        self.btn_plot_iaa.setToolTip("Plot Induced Acceleration Analysis")
+
         results_layout.addWidget(self.btn_video)
         results_layout.addWidget(self.btn_data)
+        results_layout.addWidget(self.btn_plot_iaa)
         results_layout.addStretch()
 
         layout.addLayout(results_layout)
         layout.addStretch()
 
         self.tabs.addTab(tab, "Simulation")
+
+    def enable_results(self, enabled: bool) -> None:
+        self.btn_video.setEnabled(enabled)
+        self.btn_data.setEnabled(enabled)
+        self.btn_plot_iaa.setEnabled(enabled and HAS_MATPLOTLIB)
 
     def setup_appearance_tab(self):
         tab = QWidget()
@@ -798,6 +816,95 @@ class HumanoidLauncher(QMainWindow):
         cmd.extend(["-m", "humanoid_golf.sim"])
 
         return cmd
+
+    def plot_induced_acceleration(self):
+        """Plot Induced Acceleration Analysis from CSV."""
+        if not HAS_MATPLOTLIB:
+            return
+
+        csv_path = self.current_dir.parent / "docker" / "src" / "golf_data.csv"
+        if not csv_path.exists():
+            QMessageBox.warning(self, "No Data", "golf_data.csv not found.")
+            return
+
+        try:
+            # Read CSV headers to find joints
+            joints = set()
+            with open(csv_path) as f:
+                reader = csv.reader(f)
+                headers = next(reader)
+
+            # Headers like iaa_{joint}_{type}
+            # type is g, c, t, total
+            for h in headers:
+                if h.startswith("iaa_") and h.endswith("_total"):
+                    # Extract joint name: iaa_HEAD_total
+                    parts = h.split("_")
+                    if len(parts) >= 3:
+                        joint = "_".join(parts[1:-1])
+                        joints.add(joint)
+
+            if not joints:
+                QMessageBox.warning(
+                    self,
+                    "No IAA Data",
+                    "No Induced Acceleration data found in CSV.",
+                )
+                return
+
+            sorted_joints = sorted(list(joints))
+
+            # Ask user for joint
+            joint, ok = QInputDialog.getItem(
+                self, "Select Joint", "Joint:", sorted_joints, 0, False
+            )
+            if not ok or not joint:
+                return
+
+            # Read Data
+            times = []
+            g_vals = []
+            c_vals = []
+            t_vals = []
+            tot_vals = []
+
+            # Column names
+            col_g = f"iaa_{joint}_g"
+            col_c = f"iaa_{joint}_c"
+            col_t = f"iaa_{joint}_t"
+            col_tot = f"iaa_{joint}_total"
+
+            with open(csv_path) as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    try:
+                        times.append(float(row["time"]))
+                        g_vals.append(float(row[col_g]))
+                        c_vals.append(float(row[col_c]))
+                        t_vals.append(float(row[col_t]))
+                        tot_vals.append(float(row[col_tot]))
+                    except (ValueError, KeyError):
+                        continue
+
+            if not times:
+                return
+
+            # Plot
+            plt.figure(figsize=(10, 6))
+            plt.plot(times, g_vals, label="Gravity", linestyle="--")
+            plt.plot(times, c_vals, label="Velocity (Coriolis)", linestyle="-.")
+            plt.plot(times, t_vals, label="Control", linestyle=":")
+            plt.plot(times, tot_vals, label="Total", color="k", linewidth=1)
+
+            plt.title(f"Induced Accelerations: {joint}")
+            plt.xlabel("Time [s]")
+            plt.ylabel("Acceleration [rad/s^2]")
+            plt.legend()
+            plt.grid(True)
+            plt.show()
+
+        except Exception as e:
+            QMessageBox.critical(self, "Plot Error", str(e))
 
     def start_simulation(self):
         self.save_config()
