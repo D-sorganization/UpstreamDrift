@@ -705,7 +705,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self.log_write(msg)
             return
 
-        # joint_names is pre-populated above; widgets are only created for supported 1-DOF joints.
+        # joint_names is pre-populated above; widgets are only created for supported
+        # 1-DOF joints
         row = QtWidgets.QWidget()
         r_layout = QtWidgets.QHBoxLayout(row)
         r_layout.setContentsMargins(0, 0, 0, 0)
