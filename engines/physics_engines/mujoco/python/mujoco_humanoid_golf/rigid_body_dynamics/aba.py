@@ -86,23 +86,26 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     a_grav = model.get("gravity", np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2]))
 
     # Initialize arrays
-    xup: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Transforms from body to parent
+    # OPTIMIZATION: Use single tensor for transforms and empty for overwritten arrays
+    xup = np.empty((nb, 6, 6))  # Transforms from body to parent
     s_subspace: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Motion subspaces
-    v = np.zeros((6, nb))  # Spatial velocities
-    c = np.zeros((6, nb))  # Velocity-product accelerations (bias)
+    v = np.empty((6, nb))  # Spatial velocities
+    c = np.empty((6, nb))  # Velocity-product accelerations (bias)
     ia_articulated: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Articulated-body inertias
-    pa_bias = np.zeros((6, nb))  # Articulated-body bias forces
-    u_force = np.zeros((6, nb))  # IA * S
-    d = np.zeros(nb)  # S.T @ U (joint-space inertia)
-    u = np.zeros(nb)  # tau - S.T @ pA (bias force)
-    a = np.zeros((6, nb))  # Spatial accelerations
-    qdd = np.zeros(nb)  # Joint accelerations
-    cross_buf = np.zeros(6)  # Optimization: temporary buffer for cross product
+    pa_bias = np.empty((6, nb))  # Articulated-body bias forces
+    u_force = np.empty((6, nb))  # IA * S
+    d = np.empty(nb)  # S.T @ U (joint-space inertia)
+    u = np.empty(nb)  # tau - S.T @ pA (bias force)
+    a = np.empty((6, nb))  # Spatial accelerations
+    qdd = np.empty(nb)  # Joint accelerations
+    cross_buf = np.empty(6)  # Optimization: temporary buffer for cross product
+    xj_buf = np.empty((6, 6))  # Optimization: buffer for jcalc
 
     # --- Pass 1: Forward kinematics ---
     for i in range(nb):
-        xj_transform, s_subspace[i] = jcalc(model["jtype"][i], q[i])
-        xup[i] = xj_transform @ model["Xtree"][i]
+        xj_transform, s_subspace[i] = jcalc(model["jtype"][i], q[i], out=xj_buf)
+        # Optimized xup[i] = xj_transform @ model["Xtree"][i]
+        np.matmul(xj_transform, model["Xtree"][i], out=xup[i])
 
         vj_velocity = s_subspace[i] * qd[i]  # Joint velocity
 
