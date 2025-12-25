@@ -37,6 +37,18 @@ GOLF_BALL_LIFT_COEFFICIENT: float = (
 DRIVER_LENGTH_MAX_M: float = 1.1684  # [m] USGA Rule 1-1c (46 inches)
 DRIVER_LOFT_TYPICAL_DEG: float = 10.5  # [degrees] Modern driver average
 IRON_LOFT_RANGE_DEG: tuple[float, float] = (18.0, 64.0)  # [degrees] 2-iron to lob wedge
+IRON_7_LOFT_DEG: float = 34.0  # [degrees] Standard 7-iron loft
+PUTTER_LOFT_DEG: float = 3.0  # [degrees] Standard putter loft
+
+# Course conditions
+GREEN_SPEED_STIMP: float = 10.0  # [ft] Fast green speed
+ROUGH_HEIGHT_MM: float = 25.0  # [mm] Medium rough height
+BUNKER_DEPTH_MM: float = 100.0  # [mm] Standard bunker depth
+
+# Atmospheric conditions (Standard)
+TEMPERATURE_C: float = 20.0  # [°C] Standard temperature
+PRESSURE_HPA: float = 1013.25  # [hPa] Standard atmospheric pressure
+HUMIDITY_PERCENT: float = 50.0  # [%] Standard relative humidity
 
 # Conversion factors (exact)
 MPS_TO_KPH: float = 3.6  # [m/s → km/h] = (1000m/1km)/(3600s/1h)
