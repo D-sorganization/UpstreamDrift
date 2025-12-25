@@ -7,8 +7,6 @@ import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
 
-import numpy as np
-import pandas as pd
 import pytest
 
 
@@ -23,6 +21,9 @@ def temp_dir():
 @pytest.fixture
 def sample_swing_data():
     """Generate sample swing data for testing."""
+    import numpy as np
+    import pandas as pd
+
     time = np.linspace(0, 2.0, 100)  # 2 second swing
 
     # Simple sinusoidal swing motion
@@ -128,6 +129,7 @@ def setup_test_environment():
     # Disable GUI components during testing
     os.environ["GOLF_SUITE_HEADLESS"] = "1"
     os.environ["GOLF_SUITE_TEST_MODE"] = "1"
+    os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
     yield
 
