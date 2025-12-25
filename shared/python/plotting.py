@@ -423,7 +423,7 @@ class GolfSwingPlotter:
         ax.set_zlabel("Z (m)", fontsize=10, fontweight="bold")  # type: ignore[attr-defined]
         ax.set_title("Club Head 3D Trajectory", fontsize=14, fontweight="bold")
         ax.legend(loc="best")
-        plt.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
+        fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
         fig.tight_layout()
 
     def plot_phase_diagram(self, fig: Figure, joint_idx: int = 0) -> None:
@@ -491,7 +491,7 @@ class GolfSwingPlotter:
         ax.set_title(f"Phase Diagram: {joint_name}", fontsize=14, fontweight="bold")
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3, linestyle="--")
-        plt.colorbar(sc, ax=ax, label="Time (s)")
+        fig.colorbar(sc, ax=ax, label="Time (s)")
         fig.tight_layout()
 
     def plot_torque_comparison(self, fig: Figure) -> None:
@@ -897,7 +897,7 @@ class GolfSwingPlotter:
         ax.set_xlabel("Position (deg)", fontsize=10, fontweight="bold")
         ax.set_ylabel("Velocity (deg/s)", fontsize=10, fontweight="bold")
         ax.set_zlabel("Acceleration (deg/s²)", fontsize=10, fontweight="bold")  # type: ignore[attr-defined]
-        plt.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
+        fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
         fig.tight_layout()
 
     def plot_correlation_matrix(
@@ -959,5 +959,5 @@ class GolfSwingPlotter:
                     )
 
         ax.set_title(title, fontsize=14, fontweight="bold")
-        plt.colorbar(im, ax=ax, label="Correlation Coefficient")
+        fig.colorbar(im, ax=ax, label="Correlation Coefficient")
         fig.tight_layout()
