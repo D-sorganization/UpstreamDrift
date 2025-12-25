@@ -9,7 +9,7 @@ class InducedAccelerationAnalyzer:
     """
     Analyzes induced accelerations (Gravity, Velocity, Control) for a Pinocchio model.
     Based on the equation of motion: M(q)q_ddot + C(q, q_dot)q_dot + G(q) = tau
-    
+
     Induced Accelerations:
     - Gravity: q_ddot_g = -M^(-1) * G(q)
     - Velocity (Coriolis/Centrifugal): q_ddot_v = -M^(-1) * C(q, q_dot)q_dot
@@ -26,24 +26,29 @@ class InducedAccelerationAnalyzer:
         # We need a secondary data object to avoid side effects on the main simulation
         self._temp_data = model.createData()
 
-    def compute_components(self, q: np.ndarray, v: np.ndarray, tau: np.ndarray) -> dict[str, np.ndarray]:
+    def compute_components(
+        self, q: np.ndarray, v: np.ndarray, tau: np.ndarray
+    ) -> dict[str, np.ndarray]:
         """
         Compute induced acceleration components.
-        
+
         Args:
             q: Joint configurations
             v: Joint velocities
             tau: Joint torques
-            
+
         Returns:
-            Dictionary with keys 'gravity', 'velocity', 'control', 'total' mapping to acceleration arrays.
+            Dictionary with keys 'gravity', 'velocity', 'control', 'total'
+            mapping to acceleration arrays.
         """
         # 1. Gravity Induced Acceleration
         # M * q_ddot_g = -G(q)
         # We can use ABA with v=0, tau=0, and gravity enabled.
         # equation: M*a + 0 + G = 0 => M*a = -G
         # Pinocchio ABA: a = aba(model, data, q, v, tau)
-        q_ddot_g = pin.aba(self.model, self._temp_data, q, np.zeros(self.nv), np.zeros(self.nv))
+        q_ddot_g = pin.aba(
+            self.model, self._temp_data, q, np.zeros(self.nv), np.zeros(self.nv)
+        )
 
         # 2. Velocity Induced Acceleration
         # M * q_ddot_v = -C(q, v)v
@@ -58,7 +63,8 @@ class InducedAccelerationAnalyzer:
         # Or simply:
         # q_ddot_v = aba(model_no_grav, data, q, v, 0)
 
-        # Let's try the subtraction method which is safe and doesn't require modifying model:
+        # Let's try the subtraction method which is safe and doesn't require modifying
+        # model:
         # ABA(q, v, 0) gives a s.t. M*a + C*v + G = 0 => M*a = -C*v - G
         # This is (Gravity + Velocity) induced acc.
         q_ddot_gv = pin.aba(self.model, self._temp_data, q, v, np.zeros(self.nv))
@@ -71,7 +77,8 @@ class InducedAccelerationAnalyzer:
         # We can use M.inverse() * tau.
         # Or ABA with: q, v=0, tau=tau, gravity=0 (impossible without mod).
         # OR:
-        # ABA(q, v, tau) gives M*a + C*v + G = tau => M*a = tau - C*v - G = tau - (C*v + G)
+        # ABA(q, v, tau) gives M*a + C*v + G = tau => M*a = tau - C*v - G
+        # = tau - (C*v + G)
         # This is Total Acceleration.
         q_ddot_total = pin.aba(self.model, self._temp_data, q, v, tau)
 
