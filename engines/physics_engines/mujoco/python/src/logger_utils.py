@@ -7,8 +7,10 @@ scientific computations.
 import logging
 import random
 import sys
+from typing import TYPE_CHECKING
 
-import numpy as np
+if TYPE_CHECKING:
+    pass
 
 try:
     import torch
@@ -51,6 +53,8 @@ def set_seeds(seed: int = DEFAULT_SEED) -> None:
         seed: Random seed value (default: 42)
 
     """
+    import numpy as np
+
     random.seed(seed)
 
     np.random.default_rng(seed)

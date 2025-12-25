@@ -1,36 +1,35 @@
 """Common utilities shared across all golf modeling engines."""
 
-import logging
-import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
+# Import core utilities (exceptions, logging) from the lightweight module
+from .core import (
+    DataFormatError,
+    EngineNotFoundError,
+    GolfModelingError,
+    setup_logging,
+)
 
+# Re-export them for backward compatibility
+__all__ = [
+    "DataFormatError",
+    "EngineNotFoundError",
+    "GolfModelingError",
+    "setup_logging",
+    "ensure_output_dir",
+    "load_golf_data",
+    "save_golf_data",
+    "standardize_joint_angles",
+    "plot_joint_trajectories",
+    "convert_units",
+    "get_shared_urdf_path",
+]
 
-def setup_logging(name: str, level: int = logging.INFO) -> logging.Logger:
-    """Set up consistent logging across all engines.
-
-    Args:
-        name: Logger name (typically __name__)
-        level: Logging level
-
-    Returns:
-        Configured logger instance
-    """
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
-
-    if not logger.handlers:
-        handler = logging.StreamHandler(sys.stdout)
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-
-    return logger
+if TYPE_CHECKING:
+    import matplotlib.pyplot as plt
+    import numpy as np
+    import pandas as pd
 
 
 def ensure_output_dir(engine_name: str, subdir: str | None = None) -> Path:
@@ -53,7 +52,7 @@ def ensure_output_dir(engine_name: str, subdir: str | None = None) -> Path:
     return output_path
 
 
-def load_golf_data(data_path: str | Path) -> pd.DataFrame:
+def load_golf_data(data_path: str | Path) -> "pd.DataFrame":
     """Load golf swing data from various formats.
 
     Args:
@@ -65,6 +64,8 @@ def load_golf_data(data_path: str | Path) -> pd.DataFrame:
     Raises:
         ValueError: If file format not supported
     """
+    import pandas as pd
+
     data_path = Path(data_path)
 
     if data_path.suffix.lower() == ".csv":
@@ -78,7 +79,7 @@ def load_golf_data(data_path: str | Path) -> pd.DataFrame:
 
 
 def save_golf_data(
-    data: pd.DataFrame, output_path: str | Path, format: str = "csv"
+    data: "pd.DataFrame", output_path: str | Path, format: str = "csv"
 ) -> None:
     """Save golf swing data in specified format.
 
@@ -100,8 +101,8 @@ def save_golf_data(
 
 
 def standardize_joint_angles(
-    angles: np.ndarray, angle_names: list[str] | None = None
-) -> pd.DataFrame:
+    angles: "np.ndarray", angle_names: list[str] | None = None
+) -> "pd.DataFrame":
     """Standardize joint angle data across engines.
 
     Args:
@@ -111,6 +112,9 @@ def standardize_joint_angles(
     Returns:
         Standardized DataFrame with joint angles
     """
+    import numpy as np
+    import pandas as pd
+
     if angle_names is None:
         angle_names = [f"joint_{i}" for i in range(angles.shape[1])]
 
@@ -121,10 +125,10 @@ def standardize_joint_angles(
 
 
 def plot_joint_trajectories(
-    data: pd.DataFrame,
+    data: "pd.DataFrame",
     title: str = "Joint Trajectories",
     save_path: Path | None = None,
-) -> plt.Figure:
+) -> "plt.Figure":
     """Create standardized joint trajectory plots.
 
     Args:
@@ -135,6 +139,8 @@ def plot_joint_trajectories(
     Returns:
         Matplotlib figure
     """
+    import matplotlib.pyplot as plt
+
     fig, axes = plt.subplots(2, 2, figsize=(12, 8))
     axes = axes.flatten()
 
@@ -172,6 +178,8 @@ def convert_units(value: float, from_unit: str, to_unit: str) -> float:
     Returns:
         Converted value
     """
+    import numpy as np
+
     # Angle conversions
     if from_unit == "deg" and to_unit == "rad":
         return float(np.deg2rad(value))
@@ -192,24 +200,6 @@ def convert_units(value: float, from_unit: str, to_unit: str) -> float:
 
     else:
         raise ValueError(f"Conversion from {from_unit} to {to_unit} not supported")
-
-
-class GolfModelingError(Exception):
-    """Base exception for golf modeling suite."""
-
-    pass
-
-
-class EngineNotFoundError(GolfModelingError):
-    """Raised when a physics engine is not found or not properly installed."""
-
-    pass
-
-
-class DataFormatError(GolfModelingError):
-    """Raised when data format is invalid or unsupported."""
-
-    pass
 
 
 def get_shared_urdf_path() -> Path | None:

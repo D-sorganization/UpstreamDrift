@@ -8,7 +8,13 @@ import logging
 import sys
 from pathlib import Path
 
-from PyQt6.QtWidgets import QApplication
+try:
+    from PyQt6.QtWidgets import QApplication
+
+    PYQT_AVAILABLE = True
+except ImportError:
+    PYQT_AVAILABLE = False
+    QApplication = None  # type: ignore
 
 logger = logging.getLogger(__name__)
 
@@ -22,10 +28,20 @@ class UnifiedLauncher:
 
     def __init__(self) -> None:
         """Initialize the unified launcher."""
+        if not PYQT_AVAILABLE:
+            raise ImportError(
+                "PyQt6 is required to run the launcher. Install it with: pip install PyQt6"
+            )
+
         # Import here to avoid circular dependencies
         from .golf_launcher import GolfLauncher
 
         # Create QApplication if it doesn't exist
+        # Check if QApplication is None (if import failed, but we raised above)
+        # or if instance() returns None.
+        if QApplication is None:
+            raise ImportError("PyQt6 not properly imported.")
+
         self.app = QApplication.instance()
         if self.app is None:
             self.app = QApplication(sys.argv)

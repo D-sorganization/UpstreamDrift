@@ -30,7 +30,10 @@ MATLAB_3D_ROOT = ENGINES_ROOT / "Simscape_Multibody_Models" / "3D_Golf_Model"
 PENDULUM_ROOT = ENGINES_ROOT / "pendulum_models"
 
 # Import key classes for easier access
-from .common_utils import GolfModelingError, setup_logging  # noqa: E402
+# NOTE: We now import from .core to avoid heavy dependencies in __init__
+from .comparative_analysis import ComparativeSwingAnalyzer  # noqa: E402
+from .comparative_plotting import ComparativePlotter  # noqa: E402
+from .core import GolfModelingError, setup_logging  # noqa: E402
 from .engine_manager import EngineManager, EngineStatus, EngineType  # noqa: E402
 
 __all__ = [
@@ -49,4 +52,6 @@ __all__ = [
     "EngineStatus",
     "GolfModelingError",
     "setup_logging",
+    "ComparativeSwingAnalyzer",
+    "ComparativePlotter",
 ]
