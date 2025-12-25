@@ -54,23 +54,24 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
     # Initialize lists (no need to pre-allocate numpy arrays since we replace them)
     # OPTIMIZATION: Avoid allocating initial zero arrays that are immediately discarded
     # We use lists and append to avoid Optional[np.ndarray] types for strict typing
-    xup: list[np.ndarray] = []
+    xup = np.empty((nb, 6, 6))
     s_subspace: list[np.ndarray] = []
     # ic_composite will be initialized later
 
     h_matrix = np.zeros((nb, nb))
 
     # Pre-allocate temporary buffers to avoid allocation in loop
-    xj_buf = np.zeros((6, 6))
-    tmp_6x6 = np.zeros((6, 6))
-    f_force = np.zeros(6)
-    scratch_vec = np.zeros(6)
+    xj_buf = np.empty((6, 6))
+    tmp_6x6 = np.empty((6, 6))
+    f_force = np.empty(6)
+    scratch_vec = np.empty(6)
 
     # --- Forward pass: compute transforms and motion subspaces ---
     for i in range(nb):
-        xj_transform, s_vec = jcalc(model["jtype"][i], q[i])
+        xj_transform, s_vec = jcalc(model["jtype"][i], q[i], out=xj_buf)
         s_subspace.append(s_vec)
-        xup.append(xj_transform @ model["Xtree"][i])
+        # Optimized xup[i] = xj_transform @ model["Xtree"][i]
+        np.matmul(xj_transform, model["Xtree"][i], out=xup[i])
 
     # --- Backward pass: compute composite inertias ---
     # Initialize composite inertias with body inertias
