@@ -133,3 +133,10 @@ input.input-error:focus-visible {
   white-space: nowrap;
   border: 0;
 }
+
+.keyboard-hint {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #8b9bb4;
+  margin-top: 0.5rem;
+}
