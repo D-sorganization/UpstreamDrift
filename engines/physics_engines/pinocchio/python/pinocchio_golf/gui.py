@@ -534,17 +534,17 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             # Assuming 1-DOF for simplicity or take the first DOF of the joint
             dof = 0
 
-            g_accs.append(res['gravity'][v_idx + dof])
-            v_accs.append(res['velocity'][v_idx + dof])
-            c_accs.append(res['control'][v_idx + dof])
-            t_accs.append(res['total'][v_idx + dof])
+            g_accs.append(res["gravity"][v_idx + dof])
+            v_accs.append(res["velocity"][v_idx + dof])
+            c_accs.append(res["control"][v_idx + dof])
+            t_accs.append(res["total"][v_idx + dof])
 
         # Plot
         ax = self.canvas.fig.add_subplot(111)
-        ax.plot(times, g_accs, label='Gravity', linestyle='--', alpha=0.8)
-        ax.plot(times, v_accs, label='Velocity (Coriolis)', linestyle='-.', alpha=0.8)
-        ax.plot(times, c_accs, label='Control (Torque)', linestyle=':', alpha=0.8)
-        ax.plot(times, t_accs, label='Total', color='k', linewidth=1.5)
+        ax.plot(times, g_accs, label="Gravity", linestyle="--", alpha=0.8)
+        ax.plot(times, v_accs, label="Velocity (Coriolis)", linestyle="-.", alpha=0.8)
+        ax.plot(times, c_accs, label="Control (Torque)", linestyle=":", alpha=0.8)
+        ax.plot(times, t_accs, label="Total", color="k", linewidth=1.5)
 
         ax.set_title(f"Induced Accelerations: {joint_name}")
         ax.set_xlabel("Time [s]")

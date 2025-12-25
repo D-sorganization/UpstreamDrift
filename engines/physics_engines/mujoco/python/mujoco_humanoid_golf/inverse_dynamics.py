@@ -249,7 +249,7 @@ class InverseDynamicsSolver:
 
         # B. Coriolis (C * qdot)
         # mj_forward computes qfrc_bias = C + G.
-        self.data.qvel[:] = qvel_backup # Restore
+        self.data.qvel[:] = qvel_backup  # Restore
         mujoco.mj_forward(self.model, self.data)
         bias_force = self.data.qfrc_bias.copy()
         c_force = bias_force - g_force
@@ -303,10 +303,7 @@ class InverseDynamicsSolver:
         total = a_g + a_c + a_t
 
         return InducedAccelerationResult(
-            gravity=a_g,
-            velocity=a_c,
-            control=a_t,
-            total=total
+            gravity=a_g, velocity=a_c, control=a_t, total=total
         )
 
     def solve_inverse_dynamics_trajectory(

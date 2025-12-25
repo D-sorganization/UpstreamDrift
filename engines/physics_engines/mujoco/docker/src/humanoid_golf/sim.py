@@ -473,12 +473,12 @@ def run_simulation(
                         # joint name -> dof index
                         # physics.named.model.jnt_dofadr[j] usually works if supported
                         # Or manual lookup:
-                        j_id = physics.model.name2id(j, 'joint')
+                        j_id = physics.model.name2id(j, "joint")
                         dof_adr = physics.model.jnt_dofadr[j_id]
 
-                        g_val = iaa['gravity'][dof_adr]
-                        c_val = iaa['coriolis'][dof_adr]
-                        t_val = iaa['control'][dof_adr]
+                        g_val = iaa["gravity"][dof_adr]
+                        c_val = iaa["coriolis"][dof_adr]
+                        t_val = iaa["control"][dof_adr]
                         tot_val = g_val + c_val + t_val
 
                         row.extend([g_val, c_val, t_val, tot_val])

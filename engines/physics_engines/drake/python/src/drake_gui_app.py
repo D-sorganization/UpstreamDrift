@@ -30,6 +30,7 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 try:
     import matplotlib.pyplot as plt
+
     HAS_MATPLOTLIB = True
 except ImportError:
     HAS_MATPLOTLIB = False
@@ -65,7 +66,6 @@ SPINBOX_STEP_RAD: typing.Final[float] = 0.1  # [rad] Step size for UI
 # UI Styles
 STYLE_BUTTON_RUN: typing.Final[str] = "background-color: #ccffcc;"  # Light Green
 STYLE_BUTTON_STOP: typing.Final[str] = "background-color: #ffcccc;"  # Light Red
-
 
 
 class DrakeRecorder:

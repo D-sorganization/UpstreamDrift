@@ -5,6 +5,7 @@ import pinocchio as pin
 
 logger = logging.getLogger(__name__)
 
+
 class InducedAccelerationAnalyzer:
     """
     Analyzes induced accelerations (Gravity, Velocity, Control) for a Pinocchio model.
@@ -89,5 +90,5 @@ class InducedAccelerationAnalyzer:
             "gravity": q_ddot_g,
             "velocity": q_ddot_v,
             "control": q_ddot_t,
-            "total": q_ddot_total
+            "total": q_ddot_total,
         }

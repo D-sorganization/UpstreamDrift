@@ -1,4 +1,3 @@
-
 def compute_induced_accelerations(physics) -> dict:
     """Compute induced accelerations (Gravity, Velocity, Control) for current state."""
     results = {}
@@ -31,7 +30,7 @@ def compute_induced_accelerations(physics) -> dict:
     # We want G vector.
     # But mj_rne outputs to data.qfrc_inverse.
     mujoco.mj_rne(model, data)
-    g_force = data.qfrc_inverse.copy() # This is G(q)
+    g_force = data.qfrc_inverse.copy()  # This is G(q)
 
     # 3. Coriolis/Centrifugal Force (C)
     # Restore v, set a=0.
@@ -39,15 +38,15 @@ def compute_induced_accelerations(physics) -> dict:
     data.qvel[:] = qvel_backup
     data.qacc[:] = 0
     mujoco.mj_rne(model, data)
-    bias_force = data.qfrc_inverse.copy() # C + G
-    c_force = bias_force - g_force # C(q, v)
+    bias_force = data.qfrc_inverse.copy()  # C + G
+    c_force = bias_force - g_force  # C(q, v)
 
     # 4. Control Force (from actuators) is tricky in Inverse Dynamics.
     # Usually we go Forward: tau_ctrl is known.
     # In dm_control, physics.data.actuator_force contains forces?
     # Or qfrc_actuation after mj_fwdActuation?
     # We should run Forward logic to get qfrc_actuation.
-    data.qpos[:] = qpos_backup # Restore pos just in case
+    data.qpos[:] = qpos_backup  # Restore pos just in case
     data.qvel[:] = qvel_backup
     data.ctrl[:] = ctrl_backup
     mujoco.mj_fwdActuation(model, data)
@@ -63,7 +62,7 @@ def compute_induced_accelerations(physics) -> dict:
     vec_c = -c_force
     vec_t = tau_control
 
-    mujoco.mj_solveM(model, data, vec_g) # vec_g becomes a_g
+    mujoco.mj_solveM(model, data, vec_g)  # vec_g becomes a_g
     mujoco.mj_solveM(model, data, vec_c)
     mujoco.mj_solveM(model, data, vec_t)
 
@@ -88,8 +87,4 @@ def compute_induced_accelerations(physics) -> dict:
     # The caller (run_simulation) has TARGET_POSE keys.
     # We can access physics.model.jnt_dofadr to find address in qacc/qfrc.
 
-    return {
-        "gravity": vec_g,
-        "coriolis": vec_c,
-        "control": vec_t
-    }
+    return {"gravity": vec_g, "coriolis": vec_c, "control": vec_t}

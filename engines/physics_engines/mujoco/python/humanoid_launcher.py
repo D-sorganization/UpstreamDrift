@@ -15,6 +15,7 @@ from pathlib import Path
 
 try:
     import matplotlib.pyplot as plt
+
     HAS_MATPLOTLIB = True
 except ImportError:
     HAS_MATPLOTLIB = False
@@ -904,7 +905,6 @@ class HumanoidLauncher(QMainWindow):
 
         except Exception as e:
             QMessageBox.critical(self, "Plot Error", str(e))
-
 
     def start_simulation(self):
         self.save_config()
