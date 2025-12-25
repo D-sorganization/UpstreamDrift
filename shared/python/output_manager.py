@@ -51,14 +51,16 @@ class OutputManager:
             current_path = Path(__file__).resolve()
             project_root = current_path
 
-            # Navigate up to find Golf_Modeling_Suite root
-            while (
-                project_root.name != "Golf_Modeling_Suite"
-                and project_root.parent != project_root
-            ):
+            # Navigate up to find project root (look for .git directory or engines/ folder)
+            while project_root.parent != project_root:
+                if (project_root / ".git").exists() or (
+                    project_root / "engines"
+                ).exists():
+                    break
                 project_root = project_root.parent
 
-            if project_root.name == "Golf_Modeling_Suite":
+            # Verify if we found a valid root, otherwise fallback to CWD
+            if (project_root / "engines").exists():
                 base_path = project_root / "output"
             else:
                 base_path = Path.cwd() / "output"

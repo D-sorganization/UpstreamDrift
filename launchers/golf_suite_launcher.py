@@ -12,14 +12,23 @@ import subprocess
 import sys
 from pathlib import Path
 
-from PyQt6 import QtCore, QtWidgets
+try:
+    from PyQt6 import QtCore, QtWidgets
+
+    PYQT_AVAILABLE = True
+except ImportError:
+    PYQT_AVAILABLE = False
+    QtWidgets = None  # type: ignore
+    QtCore = None  # type: ignore
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("GolfSuiteLauncher")
 
 
-class GolfLauncher(QtWidgets.QMainWindow):
+class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type: ignore[misc]
     def __init__(self) -> None:
+        if not PYQT_AVAILABLE:
+            raise ImportError("PyQt6 is required to run this launcher.")
         super().__init__()
         self.setWindowTitle("Golf Modeling Suite - Local Launcher")
         self.resize(400, 300)
@@ -174,6 +183,13 @@ class GolfLauncher(QtWidgets.QMainWindow):
 
 
 def main() -> None:
+    if not PYQT_AVAILABLE:
+        print(
+            "Error: PyQt6 is not installed. Please install it to use the GUI launcher."
+        )
+        print("Try: pip install PyQt6")
+        sys.exit(1)
+
     app = QtWidgets.QApplication(sys.argv)
     window = GolfLauncher()
     window.show()

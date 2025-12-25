@@ -86,25 +86,44 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     a_grav = model.get("gravity", np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2]))
 
     # Initialize arrays
-    # OPTIMIZATION: Use single tensor for transforms and empty for overwritten arrays
-    xup = np.empty((nb, 6, 6))  # Transforms from body to parent
-    s_subspace: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Motion subspaces
+    # OPTIMIZATION: Pre-allocate 3D arrays instead of lists of arrays
+    # Stores transform from body to parent for each body (NB, 6, 6)
+    xup = np.empty((nb, 6, 6))
+
+    # Motion subspaces (NB, 6)
+    # Using list for subspaces is fine (refs to global constants mostly).
+    # Be careful if modifying them (jcalc returns new array/ref).
+    # Stored in list to be consistent with RNEA optimization.
+    s_subspace: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item]
+
     v = np.empty((6, nb))  # Spatial velocities
     c = np.empty((6, nb))  # Velocity-product accelerations (bias)
-    ia_articulated: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Articulated-body inertias
-    pa_bias = np.empty((6, nb))  # Articulated-body bias forces
-    u_force = np.empty((6, nb))  # IA * S
-    d = np.empty(nb)  # S.T @ U (joint-space inertia)
-    u = np.empty(nb)  # tau - S.T @ pA (bias force)
-    a = np.empty((6, nb))  # Spatial accelerations
-    qdd = np.empty(nb)  # Joint accelerations
-    cross_buf = np.empty(6)  # Optimization: temporary buffer for cross product
-    xj_buf = np.empty((6, 6))  # Optimization: buffer for jcalc
+
+    # Articulated-body inertias (NB, 6, 6)
+    # OPTIMIZATION: Pre-allocate to avoid new array creation in loop
+    ia_articulated = np.empty((nb, 6, 6))
+
+    pa_bias = np.zeros((6, nb))  # Articulated-body bias forces
+    u_force = np.zeros((6, nb))  # IA * S
+    d = np.zeros(nb)  # S.T @ U (joint-space inertia)
+    u = np.zeros(nb)  # tau - S.T @ pA (bias force)
+    a = np.zeros((6, nb))  # Spatial accelerations
+    qdd = np.zeros(nb)  # Joint accelerations
+
+    # Optimization: temporary buffers
+    xj_buf = np.empty((6, 6))
+    cross_buf = np.empty(6)
+    scratch_vec = np.empty(6)
+    scratch_mat = np.empty((6, 6))
+    i_v_buf = np.empty(6)
 
     # --- Pass 1: Forward kinematics ---
     for i in range(nb):
-        xj_transform, s_subspace[i] = jcalc(model["jtype"][i], q[i], out=xj_buf)
-        # Optimized xup[i] = xj_transform @ model["Xtree"][i]
+        # OPTIMIZATION: Use pre-allocated buffer for jcalc
+        xj_transform, s_vec = jcalc(model["jtype"][i], q[i], out=xj_buf)
+        s_subspace[i] = s_vec
+
+        # OPTIMIZATION: Write directly to pre-allocated xup buffer
         np.matmul(xj_transform, model["Xtree"][i], out=xup[i])
 
         vj_velocity = s_subspace[i] * qd[i]  # Joint velocity
@@ -114,27 +133,41 @@ def aba(  # noqa: C901, PLR0912, PLR0915
             c[:, i] = np.zeros(6)  # No bias for base-connected bodies
         else:
             p = model["parent"][i]
-            v[:, i] = xup[i] @ v[:, p] + vj_velocity
-            # Optimization: Use pre-allocated buffer for cross product
+            # v[:, i] = xup[i] @ v[:, p] + vj_velocity
+            # OPTIMIZATION: Use matmul with out
+            np.matmul(xup[i], v[:, p], out=scratch_vec)
+            scratch_vec += vj_velocity
+            v[:, i] = scratch_vec
+
+            # OPTIMIZATION: Use pre-allocated buffer for cross product
             cross_motion(
                 v[:, i], vj_velocity, out=c[:, i]
             )  # Velocity-product acceleration
 
         # Initialize articulated-body inertia with rigid-body inertia
-        ia_articulated[i] = model["I"][i].copy()
+        # OPTIMIZATION: Copy into pre-allocated buffer instead of creating new array
+        # This is safe because ia_articulated[i] is a slice of the contiguous 3D array
+        ia_articulated[i] = model["I"][i]
 
         # Bias force: Coriolis + external forces
         # pa_bias[:, i] = cross_force(v[:, i], model["I"][i] @ v[:, i]) - f_ext[:, i]
         # Optimization: Use temporary buffer
-        i_v = model["I"][i] @ v[:, i]
-        cross_force(v[:, i], i_v, out=cross_buf)
+        # i_v = model["I"][i] @ v[:, i]
+        np.matmul(model["I"][i], v[:, i], out=i_v_buf)
+
+        cross_force(v[:, i], i_v_buf, out=cross_buf)
         pa_bias[:, i] = cross_buf - f_ext[:, i]
 
     # --- Pass 2: Backward recursion (articulated-body inertias) ---
     for i in range(nb - 1, -1, -1):
-        u_force[:, i] = ia_articulated[i] @ s_subspace[i]
-        d[i] = s_subspace[i] @ u_force[:, i]  # Joint-space inertia
-        u[i] = tau[i] - s_subspace[i] @ pa_bias[:, i]  # Bias torque
+        # u_force[:, i] = ia_articulated[i] @ s_subspace[i]
+        np.matmul(ia_articulated[i], s_subspace[i], out=u_force[:, i])
+
+        # d[i] = s_subspace[i] @ u_force[:, i]  # Joint-space inertia
+        d[i] = np.dot(s_subspace[i], u_force[:, i])
+
+        # u[i] = tau[i] - s_subspace[i] @ pa_bias[:, i]  # Bias torque
+        u[i] = tau[i] - np.dot(s_subspace[i], pa_bias[:, i])
 
         # Articulated-body inertia update for parent
         if model["parent"][i] != -1:
@@ -148,29 +181,79 @@ def aba(  # noqa: C901, PLR0912, PLR0915
             dinv = 1 / d[i]
 
             # Update articulated inertia
-            ia_update = np.outer(u_force[:, i], u_force[:, i]) * dinv
-            ia_articulated[p] = (
-                ia_articulated[p] + xup[i].T @ (ia_articulated[i] - ia_update) @ xup[i]
-            )
+            # ia_update = np.outer(u_force[:, i], u_force[:, i]) * dinv
+            # ia_articulated[p] = (
+            #     ia_articulated[p] + xup[i].T @ (ia_articulated[i]-ia_update) @ xup[i]
+            # )
+
+            # OPTIMIZATION: Minimize allocations in the update
+            # 1. ia_prev = ia_articulated[i] - ia_update
+            # We can construct (ia_articulated[i] - ia_update) efficiently
+            # ia_update is rank-1.
+            # Let's compute term1 = (ia_articulated[i] - ia_update) @ xup[i]
+            # term1 = ia_articulated[i] @ xup[i] - ia_update @ xup[i]
+            # term1 = ia_articulated[i] @ xup[i] - (u * u.T * dinv) @ xup[i]
+            # term1 = ia_articulated[i] @ xup[i] - u * (u.T @ xup[i]) * dinv
+
+            # scratch_mat = ia_articulated[i] @ xup[i]
+            np.matmul(ia_articulated[i], xup[i], out=scratch_mat)
+
+            # scratch_vec = xup[i].T @ u_force[:, i]  (equiv to u_force.T @ xup[i])
+            np.matmul(xup[i].T, u_force[:, i], out=scratch_vec)
+
+            # Subtract rank-1 update from scratch_mat
+            # scratch_mat -= np.outer(u_force[:, i] * dinv, scratch_vec)
+            # Sticking to np.outer is fine for readability/speed balance.
+            scratch_mat -= np.outer(u_force[:, i] * dinv, scratch_vec)
+
+            # Now add xup[i].T @ scratch_mat to ia_articulated[p]
+            # This is ia_articulated[p] += xup[i].T @ scratch_mat
+            # Reuse another buffer or just accumulate directly if possible?
+            # We can reuse xj_buf as a temp buffer for the result of matmul
+            np.matmul(xup[i].T, scratch_mat, out=xj_buf)
+            ia_articulated[p] += xj_buf
 
             # Update bias force
-            pa_update = (
-                pa_bias[:, i]
-                + ia_articulated[i] @ c[:, i]
-                + u_force[:, i] * dinv * u[i]
-            )
-            pa_bias[:, p] = pa_bias[:, p] + xup[i].T @ pa_update
+            # pa_update = (
+            #     pa_bias[:, i]
+            #     + ia_articulated[i] @ c[:, i]
+            #     + u_force[:, i] * dinv * u[i]
+            # )
+            # pa_bias[:, p] = pa_bias[:, p] + xup[i].T @ pa_update
+
+            # OPTIMIZATION:
+            # 1. term = ia_articulated[i] @ c[:, i]
+            np.matmul(ia_articulated[i], c[:, i], out=scratch_vec)
+
+            # 2. Add other terms
+            scratch_vec += pa_bias[:, i]
+            scratch_vec += u_force[:, i] * (dinv * u[i])
+
+            # 3. Transform and add to parent
+            # pa_bias[:, p] += xup[i].T @ scratch_vec
+            # Re-use cross_buf as temp
+            np.matmul(xup[i].T, scratch_vec, out=cross_buf)
+            pa_bias[:, p] += cross_buf
 
     # --- Pass 3: Forward recursion (accelerations) ---
     for i in range(nb):
         if model["parent"][i] == -1:
             # For base-connected bodies, apply gravity through Xup transform
-            a[:, i] = xup[i] @ (-a_grav) + c[:, i]
+            # a[:, i] = xup[i] @ (-a_grav) + c[:, i]
+            np.matmul(xup[i], -a_grav, out=scratch_vec)
+            scratch_vec += c[:, i]
+            a[:, i] = scratch_vec
         else:
             p = model["parent"][i]
-            a[:, i] = xup[i] @ a[:, p] + c[:, i]
+            # a[:, i] = xup[i] @ a[:, p] + c[:, i]
+            np.matmul(xup[i], a[:, p], out=scratch_vec)
+            scratch_vec += c[:, i]
+            a[:, i] = scratch_vec
 
-        qdd[i] = (u[i] - u_force[:, i] @ a[:, i]) / d[i]
-        a[:, i] = a[:, i] + s_subspace[i] * qdd[i]
+        # qdd[i] = (u[i] - u_force[:, i] @ a[:, i]) / d[i]
+        qdd[i] = (u[i] - np.dot(u_force[:, i], a[:, i])) / d[i]
+
+        # a[:, i] = a[:, i] + s_subspace[i] * qdd[i]
+        a[:, i] += s_subspace[i] * qdd[i]
 
     return qdd
