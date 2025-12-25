@@ -88,16 +88,20 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     # Initialize arrays
     xup: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Transforms from body to parent
     s_subspace: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Motion subspaces
-    v = np.zeros((6, nb))  # Spatial velocities
-    c = np.zeros((6, nb))  # Velocity-product accelerations (bias)
+
+    # OPTIMIZATION: use np.empty instead of np.zeros for arrays that are fully overwritten
+    # This saves initialization cost which is significant for small matrices in tight loops
+    v = np.empty((6, nb))  # Spatial velocities
+    c = np.empty((6, nb))  # Velocity-product accelerations (bias)
+
     ia_articulated: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Articulated-body inertias
-    pa_bias = np.zeros((6, nb))  # Articulated-body bias forces
-    u_force = np.zeros((6, nb))  # IA * S
-    d = np.zeros(nb)  # S.T @ U (joint-space inertia)
-    u = np.zeros(nb)  # tau - S.T @ pA (bias force)
-    a = np.zeros((6, nb))  # Spatial accelerations
-    qdd = np.zeros(nb)  # Joint accelerations
-    cross_buf = np.zeros(6)  # Optimization: temporary buffer for cross product
+    pa_bias = np.zeros((6, nb))  # Articulated-body bias forces (accumulated)
+    u_force = np.empty((6, nb))  # IA * S
+    d = np.empty(nb)  # S.T @ U (joint-space inertia)
+    u = np.empty(nb)  # tau - S.T @ pA (bias force)
+    a = np.empty((6, nb))  # Spatial accelerations
+    qdd = np.empty(nb)  # Joint accelerations
+    cross_buf = np.empty(6)  # Optimization: temporary buffer for cross product
 
     # --- Pass 1: Forward kinematics ---
     for i in range(nb):

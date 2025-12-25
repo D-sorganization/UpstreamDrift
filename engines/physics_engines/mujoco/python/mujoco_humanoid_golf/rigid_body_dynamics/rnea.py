@@ -83,10 +83,11 @@ def rnea(  # noqa: PLR0915
     a_grav = model.get("gravity", DEFAULT_GRAVITY)
 
     # Initialize arrays
-    v = np.zeros((6, nb))  # Spatial velocities
-    a = np.zeros((6, nb))  # Spatial accelerations
-    f = np.zeros((6, nb))  # Spatial forces
-    tau = np.zeros(nb)  # Joint torques
+    # OPTIMIZATION: use np.empty instead of np.zeros for arrays that are fully overwritten
+    v = np.empty((6, nb))  # Spatial velocities
+    a = np.empty((6, nb))  # Spatial accelerations
+    f = np.zeros((6, nb))  # Spatial forces (must be zero for accumulation)
+    tau = np.empty(nb)  # Joint torques
 
     # OPTIMIZATION: Pre-allocate buffers
     # Stores transform from parent to i for each body
