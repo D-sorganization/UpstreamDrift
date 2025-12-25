@@ -14,6 +14,8 @@ import csv
 import json
 import logging
 import typing
+from datetime import datetime
+from pathlib import Path
 
 import mujoco
 import numpy as np
@@ -562,6 +564,14 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
                 style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload),
             )
 
+        self.screenshot_btn = QtWidgets.QPushButton("Screenshot")
+        self.screenshot_btn.clicked.connect(self.on_take_screenshot)
+        self.screenshot_btn.setToolTip("Save screenshot to output/screenshots/")
+        if style:
+            self.screenshot_btn.setIcon(
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DialogSaveButton),
+            )
+
         self.record_btn = QtWidgets.QPushButton("Start Recording")
         self.record_btn.setCheckable(True)
         self.record_btn.toggled.connect(self.on_record_toggled)
@@ -578,7 +588,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
 
         buttons_layout.addWidget(self.play_pause_btn, 0, 0)
         buttons_layout.addWidget(self.reset_btn, 0, 1)
-        buttons_layout.addWidget(self.record_btn, 1, 0, 1, 2)
+        buttons_layout.addWidget(self.screenshot_btn, 1, 0)
+        buttons_layout.addWidget(self.record_btn, 1, 1)
         control_layout.addWidget(buttons_group)
 
         # Recording info
@@ -2505,6 +2516,28 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         else:
             self.record_btn.setText("Start Recording")
             recorder.stop_recording()
+
+    def on_take_screenshot(self) -> None:
+        """Capture and save the current simulation view."""
+        pixmap = self.sim_widget.label.pixmap()
+        if pixmap is None or pixmap.isNull():
+            self.statusBar().showMessage(
+                "Screenshot failed: No image to capture", 3000
+            )
+            return
+
+        # Ensure directory exists
+        output_dir = Path("output/screenshots")
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = output_dir / f"screenshot_{timestamp}.png"
+
+        if pixmap.save(str(filename)):
+            self.statusBar().showMessage(f"Screenshot saved: {filename}", 5000)
+            logger.info("Screenshot saved to %s", filename)
+        else:
+            self.statusBar().showMessage("Screenshot failed to save", 5000)
 
     def on_actuator_changed(self) -> None:
         """Update actuator torques when any slider changes."""
