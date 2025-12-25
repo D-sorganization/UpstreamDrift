@@ -7,7 +7,7 @@ import typing
 import imageio
 import numpy as np
 
-from . import utils
+from . import iaa_helper, utils
 
 # Check for viewer support
 try:
@@ -420,6 +420,10 @@ def run_simulation(
             ["time"]
             + [f"pos_{j}" for j in TARGET_POSE]
             + [f"force_{a}" for a in actuator_names]
+            + [f"iaa_{j}_g" for j in TARGET_POSE]
+            + [f"iaa_{j}_c" for j in TARGET_POSE]
+            + [f"iaa_{j}_t" for j in TARGET_POSE]
+            + [f"iaa_{j}_total" for j in TARGET_POSE]
         )
 
         camera_id = 0
@@ -436,6 +440,10 @@ def run_simulation(
             pixels = physics.render(height=480, width=640, camera_id=camera_id)
             frames.append(pixels)
 
+            # Compute IAA
+            iaa = iaa_helper.compute_induced_accelerations(physics)
+            # iaa is dict: gravity, coriolis, control (arrays of shape [nv])
+
             # Log Data
             row = [physics.data.time]
             for j in TARGET_POSE:
@@ -451,6 +459,35 @@ def run_simulation(
                 except Exception:
                     val = 0
                 row.append(val)
+
+            # Append IAA
+            if iaa:
+                for j in TARGET_POSE:
+                    try:
+                        # Find DOF address
+                        # Assuming dm_control physics.named.data.qpos works with names
+                        # We need index for array access.
+                        # Using named access is safer if available?
+                        # But returns scalar.
+                        # We have raw arrays in iaa result.
+                        # joint name -> dof index
+                        # physics.named.model.jnt_dofadr[j] usually works if supported
+                        # Or manual lookup:
+                        j_id = physics.model.name2id(j, 'joint')
+                        dof_adr = physics.model.jnt_dofadr[j_id]
+
+                        g_val = iaa['gravity'][dof_adr]
+                        c_val = iaa['coriolis'][dof_adr]
+                        t_val = iaa['control'][dof_adr]
+                        tot_val = g_val + c_val + t_val
+
+                        row.extend([g_val, c_val, t_val, tot_val])
+                    except Exception:
+                        row.extend([0, 0, 0, 0])
+            else:
+                # Fill zeros
+                row.extend([0] * (4 * len(TARGET_POSE)))
+
             data_rows.append(row)
 
             if i % 30 == 0:

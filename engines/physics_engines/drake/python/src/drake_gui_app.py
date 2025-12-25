@@ -28,8 +28,15 @@ from pydrake.all import (
 )
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+try:
+    import matplotlib.pyplot as plt
+    HAS_MATPLOTLIB = True
+except ImportError:
+    HAS_MATPLOTLIB = False
+
 from .drake_golf_model import GolfModelParams, build_golf_swing_diagram
 from .drake_visualizer import DrakeVisualizer
+from .induced_acceleration import DrakeInducedAccelerationAnalyzer
 from .logger_utils import setup_logging
 
 LOGGER = logging.getLogger(__name__)
@@ -60,6 +67,34 @@ STYLE_BUTTON_RUN: typing.Final[str] = "background-color: #ccffcc;"  # Light Gree
 STYLE_BUTTON_STOP: typing.Final[str] = "background-color: #ffcccc;"  # Light Red
 
 
+
+class DrakeRecorder:
+    """Records simulation data for analysis."""
+
+    def __init__(self) -> None:
+        self.reset()
+
+    def reset(self) -> None:
+        self.times: list[float] = []
+        self.q_history: list[np.ndarray] = []
+        self.v_history: list[np.ndarray] = []
+        self.is_recording = False
+
+    def start(self) -> None:
+        self.reset()
+        self.is_recording = True
+
+    def stop(self) -> None:
+        self.is_recording = False
+
+    def record(self, t: float, q: np.ndarray, v: np.ndarray) -> None:
+        if not self.is_recording:
+            return
+        self.times.append(t)
+        self.q_history.append(q.copy())
+        self.v_history.append(v.copy())
+
+
 class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimported]
     """Main GUI Window for Drake Golf Simulation."""
 
@@ -77,10 +112,14 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.visualizer: DrakeVisualizer | None = None
 
         self.operating_mode = "dynamic"  # "dynamic" or "kinematic"
+        self.operating_mode = "dynamic"  # "dynamic" or "kinematic"
         self.is_running = False
         self.time_step = TIME_STEP_S
         self.sliders: dict[int, QtWidgets.QSlider] = {}  # type: ignore[no-any-unimported]
         self.spinboxes: dict[int, QtWidgets.QDoubleSpinBox] = {}  # type: ignore[no-any-unimported]
+
+        self.recorder = DrakeRecorder()
+        self.eval_context: Context | None = None  # type: ignore[no-any-unimported]
 
         # Model Management
         self.current_urdf_path: str | None = None
@@ -195,6 +234,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             self.visualizer = DrakeVisualizer(self.meshcat, self.plant)
         else:
             LOGGER.warning("Visualizer disabled due to Meshcat initialization failure.")
+
+        # Create evaluation context for analysis
+        self.eval_context = self.plant.CreateDefaultContext()
 
         # Initial State
         self._reset_state()
@@ -331,6 +373,30 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.btn_reset.setShortcut(QtGui.QKeySequence("Ctrl+R"))
         self.btn_reset.clicked.connect(self._reset_simulation)
         dyn_layout.addWidget(self.btn_reset)
+
+        # Recording & Analysis
+        analysis_group = QtWidgets.QGroupBox("Analysis")
+        analysis_layout = QtWidgets.QVBoxLayout()
+
+        rec_row = QtWidgets.QHBoxLayout()
+        self.btn_record = QtWidgets.QPushButton("Record")
+        self.btn_record.setCheckable(True)
+        self.btn_record.clicked.connect(self._toggle_recording)
+        self.lbl_rec_status = QtWidgets.QLabel("Frames: 0")
+        rec_row.addWidget(self.btn_record)
+        rec_row.addWidget(self.lbl_rec_status)
+        analysis_layout.addLayout(rec_row)
+
+        self.btn_induced_acc = QtWidgets.QPushButton("Show Induced Acceleration")
+        self.btn_induced_acc.setToolTip(
+            "Analyze Gravity/Velocity/Control contributions to Acceleration"
+        )
+        self.btn_induced_acc.clicked.connect(self._show_induced_acceleration_plot)
+        self.btn_induced_acc.setEnabled(HAS_MATPLOTLIB)
+        analysis_layout.addWidget(self.btn_induced_acc)
+
+        analysis_group.setLayout(analysis_layout)
+        dyn_layout.addWidget(analysis_group)
 
         dyn_layout.addStretch()
         self.controls_stack.addWidget(dynamic_page)
@@ -607,6 +673,14 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 self.visualizer.update_com_transforms(context)
                 self._update_ellipsoids()
 
+            # Recording
+            if self.recorder.is_recording and self.plant:
+                plant_context = self.plant.GetMyContextFromRoot(context)
+                q = self.plant.GetPositions(plant_context)
+                v = self.plant.GetVelocities(plant_context)
+                self.recorder.record(context.get_time(), q, v)
+                self.lbl_rec_status.setText(f"Frames: {len(self.recorder.times)}")
+
     def _on_visualization_changed(self) -> None:
         """Handle toggling of visualization options."""
         if self.visualizer:
@@ -753,6 +827,98 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             if self.visualizer:
                 self.visualizer.update_frame_transforms(context)
                 self.visualizer.update_com_transforms(context)
+
+    def _toggle_recording(self, checked: bool) -> None:  # noqa: FBT001
+        if checked:
+            self.recorder.start()
+            self.btn_record.setText("Stop Recording")
+            self._update_status("Recording started...")
+        else:
+            self.recorder.stop()
+            self.btn_record.setText("Record")
+            self._update_status(
+                f"Recording stopped. Total Frames: {len(self.recorder.times)}"
+            )
+
+    def _show_induced_acceleration_plot(self) -> None:
+        """Calculate and plot induced accelerations."""
+        if not HAS_MATPLOTLIB:
+            QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")
+            return
+
+        if not self.recorder.times:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "No Data",
+                "No recording available. Please Record a simulation first.",
+            )
+            return
+
+        if not self.plant or not self.eval_context:
+            return
+
+        # Computation
+        times = self.recorder.times
+        g_induced = []
+        c_induced = []
+        # Control is assumed 0 for now as we don't capture u
+
+        analyzer = DrakeInducedAccelerationAnalyzer(self.plant)
+
+        try:
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
+
+            for q, v in zip(
+                self.recorder.q_history, self.recorder.v_history, strict=False
+            ):
+                self.plant.SetPositions(self.eval_context, q)
+                self.plant.SetVelocities(self.eval_context, v)
+
+                # Use Analyzer
+                res = analyzer.compute_components(self.eval_context)
+
+                g_induced.append(res["gravity"])
+                c_induced.append(res["velocity"])
+
+        except Exception as e:
+            QtWidgets.QApplication.restoreOverrideCursor()
+            QtWidgets.QMessageBox.critical(self, "Analysis Error", str(e))
+            return
+        finally:
+            QtWidgets.QApplication.restoreOverrideCursor()
+
+        g_induced_arr = np.array(g_induced)
+        c_induced_arr = np.array(c_induced)
+        # Total passive
+        total_arr = g_induced_arr + c_induced_arr
+
+        # Plotting - Select a joint (e.g., joint 0)
+        # We can pick the Joint with largest movement or just the first.
+        joint_idx = 0
+
+        # Try to find a meaningful joint (e.g. Spine Twist) if available
+        # But joint indices are internal.
+        # Let's just pick index 2 (Hips/Spine?) or 0.
+        if g_induced_arr.shape[1] > 2:
+            joint_idx = 2
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+
+        ax.plot(
+            times, g_induced_arr[:, joint_idx], label="Gravity Induced", linestyle="--"
+        )
+        ax.plot(
+            times, c_induced_arr[:, joint_idx], label="Velocity Induced", linestyle="-."
+        )
+        ax.plot(times, total_arr[:, joint_idx], label="Total (Passive)", color="k")
+
+        ax.set_title(f"Induced Acceleration Analysis (Joint Index {joint_idx})")
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Acceleration [rad/s^2]")
+        ax.legend()
+        ax.grid(True)
+
+        plt.show()
 
 
 def main() -> None:

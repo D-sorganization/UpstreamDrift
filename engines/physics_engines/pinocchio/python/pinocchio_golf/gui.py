@@ -11,7 +11,7 @@ try:
 except ImportError:
     pass
 
-import numpy as np  # noqa: TID253
+import numpy as np
 import pinocchio as pin
 from pinocchio.visualize import MeshcatVisualizer
 from PyQt6 import QtCore, QtWidgets
@@ -19,6 +19,8 @@ from shared.python.biomechanics_data import BiomechanicalData
 from shared.python.common_utils import get_shared_urdf_path
 from shared.python.plotting import GolfSwingPlotter, MplCanvas
 from shared.python.statistical_analysis import StatisticalAnalyzer
+
+from .induced_acceleration import InducedAccelerationAnalyzer
 
 # Set up logging
 logging.basicConfig(
@@ -407,9 +409,17 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 "Kinematic Sequence",
                 "Phase Diagram",
                 "Frequency Analysis (PSD)",
+                "Frequency Analysis (PSD)",
                 "Correlation Matrix",
+                "Induced Accelerations",
             ]
         )
+
+        self.joint_select_combo = QtWidgets.QComboBox()
+        # Will be populated when model loads
+        self.joint_select_combo.setMinimumWidth(120)
+        controls.addWidget(QtWidgets.QLabel("Joint:"))
+        controls.addWidget(self.joint_select_combo)
         controls.addWidget(QtWidgets.QLabel("Plot Type:"))
         controls.addWidget(self.plot_combo)
 
@@ -474,8 +484,73 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             plotter.plot_frequency_analysis(self.canvas.fig, joint_idx=0)
         elif plot_type == "Correlation Matrix":
             plotter.plot_correlation_matrix(self.canvas.fig)
+        elif plot_type == "Induced Accelerations":
+            self._plot_induced_accelerations()
 
         self.canvas.draw()
+
+    def _plot_induced_accelerations(self) -> None:
+        """Calculate and plot induced accelerations for selected joint."""
+        if self.model is None or not self.recorder.frames:
+            return
+
+        # Get selected joint
+        joint_name = self.joint_select_combo.currentText()
+        if not joint_name:
+            # Fallback
+            if self.joint_names:
+                joint_name = self.joint_names[0]
+            else:
+                return
+
+        try:
+            joint_idx = list(self.model.names).index(joint_name)
+            v_idx = self.model.joints[joint_idx].idx_v
+        except ValueError:
+            return
+
+        analyzer = InducedAccelerationAnalyzer(self.model, self.data)
+
+        times = []
+        g_accs = []
+        v_accs = []
+        c_accs = []
+        t_accs = []
+
+        # Progress bar could be nice here if slow, but simple loop for now
+        for frame in self.recorder.frames:
+            times.append(frame.time)
+
+            # Reconstruct state
+            res = analyzer.compute_components(
+                frame.joint_positions,
+                frame.joint_velocities,
+                frame.joint_torques,
+            )
+
+            # Extract acceleration for the specific joint (v_idx)
+            # v_idx points to the start of the DOF in the velocity vector
+            # (and acceleration vector)
+            # Assuming 1-DOF for simplicity or take the first DOF of the joint
+            dof = 0
+
+            g_accs.append(res['gravity'][v_idx + dof])
+            v_accs.append(res['velocity'][v_idx + dof])
+            c_accs.append(res['control'][v_idx + dof])
+            t_accs.append(res['total'][v_idx + dof])
+
+        # Plot
+        ax = self.canvas.fig.add_subplot(111)
+        ax.plot(times, g_accs, label='Gravity', linestyle='--', alpha=0.8)
+        ax.plot(times, v_accs, label='Velocity (Coriolis)', linestyle='-.', alpha=0.8)
+        ax.plot(times, c_accs, label='Control (Torque)', linestyle=':', alpha=0.8)
+        ax.plot(times, t_accs, label='Total', color='k', linewidth=1.5)
+
+        ax.set_title(f"Induced Accelerations: {joint_name}")
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Acceleration [rad/s²]")
+        ax.legend()
+        ax.grid(True, linestyle=":", alpha=0.6)
 
     def _export_statistics(self) -> None:
         """Export statistical analysis to CSV."""
@@ -684,6 +759,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         # Populate joint_names for joints 1..N (excluding Universe at index 0).
         self.joint_names = list(self.model.names)[1:]
+
+        # Update joint selection combo for analysis
+        self.joint_select_combo.clear()
+        self.joint_select_combo.addItems(self.joint_names)
 
         # Iterate joints (skip universe)
         for i in range(1, self.model.njoints):
