@@ -47,14 +47,18 @@ class TestSharedModuleLazyImports:
         assert hasattr(output_manager, "np")
         assert hasattr(output_manager, "pd")
 
-    def test_common_utils_imports_dependencies(self):
-        """Verify common_utils.py imports matplotlib, numpy, pandas directly."""
+    def test_common_utils_lazy_imports(self):
+        """Verify common_utils.py does NOT import heavy dependencies at module level."""
+        # We need to reload common_utils to ensure we test the clean state
+        if "shared.python.common_utils" in sys.modules:
+            del sys.modules["shared.python.common_utils"]
+
         from shared.python import common_utils
 
-        # These should be available in the module
-        assert hasattr(common_utils, "plt")
-        assert hasattr(common_utils, "np")
-        assert hasattr(common_utils, "pd")
+        # These should NOT be available in the module anymore (lazy loaded)
+        assert not hasattr(common_utils, "plt")
+        assert not hasattr(common_utils, "np")
+        assert not hasattr(common_utils, "pd")
 
 
 class TestPolynomialGeneratorLazyImport:
