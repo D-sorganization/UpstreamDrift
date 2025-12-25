@@ -83,7 +83,8 @@ def rnea(  # noqa: PLR0915
     a_grav = model.get("gravity", DEFAULT_GRAVITY)
 
     # Initialize arrays
-    # OPTIMIZATION: use np.empty instead of np.zeros for arrays that are fully overwritten
+    # OPTIMIZATION: use np.empty instead of np.zeros for arrays that are fully
+    # overwritten
     v = np.empty((6, nb))  # Spatial velocities
     a = np.empty((6, nb))  # Spatial accelerations
     f = np.zeros((6, nb))  # Spatial forces (must be zero for accumulation)

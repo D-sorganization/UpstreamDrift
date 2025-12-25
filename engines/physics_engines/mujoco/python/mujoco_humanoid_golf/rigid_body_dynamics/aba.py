@@ -89,8 +89,10 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     xup: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Transforms from body to parent
     s_subspace: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Motion subspaces
 
-    # OPTIMIZATION: use np.empty instead of np.zeros for arrays that are fully overwritten
-    # This saves initialization cost which is significant for small matrices in tight loops
+    # OPTIMIZATION: use np.empty instead of np.zeros for arrays that are fully
+    # overwritten
+    # This saves initialization cost which is significant for small matrices in tight
+    # loops
     v = np.empty((6, nb))  # Spatial velocities
     c = np.empty((6, nb))  # Velocity-product accelerations (bias)
 
