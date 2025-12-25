@@ -1,60 +1,21 @@
-# Contributing Guide
+# Contributing
 
-Welcome to the Golf Modeling Suite development team! We follow strict engineering standards to ensure reliability and reproducibility.
+We welcome contributions! Please follow these guidelines.
 
-## 🛠️ Development Setup
+## Workflow
+1.  Fork the repository.
+2.  Create a feature branch.
+3.  Make your changes.
+4.  Run tests (`python validate_suite.py`).
+5.  Submit a Pull Request.
 
-### Prerequisites
-- Python 3.11+
-- Git
-- Docker (optional, but recommended for full physics validation)
-- MATLAB (optional, for Simscape models)
+## Code Style
+- **Python**: We use `ruff` and `black`.
+- **Type Checking**: We use `mypy`.
+- **MATLAB**: Follow standard MATLAB coding practices.
 
-### Installation
+## Commit Messages
+Use descriptive commit messages.
 
-```bash
-# Clone the repository
-git clone https://github.com/D-sorganization/Golf_Modeling_Suite.git
-cd Golf_Modeling_Suite
-
-# Install with development dependencies
-pip install -e ".[dev,engines,analysis]"
-
-# Install pre-commit hooks
-pre-commit install
-```
-
-## 🧪 Testing Standards
-
-We use `pytest` for testing. All PRs must pass the test suite.
-
-```bash
-# Run unit tests
-pytest tests/unit/
-
-# Run physics validation (requires engines)
-pytest tests/physics_validation/
-
-# Run coverage report
-pytest --cov=shared --cov-report=html
-```
-
-## 🎨 Code Style
-
-We enforce strict formatting and typing:
-- **Black**: Code formatter (line length 88)
-- **Ruff**: Linter (E, F, B, I rules)
-- **MyPy**: Static type checking (strict mode)
-
-Run the full quality gate before committing:
-```bash
-black . && ruff check . && mypy .
-```
-
-## 📝 Pull Request Process
-
-1. Create a branch from `main` (e.g., `feat/my-feature`).
-2. Implement your changes.
-3. Ensure all tests pass.
-4. Update documentation if API changes.
-5. Create PR with descriptive title and body.
+## Documentation
+Update documentation if you change functionality or add new features.

@@ -1,4 +1,0 @@
-engines/physics_engines/mujoco/python/mujoco_humanoid_golf/meshcat_adapter.py:143: error: Item "None" of "Any | None" has no attribute "ngeom"  [union-attr]
-engines/physics_engines/mujoco/python/mujoco_humanoid_golf/meshcat_adapter.py:195: error: Item "None" of "Any | None" has no attribute "nbody"  [union-attr]
-engines/physics_engines/mujoco/python/mujoco_humanoid_golf/meshcat_adapter.py:225: error: Value of type "Any | None" is not indexable  [index]
-Found 3 errors in 1 file (checked 144 source files)

@@ -63,7 +63,11 @@ temp-worktree/engines/physics_engines/mujoco/vendor/mujoco_menagerie/
 
 # MyPy and coverage output
 mypy_errors.txt
+mypy_report*.txt
 ruff_errors.json
+ruff_report*.txt
+quality_report*.txt
+black_report*.txt
 coverage.xml
 
 # Generated agent memory

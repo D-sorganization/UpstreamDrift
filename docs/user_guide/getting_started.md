@@ -1,63 +1,40 @@
 # Getting Started
 
-This guide will help you install and set up the Golf Modeling Suite on your machine.
+## Running the Unified Launcher
 
-## Prerequisites
-
-- **Operating System**: Windows 10/11, Linux (Ubuntu 20.04+), or macOS (12+)
-- **Python**: Version 3.10 or higher
-- **Git**: For version control
-- **Docker** (Optional): For running the full validation suite without local dependencies
-
-## Installation
-
-### 1. Clone the Repository
+The easiest way to explore the suite is using the Python-based unified launcher.
 
 ```bash
-git clone https://github.com/D-sorganization/Golf_Modeling_Suite.git
-cd Golf_Modeling_Suite
+python launchers/golf_launcher.py
 ```
 
-### 2. Create a Virtual Environment
+This will open a graphical interface allowing you to:
+- Select a Physics Engine (MuJoCo, Drake, Pinocchio).
+- Choose a specific model (e.g., 2D Golf, Humanoid).
+- Configure simulation parameters.
+- Launch the simulation.
 
-It is recommended to use a virtual environment to manage dependencies.
+## Running Specific Engines directly
 
+### MuJoCo
 ```bash
-# Windows
-python -m venv venv
-venv\Scripts\activate
-
-# Unix/macOS
-python3 -m venv venv
-source venv/bin/activate
+python engines/physics_engines/mujoco/python/main.py
 ```
 
-### 3. Install Dependencies
-
-Install the core suite along with development and engine dependencies:
-
+### Drake
 ```bash
-pip install -e ".[dev,engines,analysis]"
+# Ensure you are in the root directory
+python -m engines.physics_engines.drake.python.main
 ```
 
-This command installs:
-- Core utilities (`numpy`, `pandas`)
-- Visualization tools (`pyqt6`, `matplotlib`)
-- Physics engines (`mujoco`, `pydrake`, `pinocchio`)
-- Development tools (`pytest`, `black`, `ruff`)
-
-## Verifying Installation
-
-To verify that the suite is correctly installed, you can run the status check:
-
+### Pinocchio
 ```bash
-python launch_golf_suite.py --status
+python engines/physics_engines/pinocchio/python/main.py
 ```
 
-You should see a report listing the available physics engines and their status (Loaded/Available).
+## MATLAB Models
 
-## Next Steps
-
-- Learn how to [Configure the Suite](configuration.md)
-- Try [Running Simulations](running_simulations.md)
-- Explore the [Examples](../examples/index.rst)
+1. Open MATLAB.
+2. Run `setup_golf_suite()`.
+3. Open the desired `.slx` file from `engines/Simscape_Multibody_Models/`.
+4. Press Run in Simulink.
