@@ -43,10 +43,7 @@ function rotatePoint(point, angleRad, center = pivot) {
   };
 }
 
-function parseInputs() {
-  state.theta1 = Number(document.getElementById('theta1').value) * Math.PI / 180;
-  state.theta2 = Number(document.getElementById('theta2').value) * Math.PI / 180;
-  state.omega1 = 0; state.omega2 = 0; state.time = 0;
+function updateParams() {
   params.l1 = Number(document.getElementById('l1').value);
   params.l2 = Number(document.getElementById('l2').value);
   params.m1 = Number(document.getElementById('m1').value);
@@ -80,6 +77,20 @@ function parseInputs() {
   } catch (e) {
     params.tau2Fn = () => 0;
   }
+}
+
+function resetState() {
+  state.theta1 = Number(document.getElementById('theta1').value) * Math.PI / 180;
+  state.theta2 = Number(document.getElementById('theta2').value) * Math.PI / 180;
+  state.omega1 = 0;
+  state.omega2 = 0;
+  state.time = 0;
+}
+
+function parseInputs() {
+  // Legacy function kept for compatibility if needed, but internally uses split logic
+  resetState();
+  updateParams();
 }
 
 function validateExpression(expr) {
@@ -272,20 +283,33 @@ function updateA11yStatus(message) {
 }
 
 function start() {
-  cancelAnimationFrame(animationId);
-  parseInputs();
+  if (animationId) cancelAnimationFrame(animationId);
+  resetState();
+  updateParams();
   step();
   updateA11yStatus('Simulation started');
 }
 
 function pause() {
-  cancelAnimationFrame(animationId);
+  if (animationId) {
+    cancelAnimationFrame(animationId);
+    animationId = null;
+  }
   updateA11yStatus('Simulation paused');
+}
+
+function resume() {
+  if (!animationId) {
+    updateParams(); // Apply any param changes
+    step();
+    updateA11yStatus('Simulation resumed');
+  }
 }
 
 function reset() {
   pause();
-  parseInputs();
+  resetState();
+  updateParams();
   draw();
   document.getElementById('torques').textContent = 'Torques: --';
   updateA11yStatus('Simulation reset to initial state');
@@ -311,6 +335,19 @@ function reset() {
       help.className = "input-help error";
     }
   });
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.target.matches('input, textarea')) return;
+
+  if (e.key === ' ' || e.code === 'Space') {
+     e.preventDefault();
+     if (animationId) pause();
+     else resume();
+  }
+  if (e.key.toLowerCase() === 'r') {
+     reset();
+  }
 });
 
 reset();
