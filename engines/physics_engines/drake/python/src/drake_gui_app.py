@@ -78,6 +78,7 @@ class DrakeRecorder:
         self.times: list[float] = []
         self.q_history: list[np.ndarray] = []
         self.v_history: list[np.ndarray] = []
+        self.club_head_pos_history: list[np.ndarray] = []
         self.is_recording = False
 
     def start(self) -> None:
@@ -87,12 +88,35 @@ class DrakeRecorder:
     def stop(self) -> None:
         self.is_recording = False
 
-    def record(self, t: float, q: np.ndarray, v: np.ndarray) -> None:
+    def record(
+        self,
+        t: float,
+        q: np.ndarray,
+        v: np.ndarray,
+        club_pos: np.ndarray | None = None,
+    ) -> None:
         if not self.is_recording:
             return
         self.times.append(t)
         self.q_history.append(q.copy())
         self.v_history.append(v.copy())
+        if club_pos is not None:
+            self.club_head_pos_history.append(club_pos.copy())
+        else:
+            self.club_head_pos_history.append(np.zeros(3))
+
+    def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
+        """Implement RecorderInterface."""
+        times = np.array(self.times)
+        if field_name == "club_head_position":
+            return times, np.array(self.club_head_pos_history)
+        if field_name == "joint_positions":
+            return times, np.array(self.q_history)
+        if field_name == "joint_velocities":
+            return times, np.array(self.v_history)
+
+        # Fallback
+        return times, []
 
 
 class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimported]
@@ -395,6 +419,12 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.btn_induced_acc.setEnabled(HAS_MATPLOTLIB)
         analysis_layout.addWidget(self.btn_induced_acc)
 
+        self.btn_swing_plane = QtWidgets.QPushButton("Show Swing Plane Analysis")
+        self.btn_swing_plane.setToolTip("Analyze the swing plane and deviation")
+        self.btn_swing_plane.clicked.connect(self._show_swing_plane_analysis)
+        self.btn_swing_plane.setEnabled(HAS_MATPLOTLIB)
+        analysis_layout.addWidget(self.btn_swing_plane)
+
         analysis_group.setLayout(analysis_layout)
         dyn_layout.addWidget(analysis_group)
 
@@ -678,7 +708,24 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 plant_context = self.plant.GetMyContextFromRoot(context)
                 q = self.plant.GetPositions(plant_context)
                 v = self.plant.GetVelocities(plant_context)
-                self.recorder.record(context.get_time(), q, v)
+
+                # Get club head position
+                club_pos = None
+                body_names = ["clubhead", "club_body", "wrist", "hand", "link_7"]
+                for name in body_names:
+                    if self.plant.HasBodyNamed(name):
+                        body = self.plant.GetBodyByName(name)
+                        X_WB = self.plant.EvalBodyPoseInWorld(plant_context, body)
+                        club_pos = X_WB.translation()
+                        break
+
+                if club_pos is None:
+                    # Fallback to last body
+                    body = self.plant.get_body(BodyIndex(self.plant.num_bodies() - 1))
+                    X_WB = self.plant.EvalBodyPoseInWorld(plant_context, body)
+                    club_pos = X_WB.translation()
+
+                self.recorder.record(context.get_time(), q, v, club_pos)
                 self.lbl_rec_status.setText(f"Frames: {len(self.recorder.times)}")
 
     def _on_visualization_changed(self) -> None:
@@ -918,6 +965,28 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         ax.legend()
         ax.grid(True)
 
+        plt.show()
+
+    def _show_swing_plane_analysis(self) -> None:
+        """Show swing plane analysis using shared plotter."""
+        if not HAS_MATPLOTLIB:
+            QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")
+            return
+
+        # Import here to avoid hard dependency on matplotlib
+        from shared.python.plotting import GolfSwingPlotter
+
+        if not self.recorder.times:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "No Data",
+                "No recording available. Please Record a simulation first.",
+            )
+            return
+
+        plotter = GolfSwingPlotter(self.recorder)
+        fig = plt.figure(figsize=(10, 8))
+        plotter.plot_swing_plane(fig)
         plt.show()
 
 

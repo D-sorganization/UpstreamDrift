@@ -297,6 +297,48 @@ def cross_force(
     return res
 
 
+def cross_motion_fast(v: np.ndarray, m: np.ndarray, out: np.ndarray) -> None:
+    """
+    Optimized version of cross_motion without shape checks or asarray.
+    Assumes inputs are 6x1 arrays and out is provided.
+
+    Args:
+        v: 6x1 spatial motion vector
+        m: 6x1 spatial motion vector
+        out: 6x1 output array
+    """
+    # w x m_w
+    out[0] = v[1] * m[2] - v[2] * m[1]
+    out[1] = v[2] * m[0] - v[0] * m[2]
+    out[2] = v[0] * m[1] - v[1] * m[0]
+
+    # v_lin x m_w + w x m_lin
+    out[3] = v[4] * m[2] - v[5] * m[1] + v[1] * m[5] - v[2] * m[4]
+    out[4] = v[5] * m[0] - v[3] * m[2] + v[2] * m[3] - v[0] * m[5]
+    out[5] = v[3] * m[1] - v[4] * m[0] + v[0] * m[4] - v[1] * m[3]
+
+
+def cross_force_fast(v: np.ndarray, f: np.ndarray, out: np.ndarray) -> None:
+    """
+    Optimized version of cross_force without shape checks or asarray.
+    Assumes inputs are 6x1 arrays and out is provided.
+
+    Args:
+        v: 6x1 spatial motion vector
+        f: 6x1 spatial force vector
+        out: 6x1 output array
+    """
+    # Top: w x tau + v_lin x force
+    out[0] = v[1] * f[2] - v[2] * f[1] + v[4] * f[5] - v[5] * f[4]
+    out[1] = v[2] * f[0] - v[0] * f[2] + v[5] * f[3] - v[3] * f[5]
+    out[2] = v[0] * f[1] - v[1] * f[0] + v[3] * f[4] - v[4] * f[3]
+
+    # Bot: w x force
+    out[3] = v[1] * f[5] - v[2] * f[4]
+    out[4] = v[2] * f[3] - v[0] * f[5]
+    out[5] = v[0] * f[4] - v[1] * f[3]
+
+
 def spatial_cross(
     v: np.ndarray,
     u: np.ndarray,

@@ -15,6 +15,8 @@ from typing import TYPE_CHECKING, Protocol
 import numpy as np
 from matplotlib.figure import Figure
 
+from shared.python.swing_plane_analysis import SwingPlaneAnalyzer
+
 if TYPE_CHECKING:
     pass
 
@@ -959,4 +961,97 @@ class GolfSwingPlotter:
 
         ax.set_title(title, fontsize=14, fontweight="bold")
         fig.colorbar(im, ax=ax, label="Correlation Coefficient")
+        fig.tight_layout()
+
+    def plot_swing_plane(self, fig: Figure) -> None:
+        """Plot fitted swing plane and trajectory deviation.
+
+        Args:
+            fig: Matplotlib figure
+        """
+        times, positions = self.recorder.get_time_series("club_head_position")
+
+        if len(times) < 3 or len(positions) < 3:
+            ax = fig.add_subplot(111)
+            ax.text(
+                0.5,
+                0.5,
+                "Insufficient data for plane fitting",
+                ha="center",
+                va="center",
+            )
+            return
+
+        # Ensure positions is a numpy array
+        if not isinstance(positions, np.ndarray):
+            positions = np.array(positions)
+
+        analyzer = SwingPlaneAnalyzer()
+        try:
+            metrics = analyzer.analyze(positions)
+        except ValueError as e:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, str(e), ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111, projection="3d")
+
+        x = positions[:, 0]
+        y = positions[:, 1]
+        z = positions[:, 2]
+
+        # Plot trajectory color-coded by deviation from plane
+        centroid = metrics.point_on_plane
+        normal = metrics.normal_vector
+        deviations = analyzer.calculate_deviation(positions, centroid, normal)
+
+        # Plot trajectory
+        sc = ax.scatter(
+            x,
+            y,
+            z,
+            c=np.abs(deviations),
+            cmap="coolwarm",
+            s=20,  # type: ignore[misc]
+            label="Trajectory",
+        )
+
+        # Plot plane
+        # Create a grid around the centroid
+        # Find bounds
+        min_x, max_x = np.min(x), np.max(x)
+        min_y, max_y = np.min(y), np.max(y)
+
+        # Create meshgrid
+        margin = 0.5
+        xx, yy = np.meshgrid(
+            np.linspace(min_x - margin, max_x + margin, 10),
+            np.linspace(min_y - margin, max_y + margin, 10),
+        )
+
+        # Plane equation: n . (p - c) = 0 => nx(x-cx) + ny(y-cy) + nz(z-cz) = 0
+        # z = cz - (nx(x-cx) + ny(y-cy))/nz
+
+        if abs(normal[2]) > 1e-6:
+            zz = (
+                centroid[2]
+                - (normal[0] * (xx - centroid[0]) + normal[1] * (yy - centroid[1]))
+                / normal[2]
+            )
+            ax.plot_surface(xx, yy, zz, alpha=0.2, color="cyan")  # type: ignore[attr-defined]
+        else:
+            # Vertical plane (rare for golf swing but possible)
+            pass
+
+        ax.set_xlabel("X (m)")
+        ax.set_ylabel("Y (m)")
+        ax.set_zlabel("Z (m)")  # type: ignore[attr-defined]
+        ax.set_title(
+            f"Swing Plane Analysis\nSteepness: {metrics.steepness_deg:.1f}°, "
+            f"RMSE: {metrics.rmse*100:.1f} cm",
+            fontsize=12,
+            fontweight="bold",
+        )
+
+        fig.colorbar(sc, ax=ax, label="Deviation from Plane (m)", shrink=0.6)
         fig.tight_layout()

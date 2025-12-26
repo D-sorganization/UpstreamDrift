@@ -1298,6 +1298,7 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
                 "Energy Analysis",
                 "Club Head Speed",
                 "Club Head Trajectory (3D)",
+                "Swing Plane Analysis",
                 "Phase Diagram",
                 "Torque Comparison",
             ],
@@ -2847,6 +2848,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
                 plotter.plot_club_head_speed(canvas.fig)
             elif plot_type == "Club Head Trajectory (3D)":
                 plotter.plot_club_head_trajectory(canvas.fig)
+            elif plot_type == "Swing Plane Analysis":
+                plotter.plot_swing_plane(canvas.fig)
             elif plot_type == "Phase Diagram":
                 joint_idx = self.joint_select_combo.currentIndex()
                 plotter.plot_phase_diagram(canvas.fig, joint_idx)
