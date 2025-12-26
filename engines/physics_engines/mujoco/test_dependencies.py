@@ -39,17 +39,17 @@ def test_imports():
         return False
 
     # Test the module that uses defusedxml
-    if importlib.util.find_spec("mujoco_golf_pendulum.urdf_io") is not None:
-        print("✓ mujoco_golf_pendulum.urdf_io available")
+    if importlib.util.find_spec("mujoco_humanoid_golf.urdf_io") is not None:
+        print("✓ mujoco_humanoid_golf.urdf_io available")
     else:
-        print("✗ mujoco_golf_pendulum.urdf_io missing")
+        print("✗ mujoco_humanoid_golf.urdf_io missing")
         return False
 
     # Test the main module
-    if importlib.util.find_spec("mujoco_golf_pendulum") is not None:
-        print("✓ mujoco_golf_pendulum module available")
+    if importlib.util.find_spec("mujoco_humanoid_golf") is not None:
+        print("✓ mujoco_humanoid_golf module available")
     else:
-        print("✗ mujoco_golf_pendulum module missing")
+        print("✗ mujoco_humanoid_golf module missing")
         return False
 
     print("\n✓ All dependencies are available!")

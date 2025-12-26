@@ -44,7 +44,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         # Define paths to the GUI scripts in the new structure
         self.mujoco_path = (
             self.suite_root
-            / "engines/physics_engines/mujoco/python/mujoco_golf_pendulum"
+            / "engines/physics_engines/mujoco/python/mujoco_humanoid_golf"
             / "advanced_gui.py"
         )
         self.drake_path = (
