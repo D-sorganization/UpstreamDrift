@@ -21,7 +21,7 @@ classifiers = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "numpy>=1.26.4,<2.0.0",
+    "numpy>=1.26.4,<3.0.0",
     "pandas>=2.2.3,<3.0.0",
     "matplotlib>=3.8.0,<4.0.0",
     "scipy>=1.13.1,<2.0.0",
@@ -213,8 +213,6 @@ omit = [
     "*/__pycache__/*",
     "*/matlab/*",
     "*/legacy/*",
-    "engines/*/python/*",  # Exclude engine implementations from coverage
-    "engines/physics_engines/*",  # Focus on shared components only
 ]
 
 [tool.coverage.report]
