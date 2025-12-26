@@ -111,7 +111,12 @@ def rnea(  # noqa: PLR0915
         s_subspace_list[i] = s_subspace
 
         # Joint velocity in joint frame
-        vj_velocity = s_subspace * qd[i]
+        # OPTIMIZATION: Avoid allocation by using existing buffer (i_v_buf)
+        # This is safe because i_v_buf is only used in backward pass (step 2)
+        # or as a very short-lived temp in forward pass.
+        # vj_velocity = s_subspace * qd[i]
+        np.multiply(s_subspace, qd[i], out=i_v_buf)
+        vj_velocity = i_v_buf
 
         # Composite transform from body i to parent/base
         if model["parent"][i] == -1:  # Python uses -1 for no parent
@@ -121,7 +126,10 @@ def rnea(  # noqa: PLR0915
 
             # Optimized a[:, i] = xj_transform @ (-a_grav) + s_subspace * qdd[i]
             np.matmul(xj_transform, -a_grav, out=scratch_vec)
-            scratch_vec += s_subspace * qdd[i]
+            # scratch_vec += s_subspace * qdd[i]
+            # OPTIMIZATION: Use cross_buf for temp multiplication to avoid allocation
+            np.multiply(s_subspace, qdd[i], out=cross_buf)
+            scratch_vec += cross_buf
             a[:, i] = scratch_vec
         else:
             # Body i has a parent
@@ -140,7 +148,11 @@ def rnea(  # noqa: PLR0915
             # Acceleration: transform parent accel + bias accel + joint accel
             # Optimized a[:, i] = (xup[i] @ a[:, p] + ... )
             np.matmul(xup[i], a[:, p], out=scratch_vec)
-            scratch_vec += s_subspace * qdd[i]
+            # scratch_vec += s_subspace * qdd[i]
+            # OPTIMIZATION: Use cross_buf for temp multiplication
+            np.multiply(s_subspace, qdd[i], out=cross_buf)
+            scratch_vec += cross_buf
+
             # Optimization: Use pre-allocated buffer for cross product
             cross_motion(v[:, i], vj_velocity, out=cross_buf)
             scratch_vec += cross_buf
