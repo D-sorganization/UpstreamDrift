@@ -150,7 +150,7 @@ class TestLauncherUtilities:
             / "physics_engines"
             / "mujoco"
             / "python"
-            / "mujoco_golf_pendulum"
+            / "mujoco_humanoid_golf"
             / "advanced_gui.py"
         )
 
