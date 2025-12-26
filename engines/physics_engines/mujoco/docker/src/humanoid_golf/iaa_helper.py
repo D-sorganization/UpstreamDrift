@@ -1,6 +1,6 @@
 def compute_induced_accelerations(physics) -> dict:
     """Compute induced accelerations (Gravity, Velocity, Control) for current state."""
-    results = {}
+    results: dict = {}
     try:
         import mujoco
     except ImportError:
