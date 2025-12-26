@@ -8,7 +8,15 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parents[1]))
 
 from shared.python.common_utils import get_shared_urdf_path
-from tools.urdf_generator.main import URDFGenerator
+
+# Try to import PyQt6 and URDFGenerator, skip tests if not available
+try:
+    from tools.urdf_generator.main import URDFGenerator
+
+    PYQT6_AVAILABLE = True
+except ImportError:
+    PYQT6_AVAILABLE = False
+    URDFGenerator = None
 
 
 class MockFileDialog:
@@ -21,6 +29,7 @@ class MockFileDialog:
         return "test_robot.urdf", "URDF Files (*.urdf)"
 
 
+@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not available")
 def test_urdf_generation_logic(qtbot):
     """Test the logic of generating URDF XML."""
     window = URDFGenerator()

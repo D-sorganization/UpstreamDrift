@@ -79,22 +79,22 @@ def test_specific_imports():
             sys.path.insert(0, python_dir)
             print(f"  Added {python_dir} to Python path")
 
-        if importlib.util.find_spec("mujoco_golf_pendulum.urdf_io"):
-            print("✓ mujoco_golf_pendulum.urdf_io imported successfully")
+        if importlib.util.find_spec("mujoco_humanoid_golf.urdf_io"):
+            print("✓ mujoco_humanoid_golf.urdf_io imported successfully")
         else:
-            raise ImportError("mujoco_golf_pendulum.urdf_io not found")
+            raise ImportError("mujoco_humanoid_golf.urdf_io not found")
     except ImportError as e:
-        print(f"❌ mujoco_golf_pendulum.urdf_io failed: {e}")
+        print(f"❌ mujoco_humanoid_golf.urdf_io failed: {e}")
         return False
 
     # Test the main module
     try:
-        if importlib.util.find_spec("mujoco_golf_pendulum"):
-            print("✓ mujoco_golf_pendulum module imported successfully")
+        if importlib.util.find_spec("mujoco_humanoid_golf"):
+            print("✓ mujoco_humanoid_golf module imported successfully")
         else:
-            raise ImportError("mujoco_golf_pendulum not found")
+            raise ImportError("mujoco_humanoid_golf not found")
     except ImportError as e:
-        print(f"❌ mujoco_golf_pendulum module failed: {e}")
+        print(f"❌ mujoco_humanoid_golf module failed: {e}")
         return False
 
     return True
