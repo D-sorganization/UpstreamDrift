@@ -156,7 +156,8 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         np.matmul(model["I"][i], v[:, i], out=i_v_buf)
 
         cross_force(v[:, i], i_v_buf, out=cross_buf)
-        pa_bias[:, i] = cross_buf - f_ext[:, i]
+        # pa_bias[:, i] = cross_buf - f_ext[:, i]
+        np.subtract(cross_buf, f_ext[:, i], out=pa_bias[:, i])
 
     # --- Pass 2: Backward recursion (articulated-body inertias) ---
     for i in range(nb - 1, -1, -1):

@@ -100,6 +100,7 @@ def rnea(  # noqa: PLR0915
     scratch_vec = np.empty(6)
     i_v_buf = np.empty(6)
     cross_buf = np.empty(6)
+    vj_buf = np.empty(6)  # New buffer for joint velocity
 
     s_subspace_list: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Cache motion subspaces
 
@@ -111,17 +112,21 @@ def rnea(  # noqa: PLR0915
         s_subspace_list[i] = s_subspace
 
         # Joint velocity in joint frame
-        vj_velocity = s_subspace * qd[i]
+        # vj_velocity = s_subspace * qd[i]
+        np.multiply(s_subspace, qd[i], out=vj_buf)
 
         # Composite transform from body i to parent/base
         if model["parent"][i] == -1:  # Python uses -1 for no parent
             # Body i is connected to base
             # Use Xj directly (not Xj * Xtree) per MATLAB reference
-            v[:, i] = vj_velocity
+            v[:, i] = vj_buf
 
             # Optimized a[:, i] = xj_transform @ (-a_grav) + s_subspace * qdd[i]
             np.matmul(xj_transform, -a_grav, out=scratch_vec)
-            scratch_vec += s_subspace * qdd[i]
+            # scratch_vec += s_subspace * qdd[i]
+            np.multiply(s_subspace, qdd[i], out=i_v_buf)
+            scratch_vec += i_v_buf
+
             a[:, i] = scratch_vec
         else:
             # Body i has a parent
@@ -134,15 +139,19 @@ def rnea(  # noqa: PLR0915
             # Velocity: transform parent velocity and add joint velocity
             # Optimized v[:, i] = xup[i] @ v[:, p] + vj_velocity
             np.matmul(xup[i], v[:, p], out=scratch_vec)
-            scratch_vec += vj_velocity
+            scratch_vec += vj_buf
             v[:, i] = scratch_vec
 
             # Acceleration: transform parent accel + bias accel + joint accel
             # Optimized a[:, i] = (xup[i] @ a[:, p] + ... )
             np.matmul(xup[i], a[:, p], out=scratch_vec)
-            scratch_vec += s_subspace * qdd[i]
+
+            # scratch_vec += s_subspace * qdd[i]
+            np.multiply(s_subspace, qdd[i], out=i_v_buf)
+            scratch_vec += i_v_buf
+
             # Optimization: Use pre-allocated buffer for cross product
-            cross_motion(v[:, i], vj_velocity, out=cross_buf)
+            cross_motion(v[:, i], vj_buf, out=cross_buf)
             scratch_vec += cross_buf
             a[:, i] = scratch_vec
 
