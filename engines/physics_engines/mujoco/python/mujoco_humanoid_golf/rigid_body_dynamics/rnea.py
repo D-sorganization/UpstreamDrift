@@ -7,7 +7,11 @@ Computes the joint forces/torques required to produce a given motion.
 from __future__ import annotations
 
 import numpy as np
-from mujoco_humanoid_golf.spatial_algebra import cross_force, cross_motion, jcalc
+from mujoco_humanoid_golf.spatial_algebra import (
+    cross_force_fast,
+    cross_motion_fast,
+    jcalc,
+)
 from shared.python import constants
 
 DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
@@ -111,7 +115,10 @@ def rnea(  # noqa: PLR0915
         s_subspace_list[i] = s_subspace
 
         # Joint velocity in joint frame
-        vj_velocity = s_subspace * qd[i]
+        # OPTIMIZATION: Use pre-allocated buffer (reuse i_v_buf from backward pass)
+        # vj_velocity = s_subspace * qd[i] (Avoids allocation)
+        np.multiply(s_subspace, qd[i], out=i_v_buf)
+        vj_velocity = i_v_buf
 
         # Composite transform from body i to parent/base
         if model["parent"][i] == -1:  # Python uses -1 for no parent
@@ -121,7 +128,10 @@ def rnea(  # noqa: PLR0915
 
             # Optimized a[:, i] = xj_transform @ (-a_grav) + s_subspace * qdd[i]
             np.matmul(xj_transform, -a_grav, out=scratch_vec)
-            scratch_vec += s_subspace * qdd[i]
+            # Optimization: Avoid allocation for s_subspace * qdd[i]
+            # scratch_vec += s_subspace * qdd[i]
+            np.multiply(s_subspace, qdd[i], out=cross_buf)
+            scratch_vec += cross_buf
             a[:, i] = scratch_vec
         else:
             # Body i has a parent
@@ -140,9 +150,16 @@ def rnea(  # noqa: PLR0915
             # Acceleration: transform parent accel + bias accel + joint accel
             # Optimized a[:, i] = (xup[i] @ a[:, p] + ... )
             np.matmul(xup[i], a[:, p], out=scratch_vec)
-            scratch_vec += s_subspace * qdd[i]
+
+            # Optimization: Avoid allocation for s_subspace * qdd[i]
+            # Use cross_buf as temporary buffer before it's needed for cross_motion
+            # scratch_vec += s_subspace * qdd[i]
+            np.multiply(s_subspace, qdd[i], out=cross_buf)
+            scratch_vec += cross_buf
+
             # Optimization: Use pre-allocated buffer for cross product
-            cross_motion(v[:, i], vj_velocity, out=cross_buf)
+            # Overwrites cross_buf, which is fine as we are done with qdd term
+            cross_motion_fast(v[:, i], vj_velocity, out=cross_buf)
             scratch_vec += cross_buf
             a[:, i] = scratch_vec
 
@@ -159,7 +176,7 @@ def rnea(  # noqa: PLR0915
 
         # 3. Add Coriolis (cross_force allocates, but we add to buffer)
         # Optimization: Use pre-allocated buffer for cross product
-        cross_force(v[:, i], i_v_buf, out=cross_buf)
+        cross_force_fast(v[:, i], i_v_buf, out=cross_buf)
         f_body += cross_buf
         f_body -= f_ext[:, i]
 
