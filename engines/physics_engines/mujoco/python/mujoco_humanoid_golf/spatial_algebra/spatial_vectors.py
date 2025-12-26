@@ -297,9 +297,7 @@ def cross_force(
     return res
 
 
-def cross_motion_fast(
-    v: np.ndarray, m: np.ndarray, out: np.ndarray
-) -> None:
+def cross_motion_fast(v: np.ndarray, m: np.ndarray, out: np.ndarray) -> None:
     """
     Optimized version of cross_motion without shape checks or asarray.
     Assumes inputs are 6x1 arrays and out is provided.
@@ -320,9 +318,7 @@ def cross_motion_fast(
     out[5] = v[3] * m[1] - v[4] * m[0] + v[0] * m[4] - v[1] * m[3]
 
 
-def cross_force_fast(
-    v: np.ndarray, f: np.ndarray, out: np.ndarray
-) -> None:
+def cross_force_fast(v: np.ndarray, f: np.ndarray, out: np.ndarray) -> None:
     """
     Optimized version of cross_force without shape checks or asarray.
     Assumes inputs are 6x1 arrays and out is provided.

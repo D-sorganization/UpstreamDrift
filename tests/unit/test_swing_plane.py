@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+
 from shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 
 
@@ -84,14 +85,6 @@ class TestSwingPlaneAnalyzer:
     def test_deviation_calculation(self, analyzer: SwingPlaneAnalyzer) -> None:
         """Test deviation calculation."""
         # Plane Z=0
-        points = np.array(
-            [
-                [0, 0, 0],
-                [1, 0, 0],
-                [0, 1, 0],
-            ],
-            dtype=np.float64,
-        )
         centroid = np.array([0, 0, 0])
         normal = np.array([0, 0, 1])
 
