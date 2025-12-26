@@ -337,6 +337,40 @@ function reset() {
   });
 });
 
+// Palette: Live parameter tuning
+// Updates simulation parameters immediately when inputs change
+const liveParams = [
+  'l1', 'm1', 'com1',
+  'l2', 'mshaft', 'mhead', 'com2',
+  'plane',
+  'tau1', 'tau2'
+];
+
+liveParams.forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', () => {
+      updateParams();
+      // If paused, redraw to show physical changes (length, etc)
+      if (!animationId) draw();
+    });
+  }
+});
+
+// Palette: Live initial condition preview
+// Updates the pendulum position while setting up initial angles (only when reset/time=0)
+['theta1', 'theta2'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) {
+    el.addEventListener('input', () => {
+      if (state.time === 0 && !animationId) {
+        resetState();
+        draw();
+      }
+    });
+  }
+});
+
 document.addEventListener('keydown', (e) => {
   if (e.target.matches('input, textarea')) return;
 
