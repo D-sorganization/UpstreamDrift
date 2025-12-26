@@ -72,6 +72,16 @@ button {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
+  transition: filter 0.2s, transform 0.1s;
+}
+
+button:hover {
+  filter: brightness(1.15);
+}
+
+button:active {
+  transform: translateY(1px);
+  filter: brightness(1.05);
 }
 
 button svg {
