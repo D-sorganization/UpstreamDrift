@@ -105,7 +105,7 @@ def main():
     files = [
         "launchers/golf_launcher.py",
         "engines/physics_engines/mujoco/python/humanoid_launcher.py",
-        "engines/physics_engines/mujoco/python/mujoco_golf_pendulum/advanced_gui.py",
+        "engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui.py",
     ]
 
     root = Path(__file__).parent.resolve()

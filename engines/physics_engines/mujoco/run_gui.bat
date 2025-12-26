@@ -14,7 +14,7 @@ if %ERRORLEVEL% NEQ 0 (
     echo Please install Miniconda/Anaconda or add conda to your PATH
     echo.
     echo Alternatively, activate your environment manually and run:
-    echo   python -m python.mujoco_golf_pendulum
+    echo   python -m python.mujoco_humanoid_golf
     pause
     exit /b 1
 )
@@ -42,7 +42,7 @@ echo Starting MuJoCo Golf Swing Model GUI...
 echo.
 
 REM Run the application
-python -m python.mujoco_golf_pendulum
+python -m python.mujoco_humanoid_golf
 
 REM If the application exits, pause to see any error messages
 if %ERRORLEVEL% NEQ 0 (

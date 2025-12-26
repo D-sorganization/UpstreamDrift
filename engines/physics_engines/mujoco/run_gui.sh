@@ -53,7 +53,7 @@ else
         echo "Please install Miniconda/Anaconda or activate your environment manually"
         echo ""
         echo "Alternatively, activate your environment and run:"
-        echo "  python -m python.mujoco_golf_pendulum"
+        echo "  python -m python.mujoco_humanoid_golf"
         exit 1
     fi
 fi
@@ -80,7 +80,7 @@ echo "Starting MuJoCo Golf Swing Model GUI..."
 echo ""
 
 # Run the application
-python -m python.mujoco_golf_pendulum
+python -m python.mujoco_humanoid_golf
 
 # Capture exit code
 EXIT_CODE=$?
