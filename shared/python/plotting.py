@@ -1012,7 +1012,7 @@ class GolfSwingPlotter:
             z,
             c=np.abs(deviations),
             cmap="coolwarm",
-            s=20,
+            s=20,  # type: ignore[misc]
             label="Trajectory",
         )
 
@@ -1038,7 +1038,7 @@ class GolfSwingPlotter:
                 - (normal[0] * (xx - centroid[0]) + normal[1] * (yy - centroid[1]))
                 / normal[2]
             )
-            ax.plot_surface(xx, yy, zz, alpha=0.2, color="cyan")
+            ax.plot_surface(xx, yy, zz, alpha=0.2, color="cyan")  # type: ignore[attr-defined]
         else:
             # Vertical plane (rare for golf swing but possible)
             pass
