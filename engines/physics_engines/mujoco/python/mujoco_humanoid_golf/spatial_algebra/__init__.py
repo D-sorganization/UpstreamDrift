@@ -19,7 +19,15 @@ References:
 
 from .inertia import mci, transform_spatial_inertia
 from .joints import jcalc
-from .spatial_vectors import crf, crm, cross_force, cross_motion, spatial_cross
+from .spatial_vectors import (
+    crf,
+    crm,
+    cross_force,
+    cross_force_fast,
+    cross_motion,
+    cross_motion_fast,
+    spatial_cross,
+)
 from .transforms import inv_xtrans, xlt, xrot, xtrans
 
 __all__ = [
@@ -27,7 +35,9 @@ __all__ = [
     # Spatial cross products
     "crm",
     "cross_force",
+    "cross_force_fast",
     "cross_motion",
+    "cross_motion_fast",
     "inv_xtrans",
     # Joints
     "jcalc",
