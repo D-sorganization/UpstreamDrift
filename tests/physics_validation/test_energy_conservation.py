@@ -18,11 +18,11 @@ def is_engine_available(engine_type: EngineType) -> bool:
     return probe_result.is_available()
 
 
-@pytest.mark.skipif(
-    not is_engine_available(EngineType.MUJOCO), reason="MuJoCo not installed"
-)
 def test_mujoco_ballistic_energy_conservation():
     """Verify energy conservation for a falling particle in MuJoCo."""
+    if not is_engine_available(EngineType.MUJOCO):
+        pytest.skip("MuJoCo not installed")
+
     import mujoco
 
     # 1. Setup Simulation
@@ -78,11 +78,11 @@ def test_mujoco_ballistic_energy_conservation():
     assert percent_error < 0.1, f"Energy not conserved! Error: {percent_error:.4f}%"
 
 
-@pytest.mark.skipif(
-    not is_engine_available(EngineType.PINOCCHIO), reason="Pinocchio not installed"
-)
 def test_pinocchio_energy_check():
     """Verify energy conservation with Pinocchio using explicit integration."""
+    if not is_engine_available(EngineType.PINOCCHIO):
+        pytest.skip("Pinocchio not installed")
+
     import pinocchio
 
     # 1. Create Model (Free floating body)
@@ -148,3 +148,73 @@ def test_pinocchio_energy_check():
 
     # Allow slightly higher error due to simple integrator
     assert max_error < 0.05, f"Pinocchio energy check failed. Error: {max_error}"
+
+
+def test_drake_energy_conservation():
+    """Verify energy conservation with Drake (if available)."""
+    if not is_engine_available(EngineType.DRAKE):
+        pytest.skip("Drake not installed")
+
+    import pydrake.all
+
+    # 1. Create a MultibodyPlant (Standard Boilerplate)
+    builder = pydrake.systems.framework.DiagramBuilder()
+    plant, scene_graph = pydrake.multibody.plant.AddMultibodyPlantSceneGraph(
+        builder, time_step=0.0
+    )
+
+    # Add a particle (Body)
+    pydrake.multibody.tree.BodyIndex(plant.num_bodies())
+    mass = 1.0
+    M = pydrake.multibody.tree.SpatialInertia.MakeFromCentralInertia(
+        mass=mass,
+        p_PScm_E=[0, 0, 0],
+        I_SScm_E=pydrake.multibody.tree.RotationalInertia(0, 0, 0),
+    )
+
+    body = plant.AddRigidBody("particle", M)
+
+    # Add Prismatic Joint for falling in Z
+    plant.AddJoint(
+        pydrake.multibody.tree.PrismaticJoint(
+            "joint",
+            plant.world_frame(),
+            pydrake.multibody.tree.FixedOffsetFrame(
+                "frame", body, pydrake.math.RigidTransform()
+            ),
+            [0, 0, 1],  # Z axis
+        )
+    )
+
+    plant.Finalize()
+
+    # Create Context
+    diagram = builder.Build()
+    context = diagram.CreateDefaultContext()
+    plant_context = plant.GetMyContextFromRoot(context)
+
+    # Initial State: z=10, vz=0
+    # Prismatic joint: q=10
+    plant.SetPositions(plant_context, [10.0])
+    plant.SetVelocities(plant_context, [0.0])
+
+    # Compute Initial Energy
+    pe = plant.EvalPotentialEnergy(plant_context)
+    ke = plant.EvalKineticEnergy(plant_context)
+    initial_energy = pe + ke
+
+    # Simulate
+    simulator = pydrake.systems.analysis.Simulator(diagram, context)
+    simulator.AdvanceTo(1.0)  # 1 second
+
+    # Check Final Energy
+    pe_final = plant.EvalPotentialEnergy(plant_context)
+    ke_final = plant.EvalKineticEnergy(plant_context)
+    final_energy = pe_final + ke_final
+
+    # Calculate error
+    error = abs(final_energy - initial_energy)
+
+    logger.info(f"Drake Energy Error: {error:.6f} J")
+
+    assert error < 0.01, f"Drake energy conservation failed. Error: {error}"

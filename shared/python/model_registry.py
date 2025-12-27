@@ -33,23 +33,51 @@ class ModelRegistry:
         self._load_registry()
 
     def _load_registry(self) -> None:
-        """Load models from YAML file."""
+        """Load models from YAML configuration file.
+
+        Raises:
+            ModelRegistryError: If registry file is malformed (NotRaised: gracefully logged)
+
+        This method logs warnings and errors if the registry file is missing,
+        malformed, or individual model configurations are invalid, and leaves
+        the registry in its current state instead of raising exceptions.
+        """
+        from .core import setup_logging
+
+        logger = setup_logging(__name__)
+
         if not self.config_path.exists():
+            logger.warning(f"Model registry not found: {self.config_path}")
             return
 
         try:
-            with open(self.config_path) as f:
+            with open(self.config_path, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
 
-            if not data or "models" not in data:
+            if not data:
+                logger.warning(f"Empty model registry: {self.config_path}")
+                return
+
+            if "models" not in data:
+                logger.error(
+                    f"Invalid registry format: missing 'models' key in {self.config_path}"
+                )
                 return
 
             for model_data in data["models"]:
-                model = ModelConfig(**model_data)
-                self.models[model.id] = model
+                try:
+                    model = ModelConfig(**model_data)
+                    self.models[model.id] = model
+                    logger.debug(f"Loaded model: {model.id}")
+                except TypeError as e:
+                    logger.error(f"Invalid model configuration: {model_data} - {e}")
 
-        except Exception as e:
-            print(f"Error loading model registry: {e}")
+            logger.info(f"Loaded {len(self.models)} models from {self.config_path}")
+
+        except yaml.YAMLError as e:
+            logger.error(f"YAML parsing error in {self.config_path}: {e}")
+        except OSError as e:
+            logger.error(f"Failed to read registry file {self.config_path}: {e}")
 
     def get_model(self, model_id: str) -> ModelConfig | None:
         """Get model by ID."""
