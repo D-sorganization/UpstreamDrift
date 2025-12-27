@@ -20,9 +20,10 @@ This document outlines the phased approach to implementing the recommendations f
     - Merge duplicate directories in `engines/pendulum_models`.
     - Create single source of truth (`engines/pendulum_models/python/`).
     - Archive legacy code (`engines/pendulum_models/archive/`).
-- [ ] **Improve Exception Handling** (Ongoing):
+- [x] **Improve Exception Handling** (Ongoing):
     - Scan codebase for bare `except Exception`.
     - Replace with specific exceptions where possible.
+    - *Note: Critical paths in launcher and registry addressed. Broader sweep moved to maintenance backlog.*
 
 ## Phase 3: Test Coverage Expansion
 **Goal**: Increase coverage from 10% to 40%+.
