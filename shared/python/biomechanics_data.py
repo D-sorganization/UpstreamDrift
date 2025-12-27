@@ -56,3 +56,9 @@ class BiomechanicalData:
     # Center of mass
     com_position: np.ndarray | None = None
     com_velocity: np.ndarray | None = None
+
+    # Angular Momentum (at CoM)
+    angular_momentum: np.ndarray | None = None
+
+    # Center of Pressure (global frame, usually on z=0 plane)
+    cop_position: np.ndarray | None = None
