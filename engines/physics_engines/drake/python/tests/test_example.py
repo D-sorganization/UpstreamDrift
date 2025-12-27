@@ -11,7 +11,11 @@ from pathlib import Path
 
 import pytest
 
+# Add repo root to path to allow importing shared
+repo_root = Path(__file__).resolve().parents[5]
+sys.path.insert(0, str(repo_root))
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
 from shared.python import constants
 from src import logger_utils
 
