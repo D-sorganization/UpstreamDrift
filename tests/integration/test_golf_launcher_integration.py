@@ -53,17 +53,29 @@ models:
         models_yaml.write_text(config_content, encoding="utf-8")
 
         # Patch ModelRegistry to use our temp file
-        real_registry = ModelRegistry(models_yaml)
+        temp_registry = ModelRegistry(models_yaml)
 
-        # Override ASSETS_DIR to point to our empty temp dir
-        # This ensures icon lookup fails gracefully via real filesystem checks
-        # avoiding proper QIcon initialization and associated C++ type errors
+        # Override ASSETS_DIR to point to our empty temp dir.
+        # In the real application, GolfLauncher creates QIcon instances from
+        # files under ASSETS_DIR. In headless/CI test runs, fully initializing
+        # QIcon with real image assets can trigger Qt plugin loading and C++
+        # type handling that is fragile without a complete desktop environment
+        # (e.g. missing platform plugins or windowing system), which has
+        # previously resulted in hard-to-debug C++-side errors.
+        #
+        # Instead of mocking QIcon itself (which would bypass the real
+        # filesystem-based icon lookup that we want to exercise), we point
+        # ASSETS_DIR at an empty temporary directory. This makes icon lookups
+        # resolve via genuine filesystem checks but guarantees that no real
+        # icon files are found, so Qt never attempts heavy-weight icon
+        # initialization while the logic we care about (graceful handling of
+        # missing assets) is still executed.
         with (
             patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
             patch("launchers.golf_launcher.ASSETS_DIR", new=temp_path),
         ):
 
-            MockRegistry.return_value = real_registry
+            MockRegistry.return_value = temp_registry
 
             # Create Launcher
             launcher = GolfLauncher()
