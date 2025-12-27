@@ -134,7 +134,8 @@ class VisualizationTab(QtWidgets.QWidget):
             "\u2022 Wheel: Zoom",
         )
         mouse_info.setWordWrap(True)
-        mouse_info.setStyleSheet("color: #666; font-size: 9pt;")
+        # Style set in dark_theme.qss
+        mouse_info.setObjectName("helpLabel")
         advanced_cam_layout.addRow("", mouse_info)
 
         camera_layout.addWidget(advanced_cam_group)
@@ -148,7 +149,7 @@ class VisualizationTab(QtWidgets.QWidget):
         sky_layout = QtWidgets.QHBoxLayout()
         sky_layout.addWidget(QtWidgets.QLabel("Sky Color:"))
         self.sky_color_btn = QtWidgets.QPushButton()
-        self.sky_color_btn.setFixedSize(60, 30)
+        self.sky_color_btn.setMinimumSize(60, 30)
         self.sky_color_btn.setStyleSheet("background-color: rgb(51, 77, 102);")
         self.sky_color_btn.setToolTip("Click to change sky color")
         self.sky_color_btn.setAccessibleName("Sky Color")
@@ -162,7 +163,7 @@ class VisualizationTab(QtWidgets.QWidget):
         ground_layout = QtWidgets.QHBoxLayout()
         ground_layout.addWidget(QtWidgets.QLabel("Ground Color:"))
         self.ground_color_btn = QtWidgets.QPushButton()
-        self.ground_color_btn.setFixedSize(60, 30)
+        self.ground_color_btn.setMinimumSize(60, 30)
         self.ground_color_btn.setStyleSheet("background-color: rgb(51, 51, 51);")
         self.ground_color_btn.setToolTip("Click to change ground color")
         self.ground_color_btn.setAccessibleName("Ground Color")
