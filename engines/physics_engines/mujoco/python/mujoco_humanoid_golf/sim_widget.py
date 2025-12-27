@@ -268,15 +268,15 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.telemetry = TelemetryRecorder(self.model)
 
         # Reset control system
-        self.control_system = ControlSystem(self.model, self.data)
-        self._setup_control_vector()
+        self.control_system = ControlSystem(self.model.nu)
+        self.control_vector = np.zeros(self.model.nu, dtype=np.float64)
 
         # Reset Biomechanics
         self.analyzer = BiomechanicalAnalyzer(self.model, self.data)
         self.recorder.reset()
 
         # Reset Interaction
-        self.manipulator = InteractiveManipulator(self.model, self.data, self.camera)
+        self.manipulator = InteractiveManipulator(self.model, self.data)
 
         # Restart timer
         self.timer.start(int(1000 / self.fps))
