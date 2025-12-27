@@ -3,12 +3,9 @@ Unit tests for shared.python.output_manager module.
 """
 
 import json
-import logging
 import os
-import shutil
-import pickle
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -39,11 +36,13 @@ def output_manager(temp_output_dir):
 @pytest.fixture
 def sample_data():
     """Create sample data for testing."""
-    return pd.DataFrame({
-        "time": [0.0, 0.1, 0.2],
-        "position": [1.0, 2.0, 3.0],
-        "velocity": [0.5, 1.0, 1.5]
-    })
+    return pd.DataFrame(
+        {
+            "time": [0.0, 0.1, 0.2],
+            "position": [1.0, 2.0, 3.0],
+            "velocity": [0.5, 1.0, 1.5],
+        }
+    )
 
 
 @pytest.fixture
@@ -52,7 +51,7 @@ def sample_dict_data():
     return {
         "metadata": {"version": "1.0"},
         "results": {"score": 100, "valid": True},
-        "array": np.array([1, 2, 3])
+        "array": np.array([1, 2, 3]),
     }
 
 
@@ -102,7 +101,9 @@ class TestOutputManager:
             # Let's make it find 'engines' immediately at the parent
             mock_parent = MagicMock()
             mock_resolved.parent = mock_parent
-            mock_parent.parent = MagicMock() # Different so loop continues once if needed, or stops
+            mock_parent.parent = (
+                MagicMock()
+            )  # Different so loop continues once if needed, or stops
 
             # Make (project_root / "engines").exists() return True
             mock_engines = MagicMock()
@@ -116,7 +117,9 @@ class TestOutputManager:
 
             mock_resolved_engines = MagicMock()
             mock_resolved_engines.exists.return_value = True
-            mock_resolved.__truediv__.side_effect = lambda x: mock_resolved_engines if x == "engines" else MagicMock()
+            mock_resolved.__truediv__.side_effect = lambda x: (
+                mock_resolved_engines if x == "engines" else MagicMock()
+            )
 
             # But wait, the real code does: Path(__file__).resolve()
             # So we need to ensure that works.
@@ -134,19 +137,14 @@ class TestOutputManager:
 
         # Save
         path = output_manager.save_simulation_results(
-            sample_data,
-            filename,
-            OutputFormat.CSV,
-            engine="mujoco"
+            sample_data, filename, OutputFormat.CSV, engine="mujoco"
         )
         assert path.exists()
         assert path.suffix == ".csv"
 
         # Load
         loaded_df = output_manager.load_simulation_results(
-            filename,
-            OutputFormat.CSV,
-            engine="mujoco"
+            filename, OutputFormat.CSV, engine="mujoco"
         )
         pd.testing.assert_frame_equal(sample_data, loaded_df)
 
@@ -156,19 +154,14 @@ class TestOutputManager:
 
         # Save
         path = output_manager.save_simulation_results(
-            sample_dict_data,
-            filename,
-            OutputFormat.JSON,
-            engine="mujoco"
+            sample_dict_data, filename, OutputFormat.JSON, engine="mujoco"
         )
         assert path.exists()
         assert path.suffix == ".json"
 
         # Load
         loaded_data = output_manager.load_simulation_results(
-            filename,
-            OutputFormat.JSON,
-            engine="mujoco"
+            filename, OutputFormat.JSON, engine="mujoco"
         )
 
         # JSON converts arrays to lists
@@ -181,19 +174,14 @@ class TestOutputManager:
 
         # Save
         path = output_manager.save_simulation_results(
-            sample_dict_data,
-            filename,
-            OutputFormat.PICKLE,
-            engine="mujoco"
+            sample_dict_data, filename, OutputFormat.PICKLE, engine="mujoco"
         )
         assert path.exists()
         assert path.suffix == ".pickle"
 
         # Load
         loaded_data = output_manager.load_simulation_results(
-            filename,
-            OutputFormat.PICKLE,
-            engine="mujoco"
+            filename, OutputFormat.PICKLE, engine="mujoco"
         )
 
         # Pickle preserves numpy arrays
@@ -205,19 +193,14 @@ class TestOutputManager:
 
         # Save
         path = output_manager.save_simulation_results(
-            sample_data,
-            filename,
-            OutputFormat.PARQUET,
-            engine="mujoco"
+            sample_data, filename, OutputFormat.PARQUET, engine="mujoco"
         )
         assert path.exists()
         assert path.suffix == ".parquet"
 
         # Load
         loaded_df = output_manager.load_simulation_results(
-            filename,
-            OutputFormat.PARQUET,
-            engine="mujoco"
+            filename, OutputFormat.PARQUET, engine="mujoco"
         )
         pd.testing.assert_frame_equal(sample_data, loaded_df)
 
@@ -227,19 +210,14 @@ class TestOutputManager:
 
         # Save
         path = output_manager.save_simulation_results(
-            sample_data,
-            filename,
-            OutputFormat.HDF5,
-            engine="mujoco"
+            sample_data, filename, OutputFormat.HDF5, engine="mujoco"
         )
         assert path.exists()
         assert path.suffix == ".hdf5"
 
         # Load
         loaded_df = output_manager.load_simulation_results(
-            filename,
-            OutputFormat.HDF5,
-            engine="mujoco"
+            filename, OutputFormat.HDF5, engine="mujoco"
         )
         pd.testing.assert_frame_equal(sample_data, loaded_df)
 
@@ -248,11 +226,7 @@ class TestOutputManager:
         data = {"col1": [1, 2], "col2": [3, 4]}
         filename = "test_dict_csv"
 
-        path = output_manager.save_simulation_results(
-            data,
-            filename,
-            OutputFormat.CSV
-        )
+        path = output_manager.save_simulation_results(data, filename, OutputFormat.CSV)
         assert path.exists()
 
         loaded_df = pd.read_csv(path)
@@ -262,8 +236,12 @@ class TestOutputManager:
     def test_get_simulation_list(self, output_manager, sample_data):
         """Test listing simulation files."""
         # Create some files
-        output_manager.save_simulation_results(sample_data, "sim1", OutputFormat.CSV, engine="mujoco")
-        output_manager.save_simulation_results(sample_data, "sim2", OutputFormat.CSV, engine="drake")
+        output_manager.save_simulation_results(
+            sample_data, "sim1", OutputFormat.CSV, engine="mujoco"
+        )
+        output_manager.save_simulation_results(
+            sample_data, "sim2", OutputFormat.CSV, engine="drake"
+        )
 
         # List all
         all_sims = output_manager.get_simulation_list()
@@ -300,7 +278,9 @@ class TestOutputManager:
         """Test cleaning up old files."""
         # Create a file
         filename = "old_sim"
-        path = output_manager.save_simulation_results(sample_data, filename, OutputFormat.CSV)
+        path = output_manager.save_simulation_results(
+            sample_data, filename, OutputFormat.CSV
+        )
 
         # Set file time to 31 days ago
         old_time = time.time() - (31 * 24 * 3600)
@@ -308,7 +288,9 @@ class TestOutputManager:
 
         # Also create a new file
         new_filename = "new_sim"
-        new_path = output_manager.save_simulation_results(sample_data, new_filename, OutputFormat.CSV)
+        new_path = output_manager.save_simulation_results(
+            sample_data, new_filename, OutputFormat.CSV
+        )
 
         # Run cleanup
         count = output_manager.cleanup_old_files(max_age_days=30)
@@ -319,7 +301,9 @@ class TestOutputManager:
         assert new_path.exists()
 
         # Check archive
-        archive_path = output_manager.base_path / "archive" / "simulations" / "mujoco" / path.name
+        archive_path = (
+            output_manager.base_path / "archive" / "simulations" / "mujoco" / path.name
+        )
         assert archive_path.exists()
 
     def test_convenience_functions(self, temp_output_dir, sample_data):
@@ -340,9 +324,11 @@ class TestOutputManager:
         data = {
             "date": datetime(2023, 1, 1),
             "np_int": np.int64(42),
-            "np_float": np.float64(3.14)
+            "np_float": np.float64(3.14),
         }
-        path = output_manager.save_simulation_results(data, "edge_cases", OutputFormat.JSON)
+        path = output_manager.save_simulation_results(
+            data, "edge_cases", OutputFormat.JSON
+        )
 
         with open(path) as f:
             loaded = json.load(f)
