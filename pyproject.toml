@@ -38,7 +38,7 @@ dev = [
     "pytest-cov>=5.0.0",
     "pytest-mock>=3.14.0",
     "pytest-qt>=4.2.0",
-    "ruff==0.5.0",
+    "ruff==0.14.10",
     "black>=24.4.2",
     "mypy>=1.10.0",
     "pre-commit>=4.0.0",
@@ -73,9 +73,9 @@ all = [
 golf-suite = "launchers.launch_golf_suite:main"
 
 [project.urls]
-Homepage = "https://github.com/your-org/golf-modeling-suite"
-Repository = "https://github.com/your-org/golf-modeling-suite"
-Issues = "https://github.com/your-org/golf-modeling-suite/issues"
+Homepage = "https://github.com/D-sorganization/Golf_Modeling_Suite"
+Repository = "https://github.com/D-sorganization/Golf_Modeling_Suite"
+Issues = "https://github.com/D-sorganization/Golf_Modeling_Suite/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
