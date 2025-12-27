@@ -967,7 +967,9 @@ class DoublePendulumApp:
 
         # Draw pivot point (hub) - make it prominent
         self.ax.scatter(
-            x=pivot[0], y=pivot[1], z=pivot[2],
+            x=pivot[0],
+            y=pivot[1],
+            z=pivot[2],
             color="black",
             s=250,
             marker="o",
@@ -979,7 +981,9 @@ class DoublePendulumApp:
 
         # Draw elbow joint - blue to match upper segment
         self.ax.scatter(
-            x=elbow[0], y=elbow[1], z=elbow[2],
+            x=elbow[0],
+            y=elbow[1],
+            z=elbow[2],
             color="#2E86AB",
             s=100,
             marker="o",
@@ -990,7 +994,9 @@ class DoublePendulumApp:
 
         # Draw wrist/end point (clubhead) - red to match lower segment
         self.ax.scatter(
-            x=wrist[0], y=wrist[1], z=wrist[2],
+            x=wrist[0],
+            y=wrist[1],
+            z=wrist[2],
             color="#A23B72",
             s=180,
             marker="o",
