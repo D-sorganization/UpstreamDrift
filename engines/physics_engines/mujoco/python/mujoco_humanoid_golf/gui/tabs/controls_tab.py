@@ -128,6 +128,24 @@ class ControlsTab(QtWidgets.QWidget):
 
         main_layout.addWidget(self.dynamic_controls_widget)
 
+        # 5. Container for Kinematic Mode Controls (Joints)
+        self.kinematic_controls_widget = QtWidgets.QWidget()
+        self.kinematic_controls_widget.setVisible(False)
+        kinematic_layout = QtWidgets.QVBoxLayout(self.kinematic_controls_widget)
+        kinematic_layout.setContentsMargins(0, 0, 0, 0)
+
+        k_scroll = QtWidgets.QScrollArea()
+        k_scroll.setWidgetResizable(True)
+        self.joint_container = QtWidgets.QWidget()
+        self.joint_layout = QtWidgets.QVBoxLayout(self.joint_container)
+        k_scroll.setWidget(self.joint_container)
+        kinematic_layout.addWidget(k_scroll)
+
+        main_layout.addWidget(self.kinematic_controls_widget)
+
+        # Storage for joint widgets
+        self.joint_widgets: dict[str, dict[str, QtWidgets.QWidget]] = {}
+
     def _create_help_panel(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
         """Create a collapsible help panel."""
         help_group = QtWidgets.QGroupBox("Quick Start Guide")
@@ -146,6 +164,14 @@ class ControlsTab(QtWidgets.QWidget):
         label.setWordWrap(True)
         help_layout.addWidget(label)
         parent_layout.addWidget(help_group)
+
+        # 4. Container for Dynamic Mode Controls (Actuators) (Deleted duplicate)
+        # 5. Container for Kinematic Mode Controls (Joints) (Deleted duplicate)
+        # Storage for joint widgets (Deleted duplicate)
+
+    def _create_controls_container(self, main_layout: QtWidgets.QVBoxLayout) -> None:
+        # Deleted duplicate
+        pass
 
     def _create_quick_camera_buttons(
         self, parent_layout: QtWidgets.QVBoxLayout
@@ -196,6 +222,16 @@ class ControlsTab(QtWidgets.QWidget):
     def on_mode_changed(self, mode: str) -> None:
         """Handle operating mode change (dynamic/kinematic)."""
         self.dynamic_controls_widget.setVisible(mode == "dynamic")
+        self.kinematic_controls_widget.setVisible(mode == "kinematic")
+
+        if mode == "kinematic":
+            self._refresh_kinematic_controls()
+            # Ensure simulation is "running" so interactive events work
+            if self.sim_widget.model is not None:
+                if self.play_pause_btn.isChecked():  # If paused
+                    self.play_pause_btn.setChecked(False)  # Resume
+                else:
+                    self.sim_widget.set_running(True)
 
     # -------- Actuator Management --------
 
@@ -524,6 +560,140 @@ class ControlsTab(QtWidgets.QWidget):
     def on_export_data(self) -> None:
         if hasattr(self.main_window, "on_export_data"):
             self.main_window.on_export_data()
+
+    def _refresh_kinematic_controls(self) -> None:
+        """Rebuild the kinematic joint controls."""
+        # Clear existing
+        while self.joint_layout.count():
+            item = self.joint_layout.takeAt(0)
+            if item is None:
+                continue
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+
+        # Initialize storage for cross-referencing
+        self.joint_widgets = {}
+
+        dof_info = self.sim_widget.get_dof_info()
+
+        if not dof_info:
+            self.joint_layout.addWidget(
+                QtWidgets.QLabel("No controllable joints found.")
+            )
+            return
+
+        for name, (min_val, max_val), current_val in dof_info:
+            # Container
+            container = QtWidgets.QFrame()
+            container.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+            layout = QtWidgets.QVBoxLayout(container)
+
+            # Label
+            header = QtWidgets.QHBoxLayout()
+            header.addWidget(QtWidgets.QLabel(f"<b>{name}</b>"))
+            val_label = QtWidgets.QLabel(f"{current_val:.3f}")
+            header.addWidget(val_label, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
+            layout.addLayout(header)
+
+            # Slider
+            slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
+            steps = 1000
+            slider.setRange(0, steps)
+
+            # Set init value
+            range_span = max_val - min_val
+            if range_span <= 0:
+                range_span = 1.0  # Protect div zero
+
+            norm_val = (current_val - min_val) / range_span
+            slider_val = int(norm_val * steps)
+            slider_val = max(0, min(steps, slider_val))
+            slider.setValue(slider_val)
+
+            def _on_slider_change(v, n=name, mn=min_val, mx=max_val, lbl=val_label):
+                self._on_joint_slider_changed(n, v, mn, mx, lbl)
+
+            slider.valueChanged.connect(_on_slider_change)
+
+            layout.addWidget(slider)
+
+            # Text Input for precise control
+            spin = QtWidgets.QDoubleSpinBox()
+            spin.setRange(min_val, max_val)
+            spin.setSingleStep(0.01)
+            spin.setValue(current_val)
+
+            def _on_spin_change(
+                v, n=name, mn=min_val, mx=max_val, sl=slider, lbl=val_label
+            ):
+                self._on_joint_spin_changed(n, v, mn, mx, sl, lbl)
+
+            spin.valueChanged.connect(_on_spin_change)
+
+            layout.addWidget(spin)
+
+            # Store references
+            self.joint_widgets[name] = {"slider": slider, "spin": spin}
+
+            self.joint_layout.addWidget(container)
+
+    def _on_joint_slider_changed(
+        self,
+        name: str,
+        value_int: int,
+        min_val: float,
+        max_val: float,
+        label: QtWidgets.QLabel,
+    ) -> None:
+        """Handle joint slider change."""
+        steps = 1000
+        val = min_val + (value_int / steps) * (max_val - min_val)
+
+        # Update label
+        label.setText(f"{val:.3f}")
+
+        # Update simulation
+        self.sim_widget.set_joint_qpos(name, val)
+
+        # Update spinbox if available
+        if hasattr(self, "joint_widgets") and name in self.joint_widgets:
+            spin = self.joint_widgets[name]["spin"]
+            if isinstance(spin, QtWidgets.QDoubleSpinBox):
+                spin.blockSignals(True)
+                spin.setValue(val)
+                spin.blockSignals(False)
+
+    def _on_joint_spin_changed(
+        self,
+        name: str,
+        value: float,
+        min_val: float,
+        max_val: float,
+        slider: QtWidgets.QSlider,
+        label: QtWidgets.QLabel,
+    ) -> None:
+        """Handle joint spinbox change."""
+        # Update simulation
+        self.sim_widget.set_joint_qpos(name, value)
+
+        # Update label
+        label.setText(f"{value:.3f}")
+
+        # Update slider
+        steps = 1000
+        range_span = max_val - min_val
+        if range_span <= 0:
+            range_span = 1.0
+
+        norm_val = (value - min_val) / range_span
+        slider_val = int(norm_val * steps)
+        slider_val = max(0, min(steps, slider_val))
+
+        if isinstance(slider, QtWidgets.QSlider):
+            slider.blockSignals(True)
+            slider.setValue(slider_val)
+            slider.blockSignals(False)
 
 
 class ActuatorDetailDialog(QtWidgets.QDialog):

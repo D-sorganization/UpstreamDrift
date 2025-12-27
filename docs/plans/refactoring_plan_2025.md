@@ -27,7 +27,7 @@ Based on reviews from Claude and Codex, this plan outlines a 4-phase approach to
     - [x] Extract `VisualizationTab` (`gui/tabs/visualization_tab.py`)
     - [x] Extract `PhysicsTab`
     - [x] Extract `ControlsTab`
-    - [ ] Extract `AnalysisTab`
+    - [x] Extract `AnalysisTab` (metrics, export)
     - [ ] Refactor `AdvancedGolfAnalysisWindow` to use composed tabs
 - [x] **2.2 Archive & Legacy Cleanup**
   - **Issue:** 13+ archive directories bloat the repo.

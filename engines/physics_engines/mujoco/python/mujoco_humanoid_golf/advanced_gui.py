@@ -10,29 +10,21 @@ This module provides a comprehensive interface with:
 
 from __future__ import annotations
 
-import csv
-import json
 import logging
 import typing
 
-
 import mujoco
-
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-
 from .advanced_gui_methods import AdvancedGuiMethodsMixin
-
 from .grip_modelling_tab import GripModellingTab
+from .gui.tabs.analysis_tab import AnalysisTab
 from .gui.tabs.controls_tab import ControlsTab
 from .gui.tabs.physics_tab import PhysicsTab
 from .gui.tabs.visualization_tab import VisualizationTab
 from .interactive_manipulation import ConstraintType
-
 from .plotting import GolfSwingPlotter, MplCanvas
-
 from .sim_widget import MuJoCoSimWidget
-
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +110,8 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         # Create tabs
         self._create_control_tab()
         self._create_visualization_tab()
-        self._create_analysis_tab()
+        self.analysis_tab = AnalysisTab(self.sim_widget, self)
+        self.tab_widget.addTab(self.analysis_tab, "Analysis")
         self._create_plotting_tab()
         self._create_manipulation_tab()
 
@@ -143,6 +136,20 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.status_timer = QtCore.QTimer(self)
         self.status_timer.timeout.connect(self._update_status_bar)
         self.status_timer.start(200)  # Update every 200ms
+
+    @property
+    def model_configs(self) -> list[dict]:
+        """Expose model configs from PhysicsTab for mixin compatibility."""
+        if hasattr(self, "physics_tab"):
+            return self.physics_tab.model_configs
+        return []
+
+    @property
+    def model_combo(self) -> QtWidgets.QComboBox | None:
+        """Expose model combo from PhysicsTab for mixin compatibility."""
+        if hasattr(self, "physics_tab"):
+            return self.physics_tab.model_combo
+        return None
 
     def _create_control_tab(self) -> None:
         """Create the simulation tabs (Physics, Controls)."""
@@ -213,6 +220,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         camera_layout.addWidget(reset_btn)
 
         parent_layout.addWidget(camera_group)
+
+    def _on_quick_camera_clicked(self, preset_name: str) -> None:
+        """Handle quick camera button click."""
+        if hasattr(self, "visualization_tab"):
+            self.visualization_tab._on_preset_clicked(preset_name)
 
     def on_reset_camera(self) -> None:
         """Reset camera to default position."""
@@ -329,10 +341,10 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
             return
 
         # Update model info
-        if hasattr(self, "controls_tab") and hasattr(self.controls_tab, "model_combo"):
-            config_idx = self.controls_tab.model_combo.currentIndex()
-            if config_idx < len(self.controls_tab.model_configs):
-                model_name = self.controls_tab.model_configs[config_idx]["name"]
+        if hasattr(self, "physics_tab") and hasattr(self.physics_tab, "model_configs"):
+            config_idx = self.physics_tab.model_combo.currentIndex()
+            if config_idx < len(self.physics_tab.model_configs):
+                model_name = self.physics_tab.model_configs[config_idx]["name"]
                 num_actuators = self.sim_widget.model.nu
                 self.status_model_label.setText(
                     f"Model: {model_name} ({num_actuators} actuators)",
@@ -385,51 +397,6 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         """Create the visualization settings tab."""
         self.visualization_tab = VisualizationTab(self.sim_widget, self)
         self.tab_widget.addTab(self.visualization_tab, "Visualization")
-
-    def _create_analysis_tab(self) -> None:
-        """Create the biomechanical analysis tab."""
-        analysis_widget = QtWidgets.QWidget()
-        analysis_layout = QtWidgets.QVBoxLayout(analysis_widget)
-        analysis_layout.setContentsMargins(8, 8, 8, 8)
-
-        # Real-time metrics
-        metrics_group = QtWidgets.QGroupBox("Real-Time Metrics")
-        metrics_layout = QtWidgets.QFormLayout(metrics_group)
-
-        self.club_speed_label = QtWidgets.QLabel("--")
-        self.total_energy_label = QtWidgets.QLabel("--")
-        self.recording_time_label = QtWidgets.QLabel("--")
-        self.num_frames_label = QtWidgets.QLabel("--")
-
-        metrics_layout.addRow("Club Head Speed:", self.club_speed_label)
-        metrics_layout.addRow("Total Energy:", self.total_energy_label)
-        metrics_layout.addRow("Recording Time:", self.recording_time_label)
-        metrics_layout.addRow("Frames Recorded:", self.num_frames_label)
-
-        analysis_layout.addWidget(metrics_group)
-
-        # Data export
-        export_group = QtWidgets.QGroupBox("Data Export")
-        export_layout = QtWidgets.QVBoxLayout(export_group)
-
-        self.export_csv_btn = QtWidgets.QPushButton("Export to CSV")
-        self.export_csv_btn.clicked.connect(self.on_export_csv)
-        export_layout.addWidget(self.export_csv_btn)
-
-        self.export_json_btn = QtWidgets.QPushButton("Export to JSON")
-        self.export_json_btn.clicked.connect(self.on_export_json)
-        export_layout.addWidget(self.export_json_btn)
-
-        analysis_layout.addWidget(export_group)
-
-        # Update metrics timer
-        self.metrics_timer = QtCore.QTimer(self)
-        self.metrics_timer.timeout.connect(self.update_metrics)
-        self.metrics_timer.start(100)  # Update every 100ms
-
-        analysis_layout.addStretch(1)
-
-        self.tab_widget.addTab(analysis_widget, "Analysis")
 
     def _create_plotting_tab(self) -> None:
         """Create the advanced plotting tab."""
@@ -925,181 +892,6 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         finally:
             QtWidgets.QApplication.restoreOverrideCursor()
 
-    def update_metrics(self) -> None:
-        """Update real-time metrics display."""
-        recorder = self.sim_widget.get_recorder()
-        analyzer = self.sim_widget.get_analyzer()
-
-        # Update recording status
-        if recorder.is_recording:
-            duration = recorder.get_duration()
-            num_frames = recorder.get_num_frames()
-            self.recording_label.setText(
-                f"Recording: {duration:.2f}s ({num_frames} frames)",
-            )
-            self.recording_label.setStyleSheet(
-                "background-color: #d62728; color: white; font-weight: bold; "
-                "padding: 5px;",
-            )
-        else:
-            num_frames = recorder.get_num_frames()
-            if num_frames > 0:
-                duration = recorder.get_duration()
-                self.recording_label.setText(
-                    f"Stopped: {duration:.2f}s ({num_frames} frames)",
-                )
-                self.recording_label.setStyleSheet(
-                    "background-color: #ff7f0e; color: white; font-weight: bold; "
-                    "padding: 5px;",
-                )
-            else:
-                self.recording_label.setText("Not recording")
-                self.recording_label.setStyleSheet("font-weight: bold; padding: 5px;")
-
-        # Update metrics
-        if analyzer is not None:
-            _, _, club_speed = analyzer.get_club_head_data()
-            _, _, total_energy = analyzer.compute_energies()
-
-            self.club_speed_label.setText(
-                f"{club_speed * 2.23694:.1f} mph ({club_speed:.1f} m/s)",
-            )
-            self.total_energy_label.setText(f"{total_energy:.2f} J")
-
-        self.recording_time_label.setText(f"{recorder.get_duration():.2f} s")
-        self.num_frames_label.setText(str(recorder.get_num_frames()))
-
-    def on_export_csv(self) -> None:
-        """Export recorded data to CSV."""
-        recorder = self.sim_widget.get_recorder()
-
-        if recorder.get_num_frames() == 0:
-            QtWidgets.QMessageBox.warning(
-                self,
-                "No Data",
-                "No recorded data available to export.",
-            )
-            return
-
-        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self,
-            "Export CSV",
-            "",
-            "CSV Files (*.csv)",
-        )
-
-        if filename:
-            try:
-                data_dict = recorder.export_to_dict()
-
-                # Write to CSV
-                with open(filename, "w", newline="") as csvfile:
-                    writer = csv.writer(csvfile)
-
-                    # Write header
-                    writer.writerow(data_dict.keys())
-
-                    # Write data rows
-                    num_rows = len(next(iter(data_dict.values())))
-                    for i in range(num_rows):
-                        row = [
-                            data_dict[key][i] if i < len(data_dict[key]) else ""
-                            for key in data_dict
-                        ]
-                        writer.writerow(row)
-
-                QtWidgets.QMessageBox.information(
-                    self,
-                    "Export Successful",
-                    f"Data exported to {filename}",
-                )
-
-            except Exception as e:
-                QtWidgets.QMessageBox.critical(
-                    self,
-                    "Export Error",
-                    f"Error exporting data: {e!s}",
-                )
-
-    def _on_export_data_handler(self) -> None:
-        """Export simulation data to CSV and JSON."""
-        # Use existing top-level imports: csv, json, os (ensure os is imported)
-
-        recorder = self.sim_widget.get_recorder()
-
-        if recorder.get_num_frames() == 0:
-            QtWidgets.QMessageBox.warning(
-                self,
-                "No Data",
-                "No recorded data available to export.",
-            )
-            return
-
-        # Placeholder for the rest of the export logic, which would typically involve
-        # a dialog for choosing export type (CSV/JSON) and then calling the
-        # respective export functions.
-        # For now, we'll just show a message.
-        # Ask user for export format
-        formats = ["CSV", "JSON"]
-        format_name, ok = QtWidgets.QInputDialog.getItem(
-            self,
-            "Export Format",
-            "Choose export format:",
-            formats,
-            0,
-            False,
-        )
-        if ok:
-            if format_name == "CSV":
-                self.on_export_csv()
-            elif format_name == "JSON":
-                self.on_export_json()
-            else:
-                QtWidgets.QMessageBox.warning(
-                    self,
-                    "Export Error",
-                    f"Unknown export format: {format_name}",
-                )
-
-    def on_export_json(self) -> None:
-        """Export recorded data to JSON."""
-        recorder = self.sim_widget.get_recorder()
-
-        if recorder.get_num_frames() == 0:
-            QtWidgets.QMessageBox.warning(
-                self,
-                "No Data",
-                "No recorded data available to export.",
-            )
-            return
-
-        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self,
-            "Export JSON",
-            "",
-            "JSON Files (*.json)",
-        )
-
-        if filename:
-            try:
-                data_dict = recorder.export_to_dict()
-
-                with open(filename, "w") as jsonfile:
-                    json.dump(data_dict, jsonfile, indent=2)
-
-                QtWidgets.QMessageBox.information(
-                    self,
-                    "Export Successful",
-                    f"Data exported to {filename}",
-                )
-
-            except Exception as e:
-                QtWidgets.QMessageBox.critical(
-                    self,
-                    "Export Error",
-                    f"Error exporting data: {e!s}",
-                )
-
     # -------- Interactive manipulation event handlers --------
 
     def update_body_lists(self) -> None:
@@ -1533,161 +1325,3 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         step_size = value / 100.0
         manipulator.ik_step_size = step_size
         self.ik_step_label.setText(f"{step_size:.2f}")
-
-    def _on_operating_mode_changed_handler(self, index: int) -> None:
-        """Handle operating mode switch."""
-        mode = "kinematic" if index == 1 else "dynamic"
-        self.sim_widget.set_operating_mode(mode)
-
-        is_kinematic = mode == "kinematic"
-
-        self.controls_tab.dynamic_controls_widget.setVisible(not is_kinematic)
-        self.controls_tab.kinematic_controls_widget.setVisible(is_kinematic)
-
-        if is_kinematic:
-            self.controls_tab._refresh_kinematic_controls()
-            # Ensure simulation is "running" so that timer loop executes
-            # (which handles interactive rendering and constraints in kinematic mode)
-            if self.sim_widget.model is not None:
-                if self.play_pause_btn.isChecked():
-                    # If currently paused (Checked), uncheck to Resume
-                    self.play_pause_btn.setChecked(False)
-                else:
-                    # Already playing, just ensure internal flag is true
-                    self.sim_widget.set_running(True)
-
-    def _refresh_kinematic_controls(self) -> None:
-        """Rebuild the kinematic joint controls."""
-        # Clear existing
-        while self.joint_layout.count():
-            item = self.joint_layout.takeAt(0)
-            if item is None:
-                continue
-            widget = item.widget()
-            if widget is not None:
-                widget.deleteLater()
-
-        # Initialize storage for cross-referencing
-        self.joint_widgets: dict[str, dict[str, QtWidgets.QWidget]] = {}
-
-        dof_info = self.sim_widget.get_dof_info()
-
-        if not dof_info:
-            self.joint_layout.addWidget(
-                QtWidgets.QLabel("No controllable joints found.")
-            )
-            return
-
-        for name, (min_val, max_val), current_val in dof_info:
-            # Container
-            container = QtWidgets.QFrame()
-            container.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
-            layout = QtWidgets.QVBoxLayout(container)
-
-            # Label
-            header = QtWidgets.QHBoxLayout()
-            header.addWidget(QtWidgets.QLabel(f"<b>{name}</b>"))
-            val_label = QtWidgets.QLabel(f"{current_val:.3f}")
-            header.addWidget(val_label, alignment=QtCore.Qt.AlignmentFlag.AlignRight)
-            layout.addLayout(header)
-
-            # Slider
-            slider = QtWidgets.QSlider(QtCore.Qt.Orientation.Horizontal)
-            # Map float range to int slider (e.g. 0-1000)
-            # Let's say we want 0.01 precision.
-            steps = 1000
-            slider.setRange(0, steps)
-
-            # Set init value
-            range_span = max_val - min_val
-            if range_span <= 0:
-                range_span = 1.0  # Protect div zero
-
-            norm_val = (current_val - min_val) / range_span
-            slider_val = int(norm_val * steps)
-            slider_val = max(0, min(steps, slider_val))
-            slider.setValue(slider_val)
-
-            def _on_slider_change(v, n=name, mn=min_val, mx=max_val, lbl=val_label):
-                self._on_joint_slider_changed(n, v, mn, mx, lbl)
-
-            slider.valueChanged.connect(_on_slider_change)
-
-            layout.addWidget(slider)
-
-            # Text Input for precise control
-            spin = QtWidgets.QDoubleSpinBox()
-            spin.setRange(min_val, max_val)
-            spin.setSingleStep(0.01)
-            spin.setValue(current_val)
-
-            def _on_spin_change(
-                v, n=name, mn=min_val, mx=max_val, sl=slider, lbl=val_label
-            ):
-                self._on_joint_spin_changed(n, v, mn, mx, sl, lbl)
-
-            spin.valueChanged.connect(_on_spin_change)
-
-            layout.addWidget(spin)
-
-            # Store references
-            self.joint_widgets[name] = {"slider": slider, "spin": spin}
-
-            self.joint_layout.addWidget(container)
-
-    def _on_joint_slider_changed(
-        self,
-        name: str,
-        value_int: int,
-        min_val: float,
-        max_val: float,
-        label: QtWidgets.QLabel,
-    ) -> None:
-        """Handle joint slider change."""
-        steps = 1000
-        val = min_val + (value_int / steps) * (max_val - min_val)
-
-        # Update label
-        label.setText(f"{val:.3f}")
-
-        # Update simulation
-        self.sim_widget.set_joint_qpos(name, val)
-
-        # Update spinbox if available
-        if hasattr(self, "joint_widgets") and name in self.joint_widgets:
-            spin = self.joint_widgets[name]["spin"]
-            if isinstance(spin, QtWidgets.QDoubleSpinBox):
-                spin.blockSignals(True)
-                spin.setValue(val)
-                spin.blockSignals(False)
-
-    def _on_joint_spin_changed(
-        self,
-        name: str,
-        value: float,
-        min_val: float,
-        max_val: float,
-        slider: QtWidgets.QSlider,
-        label: QtWidgets.QLabel,
-    ) -> None:
-        """Handle joint spinbox change."""
-        # Update simulation
-        self.sim_widget.set_joint_qpos(name, value)
-
-        # Update label
-        label.setText(f"{value:.3f}")
-
-        # Update slider
-        steps = 1000
-        range_span = max_val - min_val
-        if range_span <= 0:
-            range_span = 1.0
-
-        norm_val = (value - min_val) / range_span
-        slider_val = int(norm_val * steps)
-        slider_val = max(0, min(steps, slider_val))
-
-        if isinstance(slider, QtWidgets.QSlider):
-            slider.blockSignals(True)
-            slider.setValue(slider_val)
-            slider.blockSignals(False)
