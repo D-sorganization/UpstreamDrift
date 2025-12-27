@@ -50,7 +50,7 @@ def main():
     gravity_param = registry.get("GRAVITY")
     if gravity_param is None:
         raise ValueError("GRAVITY parameter not found in registry")
-    gravity = gravity_param.value
+    gravity = gravity_param.value  # type: ignore[union-attr]
     launch_angles = [30, 45, 60]
     velocities = np.linspace(20, 50, 4)  # 20, 30, 40, 50 m/s
 
