@@ -98,10 +98,11 @@ class DockerCheckThread(QThread):
                 check=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
+                timeout=5.0,
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
             self.result.emit(True)
-        except (subprocess.CalledProcessError, FileNotFoundError):
+        except (subprocess.CalledProcessError, FileNotFoundError, subprocess.TimeoutExpired):
             self.result.emit(False)
 
 
