@@ -726,6 +726,28 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         return {"jacobian_condition": cond, "constraint_rank": rank, "nefc": nefc}
 
+    def set_body_color(self, body_name: str, rgba: list[float]) -> None:
+        """Set color of all geoms in a body."""
+        if self.model is None:
+            return
+        body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
+        if body_id == -1:
+            return
+
+        start_geom = self.model.body_geomadr[body_id]
+        num_geoms = self.model.body_geomnum[body_id]
+        if start_geom >= 0 and num_geoms > 0:
+            for i in range(num_geoms):
+                geom_id = start_geom + i
+                self.model.geom_rgba[geom_id] = rgba
+
+        self._render_once()
+
+    def reset_body_color(self, body_name: str) -> None:
+        """Reset body color to default."""
+        # For now, just set to a generic gray default
+        self.set_body_color(body_name, [0.5, 0.5, 0.5, 1.0])
+
     def compute_ellipsoids(self) -> None:
         """Compute and draw Mobility and Force Ellipsoids for selected body."""
         if (
