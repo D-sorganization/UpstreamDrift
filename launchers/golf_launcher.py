@@ -845,9 +845,7 @@ class GolfLauncher(QMainWindow):
                 + " ".join(cmd),
             ]
             logger.info("Starting new console for simulation...")
-            subprocess.Popen(
-                diagnostic_cmd, creationflags=CREATE_NEW_CONSOLE
-            )
+            subprocess.Popen(diagnostic_cmd, creationflags=CREATE_NEW_CONSOLE)
         else:
             subprocess.Popen(cmd)
 
