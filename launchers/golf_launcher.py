@@ -134,11 +134,15 @@ class DockerBuildThread(QThread):
 
             # Read output real-time
             while True:
-                line = process.stdout.readline()
-                if not line and process.poll() is not None:
-                    break
-                if line:
-                    self.log_signal.emit(line.strip())
+                if process.stdout is not None:
+                    line = process.stdout.readline()
+                    if not line and process.poll() is not None:
+                        break
+                    if line:
+                        self.log_signal.emit(line.strip())
+                else:
+                    if process.poll() is not None:
+                        break
 
             process.wait()
 
@@ -329,7 +333,9 @@ class GolfLauncher(QMainWindow):
         try:
             from shared.python.model_registry import ModelRegistry
 
-            self.registry = ModelRegistry(REPOS_ROOT / "config/models.yaml")
+            self.registry: ModelRegistry | None = ModelRegistry(
+                REPOS_ROOT / "config/models.yaml"
+            )
         except ImportError:
             logger.error("Failed to import ModelRegistry. Registry unavailable.")
             self.registry = None
@@ -447,8 +453,16 @@ class GolfLauncher(QMainWindow):
         card = QFrame()
         card.setObjectName("ModelCard")
         card.setCursor(Qt.CursorShape.PointingHandCursor)
-        card.mousePressEvent = lambda e: self.select_model(model_id)
-        card.mouseDoubleClickEvent = lambda e: self.launch_model_direct(model_id)
+
+        # Create proper event handlers instead of assigning to methods
+        def handle_mouse_press(e):
+            self.select_model(model_id)
+
+        def handle_mouse_double_click(e):
+            self.launch_model_direct(model_id)
+
+        card.mousePressEvent = handle_mouse_press  # type: ignore[method-assign]
+        card.mouseDoubleClickEvent = handle_mouse_double_click  # type: ignore[method-assign]
 
         layout = QVBoxLayout(card)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
