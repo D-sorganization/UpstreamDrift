@@ -160,7 +160,6 @@ class MockQLabel(MockQWidget):
     def __init__(self, text="", parent=None):
         self.text = text
 
-
     def setText(self, t):
         self.text = t
 
@@ -300,9 +299,7 @@ class TestGolfLauncherLogic:
                     # Verify volume mount path logic: args[5] should be the
                     # '-v host_path:container_path' argument containing the model path,
                     # allowing for platform-specific path separators.
-                    assert (
-                        "engines/test" in args[5] or "engines\\test" in args[5]
-                    )
+                    assert "engines/test" in args[5] or "engines\\test" in args[5]
 
     @patch("shared.python.model_registry.ModelRegistry")
     @patch("launchers.golf_launcher.DockerCheckThread")
