@@ -20,6 +20,7 @@ import math
 import tkinter as tk
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any
 
 import numpy as np
 from double_pendulum_model.physics.double_pendulum import (
@@ -72,7 +73,7 @@ class DoublePendulumApp:
         self.data_logging_enabled = False
         self.data_granularity = 1  # Log every N steps
         self.data_step_counter = 0
-        self.data_file: csv.writer | None = None  # type: ignore[name-defined]
+        self.data_file: Any = None  # CSV writer object
         self.data_file_handle: object | None = None
         self.data_file_stack: contextlib.ExitStack | None = None
 
@@ -93,13 +94,13 @@ class DoublePendulumApp:
         self.ax = self.fig.add_subplot(111, projection="3d")
         self.ax.set_xlabel("X (m)", fontsize=10)
         self.ax.set_ylabel("Y (m)", fontsize=10)
-        self.ax.set_zlabel("Z (m)", fontsize=10)
+        self.ax.set_zlabel("Z (m)", fontsize=10)  # type: ignore[attr-defined]
         self.ax.set_title("Double Pendulum 3D View", fontsize=12, fontweight="bold")
 
         # Set initial view limits
-        self.ax.set_xlim([-2, 2])
-        self.ax.set_ylim([-2, 2])
-        self.ax.set_zlim([-1, 1])
+        self.ax.set_xlim((-2, 2))
+        self.ax.set_ylim((-2, 2))
+        self.ax.set_zlim((-1, 1))  # type: ignore[attr-defined]
 
         # Enable interactive rotation and zoom
         self.canvas = FigureCanvasTkAgg(self.fig, main_frame)

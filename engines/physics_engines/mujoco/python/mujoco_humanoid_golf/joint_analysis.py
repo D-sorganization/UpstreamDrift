@@ -55,10 +55,16 @@ class UniversalJointAnalyzer:
             return np.array([self.data.qfrc_constraint[jnt_dofadr]], dtype=np.float64)
         if jnt_type == mj.mjtJoint.mjJNT_BALL:
             # Ball joint has 3 DOF
-            return np.array(self.data.qfrc_constraint[jnt_dofadr : jnt_dofadr + 3], dtype=np.float64)
+            return np.array(
+                self.data.qfrc_constraint[jnt_dofadr : jnt_dofadr + 3],
+                dtype=np.float64,
+            )
         if jnt_type == mj.mjtJoint.mjJNT_FREE:
             # Free joint has 6 DOF (3 translation + 3 rotation)
-            return np.array(self.data.qfrc_constraint[jnt_dofadr : jnt_dofadr + 6], dtype=np.float64)
+            return np.array(
+                self.data.qfrc_constraint[jnt_dofadr : jnt_dofadr + 6],
+                dtype=np.float64,
+            )
         return np.array([0.0], dtype=np.float64)
 
     def get_universal_joint_angles(
