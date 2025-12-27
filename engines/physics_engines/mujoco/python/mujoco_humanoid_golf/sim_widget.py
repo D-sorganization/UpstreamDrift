@@ -10,27 +10,59 @@ from typing import Any, Final
 
 import mujoco
 import numpy as np
+
+# ... imports ...
 from PyQt6 import QtCore, QtGui, QtWidgets
 
-try:
-    import scipy.linalg
-except ImportError:
-    scipy = None  # type: ignore
-
+# Removed unused scipy import
 from .biomechanics import BiomechanicalAnalyzer, SwingRecorder
 from .control_system import ControlSystem, ControlType
 from .interactive_manipulation import InteractiveManipulator
 from .meshcat_adapter import MuJoCoMeshcatAdapter
 from .telemetry import TelemetryRecorder
 
-try:
-    import cv2
-except ImportError:  # pragma: no cover - optional dependency
-    cv2 = None  # type: ignore
+# Lazy loading globals for OpenCV
+CV2_LIB = None
+INVALID_CV2 = False
+
+def get_cv2():
+    """Lazy import of OpenCV to speed up initial load."""
+    global CV2_LIB, INVALID_CV2
+    if CV2_LIB is None and not INVALID_CV2:
+        try:
+            import cv2
+            CV2_LIB = cv2
+        except ImportError:
+            INVALID_CV2 = True
+    return CV2_LIB
 
 LOGGER = logging.getLogger(__name__)
 MIN_CAMERA_DEPTH: Final[float] = 0.1
 FORCE_VISUALIZATION_THRESHOLD: Final[float] = 1e-5
+
+
+class ModelLoaderThread(QtCore.QThread):
+    """Worker thread to load MuJoCo models asynchronously."""
+
+    # Signal returns (model, data) on success, or (None, error_msg) on failure
+    finished_loading = QtCore.pyqtSignal(object, object, str)
+
+    def __init__(self, xml_content: str, is_file: bool = False):
+        super().__init__()
+        self.xml_content = xml_content
+        self.is_file = is_file
+
+    def run(self):
+        try:
+            if self.is_file:
+                model = mujoco.MjModel.from_xml_path(self.xml_content)
+            else:
+                model = mujoco.MjModel.from_xml_string(self.xml_content)
+
+            data = mujoco.MjData(model)
+            self.finished_loading.emit(model, data, "")
+        except Exception as e:
+            self.finished_loading.emit(None, None, str(e))
 
 
 class MuJoCoSimWidget(QtWidgets.QWidget):
@@ -42,6 +74,10 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
     - Visualizes forces and torques as 3D vectors
     - Records biomechanical data
     """
+
+    # Signal emitted when model loading starts/ends
+    loading_started = QtCore.pyqtSignal()
+    loading_finished = QtCore.pyqtSignal(bool) # True = success
 
     def __init__(
         self,
@@ -77,7 +113,6 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         # Meshcat integration
         self.meshcat_adapter: MuJoCoMeshcatAdapter | None = None
-        # Lazy init or direct? Let's init if possible.
         try:
             self.meshcat_adapter = MuJoCoMeshcatAdapter()
         except Exception:
@@ -150,165 +185,128 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.timer.timeout.connect(self._on_timer)
         self.timer.start(int(1000 / self.fps))
 
+        self.loader_thread: ModelLoaderThread | None = None
+
     # -------- MuJoCo setup --------
 
-    def load_model_from_xml(self, xml_string: str) -> None:
-        """(Re)load a MuJoCo model from an MJCF XML string."""
-        # Stop timer to prevent access during reload
-        self.timer.stop()
-
-        try:
-            # Load into temporary variables first to preserve state on failure
-            new_model = mujoco.MjModel.from_xml_string(xml_string)
-            new_data = mujoco.MjData(new_model)
-
-            # Create new renderer
-            new_renderer = mujoco.Renderer(
-                new_model,
-                width=self.frame_width,
-                height=self.frame_height,
-            )
-
-            # Create new scene
-            new_scene = mujoco.MjvScene(new_model, maxgeom=10000)
-            mujoco.mjv_updateScene(
-                new_model,
-                new_data,
-                self.scene_option,
-                None,
-                self.camera,
-                mujoco.mjtCatBit.mjCAT_ALL,
-                new_scene,
-            )
-
-            # Commit changes
-            self.model = new_model
-            self.data = new_data
-            self.renderer = new_renderer
-            self.scene = new_scene
-
-            # Important: Reset camera to ensure it points at the new model
-            mujoco.mjv_defaultFreeCamera(self.model, self.camera)
-            # Apply custom defaults if we have them
-            self._auto_position_camera()
-
-            # Apply background colors
-            self._update_background_colors()
-
-            self.telemetry = TelemetryRecorder(self.model)
-
-            # Control vector length = number of actuators
-            self.control_vector = np.zeros(self.model.nu, dtype=np.float64)
-
-            # Initialize advanced control system
-            self.control_system = ControlSystem(self.model.nu)
-
-            # Create biomechanical analyzer
-            self.analyzer = BiomechanicalAnalyzer(self.model, self.data)
-
-            # Create interactive manipulator
-            self.manipulator = InteractiveManipulator(self.model, self.data)
-
-            # Clear per-body visualization sets as IDs might have changed
-            self.visible_frames.clear()
-            self.visible_coms.clear()
-
-            # Reset state
-            mujoco.mj_resetData(self.model, self.data)
-            self.reset_state()
-
-            # Ensure render once to populate buffer
-            self._render_once()
-
-            # Load Meshcat Geometry
-            if self.meshcat_adapter:
-                self.meshcat_adapter.model = self.model
-                self.meshcat_adapter.load_model_geometry()
-
-        except Exception:
-            LOGGER.exception("Failed to load model from XML")
-            # Do not clear model/data; preserve previous valid state
-            raise
-        finally:
-            # Restart timer (only if it was running or should be running)
-            if self.fps > 0:
-                self.timer.start(int(1000 / self.fps))
-
-    def load_model_from_file(self, xml_path: str) -> None:
-        """(Re)load a MuJoCo model from an MJCF XML file path.
+    def load_model_async(self, xml_source: str, is_file: bool = False) -> None:
+        """Load a MuJoCo model asynchronously to prevent UI freeze.
 
         Args:
-            xml_path: Path to the XML model file (absolute or relative to project root)
-
-        Raises:
-            FileNotFoundError: If the model file doesn't exist
-            ValueError: If the model file is invalid
+            xml_source: XML string or file path.
+            is_file: True if xml_source is a path, False if string content.
         """
-        # Convert to absolute path if needed
-        if not os.path.isabs(xml_path):
-            project_root = Path(__file__).parent.parent.parent
-            xml_path = str(project_root / xml_path)
+        if self.loader_thread and self.loader_thread.isRunning():
+            LOGGER.warning("Model loading already in progress.")
+            return
 
-        # Check if file exists
-        if not os.path.exists(xml_path):
-            raise FileNotFoundError(f"Model file not found: {xml_path}")
+        self.timer.stop()
+        self.loading_started.emit()
+
+        # Show loading indicator in label?
+        self.label.setText("Loading Model...")
+        self.label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+
+        self.loader_thread = ModelLoaderThread(xml_source, is_file)
+        self.loader_thread.finished_loading.connect(self._on_model_loaded_async)
+        self.loader_thread.start()
+
+    def _on_model_loaded_async(self, model, data, error_msg):
+        """Handle completion of async model loading."""
+        if error_msg:
+            LOGGER.error("Async load failed: %s", error_msg)
+            self.label.setText(f"Error loading model: {error_msg}")
+            self.loading_finished.emit(False)
+            return
 
         try:
-            self.model = mujoco.MjModel.from_xml_path(xml_path)
-            self.data = mujoco.MjData(self.model)
+            self._finalize_model_load(model, data)
+            self.loading_finished.emit(True)
         except Exception as e:
-            raise ValueError(f"Failed to load model from {xml_path}: {e}") from e
+            LOGGER.error("Finalization failed: %s", e)
+            self.label.setText(f"Error initializing renderer: {e}")
+            self.loading_finished.emit(False)
 
-        # Create new renderer
-        self.renderer = mujoco.Renderer(
-            self.model,
+    def _finalize_model_load(self, new_model, new_data):
+        """Finalize setup on main thread after model/data creation."""
+        # Create new renderer (must be on main thread with context)
+        new_renderer = mujoco.Renderer(
+            new_model,
             width=self.frame_width,
             height=self.frame_height,
         )
 
         # Create new scene
-        self.scene = mujoco.MjvScene(self.model, maxgeom=10000)
+        new_scene = mujoco.MjvScene(new_model, maxgeom=10000)
         mujoco.mjv_updateScene(
-            self.model,
-            self.data,
+            new_model,
+            new_data,
             self.scene_option,
             None,
             self.camera,
             mujoco.mjtCatBit.mjCAT_ALL,
-            self.scene,
+            new_scene,
         )
+
+        # Commit changes
+        self.model = new_model
+        self.data = new_data
+        self.renderer = new_renderer
+        self.scene = new_scene
+
+        # Important: Reset camera to ensure it points at the new model
+        mujoco.mjv_defaultFreeCamera(self.model, self.camera)
+        # Apply custom defaults if we have them
+        self._auto_position_camera()
 
         # Apply background colors
         self._update_background_colors()
 
-        # Control vector length = number of actuators
-        self.control_vector = np.zeros(self.model.nu, dtype=np.float64)
-
-        # Initialize advanced control system
-        self.control_system = ControlSystem(self.model.nu)
-
-        # Create biomechanical analyzer
-        self.analyzer = BiomechanicalAnalyzer(self.model, self.data)
-
-        # Create interactive manipulator
-        self.manipulator = InteractiveManipulator(self.model, self.data)
-
-        # Reset state
-        mujoco.mj_resetData(self.model, self.data)
-        self.reset_state()
+        self.telemetry = TelemetryRecorder(self.model)
 
         # Reset control system
-        if self.control_system is not None:
-            self.control_system.reset()
+        self.control_system = ControlSystem(self.model, self.data)
+        self._setup_control_vector()
 
-        # Auto-position camera based on model bounds
-        self._auto_position_camera()
+        # Reset Biomechanics
+        self.analyzer = BiomechanicalAnalyzer(self.model, self.data)
+        self.recorder.reset()
 
-        # Clear per-body visualization sets as IDs might have changed
-        self.visible_frames.clear()
-        self.visible_coms.clear()
+        # Reset Interaction
+        self.manipulator = InteractiveManipulator(self.model, self.data, self.camera)
 
-        self._render_once()
+        # Restart timer
+        self.timer.start(int(1000 / self.fps))
+
+    def load_model_from_xml(self, xml_string: str) -> None:
+        """(Legacy/Sync) Load a MuJoCo model from an MJCF XML string."""
+        self.timer.stop()
+        try:
+            new_model = mujoco.MjModel.from_xml_string(xml_string)
+            new_data = mujoco.MjData(new_model)
+            self._finalize_model_load(new_model, new_data)
+        except Exception as e:
+            LOGGER.error("Sync load failed: %s", e)
+            raise
+
+    def load_model_from_file(self, xml_path: str) -> None:
+        """(Legacy/Sync) Load from file."""
+        self.timer.stop()
+        try:
+            # Convert to absolute path if needed
+            if not os.path.isabs(xml_path):
+                project_root = Path(__file__).parent.parent.parent
+                xml_path = str(project_root / xml_path)
+
+            if not os.path.exists(xml_path):
+                raise FileNotFoundError(f"Model file not found: {xml_path}")
+
+            new_model = mujoco.MjModel.from_xml_path(xml_path)
+            new_data = mujoco.MjData(new_model)
+            self._finalize_model_load(new_model, new_data)
+        except Exception as e:
+            LOGGER.error("Sync load failed: %s", e)
+            raise
 
     def reset_state(self) -> None:
         """Set golf-like initial joint angles for all model types."""
@@ -1019,6 +1017,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         if self.model is None or self.data is None:
             return rgb
 
+        cv2 = get_cv2()
         if cv2 is None:
             LOGGER.warning("OpenCV not installed, cannot draw force/torque overlays.")
             return rgb
@@ -1112,6 +1111,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         Returns:
             Image array with overlays
         """
+        cv2 = get_cv2()
         if cv2 is None:
             # OpenCV not available, return original image
             return rgb
@@ -1536,6 +1536,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
     def _add_frame_and_com_overlays(self, rgb: np.ndarray) -> np.ndarray:
         """Overlay coordinate frames and center of mass markers."""
+        cv2 = get_cv2()
         if self.model is None or self.data is None or cv2 is None:
             return rgb
 
