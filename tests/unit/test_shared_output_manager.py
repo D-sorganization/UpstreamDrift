@@ -85,7 +85,7 @@ class TestOutputManager(unittest.TestCase):
         data = {
             "array": np.array([1, 2, 3]),
             "float": np.float64(1.5),
-            "int": np.int64(10)
+            "int": np.int64(10),
         }
 
         path = self.manager.save_simulation_results(
@@ -140,6 +140,7 @@ class TestOutputManager(unittest.TestCase):
         # Modify mtime to be old
         old_time = (datetime.now() - pd.Timedelta(days=2)).timestamp()
         import os
+
         os.utime(old_file, (old_time, old_time))
 
         # Create a new file

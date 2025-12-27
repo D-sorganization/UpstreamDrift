@@ -35,7 +35,7 @@ class TestSignalProcessing(unittest.TestCase):
 
         # Check that we have peaks at roughly 10 Hz and 50 Hz
         # Finding indices of peaks
-        peaks, _ = scipy.signal.find_peaks(psd, height=0.01) # Lower threshold
+        peaks, _ = scipy.signal.find_peaks(psd, height=0.01)  # Lower threshold
         peak_freqs = freqs[peaks]
 
         # There should be peaks near 10 and 50

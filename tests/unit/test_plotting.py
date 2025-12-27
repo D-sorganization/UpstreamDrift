@@ -2,18 +2,18 @@
 Unit tests for shared.python.plotting module.
 """
 
-import sys
-import pytest
-import numpy as np
 from unittest.mock import MagicMock, patch
+
+import numpy as np
+import pytest
 
 # Mock modules that might not be available in all environments
 # We need to ensure we can import plotting even if matplotlib backends are missing
 # The plotting module itself handles importing MplCanvas with a try-except,
 # so we just need to ensure matplotlib.figure.Figure is available or mocked.
 # But for unit testing, we want to mock plotting calls anyway.
-
 from shared.python.plotting import GolfSwingPlotter, RecorderInterface
+
 
 @pytest.fixture
 def mock_recorder():
@@ -32,7 +32,7 @@ def mock_recorder():
 
     # Club head data (3D)
     club_pos = np.stack([np.sin(times), np.cos(times), times], axis=1)
-    club_speed = np.sqrt(np.sum(velocities**2, axis=1)) # Just dummy scalar
+    club_speed = np.sqrt(np.sum(velocities**2, axis=1))  # Just dummy scalar
 
     # Energy
     ke = 0.5 * club_speed**2
@@ -65,10 +65,12 @@ def mock_recorder():
     recorder.get_time_series.side_effect = get_data
     return recorder
 
+
 @pytest.fixture
 def plotter(mock_recorder):
     """Create a GolfSwingPlotter instance."""
     return GolfSwingPlotter(mock_recorder, joint_names=["Joint1", "Joint2"])
+
 
 @pytest.fixture
 def mock_figure():
@@ -83,6 +85,7 @@ def mock_figure():
     # We can just return the same ax mock, or specialize if needed.
 
     return fig
+
 
 class TestGolfSwingPlotter:
     """Test suite for GolfSwingPlotter."""
@@ -117,7 +120,7 @@ class TestGolfSwingPlotter:
         plotter.plot_joint_angles(mock_figure)
         mock_figure.add_subplot.assert_called()
         ax = mock_figure.add_subplot.return_value
-        assert ax.plot.call_count == 2 # 2 joints
+        assert ax.plot.call_count == 2  # 2 joints
         ax.set_xlabel.assert_called_with("Time (s)", fontsize=12, fontweight="bold")
 
     def test_plot_joint_velocities(self, plotter, mock_figure):
@@ -146,7 +149,7 @@ class TestGolfSwingPlotter:
         plotter.plot_energy_analysis(mock_figure)
         mock_figure.add_subplot.assert_called()
         ax = mock_figure.add_subplot.return_value
-        assert ax.plot.call_count == 3 # KE, PE, TE
+        assert ax.plot.call_count == 3  # KE, PE, TE
 
     def test_plot_club_head_speed(self, plotter, mock_figure):
         """Test plotting club head speed."""
@@ -172,19 +175,24 @@ class TestGolfSwingPlotter:
         """Test torque comparison plotting (stackplot)."""
         plotter.plot_torque_comparison(mock_figure)
         ax = mock_figure.add_subplot.return_value
-        assert ax.stackplot.call_count == 2 # Positive and negative
+        assert ax.stackplot.call_count == 2  # Positive and negative
 
     def test_plot_frequency_analysis(self, plotter, mock_figure):
         """Test frequency analysis plotting."""
         # This calls scipy or shared signal processing
-        with patch("scipy.signal.welch", return_value=(np.arange(10), np.random.rand(10))):
+        with patch(
+            "scipy.signal.welch", return_value=(np.arange(10), np.random.rand(10))
+        ):
             plotter.plot_frequency_analysis(mock_figure, joint_idx=0)
             ax = mock_figure.add_subplot.return_value
             ax.semilogy.assert_called()
 
     def test_plot_spectrogram(self, plotter, mock_figure):
         """Test spectrogram plotting."""
-        with patch("scipy.signal.spectrogram", return_value=(np.arange(10), np.arange(10), np.random.rand(10, 10))):
+        with patch(
+            "scipy.signal.spectrogram",
+            return_value=(np.arange(10), np.arange(10), np.random.rand(10, 10)),
+        ):
             plotter.plot_spectrogram(mock_figure, joint_idx=0)
             ax = mock_figure.add_subplot.return_value
             ax.pcolormesh.assert_called()
@@ -244,4 +252,6 @@ class TestGolfSwingPlotter:
 
         plotter.plot_joint_angles(mock_figure)
         ax = mock_figure.add_subplot.return_value
-        ax.text.assert_called_with(0.5, 0.5, "No data recorded", ha="center", va="center")
+        ax.text.assert_called_with(
+            0.5, 0.5, "No data recorded", ha="center", va="center"
+        )

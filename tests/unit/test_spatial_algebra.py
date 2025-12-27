@@ -6,18 +6,19 @@ import numpy as np
 import pytest
 
 from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.spatial_algebra import (
+    inertia,
+    joints,
     spatial_vectors,
     transforms,
-    joints,
-    inertia
 )
+
 
 class TestSpatialVectors:
     """Test spatial vector operations."""
 
     def test_spatial_cross_motion(self):
         """Test motion cross product (v x m)."""
-        v1 = np.array([1., 2., 3., 4., 5., 6.])
+        v1 = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         v2 = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
 
         res = spatial_vectors.cross_motion(v1, v2)
@@ -29,7 +30,7 @@ class TestSpatialVectors:
 
     def test_spatial_cross_force(self):
         """Test force cross product (v x* f)."""
-        v = np.array([1., 2., 3., 4., 5., 6.])
+        v = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
         f = np.array([0.1, 0.2, 0.3, 0.4, 0.5, 0.6])
 
         res = spatial_vectors.cross_force(v, f)
@@ -49,17 +50,20 @@ class TestSpatialVectors:
         # Check symmetry
         np.testing.assert_allclose(I_spatial, I_spatial.T)
 
+
 class TestTransforms:
     """Test coordinate transforms."""
 
     def test_xrot(self):
         """Test X-axis rotation."""
         theta = np.pi / 2
-        Rx = np.array([
-            [1, 0, 0],
-            [0, np.cos(theta), -np.sin(theta)],
-            [0, np.sin(theta), np.cos(theta)]
-        ])
+        Rx = np.array(
+            [
+                [1, 0, 0],
+                [0, np.cos(theta), -np.sin(theta)],
+                [0, np.sin(theta), np.cos(theta)],
+            ]
+        )
 
         X = transforms.xrot(Rx)
         expected = np.zeros((6, 6))
@@ -70,7 +74,7 @@ class TestTransforms:
 
     def test_xlt(self):
         """Test spatial transform generation from translation."""
-        r = np.array([1., 2., 3.])
+        r = np.array([1.0, 2.0, 3.0])
 
         X = transforms.xlt(r)
         assert X.shape == (6, 6)
@@ -82,12 +86,14 @@ class TestTransforms:
     def test_xtrans(self):
         """Test general spatial transform."""
         theta = np.pi / 2
-        R = np.array([
-            [np.cos(theta), -np.sin(theta), 0],
-            [np.sin(theta), np.cos(theta), 0],
-            [0, 0, 1]
-        ])
-        r = np.array([1., 0., 0.])
+        R = np.array(
+            [
+                [np.cos(theta), -np.sin(theta), 0],
+                [np.sin(theta), np.cos(theta), 0],
+                [0, 0, 1],
+            ]
+        )
+        r = np.array([1.0, 0.0, 0.0])
 
         X = transforms.xtrans(R, r)
         assert X.shape == (6, 6)
@@ -95,18 +101,21 @@ class TestTransforms:
     def test_inv_xtrans(self):
         """Test inverse transform."""
         theta = np.pi / 4
-        R = np.array([
-            [np.cos(theta), -np.sin(theta), 0],
-            [np.sin(theta), np.cos(theta), 0],
-            [0, 0, 1]
-        ])
-        r = np.array([1., 2., 3.])
+        R = np.array(
+            [
+                [np.cos(theta), -np.sin(theta), 0],
+                [np.sin(theta), np.cos(theta), 0],
+                [0, 0, 1],
+            ]
+        )
+        r = np.array([1.0, 2.0, 3.0])
 
         X = transforms.xtrans(R, r)
         X_inv = transforms.inv_xtrans(R, r)
 
         # Check X * X_inv = I
         np.testing.assert_allclose(X @ X_inv, np.eye(6), atol=1e-10)
+
 
 class TestJoints:
     """Test joint subspace generation."""

@@ -18,8 +18,14 @@ class TestPhysicsParameter(unittest.TestCase):
     def test_validation(self):
         """Test parameter validation."""
         param = PhysicsParameter(
-            "TEST", 10.0, "m", ParameterCategory.SIMULATION, "Test", "Test",
-            min_value=0.0, max_value=20.0
+            "TEST",
+            10.0,
+            "m",
+            ParameterCategory.SIMULATION,
+            "Test",
+            "Test",
+            min_value=0.0,
+            max_value=20.0,
         )
 
         # Valid
@@ -44,8 +50,13 @@ class TestPhysicsParameter(unittest.TestCase):
     def test_constant(self):
         """Test constant parameter."""
         param = PhysicsParameter(
-            "CONST", 10.0, "m", ParameterCategory.SIMULATION, "Test", "Test",
-            is_constant=True
+            "CONST",
+            10.0,
+            "m",
+            ParameterCategory.SIMULATION,
+            "Test",
+            "Test",
+            is_constant=True,
         )
 
         valid, msg = param.validate(20.0)
@@ -86,8 +97,14 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
     def test_set_value(self):
         """Test setting parameter values."""
         param = PhysicsParameter(
-            "TEST", 10.0, "m", ParameterCategory.SIMULATION, "Test", "Test",
-            min_value=0.0, max_value=20.0
+            "TEST",
+            10.0,
+            "m",
+            ParameterCategory.SIMULATION,
+            "Test",
+            "Test",
+            min_value=0.0,
+            max_value=20.0,
         )
         self.registry.register(param)
 
@@ -97,7 +114,7 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
 
         success, msg = self.registry.set("TEST", 25.0)
         self.assertFalse(success)
-        self.assertEqual(self.registry.get("TEST").value, 15.0) # Should not change
+        self.assertEqual(self.registry.get("TEST").value, 15.0)  # Should not change
 
         success, msg = self.registry.set("NONEXISTENT", 1.0)
         self.assertFalse(success)
@@ -121,17 +138,17 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
 
         # Mock open for export
         with patch("builtins.open", new_callable=mock_open) as mock_file:
-             self.registry.export_to_json("test.json")
-             mock_file.assert_called_with("test.json", "w")
-             # Verify write was called
-             handle = mock_file()
-             handle.write.assert_called()
+            self.registry.export_to_json("test.json")
+            mock_file.assert_called_with("test.json", "w")
+            # Verify write was called
+            handle = mock_file()
+            handle.write.assert_called()
 
         # Mock open for import
-        import_data = {
-            "P1": {"value": 2.0}
-        }
-        with patch("builtins.open", new_callable=mock_open, read_data=json.dumps(import_data)):
+        import_data = {"P1": {"value": 2.0}}
+        with patch(
+            "builtins.open", new_callable=mock_open, read_data=json.dumps(import_data)
+        ):
             count = self.registry.import_from_json("test.json")
             self.assertEqual(count, 1)
             self.assertEqual(self.registry.get("P1").value, 2.0)
