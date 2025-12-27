@@ -20,16 +20,16 @@ This document outlines the phased approach to implementing the recommendations f
     - Merge duplicate directories in `engines/pendulum_models`.
     - Create single source of truth (`engines/pendulum_models/python/`).
     - Archive legacy code (`engines/pendulum_models/archive/`).
-- [x] **Improve Exception Handling** (Ongoing):
+- [x] **Improve Exception Handling**:
     - Scan codebase for bare `except Exception`.
     - Replace with specific exceptions where possible.
-    - *Note: Critical paths in launcher and registry addressed. Broader sweep moved to maintenance backlog.*
+    - *Note: Critical paths in launcher, registry, and engine_manager addressed.*
 
-## Phase 3: Test Coverage Expansion
+## Phase 3: Test Coverage Expansion (Completed)
 **Goal**: Increase coverage from 10% to 40%+.
-- [ ] **Model Registry Tests**: Create unit tests for registry loading and error states.
-- [ ] **Launcher Integration Tests**: specific tests for `golf_launcher.py`.
-- [ ] **Physics Validation**: Add missing energy conservation checks for Drake/Pinocchio.
+- [x] **Model Registry Tests**: Create unit tests for registry loading and error states.
+- [x] **Launcher Integration Tests**: specific tests for `golf_launcher.py`.
+- [x] **Physics Validation**: Add missing energy conservation checks for Drake/Pinocchio.
 
 ## Phase 4: Documentation & Performance
 **Goal**: Professional polish and regression testing.
