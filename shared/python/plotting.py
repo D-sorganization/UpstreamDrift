@@ -765,9 +765,7 @@ class GolfSwingPlotter:
         times_cop, cop = self.recorder.get_time_series("cop_position")
         cop = np.asarray(cop)
         if len(times_cop) > 0 and cop.size > 0:
-            sc = ax5.scatter(
-                cop[:, 0], cop[:, 1], c=times_cop, cmap="viridis", s=10
-            )
+            ax5.scatter(cop[:, 0], cop[:, 1], c=times_cop, cmap="viridis", s=10)
             ax5.set_title("CoP Trajectory", fontsize=11, fontweight="bold")
             ax5.set_xlabel("X (m)", fontsize=9)
             ax5.set_ylabel("Y (m)", fontsize=9)
