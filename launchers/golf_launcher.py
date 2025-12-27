@@ -18,6 +18,18 @@ from pathlib import Path
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QFont, QIcon, QPixmap
+
+# Windows-specific subprocess constants
+if os.name == "nt":
+    try:
+        CREATE_NO_WINDOW = subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
+        CREATE_NEW_CONSOLE = subprocess.CREATE_NEW_CONSOLE  # type: ignore[attr-defined]
+    except AttributeError:
+        CREATE_NO_WINDOW = 0x08000000
+        CREATE_NEW_CONSOLE = 0x00000010
+else:
+    CREATE_NO_WINDOW = 0
+    CREATE_NEW_CONSOLE = 0
 from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -71,7 +83,7 @@ class DockerCheckThread(QThread):
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 timeout=5.0,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
             self.result.emit(True)
         except (
@@ -129,7 +141,7 @@ class DockerBuildThread(QThread):
                 text=True,
                 bufsize=1,  # Line buffered to ensure real-time output
                 env=env,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
 
             # Read output real-time
@@ -834,7 +846,7 @@ class GolfLauncher(QMainWindow):
             ]
             logger.info("Starting new console for simulation...")
             subprocess.Popen(
-                diagnostic_cmd, creationflags=subprocess.CREATE_NEW_CONSOLE
+                diagnostic_cmd, creationflags=CREATE_NEW_CONSOLE
             )
         else:
             subprocess.Popen(cmd)
