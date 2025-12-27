@@ -53,14 +53,26 @@ models:
     type: "mjcf"
     path: "engines/physics_engines/mujoco/models/musculoskeletal.xml"
 
+  - id: mujoco_humanoid
+    name: "MuJoCo Humanoid"
+    description: "High-fidelity whole-body biomechanics simulation. Features a 23-DOF humanoid model with active muscle sites, ground reaction force (GRF) visualization, and detailed contact dynamics. Ideal for analyzing kinetic chains and joint torque generation during the swing."
+    type: "custom_humanoid"
+    path: "engines/physics_engines/mujoco"
+
+  - id: mujoco_dashboard
+    name: "MuJoCo Dashboard"
+    description: "Interactive research workbench for comparative analysis. Switch instantly between double-pendulum, wrist-cocking, and full-body models. Includes real-time plots for phase space trajectories, energy conservation verification, and parameter tuning sliders."
+    type: "custom_dashboard"
+    path: "engines/physics_engines/mujoco"
+
   - id: drake_golf
     name: "Drake Golf Model"
-    description: "Control-theoretic golf robot focusing on trajectory optimization."
+    description: "Control-theoretic golf robot focusing on trajectory optimization. Utilizes Drake's rigorous multibody dynamics and constraint solvers to generate physically consistent swing paths. Features stabilizing controllers and inverse dynamics solvers."
     type: "drake"
     path: "engines/physics_engines/drake"
 
   - id: pinocchio_golf
     name: "Pinocchio Golf Model"
-    description: "Ultra-fast rigid body dynamics engine based on Featherstone's spatial algebra."
+    description: "Ultra-fast rigid body dynamics engine based on Featherstone's spatial algebra. Specialized for rapid iteration and derivative computation. Validates kinematic chains and provides baseline capabilities for trajectory optimization algorithms."
     type: "pinocchio"
     path: "engines/physics_engines/pinocchio"
