@@ -526,7 +526,10 @@ class GolfSwingPlotter:
         # Plot positive torques
         ax.stackplot(times, torques_pos.T, labels=labels, alpha=0.7)
         # Plot negative torques (same colors, no labels to avoid duplicate legend)
-        ax.set_prop_cycle(None)  # Reset color cycle
+        # Reset color cycle by creating a new cycler with the same colors
+        from matplotlib import pyplot as plt
+
+        ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
         ax.stackplot(times, torques_neg.T, alpha=0.7)
 
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
