@@ -25,10 +25,12 @@ def _has_parquet_support():
     """Check if parquet support is available."""
     try:
         import pyarrow  # noqa: F401
+
         return True
     except ImportError:
         try:
             import fastparquet  # noqa: F401
+
             return True
         except ImportError:
             return False
@@ -38,6 +40,7 @@ def _has_hdf5_support():
     """Check if HDF5 support is available."""
     try:
         import tables  # noqa: F401
+
         return True
     except ImportError:
         return False
@@ -210,7 +213,8 @@ class TestOutputManager:
         np.testing.assert_array_equal(loaded_data["array"], sample_dict_data["array"])
 
     @pytest.mark.skipif(
-        not _has_parquet_support(), reason="Parquet support not available (missing pyarrow/fastparquet)"
+        not _has_parquet_support(),
+        reason="Parquet support not available (missing pyarrow/fastparquet)",
     )
     def test_save_load_parquet(self, output_manager, sample_data):
         """Test saving and loading Parquet files."""

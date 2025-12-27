@@ -13,8 +13,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Protocol
 
 import numpy as np
-from matplotlib.figure import Figure
 from matplotlib import pyplot as plt
+from matplotlib.figure import Figure
 
 from shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 
