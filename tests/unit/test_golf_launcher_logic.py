@@ -160,8 +160,12 @@ class MockQLabel(MockQWidget):
     def __init__(self, text="", parent=None):
         self.text = text
 
+
     def setText(self, t):
         self.text = t
+
+    def setPixmap(self, p):
+        pass
 
 
 mock_qt_widgets = MagicMock()
@@ -255,7 +259,7 @@ class TestGolfLauncherLogic:
         # The select_model("MuJoCo Humanoid") call probably happened.
         # But we only have "Test Model".
 
-        # Le's manually select "Test Model"
+        # Let's manually select "Test Model"
         launcher.select_model("Test Model")
 
         assert launcher.selected_model == "Test Model"
@@ -283,7 +287,6 @@ class TestGolfLauncherLogic:
         with patch("launchers.golf_launcher.subprocess.Popen") as mock_popen:
             with patch.object(Path, "exists", return_value=True):
                 with patch("os.name", "posix"):
-                    # Also patch os.name if needed for platform specific branches
 
                     # We need to verify _launch_docker_container is called essentially
                     # because "Test Model" is not in custom_launchers dict
@@ -294,10 +297,12 @@ class TestGolfLauncherLogic:
                     args = mock_popen.call_args[0][0]
                     assert args[0] == "docker"
                     assert args[1] == "run"
-                    # Verify volume mount path logic
+                    # Verify volume mount path logic: args[5] should be the
+                    # '-v host_path:container_path' argument containing the model path,
+                    # allowing for platform-specific path separators.
                     assert (
                         "engines/test" in args[5] or "engines\\test" in args[5]
-                    )  # check index 5 roughly
+                    )
 
     @patch("shared.python.model_registry.ModelRegistry")
     @patch("launchers.golf_launcher.DockerCheckThread")
