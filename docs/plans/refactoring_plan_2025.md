@@ -27,10 +27,10 @@ Based on reviews from Claude and Codex, this plan outlines a 4-phase approach to
     - `gui/core/main_window.py`
     - `gui/widgets/simulation_panel.py`
     - `gui/visualization/renderer.py`
-- [ ] **2.2 Archive & Legacy Cleanup**
+- [x] **2.2 Archive & Legacy Cleanup**
   - **Issue:** 13+ archive directories bloat the repo.
   - **Action:** Move valid historical code to a `legacy/` branch and delete these folders from `main`.
-- [ ] **2.3 Constants Normalization**
+- [x] **2.3 Constants Normalization**
   - **Issue:** Multiple `constants.py` files with conflicting values (e.g., `GRAVITY`).
   - **Action:** Create `shared/python/physics_constants.py` as the source of truth and update all engines to import from it.
 

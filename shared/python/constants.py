@@ -16,6 +16,13 @@ PI: float = math.pi  # [dimensionless] Ratio of circumference to diameter
 E: float = (
     2.718281828459045  # [dimensionless] Euler's number, base of natural logarithm
 )
+PI_HALF: float = math.pi / 2  # [dimensionless] π/2
+PI_QUARTER: float = math.pi / 4  # [dimensionless] π/4
+
+# Spatial algebra constants
+SPATIAL_DIM: int = 6  # [dimensionless] Dimension of spatial vectors (3 linear + 3 angular)
+SPATIAL_LIN_DIM: int = 3  # [dimensionless] Linear dimension (position/velocity)
+SPATIAL_ANG_DIM: int = 3  # [dimensionless] Angular dimension (orientation/angular velocity)
 
 # Physical constants - SI units
 GRAVITY_M_S2: float = 9.80665  # [m/s²] Standard gravity, ISO 80000-3:2006

@@ -22,7 +22,7 @@ import defusedxml.ElementTree as DefusedET
 import mujoco
 import numpy as np
 
-from .constants import GRAVITY_STANDARD_M_S2, PI, PI_HALF
+from shared.python.constants import GRAVITY_M_S2 as GRAVITY_STANDARD_M_S2, PI, PI_HALF
 
 logger = logging.getLogger(__name__)
 

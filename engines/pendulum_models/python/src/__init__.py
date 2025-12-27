@@ -10,7 +10,7 @@ __email__ = "team@example.com"
 
 
 # Export commonly used functions and constants
-from .constants import (
+from shared.python.constants import (
     DEFAULT_RANDOM_SEED,
     GOLF_BALL_DIAMETER_M,
     GOLF_BALL_MASS_KG,
