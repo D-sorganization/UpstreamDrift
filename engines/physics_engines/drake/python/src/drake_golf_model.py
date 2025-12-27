@@ -30,15 +30,9 @@ from pydrake.all import (
     UnitInertia,
 )
 
-try:
-    from .constants import (
-        GOLF_BALL_DIAMETER_M,
-    )
-except ImportError:
-    # Fallback to absolute import when run/imported as script
-    from constants import (  # type: ignore[no-redef]
-        GOLF_BALL_DIAMETER_M,
-    )
+from shared.python.constants import (
+    GOLF_BALL_DIAMETER_M,
+)
 
 __all__ = [
     "GolfModelParams",
