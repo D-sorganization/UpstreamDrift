@@ -1,5 +1,0 @@
-Quiver_1_TotalForceLHRH;
-Quiver_2_ZTCFLHRH;
-Quiver_3_LHRHDelta;
-Quiver_4_ForceOnHandPathMidpoint;
-Quiver_5_TotalForceonMidpointComparison;

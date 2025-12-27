@@ -26,7 +26,26 @@ def find_duplicates(root_dir: Path, tracked_files: set[str]) -> int:
     files_by_name: dict[str, list[Path]] = {}
 
     # Walk the tree
+    # Walk the tree, excluding common heavy directories
+    ignored_dirs = {
+        ".git",
+        ".venv",
+        "venv",
+        "node_modules",
+        "__pycache__",
+        ".pytest_cache",
+        ".mypy_cache",
+    }
+
     for path in root_dir.rglob("*"):
+        # Optimization: Skip ignored directories to avoid traversing deep trees
+        # Note: rglob yields everything; we must check parts to skip properly
+        # but Path.rglob is a generator. We can't prune the walk easily with rglob.
+        # A simple check on path parts is enough for correctness, but os.walk or explicit recursion is better for perf.
+        # For now, just filtering is better than nothing if the iterator is fast.
+        if any(part in ignored_dirs for part in path.parts):
+            continue
+
         if path.is_file():
             if path.name in tracked_files:
                 files_by_name.setdefault(path.name, []).append(path)
@@ -53,7 +72,7 @@ def main():
     tracked_files = {
         "matlab_quality_check.py",
         # "matlab_quality_config.m", # Todo: consolidating in Phase 2
-        # "constants.py" # Todo: consolidating in Phase 2
+        "constants.py",
     }
 
     print(f"Scanning for duplicates of: {tracked_files}")
