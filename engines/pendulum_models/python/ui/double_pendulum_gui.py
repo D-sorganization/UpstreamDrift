@@ -72,7 +72,7 @@ class DoublePendulumApp:
         self.data_logging_enabled = False
         self.data_granularity = 1  # Log every N steps
         self.data_step_counter = 0
-        self.data_file: csv.Writer | None = None
+        self.data_file: csv.writer | None = None
         self.data_file_handle: object | None = None
         self.data_file_stack: contextlib.ExitStack | None = None
 
@@ -130,7 +130,7 @@ class DoublePendulumApp:
         canvas_scroll.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas_scroll.configure(yscrollcommand=scrollbar.set)
 
-        self.entries = {}
+        self.entries: dict[str, tk.Entry] = {}
         row = 0
 
         # Title
@@ -565,7 +565,8 @@ class DoublePendulumApp:
                         f"{breakdown.coriolis_centripetal[1]:.6f}",
                     ]
                 )
-                self.data_file_handle.flush()
+                if self.data_file_handle is not None:
+                    self.data_file_handle.flush()
 
     def _update_pendulum_immediately(self) -> None:
         """Update pendulum position immediately when parameters change."""

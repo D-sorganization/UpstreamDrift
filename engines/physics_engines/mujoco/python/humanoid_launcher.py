@@ -128,9 +128,12 @@ class SimulationWorker(QThread):
                 if self.process.poll() is not None:
                     break
 
-                line = self.process.stdout.readline()
-                if line:
-                    self.log_signal.emit(line.strip())
+                if self.process.stdout is not None:
+                    line = self.process.stdout.readline()
+                    if line:
+                        self.log_signal.emit(line.strip())
+                else:
+                    break
 
             # Capture remaining output
             stdout, stderr = self.process.communicate()
@@ -281,7 +284,7 @@ class HumanoidLauncher(QMainWindow):
 
         # Connect to updated help text method
         self.combo_control.currentTextChanged.connect(self.on_control_mode_changed)
-        self.combo_control.setCurrentText(self.config.get("control_mode", "pd"))
+        self.combo_control.setCurrentText(str(self.config.get("control_mode", "pd")))
 
         settings_layout.addWidget(self.combo_control, 0, 1)
         settings_layout.addWidget(self.btn_poly_generator, 0, 2)
@@ -292,7 +295,7 @@ class HumanoidLauncher(QMainWindow):
 
         # Live View
         self.chk_live = QCheckBox("Live Interactive View (requires X11/VcXsrv)")
-        self.chk_live.setChecked(self.config.get("live_view", False))
+        self.chk_live.setChecked(bool(self.config.get("live_view", False)))
         settings_layout.addWidget(self.chk_live, 1, 0, 1, 3)
 
         settings_group.setLayout(settings_layout)
@@ -310,7 +313,7 @@ class HumanoidLauncher(QMainWindow):
 
         # Load Path
         state_layout.addWidget(QLabel("Load State:"), 0, 0)
-        self.txt_load_path = QLineEdit(self.config.get("load_state_path", ""))
+        self.txt_load_path = QLineEdit(str(self.config.get("load_state_path", "")))
         state_layout.addWidget(self.txt_load_path, 0, 1)
         btn_browse_load = QPushButton("Browse")
         btn_browse_load.clicked.connect(lambda: self.browse_file(self.txt_load_path))
@@ -318,7 +321,7 @@ class HumanoidLauncher(QMainWindow):
 
         # Save Path
         state_layout.addWidget(QLabel("Save State:"), 1, 0)
-        self.txt_save_path = QLineEdit(self.config.get("save_state_path", ""))
+        self.txt_save_path = QLineEdit(str(self.config.get("save_state_path", "")))
         state_layout.addWidget(self.txt_save_path, 1, 1)
         btn_browse_save = QPushButton("Browse")
         btn_browse_save.clicked.connect(
@@ -489,9 +492,9 @@ class HumanoidLauncher(QMainWindow):
         self.slider_mass.setRange(10, 200)  # 0.1 to 2.0 * 100
         self.slider_mass.setValue(int(self.config.get("club_mass", 0.5) * 100))
 
-        self.lbl_mass_val = QLabel(f"{self.slider_mass.value()/100:.2f} kg")
+        self.lbl_mass_val = QLabel(f"{float(self.slider_mass.value())/100:.2f} kg")
         self.slider_mass.valueChanged.connect(
-            lambda v: self.lbl_mass_val.setText(f"{v/100:.2f} kg")
+            lambda v: self.lbl_mass_val.setText(f"{float(v)/100:.2f} kg")
         )
 
         club_layout.addWidget(self.slider_mass, 1, 1)
@@ -505,15 +508,15 @@ class HumanoidLauncher(QMainWindow):
         feat_layout = QVBoxLayout()
 
         self.chk_two_hand = QCheckBox("Two-Handed Grip (Constrained)")
-        self.chk_two_hand.setChecked(self.config.get("two_handed", False))
+        self.chk_two_hand.setChecked(bool(self.config.get("two_handed", False)))
         feat_layout.addWidget(self.chk_two_hand)
 
         self.chk_face = QCheckBox("Enhanced Face (Nose, Mouth)")
-        self.chk_face.setChecked(self.config.get("enhance_face", False))
+        self.chk_face.setChecked(bool(self.config.get("enhance_face", False)))
         feat_layout.addWidget(self.chk_face)
 
         self.chk_fingers = QCheckBox("Articulated Fingers (Segments)")
-        self.chk_fingers.setChecked(self.config.get("articulated_fingers", False))
+        self.chk_fingers.setChecked(bool(self.config.get("articulated_fingers", False)))
         feat_layout.addWidget(self.chk_fingers)
 
         feat_group.setLayout(feat_layout)
@@ -572,13 +575,20 @@ class HumanoidLauncher(QMainWindow):
 
     def pick_color(self, key, btn):
         current = self.config["colors"][key]
-        initial = QColor(
-            int(current[0] * 255), int(current[1] * 255), int(current[2] * 255)
-        )
+        if isinstance(current, (list, tuple)) and len(current) >= 3:
+            initial = QColor(
+                int(float(current[0]) * 255), 
+                int(float(current[1]) * 255), 
+                int(float(current[2]) * 255)
+            )
+        else:
+            initial = QColor(255, 255, 255)  # Default to white
 
         color = QColorDialog.getColor(initial, self, f"Choose {key} Color")
         if color.isValid():
             new_rgba = [color.redF(), color.greenF(), color.blueF(), 1.0]
+            if "colors" not in self.config:
+                self.config["colors"] = {}
             self.config["colors"][key] = new_rgba
             self.set_btn_color(btn, new_rgba)
             self.save_config()
@@ -678,7 +688,10 @@ class HumanoidLauncher(QMainWindow):
             """Save generated polynomial coefficients to config."""
             if "polynomial_coefficients" not in self.config:
                 self.config["polynomial_coefficients"] = {}
-            self.config["polynomial_coefficients"][joint_name] = coefficients
+            poly_coeffs = self.config.get("polynomial_coefficients", {})
+            if isinstance(poly_coeffs, dict):
+                poly_coeffs[joint_name] = coefficients
+                self.config["polynomial_coefficients"] = poly_coeffs
             self.save_config()
             self.log(f"Polynomial generated for {joint_name}: {coefficients}")
 
@@ -715,7 +728,10 @@ class HumanoidLauncher(QMainWindow):
                     for k, v in data.items():
                         if k == "colors":
                             if "colors" in self.config:
-                                self.config["colors"].update(v)
+                                colors_dict = self.config.get("colors", {})
+                                if isinstance(colors_dict, dict) and isinstance(v, dict):
+                                    colors_dict.update(v)
+                                    self.config["colors"] = colors_dict
                         else:
                             self.config[k] = v
             except Exception as e:
@@ -878,11 +894,11 @@ class HumanoidLauncher(QMainWindow):
                 reader = csv.DictReader(f)
                 for row in reader:
                     try:
-                        times.append(float(row["time"]))
-                        g_vals.append(float(row[col_g]))
-                        c_vals.append(float(row[col_c]))
-                        t_vals.append(float(row[col_t]))
-                        tot_vals.append(float(row[col_tot]))
+                        times.append(float(row.get("time", "0")))
+                        g_vals.append(float(row.get(col_g, "0")))
+                        c_vals.append(float(row.get(col_c, "0")))
+                        t_vals.append(float(row.get(col_t, "0")))
+                        tot_vals.append(float(row.get(col_tot, "0")))
                     except (ValueError, KeyError):
                         continue
 

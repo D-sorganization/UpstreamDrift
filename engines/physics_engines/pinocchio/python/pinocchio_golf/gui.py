@@ -956,7 +956,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
                 self.recorder.record_frame(
                     time=self.sim_time,
-                    q=self.q,
+                    q=self.q if self.q is not None else np.array([]),
                     v=self.v,
                     tau=tau,
                     kinetic_energy=self.data.kinetic_energy,
