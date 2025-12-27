@@ -54,9 +54,9 @@ Based on reviews from Claude and Codex, this plan outlines a 4-phase approach to
 ## Phase 4: Performance Optimization (Month 3)
 **Goal:** smooth user experience and faster feedback loops.
 
-- [ ] **4.1 Async Engine Loading**
+- [x] **4.1 Async Engine Loading**
   - **Issue:** App freezes while MATLAB/MuJoCo loads.
   - **Action:** Move engine initialization to background threads with a splash screen/progress bar.
-- [ ] **4.2 Lazy Import implementation**
+- [x] **4.2 Lazy Import implementation**
   - **Issue:** `golf_launcher.py` imports heavy PyQt6 modules at the top level.
   - **Action:** Move imports inside functions where possible to speed up CLI response time.

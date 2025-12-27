@@ -216,6 +216,11 @@ class PhysicsTab(QtWidgets.QWidget):
         # Add shared URDF models
         self._load_shared_urdfs()
 
+        # Connect to sim_widget loading signals
+        if hasattr(self.sim_widget, "loading_started"):
+            self.sim_widget.loading_started.connect(self._on_loading_started)
+            self.sim_widget.loading_finished.connect(self._on_loading_finished)
+
     def _load_shared_urdfs(self) -> None:
         """Load URDF models from shared/urdf directory."""
         base_dir = Path(get_shared_urdf_path()).parent
@@ -334,25 +339,38 @@ class PhysicsTab(QtWidgets.QWidget):
         self.load_current_model()
         self._update_model_description(index)
 
-    def load_current_model(self) -> None:
-        """Load selected model and emit change signal."""
+    def _on_loading_started(self) -> None:
+        """Handle start of model loading."""
+        self.model_combo.setEnabled(False)
+        self.mode_combo.setEnabled(False)
+        if hasattr(self.main_window, "statusBar"):
+            self.main_window.statusBar().showMessage("Loading physics model...")
+
+    def _on_loading_finished(self, success: bool) -> None:
+        """Handle completion of model loading."""
+        self.model_combo.setEnabled(True)
+        self.mode_combo.setEnabled(True)
+
+        if hasattr(self.main_window, "statusBar"):
+             if success:
+                 self.main_window.statusBar().showMessage(
+                     "Model loaded successfully.", 3000
+                 )
+             else:
+                 self.main_window.statusBar().showMessage(
+                     "Model load failed.", 5000
+                 )
+
+        if success:
+            self._finalize_model_change()
+
+    def _finalize_model_change(self) -> None:
+        """Post-load configuration update."""
         index = self.model_combo.currentIndex()
         if index < 0 or index >= len(self.model_configs):
             return
 
         config = self.model_configs[index]
-
-        try:
-            if "xml_path" in config:
-                self.sim_widget.load_model_from_file(str(config["xml_path"]))
-            elif "xml" in config:
-                self.sim_widget.load_model_from_xml(str(config["xml"]))
-            else:
-                raise ValueError(f"Invalid config: {config['name']}")
-        except Exception as e:
-            QtWidgets.QMessageBox.warning(self, "Error", f"Failed to load model: {e}")
-            logger.error("Failed to load model: %s", e)
-            return
 
         # Handle actuator count mismatch
         model = self.sim_widget.model
@@ -377,6 +395,43 @@ class PhysicsTab(QtWidgets.QWidget):
 
         # Trigger mode update too
         self._on_operating_mode_changed(self.mode_combo.currentIndex())
+
+    def load_current_model(self) -> None:
+        """Load selected model and emit change signal."""
+        index = self.model_combo.currentIndex()
+        if index < 0 or index >= len(self.model_configs):
+            return
+
+        config = self.model_configs[index]
+
+        try:
+            if hasattr(self.sim_widget, "load_model_async"):
+                 if "xml_path" in config:
+                     self.sim_widget.load_model_async(
+                         str(config["xml_path"]), is_file=True
+                     )
+                 elif "xml" in config:
+                     self.sim_widget.load_model_async(
+                         str(config["xml"]), is_file=False
+                     )
+                 else:
+                     raise ValueError(f"Invalid config: {config['name']}")
+            else:
+                # Fallback to sync
+                if "xml_path" in config:
+                    self.sim_widget.load_model_from_file(str(config["xml_path"]))
+                elif "xml" in config:
+                    self.sim_widget.load_model_from_xml(str(config["xml"]))
+                else:
+                    raise ValueError(f"Invalid config: {config['name']}")
+
+                # If sync, manually trigger finalize
+                self._finalize_model_change()
+
+        except Exception as e:
+            QtWidgets.QMessageBox.warning(self, "Error", f"Failed to load model: {e}")
+            logger.error("Failed to load model: %s", e)
+            return
 
     def _on_operating_mode_changed(self, index: int) -> None:
         """Handle operating mode change (Dynamic vs Kinematic)."""
