@@ -577,7 +577,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             return False
         if self.control_system is None:
             return False
-        return self.control_system.num_actuators == self.model.nu
+        return bool(self.control_system.num_actuators == self.model.nu)
 
     def set_running(self, running: bool) -> None:
         """Set the simulation running state."""

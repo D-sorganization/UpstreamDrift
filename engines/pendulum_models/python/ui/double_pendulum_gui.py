@@ -567,7 +567,7 @@ class DoublePendulumApp:
                     ]
                 )
                 if self.data_file_handle is not None:
-                    self.data_file_handle.flush()  # type: ignore[union-attr]
+                    self.data_file_handle.flush()  # type: ignore[attr-defined]
 
     def _update_pendulum_immediately(self) -> None:
         """Update pendulum position immediately when parameters change."""

@@ -378,7 +378,8 @@ class PinocchioWrapper:
             q = self._mujoco_q_to_pinocchio_q(self.data.qpos)
 
         # Compute gravity vector
-        return pin.computeGeneralizedGravity(self.pin_model, self.pin_data, q)
+        gravity_vector = pin.computeGeneralizedGravity(self.pin_model, self.pin_data, q)
+        return np.array(gravity_vector, dtype=np.float64)
 
     def compute_end_effector_jacobian(
         self,
@@ -432,7 +433,7 @@ class PinocchioWrapper:
                 pin.WORLD,
             )
 
-        return jacobian
+        return np.array(jacobian, dtype=np.float64)
 
     def compute_dynamics_derivatives(
         self,
