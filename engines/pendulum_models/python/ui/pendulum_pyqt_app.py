@@ -230,7 +230,8 @@ class PendulumController(QtWidgets.QWidget):
         try:
             # For immediate evaluation in UI, we don't allow variables
             evaluator = SafeEvaluator(allowed_variables=set())
-            return float(evaluator.evaluate(expression))
+            result = evaluator.evaluate(expression)
+            return float(result)
         except Exception:
             return 0.0
 
@@ -346,7 +347,8 @@ class PendulumController(QtWidgets.QWidget):
                 -length * math.cos(angle),
             ]
         )
-        return np.array(rotation @ local)
+        result = rotation @ local
+        return np.array(result, dtype=np.float64)
 
     def _plane_rotation(self, inclination_deg: float) -> np.ndarray:
         inclination_rad = math.radians(inclination_deg)

@@ -72,7 +72,7 @@ class DoublePendulumApp:
         self.data_logging_enabled = False
         self.data_granularity = 1  # Log every N steps
         self.data_step_counter = 0
-        self.data_file: csv.writer | None = None
+        self.data_file: csv.writer | None = None  # type: ignore[name-defined]
         self.data_file_handle: object | None = None
         self.data_file_stack: contextlib.ExitStack | None = None
 
@@ -566,7 +566,7 @@ class DoublePendulumApp:
                     ]
                 )
                 if self.data_file_handle is not None:
-                    self.data_file_handle.flush()
+                    self.data_file_handle.flush()  # type: ignore[union-attr]
 
     def _update_pendulum_immediately(self) -> None:
         """Update pendulum position immediately when parameters change."""
