@@ -80,13 +80,34 @@ class ModelRegistry:
             logger.error(f"Failed to read registry file {self.config_path}: {e}")
 
     def get_model(self, model_id: str) -> ModelConfig | None:
-        """Get model by ID."""
+        """
+        Get model configuration by its unique ID.
+
+        Args:
+            model_id: The unique identifier of the model.
+
+        Returns:
+            The model configuration object, or None if not found.
+        """
         return self.models.get(model_id)
 
     def get_all_models(self) -> list[ModelConfig]:
-        """Get all registered models."""
+        """
+        Retrieve all registered models.
+
+        Returns:
+            A list of all ModelConfig objects in the registry.
+        """
         return list(self.models.values())
 
     def get_models_by_type(self, model_type: str) -> list[ModelConfig]:
-        """Get models of a specific type (e.g., 'mjcf')."""
+        """
+        Retrieve all models of a specific type (e.g., 'mjcf', 'urdf').
+
+        Args:
+            model_type: The type string to filter by.
+
+        Returns:
+            A list of ModelConfig objects matching the specified type.
+        """
         return [m for m in self.models.values() if m.type == model_type]

@@ -459,7 +459,15 @@ class GolfLauncher(QMainWindow):
         self.select_model("MuJoCo Humanoid")
 
     def create_model_card(self, model):
-        """Creates a clickable card widget."""
+        """
+        Create a clickable card widget for a model.
+
+        Args:
+            model (Models): The model identifier/name.
+
+        Returns:
+            QFrame: A card widget containing the model's image and description.
+        """
         name = model.name
         card = QFrame()
         card.setObjectName("ModelCard")
@@ -524,13 +532,23 @@ class GolfLauncher(QMainWindow):
         return card
 
     def launch_model_direct(self, name):
-        """Selects and immediately launches the model (for double-click)."""
+        """
+        Select and immediately launch a model (handler for double-click events).
+
+        Args:
+            name (str): The name of the model to launch.
+        """
         self.select_model(name)
         if self.btn_launch.isEnabled():
             self.launch_simulation()
 
     def select_model(self, name):
-        """Select a model and update UI."""
+        """
+        Select a model, update the UI selection state, and refresh details.
+
+        Args:
+            name (str): The name of the selected model.
+        """
         self.selected_model = name
 
         # Update Styles
@@ -563,7 +581,9 @@ class GolfLauncher(QMainWindow):
         self.update_launch_button()
 
     def update_launch_button(self):
-        """Update the launch button state."""
+        """
+        Update the launch button text and state based on the current selection.
+        """
         if self.docker_available and self.selected_model:
             self.btn_launch.setEnabled(True)
             self.btn_launch.setText(f"LAUNCH {self.selected_model.upper()}")
@@ -575,7 +595,9 @@ class GolfLauncher(QMainWindow):
             self.btn_launch.setText("SELECT A MODEL")
 
     def apply_styles(self):
-        """Apply custom stylesheets."""
+        """
+        Apply custom CSS stylesheets to the application.
+        """
         self.setStyleSheet(
             """
             QMainWindow, QWidget {
@@ -654,13 +676,20 @@ class GolfLauncher(QMainWindow):
         )
 
     def check_docker(self):
-        """Start the docker check thread."""
+        """
+        Start the background thread to check Docker availability.
+        """
         self.check_thread = DockerCheckThread()
         self.check_thread.result.connect(self.on_docker_check_complete)
         self.check_thread.start()
 
     def on_docker_check_complete(self, available):
-        """Handle docker check result."""
+        """
+        Handle the result from the Docker check thread.
+
+        Args:
+            available (bool): True if Docker is available/running, False otherwise.
+        """
         self.docker_available = available
         if available:
             self.lbl_status.setText("● System Ready")
@@ -677,17 +706,26 @@ class GolfLauncher(QMainWindow):
         self.update_launch_button()
 
     def open_help(self):
-        """Open the help dialog."""
+        """
+        Open the help dialog to display documentation.
+        """
         dlg = HelpDialog(self)
         dlg.exec()
 
     def open_environment_manager(self):
-        """Open the environment manager dialog."""
+        """
+        Open the environment manager dialog to configure Docker and dependencies.
+        """
         dlg = EnvironmentDialog(self)
         dlg.exec()
 
     def launch_simulation(self):
-        """Launch the selected simulation."""
+        """
+        Launch the selected simulation model.
+
+        Resolves the model path from the registry or fallback dictionary, and
+        dispatches the launch to the appropriate handler (custom or Docker).
+        """
         if not self.selected_model:
             return
 
