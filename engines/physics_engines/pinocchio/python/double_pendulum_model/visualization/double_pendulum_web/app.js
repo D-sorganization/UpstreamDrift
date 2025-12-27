@@ -7,6 +7,7 @@ const pivot = {
   y: canvas.height * 0.28,
 };
 let animationId = null;
+const defaultValues = {};
 
 const gravity = 9.80665;
 
@@ -82,6 +83,19 @@ function updateParamsFromInputs() {
 
   params.tau1Expr = tau1Input.value || '0';
   params.tau2Expr = tau2Input.value || '0';
+}
+
+function restoreDefaults() {
+  pause();
+  document.querySelectorAll('.grid input').forEach(input => {
+    if (defaultValues[input.id] !== undefined) {
+      input.value = defaultValues[input.id];
+    }
+  });
+  resetStateFromInputs();
+  updateParamsFromInputs();
+  draw();
+  announce('Parameters restored to defaults');
 }
 
 function safeEval(expr, context) {
@@ -302,9 +316,13 @@ function reset() {
   announce('Simulation reset');
 }
 
-['start', 'pause', 'reset'].forEach(id => document.getElementById(id).addEventListener('click', () => {
-  ({ start, pause, reset })[id]();
+['start', 'pause', 'reset', 'defaults'].forEach(id => document.getElementById(id).addEventListener('click', () => {
+  ({ start, pause, reset, defaults: restoreDefaults })[id]();
 }));
+
+document.querySelectorAll('.grid input').forEach(input => {
+  defaultValues[input.id] = input.value;
+});
 
 document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT') return;
