@@ -22,9 +22,6 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import numpy as np
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.figure import Figure
-
 from double_pendulum_model.physics.double_pendulum import (
     DEFAULT_PLANE_INCLINATION_DEG,
     DoublePendulumDynamics,
@@ -32,6 +29,8 @@ from double_pendulum_model.physics.double_pendulum import (
     DoublePendulumState,
     compile_forcing_functions,
 )
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
 
 TIME_STEP = 0.01
 
