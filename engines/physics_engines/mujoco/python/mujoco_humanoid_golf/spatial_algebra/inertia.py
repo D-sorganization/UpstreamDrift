@@ -119,4 +119,5 @@ def transform_spatial_inertia(i_b: np.ndarray, x_transform: np.ndarray) -> np.nd
     i_a = x_transform.T @ i_b @ x_transform
 
     # Ensure result is symmetric
-    return (i_a + i_a.T) / 2
+    result = (i_a + i_a.T) / 2
+    return np.array(result, dtype=np.float64)

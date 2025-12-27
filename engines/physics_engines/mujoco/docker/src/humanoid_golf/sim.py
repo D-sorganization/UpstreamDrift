@@ -188,7 +188,8 @@ class LQRController(BaseController):
         # (e.g. via scipy.spatial.transform.Rotation).
         err = x_targ - x_curr
 
-        return self.K @ err
+        control_output = self.K @ err
+        return np.array(control_output, dtype=np.float64)
 
 
 class TimeStep:
@@ -207,13 +208,13 @@ class TimeStep:
         self.observation = observation or {}
 
     def first(self) -> bool:
-        return self.step_type == 0
+        return bool(self.step_type == 0)
 
     def mid(self) -> bool:
-        return self.step_type == 1
+        return bool(self.step_type == 1)
 
     def last(self) -> bool:
-        return self.step_type == 2
+        return bool(self.step_type == 2)
 
     def __getitem__(self, key):
         return getattr(self, key)
