@@ -57,7 +57,7 @@ jobs:
       # TODO detection now BLOCKING - Jules Auto-Repair will fix
       - name: Verify No Placeholders
         run: |
-          if grep -rE "TODO|FIXME" shared/python/; then
+          if grep -rE "TODO|FIXME" --include="*.py" . --exclude-dir=".git" --exclude-dir=".mypy_cache" --exclude-dir=".ruff_cache" --exclude-dir="__pycache__" --exclude-dir="archive" --exclude-dir="check_code_quality"; then
              echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
              exit 1
           fi
