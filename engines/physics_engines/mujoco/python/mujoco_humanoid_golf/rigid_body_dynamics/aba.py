@@ -8,9 +8,7 @@ from __future__ import annotations
 
 import numpy as np
 from mujoco_humanoid_golf.spatial_algebra import (
-    cross_force,
     cross_force_fast,
-    cross_motion,
     cross_motion_fast,
     jcalc,
 )
