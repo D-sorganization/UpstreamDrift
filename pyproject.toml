@@ -38,6 +38,8 @@ dev = [
     "pytest-cov>=5.0.0",
     "pytest-mock>=3.14.0",
     "pytest-qt>=4.2.0",
+    "pytest-benchmark>=4.0.0",
+    "pip-audit>=2.7.0",
     "ruff==0.14.10",
     "black>=24.4.2",
     "mypy>=1.10.0",

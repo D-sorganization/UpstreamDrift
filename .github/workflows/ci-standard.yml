@@ -67,6 +67,11 @@ jobs:
             exit 1
           fi
 
+      - name: Security Audit
+        run: |
+          pip install pip-audit
+          pip-audit
+
       # FIX: Run Python-based MATLAB Quality Check (Works without License)
       # Non-blocking, archives results for legacy support
       - name: MATLAB Quality Check

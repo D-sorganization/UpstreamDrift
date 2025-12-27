@@ -19,20 +19,39 @@ simulation and optimization, including:
 # Motion capture and force analysis
 # Advanced robotics modules
 # Core modules
-from . import (
-    advanced_control,
-    advanced_kinematics,
-    biomechanics,
-    control_system,
-    inverse_dynamics,
-    kinematic_forces,
-    models,
-    motion_capture,
-    motion_optimization,
-    plotting,
-    urdf_io,
-)
-from .control_system import ActuatorControl, ControlSystem, ControlType
+# Core modules
+try:
+    from . import (
+        advanced_control,
+        advanced_kinematics,
+        biomechanics,
+        control_system,
+        inverse_dynamics,
+        kinematic_forces,
+        models,
+        motion_capture,
+        motion_optimization,
+        plotting,
+        urdf_io,
+    )
+    from .control_system import ActuatorControl, ControlSystem, ControlType
+except (ImportError, OSError):
+    # If core modules fail to load (e.g. strict headless environments with no GL),
+    # we allow partial loading.
+    advanced_control = None  # type: ignore
+    advanced_kinematics = None  # type: ignore
+    biomechanics = None  # type: ignore
+    control_system = None  # type: ignore
+    inverse_dynamics = None  # type: ignore
+    kinematic_forces = None  # type: ignore
+    models = None  # type: ignore
+    motion_capture = None  # type: ignore
+    motion_optimization = None  # type: ignore
+    plotting = None  # type: ignore
+    urdf_io = None  # type: ignore
+    ActuatorControl = None  # type: ignore
+    ControlSystem = None  # type: ignore
+    ControlType = None  # type: ignore
 
 # Telemetry
 from .telemetry import TelemetryRecorder, TelemetryReport
