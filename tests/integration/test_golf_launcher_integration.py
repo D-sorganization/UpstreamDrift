@@ -54,11 +54,13 @@ models:
 
         # Patch ModelRegistry to use our temp file
         real_registry = ModelRegistry(models_yaml)
-        # Patch QIcon and setWindowIcon to prevent C++ type errors in headless env
+
+        # Override ASSETS_DIR to point to our empty temp dir
+        # This ensures icon lookup fails gracefully via real filesystem checks
+        # avoiding proper QIcon initialization and associated C++ type errors
         with (
             patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
-            patch("PyQt6.QtGui.QIcon"),
-            patch("launchers.golf_launcher.GolfLauncher.setWindowIcon"),
+            patch("launchers.golf_launcher.ASSETS_DIR", new=temp_path),
         ):
 
             MockRegistry.return_value = real_registry
