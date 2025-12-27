@@ -28,7 +28,7 @@ class RecorderInterface(Protocol):
         Returns:
             Tuple of (times, values)
         """
-        ...
+        ...  # pragma: no cover
 
 
 @dataclass
