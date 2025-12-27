@@ -18,11 +18,11 @@ def is_engine_available(engine_type: EngineType) -> bool:
     return probe_result.is_available()
 
 
-@pytest.mark.skipif(
-    not is_engine_available(EngineType.MUJOCO), reason="MuJoCo not installed"
-)
 def test_mujoco_pendulum_accuracy():
     """Verify MuJoCo pendulum matches analytical solution."""
+    if not is_engine_available(EngineType.MUJOCO):
+        pytest.skip("MuJoCo not installed")
+
     import mujoco
 
     # 1. Model: Simple Pendulum (L=1, m=1)
@@ -95,11 +95,11 @@ def test_mujoco_pendulum_accuracy():
     ), f"MuJoCo pendulum drifted! Max error: {max_energy_error}"
 
 
-@pytest.mark.skipif(
-    not is_engine_available(EngineType.DRAKE), reason="Drake not installed"
-)
 def test_drake_pendulum_accuracy():
     """Verify Drake pendulum matches analytical solution."""
+    if not is_engine_available(EngineType.DRAKE):
+        pytest.skip("Drake not installed")
+
     import pydrake.multibody.tree as mut
     from pydrake.multibody.plant import AddMultibodyPlantSceneGraph
     from pydrake.systems.analysis import Simulator
