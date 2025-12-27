@@ -73,7 +73,8 @@ class MuJoCoBackend:
         Returns:
             Joint positions [nq]
         """
-        return self.data.qpos.copy()
+        result = self.data.qpos.copy()
+        return np.asarray(result, dtype=np.float64)
 
     def get_qvel(self) -> npt.NDArray[np.float64]:
         """Get joint velocities.
@@ -81,7 +82,8 @@ class MuJoCoBackend:
         Returns:
             Joint velocities [nv]
         """
-        return self.data.qvel.copy()
+        result = self.data.qvel.copy()
+        return np.asarray(result, dtype=np.float64)
 
     def get_qacc(self) -> npt.NDArray[np.float64]:
         """Get joint accelerations.
@@ -89,7 +91,8 @@ class MuJoCoBackend:
         Returns:
             Joint accelerations [nv]
         """
-        return self.data.qacc.copy()
+        result = self.data.qacc.copy()
+        return np.asarray(result, dtype=np.float64)
 
     def set_qpos(self, q: npt.NDArray[np.float64]) -> None:
         """Set joint positions.
@@ -132,7 +135,8 @@ class MuJoCoBackend:
         mujoco.mj_inverse(self.model, self.data)
         self.data.qacc[:] = a_arr
         mujoco.mj_forward(self.model, self.data)
-        return self.data.qfrc_inverse.copy()
+        result = self.data.qfrc_inverse.copy()
+        return np.asarray(result, dtype=np.float64)
 
     def get_contact_forces(self) -> npt.NDArray[np.float64]:
         """Get contact forces.

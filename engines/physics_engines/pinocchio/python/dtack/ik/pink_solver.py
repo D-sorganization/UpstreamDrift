@@ -91,4 +91,5 @@ class PinkSolver:
         )
 
         # Integrate velocity to update configuration: q_next = q + v * dt
-        return pin.integrate(self.model, q_init, velocity * dt)
+        result = pin.integrate(self.model, q_init, velocity * dt)
+        return np.array(result, dtype=np.float64)

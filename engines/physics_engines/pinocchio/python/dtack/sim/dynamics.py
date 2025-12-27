@@ -41,8 +41,10 @@ class DynamicsEngine:
             Joint acceleration 'a'
         """
         if f_ext is None:
-            return pin.aba(self.model, self.data, q, v, tau)
-        return pin.aba(self.model, self.data, q, v, tau, f_ext)
+            result = pin.aba(self.model, self.data, q, v, tau)
+            return np.array(result, dtype=np.float64)
+        result = pin.aba(self.model, self.data, q, v, tau, f_ext)
+        return np.array(result, dtype=np.float64)
 
     def inverse_dynamics(
         self, q: np.ndarray, v: np.ndarray, a: np.ndarray, f_ext: list | None = None
@@ -52,8 +54,10 @@ class DynamicsEngine:
         Returns: tau (torque)
         """
         if f_ext is None:
-            return pin.rnea(self.model, self.data, q, v, a)
-        return pin.rnea(self.model, self.data, q, v, a, f_ext)
+            result = pin.rnea(self.model, self.data, q, v, a)
+            return np.array(result, dtype=np.float64)
+        result = pin.rnea(self.model, self.data, q, v, a, f_ext)
+        return np.array(result, dtype=np.float64)
 
     def compute_ztcf(
         self, q: np.ndarray, v: np.ndarray, dt: float
