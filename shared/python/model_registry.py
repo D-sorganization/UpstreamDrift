@@ -34,27 +34,30 @@ class ModelRegistry:
 
     def _load_registry(self) -> None:
         """Load models from YAML configuration file.
-        
+
         Raises:
             ModelRegistryError: If registry file is malformed
         """
         from .core import setup_logging
+
         logger = setup_logging(__name__)
-        
+
         if not self.config_path.exists():
             logger.warning(f"Model registry not found: {self.config_path}")
             return
 
         try:
-            with open(self.config_path, encoding='utf-8') as f:
+            with open(self.config_path, encoding="utf-8") as f:
                 data = yaml.safe_load(f)
 
             if not data:
                 logger.warning(f"Empty model registry: {self.config_path}")
                 return
-                
+
             if "models" not in data:
-                logger.error(f"Invalid registry format: missing 'models' key in {self.config_path}")
+                logger.error(
+                    f"Invalid registry format: missing 'models' key in {self.config_path}"
+                )
                 return
 
             for model_data in data["models"]:
@@ -64,7 +67,7 @@ class ModelRegistry:
                     logger.debug(f"Loaded model: {model.id}")
                 except TypeError as e:
                     logger.error(f"Invalid model configuration: {model_data} - {e}")
-                    
+
             logger.info(f"Loaded {len(self.models)} models from {self.config_path}")
 
         except yaml.YAMLError as e:

@@ -164,26 +164,30 @@ def test_drake_energy_conservation():
     )
 
     # Add a particle (Body)
-    instance = pydrake.multibody.tree.BodyIndex(plant.num_bodies())
+    pydrake.multibody.tree.BodyIndex(plant.num_bodies())
     mass = 1.0
     M = pydrake.multibody.tree.SpatialInertia.MakeFromCentralInertia(
-        mass=mass, p_PScm_E=[0, 0, 0], I_SScm_E=pydrake.multibody.tree.RotationalInertia(0, 0, 0)
+        mass=mass,
+        p_PScm_E=[0, 0, 0],
+        I_SScm_E=pydrake.multibody.tree.RotationalInertia(0, 0, 0),
     )
-    
+
     body = plant.AddRigidBody("particle", M)
-    
+
     # Add Prismatic Joint for falling in Z
     plant.AddJoint(
         pydrake.multibody.tree.PrismaticJoint(
             "joint",
             plant.world_frame(),
-            pydrake.multibody.tree.FixedOffsetFrame("frame", body, pydrake.math.RigidTransform()),
-            [0, 0, 1] # Z axis
+            pydrake.multibody.tree.FixedOffsetFrame(
+                "frame", body, pydrake.math.RigidTransform()
+            ),
+            [0, 0, 1],  # Z axis
         )
     )
 
     plant.Finalize()
-    
+
     # Create Context
     diagram = builder.Build()
     context = diagram.CreateDefaultContext()
@@ -201,7 +205,7 @@ def test_drake_energy_conservation():
 
     # Simulate
     simulator = pydrake.systems.analysis.Simulator(diagram, context)
-    simulator.AdvanceTo(1.0) # 1 second
+    simulator.AdvanceTo(1.0)  # 1 second
 
     # Check Final Energy
     pe_final = plant.EvalPotentialEnergy(plant_context)
@@ -210,7 +214,7 @@ def test_drake_energy_conservation():
 
     # Calculate error
     error = abs(final_energy - initial_energy)
-    
+
     logger.info(f"Drake Energy Error: {error:.6f} J")
-    
+
     assert error < 0.01, f"Drake energy conservation failed. Error: {error}"

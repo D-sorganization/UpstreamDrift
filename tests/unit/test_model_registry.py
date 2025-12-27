@@ -3,10 +3,9 @@
 import tempfile
 from pathlib import Path
 
-import pytest
 import yaml
 
-from shared.python.model_registry import ModelConfig, ModelRegistry
+from shared.python.model_registry import ModelRegistry
 
 
 class TestModelRegistry:
@@ -29,10 +28,10 @@ class TestModelRegistry:
             }
             with open(config_path, "w", encoding="utf-8") as f:
                 yaml.dump(config_data, f)
-            
+
             registry = ModelRegistry(config_path)
             assert len(registry.models) == 1
-            
+
             model = registry.get_model("test_model")
             assert model is not None
             assert model.id == "test_model"
@@ -44,7 +43,7 @@ class TestModelRegistry:
         with tempfile.TemporaryDirectory() as tmpdir:
             config_path = Path(tmpdir) / "models.yaml"
             config_path.write_text("", encoding="utf-8")
-            
+
             registry = ModelRegistry(config_path)
             assert len(registry.models) == 0
 
@@ -61,7 +60,7 @@ class TestModelRegistry:
             # Write invalid YAML (tab character instead of spaces)
             with open(config_path, "w", encoding="utf-8") as f:
                 f.write("models:\n\t- id: test")
-            
+
             registry = ModelRegistry(config_path)
             # Should handle exception gracefully (log error) and have 0 models
             assert len(registry.models) == 0
@@ -152,7 +151,7 @@ class TestModelRegistry:
             mjcf_models = registry.get_models_by_type("mjcf")
             assert len(mjcf_models) == 2
             assert {m.id for m in mjcf_models} == {"m1", "m3"}
-            
+
             drake_models = registry.get_models_by_type("drake")
             assert len(drake_models) == 1
             assert drake_models[0].id == "m2"

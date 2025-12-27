@@ -76,6 +76,7 @@ def test_pinocchio_golfer_stability():
 
     logger.info("Golfer URDF stability check passed.")
 
+
 def test_mujoco_myoarm_stability():
     """Verify the MuJoCo MyoArm XML loads and steps safely."""
     if not is_engine_available(EngineType.MUJOCO):
@@ -96,7 +97,6 @@ def test_mujoco_myoarm_stability():
 
     if not xml_path.exists():
         pytest.skip(f"MyoArm XML not found at {xml_path}")
-
 
     # 2. Load Model
     try:
