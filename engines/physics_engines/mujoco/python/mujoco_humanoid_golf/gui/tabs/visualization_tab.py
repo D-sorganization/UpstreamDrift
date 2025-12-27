@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
+import mujoco
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 if TYPE_CHECKING:
@@ -300,9 +301,9 @@ class VisualizationTab(QtWidgets.QWidget):
         """Handle camera view change."""
         self.sim_widget.set_camera(camera_name)
         # Update sliders to match camera preset
-        self._update_camera_sliders()
+        self.update_camera_sliders()
 
-    def _update_camera_sliders(self) -> None:
+    def update_camera_sliders(self) -> None:
         """Update camera control sliders to match current camera state."""
         if self.sim_widget.camera is not None:
             # Update azimuth (0-360)
@@ -354,7 +355,7 @@ class VisualizationTab(QtWidgets.QWidget):
     def on_reset_camera(self) -> None:
         """Reset camera to default position."""
         self.sim_widget.reset_camera()
-        self._update_camera_sliders()
+        self.update_camera_sliders()
 
     def on_sky_color_clicked(self) -> None:
         """Handle sky color button click - open color picker."""
@@ -505,3 +506,18 @@ class VisualizationTab(QtWidgets.QWidget):
         self.jacobian_cond_label.setText(f"Condition: {cond}")
         self.constraint_rank_label.setText(f"Rank: {rank}")
         self.nefc_label.setText(f"Constraints: {nefc}")
+
+    def update_body_list(self) -> None:
+        """Update body selection list."""
+        if self.sim_widget.model is None:
+            return
+
+        self.viz_body_combo.clear()
+        for body_id in range(1, self.sim_widget.model.nbody):
+            body_name = mujoco.mj_id2name(
+                self.sim_widget.model,
+                mujoco.mjtObj.mjOBJ_BODY,
+                body_id,
+            )
+            if body_name:
+                self.viz_body_combo.addItem(f"{body_id}: {body_name}")

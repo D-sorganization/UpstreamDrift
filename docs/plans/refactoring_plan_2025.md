@@ -28,7 +28,9 @@ Based on reviews from Claude and Codex, this plan outlines a 4-phase approach to
     - [x] Extract `PhysicsTab`
     - [x] Extract `ControlsTab`
     - [x] Extract `AnalysisTab` (metrics, export)
-    - [ ] Refactor `AdvancedGolfAnalysisWindow` to use composed tabs
+    - [x] Extract `PlottingTab` (refactor from `advanced_gui.py`)
+    - [x] Extract `ManipulationTab` (Interactive Pose)
+    - [x] Refactor `AdvancedGolfAnalysisWindow` to use composed tabs
 - [x] **2.2 Archive & Legacy Cleanup**
   - **Issue:** 13+ archive directories bloat the repo.
   - **Action:** Move valid historical code to a `legacy/` branch and delete these folders from `main`.
