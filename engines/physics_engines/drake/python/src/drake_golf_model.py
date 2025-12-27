@@ -29,7 +29,6 @@ from pydrake.all import (
     Sphere,
     UnitInertia,
 )
-
 from shared.python.constants import (
     GOLF_BALL_DIAMETER_M,
 )
