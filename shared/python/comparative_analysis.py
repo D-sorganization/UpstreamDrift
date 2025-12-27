@@ -13,7 +13,7 @@ import numpy as np
 from scipy import interpolate
 
 if TYPE_CHECKING:
-    pass
+    pass  # pragma: no cover
 
 
 class RecorderInterface(Protocol):
