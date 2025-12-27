@@ -501,7 +501,7 @@ class DoublePendulumApp:
         filename = f"pendulum_data_{timestamp}.csv"
         self.data_file_stack = contextlib.ExitStack()
         self.data_file_handle = self.data_file_stack.enter_context(
-            open(filename, "w", newline="")  # noqa: SIM115
+            open(filename, "w", newline="")
         )
         self.data_file = csv.writer(self.data_file_handle)
         self.data_file.writerow(
@@ -680,7 +680,9 @@ class DoublePendulumApp:
                 )
 
             self._draw_pendulum_3d()
-        except Exception as error:  # noqa: BLE001
+        except Exception as error:
+            # Catch all exceptions during UI updates to prevent crash
+            print(f"Error updating pendulum: {error}")
             # Still try to draw something even if there's an error
             if self.state is None or self.dynamics is None:
                 # Initialize with defaults if not set
