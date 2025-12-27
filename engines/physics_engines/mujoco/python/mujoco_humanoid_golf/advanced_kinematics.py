@@ -211,7 +211,7 @@ class AdvancedKinematicsAnalyzer:
         # Constraint: relative position should be constant
         # d/dt(p_right - p_left) = 0
         # J_right * qvel - J_left * qvel = 0
-        return jacp_right - jacp_left
+        return np.asarray(jacp_right - jacp_left)
 
     def compute_manipulability(
         self,
@@ -544,7 +544,7 @@ class AdvancedKinematicsAnalyzer:
         """
         # Use rcond for numerical stability (works in all scipy versions)
         j_pinv = pinv(jacobian, rcond=1e-3)
-        return np.eye(jacobian.shape[1]) - j_pinv @ jacobian
+        return np.asarray(np.eye(jacobian.shape[1]) - j_pinv @ jacobian)
 
     def compute_task_space_inertia(self, jacobian: np.ndarray) -> np.ndarray:
         """Compute task-space inertia matrix.

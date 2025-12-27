@@ -266,7 +266,7 @@ class PinocchioWrapper:
             v = self.data.qvel.copy()
 
         # Compute inverse dynamics (RNEA)
-        return pin.rnea(self.pin_model, self.pin_data, q, v, a)
+        return pin.rnea(self.pin_model, self.pin_data, q, v, a)  # type: ignore[no-any-return]
 
     def compute_forward_dynamics(
         self,
@@ -305,7 +305,7 @@ class PinocchioWrapper:
             tau = np.zeros(self.pin_model.nv)
 
         # Compute forward dynamics (ABA)
-        return pin.aba(self.pin_model, self.pin_data, q, v, tau)
+        return pin.aba(self.pin_model, self.pin_data, q, v, tau)  # type: ignore[no-any-return]
 
     def compute_mass_matrix(
         self,
@@ -328,7 +328,7 @@ class PinocchioWrapper:
             q = self._mujoco_q_to_pinocchio_q(self.data.qpos)
 
         # Compute mass matrix (CRBA)
-        return pin.crba(self.pin_model, self.pin_data, q)
+        return pin.crba(self.pin_model, self.pin_data, q)  # type: ignore[no-any-return]
 
     def compute_coriolis_matrix(
         self,
@@ -355,7 +355,7 @@ class PinocchioWrapper:
             v = self.data.qvel.copy()
 
         # Compute Coriolis matrix
-        return pin.computeCoriolisMatrix(self.pin_model, self.pin_data, q, v)
+        return pin.computeCoriolisMatrix(self.pin_model, self.pin_data, q, v)  # type: ignore[no-any-return]
 
     def compute_gravity_vector(
         self,
