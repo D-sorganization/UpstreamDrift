@@ -348,6 +348,15 @@ class GolfLauncher(QMainWindow):
         self.selected_model = None
         self.model_cards = {}
 
+        # Load Registry
+        try:
+            from shared.python.model_registry import ModelRegistry
+
+            self.registry = ModelRegistry(REPOS_ROOT / "config/models.yaml")
+        except ImportError:
+            logger.error("Failed to import ModelRegistry. Using empty registry.")
+            self.registry = None
+
         self.init_ui()
         self.check_docker()
 
@@ -391,14 +400,16 @@ class GolfLauncher(QMainWindow):
 
         # Populate Grid
         row, col = 0, 0
-        for name, _ in MODELS_DICT.items():
-            card = self.create_model_card(name)
-            self.model_cards[name] = card
-            self.grid_layout.addWidget(card, row, col)
-            col += 1
-            if col >= GRID_COLUMNS:
-                col = 0
-                row += 1
+        if self.registry:
+            models = self.registry.get_all_models()
+            for model in models:
+                card = self.create_model_card(model)
+                self.model_cards[model.name] = card
+                self.grid_layout.addWidget(card, row, col)
+                col += 1
+                if col >= GRID_COLUMNS:
+                    col = 0
+                    row += 1
 
         grid_area.setWidget(grid_widget)
         main_layout.addWidget(grid_area)
@@ -442,8 +453,9 @@ class GolfLauncher(QMainWindow):
         # Select first model by default
         self.select_model("MuJoCo Humanoid")
 
-    def create_model_card(self, name):
+    def create_model_card(self, model):
         """Creates a clickable card widget."""
+        name = model.name
         card = QFrame()
         card.setObjectName("ModelCard")
         card.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -454,7 +466,17 @@ class GolfLauncher(QMainWindow):
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
         # Image
+        # Temporary fallback mapping until images are in registry
         img_name = MODEL_IMAGES.get(name)
+        if not img_name:
+            # Try to guess based on ID
+            if "mujoco" in model.id:
+                img_name = "mujoco_humanoid.png"
+            elif "drake" in model.id:
+                img_name = "drake.png"
+            elif "pinocchio" in model.id:
+                img_name = "pinocchio.png"
+
         img_path = ASSETS_DIR / img_name if img_name else None
 
         lbl_img = QLabel()
@@ -486,7 +508,7 @@ class GolfLauncher(QMainWindow):
         layout.addWidget(lbl_name)
 
         # Description
-        desc_text = MODEL_DESCRIPTIONS.get(name, "")
+        desc_text = model.description
         lbl_desc = QLabel(desc_text)
         lbl_desc.setFont(QFont("Segoe UI", 9))
         lbl_desc.setStyleSheet("color: #cccccc;")
@@ -665,27 +687,71 @@ class GolfLauncher(QMainWindow):
             return
 
         model_name = self.selected_model
-        repo_rel_path = MODELS_DICT[model_name]
-        abs_repo_path = REPOS_ROOT / repo_rel_path
 
-        if not abs_repo_path.exists():
-            QMessageBox.critical(self, "Error", f"Path not found: {abs_repo_path}")
+        # Look up in registry first
+        path: Path | None = None
+        if self.registry:
+            # Find model by name
+            # This is inefficient, but we indexed matching cards by name in init
+            # ideally we should track ID.
+            for m in self.registry.get_all_models():
+                if m.name == model_name:
+                    path = REPOS_ROOT / m.path
+                    break
+
+        # Fallback for old behaviour if not in registry
+        if not path:
+            # This fallback might be deprecated if we are fully migrated
+            if model_name in MODELS_DICT:
+                repo_rel_path = MODELS_DICT[model_name]
+                path = REPOS_ROOT / repo_rel_path
+
+        if not path or not path.exists():
+            QMessageBox.critical(self, "Error", f"Path not found: {path}")
             return
 
         # Engine-specific launch logic
         try:
             custom_launchers = {
                 "MuJoCo Humanoid": self._custom_launch_humanoid,
+                # Fix: Basic models should use standard mjcf launcher if available?
+                # For now, let's keep custom overrides.
                 "MuJoCo Dashboard": self._custom_launch_comprehensive,
             }
 
+            # If it's a generic MJCF model, we might want a generic launcher?
+            # Current architecture assumes specific custom launchers for "Humanoid" and "Dashboard".
+            # The new models in registry are mostly MJCF.
+            # We probably need a generic MJCF viewer/launcher.
+            # For now, let's assume if it is a .xml file, we launch basic viewer?
+
+            if str(path).endswith(".xml"):
+                self._launch_generic_mjcf(path)
+                return
+
             launcher = custom_launchers.get(model_name)
             if launcher:
-                launcher(abs_repo_path)
+                launcher(path)
             else:
-                self._launch_docker_container(model_name, abs_repo_path)
+                self._launch_docker_container(model_name, path)
         except Exception as e:
             QMessageBox.critical(self, "Launch Error", str(e))
+
+    def _launch_generic_mjcf(self, path: Path):
+        """Launch generic MJCF file in passive viewer."""
+        # We can use python -m mujoco.viewer or similar
+        logger.info(f"Launching generic MJCF: {path}")
+        try:
+            # Use the python executable to run a simple viewer script or module
+            # Creating a temporary script or using -c
+            cmd = [
+                sys.executable,
+                "-c",
+                f"import mujoco; import mujoco.viewer; m=mujoco.MjModel.from_xml_path(r'{str(path)}'); mujoco.viewer.launch(m)",
+            ]
+            subprocess.Popen(cmd)
+        except Exception as e:
+            QMessageBox.critical(self, "Viewer Error", str(e))
 
     def _custom_launch_humanoid(self, abs_repo_path):
         """Launch the humanoid GUI directly."""
