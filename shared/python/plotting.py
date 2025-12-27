@@ -1061,6 +1061,8 @@ class GolfSwingPlotter:
             ax.plot_surface(xx, yy, zz, alpha=0.2, color="cyan")  # type: ignore[attr-defined]
         else:
             # Vertical plane (rare for golf swing but possible)
+            # Cannot plot as z = f(x,y), would need x = f(y,z) or similar
+            # For visualization purposes, we skip drawing the surface if vertical
             pass
 
         ax.set_xlabel("X (m)")
