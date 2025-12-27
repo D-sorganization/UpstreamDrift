@@ -3,12 +3,10 @@ Unit tests for basic golf launcher functionality (Docker threads).
 """
 
 import sys
-from pathlib import Path
+from importlib import reload
 from unittest.mock import MagicMock, Mock, patch
 
-# Add the project root to the path for imports
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
+import pytest
 
 
 # Define Dummy Qt classes to avoid inheriting from Mock
@@ -31,16 +29,6 @@ class MockQThread:
 
 def mock_pyqt_signal(*args):
     return MagicMock()
-
-
-# Setup sys.modules for PyQt6
-# We need to construct the module structure so imports work
-mock_qt_core = MagicMock()
-mock_qt_core.QThread = MockQThread
-mock_qt_core.pyqtSignal = mock_pyqt_signal
-mock_qt_core.Qt = MagicMock()
-
-mock_qt_widgets = MagicMock()
 
 
 # Define widget mocks
@@ -92,38 +80,68 @@ class MockQVBoxLayout:
         pass
 
 
-mock_qt_widgets.QDialog = MockQDialog
-mock_qt_widgets.QTextEdit = MockQTextEdit
-mock_qt_gui = MagicMock()
-mock_qt_widgets.QVBoxLayout = MockQVBoxLayout
-mock_qt_widgets.QWidget = MockQWidget
-mock_qt_widgets.QLabel = MagicMock()
+@pytest.fixture
+def mocked_launcher_module():
+    """
+    Import golf_launcher with mocked Qt modules.
+    This fixture ensures that the mocks don't pollute the global sys.modules,
+    allowing other tests to run with real Qt modules.
+    """
+    # Create mocks
+    mock_qt_core = MagicMock()
+    mock_qt_core.QThread = MockQThread
+    mock_qt_core.pyqtSignal = mock_pyqt_signal
+    mock_qt_core.Qt = MagicMock()
 
-sys.modules["PyQt6"] = MagicMock()
-sys.modules["PyQt6.QtCore"] = mock_qt_core
-sys.modules["PyQt6.QtGui"] = mock_qt_gui
-sys.modules["PyQt6.QtWidgets"] = mock_qt_widgets
+    mock_qt_widgets = MagicMock()
+    mock_qt_widgets.QDialog = MockQDialog
+    mock_qt_widgets.QTextEdit = MockQTextEdit
+    mock_qt_widgets.QVBoxLayout = MockQVBoxLayout
+    mock_qt_widgets.QWidget = MockQWidget
+    mock_qt_widgets.QLabel = MagicMock()
 
-# Now we can safely import
-# Note: We must enable import of launchers.golf_launcher
-# We import HelpDialog too
-from launchers.golf_launcher import (  # noqa: E402, I001
-    DockerBuildThread,
-    DockerCheckThread,
-    HelpDialog,
-)
+    mock_qt_gui = MagicMock()
+
+    # Create mock module dictionary
+    mock_modules = {
+        "PyQt6": MagicMock(),
+        "PyQt6.QtCore": mock_qt_core,
+        "PyQt6.QtGui": mock_qt_gui,
+        "PyQt6.QtWidgets": mock_qt_widgets,
+    }
+
+    # Patch sys.modules
+    with patch.dict(sys.modules, mock_modules):
+        # Remove launchers.golf_launcher from sys.modules if it exists
+        # to ensure it gets re-imported using our mocks
+        if "launchers.golf_launcher" in sys.modules:
+            del sys.modules["launchers.golf_launcher"]
+
+        # Import the module
+        import launchers.golf_launcher
+
+        # If it was already imported before, we might need to reload it to ensure
+        # it picks up the mocked Qt modules
+        reload(launchers.golf_launcher)
+
+        yield launchers.golf_launcher
+
+        # Cleanup: Remove the module from sys.modules so subsequent tests
+        # import the clean/real version
+        if "launchers.golf_launcher" in sys.modules:
+            del sys.modules["launchers.golf_launcher"]
 
 
 class TestDockerThreads:
     """Test Docker-related threads in golf_launcher."""
 
     @patch("subprocess.run")
-    def test_docker_check_thread_success(self, mock_run):
+    def test_docker_check_thread_success(self, mock_run, mocked_launcher_module):
         """Test DockerCheckThread success."""
         # subprocess.run return value
         mock_run.return_value.returncode = 0
 
-        thread = DockerCheckThread()
+        thread = mocked_launcher_module.DockerCheckThread()
         # Mock the signal (it's a MagicMock from mock_pyqt_signal)
         # We replace it with a fresh Mock to assert calls easily
         thread.result = Mock()
@@ -134,11 +152,11 @@ class TestDockerThreads:
         thread.result.emit.assert_called_with(True)
 
     @patch("subprocess.run")
-    def test_docker_check_thread_failure(self, mock_run):
+    def test_docker_check_thread_failure(self, mock_run, mocked_launcher_module):
         """Test DockerCheckThread failure."""
         mock_run.side_effect = FileNotFoundError
 
-        thread = DockerCheckThread()
+        thread = mocked_launcher_module.DockerCheckThread()
         thread.result = Mock()
 
         thread.run()
@@ -146,34 +164,32 @@ class TestDockerThreads:
         thread.result.emit.assert_called_with(False)
 
     @patch("subprocess.Popen")
-    def test_docker_build_thread_success(self, mock_popen):
+    def test_docker_build_thread_success(self, mock_popen, mocked_launcher_module):
         """Test DockerBuildThread success."""
         # Setup mock process with file-like stdout
         process_mock = Mock()
 
         # Create a mock file-like object for stdout that behaves like a real file
-        # After the lines are exhausted, readline() should return empty string
         stdout_lines_iter = iter(["Step 1/5\n", "Successfully built\n", ""])
 
         def readline_side_effect():
             try:
                 return next(stdout_lines_iter)
             except StopIteration:
-                return ""  # After exhausting lines, return empty string
+                return ""
 
         stdout_mock = Mock()
         stdout_mock.readline = Mock(side_effect=readline_side_effect)
 
         process_mock.stdout = stdout_mock
         # poll() returns None while running, then 0 when done
-        # The loop calls poll() after each readline(), so we need enough None values
         process_mock.poll = Mock(side_effect=[None, None, 0, 0, 0])
         process_mock.wait = Mock(return_value=None)
         process_mock.returncode = 0
 
         mock_popen.return_value = process_mock
 
-        thread = DockerBuildThread(target_stage="mujoco")
+        thread = mocked_launcher_module.DockerBuildThread(target_stage="mujoco")
         thread.log_signal = Mock()
         thread.finished_signal = Mock()
 
@@ -191,7 +207,7 @@ class TestDockerThreads:
         thread.finished_signal.emit.assert_called_with(True, "Build successful.")
 
     @patch("subprocess.Popen")
-    def test_docker_build_thread_failure(self, mock_popen):
+    def test_docker_build_thread_failure(self, mock_popen, mocked_launcher_module):
         """Test DockerBuildThread failure."""
         # Setup mock process with file-like stdout
         process_mock = Mock()
@@ -203,7 +219,7 @@ class TestDockerThreads:
             try:
                 return next(stdout_lines_iter)
             except StopIteration:
-                return ""  # After exhausting lines, return empty string
+                return ""
 
         stdout_mock = Mock()
         stdout_mock.readline = Mock(side_effect=readline_side_effect)
@@ -216,7 +232,7 @@ class TestDockerThreads:
 
         mock_popen.return_value = process_mock
 
-        thread = DockerBuildThread(target_stage="mujoco")
+        thread = mocked_launcher_module.DockerBuildThread(target_stage="mujoco")
         thread.log_signal = Mock()
         thread.finished_signal = Mock()
 
@@ -226,10 +242,10 @@ class TestDockerThreads:
             False, "Build failed with code 1"
         )
 
-    def test_docker_build_thread_missing_path(self):
+    def test_docker_build_thread_missing_path(self, mocked_launcher_module):
         """Test DockerBuildThread with missing path (mocking exists)."""
         with patch("pathlib.Path.exists", return_value=False):
-            thread = DockerBuildThread()
+            thread = mocked_launcher_module.DockerBuildThread()
             thread.finished_signal = Mock()
 
             thread.run()
@@ -242,14 +258,11 @@ class TestDockerThreads:
 
     @patch("pathlib.Path.read_text", return_value="# Help")
     @patch("pathlib.Path.exists", return_value=True)
-    def test_help_dialog(self, mock_exists, mock_read):
+    def test_help_dialog(self, mock_exists, mock_read, mocked_launcher_module):
         """Test HelpDialog initialization and content loading."""
-        dialog = HelpDialog()
+        dialog = mocked_launcher_module.HelpDialog()
         assert dialog is not None
         # Verify text was loaded (mock read_text called)
         mock_read.assert_called_once()
         # Verify title
         assert dialog.windowTitle() == "Golf Suite - Help"
-        # Verify text was set
-        # Since we mocked QTextEdit, we can't easily verify internal state without
-        # capturing the instance. But simpler is just ensuring it runs without error.
