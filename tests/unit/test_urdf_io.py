@@ -140,7 +140,7 @@ class TestURDFExporter:
         self, mock_mjdata_class, mock_id2name, mock_mujoco_model, tmp_path
     ):
         """Test exporting MJCF to URDF."""
-        
+
         # Mock the MjData constructor to return a mock instance
         mock_data_instance = MagicMock()
         mock_mjdata_class.return_value = mock_data_instance
