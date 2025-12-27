@@ -73,7 +73,6 @@ models:
         with (
             patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
             patch("launchers.golf_launcher.ASSETS_DIR", new=temp_path),
-            patch("launchers.golf_launcher.GolfLauncher.setCentralWidget"),
         ):
 
             MockRegistry.return_value = temp_registry
