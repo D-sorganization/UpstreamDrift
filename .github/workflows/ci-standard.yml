@@ -57,9 +57,14 @@ jobs:
       # TODO detection now BLOCKING - Jules Auto-Repair will fix
       - name: Verify No Placeholders
         run: |
-          if grep -rE "TODO|FIXME" --include="*.py" . --exclude-dir=".git" --exclude-dir=".mypy_cache" --exclude-dir=".ruff_cache" --exclude-dir="__pycache__" --exclude-dir="archive" --exclude-dir="check_code_quality"; then
-             echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
-             exit 1
+          violations=$(
+            find . \( -path "./.git" -o -path "./.mypy_cache" -o -path "./.ruff_cache" -o -path "./__pycache__" -o -path "./archive" -o -path "./check_code_quality" \) -prune -o -type f -name "*.py" -print0 \
+              | xargs -0 grep -nE "TODO|FIXME" || true
+          )
+          if [ -n "$violations" ]; then
+            echo "$violations"
+            echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
+            exit 1
           fi
 
       # FIX: Run Python-based MATLAB Quality Check (Works without License)

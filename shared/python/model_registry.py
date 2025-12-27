@@ -36,7 +36,11 @@ class ModelRegistry:
         """Load models from YAML configuration file.
 
         Raises:
-            ModelRegistryError: If registry file is malformed
+            ModelRegistryError: If registry file is malformed (NotRaised: gracefully logged)
+
+        This method logs warnings and errors if the registry file is missing,
+        malformed, or individual model configurations are invalid, and leaves
+        the registry in its current state instead of raising exceptions.
         """
         from .core import setup_logging
 
