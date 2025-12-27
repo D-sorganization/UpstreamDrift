@@ -323,9 +323,9 @@ class PhysicsTab(QtWidgets.QWidget):
             self.model_combo.addItem(display_name)
 
             # Store description
-            desc = desc_map.get(i)
+            desc = str(desc_map.get(i)) if desc_map.get(i) else None
             if not desc:
-                desc = config.get("description", "Imported model")
+                desc = str(config.get("description", "Imported model"))
             self.model_descriptions[i] = desc
 
     def _update_model_description(self, index: int) -> None:
@@ -352,14 +352,12 @@ class PhysicsTab(QtWidgets.QWidget):
         self.mode_combo.setEnabled(True)
 
         if hasattr(self.main_window, "statusBar"):
-             if success:
-                 self.main_window.statusBar().showMessage(
-                     "Model loaded successfully.", 3000
-                 )
-             else:
-                 self.main_window.statusBar().showMessage(
-                     "Model load failed.", 5000
-                 )
+            if success:
+                self.main_window.statusBar().showMessage(
+                    "Model loaded successfully.", 3000
+                )
+            else:
+                self.main_window.statusBar().showMessage("Model load failed.", 5000)
 
         if success:
             self._finalize_model_change()
@@ -406,16 +404,14 @@ class PhysicsTab(QtWidgets.QWidget):
 
         try:
             if hasattr(self.sim_widget, "load_model_async"):
-                 if "xml_path" in config:
-                     self.sim_widget.load_model_async(
-                         str(config["xml_path"]), is_file=True
-                     )
-                 elif "xml" in config:
-                     self.sim_widget.load_model_async(
-                         str(config["xml"]), is_file=False
-                     )
-                 else:
-                     raise ValueError(f"Invalid config: {config['name']}")
+                if "xml_path" in config:
+                    self.sim_widget.load_model_async(
+                        str(config["xml_path"]), is_file=True
+                    )
+                elif "xml" in config:
+                    self.sim_widget.load_model_async(str(config["xml"]), is_file=False)
+                else:
+                    raise ValueError(f"Invalid config: {config['name']}")
             else:
                 # Fallback to sync
                 if "xml_path" in config:

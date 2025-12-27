@@ -25,16 +25,19 @@ from .telemetry import TelemetryRecorder
 CV2_LIB = None
 INVALID_CV2 = False
 
+
 def get_cv2():
     """Lazy import of OpenCV to speed up initial load."""
     global CV2_LIB, INVALID_CV2
     if CV2_LIB is None and not INVALID_CV2:
         try:
             import cv2
+
             CV2_LIB = cv2
         except ImportError:
             INVALID_CV2 = True
     return CV2_LIB
+
 
 LOGGER = logging.getLogger(__name__)
 MIN_CAMERA_DEPTH: Final[float] = 0.1
@@ -77,7 +80,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
     # Signal emitted when model loading starts/ends
     loading_started = QtCore.pyqtSignal()
-    loading_finished = QtCore.pyqtSignal(bool) # True = success
+    loading_finished = QtCore.pyqtSignal(bool)  # True = success
 
     def __init__(
         self,
