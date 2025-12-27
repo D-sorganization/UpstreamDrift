@@ -591,7 +591,8 @@ class HumanoidLauncher(QMainWindow):
         self.log("Log cleared.")
 
     def set_btn_color(self, btn, rgba):
-        from typing import Sequence
+        from collections.abc import Sequence
+
         rgba_seq: Sequence[float] = rgba  # type: ignore[assignment]
         r, g, b = (int(c * 255) for c in rgba_seq[:3])
         btn.setStyleSheet(
@@ -604,12 +605,12 @@ class HumanoidLauncher(QMainWindow):
             current = colors_dict.get(key, [1, 1, 1, 1])
         else:
             current = [1, 1, 1, 1]
-            
+
         if isinstance(current, (list, tuple)) and len(current) >= 3:
             initial = QColor(
-                int(float(current[0]) * 255), 
-                int(float(current[1]) * 255), 
-                int(float(current[2]) * 255)
+                int(float(current[0]) * 255),
+                int(float(current[1]) * 255),
+                int(float(current[2]) * 255),
             )
         else:
             initial = QColor(255, 255, 255)  # Default to white
@@ -765,7 +766,9 @@ class HumanoidLauncher(QMainWindow):
                         if k == "colors":
                             if "colors" in config_dict:
                                 colors_dict = config_dict.get("colors", {})
-                                if isinstance(colors_dict, dict) and isinstance(v, dict):
+                                if isinstance(colors_dict, dict) and isinstance(
+                                    v, dict
+                                ):
                                     colors_dict.update(v)
                                     config_dict["colors"] = colors_dict
                         else:
