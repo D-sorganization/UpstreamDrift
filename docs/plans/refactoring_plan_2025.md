@@ -41,13 +41,13 @@ Based on reviews from Claude and Codex, this plan outlines a 4-phase approach to
 ## Phase 3: Testing & Documentation (Month 2)
 **Goal:** Increase confidence in cross-engine validity.
 
-- [ ] **3.1 Cross-Engine Integration Tests**
+- [x] **3.1 Cross-Engine Integration Tests**
   - **Issue:** No automated way to verify that MuJoCo, Drake, and Pinocchio results match.
   - **Action:** Create `tests/integration/test_physics_consistency.py` that runs simple pendulums on all 3 engines and asserts result proximity.
-- [ ] **3.2 Architecture Documentation**
+- [x] **3.2 Architecture Documentation**
   - **Issue:** Missing high-level diagrams.
   - **Action:** Add Mermaid diagrams for "Engine Loading Flow" and "Data Pipeline" to `docs/architecture/`.
-- [ ] **3.3 Launcher Configuration Abstraction**
+- [x] **3.3 Launcher Configuration Abstraction**
   - **Issue:** `golf_launcher.py` contains hardcoded paths and mixed concerns.
   - **Action:** Move model definitions to `config/models.yaml` and create a `ModelRegistry` class.
 
