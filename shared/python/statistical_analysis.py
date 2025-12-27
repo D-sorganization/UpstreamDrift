@@ -77,6 +77,8 @@ class StatisticalAnalyzer:
         joint_torques: np.ndarray,
         club_head_speed: np.ndarray | None = None,
         club_head_position: np.ndarray | None = None,
+        angular_momentum: np.ndarray | None = None,
+        cop_position: np.ndarray | None = None,
     ) -> None:
         """Initialize analyzer with recorded data.
 
@@ -87,6 +89,8 @@ class StatisticalAnalyzer:
             joint_torques: Joint torques (N, nu)
             club_head_speed: Club head speed (N,) [optional]
             club_head_position: Club head 3D position (N, 3) [optional]
+            angular_momentum: System angular momentum (N, 3) [optional]
+            cop_position: Center of Pressure position (N, 3) [optional]
         """
         self.times = times
         self.joint_positions = joint_positions
@@ -94,6 +98,8 @@ class StatisticalAnalyzer:
         self.joint_torques = joint_torques
         self.club_head_speed = club_head_speed
         self.club_head_position = club_head_position
+        self.angular_momentum = angular_momentum
+        self.cop_position = cop_position
 
         self.dt = float(np.mean(np.diff(times))) if len(times) > 1 else 0.0
         self.duration = times[-1] - times[0] if len(times) > 1 else 0.0
@@ -570,6 +576,68 @@ class StatisticalAnalyzer:
 
             freqs, psd = signal.welch(data, fs=fs, window=window)
             return freqs, psd
+
+    def compute_angular_momentum_metrics(self) -> dict[str, Any]:
+        """Compute metrics related to angular momentum.
+
+        Returns:
+            Dictionary with angular momentum metrics or empty if no data.
+        """
+        if self.angular_momentum is None or len(self.angular_momentum) == 0:
+            return {}
+
+        # Magnitude
+        am_magnitude = np.linalg.norm(self.angular_momentum, axis=1)
+
+        # Peak AM
+        peak_am_idx = np.argmax(am_magnitude)
+        peak_am = float(am_magnitude[peak_am_idx])
+        peak_am_time = float(self.times[peak_am_idx])
+
+        # AM at impact (if available)
+        am_at_impact = 0.0
+        if self.club_head_speed is not None:
+            impact_idx = np.argmax(self.club_head_speed)
+            am_at_impact = float(am_magnitude[impact_idx])
+
+        return {
+            "peak_angular_momentum": peak_am,
+            "peak_angular_momentum_time": peak_am_time,
+            "angular_momentum_at_impact": am_at_impact,
+            "mean_angular_momentum": float(np.mean(am_magnitude)),
+        }
+
+    def compute_cop_metrics(self) -> dict[str, Any]:
+        """Compute metrics related to Center of Pressure.
+
+        Returns:
+            Dictionary with CoP metrics or empty if no data.
+        """
+        if self.cop_position is None or len(self.cop_position) == 0:
+            return {}
+
+        # CoP excursion (path length)
+        # Using simple Euclidean distance between consecutive points
+        diffs = np.diff(self.cop_position[:, :2], axis=0)  # Use X, Y
+        distances = np.linalg.norm(diffs, axis=1)
+        path_length = float(np.sum(distances))
+
+        # Range (bounding box)
+        min_x = float(np.min(self.cop_position[:, 0]))
+        max_x = float(np.max(self.cop_position[:, 0]))
+        min_y = float(np.min(self.cop_position[:, 1]))
+        max_y = float(np.max(self.cop_position[:, 1]))
+
+        # Max velocity of CoP
+        velocity = distances / self.dt if self.dt > 0 else 0.0
+        max_velocity = float(np.max(velocity)) if isinstance(velocity, np.ndarray) else 0.0
+
+        return {
+            "cop_path_length": path_length,
+            "cop_range_x": max_x - min_x,
+            "cop_range_y": max_y - min_y,
+            "max_cop_velocity": max_velocity,
+        }
 
     def compute_smoothness_metric(self, data: np.ndarray) -> float:
         """Compute smoothness metric (Spectral Arc Length).

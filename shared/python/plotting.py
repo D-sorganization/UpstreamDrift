@@ -676,23 +676,18 @@ class GolfSwingPlotter:
         Args:
             fig: Matplotlib figure to plot on
         """
-        # Create 2x2 grid
-        gs = fig.add_gridspec(2, 2, hspace=0.3, wspace=0.3)
+        # Create 2x3 grid (more space for advanced metrics)
+        gs = fig.add_gridspec(2, 3, hspace=0.3, wspace=0.3)
 
-        # Top left: Club head speed
+        # 1. Club head speed (Top Left)
         ax1 = fig.add_subplot(gs[0, 0])
         times, speeds = self.recorder.get_time_series("club_head_speed")
-        # Convert to numpy array if needed
         speeds = np.asarray(speeds)
         if len(times) > 0 and len(speeds) > 0:
             speeds_mph = speeds * 2.23694
             ax1.plot(times, speeds_mph, linewidth=2, color=self.colors["primary"])
             ax1.fill_between(
-                times,
-                0,
-                speeds_mph,
-                alpha=0.3,
-                color=self.colors["primary"],
+                times, 0, speeds_mph, alpha=0.3, color=self.colors["primary"]
             )
             max_speed = np.max(speeds_mph)
             ax1.set_title(
@@ -706,24 +701,16 @@ class GolfSwingPlotter:
         else:
             ax1.text(0.5, 0.5, "No club head data", ha="center", va="center")
 
-        # Top right: Energy
+        # 2. Energy (Top Center)
         ax2 = fig.add_subplot(gs[0, 1])
         times_ke, ke = self.recorder.get_time_series("kinetic_energy")
         times_pe, pe = self.recorder.get_time_series("potential_energy")
         if len(times_ke) > 0:
             ax2.plot(
-                times_ke,
-                ke,
-                label="KE",
-                linewidth=2,
-                color=self.colors["primary"],
+                times_ke, ke, label="KE", linewidth=2, color=self.colors["primary"]
             )
             ax2.plot(
-                times_pe,
-                pe,
-                label="PE",
-                linewidth=2,
-                color=self.colors["secondary"],
+                times_pe, pe, label="PE", linewidth=2, color=self.colors["secondary"]
             )
             ax2.set_title("Energy", fontsize=11, fontweight="bold")
             ax2.set_xlabel("Time (s)", fontsize=9)
@@ -733,48 +720,81 @@ class GolfSwingPlotter:
         else:
             ax2.text(0.5, 0.5, "No energy data", ha="center", va="center")
 
-        # Bottom left: Joint angles
-        ax3 = fig.add_subplot(gs[1, 0])
+        # 3. Angular Momentum (Top Right)
+        ax3 = fig.add_subplot(gs[0, 2])
+        times_am, am = self.recorder.get_time_series("angular_momentum")
+        am = np.asarray(am)
+        if len(times_am) > 0 and am.size > 0:
+            am_mag = np.linalg.norm(am, axis=1)
+            ax3.plot(
+                times_am,
+                am_mag,
+                label="Mag",
+                linewidth=2,
+                color=self.colors["quaternary"],
+            )
+            ax3.set_title("Angular Momentum", fontsize=11, fontweight="bold")
+            ax3.set_xlabel("Time (s)", fontsize=9)
+            ax3.set_ylabel("L (kg m²/s)", fontsize=9)
+            ax3.grid(True, alpha=0.3)
+        else:
+            ax3.text(0.5, 0.5, "No AM data", ha="center", va="center")
+
+        # 4. Joint Angles (Bottom Left)
+        ax4 = fig.add_subplot(gs[1, 0])
         times, positions = self.recorder.get_time_series("joint_positions")
-        # Convert to numpy array if needed
         positions = np.asarray(positions)
         if len(times) > 0 and len(positions) > 0 and positions.ndim >= 2:
             for idx in range(min(3, positions.shape[1])):  # Plot first 3 joints
-                ax3.plot(
+                ax4.plot(
                     times,
                     np.rad2deg(positions[:, idx]),
                     label=self.get_joint_name(idx),
                     linewidth=2,
                 )
-            ax3.set_title("Joint Angles", fontsize=11, fontweight="bold")
-            ax3.set_xlabel("Time (s)", fontsize=9)
-            ax3.set_ylabel("Angle (deg)", fontsize=9)
-            ax3.legend(fontsize=7, loc="best")
-            ax3.grid(True, alpha=0.3)
+            ax4.set_title("Joint Angles", fontsize=11, fontweight="bold")
+            ax4.set_xlabel("Time (s)", fontsize=9)
+            ax4.set_ylabel("Angle (deg)", fontsize=9)
+            ax4.legend(fontsize=7, loc="best")
+            ax4.grid(True, alpha=0.3)
         else:
-            ax3.text(0.5, 0.5, "No position data", ha="center", va="center")
+            ax4.text(0.5, 0.5, "No position data", ha="center", va="center")
 
-        # Bottom right: Torques
-        ax4 = fig.add_subplot(gs[1, 1])
+        # 5. CoP (Bottom Center)
+        ax5 = fig.add_subplot(gs[1, 1])
+        times_cop, cop = self.recorder.get_time_series("cop_position")
+        cop = np.asarray(cop)
+        if len(times_cop) > 0 and cop.size > 0:
+            sc = ax5.scatter(
+                cop[:, 0], cop[:, 1], c=times_cop, cmap="viridis", s=10
+            )
+            ax5.set_title("CoP Trajectory", fontsize=11, fontweight="bold")
+            ax5.set_xlabel("X (m)", fontsize=9)
+            ax5.set_ylabel("Y (m)", fontsize=9)
+            ax5.axis("equal")
+            ax5.grid(True, alpha=0.3)
+        else:
+            ax5.text(0.5, 0.5, "No CoP data", ha="center", va="center")
+
+        # 6. Torques (Bottom Right)
+        ax6 = fig.add_subplot(gs[1, 2])
         times, torques = self.recorder.get_time_series("joint_torques")
-        # Convert to numpy array if needed
         torques = np.asarray(torques)
         if len(times) > 0 and len(torques) > 0 and torques.ndim >= 2:
-            for idx in range(min(3, torques.shape[1])):  # Plot first 3 actuators
-                ax4.plot(
+            for idx in range(min(3, torques.shape[1])):
+                ax6.plot(
                     times,
                     torques[:, idx],
                     label=self.get_joint_name(idx),
                     linewidth=2,
                 )
-            ax4.set_title("Joint Torques", fontsize=11, fontweight="bold")
-            ax4.set_xlabel("Time (s)", fontsize=9)
-            ax4.set_ylabel("Torque (Nm)", fontsize=9)
-            ax4.legend(fontsize=7, loc="best")
-            ax4.grid(True, alpha=0.3)
-            ax4.axhline(y=0, color="k", linestyle="-", alpha=0.3)
+            ax6.set_title("Joint Torques", fontsize=11, fontweight="bold")
+            ax6.set_xlabel("Time (s)", fontsize=9)
+            ax6.set_ylabel("Torque (Nm)", fontsize=9)
+            ax6.legend(fontsize=7, loc="best")
+            ax6.grid(True, alpha=0.3)
         else:
-            ax4.text(0.5, 0.5, "No torque data", ha="center", va="center")
+            ax6.text(0.5, 0.5, "No torque data", ha="center", va="center")
 
         fig.suptitle(
             "Golf Swing Analysis Dashboard",
@@ -1054,4 +1074,90 @@ class GolfSwingPlotter:
         )
 
         fig.colorbar(sc, ax=ax, label="Deviation from Plane (m)", shrink=0.6)
+        fig.tight_layout()
+
+    def plot_angular_momentum(self, fig: Figure) -> None:
+        """Plot Angular Momentum over time (Magnitude and Components).
+
+        Args:
+            fig: Matplotlib figure
+        """
+        times, am_data = self.recorder.get_time_series("angular_momentum")
+        am_data = np.asarray(am_data)
+
+        if len(times) == 0 or am_data.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No Angular Momentum Data", ha="center", va="center")
+            return
+
+        # Calculate magnitude
+        am_mag = np.linalg.norm(am_data, axis=1)
+
+        ax = fig.add_subplot(111)
+
+        # Plot components
+        ax.plot(
+            times, am_data[:, 0], label="Lx", color=self.colors["secondary"], alpha=0.7
+        )
+        ax.plot(
+            times, am_data[:, 1], label="Ly", color=self.colors["tertiary"], alpha=0.7
+        )
+        ax.plot(
+            times, am_data[:, 2], label="Lz", color=self.colors["quaternary"], alpha=0.7
+        )
+
+        # Plot magnitude
+        ax.plot(
+            times,
+            am_mag,
+            label="Magnitude",
+            color=self.colors["primary"],
+            linewidth=2.5,
+        )
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Angular Momentum (kg m²/s)", fontsize=12, fontweight="bold")
+        ax.set_title("System Angular Momentum", fontsize=14, fontweight="bold")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        fig.tight_layout()
+
+    def plot_cop_trajectory(self, fig: Figure) -> None:
+        """Plot Center of Pressure trajectory (top-down view).
+
+        Args:
+            fig: Matplotlib figure
+        """
+        times, cop_data = self.recorder.get_time_series("cop_position")
+        cop_data = np.asarray(cop_data)
+
+        if len(times) == 0 or cop_data.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No CoP Data", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        # Assuming X is lateral (target line) and Y is anterior-posterior (toe-heel)
+        # or typical MuJoCo frame where X forward, Y left.
+        # We'll plot X vs Y.
+        x = cop_data[:, 0]
+        y = cop_data[:, 1]
+
+        # Scatter with time color
+        sc = ax.scatter(x, y, c=times, cmap="viridis", s=30, zorder=2)
+        ax.plot(x, y, color="gray", alpha=0.4, zorder=1)
+
+        # Mark Start/End
+        ax.scatter(x[0], y[0], c="green", s=100, label="Start", zorder=3)
+        ax.scatter(x[-1], y[-1], c="red", s=100, marker="s", label="End", zorder=3)
+
+        ax.set_xlabel("X Position (m)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Y Position (m)", fontsize=12, fontweight="bold")
+        ax.set_title("Center of Pressure Trajectory", fontsize=14, fontweight="bold")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        ax.axis("equal")  # Preserve aspect ratio
+
+        fig.colorbar(sc, ax=ax, label="Time (s)")
         fig.tight_layout()

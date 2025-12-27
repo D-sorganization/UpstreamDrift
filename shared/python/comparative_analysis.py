@@ -221,5 +221,32 @@ class ComparativeSwingAnalyzer:
                 )
             )
 
+        # Add angular momentum comparison
+        _, am_a = self.recorder_a.get_time_series("angular_momentum")
+        _, am_b = self.recorder_b.get_time_series("angular_momentum")
+        if len(am_a) > 0 and len(am_b) > 0:
+            am_a = np.asarray(am_a)
+            am_b = np.asarray(am_b)
+            # Compare max magnitude
+            max_am_a = float(np.max(np.linalg.norm(am_a, axis=1)))
+            max_am_b = float(np.max(np.linalg.norm(am_b, axis=1)))
+            metrics.append(
+                self.compare_scalars("Max Angular Momentum", max_am_a, max_am_b)
+            )
+
+        # Add CoP path length comparison
+        _, cop_a = self.recorder_a.get_time_series("cop_position")
+        _, cop_b = self.recorder_b.get_time_series("cop_position")
+        if len(cop_a) > 0 and len(cop_b) > 0:
+            cop_a = np.asarray(cop_a)
+            cop_b = np.asarray(cop_b)
+
+            def path_len(c):
+                return float(np.sum(np.linalg.norm(np.diff(c[:, :2], axis=0), axis=1)))
+
+            metrics.append(
+                self.compare_scalars("CoP Path Length", path_len(cop_a), path_len(cop_b))
+            )
+
         report = {"swing_a": self.name_a, "swing_b": self.name_b, "metrics": metrics}
         return report
