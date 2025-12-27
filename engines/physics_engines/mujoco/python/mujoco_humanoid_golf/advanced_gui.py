@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import logging
 import typing
+from pathlib import Path
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
@@ -45,33 +46,20 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.resize(1600, 900)
 
         # Apply Global Stylesheet
-        self.setStyleSheet(
-            """
-            QPushButton {
-                border-radius: 5px;
-                padding: 5px;
-            }
-            QPushButton:hover {
-                border: 1px solid #4a90e2;
-            }
-            QLineEdit, QComboBox, QSpinBox, QDoubleSpinBox {
-                border-radius: 4px;
-                padding: 4px;
-                background-color: #333;
-                color: white;
-            }
-            QGroupBox {
-                border: 1px solid #555;
-                border-radius: 5px;
-                margin-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
-            }
-        """
-        )
+        # Apply Global Stylesheet
+        self._load_stylesheet()
+
+    def _load_stylesheet(self) -> None:
+        """Load and apply the external QSS stylesheet."""
+        try:
+            style_path = Path(__file__).parent / "gui" / "styles" / "dark_theme.qss"
+            if style_path.exists():
+                with open(style_path) as f:
+                    self.setStyleSheet(f.read())
+            else:
+                logger.warning("Stylesheet not found: %s", style_path)
+        except Exception:
+            logger.exception("Failed to load stylesheet")
 
         # Model configurations
 

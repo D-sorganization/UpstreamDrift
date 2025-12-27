@@ -259,10 +259,8 @@ class PhysicsTab(QtWidgets.QWidget):
         # Model description label
         self.model_description_label = QtWidgets.QLabel()
         self.model_description_label.setWordWrap(True)
-        self.model_description_label.setStyleSheet(
-            "QLabel { color: #666; font-style: italic; padding: 5px; "
-            "background-color: #f5f5f5; border-radius: 3px; }"
-        )
+        # Style set in dark_theme.qss
+        self.model_description_label.setObjectName("descriptionLabel")
         model_layout.addWidget(self.model_description_label)
         self._update_model_description(0)
         main_layout.addWidget(model_group)
