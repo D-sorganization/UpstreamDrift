@@ -27,7 +27,15 @@ def find_duplicates(root_dir: Path, tracked_files: set[str]) -> int:
 
     # Walk the tree
     # Walk the tree, excluding common heavy directories
-    ignored_dirs = {".git", ".venv", "venv", "node_modules", "__pycache__", ".pytest_cache", ".mypy_cache"}
+    ignored_dirs = {
+        ".git",
+        ".venv",
+        "venv",
+        "node_modules",
+        "__pycache__",
+        ".pytest_cache",
+        ".mypy_cache",
+    }
 
     for path in root_dir.rglob("*"):
         # Optimization: Skip ignored directories to avoid traversing deep trees
@@ -64,7 +72,7 @@ def main():
     tracked_files = {
         "matlab_quality_check.py",
         # "matlab_quality_config.m", # Todo: consolidating in Phase 2
-        "constants.py"
+        "constants.py",
     }
 
     print(f"Scanning for duplicates of: {tracked_files}")

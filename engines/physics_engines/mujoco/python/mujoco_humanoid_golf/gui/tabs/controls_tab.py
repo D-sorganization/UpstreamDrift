@@ -165,8 +165,6 @@ class ControlsTab(QtWidgets.QWidget):
         help_layout.addWidget(label)
         parent_layout.addWidget(help_group)
 
-
-
     def _create_quick_camera_buttons(
         self, parent_layout: QtWidgets.QVBoxLayout
     ) -> None:
