@@ -29,7 +29,7 @@ def create_random_model(num_bodies=10):
     model = {}
     model["NB"] = num_bodies
     model["parent"] = np.array([-1] + [i - 1 for i in range(1, num_bodies)], dtype=int)
-    model["jtype"] = ["R"] * num_bodies  # Revolute joints
+    model["jtype"] = ["Rz"] * num_bodies  # Revolute joints (z-axis)
 
     # Random transforms
     model["Xtree"] = [np.eye(6) for _ in range(num_bodies)]
