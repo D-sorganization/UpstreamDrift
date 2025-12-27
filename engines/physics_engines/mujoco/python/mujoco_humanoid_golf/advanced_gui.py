@@ -57,9 +57,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
                 with open(style_path) as f:
                     self.setStyleSheet(f.read())
             else:
-                logger.warning("Stylesheet not found: %s", style_path)
+                logger.warning(
+                    "Stylesheet not found: %s; using default Qt styling", style_path
+                )
         except Exception:
-            logger.exception("Failed to load stylesheet")
+            logger.exception("Failed to load stylesheet, using default Qt styling")
 
         # Model configurations
 

@@ -6,6 +6,15 @@ QWidget {
     color: #e0e0e0;
     font-family: "Segoe UI", "Roboto", sans-serif;
     font-size: 10pt;
+    /*
+     * Theme Constants:
+     * Accent Color: #007acc
+     * Accent Hover: #0098ff
+     * Accent Pressed: #005c99
+     * Background Dark: #1e1e1e
+     * Background Light: #2b2b2b
+     * Border Color: #3d3d3d
+     */
 }
 
 /* Tab Widget Styling */
