@@ -241,7 +241,8 @@ class ComparativeSwingAnalyzer:
             cop_a = np.asarray(cop_a)
             cop_b = np.asarray(cop_b)
 
-            def path_len(c):
+            def path_len(c: np.ndarray) -> float:
+                """Calculate path length of a trajectory."""
                 return float(np.sum(np.linalg.norm(np.diff(c[:, :2], axis=0), axis=1)))
 
             metrics.append(
