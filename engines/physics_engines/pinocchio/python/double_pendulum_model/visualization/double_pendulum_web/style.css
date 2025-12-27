@@ -84,6 +84,12 @@ button:disabled {
   filter: none;
 }
 
+#defaults {
+  background: #2a3545;
+  color: var(--text);
+  border: 1px solid #3c4c5d;
+}
+
 .icon {
   flex-shrink: 0;
 }
