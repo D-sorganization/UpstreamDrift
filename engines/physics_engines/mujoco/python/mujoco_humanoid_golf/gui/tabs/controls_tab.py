@@ -165,13 +165,7 @@ class ControlsTab(QtWidgets.QWidget):
         help_layout.addWidget(label)
         parent_layout.addWidget(help_group)
 
-        # 4. Container for Dynamic Mode Controls (Actuators) (Deleted duplicate)
-        # 5. Container for Kinematic Mode Controls (Joints) (Deleted duplicate)
-        # Storage for joint widgets (Deleted duplicate)
 
-    def _create_controls_container(self, main_layout: QtWidgets.QVBoxLayout) -> None:
-        # Deleted duplicate
-        pass
 
     def _create_quick_camera_buttons(
         self, parent_layout: QtWidgets.QVBoxLayout

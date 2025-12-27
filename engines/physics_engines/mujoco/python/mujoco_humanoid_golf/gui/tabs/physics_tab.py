@@ -291,12 +291,12 @@ class PhysicsTab(QtWidgets.QWidget):
         # Add basic described models first
         desc_map = {
             0: "Simple driven pendulum showing chaotic behavior.",
-            1: "Basic golf swing with shoulder and wrist joints. Simplest realistic model.",
+            1: "Basic swing with shoulder and wrist joints. Simplest realistic model.",
             2: "Adds elbow joint for more realistic arm mechanics.",
             3: "Upper body model with spine rotation and both arms.",
             4: "Full body model including leg drive and weight transfer.",
-            5: "Most detailed model with scapulae, 3-DOF shoulders, and flexible shaft.",
-            6: "Muscle-actuated upper body. Each muscle can be controlled independently.",
+            5: "Most detailed model with scapulae, 3-DOF shoulders, flexible shaft.",
+            6: "Muscle-actuated upper body. Independent muscle control.",
             7: "Complete musculoskeletal model. Very complex - for advanced users.",
             8: "Both arms with muscle actuation. Good for arm mechanics study.",
         }
@@ -375,7 +375,7 @@ class PhysicsTab(QtWidgets.QWidget):
         # Emit signal so other tabs can update
         self.model_changed.emit(config["name"], config)
 
-        # Triger mode update too
+        # Trigger mode update too
         self._on_operating_mode_changed(self.mode_combo.currentIndex())
 
     def _on_operating_mode_changed(self, index: int) -> None:
