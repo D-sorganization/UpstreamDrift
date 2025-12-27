@@ -44,11 +44,11 @@ class PendulumCanvas(FigureCanvasQTAgg):
     def _configure_axes(self) -> None:
         self.ax.set_xlabel("X (m)")
         self.ax.set_ylabel("Y (m)")
-        self.ax.set_zlabel("Z (m)")
-        self.ax.view_init(elev=25, azim=-60)
-        self.ax.set_xlim([-2.5, 2.5])
-        self.ax.set_ylim([-2.5, 2.5])
-        self.ax.set_zlim([-1.5, 1.5])
+        self.ax.set_zlabel("Z (m)")  # type: ignore[attr-defined]
+        self.ax.view_init(elev=25, azim=-60)  # type: ignore[attr-defined]
+        self.ax.set_xlim((-2.5, 2.5))
+        self.ax.set_ylim((-2.5, 2.5))
+        self.ax.set_zlim((-1.5, 1.5))  # type: ignore[attr-defined]
 
     def draw_chain(self, points: np.ndarray) -> None:
         self.ax.cla()

@@ -163,7 +163,7 @@ def diagnose_and_fix_icons():
     try:
         source_img = Image.open(source_image)
         if source_img.mode != "RGBA":
-            source_img = source_img.convert("RGBA")
+            source_img = source_img.convert("RGBA")  # type: ignore[assignment]
 
         # Create ultra-sharp versions
         ultra_sharp_sizes = [16, 20, 24, 32, 48, 64, 128, 256]

@@ -65,23 +65,23 @@ def create_high_quality_favicon():
 
         # Convert to RGBA if needed
         if img.mode != "RGBA":
-            img = img.convert("RGBA")
+            img = img.convert("RGBA")  # type: ignore[assignment]
 
         # Pre-process the image for better icon quality
         # Enhance contrast slightly for better icon visibility
         contrast_enhancer = ImageEnhance.Contrast(img)
-        img = contrast_enhancer.enhance(1.05)
+        img = contrast_enhancer.enhance(1.05)  # type: ignore[assignment]
 
         # Enhance sharpness of the source
         sharpness_enhancer = ImageEnhance.Sharpness(img)
-        img = sharpness_enhancer.enhance(1.1)
+        img = sharpness_enhancer.enhance(1.1)  # type: ignore[assignment]
 
         # If source is very large, resize to optimal intermediate size first
         if max(img.size) > 1024:
             # Calculate aspect ratio preserving resize
             ratio = min(1024 / img.width, 1024 / img.height)
             new_size = (int(img.width * ratio), int(img.height * ratio))
-            img = img.resize(new_size, Image.Resampling.LANCZOS)
+            img = img.resize(new_size, Image.Resampling.LANCZOS)  # type: ignore[assignment]
             logging.info(f"Pre-resized to intermediate size: {img.size}")
 
         # Create high-quality PNG icon (256x256)

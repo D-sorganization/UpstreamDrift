@@ -133,7 +133,7 @@ def create_cropped_robot_icon():
 
         # Convert to RGBA
         if img.mode != "RGBA":
-            img = img.convert("RGBA")
+            img = img.convert("RGBA")  # type: ignore[assignment]
 
         # Auto-crop to focus on the robot
         cropped_img = auto_crop_robot(img)
