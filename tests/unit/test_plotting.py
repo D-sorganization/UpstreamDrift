@@ -201,8 +201,8 @@ class TestGolfSwingPlotter:
         """Test dashboard plotting."""
         plotter.plot_summary_dashboard(mock_figure)
         assert mock_figure.add_gridspec.called
-        # Should create 4 subplots
-        assert mock_figure.add_subplot.call_count == 4
+        # Should create 6 subplots (2x3 grid)
+        assert mock_figure.add_subplot.call_count == 6
 
     def test_plot_kinematic_sequence(self, plotter, mock_figure):
         """Test kinematic sequence plotting."""

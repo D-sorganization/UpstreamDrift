@@ -14,6 +14,7 @@ from typing import TYPE_CHECKING, Protocol
 
 import numpy as np
 from matplotlib.figure import Figure
+from matplotlib import pyplot as plt
 
 from shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 
@@ -527,8 +528,6 @@ class GolfSwingPlotter:
         ax.stackplot(times, torques_pos.T, labels=labels, alpha=0.7)
         # Plot negative torques (same colors, no labels to avoid duplicate legend)
         # Reset color cycle by creating a new cycler with the same colors
-        from matplotlib import pyplot as plt
-
         ax.set_prop_cycle(plt.rcParams["axes.prop_cycle"])
         ax.stackplot(times, torques_neg.T, alpha=0.7)
 

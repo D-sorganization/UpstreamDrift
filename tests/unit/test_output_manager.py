@@ -21,6 +21,28 @@ from shared.python.output_manager import (
 )
 
 
+def _has_parquet_support():
+    """Check if parquet support is available."""
+    try:
+        import pyarrow  # noqa: F401
+        return True
+    except ImportError:
+        try:
+            import fastparquet  # noqa: F401
+            return True
+        except ImportError:
+            return False
+
+
+def _has_hdf5_support():
+    """Check if HDF5 support is available."""
+    try:
+        import tables  # noqa: F401
+        return True
+    except ImportError:
+        return False
+
+
 @pytest.fixture
 def temp_output_dir(tmp_path):
     """Create a temporary output directory for testing."""
@@ -187,6 +209,9 @@ class TestOutputManager:
         # Pickle preserves numpy arrays
         np.testing.assert_array_equal(loaded_data["array"], sample_dict_data["array"])
 
+    @pytest.mark.skipif(
+        not _has_parquet_support(), reason="Parquet support not available (missing pyarrow/fastparquet)"
+    )
     def test_save_load_parquet(self, output_manager, sample_data):
         """Test saving and loading Parquet files."""
         filename = "test_sim"
@@ -204,6 +229,9 @@ class TestOutputManager:
         )
         pd.testing.assert_frame_equal(sample_data, loaded_df)
 
+    @pytest.mark.skipif(
+        not _has_hdf5_support(), reason="HDF5 support not available (missing pytables)"
+    )
     def test_save_load_hdf5(self, output_manager, sample_data):
         """Test saving and loading HDF5 files."""
         filename = "test_sim"

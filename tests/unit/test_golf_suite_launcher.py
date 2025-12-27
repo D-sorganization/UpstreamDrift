@@ -41,6 +41,9 @@ class MockQWidget:
 
 
 class MockQVBoxLayout:
+    def __init__(self):
+        pass
+    
     def addWidget(self, w):
         pass
 
@@ -55,6 +58,9 @@ class MockQVBoxLayout:
 
 
 class MockQHBoxLayout:
+    def __init__(self):
+        pass
+    
     def addWidget(self, w):
         pass
 
