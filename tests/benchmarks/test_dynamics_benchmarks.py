@@ -2,9 +2,6 @@
 Benchmarks for Rigid Body Dynamics Algorithms (ABA and RNEA).
 """
 
-import numpy as np
-import pytest
-
 import sys
 from pathlib import Path
 
@@ -17,10 +14,12 @@ MUJOCO_PYTHON_PATH = (
 if str(MUJOCO_PYTHON_PATH) not in sys.path:
     sys.path.append(str(MUJOCO_PYTHON_PATH))
 
-from mujoco_humanoid_golf.rigid_body_dynamics.aba import (
+import numpy as np  # noqa: E402
+import pytest  # noqa: E402
+from mujoco_humanoid_golf.rigid_body_dynamics.aba import (  # noqa: E402
     aba,
 )
-from mujoco_humanoid_golf.rigid_body_dynamics.rnea import (
+from mujoco_humanoid_golf.rigid_body_dynamics.rnea import (  # noqa: E402
     rnea,
 )
 
