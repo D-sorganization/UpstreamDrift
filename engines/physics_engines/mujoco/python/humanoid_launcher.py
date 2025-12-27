@@ -407,7 +407,7 @@ class HumanoidLauncher(QMainWindow):
         self.spin_height = QDoubleSpinBox()
         self.spin_height.setRange(0.5, 3.0)
         self.spin_height.setSingleStep(0.05)
-        self.spin_height.setValue(self.config.get("height_m", 1.8))
+        self.spin_height.setValue(float(self.config.get("height_m", 1.8)))
         dim_layout.addWidget(self.spin_height, 0, 1)
 
         dim_layout.addWidget(QLabel("Weight (%):"), 1, 0)
