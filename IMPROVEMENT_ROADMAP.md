@@ -9,18 +9,18 @@ This document outlines the phased approach to implementing the recommendations f
 - [x] Fix test discovery (added `__init__.py`, refactored imports).
 - [x] Add subprocess timeouts in `golf_launcher.py`.
 
-## Phase 2: Quality & Hygiene (Current)
+## Phase 2: Quality & Hygiene (Completed)
 **Goal**: Clean up technical debt, remove placeholders, and consolidate duplicate code.
-- [ ] **Address TODO/FIXME Markers**:
+- [x] **Address TODO/FIXME Markers**:
     - Scan for all TODOs.
     - Resolve trivial ones inline.
     - Convert complex ones to GitHub issues.
     - Update CI to enforce no new TODOs in Python files.
-- [ ] **Consolidate Pendulum Models**:
+- [x] **Consolidate Pendulum Models**:
     - Merge duplicate directories in `engines/pendulum_models`.
-    - Create single source of truth.
-    - Archive legacy code.
-- [ ] **Improve Exception Handling**:
+    - Create single source of truth (`engines/pendulum_models/python/`).
+    - Archive legacy code (`engines/pendulum_models/archive/`).
+- [ ] **Improve Exception Handling** (Ongoing):
     - Scan codebase for bare `except Exception`.
     - Replace with specific exceptions where possible.
 
