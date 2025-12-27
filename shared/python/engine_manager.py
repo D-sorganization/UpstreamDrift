@@ -132,7 +132,7 @@ class EngineManager:
             self.current_engine = engine_type
             logger.info(f"Successfully switched to engine: {engine_type.value}")
             return True
-        except Exception as e:
+        except GolfModelingError as e:
             logger.error(f"Failed to switch to engine {engine_type}: {e}")
             self.engine_status[engine_type] = EngineStatus.ERROR
             return False
