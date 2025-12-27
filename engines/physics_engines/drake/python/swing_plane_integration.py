@@ -109,7 +109,6 @@ class DrakeSwingPlaneAnalyzer:
             "non-functional swing plane metrics. Implement Drake trajectory "
             "extraction before calling this method."
         )
-
     def integrate_with_optimization(
         self, trajectory_optimizer, swing_plane_constraint_weight: float = 1.0
     ) -> None:
