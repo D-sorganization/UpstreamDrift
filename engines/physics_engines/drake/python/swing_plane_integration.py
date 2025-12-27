@@ -93,16 +93,22 @@ class DrakeSwingPlaneAnalyzer:
         # For now, create dummy trajectory data
         # NOTE: This is SYNTHETIC TEST DATA, not actual Drake simulation output
         # TODO: Replace with real trajectory extraction from Drake context
-        t = np.linspace(0, 2, num_samples)
-        positions = np.column_stack(
-            [
-                0.5 * np.sin(2 * np.pi * t),  # x
-                0.3 * np.cos(2 * np.pi * t),  # y
-                0.2 * t,  # z (slight upward trend)
-            ]
-        )
+        # t = np.linspace(0, 2, num_samples)
+        # positions = np.column_stack(
+        #     [
+        #         0.5 * np.sin(2 * np.pi * t),  # x
+        #         0.3 * np.cos(2 * np.pi * t),  # y
+        #         0.2 * t,  # z (slight upward trend)
+        #     ]
+        # )
 
-        return self.analyze_trajectory(positions)
+        # return self.analyze_trajectory(positions)
+        raise RuntimeError(
+            "DrakeSwingPlaneAnalyzer.analyze_from_drake_context is not implemented. "
+            "Synthetic test data generation has been removed to avoid returning "
+            "non-functional swing plane metrics. Implement Drake trajectory "
+            "extraction before calling this method."
+        )
 
     def integrate_with_optimization(
         self, trajectory_optimizer, swing_plane_constraint_weight: float = 1.0
