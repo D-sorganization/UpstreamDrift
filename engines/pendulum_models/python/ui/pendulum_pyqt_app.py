@@ -4,10 +4,6 @@ import math
 from dataclasses import dataclass
 
 import numpy as np
-from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
-from PyQt6 import QtCore, QtWidgets
-
 from double_pendulum_model.physics.double_pendulum import (
     DoublePendulumDynamics,
     DoublePendulumParameters,
@@ -21,6 +17,9 @@ from double_pendulum_model.physics.triple_pendulum import (
     TriplePendulumState,
 )
 from double_pendulum_model.safe_eval import SafeEvaluator
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
+from PyQt6 import QtCore, QtWidgets
 
 TIME_STEP = 0.01
 

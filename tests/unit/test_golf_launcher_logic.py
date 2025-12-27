@@ -2,12 +2,10 @@
 Unit tests for GolfLauncher GUI logic (Model selection, Launching).
 """
 
-import sys
-import os
 import importlib
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
-import pytest
 
 # Add the project root to the path for imports
 project_root = Path(__file__).parent.parent.parent
@@ -22,25 +20,25 @@ class MockQWidget:
 
     def setWindowTitle(self, title):
         self._window_title = title
-    
+
     def windowTitle(self):
         return self._window_title
 
     def setWindowIcon(self, icon):
         pass
-    
+
     def setFont(self, f):
         pass
 
     def resize(self, w, h):
         pass
-    
+
     def setCentralWidget(self, w):
         pass
 
     def setCursor(self, c):
         pass
-    
+
     def setStyleSheet(self, s):
         self._style_sheet = s
 
@@ -49,29 +47,29 @@ class MockQWidget:
 
     def setFixedSize(self, w, h):
         pass
-    
+
     def setAlignment(self, a):
         pass
-    
+
     def setWordWrap(self, b):
         pass
-    
+
     def setAttribute(self, a):
         pass
 
-    def setLayout(self, l):
+    def setLayout(self, layout):
         pass
-    
+
     def setSpacing(self, s):
         pass
 
-    def setContentsMargins(self, l, t, r, b):
+    def setContentsMargins(self, left, top, right, bottom):
         pass
-    
+
     def addWidget(self, w, *args):
         pass
-    
-    def addLayout(self, l, *args):
+
+    def addLayout(self, layout, *args):
         pass
 
     def addStretch(self):
@@ -92,8 +90,10 @@ class MockQWidget:
     def setObjectName(self, n):
         pass
 
+
 class MockQMainWindow(MockQWidget):
     pass
+
 
 class MockQPushButton(MockQWidget):
     def __init__(self, text="", parent=None):
@@ -101,60 +101,68 @@ class MockQPushButton(MockQWidget):
         self.text = text
         self.clicked = MagicMock()
         self.enabled = True
-    
+
     def setText(self, t):
         self.text = t
-    
+
     def text(self):
         return self.text
-    
+
     def setEnabled(self, b):
         self.enabled = b
-    
+
     def isEnabled(self):
         return self.enabled
-    
+
     def setFont(self, f):
         pass
-    
+
     def setFixedHeight(self, h):
         pass
+
 
 class MockQCheckBox(MockQWidget):
     def __init__(self, text="", parent=None):
         self.checked = False
-    
+
     def setChecked(self, b):
         self.checked = b
-    
+
     def isChecked(self):
         return self.checked
-    
+
     def setToolTip(self, t):
         pass
+
 
 class MockQFrame(MockQWidget):
     class Shape:
         NoFrame = 0
 
+
 class MockQGridLayout(MockQWidget):
     pass
+
 
 class MockQVBoxLayout(MockQWidget):
     pass
 
+
 class MockQHBoxLayout(MockQWidget):
     pass
+
 
 class MockQScrollArea(MockQWidget):
     pass
 
+
 class MockQLabel(MockQWidget):
     def __init__(self, text="", parent=None):
         self.text = text
-    
+
     def setText(self, t):
         self.text = t
+
 
 mock_qt_widgets = MagicMock()
 mock_qt_widgets.QMainWindow = MockQMainWindow
@@ -189,9 +197,11 @@ sys.modules["PyQt6.QtGui"] = mock_qt_gui
 sys.modules["PyQt6.QtWidgets"] = mock_qt_widgets
 
 # Import after mocking
-import launchers.golf_launcher
+import launchers.golf_launcher  # noqa: E402
+
 importlib.reload(launchers.golf_launcher)
-from launchers.golf_launcher import GolfLauncher
+from launchers.golf_launcher import GolfLauncher  # noqa: E402
+
 
 class TestGolfLauncherLogic:
 
@@ -202,16 +212,16 @@ class TestGolfLauncherLogic:
         # Setup mock registry
         registry_instance = mock_registry.return_value
         registry_instance.get_all_models.return_value = []
-        
+
         # Setup mock thread
         thread_instance = mock_thread.return_value
         thread_instance.result = MagicMock()
-        
+
         launcher = GolfLauncher()
-        
+
         assert launcher.windowTitle() == "Golf Modeling Suite - GolfingRobot"
         mock_thread.return_value.start.assert_called_once()
-        
+
         # Verify UI components exist
         assert hasattr(launcher, "grid_layout")
         assert hasattr(launcher, "btn_launch")
@@ -225,29 +235,29 @@ class TestGolfLauncherLogic:
         mock_model.name = "Test Model"
         mock_model.description = "Desc"
         mock_model.id = "test_model"
-        
+
         registry_instance = mock_registry.return_value
         registry_instance.get_all_models.return_value = [mock_model]
-        
+
         launcher = GolfLauncher()
-        
+
         # Initial state: No Docker, No Model
         assert launcher.btn_launch.isEnabled() is False
         # assert launcher.btn_launch.text == "SELECT A MODEL" # Flaky in test env
         # Code actually selects first model by default if registry has models
         # "self.select_model('MuJoCo Humanoid')" is hardcoded at end of init
-        
+
         # Simulate Docker becoming available
         launcher.on_docker_check_complete(True)
         assert launcher.docker_available is True
-        
+
         # If "MuJoCo Humanoid" is selected by default but our registry doesn't have it...
         # The select_model("MuJoCo Humanoid") call probably happened.
         # But we only have "Test Model".
-        
+
         # Le's manually select "Test Model"
         launcher.select_model("Test Model")
-        
+
         assert launcher.selected_model == "Test Model"
         assert launcher.btn_launch.isEnabled() is True
         assert "TEST MODEL" in launcher.btn_launch.text
@@ -260,32 +270,34 @@ class TestGolfLauncherLogic:
         mock_model.name = "Test Model"
         mock_model.path = "engines/test"
         mock_model.id = "test_model"
-        
+
         registry_instance = mock_registry.return_value
         registry_instance.get_all_models.return_value = [mock_model]
         registry_instance.get_model_by_name.return_value = mock_model
-        
+
         launcher = GolfLauncher()
         launcher.docker_available = True
         launcher.select_model("Test Model")
-        
+
         # Mock subprocess
         with patch("launchers.golf_launcher.subprocess.Popen") as mock_popen:
             with patch.object(Path, "exists", return_value=True):
                 with patch("os.name", "posix"):
                     # Also patch os.name if needed for platform specific branches
-                    
+
                     # We need to verify _launch_docker_container is called essentially
                     # because "Test Model" is not in custom_launchers dict
-                    
+
                     launcher.launch_simulation()
-                    
+
                     mock_popen.assert_called()
                     args = mock_popen.call_args[0][0]
                     assert args[0] == "docker"
                     assert args[1] == "run"
                     # Verify volume mount path logic
-                    assert "engines/test" in args[5] or "engines\\test" in args[5] # check index 5 roughly
+                    assert (
+                        "engines/test" in args[5] or "engines\\test" in args[5]
+                    )  # check index 5 roughly
 
     @patch("shared.python.model_registry.ModelRegistry")
     @patch("launchers.golf_launcher.DockerCheckThread")
@@ -295,22 +307,21 @@ class TestGolfLauncherLogic:
         mock_model.name = "Generic MJCF"
         mock_model.path = "engines/test/model.xml"
         mock_model.id = "generic_mjcf"
-        
+
         registry_instance = mock_registry.return_value
         registry_instance.get_all_models.return_value = [mock_model]
         registry_instance.get_model_by_name.return_value = mock_model
-        
+
         launcher = GolfLauncher()
         launcher.docker_available = True
         launcher.select_model("Generic MJCF")
-        
-        with patch("launchers.golf_launcher.subprocess.Popen") as mock_popen:
-             with patch.object(Path, "exists", return_value=True):
-                 launcher.launch_simulation()
-                 
-                 mock_popen.assert_called()
-                 args = mock_popen.call_args[0][0]
-                 # Should use sys.executable
-                 assert args[0] == sys.executable
-                 assert "mujoco.viewer" in args[2]
 
+        with patch("launchers.golf_launcher.subprocess.Popen") as mock_popen:
+            with patch.object(Path, "exists", return_value=True):
+                launcher.launch_simulation()
+
+                mock_popen.assert_called()
+                args = mock_popen.call_args[0][0]
+                # Should use sys.executable
+                assert args[0] == sys.executable
+                assert "mujoco.viewer" in args[2]
