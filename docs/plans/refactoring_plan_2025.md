@@ -25,8 +25,8 @@ Based on reviews from Claude and Codex, this plan outlines a 4-phase approach to
   - **Issue:** `advanced_gui.py` is 3,933 lines long.
   - **Action:** Split into sub-modules:
     - [x] Extract `VisualizationTab` (`gui/tabs/visualization_tab.py`)
-    - [ ] Extract `PhysicsTab`
-    - [ ] Extract `ControlsTab`
+    - [x] Extract `PhysicsTab`
+    - [x] Extract `ControlsTab`
     - [ ] Extract `AnalysisTab`
     - [ ] Refactor `AdvancedGolfAnalysisWindow` to use composed tabs
 - [x] **2.2 Archive & Legacy Cleanup**
