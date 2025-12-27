@@ -92,7 +92,7 @@ class DrakeSwingPlaneAnalyzer:
 
         # For now, create dummy trajectory data
         # NOTE: This is SYNTHETIC TEST DATA, not actual Drake simulation output
-        # TODO: Replace with real trajectory extraction from Drake context
+        # See issue #101: Replace with real trajectory extraction from Drake context
         # t = np.linspace(0, 2, num_samples)
         # positions = np.column_stack(
         #     [
