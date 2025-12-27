@@ -2,9 +2,7 @@
 Unit tests for URDF I/O module.
 """
 
-import os
 import xml.etree.ElementTree as ET
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import mujoco
@@ -74,12 +72,14 @@ def mock_mujoco_model():
     model.ngeom = 2
 
     # Body properties
-    model.body_mass = np.array([0, 1.0, 0.5]) # ID 0 is world
+    model.body_mass = np.array([0, 1.0, 0.5])  # ID 0 is world
     model.body_pos = np.array([[0, 0, 0], [0, 0, 0], [0, 0, 1]])
     model.body_ipos = np.zeros((3, 3))
     model.body_inertia = np.ones((3, 3))
     model.body_parentid = np.array([0, 0, 1])
-    model.body_jntadr = np.array([-1, -1, 0]) # Body 0 has no joint, 1 has no joint, 2 has joint 0
+    model.body_jntadr = np.array(
+        [-1, -1, 0]
+    )  # Body 0 has no joint, 1 has no joint, 2 has joint 0
 
     # Joint properties
     model.jnt_type = np.array([mujoco.mjtJoint.mjJNT_HINGE])
@@ -136,15 +136,21 @@ class TestURDFExporter:
 
     @patch("mujoco.mj_id2name")
     @patch("mujoco.MjData")
-    def test_export_to_urdf(self, mock_mjdata, mock_id2name, mock_mujoco_model, tmp_path):
+    def test_export_to_urdf(
+        self, mock_mjdata, mock_id2name, mock_mujoco_model, tmp_path
+    ):
         """Test exporting MJCF to URDF."""
+
         # Mock id2name to return reasonable names based on ID
         def id2name_side_effect(model, obj_type, obj_id):
             if obj_type == mujoco.mjtObj.mjOBJ_BODY:
                 # 0 is world, 1 is base, 2 is child
-                if obj_id == 0: return "world"
-                if obj_id == 1: return "base_link"
-                if obj_id == 2: return "child_link"
+                if obj_id == 0:
+                    return "world"
+                if obj_id == 1:
+                    return "base_link"
+                if obj_id == 2:
+                    return "child_link"
             elif obj_type == mujoco.mjtObj.mjOBJ_JOINT:
                 return f"joint_{obj_id}"
             return None
@@ -157,9 +163,9 @@ class TestURDFExporter:
         urdf_str = exporter.export_to_urdf(output_path, model_name="test_export")
 
         assert output_path.exists()
-        assert "robot name=\"test_export\"" in urdf_str
-        assert "link name=\"base_link\"" in urdf_str
-        assert "link name=\"child_link\"" in urdf_str
+        assert 'robot name="test_export"' in urdf_str
+        assert 'link name="base_link"' in urdf_str
+        assert 'link name="child_link"' in urdf_str
 
         # Since body 2 (child_link) is child of 1 (base_link), checking for joint logic
         # In _build_children: parent is base_link (id 1).
@@ -168,7 +174,7 @@ class TestURDFExporter:
         # child_jntadr[2] is 0. Joint 0 exists.
         # Joint 0 name is joint_0.
 
-        assert "joint name=\"joint_0\"" in urdf_str
+        assert 'joint name="joint_0"' in urdf_str
 
 
 def test_convenience_functions(sample_urdf, mock_mujoco_model, tmp_path):
@@ -180,7 +186,9 @@ def test_convenience_functions(sample_urdf, mock_mujoco_model, tmp_path):
     # Export
     # We need to mock URDFExporter inside the function or pass a mock model that works
     # Using patch to avoid complexity of real exporter running on mock model
-    with patch("engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.URDFExporter") as MockExporter:
+    with patch(
+        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.URDFExporter"
+    ) as MockExporter:
         instance = MockExporter.return_value
         instance.export_to_urdf.return_value = "<robot></robot>"
 

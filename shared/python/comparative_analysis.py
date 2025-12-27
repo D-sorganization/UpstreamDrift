@@ -246,7 +246,9 @@ class ComparativeSwingAnalyzer:
                 return float(np.sum(np.linalg.norm(np.diff(c[:, :2], axis=0), axis=1)))
 
             metrics.append(
-                self.compare_scalars("CoP Path Length", path_len(cop_a), path_len(cop_b))
+                self.compare_scalars(
+                    "CoP Path Length", path_len(cop_a), path_len(cop_b)
+                )
             )
 
         report = {"swing_a": self.name_a, "swing_b": self.name_b, "metrics": metrics}

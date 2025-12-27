@@ -22,11 +22,15 @@ class TestEngineManager(unittest.TestCase):
         # Patch engine probes individually
         self.mujoco_patcher = patch("shared.python.engine_probes.MuJoCoProbe")
         self.mock_mujoco_probe_cls = self.mujoco_patcher.start()
-        self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = True
+        self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = (
+            True
+        )
 
         self.drake_patcher = patch("shared.python.engine_probes.DrakeProbe")
         self.mock_drake_probe_cls = self.drake_patcher.start()
-        self.mock_drake_probe_cls.return_value.probe.return_value.is_available.return_value = True
+        self.mock_drake_probe_cls.return_value.probe.return_value.is_available.return_value = (
+            True
+        )
 
         self.pinocchio_patcher = patch("shared.python.engine_probes.PinocchioProbe")
         self.mock_pinocchio_probe_cls = self.pinocchio_patcher.start()
@@ -71,8 +75,12 @@ class TestEngineManager(unittest.TestCase):
 
         manager._discover_engines()
 
-        self.assertEqual(manager.engine_status[EngineType.MUJOCO], EngineStatus.AVAILABLE)
-        self.assertEqual(manager.engine_status[EngineType.DRAKE], EngineStatus.UNAVAILABLE)
+        self.assertEqual(
+            manager.engine_status[EngineType.MUJOCO], EngineStatus.AVAILABLE
+        )
+        self.assertEqual(
+            manager.engine_status[EngineType.DRAKE], EngineStatus.UNAVAILABLE
+        )
 
     def test_switch_engine_success(self):
         """Test successful engine switch."""
@@ -99,10 +107,14 @@ class TestEngineManager(unittest.TestCase):
         manager = EngineManager(self.mock_root)
         manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
-        with patch.object(manager, "_load_engine", side_effect=GolfModelingError("Fail")):
-             success = manager.switch_engine(EngineType.MUJOCO)
-             self.assertFalse(success)
-             self.assertEqual(manager.engine_status[EngineType.MUJOCO], EngineStatus.ERROR)
+        with patch.object(
+            manager, "_load_engine", side_effect=GolfModelingError("Fail")
+        ):
+            success = manager.switch_engine(EngineType.MUJOCO)
+            self.assertFalse(success)
+            self.assertEqual(
+                manager.engine_status[EngineType.MUJOCO], EngineStatus.ERROR
+            )
 
     def test_load_mujoco_engine_details(self):
         """Test detailed steps of loading MuJoCo engine."""
@@ -113,11 +125,15 @@ class TestEngineManager(unittest.TestCase):
         mock_mujoco.__version__ = "3.2.3"
 
         # Configure probe specifically for this test
-        self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = True
+        self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = (
+            True
+        )
 
         with patch.dict("sys.modules", {"mujoco": mock_mujoco}):
-            with patch("pathlib.Path.exists", return_value=True), \
-                 patch("pathlib.Path.glob", return_value=[Path("model.xml")]):
+            with (
+                patch("pathlib.Path.exists", return_value=True),
+                patch("pathlib.Path.glob", return_value=[Path("model.xml")]),
+            ):
 
                 mock_mujoco.MjModel.from_xml_path.return_value = MagicMock()
 
@@ -138,4 +154,4 @@ class TestEngineManager(unittest.TestCase):
         manager.engine_status = {EngineType.MUJOCO: EngineStatus.AVAILABLE}
 
         with patch("pathlib.Path.exists", return_value=True):
-             self.assertTrue(manager.validate_engine_configuration(EngineType.MUJOCO))
+            self.assertTrue(manager.validate_engine_configuration(EngineType.MUJOCO))

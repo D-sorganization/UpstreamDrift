@@ -2,8 +2,8 @@
 Unit tests for Golf Suite Launcher.
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -17,56 +17,111 @@ mock_qt = MagicMock()
 mock_widgets = MagicMock()
 mock_core = MagicMock()
 
+
 # Setup mock classes
 class MockQMainWindow:
-    def __init__(self): pass
-    def setWindowTitle(self, t): pass
-    def resize(self, w, h): pass
-    def setCentralWidget(self, w): pass
-    def show(self): pass
+    def __init__(self):
+        pass
+
+    def setWindowTitle(self, t):
+        pass
+
+    def resize(self, w, h):
+        pass
+
+    def setCentralWidget(self, w):
+        pass
+
+    def show(self):
+        pass
+
 
 class MockQWidget:
     pass
 
+
 class MockQVBoxLayout:
-    def addWidget(self, w): pass
-    def addSpacing(self, s): pass
-    def addStretch(self): pass
-    def addLayout(self, l): pass
+    def addWidget(self, w):
+        pass
+
+    def addSpacing(self, s):
+        pass
+
+    def addStretch(self):
+        pass
+
+    def addLayout(self, layout):
+        pass
+
 
 class MockQHBoxLayout:
-    def addWidget(self, w): pass
-    def addStretch(self): pass
+    def addWidget(self, w):
+        pass
+
+    def addStretch(self):
+        pass
+
 
 class MockQLabel:
-    def __init__(self, t=""): pass
-    def setAlignment(self, a): pass
-    def font(self): return MagicMock()
-    def setFont(self, f): pass
-    def setText(self, t): pass
+    def __init__(self, t=""):
+        pass
+
+    def setAlignment(self, a):
+        pass
+
+    def font(self):
+        return MagicMock()
+
+    def setFont(self, f):
+        pass
+
+    def setText(self, t):
+        pass
+
 
 class MockQPushButton:
     def __init__(self, t=""):
         self.clicked = MagicMock()
-    def setMinimumHeight(self, h): pass
+
+    def setMinimumHeight(self, h):
+        pass
+
 
 class MockQTextEdit:
-    def setMaximumHeight(self, h): pass
-    def setReadOnly(self, b): pass
-    def setStyleSheet(self, s): pass
-    def append(self, s): pass
-    def clear(self): pass
+    def setMaximumHeight(self, h):
+        pass
+
+    def setReadOnly(self, b):
+        pass
+
+    def setStyleSheet(self, s):
+        pass
+
+    def append(self, s):
+        pass
+
+    def clear(self):
+        pass
+
 
 class MockQGroupBox:
-    def __init__(self, t=""): pass
+    def __init__(self, t=""):
+        pass
+
 
 class MockQMessageBox:
     @staticmethod
-    def critical(p, t, m): pass
+    def critical(p, t, m):
+        pass
+
 
 class MockQApplication:
-    def __init__(self, args): pass
-    def exec(self): return 0
+    def __init__(self, args):
+        pass
+
+    def exec(self):
+        return 0
+
 
 # Assign mocks
 mock_widgets.QMainWindow = MockQMainWindow
@@ -85,14 +140,15 @@ mock_qt.QtWidgets = mock_widgets
 mock_qt.QtCore = mock_core
 
 # Apply patches to sys.modules BEFORE importing the launcher
-with patch.dict(sys.modules, {
-    "PyQt6": mock_qt,
-    "PyQt6.QtWidgets": mock_widgets,
-    "PyQt6.QtCore": mock_core
-}):
-    from launchers import golf_suite_launcher
+with patch.dict(
+    sys.modules,
+    {"PyQt6": mock_qt, "PyQt6.QtWidgets": mock_widgets, "PyQt6.QtCore": mock_core},
+):
     # Force reload to ensure it uses our mocks if it was already loaded
     import importlib
+
+    from launchers import golf_suite_launcher
+
     importlib.reload(golf_suite_launcher)
 
 
@@ -105,6 +161,7 @@ def mock_subprocess():
         mock_popen.return_value = process
         yield mock_popen
 
+
 @pytest.fixture
 def launcher_app():
     """Fixture to create the launcher instance."""
@@ -112,6 +169,7 @@ def launcher_app():
     golf_suite_launcher.PYQT_AVAILABLE = True
     app = golf_suite_launcher.GolfLauncher()
     return app
+
 
 class TestGolfSuiteLauncher:
     """Test suite for GolfLauncher."""
@@ -181,9 +239,11 @@ class TestGolfSuiteLauncher:
 
     def test_main_function(self):
         """Test main entry point."""
-        with patch("launchers.golf_suite_launcher.GolfLauncher") as MockLauncher, \
-             patch("launchers.golf_suite_launcher.QtWidgets.QApplication") as MockApp, \
-             patch("sys.exit") as mock_exit:
+        with (
+            patch("launchers.golf_suite_launcher.GolfLauncher") as MockLauncher,
+            patch("launchers.golf_suite_launcher.QtWidgets.QApplication") as MockApp,
+            patch("sys.exit") as mock_exit,
+        ):
 
             instance = MockLauncher.return_value
             app = MockApp.return_value
