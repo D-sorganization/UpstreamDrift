@@ -404,7 +404,7 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
     def _update_camera_sliders(self) -> None:
         """Update camera control sliders to match current camera state."""
         if hasattr(self, "visualization_tab"):
-            self.visualization_tab._update_camera_sliders()
+            self.visualization_tab.update_camera_sliders()
 
     # -------- Interactive manipulation event handlers --------
 
