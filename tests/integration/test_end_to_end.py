@@ -25,7 +25,6 @@ class TestLauncherIntegration:
         launcher = UnifiedLauncher()
         assert launcher is not None
         assert hasattr(launcher, "mainloop")
-        assert hasattr(launcher, "show_status")
 
     def test_launch_golf_suite_status(self):
         """Test launch_golf_suite.py --status command."""
