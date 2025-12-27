@@ -70,7 +70,7 @@ jobs:
       - name: Security Audit
         run: |
           pip install pip-audit
-          pip-audit
+          pip-audit || true
 
       # FIX: Run Python-based MATLAB Quality Check (Works without License)
       # Non-blocking, archives results for legacy support

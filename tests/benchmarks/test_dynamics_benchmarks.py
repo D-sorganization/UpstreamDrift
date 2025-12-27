@@ -5,31 +5,43 @@ Benchmarks for Rigid Body Dynamics Algorithms (ABA and RNEA).
 import numpy as np
 import pytest
 
-from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.aba import (
+import sys
+from pathlib import Path
+
+# Fix for CI: Add the MuJoCo engine python path to sys.path
+# This handles the case where the project is not installed as a package
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+MUJOCO_PYTHON_PATH = (
+    REPO_ROOT / "engines" / "physics_engines" / "mujoco" / "python"
+)
+if str(MUJOCO_PYTHON_PATH) not in sys.path:
+    sys.path.append(str(MUJOCO_PYTHON_PATH))
+
+from mujoco_humanoid_golf.rigid_body_dynamics.aba import (
     aba,
 )
-from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.rnea import (
+from mujoco_humanoid_golf.rigid_body_dynamics.rnea import (
     rnea,
 )
 
 
-def create_random_model(nb=10):
+def create_random_model(num_bodies=10):
     """
     Create a random kinematic chain model for benchmarking.
     """
     model = {}
-    model["NB"] = nb
-    model["parent"] = np.array([-1] + [i - 1 for i in range(1, nb)], dtype=int)
-    model["jtype"] = ["R"] * nb  # Revolute joints
+    model["NB"] = num_bodies
+    model["parent"] = np.array([-1] + [i - 1 for i in range(1, num_bodies)], dtype=int)
+    model["jtype"] = ["R"] * num_bodies  # Revolute joints
 
     # Random transforms
-    model["Xtree"] = [np.eye(6) for _ in range(nb)]
+    model["Xtree"] = [np.eye(6) for _ in range(num_bodies)]
 
     # Random inertias (should be positive definite)
     model["I"] = []
-    for _ in range(nb):
+    for _ in range(num_bodies):
         # Create random spatial inertia
-        # Just identity for benchmarking purposes is fine, but lets make it slightly realistic
+        # Just identity for benchmarking purposes is fine, but let's make it slightly realistic
         # mass = 1, diagonal inertia
         mass = 1.0
         I_3x3 = np.eye(3)
