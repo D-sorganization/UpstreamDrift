@@ -492,7 +492,7 @@ class AdvancedController:
 
         # Gravity compensation is the bias force without velocity terms
         # In quasi-static case: g(q) ≈ qfrc_bias
-        return qfrc_bias.copy()
+        return np.asarray(qfrc_bias.copy())
 
     def compute_operational_space_control(
         self,
