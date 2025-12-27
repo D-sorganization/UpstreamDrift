@@ -323,7 +323,9 @@ class PhysicsTab(QtWidgets.QWidget):
             self.model_combo.addItem(display_name)
 
             # Store description
-            desc = str(desc_map.get(i)) if desc_map.get(i) else None
+            mapped_desc = desc_map.get(i)
+            desc = str(mapped_desc) if mapped_desc else None
+
             if not desc:
                 desc = str(config.get("description", "Imported model"))
             self.model_descriptions[i] = desc
