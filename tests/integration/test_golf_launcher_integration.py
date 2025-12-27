@@ -54,14 +54,14 @@ models:
 
         # Patch ModelRegistry to use our temp file
         real_registry = ModelRegistry(models_yaml)
-        # Patch QIcon to avoid invalid argument types during initialization
+        # Patch QIcon and setWindowIcon to prevent C++ type errors in headless env
         with (
             patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
-            patch("PyQt6.QtGui.QIcon") as MockIcon,
+            patch("PyQt6.QtGui.QIcon"),
+            patch("launchers.golf_launcher.GolfLauncher.setWindowIcon"),
         ):
 
             MockRegistry.return_value = real_registry
-            MockIcon.return_value = "MockIcon"  # Simple string or mock object
 
             # Create Launcher
             launcher = GolfLauncher()
