@@ -15,7 +15,7 @@ For detailed documentation, please visit the **[Documentation Hub](docs/README.m
 ## Quick Start
 
 ### Prerequisites
-- **Python** 3.10+ (for physics engines)
+- **Python** 3.11+ (for physics engines)
 - **MATLAB** R2023a+ with Simulink and Simscape Multibody (optional, for MATLAB models)
 - **Git** with Git LFS
 
