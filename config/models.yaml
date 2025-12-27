@@ -1,0 +1,66 @@
+models:
+  - id: simple_pendulum
+    name: "Simple Pendulum"
+    description: "Simple driven pendulum showing chaotic behavior."
+    type: "mjcf"
+    path: "engines/physics_engines/mujoco/models/simple_pendulum.xml"
+
+  - id: basic_swing
+    name: "Basic Swing"
+    description: "Basic swing with shoulder and wrist joints. Simplest realistic model."
+    type: "mjcf"
+    path: "engines/physics_engines/mujoco/models/basic_swing.xml"
+
+  - id: arm_mechanics
+    name: "Arm Mechanics"
+    description: "Adds elbow joint for more realistic arm mechanics."
+    type: "mjcf"
+    path: "engines/physics_engines/mujoco/models/arm_mechanics.xml"
+
+  - id: spine_rotation
+    name: "Spine Rotation"
+    description: "Upper body model with spine rotation and both arms."
+    type: "mjcf"
+    path: "engines/physics_engines/mujoco/models/spine_rotation.xml"
+
+  - id: full_body
+    name: "Full Body"
+    description: "Full body model including leg drive and weight transfer."
+    type: "mjcf"
+    path: "engines/physics_engines/mujoco/models/full_body.xml"
+
+  - id: detailed_shoulders
+    name: "Detailed Shoulders"
+    description: "Most detailed model with scapulae, 3-DOF shoulders, flexible shaft."
+    type: "mjcf"
+    path: "engines/physics_engines/mujoco/models/detailed_shoulders.xml"
+
+  - id: muscle_arms
+    name: "Muscle Arms"
+    description: "Both arms with muscle actuation. Good for arm mechanics study."
+    type: "mjcf"
+    path: "engines/physics_engines/mujoco/models/muscle_arms.xml"
+
+  - id: muscle_upper
+    name: "Muscle Upper Body"
+    description: "Muscle-actuated upper body. Independent muscle control."
+    type: "mjcf"
+    path: "engines/physics_engines/mujoco/models/muscle_upper.xml"
+
+  - id: musculoskeletal
+    name: "Complete Musculoskeletal"
+    description: "Complete musculoskeletal model. Very complex - for advanced users."
+    type: "mjcf"
+    path: "engines/physics_engines/mujoco/models/musculoskeletal.xml"
+
+  - id: drake_golf
+    name: "Drake Golf Model"
+    description: "Control-theoretic golf robot focusing on trajectory optimization."
+    type: "drake"
+    path: "engines/physics_engines/drake"
+
+  - id: pinocchio_golf
+    name: "Pinocchio Golf Model"
+    description: "Ultra-fast rigid body dynamics engine based on Featherstone's spatial algebra."
+    type: "pinocchio"
+    path: "engines/physics_engines/pinocchio"
