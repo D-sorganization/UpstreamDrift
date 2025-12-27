@@ -16,8 +16,9 @@ repo_root = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(repo_root))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from shared.python import constants
-from src import logger_utils
+from shared.python import constants  # noqa: E402
+
+from src import logger_utils  # noqa: E402
 
 
 class TestConstants:
