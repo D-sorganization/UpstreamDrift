@@ -115,7 +115,7 @@ def rnea(  # noqa: PLR0915
         s_subspace_list[i] = s_subspace
 
         # Joint velocity in joint frame
-        # OPTIMIZATION: Use pre-allocated buffer (reuse i_v_buf within forward pass)
+        # OPTIMIZATION: Use pre-allocated buffer (reuse i_v_buf)
         # vj_velocity = s_subspace * qd[i] (Avoids allocation)
         np.multiply(s_subspace, qd[i], out=i_v_buf)
         vj_velocity = i_v_buf

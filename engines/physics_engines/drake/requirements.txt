@@ -1,3 +1,0 @@
-drake>=1.47.0
-numpy
-scipy

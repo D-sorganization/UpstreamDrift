@@ -175,7 +175,7 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=xml",
     "--cov-report=html",
-    "--cov-fail-under=35",  # Focused on shared components; GUI components excluded
+    "--cov-fail-under=10",  # Adjusted for engine inclusion; will increase as tests are added
 ]
 testpaths = [
     "tests",
@@ -213,8 +213,6 @@ omit = [
     "*/__pycache__/*",
     "*/matlab/*",
     "*/legacy/*",
-    "engines/*/python/*",  # Exclude engine implementations from coverage
-    "engines/physics_engines/*",  # Focus on shared components only
 ]
 
 [tool.coverage.report]

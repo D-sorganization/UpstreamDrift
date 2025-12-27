@@ -96,6 +96,8 @@ def verify_installation():
     """Verify that the installation works."""
     print("🧪 Verifying installation...")
 
+    import importlib.util
+
     test_imports = [
         "numpy",
         "scipy",
@@ -110,8 +112,6 @@ def verify_installation():
         except ImportError as e:
             print(f"❌ {module} failed to import: {e}")
             return False
-
-        import importlib.util
 
         # Test shared module import
         if importlib.util.find_spec("shared.python"):
