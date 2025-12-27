@@ -52,11 +52,16 @@ models:
 """
         models_yaml.write_text(config_content, encoding="utf-8")
 
-        # Patch ModelRegistry used by GolfLauncher to return a real registry
-        # that is configured with the temporary models.yaml created above.
+        # Patch ModelRegistry to use our temp file
         real_registry = ModelRegistry(models_yaml)
-        with patch("shared.python.model_registry.ModelRegistry") as MockRegistry:
+        # Patch QIcon to avoid invalid argument types during initialization
+        with (
+            patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
+            patch("PyQt6.QtGui.QIcon") as MockIcon,
+        ):
+
             MockRegistry.return_value = real_registry
+            MockIcon.return_value = "MockIcon"  # Simple string or mock object
 
             # Create Launcher
             launcher = GolfLauncher()
