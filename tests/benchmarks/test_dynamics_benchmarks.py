@@ -8,9 +8,7 @@ from pathlib import Path
 # Fix for CI: Add the MuJoCo engine python path to sys.path
 # This handles the case where the project is not installed as a package
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-MUJOCO_PYTHON_PATH = (
-    REPO_ROOT / "engines" / "physics_engines" / "mujoco" / "python"
-)
+MUJOCO_PYTHON_PATH = REPO_ROOT / "engines" / "physics_engines" / "mujoco" / "python"
 if str(MUJOCO_PYTHON_PATH) not in sys.path:
     sys.path.append(str(MUJOCO_PYTHON_PATH))
 
