@@ -24,9 +24,11 @@ Based on reviews from Claude and Codex, this plan outlines a 4-phase approach to
 - [ ] **2.1 GUI Refactoring (Single Responsibility Principle)**
   - **Issue:** `advanced_gui.py` is 3,933 lines long.
   - **Action:** Split into sub-modules:
-    - `gui/core/main_window.py`
-    - `gui/widgets/simulation_panel.py`
-    - `gui/visualization/renderer.py`
+    - [x] Extract `VisualizationTab` (`gui/tabs/visualization_tab.py`)
+    - [ ] Extract `PhysicsTab`
+    - [ ] Extract `ControlsTab`
+    - [ ] Extract `AnalysisTab`
+    - [ ] Refactor `AdvancedGolfAnalysisWindow` to use composed tabs
 - [x] **2.2 Archive & Legacy Cleanup**
   - **Issue:** 13+ archive directories bloat the repo.
   - **Action:** Move valid historical code to a `legacy/` branch and delete these folders from `main`.
