@@ -18,7 +18,7 @@ from matplotlib.figure import Figure
 from shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 
 if TYPE_CHECKING:
-    pass
+    pass  # pragma: no cover
 
 # Qt backend - optional for headless environments
 try:
@@ -1063,7 +1063,7 @@ class GolfSwingPlotter:
             # Vertical plane (rare for golf swing but possible)
             # Cannot plot as z = f(x,y), would need x = f(y,z) or similar
             # For visualization purposes, we skip drawing the surface if vertical
-            pass
+            pass  # pragma: no cover
 
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")
