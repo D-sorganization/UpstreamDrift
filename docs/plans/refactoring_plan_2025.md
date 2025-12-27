@@ -60,3 +60,13 @@ Based on reviews from Claude and Codex, this plan outlines a 4-phase approach to
 - [x] **4.2 Lazy Import implementation**
   - **Issue:** `golf_launcher.py` imports heavy PyQt6 modules at the top level.
   - **Action:** Move imports inside functions where possible to speed up CLI response time.
+
+## Phase 5: Modern UI/UX Overhaul (Month 3)
+**Goal:** Professional, responsive, and accessible interface.
+
+- [x] **5.1 Dark Theme & Stylesheet**
+  - **Issue:** Default Qt look is outdated and inconsistent.
+  - **Action:** Create `gui/styles/dark_theme.qss` and load it in `advanced_gui.py`.
+- [x] **5.2 Responsive Grid Layouts**
+  - **Issue:** Fixed pixel sizes in tabs cause cropping on small screens.
+  - **Action:** Replace fixed sizes with `QGridLayout` and `QSplitter` in `VisualizationTab` and `PhysicsTab`.
