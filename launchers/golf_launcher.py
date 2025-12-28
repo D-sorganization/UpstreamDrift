@@ -69,6 +69,10 @@ MODEL_IMAGES = {
     "MuJoCo Dashboard": "mujoco_hand.png",
     "Drake Golf Model": "drake.png",
     "Pinocchio Golf Model": "pinocchio.png",
+    "OpenSim Golf": "opensim.png",
+    "MyoSim Suite": "myosim.png",
+    "OpenPose Analysis": "openpose.jpg",
+    "Matlab Simscape": "matlab.png",
 }
 
 DOCKER_STAGES = ["all", "mujoco", "pinocchio", "drake", "base"]
