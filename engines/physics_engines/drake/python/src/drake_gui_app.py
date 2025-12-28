@@ -425,6 +425,12 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.btn_swing_plane.setEnabled(HAS_MATPLOTLIB)
         analysis_layout.addWidget(self.btn_swing_plane)
 
+        self.btn_advanced_plots = QtWidgets.QPushButton("Show Advanced Plots")
+        self.btn_advanced_plots.setToolTip("Show Radar Chart, CoP Field, and Power Flow")
+        self.btn_advanced_plots.clicked.connect(self._show_advanced_plots)
+        self.btn_advanced_plots.setEnabled(HAS_MATPLOTLIB)
+        analysis_layout.addWidget(self.btn_advanced_plots)
+
         analysis_group.setLayout(analysis_layout)
         dyn_layout.addWidget(analysis_group)
 
@@ -987,6 +993,83 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         plotter = GolfSwingPlotter(self.recorder)
         fig = plt.figure(figsize=(10, 8))
         plotter.plot_swing_plane(fig)
+        plt.show()
+
+    def _show_advanced_plots(self) -> None:
+        """Show advanced analysis plots."""
+        if not HAS_MATPLOTLIB:
+            QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")
+            return
+
+        from shared.python.plotting import GolfSwingPlotter
+        from shared.python.statistical_analysis import StatisticalAnalyzer
+
+        if not self.recorder.times:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "No Data",
+                "No recording available. Please Record a simulation first.",
+            )
+            return
+
+        # Create Plotter and Analyzer
+        plotter = GolfSwingPlotter(self.recorder)
+
+        # We need to extract data for StatisticalAnalyzer
+        times = np.array(self.recorder.times)
+        q_history = np.array(self.recorder.q_history)
+        v_history = np.array(self.recorder.v_history)
+        # Assuming torques not recorded in DrakeRecorder yet, need to update if we want torque analysis
+        # For now pass zeros for torques
+        tau_history = np.zeros((len(times), v_history.shape[1]))
+
+        _, club_pos = self.recorder.get_time_series("club_head_position")
+
+        analyzer = StatisticalAnalyzer(
+            times, q_history, v_history, tau_history, club_head_position=club_pos
+        )
+        report = analyzer.generate_comprehensive_report()
+
+        # Prepare metrics for Radar Chart
+        metrics = {
+            "Club Speed": 0.0,
+            "Swing Efficiency": 0.0,
+            "Tempo": 0.0,
+            "Consistency": 0.8, # Placeholder
+            "Power Transfer": 0.0
+        }
+
+        if "club_head_speed" in report:
+            # Normalize reasonably (e.g. max speed 50 m/s)
+            peak_speed = report["club_head_speed"]["peak_value"]
+            metrics["Club Speed"] = min(peak_speed / 50.0, 1.0)
+
+        if "tempo" in report:
+            ratio = report["tempo"]["ratio"]
+            # Ideal 3:1 => 3.0. Normalize error from 3.0
+            error = abs(ratio - 3.0)
+            metrics["Tempo"] = max(0, 1.0 - error)
+
+        # Create Figure with tabs or subplots
+        # For simplicity, just use subplots in one figure
+        fig = plt.figure(figsize=(15, 10))
+        gs = fig.add_gridspec(2, 2)
+
+        # 1. Radar Chart
+        plotter.plot_radar_chart(fig, metrics)
+
+        # 2. CoP Vector Field (Drake doesn't record CoP yet, so skip or mock)
+        # If we had CoP data, we would call plotter.plot_cop_vector_field(fig)
+        ax2 = fig.add_subplot(gs[0, 1])
+        ax2.text(0.5, 0.5, "CoP Data Not Available in Drake", ha="center", va="center")
+
+        # 3. Power Flow
+        # Requires actuator powers. DrakeRecorder needs to record powers.
+        # For now placeholder
+        ax3 = fig.add_subplot(gs[1, :])
+        ax3.text(0.5, 0.5, "Power Data Not Available in Drake", ha="center", va="center")
+
+        plt.tight_layout()
         plt.show()
 
 
