@@ -7,22 +7,28 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
+import pytest
+
 # Add the project root to the path for imports
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 
 # --- Mock PyQt6 Modules ---
-class MockQWidget:
-    def __init__(self, parent=None):
-        self._window_title = ""
-        self._style_sheet = ""
+class MockQtBase:
+    """Base class for all Qt mocks to handle common behavior."""
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __getattr__(self, name):
+        return MagicMock()
 
     def setWindowTitle(self, title):
-        self._window_title = title
+        pass
 
     def windowTitle(self):
-        return self._window_title
+        return getattr(self, "_window_title", "")
 
     def setWindowIcon(self, icon):
         pass
@@ -32,18 +38,6 @@ class MockQWidget:
 
     def resize(self, w, h):
         pass
-
-    def setCentralWidget(self, w):
-        pass
-
-    def setCursor(self, c):
-        pass
-
-    def setStyleSheet(self, s):
-        self._style_sheet = s
-
-    def styleSheet(self):
-        return self._style_sheet
 
     def setFixedSize(self, w, h):
         pass
@@ -91,8 +85,25 @@ class MockQWidget:
         pass
 
 
+class MockQWidget(MockQtBase):
+    def __init__(self, parent=None):
+        super().__init__()
+        self._window_title = ""
+        self._style_sheet = ""
+
+    def setWindowTitle(self, title):
+        self._window_title = title
+
+    def setStyleSheet(self, s):
+        self._style_sheet = s
+
+    def styleSheet(self):
+        return self._style_sheet
+
+
 class MockQMainWindow(MockQWidget):
-    pass
+    def setCentralWidget(self, w):
+        pass
 
 
 class MockQPushButton(MockQWidget):
@@ -112,6 +123,7 @@ class MockQPushButton(MockQWidget):
         self._enabled = bool(b)
 
     def isEnabled(self):
+<<<<<<< HEAD
         return self._enabled
 
     def setFont(self, f):
@@ -119,10 +131,18 @@ class MockQPushButton(MockQWidget):
 
     def setFixedHeight(self, h):
         pass
+=======
+        if isinstance(self._enabled, bool):
+            return self._enabled
+        # If it's a mock, it's effectively truthy but acts as False for logic checks
+        # So we default to False if not explicitly set to True
+        return False
+>>>>>>> feature/interactive-urdf-generator
 
 
 class MockQCheckBox(MockQWidget):
     def __init__(self, text="", parent=None):
+        super().__init__(parent)
         self.checked = False
 
     def setChecked(self, b):
@@ -158,6 +178,7 @@ class MockQScrollArea(MockQWidget):
 
 class MockQLabel(MockQWidget):
     def __init__(self, text="", parent=None):
+        super().__init__(parent)
         self._text = text
 
     def setText(self, t):
@@ -167,51 +188,72 @@ class MockQLabel(MockQWidget):
         pass
 
 
-mock_qt_widgets = MagicMock()
-mock_qt_widgets.QMainWindow = MockQMainWindow
-mock_qt_widgets.QWidget = MockQWidget
-mock_qt_widgets.QPushButton = MockQPushButton
-mock_qt_widgets.QCheckBox = MockQCheckBox
-mock_qt_widgets.QLabel = MockQLabel
-mock_qt_widgets.QFrame = MockQFrame
-mock_qt_widgets.QGridLayout = MockQGridLayout
-mock_qt_widgets.QVBoxLayout = MockQVBoxLayout
-mock_qt_widgets.QHBoxLayout = MockQHBoxLayout
-mock_qt_widgets.QScrollArea = MockQScrollArea
-mock_qt_widgets.QApplication = MagicMock()
-mock_qt_widgets.QComboBox = MagicMock()
-mock_qt_widgets.QDialog = MagicMock()
-mock_qt_widgets.QTextEdit = MagicMock()
-mock_qt_widgets.QTabWidget = MagicMock()
+@pytest.fixture
+def mock_pyqt(monkeypatch):
+    """
+    Fixture to patch sys.modules with our local Mock classes.
+    This ensures that when 'launchers.golf_launcher' is imported/reloaded,
+    it sees OUR mocks, not the real PyQt6 or mocks from other tests.
+    """
+    mock_qt_widgets = MagicMock()
+    mock_qt_widgets.QMainWindow = MockQMainWindow
+    mock_qt_widgets.QWidget = MockQWidget
+    mock_qt_widgets.QPushButton = MockQPushButton
+    mock_qt_widgets.QCheckBox = MockQCheckBox
+    mock_qt_widgets.QLabel = MockQLabel
+    mock_qt_widgets.QFrame = MockQFrame
+    mock_qt_widgets.QGridLayout = MockQGridLayout
+    mock_qt_widgets.QVBoxLayout = MockQVBoxLayout
+    mock_qt_widgets.QHBoxLayout = MockQHBoxLayout
+    mock_qt_widgets.QScrollArea = MockQScrollArea
+    mock_qt_widgets.QApplication = MagicMock()
+    mock_qt_widgets.QComboBox = MagicMock()
+    mock_qt_widgets.QDialog = MagicMock()
+    mock_qt_widgets.QTextEdit = MagicMock()
+    mock_qt_widgets.QTabWidget = MagicMock()
 
-mock_qt_core = MagicMock()
-mock_qt_core.Qt = MagicMock()
-mock_qt_core.QThread = MagicMock()
-mock_qt_core.pyqtSignal = MagicMock()
+    mock_qt_core = MagicMock()
+    mock_qt_core.Qt = MagicMock()
+    mock_qt_core.QThread = MagicMock()
+    mock_qt_core.pyqtSignal = MagicMock()
 
-mock_qt_gui = MagicMock()
-mock_qt_gui.QFont = MagicMock()
-mock_qt_gui.QIcon = MagicMock()
-mock_qt_gui.QPixmap = MagicMock()
+    mock_qt_gui = MagicMock()
+    mock_qt_gui.QFont = MagicMock()
+    mock_qt_gui.QIcon = MagicMock()
+    mock_qt_gui.QPixmap = MagicMock()
 
-sys.modules["PyQt6"] = MagicMock()
-sys.modules["PyQt6.QtCore"] = mock_qt_core
-sys.modules["PyQt6.QtGui"] = mock_qt_gui
-sys.modules["PyQt6.QtWidgets"] = mock_qt_widgets
-
-# Import after mocking
-import launchers.golf_launcher  # noqa: E402
-
-importlib.reload(launchers.golf_launcher)
-from launchers.golf_launcher import GolfLauncher  # noqa: E402
+    with patch.dict(
+        sys.modules,
+        {
+            "PyQt6": MagicMock(),
+            "PyQt6.QtCore": mock_qt_core,
+            "PyQt6.QtGui": mock_qt_gui,
+            "PyQt6.QtWidgets": mock_qt_widgets,
+        },
+    ):
+        yield
 
 
 class TestGolfLauncherLogic:
+
+    @pytest.fixture(autouse=True)
+    def setup_launcher_module(self, mock_pyqt):
+        """
+        Reload the module to ensure it uses the patched sys.modules.
+        """
+        import launchers.golf_launcher
+
+        importlib.reload(launchers.golf_launcher)
+        yield
+        # Optional: cleanup or reload again if necessary, though
+        # patch.dict handles sys.modules restoration.
 
     @patch("shared.python.model_registry.ModelRegistry")
     @patch("launchers.golf_launcher.DockerCheckThread")
     def test_initialization(self, mock_thread, mock_registry):
         """Test proper initialization of the launcher."""
+        from launchers.golf_launcher import GolfLauncher
+
         # Setup mock registry
         registry_instance = mock_registry.return_value
         registry_instance.get_all_models.return_value = []
@@ -233,6 +275,8 @@ class TestGolfLauncherLogic:
     @patch("launchers.golf_launcher.DockerCheckThread")
     def test_model_selection_updates_ui(self, mock_thread, mock_registry):
         """Test that selecting a model updates the launch button."""
+        from launchers.golf_launcher import GolfLauncher
+
         # Setup registry with one model
         mock_model = Mock()
         mock_model.name = "Test Model"
@@ -270,6 +314,8 @@ class TestGolfLauncherLogic:
     @patch("launchers.golf_launcher.DockerCheckThread")
     def test_launch_simulation_constructs_command(self, mock_thread, mock_registry):
         """Test launch simulation logic."""
+        from launchers.golf_launcher import GolfLauncher
+
         mock_model = Mock()
         mock_model.name = "Test Model"
         mock_model.path = "engines/test"
@@ -307,6 +353,8 @@ class TestGolfLauncherLogic:
     @patch("launchers.golf_launcher.DockerCheckThread")
     def test_launch_generic_mjcf(self, mock_thread, mock_registry):
         """Test launching a generic MJCF file."""
+        from launchers.golf_launcher import GolfLauncher
+
         mock_model = Mock()
         mock_model.name = "Generic MJCF"
         mock_model.path = "engines/test/model.xml"
