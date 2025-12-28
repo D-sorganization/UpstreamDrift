@@ -109,6 +109,61 @@ class BiomechanicalAnalyzer:
 
         return np.array(qacc, dtype=np.float64)
 
+    def compute_induced_acceleration(self, source_name: str) -> np.ndarray:
+        """Compute induced acceleration for a specific source.
+
+        Args:
+            source_name: "gravity" or "actuator"
+
+        Returns:
+            Acceleration array
+        """
+        # MuJoCo mj_rne is inverse dynamics. For forward dynamics (induced accel),
+        # we need M^-1 * force.
+        # mj_solveM(model, data, x, y) solves M*x = y for x.
+
+        # Prepare the force vector y
+        y = np.zeros(self.model.nv)
+
+        if source_name == "gravity":
+            # Gravity force is -g(q) in M a + C + g = tau
+            # So induced acceleration by gravity: M a = -g -> a = -M^-1 g
+            # However, mj_rne(q, v, a) = tau.
+            # If we want pure gravity term g(q), we call mj_rne with v=0, a=0.
+            # tau_g = mj_rne(q, 0, 0).
+            # Then M a_grav = -tau_g.
+
+            # Save state
+            qvel_save = self.data.qvel.copy()
+            qacc_save = self.data.qacc.copy()
+
+            # To isolate gravity, we set velocity and acceleration to zero.
+            # Then RNEA computes: tau = M(0) + C(0) + g(q) = g(q)
+            self.data.qvel[:] = 0
+            self.data.qacc[:] = 0
+            mujoco.mj_rne(self.model, self.data)
+            tau_g = self.data.qfrc_inverse.copy()
+
+            # Restore state
+            self.data.qvel[:] = qvel_save
+            self.data.qacc[:] = qacc_save
+
+            y = -tau_g
+
+        elif source_name == "actuator":
+            # Force from actuators is data.qfrc_actuator
+            # We want a_act = M^-1 * qfrc_actuator
+            y = self.data.qfrc_actuator.copy()
+
+        else:
+            return np.zeros(self.model.nv)
+
+        # Solve M * x = y
+        x = np.zeros(self.model.nv)
+        mujoco.mj_solveM(self.model, self.data, x, y)
+
+        return x
+
     def get_club_head_data(
         self,
     ) -> tuple[np.ndarray | None, np.ndarray | None, float]:
@@ -272,6 +327,13 @@ class BiomechanicalAnalyzer:
         if club_vel is not None:
             self._prev_club_vel = club_vel.copy()
 
+        # Induced Accelerations
+        # Only compute if needed to save perf? For now, compute basics.
+        induced = {
+            "gravity": self.compute_induced_acceleration("gravity"),
+            "actuator": self.compute_induced_acceleration("actuator"),
+        }
+
         return BiomechanicalData(
             time=float(self.data.time),
             joint_positions=self.data.qpos.copy(),
@@ -292,6 +354,7 @@ class BiomechanicalAnalyzer:
             total_energy=te,
             com_position=com_pos,
             com_velocity=com_vel,
+            induced_accelerations=induced,
         )
 
 
@@ -365,6 +428,46 @@ class SwingRecorder:
 
         return times, values_array
 
+    def get_induced_acceleration_series(
+        self, source_name: str
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Extract time series for a specific induced acceleration source."""
+        if not self.frames:
+            return np.array([]), np.array([])
+
+        times = []
+        values = []
+
+        # Iterate over all frames
+        for f in self.frames:
+            val = f.induced_accelerations.get(source_name)
+            if val is not None:
+                times.append(f.time)
+                values.append(val)
+
+        if not values:
+            return np.array([]), np.array([])
+
+        return np.array(times), np.array(values)
+
+    def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
+        """Extract counterfactual series."""
+        if not self.frames:
+            return np.array([]), np.array([])
+
+        times = []
+        values = []
+        for f in self.frames:
+            val = f.counterfactuals.get(cf_name)
+            if val is not None:
+                times.append(f.time)
+                values.append(val)
+
+        if not values:
+            return np.array([]), np.array([])
+
+        return np.array(times), np.array(values)
+
     def get_num_frames(self) -> int:
         """Get number of recorded frames."""
         return len(self.frames)
@@ -436,5 +539,26 @@ class SwingRecorder:
                 export_data[f"{field_name}_x"] = values[:, 0].tolist()
                 export_data[f"{field_name}_y"] = values[:, 1].tolist()
                 export_data[f"{field_name}_z"] = values[:, 2].tolist()
+
+        # Export induced
+        if self.frames and self.frames[0].induced_accelerations:
+            keys = self.frames[0].induced_accelerations.keys()
+            for key in keys:
+                _, vals = self.get_induced_acceleration_series(key)
+                if len(vals) > 0:
+                    for i in range(vals.shape[1]):
+                        export_data[f"induced_acc_{key}_{i}"] = vals[:, i].tolist()
+
+        # Export counterfactuals
+        if self.frames and self.frames[0].counterfactuals:
+            keys = self.frames[0].counterfactuals.keys()
+            for key in keys:
+                _, vals = self.get_counterfactual_series(key)
+                if len(vals) > 0 and isinstance(vals, np.ndarray):
+                    if vals.ndim == 1:
+                        export_data[f"cf_{key}"] = vals.tolist()
+                    elif vals.ndim == 2:
+                        for i in range(vals.shape[1]):
+                            export_data[f"cf_{key}_{i}"] = vals[:, i].tolist()
 
         return export_data
