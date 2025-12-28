@@ -1,15 +1,66 @@
 models:
-  - id: simple_pendulum
-    name: "Simple Pendulum"
-    description: "Simple driven pendulum showing chaotic behavior."
-    type: "mjcf"
-    path: "engines/physics_engines/mujoco/models/simple_pendulum.xml"
+  # --- Primary Engines (Row 1) ---
+  - id: mujoco_humanoid
+    name: "MuJoCo Humanoid"
+    description: "High-fidelity whole-body biomechanics simulation. Features a 23-DOF humanoid model with active muscle sites, ground reaction force (GRF) visualization, and detailed contact dynamics. Ideal for analyzing kinetic chains and joint torque generation during the swing."
+    type: "custom_humanoid"
+    path: "engines/physics_engines/mujoco"
 
+  - id: drake_golf
+    name: "Drake Golf Model"
+    description: "Control-theoretic golf robot focusing on trajectory optimization. Utilizes Drake's rigorous multibody dynamics and constraint solvers to generate physically consistent swing paths. Features stabilizing controllers and inverse dynamics solvers."
+    type: "drake"
+    path: "engines/physics_engines/drake"
+
+  - id: pinocchio_golf
+    name: "Pinocchio Golf Model"
+    description: "Ultra-fast rigid body dynamics engine based on Featherstone's spatial algebra. Specialized for rapid iteration and derivative computation. Validates kinematic chains and provides baseline capabilities for trajectory optimization algorithms."
+    type: "pinocchio"
+    path: "engines/physics_engines/pinocchio"
+
+  - id: opensim_golf
+    name: "OpenSim Golf"
+    description: "Musculoskeletal modeling engine for biomechanical analysis. Focuses on muscle forces, moment arms, and physiological constraints."
+    type: "opensim"
+    path: "engines/physics_engines/opensim"
+
+  # --- Primary Engines (Row 2) ---
+  - id: myosim_suite
+    name: "MyoSim Suite"
+    description: "Multi-scale muscle simulation framework integrating with OpenSim. Models sarcomere dynamics and detailed contraction physics."
+    type: "myosim"
+    path: "engines/physics_engines/myosim"
+
+  - id: openpose_analysis
+    name: "OpenPose Analysis"
+    description: "Vision-based pose estimation pipeline. Extracts 2D joint centers from video inputs for kinematic analysis."
+    type: "openpose"
+    path: "shared/python/pose_estimation"
+
+  - id: mujoco_dashboard
+    name: "MuJoCo Dashboard"
+    description: "Interactive research workbench for comparative analysis. Switch instantly between double-pendulum, wrist-cocking, and full-body models. Includes real-time plots for phase space trajectories, energy conservation verification, and parameter tuning sliders."
+    type: "custom_dashboard"
+    path: "engines/physics_engines/mujoco"
+
+  - id: matlab_simscape
+    name: "Matlab Simscape"
+    description: "Simscape Multibody models for control design and validation. Requires local MATLAB installation."
+    type: "matlab"
+    path: "engines/Simscape_Multibody_Models"
+
+  # --- Example Models (Row 3+) ---
   - id: basic_swing
     name: "Basic Swing"
     description: "Basic swing with shoulder and wrist joints. Simplest realistic model."
     type: "mjcf"
     path: "engines/physics_engines/mujoco/models/basic_swing.xml"
+
+  - id: simple_pendulum
+    name: "Simple Pendulum"
+    description: "Simple driven pendulum showing chaotic behavior."
+    type: "mjcf"
+    path: "engines/physics_engines/mujoco/models/simple_pendulum.xml"
 
   - id: arm_mechanics
     name: "Arm Mechanics"
@@ -52,27 +103,3 @@ models:
     description: "Complete musculoskeletal model. Very complex - for advanced users."
     type: "mjcf"
     path: "engines/physics_engines/mujoco/models/musculoskeletal.xml"
-
-  - id: mujoco_humanoid
-    name: "MuJoCo Humanoid"
-    description: "High-fidelity whole-body biomechanics simulation. Features a 23-DOF humanoid model with active muscle sites, ground reaction force (GRF) visualization, and detailed contact dynamics. Ideal for analyzing kinetic chains and joint torque generation during the swing."
-    type: "custom_humanoid"
-    path: "engines/physics_engines/mujoco"
-
-  - id: mujoco_dashboard
-    name: "MuJoCo Dashboard"
-    description: "Interactive research workbench for comparative analysis. Switch instantly between double-pendulum, wrist-cocking, and full-body models. Includes real-time plots for phase space trajectories, energy conservation verification, and parameter tuning sliders."
-    type: "custom_dashboard"
-    path: "engines/physics_engines/mujoco"
-
-  - id: drake_golf
-    name: "Drake Golf Model"
-    description: "Control-theoretic golf robot focusing on trajectory optimization. Utilizes Drake's rigorous multibody dynamics and constraint solvers to generate physically consistent swing paths. Features stabilizing controllers and inverse dynamics solvers."
-    type: "drake"
-    path: "engines/physics_engines/drake"
-
-  - id: pinocchio_golf
-    name: "Pinocchio Golf Model"
-    description: "Ultra-fast rigid body dynamics engine based on Featherstone's spatial algebra. Specialized for rapid iteration and derivative computation. Validates kinematic chains and provides baseline capabilities for trajectory optimization algorithms."
-    type: "pinocchio"
-    path: "engines/physics_engines/pinocchio"
