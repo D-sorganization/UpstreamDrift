@@ -2,6 +2,8 @@
 Unit tests for URDF I/O module.
 """
 
+import importlib
+import sys
 import xml.etree.ElementTree as ET
 from unittest.mock import MagicMock, patch
 
@@ -10,7 +12,6 @@ import numpy as np
 import pytest
 
 from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
-    URDFExporter,
     URDFImporter,
     export_model_to_urdf,
     import_urdf_to_mujoco,
@@ -134,43 +135,69 @@ class TestURDFImporter:
 class TestURDFExporter:
     """Test suite for URDFExporter."""
 
-    @patch("mujoco.mj_id2name")
     @patch(
         "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco.MjData"
     )
     def test_export_to_urdf(
-        self, mock_mjdata_class, mock_id2name, mock_mujoco_model, tmp_path
+        self, mock_mjdata_class, tmp_path
     ):
         """Test exporting MJCF to URDF."""
+        # Setup comprehensive mujoco mock in sys.modules to bypass C-extension issues
+        mock_mujoco = MagicMock()
+        mock_mujoco.MjModel = MagicMock
+        mock_mujoco.mjtObj.mjOBJ_BODY = 1
+        mock_mujoco.mjtObj.mjOBJ_JOINT = 2
+        mock_mujoco.mjtObj.mjOBJ_MODEL = 3
+        mock_mujoco.mjtJoint.mjJNT_HINGE = 0 # Define this for the mock model
 
-        # Mock the MjData constructor to return a mock instance
-        mock_data_instance = MagicMock()
-        mock_mjdata_class.return_value = mock_data_instance
-
-        # Mock id2name to return reasonable names based on ID
+        # Mock id2name logic
         def id2name_side_effect(model, obj_type, obj_id):
-            if obj_type == mujoco.mjtObj.mjOBJ_BODY:
-                # 0 is world, 1 is base, 2 is child
+            if obj_type == 1:  # mjOBJ_BODY
                 if obj_id == 0:
                     return "world"
                 if obj_id == 1:
                     return "base_link"
                 if obj_id == 2:
                     return "child_link"
-            elif obj_type == mujoco.mjtObj.mjOBJ_JOINT:
+            elif obj_type == 2:  # mjOBJ_JOINT
                 return f"joint_{obj_id}"
             return None
 
-        mock_id2name.side_effect = id2name_side_effect
+        mock_mujoco.mj_id2name.side_effect = id2name_side_effect
 
-        exporter = URDFExporter(mock_mujoco_model)
+        with patch.dict(sys.modules, {"mujoco": mock_mujoco}):
+            # Re-import to pick up the mock
+            importlib.reload(sys.modules["engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io"])
+            from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
+                URDFExporter,
+                mujoco,
+            )
 
-        output_path = tmp_path / "exported.urdf"
-        urdf_str = exporter.export_to_urdf(output_path, model_name="test_export")
+            mock_mujoco_model = MagicMock()
+            mock_mujoco_model.nbody = 3
+            mock_mujoco_model.body_jntadr = [-1, -1, 0]  # Child has joint at index 0
+            mock_mujoco_model.jnt_type = [mujoco.mjtJoint.mjJNT_HINGE] # Joint 0 is hinge
+            mock_mujoco_model.body_parentid = [0, 0, 1]
+            mock_mujoco_model.body_mass = [0, 1.0, 1.0]
+            mock_mujoco_model.body_inertia = np.zeros((3, 3))
+            mock_mujoco_model.body_ipos = np.zeros((3, 3))
+            mock_mujoco_model.ngeom = 0
+            mock_mujoco_model.jnt_pos = np.zeros((1, 3))
+            mock_mujoco_model.jnt_axis = np.array([[0, 0, 1]])
+            mock_mujoco_model.jnt_limited = [False]
+            mock_mujoco_model.jnt_range = np.zeros((1, 2))
 
-        assert output_path.exists()
-        assert 'robot name="test_export"' in urdf_str
-        assert 'link name="base_link"' in urdf_str
+            # Constants that might have been lost in reload/mock
+            # Ensure URDFExporter uses the mocked enums/constants
+
+            exporter = URDFExporter(mock_mujoco_model)
+
+            output_path = tmp_path / "exported.urdf"
+            urdf_str = exporter.export_to_urdf(output_path, model_name="test_export")
+
+            assert output_path.exists()
+            assert "robot name=\"test_export\"" in urdf_str
+            assert "link name=\"base_link\"" in urdf_str
         assert 'link name="child_link"' in urdf_str
 
         # Since body 2 (child_link) is child of 1 (base_link), checking for joint logic
