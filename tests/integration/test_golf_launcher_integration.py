@@ -4,24 +4,132 @@ import os
 import sys
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
-from PyQt6.QtWidgets import QApplication
 
-from launchers.golf_launcher import GolfLauncher
+# Mock PyQt6 for headless/CI environment where DLLs are broken/missing
+# This must happen BEFORE importing modules that use PyQt6
+mock_qt = MagicMock()
+mock_widgets = MagicMock()
+mock_core = MagicMock()
+mock_gui = MagicMock()
+
 from shared.python.model_registry import ModelRegistry
 
-# Improve headless stability
-os.environ["QT_QPA_PLATFORM"] = "offscreen"
+# Define robust Mock classes to avoid recursion issues when inheriting from MagicMock
+class MockQtBase:
+    def __init__(self, *args, **kwargs):
+        pass
+
+    def __getattr__(self, name):
+        return MagicMock()
+
+    def setWindowTitle(self, title):
+        pass
+
+    def resize(self, w, h):
+        pass
+
+    def setStyleSheet(self, s):
+        pass
+
+    def setWindowIcon(self, i):
+        pass
+
+    def show(self):
+        pass
+
+    def setCentralWidget(self, w):
+        pass
+
+    def setLayout(self, l):
+        pass
+
+    def exec(self):
+        pass
+
+    def setFixedSize(self, w, h):
+        pass
+
+    def setAlignment(self, a):
+        pass
+
+    def setWordWrap(self, b):
+        pass
+
+    def font(self):
+        return MagicMock()
+
+
+class MockQWidget(MockQtBase):
+    pass
+
+
+class MockQMainWindow(MockQtBase):
+    pass
+
+
+class MockQDialog(MockQtBase):
+    pass
+class MockQFrame(MockQtBase):
+    class Shape:
+        NoFrame = 0
+
+class MockQThread(MockQtBase):
+    def start(self): pass
+    def wait(self): pass
+    def run(self): pass
+
+# Setup Constants and Classes
+mock_core.Qt.AlignmentFlag.AlignCenter = 0
+mock_core.Qt.AspectRatioMode.KeepAspectRatio = 0
+mock_core.Qt.TransformationMode.SmoothTransformation = 0
+mock_core.Qt.CursorShape.PointingHandCursor = 0
+mock_core.QThread = MockQThread
+# Use lambda to ignore arguments so they aren't treated as 'spec' by MagicMock
+mock_core.pyqtSignal = lambda *args, **kwargs: MagicMock()
+
+mock_widgets.QApplication = MagicMock()
+mock_widgets.QApplication.instance.return_value = None
+mock_widgets.QMainWindow = MockQMainWindow
+mock_widgets.QWidget = MockQWidget
+mock_widgets.QDialog = MockQDialog
+mock_widgets.QFrame = MockQFrame
+mock_widgets.QLabel = MockQWidget
+mock_widgets.QPushButton = MockQWidget
+mock_widgets.QCheckBox = MockQWidget
+mock_widgets.QComboBox = MockQWidget
+mock_widgets.QTextEdit = MockQWidget
+mock_widgets.QScrollArea = MockQWidget
+mock_widgets.QTabWidget = MockQWidget
+mock_widgets.QVBoxLayout = MockQWidget
+mock_widgets.QHBoxLayout = MockQWidget
+mock_widgets.QGridLayout = MockQWidget
+mock_widgets.QMessageBox = MagicMock()
+
+@pytest.fixture(scope="module", autouse=True)
+def mock_pyqt_modules():
+    """Patch PyQt6 modules in sys.modules for the duration of this test module."""
+    with patch.dict(sys.modules, {
+        "PyQt6": mock_qt,
+        "PyQt6.QtWidgets": mock_widgets,
+        "PyQt6.QtCore": mock_core,
+        "PyQt6.QtGui": mock_gui,
+    }):
+        yield
+
+# Note: We do not import GolfLauncher at the top level to avoid
+# importing it before the sys.modules patch is active, and to avoid
+# referencing a "stale" class definition if we reload it later.
 
 
 @pytest.fixture(scope="session")
 def qapp():
     """Create QApplication instance."""
-    app = QApplication.instance()
+    app = mock_widgets.QApplication.instance()
     if app is None:
-        app = QApplication(sys.argv)
+        app = mock_widgets.QApplication(sys.argv)
     yield app
 
 
@@ -78,7 +186,13 @@ models:
             MockRegistry.return_value = temp_registry
 
             # Create Launcher
-            launcher = GolfLauncher()
+            # Force reload to ensure no mocks from unit tests persist
+            import importlib
+            import launchers.golf_launcher
+            importlib.reload(launchers.golf_launcher)
+            from launchers.golf_launcher import GolfLauncher as FreshGolfLauncher
+
+            launcher = FreshGolfLauncher()
             yield launcher, model_xml
 
 
@@ -87,14 +201,14 @@ def test_launcher_detects_real_model_files(launcher_env):
     launcher, model_path = launcher_env
 
     # 1. Verify model loaded from registry (UI cards)
-    assert "Integration Test Model" in launcher.model_cards
+    assert "test_integration_model" in launcher.model_cards
 
-    # 2. Select it
-    launcher.select_model("Integration Test Model")
-    assert launcher.selected_model == "Integration Test Model"
+    # 2. Select it using ID
+    launcher.select_model("test_integration_model")
+    assert launcher.selected_model == "test_integration_model"
 
     # 3. Verify path resolving via configuration
-    # Note: Registry lookups are by ID, but UI selection is by Name.
+    # Note: Registry lookups are by ID
     # The temp config ID is "test_integration_model"
     model_config = launcher.registry.get_model("test_integration_model")
     assert model_config is not None
@@ -105,7 +219,7 @@ def test_launcher_handles_missing_file_on_launch(launcher_env):
     """Test launching a model where the file was deleted after load."""
     launcher, model_path = launcher_env
 
-    launcher.select_model("Integration Test Model")
+    launcher.select_model("test_integration_model")
 
     # DELETE the file
     os.remove(model_path)
