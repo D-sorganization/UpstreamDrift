@@ -2,7 +2,6 @@
 Unit tests for GolfLauncher GUI logic (Model selection, Launching).
 """
 
-import importlib
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
@@ -93,6 +92,9 @@ class MockQWidget(MockQtBase):
 
     def setWindowTitle(self, title):
         self._window_title = title
+
+    def windowTitle(self):
+        return self._window_title
 
     def setStyleSheet(self, s):
         self._style_sheet = s
@@ -239,19 +241,12 @@ class TestGolfLauncherLogic:
         """
         import sys
 
-        import launchers.golf_launcher
+        # Remove from sys.modules to force a fresh import that picks up the mocks
+        # This avoids potential ImportErrors with reload() if the module wasn't previously loaded
+        sys.modules.pop("launchers.golf_launcher", None)
 
-        # Only reload if the module is properly in sys.modules and we need to refresh it
-        # In CI environments, sometimes the module state is inconsistent
-        try:
-            if "launchers.golf_launcher" in sys.modules:
-                importlib.reload(launchers.golf_launcher)
-        except ImportError:
-            # If reload fails, the module is still imported and should work
-            pass
         yield
-        # Optional: cleanup or reload again if necessary, though
-        # patch.dict handles sys.modules restoration.
+        # patch.dict handles sys.modules restoration automatically
 
     @patch("shared.python.model_registry.ModelRegistry")
     @patch("launchers.golf_launcher.DockerCheckThread")
