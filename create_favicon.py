@@ -34,7 +34,7 @@ def create_favicon():
 
         # Convert to RGBA if needed
         if img.mode != "RGBA":
-            img = img.convert("RGBA")
+            img = img.convert("RGBA")  # type: ignore[assignment]
 
         # Create high-quality PNG icon (256x256)
         png_icon = img.resize((256, 256), Image.Resampling.LANCZOS)

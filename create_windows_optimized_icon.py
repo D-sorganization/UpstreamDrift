@@ -75,7 +75,7 @@ def create_windows_optimized_icons():
         # Load source image
         source_img = Image.open(source_image)
         if source_img.mode != "RGBA":
-            source_img = source_img.convert("RGBA")
+            source_img = source_img.convert("RGBA")  # type: ignore[assignment]
 
         logging.info(f"Creating Windows-optimized icons from {source_img.size} source")
 

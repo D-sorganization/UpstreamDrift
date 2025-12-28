@@ -249,7 +249,7 @@ class AdvancedController:
             tau += self._compute_gravity_compensation()
 
         # Map to actuators (assuming 1-to-1 mapping for now)
-        return tau[: self.model.nu]
+        return np.asarray(tau[: self.model.nu])
 
     def _compute_admittance_control(
         self,
@@ -295,7 +295,7 @@ class AdvancedController:
         if self.enable_gravity_compensation:
             tau += self._compute_gravity_compensation()
 
-        return tau[: self.model.nu]
+        return tau[: self.model.nu]  # type: ignore[no-any-return]
 
     def _compute_hybrid_control(
         self,
@@ -347,7 +347,7 @@ class AdvancedController:
         if self.enable_gravity_compensation:
             tau += self._compute_gravity_compensation()
 
-        return tau[: self.model.nu]
+        return tau[: self.model.nu]  # type: ignore[no-any-return]
 
     def _compute_computed_torque_control(
         self,
@@ -397,7 +397,7 @@ class AdvancedController:
 
         tau = m_qddot + self.data.qfrc_bias
 
-        return tau[: self.model.nu]
+        return tau[: self.model.nu]  # type: ignore[no-any-return]
 
     def _compute_task_space_control(
         self,
@@ -475,7 +475,7 @@ class AdvancedController:
         if self.enable_gravity_compensation:
             tau += self._compute_gravity_compensation()
 
-        return tau[: self.model.nu]
+        return tau[: self.model.nu]  # type: ignore[no-any-return]
 
     def _compute_gravity_compensation(self) -> np.ndarray:
         """Compute gravity compensation torques.
@@ -492,7 +492,7 @@ class AdvancedController:
 
         # Gravity compensation is the bias force without velocity terms
         # In quasi-static case: g(q) ≈ qfrc_bias
-        return qfrc_bias.copy()
+        return np.asarray(qfrc_bias.copy())
 
     def compute_operational_space_control(
         self,
@@ -577,7 +577,7 @@ class AdvancedController:
 
         tau = tau_task + tau_null + self.data.qfrc_bias
 
-        return tau[: self.model.nu]
+        return tau[: self.model.nu]  # type: ignore[no-any-return]
 
 
 class TrajectoryGenerator:

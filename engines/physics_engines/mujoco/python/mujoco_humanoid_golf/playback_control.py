@@ -209,7 +209,7 @@ class PlaybackController:
 
     def get_current_time(self) -> float:
         """Get current playback time."""
-        return self.times[self.current_frame]
+        return float(self.times[self.current_frame])
 
     def get_current_frame(self) -> int:
         """Get current frame index."""

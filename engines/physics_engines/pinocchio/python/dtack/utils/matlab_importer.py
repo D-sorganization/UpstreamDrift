@@ -128,4 +128,5 @@ class MATLABImporter:
             RuntimeError: Parser not yet implemented. File format requires reverse
                 engineering.
         """
-        return OpticalParser.load(file_path)
+        result = OpticalParser.load(file_path)
+        return dict(result)  # type: ignore[arg-type]

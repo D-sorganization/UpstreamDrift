@@ -328,7 +328,8 @@ class TriplePendulumDynamics:
         damping = np.array(self.parameters.damping, dtype=float) * np.array(
             omega, dtype=float
         )
-        return np.array(bias, dtype=float).flatten() + damping
+        result = np.array(bias, dtype=float).flatten() + damping
+        return np.array(result, dtype=np.float64)
 
     def forward_dynamics(
         self, state: TriplePendulumState, control: tuple[float, float, float]

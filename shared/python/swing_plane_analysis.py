@@ -75,7 +75,8 @@ class SwingPlaneAnalyzer:
         Returns:
             deviations: (N,) signed distances
         """
-        return np.dot(points - centroid, normal)
+        result = np.dot(points - centroid, normal)
+        return np.asarray(result)
 
     def analyze(self, points: np.ndarray) -> SwingPlaneMetrics:
         """Perform full swing plane analysis on trajectory.

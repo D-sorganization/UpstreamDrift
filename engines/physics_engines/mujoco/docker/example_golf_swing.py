@@ -87,18 +87,19 @@ def get_cmu_joint_names(env) -> list[str]:
     # If explicit names aren't in named.data, we might need a hardcoded
     # mapping or try to print them.
     try:
-        return env.physics.named.data.qpos.axes.row.names
+        names = env.physics.named.data.qpos.axes.row.names
+        return list(names)
     except Exception:
         return []
 
 
-def interpolate_pose(start_pose, end_pose, alpha) -> dict:
+def interpolate_pose(start_pose, end_pose, alpha) -> dict[str, float]:
     """Linearly interpolate between two poses."""
     result = start_pose.copy()
     for joint, end_val in end_pose.items():
         start_val = start_pose.get(joint, 0.0)
         result[joint] = start_val + (end_val - start_val) * alpha
-    return result
+    return dict(result)
 
 
 def main() -> None:

@@ -179,7 +179,11 @@ class URDFGenerator(QtWidgets.QMainWindow):
             return
 
         data = item.data(0, QtCore.Qt.ItemDataRole.UserRole)
-        parent_text = item.parent().text(0)
+        parent_item = item.parent()
+        if parent_item is not None:
+            parent_text = parent_item.text(0)
+        else:
+            return
 
         if parent_text == "Links":
             self.links.remove(data)
@@ -320,18 +324,22 @@ class URDFGenerator(QtWidgets.QMainWindow):
                 if visual is not None:
                     geometry = visual.find("geometry")
                     if geometry is not None:
-                        if geometry.find("box") is not None:
+                        box_elem = geometry.find("box")
+                        if box_elem is not None:
                             geom_type = "box"
-                            size = geometry.find("box").attrib.get("size", size)
-                        elif geometry.find("cylinder") is not None:
-                            geom_type = "cylinder"
-                            cyl = geometry.find("cylinder")
-                            r = cyl.attrib.get("radius", "0.1")
-                            length_val = cyl.attrib.get("length", "0.5")
-                            size = f"{r} {length_val}"
-                        elif geometry.find("sphere") is not None:
-                            geom_type = "sphere"
-                            size = geometry.find("sphere").attrib.get("radius", "0.1")
+                            size = box_elem.attrib.get("size", size)
+                        else:
+                            cyl_elem = geometry.find("cylinder")
+                            if cyl_elem is not None:
+                                geom_type = "cylinder"
+                                r = cyl_elem.attrib.get("radius", "0.1")
+                                length_val = cyl_elem.attrib.get("length", "0.5")
+                                size = f"{r} {length_val}"
+                            else:
+                                sphere_elem = geometry.find("sphere")
+                                if sphere_elem is not None:
+                                    geom_type = "sphere"
+                                    size = sphere_elem.attrib.get("radius", "0.1")
 
                     material = visual.find("material")
                     if material is not None:
@@ -351,8 +359,14 @@ class URDFGenerator(QtWidgets.QMainWindow):
             for joint in root.findall("joint"):
                 name = joint.attrib["name"]
                 jtype = joint.attrib.get("type", "revolute")
-                parent = joint.find("parent").attrib["link"]
-                child = joint.find("child").attrib["link"]
+                parent_elem = joint.find("parent")
+                child_elem = joint.find("child")
+
+                if parent_elem is not None and child_elem is not None:
+                    parent = parent_elem.attrib["link"]
+                    child = child_elem.attrib["link"]
+                else:
+                    continue  # Skip malformed joints
 
                 origin_elem = joint.find("origin")
                 origin = "0 0 0"

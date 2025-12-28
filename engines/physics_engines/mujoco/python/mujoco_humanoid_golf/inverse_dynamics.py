@@ -121,7 +121,7 @@ class InverseDynamicsSolver:
         """
         # Simple heuristic: Check for equality constraints
         # In production, more sophisticated analysis needed
-        return self.model.neq > 0
+        return bool(self.model.neq > 0)
 
     def compute_required_torques(
         self,
@@ -468,7 +468,7 @@ class InverseDynamicsSolver:
         # Use least-squares for redundant/constrained systems
         ee_force, _residuals, _rank, _s = lstsq(jacp.T, result.joint_torques)
 
-        return ee_force
+        return np.array(ee_force, dtype=np.float64)
 
     def validate_solution(
         self,

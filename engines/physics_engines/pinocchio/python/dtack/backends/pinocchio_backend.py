@@ -133,7 +133,8 @@ class PinocchioBackend:
         v_arr = np.asarray(v, dtype=np.float64)
         a_arr = np.asarray(a, dtype=np.float64)
 
-        return pin.rnea(self.model, self.data, q_arr, v_arr, a_arr)
+        result = pin.rnea(self.model, self.data, q_arr, v_arr, a_arr)
+        return np.asarray(result, dtype=np.float64)
 
     def compute_forward_dynamics(
         self,
@@ -155,7 +156,8 @@ class PinocchioBackend:
         v_arr = np.asarray(v, dtype=np.float64)
         tau_arr = np.asarray(tau, dtype=np.float64)
 
-        return pin.aba(self.model, self.data, q_arr, v_arr, tau_arr)
+        result = pin.aba(self.model, self.data, q_arr, v_arr, tau_arr)
+        return np.asarray(result, dtype=np.float64)
 
     def compute_mass_matrix(
         self, q: npt.NDArray[np.float64]
@@ -169,7 +171,8 @@ class PinocchioBackend:
             Mass matrix [nv x nv]
         """
         q_arr = np.asarray(q, dtype=np.float64)
-        return pin.crba(self.model, self.data, q_arr)
+        result = pin.crba(self.model, self.data, q_arr)
+        return np.asarray(result, dtype=np.float64)
 
     def compute_bias_forces(
         self,
@@ -192,7 +195,8 @@ class PinocchioBackend:
         # This avoids:
         # 1. Redundant computeGeneralizedGravity (rnea computes it internally)
         # 2. Allocating np.zeros(self.model.nv) for 'a' in rnea
-        return pin.nle(self.model, self.data, q_arr, v_arr)
+        result = pin.nle(self.model, self.data, q_arr, v_arr)
+        return np.asarray(result, dtype=np.float64)
 
     def compute_frame_jacobian(
         self,
@@ -217,9 +221,10 @@ class PinocchioBackend:
 
         pin.forwardKinematics(self.model, self.data, q_arr)
         pin.updateFramePlacements(self.model, self.data)
-        return pin.computeFrameJacobian(
+        result = pin.computeFrameJacobian(
             self.model, self.data, q_arr, frame_id, reference_frame
         )
+        return np.asarray(result, dtype=np.float64)
 
     def forward_kinematics(self, q: npt.NDArray[np.float64]) -> list[pin.SE3]:
         """Compute forward kinematics for all frames.

@@ -37,6 +37,21 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+# Windows-specific subprocess constants
+CREATE_NO_WINDOW: int
+CREATE_NEW_CONSOLE: int
+
+if os.name == "nt":
+    try:
+        CREATE_NO_WINDOW = subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
+        CREATE_NEW_CONSOLE = subprocess.CREATE_NEW_CONSOLE  # type: ignore[attr-defined]
+    except AttributeError:
+        CREATE_NO_WINDOW = 0x08000000
+        CREATE_NEW_CONSOLE = 0x00000010
+else:
+    CREATE_NO_WINDOW = 0
+    CREATE_NEW_CONSOLE = 0
+
 # Configure Logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
@@ -49,39 +64,11 @@ ASSETS_DIR = Path(__file__).parent / "assets"
 DOCKER_IMAGE_NAME = "robotics_env"
 GRID_COLUMNS = 4
 
-MODELS_DICT = {
-    "MuJoCo Humanoid": "engines/physics_engines/mujoco",
-    "MuJoCo Dashboard": "engines/physics_engines/mujoco",
-    "Drake Golf Model": "engines/physics_engines/drake",
-    "Pinocchio Golf Model": "engines/physics_engines/pinocchio",
-}
-
 MODEL_IMAGES = {
     "MuJoCo Humanoid": "mujoco_humanoid.png",
     "MuJoCo Dashboard": "mujoco_hand.png",
     "Drake Golf Model": "drake.png",
     "Pinocchio Golf Model": "pinocchio.png",
-}
-
-MODEL_DESCRIPTIONS = {
-    "MuJoCo Humanoid": "High-fidelity whole-body biomechanics simulation. Features a "
-    "23-DOF humanoid model with active muscle sites, ground reaction force (GRF) "
-    "visualization, and detailed contact dynamics. Ideal for analyzing kinetic "
-    "chains and joint torque generation during the swing.",
-    "MuJoCo Dashboard": "Interactive research workbench for comparative analysis. "
-    "Switch instantly between double-pendulum, wrist-cocking, and full-body models. "
-    "Includes real-time plots for phase space trajectories, energy conservation "
-    "verification, and parameter tuning sliders.",
-    "Drake Golf Model": "Control-theoretic golf robot focusing on trajectory "
-    "optimization."
-    "Utilizes Drake's rigorous multibody dynamics and constraint solvers to generate "
-    "physically consistent swing paths. Features stabilizing controllers and inverse "
-    "dynamics solvers.",
-    "Pinocchio Golf Model": "Ultra-fast rigid body dynamics engine based on "
-    "Featherstone's spatial algebra."
-    " Specialized for rapid iteration and derivative computation. "
-    "Validates kinematic chains and provides baseline capabilities for trajectory "
-    "optimization algorithms.",
 }
 
 DOCKER_STAGES = ["all", "mujoco", "pinocchio", "drake", "base"]
@@ -99,7 +86,7 @@ class DockerCheckThread(QThread):
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 timeout=5.0,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
             self.result.emit(True)
         except (
@@ -121,8 +108,8 @@ class DockerBuildThread(QThread):
 
     def run(self):
         """Run the docker build command."""
-        mujoco_path = REPOS_ROOT / MODELS_DICT["MuJoCo Humanoid"]
-        # Dockerfile is at engines/physics_engines/mujoco/Dockerfile
+        # Assume MuJoCo path for context as it's the primary engine root
+        mujoco_path = REPOS_ROOT / "engines/physics_engines/mujoco"
         docker_context = mujoco_path
 
         if not docker_context.exists():
@@ -157,16 +144,20 @@ class DockerBuildThread(QThread):
                 text=True,
                 bufsize=1,  # Line buffered to ensure real-time output
                 env=env,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
 
             # Read output real-time
             while True:
-                line = process.stdout.readline()
-                if not line and process.poll() is not None:
-                    break
-                if line:
-                    self.log_signal.emit(line.strip())
+                if process.stdout is not None:
+                    line = process.stdout.readline()
+                    if not line and process.poll() is not None:
+                        break
+                    if line:
+                        self.log_signal.emit(line.strip())
+                else:
+                    if process.poll() is not None:
+                        break
 
             process.wait()
 
@@ -357,9 +348,11 @@ class GolfLauncher(QMainWindow):
         try:
             from shared.python.model_registry import ModelRegistry
 
-            self.registry = ModelRegistry(REPOS_ROOT / "config/models.yaml")
+            self.registry: ModelRegistry | None = ModelRegistry(
+                REPOS_ROOT / "config/models.yaml"
+            )
         except ImportError:
-            logger.error("Failed to import ModelRegistry. Using empty registry.")
+            logger.error("Failed to import ModelRegistry. Registry unavailable.")
             self.registry = None
 
         self.init_ui()
@@ -409,7 +402,7 @@ class GolfLauncher(QMainWindow):
             models = self.registry.get_all_models()
             for model in models:
                 card = self.create_model_card(model)
-                self.model_cards[model.name] = card
+                self.model_cards[model.id] = card  # Use ID as key
                 self.grid_layout.addWidget(card, row, col)
                 col += 1
                 if col >= GRID_COLUMNS:
@@ -455,25 +448,36 @@ class GolfLauncher(QMainWindow):
         # --- Styling ---
         self.apply_styles()
 
-        # Select first model by default
-        self.select_model("MuJoCo Humanoid")
+        # Select first model by default if available
+        if self.registry:
+            models = self.registry.get_all_models()
+            if models:
+                # Prefer MuJoCo Humanoid if available
+                humanoid = next(
+                    (m for m in models if m.name == "MuJoCo Humanoid"), None
+                )
+                if humanoid:
+                    self.select_model(humanoid.id)
+                else:
+                    self.select_model(models[0].id)
 
     def create_model_card(self, model):
-        """
-        Create a clickable card widget for a model.
-
-        Args:
-            model (Models): The model identifier/name.
-
-        Returns:
-            QFrame: A card widget containing the model's image and description.
-        """
+        """Creates a clickable card widget."""
         name = model.name
+        model_id = model.id
         card = QFrame()
         card.setObjectName("ModelCard")
         card.setCursor(Qt.CursorShape.PointingHandCursor)
-        card.mousePressEvent = lambda e: self.select_model(name)
-        card.mouseDoubleClickEvent = lambda e: self.launch_model_direct(name)
+
+        # Create proper event handlers instead of assigning to methods
+        def handle_mouse_press(e):
+            self.select_model(model_id)
+
+        def handle_mouse_double_click(e):
+            self.launch_model_direct(model_id)
+
+        card.mousePressEvent = handle_mouse_press  # type: ignore[method-assign]
+        card.mouseDoubleClickEvent = handle_mouse_double_click  # type: ignore[method-assign]
 
         layout = QVBoxLayout(card)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -531,29 +535,26 @@ class GolfLauncher(QMainWindow):
 
         return card
 
-    def launch_model_direct(self, name):
-        """
-        Select and immediately launch a model (handler for double-click events).
-
-        Args:
-            name (str): The name of the model to launch.
-        """
-        self.select_model(name)
+    def launch_model_direct(self, model_id):
+        """Selects and immediately launches the model (for double-click)."""
+        self.select_model(model_id)
         if self.btn_launch.isEnabled():
             self.launch_simulation()
 
-    def select_model(self, name):
-        """
-        Select a model, update the UI selection state, and refresh details.
+    def select_model(self, model_id):
+        """Select a model and update UI."""
+        self.selected_model = model_id
 
-        Args:
-            name (str): The name of the selected model.
-        """
-        self.selected_model = name
+        # Get model name for display
+        model_name = model_id
+        if self.registry:
+            model = self.registry.get_model(model_id)
+            if model:
+                model_name = model.name
 
         # Update Styles
-        for model_name, card in self.model_cards.items():
-            if model_name == name:
+        for m_id, card in self.model_cards.items():
+            if m_id == model_id:
                 card.setStyleSheet(
                     """
                     QFrame#ModelCard {
@@ -578,15 +579,19 @@ class GolfLauncher(QMainWindow):
                 """
                 )
 
-        self.update_launch_button()
+        self.update_launch_button(model_name)
 
-    def update_launch_button(self):
-        """
-        Update the launch button text and state based on the current selection.
-        """
+    def update_launch_button(self, model_name=None):
+        """Update the launch button state."""
+        if not model_name and self.selected_model:
+            if self.registry:
+                model = self.registry.get_model(self.selected_model)
+                if model:
+                    model_name = model.name
+
         if self.docker_available and self.selected_model:
             self.btn_launch.setEnabled(True)
-            self.btn_launch.setText(f"LAUNCH {self.selected_model.upper()}")
+            self.btn_launch.setText(f"LAUNCH {str(model_name).upper()}")
         elif not self.docker_available:
             self.btn_launch.setEnabled(False)
             self.btn_launch.setText("DOCKER NOT FOUND")
@@ -595,9 +600,7 @@ class GolfLauncher(QMainWindow):
             self.btn_launch.setText("SELECT A MODEL")
 
     def apply_styles(self):
-        """
-        Apply custom CSS stylesheets to the application.
-        """
+        """Apply custom stylesheets."""
         self.setStyleSheet(
             """
             QMainWindow, QWidget {
@@ -676,20 +679,13 @@ class GolfLauncher(QMainWindow):
         )
 
     def check_docker(self):
-        """
-        Start the background thread to check Docker availability.
-        """
+        """Start the docker check thread."""
         self.check_thread = DockerCheckThread()
         self.check_thread.result.connect(self.on_docker_check_complete)
         self.check_thread.start()
 
     def on_docker_check_complete(self, available):
-        """
-        Handle the result from the Docker check thread.
-
-        Args:
-            available (bool): True if Docker is available/running, False otherwise.
-        """
+        """Handle docker check result."""
         self.docker_available = available
         if available:
             self.lbl_status.setText("● System Ready")
@@ -706,48 +702,34 @@ class GolfLauncher(QMainWindow):
         self.update_launch_button()
 
     def open_help(self):
-        """
-        Open the help dialog to display documentation.
-        """
+        """Open the help dialog."""
         dlg = HelpDialog(self)
         dlg.exec()
 
     def open_environment_manager(self):
-        """
-        Open the environment manager dialog to configure Docker and dependencies.
-        """
+        """Open the environment manager dialog."""
         dlg = EnvironmentDialog(self)
         dlg.exec()
 
     def launch_simulation(self):
-        """
-        Launch the selected simulation model.
-
-        Resolves the model path from the registry or fallback dictionary, and
-        dispatches the launch to the appropriate handler (custom or Docker).
-        """
+        """Launch the selected simulation."""
         if not self.selected_model:
             return
 
-        model_name = self.selected_model
+        model_id = self.selected_model
 
-        # Look up in registry first
-        path: Path | None = None
-        if self.registry:
-            # Find model by name
-            # This is inefficient, but we indexed matching cards by name in init
-            # ideally we should track ID.
-            for m in self.registry.get_all_models():
-                if m.name == model_name:
-                    path = REPOS_ROOT / m.path
-                    break
+        if not self.registry:
+            QMessageBox.critical(self, "Error", "Model registry is unavailable.")
+            return
 
-        # Fallback for old behaviour if not in registry
-        if not path:
-            # This fallback might be deprecated if we are fully migrated
-            if model_name in MODELS_DICT:
-                repo_rel_path = MODELS_DICT[model_name]
-                path = REPOS_ROOT / repo_rel_path
+        model = self.registry.get_model(model_id)
+        if not model:
+            QMessageBox.critical(
+                self, "Error", f"Model not found in registry: {model_id}"
+            )
+            return
+
+        path = REPOS_ROOT / model.path
 
         if not path or not path.exists():
             QMessageBox.critical(self, "Error", f"Path not found: {path}")
@@ -755,34 +737,20 @@ class GolfLauncher(QMainWindow):
 
         # Engine-specific launch logic
         try:
-            custom_launchers = {
-                "MuJoCo Humanoid": self._custom_launch_humanoid,
-                # Fix: Basic models should use standard mjcf launcher if available?
-                # For now, let's keep custom overrides.
-                "MuJoCo Dashboard": self._custom_launch_comprehensive,
-            }
-
-            # If it's a generic MJCF model, we might want a generic launcher?
-            # Current architecture assumes specific custom launchers for "Humanoid" and "Dashboard".
-            # The new models in registry are mostly MJCF.
-            # We probably need a generic MJCF viewer/launcher.
-            # For now, let's assume if it is a .xml file, we launch basic viewer?
-
-            if str(path).endswith(".xml"):
+            if model.type == "custom_humanoid":
+                self._custom_launch_humanoid(path)
+            elif model.type == "custom_dashboard":
+                self._custom_launch_comprehensive(path)
+            elif model.type == "mjcf" or str(path).endswith(".xml"):
                 self._launch_generic_mjcf(path)
-                return
-
-            launcher = custom_launchers.get(model_name)
-            if launcher:
-                launcher(path)
             else:
-                self._launch_docker_container(model_name, path)
+                # Default to docker launch
+                self._launch_docker_container(model, path)
         except Exception as e:
             QMessageBox.critical(self, "Launch Error", str(e))
 
     def _launch_generic_mjcf(self, path: Path):
         """Launch generic MJCF file in passive viewer."""
-        # We can use python -m mujoco.viewer or similar
         logger.info(f"Launching generic MJCF: {path}")
         try:
             # Use the python executable to run a simple viewer script or module
@@ -815,7 +783,7 @@ class GolfLauncher(QMainWindow):
         logger.info(f"Launching Comprehensive GUI from {python_dir}")
         subprocess.Popen([sys.executable, "-m", "mujoco_humanoid_golf"], cwd=python_dir)
 
-    def _launch_docker_container(self, model_name, abs_repo_path):
+    def _launch_docker_container(self, model, abs_repo_path):
         """Launch the simulation in a docker container."""
         cmd = ["docker", "run", "--rm", "-it"]
 
@@ -840,7 +808,7 @@ class GolfLauncher(QMainWindow):
 
         # Network for Meshcat (Drake/Pinocchio)
         host_port = None
-        if "Drake" in model_name or "Pinocchio" in model_name or "MuJoCo" in model_name:
+        if "drake" in model.type or "pinocchio" in model.type:
             cmd.extend(["-p", "7000-7010:7000-7010"])
             cmd.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
             host_port = 7000
@@ -848,16 +816,15 @@ class GolfLauncher(QMainWindow):
         cmd.append(DOCKER_IMAGE_NAME)
 
         # Entry Command
-        if "Drake" in model_name:
+        if model.type == "drake":
             # Run as module for relative imports (workdir is now /workspace/python)
-            # FIX: Use drake_gui_app instead of the empty golf_gui
             cmd.extend(["/opt/mujoco-env/bin/python", "-m", "src.drake_gui_app"])
 
             if host_port:
                 logger.info(f"Drake Meshcat will be available on host port {host_port}")
                 self._start_meshcat_browser(host_port)
 
-        elif "Pinocchio" in model_name:
+        elif model.type == "pinocchio":
             # Run from python dir
             cmd.extend(["/opt/mujoco-env/bin/python", "pinocchio_golf/gui.py"])
 
@@ -881,9 +848,7 @@ class GolfLauncher(QMainWindow):
                 + " ".join(cmd),
             ]
             logger.info("Starting new console for simulation...")
-            subprocess.Popen(
-                diagnostic_cmd, creationflags=subprocess.CREATE_NEW_CONSOLE
-            )
+            subprocess.Popen(diagnostic_cmd, creationflags=CREATE_NEW_CONSOLE)
         else:
             subprocess.Popen(cmd)
 
