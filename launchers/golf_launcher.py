@@ -18,21 +18,6 @@ from pathlib import Path
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QFont, QIcon, QPixmap
-
-# Windows-specific subprocess constants
-CREATE_NO_WINDOW: int
-CREATE_NEW_CONSOLE: int
-
-if os.name == "nt":
-    try:
-        CREATE_NO_WINDOW = subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
-        CREATE_NEW_CONSOLE = subprocess.CREATE_NEW_CONSOLE  # type: ignore[attr-defined]
-    except AttributeError:
-        CREATE_NO_WINDOW = 0x08000000
-        CREATE_NEW_CONSOLE = 0x00000010
-else:
-    CREATE_NO_WINDOW = 0
-    CREATE_NEW_CONSOLE = 0
 from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -51,6 +36,21 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+# Windows-specific subprocess constants
+CREATE_NO_WINDOW: int
+CREATE_NEW_CONSOLE: int
+
+if os.name == "nt":
+    try:
+        CREATE_NO_WINDOW = subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
+        CREATE_NEW_CONSOLE = subprocess.CREATE_NEW_CONSOLE  # type: ignore[attr-defined]
+    except AttributeError:
+        CREATE_NO_WINDOW = 0x08000000
+        CREATE_NEW_CONSOLE = 0x00000010
+else:
+    CREATE_NO_WINDOW = 0
+    CREATE_NEW_CONSOLE = 0
 
 # Configure Logging
 logging.basicConfig(
