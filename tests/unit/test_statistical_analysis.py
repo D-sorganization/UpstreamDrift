@@ -29,11 +29,11 @@ def sample_data():
     torques = np.zeros((101, 2))
 
     # CoP (Circle)
-    cop = np.stack([np.cos(2*np.pi*times), np.sin(2*np.pi*times)], axis=1)
+    cop = np.stack([np.cos(2 * np.pi * times), np.sin(2 * np.pi * times)], axis=1)
 
     # Ground Forces
     forces = np.zeros((101, 3))
-    forces[:, 2] = 1000.0 # Vertical
+    forces[:, 2] = 1000.0  # Vertical
 
     return {
         "times": times,
@@ -42,8 +42,9 @@ def sample_data():
         "torques": torques,
         "speed": speed,
         "cop": cop,
-        "forces": forces
+        "forces": forces,
     }
+
 
 @pytest.fixture
 def analyzer(sample_data):
@@ -54,8 +55,9 @@ def analyzer(sample_data):
         joint_torques=sample_data["torques"],
         club_head_speed=sample_data["speed"],
         cop_position=sample_data["cop"],
-        ground_forces=sample_data["forces"]
+        ground_forces=sample_data["forces"],
     )
+
 
 class TestStatisticalAnalyzer:
     def test_initialization(self, analyzer):

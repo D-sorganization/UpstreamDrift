@@ -112,7 +112,9 @@ class PlottingTab(QtWidgets.QWidget):
         plot_layout.addWidget(self.generate_plot_btn)
 
         self.btn_advanced_dialog = QtWidgets.QPushButton("Open Advanced Analysis...")
-        self.btn_advanced_dialog.clicked.connect(self.main_window.show_advanced_plots_dialog)
+        self.btn_advanced_dialog.clicked.connect(
+            self.main_window.show_advanced_plots_dialog
+        )
         self.btn_advanced_dialog.setStyleSheet(
             """
             QPushButton {
@@ -194,8 +196,9 @@ class PlottingTab(QtWidgets.QWidget):
         # We should pass joint names if possible
         joint_names = []
         if self.sim_widget.model:
-             import mujoco
-             for i in range(self.sim_widget.model.njnt):
+            import mujoco
+
+            for i in range(self.sim_widget.model.njnt):
                 name = mujoco.mj_id2name(
                     self.sim_widget.model, mujoco.mjtObj.mjOBJ_JOINT, i
                 )

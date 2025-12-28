@@ -68,7 +68,9 @@ class RecorderInterface(Protocol):
         """
         ...  # pragma: no cover
 
-    def get_induced_acceleration_series(self, source_name: str) -> tuple[np.ndarray, np.ndarray]:
+    def get_induced_acceleration_series(
+        self, source_name: str
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Extract time series for a specific induced acceleration source.
 
         Args:
@@ -77,7 +79,7 @@ class RecorderInterface(Protocol):
         Returns:
             Tuple of (times, acceleration_array)
         """
-        ... # pragma: no cover
+        ...  # pragma: no cover
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Extract time series for a specific counterfactual component.
@@ -88,7 +90,7 @@ class RecorderInterface(Protocol):
         Returns:
             Tuple of (times, data_array)
         """
-        ... # pragma: no cover
+        ...  # pragma: no cover
 
 
 class GolfSwingPlotter:
@@ -1217,14 +1219,16 @@ class GolfSwingPlotter:
         t = times[::skip_steps]
 
         # Quiver plot
-        q = ax.quiver(x, y, u, v, t, cmap="viridis", scale_units='xy', angles='xy')
+        q = ax.quiver(x, y, u, v, t, cmap="viridis", scale_units="xy", angles="xy")
 
         # Plot trajectory line
-        ax.plot(cop_data[:, 0], cop_data[:, 1], 'k-', alpha=0.2)
+        ax.plot(cop_data[:, 0], cop_data[:, 1], "k-", alpha=0.2)
 
         ax.set_xlabel("X Position (m)", fontsize=12, fontweight="bold")
         ax.set_ylabel("Y Position (m)", fontsize=12, fontweight="bold")
-        ax.set_title("Center of Pressure Velocity Field", fontsize=14, fontweight="bold")
+        ax.set_title(
+            "Center of Pressure Velocity Field", fontsize=14, fontweight="bold"
+        )
         ax.axis("equal")
         fig.colorbar(q, ax=ax, label="Time (s)")
         fig.tight_layout()
@@ -1248,7 +1252,13 @@ class GolfSwingPlotter:
 
         if num_vars < 3:
             ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "Need at least 3 metrics for radar chart", ha="center", va="center")
+            ax.text(
+                0.5,
+                0.5,
+                "Need at least 3 metrics for radar chart",
+                ha="center",
+                va="center",
+            )
             return
 
         # Compute angles
@@ -1292,7 +1302,7 @@ class GolfSwingPlotter:
         # Prepare data for stacked bar
         # Group by positive and negative power to show generation vs absorption
 
-        (times[-1] - times[0]) / len(times) * 1.0 # Continuous-ish
+        (times[-1] - times[0]) / len(times) * 1.0  # Continuous-ish
 
         # Stackplot is better for continuous time
         # Separate positive and negative
@@ -1302,18 +1312,22 @@ class GolfSwingPlotter:
         labels = [self.get_joint_name(i) for i in range(powers.shape[1])]
 
         ax.stackplot(times, pos_powers.T, labels=labels, alpha=0.7)
-        ax.set_prop_cycle(None) # Reset color cycle
+        ax.set_prop_cycle(None)  # Reset color cycle
         ax.stackplot(times, neg_powers.T, alpha=0.7)
 
-        ax.axhline(0, color='k', linewidth=1)
+        ax.axhline(0, color="k", linewidth=1)
 
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax.set_ylabel("Power (W)", fontsize=12, fontweight="bold")
-        ax.set_title("Power Flow (Generation/Absorption)", fontsize=14, fontweight="bold")
-        ax.legend(loc='upper left', bbox_to_anchor=(1, 1), ncol=1)
+        ax.set_title(
+            "Power Flow (Generation/Absorption)", fontsize=14, fontweight="bold"
+        )
+        ax.legend(loc="upper left", bbox_to_anchor=(1, 1), ncol=1)
         fig.tight_layout()
 
-    def plot_induced_acceleration(self, fig: Figure, source_name: str, joint_idx: int | None = None) -> None:
+    def plot_induced_acceleration(
+        self, fig: Figure, source_name: str, joint_idx: int | None = None
+    ) -> None:
         """Plot induced accelerations from a specific source.
 
         Args:
@@ -1325,7 +1339,13 @@ class GolfSwingPlotter:
             times, acc = self.recorder.get_induced_acceleration_series(source_name)
         except (AttributeError, KeyError):
             ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, f"No induced acceleration data for {source_name}", ha="center", va="center")
+            ax.text(
+                0.5,
+                0.5,
+                f"No induced acceleration data for {source_name}",
+                ha="center",
+                va="center",
+            )
             return
 
         if len(times) == 0 or acc.size == 0:
@@ -1336,27 +1356,51 @@ class GolfSwingPlotter:
         ax = fig.add_subplot(111)
 
         if joint_idx is not None:
-             # Plot specific joint
+            # Plot specific joint
             if joint_idx < acc.shape[1]:
-                ax.plot(times, acc[:, joint_idx], label=self.get_joint_name(joint_idx), linewidth=2, color=self.colors["primary"])
-                ax.set_ylabel(f"Joint {joint_idx} Acceleration (rad/s²)", fontsize=12, fontweight="bold")
+                ax.plot(
+                    times,
+                    acc[:, joint_idx],
+                    label=self.get_joint_name(joint_idx),
+                    linewidth=2,
+                    color=self.colors["primary"],
+                )
+                ax.set_ylabel(
+                    f"Joint {joint_idx} Acceleration (rad/s²)",
+                    fontsize=12,
+                    fontweight="bold",
+                )
             else:
-                ax.text(0.5, 0.5, f"Joint index {joint_idx} out of bounds", ha="center", va="center")
+                ax.text(
+                    0.5,
+                    0.5,
+                    f"Joint index {joint_idx} out of bounds",
+                    ha="center",
+                    va="center",
+                )
                 return
         else:
-             # Plot magnitude or norm if too many dimensions?
-             # Or plot all joints? Let's plot L2 norm for summary
-             norm = np.linalg.norm(acc, axis=1)
-             ax.plot(times, norm, label="L2 Norm", linewidth=2, color=self.colors["primary"])
-             ax.set_ylabel("Acceleration Magnitude (rad/s²)", fontsize=12, fontweight="bold")
+            # Plot magnitude or norm if too many dimensions?
+            # Or plot all joints? Let's plot L2 norm for summary
+            norm = np.linalg.norm(acc, axis=1)
+            ax.plot(
+                times, norm, label="L2 Norm", linewidth=2, color=self.colors["primary"]
+            )
+            ax.set_ylabel(
+                "Acceleration Magnitude (rad/s²)", fontsize=12, fontweight="bold"
+            )
 
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
-        ax.set_title(f"Induced Acceleration: {source_name}", fontsize=14, fontweight="bold")
+        ax.set_title(
+            f"Induced Acceleration: {source_name}", fontsize=14, fontweight="bold"
+        )
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3, linestyle="--")
         fig.tight_layout()
 
-    def plot_counterfactual_comparison(self, fig: Figure, cf_name: str, metric_idx: int = 0) -> None:
+    def plot_counterfactual_comparison(
+        self, fig: Figure, cf_name: str, metric_idx: int = 0
+    ) -> None:
         """Plot counterfactual data against actual data.
 
         Args:
@@ -1371,7 +1415,13 @@ class GolfSwingPlotter:
             times_cf, cf_data = self.recorder.get_counterfactual_series(cf_name)
         except (AttributeError, KeyError):
             ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, f"No counterfactual data for {cf_name}", ha="center", va="center")
+            ax.text(
+                0.5,
+                0.5,
+                f"No counterfactual data for {cf_name}",
+                ha="center",
+                va="center",
+            )
             return
 
         if len(times_actual) == 0 or len(times_cf) == 0:
@@ -1383,16 +1433,33 @@ class GolfSwingPlotter:
 
         # Plot Actual
         if metric_idx < actual.shape[1]:
-            ax.plot(times_actual, np.rad2deg(actual[:, metric_idx]), label="Actual", linewidth=2, color="black")
+            ax.plot(
+                times_actual,
+                np.rad2deg(actual[:, metric_idx]),
+                label="Actual",
+                linewidth=2,
+                color="black",
+            )
 
         # Plot Counterfactual
         # Ensure dimensions match
         if cf_data.ndim > 1 and metric_idx < cf_data.shape[1]:
-             ax.plot(times_cf, np.rad2deg(cf_data[:, metric_idx]), label=cf_name.upper(), linewidth=2, linestyle="--", color=self.colors["primary"])
+            ax.plot(
+                times_cf,
+                np.rad2deg(cf_data[:, metric_idx]),
+                label=cf_name.upper(),
+                linewidth=2,
+                linestyle="--",
+                color=self.colors["primary"],
+            )
 
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax.set_ylabel("Angle (deg)", fontsize=12, fontweight="bold")
-        ax.set_title(f"Counterfactual Analysis: {cf_name.upper()}", fontsize=14, fontweight="bold")
+        ax.set_title(
+            f"Counterfactual Analysis: {cf_name.upper()}",
+            fontsize=14,
+            fontweight="bold",
+        )
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3, linestyle="--")
         fig.tight_layout()

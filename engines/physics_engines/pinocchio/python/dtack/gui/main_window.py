@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 class GuiRecorder(RecorderInterface):
     """Recorder adapter for the GUI data."""
+
     def __init__(self, data_store: list[BiomechanicalData]):
         self.data_store = data_store
 
@@ -34,22 +35,22 @@ class GuiRecorder(RecorderInterface):
             if val is None:
                 # Try specific mappings if needed, or fallback
                 pass
-            values.append(val if val is not None else 0.0) # Handle None generally?
+            values.append(val if val is not None else 0.0)  # Handle None generally?
 
         # Refine handling based on field_name
         if field_name == "joint_positions":
-             values = np.array([d.joint_positions for d in self.data_store])
+            values = np.array([d.joint_positions for d in self.data_store])
         elif field_name == "joint_velocities":
-             values = np.array([d.joint_velocities for d in self.data_store])
+            values = np.array([d.joint_velocities for d in self.data_store])
         elif field_name == "joint_torques":
-             values = np.array([d.joint_torques for d in self.data_store])
+            values = np.array([d.joint_torques for d in self.data_store])
         elif field_name == "club_head_speed":
-             values = np.array([d.club_head_speed for d in self.data_store])
+            values = np.array([d.club_head_speed for d in self.data_store])
         else:
-             # Generic fallback for scalar or simple arrays
-             try:
+            # Generic fallback for scalar or simple arrays
+            try:
                 values = np.array(values)
-             except Exception:
+            except Exception:
                 pass
 
         return times, values
@@ -69,13 +70,13 @@ class GuiRecorder(RecorderInterface):
                 values.append(val)
 
         if not values:
-             return np.array([]), np.array([])
+            return np.array([]), np.array([])
 
         return np.array(times), np.array(values)
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         if not self.data_store:
-             return np.array([]), np.array([])
+            return np.array([]), np.array([])
 
         times = []
         values = []
@@ -259,16 +260,18 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
         control_layout = QtWidgets.QVBoxLayout()
 
         self.plot_type_combo = QtWidgets.QComboBox()
-        self.plot_type_combo.addItems([
-            "Summary Dashboard",
-            "Joint Angles",
-            "Joint Velocities",
-            "Joint Torques",
-            "Induced Accelerations",
-            "Energy Analysis",
-            "Phase Diagram",
-            "Counterfactual Comparison"
-        ])
+        self.plot_type_combo.addItems(
+            [
+                "Summary Dashboard",
+                "Joint Angles",
+                "Joint Velocities",
+                "Joint Torques",
+                "Induced Accelerations",
+                "Energy Analysis",
+                "Phase Diagram",
+                "Counterfactual Comparison",
+            ]
+        )
         control_layout.addWidget(QtWidgets.QLabel("Plot Type:"))
         control_layout.addWidget(self.plot_type_combo)
 
@@ -354,14 +357,14 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
         logger.info(f"Running {cf_type} counterfactual...")
 
         if not self.dynamics_engine or not self.recorded_data:
-             # Need real data to run real counterfactuals
-             if not self.recorded_data:
-                 QtWidgets.QMessageBox.warning(
+            # Need real data to run real counterfactuals
+            if not self.recorded_data:
+                QtWidgets.QMessageBox.warning(
                     self,
                     "No Data",
                     "No recorded data to analyze. Run simulation first.",
                 )
-                 return
+                return
 
         # Perform Analysis frame-by-frame
         # Note: This is simplified. ZVCF/ZTCF usually imply re-integration over time.
@@ -373,33 +376,33 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
         # 1. Take initial state from recorded data
         # 2. Integrate using ZTCF/ZVCF dynamics
 
-        if cf_type == 'ztcf':
-             # Drift simulation (tau=0)
-             dt = 0.01 # Assumed time step
-             q = self.recorded_data[0].joint_positions.copy()
-             v = self.recorded_data[0].joint_velocities.copy()
+        if cf_type == "ztcf":
+            # Drift simulation (tau=0)
+            dt = 0.01  # Assumed time step
+            q = self.recorded_data[0].joint_positions.copy()
+            v = self.recorded_data[0].joint_velocities.copy()
 
-             for _i, frame in enumerate(self.recorded_data):
-                 # Store result in frame
-                 frame.counterfactuals['ztcf'] = q.copy()
+            for _i, frame in enumerate(self.recorded_data):
+                # Store result in frame
+                frame.counterfactuals["ztcf"] = q.copy()
 
-                 # Step
-                 q, v = self.dynamics_engine.compute_ztcf(q, v, dt)
+                # Step
+                q, v = self.dynamics_engine.compute_ztcf(q, v, dt)
 
-        elif cf_type == 'zvcf':
-             # Zero Velocity (tau_g + tau_ctrl but v=0)
-             dt = 0.01
-             q = self.recorded_data[0].joint_positions.copy()
+        elif cf_type == "zvcf":
+            # Zero Velocity (tau_g + tau_ctrl but v=0)
+            dt = 0.01
+            q = self.recorded_data[0].joint_positions.copy()
 
-             for _i, frame in enumerate(self.recorded_data):
-                 frame.counterfactuals['zvcf'] = q.copy()
+            for _i, frame in enumerate(self.recorded_data):
+                frame.counterfactuals["zvcf"] = q.copy()
 
-                 # Step
-                 tau = frame.joint_torques
-                 if tau.size == 0:
-                     tau = np.zeros(self.model.nv)
+                # Step
+                tau = frame.joint_torques
+                if tau.size == 0:
+                    tau = np.zeros(self.model.nv)
 
-                 q, _ = self.dynamics_engine.compute_zvcf(q, tau, dt)
+                q, _ = self.dynamics_engine.compute_zvcf(q, tau, dt)
 
         # Update Plot
         self.cf_plot_canvas.fig.clear()
@@ -436,9 +439,9 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
                 self.recorded_data
                 and "actuator" in self.recorded_data[0].induced_accelerations
             ):
-                 # Override for demo
-                 self.results_canvas.fig.clear()
-                 plotter.plot_induced_acceleration(self.results_canvas.fig, "actuator")
+                # Override for demo
+                self.results_canvas.fig.clear()
+                plotter.plot_induced_acceleration(self.results_canvas.fig, "actuator")
         elif plot_type == "Energy Analysis":
             plotter.plot_energy_analysis(self.results_canvas.fig)
         elif plot_type == "Phase Diagram":
@@ -459,18 +462,18 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
             # Simple export logic
             data_list = []
             for d in self.recorded_data:
-                row = {'time': d.time}
+                row = {"time": d.time}
                 # Add basic fields
                 for i, q in enumerate(d.joint_positions):
-                    row[f'q_{i}'] = q
+                    row[f"q_{i}"] = q
                 # Add induced
                 for k, v in d.induced_accelerations.items():
                     for i, a in enumerate(v):
-                        row[f'acc_induced_{k}_{i}'] = a
+                        row[f"acc_induced_{k}_{i}"] = a
                 # Add CF
                 for k, v in d.counterfactuals.items():
                     for i, val in enumerate(v):
-                        row[f'cf_{k}_{i}'] = val
+                        row[f"cf_{k}_{i}"] = val
 
                 data_list.append(row)
 

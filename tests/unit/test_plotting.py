@@ -248,7 +248,11 @@ class TestGolfSwingPlotter:
         # Setup mock recorder to return some AM data
         times = np.linspace(0, 1, 100)
         am = np.ones((100, 3))
-        plotter.recorder.get_time_series = MagicMock(side_effect=lambda name: (times, am) if name == "angular_momentum" else ([], []))
+        plotter.recorder.get_time_series = MagicMock(
+            side_effect=lambda name: (
+                (times, am) if name == "angular_momentum" else ([], [])
+            )
+        )
 
         plotter.plot_angular_momentum(mock_figure)
         ax = mock_figure.add_subplot.return_value
@@ -259,7 +263,11 @@ class TestGolfSwingPlotter:
         """Test CoP trajectory plotting."""
         times = np.linspace(0, 1, 100)
         cop = np.random.rand(100, 2)
-        plotter.recorder.get_time_series = MagicMock(side_effect=lambda name: (times, cop) if name == "cop_position" else ([], []))
+        plotter.recorder.get_time_series = MagicMock(
+            side_effect=lambda name: (
+                (times, cop) if name == "cop_position" else ([], [])
+            )
+        )
 
         plotter.plot_cop_trajectory(mock_figure)
         ax = mock_figure.add_subplot.return_value
@@ -280,7 +288,11 @@ class TestGolfSwingPlotter:
         """Test power flow plotting."""
         times = np.linspace(0, 1, 100)
         powers = np.random.rand(100, 3)
-        plotter.recorder.get_time_series = MagicMock(side_effect=lambda name: (times, powers) if name == "actuator_powers" else ([], []))
+        plotter.recorder.get_time_series = MagicMock(
+            side_effect=lambda name: (
+                (times, powers) if name == "actuator_powers" else ([], [])
+            )
+        )
 
         plotter.plot_power_flow(mock_figure)
         ax = mock_figure.add_subplot.return_value
@@ -291,7 +303,11 @@ class TestGolfSwingPlotter:
         """Test CoP vector field plotting."""
         times = np.linspace(0, 1, 100)
         cop = np.random.rand(100, 2)
-        plotter.recorder.get_time_series = MagicMock(side_effect=lambda name: (times, cop) if name == "cop_position" else ([], []))
+        plotter.recorder.get_time_series = MagicMock(
+            side_effect=lambda name: (
+                (times, cop) if name == "cop_position" else ([], [])
+            )
+        )
 
         plotter.plot_cop_vector_field(mock_figure)
         ax = mock_figure.add_subplot.return_value

@@ -492,10 +492,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         elif plot_type == "Power Flow":
             # Requires power data in recorder
             if any(f.actuator_powers.size > 0 for f in self.recorder.frames):
-                 plotter.plot_power_flow(self.canvas.fig)
+                plotter.plot_power_flow(self.canvas.fig)
             else:
-                 ax = self.canvas.fig.add_subplot(111)
-                 ax.text(0.5, 0.5, "No actuator power data", ha="center", va="center")
+                ax = self.canvas.fig.add_subplot(111)
+                ax.text(0.5, 0.5, "No actuator power data", ha="center", va="center")
 
         self.canvas.draw()
 
@@ -522,8 +522,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             "Speed": 0.0,
             "Efficiency": 0.0,
             "Tempo": 0.0,
-            "Stability": 0.0, # Placeholder
-            "Power": 0.0
+            "Stability": 0.0,  # Placeholder
+            "Power": 0.0,
         }
 
         # Populate real metrics where possible

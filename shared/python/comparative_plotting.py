@@ -243,19 +243,44 @@ class ComparativePlotter:
             ax.text(0.5, 0.5, "No trajectory data", ha="center", va="center")
             return
 
-        ax = fig.add_subplot(111, projection='3d')
+        ax = fig.add_subplot(111, projection="3d")
 
-        ax.plot(pos_a[:, 0], pos_a[:, 1], pos_a[:, 2], label=self.analyzer.name_a, color=self.colors['a'])
-        ax.plot(pos_b[:, 0], pos_b[:, 1], pos_b[:, 2], label=self.analyzer.name_b, color=self.colors['b'], linestyle='--')
+        ax.plot(
+            pos_a[:, 0],
+            pos_a[:, 1],
+            pos_a[:, 2],
+            label=self.analyzer.name_a,
+            color=self.colors["a"],
+        )
+        ax.plot(
+            pos_b[:, 0],
+            pos_b[:, 1],
+            pos_b[:, 2],
+            label=self.analyzer.name_b,
+            color=self.colors["b"],
+            linestyle="--",
+        )
 
         # Start/End markers
-        ax.scatter([pos_a[0,0]], [pos_a[0,1]], [pos_a[0,2]], color=self.colors['a'], marker='o')
-        ax.scatter([pos_b[0,0]], [pos_b[0,1]], [pos_b[0,2]], color=self.colors['b'], marker='o')
+        ax.scatter(
+            [pos_a[0, 0]],
+            [pos_a[0, 1]],
+            [pos_a[0, 2]],
+            color=self.colors["a"],
+            marker="o",
+        )
+        ax.scatter(
+            [pos_b[0, 0]],
+            [pos_b[0, 1]],
+            [pos_b[0, 2]],
+            color=self.colors["b"],
+            marker="o",
+        )
 
         ax.set_title(title, fontsize=14, fontweight="bold")
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")
-        ax.set_zlabel("Z (m)") # type: ignore
+        ax.set_zlabel("Z (m)")  # type: ignore
         ax.legend()
         fig.tight_layout()
 
