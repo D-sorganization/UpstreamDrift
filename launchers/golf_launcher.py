@@ -20,6 +20,9 @@ from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QFont, QIcon, QPixmap
 
 # Windows-specific subprocess constants
+CREATE_NO_WINDOW: int
+CREATE_NEW_CONSOLE: int
+
 if os.name == "nt":
     try:
         CREATE_NO_WINDOW = subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
