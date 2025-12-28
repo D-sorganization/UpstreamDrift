@@ -34,7 +34,6 @@ def main():
     # Load Pinocchio model
     model = pin.buildModelFromUrdf(urdf_path)
 
-
     print(f"Model loaded: {model.nq} DOFs, {model.nv} velocities")
 
     # 2. Initialize CasADi Model
