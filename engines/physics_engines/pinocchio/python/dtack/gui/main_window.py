@@ -39,17 +39,17 @@ class GuiRecorder(RecorderInterface):
 
         # Refine handling based on field_name
         if field_name == "joint_positions":
-            values = np.array([d.joint_positions for d in self.data_store])
+            values = [d.joint_positions for d in self.data_store]
         elif field_name == "joint_velocities":
-            values = np.array([d.joint_velocities for d in self.data_store])
+            values = [d.joint_velocities for d in self.data_store]
         elif field_name == "joint_torques":
-            values = np.array([d.joint_torques for d in self.data_store])
+            values = [d.joint_torques for d in self.data_store]
         elif field_name == "club_head_speed":
-            values = np.array([d.club_head_speed for d in self.data_store])
+            values = [d.club_head_speed for d in self.data_store]
         else:
             # Generic fallback for scalar or simple arrays
             try:
-                values = np.array(values)
+                values = [val if val is not None else 0.0 for val in values]
             except Exception:
                 pass
 
@@ -340,9 +340,10 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
         logger.info("Loading model from: %s", path)
         try:
             self.model = pin.buildModelFromUrdf(path)
-            self.data = self.model.createData()
-            self.dynamics_engine = DynamicsEngine(self.model, self.data)
-            logger.info("Pinocchio model loaded successfully")
+            if self.model is not None:
+                self.data = self.model.createData()
+                self.dynamics_engine = DynamicsEngine(self.model, self.data)
+                logger.info("Pinocchio model loaded successfully")
         except Exception as e:
             logger.error(f"Failed to load model: {e}")
             QtWidgets.QMessageBox.critical(self, "Error", f"Failed to load model: {e}")
@@ -386,8 +387,9 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
                 # Store result in frame
                 frame.counterfactuals["ztcf"] = q.copy()
 
-                # Step
-                q, v = self.dynamics_engine.compute_ztcf(q, v, dt)
+                # Step - check if dynamics_engine is available
+                if self.dynamics_engine is not None:
+                    q, v = self.dynamics_engine.compute_ztcf(q, v, dt)
 
         elif cf_type == "zvcf":
             # Zero Velocity (tau_g + tau_ctrl but v=0)
@@ -397,12 +399,13 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
             for _i, frame in enumerate(self.recorded_data):
                 frame.counterfactuals["zvcf"] = q.copy()
 
-                # Step
-                tau = frame.joint_torques
-                if tau.size == 0:
-                    tau = np.zeros(self.model.nv)
+                # Step - check if dynamics_engine and model are available
+                if self.dynamics_engine is not None and self.model is not None:
+                    tau = frame.joint_torques
+                    if tau.size == 0:
+                        tau = np.zeros(self.model.nv)
 
-                q, _ = self.dynamics_engine.compute_zvcf(q, tau, dt)
+                    q, _ = self.dynamics_engine.compute_zvcf(q, tau, dt)
 
         # Update Plot
         self.cf_plot_canvas.fig.clear()

@@ -1312,7 +1312,22 @@ class GolfSwingPlotter:
         labels = [self.get_joint_name(i) for i in range(powers.shape[1])]
 
         ax.stackplot(times, pos_powers.T, labels=labels, alpha=0.7)
-        ax.set_prop_cycle(None)  # Reset color cycle
+        # Reset color cycle by creating a new cycler with default colors
+        from cycler import cycler
+
+        default_colors = [
+            "#1f77b4",
+            "#ff7f0e",
+            "#2ca02c",
+            "#d62728",
+            "#9467bd",
+            "#8c564b",
+            "#e377c2",
+            "#7f7f7f",
+            "#bcbd22",
+            "#17becf",
+        ]
+        ax.set_prop_cycle(cycler("color", default_colors))
         ax.stackplot(times, neg_powers.T, alpha=0.7)
 
         ax.axhline(0, color="k", linewidth=1)
@@ -1409,10 +1424,12 @@ class GolfSwingPlotter:
             metric_idx: Index of metric to compare (e.g. joint angle index)
         """
         # Get actual data (assume joint positions for now as primary comparison)
-        times_actual, actual = self.recorder.get_time_series("joint_positions")
+        times_actual, actual_data = self.recorder.get_time_series("joint_positions")
+        actual = np.asarray(actual_data)
 
         try:
-            times_cf, cf_data = self.recorder.get_counterfactual_series(cf_name)
+            times_cf, cf_data_raw = self.recorder.get_counterfactual_series(cf_name)
+            cf_data = np.asarray(cf_data_raw)
         except (AttributeError, KeyError):
             ax = fig.add_subplot(111)
             ax.text(
@@ -1432,7 +1449,7 @@ class GolfSwingPlotter:
         ax = fig.add_subplot(111)
 
         # Plot Actual
-        if metric_idx < actual.shape[1]:
+        if actual.ndim > 1 and metric_idx < actual.shape[1]:
             ax.plot(
                 times_actual,
                 np.rad2deg(actual[:, metric_idx]),
