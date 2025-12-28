@@ -4,7 +4,9 @@ Unit tests for shared.python.statistical_analysis module.
 
 import numpy as np
 import pytest
-from shared.python.statistical_analysis import StatisticalAnalyzer, PeakInfo, SwingPhase
+
+from shared.python.statistical_analysis import StatisticalAnalyzer
+
 
 @pytest.fixture
 def sample_data():

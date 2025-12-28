@@ -110,11 +110,10 @@ class AdvancedGuiMethodsMixin:
 
     def show_advanced_plots_dialog(self) -> None:
         """Show dialog with advanced analysis plots."""
-        from PyQt6 import QtWidgets
         import numpy as np
+        from PyQt6 import QtWidgets
 
         try:
-            import matplotlib.pyplot as plt
             from shared.python.plotting import GolfSwingPlotter
             from shared.python.statistical_analysis import StatisticalAnalyzer
         except ImportError:
@@ -131,7 +130,9 @@ class AdvancedGuiMethodsMixin:
 
         if len(times) == 0:
             QtWidgets.QMessageBox.warning(
-                self, "No Data", "No recording available. Please Record a simulation first."
+                self,
+                "No Data",
+                "No recording available. Please Record a simulation first.",
             )
             return
 
@@ -201,12 +202,15 @@ class AdvancedGuiMethodsMixin:
         canvas = FigureCanvasQTAgg(fig)
         layout.addWidget(canvas)
 
-        gs = fig.add_gridspec(2, 2)
+        fig.add_gridspec(2, 2)
 
         # 1. Radar Chart
-        plotter.plot_radar_chart(fig, metrics) # This method centers the polar plot usually
-        # But wait, plot_radar_chart in shared/python/plotting.py uses add_subplot(111, polar=True)
-        # which clears the figure. We need to update plot_radar_chart to accept ax or modify usage.
+        # This method centers the polar plot usually
+        plotter.plot_radar_chart(fig, metrics)
+        # But wait, plot_radar_chart in shared/python/plotting.py uses
+        # add_subplot(111, polar=True)
+        # which clears the figure. We need to update plot_radar_chart to accept
+        # ax or modify usage.
         # Actually my implementation of plot_radar_chart used add_subplot(111).
         # Let's fix that in plotting.py first? Or just show one plot per dialog?
         # The user requested advanced features.
