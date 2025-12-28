@@ -16,7 +16,7 @@ sys.path.insert(0, str(project_root))
 
 # --- Mock PyQt6 Modules ---
 class MockQtBase:
-    """Base class for all Qt mocks to handle common behavior."""
+    """Base class for all Qt mocks (PyQt6) to handle common behavior."""
 
     def __init__(self, *args, **kwargs):
         pass
