@@ -148,8 +148,14 @@ class TestURDFExporter:
         mock_mujoco.mjtObj.mjOBJ_MODEL = 3
         mock_mujoco.mjtJoint.mjJNT_HINGE = 0  # Define this for the mock model
 
-        # Mock id2name logic
+        # Mock id2name logic - need to handle the actual MjModel mock being passed
         def id2name_side_effect(model, obj_type, obj_id):
+            # Convert obj_type to int if it's a mock object
+            if hasattr(obj_type, "value"):
+                obj_type = obj_type.value
+            elif not isinstance(obj_type, int):
+                obj_type = int(obj_type)
+
             if obj_type == 1:  # mjOBJ_BODY
                 if obj_id == 0:
                     return "world"
