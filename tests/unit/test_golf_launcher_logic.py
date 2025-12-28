@@ -220,16 +220,29 @@ def mock_pyqt(monkeypatch):
     mock_qt_gui.QIcon = MagicMock()
     mock_qt_gui.QPixmap = MagicMock()
 
-    with patch.dict(
-        sys.modules,
-        {
-            "PyQt6": MagicMock(),
-            "PyQt6.QtCore": mock_qt_core,
-            "PyQt6.QtGui": mock_qt_gui,
-            "PyQt6.QtWidgets": mock_qt_widgets,
-        },
-    ):
+    # Store original modules to restore later
+    original_modules = {}
+    pyqt_modules = ["PyQt6", "PyQt6.QtCore", "PyQt6.QtGui", "PyQt6.QtWidgets"]
+
+    for module_name in pyqt_modules:
+        if module_name in sys.modules:
+            original_modules[module_name] = sys.modules[module_name]
+
+    # Apply our mocks
+    sys.modules["PyQt6"] = MagicMock()
+    sys.modules["PyQt6.QtCore"] = mock_qt_core
+    sys.modules["PyQt6.QtGui"] = mock_qt_gui
+    sys.modules["PyQt6.QtWidgets"] = mock_qt_widgets
+
+    try:
         yield
+    finally:
+        # Restore original modules or remove if they weren't there before
+        for module_name in pyqt_modules:
+            if module_name in original_modules:
+                sys.modules[module_name] = original_modules[module_name]
+            else:
+                sys.modules.pop(module_name, None)
 
 
 class TestGolfLauncherLogic:
@@ -239,14 +252,16 @@ class TestGolfLauncherLogic:
         """
         Reload the module to ensure it uses the patched sys.modules.
         """
-        import sys
+        # Clear any cached modules that might interfere
+        modules_to_clear = [
+            "launchers.golf_launcher",
+            "tests.integration.test_golf_launcher_integration",
+        ]
 
-        # Remove from sys.modules to force a fresh import that picks up the mocks
-        # This avoids potential ImportErrors with reload() if the module wasn't previously loaded
-        sys.modules.pop("launchers.golf_launcher", None)
+        for module_name in modules_to_clear:
+            sys.modules.pop(module_name, None)
 
         yield
-        # patch.dict handles sys.modules restoration automatically
 
     @patch("shared.python.model_registry.ModelRegistry")
     @patch("launchers.golf_launcher.DockerCheckThread")
