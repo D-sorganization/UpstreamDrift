@@ -67,8 +67,11 @@ analysis = [
     "h5py>=3.9.0",
     "pillow>=10.0.0",
 ]
+optimization = [
+    "casadi>=3.6.3",
+]
 all = [
-    "golf-modeling-suite[dev,engines,analysis]",
+    "golf-modeling-suite[dev,engines,analysis,optimization]",
 ]
 
 [project.scripts]
