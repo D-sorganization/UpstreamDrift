@@ -161,10 +161,6 @@ ignore_errors = true
 module = "*.tests.*"
 ignore_errors = true
 
-[[tool.mypy.overrides]]
-module = "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.*"
-ignore_errors = true
-
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = [

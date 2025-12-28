@@ -251,16 +251,16 @@ class TestGolfLauncherLogic:
         """
         Reload the module to ensure it uses the patched sys.modules.
         """
-        # Clear any cached modules that might interfere
-        modules_to_clear = [
-            "launchers.golf_launcher",
-            "tests.integration.test_golf_launcher_integration",
-        ]
+        import sys
 
-        for module_name in modules_to_clear:
-            sys.modules.pop(module_name, None)
+        # Remove from sys.modules to force a fresh import that picks up the mocks
+        # This avoids potential ImportErrors with reload() if the module wasn't previously loaded
+        sys.modules.pop("launchers.golf_launcher", None)
+
+        import launchers.golf_launcher  # noqa: F401
 
         yield
+        # patch.dict handles sys.modules restoration automatically
 
     @patch("shared.python.model_registry.ModelRegistry")
     @patch("launchers.golf_launcher.DockerCheckThread")

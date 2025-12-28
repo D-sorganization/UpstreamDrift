@@ -10,23 +10,9 @@ __email__ = "team@example.com"
 
 
 # Export commonly used functions and constants
-from .constants import (
-    DEFAULT_RANDOM_SEED,
-    GOLF_BALL_DIAMETER_M,
-    GOLF_BALL_MASS_KG,
-    GRAVITY_M_S2,
-    PI,
-    E,
-)
 from .logger_utils import get_logger, set_seeds, setup_logging
 
 __all__ = [
-    "DEFAULT_RANDOM_SEED",
-    "GOLF_BALL_DIAMETER_M",
-    "GOLF_BALL_MASS_KG",
-    "GRAVITY_M_S2",
-    "PI",
-    "E",
     "__author__",
     "__email__",
     "__version__",

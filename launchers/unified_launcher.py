@@ -59,7 +59,7 @@ class UnifiedLauncher:
         if self.app is None:
             logger.error("QApplication failed to initialize.")
             return 1
-        return self.app.exec()
+        return int(self.app.exec())
 
     def show_status(self) -> None:
         """Display suite status information.

@@ -7,8 +7,15 @@ Computes joint accelerations given applied torques.
 from __future__ import annotations
 
 import numpy as np
-from mujoco_humanoid_golf.spatial_algebra import cross_force, cross_motion, jcalc
+from mujoco_humanoid_golf.spatial_algebra import (
+    cross_force_fast,
+    cross_motion_fast,
+    jcalc,
+)
 from shared.python import constants
+
+DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
+DEFAULT_GRAVITY.flags.writeable = False
 
 TOLERANCE = 1e-10  # Numerical tolerance to avoid division by zero
 
@@ -83,7 +90,7 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         f_ext = np.zeros((6, nb))
 
     # Get gravity vector
-    a_grav = model.get("gravity", np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2]))
+    a_grav = model.get("gravity", DEFAULT_GRAVITY)
 
     # Initialize arrays
     # OPTIMIZATION: Pre-allocate 3D arrays instead of lists of arrays
@@ -140,9 +147,8 @@ def aba(  # noqa: C901, PLR0912, PLR0915
             v[:, i] = scratch_vec
 
             # OPTIMIZATION: Use pre-allocated buffer for cross product
-            cross_motion(
-                v[:, i], vj_velocity, out=c[:, i]
-            )  # Velocity-product acceleration
+            # Use fast version to avoid overhead
+            cross_motion_fast(v[:, i], vj_velocity, out=c[:, i])
 
         # Initialize articulated-body inertia with rigid-body inertia
         # OPTIMIZATION: Copy into pre-allocated buffer instead of creating new array
@@ -155,7 +161,8 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         # i_v = model["I"][i] @ v[:, i]
         np.matmul(model["I"][i], v[:, i], out=i_v_buf)
 
-        cross_force(v[:, i], i_v_buf, out=cross_buf)
+        # Use fast version to avoid overhead
+        cross_force_fast(v[:, i], i_v_buf, out=cross_buf)
         # pa_bias[:, i] = cross_buf - f_ext[:, i]
         np.subtract(cross_buf, f_ext[:, i], out=pa_bias[:, i])
 
