@@ -14,8 +14,15 @@
       <div class="grid">
         <label>Shoulder angle (deg)<input id="theta1" type="number" value="-45"></label>
         <label>Wrist angle (deg)<input id="theta2" type="number" value="-90"></label>
-        <label>Shoulder torque f(t)<input id="tau1" type="text" value="0"></label>
-        <label>Wrist torque f(t)<input id="tau2" type="text" value="0"></label>
+        <label>Shoulder torque f(t)<input id="tau1" type="text" value="0" aria-describedby="math-hint"></label>
+        <label>Wrist torque f(t)<input id="tau2" type="text" value="0" aria-describedby="math-hint"></label>
+        <p id="math-hint" class="hint">
+          <svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+            <path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z"/>
+          </svg>
+          Use: <code>t</code>, <code>theta1</code>, <code>theta2</code>, <code>omega1</code>, <code>omega2</code>, <code>Math.*</code>
+        </p>
         <label>Upper length (m)<input id="l1" type="number" value="0.75" step="0.01" min="0"></label>
         <label>Upper mass (kg)<input id="m1" type="number" value="7.5" step="0.1" min="0"></label>
         <label>Upper COM ratio<input id="com1" type="number" value="0.45" step="0.01" min="0" max="1"></label>

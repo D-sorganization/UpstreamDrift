@@ -76,8 +76,10 @@ function updateParamsFromInputs() {
   [tau1Input, tau2Input].forEach(input => {
     if (validateExpr(input.value || '0')) {
       input.classList.remove('error');
+      input.setAttribute('aria-invalid', 'false');
     } else {
       input.classList.add('error');
+      input.setAttribute('aria-invalid', 'true');
     }
   });
 
