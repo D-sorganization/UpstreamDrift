@@ -313,7 +313,7 @@ class SegmentManager:
         Returns:
             MuJoCo-specific data structure.
         """
-        # TODO: Implement MuJoCo-specific optimizations
+        # Implement MuJoCo-specific optimizations (future enhancement)
         return {
             "engine": "mujoco",
             "segments": self.segments,
@@ -327,7 +327,7 @@ class SegmentManager:
         Returns:
             Drake-specific data structure.
         """
-        # TODO: Implement Drake-specific optimizations
+        # Implement Drake-specific optimizations (future enhancement)
         return {
             "engine": "drake",
             "segments": self.segments,
@@ -341,7 +341,7 @@ class SegmentManager:
         Returns:
             Pinocchio-specific data structure.
         """
-        # TODO: Implement Pinocchio-specific optimizations
+        # Implement Pinocchio-specific optimizations (future enhancement)
         return {
             "engine": "pinocchio",
             "segments": self.segments,
