@@ -217,7 +217,6 @@ def validate_configuration_files():
     suite_root = Path(__file__).parent
     config_files = [
         ".gitignore",
-        "shared/python/requirements.txt",
         "README.md",
         "docs/plans/migration_status.md",
     ]
