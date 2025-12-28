@@ -2,7 +2,7 @@
 
 import logging
 
-from PyQt6.QtCore import Qt, QPointF, QTimer
+from PyQt6.QtCore import QPointF, Qt, QTimer
 from PyQt6.QtGui import QMouseEvent, QWheelEvent
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
