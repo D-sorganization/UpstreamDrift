@@ -1,6 +1,8 @@
-import pytest
 import numpy as np
-from shared.python.statistical_analysis import StatisticalAnalyzer, SwingPhase, PeakInfo
+import pytest
+
+from shared.python.statistical_analysis import StatisticalAnalyzer, SwingPhase
+
 
 @pytest.fixture
 def sample_data():

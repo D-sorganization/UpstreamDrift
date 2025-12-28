@@ -428,7 +428,9 @@ class SwingRecorder:
 
         return times, values_array
 
-    def get_induced_acceleration_series(self, source_name: str) -> tuple[np.ndarray, np.ndarray]:
+    def get_induced_acceleration_series(
+        self, source_name: str
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Extract time series for a specific induced acceleration source."""
         if not self.frames:
              return np.array([]), np.array([])

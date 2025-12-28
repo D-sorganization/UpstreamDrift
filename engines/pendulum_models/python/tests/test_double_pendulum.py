@@ -3,21 +3,20 @@
 import numpy as np
 import pytest
 from engines.pendulum_models.python.double_pendulum import (
-    M_matrix,
-    C_times_qdot,
-    g_vector,
-    tau_natural,
-    double_pendulum_dynamics,
-    u_pd,
-    g,
-    m1,
-    m2,
-    l1,
-    l2,
-    c1,
-    c2,
     I1,
     I2,
+    C_times_qdot,
+    M_matrix,
+    c1,
+    c2,
+    double_pendulum_dynamics,
+    g,
+    g_vector,
+    l1,
+    m1,
+    m2,
+    tau_natural,
+    u_pd,
 )
 
 # Constants for tolerance
@@ -43,7 +42,9 @@ class TestDoublePendulumDynamics:
             M = M_matrix(q)
 
             # Symmetry check
-            assert np.allclose(M, M.T, rtol=RTOL, atol=ATOL), f"Mass matrix not symmetric at q={q}"
+            assert np.allclose(
+                M, M.T, rtol=RTOL, atol=ATOL
+            ), f"Mass matrix not symmetric at q={q}"
 
             # Positive definite check (eigenvalues > 0)
             eigvals = np.linalg.eigvals(M)
@@ -72,10 +73,12 @@ class TestDoublePendulumDynamics:
     def test_gravity_vector_static(self) -> None:
         """Test gravity vector at static equilibrium points."""
         # Downward position (0, 0) - Stable equilibrium if defined as 0
-        # The code uses sin(q), so q=0 corresponds to gravity acting "down" relative to the angle?
+        # The code uses sin(q), so q=0 corresponds to gravity acting "down"
+        # relative to the angle?
         # Let's check the implementation of g_vector:
         # g1 = (m1 * c1 + m2 * l1) * g * sin(q1) + ...
-        # If q=[0,0], sin(0)=0 -> g=[0,0]. This implies 0 is a stable/unstable equilibrium.
+        # If q=[0,0], sin(0)=0 -> g=[0,0]. This implies 0 is a
+        # stable/unstable equilibrium.
 
         q = np.array([0.0, 0.0])
         g_vec = g_vector(q)
@@ -102,7 +105,8 @@ class TestDoublePendulumDynamics:
         assert np.allclose(C, np.zeros(2), rtol=RTOL, atol=ATOL)
 
     def test_dynamics_consistency(self) -> None:
-        """Test that forward dynamics is consistent with inverse dynamics (tau_natural)."""
+        """Test that forward dynamics is consistent with inverse dynamics
+        (tau_natural)."""
         # Generate random state
         q = np.random.uniform(-np.pi, np.pi, 2)
         qdot = np.random.uniform(-10, 10, 2)
@@ -118,9 +122,11 @@ class TestDoublePendulumDynamics:
         xdot = double_pendulum_dynamics(0.0, x, u_func)
         qddot_computed = xdot[2:4]
 
-        # Now use inverse dynamics (tau_natural) to see if we get back the applied torque
+        # Now use inverse dynamics (tau_natural) to see if we get back the
+        # applied torque
         # tau_nat = M*qddot + C*qdot + g
-        # Our dynamics: qddot = M^-1(u - C*qdot - g) => M*qddot = u - C*qdot - g => M*qddot + C*qdot + g = u
+        # Our dynamics: qddot = M^-1(u - C*qdot - g) => M*qddot = u - C*qdot - g
+        # => M*qddot + C*qdot + g = u
         # So tau_natural should equal u
         tau_computed = tau_natural(q, qdot, qddot_computed)
 

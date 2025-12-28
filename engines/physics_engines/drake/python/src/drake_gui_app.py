@@ -1,3 +1,137 @@
+"""Drake Golf Swing Analysis GUI Application."""
+
+from __future__ import annotations
+
+import logging
+import os
+import sys
+import webbrowser
+from pathlib import Path
+from typing import TYPE_CHECKING
+
+import numpy as np
+
+# Qt imports
+try:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+    HAS_QT = True
+except ImportError:
+    HAS_QT = False
+    QtCore = None  # type: ignore[misc, assignment]
+    QtGui = None  # type: ignore[misc, assignment]
+    QtWidgets = None  # type: ignore[misc, assignment]
+
+# Matplotlib imports
+try:
+    import matplotlib.pyplot as plt
+    HAS_MATPLOTLIB = True
+except ImportError:
+    HAS_MATPLOTLIB = False
+    plt = None  # type: ignore[misc, assignment]
+
+# Drake imports
+if TYPE_CHECKING or HAS_QT:
+    try:
+        from pydrake.all import (
+            AddMultibodyPlantSceneGraph,
+            BodyIndex,
+            Context,
+            Diagram,
+            DiagramBuilder,
+            DrakeVisualizer,
+            JacobianWrtVariable,
+            JointIndex,
+            Meshcat,
+            MeshcatParams,
+            MeshcatVisualizer,
+            MultibodyPlant,
+            Parser,
+            PrismaticJoint,
+            RevoluteJoint,
+            RigidTransform,
+            Simulator,
+        )
+    except ImportError:
+        # Fallback for when Drake is not available
+        AddMultibodyPlantSceneGraph = None  # type: ignore[misc, assignment]
+        BodyIndex = None  # type: ignore[misc, assignment]
+        Context = None  # type: ignore[misc, assignment]
+        Diagram = None  # type: ignore[misc, assignment]
+        DiagramBuilder = None  # type: ignore[misc, assignment]
+        DrakeVisualizer = None  # type: ignore[misc, assignment]
+        JointIndex = None  # type: ignore[misc, assignment]
+        JacobianWrtVariable = None  # type: ignore[misc, assignment]
+        Meshcat = None  # type: ignore[misc, assignment]
+        MeshcatParams = None  # type: ignore[misc, assignment]
+        MeshcatVisualizer = None  # type: ignore[misc, assignment]
+        MultibodyPlant = None  # type: ignore[misc, assignment]
+        Parser = None  # type: ignore[misc, assignment]
+        PrismaticJoint = None  # type: ignore[misc, assignment]
+        RevoluteJoint = None  # type: ignore[misc, assignment]
+        RigidTransform = None  # type: ignore[misc, assignment]
+        Simulator = None  # type: ignore[misc, assignment]
+
+# Shared imports
+try:
+    from shared.python.plotting import GolfSwingPlotter
+    from shared.python.statistical_analysis import StatisticalAnalyzer
+except ImportError:
+    GolfSwingPlotter = None  # type: ignore[misc, assignment]
+    StatisticalAnalyzer = None  # type: ignore[misc, assignment]
+
+# Try to import golf model components
+try:
+    from engines.physics_engines.drake.python.src.drake_golf_model import (
+        GolfModelParams,
+        build_golf_swing_diagram,
+    )
+except ImportError:
+    # Fallback classes
+    class GolfModelParams:  # type: ignore[no-redef]
+        """Placeholder for golf model parameters."""
+        pass
+
+    def build_golf_swing_diagram(*args, **kwargs):  # type: ignore[no-redef, misc]
+        """Placeholder for golf swing diagram builder."""
+        return None, None, None
+
+# Constants
+TIME_STEP_S = 0.001
+MS_PER_SECOND = 1000
+JOINT_ANGLE_MIN_RAD = -3.14159
+JOINT_ANGLE_MAX_RAD = 3.14159
+SPINBOX_STEP_RAD = 0.01
+SLIDER_TO_RADIAN = 0.01
+SLIDER_RANGE_MIN = -314
+SLIDER_RANGE_MAX = 314
+INITIAL_PELVIS_HEIGHT_M = 1.0
+
+# Styles
+STYLE_BUTTON_RUN = "QPushButton { background-color: #4CAF50; color: white; }"
+STYLE_BUTTON_STOP = "QPushButton { background-color: #f44336; color: white; }"
+
+# Logger
+LOGGER = logging.getLogger(__name__)
+
+# Placeholder for missing classes
+class DrakeInducedAccelerationAnalyzer:
+    """Placeholder for induced acceleration analysis."""
+
+    def __init__(self, plant: MultibodyPlant | None) -> None:
+        self.plant = plant
+
+    def compute_induced_acceleration(
+        self, q: np.ndarray, v: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Compute induced accelerations (placeholder)."""
+        # Return dummy data for now
+        return np.zeros_like(v), np.zeros_like(v)
+
+def setup_logging() -> None:
+    """Setup logging configuration."""
+    logging.basicConfig(level=logging.INFO)
+
+
 class DrakeRecorder:
     """Records simulation data for analysis."""
 
@@ -51,7 +185,9 @@ class DrakeRecorder:
         # Fallback
         return times, []
 
-    def get_induced_acceleration_series(self, source_name: str) -> tuple[np.ndarray, np.ndarray]:
+    def get_induced_acceleration_series(
+        self, source_name: str
+    ) -> tuple[np.ndarray, np.ndarray]:
         """Get induced accelerations."""
         if source_name not in self.induced_accelerations:
              return np.array([]), np.array([])
@@ -95,7 +231,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.plant: MultibodyPlant | None = None  # type: ignore[no-any-unimported]
         self.context: Context | None = None  # type: ignore[no-any-unimported]
         self.meshcat: Meshcat | None = None  # type: ignore[no-any-unimported]
-        self.visualizer: DrakeVisualizer | None = None        self.operating_mode = "dynamic"  # "dynamic" or "kinematic"
+        self.visualizer: DrakeVisualizer | None = None  # type: ignore[no-any-unimported]
         self.operating_mode = "dynamic"  # "dynamic" or "kinematic"
         self.is_running = False
         self.time_step = TIME_STEP_S
@@ -386,7 +522,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         analysis_layout.addWidget(self.btn_swing_plane)
 
         self.btn_advanced_plots = QtWidgets.QPushButton("Show Advanced Plots")
-        self.btn_advanced_plots.setToolTip("Show Radar Chart, CoP Field, and Power Flow")
+        self.btn_advanced_plots.setToolTip(
+            "Show Radar Chart, CoP Field, and Power Flow"
+        )
         self.btn_advanced_plots.clicked.connect(self._show_advanced_plots)
         self.btn_advanced_plots.setEnabled(HAS_MATPLOTLIB)
         analysis_layout.addWidget(self.btn_advanced_plots)
@@ -979,7 +1117,8 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         times = np.array(self.recorder.times)
         q_history = np.array(self.recorder.q_history)
         v_history = np.array(self.recorder.v_history)
-        # Assuming torques not recorded in DrakeRecorder yet, need to update if we want torque analysis
+        # Assuming torques not recorded in DrakeRecorder yet, need to update
+        # if we want torque analysis
         # For now pass zeros for torques
         tau_history = np.zeros((len(times), v_history.shape[1]))
 
@@ -1027,7 +1166,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         # Requires actuator powers. DrakeRecorder needs to record powers.
         # For now placeholder
         ax3 = fig.add_subplot(gs[1, :])
-        ax3.text(0.5, 0.5, "Power Data Not Available in Drake", ha="center", va="center")
+        ax3.text(
+            0.5, 0.5, "Power Data Not Available in Drake", ha="center", va="center"
+        )
 
         plt.tight_layout()
         plt.show()
@@ -1045,4 +1186,3 @@ if __name__ == "__main__":
     from pydrake.all import JacobianWrtVariable  # Import here for use in method
 
     main()
->>>>>>> origin/feature/advanced-data-analysis-viz-12707168122830297167

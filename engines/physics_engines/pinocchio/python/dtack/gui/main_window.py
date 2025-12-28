@@ -5,12 +5,12 @@ from __future__ import annotations
 import logging
 import sys
 
-from PySide6 import QtWidgets, QtCore
 import numpy as np
 import pinocchio as pin
-
+from PySide6 import QtWidgets
 from shared.python.biomechanics_data import BiomechanicalData
 from shared.python.plotting import GolfSwingPlotter, MplCanvas, RecorderInterface
+
 from ..sim.dynamics import DynamicsEngine
 
 logger = logging.getLogger(__name__)
@@ -54,7 +54,9 @@ class GuiRecorder(RecorderInterface):
 
         return times, values
 
-    def get_induced_acceleration_series(self, source_name: str) -> tuple[np.ndarray, np.ndarray]:
+    def get_induced_acceleration_series(
+        self, source_name: str
+    ) -> tuple[np.ndarray, np.ndarray]:
         if not self.data_store:
             return np.array([]), np.array([])
 
@@ -354,13 +356,18 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
         if not self.dynamics_engine or not self.recorded_data:
              # Need real data to run real counterfactuals
              if not self.recorded_data:
-                 QtWidgets.QMessageBox.warning(self, "No Data", "No recorded data to analyze. Run simulation first.")
+                 QtWidgets.QMessageBox.warning(
+                    self,
+                    "No Data",
+                    "No recorded data to analyze. Run simulation first.",
+                )
                  return
 
         # Perform Analysis frame-by-frame
         # Note: This is simplified. ZVCF/ZTCF usually imply re-integration over time.
         # But here we might just compute instantaneous drift or single-step prediction.
-        # If we want full trajectory counterfactual, we need to re-simulate the whole sequence.
+        # If we want full trajectory counterfactual, we need to re-simulate
+        # the whole sequence.
 
         # Re-simulation approach:
         # 1. Take initial state from recorded data
@@ -372,7 +379,7 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
              q = self.recorded_data[0].joint_positions.copy()
              v = self.recorded_data[0].joint_velocities.copy()
 
-             for i, frame in enumerate(self.recorded_data):
+             for _i, frame in enumerate(self.recorded_data):
                  # Store result in frame
                  frame.counterfactuals['ztcf'] = q.copy()
 
@@ -384,7 +391,7 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
              dt = 0.01
              q = self.recorded_data[0].joint_positions.copy()
 
-             for i, frame in enumerate(self.recorded_data):
+             for _i, frame in enumerate(self.recorded_data):
                  frame.counterfactuals['zvcf'] = q.copy()
 
                  # Step
@@ -397,10 +404,14 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
         # Update Plot
         self.cf_plot_canvas.fig.clear()
         plotter = GolfSwingPlotter(self.recorder)
-        plotter.plot_counterfactual_comparison(self.cf_plot_canvas.fig, cf_type, metric_idx=0)
+        plotter.plot_counterfactual_comparison(
+            self.cf_plot_canvas.fig, cf_type, metric_idx=0
+        )
         self.cf_plot_canvas.draw()
 
-        QtWidgets.QMessageBox.information(self, "Success", f"{cf_type.upper()} analysis complete.")
+        QtWidgets.QMessageBox.information(
+            self, "Success", f"{cf_type.upper()} analysis complete."
+        )
 
     def _update_results_plot(self) -> None:
         """Update the plot in the Results tab."""
@@ -421,7 +432,10 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
             # Just default to gravity for now, ideally UI lets user pick source
             plotter.plot_induced_acceleration(self.results_canvas.fig, "gravity")
             # Or actuator if available
-            if self.recorded_data and 'actuator' in self.recorded_data[0].induced_accelerations:
+            if (
+                self.recorded_data
+                and "actuator" in self.recorded_data[0].induced_accelerations
+            ):
                  # Override for demo
                  self.results_canvas.fig.clear()
                  plotter.plot_induced_acceleration(self.results_canvas.fig, "actuator")
@@ -436,7 +450,9 @@ class UnifiedGolfGUI(QtWidgets.QMainWindow):
 
     def _export_data(self) -> None:
         """Export data to CSV/Parquet."""
-        filename, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Export Data", "", "CSV Files (*.csv)")
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Export Data", "", "CSV Files (*.csv)"
+        )
         if filename:
             import pandas as pd
 

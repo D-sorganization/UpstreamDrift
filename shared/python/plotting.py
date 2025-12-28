@@ -12,7 +12,7 @@ This module provides comprehensive plotting capabilities including:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol, Any
+from typing import TYPE_CHECKING, Protocol
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -1292,7 +1292,7 @@ class GolfSwingPlotter:
         # Prepare data for stacked bar
         # Group by positive and negative power to show generation vs absorption
 
-        width = (times[-1] - times[0]) / len(times) * 1.0 # Continuous-ish
+        (times[-1] - times[0]) / len(times) * 1.0 # Continuous-ish
 
         # Stackplot is better for continuous time
         # Separate positive and negative

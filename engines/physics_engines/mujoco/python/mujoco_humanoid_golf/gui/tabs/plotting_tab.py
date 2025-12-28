@@ -196,7 +196,9 @@ class PlottingTab(QtWidgets.QWidget):
         if self.sim_widget.model:
              import mujoco
              for i in range(self.sim_widget.model.njnt):
-                name = mujoco.mj_id2name(self.sim_widget.model, mujoco.mjtObj.mjOBJ_JOINT, i)
+                name = mujoco.mj_id2name(
+                    self.sim_widget.model, mujoco.mjtObj.mjOBJ_JOINT, i
+                )
                 joint_names.append(name or f"Joint {i}")
 
         plotter = GolfSwingPlotter(recorder, joint_names=joint_names)
