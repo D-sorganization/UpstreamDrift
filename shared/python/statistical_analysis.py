@@ -10,7 +10,7 @@ Provides comprehensive statistical analysis including:
 from __future__ import annotations
 
 import csv
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import Any
 
 import numpy as np
@@ -66,6 +66,18 @@ class KinematicSequenceInfo:
     order_index: int
 
 
+@dataclass
+class GRFMetrics:
+    """Ground Reaction Force and Center of Pressure metrics."""
+
+    cop_path_length: float
+    cop_max_velocity: float
+    cop_x_range: float
+    cop_y_range: float
+    peak_vertical_force: float | None = None
+    peak_shear_force: float | None = None
+
+
 class StatisticalAnalyzer:
     """Comprehensive statistical analysis for golf swing data."""
 
@@ -77,6 +89,8 @@ class StatisticalAnalyzer:
         joint_torques: np.ndarray,
         club_head_speed: np.ndarray | None = None,
         club_head_position: np.ndarray | None = None,
+        cop_position: np.ndarray | None = None,
+        ground_forces: np.ndarray | None = None,
     ) -> None:
         """Initialize analyzer with recorded data.
 
@@ -87,6 +101,8 @@ class StatisticalAnalyzer:
             joint_torques: Joint torques (N, nu)
             club_head_speed: Club head speed (N,) [optional]
             club_head_position: Club head 3D position (N, 3) [optional]
+            cop_position: Center of Pressure position (N, 2) or (N, 3) [optional]
+            ground_forces: Ground reaction forces (N, 3) or (N, 6) [optional]
         """
         self.times = times
         self.joint_positions = joint_positions
@@ -94,6 +110,8 @@ class StatisticalAnalyzer:
         self.joint_torques = joint_torques
         self.club_head_speed = club_head_speed
         self.club_head_position = club_head_position
+        self.cop_position = cop_position
+        self.ground_forces = ground_forces
 
         self.dt = float(np.mean(np.diff(times))) if len(times) > 1 else 0.0
         self.duration = times[-1] - times[0] if len(times) > 1 else 0.0
@@ -272,6 +290,30 @@ class StatisticalAnalyzer:
         hip_rotation = np.rad2deg(self.joint_positions[:, hip_joint_idx])
 
         return np.asarray(shoulder_rotation - hip_rotation)
+
+    def compute_x_factor_stretch(
+        self,
+        shoulder_joint_idx: int,
+        hip_joint_idx: int,
+    ) -> tuple[np.ndarray, float] | None:
+        """Compute X-Factor velocity (stretch rate) and peak stretch.
+
+        Args:
+            shoulder_joint_idx: Index of shoulder/torso rotation joint
+            hip_joint_idx: Index of hip rotation joint
+
+        Returns:
+            Tuple of (x_factor_velocity_array, peak_stretch_rate) or None
+        """
+        x_factor = self.compute_x_factor(shoulder_joint_idx, hip_joint_idx)
+        if x_factor is None:
+            return None
+
+        # Calculate derivative (finite difference)
+        x_factor_velocity = np.gradient(x_factor, self.dt)
+        peak_stretch_rate = float(np.max(np.abs(x_factor_velocity)))
+
+        return x_factor_velocity, peak_stretch_rate
 
     def detect_impact_time(self) -> float | None:
         """Detect ball impact time.
@@ -462,6 +504,46 @@ class StatisticalAnalyzer:
 
         return phase_stats
 
+    def compute_grf_metrics(self) -> GRFMetrics | None:
+        """Compute Ground Reaction Force and Center of Pressure metrics.
+
+        Returns:
+            GRFMetrics object or None if data unavailable
+        """
+        if self.cop_position is None or len(self.cop_position) == 0:
+            return None
+
+        # CoP Path Length
+        cop_diff = np.diff(self.cop_position, axis=0)
+        path_length = np.sum(np.linalg.norm(cop_diff, axis=1))
+
+        # CoP Velocity
+        cop_vel = cop_diff / self.dt
+        max_vel = np.max(np.linalg.norm(cop_vel, axis=1))
+
+        # CoP Range
+        x_range = float(np.max(self.cop_position[:, 0]) - np.min(self.cop_position[:, 0]))
+        y_range = float(np.max(self.cop_position[:, 1]) - np.min(self.cop_position[:, 1]))
+
+        # Force metrics
+        peak_vertical = None
+        peak_shear = None
+        if self.ground_forces is not None:
+            # Assuming Z is vertical (index 2)
+            if self.ground_forces.shape[1] >= 3:
+                peak_vertical = float(np.max(self.ground_forces[:, 2]))
+                shear = np.linalg.norm(self.ground_forces[:, :2], axis=1)
+                peak_shear = float(np.max(shear))
+
+        return GRFMetrics(
+            cop_path_length=float(path_length),
+            cop_max_velocity=float(max_vel),
+            cop_x_range=x_range,
+            cop_y_range=y_range,
+            peak_vertical_force=peak_vertical,
+            peak_shear_force=peak_shear,
+        )
+
     def generate_comprehensive_report(self) -> dict[str, Any]:
         """Generate comprehensive statistical report.
 
@@ -481,9 +563,9 @@ class StatisticalAnalyzer:
                 report["club_head_speed"] = {
                     "peak_value": peak_speed.value,
                     "peak_time": peak_speed.time,
-                    "statistics": self.compute_summary_stats(
+                    "statistics": asdict(self.compute_summary_stats(
                         self.club_head_speed,
-                    ).__dict__,
+                    )),
                 }
 
         # Tempo analysis
@@ -507,6 +589,11 @@ class StatisticalAnalyzer:
             for p in phases
         ]
 
+        # GRF Metrics
+        grf_metrics = self.compute_grf_metrics()
+        if grf_metrics:
+            report["grf_metrics"] = asdict(grf_metrics)
+
         # Joint statistics
         report["joints"] = {}
         for i in range(self.joint_positions.shape[1]):
@@ -525,18 +612,18 @@ class StatisticalAnalyzer:
                     "max_deg": position_stats.max,
                     "rom_deg": position_stats.range,
                 },
-                "position_stats": position_stats.__dict__,
+                "position_stats": asdict(position_stats),
             }
 
             if velocities is not None:
-                joint_stats["velocity_stats"] = self.compute_summary_stats(
+                joint_stats["velocity_stats"] = asdict(self.compute_summary_stats(
                     np.rad2deg(velocities),
-                ).__dict__
+                ))
 
             if i < self.joint_torques.shape[1]:
-                joint_stats["torque_stats"] = self.compute_summary_stats(
+                joint_stats["torque_stats"] = asdict(self.compute_summary_stats(
                     self.joint_torques[:, i],
-                ).__dict__
+                ))
 
             report["joints"][f"joint_{i}"] = joint_stats
 
@@ -752,6 +839,16 @@ class StatisticalAnalyzer:
                             f"{phase['duration']:.3f}",
                         ],
                     )
+                writer.writerow([])
+
+            # GRF Metrics
+            if "grf_metrics" in report:
+                writer.writerow(["GRF & CoP Metrics"])
+                writer.writerow(["Metric", "Value"])
+                grf = report["grf_metrics"]
+                for key, val in grf.items():
+                    if val is not None:
+                        writer.writerow([key.replace('_', ' ').title(), f"{val:.4f}"])
                 writer.writerow([])
 
             # Joint statistics

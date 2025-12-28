@@ -12,7 +12,7 @@ This module provides comprehensive plotting capabilities including:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Protocol, Any
 
 import numpy as np
 from matplotlib import pyplot as plt
@@ -1186,6 +1186,131 @@ class GolfSwingPlotter:
         ax.axis("equal")  # Preserve aspect ratio
 
         fig.colorbar(sc, ax=ax, label="Time (s)")
+        fig.tight_layout()
+
+    def plot_cop_vector_field(self, fig: Figure, skip_steps: int = 5) -> None:
+        """Plot CoP velocity vector field.
+
+        Args:
+            fig: Matplotlib figure
+            skip_steps: Number of steps to skip for decluttering vectors
+        """
+        times, cop_data = self.recorder.get_time_series("cop_position")
+        cop_data = np.asarray(cop_data)
+
+        if len(times) == 0 or cop_data.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No CoP Data", ha="center", va="center")
+            return
+
+        # Compute velocity
+        dt = np.mean(np.diff(times)) if len(times) > 1 else 1.0
+        vel = np.gradient(cop_data, dt, axis=0)
+
+        ax = fig.add_subplot(111)
+
+        # Downsample
+        x = cop_data[::skip_steps, 0]
+        y = cop_data[::skip_steps, 1]
+        u = vel[::skip_steps, 0]
+        v = vel[::skip_steps, 1]
+        t = times[::skip_steps]
+
+        # Quiver plot
+        q = ax.quiver(x, y, u, v, t, cmap="viridis", scale_units='xy', angles='xy')
+
+        # Plot trajectory line
+        ax.plot(cop_data[:, 0], cop_data[:, 1], 'k-', alpha=0.2)
+
+        ax.set_xlabel("X Position (m)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Y Position (m)", fontsize=12, fontweight="bold")
+        ax.set_title("Center of Pressure Velocity Field", fontsize=14, fontweight="bold")
+        ax.axis("equal")
+        fig.colorbar(q, ax=ax, label="Time (s)")
+        fig.tight_layout()
+
+    def plot_radar_chart(
+        self,
+        fig: Figure,
+        metrics: dict[str, float],
+        title: str = "Swing DNA",
+    ) -> None:
+        """Plot a radar chart of swing metrics.
+
+        Args:
+            fig: Matplotlib figure
+            metrics: Dictionary of metrics. Values should be normalized to [0, 1] or [0, 100].
+            title: Chart title
+        """
+        labels = list(metrics.keys())
+        values = list(metrics.values())
+        num_vars = len(labels)
+
+        if num_vars < 3:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Need at least 3 metrics for radar chart", ha="center", va="center")
+            return
+
+        # Compute angles
+        angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+
+        # The plot is a circle, so we need to "close the loop"
+        values += values[:1]
+        angles += angles[:1]
+        labels += labels[:1]
+
+        ax = fig.add_subplot(111, polar=True)
+        ax.plot(angles, values, color=self.colors["primary"], linewidth=2)
+        ax.fill(angles, values, color=self.colors["primary"], alpha=0.25)
+
+        # Draw labels
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(labels[:-1])
+
+        # Draw grid
+        ax.grid(True, alpha=0.3)
+
+        ax.set_title(title, size=15, color=self.colors["primary"], y=1.1)
+        fig.tight_layout()
+
+    def plot_power_flow(self, fig: Figure) -> None:
+        """Plot power flow (stacked bar) over time.
+
+        Args:
+            fig: Matplotlib figure
+        """
+        times, powers = self.recorder.get_time_series("actuator_powers")
+        powers = np.asarray(powers)
+
+        if len(times) == 0 or powers.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No Power Data", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        # Prepare data for stacked bar
+        # Group by positive and negative power to show generation vs absorption
+
+        width = (times[-1] - times[0]) / len(times) * 1.0 # Continuous-ish
+
+        # Stackplot is better for continuous time
+        # Separate positive and negative
+        pos_powers = np.maximum(powers, 0)
+        neg_powers = np.minimum(powers, 0)
+
+        labels = [self.get_joint_name(i) for i in range(powers.shape[1])]
+
+        ax.stackplot(times, pos_powers.T, labels=labels, alpha=0.7)
+        ax.set_prop_cycle(None) # Reset color cycle
+        ax.stackplot(times, neg_powers.T, alpha=0.7)
+
+        ax.axhline(0, color='k', linewidth=1)
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Power (W)", fontsize=12, fontweight="bold")
+        ax.set_title("Power Flow (Generation/Absorption)", fontsize=14, fontweight="bold")
+        ax.legend(loc='upper left', bbox_to_anchor=(1, 1), ncol=1)
         fig.tight_layout()
 
     def plot_induced_acceleration(self, fig: Figure, source_name: str, joint_idx: int | None = None) -> None:
