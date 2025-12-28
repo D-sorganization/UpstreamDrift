@@ -196,6 +196,69 @@ class ComparativePlotter:
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3)
 
+    def plot_3d_trajectory_comparison(
+        self,
+        fig: Figure,
+        title: str = "Trajectory Comparison",
+    ) -> None:
+        """Plot 3D trajectory comparison (e.g., Club Head Path).
+
+        Args:
+            fig: Matplotlib figure
+            title: Plot title
+        """
+        # Align club head positions
+        # Club head position is (N, 3), so we treat each dimension as a signal
+
+        # This assumes align_signals handles multi-dim or we loop.
+        # But align_signals is for 1D. We need to align manually or use underlying method.
+        # Actually, if we use time warping, the time mapping should be same for all dimensions.
+        # The current ComparativeSwingAnalyzer aligns based on a reference signal (usually club speed)
+        # and applies warping indices.
+
+        # For simplicity in this implementation, we will assume pre-aligned or align each dim separately
+        # (which might distort geometry) OR better: rely on time normalization (0-100%).
+
+        # Since RecorderInterface doesn't support 'get_time_series' with warping directly,
+        # we rely on the analyzer to give us signals.
+
+        # Let's extract raw signals from analyzer's recorders and assume simple time scaling
+        # if the analyzer doesn't expose 3D alignment.
+        # Actually, ComparativeSwingAnalyzer aligns 1D signals.
+
+        # We will retrieve the raw data and just plot them in their original space,
+        # maybe normalizing time for color.
+
+        rec_a = self.analyzer.recorder_a
+        rec_b = self.analyzer.recorder_b
+
+        t_a, pos_a = rec_a.get_time_series("club_head_position")
+        t_b, pos_b = rec_b.get_time_series("club_head_position")
+
+        pos_a = np.asarray(pos_a)
+        pos_b = np.asarray(pos_b)
+
+        if len(t_a) == 0 or len(t_b) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No trajectory data", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111, projection='3d')
+
+        ax.plot(pos_a[:, 0], pos_a[:, 1], pos_a[:, 2], label=self.analyzer.name_a, color=self.colors['a'])
+        ax.plot(pos_b[:, 0], pos_b[:, 1], pos_b[:, 2], label=self.analyzer.name_b, color=self.colors['b'], linestyle='--')
+
+        # Start/End markers
+        ax.scatter([pos_a[0,0]], [pos_a[0,1]], [pos_a[0,2]], color=self.colors['a'], marker='o')
+        ax.scatter([pos_b[0,0]], [pos_b[0,1]], [pos_b[0,2]], color=self.colors['b'], marker='o')
+
+        ax.set_title(title, fontsize=14, fontweight="bold")
+        ax.set_xlabel("X (m)")
+        ax.set_ylabel("Y (m)")
+        ax.set_zlabel("Z (m)") # type: ignore
+        ax.legend()
+        fig.tight_layout()
+
     def plot_dashboard(self, fig: Figure) -> None:
         """Create a summary dashboard for the comparison.
 

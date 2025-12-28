@@ -409,9 +409,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 "Kinematic Sequence",
                 "Phase Diagram",
                 "Frequency Analysis (PSD)",
-                "Frequency Analysis (PSD)",
                 "Correlation Matrix",
                 "Induced Accelerations",
+                "Swing DNA (Radar)",
+                "Power Flow",
             ]
         )
 
@@ -486,8 +487,61 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             plotter.plot_correlation_matrix(self.canvas.fig)
         elif plot_type == "Induced Accelerations":
             self._plot_induced_accelerations()
+        elif plot_type == "Swing DNA (Radar)":
+            self._plot_swing_dna(plotter)
+        elif plot_type == "Power Flow":
+            # Requires power data in recorder
+            if any(f.actuator_powers.size > 0 for f in self.recorder.frames):
+                 plotter.plot_power_flow(self.canvas.fig)
+            else:
+                 ax = self.canvas.fig.add_subplot(111)
+                 ax.text(0.5, 0.5, "No actuator power data", ha="center", va="center")
 
         self.canvas.draw()
+
+    def _plot_swing_dna(self, plotter: GolfSwingPlotter) -> None:
+        """Plot the Swing DNA radar chart."""
+        # Calculate metrics using StatisticalAnalyzer
+        times, positions = self.recorder.get_time_series("joint_positions")
+        _, velocities = self.recorder.get_time_series("joint_velocities")
+        _, torques = self.recorder.get_time_series("joint_torques")
+        _, club_speed = self.recorder.get_time_series("club_head_speed")
+
+        # Need to ensure types are correct
+        positions = np.asarray(positions)
+        velocities = np.asarray(velocities)
+        torques = np.asarray(torques)
+        club_speed = np.asarray(club_speed)
+
+        analyzer = StatisticalAnalyzer(
+            times, positions, velocities, torques, club_head_speed=club_speed
+        )
+        report = analyzer.generate_comprehensive_report()
+
+        metrics = {
+            "Speed": 0.0,
+            "Efficiency": 0.0,
+            "Tempo": 0.0,
+            "Stability": 0.0, # Placeholder
+            "Power": 0.0
+        }
+
+        # Populate real metrics where possible
+        if "club_head_speed" in report:
+            peak = report["club_head_speed"]["peak_value"]
+            # Normalize: assume 50 m/s is pro level
+            metrics["Speed"] = min(peak / 50.0, 1.0)
+
+        if "tempo" in report:
+            ratio = report["tempo"]["ratio"]
+            # Ideal 3.0.
+            err = abs(ratio - 3.0)
+            metrics["Tempo"] = max(0.0, 1.0 - (err / 2.0))
+
+        if "energy_efficiency" in report:
+            metrics["Efficiency"] = report["energy_efficiency"] / 100.0
+
+        plotter.plot_radar_chart(self.canvas.fig, metrics)
 
     def _plot_induced_accelerations(self) -> None:
         """Calculate and plot induced accelerations for selected joint."""
