@@ -18,16 +18,16 @@ class MockQtBase:
     """Base class for all Qt mocks (PyQt6) to handle common behavior."""
 
     def __init__(self, *args, **kwargs):
-        pass
+        self._window_title = ""
 
     def __getattr__(self, name):
         return MagicMock()
 
     def setWindowTitle(self, title):
-        pass
+        self._window_title = title
 
     def windowTitle(self):
-        return getattr(self, "_window_title", "")
+        return self._window_title
 
     def setWindowIcon(self, icon):
         pass
@@ -104,6 +104,9 @@ class MockQWidget(MockQtBase):
 
 
 class MockQMainWindow(MockQWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
     def setCentralWidget(self, w):
         pass
 
@@ -116,7 +119,7 @@ class MockQPushButton(MockQWidget):
         self._enabled = True
 
     def setText(self, t):
-        self._text = t
+        self._text = str(t)  # Ensure it's always a string
 
     def text(self):
         return self._text
@@ -125,11 +128,7 @@ class MockQPushButton(MockQWidget):
         self._enabled = bool(b)
 
     def isEnabled(self):
-        if isinstance(self._enabled, bool):
-            return self._enabled
-        # If it's a mock, it's effectively truthy but acts as False for logic checks
-        # So we default to False if not explicitly set to True
-        return False
+        return self._enabled
 
     def setFont(self, f):
         pass

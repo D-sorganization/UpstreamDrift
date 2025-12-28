@@ -116,7 +116,7 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
 
     def initializeGL(self) -> None:
         """Initialize OpenGL."""
-        # Future enhancement: Implement OpenGL context initialization when rendering is added
+        # TODO: Implement OpenGL context initialization when rendering is added
         # This will include setting up shaders, buffers, and rendering pipeline for 3D URDF visualization
         pass
 
