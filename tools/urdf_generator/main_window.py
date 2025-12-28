@@ -92,9 +92,13 @@ class URDFGeneratorWindow(QMainWindow):
     def _setup_menu_bar(self) -> None:
         """Set up the menu bar."""
         menubar = self.menuBar()
+        if menubar is None:
+            return
 
         # File menu
         file_menu = menubar.addMenu("&File")
+        if file_menu is None:
+            return
 
         new_action = QAction("&New", self)
         new_action.setShortcut("Ctrl+N")
@@ -121,6 +125,8 @@ class URDFGeneratorWindow(QMainWindow):
         file_menu.addSeparator()
 
         export_menu = file_menu.addMenu("&Export")
+        if export_menu is None:
+            return
 
         export_mujoco_action = QAction("Export for MuJoCo", self)
         export_mujoco_action.triggered.connect(self.export_for_mujoco)
@@ -143,6 +149,8 @@ class URDFGeneratorWindow(QMainWindow):
 
         # Edit menu
         edit_menu = menubar.addMenu("&Edit")
+        if edit_menu is None:
+            return
 
         undo_action = QAction("&Undo", self)
         undo_action.setShortcut("Ctrl+Z")
@@ -156,6 +164,8 @@ class URDFGeneratorWindow(QMainWindow):
 
         # View menu
         view_menu = menubar.addMenu("&View")
+        if view_menu is None:
+            return
 
         reset_view_action = QAction("&Reset View", self)
         reset_view_action.setShortcut("Ctrl+R")
@@ -164,6 +174,8 @@ class URDFGeneratorWindow(QMainWindow):
 
         # Help menu
         help_menu = menubar.addMenu("&Help")
+        if help_menu is None:
+            return
 
         about_action = QAction("&About", self)
         about_action.triggered.connect(self.show_about)

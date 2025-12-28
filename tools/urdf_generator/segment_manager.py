@@ -206,7 +206,7 @@ class SegmentManager:
             rec_stack.remove(name)
             return False
 
-        visited = set()
+        visited: set[str] = set()
         for name in self.segments:
             if name not in visited:
                 if has_cycle(name, visited, set()):

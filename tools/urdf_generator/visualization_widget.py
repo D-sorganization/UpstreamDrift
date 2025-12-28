@@ -2,7 +2,7 @@
 
 import logging
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QPointF, QTimer
 from PyQt6.QtGui import QMouseEvent, QWheelEvent
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
@@ -107,7 +107,7 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         self.camera_rotation_y = 0.0
 
         # Mouse interaction
-        self.last_mouse_pos = None
+        self.last_mouse_pos: QPointF | None = None
 
         # Timer for animation
         self.timer = QTimer()
@@ -134,22 +134,22 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         # TODO: Implement OpenGL rendering
         pass
 
-    def mousePressEvent(self, event: QMouseEvent) -> None:
+    def mousePressEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse press events.
 
         Args:
             event: Mouse event.
         """
-        if event.button() == Qt.MouseButton.LeftButton:
+        if event is not None and event.button() == Qt.MouseButton.LeftButton:
             self.last_mouse_pos = event.position()
 
-    def mouseMoveEvent(self, event: QMouseEvent) -> None:
+    def mouseMoveEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse move events.
 
         Args:
             event: Mouse event.
         """
-        if self.last_mouse_pos is not None:
+        if event is not None and self.last_mouse_pos is not None:
             dx = event.position().x() - self.last_mouse_pos.x()
             dy = event.position().y() - self.last_mouse_pos.y()
 
@@ -162,27 +162,29 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
             self.last_mouse_pos = event.position()
             self.update()
 
-    def mouseReleaseEvent(self, event: QMouseEvent) -> None:
+    def mouseReleaseEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse release events.
 
         Args:
             event: Mouse event.
         """
-        self.last_mouse_pos = None
+        if event is not None:
+            self.last_mouse_pos = None
 
-    def wheelEvent(self, event: QWheelEvent) -> None:
+    def wheelEvent(self, event: QWheelEvent | None) -> None:
         """Handle wheel events for zooming.
 
         Args:
             event: Wheel event.
         """
-        delta = event.angleDelta().y()
-        zoom_factor = 1.1 if delta > 0 else 0.9
+        if event is not None:
+            delta = event.angleDelta().y()
+            zoom_factor = 1.1 if delta > 0 else 0.9
 
-        self.camera_distance *= zoom_factor
-        self.camera_distance = max(1.0, min(20.0, self.camera_distance))
+            self.camera_distance *= zoom_factor
+            self.camera_distance = max(1.0, min(20.0, self.camera_distance))
 
-        self.update()
+            self.update()
 
 
 # TODO: Implement proper 3D visualization using one of these approaches:
