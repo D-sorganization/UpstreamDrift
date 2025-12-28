@@ -49,7 +49,7 @@ def test_load_save_golf_data(tmp_path):
 
     # Excel - requires openpyxl, handle if missing
     try:
-        import openpyxl
+        import openpyxl  # noqa: F401
         xlsx_path = tmp_path / "test.xlsx"
         save_golf_data(df, xlsx_path, "excel")
         loaded_df_xlsx = load_golf_data(xlsx_path)
