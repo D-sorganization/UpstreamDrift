@@ -745,11 +745,11 @@ class HumanoidLauncher(QMainWindow):
     def browse_file(self, line_edit, save=False):
         if save:
             path, _ = QFileDialog.getSaveFileName(
-                self, "Save State", "", "Pickle State (*.pkl)"
+                self, "Save State", "", "JSON State (*.json)"
             )
         else:
             path, _ = QFileDialog.getOpenFileName(
-                self, "Load State", "", "Pickle State (*.pkl)"
+                self, "Load State", "", "JSON State (*.json)"
             )
 
         if path:

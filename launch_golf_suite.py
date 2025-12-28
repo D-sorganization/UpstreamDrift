@@ -13,6 +13,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "shared" / "python"))
 
 from shared.python.common_utils import GolfModelingError, setup_logging
+from shared.python.constants import (
+    DRAKE_LAUNCHER_SCRIPT,
+    GUI_LAUNCHER_SCRIPT,
+    LOCAL_LAUNCHER_SCRIPT,
+    MUJOCO_LAUNCHER_SCRIPT,
+    PINOCCHIO_LAUNCHER_SCRIPT,
+    URDF_GENERATOR_SCRIPT,
+)
 
 logger = setup_logging(__name__)
 
@@ -90,15 +98,7 @@ def launch_mujoco():
             logger.info(f"Fix: {probe_result.get_fix_instructions()}")
             return False
 
-        mujoco_script = (
-            suite_root
-            / "engines"
-            / "physics_engines"
-            / "mujoco"
-            / "python"
-            / "mujoco_humanoid_golf"
-            / "advanced_gui.py"
-        )
+        mujoco_script = suite_root / MUJOCO_LAUNCHER_SCRIPT
 
         work_dir = _validate_and_get_workdir(mujoco_script)
 
@@ -127,15 +127,7 @@ def launch_drake():
             logger.info(f"Fix: {probe_result.get_fix_instructions()}")
             return False
 
-        drake_script = (
-            suite_root
-            / "engines"
-            / "physics_engines"
-            / "drake"
-            / "python"
-            / "src"
-            / "golf_gui.py"
-        )
+        drake_script = suite_root / DRAKE_LAUNCHER_SCRIPT
 
         work_dir = _validate_and_get_workdir(drake_script)
 
@@ -165,15 +157,7 @@ def launch_pinocchio():
             logger.info(f"Fix: {probe_result.get_fix_instructions()}")
             return False
 
-        pinocchio_script = (
-            suite_root
-            / "engines"
-            / "physics_engines"
-            / "pinocchio"
-            / "python"
-            / "pinocchio_golf"
-            / "gui.py"
-        )
+        pinocchio_script = suite_root / PINOCCHIO_LAUNCHER_SCRIPT
 
         work_dir = _validate_and_get_workdir(pinocchio_script)
 
@@ -192,7 +176,7 @@ def launch_urdf_generator():
         import subprocess
 
         suite_root = Path(__file__).parent
-        generator_script = suite_root / "tools" / "urdf_generator" / "main.py"
+        generator_script = suite_root / URDF_GENERATOR_SCRIPT
 
         work_dir = suite_root
 
@@ -247,8 +231,8 @@ def _show_basic_status():
 
     # Check launchers
     launchers = {
-        "GUI Launcher": suite_root / "launchers" / "golf_launcher.py",
-        "Local Launcher": suite_root / "launchers" / "golf_suite_launcher.py",
+        "GUI Launcher": suite_root / GUI_LAUNCHER_SCRIPT,
+        "Local Launcher": suite_root / LOCAL_LAUNCHER_SCRIPT,
     }
 
     lines.append("\nLaunchers:")
