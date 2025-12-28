@@ -61,23 +61,25 @@ def test_compute_range_of_motion(sample_data):
 
 def test_compute_tempo():
     # Construct data where we can predict tempo
-    times = np.linspace(0, 2.0, 200)
+    # Use "Plateau - Dip - Ramp" shape to be robust against finding min
+    times = np.linspace(0, 2.0, 200) # dt = 0.01
     speed = np.zeros_like(times)
 
-    # Backswing: 0.0 to 1.0 (Duration 1.0)
-    # We want a single hump so min search works correctly (min at start and end)
-    # Speed starts at 0, goes up, then down to near 0 at 1.0 (transition)
-    speed[:100] = 10.0 * np.sin(np.pi * times[:100]) + 0.1
+    # 0.0 to 0.5s (Indices 0-50): Backswing movement (Speed 5.0)
+    speed[:50] = 5.0
 
-    # Downswing: 1.0 to 1.3 (Duration 0.3)
-    # Starts at 0.1, goes to 100
-    speed[100:130] = 0.1 + (100.0 - 0.1) * (times[100:130] - 1.0) / 0.3
+    # 0.5s to 0.6s (Indices 50-60): Transition dip (Speed 0.1)
+    # The actual min should be around here.
+    speed[50:60] = 0.1
 
-    # Impact at 1.3
-    speed[130] = 100.0
+    # 0.6s to 1.0s (Indices 60-100): Downswing ramp to Impact
+    speed[60:100] = np.linspace(0.1, 100.0, 40)
+
+    # Impact at 1.0s (Index 100)
+    speed[100] = 100.0
 
     # Follow through
-    speed[130:] = np.linspace(100, 0, 70)
+    speed[100:] = 0.0
 
     analyzer = StatisticalAnalyzer(
         times, np.zeros((200,1)), np.zeros((200,1)), np.zeros((200,1)),
@@ -87,10 +89,12 @@ def test_compute_tempo():
     res = analyzer.compute_tempo()
     if res:
         b, d, r = res
-        # Backswing should be around 1.0s (from start to transition)
-        # Downswing should be around 0.3s (transition to impact)
-        assert b == pytest.approx(1.0, abs=0.1)
-        assert d == pytest.approx(0.3, abs=0.05)
+        # Impact index 100. Search limit 0.7 * 100 = 70.
+        # Min in speed[5:70] is at 50-60 (0.5s).
+        # Backswing duration = 0.5s
+        # Downswing duration = 1.0s - 0.5s = 0.5s
+        assert b == pytest.approx(0.5, abs=0.1)
+        assert d == pytest.approx(0.5, abs=0.1)
 
     # Test insufficient data
     analyzer_empty = StatisticalAnalyzer(
