@@ -138,9 +138,7 @@ class TestURDFExporter:
     @patch(
         "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco.MjData"
     )
-    def test_export_to_urdf(
-        self, mock_mjdata_class, tmp_path
-    ):
+    def test_export_to_urdf(self, mock_mjdata_class, tmp_path):
         """Test exporting MJCF to URDF."""
         # Setup comprehensive mujoco mock in sys.modules to bypass C-extension issues
         mock_mujoco = MagicMock()
@@ -148,7 +146,7 @@ class TestURDFExporter:
         mock_mujoco.mjtObj.mjOBJ_BODY = 1
         mock_mujoco.mjtObj.mjOBJ_JOINT = 2
         mock_mujoco.mjtObj.mjOBJ_MODEL = 3
-        mock_mujoco.mjtJoint.mjJNT_HINGE = 0 # Define this for the mock model
+        mock_mujoco.mjtJoint.mjJNT_HINGE = 0  # Define this for the mock model
 
         # Mock id2name logic
         def id2name_side_effect(model, obj_type, obj_id):
@@ -167,7 +165,11 @@ class TestURDFExporter:
 
         with patch.dict(sys.modules, {"mujoco": mock_mujoco}):
             # Re-import to pick up the mock
-            importlib.reload(sys.modules["engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io"])
+            importlib.reload(
+                sys.modules[
+                    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io"
+                ]
+            )
             from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
                 URDFExporter,
                 mujoco,
@@ -176,7 +178,9 @@ class TestURDFExporter:
             mock_mujoco_model = MagicMock()
             mock_mujoco_model.nbody = 3
             mock_mujoco_model.body_jntadr = [-1, -1, 0]  # Child has joint at index 0
-            mock_mujoco_model.jnt_type = [mujoco.mjtJoint.mjJNT_HINGE] # Joint 0 is hinge
+            mock_mujoco_model.jnt_type = [
+                mujoco.mjtJoint.mjJNT_HINGE
+            ]  # Joint 0 is hinge
             mock_mujoco_model.body_parentid = [0, 0, 1]
             mock_mujoco_model.body_mass = [0, 1.0, 1.0]
             mock_mujoco_model.body_inertia = np.zeros((3, 3))
@@ -196,8 +200,8 @@ class TestURDFExporter:
             urdf_str = exporter.export_to_urdf(output_path, model_name="test_export")
 
             assert output_path.exists()
-            assert "robot name=\"test_export\"" in urdf_str
-            assert "link name=\"base_link\"" in urdf_str
+            assert 'robot name="test_export"' in urdf_str
+            assert 'link name="base_link"' in urdf_str
         assert 'link name="child_link"' in urdf_str
 
         # Since body 2 (child_link) is child of 1 (base_link), checking for joint logic
