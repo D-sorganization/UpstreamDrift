@@ -3,6 +3,7 @@ def compute_induced_accelerations(physics) -> dict:
     results: dict = {}
     try:
         import mujoco
+        import numpy as np
     except ImportError:
         return results
 
@@ -29,7 +30,7 @@ def compute_induced_accelerations(physics) -> dict:
     # If a=0, v=0, then tau = G.
     # We want G vector.
     # But mj_rne outputs to data.qfrc_inverse.
-    mujoco.mj_rne(model, data)
+    mujoco.mj_rne(model, data, 0, data.qfrc_inverse)
     g_force = data.qfrc_inverse.copy()  # This is G(q)
 
     # 3. Coriolis/Centrifugal Force (C)
@@ -37,7 +38,7 @@ def compute_induced_accelerations(physics) -> dict:
     # mj_rne(v, a=0) -> C + G.
     data.qvel[:] = qvel_backup
     data.qacc[:] = 0
-    mujoco.mj_rne(model, data)
+    mujoco.mj_rne(model, data, 0, data.qfrc_inverse)
     bias_force = data.qfrc_inverse.copy()  # C + G
     c_force = bias_force - g_force  # C(q, v)
 
@@ -50,7 +51,7 @@ def compute_induced_accelerations(physics) -> dict:
     data.qvel[:] = qvel_backup
     data.ctrl[:] = ctrl_backup
     mujoco.mj_fwdActuation(model, data)
-    tau_control = data.qfrc_actuation.copy()
+    tau_control = data.qfrc_actuator.copy()
 
     # Now solve M * a = F
     # a_g = M^-1 * (-G)
@@ -58,13 +59,15 @@ def compute_induced_accelerations(physics) -> dict:
     # a_t = M^-1 * (tau_control)
 
     # Vectors to solve (overwritten by mj_solveM)
-    vec_g = -g_force
-    vec_c = -c_force
-    vec_t = tau_control
+    # We need explicit output buffers for mj_solveM(m, d, out, in)
+    acc_g = np.zeros_like(g_force)
+    acc_c = np.zeros_like(c_force)
+    acc_t = np.zeros_like(tau_control)
 
-    mujoco.mj_solveM(model, data, vec_g)  # vec_g becomes a_g
-    mujoco.mj_solveM(model, data, vec_c)
-    mujoco.mj_solveM(model, data, vec_t)
+    # Solve M*a = F => a = M^-1 * F
+    mujoco.mj_solveM(model, data, acc_g, -g_force)
+    mujoco.mj_solveM(model, data, acc_c, -c_force)
+    mujoco.mj_solveM(model, data, acc_t, tau_control)
 
     # Restore State fully
     data.qpos[:] = qpos_backup
@@ -87,4 +90,4 @@ def compute_induced_accelerations(physics) -> dict:
     # The caller (run_simulation) has TARGET_POSE keys.
     # We can access physics.model.jnt_dofadr to find address in qacc/qfrc.
 
-    return {"gravity": vec_g, "coriolis": vec_c, "control": vec_t}
+    return {"gravity": acc_g, "coriolis": acc_c, "control": acc_t}

@@ -5,6 +5,17 @@ Composite Rigid Body Algorithm (CRBA) for computing mass matrix.
 import numpy as np
 from mujoco_humanoid_golf.spatial_algebra import jcalc
 
+# Maps joint type to the index of the non-zero element in the motion subspace vector
+# -1 indicates a generic joint type where this optimization cannot be applied
+JOINT_AXIS_INDICES = {
+    "Rx": 0,
+    "Ry": 1,
+    "Rz": 2,
+    "Px": 3,
+    "Py": 4,
+    "Pz": 5,
+}
+
 
 def crba(model: dict, q: np.ndarray) -> np.ndarray:
     """
@@ -66,6 +77,10 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
     f_force = np.empty(6)
     scratch_vec = np.empty(6)
 
+    # Pre-compute active indices for optimization
+    # This avoids dictionary lookups and string comparisons inside the inner loops
+    active_indices = [JOINT_AXIS_INDICES.get(jt, -1) for jt in model["jtype"]]
+
     # --- Forward pass: compute transforms and motion subspaces ---
     for i in range(nb):
         xj_transform, s_vec = jcalc(model["jtype"][i], q[i], out=xj_buf)
@@ -100,11 +115,22 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
         # f_force is the force transmitted through joint i due to unit acceleration
         # at joint i, affecting the composite body rooted at i
 
-        # f_force = ic_composite[i] @ s_subspace[i]
-        np.dot(ic_composite[i], s_subspace[i], out=f_force)
+        idx = active_indices[i]
+        if idx != -1:
+            # OPTIMIZATION: For standard joints, s_subspace is sparse (one 1.0)
+            # f_force = ic_composite[i] @ s_subspace[i] becomes just a column copy
+            # This saves 36 muls and 30 adds
+            f_force[:] = ic_composite[i][:, idx]
+        else:
+            # Fallback for generic joints
+            np.dot(ic_composite[i], s_subspace[i], out=f_force)
 
         # h_matrix[i, i] = s_subspace[i] @ f_force  # Diagonal element
-        h_matrix[i, i] = np.dot(s_subspace[i], f_force)
+        if idx != -1:
+            # OPTIMIZATION: sparse dot product
+            h_matrix[i, i] = f_force[idx]
+        else:
+            h_matrix[i, i] = np.dot(s_subspace[i], f_force)
 
         # Propagate force up the tree to compute off-diagonal elements
         j = i
@@ -117,7 +143,14 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
             f_force[:] = scratch_vec
 
             # h_matrix[i, p] = s_subspace[p] @ f_force  # Off-diagonal element
-            val = np.dot(s_subspace[p], f_force)
+            # This is the hottest part of CRBA (O(n^2))
+            idx_p = active_indices[p]
+            if idx_p != -1:
+                # OPTIMIZATION: sparse dot product
+                val = f_force[idx_p]
+            else:
+                val = np.dot(s_subspace[p], f_force)
+
             h_matrix[i, p] = val
             h_matrix[p, i] = val  # Symmetric
             j = p
