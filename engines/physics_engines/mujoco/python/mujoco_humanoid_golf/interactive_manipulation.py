@@ -787,7 +787,9 @@ class InteractiveManipulator:
             Body name or "body_<id>"
         """
         name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, body_id)
-        return name if name else f"body_{body_id}"
+        if name is not None:
+            return str(name)
+        return f"body_{body_id}"
 
     def find_body_by_name(self, name: str) -> int | None:
         """Find body ID by name (case-insensitive, partial match).

@@ -115,4 +115,4 @@ class DynamicsEngine:
         pin.computeMinverse(self.model, self.data, q)
         M_inv = self.data.Minv
 
-        return M_inv @ tau_source
+        return np.asarray(M_inv @ tau_source)

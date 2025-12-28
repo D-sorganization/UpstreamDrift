@@ -117,8 +117,10 @@ class AdvancedGuiMethodsMixin:
             from shared.python.plotting import GolfSwingPlotter
             from shared.python.statistical_analysis import StatisticalAnalyzer
         except ImportError:
+            from PyQt6 import QtWidgets
+
             QtWidgets.QMessageBox.warning(
-                self, "Error", "Matplotlib or shared modules not found."
+                None, "Error", "Matplotlib or shared modules not found."
             )
             return
 
@@ -129,8 +131,10 @@ class AdvancedGuiMethodsMixin:
         times, _ = recorder.get_time_series("joint_positions")
 
         if len(times) == 0:
+            from PyQt6 import QtWidgets
+
             QtWidgets.QMessageBox.warning(
-                self,
+                None,
                 "No Data",
                 "No recording available. Please Record a simulation first.",
             )
@@ -189,7 +193,9 @@ class AdvancedGuiMethodsMixin:
             metrics["Tempo"] = max(0.0, 1.0 - err / 2.0)
 
         # Create dialog
-        dialog = QtWidgets.QDialog(self)
+        from PyQt6 import QtWidgets
+
+        dialog = QtWidgets.QDialog(None)  # Use None as parent instead of self
         dialog.setWindowTitle("Advanced Swing Analysis")
         dialog.resize(1000, 800)
         layout = QtWidgets.QVBoxLayout(dialog)
