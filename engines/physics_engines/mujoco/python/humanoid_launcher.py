@@ -5,13 +5,21 @@ A modern GUI for the MuJoCo Humanoid Golf Model.
 """
 
 import datetime
-import json
 import logging
 import os
 import platform
 import subprocess
 import sys
 from pathlib import Path
+
+# Ensure shared modules are importable
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
+SHARED_PATH = PROJECT_ROOT / "shared" / "python"
+if str(SHARED_PATH) not in sys.path:
+    sys.path.insert(0, str(SHARED_PATH))
+
+from shared.python.configuration_manager import ConfigurationManager, SimulationConfig
+from shared.python.process_worker import ProcessWorker
 
 try:
     import matplotlib.pyplot as plt
@@ -23,8 +31,6 @@ import csv
 
 from PyQt6.QtCore import (
     Qt,
-    QThread,
-    pyqtSignal,
 )
 from PyQt6.QtGui import (
     QColor,
@@ -65,95 +71,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Default Configuration
-DEFAULT_CONFIG = {
-    "colors": {
-        "shirt": [0.6, 0.6, 0.6, 1.0],
-        "pants": [0.4, 0.2, 0.0, 1.0],
-        "shoes": [0.1, 0.1, 0.1, 1.0],
-        "skin": [0.8, 0.6, 0.4, 1.0],
-        "eyes": [1.0, 1.0, 1.0, 1.0],
-        "club": [0.8, 0.8, 0.8, 1.0],
-    },
-    "height_m": 1.8,
-    "weight_percent": 100.0,
-    "control_mode": "pd",
-    "live_view": False,
-    "simulation_duration": 3.0,  # Typical golf swing duration in seconds
-    "save_state_path": "",
-    "load_state_path": "",
-    "club_length": 1.0,
-    "club_mass": 0.5,
-    "two_handed": False,
-    "enhance_face": False,
-    "articulated_fingers": False,
-    "polynomial_coefficients": {},  # Joint name -> [c0, c1, c2, c3, c4, c5, c6]
-    # Visualization options
-    "show_contact_forces": True,
-    "show_joint_torques": True,
-    "show_tracers": True,
-    "tracer_bodies": ["pelvis", "torso", "head", "r_hand", "l_hand"],  # Bodies to trace
-}
+# Logger initialized above
 
 
-class SimulationWorker(QThread):
-    """Worker thread for running Docker simulation to avoid freezing GUI."""
 
-    log_signal = pyqtSignal(str)
-    finished_signal = pyqtSignal(int, str)
 
-    def __init__(self, cmd, cwd=None):
-        super().__init__()
-        self.cmd = cmd
-        self.cwd = cwd
-        self.process = None
-        self._is_running = True
-
-    def run(self):
-        try:
-            self.log_signal.emit(f"Running command: {' '.join(self.cmd)}")
-
-            # Use subprocess to have better control than QProcess for Docker
-            # especially regarding output streaming
-            self.process = subprocess.Popen(
-                self.cmd,
-                cwd=self.cwd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True,
-                bufsize=1,  # Line buffered
-            )
-
-            # Read stdout/stderr in real-time
-            while self._is_running:
-                if self.process.poll() is not None:
-                    break
-
-                if self.process.stdout is not None:
-                    line = self.process.stdout.readline()
-                    if line:
-                        self.log_signal.emit(line.strip())
-                else:
-                    break
-
-            # Capture remaining output
-            stdout, stderr = self.process.communicate()
-            if stdout:
-                for line in stdout.splitlines():
-                    self.log_signal.emit(line.strip())
-            if stderr:
-                # Docker often outputs to stderr for info
-                for line in stderr.splitlines():
-                    self.log_signal.emit(f"STDERR: {line}")
-
-            return_code = self.process.returncode
-            self.finished_signal.emit(return_code, stderr if stderr else "")
-
-        except Exception as e:
-            self.log_signal.emit(f"Error starting process: {e}")
-            self.finished_signal.emit(-1, str(e))
-
-        if self.process:
-            self.process.terminate()
 
 
 class ModernDarkPalette(QPalette):
@@ -194,11 +116,13 @@ class HumanoidLauncher(QMainWindow):
         self.config_path = self.repo_path / "docker" / "src" / "simulation_config.json"
 
         # State
-        self.config = DEFAULT_CONFIG.copy()
+        self.config_manager = ConfigurationManager(self.config_path)
+        self.config = self.config_manager.load()
+        
         self.simulation_thread = None
 
-        # Load Config
-        self.load_config()
+        # Load Config - Already done above
+        # self.load_config()
 
         # UI Setup
         self.setup_ui()
@@ -295,7 +219,7 @@ class HumanoidLauncher(QMainWindow):
 
         # Live View
         self.chk_live = QCheckBox("Live Interactive View (requires X11/VcXsrv)")
-        self.chk_live.setChecked(bool(self.config.get("live_view", False)))
+        self.chk_live.setChecked(self.config.live_view)
         settings_layout.addWidget(self.chk_live, 1, 0, 1, 3)
 
         settings_group.setLayout(settings_layout)
@@ -313,7 +237,7 @@ class HumanoidLauncher(QMainWindow):
 
         # Load Path
         state_layout.addWidget(QLabel("Load State:"), 0, 0)
-        self.txt_load_path = QLineEdit(str(self.config.get("load_state_path", "")))
+        self.txt_load_path = QLineEdit(self.config.load_state_path)
         state_layout.addWidget(self.txt_load_path, 0, 1)
         btn_browse_load = QPushButton("Browse")
         btn_browse_load.clicked.connect(lambda: self.browse_file(self.txt_load_path))
@@ -321,7 +245,7 @@ class HumanoidLauncher(QMainWindow):
 
         # Save Path
         state_layout.addWidget(QLabel("Save State:"), 1, 0)
-        self.txt_save_path = QLineEdit(str(self.config.get("save_state_path", "")))
+        self.txt_save_path = QLineEdit(self.config.save_state_path)
         state_layout.addWidget(self.txt_save_path, 1, 1)
         btn_browse_save = QPushButton("Browse")
         btn_browse_save.clicked.connect(
@@ -407,21 +331,13 @@ class HumanoidLauncher(QMainWindow):
         self.spin_height = QDoubleSpinBox()
         self.spin_height.setRange(0.5, 3.0)
         self.spin_height.setSingleStep(0.05)
-        height_val = self.config.get("height_m", 1.8)
-        if isinstance(height_val, (int, float)):
-            self.spin_height.setValue(float(height_val))
-        else:
-            self.spin_height.setValue(1.8)
+        self.spin_height.setValue(self.config.height_m)
         dim_layout.addWidget(self.spin_height, 0, 1)
 
         dim_layout.addWidget(QLabel("Weight (%):"), 1, 0)
         self.slider_weight = QSlider(Qt.Orientation.Horizontal)
         self.slider_weight.setRange(50, 200)
-        weight_val = self.config.get("weight_percent", 100)
-        if isinstance(weight_val, (int, float)):
-            self.slider_weight.setValue(int(weight_val))
-        else:
-            self.slider_weight.setValue(100)
+        self.slider_weight.setValue(int(self.config.weight_percent))
 
         self.lbl_weight_val = QLabel(f"{self.slider_weight.value()}%")
         self.slider_weight.valueChanged.connect(
@@ -452,11 +368,7 @@ class HumanoidLauncher(QMainWindow):
 
             btn = QPushButton()
             btn.setFixedSize(50, 25)
-            colors_dict = self.config.get("colors", {})
-            if isinstance(colors_dict, dict):
-                rgba = colors_dict.get(key, [1, 1, 1, 1])
-            else:
-                rgba = [1, 1, 1, 1]
+            rgba = self.config.colors.get(key, [1, 1, 1, 1])
             self.set_btn_color(btn, rgba)
             btn.clicked.connect(lambda checked, k=key, b=btn: self.pick_color(k, b))
 
@@ -489,11 +401,7 @@ class HumanoidLauncher(QMainWindow):
         club_layout.addWidget(QLabel("Club Length (m):"), 0, 0)
         self.slider_length = QSlider(Qt.Orientation.Horizontal)
         self.slider_length.setRange(50, 150)  # 0.5 to 1.5 * 100
-        length_val = self.config.get("club_length", 1.0)
-        if isinstance(length_val, (int, float)):
-            self.slider_length.setValue(int(float(length_val) * 100))
-        else:
-            self.slider_length.setValue(100)
+        self.slider_length.setValue(int(self.config.club_length * 100))
 
         self.lbl_length_val = QLabel(f"{self.slider_length.value()/100:.2f} m")
         self.slider_length.valueChanged.connect(
@@ -506,11 +414,7 @@ class HumanoidLauncher(QMainWindow):
         club_layout.addWidget(QLabel("Club Mass (kg):"), 1, 0)
         self.slider_mass = QSlider(Qt.Orientation.Horizontal)
         self.slider_mass.setRange(10, 200)  # 0.1 to 2.0 * 100
-        mass_val = self.config.get("club_mass", 0.5)
-        if isinstance(mass_val, (int, float)):
-            self.slider_mass.setValue(int(float(mass_val) * 100))
-        else:
-            self.slider_mass.setValue(50)
+        self.slider_mass.setValue(int(self.config.club_mass * 100))
 
         self.lbl_mass_val = QLabel(f"{float(self.slider_mass.value())/100:.2f} kg")
         self.slider_mass.valueChanged.connect(
@@ -528,18 +432,15 @@ class HumanoidLauncher(QMainWindow):
         feat_layout = QVBoxLayout()
 
         self.chk_two_hand = QCheckBox("Two-Handed Grip (Constrained)")
-        two_handed_val = self.config.get("two_handed", False)
-        self.chk_two_hand.setChecked(bool(two_handed_val))
+        self.chk_two_hand.setChecked(self.config.two_handed)
         feat_layout.addWidget(self.chk_two_hand)
 
         self.chk_face = QCheckBox("Enhanced Face (Nose, Mouth)")
-        enhance_face_val = self.config.get("enhance_face", False)
-        self.chk_face.setChecked(bool(enhance_face_val))
+        self.chk_face.setChecked(self.config.enhance_face)
         feat_layout.addWidget(self.chk_face)
 
         self.chk_fingers = QCheckBox("Articulated Fingers (Segments)")
-        articulated_fingers_val = self.config.get("articulated_fingers", False)
-        self.chk_fingers.setChecked(bool(articulated_fingers_val))
+        self.chk_fingers.setChecked(self.config.articulated_fingers)
         feat_layout.addWidget(self.chk_fingers)
 
         feat_group.setLayout(feat_layout)
@@ -600,31 +501,17 @@ class HumanoidLauncher(QMainWindow):
         )
 
     def pick_color(self, key, btn):
-        colors_dict = self.config.get("colors", {})
-        if isinstance(colors_dict, dict):
-            current = colors_dict.get(key, [1, 1, 1, 1])
-        else:
-            current = [1, 1, 1, 1]
-
-        if isinstance(current, (list, tuple)) and len(current) >= 3:
-            initial = QColor(
-                int(float(current[0]) * 255),
-                int(float(current[1]) * 255),
-                int(float(current[2]) * 255),
-            )
-        else:
-            initial = QColor(255, 255, 255)  # Default to white
+        current = self.config.colors.get(key, [1.0, 1.0, 1.0, 1.0])
+        initial = QColor(
+            int(current[0] * 255),
+            int(current[1] * 255),
+            int(current[2] * 255),
+        )
 
         color = QColorDialog.getColor(initial, self, f"Choose {key} Color")
         if color.isValid():
             new_rgba = [color.redF(), color.greenF(), color.blueF(), 1.0]
-            config_dict = self.config  # type: ignore[assignment]
-            if "colors" not in config_dict:
-                config_dict["colors"] = {}
-            colors_dict = config_dict.get("colors", {})
-            if isinstance(colors_dict, dict):
-                colors_dict[key] = new_rgba
-                config_dict["colors"] = colors_dict
+            self.config.colors[key] = new_rgba
             self.set_btn_color(btn, new_rgba)
             self.save_config()
 
@@ -721,13 +608,7 @@ class HumanoidLauncher(QMainWindow):
         # Connect signal to save coefficients
         def on_polynomial_generated(joint_name, coefficients):
             """Save generated polynomial coefficients to config."""
-            config_dict = self.config  # type: ignore[assignment]
-            if "polynomial_coefficients" not in config_dict:
-                config_dict["polynomial_coefficients"] = {}
-            poly_coeffs = config_dict.get("polynomial_coefficients", {})
-            if isinstance(poly_coeffs, dict):
-                poly_coeffs[joint_name] = coefficients
-                config_dict["polynomial_coefficients"] = poly_coeffs
+            self.config.polynomial_coefficients[joint_name] = coefficients
             self.save_config()
             self.log(f"Polynomial generated for {joint_name}: {coefficients}")
 
@@ -756,50 +637,43 @@ class HumanoidLauncher(QMainWindow):
             line_edit.setText(path)
 
     def load_config(self):
-        if self.config_path.exists():
-            try:
-                with open(self.config_path) as f:
-                    data = json.load(f)
-                    # Merge with default to ensure all keys exist
-                    config_dict = self.config  # type: ignore[assignment]
-                    for k, v in data.items():
-                        if k == "colors":
-                            if "colors" in config_dict:
-                                colors_dict = config_dict.get("colors", {})
-                                if isinstance(colors_dict, dict) and isinstance(
-                                    v, dict
-                                ):
-                                    colors_dict.update(v)
-                                    config_dict["colors"] = colors_dict
-                        else:
-                            config_dict[k] = v
-            except Exception as e:
-                self.log(f"Error loading config: {e}")
+        """Deprecated: Config is loaded in __init__. Kept for compatibility."""
+        pass
 
     def save_config(self):
-        # Update config object from UI
-        config_dict = self.config  # type: ignore[assignment]
-        config_dict["control_mode"] = self.combo_control.currentText()
-        config_dict["live_view"] = self.chk_live.isChecked()
-        config_dict["load_state_path"] = self.txt_load_path.text()
-        config_dict["save_state_path"] = self.txt_save_path.text()
-
-        config_dict["height_m"] = self.spin_height.value()
-        config_dict["weight_percent"] = float(self.slider_weight.value())
-
-        config_dict["club_length"] = self.slider_length.value() / 100.0
-        config_dict["club_mass"] = self.slider_mass.value() / 100.0
-
-        config_dict["two_handed"] = self.chk_two_hand.isChecked()
-        config_dict["enhance_face"] = self.chk_face.isChecked()
-        config_dict["articulated_fingers"] = self.chk_fingers.isChecked()
-
+        """Save current configuration to file."""
         try:
-            with open(self.config_path, "w") as f:
-                json.dump(self.config, f, indent=4)
-            self.log(f"Configuration saved to {self.config_path}")
+            # Update config object from UI
+            self.config.height_m = self.spin_height.value()
+            self.config.weight_percent = self.slider_weight.value()
+            self.config.club_length = self.slider_length.value() / 100.0
+            self.config.club_mass = self.slider_mass.value() / 100.0
+            
+            # Features
+            self.config.two_handed = self.chk_two_hand.isChecked()
+            self.config.enhance_face = self.chk_face.isChecked()
+            self.config.articulated_fingers = self.chk_fingers.isChecked()
+            
+            # Paths
+            self.config.save_state_path = self.txt_save_path.text()
+            self.config.load_state_path = self.txt_load_path.text()
+            
+            # Live View
+            self.config.live_view = self.chk_live.isChecked()
+            
+            # Control Mode
+            text = self.combo_control.currentText()
+            if "PD" in text:
+                self.config.control_mode = "pd"
+            elif "LQR" in text:
+                self.config.control_mode = "lqr"
+            elif "Polynomial" in text:
+                self.config.control_mode = "poly"
+            
+            self.config_manager.save(self.config)
+            self.log(f"Config saved to {self.config_path}")
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Could not save config: {e}")
+            self.log(f"Error saving config: {e}")
 
     def get_docker_cmd(self):
         is_windows = platform.system() == "Windows"
@@ -969,7 +843,7 @@ class HumanoidLauncher(QMainWindow):
 
         cmd = self.get_docker_cmd()
 
-        self.simulation_thread = SimulationWorker(cmd)
+        self.simulation_thread = ProcessWorker(cmd)
         self.simulation_thread.log_signal.connect(self.log)
         self.simulation_thread.finished_signal.connect(self.on_simulation_finished)
 
@@ -1043,7 +917,7 @@ class HumanoidLauncher(QMainWindow):
             cmd = ["docker", "build", "-t", "robotics_env", "."]
 
             # Start worker for build
-            self.build_thread = SimulationWorker(cmd, cwd=str(docker_dir))
+            self.build_thread = ProcessWorker(cmd, cwd=str(docker_dir))
             self.build_thread.log_signal.connect(self.log)
             self.build_thread.finished_signal.connect(
                 lambda c, e: self.log(f"Build complete with code {c}")

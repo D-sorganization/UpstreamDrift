@@ -20,6 +20,7 @@ from .control_system import ControlSystem, ControlType
 from .interactive_manipulation import InteractiveManipulator
 from .meshcat_adapter import MuJoCoMeshcatAdapter
 from .telemetry import TelemetryRecorder
+from .physics_engine import MuJoCoPhysicsEngine
 
 # Lazy loading globals for OpenCV
 CV2_LIB = None
@@ -97,8 +98,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.frame_width = width
         self.frame_height = height
 
-        self.model: mujoco.MjModel | None = None
-        self.data: mujoco.MjData | None = None
+        self.engine = MuJoCoPhysicsEngine()
         self.renderer: mujoco.Renderer | None = None
         self.control_vector: np.ndarray | None = None
         self.control_system: ControlSystem | None = None
@@ -189,6 +189,22 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.timer.start(int(1000 / self.fps))
 
         self.loader_thread: ModelLoaderThread | None = None
+
+    @property
+    def model(self) -> mujoco.MjModel | None:
+        return self.engine.model
+    
+    @model.setter
+    def model(self, value: mujoco.MjModel | None) -> None:
+        self.engine.model = value
+
+    @property
+    def data(self) -> mujoco.MjData | None:
+        return self.engine.data
+    
+    @data.setter
+    def data(self, value: mujoco.MjData | None) -> None:
+        self.engine.data = value
 
     # -------- MuJoCo setup --------
 
@@ -316,14 +332,14 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         if self.model is None or self.data is None:
             return
 
-        mujoco.mj_resetData(self.model, self.data)
+        self.engine.reset()
 
         # Zero all positions/velocities first
         self.data.qpos[:] = 0.0
         self.data.qvel[:] = 0.0
 
         # Forward kinematics to update body positions
-        mujoco.mj_forward(self.model, self.data)
+        self.engine.forward()
 
         # Use nq to distinguish model types:
         #   nq == 2 -> [shoulder, wrist] - Double pendulum
@@ -366,7 +382,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.data.qvel[:] = 0.0
 
         # Forward kinematics to update positions
-        mujoco.mj_forward(self.model, self.data)
+        self.engine.forward()
 
         self._render_once()
 
