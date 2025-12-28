@@ -1,5 +1,5 @@
 models:
-  # --- Pimarary Engines (Row 1) ---
+  # --- Primary Engines (Row 1) ---
   - id: mujoco_humanoid
     name: "MuJoCo Humanoid"
     description: "High-fidelity whole-body biomechanics simulation. Features a 23-DOF humanoid model with active muscle sites, ground reaction force (GRF) visualization, and detailed contact dynamics. Ideal for analyzing kinetic chains and joint torque generation during the swing."

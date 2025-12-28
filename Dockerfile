@@ -71,8 +71,8 @@ RUN pip install --no-cache-dir \
     gymnasium
 
 # OpenPose Installation Note:
-# Full OpenPose build requires CUDACuDNN and extensive compilation time.
-# For this container, we relay on 'opencv' for basic pose estimation fallback
+# Full OpenPose build requires CUDA + CuDNN and extensive compilation time.
+# For this container, we rely on 'opencv' for basic pose estimation fallback
 # unless a pre-built 'pyopenpose' wheel is mounted or built in a separate stage.
 
 WORKDIR /workspace
