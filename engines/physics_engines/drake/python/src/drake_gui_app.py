@@ -14,6 +14,7 @@ import numpy as np
 # Qt imports
 try:
     from PyQt6 import QtCore, QtGui, QtWidgets
+
     HAS_QT = True
 except ImportError:
     HAS_QT = False
@@ -24,6 +25,7 @@ except ImportError:
 # Matplotlib imports
 try:
     import matplotlib.pyplot as plt
+
     HAS_MATPLOTLIB = True
 except ImportError:
     HAS_MATPLOTLIB = False
@@ -89,11 +91,13 @@ except ImportError:
     # Fallback classes
     class GolfModelParams:  # type: ignore[no-redef]
         """Placeholder for golf model parameters."""
+
         pass
 
     def build_golf_swing_diagram(*args, **kwargs):  # type: ignore[no-redef, misc]
         """Placeholder for golf swing diagram builder."""
         return None, None, None
+
 
 # Constants
 TIME_STEP_S = 0.001
@@ -113,6 +117,7 @@ STYLE_BUTTON_STOP = "QPushButton { background-color: #f44336; color: white; }"
 # Logger
 LOGGER = logging.getLogger(__name__)
 
+
 # Placeholder for missing classes
 class DrakeInducedAccelerationAnalyzer:
     """Placeholder for induced acceleration analysis."""
@@ -126,6 +131,7 @@ class DrakeInducedAccelerationAnalyzer:
         """Compute induced accelerations (placeholder)."""
         # Return dummy data for now
         return np.zeros_like(v), np.zeros_like(v)
+
 
 def setup_logging() -> None:
     """Setup logging configuration."""
@@ -190,29 +196,29 @@ class DrakeRecorder:
     ) -> tuple[np.ndarray, np.ndarray]:
         """Get induced accelerations."""
         if source_name not in self.induced_accelerations:
-             return np.array([]), np.array([])
+            return np.array([]), np.array([])
 
         times = np.array(self.times)
         # Ensure alignment
         vals = self.induced_accelerations[source_name]
         if len(vals) != len(times):
-             # Truncate to match
-             min_len = min(len(vals), len(times))
-             return times[:min_len], np.array(vals[:min_len])
+            # Truncate to match
+            min_len = min(len(vals), len(times))
+            return times[:min_len], np.array(vals[:min_len])
 
         return times, np.array(vals)
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Get counterfactual data."""
         if cf_name not in self.counterfactuals:
-             return np.array([]), np.array([])
+            return np.array([]), np.array([])
 
         times = np.array(self.times)
         vals = self.counterfactuals[cf_name]
 
         if len(vals) != len(times):
-             min_len = min(len(vals), len(times))
-             return times[:min_len], np.array(vals[:min_len])
+            min_len = min(len(vals), len(times))
+            return times[:min_len], np.array(vals[:min_len])
 
         return times, np.array(vals)
 
@@ -1134,8 +1140,8 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             "Club Speed": 0.0,
             "Swing Efficiency": 0.0,
             "Tempo": 0.0,
-            "Consistency": 0.8, # Placeholder
-            "Power Transfer": 0.0
+            "Consistency": 0.8,  # Placeholder
+            "Power Transfer": 0.0,
         }
 
         if "club_head_speed" in report:
