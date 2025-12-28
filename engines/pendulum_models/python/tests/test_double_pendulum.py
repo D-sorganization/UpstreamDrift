@@ -134,7 +134,7 @@ class TestDoublePendulumDynamics:
 
     def test_pd_controller_output(self) -> None:
         """Test the PD controller function."""
-        x = np.array([0.1, 0.2, 0.0, 0.0]) # Small displacement, zero velocity
+        x = np.array([0.1, 0.2, 0.0, 0.0])  # Small displacement, zero velocity
         kp, kd = 100.0, 10.0
 
         # u = -kp*(q - q_des) - kd*(qdot - qdot_des)

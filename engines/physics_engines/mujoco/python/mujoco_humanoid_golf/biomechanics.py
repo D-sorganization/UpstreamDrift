@@ -151,12 +151,12 @@ class BiomechanicalAnalyzer:
             y = -tau_g
 
         elif source_name == "actuator":
-             # Force from actuators is data.qfrc_actuator
-             # We want a_act = M^-1 * qfrc_actuator
-             y = self.data.qfrc_actuator.copy()
+            # Force from actuators is data.qfrc_actuator
+            # We want a_act = M^-1 * qfrc_actuator
+            y = self.data.qfrc_actuator.copy()
 
         else:
-             return np.zeros(self.model.nv)
+            return np.zeros(self.model.nv)
 
         # Solve M * x = y
         x = np.zeros(self.model.nv)
@@ -330,8 +330,8 @@ class BiomechanicalAnalyzer:
         # Induced Accelerations
         # Only compute if needed to save perf? For now, compute basics.
         induced = {
-            'gravity': self.compute_induced_acceleration('gravity'),
-            'actuator': self.compute_induced_acceleration('actuator')
+            "gravity": self.compute_induced_acceleration("gravity"),
+            "actuator": self.compute_induced_acceleration("actuator"),
         }
 
         return BiomechanicalData(
@@ -433,17 +433,17 @@ class SwingRecorder:
     ) -> tuple[np.ndarray, np.ndarray]:
         """Extract time series for a specific induced acceleration source."""
         if not self.frames:
-             return np.array([]), np.array([])
+            return np.array([]), np.array([])
 
         times = []
         values = []
 
         # Iterate over all frames
         for f in self.frames:
-             val = f.induced_accelerations.get(source_name)
-             if val is not None:
-                 times.append(f.time)
-                 values.append(val)
+            val = f.induced_accelerations.get(source_name)
+            if val is not None:
+                times.append(f.time)
+                values.append(val)
 
         if not values:
             return np.array([]), np.array([])
@@ -453,7 +453,7 @@ class SwingRecorder:
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Extract counterfactual series."""
         if not self.frames:
-             return np.array([]), np.array([])
+            return np.array([]), np.array([])
 
         times = []
         values = []
@@ -542,12 +542,12 @@ class SwingRecorder:
 
         # Export induced
         if self.frames and self.frames[0].induced_accelerations:
-             keys = self.frames[0].induced_accelerations.keys()
-             for key in keys:
-                 _, vals = self.get_induced_acceleration_series(key)
-                 if len(vals) > 0:
-                     for i in range(vals.shape[1]):
-                         export_data[f"induced_acc_{key}_{i}"] = vals[:, i].tolist()
+            keys = self.frames[0].induced_accelerations.keys()
+            for key in keys:
+                _, vals = self.get_induced_acceleration_series(key)
+                if len(vals) > 0:
+                    for i in range(vals.shape[1]):
+                        export_data[f"induced_acc_{key}_{i}"] = vals[:, i].tolist()
 
         # Export counterfactuals
         if self.frames and self.frames[0].counterfactuals:
@@ -556,10 +556,9 @@ class SwingRecorder:
                 _, vals = self.get_counterfactual_series(key)
                 if len(vals) > 0 and isinstance(vals, np.ndarray):
                     if vals.ndim == 1:
-                         export_data[f"cf_{key}"] = vals.tolist()
+                        export_data[f"cf_{key}"] = vals.tolist()
                     elif vals.ndim == 2:
                         for i in range(vals.shape[1]):
                             export_data[f"cf_{key}_{i}"] = vals[:, i].tolist()
-
 
         return export_data

@@ -522,8 +522,12 @@ class StatisticalAnalyzer:
         max_vel = np.max(np.linalg.norm(cop_vel, axis=1))
 
         # CoP Range
-        x_range = float(np.max(self.cop_position[:, 0]) - np.min(self.cop_position[:, 0]))
-        y_range = float(np.max(self.cop_position[:, 1]) - np.min(self.cop_position[:, 1]))
+        x_range = float(
+            np.max(self.cop_position[:, 0]) - np.min(self.cop_position[:, 0])
+        )
+        y_range = float(
+            np.max(self.cop_position[:, 1]) - np.min(self.cop_position[:, 1])
+        )
 
         # Force metrics
         peak_vertical = None
@@ -563,9 +567,11 @@ class StatisticalAnalyzer:
                 report["club_head_speed"] = {
                     "peak_value": peak_speed.value,
                     "peak_time": peak_speed.time,
-                    "statistics": asdict(self.compute_summary_stats(
-                        self.club_head_speed,
-                    )),
+                    "statistics": asdict(
+                        self.compute_summary_stats(
+                            self.club_head_speed,
+                        )
+                    ),
                 }
 
         # Tempo analysis
@@ -616,14 +622,18 @@ class StatisticalAnalyzer:
             }
 
             if velocities is not None:
-                joint_stats["velocity_stats"] = asdict(self.compute_summary_stats(
-                    np.rad2deg(velocities),
-                ))
+                joint_stats["velocity_stats"] = asdict(
+                    self.compute_summary_stats(
+                        np.rad2deg(velocities),
+                    )
+                )
 
             if i < self.joint_torques.shape[1]:
-                joint_stats["torque_stats"] = asdict(self.compute_summary_stats(
-                    self.joint_torques[:, i],
-                ))
+                joint_stats["torque_stats"] = asdict(
+                    self.compute_summary_stats(
+                        self.joint_torques[:, i],
+                    )
+                )
 
             report["joints"][f"joint_{i}"] = joint_stats
 
@@ -848,7 +858,7 @@ class StatisticalAnalyzer:
                 grf = report["grf_metrics"]
                 for key, val in grf.items():
                     if val is not None:
-                        writer.writerow([key.replace('_', ' ').title(), f"{val:.4f}"])
+                        writer.writerow([key.replace("_", " ").title(), f"{val:.4f}"])
                 writer.writerow([])
 
             # Joint statistics

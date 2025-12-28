@@ -160,7 +160,7 @@ class AdvancedGuiMethodsMixin:
             velocities,
             torques,
             club_head_speed=club_speed,
-            club_head_position=club_pos
+            club_head_position=club_pos,
         )
         report = analyzer.generate_comprehensive_report()
 
@@ -173,12 +173,12 @@ class AdvancedGuiMethodsMixin:
             "Efficiency": 0.0,
             "Tempo": 0.0,
             "Consistency": 0.0,
-            "Power": 0.0
+            "Power": 0.0,
         }
 
         if "club_head_speed" in report:
             peak = report["club_head_speed"]["peak_value"]
-            metrics["Speed"] = min(peak / 50.0, 1.0) # Approx 110 mph = 50 m/s
+            metrics["Speed"] = min(peak / 50.0, 1.0)  # Approx 110 mph = 50 m/s
 
         if "energy_efficiency" in report:
             metrics["Efficiency"] = report["energy_efficiency"] / 100.0
@@ -186,7 +186,7 @@ class AdvancedGuiMethodsMixin:
         if "tempo" in report:
             ratio = report["tempo"]["ratio"]
             err = abs(ratio - 3.0)
-            metrics["Tempo"] = max(0.0, 1.0 - err/2.0)
+            metrics["Tempo"] = max(0.0, 1.0 - err / 2.0)
 
         # Create dialog
         dialog = QtWidgets.QDialog(self)
@@ -243,10 +243,10 @@ class AdvancedGuiMethodsMixin:
         canvas2 = FigureCanvasQTAgg(fig2)
         cop_layout.addWidget(canvas2)
         if any(f.cop_position is not None for f in recorder.frames):
-             plotter.plot_cop_vector_field(fig2)
+            plotter.plot_cop_vector_field(fig2)
         else:
-             ax = fig2.add_subplot(111)
-             ax.text(0.5, 0.5, "No CoP Data", ha="center", va="center")
+            ax = fig2.add_subplot(111)
+            ax.text(0.5, 0.5, "No CoP Data", ha="center", va="center")
         tab_widget.addTab(cop_widget, "CoP Field")
 
         # Tab 3: Power Flow
@@ -256,10 +256,10 @@ class AdvancedGuiMethodsMixin:
         canvas3 = FigureCanvasQTAgg(fig3)
         pwr_layout.addWidget(canvas3)
         if any(f.actuator_powers.size > 0 for f in recorder.frames):
-             plotter.plot_power_flow(fig3)
+            plotter.plot_power_flow(fig3)
         else:
-             ax = fig3.add_subplot(111)
-             ax.text(0.5, 0.5, "No Power Data", ha="center", va="center")
+            ax = fig3.add_subplot(111)
+            ax.text(0.5, 0.5, "No Power Data", ha="center", va="center")
         tab_widget.addTab(pwr_widget, "Power Flow")
 
         dialog.exec()
