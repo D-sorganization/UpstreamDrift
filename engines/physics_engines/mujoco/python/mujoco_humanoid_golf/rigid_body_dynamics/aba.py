@@ -14,6 +14,9 @@ from mujoco_humanoid_golf.spatial_algebra import (
 )
 from shared.python import constants
 
+DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
+DEFAULT_GRAVITY.flags.writeable = False
+
 TOLERANCE = 1e-10  # Numerical tolerance to avoid division by zero
 
 
@@ -87,7 +90,7 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         f_ext = np.zeros((6, nb))
 
     # Get gravity vector
-    a_grav = model.get("gravity", np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2]))
+    a_grav = model.get("gravity", DEFAULT_GRAVITY)
 
     # Initialize arrays
     # OPTIMIZATION: Pre-allocate 3D arrays instead of lists of arrays
