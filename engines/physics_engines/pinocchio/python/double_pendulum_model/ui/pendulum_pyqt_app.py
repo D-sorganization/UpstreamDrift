@@ -472,7 +472,8 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
                 -length * math.cos(angle),
             ]
         )
-        return rotation @ local
+        result = rotation @ local
+        return np.array(result, dtype=np.float64)
 
     def _plane_rotation(
         self, inclination_deg: float

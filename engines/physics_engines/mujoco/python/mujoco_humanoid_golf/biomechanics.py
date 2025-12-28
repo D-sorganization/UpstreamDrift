@@ -107,7 +107,7 @@ class BiomechanicalAnalyzer:
         self.prev_qvel = self.data.qvel.copy()
         self.prev_time = self.data.time
 
-        return qacc
+        return np.array(qacc, dtype=np.float64)
 
     def get_club_head_data(
         self,

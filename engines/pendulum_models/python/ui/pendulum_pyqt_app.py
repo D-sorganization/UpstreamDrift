@@ -44,11 +44,11 @@ class PendulumCanvas(FigureCanvasQTAgg):
     def _configure_axes(self) -> None:
         self.ax.set_xlabel("X (m)")
         self.ax.set_ylabel("Y (m)")
-        self.ax.set_zlabel("Z (m)")
-        self.ax.view_init(elev=25, azim=-60)
-        self.ax.set_xlim([-2.5, 2.5])
-        self.ax.set_ylim([-2.5, 2.5])
-        self.ax.set_zlim([-1.5, 1.5])
+        self.ax.set_zlabel("Z (m)")  # type: ignore[attr-defined]
+        self.ax.view_init(elev=25, azim=-60)  # type: ignore[attr-defined]
+        self.ax.set_xlim((-2.5, 2.5))
+        self.ax.set_ylim((-2.5, 2.5))
+        self.ax.set_zlim((-1.5, 1.5))  # type: ignore[attr-defined]
 
     def draw_chain(self, points: np.ndarray) -> None:
         self.ax.cla()
@@ -230,7 +230,8 @@ class PendulumController(QtWidgets.QWidget):
         try:
             # For immediate evaluation in UI, we don't allow variables
             evaluator = SafeEvaluator(allowed_variables=set())
-            return evaluator.evaluate(expression)
+            result = evaluator.evaluate(expression)
+            return float(result)
         except Exception:
             return 0.0
 
@@ -346,7 +347,8 @@ class PendulumController(QtWidgets.QWidget):
                 -length * math.cos(angle),
             ]
         )
-        return rotation @ local
+        result = rotation @ local
+        return np.array(result, dtype=np.float64)
 
     def _plane_rotation(self, inclination_deg: float) -> np.ndarray:
         inclination_rad = math.radians(inclination_deg)

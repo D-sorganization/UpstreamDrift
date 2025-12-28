@@ -306,7 +306,7 @@ class SwingOptimizer:
                 # Constraint: |v| <= v_max
                 # Formulate as: v_max - |v| >= 0
                 violations = max_vel - np.abs(velocities)
-                return violations.flatten()
+                return np.asarray(violations.flatten())
 
             constraints.append({"type": "ineq", "fun": velocity_constraint})
 

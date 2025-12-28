@@ -171,7 +171,7 @@ class KinematicForceAnalyzer:
         mujoco.mj_forward(self.model, self.data)
 
         # Coriolis forces = total bias - gravity
-        return bias_with_velocity - gravity_only
+        return np.asarray(bias_with_velocity - gravity_only)
 
     def compute_gravity_forces(self, qpos: np.ndarray) -> np.ndarray:
         """Compute gravitational forces.
@@ -189,7 +189,7 @@ class KinematicForceAnalyzer:
         mujoco.mj_forward(self.model, self.data)
 
         # With zero velocity, qfrc_bias = g(q)
-        return self.data.qfrc_bias.copy()
+        return np.asarray(self.data.qfrc_bias.copy())
 
     def decompose_coriolis_forces(
         self,
@@ -587,7 +587,7 @@ class KinematicForceAnalyzer:
         else:
             a_c = np.zeros(3)
 
-        return a_c
+        return np.asarray(a_c)
 
 
 def export_kinematic_forces_to_csv(

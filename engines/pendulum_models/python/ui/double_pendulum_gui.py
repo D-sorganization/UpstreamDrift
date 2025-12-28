@@ -20,6 +20,7 @@ import math
 import tkinter as tk
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any
 
 import numpy as np
 from double_pendulum_model.physics.double_pendulum import (
@@ -72,7 +73,7 @@ class DoublePendulumApp:
         self.data_logging_enabled = False
         self.data_granularity = 1  # Log every N steps
         self.data_step_counter = 0
-        self.data_file: csv.Writer | None = None
+        self.data_file: Any = None  # CSV writer object
         self.data_file_handle: object | None = None
         self.data_file_stack: contextlib.ExitStack | None = None
 
@@ -93,13 +94,13 @@ class DoublePendulumApp:
         self.ax = self.fig.add_subplot(111, projection="3d")
         self.ax.set_xlabel("X (m)", fontsize=10)
         self.ax.set_ylabel("Y (m)", fontsize=10)
-        self.ax.set_zlabel("Z (m)", fontsize=10)
+        self.ax.set_zlabel("Z (m)", fontsize=10)  # type: ignore[attr-defined]
         self.ax.set_title("Double Pendulum 3D View", fontsize=12, fontweight="bold")
 
         # Set initial view limits
-        self.ax.set_xlim([-2, 2])
-        self.ax.set_ylim([-2, 2])
-        self.ax.set_zlim([-1, 1])
+        self.ax.set_xlim((-2, 2))
+        self.ax.set_ylim((-2, 2))
+        self.ax.set_zlim((-1, 1))  # type: ignore[attr-defined]
 
         # Enable interactive rotation and zoom
         self.canvas = FigureCanvasTkAgg(self.fig, main_frame)
@@ -130,7 +131,7 @@ class DoublePendulumApp:
         canvas_scroll.create_window((0, 0), window=scrollable_frame, anchor="nw")
         canvas_scroll.configure(yscrollcommand=scrollbar.set)
 
-        self.entries = {}
+        self.entries: dict[str, tk.Entry] = {}
         row = 0
 
         # Title
@@ -565,7 +566,8 @@ class DoublePendulumApp:
                         f"{breakdown.coriolis_centripetal[1]:.6f}",
                     ]
                 )
-                self.data_file_handle.flush()
+                if self.data_file_handle is not None:
+                    self.data_file_handle.flush()  # type: ignore[attr-defined]
 
     def _update_pendulum_immediately(self) -> None:
         """Update pendulum position immediately when parameters change."""
@@ -907,10 +909,10 @@ class DoublePendulumApp:
         # Add prominent gravity label with arrow symbol
         gravity_label_pos = gravity_start + gravity_vec_world * 0.5
         self.ax.text(
-            gravity_label_pos[0] + max_range * 0.1,
-            gravity_label_pos[1],
-            gravity_label_pos[2],
-            "g↓",
+            x=gravity_label_pos[0] + max_range * 0.1,
+            y=gravity_label_pos[1],
+            z=gravity_label_pos[2],
+            s="g↓",
             fontsize=16,
             color="#00AA00",
             weight="bold",
@@ -965,7 +967,9 @@ class DoublePendulumApp:
 
         # Draw pivot point (hub) - make it prominent
         self.ax.scatter(
-            *pivot,
+            x=pivot[0],
+            y=pivot[1],
+            z=pivot[2],
             color="black",
             s=250,
             marker="o",
@@ -977,7 +981,9 @@ class DoublePendulumApp:
 
         # Draw elbow joint - blue to match upper segment
         self.ax.scatter(
-            *elbow,
+            x=elbow[0],
+            y=elbow[1],
+            z=elbow[2],
             color="#2E86AB",
             s=100,
             marker="o",
@@ -988,7 +994,9 @@ class DoublePendulumApp:
 
         # Draw wrist/end point (clubhead) - red to match lower segment
         self.ax.scatter(
-            *wrist,
+            x=wrist[0],
+            y=wrist[1],
+            z=wrist[2],
             color="#A23B72",
             s=180,
             marker="o",
@@ -1002,10 +1010,10 @@ class DoublePendulumApp:
         # Upper segment label (midpoint)
         upper_mid = (pivot + elbow) / 2
         self.ax.text(
-            upper_mid[0],
-            upper_mid[1],
-            upper_mid[2],
-            "UPPER",
+            x=upper_mid[0],
+            y=upper_mid[1],
+            z=upper_mid[2],
+            s="UPPER",
             fontsize=9,
             color="#2E86AB",
             weight="bold",
@@ -1021,10 +1029,10 @@ class DoublePendulumApp:
         # Lower segment label (midpoint)
         lower_mid = (elbow + wrist) / 2
         self.ax.text(
-            lower_mid[0],
-            lower_mid[1],
-            lower_mid[2],
-            "LOWER",
+            x=lower_mid[0],
+            y=lower_mid[1],
+            z=lower_mid[2],
+            s="LOWER",
             fontsize=9,
             color="#A23B72",
             weight="bold",
@@ -1051,7 +1059,7 @@ class DoublePendulumApp:
             z_plane = y_plane_grid * math.sin(plane_angle)
             y_plane_rotated = y_plane_grid * math.cos(plane_angle)
 
-            self.ax.plot_surface(
+            self.ax.plot_surface(  # type: ignore[attr-defined]
                 x_plane_grid,
                 y_plane_rotated,
                 z_plane,
@@ -1061,12 +1069,12 @@ class DoublePendulumApp:
             )
 
         # Set equal aspect ratio and labels
-        self.ax.set_xlim([-max_range, max_range])
-        self.ax.set_ylim([-max_range, max_range])
-        self.ax.set_zlim([-max_range * 0.5, max_range * 0.5])
+        self.ax.set_xlim((-max_range, max_range))
+        self.ax.set_ylim((-max_range, max_range))
+        self.ax.set_zlim((-max_range * 0.5, max_range * 0.5))  # type: ignore[attr-defined]
         self.ax.set_xlabel("X (m)", fontsize=10)
         self.ax.set_ylabel("Y (m)", fontsize=10)
-        self.ax.set_zlabel("Z (m)", fontsize=10)
+        self.ax.set_zlabel("Z (m)", fontsize=10)  # type: ignore[attr-defined]
         self.ax.set_title(
             "Double Pendulum 3D View\nPivot at origin, θ₁=0° is vertical down",
             fontsize=11,

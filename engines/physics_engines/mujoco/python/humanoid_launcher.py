@@ -128,9 +128,12 @@ class SimulationWorker(QThread):
                 if self.process.poll() is not None:
                     break
 
-                line = self.process.stdout.readline()
-                if line:
-                    self.log_signal.emit(line.strip())
+                if self.process.stdout is not None:
+                    line = self.process.stdout.readline()
+                    if line:
+                        self.log_signal.emit(line.strip())
+                else:
+                    break
 
             # Capture remaining output
             stdout, stderr = self.process.communicate()
@@ -281,7 +284,7 @@ class HumanoidLauncher(QMainWindow):
 
         # Connect to updated help text method
         self.combo_control.currentTextChanged.connect(self.on_control_mode_changed)
-        self.combo_control.setCurrentText(self.config.get("control_mode", "pd"))
+        self.combo_control.setCurrentText(str(self.config.get("control_mode", "pd")))
 
         settings_layout.addWidget(self.combo_control, 0, 1)
         settings_layout.addWidget(self.btn_poly_generator, 0, 2)
@@ -292,7 +295,7 @@ class HumanoidLauncher(QMainWindow):
 
         # Live View
         self.chk_live = QCheckBox("Live Interactive View (requires X11/VcXsrv)")
-        self.chk_live.setChecked(self.config.get("live_view", False))
+        self.chk_live.setChecked(bool(self.config.get("live_view", False)))
         settings_layout.addWidget(self.chk_live, 1, 0, 1, 3)
 
         settings_group.setLayout(settings_layout)
@@ -310,7 +313,7 @@ class HumanoidLauncher(QMainWindow):
 
         # Load Path
         state_layout.addWidget(QLabel("Load State:"), 0, 0)
-        self.txt_load_path = QLineEdit(self.config.get("load_state_path", ""))
+        self.txt_load_path = QLineEdit(str(self.config.get("load_state_path", "")))
         state_layout.addWidget(self.txt_load_path, 0, 1)
         btn_browse_load = QPushButton("Browse")
         btn_browse_load.clicked.connect(lambda: self.browse_file(self.txt_load_path))
@@ -318,7 +321,7 @@ class HumanoidLauncher(QMainWindow):
 
         # Save Path
         state_layout.addWidget(QLabel("Save State:"), 1, 0)
-        self.txt_save_path = QLineEdit(self.config.get("save_state_path", ""))
+        self.txt_save_path = QLineEdit(str(self.config.get("save_state_path", "")))
         state_layout.addWidget(self.txt_save_path, 1, 1)
         btn_browse_save = QPushButton("Browse")
         btn_browse_save.clicked.connect(
@@ -404,13 +407,21 @@ class HumanoidLauncher(QMainWindow):
         self.spin_height = QDoubleSpinBox()
         self.spin_height.setRange(0.5, 3.0)
         self.spin_height.setSingleStep(0.05)
-        self.spin_height.setValue(self.config.get("height_m", 1.8))
+        height_val = self.config.get("height_m", 1.8)
+        if isinstance(height_val, (int, float)):
+            self.spin_height.setValue(float(height_val))
+        else:
+            self.spin_height.setValue(1.8)
         dim_layout.addWidget(self.spin_height, 0, 1)
 
         dim_layout.addWidget(QLabel("Weight (%):"), 1, 0)
         self.slider_weight = QSlider(Qt.Orientation.Horizontal)
         self.slider_weight.setRange(50, 200)
-        self.slider_weight.setValue(int(self.config.get("weight_percent", 100)))
+        weight_val = self.config.get("weight_percent", 100)
+        if isinstance(weight_val, (int, float)):
+            self.slider_weight.setValue(int(weight_val))
+        else:
+            self.slider_weight.setValue(100)
 
         self.lbl_weight_val = QLabel(f"{self.slider_weight.value()}%")
         self.slider_weight.valueChanged.connect(
@@ -441,7 +452,11 @@ class HumanoidLauncher(QMainWindow):
 
             btn = QPushButton()
             btn.setFixedSize(50, 25)
-            rgba = self.config["colors"].get(key, [1, 1, 1, 1])
+            colors_dict = self.config.get("colors", {})
+            if isinstance(colors_dict, dict):
+                rgba = colors_dict.get(key, [1, 1, 1, 1])
+            else:
+                rgba = [1, 1, 1, 1]
             self.set_btn_color(btn, rgba)
             btn.clicked.connect(lambda checked, k=key, b=btn: self.pick_color(k, b))
 
@@ -474,7 +489,11 @@ class HumanoidLauncher(QMainWindow):
         club_layout.addWidget(QLabel("Club Length (m):"), 0, 0)
         self.slider_length = QSlider(Qt.Orientation.Horizontal)
         self.slider_length.setRange(50, 150)  # 0.5 to 1.5 * 100
-        self.slider_length.setValue(int(self.config.get("club_length", 1.0) * 100))
+        length_val = self.config.get("club_length", 1.0)
+        if isinstance(length_val, (int, float)):
+            self.slider_length.setValue(int(float(length_val) * 100))
+        else:
+            self.slider_length.setValue(100)
 
         self.lbl_length_val = QLabel(f"{self.slider_length.value()/100:.2f} m")
         self.slider_length.valueChanged.connect(
@@ -487,11 +506,15 @@ class HumanoidLauncher(QMainWindow):
         club_layout.addWidget(QLabel("Club Mass (kg):"), 1, 0)
         self.slider_mass = QSlider(Qt.Orientation.Horizontal)
         self.slider_mass.setRange(10, 200)  # 0.1 to 2.0 * 100
-        self.slider_mass.setValue(int(self.config.get("club_mass", 0.5) * 100))
+        mass_val = self.config.get("club_mass", 0.5)
+        if isinstance(mass_val, (int, float)):
+            self.slider_mass.setValue(int(float(mass_val) * 100))
+        else:
+            self.slider_mass.setValue(50)
 
-        self.lbl_mass_val = QLabel(f"{self.slider_mass.value()/100:.2f} kg")
+        self.lbl_mass_val = QLabel(f"{float(self.slider_mass.value())/100:.2f} kg")
         self.slider_mass.valueChanged.connect(
-            lambda v: self.lbl_mass_val.setText(f"{v/100:.2f} kg")
+            lambda v: self.lbl_mass_val.setText(f"{float(v)/100:.2f} kg")
         )
 
         club_layout.addWidget(self.slider_mass, 1, 1)
@@ -505,15 +528,18 @@ class HumanoidLauncher(QMainWindow):
         feat_layout = QVBoxLayout()
 
         self.chk_two_hand = QCheckBox("Two-Handed Grip (Constrained)")
-        self.chk_two_hand.setChecked(self.config.get("two_handed", False))
+        two_handed_val = self.config.get("two_handed", False)
+        self.chk_two_hand.setChecked(bool(two_handed_val))
         feat_layout.addWidget(self.chk_two_hand)
 
         self.chk_face = QCheckBox("Enhanced Face (Nose, Mouth)")
-        self.chk_face.setChecked(self.config.get("enhance_face", False))
+        enhance_face_val = self.config.get("enhance_face", False)
+        self.chk_face.setChecked(bool(enhance_face_val))
         feat_layout.addWidget(self.chk_face)
 
         self.chk_fingers = QCheckBox("Articulated Fingers (Segments)")
-        self.chk_fingers.setChecked(self.config.get("articulated_fingers", False))
+        articulated_fingers_val = self.config.get("articulated_fingers", False)
+        self.chk_fingers.setChecked(bool(articulated_fingers_val))
         feat_layout.addWidget(self.chk_fingers)
 
         feat_group.setLayout(feat_layout)
@@ -565,21 +591,40 @@ class HumanoidLauncher(QMainWindow):
         self.log("Log cleared.")
 
     def set_btn_color(self, btn, rgba):
-        r, g, b = (int(c * 255) for c in rgba[:3])
+        from collections.abc import Sequence
+
+        rgba_seq: Sequence[float] = rgba  # type: ignore[assignment]
+        r, g, b = (int(c * 255) for c in rgba_seq[:3])
         btn.setStyleSheet(
             f"background-color: rgb({r},{g},{b}); border: 1px solid #555;"
         )
 
     def pick_color(self, key, btn):
-        current = self.config["colors"][key]
-        initial = QColor(
-            int(current[0] * 255), int(current[1] * 255), int(current[2] * 255)
-        )
+        colors_dict = self.config.get("colors", {})
+        if isinstance(colors_dict, dict):
+            current = colors_dict.get(key, [1, 1, 1, 1])
+        else:
+            current = [1, 1, 1, 1]
+
+        if isinstance(current, (list, tuple)) and len(current) >= 3:
+            initial = QColor(
+                int(float(current[0]) * 255),
+                int(float(current[1]) * 255),
+                int(float(current[2]) * 255),
+            )
+        else:
+            initial = QColor(255, 255, 255)  # Default to white
 
         color = QColorDialog.getColor(initial, self, f"Choose {key} Color")
         if color.isValid():
             new_rgba = [color.redF(), color.greenF(), color.blueF(), 1.0]
-            self.config["colors"][key] = new_rgba
+            config_dict = self.config  # type: ignore[assignment]
+            if "colors" not in config_dict:
+                config_dict["colors"] = {}
+            colors_dict = config_dict.get("colors", {})
+            if isinstance(colors_dict, dict):
+                colors_dict[key] = new_rgba
+                config_dict["colors"] = colors_dict
             self.set_btn_color(btn, new_rgba)
             self.save_config()
 
@@ -676,9 +721,13 @@ class HumanoidLauncher(QMainWindow):
         # Connect signal to save coefficients
         def on_polynomial_generated(joint_name, coefficients):
             """Save generated polynomial coefficients to config."""
-            if "polynomial_coefficients" not in self.config:
-                self.config["polynomial_coefficients"] = {}
-            self.config["polynomial_coefficients"][joint_name] = coefficients
+            config_dict = self.config  # type: ignore[assignment]
+            if "polynomial_coefficients" not in config_dict:
+                config_dict["polynomial_coefficients"] = {}
+            poly_coeffs = config_dict.get("polynomial_coefficients", {})
+            if isinstance(poly_coeffs, dict):
+                poly_coeffs[joint_name] = coefficients
+                config_dict["polynomial_coefficients"] = poly_coeffs
             self.save_config()
             self.log(f"Polynomial generated for {joint_name}: {coefficients}")
 
@@ -712,31 +761,38 @@ class HumanoidLauncher(QMainWindow):
                 with open(self.config_path) as f:
                     data = json.load(f)
                     # Merge with default to ensure all keys exist
+                    config_dict = self.config  # type: ignore[assignment]
                     for k, v in data.items():
                         if k == "colors":
-                            if "colors" in self.config:
-                                self.config["colors"].update(v)
+                            if "colors" in config_dict:
+                                colors_dict = config_dict.get("colors", {})
+                                if isinstance(colors_dict, dict) and isinstance(
+                                    v, dict
+                                ):
+                                    colors_dict.update(v)
+                                    config_dict["colors"] = colors_dict
                         else:
-                            self.config[k] = v
+                            config_dict[k] = v
             except Exception as e:
                 self.log(f"Error loading config: {e}")
 
     def save_config(self):
         # Update config object from UI
-        self.config["control_mode"] = self.combo_control.currentText()
-        self.config["live_view"] = self.chk_live.isChecked()
-        self.config["load_state_path"] = self.txt_load_path.text()
-        self.config["save_state_path"] = self.txt_save_path.text()
+        config_dict = self.config  # type: ignore[assignment]
+        config_dict["control_mode"] = self.combo_control.currentText()
+        config_dict["live_view"] = self.chk_live.isChecked()
+        config_dict["load_state_path"] = self.txt_load_path.text()
+        config_dict["save_state_path"] = self.txt_save_path.text()
 
-        self.config["height_m"] = self.spin_height.value()
-        self.config["weight_percent"] = float(self.slider_weight.value())
+        config_dict["height_m"] = self.spin_height.value()
+        config_dict["weight_percent"] = float(self.slider_weight.value())
 
-        self.config["club_length"] = self.slider_length.value() / 100.0
-        self.config["club_mass"] = self.slider_mass.value() / 100.0
+        config_dict["club_length"] = self.slider_length.value() / 100.0
+        config_dict["club_mass"] = self.slider_mass.value() / 100.0
 
-        self.config["two_handed"] = self.chk_two_hand.isChecked()
-        self.config["enhance_face"] = self.chk_face.isChecked()
-        self.config["articulated_fingers"] = self.chk_fingers.isChecked()
+        config_dict["two_handed"] = self.chk_two_hand.isChecked()
+        config_dict["enhance_face"] = self.chk_face.isChecked()
+        config_dict["articulated_fingers"] = self.chk_fingers.isChecked()
 
         try:
             with open(self.config_path, "w") as f:
@@ -862,11 +918,11 @@ class HumanoidLauncher(QMainWindow):
                 return
 
             # Read Data
-            times = []
-            g_vals = []
-            c_vals = []
-            t_vals = []
-            tot_vals = []
+            times: list[float] = []
+            g_vals: list[float] = []
+            c_vals: list[float] = []
+            t_vals: list[float] = []
+            tot_vals: list[float] = []
 
             # Column names
             col_g = f"iaa_{joint}_g"
@@ -875,16 +931,17 @@ class HumanoidLauncher(QMainWindow):
             col_tot = f"iaa_{joint}_total"
 
             with open(csv_path) as f:
-                reader = csv.DictReader(f)
-                for row in reader:
-                    try:
-                        times.append(float(row["time"]))
-                        g_vals.append(float(row[col_g]))
-                        c_vals.append(float(row[col_c]))
-                        t_vals.append(float(row[col_t]))
-                        tot_vals.append(float(row[col_tot]))
-                    except (ValueError, KeyError):
-                        continue
+                reader = csv.DictReader(f)  # type: ignore[assignment]
+                for row_dict in reader:
+                    if isinstance(row_dict, dict):
+                        try:
+                            times.append(float(row_dict.get("time", "0")))
+                            g_vals.append(float(row_dict.get(col_g, "0")))
+                            c_vals.append(float(row_dict.get(col_c, "0")))
+                            t_vals.append(float(row_dict.get(col_t, "0")))
+                            tot_vals.append(float(row_dict.get(col_tot, "0")))
+                        except (ValueError, KeyError):
+                            continue
 
             if not times:
                 return

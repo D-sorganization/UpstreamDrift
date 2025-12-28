@@ -52,14 +52,20 @@ class UniversalJointAnalyzer:
         # Extract constraint forces from qfrc_constraint using DOF indices
         if jnt_type in (mj.mjtJoint.mjJNT_HINGE, mj.mjtJoint.mjJNT_SLIDE):
             # Hinge and slide joints have 1 DOF
-            return self.data.qfrc_constraint[jnt_dofadr]
+            return np.array([self.data.qfrc_constraint[jnt_dofadr]], dtype=np.float64)
         if jnt_type == mj.mjtJoint.mjJNT_BALL:
             # Ball joint has 3 DOF
-            return self.data.qfrc_constraint[jnt_dofadr : jnt_dofadr + 3]
+            return np.array(
+                self.data.qfrc_constraint[jnt_dofadr : jnt_dofadr + 3],
+                dtype=np.float64,
+            )
         if jnt_type == mj.mjtJoint.mjJNT_FREE:
             # Free joint has 6 DOF (3 translation + 3 rotation)
-            return self.data.qfrc_constraint[jnt_dofadr : jnt_dofadr + 6]
-        return np.array([0.0])
+            return np.array(
+                self.data.qfrc_constraint[jnt_dofadr : jnt_dofadr + 6],
+                dtype=np.float64,
+            )
+        return np.array([0.0], dtype=np.float64)
 
     def get_universal_joint_angles(
         self,
@@ -112,9 +118,9 @@ class UniversalJointAnalyzer:
 
         denominator = 1.0 - (sin_beta**2) * (sin_theta**2)
         if abs(denominator) < 1e-9:
-            return np.inf
+            return float(np.inf)
 
-        return cos_beta / denominator
+        return float(cos_beta / denominator)
 
     def analyze_torque_transmission(
         self,

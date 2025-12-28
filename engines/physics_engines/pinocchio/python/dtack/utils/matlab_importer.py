@@ -128,4 +128,5 @@ class MATLABImporter:
             RuntimeError: Parser not yet implemented. File format requires reverse
                 engineering.
         """
-        return GearsParser.load(file_path)
+        result = GearsParser.load(file_path)
+        return dict(result)  # type: ignore[arg-type]

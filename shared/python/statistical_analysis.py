@@ -271,7 +271,7 @@ class StatisticalAnalyzer:
         shoulder_rotation = np.rad2deg(self.joint_positions[:, shoulder_joint_idx])
         hip_rotation = np.rad2deg(self.joint_positions[:, hip_joint_idx])
 
-        return shoulder_rotation - hip_rotation
+        return np.asarray(shoulder_rotation - hip_rotation)
 
     def detect_impact_time(self) -> float | None:
         """Detect ball impact time.

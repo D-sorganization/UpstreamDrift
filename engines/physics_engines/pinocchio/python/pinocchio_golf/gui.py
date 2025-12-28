@@ -954,9 +954,11 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                     )
                     club_head_vel = v_frame.linear.copy()
 
+                # Ensure q is not None for recording
+                q_for_recording = self.q if self.q is not None else np.array([])
                 self.recorder.record_frame(
                     time=self.sim_time,
-                    q=self.q,
+                    q=q_for_recording,
                     v=self.v,
                     tau=tau,
                     kinetic_energy=self.data.kinetic_energy,
