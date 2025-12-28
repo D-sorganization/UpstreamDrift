@@ -253,7 +253,8 @@ class OutputManager:
             elif format_type == OutputFormat.JSON:
                 with open(file_path) as f:
                     data = json.load(f)
-                return data.get("results", data)
+                result = data.get("results", data)
+                return dict(result) if isinstance(result, dict) else result
 
             elif format_type == OutputFormat.HDF5:
                 result = pd.read_hdf(file_path, key="data")
@@ -267,7 +268,8 @@ class OutputManager:
             elif format_type == OutputFormat.PICKLE:
                 with open(file_path, "rb") as f:
                     data = pickle.load(f)
-                return data.get("results", data)
+                result = data.get("results", data)
+                return dict(result) if isinstance(result, dict) else result
 
             elif format_type == OutputFormat.PARQUET:
                 return pd.read_parquet(file_path)

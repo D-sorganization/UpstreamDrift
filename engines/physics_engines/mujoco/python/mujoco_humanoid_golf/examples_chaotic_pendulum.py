@@ -62,7 +62,8 @@ class ChaoticPendulumController(abc.ABC):
         # Potential energy (reference at y=0, base height)
         pe = self.m * self.g * self.L * (1 - np.cos(theta))
 
-        return ke + pe
+        total_energy = ke + pe
+        return float(total_energy)
 
     @abc.abstractmethod
     def control(self, time: float) -> tuple[float, float]:
