@@ -1,5 +1,6 @@
 """Integration tests for GolfLauncher."""
 
+import importlib
 import os
 import sys
 import tempfile
@@ -64,7 +65,17 @@ class MockQtBase:
 
 
 class MockQWidget(MockQtBase):
-    pass
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._enabled = True
+
+    def setEnabled(self, b):
+        self._enabled = bool(b)
+
+    def isEnabled(self):
+        if isinstance(self._enabled, bool):
+            return self._enabled
+        return False
 
 
 class MockQMainWindow(MockQtBase):
@@ -202,8 +213,6 @@ models:
 
             # Create Launcher
             # Force reload to ensure no mocks from unit tests persist
-            import importlib
-
             import launchers.golf_launcher
 
             importlib.reload(launchers.golf_launcher)

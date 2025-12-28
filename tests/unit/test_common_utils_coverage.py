@@ -50,12 +50,13 @@ def test_load_save_golf_data(tmp_path):
 
     # Excel - requires openpyxl, handle if missing
     try:
-        import openpyxl  # noqa: F401
+        import importlib.util
 
-        xlsx_path = tmp_path / "test.xlsx"
-        save_golf_data(df, xlsx_path, "excel")
-        loaded_df_xlsx = load_golf_data(xlsx_path)
-        pd.testing.assert_frame_equal(df, loaded_df_xlsx)
+        if importlib.util.find_spec("openpyxl") is not None:
+            xlsx_path = tmp_path / "test.xlsx"
+            save_golf_data(df, xlsx_path, "excel")
+            loaded_df_xlsx = load_golf_data(xlsx_path)
+            pd.testing.assert_frame_equal(df, loaded_df_xlsx)
     except ImportError:
         pass
 
