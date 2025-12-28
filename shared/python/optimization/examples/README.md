@@ -22,6 +22,9 @@ pip install casadi
 conda install pinocchio -c conda-forge
 # or if using pip for pinocchio (experimental)
 # pip install pin
+# Note: Pinocchio installation via pip is experimental and may not work reliably.
+# It is strongly recommended to use conda (line above) and follow the official docs:
+# https://stack-of-tasks.github.io/pinocchio/download.html
 ```
 
 Run the script:
