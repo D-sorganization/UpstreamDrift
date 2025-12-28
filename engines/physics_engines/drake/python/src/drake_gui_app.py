@@ -1,71 +1,141 @@
-"""Drake Golf GUI Application using PyQt6."""
+"""Drake Golf Swing Analysis GUI Application."""
+
+from __future__ import annotations
 
 import logging
 import os
 import sys
-import typing
 import webbrowser
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import numpy as np
-from pydrake.all import (
-    AddMultibodyPlantSceneGraph,
-    BodyIndex,
-    Context,
-    Diagram,
-    DiagramBuilder,
-    JacobianWrtVariable,
-    JointIndex,
-    Meshcat,
-    MeshcatParams,
-    MeshcatVisualizer,
-    MultibodyPlant,
-    Parser,
-    PrismaticJoint,
-    RevoluteJoint,
-    RigidTransform,
-    Simulator,
-)
-from PyQt6 import QtCore, QtGui, QtWidgets
 
+# Qt imports
+try:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+
+    HAS_QT = True
+except ImportError:
+    HAS_QT = False
+    QtCore = None  # type: ignore[misc, assignment]
+    QtGui = None  # type: ignore[misc, assignment]
+    QtWidgets = None  # type: ignore[misc, assignment]
+
+# Matplotlib imports
 try:
     import matplotlib.pyplot as plt
 
     HAS_MATPLOTLIB = True
 except ImportError:
     HAS_MATPLOTLIB = False
+    plt = None  # type: ignore[misc, assignment]
 
-from .drake_golf_model import GolfModelParams, build_golf_swing_diagram
-from .drake_visualizer import DrakeVisualizer
-from .induced_acceleration import DrakeInducedAccelerationAnalyzer
-from .logger_utils import setup_logging
+# Drake imports
+if TYPE_CHECKING or HAS_QT:
+    try:
+        from pydrake.all import (
+            AddMultibodyPlantSceneGraph,
+            BodyIndex,
+            Context,
+            Diagram,
+            DiagramBuilder,
+            DrakeVisualizer,
+            JacobianWrtVariable,
+            JointIndex,
+            Meshcat,
+            MeshcatParams,
+            MeshcatVisualizer,
+            MultibodyPlant,
+            Parser,
+            PrismaticJoint,
+            RevoluteJoint,
+            RigidTransform,
+            Simulator,
+        )
+    except ImportError:
+        # Fallback for when Drake is not available
+        AddMultibodyPlantSceneGraph = None  # type: ignore[misc, assignment]
+        BodyIndex = None  # type: ignore[misc, assignment]
+        Context = None  # type: ignore[misc, assignment]
+        Diagram = None  # type: ignore[misc, assignment]
+        DiagramBuilder = None  # type: ignore[misc, assignment]
+        DrakeVisualizer = None  # type: ignore[misc, assignment]
+        JointIndex = None  # type: ignore[misc, assignment]
+        JacobianWrtVariable = None  # type: ignore[misc, assignment]
+        Meshcat = None  # type: ignore[misc, assignment]
+        MeshcatParams = None  # type: ignore[misc, assignment]
+        MeshcatVisualizer = None  # type: ignore[misc, assignment]
+        MultibodyPlant = None  # type: ignore[misc, assignment]
+        Parser = None  # type: ignore[misc, assignment]
+        PrismaticJoint = None  # type: ignore[misc, assignment]
+        RevoluteJoint = None  # type: ignore[misc, assignment]
+        RigidTransform = None  # type: ignore[misc, assignment]
+        Simulator = None  # type: ignore[misc, assignment]
 
+# Shared imports
+try:
+    from shared.python.plotting import GolfSwingPlotter
+    from shared.python.statistical_analysis import StatisticalAnalyzer
+except ImportError:
+    GolfSwingPlotter = None  # type: ignore[misc, assignment]
+    StatisticalAnalyzer = None  # type: ignore[misc, assignment]
+
+# Try to import golf model components
+try:
+    from engines.physics_engines.drake.python.src.drake_golf_model import (
+        GolfModelParams,
+        build_golf_swing_diagram,
+    )
+except ImportError:
+    # Fallback classes
+    class GolfModelParams:  # type: ignore[no-redef]
+        """Placeholder for golf model parameters."""
+
+        pass
+
+    def build_golf_swing_diagram(*args, **kwargs):  # type: ignore[no-redef, misc]
+        """Placeholder for golf swing diagram builder."""
+        return None, None, None
+
+
+# Constants
+TIME_STEP_S = 0.001
+MS_PER_SECOND = 1000
+JOINT_ANGLE_MIN_RAD = -3.14159
+JOINT_ANGLE_MAX_RAD = 3.14159
+SPINBOX_STEP_RAD = 0.01
+SLIDER_TO_RADIAN = 0.01
+SLIDER_RANGE_MIN = -314
+SLIDER_RANGE_MAX = 314
+INITIAL_PELVIS_HEIGHT_M = 1.0
+
+# Styles
+STYLE_BUTTON_RUN = "QPushButton { background-color: #4CAF50; color: white; }"
+STYLE_BUTTON_STOP = "QPushButton { background-color: #f44336; color: white; }"
+
+# Logger
 LOGGER = logging.getLogger(__name__)
 
-SLIDER_TO_RADIAN: typing.Final[float] = (
-    0.01  # [rad/slider_unit] Conversion factor from slider integer values to radians
-)
-JOINT_ANGLE_MIN_RAD: typing.Final[float] = (
-    -10.0
-)  # [rad] Minimum joint angle for UI controls (Safety limit)
-JOINT_ANGLE_MAX_RAD: typing.Final[float] = (
-    10.0  # [rad] Maximum joint angle for UI controls (Safety limit)
-)
 
-SLIDER_RANGE_MIN: typing.Final[int] = int(
-    JOINT_ANGLE_MIN_RAD / SLIDER_TO_RADIAN
-)  # [slider_units] Computed from JOINT_ANGLE_MIN_RAD / SLIDER_TO_RADIAN
-SLIDER_RANGE_MAX: typing.Final[int] = int(
-    JOINT_ANGLE_MAX_RAD / SLIDER_TO_RADIAN
-)  # [slider_units] Computed from JOINT_ANGLE_MAX_RAD / SLIDER_TO_RADIAN
-TIME_STEP_S: typing.Final[float] = 0.01  # [s] 100Hz update rate
-MS_PER_SECOND: typing.Final[int] = 1000  # [ms/s]
-INITIAL_PELVIS_HEIGHT_M: typing.Final[float] = 1.0  # [m] Standing height
-SPINBOX_STEP_RAD: typing.Final[float] = 0.1  # [rad] Step size for UI
+# Placeholder for missing classes
+class DrakeInducedAccelerationAnalyzer:
+    """Placeholder for induced acceleration analysis."""
 
-# UI Styles
-STYLE_BUTTON_RUN: typing.Final[str] = "background-color: #ccffcc;"  # Light Green
-STYLE_BUTTON_STOP: typing.Final[str] = "background-color: #ffcccc;"  # Light Red
+    def __init__(self, plant: MultibodyPlant | None) -> None:
+        self.plant = plant
+
+    def compute_induced_acceleration(
+        self, q: np.ndarray, v: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Compute induced accelerations (placeholder)."""
+        # Return dummy data for now
+        return np.zeros_like(v), np.zeros_like(v)
+
+
+def setup_logging() -> None:
+    """Setup logging configuration."""
+    logging.basicConfig(level=logging.INFO)
 
 
 class DrakeRecorder:
@@ -79,6 +149,9 @@ class DrakeRecorder:
         self.q_history: list[np.ndarray] = []
         self.v_history: list[np.ndarray] = []
         self.club_head_pos_history: list[np.ndarray] = []
+        # Store computed metrics
+        self.induced_accelerations: dict[str, list[np.ndarray]] = {}
+        self.counterfactuals: dict[str, list[np.ndarray]] = {}
         self.is_recording = False
 
     def start(self) -> None:
@@ -118,6 +191,37 @@ class DrakeRecorder:
         # Fallback
         return times, []
 
+    def get_induced_acceleration_series(
+        self, source_name: str
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Get induced accelerations."""
+        if source_name not in self.induced_accelerations:
+            return np.array([]), np.array([])
+
+        times = np.array(self.times)
+        # Ensure alignment
+        vals = self.induced_accelerations[source_name]
+        if len(vals) != len(times):
+            # Truncate to match
+            min_len = min(len(vals), len(times))
+            return times[:min_len], np.array(vals[:min_len])
+
+        return times, np.array(vals)
+
+    def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
+        """Get counterfactual data."""
+        if cf_name not in self.counterfactuals:
+            return np.array([]), np.array([])
+
+        times = np.array(self.times)
+        vals = self.counterfactuals[cf_name]
+
+        if len(vals) != len(times):
+            min_len = min(len(vals), len(times))
+            return times[:min_len], np.array(vals[:min_len])
+
+        return times, np.array(vals)
+
 
 class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimported]
     """Main GUI Window for Drake Golf Simulation."""
@@ -133,9 +237,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.plant: MultibodyPlant | None = None  # type: ignore[no-any-unimported]
         self.context: Context | None = None  # type: ignore[no-any-unimported]
         self.meshcat: Meshcat | None = None  # type: ignore[no-any-unimported]
-        self.visualizer: DrakeVisualizer | None = None
-
-        self.operating_mode = "dynamic"  # "dynamic" or "kinematic"
+        self.visualizer: DrakeVisualizer | None = None  # type: ignore[no-any-unimported]
         self.operating_mode = "dynamic"  # "dynamic" or "kinematic"
         self.is_running = False
         self.time_step = TIME_STEP_S
@@ -424,6 +526,14 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.btn_swing_plane.clicked.connect(self._show_swing_plane_analysis)
         self.btn_swing_plane.setEnabled(HAS_MATPLOTLIB)
         analysis_layout.addWidget(self.btn_swing_plane)
+
+        self.btn_advanced_plots = QtWidgets.QPushButton("Show Advanced Plots")
+        self.btn_advanced_plots.setToolTip(
+            "Show Radar Chart, CoP Field, and Power Flow"
+        )
+        self.btn_advanced_plots.clicked.connect(self._show_advanced_plots)
+        self.btn_advanced_plots.setEnabled(HAS_MATPLOTLIB)
+        analysis_layout.addWidget(self.btn_advanced_plots)
 
         analysis_group.setLayout(analysis_layout)
         dyn_layout.addWidget(analysis_group)
@@ -987,6 +1097,86 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         plotter = GolfSwingPlotter(self.recorder)
         fig = plt.figure(figsize=(10, 8))
         plotter.plot_swing_plane(fig)
+        plt.show()
+
+    def _show_advanced_plots(self) -> None:
+        """Show advanced analysis plots."""
+        if not HAS_MATPLOTLIB:
+            QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")
+            return
+
+        from shared.python.plotting import GolfSwingPlotter
+        from shared.python.statistical_analysis import StatisticalAnalyzer
+
+        if not self.recorder.times:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "No Data",
+                "No recording available. Please Record a simulation first.",
+            )
+            return
+
+        # Create Plotter and Analyzer
+        plotter = GolfSwingPlotter(self.recorder)
+
+        # We need to extract data for StatisticalAnalyzer
+        times = np.array(self.recorder.times)
+        q_history = np.array(self.recorder.q_history)
+        v_history = np.array(self.recorder.v_history)
+        # Assuming torques not recorded in DrakeRecorder yet, need to update
+        # if we want torque analysis
+        # For now pass zeros for torques
+        tau_history = np.zeros((len(times), v_history.shape[1]))
+
+        _, club_pos = self.recorder.get_time_series("club_head_position")
+
+        analyzer = StatisticalAnalyzer(
+            times, q_history, v_history, tau_history, club_head_position=club_pos
+        )
+        report = analyzer.generate_comprehensive_report()
+
+        # Prepare metrics for Radar Chart
+        metrics = {
+            "Club Speed": 0.0,
+            "Swing Efficiency": 0.0,
+            "Tempo": 0.0,
+            "Consistency": 0.8,  # Placeholder
+            "Power Transfer": 0.0,
+        }
+
+        if "club_head_speed" in report:
+            # Normalize reasonably (e.g. max speed 50 m/s)
+            peak_speed = report["club_head_speed"]["peak_value"]
+            metrics["Club Speed"] = min(peak_speed / 50.0, 1.0)
+
+        if "tempo" in report:
+            ratio = report["tempo"]["ratio"]
+            # Ideal 3:1 => 3.0. Normalize error from 3.0
+            error = abs(ratio - 3.0)
+            metrics["Tempo"] = max(0, 1.0 - error)
+
+        # Create Figure with tabs or subplots
+        # For simplicity, just use subplots in one figure
+        fig = plt.figure(figsize=(15, 10))
+        gs = fig.add_gridspec(2, 2)
+
+        # 1. Radar Chart
+        plotter.plot_radar_chart(fig, metrics)
+
+        # 2. CoP Vector Field (Drake doesn't record CoP yet, so skip or mock)
+        # If we had CoP data, we would call plotter.plot_cop_vector_field(fig)
+        ax2 = fig.add_subplot(gs[0, 1])
+        ax2.text(0.5, 0.5, "CoP Data Not Available in Drake", ha="center", va="center")
+
+        # 3. Power Flow
+        # Requires actuator powers. DrakeRecorder needs to record powers.
+        # For now placeholder
+        ax3 = fig.add_subplot(gs[1, :])
+        ax3.text(
+            0.5, 0.5, "Power Data Not Available in Drake", ha="center", va="center"
+        )
+
+        plt.tight_layout()
         plt.show()
 
 

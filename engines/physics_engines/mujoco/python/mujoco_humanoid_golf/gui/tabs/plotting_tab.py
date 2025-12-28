@@ -48,6 +48,7 @@ class PlottingTab(QtWidgets.QWidget):
                 "Joint Angles",
                 "Joint Velocities",
                 "Joint Torques",
+                "Induced Accelerations",
                 "Actuator Powers",
                 "Energy Analysis",
                 "Club Head Speed",
@@ -55,18 +56,41 @@ class PlottingTab(QtWidgets.QWidget):
                 "Swing Plane Analysis",
                 "Phase Diagram",
                 "Torque Comparison",
+                "Counterfactual Comparison",
             ]
         )
         plot_layout.addWidget(self.plot_combo)
 
-        # Joint selection for phase diagrams
-        self.joint_select_layout = QtWidgets.QFormLayout()
-        self.joint_select_combo = QtWidgets.QComboBox()
-        self.joint_select_layout.addRow("Joint:", self.joint_select_combo)
+        # Settings Stack
+        self.settings_stack = QtWidgets.QStackedWidget()
+        plot_layout.addWidget(self.settings_stack)
+
+        # Empty page
+        self.empty_page = QtWidgets.QWidget()
+        self.settings_stack.addWidget(self.empty_page)
+
+        # Joint selection (for phase diagram)
         self.joint_select_widget = QtWidgets.QWidget()
-        self.joint_select_widget.setLayout(self.joint_select_layout)
-        self.joint_select_widget.setVisible(False)
-        plot_layout.addWidget(self.joint_select_widget)
+        js_layout = QtWidgets.QFormLayout(self.joint_select_widget)
+        self.joint_select_combo = QtWidgets.QComboBox()
+        js_layout.addRow("Joint:", self.joint_select_combo)
+        self.settings_stack.addWidget(self.joint_select_widget)
+
+        # Induced Accel Settings
+        self.induced_widget = QtWidgets.QWidget()
+        ind_layout = QtWidgets.QFormLayout(self.induced_widget)
+        self.induced_source_combo = QtWidgets.QComboBox()
+        self.induced_source_combo.addItems(["gravity", "actuator"])
+        ind_layout.addRow("Source:", self.induced_source_combo)
+        self.settings_stack.addWidget(self.induced_widget)
+
+        # Counterfactual Settings
+        self.cf_widget = QtWidgets.QWidget()
+        cf_layout = QtWidgets.QFormLayout(self.cf_widget)
+        self.cf_combo = QtWidgets.QComboBox()
+        self.cf_combo.addItems(["ztcf", "zvcf"])
+        cf_layout.addRow("Counterfactual:", self.cf_combo)
+        self.settings_stack.addWidget(self.cf_widget)
 
         self.plot_combo.currentTextChanged.connect(self.on_plot_type_changed)
 
@@ -87,6 +111,25 @@ class PlottingTab(QtWidgets.QWidget):
         )
         plot_layout.addWidget(self.generate_plot_btn)
 
+        self.btn_advanced_dialog = QtWidgets.QPushButton("Open Advanced Analysis...")
+        self.btn_advanced_dialog.clicked.connect(
+            self.main_window.show_advanced_plots_dialog
+        )
+        self.btn_advanced_dialog.setStyleSheet(
+            """
+            QPushButton {
+                background-color: #9467bd;
+                color: white;
+                font-weight: bold;
+                padding: 8px;
+            }
+            QPushButton:hover {
+                background-color: #8c564b;
+            }
+            """
+        )
+        plot_layout.addWidget(self.btn_advanced_dialog)
+
         layout.addWidget(plot_group)
 
         # Plot canvas container
@@ -105,10 +148,6 @@ class PlottingTab(QtWidgets.QWidget):
         if self.sim_widget.model is None:
             return
 
-        # Get DOF info or just joint names
-        # Assuming model.nq or similar, but let's use dof info if available
-        # Or just enumerate qpos addresses.
-        # Let's try to get joint names via mujoco
         import mujoco
 
         for i in range(self.sim_widget.model.njnt):
@@ -122,9 +161,16 @@ class PlottingTab(QtWidgets.QWidget):
 
     def on_plot_type_changed(self, plot_type: str) -> None:
         """Handle plot type selection change."""
-        self.joint_select_widget.setVisible(plot_type == "Phase Diagram")
-        if plot_type == "Phase Diagram" and self.joint_select_combo.count() == 0:
-            self.update_joint_list()
+        if plot_type == "Phase Diagram":
+            self.settings_stack.setCurrentWidget(self.joint_select_widget)
+            if self.joint_select_combo.count() == 0:
+                self.update_joint_list()
+        elif plot_type == "Induced Accelerations":
+            self.settings_stack.setCurrentWidget(self.induced_widget)
+        elif plot_type == "Counterfactual Comparison":
+            self.settings_stack.setCurrentWidget(self.cf_widget)
+        else:
+            self.settings_stack.setCurrentWidget(self.empty_page)
 
     def on_generate_plot(self) -> None:
         """Generate the selected plot."""
@@ -146,7 +192,19 @@ class PlottingTab(QtWidgets.QWidget):
 
         # Create new canvas
         canvas = MplCanvas(width=8, height=6, dpi=100)
-        plotter = GolfSwingPlotter(recorder, self.sim_widget.model)
+
+        # We should pass joint names if possible
+        joint_names = []
+        if self.sim_widget.model:
+            import mujoco
+
+            for i in range(self.sim_widget.model.njnt):
+                name = mujoco.mj_id2name(
+                    self.sim_widget.model, mujoco.mjtObj.mjOBJ_JOINT, i
+                )
+                joint_names.append(name or f"Joint {i}")
+
+        plotter = GolfSwingPlotter(recorder)
 
         # Generate appropriate plot
         plot_type = self.plot_combo.currentText()
@@ -176,6 +234,12 @@ class PlottingTab(QtWidgets.QWidget):
                 plotter.plot_phase_diagram(canvas.fig, joint_idx)
             elif plot_type == "Torque Comparison":
                 plotter.plot_torque_comparison(canvas.fig)
+            elif plot_type == "Induced Accelerations":
+                source = self.induced_source_combo.currentText()
+                plotter.plot_induced_acceleration(canvas.fig, source)
+            elif plot_type == "Counterfactual Comparison":
+                cf_name = self.cf_combo.currentText()
+                plotter.plot_counterfactual_comparison(canvas.fig, cf_name)
 
             canvas.draw()
             self.current_plot_canvas = canvas

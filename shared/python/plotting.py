@@ -6,6 +6,8 @@ This module provides comprehensive plotting capabilities including:
 - Force/torque visualizations
 - Power and energy analysis
 - Swing sequence analysis
+- Induced Accelerations
+- Counterfactual Data (ZTCF, ZVCF)
 """
 
 from __future__ import annotations
@@ -63,6 +65,30 @@ class RecorderInterface(Protocol):
 
         Returns:
             Tuple of (times, values)
+        """
+        ...  # pragma: no cover
+
+    def get_induced_acceleration_series(
+        self, source_name: str
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Extract time series for a specific induced acceleration source.
+
+        Args:
+            source_name: Name of the force source (e.g. 'gravity', 'actuator_1')
+
+        Returns:
+            Tuple of (times, acceleration_array)
+        """
+        ...  # pragma: no cover
+
+    def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
+        """Extract time series for a specific counterfactual component.
+
+        Args:
+            cf_name: Name of the counterfactual (e.g. 'ztcf', 'zvcf')
+
+        Returns:
+            Tuple of (times, data_array)
         """
         ...  # pragma: no cover
 
@@ -1162,4 +1188,295 @@ class GolfSwingPlotter:
         ax.axis("equal")  # Preserve aspect ratio
 
         fig.colorbar(sc, ax=ax, label="Time (s)")
+        fig.tight_layout()
+
+    def plot_cop_vector_field(self, fig: Figure, skip_steps: int = 5) -> None:
+        """Plot CoP velocity vector field.
+
+        Args:
+            fig: Matplotlib figure
+            skip_steps: Number of steps to skip for decluttering vectors
+        """
+        times, cop_data = self.recorder.get_time_series("cop_position")
+        cop_data = np.asarray(cop_data)
+
+        if len(times) == 0 or cop_data.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No CoP Data", ha="center", va="center")
+            return
+
+        # Compute velocity
+        dt = np.mean(np.diff(times)) if len(times) > 1 else 1.0
+        vel = np.gradient(cop_data, dt, axis=0)
+
+        ax = fig.add_subplot(111)
+
+        # Downsample
+        x = cop_data[::skip_steps, 0]
+        y = cop_data[::skip_steps, 1]
+        u = vel[::skip_steps, 0]
+        v = vel[::skip_steps, 1]
+        t = times[::skip_steps]
+
+        # Quiver plot
+        q = ax.quiver(x, y, u, v, t, cmap="viridis", scale_units="xy", angles="xy")
+
+        # Plot trajectory line
+        ax.plot(cop_data[:, 0], cop_data[:, 1], "k-", alpha=0.2)
+
+        ax.set_xlabel("X Position (m)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Y Position (m)", fontsize=12, fontweight="bold")
+        ax.set_title(
+            "Center of Pressure Velocity Field", fontsize=14, fontweight="bold"
+        )
+        ax.axis("equal")
+        fig.colorbar(q, ax=ax, label="Time (s)")
+        fig.tight_layout()
+
+    def plot_radar_chart(
+        self,
+        fig: Figure,
+        metrics: dict[str, float],
+        title: str = "Swing DNA",
+    ) -> None:
+        """Plot a radar chart of swing metrics.
+
+        Args:
+            fig: Matplotlib figure
+            metrics: Dictionary of metrics. Values should be normalized to [0, 1] or [0, 100].
+            title: Chart title
+        """
+        labels = list(metrics.keys())
+        values = list(metrics.values())
+        num_vars = len(labels)
+
+        if num_vars < 3:
+            ax = fig.add_subplot(111)
+            ax.text(
+                0.5,
+                0.5,
+                "Need at least 3 metrics for radar chart",
+                ha="center",
+                va="center",
+            )
+            return
+
+        # Compute angles
+        angles = np.linspace(0, 2 * np.pi, num_vars, endpoint=False).tolist()
+
+        # The plot is a circle, so we need to "close the loop"
+        values += values[:1]
+        angles += angles[:1]
+        labels += labels[:1]
+
+        ax = fig.add_subplot(111, polar=True)
+        ax.plot(angles, values, color=self.colors["primary"], linewidth=2)
+        ax.fill(angles, values, color=self.colors["primary"], alpha=0.25)
+
+        # Draw labels
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(labels[:-1])
+
+        # Draw grid
+        ax.grid(True, alpha=0.3)
+
+        ax.set_title(title, size=15, color=self.colors["primary"], y=1.1)
+        fig.tight_layout()
+
+    def plot_power_flow(self, fig: Figure) -> None:
+        """Plot power flow (stacked bar) over time.
+
+        Args:
+            fig: Matplotlib figure
+        """
+        times, powers = self.recorder.get_time_series("actuator_powers")
+        powers = np.asarray(powers)
+
+        if len(times) == 0 or powers.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No Power Data", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        # Prepare data for stacked bar
+        # Group by positive and negative power to show generation vs absorption
+
+        (times[-1] - times[0]) / len(times) * 1.0  # Continuous-ish
+
+        # Stackplot is better for continuous time
+        # Separate positive and negative
+        pos_powers = np.maximum(powers, 0)
+        neg_powers = np.minimum(powers, 0)
+
+        labels = [self.get_joint_name(i) for i in range(powers.shape[1])]
+
+        ax.stackplot(times, pos_powers.T, labels=labels, alpha=0.7)
+        # Reset color cycle by creating a new cycler with default colors
+        from cycler import cycler
+
+        default_colors = [
+            "#1f77b4",
+            "#ff7f0e",
+            "#2ca02c",
+            "#d62728",
+            "#9467bd",
+            "#8c564b",
+            "#e377c2",
+            "#7f7f7f",
+            "#bcbd22",
+            "#17becf",
+        ]
+        ax.set_prop_cycle(cycler("color", default_colors))
+        ax.stackplot(times, neg_powers.T, alpha=0.7)
+
+        ax.axhline(0, color="k", linewidth=1)
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Power (W)", fontsize=12, fontweight="bold")
+        ax.set_title(
+            "Power Flow (Generation/Absorption)", fontsize=14, fontweight="bold"
+        )
+        ax.legend(loc="upper left", bbox_to_anchor=(1, 1), ncol=1)
+        fig.tight_layout()
+
+    def plot_induced_acceleration(
+        self, fig: Figure, source_name: str, joint_idx: int | None = None
+    ) -> None:
+        """Plot induced accelerations from a specific source.
+
+        Args:
+            fig: Matplotlib figure
+            source_name: Name of the force source
+            joint_idx: Optional joint index to plot (plots magnitude or all if None)
+        """
+        try:
+            times, acc = self.recorder.get_induced_acceleration_series(source_name)
+        except (AttributeError, KeyError):
+            ax = fig.add_subplot(111)
+            ax.text(
+                0.5,
+                0.5,
+                f"No induced acceleration data for {source_name}",
+                ha="center",
+                va="center",
+            )
+            return
+
+        if len(times) == 0 or acc.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, f"No data for {source_name}", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        if joint_idx is not None:
+            # Plot specific joint
+            if joint_idx < acc.shape[1]:
+                ax.plot(
+                    times,
+                    acc[:, joint_idx],
+                    label=self.get_joint_name(joint_idx),
+                    linewidth=2,
+                    color=self.colors["primary"],
+                )
+                ax.set_ylabel(
+                    f"Joint {joint_idx} Acceleration (rad/s²)",
+                    fontsize=12,
+                    fontweight="bold",
+                )
+            else:
+                ax.text(
+                    0.5,
+                    0.5,
+                    f"Joint index {joint_idx} out of bounds",
+                    ha="center",
+                    va="center",
+                )
+                return
+        else:
+            # Plot magnitude or norm if too many dimensions?
+            # Or plot all joints? Let's plot L2 norm for summary
+            norm = np.linalg.norm(acc, axis=1)
+            ax.plot(
+                times, norm, label="L2 Norm", linewidth=2, color=self.colors["primary"]
+            )
+            ax.set_ylabel(
+                "Acceleration Magnitude (rad/s²)", fontsize=12, fontweight="bold"
+            )
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_title(
+            f"Induced Acceleration: {source_name}", fontsize=14, fontweight="bold"
+        )
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        fig.tight_layout()
+
+    def plot_counterfactual_comparison(
+        self, fig: Figure, cf_name: str, metric_idx: int = 0
+    ) -> None:
+        """Plot counterfactual data against actual data.
+
+        Args:
+            fig: Matplotlib figure
+            cf_name: Name of counterfactual (e.g. 'ztcf')
+            metric_idx: Index of metric to compare (e.g. joint angle index)
+        """
+        # Get actual data (assume joint positions for now as primary comparison)
+        times_actual, actual_data = self.recorder.get_time_series("joint_positions")
+        actual = np.asarray(actual_data)
+
+        try:
+            times_cf, cf_data_raw = self.recorder.get_counterfactual_series(cf_name)
+            cf_data = np.asarray(cf_data_raw)
+        except (AttributeError, KeyError):
+            ax = fig.add_subplot(111)
+            ax.text(
+                0.5,
+                0.5,
+                f"No counterfactual data for {cf_name}",
+                ha="center",
+                va="center",
+            )
+            return
+
+        if len(times_actual) == 0 or len(times_cf) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        # Plot Actual
+        if actual.ndim > 1 and metric_idx < actual.shape[1]:
+            ax.plot(
+                times_actual,
+                np.rad2deg(actual[:, metric_idx]),
+                label="Actual",
+                linewidth=2,
+                color="black",
+            )
+
+        # Plot Counterfactual
+        # Ensure dimensions match
+        if cf_data.ndim > 1 and metric_idx < cf_data.shape[1]:
+            ax.plot(
+                times_cf,
+                np.rad2deg(cf_data[:, metric_idx]),
+                label=cf_name.upper(),
+                linewidth=2,
+                linestyle="--",
+                color=self.colors["primary"],
+            )
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Angle (deg)", fontsize=12, fontweight="bold")
+        ax.set_title(
+            f"Counterfactual Analysis: {cf_name.upper()}",
+            fontsize=14,
+            fontweight="bold",
+        )
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
         fig.tight_layout()
