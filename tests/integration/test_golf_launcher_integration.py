@@ -8,6 +8,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from shared.python.model_registry import ModelRegistry
+
 # Mock PyQt6 for headless/CI environment where DLLs are broken/missing
 # This must happen BEFORE importing modules that use PyQt6
 mock_qt = MagicMock()
@@ -15,7 +17,6 @@ mock_widgets = MagicMock()
 mock_core = MagicMock()
 mock_gui = MagicMock()
 
-from shared.python.model_registry import ModelRegistry
 
 # Define robust Mock classes to avoid recursion issues when inheriting from MagicMock
 class MockQtBase:
@@ -43,7 +44,7 @@ class MockQtBase:
     def setCentralWidget(self, w):
         pass
 
-    def setLayout(self, l):
+    def setLayout(self, layout):
         pass
 
     def exec(self):
@@ -188,6 +189,7 @@ models:
             # Create Launcher
             # Force reload to ensure no mocks from unit tests persist
             import importlib
+
             import launchers.golf_launcher
             importlib.reload(launchers.golf_launcher)
             from launchers.golf_launcher import GolfLauncher as FreshGolfLauncher
