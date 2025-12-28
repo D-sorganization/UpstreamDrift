@@ -100,7 +100,7 @@ class MockQPushButton(MockQWidget):
         super().__init__(parent)
         self._text = text
         self.clicked = MagicMock()
-        self.enabled = True
+        self._enabled = True
 
     def setText(self, t):
         self._text = t
@@ -109,10 +109,10 @@ class MockQPushButton(MockQWidget):
         return self._text
 
     def setEnabled(self, b):
-        self.enabled = b
+        self._enabled = bool(b)
 
     def isEnabled(self):
-        return self.enabled
+        return self._enabled
 
     def setFont(self, f):
         pass
