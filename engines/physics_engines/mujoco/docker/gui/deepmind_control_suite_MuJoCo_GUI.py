@@ -879,10 +879,10 @@ class GolfSimulationGUI:
         """Open file dialog to browse for file."""
         if save:
             path = filedialog.asksaveasfilename(
-                defaultextension=".pkl", filetypes=[("Pickle State", "*.pkl")]
+                defaultextension=".json", filetypes=[("JSON State", "*.json")]
             )
         else:
-            path = filedialog.askopenfilename(filetypes=[("Pickle State", "*.pkl")])
+            path = filedialog.askopenfilename(filetypes=[("JSON State", "*.json")])
         if path:
             var.set(path)
 

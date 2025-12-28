@@ -143,7 +143,7 @@ python_version = "3.11"
 explicit_package_bases = true
 ignore_missing_imports = true
 check_untyped_defs = true
-disallow_untyped_defs = false
+disallow_untyped_defs = true
 warn_return_any = true
 warn_unused_configs = true
 exclude = [
@@ -155,6 +155,11 @@ exclude = [
     "tests",
     "drake",
 ]
+
+[[tool.mypy.overrides]]
+# Allow untyped definitions in engines for now to allow gradual migration
+module = "engines.*"
+disallow_untyped_defs = false
 
 [[tool.mypy.overrides]]
 module = "engines.physics_engines.pinocchio.python.double_pendulum_model.tests.*"
@@ -176,7 +181,7 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=xml",
     "--cov-report=html",
-    "--cov-fail-under=10",  # Adjusted for engine inclusion; will increase as tests are added
+    "--cov-fail-under=60",  # Increased to enforce better testing standards
 ]
 testpaths = [
     "tests",
