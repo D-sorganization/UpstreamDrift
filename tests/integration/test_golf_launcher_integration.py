@@ -73,14 +73,23 @@ class MockQMainWindow(MockQtBase):
 
 class MockQDialog(MockQtBase):
     pass
+
+
 class MockQFrame(MockQtBase):
     class Shape:
         NoFrame = 0
 
+
 class MockQThread(MockQtBase):
-    def start(self): pass
-    def wait(self): pass
-    def run(self): pass
+    def start(self):
+        pass
+
+    def wait(self):
+        pass
+
+    def run(self):
+        pass
+
 
 # Setup Constants and Classes
 mock_core.Qt.AlignmentFlag.AlignCenter = 0
@@ -109,16 +118,21 @@ mock_widgets.QHBoxLayout = MockQWidget
 mock_widgets.QGridLayout = MockQWidget
 mock_widgets.QMessageBox = MagicMock()
 
+
 @pytest.fixture(scope="module", autouse=True)
 def mock_pyqt_modules():
     """Patch PyQt6 modules in sys.modules for the duration of this test module."""
-    with patch.dict(sys.modules, {
-        "PyQt6": mock_qt,
-        "PyQt6.QtWidgets": mock_widgets,
-        "PyQt6.QtCore": mock_core,
-        "PyQt6.QtGui": mock_gui,
-    }):
+    with patch.dict(
+        sys.modules,
+        {
+            "PyQt6": mock_qt,
+            "PyQt6.QtWidgets": mock_widgets,
+            "PyQt6.QtCore": mock_core,
+            "PyQt6.QtGui": mock_gui,
+        },
+    ):
         yield
+
 
 # Note: We do not import GolfLauncher at the top level to avoid
 # importing it before the sys.modules patch is active, and to avoid
@@ -191,6 +205,7 @@ models:
             import importlib
 
             import launchers.golf_launcher
+
             importlib.reload(launchers.golf_launcher)
             from launchers.golf_launcher import GolfLauncher as FreshGolfLauncher
 
