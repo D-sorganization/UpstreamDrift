@@ -95,3 +95,24 @@ class DynamicsEngine:
         v_next = v_zero + a * dt
         q_next = pin.integrate(self.model, q, v_next * dt)
         return q_next, v_next
+
+    def compute_induced_acceleration(
+        self, q: np.ndarray, tau_source: np.ndarray
+    ) -> np.ndarray:
+        """Compute acceleration induced solely by a specific torque source.
+
+        Equation: a = M(q)^-1 * tau_source
+        This ignores gravity, Coriolis, and other forces.
+
+        Args:
+            q: Joint configuration
+            tau_source: Torque vector from the specific source
+
+        Returns:
+            Induced acceleration vector
+        """
+        # Compute Mass Matrix Inverse
+        pin.computeMinverse(self.model, self.data, q)
+        M_inv = self.data.Minv
+
+        return np.asarray(M_inv @ tau_source)

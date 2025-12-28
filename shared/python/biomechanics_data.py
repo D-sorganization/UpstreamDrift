@@ -62,3 +62,11 @@ class BiomechanicalData:
 
     # Center of Pressure (global frame, usually on z=0 plane)
     cop_position: np.ndarray | None = None
+
+    # Induced Accelerations (acceleration caused by specific force components)
+    # Key: Source Name (e.g. 'gravity', 'velocity_dependent', 'actuator_X'), Value: Acceleration array
+    induced_accelerations: dict[str, np.ndarray] = field(default_factory=dict)
+
+    # Counterfactual Data (e.g. ZTCF, ZVCF results for this timestep)
+    # Key: Counterfactual Name (e.g. 'ztcf_pos', 'zvcf_force'), Value: Data array
+    counterfactuals: dict[str, np.ndarray] = field(default_factory=dict)

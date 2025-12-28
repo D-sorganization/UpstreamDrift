@@ -243,6 +243,76 @@ class TestGolfSwingPlotter:
             ax = mock_figure.add_subplot.return_value
             ax.plot_surface.assert_called()
 
+    def test_plot_angular_momentum(self, plotter, mock_figure):
+        """Test angular momentum plotting."""
+        # Setup mock recorder to return some AM data
+        times = np.linspace(0, 1, 100)
+        am = np.ones((100, 3))
+        plotter.recorder.get_time_series = MagicMock(
+            side_effect=lambda name: (
+                (times, am) if name == "angular_momentum" else ([], [])
+            )
+        )
+
+        plotter.plot_angular_momentum(mock_figure)
+        ax = mock_figure.add_subplot.return_value
+        # Should plot 3 components + magnitude
+        assert ax.plot.call_count == 4
+
+    def test_plot_cop_trajectory(self, plotter, mock_figure):
+        """Test CoP trajectory plotting."""
+        times = np.linspace(0, 1, 100)
+        cop = np.random.rand(100, 2)
+        plotter.recorder.get_time_series = MagicMock(
+            side_effect=lambda name: (
+                (times, cop) if name == "cop_position" else ([], [])
+            )
+        )
+
+        plotter.plot_cop_trajectory(mock_figure)
+        ax = mock_figure.add_subplot.return_value
+        # Scatter + plot + markers
+        assert ax.scatter.call_count >= 1
+        assert ax.plot.call_count >= 1
+
+    def test_plot_radar_chart(self, plotter, mock_figure):
+        """Test radar chart plotting."""
+        metrics = {"A": 0.5, "B": 0.8, "C": 0.2}
+        plotter.plot_radar_chart(mock_figure, metrics)
+        mock_figure.add_subplot.assert_called_with(111, polar=True)
+        ax = mock_figure.add_subplot.return_value
+        ax.plot.assert_called()
+        ax.fill.assert_called()
+
+    def test_plot_power_flow(self, plotter, mock_figure):
+        """Test power flow plotting."""
+        times = np.linspace(0, 1, 100)
+        powers = np.random.rand(100, 3)
+        plotter.recorder.get_time_series = MagicMock(
+            side_effect=lambda name: (
+                (times, powers) if name == "actuator_powers" else ([], [])
+            )
+        )
+
+        plotter.plot_power_flow(mock_figure)
+        ax = mock_figure.add_subplot.return_value
+        # 2 stackplots (pos/neg)
+        assert ax.stackplot.call_count == 2
+
+    def test_plot_cop_vector_field(self, plotter, mock_figure):
+        """Test CoP vector field plotting."""
+        times = np.linspace(0, 1, 100)
+        cop = np.random.rand(100, 2)
+        plotter.recorder.get_time_series = MagicMock(
+            side_effect=lambda name: (
+                (times, cop) if name == "cop_position" else ([], [])
+            )
+        )
+
+        plotter.plot_cop_vector_field(mock_figure)
+        ax = mock_figure.add_subplot.return_value
+        ax.quiver.assert_called()
+
     def test_empty_data_handling(self, mock_figure):
         """Test handling of empty data."""
         empty_recorder = MagicMock(spec=RecorderInterface)
