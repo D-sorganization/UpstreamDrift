@@ -184,6 +184,60 @@ class PinocchioRecorder:
 
         return times, values_array
 
+    def get_induced_acceleration_series(
+        self, source_name: str
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Extract time series for a specific induced acceleration source.
+
+        Args:
+            source_name: Name of the force source
+
+        Returns:
+            Tuple of (times, acceleration_array)
+        """
+        if not self.frames:
+            return np.array([]), np.array([])
+
+        times = np.array([f.time for f in self.frames])
+
+        # Check if frames have induced acceleration data
+        first_frame = self.frames[0]
+        if (
+            hasattr(first_frame, "induced_accelerations")
+            and source_name in first_frame.induced_accelerations
+        ):
+            values = [f.induced_accelerations[source_name] for f in self.frames]
+            return times, np.array(values)
+
+        # Return empty arrays if no data
+        return np.array([]), np.array([])
+
+    def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
+        """Extract time series for a specific counterfactual component.
+
+        Args:
+            cf_name: Name of the counterfactual (e.g. 'ztcf', 'zvcf')
+
+        Returns:
+            Tuple of (times, data_array)
+        """
+        if not self.frames:
+            return np.array([]), np.array([])
+
+        times = np.array([f.time for f in self.frames])
+
+        # Check if frames have counterfactual data
+        first_frame = self.frames[0]
+        if (
+            hasattr(first_frame, "counterfactuals")
+            and cf_name in first_frame.counterfactuals
+        ):
+            values = [f.counterfactuals[cf_name] for f in self.frames]
+            return times, np.array(values)
+
+        # Return empty arrays if no data
+        return np.array([]), np.array([])
+
 
 class PinocchioGUI(QtWidgets.QMainWindow):
     """Main GUI widget for Pinocchio robot visualization and computation."""

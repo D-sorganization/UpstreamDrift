@@ -204,7 +204,7 @@ class PlottingTab(QtWidgets.QWidget):
                 )
                 joint_names.append(name or f"Joint {i}")
 
-        plotter = GolfSwingPlotter(recorder, joint_names=joint_names)
+        plotter = GolfSwingPlotter(recorder)
 
         # Generate appropriate plot
         plot_type = self.plot_combo.currentText()
