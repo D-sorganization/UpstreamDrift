@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class SimulationResult:  # type: ignore[no-any-unimported]
+class SimulationResult:
     """Container for simulation results."""
 
     time: np.ndarray
