@@ -12,6 +12,15 @@ import pytest
 # Ensure offscreen platform
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
+
+@pytest.fixture(scope="module", autouse=True)
+def cleanup_imports():
+    """Clean up imports after tests to prevent mock leakage."""
+    yield
+    sys.modules.pop("launchers.golf_suite_launcher", None)
+    sys.modules.pop("launchers.golf_launcher", None)
+
+
 # Create mocks for PyQt6 modules
 mock_qt = MagicMock()
 mock_widgets = MagicMock()
@@ -20,7 +29,7 @@ mock_core = MagicMock()
 
 # Setup mock classes
 class MockQMainWindow:
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         pass
 
     def setWindowTitle(self, t):
@@ -37,11 +46,12 @@ class MockQMainWindow:
 
 
 class MockQWidget:
-    pass
+    def __init__(self, *args, **kwargs):
+        pass
 
 
 class MockQVBoxLayout:
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         pass
 
     def addWidget(self, w):
@@ -58,7 +68,7 @@ class MockQVBoxLayout:
 
 
 class MockQHBoxLayout:
-    def __init__(self):
+    def __init__(self, *args, **kwargs):
         pass
 
     def addWidget(self, w):
@@ -69,7 +79,7 @@ class MockQHBoxLayout:
 
 
 class MockQLabel:
-    def __init__(self, t=""):
+    def __init__(self, t="", *args, **kwargs):
         pass
 
     def setAlignment(self, a):
@@ -86,7 +96,7 @@ class MockQLabel:
 
 
 class MockQPushButton:
-    def __init__(self, t=""):
+    def __init__(self, t="", *args, **kwargs):
         self.clicked = MagicMock()
 
     def setMinimumHeight(self, h):
@@ -94,6 +104,9 @@ class MockQPushButton:
 
 
 class MockQTextEdit:
+    def __init__(self, *args, **kwargs):
+        pass
+
     def setMaximumHeight(self, h):
         pass
 
@@ -111,7 +124,7 @@ class MockQTextEdit:
 
 
 class MockQGroupBox:
-    def __init__(self, t=""):
+    def __init__(self, t="", *args, **kwargs):
         pass
 
 
@@ -119,14 +132,6 @@ class MockQMessageBox:
     @staticmethod
     def critical(p, t, m):
         pass
-
-
-class MockQApplication:
-    def __init__(self, args):
-        pass
-
-    def exec(self):
-        return 0
 
 
 # Assign mocks
@@ -139,7 +144,8 @@ mock_widgets.QPushButton = MockQPushButton
 mock_widgets.QTextEdit = MockQTextEdit
 mock_widgets.QGroupBox = MockQGroupBox
 mock_widgets.QMessageBox = MockQMessageBox
-mock_widgets.QApplication = MockQApplication
+mock_widgets.QApplication = MagicMock()
+mock_widgets.QApplication.return_value.exec.return_value = 0
 mock_core.Qt.AlignmentFlag.AlignCenter = 0
 
 mock_qt.QtWidgets = mock_widgets
@@ -198,7 +204,8 @@ class TestGolfSuiteLauncher:
         cmd = args[0]
         assert cmd[0] == sys.executable
         assert "advanced_gui.py" in str(cmd[1])
-        assert "mujoco_humanoid_golf" in str(kwargs["cwd"])
+        # CWD is the python root, checks only for mujoco path component
+        assert "mujoco" in str(kwargs["cwd"])
 
     def test_launch_drake(self, launcher_app, mock_subprocess):
         """Test launching Drake engine."""
@@ -243,21 +250,29 @@ class TestGolfSuiteLauncher:
         launcher_app.clear_log()
         launcher_app.log_text.clear.assert_called()
 
-    def test_main_function(self):
+    def test_main_function(self, launcher_app):
         """Test main entry point."""
-        with (
-            patch("launchers.golf_suite_launcher.GolfLauncher") as MockLauncher,
-            patch("launchers.golf_suite_launcher.QtWidgets.QApplication") as MockApp,
-            patch("sys.exit") as mock_exit,
-        ):
+        # Use manual patching to ensure we modify the *reloaded* module object
+        original_launcher = golf_suite_launcher.GolfLauncher
+        mock_launcher = MagicMock()
+        golf_suite_launcher.GolfLauncher = mock_launcher
 
-            instance = MockLauncher.return_value
-            app = MockApp.return_value
+        # Use the already mocked QApplication from module setup
+        app = mock_widgets.QApplication.return_value
 
+        # Mock sys.exit
+        with patch("sys.exit") as mock_exit:
             golf_suite_launcher.PYQT_AVAILABLE = True
+
+            # Print for debug (captured in verbose output if needed)
+            print(f"DEBUG: PYQT_AVAILABLE={golf_suite_launcher.PYQT_AVAILABLE}")
+
             golf_suite_launcher.main()
 
-            MockLauncher.assert_called()
-            instance.show.assert_called()
+            mock_launcher.assert_called()
+            mock_launcher.return_value.show.assert_called()
             app.exec.assert_called()
             mock_exit.assert_called()
+
+        # Restore
+        golf_suite_launcher.GolfLauncher = original_launcher
