@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -29,6 +28,7 @@ def test_convert_units():
     with pytest.raises(ValueError, match="not supported"):
         convert_units(1, "kg", "lb")
 
+
 def test_ensure_output_dir(tmp_path):
     """Test output directory creation."""
     with patch("shared.python.OUTPUT_ROOT", tmp_path / "outputs"):
@@ -36,6 +36,7 @@ def test_ensure_output_dir(tmp_path):
         assert path.exists()
         assert path.name == "run1"
         assert path.parent.name == "test_engine"
+
 
 def test_load_save_golf_data(tmp_path):
     """Test loading and saving golf data."""
@@ -50,6 +51,7 @@ def test_load_save_golf_data(tmp_path):
     # Excel - requires openpyxl, handle if missing
     try:
         import openpyxl  # noqa: F401
+
         xlsx_path = tmp_path / "test.xlsx"
         save_golf_data(df, xlsx_path, "excel")
         loaded_df_xlsx = load_golf_data(xlsx_path)
@@ -70,6 +72,7 @@ def test_load_save_golf_data(tmp_path):
     with pytest.raises(ValueError):
         load_golf_data(tmp_path / "test.txt")
 
+
 def test_standardize_joint_angles():
     """Test joint angle standardization."""
     angles = np.array([[0, 1], [0.1, 1.1]])
@@ -79,18 +82,17 @@ def test_standardize_joint_angles():
     assert "time" in df.columns
     assert len(df) == 2
 
+
 def test_plot_joint_trajectories():
     """Test plotting function."""
-    df = pd.DataFrame({
-        "time": [0, 1],
-        "joint_0": [0, 1],
-        "joint_1": [2, 3]
-    })
+    df = pd.DataFrame({"time": [0, 1], "joint_0": [0, 1], "joint_1": [2, 3]})
 
     # Only test that it runs without error (mocking plt to avoid display)
-    with patch("matplotlib.pyplot.figure"), \
-         patch("matplotlib.pyplot.subplots") as mock_subplots, \
-         patch("matplotlib.pyplot.savefig"):
+    with (
+        patch("matplotlib.pyplot.figure"),
+        patch("matplotlib.pyplot.subplots") as mock_subplots,
+        patch("matplotlib.pyplot.savefig"),
+    ):
 
         mock_fig = MagicMock()
         # Explicitly create and assign to object array to ensure no None values
@@ -104,6 +106,7 @@ def test_plot_joint_trajectories():
 
         fig = plot_joint_trajectories(df, title="Test Plot")
         assert fig is mock_fig
+
 
 def test_get_shared_urdf_path():
     """Test URDF path resolution."""
