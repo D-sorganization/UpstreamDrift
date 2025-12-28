@@ -107,3 +107,155 @@ class AdvancedGuiMethodsMixin:
 
             # Update visualization
             self.sim_widget.set_ellipsoid_visualization(show_mobility, show_force)
+
+    def show_advanced_plots_dialog(self) -> None:
+        """Show dialog with advanced analysis plots."""
+        from PyQt6 import QtWidgets
+        import numpy as np
+
+        try:
+            import matplotlib.pyplot as plt
+            from shared.python.plotting import GolfSwingPlotter
+            from shared.python.statistical_analysis import StatisticalAnalyzer
+        except ImportError:
+            QtWidgets.QMessageBox.warning(
+                self, "Error", "Matplotlib or shared modules not found."
+            )
+            return
+
+        if not hasattr(self, "sim_widget"):
+            return
+
+        recorder = self.sim_widget.get_recorder()
+        times, _ = recorder.get_time_series("joint_positions")
+
+        if len(times) == 0:
+            QtWidgets.QMessageBox.warning(
+                self, "No Data", "No recording available. Please Record a simulation first."
+            )
+            return
+
+        # Prepare analyzer
+        # MuJoCo recorder should implement get_time_series correctly
+        # But we need full arrays for StatisticalAnalyzer constructor
+
+        times, positions = recorder.get_time_series("joint_positions")
+        _, velocities = recorder.get_time_series("joint_velocities")
+        _, torques = recorder.get_time_series("joint_torques")
+        _, club_speed = recorder.get_time_series("club_head_speed")
+        _, club_pos = recorder.get_time_series("club_head_position")
+
+        # Ensure arrays
+        times = np.asarray(times)
+        positions = np.asarray(positions)
+        velocities = np.asarray(velocities)
+        torques = np.asarray(torques)
+        club_speed = np.asarray(club_speed)
+        club_pos = np.asarray(club_pos)
+
+        analyzer = StatisticalAnalyzer(
+            times,
+            positions,
+            velocities,
+            torques,
+            club_head_speed=club_speed,
+            club_head_position=club_pos
+        )
+        report = analyzer.generate_comprehensive_report()
+
+        # Plotter
+        plotter = GolfSwingPlotter(recorder)
+
+        # Metrics for Radar
+        metrics = {
+            "Speed": 0.0,
+            "Efficiency": 0.0,
+            "Tempo": 0.0,
+            "Consistency": 0.0,
+            "Power": 0.0
+        }
+
+        if "club_head_speed" in report:
+            peak = report["club_head_speed"]["peak_value"]
+            metrics["Speed"] = min(peak / 50.0, 1.0) # Approx 110 mph = 50 m/s
+
+        if "energy_efficiency" in report:
+            metrics["Efficiency"] = report["energy_efficiency"] / 100.0
+
+        if "tempo" in report:
+            ratio = report["tempo"]["ratio"]
+            err = abs(ratio - 3.0)
+            metrics["Tempo"] = max(0.0, 1.0 - err/2.0)
+
+        # Create dialog
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle("Advanced Swing Analysis")
+        dialog.resize(1000, 800)
+        layout = QtWidgets.QVBoxLayout(dialog)
+
+        # Matplotlib canvas
+        from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+        from matplotlib.figure import Figure
+
+        fig = Figure(figsize=(10, 8))
+        canvas = FigureCanvasQTAgg(fig)
+        layout.addWidget(canvas)
+
+        gs = fig.add_gridspec(2, 2)
+
+        # 1. Radar Chart
+        plotter.plot_radar_chart(fig, metrics) # This method centers the polar plot usually
+        # But wait, plot_radar_chart in shared/python/plotting.py uses add_subplot(111, polar=True)
+        # which clears the figure. We need to update plot_radar_chart to accept ax or modify usage.
+        # Actually my implementation of plot_radar_chart used add_subplot(111).
+        # Let's fix that in plotting.py first? Or just show one plot per dialog?
+        # The user requested advanced features.
+
+        # To avoid editing plotting.py again right now and risk breaking stuff,
+        # let's just make tabs in the dialog for different advanced plots.
+
+        # Wait, I cannot use tabs with a single canvas easily unless I redraw.
+        # Let's rebuild the dialog structure.
+
+        layout.removeWidget(canvas)
+        canvas.deleteLater()
+
+        tab_widget = QtWidgets.QTabWidget()
+        layout.addWidget(tab_widget)
+
+        # Tab 1: Swing DNA
+        dna_widget = QtWidgets.QWidget()
+        dna_layout = QtWidgets.QVBoxLayout(dna_widget)
+        fig1 = Figure(figsize=(8, 6))
+        canvas1 = FigureCanvasQTAgg(fig1)
+        dna_layout.addWidget(canvas1)
+        plotter.plot_radar_chart(fig1, metrics)
+        tab_widget.addTab(dna_widget, "Swing DNA")
+
+        # Tab 2: CoP Field
+        cop_widget = QtWidgets.QWidget()
+        cop_layout = QtWidgets.QVBoxLayout(cop_widget)
+        fig2 = Figure(figsize=(8, 6))
+        canvas2 = FigureCanvasQTAgg(fig2)
+        cop_layout.addWidget(canvas2)
+        if any(f.cop_position is not None for f in recorder.frames):
+             plotter.plot_cop_vector_field(fig2)
+        else:
+             ax = fig2.add_subplot(111)
+             ax.text(0.5, 0.5, "No CoP Data", ha="center", va="center")
+        tab_widget.addTab(cop_widget, "CoP Field")
+
+        # Tab 3: Power Flow
+        pwr_widget = QtWidgets.QWidget()
+        pwr_layout = QtWidgets.QVBoxLayout(pwr_widget)
+        fig3 = Figure(figsize=(8, 6))
+        canvas3 = FigureCanvasQTAgg(fig3)
+        pwr_layout.addWidget(canvas3)
+        if any(f.actuator_powers.size > 0 for f in recorder.frames):
+             plotter.plot_power_flow(fig3)
+        else:
+             ax = fig3.add_subplot(111)
+             ax.text(0.5, 0.5, "No Power Data", ha="center", va="center")
+        tab_widget.addTab(pwr_widget, "Power Flow")
+
+        dialog.exec()
