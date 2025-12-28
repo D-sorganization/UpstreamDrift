@@ -6,6 +6,8 @@ This module provides comprehensive plotting capabilities including:
 - Force/torque visualizations
 - Power and energy analysis
 - Swing sequence analysis
+- Induced Accelerations
+- Counterfactual Data (ZTCF, ZVCF)
 """
 
 from __future__ import annotations
@@ -65,6 +67,28 @@ class RecorderInterface(Protocol):
             Tuple of (times, values)
         """
         ...  # pragma: no cover
+
+    def get_induced_acceleration_series(self, source_name: str) -> tuple[np.ndarray, np.ndarray]:
+        """Extract time series for a specific induced acceleration source.
+
+        Args:
+            source_name: Name of the force source (e.g. 'gravity', 'actuator_1')
+
+        Returns:
+            Tuple of (times, acceleration_array)
+        """
+        ... # pragma: no cover
+
+    def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
+        """Extract time series for a specific counterfactual component.
+
+        Args:
+            cf_name: Name of the counterfactual (e.g. 'ztcf', 'zvcf')
+
+        Returns:
+            Tuple of (times, data_array)
+        """
+        ... # pragma: no cover
 
 
 class GolfSwingPlotter:
@@ -1162,4 +1186,88 @@ class GolfSwingPlotter:
         ax.axis("equal")  # Preserve aspect ratio
 
         fig.colorbar(sc, ax=ax, label="Time (s)")
+        fig.tight_layout()
+
+    def plot_induced_acceleration(self, fig: Figure, source_name: str, joint_idx: int | None = None) -> None:
+        """Plot induced accelerations from a specific source.
+
+        Args:
+            fig: Matplotlib figure
+            source_name: Name of the force source
+            joint_idx: Optional joint index to plot (plots magnitude or all if None)
+        """
+        try:
+            times, acc = self.recorder.get_induced_acceleration_series(source_name)
+        except (AttributeError, KeyError):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, f"No induced acceleration data for {source_name}", ha="center", va="center")
+            return
+
+        if len(times) == 0 or acc.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, f"No data for {source_name}", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        if joint_idx is not None:
+             # Plot specific joint
+            if joint_idx < acc.shape[1]:
+                ax.plot(times, acc[:, joint_idx], label=self.get_joint_name(joint_idx), linewidth=2, color=self.colors["primary"])
+                ax.set_ylabel(f"Joint {joint_idx} Acceleration (rad/s²)", fontsize=12, fontweight="bold")
+            else:
+                ax.text(0.5, 0.5, f"Joint index {joint_idx} out of bounds", ha="center", va="center")
+                return
+        else:
+             # Plot magnitude or norm if too many dimensions?
+             # Or plot all joints? Let's plot L2 norm for summary
+             norm = np.linalg.norm(acc, axis=1)
+             ax.plot(times, norm, label="L2 Norm", linewidth=2, color=self.colors["primary"])
+             ax.set_ylabel("Acceleration Magnitude (rad/s²)", fontsize=12, fontweight="bold")
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_title(f"Induced Acceleration: {source_name}", fontsize=14, fontweight="bold")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        fig.tight_layout()
+
+    def plot_counterfactual_comparison(self, fig: Figure, cf_name: str, metric_idx: int = 0) -> None:
+        """Plot counterfactual data against actual data.
+
+        Args:
+            fig: Matplotlib figure
+            cf_name: Name of counterfactual (e.g. 'ztcf')
+            metric_idx: Index of metric to compare (e.g. joint angle index)
+        """
+        # Get actual data (assume joint positions for now as primary comparison)
+        times_actual, actual = self.recorder.get_time_series("joint_positions")
+
+        try:
+            times_cf, cf_data = self.recorder.get_counterfactual_series(cf_name)
+        except (AttributeError, KeyError):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, f"No counterfactual data for {cf_name}", ha="center", va="center")
+            return
+
+        if len(times_actual) == 0 or len(times_cf) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        # Plot Actual
+        if metric_idx < actual.shape[1]:
+            ax.plot(times_actual, np.rad2deg(actual[:, metric_idx]), label="Actual", linewidth=2, color="black")
+
+        # Plot Counterfactual
+        # Ensure dimensions match
+        if cf_data.ndim > 1 and metric_idx < cf_data.shape[1]:
+             ax.plot(times_cf, np.rad2deg(cf_data[:, metric_idx]), label=cf_name.upper(), linewidth=2, linestyle="--", color=self.colors["primary"])
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Angle (deg)", fontsize=12, fontweight="bold")
+        ax.set_title(f"Counterfactual Analysis: {cf_name.upper()}", fontsize=14, fontweight="bold")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
         fig.tight_layout()
