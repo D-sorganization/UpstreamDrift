@@ -237,9 +237,13 @@ class TestGolfLauncherLogic:
         """
         Reload the module to ensure it uses the patched sys.modules.
         """
+        import sys
+
         import launchers.golf_launcher
 
-        importlib.reload(launchers.golf_launcher)
+        # Ensure the module is in sys.modules before reloading
+        if "launchers.golf_launcher" in sys.modules:
+            importlib.reload(launchers.golf_launcher)
         yield
         # Optional: cleanup or reload again if necessary, though
         # patch.dict handles sys.modules restoration.
