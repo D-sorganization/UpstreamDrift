@@ -68,7 +68,7 @@ def mock_mujoco_model():
     # Since we can't easily construct a valid MjModel without XML parsing,
     # we'll mock the attributes needed by URDFExporter.
     model = MagicMock(spec=mujoco.MjModel)
-    model.nbody = 2
+    model.nbody = 3
     model.ngeom = 2
 
     # Body properties
@@ -135,7 +135,9 @@ class TestURDFExporter:
     """Test suite for URDFExporter."""
 
     @patch("mujoco.mj_id2name")
-    @patch("mujoco.MjData")
+    @patch(
+        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco.MjData"
+    )
     def test_export_to_urdf(
         self, mock_mjdata_class, mock_id2name, mock_mujoco_model, tmp_path
     ):
