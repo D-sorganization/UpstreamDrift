@@ -17,7 +17,6 @@ sys.path.insert(0, str(project_root))
 # --- Mock PyQt6 Modules ---
 class MockQtBase:
     """Base class for all Qt mocks to handle common behavior."""
-
     def __init__(self, *args, **kwargs):
         pass
 
@@ -123,21 +122,11 @@ class MockQPushButton(MockQWidget):
         self._enabled = bool(b)
 
     def isEnabled(self):
-<<<<<<< HEAD
-        return self._enabled
-
-    def setFont(self, f):
-        pass
-
-    def setFixedHeight(self, h):
-        pass
-=======
         if isinstance(self._enabled, bool):
             return self._enabled
         # If it's a mock, it's effectively truthy but acts as False for logic checks
         # So we default to False if not explicitly set to True
         return False
->>>>>>> feature/interactive-urdf-generator
 
     def setFont(self, f):
         pass
@@ -228,15 +217,12 @@ def mock_pyqt(monkeypatch):
     mock_qt_gui.QIcon = MagicMock()
     mock_qt_gui.QPixmap = MagicMock()
 
-    with patch.dict(
-        sys.modules,
-        {
-            "PyQt6": MagicMock(),
-            "PyQt6.QtCore": mock_qt_core,
-            "PyQt6.QtGui": mock_qt_gui,
-            "PyQt6.QtWidgets": mock_qt_widgets,
-        },
-    ):
+    with patch.dict(sys.modules, {
+        "PyQt6": MagicMock(),
+        "PyQt6.QtCore": mock_qt_core,
+        "PyQt6.QtGui": mock_qt_gui,
+        "PyQt6.QtWidgets": mock_qt_widgets,
+    }):
         yield
 
 
@@ -248,7 +234,6 @@ class TestGolfLauncherLogic:
         Reload the module to ensure it uses the patched sys.modules.
         """
         import launchers.golf_launcher
-
         importlib.reload(launchers.golf_launcher)
         yield
         # Optional: cleanup or reload again if necessary, though
