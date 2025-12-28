@@ -139,6 +139,12 @@ class MockQPushButton(MockQWidget):
         return False
 >>>>>>> feature/interactive-urdf-generator
 
+    def setFont(self, f):
+        pass
+
+    def setFixedHeight(self, h):
+        pass
+
 
 class MockQCheckBox(MockQWidget):
     def __init__(self, text="", parent=None):
