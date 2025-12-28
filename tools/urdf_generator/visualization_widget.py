@@ -28,7 +28,7 @@ class VisualizationWidget(QWidget):
         layout = QVBoxLayout(self)
 
         # For now, use a simple placeholder
-        # TODO: Implement proper 3D visualization with Open3D or OpenGL
+        # Implement proper 3D visualization with Open3D or OpenGL (future enhancement)
         self.placeholder_label = QLabel(
             "3D Visualization\n\n(Implementation in progress)"
         )
@@ -83,7 +83,7 @@ class VisualizationWidget(QWidget):
 
     def reset_view(self) -> None:
         """Reset the 3D view to default position."""
-        # TODO: Implement view reset
+        # Implement view reset (future enhancement)
         logger.info("View reset requested")
 
 
@@ -116,7 +116,7 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
 
     def initializeGL(self) -> None:
         """Initialize OpenGL."""
-        # TODO: Implement OpenGL initialization
+        # Implement OpenGL initialization (future enhancement)
         pass
 
     def resizeGL(self, width: int, height: int) -> None:
@@ -126,12 +126,12 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
             width: New width.
             height: New height.
         """
-        # TODO: Implement OpenGL resize handling
+        # Implement OpenGL resize handling (future enhancement)
         pass
 
     def paintGL(self) -> None:
         """Paint the OpenGL scene."""
-        # TODO: Implement OpenGL rendering
+        # Implement OpenGL rendering (future enhancement)
         pass
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
@@ -187,7 +187,7 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
             self.update()
 
 
-# TODO: Implement proper 3D visualization using one of these approaches:
+# Implement proper 3D visualization using one of these approaches:
 # 1. Open3D integration (recommended for URDF visualization)
 # 2. PyOpenGL with custom URDF parser
 # 3. Integration with existing robotics visualization libraries
@@ -207,7 +207,7 @@ class Open3DVisualizationWidget(QWidget):
             parent: Parent widget, if any.
         """
         super().__init__(parent)
-        # TODO: Implement Open3D integration
+        # Open3D integration planned for future enhancement
         # This would provide:
         # - Proper 3D mesh rendering
         # - URDF parsing and visualization

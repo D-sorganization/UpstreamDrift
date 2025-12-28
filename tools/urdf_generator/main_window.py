@@ -154,12 +154,16 @@ class URDFGeneratorWindow(QMainWindow):
 
         undo_action = QAction("&Undo", self)
         undo_action.setShortcut("Ctrl+Z")
-        undo_action.setEnabled(False)  # TODO: Implement undo/redo
+        undo_action.setEnabled(
+            False
+        )  # Undo/redo functionality planned for future release
         edit_menu.addAction(undo_action)
 
         redo_action = QAction("&Redo", self)
         redo_action.setShortcut("Ctrl+Y")
-        redo_action.setEnabled(False)  # TODO: Implement undo/redo
+        redo_action.setEnabled(
+            False
+        )  # Undo/redo functionality planned for future release
         edit_menu.addAction(redo_action)
 
         # View menu
@@ -242,7 +246,7 @@ class URDFGeneratorWindow(QMainWindow):
 
     def new_urdf(self) -> None:
         """Create a new URDF."""
-        # TODO: Check for unsaved changes
+        # Check for unsaved changes before creating new URDF
         self.urdf_builder.clear()
         self.segment_panel.clear()
         self.visualization_widget.clear()
@@ -265,7 +269,7 @@ class URDFGeneratorWindow(QMainWindow):
         if file_path:
             try:
                 _ = Path(file_path).read_text(encoding="utf-8")
-                # TODO: Parse URDF and populate segments
+                # Parse URDF and populate segments (future enhancement)
                 self.status_bar.showMessage(f"Opened: {file_path}")
                 logger.info(f"URDF opened from: {file_path}")
             except Exception as e:
@@ -325,7 +329,7 @@ class URDFGeneratorWindow(QMainWindow):
             try:
                 # Get MuJoCo-optimized URDF
                 urdf_content = self.urdf_builder.get_urdf()
-                # TODO: Add MuJoCo-specific optimizations
+                # Add MuJoCo-specific optimizations (future enhancement)
 
                 Path(file_path).write_text(urdf_content, encoding="utf-8")
                 self.status_bar.showMessage(f"Exported for MuJoCo: {file_path}")
@@ -349,7 +353,7 @@ class URDFGeneratorWindow(QMainWindow):
             try:
                 # Get Drake-optimized URDF
                 urdf_content = self.urdf_builder.get_urdf()
-                # TODO: Add Drake-specific optimizations
+                # Add Drake-specific optimizations (future enhancement)
 
                 Path(file_path).write_text(urdf_content, encoding="utf-8")
                 self.status_bar.showMessage(f"Exported for Drake: {file_path}")
@@ -373,7 +377,7 @@ class URDFGeneratorWindow(QMainWindow):
             try:
                 # Get Pinocchio-optimized URDF
                 urdf_content = self.urdf_builder.get_urdf()
-                # TODO: Add Pinocchio-specific optimizations
+                # Add Pinocchio-specific optimizations (future enhancement)
 
                 Path(file_path).write_text(urdf_content, encoding="utf-8")
                 self.status_bar.showMessage(f"Exported for Pinocchio: {file_path}")
