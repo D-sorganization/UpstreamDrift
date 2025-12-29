@@ -12,21 +12,22 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import numpy as np
 import pytest
 
 # Add project root to path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from shared.python.engine_manager import EngineManager, EngineStatus, EngineType
+from shared.python.engine_manager import EngineManager, EngineStatus  # noqa: E402
 
 
 # Helper to check if a module is mocked (from unit tests polluting sys.modules)
 def is_mock(module_name: str) -> bool:
     """Check if a module in sys.modules is a mock."""
     mod = sys.modules.get(module_name)
-    return isinstance(mod, MagicMock) or (hasattr(mod, "__file__") and mod.__file__ is None)
+    return isinstance(mod, MagicMock) or (
+        hasattr(mod, "__file__") and mod.__file__ is None
+    )
 
 
 # Test assets
@@ -86,7 +87,9 @@ class TestEngineManagerIntegration:
             # If status says available, path must exist
             status = manager.get_engine_status(engine_type)
             if status == EngineStatus.AVAILABLE or status == EngineStatus.LOADED:
-                assert path.exists(), f"{engine_type} marked as {status} but path doesn't exist"
+                assert (
+                    path.exists()
+                ), f"{engine_type} marked as {status} but path doesn't exist"
 
 
 @pytest.mark.skipif(not SIMPLE_ARM_URDF.exists(), reason="Test asset missing")
@@ -106,6 +109,7 @@ class TestMuJoCoEngineIntegration:
 
         try:
             import mujoco  # noqa: F401
+
             return True
         except ImportError:
             pytest.skip("MuJoCo not installed")
@@ -226,7 +230,9 @@ class TestCrossEngineConsistency:
         for name, engine in available_engines.items():
             if hasattr(engine, "model"):
                 # MuJoCo-style
-                dof_counts[name] = engine.model.nq if hasattr(engine.model, "nq") else None
+                dof_counts[name] = (
+                    engine.model.nq if hasattr(engine.model, "nq") else None
+                )
             elif hasattr(engine, "plant"):
                 # Drake-style
                 dof_counts[name] = engine.plant.num_positions()

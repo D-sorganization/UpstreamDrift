@@ -11,14 +11,17 @@ from pathlib import Path
 from typing import Any
 from unittest.mock import Mock
 
-import numpy as np
 import pytest
 
 # Add the project root to the path for imports
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from shared.python.engine_manager import EngineManager, EngineStatus, EngineType  # noqa: E402
+from shared.python.engine_manager import (  # noqa: E402
+    EngineManager,
+    EngineStatus,
+    EngineType,
+)
 
 
 class TestEngineIntegration:
@@ -55,7 +58,9 @@ class TestEngineIntegration:
         # For each available engine, verify its path actually exists
         for engine in available_engines:
             engine_path = manager.engine_paths[engine]
-            assert engine_path.exists(), f"{engine} marked available but path missing: {engine_path}"
+            assert (
+                engine_path.exists()
+            ), f"{engine} marked available but path missing: {engine_path}"
 
         # For unavailable engines, verify why they're unavailable
         for engine in EngineType:
@@ -65,7 +70,9 @@ class TestEngineIntegration:
                 if engine_path.exists():
                     # Path exists but validation failed - expected for incomplete installations
                     result = manager.validate_engine_configuration(engine)
-                    assert result is False, f"{engine} exists but should fail validation"
+                    assert (
+                        result is False
+                    ), f"{engine} exists but should fail validation"
 
     @pytest.mark.integration
     def test_engine_probe_consistency(self):
@@ -91,7 +98,10 @@ class TestEngineIntegration:
                 available_engines = manager.get_available_engines()
                 if probe_result and engine_type in available_engines:
                     # Consistency check: status should not be UNAVAILABLE
-                    assert manager.get_engine_status(engine_type) != EngineStatus.UNAVAILABLE
+                    assert (
+                        manager.get_engine_status(engine_type)
+                        != EngineStatus.UNAVAILABLE
+                    )
             except Exception:
                 # Some probes may fail if dependencies missing - that's expected
                 pass
