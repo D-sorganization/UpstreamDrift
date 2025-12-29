@@ -9,6 +9,8 @@ from typing import Any
 import numpy as np
 import pytest
 
+from shared.python.constants import GRAVITY_M_S2
+
 # Tolerances
 PERIOD_TOLERANCE = 1e-2  # Seconds difference allowed
 ENERGY_TOLERANCE = 1e-3  # Joules energy drift allowed
@@ -19,7 +21,7 @@ class SimplePendulumParams:
 
     mass: float = 1.0  # kg
     length: float = 1.0  # m
-    gravity: float = 9.81  # m/s^2 (Approx, usage differs slightly engines)
+    gravity: float = GRAVITY_M_S2  # m/s^2 (Approx, usage differs slightly engines)
     initial_angle: float = np.pi / 4  # rad (45 degrees)
     duration: float = 5.0  # s
     timestep: float = 0.001  # s
@@ -27,7 +29,7 @@ class SimplePendulumParams:
 
 def expected_period_small_angle(length: float, gravity: float) -> float:
     """Calculate theoretical period for small angles T = 2*pi*sqrt(L/g)."""
-    return 2 * np.pi * np.sqrt(length / gravity)
+    return float(2 * np.pi * np.sqrt(length / gravity))
 
 
 def run_mujoco_pendulum(params: SimplePendulumParams) -> dict[str, Any]:

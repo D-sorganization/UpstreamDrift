@@ -14,6 +14,8 @@ if str(MUJOCO_PYTHON_PATH) not in sys.path:
 
 import numpy as np  # noqa: E402
 import pytest  # noqa: E402
+
+from shared.python.constants import GRAVITY_M_S2  # noqa: E402
 from mujoco_humanoid_golf.rigid_body_dynamics.aba import (  # noqa: E402
     aba,
 )
@@ -48,7 +50,7 @@ def create_random_model(num_bodies=10):
         spatial_inertia[3:, 3:] = mass * np.eye(3)
         model["I"].append(spatial_inertia)
 
-    model["gravity"] = np.array([0, 0, 0, 0, 0, -9.81])
+    model["gravity"] = np.array([0, 0, 0, 0, 0, -GRAVITY_M_S2])
     return model
 
 
