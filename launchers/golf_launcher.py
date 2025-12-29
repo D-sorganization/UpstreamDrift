@@ -346,8 +346,8 @@ class GolfLauncher(QMainWindow):
 
         # State
         self.docker_available = False
-        self.selected_model = None
-        self.model_cards = {}
+        self.selected_model: str | None = None
+        self.model_cards: dict[str, Any] = {}
 
         # Load Registry
         try:
@@ -475,14 +475,14 @@ class GolfLauncher(QMainWindow):
         card.setCursor(Qt.CursorShape.PointingHandCursor)
 
         # Create proper event handlers instead of assigning to methods
-        def handle_mouse_press(e):
+        def handle_mouse_press(e: Any) -> None:
             self.select_model(model_id)
 
-        def handle_mouse_double_click(e):
+        def handle_mouse_double_click(e: Any) -> None:
             self.launch_model_direct(model_id)
 
-        card.mousePressEvent = handle_mouse_press  # type: ignore[method-assign]
-        card.mouseDoubleClickEvent = handle_mouse_double_click  # type: ignore[method-assign]
+        card.mousePressEvent = handle_mouse_press  # type: ignore[assignment]
+        card.mouseDoubleClickEvent = handle_mouse_double_click  # type: ignore[assignment]
 
         layout = QVBoxLayout(card)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -857,10 +857,10 @@ class GolfLauncher(QMainWindow):
         else:
             subprocess.Popen(cmd)
 
-    def _start_meshcat_browser(self, port):
+    def _start_meshcat_browser(self, port: int) -> None:
         """Start the meshcat browser."""
 
-        def open_url():
+        def open_url() -> None:
             """Open the browser URL."""
             time.sleep(3)
             webbrowser.open(f"http://localhost:{port}")

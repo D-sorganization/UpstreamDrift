@@ -97,7 +97,9 @@ DEFAULT_RANDOM_SEED: int = 42  # [dimensionless] Answer to everything
 MUJOCO_LAUNCHER_SCRIPT: Path = Path(
     "engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui.py"
 )
-DRAKE_LAUNCHER_SCRIPT: Path = Path("engines/physics_engines/drake/python/src/golf_gui.py")
+DRAKE_LAUNCHER_SCRIPT: Path = Path(
+    "engines/physics_engines/drake/python/src/golf_gui.py"
+)
 PINOCCHIO_LAUNCHER_SCRIPT: Path = Path(
     "engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
 )

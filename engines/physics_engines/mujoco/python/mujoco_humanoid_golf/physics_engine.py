@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any  # noqa: F401
+from typing import Any, cast  # noqa: F401
 
 import mujoco
 import numpy as np
@@ -14,7 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 class MuJoCoPhysicsEngine(PhysicsEngine):
     """Encapsulates MuJoCo model, data, and simulation control.
-    
+
     Implements the shared PhysicsEngine protocol.
     """
 
@@ -32,8 +32,8 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         # MjModel doesn't always have a name field populated from XML, but we can check
         # Or return the filename stem
         if self.model.names:
-             # Just a placeholder, simpler to return "MuJoCo Model" or handle appropriately
-             pass
+            # Placeholder for model name logic
+            pass
         return "MuJoCo Model"
 
     def load_from_string(self, content: str, extension: str | None = None) -> None:
@@ -79,10 +79,10 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             # MuJoCo's timestep is in model.opt.timestep.
             # Changing it might be unstable if not careful, but protocol allows it.
             if dt is not None:
-                 old_dt = self.model.opt.timestep
-                 self.model.opt.timestep = dt
-                 mujoco.mj_step(self.model, self.data)
-                 self.model.opt.timestep = old_dt
+                old_dt = self.model.opt.timestep
+                self.model.opt.timestep = dt
+                mujoco.mj_step(self.model, self.data)
+                self.model.opt.timestep = old_dt
             else:
                 mujoco.mj_step(self.model, self.data)
 
@@ -96,7 +96,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         if self.model is not None and self.data is not None:
             mujoco.mj_resetData(self.model, self.data)
             self.forward()
-            
+
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Get the current state (positions, velocities)."""
         if self.data is None:
@@ -107,15 +107,15 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         """Set the current state."""
         if self.data is not None:
             if len(q) == len(self.data.qpos):
-                 self.data.qpos[:] = q
+                self.data.qpos[:] = q
             if len(v) == len(self.data.qvel):
-                 self.data.qvel[:] = v
+                self.data.qvel[:] = v
             # Need to call forward to update accelerations implies by new state?
             # Usually set_state implies just setting kinematics.
 
     def set_control(self, u: np.ndarray) -> None:
         """Set control vector."""
-        if self.data is not None:
+        if self.data is not None and self.model is not None:
             # Ensure size matches
             if len(u) == self.model.nu:
                 self.data.ctrl[:] = u
@@ -125,12 +125,12 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
                     len(u),
                     self.model.nu,
                 )
-                
+
     def get_time(self) -> float:
         """Get the current simulation time."""
         if self.data is None:
             return 0.0
-        return self.data.time
+        return float(self.data.time)
 
     # -------- Section 1: Core Dynamics Engine Capabilities --------
 
@@ -154,13 +154,13 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         if self.data is None:
             return np.array([])
         # This is populated after mj_forward/mj_step
-        return self.data.qfrc_bias.copy()
+        return cast(np.ndarray, self.data.qfrc_bias.copy())
 
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravity forces g(q)."""
         if self.data is None:
             return np.array([])
-        return self.data.qfrc_grav.copy()
+        return cast(np.ndarray, self.data.qfrc_grav.copy())
 
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics: tau = ID(q, qdot, qacc)."""
@@ -177,7 +177,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         # Compute inverse dynamics
         mujoco.mj_inverse(self.model, self.data)
 
-        return self.data.qfrc_inverse.copy()
+        return cast(np.ndarray, self.data.qfrc_inverse.copy())
 
     # -------- Section 3: Drift vs Control (Affine View) --------
 
@@ -203,7 +203,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         self.data.ctrl[:] = saved_ctrl
         mujoco.mj_forward(self.model, self.data)  # Restore state
 
-        return drift_acc
+        return cast(np.ndarray, drift_acc)
 
     # -------- Section 4: Jacobian Analysis --------
 

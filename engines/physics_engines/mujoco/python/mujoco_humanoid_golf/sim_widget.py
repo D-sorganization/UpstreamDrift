@@ -19,8 +19,8 @@ from .biomechanics import BiomechanicalAnalyzer, SwingRecorder
 from .control_system import ControlSystem, ControlType
 from .interactive_manipulation import InteractiveManipulator
 from .meshcat_adapter import MuJoCoMeshcatAdapter
-from .telemetry import TelemetryRecorder
 from .physics_engine import MuJoCoPhysicsEngine
+from .telemetry import TelemetryRecorder
 
 # Lazy loading globals for OpenCV
 CV2_LIB = None
@@ -193,7 +193,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
     @property
     def model(self) -> mujoco.MjModel | None:
         return self.engine.model
-    
+
     @model.setter
     def model(self, value: mujoco.MjModel | None) -> None:
         self.engine.model = value
@@ -201,7 +201,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
     @property
     def data(self) -> mujoco.MjData | None:
         return self.engine.data
-    
+
     @data.setter
     def data(self, value: mujoco.MjData | None) -> None:
         self.engine.data = value

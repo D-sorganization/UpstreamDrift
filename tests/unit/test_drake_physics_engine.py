@@ -18,8 +18,12 @@ sys.modules["pydrake.all"] = MagicMock()
 # Mock interfaces
 mock_interfaces = MagicMock()
 sys.modules["shared.python.interfaces"] = mock_interfaces
+
+
 class MockPhysicsEngine:
     pass
+
+
 mock_interfaces.PhysicsEngine = MockPhysicsEngine
 
 from engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: E402
@@ -29,7 +33,9 @@ from engines.physics_engines.drake.python.drake_physics_engine import (  # noqa:
 
 @pytest.fixture
 def engine():
-    with patch("engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph") as mock_add:
+    with patch(
+        "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
+    ) as mock_add:
         mock_plant = MagicMock()
         mock_scene_graph = MagicMock()
         mock_add.return_value = (mock_plant, mock_scene_graph)
@@ -40,13 +46,17 @@ def engine():
         eng.builder = MagicMock()
         return eng
 
+
 def test_initialization(engine):
     assert engine.plant is not None
     assert engine.builder is not None
     assert not engine._is_finalized
 
+
 def test_load_from_path(engine):
-    with patch("engines.physics_engines.drake.python.drake_physics_engine.Parser") as mock_parser_cls:
+    with patch(
+        "engines.physics_engines.drake.python.drake_physics_engine.Parser"
+    ) as mock_parser_cls:
         mock_parser = MagicMock()
         mock_parser_cls.return_value = mock_parser
 
@@ -59,8 +69,11 @@ def test_load_from_path(engine):
         engine.plant.Finalize.assert_called_once()
         engine.builder.Build.assert_called_once()
 
+
 def test_load_from_string(engine):
-    with patch("engines.physics_engines.drake.python.drake_physics_engine.Parser") as mock_parser_cls:
+    with patch(
+        "engines.physics_engines.drake.python.drake_physics_engine.Parser"
+    ) as mock_parser_cls:
         mock_parser = MagicMock()
         mock_parser_cls.return_value = mock_parser
 
@@ -70,6 +83,7 @@ def test_load_from_string(engine):
         mock_parser.AddModelsFromString.assert_called_once_with(content, "urdf")
         assert engine.model_name == "StringLoadedModel"
 
+
 def test_step(engine):
     # Mock context and diagram
     engine.diagram = MagicMock()
@@ -77,7 +91,9 @@ def test_step(engine):
     engine.context.get_time.return_value = 0.0
     engine.plant.time_step.return_value = 0.001
 
-    with patch("engines.physics_engines.drake.python.drake_physics_engine.analysis.Simulator") as mock_sim_cls:
+    with patch(
+        "engines.physics_engines.drake.python.drake_physics_engine.analysis.Simulator"
+    ) as mock_sim_cls:
         mock_sim = MagicMock()
         mock_sim_cls.return_value = mock_sim
 
@@ -85,6 +101,7 @@ def test_step(engine):
 
         mock_sim.Initialize.assert_called_once()
         mock_sim.AdvanceTo.assert_called_once_with(0.01)
+
 
 def test_get_state(engine):
     engine.plant_context = MagicMock()
@@ -97,6 +114,7 @@ def test_get_state(engine):
     np.testing.assert_array_equal(v, np.array([3.0, 4.0]))
     engine.plant.GetPositions.assert_called_once()
 
+
 def test_compute_mass_matrix(engine):
     engine.plant_context = MagicMock()
     expected_M = np.eye(2)
@@ -106,6 +124,7 @@ def test_compute_mass_matrix(engine):
 
     np.testing.assert_array_equal(M, expected_M)
     engine.plant.CalcMassMatrixViaInverseDynamics.assert_called_once()
+
 
 def test_compute_inverse_dynamics(engine):
     engine.plant_context = MagicMock()
@@ -119,7 +138,5 @@ def test_compute_inverse_dynamics(engine):
 
     np.testing.assert_array_equal(tau, expected_tau)
     engine.plant.CalcInverseDynamics.assert_called_with(
-        engine.plant_context,
-        qacc,
-        engine.plant.MakeMultibodyForces(engine.plant)
+        engine.plant_context, qacc, engine.plant.MakeMultibodyForces(engine.plant)
     )

@@ -1,0 +1,85 @@
+show_physics_parameters.py:12: error: Function is missing a return type annotation  [no-untyped-def]
+show_physics_parameters.py:12: note: Use "-> None" if function does not return a value
+scripts\perform_phase_1_cleanup.py:4: error: Function is missing a return type annotation  [no-untyped-def]
+scripts\perform_phase_1_cleanup.py:4: note: Use "-> None" if function does not return a value
+check_system_health.py:13: error: Function is missing a type annotation  [no-untyped-def]
+check_system_health.py:19: error: Function is missing a type annotation  [no-untyped-def]
+check_system_health.py:29: error: Function is missing a type annotation  [no-untyped-def]
+check_system_health.py:42: error: Function is missing a return type annotation  [no-untyped-def]
+check_system_health.py:61: error: Function is missing a return type annotation  [no-untyped-def]
+check_system_health.py:61: note: Use "-> None" if function does not return a value
+scripts\check_duplicates.py:69: error: Function is missing a return type annotation  [no-untyped-def]
+scripts\check_duplicates.py:69: note: Use "-> None" if function does not return a value
+tools\urdf_generator\segment_manager.py:11: error: Function is missing a return type annotation  [no-untyped-def]
+tools\urdf_generator\segment_manager.py:11: note: Use "-> None" if function does not return a value
+scripts\validate_physics.py:98: error: Function is missing a return type annotation  [no-untyped-def]
+scripts\validate_physics.py:98: note: Use "-> None" if function does not return a value
+shared\python\optimization\examples\optimize_arm.py:18: error: Function is missing a return type annotation  [no-untyped-def]
+shared\python\optimization\examples\optimize_arm.py:18: note: Use "-> None" if function does not return a value
+scripts\fix_numpy_compatibility.py:13: error: Function is missing a type annotation  [no-untyped-def]
+scripts\fix_numpy_compatibility.py:23: error: Function is missing a return type annotation  [no-untyped-def]
+scripts\fix_numpy_compatibility.py:36: error: Function is missing a return type annotation  [no-untyped-def]
+scripts\fix_numpy_compatibility.py:36: note: Use "-> None" if function does not return a value
+scripts\fix_numpy_compatibility.py:95: error: Function is missing a return type annotation  [no-untyped-def]
+validate_phase1_upgrades.py:17: error: Function is missing a return type annotation  [no-untyped-def]
+validate_phase1_upgrades.py:17: note: Use "-> None" if function does not return a value
+validate_phase1_upgrades.py:437: error: Function is missing a return type annotation  [no-untyped-def]
+validate_phase1_upgrades.py:437: note: Use "-> None" if function does not return a value
+validate_phase1_upgrades.py:474: error: Function is missing a return type annotation  [no-untyped-def]
+validate_phase1_upgrades.py:474: note: Use "-> None" if function does not return a value
+reproduce_issue_fix.py:8: error: Function is missing a return type annotation  [no-untyped-def]
+reproduce_issue_fix.py:67: error: Function is missing a return type annotation  [no-untyped-def]
+reproduce_issue_fix.py:67: note: Use "-> None" if function does not return a value
+tools\urdf_generator\urdf_builder.py:14: error: Function is missing a return type annotation  [no-untyped-def]
+tools\urdf_generator\urdf_builder.py:14: note: Use "-> None" if function does not return a value
+launchers\golf_launcher.py:478: error: Function is missing a type annotation  [no-untyped-def]
+launchers\golf_launcher.py:481: error: Function is missing a type annotation  [no-untyped-def]
+launchers\golf_launcher.py:860: error: Function is missing a type annotation  [no-untyped-def]
+launchers\golf_launcher.py:863: error: Function is missing a return type annotation  [no-untyped-def]
+launchers\golf_launcher.py:863: note: Use "-> None" if function does not return a value
+tools\urdf_generator\main_window.py:403: error: Function is missing a type annotation for one or more arguments  [no-untyped-def]
+tools\urdf_generator\main_window.py:431: error: Function is missing a return type annotation  [no-untyped-def]
+tools\urdf_generator\main_window.py:431: note: Use "-> None" if function does not return a value
+tools\urdf_generator\main.py:448: error: Function is missing a type annotation  [no-untyped-def]
+tools\urdf_generator\main.py:484: error: Function is missing a type annotation for one or more arguments  [no-untyped-def]
+tools\urdf_generator\main.py:533: error: Function is missing a return type annotation  [no-untyped-def]
+tools\urdf_generator\main.py:533: note: Use "-> None" if function does not return a value
+create_favicon.py:15: error: Function is missing a return type annotation  [no-untyped-def]
+setup_golf_suite.py:26: error: Function is missing a return type annotation  [no-untyped-def]
+setup_golf_suite.py:44: error: Function is missing a return type annotation  [no-untyped-def]
+setup_golf_suite.py:143: error: Function is missing a return type annotation  [no-untyped-def]
+setup_golf_suite.py:187: error: Function is missing a return type annotation  [no-untyped-def]
+diagnose_icon_quality.py:128: error: Function is missing a return type annotation  [no-untyped-def]
+create_windows_optimized_icon.py:64: error: Function is missing a return type annotation  [no-untyped-def]
+create_high_quality_favicon.py:46: error: Function is missing a return type annotation  [no-untyped-def]
+create_cropped_robot_icon.py:115: error: Function is missing a return type annotation  [no-untyped-def]
+shared\python\__init__.py:43: error: Function is missing a type annotation  [no-untyped-def]
+scripts\verify_physics.py:21: error: Function is missing a return type annotation  [no-untyped-def]
+scripts\verify_physics.py:21: note: Use "-> None" if function does not return a value
+scripts\verify_physics.py:61: error: Function is missing a return type annotation  [no-untyped-def]
+scripts\verify_physics.py:61: note: Use "-> None" if function does not return a value
+scripts\verify_physics.py:64: error: Function is missing a type annotation  [no-untyped-def]
+examples\01_basic_simulation.py:28: error: Function is missing a return type annotation  [no-untyped-def]
+examples\01_basic_simulation.py:28: note: Use "-> None" if function does not return a value
+validate_suite.py:20: error: Function is missing a return type annotation  [no-untyped-def]
+validate_suite.py:56: error: Function is missing a return type annotation  [no-untyped-def]
+validate_suite.py:94: error: Function is missing a return type annotation  [no-untyped-def]
+validate_suite.py:154: error: Function is missing a return type annotation  [no-untyped-def]
+validate_suite.py:190: error: Function is missing a return type annotation  [no-untyped-def]
+validate_suite.py:213: error: Function is missing a return type annotation  [no-untyped-def]
+validate_suite.py:234: error: Function is missing a return type annotation  [no-untyped-def]
+launch_golf_suite.py:28: error: Function is missing a return type annotation  [no-untyped-def]
+launch_golf_suite.py:45: error: Function is missing a return type annotation  [no-untyped-def]
+launch_golf_suite.py:84: error: Function is missing a return type annotation  [no-untyped-def]
+launch_golf_suite.py:113: error: Function is missing a return type annotation  [no-untyped-def]
+launch_golf_suite.py:143: error: Function is missing a return type annotation  [no-untyped-def]
+launch_golf_suite.py:173: error: Function is missing a return type annotation  [no-untyped-def]
+launch_golf_suite.py:192: error: Function is missing a return type annotation  [no-untyped-def]
+launch_golf_suite.py:192: note: Use "-> None" if function does not return a value
+launch_golf_suite.py:205: error: Function is missing a return type annotation  [no-untyped-def]
+launch_golf_suite.py:205: note: Use "-> None" if function does not return a value
+launch_golf_suite.py:259: error: Function is missing a return type annotation  [no-untyped-def]
+examples\02_parameter_sweeps.py:31: error: Function is missing a return type annotation  [no-untyped-def]
+shared\python\plotting.py:33: error: Function is missing a type annotation for one or more arguments  [no-untyped-def]
+shared\python\plotting.py:49: error: Function is missing a type annotation for one or more arguments  [no-untyped-def]
+Found 63 errors in 27 files (checked 234 source files)
