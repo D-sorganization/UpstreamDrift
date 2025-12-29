@@ -7,8 +7,8 @@ agnostic of the underlying solver.
 
 from __future__ import annotations
 
-from abc import ABC, abstractmethod
-from typing import Any, Protocol, runtime_checkable
+from abc import abstractmethod
+from typing import Protocol, runtime_checkable
 
 import numpy as np
 
@@ -16,7 +16,7 @@ import numpy as np
 @runtime_checkable
 class PhysicsEngine(Protocol):
     """Protocol defining the required interface for a Golf Modeling Suite physics engine.
-    
+
     All implementations must be stateless wrappers around a Model/Data pair (or equivalent),
     or manage their own internal state consistently.
     """
@@ -59,11 +59,11 @@ class PhysicsEngine(Protocol):
             dt: Optional time step to advance. If None, uses the model's default timestep.
         """
         ...
-        
+
     @abstractmethod
     def forward(self) -> None:
         """Compute forward kinematics and dynamics without advancing time.
-        
+
         Using current positions and velocities, updates all derived quantities
         (accelerations, forces, derived kinematics).
         """
@@ -109,7 +109,7 @@ class PhysicsEngine(Protocol):
     @abstractmethod
     def compute_mass_matrix(self) -> np.ndarray:
         """Compute the dense inertia matrix M(q).
-        
+
         Returns:
             M: (n_v, n_v) mass matrix.
         """
@@ -118,16 +118,16 @@ class PhysicsEngine(Protocol):
     @abstractmethod
     def compute_bias_forces(self) -> np.ndarray:
         """Compute bias forces C(q,v) + g(q).
-        
+
         Returns:
             b: (n_v,) vector containing Coriolis, Centrifugal, and Gravity terms.
         """
         ...
-        
+
     @abstractmethod
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravity forces g(q).
-        
+
         Returns:
             g: (n_v,) gravity vector.
         """
@@ -136,22 +136,22 @@ class PhysicsEngine(Protocol):
     @abstractmethod
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a).
-        
+
         Args:
             qacc: Desired acceleration vector (n_v,).
-            
+
         Returns:
             tau: Required generalized forces (n_v,).
         """
         ...
-        
+
     @abstractmethod
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body.
-        
+
         Args:
             body_name: Name of the body frame.
-            
+
         Returns:
             Dictionary with keys 'linear', 'angular', 'spatial', or None if body not found.
         """

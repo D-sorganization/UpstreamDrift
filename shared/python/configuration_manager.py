@@ -6,7 +6,6 @@ Handles validation, loading, and saving of simulation configurations.
 import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any
 
 from shared.python.common_utils import GolfModelingError
 
@@ -36,7 +35,7 @@ class SimulationConfig:
     # State Persistence
     save_state_path: str = ""
     load_state_path: str = ""
-    
+
     # Polynomial Control
     polynomial_coefficients: dict[str, list[float]] = field(default_factory=dict)
 
@@ -85,16 +84,16 @@ class ConfigurationManager:
             return SimulationConfig()
 
         try:
-            with open(self.config_path, "r") as f:
+            with open(self.config_path) as f:
                 data = json.load(f)
-            
+
             # Use dacite or simple dict unpacking with filtering
             # For simplicity and robustness, we explicitly map fields or allow extra fields to be ignored
             # if we use **data, but we need to match keys.
             # Using a filtered dict to avoid TypeError on unknown keys
             valid_keys = SimulationConfig.__annotations__.keys()
             filtered_data = {k: v for k, v in data.items() if k in valid_keys}
-            
+
             config = SimulationConfig(**filtered_data)
             config.validate()
             return config

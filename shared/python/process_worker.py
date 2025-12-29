@@ -6,26 +6,30 @@ capturing output in real-time, and handling process termination.
 
 import subprocess
 import threading
-from typing import Optional, List, Callable
+from typing import Any
 
 try:
     from PyQt6.QtCore import QThread, pyqtSignal
 except ImportError:
     # Fallback for headless environments or non-PyQt usage
     class QThread:  # type: ignore[no-redef]
-        def __init__(self, parent=None):
+        def __init__(self, parent: Any = None) -> None:
             pass
-        def start(self):
+
+        def start(self) -> None:
             self.run()
-        def run(self):
+
+        def run(self) -> None:
             pass
-        def wait(self):
+
+        def wait(self) -> None:
             pass
-            
+
     class pyqtSignal:  # type: ignore[no-redef]
-        def __init__(self, *args):
+        def __init__(self, *args: Any) -> None:
             pass
-        def emit(self, *args):
+
+        def emit(self, *args: Any) -> None:
             pass
 
 
@@ -35,9 +39,9 @@ class ProcessWorker(QThread):
     log_signal = pyqtSignal(str)
     finished_signal = pyqtSignal(int, str)
 
-    def __init__(self, cmd: List[str], cwd: Optional[str] = None) -> None:
+    def __init__(self, cmd: list[str], cwd: str | None = None) -> None:
         """Initialize worker.
-        
+
         Args:
             cmd: Command list to execute.
             cwd: Working directory.
@@ -45,7 +49,7 @@ class ProcessWorker(QThread):
         super().__init__()
         self.cmd = cmd
         self.cwd = cwd
-        self.process: Optional[subprocess.Popen] = None
+        self.process: subprocess.Popen | None = None
         self._is_running = True
         self._stop_event = threading.Event()
 
@@ -73,12 +77,12 @@ class ProcessWorker(QThread):
 
             # Wait for completion
             stdout, stderr = self.process.communicate()
-            
+
             # Process remaining output
             if stdout:
                 for line in stdout.splitlines():
                     self.log_signal.emit(line.strip())
-            
+
             if stderr:
                 for line in stderr.splitlines():
                     self.log_signal.emit(f"STDERR: {line}")

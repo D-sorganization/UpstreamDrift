@@ -6,7 +6,7 @@ Wraps pydrake.multibody to provide a compliant PhysicsEngine interface.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -197,7 +197,7 @@ class DrakePhysicsEngine(PhysicsEngine):
     def get_time(self) -> float:
         """Get the current simulation time."""
         if self.context:
-            return self.context.get_time()
+            return cast(float, self.context.get_time())
         return 0.0
 
     # -------- Dynamics Interface --------
@@ -208,7 +208,7 @@ class DrakePhysicsEngine(PhysicsEngine):
             return np.array([])
 
         M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
-        return M
+        return cast(np.ndarray, M)
 
     def compute_bias_forces(self) -> np.ndarray:
         """Compute bias forces C(q,v) + g(q)."""
@@ -224,7 +224,7 @@ class DrakePhysicsEngine(PhysicsEngine):
         forces = self.plant.CalcInverseDynamics(
             self.plant_context, vdot_zero, self.plant.MakeMultibodyForces(self.plant)
         )
-        return forces
+        return cast(np.ndarray, forces)
 
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravity forces g(q)."""
@@ -232,7 +232,9 @@ class DrakePhysicsEngine(PhysicsEngine):
             return np.array([])
 
         # g(q) = GravityForces(context)
-        return self.plant.CalcGravityGeneralizedForces(self.plant_context)
+        return cast(
+            np.ndarray, self.plant.CalcGravityGeneralizedForces(self.plant_context)
+        )
 
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a)."""
@@ -242,7 +244,7 @@ class DrakePhysicsEngine(PhysicsEngine):
         forces = self.plant.CalcInverseDynamics(
             self.plant_context, qacc, self.plant.MakeMultibodyForces(self.plant)
         )
-        return forces
+        return cast(np.ndarray, forces)
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
@@ -268,6 +270,7 @@ class DrakePhysicsEngine(PhysicsEngine):
             self.plant.world_frame(),
             self.plant.world_frame(),  # Expressed in world?
         )
+        J = cast(np.ndarray, J)
 
         # J is (6, nv). Top 3 angular, bottom 3 linear?
         # Drake SpatialVelocity is (w, v) -> Angular, Linear.

@@ -6,6 +6,7 @@ Wraps pinocchio to provide a compliant PhysicsEngine interface.
 from __future__ import annotations
 
 import logging
+from typing import cast
 
 import numpy as np
 
@@ -44,7 +45,7 @@ class PinocchioPhysicsEngine(PhysicsEngine):
     def model_name(self) -> str:
         """Return the name of the currently loaded model."""
         if self.model:
-            return self.model.name
+            return cast(str, self.model.name)
         return self.model_name_str
 
     def load_from_path(self, path: str) -> None:
@@ -175,8 +176,9 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         # to numpy) But specifically crba fills the upper triangle.
 
         # For safety/consistency:
+        # For safety/consistency:
         M = np.triu(M) + np.triu(M, 1).T
-        return M
+        return cast(np.ndarray, M)
 
     def compute_bias_forces(self) -> np.ndarray:
         """Compute bias forces C(q,v) + g(q)."""
@@ -188,7 +190,7 @@ class PinocchioPhysicsEngine(PhysicsEngine):
 
         a0 = np.zeros(self.model.nv)
         b = pin.rnea(self.model, self.data, self.q, self.v, a0)
-        return b
+        return cast(np.ndarray, b)
 
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravity forces g(q)."""
@@ -196,7 +198,9 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             return np.array([])
 
         # computeGeneralizedGravity(model, data, q)
-        return pin.computeGeneralizedGravity(self.model, self.data, self.q)
+        return cast(
+            np.ndarray, pin.computeGeneralizedGravity(self.model, self.data, self.q)
+        )
 
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a)."""
@@ -204,7 +208,7 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             return np.array([])
 
         tau = pin.rnea(self.model, self.data, self.q, self.v, qacc)
-        return tau
+        return cast(np.ndarray, tau)
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
@@ -237,4 +241,8 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         jacp = J[:3, :]
         jacr = J[3:, :]
 
-        return {"linear": jacp, "angular": jacr, "spatial": J}
+        return {
+            "linear": cast(np.ndarray, jacp),
+            "angular": cast(np.ndarray, jacr),
+            "spatial": cast(np.ndarray, J),
+        }

@@ -456,4 +456,3 @@ class EngineManager:
         lines.append("")
 
         return "\n".join(lines)
-
