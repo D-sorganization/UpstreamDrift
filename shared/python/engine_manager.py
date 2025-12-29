@@ -303,15 +303,30 @@ class EngineManager:
             raise GolfModelingError("Pinocchio requirements not met.") from e
 
     def _load_opensim_engine(self) -> None:
-        """Load OpenSim engine (Stub)."""
-        logger.info("Loading OpenSim engine (Stub)...")
-        from engines.physics_engines.opensim.python.opensim_physics_engine import (
-            OpenSimPhysicsEngine,
-        )
+        """Load OpenSim engine."""
+        logger.info("Loading OpenSim engine...")
+        try:
+            from .engine_probes import OpenSimProbe
 
-        engine = OpenSimPhysicsEngine()
-        self.active_physics_engine = engine
-        logger.info("OpenSim engine stub loaded")
+            probe = OpenSimProbe(self.suite_root)
+            result = probe.probe()
+
+            if not result.is_available():
+                raise GolfModelingError(
+                    f"OpenSim not ready:\n{result.diagnostic_message}\n"
+                    f"Fix: {result.get_fix_instructions()}"
+                )
+
+            from engines.physics_engines.opensim.python.opensim_physics_engine import (
+                OpenSimPhysicsEngine,
+            )
+
+            engine = OpenSimPhysicsEngine()
+            self.active_physics_engine = engine
+            logger.info("OpenSim engine loaded")
+
+        except ImportError as e:
+            raise GolfModelingError("OpenSim requirements not met.") from e
 
     def _load_myosim_engine(self) -> None:
         """Load MyoSim engine."""
