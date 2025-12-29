@@ -11,7 +11,7 @@ def test_compute_psd():
     t = np.arange(0, 1.0, 1 / fs)
     data = np.sin(2 * np.pi * 50 * t)
 
-    with patch('scipy.signal.welch') as mock_welch:
+    with patch("scipy.signal.welch") as mock_welch:
         mock_welch.return_value = (np.arange(129), np.random.rand(129))
         freqs, psd = signal_processing.compute_psd(data, fs, nperseg=256)
 
@@ -26,7 +26,7 @@ def test_compute_spectrogram():
     t = np.arange(0, 1.0, 1 / fs)
     data = np.sin(2 * np.pi * 20 * t + 2 * np.pi * 40 * t**2)
 
-    with patch('scipy.signal.spectrogram') as mock_spec:
+    with patch("scipy.signal.spectrogram") as mock_spec:
         mock_spec.return_value = (np.arange(10), np.arange(10), np.random.rand(10, 10))
         f, t_spec, Sxx = signal_processing.compute_spectrogram(data, fs, nperseg=128)
 

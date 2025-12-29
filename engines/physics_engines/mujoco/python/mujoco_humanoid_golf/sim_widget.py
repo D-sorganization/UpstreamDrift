@@ -994,7 +994,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             except Exception:
                 pass  # Avoid crashing main loop if meshcat fails
 
-    # Convert to QImage / QPixmap
+        # Convert to QImage / QPixmap
         if rgb is None or rgb.size == 0 or len(rgb.shape) < 3:
             return
 
