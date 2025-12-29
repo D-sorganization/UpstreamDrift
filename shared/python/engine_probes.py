@@ -600,3 +600,64 @@ class MyoSimProbe(EngineProbe):
             diagnostic_message=f"MyoSim ready (via MuJoCo {version})",
             details={"engine_dir": str(engine_dir)},
         )
+
+
+class OpenPoseProbe(EngineProbe):
+    """Probe for OpenPose system."""
+
+    def __init__(self, suite_root: Path) -> None:
+        """Initialize OpenPose probe."""
+        super().__init__("OpenPose", suite_root)
+
+    def probe(self) -> EngineProbeResult:
+        """Check OpenPose readiness."""
+        missing = []
+        version = "unknown"
+
+        try:
+            import pyopenpose as op  # type: ignore # noqa: F401
+
+            # pyopenpose usually doesn't expose version string directly in top level
+            version = "installed"
+        except ImportError:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.NOT_INSTALLED,
+                version=None,
+                missing_dependencies=["pyopenpose"],
+                diagnostic_message="pyopenpose not in python path. "
+                "Ensure OpenPose is built and wrapper is installed.",
+            )
+
+        # Check for models dir
+        # We check environment variable OPENPOSE_MODELS or standard windows paths
+        import os
+
+        model_path_env = os.environ.get("OPENPOSE_MODELS")
+        default_path = Path("C:/openpose/models")
+
+        models_found = False
+        if model_path_env and Path(model_path_env).exists():
+            models_found = True
+        elif default_path.exists():
+            models_found = True
+
+        if not models_found:
+            missing.append("OpenPose Models (check OPENPOSE_MODELS env var)")
+
+        if missing:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_ASSETS,
+                version=version,
+                missing_dependencies=missing,
+                diagnostic_message=f"OpenPose installed but missing: {', '.join(missing)}",
+            )
+
+        return EngineProbeResult(
+            engine_name=self.engine_name,
+            status=ProbeStatus.AVAILABLE,
+            version=version,
+            missing_dependencies=[],
+            diagnostic_message="OpenPose Ready",
+        )
