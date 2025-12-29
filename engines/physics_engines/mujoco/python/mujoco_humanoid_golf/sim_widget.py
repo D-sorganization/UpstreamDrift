@@ -981,7 +981,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
     # Convert to QImage / QPixmap
         if rgb is None or rgb.size == 0 or len(rgb.shape) < 3:
             return
-            
+
         h, w, _ = rgb.shape
         image = QtGui.QImage(rgb.data, w, h, 3 * w, QtGui.QImage.Format.Format_RGB888)
         image = image.copy()  # deep copy
