@@ -26,7 +26,7 @@ S_PZ.flags.writeable = False
 
 def jcalc(
     jtype: str, q: float, out: np.ndarray | None = None
-) -> tuple[np.ndarray, np.ndarray]:  # noqa: PLR0915
+) -> tuple[np.ndarray, np.ndarray, int]:  # noqa: PLR0915
     """
     Calculate joint transform and motion subspace.
 
@@ -48,9 +48,11 @@ def jcalc(
             created.
 
     Returns:
-        Tuple of (xj_transform, s_subspace) where:
+        Tuple of (xj_transform, s_subspace, dof_idx) where:
             xj_transform: 6x6 spatial transformation from successor to predecessor
             s_subspace: 6x1 motion subspace vector (joint axis)
+            dof_idx: Index of the non-zero element in s_subspace (0-5),
+                or -1 if not sparse
 
     Raises:
         ValueError: If jtype is not supported
@@ -61,20 +63,27 @@ def jcalc(
 
     Examples:
         >>> # Revolute joint about z-axis at 45 degrees
-        >>> xj_transform, s_subspace = jcalc('Rz', np.pi/4)
+        >>> xj_transform, s_subspace, idx = jcalc('Rz', np.pi/4)
         >>> s_subspace
         array([0., 0., 1., 0., 0., 0.])
+        >>> idx
+        2
 
         >>> # Prismatic joint along x-axis extended 0.5m
-        >>> xj_transform, s_subspace = jcalc('Px', 0.5)
+        >>> xj_transform, s_subspace, idx = jcalc('Px', 0.5)
         >>> s_subspace
         array([0., 0., 0., 1., 0., 0.])
+        >>> idx
+        3
     """
     if out is None:
         xj_transform = np.zeros((6, 6))
     else:
         xj_transform = out
         xj_transform.fill(0.0)
+
+    # Optimization: Return active index to allow consumers to bypass full vector ops
+    dof_idx = -1
 
     if jtype == "Rx":  # Revolute about x-axis
         c = math.cos(q)
@@ -92,6 +101,7 @@ def jcalc(
         xj_transform[5, 4] = s
         xj_transform[5, 5] = c
         s_subspace = S_RX
+        dof_idx = 0
 
     elif jtype == "Ry":  # Revolute about y-axis
         c = math.cos(q)
@@ -109,6 +119,7 @@ def jcalc(
         xj_transform[5, 3] = -s
         xj_transform[5, 5] = c
         s_subspace = S_RY
+        dof_idx = 1
 
     elif jtype == "Rz":  # Revolute about z-axis
         c = math.cos(q)
@@ -126,24 +137,28 @@ def jcalc(
         xj_transform[4, 4] = c
         xj_transform[5, 5] = 1.0
         s_subspace = S_RZ
+        dof_idx = 2
 
     elif jtype == "Px":  # Prismatic along x-axis
         np.fill_diagonal(xj_transform, 1.0)
         xj_transform[4, 2] = q
         xj_transform[5, 1] = -q
         s_subspace = S_PX
+        dof_idx = 3
 
     elif jtype == "Py":  # Prismatic along y-axis
         np.fill_diagonal(xj_transform, 1.0)
         xj_transform[3, 2] = -q
         xj_transform[5, 0] = q
         s_subspace = S_PY
+        dof_idx = 4
 
     elif jtype == "Pz":  # Prismatic along z-axis
         np.fill_diagonal(xj_transform, 1.0)
         xj_transform[3, 1] = q
         xj_transform[4, 0] = -q
         s_subspace = S_PZ
+        dof_idx = 5
 
     else:
         msg = (
@@ -154,4 +169,4 @@ def jcalc(
             msg,
         )
 
-    return xj_transform, s_subspace
+    return xj_transform, s_subspace, dof_idx
