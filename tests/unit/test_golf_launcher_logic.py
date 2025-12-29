@@ -277,6 +277,7 @@ class TestGolfLauncherLogic:
         thread_instance.result = MagicMock()
 
         launcher = GolfLauncher()
+        launcher.engine_manager = MagicMock()
 
         assert launcher.windowTitle() == "Golf Modeling Suite - GolfingRobot"
         mock_thread.return_value.start.assert_called_once()
@@ -302,6 +303,7 @@ class TestGolfLauncherLogic:
         registry_instance.get_model.return_value = mock_model
 
         launcher = GolfLauncher()
+        launcher.engine_manager = MagicMock()
 
         # Initial state: No Docker, No Model
         assert launcher.btn_launch.isEnabled() is False
@@ -341,6 +343,7 @@ class TestGolfLauncherLogic:
         registry_instance.get_model.return_value = mock_model
 
         launcher = GolfLauncher()
+        launcher.engine_manager = MagicMock()
         launcher.docker_available = True
         launcher.select_model("test_model")
 
@@ -380,6 +383,7 @@ class TestGolfLauncherLogic:
         registry_instance.get_model.return_value = mock_model
 
         launcher = GolfLauncher()
+        launcher.engine_manager = MagicMock()
         launcher.docker_available = True
         launcher.select_model("generic_mjcf")
 

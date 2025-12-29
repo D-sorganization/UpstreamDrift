@@ -1,3 +1,5 @@
+from unittest.mock import MagicMock
+
 """Physics validation tests verifying energy conservation."""
 
 import logging
@@ -24,6 +26,9 @@ def test_mujoco_ballistic_energy_conservation():
         pytest.skip("MuJoCo not installed")
 
     import mujoco
+
+    if isinstance(mujoco, MagicMock):
+        pytest.skip("mujoco is mocked")
 
     # 1. Setup Simulation
     # Define a simple XML model: a particle falling under gravity
@@ -84,6 +89,9 @@ def test_pinocchio_energy_check():
         pytest.skip("Pinocchio not installed")
 
     import pinocchio
+
+    if isinstance(pinocchio, MagicMock):
+        pytest.skip("pinocchio is mocked")
 
     # 1. Create Model (Free floating body)
     model = pinocchio.Model()
@@ -155,7 +163,10 @@ def test_drake_energy_conservation():
     if not is_engine_available(EngineType.DRAKE):
         pytest.skip("Drake not installed")
 
-    import pydrake.all
+    import pydrake
+
+    if isinstance(pydrake, MagicMock):
+        pytest.skip("pydrake is mocked").all
 
     # 1. Create a MultibodyPlant (Standard Boilerplate)
     builder = pydrake.systems.framework.DiagramBuilder()
