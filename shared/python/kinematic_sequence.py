@@ -35,7 +35,9 @@ class KinematicSequenceResult:
     sequence_order: list[str]  # Names in order of peak time
     expected_order: list[str] | None
     efficiency_score: float  # 0.0 to 1.0
-    timing_gaps: dict[str, float] = field(default_factory=dict)  # Time diff between peaks
+    timing_gaps: dict[str, float] = field(
+        default_factory=dict
+    )  # Time diff between peaks
     is_valid_sequence: bool = False  # True if order matches expected
 
 
@@ -127,7 +129,6 @@ class KinematicSequenceAnalyzer:
                 is_valid = False
             else:
                 # Calculate simple match score
-                matches = 0
 
                 # Check direct position matches
                 # Note: This is strict. If one is missing, it shifts everything.
@@ -141,6 +142,7 @@ class KinematicSequenceAnalyzer:
                 peak_map = {p.name: p.time for p in peaks}
 
                 import itertools
+
                 for s1, s2 in itertools.combinations(relevant_expected, 2):
                     if s1 in peak_map and s2 in peak_map:
                         total_pairs += 1
@@ -150,9 +152,9 @@ class KinematicSequenceAnalyzer:
                 if total_pairs > 0:
                     efficiency_score = correct_pairs / total_pairs
                 else:
-                    efficiency_score = 1.0 if len(peaks) < 2 else 0.0 # Trivial case
+                    efficiency_score = 1.0 if len(peaks) < 2 else 0.0  # Trivial case
 
-                is_valid = (efficiency_score == 1.0)
+                is_valid = efficiency_score == 1.0
 
         return KinematicSequenceResult(
             peaks=peaks,
