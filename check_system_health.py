@@ -10,7 +10,7 @@ import time
 from pathlib import Path
 
 
-def print_result(component: str, status: str, message: str = '') -> None:
+def print_result(component: str, status: str, message: str = "") -> None:
     color = "\033[92m" if status == "OK" else "\033[91m"
     reset = "\033[0m"
     print(f"{component:<30} [{color}{status}{reset}] {message}")
