@@ -12,6 +12,7 @@ from mujoco_humanoid_golf.spatial_algebra import (
     cross_motion_fast,
     jcalc,
 )
+from mujoco_humanoid_golf.spatial_algebra.joints import JOINT_AXIS_INDICES
 from shared.python import constants
 
 DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
@@ -124,6 +125,9 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     scratch_mat = np.empty((6, 6))
     i_v_buf = np.empty(6)
 
+    # Pre-compute active indices for optimization
+    active_indices = [JOINT_AXIS_INDICES.get(jt, -1) for jt in model["jtype"]]
+
     # --- Pass 1: Forward kinematics ---
     for i in range(nb):
         # OPTIMIZATION: Use pre-allocated buffer for jcalc
@@ -168,14 +172,27 @@ def aba(  # noqa: C901, PLR0912, PLR0915
 
     # --- Pass 2: Backward recursion (articulated-body inertias) ---
     for i in range(nb - 1, -1, -1):
+        idx = active_indices[i]
+
         # u_force[:, i] = ia_articulated[i] @ s_subspace[i]
-        np.matmul(ia_articulated[i], s_subspace[i], out=u_force[:, i])
+        if idx != -1:
+            # OPTIMIZATION: s_subspace is sparse (one 1.0)
+            # u_force becomes just a column copy of ia_articulated
+            u_force[:, i] = ia_articulated[i][:, idx]
+        else:
+            np.matmul(ia_articulated[i], s_subspace[i], out=u_force[:, i])
 
         # d[i] = s_subspace[i] @ u_force[:, i]  # Joint-space inertia
-        d[i] = np.dot(s_subspace[i], u_force[:, i])
+        if idx != -1:
+            d[i] = u_force[idx, i]
+        else:
+            d[i] = np.dot(s_subspace[i], u_force[:, i])
 
         # u[i] = tau[i] - s_subspace[i] @ pa_bias[:, i]  # Bias torque
-        u[i] = tau[i] - np.dot(s_subspace[i], pa_bias[:, i])
+        if idx != -1:
+            u[i] = tau[i] - pa_bias[idx, i]
+        else:
+            u[i] = tau[i] - np.dot(s_subspace[i], pa_bias[:, i])
 
         # Articulated-body inertia update for parent
         if model["parent"][i] != -1:
