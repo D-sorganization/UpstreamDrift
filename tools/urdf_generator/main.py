@@ -1,4 +1,3 @@
-
 """Interactive URDF Generator Tool.
 
 This tool allows users to graphically create URDF models by adding links and joints.
