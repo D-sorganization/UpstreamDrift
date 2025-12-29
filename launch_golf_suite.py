@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """Golf Modeling Suite - Main Launcher Script.
 
