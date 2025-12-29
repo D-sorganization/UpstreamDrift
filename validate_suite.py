@@ -231,7 +231,7 @@ def validate_configuration_files() -> None:
     return True
 
 
-def run_comprehensive_validation() -> None:
+def run_comprehensive_validation() -> bool:
     """Run all validation tests."""
     logger.info("Starting comprehensive Golf Modeling Suite validation...")
     logger.info("=" * 60)
