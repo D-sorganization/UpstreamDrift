@@ -7,21 +7,11 @@ try:
     import casadi as ca
     import pinocchio as pin
     import pinocchio.casadi as cpin
-except ImportError as e:
-    print(f"Error importing dependencies: {e}")
-    print("Please install casadi and pinocchio:")
-    print("  pip install casadi")
-    print("  conda install pinocchio -c conda-forge")
-    # For testing purposes, we define a dummy main to avoid attribute errors
-    # if this module is imported but dependencies are missing.
-    def main():
-        print("Skipping optimize_arm.py due to missing dependencies.")
 
-    if __name__ == "__main__":
-        sys.exit(0) # Exit gracefully if run as script
-    else:
-        # If imported, stop execution here to prevent NameErrors later
-        raise ImportError(f"Missing dependencies for optimize_arm.py: {e}") from e
+    DEPENDENCIES_AVAILABLE = True
+except ImportError as e:
+    DEPENDENCIES_AVAILABLE = False
+    MISSING_DEP_ERROR = e
 
 
 def main() -> None:
@@ -29,6 +19,15 @@ def main() -> None:
     Example: Optimization of a 2-link arm swing using CasADi + Pinocchio.
     Objective: Swing from hanging down (0,0) to upright (pi, 0) with minimum effort.
     """
+    if not DEPENDENCIES_AVAILABLE:
+        print(
+            f"Skipping optimize_arm.py due to missing dependencies: {MISSING_DEP_ERROR}"
+        )
+        print("Please install casadi and pinocchio:")
+        print("  pip install casadi")
+        print("  conda install pinocchio -c conda-forge")
+        return
+
     print("Setting up optimization problem...")
 
     # 1. Load Model

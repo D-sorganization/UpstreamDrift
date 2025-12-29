@@ -1,0 +1,137 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-8.4.1, pluggy-1.6.0
+benchmark: 4.0.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: C:\Users\diete\Repositories\Golf_Modeling_Suite
+configfile: pyproject.toml
+plugins: anyio-4.9.0, benchmark-4.0.0, cov-7.0.0
+collected 13 items
+
+tests\unit\test_output_manager.py .............
+ERROR: Coverage failure: total of 2 is less than fail-under=10
+                                                                         [100%]
+
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.13.5-final-0 _______________
+
+Name                                                                                            Stmts   Miss  Cover   Missing
+-----------------------------------------------------------------------------------------------------------------------------
+engines\__init__.py                                                                                 0      0   100%
+engines\physics_engines\__init__.py                                                                 0      0   100%
+engines\physics_engines\mujoco\__init__.py                                                          0      0   100%
+engines\physics_engines\mujoco\add_defusedxml_to_robotics_env.py                                   60     60     0%   4-158
+engines\physics_engines\mujoco\add_qt_dependencies.py                                              47     47     0%   4-144
+engines\physics_engines\mujoco\create_myo_placeholders.py                                          21     21     0%   4-233
+engines\physics_engines\mujoco\docker_test_dependencies.py                                         96     96     0%   4-161
+engines\physics_engines\mujoco\fix_linting.py                                                       7      7     0%   4-35
+engines\physics_engines\mujoco\head_models.py                                                      96     96     0%   7-1600
+engines\physics_engines\mujoco\python\__init__.py                                                   0      0   100%
+engines\physics_engines\mujoco\python\examples\__init__.py                                          0      0   100%
+engines\physics_engines\mujoco\python\examples\example_featherstone_algorithms.py                  28     28     0%   7-74
+engines\physics_engines\mujoco\python\examples\example_screw_theory.py                             39     39     0%   7-82
+engines\physics_engines\mujoco\python\golf_suite_launcher.py                                       89     89     0%   6-182
+engines\physics_engines\mujoco\python\humanoid_launcher.py                                        588    588     0%   7-1075
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\__init__.py                             18     18     0%   22-97
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\__main__.py                            146    146     0%   3-360
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\advanced_control.py                    227    227     0%   12-673
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\advanced_export.py                     184    184     0%   9-574
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\advanced_gui.py                        187    187     0%   11-406
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\advanced_gui_methods.py                187    187     0%   1-361
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\advanced_kinematics.py                 185    185     0%   11-570
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\biomechanics.py                        246    246     0%   8-564
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\cli_runner.py                          151    151     0%   3-315
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\club_configurations.py                  66     66     0%   6-478
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\control_system.py                      105    105     0%   6-318
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\examples_advanced_robotics.py          112    112     0%   7-318
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\examples_chaotic_pendulum.py           256    256     0%   14-563
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\examples_joint_analysis.py             101    101     0%   13-231
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\examples_motion_capture.py             160    160     0%   15-470
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\grip_modelling_tab.py                  253    253     0%   3-532
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\gui\__init__.py                          0      0   100%
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\gui\tabs\__init__.py                     3      3     0%   1-4
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\gui\tabs\analysis_tab.py               101    101     0%   1-213
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\gui\tabs\controls_tab.py               547    547     0%   1-889
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\gui\tabs\manipulation_tab.py           423    423     0%   1-707
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\gui\tabs\physics_tab.py                144    144     0%   1-436
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\gui\tabs\plotting_tab.py               139    139     0%   1-256
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\gui\tabs\visualization_tab.py          310    310     0%   1-524
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\interactive_manipulation.py            302    302     0%   11-813
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\inverse_dynamics.py                    209    209     0%   13-772
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\joint_analysis.py                      144    144     0%   13-395
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\kinematic_forces.py                    211    211     0%   16-669
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\linkage_mechanisms\__init__.py          43     43     0%   18-1346
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\meshcat_adapter.py                     131    131     0%   1-293
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\models.py                               97     97     0%   7-1602
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\motion_capture.py                      239    239     0%   11-709
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\motion_optimization.py                 265    265     0%   12-704
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\pinocchio_interface.py                 139    139     0%   20-565
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\playback_control.py                    112    112     0%   10-284
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\plotting.py                             15     15     0%   7-39
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\polynomial_generator.py                300    300     0%   12-566
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\recording_library.py                   252    252     0%   10-663
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\rigid_body_dynamics\__init__.py          4      4     0%   17-21
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\rigid_body_dynamics\aba.py             105    105     0%   7-292
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\rigid_body_dynamics\crba.py             49     49     0%   5-148
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\rigid_body_dynamics\rnea.py             82     82     0%   7-223
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\screw_theory\__init__.py                 5      5     0%   19-24
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\screw_theory\adjoint.py                 13     13     0%   5-78
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\screw_theory\exponential.py             51     51     0%   5-177
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\screw_theory\screws.py                  15     15     0%   5-103
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\screw_theory\twists.py                  22     22     0%   5-103
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\sim_widget.py                          813    813     0%   3-1609
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\spatial_algebra\__init__.py              5      5     0%   20-33
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\spatial_algebra\inertia.py              32     32     0%   8-123
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\spatial_algebra\joints.py               87     87     0%   8-183
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\spatial_algebra\spatial_vectors.py     139    139     0%   8-379
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\spatial_algebra\transforms.py           59     59     0%   8-215
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\statistical_analysis.py                  3      3     0%   6-16
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\telemetry.py                           178    178     0%   9-321
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\urdf_io.py                             440    440     0%   14-926
+engines\physics_engines\mujoco\python\mujoco_humanoid_golf\video_export.py                        185    185     0%   10-456
+engines\physics_engines\mujoco\python\playground_experiments\__init__.py                            0      0   100%
+engines\physics_engines\mujoco\python\playground_experiments\humanoid_cm_demo.py                   77     77     0%   1-138
+engines\physics_engines\mujoco\python\playground_experiments\mocapact_demo.py                      40     40     0%   10-84
+engines\physics_engines\mujoco\python\src\__init__.py                                               5      5     0%   7-15
+engines\physics_engines\mujoco\python\src\logger_utils.py                                          31     31     0%   7-83
+engines\physics_engines\mujoco\python\validate_models.py                                           50     50     0%   4-94
+engines\physics_engines\mujoco\rebuild_docker.py                                                   35     35     0%   4-65
+engines\physics_engines\myosim\__init__.py                                                          0      0   100%
+engines\physics_engines\myosim\python\__init__.py                                                   0      0   100%
+engines\physics_engines\myosim\python\myosim\__init__.py                                            0      0   100%
+engines\physics_engines\myosim\python\myosim\model.py                                              45     45     0%   1-74
+engines\physics_engines\opensim\__init__.py                                                         0      0   100%
+engines\physics_engines\opensim\python\__init__.py                                                  0      0   100%
+engines\physics_engines\opensim\python\opensim_golf\__init__.py                                     0      0   100%
+engines\physics_engines\opensim\python\opensim_golf\core.py                                        95     95     0%   5-227
+launchers\__init__.py                                                                               0      0   100%
+launchers\golf_launcher.py                                                                        419    419     0%   10-868
+launchers\golf_suite_launcher.py                                                                  130    130     0%   10-218
+launchers\unified_launcher.py                                                                      77     77     0%   7-164
+shared\python\__init__.py                                                                          26      8    69%   45-55
+shared\python\biomechanics_data.py                                                                 28     28     0%   7-72
+shared\python\common_utils.py                                                                      91     79    13%   30-32, 45-52, 67-78, 91-100, 115-124, 142-167, 181-202, 214-236
+shared\python\comparative_analysis.py                                                             107    107     0%   7-255
+shared\python\comparative_plotting.py                                                             100    100     0%   6-342
+shared\python\constants.py                                                                         46     46     0%   12-92
+shared\python\core.py                                                                              17      0   100%
+shared\python\engine_manager.py                                                                   236    199    16%   47-99, 107, 122-138, 142-148, 159-181, 187-241, 247-290, 296-331, 337-362, 370-383, 387-405, 413, 424, 432, 449-468, 477-480, 491-494, 503-536
+shared\python\engine_probes.py                                                                    187    187     0%   7-461
+shared\python\kinematic_sequence.py                                                                77     77     0%   8-192
+shared\python\model_registry.py                                                                    49     49     0%   3-113
+shared\python\optimization\__init__.py                                                              0      0   100%
+shared\python\optimization\examples\__init__.py                                                     0      0   100%
+shared\python\optimization\examples\optimize_arm.py                                                82     82     0%   1-166
+shared\python\output_manager.py                                                                   219     39    82%   60, 66, 142-143, 147, 175, 194-195, 211-212, 217-219, 247, 262, 277-279, 344-350, 370-372, 392-402, 427-428
+shared\python\physics_parameters.py                                                               120    120     0%   7-447
+shared\python\plotting.py                                                                         668    668     0%   13-1517
+shared\python\pose_estimation\__init__.py                                                           2      2     0%   7-9
+shared\python\pose_estimation\interface.py                                                         11     11     0%   3-20
+shared\python\pose_estimation\openpose_estimator.py                                                15     15     0%   1-31
+shared\python\signal_processing.py                                                                 32     32     0%   8-131
+shared\python\statistical_analysis.py                                                             315    315     0%   10-882
+shared\python\swing_plane_analysis.py                                                              40     40     0%   9-109
+-----------------------------------------------------------------------------------------------------------------------------
+TOTAL                                                                                           13540  13276     2%
+Coverage HTML written to dir htmlcov
+Coverage XML written to file coverage.xml
+FAIL Required test coverage of 10% not reached. Total coverage: 1.95%
+============================= 13 passed in 21.10s =============================
