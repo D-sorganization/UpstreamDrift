@@ -17,6 +17,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
+from shared.python.constants import GRAVITY_M_S2  # noqa: E402
 from shared.python.engine_manager import EngineManager, EngineType  # noqa: E402
 from shared.python.output_manager import OutputManager  # noqa: E402
 
@@ -57,7 +58,6 @@ def main():
 
     # Simple ballistic trajectory: z = v0*t - 0.5*g*t^2
     v0 = 20.0
-    GRAVITY_M_S2 = 9.81
 
     for i in range(steps):
         t = i * dt
