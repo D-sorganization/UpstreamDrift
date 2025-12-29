@@ -5,7 +5,7 @@ implementing the standardized PoseEstimator interface.
 """
 
 import logging
-import sys
+import time
 from pathlib import Path
 from typing import Any, ClassVar
 
@@ -79,8 +79,8 @@ class OpenPoseEstimator(PoseEstimator):
         if op is None:
             raise ImportError("pyopenpose module is not installed.")
 
-        self.params = dict()
-        
+        self.params = {}
+
         # Set model folder
         if model_path:
             self.params["model_folder"] = str(model_path)
@@ -98,7 +98,7 @@ class OpenPoseEstimator(PoseEstimator):
         self.params["model_pose"] = "BODY_25"
         self.params["net_resolution"] = "-1x368"
         self.params["number_people_max"] = 1  # Assume single golfer for analysis
-        
+
         try:
             self.wrapper = op.WrapperPython()
             self.wrapper.configure(self.params)
@@ -130,28 +130,25 @@ class OpenPoseEstimator(PoseEstimator):
             # We take the first person (index 0)
             person_keypoints = datum.poseKeypoints[0]
 
-            raw_keypoints = {}
+            keypoints_dict = {}
             total_score = 0.0
             valid_points = 0
 
             for idx, (x, y, score) in enumerate(person_keypoints):
                 if score > 0.0:
                     name = self.KEYPOINT_MAP.get(idx, f"Pt{idx}")
-                    raw_keypoints[name] = np.array([x, y, score])
+                    keypoints_dict[name] = np.array([x, y, score])
                     total_score += score
                     valid_points += 1
 
             avg_confidence = total_score / valid_points if valid_points > 0 else 0.0
 
-            # TODO: Implement basic joint angle calculations from 2D points if needed.
-            # For now, we return empty joint angles as specific biomechanical model 
-            # is needed to convert 2D keypoints to meaningful 3D angles without depth.
-            
+            # returning empty joint angles until a biomechanical model is integrated.
             return PoseEstimationResult(
-                joint_angles={}, 
+                raw_keypoints=keypoints_dict,
                 confidence=avg_confidence,
-                timestamp=0.0,
-                raw_keypoints=raw_keypoints
+                timestamp=time.time(),
+                joint_angles={},
             )
 
         except Exception as e:
@@ -164,7 +161,7 @@ class OpenPoseEstimator(PoseEstimator):
 
         results = []
         cap = cv2.VideoCapture(str(video_path))
-        
+
         if not cap.isOpened():
             raise FileNotFoundError(f"Could not open video: {video_path}")
 
@@ -173,10 +170,10 @@ class OpenPoseEstimator(PoseEstimator):
                 ret, frame = cap.read()
                 if not ret:
                     break
-                
+
                 # Timestamp in seconds
                 ts = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000.0
-                
+
                 result = self.estimate_from_image(frame)
                 result.timestamp = ts
                 results.append(result)
