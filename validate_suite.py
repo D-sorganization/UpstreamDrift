@@ -8,7 +8,6 @@ are properly migrated and functional.
 import importlib.util
 import sys
 from pathlib import Path
-from typing import Any
 
 # Add shared utilities to path
 sys.path.insert(0, str(Path(__file__).parent / "shared" / "python"))
