@@ -17,7 +17,7 @@ from shared.python.common_utils import setup_logging
 logger = setup_logging(__name__)
 
 
-def validate_directory_structure():
+def validate_directory_structure() -> bool:
     """Validate that all expected directories exist."""
     logger.info("Validating directory structure...")
 
@@ -53,7 +53,7 @@ def validate_directory_structure():
     return True
 
 
-def validate_launchers():
+def validate_launchers() -> bool:
     """Validate that launchers can be imported and have required functions."""
     logger.info("Validating launchers...")
 
@@ -91,7 +91,7 @@ def validate_launchers():
     return True
 
 
-def validate_shared_components():
+def validate_shared_components() -> bool:
     """Validate shared Python and MATLAB components."""
     logger.info("Validating shared components...")
 
@@ -151,7 +151,7 @@ def validate_shared_components():
     return True
 
 
-def validate_engine_structure():
+def validate_engine_structure() -> bool:
     """Validate that all physics engines have expected structure."""
     logger.info("Validating engine structure...")
 
@@ -187,7 +187,7 @@ def validate_engine_structure():
     return True
 
 
-def validate_git_repository():
+def validate_git_repository() -> bool:
     """Validate that this is a proper Git repository."""
     logger.info("Validating Git repository...")
 
@@ -210,7 +210,7 @@ def validate_git_repository():
     return True
 
 
-def validate_configuration_files():
+def validate_configuration_files() -> bool:
     """Validate that all configuration files are present."""
     logger.info("Validating configuration files...")
 
@@ -231,7 +231,7 @@ def validate_configuration_files():
     return True
 
 
-def run_comprehensive_validation():
+def run_comprehensive_validation() -> bool:
     """Run all validation tests."""
     logger.info("Starting comprehensive Golf Modeling Suite validation...")
     logger.info("=" * 60)

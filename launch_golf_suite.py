@@ -13,11 +13,19 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent / "shared" / "python"))
 
 from shared.python.common_utils import GolfModelingError, setup_logging
+from shared.python.constants import (
+    DRAKE_LAUNCHER_SCRIPT,
+    GUI_LAUNCHER_SCRIPT,
+    LOCAL_LAUNCHER_SCRIPT,
+    MUJOCO_LAUNCHER_SCRIPT,
+    PINOCCHIO_LAUNCHER_SCRIPT,
+    URDF_GENERATOR_SCRIPT,
+)
 
 logger = setup_logging(__name__)
 
 
-def launch_gui_launcher():
+def launch_gui_launcher() -> int | None:
     """Launch the GUI-based unified launcher."""
     try:
         from launchers.unified_launcher import UnifiedLauncher
@@ -34,7 +42,7 @@ def launch_gui_launcher():
         return False
 
 
-def launch_local_launcher():
+def launch_local_launcher() -> bool:
     """Launch the local Python launcher."""
     try:
         from launchers.golf_suite_launcher import main
@@ -73,7 +81,7 @@ def _validate_and_get_workdir(script_path: Path) -> Path:
     return work_dir
 
 
-def launch_mujoco():
+def launch_mujoco() -> bool:
     """Launch MuJoCo engine directly with validation."""
     try:
         import subprocess
@@ -90,15 +98,7 @@ def launch_mujoco():
             logger.info(f"Fix: {probe_result.get_fix_instructions()}")
             return False
 
-        mujoco_script = (
-            suite_root
-            / "engines"
-            / "physics_engines"
-            / "mujoco"
-            / "python"
-            / "mujoco_humanoid_golf"
-            / "advanced_gui.py"
-        )
+        mujoco_script = suite_root / MUJOCO_LAUNCHER_SCRIPT
 
         work_dir = _validate_and_get_workdir(mujoco_script)
 
@@ -110,7 +110,7 @@ def launch_mujoco():
     return True
 
 
-def launch_drake():
+def launch_drake() -> bool:
     """Launch Drake engine directly with validation."""
     try:
         import subprocess
@@ -127,15 +127,7 @@ def launch_drake():
             logger.info(f"Fix: {probe_result.get_fix_instructions()}")
             return False
 
-        drake_script = (
-            suite_root
-            / "engines"
-            / "physics_engines"
-            / "drake"
-            / "python"
-            / "src"
-            / "golf_gui.py"
-        )
+        drake_script = suite_root / DRAKE_LAUNCHER_SCRIPT
 
         work_dir = _validate_and_get_workdir(drake_script)
 
@@ -148,7 +140,7 @@ def launch_drake():
     return True
 
 
-def launch_pinocchio():
+def launch_pinocchio() -> bool:
     """Launch Pinocchio engine directly with validation."""
     try:
         import subprocess
@@ -165,15 +157,7 @@ def launch_pinocchio():
             logger.info(f"Fix: {probe_result.get_fix_instructions()}")
             return False
 
-        pinocchio_script = (
-            suite_root
-            / "engines"
-            / "physics_engines"
-            / "pinocchio"
-            / "python"
-            / "pinocchio_golf"
-            / "gui.py"
-        )
+        pinocchio_script = suite_root / PINOCCHIO_LAUNCHER_SCRIPT
 
         work_dir = _validate_and_get_workdir(pinocchio_script)
 
@@ -186,13 +170,13 @@ def launch_pinocchio():
     return True
 
 
-def launch_urdf_generator():
+def launch_urdf_generator() -> bool:
     """Launch the Graphic URDF Generator."""
     try:
         import subprocess
 
         suite_root = Path(__file__).parent
-        generator_script = suite_root / "tools" / "urdf_generator" / "main.py"
+        generator_script = suite_root / URDF_GENERATOR_SCRIPT
 
         work_dir = suite_root
 
@@ -205,7 +189,7 @@ def launch_urdf_generator():
     return True
 
 
-def show_status():
+def show_status() -> None:
     """Show Golf Modeling Suite status."""
     try:
         from launchers.unified_launcher import UnifiedLauncher
@@ -218,7 +202,7 @@ def show_status():
         _show_basic_status()
 
 
-def _show_basic_status():
+def _show_basic_status() -> None:
     """Show basic status (fallback)."""
     suite_root = Path(__file__).parent
 
@@ -247,8 +231,8 @@ def _show_basic_status():
 
     # Check launchers
     launchers = {
-        "GUI Launcher": suite_root / "launchers" / "golf_launcher.py",
-        "Local Launcher": suite_root / "launchers" / "golf_suite_launcher.py",
+        "GUI Launcher": suite_root / GUI_LAUNCHER_SCRIPT,
+        "Local Launcher": suite_root / LOCAL_LAUNCHER_SCRIPT,
     }
 
     lines.append("\nLaunchers:")
@@ -272,7 +256,7 @@ def _show_basic_status():
         logger.info(line)
 
 
-def main():
+def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Golf Modeling Suite - Unified Launcher",

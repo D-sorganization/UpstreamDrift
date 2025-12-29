@@ -3,6 +3,7 @@
 import logging
 import sys
 from pathlib import Path
+from typing import Any
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QAction
@@ -32,7 +33,7 @@ class URDFGeneratorWindow(QMainWindow):
     segment_added = pyqtSignal(dict)  # Emitted when a segment is added
     segment_removed = pyqtSignal(str)  # Emitted when a segment is removed
 
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the main window.
 
         Args:
@@ -400,7 +401,7 @@ class URDFGeneratorWindow(QMainWindow):
             "Compatible with MuJoCo, Drake, and Pinocchio.",
         )
 
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, event: Any) -> None:
         """Handle window close event."""
         from PyQt6.QtWidgets import QMessageBox
 
@@ -428,7 +429,7 @@ class URDFGeneratorWindow(QMainWindow):
         logger.info("URDF Generator window closed")
 
 
-def main():
+def main() -> None:
     """Main entry point for the URDF Generator."""
     app = QApplication(sys.argv)
     app.setApplicationName("URDF Generator")

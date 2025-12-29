@@ -95,7 +95,7 @@ def run_tests(engine_filter: str, test_type: str) -> bool:
         return False
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Run Physics Validation Suite")
     parser.add_argument(
         "--engine",

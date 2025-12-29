@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class URDFBuilder:
     """Builder class for creating URDF files with support for parallel configurations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the URDF builder."""
         self.segments: list[dict] = []
         self.materials: dict[str, dict] = {}

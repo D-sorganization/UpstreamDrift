@@ -12,7 +12,7 @@ except ImportError:
     exit(1)
 
 
-def create_favicon():
+def create_favicon() -> bool:
     """Create favicon and icon files from GolfingRobot.png"""
 
     # Paths

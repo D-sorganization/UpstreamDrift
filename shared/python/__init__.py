@@ -14,6 +14,7 @@ __author__ = "Golf Modeling Suite Team"
 # about missing dependencies only when specific features are used.
 
 from pathlib import Path  # Lightweight, always available
+from typing import Any
 
 # Suite-wide constants
 SUITE_ROOT = Path(__file__).parent.parent.parent
@@ -40,7 +41,7 @@ _HEAVY_IMPORTS = {
 }
 
 
-def __getattr__(name):
+def __getattr__(name: str) -> Any:
     """Lazy import for heavy dependencies to avoid immediate scipy/matplotlib dependency."""
     if name in _HEAVY_IMPORTS:
         module_name, class_name = _HEAVY_IMPORTS[name]

@@ -66,7 +66,7 @@ def find_duplicates(root_dir: Path, tracked_files: set[str]) -> int:
     return exit_code
 
 
-def main():
+def main() -> None:
     root = Path(".")
     # Files that must NOT be duplicated
     tracked_files = {

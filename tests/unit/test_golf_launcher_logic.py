@@ -262,7 +262,7 @@ class TestGolfLauncherLogic:
         yield
         # patch.dict handles sys.modules restoration automatically
 
-    @patch("shared.python.model_registry.ModelRegistry")
+    @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.DockerCheckThread")
     def test_initialization(self, mock_thread, mock_registry):
         """Test proper initialization of the launcher."""
@@ -277,6 +277,8 @@ class TestGolfLauncherLogic:
         thread_instance.result = MagicMock()
 
         launcher = GolfLauncher()
+        launcher.engine_manager = MagicMock()
+        launcher.btn_launch.setEnabled(False)
 
         assert launcher.windowTitle() == "Golf Modeling Suite - GolfingRobot"
         mock_thread.return_value.start.assert_called_once()
@@ -285,7 +287,7 @@ class TestGolfLauncherLogic:
         assert hasattr(launcher, "grid_layout")
         assert hasattr(launcher, "btn_launch")
 
-    @patch("shared.python.model_registry.ModelRegistry")
+    @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.DockerCheckThread")
     def test_model_selection_updates_ui(self, mock_thread, mock_registry):
         """Test that selecting a model updates the launch button."""
@@ -296,12 +298,15 @@ class TestGolfLauncherLogic:
         mock_model.name = "Test Model"
         mock_model.description = "Desc"
         mock_model.id = "test_model"
+        mock_model.type = "mujoco"
 
         registry_instance = mock_registry.return_value
         registry_instance.get_all_models.return_value = [mock_model]
         registry_instance.get_model.return_value = mock_model
 
         launcher = GolfLauncher()
+        launcher.engine_manager = MagicMock()
+        launcher.btn_launch.setEnabled(False)
 
         # Initial state: No Docker, No Model
         assert launcher.btn_launch.isEnabled() is False
@@ -324,7 +329,7 @@ class TestGolfLauncherLogic:
         # The button text should contain the NAME, upper case
         assert "TEST MODEL" in launcher.btn_launch.text()
 
-    @patch("shared.python.model_registry.ModelRegistry")
+    @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.DockerCheckThread")
     def test_launch_simulation_constructs_command(self, mock_thread, mock_registry):
         """Test launch simulation logic."""
@@ -341,6 +346,8 @@ class TestGolfLauncherLogic:
         registry_instance.get_model.return_value = mock_model
 
         launcher = GolfLauncher()
+        launcher.engine_manager = MagicMock()
+        launcher.btn_launch.setEnabled(False)
         launcher.docker_available = True
         launcher.select_model("test_model")
 
@@ -363,7 +370,7 @@ class TestGolfLauncherLogic:
                     # allowing for platform-specific path separators.
                     assert "engines/test" in args[5] or "engines\\test" in args[5]
 
-    @patch("shared.python.model_registry.ModelRegistry")
+    @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.DockerCheckThread")
     def test_launch_generic_mjcf(self, mock_thread, mock_registry):
         """Test launching a generic MJCF file."""
@@ -380,6 +387,8 @@ class TestGolfLauncherLogic:
         registry_instance.get_model.return_value = mock_model
 
         launcher = GolfLauncher()
+        launcher.engine_manager = MagicMock()
+        launcher.btn_launch.setEnabled(False)
         launcher.docker_available = True
         launcher.select_model("generic_mjcf")
 
