@@ -17,3 +17,7 @@
 ## 2024-10-25 - Live Parameter Tuning in Physics Simulations
 **Learning:** Users expect immediate feedback when adjusting simulation parameters (mass, length) without restarting the simulation loop. This encourages "playful exploration".
 **Action:** Implement `input` listeners on parameter fields to update the simulation model in real-time, while carefully separating state variables (integrator state) from model parameters.
+
+## 2024-05-23 - Standard Icons in PyQt6
+**Learning:** PyQt6's `QStyle.StandardPixmap` provides a reliable way to add semantic icons (like Play, Clear, Trash) without managing external assets. This ensures visual consistency with the OS and reduces bundle size.
+**Action:** Always check `QStyle.StandardPixmap` before adding custom icon files for generic actions like Launch, Clear, or Save.
