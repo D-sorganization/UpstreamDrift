@@ -25,9 +25,9 @@ from shared.python.engine_manager import EngineManager, EngineStatus  # noqa: E4
 def is_mock(module_name: str) -> bool:
     """Check if a module in sys.modules is a mock."""
     mod = sys.modules.get(module_name)
-    return isinstance(mod, MagicMock) or (
-        hasattr(mod, "__file__") and mod.__file__ is None
-    )
+    if mod is None:
+        return False
+    return isinstance(mod, MagicMock) or getattr(mod, "__file__", None) is None
 
 
 # Test assets

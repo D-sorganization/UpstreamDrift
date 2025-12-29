@@ -108,7 +108,7 @@ class TestEngineIntegration:
 
         # Validate we have at least one engine available in the test environment
         available = manager.get_available_engines()
-        assert len(available) >= 0  # May be 0 in minimal CI environment
+        assert isinstance(available, list)  # May be empty in minimal CI environment
 
     @pytest.mark.integration
     def test_engine_parameter_consistency(self):
