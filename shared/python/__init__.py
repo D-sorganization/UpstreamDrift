@@ -40,7 +40,7 @@ _HEAVY_IMPORTS = {
 }
 
 
-def __getattr__(name):
+def __getattr__(name: str) -> Any:
     """Lazy import for heavy dependencies to avoid immediate scipy/matplotlib dependency."""
     if name in _HEAVY_IMPORTS:
         module_name, class_name = _HEAVY_IMPORTS[name]
