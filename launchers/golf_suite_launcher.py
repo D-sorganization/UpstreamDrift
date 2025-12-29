@@ -81,16 +81,31 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         # Buttons
         self.btn_mujoco = QtWidgets.QPushButton("Launch MuJoCo Engine")
         self.btn_mujoco.setMinimumHeight(40)
+        self.btn_mujoco.setIcon(
+            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        )
+        self.btn_mujoco.setToolTip("Launch the MuJoCo physics engine interface")
+        self.btn_mujoco.setAccessibleName("Launch MuJoCo")
         self.btn_mujoco.clicked.connect(self._launch_mujoco)
         layout.addWidget(self.btn_mujoco)
 
         self.btn_drake = QtWidgets.QPushButton("Launch Drake Engine")
         self.btn_drake.setMinimumHeight(40)
+        self.btn_drake.setIcon(
+            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        )
+        self.btn_drake.setToolTip("Launch the Drake physics engine interface")
+        self.btn_drake.setAccessibleName("Launch Drake")
         self.btn_drake.clicked.connect(self._launch_drake)
         layout.addWidget(self.btn_drake)
 
         self.btn_pinocchio = QtWidgets.QPushButton("Launch Pinocchio Engine")
         self.btn_pinocchio.setMinimumHeight(40)
+        self.btn_pinocchio.setIcon(
+            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        )
+        self.btn_pinocchio.setToolTip("Launch the Pinocchio physics engine interface")
+        self.btn_pinocchio.setAccessibleName("Launch Pinocchio")
         self.btn_pinocchio.clicked.connect(self._launch_pinocchio)
         layout.addWidget(self.btn_pinocchio)
 
@@ -114,6 +129,13 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         log_controls.addStretch()
 
         clear_btn = QtWidgets.QPushButton("Clear Log")
+        clear_btn.setIcon(
+            self.style().standardIcon(
+                QtWidgets.QStyle.StandardPixmap.SP_DialogResetButton
+            )
+        )
+        clear_btn.setToolTip("Clear the simulation log output")
+        clear_btn.setAccessibleName("Clear Log")
         clear_btn.clicked.connect(self.clear_log)
         log_controls.addWidget(clear_btn)
 
