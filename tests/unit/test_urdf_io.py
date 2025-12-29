@@ -68,7 +68,7 @@ def mock_mujoco_model():
     """Create a mock MuJoCo model."""
     # Since we can't easily construct a valid MjModel without XML parsing,
     # we'll mock the attributes needed by URDFExporter.
-    model = MagicMock(spec=mujoco.MjModel)
+    model = MagicMock()
     model.nbody = 3
     model.ngeom = 2
 

@@ -125,7 +125,7 @@ def create_ultra_sharp_icon(source_img: Image.Image, target_size: int) -> Image.
     return final_img
 
 
-def diagnose_and_fix_icons():
+def diagnose_and_fix_icons() -> bool:
     """Diagnose current icon quality and create ultra-sharp versions"""
 
     source_image = Path("GolfingRobot.png")

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 class SegmentManager:
     """Manager for URDF segments with support for parallel configurations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the segment manager."""
         self.segments: dict[str, dict] = {}
         self.hierarchy: dict[str, list[str]] = {}  # parent -> [children]

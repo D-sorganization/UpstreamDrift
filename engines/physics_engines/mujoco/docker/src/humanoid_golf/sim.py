@@ -1,7 +1,6 @@
 import csv
 import json
 import os
-import pickle
 import typing
 
 import imageio
@@ -263,10 +262,14 @@ class PhysicsEnvWrapper:
 
 def save_state(physics, filename) -> None:
     """Save simulation state to file."""
+    # Get state as numpy array
     state = physics.get_state()
+    # Convert to list for JSON serialization
+    state_list = state.tolist()
+
     try:
-        with open(filename, "wb") as f:
-            pickle.dump(state, f)
+        with open(filename, "w") as f:
+            json.dump(state_list, f)
         print(f"State saved to {filename}")
     except Exception as e:
         print(f"Error saving state: {e}")
@@ -276,8 +279,10 @@ def load_state(physics, filename) -> None:
     """Load simulation state from file."""
     if os.path.exists(filename):
         try:
-            with open(filename, "rb") as f:
-                state = pickle.load(f)
+            with open(filename) as f:
+                state_list = json.load(f)
+            # Convert back to numpy array
+            state = np.array(state_list)
             physics.set_state(state)
             print(f"State loaded from {filename}")
         except Exception as e:

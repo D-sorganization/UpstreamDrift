@@ -14,10 +14,10 @@ from pathlib import Path
 class Phase1Validator:
     """Validates Phase 1 infrastructure upgrades."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.project_root = Path(__file__).parent
-        self.results = {}
-        self.errors = []
+        self.results: dict[str, bool] = {}
+        self.errors: list[str] = []
 
     def run_validation(self) -> dict[str, bool]:
         """Run all validation checks."""
@@ -434,7 +434,7 @@ class Phase1Validator:
             print(f"   Error checking CI/CD config: {e}")
             return False
 
-    def print_summary(self):
+    def print_summary(self) -> None:
         """Print validation summary."""
         print("\n" + "=" * 50)
         print("📊 VALIDATION SUMMARY")
@@ -471,7 +471,7 @@ class Phase1Validator:
             print(f"   {status} {check_name}")
 
 
-def main():
+def main() -> None:
     """Main validation function."""
     validator = Phase1Validator()
     results = validator.run_validation()

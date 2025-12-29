@@ -61,7 +61,7 @@ def create_windows_optimized_icon(source_img: Image.Image, size: int) -> Image.I
     return final
 
 
-def create_windows_optimized_icons():
+def create_windows_optimized_icons() -> bool:
     """Create Windows-optimized icons"""
 
     source_image = Path("GolfingRobot.png")
