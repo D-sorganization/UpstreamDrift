@@ -34,6 +34,8 @@ def run_mujoco_pendulum(params: SimplePendulumParams) -> dict[str, Any]:
     """Run pendulum simulation in MuJoCo."""
     try:
         import mujoco
+        if "unittest.mock" in str(type(mujoco)):
+             return {"error": "MuJoCo is mocked"}
     except ImportError:
         return {"error": "MuJoCo not installed"}
 
