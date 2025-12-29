@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -63,30 +64,28 @@ def test_mujoco_loading_failure_missing_dependency(mock_probe, mock_engine_manag
     assert mock_engine_manager.get_current_engine() is None
 
 
+@patch.dict("sys.modules", {
+    "pydrake": MagicMock(),
+    "pydrake.systems.framework": MagicMock(),
+    "pydrake.geometry": MagicMock(),
+})
+@patch("engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine")
 @patch("shared.python.engine_probes.DrakeProbe.probe")
-def test_drake_loading_success(mock_probe, mock_engine_manager):
+def test_drake_loading_success(mock_probe, mock_drake_class, mock_engine_manager):
     """Test successful Drake loading."""
     mock_probe.return_value.is_available.return_value = True
 
     # Force engine availability
     mock_engine_manager.engine_status[EngineType.DRAKE] = EngineStatus.AVAILABLE
 
-    mock_drake = MagicMock()
+    mock_drake = sys.modules["pydrake"]
     mock_drake.__version__ = "1.22.0"
 
-    with patch.dict(
-        "sys.modules",
-        {
-            "pydrake": mock_drake,
-            "pydrake.systems.framework": MagicMock(),
-            "pydrake.geometry": MagicMock(),
-        },
-    ):
-        result = mock_engine_manager.switch_engine(EngineType.DRAKE)
+    result = mock_engine_manager.switch_engine(EngineType.DRAKE)
 
-        assert result is True
-        assert mock_engine_manager.get_current_engine() == EngineType.DRAKE
-        assert mock_engine_manager._drake_module == mock_drake
+    assert result is True
+    assert mock_engine_manager.get_current_engine() == EngineType.DRAKE
+    assert mock_engine_manager._drake_module == mock_drake
 
 
 @patch("shared.python.engine_probes.PinocchioProbe.probe")
