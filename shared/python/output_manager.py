@@ -114,7 +114,7 @@ class OutputManager:
 
     def save_simulation_results(
         self,
-        results: pd.DataFrame | dict[str, Any],
+        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]],
         filename: str,
         format_type: OutputFormat = OutputFormat.CSV,
         engine: str = "mujoco",
@@ -223,7 +223,7 @@ class OutputManager:
         filename: str,
         format_type: OutputFormat = OutputFormat.CSV,
         engine: str = "mujoco",
-    ) -> pd.DataFrame | dict[str, Any]:
+    ) -> pd.DataFrame | dict[str, Any] | list[dict[str, Any]]:
         """
         Load simulation results from file.
 
