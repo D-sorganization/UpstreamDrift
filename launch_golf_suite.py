@@ -26,7 +26,7 @@ from shared.python.constants import (
 logger = setup_logging(__name__)
 
 
-def launch_gui_launcher() -> Any:
+def launch_gui_launcher() -> int | None:
     """Launch the GUI-based unified launcher."""
     try:
         from launchers.unified_launcher import UnifiedLauncher
@@ -43,7 +43,7 @@ def launch_gui_launcher() -> Any:
         return False
 
 
-def launch_local_launcher() -> Any:
+def launch_local_launcher() -> None:
     """Launch the local Python launcher."""
     try:
         from launchers.golf_suite_launcher import main
