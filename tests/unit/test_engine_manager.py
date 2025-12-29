@@ -312,8 +312,12 @@ class TestEngineManagerBehavior:
             assert EngineType.PINOCCHIO not in available
 
             # Verify status reflects reality
-            assert manager.get_engine_status(EngineType.MUJOCO) != EngineStatus.UNAVAILABLE
-            assert manager.get_engine_status(EngineType.DRAKE) == EngineStatus.UNAVAILABLE
+            assert (
+                manager.get_engine_status(EngineType.MUJOCO) != EngineStatus.UNAVAILABLE
+            )
+            assert (
+                manager.get_engine_status(EngineType.DRAKE) == EngineStatus.UNAVAILABLE
+            )
 
     def test_engine_manager_handles_partial_installation(self):
         """Test behavior when engine directory exists but is incomplete.
