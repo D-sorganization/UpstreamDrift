@@ -12,11 +12,6 @@ from mujoco_humanoid_golf.spatial_algebra import (
     cross_motion_fast,
     jcalc,
 )
-<<<<<<< HEAD
-
-=======
-from mujoco_humanoid_golf.spatial_algebra.joints import JOINT_AXIS_INDICES
->>>>>>> origin/audit-fixes-8636978450494694454
 from shared.python import constants
 
 DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
@@ -114,15 +109,12 @@ def rnea(  # noqa: PLR0915
     dof_indices: list[int] = [-1] * nb  # Cache active DOF indices
 
     # Pre-compute active indices for optimization
-    active_indices = [JOINT_AXIS_INDICES.get(jt, -1) for jt in model["jtype"]]
 
     # --- Forward pass: kinematics ---
     for i in range(nb):
         # Calculate joint transform and motion subspace
         # OPTIMIZATION: Use pre-allocated buffer
-        xj_transform, s_subspace, dof_idx = jcalc(
-            model["jtype"][i], q[i], out=xj_buf
-        )
+        xj_transform, s_subspace, dof_idx = jcalc(model["jtype"][i], q[i], out=xj_buf)
         s_subspace_list[i] = s_subspace
         dof_indices[i] = dof_idx
 
@@ -212,7 +204,6 @@ def rnea(  # noqa: PLR0915
         f[:, i] += f_body
 
         # Project force to joint torque
-<<<<<<< HEAD
         s_subspace = s_subspace_list[i]
         dof_idx = dof_indices[i]
 
@@ -221,16 +212,6 @@ def rnea(  # noqa: PLR0915
             tau[i] = f[dof_idx, i]
         else:
             tau[i] = s_subspace @ f[:, i]
-=======
-        idx = active_indices[i]
-        if idx != -1:
-            # OPTIMIZATION: sparse dot product
-            # s_subspace has 1.0 at index idx, 0.0 elsewhere
-            tau[i] = f[idx, i]
-        else:
-            s_subspace = s_subspace_list[i]
-            tau[i] = np.dot(s_subspace, f[:, i])
->>>>>>> origin/audit-fixes-8636978450494694454
 
         # Propagate force to parent
         if model["parent"][i] != -1:
