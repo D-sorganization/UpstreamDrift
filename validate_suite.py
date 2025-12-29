@@ -17,7 +17,7 @@ from shared.python.common_utils import setup_logging
 logger = setup_logging(__name__)
 
 
-def validate_directory_structure() -> None:
+def validate_directory_structure() -> bool:
     """Validate that all expected directories exist."""
     logger.info("Validating directory structure...")
 

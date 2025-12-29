@@ -25,7 +25,7 @@ from shared.python.constants import (
 logger = setup_logging(__name__)
 
 
-def launch_gui_launcher() -> None:
+def launch_gui_launcher() -> bool:
     """Launch the GUI-based unified launcher."""
     try:
         from launchers.unified_launcher import UnifiedLauncher
@@ -42,7 +42,7 @@ def launch_gui_launcher() -> None:
         return False
 
 
-def launch_local_launcher() -> None:
+def launch_local_launcher() -> bool:
     """Launch the local Python launcher."""
     try:
         from launchers.golf_suite_launcher import main
@@ -170,7 +170,7 @@ def launch_pinocchio() -> None:
     return True
 
 
-def launch_urdf_generator() -> None:
+def launch_urdf_generator() -> bool:
     """Launch the Graphic URDF Generator."""
     try:
         import subprocess
@@ -256,7 +256,7 @@ def _show_basic_status() -> None:
         logger.info(line)
 
 
-def main() -> None:
+def main() -> bool | None:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Golf Modeling Suite - Unified Launcher",
