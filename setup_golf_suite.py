@@ -23,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def check_dependencies() -> None:
+def check_dependencies() -> bool:
     """Ensure required dependencies are installed."""
     try:
         import PIL  # noqa: F401

@@ -112,7 +112,7 @@ def create_sharp_icon(img: Image.Image, size: int) -> Image.Image:
     return resized
 
 
-def create_cropped_robot_icon() -> None:
+def create_cropped_robot_icon() -> bool:
     """Create cropped robot icon focusing on the robot character"""
 
     source_image = Path("GolfingRobot.png")
