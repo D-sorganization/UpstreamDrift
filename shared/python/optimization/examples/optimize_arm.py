@@ -2,6 +2,7 @@ import os
 import sys
 
 import numpy as np
+
 try:
     import casadi as ca
     import pinocchio as pin
