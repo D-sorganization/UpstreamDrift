@@ -35,7 +35,6 @@ def test_mujoco_pendulum_accuracy():
         pytest.skip("mujoco is mocked")
 
     # 1. Model: Simple Pendulum (L=1, m=1)
-    # 1. Model: Simple Pendulum (L=1, m=1)
     # Standard pendulum model with point mass at end of massless rod.
     xml = """
     <mujoco>
