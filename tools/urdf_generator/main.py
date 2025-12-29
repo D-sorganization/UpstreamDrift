@@ -1,3 +1,4 @@
+
 """Interactive URDF Generator Tool.
 
 This tool allows users to graphically create URDF models by adding links and joints.
@@ -7,6 +8,7 @@ import logging
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
+from typing import Any
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
@@ -445,7 +447,7 @@ class URDFGenerator(QtWidgets.QMainWindow):
 
 
 class LinkDialog(QtWidgets.QDialog):
-    def __init__(self, parent=None) -> None:
+    def __init__(self, parent: Any = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Add Link")
         layout = QtWidgets.QFormLayout(self)
@@ -481,7 +483,7 @@ class LinkDialog(QtWidgets.QDialog):
 
 
 class JointDialog(QtWidgets.QDialog):
-    def __init__(self, links: list[str], parent=None) -> None:
+    def __init__(self, links: list[str], parent: Any = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Add Joint")
         layout = QtWidgets.QFormLayout(self)

@@ -62,7 +62,7 @@ def run_verification() -> None:
         def __init__(self) -> None:
             self.results: list[dict[str, Any]] = []
 
-        def pytest_runtest_logreport(self, report) -> None:
+        def pytest_runtest_logreport(self, report: Any) -> None:
             if report.when == "call":
                 self.results.append(
                     {

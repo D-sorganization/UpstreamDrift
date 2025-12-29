@@ -1,8 +1,10 @@
+
 """Main window for the Interactive URDF Generator."""
 
 import logging
 import sys
 from pathlib import Path
+from typing import Any
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QAction
@@ -400,7 +402,7 @@ class URDFGeneratorWindow(QMainWindow):
             "Compatible with MuJoCo, Drake, and Pinocchio.",
         )
 
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, event: Any) -> None:
         """Handle window close event."""
         from PyQt6.QtWidgets import QMessageBox
 
