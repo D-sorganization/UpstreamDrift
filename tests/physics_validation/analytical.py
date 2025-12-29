@@ -2,6 +2,8 @@
 
 import numpy as np
 
+from shared.python.constants import GRAVITY_M_S2
+
 
 class AnalyticalPendulum:
     """Exact solution for a simple pendulum."""
@@ -10,7 +12,7 @@ class AnalyticalPendulum:
         self,
         length: float = 1.0,
         mass: float = 1.0,
-        g: float = 9.81,
+        g: float = GRAVITY_M_S2,
         inertia: float | None = None,
     ):
         self.L = length
@@ -26,7 +28,7 @@ class AnalyticalPendulum:
         h = L * (1 - cos(theta))
         """
         h = self.L * (1.0 - np.cos(theta))
-        return self.m * self.g * h
+        return float(self.m * self.g * h)
 
     def kinetic_energy(self, omega: float) -> float:
         """Calculate kinetic energy.
@@ -43,7 +45,7 @@ class AnalyticalPendulum:
 class AnalyticalBallistic:
     """Exact solution for a ballistic trajectory (no drag)."""
 
-    def __init__(self, mass: float = 1.0, g: float = 9.81):
+    def __init__(self, mass: float = 1.0, g: float = GRAVITY_M_S2):
         self.m = mass
         self.g = g
 

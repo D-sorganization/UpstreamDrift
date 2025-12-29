@@ -122,15 +122,17 @@ class TestJoints:
 
     def test_jcalc_revolute(self):
         """Test revolute joint subspace."""
-        X, S = joints.jcalc("Rx", 0.0)
+        X, S, idx = joints.jcalc("Rx", 0.0)
         assert X.shape == (6, 6)
         assert S.shape == (6,)
         np.testing.assert_allclose(S, np.array([1, 0, 0, 0, 0, 0]))
+        assert idx == 0
 
     def test_jcalc_prismatic(self):
         """Test prismatic joint subspace."""
-        X, S = joints.jcalc("Px", 0.0)
+        X, S, idx = joints.jcalc("Px", 0.0)
         np.testing.assert_allclose(S, np.array([0, 0, 0, 1, 0, 0]))
+        assert idx == 3
 
     def test_unknown_joint(self):
         """Test error handling for unknown joint."""

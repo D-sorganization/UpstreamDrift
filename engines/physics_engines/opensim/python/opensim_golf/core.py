@@ -8,6 +8,8 @@ from typing import Any
 
 import numpy as np
 
+from shared.python import constants
+
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -47,7 +49,7 @@ class GolfSwingModel:
         self._state: Any = None
 
         # Simulation parameters
-        self.gravity = -9.81
+        self.gravity = -constants.GRAVITY_M_S2
         self.dt = 0.001
         self.duration = 1.5  # seconds
 
