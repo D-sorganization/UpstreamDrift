@@ -12,6 +12,14 @@ from mujoco_humanoid_golf.spatial_algebra import (
     cross_motion_fast,
     jcalc,
 )
+from mujoco_humanoid_golf.spatial_algebra.joints import (
+    S_PX,
+    S_PY,
+    S_PZ,
+    S_RX,
+    S_RY,
+    S_RZ,
+)
 from shared.python import constants
 
 DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
@@ -186,7 +194,23 @@ def rnea(  # noqa: PLR0915
 
         # Project force to joint torque
         s_subspace = s_subspace_list[i]
-        tau[i] = s_subspace @ f[:, i]
+        # Optimization: Fast path for standard joints (avoids 6 muls + 5 adds)
+        # s_subspace is guaranteed to be one of these singleton objects for
+        # standard joints, so `is` check is valid and fast.
+        if s_subspace is S_RZ:
+            tau[i] = f[2, i]  # Moment Z
+        elif s_subspace is S_RY:
+            tau[i] = f[1, i]  # Moment Y
+        elif s_subspace is S_RX:
+            tau[i] = f[0, i]  # Moment X
+        elif s_subspace is S_PZ:
+            tau[i] = f[5, i]  # Force Z
+        elif s_subspace is S_PY:
+            tau[i] = f[4, i]  # Force Y
+        elif s_subspace is S_PX:
+            tau[i] = f[3, i]  # Force X
+        else:
+            tau[i] = s_subspace @ f[:, i]
 
         # Propagate force to parent
         if model["parent"][i] != -1:
