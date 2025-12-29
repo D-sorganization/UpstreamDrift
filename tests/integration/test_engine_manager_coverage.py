@@ -22,12 +22,12 @@ class TestEngineManagerCoverage:
     def mock_manager(self):
         """Create an EngineManager with mocked probes and paths."""
         with (
-            patch("shared.python.engine_manager.MuJoCoProbe"),
-            patch("shared.python.engine_manager.DrakeProbe"),
-            patch("shared.python.engine_manager.PinocchioProbe"),
-            patch("shared.python.engine_manager.OpenSimProbe"),
-            patch("shared.python.engine_manager.PendulumProbe"),
-            patch("shared.python.engine_manager.MatlabProbe"),
+            patch("shared.python.engine_probes.MuJoCoProbe"),
+            patch("shared.python.engine_probes.DrakeProbe"),
+            patch("shared.python.engine_probes.PinocchioProbe"),
+            patch("shared.python.engine_probes.OpenSimProbe"),
+            patch("shared.python.engine_probes.PendulumProbe"),
+            patch("shared.python.engine_probes.MatlabProbe"),
         ):
             manager = EngineManager(suite_root=Path("/tmp/fake_root"))
             # Mock engine paths to exist
