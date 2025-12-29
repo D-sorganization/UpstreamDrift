@@ -17,7 +17,7 @@ from shared.python.common_utils import setup_logging
 logger = setup_logging(__name__)
 
 
-def validate_directory_structure() -> bool:
+def validate_directory_structure() -> Any:
     """Validate that all expected directories exist."""
     logger.info("Validating directory structure...")
 
@@ -231,7 +231,7 @@ def validate_configuration_files() -> None:
     return True
 
 
-def run_comprehensive_validation() -> bool:
+def run_comprehensive_validation() -> Any:
     """Run all validation tests."""
     logger.info("Starting comprehensive Golf Modeling Suite validation...")
     logger.info("=" * 60)

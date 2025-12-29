@@ -23,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def check_dependencies() -> bool:
+def check_dependencies() -> Any:
     """Ensure required dependencies are installed."""
     try:
         import PIL  # noqa: F401
@@ -184,7 +184,7 @@ def create_shortcut_windows(
         return False
 
 
-def main() -> None:
+def main() -> Any:
     logger.info("Initializing Golf Modeling Suite setup...")
 
     # 1. Sync
