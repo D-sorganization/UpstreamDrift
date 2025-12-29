@@ -81,7 +81,7 @@ def _validate_and_get_workdir(script_path: Path) -> Path:
     return work_dir
 
 
-def launch_mujoco() -> None:
+def launch_mujoco() -> bool:
     """Launch MuJoCo engine directly with validation."""
     try:
         import subprocess
@@ -110,7 +110,7 @@ def launch_mujoco() -> None:
     return True
 
 
-def launch_drake() -> None:
+def launch_drake() -> bool:
     """Launch Drake engine directly with validation."""
     try:
         import subprocess
@@ -140,7 +140,7 @@ def launch_drake() -> None:
     return True
 
 
-def launch_pinocchio() -> None:
+def launch_pinocchio() -> bool:
     """Launch Pinocchio engine directly with validation."""
     try:
         import subprocess
