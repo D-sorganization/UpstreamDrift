@@ -135,32 +135,32 @@ class TestOutputManager(unittest.TestCase):
     def test_cleanup_old_files(self):
         """Test cleaning up old files."""
         self.manager.create_output_structure()
-        
+
         # We use strict mocking to avoid filesystem timestamp issues and OS errors with mocks
-        with patch('shared.python.output_manager.datetime') as mock_datetime:
+        with patch("shared.python.output_manager.datetime") as mock_datetime:
             # Fix "now" to a specific time
             fixed_now = datetime(2025, 1, 10, 12, 0, 0)
             mock_datetime.now.return_value = fixed_now
             mock_datetime.fromtimestamp.side_effect = datetime.fromtimestamp
-            
+
             # Create a file that we will pretend is old
             old_file = self.manager.directories["cache"] / "temp" / "old.txt"
             old_file.parent.mkdir(parents=True, exist_ok=True)
             old_file.touch()
-            
+
             # Mock Path.stat to return an old timestamp
             # 2 days ago from fixed_now
             old_ts = (fixed_now - timedelta(days=2)).timestamp()
-             
-            with patch.object(Path, 'stat') as mock_stat:
+
+            with patch.object(Path, "stat") as mock_stat:
                 mock_stat_res = MagicMock()
                 mock_stat_res.st_mtime = old_ts
-                mock_stat_res.st_mode = 33188 # Regular file mode
+                mock_stat_res.st_mode = 33188  # Regular file mode
                 mock_stat.return_value = mock_stat_res
-                
+
                 # Also mock unlink to verify it was called
-                with patch.object(Path, 'unlink') as mock_unlink:
+                with patch.object(Path, "unlink") as mock_unlink:
                     cleaned = self.manager.cleanup_old_files()
-                    
+
                     self.assertGreaterEqual(cleaned, 1)
                     self.assertTrue(mock_unlink.called)
