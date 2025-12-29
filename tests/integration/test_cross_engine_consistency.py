@@ -216,5 +216,5 @@ class TestCrossEngineConsistency:
                 base_G,
                 rtol=1e-3,
                 atol=1e-4,
-                err_msg=f"Gravity force mismatch betwen {base_name} and {name}",
+                err_msg=f"Gravity force mismatch between {base_name} and {name}",
             )

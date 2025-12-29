@@ -97,8 +97,8 @@ class ProcessWorker(QThread):
             if self.process and self.process.poll() is None:
                 try:
                     self.process.terminate()
-                except Exception:
-                    pass
+                except Exception as e:
+                    self.log_signal.emit(f"Error terminating process: {e}")
 
     def stop(self) -> None:
         """Stop the process."""
