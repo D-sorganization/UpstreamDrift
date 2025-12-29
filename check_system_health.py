@@ -26,7 +26,7 @@ def check_python_module(module_name) -> None:
         return False, f"Error: {e}"
 
 
-def check_docker_image(image_name) -> None:
+def check_docker_image(image_name: str) -> None:
     try:
         result = subprocess.run(
             ["docker", "image", "inspect", image_name], capture_output=True, text=True

@@ -7,6 +7,7 @@ runs validation tests, and generates a detailed compliance report.
 
 import datetime
 import sys
+from typing import Any
 from pathlib import Path
 
 import pytest
@@ -59,7 +60,7 @@ def run_verification() -> None:
 
     class Plugin:
         def __init__(self) -> None:
-            self.results = []
+            self.results: list[dict[str, Any]] = []
 
         def pytest_runtest_logreport(self, report) -> None:
             if report.when == "call":
