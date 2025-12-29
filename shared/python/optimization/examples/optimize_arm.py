@@ -20,7 +20,9 @@ def main() -> None:
     Objective: Swing from hanging down (0,0) to upright (pi, 0) with minimum effort.
     """
     if not DEPENDENCIES_AVAILABLE:
-        print(f"Skipping optimize_arm.py due to missing dependencies: {MISSING_DEP_ERROR}")
+        print(
+            f"Skipping optimize_arm.py due to missing dependencies: {MISSING_DEP_ERROR}"
+        )
         print("Please install casadi and pinocchio:")
         print("  pip install casadi")
         print("  conda install pinocchio -c conda-forge")
