@@ -12,6 +12,7 @@ import pytest
 # The plotting module itself handles importing MplCanvas with a try-except,
 # so we just need to ensure matplotlib.figure.Figure is available or mocked.
 # But for unit testing, we want to mock plotting calls anyway.
+from shared.python.constants import GRAVITY_M_S2
 from shared.python.plotting import GolfSwingPlotter, RecorderInterface
 
 
@@ -36,7 +37,7 @@ def mock_recorder():
 
     # Energy
     ke = 0.5 * club_speed**2
-    pe = 9.81 * club_pos[:, 2]
+    pe = GRAVITY_M_S2 * club_pos[:, 2]
     te = ke + pe
 
     def get_data(field_name):
