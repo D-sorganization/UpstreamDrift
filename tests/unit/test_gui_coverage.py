@@ -11,6 +11,7 @@ def mock_module(name):
     sys.modules[name] = pool
     return pool
 
+
 @pytest.fixture
 def clean_imports():
     """Ensure we can re-import modules by removing them from sys.modules if present."""
@@ -20,20 +21,24 @@ def clean_imports():
     # but we will use patch.dict to safely override them for this test scope.
     yield
 
+
 class TestGUIComponents:
 
     def test_sim_widget_coverage(self, clean_imports):
-        with patch.dict(sys.modules, {
-            "mujoco": MagicMock(),
-            "OpenGL": MagicMock(),
-            "OpenGL.GL": MagicMock(),
-            "PyQt6": MagicMock(),
-            "PyQt6.QtWidgets": MagicMock(),
-            "PyQt6.QtCore": MagicMock(),
-            "PyQt6.QtGui": MagicMock(),
-            "meshcat": MagicMock(),
-            "cv2": MagicMock(),
-        }):
+        with patch.dict(
+            sys.modules,
+            {
+                "mujoco": MagicMock(),
+                "OpenGL": MagicMock(),
+                "OpenGL.GL": MagicMock(),
+                "PyQt6": MagicMock(),
+                "PyQt6.QtWidgets": MagicMock(),
+                "PyQt6.QtCore": MagicMock(),
+                "PyQt6.QtGui": MagicMock(),
+                "meshcat": MagicMock(),
+                "cv2": MagicMock(),
+            },
+        ):
             # Setup specific mujoco mocks needed for instantiation
             mj_mock = sys.modules["mujoco"]
             mj_mock.MjtVisFlag.mjVIS_CONTACTPOINT = 0
@@ -57,8 +62,14 @@ class TestGUIComponents:
             )
 
             # Patch internals
-            with patch("engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget.MuJoCoMeshcatAdapter"), \
-                 patch("engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget.mujoco.Renderer"):
+            with (
+                patch(
+                    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget.MuJoCoMeshcatAdapter"
+                ),
+                patch(
+                    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget.mujoco.Renderer"
+                ),
+            ):
 
                 widget = MuJoCoSimWidget(width=100, height=100, fps=60)
                 # Mock model/data for coverage
@@ -89,15 +100,20 @@ class TestGUIComponents:
                 widget.close()
 
     def test_humanoid_launcher_coverage(self, clean_imports):
-        with patch.dict(sys.modules, {
-            "mujoco": MagicMock(),
-            "PyQt6": MagicMock(),
-            "PyQt6.QtWidgets": MagicMock(),
-            "PyQt6.QtCore": MagicMock(),
-            "PyQt6.QtGui": MagicMock(),
-        }):
+        with patch.dict(
+            sys.modules,
+            {
+                "mujoco": MagicMock(),
+                "PyQt6": MagicMock(),
+                "PyQt6.QtWidgets": MagicMock(),
+                "PyQt6.QtCore": MagicMock(),
+                "PyQt6.QtGui": MagicMock(),
+            },
+        ):
 
-            from engines.physics_engines.mujoco.python.humanoid_launcher import HumanoidLauncher # noqa: E402, I001
+            from engines.physics_engines.mujoco.python.humanoid_launcher import (
+                HumanoidLauncher,
+            )  # noqa: E402, I001
 
             launcher = HumanoidLauncher()
             try:
@@ -107,14 +123,21 @@ class TestGUIComponents:
                 pass
 
     def test_controls_tab(self, clean_imports):
-        with patch.dict(sys.modules, {
-            "mujoco": MagicMock(),
-            "PyQt6": MagicMock(),
-            "PyQt6.QtWidgets": MagicMock(),
-            "PyQt6.QtCore": MagicMock(),
-            "PyQt6.QtGui": MagicMock(),
-        }):
-            from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.controls_tab import ControlsTab # noqa: E402, I001
+        with patch.dict(
+            sys.modules,
+            {
+                "mujoco": MagicMock(),
+                "PyQt6": MagicMock(),
+                "PyQt6.QtWidgets": MagicMock(),
+                "PyQt6.QtCore": MagicMock(),
+                "PyQt6.QtGui": MagicMock(),
+            },
+        ):
+            from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.controls_tab import (
+                ControlsTab,
+            )  # noqa: E402, I001
 
-            with patch("engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.controls_tab.MuJoCoSimWidget"):
-                 _ = ControlsTab(MagicMock(), MagicMock())
+            with patch(
+                "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.controls_tab.MuJoCoSimWidget"
+            ):
+                _ = ControlsTab(MagicMock(), MagicMock())
