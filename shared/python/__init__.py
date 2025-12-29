@@ -14,6 +14,7 @@ __author__ = "Golf Modeling Suite Team"
 # about missing dependencies only when specific features are used.
 
 from pathlib import Path  # Lightweight, always available
+from typing import Any
 
 # Suite-wide constants
 SUITE_ROOT = Path(__file__).parent.parent.parent
