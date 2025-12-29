@@ -7,8 +7,6 @@ This script combines the best practices from various utility scripts into a sing
 robust setup procedure.
 """
 
-from typing import Any
-from typing import Any
 import logging
 import os
 import platform
