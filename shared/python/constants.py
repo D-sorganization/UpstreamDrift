@@ -10,6 +10,7 @@ properties used in scientific computing applications.
 """
 
 import math
+from pathlib import Path
 
 # Mathematical constants
 PI: float = math.pi  # [dimensionless] Ratio of circumference to diameter
@@ -90,3 +91,18 @@ CONVERGENCE_TOLERANCE: float = 1e-6  # [dimensionless] Default convergence toler
 
 # Reproducibility
 DEFAULT_RANDOM_SEED: int = 42  # [dimensionless] Answer to everything
+
+# Project Config
+# Relative paths from repository root
+MUJOCO_LAUNCHER_SCRIPT: Path = Path(
+    "engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui.py"
+)
+DRAKE_LAUNCHER_SCRIPT: Path = Path(
+    "engines/physics_engines/drake/python/src/golf_gui.py"
+)
+PINOCCHIO_LAUNCHER_SCRIPT: Path = Path(
+    "engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
+)
+URDF_GENERATOR_SCRIPT: Path = Path("tools/urdf_generator/main.py")
+GUI_LAUNCHER_SCRIPT: Path = Path("launchers/golf_launcher.py")
+LOCAL_LAUNCHER_SCRIPT: Path = Path("launchers/golf_suite_launcher.py")

@@ -23,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def check_dependencies():
+def check_dependencies() -> bool:
     """Ensure required dependencies are installed."""
     try:
         import PIL  # noqa: F401
@@ -41,7 +41,7 @@ def check_dependencies():
             return False
 
 
-def git_sync():
+def git_sync() -> bool:
     """Sync the repository with remote."""
     logger.info("Syncing repository with remote...")
     try:
@@ -142,7 +142,7 @@ def create_optimized_icon(source_path: Path, output_path: Path) -> bool:
 
 def create_shortcut_windows(
     target_script: str, working_dir: Path, icon_path: Path, description: str
-):
+) -> bool:
     """Create a desktop shortcut using PowerShell interaction."""
     desktop_path = Path(os.environ["USERPROFILE"]) / "Desktop"
     shortcut_path = desktop_path / "Golf Modeling Suite.lnk"
@@ -184,7 +184,7 @@ def create_shortcut_windows(
         return False
 
 
-def main():
+def main() -> int:
     logger.info("Initializing Golf Modeling Suite setup...")
 
     # 1. Sync

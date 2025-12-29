@@ -56,7 +56,14 @@ def test_pinocchio_iaa():
 def test_drake_iaa():
     """Test DrakeInducedAccelerationAnalyzer."""
     try:
+        from unittest.mock import MagicMock
+
         from pydrake.all import MultibodyPlant
+
+        if isinstance(MultibodyPlant, MagicMock) or hasattr(
+            MultibodyPlant, "assert_called"
+        ):
+            pytest.skip("Drake is mocked")
 
         from engines.physics_engines.drake.python.src.induced_acceleration import (
             DrakeInducedAccelerationAnalyzer,
