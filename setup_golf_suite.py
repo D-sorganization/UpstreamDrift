@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 """
 Golf Modeling Suite - Unified Setup Script
@@ -13,6 +14,7 @@ import platform
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 # Configure logging
 logging.basicConfig(
