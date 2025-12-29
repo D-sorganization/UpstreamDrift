@@ -16,7 +16,7 @@ def print_result(component, status, message="") -> None:
     print(f"{component:<30} [{color}{status}{reset}] {message}")
 
 
-def check_python_module(module_name) -> None:
+def check_python_module(module_name: str) -> tuple[bool, str]:
     try:
         __import__(module_name)
         return True, ""
@@ -26,7 +26,7 @@ def check_python_module(module_name) -> None:
         return False, f"Error: {e}"
 
 
-def check_docker_image(image_name: str) -> bool:
+def check_docker_image(image_name: str) -> tuple[bool, str]:
     try:
         result = subprocess.run(
             ["docker", "image", "inspect", image_name], capture_output=True, text=True

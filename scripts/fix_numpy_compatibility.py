@@ -10,7 +10,7 @@ import subprocess
 import sys
 
 
-def run_command(cmd: list[str], check: bool = True) -> bool:
+def run_command(cmd: list[str], check: bool = True) -> subprocess.CompletedProcess:
     """Run a command and return the result."""
     print(f"Running: {' '.join(cmd)}")
     result = subprocess.run(cmd, capture_output=True, text=True, check=False)
