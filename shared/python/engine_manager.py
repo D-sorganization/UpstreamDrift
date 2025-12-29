@@ -75,15 +75,16 @@ class EngineManager:
             DrakeProbe,
             MatlabProbe,
             MuJoCoProbe,
+            OpenSimProbe,
             PendulumProbe,
             PinocchioProbe,
         )
 
-        # Note: OpenSimProbe not yet implemented, treating as optional/manual check for now
         self.probes = {
             EngineType.MUJOCO: MuJoCoProbe(self.suite_root),
             EngineType.DRAKE: DrakeProbe(self.suite_root),
             EngineType.PINOCCHIO: PinocchioProbe(self.suite_root),
+            EngineType.OPENSIM: OpenSimProbe(self.suite_root),
             EngineType.PENDULUM: PendulumProbe(self.suite_root),
             EngineType.MATLAB_2D: MatlabProbe(self.suite_root, is_3d=False),
             EngineType.MATLAB_3D: MatlabProbe(self.suite_root, is_3d=True),

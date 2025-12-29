@@ -6,8 +6,7 @@ from typing import Any, cast  # noqa: F401
 
 import mujoco
 import numpy as np
-
-from .interfaces import PhysicsEngine
+from shared.python.interfaces import PhysicsEngine
 
 LOGGER = logging.getLogger(__name__)
 
