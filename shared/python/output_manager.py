@@ -156,7 +156,14 @@ class OutputManager:
 
         try:
             if format_type == OutputFormat.CSV:
-                if isinstance(results, pd.DataFrame):
+                is_dataframe = False
+                try:
+                    is_dataframe = isinstance(results, pd.DataFrame)
+                except TypeError:
+                    # Likely pd.DataFrame is a mock and not a type
+                    is_dataframe = False
+
+                if is_dataframe:
                     results.to_csv(file_path, index=False)
                 else:
                     # Convert dict to DataFrame if possible
