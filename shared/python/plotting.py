@@ -833,6 +833,7 @@ class GolfSwingPlotter:
         self,
         fig: Figure,
         segment_indices: dict[str, int],
+        analyzer_result: Any | None = None,
     ) -> None:
         """Plot kinematic sequence (normalized velocities).
 
@@ -841,6 +842,7 @@ class GolfSwingPlotter:
         Args:
             fig: Matplotlib figure
             segment_indices: Map of segment names to joint indices
+            analyzer_result: Optional KinematicSequenceResult object
         """
         times, velocities = self.recorder.get_time_series("joint_velocities")
         # Convert to numpy array if needed
@@ -862,6 +864,7 @@ class GolfSwingPlotter:
             self.colors["quinary"],
         ]
 
+        # Use analyzer result if available, otherwise raw calculation
         for i, (name, idx) in enumerate(segment_indices.items()):
             if idx < velocities.shape[1]:
                 vel = np.abs(velocities[:, idx])
@@ -876,16 +879,48 @@ class GolfSwingPlotter:
                 ax.plot(times, vel_norm, label=name, color=color, linewidth=2)
 
                 # Mark peak
-                max_t_idx = np.argmax(vel)
-                ax.plot(
-                    times[max_t_idx],
-                    vel_norm[max_t_idx],
-                    "o",
-                    color=color,
-                    markersize=8,
-                )
+                if analyzer_result:
+                    # Find matching peak in result
+                    peak_info = next(
+                        (p for p in analyzer_result.peaks if p.name == name), None
+                    )
+                    if peak_info:
+                        ax.plot(
+                            peak_info.time,
+                            peak_info.normalized_velocity,
+                            "o",
+                            color=color,
+                            markersize=8,
+                        )
+                        # Add order label
+                        order_idx = analyzer_result.sequence_order.index(name) + 1
+                        ax.text(
+                            peak_info.time,
+                            peak_info.normalized_velocity + 0.05,
+                            f"{order_idx}",
+                            color=color,
+                            fontsize=10,
+                            fontweight="bold",
+                            ha="center",
+                        )
+                else:
+                    max_t_idx = np.argmax(vel)
+                    ax.plot(
+                        times[max_t_idx],
+                        vel_norm[max_t_idx],
+                        "o",
+                        color=color,
+                        markersize=8,
+                    )
 
-        ax.set_title("Kinematic Sequence (Normalized)", fontsize=14, fontweight="bold")
+        title = "Kinematic Sequence (Normalized)"
+        if analyzer_result:
+            score = analyzer_result.efficiency_score * 100
+            title += f"\nEfficiency Score: {score:.1f}%"
+            if not analyzer_result.is_valid_sequence:
+                title += " (Out of Order)"
+
+        ax.set_title(title, fontsize=14, fontweight="bold")
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax.set_ylabel("Normalized Velocity", fontsize=12, fontweight="bold")
         ax.legend(loc="best")
