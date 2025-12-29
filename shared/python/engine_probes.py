@@ -467,6 +467,7 @@ class MatlabProbe(EngineProbe):
             details={"engine_dir": str(engine_dir)},
         )
 
+
 class OpenSimProbe(EngineProbe):
     """Probe for OpenSim physics engine."""
 
