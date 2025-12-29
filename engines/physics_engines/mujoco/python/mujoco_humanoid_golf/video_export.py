@@ -9,6 +9,7 @@ This module provides professional video export capabilities:
 
 from __future__ import annotations
 
+import logging
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any  # noqa: ICN003
@@ -32,6 +33,9 @@ try:
     IMAGEIO_AVAILABLE = True
 except ImportError:
     IMAGEIO_AVAILABLE = False
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 
 class VideoFormat(Enum):
@@ -134,7 +138,8 @@ class VideoExporter:
             self.frame_count = 0
             return True
 
-        except Exception:
+        except Exception as e:
+            logger.error(f"Failed to start video recording: {e}")
             return False
 
     def add_frame(
@@ -261,7 +266,8 @@ class VideoExporter:
             self.finish_recording(output_path)
             return True
 
-        except Exception:
+        except Exception as e:
+            logger.error(f"Failed during video export: {e}")
             self.finish_recording()
             return False
 
@@ -326,6 +332,7 @@ def create_metrics_overlay(
             cv2.putText(frame, text, (10, y_offset), font, font_scale, color, thickness)
             y_offset += line_height
         except Exception:
+            # Skip metric if extraction fails
             pass
 
     return frame
@@ -417,6 +424,7 @@ def export_simulation_video(
                         speed = np.linalg.norm(vel) * 2.237  # m/s to mph
                         metrics["Club Speed"] = lambda d, s=speed: int(s)  # type: ignore[assignment]
                 except Exception:
+                    # Ignore club speed if club head not found
                     pass
 
                 def overlay_fn(
@@ -442,6 +450,7 @@ def export_simulation_video(
         exporter.finish_recording(output_path)
         return True
 
-    except Exception:
+    except Exception as e:
+        logger.error(f"Failed to export simulation video: {e}")
         exporter.finish_recording()
         return False

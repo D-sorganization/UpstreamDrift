@@ -12,6 +12,7 @@ from mujoco_humanoid_golf.spatial_algebra import (
     cross_motion_fast,
     jcalc,
 )
+
 from shared.python import constants
 
 DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
@@ -126,6 +127,8 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     i_v_buf = np.empty(6)
     temp_vec = np.empty(6)  # Additional scratch vector
 
+
+
     # --- Pass 1: Forward kinematics ---
     for i in range(nb):
         # OPTIMIZATION: Use pre-allocated buffer for jcalc
@@ -177,7 +180,6 @@ def aba(  # noqa: C901, PLR0912, PLR0915
 
     # --- Pass 2: Backward recursion (articulated-body inertias) ---
     for i in range(nb - 1, -1, -1):
-        # u_force[:, i] = ia_articulated[i] @ s_subspace[i]
         dof_idx = dof_indices[i]
 
         if dof_idx != -1:
