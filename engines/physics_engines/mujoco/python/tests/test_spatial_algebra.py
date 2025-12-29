@@ -220,7 +220,7 @@ class TestJointCalculations:
 
     def test_jcalc_revolute_z(self) -> None:
         """Test revolute joint about z-axis."""
-        Xj, S = jcalc("Rz", np.pi / 4)
+        Xj, S, idx = jcalc("Rz", np.pi / 4)
 
         # Motion subspace should be [0, 0, 1, 0, 0, 0]
         expected_S = np.array([0, 0, 1, 0, 0, 0])
@@ -229,22 +229,29 @@ class TestJointCalculations:
         # Xj should be 6x6
         assert Xj.shape == (6, 6)
 
+        # Index should be 2 for Rz
+        assert idx == 2
+
     def test_jcalc_prismatic_x(self) -> None:
         """Test prismatic joint along x-axis."""
-        _Xj, S = jcalc("Px", 0.5)
+        _Xj, S, idx = jcalc("Px", 0.5)
 
         # Motion subspace should be [0, 0, 0, 1, 0, 0]
         expected_S = np.array([0, 0, 0, 1, 0, 0])
         np.testing.assert_allclose(S, expected_S, atol=1e-10)
 
+        # Index should be 3 for Px
+        assert idx == 3
+
     def test_jcalc_all_joint_types(self) -> None:
         """Test all supported joint types."""
         joint_types = ["Rx", "Ry", "Rz", "Px", "Py", "Pz"]
 
-        for jtype in joint_types:
-            Xj, S = jcalc(jtype, 0.1)
+        for i, jtype in enumerate(joint_types):
+            Xj, S, idx = jcalc(jtype, 0.1)
             assert Xj.shape == (6, 6)
             assert S.shape == (6,)
+            assert idx == i
 
     def test_jcalc_unsupported_joint(self) -> None:
         """Test error for unsupported joint type."""
