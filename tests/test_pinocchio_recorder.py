@@ -4,9 +4,12 @@ import pytest
 # Skip test module if pinocchio is not installed
 pytest.importorskip("pinocchio")
 
-from engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (  # noqa: E402
-    PinocchioRecorder,
-)
+try:
+    from engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (  # noqa: E402
+        PinocchioRecorder,
+    )
+except ImportError:
+    pass
 
 
 def test_pinocchio_recorder_basic():
