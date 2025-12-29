@@ -102,6 +102,7 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     # Be careful if modifying them (jcalc returns new array/ref).
     # Stored in list to be consistent with RNEA optimization.
     s_subspace: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item]
+    dof_indices: list[int] = [-1] * nb
 
     v = np.empty((6, nb))  # Spatial velocities
     c = np.empty((6, nb))  # Velocity-product accelerations (bias)
@@ -123,17 +124,25 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     scratch_vec = np.empty(6)
     scratch_mat = np.empty((6, 6))
     i_v_buf = np.empty(6)
+    temp_vec = np.empty(6)  # Additional scratch vector
 
     # --- Pass 1: Forward kinematics ---
     for i in range(nb):
         # OPTIMIZATION: Use pre-allocated buffer for jcalc
-        xj_transform, s_vec = jcalc(model["jtype"][i], q[i], out=xj_buf)
+        xj_transform, s_vec, dof_idx = jcalc(model["jtype"][i], q[i], out=xj_buf)
         s_subspace[i] = s_vec
+        dof_indices[i] = dof_idx
 
         # OPTIMIZATION: Write directly to pre-allocated xup buffer
         np.matmul(xj_transform, model["Xtree"][i], out=xup[i])
 
-        vj_velocity = s_subspace[i] * qd[i]  # Joint velocity
+        # vj_velocity = s_subspace[i] * qd[i]  # Joint velocity
+        if dof_idx != -1:
+            temp_vec.fill(0)
+            temp_vec[dof_idx] = qd[i]
+            vj_velocity = temp_vec
+        else:
+            vj_velocity = s_subspace[i] * qd[i]
 
         if model["parent"][i] == -1:
             v[:, i] = vj_velocity
@@ -169,13 +178,25 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     # --- Pass 2: Backward recursion (articulated-body inertias) ---
     for i in range(nb - 1, -1, -1):
         # u_force[:, i] = ia_articulated[i] @ s_subspace[i]
-        np.matmul(ia_articulated[i], s_subspace[i], out=u_force[:, i])
+        dof_idx = dof_indices[i]
+
+        if dof_idx != -1:
+            # Optimized: u_force is just a column of ia_articulated
+            u_force[:, i] = ia_articulated[i][:, dof_idx]
+        else:
+            np.matmul(ia_articulated[i], s_subspace[i], out=u_force[:, i])
 
         # d[i] = s_subspace[i] @ u_force[:, i]  # Joint-space inertia
-        d[i] = np.dot(s_subspace[i], u_force[:, i])
+        if dof_idx != -1:
+            d[i] = u_force[dof_idx, i]
+        else:
+            d[i] = np.dot(s_subspace[i], u_force[:, i])
 
         # u[i] = tau[i] - s_subspace[i] @ pa_bias[:, i]  # Bias torque
-        u[i] = tau[i] - np.dot(s_subspace[i], pa_bias[:, i])
+        if dof_idx != -1:
+            u[i] = tau[i] - pa_bias[dof_idx, i]
+        else:
+            u[i] = tau[i] - np.dot(s_subspace[i], pa_bias[:, i])
 
         # Articulated-body inertia update for parent
         if model["parent"][i] != -1:
@@ -200,7 +221,6 @@ def aba(  # noqa: C901, PLR0912, PLR0915
             # ia_update is rank-1.
             # Let's compute term1 = (ia_articulated[i] - ia_update) @ xup[i]
             # term1 = ia_articulated[i] @ xup[i] - ia_update @ xup[i]
-            # term1 = ia_articulated[i] @ xup[i] - (u * u.T * dinv) @ xup[i]
             # term1 = ia_articulated[i] @ xup[i] - u * (u.T @ xup[i]) * dinv
 
             # scratch_mat = ia_articulated[i] @ xup[i]
@@ -262,6 +282,12 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         qdd[i] = (u[i] - np.dot(u_force[:, i], a[:, i])) / d[i]
 
         # a[:, i] = a[:, i] + s_subspace[i] * qdd[i]
-        a[:, i] += s_subspace[i] * qdd[i]
+        dof_idx = dof_indices[i]
+        if dof_idx != -1:
+            # Optimize: a[dof_idx, i] += qdd[i]
+            # But a is (6, nb), so a[:, i] is a 1D slice.
+            a[dof_idx, i] += qdd[i]
+        else:
+            a[:, i] += s_subspace[i] * qdd[i]
 
     return qdd
