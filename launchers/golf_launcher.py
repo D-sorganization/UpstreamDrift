@@ -784,12 +784,12 @@ class GolfLauncher(QMainWindow):
             engine_type = self._get_engine_type(model.type)
             # If we don't know the engine type, we assume it's a generic file launch which effectively relies on local util
             if not engine_type:
-                 # Generic XML/MJCF usually implies local viewer
-                 is_local_fit = True
+                # Generic XML/MJCF usually implies local viewer
+                is_local_fit = True
             else:
-                 probe = self.engine_manager.probes.get(engine_type)
-                 if probe and probe.is_available():
-                     is_local_fit = True
+                probe = self.engine_manager.probes.get(engine_type)
+                if probe and probe.is_available():
+                    is_local_fit = True
 
         # Override: If User manually selected Docker? (For now, we prioritize Local if available)
         # However, checking 'is_local_fit' allows us to Fallback to Docker if Local is broken.
@@ -892,8 +892,8 @@ class GolfLauncher(QMainWindow):
             cmd.extend(["python", "python/humanoid_launcher.py"])
 
         elif model.type == "custom_dashboard":
-             # Run the module inside docker
-             cmd.extend(["python", "-m", "mujoco_humanoid_golf"])
+            # Run the module inside docker
+            cmd.extend(["python", "-m", "mujoco_humanoid_golf"])
 
         elif model.type == "pinocchio":
             # Run from python dir
