@@ -1,9 +1,4 @@
-#!/usr/bin/env python3
-"""
-Humanoid Golf Simulation Launcher (PyQt6)
-A modern GUI for the MuJoCo Humanoid Golf Model.
-"""
-
+import csv
 import datetime
 import logging
 import os
@@ -12,30 +7,16 @@ import subprocess
 import sys
 from pathlib import Path
 
-# Ensure shared modules are importable
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
-SHARED_PATH = PROJECT_ROOT / "shared" / "python"
-if str(SHARED_PATH) not in sys.path:
-    sys.path.insert(0, str(SHARED_PATH))
-
-from shared.python.configuration_manager import ConfigurationManager, SimulationConfig
-from shared.python.process_worker import ProcessWorker
-
+# Third-party imports
 try:
     import matplotlib.pyplot as plt
 
     HAS_MATPLOTLIB = True
 except ImportError:
     HAS_MATPLOTLIB = False
-import csv
 
-from PyQt6.QtCore import (
-    Qt,
-)
-from PyQt6.QtGui import (
-    QColor,
-    QPalette,
-)
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QColor, QPalette
 from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -60,6 +41,15 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+# Ensure shared modules are importable
+PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
+SHARED_PATH = PROJECT_ROOT / "shared" / "python"
+if str(SHARED_PATH) not in sys.path:
+    sys.path.insert(0, str(SHARED_PATH))
+
+from shared.python.configuration_manager import ConfigurationManager  # noqa: E402
+from shared.python.process_worker import ProcessWorker  # noqa: E402
+
 # Polynomial generator widget imported lazily to avoid MuJoCo DLL issues
 # Import happens in open_polynomial_generator() only when needed
 
@@ -72,10 +62,6 @@ logger = logging.getLogger(__name__)
 
 # Default Configuration
 # Logger initialized above
-
-
-
-
 
 
 class ModernDarkPalette(QPalette):
@@ -118,7 +104,7 @@ class HumanoidLauncher(QMainWindow):
         # State
         self.config_manager = ConfigurationManager(self.config_path)
         self.config = self.config_manager.load()
-        
+
         self.simulation_thread = None
 
         # Load Config - Already done above
@@ -208,7 +194,9 @@ class HumanoidLauncher(QMainWindow):
 
         # Connect to updated help text method
         self.combo_control.currentTextChanged.connect(self.on_control_mode_changed)
-        self.combo_control.setCurrentText(str(self.config.get("control_mode", "pd")))
+        self.combo_control.setCurrentText(
+            str(getattr(self.config, "control_mode", "pd"))
+        )
 
         settings_layout.addWidget(self.combo_control, 0, 1)
         settings_layout.addWidget(self.btn_poly_generator, 0, 2)
@@ -648,19 +636,19 @@ class HumanoidLauncher(QMainWindow):
             self.config.weight_percent = self.slider_weight.value()
             self.config.club_length = self.slider_length.value() / 100.0
             self.config.club_mass = self.slider_mass.value() / 100.0
-            
+
             # Features
             self.config.two_handed = self.chk_two_hand.isChecked()
             self.config.enhance_face = self.chk_face.isChecked()
             self.config.articulated_fingers = self.chk_fingers.isChecked()
-            
+
             # Paths
             self.config.save_state_path = self.txt_save_path.text()
             self.config.load_state_path = self.txt_load_path.text()
-            
+
             # Live View
             self.config.live_view = self.chk_live.isChecked()
-            
+
             # Control Mode
             text = self.combo_control.currentText()
             if "PD" in text:
@@ -669,7 +657,7 @@ class HumanoidLauncher(QMainWindow):
                 self.config.control_mode = "lqr"
             elif "Polynomial" in text:
                 self.config.control_mode = "poly"
-            
+
             self.config_manager.save(self.config)
             self.log(f"Config saved to {self.config_path}")
         except Exception as e:
@@ -711,7 +699,7 @@ class HumanoidLauncher(QMainWindow):
         )
 
         # Display settings
-        if self.config["live_view"]:
+        if self.config.live_view:
             if is_windows:
                 cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])

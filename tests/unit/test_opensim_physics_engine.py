@@ -12,8 +12,10 @@ from engines.physics_engines.opensim.python.opensim_physics_engine import (
 def engine():
     return OpenSimPhysicsEngine()
 
+
 def test_initialization(engine):
     assert engine.model_name == "OpenSimStub"
+
 
 def test_methods_raise_not_implemented(engine):
     with pytest.raises(NotImplementedError):
@@ -21,6 +23,7 @@ def test_methods_raise_not_implemented(engine):
 
     with pytest.raises(NotImplementedError):
         engine.load_from_string("<osim/>")
+
 
 def test_stubs_return_safe_defaults(engine):
     # Ensure stubs that return values don't crash and return correct types/shapes

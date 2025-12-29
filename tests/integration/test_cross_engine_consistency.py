@@ -17,7 +17,10 @@ from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine i
 # Helper to check if a module is a mock (leaked from unit tests)
 def is_mock(module_name):
     mod = sys.modules.get(module_name)
-    return isinstance(mod, MagicMock) or (hasattr(mod, "__file__") and mod.__file__ is None)
+    return isinstance(mod, MagicMock) or (
+        hasattr(mod, "__file__") and mod.__file__ is None
+    )
+
 
 # Drake and Pinocchio might not be importable if dependencies are missing, handle gracefully
 try:
@@ -26,6 +29,7 @@ try:
     from engines.physics_engines.drake.python.drake_physics_engine import (
         DrakePhysicsEngine,
     )
+
     HAS_DRAKE = True
 except ImportError:
     HAS_DRAKE = False
@@ -36,6 +40,7 @@ try:
     from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
         PinocchioPhysicsEngine,
     )
+
     HAS_PINOCCHIO = True
 except ImportError:
     HAS_PINOCCHIO = False
@@ -44,6 +49,7 @@ LOGGER = logging.getLogger(__name__)
 
 ASSET_DIR = os.path.join(os.path.dirname(__file__), "..", "assets")
 URDF_PATH = os.path.join(ASSET_DIR, "simple_arm.urdf")
+
 
 @pytest.mark.skipif(not os.path.exists(URDF_PATH), reason="Test asset missing")
 class TestCrossEngineConsistency:
@@ -92,7 +98,7 @@ class TestCrossEngineConsistency:
             pytest.skip("Not enough engines available for comparison")
 
         # Set a fixed state
-        q = np.array([0.5, -0.5]) # 2 DOF
+        q = np.array([0.5, -0.5])  # 2 DOF
         v = np.array([0.1, -0.1])
 
         results = {}
@@ -105,7 +111,7 @@ class TestCrossEngineConsistency:
                 M = engine.compute_mass_matrix()
                 results[name] = M
             except Exception as e:
-                 LOGGER.error(f"Engine {name} failed: {e}")
+                LOGGER.error(f"Engine {name} failed: {e}")
 
         # Compare
         base_name = list(results.keys())[0]
@@ -118,8 +124,11 @@ class TestCrossEngineConsistency:
             # Tolerance might need to be generous due to different modeling assumptions
             # (e.g. joint linking, inertia representation)
             np.testing.assert_allclose(
-                M, base_M, rtol=1e-3, atol=1e-4,
-                err_msg=f"Mass matrix mismatch between {base_name} and {name}"
+                M,
+                base_M,
+                rtol=1e-3,
+                atol=1e-4,
+                err_msg=f"Mass matrix mismatch between {base_name} and {name}",
             )
 
     def test_gravity_forces_consistency(self, engines):
@@ -144,7 +153,9 @@ class TestCrossEngineConsistency:
             if name == base_name:
                 continue
             np.testing.assert_allclose(
-                G, base_G, rtol=1e-3, atol=1e-4,
-                err_msg=f"Gravity force mismatch betwen {base_name} and {name}"
+                G,
+                base_G,
+                rtol=1e-3,
+                atol=1e-4,
+                err_msg=f"Gravity force mismatch betwen {base_name} and {name}",
             )
-
