@@ -106,18 +106,26 @@ def rnea(  # noqa: PLR0915
     cross_buf = np.empty(6)
 
     s_subspace_list: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Cache motion subspaces
+    dof_indices: list[int] = [-1] * nb  # Cache active DOF indices
 
     # --- Forward pass: kinematics ---
     for i in range(nb):
         # Calculate joint transform and motion subspace
         # OPTIMIZATION: Use pre-allocated buffer
-        xj_transform, s_subspace = jcalc(model["jtype"][i], q[i], out=xj_buf)
+        xj_transform, s_subspace, dof_idx = jcalc(
+            model["jtype"][i], q[i], out=xj_buf
+        )
         s_subspace_list[i] = s_subspace
+        dof_indices[i] = dof_idx
 
         # Joint velocity in joint frame
-        # OPTIMIZATION: Use pre-allocated buffer (reuse i_v_buf)
-        # vj_velocity = s_subspace * qd[i] (Avoids allocation)
-        np.multiply(s_subspace, qd[i], out=i_v_buf)
+        # OPTIMIZATION: Use active index to avoid full vector multiplication
+        # vj_velocity = s_subspace * qd[i]
+        if dof_idx != -1:
+            i_v_buf.fill(0)
+            i_v_buf[dof_idx] = qd[i]
+        else:
+            np.multiply(s_subspace, qd[i], out=i_v_buf)
         vj_velocity = i_v_buf
 
         # Composite transform from body i to parent/base
@@ -130,8 +138,14 @@ def rnea(  # noqa: PLR0915
             np.matmul(xj_transform, -a_grav, out=scratch_vec)
             # Optimization: Avoid allocation for s_subspace * qdd[i]
             # scratch_vec += s_subspace * qdd[i]
-            np.multiply(s_subspace, qdd[i], out=cross_buf)
-            scratch_vec += cross_buf
+
+            if dof_idx != -1:
+                # Direct addition to the specific component
+                scratch_vec[dof_idx] += qdd[i]
+            else:
+                np.multiply(s_subspace, qdd[i], out=cross_buf)
+                scratch_vec += cross_buf
+
             a[:, i] = scratch_vec
         else:
             # Body i has a parent
@@ -153,9 +167,14 @@ def rnea(  # noqa: PLR0915
 
             # Optimization: Avoid allocation for s_subspace * qdd[i]
             # Use cross_buf as temporary buffer before it's needed for cross_motion
-            # scratch_vec += s_subspace * qdd[i]
-            np.multiply(s_subspace, qdd[i], out=cross_buf)
-            scratch_vec += cross_buf
+            if dof_idx != -1:
+                # We need to add s_subspace * qdd[i] to scratch_vec
+                # But scratch_vec is also modified by cross_motion result later.
+                # It's safer to add it directly.
+                scratch_vec[dof_idx] += qdd[i]
+            else:
+                np.multiply(s_subspace, qdd[i], out=cross_buf)
+                scratch_vec += cross_buf
 
             # Optimization: Use pre-allocated buffer for cross product
             # Overwrites cross_buf, which is fine as we are done with qdd term
@@ -186,7 +205,13 @@ def rnea(  # noqa: PLR0915
 
         # Project force to joint torque
         s_subspace = s_subspace_list[i]
-        tau[i] = s_subspace @ f[:, i]
+        dof_idx = dof_indices[i]
+
+        if dof_idx != -1:
+            # Optimized: tau[i] = f[dof_idx, i] (dot product with unit vector)
+            tau[i] = f[dof_idx, i]
+        else:
+            tau[i] = s_subspace @ f[:, i]
 
         # Propagate force to parent
         if model["parent"][i] != -1:
