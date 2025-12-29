@@ -5,12 +5,29 @@ from unittest.mock import MagicMock
 
 # Explicitly mock dependencies BEFORE any internal imports
 MOCKS = [
-    "mujoco", "mujoco.viewer", "mujoco.renderer",
-    "pydrake", "pydrake.all", "pydrake.multibody", "pydrake.multibody.tree",
-    "pinocchio", "pinocchio.visualize", "pinocchio.robot_wrapper",
-    "PyQt6", "PyQt6.QtWidgets", "PyQt6.QtCore", "PyQt6.QtGui",
-    "sci_analysis", "pyqtgraph", "OpenGL", "OpenGL.GL",
-    "pandas", "numpy", "scipy", "scipy.signal", "scipy.spatial"
+    "mujoco",
+    "mujoco.viewer",
+    "mujoco.renderer",
+    "pydrake",
+    "pydrake.all",
+    "pydrake.multibody",
+    "pydrake.multibody.tree",
+    "pinocchio",
+    "pinocchio.visualize",
+    "pinocchio.robot_wrapper",
+    "PyQt6",
+    "PyQt6.QtWidgets",
+    "PyQt6.QtCore",
+    "PyQt6.QtGui",
+    "sci_analysis",
+    "pyqtgraph",
+    "OpenGL",
+    "OpenGL.GL",
+    "pandas",
+    "numpy",
+    "scipy",
+    "scipy.signal",
+    "scipy.spatial",
 ]
 # Note: numpy/scipy are real in CI, but if they are missing we mock them
 for m in MOCKS:
@@ -19,6 +36,7 @@ for m in MOCKS:
     # But for heavy things like MuJoCo we must mock.
     if m not in sys.modules:
         sys.modules[m] = MagicMock()
+
 
 def test_recursive_import_coverage():
     """Recursively import all modules in engines/physics_engines/mujoco to boost definition coverage."""
@@ -52,7 +70,7 @@ def test_recursive_import_coverage():
                 else:
                     mod_prefix = rel_dir.replace(os.sep, ".") + "."
 
-                mod_name = mod_prefix + file[:-3] # remove .py
+                mod_name = mod_prefix + file[:-3]  # remove .py
 
                 print(f"DEBUG: Attempting to import {mod_name}")
 
@@ -64,8 +82,11 @@ def test_recursive_import_coverage():
                     # We do not assert fail here, to allow partial success,
                     # but we print to debug logs.
 
-    print(f"DEBUG: Found {modules_found} modules, imported {modules_imported} successfully.")
+    print(
+        f"DEBUG: Found {modules_found} modules, imported {modules_imported} successfully."
+    )
     assert modules_imported > 5, "Failed to import a significant number of modules."
+
 
 def test_instantiate_basic_classes():
     """Try to instantiate key classes with mocks."""
@@ -74,6 +95,7 @@ def test_instantiate_basic_classes():
         from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.advanced_control import (
             AdvancedControl,
         )
+
         ac = AdvancedControl(MagicMock(), MagicMock())
         assert ac is not None
     except Exception as e:
@@ -84,6 +106,7 @@ def test_instantiate_basic_classes():
         from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.biomechanics import (
             BiomechanicsAnalyzer,
         )
+
         ba = BiomechanicsAnalyzer(MagicMock(), MagicMock())
         assert ba is not None
     except Exception as e:
