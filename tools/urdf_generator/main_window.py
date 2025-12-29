@@ -1,4 +1,3 @@
-
 """Main window for the Interactive URDF Generator."""
 
 import logging
