@@ -445,7 +445,7 @@ class URDFGenerator(QtWidgets.QMainWindow):
 
 
 class LinkDialog(QtWidgets.QDialog):
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Add Link")
         layout = QtWidgets.QFormLayout(self)
@@ -481,7 +481,7 @@ class LinkDialog(QtWidgets.QDialog):
 
 
 class JointDialog(QtWidgets.QDialog):
-    def __init__(self, links: list[str], parent=None):
+    def __init__(self, links: list[str], parent=None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Add Joint")
         layout = QtWidgets.QFormLayout(self)
@@ -530,7 +530,7 @@ class JointDialog(QtWidgets.QDialog):
         }
 
 
-def main():
+def main() -> None:
     app = QtWidgets.QApplication(sys.argv)
     window = URDFGenerator()
     window.show()

@@ -32,7 +32,7 @@ class URDFGeneratorWindow(QMainWindow):
     segment_added = pyqtSignal(dict)  # Emitted when a segment is added
     segment_removed = pyqtSignal(str)  # Emitted when a segment is removed
 
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the main window.
 
         Args:
@@ -428,7 +428,7 @@ class URDFGeneratorWindow(QMainWindow):
         logger.info("URDF Generator window closed")
 
 
-def main():
+def main() -> None:
     """Main entry point for the URDF Generator."""
     app = QApplication(sys.argv)
     app.setApplicationName("URDF Generator")

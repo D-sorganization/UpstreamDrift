@@ -362,6 +362,7 @@ class GolfLauncher(QMainWindow):
             self.registry = None
 
         # Engine Manager for local discovery
+        self.engine_manager: Any = None
         try:
             self.engine_manager = EngineManager(REPOS_ROOT)
         except Exception as e:

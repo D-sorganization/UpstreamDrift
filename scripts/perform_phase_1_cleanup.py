@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-def cleanup():
+def cleanup() -> None:
     root = Path(".")
 
     # 1. Delete redundant requirements.txt

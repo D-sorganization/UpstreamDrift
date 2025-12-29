@@ -18,7 +18,7 @@ sys.path.append(str(ROOT_DIR))
 from shared.python.engine_manager import EngineManager  # noqa: E402
 
 
-def run_verification():
+def run_verification() -> None:
     """Run the physics verification suite."""
     report_lines = []
     report_lines.append("# Physics Verification Report")
@@ -58,10 +58,10 @@ def run_verification():
     print("\nRunning Pytest Suite...")
 
     class Plugin:
-        def __init__(self):
+        def __init__(self) -> None:
             self.results = []
 
-        def pytest_runtest_logreport(self, report):
+        def pytest_runtest_logreport(self, report) -> None:
             if report.when == "call":
                 self.results.append(
                     {

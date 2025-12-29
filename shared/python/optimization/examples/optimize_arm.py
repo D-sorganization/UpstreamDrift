@@ -15,7 +15,7 @@ except ImportError as e:
     sys.exit(1)
 
 
-def main():
+def main() -> None:
     """
     Example: Optimization of a 2-link arm swing using CasADi + Pinocchio.
     Objective: Swing from hanging down (0,0) to upright (pi, 0) with minimum effort.
