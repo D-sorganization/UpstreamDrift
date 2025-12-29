@@ -299,6 +299,7 @@ class TestGolfLauncherLogic:
         mock_model.name = "Test Model"
         mock_model.description = "Desc"
         mock_model.id = "test_model"
+        mock_model.type = "mujoco"
 
         registry_instance = mock_registry.return_value
         registry_instance.get_all_models.return_value = [mock_model]
