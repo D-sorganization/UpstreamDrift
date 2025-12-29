@@ -25,7 +25,7 @@ from shared.python.constants import (
 logger = setup_logging(__name__)
 
 
-def launch_gui_launcher():
+def launch_gui_launcher() -> None:
     """Launch the GUI-based unified launcher."""
     try:
         from launchers.unified_launcher import UnifiedLauncher
@@ -42,7 +42,7 @@ def launch_gui_launcher():
         return False
 
 
-def launch_local_launcher():
+def launch_local_launcher() -> None:
     """Launch the local Python launcher."""
     try:
         from launchers.golf_suite_launcher import main
@@ -81,7 +81,7 @@ def _validate_and_get_workdir(script_path: Path) -> Path:
     return work_dir
 
 
-def launch_mujoco():
+def launch_mujoco() -> None:
     """Launch MuJoCo engine directly with validation."""
     try:
         import subprocess
@@ -110,7 +110,7 @@ def launch_mujoco():
     return True
 
 
-def launch_drake():
+def launch_drake() -> None:
     """Launch Drake engine directly with validation."""
     try:
         import subprocess
@@ -140,7 +140,7 @@ def launch_drake():
     return True
 
 
-def launch_pinocchio():
+def launch_pinocchio() -> None:
     """Launch Pinocchio engine directly with validation."""
     try:
         import subprocess
@@ -170,7 +170,7 @@ def launch_pinocchio():
     return True
 
 
-def launch_urdf_generator():
+def launch_urdf_generator() -> None:
     """Launch the Graphic URDF Generator."""
     try:
         import subprocess
@@ -189,7 +189,7 @@ def launch_urdf_generator():
     return True
 
 
-def show_status():
+def show_status() -> None:
     """Show Golf Modeling Suite status."""
     try:
         from launchers.unified_launcher import UnifiedLauncher
@@ -202,7 +202,7 @@ def show_status():
         _show_basic_status()
 
 
-def _show_basic_status():
+def _show_basic_status() -> None:
     """Show basic status (fallback)."""
     suite_root = Path(__file__).parent
 
@@ -256,7 +256,7 @@ def _show_basic_status():
         logger.info(line)
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Golf Modeling Suite - Unified Launcher",

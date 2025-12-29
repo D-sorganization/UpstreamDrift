@@ -5,7 +5,7 @@ from PyQt6.QtWidgets import QApplication, QDoubleSpinBox, QLabel, QSlider
 
 
 class MockWindowFix:
-    def __init__(self):
+    def __init__(self) -> None:
         self.actuator_constant_inputs = []
         self.actuator_sliders = []
         self.actuator_labels = []
@@ -64,7 +64,7 @@ class MockWindowFix:
         self.control_system_calls += 1
 
 
-def run_test():
+def run_test() -> None:
     _ = QApplication(sys.argv + ["-platform", "offscreen"])
 
     window = MockWindowFix()

@@ -10,13 +10,13 @@ import time
 from pathlib import Path
 
 
-def print_result(component, status, message=""):
+def print_result(component, status, message="") -> None:
     color = "\033[92m" if status == "OK" else "\033[91m"
     reset = "\033[0m"
     print(f"{component:<30} [{color}{status}{reset}] {message}")
 
 
-def check_python_module(module_name):
+def check_python_module(module_name) -> None:
     try:
         __import__(module_name)
         return True, ""
@@ -26,7 +26,7 @@ def check_python_module(module_name):
         return False, f"Error: {e}"
 
 
-def check_docker_image(image_name):
+def check_docker_image(image_name) -> None:
     try:
         result = subprocess.run(
             ["docker", "image", "inspect", image_name], capture_output=True, text=True
@@ -39,7 +39,7 @@ def check_docker_image(image_name):
         return False, "Docker command not found"
 
 
-def check_nvidia_docker():
+def check_nvidia_docker() -> None:
     try:
         # Check Docker without running a full container
         result = subprocess.run(
@@ -58,7 +58,7 @@ def check_nvidia_docker():
         return False, f"Docker check failed: {e}"
 
 
-def main():
+def main() -> None:
     print("=" * 60)
     print(f"System Health Check - {time.strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 60)

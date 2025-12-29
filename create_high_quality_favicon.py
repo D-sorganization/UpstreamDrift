@@ -43,7 +43,7 @@ def sharpen_small_icon(img: Image.Image, target_size: int) -> Image.Image:
     return resized
 
 
-def create_high_quality_favicon():
+def create_high_quality_favicon() -> None:
     """Create high-quality favicon and icon files from GolfingRobot.png"""
 
     # Paths

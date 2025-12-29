@@ -10,7 +10,7 @@ import subprocess
 import sys
 
 
-def run_command(cmd, check=True):
+def run_command(cmd, check=True) -> None:
     """Run a command and return the result."""
     print(f"Running: {' '.join(cmd)}")
     result = subprocess.run(cmd, capture_output=True, text=True, check=False)
@@ -20,7 +20,7 @@ def run_command(cmd, check=True):
     return result
 
 
-def check_numpy_version():
+def check_numpy_version() -> None:
     """Check current NumPy version."""
     try:
         import numpy
@@ -33,7 +33,7 @@ def check_numpy_version():
         return None
 
 
-def fix_numpy_compatibility():
+def fix_numpy_compatibility() -> None:
     """Fix NumPy compatibility issues."""
     print("🔧 Fixing NumPy compatibility issues...")
 
@@ -92,7 +92,7 @@ def fix_numpy_compatibility():
     print("✅ NumPy compatibility fix complete!")
 
 
-def verify_installation():
+def verify_installation() -> None:
     """Verify that the installation works."""
     print("🧪 Verifying installation...")
 
