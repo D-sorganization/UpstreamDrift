@@ -25,11 +25,16 @@ mj = sys.modules.get("mujoco")
 if mj:
     if not hasattr(mj, "mjtVisFlag") or isinstance(mj, MagicMock):
         if isinstance(mj, MagicMock):
-            if not hasattr(mj, "mjtVisFlag"): mj.mjtVisFlag = MagicMock()
-            if not hasattr(mj, "mjtGeom"): mj.mjtGeom = MagicMock()
-            if not hasattr(mj, "mjtJoint"): mj.mjtJoint = MagicMock()
-            if not hasattr(mj, "mjtObj"): mj.mjtObj = MagicMock()
-            if not hasattr(mj, "mjtCatBit"): mj.mjtCatBit = MagicMock()
+            if not hasattr(mj, "mjtVisFlag"):
+                mj.mjtVisFlag = MagicMock()
+            if not hasattr(mj, "mjtGeom"):
+                mj.mjtGeom = MagicMock()
+            if not hasattr(mj, "mjtJoint"):
+                mj.mjtJoint = MagicMock()
+            if not hasattr(mj, "mjtObj"):
+                mj.mjtObj = MagicMock()
+            if not hasattr(mj, "mjtCatBit"):
+                mj.mjtCatBit = MagicMock()
             
             mj.mjtVisFlag.mjVIS_CONTACTPOINT = 0
             mj.mjtVisFlag.mjVIS_CONTACTFORCE = 1
@@ -45,7 +50,7 @@ if mj:
 
 # --- Imports ---
 from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget import MuJoCoSimWidget  # noqa: E402
-from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.humanoid_launcher import HumanoidLauncher  # noqa: E402
+from engines.physics_engines.mujoco.python.humanoid_launcher import HumanoidLauncher  # noqa: E402
 from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.controls_tab import ControlsTab  # noqa: E402
 
 @pytest.fixture
@@ -116,15 +121,14 @@ class TestGUIComponents:
             widget.close()
 
     def test_humanoid_launcher_coverage(self, mock_mujoco_interface, app):
-        with patch("engines.physics_engines.mujoco.python.mujoco_humanoid_golf.humanoid_launcher.MuJoCoSimWidget") as m_sim:
-            m_sim.return_value = MagicMock()
-            l = HumanoidLauncher()
-            try:
-                l.show()
-                l.close()
-            except Exception:
-                pass
+        # HumanoidLauncher uses subprocess, doesn't embed SimWidget directly
+        l = HumanoidLauncher()
+        try:
+            l.show()
+            l.close()
+        except Exception:
+            pass
             
     def test_controls_tab(self, mock_mujoco_interface, app):
         with patch("engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.controls_tab.MuJoCoSimWidget"):
-             t = ControlsTab()
+             _ = ControlsTab(MagicMock(), MagicMock())
