@@ -159,7 +159,10 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         """Compute gravity forces g(q)."""
         if self.data is None:
             return np.array([])
-        return cast(np.ndarray, getattr(self.data, "qfrc_grav", getattr(self.data, "qfrc_bias", np.zeros(self.model.nv))).copy())
+        qfrc_grav = getattr(self.data, "qfrc_grav", None)
+        if qfrc_grav is None:
+            qfrc_grav = getattr(self.data, "qfrc_bias", np.zeros(self.model.nv))
+        return cast(np.ndarray, qfrc_grav.copy())
 
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics: tau = ID(q, qdot, qacc)."""
