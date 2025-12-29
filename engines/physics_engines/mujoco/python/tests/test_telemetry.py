@@ -130,7 +130,8 @@ def test_export_telemetry_csv():
     assert success
     mock_file.assert_called_with("test.csv", "w", newline="")
 
-    # Test with incompatible data length (should handle or fail gracefully depending on impl, code pads with "")
+    # Test with incompatible data length (should handle or fail gracefully depending on
+    # impl, code pads with "")
     data_mixed = {"short": np.array([1]), "long": np.array([1, 2])}
     with patch("builtins.open", mock_open()) as mock_file:
         success = export_telemetry_csv("test_mixed.csv", data_mixed)

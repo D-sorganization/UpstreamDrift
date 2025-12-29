@@ -9,7 +9,7 @@ import pytest
 sys.modules["cv2"] = MagicMock()
 sys.modules["imageio"] = MagicMock()
 
-from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export import (
+from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export import (  # noqa: E402
     VideoExporter,
     VideoFormat,
     create_metrics_overlay,
@@ -204,7 +204,8 @@ class TestVideoExporter:
                 True,
             ),
         ):
-            # We need to capture the writer after start_recording is called inside export_recording
+            # We need to capture the writer after start_recording is called inside
+            # export_recording
             # But we can't easily access it from outside.
             # We can verify the mock_cv2.VideoWriter().release() was called.
 
