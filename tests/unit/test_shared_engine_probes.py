@@ -237,6 +237,7 @@ def test_matlab_probe_not_installed(tmp_path):
             result = probe.probe()
             assert result.status == ProbeStatus.NOT_INSTALLED
 
+
 # Test OpenSimProbe
 def test_opensim_probe_success(tmp_path):
     engine_dir = tmp_path / "engines/physics_engines/opensim"
@@ -250,16 +251,20 @@ def test_opensim_probe_success(tmp_path):
         assert result.status == ProbeStatus.AVAILABLE
         assert result.version == "4.0"
 
+
 def test_opensim_probe_missing_dir(tmp_path):
     from shared.python.engine_probes import OpenSimProbe
+
     with patch.dict(sys.modules, {"opensim": MagicMock(__version__="4.0")}):
         probe = OpenSimProbe(tmp_path)
         result = probe.probe()
         assert result.status == ProbeStatus.MISSING_ASSETS
         assert "engine directory" in result.missing_dependencies
 
+
 def test_opensim_probe_not_installed(tmp_path):
     from shared.python.engine_probes import OpenSimProbe
+
     with patch.dict(sys.modules):
         if "opensim" in sys.modules:
             del sys.modules["opensim"]
