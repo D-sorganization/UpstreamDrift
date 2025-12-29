@@ -18,23 +18,11 @@
 # ============================================================================
 # For specific engines only, uncomment as needed:
 # -e .[engines]     # Drake, Pinocchio, advanced solvers
-# -e .[analysis]    # OpenCV, ML tools, advanced analysis
 
 # ============================================================================
-# Installation Notes
+# Testing Dependencies (Always Install for CI)
 # ============================================================================
-# 1. Basic installation (core functionality):
-#    pip install -r requirements.txt
-#
-# 2. Full development setup:
-#    pip install -r requirements.txt -e .[dev,all]
-#
-# 3. Engine-specific setup:
-#    pip install -r requirements.txt -e .[engines]
-#
-# 4. For MATLAB integration, install MATLAB Engine for Python:
-#    cd "matlabroot\extern\engines\python"
-#    python setup.py install
-#
-# 5. For conda environments, some packages may need conda-forge:
-#    conda install -c conda-forge pinocchio drake
+# These are required for running tests even in minimal environments
+pytest>=8.2.1
+pytest-cov>=5.0.0
+pytest-mock>=3.14.0

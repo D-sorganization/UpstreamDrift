@@ -272,3 +272,116 @@ class TestEngineStatus:
 
         for status, expected_value in expected_values.items():
             assert status.value == expected_value
+
+
+# ==============================================================================
+# EXEMPLARY TESTS - These demonstrate proper testing practices
+# ==============================================================================
+# Key principles demonstrated below:
+# 1. Test actual behavior, not mock interactions
+# 2. Use real filesystem operations (with tempdir) instead of mocking everything
+# 3. Test edge cases and error conditions
+# 4. Verify state changes, not just that methods were called
+# 5. Mock only at system boundaries (external dependencies)
+# ==============================================================================
+
+
+class TestEngineManagerBehavior:
+    """Exemplary tests demonstrating proper testing practices."""
+
+    def test_engine_discovery_respects_filesystem_state(self):
+        """Test that engine discovery accurately reflects filesystem reality.
+
+        GOOD PRACTICE: Tests actual behavior using real filesystem operations.
+        We create real directories and verify the manager discovers them correctly.
+        """
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            engines_dir = temp_path / "engines" / "physics_engines"
+            engines_dir.mkdir(parents=True)
+
+            # Create only MuJoCo engine
+            (engines_dir / "mujoco" / "python").mkdir(parents=True)
+
+            manager = EngineManager(suite_root=temp_path)
+            available = manager.get_available_engines()
+
+            # Should find exactly what exists
+            assert EngineType.MUJOCO in available
+            assert EngineType.DRAKE not in available
+            assert EngineType.PINOCCHIO not in available
+
+            # Verify status reflects reality
+            assert (
+                manager.get_engine_status(EngineType.MUJOCO) != EngineStatus.UNAVAILABLE
+            )
+            assert (
+                manager.get_engine_status(EngineType.DRAKE) == EngineStatus.UNAVAILABLE
+            )
+
+    def test_engine_manager_handles_partial_installation(self):
+        """Test behavior when engine directory exists but is incomplete.
+
+        GOOD PRACTICE: Tests edge case - directory exists but missing required subdirs.
+        """
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            engines_dir = temp_path / "engines" / "physics_engines"
+
+            # Create drake directory but no python subdirectory
+            (engines_dir / "drake").mkdir(parents=True)
+
+            manager = EngineManager(suite_root=temp_path)
+
+            # Should detect incomplete installation
+            result = manager.validate_engine_configuration(EngineType.DRAKE)
+            assert result is False
+
+    def test_engine_info_provides_complete_state(self):
+        """Test that get_engine_info provides complete, accurate state.
+
+        GOOD PRACTICE: Tests the contract of the API - what data it returns
+        and in what format, not how it's implemented.
+        """
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            engines_dir = temp_path / "engines" / "physics_engines"
+            (engines_dir / "mujoco" / "python").mkdir(parents=True)
+
+            manager = EngineManager(suite_root=temp_path)
+            manager.current_engine = EngineType.MUJOCO
+
+            info = manager.get_engine_info()
+
+            # Verify complete state snapshot
+            assert info["current_engine"] == EngineType.MUJOCO.value
+            assert EngineType.MUJOCO.value in info["available_engines"]
+            assert EngineType.MUJOCO.value in info["engine_status"]
+
+            # Verify types (API contract)
+            assert isinstance(info["available_engines"], list)
+            assert isinstance(info["engine_status"], dict)
+            # Keys are strings (engine type values)
+            assert all(isinstance(k, str) for k in info["engine_status"])
+
+    def test_multiple_switch_operations_maintain_consistency(self):
+        """Test that multiple engine switches maintain consistent state.
+
+        GOOD PRACTICE: Tests behavioral invariants across multiple operations.
+        State should remain consistent regardless of operation sequence.
+        """
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_path = Path(temp_dir)
+            engines_dir = temp_path / "engines" / "physics_engines"
+            (engines_dir / "mujoco").mkdir(parents=True)
+            (engines_dir / "drake").mkdir(parents=True)
+
+            manager = EngineManager(suite_root=temp_path)
+
+            # Attempt multiple switches to non-existent engines
+            for engine in [EngineType.PINOCCHIO, EngineType.OPENSIM]:
+                result = manager.switch_engine(engine)
+                assert result is False
+                # State should remain consistent: no current engine
+                assert manager.current_engine is None
+                assert manager.get_current_engine() is None
