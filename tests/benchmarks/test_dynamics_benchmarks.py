@@ -14,14 +14,14 @@ if str(MUJOCO_PYTHON_PATH) not in sys.path:
 
 import numpy as np  # noqa: E402
 import pytest  # noqa: E402
-
-from shared.python.constants import GRAVITY_M_S2  # noqa: E402
 from mujoco_humanoid_golf.rigid_body_dynamics.aba import (  # noqa: E402
     aba,
 )
 from mujoco_humanoid_golf.rigid_body_dynamics.rnea import (  # noqa: E402
     rnea,
 )
+
+from shared.python.constants import GRAVITY_M_S2  # noqa: E402
 
 
 def create_random_model(num_bodies=10):

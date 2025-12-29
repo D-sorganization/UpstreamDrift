@@ -12,7 +12,6 @@ from mujoco_humanoid_golf.spatial_algebra import (
     cross_motion_fast,
     jcalc,
 )
-
 from shared.python import constants
 
 DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
@@ -126,8 +125,6 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     scratch_mat = np.empty((6, 6))
     i_v_buf = np.empty(6)
     temp_vec = np.empty(6)  # Additional scratch vector
-
-
 
     # --- Pass 1: Forward kinematics ---
     for i in range(nb):

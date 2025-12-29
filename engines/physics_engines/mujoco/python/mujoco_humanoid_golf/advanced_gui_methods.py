@@ -279,14 +279,16 @@ class AdvancedGuiMethodsMixin:
             from shared.python.kinematic_sequence import KinematicSequenceAnalyzer
 
             # Define segments for the standard humanoid model
-            # Note: Indices might need adjustment based on specific model loaded (full_body vs upper_body)
+            # Note: Indices might need adjustment based on specific model loaded
+            # (full_body vs upper_body)
             # This is a best-effort mapping for standard models.
             # In a robust system, these would be defined in the model config/metadata.
 
             # Default mapping for full body / upper body models in this repo
             # Based on inspection of XMLs, joints are named.
             # We need to find the qvel index for specific joints.
-            # joint_names = [mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i) for i in range(model.njnt)]
+            # joint_names = [mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i) \
+            #                for i in range(model.njnt)]
 
             # Helper to find index
             model = self.sim_widget.model
@@ -300,15 +302,17 @@ class AdvancedGuiMethodsMixin:
 
             # Try to map typical chain: Pelvis -> Thorax -> Arm -> Club
             # Adjust names based on actual XML joint names
-            # Full Body XML: pelvis (free), spine_rotation, right_shoulder_swing, right_wrist, club_wrist
+            # Full Body XML: pelvis (free), spine_rotation, right_shoulder_swing, \
+            # right_wrist, club_wrist
             # Upper Body XML: spine_rotation, ...
 
             # Let's try to detect the chain dynamically or use known names
             potential_chain = {
                 "Pelvis": ["pelvis", "root", "waist"],
                 "Torso": ["spine_rotation", "spine_yaw", "torso_twist"],
-                "Lead Arm": ["left_shoulder_swing", "left_shoulder_flexion"], # Assuming right-handed golfer (left arm lead)
-                "Club": ["club_wrist", "wrist_flexion"]
+                "Lead Arm": ["left_shoulder_swing", "left_shoulder_flexion"],
+                # Assuming right-handed golfer
+                "Club": ["club_wrist", "wrist_flexion"],
             }
 
             segment_indices = {}
@@ -320,20 +324,32 @@ class AdvancedGuiMethodsMixin:
                         break
 
             if segment_indices:
-                ks_analyzer = KinematicSequenceAnalyzer(expected_order=["Pelvis", "Torso", "Lead Arm", "Club"])
+                ks_analyzer = KinematicSequenceAnalyzer(
+                    expected_order=["Pelvis", "Torso", "Lead Arm", "Club"]
+                )
 
                 # Extract velocities
                 # Use analyzer helper
-                ks_data, ks_times = ks_analyzer.extract_velocities_from_recorder(recorder, segment_indices)
+                ks_data, ks_times = ks_analyzer.extract_velocities_from_recorder(
+                    recorder, segment_indices
+                )
 
                 if ks_data:
                     ks_result = ks_analyzer.analyze(ks_data, ks_times)
-                    plotter.plot_kinematic_sequence(fig4, segment_indices, analyzer_result=ks_result)
+                    plotter.plot_kinematic_sequence(
+                        fig4, segment_indices, analyzer_result=ks_result
+                    )
                 else:
                     plotter.plot_kinematic_sequence(fig4, segment_indices)
             else:
-                 ax = fig4.add_subplot(111)
-                 ax.text(0.5, 0.5, "Could not map joints for kinematic sequence", ha="center", va="center")
+                ax = fig4.add_subplot(111)
+                ax.text(
+                    0.5,
+                    0.5,
+                    "Could not map joints for kinematic sequence",
+                    ha="center",
+                    va="center",
+                )
 
         except Exception as e:
             logger.error(f"Failed to plot kinematic sequence: {e}")

@@ -1,7 +1,7 @@
 """Unit tests for kinematic sequence analysis."""
 
 import numpy as np
-import pytest
+
 from shared.python.kinematic_sequence import KinematicSequenceAnalyzer
 
 
@@ -34,7 +34,9 @@ def test_kinematic_sequence_ideal():
         "Club": club_vel,
     }
 
-    analyzer = KinematicSequenceAnalyzer(expected_order=["Pelvis", "Torso", "Arm", "Club"])
+    analyzer = KinematicSequenceAnalyzer(
+        expected_order=["Pelvis", "Torso", "Arm", "Club"]
+    )
     result = analyzer.analyze(data, times)
 
     assert result.is_valid_sequence
@@ -55,7 +57,7 @@ def test_kinematic_sequence_out_of_order():
 
     # Club peaks too early (casting)
     pelvis_vel = np.exp(-((times - 0.2) ** 2) / 0.01) * 10
-    club_vel = np.exp(-((times - 0.25) ** 2) / 0.01) * 30 # Early club
+    club_vel = np.exp(-((times - 0.25) ** 2) / 0.01) * 30  # Early club
     torso_vel = np.exp(-((times - 0.3) ** 2) / 0.01) * 15
     arm_vel = np.exp(-((times - 0.4) ** 2) / 0.01) * 20
 
@@ -66,7 +68,9 @@ def test_kinematic_sequence_out_of_order():
         "Club": club_vel,
     }
 
-    analyzer = KinematicSequenceAnalyzer(expected_order=["Pelvis", "Torso", "Arm", "Club"])
+    analyzer = KinematicSequenceAnalyzer(
+        expected_order=["Pelvis", "Torso", "Arm", "Club"]
+    )
     result = analyzer.analyze(data, times)
 
     assert not result.is_valid_sequence
@@ -78,7 +82,7 @@ def test_kinematic_sequence_out_of_order():
     # T<A (ok), T<C (FAIL: T=0.3 > C=0.25)
     # A<C (FAIL: A=0.4 > C=0.25)
     # Correct pairs: 4/6 = 0.666
-    assert np.isclose(result.efficiency_score, 4/6, atol=0.01)
+    assert np.isclose(result.efficiency_score, 4 / 6, atol=0.01)
     assert result.sequence_order == ["Pelvis", "Club", "Torso", "Arm"]
 
 
@@ -86,11 +90,7 @@ def test_extract_velocities():
     """Test extraction helper."""
     times = np.array([0, 1, 2])
     # 2 joints
-    vels = np.array([
-        [1, 10],
-        [2, 20],
-        [3, 30]
-    ])
+    vels = np.array([[1, 10], [2, 20], [3, 30]])
 
     recorder = MockRecorder(times, vels)
     indices = {"JointA": 0, "JointB": 1}

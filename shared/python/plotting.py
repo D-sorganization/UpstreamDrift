@@ -12,7 +12,7 @@ This module provides comprehensive plotting capabilities including:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 from matplotlib import pyplot as plt
