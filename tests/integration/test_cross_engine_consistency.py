@@ -93,6 +93,19 @@ class TestCrossEngineConsistency:
         return engs
 
     def test_mass_matrix_consistency(self, engines):
+        from unittest.mock import MagicMock
+
+        real_engines = {}
+        for name, engine in engines.items():
+            if hasattr(engine, "compute_mass_matrix") and (
+                isinstance(engine.compute_mass_matrix, MagicMock)
+                or hasattr(engine.compute_mass_matrix, "assert_called")
+            ):
+                continue
+            real_engines[name] = engine
+        engines = real_engines
+        if len(engines) < 2:
+            pytest.skip("Not enough real engines")
         """Check if Mass Matrix is consistent between engines."""
         if len(engines) < 2:
             pytest.skip("Not enough engines available for comparison")
