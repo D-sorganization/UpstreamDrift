@@ -64,11 +64,14 @@ def test_mujoco_loading_failure_missing_dependency(mock_probe, mock_engine_manag
     assert mock_engine_manager.get_current_engine() is None
 
 
-@patch.dict("sys.modules", {
-    "pydrake": MagicMock(),
-    "pydrake.systems.framework": MagicMock(),
-    "pydrake.geometry": MagicMock(),
-})
+@patch.dict(
+    "sys.modules",
+    {
+        "pydrake": MagicMock(),
+        "pydrake.systems.framework": MagicMock(),
+        "pydrake.geometry": MagicMock(),
+    },
+)
 @patch("engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine")
 @patch("shared.python.engine_probes.DrakeProbe.probe")
 def test_drake_loading_success(mock_probe, mock_drake_class, mock_engine_manager):
