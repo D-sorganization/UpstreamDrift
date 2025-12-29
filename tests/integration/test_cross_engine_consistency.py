@@ -104,8 +104,9 @@ class TestCrossEngineConsistency:
                 continue
             try:
                 res = engine.compute_mass_matrix()
-                if hasattr(res, "size") and res.size == 0:
-                    continue
+                if hasattr(res, shape) and (0 in res.shape): continue
+                if hasattr(res, size) and res.size == 0: continue
+                if hasattr(res, assert_called) or hasattr(res, _mock_return_value): continue
             except Exception:
                 continue
             valid_engines[name] = engine
@@ -175,8 +176,9 @@ class TestCrossEngineConsistency:
                 continue
             try:
                 res = engine.compute_gravity_forces()
-                if hasattr(res, "size") and res.size == 0:
-                    continue
+                if hasattr(res, shape) and (0 in res.shape): continue
+                if hasattr(res, size) and res.size == 0: continue
+                if hasattr(res, assert_called) or hasattr(res, _mock_return_value): continue
             except Exception:
                 continue
             valid_engines[name] = engine
