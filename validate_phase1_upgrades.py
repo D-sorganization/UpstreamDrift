@@ -16,8 +16,8 @@ class Phase1Validator:
 
     def __init__(self) -> None:
         self.project_root = Path(__file__).parent
-        self.results = {}
-        self.errors = []
+        self.results: dict[str, bool] = {}
+        self.errors: list[str] = []
 
     def run_validation(self) -> dict[str, bool]:
         """Run all validation checks."""
