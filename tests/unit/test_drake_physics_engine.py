@@ -26,6 +26,11 @@ class MockPhysicsEngine:
 
 mock_interfaces.PhysicsEngine = MockPhysicsEngine
 
+import importlib
+import engines.physics_engines.drake.python.drake_physics_engine
+
+importlib.reload(engines.physics_engines.drake.python.drake_physics_engine)
+
 from engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: E402
     DrakePhysicsEngine,
 )
