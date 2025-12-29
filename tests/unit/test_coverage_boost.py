@@ -1,8 +1,7 @@
-import sys
-import os
 import importlib
+import os
+import sys
 from unittest.mock import MagicMock
-import pytest
 
 # Explicitly mock dependencies BEFORE any internal imports
 MOCKS = [
@@ -11,7 +10,7 @@ MOCKS = [
     "pinocchio", "pinocchio.visualize", "pinocchio.robot_wrapper",
     "PyQt6", "PyQt6.QtWidgets", "PyQt6.QtCore", "PyQt6.QtGui",
     "sci_analysis", "pyqtgraph", "OpenGL", "OpenGL.GL",
-    "pandas", "numpy", "scipy", "scipy.signal", "scipy.spatial" 
+    "pandas", "numpy", "scipy", "scipy.signal", "scipy.spatial"
 ]
 # Note: numpy/scipy are real in CI, but if they are missing we mock them
 for m in MOCKS:
@@ -24,10 +23,10 @@ for m in MOCKS:
 def test_recursive_import_coverage():
     """Recursively import all modules in engines/physics_engines/mujoco to boost definition coverage."""
     print(f"DEBUG: CWD is {os.getcwd()}")
-    
+
     # Target directory
     base_path = os.path.join("engines", "physics_engines", "mujoco", "python")
-    
+
     # In CI, we might be in repo root. Check existence.
     if not os.path.exists(base_path):
         # Maybe we are in tests/? Try going up.
@@ -42,21 +41,21 @@ def test_recursive_import_coverage():
         for file in files:
             if file.endswith(".py") and file != "__init__.py":
                 modules_found += 1
-                
+
                 # Construct import path
                 # root is relative to CWD (e.g. engines/physics_engines/mujoco/python/...)
                 rel_dir = os.path.relpath(root, ".")
-                
+
                 # Create module name: engines.physics_engines...
                 if rel_dir == ".":
                     mod_prefix = ""
                 else:
                     mod_prefix = rel_dir.replace(os.sep, ".") + "."
-                
+
                 mod_name = mod_prefix + file[:-3] # remove .py
-                
+
                 print(f"DEBUG: Attempting to import {mod_name}")
-                
+
                 try:
                     importlib.import_module(mod_name)
                     modules_imported += 1
@@ -64,7 +63,7 @@ def test_recursive_import_coverage():
                     print(f"DEBUG: Failed to import {mod_name}: {e}")
                     # We do not assert fail here, to allow partial success,
                     # but we print to debug logs.
-    
+
     print(f"DEBUG: Found {modules_found} modules, imported {modules_imported} successfully.")
     assert modules_imported > 5, "Failed to import a significant number of modules."
 
@@ -72,7 +71,9 @@ def test_instantiate_basic_classes():
     """Try to instantiate key classes with mocks."""
     # AdvancedControl
     try:
-        from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.advanced_control import AdvancedControl
+        from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.advanced_control import (
+            AdvancedControl,
+        )
         ac = AdvancedControl(MagicMock(), MagicMock())
         assert ac is not None
     except Exception as e:
@@ -80,7 +81,9 @@ def test_instantiate_basic_classes():
 
     # BiomechanicsAnalyzer
     try:
-        from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.biomechanics import BiomechanicsAnalyzer
+        from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.biomechanics import (
+            BiomechanicsAnalyzer,
+        )
         ba = BiomechanicsAnalyzer(MagicMock(), MagicMock())
         assert ba is not None
     except Exception as e:
