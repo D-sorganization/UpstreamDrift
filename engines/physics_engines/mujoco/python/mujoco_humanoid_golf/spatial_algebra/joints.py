@@ -23,6 +23,17 @@ S_PY.flags.writeable = False
 S_PZ = np.array([0.0, 0.0, 0.0, 0.0, 0.0, 1.0])
 S_PZ.flags.writeable = False
 
+# Maps joint type to the index of the non-zero element in the motion subspace vector
+# -1 indicates a generic joint type where optimization cannot be applied
+JOINT_AXIS_INDICES = {
+    "Rx": 0,
+    "Ry": 1,
+    "Rz": 2,
+    "Px": 3,
+    "Py": 4,
+    "Pz": 5,
+}
+
 
 def jcalc(
     jtype: str, q: float, out: np.ndarray | None = None

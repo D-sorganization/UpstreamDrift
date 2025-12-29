@@ -4,17 +4,7 @@ Composite Rigid Body Algorithm (CRBA) for computing mass matrix.
 
 import numpy as np
 from mujoco_humanoid_golf.spatial_algebra import jcalc
-
-# Maps joint type to the index of the non-zero element in the motion subspace vector
-# -1 indicates a generic joint type where this optimization cannot be applied
-JOINT_AXIS_INDICES = {
-    "Rx": 0,
-    "Ry": 1,
-    "Rz": 2,
-    "Px": 3,
-    "Py": 4,
-    "Pz": 5,
-}
+from mujoco_humanoid_golf.spatial_algebra.joints import JOINT_AXIS_INDICES
 
 
 def crba(model: dict, q: np.ndarray) -> np.ndarray:
