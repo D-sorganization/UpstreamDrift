@@ -38,6 +38,9 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from shared.python.engine_manager import EngineManager, EngineType
+from shared.python.model_registry import ModelRegistry
+
 # Windows-specific subprocess constants
 CREATE_NO_WINDOW: int
 CREATE_NEW_CONSOLE: int
@@ -351,14 +354,19 @@ class GolfLauncher(QMainWindow):
 
         # Load Registry
         try:
-            from shared.python.model_registry import ModelRegistry
-
             self.registry: ModelRegistry | None = ModelRegistry(
                 REPOS_ROOT / "config/models.yaml"
             )
         except ImportError:
             logger.error("Failed to import ModelRegistry. Registry unavailable.")
             self.registry = None
+
+        # Engine Manager for local discovery
+        try:
+            self.engine_manager = EngineManager(REPOS_ROOT)
+        except Exception as e:
+            logger.warning(f"Failed to initialize EngineManager: {e}")
+            self.engine_manager = None
 
         self.init_ui()
         self.check_docker()
@@ -588,21 +596,51 @@ class GolfLauncher(QMainWindow):
 
     def update_launch_button(self, model_name: str | None = None) -> None:
         """Update the launch button state."""
-        if not model_name and self.selected_model:
-            if self.registry:
-                model = self.registry.get_model(self.selected_model)
-                if model:
-                    model_name = model.name
+        model_type = None
+        if self.selected_model and self.registry:
+            model = self.registry.get_model(self.selected_model)
+            if model:
+                model_name = model.name
+                model_type = model.type
 
-        if self.docker_available and self.selected_model:
-            self.btn_launch.setEnabled(True)
-            self.btn_launch.setText(f"LAUNCH {str(model_name).upper()}")
-        elif not self.docker_available:
-            self.btn_launch.setEnabled(False)
-            self.btn_launch.setText("DOCKER NOT FOUND")
-        else:
+        if not self.selected_model:
             self.btn_launch.setEnabled(False)
             self.btn_launch.setText("SELECT A MODEL")
+            return
+
+        # Check local availability first
+        is_local = False
+        if self.engine_manager and model_type:
+            engine_type = self._get_engine_type(model_type)
+            if engine_type:
+                probe = self.engine_manager.probes.get(engine_type)
+                if probe and probe.is_available():
+                    is_local = True
+
+        if is_local:
+            self.btn_launch.setEnabled(True)
+            self.btn_launch.setText(f"LAUNCH {str(model_name).upper()} (LOCAL)")
+            self.btn_launch.setStyleSheet("background-color: #28a745; color: white;")
+        elif self.docker_available:
+            self.btn_launch.setEnabled(True)
+            self.btn_launch.setText(f"LAUNCH {str(model_name).upper()} (DOCKER)")
+            self.btn_launch.setStyleSheet("background-color: #007acc; color: white;")
+        else:
+            self.btn_launch.setEnabled(False)
+            self.btn_launch.setText("ENGINE NOT FOUND (LOCAL OR DOCKER)")
+            self.btn_launch.setStyleSheet("background-color: #444444; color: #888888;")
+
+    def _get_engine_type(self, model_type: str) -> EngineType | None:
+        """Map model type to EngineType."""
+        if "humanoid" in model_type or "mujoco" in model_type:
+            return EngineType.MUJOCO
+        elif "drake" in model_type:
+            return EngineType.DRAKE
+        elif "pinocchio" in model_type:
+            return EngineType.PINOCCHIO
+        elif "opensim" in model_type:
+            return EngineType.OPENSIM
+        return None
 
     def apply_styles(self) -> None:
         """Apply custom stylesheets."""
@@ -740,16 +778,36 @@ class GolfLauncher(QMainWindow):
             QMessageBox.critical(self, "Error", f"Path not found: {path}")
             return
 
-        # Engine-specific launch logic
-        try:
-            if model.type == "custom_humanoid":
-                self._custom_launch_humanoid(path)
-            elif model.type == "custom_dashboard":
-                self._custom_launch_comprehensive(path)
-            elif model.type == "mjcf" or str(path).endswith(".xml"):
-                self._launch_generic_mjcf(path)
+        # Determine execution mode (Local vs Docker)
+        is_local_fit = False
+        if self.engine_manager:
+            engine_type = self._get_engine_type(model.type)
+            # If we don't know the engine type, we assume it's a generic file launch which effectively relies on local util
+            if not engine_type:
+                 # Generic XML/MJCF usually implies local viewer
+                 is_local_fit = True
             else:
-                # Default to docker launch
+                 probe = self.engine_manager.probes.get(engine_type)
+                 if probe and probe.is_available():
+                     is_local_fit = True
+
+        # Override: If User manually selected Docker? (For now, we prioritize Local if available)
+        # However, checking 'is_local_fit' allows us to Fallback to Docker if Local is broken.
+
+        launch_locally = is_local_fit
+
+        try:
+            if launch_locally:
+                if model.type == "custom_humanoid":
+                    self._custom_launch_humanoid(path)
+                elif model.type == "custom_dashboard":
+                    self._custom_launch_comprehensive(path)
+                elif model.type == "mjcf" or str(path).endswith(".xml"):
+                    self._launch_generic_mjcf(path)
+                else:
+                    self._launch_docker_container(model, path)
+            else:
+                # Force Docker Launch
                 self._launch_docker_container(model, path)
         except Exception as e:
             QMessageBox.critical(self, "Launch Error", str(e))
@@ -828,6 +886,14 @@ class GolfLauncher(QMainWindow):
             if host_port:
                 logger.info(f"Drake Meshcat will be available on host port {host_port}")
                 self._start_meshcat_browser(host_port)
+
+        elif model.type == "custom_humanoid":
+            # Run the humanoid launcher inside docker
+            cmd.extend(["python", "python/humanoid_launcher.py"])
+
+        elif model.type == "custom_dashboard":
+             # Run the module inside docker
+             cmd.extend(["python", "-m", "mujoco_humanoid_golf"])
 
         elif model.type == "pinocchio":
             # Run from python dir
