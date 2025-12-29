@@ -39,7 +39,7 @@ def check_docker_image(image_name: str) -> tuple[bool, str]:
         return False, "Docker command not found"
 
 
-def check_nvidia_docker() -> None:
+def check_nvidia_docker() -> tuple[bool, str]:
     try:
         # Check Docker without running a full container
         result = subprocess.run(
