@@ -44,6 +44,9 @@ class MockQMainWindow:
     def show(self):
         pass
 
+    def style(self):
+        return MagicMock()
+
 
 class MockQWidget:
     def __init__(self, *args, **kwargs):
@@ -100,6 +103,15 @@ class MockQPushButton:
         self.clicked = MagicMock()
 
     def setMinimumHeight(self, h):
+        pass
+
+    def setIcon(self, icon):
+        pass
+
+    def setToolTip(self, t):
+        pass
+
+    def setAccessibleName(self, n):
         pass
 
 

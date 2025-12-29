@@ -73,10 +73,10 @@ MODEL_IMAGES = {
     "MuJoCo Dashboard": "mujoco_hand.png",
     "Drake Golf Model": "drake.png",
     "Pinocchio Golf Model": "pinocchio.png",
-    "OpenSim Golf": "opensim.png",
+    "OpenSim Golf": "openpose.jpg",
     "MyoSim Suite": "myosim.png",
-    "OpenPose Analysis": "openpose.jpg",
-    "Matlab Simscape": "matlab.png",
+    "OpenPose Analysis": "opensim.png",
+    "Matlab Simscape": "simscape_multibody.png",
 }
 
 DOCKER_STAGES = ["all", "mujoco", "pinocchio", "drake", "base"]
@@ -413,7 +413,8 @@ class GolfLauncher(QMainWindow):
         # Populate Grid
         row, col = 0, 0
         if self.registry:
-            models = self.registry.get_all_models()
+            # User Request: Limit to first 8 models (2x4 grid), removing subsets
+            models = self.registry.get_all_models()[:8]
             for model in models:
                 card = self.create_model_card(model)
                 self.model_cards[model.id] = card  # Use ID as key
