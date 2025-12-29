@@ -466,3 +466,70 @@ class MatlabProbe(EngineProbe):
             diagnostic_message=f"{self.engine_name} ready",
             details={"engine_dir": str(engine_dir)},
         )
+
+class OpenSimProbe(EngineProbe):
+    """Probe for OpenSim physics engine."""
+
+    def __init__(self, suite_root: Path) -> None:
+        """Initialize OpenSim probe."""
+        super().__init__("OpenSim", suite_root)
+
+    def probe(self) -> EngineProbeResult:
+        """Check OpenSim readiness."""
+        missing = []
+
+        # Check for opensim package
+        try:
+            import opensim
+
+            version = getattr(opensim, "__version__", "unknown")
+            if version == "unknown":
+                # Try getting version from build info if available
+                try:
+                    version = opensim.GetVersion()
+                except AttributeError:
+                    pass
+
+        except ImportError:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.NOT_INSTALLED,
+                version=None,
+                missing_dependencies=["opensim"],
+                diagnostic_message="OpenSim Python package not installed. "
+                "See OpenSim documentation for installation.",
+            )
+
+        # Check for engine directory
+        engine_dir = self.suite_root / "engines" / "physics_engines" / "opensim"
+        if not engine_dir.exists():
+            missing.append("engine directory")
+
+        # Check for Python modules
+        python_dir = engine_dir / "python"
+        if python_dir.exists():
+            key_dirs = ["opensim_golf"]
+            for dir_name in key_dirs:
+                if not (python_dir / dir_name).exists():
+                    missing.append(f"module: {dir_name}")
+        else:
+            missing.append("python directory")
+
+        if missing:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_ASSETS,
+                version=version,
+                missing_dependencies=missing,
+                diagnostic_message=f"OpenSim {version} installed but missing: "
+                f"{', '.join(missing)}",
+            )
+
+        return EngineProbeResult(
+            engine_name=self.engine_name,
+            status=ProbeStatus.AVAILABLE,
+            version=version,
+            missing_dependencies=[],
+            diagnostic_message=f"OpenSim {version} ready",
+            details={"engine_dir": str(engine_dir)},
+        )

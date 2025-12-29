@@ -68,9 +68,9 @@ class TestCrossEngineConsistency:
         try:
             mj = MuJoCoPhysicsEngine()
             # MuJoCo direct URDF load might need xml string conversion or file path if supported
-            # mj.load_from_path(URDF_PATH)
-            # engs["mujoco"] = mj # Uncomment when supported
-            del mj  # Explicitly delete to avoid F841 unused variable
+            mj.load_from_path(URDF_PATH)
+            engs["mujoco"] = mj
+            # del mj  # Explicitly delete to avoid F841 unused variable
         except Exception as e:
             LOGGER.warning(f"MuJoCo init failed: {e}")
 
