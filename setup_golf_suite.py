@@ -23,7 +23,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def check_dependencies():
+def check_dependencies() -> None:
     """Ensure required dependencies are installed."""
     try:
         import PIL  # noqa: F401
@@ -41,7 +41,7 @@ def check_dependencies():
             return False
 
 
-def git_sync():
+def git_sync() -> None:
     """Sync the repository with remote."""
     logger.info("Syncing repository with remote...")
     try:
@@ -184,7 +184,7 @@ def create_shortcut_windows(
         return False
 
 
-def main():
+def main() -> None:
     logger.info("Initializing Golf Modeling Suite setup...")
 
     # 1. Sync

@@ -28,7 +28,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-def main():
+def main() -> None:
     """Run parameter sweep example."""
     logger.info("Starting Example 02: Parameter Sweeps")
 
