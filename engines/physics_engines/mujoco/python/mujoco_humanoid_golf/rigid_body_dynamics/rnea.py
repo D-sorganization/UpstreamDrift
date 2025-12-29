@@ -12,6 +12,7 @@ from mujoco_humanoid_golf.spatial_algebra import (
     cross_motion_fast,
     jcalc,
 )
+from mujoco_humanoid_golf.spatial_algebra.joints import JOINT_AXIS_INDICES
 from shared.python import constants
 
 DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
@@ -107,6 +108,9 @@ def rnea(  # noqa: PLR0915
 
     s_subspace_list: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item] # Cache motion subspaces
 
+    # Pre-compute active indices for optimization
+    active_indices = [JOINT_AXIS_INDICES.get(jt, -1) for jt in model["jtype"]]
+
     # --- Forward pass: kinematics ---
     for i in range(nb):
         # Calculate joint transform and motion subspace
@@ -185,8 +189,14 @@ def rnea(  # noqa: PLR0915
         f[:, i] += f_body
 
         # Project force to joint torque
-        s_subspace = s_subspace_list[i]
-        tau[i] = s_subspace @ f[:, i]
+        idx = active_indices[i]
+        if idx != -1:
+            # OPTIMIZATION: sparse dot product
+            # s_subspace has 1.0 at index idx, 0.0 elsewhere
+            tau[i] = f[idx, i]
+        else:
+            s_subspace = s_subspace_list[i]
+            tau[i] = np.dot(s_subspace, f[:, i])
 
         # Propagate force to parent
         if model["parent"][i] != -1:
