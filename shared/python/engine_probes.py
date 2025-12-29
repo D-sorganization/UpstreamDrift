@@ -516,7 +516,7 @@ class OpenSimProbe(EngineProbe):
         # Check for Python modules
         python_dir = engine_dir / "python"
         if python_dir.exists():
-            key_dirs = ["opensim_golf"]
+            key_dirs = ["opensim_physics_engine.py"]
             for dir_name in key_dirs:
                 if not (python_dir / dir_name).exists():
                     missing.append(f"module: {dir_name}")
@@ -539,5 +539,64 @@ class OpenSimProbe(EngineProbe):
             version=version,
             missing_dependencies=[],
             diagnostic_message=f"OpenSim {version} ready",
+            details={"engine_dir": str(engine_dir)},
+        )
+
+
+class MyoSimProbe(EngineProbe):
+    """Probe for MyoSim physics engine."""
+
+    def __init__(self, suite_root: Path) -> None:
+        """Initialize MyoSim probe."""
+        super().__init__("MyoSim", suite_root)
+
+    def probe(self) -> EngineProbeResult:
+        """Check MyoSim readiness."""
+        missing = []
+
+        # Check for mujoco package (MyoSim depends on MuJoCo)
+        try:
+            import mujoco
+
+            version = getattr(mujoco, "__version__", "unknown")
+        except ImportError:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.NOT_INSTALLED,
+                version=None,
+                missing_dependencies=["mujoco"],
+                diagnostic_message="MuJoCo Python package not installed (required for MyoSim). "
+                "Install with: pip install mujoco",
+            )
+
+        # Check for engine directory
+        engine_dir = self.suite_root / "engines" / "physics_engines" / "myosim"
+        if not engine_dir.exists():
+            missing.append("engine directory")
+
+        # Check for Python modules
+        python_dir = engine_dir / "python"
+        if python_dir.exists():
+            if not (python_dir / "myosim_physics_engine.py").exists():
+                 missing.append("module: myosim_physics_engine.py")
+        else:
+            missing.append("python directory")
+
+        if missing:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_ASSETS,
+                version=version,
+                missing_dependencies=missing,
+                diagnostic_message=f"MyoSim installed but missing: "
+                f"{', '.join(missing)}",
+            )
+
+        return EngineProbeResult(
+            engine_name=self.engine_name,
+            status=ProbeStatus.AVAILABLE,
+            version=version,
+            missing_dependencies=[],
+            diagnostic_message=f"MyoSim ready (via MuJoCo {version})",
             details={"engine_dir": str(engine_dir)},
         )
