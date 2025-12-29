@@ -1,21 +1,22 @@
-"""MuJoCo Physics Engine encapsulation.
-
-Manages the low-level MuJoCo simulation state, loading, and stepping.
-"""
-
 from __future__ import annotations
 
 import logging
 import os
+from typing import Any  # noqa: F401
 
 import mujoco
 import numpy as np
 
+from .interfaces import PhysicsEngine
+
 LOGGER = logging.getLogger(__name__)
 
 
-class MuJoCoPhysicsEngine:
-    """Encapsulates MuJoCo model, data, and simulation control."""
+class MuJoCoPhysicsEngine(PhysicsEngine):
+    """Encapsulates MuJoCo model, data, and simulation control.
+    
+    Implements the shared PhysicsEngine protocol.
+    """
 
     def __init__(self) -> None:
         """Initialize the physics engine."""
@@ -23,31 +24,40 @@ class MuJoCoPhysicsEngine:
         self.data: mujoco.MjData | None = None
         self.xml_path: str | None = None
 
-    def load_from_xml_string(self, xml_content: str) -> None:
+    @property
+    def model_name(self) -> str:
+        """Return the name of the currently loaded model."""
+        if self.model is None:
+            return "None"
+        # MjModel doesn't always have a name field populated from XML, but we can check
+        # Or return the filename stem
+        if self.model.names:
+             # Just a placeholder, simpler to return "MuJoCo Model" or handle appropriately
+             pass
+        return "MuJoCo Model"
+
+    def load_from_string(self, content: str, extension: str | None = None) -> None:
         """Load model from XML string."""
         try:
-            self.model = mujoco.MjModel.from_xml_string(xml_content)
+            self.model = mujoco.MjModel.from_xml_string(content)
             self.data = mujoco.MjData(self.model)
             self.xml_path = None
         except Exception as e:
             LOGGER.error("Failed to load model from XML string: %s", e)
             raise
 
-    def load_from_path(self, xml_path: str) -> None:
+    def load_from_path(self, path: str) -> None:
         """Load model from file path."""
         try:
             # Convert to absolute path if needed
-            if not os.path.isabs(xml_path):
-                # Attempt to resolve relative to project root?
-                # Or assume caller handles resolution.
-                # For safety, let's assume absolute or relative to cwd.
+            if not os.path.isabs(path):
                 pass
 
-            self.model = mujoco.MjModel.from_xml_path(xml_path)
+            self.model = mujoco.MjModel.from_xml_path(path)
             self.data = mujoco.MjData(self.model)
-            self.xml_path = xml_path
+            self.xml_path = path
         except Exception as e:
-            LOGGER.error("Failed to load model from path %s: %s", xml_path, e)
+            LOGGER.error("Failed to load model from path %s: %s", path, e)
             raise
 
     def set_model_data(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
@@ -62,10 +72,19 @@ class MuJoCoPhysicsEngine:
     def get_data(self) -> mujoco.MjData | None:
         return self.data
 
-    def step(self) -> None:
+    def step(self, dt: float | None = None) -> None:
         """Step the simulation forward."""
         if self.model is not None and self.data is not None:
-            mujoco.mj_step(self.model, self.data)
+            # If dt is provided, temporarily override option.timestep?
+            # MuJoCo's timestep is in model.opt.timestep.
+            # Changing it might be unstable if not careful, but protocol allows it.
+            if dt is not None:
+                 old_dt = self.model.opt.timestep
+                 self.model.opt.timestep = dt
+                 mujoco.mj_step(self.model, self.data)
+                 self.model.opt.timestep = old_dt
+            else:
+                mujoco.mj_step(self.model, self.data)
 
     def forward(self) -> None:
         """Compute forward kinematics/dynamics without stepping time."""
@@ -77,68 +96,80 @@ class MuJoCoPhysicsEngine:
         if self.model is not None and self.data is not None:
             mujoco.mj_resetData(self.model, self.data)
             self.forward()
+            
+    def get_state(self) -> tuple[np.ndarray, np.ndarray]:
+        """Get the current state (positions, velocities)."""
+        if self.data is None:
+            return np.array([]), np.array([])
+        return self.data.qpos.copy(), self.data.qvel.copy()
 
-    def set_control(self, ctrl: np.ndarray) -> None:
+    def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
+        """Set the current state."""
+        if self.data is not None:
+            if len(q) == len(self.data.qpos):
+                 self.data.qpos[:] = q
+            if len(v) == len(self.data.qvel):
+                 self.data.qvel[:] = v
+            # Need to call forward to update accelerations implies by new state?
+            # Usually set_state implies just setting kinematics.
+
+    def set_control(self, u: np.ndarray) -> None:
         """Set control vector."""
         if self.data is not None:
             # Ensure size matches
-            if len(ctrl) == self.model.nu:
-                self.data.ctrl[:] = ctrl
+            if len(u) == self.model.nu:
+                self.data.ctrl[:] = u
             else:
                 LOGGER.warning(
                     "Control vector size mismatch: got %d, expected %d",
-                    len(ctrl),
+                    len(u),
                     self.model.nu,
                 )
+                
+    def get_time(self) -> float:
+        """Get the current simulation time."""
+        if self.data is None:
+            return 0.0
+        return self.data.time
 
     # -------- Section 1: Core Dynamics Engine Capabilities --------
 
-    def compute_mass_matrix(self) -> np.ndarray | None:
+    def compute_mass_matrix(self) -> np.ndarray:
         """Compute the dense inertia matrix M(q)."""
         if self.model is None or self.data is None:
-            return None
+            return np.array([])
 
         nv = self.model.nv
         M = np.zeros((nv, nv), dtype=np.float64)
 
         # Ensure qM is updated
-        # Usually mj_forward or mj_step updates qM. But mj_fullM needs qM.
-        # It's computed during inverse/forward dynamics.
         if hasattr(mujoco, "mj_makeInertia"):
             mujoco.mj_makeInertia(self.model, self.data)
 
         mujoco.mj_fullM(self.model, M, self.data.qM)
         return M
 
-    def compute_bias_forces(self) -> np.ndarray | None:
-        """Compute bias forces C(q, qdot) + g(q).
-
-        Returns:
-            Vector of size (nv,) containing Coriolis, Centrifugal, and Gravity forces.
-        """
+    def compute_bias_forces(self) -> np.ndarray:
+        """Compute bias forces C(q, qdot) + g(q)."""
         if self.data is None:
-            return None
+            return np.array([])
         # This is populated after mj_forward/mj_step
         return self.data.qfrc_bias.copy()
 
-    def compute_gravity_forces(self) -> np.ndarray | None:
+    def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravity forces g(q)."""
         if self.data is None:
-            return None
+            return np.array([])
         return self.data.qfrc_grav.copy()
 
-    def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray | None:
-        """Compute inverse dynamics: tau = ID(q, qdot, qacc).
-
-        Computes the forces required to produce the given acceleration.
-        Note: This writes to data.qfrc_inverse.
-        """
+    def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
+        """Compute inverse dynamics: tau = ID(q, qdot, qacc)."""
         if self.model is None or self.data is None:
-            return None
+            return np.array([])
 
         if len(qacc) != self.model.nv:
             LOGGER.error("Dimension mismatch for qacc")
-            return None
+            return np.array([])
 
         # Copy qacc to data
         self.data.qacc[:] = qacc
@@ -150,13 +181,13 @@ class MuJoCoPhysicsEngine:
 
     # -------- Section 3: Drift vs Control (Affine View) --------
 
-    def compute_affine_drift(self) -> np.ndarray | None:
+    def compute_affine_drift(self) -> np.ndarray:
         """Compute the 'Drift' vector f(q, qdot).
 
         acceleration when tau = 0 (and no active control).
         """
         if self.model is None or self.data is None:
-            return None
+            return np.array([])
 
         # Save current control
         saved_ctrl = self.data.ctrl.copy()

@@ -6,6 +6,18 @@ import pytest
 
 # Mock mujoco before importing the engine if it's imported at top level
 sys.modules["mujoco"] = MagicMock()
+
+# Mock interfaces module so we can import PhysicsEngine
+mock_interfaces = MagicMock()
+sys.modules["engines.physics_engines.mujoco.python.mujoco_humanoid_golf.interfaces"] = mock_interfaces
+
+# Mock PhysicsEngine specifically within interfaces
+# Using spec=True allows isinstance checks but won't necessarily instantiate fully
+# We just need it to be a class that MuJoCoPhysicsEngine can inherit from
+class MockPhysicsEngine:
+    pass
+mock_interfaces.PhysicsEngine = MockPhysicsEngine
+
 from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
     MuJoCoPhysicsEngine,
 )
@@ -19,9 +31,9 @@ def test_initialization(engine):
     assert engine.data is None
 
 @patch("engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco")
-def test_load_from_xml_string(mock_mujoco, engine):
+def test_load_from_string(mock_mujoco, engine):
     xml = "<mujoco/>"
-    engine.load_from_xml_string(xml)
+    engine.load_from_string(xml)
     
     mock_mujoco.MjModel.from_xml_string.assert_called_once_with(xml)
     assert engine.model is not None
