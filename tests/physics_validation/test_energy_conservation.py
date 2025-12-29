@@ -1,7 +1,6 @@
 """Physics validation tests verifying energy conservation."""
 
 import logging
-import sys
 from unittest.mock import MagicMock
 
 import numpy as np
