@@ -44,6 +44,11 @@ class MockQMainWindow:
     def show(self):
         pass
 
+    def style(self):
+        mock_style = MagicMock()
+        mock_style.standardIcon.return_value = MagicMock()
+        return mock_style
+
 
 class MockQWidget:
     def __init__(self, *args, **kwargs):
@@ -102,6 +107,15 @@ class MockQPushButton:
     def setMinimumHeight(self, h):
         pass
 
+    def setIcon(self, icon):
+        pass
+
+    def setToolTip(self, t):
+        pass
+
+    def setAccessibleName(self, n):
+        pass
+
 
 class MockQTextEdit:
     def __init__(self, *args, **kwargs):
@@ -146,6 +160,7 @@ mock_widgets.QGroupBox = MockQGroupBox
 mock_widgets.QMessageBox = MockQMessageBox
 mock_widgets.QApplication = MagicMock()
 mock_widgets.QApplication.return_value.exec.return_value = 0
+mock_widgets.QStyle.StandardPixmap = MagicMock()
 mock_core.Qt.AlignmentFlag.AlignCenter = 0
 
 mock_qt.QtWidgets = mock_widgets
