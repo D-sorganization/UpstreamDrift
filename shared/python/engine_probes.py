@@ -66,6 +66,13 @@ class EngineProbe:
         self.engine_name = engine_name
         self.suite_root = suite_root
 
+    def is_available(self) -> bool:
+        """Check availability via probe."""
+        try:
+            return self.probe().is_available()
+        except Exception:
+            return False
+
     def probe(self) -> EngineProbeResult:
         """Check if engine is ready to use.
 
