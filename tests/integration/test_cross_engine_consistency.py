@@ -2,6 +2,8 @@
 
 import logging
 import os
+import sys
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
@@ -11,8 +13,16 @@ from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine i
     MuJoCoPhysicsEngine,
 )
 
+
+# Helper to check if a module is a mock (leaked from unit tests)
+def is_mock(module_name):
+    mod = sys.modules.get(module_name)
+    return isinstance(mod, MagicMock) or (hasattr(mod, "__file__") and mod.__file__ is None)
+
 # Drake and Pinocchio might not be importable if dependencies are missing, handle gracefully
 try:
+    if is_mock("pydrake"):
+        raise ImportError("pydrake is mocked")
     from engines.physics_engines.drake.python.drake_physics_engine import (
         DrakePhysicsEngine,
     )
@@ -21,6 +31,8 @@ except ImportError:
     HAS_DRAKE = False
 
 try:
+    if is_mock("pinocchio"):
+        raise ImportError("pinocchio is mocked")
     from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
         PinocchioPhysicsEngine,
     )

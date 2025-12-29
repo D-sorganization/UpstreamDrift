@@ -51,7 +51,7 @@ class EngineManager:
         self.suite_root = Path(suite_root)
         self.engines_root = self.suite_root / "engines"
 
-        self.current_engine_type: EngineType | None = None
+        self.current_engine: EngineType | None = None
         self.active_physics_engine: PhysicsEngine | None = None
         self.engine_status: dict[EngineType, EngineStatus] = {}
 
@@ -153,7 +153,7 @@ class EngineManager:
 
         try:
             self._load_engine(engine_type)
-            self.current_engine_type = engine_type
+            self.current_engine = engine_type
             logger.info(f"Successfully switched to engine: {engine_type.value}")
             return True
         except GolfModelingError as e:
@@ -356,13 +356,13 @@ class EngineManager:
             self._drake_meshcat = None
 
         self.active_physics_engine = None
-        self.current_engine_type = None
+        self.current_engine = None
 
         logger.info("Engine cleanup complete")
 
     def get_current_engine(self) -> EngineType | None:
         """Get the currently active engine type."""
-        return self.current_engine_type
+        return self.current_engine
 
     def get_engine_status(self, engine_type: EngineType) -> EngineStatus:
         """Get status of a specific engine."""
@@ -372,7 +372,7 @@ class EngineManager:
         """Get information about all engines."""
         return {
             "current_engine": (
-                self.current_engine_type.value if self.current_engine_type else None
+                self.current_engine.value if self.current_engine else None
             ),
             "available_engines": [e.value for e in self.get_available_engines()],
             "engine_status": {e.value: s.value for e, s in self.engine_status.items()},
