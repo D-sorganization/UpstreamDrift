@@ -17,7 +17,9 @@ try:
     import mujoco
 except ImportError:
     mujoco = None
-    logger.warning("MuJoCo python package not found. MyoSimPhysicsEngine will not function.")
+    logger.warning(
+        "MuJoCo python package not found. MyoSimPhysicsEngine will not function."
+    )
 
 
 class MyoSimPhysicsEngine(PhysicsEngine):
@@ -28,7 +30,7 @@ class MyoSimPhysicsEngine(PhysicsEngine):
         self.model: Any | None = None
         self.data: Any | None = None
         self.xml_path: str | None = None
-        
+
         if mujoco is None:
             logger.error("MuJoCo library is not installed.")
 
@@ -149,20 +151,20 @@ class MyoSimPhysicsEngine(PhysicsEngine):
         # qfrc_grav is available in newer MuJoCo versions
         if self.data is None:
             return np.array([])
-            
+
         if hasattr(self.data, "qfrc_grav"):
-             return cast(np.ndarray, self.data.qfrc_grav.copy())
-             
+            return cast(np.ndarray, self.data.qfrc_grav.copy())
+
         return np.array([])
 
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics."""
         if self.model is None or self.data is None:
             return np.array([])
-            
+
         if len(qacc) != self.model.nv:
             return np.array([])
-            
+
         self.data.qacc[:] = qacc
         mujoco.mj_inverse(self.model, self.data)
         return cast(np.ndarray, self.data.qfrc_inverse.copy())

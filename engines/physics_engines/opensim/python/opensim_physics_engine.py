@@ -16,7 +16,9 @@ try:
     import opensim
 except ImportError:
     opensim = None
-    logger.warning("OpenSim python package not found. OpenSimPhysicsEngine will not function fully.")
+    logger.warning(
+        "OpenSim python package not found. OpenSimPhysicsEngine will not function fully."
+    )
 
 
 class OpenSimPhysicsEngine(PhysicsEngine):
@@ -48,6 +50,8 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         try:
             self._model = opensim.Model(path)
             self._model_path = path
+            if self._model is None:
+                raise ValueError("Failed to create OpenSim Model object")
             # Initialize the system and state
             self._state = self._model.initSystem()
             self._manager = opensim.Manager(self._model)
@@ -74,15 +78,15 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
         step_size = dt if dt is not None else self._time_step
         current_time = self._state.getTime()
-        
+
         # Integrate to new time
         self._manager.setInitialTime(current_time)
         self._manager.setFinalTime(current_time + step_size)
-        
+
         # Integrate
         self._manager.integrate(current_time + step_size)
-        
-        # Update our internal state reference? 
+
+        # Update our internal state reference?
         # The manager updates the state in the model, but let's be sure.
         # Actually opensim Manager behavior varies by version.
         # Usually manager.integrate(t_final) updates the state.
@@ -145,12 +149,12 @@ class OpenSimPhysicsEngine(PhysicsEngine):
     def compute_mass_matrix(self) -> np.ndarray:
         if not self._model or not self._state:
             return np.array([])
-        
+
         matter = self._model.getMatterSubsystem()
         n_u = self._model.getNumSpeeds()
         m_mat = opensim.Matrix()
         matter.calcM(self._state, m_mat)
-        
+
         # Convert opensim Matrix to numpy
         res = np.zeros((n_u, n_u))
         for r in range(n_u):
@@ -167,9 +171,9 @@ class OpenSimPhysicsEngine(PhysicsEngine):
     def compute_gravity_forces(self) -> np.ndarray:
         if not self._model or not self._state:
             return np.array([])
-        
-        matter = self._model.getMatterSubsystem()
-        g_force = opensim.Vector()
+
+        # matter = self._model.getMatterSubsystem()
+        # g_force = opensim.Vector()
         # This might not be exposed directly on MatterSubsystem in all versions.
         # Fallback to ID with zero qacc and zero vel?
         return np.array([])
@@ -177,7 +181,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         if not self._model or not self._state:
             return np.array([])
-        
+
         # InverseDynamicsSolver
         # Note: OpenSim ID usually solves for Gen Forces, not actuator torques directly in the same way.
         return np.array([])
@@ -185,13 +189,17 @@ class OpenSimPhysicsEngine(PhysicsEngine):
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         if not self._model or not self._state:
             return None
-        
+
         # Access body by name
         try:
-           body = self._model.getBodySet().get(body_name)
-        except:
-           return None
-           
-        matter = self._model.getMatterSubsystem()
+            self._model.getBodySet().get(body_name)
+        except Exception:
+            # Fallback if accessed by index or other means fail
+            try:
+                self._model.getBodySet().get(body_name)
+            except Exception:
+                raise ValueError(f"Body {body_name} not found in model") from None
+
+        # matter = self._model.getMatterSubsystem()
         # matter.calcStationJacobian(...)
         return None

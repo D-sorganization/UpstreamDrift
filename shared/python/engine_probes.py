@@ -578,7 +578,7 @@ class MyoSimProbe(EngineProbe):
         python_dir = engine_dir / "python"
         if python_dir.exists():
             if not (python_dir / "myosim_physics_engine.py").exists():
-                 missing.append("module: myosim_physics_engine.py")
+                missing.append("module: myosim_physics_engine.py")
         else:
             missing.append("python directory")
 
