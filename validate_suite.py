@@ -53,7 +53,7 @@ def validate_directory_structure() -> bool:
     return True
 
 
-def validate_launchers() -> None:
+def validate_launchers() -> bool:
     """Validate that launchers can be imported and have required functions."""
     logger.info("Validating launchers...")
 
@@ -91,7 +91,7 @@ def validate_launchers() -> None:
     return True
 
 
-def validate_shared_components() -> None:
+def validate_shared_components() -> bool:
     """Validate shared Python and MATLAB components."""
     logger.info("Validating shared components...")
 
@@ -151,7 +151,7 @@ def validate_shared_components() -> None:
     return True
 
 
-def validate_engine_structure() -> None:
+def validate_engine_structure() -> bool:
     """Validate that all physics engines have expected structure."""
     logger.info("Validating engine structure...")
 
@@ -187,7 +187,7 @@ def validate_engine_structure() -> None:
     return True
 
 
-def validate_git_repository() -> None:
+def validate_git_repository() -> bool:
     """Validate that this is a proper Git repository."""
     logger.info("Validating Git repository...")
 
@@ -210,7 +210,7 @@ def validate_git_repository() -> None:
     return True
 
 
-def validate_configuration_files() -> None:
+def validate_configuration_files() -> bool:
     """Validate that all configuration files are present."""
     logger.info("Validating configuration files...")
 

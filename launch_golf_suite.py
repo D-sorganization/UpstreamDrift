@@ -42,7 +42,7 @@ def launch_gui_launcher() -> int | None:
         return False
 
 
-def launch_local_launcher() -> None:
+def launch_local_launcher() -> bool:
     """Launch the local Python launcher."""
     try:
         from launchers.golf_suite_launcher import main
@@ -256,7 +256,7 @@ def _show_basic_status() -> None:
         logger.info(line)
 
 
-def main() -> bool | None:
+def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Golf Modeling Suite - Unified Launcher",
