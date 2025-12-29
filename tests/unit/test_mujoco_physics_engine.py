@@ -133,6 +133,7 @@ def test_compute_bias_forces(engine):
 
 
 def test_compute_gravity_forces(engine):
+    engine.model = MagicMock()
     engine.data = MagicMock()
     engine.data.qfrc_grav = np.array([0.0, -9.81])
 

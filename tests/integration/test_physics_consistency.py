@@ -76,6 +76,9 @@ def run_pinocchio_pendulum(params: SimplePendulumParams) -> dict[str, Any]:
     """Run pendulum simulation in Pinocchio."""
     try:
         import pinocchio as pin
+
+        if hasattr(pin, "assert_called") or hasattr(pin, "reset_mock"):
+            return {"error": "Pinocchio is mocked"}
     except ImportError:
         return {"error": "Pinocchio not installed"}
 
