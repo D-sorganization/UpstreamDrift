@@ -354,14 +354,15 @@ class TestEngineManagerBehavior:
             info = manager.get_engine_info()
 
             # Verify complete state snapshot
-            assert info["current_engine"] == EngineType.MUJOCO
-            assert EngineType.MUJOCO in info["available_engines"]
-            assert EngineType.MUJOCO in info["engine_status"]
+            assert info["current_engine"] == EngineType.MUJOCO.value
+            assert EngineType.MUJOCO.value in info["available_engines"]
+            assert EngineType.MUJOCO.value in info["engine_status"]
 
             # Verify types (API contract)
             assert isinstance(info["available_engines"], list)
             assert isinstance(info["engine_status"], dict)
-            assert all(isinstance(k, EngineType) for k in info["engine_status"])
+            # Keys are strings (engine type values)
+            assert all(isinstance(k, str) for k in info["engine_status"])
 
     def test_multiple_switch_operations_maintain_consistency(self):
         """Test that multiple engine switches maintain consistent state.
