@@ -134,7 +134,8 @@ def test_export_to_urdf(mock_mujoco_model):
             # Wait, body_jntadr=[ -1, 0, 1]. body 1 (link1) has joint 0.
             # In _build_children:
             #   Iterate children of root (link1).
-            #   Link1 is found as root in _find_root_body because it's first child of world.
+            #   Link1 is found as root in _find_root_body because it's first child
+            #   of world.
             #   So root link is created for Link1.
             #   Then _build_children for Link1.
             #   Child is Link2 (parent=1).
@@ -142,18 +143,20 @@ def test_export_to_urdf(mock_mujoco_model):
             #   Joint is defined by child body (Link2). Link2 has joint 1.
             #   So we should see joint_1.
 
-            # The joint attached to Link1 (joint 0) is effectively the "root joint" connecting to world.
+            # The joint attached to Link1 (joint 0) is effectively the "root joint"
+            # connecting to world.
             # URDF roots don't have joints.
             # But wait, MJCF uses joints inside bodies to define DOF.
             # If Link1 is floating base, it has free joint.
             # Here Link1 has HINGE joint (joint 0).
-            # If it's attached to world (parent 0), it should be connected to world with a fixed joint or
-            # the robot base link should be world?
+            # If it's attached to world (parent 0), it should be connected to world
+            # with a fixed joint or the robot base link should be world?
             # Typically URDF robot "base_link" is the first link.
             # If MJCF "world" is 0, and Link1 is 1 attached to 0.
             # Exporter finds root body = Link1.
             # Creates Link1.
-            # It does NOT create a joint for Link1 because it's the root of the URDF tree.
+            # It does NOT create a joint for Link1 because it's the root of the
+            # URDF tree.
             # So joint 0 is LOST in this export unless we have a dummy world link.
             # But normally URDF roots are floating or fixed to world implicitly.
 
