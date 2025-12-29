@@ -7,8 +7,8 @@ runs validation tests, and generates a detailed compliance report.
 
 import datetime
 import sys
-from typing import Any
 from pathlib import Path
+from typing import Any
 
 import pytest
 
