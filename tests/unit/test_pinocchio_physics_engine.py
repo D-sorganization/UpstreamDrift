@@ -18,8 +18,8 @@ class MockPhysicsEngine:
 
 mock_interfaces.PhysicsEngine = MockPhysicsEngine
 
-import importlib
-import engines.physics_engines.pinocchio.python.pinocchio_physics_engine
+import importlib  # noqa: E402, I001
+import engines.physics_engines.pinocchio.python.pinocchio_physics_engine  # noqa: E402
 
 importlib.reload(engines.physics_engines.pinocchio.python.pinocchio_physics_engine)
 
