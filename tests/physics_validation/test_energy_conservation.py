@@ -1,8 +1,8 @@
-from unittest.mock import MagicMock
-
 """Physics validation tests verifying energy conservation."""
 
 import logging
+import sys
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
@@ -166,7 +166,7 @@ def test_drake_energy_conservation():
     import pydrake
 
     if isinstance(pydrake, MagicMock):
-        pytest.skip("pydrake is mocked").all
+        pytest.skip("pydrake is mocked")
 
     # 1. Create a MultibodyPlant (Standard Boilerplate)
     builder = pydrake.systems.framework.DiagramBuilder()

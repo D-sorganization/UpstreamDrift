@@ -1,11 +1,12 @@
-import sys
-from unittest.mock import MagicMock
-
-if "pydrake.multibody.tree" not in sys.modules:
-    sys.modules["pydrake.multibody.tree"] = MagicMock()
 """Physics validation tests verifying pendulum dynamics accuracy."""
 
 import logging
+import sys
+from unittest.mock import MagicMock
+
+# Mock pydrake tree if missing (before other imports potentially load it)
+if "pydrake.multibody.tree" not in sys.modules:
+    sys.modules["pydrake.multibody.tree"] = MagicMock()
 
 import numpy as np
 import pytest
