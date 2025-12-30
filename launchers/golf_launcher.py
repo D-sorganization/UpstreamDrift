@@ -20,7 +20,16 @@ from pathlib import Path
 from typing import Any
 
 from PyQt6.QtCore import QMimeData, QPoint, Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QDrag, QFont, QIcon, QPixmap
+from PyQt6.QtGui import (
+    QCloseEvent,
+    QDrag,
+    QDragEnterEvent,
+    QDropEvent,
+    QFont,
+    QIcon,
+    QMouseEvent,
+    QPixmap,
+)
 from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -157,17 +166,17 @@ class DraggableModelCard(QFrame):
         lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(lbl_desc)
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse press for selection and drag initiation."""
-        if event.button() == Qt.MouseButton.LeftButton:
+        if event and event.button() == Qt.MouseButton.LeftButton:
             self.drag_start_position = event.position().toPoint()
             if self.parent_launcher:
                 self.parent_launcher.select_model(self.model.id)
         super().mousePressEvent(event)
 
-    def mouseMoveEvent(self, event) -> None:
+    def mouseMoveEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse move for drag operation."""
-        if not (event.buttons() & Qt.MouseButton.LeftButton):
+        if not event or not (event.buttons() & Qt.MouseButton.LeftButton):
             return
 
         if (
@@ -198,32 +207,40 @@ class DraggableModelCard(QFrame):
         except Exception as e:
             logger.error(f"Drag operation failed: {e}")
 
-    def mouseDoubleClickEvent(self, event) -> None:
+    def mouseDoubleClickEvent(self, event: QMouseEvent | None) -> None:
         """Handle double-click to launch model."""
         if self.parent_launcher:
             self.parent_launcher.launch_model_direct(self.model.id)
         super().mouseDoubleClickEvent(event)
 
-    def dragEnterEvent(self, event) -> None:
+    def dragEnterEvent(self, event: QDragEnterEvent | None) -> None:
         """Handle drag enter event."""
-        if event.mimeData().hasText() and event.mimeData().text().startswith(
-            "model_card:"
-        ):
-            event.acceptProposedAction()
-        else:
-            event.ignore()
+        if event:
+            mime_data = event.mimeData()
+            if (
+                mime_data
+                and mime_data.hasText()
+                and mime_data.text().startswith("model_card:")
+            ):
+                event.acceptProposedAction()
+            else:
+                event.ignore()
 
-    def dropEvent(self, event) -> None:
+    def dropEvent(self, event: QDropEvent | None) -> None:
         """Handle drop event."""
-        if event.mimeData().hasText() and event.mimeData().text().startswith(
-            "model_card:"
-        ):
-            source_model_id = event.mimeData().text().split(":", 1)[1]
-            if self.parent_launcher and source_model_id != self.model.id:
-                self.parent_launcher._swap_models(source_model_id, self.model.id)
-            event.acceptProposedAction()
-        else:
-            event.ignore()
+        if event:
+            mime_data = event.mimeData()
+            if (
+                mime_data
+                and mime_data.hasText()
+                and mime_data.text().startswith("model_card:")
+            ):
+                source_model_id = mime_data.text().split(":", 1)[1]
+                if self.parent_launcher and source_model_id != self.model.id:
+                    self.parent_launcher._swap_models(source_model_id, self.model.id)
+                event.acceptProposedAction()
+            else:
+                event.ignore()
 
 
 class DockerCheckThread(QThread):
@@ -597,7 +614,7 @@ class GolfLauncher(QMainWindow):
         except Exception as e:
             logger.error(f"Failed to load layout: {e}")
 
-    def closeEvent(self, event) -> None:
+    def closeEvent(self, event: QCloseEvent | None) -> None:
         """Handle window close event to save layout."""
         self._save_layout()
         super().closeEvent(event)
@@ -761,9 +778,11 @@ class GolfLauncher(QMainWindow):
         """Rebuild the grid layout based on current model order."""
         # Clear the layout
         for i in reversed(range(self.grid_layout.count())):
-            child = self.grid_layout.itemAt(i).widget()
-            if child:
-                self.grid_layout.removeWidget(child)
+            item = self.grid_layout.itemAt(i)
+            if item:
+                child = item.widget()
+                if child:
+                    self.grid_layout.removeWidget(child)
 
         # Re-add widgets in new order
         row, col = 0, 0
