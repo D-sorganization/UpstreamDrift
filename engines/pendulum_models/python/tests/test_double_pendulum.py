@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from engines.pendulum_models.python.double_pendulum import (
+    GRAVITY,
     I1,
     I2,
     C_times_qdot,
@@ -11,7 +12,6 @@ from engines.pendulum_models.python.double_pendulum import (
     c1,
     c2,
     double_pendulum_dynamics,
-    GRAVITY,
     g_vector,
     l1,
     m1,
