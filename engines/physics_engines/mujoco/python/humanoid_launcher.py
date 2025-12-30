@@ -197,13 +197,22 @@ class HumanoidLauncher(QMainWindow):
         self.combo_control.setCurrentText(
             str(getattr(self.config, "control_mode", "pd"))
         )
-
         settings_layout.addWidget(self.combo_control, 0, 1)
         settings_layout.addWidget(self.btn_poly_generator, 0, 2)
         settings_layout.addWidget(self.mode_help_label, 1, 1, 1, 2)
 
         # Trigger initial update after button exists
         self.on_control_mode_changed(self.combo_control.currentText())
+
+        # Polynomial Generator Button (only shown for poly mode)
+        self.btn_poly_generator = QPushButton("📊 Configure Polynomial")
+        self.btn_poly_generator.setStyleSheet(
+            "background-color: #0078d4; color: white; padding: 8px; font-weight: bold;"
+        )
+        self.btn_poly_generator.clicked.connect(self.open_polynomial_generator)
+        # Enable button for poly mode - availability checked when clicked
+        self.btn_poly_generator.setEnabled(self.config.get("control_mode") == "poly")
+        settings_layout.addWidget(self.btn_poly_generator, 0, 2)
 
         # Live View
         self.chk_live = QCheckBox("Live Interactive View (requires X11/VcXsrv)")
@@ -545,7 +554,6 @@ class HumanoidLauncher(QMainWindow):
                 spec.loader.exec_module(module)
 
             PolynomialGeneratorWidget = module.PolynomialGeneratorWidget
-
         except ImportError as e:
             QMessageBox.warning(
                 self,
