@@ -170,11 +170,15 @@ class DraggableModelCard(QFrame):
         if not (event.buttons() & Qt.MouseButton.LeftButton):
             return
 
-        if not hasattr(self, 'drag_start_position') or self.drag_start_position.isNull():
+        if (
+            not hasattr(self, "drag_start_position")
+            or self.drag_start_position.isNull()
+        ):
             return
 
-        if ((event.position().toPoint() - self.drag_start_position).manhattanLength() <
-            QApplication.startDragDistance()):
+        if (
+            event.position().toPoint() - self.drag_start_position
+        ).manhattanLength() < QApplication.startDragDistance():
             return
 
         try:
@@ -202,14 +206,18 @@ class DraggableModelCard(QFrame):
 
     def dragEnterEvent(self, event) -> None:
         """Handle drag enter event."""
-        if event.mimeData().hasText() and event.mimeData().text().startswith("model_card:"):
+        if event.mimeData().hasText() and event.mimeData().text().startswith(
+            "model_card:"
+        ):
             event.acceptProposedAction()
         else:
             event.ignore()
 
     def dropEvent(self, event) -> None:
         """Handle drop event."""
-        if event.mimeData().hasText() and event.mimeData().text().startswith("model_card:"):
+        if event.mimeData().hasText() and event.mimeData().text().startswith(
+            "model_card:"
+        ):
             source_model_id = event.mimeData().text().split(":", 1)[1]
             if self.parent_launcher and source_model_id != self.model.id:
                 self.parent_launcher._swap_models(source_model_id, self.model.id)
@@ -525,15 +533,19 @@ class GolfLauncher(QMainWindow):
                     "x": self.x(),
                     "y": self.y(),
                     "width": self.width(),
-                    "height": self.height()
+                    "height": self.height(),
                 },
                 "options": {
-                    "live_visualization": self.chk_live.isChecked() if hasattr(self, 'chk_live') else True,
-                    "gpu_acceleration": self.chk_gpu.isChecked() if hasattr(self, 'chk_gpu') else False
-                }
+                    "live_visualization": (
+                        self.chk_live.isChecked() if hasattr(self, "chk_live") else True
+                    ),
+                    "gpu_acceleration": (
+                        self.chk_gpu.isChecked() if hasattr(self, "chk_gpu") else False
+                    ),
+                },
             }
 
-            with open(LAYOUT_CONFIG_FILE, 'w', encoding='utf-8') as f:
+            with open(LAYOUT_CONFIG_FILE, "w", encoding="utf-8") as f:
                 json.dump(layout_data, f, indent=2)
 
             logger.info(f"Layout saved to {LAYOUT_CONFIG_FILE}")
@@ -548,7 +560,7 @@ class GolfLauncher(QMainWindow):
                 logger.info("No saved layout found, using default")
                 return
 
-            with open(LAYOUT_CONFIG_FILE, encoding='utf-8') as f:
+            with open(LAYOUT_CONFIG_FILE, encoding="utf-8") as f:
                 layout_data = json.load(f)
 
             # Restore model order if valid
@@ -567,14 +579,14 @@ class GolfLauncher(QMainWindow):
                     geometry.get("x", self.x()),
                     geometry.get("y", self.y()),
                     geometry.get("width", self.width()),
-                    geometry.get("height", self.height())
+                    geometry.get("height", self.height()),
                 )
 
             # Restore options
             options = layout_data.get("options", {})
-            if hasattr(self, 'chk_live'):
+            if hasattr(self, "chk_live"):
                 self.chk_live.setChecked(options.get("live_visualization", True))
-            if hasattr(self, 'chk_gpu'):
+            if hasattr(self, "chk_gpu"):
                 self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
 
             # Restore selected model
@@ -635,21 +647,29 @@ class GolfLauncher(QMainWindow):
             models = self.registry.get_all_models()[:10]
 
             # Add URDF generator as a special model
-            urdf_model = type('URDFModel', (), {
-                'id': 'urdf_generator',
-                'name': 'URDF Generator',
-                'description': 'Interactive URDF model builder',
-                'type': 'urdf_generator'
-            })()
+            urdf_model = type(
+                "URDFModel",
+                (),
+                {
+                    "id": "urdf_generator",
+                    "name": "URDF Generator",
+                    "description": "Interactive URDF model builder",
+                    "type": "urdf_generator",
+                },
+            )()
             models.append(urdf_model)
 
             # Add C3D viewer as a special model
-            c3d_model = type('C3DModel', (), {
-                'id': 'c3d_viewer',
-                'name': 'C3D Motion Viewer',
-                'description': 'C3D motion capture file viewer and analyzer',
-                'type': 'c3d_viewer'
-            })()
+            c3d_model = type(
+                "C3DModel",
+                (),
+                {
+                    "id": "c3d_viewer",
+                    "name": "C3D Motion Viewer",
+                    "description": "C3D motion capture file viewer and analyzer",
+                    "type": "c3d_viewer",
+                },
+            )()
             models.append(c3d_model)
 
             for model in models:
@@ -726,7 +746,7 @@ class GolfLauncher(QMainWindow):
         # Swap in order list
         self.model_order[source_idx], self.model_order[target_idx] = (
             self.model_order[target_idx],
-            self.model_order[source_idx]
+            self.model_order[source_idx],
         )
 
         # Rebuild the grid layout
@@ -849,14 +869,16 @@ class GolfLauncher(QMainWindow):
 
             # Path to URDF generator
             suite_root = Path(__file__).parent.parent
-            urdf_script = suite_root / "tools" / "urdf_generator" / "launch_urdf_generator.py"
+            urdf_script = (
+                suite_root / "tools" / "urdf_generator" / "launch_urdf_generator.py"
+            )
 
             if not urdf_script.exists():
                 QMessageBox.warning(
                     self,
                     "URDF Generator Not Found",
                     f"URDF Generator script not found at:\n{urdf_script}\n\n"
-                    "Please ensure the URDF generator is properly installed."
+                    "Please ensure the URDF generator is properly installed.",
                 )
                 return
 
@@ -868,21 +890,18 @@ class GolfLauncher(QMainWindow):
                 subprocess.Popen(
                     [sys.executable, str(urdf_script)],
                     creationflags=CREATE_NEW_CONSOLE,
-                    cwd=str(suite_root)
+                    cwd=str(suite_root),
                 )
             else:
                 # Unix: Launch in background
                 subprocess.Popen(
-                    [sys.executable, str(urdf_script)],
-                    cwd=str(suite_root)
+                    [sys.executable, str(urdf_script)], cwd=str(suite_root)
                 )
 
         except Exception as e:
             logger.error(f"Failed to launch URDF Generator: {e}")
             QMessageBox.critical(
-                self,
-                "Launch Error",
-                f"Failed to launch URDF Generator:\n{e}"
+                self, "Launch Error", f"Failed to launch URDF Generator:\n{e}"
             )
 
     def _launch_c3d_viewer(self) -> None:
@@ -894,14 +913,23 @@ class GolfLauncher(QMainWindow):
 
             # Path to C3D viewer
             suite_root = Path(__file__).parent.parent
-            c3d_script = suite_root / "engines" / "Simscape_Multibody_Models" / "3D_Golf_Model" / "python" / "src" / "apps" / "c3d_viewer.py"
+            c3d_script = (
+                suite_root
+                / "engines"
+                / "Simscape_Multibody_Models"
+                / "3D_Golf_Model"
+                / "python"
+                / "src"
+                / "apps"
+                / "c3d_viewer.py"
+            )
 
             if not c3d_script.exists():
                 QMessageBox.warning(
                     self,
                     "C3D Viewer Not Found",
                     f"C3D Viewer script not found at:\n{c3d_script}\n\n"
-                    "Please ensure the C3D viewer is properly installed."
+                    "Please ensure the C3D viewer is properly installed.",
                 )
                 return
 
@@ -913,21 +941,18 @@ class GolfLauncher(QMainWindow):
                 subprocess.Popen(
                     [sys.executable, str(c3d_script)],
                     creationflags=CREATE_NEW_CONSOLE,
-                    cwd=str(c3d_script.parent)
+                    cwd=str(c3d_script.parent),
                 )
             else:
                 # Unix: Launch in background
                 subprocess.Popen(
-                    [sys.executable, str(c3d_script)],
-                    cwd=str(c3d_script.parent)
+                    [sys.executable, str(c3d_script)], cwd=str(c3d_script.parent)
                 )
 
         except Exception as e:
             logger.error(f"Failed to launch C3D Viewer: {e}")
             QMessageBox.critical(
-                self,
-                "Launch Error",
-                f"Failed to launch C3D Viewer:\n{e}"
+                self, "Launch Error", f"Failed to launch C3D Viewer:\n{e}"
             )
 
     def select_model(self, model_id: str) -> None:
@@ -1240,7 +1265,9 @@ class GolfLauncher(QMainWindow):
         cmd.extend(["-w", "/workspace"])
 
         # Environment variables for Python path and shared modules
-        cmd.extend(["-e", "PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines"])
+        cmd.extend(
+            ["-e", "PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines"]
+        )
 
         # Display/X11
         if self.chk_live.isChecked():
@@ -1268,8 +1295,13 @@ class GolfLauncher(QMainWindow):
         # Entry Command - Updated to use correct paths and Python executable
         if model.type == "drake":
             # Change to the drake python directory and run as module
-            cmd.extend(["bash", "-c",
-                       "cd /workspace/engines/physics_engines/drake/python && python -m src.drake_gui_app"])
+            cmd.extend(
+                [
+                    "bash",
+                    "-c",
+                    "cd /workspace/engines/physics_engines/drake/python && python -m src.drake_gui_app",
+                ]
+            )
 
             if host_port:
                 logger.info(f"Drake Meshcat will be available on host port {host_port}")
@@ -1277,18 +1309,33 @@ class GolfLauncher(QMainWindow):
 
         elif model.type == "custom_humanoid":
             # Change to mujoco python directory and run humanoid launcher
-            cmd.extend(["bash", "-c",
-                       "cd /workspace/engines/physics_engines/mujoco/python && python humanoid_launcher.py"])
+            cmd.extend(
+                [
+                    "bash",
+                    "-c",
+                    "cd /workspace/engines/physics_engines/mujoco/python && python humanoid_launcher.py",
+                ]
+            )
 
         elif model.type == "custom_dashboard":
             # Change to mujoco python directory and run as module
-            cmd.extend(["bash", "-c",
-                       "cd /workspace/engines/physics_engines/mujoco/python && python -m mujoco_humanoid_golf"])
+            cmd.extend(
+                [
+                    "bash",
+                    "-c",
+                    "cd /workspace/engines/physics_engines/mujoco/python && python -m mujoco_humanoid_golf",
+                ]
+            )
 
         elif model.type == "pinocchio":
             # Change to pinocchio python directory and run GUI
-            cmd.extend(["bash", "-c",
-                       "cd /workspace/engines/physics_engines/pinocchio/python && python pinocchio_golf/gui.py"])
+            cmd.extend(
+                [
+                    "bash",
+                    "-c",
+                    "cd /workspace/engines/physics_engines/pinocchio/python && python pinocchio_golf/gui.py",
+                ]
+            )
 
             if host_port:
                 logger.info(

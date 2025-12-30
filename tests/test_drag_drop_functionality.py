@@ -103,9 +103,11 @@ class TestGridLayout(unittest.TestCase):
 
         self.assertEqual(GRID_COLUMNS, 4, "Grid should be 3x4 layout")
 
-    @patch('launchers.golf_launcher.ModelRegistry')
-    @patch('launchers.golf_launcher.EngineManager')
-    def test_model_order_with_urdf_generator_and_c3d_viewer(self, mock_engine_manager, mock_registry_class) -> None:
+    @patch("launchers.golf_launcher.ModelRegistry")
+    @patch("launchers.golf_launcher.EngineManager")
+    def test_model_order_with_urdf_generator_and_c3d_viewer(
+        self, mock_engine_manager, mock_registry_class
+    ) -> None:
         """Test that URDF generator and C3D viewer are added to model order."""
         from launchers.golf_launcher import GolfLauncher
 
@@ -126,9 +128,11 @@ class TestGridLayout(unittest.TestCase):
         mock_engine_manager.return_value = Mock()
 
         # Mock the UI initialization to avoid Qt widget creation
-        with patch.object(GolfLauncher, 'init_ui'), \
-             patch.object(GolfLauncher, 'check_docker'), \
-             patch.object(GolfLauncher, '_load_layout'):
+        with (
+            patch.object(GolfLauncher, "init_ui"),
+            patch.object(GolfLauncher, "check_docker"),
+            patch.object(GolfLauncher, "_load_layout"),
+        ):
 
             launcher = GolfLauncher()
 
@@ -151,9 +155,11 @@ class TestGridLayout(unittest.TestCase):
             self.assertEqual(launcher.model_order[-2], "urdf_generator")
             self.assertEqual(launcher.model_order[-1], "c3d_viewer")
 
-    @patch('launchers.golf_launcher.ModelRegistry')
-    @patch('launchers.golf_launcher.EngineManager')
-    def test_model_swap_preserves_special_tiles(self, mock_engine_manager, mock_registry_class):
+    @patch("launchers.golf_launcher.ModelRegistry")
+    @patch("launchers.golf_launcher.EngineManager")
+    def test_model_swap_preserves_special_tiles(
+        self, mock_engine_manager, mock_registry_class
+    ):
         """Test that model swapping works with URDF generator and C3D viewer."""
         from launchers.golf_launcher import GolfLauncher
 
@@ -191,11 +197,13 @@ class TestC3DViewerIntegration(unittest.TestCase):
 
     def test_c3d_viewer_files_exist(self):
         """Test that C3D viewer files exist."""
-        c3d_script = Path("engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py")
+        c3d_script = Path(
+            "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
+        )
         self.assertTrue(c3d_script.exists(), "C3D viewer script should exist")
 
         # Check that the script is executable Python
-        with open(c3d_script, encoding='utf-8') as f:
+        with open(c3d_script, encoding="utf-8") as f:
             content = f.read()
             self.assertIn("#!/usr/bin/env python", content)
             self.assertIn("C3DViewerMainWindow", content)
@@ -208,12 +216,11 @@ class TestC3DViewerIntegration(unittest.TestCase):
             import ezc3d
             import matplotlib
             import numpy as np
-            from PyQt6 import QtWidgets
 
             # Basic functionality test
-            self.assertTrue(hasattr(ezc3d, 'c3d'))
-            self.assertTrue(hasattr(np, 'ndarray'))
-            self.assertTrue(hasattr(matplotlib, 'pyplot'))
+            self.assertTrue(hasattr(ezc3d, "c3d"))
+            self.assertTrue(hasattr(np, "ndarray"))
+            self.assertTrue(hasattr(matplotlib, "pyplot"))
 
         except ImportError as e:
             self.skipTest(f"C3D viewer dependencies not available: {e}")
@@ -226,7 +233,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
         # Use Path.as_posix() to get forward slashes on all platforms
         self.assertEqual(
             C3D_VIEWER_SCRIPT.as_posix(),
-            "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
+            "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py",
         )
 
     @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
@@ -238,9 +245,11 @@ class TestC3DViewerIntegration(unittest.TestCase):
         launcher = GolfLauncher.__new__(GolfLauncher)
 
         # Mock the C3D viewer script path
-        with patch('pathlib.Path.exists', return_value=True), \
-             patch('subprocess.Popen') as mock_popen, \
-             patch('os.name', 'nt'):
+        with (
+            patch("pathlib.Path.exists", return_value=True),
+            patch("subprocess.Popen") as mock_popen,
+            patch("os.name", "nt"),
+        ):
 
             launcher._launch_c3d_viewer()
 
@@ -251,7 +260,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
             call_args = mock_popen.call_args[0][0]
 
             # Verify it's launching the C3D viewer
-            self.assertIn('c3d_viewer.py', ' '.join(call_args))
+            self.assertIn("c3d_viewer.py", " ".join(call_args))
 
     @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
     def test_c3d_viewer_missing_file_handling(self):
@@ -261,8 +270,10 @@ class TestC3DViewerIntegration(unittest.TestCase):
         launcher = GolfLauncher.__new__(GolfLauncher)
 
         # Mock missing file
-        with patch('pathlib.Path.exists', return_value=False), \
-             patch('launchers.golf_launcher.QMessageBox') as mock_msgbox:
+        with (
+            patch("pathlib.Path.exists", return_value=False),
+            patch("launchers.golf_launcher.QMessageBox") as mock_msgbox,
+        ):
 
             launcher._launch_c3d_viewer()
 
@@ -274,8 +285,10 @@ class TestC3DViewerIntegration(unittest.TestCase):
         from launch_golf_suite import launch_c3d_viewer
 
         # Mock the subprocess call
-        with patch('subprocess.run') as mock_run, \
-             patch('pathlib.Path.exists', return_value=True):
+        with (
+            patch("subprocess.run") as mock_run,
+            patch("pathlib.Path.exists", return_value=True),
+        ):
 
             result = launch_c3d_viewer()
 
@@ -285,7 +298,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
 
             # Check the command
             call_args = mock_run.call_args[0][0]
-            self.assertIn('c3d_viewer.py', ' '.join(call_args))
+            self.assertIn("c3d_viewer.py", " ".join(call_args))
 
 
 class TestURDFGeneratorIntegration(unittest.TestCase):
@@ -306,7 +319,9 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
 
         for file_name in required_files:
             file_path = urdf_dir / file_name
-            self.assertTrue(file_path.exists(), f"Required file {file_name} should exist")
+            self.assertTrue(
+                file_path.exists(), f"Required file {file_name} should exist"
+            )
 
     def test_urdf_generator_engine_support(self):
         """Test that URDF generator supports multiple engines."""
@@ -316,15 +331,15 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
             manager = SegmentManager()
 
             # Test engine export methods exist
-            self.assertTrue(hasattr(manager, 'export_for_engine'))
+            self.assertTrue(hasattr(manager, "export_for_engine"))
 
             # Test supported engines
-            supported_engines = ['mujoco', 'drake', 'pinocchio']
+            supported_engines = ["mujoco", "drake", "pinocchio"]
             for engine in supported_engines:
                 try:
                     result = manager.export_for_engine(engine)
                     self.assertIsInstance(result, dict)
-                    self.assertEqual(result['engine'], engine)
+                    self.assertEqual(result["engine"], engine)
                 except Exception as e:
                     self.fail(f"Engine {engine} export failed: {e}")
 
@@ -340,9 +355,11 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
         launcher = GolfLauncher.__new__(GolfLauncher)
 
         # Mock the URDF generator script path
-        with patch('pathlib.Path.exists', return_value=True), \
-             patch('subprocess.Popen') as mock_popen, \
-             patch('os.name', 'nt'):
+        with (
+            patch("pathlib.Path.exists", return_value=True),
+            patch("subprocess.Popen") as mock_popen,
+            patch("os.name", "nt"),
+        ):
 
             launcher._launch_urdf_generator()
 
@@ -353,7 +370,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
             call_args = mock_popen.call_args[0][0]
 
             # Verify it's launching the URDF generator
-            self.assertIn('launch_urdf_generator.py', ' '.join(call_args))
+            self.assertIn("launch_urdf_generator.py", " ".join(call_args))
 
     @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
     def test_urdf_generator_missing_file_handling(self):
@@ -363,8 +380,10 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
         launcher = GolfLauncher.__new__(GolfLauncher)
 
         # Mock missing file
-        with patch('pathlib.Path.exists', return_value=False), \
-             patch('launchers.golf_launcher.QMessageBox') as mock_msgbox:
+        with (
+            patch("pathlib.Path.exists", return_value=False),
+            patch("launchers.golf_launcher.QMessageBox") as mock_msgbox,
+        ):
 
             launcher._launch_urdf_generator()
 
@@ -424,10 +443,12 @@ if __name__ == "__main__":
 
     # Add PyQt tests only if available
     if PYQT_AVAILABLE:
-        test_classes.extend([
-            TestDragDropFunctionality,
-            TestGridLayout,
-        ])
+        test_classes.extend(
+            [
+                TestDragDropFunctionality,
+                TestGridLayout,
+            ]
+        )
     else:
         print("⚠️  PyQt6 not available - skipping GUI tests")
 

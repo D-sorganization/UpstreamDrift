@@ -25,7 +25,7 @@ class TestLauncherIntegration(unittest.TestCase):
             [sys.executable, "launch_golf_suite.py", "--help"],
             capture_output=True,
             text=True,
-            timeout=10
+            timeout=10,
         )
 
         self.assertEqual(result.returncode, 0, "Help command should succeed")
@@ -38,7 +38,7 @@ class TestLauncherIntegration(unittest.TestCase):
             [sys.executable, "launch_golf_suite.py", "--status"],
             capture_output=True,
             text=True,
-            timeout=15
+            timeout=15,
         )
 
         self.assertEqual(result.returncode, 0, "Status command should succeed")
@@ -58,7 +58,9 @@ class TestLauncherIntegration(unittest.TestCase):
 
         for file_name in required_files:
             file_path = urdf_dir / file_name
-            self.assertTrue(file_path.exists(), f"Required file {file_name} should exist")
+            self.assertTrue(
+                file_path.exists(), f"Required file {file_name} should exist"
+            )
 
     def test_shared_modules_importable(self):
         """Test that shared modules can be imported."""
@@ -68,8 +70,13 @@ class TestLauncherIntegration(unittest.TestCase):
             from shared.python.process_worker import ProcessWorker
 
             # Test basic instantiation
-            manager = EngineManager()
-            self.assertIsNotNone(manager)
+            config_manager = ConfigurationManager()
+            engine_manager = EngineManager()
+            process_worker = ProcessWorker()
+
+            self.assertIsNotNone(config_manager)
+            self.assertIsNotNone(engine_manager)
+            self.assertIsNotNone(process_worker)
 
         except ImportError as e:
             self.fail(f"Failed to import shared modules: {e}")
@@ -87,7 +94,7 @@ class TestLauncherIntegration(unittest.TestCase):
 
             # Check for expected engines
             engine_names = [engine.value for engine in engines]
-            expected_engines = ['mujoco', 'drake', 'pinocchio']
+            expected_engines = ["mujoco", "drake", "pinocchio"]
 
             for expected in expected_engines:
                 if expected in engine_names:
@@ -104,7 +111,11 @@ class TestLauncherIntegration(unittest.TestCase):
             from launchers.golf_launcher import GRID_COLUMNS, MODEL_IMAGES
 
             self.assertEqual(GRID_COLUMNS, 4, "Grid should be 3x4")
-            self.assertIn("URDF Generator", MODEL_IMAGES, "URDF Generator should have image mapping")
+            self.assertIn(
+                "URDF Generator",
+                MODEL_IMAGES,
+                "URDF Generator should have image mapping",
+            )
 
         except ImportError as e:
             self.skipTest(f"Golf launcher not available: {e}")
@@ -117,14 +128,14 @@ class TestLauncherIntegration(unittest.TestCase):
             manager = SegmentManager()
 
             # Test that export method exists
-            self.assertTrue(hasattr(manager, 'export_for_engine'))
+            self.assertTrue(hasattr(manager, "export_for_engine"))
 
             # Test supported engines
-            supported_engines = ['mujoco', 'drake', 'pinocchio']
+            supported_engines = ["mujoco", "drake", "pinocchio"]
             for engine in supported_engines:
                 result = manager.export_for_engine(engine)
                 self.assertIsInstance(result, dict)
-                self.assertEqual(result['engine'], engine)
+                self.assertEqual(result["engine"], engine)
                 print(f"✅ {engine} export working")
 
         except ImportError as e:
@@ -140,10 +151,15 @@ class TestLauncherIntegration(unittest.TestCase):
         content = dockerfile_path.read_text()
 
         # Check for key components
-        self.assertIn("continuumio/miniconda3:latest", content, "Should use miniconda base")
+        self.assertIn(
+            "continuumio/miniconda3:latest", content, "Should use miniconda base"
+        )
         self.assertIn("PYTHONPATH=", content, "Should set PYTHONPATH")
-        self.assertIn("/workspace:/workspace/shared/python:/workspace/engines", content,
-                     "PYTHONPATH should include all required directories")
+        self.assertIn(
+            "/workspace:/workspace/shared/python:/workspace/engines",
+            content,
+            "PYTHONPATH should include all required directories",
+        )
         self.assertIn("WORKDIR /workspace", content, "Should set workspace directory")
 
 
@@ -159,7 +175,7 @@ class TestLauncherCommands(unittest.TestCase):
             [sys.executable, "launch_golf_suite.py", "--urdf-generator"],
             capture_output=True,
             text=True,
-            timeout=5  # Short timeout since GUI will start
+            timeout=5,  # Short timeout since GUI will start
         )
 
         # Command should start successfully (may timeout due to GUI)
@@ -173,7 +189,7 @@ class TestLauncherCommands(unittest.TestCase):
 
     def test_engine_launch_commands(self):
         """Test individual engine launch commands."""
-        engines = ['mujoco', 'drake', 'pinocchio']
+        engines = ["mujoco", "drake", "pinocchio"]
 
         for engine in engines:
             with self.subTest(engine=engine):
@@ -182,13 +198,15 @@ class TestLauncherCommands(unittest.TestCase):
                     [sys.executable, "launch_golf_suite.py", "--engine", engine],
                     capture_output=True,
                     text=True,
-                    timeout=3  # Short timeout
+                    timeout=3,  # Short timeout
                 )
 
                 # Check for immediate failures (import errors, etc.)
                 if result.returncode != 0 and result.returncode != -1:  # -1 is timeout
                     if "not ready" in result.stderr or "not available" in result.stderr:
-                        print(f"⚠️  Engine {engine} not ready (expected in some environments)")
+                        print(
+                            f"⚠️  Engine {engine} not ready (expected in some environments)"
+                        )
                     else:
                         print(f"❌ Engine {engine} launch failed: {result.stderr}")
                 else:

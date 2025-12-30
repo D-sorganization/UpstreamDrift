@@ -20,8 +20,10 @@ from unittest.mock import Mock
 sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
 
 try:
-    from PyQt6.QtWidgets import QApplication
-    PYQT_AVAILABLE = True
+    # Check if PyQt6 is available for GUI tests
+    import importlib.util
+
+    PYQT_AVAILABLE = importlib.util.find_spec("PyQt6") is not None
 except ImportError:
     PYQT_AVAILABLE = False
 
@@ -38,16 +40,8 @@ class TestLayoutPersistence(unittest.TestCase):
         self.sample_layout = {
             "model_order": ["model_1", "model_2", "urdf_generator"],
             "selected_model": "model_1",
-            "window_geometry": {
-                "x": 100,
-                "y": 100,
-                "width": 1400,
-                "height": 900
-            },
-            "options": {
-                "live_visualization": True,
-                "gpu_acceleration": False
-            }
+            "window_geometry": {"x": 100, "y": 100, "width": 1400, "height": 900},
+            "options": {"live_visualization": True, "gpu_acceleration": False},
         }
 
     def test_layout_data_structure(self):
@@ -72,16 +66,18 @@ class TestLayoutPersistence(unittest.TestCase):
     def test_layout_file_creation(self):
         """Test that layout file can be created and read."""
         # Write layout data
-        with open(self.config_file, 'w', encoding='utf-8') as f:
+        with open(self.config_file, "w", encoding="utf-8") as f:
             json.dump(self.sample_layout, f, indent=2)
 
         self.assertTrue(self.config_file.exists(), "Layout file should be created")
 
         # Read layout data back
-        with open(self.config_file, encoding='utf-8') as f:
+        with open(self.config_file, encoding="utf-8") as f:
             loaded_data = json.load(f)
 
-        self.assertEqual(loaded_data, self.sample_layout, "Loaded data should match saved data")
+        self.assertEqual(
+            loaded_data, self.sample_layout, "Loaded data should match saved data"
+        )
 
     def test_model_order_validation(self):
         """Test model order validation logic."""
@@ -104,7 +100,9 @@ class TestLayoutPersistence(unittest.TestCase):
 
         # The constant should point to a valid path structure
         self.assertIsInstance(CONFIG_DIR, Path)
-        self.assertTrue(str(CONFIG_DIR).endswith("launcher"), "Should end with launcher directory")
+        self.assertTrue(
+            str(CONFIG_DIR).endswith("launcher"), "Should end with launcher directory"
+        )
 
     @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
     def test_layout_save_load_integration(self):
@@ -116,8 +114,12 @@ class TestLayoutPersistence(unittest.TestCase):
         mock_launcher_state = {
             "model_order": ["urdf_generator", "model_1", "model_2"],
             "selected_model": "urdf_generator",
-            "x": 200, "y": 150, "width": 1200, "height": 800,
-            "live_viz": False, "gpu_accel": True
+            "x": 200,
+            "y": 150,
+            "width": 1200,
+            "height": 800,
+            "live_viz": False,
+            "gpu_accel": True,
         }
 
         # Simulate save operation
@@ -128,27 +130,32 @@ class TestLayoutPersistence(unittest.TestCase):
                 "x": mock_launcher_state["x"],
                 "y": mock_launcher_state["y"],
                 "width": mock_launcher_state["width"],
-                "height": mock_launcher_state["height"]
+                "height": mock_launcher_state["height"],
             },
             "options": {
                 "live_visualization": mock_launcher_state["live_viz"],
-                "gpu_acceleration": mock_launcher_state["gpu_accel"]
-            }
+                "gpu_acceleration": mock_launcher_state["gpu_accel"],
+            },
         }
 
         # Save to file
-        with open(self.config_file, 'w', encoding='utf-8') as f:
+        with open(self.config_file, "w", encoding="utf-8") as f:
             json.dump(layout_data, f, indent=2)
 
         # Load from file
-        with open(self.config_file, encoding='utf-8') as f:
+        with open(self.config_file, encoding="utf-8") as f:
             loaded_data = json.load(f)
 
         # Verify data integrity
         self.assertEqual(loaded_data["model_order"], mock_launcher_state["model_order"])
-        self.assertEqual(loaded_data["selected_model"], mock_launcher_state["selected_model"])
+        self.assertEqual(
+            loaded_data["selected_model"], mock_launcher_state["selected_model"]
+        )
         self.assertEqual(loaded_data["window_geometry"]["x"], mock_launcher_state["x"])
-        self.assertEqual(loaded_data["options"]["live_visualization"], mock_launcher_state["live_viz"])
+        self.assertEqual(
+            loaded_data["options"]["live_visualization"],
+            mock_launcher_state["live_viz"],
+        )
 
 
 class TestLayoutConstants(unittest.TestCase):
@@ -188,12 +195,12 @@ class TestLayoutErrorHandling(unittest.TestCase):
         temp_file = Path(tempfile.mktemp(suffix=".json"))
 
         # Write invalid JSON
-        with open(temp_file, 'w') as f:
+        with open(temp_file, "w") as f:
             f.write("{ invalid json content")
 
         # Attempt to load should not crash
         try:
-            with open(temp_file, encoding='utf-8') as f:
+            with open(temp_file, encoding="utf-8") as f:
                 json.load(f)
             self.fail("Should have raised JSONDecodeError")
         except json.JSONDecodeError:
