@@ -47,6 +47,7 @@ def mock_casadi():
 
     # Set up value side effect to return appropriate mock data
     call_count = 0
+
     def value_side_effect(arg):
         nonlocal call_count
         call_count += 1
