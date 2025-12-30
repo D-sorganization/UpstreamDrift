@@ -204,7 +204,8 @@ class DrakeInducedAccelerationAnalyzer:
         """Compute induced acceleration for a specific control vector.
 
         Note:
-            This method calculates the acceleration induced solely by the provided torque vector `tau`.
+            This method calculates the acceleration induced solely by the provided
+            torque vector `tau`.
             It solves M * a = tau. If `tau` represents a unit torque
             (e.g., [0, 1, 0]), the result is the sensitivity of acceleration
             to that specific actuator.
