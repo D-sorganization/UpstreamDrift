@@ -158,6 +158,10 @@ class TestDraggableModelCard(unittest.TestCase):
 
         card.mousePressEvent(event)
 
+        print(f"DEBUG: parent_launcher in test: {card.parent_launcher}")
+        print(f"DEBUG: select_model mock: {self.mock_launcher.select_model}")
+        print(f"DEBUG: select_model call count: {self.mock_launcher.select_model.call_count}")
+
         # Verify model selection was called
         self.mock_launcher.select_model.assert_called_once_with("test_model")
 
