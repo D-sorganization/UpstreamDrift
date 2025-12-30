@@ -1,9 +1,7 @@
 # Comprehensive Dockerfile for Golf Modeling Suite
 # Unifies Robotics (MuJoCo, Drake, Pinocchio) and Biomechanics (OpenSim, MyoSim)
 
-FROM mambaorg/micromamba:1.5.8
-
-USER root
+FROM continuumio/miniconda3:latest
 
 # System dependencies
 # - GL libraries for MuJoCo/Visualization
@@ -22,63 +20,58 @@ RUN apt-get update && apt-get install -y \
     xvfb \
     unzip \
     wget \
+    pkg-config \
+    libeigen3-dev \
+    libboost-all-dev \
+    liburdfdom-dev \
+    liboctomap-dev \
+    libassimp-dev \
     && rm -rf /var/lib/apt/lists/*
 
-USER micromamba
-
 # Create comprehensive environment
-# Channels:
-# - conda-forge: Main scientific stack & Pinocchio
-# - opensim-org: OpenSim binaries
-RUN micromamba install -y -n base -c conda-forge -c opensim-org \
+# Install core scientific packages via conda
+RUN conda install -y -c conda-forge \
     python=3.11 \
     numpy \
-    scipy>=1.13.1 \
+    scipy \
     matplotlib \
     pandas \
     sympy \
-    pyqt>=6.6.0 \
-    mujoco>=3.2.3 \
-    pinocchio \
-    casadi>=3.6.3 \
-    opensim>=4.4.0 \
+    pyqt \
     opencv \
     pyyaml \
     defusedxml \
     h5py \
     scikit-learn \
     pillow \
-    && micromamba clean --all --yes
+    && conda clean --all --yes
 
-# Activate environment for subsequent commands
-ARG MAMBA_DOCKERFILE_ACTIVATE=1
+# Install Pinocchio ecosystem via conda-forge (recommended for better compatibility)
+RUN conda install -y -c conda-forge \
+    pinocchio \
+    crocoddyl \
+    && conda clean --all --yes
 
-# Install Pip-only packages
-# - Drake (often better via pip/wheel for specific versions)
-# - MyoSim (if pip available, else source install logic below)
-# - Dev tools
+# Install physics engines and additional packages via pip
 RUN pip install --no-cache-dir \
-    drake>=1.22.0 \
-    myosim>=2.4.2 \
-    pre-commit \
-    ruff \
-    black \
-    mypy \
-    pytest \
-    pytest-cov \
-    pip-audit \
-    shimmy \
-    gymnasium
+    mujoco>=3.2.3 \
+    drake \
+    meshcat \
+    casadi \
+    pin-pink \
+    qpsolvers \
+    osqp \
+    ezc3d \
+    && echo "Physics engines and robotics packages installed successfully"
 
-# OpenPose Installation Note:
-# Full OpenPose build requires CUDA + CuDNN and extensive compilation time.
-# For this container, we rely on 'opencv' for basic pose estimation fallback
-# unless a pre-built 'pyopenpose' wheel is mounted or built in a separate stage.
-
-WORKDIR /workspace
-
-# Set Python Path
+# Set up Python path for shared modules
 ENV PYTHONPATH="/workspace:/workspace/shared/python:/workspace/engines"
+
+# Create workspace directory structure
+RUN mkdir -p /workspace/shared/python /workspace/engines
+
+# Set working directory
+WORKDIR /workspace
 
 # Default command
 CMD ["/bin/bash"]
