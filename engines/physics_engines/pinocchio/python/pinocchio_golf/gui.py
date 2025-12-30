@@ -702,21 +702,20 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 t_accs.append(res["total"][v_idx])
 
         # Specific Control Input
-        spec_tau = None
+        spec_tau: np.ndarray | None = None
         txt = self.induced_source_edit.text().strip()
         if txt and self.model:
             try:
                 # Parse comma separated values
-                parts = [float(x) for x in txt.split(",")]
+                parts: list[float] = [float(x) for x in txt.split(",")]
                 if len(parts) == self.model.nv:
                     spec_tau = np.array(parts)
                 else:
                     # Pad or truncate? Or just log warning.
                     # Let's try to map to size NV.
                     temp_tau = np.zeros(self.model.nv, dtype=np.float64)
-                    for i, v in enumerate(parts):
-                        if i < len(temp_tau):
-                            temp_tau[i] = v
+                    min_len = min(len(parts), len(temp_tau))
+                    temp_tau[:min_len] = parts[:min_len]
                     spec_tau = temp_tau
             except ValueError:
                 pass
