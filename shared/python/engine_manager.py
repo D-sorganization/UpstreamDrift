@@ -22,6 +22,7 @@ class EngineType(Enum):
     DRAKE = "drake"
     PINOCCHIO = "pinocchio"
     OPENSIM = "opensim"
+    MYOSIM = "myosim"
     MATLAB_2D = "matlab_2d"
     MATLAB_3D = "matlab_3d"
     PENDULUM = "pendulum"
@@ -61,6 +62,7 @@ class EngineManager:
             EngineType.DRAKE: (self.engines_root / "physics_engines" / "drake"),
             EngineType.PINOCCHIO: (self.engines_root / "physics_engines" / "pinocchio"),
             EngineType.OPENSIM: (self.engines_root / "physics_engines" / "opensim"),
+            EngineType.MYOSIM: (self.engines_root / "physics_engines" / "myosim"),
             EngineType.MATLAB_2D: (
                 self.engines_root / "Simscape_Multibody_Models" / "2D_Golf_Model"
             ),
@@ -75,6 +77,7 @@ class EngineManager:
             DrakeProbe,
             MatlabProbe,
             MuJoCoProbe,
+            MyoSimProbe,
             OpenSimProbe,
             PendulumProbe,
             PinocchioProbe,
@@ -85,6 +88,7 @@ class EngineManager:
             EngineType.DRAKE: DrakeProbe(self.suite_root),
             EngineType.PINOCCHIO: PinocchioProbe(self.suite_root),
             EngineType.OPENSIM: OpenSimProbe(self.suite_root),
+            EngineType.MYOSIM: MyoSimProbe(self.suite_root),
             EngineType.PENDULUM: PendulumProbe(self.suite_root),
             EngineType.MATLAB_2D: MatlabProbe(self.suite_root, is_3d=False),
             EngineType.MATLAB_3D: MatlabProbe(self.suite_root, is_3d=True),
@@ -110,6 +114,7 @@ class EngineManager:
             EngineType.DRAKE: self._load_drake_engine,
             EngineType.PINOCCHIO: self._load_pinocchio_engine,
             EngineType.OPENSIM: self._load_opensim_engine,
+            EngineType.MYOSIM: self._load_myosim_engine,
             EngineType.MATLAB_2D: lambda: self._load_matlab_engine(
                 EngineType.MATLAB_2D
             ),
@@ -298,15 +303,56 @@ class EngineManager:
             raise GolfModelingError("Pinocchio requirements not met.") from e
 
     def _load_opensim_engine(self) -> None:
-        """Load OpenSim engine (Stub)."""
-        logger.info("Loading OpenSim engine (Stub)...")
-        from engines.physics_engines.opensim.python.opensim_physics_engine import (
-            OpenSimPhysicsEngine,
-        )
+        """Load OpenSim engine."""
+        logger.info("Loading OpenSim engine...")
+        try:
+            from .engine_probes import OpenSimProbe
 
-        engine = OpenSimPhysicsEngine()
-        self.active_physics_engine = engine
-        logger.info("OpenSim engine stub loaded")
+            probe = OpenSimProbe(self.suite_root)
+            result = probe.probe()
+
+            if not result.is_available():
+                raise GolfModelingError(
+                    f"OpenSim not ready:\n{result.diagnostic_message}\n"
+                    f"Fix: {result.get_fix_instructions()}"
+                )
+
+            from engines.physics_engines.opensim.python.opensim_physics_engine import (
+                OpenSimPhysicsEngine,
+            )
+
+            engine = OpenSimPhysicsEngine()
+            self.active_physics_engine = engine
+            logger.info("OpenSim engine loaded")
+
+        except ImportError as e:
+            raise GolfModelingError("OpenSim requirements not met.") from e
+
+    def _load_myosim_engine(self) -> None:
+        """Load MyoSim engine."""
+        logger.info("Loading MyoSim engine...")
+        try:
+            from .engine_probes import MyoSimProbe
+
+            probe = MyoSimProbe(self.suite_root)
+            result = probe.probe()
+
+            if not result.is_available():
+                raise GolfModelingError(
+                    f"MyoSim not ready:\n{result.diagnostic_message}\n"
+                    f"Fix: {result.get_fix_instructions()}"
+                )
+
+            from engines.physics_engines.myosim.python.myosim_physics_engine import (
+                MyoSimPhysicsEngine,
+            )
+
+            engine = MyoSimPhysicsEngine()
+            self.active_physics_engine = engine
+            logger.info("MyoSim engine loaded")
+
+        except ImportError as e:
+            raise GolfModelingError("MyoSim requirements not met.") from e
 
     def _load_matlab_engine(self, engine_type: EngineType) -> None:
         """Load MATLAB engine type."""
@@ -393,6 +439,7 @@ class EngineManager:
             EngineType.DRAKE: base_path / "python",
             EngineType.PINOCCHIO: base_path / "python",
             EngineType.OPENSIM: base_path / "python",
+            EngineType.MYOSIM: base_path / "python",
             EngineType.MATLAB_2D: base_path / "matlab",
             EngineType.MATLAB_3D: base_path / "matlab",
             EngineType.PENDULUM: base_path / "python",

@@ -516,7 +516,7 @@ class OpenSimProbe(EngineProbe):
         # Check for Python modules
         python_dir = engine_dir / "python"
         if python_dir.exists():
-            key_dirs = ["opensim_golf"]
+            key_dirs = ["opensim_physics_engine.py"]
             for dir_name in key_dirs:
                 if not (python_dir / dir_name).exists():
                     missing.append(f"module: {dir_name}")
@@ -540,4 +540,124 @@ class OpenSimProbe(EngineProbe):
             missing_dependencies=[],
             diagnostic_message=f"OpenSim {version} ready",
             details={"engine_dir": str(engine_dir)},
+        )
+
+
+class MyoSimProbe(EngineProbe):
+    """Probe for MyoSim physics engine."""
+
+    def __init__(self, suite_root: Path) -> None:
+        """Initialize MyoSim probe."""
+        super().__init__("MyoSim", suite_root)
+
+    def probe(self) -> EngineProbeResult:
+        """Check MyoSim readiness."""
+        missing = []
+
+        # Check for mujoco package (MyoSim depends on MuJoCo)
+        try:
+            import mujoco
+
+            version = getattr(mujoco, "__version__", "unknown")
+        except ImportError:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.NOT_INSTALLED,
+                version=None,
+                missing_dependencies=["mujoco"],
+                diagnostic_message="MuJoCo Python package not installed (required for MyoSim). "
+                "Install with: pip install mujoco",
+            )
+
+        # Check for engine directory
+        engine_dir = self.suite_root / "engines" / "physics_engines" / "myosim"
+        if not engine_dir.exists():
+            missing.append("engine directory")
+
+        # Check for Python modules
+        python_dir = engine_dir / "python"
+        if python_dir.exists():
+            if not (python_dir / "myosim_physics_engine.py").exists():
+                missing.append("module: myosim_physics_engine.py")
+        else:
+            missing.append("python directory")
+
+        if missing:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_ASSETS,
+                version=version,
+                missing_dependencies=missing,
+                diagnostic_message=f"MyoSim installed but missing: "
+                f"{', '.join(missing)}",
+            )
+
+        return EngineProbeResult(
+            engine_name=self.engine_name,
+            status=ProbeStatus.AVAILABLE,
+            version=version,
+            missing_dependencies=[],
+            diagnostic_message=f"MyoSim ready (via MuJoCo {version})",
+            details={"engine_dir": str(engine_dir)},
+        )
+
+
+class OpenPoseProbe(EngineProbe):
+    """Probe for OpenPose system."""
+
+    def __init__(self, suite_root: Path) -> None:
+        """Initialize OpenPose probe."""
+        super().__init__("OpenPose", suite_root)
+
+    def probe(self) -> EngineProbeResult:
+        """Check OpenPose readiness."""
+        missing = []
+        version = "unknown"
+
+        try:
+            import pyopenpose as op  # type: ignore # noqa: F401
+
+            # pyopenpose usually doesn't expose version string directly in top level
+            version = "installed"
+        except ImportError:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.NOT_INSTALLED,
+                version=None,
+                missing_dependencies=["pyopenpose"],
+                diagnostic_message="pyopenpose not in python path. "
+                "Ensure OpenPose is built and wrapper is installed.",
+            )
+
+        # Check for models dir
+        # We check environment variable OPENPOSE_MODELS or standard windows paths
+        import os
+
+        model_path_env = os.environ.get("OPENPOSE_MODELS")
+        default_path = Path("C:/openpose/models")
+
+        models_found = False
+        if model_path_env and Path(model_path_env).exists():
+            models_found = True
+        elif default_path.exists():
+            models_found = True
+
+        if not models_found:
+            missing.append("OpenPose Models (check OPENPOSE_MODELS env var)")
+
+        if missing:
+            return EngineProbeResult(
+                engine_name=self.engine_name,
+                status=ProbeStatus.MISSING_ASSETS,
+                version=version,
+                missing_dependencies=missing,
+                diagnostic_message=f"OpenPose installed but missing: {', '.join(missing)}",
+            )
+
+        return EngineProbeResult(
+            engine_name=self.engine_name,
+            status=ProbeStatus.AVAILABLE,
+            version=version,
+            missing_dependencies=[],
+            diagnostic_message="OpenPose Ready",
         )

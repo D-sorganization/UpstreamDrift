@@ -63,6 +63,7 @@ class TestLauncherIntegration:
 
         from unittest.mock import patch
 
+        # Import inside the test to avoid circular dependencies
         from launchers.unified_launcher import UnifiedLauncher
 
         # Patch GolfLauncher to avoid instantiation issues (StopIteration from side_effects)
@@ -95,11 +96,15 @@ class TestEngineProbes:
         suite_root = Path(__file__).parent.parent.parent
         sys.path.insert(0, str(suite_root))
 
+        from unittest.mock import MagicMock, patch
+
         from shared.python.engine_manager import EngineManager
         from shared.python.engine_probes import ProbeStatus
 
-        manager = EngineManager()
-        results = manager.probe_all_engines()
+        # Mock mujoco to avoid DLL errors in CI
+        with patch.dict(sys.modules, {"mujoco": MagicMock(__version__="3.0.0")}):
+            manager = EngineManager()
+            results = manager.probe_all_engines()
 
         # Should have results for all probed engines
         assert len(results) > 0
@@ -115,10 +120,14 @@ class TestEngineProbes:
         suite_root = Path(__file__).parent.parent.parent
         sys.path.insert(0, str(suite_root))
 
+        from unittest.mock import MagicMock, patch
+
         from shared.python.engine_manager import EngineManager
 
-        manager = EngineManager()
-        report = manager.get_diagnostic_report()
+        # Mock mujoco to avoid DLL errors in CI
+        with patch.dict(sys.modules, {"mujoco": MagicMock(__version__="3.0.0")}):
+            manager = EngineManager()
+            report = manager.get_diagnostic_report()
 
         # Report should be non-empty string
         assert isinstance(report, str)
@@ -132,11 +141,15 @@ class TestEngineProbes:
         suite_root = Path(__file__).parent.parent.parent
         sys.path.insert(0, str(suite_root))
 
+        from unittest.mock import MagicMock, patch
+
         from shared.python.engine_manager import EngineManager
         from shared.python.engine_probes import ProbeStatus
 
-        manager = EngineManager()
-        results = manager.probe_all_engines()
+        # Mock mujoco to avoid DLL errors in CI
+        with patch.dict(sys.modules, {"mujoco": MagicMock(__version__="3.0.0")}):
+            manager = EngineManager()
+            results = manager.probe_all_engines()
 
         # Check if any engine is available
         available_engines = [
