@@ -33,20 +33,22 @@ class TestDockerBuild(unittest.TestCase):
         content = dockerfile_path.read_text()
 
         # Verify PYTHONPATH includes all required directories
-        pythonpath_line = [line for line in content.split('\n') if 'PYTHONPATH=' in line][0]
-        self.assertIn('/workspace', pythonpath_line)
-        self.assertIn('/workspace/shared/python', pythonpath_line)
-        self.assertIn('/workspace/engines', pythonpath_line)
+        pythonpath_line = [
+            line for line in content.split("\n") if "PYTHONPATH=" in line
+        ][0]
+        self.assertIn("/workspace", pythonpath_line)
+        self.assertIn("/workspace/shared/python", pythonpath_line)
+        self.assertIn("/workspace/engines", pythonpath_line)
 
     @unittest.skipUnless(
-        subprocess.run(['docker', '--version'], capture_output=True).returncode == 0,
-        "Docker not available"
+        subprocess.run(["docker", "--version"], capture_output=True).returncode == 0,
+        "Docker not available",
     )
     def test_docker_available(self):
         """Test that Docker is available for building."""
-        result = subprocess.run(['docker', '--version'], capture_output=True, text=True)
+        result = subprocess.run(["docker", "--version"], capture_output=True, text=True)
         self.assertEqual(result.returncode, 0)
-        self.assertIn('Docker version', result.stdout)
+        self.assertIn("Docker version", result.stdout)
 
 
 class TestDockerLaunchCommands(unittest.TestCase):
@@ -77,9 +79,11 @@ class TestDockerLaunchCommands(unittest.TestCase):
         # Mock path
         mock_path = Path("/test/suite/path")
 
-        with patch('subprocess.Popen') as mock_popen, \
-             patch('os.name', 'nt'), \
-             patch('launchers.golf_launcher.logger'):
+        with (
+            patch("subprocess.Popen") as mock_popen,
+            patch("os.name", "nt"),
+            patch("launchers.golf_launcher.logger"),
+        ):
 
             launcher._launch_docker_container(mock_model, mock_path)
 
@@ -88,15 +92,20 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
             # Get the command arguments
             call_args = mock_popen.call_args[0][0]
-            command_str = ' '.join(call_args)
+            command_str = " ".join(call_args)
 
             # Verify command structure
-            self.assertIn('docker run', command_str)
-            self.assertIn('--rm -it', command_str)
-            self.assertIn('-v /test/suite/path:/workspace', command_str)
-            self.assertIn('-e PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines', command_str)
-            self.assertIn('cd /workspace/engines/physics_engines/mujoco/python', command_str)
-            self.assertIn('python humanoid_launcher.py', command_str)
+            self.assertIn("docker run", command_str)
+            self.assertIn("--rm -it", command_str)
+            self.assertIn("-v /test/suite/path:/workspace", command_str)
+            self.assertIn(
+                "-e PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines",
+                command_str,
+            )
+            self.assertIn(
+                "cd /workspace/engines/physics_engines/mujoco/python", command_str
+            )
+            self.assertIn("python humanoid_launcher.py", command_str)
 
     def test_drake_command(self):
         """Test Drake Docker command generation."""
@@ -113,21 +122,25 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
         mock_path = Path("/test/suite/path")
 
-        with patch('subprocess.Popen') as mock_popen, \
-             patch('os.name', 'nt'), \
-             patch('launchers.golf_launcher.logger'), \
-             patch('launchers.golf_launcher.threading.Thread'):
+        with (
+            patch("subprocess.Popen") as mock_popen,
+            patch("os.name", "nt"),
+            patch("launchers.golf_launcher.logger"),
+            patch("launchers.golf_launcher.threading.Thread"),
+        ):
 
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
-            command_str = ' '.join(call_args)
+            command_str = " ".join(call_args)
 
             # Verify Drake-specific components
-            self.assertIn('-p 7000-7010:7000-7010', command_str)
-            self.assertIn('-e MESHCAT_HOST=0.0.0.0', command_str)
-            self.assertIn('cd /workspace/engines/physics_engines/drake/python', command_str)
-            self.assertIn('python -m src.drake_gui_app', command_str)
+            self.assertIn("-p 7000-7010:7000-7010", command_str)
+            self.assertIn("-e MESHCAT_HOST=0.0.0.0", command_str)
+            self.assertIn(
+                "cd /workspace/engines/physics_engines/drake/python", command_str
+            )
+            self.assertIn("python -m src.drake_gui_app", command_str)
 
     def test_pinocchio_command(self):
         """Test Pinocchio Docker command generation."""
@@ -144,21 +157,25 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
         mock_path = Path("/test/suite/path")
 
-        with patch('subprocess.Popen') as mock_popen, \
-             patch('os.name', 'nt'), \
-             patch('launchers.golf_launcher.logger'), \
-             patch('launchers.golf_launcher.threading.Thread'):
+        with (
+            patch("subprocess.Popen") as mock_popen,
+            patch("os.name", "nt"),
+            patch("launchers.golf_launcher.logger"),
+            patch("launchers.golf_launcher.threading.Thread"),
+        ):
 
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
-            command_str = ' '.join(call_args)
+            command_str = " ".join(call_args)
 
             # Verify Pinocchio-specific components
-            self.assertIn('-p 7000-7010:7000-7010', command_str)
-            self.assertIn('-e MESHCAT_HOST=0.0.0.0', command_str)
-            self.assertIn('cd /workspace/engines/physics_engines/pinocchio/python', command_str)
-            self.assertIn('python pinocchio_golf/gui.py', command_str)
+            self.assertIn("-p 7000-7010:7000-7010", command_str)
+            self.assertIn("-e MESHCAT_HOST=0.0.0.0", command_str)
+            self.assertIn(
+                "cd /workspace/engines/physics_engines/pinocchio/python", command_str
+            )
+            self.assertIn("python pinocchio_golf/gui.py", command_str)
 
     def test_display_configuration_windows(self):
         """Test Windows display configuration."""
@@ -174,19 +191,21 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_model.type = "custom_humanoid"
         mock_path = Path("/test/path")
 
-        with patch('subprocess.Popen') as mock_popen, \
-             patch('os.name', 'nt'), \
-             patch('launchers.golf_launcher.logger'):
+        with (
+            patch("subprocess.Popen") as mock_popen,
+            patch("os.name", "nt"),
+            patch("launchers.golf_launcher.logger"),
+        ):
 
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
-            command_str = ' '.join(call_args)
+            command_str = " ".join(call_args)
 
             # Verify Windows-specific display setup
-            self.assertIn('-e DISPLAY=host.docker.internal:0', command_str)
-            self.assertIn('-e MUJOCO_GL=glfw', command_str)
-            self.assertIn('-e LIBGL_ALWAYS_INDIRECT=1', command_str)
+            self.assertIn("-e DISPLAY=host.docker.internal:0", command_str)
+            self.assertIn("-e MUJOCO_GL=glfw", command_str)
+            self.assertIn("-e LIBGL_ALWAYS_INDIRECT=1", command_str)
 
     def test_gpu_acceleration_option(self):
         """Test GPU acceleration option."""
@@ -202,17 +221,19 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_model.type = "custom_humanoid"
         mock_path = Path("/test/path")
 
-        with patch('subprocess.Popen') as mock_popen, \
-             patch('os.name', 'nt'), \
-             patch('launchers.golf_launcher.logger'):
+        with (
+            patch("subprocess.Popen") as mock_popen,
+            patch("os.name", "nt"),
+            patch("launchers.golf_launcher.logger"),
+        ):
 
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
-            command_str = ' '.join(call_args)
+            command_str = " ".join(call_args)
 
             # Verify GPU option is included
-            self.assertIn('--gpus=all', command_str)
+            self.assertIn("--gpus=all", command_str)
 
 
 class TestContainerEnvironment(unittest.TestCase):
@@ -224,14 +245,18 @@ class TestContainerEnvironment(unittest.TestCase):
         content = dockerfile_path.read_text()
 
         # Find PYTHONPATH line
-        pythonpath_lines = [line for line in content.split('\n') if 'PYTHONPATH=' in line]
-        self.assertEqual(len(pythonpath_lines), 1, "Should have exactly one PYTHONPATH definition")
+        pythonpath_lines = [
+            line for line in content.split("\n") if "PYTHONPATH=" in line
+        ]
+        self.assertEqual(
+            len(pythonpath_lines), 1, "Should have exactly one PYTHONPATH definition"
+        )
 
         pythonpath_line = pythonpath_lines[0]
         expected_paths = [
-            '/workspace',
-            '/workspace/shared/python',
-            '/workspace/engines'
+            "/workspace",
+            "/workspace/shared/python",
+            "/workspace/engines",
         ]
 
         for path in expected_paths:
@@ -243,8 +268,8 @@ class TestContainerEnvironment(unittest.TestCase):
         content = dockerfile_path.read_text()
 
         # Check for workspace directory creation
-        self.assertIn('mkdir -p /workspace/shared/python /workspace/engines', content)
-        self.assertIn('WORKDIR /workspace', content)
+        self.assertIn("mkdir -p /workspace/shared/python /workspace/engines", content)
+        self.assertIn("WORKDIR /workspace", content)
 
     def test_conda_environment_setup(self):
         """Test conda environment configuration."""
@@ -252,12 +277,12 @@ class TestContainerEnvironment(unittest.TestCase):
         content = dockerfile_path.read_text()
 
         # Verify base image and package installation
-        self.assertIn('FROM continuumio/miniconda3:latest', content)
-        self.assertIn('conda install', content)
-        self.assertIn('python=3.11', content)
+        self.assertIn("FROM continuumio/miniconda3:latest", content)
+        self.assertIn("conda install", content)
+        self.assertIn("python=3.11", content)
 
         # Check for required packages
-        required_packages = ['numpy', 'scipy', 'matplotlib', 'pandas', 'pyqt']
+        required_packages = ["numpy", "scipy", "matplotlib", "pandas", "pyqt"]
         for package in required_packages:
             self.assertIn(package, content, f"Should install {package}")
 
@@ -272,10 +297,10 @@ class TestModuleAccessibility(unittest.TestCase):
 
         # Check for key modules
         key_modules = [
-            'configuration_manager.py',
-            'process_worker.py',
-            'engine_manager.py',
-            '__init__.py'
+            "configuration_manager.py",
+            "process_worker.py",
+            "engine_manager.py",
+            "__init__.py",
         ]
 
         for module in key_modules:
@@ -289,28 +314,42 @@ class TestModuleAccessibility(unittest.TestCase):
 
         # Check for physics engines
         physics_engines_path = engines_path / "physics_engines"
-        self.assertTrue(physics_engines_path.exists(), "Physics engines directory should exist")
+        self.assertTrue(
+            physics_engines_path.exists(), "Physics engines directory should exist"
+        )
 
         # Check for specific engines
-        expected_engines = ['mujoco', 'drake', 'pinocchio']
+        expected_engines = ["mujoco", "drake", "pinocchio"]
         for engine in expected_engines:
             engine_path = physics_engines_path / engine
             if engine_path.exists():  # Not all engines may be installed
                 python_path = engine_path / "python"
-                self.assertTrue(python_path.exists(), f"{engine} should have python directory")
+                self.assertTrue(
+                    python_path.exists(), f"{engine} should have python directory"
+                )
 
     def test_mujoco_module_accessibility(self):
         """Test MuJoCo module structure for container access."""
-        mujoco_python_path = Path(__file__).parent.parent / "engines" / "physics_engines" / "mujoco" / "python"
+        mujoco_python_path = (
+            Path(__file__).parent.parent
+            / "engines"
+            / "physics_engines"
+            / "mujoco"
+            / "python"
+        )
 
         if mujoco_python_path.exists():
             # Check for humanoid launcher
             humanoid_launcher = mujoco_python_path / "humanoid_launcher.py"
-            self.assertTrue(humanoid_launcher.exists(), "Humanoid launcher should exist")
+            self.assertTrue(
+                humanoid_launcher.exists(), "Humanoid launcher should exist"
+            )
 
             # Check for module package
             module_path = mujoco_python_path / "mujoco_humanoid_golf"
-            self.assertTrue(module_path.exists(), "MuJoCo humanoid golf module should exist")
+            self.assertTrue(
+                module_path.exists(), "MuJoCo humanoid golf module should exist"
+            )
 
             main_file = module_path / "__main__.py"
             self.assertTrue(main_file.exists(), "Module should have __main__.py")

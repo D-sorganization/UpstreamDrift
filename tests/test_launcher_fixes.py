@@ -18,8 +18,7 @@ from unittest.mock import Mock, patch
 sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
 
 try:
-    from PyQt6.QtCore import QMimeData, QPoint, Qt
-    from PyQt6.QtGui import QDragEnterEvent, QDropEvent, QMouseEvent
+    from PyQt6.QtCore import QPoint, Qt
     from PyQt6.QtWidgets import QApplication
 
     PYQT_AVAILABLE = True
@@ -34,7 +33,10 @@ class TestSharedModuleImports(unittest.TestCase):
         """Test configuration manager import."""
         try:
             from shared.python.configuration_manager import ConfigurationManager
-            self.assertTrue(True, "ConfigurationManager imported successfully")
+
+            # Test that we can instantiate it
+            config_manager = ConfigurationManager()
+            self.assertIsNotNone(config_manager)
         except ImportError as e:
             self.fail(f"Failed to import ConfigurationManager: {e}")
 
@@ -42,7 +44,10 @@ class TestSharedModuleImports(unittest.TestCase):
         """Test process worker import."""
         try:
             from shared.python.process_worker import ProcessWorker
-            self.assertTrue(True, "ProcessWorker imported successfully")
+
+            # Test that we can instantiate it
+            worker = ProcessWorker()
+            self.assertIsNotNone(worker)
         except ImportError as e:
             self.fail(f"Failed to import ProcessWorker: {e}")
 
@@ -50,7 +55,12 @@ class TestSharedModuleImports(unittest.TestCase):
         """Test engine manager import."""
         try:
             from shared.python.engine_manager import EngineManager, EngineType
-            self.assertTrue(True, "EngineManager imported successfully")
+
+            # Test that we can instantiate it
+            manager = EngineManager()
+            self.assertIsNotNone(manager)
+            # Test that EngineType enum exists
+            self.assertTrue(hasattr(EngineType, "MUJOCO"))
         except ImportError as e:
             self.fail(f"Failed to import EngineManager: {e}")
 
@@ -61,6 +71,7 @@ class TestEngineManager(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         from shared.python.engine_manager import EngineManager
+
         self.manager = EngineManager()
 
     def test_engine_discovery(self):
@@ -71,7 +82,7 @@ class TestEngineManager(unittest.TestCase):
 
     def test_engine_paths_exist(self):
         """Test that engine paths are properly configured."""
-        for engine_type, path in self.manager.engine_paths.items():
+        for _engine_type, path in self.manager.engine_paths.items():
             self.assertIsInstance(path, Path)
             # Note: Not all engines may be installed, so we don't require existence
 
@@ -83,8 +94,8 @@ class TestEngineManager(unittest.TestCase):
         if EngineType.MUJOCO in self.manager.probes:
             probe_result = self.manager.get_probe_result(EngineType.MUJOCO)
             self.assertIsNotNone(probe_result)
-            self.assertHasAttr(probe_result, 'is_available')
-            self.assertHasAttr(probe_result, 'diagnostic_message')
+            self.assertHasAttr(probe_result, "is_available")
+            self.assertHasAttr(probe_result, "diagnostic_message")
 
 
 @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
@@ -187,7 +198,9 @@ class TestDraggableModelCard(unittest.TestCase):
         card.dropEvent(event)
 
         # Verify swap was called
-        self.mock_launcher._swap_models.assert_called_once_with("source_model", "test_model")
+        self.mock_launcher._swap_models.assert_called_once_with(
+            "source_model", "test_model"
+        )
         event.acceptProposedAction.assert_called_once()
 
 
@@ -217,8 +230,8 @@ class TestGolfLauncherGrid(unittest.TestCase):
 
         self.mock_registry.get_all_models.return_value = self.mock_models
 
-    @patch('launchers.golf_launcher.ModelRegistry')
-    @patch('launchers.golf_launcher.EngineManager')
+    @patch("launchers.golf_launcher.ModelRegistry")
+    @patch("launchers.golf_launcher.EngineManager")
     def test_model_order_tracking(self, mock_engine_manager, mock_registry_class):
         """Test that model order is properly tracked."""
         from launchers.golf_launcher import GolfLauncher
@@ -232,8 +245,8 @@ class TestGolfLauncherGrid(unittest.TestCase):
         self.assertIsInstance(launcher.model_order, list)
         self.assertEqual(len(launcher.model_order), len(self.mock_models))
 
-    @patch('launchers.golf_launcher.ModelRegistry')
-    @patch('launchers.golf_launcher.EngineManager')
+    @patch("launchers.golf_launcher.ModelRegistry")
+    @patch("launchers.golf_launcher.EngineManager")
     def test_model_swap_functionality(self, mock_engine_manager, mock_registry_class):
         """Test model swapping functionality."""
         from launchers.golf_launcher import GolfLauncher
@@ -296,9 +309,11 @@ class TestDockerConfiguration(unittest.TestCase):
         # Mock path
         mock_path = Path("/test/path")
 
-        with patch('subprocess.Popen') as mock_popen, \
-             patch('os.name', 'nt'), \
-             patch('launchers.golf_launcher.logger'):
+        with (
+            patch("subprocess.Popen") as mock_popen,
+            patch("os.name", "nt"),
+            patch("launchers.golf_launcher.logger"),
+        ):
 
             launcher._launch_docker_container(mock_model, mock_path)
 
@@ -309,8 +324,11 @@ class TestDockerConfiguration(unittest.TestCase):
             call_args = mock_popen.call_args[0][0]
 
             # Verify key components are in the command
-            command_str = ' '.join(call_args)
-            self.assertIn("PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines", command_str)
+            command_str = " ".join(call_args)
+            self.assertIn(
+                "PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines",
+                command_str,
+            )
             self.assertIn("docker run", command_str)
 
 
@@ -338,7 +356,9 @@ class TestMuJoCoModule(unittest.TestCase):
 
         for file_name in required_files:
             file_path = mujoco_path / file_name
-            self.assertTrue(file_path.exists(), f"Required file {file_name} should exist")
+            self.assertTrue(
+                file_path.exists(), f"Required file {file_name} should exist"
+            )
 
 
 class TestLauncherIntegration(unittest.TestCase):
@@ -360,7 +380,10 @@ class TestLauncherIntegration(unittest.TestCase):
         """Test that unified launcher can be imported."""
         try:
             from launchers.unified_launcher import UnifiedLauncher
-            self.assertTrue(True, "UnifiedLauncher imported successfully")
+
+            # Test that we can instantiate it
+            launcher = UnifiedLauncher()
+            self.assertIsNotNone(launcher)
         except ImportError as e:
             # This might fail if PyQt6 is not available, which is acceptable
             if "PyQt6" not in str(e):
@@ -383,10 +406,12 @@ if __name__ == "__main__":
 
     # Add PyQt tests only if available
     if PYQT_AVAILABLE:
-        test_classes.extend([
-            TestDraggableModelCard,
-            TestGolfLauncherGrid,
-        ])
+        test_classes.extend(
+            [
+                TestDraggableModelCard,
+                TestGolfLauncherGrid,
+            ]
+        )
     else:
         print("⚠️  PyQt6 not available - skipping GUI tests")
 
@@ -402,17 +427,21 @@ if __name__ == "__main__":
     print(f"Tests run: {result.testsRun}")
     print(f"Failures: {len(result.failures)}")
     print(f"Errors: {len(result.errors)}")
-    print(f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%")
+    print(
+        f"Success rate: {((result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun * 100):.1f}%"
+    )
 
     if result.failures:
         print("\n❌ Failures:")
         for test, traceback in result.failures:
-            print(f"  - {test}: {traceback.split('AssertionError: ')[-1].split('\\n')[0]}")
+            error_msg = traceback.split("AssertionError: ")[-1].split("\n")[0]
+            print(f"  - {test}: {error_msg}")
 
     if result.errors:
         print("\n💥 Errors:")
         for test, traceback in result.errors:
-            print(f"  - {test}: {traceback.split('\\n')[-2]}")
+            error_msg = traceback.split("\n")[-2]
+            print(f"  - {test}: {error_msg}")
 
     if not result.failures and not result.errors:
         print("\n🎉 All tests passed!")
