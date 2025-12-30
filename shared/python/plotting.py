@@ -286,6 +286,10 @@ class GolfSwingPlotter:
             fig: Matplotlib figure
             coupling_angles: Array of coupling angles [0, 360)
             title: Optional title
+
+        Note:
+            This method expects pre-calculated coupling angles.
+            See shared.python.statistical_analysis.compute_coupling_angles.
         """
         times, _ = self.recorder.get_time_series("joint_positions")
 

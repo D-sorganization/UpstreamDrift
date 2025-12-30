@@ -1,26 +1,85 @@
 """Benchmark tests for physics dynamics."""
 
 import importlib.util
+import sys
+from pathlib import Path
 
 import numpy as np
 import pytest
+
+# Fix for CI: Add the MuJoCo engine python path to sys.path
+# This handles the case where the project is not installed as a package
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+MUJOCO_PYTHON_PATH = REPO_ROOT / "engines" / "physics_engines" / "mujoco" / "python"
+if str(MUJOCO_PYTHON_PATH) not in sys.path:
+    sys.path.append(str(MUJOCO_PYTHON_PATH))
+
+from shared.python.constants import GRAVITY_M_S2  # noqa: E402
 
 # Check if pytest-benchmark is installed, otherwise skip
 if importlib.util.find_spec("pytest_benchmark") is None:
     pytest.skip("pytest-benchmark not installed", allow_module_level=True)
 
+try:
+    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.aba import (  # noqa: E402
+        aba,
+    )
+    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.rnea import (  # noqa: E402, I001
+        rnea,
+    )
+except ImportError:
+    pytest.skip("MuJoCo dynamics modules not found", allow_module_level=True)
 
-def simulate_dynamics(n_steps=1000):
-    """Simulate some dummy dynamics for benchmarking."""
-    # Dummy O(N) operation
-    state = np.zeros(10)
-    for _ in range(n_steps):
-        state += np.random.rand(10) * 0.01
-    return state
+
+def create_random_model(num_bodies=10):
+    """
+    Create a random kinematic chain model for benchmarking.
+    """
+    model = {}
+    model["NB"] = num_bodies
+    model["parent"] = np.array([-1] + [i - 1 for i in range(1, num_bodies)], dtype=int)
+    model["jtype"] = ["Rz"] * num_bodies  # Revolute joints (z-axis)
+
+    # Random transforms
+    model["Xtree"] = [np.eye(6) for _ in range(num_bodies)]
+
+    # Random inertias (should be positive definite)
+    model["I"] = []
+    for _ in range(num_bodies):
+        # Create random spatial inertia
+        # Just identity for benchmarking purposes is fine, but let's make it slightly realistic
+        # mass = 1, diagonal inertia
+        mass = 1.0
+        I_3x3 = np.eye(3)
+        # Construct 6x6 spatial inertia
+        spatial_inertia = np.zeros((6, 6))
+        spatial_inertia[:3, :3] = I_3x3
+        spatial_inertia[3:, 3:] = mass * np.eye(3)
+        model["I"].append(spatial_inertia)
+
+    model["gravity"] = np.array([0, 0, 0, 0, 0, -GRAVITY_M_S2])
+    return model
 
 
-def test_dynamics_performance(benchmark):
-    """Benchmark the dynamics simulation."""
-    # benchmark() runs the function many times and records timing
-    result = benchmark(simulate_dynamics, n_steps=100)
-    assert result is not None
+@pytest.fixture
+def dynamics_setup():
+    """Setup arrays for dynamics benchmarks."""
+    nb = 20  # Reasonable size for a humanoid(-ish) robot
+    model = create_random_model(nb)
+    q = np.random.rand(nb)
+    qd = np.random.rand(nb)
+    qdd = np.random.rand(nb)
+    tau = np.random.rand(nb)
+    return model, q, qd, qdd, tau
+
+
+def test_aba_benchmark(benchmark, dynamics_setup):
+    """Benchmark the Articulated Body Algorithm."""
+    model, q, qd, _, tau = dynamics_setup
+    benchmark(aba, model, q, qd, tau)
+
+
+def test_rnea_benchmark(benchmark, dynamics_setup):
+    """Benchmark the Recursive Newton-Euler Algorithm."""
+    model, q, qd, qdd, _ = dynamics_setup
+    benchmark(rnea, model, q, qd, qdd)
