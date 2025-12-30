@@ -254,6 +254,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.QMessageBox"),
+            patch("launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
         ):
 
             launcher._launch_c3d_viewer()
@@ -369,6 +370,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.QMessageBox"),
+            patch("launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
         ):
 
             launcher._launch_urdf_generator()
