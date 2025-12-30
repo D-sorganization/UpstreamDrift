@@ -175,6 +175,17 @@ exclude = [
     "archive",
     "tests",
     "drake",
+    "engines/physics_engines/mujoco/rebuild_docker.py",
+    "engines/physics_engines/mujoco/test_docker_venv.py",
+    "engines/physics_engines/mujoco/add_defusedxml_to_robotics_env.py",
+    "engines/physics_engines/mujoco/add_qt_dependencies.py",
+    "engines/physics_engines/mujoco/create_myo_placeholders.py",
+    "engines/physics_engines/mujoco/docker_test_dependencies.py",
+    "engines/physics_engines/mujoco/fix_linting.py",
+    "engines/physics_engines/mujoco/head_models.py",
+    "engines/physics_engines/mujoco/test_dependencies.py",
+    "engines/physics_engines/mujoco/test_mechanisms.py",
+    "engines/physics_engines/mujoco/test_new_models.py",
 ]
 
 [[tool.mypy.overrides]]
