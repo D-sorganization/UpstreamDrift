@@ -1,12 +1,12 @@
 """Benchmark tests for physics dynamics."""
 
+import importlib.util
+
 import numpy as np
 import pytest
 
 # Check if pytest-benchmark is installed, otherwise skip
-try:
-    import pytest_benchmark
-except ImportError:
+if importlib.util.find_spec("pytest_benchmark") is None:
     pytest.skip("pytest-benchmark not installed", allow_module_level=True)
 
 
