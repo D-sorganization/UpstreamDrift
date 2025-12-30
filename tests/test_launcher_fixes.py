@@ -159,7 +159,9 @@ class TestDraggableModelCard(unittest.TestCase):
         card.mousePressEvent(event)
 
         # DEBUG: Check if call happened
-        print(f"DEBUG: select_model call count: {self.mock_launcher.select_model.call_count}")
+        print(
+            f"DEBUG: select_model call count: {self.mock_launcher.select_model.call_count}"
+        )
         print(f"DEBUG: event.button() returned: {event.button()}")
         print(f"DEBUG: Qt.MouseButton.LeftButton is: {Qt.MouseButton.LeftButton}")
         print(f"DEBUG: Equality check: {event.button() == Qt.MouseButton.LeftButton}")
