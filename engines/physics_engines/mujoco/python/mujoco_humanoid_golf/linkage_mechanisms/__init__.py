@@ -98,18 +98,18 @@ def generate_four_bar_linkage_xml(
         <body name="crank" pos="0 0 0.5">
             <joint name="crank_joint" type="hinge" axis="0 0 1" damping="0.1"/>
             <geom type="capsule"
-                  fromto="0 0 0  {crank*np.cos(np.pi/4)} {crank*np.sin(np.pi/4)} 0"
+                  fromto="0 0 0  {crank * np.cos(np.pi / 4)} {crank * np.sin(np.pi / 4)} 0"
                   size="0.05" material="crank_mat" mass="0.5"/>
             <geom name="crank_end" type="sphere"
-                  pos="{crank*np.cos(np.pi/4)} {crank*np.sin(np.pi/4)} 0"
+                  pos="{crank * np.cos(np.pi / 4)} {crank * np.sin(np.pi / 4)} 0"
                   size="0.07" rgba="1 0.5 0 1" contype="0" conaffinity="0"/>
 
             <!-- Coupler link attached to crank end -->
-            <body name="coupler" pos="{crank*np.cos(np.pi/4)} {crank*np.sin(np.pi/4)} 0">
+            <body name="coupler" pos="{crank * np.cos(np.pi / 4)} {crank * np.sin(np.pi / 4)} 0">
                 <joint name="coupler_crank_joint" type="hinge" axis="0 0 1" damping="0.05"/>
-                <geom type="capsule" fromto="0 0 0  {coupler*0.7} {coupler*0.3} 0"
+                <geom type="capsule" fromto="0 0 0  {coupler * 0.7} {coupler * 0.3} 0"
                       size="0.05" material="coupler_mat" mass="0.5"/>
-                <geom name="coupler_point" type="sphere" pos="{coupler*0.35} {coupler*0.15} 0"
+                <geom name="coupler_point" type="sphere" pos="{coupler * 0.35} {coupler * 0.15} 0"
                       size="0.06" rgba="1 1 0 1" contype="0" conaffinity="0"/>
             </body>
         </body>
@@ -117,9 +117,9 @@ def generate_four_bar_linkage_xml(
         <!-- Follower link -->
         <body name="follower" pos="{ground} 0 0.5">
             <joint name="follower_joint" type="hinge" axis="0 0 1" damping="0.1"/>
-            <geom type="capsule" fromto="0 0 0  {-follower*0.7} {follower*0.3} 0"
+            <geom type="capsule" fromto="0 0 0  {-follower * 0.7} {follower * 0.3} 0"
                   size="0.05" material="follower_mat" mass="0.5"/>
-            <geom name="follower_end" type="sphere" pos="{-follower*0.7} {follower*0.3} 0"
+            <geom name="follower_end" type="sphere" pos="{-follower * 0.7} {follower * 0.3} 0"
                   size="0.07" rgba="0.5 0 1 1" contype="0" conaffinity="0"/>
         </body>
     </worldbody>
@@ -181,8 +181,8 @@ def generate_slider_crank_xml(
 
         <!-- Slider guide rail -->
         <geom type="cylinder"
-              fromto="{slider_start if orientation=='horizontal' else 0} 0 {1 if orientation=='horizontal' else slider_start}
-                      {slider_end if orientation=='horizontal' else 0} 0 {1 if orientation=='horizontal' else slider_end}"
+              fromto="{slider_start if orientation == "horizontal" else 0} 0 {1 if orientation == "horizontal" else slider_start}
+                      {slider_end if orientation == "horizontal" else 0} 0 {1 if orientation == "horizontal" else slider_end}"
               size="0.04" rgba="0.3 0.3 0.3 1" contype="0" conaffinity="0"/>
 
         <!-- Crank -->
@@ -190,31 +190,31 @@ def generate_slider_crank_xml(
             <joint name="crank_joint" type="hinge" axis="0 1 0" damping="0.2"/>
             <geom type="capsule"
                   fromto="0 0 0
-                          {crank_length if orientation=='horizontal' else 0} 0
-                          {0 if orientation=='horizontal' else crank_length}"
+                          {crank_length if orientation == "horizontal" else 0} 0
+                          {0 if orientation == "horizontal" else crank_length}"
                   size="0.06" material="crank_mat" mass="1.0"/>
             <geom name="crank_end" type="sphere"
-                  pos="{crank_length if orientation=='horizontal' else 0} 0
-                       {0 if orientation=='horizontal' else crank_length}"
+                  pos="{crank_length if orientation == "horizontal" else 0} 0
+                       {0 if orientation == "horizontal" else crank_length}"
                   size="0.08" rgba="1 0.5 0 1" contype="0" conaffinity="0"/>
 
             <!-- Connecting rod -->
             <body name="connecting_rod"
-                  pos="{crank_length if orientation=='horizontal' else 0} 0
-                       {0 if orientation=='horizontal' else crank_length}">
+                  pos="{crank_length if orientation == "horizontal" else 0} 0
+                       {0 if orientation == "horizontal" else crank_length}">
                 <joint name="rod_crank_joint" type="hinge" axis="0 1 0" damping="0.1"/>
                 <geom type="capsule"
                   fromto="0 0 0
-                          {rod_length if orientation=='horizontal' else 0} 0
-                          {0 if orientation=='horizontal' else rod_length}"
+                          {rod_length if orientation == "horizontal" else 0} 0
+                          {0 if orientation == "horizontal" else rod_length}"
                   size="0.05" material="rod_mat" mass="0.5"/>
             </body>
         </body>
 
         <!-- Slider -->
         <body name="slider"
-              pos="{rod_length+crank_length if orientation=='horizontal' else 0} 0
-                   {1 if orientation=='horizontal' else rod_length+crank_length}">
+              pos="{rod_length + crank_length if orientation == "horizontal" else 0} 0
+                   {1 if orientation == "horizontal" else rod_length + crank_length}">
             <joint name="slider_joint" type="slide" axis="{slider_axis}" damping="1.0"
                    range="{slider_start} {slider_end}"/>
             <geom type="box" size="0.15 0.1 0.15" material="slider_mat" mass="2.0"/>
@@ -225,8 +225,8 @@ def generate_slider_crank_xml(
 
     <equality>
         <connect body1="connecting_rod" body2="slider"
-                 anchor="{rod_length if orientation=='horizontal' else 0} 0
-                         {0 if orientation=='horizontal' else rod_length}"/>
+                 anchor="{rod_length if orientation == "horizontal" else 0} 0
+                         {0 if orientation == "horizontal" else rod_length}"/>
     </equality>
 
     <actuator>
@@ -294,7 +294,7 @@ def generate_scotch_yoke_xml(crank_radius=1.0) -> str:
         <!-- Yoke (slider) -->
         <body name="yoke" pos="0 0 1.5">
             <joint name="yoke_joint" type="slide" axis="0 0 1" damping="2.0"
-                   range="{-crank_radius-0.5} {crank_radius+0.5}"/>
+                   range="{-crank_radius - 0.5} {crank_radius + 0.5}"/>
             <geom type="box" size="0.4 0.35 0.1" material="yoke_mat" mass="2.0"/>
             <!-- Slot visualization (simplified) -->
             <geom type="box" pos="0 0 0" size="0.35 0.08 0.08"
@@ -353,34 +353,34 @@ def generate_geneva_mechanism_xml(num_slots=6, drive_radius=2.0) -> str:
         <!-- Drive wheel (continuous rotation) -->
         <body name="drive_wheel" pos="0 0 1">
             <joint name="drive_joint" type="hinge" axis="0 0 1" damping="0.5"/>
-            <geom type="cylinder" size="{drive_radius*0.8} 0.1" material="drive_mat" mass="1.0"/>
+            <geom type="cylinder" size="{drive_radius * 0.8} 0.1" material="drive_mat" mass="1.0"/>
             <!-- Drive pin -->
             <geom type="cylinder"
-                  fromto="{drive_radius*0.5} 0 0.11  {drive_radius*0.5} 0 0.3"
+                  fromto="{drive_radius * 0.5} 0 0.11  {drive_radius * 0.5} 0 0.3"
                   size="0.1" rgba="1 0.5 0 1" mass="0.3"/>
-            <geom type="sphere" pos="{drive_radius*0.5} 0 0.3" size="0.12"
+            <geom type="sphere" pos="{drive_radius * 0.5} 0 0.3" size="0.12"
                   rgba="1 1 0 1" mass="0.1"/>
         </body>
 
         <!-- Geneva wheel (intermittent rotation) -->
-        <body name="geneva_wheel" pos="{drive_radius*1.5} 0 1">
+        <body name="geneva_wheel" pos="{drive_radius * 1.5} 0 1">
             <joint name="geneva_joint" type="hinge" axis="0 0 1" damping="1.0"/>
             <geom type="cylinder" size="{drive_radius} 0.15" material="geneva_mat" mass="2.0"/>
             <!-- Simplified slot representations as visual markers -->
-            <geom type="box" pos="{drive_radius*0.7} 0 0.16" size="0.15 0.12 0.05"
+            <geom type="box" pos="{drive_radius * 0.7} 0 0.16" size="0.15 0.12 0.05"
                   rgba="0.2 0.9 0.2 0.7" contype="0" conaffinity="0"/>
-            <geom type="box" pos="{-drive_radius*0.7} 0 0.16" size="0.15 0.12 0.05"
+            <geom type="box" pos="{-drive_radius * 0.7} 0 0.16" size="0.15 0.12 0.05"
                   rgba="0.2 0.9 0.2 0.7" contype="0" conaffinity="0"/>
-            <geom type="box" pos="0 {drive_radius*0.7} 0.16" size="0.12 0.15 0.05"
+            <geom type="box" pos="0 {drive_radius * 0.7} 0.16" size="0.12 0.15 0.05"
                   rgba="0.2 0.9 0.2 0.7" contype="0" conaffinity="0"/>
-            <geom type="box" pos="0 {-drive_radius*0.7} 0.16" size="0.12 0.15 0.05"
+            <geom type="box" pos="0 {-drive_radius * 0.7} 0.16" size="0.12 0.15 0.05"
                   rgba="0.2 0.9 0.2 0.7" contype="0" conaffinity="0"/>
         </body>
 
         <!-- Center pivots -->
         <geom name="drive_pivot" type="sphere" pos="0 0 1" size="0.15"
               rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-        <geom name="geneva_pivot" type="sphere" pos="{drive_radius*1.5} 0 1" size="0.15"
+        <geom name="geneva_pivot" type="sphere" pos="{drive_radius * 1.5} 0 1" size="0.15"
               rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
     </worldbody>
 
@@ -423,38 +423,38 @@ def generate_peaucellier_linkage_xml(scale=1.0) -> str:
         <!-- Fixed anchor points -->
         <geom name="anchor_O" type="sphere" pos="0 0 1" size="0.1"
               rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-        <geom name="anchor_A" type="sphere" pos="{2.5*scale} 0 1" size="0.1"
+        <geom name="anchor_A" type="sphere" pos="{2.5 * scale} 0 1" size="0.1"
               rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
 
         <!-- Drive arm from O -->
         <body name="drive_arm" pos="0 0 1">
             <joint name="drive_joint" type="hinge" axis="0 0 1" damping="0.2"/>
-            <geom type="capsule" fromto="0 0 0  {1.5*scale} 0 0" size="0.04"
+            <geom type="capsule" fromto="0 0 0  {1.5 * scale} 0 0" size="0.04"
                   rgba="0.9 0.5 0.1 1" mass="0.5"/>
 
             <!-- Point B on drive arm -->
-            <body name="point_B" pos="{1.5*scale} 0 0">
+            <body name="point_B" pos="{1.5 * scale} 0 0">
                 <geom type="sphere" size="0.08" rgba="1 0.7 0 1" mass="0.2" contype="0" conaffinity="0"/>
             </body>
         </body>
 
         <!-- Link from A to B -->
-        <body name="link_AB" pos="{2.5*scale} 0 1">
+        <body name="link_AB" pos="{2.5 * scale} 0 1">
             <joint name="joint_A" type="hinge" axis="0 0 1" damping="0.1"/>
-            <geom type="capsule" fromto="0 0 0  {-1.8*scale} 0 0" size="0.04"
+            <geom type="capsule" fromto="0 0 0  {-1.8 * scale} 0 0" size="0.04"
                   material="link_mat" mass="0.4"/>
         </body>
 
         <!-- Rhombus linkage (simplified representation) -->
-        <body name="rhombus_center" pos="{1.2*scale} 0 1">
+        <body name="rhombus_center" pos="{1.2 * scale} 0 1">
             <joint name="rhombus_joint" type="hinge" axis="0 0 1" damping="0.1"/>
-            <geom type="capsule" fromto="{-0.5*scale} {0.8*scale} 0  {0.5*scale} {-0.8*scale} 0"
+            <geom type="capsule" fromto="{-0.5 * scale} {0.8 * scale} 0  {0.5 * scale} {-0.8 * scale} 0"
                   size="0.03" material="link_mat" mass="0.3"/>
-            <geom type="capsule" fromto="{-0.5*scale} {-0.8*scale} 0  {0.5*scale} {0.8*scale} 0"
+            <geom type="capsule" fromto="{-0.5 * scale} {-0.8 * scale} 0  {0.5 * scale} {0.8 * scale} 0"
                   size="0.03" material="link_mat" mass="0.3"/>
 
             <!-- Tracer point (generates straight line) -->
-            <body name="tracer" pos="{1.2*scale} 0 0">
+            <body name="tracer" pos="{1.2 * scale} 0 0">
                 <geom type="sphere" size="0.12" material="tracer_mat" mass="0.3"/>
                 <geom type="cylinder" fromto="0 0 0  0 0 0.5" size="0.02"
                       rgba="1 0 0 0.5" contype="0" conaffinity="0"/>
@@ -608,11 +608,11 @@ def generate_pantograph_xml(scale_factor=2.0) -> str:
             <!-- Second arm segment -->
             <body name="arm2" pos="1.5 1.0 0">
                 <joint name="arm2_joint" type="hinge" axis="0 0 1" damping="0.15"/>
-                <geom type="capsule" fromto="0 0 0  {1.5*scale_factor} {1.0*scale_factor} 0"
+                <geom type="capsule" fromto="0 0 0  {1.5 * scale_factor} {1.0 * scale_factor} 0"
                       size="0.05" material="arm_mat" mass="0.5"/>
 
                 <!-- Output point (scaled) -->
-                <body name="output_point" pos="{0.75*scale_factor} {0.5*scale_factor} 0">
+                <body name="output_point" pos="{0.75 * scale_factor} {0.5 * scale_factor} 0">
                     <geom type="sphere" size="0.15" material="output_mat" mass="0.4"/>
                     <geom type="cylinder" fromto="0 0 0  0 0 0.8" size="0.03"
                           rgba="0.9 0.1 0.1 0.6" contype="0" conaffinity="0"/>
@@ -703,7 +703,7 @@ def generate_delta_robot_xml(base_radius=2.0, platform_radius=0.5) -> str:
         </body>
 
         <!-- Arm 2 (120 degrees) -->
-        <body name="base2" pos="{base_radius*np.cos(2*np.pi/3)} {base_radius*np.sin(2*np.pi/3)} 2">
+        <body name="base2" pos="{base_radius * np.cos(2 * np.pi / 3)} {base_radius * np.sin(2 * np.pi / 3)} 2">
             <geom type="sphere" size="0.15" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
             <body name="arm2" pos="0 0 0" euler="0 0 120">
                 <joint name="joint2" type="hinge" axis="0 1 0" range="-120 120" damping="1.0"/>
@@ -724,7 +724,7 @@ def generate_delta_robot_xml(base_radius=2.0, platform_radius=0.5) -> str:
         </body>
 
         <!-- Arm 3 (240 degrees) -->
-        <body name="base3" pos="{base_radius*np.cos(4*np.pi/3)} {base_radius*np.sin(4*np.pi/3)} 2">
+        <body name="base3" pos="{base_radius * np.cos(4 * np.pi / 3)} {base_radius * np.sin(4 * np.pi / 3)} 2">
             <geom type="sphere" size="0.15" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
             <body name="arm3" pos="0 0 0" euler="0 0 240">
                 <joint name="joint3" type="hinge" axis="0 1 0" range="-120 120" damping="1.0"/>
@@ -745,7 +745,7 @@ def generate_delta_robot_xml(base_radius=2.0, platform_radius=0.5) -> str:
         </body>
 
         <!-- End effector platform -->
-        <body name="platform" pos="0 0 {2-arm_length-forearm_length}">
+        <body name="platform" pos="0 0 {2 - arm_length - forearm_length}">
             <freejoint/>
             <geom type="cylinder" size="{platform_radius} 0.1" material="platform_mat" mass="0.5"/>
             <geom type="sphere" pos="0 0 -0.3" size="0.2" rgba="1 0.5 0 1" mass="0.3"/>
@@ -809,19 +809,19 @@ def generate_five_bar_parallel_xml(link_length=1.5) -> str:
         <geom type="plane" size="10 10 0.1" material="grid"/>
 
         <!-- Base -->
-        <geom type="box" pos="0 0 0.25" size="{base_width/2} 0.15 0.25"
+        <geom type="box" pos="0 0 0.25" size="{base_width / 2} 0.15 0.25"
               rgba="0.3 0.3 0.3 1" contype="0" conaffinity="0"/>
 
         <!-- Left base pivot -->
-        <geom name="left_pivot" type="sphere" pos="{-base_width/2} 0 0.5" size="0.12"
+        <geom name="left_pivot" type="sphere" pos="{-base_width / 2} 0 0.5" size="0.12"
               rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
 
         <!-- Right base pivot -->
-        <geom name="right_pivot" type="sphere" pos="{base_width/2} 0 0.5" size="0.12"
+        <geom name="right_pivot" type="sphere" pos="{base_width / 2} 0 0.5" size="0.12"
               rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
 
         <!-- Left arm chain -->
-        <body name="left_link1" pos="{-base_width/2} 0 0.5">
+        <body name="left_link1" pos="{-base_width / 2} 0 0.5">
             <joint name="left_joint1" type="hinge" axis="0 0 1" damping="0.5"/>
             <geom type="capsule" fromto="0 0 0  {link_length} 0 0" size="0.06"
                   material="link1_mat" mass="0.8"/>
@@ -836,7 +836,7 @@ def generate_five_bar_parallel_xml(link_length=1.5) -> str:
         </body>
 
         <!-- Right arm chain -->
-        <body name="right_link1" pos="{base_width/2} 0 0.5">
+        <body name="right_link1" pos="{base_width / 2} 0 0.5">
             <joint name="right_joint1" type="hinge" axis="0 0 1" damping="0.5"/>
             <geom type="capsule" fromto="0 0 0  {-link_length} 0 0" size="0.06"
                   material="link1_mat" mass="0.8"/>
@@ -913,86 +913,86 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
             <geom type="cylinder" size="{base_radius} 0.15" material="base_mat" mass="5.0"/>
 
             <!-- Base attachment points (6 around hexagon) -->
-            <geom type="sphere" pos="{base_radius*np.cos(0)} {base_radius*np.sin(0)} 0.15"
+            <geom type="sphere" pos="{base_radius * np.cos(0)} {base_radius * np.sin(0)} 0.15"
                   size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" pos="{base_radius*np.cos(np.pi/3)} {base_radius*np.sin(np.pi/3)} 0.15"
+            <geom type="sphere" pos="{base_radius * np.cos(np.pi / 3)} {base_radius * np.sin(np.pi / 3)} 0.15"
                   size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" pos="{base_radius*np.cos(2*np.pi/3)} {base_radius*np.sin(2*np.pi/3)} 0.15"
+            <geom type="sphere" pos="{base_radius * np.cos(2 * np.pi / 3)} {base_radius * np.sin(2 * np.pi / 3)} 0.15"
                   size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" pos="{base_radius*np.cos(np.pi)} {base_radius*np.sin(np.pi)} 0.15"
+            <geom type="sphere" pos="{base_radius * np.cos(np.pi)} {base_radius * np.sin(np.pi)} 0.15"
                   size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" pos="{base_radius*np.cos(4*np.pi/3)} {base_radius*np.sin(4*np.pi/3)} 0.15"
+            <geom type="sphere" pos="{base_radius * np.cos(4 * np.pi / 3)} {base_radius * np.sin(4 * np.pi / 3)} 0.15"
                   size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
-            <geom type="sphere" pos="{base_radius*np.cos(5*np.pi/3)} {base_radius*np.sin(5*np.pi/3)} 0.15"
+            <geom type="sphere" pos="{base_radius * np.cos(5 * np.pi / 3)} {base_radius * np.sin(5 * np.pi / 3)} 0.15"
                   size="0.1" rgba="0.5 0.5 0.5 1" contype="0" conaffinity="0"/>
 
             <!-- Leg 1 -->
-            <body name="leg1_lower" pos="{base_radius*np.cos(0)} {base_radius*np.sin(0)} 0.15">
+            <body name="leg1_lower" pos="{base_radius * np.cos(0)} {base_radius * np.sin(0)} 0.15">
                 <joint name="leg1_base_ball" type="ball" damping="0.5"/>
                 <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
 
                 <body name="leg1_upper" pos="0 0 1.2">
-                    <joint name="leg1_extend" type="slide" axis="0 0 1" range="{leg_min-1.2} {leg_max-1.2}" damping="2.0"/>
+                    <joint name="leg1_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
                     <geom type="capsule" fromto="0 0 0  0 0 1.0" size="0.045"
                           rgba="0.1 0.6 0.8 1" mass="0.4"/>
                 </body>
             </body>
 
             <!-- Leg 2 -->
-            <body name="leg2_lower" pos="{base_radius*np.cos(np.pi/3)} {base_radius*np.sin(np.pi/3)} 0.15">
+            <body name="leg2_lower" pos="{base_radius * np.cos(np.pi / 3)} {base_radius * np.sin(np.pi / 3)} 0.15">
                 <joint name="leg2_base_ball" type="ball" damping="0.5"/>
                 <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
 
                 <body name="leg2_upper" pos="0 0 1.2">
-                    <joint name="leg2_extend" type="slide" axis="0 0 1" range="{leg_min-1.2} {leg_max-1.2}" damping="2.0"/>
+                    <joint name="leg2_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
                     <geom type="capsule" fromto="0 0 0  0 0 1.0" size="0.045"
                           rgba="0.1 0.6 0.8 1" mass="0.4"/>
                 </body>
             </body>
 
             <!-- Leg 3 -->
-            <body name="leg3_lower" pos="{base_radius*np.cos(2*np.pi/3)} {base_radius*np.sin(2*np.pi/3)} 0.15">
+            <body name="leg3_lower" pos="{base_radius * np.cos(2 * np.pi / 3)} {base_radius * np.sin(2 * np.pi / 3)} 0.15">
                 <joint name="leg3_base_ball" type="ball" damping="0.5"/>
                 <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
 
                 <body name="leg3_upper" pos="0 0 1.2">
-                    <joint name="leg3_extend" type="slide" axis="0 0 1" range="{leg_min-1.2} {leg_max-1.2}" damping="2.0"/>
+                    <joint name="leg3_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
                     <geom type="capsule" fromto="0 0 0  0 0 1.0" size="0.045"
                           rgba="0.1 0.6 0.8 1" mass="0.4"/>
                 </body>
             </body>
 
             <!-- Leg 4 -->
-            <body name="leg4_lower" pos="{base_radius*np.cos(np.pi)} {base_radius*np.sin(np.pi)} 0.15">
+            <body name="leg4_lower" pos="{base_radius * np.cos(np.pi)} {base_radius * np.sin(np.pi)} 0.15">
                 <joint name="leg4_base_ball" type="ball" damping="0.5"/>
                 <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
 
                 <body name="leg4_upper" pos="0 0 1.2">
-                    <joint name="leg4_extend" type="slide" axis="0 0 1" range="{leg_min-1.2} {leg_max-1.2}" damping="2.0"/>
+                    <joint name="leg4_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
                     <geom type="capsule" fromto="0 0 0  0 0 1.0" size="0.045"
                           rgba="0.1 0.6 0.8 1" mass="0.4"/>
                 </body>
             </body>
 
             <!-- Leg 5 -->
-            <body name="leg5_lower" pos="{base_radius*np.cos(4*np.pi/3)} {base_radius*np.sin(4*np.pi/3)} 0.15">
+            <body name="leg5_lower" pos="{base_radius * np.cos(4 * np.pi / 3)} {base_radius * np.sin(4 * np.pi / 3)} 0.15">
                 <joint name="leg5_base_ball" type="ball" damping="0.5"/>
                 <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
 
                 <body name="leg5_upper" pos="0 0 1.2">
-                    <joint name="leg5_extend" type="slide" axis="0 0 1" range="{leg_min-1.2} {leg_max-1.2}" damping="2.0"/>
+                    <joint name="leg5_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
                     <geom type="capsule" fromto="0 0 0  0 0 1.0" size="0.045"
                           rgba="0.1 0.6 0.8 1" mass="0.4"/>
                 </body>
             </body>
 
             <!-- Leg 6 -->
-            <body name="leg6_lower" pos="{base_radius*np.cos(5*np.pi/3)} {base_radius*np.sin(5*np.pi/3)} 0.15">
+            <body name="leg6_lower" pos="{base_radius * np.cos(5 * np.pi / 3)} {base_radius * np.sin(5 * np.pi / 3)} 0.15">
                 <joint name="leg6_base_ball" type="ball" damping="0.5"/>
                 <geom type="capsule" fromto="0 0 0  0 0 1.2" size="0.05" material="leg_mat" mass="0.5"/>
 
                 <body name="leg6_upper" pos="0 0 1.2">
-                    <joint name="leg6_extend" type="slide" axis="0 0 1" range="{leg_min-1.2} {leg_max-1.2}" damping="2.0"/>
+                    <joint name="leg6_extend" type="slide" axis="0 0 1" range="{leg_min - 1.2} {leg_max - 1.2}" damping="2.0"/>
                     <geom type="capsule" fromto="0 0 0  0 0 1.0" size="0.045"
                           rgba="0.1 0.6 0.8 1" mass="0.4"/>
                 </body>
@@ -1007,22 +1007,22 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
 
             <!-- Platform attachment points -->
             <geom type="sphere"
-                  pos="{platform_radius*np.cos(np.pi/6)} {platform_radius*np.sin(np.pi/6)} -0.12"
+                  pos="{platform_radius * np.cos(np.pi / 6)} {platform_radius * np.sin(np.pi / 6)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{platform_radius*np.cos(np.pi/2)} {platform_radius*np.sin(np.pi/2)} -0.12"
+                  pos="{platform_radius * np.cos(np.pi / 2)} {platform_radius * np.sin(np.pi / 2)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{platform_radius*np.cos(5*np.pi/6)} {platform_radius*np.sin(5*np.pi/6)} -0.12"
+                  pos="{platform_radius * np.cos(5 * np.pi / 6)} {platform_radius * np.sin(5 * np.pi / 6)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{platform_radius*np.cos(7*np.pi/6)} {platform_radius*np.sin(7*np.pi/6)} -0.12"
+                  pos="{platform_radius * np.cos(7 * np.pi / 6)} {platform_radius * np.sin(7 * np.pi / 6)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{platform_radius*np.cos(3*np.pi/2)} {platform_radius*np.sin(3*np.pi/2)} -0.12"
+                  pos="{platform_radius * np.cos(3 * np.pi / 2)} {platform_radius * np.sin(3 * np.pi / 2)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
             <geom type="sphere"
-                  pos="{platform_radius*np.cos(11*np.pi/6)} {platform_radius*np.sin(11*np.pi/6)} -0.12"
+                  pos="{platform_radius * np.cos(11 * np.pi / 6)} {platform_radius * np.sin(11 * np.pi / 6)} -0.12"
                   size="0.08" rgba="0.8 0.6 0.1 1" contype="0" conaffinity="0"/>
         </body>
     </worldbody>
@@ -1030,23 +1030,23 @@ def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
     <equality>
         <!-- Connect leg tops to platform -->
         <connect body1="leg1_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius*np.cos(np.pi/6)}
-                          {platform_radius*np.sin(np.pi/6)} -0.12  1 0 0 0"/>
+                 relpose="{platform_radius * np.cos(np.pi / 6)}
+                          {platform_radius * np.sin(np.pi / 6)} -0.12  1 0 0 0"/>
         <connect body1="leg2_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius*np.cos(np.pi/2)}
-                          {platform_radius*np.sin(np.pi/2)} -0.12  1 0 0 0"/>
+                 relpose="{platform_radius * np.cos(np.pi / 2)}
+                          {platform_radius * np.sin(np.pi / 2)} -0.12  1 0 0 0"/>
         <connect body1="leg3_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius*np.cos(5*np.pi/6)}
-                          {platform_radius*np.sin(5*np.pi/6)} -0.12  1 0 0 0"/>
+                 relpose="{platform_radius * np.cos(5 * np.pi / 6)}
+                          {platform_radius * np.sin(5 * np.pi / 6)} -0.12  1 0 0 0"/>
         <connect body1="leg4_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius*np.cos(7*np.pi/6)}
-                          {platform_radius*np.sin(7*np.pi/6)} -0.12  1 0 0 0"/>
+                 relpose="{platform_radius * np.cos(7 * np.pi / 6)}
+                          {platform_radius * np.sin(7 * np.pi / 6)} -0.12  1 0 0 0"/>
         <connect body1="leg5_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius*np.cos(3*np.pi/2)}
-                          {platform_radius*np.sin(3*np.pi/2)} -0.12  1 0 0 0"/>
+                 relpose="{platform_radius * np.cos(3 * np.pi / 2)}
+                          {platform_radius * np.sin(3 * np.pi / 2)} -0.12  1 0 0 0"/>
         <connect body1="leg6_upper" body2="platform" anchor="0 0 1.0"
-                 relpose="{platform_radius*np.cos(11*np.pi/6)}
-                          {platform_radius*np.sin(11*np.pi/6)} -0.12  1 0 0 0"/>
+                 relpose="{platform_radius * np.cos(11 * np.pi / 6)}
+                          {platform_radius * np.sin(11 * np.pi / 6)} -0.12  1 0 0 0"/>
     </equality>
 
     <actuator>

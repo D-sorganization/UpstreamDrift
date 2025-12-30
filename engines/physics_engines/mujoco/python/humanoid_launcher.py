@@ -204,16 +204,6 @@ class HumanoidLauncher(QMainWindow):
         # Trigger initial update after button exists
         self.on_control_mode_changed(self.combo_control.currentText())
 
-        # Polynomial Generator Button (only shown for poly mode)
-        self.btn_poly_generator = QPushButton("📊 Configure Polynomial")
-        self.btn_poly_generator.setStyleSheet(
-            "background-color: #0078d4; color: white; padding: 8px; font-weight: bold;"
-        )
-        self.btn_poly_generator.clicked.connect(self.open_polynomial_generator)
-        # Enable button for poly mode - availability checked when clicked
-        self.btn_poly_generator.setEnabled(self.config.get("control_mode") == "poly")
-        settings_layout.addWidget(self.btn_poly_generator, 0, 2)
-
         # Live View
         self.chk_live = QCheckBox("Live Interactive View (requires X11/VcXsrv)")
         self.chk_live.setChecked(self.config.live_view)
@@ -273,8 +263,7 @@ class HumanoidLauncher(QMainWindow):
 
         self.btn_rebuild = QPushButton("UPDATE ENV")
         self.btn_rebuild.setStyleSheet(
-            "background-color: #8b5cf6; color: white;"
-            "padding: 12px; font-weight: bold;"
+            "background-color: #8b5cf6; color: white;padding: 12px; font-weight: bold;"
         )
         self.btn_rebuild.clicked.connect(self.rebuild_docker)
 
@@ -400,9 +389,9 @@ class HumanoidLauncher(QMainWindow):
         self.slider_length.setRange(50, 150)  # 0.5 to 1.5 * 100
         self.slider_length.setValue(int(self.config.club_length * 100))
 
-        self.lbl_length_val = QLabel(f"{self.slider_length.value()/100:.2f} m")
+        self.lbl_length_val = QLabel(f"{self.slider_length.value() / 100:.2f} m")
         self.slider_length.valueChanged.connect(
-            lambda v: self.lbl_length_val.setText(f"{v/100:.2f} m")
+            lambda v: self.lbl_length_val.setText(f"{v / 100:.2f} m")
         )
 
         club_layout.addWidget(self.slider_length, 0, 1)
@@ -413,9 +402,9 @@ class HumanoidLauncher(QMainWindow):
         self.slider_mass.setRange(10, 200)  # 0.1 to 2.0 * 100
         self.slider_mass.setValue(int(self.config.club_mass * 100))
 
-        self.lbl_mass_val = QLabel(f"{float(self.slider_mass.value())/100:.2f} kg")
+        self.lbl_mass_val = QLabel(f"{float(self.slider_mass.value()) / 100:.2f} kg")
         self.slider_mass.valueChanged.connect(
-            lambda v: self.lbl_mass_val.setText(f"{float(v)/100:.2f} kg")
+            lambda v: self.lbl_mass_val.setText(f"{float(v) / 100:.2f} kg")
         )
 
         club_layout.addWidget(self.slider_mass, 1, 1)

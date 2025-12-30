@@ -189,8 +189,8 @@ class BiomechanicalAnalyzer:
         actuator_force_save = self.data.actuator_force.copy()
 
         # Set specific control
-        # We want the induced acceleration of the CURRENT torque applied by this actuator.
-        # So we keep its current ctrl value, set others to 0.
+        # We want the induced acceleration of the CURRENT torque applied by this
+        # actuator. So we keep its current ctrl value, set others to 0.
         current_val = self.data.ctrl[act_id]
         self.data.ctrl[:] = 0
         self.data.ctrl[act_id] = current_val
@@ -232,7 +232,8 @@ class BiomechanicalAnalyzer:
 
         # ZVCF: Torque/Forces if v=0.
         # If v=0, then C=0. Equation is M*a + g = tau.
-        # Usually ZVCF means "Static Torques needed to hold posture" => a=0, v=0 => tau = g.
+        # Usually ZVCF means "Static Torques needed to hold posture"
+        # => a=0, v=0 => tau = g.
         # Or "Forces acting on system if frozen" => Gravity.
         # Let's return the static torque 'tau_static' = g(q).
 
@@ -393,7 +394,8 @@ class BiomechanicalAnalyzer:
         """Extract complete biomechanical state at current time.
 
         Args:
-            selected_actuator_name: Optional name of actuator to compute induced accel for.
+            selected_actuator_name: Optional name of actuator to compute induced accel
+                for.
 
         Returns:
             BiomechanicalData object with all available measurements

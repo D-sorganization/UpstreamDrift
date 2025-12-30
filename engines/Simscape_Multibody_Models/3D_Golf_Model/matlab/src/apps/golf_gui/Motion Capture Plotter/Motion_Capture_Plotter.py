@@ -1283,7 +1283,7 @@ class MotionCapturePlotter(QMainWindow):
                         linestyle="--",
                         alpha=0.6,
                         linewidth=2,
-                        label=f'{segment_key.replace("_", " ").title()} Path',
+                        label=f"{segment_key.replace('_', ' ').title()} Path",
                     )
 
     def update_info_text(self, frame_data):

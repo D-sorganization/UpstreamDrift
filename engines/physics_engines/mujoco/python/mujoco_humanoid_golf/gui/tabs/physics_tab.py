@@ -173,7 +173,7 @@ class PhysicsTab(QtWidgets.QWidget):
             {
                 "name": "myobody",
                 "xml_path": MYOBODY_PATH,
-                "actuators": [f"Muscle {i+1}" for i in range(290)],
+                "actuators": [f"Muscle {i + 1}" for i in range(290)],
             },
             {
                 "name": "myoarm_simple",

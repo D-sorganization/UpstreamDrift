@@ -608,7 +608,8 @@ class WiffleGolfMainWindow(QMainWindow):
             # Update status bar with frame info
             time_val = self.baseq_data.iloc[frame_idx]["Time"]
             self.statusBar().showMessage(
-                f"Frame {frame_idx+1}, Time: {time_val:.3f}s, Distance: {distance:.3f}m"
+                f"Frame {frame_idx + 1}, Time: {time_val:.3f}s, "
+                f"Distance: {distance:.3f}m"
             )
 
         except Exception:

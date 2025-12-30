@@ -5,7 +5,9 @@ from playwright.sync_api import expect, sync_playwright
 
 def run():
     # Use absolute path for file URL
-    file_path = os.path.abspath("engines/physics_engines/pinocchio/python/double_pendulum_model/visualization/double_pendulum_web/index.html")
+    file_path = os.path.abspath(
+        "engines/physics_engines/pinocchio/python/double_pendulum_model/visualization/double_pendulum_web/index.html"
+    )
     url = f"file://{file_path}"
 
     with sync_playwright() as p:
@@ -52,6 +54,7 @@ def run():
         print("Verified: Space on canvas started simulation")
 
         browser.close()
+
 
 if __name__ == "__main__":
     run()

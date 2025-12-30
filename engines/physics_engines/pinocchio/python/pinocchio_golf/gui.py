@@ -623,6 +623,11 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         plotter.plot_radar_chart(self.canvas.fig, metrics)
 
+    def _ensure_analyzer_initialized(self) -> None:
+        """Ensure the InducedAccelerationAnalyzer is initialized."""
+        if self.analyzer is None and self.model is not None:
+            self.analyzer = InducedAccelerationAnalyzer(self.model, self.data)
+
     def _plot_induced_accelerations(self) -> None:
         """Calculate and plot induced accelerations for selected joint."""
         # Check for data presence
@@ -660,35 +665,26 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         t_accs = []
 
         # Use existing analyzer or create new
-        if self.analyzer is None and self.model is not None:
-             self.analyzer = InducedAccelerationAnalyzer(self.model, self.data)
+        self._ensure_analyzer_initialized()
 
         for frame in self.recorder.frames:
             times.append(frame.time)
 
             # If we have pre-computed induced accels (future proofing)
             if frame.induced_accelerations:
-                 # Assume dictionary structure
-                 # We need to map joint index to array index.
-                 # Usually array is size NV. v_idx points to start.
-                 # Assuming 1-DOF for plotting.
-                 g = frame.induced_accelerations.get(
-                     "gravity", np.zeros(self.model.nv)
-                 )
-                 v = frame.induced_accelerations.get(
-                     "velocity", np.zeros(self.model.nv)
-                 )
-                 c = frame.induced_accelerations.get(
-                     "control", np.zeros(self.model.nv)
-                 )
-                 t = frame.induced_accelerations.get(
-                     "total", np.zeros(self.model.nv)
-                 )
+                # Assume dictionary structure
+                # We need to map joint index to array index.
+                # Usually array is size NV. v_idx points to start.
+                # Assuming 1-DOF for plotting.
+                g = frame.induced_accelerations.get("gravity", np.zeros(self.model.nv))
+                v = frame.induced_accelerations.get("velocity", np.zeros(self.model.nv))
+                c = frame.induced_accelerations.get("control", np.zeros(self.model.nv))
+                t = frame.induced_accelerations.get("total", np.zeros(self.model.nv))
 
-                 g_accs.append(g[v_idx])
-                 v_accs.append(v[v_idx])
-                 c_accs.append(c[v_idx])
-                 t_accs.append(t[v_idx])
+                g_accs.append(g[v_idx])
+                v_accs.append(v[v_idx])
+                c_accs.append(c[v_idx])
+                t_accs.append(t[v_idx])
 
             else:
                 # Recompute post-hoc
@@ -708,7 +704,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         if txt and self.model:
             try:
                 # Parse comma separated values
-                parts = [float(x) for x in txt.split(',')]
+                parts = [float(x) for x in txt.split(",")]
                 if len(parts) == self.model.nv:
                     spec_tau = np.array(parts)
                 else:
@@ -724,14 +720,14 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         spec_accs = []
         if spec_tau is not None and self.analyzer:
-             # Recompute for whole trajectory
-             for frame in self.recorder.frames:
-                 # We need q.
-                 # Assuming compute_specific_control(q, tau)
-                 a_spec = self.analyzer.compute_specific_control(
-                     frame.joint_positions, spec_tau
-                 )
-                 spec_accs.append(a_spec[v_idx])
+            # Recompute for whole trajectory
+            for frame in self.recorder.frames:
+                # We need q.
+                # Assuming compute_specific_control(q, tau)
+                a_spec = self.analyzer.compute_specific_control(
+                    frame.joint_positions, spec_tau
+                )
+                spec_accs.append(a_spec[v_idx])
 
         # Plot
         ax = self.canvas.fig.add_subplot(111)
@@ -741,7 +737,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         ax.plot(times, t_accs, label="Total", color="k", linewidth=1.5)
 
         if spec_accs:
-            ax.plot(times, spec_accs, label="Specific Source", color='m', linewidth=2)
+            ax.plot(times, spec_accs, label="Specific Source", color="m", linewidth=2)
 
         ax.set_title(f"Induced Accelerations: {joint_name}")
         ax.set_xlabel("Time [s]")
@@ -768,11 +764,11 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             return
 
         times = []
-        ztcf_vals = [] # Acceleration
-        zvcf_vals = [] # Torque/Force
+        ztcf_vals = []  # Acceleration
+        zvcf_vals = []  # Torque/Force
 
         if self.analyzer is None and self.model is not None:
-             self.analyzer = InducedAccelerationAnalyzer(self.model, self.data)
+            self._ensure_analyzer_initialized()
 
         for frame in self.recorder.frames:
             times.append(frame.time)
@@ -785,23 +781,22 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             else:
                 # Recompute
                 res = self.analyzer.compute_counterfactuals(
-                    frame.joint_positions,
-                    frame.joint_velocities
+                    frame.joint_positions, frame.joint_velocities
                 )
                 ztcf_vals.append(res["ztcf_accel"][v_idx])
                 zvcf_vals.append(res["zvcf_torque"][v_idx])
 
         # Plot with dual y-axis
         ax1 = self.canvas.fig.add_subplot(111)
-        line1 = ax1.plot(times, ztcf_vals, 'b-', label="ZTCF Accel (Zero Torque)")
+        line1 = ax1.plot(times, ztcf_vals, "b-", label="ZTCF Accel (Zero Torque)")
         ax1.set_xlabel("Time [s]")
-        ax1.set_ylabel("Acceleration [rad/s²]", color='b')
-        ax1.tick_params(axis='y', labelcolor='b')
+        ax1.set_ylabel("Acceleration [rad/s²]", color="b")
+        ax1.tick_params(axis="y", labelcolor="b")
 
         ax2 = ax1.twinx()
-        line2 = ax2.plot(times, zvcf_vals, 'r--', label="ZVCF Torque (Zero Velocity)")
-        ax2.set_ylabel("Torque [Nm]", color='r')
-        ax2.tick_params(axis='y', labelcolor='r')
+        line2 = ax2.plot(times, zvcf_vals, "r--", label="ZVCF Torque (Zero Velocity)")
+        ax2.set_ylabel("Torque [Nm]", color="r")
+        ax2.tick_params(axis="y", labelcolor="r")
 
         ax1.set_title(f"Counterfactual Analysis: {joint_name}")
 
@@ -1243,7 +1238,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                     club_head_position=club_head_pos,
                     club_head_velocity=club_head_vel,
                     induced_accelerations=induced,
-                    counterfactuals=counterfactuals
+                    counterfactuals=counterfactuals,
                 )
                 self.lbl_rec_status.setText(f"Frames: {self.recorder.get_num_frames()}")
 
@@ -1267,7 +1262,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         # Calculate matrices for analysis
         self._compute_analysis()
-
 
         # Overlays
         if self.chk_frames.isChecked():
@@ -1393,7 +1387,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         self.viewer[path].set_transform(T)
 
-
     def _draw_vectors(self) -> None:
         """Draw force and torque vectors at joints."""
         if self.model is None or self.data is None or self.viewer is None:
@@ -1448,7 +1441,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         """Helper to draw an arrow in Meshcat."""
         if self.viewer is None:
             return
-
 
         # Note: Meshcat Arrow might not exist in all versions, using a Line for now
         # as it is highly compatible. Arrows can be added with Triad or custom mesh.

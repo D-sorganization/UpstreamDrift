@@ -349,7 +349,6 @@ class TestDockerConfiguration(unittest.TestCase):
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
         ):
-
             launcher._launch_docker_container(mock_model, mock_path)
 
             # Verify subprocess was called
@@ -458,7 +457,7 @@ if __name__ == "__main__":
     result = runner.run(suite)
 
     # Print summary
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"Tests run: {result.testsRun}")
     print(f"Failures: {len(result.failures)}")
     print(f"Errors: {len(result.errors)}")

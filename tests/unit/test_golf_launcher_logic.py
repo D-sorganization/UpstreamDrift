@@ -245,7 +245,6 @@ def mock_pyqt(monkeypatch):
 
 
 class TestGolfLauncherLogic:
-
     @pytest.fixture(autouse=True)
     def setup_launcher_module(self, mock_pyqt):
         """
@@ -355,7 +354,6 @@ class TestGolfLauncherLogic:
         with patch("launchers.golf_launcher.subprocess.Popen") as mock_popen:
             with patch.object(Path, "exists", return_value=True):
                 with patch("os.name", "posix"):
-
                     # We need to verify _launch_docker_container is called essentially
                     # because type is "docker" (not custom)
 

@@ -3,6 +3,7 @@
 Check for duplicate files in the repository.
 Fails if duplicates of tracked files are found (e.g., quality check scripts).
 """
+
 import hashlib
 import sys
 from pathlib import Path

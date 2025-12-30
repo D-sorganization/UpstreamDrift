@@ -876,13 +876,13 @@ if __name__ == "__main__":
     # Test geometry utilities
     print("\n[TEST] Testing geometry utilities...")
     vertices, normals, indices = GeometryUtils.create_cylinder_mesh()
-    print(f"   Cylinder: {len(vertices)//3} vertices, {len(indices)//3} triangles")
+    print(f"   Cylinder: {len(vertices) // 3} vertices, {len(indices) // 3} triangles")
 
     vertices, normals, indices = GeometryUtils.create_sphere_mesh()
-    print(f"   Sphere: {len(vertices)//3} vertices, {len(indices)//3} triangles")
+    print(f"   Sphere: {len(vertices) // 3} vertices, {len(indices) // 3} triangles")
 
     vertices, normals, indices = GeometryUtils.create_arrow_mesh()
-    print(f"   Arrow: {len(vertices)//3} vertices, {len(indices)//3} triangles")
+    print(f"   Arrow: {len(vertices) // 3} vertices, {len(indices) // 3} triangles")
 
     # Test data structures
     print("\n[TEST] Testing data structures...")

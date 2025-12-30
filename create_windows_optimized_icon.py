@@ -2,6 +2,7 @@
 """
 Create Windows-optimized icons that address common blurriness issues
 """
+
 import logging
 from pathlib import Path
 

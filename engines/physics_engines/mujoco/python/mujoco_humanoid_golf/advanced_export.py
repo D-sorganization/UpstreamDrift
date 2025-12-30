@@ -276,14 +276,14 @@ def _export_to_c3d_ezc3d(
             for fp in range(num_force_plates):
                 for axis, label in enumerate(["X", "Y", "Z"]):
                     analog_data.append(forces[:, fp, axis])
-                    analog_labels.append(f"Force{fp+1}_{label}")
+                    analog_labels.append(f"Force{fp + 1}_{label}")
 
         if moments is not None:
             num_moment_plates = moments.shape[1]
             for mp in range(num_moment_plates):
                 for axis, label in enumerate(["X", "Y", "Z"]):
                     analog_data.append(moments[:, mp, axis])
-                    analog_labels.append(f"Moment{mp+1}_{label}")
+                    analog_labels.append(f"Moment{mp + 1}_{label}")
 
         if analog_data:
             # Analog data format: (num_channels, num_samples)

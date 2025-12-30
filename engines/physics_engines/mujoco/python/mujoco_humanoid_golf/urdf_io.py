@@ -349,7 +349,7 @@ class URDFExporter:
 
         if geom_type == mujoco.mjtGeom.mjGEOM_BOX:
             box = ET.SubElement(parent, "box")
-            box.set("size", f"{2*geom_size[0]} {2*geom_size[1]} {2*geom_size[2]}")
+            box.set("size", f"{2 * geom_size[0]} {2 * geom_size[1]} {2 * geom_size[2]}")
             return box
 
         if geom_type == mujoco.mjtGeom.mjGEOM_SPHERE:
@@ -800,7 +800,8 @@ class URDFImporter:
             size = box.get("size", "0.1 0.1 0.1").split()
             geom.set("type", "box")
             geom.set(
-                "size", f"{float(size[0])/2} {float(size[1])/2} {float(size[2])/2}"
+                "size",
+                f"{float(size[0]) / 2} {float(size[1]) / 2} {float(size[2]) / 2}",
             )
             return
 
@@ -816,7 +817,7 @@ class URDFImporter:
             radius = cylinder.get("radius", "0.05")
             length = cylinder.get("length", "0.1")
             geom.set("type", "cylinder")
-            geom.set("size", f"{radius} {float(length)/2}")
+            geom.set("size", f"{radius} {float(length) / 2}")
             return
 
         mesh = geometry.find("mesh")

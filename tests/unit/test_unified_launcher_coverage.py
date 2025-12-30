@@ -22,7 +22,7 @@ def mock_app():
 def launcher(mock_app):
     # Patch the GolfLauncher class where it is defined, so when it is imported
     # by UnifiedLauncher it uses the mock.
-    with patch("launchers.golf_launcher.GolfLauncher") as MockGolfLauncher:
+    with patch("launchers.golf_launcher.GolfLauncher"):
         launcher = UnifiedLauncher()
         return launcher
 
@@ -48,7 +48,6 @@ def test_show_status(launcher):
         patch("shared.python.engine_manager.EngineManager") as MockEngineManager,
         patch("builtins.print") as mock_print,
     ):
-
         mock_manager = MockEngineManager.return_value
         mock_manager.get_available_engines.return_value = [MagicMock(value="mujoco")]
 

@@ -322,7 +322,9 @@ class GolfSwingPlotter:
         ax.set_ylabel("Coupling Angle (deg)", fontsize=12, fontweight="bold")
         ax.set_ylim(0, 360)
         ax.set_yticks([0, 45, 90, 135, 180, 225, 270, 315, 360])
-        ax.set_title(title or "Coordination Variability", fontsize=14, fontweight="bold")
+        ax.set_title(
+            title or "Coordination Variability", fontsize=14, fontweight="bold"
+        )
         ax.grid(True, alpha=0.3)
         fig.tight_layout()
 
@@ -1259,7 +1261,7 @@ class GolfSwingPlotter:
         ax.set_zlabel("Z (m)")  # type: ignore[attr-defined]
         ax.set_title(
             f"Swing Plane Analysis\nSteepness: {metrics.steepness_deg:.1f}°, "
-            f"RMSE: {metrics.rmse*100:.1f} cm",
+            f"RMSE: {metrics.rmse * 100:.1f} cm",
             fontsize=12,
             fontweight="bold",
         )
