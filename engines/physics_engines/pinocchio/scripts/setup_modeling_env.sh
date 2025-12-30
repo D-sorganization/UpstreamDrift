@@ -78,6 +78,9 @@ pip install pin
 echo ">>> Installing Pink (pin-pink) - stacked on top of Pinocchio..."
 pip install pin-pink
 
+echo ">>> Installing Crocoddyl - optimal control library for robotics..."
+pip install crocoddyl
+
 echo ">>> Installing QP solvers (qpsolvers, osqp, scs, quadprog)..."
 pip install qpsolvers osqp scs quadprog
 
@@ -93,12 +96,14 @@ echo ">>> Running sanity check..."
 python3 - << 'EOF'
 import pinocchio as pin
 import pink
+import crocoddyl
 import pydrake
 import qpsolvers
 import numpy as np
 
 print("Pinocchio:", pin.__version__)
 print("Pink:", pink.__file__)
+print("Crocoddyl:", crocoddyl.__version__)
 print("Drake:", pydrake.__file__)
 print("NumPy:", np.__version__)
 print("QP solvers:", qpsolvers.available_solvers)
@@ -115,4 +120,4 @@ echo ""
 echo "Or from the project root:"
 echo "    source .venv/bin/activate"
 echo ""
-echo "Pink is installed and ready to use with Pinocchio!"
+echo "Crocoddyl and Pink are installed and ready to use with Pinocchio!"

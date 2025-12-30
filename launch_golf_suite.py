@@ -14,6 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent / "shared" / "python"))
 
 from shared.python.common_utils import GolfModelingError, setup_logging
 from shared.python.constants import (
+    C3D_VIEWER_SCRIPT,
     DRAKE_LAUNCHER_SCRIPT,
     GUI_LAUNCHER_SCRIPT,
     LOCAL_LAUNCHER_SCRIPT,
@@ -189,6 +190,24 @@ def launch_urdf_generator() -> bool:
     return True
 
 
+def launch_c3d_viewer() -> bool:
+    """Launch the C3D Motion Viewer."""
+    try:
+        import subprocess
+
+        suite_root = Path(__file__).parent
+        c3d_script = suite_root / C3D_VIEWER_SCRIPT
+
+        work_dir = c3d_script.parent
+
+        logger.info("Launching C3D Motion Viewer...")
+        subprocess.run([sys.executable, str(c3d_script)], cwd=str(work_dir))
+    except Exception as e:
+        logger.error(f"Error launching C3D Viewer: {e}")
+        return False
+    return True
+
+
 def show_status() -> None:
     """Show Golf Modeling Suite status."""
     try:
@@ -267,6 +286,7 @@ Examples:
   python launch_golf_suite.py --local           # Launch local launcher
   python launch_golf_suite.py --engine mujoco   # Launch MuJoCo directly
   python launch_golf_suite.py --urdf-generator  # Launch URDF Generator
+  python launch_golf_suite.py --c3d-viewer      # Launch C3D Motion Viewer
   python launch_golf_suite.py --status          # Show suite status
         """,
     )
@@ -286,6 +306,10 @@ Examples:
     )
 
     parser.add_argument(
+        "--c3d-viewer", action="store_true", help="Launch C3D Motion Viewer"
+    )
+
+    parser.add_argument(
         "--status", action="store_true", help="Show Golf Modeling Suite status"
     )
 
@@ -296,6 +320,8 @@ Examples:
             show_status()
         elif args.urdf_generator:
             launch_urdf_generator()
+        elif args.c3d_viewer:
+            launch_c3d_viewer()
         elif args.engine:
             if args.engine == "mujoco":
                 launch_mujoco()
