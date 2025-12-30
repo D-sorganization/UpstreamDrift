@@ -142,6 +142,7 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "test_*.py" = ["B011", "T201"]
+"tests/*" = ["T201"]
 "scripts/*" = ["T201"]
 "tools/*" = ["T201"]
 "launchers/*" = ["T201"]
@@ -153,9 +154,10 @@ ignore = [
 "show_physics_parameters.py" = ["T201"]
 "engines/physics_engines/mujoco/python/mujoco_humanoid_golf/cli_runner.py" = ["T201"]
 "engines/pendulum_models/tools/scientific_auditor.py" = ["T201"]
-"engines/Simscape_Multibody_Models/*/scripts/*.py" = ["T201"]
-"engines/Simscape_Multibody_Models/*/matlab/*.py" = ["T201"]
+"engines/Simscape_Multibody_Models/**/*.py" = ["T201"]
+"engines/pendulum_models/**/*.py" = ["T201"]
 "engines/physics_engines/mujoco/python/tests/test_urdf_io.py" = ["T201"]
+"verification/*" = ["T201"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -196,7 +198,9 @@ module = [
     "engines.physics_engines.drake.python.motion_optimization",
     "engines.physics_engines.drake.python.src.drake_gui_app",
     "engines.physics_engines.pinocchio.python.swing_plane_integration",
-    "engines.pendulum_models.python.ui.double_pendulum_gui"
+    "engines.pendulum_models.python.ui.double_pendulum_gui",
+    "engines.physics_engines.mujoco.rebuild_docker",
+    "engines.physics_engines.mujoco.test_docker_venv"
 ]
 disallow_untyped_defs = false
 
