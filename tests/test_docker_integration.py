@@ -11,6 +11,17 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 
+def _is_docker_available() -> bool:
+    """Check if Docker is available."""
+    try:
+        result = subprocess.run(
+            ["docker", "--version"], capture_output=True, timeout=5
+        )
+        return result.returncode == 0
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return False
+
+
 class TestDockerBuild(unittest.TestCase):
     """Test Docker image building and configuration."""
 
@@ -40,10 +51,7 @@ class TestDockerBuild(unittest.TestCase):
         self.assertIn("/workspace/shared/python", pythonpath_line)
         self.assertIn("/workspace/engines", pythonpath_line)
 
-    @unittest.skipUnless(
-        subprocess.run(["docker", "--version"], capture_output=True).returncode == 0,
-        "Docker not available",
-    )
+    @unittest.skipUnless(_is_docker_available(), "Docker not available")
     def test_docker_available(self):
         """Test that Docker is available for building."""
         result = subprocess.run(["docker", "--version"], capture_output=True, text=True)
