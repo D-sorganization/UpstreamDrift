@@ -1,0 +1,107 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-8.4.1, pluggy-1.6.0
+benchmark: 4.0.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: C:\Users\diete\Repositories\Golf_Modeling_Suite
+configfile: pyproject.toml
+plugins: anyio-4.9.0, benchmark-4.0.0, cov-7.0.0
+collected 10 items
+
+tests\unit\test_launchers.py ...Windows fatal exception: access violation
+
+Current thread 0x00009624 (most recent call first):
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\ctypes\__init__.py", line 390 in __init__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 210 in _load_all_bundled_plugins
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 217 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1026 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_probes.py", line 98 in probe
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_probes.py", line 72 in is_available
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\launchers\golf_launcher.py", line 621 in update_launch_button
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\launchers\golf_launcher.py", line 599 in select_model
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\launchers\golf_launcher.py", line 477 in init_ui
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\launchers\golf_launcher.py", line 374 in __init__
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\launchers\unified_launcher.py", line 50 in __init__
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\launch_golf_suite.py", line 197 in show_status
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\launch_golf_suite.py", line 296 in main
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\tests\unit\test_launchers.py", line 92 in test_main_help_argument
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py", line 1426 in patched
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 157 in pytest_pyfunc_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 1671 in runtest
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 178 in pytest_runtest_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 246 in <lambda>
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 344 in from_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 245 in call_and_report
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 136 in runtestprotocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 117 in pytest_runtest_protocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 367 in pytest_runtestloop
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 343 in _main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 289 in wrap_session
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 336 in pytest_cmdline_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 175 in main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 201 in console_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Scripts\pytest.exe\__main__.py", line 7 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main
+.......
+ERROR: Coverage failure: total of 17 is less than fail-under=35
+                                                                         [100%]
+
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.13.5-final-0 _______________
+
+Name                                                  Stmts   Miss  Cover   Missing
+-----------------------------------------------------------------------------------
+launchers\__init__.py                                     0      0   100%
+launchers\golf_launcher.py                              469    245    48%   54-59, 92-107, 116-117, 122-182, 189-192, 196-268, 272-279, 283-284, 288-292, 300-319, 350, 362-364, 370-372, 479, 491, 494, 507-512, 532-533, 557-559, 611-613, 622, 625-627, 629-631, 641-647, 736-749, 753-754, 758-759, 763-817, 821-832, 836-845, 849-851, 855-928, 933-938
+launchers\golf_suite_launcher.py                        130    111    15%   19-22, 30-58, 61-149, 153-156, 160-161, 164-189, 193-194, 198-199, 203-204, 208-218
+launchers\unified_launcher.py                            77     26    66%   15-17, 32, 43, 58-62, 86, 131-147, 157-158, 163-164
+shared\python\__init__.py                                27      8    70%   46-56
+shared\python\biomechanics_data.py                       28     28     0%   7-72
+shared\python\common_utils.py                            91     79    13%   30-32, 45-52, 67-78, 91-100, 115-124, 142-167, 181-202, 214-236
+shared\python\comparative_analysis.py                   107    107     0%   7-255
+shared\python\comparative_plotting.py                   100    100     0%   6-342
+shared\python\configuration_manager.py                   56     56     0%   6-112
+shared\python\constants.py                               53      0   100%
+shared\python\core.py                                    17      0   100%
+shared\python\engine_manager.py                         237    168    29%   129, 152-168, 177-178, 189-207, 213-243, 249-274, 278-303, 307-329, 333-355, 362-382, 386-390, 394-408, 412, 416, 420, 430-449, 457-459, 463-465, 473-506
+shared\python\engine_probes.py                          265    195    26%   43-53, 73-74, 100, 102, 122-165, 187-273, 297-339, 358-394, 420-468, 487-536, 555-595, 610, 614-657
+shared\python\interfaces.py                               4      0   100%
+shared\python\kinematic_sequence.py                      77     77     0%   8-192
+shared\python\model_registry.py                          49     13    73%   50-51, 58-59, 62-65, 72-73, 77-80, 113
+shared\python\optimization\__init__.py                    0      0   100%
+shared\python\optimization\examples\__init__.py           0      0   100%
+shared\python\optimization\examples\optimize_arm.py      87     87     0%   1-169
+shared\python\output_manager.py                         225    225     0%   8-500
+shared\python\physics_parameters.py                     120    120     0%   7-447
+shared\python\plotting.py                               668    668     0%   13-1519
+shared\python\pose_estimation\__init__.py                 3      3     0%   7-10
+shared\python\pose_estimation\interface.py               11     11     0%   3-20
+shared\python\pose_estimation\openpose_estimator.py      83     83     0%   7-183
+shared\python\process_worker.py                          62     62     0%   7-108
+shared\python\signal_processing.py                       32     32     0%   8-131
+shared\python\statistical_analysis.py                   315    315     0%   10-882
+shared\python\swing_plane_analysis.py                    40     40     0%   9-109
+-----------------------------------------------------------------------------------
+TOTAL                                                  3433   2859    17%
+Coverage HTML written to dir htmlcov
+Coverage XML written to file coverage.xml
+FAIL Required test coverage of 35% not reached. Total coverage: 16.72%
+============================= 10 passed in 2.42s ==============================
