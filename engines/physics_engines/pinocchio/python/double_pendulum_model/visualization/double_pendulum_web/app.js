@@ -327,7 +327,7 @@ document.querySelectorAll('.grid input').forEach(input => {
 });
 
 document.addEventListener('keydown', (e) => {
-  if (e.target.tagName === 'INPUT') return;
+  if (e.target.matches('input, button, select, textarea')) return;
 
   if (e.key === ' ' || e.key === 'Spacebar') {
     e.preventDefault();
