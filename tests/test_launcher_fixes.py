@@ -145,7 +145,8 @@ class TestDraggableModelCard(unittest.TestCase):
 
         # Create mock mouse event with proper button method
         event = Mock()
-        event.button.return_value = Qt.MouseButton.LeftButton
+        # Use integer 1 (LeftButton) to avoid enum identity issues in CI
+        event.button.return_value = 1
         event.position.return_value.toPoint.return_value = QPoint(10, 10)
 
         # Verify parent launcher is set correctly
