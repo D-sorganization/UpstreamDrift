@@ -372,7 +372,9 @@ class PlottingTab(QtWidgets.QWidget):
 
                                 res = analyzer.compute_counterfactuals()
                                 if cf_name in res:
-                                    frame.counterfactuals[cf_name] = res[cf_name]
+                                    cf_value = res[cf_name]
+                                    if isinstance(cf_value, np.ndarray):
+                                        frame.counterfactuals[cf_name] = cf_value
 
                             self.sim_widget.data.qpos[:] = qpos_bak
                             self.sim_widget.data.qvel[:] = qvel_bak
