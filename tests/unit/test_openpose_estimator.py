@@ -5,58 +5,19 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from shared.python.pose_estimation.openpose_estimator import OpenPoseEstimator
+# Mock modules at top level to ensure imports work
+sys.modules["pyopenpose"] = MagicMock()
+sys.modules["cv2"] = MagicMock()
 
+import pyopenpose as op  # noqa: E402
 
-@pytest.fixture(autouse=True)
-def mock_openpose_modules():
-    """Mock pyopenpose and cv2 modules for all tests."""
-    with patch.dict(sys.modules, {"pyopenpose": MagicMock(), "cv2": MagicMock()}):
-        # We need to reload the module or ensure it picks up the mock
-        # But since we patch sys.modules before import in the original file,
-        # we can't easily undo the import at module level.
-        # However, for the purpose of the test, we can patch sys.modules
-        # and re-import or just rely on the fact that we patched it.
-
-        # NOTE: Since the module 'shared.python.pose_estimation.openpose_estimator'
-        # imports pyopenpose at top level (maybe?), we must ensure mocks are in place.
-        # But 'OpenPoseEstimator' is already imported at top of this file.
-        # The original test file had sys.modules set at TOP LEVEL.
-        # Refactoring to a fixture means we must move the import INSIDE the test or fixture
-        # OR ensure the mock is established before the test runs.
-
-        # Current 'OpenPoseEstimator' import:
-        # from shared.python.pose_estimation.openpose_estimator import OpenPoseEstimator
-
-        # If we move sys.modules mock to a fixture, the top-level import might fail
-        # if it really requires pyopenpose to exist.
-        # The user wants to fix the module level mocking.
-
-        # Re-importing inside fixture to ensure mocks are used
-        import importlib
-
-        import shared.python.pose_estimation.openpose_estimator
-
-        importlib.reload(shared.python.pose_estimation.openpose_estimator)
-        yield
-
-
-# Re-import for type hints if needed, but we rely on the fixture
-
-
-# Need to mock op globally for the tests to see it?
-# In the original file:
-# sys.modules["pyopenpose"] = MagicMock()
-# import pyopenpose as op
-# We need 'op' to be available for assertions.
-
-# We will provide 'op' via fixture or just import it after mocking.
+from shared.python.pose_estimation.openpose_estimator import (  # noqa: E402
+    OpenPoseEstimator,
+)
 
 
 @pytest.fixture
-def op_mock(mock_openpose_modules):
-    import pyopenpose as op
-
+def op_mock():
     return op
 
 
@@ -76,7 +37,7 @@ def estimator(mock_op_wrapper):
     return est
 
 
-def test_initialization(mock_openpose_modules):
+def test_initialization():
     est = OpenPoseEstimator()
     assert est.wrapper is None
     assert est._is_loaded is False
@@ -105,7 +66,7 @@ def test_load_model_failure(estimator, op_mock):
         estimator.load_model(Path("/tmp"))
 
 
-def test_estimate_from_image_not_loaded(mock_openpose_modules):
+def test_estimate_from_image_not_loaded():
     est = OpenPoseEstimator()
     with pytest.raises(RuntimeError):
         est.estimate_from_image(np.zeros((100, 100, 3)))
