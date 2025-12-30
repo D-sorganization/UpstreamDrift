@@ -279,8 +279,10 @@ function updateButtonStates(isRunning) {
   if (!isRunning && startSpan) {
     if (state.time !== 0) {
       startSpan.textContent = 'Resume';
+      startBtn.title = 'Resume simulation (Space)';
     } else {
       startSpan.textContent = 'Start';
+      startBtn.title = 'Start simulation (Space)';
     }
   }
 }
