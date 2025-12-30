@@ -50,10 +50,10 @@
           <span>Defaults</span>
         </button>
       </div>
-      <p class="shortcuts"><small>Shortcuts: <strong>Space</strong> (Start/Pause), <strong>R</strong> (Reset)</small></p>
+      <p class="shortcuts" id="shortcuts"><small>Shortcuts: <strong>Space</strong> (Start/Pause), <strong>R</strong> (Reset)</small></p>
       <div class="readout" id="torques">Torques: --</div>
     </div>
-    <canvas id="canvas" role="img" aria-label="Double Pendulum Simulation" width="900" height="700"></canvas>
+    <canvas id="canvas" role="img" aria-label="Double Pendulum Simulation" aria-describedby="shortcuts" tabindex="0" width="900" height="700"></canvas>
   </div>
   <div id="status-announcer" class="sr-only" aria-live="polite"></div>
   <script src="app.js"></script>
