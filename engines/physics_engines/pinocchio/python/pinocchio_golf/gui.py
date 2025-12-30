@@ -694,8 +694,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                     res = self.analyzer.compute_components(
                         frame.joint_positions,
                         frame.joint_velocities,
-                    frame.joint_torques,
-                )
+                        frame.joint_torques,
+                    )
                 g_accs.append(res["gravity"][v_idx])
                 v_accs.append(res["velocity"][v_idx])
                 c_accs.append(res["control"][v_idx])
@@ -785,8 +785,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 zvcf_vals.append(zvcf[v_idx])
             else:
                 # Recompute
-                if (self.analyzer is not None and
-                    hasattr(self.analyzer, 'compute_counterfactuals')):
+                if self.analyzer is not None and hasattr(
+                    self.analyzer, "compute_counterfactuals"
+                ):
                     res = self.analyzer.compute_counterfactuals(
                         frame.joint_positions, frame.joint_velocities
                     )
@@ -1231,7 +1232,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
                 if self.analyzer and self.q is not None and self.v is not None:
                     induced = self.analyzer.compute_components(self.q, self.v, tau)
-                    if hasattr(self.analyzer, 'compute_counterfactuals'):
+                    if hasattr(self.analyzer, "compute_counterfactuals"):
                         counterfactuals = self.analyzer.compute_counterfactuals(
                             self.q, self.v
                         )
