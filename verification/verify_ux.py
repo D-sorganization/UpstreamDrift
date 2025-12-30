@@ -3,7 +3,7 @@ import os
 from playwright.sync_api import expect, sync_playwright
 
 
-def run():
+def run() -> None:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
