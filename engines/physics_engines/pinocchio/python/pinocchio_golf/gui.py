@@ -652,6 +652,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 return
 
         try:
+            if self.model is None:
+                return
             joint_idx = list(self.model.names).index(joint_name)
             v_idx = self.model.joints[joint_idx].idx_v
         except ValueError:
@@ -671,7 +673,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             times.append(frame.time)
 
             # If we have pre-computed induced accels (future proofing)
-            if frame.induced_accelerations:
+            if frame.induced_accelerations and self.model is not None:
                 # Assume dictionary structure
                 # We need to map joint index to array index.
                 # Usually array is size NV. v_idx points to start.
@@ -688,9 +690,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
             else:
                 # Recompute post-hoc
-                res = self.analyzer.compute_components(
-                    frame.joint_positions,
-                    frame.joint_velocities,
+                if self.analyzer is not None:
+                    res = self.analyzer.compute_components(
+                        frame.joint_positions,
+                        frame.joint_velocities,
                     frame.joint_torques,
                 )
                 g_accs.append(res["gravity"][v_idx])
@@ -710,10 +713,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 else:
                     # Pad or truncate? Or just log warning.
                     # Let's try to map to size NV.
-                    t = np.zeros(self.model.nv)
+                    t: np.ndarray = np.zeros(self.model.nv)
                     for i, v in enumerate(parts):
                         if i < len(t):
-                            t[i] = v
+                            t[i] = float(v)
                     spec_tau = t
             except ValueError:
                 pass
@@ -758,6 +761,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 return
 
         try:
+            if self.model is None:
+                return
             joint_idx = list(self.model.names).index(joint_name)
             v_idx = self.model.joints[joint_idx].idx_v
         except ValueError:
@@ -773,16 +778,17 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         for frame in self.recorder.frames:
             times.append(frame.time)
 
-            if frame.counterfactuals:
+            if frame.counterfactuals and self.model is not None:
                 ztcf = frame.counterfactuals.get("ztcf_accel", np.zeros(self.model.nv))
                 zvcf = frame.counterfactuals.get("zvcf_torque", np.zeros(self.model.nv))
                 ztcf_vals.append(ztcf[v_idx])
                 zvcf_vals.append(zvcf[v_idx])
             else:
                 # Recompute
-                res = self.analyzer.compute_counterfactuals(
-                    frame.joint_positions, frame.joint_velocities
-                )
+                if self.analyzer is not None and hasattr(self.analyzer, 'compute_counterfactuals'):
+                    res = self.analyzer.compute_counterfactuals(
+                        frame.joint_positions, frame.joint_velocities
+                    )
                 ztcf_vals.append(res["ztcf_accel"][v_idx])
                 zvcf_vals.append(res["zvcf_torque"][v_idx])
 
@@ -802,7 +808,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         # Legend
         lns = line1 + line2
-        labs = [line.get_label() for line in lns]
+        labs = [str(line.get_label()) for line in lns]
         ax1.legend(lns, labs, loc=0)
 
         ax1.grid(True)
@@ -1222,11 +1228,12 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 induced = None
                 counterfactuals = None
 
-                if self.analyzer:
+                if self.analyzer and self.q is not None and self.v is not None:
                     induced = self.analyzer.compute_components(self.q, self.v, tau)
-                    counterfactuals = self.analyzer.compute_counterfactuals(
-                        self.q, self.v
-                    )
+                    if hasattr(self.analyzer, 'compute_counterfactuals'):
+                        counterfactuals = self.analyzer.compute_counterfactuals(
+                            self.q, self.v
+                        )
 
                 self.recorder.record_frame(
                     time=self.sim_time,
