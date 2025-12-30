@@ -249,9 +249,9 @@ This section defines the active agents within the Jules "Control Tower" Architec
 
 ## 🛠️ GitHub CLI & Workflow Reference
 
-Always use Github CLI for making pull requests.
+Always use GitHub CLI for making pull requests.
 Whenever you finish a task for the user, push it to remote.
-NEVER try to use GitKraken or anything other than Github CLI for Pull request creation.
+NEVER try to use GitKraken or anything other than GitHub CLI for Pull request creation.
 All pull requests should be verified to pass the ruff, black, and mypy requirements in the ci / cd pipeline before they are created.
 
 ### For PR Creation:
