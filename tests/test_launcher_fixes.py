@@ -158,8 +158,6 @@ class TestDraggableModelCard(unittest.TestCase):
 
         card.mousePressEvent(event)
 
-
-
         # Verify model selection was called
         self.mock_launcher.select_model.assert_called_once_with("test_model")
 
