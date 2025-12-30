@@ -1,7 +1,7 @@
 """Unit tests for Drake GUI App."""
 
-import sys
 import importlib.util
+import sys
 from unittest.mock import MagicMock
 
 import numpy as np
