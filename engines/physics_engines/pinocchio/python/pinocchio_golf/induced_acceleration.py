@@ -92,3 +92,67 @@ class InducedAccelerationAnalyzer:
             "control": q_ddot_t,
             "total": q_ddot_total,
         }
+
+    def compute_specific_control(
+        self, q: np.ndarray, specific_tau: np.ndarray
+    ) -> np.ndarray:
+        """
+        Compute induced acceleration for a specific control torque vector.
+
+        Args:
+            q: Joint configurations
+            specific_tau: Torque vector to analyze
+
+        Returns:
+            Induced acceleration (M^-1 * specific_tau)
+        """
+        # M * a = tau  (assuming C=0, G=0, or just isolate tau contribution)
+        # We want a = M^-1 * tau.
+        # We can use ABA with v=0, gravity=0... but we can't easily turn off
+        # gravity in model.
+        # But we know ABA(q, 0, tau) = M^-1 * (tau - G(q)).
+        # And ABA(q, 0, 0) = M^-1 * (-G(q)).
+        # So ABA(q, 0, tau) - ABA(q, 0, 0) = M^-1 * tau.
+
+        a_tau_G: np.ndarray = pin.aba(
+            self.model, self._temp_data, q, np.zeros(self.nv), specific_tau
+        )
+        a_G: np.ndarray = pin.aba(
+            self.model, self._temp_data, q, np.zeros(self.nv), np.zeros(self.nv)
+        )
+
+        return np.asarray(a_tau_G - a_G)
+
+    def compute_counterfactuals(
+        self, q: np.ndarray, v: np.ndarray
+    ) -> dict[str, np.ndarray]:
+        """
+        Decompose acceleration into Zero-Torque (ZTCF) and Zero-Velocity (ZVCF)
+        components.
+        This helps analyze how much acceleration comes from internal dynamics vs
+        applied torque.
+        Ref: 'Induced Acceleration Analysis' in biomechanics.
+
+        Args:
+            q: Joint position
+            v: Joint velocity
+
+        Returns:
+            Dict with keys 'ztcf_accel' (Zero Torque Accel) and 'zvcf_torque'
+            (Zero Velocity Torque)
+        """
+        # ZTCF: Acceleration if tau=0.
+        # M*a + C*v + G = 0  => a = -M^-1 * (C*v + G)
+        # This is just ABA with tau=0.
+        ztcf_accel = pin.aba(self.model, self._temp_data, q, v, np.zeros(self.nv))
+
+        # ZVCF: Torque/Force if v=0.
+        # M*a + G = tau.
+        # If we define ZVCF as "Forces to hold static posture" => a=0, v=0 => tau = G.
+        # This is computeGeneralizedGravity(q).
+        zvcf_torque = pin.computeGeneralizedGravity(self.model, self._temp_data, q)
+
+        return {
+            "ztcf_accel": ztcf_accel,
+            "zvcf_torque": zvcf_torque,
+        }

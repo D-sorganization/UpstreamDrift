@@ -133,7 +133,6 @@ class TestGridLayout(unittest.TestCase):
             patch.object(GolfLauncher, "check_docker"),
             patch.object(GolfLauncher, "_load_layout"),
         ):
-
             launcher = GolfLauncher()
 
             # Manually set up the model order as it would be in init_ui
@@ -287,7 +286,6 @@ class TestC3DViewerIntegration(unittest.TestCase):
             patch("pathlib.Path.exists", return_value=False),
             patch("launchers.golf_launcher.QMessageBox") as mock_msgbox,
         ):
-
             launcher._launch_c3d_viewer()
 
             # Verify warning message was shown
@@ -302,7 +300,6 @@ class TestC3DViewerIntegration(unittest.TestCase):
             patch("subprocess.run") as mock_run,
             patch("pathlib.Path.exists", return_value=True),
         ):
-
             result = launch_c3d_viewer()
 
             # Verify it was called
@@ -411,7 +408,6 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
             patch("pathlib.Path.exists", return_value=False),
             patch("launchers.golf_launcher.QMessageBox") as mock_msgbox,
         ):
-
             launcher._launch_urdf_generator()
 
             # Verify warning message was shown
@@ -487,9 +483,9 @@ if __name__ == "__main__":
     result = runner.run(suite)
 
     # Print summary
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("Drag-and-Drop Tests Summary")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Tests run: {result.testsRun}")
     print(f"Failures: {len(result.failures)}")
     print(f"Errors: {len(result.errors)}")

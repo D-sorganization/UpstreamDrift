@@ -94,7 +94,6 @@ def test_plot_joint_trajectories():
         patch("matplotlib.pyplot.subplots") as mock_subplots,
         patch("matplotlib.pyplot.savefig"),
     ):
-
         mock_fig = MagicMock()
         # Explicitly create and assign to object array to ensure no None values
         mock_arr = np.empty((2, 2), dtype=object)

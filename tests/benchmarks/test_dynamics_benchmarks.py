@@ -1,9 +1,11 @@
-"""
-Benchmarks for Rigid Body Dynamics Algorithms (ABA and RNEA).
-"""
+"""Benchmark tests for physics dynamics."""
 
+import importlib.util
 import sys
 from pathlib import Path
+
+import numpy as np
+import pytest
 
 # Fix for CI: Add the MuJoCo engine python path to sys.path
 # This handles the case where the project is not installed as a package
@@ -12,16 +14,21 @@ MUJOCO_PYTHON_PATH = REPO_ROOT / "engines" / "physics_engines" / "mujoco" / "pyt
 if str(MUJOCO_PYTHON_PATH) not in sys.path:
     sys.path.append(str(MUJOCO_PYTHON_PATH))
 
-import numpy as np  # noqa: E402
-import pytest  # noqa: E402
-from mujoco_humanoid_golf.rigid_body_dynamics.aba import (  # noqa: E402
-    aba,
-)
-from mujoco_humanoid_golf.rigid_body_dynamics.rnea import (  # noqa: E402
-    rnea,
-)
-
 from shared.python.constants import GRAVITY_M_S2  # noqa: E402
+
+# Check if pytest-benchmark is installed, otherwise skip
+if importlib.util.find_spec("pytest_benchmark") is None:
+    pytest.skip("pytest-benchmark not installed", allow_module_level=True)
+
+try:
+    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.aba import (  # noqa: E402
+        aba,
+    )
+    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.rnea import (  # noqa: E402, I001
+        rnea,
+    )
+except ImportError:
+    pytest.skip("MuJoCo dynamics modules not found", allow_module_level=True)
 
 
 def create_random_model(num_bodies=10):

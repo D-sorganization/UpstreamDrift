@@ -85,6 +85,8 @@ def rnea(  # noqa: PLR0915
 
     # Get gravity vector
     a_grav = model.get("gravity", DEFAULT_GRAVITY)
+    # OPTIMIZATION: Pre-compute negative gravity to avoid allocation in loop
+    neg_a_grav = -a_grav
 
     # Initialize arrays
     # OPTIMIZATION: use np.empty instead of np.zeros for arrays that are fully
@@ -135,7 +137,7 @@ def rnea(  # noqa: PLR0915
             v[:, i] = vj_velocity
 
             # Optimized a[:, i] = xj_transform @ (-a_grav) + s_subspace * qdd[i]
-            np.matmul(xj_transform, -a_grav, out=scratch_vec)
+            np.matmul(xj_transform, neg_a_grav, out=scratch_vec)
             # Optimization: Avoid allocation for s_subspace * qdd[i]
             # scratch_vec += s_subspace * qdd[i]
 

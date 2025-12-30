@@ -164,6 +164,90 @@ class BiomechanicalAnalyzer:
 
         return x
 
+    def compute_induced_acceleration_for_actuator(
+        self, actuator_name_or_id: str | int
+    ) -> np.ndarray:
+        """Compute induced acceleration for a specific actuator."""
+        if isinstance(actuator_name_or_id, str):
+            act_id = mujoco.mj_name2id(
+                self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_name_or_id
+            )
+        else:
+            act_id = actuator_name_or_id
+
+        if act_id == -1:
+            return np.zeros(self.model.nv)
+
+        # Force vector
+        # qfrc_actuator contains forces from ALL actuators.
+        # We need force from JUST ONE.
+        # We assume simple additivity and that we can re-run fwdActuator
+        # isolating one control.
+
+        ctrl_save = self.data.ctrl.copy()
+        qfrc_actuator_save = self.data.qfrc_actuator.copy()
+        actuator_force_save = self.data.actuator_force.copy()
+
+        # Set specific control
+        # We want the induced acceleration of the CURRENT torque applied by this
+        # actuator. So we keep its current ctrl value, set others to 0.
+        current_val = self.data.ctrl[act_id]
+        self.data.ctrl[:] = 0
+        self.data.ctrl[act_id] = current_val
+
+        mujoco.mj_fwdActuator(self.model, self.data)
+
+        # Now qfrc_actuator contains only forces from this actuator
+        y = self.data.qfrc_actuator.copy()
+
+        # Restore
+        self.data.ctrl[:] = ctrl_save
+        self.data.qfrc_actuator[:] = qfrc_actuator_save
+        self.data.actuator_force[:] = actuator_force_save
+
+        # Solve M*x = y
+        x = np.zeros(self.model.nv)
+        mujoco.mj_solveM(self.model, self.data, x, y)
+
+        return x
+
+    def compute_counterfactuals(self) -> dict[str, np.ndarray]:
+        """Compute instantaneous counterfactuals."""
+        # ZTCF: Acceleration if tau=0.
+        # M*a + C + g = 0  => M*a = -(C+g)
+        # We can get (C+g) by calling RNEA with a=0.
+
+        qvel_save = self.data.qvel.copy()
+        qacc_save = self.data.qacc.copy()
+
+        # 1. Compute C+g (Inverse Dynamics with a=0)
+        # Note: mj_rne uses current q, v.
+        self.data.qacc[:] = 0
+        mujoco.mj_rne(self.model, self.data)
+        c_plus_g = self.data.qfrc_inverse.copy()
+
+        # Solve M * a_ztcf = -(C+g)
+        a_ztcf = np.zeros(self.model.nv)
+        mujoco.mj_solveM(self.model, self.data, a_ztcf, -c_plus_g)
+
+        # ZVCF: Torque/Forces if v=0.
+        # If v=0, then C=0. Equation is M*a + g = tau.
+        # Usually ZVCF means "Static Torques needed to hold posture"
+        # => a=0, v=0 => tau = g.
+        # Or "Forces acting on system if frozen" => Gravity.
+        # Let's return the static torque 'tau_static' = g(q).
+
+        self.data.qvel[:] = 0
+        self.data.qacc[:] = 0
+        mujoco.mj_rne(self.model, self.data)
+        tau_zvcf = self.data.qfrc_inverse.copy()  # This is g(q)
+
+        # Restore
+        self.data.qvel[:] = qvel_save
+        self.data.qacc[:] = qacc_save
+
+        return {"ztcf_accel": a_ztcf, "zvcf_torque": tau_zvcf}
+
     def get_club_head_data(
         self,
     ) -> tuple[np.ndarray | None, np.ndarray | None, float]:
@@ -304,8 +388,14 @@ class BiomechanicalAnalyzer:
 
         return powers
 
-    def extract_full_state(self) -> BiomechanicalData:
+    def extract_full_state(
+        self, selected_actuator_name: str | None = None
+    ) -> BiomechanicalData:
         """Extract complete biomechanical state at current time.
+
+        Args:
+            selected_actuator_name: Optional name of actuator to compute induced accel
+                for.
 
         Returns:
             BiomechanicalData object with all available measurements
@@ -328,11 +418,17 @@ class BiomechanicalAnalyzer:
             self._prev_club_vel = club_vel.copy()
 
         # Induced Accelerations
-        # Only compute if needed to save perf? For now, compute basics.
         induced = {
             "gravity": self.compute_induced_acceleration("gravity"),
             "actuator": self.compute_induced_acceleration("actuator"),
         }
+        if selected_actuator_name:
+            induced["selected_actuator"] = (
+                self.compute_induced_acceleration_for_actuator(selected_actuator_name)
+            )
+
+        # Counterfactuals
+        counterfactuals = self.compute_counterfactuals()
 
         return BiomechanicalData(
             time=float(self.data.time),
@@ -355,6 +451,7 @@ class BiomechanicalAnalyzer:
             com_position=com_pos,
             com_velocity=com_vel,
             induced_accelerations=induced,
+            counterfactuals=counterfactuals,
         )
 
 

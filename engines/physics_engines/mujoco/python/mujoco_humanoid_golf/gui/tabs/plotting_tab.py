@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import typing
 
+import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
 from ...plotting import GolfSwingPlotter, MplCanvas
@@ -16,6 +17,11 @@ logger = logging.getLogger(__name__)
 
 class PlottingTab(QtWidgets.QWidget):
     """Tab for advanced plotting and data visualization."""
+
+    CF_MAP: typing.ClassVar[dict[str, str]] = {
+        "ZTCF (Zero Torque)": "ztcf_accel",
+        "ZVCF (Zero Velocity)": "zvcf_torque",
+    }
 
     def __init__(
         self,
@@ -81,14 +87,22 @@ class PlottingTab(QtWidgets.QWidget):
         ind_layout = QtWidgets.QFormLayout(self.induced_widget)
         self.induced_source_combo = QtWidgets.QComboBox()
         self.induced_source_combo.addItems(["gravity", "actuator"])
+        # Add support for specific actuator selection if model is loaded
+        # We will populate this dynamically or allow text input?
+        # For now, let's add a text input for actuator name
+        self.induced_actuator_edit = QtWidgets.QLineEdit()
+        self.induced_actuator_edit.setPlaceholderText(
+            "Specific Actuator Name (optional)"
+        )
         ind_layout.addRow("Source:", self.induced_source_combo)
+        ind_layout.addRow("Or Actuator:", self.induced_actuator_edit)
         self.settings_stack.addWidget(self.induced_widget)
 
         # Counterfactual Settings
         self.cf_widget = QtWidgets.QWidget()
         cf_layout = QtWidgets.QFormLayout(self.cf_widget)
         self.cf_combo = QtWidgets.QComboBox()
-        self.cf_combo.addItems(["ztcf", "zvcf"])
+        self.cf_combo.addItems(list(self.CF_MAP.keys()))
         cf_layout.addRow("Counterfactual:", self.cf_combo)
         self.settings_stack.addWidget(self.cf_widget)
 
@@ -184,6 +198,12 @@ class PlottingTab(QtWidgets.QWidget):
             )
             return
 
+        # Safety: Pause simulation if running, as we might modify data for re-analysis
+        was_running = False
+        if self.sim_widget.running:
+            self.sim_widget.set_running(False)
+            was_running = True
+
         # Clear existing plot
         if self.current_plot_canvas is not None:
             self.plot_container_layout.removeWidget(self.current_plot_canvas)
@@ -236,9 +256,137 @@ class PlottingTab(QtWidgets.QWidget):
                 plotter.plot_torque_comparison(canvas.fig)
             elif plot_type == "Induced Accelerations":
                 source = self.induced_source_combo.currentText()
+                spec_act = self.induced_actuator_edit.text().strip()
+                if spec_act:
+                    # Check if present
+                    _, vals = recorder.get_induced_acceleration_series(spec_act)
+                    if len(vals) == 0:
+                        # Recompute using Analyzer if available
+                        analyzer = self.sim_widget.get_analyzer()
+                        if analyzer:
+                            times = []
+                            vals_list = []
+                            if (
+                                self.sim_widget.model is not None
+                                and self.sim_widget.data is not None
+                            ):
+                                total_frames = len(recorder.frames)
+                                progress = QtWidgets.QProgressDialog(
+                                    "Computing Induced Accelerations...",
+                                    "Cancel",
+                                    0,
+                                    total_frames,
+                                    self,
+                                )
+                                progress.setWindowModality(
+                                    QtCore.Qt.WindowModality.WindowModal
+                                )
+
+                                for i, frame in enumerate(recorder.frames):
+                                    if progress.wasCanceled():
+                                        raise RuntimeError("Operation canceled")
+                                    progress.setValue(i)
+
+                                    # Save current state
+                                    qpos_bak = self.sim_widget.data.qpos.copy()
+                                    qvel_bak = self.sim_widget.data.qvel.copy()
+                                    ctrl_bak = self.sim_widget.data.ctrl.copy()
+
+                                    self.sim_widget.data.qpos[:] = frame.joint_positions
+                                    self.sim_widget.data.qvel[:] = (
+                                        frame.joint_velocities
+                                    )
+                                    self.sim_widget.data.ctrl[:] = frame.joint_torques
+
+                                    import mujoco
+
+                                    mujoco.mj_forward(
+                                        self.sim_widget.model, self.sim_widget.data
+                                    )
+
+                                    compute_fn = (
+                                        analyzer.compute_induced_acceleration_for_actuator
+                                    )
+                                    res = compute_fn(spec_act)
+                                    vals_list.append(res)
+                                    times.append(frame.time)
+
+                                    # Restore
+                                    self.sim_widget.data.qpos[:] = qpos_bak
+                                    self.sim_widget.data.qvel[:] = qvel_bak
+                                    self.sim_widget.data.ctrl[:] = ctrl_bak
+                                    mujoco.mj_forward(
+                                        self.sim_widget.model, self.sim_widget.data
+                                    )
+
+                                progress.setValue(total_frames)
+
+                            # Inject into recorder frames
+                            for i, val in enumerate(vals_list):
+                                recorder.frames[i].induced_accelerations[spec_act] = val
+
+                    source = spec_act
+
                 plotter.plot_induced_acceleration(canvas.fig, source)
             elif plot_type == "Counterfactual Comparison":
-                cf_name = self.cf_combo.currentText()
+                cf_selection = self.cf_combo.currentText()
+                cf_name = self.CF_MAP.get(cf_selection, "ztcf_accel")
+
+                # Ensure data exists (Recompute if missing)
+                _, vals = recorder.get_counterfactual_series(cf_name)
+                if len(vals) == 0:
+                    analyzer = self.sim_widget.get_analyzer()
+                    if analyzer:
+                        import mujoco
+
+                        if (
+                            self.sim_widget.model is not None
+                            and self.sim_widget.data is not None
+                        ):
+                            total_frames = len(recorder.frames)
+                            progress = QtWidgets.QProgressDialog(
+                                "Computing Counterfactuals...",
+                                "Cancel",
+                                0,
+                                total_frames,
+                                self,
+                            )
+                            progress.setWindowModality(
+                                QtCore.Qt.WindowModality.WindowModal
+                            )
+
+                            qpos_bak = self.sim_widget.data.qpos.copy()
+                            qvel_bak = self.sim_widget.data.qvel.copy()
+                            ctrl_bak = self.sim_widget.data.ctrl.copy()
+
+                            for i, frame in enumerate(recorder.frames):
+                                if progress.wasCanceled():
+                                    raise RuntimeError("Operation canceled")
+                                progress.setValue(i)
+
+                                self.sim_widget.data.qpos[:] = frame.joint_positions
+                                self.sim_widget.data.qvel[:] = frame.joint_velocities
+                                self.sim_widget.data.ctrl[:] = frame.joint_torques
+                                mujoco.mj_forward(
+                                    self.sim_widget.model, self.sim_widget.data
+                                )
+
+                                cf_results: dict[str, np.ndarray] = (
+                                    analyzer.compute_counterfactuals()
+                                )
+                                if cf_name in cf_results:
+                                    cf_value: np.ndarray = cf_results[cf_name]
+                                    frame.counterfactuals[cf_name] = cf_value
+
+                            progress.setValue(total_frames)
+
+                            self.sim_widget.data.qpos[:] = qpos_bak
+                            self.sim_widget.data.qvel[:] = qvel_bak
+                            self.sim_widget.data.ctrl[:] = ctrl_bak
+                            mujoco.mj_forward(
+                                self.sim_widget.model, self.sim_widget.data
+                            )
+
                 plotter.plot_counterfactual_comparison(canvas.fig, cf_name)
 
             canvas.draw()
@@ -254,3 +402,6 @@ class PlottingTab(QtWidgets.QWidget):
             logger.error("Plot generation failed: %s", e)
         finally:
             QtWidgets.QApplication.restoreOverrideCursor()
+            # Restore simulation state
+            if was_running:
+                self.sim_widget.set_running(True)

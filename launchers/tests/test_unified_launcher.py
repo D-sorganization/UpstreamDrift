@@ -71,7 +71,6 @@ def test_show_status():
         patch("shared.python.engine_manager.EngineManager") as mock_mgr_cls,
         patch("builtins.print") as mock_print,
     ):
-
         mock_mgr = mock_mgr_cls.return_value
         mock_mgr.get_available_engines.return_value = []
 
@@ -99,14 +98,12 @@ def test_show_status():
         patch("launchers.unified_launcher.QApplication"),
         patch("launchers.golf_launcher.GolfLauncher"),
     ):
-
         launcher = UnifiedLauncher()
 
         with (
             patch("shared.python.engine_manager.EngineManager") as mock_mgr_cls,
             patch("builtins.print") as mock_print,
         ):
-
             mock_mgr = mock_mgr_cls.return_value
             mock_mgr.get_available_engines.return_value = [
                 MagicMock(value="test_engine")
@@ -130,7 +127,6 @@ def test_get_version():
         patch("launchers.unified_launcher.QApplication"),
         patch("launchers.golf_launcher.GolfLauncher"),
     ):
-
         launcher = UnifiedLauncher()
 
         # Case 1: Package metadata
