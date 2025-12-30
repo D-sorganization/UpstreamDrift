@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import typing
 
+import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
 from ...plotting import GolfSwingPlotter, MplCanvas
