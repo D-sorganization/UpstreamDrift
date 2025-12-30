@@ -14,9 +14,7 @@ from unittest.mock import Mock, patch
 def _is_docker_available() -> bool:
     """Check if Docker is available."""
     try:
-        result = subprocess.run(
-            ["docker", "--version"], capture_output=True, timeout=5
-        )
+        result = subprocess.run(["docker", "--version"], capture_output=True, timeout=5)
         return result.returncode == 0
     except (FileNotFoundError, subprocess.TimeoutExpired):
         return False
