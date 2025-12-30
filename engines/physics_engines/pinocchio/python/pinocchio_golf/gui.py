@@ -784,14 +784,19 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 zvcf_vals.append(zvcf[v_idx])
             else:
                 # Recompute
-                if self.analyzer is not None and hasattr(
-                    self.analyzer, "compute_counterfactuals"
-                ):
+                if self.analyzer is None and self.model is not None:
+                    self._ensure_analyzer_initialized()
+
+                if self.analyzer is not None:
                     res = self.analyzer.compute_counterfactuals(
                         frame.joint_positions, frame.joint_velocities
                     )
-                ztcf_vals.append(res["ztcf_accel"][v_idx])
-                zvcf_vals.append(res["zvcf_torque"][v_idx])
+                    ztcf_vals.append(res["ztcf_accel"][v_idx])
+                    zvcf_vals.append(res["zvcf_torque"][v_idx])
+                else:
+                    # Fallback if analyzer init failed
+                    ztcf_vals.append(0.0)
+                    zvcf_vals.append(0.0)
 
         # Plot with dual y-axis
         ax1 = self.canvas.fig.add_subplot(111)
