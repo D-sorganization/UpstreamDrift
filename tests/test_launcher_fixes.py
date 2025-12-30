@@ -143,11 +143,10 @@ class TestDraggableModelCard(unittest.TestCase):
 
         card = DraggableModelCard(self.mock_model, self.mock_launcher)
 
-        # Create mock mouse event
+        # Create mock mouse event with proper button method
         event = Mock()
-        event.button = Mock(return_value=Qt.MouseButton.LeftButton)
-        event.position = Mock()
-        event.position.return_value.toPoint = Mock(return_value=QPoint(10, 10))
+        event.button.return_value = Qt.MouseButton.LeftButton
+        event.position.return_value.toPoint.return_value = QPoint(10, 10)
 
         card.mousePressEvent(event)
 
