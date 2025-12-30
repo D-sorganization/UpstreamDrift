@@ -15,11 +15,12 @@ import sys
 import threading
 import time
 import webbrowser
+import json
 from pathlib import Path
 from typing import Any
 
-from PyQt6.QtCore import Qt, QThread, pyqtSignal
-from PyQt6.QtGui import QFont, QIcon, QPixmap
+from PyQt6.QtCore import Qt, QThread, pyqtSignal, QMimeData, QPoint
+from PyQt6.QtGui import QFont, QIcon, QPixmap, QDrag, QPainter
 from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
@@ -66,8 +67,10 @@ logger = logging.getLogger(__name__)
 # Constants
 REPOS_ROOT = Path(__file__).parent.parent.resolve()
 ASSETS_DIR = Path(__file__).parent / "assets"
+CONFIG_DIR = REPOS_ROOT / ".kiro" / "launcher"
+LAYOUT_CONFIG_FILE = CONFIG_DIR / "layout.json"
 DOCKER_IMAGE_NAME = "robotics_env"
-GRID_COLUMNS = 4
+GRID_COLUMNS = 3  # Changed to 3x3 grid
 
 MODEL_IMAGES = {
     "MuJoCo Humanoid": "mujoco_humanoid.png",
@@ -78,9 +81,138 @@ MODEL_IMAGES = {
     "MyoSim Suite": "myosim.png",
     "OpenPose Analysis": "opensim.png",
     "Matlab Simscape": "simscape_multibody.png",
+    "URDF Generator": "urdf_icon.png",  # Add URDF generator icon
 }
 
 DOCKER_STAGES = ["all", "mujoco", "pinocchio", "drake", "base"]
+
+
+class DraggableModelCard(QFrame):
+    """Draggable model card widget with reordering support."""
+    
+    def __init__(self, model: Any, parent: Any = None):
+        super().__init__(parent)
+        self.model = model
+        self.parent_launcher = parent
+        self.setAcceptDrops(True)
+        self.setObjectName("ModelCard")
+        self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.drag_start_position = QPoint()
+        self.setup_ui()
+        
+    def setup_ui(self) -> None:
+        """Set up the card UI."""
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        # Image
+        img_name = MODEL_IMAGES.get(self.model.name)
+        if not img_name:
+            # Try to guess based on ID
+            if "mujoco" in self.model.id:
+                img_name = "mujoco_humanoid.png"
+            elif "drake" in self.model.id:
+                img_name = "drake.png"
+            elif "pinocchio" in self.model.id:
+                img_name = "pinocchio.png"
+            elif "urdf" in self.model.id:
+                img_name = "urdf_icon.png"
+
+        img_path = ASSETS_DIR / img_name if img_name else None
+
+        lbl_img = QLabel()
+        lbl_img.setFixedSize(200, 200)
+        lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        if img_path and img_path.exists():
+            pixmap = QPixmap(str(img_path))
+            pixmap = pixmap.scaled(
+                180,
+                180,
+                Qt.AspectRatioMode.KeepAspectRatio,
+                Qt.TransformationMode.SmoothTransformation,
+            )
+            lbl_img.setPixmap(pixmap)
+        else:
+            lbl_img.setText("No Image")
+            lbl_img.setStyleSheet("color: #666; font-style: italic;")
+
+        layout.addWidget(lbl_img)
+
+        # Label
+        lbl_name = QLabel(self.model.name)
+        lbl_name.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
+        lbl_name.setWordWrap(True)
+        lbl_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(lbl_name)
+
+        # Description
+        lbl_desc = QLabel(self.model.description)
+        lbl_desc.setFont(QFont("Segoe UI", 9))
+        lbl_desc.setStyleSheet("color: #cccccc;")
+        lbl_desc.setWordWrap(True)
+        lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(lbl_desc)
+        
+    def mousePressEvent(self, event) -> None:
+        """Handle mouse press for selection and drag initiation."""
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.drag_start_position = event.position().toPoint()
+            if self.parent_launcher:
+                self.parent_launcher.select_model(self.model.id)
+        super().mousePressEvent(event)
+        
+    def mouseMoveEvent(self, event) -> None:
+        """Handle mouse move for drag operation."""
+        if not (event.buttons() & Qt.MouseButton.LeftButton):
+            return
+            
+        if not hasattr(self, 'drag_start_position') or self.drag_start_position.isNull():
+            return
+            
+        if ((event.position().toPoint() - self.drag_start_position).manhattanLength() < 
+            QApplication.startDragDistance()):
+            return
+            
+        try:
+            # Start drag operation
+            drag = QDrag(self)
+            mimeData = QMimeData()
+            mimeData.setText(f"model_card:{self.model.id}")
+            drag.setMimeData(mimeData)
+            
+            # Create drag pixmap (simplified to avoid painter issues)
+            pixmap = self.grab()
+            drag.setPixmap(pixmap)
+            drag.setHotSpot(self.drag_start_position)
+            
+            # Execute drag
+            drag.exec(Qt.DropAction.MoveAction)
+        except Exception as e:
+            logger.error(f"Drag operation failed: {e}")
+        
+    def mouseDoubleClickEvent(self, event) -> None:
+        """Handle double-click to launch model."""
+        if self.parent_launcher:
+            self.parent_launcher.launch_model_direct(self.model.id)
+        super().mouseDoubleClickEvent(event)
+        
+    def dragEnterEvent(self, event) -> None:
+        """Handle drag enter event."""
+        if event.mimeData().hasText() and event.mimeData().text().startswith("model_card:"):
+            event.acceptProposedAction()
+        else:
+            event.ignore()
+            
+    def dropEvent(self, event) -> None:
+        """Handle drop event."""
+        if event.mimeData().hasText() and event.mimeData().text().startswith("model_card:"):
+            source_model_id = event.mimeData().text().split(":", 1)[1]
+            if self.parent_launcher and source_model_id != self.model.id:
+                self.parent_launcher._swap_models(source_model_id, self.model.id)
+            event.acceptProposedAction()
+        else:
+            event.ignore()
 
 
 class DockerCheckThread(QThread):
@@ -352,6 +484,7 @@ class GolfLauncher(QMainWindow):
         self.docker_available = False
         self.selected_model: str | None = None
         self.model_cards: dict[str, Any] = {}
+        self.model_order: list[str] = []  # Track model order for drag-and-drop
 
         # Load Registry
         try:
@@ -372,6 +505,87 @@ class GolfLauncher(QMainWindow):
 
         self.init_ui()
         self.check_docker()
+        
+        # Load saved layout
+        self._load_layout()
+
+    def _save_layout(self) -> None:
+        """Save the current model layout to configuration file."""
+        try:
+            # Ensure config directory exists
+            CONFIG_DIR.mkdir(parents=True, exist_ok=True)
+            
+            layout_data = {
+                "model_order": self.model_order,
+                "selected_model": self.selected_model,
+                "window_geometry": {
+                    "x": self.x(),
+                    "y": self.y(),
+                    "width": self.width(),
+                    "height": self.height()
+                },
+                "options": {
+                    "live_visualization": self.chk_live.isChecked() if hasattr(self, 'chk_live') else True,
+                    "gpu_acceleration": self.chk_gpu.isChecked() if hasattr(self, 'chk_gpu') else False
+                }
+            }
+            
+            with open(LAYOUT_CONFIG_FILE, 'w', encoding='utf-8') as f:
+                json.dump(layout_data, f, indent=2)
+                
+            logger.info(f"Layout saved to {LAYOUT_CONFIG_FILE}")
+            
+        except Exception as e:
+            logger.error(f"Failed to save layout: {e}")
+
+    def _load_layout(self) -> None:
+        """Load the saved model layout from configuration file."""
+        try:
+            if not LAYOUT_CONFIG_FILE.exists():
+                logger.info("No saved layout found, using default")
+                return
+                
+            with open(LAYOUT_CONFIG_FILE, 'r', encoding='utf-8') as f:
+                layout_data = json.load(f)
+            
+            # Restore model order if valid
+            saved_order = layout_data.get("model_order", [])
+            if saved_order and len(saved_order) == len(self.model_order):
+                # Verify all models still exist
+                if all(model_id in self.model_cards for model_id in saved_order):
+                    self.model_order = saved_order
+                    self._rebuild_grid()
+                    logger.info("Model layout restored from saved configuration")
+            
+            # Restore window geometry
+            geometry = layout_data.get("window_geometry", {})
+            if geometry:
+                self.setGeometry(
+                    geometry.get("x", self.x()),
+                    geometry.get("y", self.y()),
+                    geometry.get("width", self.width()),
+                    geometry.get("height", self.height())
+                )
+            
+            # Restore options
+            options = layout_data.get("options", {})
+            if hasattr(self, 'chk_live'):
+                self.chk_live.setChecked(options.get("live_visualization", True))
+            if hasattr(self, 'chk_gpu'):
+                self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
+            
+            # Restore selected model
+            saved_selection = layout_data.get("selected_model")
+            if saved_selection and saved_selection in self.model_cards:
+                self.select_model(saved_selection)
+                
+        except Exception as e:
+            logger.error(f"Failed to load layout: {e}")
+
+    def closeEvent(self, event) -> None:
+        """Handle window close event to save layout."""
+        self._save_layout()
+        super().closeEvent(event)
 
     def init_ui(self) -> None:
         """Initialize the user interface."""
@@ -411,14 +625,25 @@ class GolfLauncher(QMainWindow):
         self.grid_layout = QGridLayout(grid_widget)
         self.grid_layout.setSpacing(20)
 
-        # Populate Grid
+        # Populate Grid - 3x3 layout with URDF generator
         row, col = 0, 0
         if self.registry:
-            # User Request: Limit to first 8 models (2x4 grid), removing subsets
+            # Get first 8 models plus add URDF generator as 9th
             models = self.registry.get_all_models()[:8]
+            
+            # Add URDF generator as a special model
+            urdf_model = type('URDFModel', (), {
+                'id': 'urdf_generator',
+                'name': 'URDF Generator',
+                'description': 'Interactive URDF model builder',
+                'type': 'urdf_generator'
+            })()
+            models.append(urdf_model)
+            
             for model in models:
-                card = self.create_model_card(model)
+                card = DraggableModelCard(model, self)
                 self.model_cards[model.id] = card  # Use ID as key
+                self.model_order.append(model.id)  # Track order
                 self.grid_layout.addWidget(card, row, col)
                 col += 1
                 if col >= GRID_COLUMNS:
@@ -476,6 +701,48 @@ class GolfLauncher(QMainWindow):
                     self.select_model(humanoid.id)
                 else:
                     self.select_model(models[0].id)
+
+    def _swap_models(self, source_id: str, target_id: str) -> None:
+        """Swap two models in the grid layout."""
+        if source_id not in self.model_cards or target_id not in self.model_cards:
+            return
+            
+        # Find positions in the order list
+        source_idx = self.model_order.index(source_id)
+        target_idx = self.model_order.index(target_id)
+        
+        # Swap in order list
+        self.model_order[source_idx], self.model_order[target_idx] = (
+            self.model_order[target_idx], 
+            self.model_order[source_idx]
+        )
+        
+        # Rebuild the grid layout
+        self._rebuild_grid()
+        
+        # Save layout after swap
+        self._save_layout()
+        
+        logger.info(f"Swapped models: {source_id} <-> {target_id}")
+        
+    def _rebuild_grid(self) -> None:
+        """Rebuild the grid layout based on current model order."""
+        # Clear the layout
+        for i in reversed(range(self.grid_layout.count())):
+            child = self.grid_layout.itemAt(i).widget()
+            if child:
+                self.grid_layout.removeWidget(child)
+        
+        # Re-add widgets in new order
+        row, col = 0, 0
+        for model_id in self.model_order:
+            if model_id in self.model_cards:
+                card = self.model_cards[model_id]
+                self.grid_layout.addWidget(card, row, col)
+                col += 1
+                if col >= GRID_COLUMNS:
+                    col = 0
+                    row += 1
 
     def create_model_card(self, model: Any) -> QFrame:
         """Creates a clickable card widget."""
@@ -554,8 +821,55 @@ class GolfLauncher(QMainWindow):
     def launch_model_direct(self, model_id: str) -> None:
         """Selects and immediately launches the model (for double-click)."""
         self.select_model(model_id)
-        if self.btn_launch.isEnabled():
+        if model_id == "urdf_generator":
+            self._launch_urdf_generator()
+        elif self.btn_launch.isEnabled():
             self.launch_simulation()
+    
+    def _launch_urdf_generator(self) -> None:
+        """Launch the URDF generator application."""
+        try:
+            import subprocess
+            import sys
+            from pathlib import Path
+            
+            # Path to URDF generator
+            suite_root = Path(__file__).parent.parent
+            urdf_script = suite_root / "tools" / "urdf_generator" / "launch_urdf_generator.py"
+            
+            if not urdf_script.exists():
+                QMessageBox.warning(
+                    self, 
+                    "URDF Generator Not Found",
+                    f"URDF Generator script not found at:\n{urdf_script}\n\n"
+                    "Please ensure the URDF generator is properly installed."
+                )
+                return
+            
+            logger.info("Launching URDF Generator...")
+            
+            # Launch in new process
+            if os.name == "nt":
+                # Windows: Launch in new console
+                subprocess.Popen(
+                    [sys.executable, str(urdf_script)],
+                    creationflags=CREATE_NEW_CONSOLE,
+                    cwd=str(suite_root)
+                )
+            else:
+                # Unix: Launch in background
+                subprocess.Popen(
+                    [sys.executable, str(urdf_script)],
+                    cwd=str(suite_root)
+                )
+                
+        except Exception as e:
+            logger.error(f"Failed to launch URDF Generator: {e}")
+            QMessageBox.critical(
+                self,
+                "Launch Error", 
+                f"Failed to launch URDF Generator:\n{e}"
+            )
 
     def select_model(self, model_id: str) -> None:
         """Select a model and update UI."""
@@ -568,7 +882,7 @@ class GolfLauncher(QMainWindow):
             if model:
                 model_name = model.name
 
-        # Update Styles
+        # Update Styles for draggable cards
         for m_id, card in self.model_cards.items():
             if m_id == model_id:
                 card.setStyleSheet(
@@ -763,6 +1077,11 @@ class GolfLauncher(QMainWindow):
             return
 
         model_id = self.selected_model
+        
+        # Handle URDF generator specially
+        if model_id == "urdf_generator":
+            self._launch_urdf_generator()
+            return
 
         if not self.registry:
             QMessageBox.critical(self, "Error", "Model registry is unavailable.")
@@ -853,10 +1172,13 @@ class GolfLauncher(QMainWindow):
         """Launch the simulation in a docker container."""
         cmd = ["docker", "run", "--rm", "-it"]
 
-        # Volumes
+        # Volumes - mount entire suite root to /workspace
         mount_path = str(abs_repo_path).replace("\\", "/")
         cmd.extend(["-v", f"{mount_path}:/workspace"])
-        cmd.extend(["-w", "/workspace/python"])
+        cmd.extend(["-w", "/workspace"])
+
+        # Environment variables for Python path and shared modules
+        cmd.extend(["-e", "PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines"])
 
         # Display/X11
         if self.chk_live.isChecked():
@@ -881,26 +1203,30 @@ class GolfLauncher(QMainWindow):
 
         cmd.append(DOCKER_IMAGE_NAME)
 
-        # Entry Command
+        # Entry Command - Updated to use correct paths and Python executable
         if model.type == "drake":
-            # Run as module for relative imports (workdir is now /workspace/python)
-            cmd.extend(["/opt/mujoco-env/bin/python", "-m", "src.drake_gui_app"])
+            # Change to the drake python directory and run as module
+            cmd.extend(["bash", "-c", 
+                       "cd /workspace/engines/physics_engines/drake/python && python -m src.drake_gui_app"])
 
             if host_port:
                 logger.info(f"Drake Meshcat will be available on host port {host_port}")
                 self._start_meshcat_browser(host_port)
 
         elif model.type == "custom_humanoid":
-            # Run the humanoid launcher inside docker
-            cmd.extend(["python", "humanoid_launcher.py"])
+            # Change to mujoco python directory and run humanoid launcher
+            cmd.extend(["bash", "-c", 
+                       "cd /workspace/engines/physics_engines/mujoco/python && python humanoid_launcher.py"])
 
         elif model.type == "custom_dashboard":
-            # Run the module inside docker
-            cmd.extend(["python", "-m", "mujoco_humanoid_golf"])
+            # Change to mujoco python directory and run as module
+            cmd.extend(["bash", "-c", 
+                       "cd /workspace/engines/physics_engines/mujoco/python && python -m mujoco_humanoid_golf"])
 
         elif model.type == "pinocchio":
-            # Run from python dir
-            cmd.extend(["/opt/mujoco-env/bin/python", "pinocchio_golf/gui.py"])
+            # Change to pinocchio python directory and run GUI
+            cmd.extend(["bash", "-c", 
+                       "cd /workspace/engines/physics_engines/pinocchio/python && python pinocchio_golf/gui.py"])
 
             if host_port:
                 logger.info(
