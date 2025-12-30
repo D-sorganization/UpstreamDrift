@@ -150,7 +150,11 @@ class TestDraggableModelCard(unittest.TestCase):
 
         # Verify parent launcher is set correctly
         self.assertIsNotNone(card.parent_launcher, "Parent launcher should not be None")
-        self.assertEqual(card.parent_launcher, self.mock_launcher, "Parent launcher should match mock")
+        self.assertEqual(
+            card.parent_launcher,
+            self.mock_launcher,
+            "Parent launcher should match mock",
+        )
 
         card.mousePressEvent(event)
 
