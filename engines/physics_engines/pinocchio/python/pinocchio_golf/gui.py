@@ -681,12 +681,14 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 g = frame.induced_accelerations.get("gravity", np.zeros(self.model.nv))
                 v = frame.induced_accelerations.get("velocity", np.zeros(self.model.nv))
                 c = frame.induced_accelerations.get("control", np.zeros(self.model.nv))
-                t = frame.induced_accelerations.get("total", np.zeros(self.model.nv))
+                total_acc = frame.induced_accelerations.get(
+                    "total", np.zeros(self.model.nv)
+                )
 
                 g_accs.append(g[v_idx])
                 v_accs.append(v[v_idx])
                 c_accs.append(c[v_idx])
-                t_accs.append(t[v_idx])
+                t_accs.append(total_acc[v_idx])
 
             else:
                 # Recompute post-hoc
@@ -713,6 +715,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 else:
                     # Pad or truncate? Or just log warning.
                     # Let's try to map to size NV.
+                    logger.warning(
+                        f"Input torque vector length {len(parts)} does not match "
+                        f"model NV {self.model.nv}. Padding/Truncating."
+                    )
                     temp_tau = np.zeros(self.model.nv, dtype=np.float64)
                     min_len = min(len(parts), len(temp_tau))
                     temp_tau[:min_len] = parts[:min_len]
