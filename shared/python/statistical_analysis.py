@@ -785,6 +785,46 @@ class StatisticalAnalyzer:
 
         return corr_matrix, labels
 
+    def compute_coupling_angles(
+        self,
+        joint_idx_1: int,
+        joint_idx_2: int,
+    ) -> np.ndarray:
+        """Compute Vector Coding coupling angles between two joints.
+
+        The coupling angle represents the direction of the vector between
+        successive data points in an Angle-Angle diagram. It quantifies
+        the coordination pattern between the two segments.
+
+        Args:
+            joint_idx_1: Index of the first joint (x-axis)
+            joint_idx_2: Index of the second joint (y-axis)
+
+        Returns:
+            Array of coupling angles in degrees [0, 360)
+        """
+        if (
+            joint_idx_1 >= self.joint_velocities.shape[1]
+            or joint_idx_2 >= self.joint_velocities.shape[1]
+        ):
+            return np.array([])
+
+        # Use velocities for instantaneous tangent
+        # Gamma = arctan2(vel2, vel1)
+        vel1 = self.joint_velocities[:, joint_idx_1]
+        vel2 = self.joint_velocities[:, joint_idx_2]
+
+        # Handle near-zero velocities to avoid noise
+        # (Optional: thresholding, but raw calc is standard)
+
+        gamma_rad = np.arctan2(vel2, vel1)
+        gamma_deg = np.rad2deg(gamma_rad)
+
+        # Normalize to [0, 360)
+        gamma_deg = np.mod(gamma_deg, 360.0)
+
+        return gamma_deg
+
     def export_statistics_csv(
         self,
         filename: str,
