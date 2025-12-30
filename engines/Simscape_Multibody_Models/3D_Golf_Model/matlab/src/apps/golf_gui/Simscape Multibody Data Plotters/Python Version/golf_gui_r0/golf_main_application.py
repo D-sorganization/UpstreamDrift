@@ -327,7 +327,7 @@ class EnhancedMainWindow(GolfVisualizerMainWindow):
         presets = list(CameraPreset)
         for i, preset in enumerate(presets):
             if i < 7:  # F1-F7
-                shortcut = QShortcut(QKeySequence(f"F{i+1}"), self)
+                shortcut = QShortcut(QKeySequence(f"F{i + 1}"), self)
                 shortcut.activated.connect(
                     lambda p=preset: self.camera_controller.set_preset(p)
                 )

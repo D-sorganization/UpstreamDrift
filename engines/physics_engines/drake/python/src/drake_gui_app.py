@@ -135,7 +135,11 @@ class DrakeInducedAccelerationAnalyzer:
             Dict with 'gravity', 'velocity', 'total' (passive)
         """
         if self.plant is None:
-            return {"gravity": np.array([]), "velocity": np.array([]), "total": np.array([])}
+            return {
+                "gravity": np.array([]),
+                "velocity": np.array([]),
+                "total": np.array([]),
+            }
 
         # 1. Calc Mass Matrix
         M = self.plant.CalcMassMatrix(context)
@@ -157,11 +161,7 @@ class DrakeInducedAccelerationAnalyzer:
         # Force due to velocity = -Cv = -(bias + tau_g)
         a_v = Minv @ (-(bias + tau_g))
 
-        return {
-            "gravity": a_g,
-            "velocity": a_v,
-            "total": a_g + a_v
-        }
+        return {"gravity": a_g, "velocity": a_v, "total": a_g + a_v}
 
     def compute_counterfactuals(self, context: Context) -> dict[str, np.ndarray]:
         """Compute ZTCF and ZVCF."""
@@ -198,10 +198,7 @@ class DrakeInducedAccelerationAnalyzer:
         tau_g = self.plant.CalcGravityGeneralizedForces(context)
         zvcf_torque = -tau_g
 
-        return {
-            "ztcf_accel": ztcf_accel,
-            "zvcf_torque": zvcf_torque
-        }
+        return {"ztcf_accel": ztcf_accel, "zvcf_torque": zvcf_torque}
 
     def compute_specific_control(self, context: Context, tau: np.ndarray) -> np.ndarray:
         """Compute induced acceleration for a specific control vector."""
@@ -616,7 +613,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         analysis_layout.addLayout(ind_layout)
 
-        self.btn_counterfactuals = QtWidgets.QPushButton("Show Counterfactuals (ZTCF/ZVCF)")
+        self.btn_counterfactuals = QtWidgets.QPushButton(
+            "Show Counterfactuals (ZTCF/ZVCF)"
+        )
         self.btn_counterfactuals.setToolTip(
             "Show Zero Torque (ZTCF) and Zero Velocity (ZVCF) analysis"
         )
@@ -1142,9 +1141,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         try:
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
 
-            for i, (q, v) in enumerate(zip(
-                self.recorder.q_history, self.recorder.v_history, strict=False
-            )):
+            for _i, (q, v) in enumerate(
+                zip(self.recorder.q_history, self.recorder.v_history, strict=False)
+            ):
                 self.plant.SetPositions(self.eval_context, q)
                 self.plant.SetVelocities(self.eval_context, v)
 
@@ -1160,16 +1159,17 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                     # We don't record 'u' in recorder yet.
                     # So we can only simulate "Unit Torque" induced acceleration?
                     # Or "What acceleration would 1 Nm cause?"
-                    # The prompt asks for "induced accelerations (for a specified joint torque source)".
+                    # The prompt asks for "induced accelerations
+                    # (for a specified joint torque source)".
                     # This usually means contribution of that source to motion.
                     # Without recording 'u', we assume 1.0 or 0.0?
                     # Let's compute Unit Torque response: Accel if tau[i]=1, others=0.
 
-                    tau = np.zeros(self.plant.num_velocities()) # Generalized forces
+                    tau = np.zeros(self.plant.num_velocities())  # Generalized forces
                     # Map actuator index to generalized force index?
                     # If fully actuated, nu = nv.
                     if spec_act_idx < len(tau):
-                        tau[spec_act_idx] = 1.0 # Unit torque
+                        tau[spec_act_idx] = 1.0  # Unit torque
 
                     spec = analyzer.compute_specific_control(self.eval_context, tau)
                     spec_induced.append(spec)
@@ -1201,15 +1201,27 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         fig, ax = plt.subplots(figsize=(10, 6))
 
         ax.plot(
-            times, g_induced_arr[:, joint_idx], label="Gravity Induced", linestyle="--"
+            times,
+            g_induced_arr[:, joint_idx],
+            label="Gravity Induced",
+            linestyle="--",
         )
         ax.plot(
-            times, c_induced_arr[:, joint_idx], label="Velocity Induced", linestyle="-."
+            times,
+            c_induced_arr[:, joint_idx],
+            label="Velocity Induced",
+            linestyle="-.",
         )
         ax.plot(times, total_arr[:, joint_idx], label="Total (Passive)", color="k")
 
         if spec_induced_arr is not None and spec_induced_arr.shape[0] > 0:
-             ax.plot(times, spec_induced_arr[:, joint_idx], label=f"Induced by Act {spec_act_idx} (Unit Torque)", color='m', linewidth=2)
+            ax.plot(
+                times,
+                spec_induced_arr[:, joint_idx],
+                label=f"Induced by Act {spec_act_idx} (Unit Torque)",
+                color="m",
+                linewidth=2,
+            )
 
         ax.set_title(f"Induced Acceleration Analysis (Joint Index {joint_idx})")
         ax.set_xlabel("Time [s]")
@@ -1272,18 +1284,24 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         fig, ax1 = plt.subplots(figsize=(10, 6))
 
         # ZTCF (Accel) on Left Axis
-        color = 'tab:blue'
-        ax1.set_xlabel('Time [s]')
-        ax1.set_ylabel('ZTCF Acceleration [rad/s^2]', color=color)
+        color = "tab:blue"
+        ax1.set_xlabel("Time [s]")
+        ax1.set_ylabel("ZTCF Acceleration [rad/s^2]", color=color)
         ax1.plot(times, ztcf_arr[:, joint_idx], color=color, label="ZTCF Accel")
-        ax1.tick_params(axis='y', labelcolor=color)
+        ax1.tick_params(axis="y", labelcolor=color)
 
         # ZVCF (Torque) on Right Axis
         ax2 = ax1.twinx()
-        color = 'tab:red'
-        ax2.set_ylabel('ZVCF Torque [Nm]', color=color)
-        ax2.plot(times, zvcf_arr[:, joint_idx], color=color, linestyle='--', label="ZVCF Torque")
-        ax2.tick_params(axis='y', labelcolor=color)
+        color = "tab:red"
+        ax2.set_ylabel("ZVCF Torque [Nm]", color=color)
+        ax2.plot(
+            times,
+            zvcf_arr[:, joint_idx],
+            color=color,
+            linestyle="--",
+            label="ZVCF Torque",
+        )
+        ax2.tick_params(axis="y", labelcolor=color)
 
         plt.title(f"Counterfactual Analysis (Joint Index {joint_idx})")
         fig.tight_layout()

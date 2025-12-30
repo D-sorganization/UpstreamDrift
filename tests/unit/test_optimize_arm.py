@@ -9,11 +9,11 @@ sys.modules["casadi"] = MagicMock()
 sys.modules["pinocchio"] = MagicMock()
 sys.modules["pinocchio.casadi"] = MagicMock()
 
-import casadi as ca
-import pinocchio as pin
-import pinocchio.casadi as cpin
+import casadi as ca  # noqa: E402
+import pinocchio as pin  # noqa: E402
+import pinocchio.casadi as cpin  # noqa: E402
 
-from shared.python.optimization.examples.optimize_arm import main
+from shared.python.optimization.examples.optimize_arm import main  # noqa: E402
 
 
 @pytest.fixture
@@ -99,7 +99,6 @@ def test_main_execution(mock_casadi, mock_pinocchio):
         patch("os.path.exists", return_value=True),
         patch("numpy.savetxt") as mock_save,
     ):
-
         main()
 
         # Verify solver called
@@ -124,7 +123,6 @@ def test_main_missing_dependencies():
             create=True,
         ),
     ):
-
         with patch("builtins.print") as mock_print:
             main()
             mock_print.assert_any_call(

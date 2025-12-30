@@ -85,7 +85,9 @@ class PlottingTab(QtWidgets.QWidget):
         # We will populate this dynamically or allow text input?
         # For now, let's add a text input for actuator name
         self.induced_actuator_edit = QtWidgets.QLineEdit()
-        self.induced_actuator_edit.setPlaceholderText("Specific Actuator Name (optional)")
+        self.induced_actuator_edit.setPlaceholderText(
+            "Specific Actuator Name (optional)"
+        )
         ind_layout.addRow("Source:", self.induced_source_combo)
         ind_layout.addRow("Or Actuator:", self.induced_actuator_edit)
         self.settings_stack.addWidget(self.induced_widget)
@@ -94,7 +96,7 @@ class PlottingTab(QtWidgets.QWidget):
         self.cf_widget = QtWidgets.QWidget()
         cf_layout = QtWidgets.QFormLayout(self.cf_widget)
         self.cf_combo = QtWidgets.QComboBox()
-        self.cf_combo.addItems(["ztcf_accel", "zvcf_torque"])
+        self.cf_combo.addItems(["ZTCF (Zero Torque)", "ZVCF (Zero Velocity)"])
         cf_layout.addRow("Counterfactual:", self.cf_combo)
         self.settings_stack.addWidget(self.cf_widget)
 
@@ -252,10 +254,12 @@ class PlottingTab(QtWidgets.QWidget):
                 if spec_act:
                     # If specific actuator is provided, we need to ensure data exists.
                     # The recorder stores 'gravity' and 'actuator' by default.
-                    # For specific actuator, we might need to re-compute it if not stored?
-                    # Or we should have stored it.
-                    # Our biomechanics.py extract_full_state implementation only stored 'gravity' and 'actuator'.
-                    # We didn't update it to compute dynamic actuator requests because recorder loop runs blindly.
+                    # For specific actuator, we might need to re-compute it if not
+                    # stored? Or we should have stored it.
+                    # Our biomechanics.py extract_full_state implementation only stored
+                    # 'gravity' and 'actuator'.
+                    # We didn't update it to compute dynamic actuator requests because
+                    # recorder loop runs blindly.
                     # So we need to calculate it HERE using the Analyzer post-hoc
                     # if not present.
 
@@ -280,13 +284,18 @@ class PlottingTab(QtWidgets.QWidget):
                                     # or save/restore.
                                     # BiomechanicalAnalyzer uses self.data.
 
+                                    # Process events to keep UI responsive
+                                    QtWidgets.QApplication.processEvents()
+
                                     # Save current state
                                     qpos_bak = self.sim_widget.data.qpos.copy()
                                     qvel_bak = self.sim_widget.data.qvel.copy()
                                     ctrl_bak = self.sim_widget.data.ctrl.copy()
 
                                     self.sim_widget.data.qpos[:] = frame.joint_positions
-                                    self.sim_widget.data.qvel[:] = frame.joint_velocities
+                                    self.sim_widget.data.qvel[:] = (
+                                        frame.joint_velocities
+                                    )
                                     self.sim_widget.data.ctrl[:] = frame.joint_torques
 
                                     # Run forward kinematics/dynamics
@@ -296,9 +305,11 @@ class PlottingTab(QtWidgets.QWidget):
                                         self.sim_widget.model, self.sim_widget.data
                                     )
 
-                                    res = analyzer.compute_induced_acceleration_for_actuator(
-                                        spec_act
+                                    # Compute induced acceleration for specific actuator
+                                    compute_fn = (
+                                        analyzer.compute_induced_acceleration_for_actuator
                                     )
+                                    res = compute_fn(spec_act)
                                     vals_list.append(res)
                                     times.append(frame.time)
 
@@ -315,8 +326,8 @@ class PlottingTab(QtWidgets.QWidget):
                             # Add to recorder temporarily for plotting?
                             # Or just plot directly?
                             # Plotter expects it in recorder or passed explicitly?
-                            # GolfSwingPlotter.plot_induced_acceleration takes source name
-                            # and pulls from recorder.
+                            # GolfSwingPlotter.plot_induced_acceleration takes source
+                            # name and pulls from recorder.
                             # So we should inject it into the recorder frames?
                             # Or update Plotter to accept data.
 
@@ -328,7 +339,14 @@ class PlottingTab(QtWidgets.QWidget):
 
                 plotter.plot_induced_acceleration(canvas.fig, source)
             elif plot_type == "Counterfactual Comparison":
-                cf_name = self.cf_combo.currentText()
+                cf_selection = self.cf_combo.currentText()
+                # Map selection to internal key
+                cf_map = {
+                    "ZTCF (Zero Torque)": "ztcf_accel",
+                    "ZVCF (Zero Velocity)": "zvcf_torque",
+                }
+                cf_name = cf_map.get(cf_selection, "ztcf_accel")
+
                 # Ensure data exists (Recompute if missing)
                 _, vals = recorder.get_counterfactual_series(cf_name)
                 if len(vals) == 0:

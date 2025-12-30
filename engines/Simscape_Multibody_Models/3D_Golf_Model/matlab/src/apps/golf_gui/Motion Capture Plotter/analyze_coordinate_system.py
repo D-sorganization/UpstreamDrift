@@ -76,29 +76,29 @@ def analyze_coordinate_system():
     print("Mid-hands motion ranges:")
     print(
         f"  X: {mid_x_range[0]:.3f} to {mid_x_range[1]:.3f} "
-        f"(range: {mid_x_range[1]-mid_x_range[0]:.3f})"
+        f"(range: {mid_x_range[1] - mid_x_range[0]:.3f})"
     )
     print(
         f"  Y: {mid_y_range[0]:.3f} to {mid_y_range[1]:.3f} "
-        f"(range: {mid_y_range[1]-mid_y_range[0]:.3f})"
+        f"(range: {mid_y_range[1] - mid_y_range[0]:.3f})"
     )
     print(
         f"  Z: {mid_z_range[0]:.3f} to {mid_z_range[1]:.3f} "
-        f"(range: {mid_z_range[1]-mid_z_range[0]:.3f})"
+        f"(range: {mid_z_range[1] - mid_z_range[0]:.3f})"
     )
 
     print("Club head motion ranges:")
     print(
         f"  X: {club_x_range[0]:.3f} to {club_x_range[1]:.3f} "
-        f"(range: {club_x_range[1]-club_x_range[0]:.3f})"
+        f"(range: {club_x_range[1] - club_x_range[0]:.3f})"
     )
     print(
         f"  Y: {club_y_range[0]:.3f} to {club_y_range[1]:.3f} "
-        f"(range: {club_y_range[1]-club_y_range[0]:.3f})"
+        f"(range: {club_y_range[1] - club_y_range[0]:.3f})"
     )
     print(
         f"  Z: {club_z_range[0]:.3f} to {club_z_range[1]:.3f} "
-        f"(range: {club_z_range[1]-club_z_range[0]:.3f})"
+        f"(range: {club_z_range[1] - club_z_range[0]:.3f})"
     )
 
     # Determine primary motion direction

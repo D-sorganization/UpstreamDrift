@@ -3,6 +3,7 @@
 Create high-quality favicon and icon files from GolfingRobot.png
 Uses advanced image processing techniques to maintain sharpness at all sizes
 """
+
 import logging
 from pathlib import Path
 

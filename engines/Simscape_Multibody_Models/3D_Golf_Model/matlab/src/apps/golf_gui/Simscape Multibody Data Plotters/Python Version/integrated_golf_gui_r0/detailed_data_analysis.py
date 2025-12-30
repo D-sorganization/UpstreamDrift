@@ -40,8 +40,7 @@ def deep_analyze_matlab_file(filename):
                             field_data.shape if hasattr(field_data, "shape") else "N/A"
                         )
                         print(
-                            f"    {field_name}: {type(field_data)}, "
-                            f"shape {shape_info}"
+                            f"    {field_name}: {type(field_data)}, shape {shape_info}"
                         )
 
                         # If it's an object array, try to explore further
@@ -181,7 +180,7 @@ def main():
                 print(f"❌ Could not extract data from {filename}")
 
     # Summary
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("SUMMARY")
     print("=" * 60)
 

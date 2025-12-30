@@ -173,8 +173,7 @@ def jcalc(
 
     else:
         msg = (
-            f"Unsupported joint type: {jtype}. "
-            f"Supported types: Rx, Ry, Rz, Px, Py, Pz"
+            f"Unsupported joint type: {jtype}. Supported types: Rx, Ry, Rz, Px, Py, Pz"
         )
         raise ValueError(
             msg,

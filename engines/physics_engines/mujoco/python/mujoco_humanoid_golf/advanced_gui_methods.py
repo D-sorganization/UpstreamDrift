@@ -401,7 +401,8 @@ class AdvancedGuiMethodsMixin:
                 # gs = fig5.add_gridspec(2, 1)
 
                 # Plot Angle-Angle
-                # We need to manually manage subplot placement since plotter methods use add_subplot(111)
+                # We need to manually manage subplot placement since plotter methods
+                # use add_subplot(111)
                 # But plotter methods typically take `fig` and call
                 # `fig.add_subplot(111)`.
                 # If we pass a subfigure or modify plotting.py to accept axes,
@@ -415,10 +416,7 @@ class AdvancedGuiMethodsMixin:
                 # visual "Advanced" feature.
 
                 plotter.plot_angle_angle_diagram(
-                    fig5,
-                    pelvis_idx,
-                    torso_idx,
-                    title="Coordination: Pelvis vs Torso"
+                    fig5, pelvis_idx, torso_idx, title="Coordination: Pelvis vs Torso"
                 )
             else:
                 ax = fig5.add_subplot(111)

@@ -160,7 +160,7 @@ def main():
 
     results = {}
     for test_name, test_func in tests:
-        print(f"\n{'='*20} {test_name} {'='*20}")
+        print(f"\n{'=' * 20} {test_name} {'=' * 20}")
         try:
             results[test_name] = test_func()
         except Exception as e:
@@ -168,7 +168,7 @@ def main():
             results[test_name] = False
 
     # Summary and recommendations
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print("ANALYSIS SUMMARY")
     print("=" * 50)
 

@@ -84,7 +84,6 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
         ):
-
             launcher._launch_docker_container(mock_model, mock_path)
 
             # Verify subprocess was called
@@ -128,7 +127,6 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.threading.Thread"),
         ):
-
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
@@ -163,7 +161,6 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.threading.Thread"),
         ):
-
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
@@ -196,7 +193,6 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
         ):
-
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
@@ -226,7 +222,6 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
         ):
-
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
