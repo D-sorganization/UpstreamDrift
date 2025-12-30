@@ -129,7 +129,9 @@ def g_vector(q: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """
     q1, q2 = q
 
-    g1 = (m1 * c1 + m2 * l1) * GRAVITY * np.sin(q1) + m2 * c2 * GRAVITY * np.sin(q1 + q2)
+    g1 = (m1 * c1 + m2 * l1) * GRAVITY * np.sin(q1) + m2 * c2 * GRAVITY * np.sin(
+        q1 + q2
+    )
     g2 = m2 * c2 * GRAVITY * np.sin(q1 + q2)
 
     return np.array([g1, g2], dtype=float)

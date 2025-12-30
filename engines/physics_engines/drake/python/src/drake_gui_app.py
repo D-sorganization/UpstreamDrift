@@ -1001,9 +1001,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         try:
             # Condition Number
             s = np.linalg.svd(J, compute_uv=False)
-            cond = (
-                s[0] / s[-1] if s[-1] > 1e-9 else float("inf")
-            )  # Fix line length
+            cond = s[0] / s[-1] if s[-1] > 1e-9 else float("inf")  # Fix line length
             self.lbl_cond.setText(f"{cond:.2f}")
 
             # Constraint Rank (if any constraints?)

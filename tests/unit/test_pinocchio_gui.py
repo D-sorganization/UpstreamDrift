@@ -16,6 +16,7 @@ sys.modules["meshcat.visualizer"] = MagicMock()
 # Check if PyQt6 is available, else skip
 try:
     from PyQt6 import QtWidgets
+
     HAS_QT = True
 except ImportError:
     HAS_QT = False
@@ -37,9 +38,17 @@ class TestPinocchioGUI:
     def mock_gui(self, qapp):
         """Create a mocked PinocchioGUI instance."""
         # Use patch for everything that might cause import errors or runtime errors
-        with patch("engines.physics_engines.pinocchio.python.pinocchio_golf.gui.viz.Visualizer"), \
-             patch("engines.physics_engines.pinocchio.python.pinocchio_golf.gui.MeshcatVisualizer"), \
-             patch("engines.physics_engines.pinocchio.python.pinocchio_golf.gui.get_shared_urdf_path") as mock_urdf:
+        with (
+            patch(
+                "engines.physics_engines.pinocchio.python.pinocchio_golf.gui.viz.Visualizer"
+            ),
+            patch(
+                "engines.physics_engines.pinocchio.python.pinocchio_golf.gui.MeshcatVisualizer"
+            ),
+            patch(
+                "engines.physics_engines.pinocchio.python.pinocchio_golf.gui.get_shared_urdf_path"
+            ) as mock_urdf,
+        ):
 
             mock_urdf.return_value.exists.return_value = False
 
@@ -47,6 +56,7 @@ class TestPinocchioGUI:
             from engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (
                 PinocchioGUI,
             )
+
             gui = PinocchioGUI()
             return gui
 
@@ -62,7 +72,9 @@ class TestPinocchioGUI:
         mock_gui.model = MagicMock()
         mock_gui.data = MagicMock()
 
-        with patch("engines.physics_engines.pinocchio.python.pinocchio_golf.gui.InducedAccelerationAnalyzer") as MockAnalyzer:
+        with patch(
+            "engines.physics_engines.pinocchio.python.pinocchio_golf.gui.InducedAccelerationAnalyzer"
+        ) as MockAnalyzer:
             mock_gui._ensure_analyzer_initialized()
 
             assert mock_gui.analyzer is not None
@@ -72,7 +84,9 @@ class TestPinocchioGUI:
         existing_analyzer = MagicMock()
         mock_gui.analyzer = existing_analyzer
 
-        with patch("engines.physics_engines.pinocchio.python.pinocchio_golf.gui.InducedAccelerationAnalyzer") as MockAnalyzer:
+        with patch(
+            "engines.physics_engines.pinocchio.python.pinocchio_golf.gui.InducedAccelerationAnalyzer"
+        ) as MockAnalyzer:
             mock_gui._ensure_analyzer_initialized()
 
             assert mock_gui.analyzer is existing_analyzer
