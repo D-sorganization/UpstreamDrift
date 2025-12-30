@@ -121,7 +121,7 @@ class InducedAccelerationAnalyzer:
             self.model, self._temp_data, q, np.zeros(self.nv), np.zeros(self.nv)
         )
 
-        return a_tau_G - a_G
+        return np.asarray(a_tau_G - a_G)
 
     def get_acceleration_contribution(
         self, q: np.ndarray, v: np.ndarray, tau: np.ndarray, dt: float
