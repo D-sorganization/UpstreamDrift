@@ -201,7 +201,14 @@ class DrakeInducedAccelerationAnalyzer:
         return {"ztcf_accel": ztcf_accel, "zvcf_torque": zvcf_torque}
 
     def compute_specific_control(self, context: Context, tau: np.ndarray) -> np.ndarray:
-        """Compute induced acceleration for a specific control vector."""
+        """Compute induced acceleration for a specific control vector.
+
+        Note:
+            This method calculates the acceleration induced solely by the provided torque vector `tau`.
+            It solves M * a = tau. If `tau` represents a unit torque
+            (e.g., [0, 1, 0]), the result is the sensitivity of acceleration
+            to that specific actuator.
+        """
         if self.plant is None:
             return np.array([])
 
@@ -993,7 +1000,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         try:
             # Condition Number
             s = np.linalg.svd(J, compute_uv=False)
-            cond = s[0] / s[-1] if s[-1] > 1e-9 else float("inf")
+            cond = (
+                s[0] / s[-1] if s[-1] > 1e-9 else float("inf")
+            )  # Fix line length
             self.lbl_cond.setText(f"{cond:.2f}")
 
             # Constraint Rank (if any constraints?)

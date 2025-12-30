@@ -58,7 +58,8 @@ class TestSignalProcessing:
     def test_compute_psd_mock(self):
         """Test PSD computation using mock to verify call arguments."""
         with patch("scipy.signal.welch") as mock_welch:
-            mock_welch.return_value = (np.arange(129), np.random.rand(129))
+            rng = np.random.default_rng(42)
+            mock_welch.return_value = (np.arange(129), rng.random(129))
             freqs, psd = compute_psd(self.signal, self.fs, nperseg=256)
 
             assert len(freqs) == 129
@@ -78,10 +79,11 @@ class TestSignalProcessing:
         """Test Spectrogram computation using mock."""
         data = np.sin(2 * np.pi * 20 * self.t + 2 * np.pi * 40 * self.t**2)
         with patch("scipy.signal.spectrogram") as mock_spec:
+            rng = np.random.default_rng(42)
             mock_spec.return_value = (
                 np.arange(10),
                 np.arange(10),
-                np.random.rand(10, 10),
+                rng.random((10, 10)),
             )
             f, t_spec, Sxx = compute_spectrogram(data, self.fs, nperseg=128)
 

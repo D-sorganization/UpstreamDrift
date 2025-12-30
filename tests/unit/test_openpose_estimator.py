@@ -5,20 +5,18 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-# Mock modules at top level to ensure imports work
-sys.modules["pyopenpose"] = MagicMock()
-sys.modules["cv2"] = MagicMock()
-
-import pyopenpose as op  # noqa: E402
-
-from shared.python.pose_estimation.openpose_estimator import (  # noqa: E402
+# We import the module under test normally
+# dependencies will be handled by patching attributes or local imports
+from shared.python.pose_estimation.openpose_estimator import (
     OpenPoseEstimator,
 )
 
 
 @pytest.fixture
 def op_mock():
-    return op
+    mock_op = MagicMock()
+    with patch("shared.python.pose_estimation.openpose_estimator.op", mock_op):
+        yield mock_op
 
 
 @pytest.fixture
@@ -107,9 +105,11 @@ def test_estimate_from_image_no_pose(estimator, op_mock):
 
 
 def test_estimate_from_video_success(estimator, op_mock):
-    # We mock cv2 inside the test as well to control return values
-    with patch("cv2.VideoCapture") as MockCap:
-        cap = MockCap.return_value
+    # Mock cv2 module since it's imported locally
+    mock_cv2 = MagicMock()
+    with patch.dict(sys.modules, {"cv2": mock_cv2}):
+        # Setup VideoCapture mock
+        cap = mock_cv2.VideoCapture.return_value
         cap.isOpened.return_value = True
 
         # Return 2 frames then stop
@@ -131,8 +131,9 @@ def test_estimate_from_video_success(estimator, op_mock):
 
 
 def test_estimate_from_video_not_found(estimator):
-    with patch("cv2.VideoCapture") as MockCap:
-        cap = MockCap.return_value
+    mock_cv2 = MagicMock()
+    with patch.dict(sys.modules, {"cv2": mock_cv2}):
+        cap = mock_cv2.VideoCapture.return_value
         cap.isOpened.return_value = False
 
         with pytest.raises(FileNotFoundError):

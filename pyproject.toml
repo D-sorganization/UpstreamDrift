@@ -68,8 +68,8 @@ analysis = [
     "scikit-learn>=1.3.0",
     "h5py>=3.9.0",
     "pillow>=10.0.0",
-    "pyarrow>=14.0.0",
-    "tables>=3.9.0",
+    "pyarrow>=14.0.0", # Used by OutputManager for Parquet support
+    "tables>=3.9.0",   # Used by OutputManager for HDF5 support
 ]
 optimization = [
     "casadi>=3.6.3",

@@ -101,7 +101,9 @@ def mock_pinocchio():
 def test_main_execution(mock_casadi, mock_pinocchio):
     with (
         patch("os.path.exists", return_value=True),
-        patch("numpy.savetxt") as mock_save,
+        patch(
+            "shared.python.optimization.examples.optimize_arm.np.savetxt"
+        ) as mock_save,
     ):
         main()
 

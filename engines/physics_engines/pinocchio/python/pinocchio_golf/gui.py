@@ -296,12 +296,12 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
             self.log_write("Please ensure meshcat-server is running or try again.")
 
-        # Setup UI
-        self._setup_ui()
-
         # Model Management
         self.available_models: list[dict] = []
         self._scan_urdf_models()
+
+        # Setup UI
+        self._setup_ui()
 
         # Timer
         self.timer = QtCore.QTimer()
