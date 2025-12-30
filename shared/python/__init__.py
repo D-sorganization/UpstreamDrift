@@ -30,7 +30,8 @@ MATLAB_2D_ROOT = ENGINES_ROOT / "Simscape_Multibody_Models" / "2D_Golf_Model"
 MATLAB_3D_ROOT = ENGINES_ROOT / "Simscape_Multibody_Models" / "3D_Golf_Model"
 PENDULUM_ROOT = ENGINES_ROOT / "pendulum_models"
 
-# Import lightweight core components only
+# Import key classes for easier access
+# NOTE: We now import from .core to avoid heavy dependencies in __init__
 from .core import GolfModelingError, setup_logging  # noqa: E402
 from .engine_manager import EngineManager, EngineStatus, EngineType  # noqa: E402
 
