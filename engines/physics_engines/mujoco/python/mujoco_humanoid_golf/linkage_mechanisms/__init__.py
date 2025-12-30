@@ -16,8 +16,7 @@ Categories:
 """
 
 import numpy as np
-
-GRAVITY_M_S2 = 9.81
+from shared.python.constants import GRAVITY_M_S2
 
 
 def generate_four_bar_linkage_xml(
@@ -205,10 +204,10 @@ def generate_slider_crank_xml(
                        {0 if orientation=='horizontal' else crank_length}">
                 <joint name="rod_crank_joint" type="hinge" axis="0 1 0" damping="0.1"/>
                 <geom type="capsule"
-                      fromto="0 0 0
-                              {rod_length if orientation=='horizontal' else 0} 0
-                              {0 if orientation=='horizontal' else rod_length}"
-                      size="0.05" material="rod_mat" mass="0.5"/>
+                  fromto="0 0 0
+                          {rod_length if orientation=='horizontal' else 0} 0
+                          {0 if orientation=='horizontal' else rod_length}"
+                  size="0.05" material="rod_mat" mass="0.5"/>
             </body>
         </body>
 
@@ -477,7 +476,7 @@ def generate_chebyshev_linkage_xml() -> str:
     Produces an approximate straight line over a portion of its path,
     useful for walking mechanisms.
     """
-    return """
+    return f"""
 <mujoco model="chebyshev_linkage">
     <option timestep="0.002" gravity="0 0 -{GRAVITY_M_S2}"/>
 
@@ -1074,7 +1073,7 @@ def generate_watt_linkage_xml() -> str:
 
     Used historically in steam engines for straight-line guidance.
     """
-    return """
+    return f"""
 <mujoco model="watt_linkage">
     <option timestep="0.002" gravity="0 0 -{GRAVITY_M_S2}"/>
 
