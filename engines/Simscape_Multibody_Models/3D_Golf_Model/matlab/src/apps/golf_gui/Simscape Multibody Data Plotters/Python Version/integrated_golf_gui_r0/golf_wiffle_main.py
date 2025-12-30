@@ -445,9 +445,11 @@ class WiffleGolfMainWindow(QMainWindow):
         self.export_comparison_btn.setEnabled(True)
 
         # Update data info
-        info_text = f"ProV1: {len(baseq)} frames\n"
-        info_text += f"Wiffle: {len(ztcfq)} frames\n"
-        info_text += f"Time: {baseq['Time'].min():.3f} - {baseq['Time'].max():.3f}s"
+        info_text = (
+            f"ProV1: {len(baseq)} frames\n"
+            f"Wiffle: {len(ztcfq)} frames\n"
+            f"Time: {baseq['Time'].min():.3f} - {baseq['Time'].max():.3f}s"
+        )
         self.data_info_label.setText(info_text)
 
         # Calculate and display metrics
@@ -540,13 +542,13 @@ class WiffleGolfMainWindow(QMainWindow):
             # Calculate trajectory differences
             trajectory_diff = self._calculate_trajectory_difference()
 
-            metrics_text = "Max Speed:\n"
-            metrics_text += f"  ProV1: {prov1_max_speed:.2f} m/s\n"
-            metrics_text += f"  Wiffle: {wiffle_max_speed:.2f} m/s\n"
-            metrics_text += (
+            metrics_text = (
+                f"Max Speed:\n"
+                f"  ProV1: {prov1_max_speed:.2f} m/s\n"
+                f"  Wiffle: {wiffle_max_speed:.2f} m/s\n"
                 f"  Difference: {abs(prov1_max_speed - wiffle_max_speed):.2f} m/s\n\n"
+                f"Trajectory RMS: {trajectory_diff:.3f} m"
             )
-            metrics_text += f"Trajectory RMS: {trajectory_diff:.3f} m"
 
             self.metrics_label.setText(metrics_text)
 
