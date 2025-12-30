@@ -145,8 +145,9 @@ class TestDraggableModelCard(unittest.TestCase):
 
         # Create mock mouse event
         event = Mock()
-        event.button.return_value = Qt.MouseButton.LeftButton
-        event.position.return_value.toPoint.return_value = QPoint(10, 10)
+        event.button = Mock(return_value=Qt.MouseButton.LeftButton)
+        event.position = Mock()
+        event.position.return_value.toPoint = Mock(return_value=QPoint(10, 10))
 
         card.mousePressEvent(event)
 
@@ -259,7 +260,11 @@ class TestGolfLauncherGrid(unittest.TestCase):
 
         # Check that model order is initialized
         self.assertIsInstance(launcher.model_order, list)
-        self.assertEqual(len(launcher.model_order), len(self.mock_models))
+        # The launcher adds 2 special models (C3D viewer and URDF generator) to the registry models
+        expected_count = (
+            len(self.mock_models) + 2
+        )  # 4 mock models + 2 special models = 6
+        self.assertEqual(len(launcher.model_order), expected_count)
 
     @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.EngineManager")
