@@ -172,7 +172,7 @@ class DraggableModelCard(QFrame):
             self.drag_start_position = event.position().toPoint()
             if self.parent_launcher:
                 self.parent_launcher.select_model(self.model.id)
-        super().mousePressEvent(event)
+        # Don't call super() as QLabel doesn't have mousePressEvent
 
     def mouseMoveEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse move for drag operation."""
@@ -211,7 +211,7 @@ class DraggableModelCard(QFrame):
         """Handle double-click to launch model."""
         if self.parent_launcher:
             self.parent_launcher.launch_model_direct(self.model.id)
-        super().mouseDoubleClickEvent(event)
+        # Don't call super() as QLabel doesn't have mouseDoubleClickEvent
 
     def dragEnterEvent(self, event: QDragEnterEvent | None) -> None:
         """Handle drag enter event."""
