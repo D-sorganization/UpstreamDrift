@@ -11,7 +11,7 @@ def run() -> None:
     url = f"file://{file_path}"
 
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(headless=True)
         page = browser.new_page()
 
         # 1. Load the page

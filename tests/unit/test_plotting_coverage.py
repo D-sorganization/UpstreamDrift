@@ -13,7 +13,6 @@ def mock_recorder():
 
     # Default behavior: return some dummy data
     times = np.linspace(0, 1, 100)
-    # data = np.random.rand(100, 3)  # Unused
 
     def get_time_series(field):
         if field == "joint_positions":

@@ -2,6 +2,8 @@ import os
 
 from playwright.sync_api import expect, sync_playwright
 
+SIMULATION_RUN_DURATION_MS = 500
+
 
 def run() -> None:
     with sync_playwright() as p:
@@ -24,7 +26,7 @@ def run() -> None:
 
         # 2. Start the simulation
         start_btn.click()
-        page.wait_for_timeout(500)  # Let it run for a bit
+        page.wait_for_timeout(SIMULATION_RUN_DURATION_MS)  # Let it run for a bit
 
         # 3. Verify tooltip changes to Resume after pause
         # Click pause
