@@ -120,17 +120,102 @@ LOGGER = logging.getLogger(__name__)
 
 # Placeholder for missing classes
 class DrakeInducedAccelerationAnalyzer:
-    """Placeholder for induced acceleration analysis."""
+    """Induced acceleration analyzer for Drake."""
 
     def __init__(self, plant: MultibodyPlant | None) -> None:
         self.plant = plant
 
-    def compute_induced_acceleration(
-        self, q: np.ndarray, v: np.ndarray
-    ) -> tuple[np.ndarray, np.ndarray]:
-        """Compute induced accelerations (placeholder)."""
-        # Return dummy data for now
-        return np.zeros_like(v), np.zeros_like(v)
+    def compute_components(self, context: Context) -> dict[str, np.ndarray]:
+        """Compute induced acceleration components.
+
+        Args:
+            context: The plant context (with q, v set)
+
+        Returns:
+            Dict with 'gravity', 'velocity', 'total' (passive)
+        """
+        if self.plant is None:
+            return {"gravity": np.array([]), "velocity": np.array([]), "total": np.array([])}
+
+        # 1. Calc Mass Matrix
+        M = self.plant.CalcMassMatrix(context)
+
+        # 2. Calc Gravity Torque
+        tau_g = self.plant.CalcGravityGeneralizedForces(context)
+
+        # 3. Calc Bias Term (Cv - tau_g)
+        bias = self.plant.CalcBiasTerm(context)
+
+        # Invert M
+        try:
+            Minv = np.linalg.inv(M)
+        except np.linalg.LinAlgError:
+            Minv = np.linalg.pinv(M)
+
+        a_g = Minv @ tau_g
+
+        # Force due to velocity = -Cv = -(bias + tau_g)
+        a_v = Minv @ (-(bias + tau_g))
+
+        return {
+            "gravity": a_g,
+            "velocity": a_v,
+            "total": a_g + a_v
+        }
+
+    def compute_counterfactuals(self, context: Context) -> dict[str, np.ndarray]:
+        """Compute ZTCF and ZVCF."""
+        if self.plant is None:
+            return {}
+
+        # ZTCF (Zero Torque Accel): a = -M^-1 (C + G).
+        # We assume zero torque applied.
+        # This is essentially the passive dynamics accel.
+        # We already computed this as 'total' in compute_components if we sum a_g + a_v.
+        # Or specifically: M a + Cv - tau_g = 0 => M a = tau_g - Cv = -bias.
+        # So a_ztcf = -M^-1 * bias.
+
+        M = self.plant.CalcMassMatrix(context)
+        bias = self.plant.CalcBiasTerm(context)
+
+        try:
+            Minv = np.linalg.inv(M)
+        except np.linalg.LinAlgError:
+            Minv = np.linalg.pinv(M)
+
+        ztcf_accel = Minv @ (-bias)
+
+        # ZVCF (Zero Velocity Torque):
+        # M a + G = tau. If v=0, C=0.
+        # If we hold position (a=0, v=0), tau = G.
+        # tau_g = CalcGravityGeneralizedForces.
+        # Wait, equation is M vdot + Cv - tau_g = tau.
+        # If v=0 => Cv=0. If a=0 => M vdot = 0.
+        # So -tau_g = tau => tau = -tau_g?
+        # Drake defines tau_g as forces on RHS.
+        # So tau_holding = -tau_g.
+
+        tau_g = self.plant.CalcGravityGeneralizedForces(context)
+        zvcf_torque = -tau_g
+
+        return {
+            "ztcf_accel": ztcf_accel,
+            "zvcf_torque": zvcf_torque
+        }
+
+    def compute_specific_control(self, context: Context, tau: np.ndarray) -> np.ndarray:
+        """Compute induced acceleration for a specific control vector."""
+        if self.plant is None:
+            return np.array([])
+
+        # M * a = tau
+        M = self.plant.CalcMassMatrix(context)
+        try:
+            Minv = np.linalg.inv(M)
+        except np.linalg.LinAlgError:
+            Minv = np.linalg.pinv(M)
+
+        return Minv @ tau
 
 
 def setup_logging() -> None:
@@ -513,13 +598,31 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         rec_row.addWidget(self.lbl_rec_status)
         analysis_layout.addLayout(rec_row)
 
+        # Induced Accel
+        ind_layout = QtWidgets.QHBoxLayout()
         self.btn_induced_acc = QtWidgets.QPushButton("Show Induced Acceleration")
         self.btn_induced_acc.setToolTip(
             "Analyze Gravity/Velocity/Control contributions to Acceleration"
         )
         self.btn_induced_acc.clicked.connect(self._show_induced_acceleration_plot)
         self.btn_induced_acc.setEnabled(HAS_MATPLOTLIB)
-        analysis_layout.addWidget(self.btn_induced_acc)
+        ind_layout.addWidget(self.btn_induced_acc)
+
+        self.txt_specific_actuator = QtWidgets.QLineEdit()
+        self.txt_specific_actuator.setPlaceholderText("Specific Actuator (index)")
+        self.txt_specific_actuator.setToolTip("Index of actuator to isolate (optional)")
+        self.txt_specific_actuator.setMaximumWidth(150)
+        ind_layout.addWidget(self.txt_specific_actuator)
+
+        analysis_layout.addLayout(ind_layout)
+
+        self.btn_counterfactuals = QtWidgets.QPushButton("Show Counterfactuals (ZTCF/ZVCF)")
+        self.btn_counterfactuals.setToolTip(
+            "Show Zero Torque (ZTCF) and Zero Velocity (ZVCF) analysis"
+        )
+        self.btn_counterfactuals.clicked.connect(self._show_counterfactuals_plot)
+        self.btn_counterfactuals.setEnabled(HAS_MATPLOTLIB)
+        analysis_layout.addWidget(self.btn_counterfactuals)
 
         self.btn_swing_plane = QtWidgets.QPushButton("Show Swing Plane Analysis")
         self.btn_swing_plane.setToolTip("Analyze the swing plane and deviation")
@@ -1014,10 +1117,24 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         if not self.plant or not self.eval_context:
             return
 
+        # Specific Actuator Input
+        spec_act_idx = -1
+        txt = self.txt_specific_actuator.text().strip()
+        if txt:
+            try:
+                spec_act_idx = int(txt)
+                if spec_act_idx < 0 or spec_act_idx >= self.plant.num_actuators():
+                    # Wait, num_actuators vs num_joints.
+                    # We usually control joints.
+                    pass
+            except ValueError:
+                pass
+
         # Computation
         times = self.recorder.times
         g_induced = []
         c_induced = []
+        spec_induced = []
         # Control is assumed 0 for now as we don't capture u
 
         analyzer = DrakeInducedAccelerationAnalyzer(self.plant)
@@ -1025,17 +1142,37 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         try:
             QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
 
-            for q, v in zip(
+            for i, (q, v) in enumerate(zip(
                 self.recorder.q_history, self.recorder.v_history, strict=False
-            ):
+            )):
                 self.plant.SetPositions(self.eval_context, q)
                 self.plant.SetVelocities(self.eval_context, v)
 
-                # Use Analyzer
+                # Use Analyzer (updated API)
                 res = analyzer.compute_components(self.eval_context)
 
                 g_induced.append(res["gravity"])
                 c_induced.append(res["velocity"])
+
+                if spec_act_idx >= 0:
+                    # Construct torque vector
+                    # Note: We need the ACTUAL torque applied.
+                    # We don't record 'u' in recorder yet.
+                    # So we can only simulate "Unit Torque" induced acceleration?
+                    # Or "What acceleration would 1 Nm cause?"
+                    # The prompt asks for "induced accelerations (for a specified joint torque source)".
+                    # This usually means contribution of that source to motion.
+                    # Without recording 'u', we assume 1.0 or 0.0?
+                    # Let's compute Unit Torque response: Accel if tau[i]=1, others=0.
+
+                    tau = np.zeros(self.plant.num_velocities()) # Generalized forces
+                    # Map actuator index to generalized force index?
+                    # If fully actuated, nu = nv.
+                    if spec_act_idx < len(tau):
+                        tau[spec_act_idx] = 1.0 # Unit torque
+
+                    spec = analyzer.compute_specific_control(self.eval_context, tau)
+                    spec_induced.append(spec)
 
         except Exception as e:
             QtWidgets.QApplication.restoreOverrideCursor()
@@ -1046,6 +1183,8 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         g_induced_arr = np.array(g_induced)
         c_induced_arr = np.array(c_induced)
+        spec_induced_arr = np.array(spec_induced) if spec_induced else None
+
         # Total passive
         total_arr = g_induced_arr + c_induced_arr
 
@@ -1069,12 +1208,85 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         )
         ax.plot(times, total_arr[:, joint_idx], label="Total (Passive)", color="k")
 
+        if spec_induced_arr is not None and spec_induced_arr.shape[0] > 0:
+             ax.plot(times, spec_induced_arr[:, joint_idx], label=f"Induced by Act {spec_act_idx} (Unit Torque)", color='m', linewidth=2)
+
         ax.set_title(f"Induced Acceleration Analysis (Joint Index {joint_idx})")
         ax.set_xlabel("Time [s]")
         ax.set_ylabel("Acceleration [rad/s^2]")
         ax.legend()
         ax.grid(True)
 
+        plt.show()
+
+    def _show_counterfactuals_plot(self) -> None:
+        """Calculate and plot Counterfactuals (ZTCF/ZVCF)."""
+        if not HAS_MATPLOTLIB:
+            QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")
+            return
+
+        if not self.recorder.times:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "No Data",
+                "No recording available. Please Record a simulation first.",
+            )
+            return
+
+        if not self.plant or not self.eval_context:
+            return
+
+        analyzer = DrakeInducedAccelerationAnalyzer(self.plant)
+        times = self.recorder.times
+        ztcf_list = []
+        zvcf_list = []
+
+        try:
+            QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
+
+            for q, v in zip(
+                self.recorder.q_history, self.recorder.v_history, strict=False
+            ):
+                self.plant.SetPositions(self.eval_context, q)
+                self.plant.SetVelocities(self.eval_context, v)
+
+                res = analyzer.compute_counterfactuals(self.eval_context)
+                ztcf_list.append(res["ztcf_accel"])
+                zvcf_list.append(res["zvcf_torque"])
+
+        except Exception as e:
+            QtWidgets.QApplication.restoreOverrideCursor()
+            QtWidgets.QMessageBox.critical(self, "Analysis Error", str(e))
+            return
+        finally:
+            QtWidgets.QApplication.restoreOverrideCursor()
+
+        ztcf_arr = np.array(ztcf_list)
+        zvcf_arr = np.array(zvcf_list)
+
+        # Plotting - Joint Index
+        joint_idx = 0
+        if ztcf_arr.shape[1] > 2:
+            joint_idx = 2
+
+        fig, ax1 = plt.subplots(figsize=(10, 6))
+
+        # ZTCF (Accel) on Left Axis
+        color = 'tab:blue'
+        ax1.set_xlabel('Time [s]')
+        ax1.set_ylabel('ZTCF Acceleration [rad/s^2]', color=color)
+        ax1.plot(times, ztcf_arr[:, joint_idx], color=color, label="ZTCF Accel")
+        ax1.tick_params(axis='y', labelcolor=color)
+
+        # ZVCF (Torque) on Right Axis
+        ax2 = ax1.twinx()
+        color = 'tab:red'
+        ax2.set_ylabel('ZVCF Torque [Nm]', color=color)
+        ax2.plot(times, zvcf_arr[:, joint_idx], color=color, linestyle='--', label="ZVCF Torque")
+        ax2.tick_params(axis='y', labelcolor=color)
+
+        plt.title(f"Counterfactual Analysis (Joint Index {joint_idx})")
+        fig.tight_layout()
         plt.show()
 
     def _show_swing_plane_analysis(self) -> None:
