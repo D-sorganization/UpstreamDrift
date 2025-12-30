@@ -1,0 +1,3 @@
+## 2025-10-15 - Canvas Keyboard Accessibility
+**Learning:** Standard `<canvas>` elements are invisible to the keyboard tab order by default, forcing users to rely on global `document` listeners that can conflict with other interactive controls (like button clicks triggering spacebar shortcuts).
+**Action:** Always add `tabindex="0"` to interactive canvases and explicit `aria-describedby` pointing to instructions/shortcuts to make them "first-class" citizens in the tab order. Ensure global keydown listeners exclude other interactive elements (`e.target.matches('button, input, ...')`) to prevent double-triggering.
