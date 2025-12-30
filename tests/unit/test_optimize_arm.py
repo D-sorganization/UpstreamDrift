@@ -57,12 +57,18 @@ def mock_casadi():
         return np.zeros((2, 41))  # Default to array
 
     # We can use side_effect with an iterator if the order is deterministic
-    sol.value.side_effect = [
-        np.zeros((2, 41)),  # Q
-        np.zeros((2, 41)),  # V
-        np.zeros((2, 40)),  # U
-        0.1234,  # Cost (scalar float)
-    ]
+    def value_side_effect(arg):
+        # Return appropriate mock data based on what's being requested
+        if hasattr(arg, 'shape') or str(arg).startswith('Q'):
+            return np.zeros((2, 41))  # Q matrix
+        elif str(arg).startswith('V'):
+            return np.zeros((2, 41))  # V matrix  
+        elif str(arg).startswith('U'):
+            return np.zeros((2, 40))  # U matrix
+        else:
+            return 0.1234  # Cost (scalar)
+    
+    sol.value.side_effect = value_side_effect
 
     opti.solve.return_value = sol
 
