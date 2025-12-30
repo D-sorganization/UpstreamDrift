@@ -817,8 +817,8 @@ class StatisticalAnalyzer:
         # Handle near-zero velocities to avoid noise
         # (Optional: thresholding, but raw calc is standard)
 
-        gamma_rad = np.arctan2(vel2, vel1)
-        gamma_deg = np.rad2deg(gamma_rad)
+        gamma_rad: np.ndarray = np.arctan2(vel2, vel1)
+        gamma_deg: np.ndarray = np.rad2deg(gamma_rad)
 
         # Normalize to [0, 360)
         gamma_deg = np.mod(gamma_deg, 360.0)
