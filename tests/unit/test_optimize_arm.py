@@ -42,32 +42,18 @@ def mock_casadi():
     # Mock solve
     sol = MagicMock()
 
-    # Make value return different things based on input
-    # Since we can't easily check identity of input mock objects created inside main(),
-    # we can try to infer based on call count or just make it return a float sometimes?
-    # Or better, make sol.value return a MagicMock that acts as both a float and an array?
-    # No, that's hard.
-    # Let's inspect call args.
-    def value_side_effect(arg):
-        # Heuristic: if it looks like the cost (scalar), return float
-        # But we don't know what 'arg' is exactly.
-        # However, cost comes last in the sequence of calls in main: q, v, u, cost
-        # But order isn't guaranteed by dict iteration if that were used, but here it's procedural.
-        # q, v, u are arrays. cost is scalar.
-        return np.zeros((2, 41))  # Default to array
-
-    # We can use side_effect with an iterator if the order is deterministic
+    # Set up value side effect to return appropriate mock data
     def value_side_effect(arg):
         # Return appropriate mock data based on what's being requested
-        if hasattr(arg, 'shape') or str(arg).startswith('Q'):
+        if hasattr(arg, "shape") or str(arg).startswith("Q"):
             return np.zeros((2, 41))  # Q matrix
-        elif str(arg).startswith('V'):
-            return np.zeros((2, 41))  # V matrix  
-        elif str(arg).startswith('U'):
+        elif str(arg).startswith("V"):
+            return np.zeros((2, 41))  # V matrix
+        elif str(arg).startswith("U"):
             return np.zeros((2, 40))  # U matrix
         else:
             return 0.1234  # Cost (scalar)
-    
+
     sol.value.side_effect = value_side_effect
 
     opti.solve.return_value = sol
