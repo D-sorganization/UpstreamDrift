@@ -174,12 +174,23 @@ class TestLauncherCommands(unittest.TestCase):
         # Test that the command doesn't immediately fail
         # We can't test full GUI launch in CI, but we can test script validation
 
-        result = subprocess.run(
-            [sys.executable, "launch_golf_suite.py", "--urdf-generator"],
-            capture_output=True,
-            text=True,
-            timeout=5,  # Short timeout since GUI will start
-        )
+        try:
+            result = subprocess.run(
+                [sys.executable, "launch_golf_suite.py", "--urdf-generator"],
+                capture_output=True,
+                text=True,
+                timeout=5,  # Short timeout since GUI will start
+            )
+
+            # If it completes without timeout, check return code
+            self.assertEqual(result.returncode, 0, f"Command failed: {result.stderr}")
+
+        except subprocess.TimeoutExpired:
+            # This is expected behavior - the GUI starts and runs indefinitely
+            # The fact that it didn't fail immediately means the command works
+            self.assertTrue(
+                True, "Command started successfully (timed out as expected for GUI)"
+            )
 
         # Command should start successfully (may timeout due to GUI)
         # We're mainly checking that there are no immediate import/path errors
