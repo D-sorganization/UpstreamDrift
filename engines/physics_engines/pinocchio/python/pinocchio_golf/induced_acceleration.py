@@ -123,8 +123,8 @@ class InducedAccelerationAnalyzer:
 
         return np.asarray(a_tau_G - a_G)
 
-    def get_acceleration_contribution(
-        self, q: np.ndarray, v: np.ndarray, tau: np.ndarray, dt: float
+    def compute_counterfactuals(
+        self, q: np.ndarray, v: np.ndarray
     ) -> dict[str, np.ndarray]:
         """
         Decompose acceleration into Zero-Torque (ZTCF) and Zero-Velocity (ZVCF)
@@ -136,8 +136,6 @@ class InducedAccelerationAnalyzer:
         Args:
             q: Joint position
             v: Joint velocity
-            tau: Joint torque
-            dt: Time step (unused for acceleration, but kept for interface)
 
         Returns:
             Dict with keys 'ztcf_accel' (Zero Torque Accel) and 'zvcf_torque'
