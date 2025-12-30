@@ -9,10 +9,10 @@ sys.path.append(os.getcwd())
 class TestVerification(unittest.TestCase):
     def test_mujoco_analyzer(self):
         try:
-            import mujoco
+            import mujoco  # noqa: F401
 
             from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.biomechanics import (
-                BiomechanicalAnalyzer,
+                BiomechanicalAnalyzer,  # noqa: F401
             )
 
             # Create dummy model/data
@@ -27,10 +27,10 @@ class TestVerification(unittest.TestCase):
 
     def test_pinocchio_analyzer(self):
         try:
-            import pinocchio as pin
+            import pinocchio as pin  # noqa: F401
 
             from engines.physics_engines.pinocchio.python.pinocchio_golf.induced_acceleration import (
-                InducedAccelerationAnalyzer,
+                InducedAccelerationAnalyzer,  # noqa: F401
             )
 
             print("Successfully imported Pinocchio InducedAccelerationAnalyzer")
@@ -42,7 +42,7 @@ class TestVerification(unittest.TestCase):
             # Mock pydrake if not present, but we are in env where we might not have it installed?
             # If installed:
             from engines.physics_engines.drake.python.src.drake_gui_app import (
-                DrakeInducedAccelerationAnalyzer,
+                DrakeInducedAccelerationAnalyzer,  # noqa: F401
             )
             print("Successfully imported DrakeInducedAccelerationAnalyzer")
         except ImportError:
