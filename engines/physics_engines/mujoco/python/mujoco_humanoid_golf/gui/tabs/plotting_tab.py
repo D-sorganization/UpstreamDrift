@@ -256,7 +256,8 @@ class PlottingTab(QtWidgets.QWidget):
                     # Or we should have stored it.
                     # Our biomechanics.py extract_full_state implementation only stored 'gravity' and 'actuator'.
                     # We didn't update it to compute dynamic actuator requests because recorder loop runs blindly.
-                    # So we need to calculate it HERE using the Analyzer post-hoc if not present.
+                    # So we need to calculate it HERE using the Analyzer post-hoc
+                    # if not present.
 
                     # Check if present
                     _, vals = recorder.get_induced_acceleration_series(spec_act)
@@ -268,41 +269,54 @@ class PlottingTab(QtWidgets.QWidget):
                             # This might be slow for long recordings
                             times = []
                             vals_list = []
-                            for frame in recorder.frames:
-                                # We need to set state to the frame state
-                                # This is invasive on the sim_widget.model/data.
-                                # Should use a separate data instance if possible, or save/restore.
-                                # BiomechanicalAnalyzer uses self.data.
+                            if (
+                                self.sim_widget.model is not None
+                                and self.sim_widget.data is not None
+                            ):
+                                for frame in recorder.frames:
+                                    # We need to set state to the frame state
+                                    # This is invasive on the sim_widget.model/data.
+                                    # Should use a separate data instance if possible,
+                                    # or save/restore.
+                                    # BiomechanicalAnalyzer uses self.data.
 
-                                # Save current state
-                                qpos_bak = self.sim_widget.data.qpos.copy()
-                                qvel_bak = self.sim_widget.data.qvel.copy()
-                                ctrl_bak = self.sim_widget.data.ctrl.copy()
+                                    # Save current state
+                                    qpos_bak = self.sim_widget.data.qpos.copy()
+                                    qvel_bak = self.sim_widget.data.qvel.copy()
+                                    ctrl_bak = self.sim_widget.data.ctrl.copy()
 
-                                self.sim_widget.data.qpos[:] = frame.joint_positions
-                                self.sim_widget.data.qvel[:] = frame.joint_velocities
-                                self.sim_widget.data.ctrl[:] = frame.joint_torques
+                                    self.sim_widget.data.qpos[:] = frame.joint_positions
+                                    self.sim_widget.data.qvel[:] = frame.joint_velocities
+                                    self.sim_widget.data.ctrl[:] = frame.joint_torques
 
-                                # Run forward kinematics/dynamics
-                                import mujoco
-                                mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+                                    # Run forward kinematics/dynamics
+                                    import mujoco
 
-                                res = analyzer.compute_induced_acceleration_for_actuator(spec_act)
-                                vals_list.append(res)
-                                times.append(frame.time)
+                                    mujoco.mj_forward(
+                                        self.sim_widget.model, self.sim_widget.data
+                                    )
 
-                                # Restore
-                                self.sim_widget.data.qpos[:] = qpos_bak
-                                self.sim_widget.data.qvel[:] = qvel_bak
-                                self.sim_widget.data.ctrl[:] = ctrl_bak
+                                    res = analyzer.compute_induced_acceleration_for_actuator(
+                                        spec_act
+                                    )
+                                    vals_list.append(res)
+                                    times.append(frame.time)
 
-                                # Re-render to ensure consistent state
-                                mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+                                    # Restore
+                                    self.sim_widget.data.qpos[:] = qpos_bak
+                                    self.sim_widget.data.qvel[:] = qvel_bak
+                                    self.sim_widget.data.ctrl[:] = ctrl_bak
+
+                                    # Re-render to ensure consistent state
+                                    mujoco.mj_forward(
+                                        self.sim_widget.model, self.sim_widget.data
+                                    )
 
                             # Add to recorder temporarily for plotting?
                             # Or just plot directly?
                             # Plotter expects it in recorder or passed explicitly?
-                            # GolfSwingPlotter.plot_induced_acceleration takes source name and pulls from recorder.
+                            # GolfSwingPlotter.plot_induced_acceleration takes source name
+                            # and pulls from recorder.
                             # So we should inject it into the recorder frames?
                             # Or update Plotter to accept data.
 
@@ -321,24 +335,33 @@ class PlottingTab(QtWidgets.QWidget):
                     analyzer = self.sim_widget.get_analyzer()
                     if analyzer:
                         import mujoco
-                        qpos_bak = self.sim_widget.data.qpos.copy()
-                        qvel_bak = self.sim_widget.data.qvel.copy()
-                        ctrl_bak = self.sim_widget.data.ctrl.copy()
 
-                        for frame in recorder.frames:
-                            self.sim_widget.data.qpos[:] = frame.joint_positions
-                            self.sim_widget.data.qvel[:] = frame.joint_velocities
-                            self.sim_widget.data.ctrl[:] = frame.joint_torques
-                            mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+                        if (
+                            self.sim_widget.model is not None
+                            and self.sim_widget.data is not None
+                        ):
+                            qpos_bak = self.sim_widget.data.qpos.copy()
+                            qvel_bak = self.sim_widget.data.qvel.copy()
+                            ctrl_bak = self.sim_widget.data.ctrl.copy()
 
-                            res = analyzer.compute_counterfactuals()
-                            if cf_name in res:
-                                frame.counterfactuals[cf_name] = res[cf_name]
+                            for frame in recorder.frames:
+                                self.sim_widget.data.qpos[:] = frame.joint_positions
+                                self.sim_widget.data.qvel[:] = frame.joint_velocities
+                                self.sim_widget.data.ctrl[:] = frame.joint_torques
+                                mujoco.mj_forward(
+                                    self.sim_widget.model, self.sim_widget.data
+                                )
 
-                        self.sim_widget.data.qpos[:] = qpos_bak
-                        self.sim_widget.data.qvel[:] = qvel_bak
-                        self.sim_widget.data.ctrl[:] = ctrl_bak
-                        mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+                                res = analyzer.compute_counterfactuals()
+                                if cf_name in res:
+                                    frame.counterfactuals[cf_name] = res[cf_name]
+
+                            self.sim_widget.data.qpos[:] = qpos_bak
+                            self.sim_widget.data.qvel[:] = qvel_bak
+                            self.sim_widget.data.ctrl[:] = ctrl_bak
+                            mujoco.mj_forward(
+                                self.sim_widget.model, self.sim_widget.data
+                            )
 
                 plotter.plot_counterfactual_comparison(canvas.fig, cf_name)
 

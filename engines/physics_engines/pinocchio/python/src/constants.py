@@ -14,7 +14,6 @@ from shared.python.constants import (
     DEG_TO_RAD,
     DRIVER_LENGTH_MAX_M,
     DRIVER_LOFT_TYPICAL_DEG,
-    E,
     EPSILON,
     GOLF_BALL_DIAMETER_M,
     GOLF_BALL_DRAG_COEFFICIENT,
@@ -37,6 +36,7 @@ from shared.python.constants import (
     STEEL_DENSITY_KG_M3,
     TITANIUM_DENSITY_KG_M3,
     UNIVERSAL_GAS_CONSTANT_J_MOL_K,
+    E,
 )
 
 __all__ = [
