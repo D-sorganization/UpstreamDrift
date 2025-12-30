@@ -249,12 +249,18 @@ class TestC3DViewerIntegration(unittest.TestCase):
             patch("pathlib.Path.exists", return_value=True),
             patch("subprocess.Popen") as mock_popen,
             patch("launchers.golf_launcher.os.name", "nt"),
-            patch("launchers.golf_launcher.logger"),
+            patch("launchers.golf_launcher.logger") as mock_logger,
             patch("launchers.golf_launcher.QMessageBox"),
             patch("launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
         ):
 
             launcher._launch_c3d_viewer()
+
+            # Check for suppressed exceptions
+            logger_mock = mock_logger
+            if logger_mock.error.called:
+                error_call = logger_mock.error.call_args
+                self.fail(f"Exception suppressed in _launch_c3d_viewer: {error_call}")
 
             # Verify subprocess was called
             mock_popen.assert_called_once()
@@ -362,12 +368,17 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
             patch("pathlib.Path.exists", return_value=True),
             patch("subprocess.Popen") as mock_popen,
             patch("launchers.golf_launcher.os.name", "nt"),
-            patch("launchers.golf_launcher.logger"),
+            patch("launchers.golf_launcher.logger") as mock_logger,
             patch("launchers.golf_launcher.QMessageBox"),
             patch("launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
         ):
 
             launcher._launch_urdf_generator()
+
+            # Check for suppressed exceptions
+            if mock_logger.error.called:
+                error_call = mock_logger.error.call_args
+                self.fail(f"Exception suppressed in _launch_urdf_generator: {error_call}")
 
             # Verify subprocess was called
             mock_popen.assert_called_once()
