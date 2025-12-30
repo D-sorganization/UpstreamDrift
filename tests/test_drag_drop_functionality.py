@@ -244,14 +244,11 @@ class TestC3DViewerIntegration(unittest.TestCase):
         # Create launcher instance without full initialization
         launcher = GolfLauncher.__new__(GolfLauncher)
 
-        # Mock required attributes that might be accessed
-        launcher.logger = Mock()
-
-        # Mock the C3D viewer script path
+        # Mock the C3D viewer script path and subprocess
         with (
             patch("pathlib.Path.exists", return_value=True),
-            patch("subprocess.Popen") as mock_popen,
-            patch("os.name", "nt"),
+            patch("launchers.golf_launcher.subprocess.Popen") as mock_popen,
+            patch("launchers.golf_launcher.os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.QMessageBox"),
             patch("launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
@@ -360,14 +357,11 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
         # Create launcher instance without full initialization
         launcher = GolfLauncher.__new__(GolfLauncher)
 
-        # Mock required attributes that might be accessed
-        launcher.logger = Mock()
-
-        # Mock the URDF generator script path
+        # Mock the URDF generator script path and subprocess
         with (
             patch("pathlib.Path.exists", return_value=True),
-            patch("subprocess.Popen") as mock_popen,
-            patch("os.name", "nt"),
+            patch("launchers.golf_launcher.subprocess.Popen") as mock_popen,
+            patch("launchers.golf_launcher.os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.QMessageBox"),
             patch("launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),

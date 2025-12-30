@@ -196,12 +196,15 @@ class TestLauncherCommands(unittest.TestCase):
 
         # Command should start successfully (may timeout due to GUI)
         # We're mainly checking that there are no immediate import/path errors
-        if result and result.returncode != 0:
+        if result is not None and result.returncode != 0:
             # Check if it's just a timeout or GUI-related issue
             if "Launching URDF Generator" in result.stdout or result.returncode == -1:
                 print("✅ URDF Generator launch initiated successfully")
             else:
                 self.fail(f"URDF Generator launch failed: {result.stderr}")
+        elif result is None:
+            # This shouldn't happen, but handle it gracefully
+            self.fail("Failed to execute URDF generator launch command")
 
     def test_engine_launch_commands(self):
         """Test individual engine launch commands."""
