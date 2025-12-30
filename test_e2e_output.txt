@@ -1,0 +1,703 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-8.4.1, pluggy-1.6.0
+benchmark: 4.0.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: C:\Users\diete\Repositories\Golf_Modeling_Suite
+configfile: pyproject.toml
+plugins: anyio-4.9.0, benchmark-4.0.0, cov-7.0.0
+collected 15 items
+
+tests\integration\test_end_to_end.py Windows fatal exception: access violation
+
+Current thread 0x00007bdc (most recent call first):
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\ctypes\__init__.py", line 390 in __init__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 210 in _load_all_bundled_plugins
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 217 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1026 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_probes.py", line 98 in probe
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_probes.py", line 72 in is_available
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\launchers\golf_launcher.py", line 621 in update_launch_button
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\launchers\golf_launcher.py", line 599 in select_model
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\launchers\golf_launcher.py", line 477 in init_ui
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\launchers\golf_launcher.py", line 374 in __init__
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\launchers\unified_launcher.py", line 50 in __init__
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\tests\integration\test_end_to_end.py", line 25 in test_launch_golf_suite_imports
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 157 in pytest_pyfunc_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 1671 in runtest
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 178 in pytest_runtest_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 246 in <lambda>
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 344 in from_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 245 in call_and_report
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 136 in runtestprotocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 117 in pytest_runtest_protocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 367 in pytest_runtestloop
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 343 in _main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 289 in wrap_session
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 336 in pytest_cmdline_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 175 in main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 201 in console_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Scripts\pytest.exe\__main__.py", line 7 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main
+....Windows fatal exception: access violation
+
+Current thread 0x00007bdc (most recent call first):
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\ctypes\__init__.py", line 390 in __init__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 210 in _load_all_bundled_plugins
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 217 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1026 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_probes.py", line 98 in probe
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_manager.py", line 458 in probe_all_engines
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\tests\integration\test_end_to_end.py", line 103 in test_probe_all_engines
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 157 in pytest_pyfunc_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 1671 in runtest
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 178 in pytest_runtest_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 246 in <lambda>
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 344 in from_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 245 in call_and_report
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 136 in runtestprotocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 117 in pytest_runtest_protocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 367 in pytest_runtestloop
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 343 in _main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 289 in wrap_session
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 336 in pytest_cmdline_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 175 in main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 201 in console_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Scripts\pytest.exe\__main__.py", line 7 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main
+Windows fatal exception: access violation
+
+Current thread 0x00007bdc (most recent call first):
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\ctypes\__init__.py", line 390 in __init__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 210 in _load_all_bundled_plugins
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 217 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1026 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_probes.py", line 559 in probe
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_manager.py", line 458 in probe_all_engines
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\tests\integration\test_end_to_end.py", line 103 in test_probe_all_engines
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 157 in pytest_pyfunc_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 1671 in runtest
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 178 in pytest_runtest_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 246 in <lambda>
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 344 in from_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 245 in call_and_report
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 136 in runtestprotocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 117 in pytest_runtest_protocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 367 in pytest_runtestloop
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 343 in _main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 289 in wrap_session
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 336 in pytest_cmdline_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 175 in main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 201 in console_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Scripts\pytest.exe\__main__.py", line 7 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main
+FWindows fatal exception: access violation
+
+Current thread 0x00007bdc (most recent call first):
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\ctypes\__init__.py", line 390 in __init__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 210 in _load_all_bundled_plugins
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 217 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1026 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_probes.py", line 98 in probe
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_manager.py", line 458 in probe_all_engines
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_manager.py", line 474 in get_diagnostic_report
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\tests\integration\test_end_to_end.py", line 122 in test_diagnostic_report_generation
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 157 in pytest_pyfunc_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 1671 in runtest
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 178 in pytest_runtest_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 246 in <lambda>
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 344 in from_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 245 in call_and_report
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 136 in runtestprotocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 117 in pytest_runtest_protocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 367 in pytest_runtestloop
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 343 in _main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 289 in wrap_session
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 336 in pytest_cmdline_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 175 in main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 201 in console_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Scripts\pytest.exe\__main__.py", line 7 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main
+Windows fatal exception: access violation
+
+Current thread 0x00007bdc (most recent call first):
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\ctypes\__init__.py", line 390 in __init__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 210 in _load_all_bundled_plugins
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 217 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1026 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_probes.py", line 559 in probe
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_manager.py", line 458 in probe_all_engines
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_manager.py", line 474 in get_diagnostic_report
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\tests\integration\test_end_to_end.py", line 122 in test_diagnostic_report_generation
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 157 in pytest_pyfunc_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 1671 in runtest
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 178 in pytest_runtest_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 246 in <lambda>
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 344 in from_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 245 in call_and_report
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 136 in runtestprotocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 117 in pytest_runtest_protocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 367 in pytest_runtestloop
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 343 in _main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 289 in wrap_session
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 336 in pytest_cmdline_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 175 in main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 201 in console_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Scripts\pytest.exe\__main__.py", line 7 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main
+FWindows fatal exception: access violation
+
+Current thread 0x00007bdc (most recent call first):
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\ctypes\__init__.py", line 390 in __init__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 210 in _load_all_bundled_plugins
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 217 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1026 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_probes.py", line 98 in probe
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_manager.py", line 458 in probe_all_engines
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\tests\integration\test_end_to_end.py", line 140 in test_at_least_one_engine_available
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 157 in pytest_pyfunc_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 1671 in runtest
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 178 in pytest_runtest_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 246 in <lambda>
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 344 in from_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 245 in call_and_report
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 136 in runtestprotocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 117 in pytest_runtest_protocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 367 in pytest_runtestloop
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 343 in _main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 289 in wrap_session
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 336 in pytest_cmdline_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 175 in main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 201 in console_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Scripts\pytest.exe\__main__.py", line 7 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main
+Windows fatal exception: access violation
+
+Current thread 0x00007bdc (most recent call first):
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\ctypes\__init__.py", line 390 in __init__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 210 in _load_all_bundled_plugins
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 217 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1026 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_probes.py", line 559 in probe
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\engine_manager.py", line 458 in probe_all_engines
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\tests\integration\test_end_to_end.py", line 140 in test_at_least_one_engine_available
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 157 in pytest_pyfunc_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 1671 in runtest
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 178 in pytest_runtest_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 246 in <lambda>
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 344 in from_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 245 in call_and_report
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 136 in runtestprotocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 117 in pytest_runtest_protocol
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 367 in pytest_runtestloop
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 343 in _main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 289 in wrap_session
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 336 in pytest_cmdline_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 175 in main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 201 in console_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Scripts\pytest.exe\__main__.py", line 7 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main
+F........
+ERROR: Coverage failure: total of 20 is less than fail-under=35
+                                                                         [100%]
+
+================================== FAILURES ===================================
+___________________ TestEngineProbes.test_probe_all_engines ___________________
+
+self = <tests.integration.test_end_to_end.TestEngineProbes object at 0x00000215F8CE9810>
+
+    def test_probe_all_engines(self):
+        """Test probing all engines."""
+        suite_root = Path(__file__).parent.parent.parent
+        sys.path.insert(0, str(suite_root))
+    
+        from shared.python.engine_manager import EngineManager
+        from shared.python.engine_probes import ProbeStatus
+    
+        manager = EngineManager()
+>       results = manager.probe_all_engines()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_end_to_end.py:103: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+shared\python\engine_manager.py:458: in probe_all_engines
+    self.probe_results[engine_type] = probe.probe()
+                                      ^^^^^^^^^^^^^
+shared\python\engine_probes.py:559: in probe
+    import mujoco
+..\..\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py:217: in <module>
+    _load_all_bundled_plugins()
+..\..\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py:210: in _load_all_bundled_plugins
+    PLUGIN_HANDLES.append(ctypes.CDLL(os.path.join(directory, filename)))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <CDLL 'C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\plugin\actuator.dll', handle 0 at 0x215a1727230>
+name = 'C:\\Users\\diete\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\mujoco\\plugin\\actuator.dll'
+mode = 4352, handle = None, use_errno = False, use_last_error = False
+winmode = None
+
+    def __init__(self, name, mode=DEFAULT_MODE, handle=None,
+                 use_errno=False,
+                 use_last_error=False,
+                 winmode=None):
+        if name:
+            name = _os.fspath(name)
+    
+            # If the filename that has been provided is an iOS/tvOS/watchOS
+            # .fwork file, dereference the location to the true origin of the
+            # binary.
+            if name.endswith(".fwork"):
+                with open(name) as f:
+                    name = _os.path.join(
+                        _os.path.dirname(_sys.executable),
+                        f.read().strip()
+                    )
+    
+        self._name = name
+        flags = self._func_flags_
+        if use_errno:
+            flags |= _FUNCFLAG_USE_ERRNO
+        if use_last_error:
+            flags |= _FUNCFLAG_USE_LASTERROR
+        if _sys.platform.startswith("aix"):
+            """When the name contains ".a(" and ends with ")",
+               e.g., "libFOO.a(libFOO.so)" - this is taken to be an
+               archive(member) syntax for dlopen(), and the mode is adjusted.
+               Otherwise, name is presented to dlopen() as a file argument.
+            """
+            if name and name.endswith(")") and ".a(" in name:
+                mode |= ( _os.RTLD_MEMBER | _os.RTLD_NOW )
+        if _os.name == "nt":
+            if winmode is not None:
+                mode = winmode
+            else:
+                import nt
+                mode = nt._LOAD_LIBRARY_SEARCH_DEFAULT_DIRS
+                if '/' in name or '\\' in name:
+                    self._name = nt._getfullpathname(self._name)
+                    mode |= nt._LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR
+    
+        class _FuncPtr(_CFuncPtr):
+            _flags_ = flags
+            _restype_ = self._func_restype_
+        self._FuncPtr = _FuncPtr
+    
+        if handle is None:
+>           self._handle = _dlopen(self._name, mode)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           OSError: [WinError 1114] A dynamic link library (DLL) initialization routine failed
+
+..\..\AppData\Local\Programs\Python\Python313\Lib\ctypes\__init__.py:390: OSError
+---------------------------- Captured stdout call -----------------------------
+2025-12-29 16:23:48,167 - shared.python.engine_manager - INFO - Engine mujoco is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\mujoco
+2025-12-29 16:23:48,167 - shared.python.engine_manager - INFO - Engine drake is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\drake
+2025-12-29 16:23:48,168 - shared.python.engine_manager - INFO - Engine pinocchio is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\pinocchio
+2025-12-29 16:23:48,168 - shared.python.engine_manager - INFO - Engine opensim is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\opensim
+2025-12-29 16:23:48,168 - shared.python.engine_manager - INFO - Engine myosim is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\myosim
+2025-12-29 16:23:48,168 - shared.python.engine_manager - INFO - Engine matlab_2d is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\Simscape_Multibody_Models\2D_Golf_Model
+2025-12-29 16:23:48,169 - shared.python.engine_manager - INFO - Engine matlab_3d is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\Simscape_Multibody_Models\3D_Golf_Model
+2025-12-29 16:23:48,169 - shared.python.engine_manager - INFO - Engine pendulum is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\pendulum_models
+------------------------------ Captured log call ------------------------------
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine mujoco is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\mujoco
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine drake is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\drake
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine pinocchio is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\pinocchio
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine opensim is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\opensim
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine myosim is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\myosim
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine matlab_2d is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\Simscape_Multibody_Models\2D_Golf_Model
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine matlab_3d is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\Simscape_Multibody_Models\3D_Golf_Model
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine pendulum is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\pendulum_models
+_____________ TestEngineProbes.test_diagnostic_report_generation ______________
+
+self = <tests.integration.test_end_to_end.TestEngineProbes object at 0x00000215F8C7B490>
+
+    def test_diagnostic_report_generation(self):
+        """Test generating diagnostic report."""
+        suite_root = Path(__file__).parent.parent.parent
+        sys.path.insert(0, str(suite_root))
+    
+        from shared.python.engine_manager import EngineManager
+    
+        manager = EngineManager()
+>       report = manager.get_diagnostic_report()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_end_to_end.py:122: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+shared\python\engine_manager.py:474: in get_diagnostic_report
+    self.probe_all_engines()
+shared\python\engine_manager.py:458: in probe_all_engines
+    self.probe_results[engine_type] = probe.probe()
+                                      ^^^^^^^^^^^^^
+shared\python\engine_probes.py:559: in probe
+    import mujoco
+..\..\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py:217: in <module>
+    _load_all_bundled_plugins()
+..\..\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py:210: in _load_all_bundled_plugins
+    PLUGIN_HANDLES.append(ctypes.CDLL(os.path.join(directory, filename)))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <CDLL 'C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\plugin\actuator.dll', handle 0 at 0x215a18182b0>
+name = 'C:\\Users\\diete\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\mujoco\\plugin\\actuator.dll'
+mode = 4352, handle = None, use_errno = False, use_last_error = False
+winmode = None
+
+    def __init__(self, name, mode=DEFAULT_MODE, handle=None,
+                 use_errno=False,
+                 use_last_error=False,
+                 winmode=None):
+        if name:
+            name = _os.fspath(name)
+    
+            # If the filename that has been provided is an iOS/tvOS/watchOS
+            # .fwork file, dereference the location to the true origin of the
+            # binary.
+            if name.endswith(".fwork"):
+                with open(name) as f:
+                    name = _os.path.join(
+                        _os.path.dirname(_sys.executable),
+                        f.read().strip()
+                    )
+    
+        self._name = name
+        flags = self._func_flags_
+        if use_errno:
+            flags |= _FUNCFLAG_USE_ERRNO
+        if use_last_error:
+            flags |= _FUNCFLAG_USE_LASTERROR
+        if _sys.platform.startswith("aix"):
+            """When the name contains ".a(" and ends with ")",
+               e.g., "libFOO.a(libFOO.so)" - this is taken to be an
+               archive(member) syntax for dlopen(), and the mode is adjusted.
+               Otherwise, name is presented to dlopen() as a file argument.
+            """
+            if name and name.endswith(")") and ".a(" in name:
+                mode |= ( _os.RTLD_MEMBER | _os.RTLD_NOW )
+        if _os.name == "nt":
+            if winmode is not None:
+                mode = winmode
+            else:
+                import nt
+                mode = nt._LOAD_LIBRARY_SEARCH_DEFAULT_DIRS
+                if '/' in name or '\\' in name:
+                    self._name = nt._getfullpathname(self._name)
+                    mode |= nt._LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR
+    
+        class _FuncPtr(_CFuncPtr):
+            _flags_ = flags
+            _restype_ = self._func_restype_
+        self._FuncPtr = _FuncPtr
+    
+        if handle is None:
+>           self._handle = _dlopen(self._name, mode)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           OSError: [WinError 1114] A dynamic link library (DLL) initialization routine failed
+
+..\..\AppData\Local\Programs\Python\Python313\Lib\ctypes\__init__.py:390: OSError
+---------------------------- Captured stdout call -----------------------------
+2025-12-29 16:23:48,819 - shared.python.engine_manager - INFO - Engine mujoco is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\mujoco
+2025-12-29 16:23:48,819 - shared.python.engine_manager - INFO - Engine drake is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\drake
+2025-12-29 16:23:48,819 - shared.python.engine_manager - INFO - Engine pinocchio is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\pinocchio
+2025-12-29 16:23:48,820 - shared.python.engine_manager - INFO - Engine opensim is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\opensim
+2025-12-29 16:23:48,820 - shared.python.engine_manager - INFO - Engine myosim is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\myosim
+2025-12-29 16:23:48,820 - shared.python.engine_manager - INFO - Engine matlab_2d is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\Simscape_Multibody_Models\2D_Golf_Model
+2025-12-29 16:23:48,820 - shared.python.engine_manager - INFO - Engine matlab_3d is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\Simscape_Multibody_Models\3D_Golf_Model
+2025-12-29 16:23:48,820 - shared.python.engine_manager - INFO - Engine pendulum is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\pendulum_models
+------------------------------ Captured log call ------------------------------
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine mujoco is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\mujoco
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine drake is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\drake
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine pinocchio is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\pinocchio
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine opensim is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\opensim
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine myosim is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\myosim
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine matlab_2d is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\Simscape_Multibody_Models\2D_Golf_Model
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine matlab_3d is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\Simscape_Multibody_Models\3D_Golf_Model
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine pendulum is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\pendulum_models
+_____________ TestEngineProbes.test_at_least_one_engine_available _____________
+
+self = <tests.integration.test_end_to_end.TestEngineProbes object at 0x00000215F8C7B5C0>
+
+    def test_at_least_one_engine_available(self):
+        """Verify at least one engine is available or properly diagnosed."""
+        suite_root = Path(__file__).parent.parent.parent
+        sys.path.insert(0, str(suite_root))
+    
+        from shared.python.engine_manager import EngineManager
+        from shared.python.engine_probes import ProbeStatus
+    
+        manager = EngineManager()
+>       results = manager.probe_all_engines()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_end_to_end.py:140: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+shared\python\engine_manager.py:458: in probe_all_engines
+    self.probe_results[engine_type] = probe.probe()
+                                      ^^^^^^^^^^^^^
+shared\python\engine_probes.py:559: in probe
+    import mujoco
+..\..\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py:217: in <module>
+    _load_all_bundled_plugins()
+..\..\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py:210: in _load_all_bundled_plugins
+    PLUGIN_HANDLES.append(ctypes.CDLL(os.path.join(directory, filename)))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <CDLL 'C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\plugin\actuator.dll', handle 0 at 0x215a18188a0>
+name = 'C:\\Users\\diete\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\mujoco\\plugin\\actuator.dll'
+mode = 4352, handle = None, use_errno = False, use_last_error = False
+winmode = None
+
+    def __init__(self, name, mode=DEFAULT_MODE, handle=None,
+                 use_errno=False,
+                 use_last_error=False,
+                 winmode=None):
+        if name:
+            name = _os.fspath(name)
+    
+            # If the filename that has been provided is an iOS/tvOS/watchOS
+            # .fwork file, dereference the location to the true origin of the
+            # binary.
+            if name.endswith(".fwork"):
+                with open(name) as f:
+                    name = _os.path.join(
+                        _os.path.dirname(_sys.executable),
+                        f.read().strip()
+                    )
+    
+        self._name = name
+        flags = self._func_flags_
+        if use_errno:
+            flags |= _FUNCFLAG_USE_ERRNO
+        if use_last_error:
+            flags |= _FUNCFLAG_USE_LASTERROR
+        if _sys.platform.startswith("aix"):
+            """When the name contains ".a(" and ends with ")",
+               e.g., "libFOO.a(libFOO.so)" - this is taken to be an
+               archive(member) syntax for dlopen(), and the mode is adjusted.
+               Otherwise, name is presented to dlopen() as a file argument.
+            """
+            if name and name.endswith(")") and ".a(" in name:
+                mode |= ( _os.RTLD_MEMBER | _os.RTLD_NOW )
+        if _os.name == "nt":
+            if winmode is not None:
+                mode = winmode
+            else:
+                import nt
+                mode = nt._LOAD_LIBRARY_SEARCH_DEFAULT_DIRS
+                if '/' in name or '\\' in name:
+                    self._name = nt._getfullpathname(self._name)
+                    mode |= nt._LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR
+    
+        class _FuncPtr(_CFuncPtr):
+            _flags_ = flags
+            _restype_ = self._func_restype_
+        self._FuncPtr = _FuncPtr
+    
+        if handle is None:
+>           self._handle = _dlopen(self._name, mode)
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^
+E           OSError: [WinError 1114] A dynamic link library (DLL) initialization routine failed
+
+..\..\AppData\Local\Programs\Python\Python313\Lib\ctypes\__init__.py:390: OSError
+---------------------------- Captured stdout call -----------------------------
+2025-12-29 16:23:49,468 - shared.python.engine_manager - INFO - Engine mujoco is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\mujoco
+2025-12-29 16:23:49,468 - shared.python.engine_manager - INFO - Engine drake is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\drake
+2025-12-29 16:23:49,469 - shared.python.engine_manager - INFO - Engine pinocchio is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\pinocchio
+2025-12-29 16:23:49,469 - shared.python.engine_manager - INFO - Engine opensim is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\opensim
+2025-12-29 16:23:49,469 - shared.python.engine_manager - INFO - Engine myosim is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\myosim
+2025-12-29 16:23:49,469 - shared.python.engine_manager - INFO - Engine matlab_2d is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\Simscape_Multibody_Models\2D_Golf_Model
+2025-12-29 16:23:49,470 - shared.python.engine_manager - INFO - Engine matlab_3d is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\Simscape_Multibody_Models\3D_Golf_Model
+2025-12-29 16:23:49,470 - shared.python.engine_manager - INFO - Engine pendulum is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\pendulum_models
+------------------------------ Captured log call ------------------------------
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine mujoco is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\mujoco
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine drake is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\drake
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine pinocchio is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\pinocchio
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine opensim is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\opensim
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine myosim is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\physics_engines\myosim
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine matlab_2d is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\Simscape_Multibody_Models\2D_Golf_Model
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine matlab_3d is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\Simscape_Multibody_Models\3D_Golf_Model
+INFO     shared.python.engine_manager:engine_manager.py:175 Engine pendulum is available at C:\Users\diete\Repositories\Golf_Modeling_Suite\engines\pendulum_models
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.13.5-final-0 _______________
+
+Name                                                  Stmts   Miss  Cover   Missing
+-----------------------------------------------------------------------------------
+launchers\__init__.py                                     0      0   100%
+launchers\golf_launcher.py                              469    245    48%   54-59, 92-107, 116-117, 122-182, 189-192, 196-268, 272-279, 283-284, 288-292, 300-319, 350, 362-364, 370-372, 479, 491, 494, 507-512, 532-533, 557-559, 611-613, 622, 625-627, 629-631, 641-647, 736-749, 753-754, 758-759, 763-817, 821-832, 836-845, 849-851, 855-928, 933-938
+launchers\golf_suite_launcher.py                        130    130     0%   10-218
+launchers\unified_launcher.py                            77     26    66%   15-17, 32, 43, 58-62, 86, 131-147, 157-158, 163-164
+shared\python\__init__.py                                27      6    78%   47-52
+shared\python\biomechanics_data.py                       28     28     0%   7-72
+shared\python\common_utils.py                            91     79    13%   30-32, 45-52, 67-78, 91-100, 115-124, 142-167, 181-202, 214-236
+shared\python\comparative_analysis.py                   107    107     0%   7-255
+shared\python\comparative_plotting.py                   100    100     0%   6-342
+shared\python\configuration_manager.py                   56     56     0%   6-112
+shared\python\constants.py                               53      0   100%
+shared\python\core.py                                    17      0   100%
+shared\python\engine_manager.py                         237    164    31%   129, 152-168, 177-178, 189-207, 213-243, 249-274, 278-303, 307-329, 333-355, 362-382, 386-390, 394-408, 412, 416, 420, 430-449, 459, 463-465, 476-506
+shared\python\engine_probes.py                          265    176    34%   43-53, 73-74, 100, 102, 122-165, 193-199, 219-273, 303, 315-339, 358-394, 420-468, 493-499, 512-536, 561, 563-595, 610, 614-657
+shared\python\interfaces.py                               4      0   100%
+shared\python\kinematic_sequence.py                      77     77     0%   8-192
+shared\python\model_registry.py                          49     13    73%   50-51, 58-59, 62-65, 72-73, 77-80, 113
+shared\python\optimization\__init__.py                    0      0   100%
+shared\python\optimization\examples\__init__.py           0      0   100%
+shared\python\optimization\examples\optimize_arm.py      87     87     0%   1-169
+shared\python\output_manager.py                         225    177    21%   51-66, 85-113, 142-143, 147, 151-152, 159-171, 176-182, 196-219, 224-226, 245-286, 298-321, 340-379, 391-438, 442-480, 488-492, 499-500
+shared\python\physics_parameters.py                     120     45    62%   57, 67, 76, 316, 344, 352, 360-361, 372-384, 392-431
+shared\python\plotting.py                               668    668     0%   13-1519
+shared\python\pose_estimation\__init__.py                 3      3     0%   7-10
+shared\python\pose_estimation\interface.py               11     11     0%   3-20
+shared\python\pose_estimation\openpose_estimator.py      83     83     0%   7-183
+shared\python\process_worker.py                          62     62     0%   7-108
+shared\python\signal_processing.py                       32     32     0%   8-131
+shared\python\statistical_analysis.py                   315    315     0%   10-882
+shared\python\swing_plane_analysis.py                    40     40     0%   9-109
+-----------------------------------------------------------------------------------
+TOTAL                                                  3433   2730    20%
+Coverage HTML written to dir htmlcov
+Coverage XML written to file coverage.xml
+FAIL Required test coverage of 35% not reached. Total coverage: 20.48%
+=========================== short test summary info ===========================
+FAILED tests/integration/test_end_to_end.py::TestEngineProbes::test_probe_all_engines
+FAILED tests/integration/test_end_to_end.py::TestEngineProbes::test_diagnostic_report_generation
+FAILED tests/integration/test_end_to_end.py::TestEngineProbes::test_at_least_one_engine_available
+======================== 3 failed, 12 passed in 6.61s =========================
