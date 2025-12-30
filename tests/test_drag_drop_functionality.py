@@ -244,11 +244,15 @@ class TestC3DViewerIntegration(unittest.TestCase):
         # Create launcher instance without full initialization
         launcher = GolfLauncher.__new__(GolfLauncher)
 
+        # Mock required attributes that might be accessed
+        launcher.logger = Mock()
+
         # Mock the C3D viewer script path
         with (
             patch("pathlib.Path.exists", return_value=True),
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
+            patch("launchers.golf_launcher.logger"),
         ):
 
             launcher._launch_c3d_viewer()
@@ -354,11 +358,15 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
         # Create launcher instance without full initialization
         launcher = GolfLauncher.__new__(GolfLauncher)
 
+        # Mock required attributes that might be accessed
+        launcher.logger = Mock()
+
         # Mock the URDF generator script path
         with (
             patch("pathlib.Path.exists", return_value=True),
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
+            patch("launchers.golf_launcher.logger"),
         ):
 
             launcher._launch_urdf_generator()
