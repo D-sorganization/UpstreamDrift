@@ -253,6 +253,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
+            patch("launchers.golf_launcher.QMessageBox"),
         ):
 
             launcher._launch_c3d_viewer()
@@ -367,6 +368,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
+            patch("launchers.golf_launcher.QMessageBox"),
         ):
 
             launcher._launch_urdf_generator()

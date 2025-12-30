@@ -229,12 +229,22 @@ class TestGolfLauncherGrid(unittest.TestCase):
             model.id = f"model_{i}"
             model.name = f"Model {i}"
             model.description = f"Description {i}"
+            model.type = "mujoco"  # Set a proper string type for _get_engine_type
             self.mock_models.append(model)
 
         # Make sure the registry returns our mock models
         self.mock_registry.get_all_models.return_value = self.mock_models
         # Make the registry iterable for any 'in' operations
         self.mock_registry.__iter__ = lambda x: iter(self.mock_models)
+
+        # Mock get_model to return a model with proper type
+        def mock_get_model(model_id):
+            for model in self.mock_models:
+                if model.id == model_id:
+                    return model
+            return None
+
+        self.mock_registry.get_model.side_effect = mock_get_model
 
     @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.EngineManager")
