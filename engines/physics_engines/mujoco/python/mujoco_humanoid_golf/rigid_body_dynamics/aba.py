@@ -91,6 +91,8 @@ def aba(  # noqa: C901, PLR0912, PLR0915
 
     # Get gravity vector
     a_grav = model.get("gravity", DEFAULT_GRAVITY)
+    # OPTIMIZATION: Pre-compute negative gravity to avoid allocation in loop
+    neg_a_grav = -a_grav
 
     # Initialize arrays
     # OPTIMIZATION: Pre-allocate 3D arrays instead of lists of arrays
@@ -230,8 +232,11 @@ def aba(  # noqa: C901, PLR0912, PLR0915
 
             # Subtract rank-1 update from scratch_mat
             # scratch_mat -= np.outer(u_force[:, i] * dinv, scratch_vec)
-            # Sticking to np.outer is fine for readability/speed balance.
-            scratch_mat -= np.outer(u_force[:, i] * dinv, scratch_vec)
+            # OPTIMIZATION: Avoid temporary allocations
+            np.multiply(u_force[:, i], dinv, out=temp_vec)
+            # Re-use xj_buf as temporary buffer for outer product
+            np.outer(temp_vec, scratch_vec, out=xj_buf)
+            scratch_mat -= xj_buf
 
             # Now add xup[i].T @ scratch_mat to ia_articulated[p]
             # This is ia_articulated[p] += xup[i].T @ scratch_mat
@@ -254,7 +259,10 @@ def aba(  # noqa: C901, PLR0912, PLR0915
 
             # 2. Add other terms
             scratch_vec += pa_bias[:, i]
-            scratch_vec += u_force[:, i] * (dinv * u[i])
+            # OPTIMIZATION: Avoid allocation for u_force * scalar
+            scalar = dinv * u[i]
+            np.multiply(u_force[:, i], scalar, out=temp_vec)
+            scratch_vec += temp_vec
 
             # 3. Transform and add to parent
             # pa_bias[:, p] += xup[i].T @ scratch_vec
@@ -267,7 +275,7 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         if model["parent"][i] == -1:
             # For base-connected bodies, apply gravity through Xup transform
             # a[:, i] = xup[i] @ (-a_grav) + c[:, i]
-            np.matmul(xup[i], -a_grav, out=scratch_vec)
+            np.matmul(xup[i], neg_a_grav, out=scratch_vec)
             scratch_vec += c[:, i]
             a[:, i] = scratch_vec
         else:
