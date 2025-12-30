@@ -174,6 +174,7 @@ class TestLauncherCommands(unittest.TestCase):
         # Test that the command doesn't immediately fail
         # We can't test full GUI launch in CI, but we can test script validation
 
+        result = None  # Initialize result variable
         try:
             result = subprocess.run(
                 [sys.executable, "launch_golf_suite.py", "--urdf-generator"],
@@ -191,10 +192,11 @@ class TestLauncherCommands(unittest.TestCase):
             self.assertTrue(
                 True, "Command started successfully (timed out as expected for GUI)"
             )
+            return  # Exit early since timeout is expected
 
         # Command should start successfully (may timeout due to GUI)
         # We're mainly checking that there are no immediate import/path errors
-        if result.returncode != 0:
+        if result and result.returncode != 0:
             # Check if it's just a timeout or GUI-related issue
             if "Launching URDF Generator" in result.stdout or result.returncode == -1:
                 print("✅ URDF Generator launch initiated successfully")
