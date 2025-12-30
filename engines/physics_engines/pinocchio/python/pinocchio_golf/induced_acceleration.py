@@ -114,7 +114,7 @@ class InducedAccelerationAnalyzer:
         # And ABA(q, 0, 0) = M^-1 * (-G(q)).
         # So ABA(q, 0, tau) - ABA(q, 0, 0) = M^-1 * tau.
 
-        a_tau_G = pin.aba(
+        a_tau_G: np.ndarray = pin.aba(
             self.model, self._temp_data, q, np.zeros(self.nv), specific_tau
         )
         a_G: np.ndarray = pin.aba(
