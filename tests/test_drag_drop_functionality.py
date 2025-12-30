@@ -270,11 +270,9 @@ class TestC3DViewerIntegration(unittest.TestCase):
             # Verify subprocess was called
             mock_popen.assert_called_once()
 
-            # Get the command that was called
-            call_args = mock_popen.call_args[0][0]
-
             # Verify it's launching the C3D viewer
             # Since we mock Path, we can't check the string content reliably
+            # call_args = mock_popen.call_args[0][0]
             # self.assertIn("c3d_viewer.py", " ".join(call_args))
 
     @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
@@ -394,11 +392,9 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
             # Verify subprocess was called
             mock_popen.assert_called_once()
 
-            # Get the command that was called
-            call_args = mock_popen.call_args[0][0]
-
             # Verify it's launching the URDF generator
             # Since we mock Path, we can't check the string content reliably
+            # call_args = mock_popen.call_args[0][0]
             # self.assertIn("launch_urdf_generator.py", " ".join(call_args))
 
     @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
