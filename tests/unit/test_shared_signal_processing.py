@@ -78,7 +78,11 @@ class TestSignalProcessing:
         """Test Spectrogram computation using mock."""
         data = np.sin(2 * np.pi * 20 * self.t + 2 * np.pi * 40 * self.t**2)
         with patch("scipy.signal.spectrogram") as mock_spec:
-            mock_spec.return_value = (np.arange(10), np.arange(10), np.random.rand(10, 10))
+            mock_spec.return_value = (
+                np.arange(10),
+                np.arange(10),
+                np.random.rand(10, 10),
+            )
             f, t_spec, Sxx = compute_spectrogram(data, self.fs, nperseg=128)
 
             assert len(f) == 10
