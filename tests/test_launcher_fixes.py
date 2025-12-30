@@ -18,7 +18,7 @@ from unittest.mock import Mock, patch
 sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
 
 try:
-    from PyQt6.QtCore import QPoint, Qt
+    from PyQt6.QtCore import QPoint
     from PyQt6.QtWidgets import QApplication
 
     PYQT_AVAILABLE = True
