@@ -186,6 +186,7 @@ exclude = [
     "engines/physics_engines/mujoco/test_dependencies.py",
     "engines/physics_engines/mujoco/test_mechanisms.py",
     "engines/physics_engines/mujoco/test_new_models.py",
+    "engines/physics_engines/mujoco/docker/",
 ]
 
 [[tool.mypy.overrides]]
