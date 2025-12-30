@@ -81,14 +81,20 @@ class PlottingTab(QtWidgets.QWidget):
         ind_layout = QtWidgets.QFormLayout(self.induced_widget)
         self.induced_source_combo = QtWidgets.QComboBox()
         self.induced_source_combo.addItems(["gravity", "actuator"])
+        # Add support for specific actuator selection if model is loaded
+        # We will populate this dynamically or allow text input?
+        # For now, let's add a text input for actuator name
+        self.induced_actuator_edit = QtWidgets.QLineEdit()
+        self.induced_actuator_edit.setPlaceholderText("Specific Actuator Name (optional)")
         ind_layout.addRow("Source:", self.induced_source_combo)
+        ind_layout.addRow("Or Actuator:", self.induced_actuator_edit)
         self.settings_stack.addWidget(self.induced_widget)
 
         # Counterfactual Settings
         self.cf_widget = QtWidgets.QWidget()
         cf_layout = QtWidgets.QFormLayout(self.cf_widget)
         self.cf_combo = QtWidgets.QComboBox()
-        self.cf_combo.addItems(["ztcf", "zvcf"])
+        self.cf_combo.addItems(["ztcf_accel", "zvcf_torque"])
         cf_layout.addRow("Counterfactual:", self.cf_combo)
         self.settings_stack.addWidget(self.cf_widget)
 
@@ -184,6 +190,12 @@ class PlottingTab(QtWidgets.QWidget):
             )
             return
 
+        # Safety: Pause simulation if running, as we might modify data for re-analysis
+        was_running = False
+        if self.sim_widget.running:
+            self.sim_widget.set_running(False)
+            was_running = True
+
         # Clear existing plot
         if self.current_plot_canvas is not None:
             self.plot_container_layout.removeWidget(self.current_plot_canvas)
@@ -236,9 +248,98 @@ class PlottingTab(QtWidgets.QWidget):
                 plotter.plot_torque_comparison(canvas.fig)
             elif plot_type == "Induced Accelerations":
                 source = self.induced_source_combo.currentText()
+                spec_act = self.induced_actuator_edit.text().strip()
+                if spec_act:
+                    # If specific actuator is provided, we need to ensure data exists.
+                    # The recorder stores 'gravity' and 'actuator' by default.
+                    # For specific actuator, we might need to re-compute it if not stored?
+                    # Or we should have stored it.
+                    # Our biomechanics.py extract_full_state implementation only stored 'gravity' and 'actuator'.
+                    # We didn't update it to compute dynamic actuator requests because recorder loop runs blindly.
+                    # So we need to calculate it HERE using the Analyzer post-hoc if not present.
+
+                    # Check if present
+                    _, vals = recorder.get_induced_acceleration_series(spec_act)
+                    if len(vals) == 0:
+                        # Recompute using Analyzer if available
+                        analyzer = self.sim_widget.get_analyzer()
+                        if analyzer:
+                            # Reconstruct time series
+                            # This might be slow for long recordings
+                            times = []
+                            vals_list = []
+                            for frame in recorder.frames:
+                                # We need to set state to the frame state
+                                # This is invasive on the sim_widget.model/data.
+                                # Should use a separate data instance if possible, or save/restore.
+                                # BiomechanicalAnalyzer uses self.data.
+
+                                # Save current state
+                                qpos_bak = self.sim_widget.data.qpos.copy()
+                                qvel_bak = self.sim_widget.data.qvel.copy()
+                                ctrl_bak = self.sim_widget.data.ctrl.copy()
+
+                                self.sim_widget.data.qpos[:] = frame.joint_positions
+                                self.sim_widget.data.qvel[:] = frame.joint_velocities
+                                self.sim_widget.data.ctrl[:] = frame.joint_torques
+
+                                # Run forward kinematics/dynamics
+                                import mujoco
+                                mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+
+                                res = analyzer.compute_induced_acceleration_for_actuator(spec_act)
+                                vals_list.append(res)
+                                times.append(frame.time)
+
+                                # Restore
+                                self.sim_widget.data.qpos[:] = qpos_bak
+                                self.sim_widget.data.qvel[:] = qvel_bak
+                                self.sim_widget.data.ctrl[:] = ctrl_bak
+
+                                # Re-render to ensure consistent state
+                                mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+
+                            # Add to recorder temporarily for plotting?
+                            # Or just plot directly?
+                            # Plotter expects it in recorder or passed explicitly?
+                            # GolfSwingPlotter.plot_induced_acceleration takes source name and pulls from recorder.
+                            # So we should inject it into the recorder frames?
+                            # Or update Plotter to accept data.
+
+                            # Let's inject into recorder frames for this session
+                            for i, val in enumerate(vals_list):
+                                recorder.frames[i].induced_accelerations[spec_act] = val
+
+                    source = spec_act
+
                 plotter.plot_induced_acceleration(canvas.fig, source)
             elif plot_type == "Counterfactual Comparison":
                 cf_name = self.cf_combo.currentText()
+                # Ensure data exists (Recompute if missing)
+                _, vals = recorder.get_counterfactual_series(cf_name)
+                if len(vals) == 0:
+                    analyzer = self.sim_widget.get_analyzer()
+                    if analyzer:
+                        import mujoco
+                        qpos_bak = self.sim_widget.data.qpos.copy()
+                        qvel_bak = self.sim_widget.data.qvel.copy()
+                        ctrl_bak = self.sim_widget.data.ctrl.copy()
+
+                        for frame in recorder.frames:
+                            self.sim_widget.data.qpos[:] = frame.joint_positions
+                            self.sim_widget.data.qvel[:] = frame.joint_velocities
+                            self.sim_widget.data.ctrl[:] = frame.joint_torques
+                            mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+
+                            res = analyzer.compute_counterfactuals()
+                            if cf_name in res:
+                                frame.counterfactuals[cf_name] = res[cf_name]
+
+                        self.sim_widget.data.qpos[:] = qpos_bak
+                        self.sim_widget.data.qvel[:] = qvel_bak
+                        self.sim_widget.data.ctrl[:] = ctrl_bak
+                        mujoco.mj_forward(self.sim_widget.model, self.sim_widget.data)
+
                 plotter.plot_counterfactual_comparison(canvas.fig, cf_name)
 
             canvas.draw()
@@ -254,3 +355,6 @@ class PlottingTab(QtWidgets.QWidget):
             logger.error("Plot generation failed: %s", e)
         finally:
             QtWidgets.QApplication.restoreOverrideCursor()
+            # Restore simulation state
+            if was_running:
+                self.sim_widget.set_running(True)
