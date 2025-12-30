@@ -387,7 +387,9 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
             # Check for suppressed exceptions
             if mock_logger.error.called:
                 error_call = mock_logger.error.call_args
-                self.fail(f"Exception suppressed in _launch_urdf_generator: {error_call}")
+                self.fail(
+                    f"Exception suppressed in _launch_urdf_generator: {error_call}"
+                )
 
             # Verify subprocess was called
             mock_popen.assert_called_once()
