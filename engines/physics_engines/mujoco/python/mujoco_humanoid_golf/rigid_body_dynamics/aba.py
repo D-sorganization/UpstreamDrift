@@ -125,6 +125,7 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     scratch_mat = np.empty((6, 6))
     i_v_buf = np.empty(6)
     temp_vec = np.empty(6)  # Additional scratch vector
+    outer_buf = np.empty((6, 6))  # Buffer for outer product
 
     # --- Pass 1: Forward kinematics ---
     for i in range(nb):
@@ -231,7 +232,15 @@ def aba(  # noqa: C901, PLR0912, PLR0915
             # Subtract rank-1 update from scratch_mat
             # scratch_mat -= np.outer(u_force[:, i] * dinv, scratch_vec)
             # Sticking to np.outer is fine for readability/speed balance.
-            scratch_mat -= np.outer(u_force[:, i] * dinv, scratch_vec)
+
+            # OPTIMIZATION: Avoid allocation for vector scaling
+            np.multiply(u_force[:, i], dinv, out=temp_vec)
+
+            # OPTIMIZATION: Use outer product into pre-allocated buffer
+            np.outer(temp_vec, scratch_vec, out=outer_buf)
+
+            # In-place subtraction
+            scratch_mat -= outer_buf
 
             # Now add xup[i].T @ scratch_mat to ia_articulated[p]
             # This is ia_articulated[p] += xup[i].T @ scratch_mat
