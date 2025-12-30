@@ -38,18 +38,24 @@ def mock_casadi():
 
     # Mock bounds and constraints
     opti.bounded.return_value = MagicMock()
+    opti.subject_to.return_value = MagicMock()
+    opti.minimize.return_value = MagicMock()
+    opti.solver.return_value = MagicMock()
 
     # Mock solve
     sol = MagicMock()
 
     # Set up value side effect to return appropriate mock data
+    call_count = 0
     def value_side_effect(arg):
-        # Return appropriate mock data based on what's being requested
-        if hasattr(arg, "shape") or str(arg).startswith("Q"):
+        nonlocal call_count
+        call_count += 1
+        # Return data based on call order: Q, V, U, cost
+        if call_count == 1:
             return np.zeros((2, 41))  # Q matrix
-        elif str(arg).startswith("V"):
+        elif call_count == 2:
             return np.zeros((2, 41))  # V matrix
-        elif str(arg).startswith("U"):
+        elif call_count == 3:
             return np.zeros((2, 40))  # U matrix
         else:
             return 0.1234  # Cost (scalar)
