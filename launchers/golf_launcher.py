@@ -181,12 +181,26 @@ class DraggableModelCard(QFrame):
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse press for selection and drag initiation."""
+        # DEBUG: Trace execution
+        print(f"DEBUG: mousePressEvent entered. event={event}")
+        if event:
+            print(f"DEBUG: event.button()={event.button()}")
+            print(f"DEBUG: Qt.MouseButton.LeftButton={Qt.MouseButton.LeftButton}")
+            print(f"DEBUG: Comparison 1: {event.button() == Qt.MouseButton.LeftButton}")
+            print(f"DEBUG: Comparison 2: {event.button() == 1}")
+
         if event and (
             event.button() == Qt.MouseButton.LeftButton or event.button() == 1
         ):
+            print("DEBUG: Button check passed")
             self.drag_start_position = event.position().toPoint()
+            print(f"DEBUG: parent_launcher={self.parent_launcher}")
             if self.parent_launcher:
+                print("DEBUG: calling select_model")
                 self.parent_launcher.select_model(self.model.id)
+                print("DEBUG: called select_model")
+        else:
+            print("DEBUG: Button check failed")
         # Don't call super() as QLabel doesn't have mousePressEvent
 
     def mouseMoveEvent(self, event: QMouseEvent | None) -> None:
