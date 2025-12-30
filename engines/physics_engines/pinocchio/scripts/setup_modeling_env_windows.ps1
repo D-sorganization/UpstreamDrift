@@ -15,10 +15,10 @@ $EnvExists = conda env list | Select-String -Pattern "^$EnvName\s"
 
 if (-not $EnvExists) {
     Write-Host ">>> Creating conda env '$EnvName'..."
-    conda create -y -n $EnvName -c conda-forge python=3.10 pinocchio pink numpy scipy matplotlib pytest pytest-cov ruff black mypy pyyaml
+    conda create -y -n $EnvName -c conda-forge python=3.10 pinocchio pink crocoddyl numpy scipy matplotlib pytest pytest-cov ruff black mypy pyyaml
 } else {
     Write-Host ">>> Updating conda env '$EnvName'..."
-    conda install -y -n $EnvName -c conda-forge pinocchio pink numpy scipy matplotlib pytest pytest-cov ruff black mypy pyyaml
+    conda install -y -n $EnvName -c conda-forge pinocchio pink crocoddyl numpy scipy matplotlib pytest pytest-cov ruff black mypy pyyaml
 }
 
 # 3. Install Pip Dependencies

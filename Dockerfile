@@ -20,6 +20,12 @@ RUN apt-get update && apt-get install -y \
     xvfb \
     unzip \
     wget \
+    pkg-config \
+    libeigen3-dev \
+    libboost-all-dev \
+    liburdfdom-dev \
+    liboctomap-dev \
+    libassimp-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Create comprehensive environment
@@ -40,13 +46,23 @@ RUN conda install -y -c conda-forge \
     pillow \
     && conda clean --all --yes
 
-# Install physics engines via pip for better compatibility
+# Install Pinocchio ecosystem via conda-forge (recommended for better compatibility)
+RUN conda install -y -c conda-forge \
+    pinocchio \
+    crocoddyl \
+    && conda clean --all --yes
+
+# Install physics engines and additional packages via pip
 RUN pip install --no-cache-dir \
     mujoco>=3.2.3 \
     drake \
     meshcat \
     casadi \
-    && echo "Physics engines installed successfully"
+    pin-pink \
+    qpsolvers \
+    osqp \
+    ezc3d \
+    && echo "Physics engines and robotics packages installed successfully"
 
 # Set up Python path for shared modules
 ENV PYTHONPATH="/workspace:/workspace/shared/python:/workspace/engines"
@@ -56,17 +72,6 @@ RUN mkdir -p /workspace/shared/python /workspace/engines
 
 # Set working directory
 WORKDIR /workspace
-
-# Default command
-CMD ["/bin/bash"]
-# Full OpenPose build requires CUDA + CuDNN and extensive compilation time.
-# For this container, we rely on 'opencv' for basic pose estimation fallback
-# unless a pre-built 'pyopenpose' wheel is mounted or built in a separate stage.
-
-WORKDIR /workspace
-
-# Set Python Path
-ENV PYTHONPATH="/workspace:/workspace/shared/python:/workspace/engines"
 
 # Default command
 CMD ["/bin/bash"]

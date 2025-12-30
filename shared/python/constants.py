@@ -104,5 +104,8 @@ PINOCCHIO_LAUNCHER_SCRIPT: Path = Path(
     "engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
 )
 URDF_GENERATOR_SCRIPT: Path = Path("tools/urdf_generator/main.py")
+C3D_VIEWER_SCRIPT: Path = Path(
+    "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
+)
 GUI_LAUNCHER_SCRIPT: Path = Path("launchers/golf_launcher.py")
 LOCAL_LAUNCHER_SCRIPT: Path = Path("launchers/golf_suite_launcher.py")
