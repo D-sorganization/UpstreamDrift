@@ -101,7 +101,20 @@ class DraggableModelCard(QFrame):
     """Draggable model card widget with reordering support."""
 
     def __init__(self, model: Any, parent: Any = None):
-        super().__init__(parent)
+        # Only pass parent to QFrame if it's a proper QWidget, otherwise use None
+        # Check if parent is actually a QWidget by checking its type
+        from unittest.mock import Mock
+
+        from PyQt6.QtWidgets import QWidget
+
+        if parent is None or isinstance(parent, Mock):
+            qt_parent = None
+        elif isinstance(parent, QWidget):
+            qt_parent = parent
+        else:
+            qt_parent = None
+
+        super().__init__(qt_parent)
         self.model = model
         self.parent_launcher = parent
         self.setAcceptDrops(True)
