@@ -1,8 +1,9 @@
 """Unit tests for shared signal processing."""
 
+from unittest.mock import patch
+
 import numpy as np
 import pytest
-from unittest.mock import patch
 
 from shared.python.signal_processing import (
     compute_psd,
