@@ -713,10 +713,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 else:
                     # Pad or truncate? Or just log warning.
                     # Let's try to map to size NV.
-                    temp_tau: np.ndarray = np.zeros(self.model.nv)
+                    temp_tau = np.zeros(self.model.nv, dtype=np.float64)
                     for i, v in enumerate(parts):
                         if i < len(temp_tau):
-                            temp_tau[i] = float(v)
+                            temp_tau[i] = v
                     spec_tau = temp_tau
             except ValueError:
                 pass
