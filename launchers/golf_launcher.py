@@ -6,6 +6,7 @@ Features:
 - Modular Docker Environment Management.
 - Integrated Help and Documentation.
 """
+from __future__ import annotations
 
 import logging
 import os
@@ -891,7 +892,7 @@ class GolfLauncher(QMainWindow):
 
         elif model.type == "custom_humanoid":
             # Run the humanoid launcher inside docker
-            cmd.extend(["python", "python/humanoid_launcher.py"])
+            cmd.extend(["python", "humanoid_launcher.py"])
 
         elif model.type == "custom_dashboard":
             # Run the module inside docker
