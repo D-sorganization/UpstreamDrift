@@ -247,7 +247,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
         # Mock the C3D viewer script path and subprocess
         with (
             patch("pathlib.Path.exists", return_value=True),
-            patch("launchers.golf_launcher.subprocess.Popen") as mock_popen,
+            patch("subprocess.Popen") as mock_popen,
             patch("launchers.golf_launcher.os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.QMessageBox"),
@@ -360,7 +360,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
         # Mock the URDF generator script path and subprocess
         with (
             patch("pathlib.Path.exists", return_value=True),
-            patch("launchers.golf_launcher.subprocess.Popen") as mock_popen,
+            patch("subprocess.Popen") as mock_popen,
             patch("launchers.golf_launcher.os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.QMessageBox"),
