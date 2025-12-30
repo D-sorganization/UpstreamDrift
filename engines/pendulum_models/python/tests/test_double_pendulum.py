@@ -11,7 +11,7 @@ from engines.pendulum_models.python.double_pendulum import (
     c1,
     c2,
     double_pendulum_dynamics,
-    g,
+    GRAVITY,
     g_vector,
     l1,
     m1,
@@ -91,9 +91,9 @@ class TestDoublePendulumDynamics:
         # Expected torque is moment arm * weight
         # Link 1 CM dist: c1. Total Mass: m1. Torque: m1*g*c1
         # Link 2 CM dist from joint 1: l1 + c2. Mass: m2. Torque: m2*g*(l1+c2)
-        expected_g1 = m1 * g * c1 + m2 * g * (l1 + c2)
+        expected_g1 = m1 * GRAVITY * c1 + m2 * GRAVITY * (l1 + c2)
         # Torque on joint 2 is just m2*g*c2
-        expected_g2 = m2 * g * c2
+        expected_g2 = m2 * GRAVITY * c2
 
         assert g_vec[0] == pytest.approx(expected_g1, rel=RTOL)
         assert g_vec[1] == pytest.approx(expected_g2, rel=RTOL)
