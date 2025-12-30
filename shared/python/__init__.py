@@ -54,7 +54,7 @@ def __getattr__(name: str) -> Any:
                 f"Failed to import {name}. This may be due to missing dependencies "
                 f"or NumPy compatibility issues. Original error: {e}"
             ) from e
-    
+
     # Handle module imports
     if name == "pose_estimation":
         try:
@@ -65,7 +65,7 @@ def __getattr__(name: str) -> Any:
                 f"Failed to import {name}. This may be due to missing dependencies "
                 f"or NumPy compatibility issues. Original error: {e}"
             ) from e
-    
+
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 
