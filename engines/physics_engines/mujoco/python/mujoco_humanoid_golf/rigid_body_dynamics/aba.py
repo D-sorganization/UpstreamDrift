@@ -127,8 +127,6 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     scratch_mat = np.empty((6, 6))
     i_v_buf = np.empty(6)
     temp_vec = np.empty(6)  # Additional scratch vector
-    # outer_buf = np.empty((6, 6))  # Unused; xj_buf is reused for outer
-    # product operations in the backward pass
 
     # --- Pass 1: Forward kinematics ---
     for i in range(nb):

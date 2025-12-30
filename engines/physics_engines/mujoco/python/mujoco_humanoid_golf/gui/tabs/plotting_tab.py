@@ -18,6 +18,11 @@ logger = logging.getLogger(__name__)
 class PlottingTab(QtWidgets.QWidget):
     """Tab for advanced plotting and data visualization."""
 
+    CF_MAP: typing.ClassVar[dict[str, str]] = {
+        "ZTCF (Zero Torque)": "ztcf_accel",
+        "ZVCF (Zero Velocity)": "zvcf_torque",
+    }
+
     def __init__(
         self,
         sim_widget: MuJoCoSimWidget,
@@ -97,7 +102,7 @@ class PlottingTab(QtWidgets.QWidget):
         self.cf_widget = QtWidgets.QWidget()
         cf_layout = QtWidgets.QFormLayout(self.cf_widget)
         self.cf_combo = QtWidgets.QComboBox()
-        self.cf_combo.addItems(["ZTCF (Zero Torque)", "ZVCF (Zero Velocity)"])
+        self.cf_combo.addItems(list(self.CF_MAP.keys()))
         cf_layout.addRow("Counterfactual:", self.cf_combo)
         self.settings_stack.addWidget(self.cf_widget)
 
@@ -253,40 +258,34 @@ class PlottingTab(QtWidgets.QWidget):
                 source = self.induced_source_combo.currentText()
                 spec_act = self.induced_actuator_edit.text().strip()
                 if spec_act:
-                    # If specific actuator is provided, we need to ensure data exists.
-                    # The recorder stores 'gravity' and 'actuator' by default.
-                    # For specific actuator, we might need to re-compute it if not
-                    # stored? Or we should have stored it.
-                    # Our biomechanics.py extract_full_state implementation only stored
-                    # 'gravity' and 'actuator'.
-                    # We didn't update it to compute dynamic actuator requests because
-                    # recorder loop runs blindly.
-                    # So we need to calculate it HERE using the Analyzer post-hoc
-                    # if not present.
-
                     # Check if present
                     _, vals = recorder.get_induced_acceleration_series(spec_act)
                     if len(vals) == 0:
                         # Recompute using Analyzer if available
                         analyzer = self.sim_widget.get_analyzer()
                         if analyzer:
-                            # Reconstruct time series
-                            # This might be slow for long recordings
                             times = []
                             vals_list = []
                             if (
                                 self.sim_widget.model is not None
                                 and self.sim_widget.data is not None
                             ):
-                                for frame in recorder.frames:
-                                    # We need to set state to the frame state
-                                    # This is invasive on the sim_widget.model/data.
-                                    # Should use a separate data instance if possible,
-                                    # or save/restore.
-                                    # BiomechanicalAnalyzer uses self.data.
+                                total_frames = len(recorder.frames)
+                                progress = QtWidgets.QProgressDialog(
+                                    "Computing Induced Accelerations...",
+                                    "Cancel",
+                                    0,
+                                    total_frames,
+                                    self,
+                                )
+                                progress.setWindowModality(
+                                    QtCore.Qt.WindowModality.WindowModal
+                                )
 
-                                    # Process events to keep UI responsive
-                                    QtWidgets.QApplication.processEvents()
+                                for i, frame in enumerate(recorder.frames):
+                                    if progress.wasCanceled():
+                                        raise RuntimeError("Operation canceled")
+                                    progress.setValue(i)
 
                                     # Save current state
                                     qpos_bak = self.sim_widget.data.qpos.copy()
@@ -299,14 +298,12 @@ class PlottingTab(QtWidgets.QWidget):
                                     )
                                     self.sim_widget.data.ctrl[:] = frame.joint_torques
 
-                                    # Run forward kinematics/dynamics
                                     import mujoco
 
                                     mujoco.mj_forward(
                                         self.sim_widget.model, self.sim_widget.data
                                     )
 
-                                    # Compute induced acceleration for specific actuator
                                     compute_fn = (
                                         analyzer.compute_induced_acceleration_for_actuator
                                     )
@@ -318,21 +315,13 @@ class PlottingTab(QtWidgets.QWidget):
                                     self.sim_widget.data.qpos[:] = qpos_bak
                                     self.sim_widget.data.qvel[:] = qvel_bak
                                     self.sim_widget.data.ctrl[:] = ctrl_bak
-
-                                    # Re-render to ensure consistent state
                                     mujoco.mj_forward(
                                         self.sim_widget.model, self.sim_widget.data
                                     )
 
-                            # Add to recorder temporarily for plotting?
-                            # Or just plot directly?
-                            # Plotter expects it in recorder or passed explicitly?
-                            # GolfSwingPlotter.plot_induced_acceleration takes source
-                            # name and pulls from recorder.
-                            # So we should inject it into the recorder frames?
-                            # Or update Plotter to accept data.
+                                progress.setValue(total_frames)
 
-                            # Let's inject into recorder frames for this session
+                            # Inject into recorder frames
                             for i, val in enumerate(vals_list):
                                 recorder.frames[i].induced_accelerations[spec_act] = val
 
@@ -341,12 +330,7 @@ class PlottingTab(QtWidgets.QWidget):
                 plotter.plot_induced_acceleration(canvas.fig, source)
             elif plot_type == "Counterfactual Comparison":
                 cf_selection = self.cf_combo.currentText()
-                # Map selection to internal key
-                cf_map = {
-                    "ZTCF (Zero Torque)": "ztcf_accel",
-                    "ZVCF (Zero Velocity)": "zvcf_torque",
-                }
-                cf_name = cf_map.get(cf_selection, "ztcf_accel")
+                cf_name = self.CF_MAP.get(cf_selection, "ztcf_accel")
 
                 # Ensure data exists (Recompute if missing)
                 _, vals = recorder.get_counterfactual_series(cf_name)
@@ -359,11 +343,27 @@ class PlottingTab(QtWidgets.QWidget):
                             self.sim_widget.model is not None
                             and self.sim_widget.data is not None
                         ):
+                            total_frames = len(recorder.frames)
+                            progress = QtWidgets.QProgressDialog(
+                                "Computing Counterfactuals...",
+                                "Cancel",
+                                0,
+                                total_frames,
+                                self,
+                            )
+                            progress.setWindowModality(
+                                QtCore.Qt.WindowModality.WindowModal
+                            )
+
                             qpos_bak = self.sim_widget.data.qpos.copy()
                             qvel_bak = self.sim_widget.data.qvel.copy()
                             ctrl_bak = self.sim_widget.data.ctrl.copy()
 
-                            for frame in recorder.frames:
+                            for i, frame in enumerate(recorder.frames):
+                                if progress.wasCanceled():
+                                    raise RuntimeError("Operation canceled")
+                                progress.setValue(i)
+
                                 self.sim_widget.data.qpos[:] = frame.joint_positions
                                 self.sim_widget.data.qvel[:] = frame.joint_velocities
                                 self.sim_widget.data.ctrl[:] = frame.joint_torques
@@ -377,6 +377,8 @@ class PlottingTab(QtWidgets.QWidget):
                                 if cf_name in cf_results:
                                     cf_value: np.ndarray = cf_results[cf_name]
                                     frame.counterfactuals[cf_name] = cf_value
+
+                            progress.setValue(total_frames)
 
                             self.sim_widget.data.qpos[:] = qpos_bak
                             self.sim_widget.data.qvel[:] = qvel_bak
