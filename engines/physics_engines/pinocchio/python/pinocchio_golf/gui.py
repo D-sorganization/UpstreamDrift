@@ -294,6 +294,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         except (ConnectionError, OSError, RuntimeError) as exc:
             logger.error(f"Failed to initialize Meshcat viewer: {exc}")
             self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
+            self.log_write("Please ensure meshcat-server is running or try again.")
 
         # Setup UI
         self._setup_ui()
@@ -428,6 +429,14 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         scale_layout.addWidget(self.spin_torque_scale)
         vis_layout.addLayout(scale_layout)
 
+        self.chk_forces = QtWidgets.QCheckBox("Show Forces")
+        self.chk_forces.toggled.connect(self._toggle_forces)
+        vis_layout.addWidget(self.chk_forces)
+
+        self.chk_torques = QtWidgets.QCheckBox("Show Torques")
+        self.chk_torques.toggled.connect(self._toggle_torques)
+        vis_layout.addWidget(self.chk_torques)
+
         vis_group.setLayout(vis_layout)
         sim_layout.addWidget(vis_group)
 
@@ -481,7 +490,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         self.induced_source_edit = QtWidgets.QLineEdit()
         self.induced_source_edit.setPlaceholderText("Induced Source (Torque Vector)")
-        self.induced_source_edit.setToolTip("Enter comma-separated torques or keep empty for standard analysis")
+        self.induced_source_edit.setToolTip(
+            "Enter comma-separated torques or keep empty for standard analysis"
+        )
         self.induced_source_edit.setMaximumWidth(150)
 
         controls.addWidget(QtWidgets.QLabel("Joint:"))
@@ -620,10 +631,12 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         # Check if we have induced data in frames
         # If we recorded it frame-by-frame, we can just pull it.
-        # But we currently don't populate it in _game_loop to save perf (unless I update _game_loop).
+        # But we currently don't populate it in _game_loop to save perf
+        # (unless I update _game_loop).
         # However, we can compute post-hoc if we saved Q/V/Tau.
 
-        # Let's assume we use the Analyzer to recompute if missing, or use saved if present.
+        # Let's assume we use the Analyzer to recompute if missing,
+        # or use saved if present.
 
         # Get selected joint
         joint_name = self.joint_select_combo.currentText()
@@ -659,10 +672,18 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                  # We need to map joint index to array index.
                  # Usually array is size NV. v_idx points to start.
                  # Assuming 1-DOF for plotting.
-                 g = frame.induced_accelerations.get("gravity", np.zeros(self.model.nv))
-                 v = frame.induced_accelerations.get("velocity", np.zeros(self.model.nv))
-                 c = frame.induced_accelerations.get("control", np.zeros(self.model.nv))
-                 t = frame.induced_accelerations.get("total", np.zeros(self.model.nv))
+                 g = frame.induced_accelerations.get(
+                     "gravity", np.zeros(self.model.nv)
+                 )
+                 v = frame.induced_accelerations.get(
+                     "velocity", np.zeros(self.model.nv)
+                 )
+                 c = frame.induced_accelerations.get(
+                     "control", np.zeros(self.model.nv)
+                 )
+                 t = frame.induced_accelerations.get(
+                     "total", np.zeros(self.model.nv)
+                 )
 
                  g_accs.append(g[v_idx])
                  v_accs.append(v[v_idx])
@@ -695,7 +716,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                     # Let's try to map to size NV.
                     t = np.zeros(self.model.nv)
                     for i, v in enumerate(parts):
-                        if i < len(t): t[i] = v
+                        if i < len(t):
+                            t[i] = v
                     spec_tau = t
             except ValueError:
                 pass
@@ -706,7 +728,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
              for frame in self.recorder.frames:
                  # We need q.
                  # Assuming compute_specific_control(q, tau)
-                 a_spec = self.analyzer.compute_specific_control(frame.joint_positions, spec_tau)
+                 a_spec = self.analyzer.compute_specific_control(
+                     frame.joint_positions, spec_tau
+                 )
                  spec_accs.append(a_spec[v_idx])
 
         # Plot
@@ -783,7 +807,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         # Legend
         lns = line1 + line2
-        labs = [l.get_label() for l in lns]
+        labs = [line.get_label() for line in lns]
         ax1.legend(lns, labs, loc=0)
 
         ax1.grid(True)
@@ -1197,14 +1221,17 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 q_for_recording = self.q if self.q is not None else np.array([])
 
                 # Induced / Counterfactuals
-                # Computing every frame inside loop is costly but most correct for playback.
+                # Computing every frame inside loop is costly but most correct
+                # for playback.
                 # Let's compute them.
                 induced = None
                 counterfactuals = None
 
                 if self.analyzer:
                     induced = self.analyzer.compute_components(self.q, self.v, tau)
-                    counterfactuals = self.analyzer.compute_counterfactuals(self.q, self.v)
+                    counterfactuals = self.analyzer.compute_counterfactuals(
+                        self.q, self.v
+                    )
 
                 self.recorder.record_frame(
                     time=self.sim_time,
@@ -1240,6 +1267,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         # Calculate matrices for analysis
         self._compute_analysis()
+
 
         # Overlays
         if self.chk_frames.isChecked():
@@ -1365,6 +1393,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         self.viewer[path].set_transform(T)
 
+
     def _draw_vectors(self) -> None:
         """Draw force and torque vectors at joints."""
         if self.model is None or self.data is None or self.viewer is None:
@@ -1419,6 +1448,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         """Helper to draw an arrow in Meshcat."""
         if self.viewer is None:
             return
+
 
         # Note: Meshcat Arrow might not exist in all versions, using a Line for now
         # as it is highly compatible. Arrows can be added with Triad or custom mesh.
