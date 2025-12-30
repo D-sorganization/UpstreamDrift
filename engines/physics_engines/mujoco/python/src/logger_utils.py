@@ -10,11 +10,7 @@ import sys
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-<<<<<<< HEAD
     pass
-=======
-    import numpy as np
->>>>>>> origin/refactor-constants-dry-decoupling-150110077470126756
 
 try:
     import torch

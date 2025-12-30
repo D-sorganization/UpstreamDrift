@@ -182,7 +182,7 @@ models:
     name: Integration Test Model
     description: A model for integration testing
     type: mjcf
-    path: {str(model_xml).replace(os.sep, '/')}
+    path: {str(model_xml).replace(os.sep, "/")}
 """
         models_yaml.write_text(config_content, encoding="utf-8")
 
@@ -208,7 +208,6 @@ models:
             patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
             patch("launchers.golf_launcher.ASSETS_DIR", new=temp_path),
         ):
-
             MockRegistry.return_value = temp_registry
 
             # Create Launcher
@@ -257,7 +256,6 @@ def test_launcher_handles_missing_file_on_launch(launcher_env):
         patch("launchers.golf_launcher.subprocess.Popen") as mock_popen,
         patch("PyQt6.QtWidgets.QMessageBox.critical") as mock_msg,
     ):
-
         launcher.launch_simulation()
 
         # Should NOT call Popen because file is missing

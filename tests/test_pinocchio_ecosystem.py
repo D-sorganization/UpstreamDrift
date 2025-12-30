@@ -238,9 +238,9 @@ if __name__ == "__main__":
     result = runner.run(suite)
 
     # Print summary
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("Pinocchio Ecosystem Tests Summary")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Tests run: {result.testsRun}")
     print(f"Failures: {len(result.failures)}")
     print(f"Errors: {len(result.errors)}")

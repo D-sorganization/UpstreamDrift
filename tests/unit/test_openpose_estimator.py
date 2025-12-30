@@ -5,20 +5,65 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-# Mock pyopenpose module
-sys.modules["pyopenpose"] = MagicMock()
-import pyopenpose as op  # type: ignore
-
-# Mock cv2 before importing OpenPoseEstimator
-sys.modules["cv2"] = MagicMock()
-
 from shared.python.pose_estimation.openpose_estimator import OpenPoseEstimator
 
 
+@pytest.fixture(autouse=True)
+def mock_openpose_modules():
+    """Mock pyopenpose and cv2 modules for all tests."""
+    with patch.dict(sys.modules, {"pyopenpose": MagicMock(), "cv2": MagicMock()}):
+        # We need to reload the module or ensure it picks up the mock
+        # But since we patch sys.modules before import in the original file,
+        # we can't easily undo the import at module level.
+        # However, for the purpose of the test, we can patch sys.modules
+        # and re-import or just rely on the fact that we patched it.
+
+        # NOTE: Since the module 'shared.python.pose_estimation.openpose_estimator'
+        # imports pyopenpose at top level (maybe?), we must ensure mocks are in place.
+        # But 'OpenPoseEstimator' is already imported at top of this file.
+        # The original test file had sys.modules set at TOP LEVEL.
+        # Refactoring to a fixture means we must move the import INSIDE the test or fixture
+        # OR ensure the mock is established before the test runs.
+
+        # Current 'OpenPoseEstimator' import:
+        # from shared.python.pose_estimation.openpose_estimator import OpenPoseEstimator
+
+        # If we move sys.modules mock to a fixture, the top-level import might fail
+        # if it really requires pyopenpose to exist.
+        # The user wants to fix the module level mocking.
+
+        # Re-importing inside fixture to ensure mocks are used
+        import importlib
+
+        import shared.python.pose_estimation.openpose_estimator
+
+        importlib.reload(shared.python.pose_estimation.openpose_estimator)
+        yield
+
+
+# Re-import for type hints if needed, but we rely on the fixture
+
+
+# Need to mock op globally for the tests to see it?
+# In the original file:
+# sys.modules["pyopenpose"] = MagicMock()
+# import pyopenpose as op
+# We need 'op' to be available for assertions.
+
+# We will provide 'op' via fixture or just import it after mocking.
+
+
 @pytest.fixture
-def mock_op_wrapper():
+def op_mock(mock_openpose_modules):
+    import pyopenpose as op
+
+    return op
+
+
+@pytest.fixture
+def mock_op_wrapper(op_mock):
     wrapper = MagicMock()
-    op.WrapperPython.return_value = wrapper
+    op_mock.WrapperPython.return_value = wrapper
     return wrapper
 
 
@@ -31,13 +76,13 @@ def estimator(mock_op_wrapper):
     return est
 
 
-def test_initialization():
+def test_initialization(mock_openpose_modules):
     est = OpenPoseEstimator()
     assert est.wrapper is None
     assert est._is_loaded is False
 
 
-def test_load_model_success(estimator):
+def test_load_model_success(estimator, op_mock):
     # Reset to unloaded
     estimator._is_loaded = False
     estimator.wrapper = None
@@ -47,26 +92,26 @@ def test_load_model_success(estimator):
 
     assert estimator._is_loaded is True
     assert estimator.params["model_folder"] == str(path)
-    op.WrapperPython.assert_called()
+    op_mock.WrapperPython.assert_called()
     estimator.wrapper.configure.assert_called()
     estimator.wrapper.start.assert_called()
 
 
-def test_load_model_failure(estimator):
+def test_load_model_failure(estimator, op_mock):
     estimator._is_loaded = False
-    op.WrapperPython.side_effect = Exception("OpenPose Error")
+    op_mock.WrapperPython.side_effect = RuntimeError("OpenPose Error")
 
-    with pytest.raises(Exception):
+    with pytest.raises(RuntimeError):
         estimator.load_model(Path("/tmp"))
 
 
-def test_estimate_from_image_not_loaded():
+def test_estimate_from_image_not_loaded(mock_openpose_modules):
     est = OpenPoseEstimator()
     with pytest.raises(RuntimeError):
         est.estimate_from_image(np.zeros((100, 100, 3)))
 
 
-def test_estimate_from_image_success(estimator):
+def test_estimate_from_image_success(estimator, op_mock):
     # Setup mock datum
     datum = MagicMock()
     # Mock shape: (1 person, 25 parts, 3 values)
@@ -75,7 +120,7 @@ def test_estimate_from_image_success(estimator):
     datum.poseKeypoints[0, :, 2] = 0.8
 
     # Mock op.Datum()
-    op.Datum.return_value = datum
+    op_mock.Datum.return_value = datum
 
     # Mock wrapper behavior
     estimator.wrapper.emplaceAndPop.side_effect = (
@@ -90,17 +135,17 @@ def test_estimate_from_image_success(estimator):
     assert "Nose" in result.raw_keypoints
 
 
-def test_estimate_from_image_no_pose(estimator):
+def test_estimate_from_image_no_pose(estimator, op_mock):
     datum = MagicMock()
     datum.poseKeypoints = None  # Or empty array
-    op.Datum.return_value = datum
+    op_mock.Datum.return_value = datum
 
     result = estimator.estimate_from_image(np.zeros((100, 100, 3)))
     assert result.confidence == 0.0
     assert len(result.raw_keypoints) == 0
 
 
-def test_estimate_from_video_success(estimator):
+def test_estimate_from_video_success(estimator, op_mock):
     # We mock cv2 inside the test as well to control return values
     with patch("cv2.VideoCapture") as MockCap:
         cap = MockCap.return_value
@@ -117,7 +162,7 @@ def test_estimate_from_video_success(estimator):
         # Mock image processing
         datum = MagicMock()
         datum.poseKeypoints = np.ones((1, 25, 3))
-        op.Datum.return_value = datum
+        op_mock.Datum.return_value = datum
 
         results = estimator.estimate_from_video(Path("test.mp4"))
         assert len(results) == 2
