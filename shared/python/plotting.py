@@ -12,6 +12,7 @@ This module provides comprehensive plotting capabilities including:
 
 from __future__ import annotations
 
+import logging
 from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
@@ -19,6 +20,8 @@ from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 
 from shared.python.swing_plane_analysis import SwingPlaneAnalyzer
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     pass  # pragma: no cover
@@ -294,6 +297,10 @@ class GolfSwingPlotter:
         # Ensure lengths match (coupling might be N or N-1 depending on method)
         if len(coupling_angles) != len(times):
             # If length mismatch, trim times to match
+            logger.warning(
+                f"Coupling angle length ({len(coupling_angles)}) does not match "
+                f"time series length ({len(times)}). Truncating times."
+            )
             plot_times = times[: len(coupling_angles)]
         else:
             plot_times = times

@@ -141,8 +141,6 @@ def test_urdf_not_found():
 
 
 def test_optimization_failure(mock_casadi, mock_pinocchio):
-    # Reset side effect to ensure we don't run out of iterator items if main() retries stuff
-    # But main() calls solve() then exits if exception.
     mock_casadi.solve.side_effect = Exception("Infeasible")
 
     with patch("os.path.exists", return_value=True):
