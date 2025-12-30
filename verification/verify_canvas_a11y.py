@@ -3,7 +3,7 @@ import os
 from playwright.sync_api import expect, sync_playwright
 
 
-def run():
+def run() -> None:
     # Use absolute path for file URL
     file_path = os.path.abspath(
         "engines/physics_engines/pinocchio/python/double_pendulum_model/visualization/double_pendulum_web/index.html"
