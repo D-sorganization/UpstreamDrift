@@ -200,6 +200,132 @@ class GolfSwingPlotter:
         ax.grid(True, alpha=0.3, linestyle="--")
         fig.tight_layout()
 
+    def plot_angle_angle_diagram(
+        self,
+        fig: Figure,
+        joint_idx_1: int,
+        joint_idx_2: int,
+        title: str | None = None,
+    ) -> None:
+        """Plot Angle-Angle diagram (Cyclogram) for two joints.
+
+        Args:
+            fig: Matplotlib figure
+            joint_idx_1: Index of first joint (X-axis)
+            joint_idx_2: Index of second joint (Y-axis)
+            title: Optional title
+        """
+        times, positions = self.recorder.get_time_series("joint_positions")
+        positions = np.asarray(positions)
+
+        if (
+            len(times) == 0
+            or positions.ndim < 2
+            or joint_idx_1 >= positions.shape[1]
+            or joint_idx_2 >= positions.shape[1]
+        ):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        theta1 = np.rad2deg(positions[:, joint_idx_1])
+        theta2 = np.rad2deg(positions[:, joint_idx_2])
+
+        # Scatter with time color
+        sc = ax.scatter(theta1, theta2, c=times, cmap="viridis", s=30, alpha=0.7)
+        ax.plot(theta1, theta2, color="gray", alpha=0.3, linewidth=1)
+
+        # Mark Start/End
+        ax.scatter(
+            theta1[0],
+            theta2[0],
+            c="green",
+            s=100,
+            label="Start",
+            edgecolor="black",
+            zorder=5,
+        )
+        ax.scatter(
+            theta1[-1],
+            theta2[-1],
+            c="red",
+            s=100,
+            marker="s",
+            label="End",
+            edgecolor="black",
+            zorder=5,
+        )
+
+        name1 = self.get_joint_name(joint_idx_1)
+        name2 = self.get_joint_name(joint_idx_2)
+
+        ax.set_xlabel(f"{name1} Angle (deg)", fontsize=12, fontweight="bold")
+        ax.set_ylabel(f"{name2} Angle (deg)", fontsize=12, fontweight="bold")
+        ax.set_title(
+            title or f"Coordination: {name1} vs {name2}", fontsize=14, fontweight="bold"
+        )
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        fig.colorbar(sc, ax=ax, label="Time (s)")
+        fig.tight_layout()
+
+    def plot_coupling_angle(
+        self,
+        fig: Figure,
+        coupling_angles: np.ndarray,
+        title: str | None = None,
+    ) -> None:
+        """Plot Coupling Angle time series (Vector Coding).
+
+        Args:
+            fig: Matplotlib figure
+            coupling_angles: Array of coupling angles [0, 360)
+            title: Optional title
+        """
+        times, _ = self.recorder.get_time_series("joint_positions")
+
+        if len(times) == 0 or len(coupling_angles) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        # Ensure lengths match (coupling might be N or N-1 depending on method)
+        if len(coupling_angles) != len(times):
+            # If length mismatch, trim times to match
+            plot_times = times[: len(coupling_angles)]
+        else:
+            plot_times = times
+
+        ax = fig.add_subplot(111)
+
+        ax.plot(
+            plot_times,
+            coupling_angles,
+            color=self.colors["primary"],
+            linewidth=2,
+            label="Coupling Angle",
+        )
+
+        # Draw coordination zones (simplified)
+        # 0/360: In-phase (Both +)
+        # 45: Joint 2 dominant
+        # 90: Joint 1 frozen, Joint 2 moving
+        # 180: Anti-phase
+        # etc.
+        # Just simple grid lines for now
+        for angle in [0, 90, 180, 270, 360]:
+            ax.axhline(y=angle, color="gray", linestyle="--", alpha=0.3)
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Coupling Angle (deg)", fontsize=12, fontweight="bold")
+        ax.set_ylim(0, 360)
+        ax.set_yticks([0, 45, 90, 135, 180, 225, 270, 315, 360])
+        ax.set_title(title or "Coordination Variability", fontsize=14, fontweight="bold")
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+
     def plot_joint_velocities(
         self,
         fig: Figure,
