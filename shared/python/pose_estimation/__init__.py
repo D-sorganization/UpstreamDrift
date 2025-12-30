@@ -5,5 +5,6 @@ human pose / joint angles from video or mocap data.
 """
 
 from .interface import PoseEstimationResult, PoseEstimator
+from .openpose_estimator import OpenPoseEstimator
 
-__all__ = ["PoseEstimator", "PoseEstimationResult"]
+__all__ = ["PoseEstimator", "PoseEstimationResult", "OpenPoseEstimator"]

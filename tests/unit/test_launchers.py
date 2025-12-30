@@ -36,7 +36,7 @@ class TestLauncherModule:
             {
                 "PyQt6": Mock(),
                 "PyQt6.QtCore": Mock(),
-                "PyQt6.QtWidgets": Mock(),
+                "PyQt6.QtWidgets": Mock(QWidget=type("QWidget", (), {})),
             },
         ):
             try:
@@ -109,7 +109,7 @@ class TestLauncherModule:
                     "PyQt6": Mock(),
                     "PyQt6.QtCore": Mock(),
                     "PyQt6.QtGui": Mock(),
-                    "PyQt6.QtWidgets": Mock(),
+                    "PyQt6.QtWidgets": Mock(QWidget=type("QWidget", (), {})),
                 },
             ):
                 with patch("launchers.golf_launcher.GolfLauncher") as mock_launcher:
@@ -207,7 +207,7 @@ class TestLauncherIntegration:
             {
                 "PyQt6": Mock(),
                 "PyQt6.QtCore": Mock(),
-                "PyQt6.QtWidgets": Mock(),
+                "PyQt6.QtWidgets": Mock(QWidget=type("QWidget", (), {})),
             },
         ):
             try:
@@ -247,7 +247,7 @@ def mock_qt_application():
         {
             "PyQt6": Mock(),
             "PyQt6.QtCore": Mock(),
-            "PyQt6.QtWidgets": Mock(),
+            "PyQt6.QtWidgets": Mock(QWidget=type("QWidget", (), {})),
         },
     ):
         mock_app = Mock()
