@@ -2,6 +2,7 @@
 
 import numpy as np
 import pytest
+
 from engines.pendulum_models.python.double_pendulum import (
     I1,
     I2,
