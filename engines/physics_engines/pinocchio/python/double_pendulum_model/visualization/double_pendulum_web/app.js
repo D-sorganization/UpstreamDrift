@@ -279,8 +279,10 @@ function updateButtonStates(isRunning) {
   if (!isRunning && startSpan) {
     if (state.time !== 0) {
       startSpan.textContent = 'Resume';
+      startBtn.title = 'Resume simulation (Space)';
     } else {
       startSpan.textContent = 'Start';
+      startBtn.title = 'Start simulation (Space)';
     }
   }
 }
@@ -327,7 +329,7 @@ document.querySelectorAll('.grid input').forEach(input => {
 });
 
 document.addEventListener('keydown', (e) => {
-  if (e.target.tagName === 'INPUT') return;
+  if (e.target.matches('input, button, select, textarea')) return;
 
   if (e.key === ' ' || e.key === 'Spacebar') {
     e.preventDefault();
