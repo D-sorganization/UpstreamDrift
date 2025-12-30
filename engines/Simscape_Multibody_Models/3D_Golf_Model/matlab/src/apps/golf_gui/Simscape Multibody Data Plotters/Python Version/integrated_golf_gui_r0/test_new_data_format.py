@@ -52,7 +52,7 @@ def main():
 
     success = test_new_data_files()
 
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print("SUMMARY")
     print("=" * 50)
 

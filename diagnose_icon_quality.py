@@ -2,6 +2,7 @@
 """
 Diagnose icon quality issues and create ultra-sharp icons
 """
+
 import logging
 from pathlib import Path
 

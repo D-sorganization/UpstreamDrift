@@ -379,7 +379,7 @@ def plot_constraint_forces(
         else:
             # Multiple force components
             for i in range(forces.shape[1]):
-                ax.plot(time, forces[:, i], linewidth=2, label=f"Component {i+1}")
+                ax.plot(time, forces[:, i], linewidth=2, label=f"Component {i + 1}")
 
         ax.set_xlabel("Time (s)", fontsize=12)
         ax.set_ylabel("Force/Torque (N or N⋅m)", fontsize=12)

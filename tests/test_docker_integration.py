@@ -11,6 +11,15 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 
 
+def _is_docker_available() -> bool:
+    """Check if Docker is available."""
+    try:
+        result = subprocess.run(["docker", "--version"], capture_output=True, timeout=5)
+        return result.returncode == 0
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        return False
+
+
 class TestDockerBuild(unittest.TestCase):
     """Test Docker image building and configuration."""
 
@@ -40,10 +49,7 @@ class TestDockerBuild(unittest.TestCase):
         self.assertIn("/workspace/shared/python", pythonpath_line)
         self.assertIn("/workspace/engines", pythonpath_line)
 
-    @unittest.skipUnless(
-        subprocess.run(["docker", "--version"], capture_output=True).returncode == 0,
-        "Docker not available",
-    )
+    @unittest.skipUnless(_is_docker_available(), "Docker not available")
     def test_docker_available(self):
         """Test that Docker is available for building."""
         result = subprocess.run(["docker", "--version"], capture_output=True, text=True)
@@ -84,7 +90,6 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
         ):
-
             launcher._launch_docker_container(mock_model, mock_path)
 
             # Verify subprocess was called
@@ -128,7 +133,6 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.threading.Thread"),
         ):
-
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
@@ -163,7 +167,6 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.threading.Thread"),
         ):
-
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
@@ -196,7 +199,6 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
         ):
-
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
@@ -226,7 +228,6 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
         ):
-
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]

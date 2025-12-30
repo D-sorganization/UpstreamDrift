@@ -358,4 +358,81 @@ class AdvancedGuiMethodsMixin:
 
         tab_widget.addTab(ks_widget, "Kinematic Sequence")
 
+        # Tab 5: Coordination (Angle-Angle & Vector Coding)
+        coord_widget = QtWidgets.QWidget()
+        coord_layout = QtWidgets.QVBoxLayout(coord_widget)
+        fig5 = Figure(figsize=(8, 6))
+        canvas5 = FigureCanvasQTAgg(fig5)
+        coord_layout.addWidget(canvas5)
+
+        # We need 2 joints to compare. For now, we try to find Pelvis vs Torso
+        # (similar to Kinematic Sequence logic)
+        try:
+            # Re-use detection logic or indices from KS
+            # If KS tab detected indices, we could reuse them, but scope is separate.
+            # Let's re-detect roughly.
+            model = self.sim_widget.model
+
+            def get_dof_index(joint_name):
+                j_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
+                if j_id == -1:
+                    return None
+                return model.jnt_dofadr[j_id]
+
+            pelvis_idx = None
+            torso_idx = None
+
+            # Pelvis candidates
+            for cand in ["pelvis", "root", "waist"]:
+                idx = get_dof_index(cand)
+                if idx is not None:
+                    pelvis_idx = idx
+                    break
+
+            # Torso candidates
+            for cand in ["spine_rotation", "spine_yaw", "torso_twist"]:
+                idx = get_dof_index(cand)
+                if idx is not None:
+                    torso_idx = idx
+                    break
+
+            if pelvis_idx is not None and torso_idx is not None:
+                # Create subplots: 1. Angle-Angle, 2. Coupling Angle
+                # gs = fig5.add_gridspec(2, 1)
+
+                # Plot Angle-Angle
+                # We need to manually manage subplot placement since plotter methods
+                # use add_subplot(111)
+                # But plotter methods typically take `fig` and call
+                # `fig.add_subplot(111)`.
+                # If we pass a subfigure or modify plotting.py to accept axes,
+                # it would be cleaner.
+                # However, existing plotter clears fig.
+
+                # HACK: The current Plotter design is "One Plot Per Figure" generally.
+                # `plot_angle_angle_diagram` calls `fig.add_subplot(111)`.
+                # So we can't easily put two plots on `fig5`.
+                # We will just plot Angle-Angle for now, as it is the most
+                # visual "Advanced" feature.
+
+                plotter.plot_angle_angle_diagram(
+                    fig5, pelvis_idx, torso_idx, title="Coordination: Pelvis vs Torso"
+                )
+            else:
+                ax = fig5.add_subplot(111)
+                ax.text(
+                    0.5,
+                    0.5,
+                    "Could not identify Pelvis/Torso for Coordination",
+                    ha="center",
+                    va="center",
+                )
+
+        except Exception as e:
+            logger.error(f"Failed to plot coordination: {e}")
+            ax = fig5.add_subplot(111)
+            ax.text(0.5, 0.5, f"Error: {str(e)}", ha="center", va="center")
+
+        tab_widget.addTab(coord_widget, "Coordination")
+
         dialog.exec()

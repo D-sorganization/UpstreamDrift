@@ -109,6 +109,8 @@ class PinocchioRecorder:
         potential_energy: float = 0.0,
         club_head_position: np.ndarray | None = None,
         club_head_velocity: np.ndarray | None = None,
+        induced_accelerations: dict[str, np.ndarray] | None = None,
+        counterfactuals: dict[str, np.ndarray] | None = None,
     ) -> None:
         """Add a frame of data to the recording.
 
@@ -121,13 +123,10 @@ class PinocchioRecorder:
             potential_energy: System potential energy
             club_head_position: Club head position (3,)
             club_head_velocity: Club head linear velocity (3,)
+            induced_accelerations: Dict of induced accel components
+            counterfactuals: Dict of counterfactual metrics
         """
         if self.is_recording:
-            # Create a BiomechanicalData object
-            # Note: Pinocchio q includes quaternion for floating base (7 for freeflyer)
-            # v is generalized velocity (6 for freeflyer)
-            # Here we just store what we get, analysis might need handling for freeflyer
-
             # Simple energy calculation if not provided (approximate)
             total_energy = kinetic_energy + potential_energy
 
@@ -146,6 +145,8 @@ class PinocchioRecorder:
                 club_head_position=club_head_position,
                 club_head_velocity=club_head_velocity,
                 club_head_speed=club_head_speed,
+                induced_accelerations=induced_accelerations or {},
+                counterfactuals=counterfactuals or {},
             )
             self.frames.append(frame)
 
@@ -257,6 +258,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.q: np.ndarray | None = None
         self.v: np.ndarray | None = None
 
+        # Analysis
+        self.analyzer: InducedAccelerationAnalyzer | None = None
+
         # Recorder
         self.recorder = PinocchioRecorder()
         self.sim_time = 0.0
@@ -290,13 +294,14 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         except (ConnectionError, OSError, RuntimeError) as exc:
             logger.error(f"Failed to initialize Meshcat viewer: {exc}")
             self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
-
-        # Setup UI
-        self._setup_ui()
+            self.log_write("Please ensure meshcat-server is running or try again.")
 
         # Model Management
         self.available_models: list[dict] = []
         self._scan_urdf_models()
+
+        # Setup UI
+        self._setup_ui()
 
         # Timer
         self.timer = QtCore.QTimer()
@@ -424,6 +429,14 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         scale_layout.addWidget(self.spin_torque_scale)
         vis_layout.addLayout(scale_layout)
 
+        self.chk_forces = QtWidgets.QCheckBox("Show Forces")
+        self.chk_forces.toggled.connect(self._toggle_forces)
+        vis_layout.addWidget(self.chk_forces)
+
+        self.chk_torques = QtWidgets.QCheckBox("Show Torques")
+        self.chk_torques.toggled.connect(self._toggle_torques)
+        vis_layout.addWidget(self.chk_torques)
+
         vis_group.setLayout(vis_layout)
         sim_layout.addWidget(vis_group)
 
@@ -465,6 +478,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 "Frequency Analysis (PSD)",
                 "Correlation Matrix",
                 "Induced Accelerations",
+                "Counterfactuals (ZTCF/ZVCF)",
                 "Swing DNA (Radar)",
                 "Power Flow",
             ]
@@ -473,8 +487,18 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.joint_select_combo = QtWidgets.QComboBox()
         # Will be populated when model loads
         self.joint_select_combo.setMinimumWidth(120)
+
+        self.induced_source_edit = QtWidgets.QLineEdit()
+        self.induced_source_edit.setPlaceholderText("Induced Source (Torque Vector)")
+        self.induced_source_edit.setToolTip(
+            "Enter comma-separated torques or keep empty for standard analysis"
+        )
+        self.induced_source_edit.setMaximumWidth(150)
+
         controls.addWidget(QtWidgets.QLabel("Joint:"))
         controls.addWidget(self.joint_select_combo)
+        controls.addWidget(QtWidgets.QLabel("Source:"))
+        controls.addWidget(self.induced_source_edit)
         controls.addWidget(QtWidgets.QLabel("Plot Type:"))
         controls.addWidget(self.plot_combo)
 
@@ -541,6 +565,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             plotter.plot_correlation_matrix(self.canvas.fig)
         elif plot_type == "Induced Accelerations":
             self._plot_induced_accelerations()
+        elif plot_type == "Counterfactuals (ZTCF/ZVCF)":
+            self._plot_counterfactuals()
         elif plot_type == "Swing DNA (Radar)":
             self._plot_swing_dna(plotter)
         elif plot_type == "Power Flow":
@@ -597,55 +623,119 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         plotter.plot_radar_chart(self.canvas.fig, metrics)
 
+    def _ensure_analyzer_initialized(self) -> None:
+        """Ensure the InducedAccelerationAnalyzer is initialized."""
+        if self.analyzer is None and self.model is not None:
+            self.analyzer = InducedAccelerationAnalyzer(self.model, self.data)
+
     def _plot_induced_accelerations(self) -> None:
         """Calculate and plot induced accelerations for selected joint."""
-        if self.model is None or not self.recorder.frames:
+        # Check for data presence
+        if not self.recorder.frames:
             return
+
+        # Check if we have induced data in frames
+        # If we recorded it frame-by-frame, we can just pull it.
+        # But we currently don't populate it in _game_loop to save perf
+        # (unless I update _game_loop).
+        # However, we can compute post-hoc if we saved Q/V/Tau.
+
+        # Let's assume we use the Analyzer to recompute if missing,
+        # or use saved if present.
 
         # Get selected joint
         joint_name = self.joint_select_combo.currentText()
         if not joint_name:
-            # Fallback
             if self.joint_names:
                 joint_name = self.joint_names[0]
             else:
                 return
 
         try:
+            if self.model is None:
+                return
             joint_idx = list(self.model.names).index(joint_name)
             v_idx = self.model.joints[joint_idx].idx_v
         except ValueError:
             return
 
-        analyzer = InducedAccelerationAnalyzer(self.model, self.data)
-
+        # Prepare arrays
         times = []
         g_accs = []
         v_accs = []
         c_accs = []
         t_accs = []
 
-        # Progress bar could be nice here if slow, but simple loop for now
+        # Use existing analyzer or create new
+        self._ensure_analyzer_initialized()
+
         for frame in self.recorder.frames:
             times.append(frame.time)
 
-            # Reconstruct state
-            res = analyzer.compute_components(
-                frame.joint_positions,
-                frame.joint_velocities,
-                frame.joint_torques,
-            )
+            # If we have pre-computed induced accels (future proofing)
+            if frame.induced_accelerations and self.model is not None:
+                # Assume dictionary structure
+                # We need to map joint index to array index.
+                # Usually array is size NV. v_idx points to start.
+                # Assuming 1-DOF for plotting.
+                g = frame.induced_accelerations.get("gravity", np.zeros(self.model.nv))
+                v = frame.induced_accelerations.get("velocity", np.zeros(self.model.nv))
+                c = frame.induced_accelerations.get("control", np.zeros(self.model.nv))
+                total_acc = frame.induced_accelerations.get(
+                    "total", np.zeros(self.model.nv)
+                )
 
-            # Extract acceleration for the specific joint (v_idx)
-            # v_idx points to the start of the DOF in the velocity vector
-            # (and acceleration vector)
-            # Assuming 1-DOF for simplicity or take the first DOF of the joint
-            dof = 0
+                g_accs.append(g[v_idx])
+                v_accs.append(v[v_idx])
+                c_accs.append(c[v_idx])
+                t_accs.append(total_acc[v_idx])
 
-            g_accs.append(res["gravity"][v_idx + dof])
-            v_accs.append(res["velocity"][v_idx + dof])
-            c_accs.append(res["control"][v_idx + dof])
-            t_accs.append(res["total"][v_idx + dof])
+            else:
+                # Recompute post-hoc
+                if self.analyzer is not None:
+                    res = self.analyzer.compute_components(
+                        frame.joint_positions,
+                        frame.joint_velocities,
+                        frame.joint_torques,
+                    )
+                g_accs.append(res["gravity"][v_idx])
+                v_accs.append(res["velocity"][v_idx])
+                c_accs.append(res["control"][v_idx])
+                t_accs.append(res["total"][v_idx])
+
+        # Specific Control Input
+        spec_tau: np.ndarray | None = None
+        txt = self.induced_source_edit.text().strip()
+        if txt and self.model:
+            try:
+                # Parse comma separated values
+                parts: list[float] = [float(x) for x in txt.split(",")]
+                if len(parts) == self.model.nv:
+                    spec_tau = np.array(parts)
+                else:
+                    # Pad or truncate? Or just log warning.
+                    # Let's try to map to size NV.
+                    logger.warning(
+                        f"Input torque vector length {len(parts)} does not match "
+                        f"model NV {self.model.nv}. Padding/Truncating."
+                    )
+                    temp_tau = np.zeros(self.model.nv, dtype=np.float64)
+                    min_len = min(len(parts), len(temp_tau))
+                    temp_tau[:min_len] = parts[:min_len]
+                    spec_tau = temp_tau
+            except ValueError:
+                pass
+
+        spec_accs = []
+        if spec_tau is not None and self.analyzer:
+            # Recompute for whole trajectory
+            for frame in self.recorder.frames:
+                # We need q.
+                # Assuming compute_specific_control(q, tau)
+                a_spec = self.analyzer.compute_specific_control(
+                    frame.joint_positions, spec_tau
+                )
+                spec_accs.append(a_spec[v_idx])
 
         # Plot
         ax = self.canvas.fig.add_subplot(111)
@@ -654,11 +744,86 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         ax.plot(times, c_accs, label="Control (Torque)", linestyle=":", alpha=0.8)
         ax.plot(times, t_accs, label="Total", color="k", linewidth=1.5)
 
+        if spec_accs:
+            ax.plot(times, spec_accs, label="Specific Source", color="m", linewidth=2)
+
         ax.set_title(f"Induced Accelerations: {joint_name}")
         ax.set_xlabel("Time [s]")
         ax.set_ylabel("Acceleration [rad/s²]")
         ax.legend()
         ax.grid(True, linestyle=":", alpha=0.6)
+
+    def _plot_counterfactuals(self) -> None:
+        """Plot ZTCF (Zero Torque Accel) and ZVCF (Zero Velocity Torque)."""
+        if not self.recorder.frames:
+            return
+
+        joint_name = self.joint_select_combo.currentText()
+        if not joint_name:
+            if self.joint_names:
+                joint_name = self.joint_names[0]
+            else:
+                return
+
+        try:
+            if self.model is None:
+                return
+            joint_idx = list(self.model.names).index(joint_name)
+            v_idx = self.model.joints[joint_idx].idx_v
+        except ValueError:
+            return
+
+        times = []
+        ztcf_vals = []  # Acceleration
+        zvcf_vals = []  # Torque/Force
+
+        if self.analyzer is None and self.model is not None:
+            self._ensure_analyzer_initialized()
+
+        for frame in self.recorder.frames:
+            times.append(frame.time)
+
+            if frame.counterfactuals and self.model is not None:
+                ztcf = frame.counterfactuals.get("ztcf_accel", np.zeros(self.model.nv))
+                zvcf = frame.counterfactuals.get("zvcf_torque", np.zeros(self.model.nv))
+                ztcf_vals.append(ztcf[v_idx])
+                zvcf_vals.append(zvcf[v_idx])
+            else:
+                # Recompute
+                if self.analyzer is None and self.model is not None:
+                    self._ensure_analyzer_initialized()
+
+                if self.analyzer is not None:
+                    res = self.analyzer.compute_counterfactuals(
+                        frame.joint_positions, frame.joint_velocities
+                    )
+                    ztcf_vals.append(res["ztcf_accel"][v_idx])
+                    zvcf_vals.append(res["zvcf_torque"][v_idx])
+                else:
+                    # Fallback if analyzer init failed
+                    ztcf_vals.append(0.0)
+                    zvcf_vals.append(0.0)
+
+        # Plot with dual y-axis
+        ax1 = self.canvas.fig.add_subplot(111)
+        line1 = ax1.plot(times, ztcf_vals, "b-", label="ZTCF Accel (Zero Torque)")
+        ax1.set_xlabel("Time [s]")
+        ax1.set_ylabel("Acceleration [rad/s²]", color="b")
+        ax1.tick_params(axis="y", labelcolor="b")
+
+        ax2 = ax1.twinx()
+        line2 = ax2.plot(times, zvcf_vals, "r--", label="ZVCF Torque (Zero Velocity)")
+        ax2.set_ylabel("Torque [Nm]", color="r")
+        ax2.tick_params(axis="y", labelcolor="r")
+
+        ax1.set_title(f"Counterfactual Analysis: {joint_name}")
+
+        # Legend
+        lns = line1 + line2
+        labs = [str(line.get_label()) for line in lns]
+        ax1.legend(lns, labs, loc=0)
+
+        ax1.grid(True)
 
     def _export_statistics(self) -> None:
         """Export statistical analysis to CSV."""
@@ -800,6 +965,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self.q = pin.neutral(self.model)
             self.v = np.zeros(self.model.nv)
             self.sim_time = 0.0
+
+            # Init Analyzer
+            self.analyzer = InducedAccelerationAnalyzer(self.model, self.data)
 
             # Reset recorder
             self.recorder.reset()
@@ -1064,6 +1232,21 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
                 # Ensure q is not None for recording
                 q_for_recording = self.q if self.q is not None else np.array([])
+
+                # Induced / Counterfactuals
+                # Computing every frame inside loop is costly but most correct
+                # for playback.
+                # Let's compute them.
+                induced = None
+                counterfactuals = None
+
+                if self.analyzer and self.q is not None and self.v is not None:
+                    induced = self.analyzer.compute_components(self.q, self.v, tau)
+                    if hasattr(self.analyzer, "compute_counterfactuals"):
+                        counterfactuals = self.analyzer.compute_counterfactuals(
+                            self.q, self.v
+                        )
+
                 self.recorder.record_frame(
                     time=self.sim_time,
                     q=q_for_recording,
@@ -1073,6 +1256,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                     potential_energy=self.data.potential_energy,
                     club_head_position=club_head_pos,
                     club_head_velocity=club_head_vel,
+                    induced_accelerations=induced,
+                    counterfactuals=counterfactuals,
                 )
                 self.lbl_rec_status.setText(f"Frames: {self.recorder.get_num_frames()}")
 
