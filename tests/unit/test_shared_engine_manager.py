@@ -134,7 +134,6 @@ class TestEngineManager(unittest.TestCase):
                 patch("pathlib.Path.exists", return_value=True),
                 patch("pathlib.Path.glob", return_value=[Path("model.xml")]),
             ):
-
                 mock_mujoco.MjModel.from_xml_path.return_value = MagicMock()
 
                 manager._load_mujoco_engine()

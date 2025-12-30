@@ -446,7 +446,7 @@ class Phase1Validator:
         print(f"Total Checks: {total_checks}")
         print(f"Passed: {passed_checks}")
         print(f"Failed: {total_checks - passed_checks}")
-        print(f"Success Rate: {passed_checks/total_checks*100:.1f}%")
+        print(f"Success Rate: {passed_checks / total_checks * 100:.1f}%")
 
         if self.errors:
             print(f"\n❌ ERRORS ({len(self.errors)}):")

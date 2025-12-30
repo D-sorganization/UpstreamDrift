@@ -119,7 +119,6 @@ def test_export_to_urdf(mock_mujoco_model):
             patch("mujoco.mj_id2name", side_effect=id2name),
             patch("pathlib.Path.write_text"),
         ):
-
             urdf_str = exporter.export_to_urdf("output.urdf", "test_robot")
 
             # Debug output if assertion fails
@@ -172,7 +171,6 @@ def test_export_model_to_urdf_function(mock_mujoco_model):
         patch("pathlib.Path.write_text"),
         patch("mujoco.MjData", autospec=True),
     ):
-
         urdf_str = export_model_to_urdf(mock_mujoco_model, "out.urdf")
         assert len(urdf_str) > 0
 
@@ -184,7 +182,6 @@ def test_urdf_importer_import(sample_urdf_xml):
         patch("defusedxml.ElementTree.parse") as mock_parse,
         patch("pathlib.Path.exists", return_value=True),
     ):
-
         mock_tree = MagicMock()
         mock_tree.getroot.return_value = ET.fromstring(sample_urdf_xml)
         mock_parse.return_value = mock_tree
@@ -203,7 +200,6 @@ def test_import_urdf_to_mujoco_function(sample_urdf_xml):
         patch("defusedxml.ElementTree.parse") as mock_parse,
         patch("pathlib.Path.exists", return_value=True),
     ):
-
         mock_tree = MagicMock()
         mock_tree.getroot.return_value = ET.fromstring(sample_urdf_xml)
         mock_parse.return_value = mock_tree
@@ -228,7 +224,6 @@ def test_exporter_no_root_body(mock_mujoco_model):
             patch("mujoco.mj_id2name", return_value="world"),
             patch("pathlib.Path.write_text"),
         ):
-
             urdf_str = exporter.export_to_urdf("out.urdf")
             # Should just be empty robot tag basically
             assert "<robot" in urdf_str

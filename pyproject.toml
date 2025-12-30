@@ -68,6 +68,8 @@ analysis = [
     "scikit-learn>=1.3.0",
     "h5py>=3.9.0",
     "pillow>=10.0.0",
+    "pyarrow>=14.0.0", # Used by OutputManager for Parquet support
+    "tables>=3.9.0",   # Used by OutputManager for HDF5 support
 ]
 optimization = [
     "casadi>=3.6.3",
@@ -129,6 +131,7 @@ select = [
     "B",  # flake8-bugbear
     "C4", # flake8-comprehensions
     "UP", # pyupgrade
+    "T",  # flake8-print (Check for print statements)
 ]
 ignore = [
     "E501",  # line too long, handled by black
@@ -138,7 +141,23 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
-"test_*.py" = ["B011"]
+"test_*.py" = ["B011", "T201"]
+"tests/*" = ["T201"]
+"scripts/*" = ["T201"]
+"tools/*" = ["T201"]
+"launchers/*" = ["T201"]
+"*/examples/*" = ["T201"]
+"reproduce_issue_fix.py" = ["T201"]
+"validate_phase1_upgrades.py" = ["T201"]
+"validate_suite.py" = ["T201"]
+"check_system_health.py" = ["T201"]
+"show_physics_parameters.py" = ["T201"]
+"engines/physics_engines/mujoco/python/mujoco_humanoid_golf/cli_runner.py" = ["T201"]
+"engines/pendulum_models/tools/scientific_auditor.py" = ["T201"]
+"engines/Simscape_Multibody_Models/**/*.py" = ["T201"]
+"engines/pendulum_models/**/*.py" = ["T201"]
+"engines/physics_engines/mujoco/python/tests/test_urdf_io.py" = ["T201"]
+"verification/*" = ["T201"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -156,12 +175,63 @@ exclude = [
     "archive",
     "tests",
     "drake",
+    "engines/physics_engines/mujoco/rebuild_docker.py",
+    "engines/physics_engines/mujoco/test_docker_venv.py",
+    "engines/physics_engines/mujoco/add_defusedxml_to_robotics_env.py",
+    "engines/physics_engines/mujoco/add_qt_dependencies.py",
+    "engines/physics_engines/mujoco/create_myo_placeholders.py",
+    "engines/physics_engines/mujoco/docker_test_dependencies.py",
+    "engines/physics_engines/mujoco/fix_linting.py",
+    "engines/physics_engines/mujoco/head_models.py",
+    "engines/physics_engines/mujoco/test_dependencies.py",
+    "engines/physics_engines/mujoco/test_mechanisms.py",
+    "engines/physics_engines/mujoco/test_new_models.py",
+    "engines/physics_engines/mujoco/docker/",
 ]
 
 [[tool.mypy.overrides]]
-# Allow untyped definitions in engines for now to allow gradual migration
-module = "engines.*"
+# Temporary overrides for modules that still have untyped definitions
+# Goal: Remove these overrides as files are typed
+module = [
+    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.meshcat_adapter",
+    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget",
+    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.grip_modelling_tab",
+    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.controls_tab",
+    "engines.physics_engines.mujoco.python.humanoid_launcher",
+    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.plotting",
+    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.examples_chaotic_pendulum",
+    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.advanced_gui_methods",
+    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.examples_joint_analysis",
+    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.linkage_mechanisms.*",
+    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.motion_optimization",
+    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.club_configurations",
+    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export",
+    "engines.physics_engines.drake.python.swing_plane_integration",
+    "engines.physics_engines.drake.python.motion_optimization",
+    "engines.physics_engines.drake.python.src.drake_gui_app",
+    "engines.physics_engines.pinocchio.python.swing_plane_integration",
+    "engines.pendulum_models.python.ui.double_pendulum_gui",
+    "engines.physics_engines.mujoco.rebuild_docker",
+    "engines.physics_engines.mujoco.test_docker_venv",
+    "engines.physics_engines.mujoco.add_defusedxml_to_robotics_env",
+    "engines.physics_engines.mujoco.add_qt_dependencies",
+    "engines.physics_engines.mujoco.create_myo_placeholders",
+    "engines.physics_engines.mujoco.docker_test_dependencies",
+    "engines.physics_engines.mujoco.fix_linting",
+    "engines.physics_engines.mujoco.head_models",
+    "engines.physics_engines.mujoco.test_dependencies",
+    "engines.physics_engines.mujoco.test_mechanisms",
+    "engines.physics_engines.mujoco.test_new_models"
+]
 disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = "engines.physics_engines.drake.python.motion_optimization"
+warn_return_any = false
+
+[[tool.mypy.overrides]]
+module = "engines.physics_engines.drake.python.src.drake_gui_app"
+ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = "engines.physics_engines.pinocchio.python.double_pendulum_model.tests.*"

@@ -79,8 +79,7 @@ class PinocchioWrapper:
         """
         if not PINOCCHIO_AVAILABLE:
             msg = (
-                "Pinocchio is required but not installed. "
-                "Install with: pip install pin"
+                "Pinocchio is required but not installed. Install with: pip install pin"
             )
             raise ImportError(msg)
 

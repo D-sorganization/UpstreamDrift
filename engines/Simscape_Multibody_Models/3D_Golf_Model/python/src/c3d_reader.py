@@ -213,7 +213,7 @@ class C3DDataReader:
         sample_indices = np.arange(values.shape[0])
         channel_names = np.array(
             metadata.analog_labels
-            or [f"Analog_{idx+1}" for idx in range(channel_count)]
+            or [f"Analog_{idx + 1}" for idx in range(channel_count)]
         )
 
         dataframe = pd.DataFrame(
@@ -325,7 +325,7 @@ class C3DDataReader:
             analog_rate = float(analog_parameters.get("RATE", {}).get("value", [0])[0])
 
         if not labels and channel_count > 0:
-            labels = [f"Analog_{idx+1}" for idx in range(channel_count)]
+            labels = [f"Analog_{idx + 1}" for idx in range(channel_count)]
 
         return labels, analog_rate
 

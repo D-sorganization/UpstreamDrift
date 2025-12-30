@@ -407,7 +407,7 @@ class DoublePendulumApp:
         def on_enter(event):
             tooltip = tk.Toplevel()
             tooltip.wm_overrideredirect(True)
-            tooltip.wm_geometry(f"+{event.x_root+10}+{event.y_root+10}")
+            tooltip.wm_geometry(f"+{event.x_root + 10}+{event.y_root + 10}")
             label = tk.Label(
                 tooltip,
                 text=text,

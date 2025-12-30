@@ -23,6 +23,8 @@ import numpy as np
 import numpy.typing as npt
 from scipy.integrate import solve_ivp
 
+from shared.python.constants import GRAVITY_M_S2
+
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
@@ -37,7 +39,7 @@ c1 = 0.5  # COM distance of link 1 from joint 1
 c2 = 0.5  # COM distance of link 2 from joint 2
 I1 = 0.05  # inertia of link 1 about its COM (out of plane)
 I2 = 0.05  # inertia of link 2 about its COM (out of plane)
-g = 9.81  # gravity
+GRAVITY = GRAVITY_M_S2  # gravity from shared constants
 
 
 # ---------------------------------------------------------------------------
@@ -127,8 +129,10 @@ def g_vector(q: npt.NDArray[np.float64]) -> npt.NDArray[np.float64]:
     """
     q1, q2 = q
 
-    g1 = (m1 * c1 + m2 * l1) * g * np.sin(q1) + m2 * c2 * g * np.sin(q1 + q2)
-    g2 = m2 * c2 * g * np.sin(q1 + q2)
+    g1 = (m1 * c1 + m2 * l1) * GRAVITY * np.sin(q1) + m2 * c2 * GRAVITY * np.sin(
+        q1 + q2
+    )
+    g2 = m2 * c2 * GRAVITY * np.sin(q1 + q2)
 
     return np.array([g1, g2], dtype=float)
 

@@ -2,6 +2,7 @@
 """
 Create favicon and icon files from GolfingRobot.png
 """
+
 import logging
 from pathlib import Path
 

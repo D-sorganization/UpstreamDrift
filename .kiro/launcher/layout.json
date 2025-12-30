@@ -1,10 +1,10 @@
 {
   "model_order": [
-    "c3d_viewer",
+    "model_2",
     "model_1",
-    "urdf_generator",
-    "model_0"
+    "model_0",
+    "model_3"
   ],
-  "selected_model": null,
+  "selected_model": "model_0",
   "window_geometry": {
     "x": 

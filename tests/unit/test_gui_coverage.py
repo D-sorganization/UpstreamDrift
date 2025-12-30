@@ -23,7 +23,6 @@ def clean_imports():
 
 
 class TestGUIComponents:
-
     def test_sim_widget_coverage(self, clean_imports):
         with patch.dict(
             sys.modules,
@@ -70,7 +69,6 @@ class TestGUIComponents:
                     "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget.mujoco.Renderer"
                 ),
             ):
-
                 widget = MuJoCoSimWidget(width=100, height=100, fps=60)
                 # Mock model/data for coverage
                 widget.model = MagicMock()
@@ -110,7 +108,6 @@ class TestGUIComponents:
                 "PyQt6.QtGui": MagicMock(),
             },
         ):
-
             from engines.physics_engines.mujoco.python.humanoid_launcher import (
                 HumanoidLauncher,
             )  # noqa: E402, I001

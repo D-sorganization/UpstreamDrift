@@ -47,7 +47,7 @@ def main() -> None:
         print("\n--- MEASUREMENTS ---")
         print(f"Head Top Z: {max_z:.4f} m")
         print(f"Foot Low Z: {min_z:.4f} m")
-        print(f"Total Height: {height:.4f} m (approx {height*3.28084:.2f} ft)")
+        print(f"Total Height: {height:.4f} m (approx {height * 3.28084:.2f} ft)")
         print("--------------------")
 
     except Exception as e:
