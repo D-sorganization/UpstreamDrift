@@ -181,7 +181,9 @@ class DraggableModelCard(QFrame):
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse press for selection and drag initiation."""
-        if event and event.button() == Qt.MouseButton.LeftButton:
+        if event and (
+            event.button() == Qt.MouseButton.LeftButton or event.button() == 1
+        ):
             self.drag_start_position = event.position().toPoint()
             if self.parent_launcher:
                 self.parent_launcher.select_model(self.model.id)
