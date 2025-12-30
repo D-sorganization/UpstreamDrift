@@ -785,7 +785,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 zvcf_vals.append(zvcf[v_idx])
             else:
                 # Recompute
-                if self.analyzer is not None and hasattr(self.analyzer, 'compute_counterfactuals'):
+                if (self.analyzer is not None and
+                    hasattr(self.analyzer, 'compute_counterfactuals')):
                     res = self.analyzer.compute_counterfactuals(
                         frame.joint_positions, frame.joint_velocities
                     )
