@@ -117,7 +117,7 @@ class InducedAccelerationAnalyzer:
         a_tau_G = pin.aba(
             self.model, self._temp_data, q, np.zeros(self.nv), specific_tau
         )
-        a_G = pin.aba(
+        a_G: np.ndarray = pin.aba(
             self.model, self._temp_data, q, np.zeros(self.nv), np.zeros(self.nv)
         )
 
