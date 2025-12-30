@@ -6,17 +6,24 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Force ImportError for PyQt6 to use fallback classes defined in process_worker.py
-# This ensures ProcessWorker is a real class, not a Mock subclass
-sys.modules["PyQt6.QtCore"] = None
 
-# Now import ProcessWorker
-from shared.python.process_worker import ProcessWorker  # noqa: E402
+@pytest.fixture
+def mock_pyqt6():
+    """Mock PyQt6 to force fallback implementation."""
+    with patch.dict(sys.modules, {"PyQt6.QtCore": None}):
+        # Reload the module to pick up the change
+        if "shared.python.process_worker" in sys.modules:
+            del sys.modules["shared.python.process_worker"]
+
+        from shared.python.process_worker import ProcessWorker
+
+        yield ProcessWorker
 
 
 @pytest.fixture
-def worker():
+def worker(mock_pyqt6):
     # Since we use fallback, we can instantiate it directly
+    ProcessWorker = mock_pyqt6
     return ProcessWorker(["echo", "hello"])
 
 

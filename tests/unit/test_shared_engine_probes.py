@@ -242,6 +242,7 @@ def test_matlab_probe_not_installed(tmp_path):
 def test_opensim_probe_success(tmp_path):
     engine_dir = tmp_path / "engines/physics_engines/opensim"
     (engine_dir / "python/opensim_golf").mkdir(parents=True)
+    (engine_dir / "python/opensim_physics_engine.py").touch()
 
     from shared.python.engine_probes import OpenSimProbe
 
