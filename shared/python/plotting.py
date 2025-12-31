@@ -1517,74 +1517,158 @@ class GolfSwingPlotter:
         fig.tight_layout()
 
     def plot_induced_acceleration(
-        self, fig: Figure, source_name: str, joint_idx: int | None = None
+        self,
+        fig: Figure,
+        source_name: str,
+        joint_idx: int | None = None,
+        breakdown_mode: bool = False,
     ) -> None:
-        """Plot induced accelerations from a specific source.
+        """Plot induced accelerations.
 
         Args:
             fig: Matplotlib figure
-            source_name: Name of the force source
+            source_name: Name of the force source (or 'breakdown' for all components)
             joint_idx: Optional joint index to plot (plots magnitude or all if None)
+            breakdown_mode: If True, plots Gravity, Velocity, and Total components
         """
-        try:
-            times, acc = self.recorder.get_induced_acceleration_series(source_name)
-        except (AttributeError, KeyError):
-            ax = fig.add_subplot(111)
-            ax.text(
-                0.5,
-                0.5,
-                f"No induced acceleration data for {source_name}",
-                ha="center",
-                va="center",
-            )
-            return
-
-        if len(times) == 0 or acc.size == 0:
-            ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, f"No data for {source_name}", ha="center", va="center")
-            return
-
         ax = fig.add_subplot(111)
 
-        if joint_idx is not None:
-            # Plot specific joint
-            if joint_idx < acc.shape[1]:
-                ax.plot(
-                    times,
-                    acc[:, joint_idx],
-                    label=self.get_joint_name(joint_idx),
-                    linewidth=2,
-                    color=self.colors["primary"],
+        if breakdown_mode:
+            # Plot Gravity, Velocity, Control, Total for one joint
+            if joint_idx is None:
+                joint_idx = 0  # Default to 0 if not specified
+
+            # Fetch components
+            components = ["gravity", "velocity", "total"]
+            linestyles = ["--", "-.", "-"]
+            labels = ["Gravity", "Velocity (Coriolis)", "Total (Passive)"]
+            colors = [
+                self.colors["secondary"],
+                self.colors["tertiary"],
+                "black",
+            ]  # type: ignore[list-item]
+
+            has_data = False
+            times = np.array([])
+
+            for comp, ls, lbl, clr in zip(
+                components, linestyles, labels, colors, strict=True
+            ):
+                try:
+                    times, acc = self.recorder.get_induced_acceleration_series(comp)
+                    if len(times) > 0 and acc.size > 0 and joint_idx < acc.shape[1]:
+                        ax.plot(
+                            times,
+                            acc[:, joint_idx],
+                            label=lbl,
+                            linestyle=ls,
+                            color=clr,
+                            linewidth=2 if comp == "total" else 1.5,
+                        )
+                        has_data = True
+                except (AttributeError, KeyError):
+                    continue
+
+            # Attempt to fetch control/specific if available
+            try:
+                times_c, acc_c = self.recorder.get_induced_acceleration_series(
+                    "control"
                 )
-                ax.set_ylabel(
-                    f"Joint {joint_idx} Acceleration (rad/s²)",
-                    fontsize=12,
-                    fontweight="bold",
-                )
-            else:
+                if (
+                    len(times_c) > 0
+                    and acc_c.size > 0
+                    and joint_idx < acc_c.shape[1]
+                ):
+                    ax.plot(
+                        times_c,
+                        acc_c[:, joint_idx],
+                        label="Control",
+                        linestyle=":",
+                        color=self.colors["quaternary"],
+                        linewidth=1.5,
+                    )
+            except (AttributeError, KeyError):
+                pass
+
+            if not has_data:
                 ax.text(
                     0.5,
                     0.5,
-                    f"Joint index {joint_idx} out of bounds",
+                    "No induced acceleration breakdown data",
                     ha="center",
                     va="center",
                 )
                 return
-        else:
-            # Plot magnitude or norm if too many dimensions?
-            # Or plot all joints? Let's plot L2 norm for summary
-            norm = np.linalg.norm(acc, axis=1)
-            ax.plot(
-                times, norm, label="L2 Norm", linewidth=2, color=self.colors["primary"]
+
+            joint_name = self.get_joint_name(joint_idx)
+            ax.set_title(
+                f"Induced Accelerations Breakdown: {joint_name}",
+                fontsize=14,
+                fontweight="bold",
             )
-            ax.set_ylabel(
-                "Acceleration Magnitude (rad/s²)", fontsize=12, fontweight="bold"
+
+        else:
+            # Single source mode
+            try:
+                times, acc = self.recorder.get_induced_acceleration_series(source_name)
+            except (AttributeError, KeyError):
+                ax.text(
+                    0.5,
+                    0.5,
+                    f"No induced acceleration data for {source_name}",
+                    ha="center",
+                    va="center",
+                )
+                return
+
+            if len(times) == 0 or acc.size == 0:
+                ax.text(
+                    0.5, 0.5, f"No data for {source_name}", ha="center", va="center"
+                )
+                return
+
+            if joint_idx is not None:
+                # Plot specific joint
+                if joint_idx < acc.shape[1]:
+                    ax.plot(
+                        times,
+                        acc[:, joint_idx],
+                        label=self.get_joint_name(joint_idx),
+                        linewidth=2,
+                        color=self.colors["primary"],
+                    )
+                    ax.set_ylabel(
+                        f"Joint {joint_idx} Acceleration (rad/s²)",
+                        fontsize=12,
+                        fontweight="bold",
+                    )
+                else:
+                    ax.text(
+                        0.5,
+                        0.5,
+                        f"Joint index {joint_idx} out of bounds",
+                        ha="center",
+                        va="center",
+                    )
+                    return
+            else:
+                # Plot L2 norm for summary
+                norm = np.linalg.norm(acc, axis=1)
+                ax.plot(
+                    times,
+                    norm,
+                    label="L2 Norm",
+                    linewidth=2,
+                    color=self.colors["primary"],
+                )
+                ax.set_ylabel(
+                    "Acceleration Magnitude (rad/s²)", fontsize=12, fontweight="bold"
+                )
+            ax.set_title(
+                f"Induced Acceleration: {source_name}", fontsize=14, fontweight="bold"
             )
 
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
-        ax.set_title(
-            f"Induced Acceleration: {source_name}", fontsize=14, fontweight="bold"
-        )
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3, linestyle="--")
         fig.tight_layout()
@@ -1596,9 +1680,15 @@ class GolfSwingPlotter:
 
         Args:
             fig: Matplotlib figure
-            cf_name: Name of counterfactual (e.g. 'ztcf')
-            metric_idx: Index of metric to compare (e.g. joint angle index)
+            cf_name: Name of counterfactual (e.g. 'ztcf', 'zvcf', or 'dual')
+            metric_idx: Index of metric to compare (e.g. joint index)
         """
+        # Special mode for Dual ZTCF/ZVCF plot
+        if cf_name == "dual":
+            self._plot_counterfactual_dual(fig, metric_idx)
+            return
+
+        # Standard comparison (Actual vs CF)
         # Get actual data (assume joint positions for now as primary comparison)
         times_actual, actual_data = self.recorder.get_time_series("joint_positions")
         actual = np.asarray(actual_data)
@@ -1655,4 +1745,65 @@ class GolfSwingPlotter:
         )
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3, linestyle="--")
+        fig.tight_layout()
+
+    def _plot_counterfactual_dual(self, fig: Figure, joint_idx: int) -> None:
+        """Helper to plot ZTCF (Accel) and ZVCF (Torque) on dual axes."""
+        try:
+            times_z, ztcf = self.recorder.get_counterfactual_series("ztcf_accel")
+            times_v, zvcf = self.recorder.get_counterfactual_series("zvcf_torque")
+        except (AttributeError, KeyError):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Counterfactual data missing", ha="center", va="center")
+            return
+
+        if len(times_z) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No CF data", ha="center", va="center")
+            return
+
+        ax1 = fig.add_subplot(111)
+
+        # Plot ZTCF (Accel)
+        if joint_idx < ztcf.shape[1]:
+            line1 = ax1.plot(
+                times_z,
+                ztcf[:, joint_idx],
+                color=self.colors["primary"],
+                label="ZTCF Accel (Zero Torque)",
+            )
+        else:
+            return
+
+        ax1.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax1.set_ylabel("Acceleration (rad/s²)", color=self.colors["primary"])
+        ax1.tick_params(axis="y", labelcolor=self.colors["primary"])
+
+        # Plot ZVCF (Torque) on twin axis
+        if len(times_v) > 0 and joint_idx < zvcf.shape[1]:
+            ax2 = ax1.twinx()
+            line2 = ax2.plot(
+                times_v,
+                zvcf[:, joint_idx],
+                color=self.colors["quaternary"],
+                linestyle="--",
+                label="ZVCF Torque (Zero Velocity)",
+            )
+            ax2.set_ylabel("Torque (Nm)", color=self.colors["quaternary"])
+            ax2.tick_params(axis="y", labelcolor=self.colors["quaternary"])
+
+            # Legend
+            lns = line1 + line2
+            labs = [str(line.get_label()) for line in lns]
+            ax1.legend(lns, labs, loc="upper left")
+        else:
+            ax1.legend(loc="best")
+
+        joint_name = self.get_joint_name(joint_idx)
+        ax1.set_title(
+            f"Counterfactuals (ZTCF vs ZVCF): {joint_name}",
+            fontsize=14,
+            fontweight="bold",
+        )
+        ax1.grid(True, alpha=0.3)
         fig.tight_layout()
