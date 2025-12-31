@@ -1733,11 +1733,7 @@ class GolfSwingPlotter:
                 times_c, acc_c = self.recorder.get_induced_acceleration_series(
                     "control"
                 )
-                if (
-                    len(times_c) > 0
-                    and acc_c.size > 0
-                    and joint_idx < acc_c.shape[1]
-                ):
+                if len(times_c) > 0 and acc_c.size > 0 and joint_idx < acc_c.shape[1]:
                     ax.plot(
                         times_c,
                         acc_c[:, joint_idx],

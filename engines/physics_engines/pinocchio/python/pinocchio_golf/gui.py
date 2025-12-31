@@ -439,7 +439,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         # Live Analysis Toggle
         self.chk_live_analysis = QtWidgets.QCheckBox("Live Analysis (Induced/CF)")
-        self.chk_live_analysis.setToolTip("Compute Induced Accelerations and Counterfactuals in real-time (Can slow down sim)")
+        self.chk_live_analysis.setToolTip(
+            "Compute Induced Accelerations and Counterfactuals in real-time "
+            "(Can slow down sim)"
+        )
         vis_layout.addWidget(self.chk_live_analysis)
 
         vis_group.setLayout(vis_layout)
@@ -677,59 +680,76 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 pass
 
         # If specific source, compute it and add to recorder temporarily
-        # We use a dedicated key 'specific_control' to avoid overwriting 'control' (total torque)
+        # We use a dedicated key 'specific_control' to avoid overwriting
+        # 'control' (total torque)
         if spec_tau is not None and self.analyzer:
-             for frame in self.recorder.frames:
+            for frame in self.recorder.frames:
                 a_spec = self.analyzer.compute_specific_control(
                     frame.joint_positions, spec_tau
                 )
-                if frame.induced_accelerations is None: frame.induced_accelerations = {}
+                if frame.induced_accelerations is None:
+                    frame.induced_accelerations = {}
                 frame.induced_accelerations["specific_control"] = a_spec
 
         plotter = GolfSwingPlotter(self.recorder, self.joint_names)
-        # We pass v_idx (velocity index) because plotting assumes index into velocity/accel array
-        # But GolfSwingPlotter.get_joint_name uses 'joint_idx'.
-        # For simple 1-DOF joints, v_idx usually maps to joint sequence if we ignore universe.
-        # Pinocchio: universe=0 (nq=0,nv=0), joint1 (idx_q=0, idx_v=0)
+        # We pass v_idx (velocity index) because plotting assumes index into
+        # velocity/accel array. But GolfSwingPlotter.get_joint_name uses 'joint_idx'.
+        # For simple 1-DOF joints, v_idx usually maps to joint sequence if we
+        # ignore universe. Pinocchio: universe=0 (nq=0,nv=0), joint1 (idx_q=0, idx_v=0)
         # So v_idx matches joint_idx-1 usually.
         # But GolfSwingPlotter expects index into the data array.
         # If we have specific control, we might want to plot that instead of breakdown,
         # or add it to breakdown. The plotter breakdown mode looks for 'control'.
         # If spec_tau is set, we want to compare components.
-        # Let's map 'specific_control' to 'control' JUST for the plotter instance by mocking or
-        # using a temporary source name.
-        # Actually, GolfSwingPlotter.plot_induced_acceleration in breakdown mode looks for 'control'.
-        # If we want to visualize specific source, we should likely update Plotter to look for 'specific_control'
-        # if available, or we pass 'specific_control' as source if not breakdown.
+        # Let's map 'specific_control' to 'control' JUST for the plotter instance
+        # by mocking or using a temporary source name.
+        # Actually, GolfSwingPlotter.plot_induced_acceleration in breakdown mode
+        # looks for 'control'. If we want to visualize specific source, we should
+        # likely update Plotter to look for 'specific_control' if available, or
+        # we pass 'specific_control' as source if not breakdown.
 
         # Current logic: Breakdown plots G, V, Total, and optionally 'control'.
-        # If we want to show Specific instead of Total Control, we need to trick it or update Plotter.
-        # But 'control' usually means 'Total Actuation'.
-        # Let's keep breakdown as is (Total) and if specific is set, plotting 'specific_control' as an extra?
-        # The updated Plotter in shared/plotting.py doesn't look for 'specific_control' automatically.
+        # If we want to show Specific instead of Total Control, we need to trick it
+        # or update Plotter. But 'control' usually means 'Total Actuation'.
+        # Let's keep breakdown as is (Total) and if specific is set, plotting
+        # 'specific_control' as an extra? The updated Plotter in shared/plotting.py
+        # doesn't look for 'specific_control' automatically.
         # It looks for 'control' inside the try-except block.
 
         # To fix the "overwrite" issue without changing Plotter API too much:
         # We can pass `source_name="specific_control"` if not in breakdown mode.
         # But user likely wants to see it in context (Breakdown).
         # We will use the fact that Plotter is generic.
-        # We can temporarily alias 'control' in the recorder accessor? No, recorder is shared.
+        # We can temporarily alias 'control' in the recorder accessor?
+        # No, recorder is shared.
 
         # Safest: Use a custom plotter call or subclass?
         # Or just tell plotter to plot 'specific_control' as a separate line?
-        # The plotter.plot_induced_acceleration with breakdown=True is hardcoded to G, V, Total, Control.
-        # I will use 'breakdown' mode, but if specific source is present, I'll manually add it to the plot
-        # after the standard breakdown.
+        # The plotter.plot_induced_acceleration with breakdown=True is hardcoded to
+        # G, V, Total, Control.
+        # I will use 'breakdown' mode, but if specific source is present,
+        # I'll manually add it to the plot after the standard breakdown.
 
-        plotter.plot_induced_acceleration(self.canvas.fig, "breakdown", joint_idx=v_idx, breakdown_mode=True)
+        plotter.plot_induced_acceleration(
+            self.canvas.fig, "breakdown", joint_idx=v_idx, breakdown_mode=True
+        )
 
         # Manually add specific control trace if it exists
         if spec_tau is not None:
-            times, spec_vals = self.recorder.get_induced_acceleration_series("specific_control")
+            times, spec_vals = self.recorder.get_induced_acceleration_series(
+                "specific_control"
+            )
             if len(times) > 0 and spec_vals.size > 0:
                 ax = self.canvas.fig.axes[0]
                 if v_idx < spec_vals.shape[1]:
-                    ax.plot(times, spec_vals[:, v_idx], label="Specific Source", color="magenta", linewidth=2, linestyle=":")
+                    ax.plot(
+                        times,
+                        spec_vals[:, v_idx],
+                        label="Specific Source",
+                        color="magenta",
+                        linewidth=2,
+                        linestyle=":",
+                    )
                     ax.legend()
 
     def _plot_counterfactuals(self) -> None:
@@ -755,7 +775,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self._ensure_analysis_data_populated()
 
         plotter = GolfSwingPlotter(self.recorder, self.joint_names)
-        plotter.plot_counterfactual_comparison(self.canvas.fig, "dual", metric_idx=v_idx)
+        plotter.plot_counterfactual_comparison(
+            self.canvas.fig, "dual", metric_idx=v_idx
+        )
 
     def _ensure_analysis_data_populated(self) -> None:
         """Populate recorder frames with analysis data if missing."""
@@ -763,12 +785,15 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             return
 
         # Check first frame
-        if (self.recorder.frames[0].induced_accelerations and
-            self.recorder.frames[0].counterfactuals):
-            return # Already populated
+        if (
+            self.recorder.frames[0].induced_accelerations
+            and self.recorder.frames[0].counterfactuals
+        ):
+            return  # Already populated
 
         self._ensure_analyzer_initialized()
-        if self.analyzer is None: return
+        if self.analyzer is None:
+            return
 
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
         try:
@@ -777,7 +802,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                     frame.induced_accelerations = self.analyzer.compute_components(
                         frame.joint_positions,
                         frame.joint_velocities,
-                        frame.joint_torques
+                        frame.joint_torques,
                     )
                 if not frame.counterfactuals:
                     if hasattr(self.analyzer, "compute_counterfactuals"):
@@ -817,7 +842,11 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 if arr.ndim > 1:
                     for i in range(arr.shape[1]):
                         # Use joint name if available
-                        col_name = f"{name}_{self.joint_names[i]}" if i < len(self.joint_names) else f"{name}_{i}"
+                        col_name = (
+                            f"{name}_{self.joint_names[i]}"
+                            if i < len(self.joint_names)
+                            else f"{name}_{i}"
+                        )
                         data[col_name] = arr[:, i]
 
             add_cols("q", positions)
@@ -833,15 +862,23 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             if first_frame.induced_accelerations:
                 for key in first_frame.induced_accelerations.keys():
                     # Extract list of arrays
-                    series = [f.induced_accelerations.get(key, np.zeros_like(first_frame.induced_accelerations[key]))
-                              for f in self.recorder.frames]
+                    series = [
+                        f.induced_accelerations.get(
+                            key, np.zeros_like(first_frame.induced_accelerations[key])
+                        )
+                        for f in self.recorder.frames
+                    ]
                     add_cols(f"induced_acc_{key}", np.array(series))
 
             # Counterfactuals
             if first_frame.counterfactuals:
                 for key in first_frame.counterfactuals.keys():
-                    series = [f.counterfactuals.get(key, np.zeros_like(first_frame.counterfactuals[key]))
-                              for f in self.recorder.frames]
+                    series = [
+                        f.counterfactuals.get(
+                            key, np.zeros_like(first_frame.counterfactuals[key])
+                        )
+                        for f in self.recorder.frames
+                    ]
                     add_cols(f"cf_{key}", np.array(series))
 
             # Create DataFrame

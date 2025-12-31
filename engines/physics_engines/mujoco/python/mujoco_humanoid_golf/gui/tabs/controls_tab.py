@@ -99,8 +99,12 @@ class ControlsTab(QtWidgets.QWidget):
         main_layout.addWidget(self.recording_label)
 
         # Real-time analysis toggle
-        self.chk_live_analysis = QtWidgets.QCheckBox("Enable Live Analysis (CPU Intensive)")
-        self.chk_live_analysis.setToolTip("Compute Induced Accelerations and Counterfactuals in real-time")
+        self.chk_live_analysis = QtWidgets.QCheckBox(
+            "Enable Live Analysis (CPU Intensive)"
+        )
+        self.chk_live_analysis.setToolTip(
+            "Compute Induced Accelerations and Counterfactuals in real-time"
+        )
         main_layout.addWidget(self.chk_live_analysis)
 
         # 4. Container for Dynamic Mode Controls (Actuators)

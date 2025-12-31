@@ -87,7 +87,9 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_path = Mock()
         mock_path.__str__ = Mock(return_value="/test/suite/path")
         # Ensure regex replacements work similarly if relying on string conversion
-        mock_path.replace = Mock(side_effect=lambda x, y: "/test/suite/path".replace(x, y))
+        mock_path.replace = Mock(
+            side_effect=lambda x, y: "/test/suite/path".replace(x, y)
+        )
 
         # Prepare mock Path to simulate suite_root
         mock_path_cls = MagicMock()
@@ -125,7 +127,9 @@ class TestDockerLaunchCommands(unittest.TestCase):
                 command_str,
             )
             # Verify working directory instead of cd
-            self.assertIn("-w /workspace/engines/physics_engines/mujoco/python", command_str)
+            self.assertIn(
+                "-w /workspace/engines/physics_engines/mujoco/python", command_str
+            )
             # Verify direct python execution
             self.assertIn("python humanoid_launcher.py", command_str)
             self.assertNotIn("bash -c", command_str)

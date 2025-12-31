@@ -328,7 +328,9 @@ class PlottingTab(QtWidgets.QWidget):
                     source = spec_act
 
                 breakdown = source == "breakdown"
-                plotter.plot_induced_acceleration(canvas.fig, source, breakdown_mode=breakdown)
+                plotter.plot_induced_acceleration(
+                    canvas.fig, source, breakdown_mode=breakdown
+                )
             elif plot_type == "Counterfactual Comparison":
                 cf_selection = self.cf_combo.currentText()
                 cf_name = self.CF_MAP.get(cf_selection, "ztcf_accel")

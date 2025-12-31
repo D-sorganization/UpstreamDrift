@@ -89,9 +89,16 @@ class TestEngineManager(unittest.TestCase):
             self.assertIsInstance(path, Path)
             # Note: Not all engines may be installed, so we don't require existence
 
-    def test_probe_system(self):
+    @patch("shared.python.engine_manager.EngineManager.get_probe_result")
+    def test_probe_system(self, mock_get_result):
         """Test engine probe system."""
         from shared.python.engine_manager import EngineType
+
+        # Setup mock return
+        mock_result = MagicMock()
+        mock_result.is_available = True
+        mock_result.diagnostic_message = "Mocked result"
+        mock_get_result.return_value = mock_result
 
         # Test MuJoCo probe if available
         if EngineType.MUJOCO in self.manager.probes:
