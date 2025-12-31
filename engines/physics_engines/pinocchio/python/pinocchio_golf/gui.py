@@ -4,6 +4,7 @@ import logging
 import sys
 import types
 from pathlib import Path
+from typing import Any
 
 try:
     import meshcat.geometry as g
@@ -837,7 +838,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             data = {"time": times}
 
             # Helper to add 2D arrays columns
-            def add_cols(name, arr):
+            def add_cols(name: str, arr: Any) -> None:
                 arr = np.asarray(arr)
                 if arr.ndim > 1:
                     for i in range(arr.shape[1]):
