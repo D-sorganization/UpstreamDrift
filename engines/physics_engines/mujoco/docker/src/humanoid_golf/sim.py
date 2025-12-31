@@ -16,6 +16,7 @@ try:
 except Exception as e:
     print(f"DEBUG: Failed to import dm_control.viewer: {e}", flush=True)
     import traceback
+
     traceback.print_exc()
     HAS_VIEWER = False
 
@@ -424,6 +425,7 @@ def run_simulation(
         except Exception as e:
             print(f"Failed to launch viewer: {e}", flush=True)
             import traceback
+
             traceback.print_exc()
             raise e
 

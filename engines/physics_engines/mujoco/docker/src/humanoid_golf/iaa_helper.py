@@ -81,9 +81,9 @@ def compute_induced_accelerations(physics) -> dict:
 
         # Shapes to try: Flat, Column, Row
         shapes_to_try = [
-            dst_clean.shape,             # (nv,)
-            (dst_clean.shape[0], 1),     # (nv, 1)
-            (1, dst_clean.shape[0])      # (1, nv)
+            dst_clean.shape,  # (nv,)
+            (dst_clean.shape[0], 1),  # (nv, 1)
+            (1, dst_clean.shape[0]),  # (1, nv)
         ]
 
         last_err = None
