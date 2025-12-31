@@ -13,7 +13,11 @@ try:
     from dm_control import viewer
 
     HAS_VIEWER = True
-except ImportError:
+except Exception as e:
+    print(f"DEBUG: Failed to import dm_control.viewer: {e}", flush=True)
+    import traceback
+
+    traceback.print_exc()
     HAS_VIEWER = False
 
 
@@ -62,7 +66,12 @@ class PDController(BaseController):
                 error = target_angle - current_q
                 torque = (self.kp * error) - (self.kd * current_v)
                 if joint_name in self.actuators:
-                    action[self.actuators[joint_name]] = torque
+                    # Fix deprecation warning for 0-d array to scalar conversion
+                    # Ensure torque is a scalar value
+                    scalar_torque = (
+                        torque.item() if isinstance(torque, np.ndarray) else torque
+                    )
+                    action[self.actuators[joint_name]] = scalar_torque
             except Exception:
                 pass
         return action
@@ -311,6 +320,11 @@ def run_simulation(
     # Extract Params
     control_mode = config.get("control_mode", "pd")
     use_viewer = config.get("live_view", False)
+    # Override: If the environment is set up for GLFW/Live, force viewer to avoid
+    # inconsistent state (Headless script trying to run in GLFW env).
+    if os.environ.get("MUJOCO_GL") == "glfw":
+        use_viewer = True
+
     save_path = config.get("save_state_path", "")
     load_path = config.get("load_state_path", "")
     # Use duration from config if specified, otherwise use function parameter
@@ -390,6 +404,8 @@ def run_simulation(
         controller = PDController(actuators, TARGET_POSE)
 
     # 5. Run Loop
+    print(f"DEBUG: use_viewer={use_viewer}, HAS_VIEWER={HAS_VIEWER}", flush=True)
+
     if use_viewer and HAS_VIEWER:
         print("Launching Live Viewer...", flush=True)
         try:
@@ -408,6 +424,9 @@ def run_simulation(
             viewer.launch(env_wrapper, policy)
         except Exception as e:
             print(f"Failed to launch viewer: {e}", flush=True)
+            import traceback
+
+            traceback.print_exc()
             raise e
 
         # Post-viewer Save

@@ -10,7 +10,7 @@ $Shortcut = $WshShell.CreateShortcut($ShortcutPath)
 $repoRoot = $PSScriptRoot
 $pythonBasePath = Join-Path (Join-Path $env:USERPROFILE "AppData\Local\Programs\Python") "Python313"
 $pythonExePath = Join-Path $pythonBasePath "python.exe"
-$launcherPath = Join-Path (Join-Path $repoRoot "launchers") "golf_launcher.py"
+$launcherPath = Join-Path $repoRoot "launch_golf_suite.py"
 
 # Use the Windows-optimized GolfingRobot icon for maximum clarity on Windows
 $iconCandidates = @(
