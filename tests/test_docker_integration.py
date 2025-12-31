@@ -114,10 +114,11 @@ class TestDockerLaunchCommands(unittest.TestCase):
                 "-e PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines",
                 command_str,
             )
-            self.assertIn(
-                "cd /workspace/engines/physics_engines/mujoco/python", command_str
-            )
+            # Verify working directory instead of cd
+            self.assertIn("-w /workspace/engines/physics_engines/mujoco/python", command_str)
+            # Verify direct python execution
             self.assertIn("python humanoid_launcher.py", command_str)
+            self.assertNotIn("bash -c", command_str)
 
     def test_drake_command(self):
         """Test Drake Docker command generation."""
