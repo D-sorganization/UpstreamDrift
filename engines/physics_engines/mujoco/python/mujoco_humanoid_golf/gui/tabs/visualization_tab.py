@@ -44,9 +44,11 @@ class VisualizationTab(QtWidgets.QWidget):
 
         # Reset camera button
         reset_cam_btn = QtWidgets.QPushButton("Reset Camera")
-        reset_cam_btn.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload)
-        )
+        style = self.style()
+        if style:
+            reset_cam_btn.setIcon(
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload)
+            )
         reset_cam_btn.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
         reset_cam_btn.clicked.connect(self.on_reset_camera)
         camera_layout.addWidget(reset_cam_btn)
@@ -189,9 +191,11 @@ class VisualizationTab(QtWidgets.QWidget):
         meshcat_layout = QtWidgets.QVBoxLayout(meshcat_group)
 
         btn_meshcat = QtWidgets.QPushButton("Open Web Visualizer")
-        btn_meshcat.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_ComputerIcon)
-        )
+        style = self.style()
+        if style:
+            btn_meshcat.setIcon(
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_ComputerIcon)
+            )
         btn_meshcat.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
         btn_meshcat.setToolTip("Open the scene in your default web browser")
         btn_meshcat.clicked.connect(self.on_open_meshcat)

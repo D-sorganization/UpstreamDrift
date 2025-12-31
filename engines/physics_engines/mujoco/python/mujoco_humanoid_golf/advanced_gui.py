@@ -398,12 +398,15 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
     def on_live_analysis_toggled(self, checked: bool) -> None:
         """Handle live analysis toggle."""
         self.sim_widget.enable_live_analysis = checked
+        status_bar = self.statusBar()
         if checked:
-            self.statusBar().showMessage(
-                "Live Biomechanical Analysis Enabled (Performance may drop)", 3000
-            )
+            if status_bar:
+                status_bar.showMessage(
+                    "Live Biomechanical Analysis Enabled (Performance may drop)", 3000
+                )
         else:
-            self.statusBar().showMessage("Live Biomechanical Analysis Disabled", 3000)
+            if status_bar:
+                status_bar.showMessage("Live Biomechanical Analysis Disabled", 3000)
 
     # -------- Model management --------
 

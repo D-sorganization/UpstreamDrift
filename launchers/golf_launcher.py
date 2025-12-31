@@ -612,10 +612,12 @@ class GolfLauncher(QMainWindow):
         if not self.screen():
             return
 
-        geometry = self.frameGeometry()
-        center_point = self.screen().availableGeometry().center()
-        geometry.moveCenter(center_point)
-        self.move(geometry.topLeft())
+        if self.screen() is not None:
+            geometry = self.frameGeometry()
+            available_geometry = self.screen().availableGeometry()
+            center_point = available_geometry.center()
+            geometry.moveCenter(center_point)
+            self.move(geometry.topLeft())
 
     def _load_layout(self) -> None:
         """Load the saved model layout from configuration file."""
