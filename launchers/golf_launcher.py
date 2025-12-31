@@ -609,15 +609,15 @@ class GolfLauncher(QMainWindow):
 
     def center_window(self) -> None:
         """Center the window on the primary screen."""
-        if not self.screen():
+        screen = self.screen()
+        if not screen:
             return
 
-        if self.screen() is not None:
-            geometry = self.frameGeometry()
-            available_geometry = self.screen().availableGeometry()
-            center_point = available_geometry.center()
-            geometry.moveCenter(center_point)
-            self.move(geometry.topLeft())
+        geometry = self.frameGeometry()
+        available_geometry = screen.availableGeometry()
+        center_point = available_geometry.center()
+        geometry.moveCenter(center_point)
+        self.move(geometry.topLeft())
 
     def _load_layout(self) -> None:
         """Load the saved model layout from configuration file."""
