@@ -435,4 +435,58 @@ class AdvancedGuiMethodsMixin:
 
         tab_widget.addTab(coord_widget, "Coordination")
 
+        # Tab 6: Energetics (Work Loops)
+        work_widget = QtWidgets.QWidget()
+        work_layout = QtWidgets.QVBoxLayout(work_widget)
+        fig6 = Figure(figsize=(8, 6))
+        canvas6 = FigureCanvasQTAgg(fig6)
+        work_layout.addWidget(canvas6)
+
+        # Plot work loop for a key joint (e.g. Torso or Pelvis)
+        # Use detected torso_idx from above or default to 0
+        target_work_idx = torso_idx if torso_idx is not None else 0
+        plotter.plot_work_loop(fig6, target_work_idx)
+
+        # Calculate metrics to display
+        work_metrics = analyzer.compute_work_metrics(target_work_idx)
+        if work_metrics:
+            info_text = (
+                f"Net Work: {work_metrics['net_work']:.1f} J\n"
+                f"Pos Work: {work_metrics['positive_work']:.1f} J\n"
+                f"Neg Work: {work_metrics['negative_work']:.1f} J"
+            )
+            ax_w = fig6.gca()
+            ax_w.text(
+                0.05,
+                0.95,
+                info_text,
+                transform=ax_w.transAxes,
+                fontsize=10,
+                bbox=dict(facecolor="white", alpha=0.8),
+                verticalalignment="top",
+            )
+
+        tab_widget.addTab(work_widget, "Work Loop")
+
+        # Tab 7: Stretch-Shortening Cycle (X-Factor Cycle)
+        ssc_widget = QtWidgets.QWidget()
+        ssc_layout = QtWidgets.QVBoxLayout(ssc_widget)
+        fig7 = Figure(figsize=(8, 6))
+        canvas7 = FigureCanvasQTAgg(fig7)
+        ssc_layout.addWidget(canvas7)
+
+        if pelvis_idx is not None and torso_idx is not None:
+            plotter.plot_x_factor_cycle(fig7, torso_idx, pelvis_idx)
+        else:
+            ax = fig7.add_subplot(111)
+            ax.text(
+                0.5,
+                0.5,
+                "Could not identify Pelvis/Torso for SSC",
+                ha="center",
+                va="center",
+            )
+
+        tab_widget.addTab(ssc_widget, "Stretch-Shortening")
+
         dialog.exec()

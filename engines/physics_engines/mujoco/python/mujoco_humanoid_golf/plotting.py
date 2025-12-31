@@ -6,9 +6,16 @@ for the existing MuJoCo implementation.
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import mujoco
 from shared.python.plotting import GolfSwingPlotter as SharedGolfSwingPlotter
 from shared.python.plotting import MplCanvas
+
+if TYPE_CHECKING:
+    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.biomechanics import (  # noqa: E501
+        SwingRecorder,
+    )
 
 __all__ = ["GolfSwingPlotter", "MplCanvas"]
 
@@ -18,7 +25,7 @@ class GolfSwingPlotter(SharedGolfSwingPlotter):
 
     def __init__(
         self,
-        recorder,
+        recorder: SwingRecorder,
         model: mujoco.MjModel | None = None,
     ) -> None:
         """Initialize plotter with recorded data.

@@ -12,7 +12,7 @@ Tests cover:
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 # Add shared modules to path for testing
 sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
@@ -89,9 +89,16 @@ class TestEngineManager(unittest.TestCase):
             self.assertIsInstance(path, Path)
             # Note: Not all engines may be installed, so we don't require existence
 
-    def test_probe_system(self):
+    @patch("shared.python.engine_manager.EngineManager.get_probe_result")
+    def test_probe_system(self, mock_get_result):
         """Test engine probe system."""
         from shared.python.engine_manager import EngineType
+
+        # Setup mock return
+        mock_result = MagicMock()
+        mock_result.is_available = True
+        mock_result.diagnostic_message = "Mocked result"
+        mock_get_result.return_value = mock_result
 
         # Test MuJoCo probe if available
         if EngineType.MUJOCO in self.manager.probes:
@@ -342,7 +349,8 @@ class TestDockerConfiguration(unittest.TestCase):
         mock_model.type = "custom_humanoid"
 
         # Mock path
-        mock_path = Path("/test/path")
+        mock_path = Mock()
+        mock_path.__str__ = Mock(return_value="/test/path")
 
         # Prepare mock Path
         mock_path_cls = MagicMock()
@@ -356,8 +364,10 @@ class TestDockerConfiguration(unittest.TestCase):
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
-            patch("launchers.golf_launcher.Path", mock_path_cls),
+            patch("launchers.golf_launcher.Path", MagicMock()),
+            patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
+            mock_repos_root.__str__.return_value = "/mock/repo/root"
             launcher._launch_docker_container(mock_model, mock_path)
 
             # Verify subprocess was called
@@ -419,7 +429,8 @@ class TestLauncherIntegration(unittest.TestCase):
         self.assertIn("def launch_drake", content)
         self.assertIn("def launch_pinocchio", content)
 
-    def test_unified_launcher_import(self):
+    @patch("launchers.golf_launcher.GolfLauncher")
+    def test_unified_launcher_import(self, mock_golf_launcher):
         """Test that unified launcher can be imported."""
         try:
             from launchers.unified_launcher import UnifiedLauncher

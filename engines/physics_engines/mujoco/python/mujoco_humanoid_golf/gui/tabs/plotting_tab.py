@@ -86,7 +86,7 @@ class PlottingTab(QtWidgets.QWidget):
         self.induced_widget = QtWidgets.QWidget()
         ind_layout = QtWidgets.QFormLayout(self.induced_widget)
         self.induced_source_combo = QtWidgets.QComboBox()
-        self.induced_source_combo.addItems(["gravity", "actuator"])
+        self.induced_source_combo.addItems(["breakdown", "gravity", "actuator"])
         # Add support for specific actuator selection if model is loaded
         # We will populate this dynamically or allow text input?
         # For now, let's add a text input for actuator name
@@ -327,7 +327,10 @@ class PlottingTab(QtWidgets.QWidget):
 
                     source = spec_act
 
-                plotter.plot_induced_acceleration(canvas.fig, source)
+                breakdown = source == "breakdown"
+                plotter.plot_induced_acceleration(
+                    canvas.fig, source, breakdown_mode=breakdown
+                )
             elif plot_type == "Counterfactual Comparison":
                 cf_selection = self.cf_combo.currentText()
                 cf_name = self.CF_MAP.get(cf_selection, "ztcf_accel")
