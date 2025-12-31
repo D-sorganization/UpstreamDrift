@@ -43,9 +43,9 @@ from PyQt6.QtWidgets import (
 
 # Ensure shared modules are importable
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
-SHARED_PATH = PROJECT_ROOT / "shared" / "python"
-if str(SHARED_PATH) not in sys.path:
-    sys.path.insert(0, str(SHARED_PATH))
+# Add Project Root to sys.path so 'shared' package is discoverable
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from shared.python.configuration_manager import ConfigurationManager  # noqa: E402
 from shared.python.process_worker import ProcessWorker  # noqa: E402
@@ -660,7 +660,31 @@ class HumanoidLauncher(QMainWindow):
         except Exception as e:
             self.log(f"Error saving config: {e}")
 
-    def get_docker_cmd(self):
+    def get_simulation_command(self) -> tuple[list[str], dict[str, str] | None]:
+        """Construct the command to run the simulation.
+
+        Returns:
+            Tuple of (command_list, environment_dict).
+        """
+        # Check if running inside Docker container
+        in_docker = Path("/.dockerenv").exists()
+        env = None
+
+        if in_docker:
+            # Running inside the Mujoco Docker container:
+            # - CWD set to /workspace/engines/physics_engines/mujoco/python
+            # - Module exists at ../docker/src/humanoid_golf/sim.py relative to here
+            cmd = ["python", "-m", "humanoid_golf.sim"]
+
+            # Ensure PYTHONPATH includes the directory containing 'humanoid_golf'
+            # We add '../docker/src' to PYTHONPATH.
+            # Note: We must also include existing PYTHONPATH if any.
+            # Using os.environ logic in ProcessWorker handles the merge,
+            # we just provide the override/addition here.
+            env = {"PYTHONPATH": "../docker/src"}
+            return cmd, env
+
+        # HOST-SIDE EXECUTION (Legacy/Dev)
         is_windows = platform.system() == "Windows"
         abs_repo_path = str(self.repo_path.resolve())
 
@@ -670,11 +694,6 @@ class HumanoidLauncher(QMainWindow):
         if is_windows:
             drive, tail = os.path.splitdrive(abs_repo_path)
             if drive:
-                # Docker Desktop on Windows often relies on WSL2 backend.
-                # When invoking docker from Windows Python, explicit WSL path conversion
-                # (/mnt/c/...) is sometimes safer for volume mounting than C:/ style,
-                # though modern Docker Desktop handles both.
-                # This logic ensures compatibility.
                 drive_letter = drive[0].lower()
                 rel_path = tail.replace("\\", "/")
                 wsl_path = f"/mnt/{drive_letter}{rel_path}"
@@ -705,8 +724,6 @@ class HumanoidLauncher(QMainWindow):
                 cmd.extend(["-e", "QT_AUTO_SCREEN_SCALE_FACTOR=0"])
                 cmd.extend(["-e", "QT_SCALE_FACTOR=1"])
                 cmd.extend(["-e", "QT_QPA_PLATFORM=xcb"])
-                # NOTE: LIBGL_ALWAYS_INDIRECT removed - causes segfaults with modern
-                # OpenGL. VcXsrv should work in direct rendering mode.
             else:
                 cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
@@ -730,7 +747,7 @@ class HumanoidLauncher(QMainWindow):
         # - Live view vs headless mode
         cmd.extend(["-m", "humanoid_golf.sim"])
 
-        return cmd
+        return cmd, None
 
     def plot_induced_acceleration(self):
         """Plot Induced Acceleration Analysis from CSV."""
@@ -826,9 +843,9 @@ class HumanoidLauncher(QMainWindow):
         self.save_config()
         self.log("Starting simulation...")
 
-        cmd = self.get_docker_cmd()
+        cmd, env = self.get_simulation_command()
 
-        self.simulation_thread = ProcessWorker(cmd)
+        self.simulation_thread = ProcessWorker(cmd, env=env)
         self.simulation_thread.log_signal.connect(self.log)
         self.simulation_thread.finished_signal.connect(self.on_simulation_finished)
 

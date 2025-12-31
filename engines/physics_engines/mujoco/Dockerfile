@@ -37,6 +37,7 @@ RUN apt-get update && apt-get install -y \
     libxcb-xfixes0 \
     libxcb-xinerama0 \
     libxcb-xkb1 \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user for security
@@ -58,7 +59,7 @@ RUN pip install \
     scipy==1.13.1 \
     PyQt6>=6.6.0 \
     opencv-python>=4.8.0 \
-    imageio>=2.31.0 \
+    imageio[ffmpeg]>=2.31.0 \
     scikit-learn>=1.3.0 \
     h5py>=3.9.0 \
     pillow>=10.0.0 \

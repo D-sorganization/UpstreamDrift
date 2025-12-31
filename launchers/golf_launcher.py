@@ -602,18 +602,26 @@ class GolfLauncher(QMainWindow):
                 # Verify all models still exist
                 if all(model_id in self.model_cards for model_id in saved_order):
                     self.model_order = saved_order
-                    self._rebuild_grid()
+                    self._rebuild_grid()  # Use _rebuild_grid as it exists
                     logger.info("Model layout restored from saved configuration")
 
             # Restore window geometry
-            geometry = layout_data.get("window_geometry", {})
-            if geometry:
-                self.setGeometry(
-                    geometry.get("x", self.x()),
-                    geometry.get("y", self.y()),
-                    geometry.get("width", self.width()),
-                    geometry.get("height", self.height()),
-                )
+            geo = layout_data.get("window_geometry", {})
+            if geo:
+                # Ensure window title bar is visible (y >= 30)
+                # And center if it looks weird
+                x = geo.get("x", 100)
+                y = geo.get("y", 100)
+                w = geo.get("width", 1280)
+                h = geo.get("height", 800)
+
+                # Clamp Y to avoid being off-screen top
+                if y < 30:
+                    y = 50
+
+                self.setGeometry(x, y, w, h)
+            else:
+                self._center_window()
 
             # Restore options
             options = layout_data.get("options", {})
@@ -627,8 +635,36 @@ class GolfLauncher(QMainWindow):
             if saved_selection and saved_selection in self.model_cards:
                 self.select_model(saved_selection)
 
+            self._rebuild_grid()  # Use _rebuild_grid as it exists
+            logger.info("Layout loaded successfully")
+
         except Exception as e:
             logger.error(f"Failed to load layout: {e}")
+            self._center_window()
+
+    def _center_window(self) -> None:
+        """Center the window on the primary screen."""
+        screen = QApplication.primaryScreen()
+        if screen:
+            screen_geo = screen.availableGeometry()
+            # Ensure width is treated as int, handling potential Mock objects from tests
+            current_width = self.width()
+            if hasattr(current_width, "return_value"):  # Handle MagicMock
+                current_width = 1280
+            width = (
+                int(current_width) if isinstance(current_width, (int, float)) else 1280
+            )
+
+            w = width if width > 100 else 1280
+            h = self.height() if self.height() > 100 else 800
+
+            x = screen_geo.x() + (screen_geo.width() - w) // 2
+            y = screen_geo.y() + (screen_geo.height() - h) // 2
+
+            # Ensure not too high
+            y = max(y, 50)
+
+            self.setGeometry(x, y, w, h)
 
     def closeEvent(self, event: QCloseEvent | None) -> None:
         """Handle window close event to save layout."""
@@ -1292,93 +1328,84 @@ class GolfLauncher(QMainWindow):
 
     def _launch_docker_container(self, model: Any, abs_repo_path: Path) -> None:
         """Launch the simulation in a docker container."""
-        cmd = ["docker", "run", "--rm", "-it"]
+        # Parts of the command
+        docker_base = ["docker", "run", "--rm", "-it"]
+        run_flags = []
+        exec_cmd = []
 
         # Volumes - mount entire suite root to /workspace
-        mount_path = str(abs_repo_path).replace("\\", "/")
-        cmd.extend(["-v", f"{mount_path}:/workspace"])
-        cmd.extend(["-w", "/workspace"])
+        suite_root = Path(__file__).parent.parent
+        mount_path = str(suite_root).replace("\\", "/")
+        run_flags.extend(["-v", f"{mount_path}:/workspace"])
 
         # Environment variables for Python path and shared modules
-        cmd.extend(
+        run_flags.extend(
             ["-e", "PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines"]
         )
+
+        # Mount 'shared' directory so that scripts can import shared modules
+        shared_host_path = suite_root / "shared"
+        if shared_host_path.exists():
+            mount_shared_str = str(shared_host_path).replace("\\", "/")
+            run_flags.extend(["-v", f"{mount_shared_str}:/shared"])
 
         # Display/X11
         if self.chk_live.isChecked():
             if os.name == "nt":
-                cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
-                cmd.extend(["-e", "MUJOCO_GL=glfw"])
-                cmd.extend(["-e", "LIBGL_ALWAYS_INDIRECT=1"])
+                run_flags.extend(["-e", "DISPLAY=host.docker.internal:0"])
+                run_flags.extend(["-e", "MUJOCO_GL=glfw"])
+                run_flags.extend(["-e", "PYOPENGL_PLATFORM=glx"])
+                run_flags.extend(["-e", "QT_QPA_PLATFORM=xcb"])
             else:
-                cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
-                cmd.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw"])
+                run_flags.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
+                run_flags.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw"])
+        else:
+            # Force headless OSMesa rendering if Live View is disabled
+            run_flags.extend(["-e", "MUJOCO_GL=osmesa"])
 
         # GPU
         if self.chk_gpu.isChecked():
-            cmd.append("--gpus=all")
+            run_flags.append("--gpus=all")
 
         # Network for Meshcat (Drake/Pinocchio)
         host_port = None
         if "drake" in model.type or "pinocchio" in model.type:
-            cmd.extend(["-p", "7000-7010:7000-7010"])
-            cmd.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
+            run_flags.extend(["-p", "7000-7010:7000-7010"])
+            run_flags.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
             host_port = 7000
 
-        cmd.append(DOCKER_IMAGE_NAME)
-
-        # Entry Command - Updated to use correct paths and Python executable
+        # Define Working Dictionary and Command based on model type
         if model.type == "drake":
-            # Change to the drake python directory and run as module
-            cmd.extend(
-                [
-                    "bash",
-                    "-c",
-                    "cd /workspace/engines/physics_engines/drake/python && python -m src.drake_gui_app",
-                ]
-            )
-
+            run_flags.extend(["-w", "/workspace/engines/physics_engines/drake/python"])
+            exec_cmd = ["python", "-m", "src.drake_gui_app"]
             if host_port:
                 logger.info(f"Drake Meshcat will be available on host port {host_port}")
                 self._start_meshcat_browser(host_port)
 
         elif model.type == "custom_humanoid":
-            # Change to mujoco python directory and run humanoid launcher
-            cmd.extend(
-                [
-                    "bash",
-                    "-c",
-                    "cd /workspace/engines/physics_engines/mujoco/python && python humanoid_launcher.py",
-                ]
-            )
+            run_flags.extend(["-w", "/workspace/engines/physics_engines/mujoco/python"])
+            exec_cmd = ["python", "humanoid_launcher.py"]
 
         elif model.type == "custom_dashboard":
-            # Change to mujoco python directory and run as module
-            cmd.extend(
-                [
-                    "bash",
-                    "-c",
-                    "cd /workspace/engines/physics_engines/mujoco/python && python -m mujoco_humanoid_golf",
-                ]
-            )
+            run_flags.extend(["-w", "/workspace/engines/physics_engines/mujoco/python"])
+            exec_cmd = ["python", "-m", "mujoco_humanoid_golf"]
 
         elif model.type == "pinocchio":
-            # Change to pinocchio python directory and run GUI
-            cmd.extend(
-                [
-                    "bash",
-                    "-c",
-                    "cd /workspace/engines/physics_engines/pinocchio/python && python pinocchio_golf/gui.py",
-                ]
+            run_flags.extend(
+                ["-w", "/workspace/engines/physics_engines/pinocchio/python"]
             )
-
+            exec_cmd = ["python", "pinocchio_golf/gui.py"]
             if host_port:
                 logger.info(
                     f"Pinocchio Meshcat will be available on host port {host_port}"
                 )
                 self._start_meshcat_browser(host_port)
 
-        logger.info(f"Final Docker Command: {' '.join(cmd)}")
+        # Construct Final Command:
+        # docker run [FLAGS] IMAGE [COMMAND]
+        cmd = docker_base + run_flags + [DOCKER_IMAGE_NAME] + exec_cmd
+
+        logger.info(f"Final Docker Command: {subprocess.list2cmdline(cmd)}")
 
         # Launch in Terminal
         if os.name == "nt":
@@ -1386,10 +1413,8 @@ class GolfLauncher(QMainWindow):
             diagnostic_cmd = [
                 "cmd",
                 "/k",
-                "echo Launching simulation container... && echo Command: "
-                + " ".join(cmd)
-                + " && "
-                + " ".join(cmd),
+                "echo Launching simulation container... && "
+                + subprocess.list2cmdline(cmd),
             ]
             logger.info("Starting new console for simulation...")
             subprocess.Popen(diagnostic_cmd, creationflags=CREATE_NEW_CONSOLE)

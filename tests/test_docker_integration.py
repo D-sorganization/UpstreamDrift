@@ -8,7 +8,7 @@ Tests Docker container setup, PYTHONPATH configuration, and module accessibility
 import subprocess
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 
 def _is_docker_available() -> bool:
@@ -85,10 +85,21 @@ class TestDockerLaunchCommands(unittest.TestCase):
         # Mock path
         mock_path = Path("/test/suite/path")
 
+        # Prepare mock Path to simulate suite_root
+        mock_path_cls = MagicMock()
+        mock_suite_root = MagicMock()
+        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        # When Path(__file__) is called, return something that eventually leads to mock_suite_root
+        # Path(__file__).parent.parent -> mock_suite_root
+        mock_file_path = MagicMock()
+        mock_file_path.parent.parent = mock_suite_root
+        mock_path_cls.return_value = mock_file_path
+
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
+            patch("launchers.golf_launcher.Path", mock_path_cls),
         ):
             launcher._launch_docker_container(mock_model, mock_path)
 
@@ -102,13 +113,15 @@ class TestDockerLaunchCommands(unittest.TestCase):
             # Verify command structure
             self.assertIn("docker run", command_str)
             self.assertIn("--rm -it", command_str)
-            self.assertIn("-v /test/suite/path:/workspace", command_str)
+            # Volume mount matches the mocked suite_root
+            self.assertIn("-v /mock/suite/root:/workspace", command_str)
             self.assertIn(
                 "-e PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines",
                 command_str,
             )
+            # Verify working directory matches implementation
             self.assertIn(
-                "cd /workspace/engines/physics_engines/mujoco/python", command_str
+                "-w /workspace/engines/physics_engines/mujoco/python", command_str
             )
             self.assertIn("python humanoid_launcher.py", command_str)
 
@@ -127,11 +140,20 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
         mock_path = Path("/test/suite/path")
 
+        # Prepare mock Path
+        mock_path_cls = MagicMock()
+        mock_suite_root = MagicMock()
+        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_file_path = MagicMock()
+        mock_file_path.parent.parent = mock_suite_root
+        mock_path_cls.return_value = mock_file_path
+
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.threading.Thread"),
+            patch("launchers.golf_launcher.Path", mock_path_cls),
         ):
             launcher._launch_docker_container(mock_model, mock_path)
 
@@ -141,8 +163,9 @@ class TestDockerLaunchCommands(unittest.TestCase):
             # Verify Drake-specific components
             self.assertIn("-p 7000-7010:7000-7010", command_str)
             self.assertIn("-e MESHCAT_HOST=0.0.0.0", command_str)
+            # Verify working directory matches implementation
             self.assertIn(
-                "cd /workspace/engines/physics_engines/drake/python", command_str
+                "-w /workspace/engines/physics_engines/drake/python", command_str
             )
             self.assertIn("python -m src.drake_gui_app", command_str)
 
@@ -161,11 +184,20 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
         mock_path = Path("/test/suite/path")
 
+        # Prepare mock Path
+        mock_path_cls = MagicMock()
+        mock_suite_root = MagicMock()
+        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_file_path = MagicMock()
+        mock_file_path.parent.parent = mock_suite_root
+        mock_path_cls.return_value = mock_file_path
+
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.threading.Thread"),
+            patch("launchers.golf_launcher.Path", mock_path_cls),
         ):
             launcher._launch_docker_container(mock_model, mock_path)
 
@@ -175,8 +207,9 @@ class TestDockerLaunchCommands(unittest.TestCase):
             # Verify Pinocchio-specific components
             self.assertIn("-p 7000-7010:7000-7010", command_str)
             self.assertIn("-e MESHCAT_HOST=0.0.0.0", command_str)
+            # Verify working directory matches implementation
             self.assertIn(
-                "cd /workspace/engines/physics_engines/pinocchio/python", command_str
+                "-w /workspace/engines/physics_engines/pinocchio/python", command_str
             )
             self.assertIn("python pinocchio_golf/gui.py", command_str)
 
@@ -194,10 +227,19 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_model.type = "custom_humanoid"
         mock_path = Path("/test/path")
 
+        # Prepare mock Path
+        mock_path_cls = MagicMock()
+        mock_suite_root = MagicMock()
+        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_file_path = MagicMock()
+        mock_file_path.parent.parent = mock_suite_root
+        mock_path_cls.return_value = mock_file_path
+
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
+            patch("launchers.golf_launcher.Path", mock_path_cls),
         ):
             launcher._launch_docker_container(mock_model, mock_path)
 
@@ -207,7 +249,8 @@ class TestDockerLaunchCommands(unittest.TestCase):
             # Verify Windows-specific display setup
             self.assertIn("-e DISPLAY=host.docker.internal:0", command_str)
             self.assertIn("-e MUJOCO_GL=glfw", command_str)
-            self.assertIn("-e LIBGL_ALWAYS_INDIRECT=1", command_str)
+            self.assertIn("-e PYOPENGL_PLATFORM=glx", command_str)
+            self.assertIn("-e QT_QPA_PLATFORM=xcb", command_str)
 
     def test_gpu_acceleration_option(self):
         """Test GPU acceleration option."""
@@ -223,10 +266,19 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_model.type = "custom_humanoid"
         mock_path = Path("/test/path")
 
+        # Prepare mock Path
+        mock_path_cls = MagicMock()
+        mock_suite_root = MagicMock()
+        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_file_path = MagicMock()
+        mock_file_path.parent.parent = mock_suite_root
+        mock_path_cls.return_value = mock_file_path
+
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
+            patch("launchers.golf_launcher.Path", mock_path_cls),
         ):
             launcher._launch_docker_container(mock_model, mock_path)
 

@@ -39,16 +39,20 @@ class ProcessWorker(QThread):
     log_signal = pyqtSignal(str)
     finished_signal = pyqtSignal(int, str)
 
-    def __init__(self, cmd: list[str], cwd: str | None = None) -> None:
+    def __init__(
+        self, cmd: list[str], cwd: str | None = None, env: dict[str, str] | None = None
+    ) -> None:
         """Initialize worker.
 
         Args:
             cmd: Command list to execute.
             cwd: Working directory.
+            env: Environment variables (optional).
         """
         super().__init__()
         self.cmd = cmd
         self.cwd = cwd
+        self.env = env
         self.process: subprocess.Popen | None = None
         self._is_running = True
         self._stop_event = threading.Event()
@@ -58,9 +62,18 @@ class ProcessWorker(QThread):
         try:
             self.log_signal.emit(f"Running command: {' '.join(self.cmd)}")
 
+            # Use current environment if explicit env is not provided, but merge if it is
+            run_env = None
+            if self.env:
+                import os
+
+                run_env = os.environ.copy()
+                run_env.update(self.env)
+
             self.process = subprocess.Popen(
                 self.cmd,
                 cwd=self.cwd,
+                env=run_env,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 text=True,
