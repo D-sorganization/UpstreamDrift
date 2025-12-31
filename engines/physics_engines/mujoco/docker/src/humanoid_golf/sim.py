@@ -319,6 +319,11 @@ def run_simulation(
     # Extract Params
     control_mode = config.get("control_mode", "pd")
     use_viewer = config.get("live_view", False)
+    # Override: If the environment is set up for GLFW/Live, force viewer to avoid
+    # inconsistent state (Headless script trying to run in GLFW env).
+    if os.environ.get("MUJOCO_GL") == "glfw":
+        use_viewer = True
+
     save_path = config.get("save_state_path", "")
     load_path = config.get("load_state_path", "")
     # Use duration from config if specified, otherwise use function parameter
