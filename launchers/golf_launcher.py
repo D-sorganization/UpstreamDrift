@@ -606,14 +606,22 @@ class GolfLauncher(QMainWindow):
                     logger.info("Model layout restored from saved configuration")
 
             # Restore window geometry
-            geometry = layout_data.get("window_geometry", {})
-            if geometry:
-                self.setGeometry(
-                    geometry.get("x", self.x()),
-                    geometry.get("y", self.y()),
-                    geometry.get("width", self.width()),
-                    geometry.get("height", self.height()),
-                )
+            geo = layout_data.get("window_geometry", {})
+            if geo:
+                # Ensure window title bar is visible (y >= 30)
+                # And center if it looks weird
+                x = geo.get("x", 100)
+                y = geo.get("y", 100)
+                w = geo.get("width", 1280)
+                h = geo.get("height", 800)
+                
+                # Clamp Y to avoid being off-screen top
+                if y < 30:
+                    y = 50
+                
+                self.setGeometry(x, y, w, h)
+            else:
+                self._center_window()
 
             # Restore options
             options = layout_data.get("options", {})
@@ -627,8 +635,28 @@ class GolfLauncher(QMainWindow):
             if saved_selection and saved_selection in self.model_cards:
                 self.select_model(saved_selection)
 
+            self._rebuild_grid() # Use _rebuild_grid as it exists
+            logger.info("Layout loaded successfully")
+
         except Exception as e:
             logger.error(f"Failed to load layout: {e}")
+            self._center_window()
+
+    def _center_window(self) -> None:
+        """Center the window on the primary screen."""
+        screen = QApplication.primaryScreen()
+        if screen:
+            screen_geo = screen.availableGeometry()
+            w = self.width() if self.width() > 100 else 1280
+            h = self.height() if self.height() > 100 else 800
+            
+            x = screen_geo.x() + (screen_geo.width() - w) // 2
+            y = screen_geo.y() + (screen_geo.height() - h) // 2
+            
+            # Ensure not too high
+            y = max(y, 50)
+            
+            self.setGeometry(x, y, w, h)
 
     def closeEvent(self, event: QCloseEvent | None) -> None:
         """Handle window close event to save layout."""
@@ -1314,14 +1342,16 @@ class GolfLauncher(QMainWindow):
             run_flags.extend(["-v", f"{mount_shared_str}:/shared"])
 
         # Display/X11
-        if self.chk_live.isChecked():
             if os.name == "nt":
                 run_flags.extend(["-e", "DISPLAY=host.docker.internal:0"])
                 run_flags.extend(["-e", "MUJOCO_GL=glfw"])
-                run_flags.extend(["-e", "LIBGL_ALWAYS_INDIRECT=1"])
+                # LIBGL_ALWAYS_INDIRECT removed: causes OpenAI/MuJoCo OpenGL 1.5 errors
             else:
                 run_flags.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
                 run_flags.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw"])
+        else:
+            # Force headless OSMesa rendering if Live View is disabled
+            run_flags.extend(["-e", "MUJOCO_GL=osmesa"])
 
         # GPU
         if self.chk_gpu.isChecked():
