@@ -1068,6 +1068,165 @@ class GolfSwingPlotter:
         ax.grid(True, alpha=0.3, linestyle="--")
         fig.tight_layout()
 
+    def plot_work_loop(
+        self,
+        fig: Figure,
+        joint_idx: int = 0,
+        title: str | None = None,
+    ) -> None:
+        """Plot Work Loop (Torque vs Angle) for a joint.
+
+        The area inside the loop represents the mechanical work done.
+
+        Args:
+            fig: Matplotlib figure
+            joint_idx: Joint index
+            title: Optional title
+        """
+        times, positions = self.recorder.get_time_series("joint_positions")
+        _, torques = self.recorder.get_time_series("joint_torques")
+
+        # Convert to numpy arrays
+        positions = np.asarray(positions)
+        torques = np.asarray(torques)
+
+        if (
+            len(times) == 0
+            or positions.ndim < 2
+            or joint_idx >= positions.shape[1]
+            or torques.ndim < 2
+            or joint_idx >= torques.shape[1]
+        ):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        # Plot Torque vs Angle
+        angle = np.rad2deg(positions[:, joint_idx])
+        torque = torques[:, joint_idx]
+
+        # Use time for color to show progression
+        sc = ax.scatter(angle, torque, c=times, cmap="viridis", s=30, alpha=0.6)
+        ax.plot(angle, torque, alpha=0.3, color="gray", linewidth=1)
+
+        # Fill area to emphasize work (just a polygon fill)
+        # We assume cyclic or start-to-end, fill gives a sense of magnitude
+        ax.fill(angle, torque, alpha=0.1, color=self.colors["primary"])
+
+        # Mark Start/End
+        ax.scatter(
+            angle[0],
+            torque[0],
+            c="green",
+            s=100,
+            label="Start",
+            edgecolor="black",
+            zorder=5,
+        )
+        ax.scatter(
+            angle[-1],
+            torque[-1],
+            c="red",
+            s=100,
+            marker="s",
+            label="End",
+            edgecolor="black",
+            zorder=5,
+        )
+
+        name = self.get_joint_name(joint_idx)
+        ax.set_xlabel(f"{name} Angle (degrees)", fontsize=12, fontweight="bold")
+        ax.set_ylabel(f"{name} Torque (Nm)", fontsize=12, fontweight="bold")
+        ax.set_title(title or f"Work Loop: {name}", fontsize=14, fontweight="bold")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        ax.axhline(0, color="k", linestyle="-", alpha=0.3)
+        fig.colorbar(sc, ax=ax, label="Time (s)")
+        fig.tight_layout()
+
+    def plot_x_factor_cycle(
+        self,
+        fig: Figure,
+        shoulder_idx: int,
+        hip_idx: int,
+    ) -> None:
+        """Plot X-Factor Cycle (Stretch-Shortening Cycle).
+
+        Plots X-Factor Velocity vs X-Factor Angle.
+
+        Args:
+            fig: Matplotlib figure
+            shoulder_idx: Shoulder/Torso joint index
+            hip_idx: Hip/Pelvis joint index
+        """
+        try:
+            # Check availability only
+            import shared.python.statistical_analysis  # noqa: F401
+        except ImportError:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Analysis module missing", ha="center", va="center")
+            return
+
+        # We need an analyzer instance to compute X-Factor easily,
+        # or just reimplement logic here. Reimplementing is cleaner for plotting module
+        # to avoid circular imports or heavy deps, but X-Factor logic is specific.
+        # Let's just calculate raw here.
+
+        times, positions = self.recorder.get_time_series("joint_positions")
+        positions = np.asarray(positions)
+
+        if (
+            len(times) < 2
+            or positions.ndim < 2
+            or shoulder_idx >= positions.shape[1]
+            or hip_idx >= positions.shape[1]
+        ):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Insufficient data", ha="center", va="center")
+            return
+
+        # Calculate X-Factor
+        shoulder_rot = np.rad2deg(positions[:, shoulder_idx])
+        hip_rot = np.rad2deg(positions[:, hip_idx])
+        x_factor = shoulder_rot - hip_rot
+
+        # Calculate Velocity
+        dt = np.mean(np.diff(times))
+        if dt <= 0:
+            dt = 0.01
+        x_factor_vel = np.gradient(x_factor, dt)
+
+        ax = fig.add_subplot(111)
+
+        # Plot Phase Diagram
+        sc = ax.scatter(x_factor, x_factor_vel, c=times, cmap="magma", s=30, alpha=0.6)
+        ax.plot(x_factor, x_factor_vel, alpha=0.3, color="gray", linewidth=1)
+
+        # Mark Peak Stretch (Max X-Factor)
+        max_idx = np.argmax(x_factor)
+        ax.scatter(
+            x_factor[max_idx],
+            x_factor_vel[max_idx],
+            c="blue",
+            s=150,
+            marker="*",
+            label=f"Peak Stretch: {x_factor[max_idx]:.1f}°",
+            zorder=10,
+        )
+
+        ax.set_xlabel("X-Factor (degrees)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("X-Factor Velocity (deg/s)", fontsize=12, fontweight="bold")
+        ax.set_title(
+            "X-Factor Stretch-Shortening Cycle", fontsize=14, fontweight="bold"
+        )
+        ax.grid(True, alpha=0.3, linestyle="--")
+        ax.axhline(0, color="k", linestyle="-", alpha=0.3)
+        ax.legend(loc="best")
+
+        fig.colorbar(sc, ax=ax, label="Time (s)")
+        fig.tight_layout()
+
     def plot_3d_phase_space(self, fig: Figure, joint_idx: int = 0) -> None:
         """Plot 3D phase space (Position vs Velocity vs Acceleration).
 
