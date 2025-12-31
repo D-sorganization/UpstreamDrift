@@ -1315,7 +1315,7 @@ class GolfLauncher(QMainWindow):
         cmd = ["docker", "run", "--rm", "-it"]
 
         # Volumes - mount entire suite root to /workspace
-        mount_path = str(abs_repo_path).replace("\\", "/")
+        mount_path = str(REPOS_ROOT).replace("\\", "/")
         cmd.extend(["-v", f"{mount_path}:/workspace"])
         cmd.extend(["-w", "/workspace"])
 
