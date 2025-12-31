@@ -197,7 +197,6 @@ module = [
     "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget",
     "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.grip_modelling_tab",
     "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.controls_tab",
-    "engines.physics_engines.mujoco.python.humanoid_launcher",
     "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.plotting",
     "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.examples_chaotic_pendulum",
     "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.advanced_gui_methods",
