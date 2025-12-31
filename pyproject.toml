@@ -151,11 +151,9 @@ ignore = [
 "validate_suite.py" = ["T201"]
 "check_system_health.py" = ["T201"]
 "show_physics_parameters.py" = ["T201"]
-"engines/physics_engines/mujoco/python/mujoco_humanoid_golf/cli_runner.py" = ["T201"]
 "engines/pendulum_models/tools/scientific_auditor.py" = ["T201"]
 "engines/Simscape_Multibody_Models/**/*.py" = ["T201"]
 "engines/pendulum_models/**/*.py" = ["T201"]
-"engines/physics_engines/mujoco/python/tests/test_urdf_io.py" = ["T201"]
 "verification/*" = ["T201"]
 
 [tool.mypy]
