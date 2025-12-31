@@ -74,27 +74,46 @@ def compute_induced_accelerations(physics) -> dict:
     neg_g_force = -g_force
     neg_c_force = -c_force
 
-    # Solve M*a = F => a = M^-1 * F
-    print("DEBUG: Calling mj_solveM...", flush=True)
-
     def safe_solveM(m_ptr, d_ptr, dst, src):
-        """Try calling mj_solveM with numpy arrays, fallback to ctypes."""
-        # Ensure contiguous arrays for C-API
-        dst = np.ascontiguousarray(dst, dtype=np.float64)
-        src = np.ascontiguousarray(src, dtype=np.float64)
+        """Try calling mj_solveM with different array shapes to satisfy binding."""
+        # Clean inputs
+        dst_clean = np.ascontiguousarray(dst, dtype=np.float64)
+        src_clean = np.ascontiguousarray(src, dtype=np.float64)
         
-        try:
-            # Try standard numpy array passing (works if wrapper accepts buffer protocol)
-            mjlib.mj_solveM(m_ptr, d_ptr, dst, src)
-        except TypeError as e:
-            # Fallback for strict wrappers: Cast to ctypes pointers explicitly
+        # Shapes to try: Flat, Column, Row
+        shapes_to_try = [
+            dst_clean.shape,             # (nv,)
+            (dst_clean.shape[0], 1),     # (nv, 1)
+            (1, dst_clean.shape[0])      # (1, nv)
+        ]
+        
+        last_err = None
+        success = False
+        
+        for shape in shapes_to_try:
             try:
-                dst_ptr = dst.ctypes.data_as(POINTER(c_double))
-                src_ptr = src.ctypes.data_as(POINTER(c_double))
-                mjlib.mj_solveM(m_ptr, d_ptr, dst_ptr, src_ptr)
-            except Exception as e2:
-                print(f"ERROR: safe_solveM failed both methods.\nMethod 1: {e}\nMethod 2: {e2}", flush=True)
-                raise e
+                # Reshape views (cheap)
+                d_view = dst_clean.reshape(shape)
+                s_view = src_clean.reshape(shape)
+                
+                # Attempt call
+                mjlib.mj_solveM(m_ptr, d_ptr, d_view, s_view)
+                
+                # If successful, copy result back to original destination
+                # (Handle flatten/shape mismatch by flat copy)
+                dst[:] = d_view.flatten()
+                success = True
+                break
+            except TypeError as e:
+                last_err = e
+            except Exception as e:
+                last_err = e
+        
+        if not success:
+            print(f"ERROR: safe_solveM failed all shapes: {shapes_to_try}", flush=True)
+            if last_err:
+                 print(f"Last Error: {last_err}", flush=True)
+            raise last_err
 
     safe_solveM(model.ptr, data.ptr, acc_g, neg_g_force)
     safe_solveM(model.ptr, data.ptr, acc_c, neg_c_force)
