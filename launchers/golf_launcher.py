@@ -1304,6 +1304,14 @@ class GolfLauncher(QMainWindow):
             ["-e", "PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines"]
         )
 
+        # Mount 'shared' directory so that scripts can import shared modules
+        # logic: launchers/golf_launcher.py -> parent -> parent = suite_root
+        suite_root = Path(__file__).parent.parent
+        shared_host_path = suite_root / "shared"
+        if shared_host_path.exists():
+            mount_shared_str = str(shared_host_path).replace("\\", "/")
+            cmd.extend(["-v", f"{mount_shared_str}:/shared"])
+
         # Display/X11
         if self.chk_live.isChecked():
             if os.name == "nt":
@@ -1343,6 +1351,7 @@ class GolfLauncher(QMainWindow):
                 self._start_meshcat_browser(host_port)
 
         elif model.type == "custom_humanoid":
+
             # Change to mujoco python directory and run humanoid launcher
             cmd.extend(
                 [
