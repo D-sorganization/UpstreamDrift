@@ -1385,7 +1385,7 @@ class GolfLauncher(QMainWindow):
 
         # Network for Meshcat (Drake/Pinocchio)
         if host_port:
-            cmd.extend(["-p", f"{host_port}:{host_port}"])
+            cmd.extend(["-p", "7000-7010:7000-7010"])
             cmd.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
 
         cmd.append(DOCKER_IMAGE_NAME)
