@@ -825,6 +825,90 @@ class StatisticalAnalyzer:
 
         return gamma_deg
 
+    def compute_work_metrics(self, joint_idx: int) -> dict[str, float] | None:
+        """Compute mechanical work metrics for a joint.
+
+        Work is calculated as the time integral of power (torque * angular velocity).
+
+        Args:
+            joint_idx: Index of the joint
+
+        Returns:
+            Dictionary with 'positive_work', 'negative_work', 'net_work' (Joules)
+            or None if data unavailable.
+        """
+        if (
+            joint_idx >= self.joint_torques.shape[1]
+            or joint_idx >= self.joint_velocities.shape[1]
+        ):
+            return None
+
+        # Power = Torque * Velocity (Nm * rad/s = Watts)
+        torque = self.joint_torques[:, joint_idx]
+        velocity = self.joint_velocities[:, joint_idx]
+
+        # Handle potentially different lengths if recorder had issues (unlikely but safe)
+        n_samples = min(len(torque), len(velocity), len(self.times))
+        if n_samples < 2:
+            return None
+
+        torque = torque[:n_samples]
+        velocity = velocity[:n_samples]
+        dt = self.dt
+
+        power = torque * velocity
+
+        # Calculate work via integration (Euler or Trapezoidal)
+        # Positive work: Energy generation (concentric)
+        # Negative work: Energy absorption (eccentric)
+        pos_power = np.maximum(power, 0)
+        neg_power = np.minimum(power, 0)
+
+        # Integrate
+        # Handle NumPy 2.0 deprecation of trapz
+        if hasattr(np, "trapezoid"):
+            positive_work = np.trapezoid(pos_power, dx=dt)
+            negative_work = np.trapezoid(neg_power, dx=dt)
+        else:
+            positive_work = np.trapz(pos_power, dx=dt)
+            negative_work = np.trapz(neg_power, dx=dt)
+
+        net_work = positive_work + negative_work
+
+        return {
+            "positive_work": float(positive_work),
+            "negative_work": float(negative_work),
+            "net_work": float(net_work),
+        }
+
+    def compute_phase_space_path_length(self, joint_idx: int) -> float:
+        """Compute path length in phase space (Angle vs Angular Velocity).
+
+        This metric quantifies the excursion or complexity of the joint trajectory.
+        Computed in normalized units (radians and radians/second).
+
+        Args:
+            joint_idx: Index of the joint
+
+        Returns:
+            Total path length in phase space.
+        """
+        if (
+            joint_idx >= self.joint_positions.shape[1]
+            or joint_idx >= self.joint_velocities.shape[1]
+        ):
+            return 0.0
+
+        pos = self.joint_positions[:, joint_idx]
+        vel = self.joint_velocities[:, joint_idx]
+
+        # Calculate Euclidean distance between consecutive points in phase space
+        d_pos = np.diff(pos)
+        d_vel = np.diff(vel)
+
+        dist = np.sqrt(d_pos**2 + d_vel**2)
+        return float(np.sum(dist))
+
     def export_statistics_csv(
         self,
         filename: str,
