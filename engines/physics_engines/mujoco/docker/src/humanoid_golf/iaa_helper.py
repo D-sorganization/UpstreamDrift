@@ -29,13 +29,15 @@ def compute_induced_accelerations(physics) -> dict:
     # Note: mj_rne computes inverse dynamics: tau = M*a + C + G.
     # If a=0, v=0, then tau = G.
     # We want G vector.
-    # Define nv explicitly
-    nv = model.nv
+    # Use the nv from the raw struct to ensure consistency
+    nv = model.ptr.nv
+    print(f"DEBUG: model.ptr.nv = {nv}", flush=True)
 
     # Allocation of explicit buffers to ensure correct shape/type for raw bindings
     # mj_rne expects output buffer of size nv.
     g_force = np.zeros(nv, dtype=np.float64)
     mujoco.mj_rne(model.ptr, data.ptr, 0, g_force)
+    print(f"DEBUG: g_force shape = {g_force.shape}", flush=True)
 
     # 3. Coriolis/Centrifugal Force (C)
     # Restore v, set a=0.
@@ -55,6 +57,12 @@ def compute_induced_accelerations(physics) -> dict:
     
     # Copy from data.qfrc_actuator (which is managed by mujoco)
     tau_control = data.qfrc_actuator.copy()
+    # Check shape
+    if tau_control.shape[0] != nv:
+        print(f"WARNING: tau_control shape {tau_control.shape} != nv {nv}. Resizing.")
+        tmp = np.zeros(nv, dtype=np.float64)
+        tmp[:min(nv, tau_control.shape[0])] = tau_control[:min(nv, tau_control.shape[0])]
+        tau_control = tmp
 
     # Now solve M * a = F
     # Vectors to solve (overwritten by mj_solveM)
@@ -62,9 +70,14 @@ def compute_induced_accelerations(physics) -> dict:
     acc_c = np.zeros(nv, dtype=np.float64)
     acc_t = np.zeros(nv, dtype=np.float64)
 
+    # Explicit input arrays
+    neg_g_force = -g_force
+    neg_c_force = -c_force
+
     # Solve M*a = F => a = M^-1 * F
-    mujoco.mj_solveM(model.ptr, data.ptr, acc_g, -g_force)
-    mujoco.mj_solveM(model.ptr, data.ptr, acc_c, -c_force)
+    print("DEBUG: Calling mj_solveM...", flush=True)
+    mujoco.mj_solveM(model.ptr, data.ptr, acc_g, neg_g_force)
+    mujoco.mj_solveM(model.ptr, data.ptr, acc_c, neg_c_force)
     mujoco.mj_solveM(model.ptr, data.ptr, acc_t, tau_control)
 
     # Restore State fully
