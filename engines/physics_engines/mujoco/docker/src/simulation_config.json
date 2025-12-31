@@ -1,4 +1,37 @@
 {
+    "height_m": 1.8,
+    "weight_percent": 100,
+    "club_length": 1.0,
+    "club_mass": 0.5,
+    "control_mode": "poly",
+    "live_view": true,
+    "simulation_duration": 3.0,
+    "two_handed": false,
+    "enhance_face": false,
+    "articulated_fingers": false,
+    "save_state_path": "",
+    "load_state_path": "",
+    "polynomial_coefficients": {
+        "lowerbackrx": [
+            -0.0003477049093795018,
+            0.013038044814800212,
+            -0.17726758699999387,
+            1.0757644686991492,
+            -2.9041966036487796,
+            3.0109860432058553,
+            1.6640295494138317
+        ]
+    },
+    "show_contact_forces": true,
+    "show_joint_torques": true,
+    "show_tracers": true,
+    "tracer_bodies": [
+        "pelvis",
+        "torso",
+        "head",
+        "r_hand",
+        "l_hand"
+    ],
     "colors": {
         "shirt": [
             0.6,
@@ -36,38 +69,5 @@
             0.8,
             1.0
         ]
-    },
-    "height_m": 1.8,
-    "weight_percent": 100.0,
-    "control_mode": "poly",
-    "live_view": true,
-    "simulation_duration": 3.0,
-    "save_state_path": "",
-    "load_state_path": "",
-    "club_length": 1.0,
-    "club_mass": 0.5,
-    "two_handed": false,
-    "enhance_face": false,
-    "articulated_fingers": false,
-    "polynomial_coefficients": {
-        "lowerbackrx": [
-            -0.0003477049093795018,
-            0.013038044814800212,
-            -0.17726758699999387,
-            1.0757644686991492,
-            -2.9041966036487796,
-            3.0109860432058553,
-            1.6640295494138317
-        ]
-    },
-    "show_contact_forces": true,
-    "show_joint_torques": true,
-    "show_tracers": true,
-    "tracer_bodies": [
-        "pelvis",
-        "torso",
-        "head",
-        "r_hand",
-        "l_hand"
-    ]
+    }
 }

@@ -345,6 +345,14 @@ class TestDockerConfiguration(unittest.TestCase):
         mock_path = Mock()
         mock_path.__str__ = Mock(return_value="/test/path")
 
+        # Prepare mock Path
+        mock_path_cls = MagicMock()
+        mock_suite_root = MagicMock()
+        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_file_path = MagicMock()
+        mock_file_path.parent.parent = mock_suite_root
+        mock_path_cls.return_value = mock_file_path
+
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
