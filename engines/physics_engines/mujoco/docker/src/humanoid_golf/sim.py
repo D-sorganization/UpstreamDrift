@@ -62,7 +62,10 @@ class PDController(BaseController):
                 error = target_angle - current_q
                 torque = (self.kp * error) - (self.kd * current_v)
                 if joint_name in self.actuators:
-                    action[self.actuators[joint_name]] = torque
+                    # Fix deprecation warning for 0-d array to scalar conversion
+                    # Ensure torque is a scalar value
+                    scalar_torque = torque.item() if isinstance(torque, np.ndarray) else torque
+                    action[self.actuators[joint_name]] = scalar_torque
             except Exception:
                 pass
         return action
