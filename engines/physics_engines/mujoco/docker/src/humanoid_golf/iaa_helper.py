@@ -4,6 +4,7 @@ def compute_induced_accelerations(physics) -> dict:
     try:
         from dm_control.mujoco.wrapper.mjbindings import mjlib
         import numpy as np
+        from ctypes import POINTER, c_double
     except ImportError:
         return results
 
@@ -75,9 +76,29 @@ def compute_induced_accelerations(physics) -> dict:
 
     # Solve M*a = F => a = M^-1 * F
     print("DEBUG: Calling mj_solveM...", flush=True)
-    mjlib.mj_solveM(model.ptr, data.ptr, acc_g, neg_g_force)
-    mjlib.mj_solveM(model.ptr, data.ptr, acc_c, neg_c_force)
-    mjlib.mj_solveM(model.ptr, data.ptr, acc_t, tau_control)
+
+    def safe_solveM(m_ptr, d_ptr, dst, src):
+        """Try calling mj_solveM with numpy arrays, fallback to ctypes."""
+        # Ensure contiguous arrays for C-API
+        dst = np.ascontiguousarray(dst, dtype=np.float64)
+        src = np.ascontiguousarray(src, dtype=np.float64)
+        
+        try:
+            # Try standard numpy array passing (works if wrapper accepts buffer protocol)
+            mjlib.mj_solveM(m_ptr, d_ptr, dst, src)
+        except TypeError as e:
+            # Fallback for strict wrappers: Cast to ctypes pointers explicitly
+            try:
+                dst_ptr = dst.ctypes.data_as(POINTER(c_double))
+                src_ptr = src.ctypes.data_as(POINTER(c_double))
+                mjlib.mj_solveM(m_ptr, d_ptr, dst_ptr, src_ptr)
+            except Exception as e2:
+                print(f"ERROR: safe_solveM failed both methods.\nMethod 1: {e}\nMethod 2: {e2}", flush=True)
+                raise e
+
+    safe_solveM(model.ptr, data.ptr, acc_g, neg_g_force)
+    safe_solveM(model.ptr, data.ptr, acc_c, neg_c_force)
+    safe_solveM(model.ptr, data.ptr, acc_t, tau_control)
 
     # Restore State fully
     data.qpos[:] = qpos_backup
