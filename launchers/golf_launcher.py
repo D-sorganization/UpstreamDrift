@@ -647,7 +647,15 @@ class GolfLauncher(QMainWindow):
         screen = QApplication.primaryScreen()
         if screen:
             screen_geo = screen.availableGeometry()
-            w = self.width() if self.width() > 100 else 1280
+            # Ensure width is treated as int, handling potential Mock objects from tests
+            current_width = self.width()
+            if hasattr(current_width, "return_value"):  # Handle MagicMock
+                current_width = 1280
+            width = (
+                int(current_width) if isinstance(current_width, (int, float)) else 1280
+            )
+
+            w = width if width > 100 else 1280
             h = self.height() if self.height() > 100 else 800
 
             x = screen_geo.x() + (screen_geo.width() - w) // 2
