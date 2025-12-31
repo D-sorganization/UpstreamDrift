@@ -1292,102 +1292,80 @@ class GolfLauncher(QMainWindow):
 
     def _launch_docker_container(self, model: Any, abs_repo_path: Path) -> None:
         """Launch the simulation in a docker container."""
-        cmd = ["docker", "run", "--rm", "-it"]
+        # Parts of the command
+        docker_base = ["docker", "run", "--rm", "-it"]
+        run_flags = []
+        exec_cmd = []
 
         # Volumes - mount entire suite root to /workspace
-        mount_path = str(abs_repo_path).replace("\\", "/")
-        cmd.extend(["-v", f"{mount_path}:/workspace"])
-        cmd.extend(["-w", "/workspace"])
+        suite_root = Path(__file__).parent.parent
+        mount_path = str(suite_root).replace("\\", "/")
+        run_flags.extend(["-v", f"{mount_path}:/workspace"])
 
         # Environment variables for Python path and shared modules
-        cmd.extend(
+        run_flags.extend(
             ["-e", "PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines"]
         )
 
         # Mount 'shared' directory so that scripts can import shared modules
-        # logic: launchers/golf_launcher.py -> parent -> parent = suite_root
-        suite_root = Path(__file__).parent.parent
         shared_host_path = suite_root / "shared"
         if shared_host_path.exists():
             mount_shared_str = str(shared_host_path).replace("\\", "/")
-            cmd.extend(["-v", f"{mount_shared_str}:/shared"])
+            run_flags.extend(["-v", f"{mount_shared_str}:/shared"])
 
         # Display/X11
         if self.chk_live.isChecked():
             if os.name == "nt":
-                cmd.extend(["-e", "DISPLAY=host.docker.internal:0"])
-                cmd.extend(["-e", "MUJOCO_GL=glfw"])
-                cmd.extend(["-e", "LIBGL_ALWAYS_INDIRECT=1"])
+                run_flags.extend(["-e", "DISPLAY=host.docker.internal:0"])
+                run_flags.extend(["-e", "MUJOCO_GL=glfw"])
+                run_flags.extend(["-e", "LIBGL_ALWAYS_INDIRECT=1"])
             else:
-                cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
-                cmd.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw"])
+                run_flags.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
+                run_flags.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw"])
 
         # GPU
         if self.chk_gpu.isChecked():
-            cmd.append("--gpus=all")
+            run_flags.append("--gpus=all")
 
         # Network for Meshcat (Drake/Pinocchio)
         host_port = None
         if "drake" in model.type or "pinocchio" in model.type:
-            cmd.extend(["-p", "7000-7010:7000-7010"])
-            cmd.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
+            run_flags.extend(["-p", "7000-7010:7000-7010"])
+            run_flags.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
             host_port = 7000
 
-        cmd.append(DOCKER_IMAGE_NAME)
-
-        # Entry Command - Updated to use correct paths and Python executable
+        # Define Working Dictionary and Command based on model type
         if model.type == "drake":
-            # Change to the drake python directory and run as module
-            cmd.extend(
-                [
-                    "bash",
-                    "-c",
-                    "cd /workspace/engines/physics_engines/drake/python && python -m src.drake_gui_app",
-                ]
-            )
-
+            run_flags.extend(["-w", "/workspace/engines/physics_engines/drake/python"])
+            exec_cmd = ["python", "-m", "src.drake_gui_app"]
             if host_port:
                 logger.info(f"Drake Meshcat will be available on host port {host_port}")
                 self._start_meshcat_browser(host_port)
 
         elif model.type == "custom_humanoid":
-
-            # Change to mujoco python directory and run humanoid launcher
-            cmd.extend(
-                [
-                    "bash",
-                    "-c",
-                    "cd /workspace/engines/physics_engines/mujoco/python && python humanoid_launcher.py",
-                ]
-            )
+            run_flags.extend(["-w", "/workspace/engines/physics_engines/mujoco/python"])
+            exec_cmd = ["python", "humanoid_launcher.py"]
 
         elif model.type == "custom_dashboard":
-            # Change to mujoco python directory and run as module
-            cmd.extend(
-                [
-                    "bash",
-                    "-c",
-                    "cd /workspace/engines/physics_engines/mujoco/python && python -m mujoco_humanoid_golf",
-                ]
-            )
+            run_flags.extend(["-w", "/workspace/engines/physics_engines/mujoco/python"])
+            exec_cmd = ["python", "-m", "mujoco_humanoid_golf"]
 
         elif model.type == "pinocchio":
-            # Change to pinocchio python directory and run GUI
-            cmd.extend(
-                [
-                    "bash",
-                    "-c",
-                    "cd /workspace/engines/physics_engines/pinocchio/python && python pinocchio_golf/gui.py",
-                ]
+            run_flags.extend(
+                ["-w", "/workspace/engines/physics_engines/pinocchio/python"]
             )
-
+            exec_cmd = ["python", "pinocchio_golf/gui.py"]
             if host_port:
                 logger.info(
                     f"Pinocchio Meshcat will be available on host port {host_port}"
                 )
                 self._start_meshcat_browser(host_port)
 
-        logger.info(f"Final Docker Command: {' '.join(cmd)}")
+        # Construct Final Command:
+        # docker run [FLAGS] IMAGE [COMMAND]
+        cmd = docker_base + run_flags + [DOCKER_IMAGE_NAME] + exec_cmd
+
+        logger.info(f"Final Docker Command: {subprocess.list2cmdline(cmd)}")
 
         # Launch in Terminal
         if os.name == "nt":
@@ -1396,9 +1374,9 @@ class GolfLauncher(QMainWindow):
                 "cmd",
                 "/k",
                 "echo Launching simulation container... && echo Command: "
-                + " ".join(cmd)
+                + subprocess.list2cmdline(cmd)
                 + " && "
-                + " ".join(cmd),
+                + subprocess.list2cmdline(cmd),
             ]
             logger.info("Starting new console for simulation...")
             subprocess.Popen(diagnostic_cmd, creationflags=CREATE_NEW_CONSOLE)
