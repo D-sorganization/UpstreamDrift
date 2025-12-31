@@ -110,8 +110,8 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     c = np.empty((6, nb))  # Velocity-product accelerations (bias)
 
     # Articulated-body inertias (NB, 6, 6)
-    # OPTIMIZATION: Pre-allocate to avoid new array creation in loop
-    ia_articulated = np.empty((nb, 6, 6))
+    # OPTIMIZATION: Bulk copy is faster than element-wise copy in loop
+    ia_articulated = np.array(model["I"], dtype=float)
 
     pa_bias = np.zeros((6, nb))  # Articulated-body bias forces
     u_force = np.zeros((6, nb))  # IA * S
@@ -160,11 +160,6 @@ def aba(  # noqa: C901, PLR0912, PLR0915
             # OPTIMIZATION: Use pre-allocated buffer for cross product
             # Use fast version to avoid overhead
             cross_motion_fast(v[:, i], vj_velocity, out=c[:, i])
-
-        # Initialize articulated-body inertia with rigid-body inertia
-        # OPTIMIZATION: Copy into pre-allocated buffer instead of creating new array
-        # This is safe because ia_articulated[i] is a slice of the contiguous 3D array
-        ia_articulated[i] = model["I"][i]
 
         # Bias force: Coriolis + external forces
         # pa_bias[:, i] = cross_force(v[:, i], model["I"][i] @ v[:, i]) - f_ext[:, i]

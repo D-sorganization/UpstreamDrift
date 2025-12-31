@@ -389,13 +389,17 @@ class BiomechanicalAnalyzer:
         return powers
 
     def extract_full_state(
-        self, selected_actuator_name: str | None = None
+        self,
+        selected_actuator_name: str | None = None,
+        compute_advanced_metrics: bool = True,
     ) -> BiomechanicalData:
         """Extract complete biomechanical state at current time.
 
         Args:
-            selected_actuator_name: Optional name of actuator to compute induced accel
-                for.
+            selected_actuator_name: Optional name of actuator to compute induced
+                accel for.
+            compute_advanced_metrics: Whether to compute expensive metrics
+                (Induced/CF).
 
         Returns:
             BiomechanicalData object with all available measurements
@@ -417,18 +421,22 @@ class BiomechanicalAnalyzer:
         if club_vel is not None:
             self._prev_club_vel = club_vel.copy()
 
-        # Induced Accelerations
-        induced = {
-            "gravity": self.compute_induced_acceleration("gravity"),
-            "actuator": self.compute_induced_acceleration("actuator"),
-        }
-        if selected_actuator_name:
-            induced["selected_actuator"] = (
-                self.compute_induced_acceleration_for_actuator(selected_actuator_name)
-            )
+        # Induced Accelerations & Counterfactuals
+        induced = {}
+        counterfactuals = {}
 
-        # Counterfactuals
-        counterfactuals = self.compute_counterfactuals()
+        if compute_advanced_metrics:
+            induced = {
+                "gravity": self.compute_induced_acceleration("gravity"),
+                "actuator": self.compute_induced_acceleration("actuator"),
+            }
+            if selected_actuator_name:
+                induced["selected_actuator"] = (
+                    self.compute_induced_acceleration_for_actuator(
+                        selected_actuator_name
+                    )
+                )
+            counterfactuals = self.compute_counterfactuals()
 
         return BiomechanicalData(
             time=float(self.data.time),
