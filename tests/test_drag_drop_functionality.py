@@ -242,6 +242,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
 
         # Create launcher instance without full initialization
         launcher = GolfLauncher.__new__(GolfLauncher)
+        launcher.running_processes = {}
 
         # Mock the C3D viewer script path and subprocess
         with (
@@ -280,6 +281,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
         from launchers.golf_launcher import GolfLauncher
 
         launcher = GolfLauncher.__new__(GolfLauncher)
+        launcher.running_processes = {}
 
         # Mock missing file
         with (
@@ -363,6 +365,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
 
         # Create launcher instance without full initialization
         launcher = GolfLauncher.__new__(GolfLauncher)
+        launcher.running_processes = {}
 
         # Mock the URDF generator script path and subprocess
         with (
@@ -402,6 +405,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
         from launchers.golf_launcher import GolfLauncher
 
         launcher = GolfLauncher.__new__(GolfLauncher)
+        launcher.running_processes = {}
 
         # Mock missing file
         with (
