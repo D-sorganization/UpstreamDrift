@@ -415,7 +415,8 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
             except Exception as e:
                 LOGGER.exception("Failed to start Meshcat")
-                LOGGER.error(  # noqa: TRY400 - Manual logging preferred over re-raising.
+                LOGGER.error(
+                    # noqa: TRY400 - Manual logging preferred over re-raising.
                     "Failed to start Meshcat for Drake visualization.\n"
                     "Common causes:\n"
                     "  - Another Meshcat server is already running on the same port "
@@ -717,7 +718,10 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         vis_layout.addWidget(self.chk_force_ellip)
 
         self.chk_live_analysis = QtWidgets.QCheckBox("Live Analysis (Induced/CF)")
-        self.chk_live_analysis.setToolTip("Compute Induced Accelerations and Counterfactuals in real-time (Can slow down sim)")
+        self.chk_live_analysis.setToolTip(
+            "Compute Induced Accelerations and Counterfactuals in real-time "
+            "(Can slow down sim)"
+        )
         vis_layout.addWidget(self.chk_live_analysis)
 
         vis_group.setLayout(vis_layout)
@@ -1238,7 +1242,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.recorder.induced_accelerations["total"] = list(total_arr)
 
         if spec_induced:
-             self.recorder.induced_accelerations["control"] = list(np.array(spec_induced))
+            self.recorder.induced_accelerations["control"] = list(
+                np.array(spec_induced)
+            )
 
         # Use shared plotter
         # Try to find a meaningful joint (e.g. Spine Twist) if available, otherwise 0
@@ -1250,7 +1256,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         fig = plt.figure(figsize=(10, 6))
 
         # Use breakdown mode to show all components
-        plotter.plot_induced_acceleration(fig, "breakdown", joint_idx=joint_idx, breakdown_mode=True)
+        plotter.plot_induced_acceleration(
+            fig, "breakdown", joint_idx=joint_idx, breakdown_mode=True
+        )
         plt.show()
 
     def _show_counterfactuals_plot(self) -> None:
@@ -1327,13 +1335,12 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         try:
             import pandas as pd
 
-            data = {
-                "time": self.recorder.times
-            }
+            data = {"time": self.recorder.times}
 
             # Helper to add arrays
             def add_series(name, arr_list):
-                if not arr_list: return
+                if not arr_list:
+                    return
                 arr = np.array(arr_list)
                 if arr.ndim > 1:
                     for i in range(arr.shape[1]):

@@ -262,6 +262,7 @@ def test_compute_smoothness_metric(sample_data):
     s = analyzer.compute_smoothness_metric(np.array([0]))
     assert s == 0.0
 
+
 def test_compute_work_metrics(sample_data):
     # We set torque = velocity in fixture.
     # Power = v^2, which is always positive.
@@ -275,6 +276,7 @@ def test_compute_work_metrics(sample_data):
 
     # Test invalid index
     assert sample_data.compute_work_metrics(99) is None
+
 
 def test_compute_phase_space_path_length(sample_data):
     pl = sample_data.compute_phase_space_path_length(0)

@@ -1366,7 +1366,7 @@ class GolfLauncher(QMainWindow):
         # Volumes - mount entire suite root to /workspace
         mount_path = str(REPOS_ROOT).replace("\\", "/")
         cmd.extend(["-v", f"{mount_path}:/workspace"])
-        
+
         # Prepare dynamic working directory and entry command
         work_dir = "/workspace"
         entry_cmd = []
@@ -1399,7 +1399,7 @@ class GolfLauncher(QMainWindow):
                     f"Pinocchio Meshcat will be available on host port {host_port}"
                 )
                 self._start_meshcat_browser(host_port)
-        
+
         # Set working directory
         cmd.extend(["-w", work_dir])
 
@@ -1438,7 +1438,7 @@ class GolfLauncher(QMainWindow):
             cmd.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
 
         cmd.append(DOCKER_IMAGE_NAME)
-        
+
         # Append entry command
         if entry_cmd:
             cmd.extend(entry_cmd)

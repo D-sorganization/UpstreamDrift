@@ -1,5 +1,7 @@
-from playwright.sync_api import sync_playwright
 import os
+
+from playwright.sync_api import sync_playwright
+
 
 def verify_ux():
     with sync_playwright() as p:
@@ -18,6 +20,7 @@ def verify_ux():
         print("Screenshot saved to verification/ux_verification.png")
 
         browser.close()
+
 
 if __name__ == "__main__":
     verify_ux()
