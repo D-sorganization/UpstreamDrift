@@ -2,9 +2,8 @@ def compute_induced_accelerations(physics) -> dict:
     """Compute induced accelerations (Gravity, Velocity, Control) for current state."""
     results: dict = {}
     try:
-        from dm_control.mujoco.wrapper.mjbindings import mjlib
         import numpy as np
-        from ctypes import POINTER, c_double
+        from dm_control.mujoco.wrapper.mjbindings import mjlib
     except ImportError:
         return results
 
@@ -41,7 +40,7 @@ def compute_induced_accelerations(physics) -> dict:
     # Restore v, set a=0.
     data.qvel[:] = qvel_backup
     data.qacc[:] = 0
-    
+
     # Needs separate buffer for the result of this call
     bias_force = np.zeros(nv, dtype=np.float64)
     mjlib.mj_rne(model.ptr, data.ptr, 0, bias_force)
@@ -52,14 +51,16 @@ def compute_induced_accelerations(physics) -> dict:
     data.qvel[:] = qvel_backup
     data.ctrl[:] = ctrl_backup
     mjlib.mj_fwdActuation(model.ptr, data.ptr)
-    
+
     # Copy from data.qfrc_actuator (which is managed by mujoco)
     tau_control = data.qfrc_actuator.copy()
     # Check shape
     if tau_control.shape[0] != nv:
         print(f"WARNING: tau_control shape {tau_control.shape} != nv {nv}. Resizing.")
         tmp = np.zeros(nv, dtype=np.float64)
-        tmp[:min(nv, tau_control.shape[0])] = tau_control[:min(nv, tau_control.shape[0])]
+        tmp[: min(nv, tau_control.shape[0])] = tau_control[
+            : min(nv, tau_control.shape[0])
+        ]
         tau_control = tmp
 
     # Now solve M * a = F
@@ -77,26 +78,26 @@ def compute_induced_accelerations(physics) -> dict:
         # Clean inputs
         dst_clean = np.ascontiguousarray(dst, dtype=np.float64)
         src_clean = np.ascontiguousarray(src, dtype=np.float64)
-        
+
         # Shapes to try: Flat, Column, Row
         shapes_to_try = [
             dst_clean.shape,             # (nv,)
             (dst_clean.shape[0], 1),     # (nv, 1)
             (1, dst_clean.shape[0])      # (1, nv)
         ]
-        
+
         last_err = None
         success = False
-        
+
         for shape in shapes_to_try:
             try:
                 # Reshape views (cheap)
                 d_view = dst_clean.reshape(shape)
                 s_view = src_clean.reshape(shape)
-                
+
                 # Attempt call
                 mjlib.mj_solveM(m_ptr, d_ptr, d_view, s_view)
-                
+
                 # If successful, copy result back to original destination
                 # (Handle flatten/shape mismatch by flat copy)
                 dst[:] = d_view.flatten()
@@ -106,7 +107,7 @@ def compute_induced_accelerations(physics) -> dict:
                 last_err = e
             except Exception as e:
                 last_err = e
-        
+
         if not success:
             raise last_err
 

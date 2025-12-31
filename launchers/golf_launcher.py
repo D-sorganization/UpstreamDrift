@@ -614,11 +614,11 @@ class GolfLauncher(QMainWindow):
                 y = geo.get("y", 100)
                 w = geo.get("width", 1280)
                 h = geo.get("height", 800)
-                
+
                 # Clamp Y to avoid being off-screen top
                 if y < 30:
                     y = 50
-                
+
                 self.setGeometry(x, y, w, h)
             else:
                 self._center_window()
@@ -649,13 +649,13 @@ class GolfLauncher(QMainWindow):
             screen_geo = screen.availableGeometry()
             w = self.width() if self.width() > 100 else 1280
             h = self.height() if self.height() > 100 else 800
-            
+
             x = screen_geo.x() + (screen_geo.width() - w) // 2
             y = screen_geo.y() + (screen_geo.height() - h) // 2
-            
+
             # Ensure not too high
             y = max(y, 50)
-            
+
             self.setGeometry(x, y, w, h)
 
     def closeEvent(self, event: QCloseEvent | None) -> None:

@@ -364,7 +364,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             # Calculate path to shared directory relative to this file
             # engines/physics_engines/drake/python/src/drake_gui_app.py
             current_file = Path(__file__)
-            
+
             # Check for Docker environment mount first
             docker_shared = Path("/shared/urdf")
             if docker_shared.exists():
@@ -372,7 +372,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 LOGGER.info(f"Found Docker shared URDF directory: {urdf_dir}")
             else:
                 # Fallback to local relative path
-                # Up 5 levels: src -> python -> drake -> physics_engines -> engines -> root
+                # Up 5 levels: src->python->drake->physics_engines->engines->root
                 try:
                     project_root = current_file.parents[5]
                     urdf_dir = project_root / "shared" / "urdf"
