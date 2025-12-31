@@ -204,6 +204,7 @@ def mock_pyqt(monkeypatch):
     mock_qt_widgets.QHBoxLayout = MockQHBoxLayout
     mock_qt_widgets.QScrollArea = MockQScrollArea
     mock_qt_widgets.QApplication = MagicMock()
+    mock_qt_widgets.QApplication.startDragDistance.return_value = 10
     mock_qt_widgets.QComboBox = MagicMock()
     mock_qt_widgets.QDialog = MagicMock()
     mock_qt_widgets.QTextEdit = MagicMock()
