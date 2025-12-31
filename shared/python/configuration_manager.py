@@ -84,7 +84,7 @@ class ConfigurationManager:
             return SimulationConfig()
 
         try:
-            with open(self.config_path) as f:
+            with open(self.config_path, encoding="utf-8") as f:
                 data = json.load(f)
 
             # Use dacite or simple dict unpacking with filtering
@@ -106,7 +106,7 @@ class ConfigurationManager:
         """Save configuration to file."""
         try:
             data = asdict(config)
-            with open(self.config_path, "w") as f:
+            with open(self.config_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=4)
         except Exception as e:
             raise GolfModelingError(f"Failed to save config: {e}") from e

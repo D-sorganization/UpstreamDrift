@@ -25,7 +25,7 @@ def check_numpy_version() -> str | None:
     try:
         import numpy
 
-        version = numpy.__version__
+        version: str = numpy.__version__
         print(f"Current NumPy version: {version}")
         return version
     except ImportError:

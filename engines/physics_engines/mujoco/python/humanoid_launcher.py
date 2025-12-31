@@ -5,6 +5,7 @@ import os
 import platform
 import subprocess
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 
 # Third-party imports
@@ -43,9 +44,9 @@ from PyQt6.QtWidgets import (
 
 # Ensure shared modules are importable
 PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
-SHARED_PATH = PROJECT_ROOT / "shared" / "python"
-if str(SHARED_PATH) not in sys.path:
-    sys.path.insert(0, str(SHARED_PATH))
+# Add Project Root to sys.path so 'shared' package is discoverable
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from shared.python.configuration_manager import ConfigurationManager  # noqa: E402
 from shared.python.process_worker import ProcessWorker  # noqa: E402
@@ -67,7 +68,7 @@ logger = logging.getLogger(__name__)
 class ModernDarkPalette(QPalette):
     """Custom Dark Palette for a modern look."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.setColor(QPalette.ColorRole.Window, QColor(43, 43, 43))
         self.setColor(QPalette.ColorRole.WindowText, Qt.GlobalColor.white)
@@ -85,7 +86,7 @@ class ModernDarkPalette(QPalette):
 
 
 class HumanoidLauncher(QMainWindow):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Humanoid Golf Simulation Suite")
         self.setMinimumSize(1000, 800)
@@ -105,7 +106,7 @@ class HumanoidLauncher(QMainWindow):
         self.config_manager = ConfigurationManager(self.config_path)
         self.config = self.config_manager.load()
 
-        self.simulation_thread = None
+        self.simulation_thread: ProcessWorker | None = None
 
         # Load Config - Already done above
         # self.load_config()
@@ -113,7 +114,7 @@ class HumanoidLauncher(QMainWindow):
         # UI Setup
         self.setup_ui()
 
-    def setup_ui(self):
+    def setup_ui(self) -> None:
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
@@ -154,7 +155,7 @@ class HumanoidLauncher(QMainWindow):
         # Footer / Log
         self.setup_log_area(main_layout)
 
-    def setup_sim_tab(self):
+    def setup_sim_tab(self) -> None:
         tab = QWidget()
         layout = QVBoxLayout(tab)
         layout.setSpacing(15)
@@ -304,7 +305,7 @@ class HumanoidLauncher(QMainWindow):
         self.btn_data.setEnabled(enabled)
         self.btn_plot_iaa.setEnabled(enabled and HAS_MATPLOTLIB)
 
-    def setup_appearance_tab(self):
+    def setup_appearance_tab(self) -> None:
         tab = QWidget()
         layout = QVBoxLayout(tab)
         layout.setContentsMargins(20, 20, 20, 20)
@@ -339,7 +340,7 @@ class HumanoidLauncher(QMainWindow):
         # Colors
         color_group = QGroupBox("🎨 Body Colors")
         self.color_layout = QGridLayout()
-        self.color_buttons = {}
+        self.color_buttons: dict[str, QPushButton] = {}
 
         parts = [
             ("Shirt", "shirt"),
@@ -375,7 +376,7 @@ class HumanoidLauncher(QMainWindow):
         layout.addStretch()
         self.tabs.addTab(tab, "Appearance")
 
-    def setup_equip_tab(self):
+    def setup_equip_tab(self) -> None:
         tab = QWidget()
         layout = QVBoxLayout(tab)
         layout.setContentsMargins(20, 20, 20, 20)
@@ -443,7 +444,7 @@ class HumanoidLauncher(QMainWindow):
         layout.addStretch()
         self.tabs.addTab(tab, "Equipment")
 
-    def setup_log_area(self, parent_layout):
+    def setup_log_area(self, parent_layout: QVBoxLayout) -> None:
         log_group = QGroupBox("Simulation Log")
         log_layout = QVBoxLayout()
 
@@ -468,25 +469,22 @@ class HumanoidLauncher(QMainWindow):
         log_group.setLayout(log_layout)
         parent_layout.addWidget(log_group)
 
-    def log(self, msg):
+    def log(self, msg: str) -> None:
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
         self.txt_log.append(f"[{timestamp}] {msg}")
         self.txt_log.ensureCursorVisible()
 
-    def clear_log(self):
+    def clear_log(self) -> None:
         self.txt_log.clear()
         self.log("Log cleared.")
 
-    def set_btn_color(self, btn, rgba):
-        from collections.abc import Sequence
-
-        rgba_seq: Sequence[float] = rgba  # type: ignore[assignment]
-        r, g, b = (int(c * 255) for c in rgba_seq[:3])
+    def set_btn_color(self, btn: QPushButton, rgba: Sequence[float]) -> None:
+        r, g, b = (int(c * 255) for c in rgba[:3])
         btn.setStyleSheet(
             f"background-color: rgb({r},{g},{b}); border: 1px solid #555;"
         )
 
-    def pick_color(self, key, btn):
+    def pick_color(self, key: str, btn: QPushButton) -> None:
         current = self.config.colors.get(key, [1.0, 1.0, 1.0, 1.0])
         initial = QColor(
             int(current[0] * 255),
@@ -512,7 +510,7 @@ class HumanoidLauncher(QMainWindow):
         self.mode_help_label.setText(descriptions.get(mode, ""))
         self.btn_poly_generator.setEnabled(mode == "poly")
 
-    def open_polynomial_generator(self):
+    def open_polynomial_generator(self) -> None:
         """Open polynomial generator dialog."""
         # Lazy import to avoid MuJoCo DLL initialization on Windows
         try:
@@ -542,7 +540,7 @@ class HumanoidLauncher(QMainWindow):
                 sys.modules[module_name] = module
                 spec.loader.exec_module(module)
 
-            PolynomialGeneratorWidget = module.PolynomialGeneratorWidget
+            PolynomialGeneratorWidget = module.PolynomialGeneratorWidget  # type: ignore[attr-defined]
         except ImportError as e:
             QMessageBox.warning(
                 self,
@@ -591,7 +589,7 @@ class HumanoidLauncher(QMainWindow):
         poly_widget.set_joints(joints)
 
         # Connect signal to save coefficients
-        def on_polynomial_generated(joint_name, coefficients):
+        def on_polynomial_generated(joint_name: str, coefficients: list[float]) -> None:
             """Save generated polynomial coefficients to config."""
             self.config.polynomial_coefficients[joint_name] = coefficients
             self.save_config()
@@ -608,7 +606,7 @@ class HumanoidLauncher(QMainWindow):
 
         dialog.exec()
 
-    def browse_file(self, line_edit, save=False):
+    def browse_file(self, line_edit: QLineEdit, save: bool = False) -> None:
         if save:
             path, _ = QFileDialog.getSaveFileName(
                 self, "Save State", "", "JSON State (*.json)"
@@ -621,11 +619,11 @@ class HumanoidLauncher(QMainWindow):
         if path:
             line_edit.setText(path)
 
-    def load_config(self):
+    def load_config(self) -> None:
         """Deprecated: Config is loaded in __init__. Kept for compatibility."""
         pass
 
-    def save_config(self):
+    def save_config(self) -> None:
         """Save current configuration to file."""
         try:
             # Update config object from UI
@@ -660,7 +658,31 @@ class HumanoidLauncher(QMainWindow):
         except Exception as e:
             self.log(f"Error saving config: {e}")
 
-    def get_docker_cmd(self):
+    def get_simulation_command(self) -> tuple[list[str], dict[str, str] | None]:
+        """Construct the command to run the simulation.
+
+        Returns:
+            Tuple of (command_list, environment_dict).
+        """
+        # Check if running inside Docker container
+        in_docker = Path("/.dockerenv").exists()
+        env = None
+
+        if in_docker:
+            # Running inside the Mujoco Docker container:
+            # - CWD set to /workspace/engines/physics_engines/mujoco/python
+            # - Module exists at ../docker/src/humanoid_golf/sim.py relative to here
+            cmd = ["python", "-m", "humanoid_golf.sim"]
+
+            # Ensure PYTHONPATH includes the directory containing 'humanoid_golf'
+            # We add '../docker/src' to PYTHONPATH.
+            # Note: We must also include existing PYTHONPATH if any.
+            # Using os.environ logic in ProcessWorker handles the merge,
+            # we just provide the override/addition here.
+            env = {"PYTHONPATH": "../docker/src"}
+            return cmd, env
+
+        # HOST-SIDE EXECUTION (Legacy/Dev)
         is_windows = platform.system() == "Windows"
         abs_repo_path = str(self.repo_path.resolve())
 
@@ -670,11 +692,6 @@ class HumanoidLauncher(QMainWindow):
         if is_windows:
             drive, tail = os.path.splitdrive(abs_repo_path)
             if drive:
-                # Docker Desktop on Windows often relies on WSL2 backend.
-                # When invoking docker from Windows Python, explicit WSL path conversion
-                # (/mnt/c/...) is sometimes safer for volume mounting than C:/ style,
-                # though modern Docker Desktop handles both.
-                # This logic ensures compatibility.
                 drive_letter = drive[0].lower()
                 rel_path = tail.replace("\\", "/")
                 wsl_path = f"/mnt/{drive_letter}{rel_path}"
@@ -705,8 +722,6 @@ class HumanoidLauncher(QMainWindow):
                 cmd.extend(["-e", "QT_AUTO_SCREEN_SCALE_FACTOR=0"])
                 cmd.extend(["-e", "QT_SCALE_FACTOR=1"])
                 cmd.extend(["-e", "QT_QPA_PLATFORM=xcb"])
-                # NOTE: LIBGL_ALWAYS_INDIRECT removed - causes segfaults with modern
-                # OpenGL. VcXsrv should work in direct rendering mode.
             else:
                 cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
@@ -730,9 +745,9 @@ class HumanoidLauncher(QMainWindow):
         # - Live view vs headless mode
         cmd.extend(["-m", "humanoid_golf.sim"])
 
-        return cmd
+        return cmd, None
 
-    def plot_induced_acceleration(self):
+    def plot_induced_acceleration(self) -> None:
         """Plot Induced Acceleration Analysis from CSV."""
         if not HAS_MATPLOTLIB:
             return
@@ -822,13 +837,13 @@ class HumanoidLauncher(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Plot Error", str(e))
 
-    def start_simulation(self):
+    def start_simulation(self) -> None:
         self.save_config()
         self.log("Starting simulation...")
 
-        cmd = self.get_docker_cmd()
+        cmd, env = self.get_simulation_command()
 
-        self.simulation_thread = ProcessWorker(cmd)
+        self.simulation_thread = ProcessWorker(cmd, env=env)
         self.simulation_thread.log_signal.connect(self.log)
         self.simulation_thread.finished_signal.connect(self.on_simulation_finished)
 
@@ -837,12 +852,12 @@ class HumanoidLauncher(QMainWindow):
         self.btn_run.setEnabled(False)
         self.btn_stop.setEnabled(True)
 
-    def stop_simulation(self):
+    def stop_simulation(self) -> None:
         if self.simulation_thread:
             self.log("Stopping simulation...")
             self.simulation_thread.stop()
 
-    def on_simulation_finished(self, code, stderr):
+    def on_simulation_finished(self, code: int, stderr: str) -> None:
         if code == 0:
             self.log("Simulation finished successfully.")
             self.btn_video.setEnabled(True)
@@ -884,7 +899,7 @@ class HumanoidLauncher(QMainWindow):
                 # Config is saved automatically in start_simulation
                 self.start_simulation()
 
-    def rebuild_docker(self):
+    def rebuild_docker(self) -> None:
         reply = QMessageBox.question(
             self,
             "Rebuild Environment",
@@ -909,15 +924,15 @@ class HumanoidLauncher(QMainWindow):
             )
             self.build_thread.start()
 
-    def open_video(self):
+    def open_video(self) -> None:
         vid_path = self.repo_path / "docker" / "src" / "humanoid_golf.mp4"
         self._open_file(vid_path)
 
-    def open_data(self):
+    def open_data(self) -> None:
         csv_path = self.repo_path / "docker" / "src" / "golf_data.csv"
         self._open_file(csv_path)
 
-    def _open_file(self, path):
+    def _open_file(self, path: Path) -> None:
         if not path.exists():
             QMessageBox.warning(self, "Error", f"File not found: {path}")
             return

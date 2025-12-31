@@ -89,6 +89,16 @@ class TestDockerLaunchCommands(unittest.TestCase):
         # Ensure regex replacements work similarly if relying on string conversion
         mock_path.replace = Mock(side_effect=lambda x, y: "/test/suite/path".replace(x, y))
 
+        # Prepare mock Path to simulate suite_root
+        mock_path_cls = MagicMock()
+        mock_suite_root = MagicMock()
+        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        # When Path(__file__) is called, return something that eventually leads to mock_suite_root
+        # Path(__file__).parent.parent -> mock_suite_root
+        mock_file_path = MagicMock()
+        mock_file_path.parent.parent = mock_suite_root
+        mock_path_cls.return_value = mock_file_path
+
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
@@ -136,6 +146,14 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_path = Mock()
         mock_path.__str__ = Mock(return_value="/test/suite/path")
 
+        # Prepare mock Path
+        mock_path_cls = MagicMock()
+        mock_suite_root = MagicMock()
+        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_file_path = MagicMock()
+        mock_file_path.parent.parent = mock_suite_root
+        mock_path_cls.return_value = mock_file_path
+
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
@@ -173,6 +191,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             # Verify Drake-specific components
             self.assertIn("-p 7000-7010:7000-7010", command_str)
             self.assertIn("-e MESHCAT_HOST=0.0.0.0", command_str)
+            # Verify working directory matches implementation
             self.assertIn(
                 "-w /workspace/engines/physics_engines/drake/python", command_str
             )
@@ -193,6 +212,14 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
         mock_path = Mock()
         mock_path.__str__ = Mock(return_value="/test/suite/path")
+
+        # Prepare mock Path
+        mock_path_cls = MagicMock()
+        mock_suite_root = MagicMock()
+        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_file_path = MagicMock()
+        mock_file_path.parent.parent = mock_suite_root
+        mock_path_cls.return_value = mock_file_path
 
         with (
             patch("subprocess.Popen") as mock_popen,
@@ -238,6 +265,14 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_path = Mock()
         mock_path.__str__ = Mock(return_value="/test/path")
 
+        # Prepare mock Path
+        mock_path_cls = MagicMock()
+        mock_suite_root = MagicMock()
+        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_file_path = MagicMock()
+        mock_file_path.parent.parent = mock_suite_root
+        mock_path_cls.return_value = mock_file_path
+
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
@@ -256,7 +291,8 @@ class TestDockerLaunchCommands(unittest.TestCase):
             # Verify Windows-specific display setup
             self.assertIn("-e DISPLAY=host.docker.internal:0", command_str)
             self.assertIn("-e MUJOCO_GL=glfw", command_str)
-            self.assertIn("-e LIBGL_ALWAYS_INDIRECT=1", command_str)
+            self.assertIn("-e PYOPENGL_PLATFORM=glx", command_str)
+            self.assertIn("-e QT_QPA_PLATFORM=xcb", command_str)
 
     def test_gpu_acceleration_option(self):
         """Test GPU acceleration option."""
@@ -272,6 +308,14 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_model.type = "custom_humanoid"
         mock_path = Mock()
         mock_path.__str__ = Mock(return_value="/test/path")
+
+        # Prepare mock Path
+        mock_path_cls = MagicMock()
+        mock_suite_root = MagicMock()
+        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_file_path = MagicMock()
+        mock_file_path.parent.parent = mock_suite_root
+        mock_path_cls.return_value = mock_file_path
 
         with (
             patch("subprocess.Popen") as mock_popen,
