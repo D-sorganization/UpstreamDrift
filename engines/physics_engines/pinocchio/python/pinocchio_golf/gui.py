@@ -437,6 +437,11 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.chk_torques.toggled.connect(self._toggle_torques)
         vis_layout.addWidget(self.chk_torques)
 
+        # Live Analysis Toggle
+        self.chk_live_analysis = QtWidgets.QCheckBox("Live Analysis (Induced/CF)")
+        self.chk_live_analysis.setToolTip("Compute Induced Accelerations and Counterfactuals in real-time (Can slow down sim)")
+        vis_layout.addWidget(self.chk_live_analysis)
+
         vis_group.setLayout(vis_layout)
         sim_layout.addWidget(vis_group)
 
@@ -630,18 +635,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
     def _plot_induced_accelerations(self) -> None:
         """Calculate and plot induced accelerations for selected joint."""
-        # Check for data presence
+        # Use updated GolfSwingPlotter logic
         if not self.recorder.frames:
             return
-
-        # Check if we have induced data in frames
-        # If we recorded it frame-by-frame, we can just pull it.
-        # But we currently don't populate it in _game_loop to save perf
-        # (unless I update _game_loop).
-        # However, we can compute post-hoc if we saved Q/V/Tau.
-
-        # Let's assume we use the Analyzer to recompute if missing,
-        # or use saved if present.
 
         # Get selected joint
         joint_name = self.joint_select_combo.currentText()
@@ -651,6 +647,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             else:
                 return
 
+        # Get velocity index for plotting
         try:
             if self.model is None:
                 return
@@ -659,66 +656,19 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         except ValueError:
             return
 
-        # Prepare arrays
-        times = []
-        g_accs = []
-        v_accs = []
-        c_accs = []
-        t_accs = []
+        # Populate recorder with post-hoc data if live analysis was off
+        self._ensure_analysis_data_populated()
 
-        # Use existing analyzer or create new
-        self._ensure_analyzer_initialized()
-
-        for frame in self.recorder.frames:
-            times.append(frame.time)
-
-            # If we have pre-computed induced accels (future proofing)
-            if frame.induced_accelerations and self.model is not None:
-                # Assume dictionary structure
-                # We need to map joint index to array index.
-                # Usually array is size NV. v_idx points to start.
-                # Assuming 1-DOF for plotting.
-                g = frame.induced_accelerations.get("gravity", np.zeros(self.model.nv))
-                v = frame.induced_accelerations.get("velocity", np.zeros(self.model.nv))
-                c = frame.induced_accelerations.get("control", np.zeros(self.model.nv))
-                total_acc = frame.induced_accelerations.get(
-                    "total", np.zeros(self.model.nv)
-                )
-
-                g_accs.append(g[v_idx])
-                v_accs.append(v[v_idx])
-                c_accs.append(c[v_idx])
-                t_accs.append(total_acc[v_idx])
-
-            else:
-                # Recompute post-hoc
-                if self.analyzer is not None:
-                    res = self.analyzer.compute_components(
-                        frame.joint_positions,
-                        frame.joint_velocities,
-                        frame.joint_torques,
-                    )
-                g_accs.append(res["gravity"][v_idx])
-                v_accs.append(res["velocity"][v_idx])
-                c_accs.append(res["control"][v_idx])
-                t_accs.append(res["total"][v_idx])
-
-        # Specific Control Input
+        # Handle specific torque source input
         spec_tau: np.ndarray | None = None
         txt = self.induced_source_edit.text().strip()
         if txt and self.model:
             try:
-                # Parse comma separated values
                 parts: list[float] = [float(x) for x in txt.split(",")]
                 if len(parts) == self.model.nv:
                     spec_tau = np.array(parts)
                 else:
-                    # Pad or truncate? Or just log warning.
-                    # Let's try to map to size NV.
-                    logger.warning(
-                        f"Input torque vector length {len(parts)} does not match "
-                        f"model NV {self.model.nv}. Padding/Truncating."
-                    )
+                    # Pad
                     temp_tau = np.zeros(self.model.nv, dtype=np.float64)
                     min_len = min(len(parts), len(temp_tau))
                     temp_tau[:min_len] = parts[:min_len]
@@ -726,32 +676,61 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             except ValueError:
                 pass
 
-        spec_accs = []
+        # If specific source, compute it and add to recorder temporarily
+        # We use a dedicated key 'specific_control' to avoid overwriting 'control' (total torque)
         if spec_tau is not None and self.analyzer:
-            # Recompute for whole trajectory
-            for frame in self.recorder.frames:
-                # We need q.
-                # Assuming compute_specific_control(q, tau)
+             for frame in self.recorder.frames:
                 a_spec = self.analyzer.compute_specific_control(
                     frame.joint_positions, spec_tau
                 )
-                spec_accs.append(a_spec[v_idx])
+                if frame.induced_accelerations is None: frame.induced_accelerations = {}
+                frame.induced_accelerations["specific_control"] = a_spec
 
-        # Plot
-        ax = self.canvas.fig.add_subplot(111)
-        ax.plot(times, g_accs, label="Gravity", linestyle="--", alpha=0.8)
-        ax.plot(times, v_accs, label="Velocity (Coriolis)", linestyle="-.", alpha=0.8)
-        ax.plot(times, c_accs, label="Control (Torque)", linestyle=":", alpha=0.8)
-        ax.plot(times, t_accs, label="Total", color="k", linewidth=1.5)
+        plotter = GolfSwingPlotter(self.recorder, self.joint_names)
+        # We pass v_idx (velocity index) because plotting assumes index into velocity/accel array
+        # But GolfSwingPlotter.get_joint_name uses 'joint_idx'.
+        # For simple 1-DOF joints, v_idx usually maps to joint sequence if we ignore universe.
+        # Pinocchio: universe=0 (nq=0,nv=0), joint1 (idx_q=0, idx_v=0)
+        # So v_idx matches joint_idx-1 usually.
+        # But GolfSwingPlotter expects index into the data array.
+        # If we have specific control, we might want to plot that instead of breakdown,
+        # or add it to breakdown. The plotter breakdown mode looks for 'control'.
+        # If spec_tau is set, we want to compare components.
+        # Let's map 'specific_control' to 'control' JUST for the plotter instance by mocking or
+        # using a temporary source name.
+        # Actually, GolfSwingPlotter.plot_induced_acceleration in breakdown mode looks for 'control'.
+        # If we want to visualize specific source, we should likely update Plotter to look for 'specific_control'
+        # if available, or we pass 'specific_control' as source if not breakdown.
 
-        if spec_accs:
-            ax.plot(times, spec_accs, label="Specific Source", color="m", linewidth=2)
+        # Current logic: Breakdown plots G, V, Total, and optionally 'control'.
+        # If we want to show Specific instead of Total Control, we need to trick it or update Plotter.
+        # But 'control' usually means 'Total Actuation'.
+        # Let's keep breakdown as is (Total) and if specific is set, plotting 'specific_control' as an extra?
+        # The updated Plotter in shared/plotting.py doesn't look for 'specific_control' automatically.
+        # It looks for 'control' inside the try-except block.
 
-        ax.set_title(f"Induced Accelerations: {joint_name}")
-        ax.set_xlabel("Time [s]")
-        ax.set_ylabel("Acceleration [rad/s²]")
-        ax.legend()
-        ax.grid(True, linestyle=":", alpha=0.6)
+        # To fix the "overwrite" issue without changing Plotter API too much:
+        # We can pass `source_name="specific_control"` if not in breakdown mode.
+        # But user likely wants to see it in context (Breakdown).
+        # We will use the fact that Plotter is generic.
+        # We can temporarily alias 'control' in the recorder accessor? No, recorder is shared.
+
+        # Safest: Use a custom plotter call or subclass?
+        # Or just tell plotter to plot 'specific_control' as a separate line?
+        # The plotter.plot_induced_acceleration with breakdown=True is hardcoded to G, V, Total, Control.
+        # I will use 'breakdown' mode, but if specific source is present, I'll manually add it to the plot
+        # after the standard breakdown.
+
+        plotter.plot_induced_acceleration(self.canvas.fig, "breakdown", joint_idx=v_idx, breakdown_mode=True)
+
+        # Manually add specific control trace if it exists
+        if spec_tau is not None:
+            times, spec_vals = self.recorder.get_induced_acceleration_series("specific_control")
+            if len(times) > 0 and spec_vals.size > 0:
+                ax = self.canvas.fig.axes[0]
+                if v_idx < spec_vals.shape[1]:
+                    ax.plot(times, spec_vals[:, v_idx], label="Specific Source", color="magenta", linewidth=2, linestyle=":")
+                    ax.legend()
 
     def _plot_counterfactuals(self) -> None:
         """Plot ZTCF (Zero Torque Accel) and ZVCF (Zero Velocity Torque)."""
@@ -773,87 +752,108 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         except ValueError:
             return
 
-        times = []
-        ztcf_vals = []  # Acceleration
-        zvcf_vals = []  # Torque/Force
+        self._ensure_analysis_data_populated()
 
-        if self.analyzer is None and self.model is not None:
-            self._ensure_analyzer_initialized()
+        plotter = GolfSwingPlotter(self.recorder, self.joint_names)
+        plotter.plot_counterfactual_comparison(self.canvas.fig, "dual", metric_idx=v_idx)
 
-        for frame in self.recorder.frames:
-            times.append(frame.time)
+    def _ensure_analysis_data_populated(self) -> None:
+        """Populate recorder frames with analysis data if missing."""
+        if not self.recorder.frames:
+            return
 
-            if frame.counterfactuals and self.model is not None:
-                ztcf = frame.counterfactuals.get("ztcf_accel", np.zeros(self.model.nv))
-                zvcf = frame.counterfactuals.get("zvcf_torque", np.zeros(self.model.nv))
-                ztcf_vals.append(ztcf[v_idx])
-                zvcf_vals.append(zvcf[v_idx])
-            else:
-                # Recompute
-                if self.analyzer is None and self.model is not None:
-                    self._ensure_analyzer_initialized()
+        # Check first frame
+        if (self.recorder.frames[0].induced_accelerations and
+            self.recorder.frames[0].counterfactuals):
+            return # Already populated
 
-                if self.analyzer is not None:
-                    res = self.analyzer.compute_counterfactuals(
-                        frame.joint_positions, frame.joint_velocities
+        self._ensure_analyzer_initialized()
+        if self.analyzer is None: return
+
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
+        try:
+            for frame in self.recorder.frames:
+                if not frame.induced_accelerations:
+                    frame.induced_accelerations = self.analyzer.compute_components(
+                        frame.joint_positions,
+                        frame.joint_velocities,
+                        frame.joint_torques
                     )
-                    ztcf_vals.append(res["ztcf_accel"][v_idx])
-                    zvcf_vals.append(res["zvcf_torque"][v_idx])
-                else:
-                    # Fallback if analyzer init failed
-                    ztcf_vals.append(0.0)
-                    zvcf_vals.append(0.0)
-
-        # Plot with dual y-axis
-        ax1 = self.canvas.fig.add_subplot(111)
-        line1 = ax1.plot(times, ztcf_vals, "b-", label="ZTCF Accel (Zero Torque)")
-        ax1.set_xlabel("Time [s]")
-        ax1.set_ylabel("Acceleration [rad/s²]", color="b")
-        ax1.tick_params(axis="y", labelcolor="b")
-
-        ax2 = ax1.twinx()
-        line2 = ax2.plot(times, zvcf_vals, "r--", label="ZVCF Torque (Zero Velocity)")
-        ax2.set_ylabel("Torque [Nm]", color="r")
-        ax2.tick_params(axis="y", labelcolor="r")
-
-        ax1.set_title(f"Counterfactual Analysis: {joint_name}")
-
-        # Legend
-        lns = line1 + line2
-        labs = [str(line.get_label()) for line in lns]
-        ax1.legend(lns, labs, loc=0)
-
-        ax1.grid(True)
+                if not frame.counterfactuals:
+                    if hasattr(self.analyzer, "compute_counterfactuals"):
+                        frame.counterfactuals = self.analyzer.compute_counterfactuals(
+                            frame.joint_positions, frame.joint_velocities
+                        )
+        finally:
+            QtWidgets.QApplication.restoreOverrideCursor()
 
     def _export_statistics(self) -> None:
-        """Export statistical analysis to CSV."""
+        """Export all data (Statistics + Time Series) to CSV."""
         if self.recorder.get_num_frames() == 0:
             return
 
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Save Statistics", "stats.csv", "CSV Files (*.csv)"
+            self, "Save Data", "pinocchio_data.csv", "CSV Files (*.csv)"
         )
         if not filename:
             return
 
-        times, positions = self.recorder.get_time_series("joint_positions")
-        _, velocities = self.recorder.get_time_series("joint_velocities")
-        _, torques = self.recorder.get_time_series("joint_torques")
-
-        # Ensure arrays are numpy arrays for mypy
-        positions_arr = np.asarray(positions)
-        velocities_arr = np.asarray(velocities)
-        torques_arr = np.asarray(torques)
-
-        analyzer = StatisticalAnalyzer(
-            times, positions_arr, velocities_arr, torques_arr
-        )
+        # Ensure advanced metrics are computed
+        self._ensure_analysis_data_populated()
 
         try:
-            analyzer.export_statistics_csv(filename)
-            self.log_write(f"Statistics exported to {filename}")
+            import pandas as pd
+
+            # 1. Basic Time Series
+            times, positions = self.recorder.get_time_series("joint_positions")
+            _, velocities = self.recorder.get_time_series("joint_velocities")
+            _, torques = self.recorder.get_time_series("joint_torques")
+
+            data = {"time": times}
+
+            # Helper to add 2D arrays columns
+            def add_cols(name, arr):
+                arr = np.asarray(arr)
+                if arr.ndim > 1:
+                    for i in range(arr.shape[1]):
+                        # Use joint name if available
+                        col_name = f"{name}_{self.joint_names[i]}" if i < len(self.joint_names) else f"{name}_{i}"
+                        data[col_name] = arr[:, i]
+
+            add_cols("q", positions)
+            add_cols("v", velocities)
+            add_cols("tau", torques)
+
+            # 2. Advanced Metrics (Induced & Counterfactuals)
+            # We need to extract them from frames since they are stored as dicts
+            # Assuming all frames have same keys after _ensure_analysis_data_populated
+            first_frame = self.recorder.frames[0]
+
+            # Induced
+            if first_frame.induced_accelerations:
+                for key in first_frame.induced_accelerations.keys():
+                    # Extract list of arrays
+                    series = [f.induced_accelerations.get(key, np.zeros_like(first_frame.induced_accelerations[key]))
+                              for f in self.recorder.frames]
+                    add_cols(f"induced_acc_{key}", np.array(series))
+
+            # Counterfactuals
+            if first_frame.counterfactuals:
+                for key in first_frame.counterfactuals.keys():
+                    series = [f.counterfactuals.get(key, np.zeros_like(first_frame.counterfactuals[key]))
+                              for f in self.recorder.frames]
+                    add_cols(f"cf_{key}", np.array(series))
+
+            # Create DataFrame
+            df = pd.DataFrame(data)
+
+            # Save
+            df.to_csv(filename, index=False)
+            self.log_write(f"Data exported to {filename}")
+
         except Exception as e:
-            self.log_write(f"Error exporting statistics: {e}")
+            self.log_write(f"Error exporting data: {e}")
+            logger.exception("Export failed")
 
     def _populate_model_combo(self) -> None:
         """Populate the model dropdown."""
@@ -1234,18 +1234,17 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 q_for_recording = self.q if self.q is not None else np.array([])
 
                 # Induced / Counterfactuals
-                # Computing every frame inside loop is costly but most correct
-                # for playback.
-                # Let's compute them.
                 induced = None
                 counterfactuals = None
 
-                if self.analyzer and self.q is not None and self.v is not None:
-                    induced = self.analyzer.compute_components(self.q, self.v, tau)
-                    if hasattr(self.analyzer, "compute_counterfactuals"):
-                        counterfactuals = self.analyzer.compute_counterfactuals(
-                            self.q, self.v
-                        )
+                # Check "Live Analysis" toggle
+                if self.chk_live_analysis.isChecked():
+                    if self.analyzer and self.q is not None and self.v is not None:
+                        induced = self.analyzer.compute_components(self.q, self.v, tau)
+                        if hasattr(self.analyzer, "compute_counterfactuals"):
+                            counterfactuals = self.analyzer.compute_counterfactuals(
+                                self.q, self.v
+                            )
 
                 self.recorder.record_frame(
                     time=self.sim_time,
