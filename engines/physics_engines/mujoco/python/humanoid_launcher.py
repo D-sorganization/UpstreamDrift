@@ -661,6 +661,62 @@ class HumanoidLauncher(QMainWindow):
             self.log(f"Error saving config: {e}")
 
     def get_docker_cmd(self):
+        # Check if running inside Docker container
+        in_docker = Path("/.dockerenv").exists()
+
+        if in_docker:
+            # We are already in the container, just run the python command directly!
+            # The working directory is already set by the outer launcher to:
+            # /workspace/engines/physics_engines/mujoco/python
+            # The target module 'humanoid_golf.sim' is in 'docker/src' relative to the engine root
+            
+            # Since we are in 'mujoco/python', the engine root is '..'
+            # So the target path is '../docker/src'
+            
+            # However, looking at the previous logic:
+            # "-w", "/workspace/docker/src" was the working dir for the simulation
+            # The volume mount was: engines/physics_engines/mujoco:/workspace
+            
+            # Let's align with that. 
+            # If we are in the consolidated workspace:
+            # /workspace/engines/physics_engines/mujoco/python  (current PWD)
+            
+            # The simulation seems to expect to run from 'docker/src' directory of the mujoco engine.
+            # Local path: engines/physics_engines/mujoco/docker/src
+            
+            # We construct the command to change directory appropriately
+            # But we can't 'change directory' easily in a list command unless we use bash -c,
+            # OR we just assume python path is correct.
+
+            # Re-reading the docker launch command:
+            # "-w", "/workspace/docker/src"
+            # It mounts 'engines/physics_engines/mujoco' to '/workspace'
+            
+            # Inside the big container:
+            # /workspace (root of repo)
+            # /workspace/engines/physics_engines/mujoco
+            
+            # So the equivalent path is:
+            # /workspace/engines/physics_engines/mujoco/docker/src
+            
+            # Let's try running python directly with the correct cwd
+            # Since we return a list, the caller (start_simulation -> ProcessWorker) usually
+            # executes it. We can't change the CWD of the caller easily.
+            # But wait, ProcessWorker usually takes a command.
+            
+            # Let's return a command that sets PYTHONPATH and runs the module
+            # We assume python is in path
+            return [
+                "python",
+                "-m",
+                "humanoid_golf.sim"
+            ]
+            
+            # NOTE: The caller (start_simulation) might need to set the CWD for this to work
+            # if the module is not in path.
+            # The 'humanoid_golf' package is in 'docker/src'.
+            # We need to make sure 'docker/src' is in PYTHONPATH.
+            
         is_windows = platform.system() == "Windows"
         abs_repo_path = str(self.repo_path.resolve())
 
