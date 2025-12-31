@@ -669,6 +669,11 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.btn_advanced_plots.setEnabled(HAS_MATPLOTLIB)
         analysis_layout.addWidget(self.btn_advanced_plots)
 
+        self.btn_export = QtWidgets.QPushButton("Export Analysis Data (CSV)")
+        self.btn_export.setToolTip("Export all recorded data and computed metrics")
+        self.btn_export.clicked.connect(self._export_data)
+        analysis_layout.addWidget(self.btn_export)
+
         analysis_group.setLayout(analysis_layout)
         dyn_layout.addWidget(analysis_group)
 
@@ -710,6 +715,10 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.chk_force_ellip = QtWidgets.QCheckBox("Show Force Ellipsoid (Red)")
         self.chk_force_ellip.toggled.connect(self._on_visualization_changed)
         vis_layout.addWidget(self.chk_force_ellip)
+
+        self.chk_live_analysis = QtWidgets.QCheckBox("Live Analysis (Induced/CF)")
+        self.chk_live_analysis.setToolTip("Compute Induced Accelerations and Counterfactuals in real-time (Can slow down sim)")
+        vis_layout.addWidget(self.chk_live_analysis)
 
         vis_group.setLayout(vis_layout)
         layout.addWidget(vis_group)
@@ -969,6 +978,30 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                     X_WB = self.plant.EvalBodyPoseInWorld(plant_context, body)
                     club_pos = X_WB.translation()
 
+                # Live Analysis if enabled
+                if self.chk_live_analysis.isChecked() and self.eval_context:
+                    # Update eval context
+                    self.plant.SetPositions(self.eval_context, q)
+                    self.plant.SetVelocities(self.eval_context, v)
+
+                    analyzer = DrakeInducedAccelerationAnalyzer(self.plant)
+
+                    # Compute Induced
+                    res = analyzer.compute_components(self.eval_context)
+                    # We need to append to recorder lists
+                    # DrakeRecorder uses dict[str, list[np.ndarray]]
+                    for k, val in res.items():
+                        if k not in self.recorder.induced_accelerations:
+                            self.recorder.induced_accelerations[k] = []
+                        self.recorder.induced_accelerations[k].append(val)
+
+                    # Compute Counterfactuals
+                    cf_res = analyzer.compute_counterfactuals(self.eval_context)
+                    for k, val in cf_res.items():
+                        if k not in self.recorder.counterfactuals:
+                            self.recorder.counterfactuals[k] = []
+                        self.recorder.counterfactuals[k].append(val)
+
                 self.recorder.record(context.get_time(), q, v, club_pos)
                 self.lbl_rec_status.setText(f"Frames: {len(self.recorder.times)}")
 
@@ -1137,6 +1170,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")
             return
 
+        # Import locally to avoid top-level dependency
+        from shared.python.plotting import GolfSwingPlotter
+
         if not self.recorder.times:
             QtWidgets.QMessageBox.warning(
                 self,
@@ -1154,20 +1190,13 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         if txt:
             try:
                 spec_act_idx = int(txt)
-                if spec_act_idx < 0 or spec_act_idx >= self.plant.num_actuators():
-                    # Wait, num_actuators vs num_joints.
-                    # We usually control joints.
-                    pass
             except ValueError:
                 pass
 
         # Computation
-        times = self.recorder.times
         g_induced = []
         c_induced = []
         spec_induced = []
-        # Control is assumed 0 for now as we don't capture u
-
         analyzer = DrakeInducedAccelerationAnalyzer(self.plant)
 
         try:
@@ -1179,30 +1208,16 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 self.plant.SetPositions(self.eval_context, q)
                 self.plant.SetVelocities(self.eval_context, v)
 
-                # Use Analyzer (updated API)
+                # Use Analyzer
                 res = analyzer.compute_components(self.eval_context)
 
                 g_induced.append(res["gravity"])
                 c_induced.append(res["velocity"])
 
                 if spec_act_idx >= 0:
-                    # Construct torque vector
-                    # Note: We need the ACTUAL torque applied.
-                    # We don't record 'u' in recorder yet.
-                    # So we can only simulate "Unit Torque" induced acceleration?
-                    # Or "What acceleration would 1 Nm cause?"
-                    # The prompt asks for "induced accelerations
-                    # (for a specified joint torque source)".
-                    # This usually means contribution of that source to motion.
-                    # Without recording 'u', we assume 1.0 or 0.0?
-                    # Let's compute Unit Torque response: Accel if tau[i]=1, others=0.
-
-                    tau = np.zeros(self.plant.num_velocities())  # Generalized forces
-                    # Map actuator index to generalized force index?
-                    # If fully actuated, nu = nv.
+                    tau = np.zeros(self.plant.num_velocities())
                     if spec_act_idx < len(tau):
                         tau[spec_act_idx] = 1.0  # Unit torque
-
                     spec = analyzer.compute_specific_control(self.eval_context, tau)
                     spec_induced.append(spec)
 
@@ -1213,54 +1228,29 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         finally:
             QtWidgets.QApplication.restoreOverrideCursor()
 
+        # Populate Recorder Data
         g_induced_arr = np.array(g_induced)
         c_induced_arr = np.array(c_induced)
-        spec_induced_arr = np.array(spec_induced) if spec_induced else None
-
-        # Total passive
         total_arr = g_induced_arr + c_induced_arr
 
-        # Plotting - Select a joint (e.g., joint 0)
-        # We can pick the Joint with largest movement or just the first.
-        joint_idx = 0
+        self.recorder.induced_accelerations["gravity"] = list(g_induced_arr)
+        self.recorder.induced_accelerations["velocity"] = list(c_induced_arr)
+        self.recorder.induced_accelerations["total"] = list(total_arr)
 
-        # Try to find a meaningful joint (e.g. Spine Twist) if available
-        # But joint indices are internal.
-        # Let's just pick index 2 (Hips/Spine?) or 0.
+        if spec_induced:
+             self.recorder.induced_accelerations["control"] = list(np.array(spec_induced))
+
+        # Use shared plotter
+        # Try to find a meaningful joint (e.g. Spine Twist) if available, otherwise 0
+        joint_idx = 0
         if g_induced_arr.shape[1] > 2:
             joint_idx = 2
 
-        fig, ax = plt.subplots(figsize=(10, 6))
+        plotter = GolfSwingPlotter(self.recorder)
+        fig = plt.figure(figsize=(10, 6))
 
-        ax.plot(
-            times,
-            g_induced_arr[:, joint_idx],
-            label="Gravity Induced",
-            linestyle="--",
-        )
-        ax.plot(
-            times,
-            c_induced_arr[:, joint_idx],
-            label="Velocity Induced",
-            linestyle="-.",
-        )
-        ax.plot(times, total_arr[:, joint_idx], label="Total (Passive)", color="k")
-
-        if spec_induced_arr is not None and spec_induced_arr.shape[0] > 0:
-            ax.plot(
-                times,
-                spec_induced_arr[:, joint_idx],
-                label=f"Induced by Act {spec_act_idx} (Unit Torque)",
-                color="m",
-                linewidth=2,
-            )
-
-        ax.set_title(f"Induced Acceleration Analysis (Joint Index {joint_idx})")
-        ax.set_xlabel("Time [s]")
-        ax.set_ylabel("Acceleration [rad/s^2]")
-        ax.legend()
-        ax.grid(True)
-
+        # Use breakdown mode to show all components
+        plotter.plot_induced_acceleration(fig, "breakdown", joint_idx=joint_idx, breakdown_mode=True)
         plt.show()
 
     def _show_counterfactuals_plot(self) -> None:
@@ -1268,6 +1258,8 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         if not HAS_MATPLOTLIB:
             QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")
             return
+
+        from shared.python.plotting import GolfSwingPlotter
 
         if not self.recorder.times:
             QtWidgets.QMessageBox.warning(
@@ -1281,7 +1273,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             return
 
         analyzer = DrakeInducedAccelerationAnalyzer(self.plant)
-        times = self.recorder.times
         ztcf_list = []
         zvcf_list = []
 
@@ -1305,39 +1296,69 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         finally:
             QtWidgets.QApplication.restoreOverrideCursor()
 
-        ztcf_arr = np.array(ztcf_list)
-        zvcf_arr = np.array(zvcf_list)
+        # Populate Recorder
+        self.recorder.counterfactuals["ztcf_accel"] = list(np.array(ztcf_list))
+        self.recorder.counterfactuals["zvcf_torque"] = list(np.array(zvcf_list))
 
-        # Plotting - Joint Index
+        # Plotting
         joint_idx = 0
-        if ztcf_arr.shape[1] > 2:
+        if np.array(ztcf_list).shape[1] > 2:
             joint_idx = 2
 
-        fig, ax1 = plt.subplots(figsize=(10, 6))
+        plotter = GolfSwingPlotter(self.recorder)
+        fig = plt.figure(figsize=(10, 6))
 
-        # ZTCF (Accel) on Left Axis
-        color = "tab:blue"
-        ax1.set_xlabel("Time [s]")
-        ax1.set_ylabel("ZTCF Acceleration [rad/s^2]", color=color)
-        ax1.plot(times, ztcf_arr[:, joint_idx], color=color, label="ZTCF Accel")
-        ax1.tick_params(axis="y", labelcolor=color)
-
-        # ZVCF (Torque) on Right Axis
-        ax2 = ax1.twinx()
-        color = "tab:red"
-        ax2.set_ylabel("ZVCF Torque [Nm]", color=color)
-        ax2.plot(
-            times,
-            zvcf_arr[:, joint_idx],
-            color=color,
-            linestyle="--",
-            label="ZVCF Torque",
-        )
-        ax2.tick_params(axis="y", labelcolor=color)
-
-        plt.title(f"Counterfactual Analysis (Joint Index {joint_idx})")
-        fig.tight_layout()
+        # Use dual mode
+        plotter.plot_counterfactual_comparison(fig, "dual", metric_idx=joint_idx)
         plt.show()
+
+    def _export_data(self) -> None:
+        """Export recorded data to CSV."""
+        if not self.recorder.times:
+            QtWidgets.QMessageBox.warning(self, "No Data", "No data to export.")
+            return
+
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Save Data", "drake_sim_data.csv", "CSV Files (*.csv)"
+        )
+        if not filename:
+            return
+
+        try:
+            import pandas as pd
+
+            data = {
+                "time": self.recorder.times
+            }
+
+            # Helper to add arrays
+            def add_series(name, arr_list):
+                if not arr_list: return
+                arr = np.array(arr_list)
+                if arr.ndim > 1:
+                    for i in range(arr.shape[1]):
+                        data[f"{name}_{i}"] = arr[:, i]
+                else:
+                    data[name] = arr
+
+            add_series("q", self.recorder.q_history)
+            add_series("v", self.recorder.v_history)
+            add_series("club_pos", self.recorder.club_head_pos_history)
+
+            # Add computed if available
+            for k, v in self.recorder.induced_accelerations.items():
+                add_series(f"induced_{k}", v)
+
+            for k, v in self.recorder.counterfactuals.items():
+                add_series(f"cf_{k}", v)
+
+            df = pd.DataFrame(data)
+            df.to_csv(filename, index=False)
+            self._update_status(f"Data exported to {filename}")
+
+        except Exception as e:
+            QtWidgets.QMessageBox.critical(self, "Export Error", str(e))
+            LOGGER.error(f"Export failed: {e}")
 
     def _show_swing_plane_analysis(self) -> None:
         """Show swing plane analysis using shared plotter."""
