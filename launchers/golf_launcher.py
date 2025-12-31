@@ -1342,10 +1342,10 @@ class GolfLauncher(QMainWindow):
             run_flags.extend(["-v", f"{mount_shared_str}:/shared"])
 
         # Display/X11
+        if self.chk_live.isChecked():
             if os.name == "nt":
                 run_flags.extend(["-e", "DISPLAY=host.docker.internal:0"])
                 run_flags.extend(["-e", "MUJOCO_GL=glfw"])
-                # LIBGL_ALWAYS_INDIRECT removed: causes OpenAI/MuJoCo OpenGL 1.5 errors
             else:
                 run_flags.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
                 run_flags.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw"])
