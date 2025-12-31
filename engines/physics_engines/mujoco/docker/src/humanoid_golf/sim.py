@@ -13,7 +13,10 @@ try:
     from dm_control import viewer
 
     HAS_VIEWER = True
-except ImportError:
+except Exception as e:
+    print(f"DEBUG: Failed to import dm_control.viewer: {e}", flush=True)
+    import traceback
+    traceback.print_exc()
     HAS_VIEWER = False
 
 
