@@ -12,7 +12,7 @@ Tests cover:
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 # Add shared modules to path for testing
 sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))

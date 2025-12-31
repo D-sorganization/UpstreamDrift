@@ -327,6 +327,8 @@ class DockerBuildThread(QThread):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 bufsize=1,  # Line buffered to ensure real-time output
                 env=env,
                 creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
