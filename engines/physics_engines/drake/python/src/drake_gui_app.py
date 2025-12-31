@@ -1338,26 +1338,26 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             data = {"time": self.recorder.times}
 
             # Helper to add arrays
-            def add_series(name, arr_list):
+            def add_series(target: dict, name: str, arr_list: list) -> None:
                 if not arr_list:
                     return
                 arr = np.array(arr_list)
                 if arr.ndim > 1:
                     for i in range(arr.shape[1]):
-                        data[f"{name}_{i}"] = arr[:, i]
+                        target[f"{name}_{i}"] = arr[:, i]
                 else:
-                    data[name] = arr
+                    target[name] = arr
 
-            add_series("q", self.recorder.q_history)
-            add_series("v", self.recorder.v_history)
-            add_series("club_pos", self.recorder.club_head_pos_history)
+            add_series(data, "q", self.recorder.q_history)
+            add_series(data, "v", self.recorder.v_history)
+            add_series(data, "club_pos", self.recorder.club_head_pos_history)
 
             # Add computed if available
             for k, v in self.recorder.induced_accelerations.items():
-                add_series(f"induced_{k}", v)
+                add_series(data, f"induced_{k}", v)
 
             for k, v in self.recorder.counterfactuals.items():
-                add_series(f"cf_{k}", v)
+                add_series(data, f"cf_{k}", v)
 
             df = pd.DataFrame(data)
             df.to_csv(filename, index=False)
