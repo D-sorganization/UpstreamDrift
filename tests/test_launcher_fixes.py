@@ -412,7 +412,8 @@ class TestLauncherIntegration(unittest.TestCase):
         self.assertIn("def launch_drake", content)
         self.assertIn("def launch_pinocchio", content)
 
-    def test_unified_launcher_import(self):
+    @patch("launchers.golf_launcher.GolfLauncher")
+    def test_unified_launcher_import(self, mock_golf_launcher):
         """Test that unified launcher can be imported."""
         try:
             from launchers.unified_launcher import UnifiedLauncher
