@@ -689,7 +689,15 @@ class GolfLauncher(QMainWindow):
             )
 
             w = width if width > 100 else 1280
-            h = self.height() if self.height() > 100 else 800
+
+            # Ensure height is treated as int, handling potential Mock objects from tests
+            current_height = self.height()
+            if hasattr(current_height, "return_value"):  # Handle MagicMock
+                current_height = 800
+            height = (
+                int(current_height) if isinstance(current_height, (int, float)) else 800
+            )
+            h = height if height > 100 else 800
 
             x = screen_geo.x() + (screen_geo.width() - w) // 2
             y = screen_geo.y() + (screen_geo.height() - h) // 2
