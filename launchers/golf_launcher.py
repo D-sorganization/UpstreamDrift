@@ -1326,8 +1326,10 @@ class GolfLauncher(QMainWindow):
         exec_cmd = []
 
         # Volumes - mount entire suite root to /workspace
-        suite_root = Path(__file__).parent.parent
-        mount_path = str(suite_root).replace("\\", "/")
+        # Use os.path to avoid issues when os.name is mocked in tests
+        import os.path as ospath
+        suite_root_str = ospath.dirname(ospath.dirname(ospath.abspath(__file__)))
+        mount_path = suite_root_str.replace("\\", "/")
         run_flags.extend(["-v", f"{mount_path}:/workspace"])
 
         # Environment variables for Python path and shared modules
@@ -1336,9 +1338,9 @@ class GolfLauncher(QMainWindow):
         )
 
         # Mount 'shared' directory so that scripts can import shared modules
-        shared_host_path = suite_root / "shared"
-        if shared_host_path.exists():
-            mount_shared_str = str(shared_host_path).replace("\\", "/")
+        shared_host_path = ospath.join(suite_root_str, "shared")
+        if ospath.exists(shared_host_path):
+            mount_shared_str = shared_host_path.replace("\\", "/")
             run_flags.extend(["-v", f"{mount_shared_str}:/shared"])
 
         # Display/X11
