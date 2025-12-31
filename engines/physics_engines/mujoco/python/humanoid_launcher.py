@@ -660,63 +660,31 @@ class HumanoidLauncher(QMainWindow):
         except Exception as e:
             self.log(f"Error saving config: {e}")
 
-    def get_docker_cmd(self):
+    def get_simulation_command(self) -> tuple[list[str], dict[str, str] | None]:
+        """Construct the command to run the simulation.
+
+        Returns:
+            Tuple of (command_list, environment_dict).
+        """
         # Check if running inside Docker container
         in_docker = Path("/.dockerenv").exists()
+        env = None
 
         if in_docker:
-            # We are already in the container, just run the python command directly!
-            # The working directory is already set by the outer launcher to:
-            # /workspace/engines/physics_engines/mujoco/python
-            # The target module 'humanoid_golf.sim' is in 'docker/src' relative to the engine root
-            
-            # Since we are in 'mujoco/python', the engine root is '..'
-            # So the target path is '../docker/src'
-            
-            # However, looking at the previous logic:
-            # "-w", "/workspace/docker/src" was the working dir for the simulation
-            # The volume mount was: engines/physics_engines/mujoco:/workspace
-            
-            # Let's align with that. 
-            # If we are in the consolidated workspace:
-            # /workspace/engines/physics_engines/mujoco/python  (current PWD)
-            
-            # The simulation seems to expect to run from 'docker/src' directory of the mujoco engine.
-            # Local path: engines/physics_engines/mujoco/docker/src
-            
-            # We construct the command to change directory appropriately
-            # But we can't 'change directory' easily in a list command unless we use bash -c,
-            # OR we just assume python path is correct.
+            # Running inside the Mujoco Docker container:
+            # - The outer launcher sets CWD to /workspace/engines/physics_engines/mujoco/python
+            # - The module exists at ../docker/src/humanoid_golf/sim.py relative to here
+            cmd = ["python", "-m", "humanoid_golf.sim"]
 
-            # Re-reading the docker launch command:
-            # "-w", "/workspace/docker/src"
-            # It mounts 'engines/physics_engines/mujoco' to '/workspace'
-            
-            # Inside the big container:
-            # /workspace (root of repo)
-            # /workspace/engines/physics_engines/mujoco
-            
-            # So the equivalent path is:
-            # /workspace/engines/physics_engines/mujoco/docker/src
-            
-            # Let's try running python directly with the correct cwd
-            # Since we return a list, the caller (start_simulation -> ProcessWorker) usually
-            # executes it. We can't change the CWD of the caller easily.
-            # But wait, ProcessWorker usually takes a command.
-            
-            # Let's return a command that sets PYTHONPATH and runs the module
-            # We assume python is in path
-            return [
-                "python",
-                "-m",
-                "humanoid_golf.sim"
-            ]
-            
-            # NOTE: The caller (start_simulation) might need to set the CWD for this to work
-            # if the module is not in path.
-            # The 'humanoid_golf' package is in 'docker/src'.
-            # We need to make sure 'docker/src' is in PYTHONPATH.
-            
+            # Ensure PYTHONPATH includes the directory containing 'humanoid_golf' package
+            # We add '../docker/src' to PYTHONPATH.
+            # Note: We must also include existing PYTHONPATH if any.
+            # Using os.environ logic in ProcessWorker handles the merge,
+            # we just provide the override/addition here.
+            env = {"PYTHONPATH": "../docker/src"}
+            return cmd, env
+
+        # HOST-SIDE EXECUTION (Legacy/Dev)
         is_windows = platform.system() == "Windows"
         abs_repo_path = str(self.repo_path.resolve())
 
@@ -726,11 +694,6 @@ class HumanoidLauncher(QMainWindow):
         if is_windows:
             drive, tail = os.path.splitdrive(abs_repo_path)
             if drive:
-                # Docker Desktop on Windows often relies on WSL2 backend.
-                # When invoking docker from Windows Python, explicit WSL path conversion
-                # (/mnt/c/...) is sometimes safer for volume mounting than C:/ style,
-                # though modern Docker Desktop handles both.
-                # This logic ensures compatibility.
                 drive_letter = drive[0].lower()
                 rel_path = tail.replace("\\", "/")
                 wsl_path = f"/mnt/{drive_letter}{rel_path}"
@@ -786,7 +749,7 @@ class HumanoidLauncher(QMainWindow):
         # - Live view vs headless mode
         cmd.extend(["-m", "humanoid_golf.sim"])
 
-        return cmd
+        return cmd, None
 
     def plot_induced_acceleration(self):
         """Plot Induced Acceleration Analysis from CSV."""
@@ -882,9 +845,9 @@ class HumanoidLauncher(QMainWindow):
         self.save_config()
         self.log("Starting simulation...")
 
-        cmd = self.get_docker_cmd()
+        cmd, env = self.get_simulation_command()
 
-        self.simulation_thread = ProcessWorker(cmd)
+        self.simulation_thread = ProcessWorker(cmd, env=env)
         self.simulation_thread.log_signal.connect(self.log)
         self.simulation_thread.finished_signal.connect(self.on_simulation_finished)
 
