@@ -602,7 +602,7 @@ class GolfLauncher(QMainWindow):
                 # Verify all models still exist
                 if all(model_id in self.model_cards for model_id in saved_order):
                     self.model_order = saved_order
-                    self._rebuild_grid()
+                    self._rebuild_grid() # Use _rebuild_grid as it exists
                     logger.info("Model layout restored from saved configuration")
 
             # Restore window geometry
@@ -1403,9 +1403,7 @@ class GolfLauncher(QMainWindow):
             diagnostic_cmd = [
                 "cmd",
                 "/k",
-                "echo Launching simulation container... && echo Command: "
-                + subprocess.list2cmdline(cmd)
-                + " && "
+                "echo Launching simulation container... && "
                 + subprocess.list2cmdline(cmd),
             ]
             logger.info("Starting new console for simulation...")
