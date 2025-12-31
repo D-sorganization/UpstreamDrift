@@ -122,7 +122,7 @@ def test_export_to_urdf(mock_mujoco_model):
             urdf_str = exporter.export_to_urdf("output.urdf", "test_robot")
 
             # Debug output if assertion fails
-            print(urdf_str)
+            # print(urdf_str)  # noqa: T201
 
             assert 'robot name="test_robot"' in urdf_str
             assert 'link name="link1"' in urdf_str
