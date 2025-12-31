@@ -699,11 +699,14 @@ class GolfLauncher(QMainWindow):
             )
             h = height if height > 100 else 800
 
-            x = screen_geo.x() + (screen_geo.width() - w) // 2
-            y = screen_geo.y() + (screen_geo.height() - h) // 2
-
-            # Ensure not too high
-            y = max(y, 50)
+            try:
+                x = screen_geo.x() + (screen_geo.width() - w) // 2
+                y = screen_geo.y() + (screen_geo.height() - h) // 2
+                # Ensure not too high
+                y = max(y, 50)
+            except (TypeError, AttributeError):
+                # Fallback for tests or invalid geometry
+                x, y = 100, 100
 
             self.setGeometry(x, y, w, h)
 
