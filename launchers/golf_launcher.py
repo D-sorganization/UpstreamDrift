@@ -335,6 +335,8 @@ class DockerBuildThread(QThread):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 bufsize=1,  # Line buffered to ensure real-time output
                 env=env,
                 creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
@@ -469,10 +471,20 @@ class EnvironmentDialog(QDialog):
     def build_finished(self, success: bool, msg: str) -> None:
         """Handle build completion."""
         self.btn_build.setEnabled(True)
+        mbox = QMessageBox(self)
+        mbox.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+            | Qt.TextInteractionFlag.TextSelectableByKeyboard
+        )
         if success:
-            QMessageBox.information(self, "Success", msg)
+            mbox.setWindowTitle("Success")
+            mbox.setText(msg)
+            mbox.setIcon(QMessageBox.Icon.Information)
         else:
-            QMessageBox.critical(self, "Build Failed", msg)
+            mbox.setWindowTitle("Build Failed")
+            mbox.setText(msg)
+            mbox.setIcon(QMessageBox.Icon.Critical)
+        mbox.exec()
 
 
 class HelpDialog(QDialog):
