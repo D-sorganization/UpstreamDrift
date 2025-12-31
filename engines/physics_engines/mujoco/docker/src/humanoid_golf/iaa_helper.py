@@ -31,13 +31,11 @@ def compute_induced_accelerations(physics) -> dict:
     # We want G vector.
     # Use the nv from the raw struct to ensure consistency
     nv = model.ptr.nv
-    print(f"DEBUG: model.ptr.nv = {nv}", flush=True)
 
     # Allocation of explicit buffers to ensure correct shape/type for raw bindings
     # mj_rne expects output buffer of size nv.
     g_force = np.zeros(nv, dtype=np.float64)
     mjlib.mj_rne(model.ptr, data.ptr, 0, g_force)
-    print(f"DEBUG: g_force shape = {g_force.shape}", flush=True)
 
     # 3. Coriolis/Centrifugal Force (C)
     # Restore v, set a=0.
@@ -110,9 +108,6 @@ def compute_induced_accelerations(physics) -> dict:
                 last_err = e
         
         if not success:
-            print(f"ERROR: safe_solveM failed all shapes: {shapes_to_try}", flush=True)
-            if last_err:
-                 print(f"Last Error: {last_err}", flush=True)
             raise last_err
 
     safe_solveM(model.ptr, data.ptr, acc_g, neg_g_force)
