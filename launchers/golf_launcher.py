@@ -20,15 +20,17 @@ import webbrowser
 from pathlib import Path
 from typing import Any
 
-from PyQt6.QtCore import QMimeData, QPoint, Qt, QThread, pyqtSignal
+from PyQt6.QtCore import QMimeData, QPoint, Qt, QThread, QTimer, pyqtSignal
 from PyQt6.QtGui import (
     QCloseEvent,
+    QColor,
     QDrag,
     QDragEnterEvent,
     QDropEvent,
     QFont,
     QIcon,
     QMouseEvent,
+    QPainter,
     QPixmap,
 )
 from PyQt6.QtWidgets import (
@@ -42,8 +44,10 @@ from PyQt6.QtWidgets import (
     QLabel,
     QMainWindow,
     QMessageBox,
+    QProgressBar,
     QPushButton,
     QScrollArea,
+    QSplashScreen,
     QTabWidget,
     QTextEdit,
     QVBoxLayout,
@@ -98,6 +102,88 @@ MODEL_IMAGES = {
 DOCKER_STAGES = ["all", "mujoco", "pinocchio", "drake", "base"]
 
 
+class GolfSplashScreen(QSplashScreen):
+    """Custom splash screen for Golf Modeling Suite."""
+
+    def __init__(self) -> None:
+        """Initialize the splash screen."""
+        # Create a splash pixmap
+        splash_pix = QPixmap(600, 400)
+        splash_pix.fill(QColor("#1e1e1e"))
+
+        super().__init__(splash_pix)
+        self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
+
+        # Add loading message
+        self.message = "Initializing Golf Modeling Suite..."
+        self.progress = 0
+
+    def drawContents(self, painter: QPainter) -> None:
+        """Draw custom content on splash screen."""
+        painter.setPen(QColor("#ffffff"))
+        painter.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
+
+        # Draw title
+        painter.drawText(
+            self.rect().adjusted(20, 100, -20, -200),
+            Qt.AlignmentFlag.AlignCenter,
+            "⛳ Golf Modeling Suite",
+        )
+
+        # Draw subtitle
+        painter.setFont(QFont("Segoe UI", 10))
+        painter.setPen(QColor("#cccccc"))
+        painter.drawText(
+            self.rect().adjusted(20, 150, -20, -150),
+            Qt.AlignmentFlag.AlignCenter,
+            "Professional Biomechanics & Robotics Platform",
+        )
+
+        # Draw loading message
+        painter.setFont(QFont("Segoe UI", 9))
+        painter.setPen(QColor("#007acc"))
+        painter.drawText(
+            self.rect().adjusted(20, 200, -20, -100),
+            Qt.AlignmentFlag.AlignCenter,
+            self.message,
+        )
+
+        # Draw progress bar
+        bar_width = 400
+        bar_height = 6
+        bar_x = (self.width() - bar_width) // 2
+        bar_y = 280
+
+        # Background
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QColor("#333333"))
+        painter.drawRoundedRect(bar_x, bar_y, bar_width, bar_height, 3, 3)
+
+        # Progress
+        painter.setBrush(QColor("#007acc"))
+        progress_width = int(bar_width * (self.progress / 100))
+        painter.drawRoundedRect(bar_x, bar_y, progress_width, bar_height, 3, 3)
+
+        # Version info
+        painter.setFont(QFont("Segoe UI", 8))
+        painter.setPen(QColor("#666666"))
+        painter.drawText(
+            self.rect().adjusted(20, 0, -20, -20),
+            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight,
+            "v1.0.0-beta",
+        )
+
+    def show_message(self, message: str, progress: int) -> None:
+        """Show a message with progress."""
+        self.message = message
+        self.progress = progress
+        self.showMessage(
+            message, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter
+        )
+        self.repaint()
+        QApplication.processEvents()
+
+
 class DraggableModelCard(QFrame):
     """Draggable model card widget with reordering support."""
 
@@ -118,7 +204,7 @@ class DraggableModelCard(QFrame):
         super().__init__(qt_parent)
         self.model = model
         self.parent_launcher = parent
-        self.setAcceptDrops(True)
+        self.setAcceptDrops(False)  # Initially disabled, will be enabled by toggle
         self.setObjectName("ModelCard")
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.drag_start_position = QPoint()
@@ -193,6 +279,12 @@ class DraggableModelCard(QFrame):
     def mouseMoveEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse move for drag operation."""
         if not event or not (event.buttons() & Qt.MouseButton.LeftButton):
+            return
+
+        # Check if layout editing is enabled
+        if self.parent_launcher and not getattr(
+            self.parent_launcher, "layout_edit_mode", False
+        ):
             return
 
         if (
@@ -550,6 +642,8 @@ class GolfLauncher(QMainWindow):
         self.selected_model: str | None = None
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []  # Track model order for drag-and-drop
+        self.layout_edit_mode = False  # Track if layout editing is enabled
+        self.running_processes: dict[str, subprocess.Popen] = {}  # Track running instances
 
         # Load Registry
         try:
@@ -573,6 +667,11 @@ class GolfLauncher(QMainWindow):
 
         # Load saved layout
         self._load_layout()
+
+        # Set up periodic process cleanup
+        self.cleanup_timer = QTimer(self)
+        self.cleanup_timer.timeout.connect(self._cleanup_processes)
+        self.cleanup_timer.start(5000)  # Clean up every 5 seconds
 
     def _save_layout(self) -> None:
         """Save the current model layout to configuration file."""
@@ -754,6 +853,27 @@ class GolfLauncher(QMainWindow):
         self.lbl_status.setStyleSheet("color: #aaaaaa; font-weight: bold;")
         top_bar.addWidget(self.lbl_status)
         top_bar.addStretch()
+
+        # Modify Layout toggle button
+        self.btn_modify_layout = QPushButton("🔒 Layout Locked")
+        self.btn_modify_layout.setCheckable(True)
+        self.btn_modify_layout.setChecked(False)
+        self.btn_modify_layout.setToolTip("Toggle to enable/disable tile rearrangement")
+        self.btn_modify_layout.clicked.connect(self.toggle_layout_mode)
+        self.btn_modify_layout.setStyleSheet(
+            """
+            QPushButton {
+                background-color: #444444;
+                color: #cccccc;
+                padding: 8px 16px;
+            }
+            QPushButton:checked {
+                background-color: #007acc;
+                color: white;
+            }
+            """
+        )
+        top_bar.addWidget(self.btn_modify_layout)
 
         btn_env = QPushButton("Manage Environment")
         btn_env.clicked.connect(self.open_environment_manager)
@@ -999,6 +1119,16 @@ class GolfLauncher(QMainWindow):
 
     def _launch_urdf_generator(self) -> None:
         """Launch the URDF generator application."""
+        # Check if already running
+        if self._is_process_running("urdf_generator"):
+            QMessageBox.information(
+                self,
+                "Already Running",
+                "URDF Generator is already running.\n\n"
+                "Please close the existing instance before launching a new one.",
+            )
+            return
+
         try:
             import subprocess
             import sys
@@ -1024,16 +1154,20 @@ class GolfLauncher(QMainWindow):
             # Launch in new process
             if os.name == "nt":
                 # Windows: Launch in new console
-                subprocess.Popen(
+                process = subprocess.Popen(
                     [sys.executable, str(urdf_script)],
                     creationflags=CREATE_NEW_CONSOLE,
                     cwd=str(suite_root),
                 )
             else:
                 # Unix: Launch in background
-                subprocess.Popen(
+                process = subprocess.Popen(
                     [sys.executable, str(urdf_script)], cwd=str(suite_root)
                 )
+
+            # Track the process
+            self.running_processes["urdf_generator"] = process
+            logger.info(f"URDF Generator launched with PID: {process.pid}")
 
         except Exception as e:
             logger.error(f"Failed to launch URDF Generator: {e}")
@@ -1043,6 +1177,16 @@ class GolfLauncher(QMainWindow):
 
     def _launch_c3d_viewer(self) -> None:
         """Launch the C3D motion viewer application."""
+        # Check if already running
+        if self._is_process_running("c3d_viewer"):
+            QMessageBox.information(
+                self,
+                "Already Running",
+                "C3D Motion Viewer is already running.\n\n"
+                "Please close the existing instance before launching a new one.",
+            )
+            return
+
         try:
             import subprocess
             import sys
@@ -1075,16 +1219,20 @@ class GolfLauncher(QMainWindow):
             # Launch in new process
             if os.name == "nt":
                 # Windows: Launch in new console
-                subprocess.Popen(
+                process = subprocess.Popen(
                     [sys.executable, str(c3d_script)],
                     creationflags=CREATE_NEW_CONSOLE,
                     cwd=str(c3d_script.parent),
                 )
             else:
                 # Unix: Launch in background
-                subprocess.Popen(
+                process = subprocess.Popen(
                     [sys.executable, str(c3d_script)], cwd=str(c3d_script.parent)
                 )
+
+            # Track the process
+            self.running_processes["c3d_viewer"] = process
+            logger.info(f"C3D Motion Viewer launched with PID: {process.pid}")
 
         except Exception as e:
             logger.error(f"Failed to launch C3D Viewer: {e}")
@@ -1375,6 +1523,16 @@ class GolfLauncher(QMainWindow):
 
     def _custom_launch_humanoid(self, abs_repo_path: Path) -> None:
         """Launch the humanoid GUI directly."""
+        # Check if already running
+        if self._is_process_running("mujoco_humanoid"):
+            QMessageBox.information(
+                self,
+                "Already Running",
+                "MuJoCo Humanoid is already running.\n\n"
+                "Please close the existing instance before launching a new one.",
+            )
+            return
+
         script = abs_repo_path / "python/humanoid_launcher.py"
         if not script.exists():
             raise FileNotFoundError(
@@ -1384,13 +1542,29 @@ class GolfLauncher(QMainWindow):
             )
 
         logger.info(f"Launching Humanoid GUI: {script}")
-        subprocess.Popen([sys.executable, str(script)], cwd=script.parent)
+        process = subprocess.Popen([sys.executable, str(script)], cwd=script.parent)
+        self.running_processes["mujoco_humanoid"] = process
+        logger.info(f"MuJoCo Humanoid launched with PID: {process.pid}")
 
     def _custom_launch_comprehensive(self, abs_repo_path: Path) -> None:
         """Launch the comprehensive dashboard directly."""
+        # Check if already running
+        if self._is_process_running("mujoco_dashboard"):
+            QMessageBox.information(
+                self,
+                "Already Running",
+                "MuJoCo Dashboard is already running.\n\n"
+                "Please close the existing instance before launching a new one.",
+            )
+            return
+
         python_dir = abs_repo_path / "python"
         logger.info(f"Launching Comprehensive GUI from {python_dir}")
-        subprocess.Popen([sys.executable, "-m", "mujoco_humanoid_golf"], cwd=python_dir)
+        process = subprocess.Popen(
+            [sys.executable, "-m", "mujoco_humanoid_golf"], cwd=python_dir
+        )
+        self.running_processes["mujoco_dashboard"] = process
+        logger.info(f"MuJoCo Dashboard launched with PID: {process.pid}")
 
     def _launch_docker_container(self, model: Any, abs_repo_path: Path) -> None:
         """Launch the simulation in a docker container."""
@@ -1507,6 +1681,60 @@ class GolfLauncher(QMainWindow):
 
         threading.Thread(target=open_url, daemon=True).start()
 
+    def toggle_layout_mode(self) -> None:
+        """Toggle layout editing mode."""
+        self.layout_edit_mode = self.btn_modify_layout.isChecked()
+
+        if self.layout_edit_mode:
+            self.btn_modify_layout.setText("🔓 Layout Unlocked")
+            logger.info("Layout editing enabled - tiles can be rearranged")
+        else:
+            self.btn_modify_layout.setText("🔒 Layout Locked")
+            # Save layout when locking
+            self._save_layout()
+            logger.info("Layout editing disabled - layout saved")
+
+        # Update all model cards to enable/disable dragging
+        for card in self.model_cards.values():
+            card.setAcceptDrops(self.layout_edit_mode)
+            if self.layout_edit_mode:
+                card.setCursor(Qt.CursorShape.OpenHandCursor)
+            else:
+                card.setCursor(Qt.CursorShape.PointingHandCursor)
+
+    def _is_process_running(self, process_key: str) -> bool:
+        """Check if a process is still running.
+
+        Args:
+            process_key: The key used to track the process
+
+        Returns:
+            True if the process is running, False otherwise
+        """
+        if process_key not in self.running_processes:
+            return False
+
+        process = self.running_processes[process_key]
+
+        # Check if process is still running
+        if process.poll() is None:
+            return True
+
+        # Process has terminated, remove it
+        del self.running_processes[process_key]
+        return False
+
+    def _cleanup_processes(self) -> None:
+        """Clean up terminated processes from the tracking dictionary."""
+        terminated = []
+        for key, process in self.running_processes.items():
+            if process.poll() is not None:
+                terminated.append(key)
+
+        for key in terminated:
+            del self.running_processes[key]
+            logger.info(f"Process {key} has terminated")
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -1515,6 +1743,35 @@ if __name__ == "__main__":
     font = QFont("Segoe UI", 10)
     app.setFont(font)
 
+    # Show splash screen
+    splash = GolfSplashScreen()
+    splash.show()
+
+    # Simulate loading process with progress updates
+    splash.show_message("Loading application resources...", 20)
+    QApplication.processEvents()
+    time.sleep(0.3)
+
+    splash.show_message("Initializing model registry...", 40)
+    QApplication.processEvents()
+    time.sleep(0.3)
+
+    splash.show_message("Setting up engine manager...", 60)
+    QApplication.processEvents()
+    time.sleep(0.3)
+
+    splash.show_message("Preparing user interface...", 80)
+    QApplication.processEvents()
+
+    # Create main window
     window = GolfLauncher()
+
+    splash.show_message("Ready!", 100)
+    QApplication.processEvents()
+    time.sleep(0.2)
+
+    # Close splash and show main window
+    splash.finish(window)
     window.show()
+
     sys.exit(app.exec())
