@@ -114,11 +114,14 @@ class GolfSplashScreen(QSplashScreen):
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
 
         # Add loading message
-        self.message = "Initializing Golf Modeling Suite..."
+        self.loading_message = "Initializing Golf Modeling Suite..."
         self.progress = 0
 
-    def drawContents(self, painter: QPainter) -> None:
+    def drawContents(self, painter: QPainter | None) -> None:
         """Draw custom content on splash screen."""
+        if painter is None:
+            return
+
         painter.setPen(QColor("#ffffff"))
         painter.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
 
@@ -144,7 +147,7 @@ class GolfSplashScreen(QSplashScreen):
         painter.drawText(
             self.rect().adjusted(20, 200, -20, -100),
             Qt.AlignmentFlag.AlignCenter,
-            self.message,
+            self.loading_message,
         )
 
         # Draw progress bar
@@ -174,7 +177,7 @@ class GolfSplashScreen(QSplashScreen):
 
     def show_message(self, message: str, progress: int) -> None:
         """Show a message with progress."""
-        self.message = message
+        self.loading_message = message
         self.progress = progress
         self.showMessage(
             message, Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignCenter
