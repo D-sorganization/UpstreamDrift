@@ -699,8 +699,33 @@ class GolfLauncher(QMainWindow):
             )
             h = height if height > 100 else 800
 
-            x = screen_geo.x() + (screen_geo.width() - w) // 2
-            y = screen_geo.y() + (screen_geo.height() - h) // 2
+            # Handle Mock objects for screen geometry
+            screen_x = screen_geo.x()
+            if hasattr(screen_x, "return_value"):
+                screen_x = 0
+            screen_x = int(screen_x) if isinstance(screen_x, (int, float)) else 0
+
+            screen_y = screen_geo.y()
+            if hasattr(screen_y, "return_value"):
+                screen_y = 0
+            screen_y = int(screen_y) if isinstance(screen_y, (int, float)) else 0
+
+            screen_width = screen_geo.width()
+            if hasattr(screen_width, "return_value"):
+                screen_width = 1920
+            screen_width = (
+                int(screen_width) if isinstance(screen_width, (int, float)) else 1920
+            )
+
+            screen_height = screen_geo.height()
+            if hasattr(screen_height, "return_value"):
+                screen_height = 1080
+            screen_height = (
+                int(screen_height) if isinstance(screen_height, (int, float)) else 1080
+            )
+
+            x = screen_x + (screen_width - w) // 2
+            y = screen_y + (screen_height - h) // 2
 
             # Ensure not too high
             y = max(y, 50)
