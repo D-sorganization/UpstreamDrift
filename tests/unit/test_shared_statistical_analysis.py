@@ -11,7 +11,12 @@ def sample_data():
     # Simple sine wave for joint positions
     joint_positions = np.sin(2 * np.pi * times)[:, np.newaxis]
     joint_velocities = 2 * np.pi * np.cos(2 * np.pi * times)[:, np.newaxis]
-    joint_torques = np.zeros_like(joint_positions)
+
+    # Constant positive torque to create work
+    # Work = Int(Torque * Vel) dt.
+    # If Torque=1, Vel=cos(t), integral over cycle is 0.
+    # Let's align torque with velocity to get positive work.
+    joint_torques = joint_velocities.copy()
 
     # Club head speed: bell curve peaking at 0.5s
     club_head_speed = 100 * np.exp(-((times - 0.5) ** 2) / 0.05)
@@ -256,3 +261,24 @@ def test_compute_smoothness_metric(sample_data):
     )
     s = analyzer.compute_smoothness_metric(np.array([0]))
     assert s == 0.0
+
+def test_compute_work_metrics(sample_data):
+    # We set torque = velocity in fixture.
+    # Power = v^2, which is always positive.
+    # So pos_work should be > 0, neg_work = 0
+    metrics = sample_data.compute_work_metrics(0)
+
+    assert metrics is not None
+    assert metrics["positive_work"] > 0
+    assert metrics["negative_work"] == pytest.approx(0.0, abs=1e-5)
+    assert metrics["net_work"] == pytest.approx(metrics["positive_work"])
+
+    # Test invalid index
+    assert sample_data.compute_work_metrics(99) is None
+
+def test_compute_phase_space_path_length(sample_data):
+    pl = sample_data.compute_phase_space_path_length(0)
+    assert pl > 0.0
+
+    # Test invalid index
+    assert sample_data.compute_phase_space_path_length(99) == 0.0
