@@ -672,11 +672,11 @@ class HumanoidLauncher(QMainWindow):
 
         if in_docker:
             # Running inside the Mujoco Docker container:
-            # - The outer launcher sets CWD to /workspace/engines/physics_engines/mujoco/python
-            # - The module exists at ../docker/src/humanoid_golf/sim.py relative to here
+            # - CWD set to /workspace/engines/physics_engines/mujoco/python
+            # - Module exists at ../docker/src/humanoid_golf/sim.py relative to here
             cmd = ["python", "-m", "humanoid_golf.sim"]
 
-            # Ensure PYTHONPATH includes the directory containing 'humanoid_golf' package
+            # Ensure PYTHONPATH includes the directory containing 'humanoid_golf'
             # We add '../docker/src' to PYTHONPATH.
             # Note: We must also include existing PYTHONPATH if any.
             # Using os.environ logic in ProcessWorker handles the merge,
