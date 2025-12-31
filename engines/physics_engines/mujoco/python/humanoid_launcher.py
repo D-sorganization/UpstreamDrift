@@ -724,8 +724,9 @@ class HumanoidLauncher(QMainWindow):
                 cmd.extend(["-e", "QT_AUTO_SCREEN_SCALE_FACTOR=0"])
                 cmd.extend(["-e", "QT_SCALE_FACTOR=1"])
                 cmd.extend(["-e", "QT_QPA_PLATFORM=xcb"])
-                # NOTE: LIBGL_ALWAYS_INDIRECT removed - causes segfaults with modern
-                # OpenGL. VcXsrv should work in direct rendering mode.
+                # Note: Resurrecting LIBGL_ALWAYS_INDIRECT=1 as it was present in the
+                # "working state" from 2 days ago. Some Windows/VcXsrv configs need it.
+                cmd.extend(["-e", "LIBGL_ALWAYS_INDIRECT=1"])
             else:
                 cmd.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
                 cmd.extend(["-e", "MUJOCO_GL=glfw"])
