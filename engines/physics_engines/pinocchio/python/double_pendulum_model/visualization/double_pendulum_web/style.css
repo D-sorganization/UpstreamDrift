@@ -183,3 +183,15 @@ input.error {
   color: var(--accent);
   font-family: "JetBrains Mono", monospace;
 }
+
+.var-badge {
+  background: #13161b;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+  color: var(--accent);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.85em;
+  margin-left: 0.5ch;
+  border: 1px solid #2a3545;
+  vertical-align: middle;
+}
