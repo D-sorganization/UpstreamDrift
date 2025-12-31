@@ -1414,13 +1414,14 @@ class GolfLauncher(QMainWindow):
         # Launch in Terminal
         if os.name == "nt":
             # Add a diagnostic echo and pause to the terminal so users can see errors
+            # We must escape & characters for the echo command, otherwise cmd.exe interprets them
+            command_str = " ".join(cmd)
+            safe_echo_str = command_str.replace("&", "^&")
+
             diagnostic_cmd = [
                 "cmd",
                 "/k",
-                "echo Launching simulation container... && echo Command: "
-                + " ".join(cmd)
-                + " && "
-                + " ".join(cmd),
+                f"echo Launching simulation container... && echo Command: {safe_echo_str} && {command_str}",
             ]
             logger.info("Starting new console for simulation...")
             subprocess.Popen(diagnostic_cmd, creationflags=CREATE_NEW_CONSOLE)
