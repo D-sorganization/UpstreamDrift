@@ -81,14 +81,6 @@ class EngineProbe:
         """
         raise NotImplementedError
 
-    def is_available(self) -> bool:
-        """Check if engine is available for use (convenience method).
-
-        Returns:
-            True if engine is available, False otherwise
-        """
-        return self.probe().is_available()
-
 
 class MuJoCoProbe(EngineProbe):
     """Probe for MuJoCo physics engine."""

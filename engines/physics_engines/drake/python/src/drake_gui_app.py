@@ -377,8 +377,8 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                     project_root = current_file.parents[5]
                     urdf_dir = project_root / "shared" / "urdf"
                 except IndexError:
-                     # Fallback for when path depth is insufficient
-                     urdf_dir = Path("non_existent")
+                    # Fallback for when path depth is insufficient
+                    urdf_dir = Path("non_existent")
 
             if urdf_dir.exists():
                 for urdf_file in urdf_dir.glob("*.urdf"):
