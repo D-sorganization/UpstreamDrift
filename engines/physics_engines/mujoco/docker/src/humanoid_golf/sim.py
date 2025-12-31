@@ -393,6 +393,8 @@ def run_simulation(
         controller = PDController(actuators, TARGET_POSE)
 
     # 5. Run Loop
+    print(f"DEBUG: use_viewer={use_viewer}, HAS_VIEWER={HAS_VIEWER}", flush=True)
+
     if use_viewer and HAS_VIEWER:
         print("Launching Live Viewer...", flush=True)
         try:
@@ -411,6 +413,8 @@ def run_simulation(
             viewer.launch(env_wrapper, policy)
         except Exception as e:
             print(f"Failed to launch viewer: {e}", flush=True)
+            import traceback
+            traceback.print_exc()
             raise e
 
         # Post-viewer Save
