@@ -396,8 +396,10 @@ class BiomechanicalAnalyzer:
         """Extract complete biomechanical state at current time.
 
         Args:
-            selected_actuator_name: Optional name of actuator to compute induced accel for.
-            compute_advanced_metrics: Whether to compute expensive metrics (Induced/CF).
+            selected_actuator_name: Optional name of actuator to compute induced
+                accel for.
+            compute_advanced_metrics: Whether to compute expensive metrics
+                (Induced/CF).
 
         Returns:
             BiomechanicalData object with all available measurements
@@ -430,7 +432,9 @@ class BiomechanicalAnalyzer:
             }
             if selected_actuator_name:
                 induced["selected_actuator"] = (
-                    self.compute_induced_acceleration_for_actuator(selected_actuator_name)
+                    self.compute_induced_acceleration_for_actuator(
+                        selected_actuator_name
+                    )
                 )
             counterfactuals = self.compute_counterfactuals()
 

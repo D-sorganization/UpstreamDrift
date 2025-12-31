@@ -920,20 +920,22 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
             # Record biomechanical data if recording is active
             if self.analyzer is not None and self.recorder.is_recording:
-                # If Live Analysis is enabled, we extract full state (includes induced/cf)
-                # If not, we might skip heavy computations if extract_full_state is heavy.
-                # Currently extract_full_state computes induced/cf unconditionally.
-                # Optimization: Pass a flag to extract_full_state?
-                # For now, rely on enable_live_analysis flag being checked inside a modified extract method
-                # or just use it here.
+                # If Live Analysis is enabled, we extract full state (includes
+                # induced/cf). If not, we might skip heavy computations if
+                # extract_full_state is heavy. Currently extract_full_state computes
+                # induced/cf unconditionally. Optimization: Pass a flag to
+                # extract_full_state? For now, rely on enable_live_analysis flag being
+                # checked inside a modified extract method or just use it here.
 
-                # We update BiomechanicalAnalyzer to respect a 'compute_advanced_metrics' flag
-                # or we handle it here.
+                # We update BiomechanicalAnalyzer to respect a
+                # 'compute_advanced_metrics' flag or we handle it here.
                 # Ideally, extract_full_state should take an argument.
-                # Let's check biomechanics.py again. It calls compute_induced... unconditionally.
-                # We should update extract_full_state to be conditional if we want to save perf when off.
-                # But for now, if we assume the user wants the data if they are recording...
-                # Actually, the user asked for a TOGGLE for real time display/computation.
+                # Let's check biomechanics.py again. It calls compute_induced...
+                # unconditionally.
+                # We should update extract_full_state to be conditional if we want to
+                # save perf when off. But for now, if we assume the user wants the data
+                # if they are recording... Actually, the user asked for a TOGGLE for
+                # real time display/computation.
 
                 bio_data = self.analyzer.extract_full_state(
                     compute_advanced_metrics=self.enable_live_analysis
