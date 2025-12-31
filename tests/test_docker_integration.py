@@ -146,6 +146,23 @@ class TestDockerLaunchCommands(unittest.TestCase):
             mock_repos_root.__str__.return_value = "/mock/repo/root"
             launcher._launch_docker_container(mock_model, mock_path)
 
+            # Verify subprocess was called
+            mock_popen.assert_called_once()
+
+            # Get the command arguments
+            call_args = mock_popen.call_args[0][0]
+            command_str = " ".join(call_args)
+
+            # Verify command structure
+            self.assertIn("docker run", command_str)
+            self.assertIn("--rm -it", command_str)
+            self.assertIn("-v /mock/repo/root:/workspace", command_str)
+            self.assertIn(
+                "-e PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines",
+                command_str,
+            )
+            self.assertNotIn("bash -c", command_str)
+
             call_args = mock_popen.call_args[0][0]
             command_str = " ".join(call_args)
 
@@ -156,7 +173,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             self.assertIn("-p 7000-7010:7000-7010", command_str)
             self.assertIn("-e MESHCAT_HOST=0.0.0.0", command_str)
             self.assertIn(
-                "cd /workspace/engines/physics_engines/drake/python", command_str
+                "-w /workspace/engines/physics_engines/drake/python", command_str
             )
             self.assertIn("python -m src.drake_gui_app", command_str)
 
@@ -196,11 +213,14 @@ class TestDockerLaunchCommands(unittest.TestCase):
             # Verify Pinocchio-specific components
             self.assertIn("-p 7000-7010:7000-7010", command_str)
             self.assertIn("-e MESHCAT_HOST=0.0.0.0", command_str)
+            # Verify working directory instead of cd
             self.assertIn(
-                "cd /workspace/engines/physics_engines/pinocchio/python",
+                "-w /workspace/engines/physics_engines/pinocchio/python",
                 command_str,
             )
+            # Verify direct python execution
             self.assertIn("python pinocchio_golf/gui.py", command_str)
+            self.assertNotIn("bash -c", command_str)
 
     def test_display_configuration_windows(self):
         """Test Windows display configuration."""
@@ -266,12 +286,6 @@ class TestDockerLaunchCommands(unittest.TestCase):
             command_str = " ".join(call_args)
 
             self.assertIn("-v /mock/repo/root:/workspace", command_str)
-            self.assertIn("--gpus=all", command_str)
-
-            call_args = mock_popen.call_args[0][0]
-            command_str = " ".join(call_args)
-
-            # Verify GPU option is included
             self.assertIn("--gpus=all", command_str)
 
 

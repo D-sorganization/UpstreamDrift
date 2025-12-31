@@ -1328,7 +1328,41 @@ class GolfLauncher(QMainWindow):
         # Volumes - mount entire suite root to /workspace
         mount_path = str(REPOS_ROOT).replace("\\", "/")
         cmd.extend(["-v", f"{mount_path}:/workspace"])
-        cmd.extend(["-w", "/workspace"])
+        # Prepare dynamic working directory and entry command
+        work_dir = "/workspace"
+        entry_cmd = []
+        host_port = None
+
+        if model.type == "drake":
+            work_dir = "/workspace/engines/physics_engines/drake/python"
+            entry_cmd = ["python", "-m", "src.drake_gui_app"]
+            host_port = 7000
+
+            if host_port:
+                logger.info(f"Drake Meshcat will be available on host port {host_port}")
+                self._start_meshcat_browser(host_port)
+
+        elif model.type == "custom_humanoid":
+            work_dir = "/workspace/engines/physics_engines/mujoco/python"
+            entry_cmd = ["python", "humanoid_launcher.py"]
+
+        elif model.type == "custom_dashboard":
+            work_dir = "/workspace/engines/physics_engines/mujoco/python"
+            entry_cmd = ["python", "-m", "mujoco_humanoid_golf"]
+
+        elif model.type == "pinocchio":
+            work_dir = "/workspace/engines/physics_engines/pinocchio/python"
+            entry_cmd = ["python", "pinocchio_golf/gui.py"]
+            host_port = 7000
+
+            if host_port:
+                logger.info(
+                    f"Pinocchio Meshcat will be available on host port {host_port}"
+                )
+                self._start_meshcat_browser(host_port)
+        
+        # Set working directory
+        cmd.extend(["-w", work_dir])
 
         # Environment variables for Python path and shared modules
         cmd.extend(
@@ -1350,58 +1384,15 @@ class GolfLauncher(QMainWindow):
             cmd.append("--gpus=all")
 
         # Network for Meshcat (Drake/Pinocchio)
-        host_port = None
-        if "drake" in model.type or "pinocchio" in model.type:
-            cmd.extend(["-p", "7000-7010:7000-7010"])
+        if host_port:
+            cmd.extend(["-p", f"{host_port}:{host_port}"])
             cmd.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
-            host_port = 7000
 
         cmd.append(DOCKER_IMAGE_NAME)
-
-        # Entry Command - Updated to use correct paths and Python executable
-        if model.type == "drake":
-            # Change to the drake python directory and run as module
-            cmd.extend(
-                [
-                    "bash",
-                    "-c",
-                    "cd /workspace/engines/physics_engines/drake/python && python -m src.drake_gui_app",
-                ]
-            )
-
-            if host_port:
-                logger.info(f"Drake Meshcat will be available on host port {host_port}")
-                self._start_meshcat_browser(host_port)
-
-        elif model.type == "custom_humanoid":
-            # Change to mujoco python directory and run humanoid launcher
-            cmd.extend(
-                [
-                    "bash",
-                    "-c",
-                    "cd /workspace/engines/physics_engines/mujoco/python && python humanoid_launcher.py",
-                ]
-            )
-
-        elif model.type == "custom_dashboard":
-            # Change to mujoco python directory and run as module
-            cmd.extend(
-                [
-                    "bash",
-                    "-c",
-                    "cd /workspace/engines/physics_engines/mujoco/python && python -m mujoco_humanoid_golf",
-                ]
-            )
-
-        elif model.type == "pinocchio":
-            # Change to pinocchio python directory and run GUI
-            cmd.extend(
-                [
-                    "bash",
-                    "-c",
-                    "cd /workspace/engines/physics_engines/pinocchio/python && python pinocchio_golf/gui.py",
-                ]
-            )
+        
+        # Append entry command
+        if entry_cmd:
+            cmd.extend(entry_cmd)
 
             if host_port:
                 logger.info(
