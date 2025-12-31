@@ -94,7 +94,9 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.Path", MagicMock()),
+            patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
+            mock_repos_root.__str__.return_value = "/mock/repo/root"
             launcher._launch_docker_container(mock_model, mock_path)
 
             # Verify subprocess was called
@@ -107,7 +109,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             # Verify command structure
             self.assertIn("docker run", command_str)
             self.assertIn("--rm -it", command_str)
-            self.assertIn("-v /test/suite/path:/workspace", command_str)
+            self.assertIn("-v /mock/repo/root:/workspace", command_str)
             self.assertIn(
                 "-e PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines",
                 command_str,
@@ -139,11 +141,16 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.threading.Thread"),
             patch("launchers.golf_launcher.Path", MagicMock()),
+            patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
+            mock_repos_root.__str__.return_value = "/mock/repo/root"
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
             command_str = " ".join(call_args)
+
+            # Verify that REPOS_ROOT is mounted
+            self.assertIn("-v /mock/repo/root:/workspace", command_str)
 
             # Verify Drake-specific components
             self.assertIn("-p 7000-7010:7000-7010", command_str)
@@ -175,17 +182,23 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.threading.Thread"),
             patch("launchers.golf_launcher.Path", MagicMock()),
+            patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
+            mock_repos_root.__str__.return_value = "/mock/repo/root"
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
             command_str = " ".join(call_args)
 
+            # Verify that REPOS_ROOT is mounted
+            self.assertIn("-v /mock/repo/root:/workspace", command_str)
+
             # Verify Pinocchio-specific components
             self.assertIn("-p 7000-7010:7000-7010", command_str)
             self.assertIn("-e MESHCAT_HOST=0.0.0.0", command_str)
             self.assertIn(
-                "cd /workspace/engines/physics_engines/pinocchio/python", command_str
+                "cd /workspace/engines/physics_engines/pinocchio/python",
+                command_str,
             )
             self.assertIn("python pinocchio_golf/gui.py", command_str)
 
@@ -209,11 +222,15 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.Path", MagicMock()),
+            patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
+            mock_repos_root.__str__.return_value = "/mock/repo/root"
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
             command_str = " ".join(call_args)
+
+            self.assertIn("-v /mock/repo/root:/workspace", command_str)
 
             # Verify Windows-specific display setup
             self.assertIn("-e DISPLAY=host.docker.internal:0", command_str)
@@ -240,8 +257,16 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.Path", MagicMock()),
+            patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
+            mock_repos_root.__str__.return_value = "/mock/repo/root"
             launcher._launch_docker_container(mock_model, mock_path)
+
+            call_args = mock_popen.call_args[0][0]
+            command_str = " ".join(call_args)
+
+            self.assertIn("-v /mock/repo/root:/workspace", command_str)
+            self.assertIn("--gpus=all", command_str)
 
             call_args = mock_popen.call_args[0][0]
             command_str = " ".join(call_args)

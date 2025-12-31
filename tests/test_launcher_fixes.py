@@ -350,7 +350,9 @@ class TestDockerConfiguration(unittest.TestCase):
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.Path", MagicMock()),
+            patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
+            mock_repos_root.__str__.return_value = "/mock/repo/root"
             launcher._launch_docker_container(mock_model, mock_path)
 
             # Verify subprocess was called
