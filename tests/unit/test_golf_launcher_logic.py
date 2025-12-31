@@ -372,7 +372,7 @@ class TestGolfLauncherLogic:
                     # Also check working directory is set to /workspace
                     assert "-w" in args
                     idx = args.index("-w")
-                    assert args[idx+1] == "/workspace"
+                    assert args[idx + 1] == "/workspace"
 
     @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.DockerCheckThread")
