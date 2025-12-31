@@ -81,9 +81,9 @@ class UnifiedLauncher:
         engines = manager.get_available_engines()
         if engines:
             for engine in engines:
-                print(f"  ✅ {engine.value.upper()}")
+                print(f"  [OK] {engine.value.upper()}")
         else:
-            print("  ❌ No engines available")
+            print("  [MISSING] No engines available")
 
         print()
 

@@ -2,14 +2,13 @@ def compute_induced_accelerations(physics) -> dict:
     """Compute induced accelerations (Gravity, Velocity, Control) for current state."""
     results: dict = {}
     try:
-        import mujoco
         import numpy as np
+        from dm_control.mujoco.wrapper.mjbindings import mjlib
     except ImportError:
         return results
 
     # Ensure we are using compatible model/data
-    # If dm_control < 1.0, this might fail unless we extract pointers
-    # But let's assume modern dm_control which uses 'mujoco' bindings.
+    # Use mjlib from dm_control for ctypes pointer compatibility
     model = physics.model
     data = physics.data
 
@@ -29,45 +28,92 @@ def compute_induced_accelerations(physics) -> dict:
     # Note: mj_rne computes inverse dynamics: tau = M*a + C + G.
     # If a=0, v=0, then tau = G.
     # We want G vector.
-    # But mj_rne outputs to data.qfrc_inverse.
-    mujoco.mj_rne(model, data, 0, data.qfrc_inverse)
-    g_force = data.qfrc_inverse.copy()  # This is G(q)
+    # Use the nv from the raw struct to ensure consistency
+    nv = model.ptr.nv
+
+    # Allocation of explicit buffers to ensure correct shape/type for raw bindings
+    # mj_rne expects output buffer of size nv.
+    g_force = np.zeros(nv, dtype=np.float64)
+    mjlib.mj_rne(model.ptr, data.ptr, 0, g_force)
 
     # 3. Coriolis/Centrifugal Force (C)
     # Restore v, set a=0.
-    # mj_rne(v, a=0) -> C + G.
     data.qvel[:] = qvel_backup
     data.qacc[:] = 0
-    mujoco.mj_rne(model, data, 0, data.qfrc_inverse)
-    bias_force = data.qfrc_inverse.copy()  # C + G
+
+    # Needs separate buffer for the result of this call
+    bias_force = np.zeros(nv, dtype=np.float64)
+    mjlib.mj_rne(model.ptr, data.ptr, 0, bias_force)
     c_force = bias_force - g_force  # C(q, v)
 
-    # 4. Control Force (from actuators) is tricky in Inverse Dynamics.
-    # Usually we go Forward: tau_ctrl is known.
-    # In dm_control, physics.data.actuator_force contains forces?
-    # Or qfrc_actuation after mj_fwdActuation?
-    # We should run Forward logic to get qfrc_actuation.
-    data.qpos[:] = qpos_backup  # Restore pos just in case
+    # 4. Control Force (from actuators)
+    data.qpos[:] = qpos_backup
     data.qvel[:] = qvel_backup
     data.ctrl[:] = ctrl_backup
-    mujoco.mj_fwdActuation(model, data)
+    mjlib.mj_fwdActuation(model.ptr, data.ptr)
+
+    # Copy from data.qfrc_actuator (which is managed by mujoco)
     tau_control = data.qfrc_actuator.copy()
+    # Check shape
+    if tau_control.shape[0] != nv:
+        print(f"WARNING: tau_control shape {tau_control.shape} != nv {nv}. Resizing.")
+        tmp = np.zeros(nv, dtype=np.float64)
+        tmp[: min(nv, tau_control.shape[0])] = tau_control[
+            : min(nv, tau_control.shape[0])
+        ]
+        tau_control = tmp
 
     # Now solve M * a = F
-    # a_g = M^-1 * (-G)
-    # a_c = M^-1 * (-C)
-    # a_t = M^-1 * (tau_control)
-
     # Vectors to solve (overwritten by mj_solveM)
-    # We need explicit output buffers for mj_solveM(m, d, out, in)
-    acc_g = np.zeros_like(g_force)
-    acc_c = np.zeros_like(c_force)
-    acc_t = np.zeros_like(tau_control)
+    acc_g = np.zeros(nv, dtype=np.float64)
+    acc_c = np.zeros(nv, dtype=np.float64)
+    acc_t = np.zeros(nv, dtype=np.float64)
 
-    # Solve M*a = F => a = M^-1 * F
-    mujoco.mj_solveM(model, data, acc_g, -g_force)
-    mujoco.mj_solveM(model, data, acc_c, -c_force)
-    mujoco.mj_solveM(model, data, acc_t, tau_control)
+    # Explicit input arrays
+    neg_g_force = -g_force
+    neg_c_force = -c_force
+
+    def safe_solveM(m_ptr, d_ptr, dst, src):
+        """Try calling mj_solveM with different array shapes to satisfy binding."""
+        # Clean inputs
+        dst_clean = np.ascontiguousarray(dst, dtype=np.float64)
+        src_clean = np.ascontiguousarray(src, dtype=np.float64)
+
+        # Shapes to try: Flat, Column, Row
+        shapes_to_try = [
+            dst_clean.shape,  # (nv,)
+            (dst_clean.shape[0], 1),  # (nv, 1)
+            (1, dst_clean.shape[0]),  # (1, nv)
+        ]
+
+        last_err = None
+        success = False
+
+        for shape in shapes_to_try:
+            try:
+                # Reshape views (cheap)
+                d_view = dst_clean.reshape(shape)
+                s_view = src_clean.reshape(shape)
+
+                # Attempt call
+                mjlib.mj_solveM(m_ptr, d_ptr, d_view, s_view)
+
+                # If successful, copy result back to original destination
+                # (Handle flatten/shape mismatch by flat copy)
+                dst[:] = d_view.flatten()
+                success = True
+                break
+            except TypeError as e:
+                last_err = e
+            except Exception as e:
+                last_err = e
+
+        if not success:
+            raise last_err
+
+    safe_solveM(model.ptr, data.ptr, acc_g, neg_g_force)
+    safe_solveM(model.ptr, data.ptr, acc_c, neg_c_force)
+    safe_solveM(model.ptr, data.ptr, acc_t, tau_control)
 
     # Restore State fully
     data.qpos[:] = qpos_backup
