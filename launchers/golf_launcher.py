@@ -44,7 +44,6 @@ from PyQt6.QtWidgets import (
     QLabel,
     QMainWindow,
     QMessageBox,
-    QProgressBar,
     QPushButton,
     QScrollArea,
     QSplashScreen,
@@ -205,6 +204,9 @@ class DraggableModelCard(QFrame):
         self.model = model
         self.parent_launcher = parent
         self.setAcceptDrops(False)  # Initially disabled, will be enabled by toggle
+        # Match initial drag-and-drop state to the parent's layout_edit_mode if available.
+        initial_accept_drops = bool(getattr(parent, "layout_edit_mode", False))
+        self.setAcceptDrops(initial_accept_drops)
         self.setObjectName("ModelCard")
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.drag_start_position = QPoint()
@@ -643,7 +645,9 @@ class GolfLauncher(QMainWindow):
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []  # Track model order for drag-and-drop
         self.layout_edit_mode = False  # Track if layout editing is enabled
-        self.running_processes: dict[str, subprocess.Popen] = {}  # Track running instances
+        self.running_processes: dict[str, subprocess.Popen] = (
+            {}
+        )  # Track running instances
 
         # Load Registry
         try:
@@ -671,7 +675,7 @@ class GolfLauncher(QMainWindow):
         # Set up periodic process cleanup
         self.cleanup_timer = QTimer(self)
         self.cleanup_timer.timeout.connect(self._cleanup_processes)
-        self.cleanup_timer.start(5000)  # Clean up every 5 seconds
+        self.cleanup_timer.start(10000)  # Clean up every 10 seconds
 
     def _save_layout(self) -> None:
         """Save the current model layout to configuration file."""
@@ -834,6 +838,20 @@ class GolfLauncher(QMainWindow):
     def closeEvent(self, event: QCloseEvent | None) -> None:
         """Handle window close event to save layout."""
         self._save_layout()
+
+        # Stop cleanup timer
+        if hasattr(self, "cleanup_timer"):
+            self.cleanup_timer.stop()
+
+        # Terminate running processes
+        for key, process in list(self.running_processes.items()):
+            if process.poll() is None:
+                logger.info(f"Terminating child process: {key}")
+                try:
+                    process.terminate()
+                except Exception as e:
+                    logger.error(f"Failed to terminate {key}: {e}")
+
         super().closeEvent(event)
 
     def init_ui(self) -> None:
@@ -1750,15 +1768,12 @@ if __name__ == "__main__":
     # Simulate loading process with progress updates
     splash.show_message("Loading application resources...", 20)
     QApplication.processEvents()
-    time.sleep(0.3)
 
     splash.show_message("Initializing model registry...", 40)
     QApplication.processEvents()
-    time.sleep(0.3)
 
     splash.show_message("Setting up engine manager...", 60)
     QApplication.processEvents()
-    time.sleep(0.3)
 
     splash.show_message("Preparing user interface...", 80)
     QApplication.processEvents()
@@ -1768,7 +1783,6 @@ if __name__ == "__main__":
 
     splash.show_message("Ready!", 100)
     QApplication.processEvents()
-    time.sleep(0.2)
 
     # Close splash and show main window
     splash.finish(window)
