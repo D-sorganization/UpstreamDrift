@@ -6,7 +6,6 @@ presence of LIBGL_ALWAYS_INDIRECT which was identified as a critical regression.
 """
 
 import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -67,11 +66,24 @@ def test_live_view_environment_flags(mocked_launcher):
     launcher.chk_live.setChecked(True)
 
     # Mock OS to look like Windows
-    with patch("os.name", "nt"), patch("subprocess.Popen") as mock_popen:
+    # Mock OS to look like Windows
+    # Also mock Path to prevent WindowsPath instantiation on Linux
+    mock_path_cls = MagicMock()
+    mock_suite_root = MagicMock()
+    mock_suite_root.__str__.return_value = "/mock/suite/root"
+    mock_file_path = MagicMock()
+    mock_file_path.parent.parent = mock_suite_root
+    mock_path_cls.return_value = mock_file_path
 
+    with (
+        patch("os.name", "nt"),
+        patch("subprocess.Popen") as mock_popen,
+        patch("launchers.golf_launcher.Path", mock_path_cls),
+    ):
         # Create a dummy model
         model = MockModel("custom_humanoid")
-        abs_path = Path("/mock/path")
+        abs_path = MagicMock()  # Use Mock for the argument too
+        abs_path.__str__.return_value = "/mock/path"
 
         # Call the method
         launcher._launch_docker_container(model, abs_path)
@@ -100,10 +112,21 @@ def test_headless_environment_flags(mocked_launcher):
     launcher = mocked_launcher()
     launcher.chk_live.setChecked(False)
 
-    with patch("os.name", "nt"), patch("subprocess.Popen") as mock_popen:
+    # Mock Path to prevent WindowsPath instantiation on Linux
+    mock_path_cls = MagicMock()
+    mock_suite_root = MagicMock()
+    mock_suite_root.__str__.return_value = "/mock/suite/root"
+    mock_file_path = MagicMock()
+    mock_file_path.parent.parent = mock_suite_root
+    mock_path_cls.return_value = mock_file_path
 
+    with (
+        patch("os.name", "nt"),
+        patch("subprocess.Popen") as mock_popen,
+        patch("launchers.golf_launcher.Path", mock_path_cls),
+    ):
         model = MockModel("custom_humanoid")
-        launcher._launch_docker_container(model, Path("/mock"))
+        launcher._launch_docker_container(model, MagicMock())
 
         args = mock_popen.call_args[0][0]
         full_command = " ".join(args)
