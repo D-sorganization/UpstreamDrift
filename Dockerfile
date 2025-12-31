@@ -37,7 +37,7 @@ RUN conda install -y -c conda-forge \
     matplotlib \
     pandas \
     sympy \
-    pyqt \
+    pyqt6 \
     opencv \
     pyyaml \
     defusedxml \
