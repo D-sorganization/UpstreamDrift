@@ -204,7 +204,7 @@ def mock_pyqt(monkeypatch):
     mock_qt_widgets.QHBoxLayout = MockQHBoxLayout
     mock_qt_widgets.QScrollArea = MockQScrollArea
     mock_qt_widgets.QApplication = MagicMock()
-    mock_qt_widgets.QApplication.startDragDistance.return_value = 10
+    mock_qt_widgets.QApplication.startDragDistance = MagicMock(return_value=10)
     mock_qt_widgets.QComboBox = MagicMock()
     mock_qt_widgets.QDialog = MagicMock()
     mock_qt_widgets.QTextEdit = MagicMock()
@@ -364,10 +364,15 @@ class TestGolfLauncherLogic:
                     args = mock_popen.call_args[0][0]
                     assert args[0] == "docker"
                     assert args[1] == "run"
+                    assert args[1] == "run"
                     # Verify volume mount path logic: args[5] should be the
-                    # '-v host_path:container_path' argument containing the model path,
-                    # allowing for platform-specific path separators.
-                    assert "engines/test" in args[5] or "engines\\test" in args[5]
+                    # '-v REPOS_ROOT:/workspace' argument.
+                    # We check that the project root is mounted.
+                    assert "Golf_Modeling_Suite" in args[5] or "workspace" in args[5]
+                    # Also check working directory is set to /workspace
+                    assert "-w" in args
+                    idx = args.index("-w")
+                    assert args[idx+1] == "/workspace"
 
     @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.DockerCheckThread")

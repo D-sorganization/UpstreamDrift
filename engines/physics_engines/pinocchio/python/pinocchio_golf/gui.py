@@ -660,8 +660,12 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         except ValueError:
             return
 
-        # Populate recorder with post-hoc data if live analysis was off
-        self._ensure_analysis_data_populated()
+        # Populate recorder with post-hoc data if live analysis was off.
+        # This can be expensive on large datasets, so only do it once per
+        # GUI instance unless explicitly reset elsewhere.
+        if not getattr(self, "_analysis_data_populated", False):
+            self._ensure_analysis_data_populated()
+            self._analysis_data_populated = True
 
         # Handle specific torque source input
         spec_tau: np.ndarray | None = None
