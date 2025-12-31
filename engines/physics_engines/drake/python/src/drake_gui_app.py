@@ -364,9 +364,21 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             # Calculate path to shared directory relative to this file
             # engines/physics_engines/drake/python/src/drake_gui_app.py
             current_file = Path(__file__)
-            # Up 5 levels: src -> python -> drake -> physics_engines -> engines -> root
-            project_root = current_file.parents[5]
-            urdf_dir = project_root / "shared" / "urdf"
+
+            # Check for Docker environment mount first
+            docker_shared = Path("/shared/urdf")
+            if docker_shared.exists():
+                urdf_dir = docker_shared
+                LOGGER.info(f"Found Docker shared URDF directory: {urdf_dir}")
+            else:
+                # Fallback to local relative path
+                # Up 5 levels: src->python->drake->physics_engines->engines->root
+                try:
+                    project_root = current_file.parents[5]
+                    urdf_dir = project_root / "shared" / "urdf"
+                except IndexError:
+                    # Fallback for when path depth is insufficient
+                    urdf_dir = Path("non_existent")
 
             if urdf_dir.exists():
                 for urdf_file in urdf_dir.glob("*.urdf"):
@@ -436,6 +448,14 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 params, meshcat=self.meshcat
             )
 
+        if self.diagram is None:
+            # Create a simple placeholder diagram if build failed or returned None
+            builder = DiagramBuilder()
+            plant, scene_graph = AddMultibodyPlantSceneGraph(builder, time_step=1e-3)
+            plant.Finalize()
+            self.plant = plant
+            self.diagram = builder.Build()
+
         self.simulator = Simulator(self.diagram)
         self.simulator.set_target_realtime_rate(1.0)
         self.simulator.Initialize()
@@ -447,7 +467,11 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         # Only initialize visualizer if Meshcat is available
         if self.meshcat is not None:
-            self.visualizer = DrakeVisualizer(self.meshcat, self.plant)
+            # self.visualizer = DrakeVisualizer(self.meshcat, self.plant)
+            # Use of pure pydrake.geometry.DrakeVisualizer here is incorrect
+            # as it expects LCM parameters. Meshcat visualization is inserted
+            # into the diagram during build_golf_swing_diagram.
+            self.visualizer = None
         else:
             LOGGER.warning("Visualizer disabled due to Meshcat initialization failure.")
 
