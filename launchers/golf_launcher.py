@@ -1346,6 +1346,8 @@ class GolfLauncher(QMainWindow):
             if os.name == "nt":
                 run_flags.extend(["-e", "DISPLAY=host.docker.internal:0"])
                 run_flags.extend(["-e", "MUJOCO_GL=glfw"])
+                run_flags.extend(["-e", "PYOPENGL_PLATFORM=glx"])
+                run_flags.extend(["-e", "QT_QPA_PLATFORM=xcb"])
             else:
                 run_flags.extend(["-e", f"DISPLAY={os.environ.get('DISPLAY', ':0')}"])
                 run_flags.extend(["-v", "/tmp/.X11-unix:/tmp/.X11-unix:rw"])
