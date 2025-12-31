@@ -2,14 +2,13 @@ def compute_induced_accelerations(physics) -> dict:
     """Compute induced accelerations (Gravity, Velocity, Control) for current state."""
     results: dict = {}
     try:
-        import mujoco
+        from dm_control.mujoco.wrapper.mjbindings import mjlib
         import numpy as np
     except ImportError:
         return results
 
     # Ensure we are using compatible model/data
-    # If dm_control < 1.0, this might fail unless we extract pointers
-    # But let's assume modern dm_control which uses 'mujoco' bindings.
+    # Use mjlib from dm_control for ctypes pointer compatibility
     model = physics.model
     data = physics.data
 
@@ -36,7 +35,7 @@ def compute_induced_accelerations(physics) -> dict:
     # Allocation of explicit buffers to ensure correct shape/type for raw bindings
     # mj_rne expects output buffer of size nv.
     g_force = np.zeros(nv, dtype=np.float64)
-    mujoco.mj_rne(model.ptr, data.ptr, 0, g_force)
+    mjlib.mj_rne(model.ptr, data.ptr, 0, g_force)
     print(f"DEBUG: g_force shape = {g_force.shape}", flush=True)
 
     # 3. Coriolis/Centrifugal Force (C)
@@ -46,14 +45,14 @@ def compute_induced_accelerations(physics) -> dict:
     
     # Needs separate buffer for the result of this call
     bias_force = np.zeros(nv, dtype=np.float64)
-    mujoco.mj_rne(model.ptr, data.ptr, 0, bias_force)
+    mjlib.mj_rne(model.ptr, data.ptr, 0, bias_force)
     c_force = bias_force - g_force  # C(q, v)
 
     # 4. Control Force (from actuators)
     data.qpos[:] = qpos_backup
     data.qvel[:] = qvel_backup
     data.ctrl[:] = ctrl_backup
-    mujoco.mj_fwdActuation(model.ptr, data.ptr)
+    mjlib.mj_fwdActuation(model.ptr, data.ptr)
     
     # Copy from data.qfrc_actuator (which is managed by mujoco)
     tau_control = data.qfrc_actuator.copy()
@@ -76,9 +75,9 @@ def compute_induced_accelerations(physics) -> dict:
 
     # Solve M*a = F => a = M^-1 * F
     print("DEBUG: Calling mj_solveM...", flush=True)
-    mujoco.mj_solveM(model.ptr, data.ptr, acc_g, neg_g_force)
-    mujoco.mj_solveM(model.ptr, data.ptr, acc_c, neg_c_force)
-    mujoco.mj_solveM(model.ptr, data.ptr, acc_t, tau_control)
+    mjlib.mj_solveM(model.ptr, data.ptr, acc_g, neg_g_force)
+    mjlib.mj_solveM(model.ptr, data.ptr, acc_c, neg_c_force)
+    mjlib.mj_solveM(model.ptr, data.ptr, acc_t, tau_control)
 
     # Restore State fully
     data.qpos[:] = qpos_backup
