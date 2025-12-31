@@ -522,6 +522,7 @@ class GolfLauncher(QMainWindow):
         super().__init__()
         self.setWindowTitle("Golf Modeling Suite - GolfingRobot")
         self.resize(1400, 900)
+        self.center_window()
 
         # Set Icon - Use Windows-optimized icon for maximum clarity on Windows
         icon_candidates = [
@@ -605,6 +606,16 @@ class GolfLauncher(QMainWindow):
 
         except Exception as e:
             logger.error(f"Failed to save layout: {e}")
+
+    def center_window(self) -> None:
+        """Center the window on the primary screen."""
+        if not self.screen():
+            return
+
+        geometry = self.frameGeometry()
+        center_point = self.screen().availableGeometry().center()
+        geometry.moveCenter(center_point)
+        self.move(geometry.topLeft())
 
     def _load_layout(self) -> None:
         """Load the saved model layout from configuration file."""
