@@ -8,7 +8,7 @@ Tests Docker container setup, PYTHONPATH configuration, and module accessibility
 import subprocess
 import unittest
 from pathlib import Path
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 
 def _is_docker_available() -> bool:
@@ -83,12 +83,17 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_model.type = "custom_humanoid"
 
         # Mock path
-        mock_path = Path("/test/suite/path")
+        # Mock path
+        mock_path = Mock()
+        mock_path.__str__ = Mock(return_value="/test/suite/path")
+        # Ensure regex replacements work similarly if relying on string conversion
+        mock_path.replace = Mock(side_effect=lambda x, y: "/test/suite/path".replace(x, y))
 
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
+            patch("launchers.golf_launcher.Path", MagicMock()),
         ):
             launcher._launch_docker_container(mock_model, mock_path)
 
@@ -125,13 +130,15 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_model = Mock()
         mock_model.type = "drake"
 
-        mock_path = Path("/test/suite/path")
+        mock_path = Mock()
+        mock_path.__str__ = Mock(return_value="/test/suite/path")
 
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.threading.Thread"),
+            patch("launchers.golf_launcher.Path", MagicMock()),
         ):
             launcher._launch_docker_container(mock_model, mock_path)
 
@@ -159,13 +166,15 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_model = Mock()
         mock_model.type = "pinocchio"
 
-        mock_path = Path("/test/suite/path")
+        mock_path = Mock()
+        mock_path.__str__ = Mock(return_value="/test/suite/path")
 
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
             patch("launchers.golf_launcher.threading.Thread"),
+            patch("launchers.golf_launcher.Path", MagicMock()),
         ):
             launcher._launch_docker_container(mock_model, mock_path)
 
@@ -192,12 +201,14 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
         mock_model = Mock()
         mock_model.type = "custom_humanoid"
-        mock_path = Path("/test/path")
+        mock_path = Mock()
+        mock_path.__str__ = Mock(return_value="/test/path")
 
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
+            patch("launchers.golf_launcher.Path", MagicMock()),
         ):
             launcher._launch_docker_container(mock_model, mock_path)
 
@@ -221,12 +232,14 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
         mock_model = Mock()
         mock_model.type = "custom_humanoid"
-        mock_path = Path("/test/path")
+        mock_path = Mock()
+        mock_path.__str__ = Mock(return_value="/test/path")
 
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
             patch("launchers.golf_launcher.logger"),
+            patch("launchers.golf_launcher.Path", MagicMock()),
         ):
             launcher._launch_docker_container(mock_model, mock_path)
 
