@@ -110,6 +110,10 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.physics_tab.model_changed.connect(self.on_model_changed_signal)
         self.physics_tab.mode_changed.connect(self.controls_tab.on_mode_changed)
 
+        # Connect live analysis toggle
+        if hasattr(self.controls_tab, "chk_live_analysis"):
+            self.controls_tab.chk_live_analysis.toggled.connect(self.on_live_analysis_toggled)
+
         # Visualization Tab
         self.visualization_tab = VisualizationTab(self.sim_widget, self)
         self.tab_widget.addTab(self.visualization_tab, "Visualization")
@@ -388,6 +392,14 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
 ```
         """,
         )
+
+    def on_live_analysis_toggled(self, checked: bool) -> None:
+        """Handle live analysis toggle."""
+        self.sim_widget.enable_live_analysis = checked
+        if checked:
+            self.statusBar().showMessage("Live Biomechanical Analysis Enabled (Performance may drop)", 3000)
+        else:
+            self.statusBar().showMessage("Live Biomechanical Analysis Disabled", 3000)
 
     # -------- Model management --------
 
