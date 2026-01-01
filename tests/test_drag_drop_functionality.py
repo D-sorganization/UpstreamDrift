@@ -82,6 +82,9 @@ class TestDragDropFunctionality(unittest.TestCase):
         # So we can check the call.
         if hasattr(card2, "setAcceptDrops") and isinstance(card2.setAcceptDrops, Mock):
             card2.setAcceptDrops.assert_called_with(False)
+        else:
+            # If QFrame is mocked but method isn't a Mock object (e.g. replaced by Qt), we can't assert call.
+            pass
 
     def test_mouse_press_initializes_drag(self) -> None:
         """Test that mouse press initializes drag position."""
@@ -97,7 +100,11 @@ class TestDragDropFunctionality(unittest.TestCase):
 
         card.mousePressEvent(event)
 
-        self.assertEqual(card.drag_start_position, QPoint(10, 10))
+        # Allow for Mock or QPoint comparison
+        if isinstance(card.drag_start_position, Mock):
+             self.assertEqual(card.drag_start_position, QPoint(10, 10))
+        else:
+             self.assertEqual(card.drag_start_position, QPoint(10, 10))
 
     def test_drag_operation_error_handling(self) -> None:
         """Test that drag operations handle errors gracefully."""
