@@ -16,7 +16,7 @@ try:
     PYQT6_AVAILABLE = True
 except ImportError:
     PYQT6_AVAILABLE = False
-    URDFGenerator = None
+    URDFGenerator = None  # type: ignore
 
 
 class MockFileDialog:
@@ -29,9 +29,7 @@ class MockFileDialog:
         return "test_robot.urdf", "URDF Files (*.urdf)"
 
 
-@pytest.mark.skipif(
-    not PYQT6_AVAILABLE or True, reason="Platform initialization failure in CI"
-)
+@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not available")
 def test_urdf_generation_logic(qtbot):
     """Test the logic of generating URDF XML."""
     window = URDFGenerator()
@@ -94,7 +92,6 @@ def test_urdf_scanning_logic():
     assert len(urdfs) >= 2
 
     names = [u.stem for u in urdfs]
-    print(f"DEBUG: Found URDFs: {names} in {urdf_dir}")
     assert "simple_humanoid" in names
     assert "arm" in names
 
