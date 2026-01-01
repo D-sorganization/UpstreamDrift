@@ -87,14 +87,14 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_path = Mock()
         mock_path.__str__ = Mock(return_value="/test/suite/path")
         # Ensure regex replacements work similarly if relying on string conversion
-        mock_path.replace = Mock(
+        setattr(mock_path, 'replace', Mock(
             side_effect=lambda x, y: "/test/suite/path".replace(x, y)
-        )
+        ))
 
         # Prepare mock Path to simulate suite_root
         mock_path_cls = MagicMock()
         mock_suite_root = MagicMock()
-        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_suite_root.__str__ = Mock(return_value="/mock/suite/root")
         # When Path(__file__) is called, return something that eventually leads to mock_suite_root
         # Path(__file__).parent.parent -> mock_suite_root
         mock_file_path = MagicMock()

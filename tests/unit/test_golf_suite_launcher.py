@@ -267,7 +267,7 @@ class TestGolfSuiteLauncher:
         # Use manual patching to ensure we modify the *reloaded* module object
         original_launcher = golf_suite_launcher.GolfLauncher
         mock_launcher = MagicMock()
-        golf_suite_launcher.GolfLauncher = mock_launcher
+        golf_suite_launcher.GolfLauncher = mock_launcher  # type: ignore[misc]
 
         # Use the already mocked QApplication from module setup
         app = mock_widgets.QApplication.return_value
@@ -287,4 +287,4 @@ class TestGolfSuiteLauncher:
             mock_exit.assert_called()
 
         # Restore
-        golf_suite_launcher.GolfLauncher = original_launcher
+        golf_suite_launcher.GolfLauncher = original_launcher  # type: ignore[misc]
