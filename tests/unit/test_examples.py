@@ -16,8 +16,12 @@ sys.path.append(str(project_root))
 
 def load_module(name, path):
     spec = importlib.util.spec_from_file_location(name, path)
+    if spec is None:
+        raise ImportError(f"Could not load spec for {name} from {path}")
     module = importlib.util.module_from_spec(spec)
     sys.modules[name] = module
+    if spec.loader is None:
+        raise ImportError(f"No loader found for {name}")
     spec.loader.exec_module(module)
     return module
 
