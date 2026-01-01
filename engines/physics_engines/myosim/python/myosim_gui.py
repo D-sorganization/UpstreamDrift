@@ -31,8 +31,10 @@ class MyoSimGUI(QMainWindow):
         layout = QVBoxLayout(central)
 
         lbl = QLabel("MyoSim Muscle Simulation")
-        lbl.setFont(self.font())
-        lbl.setStyleSheet("font-size: 20px; font-weight: bold;")
+        # Explicit font creation per review suggestion
+        from PyQt6.QtGui import QFont
+
+        lbl.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
         lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(lbl)
 
