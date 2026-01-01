@@ -60,6 +60,11 @@ from PyQt6.QtWidgets import (
 
 from shared.python.engine_manager import EngineManager, EngineType
 from shared.python.model_registry import ModelRegistry
+from shared.python.secure_subprocess import (
+    SecureSubprocessError,
+    secure_popen,
+    secure_run,
+)
 
 # Windows-specific subprocess constants
 CREATE_NO_WINDOW: int
@@ -500,19 +505,17 @@ class DockerCheckThread(QThread):
     def run(self) -> None:
         """Run docker check."""
         try:
-            subprocess.run(
+            secure_run(
                 ["docker", "--version"],
+                timeout=5.0,
                 check=True,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                timeout=5.0,
-                creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
             self.result.emit(True)
         except (
-            subprocess.CalledProcessError,
+            SecureSubprocessError,
             FileNotFoundError,
-            subprocess.TimeoutExpired,
         ):
             self.result.emit(False)
 
@@ -1483,7 +1486,6 @@ class GolfLauncher(QMainWindow):
             return
 
         try:
-            import subprocess
             import sys
             from pathlib import Path
 
@@ -1510,19 +1512,26 @@ class GolfLauncher(QMainWindow):
 
             logger.info("Launching URDF Generator...")
 
-            # Launch in new process
-            if os.name == "nt":
-                # Windows: Launch in new console
-                process = subprocess.Popen(
+            # Launch in new process with security validation
+            try:
+                creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
+                process = secure_popen(
                     [sys.executable, str(urdf_script)],
-                    creationflags=CREATE_NEW_CONSOLE,
                     cwd=str(suite_root),
+                    suite_root=suite_root,
+                    creationflags=creation_flags,
                 )
-            else:
-                # Unix: Launch in background
-                process = subprocess.Popen(
-                    [sys.executable, str(urdf_script)], cwd=str(suite_root)
+
+                # Track the process
+                self.running_processes["urdf_generator"] = process
+                logger.info(f"URDF Generator launched with PID: {process.pid}")
+
+            except SecureSubprocessError as e:
+                logger.error(f"Security validation failed for URDF generator: {e}")
+                QMessageBox.critical(
+                    self, "Security Error", f"Cannot launch URDF generator: {e}"
                 )
+                return
 
             # Track the process
             self.running_processes["urdf_generator"] = process
@@ -1547,7 +1556,6 @@ class GolfLauncher(QMainWindow):
             return
 
         try:
-            import subprocess
             import sys
             from pathlib import Path
 
@@ -1581,19 +1589,26 @@ class GolfLauncher(QMainWindow):
 
             logger.info("Launching C3D Motion Viewer...")
 
-            # Launch in new process
-            if os.name == "nt":
-                # Windows: Launch in new console
-                process = subprocess.Popen(
+            # Launch in new process with security validation
+            try:
+                creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
+                process = secure_popen(
                     [sys.executable, str(c3d_script)],
-                    creationflags=CREATE_NEW_CONSOLE,
                     cwd=str(c3d_script.parent),
+                    suite_root=suite_root,
+                    creationflags=creation_flags,
                 )
-            else:
-                # Unix: Launch in background
-                process = subprocess.Popen(
-                    [sys.executable, str(c3d_script)], cwd=str(c3d_script.parent)
+
+                # Track the process
+                self.running_processes["c3d_viewer"] = process
+                logger.info(f"C3D Viewer launched with PID: {process.pid}")
+
+            except SecureSubprocessError as e:
+                logger.error(f"Security validation failed for C3D viewer: {e}")
+                QMessageBox.critical(
+                    self, "Security Error", f"Cannot launch C3D viewer: {e}"
                 )
+                return
 
             # Track the process
             self.running_processes["c3d_viewer"] = process
@@ -1641,9 +1656,14 @@ class GolfLauncher(QMainWindow):
             f"{entrypoint_escaped}();"
         )
 
+        # Get suite root for security validation
+        suite_root = Path(__file__).parent.parent.resolve()
+
         try:
-            process = subprocess.Popen(
-                ["matlab", "-batch", matlab_command], cwd=str(working_dir)
+            process = secure_popen(
+                ["matlab", "-batch", matlab_command],
+                cwd=str(working_dir),
+                suite_root=suite_root,
             )
             self.running_processes[app_id] = process
             logger.info("Launched MATLAB app %s with PID %s", app.name, process.pid)
