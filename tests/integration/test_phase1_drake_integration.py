@@ -14,7 +14,7 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-from shared.python.engine_manager import EngineManager
+from shared.python.engine_manager import EngineManager, EngineType
 
 
 class TestPhase1DrakeIntegration(unittest.TestCase):
@@ -235,7 +235,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
 
         # Verify simulator was created and cached
         mock_pydrake.systems.analysis.Simulator.assert_called_once()
-        self.assertIsNotNone(engine._cached_simulator)
+        self.assertIsNotNone(engine.simulator)
 
         # Test second step (should reuse simulator)
         mock_pydrake.systems.analysis.Simulator.reset_mock()
@@ -314,7 +314,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         # Test engine switching
         with patch.object(manager, "_load_drake_engine") as mock_load:
             mock_load.return_value = True
-            manager.switch_engine("drake")
+            manager.switch_engine(EngineType.DRAKE)
 
             # Verify engine loading was attempted
             mock_load.assert_called_once()

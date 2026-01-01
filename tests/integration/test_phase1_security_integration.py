@@ -72,15 +72,15 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         # Test valid path (within suite)
         with patch("pathlib.Path.exists", return_value=True):
             try:
-                result = validate_script_path(str(valid_script))
-                self.assertIsNotNone(result)
+                validate_script_path(valid_script, suite_root)
+                # Should not raise exception
             except SecureSubprocessError:
                 self.fail("Valid script path should be allowed")
 
         # Test invalid path (outside suite)
         with patch("pathlib.Path.exists", return_value=True):
             with self.assertRaises(SecureSubprocessError):
-                validate_script_path(str(invalid_script))
+                validate_script_path(invalid_script, suite_root)
 
     def test_secure_run_success(self) -> None:
         """Test secure_run with valid command."""
@@ -103,7 +103,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
     def test_secure_run_shell_blocked(self) -> None:
         """Test secure_run blocks shell execution."""
         with self.assertRaises(SecureSubprocessError) as context:
-            secure_run("echo 'test'", shell=True)
+            secure_run(["echo", "test"], shell=True)
 
         self.assertIn("Shell execution not allowed", str(context.exception))
 
@@ -136,9 +136,9 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         launcher = GolfLauncher()
 
         # Test URDF generator launch (should use secure subprocess)
-        with patch.object(launcher, "launch_urdf_generator") as mock_launch:
+        with patch.object(launcher, "_launch_urdf_generator") as mock_launch:
             mock_launch.return_value = None
-            launcher.launch_urdf_generator()
+            launcher._launch_urdf_generator()
 
             # Verify launch was attempted
             mock_launch.assert_called_once()
@@ -154,10 +154,11 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
             "tools/../../../etc/passwd",
         ]
 
+        suite_root = Path.cwd()
         for path in malicious_paths:
             with self.subTest(path=path):
                 with self.assertRaises(SecureSubprocessError):
-                    validate_script_path(path)
+                    validate_script_path(Path(path), suite_root)
 
     def test_working_directory_validation(self) -> None:
         """Test working directory validation."""
@@ -211,8 +212,9 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
 
         # Test blocked path logging
         mock_logger.reset_mock()
+        suite_root = Path.cwd()
         try:
-            validate_script_path("/etc/passwd")
+            validate_script_path(Path("/etc/passwd"), suite_root)
         except SecureSubprocessError:
             pass
         # Path validation logs warnings for blocked paths
