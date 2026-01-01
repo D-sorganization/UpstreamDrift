@@ -1533,10 +1533,6 @@ class GolfLauncher(QMainWindow):
                 )
                 return
 
-            # Track the process
-            self.running_processes["urdf_generator"] = process
-            logger.info(f"URDF Generator launched with PID: {process.pid}")
-
         except Exception as e:
             logger.error(f"Failed to launch URDF Generator: {e}")
             QMessageBox.critical(
