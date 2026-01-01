@@ -1,0 +1,528 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shared Components &mdash; Golf Modeling Suite 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Physics Engines" href="engines.html" />
+    <link rel="prev" title="Golf Modeling Suite" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Golf Modeling Suite
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Shared Components</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.compute_bias_forces"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.compute_bias_forces()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.compute_gravity_forces"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.compute_gravity_forces()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.compute_inverse_dynamics"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.compute_inverse_dynamics()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.compute_jacobian"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.compute_jacobian()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.compute_mass_matrix"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.compute_mass_matrix()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.forward"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.forward()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.get_state"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.get_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.get_time"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.get_time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.load_from_path"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.load_from_path()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.load_from_string"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.load_from_string()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.model_name"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.model_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.reset"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.reset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.set_control"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.set_control()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.set_state"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.set_state()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine.step"><code class="docutils literal notranslate"><span class="pre">PhysicsEngine.step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#shared.python.engine_manager.EngineManager"><code class="docutils literal notranslate"><span class="pre">EngineManager</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineManager.cleanup"><code class="docutils literal notranslate"><span class="pre">EngineManager.cleanup()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineManager.get_active_physics_engine"><code class="docutils literal notranslate"><span class="pre">EngineManager.get_active_physics_engine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineManager.get_available_engines"><code class="docutils literal notranslate"><span class="pre">EngineManager.get_available_engines()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineManager.get_current_engine"><code class="docutils literal notranslate"><span class="pre">EngineManager.get_current_engine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineManager.get_diagnostic_report"><code class="docutils literal notranslate"><span class="pre">EngineManager.get_diagnostic_report()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineManager.get_engine_info"><code class="docutils literal notranslate"><span class="pre">EngineManager.get_engine_info()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineManager.get_engine_status"><code class="docutils literal notranslate"><span class="pre">EngineManager.get_engine_status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineManager.get_probe_result"><code class="docutils literal notranslate"><span class="pre">EngineManager.get_probe_result()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineManager.probe_all_engines"><code class="docutils literal notranslate"><span class="pre">EngineManager.probe_all_engines()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineManager.switch_engine"><code class="docutils literal notranslate"><span class="pre">EngineManager.switch_engine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineManager.validate_engine_configuration"><code class="docutils literal notranslate"><span class="pre">EngineManager.validate_engine_configuration()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#shared.python.engine_manager.EngineStatus"><code class="docutils literal notranslate"><span class="pre">EngineStatus</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineStatus.AVAILABLE"><code class="docutils literal notranslate"><span class="pre">EngineStatus.AVAILABLE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineStatus.ERROR"><code class="docutils literal notranslate"><span class="pre">EngineStatus.ERROR</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineStatus.LOADED"><code class="docutils literal notranslate"><span class="pre">EngineStatus.LOADED</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineStatus.LOADING"><code class="docutils literal notranslate"><span class="pre">EngineStatus.LOADING</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineStatus.UNAVAILABLE"><code class="docutils literal notranslate"><span class="pre">EngineStatus.UNAVAILABLE</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#shared.python.engine_manager.EngineType"><code class="docutils literal notranslate"><span class="pre">EngineType</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineType.DRAKE"><code class="docutils literal notranslate"><span class="pre">EngineType.DRAKE</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineType.MATLAB_2D"><code class="docutils literal notranslate"><span class="pre">EngineType.MATLAB_2D</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineType.MATLAB_3D"><code class="docutils literal notranslate"><span class="pre">EngineType.MATLAB_3D</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineType.MUJOCO"><code class="docutils literal notranslate"><span class="pre">EngineType.MUJOCO</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineType.MYOSIM"><code class="docutils literal notranslate"><span class="pre">EngineType.MYOSIM</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineType.OPENSIM"><code class="docutils literal notranslate"><span class="pre">EngineType.OPENSIM</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineType.PENDULUM"><code class="docutils literal notranslate"><span class="pre">EngineType.PENDULUM</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#shared.python.engine_manager.EngineType.PINOCCHIO"><code class="docutils literal notranslate"><span class="pre">EngineType.PINOCCHIO</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="engines.html">Physics Engines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="launchers.html">Launchers</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Golf Modeling Suite</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Shared Components</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/shared.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-shared.python.interfaces">
+<span id="shared-components"></span><h1>Shared Components<a class="headerlink" href="#module-shared.python.interfaces" title="Link to this heading"></a></h1>
+<p>Unified Abstract Interface for Physics Engines.</p>
+<p>This module defines the Protocol that all physics engines (MuJoCo, Drake, Pinocchio, etc.)
+must adhere to. This ensures that the GUI and Analytics layers can operate
+agnostic of the underlying solver.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">shared.python.interfaces.</span></span><span class="sig-name descname"><span class="pre">PhysicsEngine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Protocol defining the required interface for a Golf Modeling Suite physics engine.</p>
+<p>All implementations must be stateless wrappers around a Model/Data pair (or equivalent),
+or manage their own internal state consistently.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.compute_bias_forces">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_bias_forces</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.compute_bias_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.compute_bias_forces" title="Link to this definition"></a></dt>
+<dd><p>Compute bias forces C(q,v) + g(q).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(n_v,) vector containing Coriolis, Centrifugal, and Gravity terms.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>b</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.compute_gravity_forces">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_gravity_forces</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.compute_gravity_forces"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.compute_gravity_forces" title="Link to this definition"></a></dt>
+<dd><p>Compute gravity forces g(q).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(n_v,) gravity vector.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>g</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.compute_inverse_dynamics">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_inverse_dynamics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">qacc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.compute_inverse_dynamics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.compute_inverse_dynamics" title="Link to this definition"></a></dt>
+<dd><p>Compute inverse dynamics tau = ID(q, v, a).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>qacc</strong> – Desired acceleration vector (n_v,).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Required generalized forces (n_v,).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tau</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.compute_jacobian">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">body_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.compute_jacobian"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.compute_jacobian" title="Link to this definition"></a></dt>
+<dd><p>Compute spatial Jacobian for a specific body.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>body_name</strong> – Name of the body frame.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary with keys ‘linear’, ‘angular’, ‘spatial’, or None if body not found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.compute_mass_matrix">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_mass_matrix</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.compute_mass_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.compute_mass_matrix" title="Link to this definition"></a></dt>
+<dd><p>Compute the dense inertia matrix M(q).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(n_v, n_v) mass matrix.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>M</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.forward">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.forward" title="Link to this definition"></a></dt>
+<dd><p>Compute forward kinematics and dynamics without advancing time.</p>
+<p>Using current positions and velocities, updates all derived quantities
+(accelerations, forces, derived kinematics).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.get_state">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_state</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.get_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.get_state" title="Link to this definition"></a></dt>
+<dd><p>Get the current state (positions, velocities).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple of (q, v) as numpy arrays.
+q: Generalized coordinates (n_q,).
+v: Generalized velocities (n_v,).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.get_time">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_time</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.get_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.get_time" title="Link to this definition"></a></dt>
+<dd><p>Get the current simulation time.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.load_from_path">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.load_from_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.load_from_path" title="Link to this definition"></a></dt>
+<dd><p>Load a model from a file path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> – Absolute path to the model file (.xml, .urdf, .sdf, .osim).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.load_from_string">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">load_from_string</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.load_from_string"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.load_from_string" title="Link to this definition"></a></dt>
+<dd><p>Load a model from a string content.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>content</strong> – The model definition string.</p></li>
+<li><p><strong>extension</strong> – Optional hint for parsing (e.g., ‘xml’, ‘urdf’).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.model_name">
+<em class="property"><span class="k"><span class="pre">abstract</span></span><span class="w"> </span><span class="k"><span class="pre">property</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">model_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.model_name" title="Link to this definition"></a></dt>
+<dd><p>Return the name of the currently loaded model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.reset">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.reset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.reset" title="Link to this definition"></a></dt>
+<dd><p>Reset the simulation to its initial state (time=0, q=q0, v=0).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.set_control">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_control</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">u</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.set_control"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.set_control" title="Link to this definition"></a></dt>
+<dd><p>Apply control inputs (torques/forces).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>u</strong> – Control vector (n_u,).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.set_state">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_state</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.set_state"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.set_state" title="Link to this definition"></a></dt>
+<dd><p>Set the current state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>q</strong> – Generalized coordinates.</p></li>
+<li><p><strong>v</strong> – Generalized velocities.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.interfaces.PhysicsEngine.step">
+<em class="property"><span class="k"><span class="pre">abstractmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/shared/python/interfaces.html#PhysicsEngine.step"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.interfaces.PhysicsEngine.step" title="Link to this definition"></a></dt>
+<dd><p>Advance the simulation by one time step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dt</strong> – Optional time step to advance. If None, uses the model’s default timestep.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<p id="module-shared.python.engine_manager">Engine Manager for Golf Modeling Suite.</p>
+<p>This module provides unified management of different physics engines
+including MuJoCo, Drake, Pinocchio, OpenSim, MATLAB models, and pendulum models.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineManager">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">shared.python.engine_manager.</span></span><span class="sig-name descname"><span class="pre">EngineManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">suite_root</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineManager" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Manages different physics engines for golf swing modeling.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineManager.cleanup">
+<span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineManager.cleanup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineManager.cleanup" title="Link to this definition"></a></dt>
+<dd><p>Clean up loaded engines.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineManager.get_active_physics_engine">
+<span class="sig-name descname"><span class="pre">get_active_physics_engine</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#shared.python.interfaces.PhysicsEngine" title="shared.python.interfaces.PhysicsEngine"><span class="pre">PhysicsEngine</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineManager.get_active_physics_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineManager.get_active_physics_engine" title="Link to this definition"></a></dt>
+<dd><p>Get the currently active PhysicsEngine instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineManager.get_available_engines">
+<span class="sig-name descname"><span class="pre">get_available_engines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#shared.python.engine_manager.EngineType" title="shared.python.engine_manager.EngineType"><span class="pre">EngineType</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineManager.get_available_engines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineManager.get_available_engines" title="Link to this definition"></a></dt>
+<dd><p>Get list of available engines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of available engine types</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineManager.get_current_engine">
+<span class="sig-name descname"><span class="pre">get_current_engine</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#shared.python.engine_manager.EngineType" title="shared.python.engine_manager.EngineType"><span class="pre">EngineType</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineManager.get_current_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineManager.get_current_engine" title="Link to this definition"></a></dt>
+<dd><p>Get the currently active engine type.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineManager.get_diagnostic_report">
+<span class="sig-name descname"><span class="pre">get_diagnostic_report</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineManager.get_diagnostic_report"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineManager.get_diagnostic_report" title="Link to this definition"></a></dt>
+<dd><p>Get human-readable diagnostic report for all engines.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Formatted diagnostic report</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineManager.get_engine_info">
+<span class="sig-name descname"><span class="pre">get_engine_info</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineManager.get_engine_info"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineManager.get_engine_info" title="Link to this definition"></a></dt>
+<dd><p>Get information about all engines.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineManager.get_engine_status">
+<span class="sig-name descname"><span class="pre">get_engine_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#shared.python.engine_manager.EngineType" title="shared.python.engine_manager.EngineType"><span class="pre">EngineType</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#shared.python.engine_manager.EngineStatus" title="shared.python.engine_manager.EngineStatus"><span class="pre">EngineStatus</span></a></span></span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineManager.get_engine_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineManager.get_engine_status" title="Link to this definition"></a></dt>
+<dd><p>Get status of a specific engine.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineManager.get_probe_result">
+<span class="sig-name descname"><span class="pre">get_probe_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#shared.python.engine_manager.EngineType" title="shared.python.engine_manager.EngineType"><span class="pre">EngineType</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Any</span></span></span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineManager.get_probe_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineManager.get_probe_result" title="Link to this definition"></a></dt>
+<dd><p>Get probe result for a specific engine.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineManager.probe_all_engines">
+<span class="sig-name descname"><span class="pre">probe_all_engines</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#shared.python.engine_manager.EngineType" title="shared.python.engine_manager.EngineType"><span class="pre">EngineType</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineManager.probe_all_engines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineManager.probe_all_engines" title="Link to this definition"></a></dt>
+<dd><p>Probe all engines for detailed readiness checks.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dictionary mapping engine types to probe results</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineManager.switch_engine">
+<span class="sig-name descname"><span class="pre">switch_engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#shared.python.engine_manager.EngineType" title="shared.python.engine_manager.EngineType"><span class="pre">EngineType</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineManager.switch_engine"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineManager.switch_engine" title="Link to this definition"></a></dt>
+<dd><p>Switch to a different physics engine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>engine_type</strong> – The engine to switch to</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if switch was successful, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineManager.validate_engine_configuration">
+<span class="sig-name descname"><span class="pre">validate_engine_configuration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">engine_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#shared.python.engine_manager.EngineType" title="shared.python.engine_manager.EngineType"><span class="pre">EngineType</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineManager.validate_engine_configuration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineManager.validate_engine_configuration" title="Link to this definition"></a></dt>
+<dd><p>Validate engine configuration.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineStatus">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">shared.python.engine_manager.</span></span><span class="sig-name descname"><span class="pre">EngineStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineStatus"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineStatus" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>Engine status types.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineStatus.AVAILABLE">
+<span class="sig-name descname"><span class="pre">AVAILABLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'available'</span></em><a class="headerlink" href="#shared.python.engine_manager.EngineStatus.AVAILABLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineStatus.ERROR">
+<span class="sig-name descname"><span class="pre">ERROR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'error'</span></em><a class="headerlink" href="#shared.python.engine_manager.EngineStatus.ERROR" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineStatus.LOADED">
+<span class="sig-name descname"><span class="pre">LOADED</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'loaded'</span></em><a class="headerlink" href="#shared.python.engine_manager.EngineStatus.LOADED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineStatus.LOADING">
+<span class="sig-name descname"><span class="pre">LOADING</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'loading'</span></em><a class="headerlink" href="#shared.python.engine_manager.EngineStatus.LOADING" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineStatus.UNAVAILABLE">
+<span class="sig-name descname"><span class="pre">UNAVAILABLE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'unavailable'</span></em><a class="headerlink" href="#shared.python.engine_manager.EngineStatus.UNAVAILABLE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineType">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">shared.python.engine_manager.</span></span><span class="sig-name descname"><span class="pre">EngineType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/shared/python/engine_manager.html#EngineType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#shared.python.engine_manager.EngineType" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></p>
+<p>Available physics engine types.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineType.DRAKE">
+<span class="sig-name descname"><span class="pre">DRAKE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'drake'</span></em><a class="headerlink" href="#shared.python.engine_manager.EngineType.DRAKE" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineType.MATLAB_2D">
+<span class="sig-name descname"><span class="pre">MATLAB_2D</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'matlab_2d'</span></em><a class="headerlink" href="#shared.python.engine_manager.EngineType.MATLAB_2D" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineType.MATLAB_3D">
+<span class="sig-name descname"><span class="pre">MATLAB_3D</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'matlab_3d'</span></em><a class="headerlink" href="#shared.python.engine_manager.EngineType.MATLAB_3D" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineType.MUJOCO">
+<span class="sig-name descname"><span class="pre">MUJOCO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'mujoco'</span></em><a class="headerlink" href="#shared.python.engine_manager.EngineType.MUJOCO" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineType.MYOSIM">
+<span class="sig-name descname"><span class="pre">MYOSIM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'myosim'</span></em><a class="headerlink" href="#shared.python.engine_manager.EngineType.MYOSIM" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineType.OPENSIM">
+<span class="sig-name descname"><span class="pre">OPENSIM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'opensim'</span></em><a class="headerlink" href="#shared.python.engine_manager.EngineType.OPENSIM" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineType.PENDULUM">
+<span class="sig-name descname"><span class="pre">PENDULUM</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pendulum'</span></em><a class="headerlink" href="#shared.python.engine_manager.EngineType.PENDULUM" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="shared.python.engine_manager.EngineType.PINOCCHIO">
+<span class="sig-name descname"><span class="pre">PINOCCHIO</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pinocchio'</span></em><a class="headerlink" href="#shared.python.engine_manager.EngineType.PINOCCHIO" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../index.html" class="btn btn-neutral float-left" title="Golf Modeling Suite" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="engines.html" class="btn btn-neutral float-right" title="Physics Engines" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Golf Modeling Suite Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
