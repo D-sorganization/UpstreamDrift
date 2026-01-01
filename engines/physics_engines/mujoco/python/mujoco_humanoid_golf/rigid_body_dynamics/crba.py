@@ -76,8 +76,8 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
 
     # --- Backward pass: compute composite inertias ---
     # Initialize composite inertias with body inertias
-    # OPTIMIZATION: Use numpy array for bulk initialization instead of list comp
-    # This creates a contiguous (NB, 6, 6) array and is ~1.4x faster
+    # OPTIMIZATION: Bulk copy is faster than element-wise copy in loop
+    # Using numpy array for bulk initialization is ~1.4x faster
     ic_composite = np.array(model["I"], dtype=float)
 
     # Accumulate inertias from children to parents
