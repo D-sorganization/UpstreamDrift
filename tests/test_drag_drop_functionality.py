@@ -72,7 +72,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
         # Case 2: Parent has layout_edit_mode = False
         self.mock_launcher.layout_edit_mode = False
-        card2 = DraggableModelCard(self.mock_models[0], self.mock_launcher)
+        DraggableModelCard(self.mock_models[0], self.mock_launcher)
         # When layout editing is disabled, the card should disable drops via setAcceptDrops(False).
         # Because the underlying QFrame behavior may be provided by Qt or a mock, assert the call only if
         # setAcceptDrops is a Mock; otherwise, silently skip this verification.
