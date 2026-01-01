@@ -15,7 +15,10 @@ except ImportError:
 import numpy as np
 import pandas as pd
 
-from .logger_utils import get_logger
+try:
+    from .logger_utils import get_logger
+except ImportError:
+    from logger_utils import get_logger
 
 logger = get_logger(__name__)
 
@@ -39,6 +42,7 @@ class C3DMetadata:
     frame_rate: float
     units: str
     analog_labels: list[str]
+    analog_units: list[str]
     analog_rate: float | None
     events: list[C3DEvent]
 
@@ -83,7 +87,7 @@ class C3DDataReader:
             frame_count = int(point_parameters["FRAMES"]["value"][0])
             frame_rate = float(point_parameters["RATE"]["value"][0])
             units = str(point_parameters["UNITS"]["value"][0])
-            analog_labels, analog_rate = self._get_analog_details()
+            analog_labels, analog_rate, analog_units = self._get_analog_details()
             events = self._get_events()
             self._metadata = C3DMetadata(
                 marker_labels=marker_labels,
@@ -91,6 +95,7 @@ class C3DDataReader:
                 frame_rate=frame_rate,
                 units=units,
                 analog_labels=analog_labels,
+                analog_units=analog_units,
                 analog_rate=analog_rate,
                 events=events,
             )
@@ -308,26 +313,37 @@ class C3DDataReader:
             cast(dict[str, Any], analog_params) if analog_params is not None else None
         )
 
-    def _get_analog_details(self) -> tuple[list[str], float | None]:
-        """Get analog channel labels and sample rate from the C3D file."""
+    def _get_analog_details(self) -> tuple[list[str], float | None, list[str]]:
+        """Get analog channel labels, sample rate, and units from the C3D file."""
         analog_parameters = self._get_analog_parameters()
         analog_array = self._load()["data"]["analogs"]
         channel_count = analog_array.shape[1]
 
         if analog_parameters is None:
             labels = []
+            units = []
             analog_rate = None
         else:
             labels = [
                 label.strip()
                 for label in analog_parameters.get("LABELS", {}).get("value", [])
             ]
+            units = [
+                unit.strip()
+                for unit in analog_parameters.get("UNITS", {}).get("value", [])
+            ]
             analog_rate = float(analog_parameters.get("RATE", {}).get("value", [0])[0])
 
         if not labels and channel_count > 0:
             labels = [f"Analog_{idx + 1}" for idx in range(channel_count)]
 
-        return labels, analog_rate
+        # Ensure units list checks out
+        if len(units) < len(labels):
+            units.extend([""] * (len(labels) - len(units)))
+        elif len(units) > len(labels):
+            units = units[: len(labels)]
+
+        return labels, analog_rate, units
 
     def _get_events(self) -> list[C3DEvent]:
         """Extract event markers from the C3D file."""
@@ -389,14 +405,21 @@ class C3DDataReader:
         if normalized_current == normalized_target:
             return 1.0
 
-        if normalized_current == "m" and normalized_target == "mm":
-            return 1000.0
-        if normalized_current == "mm" and normalized_target == "m":
-            return 0.001
+        # Define conversion factors to meters
+        to_meters = {
+            "m": 1.0,
+            "mm": 0.001,
+            "cm": 0.01,
+            "in": 0.0254,
+            "ft": 0.3048,
+        }
 
-        raise ValueError(
-            f"Unsupported unit conversion from {current_units} to {target_units}."
-        )
+        if normalized_current not in to_meters:
+            raise ValueError(f"Unsupported source unit: {current_units}")
+        if normalized_target not in to_meters:
+            raise ValueError(f"Unsupported target unit: {target_units}")
+
+        return to_meters[normalized_current] / to_meters[normalized_target]
 
     def _export_dataframe(
         self,
