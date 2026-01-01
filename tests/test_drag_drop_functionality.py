@@ -12,6 +12,7 @@ Tests cover:
 import sys
 import unittest
 from pathlib import Path
+from typing import Any
 from unittest.mock import Mock, patch
 
 # Add shared modules to path for testing
@@ -28,9 +29,10 @@ except ImportError:
 @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
 class TestDragDropFunctionality(unittest.TestCase):
     """Test drag-and-drop functionality in model cards."""
+    app: Any = None
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
         if not QApplication.instance():
             cls.app = QApplication([])
@@ -88,16 +90,17 @@ class TestDragDropFunctionality(unittest.TestCase):
 @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
 class TestGridLayout(unittest.TestCase):
     """Test 3x3 grid layout functionality."""
+    app: Any = None
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
         if not QApplication.instance():
             cls.app = QApplication([])
         else:
             cls.app = QApplication.instance()
 
-    def test_grid_columns_constant(self):
+    def test_grid_columns_constant(self) -> None:
         """Test that grid columns is set to 4."""
         from launchers.golf_launcher import GRID_COLUMNS
 
@@ -106,7 +109,7 @@ class TestGridLayout(unittest.TestCase):
     @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.EngineManager")
     def test_model_order_with_urdf_generator_and_c3d_viewer(
-        self, mock_engine_manager, mock_registry_class
+        self, mock_engine_manager: Mock, mock_registry_class: Mock
     ) -> None:
         """Test that URDF generator and C3D viewer are added to model order."""
         from launchers.golf_launcher import GolfLauncher
@@ -154,11 +157,17 @@ class TestGridLayout(unittest.TestCase):
             self.assertEqual(launcher.model_order[-2], "urdf_generator")
             self.assertEqual(launcher.model_order[-1], "c3d_viewer")
 
+    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget")
+    @patch("launchers.golf_launcher.ContextHelpDock")
     @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.EngineManager")
     def test_model_swap_preserves_special_tiles(
-        self, mock_engine_manager, mock_registry_class
-    ):
+        self,
+        mock_engine_manager: Mock,
+        mock_registry_class: Mock,
+        mock_help_dock: Mock,
+        mock_add_dock_widget: Mock,
+    ) -> None:
         """Test that model swapping works with URDF generator and C3D viewer."""
         from launchers.golf_launcher import GolfLauncher
 
@@ -167,6 +176,7 @@ class TestGridLayout(unittest.TestCase):
         mock_registry_class.return_value = mock_registry
         mock_engine_manager.return_value = Mock()
 
+        mock_help_dock.side_effect = None
         launcher = GolfLauncher()
 
         # Set up test order with special tiles
@@ -194,7 +204,7 @@ class TestGridLayout(unittest.TestCase):
 class TestC3DViewerIntegration(unittest.TestCase):
     """Test C3D viewer integration with the launcher."""
 
-    def test_c3d_viewer_files_exist(self):
+    def test_c3d_viewer_files_exist(self) -> None:
         """Test that C3D viewer files exist."""
         c3d_script = Path(
             "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
@@ -208,11 +218,11 @@ class TestC3DViewerIntegration(unittest.TestCase):
             self.assertIn("C3DViewerMainWindow", content)
             self.assertIn("def main()", content)
 
-    def test_c3d_viewer_dependencies(self):
+    def test_c3d_viewer_dependencies(self) -> None:
         """Test that C3D viewer has required dependencies."""
         try:
             # Test imports that C3D viewer requires
-            import ezc3d
+            import ezc3d  # type: ignore[import-not-found]
             import matplotlib
             import numpy as np
 
@@ -236,7 +246,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
         )
 
     @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
-    def test_c3d_viewer_launch_method(self):
+    def test_c3d_viewer_launch_method(self) -> None:
         """Test C3D viewer launch method."""
         from launchers.golf_launcher import GolfLauncher
 
@@ -276,7 +286,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
             # self.assertIn("c3d_viewer.py", " ".join(call_args))
 
     @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
-    def test_c3d_viewer_missing_file_handling(self):
+    def test_c3d_viewer_missing_file_handling(self) -> None:
         """Test handling when C3D viewer file is missing."""
         from launchers.golf_launcher import GolfLauncher
 
@@ -293,7 +303,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
             # Verify warning message was shown
             mock_msgbox.warning.assert_called_once()
 
-    def test_c3d_viewer_cli_support(self):
+    def test_c3d_viewer_cli_support(self) -> None:
         """Test that CLI launcher supports C3D viewer."""
         from launch_golf_suite import launch_c3d_viewer
 
@@ -316,7 +326,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
 class TestURDFGeneratorIntegration(unittest.TestCase):
     """Test URDF generator integration with the launcher."""
 
-    def test_urdf_generator_files_exist(self):
+    def test_urdf_generator_files_exist(self) -> None:
         """Test that URDF generator files exist."""
         urdf_dir = Path("tools/urdf_generator")
         self.assertTrue(urdf_dir.exists(), "URDF generator directory should exist")
@@ -335,7 +345,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
                 file_path.exists(), f"Required file {file_name} should exist"
             )
 
-    def test_urdf_generator_engine_support(self):
+    def test_urdf_generator_engine_support(self) -> None:
         """Test that URDF generator supports multiple engines."""
         try:
             from tools.urdf_generator.segment_manager import SegmentManager
@@ -359,7 +369,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
             self.skipTest(f"URDF generator not available: {e}")
 
     @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
-    def test_urdf_generator_launch_method(self):
+    def test_urdf_generator_launch_method(self) -> None:
         """Test URDF generator launch method."""
         from launchers.golf_launcher import GolfLauncher
 
@@ -400,7 +410,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
             # self.assertIn("launch_urdf_generator.py", " ".join(call_args))
 
     @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
-    def test_urdf_generator_missing_file_handling(self):
+    def test_urdf_generator_missing_file_handling(self) -> None:
         """Test handling when URDF generator file is missing."""
         from launchers.golf_launcher import GolfLauncher
 
@@ -421,21 +431,21 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
 class TestModelImageHandling(unittest.TestCase):
     """Test model image handling for the new grid layout."""
 
-    def test_urdf_generator_image_mapping(self):
+    def test_urdf_generator_image_mapping(self) -> None:
         """Test that URDF generator has image mapping."""
         from launchers.golf_launcher import MODEL_IMAGES
 
         self.assertIn("URDF Generator", MODEL_IMAGES)
         self.assertEqual(MODEL_IMAGES["URDF Generator"], "urdf_icon.png")
 
-    def test_c3d_viewer_image_mapping(self):
+    def test_c3d_viewer_image_mapping(self) -> None:
         """Test that C3D viewer has image mapping."""
         from launchers.golf_launcher import MODEL_IMAGES
 
         self.assertIn("C3D Motion Viewer", MODEL_IMAGES)
         self.assertEqual(MODEL_IMAGES["C3D Motion Viewer"], "c3d_icon.png")
 
-    def test_image_fallback_for_urdf(self):
+    def test_image_fallback_for_urdf(self) -> None:
         """Test image fallback logic for URDF generator."""
         # This would be tested in the actual DraggableModelCard setup_ui method
         # The logic checks for "urdf" in model.id and assigns "urdf_icon.png"
