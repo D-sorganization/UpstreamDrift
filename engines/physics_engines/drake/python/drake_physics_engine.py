@@ -128,6 +128,8 @@ class DrakePhysicsEngine(PhysicsEngine):
 
     def step(self, dt: float | None = None) -> None:
         """Advance the simulation by one time step."""
+        self._ensure_finalized()
+
         if not self.simulator or not self.context:
             LOGGER.error("Cannot step: Simulator not initialized.")
             return
