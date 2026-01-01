@@ -830,8 +830,12 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.canvas_analysis.draw()  # type: ignore
 
 
-if __name__ == "__main__":
+def main() -> None:
     app = QtWidgets.QApplication(sys.argv)
     window = C3DViewerMainWindow()
     window.show()
     sys.exit(app.exec())
+
+
+if __name__ == "__main__":
+    main()
