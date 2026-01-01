@@ -9,8 +9,19 @@ from __future__ import annotations
 from typing import cast
 
 from shared.python import constants
+from shared.python.equipment import CLUB_CONFIGS
+from shared.python.physics_parameters import get_registry
 
 GRAVITY_M_S2 = float(constants.GRAVITY_M_S2)
+
+# Retrieve physics parameters
+_registry = get_registry()
+_ball_mass_param = _registry.get("BALL_MASS")
+_ball_radius_param = _registry.get("BALL_RADIUS")
+
+BALL_MASS = float(_ball_mass_param.value) if _ball_mass_param else 0.04593
+BALL_RADIUS = float(_ball_radius_param.value) if _ball_radius_param else 0.021335
+
 
 CHAOTIC_PENDULUM_XML = rf"""<mujoco model="chaotic_driven_pendulum">
   <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
@@ -336,10 +347,10 @@ UPPER_BODY_GOLF_SWING_XML = rf"""<mujoco model="golf_upper_body_swing">
     </body>
 
     <!-- Ball positioned at address -->
-    <body name="ball" pos="0 0.1 0.02">
+    <body name="ball" pos="0 0.1 {BALL_RADIUS}">
       <freejoint/>
-      <geom name="ball_geom" type="sphere" size="0.02135"
-            rgba="1 1 1 1" mass="0.04593"
+      <geom name="ball_geom" type="sphere" size="{BALL_RADIUS}"
+            rgba="1 1 1 1" mass="{BALL_MASS}"
             condim="3" friction="0.8 0.005 0.0001"/>
     </body>
   </worldbody>
@@ -593,10 +604,10 @@ FULL_BODY_GOLF_SWING_XML = rf"""
     </body>
 
     <!-- Golf ball -->
-    <body name="ball" pos="0 0.15 0.02135">
+    <body name="ball" pos="0 0.15 {BALL_RADIUS}">
       <freejoint/>
-      <geom name="ball_geom" type="sphere" size="0.02135"
-            rgba="1 1 1 1" mass="0.04593"
+      <geom name="ball_geom" type="sphere" size="{BALL_RADIUS}"
+            rgba="1 1 1 1" mass="{BALL_MASS}"
             condim="3" friction="0.8 0.005 0.0001"/>
     </body>
   </worldbody>
@@ -1234,14 +1245,14 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""
     </body>
 
     <!-- Golf Ball -->
-    <body name="ball" pos="0 0.20 0.02135">
+    <body name="ball" pos="0 0.20 {BALL_RADIUS}">
       <freejoint/>
-      <inertial pos="0 0 0" mass="0.04593"
+      <inertial pos="0 0 0" mass="{BALL_MASS}"
                 diaginertia="0.000017 0.000017 0.000017"/>
-      <geom name="ball_geom" type="sphere" size="0.02135"
+      <geom name="ball_geom" type="sphere" size="{BALL_RADIUS}"
             rgba="1 1 1 1" condim="3" friction="0.8 0.005 0.0001"/>
       <!-- Dimple visualization (cosmetic) -->
-      <geom name="ball_detail" type="sphere" size="0.0214"
+      <geom name="ball_detail" type="sphere" size="{BALL_RADIUS}"
             rgba="0.95 0.95 0.95 0.3"/>
     </body>
   </worldbody>
@@ -1359,53 +1370,6 @@ MYOBODY_PATH = "myo_sim/body/myobody.xml"
 
 # Simplified arm model (bilateral, 14 DOF): Both arms with simplified torso
 MYOARM_SIMPLE_PATH = "myo_sim/arm/myoarm_simple.xml"
-
-
-# GOLF CLUB CONFIGURATIONS
-# ==============================================================================
-
-# Golf club parameters (realistic values)
-CLUB_CONFIGS: dict[str, dict[str, float | list[float]]] = {
-    "driver": {
-        "grip_length": 0.28,
-        "grip_radius": 0.0145,
-        "grip_mass": 0.050,
-        "shaft_length": 1.10,  # Total shaft length
-        "shaft_radius": 0.0062,
-        "shaft_mass": 0.065,
-        "head_mass": 0.198,
-        "head_size": [0.062, 0.048, 0.038],
-        "total_length": 1.16,
-        "club_loft": 0.17,  # 10 degrees
-        "flex_stiffness": [180, 150, 120],  # Upper, middle, lower
-    },
-    "iron_7": {
-        "grip_length": 0.26,
-        "grip_radius": 0.0140,
-        "grip_mass": 0.048,
-        "shaft_length": 0.94,
-        "shaft_radius": 0.0058,
-        "shaft_mass": 0.072,
-        "head_mass": 0.253,
-        "head_size": [0.038, 0.025, 0.045],
-        "total_length": 0.95,
-        "club_loft": 0.56,  # 32 degrees
-        "flex_stiffness": [220, 200, 180],
-    },
-    "wedge": {
-        "grip_length": 0.25,
-        "grip_radius": 0.0138,
-        "grip_mass": 0.045,
-        "shaft_length": 0.89,
-        "shaft_radius": 0.0056,
-        "shaft_mass": 0.078,
-        "head_mass": 0.288,
-        "head_size": [0.032, 0.022, 0.048],
-        "total_length": 0.90,
-        "club_loft": 0.96,  # 55 degrees
-        "flex_stiffness": [240, 220, 200],
-    },
-}
 
 
 def generate_flexible_club_xml(club_type: str = "driver", num_segments: int = 3) -> str:
