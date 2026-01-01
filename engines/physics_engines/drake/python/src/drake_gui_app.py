@@ -51,8 +51,8 @@ if TYPE_CHECKING or HAS_QT:
             Parser,
             PrismaticJoint,
             RevoluteJoint,
-            RigidTransform,
             Rgba,
+            RigidTransform,
             RotationMatrix,
             Simulator,
         )
@@ -411,7 +411,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                             "skipping auto-browser open inside container."
                         )
 
-            except Exception as e:
+            except Exception:
                 LOGGER.exception("Failed to start Meshcat")
                 self.meshcat = None
 
@@ -1017,8 +1017,12 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         # Use eval context synced with current state
         plant_context = self.plant.GetMyContextFromRoot(self.context)
-        self.plant.SetPositions(self.eval_context, self.plant.GetPositions(plant_context))
-        self.plant.SetVelocities(self.eval_context, self.plant.GetVelocities(plant_context))
+        self.plant.SetPositions(
+            self.eval_context, self.plant.GetPositions(plant_context)
+        )
+        self.plant.SetVelocities(
+            self.eval_context, self.plant.GetVelocities(plant_context)
+        )
 
         analyzer = DrakeInducedAccelerationAnalyzer(self.plant)
 
@@ -1034,7 +1038,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             ztcf = res.get("ztcf_accel", np.zeros(self.plant.num_velocities()))
             self._draw_accel_vectors(ztcf, "cf", Rgba(1, 1, 0, 1))
 
-    def _draw_accel_vectors(self, accels: np.ndarray, name_prefix: str, color: Rgba) -> None:
+    def _draw_accel_vectors(
+        self, accels: np.ndarray, name_prefix: str, color: Rgba
+    ) -> None:
         """Draw acceleration vectors at joints."""
         if not self.meshcat:
             return
