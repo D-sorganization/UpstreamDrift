@@ -391,7 +391,8 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         QtWidgets.QMessageBox.about(
             self,
             "About C3D Viewer",
-            "C3D Viewer\n\nPart of the Golf Modeling Suite.\nUses the consolidated C3DDataReader for consistent ingestion.",
+            "C3D Viewer\n\nPart of the Golf Modeling Suite.\n"
+            "Uses the consolidated C3DDataReader for consistent ingestion.",
         )
 
     # --------------------------- File I/O ----------------------------------
@@ -409,7 +410,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
 
         if (sb := self.statusBar()) is not None:
             sb.showMessage(f"Loading {os.path.basename(path)}...")
-            
+
         # Ensure single cursor override
         QtWidgets.QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
@@ -438,20 +439,22 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
 
         # Load Points Data
         df_points = reader.points_dataframe(include_time=False)
-        
+
         # Build markers dict
         markers: dict[str, MarkerData] = {}
         marker_names = metadata_obj.marker_labels
-        
-        # Optimize by iterating known metadata labels, assuming dataframe acts predictably
-        # Since DataFrame is tidy, we filter by name
+
+        # Optimize by iterating known metadata labels, assuming dataframe acts
+        # predictably. Since DataFrame is tidy, we filter by name
+
         for name in marker_names:
             # Filter rows for this marker
             # Note: df_points has columns [frame, marker, x, y, z, residual]
-            # It's usually faster to groupby if we do all, but simple filtering is robust
-            mask = df_points['marker'] == name
+            # It's usually faster to groupby if we do all, but simple filtering is
+            # robust.
+            mask = df_points["marker"] == name
             sub = df_points.loc[mask]
-            
+
             if not sub.empty:
                 pos = sub[['x', 'y', 'z']].to_numpy()
                 res = sub['residual'].to_numpy()
@@ -459,19 +462,21 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             else:
                 # Handle missing marker if necessary (empty arrays)
                 markers[name] = MarkerData(
-                    name=name, 
-                    position=np.empty((0, 3)), 
+                    name=name,
+                    position=np.empty((0, 3)),
                     residuals=np.empty((0,))
                 )
 
         # Load Analog Data
         df_analog = reader.analog_dataframe(include_time=False)
         analog: dict[str, AnalogData] = {}
-        
+
         # We need units map from metadata
         # C3DMetadata now has analog_units list
-        units_map = dict(zip(metadata_obj.analog_labels, metadata_obj.analog_units))
-        
+        units_map = dict(
+            zip(metadata_obj.analog_labels, metadata_obj.analog_units, strict=False)
+        )
+
         if not df_analog.empty and 'channel' in df_analog.columns:
             for name in df_analog['channel'].unique():
                 mask = df_analog['channel'] == name
@@ -486,14 +491,14 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             if metadata_obj.frame_rate > 0
             else None
         )
-        
+
         analog_time = None
         if metadata_obj.analog_rate and metadata_obj.analog_rate > 0:
-             # Calculate analog sample count. 
-             # We can get it from the dataframe or calculate.
-             # Metadata doesn't strictly store 'analog_sample_count' but implies it via duration?
-             # Or we check one analog channel length.
-             if analog:
+            # Calculate analog sample count.
+            # We can get it from the dataframe or calculate.
+            # Metadata doesn't strictly store 'analog_sample_count' but implies it via
+            # duration? Or we check one analog channel length.
+            if analog:
                  first_analog = next(iter(analog.values()))
                  n_samples = len(first_analog.values)
                  analog_time = np.arange(n_samples) / metadata_obj.analog_rate
@@ -503,16 +508,20 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             "File": os.path.basename(filepath),
             "Path": filepath,
             "Point rate (Hz)": f"{metadata_obj.frame_rate:.3f}",
-            "Analog rate (Hz)": f"{metadata_obj.analog_rate:.3f}" if metadata_obj.analog_rate else "N/A",
+            "Analog rate (Hz)": (
+                f"{metadata_obj.analog_rate:.3f}" if metadata_obj.analog_rate else "N/A"
+            ),
             "Frames": str(metadata_obj.frame_count),
             "Points": str(metadata_obj.marker_count),
             "Units (POINT)": metadata_obj.units,
         }
-        
+
         # Add events if any
         if metadata_obj.events:
-             events_str = ", ".join([f"{e.label} ({e.time:.2f}s)" for e in metadata_obj.events])
-             metadata_ui["Events"] = events_str
+            events_str = ", ".join(
+                [f"{e.label} ({e.time:.2f}s)" for e in metadata_obj.events]
+            )
+            metadata_ui["Events"] = events_str
 
         return C3DDataModel(
             filepath=filepath,
