@@ -1467,10 +1467,16 @@ class GolfLauncher(QMainWindow):
             from pathlib import Path
 
             # Path to URDF generator
-            suite_root = Path(__file__).parent.parent
+            suite_root = Path(__file__).parent.parent.resolve()
             urdf_script = (
                 suite_root / "tools" / "urdf_generator" / "launch_urdf_generator.py"
-            )
+            ).resolve()
+
+            # Security Check: Prevent path traversal
+            if not urdf_script.is_relative_to(suite_root):
+                raise ValueError(
+                    f"Security violation: Script path {urdf_script} is outside suite root."
+                )
 
             if not urdf_script.exists():
                 QMessageBox.warning(
@@ -1525,7 +1531,7 @@ class GolfLauncher(QMainWindow):
             from pathlib import Path
 
             # Path to C3D viewer
-            suite_root = Path(__file__).parent.parent
+            suite_root = Path(__file__).parent.parent.resolve()
             c3d_script = (
                 suite_root
                 / "engines"
@@ -1535,7 +1541,13 @@ class GolfLauncher(QMainWindow):
                 / "src"
                 / "apps"
                 / "c3d_viewer.py"
-            )
+            ).resolve()
+
+            # Security Check: Prevent path traversal
+            if not c3d_script.is_relative_to(suite_root):
+                raise ValueError(
+                    f"Security violation: Script path {c3d_script} is outside suite root."
+                )
 
             if not c3d_script.exists():
                 QMessageBox.warning(

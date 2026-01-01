@@ -28,7 +28,7 @@ class TestOutputManager(unittest.TestCase):
         if self.test_dir.exists():
             try:
                 shutil.rmtree(self.test_dir)
-            except PermissionError:
+            except (PermissionError, OSError):
                 pass
 
     def test_initialization_directory_creation(self):
@@ -69,20 +69,13 @@ class TestOutputManager(unittest.TestCase):
         self.assertEqual(loaded_data, data)
 
     def test_save_load_pickle(self):
-        """Test saving and loading Pickle files."""
+        """Test that Pickle format raises security error."""
         data = {"key": "value", "array": np.array([1, 2, 3])}
 
-        path = self.manager.save_simulation_results(
-            data, "test_pickle", format_type=OutputFormat.PICKLE
-        )
-
-        self.assertTrue(path.exists())
-        loaded_data = self.manager.load_simulation_results(
-            path.stem, format_type=OutputFormat.PICKLE
-        )
-
-        self.assertEqual(loaded_data["key"], data["key"])
-        np.testing.assert_array_equal(loaded_data["array"], data["array"])
+        with self.assertRaisesRegex(ValueError, "Pickle format is disabled"):
+            self.manager.save_simulation_results(
+                data, "test_pickle", format_type=OutputFormat.PICKLE
+            )
 
     def test_save_json_numpy_serialization(self):
         """Test JSON serialization of NumPy types."""

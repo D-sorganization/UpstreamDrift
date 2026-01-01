@@ -7,7 +7,6 @@ managing file organization, and exporting analysis reports.
 
 import json
 import logging
-import pickle
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
@@ -202,14 +201,10 @@ class OutputManager:
                     df.to_hdf(file_path, key="data", mode="w")
 
             elif format_type == OutputFormat.PICKLE:
-                pickle_data: dict[str, Any] = {
-                    "metadata": metadata or {},
-                    "results": results,
-                    "timestamp": datetime.now(),
-                    "engine": engine,
-                }
-                with open(file_path, "wb") as f_pickle:
-                    pickle.dump(pickle_data, f_pickle)
+                # Security hardening: Disable Pickle
+                raise ValueError(
+                    "Security: Pickle format is disabled due to deserialization risks. Use JSON or PARQUET."
+                )
 
             elif format_type == OutputFormat.PARQUET:
                 if isinstance(results, pd.DataFrame):
@@ -273,10 +268,10 @@ class OutputManager:
                 return result
 
             elif format_type == OutputFormat.PICKLE:
-                with open(file_path, "rb") as f:
-                    data = pickle.load(f)
-                result = data.get("results", data)
-                return dict(result) if isinstance(result, dict) else result
+                # Security hardening: Disable Pickle
+                raise ValueError(
+                    "Security: Pickle format is disabled due to deserialization risks. Use JSON or PARQUET."
+                )
 
             elif format_type == OutputFormat.PARQUET:
                 return pd.read_parquet(file_path)
