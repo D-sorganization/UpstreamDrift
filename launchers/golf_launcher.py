@@ -40,6 +40,7 @@ from PyQt6.QtWidgets import (
     QComboBox,
     QDialog,
     QDialogButtonBox,
+    QDockWidget,
     QFrame,
     QGridLayout,
     QHBoxLayout,
@@ -729,6 +730,71 @@ class LayoutManagerDialog(QDialog):
         return selections
 
 
+class ContextHelpDock(QDockWidget):
+    """Context-aware help drawer."""
+
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__("Quick Help", parent)
+        self.setAllowedAreas(
+            Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea
+        )
+        self.setFeatures(
+            QDockWidget.DockWidgetFeature.DockWidgetClosable
+            | QDockWidget.DockWidgetFeature.DockWidgetMovable
+        )
+
+        # Content
+        self.text_area = QTextEdit()
+        self.text_area.setReadOnly(True)
+        self.text_area.setStyleSheet(
+            "background-color: #252526; color: #cccccc; border: none; padding: 10px;"
+        )
+        self.setWidget(self.text_area)
+
+        # Default content
+        self.update_context(None)
+
+    def update_context(self, model_id: str | None) -> None:
+        """Update help content based on selected model."""
+        if not model_id:
+            self.text_area.setMarkdown(
+                "### Context Aware Help\n\nSelect a model to view its documentation and quick start guide."
+            )
+            return
+
+        # Map ID to doc file
+        doc_file = self._get_doc_file(model_id)
+        if doc_file and doc_file.exists():
+            try:
+                content = doc_file.read_text(encoding="utf-8")
+                self.text_area.setMarkdown(content)
+            except Exception as e:
+                self.text_area.setText(f"Failed to load documentation: {e}")
+        else:
+            self.text_area.setMarkdown(
+                f"### {model_id}\n\nNo specific documentation available."
+            )
+
+    def _get_doc_file(self, model_id: str) -> Path | None:
+        docs_dir = REPOS_ROOT / "docs" / "engines"
+
+        if "mujoco" in model_id:
+            return docs_dir / "mujoco.md"
+        elif "drake" in model_id:
+            return docs_dir / "drake.md"
+        elif "pinocchio" in model_id:
+            return docs_dir / "pinocchio.md"
+        elif "matlab" in model_id:
+            return docs_dir / "matlab.md"
+        elif "urdf" in model_id:
+            return REPOS_ROOT / "tools" / "urdf_generator" / "README.md"
+        elif "c3d" in model_id:
+            # Fallback for c3d if no specific doc, or maybe it shares one?
+            return None
+
+        return None
+
+
 class GolfLauncher(QMainWindow):
     """Main application window for the launcher."""
 
@@ -1180,6 +1246,11 @@ class GolfLauncher(QMainWindow):
         # --- Styling ---
         self.apply_styles()
 
+        # --- Help Dock ---
+        self.help_dock = ContextHelpDock(self)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.help_dock)
+        self.help_dock.hide()  # Hidden by default
+
         # Select first model by default if available
         if self.model_order:
             preferred_id = next(
@@ -1489,6 +1560,10 @@ class GolfLauncher(QMainWindow):
         """Select a model and update UI."""
         self.selected_model = model_id
 
+        # Update Help Context
+        if hasattr(self, "help_dock"):
+            self.help_dock.update_context(model_id)
+
         # Get model name for display
         model_name = model_id
         model = self._get_model(model_id)
@@ -1686,9 +1761,11 @@ class GolfLauncher(QMainWindow):
         self.update_launch_button()
 
     def open_help(self) -> None:
-        """Open the help dialog."""
-        dlg = HelpDialog(self)
-        dlg.exec()
+        """Toggle the help drawer."""
+        if self.help_dock.isVisible():
+            self.help_dock.hide()
+        else:
+            self.help_dock.show()
 
     def open_environment_manager(self) -> None:
         """Open the environment manager dialog."""
