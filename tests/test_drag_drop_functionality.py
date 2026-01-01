@@ -73,13 +73,9 @@ class TestDragDropFunctionality(unittest.TestCase):
         # Case 2: Parent has layout_edit_mode = False
         self.mock_launcher.layout_edit_mode = False
         card2 = DraggableModelCard(self.mock_models[0], self.mock_launcher)
-        # Check call instead of return value because QFrame is mocked
-        # self.assertFalse(card2.acceptDrops())
-        # Checking if setAcceptDrops was called with False (or default init might have set it)
-        # But wait, looking at code: it calls self.setAcceptDrops(False) explicitly?
-        # Let's assume it does if logic dictates.
-        # Logic: if parent.layout_edit_mode: setAcceptDrops(True) else: setAcceptDrops(False)
-        # So we can check the call.
+        # When layout editing is disabled, the card should disable drops via setAcceptDrops(False).
+        # Because the underlying QFrame behavior may be provided by Qt or a mock, assert the call only if
+        # setAcceptDrops is a Mock; otherwise, silently skip this verification.
         if hasattr(card2, "setAcceptDrops") and isinstance(card2.setAcceptDrops, Mock):
             card2.setAcceptDrops.assert_called_with(False)
         else:
@@ -106,12 +102,7 @@ class TestDragDropFunctionality(unittest.TestCase):
         else:
             self.assertEqual(card.drag_start_position, QPoint(10, 10))
 
-    def test_drag_operation_error_handling(self) -> None:
-        """Test that drag operations handle errors gracefully."""
-        # Drag operation involves blocking exec(), which is hard to unit test without freezing.
-        # We assume standard Qt drag behavior.
-        # We can test that mouseMoveEvent triggers checks.
-        pass
+
 
     def test_drop_event_triggers_swap(self) -> None:
         """Test that drop events trigger model swapping."""

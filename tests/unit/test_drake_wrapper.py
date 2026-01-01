@@ -25,7 +25,7 @@ try:
     )
 except ImportError:
     # Handle case where import logic inside module fails due to complex dependencies
-    DrakePhysicsEngine = None
+    DrakePhysicsEngine = None  # type: ignore[assignment]
 
 
 class TestDrakeWrapper(unittest.TestCase):
@@ -126,6 +126,10 @@ class TestDrakeWrapper(unittest.TestCase):
         # Assert no aggressive computation was triggered
         self.engine.context.SetTime.assert_not_called()
         self.engine.context.SetContinuousState.assert_not_called()
+
+        # Verify context remains valid (conceptually)
+        # In a real scenario, we might check if self.engine.context is NOT None
+        self.assertIsNotNone(self.engine.context)
 
 
 if __name__ == "__main__":
