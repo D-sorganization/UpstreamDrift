@@ -102,9 +102,9 @@ class TestDragDropFunctionality(unittest.TestCase):
 
         # Allow for Mock or QPoint comparison
         if isinstance(card.drag_start_position, Mock):
-             self.assertEqual(card.drag_start_position, QPoint(10, 10))
+            self.assertEqual(card.drag_start_position, QPoint(10, 10))
         else:
-             self.assertEqual(card.drag_start_position, QPoint(10, 10))
+            self.assertEqual(card.drag_start_position, QPoint(10, 10))
 
     def test_drag_operation_error_handling(self) -> None:
         """Test that drag operations handle errors gracefully."""
