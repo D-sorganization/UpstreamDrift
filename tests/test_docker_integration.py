@@ -83,9 +83,8 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_model.type = "custom_humanoid"
 
         # Mock path
-        # Mock path
         mock_path = Mock()
-        mock_path.__str__ = Mock(return_value="/test/suite/path")
+        mock_path.__str__ = Mock(return_value="/test/suite/path")  # type: ignore[method-assign]  # type: ignore[method-assign]
         # Ensure regex replacements work similarly if relying on string conversion
         mock_path.replace = Mock(
             side_effect=lambda x, y: "/test/suite/path".replace(x, y)
@@ -94,7 +93,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
         # Prepare mock Path to simulate suite_root
         mock_path_cls = MagicMock()
         mock_suite_root = MagicMock()
-        mock_suite_root.__str__ = Mock(return_value="/mock/suite/root")
+        mock_suite_root.__str__ = Mock(return_value="/mock/suite/root")  # type: ignore[method-assign]
         # When Path(__file__) is called, return something that eventually leads to mock_suite_root
         # Path(__file__).parent.parent -> mock_suite_root
         mock_file_path = MagicMock()
@@ -108,7 +107,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("launchers.golf_launcher.Path", MagicMock()),
             patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
-            mock_repos_root.__str__.return_value = "/mock/repo/root"
+            mock_repos_root.__str__.return_value = "/mock/repo/root"  # type: ignore[attr-defined]  # type: ignore[attr-defined]
             launcher._launch_docker_container(mock_model, mock_path)
 
             # Verify subprocess was called
@@ -148,12 +147,12 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_model.type = "drake"
 
         mock_path = Mock()
-        mock_path.__str__ = Mock(return_value="/test/suite/path")
+        mock_path.__str__ = Mock(return_value="/test/suite/path")  # type: ignore[method-assign]
 
         # Prepare mock Path
         mock_path_cls = MagicMock()
         mock_suite_root = MagicMock()
-        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_suite_root.__str__.return_value = "/mock/suite/root"  # type: ignore[attr-defined]
         mock_file_path = MagicMock()
         mock_file_path.parent.parent = mock_suite_root
         mock_path_cls.return_value = mock_file_path
@@ -166,7 +165,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("launchers.golf_launcher.Path", MagicMock()),
             patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
-            mock_repos_root.__str__.return_value = "/mock/repo/root"
+            mock_repos_root.__str__.return_value = "/mock/repo/root"  # type: ignore[attr-defined]
             launcher._launch_docker_container(mock_model, mock_path)
 
             # Verify subprocess was called
@@ -215,12 +214,12 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_model.type = "pinocchio"
 
         mock_path = Mock()
-        mock_path.__str__ = Mock(return_value="/test/suite/path")
+        mock_path.__str__ = Mock(return_value="/test/suite/path")  # type: ignore[method-assign]
 
         # Prepare mock Path
         mock_path_cls = MagicMock()
         mock_suite_root = MagicMock()
-        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_suite_root.__str__.return_value = "/mock/suite/root"  # type: ignore[attr-defined]
         mock_file_path = MagicMock()
         mock_file_path.parent.parent = mock_suite_root
         mock_path_cls.return_value = mock_file_path
@@ -233,7 +232,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("launchers.golf_launcher.Path", MagicMock()),
             patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
-            mock_repos_root.__str__.return_value = "/mock/repo/root"
+            mock_repos_root.__str__.return_value = "/mock/repo/root"  # type: ignore[attr-defined]
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
@@ -267,12 +266,12 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_model = Mock()
         mock_model.type = "custom_humanoid"
         mock_path = Mock()
-        mock_path.__str__ = Mock(return_value="/test/path")
+        mock_path.__str__ = Mock(return_value="/test/path")  # type: ignore[method-assign]
 
         # Prepare mock Path
         mock_path_cls = MagicMock()
         mock_suite_root = MagicMock()
-        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_suite_root.__str__.return_value = "/mock/suite/root"  # type: ignore[attr-defined]
         mock_file_path = MagicMock()
         mock_file_path.parent.parent = mock_suite_root
         mock_path_cls.return_value = mock_file_path
@@ -284,7 +283,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("launchers.golf_launcher.Path", MagicMock()),
             patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
-            mock_repos_root.__str__.return_value = "/mock/repo/root"
+            mock_repos_root.__str__.return_value = "/mock/repo/root"  # type: ignore[attr-defined]
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]
@@ -311,12 +310,12 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_model = Mock()
         mock_model.type = "custom_humanoid"
         mock_path = Mock()
-        mock_path.__str__ = Mock(return_value="/test/path")
+        mock_path.__str__ = Mock(return_value="/test/path")  # type: ignore[method-assign]
 
         # Prepare mock Path
         mock_path_cls = MagicMock()
         mock_suite_root = MagicMock()
-        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_suite_root.__str__.return_value = "/mock/suite/root"  # type: ignore[attr-defined]
         mock_file_path = MagicMock()
         mock_file_path.parent.parent = mock_suite_root
         mock_path_cls.return_value = mock_file_path
@@ -328,7 +327,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             patch("launchers.golf_launcher.Path", MagicMock()),
             patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
-            mock_repos_root.__str__.return_value = "/mock/repo/root"
+            mock_repos_root.__str__.return_value = "/mock/repo/root"  # type: ignore[attr-defined]
             launcher._launch_docker_container(mock_model, mock_path)
 
             call_args = mock_popen.call_args[0][0]

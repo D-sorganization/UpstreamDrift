@@ -112,13 +112,15 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
         self.assertTrue(success)
         param = self.registry.get("TEST")
         self.assertIsNotNone(param)
-        self.assertEqual(param.value, 15.0)
+        if param is not None:  # type: ignore[assignment]
+            self.assertEqual(param.value, 15.0)
 
         success, msg = self.registry.set("TEST", 25.0)
         self.assertFalse(success)
         param = self.registry.get("TEST")
         self.assertIsNotNone(param)
-        self.assertEqual(param.value, 15.0)  # Should not change
+        if param is not None:  # type: ignore[assignment]
+            self.assertEqual(param.value, 15.0)  # Should not change
 
         success, msg = self.registry.set("NONEXISTENT", 1.0)
         self.assertFalse(success)
@@ -157,7 +159,8 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
             self.assertEqual(count, 1)
             param = self.registry.get("P1")
             self.assertIsNotNone(param)
-            self.assertEqual(param.value, 2.0)
+            if param is not None:
+                self.assertEqual(param.value, 2.0)
 
     def test_get_summary(self):
         """Test summary generation."""
