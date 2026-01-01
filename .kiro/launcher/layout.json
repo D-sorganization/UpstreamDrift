@@ -5,15 +5,6 @@
     "model_0",
     "model_3"
   ],
-  "selected_model": "urdf_generator",
+  "selected_model": "model_0",
   "window_geometry": {
-    "x": 260,
-    "y": 35,
-    "width": 1400,
-    "height": 900
-  },
-  "options": {
-    "live_visualization": true,
-    "gpu_acceleration": false
-  }
-}
+    "x": 
