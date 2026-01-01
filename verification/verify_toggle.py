@@ -4,13 +4,13 @@ import os
 
 def run():
     # Use absolute path for file:// URL
-    cwd = os.getcwd()
-    file_url = f'file://{cwd}/engines/physics_engines/pinocchio/python/double_pendulum_model/visualization/double_pendulum_web/index.html'
+    path = os.path.abspath('engines/physics_engines/pinocchio/python/double_pendulum_model/visualization/double_pendulum_web/index.html')
+    url = f'file://{path}'
 
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page()
-        page.goto(file_url)
+        page.goto(url)
 
         # Take initial screenshot
         page.screenshot(path='verification/before_click.png')
