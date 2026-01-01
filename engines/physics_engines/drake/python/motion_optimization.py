@@ -277,7 +277,7 @@ class DrakeMotionOptimizer:
         def accuracy_cost(trajectory: np.ndarray) -> float:
             # Placeholder: compute distance to target
             final_position = trajectory[-1]
-            return np.linalg.norm(final_position - target_point)
+            return float(np.linalg.norm(final_position - target_point))
 
         self.add_objective(
             name="target_accuracy",
