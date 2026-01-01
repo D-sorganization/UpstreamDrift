@@ -11,7 +11,7 @@ Provides comprehensive statistical analysis including:
 from __future__ import annotations
 
 import csv
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from typing import Any
 
 import numpy as np
@@ -115,10 +115,10 @@ class CoordinationMetrics:
     """Metrics quantifying inter-segment coordination patterns."""
 
     # Percentage of swing duration in each coordination state
-    in_phase_pct: float       # Both segments rotating same direction
-    anti_phase_pct: float     # Segments rotating opposite directions
-    proximal_leading_pct: float # Proximal segment dominant
-    distal_leading_pct: float   # Distal segment dominant
+    in_phase_pct: float  # Both segments rotating same direction
+    anti_phase_pct: float  # Segments rotating opposite directions
+    proximal_leading_pct: float  # Proximal segment dominant
+    distal_leading_pct: float  # Distal segment dominant
 
     # Mean coupling angle (if meaningful)
     mean_coupling_angle: float
@@ -635,7 +635,7 @@ class StatisticalAnalyzer:
             peak_lx=peak_lx,
             peak_ly=peak_ly,
             peak_lz=peak_lz,
-            variability=variability
+            variability=variability,
         )
 
     def compute_stability_metrics(self) -> StabilityMetrics | None:
@@ -693,13 +693,11 @@ class StatisticalAnalyzer:
             max_com_cop_distance=float(np.max(dist)),
             mean_com_cop_distance=float(np.mean(dist)),
             peak_inclination_angle=float(np.max(angles_deg)),
-            mean_inclination_angle=float(np.mean(angles_deg))
+            mean_inclination_angle=float(np.mean(angles_deg)),
         )
 
     def compute_coordination_metrics(
-        self,
-        joint_idx_1: int,
-        joint_idx_2: int
+        self, joint_idx_1: int, joint_idx_2: int
     ) -> CoordinationMetrics | None:
         """Compute coordination metrics from coupling angles (Vector Coding).
 
@@ -761,8 +759,13 @@ class StatisticalAnalyzer:
         # Circular statistics for mean and variability
         # Mean vector
         angles_rad = np.deg2rad(angles)
-        R = np.sqrt(np.sum(np.cos(angles_rad))**2 + np.sum(np.sin(angles_rad))**2) / total
-        mean_angle_rad = np.arctan2(np.sum(np.sin(angles_rad)), np.sum(np.cos(angles_rad)))
+        R = (
+            np.sqrt(np.sum(np.cos(angles_rad)) ** 2 + np.sum(np.sin(angles_rad)) ** 2)
+            / total
+        )
+        mean_angle_rad = np.arctan2(
+            np.sum(np.sin(angles_rad)), np.sum(np.cos(angles_rad))
+        )
         mean_angle_deg = np.degrees(mean_angle_rad) % 360.0
 
         # Circular standard deviation = sqrt(-2 * ln(R))
@@ -779,7 +782,7 @@ class StatisticalAnalyzer:
             proximal_leading_pct=float(proximal_cnt / total * 100),
             distal_leading_pct=float(distal_cnt / total * 100),
             mean_coupling_angle=float(mean_angle_deg),
-            coordination_variability=float(circ_std_deg)
+            coordination_variability=float(circ_std_deg),
         )
 
     def generate_comprehensive_report(self) -> dict[str, Any]:
