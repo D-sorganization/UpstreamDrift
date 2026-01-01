@@ -226,7 +226,7 @@ class DrakeInducedAccelerationAnalyzer:
         except np.linalg.LinAlgError:
             Minv = np.linalg.pinv(M)
 
-        return Minv @ tau
+        return np.array(Minv @ tau)  # type: ignore[no-any-return]
 
 
 def setup_logging() -> None:
@@ -1042,7 +1042,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self, accels: np.ndarray, name_prefix: str, color: Rgba
     ) -> None:
         """Draw acceleration vectors at joints."""
-        if not self.meshcat:
+        if not self.meshcat or self.plant is None:
             return
 
         scale = 0.1  # Visual scale
@@ -1060,8 +1060,11 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
             # Get joint frame
             frame_J = joint.frame_on_child()
-            X_WJ = self.plant.EvalBodyPoseInWorld(self.eval_context, frame_J.body())
-            start_pos = X_WJ.translation()
+            if self.plant is not None and self.eval_context is not None:
+                X_WJ = self.plant.EvalBodyPoseInWorld(self.eval_context, frame_J.body())
+                start_pos = X_WJ.translation()
+            else:
+                continue
 
             # Axis direction
             if hasattr(joint, "revolute_axis"):
@@ -1468,7 +1471,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         _, club_pos = self.recorder.get_time_series("club_head_position")
 
         analyzer = StatisticalAnalyzer(
-            times, q_history, v_history, tau_history, club_head_position=club_pos
+            times, q_history, v_history, tau_history, club_head_position=np.array(club_pos) if isinstance(club_pos, list) else club_pos
         )
         report = analyzer.generate_comprehensive_report()
 
