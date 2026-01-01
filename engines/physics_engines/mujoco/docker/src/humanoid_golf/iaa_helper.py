@@ -1,6 +1,8 @@
-def compute_induced_accelerations(physics) -> dict:
+from typing import Any, Dict
+
+def compute_induced_accelerations(physics: Any) -> Dict[str, Any]:
     """Compute induced accelerations (Gravity, Velocity, Control) for current state."""
-    results: dict = {}
+    results: Dict[str, Any] = {}
     try:
         import numpy as np
         from dm_control.mujoco.wrapper.mjbindings import mjlib
@@ -73,7 +75,7 @@ def compute_induced_accelerations(physics) -> dict:
     neg_g_force = -g_force
     neg_c_force = -c_force
 
-    def safe_solveM(m_ptr, d_ptr, dst, src):
+    def safe_solveM(m_ptr: Any, d_ptr: Any, dst: Any, src: Any) -> None:
         """Try calling mj_solveM with different array shapes to satisfy binding."""
         # Clean inputs
         dst_clean = np.ascontiguousarray(dst, dtype=np.float64)
@@ -108,7 +110,7 @@ def compute_induced_accelerations(physics) -> dict:
             except Exception as e:
                 last_err = e
 
-        if not success:
+        if not success and last_err is not None:
             raise last_err
 
     safe_solveM(model.ptr, data.ptr, acc_g, neg_g_force)
