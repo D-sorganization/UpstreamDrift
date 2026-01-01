@@ -8,6 +8,7 @@ This module provides comprehensive plotting capabilities including:
 - Swing sequence analysis
 - Induced Accelerations
 - Counterfactual Data (ZTCF, ZVCF)
+- Advanced Coordination and Stability Visualizations
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
+from matplotlib.patches import Rectangle
 
 from shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 
@@ -337,6 +339,176 @@ class GolfSwingPlotter:
             title or "Coordination Variability", fontsize=14, fontweight="bold"
         )
         ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+
+    def plot_coordination_patterns(
+        self,
+        fig: Figure,
+        coupling_angles: np.ndarray,
+        title: str | None = None,
+    ) -> None:
+        """Plot coordination patterns as a color-coded strip over time.
+
+        Visualizes discrete coordination states (In-Phase, Anti-Phase, etc.) derived
+        from vector coding coupling angles.
+
+        Args:
+            fig: Matplotlib figure
+            coupling_angles: Array of coupling angles [0, 360)
+            title: Optional title
+        """
+        times, _ = self.recorder.get_time_series("joint_positions")
+
+        if len(times) == 0 or len(coupling_angles) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        if len(coupling_angles) != len(times):
+            times = times[: len(coupling_angles)]
+
+        # Binning logic (must match StatisticalAnalyzer.compute_coordination_metrics)
+        # 0: Proximal, 1: In-Phase, 2: Distal, 3: Anti-Phase, ...
+        binned = np.floor((coupling_angles + 22.5) / 45.0) % 8
+
+        # Map 8 bins to 4 classes
+        # 0, 4 -> Proximal (0)
+        # 1, 5 -> In-Phase (1)
+        # 2, 6 -> Distal (2)
+        # 3, 7 -> Anti-Phase (3)
+
+        classes = np.zeros_like(binned)
+        classes[(binned == 0) | (binned == 4)] = 0 # Proximal
+        classes[(binned == 1) | (binned == 5)] = 1 # In-Phase
+        classes[(binned == 2) | (binned == 6)] = 2 # Distal
+        classes[(binned == 3) | (binned == 7)] = 3 # Anti-Phase
+
+        # Colors for classes
+        # Proximal: Blue
+        # In-Phase: Green
+        # Distal: Red
+        # Anti-Phase: Orange
+        cmap_colors = [
+            self.colors['primary'],      # Proximal
+            self.colors['tertiary'],     # In-Phase
+            self.colors['quaternary'],   # Distal
+            self.colors['secondary']     # Anti-Phase
+        ]
+
+        from matplotlib.colors import ListedColormap
+        cmap = ListedColormap(cmap_colors)
+
+        ax = fig.add_subplot(111)
+
+        # Prepare meshgrid for pcolormesh
+        # classes is (N,) - 1D array of values
+        # We need a 2D array for pcolormesh C argument. Shape (1, N)
+        # The coordinates X, Y define the corners of the quadrilaterals.
+        # X should be length N+1 (time boundaries)
+        # Y should be length 2 (top and bottom of strip)
+
+        # Create time boundaries: midpoints between samples, plus ends
+        if len(times) > 1:
+            dt = times[1] - times[0]
+            # Construct edges
+            time_edges = np.concatenate(([times[0] - dt/2], times[:-1] + np.diff(times)/2, [times[-1] + dt/2]))
+        else:
+            time_edges = np.array([times[0]-0.5, times[0]+0.5])
+
+        y_edges = np.array([0, 1])
+
+        # Meshgrid
+        X, Y = np.meshgrid(time_edges, y_edges)
+
+        # C must be (ny-1, nx-1) -> (1, N)
+        C = classes.reshape(1, -1)
+
+        im = ax.pcolormesh(
+            X,
+            Y,
+            C,
+            cmap=cmap,
+            vmin=0,
+            vmax=3,
+            shading='flat'
+        )
+
+        # Custom legend
+        legend_patches = [
+            Rectangle((0, 0), 1, 1, color=cmap_colors[0], label="Proximal Leading"),
+            Rectangle((0, 0), 1, 1, color=cmap_colors[1], label="In-Phase"),
+            Rectangle((0, 0), 1, 1, color=cmap_colors[2], label="Distal Leading"),
+            Rectangle((0, 0), 1, 1, color=cmap_colors[3], label="Anti-Phase")
+        ]
+
+        ax.legend(handles=legend_patches, loc='lower center', bbox_to_anchor=(0.5, 1.05), ncol=4)
+
+        ax.set_yticks([])
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_title(title or "Coordination Pattern Dynamics", fontsize=14, fontweight="bold", y=1.2)
+
+        fig.tight_layout()
+
+    def plot_stability_metrics(self, fig: Figure) -> None:
+        """Plot stability metrics (CoM-CoP distance and Inclination Angle).
+
+        Args:
+            fig: Matplotlib figure
+        """
+        try:
+            times_cop, cop = self.recorder.get_time_series("cop_position")
+            times_com, com = self.recorder.get_time_series("com_position")
+        except (AttributeError, KeyError):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Stability data missing", ha="center", va="center")
+            return
+
+        cop = np.asarray(cop)
+        com = np.asarray(com)
+
+        if len(times_cop) == 0 or len(times_com) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No stability data", ha="center", va="center")
+            return
+
+        # Compute metrics
+        cop_xy = cop[:, :2]
+        com_xy = com[:, :2]
+        dist = np.linalg.norm(cop_xy - com_xy, axis=1)
+
+        if cop.shape[1] == 2:
+            cop_z = np.zeros(len(cop))
+        else:
+            cop_z = cop[:, 2]
+
+        vec = com - np.column_stack((cop_xy, cop_z))
+        vec_norm = np.linalg.norm(vec, axis=1)
+        vec_norm[vec_norm < 1e-6] = 1.0
+
+        cos_theta = vec[:, 2] / vec_norm
+        cos_theta = np.clip(cos_theta, -1.0, 1.0)
+        angles_deg = np.rad2deg(np.arccos(cos_theta))
+
+        # Plot
+        ax1 = fig.add_subplot(111)
+
+        line1 = ax1.plot(times_cop, dist, color=self.colors['primary'], linewidth=2, label="CoM-CoP Dist (m)")
+        ax1.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax1.set_ylabel("Distance (m)", fontsize=12, fontweight="bold", color=self.colors['primary'])
+        ax1.tick_params(axis='y', labelcolor=self.colors['primary'])
+
+        ax2 = ax1.twinx()
+        line2 = ax2.plot(times_cop, angles_deg, color=self.colors['quaternary'], linewidth=2, linestyle='--', label="Inclination (deg)")
+        ax2.set_ylabel("Inclination Angle (deg)", fontsize=12, fontweight="bold", color=self.colors['quaternary'])
+        ax2.tick_params(axis='y', labelcolor=self.colors['quaternary'])
+
+        lns = line1 + line2
+        labs = [l.get_label() for l in lns]
+        ax1.legend(lns, labs, loc='best')
+
+        ax1.set_title("Postural Stability Metrics", fontsize=14, fontweight="bold")
+        ax1.grid(True, alpha=0.3)
+
         fig.tight_layout()
 
     def plot_joint_velocities(
@@ -1961,4 +2133,174 @@ class GolfSwingPlotter:
             fontweight="bold",
         )
         ax1.grid(True, alpha=0.3)
+        fig.tight_layout()
+
+    def plot_coordination_patterns(
+        self,
+        fig: Figure,
+        coupling_angles: np.ndarray,
+        title: str | None = None,
+    ) -> None:
+        """Plot coordination patterns as a color-coded strip over time.
+
+        Visualizes discrete coordination states (In-Phase, Anti-Phase, etc.) derived
+        from vector coding coupling angles.
+
+        Args:
+            fig: Matplotlib figure
+            coupling_angles: Array of coupling angles [0, 360)
+            title: Optional title
+        """
+        times, _ = self.recorder.get_time_series("joint_positions")
+
+        if len(times) == 0 or len(coupling_angles) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        if len(coupling_angles) != len(times):
+            times = times[: len(coupling_angles)]
+
+        # Binning logic (must match StatisticalAnalyzer.compute_coordination_metrics)
+        # 0: Proximal, 1: In-Phase, 2: Distal, 3: Anti-Phase, ...
+        binned = np.floor((coupling_angles + 22.5) / 45.0) % 8
+
+        # Map 8 bins to 4 classes
+        # 0, 4 -> Proximal (0)
+        # 1, 5 -> In-Phase (1)
+        # 2, 6 -> Distal (2)
+        # 3, 7 -> Anti-Phase (3)
+
+        classes = np.zeros_like(binned)
+        classes[(binned == 0) | (binned == 4)] = 0 # Proximal
+        classes[(binned == 1) | (binned == 5)] = 1 # In-Phase
+        classes[(binned == 2) | (binned == 6)] = 2 # Distal
+        classes[(binned == 3) | (binned == 7)] = 3 # Anti-Phase
+
+        # Colors for classes
+        # Proximal: Blue
+        # In-Phase: Green
+        # Distal: Red
+        # Anti-Phase: Orange
+        cmap_colors = [
+            self.colors['primary'],      # Proximal
+            self.colors['tertiary'],     # In-Phase
+            self.colors['quaternary'],   # Distal
+            self.colors['secondary']     # Anti-Phase
+        ]
+
+        from matplotlib.colors import ListedColormap
+        cmap = ListedColormap(cmap_colors)
+
+        ax = fig.add_subplot(111)
+
+        # Prepare meshgrid for pcolormesh
+        # classes is (N,) - 1D array of values
+        # We need a 2D array for pcolormesh C argument. Shape (1, N)
+        # The coordinates X, Y define the corners of the quadrilaterals.
+        # X should be length N+1 (time boundaries)
+        # Y should be length 2 (top and bottom of strip)
+
+        # Create time boundaries: midpoints between samples, plus ends
+        if len(times) > 1:
+            dt = times[1] - times[0]
+            # Construct edges
+            time_edges = np.concatenate(([times[0] - dt/2], times[:-1] + np.diff(times)/2, [times[-1] + dt/2]))
+        else:
+            time_edges = np.array([times[0]-0.5, times[0]+0.5])
+
+        y_edges = np.array([0, 1])
+
+        # Meshgrid
+        X, Y = np.meshgrid(time_edges, y_edges)
+
+        # C must be (ny-1, nx-1) -> (1, N)
+        C = classes.reshape(1, -1)
+
+        im = ax.pcolormesh(
+            X,
+            Y,
+            C,
+            cmap=cmap,
+            vmin=0,
+            vmax=3,
+            shading='flat'
+        )
+
+        # Custom legend
+        legend_patches = [
+            Rectangle((0, 0), 1, 1, color=cmap_colors[0], label="Proximal Leading"),
+            Rectangle((0, 0), 1, 1, color=cmap_colors[1], label="In-Phase"),
+            Rectangle((0, 0), 1, 1, color=cmap_colors[2], label="Distal Leading"),
+            Rectangle((0, 0), 1, 1, color=cmap_colors[3], label="Anti-Phase")
+        ]
+
+        ax.legend(handles=legend_patches, loc='lower center', bbox_to_anchor=(0.5, 1.05), ncol=4)
+
+        ax.set_yticks([])
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_title(title or "Coordination Pattern Dynamics", fontsize=14, fontweight="bold", y=1.2)
+
+        fig.tight_layout()
+
+    def plot_stability_metrics(self, fig: Figure) -> None:
+        """Plot stability metrics (CoM-CoP distance and Inclination Angle).
+
+        Args:
+            fig: Matplotlib figure
+        """
+        try:
+            times_cop, cop = self.recorder.get_time_series("cop_position")
+            times_com, com = self.recorder.get_time_series("com_position")
+        except (AttributeError, KeyError):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Stability data missing", ha="center", va="center")
+            return
+
+        cop = np.asarray(cop)
+        com = np.asarray(com)
+
+        if len(times_cop) == 0 or len(times_com) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No stability data", ha="center", va="center")
+            return
+
+        # Compute metrics
+        cop_xy = cop[:, :2]
+        com_xy = com[:, :2]
+        dist = np.linalg.norm(cop_xy - com_xy, axis=1)
+
+        if cop.shape[1] == 2:
+            cop_z = np.zeros(len(cop))
+        else:
+            cop_z = cop[:, 2]
+
+        vec = com - np.column_stack((cop_xy, cop_z))
+        vec_norm = np.linalg.norm(vec, axis=1)
+        vec_norm[vec_norm < 1e-6] = 1.0
+
+        cos_theta = vec[:, 2] / vec_norm
+        cos_theta = np.clip(cos_theta, -1.0, 1.0)
+        angles_deg = np.rad2deg(np.arccos(cos_theta))
+
+        # Plot
+        ax1 = fig.add_subplot(111)
+
+        line1 = ax1.plot(times_cop, dist, color=self.colors['primary'], linewidth=2, label="CoM-CoP Dist (m)")
+        ax1.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax1.set_ylabel("Distance (m)", fontsize=12, fontweight="bold", color=self.colors['primary'])
+        ax1.tick_params(axis='y', labelcolor=self.colors['primary'])
+
+        ax2 = ax1.twinx()
+        line2 = ax2.plot(times_cop, angles_deg, color=self.colors['quaternary'], linewidth=2, linestyle='--', label="Inclination (deg)")
+        ax2.set_ylabel("Inclination Angle (deg)", fontsize=12, fontweight="bold", color=self.colors['quaternary'])
+        ax2.tick_params(axis='y', labelcolor=self.colors['quaternary'])
+
+        lns = line1 + line2
+        labs = [l.get_label() for l in lns]
+        ax1.legend(lns, labs, loc='best')
+
+        ax1.set_title("Postural Stability Metrics", fontsize=14, fontweight="bold")
+        ax1.grid(True, alpha=0.3)
+
         fig.tight_layout()
