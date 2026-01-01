@@ -51,8 +51,9 @@ class TestModelRegistry(unittest.TestCase):
 
         model = registry.get_model("test_model")
         self.assertIsInstance(model, ModelConfig)
-        self.assertEqual(model.name, "Test Model")
-        self.assertEqual(model.type, "urdf")
+        if model is not None:
+            self.assertEqual(model.name, "Test Model")
+            self.assertEqual(model.type, "urdf")
 
     @patch("pathlib.Path.exists")
     def test_load_registry_not_found(self, mock_exists):
@@ -123,7 +124,10 @@ class TestModelRegistry(unittest.TestCase):
             "m3": ModelConfig("m3", "M3", "D3", "urdf", "p3"),
         }
 
-        self.assertEqual(registry.get_model("m1").id, "m1")
+        model_m1 = registry.get_model("m1")
+        self.assertIsNotNone(model_m1)
+        if model_m1 is not None:
+            self.assertEqual(model_m1.id, "m1")
         self.assertIsNone(registry.get_model("nonexistent"))
 
         all_models = registry.get_all_models()
