@@ -9,3 +9,6 @@ The Golf Modeling Suite integrates multiple physics engines to allow for cross-v
 - **[Pinocchio](pinocchio.md)**: Efficient rigid body dynamics algorithms, excellent for kinematic and dynamic analysis.
 - **[Simscape Multibody](simscape.md)**: High-fidelity biomechanical modeling using MATLAB/Simulink.
 - **[Pendulum Models](pendulum.md)**: Simplified 2D models for fundamental swing mechanics.
+- **[OpenSim](opensim.md)**: Musculoskeletal modeling and simulation for detailed biomechanics.
+- **[MyoSim](myosim.md)**: Muscle physiology simulator for cross-bridge kinetics and force generation.
+- **[OpenPose](openpose.md)**: Computer vision pipeline for extracting kinematics from video.
