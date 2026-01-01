@@ -153,13 +153,14 @@ class TestMuJoCoEngineIntegration:
         engine.load_from_path(str(SIMPLE_ARM_URDF))
 
         # Get initial state
-        initial_time = engine.data.time
+        initial_time = engine.data.time if engine.data is not None else 0.0
 
         # Step simulation
         engine.step()
 
         # Verify state changed
-        assert engine.data.time > initial_time, "Time should advance after step"
+        current_time = engine.data.time if engine.data is not None else 0.0
+        assert current_time > initial_time, "Time should advance after step"
 
 
 @pytest.mark.skipif(not SIMPLE_ARM_URDF.exists(), reason="Test asset missing")
@@ -197,7 +198,7 @@ class TestCrossEngineConsistency:
 
                 dk = DrakePhysicsEngine()
                 dk.load_from_path(str(SIMPLE_ARM_URDF))
-                engines["drake"] = dk
+                engines["drake"] = dk  # type: ignore[assignment]
             except Exception:
                 pass
 
@@ -210,7 +211,7 @@ class TestCrossEngineConsistency:
 
                 pn = PinocchioPhysicsEngine()
                 pn.load_from_path(str(SIMPLE_ARM_URDF))
-                engines["pinocchio"] = pn
+                engines["pinocchio"] = pn  # type: ignore[assignment]
             except Exception:
                 pass
 

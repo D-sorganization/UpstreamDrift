@@ -77,8 +77,10 @@ def test_urdf_generation_logic(qtbot):
     assert len(joints) == 1
     joint = joints[0]
     assert joint.attrib["name"] == "joint1"
-    assert joint.find("parent").attrib["link"] == "base_link"
-    assert joint.find("child").attrib["link"] == "link1"
+    parent_elem = joint.find("parent")
+    child_elem = joint.find("child")
+    assert parent_elem is not None and parent_elem.attrib["link"] == "base_link"
+    assert child_elem is not None and child_elem.attrib["link"] == "link1"
 
 
 def test_urdf_scanning_logic():

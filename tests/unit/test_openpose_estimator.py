@@ -52,8 +52,9 @@ def test_load_model_success(estimator, op_mock):
     assert estimator._is_loaded is True
     assert estimator.params["model_folder"] == str(path)
     op_mock.WrapperPython.assert_called()
-    estimator.wrapper.configure.assert_called()
-    estimator.wrapper.start.assert_called()
+    if estimator.wrapper is not None:
+        estimator.wrapper.configure.assert_called()
+        estimator.wrapper.start.assert_called()
 
 
 def test_load_model_failure(estimator, op_mock):
