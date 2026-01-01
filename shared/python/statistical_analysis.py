@@ -5,12 +5,13 @@ Provides comprehensive statistical analysis including:
 - Summary statistics
 - Swing quality metrics
 - Phase-specific analysis
+- Advanced stability and coordination metrics
 """
 
 from __future__ import annotations
 
 import csv
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from typing import Any
 
 import numpy as np
@@ -78,6 +79,52 @@ class GRFMetrics:
     peak_shear_force: float | None = None
 
 
+@dataclass
+class AngularMomentumMetrics:
+    """Metrics related to system angular momentum."""
+
+    peak_magnitude: float
+    peak_time: float
+    mean_magnitude: float
+    # Component peaks
+    peak_lx: float
+    peak_ly: float
+    peak_lz: float
+    # Conservation error (std dev / mean) if no external torques were present
+    # (Not strictly applicable to golf as it's an open system with gravity/GRF,
+    # but variability is useful)
+    variability: float
+
+
+@dataclass
+class StabilityMetrics:
+    """Metrics related to postural stability."""
+
+    # Dynamic Stability Margin proxies
+    min_com_cop_distance: float  # Minimum horizontal distance between CoM and CoP
+    max_com_cop_distance: float
+    mean_com_cop_distance: float
+
+    # Inclination Angles (Angle between vertical and CoP-CoM vector)
+    peak_inclination_angle: float  # Maximum lean
+    mean_inclination_angle: float
+
+
+@dataclass
+class CoordinationMetrics:
+    """Metrics quantifying inter-segment coordination patterns."""
+
+    # Percentage of swing duration in each coordination state
+    in_phase_pct: float       # Both segments rotating same direction
+    anti_phase_pct: float     # Segments rotating opposite directions
+    proximal_leading_pct: float # Proximal segment dominant
+    distal_leading_pct: float   # Distal segment dominant
+
+    # Mean coupling angle (if meaningful)
+    mean_coupling_angle: float
+    coordination_variability: float  # Std dev of coupling angle
+
+
 class StatisticalAnalyzer:
     """Comprehensive statistical analysis for golf swing data."""
 
@@ -91,6 +138,8 @@ class StatisticalAnalyzer:
         club_head_position: np.ndarray | None = None,
         cop_position: np.ndarray | None = None,
         ground_forces: np.ndarray | None = None,
+        com_position: np.ndarray | None = None,
+        angular_momentum: np.ndarray | None = None,
     ) -> None:
         """Initialize analyzer with recorded data.
 
@@ -103,6 +152,8 @@ class StatisticalAnalyzer:
             club_head_position: Club head 3D position (N, 3) [optional]
             cop_position: Center of Pressure position (N, 2) or (N, 3) [optional]
             ground_forces: Ground reaction forces (N, 3) or (N, 6) [optional]
+            com_position: Center of Mass position (N, 3) [optional]
+            angular_momentum: System angular momentum (N, 3) [optional]
         """
         self.times = times
         self.joint_positions = joint_positions
@@ -112,6 +163,8 @@ class StatisticalAnalyzer:
         self.club_head_position = club_head_position
         self.cop_position = cop_position
         self.ground_forces = ground_forces
+        self.com_position = com_position
+        self.angular_momentum = angular_momentum
 
         self.dt = float(np.mean(np.diff(times))) if len(times) > 1 else 0.0
         self.duration = times[-1] - times[0] if len(times) > 1 else 0.0
@@ -548,6 +601,187 @@ class StatisticalAnalyzer:
             peak_shear_force=peak_shear,
         )
 
+    def compute_angular_momentum_metrics(self) -> AngularMomentumMetrics | None:
+        """Compute metrics related to system angular momentum.
+
+        Returns:
+            AngularMomentumMetrics object or None if data unavailable
+        """
+        if self.angular_momentum is None or len(self.angular_momentum) == 0:
+            return None
+
+        mag = np.linalg.norm(self.angular_momentum, axis=1)
+
+        peak_mag = float(np.max(mag))
+        peak_idx = int(np.argmax(mag))
+        peak_time = float(self.times[peak_idx])
+
+        # Mean
+        mean_mag = float(np.mean(mag))
+
+        # Components peaks (absolute)
+        peak_lx = float(np.max(np.abs(self.angular_momentum[:, 0])))
+        peak_ly = float(np.max(np.abs(self.angular_momentum[:, 1])))
+        peak_lz = float(np.max(np.abs(self.angular_momentum[:, 2])))
+
+        # Variability
+        std_mag = float(np.std(mag))
+        variability = std_mag / mean_mag if mean_mag > 0 else 0.0
+
+        return AngularMomentumMetrics(
+            peak_magnitude=peak_mag,
+            peak_time=peak_time,
+            mean_magnitude=mean_mag,
+            peak_lx=peak_lx,
+            peak_ly=peak_ly,
+            peak_lz=peak_lz,
+            variability=variability
+        )
+
+    def compute_stability_metrics(self) -> StabilityMetrics | None:
+        """Compute postural stability metrics.
+
+        Requires both CoP and CoM positions.
+
+        Returns:
+            StabilityMetrics object or None if data unavailable
+        """
+        if (
+            self.cop_position is None
+            or self.com_position is None
+            or len(self.cop_position) != len(self.com_position)
+        ):
+            return None
+
+        # Horizontal plane distance (X-Y)
+        # Note: Depending on coordinate system, vertical might be Z or Y.
+        # MuJoCo standard is Z-up. We assume Z is vertical.
+        # CoP is usually 3D on floor (Z=0) or 2D.
+
+        cop_xy = self.cop_position[:, :2]
+        com_xy = self.com_position[:, :2]
+
+        dist = np.linalg.norm(cop_xy - com_xy, axis=1)
+
+        # Inclination Angle (Angle between vertical and CoP-CoM vector)
+        # Vector P = CoM - CoP
+        # If CoP is 2D, assume Z=0
+        if self.cop_position.shape[1] == 2:
+            cop_z = np.zeros(len(self.cop_position))
+        else:
+            cop_z = self.cop_position[:, 2]
+
+        vec = self.com_position - np.column_stack((cop_xy, cop_z))
+
+        # Angle with vertical (Z-axis [0, 0, 1])
+        # dot(v, k) = |v| * |k| * cos(theta)
+        # theta = arccos( v_z / |v| )
+
+        vec_norm = np.linalg.norm(vec, axis=1)
+        # Avoid division by zero
+        vec_norm[vec_norm < 1e-6] = 1.0
+
+        cos_theta = vec[:, 2] / vec_norm
+        # Clip for numerical stability
+        cos_theta = np.clip(cos_theta, -1.0, 1.0)
+
+        angles_rad = np.arccos(cos_theta)
+        angles_deg = np.rad2deg(angles_rad)
+
+        return StabilityMetrics(
+            min_com_cop_distance=float(np.min(dist)),
+            max_com_cop_distance=float(np.max(dist)),
+            mean_com_cop_distance=float(np.mean(dist)),
+            peak_inclination_angle=float(np.max(angles_deg)),
+            mean_inclination_angle=float(np.mean(angles_deg))
+        )
+
+    def compute_coordination_metrics(
+        self,
+        joint_idx_1: int,
+        joint_idx_2: int
+    ) -> CoordinationMetrics | None:
+        """Compute coordination metrics from coupling angles (Vector Coding).
+
+        Classifies coordination into 4 patterns:
+        - In-Phase: Both segments rotating in same direction
+        - Anti-Phase: Segments rotating in opposite directions
+        - Proximal Leading: Proximal segment dominates motion
+        - Distal Leading: Distal segment dominates motion
+
+        Standard binning (Chang et al.):
+        - In-Phase: 45 +/- 22.5, 225 +/- 22.5
+        - Proximal: 0 +/- 22.5, 180 +/- 22.5
+        - Distal: 90 +/- 22.5, 270 +/- 22.5
+        - Anti-Phase: 135 +/- 22.5, 315 +/- 22.5
+
+        Args:
+            joint_idx_1: Proximal joint index (X-axis)
+            joint_idx_2: Distal joint index (Y-axis)
+
+        Returns:
+            CoordinationMetrics object or None
+        """
+        angles = self.compute_coupling_angles(joint_idx_1, joint_idx_2)
+        if len(angles) == 0:
+            return None
+
+        # Bin counts
+        # Map 0-360 to 0-360
+
+        # Define bins centers
+        # Proximal: 0, 180, 360
+        # In-Phase: 45, 225
+        # Distal: 90, 270
+        # Anti-Phase: 135, 315
+
+        # We can map angle to 8 bins of 45 degrees, centered on 0, 45, 90...
+        # Shift by 22.5 to make integer division work easier
+        # (angle + 22.5) // 45
+
+        binned = np.floor((angles + 22.5) / 45.0) % 8
+
+        # 0: 0 +/- 22.5 -> Proximal
+        # 1: 45 +/- 22.5 -> In-Phase
+        # 2: 90 +/- 22.5 -> Distal
+        # 3: 135 +/- 22.5 -> Anti-Phase
+        # 4: 180 +/- 22.5 -> Proximal
+        # 5: 225 +/- 22.5 -> In-Phase
+        # 6: 270 +/- 22.5 -> Distal
+        # 7: 315 +/- 22.5 -> Anti-Phase
+
+        counts = np.bincount(binned.astype(int), minlength=8)
+        total = len(angles)
+
+        proximal_cnt = counts[0] + counts[4]
+        in_phase_cnt = counts[1] + counts[5]
+        distal_cnt = counts[2] + counts[6]
+        anti_phase_cnt = counts[3] + counts[7]
+
+        # Circular statistics for mean and variability
+        # Mean vector
+        angles_rad = np.deg2rad(angles)
+        R = np.sqrt(np.sum(np.cos(angles_rad))**2 + np.sum(np.sin(angles_rad))**2) / total
+        mean_angle_rad = np.arctan2(np.sum(np.sin(angles_rad)), np.sum(np.cos(angles_rad)))
+        mean_angle_deg = np.degrees(mean_angle_rad) % 360.0
+
+        # Circular standard deviation = sqrt(-2 * ln(R))
+        # Note: R is mean resultant length [0, 1]
+        if R < 1.0:
+            circ_std = np.sqrt(-2 * np.log(R))
+            circ_std_deg = np.degrees(circ_std)
+        else:
+            circ_std_deg = 0.0
+
+        return CoordinationMetrics(
+            in_phase_pct=float(in_phase_cnt / total * 100),
+            anti_phase_pct=float(anti_phase_cnt / total * 100),
+            proximal_leading_pct=float(proximal_cnt / total * 100),
+            distal_leading_pct=float(distal_cnt / total * 100),
+            mean_coupling_angle=float(mean_angle_deg),
+            coordination_variability=float(circ_std_deg)
+        )
+
     def generate_comprehensive_report(self) -> dict[str, Any]:
         """Generate comprehensive statistical report.
 
@@ -599,6 +833,16 @@ class StatisticalAnalyzer:
         grf_metrics = self.compute_grf_metrics()
         if grf_metrics:
             report["grf_metrics"] = asdict(grf_metrics)
+
+        # Angular Momentum Metrics
+        am_metrics = self.compute_angular_momentum_metrics()
+        if am_metrics:
+            report["angular_momentum_metrics"] = asdict(am_metrics)
+
+        # Stability Metrics
+        stability_metrics = self.compute_stability_metrics()
+        if stability_metrics:
+            report["stability_metrics"] = asdict(stability_metrics)
 
         # Joint statistics
         report["joints"] = {}
@@ -937,6 +1181,15 @@ class StatisticalAnalyzer:
             writer.writerow(["Sample Rate", report["sample_rate"], "Hz"])
             writer.writerow(["Samples", report["num_samples"], ""])
             writer.writerow([])
+
+            # Stability Metrics (New)
+            if "stability_metrics" in report:
+                writer.writerow(["Stability Metrics"])
+                writer.writerow(["Metric", "Value"])
+                sm = report["stability_metrics"]
+                for key, val in sm.items():
+                    writer.writerow([key.replace("_", " ").title(), f"{val:.4f}"])
+                writer.writerow([])
 
             # Club head speed
             if "club_head_speed" in report:
