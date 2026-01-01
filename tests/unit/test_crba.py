@@ -1,9 +1,10 @@
 """Unit tests for CRBA algorithm."""
 
 import numpy as np
-import pytest
 
-from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.crba import crba
+from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.crba import (
+    crba,
+)
 from shared.python.constants import GRAVITY_M_S2
 
 
@@ -66,7 +67,7 @@ def test_crba_values():
     # I = m*r^2
     model = {}
     model["NB"] = 1
-    model["parent"] = np.array([-1])
+    model["parent"] = np.array([-1], dtype=int)  # type: ignore
     model["jtype"] = ["Rx"]
     model["Xtree"] = [np.eye(6)]
 
@@ -79,8 +80,8 @@ def test_crba_values():
     # For simplicity, let's just set the rotational inertia directly
     # I_xx = I_val
     spatial_inertia = np.zeros((6, 6))
-    spatial_inertia[0, 0] = I_val # Ixx
-    spatial_inertia[3, 3] = m     # mass
+    spatial_inertia[0, 0] = I_val  # Ixx
+    spatial_inertia[3, 3] = m  # mass
     spatial_inertia[4, 4] = m
     spatial_inertia[5, 5] = m
 
