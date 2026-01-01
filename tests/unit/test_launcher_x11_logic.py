@@ -47,8 +47,8 @@ def mocked_launcher():
         # Patch the class to avoid __init__ doing GUI stuff
         class TestLauncher(launchers.golf_launcher.GolfLauncher):
             def __init__(self):
-                self.chk_live = MockQCheckBox(checked=True)
-                self.chk_gpu = MockQCheckBox(checked=False)
+                self.chk_live: MockQCheckBox = MockQCheckBox(checked=True)  # type: ignore[assignment]
+                self.chk_gpu: MockQCheckBox = MockQCheckBox(checked=False)  # type: ignore[assignment]
                 self.model_cards = {}
 
             # Override _launch_docker_container to just return the command checks
@@ -70,7 +70,7 @@ def test_live_view_environment_flags(mocked_launcher):
     # Also mock Path to prevent WindowsPath instantiation on Linux
     mock_path_cls = MagicMock()
     mock_suite_root = MagicMock()
-    mock_suite_root.__str__.return_value = "/mock/suite/root"
+    mock_suite_root.__str__ = Mock(return_value="/mock/suite/root")
     mock_file_path = MagicMock()
     mock_file_path.parent.parent = mock_suite_root
     mock_path_cls.return_value = mock_file_path
@@ -83,7 +83,7 @@ def test_live_view_environment_flags(mocked_launcher):
         # Create a dummy model
         model = MockModel("custom_humanoid")
         abs_path = MagicMock()  # Use Mock for the argument too
-        abs_path.__str__.return_value = "/mock/path"
+        abs_path.__str__ = Mock(return_value="/mock/path")
 
         # Call the method
         launcher._launch_docker_container(model, abs_path)
@@ -115,7 +115,7 @@ def test_headless_environment_flags(mocked_launcher):
     # Mock Path to prevent WindowsPath instantiation on Linux
     mock_path_cls = MagicMock()
     mock_suite_root = MagicMock()
-    mock_suite_root.__str__.return_value = "/mock/suite/root"
+    mock_suite_root.__str__ = Mock(return_value="/mock/suite/root")
     mock_file_path = MagicMock()
     mock_file_path.parent.parent = mock_suite_root
     mock_path_cls.return_value = mock_file_path
