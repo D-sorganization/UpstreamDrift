@@ -194,23 +194,16 @@ class TestOutputManager:
         assert loaded_data["array"] == [1, 2, 3]
 
     def test_save_load_pickle(self, output_manager, sample_dict_data):
-        """Test saving and loading Pickle files."""
+        """Test that Pickle format raises security error."""
         filename = "test_sim"
 
-        # Save
-        path = output_manager.save_simulation_results(
-            sample_dict_data, filename, OutputFormat.PICKLE, engine="mujoco"
-        )
-        assert path.exists()
-        assert path.suffix == ".pickle"
+        # Verify raising ValueError
+        with pytest.raises(ValueError, match="Pickle format is disabled"):
+            output_manager.save_simulation_results(
+                sample_dict_data, filename, OutputFormat.PICKLE, engine="mujoco"
+            )
 
-        # Load
-        loaded_data = output_manager.load_simulation_results(
-            filename, OutputFormat.PICKLE, engine="mujoco"
-        )
-
-        # Pickle preserves numpy arrays
-        np.testing.assert_array_equal(loaded_data["array"], sample_dict_data["array"])
+        # Rely on the raised ValueError as sufficient verification that no file is written.
 
     @pytest.mark.skipif(
         not _has_parquet_support(),
