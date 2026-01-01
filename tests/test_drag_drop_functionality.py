@@ -159,7 +159,7 @@ class TestGridLayout(unittest.TestCase):
             self.assertEqual(launcher.model_order[-2], "urdf_generator")
             self.assertEqual(launcher.model_order[-1], "c3d_viewer")
 
-    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget")
+    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
     @patch("launchers.golf_launcher.ContextHelpDock")
     @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.EngineManager")

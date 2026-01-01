@@ -274,7 +274,7 @@ class TestGolfLauncherGrid(unittest.TestCase):
         self.mock_registry.get_model.side_effect = mock_get_model
 
     @patch("launchers.golf_launcher.GolfLauncher._load_layout")
-    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget")
+    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
     @patch("launchers.golf_launcher.ContextHelpDock")
     @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.EngineManager")
@@ -303,7 +303,7 @@ class TestGolfLauncherGrid(unittest.TestCase):
         )  # 4 mock models + 5 special models = 9
         self.assertEqual(len(launcher.model_order), expected_count)
 
-    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget")
+    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
     @patch("launchers.golf_launcher.ContextHelpDock")
     @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.EngineManager")
