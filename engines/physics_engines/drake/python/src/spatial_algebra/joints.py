@@ -98,21 +98,21 @@ def jcalc(  # noqa: PLR0915
         return xj_transform, S_RZ
 
     elif jtype == "Px":  # Prismatic along x-axis
-        xj_transform = np.eye(6, dtype=np.float64)
+        xj_transform = np.eye(6, dtype=np.float64)  # type: ignore[assignment]
         # -skew([q, 0, 0]) -> [0, 0, 0; 0, 0, q; 0, -q, 0]
         xj_transform[4, 2] = q
         xj_transform[5, 1] = -q
         return xj_transform, S_PX
 
     elif jtype == "Py":  # Prismatic along y-axis
-        xj_transform = np.eye(6, dtype=np.float64)
+        xj_transform = np.eye(6, dtype=np.float64)  # type: ignore[assignment]
         # -skew([0, q, 0]) -> [0, 0, -q; 0, 0, 0; q, 0, 0]
         xj_transform[3, 2] = -q
         xj_transform[5, 0] = q
         return xj_transform, S_PY
 
     elif jtype == "Pz":  # Prismatic along z-axis
-        xj_transform = np.eye(6, dtype=np.float64)
+        xj_transform = np.eye(6, dtype=np.float64)  # type: ignore[assignment]
         # -skew([0, 0, q]) -> [0, q, 0; -q, 0, 0; 0, 0, 0]
         xj_transform[3, 1] = q
         xj_transform[4, 0] = -q
