@@ -110,14 +110,14 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
 
         success, msg = self.registry.set("TEST", 15.0)
         self.assertTrue(success)
-        param = self.registry.get("TEST")
+        param = self.registry.get("TEST")  # type: ignore[assignment]
         self.assertIsNotNone(param)
         assert param is not None  # Type narrowing for MyPy
         self.assertEqual(param.value, 15.0)
 
         success, msg = self.registry.set("TEST", 25.0)
         self.assertFalse(success)
-        param = self.registry.get("TEST")
+        param = self.registry.get("TEST")  # type: ignore[assignment]
         self.assertIsNotNone(param)
         assert param is not None  # Type narrowing for MyPy
         self.assertEqual(param.value, 15.0)  # Should not change
