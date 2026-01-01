@@ -202,7 +202,9 @@ class OutputManager:
 
             elif format_type == OutputFormat.PICKLE:
                 # Security hardening: Disable Pickle
-                raise ValueError("Security: Pickle format is disabled due to deserialization risks. Use JSON or PARQUET.")
+                raise ValueError(
+                    "Security: Pickle format is disabled due to deserialization risks. Use JSON or PARQUET."
+                )
 
             elif format_type == OutputFormat.PARQUET:
                 if isinstance(results, pd.DataFrame):
@@ -267,7 +269,9 @@ class OutputManager:
 
             elif format_type == OutputFormat.PICKLE:
                 # Security hardening: Disable Pickle
-                raise ValueError("Security: Pickle format is disabled due to deserialization risks. Use JSON or PARQUET.")
+                raise ValueError(
+                    "Security: Pickle format is disabled due to deserialization risks. Use JSON or PARQUET."
+                )
 
             elif format_type == OutputFormat.PARQUET:
                 return pd.read_parquet(file_path)

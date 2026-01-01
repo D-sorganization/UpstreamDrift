@@ -1474,7 +1474,9 @@ class GolfLauncher(QMainWindow):
 
             # Security Check: Prevent path traversal
             if not urdf_script.is_relative_to(suite_root):
-                raise ValueError(f"Security violation: Script path {urdf_script} is outside suite root.")
+                raise ValueError(
+                    f"Security violation: Script path {urdf_script} is outside suite root."
+                )
 
             if not urdf_script.exists():
                 QMessageBox.warning(
@@ -1543,7 +1545,9 @@ class GolfLauncher(QMainWindow):
 
             # Security Check: Prevent path traversal
             if not c3d_script.is_relative_to(suite_root):
-                raise ValueError(f"Security violation: Script path {c3d_script} is outside suite root.")
+                raise ValueError(
+                    f"Security violation: Script path {c3d_script} is outside suite root."
+                )
 
             if not c3d_script.exists():
                 QMessageBox.warning(

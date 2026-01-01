@@ -34,12 +34,9 @@ class TestURDFBuilder:
                 "shape": "box",
                 "dimensions": {"length": 1.0, "width": 0.5, "height": 0.5},
                 "position": {"x": 0, "y": 0, "z": 0},
-                "orientation": {"roll": 0, "pitch": 0, "yaw": 0}
+                "orientation": {"roll": 0, "pitch": 0, "yaw": 0},
             },
-            "physics": {
-                "mass": 10.0,
-                "inertia": {"ixx": 0.1, "iyy": 0.1, "izz": 0.1}
-            }
+            "physics": {"mass": 10.0, "inertia": {"ixx": 0.1, "iyy": 0.1, "izz": 0.1}},
         }
         self.builder.add_segment(segment_data)
         assert len(self.builder.segments) == 1
@@ -75,7 +72,9 @@ class TestURDFBuilder:
         """Test that removing a parent removes its children."""
         self.builder.add_segment({"name": "parent", "geometry": {}})
         self.builder.add_segment({"name": "child", "parent": "parent", "geometry": {}})
-        self.builder.add_segment({"name": "grandchild", "parent": "child", "geometry": {}})
+        self.builder.add_segment(
+            {"name": "grandchild", "parent": "child", "geometry": {}}
+        )
 
         assert len(self.builder.segments) == 3
         self.builder.remove_segment("parent")
@@ -87,7 +86,7 @@ class TestURDFBuilder:
 
         new_data = {
             "name": "link1",
-            "geometry": {"shape": "sphere", "dimensions": {"length": 2.0}}
+            "geometry": {"shape": "sphere", "dimensions": {"length": 2.0}},
         }
         self.builder.modify_segment(new_data)
 
@@ -101,26 +100,30 @@ class TestURDFBuilder:
     def test_urdf_generation_structure(self) -> None:
         """Test the structure of the generated URDF XML."""
         # Add a base link
-        self.builder.add_segment({
-            "name": "base",
-            "geometry": {
-                "shape": "cylinder",
-                "dimensions": {"width": 0.2, "length": 1.0}
-            },
-            "physics": {"mass": 5.0}
-        })
+        self.builder.add_segment(
+            {
+                "name": "base",
+                "geometry": {
+                    "shape": "cylinder",
+                    "dimensions": {"width": 0.2, "length": 1.0},
+                },
+                "physics": {"mass": 5.0},
+            }
+        )
 
         # Add a child link with a joint
-        self.builder.add_segment({
-            "name": "arm",
-            "parent": "base",
-            "geometry": {"shape": "box"},
-            "joint": {
-                "type": "revolute",
-                "limits": {"lower": -90, "upper": 90},
-                "axis": {"x": 0, "y": 1, "z": 0}
+        self.builder.add_segment(
+            {
+                "name": "arm",
+                "parent": "base",
+                "geometry": {"shape": "box"},
+                "joint": {
+                    "type": "revolute",
+                    "limits": {"lower": -90, "upper": 90},
+                    "axis": {"x": 0, "y": 1, "z": 0},
+                },
             }
-        })
+        )
 
         xml_str = self.builder.get_urdf()
 
@@ -156,11 +159,9 @@ class TestURDFBuilder:
 
     def test_validation_orphans(self) -> None:
         """Test validation detects orphaned segments."""
-        self.builder.add_segment({
-            "name": "orphan",
-            "parent": "missing_parent",
-            "geometry": {}
-        })
+        self.builder.add_segment(
+            {"name": "orphan", "parent": "missing_parent", "geometry": {}}
+        )
 
         errors = self.builder.validate_urdf()
         assert len(errors) == 1
@@ -177,16 +178,18 @@ class TestURDFBuilder:
 
     def test_materials_handling(self) -> None:
         """Test that materials are correctly added and managed."""
-        self.builder.add_segment({
-            "name": "link1",
-            "geometry": {},
-            "physics": {
-                "material": {
-                    "name": "UserBlue",
-                    "color": {"r": 0, "g": 0, "b": 1, "a": 1}
-                }
+        self.builder.add_segment(
+            {
+                "name": "link1",
+                "geometry": {},
+                "physics": {
+                    "material": {
+                        "name": "UserBlue",
+                        "color": {"r": 0, "g": 0, "b": 1, "a": 1},
+                    }
+                },
             }
-        })
+        )
 
         assert "UserBlue" in self.builder.materials
         xml_str = self.builder.get_urdf()

@@ -113,14 +113,16 @@ class TestDragDropFunctionality(unittest.TestCase):
             Qt.DropAction.MoveAction,
             mime_data,
             Qt.MouseButton.LeftButton,
-            Qt.KeyboardModifier.NoModifier
+            Qt.KeyboardModifier.NoModifier,
         )
 
         # Call dropEvent
         card.dropEvent(event)
 
         # Verify swap called
-        self.mock_launcher._swap_models.assert_called_with("source_model", "target_model")
+        self.mock_launcher._swap_models.assert_called_with(
+            "source_model", "target_model"
+        )
         # Verify event accepted
         self.assertTrue(event.isAccepted())
 
@@ -138,7 +140,7 @@ class TestDragDropFunctionality(unittest.TestCase):
             Qt.DropAction.MoveAction,
             mime_data,
             Qt.MouseButton.LeftButton,
-            Qt.KeyboardModifier.NoModifier
+            Qt.KeyboardModifier.NoModifier,
         )
 
         card.dropEvent(event)
