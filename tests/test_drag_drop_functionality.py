@@ -29,6 +29,7 @@ except ImportError:
 @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
 class TestDragDropFunctionality(unittest.TestCase):
     """Test drag-and-drop functionality in model cards."""
+
     app: Any = None
 
     @classmethod
@@ -90,6 +91,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
 class TestGridLayout(unittest.TestCase):
     """Test 3x3 grid layout functionality."""
+
     app: Any = None
 
     @classmethod
