@@ -87,9 +87,9 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_path = Mock()
         mock_path.__str__ = Mock(return_value="/test/suite/path")
         # Ensure regex replacements work similarly if relying on string conversion
-        setattr(mock_path, 'replace', Mock(
+        mock_path.replace = Mock(
             side_effect=lambda x, y: "/test/suite/path".replace(x, y)
-        ))
+        )
 
         # Prepare mock Path to simulate suite_root
         mock_path_cls = MagicMock()

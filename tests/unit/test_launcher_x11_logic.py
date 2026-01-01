@@ -6,7 +6,7 @@ presence of LIBGL_ALWAYS_INDIRECT which was identified as a critical regression.
 """
 
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 

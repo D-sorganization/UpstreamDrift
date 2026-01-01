@@ -1470,8 +1470,13 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         _, club_pos = self.recorder.get_time_series("club_head_position")
 
+        # Convert club position to numpy array if needed
+        club_head_pos = (
+            np.array(club_pos) if isinstance(club_pos, list) else club_pos
+        )
+
         analyzer = StatisticalAnalyzer(
-            times, q_history, v_history, tau_history, club_head_position=np.array(club_pos) if isinstance(club_pos, list) else club_pos
+            times, q_history, v_history, tau_history, club_head_position=club_head_pos
         )
         report = analyzer.generate_comprehensive_report()
 
