@@ -24,6 +24,9 @@ try:
     from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.aba import (  # noqa: E402
         aba,
     )
+    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.crba import (  # noqa: E402
+        crba,
+    )
     from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.rnea import (  # noqa: E402, I001
         rnea,
     )
@@ -77,6 +80,12 @@ def test_aba_benchmark(benchmark, dynamics_setup):
     """Benchmark the Articulated Body Algorithm."""
     model, q, qd, _, tau = dynamics_setup
     benchmark(aba, model, q, qd, tau)
+
+
+def test_crba_benchmark(benchmark, dynamics_setup):
+    """Benchmark the Composite Rigid Body Algorithm."""
+    model, q, _, _, _ = dynamics_setup
+    benchmark(crba, model, q)
 
 
 def test_rnea_benchmark(benchmark, dynamics_setup):
