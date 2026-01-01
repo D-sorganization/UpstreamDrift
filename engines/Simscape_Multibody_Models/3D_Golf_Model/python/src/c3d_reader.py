@@ -341,7 +341,7 @@ class C3DDataReader:
         if len(units) < len(labels):
             units.extend([""] * (len(labels) - len(units)))
         elif len(units) > len(labels):
-             units = units[:len(labels)]
+            units = units[: len(labels)]
 
         return labels, analog_rate, units
 
@@ -415,9 +415,9 @@ class C3DDataReader:
         }
 
         if normalized_current not in to_meters:
-             raise ValueError(f"Unsupported source unit: {current_units}")
+            raise ValueError(f"Unsupported source unit: {current_units}")
         if normalized_target not in to_meters:
-             raise ValueError(f"Unsupported target unit: {target_units}")
+            raise ValueError(f"Unsupported target unit: {target_units}")
 
         return to_meters[normalized_current] / to_meters[normalized_target]
 
