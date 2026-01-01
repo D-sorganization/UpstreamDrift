@@ -328,6 +328,46 @@ class DraggableModelCard(QFrame):
         lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(lbl_desc)
 
+        # Status Chip
+        status_text, status_color = self._get_status_info()
+        lbl_status = QLabel(status_text)
+        lbl_status.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
+        lbl_status.setStyleSheet(
+            f"background-color: {status_color}; color: white; padding: 2px 6px; border-radius: 4px;"
+        )
+        lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        lbl_status.setFixedWidth(80)  # Fixed width for consistency
+
+        # Center the chip
+        chip_layout = QHBoxLayout()
+        chip_layout.addStretch()
+        chip_layout.addWidget(lbl_status)
+        chip_layout.addStretch()
+        layout.addLayout(chip_layout)
+
+    def _get_status_info(self) -> tuple[str, str]:
+        """Get status text and color based on model type."""
+        t = getattr(self.model, "type", "").lower()
+
+        if t in [
+            "custom_humanoid",
+            "custom_dashboard",
+            "drake",
+            "pinocchio",
+            "openpose",
+        ]:
+            return "GUI Ready", "#28a745"  # Green
+        elif t in ["mjcf"] or str(getattr(self.model, "path", "")).endswith(".xml"):
+            return "Viewer", "#17a2b8"  # Info Blue
+        elif t in ["opensim", "myosim"]:
+            return "Demo / GUI", "#fd7e14"  # Orange
+        elif t in ["matlab", "matlab_app"]:
+            return "External", "#6f42c1"  # Purple
+        elif t in ["urdf_generator", "c3d_viewer"]:
+            return "Utility", "#6c757d"  # Gray
+
+        return "Unknown", "#6c757d"
+
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse press for selection and drag initiation."""
         if event and (
@@ -1813,7 +1853,11 @@ class GolfLauncher(QMainWindow):
                 is_local_fit = True
             else:
                 probe = self.engine_manager.probes.get(engine_type)
-                if probe and probe.is_available():
+                # For opensim/myosim/openpose, force local true if we have a GUI script,
+                # regardless of probe, to trigger the fallback/mock.
+                if model.type in ["opensim", "myosim", "openpose"]:
+                    is_local_fit = True
+                elif probe and probe.is_available():
                     is_local_fit = True
 
         # Override: If User manually selected Docker? (For now, we prioritize Local if available)
@@ -1833,6 +1877,12 @@ class GolfLauncher(QMainWindow):
                     self._custom_launch_drake(path)
                 elif model.type == "pinocchio":
                     self._custom_launch_pinocchio(path)
+                elif model.type == "opensim":
+                    self._custom_launch_opensim(path)
+                elif model.type == "myosim":
+                    self._custom_launch_myosim(path)
+                elif model.type == "openpose":
+                    self._custom_launch_openpose(path)
                 else:
                     self._launch_docker_container(model, path)
             else:
@@ -1958,6 +2008,70 @@ class GolfLauncher(QMainWindow):
             logger.info(f"Pinocchio GUI launched with PID: {process.pid}")
         except Exception as e:
             logger.error(f"Failed to launch Pinocchio: {e}")
+            QMessageBox.critical(self, "Launch Error", str(e))
+
+    def _custom_launch_opensim(self, abs_repo_path: Path) -> None:
+        """Launch the OpenSim GUI directly."""
+        # Use our new GUI script
+        script = REPOS_ROOT / "engines/physics_engines/opensim/python/opensim_gui.py"
+        if not script.exists():
+            QMessageBox.critical(
+                self, "Error", f"OpenSim GUI script not found: {script}"
+            )
+            return
+
+        logger.info(f"Launching OpenSim GUI: {script}")
+        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
+        try:
+            process = subprocess.Popen(
+                [sys.executable, str(script)],
+                cwd=str(script.parent),
+                creationflags=creation_flags,
+            )
+            self.running_processes["opensim_gui"] = process
+        except Exception as e:
+            QMessageBox.critical(self, "Launch Error", str(e))
+
+    def _custom_launch_myosim(self, abs_repo_path: Path) -> None:
+        """Launch the MyoSim GUI directly."""
+        script = REPOS_ROOT / "engines/physics_engines/myosim/python/myosim_gui.py"
+        if not script.exists():
+            QMessageBox.critical(
+                self, "Error", f"MyoSim GUI script not found: {script}"
+            )
+            return
+
+        logger.info(f"Launching MyoSim GUI: {script}")
+        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
+        try:
+            process = subprocess.Popen(
+                [sys.executable, str(script)],
+                cwd=str(script.parent),
+                creationflags=creation_flags,
+            )
+            self.running_processes["myosim_gui"] = process
+        except Exception as e:
+            QMessageBox.critical(self, "Launch Error", str(e))
+
+    def _custom_launch_openpose(self, abs_repo_path: Path) -> None:
+        """Launch the OpenPose GUI directly."""
+        script = REPOS_ROOT / "shared/python/pose_estimation/openpose_gui.py"
+        if not script.exists():
+            QMessageBox.critical(
+                self, "Error", f"OpenPose GUI script not found: {script}"
+            )
+            return
+
+        logger.info(f"Launching OpenPose GUI: {script}")
+        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
+        try:
+            process = subprocess.Popen(
+                [sys.executable, str(script)],
+                cwd=str(script.parent),
+                creationflags=creation_flags,
+            )
+            self.running_processes["openpose_gui"] = process
+        except Exception as e:
             QMessageBox.critical(self, "Launch Error", str(e))
 
     def _launch_docker_container(self, model: Any, abs_repo_path: Path) -> None:
