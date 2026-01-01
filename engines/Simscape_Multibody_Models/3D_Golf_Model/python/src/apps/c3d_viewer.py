@@ -456,15 +456,13 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             sub = df_points.loc[mask]
 
             if not sub.empty:
-                pos = sub[['x', 'y', 'z']].to_numpy()
-                res = sub['residual'].to_numpy()
+                pos = sub[["x", "y", "z"]].to_numpy()
+                res = sub["residual"].to_numpy()
                 markers[name] = MarkerData(name=name, position=pos, residuals=res)
             else:
                 # Handle missing marker if necessary (empty arrays)
                 markers[name] = MarkerData(
-                    name=name,
-                    position=np.empty((0, 3)),
-                    residuals=np.empty((0,))
+                    name=name, position=np.empty((0, 3)), residuals=np.empty((0,))
                 )
 
         # Load Analog Data
@@ -477,10 +475,10 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             zip(metadata_obj.analog_labels, metadata_obj.analog_units, strict=False)
         )
 
-        if not df_analog.empty and 'channel' in df_analog.columns:
-            for name in df_analog['channel'].unique():
-                mask = df_analog['channel'] == name
-                vals = df_analog.loc[mask, 'value'].to_numpy()
+        if not df_analog.empty and "channel" in df_analog.columns:
+            for name in df_analog["channel"].unique():
+                mask = df_analog["channel"] == name
+                vals = df_analog.loc[mask, "value"].to_numpy()
                 unit = units_map.get(name, "")
                 analog[name] = AnalogData(name=name, values=vals, unit=unit)
 
@@ -499,9 +497,9 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             # Metadata doesn't strictly store 'analog_sample_count' but implies it via
             # duration? Or we check one analog channel length.
             if analog:
-                 first_analog = next(iter(analog.values()))
-                 n_samples = len(first_analog.values)
-                 analog_time = np.arange(n_samples) / metadata_obj.analog_rate
+                first_analog = next(iter(analog.values()))
+                n_samples = len(first_analog.values)
+                analog_time = np.arange(n_samples) / metadata_obj.analog_rate
 
         # Metadata dict for UI
         metadata_ui = {
@@ -820,7 +818,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         ax = self.canvas_analysis.add_subplot(111)
         if pos.shape[0] > 2:
             # Speed vs time
-            if 'speed' in locals():
+            if "speed" in locals():
                 # Align length with t (N-1)
                 ax.plot(t[1:], speed, label="Speed")
                 ax.set_title(f"Speed Profile: {marker_name}")
