@@ -97,7 +97,7 @@ class TestDrakeWrapper(unittest.TestCase):
         mock_simulator_instance.AdvanceTo.assert_called()
 
     def test_reset_logic(self):
-        """Test that reset() clears state properly."""
+        """Test that reset() properly resets state to defaults."""
         self.engine.context = MagicMock()
         self.engine.plant_context = MagicMock()
         self.engine.plant = MagicMock()
@@ -108,28 +108,46 @@ class TestDrakeWrapper(unittest.TestCase):
         # Verify context time reset
         self.engine.context.SetTime.assert_called_with(0.0)
 
-        # Verify default context usage (from my fix)
-        self.engine.plant.SetDefaultContext.assert_called_with(
+        # Verify default positions and velocities are set (from my fix)
+        self.engine.plant.SetDefaultPositions.assert_called_with(
+            self.engine.plant_context
+        )
+        self.engine.plant.SetDefaultVelocities.assert_called_with(
             self.engine.plant_context
         )
 
-        # Verify simulator initialization
+        # Verify simulator re-initialization
         self.engine.simulator.Initialize.assert_called_once()
 
-    def test_forward_lazy_eval(self):
-        """Test forward implementation (Lazy Evaluation Pattern)."""
-        # Ensure forward() is a no-op that relies on Drake's internal lazy evaluation mechanisms
-        # It should NOT eagerly compute anything or invalidate the context manually.
-        self.engine.context = MagicMock()
+    def test_forward_computation(self):
+        """Test forward() triggers computation of derived quantities."""
+        self.engine.plant_context = MagicMock()
+        self.engine.plant = MagicMock()
+
+        # Setup plant methods
+        self.engine.plant.num_velocities.return_value = 3
+        self.engine.plant.CalcMassMatrixViaInverseDynamics.return_value = MagicMock()
+        self.engine.plant.CalcInverseDynamics.return_value = MagicMock()
+        self.engine.plant.MakeMultibodyForces.return_value = MagicMock()
+
         self.engine.forward()
 
-        # Assert no aggressive computation was triggered
-        self.engine.context.SetTime.assert_not_called()
-        self.engine.context.SetContinuousState.assert_not_called()
+        # Verify mass matrix computation was triggered (forces forward dynamics)
+        self.engine.plant.CalcMassMatrixViaInverseDynamics.assert_called_once_with(
+            self.engine.plant_context
+        )
 
-        # Verify context remains valid (conceptually)
-        # In a real scenario, we might check if self.engine.context is NOT None
-        self.assertIsNotNone(self.engine.context)
+        # Verify bias forces computation was triggered (ensures kinematics updated)
+        self.engine.plant.CalcInverseDynamics.assert_called_once()
+
+    def test_forward_with_no_context(self):
+        """Test forward() handles missing context gracefully."""
+        self.engine.plant_context = None
+
+        # Should not raise exception, just log warning
+        self.engine.forward()
+
+        # No assertions needed - just verify no exception is raised
 
 
 if __name__ == "__main__":
