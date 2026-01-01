@@ -1530,7 +1530,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         # ZTCF is acceleration (angular), ZVCF is torque (angular)
         # is_accel = "accel" in cf_type  # Unused, but concept is similar
 
-
         for i in range(1, self.model.njoints):
             joint = self.model.joints[i]
             idx_v = joint.idx_v
