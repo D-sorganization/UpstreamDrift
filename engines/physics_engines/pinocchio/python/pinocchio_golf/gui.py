@@ -261,6 +261,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         # Analysis
         self.analyzer: InducedAccelerationAnalyzer | None = None
+        self.latest_induced: dict[str, np.ndarray] | None = None
+        self.latest_cf: dict[str, np.ndarray] | None = None
 
         # Recorder
         self.recorder = PinocchioRecorder()
@@ -411,13 +413,33 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         ellip_layout.addWidget(self.chk_force_ellip)
         vis_layout.addLayout(ellip_layout)
 
+        # Advanced Vectors
+        adv_vec_layout = QtWidgets.QHBoxLayout()
+        self.chk_induced = QtWidgets.QCheckBox("Induced Accel")
+        self.chk_induced.toggled.connect(self._update_viewer)
+        self.combo_induced = QtWidgets.QComboBox()
+        self.combo_induced.addItems(["gravity", "velocity", "total"])
+        self.combo_induced.currentTextChanged.connect(self._update_viewer)
+
+        self.chk_cf = QtWidgets.QCheckBox("Counterfactuals")
+        self.chk_cf.toggled.connect(self._update_viewer)
+        self.combo_cf = QtWidgets.QComboBox()
+        self.combo_cf.addItems(["ztcf_accel", "zvcf_torque"])
+        self.combo_cf.currentTextChanged.connect(self._update_viewer)
+
+        adv_vec_layout.addWidget(self.chk_induced)
+        adv_vec_layout.addWidget(self.combo_induced)
+        adv_vec_layout.addWidget(self.chk_cf)
+        adv_vec_layout.addWidget(self.combo_cf)
+        vis_layout.addLayout(adv_vec_layout)
+
         # Vector Scales
         scale_layout = QtWidgets.QHBoxLayout()
         self.spin_force_scale = QtWidgets.QDoubleSpinBox()
         self.spin_force_scale.setRange(0.01, 10.0)
         self.spin_force_scale.setSingleStep(0.05)
         self.spin_force_scale.setValue(0.1)
-        self.spin_force_scale.setPrefix("F Scale: ")
+        self.spin_force_scale.setPrefix("Scale: ")
         self.spin_force_scale.valueChanged.connect(self._update_viewer)
         scale_layout.addWidget(self.spin_force_scale)
 
@@ -430,20 +452,13 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         scale_layout.addWidget(self.spin_torque_scale)
         vis_layout.addLayout(scale_layout)
 
-        self.chk_forces = QtWidgets.QCheckBox("Show Forces")
-        self.chk_forces.toggled.connect(self._toggle_forces)
-        vis_layout.addWidget(self.chk_forces)
-
-        self.chk_torques = QtWidgets.QCheckBox("Show Torques")
-        self.chk_torques.toggled.connect(self._toggle_torques)
-        vis_layout.addWidget(self.chk_torques)
-
         # Live Analysis Toggle
         self.chk_live_analysis = QtWidgets.QCheckBox("Live Analysis (Induced/CF)")
         self.chk_live_analysis.setToolTip(
             "Compute Induced Accelerations and Counterfactuals in real-time "
             "(Can slow down sim)"
         )
+        self.chk_live_analysis.toggled.connect(self._on_live_analysis_toggled)
         vis_layout.addWidget(self.chk_live_analysis)
 
         vis_group.setLayout(vis_layout)
@@ -465,6 +480,16 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         # Tab 2: Analysis & Plotting
         self._setup_analysis_tab()
+
+    def _on_live_analysis_toggled(self, checked: bool) -> None:
+        """Handle live analysis toggle."""
+        if checked:
+            self.log_write("Live Analysis Enabled")
+        else:
+            self.log_write("Live Analysis Disabled")
+            self.latest_induced = None
+            self.latest_cf = None
+            self._update_viewer()
 
     def _setup_analysis_tab(self) -> None:
         """Setup the analysis and plotting tab."""
@@ -697,43 +722,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 frame.induced_accelerations["specific_control"] = a_spec
 
         plotter = GolfSwingPlotter(self.recorder, self.joint_names)
-        # We pass v_idx (velocity index) because plotting assumes index into
-        # velocity/accel array. But GolfSwingPlotter.get_joint_name uses 'joint_idx'.
-        # For simple 1-DOF joints, v_idx usually maps to joint sequence if we
-        # ignore universe. Pinocchio: universe=0 (nq=0,nv=0), joint1 (idx_q=0, idx_v=0)
-        # So v_idx matches joint_idx-1 usually.
-        # But GolfSwingPlotter expects index into the data array.
-        # If we have specific control, we might want to plot that instead of breakdown,
-        # or add it to breakdown. The plotter breakdown mode looks for 'control'.
-        # If spec_tau is set, we want to compare components.
-        # Let's map 'specific_control' to 'control' JUST for the plotter instance
-        # by mocking or using a temporary source name.
-        # Actually, GolfSwingPlotter.plot_induced_acceleration in breakdown mode
-        # looks for 'control'. If we want to visualize specific source, we should
-        # likely update Plotter to look for 'specific_control' if available, or
-        # we pass 'specific_control' as source if not breakdown.
-
-        # Current logic: Breakdown plots G, V, Total, and optionally 'control'.
-        # If we want to show Specific instead of Total Control, we need to trick it
-        # or update Plotter. But 'control' usually means 'Total Actuation'.
-        # Let's keep breakdown as is (Total) and if specific is set, plotting
-        # 'specific_control' as an extra? The updated Plotter in shared/plotting.py
-        # doesn't look for 'specific_control' automatically.
-        # It looks for 'control' inside the try-except block.
-
-        # To fix the "overwrite" issue without changing Plotter API too much:
-        # We can pass `source_name="specific_control"` if not in breakdown mode.
-        # But user likely wants to see it in context (Breakdown).
-        # We will use the fact that Plotter is generic.
-        # We can temporarily alias 'control' in the recorder accessor?
-        # No, recorder is shared.
-
-        # Safest: Use a custom plotter call or subclass?
-        # Or just tell plotter to plot 'specific_control' as a separate line?
-        # The plotter.plot_induced_acceleration with breakdown=True is hardcoded to
-        # G, V, Total, Control.
-        # I will use 'breakdown' mode, but if specific source is present,
-        # I'll manually add it to the plot after the standard breakdown.
 
         plotter.plot_induced_acceleration(
             self.canvas.fig, "breakdown", joint_idx=v_idx, breakdown_mode=True
@@ -1237,12 +1225,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 pin.computePotentialEnergy(self.model, self.data, self.q)
 
                 # Capture club head data if available
-                # We assume the last body/frame is the club head or end-effector
                 club_head_pos = None
                 club_head_vel = None
 
-                # Find club head body
-                # Heuristic: look for "club" or "head" or take last body
                 club_id = -1
                 for fid in range(self.model.nframes):
                     name = self.model.frames[fid].name.lower()
@@ -1254,16 +1239,12 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                     club_id = self.model.nframes - 1
 
                 if club_id >= 0:
-                    # Get position and velocity
-                    # Need to update frame placement first
-                    # (done in update_viewer usually, but needed here)
                     pin.forwardKinematics(self.model, self.data, self.q, self.v)
                     pin.updateFramePlacements(self.model, self.data)
 
                     frame = self.data.oMf[club_id]
                     club_head_pos = frame.translation.copy()
 
-                    # Velocity
                     v_frame = pin.getFrameVelocity(
                         self.model,
                         self.data,
@@ -1272,7 +1253,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                     )
                     club_head_vel = v_frame.linear.copy()
 
-                # Ensure q is not None for recording
                 q_for_recording = self.q if self.q is not None else np.array([])
 
                 # Induced / Counterfactuals
@@ -1283,10 +1263,12 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 if self.chk_live_analysis.isChecked():
                     if self.analyzer and self.q is not None and self.v is not None:
                         induced = self.analyzer.compute_components(self.q, self.v, tau)
+                        self.latest_induced = induced
                         if hasattr(self.analyzer, "compute_counterfactuals"):
                             counterfactuals = self.analyzer.compute_counterfactuals(
                                 self.q, self.v
                             )
+                            self.latest_cf = counterfactuals
 
                 self.recorder.record_frame(
                     time=self.sim_time,
@@ -1331,6 +1313,11 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         if self.chk_forces.isChecked() or self.chk_torques.isChecked():
             self._draw_vectors()
 
+        if self.chk_induced.isChecked():
+            self._draw_induced_vectors()
+        if self.chk_cf.isChecked():
+            self._draw_cf_vectors()
+
         if self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked():
             self._draw_ellipsoids()
         else:
@@ -1342,18 +1329,12 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         if self.model is None or self.data is None or self.q is None:
             return
 
-        # Compute Jacobian for end-effector (assumed last joint for now)
         joint_id = self.model.njoints - 1
-
-        # We need to ensure Jacobians are computed.
-        # pin.computeJointJacobians(self.model, self.data, self.q)
-        # Done in update loop via FK? No.
         pin.computeJointJacobians(self.model, self.data, self.q)
         J = pin.getJointJacobian(
             self.model, self.data, joint_id, pin.ReferenceFrame.LOCAL
         )
 
-        # Condition number
         try:
             s = np.linalg.svd(J, compute_uv=False)
             cond = s[0] / s[-1] if s[-1] > 1e-9 else float("inf")
@@ -1361,7 +1342,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         except Exception:
             self.lbl_cond.setText("Error")
 
-        # Mass Matrix Rank
         M = pin.crba(self.model, self.data, self.q)
         try:
             rank = np.linalg.matrix_rank(M)
@@ -1374,42 +1354,34 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         if self.model is None or self.data is None or self.viewer is None:
             return
 
-        # End effector joint
         joint_id = self.model.njoints - 1
         joint_pos = self.data.oMi[joint_id].translation
 
-        # Get Jacobian (Translational only for 3D visualization)
         J_full = pin.getJointJacobian(
             self.model,
             self.data,
             joint_id,
             pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
         )
-        J = J_full[:3, :]  # Linear part
+        J = J_full[:3, :]
 
-        # Mass Matrix
         M = pin.crba(self.model, self.data, self.q)
-        # Ensure symmetric if using older pin version
         M_sym = np.triu(M) + np.triu(M, 1).T
 
         try:
             Minv = np.linalg.inv(M_sym)
             Lambda_inv = J @ Minv @ J.T
 
-            # Eigen decomposition
             eigvals, eigvecs = np.linalg.eigh(Lambda_inv)
 
             if self.chk_mobility.isChecked():
-                # Radii = sqrt(eigenvalues)
                 radii = np.sqrt(np.maximum(eigvals, 1e-6))
                 self._draw_ellipsoid_meshcat(
                     "mobility", joint_pos, eigvecs, radii, 0x00FF00
                 )
 
             if self.chk_force_ellip.isChecked():
-                # Radii = 1/sqrt(eigenvalues)
                 radii_force = 1.0 / np.sqrt(np.maximum(eigvals, 1e-6))
-                # Clip to reasonable visual size
                 radii_force = np.clip(radii_force, 0.01, 5.0)
                 self._draw_ellipsoid_meshcat(
                     "force", joint_pos, eigvecs, radii_force, 0xFF0000
@@ -1432,15 +1404,11 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         path = f"overlays/ellipsoids/{name}"
 
-        # Meshcat Sphere scaled
         self.viewer[path].set_object(
             g.Sphere(1.0),
             g.MeshLambertMaterial(color=color, opacity=0.5, transparent=True),
         )
 
-        # Transform: [Rot * Diag(radii) | Pos]
-        # Meshcat applies transform to the object.
-        # We need to construct 4x4 matrix
         T = np.eye(4)
         T[:3, :3] = rot @ np.diag(radii)
         T[:3, 3] = pos
@@ -1452,14 +1420,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         if self.model is None or self.data is None or self.viewer is None:
             return
 
-        # We need accelerations for RNEA to get consistent joint forces.
-        # If in kinematic mode, assume zero v/a.
         v = self.v if self.v is not None else np.zeros(self.model.nv)
-        # Use ABA to get a if it hasn't been computed recently
         a = pin.aba(self.model, self.data, self.q, v, np.zeros(self.model.nv))
 
-        # Compute reaction forces via RNEA
-        # self.data.f will contain spatial forces at each joint
         pin.rnea(self.model, self.data, self.q, v, a)
 
         force_scale = self.spin_force_scale.value()
@@ -1467,33 +1430,134 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         for i in range(1, self.model.njoints):
             joint_placement = self.data.oMi[i]
-            # f is a spatial force (linear part = forces, angular part = torques)
             f_local = self.data.f[i]
 
-            # Linear force in world frame
             f_world = joint_placement.rotation @ f_local.linear
-            # Angular torque in world frame
             t_world = joint_placement.rotation @ f_local.angular
 
             joint_name = self.model.names[i]
 
-            # Draw Force
             if self.chk_forces.isChecked() and np.linalg.norm(f_world) > 1e-3:
                 self._draw_arrow(
                     f"overlays/forces/{joint_name}",
                     joint_placement.translation,
                     f_world * force_scale,
-                    0xFF0000,  # Red for force
+                    0xFF0000,
                 )
 
-            # Draw Torque
             if self.chk_torques.isChecked() and np.linalg.norm(t_world) > 1e-3:
                 self._draw_arrow(
                     f"overlays/torques/{joint_name}",
                     joint_placement.translation,
                     t_world * torque_scale,
-                    0x0000FF,  # Blue for torque
+                    0x0000FF,
                 )
+
+    def _draw_induced_vectors(self) -> None:
+        """Draw induced acceleration vectors."""
+        if (
+            self.model is None
+            or self.data is None
+            or self.viewer is None
+            or self.latest_induced is None
+        ):
+            return
+
+        source = self.combo_induced.currentText()
+        if source not in self.latest_induced:
+            return
+
+        accels = self.latest_induced[source]
+        scale = self.spin_torque_scale.value()  # Use torque scale for now
+
+        for i in range(1, self.model.njoints):
+            joint = self.model.joints[i]
+            idx_v = joint.idx_v
+            nv = joint.nv
+            if nv != 1:
+                continue
+
+            # Get acceleration scalar
+            alpha = accels[idx_v]
+            if abs(alpha) < 1e-3:
+                continue
+
+            # Get joint axis in world frame
+            # Transform motion subspace to world
+            oMi = self.data.oMi[i]
+            # Spatial motion vector in local frame
+            # For Revolute, it is angular around axis
+            # S is 6x1.
+            S = joint.S
+            # Spatial accel in local frame
+            a_local = S * alpha
+            # Transform to world
+            # Action matrix: [R 0; [p]xR R]
+            # Actually se3 action.
+            a_world = oMi.act(a_local)
+
+            # Draw angular part (top 3)
+            # Or linear part (bottom 3)
+            # For revolute, angular is primary.
+            vec = a_world.angular
+            if np.linalg.norm(vec) < 1e-6:
+                vec = a_world.linear
+
+            self._draw_arrow(
+                f"overlays/induced/{self.model.names[i]}",
+                oMi.translation,
+                vec * scale,
+                0xFF00FF,  # Magenta
+            )
+
+    def _draw_cf_vectors(self) -> None:
+        """Draw Counterfactual vectors."""
+        if (
+            self.model is None
+            or self.data is None
+            or self.viewer is None
+            or self.latest_cf is None
+        ):
+            return
+
+        cf_type = self.combo_cf.currentText()
+        if cf_type not in self.latest_cf:
+            return
+
+        vals = self.latest_cf[cf_type]
+        scale = self.spin_torque_scale.value()
+
+        # ZTCF is acceleration, ZVCF is torque
+        is_accel = "accel" in cf_type
+
+        for i in range(1, self.model.njoints):
+            joint = self.model.joints[i]
+            idx_v = joint.idx_v
+            nv = joint.nv
+            if nv != 1:
+                continue
+
+            val = vals[idx_v]
+            if abs(val) < 1e-3:
+                continue
+
+            oMi = self.data.oMi[i]
+            S = joint.S
+            # Transform to world spatial vector
+            spatial_vec = oMi.act(S * val)
+
+            # If accel, use angular. If torque, use angular.
+            # Both are rotational usually for golf.
+            vec = spatial_vec.angular
+            if np.linalg.norm(vec) < 1e-6:
+                vec = spatial_vec.linear
+
+            self._draw_arrow(
+                f"overlays/cf/{self.model.names[i]}",
+                oMi.translation,
+                vec * scale,
+                0xFFFF00,  # Yellow
+            )
 
     def _draw_arrow(
         self, path: str, start: np.ndarray, vector: np.ndarray, color: int
@@ -1502,9 +1566,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         if self.viewer is None:
             return
 
-        # Note: Meshcat Arrow might not exist in all versions, using a Line for now
-        # as it is highly compatible. Arrows can be added with Triad or custom mesh.
-        # Simplified: Draw a line from start to start + vector
         points = np.vstack([start, start + vector]).T.astype(np.float32)
         self.viewer[path].set_object(
             g.Line(g.PointsGeometry(points), g.LineBasicMaterial(color=color))
@@ -1514,21 +1575,11 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         if self.model is None or self.data is None or self.viewer is None:
             return
 
-        # Visualize joint frames (oMf)
-        # To optimize performance, we create frame objects once and update their
-        # transforms each frame. The Meshcat Python client caches objects, so
-        # updating transforms is efficient for visualization.
         for i, frame in enumerate(self.model.frames):
             if frame.name == "universe":
                 continue
 
-            # Update transform
             transform = self.data.oMf[i]
-            # Convert Pinocchio SE3 (transform) to a 4x4 homogeneous transformation
-            # matrix.
-            # Pinocchio's SE3.homogeneous property returns a 4x4 matrix representing
-            # the pose in the world frame. Meshcat's set_transform expects a 4x4
-            # column-major matrix (compatible with this layout).
             homogeneous_matrix = transform.homogeneous
             self.viewer[f"overlays/frames/{frame.name}"].set_transform(
                 homogeneous_matrix
@@ -1538,16 +1589,11 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         if self.model is None or self.data is None or self.viewer is None:
             return
 
-        # Draw Center of Mass for each link
         for i in range(1, self.model.njoints):
-            # Joint i. Associated body has inertia.
             inertia = self.model.inertias[i]
             joint_transform = self.data.oMi[i]
-            # Compute world-frame COM for each body by transforming the local COM
-            # (inertia.lever) through the joint placement (joint_transform).
             com_world = joint_transform.act(inertia.lever)
 
-            # Update Sphere Position
             self.viewer[f"overlays/coms/{self.model.names[i]}"].set_transform(
                 pin.SE3(np.eye(3), com_world).homogeneous
             )
@@ -1560,12 +1606,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         if not checked:
             self.viewer["overlays/frames"].delete()
         else:
-            # Create objects once
             if self.model:
                 for frame in self.model.frames:
                     if frame.name == "universe":
                         continue
-                    # Triad
                     self.viewer[f"overlays/frames/{frame.name}"].set_object(
                         g.triad(scale=0.1)
                     )
