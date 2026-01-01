@@ -57,7 +57,6 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
     xup = np.empty((nb, 6, 6))
     s_subspace: list[np.ndarray] = []
     dof_indices: list[int] = []  # Cache active DOF indices
-    # ic_composite will be initialized later
 
     h_matrix = np.zeros((nb, nb))
 
@@ -77,7 +76,8 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
 
     # --- Backward pass: compute composite inertias ---
     # Initialize composite inertias with body inertias
-    ic_composite: list[np.ndarray] = [i_mat.copy() for i_mat in model["I"]]
+    # OPTIMIZATION: Bulk copy is faster than element-wise copy in loop
+    ic_composite = np.array(model["I"], dtype=float)
 
     # Accumulate inertias from children to parents
     for i in range(nb - 1, -1, -1):
