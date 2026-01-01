@@ -18,6 +18,7 @@ import threading
 import time
 import webbrowser
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 from PyQt6.QtCore import QMimeData, QPoint, Qt, QThread, QTimer, pyqtSignal
@@ -38,10 +39,13 @@ from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QDialog,
+    QDialogButtonBox,
     QFrame,
     QGridLayout,
     QHBoxLayout,
     QLabel,
+    QListWidget,
+    QListWidgetItem,
     QMainWindow,
     QMessageBox,
     QPushButton,
@@ -96,9 +100,61 @@ MODEL_IMAGES = {
     "Matlab Simscape": "simscape_multibody.png",
     "URDF Generator": "urdf_icon.png",
     "C3D Motion Viewer": "c3d_icon.png",  # Add C3D viewer icon
+    "Dataset Generator GUI": "simscape_multibody.png",
+    "Golf Swing Analysis GUI": "simscape_multibody.png",
+    "MATLAB Code Analyzer": "simscape_multibody.png",
 }
 
 DOCKER_STAGES = ["all", "mujoco", "pinocchio", "drake", "base"]
+
+SPECIAL_APPS = [
+    SimpleNamespace(
+        id="urdf_generator",
+        name="URDF Generator",
+        description="Interactive URDF model builder",
+        type="utility",
+        path="tools/urdf_generator/launch_urdf_generator.py",
+    ),
+    SimpleNamespace(
+        id="c3d_viewer",
+        name="C3D Motion Viewer",
+        description="C3D motion capture file viewer and analyzer",
+        type="utility",
+        path=(
+            "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
+        ),
+    ),
+    SimpleNamespace(
+        id="matlab_dataset_gui",
+        name="Dataset Generator GUI",
+        description="MATLAB forward dynamics dataset generator",
+        type="matlab_app",
+        path=(
+            "engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/"
+            "dataset_generator/Dataset_GUI.m"
+        ),
+    ),
+    SimpleNamespace(
+        id="matlab_golf_gui",
+        name="Golf Swing Analysis GUI",
+        description="MATLAB plotting suite with skeleton visualization",
+        type="matlab_app",
+        path=(
+            "engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/"
+            "golf_gui/2D GUI/main_scripts/golf_swing_analysis_gui.m"
+        ),
+    ),
+    SimpleNamespace(
+        id="matlab_code_analyzer",
+        name="MATLAB Code Analyzer",
+        description="Static analysis and code quality dashboard",
+        type="matlab_app",
+        path=(
+            "engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/"
+            "code_analysis_gui/launchCodeAnalyzer.m"
+        ),
+    ),
+]
 
 
 class GolfSplashScreen(QSplashScreen):
@@ -611,6 +667,62 @@ class HelpDialog(QDialog):
         layout.addWidget(btn)
 
 
+class LayoutManagerDialog(QDialog):
+    """Dialog allowing users to add or remove launcher tiles."""
+
+    def __init__(
+        self, available_models: dict[str, Any], active_models: list[str], parent: QWidget | None
+    ) -> None:
+        super().__init__(parent)
+        self.setWindowTitle("Customize Launcher Tiles")
+        self.resize(520, 520)
+
+        layout = QVBoxLayout(self)
+
+        description = QLabel(
+            "Select which applications should appear on the launcher grid. "
+            "Checked items will be visible while unchecked items will be hidden."
+        )
+        description.setWordWrap(True)
+        layout.addWidget(description)
+
+        self.list_widget = QListWidget()
+
+        sorted_models = sorted(
+            available_models.values(), key=lambda model: str(getattr(model, "name", "")).lower()
+        )
+
+        for model in sorted_models:
+            item = QListWidgetItem(f"{model.name} — {model.description}")
+            item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
+            item.setCheckState(
+                Qt.CheckState.Checked if model.id in active_models else Qt.CheckState.Unchecked
+            )
+            item.setData(Qt.ItemDataRole.UserRole, model.id)
+            self.list_widget.addItem(item)
+
+        layout.addWidget(self.list_widget)
+
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        layout.addWidget(buttons)
+
+    def selected_ids(self) -> list[str]:
+        """Return IDs of all checked models."""
+
+        selections: list[str] = []
+        for i in range(self.list_widget.count()):
+            item = self.list_widget.item(i)
+            if item and item.checkState() == Qt.CheckState.Checked:
+                model_id = item.data(Qt.ItemDataRole.UserRole)
+                if model_id:
+                    selections.append(str(model_id))
+        return selections
+
+
 class GolfLauncher(QMainWindow):
     """Main application window for the launcher."""
 
@@ -651,6 +763,8 @@ class GolfLauncher(QMainWindow):
         self.running_processes: dict[str, subprocess.Popen] = (
             {}
         )  # Track running instances
+        self.available_models: dict[str, Any] = {}
+        self.special_app_lookup: dict[str, SimpleNamespace] = {}
 
         # Load Registry
         try:
@@ -669,6 +783,9 @@ class GolfLauncher(QMainWindow):
             logger.warning(f"Failed to initialize EngineManager: {e}")
             self.engine_manager = None
 
+        self._build_available_models()
+        self._initialize_model_order()
+
         self.init_ui()
         self.check_docker()
 
@@ -679,6 +796,38 @@ class GolfLauncher(QMainWindow):
         self.cleanup_timer = QTimer(self)
         self.cleanup_timer.timeout.connect(self._cleanup_processes)
         self.cleanup_timer.start(10000)  # Clean up every 10 seconds
+
+    def _build_available_models(self) -> None:
+        """Collect all known models and auxiliary applications."""
+
+        if self.registry:
+            for model in self.registry.get_all_models():
+                self.available_models[model.id] = model
+
+        for app in SPECIAL_APPS:
+            self.available_models[app.id] = app
+            self.special_app_lookup[app.id] = app
+
+    def _initialize_model_order(self) -> None:
+        """Set a sensible default grid ordering."""
+
+        default_ids: list[str] = []
+        if self.registry:
+            default_ids.extend([m.id for m in self.registry.get_all_models()[:10]])
+
+        default_ids.extend(
+            [
+                "urdf_generator",
+                "c3d_viewer",
+                "matlab_dataset_gui",
+                "matlab_golf_gui",
+                "matlab_code_analyzer",
+            ]
+        )
+
+        self.model_order = [
+            model_id for model_id in default_ids if model_id in self.available_models
+        ]
 
     def _save_layout(self) -> None:
         """Save the current model layout to configuration file."""
@@ -713,6 +862,54 @@ class GolfLauncher(QMainWindow):
         except Exception as e:
             logger.error(f"Failed to save layout: {e}")
 
+    def _sync_model_cards(self) -> None:
+        """Ensure widgets match the current model order."""
+
+        # Remove cards that are no longer selected
+        for model_id in list(self.model_cards.keys()):
+            if model_id not in self.model_order:
+                widget = self.model_cards.pop(model_id)
+                widget.setParent(None)
+                widget.deleteLater()
+
+        # Create cards for any newly added models
+        for model_id in self.model_order:
+            if model_id not in self.model_cards:
+                model = self._get_model(model_id)
+                if model:
+                    self.model_cards[model_id] = DraggableModelCard(model, self)
+
+    def _apply_model_selection(self, selected_ids: list[str]) -> None:
+        """Apply a new set of selected models from the layout dialog."""
+
+        ordered_selection = [
+            model_id for model_id in self.model_order if model_id in selected_ids
+        ]
+
+        for model_id in selected_ids:
+            if model_id not in ordered_selection and model_id in self.available_models:
+                ordered_selection.append(model_id)
+
+        self.model_order = ordered_selection
+        self._sync_model_cards()
+        self._rebuild_grid()
+        self._save_layout()
+
+        if self.selected_model not in self.model_order:
+            self.selected_model = self.model_order[0] if self.model_order else None
+        self.update_launch_button()
+
+    def _get_model(self, model_id: str) -> Any | None:
+        """Retrieve a model or application by ID."""
+
+        if model_id in self.available_models:
+            return self.available_models[model_id]
+
+        if self.registry:
+            return self.registry.get_model(model_id)
+
+        return None
+
     def center_window(self) -> None:
         """Center the window on the primary screen."""
         screen = self.screen()
@@ -736,13 +933,16 @@ class GolfLauncher(QMainWindow):
                 layout_data = json.load(f)
 
             # Restore model order if valid
-            saved_order = layout_data.get("model_order", [])
-            if saved_order and len(saved_order) == len(self.model_order):
-                # Verify all models still exist
-                if all(model_id in self.model_cards for model_id in saved_order):
-                    self.model_order = saved_order
-                    self._rebuild_grid()  # Use _rebuild_grid as it exists
-                    logger.info("Model layout restored from saved configuration")
+            saved_order = [
+                model_id
+                for model_id in layout_data.get("model_order", [])
+                if model_id in self.available_models
+            ]
+            if saved_order:
+                self.model_order = saved_order
+                self._sync_model_cards()
+                self._rebuild_grid()
+                logger.info("Model layout restored from saved configuration")
 
             # Restore window geometry
             geo = layout_data.get("window_geometry", {})
@@ -896,6 +1096,12 @@ class GolfLauncher(QMainWindow):
         )
         top_bar.addWidget(self.btn_modify_layout)
 
+        self.btn_customize_tiles = QPushButton("Edit Tiles")
+        self.btn_customize_tiles.setEnabled(False)
+        self.btn_customize_tiles.setToolTip("Add or remove launcher tiles in edit mode")
+        self.btn_customize_tiles.clicked.connect(self.open_layout_manager)
+        top_bar.addWidget(self.btn_customize_tiles)
+
         btn_env = QPushButton("Manage Environment")
         btn_env.clicked.connect(self.open_environment_manager)
         top_bar.addWidget(btn_env)
@@ -916,47 +1122,18 @@ class GolfLauncher(QMainWindow):
         self.grid_layout = QGridLayout(grid_widget)
         self.grid_layout.setSpacing(20)
 
-        # Populate Grid - 3x4 layout with URDF generator and C3D viewer
+        self._sync_model_cards()
+
         row, col = 0, 0
-        if self.registry:
-            # Get first 10 models plus add URDF generator and C3D viewer as 11th and 12th
-            models = self.registry.get_all_models()[:10]
-
-            # Add URDF generator as a special model
-            urdf_model = type(
-                "URDFModel",
-                (),
-                {
-                    "id": "urdf_generator",
-                    "name": "URDF Generator",
-                    "description": "Interactive URDF model builder",
-                    "type": "urdf_generator",
-                },
-            )()
-            models.append(urdf_model)
-
-            # Add C3D viewer as a special model
-            c3d_model = type(
-                "C3DModel",
-                (),
-                {
-                    "id": "c3d_viewer",
-                    "name": "C3D Motion Viewer",
-                    "description": "C3D motion capture file viewer and analyzer",
-                    "type": "c3d_viewer",
-                },
-            )()
-            models.append(c3d_model)
-
-            for model in models:
-                card = DraggableModelCard(model, self)
-                self.model_cards[model.id] = card  # Use ID as key
-                self.model_order.append(model.id)  # Track order
-                self.grid_layout.addWidget(card, row, col)
-                col += 1
-                if col >= GRID_COLUMNS:
-                    col = 0
-                    row += 1
+        for model_id in self.model_order:
+            card = self.model_cards.get(model_id)
+            if not card:
+                continue
+            self.grid_layout.addWidget(card, row, col)
+            col += 1
+            if col >= GRID_COLUMNS:
+                col = 0
+                row += 1
 
         grid_area.setWidget(grid_widget)
         main_layout.addWidget(grid_area)
@@ -998,17 +1175,12 @@ class GolfLauncher(QMainWindow):
         self.apply_styles()
 
         # Select first model by default if available
-        if self.registry:
-            models = self.registry.get_all_models()
-            if models:
-                # Prefer MuJoCo Humanoid if available
-                humanoid = next(
-                    (m for m in models if m.name == "MuJoCo Humanoid"), None
-                )
-                if humanoid:
-                    self.select_model(humanoid.id)
-                else:
-                    self.select_model(models[0].id)
+        if self.model_order:
+            preferred_id = next(
+                (mid for mid in self.model_order if mid == "mujoco_humanoid"),
+                self.model_order[0],
+            )
+            self.select_model(preferred_id)
 
     def _swap_models(self, source_id: str, target_id: str) -> None:
         """Swap two models in the grid layout."""
@@ -1035,6 +1207,8 @@ class GolfLauncher(QMainWindow):
 
     def _rebuild_grid(self) -> None:
         """Rebuild the grid layout based on current model order."""
+        self._sync_model_cards()
+
         # Clear the layout
         for i in reversed(range(self.grid_layout.count())):
             item = self.grid_layout.itemAt(i)
@@ -1261,16 +1435,59 @@ class GolfLauncher(QMainWindow):
                 self, "Launch Error", f"Failed to launch C3D Viewer:\n{e}"
             )
 
+    def _launch_matlab_app(self, app: SimpleNamespace) -> None:
+        """Launch a MATLAB-based application using batch mode."""
+
+        app_id = getattr(app, "id", "matlab_app")
+        if self._is_process_running(app_id):
+            QMessageBox.information(
+                self,
+                "Already Running",
+                f"{app.name} is already running.\n\n"
+                "Please close the existing instance before launching a new one.",
+            )
+            return
+
+        app_path = REPOS_ROOT / Path(app.path)
+        if not app_path.exists():
+            QMessageBox.warning(
+                self,
+                "MATLAB App Not Found",
+                f"Unable to find the MATLAB app entry point at:\n{app_path}",
+            )
+            return
+
+        working_dir = app_path.parent
+        entrypoint = app_path.stem
+        matlab_command = (
+            f"cd('{working_dir.as_posix()}');"
+            f"addpath(genpath('{working_dir.as_posix()}'));"
+            f"{entrypoint}();"
+        )
+
+        try:
+            process = subprocess.Popen(
+                ["matlab", "-batch", matlab_command], cwd=str(working_dir)
+            )
+            self.running_processes[app_id] = process
+            logger.info("Launched MATLAB app %s with PID %s", app.name, process.pid)
+        except Exception as exc:
+            logger.error("Failed to launch MATLAB app %s: %s", app.name, exc)
+            QMessageBox.critical(
+                self,
+                "Launch Error",
+                f"Failed to launch {app.name}:\n{exc}",
+            )
+
     def select_model(self, model_id: str) -> None:
         """Select a model and update UI."""
         self.selected_model = model_id
 
         # Get model name for display
         model_name = model_id
-        if self.registry:
-            model = self.registry.get_model(model_id)
-            if model:
-                model_name = model.name
+        model = self._get_model(model_id)
+        if model:
+            model_name = model.name
 
         # Update Styles for draggable cards
         for m_id, card in self.model_cards.items():
@@ -1304,15 +1521,28 @@ class GolfLauncher(QMainWindow):
     def update_launch_button(self, model_name: str | None = None) -> None:
         """Update the launch button state."""
         model_type = None
-        if self.selected_model and self.registry:
-            model = self.registry.get_model(self.selected_model)
+        model = None
+        if self.selected_model:
+            model = self._get_model(self.selected_model)
             if model:
                 model_name = model.name
-                model_type = model.type
+                model_type = getattr(model, "type", None)
 
         if not self.selected_model:
             self.btn_launch.setEnabled(False)
             self.btn_launch.setText("SELECT A MODEL")
+            return
+
+        if model_type in {"matlab_app", "utility"} or (
+            self.selected_model in self.special_app_lookup
+        ):
+            label_suffix = "(MATLAB)" if model_type == "matlab_app" else ""
+            display_name = str(model_name).upper()
+            self.btn_launch.setEnabled(True)
+            self.btn_launch.setText(
+                f"LAUNCH {display_name} {label_suffix}".strip()
+            )
+            self.btn_launch.setStyleSheet("background-color: #28a745; color: white;")
             return
 
         # Check local availability first
@@ -1476,14 +1706,15 @@ class GolfLauncher(QMainWindow):
             self._launch_c3d_viewer()
             return
 
-        if not self.registry:
-            QMessageBox.critical(self, "Error", "Model registry is unavailable.")
+        special_app = self.special_app_lookup.get(model_id)
+        if special_app and getattr(special_app, "type", None) == "matlab_app":
+            self._launch_matlab_app(special_app)
             return
 
-        model = self.registry.get_model(model_id)
+        model = self._get_model(model_id)
         if not model:
             QMessageBox.critical(
-                self, "Error", f"Model not found in registry: {model_id}"
+                self, "Error", f"Model not found: {model_id}"
             )
             return
 
@@ -1722,6 +1953,24 @@ class GolfLauncher(QMainWindow):
                 card.setCursor(Qt.CursorShape.OpenHandCursor)
             else:
                 card.setCursor(Qt.CursorShape.PointingHandCursor)
+
+        self.btn_customize_tiles.setEnabled(self.layout_edit_mode)
+
+    def open_layout_manager(self) -> None:
+        """Allow users to add or remove available launcher tiles."""
+
+        if not self.layout_edit_mode:
+            QMessageBox.information(
+                self,
+                "Layout Locked",
+                "Enable layout editing to add or remove tiles.",
+            )
+            return
+
+        dialog = LayoutManagerDialog(self.available_models, self.model_order, self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            selections = dialog.selected_ids()
+            self._apply_model_selection(selections)
 
     def _is_process_running(self, process_key: str) -> bool:
         """Check if a process is still running.
