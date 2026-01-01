@@ -12,6 +12,7 @@ Tests cover:
 import sys
 import unittest
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 # Add shared modules to path for testing
@@ -29,13 +30,13 @@ except ImportError:
 class TestSharedModuleImports(unittest.TestCase):
     """Test that shared modules can be imported correctly."""
 
-    def test_configuration_manager_import(self):
+    def test_configuration_manager_import(self) -> None:
         """Test configuration manager import."""
         try:
             from shared.python.configuration_manager import ConfigurationManager
 
             # Test that we can instantiate it with required config_path
-            config_manager = ConfigurationManager("dummy_config.json")
+            config_manager = ConfigurationManager(Path("dummy_config.json"))
             self.assertIsNotNone(config_manager)
         except ImportError as e:
             self.fail(f"Failed to import ConfigurationManager: {e}")
@@ -43,18 +44,18 @@ class TestSharedModuleImports(unittest.TestCase):
             # If instantiation fails due to missing file, that's expected in tests
             self.assertTrue(True, f"ConfigurationManager import successful: {e}")
 
-    def test_process_worker_import(self):
+    def test_process_worker_import(self) -> None:
         """Test process worker import."""
         try:
             from shared.python.process_worker import ProcessWorker
 
             # Test that we can instantiate it with required cmd
-            worker = ProcessWorker("echo test")
+            worker = ProcessWorker(["echo", "test"])
             self.assertIsNotNone(worker)
         except ImportError as e:
             self.fail(f"Failed to import ProcessWorker: {e}")
 
-    def test_engine_manager_import(self):
+    def test_engine_manager_import(self) -> None:
         """Test engine manager import."""
         try:
             from shared.python.engine_manager import EngineManager, EngineType
@@ -71,26 +72,26 @@ class TestSharedModuleImports(unittest.TestCase):
 class TestEngineManager(unittest.TestCase):
     """Test engine manager functionality."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         from shared.python.engine_manager import EngineManager
 
         self.manager = EngineManager()
 
-    def test_engine_discovery(self):
+    def test_engine_discovery(self) -> None:
         """Test that engines are discovered correctly."""
         engines = self.manager.get_available_engines()
         self.assertIsInstance(engines, list)
         self.assertGreater(len(engines), 0, "Should discover at least one engine")
 
-    def test_engine_paths_exist(self):
+    def test_engine_paths_exist(self) -> None:
         """Test that engine paths are properly configured."""
         for _engine_type, path in self.manager.engine_paths.items():
             self.assertIsInstance(path, Path)
             # Note: Not all engines may be installed, so we don't require existence
 
     @patch("shared.python.engine_manager.EngineManager.get_probe_result")
-    def test_probe_system(self, mock_get_result):
+    def test_probe_system(self, mock_get_result: MagicMock) -> None:
         """Test engine probe system."""
         from shared.python.engine_manager import EngineType
 
@@ -112,15 +113,17 @@ class TestEngineManager(unittest.TestCase):
 class TestDraggableModelCard(unittest.TestCase):
     """Test drag-and-drop functionality in model cards."""
 
+    app: Any = None
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
         if not QApplication.instance():
             cls.app = QApplication([])
         else:
             cls.app = QApplication.instance()
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         # Mock model object
         self.mock_model = Mock()
@@ -134,7 +137,7 @@ class TestDraggableModelCard(unittest.TestCase):
         self.mock_launcher._swap_models = Mock()
         self.mock_launcher.launch_model_direct = Mock()
 
-    def test_draggable_card_creation(self):
+    def test_draggable_card_creation(self) -> None:
         """Test that draggable model cards can be created."""
         from launchers.golf_launcher import DraggableModelCard
 
@@ -144,7 +147,7 @@ class TestDraggableModelCard(unittest.TestCase):
         self.assertEqual(card.parent_launcher, self.mock_launcher)
         self.assertTrue(card.acceptDrops())
 
-    def test_mouse_press_selection(self):
+    def test_mouse_press_selection(self) -> None:
         """Test that mouse press selects the model."""
         from launchers.golf_launcher import DraggableModelCard
 
@@ -175,7 +178,7 @@ class TestDraggableModelCard(unittest.TestCase):
         # Verify model selection was called
         self.mock_launcher.select_model.assert_called_once_with("test_model")
 
-    def test_double_click_launch(self):
+    def test_double_click_launch(self) -> None:
         """Test that double-click launches the model."""
         from launchers.golf_launcher import DraggableModelCard
 
@@ -189,7 +192,7 @@ class TestDraggableModelCard(unittest.TestCase):
         # Verify launch was called
         self.mock_launcher.launch_model_direct.assert_called_once_with("test_model")
 
-    def test_drag_enter_event(self):
+    def test_drag_enter_event(self) -> None:
         """Test drag enter event handling."""
         from launchers.golf_launcher import DraggableModelCard
 
@@ -207,7 +210,7 @@ class TestDraggableModelCard(unittest.TestCase):
         # Should accept the event
         event.acceptProposedAction.assert_called_once()
 
-    def test_drop_event_swap(self):
+    def test_drop_event_swap(self) -> None:
         """Test drop event triggers model swap."""
         from launchers.golf_launcher import DraggableModelCard
 
@@ -233,15 +236,17 @@ class TestDraggableModelCard(unittest.TestCase):
 class TestGolfLauncherGrid(unittest.TestCase):
     """Test golf launcher grid functionality."""
 
+    app: Any = None
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
         if not QApplication.instance():
             cls.app = QApplication([])
         else:
             cls.app = QApplication.instance()
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         # Mock registry with test models
         self.mock_registry = Mock()
@@ -260,7 +265,7 @@ class TestGolfLauncherGrid(unittest.TestCase):
         self.mock_registry.__iter__ = lambda x: iter(self.mock_models)
 
         # Mock get_model to return a model with proper type
-        def mock_get_model(model_id):
+        def mock_get_model(model_id: str) -> Any:
             for model in self.mock_models:
                 if model.id == model_id:
                     return model
@@ -268,33 +273,53 @@ class TestGolfLauncherGrid(unittest.TestCase):
 
         self.mock_registry.get_model.side_effect = mock_get_model
 
+    @patch("launchers.golf_launcher.GolfLauncher._load_layout")
+    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
+    @patch("launchers.golf_launcher.ContextHelpDock")
     @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.EngineManager")
-    def test_model_order_tracking(self, mock_engine_manager, mock_registry_class):
+    def test_model_order_tracking(
+        self,
+        mock_engine_manager: Mock,
+        mock_registry_class: Mock,
+        mock_help_dock: Mock,
+        mock_add_dock_widget: Mock,
+        mock_load_layout: Mock,
+    ) -> None:
         """Test that model order is properly tracked."""
         from launchers.golf_launcher import GolfLauncher
 
         mock_registry_class.return_value = self.mock_registry
         mock_engine_manager.return_value = Mock()
 
+        mock_help_dock.side_effect = None
         launcher = GolfLauncher()
 
-        # Check that model order is initialized
+        # Check that model order is initialized (should rely on default since layout load is mocked)
         self.assertIsInstance(launcher.model_order, list)
-        # The launcher adds 2 special models (C3D viewer and URDF generator) to the registry models
+        # The launcher adds 5 special models (C3D, URDF, 3x MATLAB) to the registry models
         expected_count = (
-            len(self.mock_models) + 2
-        )  # 4 mock models + 2 special models = 6
+            len(self.mock_models) + 5
+        )  # 4 mock models + 5 special models = 9
         self.assertEqual(len(launcher.model_order), expected_count)
 
+    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
+    @patch("launchers.golf_launcher.ContextHelpDock")
     @patch("launchers.golf_launcher.ModelRegistry")
     @patch("launchers.golf_launcher.EngineManager")
-    def test_model_swap_functionality(self, mock_engine_manager, mock_registry_class):
+    def test_model_swap_functionality(
+        self,
+        mock_engine_manager: Mock,
+        mock_registry_class: Mock,
+        mock_help_dock: Mock,
+        mock_add_dock_widget: Mock,
+    ) -> None:
         """Test model swapping functionality."""
         from launchers.golf_launcher import GolfLauncher
 
         mock_registry_class.return_value = self.mock_registry
         mock_engine_manager.return_value = Mock()
+        mock_help_dock.side_effect = None
 
         launcher = GolfLauncher()
 
@@ -323,7 +348,7 @@ class TestGolfLauncherGrid(unittest.TestCase):
 class TestDockerConfiguration(unittest.TestCase):
     """Test Docker configuration and setup."""
 
-    def test_dockerfile_exists(self):
+    def test_dockerfile_exists(self) -> None:
         """Test that Dockerfile exists and is readable."""
         dockerfile_path = Path(__file__).parent.parent / "Dockerfile"
         self.assertTrue(dockerfile_path.exists(), "Dockerfile should exist")
@@ -333,7 +358,7 @@ class TestDockerConfiguration(unittest.TestCase):
         self.assertIn("PYTHONPATH", content, "Dockerfile should set PYTHONPATH")
         self.assertIn("/workspace", content, "Dockerfile should configure workspace")
 
-    def test_docker_launch_command_structure(self):
+    def test_docker_launch_command_structure(self) -> None:
         """Test Docker launch command structure."""
         from launchers.golf_launcher import GolfLauncher
 
@@ -350,12 +375,12 @@ class TestDockerConfiguration(unittest.TestCase):
 
         # Mock path
         mock_path = Mock()
-        mock_path.__str__ = Mock(return_value="/test/path")
+        mock_path.__str__ = Mock(return_value="/test/path")  # type: ignore[method-assign]
 
         # Prepare mock Path
         mock_path_cls = MagicMock()
         mock_suite_root = MagicMock()
-        mock_suite_root.__str__.return_value = "/mock/suite/root"
+        mock_suite_root.__str__.return_value = "/mock/suite/root"  # type: ignore[attr-defined]
         mock_file_path = MagicMock()
         mock_file_path.parent.parent = mock_suite_root
         mock_path_cls.return_value = mock_file_path
@@ -367,7 +392,7 @@ class TestDockerConfiguration(unittest.TestCase):
             patch("launchers.golf_launcher.Path", MagicMock()),
             patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
-            mock_repos_root.__str__.return_value = "/mock/repo/root"
+            mock_repos_root.__str__.return_value = "/mock/repo/root"  # type: ignore[attr-defined]
             launcher._launch_docker_container(mock_model, mock_path)
 
             # Verify subprocess was called
@@ -388,7 +413,7 @@ class TestDockerConfiguration(unittest.TestCase):
 class TestMuJoCoModule(unittest.TestCase):
     """Test MuJoCo module structure and availability."""
 
-    def test_mujoco_module_exists(self):
+    def test_mujoco_module_exists(self) -> None:
         """Test that MuJoCo humanoid golf module exists."""
         mujoco_path = Path("engines/physics_engines/mujoco/python/mujoco_humanoid_golf")
         self.assertTrue(mujoco_path.exists(), "MuJoCo module directory should exist")
@@ -396,7 +421,7 @@ class TestMuJoCoModule(unittest.TestCase):
         main_file = mujoco_path / "__main__.py"
         self.assertTrue(main_file.exists(), "MuJoCo module should have __main__.py")
 
-    def test_mujoco_module_structure(self):
+    def test_mujoco_module_structure(self) -> None:
         """Test MuJoCo module has required components."""
         mujoco_path = Path("engines/physics_engines/mujoco/python/mujoco_humanoid_golf")
 
@@ -417,7 +442,7 @@ class TestMuJoCoModule(unittest.TestCase):
 class TestLauncherIntegration(unittest.TestCase):
     """Integration tests for the launcher system."""
 
-    def test_launch_golf_suite_script(self):
+    def test_launch_golf_suite_script(self) -> None:
         """Test that launch_golf_suite.py script exists and is executable."""
         script_path = Path("launch_golf_suite.py")
         self.assertTrue(script_path.exists(), "Launch script should exist")
@@ -430,7 +455,7 @@ class TestLauncherIntegration(unittest.TestCase):
         self.assertIn("def launch_pinocchio", content)
 
     @patch("launchers.golf_launcher.GolfLauncher")
-    def test_unified_launcher_import(self, mock_golf_launcher):
+    def test_unified_launcher_import(self, mock_golf_launcher: Mock) -> None:
         """Test that unified launcher can be imported."""
         try:
             from launchers.unified_launcher import UnifiedLauncher
