@@ -41,6 +41,7 @@ if TYPE_CHECKING or HAS_QT:
             Diagram,
             DiagramBuilder,
             DrakeVisualizer,
+            Ellipsoid,
             JacobianWrtVariable,
             JointIndex,
             Meshcat,
@@ -51,6 +52,8 @@ if TYPE_CHECKING or HAS_QT:
             PrismaticJoint,
             RevoluteJoint,
             RigidTransform,
+            Rgba,
+            RotationMatrix,
             Simulator,
         )
     except ImportError:
@@ -61,6 +64,7 @@ if TYPE_CHECKING or HAS_QT:
         Diagram = None  # type: ignore[misc, assignment]
         DiagramBuilder = None  # type: ignore[misc, assignment]
         DrakeVisualizer = None  # type: ignore[misc, assignment]
+        Ellipsoid = None  # type: ignore[misc, assignment]
         JointIndex = None  # type: ignore[misc, assignment]
         JacobianWrtVariable = None  # type: ignore[misc, assignment]
         Meshcat = None  # type: ignore[misc, assignment]
@@ -71,6 +75,8 @@ if TYPE_CHECKING or HAS_QT:
         PrismaticJoint = None  # type: ignore[misc, assignment]
         RevoluteJoint = None  # type: ignore[misc, assignment]
         RigidTransform = None  # type: ignore[misc, assignment]
+        Rgba = None  # type: ignore[misc, assignment]
+        RotationMatrix = None  # type: ignore[misc, assignment]
         Simulator = None  # type: ignore[misc, assignment]
 
 # Shared imports
@@ -362,7 +368,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         """Scan shared/urdf for models."""
         try:
             # Calculate path to shared directory relative to this file
-            # engines/physics_engines/drake/python/src/drake_gui_app.py
             current_file = Path(__file__)
 
             # Check for Docker environment mount first
@@ -372,12 +377,10 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 LOGGER.info(f"Found Docker shared URDF directory: {urdf_dir}")
             else:
                 # Fallback to local relative path
-                # Up 5 levels: src->python->drake->physics_engines->engines->root
                 try:
                     project_root = current_file.parents[5]
                     urdf_dir = project_root / "shared" / "urdf"
                 except IndexError:
-                    # Fallback for when path depth is insufficient
                     urdf_dir = Path("non_existent")
 
             if urdf_dir.exists():
@@ -399,8 +402,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 self.meshcat = Meshcat(meshcat_params)
                 LOGGER.info("Meshcat available at: %s", self.meshcat.web_url())
 
-                # Open browser automatically only if running locally (not in Docker)
-                # In Docker, the launcher handles opening the browser on the host.
                 if self.meshcat:
                     if "MESHCAT_HOST" not in os.environ:
                         webbrowser.open(self.meshcat.web_url())
@@ -409,33 +410,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                             "Running in Docker/Headless mode; "
                             "skipping auto-browser open inside container."
                         )
-                        LOGGER.info(
-                            "Please access Meshcat from your host browser (e.g., http://localhost:7000)."
-                        )
 
             except Exception as e:
                 LOGGER.exception("Failed to start Meshcat")
-                LOGGER.error(
-                    # noqa: TRY400 - Manual logging preferred over re-raising.
-                    "Failed to start Meshcat for Drake visualization.\n"
-                    "Common causes:\n"
-                    "  - Another Meshcat server is already running on the same port "
-                    "(default: 7000).\n"
-                    "  - Network issues or firewall blocking localhost.\n"
-                    "  - Meshcat or its dependencies are not installed correctly.\n"
-                    "Troubleshooting steps:\n"
-                    "  1. Check if another Meshcat process is running and terminate it "
-                    "if necessary.\n"
-                    "  2. Verify that your firewall allows connections to "
-                    "localhost:7000.\n"
-                    "  3. Ensure all required Python packages are installed "
-                    "(see project README).\n"
-                    "Original exception: %s",
-                    e,
-                )
-                # We don't return here anymore, allowing simulation to run
-                # without Meshcat if needed
-                # But let's keep visualizer optional
                 self.meshcat = None
 
         # Build Diagram
@@ -466,12 +443,8 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             msg = "Plant initialization failed"
             raise RuntimeError(msg)
 
-        # Only initialize visualizer if Meshcat is available
         if self.meshcat is not None:
-            # self.visualizer = DrakeVisualizer(self.meshcat, self.plant)
-            # Use of pure pydrake.geometry.DrakeVisualizer here is incorrect
-            # as it expects LCM parameters. Meshcat visualization is inserted
-            # into the diagram during build_golf_swing_diagram.
+            # Visualizer managed by diagram
             self.visualizer = None
         else:
             LOGGER.warning("Visualizer disabled due to Meshcat initialization failure.")
@@ -511,7 +484,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         # Set default pose (standing) if 'pelvis' exists (Golf Model)
         if plant.HasBodyNamed("pelvis"):
             pelvis = plant.GetBodyByName("pelvis")
-            # In newer Drake, SetFreeBodyPose takes RigidTransform
             plant.SetFreeBodyPose(
                 plant_context, pelvis, RigidTransform([0, 0, INITIAL_PELVIS_HEIGHT_M])
             )
@@ -529,6 +501,10 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         # Sync generic UI controls if needed
         self._sync_kinematic_sliders()
 
+        # Clear visualizations
+        if self.meshcat:
+            self.meshcat.Delete("overlays")
+
     def _on_model_changed(self, index: int) -> None:
         """Handle model change."""
         model_data = self.available_models[index]
@@ -538,7 +514,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             self.current_urdf_path = new_path
 
             # Re-initialize simulation
-            # We need to stop the timer temporarily to avoid thread issues
             self.timer.stop()
             try:
                 self._init_simulation()
@@ -546,16 +521,12 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 self._sync_kinematic_sliders()
             except Exception as e:
                 QtWidgets.QMessageBox.critical(self, "Error Loading Model", str(e))
-                # Revert selection? For now just log.
                 LOGGER.error(f"Error loading model: {e}")
             finally:
                 self.timer.start(int(self.time_step * MS_PER_SECOND))
 
     def _setup_ui(self) -> None:  # noqa: PLR0915
         """Build the PyQt Interface."""
-        # ... (implementation same as before, no state access needed here mostly) ...
-        # But wait, _build_kinematic_controls uses state.
-
         central_widget = QtWidgets.QWidget()
         self.setCentralWidget(central_widget)
         layout = QtWidgets.QVBoxLayout(central_widget)
@@ -724,6 +695,16 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         )
         vis_layout.addWidget(self.chk_live_analysis)
 
+        # Advanced Vectors
+        vec_layout = QtWidgets.QHBoxLayout()
+        self.chk_induced_vec = QtWidgets.QCheckBox("Induced Vectors")
+        self.chk_induced_vec.toggled.connect(self._on_visualization_changed)
+        self.chk_cf_vec = QtWidgets.QCheckBox("CF Vectors")
+        self.chk_cf_vec.toggled.connect(self._on_visualization_changed)
+        vec_layout.addWidget(self.chk_induced_vec)
+        vec_layout.addWidget(self.chk_cf_vec)
+        vis_layout.addLayout(vec_layout)
+
         vis_group.setLayout(vis_layout)
         layout.addWidget(vis_group)
 
@@ -753,10 +734,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         # Iterate over joints
         for i in range(plant.num_joints()):
-            # Safe way to get joint index in PyDrake?
-            # Index is typically just 'i' if iterating, but let's be careful.
-            # Using Plant.get_joint(JointIndex(i))
-
             joint = plant.get_joint(JointIndex(i))
 
             # Skip welds (0 DOF) and multi-DOF joints (not yet supported)
@@ -876,7 +853,8 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         if self.visualizer:
             self.visualizer.update_frame_transforms(context)
             self.visualizer.update_com_transforms(context)
-            self._update_ellipsoids()
+
+        self._update_visualization()
 
     def _sync_kinematic_sliders(self) -> None:
         """Read current plant state and update sliders."""
@@ -954,12 +932,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             t = context.get_time()
             simulator.AdvanceTo(t + self.time_step)
 
-            # Visual update
-            if self.visualizer:
-                self.visualizer.update_frame_transforms(context)
-                self.visualizer.update_com_transforms(context)
-                self._update_ellipsoids()
-
             # Recording
             if self.recorder.is_recording and self.plant:
                 plant_context = self.plant.GetMyContextFromRoot(context)
@@ -1009,27 +981,112 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 self.recorder.record(context.get_time(), q, v, club_pos)
                 self.lbl_rec_status.setText(f"Frames: {len(self.recorder.times)}")
 
+        # Visualization Update
+        self._update_visualization()
+
     def _on_visualization_changed(self) -> None:
         """Handle toggling of visualization options."""
+        self._update_visualization()
+
+    def _update_visualization(self) -> None:
+        """Update all visualizations (ellipsoids, vectors)."""
+        if not self.meshcat or not self.plant or not self.context:
+            return
+
         if self.visualizer:
-            if not (self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked()):
-                self.visualizer.clear_ellipsoids()
+            self.visualizer.update_frame_transforms(self.context)
+            self.visualizer.update_com_transforms(self.context)
+
+        # Clear old ellipsoids/vectors if needed
+        if not (self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked()):
+            self.meshcat.Delete("overlays/ellipsoids")
+
+        if not (self.chk_induced_vec.isChecked() or self.chk_cf_vec.isChecked()):
+            self.meshcat.Delete("overlays/vectors")
+
+        self._update_ellipsoids()
+        self._update_vectors()
+
+    def _update_vectors(self) -> None:
+        """Draw advanced vectors."""
+        if not self.chk_induced_vec.isChecked() and not self.chk_cf_vec.isChecked():
+            return
+
+        if not self.plant or not self.eval_context:
+            return
+
+        # Use eval context synced with current state
+        plant_context = self.plant.GetMyContextFromRoot(self.context)
+        self.plant.SetPositions(self.eval_context, self.plant.GetPositions(plant_context))
+        self.plant.SetVelocities(self.eval_context, self.plant.GetVelocities(plant_context))
+
+        analyzer = DrakeInducedAccelerationAnalyzer(self.plant)
+
+        # Induced
+        if self.chk_induced_vec.isChecked():
+            res = analyzer.compute_components(self.eval_context)
+            accels = res.get("gravity", np.zeros(self.plant.num_velocities()))
+            self._draw_accel_vectors(accels, "induced", Rgba(1, 0, 1, 1))
+
+        # Counterfactuals
+        if self.chk_cf_vec.isChecked():
+            res = analyzer.compute_counterfactuals(self.eval_context)
+            ztcf = res.get("ztcf_accel", np.zeros(self.plant.num_velocities()))
+            self._draw_accel_vectors(ztcf, "cf", Rgba(1, 1, 0, 1))
+
+    def _draw_accel_vectors(self, accels: np.ndarray, name_prefix: str, color: Rgba) -> None:
+        """Draw acceleration vectors at joints."""
+        if not self.meshcat:
+            return
+
+        scale = 0.1  # Visual scale
+
+        for i in range(self.plant.num_joints()):
+            joint = self.plant.get_joint(JointIndex(i))
+            if joint.num_velocities() != 1:
+                continue
+
+            # Map to velocity index
+            v_start = joint.velocity_start()
+            val = accels[v_start]
+            if abs(val) < 1e-3:
+                continue
+
+            # Get joint frame
+            frame_J = joint.frame_on_child()
+            X_WJ = self.plant.EvalBodyPoseInWorld(self.eval_context, frame_J.body())
+            start_pos = X_WJ.translation()
+
+            # Axis direction
+            if hasattr(joint, "revolute_axis"):
+                axis_C = joint.revolute_axis()
+            elif hasattr(joint, "translation_axis"):
+                axis_C = joint.translation_axis()
             else:
-                self._update_ellipsoids()
+                continue
+
+            axis_W = X_WJ.rotation().multiply(axis_C)
+
+            vector = axis_W * val * scale
+            end_pos = start_pos + vector
+
+            # Draw line
+            path = f"overlays/vectors/{name_prefix}/{joint.name()}"
+
+            # Meshcat SetLineSegments expects 3xN array
+            points = np.vstack([start_pos, end_pos]).T
+            self.meshcat.SetLineSegments(path, points, 2.0, color)
 
     def _update_ellipsoids(self) -> None:
         """Compute and draw ellipsoids."""
         if not (self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked()):
             return
 
-        if not self.plant or not self.context or not self.visualizer:
+        if not self.plant or not self.context:
             return
 
         plant_context = self.plant.GetMyContextFromRoot(self.context)
 
-        # Use end effector (last body?)
-        # For golf, look for a body named "clubhead", "club_body", or just last body.
-        # Fallback to last body if specific ones not found.
         body_names = ["clubhead", "club_body", "wrist", "hand", "link_7"]
         target_body = None
         for name in body_names:
@@ -1038,40 +1095,29 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 break
 
         if target_body is None:
-            # Last body
             target_body = self.plant.get_body(BodyIndex(self.plant.num_bodies() - 1))
 
         if target_body.name() == "world":
             return
 
-        # Jacobian
-        # We need Jacobian with respect to velocities (v)
         frame_W = self.plant.world_frame()
         frame_B = target_body.body_frame()
 
         J_spatial = self.plant.CalcJacobianSpatialVelocity(
             plant_context, JacobianWrtVariable.kV, frame_B, [0, 0, 0], frame_W, frame_W
         )
-        # 6 x nv matrix. Top 3 rotational, bottom 3 translational.
-        # Use Translational part for visualization
-        J = J_spatial[3:, :]
+        J = J_spatial[3:, :]  # Translational
 
-        # Mass Matrix
         M = self.plant.CalcMassMatrix(plant_context)
 
         try:
-            # Condition Number
             s = np.linalg.svd(J, compute_uv=False)
-            cond = s[0] / s[-1] if s[-1] > 1e-9 else float("inf")  # Fix line length
+            cond = s[0] / s[-1] if s[-1] > 1e-9 else float("inf")
             self.lbl_cond.setText(f"{cond:.2f}")
 
-            # Constraint Rank (if any constraints?)
-            # Drake handles constraints differently.
-            # We can show Mass Matrix rank or check if M is singular.
             rank = np.linalg.matrix_rank(M)
             self.lbl_rank.setText(f"{rank} / {self.plant.num_velocities()}")
 
-            # Ellipsoid
             Minv = np.linalg.inv(M)
             Lambda_inv = J @ Minv @ J.T
 
@@ -1080,18 +1126,33 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             X_WB = self.plant.EvalBodyPoseInWorld(plant_context, target_body)
             pos = X_WB.translation()
 
-            if self.chk_mobility.isChecked():
-                radii = np.sqrt(np.maximum(eigvals, 1e-6))
-                self.visualizer.draw_ellipsoid(
-                    "mobility", eigvecs, radii, pos, (0, 1, 0, 0.3)
-                )
+            if self.meshcat:
+                if self.chk_mobility.isChecked():
+                    radii = np.sqrt(np.maximum(eigvals, 1e-6))
+                    path = "overlays/ellipsoids/mobility"
 
-            if self.chk_force_ellip.isChecked():
-                radii_f = 1.0 / np.sqrt(np.maximum(eigvals, 1e-6))
-                radii_f = np.clip(radii_f, 0.01, 5.0)
-                self.visualizer.draw_ellipsoid(
-                    "force", eigvecs, radii_f, pos, (1, 0, 0, 0.3)
-                )
+                    # Create ellipsoid geometry directly
+                    ellipsoid = Ellipsoid(radii[0], radii[1], radii[2])
+                    self.meshcat.SetObject(path, ellipsoid, Rgba(0, 1, 0, 0.3))
+
+                    # Transform (Rotation + Position)
+                    # pydrake RigidTransform expects rotation matrix (orthonormal)
+                    # eigvecs is orthogonal, so it's a valid rotation matrix
+                    R = RotationMatrix(eigvecs)
+                    T = RigidTransform(R, pos)
+                    self.meshcat.SetTransform(path, T)
+
+                if self.chk_force_ellip.isChecked():
+                    radii_f = 1.0 / np.sqrt(np.maximum(eigvals, 1e-6))
+                    radii_f = np.clip(radii_f, 0.01, 5.0)
+                    path = "overlays/ellipsoids/force"
+
+                    ellipsoid_f = Ellipsoid(radii_f[0], radii_f[1], radii_f[2])
+                    self.meshcat.SetObject(path, ellipsoid_f, Rgba(1, 0, 0, 0.3))
+
+                    R = RotationMatrix(eigvecs)
+                    T = RigidTransform(R, pos)
+                    self.meshcat.SetTransform(path, T)
 
         except Exception as e:
             LOGGER.warning(f"Ellipsoid calc error: {e}")
@@ -1149,7 +1210,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         dialog.exec()
 
-        # Refresh kinematics to update frame positions immediately
         if self.operating_mode == "kinematic":
             diagram.ForcedPublish(context)
             if self.visualizer:
@@ -1174,7 +1234,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")
             return
 
-        # Import locally to avoid top-level dependency
         from shared.python.plotting import GolfSwingPlotter
 
         if not self.recorder.times:
@@ -1188,7 +1247,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         if not self.plant or not self.eval_context:
             return
 
-        # Specific Actuator Input
         spec_act_idx = -1
         txt = self.txt_specific_actuator.text().strip()
         if txt:
@@ -1197,7 +1255,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             except ValueError:
                 pass
 
-        # Computation
         g_induced = []
         c_induced = []
         spec_induced = []
@@ -1212,7 +1269,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 self.plant.SetPositions(self.eval_context, q)
                 self.plant.SetVelocities(self.eval_context, v)
 
-                # Use Analyzer
                 res = analyzer.compute_components(self.eval_context)
 
                 g_induced.append(res["gravity"])
@@ -1221,7 +1277,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 if spec_act_idx >= 0:
                     tau = np.zeros(self.plant.num_velocities())
                     if spec_act_idx < len(tau):
-                        tau[spec_act_idx] = 1.0  # Unit torque
+                        tau[spec_act_idx] = 1.0
                     spec = analyzer.compute_specific_control(self.eval_context, tau)
                     spec_induced.append(spec)
 
@@ -1232,7 +1288,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         finally:
             QtWidgets.QApplication.restoreOverrideCursor()
 
-        # Populate Recorder Data
         g_induced_arr = np.array(g_induced)
         c_induced_arr = np.array(c_induced)
         total_arr = g_induced_arr + c_induced_arr
@@ -1246,8 +1301,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 np.array(spec_induced)
             )
 
-        # Use shared plotter
-        # Try to find a meaningful joint (e.g. Spine Twist) if available, otherwise 0
         joint_idx = 0
         if g_induced_arr.shape[1] > 2:
             joint_idx = 2
@@ -1255,7 +1308,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         plotter = GolfSwingPlotter(self.recorder)
         fig = plt.figure(figsize=(10, 6))
 
-        # Use breakdown mode to show all components
         plotter.plot_induced_acceleration(
             fig, "breakdown", joint_idx=joint_idx, breakdown_mode=True
         )
@@ -1304,11 +1356,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         finally:
             QtWidgets.QApplication.restoreOverrideCursor()
 
-        # Populate Recorder
         self.recorder.counterfactuals["ztcf_accel"] = list(np.array(ztcf_list))
         self.recorder.counterfactuals["zvcf_torque"] = list(np.array(zvcf_list))
 
-        # Plotting
         joint_idx = 0
         if np.array(ztcf_list).shape[1] > 2:
             joint_idx = 2
@@ -1316,7 +1366,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         plotter = GolfSwingPlotter(self.recorder)
         fig = plt.figure(figsize=(10, 6))
 
-        # Use dual mode
         plotter.plot_counterfactual_comparison(fig, "dual", metric_idx=joint_idx)
         plt.show()
 
@@ -1337,7 +1386,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
             data = {"time": self.recorder.times}
 
-            # Helper to add arrays
             def add_series(target: dict, name: str, arr_list: list) -> None:
                 if not arr_list:
                     return
@@ -1352,7 +1400,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             add_series(data, "v", self.recorder.v_history)
             add_series(data, "club_pos", self.recorder.club_head_pos_history)
 
-            # Add computed if available
             for k, v in self.recorder.induced_accelerations.items():
                 add_series(data, f"induced_{k}", v)
 
@@ -1373,7 +1420,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             QtWidgets.QMessageBox.warning(self, "Error", "Matplotlib not found.")
             return
 
-        # Import here to avoid hard dependency on matplotlib
         from shared.python.plotting import GolfSwingPlotter
 
         if not self.recorder.times:
@@ -1406,16 +1452,11 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             )
             return
 
-        # Create Plotter and Analyzer
         plotter = GolfSwingPlotter(self.recorder)
 
-        # We need to extract data for StatisticalAnalyzer
         times = np.array(self.recorder.times)
         q_history = np.array(self.recorder.q_history)
         v_history = np.array(self.recorder.v_history)
-        # Assuming torques not recorded in DrakeRecorder yet, need to update
-        # if we want torque analysis
-        # For now pass zeros for torques
         tau_history = np.zeros((len(times), v_history.shape[1]))
 
         _, club_pos = self.recorder.get_time_series("club_head_position")
@@ -1425,42 +1466,31 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         )
         report = analyzer.generate_comprehensive_report()
 
-        # Prepare metrics for Radar Chart
         metrics = {
             "Club Speed": 0.0,
             "Swing Efficiency": 0.0,
             "Tempo": 0.0,
-            "Consistency": 0.8,  # Placeholder
+            "Consistency": 0.8,
             "Power Transfer": 0.0,
         }
 
         if "club_head_speed" in report:
-            # Normalize reasonably (e.g. max speed 50 m/s)
             peak_speed = report["club_head_speed"]["peak_value"]
             metrics["Club Speed"] = min(peak_speed / 50.0, 1.0)
 
         if "tempo" in report:
             ratio = report["tempo"]["ratio"]
-            # Ideal 3:1 => 3.0. Normalize error from 3.0
             error = abs(ratio - 3.0)
             metrics["Tempo"] = max(0, 1.0 - error)
 
-        # Create Figure with tabs or subplots
-        # For simplicity, just use subplots in one figure
         fig = plt.figure(figsize=(15, 10))
         gs = fig.add_gridspec(2, 2)
 
-        # 1. Radar Chart
         plotter.plot_radar_chart(fig, metrics)
 
-        # 2. CoP Vector Field (Drake doesn't record CoP yet, so skip or mock)
-        # If we had CoP data, we would call plotter.plot_cop_vector_field(fig)
         ax2 = fig.add_subplot(gs[0, 1])
         ax2.text(0.5, 0.5, "CoP Data Not Available in Drake", ha="center", va="center")
 
-        # 3. Power Flow
-        # Requires actuator powers. DrakeRecorder needs to record powers.
-        # For now placeholder
         ax3 = fig.add_subplot(gs[1, :])
         ax3.text(
             0.5, 0.5, "Power Data Not Available in Drake", ha="center", va="center"
