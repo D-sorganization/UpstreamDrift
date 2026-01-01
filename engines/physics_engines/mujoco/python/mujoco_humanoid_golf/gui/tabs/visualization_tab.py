@@ -245,6 +245,42 @@ class VisualizationTab(QtWidgets.QWidget):
         force_scale_layout.addRow("", self.force_scale_label)
         force_layout.addLayout(force_scale_layout)
 
+        # --- Advanced Vector Visualization ---
+        advanced_vector_group = QtWidgets.QGroupBox("Advanced Vector Overlays")
+        av_layout = QtWidgets.QFormLayout(advanced_vector_group)
+
+        # Induced Accel
+        self.show_induced_cb = QtWidgets.QCheckBox("Show Induced Acceleration")
+        self.show_induced_cb.setToolTip(
+            "Show acceleration vectors induced by a specific source (Magenta)"
+        )
+        self.show_induced_cb.stateChanged.connect(self.on_advanced_vector_changed)
+
+        self.induced_source_combo = QtWidgets.QComboBox()
+        self.induced_source_combo.addItems(["gravity", "actuator"])
+        self.induced_source_combo.currentTextChanged.connect(
+            self.on_advanced_vector_changed
+        )
+
+        # Counterfactuals
+        self.show_cf_cb = QtWidgets.QCheckBox("Show Counterfactuals")
+        self.show_cf_cb.setToolTip(
+            "Show Counterfactual vectors like ZTCF accel or ZVCF torque (Yellow)"
+        )
+        self.show_cf_cb.stateChanged.connect(self.on_advanced_vector_changed)
+
+        self.cf_type_combo = QtWidgets.QComboBox()
+        self.cf_type_combo.addItems(
+            ["ztcf_accel", "zvcf_torque"]
+        )  # Keys in BiomechanicalData
+        self.cf_type_combo.currentTextChanged.connect(self.on_advanced_vector_changed)
+
+        av_layout.addRow(self.show_induced_cb, self.induced_source_combo)
+        av_layout.addRow(self.show_cf_cb, self.cf_type_combo)
+
+        force_layout.addWidget(advanced_vector_group)
+        # -------------------------------------
+
         # Contact forces
         self.show_contacts_cb = QtWidgets.QCheckBox("Show Contact Forces")
         self.show_contacts_cb.stateChanged.connect(self.on_show_contacts_changed)
@@ -469,6 +505,15 @@ class VisualizationTab(QtWidgets.QWidget):
         self.sim_widget.set_force_visualization(
             self.show_forces_cb.isChecked(),
             scale * 0.1,
+        )
+
+    def on_advanced_vector_changed(self) -> None:
+        """Handle advanced vector visualization changes."""
+        self.sim_widget.set_advanced_vector_visualization(
+            self.show_induced_cb.isChecked(),
+            self.induced_source_combo.currentText(),
+            self.show_cf_cb.isChecked(),
+            self.cf_type_combo.currentText(),
         )
 
     def on_show_contacts_changed(self, state: int) -> None:
