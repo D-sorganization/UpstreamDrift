@@ -84,7 +84,14 @@ DRIVER_LENGTH_MAX_M = PhysicalConstant(
 DRIVER_LOFT_TYPICAL_DEG = PhysicalConstant(
     10.5, "degrees", "Modern Trade Average", "Typical driver loft"
 )
-IRON_LOFT_RANGE_DEG = (18.0, 64.0)
+IRON_LOFT_RANGE_DEG = (
+    PhysicalConstant(
+        18.0, "degrees", "Modern Trade Range", "Minimum typical iron loft"
+    ),
+    PhysicalConstant(
+        64.0, "degrees", "Modern Trade Range", "Maximum typical iron loft"
+    ),
+)
 IRON_7_LOFT_DEG = PhysicalConstant(
     34.0, "degrees", "Modern Trade Average", "Standard 7-iron loft"
 )

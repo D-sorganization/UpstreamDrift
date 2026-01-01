@@ -20,7 +20,7 @@ function run_all()
     addpath(fullfile(baseDir, 'src', 'classes'));
     
     % Prepare output directory
-    timestamp = datestr(datetime('now'), 'yyyy-mm-dd_HHMMSS');
+    timestamp = datestr(datetime('now'), 'yyyy-mm-dd_HHMMss');
     outdir = fullfile(baseDir, '..', 'output', timestamp, 'baseline');
     if ~exist(outdir, 'dir')
         mkdir(outdir);
