@@ -10,7 +10,7 @@ from typing import cast
 
 from shared.python import constants
 
-GRAVITY_M_S2 = constants.GRAVITY_M_S2
+GRAVITY_M_S2 = float(constants.GRAVITY_M_S2)
 
 CHAOTIC_PENDULUM_XML = rf"""<mujoco model="chaotic_driven_pendulum">
   <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
