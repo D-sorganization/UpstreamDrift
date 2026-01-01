@@ -57,7 +57,8 @@ class TestURDFBuilder:
         """Test that adding a segment without a name raises an error."""
         segment_data: dict[str, Any] = {"geometry": {}}
         with pytest.raises(ValueError, match="must have a name"):
-            self.builder.add_segment(segment_data) # type: ignore
+            # segment_data is intentionally missing 'name' to test validation hooks
+            self.builder.add_segment(segment_data)  # type: ignore[arg-type]
 
     def test_remove_segment(self) -> None:
         """Test removing a segment."""
