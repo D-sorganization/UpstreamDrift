@@ -1,10 +1,9 @@
 import logging
+import os
 import random
 
 import numpy as np
 
-
-import os
 
 def get_logger(name: str) -> logging.Logger:
     """Get a logger instance with the specified name.
@@ -18,7 +17,7 @@ def get_logger(name: str) -> logging.Logger:
         A configured logger instance
     """
     logger_instance = logging.getLogger(name)
-    
+
     # Check environment variable for log level
     log_level_str = os.environ.get("LOG_LEVEL", "INFO").upper()
     level = getattr(logging, log_level_str, logging.INFO)

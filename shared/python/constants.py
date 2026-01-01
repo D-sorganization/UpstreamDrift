@@ -12,11 +12,10 @@ properties used in scientific computing applications.
 import math
 from pathlib import Path
 
-from typing import Any
 
 class PhysicalConstant(float):
     """A float subclass that carries physical unit and provenance metadata."""
-    
+
     def __new__(cls, value: float, unit: str, source: str, description: str = "") -> "PhysicalConstant":
         return float.__new__(cls, value)
 
