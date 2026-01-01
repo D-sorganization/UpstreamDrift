@@ -29,7 +29,9 @@ class MockFileDialog:
         return "test_robot.urdf", "URDF Files (*.urdf)"
 
 
-@pytest.mark.skipif(not PYQT6_AVAILABLE or True, reason="Platform initialization failure in CI")
+@pytest.mark.skipif(
+    not PYQT6_AVAILABLE or True, reason="Platform initialization failure in CI"
+)
 def test_urdf_generation_logic(qtbot):
     """Test the logic of generating URDF XML."""
     window = URDFGenerator()
