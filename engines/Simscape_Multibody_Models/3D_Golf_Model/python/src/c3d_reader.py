@@ -336,7 +336,7 @@ class C3DDataReader:
 
         if not labels and channel_count > 0:
             labels = [f"Analog_{idx + 1}" for idx in range(channel_count)]
-        
+
         # Ensure units list checks out
         if len(units) < len(labels):
             units.extend([""] * (len(labels) - len(units)))
