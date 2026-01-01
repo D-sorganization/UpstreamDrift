@@ -1,3 +1,6 @@
 ## 2025-10-15 - Canvas Keyboard Accessibility
 **Learning:** Standard `<canvas>` elements are invisible to the keyboard tab order by default, forcing users to rely on global `document` listeners that can conflict with other interactive controls (like button clicks triggering spacebar shortcuts).
 **Action:** Always add `tabindex="0"` to interactive canvases and explicit `aria-describedby` pointing to instructions/shortcuts to make them "first-class" citizens in the tab order. Ensure global keydown listeners exclude other interactive elements (`e.target.matches('button, input, ...')`) to prevent double-triggering.
+## 2025-06-07 - [Combined Play/Pause Button Pattern]
+**Learning:** In legacy web visualizations (like the double pendulum), separate 'Start' and 'Pause' buttons cause accessibility issues. When the 'Start' button is clicked and then disabled by script logic, keyboard focus is lost (or reset to body), confusing screen reader users and keyboard navigators.
+**Action:** Replace separate buttons with a single toggle button (Play/Pause). This preserves focus on the control during state changes. Use a CSS utility class (e.g., '.hidden') to swap the SVG icons inside the button dynamically.
