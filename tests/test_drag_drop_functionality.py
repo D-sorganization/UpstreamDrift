@@ -102,8 +102,6 @@ class TestDragDropFunctionality(unittest.TestCase):
         else:
             self.assertEqual(card.drag_start_position, QPoint(10, 10))
 
-
-
     def test_drop_event_triggers_swap(self) -> None:
         """Test that drop events trigger model swapping."""
         from launchers.golf_launcher import DraggableModelCard
