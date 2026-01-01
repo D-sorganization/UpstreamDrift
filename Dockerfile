@@ -61,8 +61,14 @@ RUN pip install --no-cache-dir \
     pin-pink \
     qpsolvers \
     osqp \
-    ezc3d \
+    ezc3d>=1.4.0 \
     && echo "Physics engines and robotics packages installed successfully"
+
+# Verify ezc3d installation for C3D file reading
+RUN python -c "import ezc3d; print(f'ezc3d version: {ezc3d.__version__}')" || \
+    (echo "ezc3d installation failed, attempting alternative installation..." && \
+     conda install -y -c conda-forge ezc3d && \
+     conda clean --all --yes)
 
 # Set up Python path for shared modules
 ENV PYTHONPATH="/workspace:/workspace/shared/python:/workspace/engines"
