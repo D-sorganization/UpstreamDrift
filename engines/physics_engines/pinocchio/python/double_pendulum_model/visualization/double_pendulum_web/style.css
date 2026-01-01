@@ -195,3 +195,4 @@ input.error {
   border: 1px solid #2a3545;
   vertical-align: middle;
 }
+.hidden { display: none !important; }

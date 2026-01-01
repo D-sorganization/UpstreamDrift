@@ -269,20 +269,25 @@ function step() {
 }
 
 function updateButtonStates(isRunning) {
-  const startBtn = document.getElementById('start');
-  const pauseBtn = document.getElementById('pause');
-  const startSpan = startBtn.querySelector('span');
+  const btn = document.getElementById('play-pause');
+  const label = btn.querySelector('span');
+  const iconPlay = document.getElementById('icon-play');
+  const iconPause = document.getElementById('icon-pause');
 
-  pauseBtn.disabled = !isRunning;
-  startBtn.disabled = isRunning;
-
-  if (!isRunning && startSpan) {
+  if (isRunning) {
+    iconPlay.classList.add('hidden');
+    iconPause.classList.remove('hidden');
+    label.textContent = 'Pause';
+    btn.title = 'Pause simulation (Space)';
+  } else {
+    iconPlay.classList.remove('hidden');
+    iconPause.classList.add('hidden');
     if (state.time !== 0) {
-      startSpan.textContent = 'Resume';
-      startBtn.title = 'Resume simulation (Space)';
+      label.textContent = 'Resume';
+      btn.title = 'Resume simulation (Space)';
     } else {
-      startSpan.textContent = 'Start';
-      startBtn.title = 'Start simulation (Space)';
+      label.textContent = 'Start';
+      btn.title = 'Start simulation (Space)';
     }
   }
 }
@@ -320,8 +325,13 @@ function reset() {
   announce('Simulation reset');
 }
 
-['start', 'pause', 'reset', 'defaults'].forEach(id => document.getElementById(id).addEventListener('click', () => {
-  ({ start, pause, reset, defaults: restoreDefaults })[id]();
+document.getElementById('play-pause').addEventListener('click', () => {
+  if (animationId) pause();
+  else start();
+});
+
+['reset', 'defaults'].forEach(id => document.getElementById(id).addEventListener('click', () => {
+  ({ reset, defaults: restoreDefaults })[id]();
 }));
 
 document.querySelectorAll('.grid input').forEach(input => {
