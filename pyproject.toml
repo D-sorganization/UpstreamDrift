@@ -170,8 +170,6 @@ exclude = [
     "engines/pendulum_models/Pendulum Models/Pendulums_Model/",
     "legacy",
     "archive",
-    "tests",
-    "drake",
     "engines/physics_engines/mujoco/rebuild_docker.py",
     "engines/physics_engines/mujoco/test_docker_venv.py",
     "engines/physics_engines/mujoco/add_defusedxml_to_robotics_env.py",
@@ -228,15 +226,23 @@ warn_return_any = false
 
 [[tool.mypy.overrides]]
 module = "engines.physics_engines.drake.python.src.drake_gui_app"
-ignore_errors = true
+disallow_untyped_defs = false
 
+[[tool.mypy.overrides]]
 [[tool.mypy.overrides]]
 module = "engines.pendulum_models.python.double_pendulum_model.tests.*"
 ignore_errors = true
 
 [[tool.mypy.overrides]]
-module = "*.tests.*"
-ignore_errors = true
+module = "engines.physics_engines.pinocchio.python.double_pendulum_model.tests.*"
+disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = [
+    "*.tests.*",
+    "tests.*",
+]
+disallow_untyped_defs = false
 
 [tool.pytest.ini_options]
 minversion = "6.0"
