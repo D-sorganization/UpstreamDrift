@@ -70,7 +70,7 @@ def test_live_view_environment_flags(mocked_launcher):
     # Also mock Path to prevent WindowsPath instantiation on Linux
     mock_path_cls = MagicMock()
     mock_suite_root = MagicMock()
-    mock_suite_root.__str__ = Mock(return_value="/mock/suite/root")
+    mock_suite_root.__str__ = Mock(return_value="/mock/suite/root")  # type: ignore[method-assign]
     mock_file_path = MagicMock()
     mock_file_path.parent.parent = mock_suite_root
     mock_path_cls.return_value = mock_file_path
@@ -83,7 +83,7 @@ def test_live_view_environment_flags(mocked_launcher):
         # Create a dummy model
         model = MockModel("custom_humanoid")
         abs_path = MagicMock()  # Use Mock for the argument too
-        abs_path.__str__ = Mock(return_value="/mock/path")
+        abs_path.__str__ = Mock(return_value="/mock/path")  # type: ignore[method-assign]
 
         # Call the method
         launcher._launch_docker_container(model, abs_path)
@@ -115,7 +115,7 @@ def test_headless_environment_flags(mocked_launcher):
     # Mock Path to prevent WindowsPath instantiation on Linux
     mock_path_cls = MagicMock()
     mock_suite_root = MagicMock()
-    mock_suite_root.__str__ = Mock(return_value="/mock/suite/root")
+    mock_suite_root.__str__ = Mock(return_value="/mock/suite/root")  # type: ignore[method-assign]
     mock_file_path = MagicMock()
     mock_file_path.parent.parent = mock_suite_root
     mock_path_cls.return_value = mock_file_path
