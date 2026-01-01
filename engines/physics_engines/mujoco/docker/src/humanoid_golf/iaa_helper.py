@@ -1,8 +1,9 @@
-from typing import Any, Dict
+from typing import Any
 
-def compute_induced_accelerations(physics: Any) -> Dict[str, Any]:
+
+def compute_induced_accelerations(physics: Any) -> dict[str, Any]:
     """Compute induced accelerations (Gravity, Velocity, Control) for current state."""
-    results: Dict[str, Any] = {}
+    results: dict[str, Any] = {}
     try:
         import numpy as np
         from dm_control.mujoco.wrapper.mjbindings import mjlib
@@ -108,7 +109,7 @@ def compute_induced_accelerations(physics: Any) -> Dict[str, Any]:
             except TypeError as e:
                 last_err = e
             except Exception as e:
-                last_err = e
+                last_err = e  # type: ignore[assignment]
 
         if not success and last_err is not None:
             raise last_err
