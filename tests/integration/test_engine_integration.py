@@ -89,7 +89,7 @@ class TestEngineIntegration:
         for engine_type, probe in manager.probes.items():
             # Probe should return consistent data structure
             try:
-                probe_result = probe.check_availability()
+                probe_result = probe.is_available()  # type: ignore[attr-defined]
 
                 # Result should be a dict or have expected attributes
                 assert isinstance(probe_result, (dict, bool, type(None)))

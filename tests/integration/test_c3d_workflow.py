@@ -70,9 +70,9 @@ def mock_ezc3d():
             },
         }
         # Populate trajectory for Marker1 X (0..9)
-        c3d_struct["data"]["points"][0, 0, :] = np.arange(frames, dtype=float)
+        c3d_struct["data"]["points"][0, 0, :] = np.arange(frames, dtype=float)  # type: ignore[index]
         # Populate analog values (constant 5.0)
-        c3d_struct["data"]["analogs"][0, 0, :] = 5.0
+        c3d_struct["data"]["analogs"][0, 0, :] = 5.0  # type: ignore[index]
 
         mock.c3d.return_value = c3d_struct
         yield mock
