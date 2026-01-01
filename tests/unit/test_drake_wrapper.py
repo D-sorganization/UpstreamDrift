@@ -25,7 +25,7 @@ try:
     )
 except ImportError:
     # Handle case where import logic inside module fails due to complex dependencies
-    DrakePhysicsEngine = None  # type: ignore[assignment]
+    DrakePhysicsEngine = None  # type: ignore[misc]
 
 
 class TestDrakeWrapper(unittest.TestCase):
@@ -70,7 +70,8 @@ class TestDrakeWrapper(unittest.TestCase):
 
         # Setup builder returns
         self.engine.builder.Build.return_value = self.engine.diagram
-        self.engine.diagram.CreateDefaultContext.return_value = self.engine.context
+        if self.engine.diagram is not None:
+            self.engine.diagram.CreateDefaultContext.return_value = self.engine.context
         self.engine.plant.GetMyContextFromRoot.return_value = self.engine.plant_context
 
         # 1. Finalize (creates simulator)
@@ -87,7 +88,8 @@ class TestDrakeWrapper(unittest.TestCase):
         mock_simulator_instance.Initialize.reset_mock()
 
         # 2. Step (should reuse simulator)
-        self.engine.context.get_time.return_value = 0.0
+        if self.engine.context is not None:
+            self.engine.context.get_time.return_value = 0.0
         self.engine.plant.time_step.return_value = 0.001
 
         self.engine.step(0.01)
