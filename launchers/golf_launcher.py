@@ -307,9 +307,20 @@ class DraggableModelCard(QFrame):
         lbl_img = QLabel()
         lbl_img.setFixedSize(200, 200)
         lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        # Ensure the image container has proper styling for centering
+        lbl_img.setStyleSheet(
+            """
+            QLabel {
+                border: none;
+                background: transparent;
+                text-align: center;
+            }
+        """
+        )
 
         if img_path and img_path.exists():
             pixmap = QPixmap(str(img_path))
+            # Scale image to fit within container while maintaining aspect ratio
             pixmap = pixmap.scaled(
                 180,
                 180,
@@ -319,7 +330,17 @@ class DraggableModelCard(QFrame):
             lbl_img.setPixmap(pixmap)
         else:
             lbl_img.setText("No Image")
-            lbl_img.setStyleSheet("color: #666; font-style: italic;")
+            lbl_img.setStyleSheet(
+                """
+                QLabel {
+                    color: #666;
+                    font-style: italic;
+                    border: none;
+                    background: transparent;
+                    text-align: center;
+                }
+            """
+            )
 
         layout.addWidget(lbl_img)
 
