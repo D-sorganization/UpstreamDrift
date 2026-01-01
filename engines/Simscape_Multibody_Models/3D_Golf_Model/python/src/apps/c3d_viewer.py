@@ -795,6 +795,8 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         ]
 
         # Find approximate peak speed frame, if sensible
+
+        speed = None
         if pos.shape[0] > 2:
             disp = np.diff(pos, axis=0)
             dt = np.diff(t)
@@ -816,16 +818,15 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         # Speed plot
         self.canvas_analysis.fig.clear()
         ax = self.canvas_analysis.add_subplot(111)
-        if pos.shape[0] > 2:
+        if speed is not None:
             # Speed vs time
-            if "speed" in locals():
-                # Align length with t (N-1)
-                ax.plot(t[1:], speed, label="Speed")
-                ax.set_title(f"Speed Profile: {marker_name}")
-                ax.set_xlabel("Time (s)")
-                ax.set_ylabel("Speed")
-                ax.grid(True)
-                ax.legend()
+            # Align length with t (N-1)
+            ax.plot(t[1:], speed, label="Speed")
+            ax.set_title(f"Speed Profile: {marker_name}")
+            ax.set_xlabel("Time (s)")
+            ax.set_ylabel("Speed")
+            ax.grid(True)
+            ax.legend()
         self.canvas_analysis.fig.tight_layout()
         self.canvas_analysis.draw()  # type: ignore
 
