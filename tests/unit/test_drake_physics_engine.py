@@ -90,10 +90,15 @@ def test_load_from_string(engine):
 
 
 def test_step(engine):
-    # Mock context and diagram
-    engine.diagram = MagicMock()
-    engine.context = MagicMock()
-    engine.context.get_time.return_value = 0.0
+    # Prepare mocks for _ensure_finalized chain
+    mock_diagram = MagicMock()
+    mock_context = MagicMock()
+
+    # engine.builder is already a Mock from fixture
+    engine.builder.Build.return_value = mock_diagram
+    mock_diagram.CreateDefaultContext.return_value = mock_context
+
+    mock_context.get_time.return_value = 0.0
     engine.plant.time_step.return_value = 0.001
 
     with patch(

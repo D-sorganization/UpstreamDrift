@@ -1,0 +1,183 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Launchers &mdash; Golf Modeling Suite 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Physics Engines" href="engines.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            Golf Modeling Suite
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="shared.html">Shared Components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="engines.html">Physics Engines</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Launchers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#launchers.unified_launcher.UnifiedLauncher"><code class="docutils literal notranslate"><span class="pre">UnifiedLauncher</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#launchers.unified_launcher.UnifiedLauncher.get_version"><code class="docutils literal notranslate"><span class="pre">UnifiedLauncher.get_version()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#launchers.unified_launcher.UnifiedLauncher.mainloop"><code class="docutils literal notranslate"><span class="pre">UnifiedLauncher.mainloop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#launchers.unified_launcher.UnifiedLauncher.show_status"><code class="docutils literal notranslate"><span class="pre">UnifiedLauncher.show_status()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#launchers.unified_launcher.launch"><code class="docutils literal notranslate"><span class="pre">launch()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#launchers.unified_launcher.show_status"><code class="docutils literal notranslate"><span class="pre">show_status()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Golf Modeling Suite</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Launchers</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/modules/launchers.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-launchers.unified_launcher">
+<span id="launchers"></span><h1>Launchers<a class="headerlink" href="#module-launchers.unified_launcher" title="Link to this heading"></a></h1>
+<p>Unified launcher interface wrapping PyQt GolfLauncher.</p>
+<p>This module provides a consistent interface for launch_golf_suite.py
+that wraps the PyQt-based GolfLauncher implementation.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="launchers.unified_launcher.UnifiedLauncher">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">launchers.unified_launcher.</span></span><span class="sig-name descname"><span class="pre">UnifiedLauncher</span></span><a class="reference internal" href="../_modules/launchers/unified_launcher.html#UnifiedLauncher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#launchers.unified_launcher.UnifiedLauncher" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Unified launcher interface compatible with launch_golf_suite.py.</p>
+<p>This class wraps the PyQt GolfLauncher to provide a consistent
+interface with a mainloop() method as expected by the CLI launcher.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="launchers.unified_launcher.UnifiedLauncher.get_version">
+<span class="sig-name descname"><span class="pre">get_version</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/launchers/unified_launcher.html#UnifiedLauncher.get_version"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#launchers.unified_launcher.UnifiedLauncher.get_version" title="Link to this definition"></a></dt>
+<dd><p>Get suite version from package metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Version string (e.g., “1.0.0-beta”)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Primary source: Package metadata (installed package)
+Fallback: shared.__version__ (development mode)
+Last resort: Hardcoded default</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="launchers.unified_launcher.UnifiedLauncher.mainloop">
+<span class="sig-name descname"><span class="pre">mainloop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/launchers/unified_launcher.html#UnifiedLauncher.mainloop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#launchers.unified_launcher.UnifiedLauncher.mainloop" title="Link to this definition"></a></dt>
+<dd><p>Start the launcher main loop.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Exit code from the application</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="launchers.unified_launcher.UnifiedLauncher.show_status">
+<span class="sig-name descname"><span class="pre">show_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/launchers/unified_launcher.html#UnifiedLauncher.show_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#launchers.unified_launcher.UnifiedLauncher.show_status" title="Link to this definition"></a></dt>
+<dd><p>Display suite status information.</p>
+<p>Shows available engines, their status, and configuration.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="launchers.unified_launcher.launch">
+<span class="sig-prename descclassname"><span class="pre">launchers.unified_launcher.</span></span><span class="sig-name descname"><span class="pre">launch</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../_modules/launchers/unified_launcher.html#launch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#launchers.unified_launcher.launch" title="Link to this definition"></a></dt>
+<dd><p>Launch the Golf Modeling Suite GUI.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Exit code</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="launchers.unified_launcher.show_status">
+<span class="sig-prename descclassname"><span class="pre">launchers.unified_launcher.</span></span><span class="sig-name descname"><span class="pre">show_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../_modules/launchers/unified_launcher.html#show_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#launchers.unified_launcher.show_status" title="Link to this definition"></a></dt>
+<dd><p>Show suite status without launching GUI.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="engines.html" class="btn btn-neutral float-left" title="Physics Engines" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Golf Modeling Suite Team.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
