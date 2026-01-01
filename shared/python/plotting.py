@@ -490,7 +490,8 @@ class GolfSwingPlotter:
         else:
             cop_z = cop[:, 2]
 
-        vec = com - np.column_stack((cop_xy, cop_z))
+        vec_temp = com - np.column_stack((cop_xy, cop_z))
+        vec = vec_temp  # type: ignore
         vec_norm = np.linalg.norm(vec, axis=1)
         vec_norm[vec_norm < 1e-6] = 1.0
 
