@@ -93,9 +93,9 @@ class TestOutputManager(unittest.TestCase):
             path.stem, format_type=OutputFormat.JSON
         )
 
-        self.assertEqual(loaded_data["array"], [1, 2, 3])
-        self.assertEqual(loaded_data["float"], 1.5)
-        self.assertEqual(loaded_data["int"], 10)
+        self.assertEqual(loaded_data[0]["array"], [1, 2, 3])  # type: ignore[index]
+        self.assertEqual(loaded_data[0]["float"], 1.5)  # type: ignore[index]
+        self.assertEqual(loaded_data[0]["int"], 10)  # type: ignore[index]
 
     def test_get_simulation_list(self):
         """Test retrieving list of simulations."""
