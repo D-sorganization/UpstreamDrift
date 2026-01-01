@@ -5,6 +5,7 @@ and asserts that the results (e.g., period, energy conservation) are close.
 """
 
 from typing import Any
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
@@ -37,7 +38,7 @@ def run_mujoco_pendulum(params: SimplePendulumParams) -> dict[str, Any]:
     try:
         import mujoco
 
-        if "unittest.mock" in str(type(mujoco)):
+        if isinstance(mujoco, MagicMock):
             return {"error": "MuJoCo is mocked"}
     except ImportError:
         return {"error": "MuJoCo not installed"}
