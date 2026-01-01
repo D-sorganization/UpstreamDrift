@@ -1,10 +1,10 @@
 """Unit tests for Drake Induced Acceleration Analyzer."""
 
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-import pytest
 import numpy as np
+import pytest
 
 # Mock pydrake before importing the module under test
 mock_pydrake = MagicMock()
@@ -68,10 +68,10 @@ class TestDrakeInducedAcceleration:
         # acc_t = 0 (default)
         # total = acc_g + acc_c + acc_t = [10-2, 0-2] = [8, -2]
 
-        np.testing.assert_allclose(results['gravity'], [10.0, 0.0])
-        np.testing.assert_allclose(results['velocity'], [-2.0, -2.0])
-        np.testing.assert_allclose(results['control'], [0.0, 0.0])
-        np.testing.assert_allclose(results['total'], [8.0, -2.0])
+        np.testing.assert_allclose(results["gravity"], [10.0, 0.0])
+        np.testing.assert_allclose(results["velocity"], [-2.0, -2.0])
+        np.testing.assert_allclose(results["control"], [0.0, 0.0])
+        np.testing.assert_allclose(results["total"], [8.0, -2.0])
 
         # Verify plant calls
         mock_plant.CalcMassMatrix.assert_called_with(context)
@@ -98,13 +98,13 @@ class TestDrakeInducedAcceleration:
         results = analyzer.compute_components(context)
 
         # acc_g = M^-1 * tau_g = [[0.5, 0], [0, 2]] * [4, 1] = [2, 2]
-        np.testing.assert_allclose(results['gravity'], [2.0, 2.0])
+        np.testing.assert_allclose(results["gravity"], [2.0, 2.0])
 
         # acc_c = M^-1 * -(bias + tau_g) = M^-1 * -[4, 1] = -[2, 2]
-        np.testing.assert_allclose(results['velocity'], [-2.0, -2.0])
+        np.testing.assert_allclose(results["velocity"], [-2.0, -2.0])
 
         # total = 0
-        np.testing.assert_allclose(results['total'], [0.0, 0.0], atol=1e-10)
+        np.testing.assert_allclose(results["total"], [0.0, 0.0], atol=1e-10)
 
     def test_compute_components_structure(self, analyzer, mock_plant):
         """Verify the result dictionary structure."""
@@ -115,7 +115,7 @@ class TestDrakeInducedAcceleration:
         results = analyzer.compute_components(MagicMock())
 
         assert isinstance(results, dict)
-        assert 'gravity' in results
-        assert 'velocity' in results
-        assert 'control' in results
-        assert 'total' in results
+        assert "gravity" in results
+        assert "velocity" in results
+        assert "control" in results
+        assert "total" in results

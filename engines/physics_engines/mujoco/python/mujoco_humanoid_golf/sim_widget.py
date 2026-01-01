@@ -11,7 +11,6 @@ from typing import Any, Final
 import mujoco
 import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
-
 from shared.python.biomechanics_data import BiomechanicalData
 
 from .biomechanics import BiomechanicalAnalyzer, SwingRecorder
