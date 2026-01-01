@@ -10,7 +10,7 @@ import pytest
 mock_pin = MagicMock()
 sys.modules["pinocchio"] = mock_pin
 
-from engines.physics_engines.pinocchio.python.pinocchio_golf.induced_acceleration import (
+from engines.physics_engines.pinocchio.python.pinocchio_golf.induced_acceleration import (  # noqa: E402, E501
     InducedAccelerationAnalyzer,
 )
 
