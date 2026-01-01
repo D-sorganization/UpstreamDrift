@@ -25,7 +25,7 @@ try:
     )
 except ImportError:
     # Handle case where import logic inside module fails due to complex dependencies
-    DrakePhysicsEngine = None  # type: ignore[misc]
+    DrakePhysicsEngine = None  # type: ignore[assignment,misc]
 
 
 class TestDrakeWrapper(unittest.TestCase):

@@ -31,6 +31,7 @@ def mock_casadi():
     mock_var.__len__.return_value = 2
 
     # Mock comparisons
+    mock_var.__eq__ = MagicMock()
     mock_var.__eq__.return_value = MagicMock()
 
     # Slicing returns
