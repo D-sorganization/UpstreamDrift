@@ -3,22 +3,20 @@
 C3D Motion Analysis GUI
 
 Features:
-- Load C3D files (via ezc3d)
+- Load C3D files (via C3DDataReader)
 - Inspect metadata, markers, analog channels
 - 2D plots of marker/analog time-series
 - 3D marker trajectory viewer
 - Basic kinematic analysis: speed, path length, extrema
-
-Dependencies:
-    See python/requirements.txt for required packages.
+- Consolidated loading path and MVC architecture
 """
 
 import os
 import sys
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
-import ezc3d
 import numpy as np
 import numpy.typing as npt
 from matplotlib.axes import Axes
@@ -26,6 +24,16 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt
+
+# Ensure we can import the shared reader
+try:
+    from ..c3d_reader import C3DDataReader  # type: ignore
+except (ImportError, ValueError):
+    # Fallback for direct execution
+    src_path = Path(__file__).resolve().parent.parent
+    if str(src_path) not in sys.path:
+        sys.path.insert(0, str(src_path))
+    from c3d_reader import C3DDataReader
 
 # ---------------------------------------------------------------------------
 # Data model for C3D content
@@ -378,6 +386,14 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         for w in widgets:
             w.setEnabled(enabled)
 
+    def show_about_dialog(self) -> None:
+        """Show the about dialog."""
+        QtWidgets.QMessageBox.about(
+            self,
+            "About C3D Viewer",
+            "C3D Viewer\n\nPart of the Golf Modeling Suite.\nUses the consolidated C3DDataReader for consistent ingestion.",
+        )
+
     # --------------------------- File I/O ----------------------------------
 
     def open_c3d_file(self) -> None:
@@ -393,6 +409,8 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
 
         if (sb := self.statusBar()) is not None:
             sb.showMessage(f"Loading {os.path.basename(path)}...")
+            
+        # Ensure single cursor override
         QtWidgets.QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
 
         try:
@@ -414,104 +432,98 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             QtWidgets.QApplication.restoreOverrideCursor()
 
     def _load_c3d(self, filepath: str) -> C3DDataModel:
-        """Load and parse a C3D file into a C3DDataModel."""
-        c3d_obj = ezc3d.c3d(filepath)
+        """Load and parse a C3D file using the consolidated C3DDataReader."""
+        reader = C3DDataReader(filepath)
+        metadata_obj = reader.get_metadata()
 
-        # Point (marker) data
-        points = c3d_obj["data"]["points"]  # shape (4, Npoints, Nframes)
-        n_dim, n_points, n_frames = points.shape
-        if n_dim != 4:
-            raise ValueError(
-                f"Expected 4 dimensions for marker data (x, y, z, residual), "
-                f"got {n_dim}"
-            )
-
-        labels_points = c3d_obj["parameters"]["POINT"]["LABELS"]["value"]
-        try:
-            units_points = c3d_obj["parameters"]["POINT"]["UNITS"]["value"][0]
-        except (KeyError, IndexError, TypeError):
-            units_points = "unknown"
-
-        frame_rate = float(c3d_obj["parameters"]["POINT"]["RATE"]["value"][0])
-
-        # Build marker dictionary
+        # Load Points Data
+        df_points = reader.points_dataframe(include_time=False)
+        
+        # Build markers dict
         markers: dict[str, MarkerData] = {}
-        for i, name in enumerate(labels_points):
-            xyz = points[0:3, i, :].T  # (Nframes, 3)
-            residuals = points[3, i, :].T  # (Nframes,)
-            markers[name] = MarkerData(name=name, position=xyz, residuals=residuals)
-
-        # Analog data
-        analog = {}
-        if "ANALOG" in c3d_obj["parameters"]:
-            labels_analog = c3d_obj["parameters"]["ANALOG"]["LABELS"]["value"]
-            analog_data = c3d_obj["data"][
-                "analogs"
-            ]  # shape (Nsubframes, Nchannels, Nframes)
-            # ezc3d stores analog as (Nsubframes, Nchannels, Nframes); flatten in time
-            n_sub, n_ch, n_f = analog_data.shape
-            analog_rate = float(c3d_obj["parameters"]["ANALOG"]["RATE"]["value"][0])
-
-            analog_flat = analog_data.transpose(2, 0, 1).reshape(
-                n_sub * n_f, n_ch
-            )  # (n_sub * n_f, n_ch)
-
-            # Units per channel, if available
-            try:
-                analog_units = c3d_obj["parameters"]["ANALOG"]["UNITS"]["value"]
-            except (KeyError, TypeError):
-                analog_units = [""] * len(labels_analog)
-
-            for j, name in enumerate(labels_analog):
-                unit = analog_units[j] if j < len(analog_units) else ""
-                analog[name] = AnalogData(
-                    name=name, values=analog_flat[:, j], unit=unit
+        marker_names = metadata_obj.marker_labels
+        
+        # Optimize by iterating known metadata labels, assuming dataframe acts predictably
+        # Since DataFrame is tidy, we filter by name
+        for name in marker_names:
+            # Filter rows for this marker
+            # Note: df_points has columns [frame, marker, x, y, z, residual]
+            # It's usually faster to groupby if we do all, but simple filtering is robust
+            mask = df_points['marker'] == name
+            sub = df_points.loc[mask]
+            
+            if not sub.empty:
+                pos = sub[['x', 'y', 'z']].to_numpy()
+                res = sub['residual'].to_numpy()
+                markers[name] = MarkerData(name=name, position=pos, residuals=res)
+            else:
+                # Handle missing marker if necessary (empty arrays)
+                markers[name] = MarkerData(
+                    name=name, 
+                    position=np.empty((0, 3)), 
+                    residuals=np.empty((0,))
                 )
-        else:
-            analog_rate = 0.0
+
+        # Load Analog Data
+        df_analog = reader.analog_dataframe(include_time=False)
+        analog: dict[str, AnalogData] = {}
+        
+        # We need units map from metadata
+        # C3DMetadata now has analog_units list
+        units_map = dict(zip(metadata_obj.analog_labels, metadata_obj.analog_units))
+        
+        if not df_analog.empty and 'channel' in df_analog.columns:
+            for name in df_analog['channel'].unique():
+                mask = df_analog['channel'] == name
+                vals = df_analog.loc[mask, 'value'].to_numpy()
+                unit = units_map.get(name, "")
+                analog[name] = AnalogData(name=name, values=vals, unit=unit)
 
         # Time vectors
-        time_point = np.arange(n_frames) / frame_rate if frame_rate > 0 else None
-        n_analog_samples = next(iter(analog.values())).values.shape[0] if analog else 0
-        time_analog = (
-            np.arange(n_analog_samples) / analog_rate
-            if analog_rate > 0 and n_analog_samples > 0
+        # Create directly from rate/counts to avoid dataframe overhead for just time
+        frame_time = (
+            np.arange(metadata_obj.frame_count) / metadata_obj.frame_rate
+            if metadata_obj.frame_rate > 0
             else None
         )
+        
+        analog_time = None
+        if metadata_obj.analog_rate and metadata_obj.analog_rate > 0:
+             # Calculate analog sample count. 
+             # We can get it from the dataframe or calculate.
+             # Metadata doesn't strictly store 'analog_sample_count' but implies it via duration?
+             # Or we check one analog channel length.
+             if analog:
+                 first_analog = next(iter(analog.values()))
+                 n_samples = len(first_analog.values)
+                 analog_time = np.arange(n_samples) / metadata_obj.analog_rate
 
-        # Metadata extraction
-        metadata = {
+        # Metadata dict for UI
+        metadata_ui = {
             "File": os.path.basename(filepath),
             "Path": filepath,
-            "Point rate (Hz)": f"{frame_rate:.3f}",
-            "Analog rate (Hz)": f"{analog_rate:.3f}",
-            "Frames": str(n_frames),
-            "Points": str(n_points),
-            "Units (POINT)": units_points,
+            "Point rate (Hz)": f"{metadata_obj.frame_rate:.3f}",
+            "Analog rate (Hz)": f"{metadata_obj.analog_rate:.3f}" if metadata_obj.analog_rate else "N/A",
+            "Frames": str(metadata_obj.frame_count),
+            "Points": str(metadata_obj.marker_count),
+            "Units (POINT)": metadata_obj.units,
         }
+        
+        # Add events if any
+        if metadata_obj.events:
+             events_str = ", ".join([f"{e.label} ({e.time:.2f}s)" for e in metadata_obj.events])
+             metadata_ui["Events"] = events_str
 
-        if "TRIAL" in c3d_obj["parameters"]:
-            for key, param in c3d_obj["parameters"]["TRIAL"].items():
-                if "value" in param:
-                    value = param["value"]
-                    if isinstance(value, list | tuple | np.ndarray):
-                        v = ", ".join(str(x) for x in value)
-                    else:
-                        v = str(value)
-                    metadata[f"TRIAL::{key}"] = v
-
-        model = C3DDataModel(
+        return C3DDataModel(
             filepath=filepath,
             markers=markers,
             analog=analog,
-            point_rate=frame_rate,
-            analog_rate=analog_rate,
-            point_time=time_point,
-            analog_time=time_analog,
-            metadata=metadata,
+            point_rate=metadata_obj.frame_rate,
+            analog_rate=metadata_obj.analog_rate or 0.0,
+            point_time=frame_time,
+            analog_time=analog_time,
+            metadata=metadata_ui,
         )
-
-        return model
 
     # --------------------- Populate UI from model --------------------------
 
@@ -798,49 +810,21 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.canvas_analysis.fig.clear()
         ax = self.canvas_analysis.add_subplot(111)
         if pos.shape[0] > 2:
-            disp = np.diff(pos, axis=0)
-            dt = np.diff(t)
-            dt[dt <= 0] = np.nan
-            speed = np.linalg.norm(disp, axis=1) / dt
-            ax.plot(t[1:], speed, label="Speed magnitude")
-            ax.set_xlabel("Time (s)")
-            ax.set_ylabel("Speed (units/s)")
-            ax.set_title(f"Speed profile: {marker_name}")
-            ax.grid(True)
-            ax.legend()
-            self.canvas_analysis.fig.tight_layout()
-
+            # Speed vs time
+            if 'speed' in locals():
+                # Align length with t (N-1)
+                ax.plot(t[1:], speed, label="Speed")
+                ax.set_title(f"Speed Profile: {marker_name}")
+                ax.set_xlabel("Time (s)")
+                ax.set_ylabel("Speed")
+                ax.grid(True)
+                ax.legend()
+        self.canvas_analysis.fig.tight_layout()
         self.canvas_analysis.draw()  # type: ignore
-
-    # ------------------------- About dialog --------------------------------
-
-    def show_about_dialog(self) -> None:
-        """Display the about dialog with application information."""
-        QtWidgets.QMessageBox.information(
-            self,
-            "About",
-            "C3D Motion Analysis Viewer\n\n"
-            "Reads C3D files using ezc3d and offers plotting, 3D visualization, "
-            "and basic marker kinematic analysis.\n\n"
-            "Extend this to domain-specific metrics (golf swing, gait, etc.).",
-        )
-
-
-# ---------------------------------------------------------------------------
-# Main entry point
-# ---------------------------------------------------------------------------
-
-
-def main() -> None:
-    """Main entry point for the C3D viewer application."""
-    app = QtWidgets.QApplication(sys.argv)
-    app.setApplicationName("C3D Motion Analysis Viewer")
-
-    window = C3DViewerMainWindow()
-    window.show()
-
-    sys.exit(app.exec())
 
 
 if __name__ == "__main__":
-    main()
+    app = QtWidgets.QApplication(sys.argv)
+    window = C3DViewerMainWindow()
+    window.show()
+    sys.exit(app.exec())
