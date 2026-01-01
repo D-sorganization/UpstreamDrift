@@ -1,10 +1,10 @@
 """Unit tests for Pinocchio Induced Acceleration Analyzer."""
 
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
-import pytest
 import numpy as np
+import pytest
 
 # Mock pinocchio before importing
 mock_pin = MagicMock()
@@ -23,7 +23,7 @@ class TestPinocchioInducedAcceleration:
         """Reset mocks before each test."""
         mock_pin.reset_mock()
         mock_pin.aba.side_effect = None
-        mock_pin.aba.return_value = MagicMock() # Default return
+        mock_pin.aba.return_value = MagicMock()  # Default return
         yield
 
     @pytest.fixture
@@ -50,7 +50,7 @@ class TestPinocchioInducedAcceleration:
         assert analyzer.model == mock_model
         assert analyzer.data == mock_data
         assert analyzer._temp_data is not None
-        assert analyzer._temp_data != mock_data # Should be a new instance
+        assert analyzer._temp_data != mock_data  # Should be a new instance
 
     def test_compute_components_logic(self, analyzer, mock_model):
         """Test compute_components logical flow."""
@@ -62,12 +62,16 @@ class TestPinocchioInducedAcceleration:
 
         def aba_side_effect(model, data, q_arg, v_arg, tau_arg):
             # Check inputs to return corresponding acceleration
-            if np.array_equal(v_arg, np.zeros(2)) and np.array_equal(tau_arg, np.zeros(2)):
-                return np.array([10.0, 10.0]) # q_ddot_g (Gravity only)
+            if np.array_equal(v_arg, np.zeros(2)) and np.array_equal(
+                tau_arg, np.zeros(2)
+            ):
+                return np.array([10.0, 10.0])  # q_ddot_g (Gravity only)
             elif np.array_equal(tau_arg, np.zeros(2)):
-                return np.array([12.0, 12.0]) # q_ddot_gv (Gravity + Velocity)
+                return np.array([12.0, 12.0])  # q_ddot_gv (Gravity + Velocity)
             else:
-                return np.array([15.0, 15.0]) # q_ddot_total (Gravity + Velocity + Control)
+                return np.array(
+                    [15.0, 15.0]
+                )  # q_ddot_total (Gravity + Velocity + Control)
 
         mock_pin.aba.side_effect = aba_side_effect
 
@@ -79,10 +83,10 @@ class TestPinocchioInducedAcceleration:
         # control = q_ddot_total - q_ddot_gv = [15, 15] - [12, 12] = [3, 3]
         # total = q_ddot_total = [15, 15]
 
-        np.testing.assert_allclose(results['gravity'], [10.0, 10.0])
-        np.testing.assert_allclose(results['velocity'], [2.0, 2.0])
-        np.testing.assert_allclose(results['control'], [3.0, 3.0])
-        np.testing.assert_allclose(results['total'], [15.0, 15.0])
+        np.testing.assert_allclose(results["gravity"], [10.0, 10.0])
+        np.testing.assert_allclose(results["velocity"], [2.0, 2.0])
+        np.testing.assert_allclose(results["control"], [3.0, 3.0])
+        np.testing.assert_allclose(results["total"], [15.0, 15.0])
 
         # Verify calls were made
         assert mock_pin.aba.call_count == 3
@@ -94,9 +98,9 @@ class TestPinocchioInducedAcceleration:
 
         def aba_side_effect(model, data, q_arg, v_arg, tau_arg):
             if np.array_equal(tau_arg, np.zeros(2)):
-                return np.array([-9.8, 0]) # Gravity accel
+                return np.array([-9.8, 0])  # Gravity accel
             else:
-                return np.array([-4.8, 5.0]) # Gravity + Specific Torque Accel
+                return np.array([-4.8, 5.0])  # Gravity + Specific Torque Accel
 
         mock_pin.aba.side_effect = aba_side_effect
 
@@ -118,8 +122,8 @@ class TestPinocchioInducedAcceleration:
 
         results = analyzer.compute_counterfactuals(q, v)
 
-        np.testing.assert_allclose(results['ztcf_accel'], [1.0, 2.0])
-        np.testing.assert_allclose(results['zvcf_torque'], [3.0, 4.0])
+        np.testing.assert_allclose(results["ztcf_accel"], [1.0, 2.0])
+        np.testing.assert_allclose(results["zvcf_torque"], [3.0, 4.0])
 
         mock_pin.aba.assert_called()
         mock_pin.computeGeneralizedGravity.assert_called()

@@ -1527,8 +1527,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         vals = self.latest_cf[cf_type]
         scale = self.spin_torque_scale.value()
 
-        # ZTCF is acceleration, ZVCF is torque
-        is_accel = "accel" in cf_type
+        # ZTCF is acceleration (angular), ZVCF is torque (angular)
+        # is_accel = "accel" in cf_type  # Unused, but concept is similar
+
 
         for i in range(1, self.model.njoints):
             joint = self.model.joints[i]

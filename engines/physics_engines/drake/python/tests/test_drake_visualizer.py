@@ -1,15 +1,16 @@
 """Unit tests for Drake Visualizer."""
 
 import sys
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock
 
-import pytest
 import numpy as np
+import pytest
 
 # Mock pydrake before importing
 mock_pydrake = MagicMock()
 sys.modules["pydrake"] = mock_pydrake
 sys.modules["pydrake.all"] = mock_pydrake
+
 
 # Fix mocking for class methods and types
 # RotationMatrix needs to be a class with MakeYRotation classmethod
@@ -29,13 +30,17 @@ class MockRotationMatrix:
     def __init__(self, *args):
         pass
 
+
 mock_pydrake.RotationMatrix = MockRotationMatrix
 
-# RigidTransform needs to handle numpy array inputs without inspecting them for coroutines (which causes ValueError on .T)
+
+# RigidTransform needs to handle numpy array inputs without inspecting them for
+# coroutines (which causes ValueError on .T).
 # So we make it a simple class or function that returns a mock.
 class MockRigidTransform:
     def __init__(self, *args, **kwargs):
         pass
+
 
 mock_pydrake.RigidTransform = MockRigidTransform
 mock_pydrake.Cylinder = MagicMock()
@@ -43,11 +48,8 @@ mock_pydrake.Sphere = MagicMock()
 mock_pydrake.Rgba = MagicMock()
 
 
-from engines.physics_engines.drake.python.src.drake_visualizer import (
+from engines.physics_engines.drake.python.src.drake_visualizer import (  # noqa: E402
     DrakeVisualizer,
-    FRAME_AXIS_LENGTH_M,
-    FRAME_AXIS_RADIUS_M,
-    COM_SPHERE_RADIUS_M,
 )
 
 
@@ -87,7 +89,7 @@ class TestDrakeVisualizer:
         assert body_name in visualizer.visible_frames
 
         # Should have set objects for x, y, z axes
-        base_path = f"visual_overlays/frames/{body_name}"
+        # base_path = f"visual_overlays/frames/{body_name}"
         # Cylinder calls return new mocks each time, so we check call count
         assert mock_meshcat.SetObject.call_count == 3
 
@@ -115,14 +117,16 @@ class TestDrakeVisualizer:
         body = MagicMock()
         mock_plant.GetBodyByName.return_value = body
 
-        X_WB = MagicMock() # World-Body transform
+        X_WB = MagicMock()  # World-Body transform
         mock_plant.EvalBodyPoseInWorld.return_value = X_WB
 
         visualizer.update_frame_transforms(context)
 
         mock_plant.GetBodyByName.assert_called_with(body_name)
         mock_plant.EvalBodyPoseInWorld.assert_called_with(plant_context, body)
-        mock_meshcat.SetTransform.assert_called_with(f"visual_overlays/frames/{body_name}", X_WB)
+        mock_meshcat.SetTransform.assert_called_with(
+            f"visual_overlays/frames/{body_name}", X_WB
+        )
 
     def test_toggle_com_visible(self, visualizer, mock_meshcat):
         """Test enabling COM visualization."""
@@ -175,7 +179,8 @@ class TestDrakeVisualizer:
 
         visualizer.update_com_transforms(context)
 
-        # Check Transform was created (we can't easily inspect args if MockRigidTransform eats them, but no crash is good)
+        # Check Transform was created (we can't easily inspect args if
+        # MockRigidTransform eats them, but no crash is good)
         mock_meshcat.SetTransform.assert_called()
 
     def test_draw_ellipsoid(self, visualizer, mock_meshcat):
