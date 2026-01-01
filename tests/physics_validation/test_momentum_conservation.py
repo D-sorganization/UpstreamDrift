@@ -15,7 +15,7 @@ def is_engine_available(engine_type: EngineType) -> bool:
     """Check if an engine is installed and importable."""
     manager = EngineManager()
     probe_result = manager.get_probe_result(engine_type)
-    return probe_result.is_available()
+    return bool(probe_result.is_available())
 
 
 def test_mujoco_momentum_conservation():
@@ -89,8 +89,8 @@ def test_mujoco_momentum_conservation():
     # Momentum should remain exactly 1.0 throughout (within float precision)
     # External forces = 0 => dP/dt = 0
 
-    momentums = np.array(momentums)
-    max_deviation = np.max(np.abs(momentums - initial_momentum_x))
+    momentums_array = np.array(momentums)
+    max_deviation = float(np.max(np.abs(momentums_array - initial_momentum_x)))
 
     logger.info(f"Max Momentum Deviation: {max_deviation:.6e}")
 
