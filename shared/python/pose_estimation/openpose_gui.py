@@ -103,7 +103,7 @@ class OpenPoseGUI(QMainWindow):
         self.timer.start(100)
 
     def update_progress(self) -> None:
-        val = self.progress.value()  # type: ignore
+        val: int = self.progress.value()
         if val < 100:
             self.progress.setValue(val + 2)
             if val % 20 == 0:

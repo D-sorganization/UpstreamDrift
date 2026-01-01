@@ -11,7 +11,7 @@
 ## Engine-by-engine findings
 
 ### MuJoCo
-- Strengths: A full-featured, modern GUI with tabbed controls, visualization, analysis, plotting, and grip modelling is clearly implemented, including force/torque vector visualization and camera controls. 【F:engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui.py†L1-L147】
+- Strengths: A full-featured, modern GUI with tabbed controls, visualization, analysis, plotting, and grip modeling is clearly implemented, including force/torque vector visualization and camera controls. 【F:engines/physics_engines/mujoco/python/mujoco_humanoid_golf/advanced_gui.py†L1-L147】
 - Documentation: The MuJoCo README explicitly advertises force/torque visualization, advanced plotting, adjustable joint-force vectors, and comprehensive analysis workflows, giving users clear expectations for manipulating graphics and loads across the model. 【F:engines/physics_engines/mujoco/README.md†L1-L119】
 - Gaps: The launcher does not surface which MuJoCo configuration is used (e.g., which model, controller, or input source) or how to switch control/force methods before entering the GUI.
 

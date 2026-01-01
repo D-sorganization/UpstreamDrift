@@ -21,10 +21,17 @@ from PyQt6.QtWidgets import (
 )
 
 matplotlib.use("QtAgg")
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+try:
+    from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
+except ImportError:
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+
 from matplotlib.figure import Figure
 
-from engines.physics_engines.opensim.python.opensim_golf.core import GolfSwingModel
+try:
+    from engines.physics_engines.opensim.python.opensim_golf.core import GolfSwingModel
+except ImportError:
+    from .opensim_golf.core import GolfSwingModel
 
 
 class OpenSimGolfGUI(QMainWindow):

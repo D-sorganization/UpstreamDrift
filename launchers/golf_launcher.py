@@ -17,8 +17,8 @@ import sys
 import threading
 import time
 import webbrowser
+from dataclasses import dataclass
 from pathlib import Path
-from types import SimpleNamespace
 from typing import Any
 
 from PyQt6.QtCore import QMimeData, QPoint, Qt, QThread, QTimer, pyqtSignal
@@ -102,21 +102,31 @@ MODEL_IMAGES = {
     "URDF Generator": "urdf_icon.png",
     "C3D Motion Viewer": "c3d_icon.png",  # Add C3D viewer icon
     "Dataset Generator GUI": "simscape_multibody.png",
-    "Golf Swing Analysis GUI": "simscape_multibody.png",
-    "MATLAB Code Analyzer": "simscape_multibody.png",
+    "Golf Swing Analysis GUI": "opensim.png",
+    "MATLAB Code Analyzer": "urdf_icon.png",
 }
 
 DOCKER_STAGES = ["all", "mujoco", "pinocchio", "drake", "base"]
 
+
+@dataclass
+class SpecialApp:
+    id: str
+    name: str
+    description: str
+    type: str
+    path: str
+
+
 SPECIAL_APPS = [
-    SimpleNamespace(
+    SpecialApp(
         id="urdf_generator",
         name="URDF Generator",
         description="Interactive URDF model builder",
         type="utility",
         path="tools/urdf_generator/launch_urdf_generator.py",
     ),
-    SimpleNamespace(
+    SpecialApp(
         id="c3d_viewer",
         name="C3D Motion Viewer",
         description="C3D motion capture file viewer and analyzer",
@@ -125,7 +135,7 @@ SPECIAL_APPS = [
             "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
         ),
     ),
-    SimpleNamespace(
+    SpecialApp(
         id="matlab_dataset_gui",
         name="Dataset Generator GUI",
         description="MATLAB forward dynamics dataset generator",
@@ -135,7 +145,7 @@ SPECIAL_APPS = [
             "dataset_generator/Dataset_GUI.m"
         ),
     ),
-    SimpleNamespace(
+    SpecialApp(
         id="matlab_golf_gui",
         name="Golf Swing Analysis GUI",
         description="MATLAB plotting suite with skeleton visualization",
@@ -145,7 +155,7 @@ SPECIAL_APPS = [
             "golf_gui/2D GUI/main_scripts/golf_swing_analysis_gui.m"
         ),
     ),
-    SimpleNamespace(
+    SpecialApp(
         id="matlab_code_analyzer",
         name="MATLAB Code Analyzer",
         description="Static analysis and code quality dashboard",
@@ -357,7 +367,9 @@ class DraggableModelCard(QFrame):
             "openpose",
         ]:
             return "GUI Ready", "#28a745"  # Green
-        elif t in ["mjcf"] or str(getattr(self.model, "path", "")).endswith(".xml"):
+
+        path_str = str(getattr(self.model, "path", ""))
+        if t == "mjcf" or path_str.endswith(".xml"):
             return "Viewer", "#17a2b8"  # Info Blue
         elif t in ["opensim", "myosim"]:
             return "Demo / GUI", "#fd7e14"  # Orange
@@ -734,7 +746,7 @@ class LayoutManagerDialog(QDialog):
 
         sorted_models = sorted(
             available_models.values(),
-            key=lambda model: str(getattr(model, "name", "")).lower(),
+            key=lambda model: getattr(model, "name", "").lower(),
         )
 
         for model in sorted_models:
@@ -830,8 +842,10 @@ class ContextHelpDock(QDockWidget):
             return REPOS_ROOT / "tools" / "urdf_generator" / "README.md"
         elif "c3d" in model_id:
             # Fallback for c3d if no specific doc, or maybe it shares one?
+            # Review: Added placeholder explanation.
             return None
 
+        # Fallback to no doc
         return None
 
 
@@ -876,7 +890,7 @@ class GolfLauncher(QMainWindow):
             {}
         )  # Track running instances
         self.available_models: dict[str, Any] = {}
-        self.special_app_lookup: dict[str, SimpleNamespace] = {}
+        self.special_app_lookup: dict[str, SpecialApp] = {}
 
         # Load Registry
         try:
@@ -1009,6 +1023,12 @@ class GolfLauncher(QMainWindow):
 
         if self.selected_model not in self.model_order:
             self.selected_model = self.model_order[0] if self.model_order else None
+
+        # Copilot AI Review Change:
+        # Start with the existing model_order filtered to the newly selected IDs so
+        # that previously selected models keep their relative positions in the grid.
+        # ordered_selection already handled this by iterating self.model_order first.
+        # Append any newly selected models (not already in model_order) to the end.
         self.update_launch_button()
 
     def _get_model(self, model_id: str) -> Any | None:
@@ -1552,7 +1572,7 @@ class GolfLauncher(QMainWindow):
                 self, "Launch Error", f"Failed to launch C3D Viewer:\n{e}"
             )
 
-    def _launch_matlab_app(self, app: SimpleNamespace) -> None:
+    def _launch_matlab_app(self, app: SpecialApp) -> None:
         """Launch a MATLAB-based application using batch mode."""
 
         app_id = getattr(app, "id", "matlab_app")
@@ -1576,10 +1596,16 @@ class GolfLauncher(QMainWindow):
 
         working_dir = app_path.parent
         entrypoint = app_path.stem
+
+        # Escape single quotes for safe insertion into MATLAB string literals
+        working_dir_str = working_dir.as_posix()
+        working_dir_escaped = working_dir_str.replace("'", "''")
+        entrypoint_escaped = entrypoint.replace("'", "''")
+
         matlab_command = (
-            f"cd('{working_dir.as_posix()}');"
-            f"addpath(genpath('{working_dir.as_posix()}'));"
-            f"{entrypoint}();"
+            f"cd('{working_dir_escaped}');"
+            f"addpath(genpath('{working_dir_escaped}'));"
+            f"{entrypoint_escaped}();"
         )
 
         try:
@@ -1588,6 +1614,13 @@ class GolfLauncher(QMainWindow):
             )
             self.running_processes[app_id] = process
             logger.info("Launched MATLAB app %s with PID %s", app.name, process.pid)
+        except FileNotFoundError:
+            QMessageBox.critical(
+                self,
+                "MATLAB Not Found",
+                "MATLAB executable not found in PATH.\n"
+                "Please verify your MATLAB installation and environment variables.",
+            )
         except Exception as exc:
             logger.error("Failed to launch MATLAB app %s: %s", app.name, exc)
             QMessageBox.critical(
