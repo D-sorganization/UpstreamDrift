@@ -117,8 +117,15 @@ class TestDrakeWrapper(unittest.TestCase):
         self.engine.simulator.Initialize.assert_called_once()
 
     def test_forward_lazy_eval(self):
-        """Test forward implementation."""
+        """Test forward implementation (Lazy Evaluation Pattern)."""
+        # Ensure forward() is a no-op that relies on Drake's internal lazy evaluation mechanisms
+        # It should NOT eagerly compute anything or invalidate the context manually.
+        self.engine.context = MagicMock()
         self.engine.forward()
+
+        # Assert no aggressive computation was triggered
+        self.engine.context.SetTime.assert_not_called()
+        self.engine.context.SetContinuousState.assert_not_called()
 
 
 if __name__ == "__main__":

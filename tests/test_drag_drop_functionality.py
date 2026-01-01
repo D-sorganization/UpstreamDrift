@@ -20,10 +20,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
 
 try:
-    from PyQt6.QtCore import QMimeData, QPoint, Qt, QPointF
-    from PyQt6.QtGui import QDragEnterEvent, QDropEvent
+    from PyQt6.QtCore import QMimeData, QPoint, QPointF, Qt
+    from PyQt6.QtGui import QDropEvent
     from PyQt6.QtTest import QTest
-    from PyQt6.QtWidgets import QApplication, QWidget
+    from PyQt6.QtWidgets import QApplication
 
     PYQT_AVAILABLE = True
 except ImportError:
