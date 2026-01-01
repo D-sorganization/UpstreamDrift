@@ -28,7 +28,7 @@ class TestOutputManager(unittest.TestCase):
         if self.test_dir.exists():
             try:
                 shutil.rmtree(self.test_dir)
-            except PermissionError:
+            except (PermissionError, OSError):
                 pass
 
     def test_initialization_directory_creation(self):
