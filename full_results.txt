@@ -1,0 +1,408 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe
+cachedir: .pytest_cache
+benchmark: 4.0.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+rootdir: C:\Users\diete\Repositories\Golf_Modeling_Suite
+configfile: pyproject.toml
+plugins: anyio-4.9.0, benchmark-4.0.0, cov-7.0.0
+collecting ... collected 306 items / 1 skipped
+
+tests/benchmarks/test_dynamics_benchmarks.py::test_aba_benchmark PASSED  [  0%]
+tests/benchmarks/test_dynamics_benchmarks.py::test_rnea_benchmark PASSED [  0%]
+tests/integration/test_cross_engine_consistency.py::TestCrossEngineConsistency::test_mass_matrix_consistency SKIPPED [  0%]
+tests/integration/test_cross_engine_consistency.py::TestCrossEngineConsistency::test_gravity_forces_consistency SKIPPED [  1%]
+tests/integration/test_end_to_end.py::TestLauncherIntegration::test_launch_golf_suite_imports PASSED [  1%]
+tests/integration/test_end_to_end.py::TestLauncherIntegration::test_launch_golf_suite_status PASSED [  1%]
+tests/integration/test_end_to_end.py::TestLauncherIntegration::test_unified_launcher_show_status PASSED [  2%]
+tests/integration/test_end_to_end.py::TestEngineProbes::test_engine_manager_probes_available PASSED [  2%]
+tests/integration/test_end_to_end.py::TestEngineProbes::test_probe_all_engines PASSED [  2%]
+tests/integration/test_end_to_end.py::TestEngineProbes::test_diagnostic_report_generation PASSED [  3%]
+tests/integration/test_end_to_end.py::TestEngineProbes::test_at_least_one_engine_available PASSED [  3%]
+tests/integration/test_end_to_end.py::TestPhysicsParameters::test_physics_parameters_accessible PASSED [  3%]
+tests/integration/test_end_to_end.py::TestPhysicsParameters::test_ball_parameters_present PASSED [  4%]
+tests/integration/test_end_to_end.py::TestPhysicsParameters::test_gravity_parameter PASSED [  4%]
+tests/integration/test_end_to_end.py::TestPhysicsParameters::test_parameter_validation PASSED [  4%]
+tests/integration/test_end_to_end.py::TestPhysicsParameters::test_parameter_categories PASSED [  5%]
+tests/integration/test_end_to_end.py::TestPhysicsParameters::test_show_physics_parameters_script PASSED [  5%]
+tests/integration/test_end_to_end.py::TestValidateSuite::test_validate_suite_runs PASSED [  5%]
+tests/integration/test_end_to_end.py::TestOutputManager::test_output_manager_real_save_load PASSED [  6%]
+tests/integration/test_engine_integration.py::TestEngineIntegration::test_engine_manager_initialization PASSED [  6%]
+tests/integration/test_engine_integration.py::TestEngineIntegration::test_mujoco_drake_comparison PASSED [  6%]
+tests/integration/test_engine_integration.py::TestEngineIntegration::test_cross_engine_validation PASSED [  7%]
+tests/integration/test_engine_integration.py::TestEngineIntegration::test_engine_parameter_consistency PASSED [  7%]
+tests/integration/test_engine_integration.py::TestEngineIntegration::test_performance_comparison PASSED [  7%]
+tests/integration/test_engine_integration.py::TestEngineDataFlow::test_shared_data_structures PASSED [  8%]
+tests/integration/test_engine_integration.py::TestEngineDataFlow::test_output_format_consistency PASSED [  8%]
+tests/integration/test_engine_integration.py::TestEngineDataFlow::test_engine_error_handling PASSED [  8%]
+tests/integration/test_engine_integration.py::TestEngineConfiguration::test_unified_configuration PASSED [  9%]
+tests/integration/test_engine_integration.py::TestEngineConfiguration::test_engine_switching SKIPPED [  9%]
+tests/integration/test_engine_loading.py::test_engine_initialization PASSED [  9%]
+tests/integration/test_engine_loading.py::test_mujoco_loading_success PASSED [ 10%]
+tests/integration/test_engine_loading.py::test_mujoco_loading_failure_missing_dependency PASSED [ 10%]
+tests/integration/test_engine_loading.py::test_drake_loading_success SKIPPED [ 10%]
+tests/integration/test_engine_loading.py::test_pinocchio_loading_success PASSED [ 11%]
+tests/integration/test_engine_loading.py::test_cleanup_releases_resources PASSED [ 11%]
+tests/integration/test_engine_loading.py::test_cleanup_handles_exceptions PASSED [ 11%]
+tests/integration/test_golf_launcher_integration.py::test_launcher_detects_real_model_files PASSED [ 12%]
+tests/integration/test_golf_launcher_integration.py::test_launcher_handles_missing_file_on_launch PASSED [ 12%]
+tests/integration/test_physics_consistency.py::test_physics_engine_consistency FAILED [ 12%]
+tests/physics_validation/test_complex_models.py::test_pinocchio_golfer_stability PASSED [ 13%]
+tests/physics_validation/test_complex_models.py::test_mujoco_myoarm_stability PASSED [ 13%]
+tests/physics_validation/test_energy_conservation.py::test_mujoco_ballistic_energy_conservation SKIPPED [ 13%]
+tests/physics_validation/test_energy_conservation.py::test_pinocchio_energy_check SKIPPED [ 14%]
+tests/physics_validation/test_energy_conservation.py::test_drake_energy_conservation SKIPPED [ 14%]
+tests/physics_validation/test_pendulum_accuracy.py::test_mujoco_pendulum_accuracy SKIPPED [ 14%]
+tests/physics_validation/test_pendulum_accuracy.py::test_drake_pendulum_accuracy SKIPPED [ 15%]
+tests/test_comparative_analysis.py::test_alignment PASSED                [ 15%]
+tests/test_comparative_analysis.py::test_metrics PASSED                  [ 15%]
+tests/test_comparative_analysis.py::test_plotter PASSED                  [ 16%]
+tests/test_shared_biomechanics.py::test_statistical_analyzer PASSED      [ 16%]
+tests/test_shared_biomechanics.py::test_biomechanics_data PASSED         [ 16%]
+tests/test_shared_biomechanics.py::test_plotter_alignment PASSED         [ 16%]
+tests/test_shared_biomechanics.py::test_plotter_methods PASSED           [ 17%]
+tests/test_urdf_tools.py::test_urdf_generation_logic SKIPPED (Platfo...) [ 17%]
+tests/test_urdf_tools.py::test_urdf_scanning_logic PASSED                [ 17%]
+tests/unit/test_common_utils_coverage.py::test_convert_units PASSED      [ 18%]
+tests/unit/test_common_utils_coverage.py::test_ensure_output_dir PASSED  [ 18%]
+tests/unit/test_common_utils_coverage.py::test_load_save_golf_data PASSED [ 18%]
+tests/unit/test_common_utils_coverage.py::test_standardize_joint_angles PASSED [ 19%]
+tests/unit/test_common_utils_coverage.py::test_plot_joint_trajectories PASSED [ 19%]
+tests/unit/test_common_utils_coverage.py::test_get_shared_urdf_path PASSED [ 19%]
+tests/unit/test_configuration_manager.py::test_default_config PASSED     [ 20%]
+tests/unit/test_configuration_manager.py::test_config_validation PASSED  [ 20%]
+tests/unit/test_configuration_manager.py::test_save_load PASSED          [ 20%]
+tests/unit/test_configuration_manager.py::test_load_partial PASSED       [ 21%]
+tests/unit/test_configuration_manager.py::test_load_nonexistent PASSED   [ 21%]
+tests/unit/test_drake_physics_engine.py::test_initialization PASSED      [ 21%]
+tests/unit/test_drake_physics_engine.py::test_load_from_path PASSED      [ 22%]
+tests/unit/test_drake_physics_engine.py::test_load_from_string PASSED    [ 22%]
+tests/unit/test_drake_physics_engine.py::test_step PASSED                [ 22%]
+tests/unit/test_drake_physics_engine.py::test_get_state PASSED           [ 23%]
+tests/unit/test_drake_physics_engine.py::test_compute_mass_matrix PASSED [ 23%]
+tests/unit/test_drake_physics_engine.py::test_compute_inverse_dynamics PASSED [ 23%]
+tests/unit/test_engine_manager.py::TestEngineManager::test_engine_manager_initialization PASSED [ 24%]
+tests/unit/test_engine_manager.py::TestEngineManager::test_engine_manager_with_custom_root PASSED [ 24%]
+tests/unit/test_engine_manager.py::TestEngineManager::test_engine_discovery_with_existing_engines PASSED [ 24%]
+tests/unit/test_engine_manager.py::TestEngineManager::test_engine_discovery_with_no_engines PASSED [ 25%]
+tests/unit/test_engine_manager.py::TestEngineManager::test_switch_engine_unavailable PASSED [ 25%]
+tests/unit/test_engine_manager.py::TestEngineManager::test_switch_engine_unknown_type PASSED [ 25%]
+tests/unit/test_engine_manager.py::TestEngineManager::test_get_current_engine PASSED [ 26%]
+tests/unit/test_engine_manager.py::TestEngineManager::test_get_engine_status PASSED [ 26%]
+tests/unit/test_engine_manager.py::TestEngineManager::test_get_engine_info PASSED [ 26%]
+tests/unit/test_engine_manager.py::TestEngineManager::test_validate_engine_configuration_existing PASSED [ 27%]
+tests/unit/test_engine_manager.py::TestEngineManager::test_validate_engine_configuration_missing PASSED [ 27%]
+tests/unit/test_engine_manager.py::TestEngineManager::test_validate_engine_configuration_unknown_engine PASSED [ 27%]
+tests/unit/test_engine_manager.py::TestEngineManager::test_engine_loading_error_handling PASSED [ 28%]
+tests/unit/test_engine_manager.py::TestEngineTypes::test_engine_type_values PASSED [ 28%]
+tests/unit/test_engine_manager.py::TestEngineTypes::test_engine_type_completeness PASSED [ 28%]
+tests/unit/test_engine_manager.py::TestEngineStatus::test_engine_status_values PASSED [ 29%]
+tests/unit/test_examples.py::test_example_01_runs PASSED                 [ 29%]
+tests/unit/test_examples.py::test_example_02_runs PASSED                 [ 29%]
+tests/unit/test_golf_launcher_basic.py::TestDockerThreads::test_docker_check_thread_success PASSED [ 30%]
+tests/unit/test_golf_launcher_basic.py::TestDockerThreads::test_docker_check_thread_failure PASSED [ 30%]
+tests/unit/test_golf_launcher_basic.py::TestDockerThreads::test_docker_build_thread_success PASSED [ 30%]
+tests/unit/test_golf_launcher_basic.py::TestDockerThreads::test_docker_build_thread_failure PASSED [ 31%]
+tests/unit/test_golf_launcher_basic.py::TestDockerThreads::test_docker_build_thread_missing_path PASSED [ 31%]
+tests/unit/test_golf_launcher_basic.py::TestDockerThreads::test_help_dialog PASSED [ 31%]
+tests/unit/test_golf_launcher_logic.py::TestGolfLauncherLogic::test_initialization PASSED [ 32%]
+tests/unit/test_golf_launcher_logic.py::TestGolfLauncherLogic::test_model_selection_updates_ui PASSED [ 32%]
+tests/unit/test_golf_launcher_logic.py::TestGolfLauncherLogic::test_launch_simulation_constructs_command PASSED [ 32%]
+tests/unit/test_golf_launcher_logic.py::TestGolfLauncherLogic::test_launch_generic_mjcf PASSED [ 33%]
+tests/unit/test_golf_suite_launcher.py::TestGolfSuiteLauncher::test_initialization PASSED [ 33%]
+tests/unit/test_golf_suite_launcher.py::TestGolfSuiteLauncher::test_launch_mujoco PASSED [ 33%]
+tests/unit/test_golf_suite_launcher.py::TestGolfSuiteLauncher::test_launch_drake PASSED [ 33%]
+tests/unit/test_golf_suite_launcher.py::TestGolfSuiteLauncher::test_launch_pinocchio PASSED [ 34%]
+tests/unit/test_golf_suite_launcher.py::TestGolfSuiteLauncher::test_script_not_found PASSED [ 34%]
+tests/unit/test_golf_suite_launcher.py::TestGolfSuiteLauncher::test_log_functions PASSED [ 34%]
+tests/unit/test_golf_suite_launcher.py::TestGolfSuiteLauncher::test_main_function PASSED [ 35%]
+tests/unit/test_launchers.py::TestLauncherModule::test_launcher_module_imports PASSED [ 35%]
+tests/unit/test_launchers.py::TestLauncherModule::test_launcher_paths_configuration PASSED [ 35%]
+tests/unit/test_launchers.py::TestLauncherModule::test_main_launcher_script_structure PASSED [ 36%]
+tests/unit/test_launchers.py::TestLauncherModule::test_main_help_argument PASSED [ 36%]
+tests/unit/test_launchers.py::TestLauncherModule::test_launcher_error_handling PASSED [ 36%]
+tests/unit/test_launchers.py::TestLauncherUtilities::test_path_resolution PASSED [ 37%]
+tests/unit/test_launchers.py::TestLauncherUtilities::test_engine_path_construction PASSED [ 37%]
+tests/unit/test_launchers.py::TestLauncherUtilities::test_logging_configuration PASSED [ 37%]
+tests/unit/test_launchers.py::TestLauncherIntegration::test_launcher_module_integration PASSED [ 38%]
+tests/unit/test_launchers.py::TestLauncherIntegration::test_shared_utilities_integration PASSED [ 38%]
+tests/unit/test_lazy_imports.py::TestSharedModuleLazyImports::test_shared_init_no_eager_imports PASSED [ 38%]
+tests/unit/test_lazy_imports.py::TestSharedModuleLazyImports::test_output_manager_imports_dependencies PASSED [ 39%]
+tests/unit/test_lazy_imports.py::TestSharedModuleLazyImports::test_common_utils_lazy_imports PASSED [ 39%]
+tests/unit/test_lazy_imports.py::TestPolynomialGeneratorLazyImport::test_polynomial_generator_not_imported_at_module_level PASSED [ 39%]
+tests/unit/test_lazy_imports.py::TestPolynomialGeneratorLazyImport::test_polynomial_generator_import_error_handling PASSED [ 40%]
+tests/unit/test_lazy_imports.py::TestPolynomialGeneratorLazyImport::test_polynomial_generator_oserror_handling PASSED [ 40%]
+tests/unit/test_lazy_imports.py::TestPolynomialGeneratorLazyImport::test_polynomial_generator_successful_import PASSED [ 40%]
+tests/unit/test_lazy_imports.py::TestGracefulDegradation::test_launcher_starts_without_mujoco PASSED [ 41%]
+tests/unit/test_lazy_imports.py::TestGracefulDegradation::test_clear_error_messages PASSED [ 41%]
+tests/unit/test_model_registry.py::TestModelRegistry::test_load_valid_registry PASSED [ 41%]
+tests/unit/test_model_registry.py::TestModelRegistry::test_load_empty_registry_file PASSED [ 42%]
+tests/unit/test_model_registry.py::TestModelRegistry::test_load_missing_registry PASSED [ 42%]
+tests/unit/test_model_registry.py::TestModelRegistry::test_load_malformed_yaml PASSED [ 42%]
+tests/unit/test_model_registry.py::TestModelRegistry::test_load_invalid_model_format PASSED [ 43%]
+tests/unit/test_model_registry.py::TestModelRegistry::test_get_all_models PASSED [ 43%]
+tests/unit/test_model_registry.py::TestModelRegistry::test_get_models_by_type PASSED [ 43%]
+tests/unit/test_mujoco_physics_engine.py::test_initialization PASSED     [ 44%]
+tests/unit/test_mujoco_physics_engine.py::test_load_from_string PASSED   [ 44%]
+tests/unit/test_mujoco_physics_engine.py::test_load_from_path PASSED     [ 44%]
+tests/unit/test_mujoco_physics_engine.py::test_step PASSED               [ 45%]
+tests/unit/test_mujoco_physics_engine.py::test_reset PASSED              [ 45%]
+tests/unit/test_mujoco_physics_engine.py::test_set_control PASSED        [ 45%]
+tests/unit/test_mujoco_physics_engine.py::test_set_control_mismatch PASSED [ 46%]
+tests/unit/test_mujoco_physics_engine.py::test_compute_mass_matrix PASSED [ 46%]
+tests/unit/test_mujoco_physics_engine.py::test_compute_bias_forces PASSED [ 46%]
+tests/unit/test_mujoco_physics_engine.py::test_compute_gravity_forces PASSED [ 47%]
+tests/unit/test_mujoco_physics_engine.py::test_compute_inverse_dynamics PASSED [ 47%]
+tests/unit/test_mujoco_physics_engine.py::test_compute_affine_drift PASSED [ 47%]
+tests/unit/test_mujoco_physics_engine.py::test_compute_jacobian PASSED   [ 48%]
+tests/unit/test_opensim_physics_engine.py::test_initialization PASSED    [ 48%]
+tests/unit/test_opensim_physics_engine.py::test_methods_raise_not_implemented PASSED [ 48%]
+tests/unit/test_opensim_physics_engine.py::test_stubs_return_safe_defaults PASSED [ 49%]
+tests/unit/test_output_manager.py::TestOutputManager::test_initialization PASSED [ 49%]
+tests/unit/test_output_manager.py::TestOutputManager::test_auto_path_resolution PASSED [ 49%]
+tests/unit/test_output_manager.py::TestOutputManager::test_save_load_csv PASSED [ 50%]
+tests/unit/test_output_manager.py::TestOutputManager::test_save_load_json PASSED [ 50%]
+tests/unit/test_output_manager.py::TestOutputManager::test_save_load_pickle PASSED [ 50%]
+tests/unit/test_output_manager.py::TestOutputManager::test_save_load_parquet PASSED [ 50%]
+tests/unit/test_output_manager.py::TestOutputManager::test_save_load_hdf5 PASSED [ 51%]
+tests/unit/test_output_manager.py::TestOutputManager::test_save_dict_as_csv PASSED [ 51%]
+tests/unit/test_output_manager.py::TestOutputManager::test_get_simulation_list PASSED [ 51%]
+tests/unit/test_output_manager.py::TestOutputManager::test_export_analysis_report PASSED [ 52%]
+tests/unit/test_output_manager.py::TestOutputManager::test_cleanup_old_files PASSED [ 52%]
+tests/unit/test_output_manager.py::TestOutputManager::test_convenience_functions PASSED [ 52%]
+tests/unit/test_output_manager.py::TestOutputManager::test_json_serialization_edge_cases PASSED [ 53%]
+tests/unit/test_physics_parameters.py::test_registry_initialization PASSED [ 53%]
+tests/unit/test_physics_parameters.py::test_parameter_validation PASSED  [ 53%]
+tests/unit/test_physics_parameters.py::test_constant_parameter PASSED    [ 54%]
+tests/unit/test_physics_parameters.py::test_registry_set PASSED          [ 54%]
+tests/unit/test_physics_parameters.py::test_get_by_category PASSED       [ 54%]
+tests/unit/test_physics_parameters.py::test_export_import_json PASSED    [ 55%]
+tests/unit/test_physics_parameters.py::test_get_summary PASSED           [ 55%]
+tests/unit/test_physics_parameters.py::test_global_registry PASSED       [ 55%]
+tests/unit/test_pinocchio_physics_engine.py::test_initialization PASSED  [ 56%]
+tests/unit/test_pinocchio_physics_engine.py::test_load_from_path PASSED  [ 56%]
+tests/unit/test_pinocchio_physics_engine.py::test_load_from_string PASSED [ 56%]
+tests/unit/test_pinocchio_physics_engine.py::test_step PASSED            [ 57%]
+tests/unit/test_pinocchio_physics_engine.py::test_compute_mass_matrix PASSED [ 57%]
+tests/unit/test_pinocchio_physics_engine.py::test_compute_jacobian PASSED [ 57%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_initialization PASSED [ 58%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_get_joint_name PASSED [ 58%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_get_aligned_label PASSED [ 58%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_joint_angles PASSED [ 59%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_joint_velocities PASSED [ 59%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_joint_torques PASSED [ 59%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_actuator_powers PASSED [ 60%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_energy_analysis PASSED [ 60%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_club_head_speed PASSED [ 60%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_club_head_trajectory PASSED [ 61%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_phase_diagram PASSED [ 61%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_torque_comparison PASSED [ 61%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_frequency_analysis PASSED [ 62%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_spectrogram PASSED [ 62%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_summary_dashboard PASSED [ 62%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_kinematic_sequence PASSED [ 63%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_3d_phase_space PASSED [ 63%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_correlation_matrix PASSED [ 63%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_swing_plane PASSED [ 64%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_angular_momentum PASSED [ 64%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_cop_trajectory PASSED [ 64%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_radar_chart PASSED [ 65%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_power_flow PASSED [ 65%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_plot_cop_vector_field PASSED [ 65%]
+tests/unit/test_plotting.py::TestGolfSwingPlotter::test_empty_data_handling PASSED [ 66%]
+tests/unit/test_shared_engine_manager.py::TestEngineManager::test_get_engine_info PASSED [ 66%]
+tests/unit/test_shared_engine_manager.py::TestEngineManager::test_initialization_discovery PASSED [ 66%]
+tests/unit/test_shared_engine_manager.py::TestEngineManager::test_load_mujoco_engine_details PASSED [ 66%]
+tests/unit/test_shared_engine_manager.py::TestEngineManager::test_switch_engine_failure PASSED [ 67%]
+tests/unit/test_shared_engine_manager.py::TestEngineManager::test_switch_engine_success PASSED [ 67%]
+tests/unit/test_shared_engine_manager.py::TestEngineManager::test_switch_engine_unavailable PASSED [ 67%]
+tests/unit/test_shared_engine_manager.py::TestEngineManager::test_validate_engine_configuration PASSED [ 68%]
+tests/unit/test_shared_engine_probes.py::test_engine_probe_result PASSED [ 68%]
+tests/unit/test_shared_engine_probes.py::test_engine_probe_base PASSED   [ 68%]
+tests/unit/test_shared_engine_probes.py::test_mujoco_probe_success PASSED [ 69%]
+tests/unit/test_shared_engine_probes.py::test_mujoco_probe_missing_package PASSED [ 69%]
+tests/unit/test_shared_engine_probes.py::test_mujoco_probe_dll_error PASSED [ 69%]
+tests/unit/test_shared_engine_probes.py::test_mujoco_probe_missing_assets PASSED [ 70%]
+tests/unit/test_shared_engine_probes.py::test_drake_probe_success PASSED [ 70%]
+tests/unit/test_shared_engine_probes.py::test_drake_probe_port_blocked PASSED [ 70%]
+tests/unit/test_shared_engine_probes.py::test_drake_probe_missing_module PASSED [ 71%]
+tests/unit/test_shared_engine_probes.py::test_pinocchio_probe_success PASSED [ 71%]
+tests/unit/test_shared_engine_probes.py::test_pinocchio_probe_missing_dir PASSED [ 71%]
+tests/unit/test_shared_engine_probes.py::test_pendulum_probe_success PASSED [ 72%]
+tests/unit/test_shared_engine_probes.py::test_pendulum_probe_missing PASSED [ 72%]
+tests/unit/test_shared_engine_probes.py::test_matlab_probe_success PASSED [ 72%]
+tests/unit/test_shared_engine_probes.py::test_matlab_probe_missing_files PASSED [ 73%]
+tests/unit/test_shared_engine_probes.py::test_matlab_probe_not_installed PASSED [ 73%]
+tests/unit/test_shared_engine_probes.py::test_opensim_probe_success PASSED [ 73%]
+tests/unit/test_shared_engine_probes.py::test_opensim_probe_missing_dir PASSED [ 74%]
+tests/unit/test_shared_engine_probes.py::test_opensim_probe_not_installed PASSED [ 74%]
+tests/unit/test_shared_model_registry.py::TestModelRegistry::test_get_methods PASSED [ 74%]
+tests/unit/test_shared_model_registry.py::TestModelRegistry::test_load_registry_empty PASSED [ 75%]
+tests/unit/test_shared_model_registry.py::TestModelRegistry::test_load_registry_invalid_format PASSED [ 75%]
+tests/unit/test_shared_model_registry.py::TestModelRegistry::test_load_registry_not_found PASSED [ 75%]
+tests/unit/test_shared_model_registry.py::TestModelRegistry::test_load_registry_partial_failure PASSED [ 76%]
+tests/unit/test_shared_model_registry.py::TestModelRegistry::test_load_registry_success PASSED [ 76%]
+tests/unit/test_shared_model_registry.py::TestModelRegistry::test_load_registry_yaml_error PASSED [ 76%]
+tests/unit/test_shared_output_manager.py::TestOutputManager::test_cleanup_old_files PASSED [ 77%]
+tests/unit/test_shared_output_manager.py::TestOutputManager::test_export_analysis_report_html PASSED [ 77%]
+tests/unit/test_shared_output_manager.py::TestOutputManager::test_get_simulation_list PASSED [ 77%]
+tests/unit/test_shared_output_manager.py::TestOutputManager::test_initialization_directory_creation PASSED [ 78%]
+tests/unit/test_shared_output_manager.py::TestOutputManager::test_save_json_numpy_serialization PASSED [ 78%]
+tests/unit/test_shared_output_manager.py::TestOutputManager::test_save_load_csv PASSED [ 78%]
+tests/unit/test_shared_output_manager.py::TestOutputManager::test_save_load_json PASSED [ 79%]
+tests/unit/test_shared_output_manager.py::TestOutputManager::test_save_load_pickle PASSED [ 79%]
+tests/unit/test_shared_physics_parameters.py::TestPhysicsParameter::test_constant PASSED [ 79%]
+tests/unit/test_shared_physics_parameters.py::TestPhysicsParameter::test_to_dict PASSED [ 80%]
+tests/unit/test_shared_physics_parameters.py::TestPhysicsParameter::test_validation PASSED [ 80%]
+tests/unit/test_shared_physics_parameters.py::TestPhysicsParameterRegistry::test_export_import_json PASSED [ 80%]
+tests/unit/test_shared_physics_parameters.py::TestPhysicsParameterRegistry::test_get_by_category PASSED [ 81%]
+tests/unit/test_shared_physics_parameters.py::TestPhysicsParameterRegistry::test_get_summary PASSED [ 81%]
+tests/unit/test_shared_physics_parameters.py::TestPhysicsParameterRegistry::test_register_get PASSED [ 81%]
+tests/unit/test_shared_physics_parameters.py::TestPhysicsParameterRegistry::test_set_value PASSED [ 82%]
+tests/unit/test_shared_physics_parameters.py::TestPhysicsParameterRegistry::test_singleton PASSED [ 82%]
+tests/unit/test_shared_signal_processing.py::TestSignalProcessing::test_compute_psd PASSED [ 82%]
+tests/unit/test_shared_signal_processing.py::TestSignalProcessing::test_compute_spectral_arc_length_empty PASSED [ 83%]
+tests/unit/test_shared_signal_processing.py::TestSignalProcessing::test_compute_spectral_arc_length_jerky PASSED [ 83%]
+tests/unit/test_shared_signal_processing.py::TestSignalProcessing::test_compute_spectral_arc_length_smooth PASSED [ 83%]
+tests/unit/test_shared_signal_processing.py::TestSignalProcessing::test_compute_spectral_arc_length_zeros PASSED [ 83%]
+tests/unit/test_shared_signal_processing.py::TestSignalProcessing::test_compute_spectrogram PASSED [ 84%]
+tests/unit/test_shared_statistical_analysis.py::test_initialization PASSED [ 84%]
+tests/unit/test_shared_statistical_analysis.py::test_compute_summary_stats PASSED [ 84%]
+tests/unit/test_shared_statistical_analysis.py::test_find_peaks_in_data PASSED [ 85%]
+tests/unit/test_shared_statistical_analysis.py::test_find_club_head_speed_peak PASSED [ 85%]
+tests/unit/test_shared_statistical_analysis.py::test_compute_range_of_motion PASSED [ 85%]
+tests/unit/test_shared_statistical_analysis.py::test_compute_tempo PASSED [ 86%]
+tests/unit/test_shared_statistical_analysis.py::test_compute_x_factor PASSED [ 86%]
+tests/unit/test_shared_statistical_analysis.py::test_detect_impact_time PASSED [ 86%]
+tests/unit/test_shared_statistical_analysis.py::test_compute_energy_metrics PASSED [ 87%]
+tests/unit/test_shared_statistical_analysis.py::test_detect_swing_phases PASSED [ 87%]
+tests/unit/test_shared_statistical_analysis.py::test_compute_phase_statistics PASSED [ 87%]
+tests/unit/test_shared_statistical_analysis.py::test_generate_comprehensive_report PASSED [ 88%]
+tests/unit/test_shared_statistical_analysis.py::test_export_statistics_csv PASSED [ 88%]
+tests/unit/test_shared_statistical_analysis.py::test_analyze_kinematic_sequence PASSED [ 88%]
+tests/unit/test_shared_statistical_analysis.py::test_compute_correlations PASSED [ 89%]
+tests/unit/test_shared_statistical_analysis.py::test_frequency_analysis PASSED [ 89%]
+tests/unit/test_shared_statistical_analysis.py::test_compute_smoothness_metric PASSED [ 89%]
+tests/unit/test_signal_processing.py::test_compute_psd PASSED            [ 90%]
+tests/unit/test_signal_processing.py::test_compute_spectrogram PASSED    [ 90%]
+tests/unit/test_signal_processing.py::test_compute_spectral_arc_length PASSED [ 90%]
+tests/unit/test_signal_processing.py::test_compute_spectral_arc_length_empty PASSED [ 91%]
+tests/unit/test_signal_processing.py::test_compute_spectral_arc_length_zero PASSED [ 91%]
+tests/unit/test_spatial_algebra.py::TestSpatialVectors::test_spatial_cross_motion PASSED [ 91%]
+tests/unit/test_spatial_algebra.py::TestSpatialVectors::test_spatial_cross_force PASSED [ 92%]
+tests/unit/test_spatial_algebra.py::TestSpatialVectors::test_mci PASSED  [ 92%]
+tests/unit/test_spatial_algebra.py::TestTransforms::test_xrot PASSED     [ 92%]
+tests/unit/test_spatial_algebra.py::TestTransforms::test_xlt PASSED      [ 93%]
+tests/unit/test_spatial_algebra.py::TestTransforms::test_xtrans PASSED   [ 93%]
+tests/unit/test_spatial_algebra.py::TestTransforms::test_inv_xtrans PASSED [ 93%]
+tests/unit/test_spatial_algebra.py::TestJoints::test_jcalc_revolute PASSED [ 94%]
+tests/unit/test_spatial_algebra.py::TestJoints::test_jcalc_prismatic PASSED [ 94%]
+tests/unit/test_spatial_algebra.py::TestJoints::test_unknown_joint PASSED [ 94%]
+tests/unit/test_statistical_analysis.py::TestStatisticalAnalyzer::test_initialization PASSED [ 95%]
+tests/unit/test_statistical_analysis.py::TestStatisticalAnalyzer::test_compute_summary_stats PASSED [ 95%]
+tests/unit/test_statistical_analysis.py::TestStatisticalAnalyzer::test_find_club_head_speed_peak PASSED [ 95%]
+tests/unit/test_statistical_analysis.py::TestStatisticalAnalyzer::test_compute_x_factor PASSED [ 96%]
+tests/unit/test_statistical_analysis.py::TestStatisticalAnalyzer::test_compute_x_factor_stretch PASSED [ 96%]
+tests/unit/test_statistical_analysis.py::TestStatisticalAnalyzer::test_compute_grf_metrics PASSED [ 96%]
+tests/unit/test_statistical_analysis.py::TestStatisticalAnalyzer::test_detect_swing_phases PASSED [ 97%]
+tests/unit/test_statistical_analysis.py::TestStatisticalAnalyzer::test_generate_report PASSED [ 97%]
+tests/unit/test_swing_plane.py::TestSwingPlaneAnalyzer::test_fit_plane_exact_horizontal PASSED [ 97%]
+tests/unit/test_swing_plane.py::TestSwingPlaneAnalyzer::test_fit_plane_exact_vertical PASSED [ 98%]
+tests/unit/test_swing_plane.py::TestSwingPlaneAnalyzer::test_analyze_metrics PASSED [ 98%]
+tests/unit/test_swing_plane.py::TestSwingPlaneAnalyzer::test_deviation_calculation PASSED [ 98%]
+tests/unit/test_swing_plane.py::TestSwingPlaneAnalyzer::test_insufficient_points PASSED [ 99%]
+tests/unit/test_urdf_io.py::TestURDFImporter::test_import_from_urdf PASSED [ 99%]
+tests/unit/test_urdf_io.py::TestURDFExporter::test_export_to_urdf PASSED [ 99%]
+tests/unit/test_urdf_io.py::test_convenience_functions PASSED            [100%]
+
+================================== FAILURES ===================================
+_______________________ test_physics_engine_consistency _______________________
+
+    def test_physics_engine_consistency():
+        """Verify that all engines produce similar physics for a simple pendulum."""
+        params = SimplePendulumParams()
+    
+        results = {}
+    
+        # Run simulations
+        mujoco_res = run_mujoco_pendulum(params)
+        results["mujoco"] = mujoco_res
+    
+        pinocchio_res = run_pinocchio_pendulum(params)
+        results["pinocchio"] = pinocchio_res
+    
+        # Check for valid results
+        valid_engines = []
+        for name, res in results.items():
+            if "error" not in res:
+                valid_engines.append(name)
+            else:
+                print(f"Skipping {name}: {res['error']}")
+    
+        if not valid_engines:
+            pytest.skip("No physics engines installed locally.")
+    
+        # Validation Logic
+        # 1. Check Period
+        theoretical_period = expected_period_small_angle(params.length, params.gravity)
+        # Note: Large angle (45 deg) period is slightly larger than small angle approx
+        # Approx adjustment: T = T0 * (1 + theta0^2/16)
+        theta0 = params.initial_angle
+        adjusted_period = theoretical_period * (1 + theta0**2 / 16)
+    
+        print(f"\nTheoretical Period (Small Angle): {theoretical_period:.4f}s")
+        print(f"Expected Period (Large Angle): {adjusted_period:.4f}s")
+    
+        for engine in valid_engines:
+            res = results[engine]
+            angles = np.array(res["angles"])
+            times = np.array(res["times"])
+    
+            # Zero crossings (falling edge) to find full period roughly
+            # Or peak to peak
+            peaks = []
+            for i in range(1, len(angles) - 1):
+>               if angles[i] > angles[i - 1] and angles[i] > angles[i + 1]:
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E               ValueError: The truth value of an empty array is ambiguous. Use `array.size > 0` to check that an array is not empty.
+
+tests\integration\test_physics_consistency.py:179: ValueError
+---------------------------- Captured stdout call -----------------------------
+Skipping pinocchio: Pinocchio is mocked
+
+Theoretical Period (Small Angle): 2.0061s
+Expected Period (Large Angle): 2.0834s
+============================== warnings summary ===============================
+tests/unit/test_lazy_imports.py::TestPolynomialGeneratorLazyImport::test_polynomial_generator_successful_import
+  C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\importlib\__init__.py:88: UserWarning: The NumPy module was reloaded (imported a second time). This can in some cases result in small but subtle issues and is discouraged.
+    return _bootstrap._gcd_import(name[level:], package, level)
+
+tests/unit/test_shared_statistical_analysis.py::test_frequency_analysis
+  C:\Users\diete\Repositories\Golf_Modeling_Suite\shared\python\signal_processing.py:31: UserWarning: nperseg=256 is greater than signal length max(len(x), len(y)) = 100, using nperseg = 100
+    freqs, psd = signal.welch(data, fs=fs, window=window, nperseg=nperseg)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+
+----------------------------------------------------------------------------------------- benchmark: 2 tests -----------------------------------------------------------------------------------------
+Name (time in us)            Min                   Max                Mean              StdDev              Median                 IQR            Outliers  OPS (Kops/s)            Rounds  Iterations
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+test_rnea_benchmark     318.0000 (1.0)      1,456.3000 (1.0)      499.5435 (1.0)      251.7826 (1.0)      364.7000 (1.0)      278.7501 (3.63)       136;14        2.0018 (1.0)         563           1
+test_aba_benchmark      512.8001 (1.61)     2,137.4000 (1.47)     731.6567 (1.46)     285.8482 (1.14)     648.0000 (1.78)      76.8499 (1.0)       117;169        1.3668 (0.68)       1193           1
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Legend:
+  Outliers: 1 Standard Deviation from Mean; 1.5 IQR (InterQuartile Range) from 1st Quartile and 3rd Quartile.
+  OPS: Operations Per Second, computed as 1 / Mean
+=========================== short test summary info ===========================
+SKIPPED [1] tests\test_pinocchio_recorder.py:5: could not import 'pinocchio': No module named 'pinocchio'
+SKIPPED [1] tests\integration\test_cross_engine_consistency.py:118: Not enough real engines
+SKIPPED [1] tests\integration\test_cross_engine_consistency.py:193: Not enough real engines
+SKIPPED [1] tests\integration\test_engine_integration.py:303: Engine EngineType.MATLAB_2D not fully implemented: assert False is True
+SKIPPED [1] tests\integration\test_engine_loading.py:66: Complex mock interaction with pydrake imports causing spurious failures
+SKIPPED [1] tests\physics_validation\test_energy_conservation.py:30: mujoco is mocked
+SKIPPED [1] tests\physics_validation\test_energy_conservation.py:93: pinocchio is mocked
+SKIPPED [1] tests\physics_validation\test_energy_conservation.py:168: pydrake is mocked
+SKIPPED [1] tests\physics_validation\test_pendulum_accuracy.py:35: mujoco is mocked
+SKIPPED [1] tests\physics_validation\test_pendulum_accuracy.py:114: pydrake is mocked
+SKIPPED [1] tests\test_urdf_tools.py:32: Platform initialization failure in CI
+FAILED tests/integration/test_physics_consistency.py::test_physics_engine_consistency
+============ 1 failed, 295 passed, 11 skipped, 2 warnings in 8.96s ============
