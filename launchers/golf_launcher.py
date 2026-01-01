@@ -671,7 +671,10 @@ class LayoutManagerDialog(QDialog):
     """Dialog allowing users to add or remove launcher tiles."""
 
     def __init__(
-        self, available_models: dict[str, Any], active_models: list[str], parent: QWidget | None
+        self,
+        available_models: dict[str, Any],
+        active_models: list[str],
+        parent: QWidget | None,
     ) -> None:
         super().__init__(parent)
         self.setWindowTitle("Customize Launcher Tiles")
@@ -689,14 +692,17 @@ class LayoutManagerDialog(QDialog):
         self.list_widget = QListWidget()
 
         sorted_models = sorted(
-            available_models.values(), key=lambda model: str(getattr(model, "name", "")).lower()
+            available_models.values(),
+            key=lambda model: str(getattr(model, "name", "")).lower(),
         )
 
         for model in sorted_models:
             item = QListWidgetItem(f"{model.name} — {model.description}")
             item.setFlags(item.flags() | Qt.ItemFlag.ItemIsUserCheckable)
             item.setCheckState(
-                Qt.CheckState.Checked if model.id in active_models else Qt.CheckState.Unchecked
+                Qt.CheckState.Checked
+                if model.id in active_models
+                else Qt.CheckState.Unchecked
             )
             item.setData(Qt.ItemDataRole.UserRole, model.id)
             self.list_widget.addItem(item)
@@ -1539,9 +1545,7 @@ class GolfLauncher(QMainWindow):
             label_suffix = "(MATLAB)" if model_type == "matlab_app" else ""
             display_name = str(model_name).upper()
             self.btn_launch.setEnabled(True)
-            self.btn_launch.setText(
-                f"LAUNCH {display_name} {label_suffix}".strip()
-            )
+            self.btn_launch.setText(f"LAUNCH {display_name} {label_suffix}".strip())
             self.btn_launch.setStyleSheet("background-color: #28a745; color: white;")
             return
 
@@ -1713,9 +1717,7 @@ class GolfLauncher(QMainWindow):
 
         model = self._get_model(model_id)
         if not model:
-            QMessageBox.critical(
-                self, "Error", f"Model not found: {model_id}"
-            )
+            QMessageBox.critical(self, "Error", f"Model not found: {model_id}")
             return
 
         path = REPOS_ROOT / model.path
@@ -1750,6 +1752,10 @@ class GolfLauncher(QMainWindow):
                     self._custom_launch_comprehensive(path)
                 elif model.type == "mjcf" or str(path).endswith(".xml"):
                     self._launch_generic_mjcf(path)
+                elif model.type == "drake":
+                    self._custom_launch_drake(path)
+                elif model.type == "pinocchio":
+                    self._custom_launch_pinocchio(path)
                 else:
                     self._launch_docker_container(model, path)
             else:
@@ -1817,6 +1823,65 @@ class GolfLauncher(QMainWindow):
         )
         self.running_processes["mujoco_dashboard"] = process
         logger.info(f"MuJoCo Dashboard launched with PID: {process.pid}")
+
+    def _custom_launch_drake(self, abs_repo_path: Path) -> None:
+        """Launch the Drake GUI directly."""
+        # Use hardcoded path to ensure we hit the correct package root
+        python_dir = REPOS_ROOT / "engines/physics_engines/drake/python"
+
+        if not python_dir.exists():
+            # Fallback to provided path if hardcoded fails
+            python_dir = (
+                abs_repo_path if abs_repo_path.is_dir() else abs_repo_path.parent
+            )
+
+        if not python_dir.exists():
+            QMessageBox.critical(
+                self, "Error", f"Drake Python directory not found: {python_dir}"
+            )
+            return
+
+        logger.info(f"Launching Drake GUI from {python_dir}")
+        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
+
+        try:
+            # Drake app is a module: src.drake_gui_app
+            process = subprocess.Popen(
+                [sys.executable, "-m", "src.drake_gui_app"],
+                cwd=str(python_dir),
+                creationflags=creation_flags,
+            )
+            self.running_processes["drake_gui"] = process
+            logger.info(f"Drake GUI launched with PID: {process.pid}")
+        except Exception as e:
+            logger.error(f"Failed to launch Drake: {e}")
+            QMessageBox.critical(self, "Launch Error", str(e))
+
+    def _custom_launch_pinocchio(self, abs_repo_path: Path) -> None:
+        """Launch the Pinocchio GUI directly."""
+        python_dir = REPOS_ROOT / "engines/physics_engines/pinocchio/python"
+        script = python_dir / "pinocchio_golf" / "gui.py"
+
+        if not script.exists():
+            QMessageBox.critical(
+                self, "Error", f"Pinocchio GUI script not found: {script}"
+            )
+            return
+
+        logger.info(f"Launching Pinocchio GUI: {script}")
+        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
+
+        try:
+            process = subprocess.Popen(
+                [sys.executable, str(script)],
+                cwd=str(python_dir),
+                creationflags=creation_flags,
+            )
+            self.running_processes["pinocchio_gui"] = process
+            logger.info(f"Pinocchio GUI launched with PID: {process.pid}")
+        except Exception as e:
+            logger.error(f"Failed to launch Pinocchio: {e}")
+            QMessageBox.critical(self, "Launch Error", str(e))
 
     def _launch_docker_container(self, model: Any, abs_repo_path: Path) -> None:
         """Launch the simulation in a docker container."""
