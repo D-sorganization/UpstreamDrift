@@ -203,10 +203,7 @@ class TestOutputManager:
                 sample_dict_data, filename, OutputFormat.PICKLE, engine="mujoco"
             )
 
-        # Ensure no file was created with that name (optional but good)
-        # We can't easily check path since save throws before returning it.
-        # But we can check if file exists if we construct path manually,
-        # or just trust the exception.
+        # Rely on the raised ValueError as sufficient verification that no file is written.
 
     @pytest.mark.skipif(
         not _has_parquet_support(),

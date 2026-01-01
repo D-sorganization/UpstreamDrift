@@ -133,9 +133,9 @@ class TestURDFBuilder:
         assert root.attrib["name"] == "golf_robot"
 
         # Check links
-        lines = root.findall("link")
-        assert len(lines) == 2
-        link_names = {link.attrib["name"] for link in lines}
+        links = root.findall("link")
+        assert len(links) == 2
+        link_names = {link.attrib["name"] for link in links}
         assert "base" in link_names
         assert "arm" in link_names
 
