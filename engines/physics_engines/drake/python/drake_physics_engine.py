@@ -65,6 +65,7 @@ class DrakePhysicsEngine(PhysicsEngine):
 
         self.model_name_str: str = ""
         self._is_finalized = False
+        self.simulator: analysis.Simulator | None = None
 
     @property
     def model_name(self) -> str:
@@ -78,6 +79,9 @@ class DrakePhysicsEngine(PhysicsEngine):
             self.diagram = self.builder.Build()
             self.context = self.diagram.CreateDefaultContext()
             self.plant_context = self.plant.GetMyContextFromRoot(self.context)
+            # Create persistent simulator to avoid overhead
+            self.simulator = analysis.Simulator(self.diagram, self.context)
+            self.simulator.Initialize()
             self._is_finalized = True
 
     def load_from_path(self, path: str) -> None:
@@ -117,48 +121,28 @@ class DrakePhysicsEngine(PhysicsEngine):
 
     def reset(self) -> None:
         """Reset the simulation to its initial state."""
-        if self.context:
+        if self.context and self.plant_context and self.simulator:
             self.context.SetTime(0.0)
-            # Reset state to default?
-            # plant.SetDefaultContext(self.plant_context)
-            pass
+            self.plant.SetDefaultContext(self.plant_context)
+            self.simulator.Initialize()
 
     def step(self, dt: float | None = None) -> None:
         """Advance the simulation by one time step."""
-        if not self.diagram or not self.context:
-            LOGGER.error("Cannot step: Diagram not built.")
+        if not self.simulator or not self.context:
+            LOGGER.error("Cannot step: Simulator not initialized.")
             return
 
-        # Drake uses a Simulator object to advance time usually,
-        # or we can manually integrate?
-        # For a "step" interface, mostly we assume a Simulator exists or we
-        # manually advance?
-        # Creating a Simulator is expensive. We should probably keep one persistent.
-        # But Simulator owns the context? Or borrows it.
-        # Simplest: Simulator.AdvanceTo(current_time + dt)
-
-        # NOTE: Making a lightweight Simulator wrapper here might be better.
-        # For now, let's assume we create a Simulator on the fly or keep one?
-        # Simulator(self.diagram, self.context)
-
-        # To avoid overhead, we'll implement explicit integration or just use
-        # the proper way:
-        # simulator = Simulator(self.diagram, self.context)
-        # simulator.AdvanceTo(self.context.get_time() + dt_to_step)
-
-        # For performance, we should cache the simulator.
-        # But typically protocol implies we control the loop.
-
-        sim = analysis.Simulator(self.diagram, self.context)
-        sim.Initialize()
         current_time = self.context.get_time()
         step_size = dt if dt is not None else self.plant.time_step()
-        sim.AdvanceTo(current_time + step_size)
+        self.simulator.AdvanceTo(current_time + step_size)
 
     def forward(self) -> None:
         """Compute forward kinematics/dynamics without advancing time."""
-        # Just ensure context is up to date?
-        # Drake updates automatically when querying ports?
+        # Drake uses lazy evaluation in the Context.
+        # Setting positions/velocities invalidates the cache.
+        # Requesting results (mass matrix, etc.) triggers computation.
+        # Therefore, no explicit forward call is needed strictly,
+        # but we ensure the context is valid.
         pass
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
