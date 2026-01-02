@@ -62,7 +62,7 @@ def test_load_from_string(mock_named_temp, engine):
     with patch.object(engine, "load_from_path") as mock_load:
         engine.load_from_string("<osim/>")
         mock_load.assert_called_once_with("/tmp/fake.osim")
-    
+
     # Check that write was called
     mock_tmp.write.assert_called_once_with("<osim/>")
 
