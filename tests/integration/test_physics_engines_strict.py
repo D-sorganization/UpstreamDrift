@@ -80,9 +80,6 @@ with patch.dict("sys.modules", module_patches):
     from engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: E402
         DrakePhysicsEngine,
     )
-    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (  # noqa: E402
-        MuJoCoPhysicsEngine,
-    )
     from engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
         MyoSuitePhysicsEngine,
     )
