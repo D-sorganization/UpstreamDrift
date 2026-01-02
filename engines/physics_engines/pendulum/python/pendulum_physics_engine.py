@@ -19,7 +19,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class PendulumPhysicsEngine(PhysicsEngine):
-    """Adapter for DoublePendulumDynamics to matching PhysicsEngine protocol."""
+    """Adapter for DoublePendulumDynamics to match PhysicsEngine protocol."""
 
     def __init__(self) -> None:
         """Initialize the pendulum engine."""
@@ -56,9 +56,8 @@ class PendulumPhysicsEngine(PhysicsEngine):
 
     def load_from_path(self, path: str) -> None:
         """Load model from file path."""
-        # Pendulum is a fixed model, but we could theoretically load params from JSON
-        # For now, we accept it but warn if it's expected to do something else
-        LOGGER.info(
+        # Pendulum is a fixed model, but we could theoretically load params from JSON.
+        LOGGER.debug(
             "PendulumPhysicsEngine is standalone. "
             "Model parameters are default. Path %s ignored.",
             path,
@@ -66,7 +65,7 @@ class PendulumPhysicsEngine(PhysicsEngine):
 
     def load_from_string(self, content: str, extension: str | None = None) -> None:
         """Load model from string."""
-        LOGGER.info("PendulumPhysicsEngine ignores load_from_string.")
+        LOGGER.debug("PendulumPhysicsEngine ignores load_from_string.")
 
     def reset(self) -> None:
         """Reset simulation state to initial configuration."""
@@ -100,8 +99,7 @@ class PendulumPhysicsEngine(PhysicsEngine):
         """Get the current state (positions, velocities)."""
         # q = [theta1, theta2]
         # v = [omega1, omega2]
-        # We ignore phi for the standard 2D pendulum protocol for now,
-        # or we could make it 3D? The protocol expects arrays.
+        # We ignore phi (planar inclination) for the standard 2D pendulum protocol for now.
         q = np.array([self.state.theta1, self.state.theta2])
         v = np.array([self.state.omega1, self.state.omega2])
         return q, v
@@ -181,7 +179,7 @@ class PendulumPhysicsEngine(PhysicsEngine):
         # x2 = x1 + l2 sin(theta1 + theta2)
         # y2 = y1 - l2 cos(theta1 + theta2)
 
-        # This requires derivatives w.r.t theta1, theta2.
+        # This requires partial derivatives w.r.t theta1, theta2.
         # Placeholder for now as it wasn't strictly required by assessment logic
         # (Pendulum was marked 0/13, so getting core dynamics is huge win).
         return None
