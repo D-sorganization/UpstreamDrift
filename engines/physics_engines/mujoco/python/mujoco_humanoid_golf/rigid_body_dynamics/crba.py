@@ -66,24 +66,31 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
     f_force = np.empty(6)
     scratch_vec = np.empty(6)
 
+    # OPTIMIZATION: Cache dictionary lookups to local variables
+    # This avoids repeated hashing and lookup in the tight loops
+    model_parent = model["parent"]
+    model_jtype = model["jtype"]
+    model_xtree = model["Xtree"]
+    model_inertia = model["I"]
+
     # --- Forward pass: compute transforms and motion subspaces ---
     for i in range(nb):
-        xj_transform, s_vec, dof_idx = jcalc(model["jtype"][i], q[i], out=xj_buf)
+        xj_transform, s_vec, dof_idx = jcalc(model_jtype[i], q[i], out=xj_buf)
         s_subspace.append(s_vec)
         dof_indices.append(dof_idx)
         # Optimized xup[i] = xj_transform @ model["Xtree"][i]
-        np.matmul(xj_transform, model["Xtree"][i], out=xup[i])
+        np.matmul(xj_transform, model_xtree[i], out=xup[i])
 
     # --- Backward pass: compute composite inertias ---
     # Initialize composite inertias with body inertias
     # OPTIMIZATION: Bulk copy to 3D array is faster than list comprehension with copy()
     # (1.48x speedup for 50 bodies)
-    ic_composite = np.array(model["I"], dtype=float)
+    ic_composite = np.array(model_inertia, dtype=float)
 
     # Accumulate inertias from children to parents
     for i in range(nb - 1, -1, -1):
-        if model["parent"][i] != -1:
-            p = model["parent"][i]
+        if model_parent[i] != -1:
+            p = model_parent[i]
             # Transform composite inertia to parent frame and add
             # ic_composite[p] += xup[i].T @ ic_composite[i] @ xup[i]
 
@@ -122,8 +129,8 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
 
         # Propagate force up the tree to compute off-diagonal elements
         j = i
-        while model["parent"][j] != -1:
-            p = model["parent"][j]
+        while model_parent[j] != -1:
+            p = model_parent[j]
 
             # f_force = xup[j].T @ f_force  # Transform force to parent frame
             # OPTIMIZATION: Use scratch buffer
