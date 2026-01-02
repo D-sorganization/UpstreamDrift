@@ -79,7 +79,9 @@ def stop_patches():
     yield
     model_patcher.stop()
 
+
 # --- Test Classes ---
+
 
 class TestMuJoCoStrict:
     def test_jacobian_standardization_mocked(self):
@@ -91,8 +93,8 @@ class TestMuJoCoStrict:
 
         # Mock mj_jacBody to return known values
         def side_effect_jac(model, data, jacp, jacr, body_id):
-            jacp.fill(1.0) # Linear
-            jacr.fill(2.0) # Angular
+            jacp.fill(1.0)  # Linear
+            jacr.fill(2.0)  # Angular
 
         mock_mujoco.mj_jacBody.side_effect = side_effect_jac
 
@@ -110,9 +112,13 @@ class TestMuJoCoStrict:
         spatial = jac["spatial"]
         assert spatial.shape == (6, 6)
         # Top 3 rows -> Angular (2.0)
-        np.testing.assert_allclose(spatial[:3, :], 2.0, err_msg="Top rows must be angular")
+        np.testing.assert_allclose(
+            spatial[:3, :], 2.0, err_msg="Top rows must be angular"
+        )
         # Bottom 3 rows -> Linear (1.0)
-        np.testing.assert_allclose(spatial[3:, :], 1.0, err_msg="Bottom rows must be linear")
+        np.testing.assert_allclose(
+            spatial[3:, :], 1.0, err_msg="Bottom rows must be linear"
+        )
 
     def test_get_sensors_implemented(self):
         engine = MuJoCoPhysicsEngine()
@@ -127,6 +133,7 @@ class TestMuJoCoStrict:
         sensors = engine.get_sensors()
         assert sensors["sensor_0"] == 0.123
 
+
 class TestDrakeStrict:
     def test_jacobian_standardization_mocked(self):
         engine = DrakePhysicsEngine()
@@ -137,8 +144,8 @@ class TestDrakeStrict:
         # Mock output of CalcJacobianSpatialVelocity
         # Drake returns (w, v) -> Angular, Linear
         J_fake = np.zeros((6, 2))
-        J_fake[:3, :] = 2.0 # Angular
-        J_fake[3:, :] = 1.0 # Linear
+        J_fake[:3, :] = 2.0  # Angular
+        J_fake[3:, :] = 1.0  # Linear
         engine.plant.CalcJacobianSpatialVelocity.return_value = J_fake
         # Ensure body lookup works
         engine.plant.GetBodyByName.return_value = MagicMock()
@@ -154,11 +161,16 @@ class TestDrakeStrict:
     def test_reset_protection(self):
         """Drake reset should warn if uninitialized."""
         engine = DrakePhysicsEngine()
-        engine.context = None # Force uninitialized
+        engine.context = None  # Force uninitialized
 
-        with patch("engines.physics_engines.drake.python.drake_physics_engine.LOGGER") as mock_log:
+        with patch(
+            "engines.physics_engines.drake.python.drake_physics_engine.LOGGER"
+        ) as mock_log:
             engine.reset()
-            mock_log.warning.assert_called_with("Attempted to reset Drake engine before initialization.")
+            mock_log.warning.assert_called_with(
+                "Attempted to reset Drake engine before initialization."
+            )
+
 
 class TestPinocchioStrict:
     def test_jacobian_standardization_mocked(self):
@@ -172,8 +184,8 @@ class TestPinocchioStrict:
 
         # Pinocchio returns [Linear; Angular] natively from getFrameJacobian
         J_native = np.zeros((6, 2))
-        J_native[:3, :] = 1.0 # Linear (top)
-        J_native[3:, :] = 2.0 # Angular (bottom)
+        J_native[:3, :] = 1.0  # Linear (top)
+        J_native[3:, :] = 2.0  # Angular (bottom)
 
         mock_pin.getFrameJacobian.return_value = J_native
 
@@ -183,9 +195,18 @@ class TestPinocchioStrict:
         # We upgraded Pinocchio to re-stack to [Angular; Linear] (MuJoCo/Drake standard)
         spatial = jac["spatial"]
         # Top 3 should now be Angular (2.0)
-        np.testing.assert_allclose(spatial[:3, :], 2.0, err_msg="Pinocchio spatial top should be re-stacked to Angular")
+        np.testing.assert_allclose(
+            spatial[:3, :],
+            2.0,
+            err_msg="Pinocchio spatial top should be re-stacked to Angular",
+        )
         # Bottom 3 should now be Linear (1.0)
-        np.testing.assert_allclose(spatial[3:, :], 1.0, err_msg="Pinocchio spatial bottom should be re-stacked to Linear")
+        np.testing.assert_allclose(
+            spatial[3:, :],
+            1.0,
+            err_msg="Pinocchio spatial bottom should be re-stacked to Linear",
+        )
+
 
 class TestOpenSimStrict:
     def test_inverse_dynamics_implemented(self):
@@ -214,6 +235,7 @@ class TestOpenSimStrict:
         # Check values
         assert tau[0] == 10.0
         assert tau[1] == 20.0
+
 
 class TestMyoSuiteStrict:
     def test_loading_uses_gym(self):
@@ -245,11 +267,12 @@ class TestMyoSuiteStrict:
         engine.load_from_path("foo")
         assert engine.sim == mock_sim
 
-        engine.step(dt=0.2) # Override dt
+        engine.step(dt=0.2)  # Override dt
 
         # Should set timestep, step, restore
         assert mock_sim.step.called
-        assert mock_sim.model.opt.timestep == 0.01 # Restored
+        assert mock_sim.model.opt.timestep == 0.01  # Restored
+
 
 class TestPendulumStrict:
     def test_protocol_methods(self):
