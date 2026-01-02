@@ -17,10 +17,10 @@ def test_mujoco_iaa_logic():
         sys.path.append(str(target_path))
 
     # Now we can import the module
+    import mujoco
     from mujoco_humanoid_golf.rigid_body_dynamics.induced_acceleration import (
         MuJoCoInducedAccelerationAnalyzer,
     )
-    import mujoco
 
     # Setup Mocks
     mock_model = MagicMock()
@@ -69,5 +69,20 @@ def test_mujoco_iaa_logic():
     # Verify qvel was restored
     np.testing.assert_array_equal(mock_data.qvel, np.array([1.0, 2.0]))
 
-    # mj_forward should be called twice: once to compute G and once to restore state
+    # Verify mj_forward called exactly twice (once for G, once for restore)
+    # Actually wait. mj_forward called inside compute_components 2 times (try + finally).
+    # But compute_components logic:
+    # 1. try: mj_forward (for G) -> 1 call
+    # 2. finally: mj_forward (for restore) -> 1 call
+    # Total 2 calls.
+    # What about the initialization? No usage there.
+    # What about line 50 mj_fullM? Not mj_forward.
+
+    # Wait, in logic 2. Compute G(q)
+    # mujoco.mj_forward(self.model, self.data)
+    # finally:
+    # mujoco.mj_forward(self.model, self.data)
+
+    # But we run test flow manually, calling compute_components once.
+    # Yes, 2 calls.
     assert mujoco.mj_forward.call_count == 2
