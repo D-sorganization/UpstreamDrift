@@ -62,17 +62,7 @@ def test_run_analysis(gui, qtbot):
         assert not gui.btn_load.isEnabled()
         assert "Starting analysis" in gui.log_area.toPlainText()
 
-        # Fast forward progress
-        def check_complete():
-            # The GUI uses a timer, so we need to wait for it.
-            # Or we can speed it up/mock QTimer?
-            # The test code uses real QTimer.
-            pass
-
-        # We can simulate time passing or just wait if it's fast enough.
-        # The GUI increments by 2 every 100ms. 100/2 * 100ms = 5 seconds.
-        # That's a bit slow for unit test.
-        # Let's verify start state and then manually trigger completion logic
+        # Verify timer started, then manually trigger completion to avoid slow waits
 
         assert gui.timer.isActive()
         gui.timer.stop()
