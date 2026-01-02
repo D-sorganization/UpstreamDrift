@@ -348,20 +348,18 @@ class TestC3DViewerIntegration(unittest.TestCase):
 
         # Mock the C3D viewer script path and subprocess
         with (
-            patch("pathlib.Path") as mock_path_cls,
+            patch("shared.python.constants.C3D_VIEWER_SCRIPT") as mock_script_path,
             patch("launchers.golf_launcher.os.name", "nt"),
             patch("launchers.golf_launcher.logger") as mock_logger,
             patch("launchers.golf_launcher.QMessageBox"),
             patch("launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
             patch("shared.python.secure_subprocess.secure_popen") as mock_secure_popen,
         ):
-            # Setup path mock to return truthy exists and proper relative paths
-            mock_path_instance = mock_path_cls.return_value
-            mock_path_instance.exists.return_value = True
-            mock_path_instance.__truediv__.return_value = mock_path_instance
-            mock_path_instance.parent = mock_path_instance
-            mock_path_instance.resolve.return_value = mock_path_instance
-            mock_path_instance.is_relative_to.return_value = True
+            # Setup script path mock
+            mock_script_path.exists.return_value = True
+            mock_script_path.parent = mock_script_path
+            mock_script_path.resolve.return_value = mock_script_path
+            mock_script_path.is_relative_to.return_value = True
 
             # Mock secure_popen to return a mock process
             mock_process = MagicMock()
@@ -477,20 +475,18 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
 
         # Mock the URDF generator script path and subprocess
         with (
-            patch("pathlib.Path") as mock_path_cls,
+            patch("shared.python.constants.URDF_GENERATOR_SCRIPT") as mock_script_path,
             patch("launchers.golf_launcher.os.name", "nt"),
             patch("launchers.golf_launcher.logger") as mock_logger,
             patch("launchers.golf_launcher.QMessageBox"),
             patch("launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
             patch("shared.python.secure_subprocess.secure_popen") as mock_secure_popen,
         ):
-            # Setup path mock to return truthy exists and proper relative paths
-            mock_path_instance = mock_path_cls.return_value
-            mock_path_instance.exists.return_value = True
-            mock_path_instance.__truediv__.return_value = mock_path_instance
-            mock_path_instance.parent = mock_path_instance
-            mock_path_instance.resolve.return_value = mock_path_instance
-            mock_path_instance.is_relative_to.return_value = True
+            # Setup script path mock
+            mock_script_path.exists.return_value = True
+            mock_script_path.parent = mock_script_path
+            mock_script_path.resolve.return_value = mock_script_path
+            mock_script_path.is_relative_to.return_value = True
 
             # Mock secure_popen to return a mock process
             mock_process = MagicMock()
