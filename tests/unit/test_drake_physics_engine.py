@@ -1,43 +1,57 @@
-import sys
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-# Mock pydrake before importing
-sys.modules["pydrake"] = MagicMock()
-sys.modules["pydrake.math"] = MagicMock()
-sys.modules["pydrake.multibody"] = MagicMock()
-sys.modules["pydrake.multibody.plant"] = MagicMock()
-sys.modules["pydrake.multibody.parsing"] = MagicMock()
-sys.modules["pydrake.systems"] = MagicMock()
-sys.modules["pydrake.systems.framework"] = MagicMock()
-sys.modules["pydrake.systems.analysis"] = MagicMock()
-sys.modules["pydrake.all"] = MagicMock()
 
-# Mock interfaces
-mock_interfaces = MagicMock()
-sys.modules["shared.python.interfaces"] = mock_interfaces
-
-
+# Mock classes that need to be defined before importing the engine
 class MockPhysicsEngine:
     pass
 
 
-mock_interfaces.PhysicsEngine = MockPhysicsEngine
+@pytest.fixture(autouse=True, scope="module")
+def mock_drake_dependencies():
+    """Fixture to mock pydrake and interfaces safely for the duration of this module."""
+    mock_pydrake = MagicMock()
+    mock_interfaces = MagicMock()
+    mock_interfaces.PhysicsEngine = MockPhysicsEngine
 
-import importlib  # noqa: E402, I001
-import engines.physics_engines.drake.python.drake_physics_engine  # noqa: E402
+    with patch.dict(
+        "sys.modules",
+        {
+            "pydrake": mock_pydrake,
+            "pydrake.math": MagicMock(),
+            "pydrake.multibody": MagicMock(),
+            "pydrake.multibody.plant": MagicMock(),
+            "pydrake.multibody.parsing": MagicMock(),
+            "pydrake.systems": MagicMock(),
+            "pydrake.systems.framework": MagicMock(),
+            "pydrake.systems.analysis": MagicMock(),
+            "pydrake.all": MagicMock(),
+            "shared.python.interfaces": mock_interfaces,
+        },
+    ):
+        yield mock_pydrake, mock_interfaces
 
-importlib.reload(engines.physics_engines.drake.python.drake_physics_engine)
 
-from engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: E402
-    DrakePhysicsEngine,
-)
+@pytest.fixture(scope="module")
+def DrakePhysicsEngineClass(mock_drake_dependencies):
+    """Fixture to provide the DrakePhysicsEngine class with mocked dependencies."""
+    import importlib
+
+    import engines.physics_engines.drake.python.drake_physics_engine
+
+    importlib.reload(engines.physics_engines.drake.python.drake_physics_engine)
+    from engines.physics_engines.drake.python.drake_physics_engine import (
+        DrakePhysicsEngine,
+    )
+
+    return DrakePhysicsEngine
 
 
 @pytest.fixture
-def engine():
+def engine(DrakePhysicsEngineClass):
+    """Fixture to provide a DrakePhysicsEngine instance."""
     with patch(
         "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
     ) as mock_add:
@@ -45,7 +59,7 @@ def engine():
         mock_scene_graph = MagicMock()
         mock_add.return_value = (mock_plant, mock_scene_graph)
 
-        eng = DrakePhysicsEngine()
+        eng = DrakePhysicsEngineClass()
         eng.plant = mock_plant
         eng.scene_graph = mock_scene_graph
         eng.builder = MagicMock()

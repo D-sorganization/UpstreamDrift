@@ -1,36 +1,52 @@
-import sys
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-# Mock mujoco before importing the engine if it's imported at top level
-sys.modules["mujoco"] = MagicMock()
 
-# Mock interfaces module so we can import PhysicsEngine
-mock_interfaces = MagicMock()
-sys.modules["engines.physics_engines.mujoco.python.mujoco_humanoid_golf.interfaces"] = (
-    mock_interfaces
-)
-
-
-# Mock PhysicsEngine specifically within interfaces
-# Using spec=True allows isinstance checks but won't necessarily instantiate fully
-# We just need it to be a class that MuJoCoPhysicsEngine can inherit from
+# Mock classes that need to be defined before importing the engine
 class MockPhysicsEngine:
     pass
 
 
-mock_interfaces.PhysicsEngine = MockPhysicsEngine
+@pytest.fixture(autouse=True, scope="module")
+def mock_mujoco_dependencies():
+    """Fixture to mock mujoco and interfaces safely for the duration of this module."""
+    mock_mujoco = MagicMock()
+    mock_interfaces = MagicMock()
+    mock_interfaces.PhysicsEngine = MockPhysicsEngine
 
-from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (  # noqa: E402
-    MuJoCoPhysicsEngine,
-)
+    with patch.dict(
+        "sys.modules",
+        {
+            "mujoco": mock_mujoco,
+            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.interfaces": mock_interfaces,
+        },
+    ):
+        yield mock_mujoco, mock_interfaces
+
+
+@pytest.fixture(scope="module")
+def MuJoCoPhysicsEngineClass(mock_mujoco_dependencies):
+    """Fixture to provide the MuJoCoPhysicsEngine class with mocked dependencies."""
+    import importlib
+
+    import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
+
+    importlib.reload(
+        engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
+    )
+    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+        MuJoCoPhysicsEngine,
+    )
+
+    return MuJoCoPhysicsEngine
 
 
 @pytest.fixture
-def engine():
-    return MuJoCoPhysicsEngine()
+def engine(MuJoCoPhysicsEngineClass):
+    """Fixture to provide a MuJoCoPhysicsEngine instance."""
+    return MuJoCoPhysicsEngineClass()
 
 
 def test_initialization(engine):

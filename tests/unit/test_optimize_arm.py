@@ -21,6 +21,13 @@ importlib.reload(optimize_arm_module)  # noqa: E402
 from shared.python.optimization.examples.optimize_arm import main  # noqa: E402
 
 
+def teardown_module(module):
+    """Clean up sys.modules pollution."""
+    for key in ["casadi", "pinocchio", "pinocchio.casadi"]:
+        if key in sys.modules:
+            del sys.modules[key]
+
+
 @pytest.fixture
 def mock_casadi():
     opti = MagicMock()
