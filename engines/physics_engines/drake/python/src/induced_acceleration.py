@@ -107,8 +107,11 @@ class DrakeInducedAccelerationAnalyzer:
         acc_g = np.linalg.solve(M, tau_g)
         acc_c = np.linalg.solve(M, -(bias + tau_g))
 
-        # Control is zero
-        acc_t = np.zeros_like(acc_g)
+        # Control contribution
+        if tau_app is not None:
+            acc_t = np.linalg.solve(M, tau_app)
+        else:
+            acc_t = np.zeros_like(acc_g)
 
         total = acc_g + acc_c + acc_t
 
