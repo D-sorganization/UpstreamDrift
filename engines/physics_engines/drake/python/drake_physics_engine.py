@@ -133,6 +133,8 @@ class DrakePhysicsEngine(PhysicsEngine):
             self.simulator.Initialize()
 
             LOGGER.debug("Drake engine reset to initial state")
+        else:
+            LOGGER.warning("Attempted to reset Drake engine before initialization.")
 
     def step(self, dt: float | None = None) -> None:
         """Advance the simulation by one time step."""
@@ -173,12 +175,13 @@ class DrakePhysicsEngine(PhysicsEngine):
 
             LOGGER.debug("Drake forward dynamics computation completed")
         except Exception as e:
-            LOGGER.error(f"Failed to compute forward dynamics: {e}")
+            LOGGER.error("Failed to compute forward dynamics: %s", e)
             raise
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Get the current state (positions, velocities)."""
         if not self.plant_context:
+            LOGGER.debug("get_state called on uninitialized engine")
             return np.array([]), np.array([])
 
         q = self.plant.GetPositions(self.plant_context)
@@ -188,6 +191,7 @@ class DrakePhysicsEngine(PhysicsEngine):
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set the current state."""
         if not self.plant_context:
+            LOGGER.warning("set_state called on uninitialized engine")
             return
 
         self.plant.SetPositions(self.plant_context, q)
@@ -196,6 +200,7 @@ class DrakePhysicsEngine(PhysicsEngine):
     def set_control(self, u: np.ndarray) -> None:
         """Apply control inputs (torques/forces)."""
         if not self.plant_context:
+            LOGGER.warning("set_control called on uninitialized engine")
             return
 
         # We need to set the actuation input port.
@@ -293,4 +298,8 @@ class DrakePhysicsEngine(PhysicsEngine):
         jacr = J[:3, :]
         jacp = J[3:, :]
 
-        return {"linear": jacp, "angular": jacr, "spatial": J}
+        return {
+            "linear": jacp,
+            "angular": jacr,
+            "spatial": J,  # Standard: Angular (0-3), Linear (3-6)
+        }
