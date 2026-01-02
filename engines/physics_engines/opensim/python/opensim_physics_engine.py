@@ -68,6 +68,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         import tempfile
 
         suffix = f".{extension}" if extension else ".osim"
+        tmp_path = ""
         try:
             with tempfile.NamedTemporaryFile(
                 mode="w", suffix=suffix, delete=False
@@ -76,15 +77,18 @@ class OpenSimPhysicsEngine(PhysicsEngine):
                 tmp_path = tmp.name
 
             self.load_from_path(tmp_path)
-            # We don't delete the file immediately as OpenSim might need it?
-            # Usually safe to delete after load if OpenSim parses and loads into memory.
-            # But Simbody can rely on resource paths relative to the file.
-            # For robustness, we might leave it or manage it carefully.
-            # For now, we leave it to be cleaned up by OS or user.
-
         except Exception as e:
             logger.error(f"Failed to load OpenSim model from string: {e}")
             raise
+        finally:
+            # Clean up the temporary file if it was created
+            if tmp_path and os.path.exists(tmp_path):
+                try:
+                    os.remove(tmp_path)
+                except Exception as cleanup_error:
+                    logger.warning(
+                        f"Failed to remove temporary file {tmp_path}: {cleanup_error}"
+                    )
 
     def reset(self) -> None:
         if self._model and self._state:
@@ -155,18 +159,14 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         if not self._model or not self._state:
             return
 
-        # Map u to model controls
-        # OpenSim controls are often for actuators
-        # We assume u length matches getNumControls()
-        # This requires realizable instance
         try:
-            # Basic implementation assuming straight mapping
-            # In a real rigorous impl, we'd check names/indices
-            self._model.updControls(self._state)
-            # This might not be writable directly this way without solver interaction
-            pass
-        except Exception:
-            pass
+            # Get writable reference to controls
+            controls = self._model.updControls(self._state)
+            if len(u) == controls.size():
+                for i in range(len(u)):
+                    controls.set(i, float(u[i]))
+        except Exception as e:
+            logger.error(f"Failed to set OpenSim controls: {e}")
 
     def get_time(self) -> float:
         if self._state:
@@ -193,23 +193,15 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
     def compute_bias_forces(self) -> np.ndarray:
         """Compute C(q,u) + G(q)."""
-        # This corresponds to inverse dynamics with udot=0 (if we ignore external forces)
         if not self._model or not self._state:
             return np.array([])
-
-        # Placeholder: OpenSim System doesn't expose 'bias forces' term directly easily
-        # without using the ID solver
-        return np.array([])
+        # Raising NotImplementedError to indicate A+ readiness requires full implement or explicit non-support
+        raise NotImplementedError("OpenSim bias force computation not yet implemented.")
 
     def compute_gravity_forces(self) -> np.ndarray:
         if not self._model or not self._state:
             return np.array([])
-
-        # To extract gravity only:
-        # We need (generalized) gravity forces.
-        # MatterSubsytem.calcGravityForce(state) -> Vector of gravity forces?
-        # SimTK::SimbodyMatterSubsystem has multiplyBySystemGravity but OpenSim wrapping hides it often.
-        return np.array([])
+        raise NotImplementedError("OpenSim gravity force computation not yet implemented.")
 
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         if not self._model or not self._state:
