@@ -18,7 +18,7 @@ from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine i
 def is_mock(module_name):
     mod = sys.modules.get(module_name)
     return isinstance(mod, MagicMock) or (
-        hasattr(mod, "__file__") and mod.__file__ is None
+        hasattr(mod, "__file__") and mod is not None and mod.__file__ is None
     )
 
 
@@ -78,7 +78,7 @@ class TestCrossEngineConsistency:
             try:
                 dk = DrakePhysicsEngine()
                 dk.load_from_path(URDF_PATH)
-                engs["drake"] = dk
+                engs["drake"] = dk  # type: ignore[assignment]
             except Exception as e:
                 LOGGER.warning(f"Drake init failed: {e}")
 
@@ -86,7 +86,7 @@ class TestCrossEngineConsistency:
             try:
                 pn = PinocchioPhysicsEngine()
                 pn.load_from_path(URDF_PATH)
-                engs["pinocchio"] = pn
+                engs["pinocchio"] = pn  # type: ignore[assignment]
             except Exception as e:
                 LOGGER.warning(f"Pinocchio init failed: {e}")
 
