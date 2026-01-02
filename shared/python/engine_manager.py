@@ -234,9 +234,19 @@ class EngineManager:
             import mujoco
 
             self._mujoco_module = mujoco
-            # Optional: preload a default model or verify model directory?
-            model_dir = self.engine_paths[EngineType.MUJOCO] / "assets"
-            self._mujoco_model_dir = model_dir
+
+            # Load default model to verify engine readiness
+            # Trying to load simple_pendulum.xml as a verification step
+            model_path = (
+                self.engine_paths[EngineType.MUJOCO] / "models" / "simple_pendulum.xml"
+            )
+            if model_path.exists():
+                logger.info(f"Loading default MuJoCo model: {model_path}")
+                engine.load_from_path(str(model_path))
+            else:
+                logger.warning(f"Default MuJoCo model not found at {model_path}")
+
+            self._mujoco_model_dir = self.engine_paths[EngineType.MUJOCO] / "models"
             logger.info("MuJoCo engine fully loaded and instantiation successful")
 
         except ImportError as e:
@@ -268,6 +278,28 @@ class EngineManager:
             import pydrake
 
             self._drake_module = pydrake
+
+            # Try to load the shared golfer URDF if available, since Drake supports URDF
+            # Note: This assumes cross-compatibility of the URDF
+            urdf_path = (
+                self.engine_paths[EngineType.PINOCCHIO]
+                / "models"
+                / "generated"
+                / "golfer.urdf"
+            )
+            if urdf_path.exists():
+                logger.info(
+                    f"Attempting to load shared golfer URDF into Drake: {urdf_path}"
+                )
+                try:
+                    engine.load_from_path(str(urdf_path))
+                except Exception as e:
+                    logger.warning(
+                        f"Failed to load default URDF into Drake (expected if missing meshes): {e}"
+                    )
+            else:
+                logger.warning(f"Default URDF not found at {urdf_path}")
+
             logger.info("Drake engine fully loaded and instantiated")
 
         except ImportError as e:
@@ -297,6 +329,20 @@ class EngineManager:
             import pinocchio
 
             self._pinocchio_module = pinocchio
+
+            # Load default golfer URDF
+            model_path = (
+                self.engine_paths[EngineType.PINOCCHIO]
+                / "models"
+                / "generated"
+                / "golfer.urdf"
+            )
+            if model_path.exists():
+                logger.info(f"Loading default Pinocchio model: {model_path}")
+                engine.load_from_path(str(model_path))
+            else:
+                logger.warning(f"Default Pinocchio model not found at {model_path}")
+
             logger.info("Pinocchio engine fully loaded and instantiated")
 
         except ImportError as e:

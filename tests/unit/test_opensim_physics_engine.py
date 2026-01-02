@@ -16,6 +16,12 @@ from engines.physics_engines.opensim.python.opensim_physics_engine import (
 )
 
 
+def teardown_module(module):
+    """Clean up sys.modules pollution."""
+    if "opensim" in sys.modules:
+        del sys.modules["opensim"]
+
+
 @pytest.fixture
 def engine():
     # Reset mock_opensim for each test

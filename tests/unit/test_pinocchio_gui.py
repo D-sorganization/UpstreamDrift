@@ -5,12 +5,22 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Mock modules before importing GUI because Pinocchio might not be installed
-sys.modules["pinocchio"] = MagicMock()
-sys.modules["pinocchio.visualize"] = MagicMock()
-sys.modules["meshcat"] = MagicMock()
-sys.modules["meshcat.geometry"] = MagicMock()
-sys.modules["meshcat.visualizer"] = MagicMock()
+
+@pytest.fixture(autouse=True, scope="module")
+def mock_pinocchio_gui_dependencies():
+    """Fixture to mock pinocchio and meshcat safely for the duration of this module."""
+    with patch.dict(
+        "sys.modules",
+        {
+            "pinocchio": MagicMock(),
+            "pinocchio.visualize": MagicMock(),
+            "meshcat": MagicMock(),
+            "meshcat.geometry": MagicMock(),
+            "meshcat.visualizer": MagicMock(),
+        },
+    ):
+        yield
+
 
 # Import after mocking
 # Check if PyQt6 is available, else skip
