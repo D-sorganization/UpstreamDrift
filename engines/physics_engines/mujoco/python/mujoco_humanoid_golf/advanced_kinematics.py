@@ -335,9 +335,8 @@ class AdvancedKinematicsAnalyzer:
 
             # Nullspace projection for redundancy resolution
             # Add nullspace motion toward desired configuration
-            # Use rcond for numerical stability (works in all scipy versions)
-            # rtol was only added in scipy 1.8.0, so we use rcond for compatibility
-            j_pinv = pinv(J, rcond=self.ik_damping)
+            # Use rtol for numerical stability (scipy >= 1.7.0)
+            j_pinv = pinv(J, rtol=self.ik_damping)
             nullspace_proj = np.eye(self.model.nv) - j_pinv @ J
             nullspace_motion = nullspace_proj @ (nullspace_objective - q)
 
@@ -542,8 +541,8 @@ class AdvancedKinematicsAnalyzer:
         Returns:
             Nullspace projection matrix [n x n]
         """
-        # Use rcond for numerical stability (works in all scipy versions)
-        j_pinv = pinv(jacobian, rcond=1e-3)
+        # Use rtol for numerical stability (scipy >= 1.7.0)
+        j_pinv = pinv(jacobian, rtol=1e-3)
         return np.asarray(np.eye(jacobian.shape[1]) - j_pinv @ jacobian)
 
     def compute_task_space_inertia(self, jacobian: np.ndarray) -> np.ndarray:
