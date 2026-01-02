@@ -204,7 +204,12 @@ class PinocchioRecorder:
 
         # Check if frames have induced acceleration data
         # Check if any frame has the key
-        valid_indices = [i for i, f in enumerate(self.frames) if hasattr(f, "induced_accelerations") and source_name in f.induced_accelerations]
+        valid_indices = [
+            i
+            for i, f in enumerate(self.frames)
+            if hasattr(f, "induced_accelerations")
+            and source_name in f.induced_accelerations
+        ]
 
         if not valid_indices:
             return np.array([]), np.array([])
@@ -212,7 +217,9 @@ class PinocchioRecorder:
         # We assume consistent structure if it exists, or fill missing with zeros?
         # Let's extract only valid ones to match time
         filtered_times = times[valid_indices]
-        values = [self.frames[i].induced_accelerations[source_name] for i in valid_indices]
+        values = [
+            self.frames[i].induced_accelerations[source_name] for i in valid_indices
+        ]
 
         return filtered_times, np.array(values)
 
@@ -230,7 +237,11 @@ class PinocchioRecorder:
 
         times = np.array([f.time for f in self.frames])
 
-        valid_indices = [i for i, f in enumerate(self.frames) if hasattr(f, "counterfactuals") and cf_name in f.counterfactuals]
+        valid_indices = [
+            i
+            for i, f in enumerate(self.frames)
+            if hasattr(f, "counterfactuals") and cf_name in f.counterfactuals
+        ]
 
         if not valid_indices:
             return np.array([]), np.array([])
@@ -421,10 +432,14 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.combo_induced = QtWidgets.QComboBox()
         self.combo_induced.setEditable(True)
         self.combo_induced.addItems(["gravity", "velocity", "total"])
-        self.combo_induced.setToolTip("Select source (e.g. gravity) or type specific torque vector in comma-sep form")
+        self.combo_induced.setToolTip(
+            "Select source (e.g. gravity) or type "
+            "specific torque vector in comma-sep form"
+        )
 
         # Use lineEdit signal to avoid lag on keystrokes
-        self.combo_induced.lineEdit().editingFinished.connect(self._update_viewer)
+        if line_edit := self.combo_induced.lineEdit():
+             line_edit.editingFinished.connect(self._update_viewer)
         self.combo_induced.currentIndexChanged.connect(self._update_viewer)
 
         self.chk_cf = QtWidgets.QCheckBox("Counterfactuals")
@@ -693,24 +708,35 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self._analysis_data_populated = True
 
         # Check if 'specific_control' is already in frames (from live recording)
-        has_specific = any("specific_control" in f.induced_accelerations for f in self.recorder.frames)
+        has_specific = any(
+            "specific_control" in f.induced_accelerations for f in self.recorder.frames
+        )
 
         # If not in frames, but we have text in combo box, compute it post-hoc
         txt = self.combo_induced.currentText()
-        if not has_specific and txt and txt not in ["gravity", "velocity", "total"] and self.analyzer:
-             try:
+        if (
+            not has_specific
+            and txt
+            and txt not in ["gravity", "velocity", "total"]
+            and self.analyzer
+        ):
+            try:
                 parts = [float(x) for x in txt.split(",")]
                 if len(parts) == self.model.nv:
                     spec_tau = np.array(parts)
                     # Compute for all frames
-                    QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
+                    QtWidgets.QApplication.setOverrideCursor(
+                        QtCore.Qt.CursorShape.WaitCursor
+                    )
                     for frame in self.recorder.frames:
                         if frame.joint_positions is not None:
-                            a_spec = self.analyzer.compute_specific_control(frame.joint_positions, spec_tau)
+                            a_spec = self.analyzer.compute_specific_control(
+                                frame.joint_positions, spec_tau
+                            )
                             frame.induced_accelerations["specific_control"] = a_spec
                     QtWidgets.QApplication.restoreOverrideCursor()
                     has_specific = True
-             except ValueError:
+            except ValueError:
                 pass
 
         plotter = GolfSwingPlotter(self.recorder, self.joint_names)
@@ -845,8 +871,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
             # Induced
             if first_frame.induced_accelerations:
-                # Get all unique keys across all frames to handle dynamic "specific_control"
-                all_keys = set()
+                # Get all unique keys across all frames to handle dynamic
+                # "specific_control"
+                all_keys: set[str] = set()
                 for f in self.recorder.frames:
                     all_keys.update(f.induced_accelerations.keys())
 
@@ -854,7 +881,13 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                     # Extract list of arrays
                     series = [
                         f.induced_accelerations.get(
-                            key, np.zeros_like(first_frame.induced_accelerations.get('total', np.zeros(self.model.nv)))
+                            key,
+                            np.zeros_like(
+                                first_frame.induced_accelerations.get(
+                                    "total",
+                                    np.zeros(self.model.nv if self.model else 0)
+                                )
+                            ),
                         )
                         for f in self.recorder.frames
                     ]
@@ -1270,7 +1303,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                                 parts = [float(x) for x in txt.split(",")]
                                 if len(parts) == self.model.nv:
                                     spec_tau = np.array(parts)
-                                    spec_acc = self.analyzer.compute_specific_control(self.q, spec_tau)
+                                    spec_acc = self.analyzer.compute_specific_control(
+                                        self.q, spec_tau
+                                    )
                                     induced["specific_control"] = spec_acc
                             except ValueError:
                                 pass

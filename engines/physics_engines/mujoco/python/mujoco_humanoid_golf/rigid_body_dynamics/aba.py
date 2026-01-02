@@ -7,13 +7,12 @@ Computes joint accelerations given applied torques.
 from __future__ import annotations
 
 import numpy as np
+from mujoco_humanoid_golf.rigid_body_dynamics.common import DEFAULT_GRAVITY
 from mujoco_humanoid_golf.spatial_algebra import (
     cross_force_fast,
     cross_motion_fast,
     jcalc,
 )
-from mujoco_humanoid_golf.rigid_body_dynamics.common import DEFAULT_GRAVITY
-
 
 TOLERANCE = 1e-10  # Numerical tolerance to avoid division by zero
 
