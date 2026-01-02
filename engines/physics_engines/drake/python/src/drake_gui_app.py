@@ -599,7 +599,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         rec_row.addWidget(self.lbl_rec_status)
         analysis_layout.addLayout(rec_row)
 
-        # Induced Accel
+        # Induced Accel Plot
         ind_layout = QtWidgets.QHBoxLayout()
         self.btn_induced_acc = QtWidgets.QPushButton("Show Induced Acceleration")
         self.btn_induced_acc.setToolTip(
@@ -609,12 +609,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.btn_induced_acc.setEnabled(HAS_MATPLOTLIB)
         ind_layout.addWidget(self.btn_induced_acc)
 
-        self.txt_specific_actuator = QtWidgets.QLineEdit()
-        self.txt_specific_actuator.setPlaceholderText("Specific Actuator (index)")
-        self.txt_specific_actuator.setToolTip("Index of actuator to isolate (optional)")
-        self.txt_specific_actuator.setMaximumWidth(150)
-        ind_layout.addWidget(self.txt_specific_actuator)
-
+        # Removed conflicting txt_specific_actuator to rely on combo box in visualization
         analysis_layout.addLayout(ind_layout)
 
         self.btn_counterfactuals = QtWidgets.QPushButton(
@@ -696,14 +691,33 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         vis_layout.addWidget(self.chk_live_analysis)
 
         # Advanced Vectors
-        vec_layout = QtWidgets.QHBoxLayout()
+        vec_grid = QtWidgets.QGridLayout()
+
         self.chk_induced_vec = QtWidgets.QCheckBox("Induced Vectors")
         self.chk_induced_vec.toggled.connect(self._on_visualization_changed)
+
+        self.combo_induced_source = QtWidgets.QComboBox()
+        self.combo_induced_source.setEditable(True)
+        self.combo_induced_source.addItems(["gravity", "velocity", "total"])
+        self.combo_induced_source.setToolTip("Select source (e.g. gravity) or type specific actuator index")
+        # Use lineEdit().editingFinished to avoid performance issues
+        self.combo_induced_source.lineEdit().editingFinished.connect(self._on_visualization_changed)
+        # Also connect index changed for dropdown selection
+        self.combo_induced_source.currentIndexChanged.connect(self._on_visualization_changed)
+
         self.chk_cf_vec = QtWidgets.QCheckBox("CF Vectors")
         self.chk_cf_vec.toggled.connect(self._on_visualization_changed)
-        vec_layout.addWidget(self.chk_induced_vec)
-        vec_layout.addWidget(self.chk_cf_vec)
-        vis_layout.addLayout(vec_layout)
+
+        self.combo_cf_type = QtWidgets.QComboBox()
+        self.combo_cf_type.addItems(["ztcf_accel", "zvcf_torque"])
+        self.combo_cf_type.currentIndexChanged.connect(self._on_visualization_changed)
+
+        vec_grid.addWidget(self.chk_induced_vec, 0, 0)
+        vec_grid.addWidget(self.combo_induced_source, 0, 1)
+        vec_grid.addWidget(self.chk_cf_vec, 1, 0)
+        vec_grid.addWidget(self.combo_cf_type, 1, 1)
+
+        vis_layout.addLayout(vec_grid)
 
         vis_group.setLayout(vis_layout)
         layout.addWidget(vis_group)
@@ -964,6 +978,22 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
                     # Compute Induced
                     res = analyzer.compute_components(self.eval_context)
+
+                    # Check for specific actuator selection
+                    if self.chk_induced_vec.isChecked():
+                        source = self.combo_induced_source.currentText()
+                        # If specific actuator selected, compute and record it
+                        if source not in ["gravity", "velocity", "total"]:
+                            try:
+                                act_idx = int(source)
+                                tau = np.zeros(self.plant.num_velocities())
+                                if 0 <= act_idx < len(tau):
+                                    tau[act_idx] = 1.0
+                                    accels = analyzer.compute_specific_control(self.eval_context, tau)
+                                    res["specific_control"] = accels
+                            except ValueError:
+                                pass
+
                     # We need to append to recorder lists
                     # DrakeRecorder uses dict[str, list[np.ndarray]]
                     for k, val in res.items():
@@ -1028,15 +1058,38 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         # Induced
         if self.chk_induced_vec.isChecked():
-            res = analyzer.compute_components(self.eval_context)
-            accels = res.get("gravity", np.zeros(self.plant.num_velocities()))
+            source = self.combo_induced_source.currentText()
+            accels = np.zeros(self.plant.num_velocities())
+
+            if source in ["gravity", "velocity", "total"]:
+                res = analyzer.compute_components(self.eval_context)
+                accels = res.get(source, accels)
+            else:
+                # Specific actuator?
+                try:
+                    act_idx = int(source)
+                    tau = np.zeros(self.plant.num_velocities())
+                    if 0 <= act_idx < len(tau):
+                        tau[act_idx] = 1.0
+                        accels = analyzer.compute_specific_control(self.eval_context, tau)
+                except ValueError:
+                    pass
+
             self._draw_accel_vectors(accels, "induced", Rgba(1, 0, 1, 1))
 
         # Counterfactuals
         if self.chk_cf_vec.isChecked():
+            cf_type = self.combo_cf_type.currentText()
             res = analyzer.compute_counterfactuals(self.eval_context)
-            ztcf = res.get("ztcf_accel", np.zeros(self.plant.num_velocities()))
-            self._draw_accel_vectors(ztcf, "cf", Rgba(1, 1, 0, 1))
+
+            # Default to ZTCF accel if not found
+            if cf_type == "ztcf_accel":
+                vals = res.get("ztcf_accel", np.zeros(self.plant.num_velocities()))
+                self._draw_accel_vectors(vals, "cf", Rgba(1, 1, 0, 1))
+            elif cf_type == "zvcf_torque":
+                vals = res.get("zvcf_torque", np.zeros(self.plant.num_velocities()))
+                # Visualize torque as vectors? reusing accel visualizer for now (scaled)
+                self._draw_accel_vectors(vals, "cf", Rgba(1, 1, 0, 1))
 
     def _draw_accel_vectors(
         self, accels: np.ndarray, name_prefix: str, color: Rgba
@@ -1257,8 +1310,15 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             return
 
         spec_act_idx = -1
-        txt = self.txt_specific_actuator.text().strip()
-        if txt:
+        # Removed text box use
+        # Just defaulting to -1 unless we parse combo box
+        # But this button is separate from the checkbox live view.
+        # Let's see if we can reuse the combo box here?
+        # Or just default to None/empty for this plot unless we add a UI element back.
+        # The user requested removing the conflicting UI element.
+        # We can try to parse the combo box current text if it's an int.
+        txt = self.combo_induced_source.currentText()
+        if txt and txt not in ["gravity", "velocity", "total"]:
             try:
                 spec_act_idx = int(txt)
             except ValueError:
@@ -1409,9 +1469,12 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             add_series(data, "v", self.recorder.v_history)
             add_series(data, "club_pos", self.recorder.club_head_pos_history)
 
+            # Export Induced Accel
             for k, v in self.recorder.induced_accelerations.items():
+                # v is list of arrays
                 add_series(data, f"induced_{k}", v)
 
+            # Export Counterfactuals
             for k, v in self.recorder.counterfactuals.items():
                 add_series(data, f"cf_{k}", v)
 
