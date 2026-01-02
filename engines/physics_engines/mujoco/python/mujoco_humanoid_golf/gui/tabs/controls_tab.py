@@ -65,19 +65,35 @@ class ControlsTab(QtWidgets.QWidget):
         buttons_layout = QtWidgets.QGridLayout(buttons_group)
 
         self.play_pause_btn = QtWidgets.QPushButton("Pause")
+        self.play_pause_btn.setIcon(
+            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause)
+        )
         self.play_pause_btn.setCheckable(True)
         self.play_pause_btn.toggled.connect(self.on_play_pause_toggled)
         self.play_pause_btn.setToolTip("Pause/Resume simulation (Shortcut: Space)")
 
         self.reset_btn = QtWidgets.QPushButton("Reset")
+        self.reset_btn.setIcon(
+            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload)
+        )
         self.reset_btn.clicked.connect(self.on_reset_clicked)
         self.reset_btn.setToolTip("Reset simulation to initial state (Shortcut: R)")
 
         self.screenshot_btn = QtWidgets.QPushButton("Screenshot")
+        self.screenshot_btn.setIcon(
+            self.style().standardIcon(
+                QtWidgets.QStyle.StandardPixmap.SP_DialogSaveButton
+            )
+        )
         self.screenshot_btn.clicked.connect(self.on_take_screenshot)
         self.screenshot_btn.setToolTip("Save screenshot to output/screenshots/")
 
         self.record_btn = QtWidgets.QPushButton("Start Recording")
+        self.record_btn.setIcon(
+            self.style().standardIcon(
+                QtWidgets.QStyle.StandardPixmap.SP_DialogYesButton
+            )
+        )
         self.record_btn.setCheckable(True)
         self.record_btn.toggled.connect(self.on_record_toggled)
         self.record_btn.setToolTip("Record simulation data for analysis and export")
@@ -525,6 +541,12 @@ class ControlsTab(QtWidgets.QWidget):
         # Toggle simulation running state
         self.sim_widget.running = not checked
         self.play_pause_btn.setText("Resume" if checked else "Pause")
+        icon = (
+            QtWidgets.QStyle.StandardPixmap.SP_MediaPlay
+            if checked
+            else QtWidgets.QStyle.StandardPixmap.SP_MediaPause
+        )
+        self.play_pause_btn.setIcon(self.style().standardIcon(icon))
 
     def on_reset_clicked(self) -> None:
         self.sim_widget.reset_state()
@@ -535,9 +557,17 @@ class ControlsTab(QtWidgets.QWidget):
         recorder = self.sim_widget.get_recorder()
         if checked:
             self.record_btn.setText("Stop Recording")
+            self.record_btn.setIcon(
+                self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaStop)
+            )
             recorder.start_recording()
         else:
             self.record_btn.setText("Start Recording")
+            self.record_btn.setIcon(
+                self.style().standardIcon(
+                    QtWidgets.QStyle.StandardPixmap.SP_DialogYesButton
+                )
+            )
             recorder.stop_recording()
 
     def on_take_screenshot(self) -> None:
