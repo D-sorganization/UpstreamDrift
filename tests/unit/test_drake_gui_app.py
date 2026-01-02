@@ -19,6 +19,13 @@ sys.modules["pydrake.multibody.tree"] = MagicMock()
 HAS_QT = importlib.util.find_spec("PyQt6") is not None
 
 
+def teardown_module(module):
+    """Clean up sys.modules pollution."""
+    for key in list(sys.modules.keys()):
+        if key.startswith("pydrake"):
+            del sys.modules[key]
+
+
 @pytest.mark.skipif(not HAS_QT, reason="PyQt6 not available")
 class TestDrakeGUIApp:
 
