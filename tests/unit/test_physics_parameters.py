@@ -112,11 +112,13 @@ def test_export_import_json(registry, tmp_path):
     new_registry = PhysicsParameterRegistry()
     # verify default is different from what we saved
     # default CLUB_MASS is 0.310
-    assert new_registry.get("CLUB_MASS").value == 0.310
+    param = new_registry.get("CLUB_MASS")
+    assert param is not None and param.value == 0.310
 
     count = new_registry.import_from_json(json_path)
     assert count > 0
-    assert new_registry.get("CLUB_MASS").value == 0.25
+    param = new_registry.get("CLUB_MASS")
+    assert param is not None and param.value == 0.25
 
 
 def test_get_summary(registry):

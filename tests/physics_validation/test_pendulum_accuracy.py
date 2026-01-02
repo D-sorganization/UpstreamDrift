@@ -21,7 +21,7 @@ def is_engine_available(engine_type: EngineType) -> bool:
     """Check if an engine is installed and importable."""
     manager = EngineManager()
     probe_result = manager.get_probe_result(engine_type)
-    return probe_result.is_available()
+    return bool(probe_result.is_available())
 
 
 def test_mujoco_pendulum_accuracy():

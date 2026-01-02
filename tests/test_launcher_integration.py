@@ -70,9 +70,9 @@ class TestLauncherIntegration(unittest.TestCase):
             from shared.python.process_worker import ProcessWorker
 
             # Test basic instantiation with required arguments
-            config_manager = ConfigurationManager("dummy_config.json")
+            config_manager = ConfigurationManager(Path("dummy_config.json"))
             engine_manager = EngineManager()
-            process_worker = ProcessWorker("echo test")
+            process_worker = ProcessWorker(["echo", "test"])
 
             self.assertIsNotNone(config_manager)
             self.assertIsNotNone(engine_manager)

@@ -66,8 +66,8 @@ def mock_cv2():
     mock.cvtColor.side_effect = lambda img, code: img
 
     # Mock constants
-    mock.COLOR_RGB2BGR = 1
-    mock.FONT_HERSHEY_SIMPLEX = 1
+    mock.COLOR_RGB2BGR = 1  # type: ignore[attr-defined]
+    mock.FONT_HERSHEY_SIMPLEX = 1  # type: ignore[attr-defined]
 
     return mock
 
