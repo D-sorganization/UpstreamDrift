@@ -121,23 +121,26 @@ class TestEngineManager(unittest.TestCase):
         manager = EngineManager(self.mock_root)
         manager.engine_paths[EngineType.MUJOCO] = Path("/mock/mujoco")
 
-        mock_mujoco = MagicMock()
-        mock_mujoco.__version__ = "3.2.3"
-
         # Configure probe specifically for this test
         self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = (
             True
         )
 
-        with patch.dict("sys.modules", {"mujoco": mock_mujoco}):
-            with (
-                patch("pathlib.Path.exists", return_value=True),
-                patch("pathlib.Path.glob", return_value=[Path("model.xml")]),
-            ):
-                mock_mujoco.MjModel.from_xml_path.return_value = MagicMock()
+        mock_mujoco_pkg = MagicMock()
+        mock_mujoco_pkg.__version__ = "3.2.3"
+        mock_mujoco_pkg.MjModel.from_xml_path.return_value = MagicMock()
 
-                manager._load_mujoco_engine()
-                self.assertEqual(manager._mujoco_module, mock_mujoco)
+        with patch.dict("sys.modules", {"mujoco": mock_mujoco_pkg}):
+            with patch(
+                "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
+            ):
+                with (
+                    patch("pathlib.Path.exists", return_value=True),
+                    patch("pathlib.Path.glob", return_value=[Path("model.xml")]),
+                ):
+                    manager._load_mujoco_engine()
+                    self.assertEqual(manager._mujoco_module, mock_mujoco_pkg)
+                    self.assertEqual(manager._mujoco_module.__version__, "3.2.3")
 
     def test_get_engine_info(self):
         """Test information retrieval."""

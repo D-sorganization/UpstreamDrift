@@ -1,36 +1,47 @@
-import sys
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-# Mock pinocchio before importing
-sys.modules["pinocchio"] = MagicMock()
 
-# Mock interfaces
-mock_interfaces = MagicMock()
-sys.modules["shared.python.interfaces"] = mock_interfaces
-
-
+# Mock classes that need to be defined before importing the engine
 class MockPhysicsEngine:
     pass
 
 
-mock_interfaces.PhysicsEngine = MockPhysicsEngine
+@pytest.fixture(autouse=True, scope="module")
+def mock_pinocchio_dependencies():
+    """Fixture to mock pinocchio and interfaces safely for the duration of this module."""
+    mock_pin = MagicMock()
+    mock_interfaces = MagicMock()
+    mock_interfaces.PhysicsEngine = MockPhysicsEngine
 
-import importlib  # noqa: E402, I001
-import engines.physics_engines.pinocchio.python.pinocchio_physics_engine  # noqa: E402
+    with patch.dict(
+        "sys.modules",
+        {"pinocchio": mock_pin, "shared.python.interfaces": mock_interfaces},
+    ):
+        yield mock_pin, mock_interfaces
 
-importlib.reload(engines.physics_engines.pinocchio.python.pinocchio_physics_engine)
 
-from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (  # noqa: E402
-    PinocchioPhysicsEngine,
-)
+@pytest.fixture(scope="module")
+def PinocchioPhysicsEngineClass(mock_pinocchio_dependencies):
+    """Fixture to provide the PinocchioPhysicsEngine class with mocked dependencies."""
+    import importlib
+
+    import engines.physics_engines.pinocchio.python.pinocchio_physics_engine
+
+    importlib.reload(engines.physics_engines.pinocchio.python.pinocchio_physics_engine)
+    from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+        PinocchioPhysicsEngine,
+    )
+
+    return PinocchioPhysicsEngine
 
 
 @pytest.fixture
-def engine():
-    return PinocchioPhysicsEngine()
+def engine(PinocchioPhysicsEngineClass):
+    """Fixture to provide a PinocchioPhysicsEngine instance."""
+    return PinocchioPhysicsEngineClass()
 
 
 def test_initialization(engine):

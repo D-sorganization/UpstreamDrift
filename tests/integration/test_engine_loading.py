@@ -32,20 +32,25 @@ def test_mujoco_loading_success(mock_probe, mock_engine_manager):
     # Force engine availability (bypass discovery)
     mock_engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
-    # Mock mujoco module
-    mock_mujoco = MagicMock()
-    mock_mujoco.__version__ = "3.2.3"
+    # Mock file system checks and mujoco module using sys.modules
+    mock_mujoco_pkg = MagicMock()
+    mock_mujoco_pkg.__version__ = "3.2.3"
+    mock_mujoco_pkg.MjModel.from_xml_path.return_value = MagicMock()
 
-    # Mock file system checks
-    with patch.dict("sys.modules", {"mujoco": mock_mujoco}):
-        with patch("pathlib.Path.exists", return_value=True):
-            with patch("pathlib.Path.glob", return_value=[Path("model.xml")]):
-                with patch("mujoco.MjModel.from_xml_path"):
+    with patch.dict("sys.modules", {"mujoco": mock_mujoco_pkg}):
+        # We also need to mock the PhysicsEngine import inside switch_engine
+        with patch(
+            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
+        ):
+            with patch("pathlib.Path.exists", return_value=True):
+                with patch("pathlib.Path.glob", return_value=[Path("model.xml")]):
                     result = mock_engine_manager.switch_engine(EngineType.MUJOCO)
 
                     assert result is True
                     assert mock_engine_manager.get_current_engine() == EngineType.MUJOCO
-                    assert mock_engine_manager._mujoco_module == mock_mujoco
+                    # Verify that the manager loaded our mock
+                    assert mock_engine_manager._mujoco_module == mock_mujoco_pkg
+                    assert mock_engine_manager._mujoco_module.__version__ == "3.2.3"
 
 
 @patch("shared.python.engine_probes.MuJoCoProbe.probe")
@@ -91,8 +96,13 @@ def test_drake_loading_success(mock_probe, mock_drake_class, mock_engine_manager
     assert mock_engine_manager._drake_module == mock_drake
 
 
+@patch(
+    "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
+)
 @patch("shared.python.engine_probes.PinocchioProbe.probe")
-def test_pinocchio_loading_success(mock_probe, mock_engine_manager):
+def test_pinocchio_loading_success(
+    mock_probe, mock_pin_engine_class, mock_engine_manager
+):
     """Test successful Pinocchio loading."""
     mock_probe.return_value.is_available.return_value = True
 

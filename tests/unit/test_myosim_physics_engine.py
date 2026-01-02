@@ -16,6 +16,12 @@ from engines.physics_engines.myosim.python.myosim_physics_engine import (
 )
 
 
+def teardown_module(module):
+    """Clean up sys.modules pollution."""
+    if "mujoco" in sys.modules:
+        del sys.modules["mujoco"]
+
+
 @pytest.fixture
 def engine():
     mock_mujoco.reset_mock()
