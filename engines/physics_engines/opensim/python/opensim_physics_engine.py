@@ -217,7 +217,6 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
         # Use an InverseDynamicsSolver
         n_u = self._model.getNumSpeeds()
-        n_u = self._model.getNumSpeeds()
 
         if len(qacc) != n_u:
             return np.array([])
