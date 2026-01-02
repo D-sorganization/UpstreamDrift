@@ -64,16 +64,33 @@ class ControlsTab(QtWidgets.QWidget):
         buttons_group = QtWidgets.QGroupBox("Simulation Control")
         buttons_layout = QtWidgets.QGridLayout(buttons_group)
 
+        style = self.style()
+
         self.play_pause_btn = QtWidgets.QPushButton("Pause")
         self.play_pause_btn.setCheckable(True)
+        if style:
+            self.play_pause_btn.setIcon(
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause)
+            )
+        self.play_pause_btn.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
         self.play_pause_btn.toggled.connect(self.on_play_pause_toggled)
         self.play_pause_btn.setToolTip("Pause/Resume simulation (Shortcut: Space)")
 
         self.reset_btn = QtWidgets.QPushButton("Reset")
+        if style:
+            self.reset_btn.setIcon(
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload)
+            )
+        self.reset_btn.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
         self.reset_btn.clicked.connect(self.on_reset_clicked)
         self.reset_btn.setToolTip("Reset simulation to initial state (Shortcut: R)")
 
         self.screenshot_btn = QtWidgets.QPushButton("Screenshot")
+        if style:
+            self.screenshot_btn.setIcon(
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DialogSaveButton)
+            )
+        self.screenshot_btn.setCursor(QtCore.Qt.CursorShape.PointingHandCursor)
         self.screenshot_btn.clicked.connect(self.on_take_screenshot)
         self.screenshot_btn.setToolTip("Save screenshot to output/screenshots/")
 
@@ -525,6 +542,15 @@ class ControlsTab(QtWidgets.QWidget):
         # Toggle simulation running state
         self.sim_widget.running = not checked
         self.play_pause_btn.setText("Resume" if checked else "Pause")
+
+        style = self.style()
+        if style:
+            icon = (
+                QtWidgets.QStyle.StandardPixmap.SP_MediaPlay
+                if checked
+                else QtWidgets.QStyle.StandardPixmap.SP_MediaPause
+            )
+            self.play_pause_btn.setIcon(style.standardIcon(icon))
 
     def on_reset_clicked(self) -> None:
         self.sim_widget.reset_state()
