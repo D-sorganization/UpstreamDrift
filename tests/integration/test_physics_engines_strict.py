@@ -8,6 +8,7 @@ to ensure it can run in any CI environment to verify LOGIC and PROTOCOL complian
 needing heavy binary dependencies.
 """
 
+import importlib
 import logging
 from unittest.mock import MagicMock, patch
 
@@ -57,7 +58,6 @@ mock_pydrake.systems.framework.DiagramBuilder = mock_pydrake.DiagramBuilder
 # --- Imports with Patch Context ---
 # Use a context manager so patches apply only during engine imports,
 # avoiding long-lived module-level patchers that can leak between tests.
-import importlib
 
 with patch.dict("sys.modules", module_patches):
     import engines.physics_engines.drake.python.drake_physics_engine
