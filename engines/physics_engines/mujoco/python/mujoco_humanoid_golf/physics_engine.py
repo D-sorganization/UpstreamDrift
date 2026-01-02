@@ -241,7 +241,8 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         return {
             "linear": jacp,
             "angular": jacr,
-            "spatial": np.vstack([jacr, jacp]),  # Standardized to [Angular; Linear] (Drake convention)
+            "spatial": np.vstack([jacr, jacp]),
+            # Standardized to [Angular; Linear] (Drake convention)
         }
 
     def get_sensors(self) -> dict[str, float]:
