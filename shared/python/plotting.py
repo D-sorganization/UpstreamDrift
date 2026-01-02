@@ -488,7 +488,7 @@ class GolfSwingPlotter:
         if cop.shape[1] == 2:
             cop_z = np.zeros(len(cop))
         else:
-            cop_z = cop[:, 2]
+            cop_z = cop[:, 2]  # type: ignore[assignment]
 
         vec_temp = com - np.column_stack((cop_xy, cop_z))
         vec: np.ndarray[tuple[int, ...], np.dtype[np.float64]] = vec_temp  # type: ignore[assignment]
