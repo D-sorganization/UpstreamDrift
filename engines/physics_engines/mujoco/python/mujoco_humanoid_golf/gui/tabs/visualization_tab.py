@@ -257,7 +257,11 @@ class VisualizationTab(QtWidgets.QWidget):
         self.show_induced_cb.stateChanged.connect(self.on_advanced_vector_changed)
 
         self.induced_source_combo = QtWidgets.QComboBox()
+        self.induced_source_combo.setEditable(True)  # Allow custom actuator names
         self.induced_source_combo.addItems(["gravity", "actuator"])
+        self.induced_source_combo.setToolTip(
+            "Select source or type specific actuator name"
+        )
         self.induced_source_combo.currentTextChanged.connect(
             self.on_advanced_vector_changed
         )
