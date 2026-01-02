@@ -203,16 +203,18 @@ class PinocchioRecorder:
         times = np.array([f.time for f in self.frames])
 
         # Check if frames have induced acceleration data
-        first_frame = self.frames[0]
-        if (
-            hasattr(first_frame, "induced_accelerations")
-            and source_name in first_frame.induced_accelerations
-        ):
-            values = [f.induced_accelerations[source_name] for f in self.frames]
-            return times, np.array(values)
+        # Check if any frame has the key
+        valid_indices = [i for i, f in enumerate(self.frames) if hasattr(f, "induced_accelerations") and source_name in f.induced_accelerations]
 
-        # Return empty arrays if no data
-        return np.array([]), np.array([])
+        if not valid_indices:
+            return np.array([]), np.array([])
+
+        # We assume consistent structure if it exists, or fill missing with zeros?
+        # Let's extract only valid ones to match time
+        filtered_times = times[valid_indices]
+        values = [self.frames[i].induced_accelerations[source_name] for i in valid_indices]
+
+        return filtered_times, np.array(values)
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Extract time series for a specific counterfactual component.
@@ -228,17 +230,15 @@ class PinocchioRecorder:
 
         times = np.array([f.time for f in self.frames])
 
-        # Check if frames have counterfactual data
-        first_frame = self.frames[0]
-        if (
-            hasattr(first_frame, "counterfactuals")
-            and cf_name in first_frame.counterfactuals
-        ):
-            values = [f.counterfactuals[cf_name] for f in self.frames]
-            return times, np.array(values)
+        valid_indices = [i for i, f in enumerate(self.frames) if hasattr(f, "counterfactuals") and cf_name in f.counterfactuals]
 
-        # Return empty arrays if no data
-        return np.array([]), np.array([])
+        if not valid_indices:
+            return np.array([]), np.array([])
+
+        filtered_times = times[valid_indices]
+        values = [self.frames[i].counterfactuals[cf_name] for i in valid_indices]
+
+        return filtered_times, np.array(values)
 
 
 class PinocchioGUI(QtWidgets.QMainWindow):
@@ -417,12 +417,19 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         adv_vec_layout = QtWidgets.QHBoxLayout()
         self.chk_induced = QtWidgets.QCheckBox("Induced Accel")
         self.chk_induced.toggled.connect(self._update_viewer)
+
         self.combo_induced = QtWidgets.QComboBox()
+        self.combo_induced.setEditable(True)
         self.combo_induced.addItems(["gravity", "velocity", "total"])
-        self.combo_induced.currentTextChanged.connect(self._update_viewer)
+        self.combo_induced.setToolTip("Select source (e.g. gravity) or type specific torque vector in comma-sep form")
+
+        # Use lineEdit signal to avoid lag on keystrokes
+        self.combo_induced.lineEdit().editingFinished.connect(self._update_viewer)
+        self.combo_induced.currentIndexChanged.connect(self._update_viewer)
 
         self.chk_cf = QtWidgets.QCheckBox("Counterfactuals")
         self.chk_cf.toggled.connect(self._update_viewer)
+
         self.combo_cf = QtWidgets.QComboBox()
         self.combo_cf.addItems(["ztcf_accel", "zvcf_torque"])
         self.combo_cf.currentTextChanged.connect(self._update_viewer)
@@ -522,17 +529,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         # Will be populated when model loads
         self.joint_select_combo.setMinimumWidth(120)
 
-        self.induced_source_edit = QtWidgets.QLineEdit()
-        self.induced_source_edit.setPlaceholderText("Induced Source (Torque Vector)")
-        self.induced_source_edit.setToolTip(
-            "Enter comma-separated torques or keep empty for standard analysis"
-        )
-        self.induced_source_edit.setMaximumWidth(150)
+        # We reuse combo_induced logic, no separate edit box needed here for live vis
 
         controls.addWidget(QtWidgets.QLabel("Joint:"))
         controls.addWidget(self.joint_select_combo)
-        controls.addWidget(QtWidgets.QLabel("Source:"))
-        controls.addWidget(self.induced_source_edit)
         controls.addWidget(QtWidgets.QLabel("Plot Type:"))
         controls.addWidget(self.plot_combo)
 
@@ -692,34 +692,26 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self._ensure_analysis_data_populated()
             self._analysis_data_populated = True
 
-        # Handle specific torque source input
-        spec_tau: np.ndarray | None = None
-        txt = self.induced_source_edit.text().strip()
-        if txt and self.model:
-            try:
-                parts: list[float] = [float(x) for x in txt.split(",")]
+        # Check if 'specific_control' is already in frames (from live recording)
+        has_specific = any("specific_control" in f.induced_accelerations for f in self.recorder.frames)
+
+        # If not in frames, but we have text in combo box, compute it post-hoc
+        txt = self.combo_induced.currentText()
+        if not has_specific and txt and txt not in ["gravity", "velocity", "total"] and self.analyzer:
+             try:
+                parts = [float(x) for x in txt.split(",")]
                 if len(parts) == self.model.nv:
                     spec_tau = np.array(parts)
-                else:
-                    # Pad
-                    temp_tau = np.zeros(self.model.nv, dtype=np.float64)
-                    min_len = min(len(parts), len(temp_tau))
-                    temp_tau[:min_len] = parts[:min_len]
-                    spec_tau = temp_tau
-            except ValueError:
+                    # Compute for all frames
+                    QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
+                    for frame in self.recorder.frames:
+                        if frame.joint_positions is not None:
+                            a_spec = self.analyzer.compute_specific_control(frame.joint_positions, spec_tau)
+                            frame.induced_accelerations["specific_control"] = a_spec
+                    QtWidgets.QApplication.restoreOverrideCursor()
+                    has_specific = True
+             except ValueError:
                 pass
-
-        # If specific source, compute it and add to recorder temporarily
-        # We use a dedicated key 'specific_control' to avoid overwriting
-        # 'control' (total torque)
-        if spec_tau is not None and self.analyzer:
-            for frame in self.recorder.frames:
-                a_spec = self.analyzer.compute_specific_control(
-                    frame.joint_positions, spec_tau
-                )
-                if frame.induced_accelerations is None:
-                    frame.induced_accelerations = {}
-                frame.induced_accelerations["specific_control"] = a_spec
 
         plotter = GolfSwingPlotter(self.recorder, self.joint_names)
 
@@ -728,7 +720,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         )
 
         # Manually add specific control trace if it exists
-        if spec_tau is not None:
+        if has_specific:
             times, spec_vals = self.recorder.get_induced_acceleration_series(
                 "specific_control"
             )
@@ -853,11 +845,16 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
             # Induced
             if first_frame.induced_accelerations:
-                for key in first_frame.induced_accelerations.keys():
+                # Get all unique keys across all frames to handle dynamic "specific_control"
+                all_keys = set()
+                for f in self.recorder.frames:
+                    all_keys.update(f.induced_accelerations.keys())
+
+                for key in all_keys:
                     # Extract list of arrays
                     series = [
                         f.induced_accelerations.get(
-                            key, np.zeros_like(first_frame.induced_accelerations[key])
+                            key, np.zeros_like(first_frame.induced_accelerations.get('total', np.zeros(self.model.nv)))
                         )
                         for f in self.recorder.frames
                     ]
@@ -1264,6 +1261,20 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                     if self.analyzer and self.q is not None and self.v is not None:
                         induced = self.analyzer.compute_components(self.q, self.v, tau)
                         self.latest_induced = induced
+
+                        # Check for specific torque override from UI
+                        txt = self.combo_induced.currentText()
+                        if txt and txt not in ["gravity", "velocity", "total"]:
+                            # Attempt to parse as comma-separated vector
+                            try:
+                                parts = [float(x) for x in txt.split(",")]
+                                if len(parts) == self.model.nv:
+                                    spec_tau = np.array(parts)
+                                    spec_acc = self.analyzer.compute_specific_control(self.q, spec_tau)
+                                    induced["specific_control"] = spec_acc
+                            except ValueError:
+                                pass
+
                         if hasattr(self.analyzer, "compute_counterfactuals"):
                             counterfactuals = self.analyzer.compute_counterfactuals(
                                 self.q, self.v
@@ -1464,10 +1475,27 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             return
 
         source = self.combo_induced.currentText()
-        if source not in self.latest_induced:
-            return
+        accels = np.zeros(self.model.nv)
 
-        accels = self.latest_induced[source]
+        if source in ["gravity", "velocity", "total"]:
+            if source in self.latest_induced:
+                accels = self.latest_induced[source]
+        else:
+            # Maybe it's a specific torque from combo box text?
+            # We don't have it pre-calculated in 'latest_induced' from the loop
+            # unless we add logic there.
+            # But we can calculate it on fly for visualization if q is current.
+            txt = source
+            if txt and self.analyzer and self.q is not None:
+                try:
+                    parts = [float(x) for x in txt.split(",")]
+                    tau = np.zeros(self.model.nv)
+                    min_len = min(len(parts), len(tau))
+                    tau[:min_len] = parts[:min_len]
+                    accels = self.analyzer.compute_specific_control(self.q, tau)
+                except ValueError:
+                    pass
+
         scale = self.spin_torque_scale.value()  # Use torque scale for now
 
         for i in range(1, self.model.njoints):
