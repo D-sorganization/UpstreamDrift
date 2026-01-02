@@ -98,9 +98,7 @@ class ControlsTab(QtWidgets.QWidget):
         self.record_btn = QtWidgets.QPushButton("Start Recording")
         if style:
             self.record_btn.setIcon(
-                style.standardIcon(
-                    QtWidgets.QStyle.StandardPixmap.SP_DialogYesButton
-                )
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DialogYesButton)
             )
         self.record_btn.setCheckable(True)
         self.record_btn.toggled.connect(self.on_record_toggled)
@@ -549,7 +547,6 @@ class ControlsTab(QtWidgets.QWidget):
         # Toggle simulation running state
         self.sim_widget.running = not checked
         self.play_pause_btn.setText("Resume" if checked else "Pause")
-
 
         style = self.style()
         if style:

@@ -207,8 +207,8 @@ def test_plot_correlation_matrix(plotter, figure):
 
 
 @patch("shared.python.swing_plane_analysis.SwingPlaneAnalyzer")
-def test_plot_swing_plane(MockAnalyzer, plotter, figure):
-    mock_analyzer = MockAnalyzer.return_value
+def test_plot_swing_plane(mock_analyzer_class, plotter, figure):
+    mock_analyzer = mock_analyzer_class.return_value
     mock_metrics = MagicMock()
     mock_metrics.steepness_deg = 45.0
     mock_metrics.rmse = 0.1
