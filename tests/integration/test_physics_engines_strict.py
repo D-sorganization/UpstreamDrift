@@ -105,25 +105,27 @@ TEST_ANGULAR_VAL = 2.0
 
 class TestMuJoCoStrict:
     def setUp(self):
-        """Enforce strict patching for every test execution."""
-        self.patcher = patch.dict("sys.modules", module_patches)
-        self.patcher.start()
+        """Enforce strict patching via direct dependency injection."""
+        # 1. Ensure the module is loaded (using whatever state sys.modules is in)
+        import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine as mod
 
-        # Force reload the engine to bind to OUR mock_mujoco
-        import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
-
-        importlib.reload(
-            engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
-        )
+        # 2. Force the module's 'mujoco' reference to be OUR mock
+        # This bypasses reload() and avoids triggering real imports or identity mismatches
+        self.original_mujoco = getattr(mod, "mujoco", None)
+        mod.mujoco = mock_mujoco
+        self.mod = mod
 
     def tearDown(self):
-        self.patcher.stop()
+        # Restore original if needed (though we mostly don't care in strict/mocked env)
+        if hasattr(self, "original_mujoco"):
+            self.mod.mujoco = self.original_mujoco
 
     def test_jacobian_standardization_mocked(self):
         """Verify compute_jacobian returns standard suite format [Angular; Linear] for spatial."""
         engine = MuJoCoPhysicsEngine()
         engine.model = MagicMock()
         engine.data = MagicMock()
+        # Ensure we attach the mocks to the same object the engine is using
         engine.model.nv = 6
 
         # Mock mj_jacBody to return known values
