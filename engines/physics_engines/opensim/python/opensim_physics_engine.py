@@ -201,7 +201,9 @@ class OpenSimPhysicsEngine(PhysicsEngine):
     def compute_gravity_forces(self) -> np.ndarray:
         if not self._model or not self._state:
             return np.array([])
-        raise NotImplementedError("OpenSim gravity force computation not yet implemented.")
+        raise NotImplementedError(
+            "OpenSim gravity force computation not yet implemented."
+        )
 
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         if not self._model or not self._state:
