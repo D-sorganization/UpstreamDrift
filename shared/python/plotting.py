@@ -1212,7 +1212,7 @@ class GolfSwingPlotter:
             if idx < velocities.shape[1]:
                 vel = np.abs(velocities[:, idx])
                 # Normalize to peak
-                max_vel = np.max(vel)
+                max_vel = float(np.max(vel))
                 if max_vel > 0:
                     vel_norm = vel / max_vel
                 else:
@@ -1875,6 +1875,121 @@ class GolfSwingPlotter:
             "Power Flow (Generation/Absorption)", fontsize=14, fontweight="bold"
         )
         ax.legend(loc="upper left", bbox_to_anchor=(1, 1), ncol=1)
+        fig.tight_layout()
+
+    def plot_joint_power_curves(
+        self,
+        fig: Figure,
+        joint_indices: list[int] | None = None,
+    ) -> None:
+        """Plot joint power curves with generation/absorption regions.
+
+        Args:
+            fig: Matplotlib figure
+            joint_indices: List of joint indices to plot (None = all)
+        """
+        # Prefer using joint_torques and joint_velocities if available to compute power
+        # rather than actuator_powers which might be pre-computed differently.
+        times, torques = self.recorder.get_time_series("joint_torques")
+        _, velocities = self.recorder.get_time_series("joint_velocities")
+
+        torques = np.asarray(torques)
+        velocities = np.asarray(velocities)
+
+        if len(times) == 0 or torques.size == 0 or velocities.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        if joint_indices is None:
+            joint_indices = list(range(min(torques.shape[1], velocities.shape[1])))
+
+        for idx in joint_indices:
+            if idx < torques.shape[1] and idx < velocities.shape[1]:
+                power = torques[:, idx] * velocities[:, idx]
+                label = self._get_aligned_label(idx, torques.shape[1])
+
+                line = ax.plot(times, power, label=label, linewidth=2)
+                color = line[0].get_color()
+
+                # Fill generation (positive) and absorption (negative)
+                ax.fill_between(
+                    times,
+                    power,
+                    0,
+                    where=(power >= 0),
+                    alpha=0.2,
+                    color=color,
+                    interpolate=True,
+                )
+                ax.fill_between(
+                    times,
+                    power,
+                    0,
+                    where=(power < 0),
+                    alpha=0.1,
+                    color=color,
+                    hatch="///",
+                    interpolate=True,
+                )
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Power (W)", fontsize=12, fontweight="bold")
+        ax.set_title(
+            "Joint Power: Generation (+) vs Absorption (-)",
+            fontsize=14,
+            fontweight="bold",
+        )
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        ax.axhline(0, color="k", linewidth=1)
+        fig.tight_layout()
+
+    def plot_impulse_accumulation(
+        self,
+        fig: Figure,
+        joint_indices: list[int] | None = None,
+    ) -> None:
+        """Plot cumulative impulse (integrated torque) over time.
+
+        Args:
+            fig: Matplotlib figure
+            joint_indices: List of joint indices to plot
+        """
+        times, torques = self.recorder.get_time_series("joint_torques")
+        torques = np.asarray(torques)
+
+        if len(times) == 0 or torques.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        if joint_indices is None:
+            joint_indices = list(range(torques.shape[1]))
+
+        dt = np.mean(np.diff(times)) if len(times) > 1 else 0.0
+
+        if dt > 0:
+            from scipy.integrate import cumulative_trapezoid
+
+            for idx in joint_indices:
+                if idx < torques.shape[1]:
+                    impulse = cumulative_trapezoid(
+                        torques[:, idx], dx=dt, initial=0
+                    )  # type: ignore[call-overload]
+                    label = self._get_aligned_label(idx, torques.shape[1])
+                    ax.plot(times, impulse, label=label, linewidth=2)
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Cumulative Impulse (Nms)", fontsize=12, fontweight="bold")
+        ax.set_title("Angular Impulse Accumulation", fontsize=14, fontweight="bold")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        ax.axhline(0, color="k", linewidth=1)
         fig.tight_layout()
 
     def plot_induced_acceleration(

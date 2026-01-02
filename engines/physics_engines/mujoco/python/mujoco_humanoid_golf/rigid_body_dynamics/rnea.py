@@ -7,15 +7,12 @@ Computes the joint forces/torques required to produce a given motion.
 from __future__ import annotations
 
 import numpy as np
+from mujoco_humanoid_golf.rigid_body_dynamics.common import DEFAULT_GRAVITY
 from mujoco_humanoid_golf.spatial_algebra import (
     cross_force_fast,
     cross_motion_fast,
     jcalc,
 )
-from shared.python import constants
-
-DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
-DEFAULT_GRAVITY.flags.writeable = False
 
 
 def rnea(  # noqa: PLR0915
