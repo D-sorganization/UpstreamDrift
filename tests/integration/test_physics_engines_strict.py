@@ -104,6 +104,18 @@ TEST_ANGULAR_VAL = 2.0
 
 
 class TestMuJoCoStrict:
+    def setUp(self):
+        """Enforce strict patching for every test execution."""
+        self.patcher = patch.dict("sys.modules", module_patches)
+        self.patcher.start()
+
+        # Force reload the engine to bind to OUR mock_mujoco
+        import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
+        importlib.reload(engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine)
+
+    def tearDown(self):
+        self.patcher.stop()
+
     def test_jacobian_standardization_mocked(self):
         """Verify compute_jacobian returns standard suite format [Angular; Linear] for spatial."""
         engine = MuJoCoPhysicsEngine()
