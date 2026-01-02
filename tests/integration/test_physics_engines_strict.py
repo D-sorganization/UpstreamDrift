@@ -112,13 +112,13 @@ class TestMuJoCoStrict:
         # 2. Force the module's 'mujoco' reference to be OUR mock
         # This bypasses reload() and avoids triggering real imports or identity mismatches
         self.original_mujoco = getattr(mod, "mujoco", None)
-        mod.mujoco = mock_mujoco
+        setattr(mod, "mujoco", mock_mujoco)  # noqa: B010
         self.mod = mod
 
     def tearDown(self):
         # Restore original if needed (though we mostly don't care in strict/mocked env)
         if hasattr(self, "original_mujoco"):
-            self.mod.mujoco = self.original_mujoco
+            setattr(self.mod, "mujoco", self.original_mujoco)  # noqa: B010
 
     def test_jacobian_standardization_mocked(self):
         """Verify compute_jacobian returns standard suite format [Angular; Linear] for spatial."""
