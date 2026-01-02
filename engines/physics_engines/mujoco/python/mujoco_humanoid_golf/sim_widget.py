@@ -814,16 +814,26 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 if self.telemetry is not None:
                     self.telemetry.record_step(self.data)
 
+            # Determine selected actuator if any
+            selected_actuator = None
+            if self.show_induced_vectors and self.induced_vector_source not in [
+                "gravity",
+                "actuator",
+            ]:
+                selected_actuator = self.induced_vector_source
+
             if self.analyzer is not None and self.recorder.is_recording:
                 bio_data = self.analyzer.extract_full_state(
-                    compute_advanced_metrics=self.enable_live_analysis
+                    selected_actuator_name=selected_actuator,
+                    compute_advanced_metrics=self.enable_live_analysis,
                 )
                 self.recorder.record_frame(bio_data)
                 self.latest_bio_data = bio_data
             elif self.enable_live_analysis and self.analyzer:
                 # Even if not recording, compute metrics for visualization if enabled
                 self.latest_bio_data = self.analyzer.extract_full_state(
-                    compute_advanced_metrics=True
+                    selected_actuator_name=selected_actuator,
+                    compute_advanced_metrics=True,
                 )
 
         self._enforce_interactive_constraints()
@@ -1014,10 +1024,18 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         """Draw Induced Acceleration vectors (Magenta)."""
         if self.model is None or self.data is None or self.latest_bio_data is None:
             return
-        if self.induced_vector_source not in self.latest_bio_data.induced_accelerations:
+
+        # Determine the key to use in the induced_accelerations dict
+        key = self.induced_vector_source
+        if key not in ["gravity", "actuator"]:
+            # If user typed specific actuator name, it's stored under
+            # 'selected_actuator'
+            key = "selected_actuator"
+
+        if key not in self.latest_bio_data.induced_accelerations:
             return
 
-        accels = self.latest_bio_data.induced_accelerations[self.induced_vector_source]
+        accels = self.latest_bio_data.induced_accelerations[key]
         # accels is ndarray of size nv (DoF accelerations)
 
         # Iterate 1-DOF joints

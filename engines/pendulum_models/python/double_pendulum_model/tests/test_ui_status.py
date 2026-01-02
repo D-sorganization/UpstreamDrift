@@ -1,3 +1,5 @@
+import typing
+
 import pytest
 from double_pendulum_model.physics.double_pendulum import DoublePendulumState
 from double_pendulum_model.physics.triple_pendulum import TriplePendulumState
@@ -10,7 +12,7 @@ def app() -> QtWidgets.QApplication:
     app = QtWidgets.QApplication.instance()
     if app is None:
         app = QtWidgets.QApplication(["test", "-platform", "offscreen"])
-    return app
+    return typing.cast(QtWidgets.QApplication, app)
 
 
 def test_status_update_double(app: QtWidgets.QApplication) -> None:  # noqa: ARG001

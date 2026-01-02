@@ -647,8 +647,14 @@ class SwingRecorder:
 
         # Export induced
         if self.frames and self.frames[0].induced_accelerations:
-            keys = self.frames[0].induced_accelerations.keys()
-            for key in keys:
+            # We must handle that different frames might have different keys
+            # But typically they are consistent.
+            # Get union of all keys
+            all_keys: set[str] = set()
+            for f in self.frames:
+                all_keys.update(f.induced_accelerations.keys())
+
+            for key in all_keys:
                 _, vals = self.get_induced_acceleration_series(key)
                 if len(vals) > 0:
                     for i in range(vals.shape[1]):
@@ -656,8 +662,11 @@ class SwingRecorder:
 
         # Export counterfactuals
         if self.frames and self.frames[0].counterfactuals:
-            keys = self.frames[0].counterfactuals.keys()
-            for key in keys:
+            all_keys = set()
+            for f in self.frames:
+                all_keys.update(f.counterfactuals.keys())
+
+            for key in all_keys:
                 _, vals = self.get_counterfactual_series(key)
                 if len(vals) > 0 and isinstance(vals, np.ndarray):
                     if vals.ndim == 1:
