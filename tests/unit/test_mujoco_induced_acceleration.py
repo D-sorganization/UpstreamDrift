@@ -35,6 +35,7 @@ def test_mujoco_iaa_logic():
     # Analyzer relies on calling mj_fullM
     def side_effect_fullM(model, M, qM):
         M[:] = np.eye(2)  # Identity mass matrix
+
     mujoco.mj_fullM.side_effect = side_effect_fullM
 
     # We need to simulate mj_forward changing qfrc_bias based on qvel
