@@ -32,6 +32,7 @@ mock_mujoco.MjData = MagicMock
 # Apply patches to sys.modules
 module_patches = {
     "mujoco": mock_mujoco,
+    "mujoco._structs": mock_mujoco,  # Often needed for type checks
     "pydrake": mock_pydrake,
     "pydrake.all": mock_pydrake,
     "pydrake.multibody": mock_pydrake,
@@ -46,6 +47,9 @@ module_patches = {
     "gym": mock_gym,
     "myosuite": mock_myosuite,
 }
+
+# Ensure specific sub-mocks exist to avoid AttributeErrors/NameErrors
+mock_pydrake.systems.framework.DiagramBuilder = MagicMock()
 
 # --- Imports with Patch Context ---
 # Use a context manager so patches apply only during engine imports,
