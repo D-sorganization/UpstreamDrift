@@ -96,9 +96,13 @@ def test_drake_loading_success(mock_probe, mock_drake_class, mock_engine_manager
     assert mock_engine_manager._drake_module == mock_drake
 
 
-@patch("engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine")
+@patch(
+    "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
+)
 @patch("shared.python.engine_probes.PinocchioProbe.probe")
-def test_pinocchio_loading_success(mock_probe, mock_pin_engine_class, mock_engine_manager):
+def test_pinocchio_loading_success(
+    mock_probe, mock_pin_engine_class, mock_engine_manager
+):
     """Test successful Pinocchio loading."""
     mock_probe.return_value.is_available.return_value = True
 
