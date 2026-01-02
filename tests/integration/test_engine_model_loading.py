@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -16,9 +15,14 @@ def mock_engine_manager():
     """Fixture to provide EngineManager with mocked root."""
     return EngineManager(Path("/mock/suite/root"))
 
+
 @patch("shared.python.engine_probes.MuJoCoProbe.probe")
-@patch("engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine")
-def test_mujoco_loads_default_model(mock_mujoco_engine_cls, mock_probe, mock_engine_manager):
+@patch(
+    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
+)
+def test_mujoco_loads_default_model(
+    mock_mujoco_engine_cls, mock_probe, mock_engine_manager
+):
     """Test that MuJoCo engine loads the default model if present."""
     # Setup probe
     mock_probe.return_value.is_available.return_value = True
@@ -40,9 +44,14 @@ def test_mujoco_loads_default_model(mock_mujoco_engine_cls, mock_probe, mock_eng
             args, _ = mock_engine_instance.load_from_path.call_args
             assert str(args[0]).endswith("simple_pendulum.xml")
 
+
 @patch("shared.python.engine_probes.PinocchioProbe.probe")
-@patch("engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine")
-def test_pinocchio_loads_default_model(mock_pin_engine_cls, mock_probe, mock_engine_manager):
+@patch(
+    "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
+)
+def test_pinocchio_loads_default_model(
+    mock_pin_engine_cls, mock_probe, mock_engine_manager
+):
     """Test that Pinocchio engine loads the default model if present."""
     mock_probe.return_value.is_available.return_value = True
     mock_engine_instance = mock_pin_engine_cls.return_value
@@ -56,9 +65,12 @@ def test_pinocchio_loads_default_model(mock_pin_engine_cls, mock_probe, mock_eng
             args, _ = mock_engine_instance.load_from_path.call_args
             assert str(args[0]).endswith("golfer.urdf")
 
+
 @patch("shared.python.engine_probes.DrakeProbe.probe")
 @patch("engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine")
-def test_drake_loads_default_model(mock_drake_engine_cls, mock_probe, mock_engine_manager):
+def test_drake_loads_default_model(
+    mock_drake_engine_cls, mock_probe, mock_engine_manager
+):
     """Test that Drake engine attempts to load the shared URDF."""
     mock_probe.return_value.is_available.return_value = True
     mock_engine_instance = mock_drake_engine_cls.return_value
