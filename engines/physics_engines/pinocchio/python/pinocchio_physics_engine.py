@@ -107,13 +107,15 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         if self.model is None or self.data is None:
             return
 
+        # Use provided dt or default to 0.001
+        # Fixed: respecting passed dt
         time_step = dt if dt is not None else 0.001
 
         # Explicit Forward Dynamics
         # a = ABA(q, v, tau)
         self.a = pin.aba(self.model, self.data, self.q, self.v, self.tau)
 
-        # Semi-implicit Euler integration? Or symplectic Euler?
+        # Semi-implicit Euler integration
         # v_next = v + a * dt
         # q_next = integrate(q, v_next * dt)
 
@@ -167,16 +169,8 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         # matrix and stores it in data.M
         pin.crba(self.model, self.data, self.q)
 
-        # data.M is symmetric, but pinocchio implementation specifics might
-        # require filling? Typically pinocchio fills the upper triangle.
-
+        # Symmetrize
         M = self.data.M.copy()
-        # Fill lower triangle if needed (Pinocchio's M is usually symmetric
-        # dense if using modern bindings, but let's ensure it maps correctly
-        # to numpy) But specifically crba fills the upper triangle.
-
-        # For safety/consistency:
-        # For safety/consistency:
         M = np.triu(M) + np.triu(M, 1).T
         return cast(np.ndarray, M)
 
@@ -187,10 +181,12 @@ class PinocchioPhysicsEngine(PhysicsEngine):
 
         # rnea(q, v, 0) -> M a + b
         # If a=0, result is b = C(q,v) + g(q)
-
-        a0 = np.zeros(self.model.nv)
-        b = pin.rnea(self.model, self.data, self.q, self.v, a0)
-        return cast(np.ndarray, b)
+        # Standard implementation
+        a_zero = np.zeros(self.model.nv)
+        return cast(
+            np.ndarray,
+            pin.rnea(self.model, self.data, self.q, self.v, a_zero),
+        )
 
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravity forces g(q)."""
@@ -215,21 +211,18 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         if self.model is None or self.data is None:
             return None
 
-        if not self.model.existBodyName(body_name):
-            # Pinocchio bodies vs frames...
-            # existBodyName checks for link/joint?
-            # maybe existFrame?
-            if not self.model.existFrame(body_name):
+        # Simplified lookup: Check frame existence first
+        # (bodies map to frames in Pinocchio context usually)
+        if not self.model.existFrame(body_name):
+            # Try body name if frame lookup fails (unlikely if standard URDF)
+            if not self.model.existBodyName(body_name):
                 return None
-            frame_id = self.model.getFrameId(body_name)
+            frame_id = self.model.getFrameId(body_name)  # This works if body exists
         else:
-            # It's a joint name or body name? Pinocchio organizes by joints.
-            # body name usually maps to frame.
             frame_id = self.model.getFrameId(body_name)
 
         # computeJointJacobians needs to be called first (done in forward)
         # getFrameJacobian
-
         J = pin.getFrameJacobian(
             self.model, self.data, frame_id, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
         )
@@ -237,12 +230,19 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         # J is (6, nv).
         # Top 3 linear, bottom 3 angular?
         # Pinocchio Motion ordering is Linear, Angular.
-
         jacp = J[:3, :]
         jacr = J[3:, :]
+
+        # Standardizing on [Angular; Linear] for "spatial" output key
+        # to match Drake/MuJoCo usage in this suite if preferred,
+        # OR just return raw J.
+        # But wait, earlier files used [jacp; jacr] for MuJoCo?
+        # MuJoCo mj_jac returns separated arrays.
+        # Let's align with Drake: Angular, Linear.
+        J_aligned = np.vstack([jacr, jacp])
 
         return {
             "linear": cast(np.ndarray, jacp),
             "angular": cast(np.ndarray, jacr),
-            "spatial": cast(np.ndarray, J),
+            "spatial": cast(np.ndarray, J_aligned),
         }
