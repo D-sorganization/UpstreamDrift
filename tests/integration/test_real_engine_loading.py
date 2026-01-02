@@ -114,8 +114,8 @@ class TestMuJoCoEngineIntegration:
 
             importlib.reload(mujoco)
             return True
-        except ImportError:
-            pytest.skip("MuJoCo not installed")
+        except (ImportError, OSError):
+            pytest.skip("MuJoCo not installed or DLL load failed")
 
     def test_mujoco_engine_loads_real_urdf(self, has_real_mujoco):
         """Test that MuJoCo engine can load and process real URDF.
