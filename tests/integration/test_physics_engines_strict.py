@@ -69,7 +69,9 @@ with patch.dict("sys.modules", module_patches):
 
     # Force reload to ensure we get the version using our mocked sys.modules
     importlib.reload(engines.physics_engines.drake.python.drake_physics_engine)
-    importlib.reload(engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine)
+    importlib.reload(
+        engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
+    )
     importlib.reload(engines.physics_engines.myosuite.python.myosuite_physics_engine)
     importlib.reload(engines.physics_engines.opensim.python.opensim_physics_engine)
     importlib.reload(engines.physics_engines.pendulum.python.pendulum_physics_engine)
