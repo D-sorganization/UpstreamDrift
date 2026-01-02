@@ -68,8 +68,8 @@ def test_crba_values():
     model = {}
     model["NB"] = 1
     model["parent"] = np.array([-1], dtype=int)  # type: ignore
-    model["jtype"] = ["Rx"]
-    model["Xtree"] = [np.eye(6)]
+    model["jtype"] = ["Rx"]  # type: ignore[assignment]
+    model["Xtree"] = [np.eye(6)]  # type: ignore[assignment]
 
     m = 2.0
     r = 0.5
@@ -85,7 +85,7 @@ def test_crba_values():
     spatial_inertia[4, 4] = m
     spatial_inertia[5, 5] = m
 
-    model["I"] = [spatial_inertia]
+    model["I"] = [spatial_inertia]  # type: ignore[assignment]
 
     q = np.array([0.0])
 

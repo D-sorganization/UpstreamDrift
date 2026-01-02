@@ -75,9 +75,10 @@ class TestPolynomialGeneratorLazyImport:
             app = QApplication([])
 
         launcher = QMainWindow()
-        launcher.log = MagicMock()
-        launcher.config = {"polynomial_coefficients": {}}
-        launcher.save_config = MagicMock()
+        # Use type ignore to avoid MyPy attribute errors
+        launcher.log = MagicMock()  # type: ignore[attr-defined]
+        launcher.config = {"polynomial_coefficients": {}}  # type: ignore[attr-defined]
+        launcher.save_config = MagicMock()  # type: ignore[attr-defined]
         return launcher
 
     def test_polynomial_generator_not_imported_at_module_level(self):

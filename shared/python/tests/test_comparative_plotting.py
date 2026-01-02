@@ -25,6 +25,14 @@ class MockRecorder(RecorderInterface):
     def get_time_series(self, field_name: str):
         return self.data.get(field_name, (np.array([]), np.array([])))
 
+    def get_counterfactual_series(self, field_name: str):
+        """Return counterfactual data series."""
+        return np.array([]), np.array([])
+
+    def get_induced_acceleration_series(self, field_name: str):
+        """Return induced acceleration data series."""
+        return np.array([]), np.array([])
+
 
 @pytest.fixture
 def mock_analyzer():

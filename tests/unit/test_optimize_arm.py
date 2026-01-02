@@ -31,12 +31,14 @@ def mock_casadi():
     mock_var.__len__.return_value = 2
 
     # Mock comparisons
-    mock_var.__eq__.return_value = MagicMock()
+    mock_var.__eq__ = MagicMock()  # type: ignore[method-assign]
+    mock_var.__eq__.return_value = MagicMock()  # type: ignore[attr-defined]
 
     # Slicing returns
     mock_slice_return = MagicMock()
     mock_slice_return.__len__.return_value = 2
-    mock_slice_return.__eq__.return_value = MagicMock()
+    mock_slice_return.__eq__ = MagicMock()  # type: ignore[method-assign]
+    mock_slice_return.__eq__.return_value = MagicMock()  # type: ignore[attr-defined]
     mock_var.__getitem__.return_value = mock_slice_return
 
     opti.variable.return_value = mock_var

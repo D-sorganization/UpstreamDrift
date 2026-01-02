@@ -82,7 +82,7 @@ def test_drake_loading_success(mock_probe, mock_drake_class, mock_engine_manager
     mock_engine_manager.engine_status[EngineType.DRAKE] = EngineStatus.AVAILABLE
 
     mock_drake = sys.modules["pydrake"]
-    mock_drake.__version__ = "1.22.0"
+    mock_drake.__version__ = "1.22.0"  # type: ignore[attr-defined]
 
     result = mock_engine_manager.switch_engine(EngineType.DRAKE)
 

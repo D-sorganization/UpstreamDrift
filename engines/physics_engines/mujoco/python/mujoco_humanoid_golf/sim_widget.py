@@ -1192,7 +1192,9 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
     def get_manipulator(self) -> InteractiveManipulator | None:
         return self.manipulator
 
-    def mousePressEvent(self, event: QtGui.QMouseEvent) -> None:
+    def mousePressEvent(self, event: QtGui.QMouseEvent | None) -> None:
+        if event is None:
+            return
         modifiers = event.modifiers()
         button = event.button()
         pos = event.position()

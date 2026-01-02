@@ -39,6 +39,18 @@ class MockRecorder(RecorderInterface):
             return self.times, getattr(self, field_name)
         return self.times, np.array([])
 
+    def get_counterfactual_series(
+        self, field_name: str
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Return counterfactual data series."""
+        return self.times, np.zeros_like(self.times)
+
+    def get_induced_acceleration_series(
+        self, field_name: str
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Return induced acceleration data series."""
+        return self.times, np.zeros_like(self.times)
+
 
 def test_statistical_analyzer() -> None:
     """Test StatisticalAnalyzer metrics calculation."""

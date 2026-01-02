@@ -122,9 +122,17 @@ class DrakePhysicsEngine(PhysicsEngine):
     def reset(self) -> None:
         """Reset the simulation to its initial state."""
         if self.context and self.plant_context and self.simulator:
+            # Reset time to zero
             self.context.SetTime(0.0)
-            self.plant.SetDefaultContext(self.plant_context)
+
+            # Reset to default state (positions and velocities)
+            self.plant.SetDefaultPositions(self.plant_context)
+            self.plant.SetDefaultVelocities(self.plant_context)
+
+            # Re-initialize the simulator with the reset state
             self.simulator.Initialize()
+
+            LOGGER.debug("Drake engine reset to initial state")
 
     def step(self, dt: float | None = None) -> None:
         """Advance the simulation by one time step."""
@@ -140,12 +148,33 @@ class DrakePhysicsEngine(PhysicsEngine):
 
     def forward(self) -> None:
         """Compute forward kinematics/dynamics without advancing time."""
-        # Drake uses lazy evaluation in the Context.
-        # Setting positions/velocities invalidates the cache.
-        # Requesting results (mass matrix, etc.) triggers computation.
-        # Therefore, no explicit forward call is needed strictly,
-        # but we ensure the context is valid.
-        pass
+        if not self.plant_context:
+            LOGGER.warning(
+                "Cannot compute forward dynamics: plant context not initialized"
+            )
+            return
+
+        # Drake uses lazy evaluation, but we can force computation by accessing
+        # derived quantities. This ensures all kinematic and dynamic quantities
+        # are up-to-date
+        try:
+            # Force computation of mass matrix (triggers forward dynamics computation)
+            _ = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
+
+            # Force computation of bias forces (ensures kinematics are updated)
+            nv = self.plant.num_velocities()
+            if nv > 0:
+                vdot_zero = np.zeros(nv)
+                _ = self.plant.CalcInverseDynamics(
+                    self.plant_context,
+                    vdot_zero,
+                    self.plant.MakeMultibodyForces(self.plant),
+                )
+
+            LOGGER.debug("Drake forward dynamics computation completed")
+        except Exception as e:
+            LOGGER.error(f"Failed to compute forward dynamics: {e}")
+            raise
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Get the current state (positions, velocities)."""

@@ -110,11 +110,17 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
 
         success, msg = self.registry.set("TEST", 15.0)
         self.assertTrue(success)
-        self.assertEqual(self.registry.get("TEST").value, 15.0)
+        param = self.registry.get("TEST")  # type: ignore[assignment]
+        self.assertIsNotNone(param)
+        assert param is not None  # Type narrowing for MyPy
+        self.assertEqual(param.value, 15.0)
 
         success, msg = self.registry.set("TEST", 25.0)
         self.assertFalse(success)
-        self.assertEqual(self.registry.get("TEST").value, 15.0)  # Should not change
+        param = self.registry.get("TEST")  # type: ignore[assignment]
+        self.assertIsNotNone(param)
+        assert param is not None  # Type narrowing for MyPy
+        self.assertEqual(param.value, 15.0)  # Should not change
 
         success, msg = self.registry.set("NONEXISTENT", 1.0)
         self.assertFalse(success)
@@ -151,7 +157,10 @@ class TestPhysicsParameterRegistry(unittest.TestCase):
         ):
             count = self.registry.import_from_json("test.json")
             self.assertEqual(count, 1)
-            self.assertEqual(self.registry.get("P1").value, 2.0)
+            param = self.registry.get("P1")
+            self.assertIsNotNone(param)
+            if param is not None:
+                self.assertEqual(param.value, 2.0)
 
     def test_get_summary(self):
         """Test summary generation."""
