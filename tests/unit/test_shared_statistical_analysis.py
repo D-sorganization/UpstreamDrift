@@ -285,6 +285,7 @@ def test_compute_phase_space_path_length(sample_data):
     # Test invalid index
     assert sample_data.compute_phase_space_path_length(99) == 0.0
 
+
 def test_compute_joint_power_metrics(sample_data):
     # In sample_data, torque = velocity = cos(t).
     # Power = cos^2(t), which is always >= 0.
@@ -305,13 +306,15 @@ def test_compute_joint_power_metrics(sample_data):
     # v = 1, tau = -1 -> power = -1
     v = np.ones((100, 1))
     tau = -np.ones((100, 1))
-    analyzer = StatisticalAnalyzer(times, np.zeros((100,1)), v, tau)
+    analyzer = StatisticalAnalyzer(times, np.zeros((100, 1)), v, tau)
 
     metrics_neg = analyzer.compute_joint_power_metrics(0)
+    assert metrics_neg is not None
     assert metrics_neg.peak_absorption == -1.0
     assert metrics_neg.avg_absorption == -1.0
     assert metrics_neg.peak_generation == 0.0
     assert metrics_neg.generation_duration == 0.0
+
 
 def test_compute_impulse_metrics(sample_data):
     # In sample_data, torque = cos(t) (since vel = cos(t) and torque=vel)
@@ -325,9 +328,11 @@ def test_compute_impulse_metrics(sample_data):
 
     # Since it's a full cycle of cosine, net impulse should be approx 0
     # But wait, it's torque = velocity. Velocity integral over 1s (cycle) is 0.
-    assert metrics.net_impulse == pytest.approx(0.0, abs=1.0) # approx
+    assert metrics.net_impulse == pytest.approx(0.0, abs=1.0)  # approx
 
     # Test invalid inputs
     assert sample_data.compute_impulse_metrics("torque", 99) is None
-    assert sample_data.compute_impulse_metrics("force", 0) is None # No forces in sample_data
+    assert (
+        sample_data.compute_impulse_metrics("force", 0) is None
+    )  # No forces in sample_data
     assert sample_data.compute_impulse_metrics("invalid", 0) is None

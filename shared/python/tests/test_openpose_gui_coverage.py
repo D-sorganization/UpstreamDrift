@@ -30,9 +30,7 @@ def test_initial_state(gui):
 
 
 def test_load_video_cancel(gui):
-    with patch.object(
-        QFileDialog, "getOpenFileName", return_value=("", "")
-    ):
+    with patch.object(QFileDialog, "getOpenFileName", return_value=("", "")):
         gui.load_video()
         assert gui.lbl_file.text() == "No file selected."
         assert not gui.btn_run.isEnabled()

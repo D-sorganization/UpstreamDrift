@@ -816,10 +816,10 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
             # Determine selected actuator if any
             selected_actuator = None
-            if (
-                self.show_induced_vectors
-                and self.induced_vector_source not in ["gravity", "actuator"]
-            ):
+            if self.show_induced_vectors and self.induced_vector_source not in [
+                "gravity",
+                "actuator",
+            ]:
                 selected_actuator = self.induced_vector_source
 
             if self.analyzer is not None and self.recorder.is_recording:
@@ -1028,7 +1028,8 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         # Determine the key to use in the induced_accelerations dict
         key = self.induced_vector_source
         if key not in ["gravity", "actuator"]:
-            # If user typed specific actuator name, it's stored under 'selected_actuator'
+            # If user typed specific actuator name, it's stored under
+            # 'selected_actuator'
             key = "selected_actuator"
 
         if key not in self.latest_bio_data.induced_accelerations:

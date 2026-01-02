@@ -650,7 +650,7 @@ class SwingRecorder:
             # We must handle that different frames might have different keys
             # But typically they are consistent.
             # Get union of all keys
-            all_keys = set()
+            all_keys: set[str] = set()
             for f in self.frames:
                 all_keys.update(f.induced_accelerations.keys())
 
