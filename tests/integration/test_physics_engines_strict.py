@@ -74,8 +74,6 @@ TEST_LINEAR_VAL = 1.0
 TEST_ANGULAR_VAL = 2.0
 
 
-
-
 # --- Test Classes ---
 
 
@@ -209,6 +207,7 @@ class TestPinocchioStrict:
 
         jac = engine.compute_jacobian("missing_link")
         assert jac is None
+
 
 class TestOpenSimStrict:
     def test_inverse_dynamics_implemented(self):
