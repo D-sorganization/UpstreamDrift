@@ -672,7 +672,7 @@ class StatisticalAnalyzer:
             cop_z = self.cop_position[:, 2]
 
         vec_temp = self.com_position - np.column_stack((cop_xy, cop_z))
-        vec = vec_temp  # type: ignore
+        vec: np.ndarray[tuple[int, ...], np.dtype[np.float64]] = vec_temp  # type: ignore[assignment]
 
         # Angle with vertical (Z-axis [0, 0, 1])
         # dot(v, k) = |v| * |k| * cos(theta)
