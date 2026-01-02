@@ -27,8 +27,8 @@ mock_gym = MagicMock()
 mock_myosuite = MagicMock()
 
 # Setup specific mock behaviors required for import time or basic init
-mock_mujoco.MjModel = MagicMock
-mock_mujoco.MjData = MagicMock
+mock_mujoco.MjModel = MagicMock()
+mock_mujoco.MjData = MagicMock()
 
 # Apply patches to sys.modules
 module_patches = {
