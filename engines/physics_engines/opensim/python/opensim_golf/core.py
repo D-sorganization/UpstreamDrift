@@ -141,7 +141,7 @@ class GolfSwingModel:
             # Active torque starts after t=0.2
             activation = 0.0
             if t > 0.2:
-                activation = min(1.0, (t - 0.2) * 5)
+                activation = min(1.0, float((t - 0.2) * 5))
 
             # Torques
             tau1 = self.shoulder_torque * activation * 2.0  # Shoulder acceleration
@@ -150,7 +150,7 @@ class GolfSwingModel:
             # Simplified: Spring-damper preventing hyper-extension + release
             tau2 = -0.1 * omega2  # Damping
             if t > 0.8:  # Release phase
-                tau2 += 5.0 * (t - 0.8)
+                tau2 += float(5.0 * (t - 0.8))
 
             # Store controls/forces
             control_signals[i] = [activation, activation * 0.5]
