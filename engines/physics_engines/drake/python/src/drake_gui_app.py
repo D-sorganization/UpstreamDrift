@@ -609,7 +609,8 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.btn_induced_acc.setEnabled(HAS_MATPLOTLIB)
         ind_layout.addWidget(self.btn_induced_acc)
 
-        # Removed conflicting txt_specific_actuator to rely on combo box in visualization
+        # Removed conflicting txt_specific_actuator to rely on combo box
+        # in visualization
         analysis_layout.addLayout(ind_layout)
 
         self.btn_counterfactuals = QtWidgets.QPushButton(
@@ -699,11 +700,16 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.combo_induced_source = QtWidgets.QComboBox()
         self.combo_induced_source.setEditable(True)
         self.combo_induced_source.addItems(["gravity", "velocity", "total"])
-        self.combo_induced_source.setToolTip("Select source (e.g. gravity) or type specific actuator index")
+        self.combo_induced_source.setToolTip(
+            "Select source (e.g. gravity) or type specific actuator index"
+        )
         # Use lineEdit().editingFinished to avoid performance issues
-        self.combo_induced_source.lineEdit().editingFinished.connect(self._on_visualization_changed)
+        if line_edit := self.combo_induced_source.lineEdit():
+            line_edit.editingFinished.connect(self._on_visualization_changed)
         # Also connect index changed for dropdown selection
-        self.combo_induced_source.currentIndexChanged.connect(self._on_visualization_changed)
+        self.combo_induced_source.currentIndexChanged.connect(
+            self._on_visualization_changed
+        )
 
         self.chk_cf_vec = QtWidgets.QCheckBox("CF Vectors")
         self.chk_cf_vec.toggled.connect(self._on_visualization_changed)
@@ -989,7 +995,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                                 tau = np.zeros(self.plant.num_velocities())
                                 if 0 <= act_idx < len(tau):
                                     tau[act_idx] = 1.0
-                                    accels = analyzer.compute_specific_control(self.eval_context, tau)
+                                    accels = analyzer.compute_specific_control(
+                                        self.eval_context, tau
+                                    )
                                     res["specific_control"] = accels
                             except ValueError:
                                 pass
@@ -1071,7 +1079,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                     tau = np.zeros(self.plant.num_velocities())
                     if 0 <= act_idx < len(tau):
                         tau[act_idx] = 1.0
-                        accels = analyzer.compute_specific_control(self.eval_context, tau)
+                        accels = analyzer.compute_specific_control(
+                            self.eval_context, tau
+                        )
                 except ValueError:
                     pass
 

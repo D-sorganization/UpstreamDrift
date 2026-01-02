@@ -120,6 +120,8 @@ exclude = [
     "dist",
     "engines/matlab_simscape/",
     "engines/Simscape_Multibody_Models/*/matlab/",
+    "**/archive",
+    "**/legacy",
 ]
 
 [tool.ruff.lint]
