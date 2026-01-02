@@ -669,7 +669,7 @@ class StatisticalAnalyzer:
         if self.cop_position.shape[1] == 2:
             cop_z = np.zeros(len(self.cop_position))
         else:
-            cop_z = self.cop_position[:, 2]
+            cop_z = self.cop_position[:, 2]  # type: ignore[assignment]
 
         vec_temp = self.com_position - np.column_stack((cop_xy, cop_z))
         vec: np.ndarray[tuple[int, ...], np.dtype[np.float64]] = vec_temp  # type: ignore[assignment]
