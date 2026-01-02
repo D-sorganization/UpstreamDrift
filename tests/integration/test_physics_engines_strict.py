@@ -13,7 +13,6 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
-
 # --- Global Mocking Setup ---
 # We must mock these libs BEFORE importing the engines, because some engines
 # (like MuJoCo) import them at the top level without try/except guards.
@@ -162,7 +161,7 @@ class TestDrakeStrict:
 
         with caplog.at_level(logging.WARNING):
             engine.reset()
-        
+
         assert "Attempted to reset Drake engine before initialization." in caplog.text
 
 
@@ -207,7 +206,7 @@ class TestPinocchioStrict:
         engine.model = MagicMock()
         engine.model.existFrame.return_value = False
         engine.model.existBodyName.return_value = False
-        
+
         jac = engine.compute_jacobian("missing_link")
         assert jac is None
 
