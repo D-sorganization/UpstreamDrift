@@ -241,11 +241,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         return {
             "linear": jacp,
             "angular": jacr,
-            "spatial": np.vstack([jacr, jacp]),  # Warning: MuJoCo uses internal check?
-            # Standard convention spatial is often v = [omega; v_lin] or [v_lin; omega]
-            # Pinocchio uses [v_lin; omega]. Drake uses [omega; v_lin].
-            # Let's standardize on [omega; v_lin] for "spatial" key if unspecified,
-            # or better yet, just return the linear/angular separation clearly.
+            "spatial": np.vstack([jacr, jacp]),  # Standardized to [Angular; Linear] (Drake convention)
         }
 
     def get_sensors(self) -> dict[str, float]:

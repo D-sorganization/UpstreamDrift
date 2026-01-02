@@ -27,7 +27,7 @@ models:
   # --- Primary Engines (Row 2) ---
   - id: myosim_suite
     name: "MyoSim Suite"
-    description: "Rigid-body physics engine powered by MuJoCo. Currently a placeholder for future multi-scale muscle simulation features (sarcomere dynamics planned)."
+    description: "Rigid-body physics engine powered by MuJoCo, integrated via MyoSuite Gym environments. Provides access to official MyoSuite musculoskeletal models."
     type: "myosuite"
     path: "engines/physics_engines/myosuite"
 

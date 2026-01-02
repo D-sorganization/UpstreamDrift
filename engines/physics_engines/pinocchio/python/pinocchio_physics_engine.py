@@ -212,14 +212,11 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             return None
 
         # Simplified lookup: Check frame existence first
-        # (bodies map to frames in Pinocchio context usually)
         if not self.model.existFrame(body_name):
-            # Try body name if frame lookup fails (unlikely if standard URDF)
-            if not self.model.existBodyName(body_name):
-                return None
-            frame_id = self.model.getFrameId(body_name)  # This works if body exists
-        else:
-            frame_id = self.model.getFrameId(body_name)
+            LOGGER.warning(f"Body/Frame '{body_name}' not found in Pinocchio model.")
+            return None
+
+        frame_id = self.model.getFrameId(body_name)
 
         # computeJointJacobians needs to be called first (done in forward)
         # getFrameJacobian
@@ -227,22 +224,15 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             self.model, self.data, frame_id, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
         )
 
-        # J is (6, nv).
-        # Top 3 linear, bottom 3 angular?
-        # Pinocchio Motion ordering is Linear, Angular.
-        jacp = J[:3, :]
-        jacr = J[3:, :]
+        # J is (6, nv) with Pinocchio Motion ordering: Linear, Angular.
+        jac_linear = J[:3, :]
+        jac_angular = J[3:, :]
 
-        # Standardizing on [Angular; Linear] for "spatial" output key
-        # to match Drake/MuJoCo usage in this suite if preferred,
-        # OR just return raw J.
-        # But wait, earlier files used [jacp; jacr] for MuJoCo?
-        # MuJoCo mj_jac returns separated arrays.
-        # Let's align with Drake: Angular, Linear.
-        J_aligned = np.vstack([jacr, jacp])
+        # Standardizing on [Angular; Linear] for "spatial" output key.
+        J_aligned = np.vstack([jac_angular, jac_linear])
 
         return {
-            "linear": cast(np.ndarray, jacp),
-            "angular": cast(np.ndarray, jacr),
+            "linear": cast(np.ndarray, jac_linear),
+            "angular": cast(np.ndarray, jac_angular),
             "spatial": cast(np.ndarray, J_aligned),
         }

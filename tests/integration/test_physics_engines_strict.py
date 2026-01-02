@@ -8,10 +8,11 @@ to ensure it can run in any CI environment to verify LOGIC and PROTOCOL complian
 needing heavy binary dependencies.
 """
 
+import logging
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-import pytest
+
 
 # --- Global Mocking Setup ---
 # We must mock these libs BEFORE importing the engines, because some engines
@@ -20,7 +21,7 @@ import pytest
 # Create Mocks
 mock_mujoco = MagicMock()
 mock_pydrake = MagicMock()
-mock_pin = MagicMock()
+mock_pinocchio = MagicMock()
 mock_opensim = MagicMock()
 mock_gym = MagicMock()
 mock_myosuite = MagicMock()
@@ -41,43 +42,39 @@ module_patches = {
     "pydrake.systems.framework": mock_pydrake,
     "pydrake.systems.analysis": mock_pydrake,
     "pydrake.math": mock_pydrake,
-    "pinocchio": mock_pin,
+    "pinocchio": mock_pinocchio,
     "opensim": mock_opensim,
     "gym": mock_gym,
     "myosuite": mock_myosuite,
 }
 
-# Context manager for the entire test module execution is hard in pytest.
-# We will use patch.dict at the top level, but we have to be careful.
-# Simplest way: Patch, then Import.
-model_patcher = patch.dict("sys.modules", module_patches)
-model_patcher.start()
+# --- Imports with Patch Context ---
+# Use a context manager so patches apply only during engine imports,
+# avoiding long-lived module-level patchers that can leak between tests.
+with patch.dict("sys.modules", module_patches):
+    from engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: E402
+        DrakePhysicsEngine,
+    )
+    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (  # noqa: E402
+        MuJoCoPhysicsEngine,
+    )
+    from engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
+        MyoSuitePhysicsEngine,
+    )
+    from engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
+        OpenSimPhysicsEngine,
+    )
+    from engines.physics_engines.pendulum.python.pendulum_physics_engine import (  # noqa: E402
+        PendulumPhysicsEngine,
+    )
+    from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (  # noqa: E402
+        PinocchioPhysicsEngine,
+    )
 
-# --- Imports (Safe now) ---
-from engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: E402
-    DrakePhysicsEngine,
-)
-from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (  # noqa: E402
-    MuJoCoPhysicsEngine,
-)
-from engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
-    MyoSuitePhysicsEngine,
-)
-from engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
-    OpenSimPhysicsEngine,
-)
-from engines.physics_engines.pendulum.python.pendulum_physics_engine import (  # noqa: E402
-    PendulumPhysicsEngine,
-)
-from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (  # noqa: E402
-    PinocchioPhysicsEngine,
-)
+TEST_LINEAR_VAL = 1.0
+TEST_ANGULAR_VAL = 2.0
 
 
-@pytest.fixture(scope="module", autouse=True)
-def stop_patches():
-    yield
-    model_patcher.stop()
 
 
 # --- Test Classes ---
@@ -92,9 +89,9 @@ class TestMuJoCoStrict:
         engine.model.nv = 6
 
         # Mock mj_jacBody to return known values
-        def side_effect_jac(model, data, jacp, jacr, body_id):
-            jacp.fill(1.0)  # Linear
-            jacr.fill(2.0)  # Angular
+        def side_effect_jac(model, data, jac_linear, jac_angular, body_id):
+            jac_linear.fill(TEST_LINEAR_VAL)  # Linear (MuJoCo spec: jacp)
+            jac_angular.fill(TEST_ANGULAR_VAL)  # Angular (MuJoCo spec: jacr)
 
         mock_mujoco.mj_jacBody.side_effect = side_effect_jac
 
@@ -113,7 +110,7 @@ class TestMuJoCoStrict:
         assert spatial.shape == (6, 6)
         # Top 3 rows -> Angular (2.0)
         np.testing.assert_allclose(
-            spatial[:3, :], 2.0, err_msg="Top rows must be angular"
+            spatial[:3, :], TEST_ANGULAR_VAL, err_msg="Top rows must be angular"
         )
         # Bottom 3 rows -> Linear (1.0)
         np.testing.assert_allclose(
@@ -144,8 +141,8 @@ class TestDrakeStrict:
         # Mock output of CalcJacobianSpatialVelocity
         # Drake returns (w, v) -> Angular, Linear
         J_fake = np.zeros((6, 2))
-        J_fake[:3, :] = 2.0  # Angular
-        J_fake[3:, :] = 1.0  # Linear
+        J_fake[:3, :] = TEST_ANGULAR_VAL  # Angular
+        J_fake[3:, :] = TEST_LINEAR_VAL  # Linear
         engine.plant.CalcJacobianSpatialVelocity.return_value = J_fake
         # Ensure body lookup works
         engine.plant.GetBodyByName.return_value = MagicMock()
@@ -155,21 +152,18 @@ class TestDrakeStrict:
 
         spatial = jac["spatial"]
         # Drake engine should pass J through directly as it is already [Angular; Linear]
-        np.testing.assert_allclose(spatial[:3, :], 2.0)
-        np.testing.assert_allclose(spatial[3:, :], 1.0)
+        np.testing.assert_allclose(spatial[:3, :], TEST_ANGULAR_VAL)
+        np.testing.assert_allclose(spatial[3:, :], TEST_LINEAR_VAL)
 
-    def test_reset_protection(self):
+    def test_reset_protection(self, caplog):
         """Drake reset should warn if uninitialized."""
         engine = DrakePhysicsEngine()
         engine.context = None  # Force uninitialized
 
-        with patch(
-            "engines.physics_engines.drake.python.drake_physics_engine.LOGGER"
-        ) as mock_log:
+        with caplog.at_level(logging.WARNING):
             engine.reset()
-            mock_log.warning.assert_called_with(
-                "Attempted to reset Drake engine before initialization."
-            )
+        
+        assert "Attempted to reset Drake engine before initialization." in caplog.text
 
 
 class TestPinocchioStrict:
@@ -184,10 +178,10 @@ class TestPinocchioStrict:
 
         # Pinocchio returns [Linear; Angular] natively from getFrameJacobian
         J_native = np.zeros((6, 2))
-        J_native[:3, :] = 1.0  # Linear (top)
-        J_native[3:, :] = 2.0  # Angular (bottom)
+        J_native[:3, :] = TEST_LINEAR_VAL  # Linear (top)
+        J_native[3:, :] = TEST_ANGULAR_VAL  # Angular (bottom)
 
-        mock_pin.getFrameJacobian.return_value = J_native
+        mock_pinocchio.getFrameJacobian.return_value = J_native
 
         jac = engine.compute_jacobian("foo")
         assert jac is not None
@@ -197,16 +191,25 @@ class TestPinocchioStrict:
         # Top 3 should now be Angular (2.0)
         np.testing.assert_allclose(
             spatial[:3, :],
-            2.0,
+            TEST_ANGULAR_VAL,
             err_msg="Pinocchio spatial top should be re-stacked to Angular",
         )
         # Bottom 3 should now be Linear (1.0)
         np.testing.assert_allclose(
             spatial[3:, :],
-            1.0,
+            TEST_LINEAR_VAL,
             err_msg="Pinocchio spatial bottom should be re-stacked to Linear",
         )
 
+    def test_compute_jacobian_missing_frame_and_body(self):
+        """Test behavior when neither frame nor body exists."""
+        engine = PinocchioPhysicsEngine()
+        engine.model = MagicMock()
+        engine.model.existFrame.return_value = False
+        engine.model.existBodyName.return_value = False
+        
+        jac = engine.compute_jacobian("missing_link")
+        assert jac is None
 
 class TestOpenSimStrict:
     def test_inverse_dynamics_implemented(self):

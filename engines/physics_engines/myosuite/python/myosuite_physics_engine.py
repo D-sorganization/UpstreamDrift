@@ -81,7 +81,9 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         LOGGER.error(
             "MyoSuite does not support loading from string (requires Env ID registration)"
         )
-        pass
+        raise RuntimeError(
+            "MyoSuite does not support loading from string (requires Env ID registration)"
+        )
 
     def reset(self) -> None:
         """Reset environment."""
@@ -161,19 +163,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
     def compute_mass_matrix(self) -> np.ndarray:
         if not self.sim:
             return np.array([])
-
-        # mujoco-py specific helper
-        if hasattr(self.sim, "data") and hasattr(self.sim.data, "get_mass_matrix"):
-            # sim.data.get_mass_matrix is not standard mujoco-py?
-            # Standard way: M = np.zeros(nv*nv); mujoco_py.functions.mj_fullM(...)
-            pass
-
-        # Fallback to general read if possible, or leave empty if too complex to bridge
-        # without identifying bindings version.
-        # Assuming newer mujoco (google) bindings might be used? No, MyoSuite uses mujoco (google) now?
-        # The docs say "MyoSuite ... simulated with the MuJoCo physics engine".
-        # Recent MyoSuite uses `mujoco` (not `mujoco-py`).
-        # If so, self.sim.data is likely `mujoco.MjData`.
 
         # Try generic mujoco approach assuming 'mujoco' lib is available
         try:
