@@ -101,6 +101,7 @@ def validate_executable(executable: str) -> str:
     exec_name = Path(executable).name.lower()
 
     if exec_name not in ALLOWED_EXECUTABLES:
+        logger.error(f"Blocked disallowed executable: {exec_name}")
         raise SecureSubprocessError(f"Executable not allowed: {exec_name}")
 
     logger.debug(f"Executable validated: {executable}")
@@ -129,6 +130,10 @@ def secure_popen(
     """
     if not cmd:
         raise SecureSubprocessError("Empty command list")
+
+    # Security: Never use shell=True (Checked first)
+    if kwargs.get("shell", False):
+        raise SecureSubprocessError("shell=True is not allowed for security")
 
     # Validate executable
     validated_executable = validate_executable(cmd[0])
@@ -163,10 +168,6 @@ def secure_popen(
                 raise SecureSubprocessError(
                     f"Working directory outside suite: {cwd_path}"
                 )
-
-    # Security: Never use shell=True
-    if kwargs.get("shell", False):
-        raise SecureSubprocessError("shell=True is not allowed for security")
 
     logger.info(f"Launching secure subprocess: {' '.join(validated_cmd)}")
 
@@ -202,6 +203,10 @@ def secure_run(
     if not cmd:
         raise SecureSubprocessError("Empty command list")
 
+    # Security: Never use shell=True (Checked first)
+    if kwargs.get("shell", False):
+        raise SecureSubprocessError("shell=True is not allowed for security")
+
     # Validate executable
     validated_executable = validate_executable(cmd[0])
     validated_cmd = [validated_executable] + cmd[1:]
@@ -235,10 +240,6 @@ def secure_run(
                 raise SecureSubprocessError(
                     f"Working directory outside suite: {cwd_path}"
                 )
-
-    # Security: Never use shell=True
-    if kwargs.get("shell", False):
-        raise SecureSubprocessError("shell=True is not allowed for security")
 
     logger.info(f"Running secure subprocess: {' '.join(validated_cmd)}")
 
