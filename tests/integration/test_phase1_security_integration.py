@@ -109,7 +109,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
     def test_secure_run_shell_blocked(self) -> None:
         """Test secure_run blocks shell execution."""
         with self.assertRaises(SecureSubprocessError) as context:
-            secure_run(["python", "test"], shell=True)
+            secure_run(["echo", "test"], shell=True)
 
         self.assertIn("shell=True is not allowed", str(context.exception))
 
@@ -141,8 +141,9 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         mock_app_instance = MagicMock()
         mock_qapp.instance.return_value = mock_app_instance
 
-        # Mock QIcon to prevent icon loading issues
-        mock_qicon.return_value = MagicMock()
+        # Mock QIcon to prevent icon loading issues - return a proper QIcon mock
+        mock_icon_instance = MagicMock()
+        mock_qicon.return_value = mock_icon_instance
 
         # Mock successful execution
         mock_result = MagicMock()
@@ -229,8 +230,9 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         except SecureSubprocessError:
             pass
 
-        # The main point is that the security exception was raised
-        self.assertTrue(True)  # Test passes if we get here without hanging
+        # Verify that some logging occurred (info level for the attempt)
+        # The secure_run function logs at info level before validation
+        self.assertTrue(mock_logger.info.called or mock_logger.error.called)
 
     def test_subprocess_timeout_handling(self) -> None:
         """Test subprocess timeout handling."""
