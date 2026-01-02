@@ -1,22 +1,14 @@
 {
   "model_order": [
-    "mujoco_humanoid",
-    "drake_golf",
-    "pinocchio_golf",
-    "opensim_golf",
-    "myosim_suite",
-    "openpose_analysis",
-    "mujoco_dashboard",
-    "matlab_simscape",
-    "urdf_generator",
     "c3d_viewer",
-    "matlab_dataset_gui",
-    "matlab_golf_gui"
+    "model_1",
+    "urdf_generator",
+    "model_0"
   ],
-  "selected_model": "myosim_suite",
+  "selected_model": "urdf_generator",
   "window_geometry": {
     "x": 260,
-    "y": 35,
+    "y": 66,
     "width": 1400,
     "height": 900
   },

@@ -206,6 +206,36 @@ def secure_run(
     validated_executable = validate_executable(cmd[0])
     validated_cmd = [validated_executable] + cmd[1:]
 
+    # If script path provided, validate it
+    if len(cmd) >= 2 and suite_root:
+        script_arg = cmd[1]
+        # Check if it looks like a script path
+        if (
+            script_arg.endswith((".py", ".m"))
+            or "/" in script_arg
+            or "\\" in script_arg
+        ):
+            try:
+                script_path = Path(script_arg)
+                if not script_path.is_absolute():
+                    # Make relative to cwd if provided, otherwise suite_root
+                    base_path = Path(cwd) if cwd else suite_root
+                    script_path = base_path / script_path
+                validate_script_path(script_path, suite_root)
+            except (ValueError, OSError):
+                # If path parsing fails, continue (might be a module name)
+                pass
+
+    # Validate working directory
+    if cwd:
+        cwd_path = Path(cwd).resolve()
+        if suite_root:
+            suite_root_abs = suite_root.resolve()
+            if not str(cwd_path).startswith(str(suite_root_abs)):
+                raise SecureSubprocessError(
+                    f"Working directory outside suite: {cwd_path}"
+                )
+
     # Security: Never use shell=True
     if kwargs.get("shell", False):
         raise SecureSubprocessError("shell=True is not allowed for security")
