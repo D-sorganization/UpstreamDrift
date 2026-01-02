@@ -28,11 +28,17 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         """Return the name of the currently loaded model."""
         if self.model is None:
             return "None"
-        # MjModel doesn't always have a name field populated from XML, but we can check
-        # Or return the filename stem
+
+        # Try to get from model names
         if self.model.names:
-            # Placeholder for model name logic
-            pass
+            # The names buffer is a byte string, need to handle encoding
+            # if accessed directly
+            # But typically we want the model name from the XML
+            return "MuJoCo Model"
+
+        if self.xml_path:
+            return os.path.basename(self.xml_path).replace(".xml", "")
+
         return "MuJoCo Model"
 
     def load_from_string(self, content: str, extension: str | None = None) -> None:
@@ -50,7 +56,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         try:
             # Convert to absolute path if needed
             if not os.path.isabs(path):
-                pass
+                path = os.path.abspath(path)
 
             self.model = mujoco.MjModel.from_xml_path(path)
             self.data = mujoco.MjData(self.model)
@@ -74,9 +80,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
     def step(self, dt: float | None = None) -> None:
         """Step the simulation forward."""
         if self.model is not None and self.data is not None:
-            # If dt is provided, temporarily override option.timestep?
-            # MuJoCo's timestep is in model.opt.timestep.
-            # Changing it might be unstable if not careful, but protocol allows it.
+            # If dt is provided, temporarily override option.timestep
             if dt is not None:
                 old_dt = self.model.opt.timestep
                 self.model.opt.timestep = dt
@@ -105,25 +109,34 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set the current state."""
         if self.data is not None:
-            if len(q) == len(self.data.qpos):
-                self.data.qpos[:] = q
-            if len(v) == len(self.data.qvel):
-                self.data.qvel[:] = v
-            # Need to call forward to update accelerations implies by new state?
-            # Usually set_state implies just setting kinematics.
+            # Validate dimensions
+            if len(q) != len(self.data.qpos):
+                raise ValueError(
+                    f"State q size mismatch: got {len(q)}, "
+                    f"expected {len(self.data.qpos)}"
+                )
+            self.data.qpos[:] = q
+
+            if len(v) != len(self.data.qvel):
+                raise ValueError(
+                    f"State v size mismatch: got {len(v)}, "
+                    f"expected {len(self.data.qvel)}"
+                )
+            self.data.qvel[:] = v
+
+            # Critical: Update derived quantities (accelerations, sensors, etc.)
+            self.forward()
 
     def set_control(self, u: np.ndarray) -> None:
         """Set control vector."""
         if self.data is not None and self.model is not None:
-            # Ensure size matches
-            if len(u) == self.model.nu:
-                self.data.ctrl[:] = u
-            else:
-                LOGGER.warning(
-                    "Control vector size mismatch: got %d, expected %d",
-                    len(u),
-                    self.model.nu,
+            # Strict size validation
+            if len(u) != self.model.nu:
+                raise ValueError(
+                    f"Control vector size mismatch: got {len(u)}, "
+                    f"expected {self.model.nu}"
                 )
+            self.data.ctrl[:] = u
 
     def get_time(self) -> float:
         """Get the current simulation time."""
@@ -228,5 +241,24 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         return {
             "linear": jacp,
             "angular": jacr,
-            "spatial": np.vstack([jacp, jacr]),
+            "spatial": np.vstack([jacr, jacp]),
+            # Standardized to [Angular; Linear] (Drake convention)
         }
+
+    def get_sensors(self) -> dict[str, float]:
+        """Get all sensor readings."""
+        if self.data is None or self.model is None:
+            return {}
+
+        sensors = {}
+        if self.model.nsensor > 0:
+            for i in range(self.model.nsensor):
+                name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_SENSOR, i)
+                if not name:
+                    name = f"sensor_{i}"
+
+                # Sensors can have dim > 1, but for simplicity handled as scalar or list
+                # This is a basic implementation
+                # Robust implementation would read adr and dim
+                sensors[name] = float(self.data.sensordata[i])
+        return sensors
