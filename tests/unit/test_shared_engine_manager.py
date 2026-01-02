@@ -126,18 +126,21 @@ class TestEngineManager(unittest.TestCase):
             True
         )
 
-        with patch(
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.mujoco"
-        ) as mock_mujoco_pkg:
-            mock_mujoco_pkg.__version__ = "3.2.3"
-            mock_mujoco_pkg.MjModel.from_xml_path.return_value = MagicMock()
+        mock_mujoco_pkg = MagicMock()
+        mock_mujoco_pkg.__version__ = "3.2.3"
+        mock_mujoco_pkg.MjModel.from_xml_path.return_value = MagicMock()
 
-            with (
-                patch("pathlib.Path.exists", return_value=True),
-                patch("pathlib.Path.glob", return_value=[Path("model.xml")]),
+        with patch.dict("sys.modules", {"mujoco": mock_mujoco_pkg}):
+            with patch(
+                "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
             ):
-                manager._load_mujoco_engine()
-                self.assertEqual(manager._mujoco_module, mock_mujoco_pkg)
+                with (
+                    patch("pathlib.Path.exists", return_value=True),
+                    patch("pathlib.Path.glob", return_value=[Path("model.xml")]),
+                ):
+                    manager._load_mujoco_engine()
+                    self.assertEqual(manager._mujoco_module, mock_mujoco_pkg)
+                    self.assertEqual(manager._mujoco_module.__version__, "3.2.3")
 
     def test_get_engine_info(self):
         """Test information retrieval."""
