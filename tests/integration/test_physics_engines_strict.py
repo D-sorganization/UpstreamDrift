@@ -54,20 +54,22 @@ model_patcher = patch.dict("sys.modules", module_patches)
 model_patcher.start()
 
 # --- Imports (Safe now) ---
-from engines.physics_engines.drake.python.drake_physics_engine import DrakePhysicsEngine
-from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+from engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: E402
+    DrakePhysicsEngine,
+)
+from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (  # noqa: E402
     MuJoCoPhysicsEngine,
 )
-from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+from engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
     MyoSuitePhysicsEngine,
 )
-from engines.physics_engines.opensim.python.opensim_physics_engine import (
+from engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
     OpenSimPhysicsEngine,
 )
-from engines.physics_engines.pendulum.python.pendulum_physics_engine import (
+from engines.physics_engines.pendulum.python.pendulum_physics_engine import (  # noqa: E402
     PendulumPhysicsEngine,
 )
-from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (  # noqa: E402
     PinocchioPhysicsEngine,
 )
 
