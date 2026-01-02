@@ -67,6 +67,7 @@ class ControlsTab(QtWidgets.QWidget):
         style = self.style()
 
         self.play_pause_btn = QtWidgets.QPushButton("Pause")
+
         self.play_pause_btn.setCheckable(True)
         if style:
             self.play_pause_btn.setIcon(
@@ -95,6 +96,10 @@ class ControlsTab(QtWidgets.QWidget):
         self.screenshot_btn.setToolTip("Save screenshot to output/screenshots/")
 
         self.record_btn = QtWidgets.QPushButton("Start Recording")
+        if style:
+            self.record_btn.setIcon(
+                style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_DialogYesButton)
+            )
         self.record_btn.setCheckable(True)
         self.record_btn.toggled.connect(self.on_record_toggled)
         self.record_btn.setToolTip("Record simulation data for analysis and export")
@@ -561,9 +566,19 @@ class ControlsTab(QtWidgets.QWidget):
         recorder = self.sim_widget.get_recorder()
         if checked:
             self.record_btn.setText("Stop Recording")
+            if style := self.style():
+                self.record_btn.setIcon(
+                    style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaStop)
+                )
             recorder.start_recording()
         else:
             self.record_btn.setText("Start Recording")
+            if style := self.style():
+                self.record_btn.setIcon(
+                    style.standardIcon(
+                        QtWidgets.QStyle.StandardPixmap.SP_DialogYesButton
+                    )
+                )
             recorder.stop_recording()
 
     def on_take_screenshot(self) -> None:

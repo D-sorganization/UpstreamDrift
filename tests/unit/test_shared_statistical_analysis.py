@@ -284,3 +284,55 @@ def test_compute_phase_space_path_length(sample_data):
 
     # Test invalid index
     assert sample_data.compute_phase_space_path_length(99) == 0.0
+
+
+def test_compute_joint_power_metrics(sample_data):
+    # In sample_data, torque = velocity = cos(t).
+    # Power = cos^2(t), which is always >= 0.
+    metrics = sample_data.compute_joint_power_metrics(0)
+
+    assert metrics is not None
+    assert metrics.peak_generation > 0
+    assert metrics.peak_absorption == 0.0
+    assert metrics.generation_duration > 0
+    assert metrics.absorption_duration == 0.0
+    assert metrics.net_work > 0
+
+    # Test invalid index
+    assert sample_data.compute_joint_power_metrics(99) is None
+
+    # Create scenario with negative power
+    times = np.linspace(0, 1, 100)
+    # v = 1, tau = -1 -> power = -1
+    v = np.ones((100, 1))
+    tau = -np.ones((100, 1))
+    analyzer = StatisticalAnalyzer(times, np.zeros((100, 1)), v, tau)
+
+    metrics_neg = analyzer.compute_joint_power_metrics(0)
+    assert metrics_neg is not None
+    assert metrics_neg.peak_absorption == -1.0
+    assert metrics_neg.avg_absorption == -1.0
+    assert metrics_neg.peak_generation == 0.0
+    assert metrics_neg.generation_duration == 0.0
+
+
+def test_compute_impulse_metrics(sample_data):
+    # In sample_data, torque = cos(t) (since vel = cos(t) and torque=vel)
+    # Integral of cos^2(t) over 0 to 1 is positive
+    # Actually wait, joint_velocities in sample_data is 2*pi*cos(2*pi*t)
+    # So torque is also 2*pi*cos(2*pi*t).
+    # Integral over 0 to 1 of cos(2*pi*t) is 0.
+
+    metrics = sample_data.compute_impulse_metrics("torque", 0)
+    assert metrics is not None
+
+    # Since it's a full cycle of cosine, net impulse should be approx 0
+    # But wait, it's torque = velocity. Velocity integral over 1s (cycle) is 0.
+    assert metrics.net_impulse == pytest.approx(0.0, abs=1.0)  # approx
+
+    # Test invalid inputs
+    assert sample_data.compute_impulse_metrics("torque", 99) is None
+    assert (
+        sample_data.compute_impulse_metrics("force", 0) is None
+    )  # No forces in sample_data
+    assert sample_data.compute_impulse_metrics("invalid", 0) is None

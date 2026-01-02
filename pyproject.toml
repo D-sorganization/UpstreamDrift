@@ -120,6 +120,8 @@ exclude = [
     "dist",
     "engines/matlab_simscape/",
     "engines/Simscape_Multibody_Models/*/matlab/",
+    "**/archive",
+    "**/legacy",
 ]
 
 [tool.ruff.lint]
@@ -152,8 +154,7 @@ ignore = [
 "check_system_health.py" = ["T201"]
 "show_physics_parameters.py" = ["T201"]
 "engines/pendulum_models/tools/scientific_auditor.py" = ["T201"]
-"engines/Simscape_Multibody_Models/**/*.py" = ["T201"]
-"engines/pendulum_models/**/*.py" = ["T201"]
+"engines/Simscape_Multibody_Models/**/matlab/**/*.py" = ["T201"]
 "verification/*" = ["T201"]
 
 [tool.mypy]
@@ -227,10 +228,6 @@ warn_return_any = false
 [[tool.mypy.overrides]]
 module = "engines.physics_engines.drake.python.src.drake_gui_app"
 disallow_untyped_defs = false
-
-[[tool.mypy.overrides]]
-module = "engines.pendulum_models.python.double_pendulum_model.tests.*"
-ignore_errors = true
 
 [[tool.mypy.overrides]]
 module = "engines.physics_engines.pinocchio.python.double_pendulum_model.tests.*"

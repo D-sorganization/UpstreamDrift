@@ -125,6 +125,28 @@ class CoordinationMetrics:
     coordination_variability: float  # Std dev of coupling angle
 
 
+@dataclass
+class JointPowerMetrics:
+    """Metrics related to joint power generation and absorption."""
+
+    peak_generation: float  # Max positive power (W)
+    peak_absorption: float  # Max negative power (W)
+    avg_generation: float  # Mean positive power (W)
+    avg_absorption: float  # Mean negative power (W)
+    net_work: float  # Total work done (J)
+    generation_duration: float  # Time spent generating power (s)
+    absorption_duration: float  # Time spent absorbing power (s)
+
+
+@dataclass
+class ImpulseMetrics:
+    """Metrics related to force/torque impulse."""
+
+    net_impulse: float  # Integrated force/torque over time
+    positive_impulse: float  # Integrated positive force/torque
+    negative_impulse: float  # Integrated negative force/torque
+
+
 class StatisticalAnalyzer:
     """Comprehensive statistical analysis for golf swing data."""
 
@@ -1118,6 +1140,7 @@ class StatisticalAnalyzer:
             positive_work = np.trapezoid(pos_power, dx=dt)
             negative_work = np.trapezoid(neg_power, dx=dt)
         else:
+            # Fallback for NumPy versions that still provide trapz
             positive_work = np.trapz(pos_power, dx=dt)
             negative_work = np.trapz(neg_power, dx=dt)
 
@@ -1128,6 +1151,113 @@ class StatisticalAnalyzer:
             "negative_work": float(negative_work),
             "net_work": float(net_work),
         }
+
+    def compute_joint_power_metrics(self, joint_idx: int) -> JointPowerMetrics | None:
+        """Compute detailed power metrics for a joint.
+
+        Args:
+            joint_idx: Index of the joint
+
+        Returns:
+            JointPowerMetrics object or None
+        """
+        if (
+            joint_idx >= self.joint_torques.shape[1]
+            or joint_idx >= self.joint_velocities.shape[1]
+        ):
+            return None
+
+        torque = self.joint_torques[:, joint_idx]
+        velocity = self.joint_velocities[:, joint_idx]
+
+        n_samples = min(len(torque), len(velocity), len(self.times))
+        if n_samples < 2:
+            return None
+
+        torque = torque[:n_samples]
+        velocity = velocity[:n_samples]
+        dt = self.dt
+
+        power = torque * velocity
+
+        # Generation (Power > 0)
+        gen_indices = power > 0
+        peak_gen = float(np.max(power)) if np.any(gen_indices) else 0.0
+        avg_gen = float(np.mean(power[gen_indices])) if np.any(gen_indices) else 0.0
+        gen_dur = float(np.sum(gen_indices) * dt)
+
+        # Absorption (Power < 0)
+        abs_indices = power < 0
+        peak_abs = float(np.min(power)) if np.any(abs_indices) else 0.0
+        avg_abs = float(np.mean(power[abs_indices])) if np.any(abs_indices) else 0.0
+        abs_dur = float(np.sum(abs_indices) * dt)
+
+        # Net work (integration)
+        if hasattr(np, "trapezoid"):
+            net_work = float(np.trapezoid(power, dx=dt))
+        else:
+            net_work = float(np.trapz(power, dx=dt))
+
+        return JointPowerMetrics(
+            peak_generation=peak_gen,
+            peak_absorption=peak_abs,
+            avg_generation=avg_gen,
+            avg_absorption=avg_abs,
+            net_work=net_work,
+            generation_duration=gen_dur,
+            absorption_duration=abs_dur,
+        )
+
+    def compute_impulse_metrics(
+        self,
+        data_type: str = "torque",
+        joint_idx: int = 0,
+    ) -> ImpulseMetrics | None:
+        """Compute impulse metrics (integral of force/torque over time).
+
+        Args:
+            data_type: 'torque' or 'force'
+            joint_idx: Index of joint or force component
+
+        Returns:
+            ImpulseMetrics or None
+        """
+        if data_type == "torque":
+            if joint_idx >= self.joint_torques.shape[1]:
+                return None
+            data = self.joint_torques[:, joint_idx]
+        elif data_type == "force":
+            if self.ground_forces is None or joint_idx >= self.ground_forces.shape[1]:
+                return None
+            data = self.ground_forces[:, joint_idx]
+        else:
+            return None
+
+        n_samples = min(len(data), len(self.times))
+        if n_samples < 2:
+            return None
+
+        data = data[:n_samples]
+        dt = self.dt
+
+        # Integrate
+        pos_data = np.maximum(data, 0)
+        neg_data = np.minimum(data, 0)
+
+        if hasattr(np, "trapezoid"):
+            net_impulse = float(np.trapezoid(data, dx=dt))
+            pos_impulse = float(np.trapezoid(pos_data, dx=dt))
+            neg_impulse = float(np.trapezoid(neg_data, dx=dt))
+        else:
+            net_impulse = float(np.trapz(data, dx=dt))
+            pos_impulse = float(np.trapz(pos_data, dx=dt))
+            neg_impulse = float(np.trapz(neg_data, dx=dt))
+
+        return ImpulseMetrics(
+            net_impulse=net_impulse,
+            positive_impulse=pos_impulse,
+            negative_impulse=neg_impulse,
+        )
 
     def compute_phase_space_path_length(self, joint_idx: int) -> float:
         """Compute path length in phase space (Angle vs Angular Velocity).
