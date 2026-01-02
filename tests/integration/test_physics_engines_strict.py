@@ -111,7 +111,10 @@ class TestMuJoCoStrict:
 
         # Force reload the engine to bind to OUR mock_mujoco
         import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
-        importlib.reload(engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine)
+
+        importlib.reload(
+            engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
+        )
 
     def tearDown(self):
         self.patcher.stop()
