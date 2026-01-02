@@ -439,7 +439,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         # Use lineEdit signal to avoid lag on keystrokes
         if line_edit := self.combo_induced.lineEdit():
-             line_edit.editingFinished.connect(self._update_viewer)
+            line_edit.editingFinished.connect(self._update_viewer)
         self.combo_induced.currentIndexChanged.connect(self._update_viewer)
 
         self.chk_cf = QtWidgets.QCheckBox("Counterfactuals")
@@ -885,7 +885,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                             np.zeros_like(
                                 first_frame.induced_accelerations.get(
                                     "total",
-                                    np.zeros(self.model.nv if self.model else 0)
+                                    np.zeros(self.model.nv if self.model else 0),
                                 )
                             ),
                         )

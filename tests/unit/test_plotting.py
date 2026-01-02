@@ -329,7 +329,6 @@ class TestGolfSwingPlotter:
         )
 
 
-
 class MockRecorder(RecorderInterface):
     def __init__(self, data):
         self.data = data

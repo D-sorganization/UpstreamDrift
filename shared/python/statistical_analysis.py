@@ -1140,8 +1140,7 @@ class StatisticalAnalyzer:
             positive_work = np.trapezoid(pos_power, dx=dt)
             negative_work = np.trapezoid(neg_power, dx=dt)
         else:
-            # MyPy might complain about trapz being missing in numpy 2.0 stubs
-            # but it exists in older numpy.
+            # Fallback for NumPy versions that still provide trapz
             positive_work = np.trapz(pos_power, dx=dt)
             negative_work = np.trapz(neg_power, dx=dt)
 
