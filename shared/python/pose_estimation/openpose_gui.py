@@ -75,6 +75,7 @@ class OpenPoseGUI(QMainWindow):
 
         # Progress
         self.progress = QProgressBar()
+        self.progress.setValue(0)
         layout.addWidget(self.progress)
 
         # Log
