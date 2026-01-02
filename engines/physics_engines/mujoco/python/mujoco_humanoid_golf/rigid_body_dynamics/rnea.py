@@ -12,10 +12,7 @@ from mujoco_humanoid_golf.spatial_algebra import (
     cross_motion_fast,
     jcalc,
 )
-from shared.python import constants
-
-DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
-DEFAULT_GRAVITY.flags.writeable = False
+from mujoco_humanoid_golf.rigid_body_dynamics.common import DEFAULT_GRAVITY
 
 
 def rnea(  # noqa: PLR0915
