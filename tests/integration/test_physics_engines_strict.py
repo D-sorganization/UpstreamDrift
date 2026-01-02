@@ -113,6 +113,8 @@ class TestMuJoCoStrict:
         # This bypasses reload() and avoids triggering real imports or identity mismatches
         self.original_mujoco = getattr(mod, "mujoco", None)
         setattr(mod, "mujoco", mock_mujoco)  # noqa: B010
+        # 3. Capture the class from THIS specific module version
+        self.MuJoCoPhysicsEngine = mod.MuJoCoPhysicsEngine
         self.mod = mod
 
     def tearDown(self):
@@ -122,7 +124,8 @@ class TestMuJoCoStrict:
 
     def test_jacobian_standardization_mocked(self):
         """Verify compute_jacobian returns standard suite format [Angular; Linear] for spatial."""
-        engine = MuJoCoPhysicsEngine()
+        # Use the class from the patched module
+        engine = self.MuJoCoPhysicsEngine()
         engine.model = MagicMock()
         engine.data = MagicMock()
         # Ensure we attach the mocks to the same object the engine is using
@@ -158,7 +161,7 @@ class TestMuJoCoStrict:
         )
 
     def test_get_sensors_implemented(self):
-        engine = MuJoCoPhysicsEngine()
+        engine = self.MuJoCoPhysicsEngine()
         assert hasattr(engine, "get_sensors"), "MuJoCo must implement get_sensors"
 
         engine.model = MagicMock()
