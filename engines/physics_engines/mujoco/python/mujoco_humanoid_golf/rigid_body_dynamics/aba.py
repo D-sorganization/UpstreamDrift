@@ -128,15 +128,22 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     i_v_buf = np.empty(6)
     temp_vec = np.empty(6)  # Additional scratch vector
 
+    # OPTIMIZATION: Cache dictionary lookups to local variables
+    # This avoids repeated hashing and lookup in the tight loops
+    model_parent = model["parent"]
+    model_jtype = model["jtype"]
+    model_xtree = model["Xtree"]
+    model_inertia = model["I"]
+
     # --- Pass 1: Forward kinematics ---
     for i in range(nb):
         # OPTIMIZATION: Use pre-allocated buffer for jcalc
-        xj_transform, s_vec, dof_idx = jcalc(model["jtype"][i], q[i], out=xj_buf)
+        xj_transform, s_vec, dof_idx = jcalc(model_jtype[i], q[i], out=xj_buf)
         s_subspace[i] = s_vec
         dof_indices[i] = dof_idx
 
         # OPTIMIZATION: Write directly to pre-allocated xup buffer
-        np.matmul(xj_transform, model["Xtree"][i], out=xup[i])
+        np.matmul(xj_transform, model_xtree[i], out=xup[i])
 
         # vj_velocity = s_subspace[i] * qd[i]  # Joint velocity
         if dof_idx != -1:
@@ -146,11 +153,11 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         else:
             vj_velocity = s_subspace[i] * qd[i]
 
-        if model["parent"][i] == -1:
+        if model_parent[i] == -1:
             v[:, i] = vj_velocity
             c[:, i] = np.zeros(6)  # No bias for base-connected bodies
         else:
-            p = model["parent"][i]
+            p = model_parent[i]
             # v[:, i] = xup[i] @ v[:, p] + vj_velocity
             # OPTIMIZATION: Use matmul with out
             np.matmul(xup[i], v[:, p], out=scratch_vec)
@@ -165,7 +172,7 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         # pa_bias[:, i] = cross_force(v[:, i], model["I"][i] @ v[:, i]) - f_ext[:, i]
         # Optimization: Use temporary buffer
         # i_v = model["I"][i] @ v[:, i]
-        np.matmul(model["I"][i], v[:, i], out=i_v_buf)
+        np.matmul(model_inertia[i], v[:, i], out=i_v_buf)
 
         # Use fast version to avoid overhead
         cross_force_fast(v[:, i], i_v_buf, out=cross_buf)
@@ -195,8 +202,8 @@ def aba(  # noqa: C901, PLR0912, PLR0915
             u[i] = tau[i] - np.dot(s_subspace[i], pa_bias[:, i])
 
         # Articulated-body inertia update for parent
-        if model["parent"][i] != -1:
-            p = model["parent"][i]
+        if model_parent[i] != -1:
+            p = model_parent[i]
 
             # Inverse of joint-space inertia
             # For 1-DOF joints, this is just 1/d(i)
@@ -267,14 +274,14 @@ def aba(  # noqa: C901, PLR0912, PLR0915
 
     # --- Pass 3: Forward recursion (accelerations) ---
     for i in range(nb):
-        if model["parent"][i] == -1:
+        if model_parent[i] == -1:
             # For base-connected bodies, apply gravity through Xup transform
             # a[:, i] = xup[i] @ (-a_grav) + c[:, i]
             np.matmul(xup[i], neg_a_grav, out=scratch_vec)
             scratch_vec += c[:, i]
             a[:, i] = scratch_vec
         else:
-            p = model["parent"][i]
+            p = model_parent[i]
             # a[:, i] = xup[i] @ a[:, p] + c[:, i]
             np.matmul(xup[i], a[:, p], out=scratch_vec)
             scratch_vec += c[:, i]
