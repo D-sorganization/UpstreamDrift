@@ -211,8 +211,8 @@ class TestPinocchioStrict:
 class TestOpenSimStrict:
     def test_inverse_dynamics_implemented(self):
         engine = OpenSimPhysicsEngine()
-        engine._model = MagicMock()
-        engine._state = MagicMock()
+        engine._model = MagicMock()  # type: ignore
+        engine._state = MagicMock()  # type: ignore
 
         # Provide correct speeds/coords
         engine._model.getNumSpeeds.return_value = 2
