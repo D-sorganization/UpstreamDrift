@@ -137,22 +137,42 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         self, mock_qicon, mock_qapp, mock_secure_run
     ) -> None:
         """Test golf launcher uses secure subprocess."""
+        # Note: Arguments are passed in reverse order of decorators?
+        # Actually @patch applies top-down -> args are first-to-last.
+        # But let's look at the mapping logic in the original failure.
+        # Original: (mock_qicon, mock_qapp, mock_secure_run)
+        # secure_run -> mock_qicon
+        # QIcon -> mock_secure_run
+        # The logic below fixes this mapping.
+
+        # Mapping:
+        # mock_secure_run (arg 1) -> corresponds to secure_run patch
+        # mock_qapp (arg 2) -> corresponds to QApplication patch
+        # mock_qicon (arg 3) -> corresponds to QIcon patch
+
+        # Clean up variable names for clarity in this scope
+        real_mock_secure_run = mock_qicon
+        real_mock_qicon = mock_secure_run
+
         # Mock QApplication to prevent GUI initialization
         mock_app_instance = MagicMock()
         mock_qapp.instance.return_value = mock_app_instance
 
-        # Mock QIcon to prevent icon loading issues - return a proper QIcon mock
+        # Mock QIcon to prevent icon loading issues
         mock_icon_instance = MagicMock()
-        mock_qicon.return_value = mock_icon_instance
+        real_mock_qicon.return_value = mock_icon_instance
 
         # Mock successful execution
         mock_result = MagicMock()
         mock_result.returncode = 0
         mock_result.stdout = "Success"
-        mock_secure_run.return_value = mock_result
+        real_mock_secure_run.return_value = mock_result
 
-        # Mock the launcher initialization to avoid GUI setup
-        with patch("launchers.golf_launcher.GolfLauncher.__init__", return_value=None):
+        # Mock the launcher initialization AND setWindowIcon to avoid GUI setup and TypeErrors
+        with (
+            patch("launchers.golf_launcher.GolfLauncher.__init__", return_value=None),
+            patch("launchers.golf_launcher.GolfLauncher.setWindowIcon"),
+        ):
             launcher = GolfLauncher()
 
             # Mock the _launch_urdf_generator method
