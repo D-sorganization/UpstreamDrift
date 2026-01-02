@@ -326,3 +326,74 @@ class TestGolfSwingPlotter:
         ax.text.assert_called_with(
             0.5, 0.5, "No data recorded", ha="center", va="center"
         )
+import numpy as np
+import pytest
+from unittest.mock import MagicMock
+from matplotlib.figure import Figure
+
+# Import after mock setup might be needed if plotting imported strict things,
+# but shared.python.plotting handles imports gracefully.
+from shared.python.plotting import GolfSwingPlotter, RecorderInterface
+
+class MockRecorder(RecorderInterface):
+    def __init__(self, data):
+        self.data = data
+        self.counter = 0
+
+    def get_time_series(self, field_name):
+        return self.data.get(field_name, (np.array([]), np.array([])))
+
+    def get_induced_acceleration_series(self, source_name):
+        return self.data.get(f"induced_{source_name}", (np.array([]), np.array([])))
+
+    def get_counterfactual_series(self, cf_name):
+        return self.data.get(f"cf_{cf_name}", (np.array([]), np.array([])))
+
+@pytest.fixture
+def sample_recorder():
+    times = np.linspace(0, 1, 100)
+    torques = np.random.randn(100, 2)
+    velocities = np.random.randn(100, 2)
+
+    data = {
+        "joint_torques": (times, torques),
+        "joint_velocities": (times, velocities)
+    }
+    return MockRecorder(data)
+
+def test_plot_joint_power_curves(sample_recorder):
+    fig = Figure()
+    plotter = GolfSwingPlotter(sample_recorder, joint_names=["J0", "J1"])
+
+    plotter.plot_joint_power_curves(fig)
+    assert len(fig.axes) == 1
+    ax = fig.axes[0]
+    # Check title/labels
+    assert "Joint Power" in ax.get_title()
+    # 2 joints + 1 horizontal line = 3 lines
+    assert len(ax.lines) == 3
+
+def test_plot_impulse_accumulation(sample_recorder):
+    fig = Figure()
+    plotter = GolfSwingPlotter(sample_recorder, joint_names=["J0", "J1"])
+
+    plotter.plot_impulse_accumulation(fig)
+    assert len(fig.axes) == 1
+    ax = fig.axes[0]
+    assert "Impulse" in ax.get_title()
+    # 2 joints + 1 horizontal line = 3 lines
+    assert len(ax.lines) == 3
+
+def test_plot_joint_power_curves_no_data():
+    fig = Figure()
+    plotter = GolfSwingPlotter(MockRecorder({}))
+    plotter.plot_joint_power_curves(fig)
+    ax = fig.axes[0]
+    assert "No data" in ax.texts[0].get_text()
+
+def test_plot_impulse_accumulation_no_data():
+    fig = Figure()
+    plotter = GolfSwingPlotter(MockRecorder({}))
+    plotter.plot_impulse_accumulation(fig)
+    ax = fig.axes[0]
+    assert "No data" in ax.texts[0].get_text()
