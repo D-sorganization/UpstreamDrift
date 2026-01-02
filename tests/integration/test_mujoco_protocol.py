@@ -15,7 +15,9 @@ with patch.dict("sys.modules", {"mujoco": MagicMock()}):
     import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
 
     # Reload to ensure we bind to the MOCK mujoco, regardless of prior imports
-    importlib.reload(engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine)
+    importlib.reload(
+        engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
+    )
 
     # Setup mock behavior
     mujoco.MjModel.from_xml_path = MagicMock()
