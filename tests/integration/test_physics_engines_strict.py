@@ -215,8 +215,8 @@ class TestOpenSimStrict:
         engine._state = MagicMock()  # type: ignore
 
         # Provide correct speeds/coords
-        engine._model.getNumSpeeds.return_value = 2
-        engine._model.getNumCoordinates.return_value = 2
+        engine._model.getNumSpeeds.return_value = 2  # type: ignore
+        engine._model.getNumCoordinates.return_value = 2  # type: ignore
 
         # Mock vector interaction for udot input
         # No error raised
