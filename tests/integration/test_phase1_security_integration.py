@@ -132,13 +132,17 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
 
     @patch("shared.python.secure_subprocess.secure_run")
     @patch("launchers.golf_launcher.QApplication")
+    @patch("launchers.golf_launcher.QIcon")
     def test_golf_launcher_security_integration(
-        self, mock_qapp, mock_secure_run
+        self, mock_qicon, mock_qapp, mock_secure_run
     ) -> None:
         """Test golf launcher uses secure subprocess."""
         # Mock QApplication to prevent GUI initialization
         mock_app_instance = MagicMock()
         mock_qapp.instance.return_value = mock_app_instance
+
+        # Mock QIcon to prevent icon loading issues
+        mock_qicon.return_value = MagicMock()
 
         # Mock successful execution
         mock_result = MagicMock()
