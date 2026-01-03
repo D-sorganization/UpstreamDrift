@@ -1508,7 +1508,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         # but formally it is the ellipsoid of (J J.T)^-1.
         if self.chk_force_ellip.isChecked():
             # For visualization stability, we can use the same eigenvectors as mobility
-            # but invert the radii (Force is reciprocal to Velocity in a given direction)
+            # but invert the radii (Force is reciprocal to Velocity in
+            # a given direction)
             # Force Matrix = inv(J @ J.T)
             # Eigenvalues of inv(A) are 1/lambda(A)
             # Radii are sqrt(1/lambda) = 1/sqrt(lambda)
