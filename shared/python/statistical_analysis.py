@@ -1104,7 +1104,7 @@ class StatisticalAnalyzer:
         # Normalize to [0, 360)
         gamma_deg = np.mod(gamma_deg, 360.0)
 
-        return gamma_deg
+        return np.asarray(gamma_deg)
 
     def compute_phase_angle(self, joint_idx: int) -> np.ndarray:
         """Compute continuous phase angle for a joint.
@@ -1202,9 +1202,9 @@ class StatisticalAnalyzer:
         # Pro avg club speed ~113 mph. Let's say 120 mph = 100 score.
         speed_score = 0.0
         if self.club_head_speed is not None:
-            peak_speed = np.max(self.club_head_speed)  # m/s
+            peak_speed = float(np.max(self.club_head_speed))  # m/s
             peak_speed_mph = peak_speed * 2.23694
-            speed_score = min(100.0, (peak_speed_mph / 120.0) * 100.0)
+            speed_score = float(min(100.0, (peak_speed_mph / 120.0) * 100.0))
 
         # 2. Sequence Score
         # Based on kinematic sequence efficiency
@@ -1237,7 +1237,7 @@ class StatisticalAnalyzer:
             # Or consistent CoM-CoP margin.
             # Let's use inclination. < 10 deg is great, > 30 is bad.
             angle = stab_metrics.mean_inclination_angle
-            stability_score = max(0.0, min(100.0, 100.0 - (angle - 5.0) * 4.0))
+            stability_score = float(max(0.0, min(100.0, 100.0 - (angle - 5.0) * 4.0)))
         else:
             stability_score = 0.0
 
@@ -1259,11 +1259,11 @@ class StatisticalAnalyzer:
                     total_work += w["positive_work"]
 
             if total_work > 0:
-                peak_ke = np.max(ke)
+                peak_ke = float(np.max(ke))
                 # Ratio of output KE to input Work
                 # (This is rough, ignores body KE, but serves as proxy)
                 eff = peak_ke / total_work
-                efficiency_score = min(100.0, eff * 200.0)  # Scaling factor
+                efficiency_score = float(min(100.0, eff * 200.0))  # Scaling factor
         else:
             efficiency_score = 0.0
 
@@ -1276,9 +1276,9 @@ class StatisticalAnalyzer:
                 min(self.joint_torques.shape[1], self.joint_velocities.shape[1])
             ):
                 total_power += self.joint_torques[:, i] * self.joint_velocities[:, i]
-            peak_power = np.max(total_power)
+            peak_power = float(np.max(total_power))
             # Pro might generate > 3000 W?
-            power_score = min(100.0, (peak_power / 3000.0) * 100.0)
+            power_score = float(min(100.0, (peak_power / 3000.0) * 100.0))
 
         return SwingDNAMetrics(
             speed_score=float(speed_score),
