@@ -133,70 +133,92 @@ def test_switch_engine_failure(engine_manager):
 
 
 def test_load_engine_no_loader(engine_manager):
-    # Mock _loaders.get to return None
-    with patch.dict(engine_manager._loaders, {EngineType.MUJOCO: None}):
-        # Or just clear it temporarily if possible, but it's a dict on instance.
-        # But wait, we can just replace the dict.
-        engine_manager._loaders = {}
+    # Mock the registry to return None (no registration)
+    from shared.python.engine_registry import get_registry
+    registry = get_registry()
+    
+    with patch.object(registry, 'get', return_value=None):
         with pytest.raises(GolfModelingError):
             engine_manager._load_engine(EngineType.MUJOCO)
 
 
 def test_load_mujoco_engine_success(engine_manager):
-    # Configure the class mock (which is instantiated inside _load_mujoco_engine)
-    MockMuJoCo = engine_manager._mocks[EngineType.MUJOCO]  # type: ignore[attr-defined]
-    MockMuJoCo.return_value.probe.return_value.is_available.return_value = True
-
+    # Test using the current registry-based approach
+    engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
+    
     mock_mujoco_module = MagicMock()
-
+    
     with patch.dict(sys.modules, {"mujoco": mock_mujoco_module}):
         with patch(
             "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
-        ):
-            engine_manager._load_mujoco_engine()
-
-            assert isinstance(engine_manager.active_physics_engine, MagicMock)
-            # The status is updated by the wrapper _load_engine, not the internal method.
-            # So here we just verify internal state updates
-            assert engine_manager._mujoco_module is not None
+        ) as mock_engine_class:
+            mock_engine_instance = MagicMock()
+            mock_engine_class.return_value = mock_engine_instance
+            
+            result = engine_manager.switch_engine(EngineType.MUJOCO)
+            
+            assert result is True
+            assert engine_manager.active_physics_engine is not None
+            assert engine_manager.engine_status[EngineType.MUJOCO] == EngineStatus.LOADED
 
 
 def test_load_mujoco_engine_probe_fail(engine_manager):
-    MockMuJoCo = engine_manager._mocks[EngineType.MUJOCO]  # type: ignore[attr-defined]
-    MockMuJoCo.return_value.probe.return_value.is_available.return_value = False
-    MockMuJoCo.return_value.probe.return_value.diagnostic_message = "Not ready"
-
-    with pytest.raises(GolfModelingError) as exc:
-        engine_manager._load_mujoco_engine()
-    assert "MuJoCo not ready" in str(exc.value)
+    # Test probe failure through switch_engine
+    engine_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
+    
+    with patch("shared.python.engine_probes.MuJoCoProbe") as mock_probe_class:
+        mock_probe = MagicMock()
+        mock_probe.probe.return_value.is_available.return_value = False
+        mock_probe.probe.return_value.diagnostic_message = "Not ready"
+        mock_probe_class.return_value = mock_probe
+        
+        # This should fail during the loading process
+        with patch("shared.python.engine_loaders.load_mujoco_engine") as mock_loader:
+            mock_loader.side_effect = GolfModelingError("MuJoCo not ready")
+            
+            result = engine_manager.switch_engine(EngineType.MUJOCO)
+            assert result is False
+            assert engine_manager.engine_status[EngineType.MUJOCO] == EngineStatus.ERROR
 
 
 def test_load_drake_engine_success(engine_manager):
-    MockDrake = engine_manager._mocks[EngineType.DRAKE]  # type: ignore[attr-defined]
-    MockDrake.return_value.probe.return_value.is_available.return_value = True
-
+    # Test using the current registry-based approach
+    engine_manager.engine_status[EngineType.DRAKE] = EngineStatus.AVAILABLE
+    
     mock_pydrake_module = MagicMock()
-
+    
     with patch.dict(sys.modules, {"pydrake": mock_pydrake_module}):
         with patch(
             "engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine"
-        ):
-            engine_manager._load_drake_engine()
+        ) as mock_engine_class:
+            mock_engine_instance = MagicMock()
+            mock_engine_class.return_value = mock_engine_instance
+            
+            result = engine_manager.switch_engine(EngineType.DRAKE)
+            
+            assert result is True
             assert engine_manager.active_physics_engine is not None
+            assert engine_manager.engine_status[EngineType.DRAKE] == EngineStatus.LOADED
 
 
 def test_load_pinocchio_engine_success(engine_manager):
-    MockPinocchio = engine_manager._mocks[EngineType.PINOCCHIO]  # type: ignore[attr-defined]
-    MockPinocchio.return_value.probe.return_value.is_available.return_value = True
-
+    # Test using the current registry-based approach
+    engine_manager.engine_status[EngineType.PINOCCHIO] = EngineStatus.AVAILABLE
+    
     mock_pinocchio_module = MagicMock()
-
+    
     with patch.dict(sys.modules, {"pinocchio": mock_pinocchio_module}):
         with patch(
             "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
-        ):
-            engine_manager._load_pinocchio_engine()
+        ) as mock_engine_class:
+            mock_engine_instance = MagicMock()
+            mock_engine_class.return_value = mock_engine_instance
+            
+            result = engine_manager.switch_engine(EngineType.PINOCCHIO)
+            
+            assert result is True
             assert engine_manager.active_physics_engine is not None
+            assert engine_manager.engine_status[EngineType.PINOCCHIO] == EngineStatus.LOADED
 
 
 def test_load_matlab_engine_success(engine_manager):
