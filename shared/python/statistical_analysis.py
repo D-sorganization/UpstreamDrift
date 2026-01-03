@@ -1272,7 +1272,9 @@ class StatisticalAnalyzer:
         power_score = 0.0
         if self.joint_torques.shape[1] > 0:
             total_power = np.zeros(len(self.times))
-            for i in range(min(self.joint_torques.shape[1], self.joint_velocities.shape[1])):
+            for i in range(
+                min(self.joint_torques.shape[1], self.joint_velocities.shape[1])
+            ):
                 total_power += self.joint_torques[:, i] * self.joint_velocities[:, i]
             peak_power = np.max(total_power)
             # Pro might generate > 3000 W?

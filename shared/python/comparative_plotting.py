@@ -216,8 +216,12 @@ class ComparativePlotter:
             title: Title
         """
         # Align both joints
-        pos1_aligned = self.analyzer.align_signals("joint_positions", joint_idx=joint_idx_1)
-        pos2_aligned = self.analyzer.align_signals("joint_positions", joint_idx=joint_idx_2)
+        pos1_aligned = self.analyzer.align_signals(
+            "joint_positions", joint_idx=joint_idx_1
+        )
+        pos2_aligned = self.analyzer.align_signals(
+            "joint_positions", joint_idx=joint_idx_2
+        )
 
         if pos1_aligned is None or pos2_aligned is None:
             ax = fig.add_subplot(111)
@@ -261,8 +265,12 @@ class ComparativePlotter:
             s=50,
         )
 
-        ax.set_xlabel(f"Joint {joint_idx_1} Angle (deg)", fontsize=11, fontweight="bold")
-        ax.set_ylabel(f"Joint {joint_idx_2} Angle (deg)", fontsize=11, fontweight="bold")
+        ax.set_xlabel(
+            f"Joint {joint_idx_1} Angle (deg)", fontsize=11, fontweight="bold"
+        )
+        ax.set_ylabel(
+            f"Joint {joint_idx_2} Angle (deg)", fontsize=11, fontweight="bold"
+        )
         ax.set_title(title, fontsize=12, fontweight="bold")
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3)
