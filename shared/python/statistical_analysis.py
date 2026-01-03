@@ -1187,7 +1187,7 @@ class StatisticalAnalyzer:
         # the continuous curve or variability.
         # For display, we often wrap to [-180, 180] or [0, 180] absolute
         # but returning raw difference preserves the most info.
-        return crp
+        return np.asarray(crp)
 
     def compute_swing_dna(self) -> SwingDNAMetrics | None:
         """Compute 'Swing DNA' scores (0-100) for radar chart visualization.
