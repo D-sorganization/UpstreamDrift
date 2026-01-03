@@ -196,6 +196,78 @@ class ComparativePlotter:
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3)
 
+    def plot_coordination_comparison(
+        self,
+        fig: Figure,
+        joint_idx_1: int,
+        joint_idx_2: int,
+        title: str = "Coordination Comparison",
+    ) -> None:
+        """Compare coordination patterns (Phase-Phase) of two swings.
+
+        Note: Ideally compares Continuous Relative Phase (CRP) if available,
+        but typically we plot Angle-Angle overlays or calculate CRP on fly.
+        Here we'll overlay Angle-Angle diagrams first as it's the most standard.
+
+        Args:
+            fig: Matplotlib figure
+            joint_idx_1: Joint 1 index (X axis)
+            joint_idx_2: Joint 2 index (Y axis)
+            title: Title
+        """
+        # Align both joints
+        pos1_aligned = self.analyzer.align_signals("joint_positions", joint_idx=joint_idx_1)
+        pos2_aligned = self.analyzer.align_signals("joint_positions", joint_idx=joint_idx_2)
+
+        if pos1_aligned is None or pos2_aligned is None:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Data not available", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        # Plot Swing A (Angle 1 vs Angle 2)
+        ax.plot(
+            np.rad2deg(pos1_aligned.signal_a),
+            np.rad2deg(pos2_aligned.signal_a),
+            color=self.colors["a"],
+            label=self.analyzer.name_a,
+            linewidth=2,
+        )
+
+        # Plot Swing B
+        ax.plot(
+            np.rad2deg(pos1_aligned.signal_b),
+            np.rad2deg(pos2_aligned.signal_b),
+            color=self.colors["b"],
+            label=self.analyzer.name_b,
+            linewidth=2,
+            linestyle="--",
+        )
+
+        # Mark Start
+        ax.scatter(
+            np.rad2deg(pos1_aligned.signal_a[0]),
+            np.rad2deg(pos2_aligned.signal_a[0]),
+            color=self.colors["a"],
+            marker="o",
+            s=50,
+        )
+        ax.scatter(
+            np.rad2deg(pos1_aligned.signal_b[0]),
+            np.rad2deg(pos2_aligned.signal_b[0]),
+            color=self.colors["b"],
+            marker="o",
+            s=50,
+        )
+
+        ax.set_xlabel(f"Joint {joint_idx_1} Angle (deg)", fontsize=11, fontweight="bold")
+        ax.set_ylabel(f"Joint {joint_idx_2} Angle (deg)", fontsize=11, fontweight="bold")
+        ax.set_title(title, fontsize=12, fontweight="bold")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3)
+        ax.axis("equal")  # Preserve aspect ratio for phase portraits
+
     def plot_3d_trajectory_comparison(
         self,
         fig: Figure,

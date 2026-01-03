@@ -458,6 +458,54 @@ class GolfSwingPlotter:
 
         fig.tight_layout()
 
+    def plot_continuous_relative_phase(
+        self,
+        fig: Figure,
+        crp_data: np.ndarray,
+        title: str | None = None,
+    ) -> None:
+        """Plot Continuous Relative Phase (CRP) time series.
+
+        Args:
+            fig: Matplotlib figure
+            crp_data: Array of CRP values in degrees
+            title: Optional title
+        """
+        times, _ = self.recorder.get_time_series("joint_positions")
+
+        if len(times) == 0 or len(crp_data) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        if len(crp_data) != len(times):
+            plot_times = times[: len(crp_data)]
+        else:
+            plot_times = times
+
+        ax = fig.add_subplot(111)
+
+        ax.plot(
+            plot_times,
+            crp_data,
+            color=self.colors["primary"],
+            linewidth=2,
+            label="CRP",
+        )
+
+        # Draw phase zones
+        # 0: In-phase, 180: Anti-phase
+        ax.axhline(y=0, color="green", linestyle="--", alpha=0.3, label="In-Phase")
+        ax.axhline(y=180, color="red", linestyle="--", alpha=0.3, label="Anti-Phase")
+        ax.axhline(y=-180, color="red", linestyle="--", alpha=0.3)
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Relative Phase (deg)", fontsize=12, fontweight="bold")
+        ax.set_title(title or "Continuous Relative Phase", fontsize=14, fontweight="bold")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
+
     def plot_stability_metrics(self, fig: Figure) -> None:
         """Plot stability metrics (CoM-CoP distance and Inclination Angle).
 
@@ -1685,6 +1733,96 @@ class GolfSwingPlotter:
         ax.set_title("System Angular Momentum", fontsize=14, fontweight="bold")
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3, linestyle="--")
+        fig.tight_layout()
+
+    def plot_kinematic_sequence_bars(
+        self,
+        fig: Figure,
+        segment_indices: dict[str, int],
+        impact_time: float | None = None,
+    ) -> None:
+        """Plot kinematic sequence as a Gantt-style bar chart of peak times.
+
+        Visualizes the 'gap' between peak velocities of segments.
+
+        Args:
+            fig: Matplotlib figure
+            segment_indices: Map of segment names to joint indices
+            impact_time: Optional impact time to mark as reference (0)
+        """
+        times, velocities = self.recorder.get_time_series("joint_velocities")
+        velocities = np.asarray(velocities)
+
+        if len(times) == 0 or velocities.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        # Find peaks
+        peaks = []
+        names = []
+        for name, idx in segment_indices.items():
+            if idx < velocities.shape[1]:
+                vel_abs = np.abs(velocities[:, idx])
+                peak_idx = np.argmax(vel_abs)
+                peaks.append(times[peak_idx])
+                names.append(name)
+
+        if not peaks:
+            ax.text(0.5, 0.5, "No valid segments", ha="center", va="center")
+            return
+
+        # Reference time (impact or first peak)
+        ref_time = impact_time if impact_time is not None else peaks[-1]
+
+        # Calculate relative times
+        rel_times = np.array(peaks) - ref_time
+
+        # Plot horizontal bars (using barh or stick plot)
+        # We'll use scatter points with lines to the axis for clarity
+        y_pos = np.arange(len(names))
+
+        colors = [
+            self.colors["primary"],
+            self.colors["secondary"],
+            self.colors["tertiary"],
+            self.colors["quaternary"],
+            self.colors["quinary"],
+        ][: len(names)]
+
+        # Draw lines from 0 to peak time? No, just point is better for instant
+        # Or maybe bar from Start of Downswing to Peak?
+        # Let's just do a Lollipop chart: Line from 0 (ref) to peak? No, ref is impact.
+        # Line from left boundary to peak?
+        # Simple Lollipop:
+        ax.hlines(y=y_pos, xmin=min(0, np.min(rel_times) - 0.05), xmax=rel_times, color="gray", alpha=0.5)
+        ax.scatter(rel_times, y_pos, color=colors, s=100, zorder=3)
+
+        # Add text labels for timing (ms)
+        for i, t in enumerate(rel_times):
+            ax.text(
+                t,
+                i + 0.15,
+                f"{t*1000:.0f} ms",
+                ha="center",
+                fontsize=10,
+                fontweight="bold",
+                color=colors[i],
+            )
+
+        ax.set_yticks(y_pos)
+        ax.set_yticklabels(names, fontweight="bold", fontsize=11)
+        ax.set_xlabel("Time relative to Impact (s)", fontsize=12, fontweight="bold")
+        ax.set_title("Kinematic Sequence Timing", fontsize=14, fontweight="bold")
+        ax.axvline(0, color="black", linestyle="--", alpha=0.8, label="Impact")
+
+        # Invert y axis so proximal (first in list) is at top?
+        # Typically Pelvis (0) is top or bottom. Let's keep input order (top-down)
+        ax.invert_yaxis()
+        ax.grid(True, axis="x", alpha=0.3)
+        ax.legend()
         fig.tight_layout()
 
     def plot_cop_trajectory(self, fig: Figure) -> None:
