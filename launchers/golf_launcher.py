@@ -2233,10 +2233,22 @@ class GolfLauncher(QMainWindow):
 
         # Network for Meshcat (Drake/Pinocchio)
         if host_port:
-            cmd.extend(["-p", "7000-7010:7000-7010"])
+            # Find an available port on the host
+            available_port = self._find_available_port(host_port)
+
+            # Map Host(Available) -> Container(7000)
+            # We assume the internal app always binds to 7000 as configured/default
+            cmd.extend(["-p", f"{available_port}:7000"])
             cmd.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
 
+            # Update the browser launch to use the actual host port
+            if host_port != available_port:
+                logger.info(f"Port {host_port} busy, using {available_port} instead")
+
+            host_port = available_port # Update for browser launch below
+
         cmd.append(DOCKER_IMAGE_NAME)
+
 
         # Append entry command
         if entry_cmd:
@@ -2261,13 +2273,29 @@ class GolfLauncher(QMainWindow):
         else:
             subprocess.Popen(cmd)
 
+    def _find_available_port(self, start_port: int, max_attempts: int = 100) -> int:
+        """Find an available port starting from start_port."""
+        import socket
+
+        for port in range(start_port, start_port + max_attempts):
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                try:
+                    s.bind(("0.0.0.0", port))
+                    return port
+                except OSError:
+                    continue
+
+        raise RuntimeError(f"Could not find available port in range {start_port}-{start_port + max_attempts}")
+
     def _start_meshcat_browser(self, port: int) -> None:
         """Start the meshcat browser."""
 
         def open_url() -> None:
             """Open the browser URL."""
             time.sleep(3)
-            webbrowser.open(f"http://localhost:{port}")
+            # Meshcat default UI is at /static/
+            # Use 127.0.0.1 instead of localhost to avoid resolution issues
+            webbrowser.open(f"http://127.0.0.1:{port}/static/")
 
         threading.Thread(target=open_url, daemon=True).start()
 
