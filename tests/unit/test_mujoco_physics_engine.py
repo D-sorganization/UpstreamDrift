@@ -73,8 +73,10 @@ def test_load_from_string(mock_mujoco, engine):
 def test_load_from_path(mock_mujoco, engine):
     path = "model.xml"
 
-    # Mock the security validation to allow test paths
-    with patch("shared.python.security_utils.validate_path") as mock_validate:
+    # Mock the security validation to allow test paths - patch where it's imported
+    with patch(
+        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.validate_path"
+    ) as mock_validate:
         mock_validate.return_value = Path(path).resolve()
 
         engine.load_from_path(path)
