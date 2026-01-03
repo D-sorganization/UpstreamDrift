@@ -25,6 +25,7 @@ from .spatial_vectors import (
     cross_force,
     cross_force_fast,
     cross_motion,
+    cross_motion_axis,
     cross_motion_fast,
     spatial_cross,
 )
@@ -37,6 +38,7 @@ __all__ = [
     "cross_force",
     "cross_force_fast",
     "cross_motion",
+    "cross_motion_axis",
     "cross_motion_fast",
     "inv_xtrans",
     # Joints
