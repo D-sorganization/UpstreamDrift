@@ -1,3 +1,4 @@
+import os
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -8,6 +9,9 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parents[1]))
 
 from shared.python.common_utils import get_shared_urdf_path
+
+# Check if display is available for Qt tests
+HAS_DISPLAY = os.environ.get("DISPLAY") is not None or sys.platform == "win32"
 
 # Try to import PyQt6 and URDFGenerator, skip tests if not available
 try:
@@ -29,7 +33,10 @@ class MockFileDialog:
         return "test_robot.urdf", "URDF Files (*.urdf)"
 
 
-@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not available")
+@pytest.mark.skipif(
+    not PYQT6_AVAILABLE or not HAS_DISPLAY,
+    reason="PyQt6 not available or no display",
+)
 def test_urdf_generation_logic(qtbot):
     """Test the logic of generating URDF XML."""
     window = URDFGenerator()
