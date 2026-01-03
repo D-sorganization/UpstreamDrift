@@ -27,9 +27,9 @@ models:
   # --- Primary Engines (Row 2) ---
   - id: myosim_suite
     name: "MyoSim Suite"
-    description: "Multi-scale muscle simulation framework integrating with OpenSim. Models sarcomere dynamics and detailed contraction physics."
-    type: "myosim"
-    path: "engines/physics_engines/myosim"
+    description: "Rigid-body physics engine powered by MuJoCo, integrated via MyoSuite Gym environments. Provides access to official MyoSuite musculoskeletal models."
+    type: "myosuite"
+    path: "engines/physics_engines/myosuite"
 
   - id: openpose_analysis
     name: "OpenPose Analysis"

@@ -50,9 +50,21 @@ def test_load_from_path(engine):
         assert engine.model_name == "TestModel"
 
 
-def test_load_from_string_raises(engine):
-    with pytest.raises(NotImplementedError):
+@patch("tempfile.NamedTemporaryFile")
+def test_load_from_string(mock_named_temp, engine):
+    # Setup mock temp file
+    mock_tmp = MagicMock()
+    mock_tmp.name = "/tmp/fake.osim"
+    # context manager return
+    mock_named_temp.return_value.__enter__.return_value = mock_tmp
+
+    # Mock load_from_path to avoid real loading logic
+    with patch.object(engine, "load_from_path") as mock_load:
         engine.load_from_string("<osim/>")
+        mock_load.assert_called_once_with("/tmp/fake.osim")
+
+    # Check that write was called
+    mock_tmp.write.assert_called_once_with("<osim/>")
 
 
 def test_reset(engine):
