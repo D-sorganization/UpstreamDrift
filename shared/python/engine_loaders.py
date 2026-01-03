@@ -14,6 +14,7 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
     """Load MuJoCo engine with full initialization."""
     try:
         import mujoco  # noqa: F401
+
         from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
             MuJoCoPhysicsEngine,
         )
@@ -30,7 +31,7 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
             )
 
         engine = MuJoCoPhysicsEngine()
-        
+
         # Load default model to verify engine readiness
         model_path = (
             suite_root / "engines" / "physics_engines" / "mujoco" / "models" / "simple_pendulum.xml"
@@ -52,11 +53,13 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
 def load_drake_engine(suite_root: Path) -> PhysicsEngine:
     """Load Drake engine with full initialization."""
     try:
-        from .engine_probes import DrakeProbe
+        import pydrake  # noqa: F401
+
         from engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
         )
-        import pydrake  # noqa: F401
+
+        from .engine_probes import DrakeProbe
 
         probe = DrakeProbe(suite_root)
         result = probe.probe()
@@ -73,7 +76,7 @@ def load_drake_engine(suite_root: Path) -> PhysicsEngine:
         urdf_path = (
             suite_root
             / "engines"
-            / "physics_engines" 
+            / "physics_engines"
             / "pinocchio"
             / "models"
             / "generated"
@@ -99,11 +102,13 @@ def load_drake_engine(suite_root: Path) -> PhysicsEngine:
 def load_pinocchio_engine(suite_root: Path) -> PhysicsEngine:
     """Load Pinocchio engine."""
     try:
-        from .engine_probes import PinocchioProbe
+        import pinocchio  # noqa: F401
+
         from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
             PinocchioPhysicsEngine,
         )
-        import pinocchio  # noqa: F401
+
+        from .engine_probes import PinocchioProbe
 
         probe = PinocchioProbe(suite_root)
         result = probe.probe()
@@ -141,10 +146,11 @@ def load_pinocchio_engine(suite_root: Path) -> PhysicsEngine:
 def load_opensim_engine(suite_root: Path) -> PhysicsEngine:
     """Load OpenSim engine."""
     try:
-        from .engine_probes import OpenSimProbe
         from engines.physics_engines.opensim.python.opensim_physics_engine import (
             OpenSimPhysicsEngine,
         )
+
+        from .engine_probes import OpenSimProbe
 
         probe = OpenSimProbe(suite_root)
         result = probe.probe()
@@ -164,10 +170,11 @@ def load_opensim_engine(suite_root: Path) -> PhysicsEngine:
 def load_myosim_engine(suite_root: Path) -> PhysicsEngine:
     """Load MyoSim engine."""
     try:
-        from .engine_probes import MyoSimProbe
         from engines.physics_engines.myosim.python.myosim_physics_engine import (
             MyoSimPhysicsEngine,
         )
+
+        from .engine_probes import MyoSimProbe
 
         probe = MyoSimProbe(suite_root)
         result = probe.probe()
