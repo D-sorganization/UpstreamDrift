@@ -140,8 +140,10 @@ class TestMuJoCoEngineIntegration:
 
         engine = MuJoCoPhysicsEngine()
 
-        # Load real URDF file
-        engine.load_from_path(str(SIMPLE_ARM_URDF))
+        # Load real URDF file - mock security validation for test
+        with patch("shared.python.security_utils.validate_path") as mock_validate:
+            mock_validate.return_value = SIMPLE_ARM_URDF
+            engine.load_from_path(str(SIMPLE_ARM_URDF))
 
         # Verify engine loaded model correctly
         assert engine.model is not None
@@ -171,7 +173,11 @@ class TestMuJoCoEngineIntegration:
         )
 
         engine = MuJoCoPhysicsEngine()
-        engine.load_from_path(str(SIMPLE_ARM_URDF))
+        
+        # Mock security validation for test
+        with patch("shared.python.security_utils.validate_path") as mock_validate:
+            mock_validate.return_value = SIMPLE_ARM_URDF
+            engine.load_from_path(str(SIMPLE_ARM_URDF))
 
         # Get initial state
         initial_time = engine.data.time if engine.data is not None else 0.0
