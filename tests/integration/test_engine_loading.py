@@ -49,7 +49,10 @@ def test_mujoco_loading_success(mock_probe, mock_engine_manager):
                     assert result is True
                     assert mock_engine_manager.get_current_engine() == EngineType.MUJOCO
                     # Verify that the engine was loaded successfully
-                    assert mock_engine_manager.engine_status[EngineType.MUJOCO] == EngineStatus.LOADED
+                    assert (
+                        mock_engine_manager.engine_status[EngineType.MUJOCO]
+                        == EngineStatus.LOADED
+                    )
                     assert mock_engine_manager.active_physics_engine is not None
 
 
@@ -121,7 +124,10 @@ def test_pinocchio_loading_success(
             assert result is True
             assert mock_engine_manager.get_current_engine() == EngineType.PINOCCHIO
             # Verify that the engine was loaded successfully
-            assert mock_engine_manager.engine_status[EngineType.PINOCCHIO] == EngineStatus.LOADED
+            assert (
+                mock_engine_manager.engine_status[EngineType.PINOCCHIO]
+                == EngineStatus.LOADED
+            )
             assert mock_engine_manager.active_physics_engine is not None
 
 

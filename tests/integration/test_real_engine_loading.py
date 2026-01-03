@@ -173,7 +173,7 @@ class TestMuJoCoEngineIntegration:
         )
 
         engine = MuJoCoPhysicsEngine()
-        
+
         # Mock security validation for test
         with patch("shared.python.security_utils.validate_path") as mock_validate:
             mock_validate.return_value = SIMPLE_ARM_URDF
