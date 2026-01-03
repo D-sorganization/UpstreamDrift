@@ -162,9 +162,7 @@ class C3DDataReader:
             coordinates[too_noisy, :] = np.nan
 
         current_marker_count = len(sorted_labels)
-        frame_indices = np.repeat(
-            np.arange(metadata.frame_count), current_marker_count
-        )
+        frame_indices = np.repeat(np.arange(metadata.frame_count), current_marker_count)
         marker_names = np.tile(sorted_labels, metadata.frame_count)
 
         data = {
@@ -472,9 +470,7 @@ class C3DDataReader:
             # Metadata for versioning
             metadata = {
                 "schema_version": SCHEMA_VERSION,
-                "created_at_utc": datetime.now(
-                    timezone.utc  # noqa: UP017
-                ).isoformat(),
+                "created_at_utc": datetime.now(timezone.utc).isoformat(),  # noqa: UP017
                 "source_file": self.file_path.name,
                 "row_count": len(dataframe),
                 "units": self.get_metadata().units,

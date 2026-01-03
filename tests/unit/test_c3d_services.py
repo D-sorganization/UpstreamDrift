@@ -9,7 +9,7 @@ import pytest
 
 # Add source directory to path to handle "3D_Golf_Model" invalid identifier issue
 # Repo root is assumed to be current working directory of test runner
-REPO_ROOT = Path(__file__).resolve().parents[2] # tests/unit -> tests -> root
+REPO_ROOT = Path(__file__).resolve().parents[2]  # tests/unit -> tests -> root
 SRC_PATH = (
     REPO_ROOT
     / "engines"
@@ -60,7 +60,9 @@ def test_compute_marker_statistics_empty():
     t = np.array([0.0])
     pos = np.array([[0, 0, 0]])
     stats = compute_marker_statistics(t, pos)
-    assert np.isnan(stats["path_length"]) or stats["path_length"] == 0.0 # Implementation detail: check code
+    assert (
+        np.isnan(stats["path_length"]) or stats["path_length"] == 0.0
+    )  # Implementation detail: check code
     assert np.isnan(stats["max_speed"])
 
 
@@ -78,6 +80,7 @@ def test_compute_marker_statistics_nan_handling():
 # ---------------------------------------------------------------------------
 # Test Loader Service
 # ---------------------------------------------------------------------------
+
 
 @patch("apps.services.c3d_loader.C3DDataReader")
 @patch("os.path.exists")
@@ -100,18 +103,25 @@ def test_load_c3d_file_success(mock_exists, mock_reader_cls):
 
     # Mock dataframes
     import pandas as pd
-    mock_reader.points_dataframe.return_value = pd.DataFrame({
-        "time": np.linspace(0, 0.1, 10),
-        "marker": ["M1"] * 10,
-        "x": np.zeros(10), "y": np.zeros(10), "z": np.zeros(10),
-        "residual": np.zeros(10)
-    })
 
-    mock_reader.analog_dataframe.return_value = pd.DataFrame({
-        "time": np.linspace(0, 0.1, 100),
-        "channel": ["A1"] * 100,
-        "value": np.ones(100)
-    })
+    mock_reader.points_dataframe.return_value = pd.DataFrame(
+        {
+            "time": np.linspace(0, 0.1, 10),
+            "marker": ["M1"] * 10,
+            "x": np.zeros(10),
+            "y": np.zeros(10),
+            "z": np.zeros(10),
+            "residual": np.zeros(10),
+        }
+    )
+
+    mock_reader.analog_dataframe.return_value = pd.DataFrame(
+        {
+            "time": np.linspace(0, 0.1, 100),
+            "channel": ["A1"] * 100,
+            "value": np.ones(100),
+        }
+    )
 
     model = load_c3d_file("/fake/path.c3d")
 
@@ -133,6 +143,7 @@ def test_load_c3d_file_not_found(mock_exists):
 # Test Loader Thread
 # ---------------------------------------------------------------------------
 
+
 def test_loader_thread(qtbot):
     """Test that thread emits signals."""
     # Since we can't reliably import the module statically due to path issues,
@@ -148,7 +159,7 @@ def test_loader_thread(qtbot):
     C3DLoaderThread = loader_thread_mod.C3DLoaderThread
 
     # Patch load_c3d_file in the loader_thread module namespace
-    with patch.object(loader_thread_mod, 'load_c3d_file') as mock_load:
+    with patch.object(loader_thread_mod, "load_c3d_file") as mock_load:
         # Case 1: Success
         mock_data = C3DDataModel(filepath="test_path.c3d")
         mock_load.return_value = mock_data

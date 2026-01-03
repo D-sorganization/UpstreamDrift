@@ -37,14 +37,16 @@ class TestC3DExportFeatures:
     @pytest.fixture
     def sample_dataframe(self):
         """Create a dummy DataFrame for export."""
-        return pd.DataFrame({
-            "frame": [1, 2],
-            "marker": ["A", "A"],
-            "x": [10, 11],
-            "y": [20, 21],
-            "z": [30, 31],
-            "residual": [0.0, 0.0]
-        })
+        return pd.DataFrame(
+            {
+                "frame": [1, 2],
+                "marker": ["A", "A"],
+                "x": [10, 11],
+                "y": [20, 21],
+                "z": [30, 31],
+                "residual": [0.0, 0.0],
+            }
+        )
 
     @pytest.fixture
     def mock_project_root(self, tmp_path):
@@ -53,7 +55,9 @@ class TestC3DExportFeatures:
             mock_cwd.return_value = Path(tmp_path).resolve()
             yield mock_cwd
 
-    def test_security_prevents_directory_traversal(self, mock_reader, sample_dataframe, tmp_path):
+    def test_security_prevents_directory_traversal(
+        self, mock_reader, sample_dataframe, tmp_path
+    ):
         """Ensure attempts to write outside the project root are blocked."""
         with patch("pathlib.Path.cwd") as mock_cwd:
             mock_root = Path(tmp_path) / "project_root"
@@ -65,29 +69,31 @@ class TestC3DExportFeatures:
 
             with pytest.raises(ValueError, match="Security: Refusing to output to"):
                 mock_reader._export_dataframe(
-                    sample_dataframe,
-                    str(outside_path),
-                    file_format="csv"
+                    sample_dataframe, str(outside_path), file_format="csv"
                 )
 
-    def test_security_allows_project_root_files(self, mock_reader, sample_dataframe, mock_project_root, tmp_path):
+    def test_security_allows_project_root_files(
+        self, mock_reader, sample_dataframe, mock_project_root, tmp_path
+    ):
         """Ensure writing within the project root is allowed."""
         # Safe path (inside tmp_path which is mocked as root)
         safe_path = tmp_path / "safe_export.csv"
 
         # Should not raise
         result = mock_reader._export_dataframe(
-            sample_dataframe,
-            str(safe_path),
-            file_format="csv"
+            sample_dataframe, str(safe_path), file_format="csv"
         )
         assert result == safe_path
 
-    def test_csv_metadata_sidecar_creation(self, mock_reader, sample_dataframe, mock_project_root, tmp_path):
+    def test_csv_metadata_sidecar_creation(
+        self, mock_reader, sample_dataframe, mock_project_root, tmp_path
+    ):
         """Verify _meta.json sidecar is created for CSV exports."""
         output_path = tmp_path / "export.csv"
 
-        mock_reader._export_dataframe(sample_dataframe, str(output_path), file_format="csv")
+        mock_reader._export_dataframe(
+            sample_dataframe, str(output_path), file_format="csv"
+        )
 
         # Check main file
         assert output_path.exists()
@@ -105,11 +111,15 @@ class TestC3DExportFeatures:
         assert meta["units"] == "mm"
         assert "created_at_utc" in meta
 
-    def test_json_envelope_structure(self, mock_reader, sample_dataframe, mock_project_root, tmp_path):
+    def test_json_envelope_structure(
+        self, mock_reader, sample_dataframe, mock_project_root, tmp_path
+    ):
         """Verify JSON export uses the envelope pattern."""
         output_path = tmp_path / "export.json"
 
-        mock_reader._export_dataframe(sample_dataframe, str(output_path), file_format="json")
+        mock_reader._export_dataframe(
+            sample_dataframe, str(output_path), file_format="json"
+        )
 
         with open(output_path) as f:
             data = json.load(f)
@@ -119,18 +129,24 @@ class TestC3DExportFeatures:
         assert data["metadata"]["schema_version"] == SCHEMA_VERSION
         assert len(data["data"]) == 2
 
-    def test_npz_metadata_embedding(self, mock_reader, sample_dataframe, mock_project_root, tmp_path):
+    def test_npz_metadata_embedding(
+        self, mock_reader, sample_dataframe, mock_project_root, tmp_path
+    ):
         """Verify NPZ export includes metadata in the archive."""
         output_path = tmp_path / "export.npz"
 
-        mock_reader._export_dataframe(sample_dataframe, str(output_path), file_format="npz")
+        mock_reader._export_dataframe(
+            sample_dataframe, str(output_path), file_format="npz"
+        )
 
         with np.load(output_path) as archive:
             assert "_metadata" in archive
             meta = json.loads(str(archive["_metadata"]))
             assert meta["schema_version"] == SCHEMA_VERSION
 
-    def test_telemetry_logging(self, mock_reader, sample_dataframe, mock_project_root, tmp_path):
+    def test_telemetry_logging(
+        self, mock_reader, sample_dataframe, mock_project_root, tmp_path
+    ):
         """Verify execution time is logged."""
         with patch("c3d_reader.log_execution_time") as mock_log_ctx:
             # Setup context manager mock
@@ -139,7 +155,9 @@ class TestC3DExportFeatures:
             mock_ctx_instance.__enter__.return_value = None
 
             output_path = tmp_path / "telemetry_test.csv"
-            mock_reader._export_dataframe(sample_dataframe, str(output_path), file_format="csv")
+            mock_reader._export_dataframe(
+                sample_dataframe, str(output_path), file_format="csv"
+            )
 
             mock_log_ctx.assert_called_once()
             args, _ = mock_log_ctx.call_args
@@ -147,10 +165,12 @@ class TestC3DExportFeatures:
 
     def test_csv_injection_sanitization(self, mock_reader, mock_project_root, tmp_path):
         """Verify dangerous characters are escaped in CSV."""
-        dangerous_df = pd.DataFrame({
-            "col1": ["=SUM(1,1)", "@EVIL", "+DATA", "-MINUS", "SAFE"],
-            "col2": [1, 2, 3, 4, 5]
-        })
+        dangerous_df = pd.DataFrame(
+            {
+                "col1": ["=SUM(1,1)", "@EVIL", "+DATA", "-MINUS", "SAFE"],
+                "col2": [1, 2, 3, 4, 5],
+            }
+        )
 
         output_path = tmp_path / "sanitized.csv"
         mock_reader._export_dataframe(dangerous_df, str(output_path), file_format="csv")

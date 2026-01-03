@@ -21,6 +21,7 @@ class EngineType(Enum):
     MATLAB_3D = "matlab_3d"
     PENDULUM = "pendulum"
 
+
 class EngineStatus(Enum):
     """Engine status types."""
 
@@ -67,8 +68,10 @@ class EngineRegistry:
         """Get all registered engine types."""
         return list(self._registrations.keys())
 
+
 # Global registry instance
 _registry = EngineRegistry()
+
 
 def get_registry() -> EngineRegistry:
     """Get the global engine registry."""
