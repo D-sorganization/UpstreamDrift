@@ -10,6 +10,7 @@ import numpy as np
 from mujoco_humanoid_golf.rigid_body_dynamics.common import DEFAULT_GRAVITY
 from mujoco_humanoid_golf.spatial_algebra import (
     cross_force_fast,
+    cross_motion_axis,
     cross_motion_fast,
     jcalc,
 )
@@ -120,6 +121,7 @@ def rnea(  # noqa: PLR0915
     for i in range(nb):
         # Calculate joint transform and motion subspace
         # OPTIMIZATION: Use pre-allocated buffer
+        # dof_idx from jcalc is the spatial axis index (0-5) or -1 if not standard
         xj_transform, s_subspace, dof_idx = jcalc(model_jtype[i], q[i], out=xj_buf)
         s_subspace_list[i] = s_subspace
         dof_indices[i] = dof_idx
@@ -184,7 +186,10 @@ def rnea(  # noqa: PLR0915
 
             # Optimization: Use pre-allocated buffer for cross product
             # Overwrites cross_buf, which is fine as we are done with qdd term
-            cross_motion_fast(v[:, i], vj_velocity, out=cross_buf)
+            if dof_idx != -1:
+                cross_motion_axis(v[:, i], dof_idx, qd[i], out=cross_buf)
+            else:
+                cross_motion_fast(v[:, i], vj_velocity, out=cross_buf)
             scratch_vec += cross_buf
             a[:, i] = scratch_vec
 
