@@ -36,8 +36,17 @@ def compute_marker_statistics(
         speed = segment_length / dt
 
     path_length = np.nansum(segment_length)
-    max_speed = np.nanmax(speed) if speed.size > 0 else np.nan
-    mean_speed = np.nanmean(speed) if speed.size > 0 else np.nan
+    
+    # Check if we have valid speed data before computing stats
+    # speed might be all NaNs if dt was all NaNs
+    valid_speed = speed[np.isfinite(speed)]
+    
+    if valid_speed.size > 0:
+        max_speed = np.max(valid_speed)
+        mean_speed = np.mean(valid_speed)
+    else:
+        max_speed = np.nan
+        mean_speed = np.nan
 
     return {
         "path_length": float(path_length),
