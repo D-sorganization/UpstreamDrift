@@ -1449,45 +1449,76 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self.lbl_rank.setText("Error")
 
     def _draw_ellipsoids(self) -> None:
-        """Draw mobility/force ellipsoids at end effector."""
+        """Draw mobility/force ellipsoids at end effector (club_head)."""
         if self.model is None or self.data is None or self.viewer is None:
             return
 
-        joint_id = self.model.njoints - 1
-        joint_pos = self.data.oMi[joint_id].translation
+        # Attempt to find the club_head frame, fallback to last joint
+        frame_name = "club_head"
+        if self.model.existFrame(frame_name):
+            frame_id = self.model.getFrameId(frame_name)
+            # Use Frame Jacobian (Linear only, top 3 rows)
+            # LOCAL_WORLD_ALIGNED gives us the Jacobian incident to the frame origin
+            # but expressed in World orientation, which is correct for visualization.
+            J_full = pin.getFrameJacobian(
+                self.model,
+                self.data,
+                frame_id,
+                pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
+            )
+            # Get position of the frame (club_head)
+            pos = self.data.oMf[frame_id].translation
+        else:
+            # Fallback to last joint
+            logger.warning(
+                f"Frame '{frame_name}' not found. Using last joint as End Effector."
+            )
+            joint_id = self.model.njoints - 1
+            J_full = pin.getJointJacobian(
+                self.model,
+                self.data,
+                joint_id,
+                pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
+            )
+            pos = self.data.oMi[joint_id].translation
 
-        J_full = pin.getJointJacobian(
-            self.model,
-            self.data,
-            joint_id,
-            pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
-        )
+        # Linear Jacobian (3xN)
         J = J_full[:3, :]
 
-        M = pin.crba(self.model, self.data, self.q)
-        M_sym = np.triu(M) + np.triu(M, 1).T
+        # 1. Mobility Ellipsoid (Kinematic): J * J.T
+        # Represents the velocity capability of the end-effector
+        if self.chk_mobility.isChecked():
+            mobility_matrix = J @ J.T
+            eigvals_m, eigvecs_m = np.linalg.eigh(mobility_matrix)
+            # Radii are sqrt of eigenvalues (A v = lambda v)
+            radii_m = np.sqrt(np.maximum(eigvals_m, 1e-6))
+            self._draw_ellipsoid_meshcat(
+                "mobility", pos, eigvecs_m, radii_m * 0.5, 0x00FF00
+            )  # Scale down for viz
 
-        try:
-            Minv = np.linalg.inv(M_sym)
-            Lambda_inv = J @ Minv @ J.T
+        # 2. Force Ellipsoid (Static): inv(J * J.T)
+        # Represents the static force capability (duality of velocity)
+        # Often visualized as J * J.T itself with radii ~ 1/sqrt(lambda)
+        # but formally it is the ellipsoid of (J J.T)^-1.
+        if self.chk_force_ellip.isChecked():
+            # For visualization stability, we can use the same eigenvectors as mobility
+            # but invert the radii (Force is reciprocal to Velocity in a given direction)
+            # Force Matrix = inv(J @ J.T)
+            # Eigenvalues of inv(A) are 1/lambda(A)
+            # Radii are sqrt(1/lambda) = 1/sqrt(lambda)
+            # We add epsilon to lambda avoids init division by zero
+            mobility_matrix = J @ J.T
+            eigvals_f, eigvecs_f = np.linalg.eigh(mobility_matrix)
 
-            eigvals, eigvecs = np.linalg.eigh(Lambda_inv)
+            # Avoid division by zero
+            safe_eigvals = np.maximum(eigvals_f, 1e-6)
+            radii_f = 1.0 / np.sqrt(safe_eigvals)
 
-            if self.chk_mobility.isChecked():
-                radii = np.sqrt(np.maximum(eigvals, 1e-6))
-                self._draw_ellipsoid_meshcat(
-                    "mobility", joint_pos, eigvecs, radii, 0x00FF00
-                )
+            self._draw_ellipsoid_meshcat(
+                "force", pos, eigvecs_f, radii_f * 0.2, 0xFF0000
+            )  # Scale for viz
 
-            if self.chk_force_ellip.isChecked():
-                radii_force = 1.0 / np.sqrt(np.maximum(eigvals, 1e-6))
-                radii_force = np.clip(radii_force, 0.01, 5.0)
-                self._draw_ellipsoid_meshcat(
-                    "force", joint_pos, eigvecs, radii_force, 0xFF0000
-                )
 
-        except Exception as e:
-            logger.error(f"Ellipsoid computation failed: {e}")
 
     def _draw_ellipsoid_meshcat(
         self,
