@@ -93,6 +93,9 @@ try:
         GolfModelParams,
         build_golf_swing_diagram,
     )
+    from engines.physics_engines.drake.python.src.induced_acceleration import (
+        DrakeInducedAccelerationAnalyzer,
+    )
 except ImportError:
     # Fallback classes
     class GolfModelParams:  # type: ignore[no-redef]
@@ -103,6 +106,21 @@ except ImportError:
     def build_golf_swing_diagram(*args, **kwargs):  # type: ignore[no-redef, misc]
         """Placeholder for golf swing diagram builder."""
         return None, None, None
+
+    class DrakeInducedAccelerationAnalyzer:  # type: ignore[no-redef]
+        """Placeholder for analyzer."""
+
+        def __init__(self, plant):  # noqa: ANN001
+            pass
+
+        def compute_components(self, context):  # noqa: ANN001
+            return {}
+
+        def compute_counterfactuals(self, context):  # noqa: ANN001
+            return {}
+
+        def compute_specific_control(self, context, tau):  # noqa: ANN001
+            return np.array([])
 
 
 # Constants
@@ -122,111 +140,6 @@ STYLE_BUTTON_STOP = "QPushButton { background-color: #f44336; color: white; }"
 
 # Logger
 LOGGER = logging.getLogger(__name__)
-
-
-# Placeholder for missing classes
-class DrakeInducedAccelerationAnalyzer:
-    """Induced acceleration analyzer for Drake."""
-
-    def __init__(self, plant: MultibodyPlant | None) -> None:
-        self.plant = plant
-
-    def compute_components(self, context: Context) -> dict[str, np.ndarray]:
-        """Compute induced acceleration components.
-
-        Args:
-            context: The plant context (with q, v set)
-
-        Returns:
-            Dict with 'gravity', 'velocity', 'total' (passive)
-        """
-        if self.plant is None:
-            return {
-                "gravity": np.array([]),
-                "velocity": np.array([]),
-                "total": np.array([]),
-            }
-
-        # 1. Calc Mass Matrix
-        M = self.plant.CalcMassMatrix(context)
-
-        # 2. Calc Gravity Torque
-        tau_g = self.plant.CalcGravityGeneralizedForces(context)
-
-        # 3. Calc Bias Term (Cv - tau_g)
-        bias = self.plant.CalcBiasTerm(context)
-
-        # Invert M
-        try:
-            Minv = np.linalg.inv(M)
-        except np.linalg.LinAlgError:
-            Minv = np.linalg.pinv(M)
-
-        a_g = Minv @ tau_g
-
-        # Force due to velocity = -Cv = -(bias + tau_g)
-        a_v = Minv @ (-(bias + tau_g))
-
-        return {"gravity": a_g, "velocity": a_v, "total": a_g + a_v}
-
-    def compute_counterfactuals(self, context: Context) -> dict[str, np.ndarray]:
-        """Compute ZTCF and ZVCF."""
-        if self.plant is None:
-            return {}
-
-        # ZTCF (Zero Torque Accel): a = -M^-1 (C + G).
-        # We assume zero torque applied.
-        # This is essentially the passive dynamics accel.
-        # We already computed this as 'total' in compute_components if we sum a_g + a_v.
-        # Or specifically: M a + Cv - tau_g = 0 => M a = tau_g - Cv = -bias.
-        # So a_ztcf = -M^-1 * bias.
-
-        M = self.plant.CalcMassMatrix(context)
-        bias = self.plant.CalcBiasTerm(context)
-
-        try:
-            Minv = np.linalg.inv(M)
-        except np.linalg.LinAlgError:
-            Minv = np.linalg.pinv(M)
-
-        ztcf_accel = Minv @ (-bias)
-
-        # ZVCF (Zero Velocity Torque):
-        # M a + G = tau. If v=0, C=0.
-        # If we hold position (a=0, v=0), tau = G.
-        # tau_g = CalcGravityGeneralizedForces.
-        # Wait, equation is M vdot + Cv - tau_g = tau.
-        # If v=0 => Cv=0. If a=0 => M vdot = 0.
-        # So -tau_g = tau => tau = -tau_g?
-        # Drake defines tau_g as forces on RHS.
-        # So tau_holding = -tau_g.
-
-        tau_g = self.plant.CalcGravityGeneralizedForces(context)
-        zvcf_torque = -tau_g
-
-        return {"ztcf_accel": ztcf_accel, "zvcf_torque": zvcf_torque}
-
-    def compute_specific_control(self, context: Context, tau: np.ndarray) -> np.ndarray:
-        """Compute induced acceleration for a specific control vector.
-
-        Note:
-            This method calculates the acceleration induced solely by the provided
-            torque vector `tau`.
-            It solves M * a = tau. If `tau` represents a unit torque
-            (e.g., [0, 1, 0]), the result is the sensitivity of acceleration
-            to that specific actuator.
-        """
-        if self.plant is None:
-            return np.array([])
-
-        # M * a = tau
-        M = self.plant.CalcMassMatrix(context)
-        try:
-            Minv = np.linalg.inv(M)
-        except np.linalg.LinAlgError:
-            Minv = np.linalg.pinv(M)
-
-        return np.array(Minv @ tau)  # type: ignore[no-any-return]
 
 
 def setup_logging() -> None:
