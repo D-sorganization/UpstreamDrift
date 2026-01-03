@@ -374,7 +374,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             "Error loading C3D",
             f"Failed to load file.\n\nError:\n{error_msg}",
         )
-        self._update_ui_state(True) # Re-enable UI (at least menus)
+        self._update_ui_state(True)  # Re-enable UI (at least menus)
 
     def _on_load_finished(self) -> None:
         """Cleanup after thread finish."""
