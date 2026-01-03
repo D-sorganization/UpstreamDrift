@@ -501,7 +501,9 @@ class GolfSwingPlotter:
 
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax.set_ylabel("Relative Phase (deg)", fontsize=12, fontweight="bold")
-        ax.set_title(title or "Continuous Relative Phase", fontsize=14, fontweight="bold")
+        ax.set_title(
+            title or "Continuous Relative Phase", fontsize=14, fontweight="bold"
+        )
         ax.legend(loc="best")
         ax.grid(True, alpha=0.3)
         fig.tight_layout()
@@ -1797,7 +1799,13 @@ class GolfSwingPlotter:
         # Let's just do a Lollipop chart: Line from 0 (ref) to peak? No, ref is impact.
         # Line from left boundary to peak?
         # Simple Lollipop:
-        ax.hlines(y=y_pos, xmin=min(0, np.min(rel_times) - 0.05), xmax=rel_times, color="gray", alpha=0.5)
+        ax.hlines(
+            y=y_pos,
+            xmin=min(0, np.min(rel_times) - 0.05),
+            xmax=rel_times,
+            color="gray",
+            alpha=0.5,
+        )
         ax.scatter(rel_times, y_pos, color=colors, s=100, zorder=3)
 
         # Add text labels for timing (ms)
