@@ -2175,10 +2175,7 @@ class GolfLauncher(QMainWindow):
             work_dir = "/workspace/engines/physics_engines/drake/python"
             entry_cmd = ["python", "-m", "src.drake_gui_app"]
             host_port = 7000
-
-            if host_port:
-                logger.info(f"Drake Meshcat will be available on host port {host_port}")
-                self._start_meshcat_browser(host_port)
+            # Browser launch moved to end of method
 
         elif model.type == "custom_humanoid":
             work_dir = "/workspace/engines/physics_engines/mujoco/python"
@@ -2192,12 +2189,7 @@ class GolfLauncher(QMainWindow):
             work_dir = "/workspace/engines/physics_engines/pinocchio/python"
             entry_cmd = ["python", "pinocchio_golf/gui.py"]
             host_port = 7000
-
-            if host_port:
-                logger.info(
-                    f"Pinocchio Meshcat will be available on host port {host_port}"
-                )
-                self._start_meshcat_browser(host_port)
+            # Browser launch moved to end of method
 
         # Set working directory
         cmd.extend(["-w", work_dir])
@@ -2245,7 +2237,10 @@ class GolfLauncher(QMainWindow):
             if host_port != available_port:
                 logger.info(f"Port {host_port} busy, using {available_port} instead")
 
-            host_port = available_port # Update for browser launch below
+            host_port = available_port  # Update for browser launch below
+            
+            logger.info(f"Launching Meshcat browser at http://127.0.0.1:{host_port}/static/")
+            self._start_meshcat_browser(host_port)
 
         cmd.append(DOCKER_IMAGE_NAME)
 
