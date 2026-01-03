@@ -150,6 +150,9 @@ AIR_VISCOSITY_KG_M_S = PhysicalConstant(
 EPSILON: float = 1e-15
 MAX_ITERATIONS: int = 10000
 CONVERGENCE_TOLERANCE: float = 1e-6
+DEFAULT_TIME_STEP = PhysicalConstant(
+    0.001, "s", "Standard", "Default simulation time step"
+)
 
 # Reproducibility
 DEFAULT_RANDOM_SEED: int = 42
