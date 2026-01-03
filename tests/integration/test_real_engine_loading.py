@@ -141,7 +141,9 @@ class TestMuJoCoEngineIntegration:
         engine = MuJoCoPhysicsEngine()
 
         # Load real URDF file - mock security validation for test
-        with patch("shared.python.security_utils.validate_path") as mock_validate:
+        with patch(
+            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.validate_path"
+        ) as mock_validate:
             mock_validate.return_value = SIMPLE_ARM_URDF
             engine.load_from_path(str(SIMPLE_ARM_URDF))
 
@@ -175,7 +177,9 @@ class TestMuJoCoEngineIntegration:
         engine = MuJoCoPhysicsEngine()
 
         # Mock security validation for test
-        with patch("shared.python.security_utils.validate_path") as mock_validate:
+        with patch(
+            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.validate_path"
+        ) as mock_validate:
             mock_validate.return_value = SIMPLE_ARM_URDF
             engine.load_from_path(str(SIMPLE_ARM_URDF))
 
