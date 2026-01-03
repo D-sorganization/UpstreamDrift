@@ -6,7 +6,7 @@ from pathlib import Path
 
 from PyQt6 import QtCore, QtWidgets
 
-from ...common_utils import get_shared_urdf_path
+from shared.python.common_utils import get_shared_urdf_path
 from ...linkage_mechanisms import LINKAGE_CATALOG
 from ...models import (
     ADVANCED_BIOMECHANICAL_GOLF_SWING_XML,

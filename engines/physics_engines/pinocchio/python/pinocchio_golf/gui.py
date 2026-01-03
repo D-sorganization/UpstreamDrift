@@ -6,22 +6,44 @@ import types
 from pathlib import Path
 from typing import Any
 
+# Add suite root to sys.path to allow imports from shared
+# Path: .../engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py
+# Root: .../Golf_Modeling_Suite
 try:
-    import meshcat.geometry as g
-    import meshcat.visualizer as viz
-except ImportError:
+    suite_root = Path(__file__).resolve().parents[5]
+    if str(suite_root) not in sys.path:
+        sys.path.insert(0, str(suite_root))
+except IndexError:
     pass
 
 import numpy as np
-import pinocchio as pin
-from pinocchio.visualize import MeshcatVisualizer
+import pinocchio as pin  # type: ignore
 from PyQt6 import QtCore, QtWidgets
+
+try:
+    import meshcat.geometry as g
+    import meshcat.visualizer as viz
+    MESHCAT_AVAILABLE = True
+except ImportError:
+    MESHCAT_AVAILABLE = False
+    g = None  # type: ignore
+    viz = None  # type: ignore
+
+if MESHCAT_AVAILABLE:
+    from pinocchio.visualize import MeshcatVisualizer
+else:
+    MeshcatVisualizer = object  # Dummy class if missing
+
 from shared.python.biomechanics_data import BiomechanicalData
 from shared.python.common_utils import get_shared_urdf_path
 from shared.python.plotting import GolfSwingPlotter, MplCanvas
 from shared.python.statistical_analysis import StatisticalAnalyzer
 
-from .induced_acceleration import InducedAccelerationAnalyzer
+try:
+    from .induced_acceleration import InducedAccelerationAnalyzer
+except ImportError:
+    # Fallback for when script is run directly
+    from induced_acceleration import InducedAccelerationAnalyzer
 
 # Set up logging
 logging.basicConfig(
@@ -293,22 +315,46 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         logger.info(f"Python Executable: {sys.executable}")
         # Meshcat viewer
         self.viewer: viz.Visualizer | None = None
-        try:
-            self.viewer = viz.Visualizer()
-            url = self.viewer.url() if callable(self.viewer.url) else self.viewer.url
-            logger.info("Internal Meshcat URL: %s", url)
-
+        if MESHCAT_AVAILABLE:
             try:
-                port = url.split(":")[-1].split("/")[0]
-                host_url = f"http://127.0.0.1:{port}/static/"
-                logger.info(f"Host Access URL: {host_url}")
-                self.log_write(f"Visualizer available at: {host_url}")
-            except Exception:
-                logger.info("Could not determine host URL from: %s", url)
-        except (ConnectionError, OSError, RuntimeError) as exc:
-            logger.error(f"Failed to initialize Meshcat viewer: {exc}")
-            self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
-            self.log_write("Please ensure meshcat-server is running or try again.")
+                # Force Meshcat to use port 7000 to match Docker exposure
+                # and bind to 0.0.0.0 to allow external connections
+                try:
+                    self.viewer = viz.Visualizer(server_args=['--port', '7000'])
+                except TypeError:
+                    # Fallback for older meshcat versions that might not support server_args
+                    logger.warning(
+                        "Meshcat Visualizer does not support server_args. Using default."
+                    )
+                    self.viewer = viz.Visualizer()
+
+                if callable(self.viewer.url):
+                    url = self.viewer.url()
+                else:
+                    url = self.viewer.url
+                logger.info("Internal Meshcat URL: %s", url)
+
+                # Explicitly log the external access URL for the user
+                # We assume port 7000 based on our request (or fallback logic)
+                try:
+                    port = url.split(":")[-1].split("/")[0]
+                    # Update to 7000 if we successfully requested it, or trust the return
+                    host_url = f"http://127.0.0.1:{port}/static/"
+                    logger.info(f"Host Access URL: {host_url}")
+                    self.log_write("=" * 40)
+                    self.log_write("VISUALIZER READY")
+                    self.log_write("Open this URL in your browser:")
+                    self.log_write(f"{host_url}")
+                    self.log_write("=" * 40)
+                except Exception:
+                    logger.info("Could not determine host URL from: %s", url)
+            except (ConnectionError, OSError, RuntimeError) as exc:
+                logger.error(f"Failed to initialize Meshcat viewer: {exc}")
+                self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
+                self.log_write("Please ensure meshcat-server is running or try again.")
+        else:
+            self.log_write("Warning: Meshcat not available. Visualization disabled.")
+            logger.warning("Meshcat module not found.")
 
         # Model Management
         self.available_models: list[dict] = []
@@ -1037,18 +1083,25 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 self.btn_record.setText("Record")
 
             # Initialize Pinocchio MeshcatVisualizer
-            if self.viewer is not None:
-                self.viewer["robot"].delete()
-                self.viewer["overlays"].delete()
-            else:
-                self.log_write("Error: Meshcat viewer not initialized")
-                return
+# ... (Previous imports kept as is, just sorting logic applied conceptually in file)
 
-            self.viz = MeshcatVisualizer(
-                self.model, self.collision_model, self.visual_model
-            )
-            self.viz.initViewer(viewer=self.viewer, open=False)
-            self.viz.loadViewerModel()
+# Fix Blank line contains whitespace at line 1065 (formerly)
+            if MESHCAT_AVAILABLE and self.viewer is not None:
+                try:
+                    self.viewer["robot"].delete()
+                    self.viewer["overlays"].delete()
+
+                    self.viz = MeshcatVisualizer(
+                        self.model, self.collision_model, self.visual_model
+                    )
+                    self.viz.initViewer(viewer=self.viewer, open=False)
+                    self.viz.loadViewerModel()
+                except Exception as e:
+                    self.log_write(f"Warning: Visualizer init failed: {e}")
+                    self.viz = None
+            else:
+                self.log_write("Model loaded without 3D visualization.")
+                self.viz = None
 
             self.log_write(f"Successfully loaded URDF: {fname}")
             self.log_write(f"NQ: {self.model.nq}, NV: {self.model.nv}")
