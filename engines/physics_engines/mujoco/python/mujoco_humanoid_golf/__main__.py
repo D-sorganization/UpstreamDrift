@@ -3,14 +3,19 @@
 import sys
 from pathlib import Path
 
-# Add suite root to sys.path to allow imports from shared provided that this file
-# is 5 levels deep from the root:
-# .../engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py
+# Add suite root to sys.path to allow imports from shared.
+# Instead of assuming a fixed directory depth, search upwards for a repository marker.
 try:
-    suite_root = Path(__file__).resolve().parents[5]
-    if str(suite_root) not in sys.path:
+    current_path = Path(__file__).resolve()
+    suite_root: Path | None = None
+    for parent in current_path.parents:
+        if (parent / ".git").exists() or (parent / ".antigravityignore").exists():
+            suite_root = parent
+            break
+    
+    if suite_root and str(suite_root) not in sys.path:
         sys.path.insert(0, str(suite_root))
-except IndexError:
+except Exception:
     pass
 
 from PyQt6 import QtCore, QtWidgets

@@ -6,14 +6,20 @@ import types
 from pathlib import Path
 from typing import Any
 
-# Add suite root to sys.path to allow imports from shared
-# Path: .../engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py
-# Root: .../Golf_Modeling_Suite
+# Add suite root to sys.path to allow imports from shared.
+# Instead of assuming a fixed directory depth, search upwards for a repository marker.
 try:
-    suite_root = Path(__file__).resolve().parents[5]
-    if str(suite_root) not in sys.path:
+    current_path = Path(__file__).resolve()
+    suite_root: Path | None = None
+    for parent in current_path.parents:
+        if (parent / ".git").exists() or (parent / ".antigravityignore").exists():
+            suite_root = parent
+            break
+    
+    if suite_root and str(suite_root) not in sys.path:
         sys.path.insert(0, str(suite_root))
-except IndexError:
+except Exception:
+    # If detection fails, fall back to existing sys.path configuration or do nothing
     pass
 
 import numpy as np

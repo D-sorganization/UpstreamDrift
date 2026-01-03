@@ -2275,7 +2275,7 @@ class GolfLauncher(QMainWindow):
         for port in range(start_port, start_port + max_attempts):
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 try:
-                    s.bind(("0.0.0.0", port))
+                    s.bind(("127.0.0.1", port))
                     return port
                 except OSError:
                     continue
