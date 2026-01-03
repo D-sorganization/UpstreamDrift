@@ -15,7 +15,9 @@
         <label><span>Shoulder angle (deg)<code class="var-badge">theta1</code></span><input id="theta1" type="number" value="-45"></label>
         <label><span>Wrist angle (deg)<code class="var-badge">theta2</code></span><input id="theta2" type="number" value="-90"></label>
         <label>Shoulder torque f(t)<input id="tau1" type="text" value="0" aria-describedby="math-hint"></label>
+        <div id="tau1-error" class="error-message hidden" role="alert"></div>
         <label>Wrist torque f(t)<input id="tau2" type="text" value="0" aria-describedby="math-hint"></label>
+        <div id="tau2-error" class="error-message hidden" role="alert"></div>
         <p id="math-hint" class="hint">
           <svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
             <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
