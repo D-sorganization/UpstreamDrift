@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, cast
 
@@ -16,13 +18,14 @@ import numpy as np
 import pandas as pd
 
 try:
-    from .logger_utils import get_logger
+    from .logger_utils import get_logger, log_execution_time
 except ImportError:
-    from logger_utils import get_logger
+    from logger_utils import get_logger, log_execution_time
 
 logger = get_logger(__name__)
 
 C3DMapping = dict[str, Any]
+SCHEMA_VERSION = "1.0"
 
 
 @dataclass(frozen=True)
@@ -159,7 +162,9 @@ class C3DDataReader:
             coordinates[too_noisy, :] = np.nan
 
         current_marker_count = len(sorted_labels)
-        frame_indices = np.repeat(np.arange(metadata.frame_count), current_marker_count)
+        frame_indices = np.repeat(
+            np.arange(metadata.frame_count), current_marker_count
+        )
         marker_names = np.tile(sorted_labels, metadata.frame_count)
 
         data = {
@@ -409,6 +414,16 @@ class C3DDataReader:
         to_meters = {
             "m": 1.0,
             "mm": 0.001,
+            "mm^2": 0.000001,  # Added minimal robust area unit support for consistency?
+            "cm": 0.01,
+            "in": 0.0254,
+            "ft": 0.3048,
+        }
+        # Note: Original code only had length units.
+        # Stick to original:
+        to_meters = {
+            "m": 1.0,
+            "mm": 0.001,
             "cm": 0.01,
             "in": 0.0254,
             "ft": 0.3048,
@@ -428,8 +443,21 @@ class C3DDataReader:
         file_format: str | None,
         sanitize: bool = True,
     ) -> Path:
-        """Export a DataFrame to CSV, JSON, or NPZ format."""
-        path = Path(output_path)
+        """Export a DataFrame to CSV, JSON, or NPZ format.
+
+        Includes validation, versioning, and telemetry.
+        """
+        path = Path(output_path).resolve()
+
+        # Security: Normalize and validate path
+        # Enforce writing only within the current working directory tree (Project Root)
+        base_dir = Path.cwd().resolve()
+        if base_dir not in path.parents and path != base_dir:
+            raise ValueError(
+                f"Security: Refusing to output to {path} "
+                f"(outside project root {base_dir})"
+            )
+
         if not file_format:
             if not path.suffix:
                 raise ValueError(
@@ -440,23 +468,56 @@ class C3DDataReader:
         normalized_format = file_format.lower()
         path.parent.mkdir(parents=True, exist_ok=True)
 
-        if normalized_format == "csv":
-            df_to_export = dataframe.copy() if sanitize else dataframe
-            if sanitize:
-                # Sanitize for CSV Injection (Excel Formula Injection)
-                for col in df_to_export.select_dtypes(
-                    include=[object, "string"]
-                ).columns:
-                    df_to_export[col] = df_to_export[col].apply(self._sanitize_for_csv)
-            df_to_export.to_csv(path, index=False)
-        elif normalized_format == "json":
-            dataframe.to_json(path, orient="records")
-        elif normalized_format == "npz":
-            np.savez(
-                path, **{column: dataframe[column].to_numpy() for column in dataframe}
-            )
-        else:  # pragma: no cover - defensive guard for unrecognized formats
-            raise ValueError(f"Unsupported export format: {file_format}")
+        with log_execution_time(f"export_{normalized_format}"):
+            # Metadata for versioning
+            metadata = {
+                "schema_version": SCHEMA_VERSION,
+                "created_at_utc": datetime.now(
+                    timezone.utc  # noqa: UP017
+                ).isoformat(),
+                "source_file": self.file_path.name,
+                "row_count": len(dataframe),
+                "units": self.get_metadata().units,
+            }
+
+            if normalized_format == "csv":
+                df_to_export = dataframe.copy() if sanitize else dataframe
+                if sanitize:
+                    # Sanitize for CSV Injection (Excel Formula Injection)
+                    for col in df_to_export.select_dtypes(
+                        include=[object, "string"]
+                    ).columns:
+                        df_to_export[col] = df_to_export[col].apply(
+                            self._sanitize_for_csv
+                        )
+                df_to_export.to_csv(path, index=False)
+
+                # Create sidecar metadata file
+                meta_path = path.with_name(f"{path.stem}_meta.json")
+                with open(meta_path, "w") as f:
+                    json.dump(metadata, f, indent=2)
+
+            elif normalized_format == "json":
+                # Envelope pattern
+                output = {
+                    "metadata": metadata,
+                    "data": dataframe.to_dict(orient="records"),
+                }
+                with open(path, "w") as f:
+                    json.dump(output, f, indent=2)
+
+            elif normalized_format == "npz":
+                # Save metadata inside NPZ and as sidecar
+                arrays = {column: dataframe[column].to_numpy() for column in dataframe}
+                np.savez(path, _metadata=json.dumps(metadata), **arrays)
+
+                # Sidecar
+                meta_path = path.with_name(f"{path.stem}_meta.json")
+                with open(meta_path, "w") as f:
+                    json.dump(metadata, f, indent=2)
+
+            else:  # pragma: no cover - defensive guard for unrecognized formats
+                raise ValueError(f"Unsupported export format: {file_format}")
 
         logger.info("Exported %s rows to %s", len(dataframe), path)
         return path
