@@ -138,9 +138,13 @@ class TestEngineManager(unittest.TestCase):
                     patch("pathlib.Path.exists", return_value=True),
                     patch("pathlib.Path.glob", return_value=[Path("model.xml")]),
                 ):
-                    manager._load_mujoco_engine()
-                    self.assertEqual(manager._mujoco_module, mock_mujoco_pkg)
-                    self.assertEqual(manager._mujoco_module.__version__, "3.2.3")
+                    # Use the actual method that exists in EngineManager
+                    manager._load_engine(EngineType.MUJOCO)
+                    # Check that the engine was loaded successfully
+                    self.assertEqual(
+                        manager.engine_status[EngineType.MUJOCO], EngineStatus.LOADED
+                    )
+                    self.assertIsNotNone(manager.active_physics_engine)
 
     def test_get_engine_info(self):
         """Test information retrieval."""
