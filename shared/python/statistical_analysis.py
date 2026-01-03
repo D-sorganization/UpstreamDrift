@@ -1154,7 +1154,7 @@ class StatisticalAnalyzer:
         # Unwrap to make continuous
         phase_unwrapped = np.unwrap(phase)
 
-        return np.rad2deg(phase_unwrapped)
+        return np.asarray(np.rad2deg(phase_unwrapped))
 
     def compute_continuous_relative_phase(
         self,
