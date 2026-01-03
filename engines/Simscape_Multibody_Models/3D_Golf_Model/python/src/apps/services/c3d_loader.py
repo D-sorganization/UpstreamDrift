@@ -21,20 +21,20 @@ except (ImportError, ValueError):
     if str(src_path) not in sys.path:
         sys.path.insert(0, str(src_path))
     try:
-        from c3d_reader import C3DDataReader  # type: ignore
+        from c3d_reader import C3DDataReader  # type: ignore[no-redef]
     except ImportError as e:
         raise ImportError("Could not find c3d_reader module.") from e
 
 
 def load_c3d_file(filepath: str) -> C3DDataModel:
     """Load and parse a C3D file using the C3DDataReader.
-    
+
     Args:
         filepath: Absolute path to the .c3d file
-    
+
     Returns:
         Populated C3DDataModel
-        
+
     Raises:
         FileNotFoundError: If file doesn't exist
         Exception: If parsing fails
