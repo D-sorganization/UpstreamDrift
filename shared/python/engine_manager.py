@@ -24,7 +24,7 @@ logger = setup_logging(__name__)
 
 class EngineManager:
     """Manages different physics engines for golf swing modeling.
-    
+
     Refactored to use EngineRegistry (Decoupling Phase).
     """
 
@@ -58,7 +58,7 @@ class EngineManager:
             ),
             EngineType.PENDULUM: self.engines_root / "pendulum_models",
         }
-        
+
         # Initialize probes
         from .engine_probes import (
             DrakeProbe,
@@ -81,7 +81,7 @@ class EngineManager:
             EngineType.MATLAB_3D: MatlabProbe(self.suite_root, is_3d=True),
         }
         self.probe_results: dict[EngineType, Any] = {}
-        
+
         # Register standard loaders
         registry = get_registry()
         for engine_type, loader_func in LOADER_MAP.items():
@@ -165,7 +165,7 @@ class EngineManager:
                 if not registration:
                     # Fallback or error
                     raise GolfModelingError(f"No registration found for {engine_type}")
-                
+
                 # Instantiate
                 engine = registration.factory()
                 self.active_physics_engine = engine
