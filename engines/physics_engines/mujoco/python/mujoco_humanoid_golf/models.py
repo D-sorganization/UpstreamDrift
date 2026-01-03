@@ -25,7 +25,8 @@ BALL_RADIUS = float(_ball_radius_param.value) if _ball_radius_param else 0.02133
 
 
 CHAOTIC_PENDULUM_XML = rf"""<mujoco model="chaotic_driven_pendulum">
-  <option timestep="{DEFAULT_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
+  <option timestep="{DEFAULT_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}"
+          integrator="RK4"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
@@ -94,7 +95,8 @@ CHAOTIC_PENDULUM_XML = rf"""<mujoco model="chaotic_driven_pendulum">
 
 
 DOUBLE_PENDULUM_XML = rf"""    <mujoco model="golf_double_pendulum">
-  <option timestep="{DEFAULT_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
+  <option timestep="{DEFAULT_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}"
+          integrator="RK4"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
@@ -143,7 +145,8 @@ DOUBLE_PENDULUM_XML = rf"""    <mujoco model="golf_double_pendulum">
 
 
 TRIPLE_PENDULUM_XML = rf"""    <mujoco model="golf_triple_pendulum">
-  <option timestep="{DEFAULT_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
+  <option timestep="{DEFAULT_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}"
+          integrator="RK4"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
