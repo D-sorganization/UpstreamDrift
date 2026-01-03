@@ -12,6 +12,7 @@ Features:
 """
 
 import os
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -21,11 +22,10 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt
-import sys
 
 from .core.models import C3DDataModel
 from .services.analysis import compute_marker_statistics
-from .services.c3d_loader import load_c3d_file
+from .services.loader_thread import C3DLoaderThread
 
 # ---------------------------------------------------------------------------
 # Matplotlib canvas embedded in Qt
@@ -341,29 +341,45 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             return
 
         if (sb := self.statusBar()) is not None:
-            sb.showMessage(f"Loading {os.path.basename(path)}...")
+            sb.showMessage(f"Loading {os.path.basename(path)}... (Async)")
 
         # Ensure single cursor override
         QtWidgets.QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        self._update_ui_state(False)  # Disable UI during load
 
-        try:
-            # Use the service loader
-            model = load_c3d_file(path)
-            self.model = model
-            self._populate_ui_with_model()
-            self._update_ui_state(True)
-            if (sb := self.statusBar()) is not None:
-                sb.showMessage(f"Loaded {os.path.basename(path)} successfully.")
-        except Exception as e:
-            if (sb := self.statusBar()) is not None:
-                sb.showMessage("Error loading file.")
-            QtWidgets.QMessageBox.critical(
-                self,
-                "Error loading C3D",
-                f"Failed to load file:\n{path}\n\nError:\n{e}",
-            )
-        finally:
-            QtWidgets.QApplication.restoreOverrideCursor()
+        # Start async worker
+        # Keep a reference to prevent garbage collection
+        self._loader_thread = C3DLoaderThread(path)
+        self._loader_thread.loaded.connect(self._on_load_success)
+        self._loader_thread.failed.connect(self._on_load_failure)
+        # Ensure we cleanup reference when done
+        self._loader_thread.finished.connect(self._on_load_finished)
+        self._loader_thread.start()
+
+    def _on_load_success(self, model: C3DDataModel) -> None:
+        """Handle successful model load."""
+        self.model = model
+        self._populate_ui_with_model()
+        self._update_ui_state(True)
+        if (sb := self.statusBar()) is not None:
+            sb.showMessage(f"Loaded {os.path.basename(model.filepath)} successfully.")
+
+    def _on_load_failure(self, error_msg: str) -> None:
+        """Handle load failure."""
+        if (sb := self.statusBar()) is not None:
+            sb.showMessage("Error loading file.")
+
+        QtWidgets.QMessageBox.critical(
+            self,
+            "Error loading C3D",
+            f"Failed to load file.\n\nError:\n{error_msg}",
+        )
+        self._update_ui_state(True) # Re-enable UI (at least menus)
+
+    def _on_load_finished(self) -> None:
+        """Cleanup after thread finish."""
+        QtWidgets.QApplication.restoreOverrideCursor()
+        self._loader_thread = None
 
     # --------------------- Populate UI from model --------------------------
 
@@ -627,7 +643,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
 
         # Update mini-plot (recalculate speed for visualization)
         self.canvas_analysis.fig.clear()
-        
+
         if pos.shape[0] > 1:
             ax = self.canvas_analysis.add_subplot(111)
             disp = np.diff(pos, axis=0)
