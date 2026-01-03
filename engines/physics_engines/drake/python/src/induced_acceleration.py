@@ -104,17 +104,12 @@ class DrakeInducedAccelerationAnalyzer:
 
         # Solve M * a = F
 
-        try:
-            Minv = np.linalg.inv(M)
-        except np.linalg.LinAlgError:
-            Minv = np.linalg.pinv(M)
-
-        acc_g = Minv @ tau_g
-        acc_c = Minv @ (-(bias + tau_g))
+        acc_g = np.linalg.solve(M, tau_g)
+        acc_c = np.linalg.solve(M, -(bias + tau_g))
 
         # Control contribution
         if tau_app is not None:
-            acc_t = Minv @ tau_app
+            acc_t = np.linalg.solve(M, tau_app)
         else:
             acc_t = np.zeros_like(acc_g)
 
@@ -126,60 +121,3 @@ class DrakeInducedAccelerationAnalyzer:
             "control": acc_t,
             "total": total,
         }
-
-    def compute_counterfactuals(self, context: Context) -> dict[str, np.ndarray]:
-        """Compute ZTCF and ZVCF."""
-        if self.plant is None:
-            return {}
-
-        # ZTCF (Zero Torque Accel): a = -M^-1 (C + G).
-        # We assume zero torque applied.
-        # This is essentially the passive dynamics accel.
-        # We already computed this as 'total' in compute_components if we sum a_g + a_v.
-        # Or specifically: M a + Cv - tau_g = 0 => M a = tau_g - Cv = -bias.
-        # So a_ztcf = -M^-1 * bias.
-
-        M = self.plant.CalcMassMatrix(context)
-        bias = self.plant.CalcBiasTerm(context)
-
-        try:
-            Minv = np.linalg.inv(M)
-        except np.linalg.LinAlgError:
-            Minv = np.linalg.pinv(M)
-
-        ztcf_accel = Minv @ (-bias)
-
-        # ZVCF (Zero Velocity Torque):
-        # M a + G = tau. If v=0, C=0.
-        # If we define ZVCF as "Forces to hold static posture" => a=0, v=0 => tau = G.
-        # Drake defines tau_g as forces on RHS (gravity helping).
-        # Dynamics: M vdot + Cv - tau_g = tau.
-        # If v=0, a=0 => -tau_g = tau.
-        # So torque needed to hold static posture against gravity is -tau_g.
-
-        tau_g = self.plant.CalcGravityGeneralizedForces(context)
-        zvcf_torque = -tau_g
-
-        return {"ztcf_accel": ztcf_accel, "zvcf_torque": zvcf_torque}
-
-    def compute_specific_control(self, context: Context, tau: np.ndarray) -> np.ndarray:
-        """Compute induced acceleration for a specific control vector.
-
-        Note:
-            This method calculates the acceleration induced solely by the provided
-            torque vector `tau`.
-            It solves M * a = tau. If `tau` represents a unit torque
-            (e.g., [0, 1, 0]), the result is the sensitivity of acceleration
-            to that specific actuator.
-        """
-        if self.plant is None:
-            return np.array([])
-
-        # M * a = tau
-        M = self.plant.CalcMassMatrix(context)
-        try:
-            Minv = np.linalg.inv(M)
-        except np.linalg.LinAlgError:
-            Minv = np.linalg.pinv(M)
-
-        return np.array(Minv @ tau)  # type: ignore[no-any-return]
