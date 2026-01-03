@@ -177,8 +177,8 @@ def load_opensim_engine(suite_root: Path) -> PhysicsEngine:
 def load_myosim_engine(suite_root: Path) -> PhysicsEngine:
     """Load MyoSim engine."""
     try:
-        from engines.physics_engines.myosim.python.myosim_physics_engine import (
-            MyoSimPhysicsEngine,
+        from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+            MyoSuitePhysicsEngine,
         )
 
         from .engine_probes import MyoSimProbe
@@ -192,7 +192,7 @@ def load_myosim_engine(suite_root: Path) -> PhysicsEngine:
                 f"Fix: {result.get_fix_instructions()}"
             )
 
-        return MyoSimPhysicsEngine()
+        return MyoSuitePhysicsEngine()
 
     except ImportError as e:
         raise GolfModelingError("MyoSim requirements not met.") from e

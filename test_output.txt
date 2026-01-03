@@ -1,0 +1,150 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe
+cachedir: .pytest_cache
+benchmark: 4.0.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+PyQt6 6.9.1 -- Qt runtime 6.9.1 -- Qt compiled 6.9.0
+rootdir: C:\Users\diete\Repositories\Golf_Modeling_Suite
+configfile: pyproject.toml
+plugins: anyio-4.9.0, benchmark-4.0.0, cov-7.0.0, qt-4.5.0
+collecting ... collected 4 items
+
+tests/integration/test_headless_smoke_suite.py::TestHeadlessSuite::test_mainwindow_startup FAILED [ 25%]
+tests/integration/test_headless_smoke_suite.py::TestHeadlessSuite::test_file_loading_trigger FAILED [ 50%]
+tests/integration/test_headless_smoke_suite.py::TestHeadlessSuite::test_successful_load_ui_update PASSED [ 75%]
+tests/integration/test_headless_smoke_suite.py::TestHeadlessSuite::test_failed_load_ui_update PASSED [100%]
+ERROR: Coverage failure: total of 3 is less than fail-under=25
+
+
+================================== FAILURES ===================================
+__________________ TestHeadlessSuite.test_mainwindow_startup __________________
+
+self = <tests.integration.test_headless_smoke_suite.TestHeadlessSuite object at 0x000001A3A99774D0>
+qtbot = <pytestqt.qtbot.QtBot object at 0x000001A3A98DFA10>
+mock_loader_thread = <MagicMock name='C3DLoaderThread' id='1802437362416'>
+
+    def test_mainwindow_startup(self, qtbot, mock_loader_thread):
+        """Verify that the main window initializes correctly."""
+        window = C3DViewerMainWindow()
+        qtbot.addWidget(window)
+    
+        assert window.windowTitle() == "C3D Motion Analysis Viewer"
+        assert window.isVisible() is False  # Should be invisible by default in test
+    
+        # Verify tabs
+        tab_widget = window.centralWidget()
+        assert tab_widget.count() > 0
+    
+        # Check for specific expected tabs
+        tab_texts = [tab_widget.tabText(i) for i in range(tab_widget.count())]
+>       assert "3D View" in tab_texts
+E       AssertionError: assert '3D View' in ['Overview', 'Markers (2D)', 'Analog', '3D Viewer', 'Analysis']
+
+tests\integration\test_headless_smoke_suite.py:65: AssertionError
+_________________ TestHeadlessSuite.test_file_loading_trigger _________________
+
+self = <tests.integration.test_headless_smoke_suite.TestHeadlessSuite object at 0x000001A3A99779D0>
+qtbot = <pytestqt.qtbot.QtBot object at 0x000001A3A9B04410>
+mock_loader_thread = <MagicMock name='C3DLoaderThread' id='1802437712528'>
+
+    def test_file_loading_trigger(self, qtbot, mock_loader_thread):
+        """Verify that opening a file triggers the loader thread."""
+        window = C3DViewerMainWindow()
+        qtbot.addWidget(window)
+    
+        # Mock the QFileDialog to return a dummy path
+        with patch("PyQt6.QtWidgets.QFileDialog.getOpenFileName") as mock_dialog:
+            mock_dialog.return_value = ("test_capture.c3d", "C3D Files (*.c3d)")
+    
+            # Trigger file open
+            window.open_c3d_file()
+    
+            # Check that loader thread was started
+>           mock_loader_thread.assert_called_with("test_capture.c3d")
+
+tests\integration\test_headless_smoke_suite.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <MagicMock name='C3DLoaderThread' id='1802437712528'>
+args = ('test_capture.c3d',), kwargs = {}, expected = call('test_capture.c3d')
+actual = call('C:\\Users\\diete\\Repositories\\Golf_Modeling_Suite\\test_capture.c3d')
+_error_message = <function NonCallableMock.assert_called_with.<locals>._error_message at 0x000001A3AC1A5C60>
+cause = None
+
+    def assert_called_with(self, /, *args, **kwargs):
+        """assert that the last call was made with the specified arguments.
+    
+        Raises an AssertionError if the args and keyword args passed in are
+        different to the last call to the mock."""
+        if self.call_args is None:
+            expected = self._format_mock_call_signature(args, kwargs)
+            actual = 'not called.'
+            error_message = ('expected call not found.\nExpected: %s\n  Actual: %s'
+                    % (expected, actual))
+            raise AssertionError(error_message)
+    
+        def _error_message():
+            msg = self._format_mock_failure_message(args, kwargs)
+            return msg
+        expected = self._call_matcher(_Call((args, kwargs), two=True))
+        actual = self._call_matcher(self.call_args)
+        if actual != expected:
+            cause = expected if isinstance(expected, Exception) else None
+>           raise AssertionError(_error_message()) from cause
+E           AssertionError: expected call not found.
+E           Expected: C3DLoaderThread('test_capture.c3d')
+E             Actual: C3DLoaderThread('C:\\Users\\diete\\Repositories\\Golf_Modeling_Suite\\test_capture.c3d')
+
+..\..\AppData\Local\Programs\Python\Python313\Lib\unittest\mock.py:979: AssertionError
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.13.5-final-0 _______________
+
+Name                                                  Stmts   Miss  Cover   Missing
+-----------------------------------------------------------------------------------
+launchers\__init__.py                                     0      0   100%
+launchers\golf_launcher.py                             1165   1165     0%   10-2344
+launchers\golf_suite_launcher.py                        130    130     0%   10-218
+launchers\unified_launcher.py                            77     77     0%   7-164
+shared\python\__init__.py                                33     14    58%   47-69
+shared\python\biomechanics_data.py                       28     28     0%   7-72
+shared\python\common_utils.py                            91     79    13%   30-32, 45-52, 67-78, 91-100, 115-124, 142-167, 181-202, 214-236
+shared\python\comparative_analysis.py                   107    107     0%   7-255
+shared\python\comparative_plotting.py                   100    100     0%   6-342
+shared\python\configuration_manager.py                   56     56     0%   6-112
+shared\python\constants.py                               61     61     0%   8-171
+shared\python\core.py                                    13      0   100%
+shared\python\engine_loaders.py                          86     74    14%   15-47, 54-96, 101-138, 143-161, 166-184
+shared\python\engine_manager.py                         151    126    17%   37-105, 109, 113, 121-137, 141-147, 151-178, 184-203, 207-211, 215-225, 228, 231, 234, 244-263, 266-268, 271-273, 276-309
+shared\python\engine_probes.py                          265    265     0%   7-657
+shared\python\engine_registry.py                         42      4    90%   60, 64, 68, 75
+shared\python\equipment.py                                7      7     0%   8-76
+shared\python\exceptions.py                              10      0   100%
+shared\python\interfaces.py                               4      0   100%
+shared\python\kinematic_sequence.py                      77     77     0%   8-192
+shared\python\model_registry.py                          49     49     0%   3-113
+shared\python\optimization\__init__.py                    0      0   100%
+shared\python\optimization\examples\__init__.py           0      0   100%
+shared\python\optimization\examples\optimize_arm.py      87     87     0%   1-169
+shared\python\output_manager.py                         219    219     0%   8-495
+shared\python\physics_parameters.py                     120    120     0%   7-447
+shared\python\plotting.py                               960    960     0%   14-2281
+shared\python\pose_estimation\__init__.py                 3      3     0%   7-10
+shared\python\pose_estimation\interface.py               11     11     0%   3-20
+shared\python\pose_estimation\openpose_estimator.py      83     83     0%   7-183
+shared\python\pose_estimation\openpose_gui.py            67     67     0%   6-124
+shared\python\process_worker.py                          68     68     0%   7-121
+shared\python\secure_subprocess.py                      100    100     0%   7-253
+shared\python\security_utils.py                          21      8    62%   22-25, 34-35, 38-39
+shared\python\signal_processing.py                       32     32     0%   8-131
+shared\python\statistical_analysis.py                   508    508     0%   11-1393
+shared\python\swing_plane_analysis.py                    40     40     0%   9-109
+-----------------------------------------------------------------------------------
+TOTAL                                                  4871   4725     3%
+Coverage HTML written to dir htmlcov
+Coverage XML written to file coverage.xml
+FAIL Required test coverage of 25% not reached. Total coverage: 3.00%
+=========================== short test summary info ===========================
+FAILED tests/integration/test_headless_smoke_suite.py::TestHeadlessSuite::test_mainwindow_startup - AssertionError: assert '3D View' in ['Overview', 'Markers (2D)', 'Analog', '3D Viewer', 'Analysis']
+FAILED tests/integration/test_headless_smoke_suite.py::TestHeadlessSuite::test_file_loading_trigger - AssertionError: expected call not found.
+Expected: C3DLoaderThread('test_capture.c3d')
+  Actual: C3DLoaderThread('C:\\Users\\diete\\Repositories\\Golf_Modeling_Suite\\test_capture.c3d')
+======================== 2 failed, 2 passed in 29.78s =========================
