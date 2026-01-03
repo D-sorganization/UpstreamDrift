@@ -7,6 +7,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from shared.python import constants
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -67,7 +69,7 @@ def test_execute_run_produces_summary_and_outputs(tmp_path: Path) -> None:
         summary = cli_runner.execute_run(
             model="double_pendulum",
             duration=0.02,
-            timestep=0.001,
+            timestep=float(constants.DEFAULT_TIME_STEP),
             control_config=None,
             output_json=output_json,
             output_csv=output_csv,
