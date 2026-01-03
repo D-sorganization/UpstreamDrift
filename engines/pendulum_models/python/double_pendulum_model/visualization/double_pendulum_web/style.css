@@ -196,3 +196,24 @@ input.error {
   vertical-align: middle;
 }
 .hidden { display: none !important; }
+.error-message {
+  color: #ff6b6b;
+  font-size: 0.75rem;
+  margin-top: -0.2rem;
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
