@@ -101,7 +101,7 @@ TEST_ANGULAR_VAL = 2.0
 
 
 class TestMuJoCoStrict:
-    def setUp(self):
+    def setup_method(self):
         """Enforce strict patching via direct dependency injection."""
         # 1. Ensure the module is loaded (using whatever state sys.modules is in)
         import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine as mod
@@ -114,7 +114,7 @@ class TestMuJoCoStrict:
         self.MuJoCoPhysicsEngine = mod.MuJoCoPhysicsEngine
         self.mod = mod
 
-    def tearDown(self):
+    def teardown_method(self):
         # Restore original if needed (though we mostly don't care in strict/mocked env)
         if hasattr(self, "original_mujoco"):
             setattr(self.mod, "mujoco", self.original_mujoco)  # noqa: B010
