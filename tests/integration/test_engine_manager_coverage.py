@@ -44,15 +44,16 @@ class TestEngineManagerCoverage:
 
         # Mock the registry to return a working factory
         from shared.python.engine_registry import get_registry
+
         registry = get_registry()
         mock_factory = MagicMock()
         mock_factory.return_value = MagicMock()  # Mock physics engine
-        
-        with patch.object(registry, 'get') as mock_get:
+
+        with patch.object(registry, "get") as mock_get:
             mock_registration = MagicMock()
             mock_registration.factory = mock_factory
             mock_get.return_value = mock_registration
-            
+
             result = mock_manager.switch_engine(EngineType.MUJOCO)
 
             assert result is True
@@ -79,16 +80,17 @@ class TestEngineManagerCoverage:
 
         # Mock the registry to return a factory that raises an error
         from shared.python.engine_registry import get_registry
+
         registry = get_registry()
-        
+
         def raise_error():
             raise GolfModelingError("Loading failed")
-        
-        with patch.object(registry, 'get') as mock_get:
+
+        with patch.object(registry, "get") as mock_get:
             mock_registration = MagicMock()
             mock_registration.factory = raise_error
             mock_get.return_value = mock_registration
-            
+
             result = mock_manager.switch_engine(EngineType.MUJOCO)
 
             assert result is False
