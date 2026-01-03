@@ -54,9 +54,9 @@ function validateExpr(expr) {
   try {
     // Check syntax with dummy context keys matching torques()
     new Function('t', 'theta1', 'theta2', 'omega1', 'omega2', 'Math', `return ${expr};`);
-    return true;
+    return null;
   } catch (e) {
-    return false;
+    return e.message;
   }
 }
 
@@ -74,12 +74,25 @@ function updateParamsFromInputs() {
   const tau2Input = document.getElementById('tau2');
 
   [tau1Input, tau2Input].forEach(input => {
-    if (validateExpr(input.value || '0')) {
+    const errorMsg = validateExpr(input.value || '0');
+    const errorEl = document.getElementById(`${input.id}-error`);
+
+    if (!errorMsg) {
       input.classList.remove('error');
       input.setAttribute('aria-invalid', 'false');
+      if (errorEl) {
+        errorEl.classList.add('hidden');
+        errorEl.textContent = '';
+      }
+      input.setAttribute('aria-describedby', 'math-hint');
     } else {
       input.classList.add('error');
       input.setAttribute('aria-invalid', 'true');
+      if (errorEl) {
+        errorEl.textContent = errorMsg;
+        errorEl.classList.remove('hidden');
+        input.setAttribute('aria-describedby', `math-hint ${input.id}-error`);
+      }
     }
   });
 
