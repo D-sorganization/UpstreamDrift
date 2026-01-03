@@ -16,9 +16,12 @@ try:
 except ImportError:
     pass
 
+from shared.python import constants
 from shared.python.interfaces import PhysicsEngine
 
 LOGGER = logging.getLogger(__name__)
+
+DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
 
 
 class PinocchioPhysicsEngine(PhysicsEngine):
@@ -107,9 +110,8 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         if self.model is None or self.data is None:
             return
 
-        # Use provided dt or default to 0.001
-        # Fixed: respecting passed dt
-        time_step = dt if dt is not None else 0.001
+        # Use provided dt or default to standard
+        time_step = dt if dt is not None else DEFAULT_TIME_STEP
 
         # Explicit Forward Dynamics
         # a = ABA(q, v, tau)

@@ -141,8 +141,11 @@ class BiomechanicalAnalyzer:
             # Then RNEA computes: tau = M(0) + C(0) + g(q) = g(q)
             self.data.qvel[:] = 0
             self.data.qacc[:] = 0
-            mujoco.mj_rne(self.model, self.data)
-            tau_g = self.data.qfrc_inverse.copy()
+
+            # Use separate buffer to match API: mj_rne(m, d, flg_acc, result)
+            res = np.zeros(self.model.nv)
+            mujoco.mj_rne(self.model, self.data, 1, res)
+            tau_g = res.copy()
 
             # Restore state
             self.data.qvel[:] = qvel_save
@@ -159,10 +162,18 @@ class BiomechanicalAnalyzer:
             return np.zeros(self.model.nv)
 
         # Solve M * x = y
-        x = np.zeros(self.model.nv)
-        mujoco.mj_solveM(self.model, self.data, x, y)
+        if self.model.nv == 0:
+            return np.zeros(0)
 
-        return x
+        # mj_solveM requires input x to have last dimension equal to nv.
+        # We treat inputs as row vectors (batch size 1) to satisfy this.
+
+        y_row = y.reshape(1, self.model.nv)
+        x_row = np.zeros((1, self.model.nv))
+
+        mujoco.mj_solveM(self.model, self.data, x_row, y_row)
+
+        return x_row.flatten()
 
     def compute_induced_acceleration_for_actuator(
         self, actuator_name_or_id: str | int
@@ -206,10 +217,14 @@ class BiomechanicalAnalyzer:
         self.data.actuator_force[:] = actuator_force_save
 
         # Solve M*x = y
-        x = np.zeros(self.model.nv)
-        mujoco.mj_solveM(self.model, self.data, x, y)
+        if self.model.nv == 0:
+            return np.zeros(0)
 
-        return x
+        y_row = y.reshape(1, self.model.nv)
+        x_row = np.zeros((1, self.model.nv))
+        mujoco.mj_solveM(self.model, self.data, x_row, y_row)
+
+        return x_row.flatten()
 
     def compute_counterfactuals(self) -> dict[str, np.ndarray]:
         """Compute instantaneous counterfactuals."""
@@ -223,12 +238,16 @@ class BiomechanicalAnalyzer:
         # 1. Compute C+g (Inverse Dynamics with a=0)
         # Note: mj_rne uses current q, v.
         self.data.qacc[:] = 0
-        mujoco.mj_rne(self.model, self.data)
-        c_plus_g = self.data.qfrc_inverse.copy()
+        res = np.zeros(self.model.nv)
+        mujoco.mj_rne(self.model, self.data, 1, res)
+        c_plus_g = res.copy()
 
         # Solve M * a_ztcf = -(C+g)
-        a_ztcf = np.zeros(self.model.nv)
-        mujoco.mj_solveM(self.model, self.data, a_ztcf, -c_plus_g)
+        rhs = -c_plus_g
+        rhs_row = rhs.reshape(1, self.model.nv)
+        x_row = np.zeros((1, self.model.nv))
+        mujoco.mj_solveM(self.model, self.data, x_row, rhs_row)
+        a_ztcf = x_row.flatten()
 
         # ZVCF: Torque/Forces if v=0.
         # If v=0, then C=0. Equation is M*a + g = tau.
@@ -239,8 +258,9 @@ class BiomechanicalAnalyzer:
 
         self.data.qvel[:] = 0
         self.data.qacc[:] = 0
-        mujoco.mj_rne(self.model, self.data)
-        tau_zvcf = self.data.qfrc_inverse.copy()  # This is g(q)
+        res = np.zeros(self.model.nv)
+        mujoco.mj_rne(self.model, self.data, 1, res)
+        tau_zvcf = res.copy()  # This is g(q)
 
         # Restore
         self.data.qvel[:] = qvel_save
