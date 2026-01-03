@@ -220,9 +220,7 @@ class TestEngineManager:
             result = manager.switch_engine(EngineType.MUJOCO)
 
             assert result is False
-            assert (
-                manager.get_engine_status(EngineType.MUJOCO) == EngineStatus.ERROR
-            )
+            assert manager.get_engine_status(EngineType.MUJOCO) == EngineStatus.ERROR
             mock_logger.error.assert_called()
 
 

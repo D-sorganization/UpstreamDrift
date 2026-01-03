@@ -9,6 +9,7 @@ import numpy.typing as npt
 @dataclass
 class MarkerData:
     """Represents a single optical marker trajectory."""
+
     name: str
     position: npt.NDArray[np.float64]  # shape (N, 3)
     residuals: npt.NDArray[np.float64] | None = None
@@ -17,6 +18,7 @@ class MarkerData:
 @dataclass
 class AnalogData:
     """Represents a single analog channel (e.g., EMG, force plate)."""
+
     name: str
     values: npt.NDArray[np.float64]  # shape (N,)
     unit: str = ""
@@ -25,6 +27,7 @@ class AnalogData:
 @dataclass
 class C3DDataModel:
     """Aggregated data model for a loaded C3D file."""
+
     filepath: str
     markers: dict[str, MarkerData] = field(default_factory=dict)
     analog: dict[str, AnalogData] = field(default_factory=dict)

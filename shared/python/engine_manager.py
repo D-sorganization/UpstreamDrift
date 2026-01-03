@@ -92,7 +92,11 @@ class EngineManager:
                     engine_type=engine_type,
                     factory=factory,
                     registration_path=self.engine_paths.get(engine_type),
-                    probe_class=type(self.probes.get(engine_type)) if engine_type in self.probes else None
+                    probe_class=(
+                        type(self.probes.get(engine_type))
+                        if engine_type in self.probes
+                        else None
+                    ),
                 )
             )
 

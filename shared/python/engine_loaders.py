@@ -34,7 +34,12 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
 
         # Load default model to verify engine readiness
         model_path = (
-            suite_root / "engines" / "physics_engines" / "mujoco" / "models" / "simple_pendulum.xml"
+            suite_root
+            / "engines"
+            / "physics_engines"
+            / "mujoco"
+            / "models"
+            / "simple_pendulum.xml"
         )
         if model_path.exists():
             logger.info(f"Loading default MuJoCo model: {model_path}")
@@ -83,7 +88,9 @@ def load_drake_engine(suite_root: Path) -> PhysicsEngine:
             / "golfer.urdf"
         )
         if urdf_path.exists():
-            logger.info(f"Attempting to load shared golfer URDF into Drake: {urdf_path}")
+            logger.info(
+                f"Attempting to load shared golfer URDF into Drake: {urdf_path}"
+            )
             try:
                 engine.load_from_path(str(urdf_path))
             except Exception as e:
@@ -189,6 +196,7 @@ def load_myosim_engine(suite_root: Path) -> PhysicsEngine:
 
     except ImportError as e:
         raise GolfModelingError("MyoSim requirements not met.") from e
+
 
 # Helper for loaders map
 LOADER_MAP = {
