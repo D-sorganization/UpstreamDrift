@@ -147,6 +147,17 @@ class ImpulseMetrics:
     negative_impulse: float  # Integrated negative force/torque
 
 
+@dataclass
+class SwingDNAMetrics:
+    """Normalized metrics (0-100) for Swing DNA visualization."""
+
+    speed_score: float
+    sequence_score: float
+    stability_score: float
+    efficiency_score: float
+    power_score: float
+
+
 class StatisticalAnalyzer:
     """Comprehensive statistical analysis for golf swing data."""
 
@@ -1093,7 +1104,189 @@ class StatisticalAnalyzer:
         # Normalize to [0, 360)
         gamma_deg = np.mod(gamma_deg, 360.0)
 
-        return gamma_deg
+        return np.asarray(gamma_deg)
+
+    def compute_phase_angle(self, joint_idx: int) -> np.ndarray:
+        """Compute continuous phase angle for a joint.
+
+        Calculated using the arctangent of normalized velocity vs normalized position.
+        Phi = arctan2(norm_vel, norm_pos).
+
+        Args:
+            joint_idx: Index of the joint
+
+        Returns:
+            Array of phase angles in degrees (unwrapped)
+        """
+        if (
+            joint_idx >= self.joint_positions.shape[1]
+            or joint_idx >= self.joint_velocities.shape[1]
+        ):
+            return np.array([])
+
+        pos = self.joint_positions[:, joint_idx]
+        vel = self.joint_velocities[:, joint_idx]
+
+        if len(pos) < 2:
+            return np.array([])
+
+        # Normalize Position to [-1, 1] using dynamic range
+        # (centered around midpoint of ROM)
+        min_p, max_p = np.min(pos), np.max(pos)
+        range_p = max_p - min_p
+        if range_p < 1e-6:
+            norm_pos = np.zeros_like(pos)
+        else:
+            # Scale to [0, 1] then to [-1, 1]
+            norm_pos = 2 * (pos - min_p) / range_p - 1.0
+
+        # Normalize Velocity by max absolute velocity
+        # (Preserves zero crossing)
+        max_v = np.max(np.abs(vel))
+        if max_v < 1e-6:
+            norm_vel = np.zeros_like(vel)
+        else:
+            norm_vel = vel / max_v
+
+        # Calculate phase angle
+        phase = np.arctan2(norm_vel, norm_pos)
+
+        # Unwrap to make continuous
+        phase_unwrapped = np.unwrap(phase)
+
+        return np.asarray(np.rad2deg(phase_unwrapped))
+
+    def compute_continuous_relative_phase(
+        self,
+        joint_idx_1: int,
+        joint_idx_2: int,
+    ) -> np.ndarray:
+        """Compute Continuous Relative Phase (CRP) between two joints.
+
+        CRP = Phase1 - Phase2.
+        Used to analyze coordination dynamics. Near 0 implies in-phase,
+        near 180 implies anti-phase.
+
+        Args:
+            joint_idx_1: Proximal joint index
+            joint_idx_2: Distal joint index
+
+        Returns:
+            Array of CRP values in degrees
+        """
+        phi1 = self.compute_phase_angle(joint_idx_1)
+        phi2 = self.compute_phase_angle(joint_idx_2)
+
+        if len(phi1) == 0 or len(phi2) == 0:
+            return np.array([])
+
+        # Calculate difference
+        crp = phi1 - phi2
+
+        # Optionally wrap to specific range, but typically analysis looks at
+        # the continuous curve or variability.
+        # For display, we often wrap to [-180, 180] or [0, 180] absolute
+        # but returning raw difference preserves the most info.
+        return np.asarray(crp)
+
+    def compute_swing_dna(self) -> SwingDNAMetrics | None:
+        """Compute 'Swing DNA' scores (0-100) for radar chart visualization.
+
+        Heuristic scoring based on typical professional golf swing data.
+        Note: These are rough approximations for visualization purposes.
+
+        Returns:
+            SwingDNAMetrics object or None if insufficient data
+        """
+        # 1. Speed Score
+        # Pro avg club speed ~113 mph. Let's say 120 mph = 100 score.
+        speed_score = 0.0
+        if self.club_head_speed is not None:
+            peak_speed = float(np.max(self.club_head_speed))  # m/s
+            peak_speed_mph = peak_speed * 2.23694
+            speed_score = float(min(100.0, (peak_speed_mph / 120.0) * 100.0))
+
+        # 2. Sequence Score
+        # Based on kinematic sequence efficiency
+        sequence_score = 0.0
+        # Assume standard order indices if available
+        # We need segment indices. We'll try to guess based on joint count
+        # or just skip if we can't reliably determine.
+        # Actually, let's use a simpler proxy if we don't have segment names:
+        # Check peak timing of first 3 joints.
+        if self.joint_velocities.shape[1] >= 3:
+            peaks = []
+            for i in range(3):
+                idx = np.argmax(np.abs(self.joint_velocities[:, i]))
+                peaks.append(idx)
+            # Check if sorted ascending (0->1->2)
+            if peaks == sorted(peaks):
+                sequence_score = 100.0
+            else:
+                # Deduct points for out of order
+                sequence_score = 50.0  # Baseline
+        else:
+            sequence_score = 0.0
+
+        # 3. Stability Score
+        # Based on CoP-CoM distance variance or inclination
+        stability_score = 0.0
+        stab_metrics = self.compute_stability_metrics()
+        if stab_metrics:
+            # Lower inclination is generally more stable/balanced?
+            # Or consistent CoM-CoP margin.
+            # Let's use inclination. < 10 deg is great, > 30 is bad.
+            angle = stab_metrics.mean_inclination_angle
+            stability_score = float(max(0.0, min(100.0, 100.0 - (angle - 5.0) * 4.0)))
+        else:
+            stability_score = 0.0
+
+        # 4. Efficiency Score
+        # Kinetic Energy transfer efficiency
+        efficiency_score = 0.0
+        if (
+            self.club_head_speed is not None
+            and self.joint_torques.shape[1] > 0
+            and self.joint_velocities.shape[1] > 0
+        ):
+            # Energy metrics
+            ke = 0.5 * 1.0 * (self.club_head_speed**2)  # Dummy mass 1kg
+            # Calculate total work done
+            total_work = 0.0
+            for i in range(self.joint_torques.shape[1]):
+                w = self.compute_work_metrics(i)
+                if w:
+                    total_work += w["positive_work"]
+
+            if total_work > 0:
+                peak_ke = float(np.max(ke))
+                # Ratio of output KE to input Work
+                # (This is rough, ignores body KE, but serves as proxy)
+                eff = peak_ke / total_work
+                efficiency_score = float(min(100.0, eff * 200.0))  # Scaling factor
+        else:
+            efficiency_score = 0.0
+
+        # 5. Power Score
+        # Peak total power
+        power_score = 0.0
+        if self.joint_torques.shape[1] > 0:
+            total_power = np.zeros(len(self.times))
+            for i in range(
+                min(self.joint_torques.shape[1], self.joint_velocities.shape[1])
+            ):
+                total_power += self.joint_torques[:, i] * self.joint_velocities[:, i]
+            peak_power = float(np.max(total_power))
+            # Pro might generate > 3000 W?
+            power_score = float(min(100.0, (peak_power / 3000.0) * 100.0))
+
+        return SwingDNAMetrics(
+            speed_score=float(speed_score),
+            sequence_score=float(sequence_score),
+            stability_score=float(stability_score),
+            efficiency_score=float(efficiency_score),
+            power_score=float(power_score),
+        )
 
     def compute_work_metrics(self, joint_idx: int) -> dict[str, float] | None:
         """Compute mechanical work metrics for a joint.
