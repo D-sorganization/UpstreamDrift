@@ -2238,7 +2238,7 @@ class GolfLauncher(QMainWindow):
                 logger.info(f"Port {host_port} busy, using {available_port} instead")
 
             host_port = available_port  # Update for browser launch below
-            
+
             logger.info(f"Launching Meshcat browser at http://127.0.0.1:{host_port}/static/")
             self._start_meshcat_browser(host_port)
 
