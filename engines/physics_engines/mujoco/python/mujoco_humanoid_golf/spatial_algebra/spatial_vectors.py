@@ -339,6 +339,72 @@ def cross_force_fast(v: np.ndarray, f: np.ndarray, out: np.ndarray) -> None:
     out[5] = v[0] * f[4] - v[1] * f[3]
 
 
+def cross_motion_axis(
+    v: np.ndarray, axis_idx: int, val: float, out: np.ndarray
+) -> None:
+    """
+    Computes v x m where m is a sparse vector with only m[axis_idx] = val.
+
+    Optimized to skip multiplications by zero.
+
+    Args:
+        v: 6x1 spatial motion vector
+        axis_idx: Index of non-zero component in m (0-5)
+        val: Value of the non-zero component
+        out: 6x1 output array
+    """
+    # Unrolled logic for sparse m
+    # indices: 0=Rx, 1=Ry, 2=Rz, 3=Px, 4=Py, 5=Pz
+
+    if axis_idx == 0:  # Rx: m = [val, 0, 0, 0, 0, 0]
+        out[0] = 0.0
+        out[1] = v[2] * val
+        out[2] = -v[1] * val
+        out[3] = 0.0
+        out[4] = v[5] * val
+        out[5] = -v[4] * val
+
+    elif axis_idx == 1:  # Ry: m = [0, val, 0, 0, 0, 0]
+        out[0] = -v[2] * val
+        out[1] = 0.0
+        out[2] = v[0] * val
+        out[3] = -v[5] * val
+        out[4] = 0.0
+        out[5] = v[3] * val
+
+    elif axis_idx == 2:  # Rz: m = [0, 0, val, 0, 0, 0]
+        out[0] = v[1] * val
+        out[1] = -v[0] * val
+        out[2] = 0.0
+        out[3] = v[4] * val
+        out[4] = -v[3] * val
+        out[5] = 0.0
+
+    elif axis_idx == 3:  # Px: m = [0, 0, 0, val, 0, 0]
+        out[0] = 0.0
+        out[1] = 0.0
+        out[2] = 0.0
+        out[3] = 0.0
+        out[4] = v[2] * val
+        out[5] = -v[1] * val
+
+    elif axis_idx == 4:  # Py: m = [0, 0, 0, 0, val, 0]
+        out[0] = 0.0
+        out[1] = 0.0
+        out[2] = 0.0
+        out[3] = -v[2] * val
+        out[4] = 0.0
+        out[5] = v[0] * val
+
+    elif axis_idx == 5:  # Pz: m = [0, 0, 0, 0, 0, val]
+        out[0] = 0.0
+        out[1] = 0.0
+        out[2] = 0.0
+        out[3] = v[1] * val
+        out[4] = -v[0] * val
+        out[5] = 0.0
+
+
 def spatial_cross(
     v: np.ndarray,
     u: np.ndarray,
