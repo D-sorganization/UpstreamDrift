@@ -11,7 +11,7 @@ These tests demonstrate proper integration testing:
 import importlib
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
