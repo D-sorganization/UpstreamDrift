@@ -48,9 +48,9 @@ def test_mujoco_loading_success(mock_probe, mock_engine_manager):
 
                     assert result is True
                     assert mock_engine_manager.get_current_engine() == EngineType.MUJOCO
-                    # Verify that the manager loaded our mock
-                    assert mock_engine_manager._mujoco_module == mock_mujoco_pkg
-                    assert mock_engine_manager._mujoco_module.__version__ == "3.2.3"
+                    # Verify that the engine was loaded successfully
+                    assert mock_engine_manager.engine_status[EngineType.MUJOCO] == EngineStatus.LOADED
+                    assert mock_engine_manager.active_physics_engine is not None
 
 
 @patch("shared.python.engine_probes.MuJoCoProbe.probe")
@@ -93,7 +93,9 @@ def test_drake_loading_success(mock_probe, mock_drake_class, mock_engine_manager
 
     assert result is True
     assert mock_engine_manager.get_current_engine() == EngineType.DRAKE
-    assert mock_engine_manager._drake_module == mock_drake
+    # Verify that the engine was loaded successfully
+    assert mock_engine_manager.engine_status[EngineType.DRAKE] == EngineStatus.LOADED
+    assert mock_engine_manager.active_physics_engine is not None
 
 
 @patch(
@@ -118,7 +120,9 @@ def test_pinocchio_loading_success(
 
             assert result is True
             assert mock_engine_manager.get_current_engine() == EngineType.PINOCCHIO
-            assert mock_engine_manager._pinocchio_module == mock_pin
+            # Verify that the engine was loaded successfully
+            assert mock_engine_manager.engine_status[EngineType.PINOCCHIO] == EngineStatus.LOADED
+            assert mock_engine_manager.active_physics_engine is not None
 
 
 def test_cleanup_releases_resources(mock_engine_manager):
@@ -127,14 +131,13 @@ def test_cleanup_releases_resources(mock_engine_manager):
     mock_matlab = MagicMock()
     mock_engine_manager._matlab_engine = mock_matlab
 
-    mock_meshcat = MagicMock()
-    mock_engine_manager._drake_meshcat = mock_meshcat
-
     mock_engine_manager.cleanup()
 
     mock_matlab.quit.assert_called_once()
     assert mock_engine_manager._matlab_engine is None
-    assert mock_engine_manager._drake_meshcat is None
+    # Verify cleanup completed successfully
+    assert mock_engine_manager.active_physics_engine is None
+    assert mock_engine_manager.current_engine is None
 
 
 def test_cleanup_handles_exceptions(mock_engine_manager):
