@@ -405,6 +405,24 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             "",
             "C3D files (*.c3d);;All files (*.*)",
         )
+        if path:
+            # Security validation (F-004)
+            # Allow User Home and Project Root
+            # shared module import must be available
+            from shared.python.security_utils import validate_path
+
+            suite_root = Path(__file__).parents[6]
+            allowed = [
+                Path.home(),
+                suite_root,
+            ]
+            try:
+                # We use strict=False to allow checking but log/warn if outside,
+                # or strict=True if we want to block. Review suggested blocking.
+                path = str(validate_path(path, allowed, strict=True))
+            except ValueError as e:
+                QtWidgets.QMessageBox.warning(self, "Security Warning", str(e))
+                return
         if not path:
             return
 
