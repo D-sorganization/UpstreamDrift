@@ -13,6 +13,7 @@ from shared.python.equipment import CLUB_CONFIGS
 from shared.python.physics_parameters import get_registry
 
 GRAVITY_M_S2 = float(constants.GRAVITY_M_S2)
+DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
 
 # Retrieve physics parameters
 _registry = get_registry()
@@ -24,7 +25,8 @@ BALL_RADIUS = float(_ball_radius_param.value) if _ball_radius_param else 0.02133
 
 
 CHAOTIC_PENDULUM_XML = rf"""<mujoco model="chaotic_driven_pendulum">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
+  <option timestep="{DEFAULT_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}"
+          integrator="RK4"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
@@ -93,7 +95,8 @@ CHAOTIC_PENDULUM_XML = rf"""<mujoco model="chaotic_driven_pendulum">
 
 
 DOUBLE_PENDULUM_XML = rf"""    <mujoco model="golf_double_pendulum">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
+  <option timestep="{DEFAULT_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}"
+          integrator="RK4"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
@@ -142,7 +145,8 @@ DOUBLE_PENDULUM_XML = rf"""    <mujoco model="golf_double_pendulum">
 
 
 TRIPLE_PENDULUM_XML = rf"""    <mujoco model="golf_triple_pendulum">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
+  <option timestep="{DEFAULT_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}"
+          integrator="RK4"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
@@ -669,7 +673,7 @@ FULL_BODY_GOLF_SWING_XML = rf"""
 # ==============================================================================
 TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML = rf"""
 <mujoco model="two_link_inclined_universal">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}"
+  <option timestep="{DEFAULT_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}"
           integrator="RK4" solver="Newton"/>
 
   <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
@@ -779,7 +783,7 @@ TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML = rf"""
 # ==============================================================================
 GIMBAL_JOINT_DEMO_XML = rf"""
 <mujoco model="gimbal_joint_demo">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}"
+  <option timestep="{DEFAULT_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}"
           integrator="RK4" solver="Newton"/>
 
   <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
@@ -893,7 +897,7 @@ GIMBAL_JOINT_DEMO_XML = rf"""
 # ==============================================================================
 ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""
 <mujoco model="advanced_biomechanical_golf_swing">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}"
+  <option timestep="{DEFAULT_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}"
           integrator="RK4" solver="Newton" iterations="50"/>
 
   <compiler angle="radian" coordinate="local"
