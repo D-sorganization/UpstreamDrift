@@ -2,13 +2,23 @@ from __future__ import annotations
 
 import logging
 import os
+from pathlib import Path
 from typing import Any, cast  # noqa: F401
 
 import mujoco
 import numpy as np
 from shared.python.interfaces import PhysicsEngine
+from shared.python.security_utils import validate_path
 
 LOGGER = logging.getLogger(__name__)
+
+# Model directories allowed for loading (relative to suite root)
+# Hardening: Prevent loading from arbitrary system paths
+SUITE_ROOT = Path(__file__).parents[5]
+ALLOWED_MODEL_DIRS = [
+    SUITE_ROOT / "engines",
+    SUITE_ROOT / "shared" / "resources",
+]
 
 
 class MuJoCoPhysicsEngine(PhysicsEngine):
@@ -54,13 +64,14 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
     def load_from_path(self, path: str) -> None:
         """Load model from file path."""
         try:
-            # Convert to absolute path if needed
-            if not os.path.isabs(path):
-                path = os.path.abspath(path)
+            # Security: Validate path is within allowed directories
+            # Hardening against path traversal (F-004)
+            resolved = validate_path(path, ALLOWED_MODEL_DIRS, strict=True)
+            path_str = str(resolved)
 
-            self.model = mujoco.MjModel.from_xml_path(path)
+            self.model = mujoco.MjModel.from_xml_path(path_str)
             self.data = mujoco.MjData(self.model)
-            self.xml_path = path
+            self.xml_path = path_str
         except Exception as e:
             LOGGER.error("Failed to load model from path %s: %s", path, e)
             raise

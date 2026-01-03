@@ -1,0 +1,169 @@
+"""Unit tests for C3D services."""
+
+import sys
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import numpy as np
+import pytest
+
+# Add source directory to path to handle "3D_Golf_Model" invalid identifier issue
+# Repo root is assumed to be current working directory of test runner
+REPO_ROOT = Path(__file__).resolve().parents[2] # tests/unit -> tests -> root
+SRC_PATH = (
+    REPO_ROOT
+    / "engines"
+    / "Simscape_Multibody_Models"
+    / "3D_Golf_Model"
+    / "python"
+    / "src"
+)
+
+if str(SRC_PATH) not in sys.path:
+    sys.path.insert(0, str(SRC_PATH))
+
+# Now we can import apps.*
+try:
+    from apps.core.models import C3DDataModel
+    from apps.services.analysis import compute_marker_statistics
+    from apps.services.c3d_loader import load_c3d_file
+
+    # We also need to patch the full path correctly in tests
+    LOADER_PATH = "apps.services.c3d_loader"
+    THREAD_PATH = "apps.services.loader_thread"
+except ImportError:
+    # Fallback or fail if path is wrong
+    pytest.fail(f"Could not import apps from {SRC_PATH}")
+
+
+# ---------------------------------------------------------------------------
+# Test Analysis Service
+# ---------------------------------------------------------------------------
+
+
+def test_compute_marker_statistics_basic():
+    """Test basic stats computation."""
+    t = np.array([0.0, 1.0, 2.0])
+    pos = np.array([[0, 0, 0], [1, 0, 0], [3, 0, 0]], dtype=float)
+    # dist: 0->1 = 1.0, 1->3 = 2.0
+    # speed: 1.0/1.0=1.0, 2.0/1.0=2.0
+
+    stats = compute_marker_statistics(t, pos)
+
+    assert stats["path_length"] == pytest.approx(3.0)
+    assert stats["max_speed"] == pytest.approx(2.0)
+    assert stats["mean_speed"] == pytest.approx(1.5)
+
+
+def test_compute_marker_statistics_empty():
+    """Test stats with empty or single point."""
+    t = np.array([0.0])
+    pos = np.array([[0, 0, 0]])
+    stats = compute_marker_statistics(t, pos)
+    assert np.isnan(stats["path_length"]) or stats["path_length"] == 0.0 # Implementation detail: check code
+    assert np.isnan(stats["max_speed"])
+
+
+def test_compute_marker_statistics_nan_handling():
+    """Test handling of NaN values."""
+    t = np.array([0.0, 1.0])
+    pos = np.array([[0, 0, 0], [np.nan, 0, 0]])
+    stats = compute_marker_statistics(t, pos)
+    # nansum should handle it? or propagate nan depending on numpy version/func
+    # Our implementation uses nansum, but diff with nan results in nan.
+    # nansum([nan]) -> 0.0
+    assert stats["path_length"] == 0.0
+
+
+# ---------------------------------------------------------------------------
+# Test Loader Service
+# ---------------------------------------------------------------------------
+
+@patch("apps.services.c3d_loader.C3DDataReader")
+@patch("os.path.exists")
+def test_load_c3d_file_success(mock_exists, mock_reader_cls):
+    """Test successful loading via service."""
+    mock_exists.return_value = True
+    mock_reader = mock_reader_cls.return_value
+
+    # Mock metadata
+    mock_meta = MagicMock()
+    mock_meta.marker_labels = ["M1"]
+    mock_meta.analog_labels = ["A1"]
+    mock_meta.analog_units = ["V"]
+    mock_meta.frame_rate = 100.0
+    mock_meta.analog_rate = 1000.0
+    mock_meta.frame_count = 10
+    mock_meta.marker_count = 1
+    mock_meta.events = []
+    mock_reader.get_metadata.return_value = mock_meta
+
+    # Mock dataframes
+    import pandas as pd
+    mock_reader.points_dataframe.return_value = pd.DataFrame({
+        "time": np.linspace(0, 0.1, 10),
+        "marker": ["M1"] * 10,
+        "x": np.zeros(10), "y": np.zeros(10), "z": np.zeros(10),
+        "residual": np.zeros(10)
+    })
+
+    mock_reader.analog_dataframe.return_value = pd.DataFrame({
+        "time": np.linspace(0, 0.1, 100),
+        "channel": ["A1"] * 100,
+        "value": np.ones(100)
+    })
+
+    model = load_c3d_file("/fake/path.c3d")
+
+    assert isinstance(model, C3DDataModel)
+    assert model.filepath == "/fake/path.c3d"
+    assert "M1" in model.markers
+    assert "A1" in model.analog
+
+
+@patch("os.path.exists")
+def test_load_c3d_file_not_found(mock_exists):
+    """Test file not found error."""
+    mock_exists.return_value = False
+    with pytest.raises(FileNotFoundError):
+        load_c3d_file("/nonexistent.c3d")
+
+
+# ---------------------------------------------------------------------------
+# Test Loader Thread
+# ---------------------------------------------------------------------------
+
+def test_loader_thread(qtbot):
+    """Test that thread emits signals."""
+    # Since we can't reliably import the module statically due to path issues,
+    # we rely on the object imported via 'apps' from our sys.path hack.
+
+    # Ensure C3DLoaderThread and its module are from the same context
+    try:
+        from apps.core.models import C3DDataModel
+        from apps.services import loader_thread as loader_thread_mod
+    except ImportError:
+        pytest.fail("Failed to import loader_thread from apps")
+
+    C3DLoaderThread = loader_thread_mod.C3DLoaderThread
+
+    # Patch load_c3d_file in the loader_thread module namespace
+    with patch.object(loader_thread_mod, 'load_c3d_file') as mock_load:
+        # Case 1: Success
+        mock_data = C3DDataModel(filepath="test_path.c3d")
+        mock_load.return_value = mock_data
+
+        worker = C3DLoaderThread("dummy.c3d")
+        with qtbot.waitSignal(worker.loaded, timeout=2000) as blocker:
+            worker.start()
+
+        # Verify result
+        assert blocker.args[0] == mock_data
+
+        # Case 2: Failure
+        mock_load.side_effect = ValueError("Corrupt file")
+        worker_fail = C3DLoaderThread("bad.c3d")
+        with qtbot.waitSignal(worker_fail.failed, timeout=2000) as blocker_fail:
+            worker_fail.start()
+
+        assert "Corrupt file" in blocker_fail.args[0]
