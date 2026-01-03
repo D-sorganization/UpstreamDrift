@@ -34,9 +34,12 @@ except ImportError:
     # Just to allow linting/static analysis if pydrake is missing
     pass
 
+from shared.python import constants
 from shared.python.interfaces import PhysicsEngine
 
 LOGGER = logging.getLogger(__name__)
+
+DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
 
 
 class DrakePhysicsEngine(PhysicsEngine):
@@ -45,7 +48,7 @@ class DrakePhysicsEngine(PhysicsEngine):
     Implements the shared PhysicsEngine protocol.
     """
 
-    def __init__(self, time_step: float = 0.001) -> None:
+    def __init__(self, time_step: float = DEFAULT_TIME_STEP) -> None:
         """Initialize the Drake physics engine.
 
         Args:

@@ -179,10 +179,10 @@ class ControlsTab(QtWidgets.QWidget):
 
     def _create_help_panel(self, parent_layout: QtWidgets.QVBoxLayout) -> None:
         """Create a collapsible help panel."""
-        help_group = QtWidgets.QGroupBox("Quick Start Guide")
-        help_group.setCheckable(True)
-        help_group.setChecked(False)  # Collapsed by default
-        help_layout = QtWidgets.QVBoxLayout(help_group)
+        self.help_group = QtWidgets.QGroupBox("Quick Start Guide")
+        self.help_group.setCheckable(True)
+        self.help_group.setChecked(False)  # Collapsed by default
+        help_layout = QtWidgets.QVBoxLayout(self.help_group)
 
         help_text = (
             "1. <b>Physics Tab:</b> Select Model and Operating Mode.<br>"
@@ -194,7 +194,7 @@ class ControlsTab(QtWidgets.QWidget):
         label = QtWidgets.QLabel(help_text)
         label.setWordWrap(True)
         help_layout.addWidget(label)
-        parent_layout.addWidget(help_group)
+        parent_layout.addWidget(self.help_group)
 
     def _create_quick_camera_buttons(
         self, parent_layout: QtWidgets.QVBoxLayout
