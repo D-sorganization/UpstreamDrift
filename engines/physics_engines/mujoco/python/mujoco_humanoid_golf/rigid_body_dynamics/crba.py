@@ -135,7 +135,8 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
             # f_force = xup[j].T @ f_force  # Transform force to parent frame
             # OPTIMIZATION: Use scratch buffer
             np.dot(xup[j].T, f_force, out=scratch_vec)
-            f_force[:] = scratch_vec
+            # OPTIMIZATION: Swap buffers instead of copying to avoid O(N) allocation/copy
+            f_force, scratch_vec = scratch_vec, f_force
 
             # h_matrix[i, p] = s_subspace[p] @ f_force  # Off-diagonal element
             # This is the hottest part of CRBA (O(n^2))
