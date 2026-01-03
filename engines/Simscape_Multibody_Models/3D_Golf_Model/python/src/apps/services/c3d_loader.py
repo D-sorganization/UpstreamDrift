@@ -13,6 +13,7 @@ try:
     # Try relative import from src/c3d_reader
     # from src.apps.services -> src is ../..
     from ...c3d_reader import C3DDataReader  # type: ignore
+    from ...logger_utils import log_execution_time
 except (ImportError, ValueError):
     # Fallback for direct execution
     # current: src/apps/services
@@ -22,8 +23,9 @@ except (ImportError, ValueError):
         sys.path.insert(0, str(src_path))
     try:
         from c3d_reader import C3DDataReader  # type: ignore[no-redef]
+        from logger_utils import log_execution_time
     except ImportError as e:
-        raise ImportError("Could not find c3d_reader module.") from e
+        raise ImportError("Could not find c3d_reader or logger_utils module.") from e
 
 
 def load_c3d_file(filepath: str) -> C3DDataModel:
@@ -42,11 +44,12 @@ def load_c3d_file(filepath: str) -> C3DDataModel:
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"File not found: {filepath}")
 
-    reader = C3DDataReader(filepath)
-    metadata_obj = reader.get_metadata()
+    with log_execution_time(f"load_c3d_{os.path.basename(filepath)}"):
+        reader = C3DDataReader(filepath)
+        metadata_obj = reader.get_metadata()
 
-    # Load Points Data
-    df_points = reader.points_dataframe(include_time=False)
+        # Load Points Data
+        df_points = reader.points_dataframe(include_time=False)
 
     # Build markers dict
     markers: dict[str, MarkerData] = {}
