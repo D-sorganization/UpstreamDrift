@@ -5,41 +5,28 @@ This module provides unified management of different physics engines
 including MuJoCo, Drake, Pinocchio, OpenSim, MATLAB models, and pendulum models.
 """
 
-from enum import Enum
+from functools import partial
 from pathlib import Path
 from typing import Any
 
 from .common_utils import GolfModelingError, setup_logging
+from .engine_loaders import LOADER_MAP
+from .engine_registry import (
+    EngineRegistration,
+    EngineStatus,
+    EngineType,
+    get_registry,
+)
 from .interfaces import PhysicsEngine
 
 logger = setup_logging(__name__)
 
 
-class EngineType(Enum):
-    """Available physics engine types."""
-
-    MUJOCO = "mujoco"
-    DRAKE = "drake"
-    PINOCCHIO = "pinocchio"
-    OPENSIM = "opensim"
-    MYOSIM = "myosim"
-    MATLAB_2D = "matlab_2d"
-    MATLAB_3D = "matlab_3d"
-    PENDULUM = "pendulum"
-
-
-class EngineStatus(Enum):
-    """Engine status types."""
-
-    AVAILABLE = "available"
-    UNAVAILABLE = "unavailable"
-    LOADING = "loading"
-    LOADED = "loaded"
-    ERROR = "error"
-
-
 class EngineManager:
-    """Manages different physics engines for golf swing modeling."""
+    """Manages different physics engines for golf swing modeling.
+
+    Refactored to use EngineRegistry (Decoupling Phase).
+    """
 
     def __init__(self, suite_root: Path | None = None):
         """Initialize the engine manager.
@@ -56,7 +43,7 @@ class EngineManager:
         self.active_physics_engine: PhysicsEngine | None = None
         self.engine_status: dict[EngineType, EngineStatus] = {}
 
-        # Define engine paths
+        # Define engine paths (Legacy map - could be moved to registry objects eventually)
         self.engine_paths = {
             EngineType.MUJOCO: (self.engines_root / "physics_engines" / "mujoco"),
             EngineType.DRAKE: (self.engines_root / "physics_engines" / "drake"),
@@ -72,7 +59,7 @@ class EngineManager:
             EngineType.PENDULUM: self.engines_root / "pendulum_models",
         }
 
-        # Initialize engine probes
+        # Initialize probes
         from .engine_probes import (
             DrakeProbe,
             MatlabProbe,
@@ -95,45 +82,38 @@ class EngineManager:
         }
         self.probe_results: dict[EngineType, Any] = {}
 
-        # Initialize engine status (Discovery)
+        # Register standard loaders
+        registry = get_registry()
+        for engine_type, loader_func in LOADER_MAP.items():
+            # Create a partial to bind suite_root
+            factory = partial(loader_func, suite_root=self.suite_root)
+            registry.register(
+                EngineRegistration(
+                    engine_type=engine_type,
+                    factory=factory,
+                    registration_path=self.engine_paths.get(engine_type),
+                    probe_class=(
+                        type(self.probes.get(engine_type))
+                        if engine_type in self.probes
+                        else None
+                    ),
+                )
+            )
+
+        # Initialize engine status
         self._discover_engines()
 
         # Engine storage (Legacy / Specifics)
-        self._mujoco_module: Any = None
-        self._mujoco_model_dir: Path | None = None
-        self._drake_module: Any = None
-        self._drake_meshcat: Any = None
-        self._pinocchio_module: Any = None
         self._matlab_engine: Any = None
         self._matlab_model_dir: Path | None = None
         self._pendulum_model_dir: Path | None = None
-
-        # Plugin Registry (Mapping Type -> Loader Function)
-        self._loaders = {
-            EngineType.MUJOCO: self._load_mujoco_engine,
-            EngineType.DRAKE: self._load_drake_engine,
-            EngineType.PINOCCHIO: self._load_pinocchio_engine,
-            EngineType.OPENSIM: self._load_opensim_engine,
-            EngineType.MYOSIM: self._load_myosim_engine,
-            EngineType.MATLAB_2D: lambda: self._load_matlab_engine(
-                EngineType.MATLAB_2D
-            ),
-            EngineType.MATLAB_3D: lambda: self._load_matlab_engine(
-                EngineType.MATLAB_3D
-            ),
-            EngineType.PENDULUM: self._load_pendulum_engine,
-        }
 
     def get_active_physics_engine(self) -> PhysicsEngine | None:
         """Get the currently active PhysicsEngine instance."""
         return self.active_physics_engine
 
     def get_available_engines(self) -> list[EngineType]:
-        """Get list of available engines.
-
-        Returns:
-            List of available engine types
-        """
+        """Get list of available engines."""
         return [
             engine
             for engine, status in self.engine_status.items()
@@ -141,14 +121,7 @@ class EngineManager:
         ]
 
     def switch_engine(self, engine_type: EngineType) -> bool:
-        """Switch to a different physics engine.
-
-        Args:
-            engine_type: The engine to switch to
-
-        Returns:
-            True if switch was successful, False otherwise
-        """
+        """Switch to a different physics engine."""
         if engine_type not in self.engine_status:
             logger.error(f"Unknown engine type: {engine_type}")
             return False
@@ -178,26 +151,28 @@ class EngineManager:
                 logger.warning(f"Engine {engine_type.value} not found at {engine_path}")
 
     def _load_engine(self, engine_type: EngineType) -> None:
-        """Load a specific engine using the plugin registry.
-
-        Args:
-            engine_type: The engine to load
-
-        Raises:
-            GolfModelingError: If engine loading fails
-        """
+        """Load a specific engine."""
         logger.info(f"Loading engine: {engine_type.value}")
         self.engine_status[engine_type] = EngineStatus.LOADING
-
-        # Unload current engine logic if needed could go here
         self.active_physics_engine = None
 
         try:
-            loader = self._loaders.get(engine_type)
-            if not loader:
-                raise GolfModelingError(f"No loader defined for {engine_type}")
+            # Handle special cases (MATLAB / PENDULUM) that don't conform to standard PhysicsEngine yet
+            if engine_type in (EngineType.MATLAB_2D, EngineType.MATLAB_3D):
+                self._load_matlab_engine(engine_type)
+            elif engine_type == EngineType.PENDULUM:
+                self._load_pendulum_engine()
+            else:
+                # Standard Registry Loading
+                registry = get_registry()
+                registration = registry.get(engine_type)
+                if not registration:
+                    # Fallback or error
+                    raise GolfModelingError(f"No registration found for {engine_type}")
 
-            loader()
+                # Instantiate
+                engine = registration.factory()
+                self.active_physics_engine = engine
 
             self.engine_status[engine_type] = EngineStatus.LOADED
             logger.info(f"Successfully loaded engine: {engine_type.value}")
@@ -208,205 +183,9 @@ class EngineManager:
                 f"Failed to load engine {engine_type.value}: {e}"
             ) from e
 
-    def _load_mujoco_engine(self) -> None:
-        """Load MuJoCo engine with full initialization."""
-        try:
-            # 1. Run probe
-            from .engine_probes import MuJoCoProbe
-
-            probe = MuJoCoProbe(self.suite_root)
-            result = probe.probe()
-
-            if not result.is_available():
-                raise GolfModelingError(
-                    f"MuJoCo not ready:\n{result.diagnostic_message}\n"
-                    f"Fix: {result.get_fix_instructions()}"
-                )
-
-            # 2. Instantiate Interface
-            from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
-                MuJoCoPhysicsEngine,
-            )
-
-            engine = MuJoCoPhysicsEngine()
-            self.active_physics_engine = engine
-
-            import mujoco
-
-            self._mujoco_module = mujoco
-
-            # Load default model to verify engine readiness
-            # Trying to load simple_pendulum.xml as a verification step
-            model_path = (
-                self.engine_paths[EngineType.MUJOCO] / "models" / "simple_pendulum.xml"
-            )
-            if model_path.exists():
-                logger.info(f"Loading default MuJoCo model: {model_path}")
-                engine.load_from_path(str(model_path))
-            else:
-                logger.warning(f"Default MuJoCo model not found at {model_path}")
-
-            self._mujoco_model_dir = self.engine_paths[EngineType.MUJOCO] / "models"
-            logger.info("MuJoCo engine fully loaded and instantiation successful")
-
-        except ImportError as e:
-            raise GolfModelingError(
-                "MuJoCo requirements not met. Install mujoco>=3.2.3"
-            ) from e
-
-    def _load_drake_engine(self) -> None:
-        """Load Drake engine with full initialization."""
-        try:
-            from .engine_probes import DrakeProbe
-
-            probe = DrakeProbe(self.suite_root)
-            result = probe.probe()
-
-            if not result.is_available():
-                raise GolfModelingError(
-                    f"Drake not ready:\n{result.diagnostic_message}\n"
-                    f"Fix: {result.get_fix_instructions()}"
-                )
-
-            from engines.physics_engines.drake.python.drake_physics_engine import (
-                DrakePhysicsEngine,
-            )
-
-            engine = DrakePhysicsEngine()
-            self.active_physics_engine = engine
-
-            import pydrake
-
-            self._drake_module = pydrake
-
-            # Try to load the shared golfer URDF if available, since Drake supports URDF
-            # Note: This assumes cross-compatibility of the URDF
-            urdf_path = (
-                self.engine_paths[EngineType.PINOCCHIO]
-                / "models"
-                / "generated"
-                / "golfer.urdf"
-            )
-            if urdf_path.exists():
-                logger.info(
-                    f"Attempting to load shared golfer URDF into Drake: {urdf_path}"
-                )
-                try:
-                    engine.load_from_path(str(urdf_path))
-                except Exception as e:
-                    logger.warning(
-                        f"Failed to load default URDF into Drake (expected if missing meshes): {e}"
-                    )
-            else:
-                logger.warning(f"Default URDF not found at {urdf_path}")
-
-            logger.info("Drake engine fully loaded and instantiated")
-
-        except ImportError as e:
-            raise GolfModelingError("Drake requirements not met.") from e
-
-    def _load_pinocchio_engine(self) -> None:
-        """Load Pinocchio engine."""
-        try:
-            from .engine_probes import PinocchioProbe
-
-            probe = PinocchioProbe(self.suite_root)
-            result = probe.probe()
-
-            if not result.is_available():
-                raise GolfModelingError(
-                    f"Pinocchio not ready:\n{result.diagnostic_message}\n"
-                    f"Fix: {result.get_fix_instructions()}"
-                )
-
-            from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
-                PinocchioPhysicsEngine,
-            )
-
-            engine = PinocchioPhysicsEngine()
-            self.active_physics_engine = engine
-
-            import pinocchio
-
-            self._pinocchio_module = pinocchio
-
-            # Load default golfer URDF
-            model_path = (
-                self.engine_paths[EngineType.PINOCCHIO]
-                / "models"
-                / "generated"
-                / "golfer.urdf"
-            )
-            if model_path.exists():
-                logger.info(f"Loading default Pinocchio model: {model_path}")
-                engine.load_from_path(str(model_path))
-            else:
-                logger.warning(f"Default Pinocchio model not found at {model_path}")
-
-            logger.info("Pinocchio engine fully loaded and instantiated")
-
-        except ImportError as e:
-            raise GolfModelingError("Pinocchio requirements not met.") from e
-
-    def _load_opensim_engine(self) -> None:
-        """Load OpenSim engine."""
-        logger.info("Loading OpenSim engine...")
-        try:
-            from .engine_probes import OpenSimProbe
-
-            probe = OpenSimProbe(self.suite_root)
-            result = probe.probe()
-
-            if not result.is_available():
-                raise GolfModelingError(
-                    f"OpenSim not ready:\n{result.diagnostic_message}\n"
-                    f"Fix: {result.get_fix_instructions()}"
-                )
-
-            from engines.physics_engines.opensim.python.opensim_physics_engine import (
-                OpenSimPhysicsEngine,
-            )
-
-            engine = OpenSimPhysicsEngine()
-            self.active_physics_engine = engine
-            logger.info("OpenSim engine loaded")
-
-        except ImportError as e:
-            raise GolfModelingError("OpenSim requirements not met.") from e
-
-    def _load_myosim_engine(self) -> None:
-        """Load MyoSim engine."""
-        logger.info("Loading MyoSim engine...")
-        try:
-            from .engine_probes import MyoSimProbe
-
-            probe = MyoSimProbe(self.suite_root)
-            result = probe.probe()
-
-            if not result.is_available():
-                raise GolfModelingError(
-                    f"MyoSim not ready:\n{result.diagnostic_message}\n"
-                    f"Fix: {result.get_fix_instructions()}"
-                )
-
-            from engines.physics_engines.myosim.python.myosim_physics_engine import (
-                MyoSimPhysicsEngine,
-            )
-
-            engine = MyoSimPhysicsEngine()
-            self.active_physics_engine = engine
-            logger.info("MyoSim engine loaded")
-
-        except ImportError as e:
-            raise GolfModelingError("MyoSim requirements not met.") from e
-
     def _load_matlab_engine(self, engine_type: EngineType) -> None:
         """Load MATLAB engine type."""
-        # MATLAB doesn't have a PhysicsEngine wrapper yet, so active_physics_engine remains None?
-        # Or we should wrap it eventually. For now, adhere to old logic but nullify active_physics_engine
-        # since it doesn't support the protocol.
         self.active_physics_engine = None
-
         try:
             import matlab.engine
 
@@ -429,7 +208,7 @@ class EngineManager:
 
     def _load_pendulum_engine(self) -> None:
         """Load pendulum models."""
-        self.active_physics_engine = None  # No protocol wrapper yet
+        self.active_physics_engine = None
         model_dir = self.engine_paths[EngineType.PENDULUM]
         if not model_dir.exists():
             raise GolfModelingError(f"Pendulum models not found: {model_dir}")
@@ -445,24 +224,17 @@ class EngineManager:
                 logger.warning(f"Error shutting down MATLAB: {e}")
             self._matlab_engine = None
 
-        if self._drake_meshcat is not None:
-            self._drake_meshcat = None
-
         self.active_physics_engine = None
         self.current_engine = None
-
         logger.info("Engine cleanup complete")
 
     def get_current_engine(self) -> EngineType | None:
-        """Get the currently active engine type."""
         return self.current_engine
 
     def get_engine_status(self, engine_type: EngineType) -> EngineStatus:
-        """Get status of a specific engine."""
         return self.engine_status.get(engine_type, EngineStatus.UNAVAILABLE)
 
     def get_engine_info(self) -> dict[str, Any]:
-        """Get information about all engines."""
         return {
             "current_engine": (
                 self.current_engine.value if self.current_engine else None
@@ -495,27 +267,16 @@ class EngineManager:
         return validation_path.exists()
 
     def probe_all_engines(self) -> dict[EngineType, Any]:
-        """Probe all engines for detailed readiness checks.
-
-        Returns:
-            Dictionary mapping engine types to probe results
-        """
         for engine_type, probe in self.probes.items():
             self.probe_results[engine_type] = probe.probe()
         return self.probe_results
 
     def get_probe_result(self, engine_type: EngineType) -> Any:
-        """Get probe result for a specific engine."""
         if not self.probe_results:
             self.probe_all_engines()
         return self.probe_results.get(engine_type)
 
     def get_diagnostic_report(self) -> str:
-        """Get human-readable diagnostic report for all engines.
-
-        Returns:
-            Formatted diagnostic report
-        """
         if not self.probe_results:
             self.probe_all_engines()
 

@@ -1,6 +1,9 @@
 import logging
 import os
 import random
+import time
+from collections.abc import Generator
+from contextlib import contextmanager
 
 import numpy as np
 
@@ -54,3 +57,22 @@ def set_seeds(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
     logger.info("Seeds set: %d", seed)
+
+
+@contextmanager
+def log_execution_time(
+    operation_name: str, logger_obj: logging.Logger | None = None
+) -> Generator[None, None, None]:
+    """Context manager to log the duration of an operation.
+
+    Args:
+        operation_name: logical name of the operation
+        logger_obj: specific logger to use, or default logger if None
+    """
+    logr = logger_obj or logger
+    start_time = time.perf_counter()
+    try:
+        yield
+    finally:
+        duration = time.perf_counter() - start_time
+        logr.info("Telemetry: %s took %.4f seconds", operation_name, duration)

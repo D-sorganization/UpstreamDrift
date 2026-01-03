@@ -13,66 +13,19 @@ Features:
 
 import os
 import sys
-from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 import numpy as np
-import numpy.typing as npt
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from PyQt6 import QtGui, QtWidgets
 from PyQt6.QtCore import Qt
 
-# Ensure we can import the shared reader
-try:
-    from ..c3d_reader import C3DDataReader  # type: ignore
-except (ImportError, ValueError):
-    # Fallback for direct execution
-    src_path = Path(__file__).resolve().parent.parent
-    if str(src_path) not in sys.path:
-        sys.path.insert(0, str(src_path))
-    from c3d_reader import C3DDataReader
-
-# ---------------------------------------------------------------------------
-# Data model for C3D content
-# ---------------------------------------------------------------------------
-
-
-@dataclass
-class MarkerData:
-    name: str
-    position: npt.NDArray[np.float64]  # shape (N, 3)
-    residuals: npt.NDArray[np.float64] | None = None
-
-
-@dataclass
-class AnalogData:
-    name: str
-    values: npt.NDArray[np.float64]  # shape (N,)
-    unit: str = ""
-
-
-@dataclass
-class C3DDataModel:
-    filepath: str
-    markers: dict[str, MarkerData] = field(default_factory=dict)
-    analog: dict[str, AnalogData] = field(default_factory=dict)
-    point_rate: float = 0.0
-    analog_rate: float = 0.0
-    point_time: npt.NDArray[np.float64] | None = None
-    analog_time: npt.NDArray[np.float64] | None = None
-    metadata: dict[str, str] = field(default_factory=dict)
-
-    def marker_names(self) -> list[str]:
-        """Return list of marker names."""
-        return list(self.markers.keys())
-
-    def analog_names(self) -> list[str]:
-        """Return list of analog channel names."""
-        return list(self.analog.keys())
-
+from .core.models import C3DDataModel
+from .services.analysis import compute_marker_statistics
+from .services.loader_thread import C3DLoaderThread
 
 # ---------------------------------------------------------------------------
 # Matplotlib canvas embedded in Qt
@@ -103,45 +56,6 @@ class MplCanvas(FigureCanvas):
         """Add a subplot to the figure and return the axes."""
         ax = self.fig.add_subplot(*args, **kwargs)
         return ax
-
-
-# ---------------------------------------------------------------------------
-# Utility: simple kinematic analysis for markers
-# ---------------------------------------------------------------------------
-
-
-def compute_marker_statistics(
-    time: npt.NDArray[np.float64], pos: npt.NDArray[np.float64]
-) -> dict[str, float]:
-    """
-    Compute basic kinematic quantities for a single marker trajectory:
-    - total path length
-    - max speed
-    - mean speed
-    """
-    if pos.shape[0] < 2 or time is None or len(time) != pos.shape[0]:
-        return {
-            "path_length": np.nan,
-            "max_speed": np.nan,
-            "mean_speed": np.nan,
-        }
-
-    dt = np.diff(time)
-    dt[dt <= 0] = np.nan  # avoid division by zero
-
-    disp = np.diff(pos, axis=0)  # (N-1, 3)
-    segment_length = np.linalg.norm(disp, axis=1)
-    speed = segment_length / dt
-
-    path_length = np.nansum(segment_length)
-    max_speed = np.nanmax(speed)
-    mean_speed = np.nanmean(speed)
-
-    return {
-        "path_length": float(path_length),
-        "max_speed": float(max_speed),
-        "mean_speed": float(mean_speed),
-    }
 
 
 # ---------------------------------------------------------------------------
@@ -405,132 +319,67 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
             "",
             "C3D files (*.c3d);;All files (*.*)",
         )
+        if path:
+            # Security validation (F-004)
+            # Allow User Home and Project Root
+            # shared module import must be available
+            from shared.python.security_utils import validate_path
+
+            suite_root = Path(__file__).parents[6]
+            allowed = [
+                Path.home(),
+                suite_root,
+            ]
+            try:
+                # We use strict=False to allow checking but log/warn if outside,
+                # or strict=True if we want to block. Review suggested blocking.
+                path = str(validate_path(path, allowed, strict=True))
+            except ValueError as e:
+                QtWidgets.QMessageBox.warning(self, "Security Warning", str(e))
+                return
         if not path:
             return
 
         if (sb := self.statusBar()) is not None:
-            sb.showMessage(f"Loading {os.path.basename(path)}...")
+            sb.showMessage(f"Loading {os.path.basename(path)}... (Async)")
 
         # Ensure single cursor override
         QtWidgets.QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        self._update_ui_state(False)  # Disable UI during load
 
-        try:
-            model = self._load_c3d(path)
-            self.model = model
-            self._populate_ui_with_model()
-            self._update_ui_state(True)
-            if (sb := self.statusBar()) is not None:
-                sb.showMessage(f"Loaded {os.path.basename(path)} successfully.")
-        except Exception as e:
-            if (sb := self.statusBar()) is not None:
-                sb.showMessage("Error loading file.")
-            QtWidgets.QMessageBox.critical(
-                self,
-                "Error loading C3D",
-                f"Failed to load file:\n{path}\n\nError:\n{e}",
-            )
-        finally:
-            QtWidgets.QApplication.restoreOverrideCursor()
+        # Start async worker
+        # Keep a reference to prevent garbage collection
+        self._loader_thread = C3DLoaderThread(path)
+        self._loader_thread.loaded.connect(self._on_load_success)
+        self._loader_thread.failed.connect(self._on_load_failure)
+        # Ensure we cleanup reference when done
+        self._loader_thread.finished.connect(self._on_load_finished)
+        self._loader_thread.start()
 
-    def _load_c3d(self, filepath: str) -> C3DDataModel:
-        """Load and parse a C3D file using the consolidated C3DDataReader."""
-        reader = C3DDataReader(filepath)
-        metadata_obj = reader.get_metadata()
+    def _on_load_success(self, model: C3DDataModel) -> None:
+        """Handle successful model load."""
+        self.model = model
+        self._populate_ui_with_model()
+        self._update_ui_state(True)
+        if (sb := self.statusBar()) is not None:
+            sb.showMessage(f"Loaded {os.path.basename(model.filepath)} successfully.")
 
-        # Load Points Data
-        df_points = reader.points_dataframe(include_time=False)
+    def _on_load_failure(self, error_msg: str) -> None:
+        """Handle load failure."""
+        if (sb := self.statusBar()) is not None:
+            sb.showMessage("Error loading file.")
 
-        # Build markers dict
-        markers: dict[str, MarkerData] = {}
-        marker_names = metadata_obj.marker_labels
-
-        # Optimize by iterating known metadata labels, assuming dataframe acts
-        # predictably. Since DataFrame is tidy, we filter by name
-
-        for name in marker_names:
-            # Filter rows for this marker
-            # Note: df_points has columns [frame, marker, x, y, z, residual]
-            # It's usually faster to groupby if we do all, but simple filtering is
-            # robust.
-            mask = df_points["marker"] == name
-            sub = df_points.loc[mask]
-
-            if not sub.empty:
-                pos = sub[["x", "y", "z"]].to_numpy()
-                res = sub["residual"].to_numpy()
-                markers[name] = MarkerData(name=name, position=pos, residuals=res)
-            else:
-                # Handle missing marker if necessary (empty arrays)
-                markers[name] = MarkerData(
-                    name=name, position=np.empty((0, 3)), residuals=np.empty((0,))
-                )
-
-        # Load Analog Data
-        df_analog = reader.analog_dataframe(include_time=False)
-        analog: dict[str, AnalogData] = {}
-
-        # We need units map from metadata
-        # C3DMetadata now has analog_units list
-        units_map = dict(
-            zip(metadata_obj.analog_labels, metadata_obj.analog_units, strict=False)
+        QtWidgets.QMessageBox.critical(
+            self,
+            "Error loading C3D",
+            f"Failed to load file.\n\nError:\n{error_msg}",
         )
+        self._update_ui_state(True)  # Re-enable UI (at least menus)
 
-        if not df_analog.empty and "channel" in df_analog.columns:
-            for name in df_analog["channel"].unique():
-                mask = df_analog["channel"] == name
-                vals = df_analog.loc[mask, "value"].to_numpy()
-                unit = units_map.get(name, "")
-                analog[name] = AnalogData(name=name, values=vals, unit=unit)
-
-        # Time vectors
-        # Create directly from rate/counts to avoid dataframe overhead for just time
-        frame_time = (
-            np.arange(metadata_obj.frame_count) / metadata_obj.frame_rate
-            if metadata_obj.frame_rate > 0
-            else None
-        )
-
-        analog_time = None
-        if metadata_obj.analog_rate and metadata_obj.analog_rate > 0:
-            # Calculate analog sample count.
-            # We can get it from the dataframe or calculate.
-            # Metadata doesn't strictly store 'analog_sample_count' but implies it via
-            # duration? Or we check one analog channel length.
-            if analog:
-                first_analog = next(iter(analog.values()))
-                n_samples = len(first_analog.values)
-                analog_time = np.arange(n_samples) / metadata_obj.analog_rate
-
-        # Metadata dict for UI
-        metadata_ui = {
-            "File": os.path.basename(filepath),
-            "Path": filepath,
-            "Point rate (Hz)": f"{metadata_obj.frame_rate:.3f}",
-            "Analog rate (Hz)": (
-                f"{metadata_obj.analog_rate:.3f}" if metadata_obj.analog_rate else "N/A"
-            ),
-            "Frames": str(metadata_obj.frame_count),
-            "Points": str(metadata_obj.marker_count),
-            "Units (POINT)": metadata_obj.units,
-        }
-
-        # Add events if any
-        if metadata_obj.events:
-            events_str = ", ".join(
-                [f"{e.label} ({e.time:.2f}s)" for e in metadata_obj.events]
-            )
-            metadata_ui["Events"] = events_str
-
-        return C3DDataModel(
-            filepath=filepath,
-            markers=markers,
-            analog=analog,
-            point_rate=metadata_obj.frame_rate,
-            analog_rate=metadata_obj.analog_rate or 0.0,
-            point_time=frame_time,
-            analog_time=analog_time,
-            metadata=metadata_ui,
-        )
+    def _on_load_finished(self) -> None:
+        """Cleanup after thread finish."""
+        QtWidgets.QApplication.restoreOverrideCursor()
+        self._loader_thread = None
 
     # --------------------- Populate UI from model --------------------------
 
@@ -781,54 +630,37 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         t = self.model.point_time
         pos = marker.position
 
+        # Use extracted service for stats
         stats = compute_marker_statistics(t, pos)
 
-        # Text summary
-        text_lines = [
-            f"Marker: {marker_name}",
-            f"Number of frames: {pos.shape[0]}",
-            "",
-            "Basic kinematic summary:",
-            f"  Total path length: {stats['path_length']:.4f} (position units)",
-            f"  Max speed:         {stats['max_speed']:.4f} (position units/s)",
-            f"  Mean speed:        {stats['mean_speed']:.4f} (position units/s)",
-        ]
+        text = (
+            f"Marker: {marker_name}\n\n"
+            f"Path length: {stats.get('path_length', 0.0):.4f} units\n"
+            f"Max speed:   {stats.get('max_speed', 0.0):.4f} units/s\n"
+            f"Mean speed:  {stats.get('mean_speed', 0.0):.4f} units/s\n"
+        )
+        self.text_analysis.setPlainText(text)
 
-        # Find approximate peak speed frame, if sensible
+        # Update mini-plot (recalculate speed for visualization)
+        self.canvas_analysis.fig.clear()
 
-        speed = None
-        if pos.shape[0] > 2:
+        if pos.shape[0] > 1:
+            ax = self.canvas_analysis.add_subplot(111)
             disp = np.diff(pos, axis=0)
             dt = np.diff(t)
             dt[dt <= 0] = np.nan
             speed = np.linalg.norm(disp, axis=1) / dt
-            if np.all(np.isnan(speed)):
-                text_lines.append("")
-                text_lines.append("  Peak speed: N/A (all speeds are NaN)")
-            else:
-                peak_idx = int(np.nanargmax(speed))
-                peak_time = t[peak_idx + 1]
-                text_lines.append("")
-                text_lines.append(
-                    f"  Peak speed at time: {peak_time:.4f} s (frame {peak_idx + 1})"
-                )
 
-        self.text_analysis.setPlainText("\n".join(text_lines))
-
-        # Speed plot
-        self.canvas_analysis.fig.clear()
-        ax = self.canvas_analysis.add_subplot(111)
-        if speed is not None:
-            # Speed vs time
-            # Align length with t (N-1)
-            ax.plot(t[1:], speed, label="Speed")
-            ax.set_title(f"Speed Profile: {marker_name}")
+            # Plot
+            ax.plot(t[1:], speed, color="green", label="Speed")
+            ax.set_title("Speed Profile")
             ax.set_xlabel("Time (s)")
             ax.set_ylabel("Speed")
             ax.grid(True)
-            ax.legend()
-        self.canvas_analysis.fig.tight_layout()
-        self.canvas_analysis.draw()  # type: ignore
+            self.canvas_analysis.fig.tight_layout()
+            self.canvas_analysis.draw()  # type: ignore
+        else:
+            self.canvas_analysis.clear_axes()
 
 
 def main() -> None:

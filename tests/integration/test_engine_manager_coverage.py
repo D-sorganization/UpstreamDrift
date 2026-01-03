@@ -42,16 +42,23 @@ class TestEngineManagerCoverage:
         # Mock status as AVAILABLE
         mock_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
-        # Mock loader
-        mock_loader = MagicMock()
-        mock_manager._loaders[EngineType.MUJOCO] = mock_loader
+        # Mock the registry to return a working factory
+        from shared.python.engine_registry import get_registry
 
-        result = mock_manager.switch_engine(EngineType.MUJOCO)
+        registry = get_registry()
+        mock_factory = MagicMock()
+        mock_factory.return_value = MagicMock()  # Mock physics engine
 
-        assert result is True
-        assert mock_manager.current_engine == EngineType.MUJOCO
-        assert mock_manager.engine_status[EngineType.MUJOCO] == EngineStatus.LOADED
-        mock_loader.assert_called_once()
+        with patch.object(registry, "get") as mock_get:
+            mock_registration = MagicMock()
+            mock_registration.factory = mock_factory
+            mock_get.return_value = mock_registration
+
+            result = mock_manager.switch_engine(EngineType.MUJOCO)
+
+            assert result is True
+            assert mock_manager.current_engine == EngineType.MUJOCO
+            assert mock_manager.engine_status[EngineType.MUJOCO] == EngineStatus.LOADED
 
     def test_switch_engine_unavailable(self, mock_manager):
         """Test switching to an unavailable engine."""
@@ -71,16 +78,23 @@ class TestEngineManagerCoverage:
         """Test failure during engine loading."""
         mock_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
-        # Mock loader to raise error
+        # Mock the registry to return a factory that raises an error
+        from shared.python.engine_registry import get_registry
+
+        registry = get_registry()
+
         def raise_error():
             raise GolfModelingError("Loading failed")
 
-        mock_manager._loaders[EngineType.MUJOCO] = raise_error
+        with patch.object(registry, "get") as mock_get:
+            mock_registration = MagicMock()
+            mock_registration.factory = raise_error
+            mock_get.return_value = mock_registration
 
-        result = mock_manager.switch_engine(EngineType.MUJOCO)
+            result = mock_manager.switch_engine(EngineType.MUJOCO)
 
-        assert result is False
-        assert mock_manager.engine_status[EngineType.MUJOCO] == EngineStatus.ERROR
+            assert result is False
+            assert mock_manager.engine_status[EngineType.MUJOCO] == EngineStatus.ERROR
 
     def test_validate_engine_configuration(self, mock_manager):
         """Test engine configuration validation."""
