@@ -142,8 +142,10 @@ def test_gui_load_logic(qapp, mock_c3d_file, mock_ezc3d):
     except Exception as e:
         pytest.skip(f"GUI initialization failed (headless environment?): {e}")
 
-    # Override cursor happens in open_c3d_file, but we test inner logic
-    model = window._load_c3d(str(mock_c3d_file))
+    # Load the model directly using the service function
+    from apps.services.c3d_loader import load_c3d_file
+
+    model = load_c3d_file(str(mock_c3d_file))
 
     # Verify C3DDataModel population
     assert isinstance(model, C3DDataModel)
