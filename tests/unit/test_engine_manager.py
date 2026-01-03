@@ -6,7 +6,7 @@ Unit tests for EngineManager functionality.
 import sys
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
@@ -198,7 +198,8 @@ class TestEngineManager:
         assert result is False
 
     @patch("shared.python.engine_manager.logger")
-    def test_engine_loading_error_handling(self, mock_logger):
+    @patch("shared.python.engine_manager.get_registry")
+    def test_engine_loading_error_handling(self, mock_get_registry, mock_logger):
         """Test error handling during engine loading."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -210,17 +211,19 @@ class TestEngineManager:
 
             manager = EngineManager(suite_root=temp_path)
 
-            # Mock the loading method to raise an exception
-            with patch.object(
-                manager, "_load_mujoco_engine", side_effect=Exception("Test error")
-            ):
-                result = manager.switch_engine(EngineType.MUJOCO)
+            # Mock the registry to return a factory that raises an exception
+            mock_registry = mock_get_registry.return_value
+            mock_registration = MagicMock()
+            mock_registration.factory.side_effect = Exception("Test error")
+            mock_registry.get.return_value = mock_registration
 
-                assert result is False
-                assert (
-                    manager.get_engine_status(EngineType.MUJOCO) == EngineStatus.ERROR
-                )
-                mock_logger.error.assert_called()
+            result = manager.switch_engine(EngineType.MUJOCO)
+
+            assert result is False
+            assert (
+                manager.get_engine_status(EngineType.MUJOCO) == EngineStatus.ERROR
+            )
+            mock_logger.error.assert_called()
 
 
 class TestEngineTypes:
