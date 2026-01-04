@@ -192,7 +192,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             self.assertIn("-v /mock/repo/root:/workspace", command_str)
 
             # Verify Drake-specific components
-            self.assertIn("-p 7000-7010:7000-7010", command_str)
+            self.assertIn("-p 7000:7000", command_str)
             self.assertIn("-e MESHCAT_HOST=0.0.0.0", command_str)
             # Verify working directory matches implementation
             self.assertIn(
@@ -242,7 +242,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             self.assertIn("-v /mock/repo/root:/workspace", command_str)
 
             # Verify Pinocchio-specific components
-            self.assertIn("-p 7000-7010:7000-7010", command_str)
+            self.assertIn("-p 7000:7000", command_str)
             self.assertIn("-e MESHCAT_HOST=0.0.0.0", command_str)
             # Verify working directory instead of cd
             self.assertIn(
