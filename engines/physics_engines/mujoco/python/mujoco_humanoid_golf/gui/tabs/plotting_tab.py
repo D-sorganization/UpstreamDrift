@@ -307,7 +307,7 @@ class PlottingTab(QtWidgets.QWidget):
                                     compute_fn = (
                                         analyzer.compute_induced_acceleration
                                     )
-                                    res = compute_fn("actuator")  # Use source name instead of actuator object
+                                    res = compute_fn("actuator")  # Use source name
                                     vals_list.append(res)
                                     times.append(frame.time)
 
