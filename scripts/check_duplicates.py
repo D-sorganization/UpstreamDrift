@@ -72,7 +72,7 @@ def main() -> None:
     # Files that must NOT be duplicated
     tracked_files = {
         "matlab_quality_check.py",
-        # "matlab_quality_config.m", # Todo: consolidating in Phase 2
+        # "matlab_quality_config.m", # NOTE: consolidating in Phase 2
         "constants.py",
     }
 

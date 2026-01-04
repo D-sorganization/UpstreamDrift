@@ -5,6 +5,7 @@ import typing
 from collections.abc import Callable
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from PyQt6 import QtCore, QtWidgets
 
@@ -653,7 +654,13 @@ class ControlsTab(QtWidgets.QWidget):
             slider_val = max(0, min(steps, slider_val))
             slider.setValue(slider_val)
 
-            def _on_slider_change(v, n=name, mn=min_val, mx=max_val, lbl=val_label):
+            def _on_slider_change(
+                v: int,
+                n: str = name,
+                mn: float = min_val,
+                mx: float = max_val,
+                lbl: Any = val_label,
+            ) -> None:
                 self._on_joint_slider_changed(n, v, mn, mx, lbl)
 
             slider.valueChanged.connect(_on_slider_change)
@@ -667,8 +674,13 @@ class ControlsTab(QtWidgets.QWidget):
             spin.setValue(current_val)
 
             def _on_spin_change(
-                v, n=name, mn=min_val, mx=max_val, sl=slider, lbl=val_label
-            ):
+                v: float,
+                n: str = name,
+                mn: float = min_val,
+                mx: float = max_val,
+                sl: Any = slider,
+                lbl: Any = val_label,
+            ) -> None:
                 self._on_joint_spin_changed(n, v, mn, mx, sl, lbl)
 
             spin.valueChanged.connect(_on_spin_change)

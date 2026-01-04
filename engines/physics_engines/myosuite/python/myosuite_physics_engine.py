@@ -172,8 +172,8 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             M = np.zeros((nv, nv))
             mujoco.mj_fullM(self.sim.model, M, self.sim.data.qM)
             return M
-        except Exception:
-            # Fallback
+        except Exception as e:
+            LOGGER.error("Failed to compute mass matrix: %s", e)
             return np.array([])
 
     def compute_bias_forces(self) -> np.ndarray:
@@ -196,7 +196,8 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             self.sim.data.qacc[:] = qacc
             mujoco.mj_inverse(self.sim.model, self.sim.data)
             return np.array(self.sim.data.qfrc_inverse)
-        except Exception:
+        except Exception as e:
+            LOGGER.error("Failed to compute inverse dynamics: %s", e)
             return np.array([])
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
@@ -217,5 +218,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             mujoco.mj_jacBody(self.sim.model, self.sim.data, jacp, jacr, body_id)
 
             return {"linear": jacp, "angular": jacr, "spatial": np.vstack([jacr, jacp])}
-        except Exception:
+        except Exception as e:
+            LOGGER.error("Failed to compute Jacobian for body '%s': %s", body_name, e)
             return None

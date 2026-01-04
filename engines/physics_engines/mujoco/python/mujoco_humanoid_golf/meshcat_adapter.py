@@ -53,11 +53,11 @@ class MuJoCoMeshcatAdapter:
 
         self.load_model_geometry()
 
-    def open_browser(self):
+    def open_browser(self) -> None:
         if self.vis is not None:
             webbrowser.open(self.vis.url())
 
-    def load_model_geometry(self):
+    def load_model_geometry(self) -> None:
         """
         Parses MuJoCo model geoms and creates corresponding Meshcat objects.
         """
@@ -133,7 +133,7 @@ class MuJoCoMeshcatAdapter:
                 else:
                     self.vis["visuals"][name].set_object(shape, material)
 
-    def update(self, data: mujoco.MjData):
+    def update(self, data: mujoco.MjData) -> None:
         """
         Updates geometry transforms from MuJoCo data.
         """
@@ -165,7 +165,7 @@ class MuJoCoMeshcatAdapter:
         show_torque: bool,
         force_scale: float = 0.1,
         torque_scale: float = 0.1,
-    ):
+    ) -> None:
         """
         Draws force/torque vectors at joints.
         """
@@ -230,7 +230,7 @@ class MuJoCoMeshcatAdapter:
         radii: np.ndarray,
         color: int = 0x00FF00,
         opacity: float = 0.3,
-    ):
+    ) -> None:
         """
         Draws an ellipsoid at the specified position/orientation.
 
@@ -264,14 +264,14 @@ class MuJoCoMeshcatAdapter:
         self.vis[path].set_object(shape, material)
         self.vis[path].set_transform(T)
 
-    def clear_ellipsoids(self):
+    def clear_ellipsoids(self) -> None:
         """Clears all drawn ellipsoids."""
         if self.vis:
             self.vis["overlays/ellipsoids"].delete()
 
     def _draw_arrow(
         self, path: str, start: np.ndarray, vec: np.ndarray, color_hex: int
-    ):
+    ) -> None:
         if self.vis is None:
             return
 

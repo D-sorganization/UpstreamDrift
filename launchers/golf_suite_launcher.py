@@ -134,7 +134,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
                 QtWidgets.QStyle.StandardPixmap.SP_DialogSaveButton
             )
         )
-        copy_btn.setToolTip("Copy log contents to clipboard")
+        copy_btn.setToolTip("Copy the simulation log to clipboard")
         copy_btn.setAccessibleName("Copy Log")
         copy_btn.clicked.connect(self.copy_log)
         log_controls.addWidget(copy_btn)
@@ -166,17 +166,18 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
         self.log_text.append(f"[{timestamp}] {message}")
 
+    def copy_log(self) -> None:
+        """Copy the log content to clipboard."""
+        clipboard = QtWidgets.QApplication.clipboard()
+        if clipboard is not None:
+            clipboard.setText(self.log_text.toPlainText())
+            self.log_message("Log copied to clipboard.")
+            self.status.setText("Log copied")
+
     def clear_log(self) -> None:
         """Clear the log text area."""
         self.log_text.clear()
         self.log_message("Log cleared.")
-
-    def copy_log(self) -> None:
-        """Copy log text to clipboard."""
-        clipboard = QtWidgets.QApplication.clipboard()
-        if clipboard:
-            clipboard.setText(self.log_text.toPlainText())
-            self.log_message("Log copied to clipboard.")
 
     def _launch_script(self, name: str, path: Path, cwd: Path) -> None:
         self.status.setText(f"Launching {name}...")
