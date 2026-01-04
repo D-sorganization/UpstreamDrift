@@ -616,7 +616,9 @@ class VisualizationTab(QtWidgets.QWidget):
 
         for i in range(self.sim_widget.model.nu):
             # Actuator name
-            act_name = mujoco.mj_id2name(self.sim_widget.model, mujoco.mjtObj.mjOBJ_ACTUATOR, i)
+            act_name = mujoco.mj_id2name(
+                self.sim_widget.model, mujoco.mjtObj.mjOBJ_ACTUATOR, i
+            )
             if not act_name:
                 act_name = f"actuator_{i}"
             self.induced_source_combo.addItem(act_name)
