@@ -1220,7 +1220,7 @@ class StatisticalAnalyzer:
                 idx = np.argmax(np.abs(self.joint_velocities[:, i]))
                 peaks.append(idx)
             # Check if sorted ascending (0->1->2)
-            if peaks == sorted(peaks):
+            if peaks == sorted(peaks, key=int):
                 sequence_score = 100.0
             else:
                 # Deduct points for out of order

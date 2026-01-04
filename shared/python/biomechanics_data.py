@@ -67,6 +67,10 @@ class BiomechanicalData:
     # Key: Source Name (e.g. 'gravity', 'velocity_dependent', 'actuator_X'), Value: Acceleration array
     induced_accelerations: dict[str, np.ndarray] = field(default_factory=dict)
 
+    # Task Space Induced Accelerations (e.g. Club Head)
+    # Key: Body name (e.g. 'club_head'), Value: Dictionary of components ('gravity', 'velocity', 'control') -> 3D vector
+    club_induced_accelerations: dict[str, np.ndarray] | None = None
+
     # Counterfactual Data (e.g. ZTCF, ZVCF results for this timestep)
     # Key: Counterfactual Name (e.g. 'ztcf_pos', 'zvcf_force'), Value: Data array
     counterfactuals: dict[str, np.ndarray] = field(default_factory=dict)
