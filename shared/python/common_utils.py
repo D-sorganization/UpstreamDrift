@@ -8,7 +8,9 @@ from .core import (
     DataFormatError,
     EngineNotFoundError,
     GolfModelingError,
+    get_logger,
     setup_logging,
+    setup_structured_logging,
 )
 
 # Re-export them for backward compatibility
@@ -17,6 +19,8 @@ __all__ = [
     "EngineNotFoundError",
     "GolfModelingError",
     "setup_logging",
+    "setup_structured_logging",
+    "get_logger",
     "ensure_output_dir",
     "load_golf_data",
     "save_golf_data",
