@@ -61,9 +61,8 @@ class MuJoCoInducedAccelerationAnalyzer:
         saved_qvel = self.data.qvel.copy()
         # We also need to save qacc/cacc if we want to preserve them,
         # but mj_forward overwrites them anyway.
-        # We assume the caller (BiomechanicalAnalyzer) handles state restoration if needed,
-        # or we restore strictly here.
-        # mj_forward updates everything.
+        # We assume the caller handles state restoration if needed,
+        # or we restore strictly here. mj_forward updates everything.
 
         try:
             self.data.qvel[:] = 0
@@ -128,7 +127,7 @@ class MuJoCoInducedAccelerationAnalyzer:
             qdd_comps: Optional pre-computed joint space components.
 
         Returns:
-            Dictionary of 3D acceleration vectors (in World Frame) or None if body not found.
+            Dictionary of 3D acceleration vectors (World Frame) or None if not found.
         """
         body_id = mujoco.mj_name2id(
             self.model, mujoco.mjtObj.mjOBJ_BODY, body_name
@@ -143,7 +142,7 @@ class MuJoCoInducedAccelerationAnalyzer:
         xmat = self.data.xmat[body_id].reshape(3, 3).copy()
 
         # 2. Get Joint Space Components
-        # If not provided, compute them (this might temporarily modify data, but restores it)
+        # If not provided, compute them (this might temp modify data, but restores it)
         if qdd_comps is None:
             qdd_comps = self.compute_components()
 
