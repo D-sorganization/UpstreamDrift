@@ -394,7 +394,7 @@ class ClubDatabase:
         cls,
         name: str,
         club_type: str,
-        **kwargs,
+        **kwargs: Any,
     ) -> ClubSpecification:
         """Create a custom club specification.
 
