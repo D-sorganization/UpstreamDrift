@@ -107,7 +107,8 @@ class BiomechanicalAnalyzer:
         self.prev_qvel = self.data.qvel.copy()
         self.prev_time = self.data.time
 
-        return np.array(qacc, dtype=np.float64)
+        # PERF-004: qacc is already a numpy array, no need to copy
+        return qacc.astype(np.float64, copy=False)
 
     def compute_induced_acceleration(self, source_name: str) -> np.ndarray:
         """Compute induced acceleration for a specific source.
@@ -145,13 +146,13 @@ class BiomechanicalAnalyzer:
             # Use separate buffer to match API: mj_rne(m, d, flg_acc, result)
             res = np.zeros(self.model.nv)
             mujoco.mj_rne(self.model, self.data, 1, res)
-            tau_g = res.copy()
 
             # Restore state
             self.data.qvel[:] = qvel_save
             self.data.qacc[:] = qacc_save
 
-            y = -tau_g
+            # PERF-004: Use res directly, no need to copy
+            y = -res
 
         elif source_name == "actuator":
             # Force from actuators is data.qfrc_actuator
@@ -240,10 +241,10 @@ class BiomechanicalAnalyzer:
         self.data.qacc[:] = 0
         res = np.zeros(self.model.nv)
         mujoco.mj_rne(self.model, self.data, 1, res)
-        c_plus_g = res.copy()
 
+        # PERF-004: Use res directly, no need to copy
         # Solve M * a_ztcf = -(C+g)
-        rhs = -c_plus_g
+        rhs = -res
         rhs_row = rhs.reshape(1, self.model.nv)
         x_row = np.zeros((1, self.model.nv))
         mujoco.mj_solveM(self.model, self.data, x_row, rhs_row)
