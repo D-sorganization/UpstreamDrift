@@ -223,7 +223,10 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def _load_shared_urdfs(self) -> None:
         """Load URDF models from shared/urdf directory."""
-        base_dir = Path(get_shared_urdf_path()).parent
+        shared_path = get_shared_urdf_path()
+        if shared_path is None:
+            return
+        base_dir = Path(shared_path).parent
         if not base_dir.exists():
             return
 
