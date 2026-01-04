@@ -1077,14 +1077,15 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             return
 
         # Explicit cleanup of disabled categories
-        if not self.chk_show_torques.isChecked():
-            self.meshcat.Delete("overlays/vectors/torques")
-        if not self.chk_show_forces.isChecked():
-            self.meshcat.Delete("overlays/vectors/forces")
-        if not self.chk_induced_vec.isChecked():
-            self.meshcat.Delete("overlays/vectors/induced")
-        if not self.chk_cf_vec.isChecked():
-            self.meshcat.Delete("overlays/vectors/cf")
+        if self.meshcat is not None:
+            if not self.chk_show_torques.isChecked():
+                self.meshcat.Delete("overlays/vectors/torques")
+            if not self.chk_show_forces.isChecked():
+                self.meshcat.Delete("overlays/vectors/forces")
+            if not self.chk_induced_vec.isChecked():
+                self.meshcat.Delete("overlays/vectors/induced")
+            if not self.chk_cf_vec.isChecked():
+                self.meshcat.Delete("overlays/vectors/cf")
 
         # Use eval context synced with current state
         plant_context = self.plant.GetMyContextFromRoot(self.context)
@@ -1127,7 +1128,8 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
                 points = np.vstack([pos_W, end_pos]).T
                 path = f"overlays/vectors/forces/{body.name()}"
-                self.meshcat.SetLineSegments(path, points, 2.0, Rgba(0, 1, 0, 1))
+                if self.meshcat is not None:
+                    self.meshcat.SetLineSegments(path, points, 2.0, Rgba(0, 1, 0, 1))
 
         # 3. Advanced Vectors (Induced / CF)
         if not (self.chk_induced_vec.isChecked() or self.chk_cf_vec.isChecked()):
@@ -1165,9 +1167,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                         pass
 
                 if found:
-                    accels = analyzer.compute_specific_control(
-                        self.eval_context, tau
-                    )
+                    accels = analyzer.compute_specific_control(self.eval_context, tau)
 
             self._draw_accel_vectors(accels, "induced", Rgba(1, 0, 1, 1))
 
