@@ -14,3 +14,7 @@ from shared.python import constants
 # Format: [ang_x, ang_y, ang_z, lin_x, lin_y, lin_z]
 DEFAULT_GRAVITY = np.array([0, 0, 0, 0, 0, -constants.GRAVITY_M_S2])
 DEFAULT_GRAVITY.flags.writeable = False
+
+# Optimized negative default gravity for RNEA/ABA to avoid allocation
+NEG_DEFAULT_GRAVITY = -DEFAULT_GRAVITY
+NEG_DEFAULT_GRAVITY.flags.writeable = False
