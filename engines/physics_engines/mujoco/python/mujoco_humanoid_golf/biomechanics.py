@@ -70,7 +70,7 @@ class BiomechanicalAnalyzer:
             self._jacr_flat = np.zeros(3 * self.model.nv)
 
         # Import locally to avoid circular import at module level
-        from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.induced_acceleration import (
+        from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.induced_acceleration import (  # noqa: E501
             MuJoCoInducedAccelerationAnalyzer,
         )
 
@@ -572,7 +572,10 @@ class SwingRecorder:
         values = []
 
         for f in self.frames:
-            if f.club_induced_accelerations and component_name in f.club_induced_accelerations:
+            if (
+                f.club_induced_accelerations
+                and component_name in f.club_induced_accelerations
+            ):
                 times.append(f.time)
                 values.append(f.club_induced_accelerations[component_name])
 
