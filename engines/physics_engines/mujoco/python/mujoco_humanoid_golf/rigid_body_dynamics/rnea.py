@@ -78,9 +78,6 @@ def rnea(  # noqa: PLR0915
         msg = f"qdd must have length {nb}, got {len(qdd)}"
         raise ValueError(msg)
 
-    if f_ext is None:
-        f_ext = np.zeros((6, nb))
-
     # Get gravity vector
     a_grav = model.get("gravity", DEFAULT_GRAVITY)
     # OPTIMIZATION: Pre-compute negative gravity to avoid allocation in loop
@@ -208,7 +205,8 @@ def rnea(  # noqa: PLR0915
         # Optimization: Use pre-allocated buffer for cross product
         cross_force_fast(v[:, i], i_v_buf, out=cross_buf)
         f_body += cross_buf
-        f_body -= f_ext[:, i]
+        if f_ext is not None:
+            f_body -= f_ext[:, i]
 
         # Accumulate with any forces already propagated from children
         # (f is initialized to zero, but children may have already propagated forces)
