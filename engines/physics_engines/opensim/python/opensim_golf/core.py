@@ -101,6 +101,7 @@ class GolfSwingModel:
         # For now, we'll raise NotImplementedError or return dummy data if this
         # path were active. Since we likely don't have OpenSim in this env, we
         # focus on the demo model.
+        # TODO: Implement full OpenSim integration once the environment includes valid OpenSim binaries and models.
         raise NotImplementedError("OpenSim integration pending environment setup.")
 
     def _run_demo_simulation(self) -> SimulationResult:
