@@ -79,7 +79,13 @@ class EngineProbe:
         Returns:
             Probe result with status and diagnostics
         """
-        raise NotImplementedError
+        return EngineProbeResult(
+            engine_name=self.engine_name,
+            status=ProbeStatus.NOT_INSTALLED,
+            version=None,
+            missing_dependencies=["Implementation missing"],
+            diagnostic_message="Probe implementation missing",
+        )
 
 
 class MuJoCoProbe(EngineProbe):
