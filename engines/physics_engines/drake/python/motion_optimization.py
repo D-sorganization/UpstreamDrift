@@ -61,7 +61,7 @@ class OptimizationResult:
 class DrakeMotionOptimizer:
     """Motion optimization for Drake golf swing simulations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the Drake motion optimizer."""
         self.logger = logger
         self.objectives: list[OptimizationObjective] = []

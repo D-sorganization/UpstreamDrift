@@ -54,7 +54,7 @@ class ModelLoaderThread(QtCore.QThread):
         self.xml_content = xml_content
         self.is_file = is_file
 
-    def run(self):
+    def run(self) -> None:
         try:
             if self.is_file:
                 model = mujoco.MjModel.from_xml_path(self.xml_content)
@@ -239,7 +239,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.loader_thread.finished_loading.connect(self._on_model_loaded_async)
         self.loader_thread.start()
 
-    def _on_model_loaded_async(self, model, data, error_msg):
+    def _on_model_loaded_async(self, model, data, error_msg) -> None:
         """Handle completion of async model loading."""
         if error_msg:
             LOGGER.error("Async load failed: %s", error_msg)
@@ -255,7 +255,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             self.label.setText(f"Error initializing renderer: {e}")
             self.loading_finished.emit(False)
 
-    def _finalize_model_load(self, new_model, new_data):
+    def _finalize_model_load(self, new_model, new_data) -> None:
         """Finalize setup on main thread after model/data creation."""
         # Create new renderer (must be on main thread with context)
         new_renderer = mujoco.Renderer(
