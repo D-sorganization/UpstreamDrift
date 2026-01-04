@@ -7,7 +7,7 @@ import os
 import sys
 import webbrowser
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -100,7 +100,7 @@ except ImportError:
 
         pass
 
-    def build_golf_swing_diagram(*args, **kwargs) -> tuple[None, None, None]:  # type: ignore[misc]
+    def build_golf_swing_diagram(*args: Any, **kwargs: Any) -> tuple[None, None, None]:
         """Placeholder for golf swing diagram builder."""
         return None, None, None
 
