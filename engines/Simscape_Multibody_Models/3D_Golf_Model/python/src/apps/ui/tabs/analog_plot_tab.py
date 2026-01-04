@@ -1,6 +1,8 @@
 from PyQt6 import QtWidgets
+
 from ...core.models import C3DDataModel
 from ..widgets.mpl_canvas import MplCanvas
+
 
 class AnalogPlotTab(QtWidgets.QWidget):
     """Analog channel plotting tab."""
@@ -34,7 +36,7 @@ class AnalogPlotTab(QtWidgets.QWidget):
         """Update UI with data from the model."""
         self.model = model
         self.list_analog.clear()
-        
+
         if model is None:
             self.canvas_analog.clear_axes()
             return
@@ -49,7 +51,7 @@ class AnalogPlotTab(QtWidgets.QWidget):
         """Update the analog plot based on selected channel."""
         if self.model is None:
             return
-            
+
         selected_items = self.list_analog.selectedItems()
         if not selected_items:
             self.canvas_analog.clear_axes()

@@ -20,12 +20,11 @@ from PyQt6.QtCore import Qt
 
 from .core.models import C3DDataModel
 from .services.loader_thread import C3DLoaderThread
-from .ui.tabs.analysis_tab import AnalysisTab
 from .ui.tabs.analog_plot_tab import AnalogPlotTab
+from .ui.tabs.analysis_tab import AnalysisTab
 from .ui.tabs.marker_plot_tab import MarkerPlotTab
 from .ui.tabs.overview_tab import OverviewTab
 from .ui.tabs.viewer_3d_tab import Viewer3DTab
-
 
 # ---------------------------------------------------------------------------
 # Main Window

@@ -1,8 +1,10 @@
-from PyQt6.QtWidgets import QWidget
+from typing import Any
+
+from matplotlib.axes import Axes
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from matplotlib.axes import Axes
-from typing import Any
+from PyQt6.QtWidgets import QWidget
+
 
 class MplCanvas(FigureCanvas):
     """Matplotlib canvas widget for embedding plots in Qt."""
