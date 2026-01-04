@@ -326,7 +326,7 @@ class MatlabDataLoader:
         # Fast path for numeric 2D arrays (most common case)
         if col_data.dtype != "object" and col_data.ndim == 2 and col_data.shape[1] == 3:
             # Vectorized operation - process all rows at once
-            return [row.astype(np.float32) for row in col_data]
+            return list(col_data.astype(np.float32))
 
         # Slower path for cell arrays and irregular data
         processed_vectors = []
@@ -375,13 +375,14 @@ class MatlabDataLoader:
         try:
             if col_data.dtype == "object":
                 # Handle cell arrays - use list comprehension for speed
-                def extract_cell(i: int) -> float:
-                    cell = col_data[i, 0] if col_data.ndim > 1 else col_data[i]
+                # Handle cell arrays - optimized iteration
+                processed = []
+                # Iterate directly over flat array to avoid indexing overhead
+                for cell in col_data.flat:
                     if hasattr(cell, "item"):
-                        return cell.item()
-                    return float(cell) if cell is not None else 0.0
-
-                processed = [extract_cell(i) for i in range(num_rows)]
+                        processed.append(cell.item())
+                    else:
+                        processed.append(float(cell) if cell is not None else 0.0)
                 return np.array(processed, dtype=np.float32)
             else:
                 # Handle numeric arrays

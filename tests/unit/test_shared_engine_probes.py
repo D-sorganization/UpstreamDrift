@@ -2,8 +2,6 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from shared.python.engine_probes import (
     DrakeProbe,
     EngineProbe,
@@ -41,8 +39,9 @@ def test_engine_probe_result():
 
 def test_engine_probe_base():
     probe = EngineProbe("Base", Path("."))
-    with pytest.raises(NotImplementedError):
-        probe.probe()
+    result = probe.probe()
+    assert result.status == ProbeStatus.NOT_INSTALLED
+    assert result.diagnostic_message == "Probe implementation missing"
 
 
 # Test MuJoCoProbe
