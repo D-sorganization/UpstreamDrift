@@ -20,7 +20,7 @@ import pandas as pd
 try:
     from .logger_utils import get_logger, log_execution_time
 except ImportError:
-    from logger_utils import get_logger, log_execution_time
+    from logger_utils import get_logger, log_execution_time  # type: ignore[no-redef]
 
 logger = get_logger(__name__)
 
@@ -35,6 +35,12 @@ class C3DEvent:
     label: str
     time: float
 
+    def __post_init__(self) -> None:
+        """Validate event data."""
+        if not self.label:
+            raise ValueError("Event label cannot be empty.")
+        # Time can be negative (pre-trigger) per spec, so we allow it.
+
 
 @dataclass(frozen=True)
 class C3DMetadata:
@@ -48,6 +54,22 @@ class C3DMetadata:
     analog_units: list[str]
     analog_rate: float | None
     events: list[C3DEvent]
+
+    def __post_init__(self) -> None:
+        """Validate metadata fields."""
+        if self.frame_count < 0:
+            raise ValueError(f"Frame count cannot be negative: {self.frame_count}")
+        if self.frame_rate < 0:
+            raise ValueError(f"Frame rate cannot be negative: {self.frame_rate}")
+        if self.analog_rate is not None and self.analog_rate < 0:
+            raise ValueError(f"Analog rate cannot be negative: {self.analog_rate}")
+
+        # Check consistency
+        if len(self.analog_units) != len(self.analog_labels):
+            raise ValueError(
+                "analog_units and analog_labels must have the same length: "
+                f"{len(self.analog_units)} units vs {len(self.analog_labels)} labels"
+            )
 
     @property
     def marker_count(self) -> int:
@@ -246,7 +268,6 @@ class C3DDataReader:
         residual_nan_threshold: float | None = None,
         target_units: str | None = None,
         file_format: str | None = None,
-        sanitize: bool = True,
     ) -> Path:
         """Export marker trajectories to a tabular file.
 
@@ -261,8 +282,9 @@ class C3DDataReader:
             residual_nan_threshold: Threshold to filter noisy data.
             target_units: Unit conversion (e.g. 'm', 'mm').
             file_format: Explicit format ('csv', 'json', 'npz').
-            sanitize: Whether to sanitize CSV output to prevent Excel Formula Injection.
-                Defaults to True. Strings starting with =, +, -, @ will be escaped.
+
+        Note:
+            CSV output is automatically sanitized to prevent Excel Formula Injection.
         """
 
         dataframe = self.points_dataframe(
@@ -271,7 +293,9 @@ class C3DDataReader:
             residual_nan_threshold=residual_nan_threshold,
             target_units=target_units,
         )
-        return self._export_dataframe(dataframe, output_path, file_format, sanitize)
+        return self._export_dataframe(
+            dataframe, output_path, file_format, sanitize=True
+        )
 
     def export_analog(
         self,
@@ -279,7 +303,6 @@ class C3DDataReader:
         *,
         include_time: bool = True,
         file_format: str | None = None,
-        sanitize: bool = True,
     ) -> Path:
         """Export analog channels to a tabular file.
 
@@ -291,12 +314,15 @@ class C3DDataReader:
             output_path: Destination file path.
             include_time: Include a time column in the output.
             file_format: Explicit format ('csv', 'json', 'npz').
-            sanitize: Whether to sanitize CSV output to prevent Excel Formula Injection.
-                Defaults to True.
+
+        Note:
+            CSV output is automatically sanitized to prevent Excel Formula Injection.
         """
 
         dataframe = self.analog_dataframe(include_time=include_time)
-        return self._export_dataframe(dataframe, output_path, file_format, sanitize)
+        return self._export_dataframe(
+            dataframe, output_path, file_format, sanitize=True
+        )
 
     def _get_point_parameters(self) -> dict[str, Any]:
         """Get POINT parameters from the C3D file."""
