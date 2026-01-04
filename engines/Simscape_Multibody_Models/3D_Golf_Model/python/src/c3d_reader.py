@@ -20,7 +20,7 @@ import pandas as pd
 try:
     from .logger_utils import get_logger, log_execution_time
 except ImportError:
-    from logger_utils import get_logger, log_execution_time
+    from logger_utils import get_logger, log_execution_time  # type: ignore[no-redef]
 
 logger = get_logger(__name__)
 
@@ -38,7 +38,8 @@ class C3DEvent:
     def __post_init__(self) -> None:
         """Validate event data."""
         if not self.label:
-            # We allow empty labels? Maybe warn, but for now just validation of types/values
+            # We allow empty labels? Maybe warn, but for now just validation
+            # of types/values
             pass
         # Time can be negative (pre-trigger)? C3D spec allows it? Assume yes.
         # But commonly 0+. strict=True might enforce it.
@@ -66,12 +67,12 @@ class C3DMetadata:
             raise ValueError(f"Frame rate cannot be negative: {self.frame_rate}")
         if self.analog_rate is not None and self.analog_rate < 0:
             raise ValueError(f"Analog rate cannot be negative: {self.analog_rate}")
-        
+
         # Check consistency
         if len(self.analog_units) != len(self.analog_labels):
-            # This logic was in _get_analog_details to force match, but here we validate strictness
-            # However, the reader *fixes* this before creating Metadata.
-            # So we can enforce it here.
+            # This logic was in _get_analog_details to force match, but here we
+            # validate strictness. However, the reader *fixes* this before
+            # creating Metadata. So we can enforce it here.
             pass
 
     @property

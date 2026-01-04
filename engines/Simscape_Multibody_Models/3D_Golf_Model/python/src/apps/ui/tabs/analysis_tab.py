@@ -1,8 +1,10 @@
-from PyQt6 import QtWidgets
 import numpy as np
+from PyQt6 import QtWidgets
+
 from ...core.models import C3DDataModel
 from ...services.analysis import compute_marker_statistics
 from ..widgets.mpl_canvas import MplCanvas
+
 
 class AnalysisTab(QtWidgets.QWidget):
     """Kinematic analysis tab."""
@@ -17,9 +19,7 @@ class AnalysisTab(QtWidgets.QWidget):
 
         top_layout = QtWidgets.QHBoxLayout()
         self.combo_marker_analysis = QtWidgets.QComboBox()
-        self.combo_marker_analysis.currentIndexChanged.connect(
-            self.update_panel
-        )
+        self.combo_marker_analysis.currentIndexChanged.connect(self.update_panel)
         top_layout.addWidget(QtWidgets.QLabel("Marker:"))
         top_layout.addWidget(self.combo_marker_analysis)
 
@@ -45,7 +45,7 @@ class AnalysisTab(QtWidgets.QWidget):
         """Update UI with data from the model."""
         self.model = model
         self.combo_marker_analysis.clear()
-        
+
         if model is None:
             self.text_analysis.clear()
             self.canvas_analysis.clear_axes()
@@ -54,7 +54,7 @@ class AnalysisTab(QtWidgets.QWidget):
         self.combo_marker_analysis.addItems(model.marker_names())
         if model.marker_names():
             self.combo_marker_analysis.setCurrentIndex(0)
-            
+
         self.update_panel()
 
     def update_panel(self) -> None:
