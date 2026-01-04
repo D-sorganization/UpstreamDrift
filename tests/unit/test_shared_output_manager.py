@@ -52,6 +52,7 @@ class TestOutputManager(unittest.TestCase):
         loaded_df = self.manager.load_simulation_results(
             path.stem, format_type=OutputFormat.CSV
         )
+        assert isinstance(loaded_df, pd.DataFrame)
         pd.testing.assert_frame_equal(df, loaded_df)
 
     def test_save_load_json(self):
