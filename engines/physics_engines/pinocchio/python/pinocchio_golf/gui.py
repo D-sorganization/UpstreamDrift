@@ -15,7 +15,7 @@ try:
         if (parent / ".git").exists() or (parent / ".antigravityignore").exists():
             suite_root = parent
             break
-    
+
     if suite_root and str(suite_root) not in sys.path:
         sys.path.insert(0, str(suite_root))
 except Exception:
