@@ -1361,17 +1361,32 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                         # Check for specific torque override from UI
                         txt = self.combo_induced.currentText()
                         if txt and txt not in ["gravity", "velocity", "total"]:
-                            # Attempt to parse as comma-separated vector
-                            try:
-                                parts = [float(x) for x in txt.split(",")]
-                                if len(parts) == self.model.nv:
-                                    spec_tau = np.array(parts)
-                                    spec_acc = self.analyzer.compute_specific_control(
-                                        self.q, spec_tau
-                                    )
-                                    induced["specific_control"] = spec_acc
-                            except ValueError:
-                                pass
+                            # Attempt to parse as comma-separated vector OR Joint Name
+                            spec_tau = np.zeros(self.model.nv)
+                            found_joint = False
+
+                            # Check if it's a joint name
+                            if self.model.existJointName(txt):
+                                j_id = self.model.getJointId(txt)
+                                joint = self.model.joints[j_id]
+                                if joint.nv == 1:
+                                    spec_tau[joint.idx_v] = 1.0
+                                    found_joint = True
+
+                            if not found_joint:
+                                try:
+                                    parts = [float(x) for x in txt.split(",")]
+                                    if len(parts) == self.model.nv:
+                                        spec_tau = np.array(parts)
+                                        found_joint = True
+                                except ValueError:
+                                    pass
+
+                            if found_joint:
+                                spec_acc = self.analyzer.compute_specific_control(
+                                    self.q, spec_tau
+                                )
+                                induced["specific_control"] = spec_acc
 
                         if hasattr(self.analyzer, "compute_counterfactuals"):
                             counterfactuals = self.analyzer.compute_counterfactuals(
