@@ -328,9 +328,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 try:
                     self.viewer = viz.Visualizer(server_args=['--port', '7000'])
                 except TypeError:
-                    # Fallback for older meshcat versions that might not support server_args
+                    # Fallback for older meshcat versions that might not
+                    # support server_args
                     logger.warning(
-                        "Meshcat Visualizer does not support server_args. Using default."
+                        "Meshcat Visualizer: server_args not supported. Using default."
                     )
                     self.viewer = viz.Visualizer()
 
@@ -344,7 +345,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 # We assume port 7000 based on our request (or fallback logic)
                 try:
                     port = url.split(":")[-1].split("/")[0]
-                    # Update to 7000 if we successfully requested it, or trust the return
+                    # Update to 7000 if we successfully requested it,
+                    # or trust the return
                     host_url = f"http://127.0.0.1:{port}/static/"
                     logger.info(f"Host Access URL: {host_url}")
                     self.log_write("=" * 40)
