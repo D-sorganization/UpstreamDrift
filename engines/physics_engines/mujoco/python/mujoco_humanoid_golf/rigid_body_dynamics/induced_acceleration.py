@@ -129,9 +129,7 @@ class MuJoCoInducedAccelerationAnalyzer:
         Returns:
             Dictionary of 3D acceleration vectors (World Frame) or None if not found.
         """
-        body_id = mujoco.mj_name2id(
-            self.model, mujoco.mjtObj.mjOBJ_BODY, body_name
-        )
+        body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
         if body_id == -1:
             return None
 
