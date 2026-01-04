@@ -52,7 +52,6 @@
 - **Objective:** Reproducibility.
 - **Action:** Finalize `pyproject.toml` with strict dependencies and `requirements.lock`.
 
-## Execution Status
 - **Phase 1**: [Completed]
-- **Phase 2**: [Pending]
-- **Phase 3**: [Pending]
+- **Phase 2**: [Completed]
+- **Phase 3**: [Completed]
