@@ -2239,11 +2239,12 @@ class GolfLauncher(QMainWindow):
 
             host_port = available_port  # Update for browser launch below
 
-            logger.info(f"Launching Meshcat browser at http://127.0.0.1:{host_port}/static/")
+            logger.info(
+                f"Launching Meshcat browser at http://127.0.0.1:{host_port}/static/"
+            )
             self._start_meshcat_browser(host_port)
 
         cmd.append(DOCKER_IMAGE_NAME)
-
 
         # Append entry command
         if entry_cmd:
@@ -2280,7 +2281,9 @@ class GolfLauncher(QMainWindow):
                 except OSError:
                     continue
 
-        raise RuntimeError(f"Could not find available port in range {start_port}-{start_port + max_attempts}")
+        raise RuntimeError(
+            f"Could not find available port in range {start_port}-{start_port + max_attempts}"
+        )
 
     def _start_meshcat_browser(self, port: int) -> None:
         """Start the meshcat browser."""
