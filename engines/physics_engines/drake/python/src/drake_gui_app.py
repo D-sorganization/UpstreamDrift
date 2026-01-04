@@ -100,7 +100,11 @@ except ImportError:
 
         pass
 
-    def build_golf_swing_diagram(*args: Any, **kwargs: Any) -> tuple[None, None, None]:
+    def build_golf_swing_diagram(
+        params: GolfModelParams | None = None,
+        urdf_path: str | None = None,
+        meshcat: Any | None = None,
+    ) -> tuple[Any, Any, Any]:
         """Placeholder for golf swing diagram builder."""
         return None, None, None
 
