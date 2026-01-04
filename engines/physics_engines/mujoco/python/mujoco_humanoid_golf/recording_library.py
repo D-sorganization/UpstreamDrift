@@ -234,7 +234,8 @@ class RecordingLibrary:
         # the symlink itself, not the target it points to.
         # Note: We compare absolute paths to avoid copying if source == dest.
         if dest_file.absolute() != data_path.absolute():
-            timestamp_hash = hashlib.md5(str(datetime.now()).encode()).hexdigest()[:8]
+            # SEC-006: Use SHA-256 instead of MD5 for consistency
+            timestamp_hash = hashlib.sha256(str(datetime.now()).encode()).hexdigest()[:8]
             temp_name = f".tmp_{filename}_{timestamp_hash}"
             temp_dest = self.library_path / temp_name
             try:
@@ -611,12 +612,15 @@ class RecordingLibrary:
         )
 
     def _compute_checksum(self, file_path: Path) -> str:
-        """Compute MD5 checksum of file."""
-        md5 = hashlib.md5()
+        """Compute SHA-256 checksum of file.
+
+        SEC-006: Replaced MD5 with SHA-256 to prevent collision attacks.
+        """
+        sha256 = hashlib.sha256()
         with open(file_path, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
-                md5.update(chunk)
-        return md5.hexdigest()
+                sha256.update(chunk)
+        return sha256.hexdigest()
 
     def get_recording_path(self, metadata: RecordingMetadata) -> Path:
         """Get full path to recording data file.
