@@ -50,7 +50,9 @@ try:
     from .induced_acceleration import InducedAccelerationAnalyzer
 except ImportError:
     # Fallback for when script is run directly
-    from induced_acceleration import InducedAccelerationAnalyzer  # type: ignore[no-redef]
+    from induced_acceleration import (
+        InducedAccelerationAnalyzer,  # type: ignore[no-redef]
+    )
 
 # Set up logging
 logging.basicConfig(
