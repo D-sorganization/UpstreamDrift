@@ -6,22 +6,53 @@ import types
 from pathlib import Path
 from typing import Any
 
+# Add suite root to sys.path to allow imports from shared.
+# Instead of assuming a fixed directory depth, search upwards for a repository marker.
 try:
-    import meshcat.geometry as g
-    import meshcat.visualizer as viz
-except ImportError:
+    current_path = Path(__file__).resolve()
+    suite_root: Path | None = None
+    for parent in current_path.parents:
+        if (parent / ".git").exists() or (parent / ".antigravityignore").exists():
+            suite_root = parent
+            break
+
+    if suite_root and str(suite_root) not in sys.path:
+        sys.path.insert(0, str(suite_root))
+except Exception:
+    # If detection fails, fall back to existing sys.path configuration or do nothing
     pass
 
 import numpy as np
-import pinocchio as pin
-from pinocchio.visualize import MeshcatVisualizer
+import pinocchio as pin  # type: ignore
 from PyQt6 import QtCore, QtWidgets
+
+try:
+    import meshcat.geometry as g
+    import meshcat.visualizer as viz
+
+    MESHCAT_AVAILABLE = True
+except ImportError:
+    MESHCAT_AVAILABLE = False
+    g = None  # type: ignore
+    viz = None  # type: ignore
+
+if MESHCAT_AVAILABLE:
+    from pinocchio.visualize import MeshcatVisualizer
+else:
+    MeshcatVisualizer = object  # Dummy class if missing
+
 from shared.python.biomechanics_data import BiomechanicalData
 from shared.python.common_utils import get_shared_urdf_path
 from shared.python.plotting import GolfSwingPlotter, MplCanvas
 from shared.python.statistical_analysis import StatisticalAnalyzer
 
-from .induced_acceleration import InducedAccelerationAnalyzer
+try:
+    from .induced_acceleration import InducedAccelerationAnalyzer
+except ImportError:
+    # Fallback for when script is run directly
+    from induced_acceleration import (  # type: ignore[no-redef]
+        InducedAccelerationAnalyzer,
+    )
 
 # Set up logging
 logging.basicConfig(
@@ -293,22 +324,48 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         logger.info(f"Python Executable: {sys.executable}")
         # Meshcat viewer
         self.viewer: viz.Visualizer | None = None
-        try:
-            self.viewer = viz.Visualizer()
-            url = self.viewer.url() if callable(self.viewer.url) else self.viewer.url
-            logger.info("Internal Meshcat URL: %s", url)
-
+        if MESHCAT_AVAILABLE:
             try:
-                port = url.split(":")[-1].split("/")[0]
-                host_url = f"http://127.0.0.1:{port}/static/"
-                logger.info(f"Host Access URL: {host_url}")
-                self.log_write(f"Visualizer available at: {host_url}")
-            except Exception:
-                logger.info("Could not determine host URL from: %s", url)
-        except (ConnectionError, OSError, RuntimeError) as exc:
-            logger.error(f"Failed to initialize Meshcat viewer: {exc}")
-            self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
-            self.log_write("Please ensure meshcat-server is running or try again.")
+                # Force Meshcat to use port 7000 to match Docker exposure
+                # and bind to 0.0.0.0 to allow external connections
+                try:
+                    self.viewer = viz.Visualizer(server_args=["--port", "7000"])
+                except TypeError:
+                    # Fallback for older meshcat versions that might not
+                    # support server_args
+                    logger.warning(
+                        "Meshcat Visualizer: server_args not supported. Using default."
+                    )
+                    self.viewer = viz.Visualizer()
+
+                if callable(self.viewer.url):
+                    url = self.viewer.url()
+                else:
+                    url = self.viewer.url
+                logger.info("Internal Meshcat URL: %s", url)
+
+                # Explicitly log the external access URL for the user
+                # We assume port 7000 based on our request (or fallback logic)
+                try:
+                    port = url.split(":")[-1].split("/")[0]
+                    # Update to 7000 if we successfully requested it,
+                    # or trust the return
+                    host_url = f"http://127.0.0.1:{port}/static/"
+                    logger.info(f"Host Access URL: {host_url}")
+                    self.log_write("=" * 40)
+                    self.log_write("VISUALIZER READY")
+                    self.log_write("Open this URL in your browser:")
+                    self.log_write(f"{host_url}")
+                    self.log_write("=" * 40)
+                except Exception:
+                    logger.info("Could not determine host URL from: %s", url)
+            except (ConnectionError, OSError, RuntimeError) as exc:
+                logger.error(f"Failed to initialize Meshcat viewer: {exc}")
+                self.log_write(f"Error: Failed to initialize Meshcat viewer: {exc}")
+                self.log_write("Please ensure meshcat-server is running or try again.")
+        else:
+            self.log_write("Warning: Meshcat not available. Visualization disabled.")
+            logger.warning("Meshcat module not found.")
 
         # Model Management
         self.available_models: list[dict] = []
@@ -1037,18 +1094,24 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 self.btn_record.setText("Record")
 
             # Initialize Pinocchio MeshcatVisualizer
-            if self.viewer is not None:
-                self.viewer["robot"].delete()
-                self.viewer["overlays"].delete()
-            else:
-                self.log_write("Error: Meshcat viewer not initialized")
-                return
+            # Initialize Pinocchio MeshcatVisualizer
+            # (Imports handled at module level)
+            if MESHCAT_AVAILABLE and self.viewer is not None:
+                try:
+                    self.viewer["robot"].delete()
+                    self.viewer["overlays"].delete()
 
-            self.viz = MeshcatVisualizer(
-                self.model, self.collision_model, self.visual_model
-            )
-            self.viz.initViewer(viewer=self.viewer, open=False)
-            self.viz.loadViewerModel()
+                    self.viz = MeshcatVisualizer(
+                        self.model, self.collision_model, self.visual_model
+                    )
+                    self.viz.initViewer(viewer=self.viewer, open=False)
+                    self.viz.loadViewerModel()
+                except Exception as e:
+                    self.log_write(f"Warning: Visualizer init failed: {e}")
+                    self.viz = None
+            else:
+                self.log_write("Model loaded without 3D visualization.")
+                self.viz = None
 
             self.log_write(f"Successfully loaded URDF: {fname}")
             self.log_write(f"NQ: {self.model.nq}, NV: {self.model.nv}")
@@ -1396,45 +1459,75 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self.lbl_rank.setText("Error")
 
     def _draw_ellipsoids(self) -> None:
-        """Draw mobility/force ellipsoids at end effector."""
+        """Draw mobility/force ellipsoids at end effector (club_head)."""
         if self.model is None or self.data is None or self.viewer is None:
             return
 
-        joint_id = self.model.njoints - 1
-        joint_pos = self.data.oMi[joint_id].translation
+        # Attempt to find the club_head frame, fallback to last joint
+        frame_name = "club_head"
+        if self.model.existFrame(frame_name):
+            frame_id = self.model.getFrameId(frame_name)
+            # Use Frame Jacobian (Linear only, top 3 rows)
+            # LOCAL_WORLD_ALIGNED gives us the Jacobian incident to the frame origin
+            # but expressed in World orientation, which is correct for visualization.
+            J_full = pin.getFrameJacobian(
+                self.model,
+                self.data,
+                frame_id,
+                pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
+            )
+            # Get position of the frame (club_head)
+            pos = self.data.oMf[frame_id].translation
+        else:
+            # Fallback to last joint
+            logger.warning(
+                f"Frame '{frame_name}' not found. Using last joint as End Effector."
+            )
+            joint_id = self.model.njoints - 1
+            J_full = pin.getJointJacobian(
+                self.model,
+                self.data,
+                joint_id,
+                pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
+            )
+            pos = self.data.oMi[joint_id].translation
 
-        J_full = pin.getJointJacobian(
-            self.model,
-            self.data,
-            joint_id,
-            pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
-        )
+        # Linear Jacobian (3xN)
         J = J_full[:3, :]
 
-        M = pin.crba(self.model, self.data, self.q)
-        M_sym = np.triu(M) + np.triu(M, 1).T
+        # 1. Mobility Ellipsoid (Kinematic): J * J.T
+        # Represents the velocity capability of the end-effector
+        if self.chk_mobility.isChecked():
+            mobility_matrix = J @ J.T
+            eigvals_m, eigvecs_m = np.linalg.eigh(mobility_matrix)
+            # Radii are sqrt of eigenvalues (A v = lambda v)
+            radii_m = np.sqrt(np.maximum(eigvals_m, 1e-6))
+            self._draw_ellipsoid_meshcat(
+                "mobility", pos, eigvecs_m, radii_m * 0.5, 0x00FF00
+            )  # Scale down for viz
 
-        try:
-            Minv = np.linalg.inv(M_sym)
-            Lambda_inv = J @ Minv @ J.T
+        # 2. Force Ellipsoid (Static): inv(J * J.T)
+        # Represents the static force capability (duality of velocity)
+        # Often visualized as J * J.T itself with radii ~ 1/sqrt(lambda)
+        # but formally it is the ellipsoid of (J J.T)^-1.
+        if self.chk_force_ellip.isChecked():
+            # For visualization stability, we can use the same eigenvectors as mobility
+            # but invert the radii (Force is reciprocal to Velocity in
+            # a given direction)
+            # Force Matrix = inv(J @ J.T)
+            # Eigenvalues of inv(A) are 1/lambda(A)
+            # Radii are sqrt(1/lambda) = 1/sqrt(lambda)
+            # We add epsilon to lambda to avoid division by zero
+            mobility_matrix = J @ J.T
+            eigvals_f, eigvecs_f = np.linalg.eigh(mobility_matrix)
 
-            eigvals, eigvecs = np.linalg.eigh(Lambda_inv)
+            # Avoid division by zero
+            safe_eigvals = np.maximum(eigvals_f, 1e-6)
+            radii_f = 1.0 / np.sqrt(safe_eigvals)
 
-            if self.chk_mobility.isChecked():
-                radii = np.sqrt(np.maximum(eigvals, 1e-6))
-                self._draw_ellipsoid_meshcat(
-                    "mobility", joint_pos, eigvecs, radii, 0x00FF00
-                )
-
-            if self.chk_force_ellip.isChecked():
-                radii_force = 1.0 / np.sqrt(np.maximum(eigvals, 1e-6))
-                radii_force = np.clip(radii_force, 0.01, 5.0)
-                self._draw_ellipsoid_meshcat(
-                    "force", joint_pos, eigvecs, radii_force, 0xFF0000
-                )
-
-        except Exception as e:
-            logger.error(f"Ellipsoid computation failed: {e}")
+            self._draw_ellipsoid_meshcat(
+                "force", pos, eigvecs_f, radii_f * 0.2, 0xFF0000
+            )  # Scale for viz
 
     def _draw_ellipsoid_meshcat(
         self,

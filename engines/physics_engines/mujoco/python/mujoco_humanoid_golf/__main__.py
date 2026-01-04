@@ -1,6 +1,22 @@
 """Entry point and main window for the MuJoCo golf pendulum demo."""
 
 import sys
+from pathlib import Path
+
+# Add suite root to sys.path to allow imports from shared.
+# Instead of assuming a fixed directory depth, search upwards for a repository marker.
+try:
+    current_path = Path(__file__).resolve()
+    suite_root: Path | None = None
+    for parent in current_path.parents:
+        if (parent / ".git").exists() or (parent / ".antigravityignore").exists():
+            suite_root = parent
+            break
+
+    if suite_root and str(suite_root) not in sys.path:
+        sys.path.insert(0, str(suite_root))
+except Exception:
+    pass
 
 from PyQt6 import QtCore, QtWidgets
 

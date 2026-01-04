@@ -5,8 +5,8 @@ import typing
 from pathlib import Path
 
 from PyQt6 import QtCore, QtWidgets
+from shared.python.common_utils import get_shared_urdf_path
 
-from ...common_utils import get_shared_urdf_path
 from ...linkage_mechanisms import LINKAGE_CATALOG
 from ...models import (
     ADVANCED_BIOMECHANICAL_GOLF_SWING_XML,
@@ -223,7 +223,10 @@ class PhysicsTab(QtWidgets.QWidget):
 
     def _load_shared_urdfs(self) -> None:
         """Load URDF models from shared/urdf directory."""
-        base_dir = Path(get_shared_urdf_path()).parent
+        shared_path = get_shared_urdf_path()
+        if shared_path is None:
+            return
+        base_dir = Path(shared_path).parent
         if not base_dir.exists():
             return
 

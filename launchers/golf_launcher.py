@@ -2175,10 +2175,7 @@ class GolfLauncher(QMainWindow):
             work_dir = "/workspace/engines/physics_engines/drake/python"
             entry_cmd = ["python", "-m", "src.drake_gui_app"]
             host_port = 7000
-
-            if host_port:
-                logger.info(f"Drake Meshcat will be available on host port {host_port}")
-                self._start_meshcat_browser(host_port)
+            # Browser launch moved to end of method
 
         elif model.type == "custom_humanoid":
             work_dir = "/workspace/engines/physics_engines/mujoco/python"
@@ -2192,12 +2189,7 @@ class GolfLauncher(QMainWindow):
             work_dir = "/workspace/engines/physics_engines/pinocchio/python"
             entry_cmd = ["python", "pinocchio_golf/gui.py"]
             host_port = 7000
-
-            if host_port:
-                logger.info(
-                    f"Pinocchio Meshcat will be available on host port {host_port}"
-                )
-                self._start_meshcat_browser(host_port)
+            # Browser launch moved to end of method
 
         # Set working directory
         cmd.extend(["-w", work_dir])
@@ -2233,8 +2225,24 @@ class GolfLauncher(QMainWindow):
 
         # Network for Meshcat (Drake/Pinocchio)
         if host_port:
-            cmd.extend(["-p", "7000-7010:7000-7010"])
+            # Find an available port on the host
+            available_port = self._find_available_port(host_port)
+
+            # Map Host(Available) -> Container(7000)
+            # We assume the internal app always binds to 7000 as configured/default
+            cmd.extend(["-p", f"{available_port}:7000"])
             cmd.extend(["-e", "MESHCAT_HOST=0.0.0.0"])
+
+            # Update the browser launch to use the actual host port
+            if host_port != available_port:
+                logger.info(f"Port {host_port} busy, using {available_port} instead")
+
+            host_port = available_port  # Update for browser launch below
+
+            logger.info(
+                f"Launching Meshcat browser at http://127.0.0.1:{host_port}/static/"
+            )
+            self._start_meshcat_browser(host_port)
 
         cmd.append(DOCKER_IMAGE_NAME)
 
@@ -2261,13 +2269,31 @@ class GolfLauncher(QMainWindow):
         else:
             subprocess.Popen(cmd)
 
+    def _find_available_port(self, start_port: int, max_attempts: int = 100) -> int:
+        """Find an available port starting from start_port."""
+        import socket
+
+        for port in range(start_port, start_port + max_attempts):
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                try:
+                    s.bind(("127.0.0.1", port))
+                    return port
+                except OSError:
+                    continue
+
+        raise RuntimeError(
+            f"Could not find available port in range {start_port}-{start_port + max_attempts}"
+        )
+
     def _start_meshcat_browser(self, port: int) -> None:
         """Start the meshcat browser."""
 
         def open_url() -> None:
             """Open the browser URL."""
             time.sleep(3)
-            webbrowser.open(f"http://localhost:{port}")
+            # Meshcat default UI is at /static/
+            # Use 127.0.0.1 instead of localhost to avoid resolution issues
+            webbrowser.open(f"http://127.0.0.1:{port}/static/")
 
         threading.Thread(target=open_url, daemon=True).start()
 
