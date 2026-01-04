@@ -1444,7 +1444,7 @@ class GolfSwingPlotter:
         x_factor = shoulder_rot - hip_rot
 
         # Calculate Velocity
-        dt = np.mean(np.diff(times))
+        dt = float(np.mean(np.diff(times)))
         if dt <= 0:
             dt = 0.01
         x_factor_vel = np.gradient(x_factor, dt)
@@ -1665,7 +1665,7 @@ class GolfSwingPlotter:
         # Plane equation: n . (p - c) = 0 => nx(x-cx) + ny(y-cy) + nz(z-cz) = 0
         # z = cz - (nx(x-cx) + ny(y-cy))/nz
 
-        if abs(normal[2]) > 1e-6:
+        if abs(float(normal[2])) > 1e-6:
             zz = (
                 centroid[2]
                 - (normal[0] * (xx - centroid[0]) + normal[1] * (yy - centroid[1]))
