@@ -2291,6 +2291,64 @@ class GolfSwingPlotter:
         ax.grid(True, alpha=0.3, linestyle="--")
         fig.tight_layout()
 
+    def plot_club_induced_acceleration(
+        self,
+        fig: Figure,
+        breakdown_mode: bool = True,
+    ) -> None:
+        """Plot club head task-space induced accelerations.
+
+        Shows the contribution of Gravity, Velocity (Kinematic), and Control
+        to the linear acceleration of the club head.
+
+        Args:
+            fig: Matplotlib figure
+            breakdown_mode: If True, plots all components.
+        """
+        ax = fig.add_subplot(111)
+
+        # Components to check
+        components = ["gravity", "velocity", "control", "constraint", "total"]
+        labels = ["Gravity", "Velocity (Kinematic)", "Control (Muscle)", "Constraint", "Total"]
+        colors = [
+            self.colors["secondary"],
+            self.colors["tertiary"],
+            self.colors["quaternary"],
+            self.colors["quinary"],
+            "black"
+        ]
+        styles = ["--", "-.", ":", "--", "-"]
+
+        has_data = False
+
+        # Check if recorder has method
+        if not hasattr(self.recorder, "get_club_induced_acceleration_series"):
+             ax.text(0.5, 0.5, "Recorder does not support club induced accel", ha="center", va="center")
+             return
+
+        for comp, label, color, style in zip(components, labels, colors, styles, strict=False):
+            times, acc_vec = self.recorder.get_club_induced_acceleration_series(comp) # type: ignore
+
+            if len(times) > 0 and acc_vec.size > 0:
+                # Plot Magnitude
+                mag = np.linalg.norm(acc_vec, axis=1)
+
+                # Check if it's mostly zero
+                if np.max(mag) > 1e-4 or comp == "total":
+                    ax.plot(times, mag, label=label, color=color, linestyle=style, linewidth=2)
+                    has_data = True
+
+        if not has_data:
+            ax.text(0.5, 0.5, "No Club Induced Acceleration Data", ha="center", va="center")
+            return
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Acceleration Magnitude (m/s²)", fontsize=12, fontweight="bold")
+        ax.set_title("Club Head Acceleration Contributors", fontsize=14, fontweight="bold")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        fig.tight_layout()
+
     def plot_counterfactual_comparison(
         self, fig: Figure, cf_name: str, metric_idx: int = 0
     ) -> None:
