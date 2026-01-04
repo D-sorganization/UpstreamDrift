@@ -29,6 +29,7 @@ from PyQt6 import QtCore, QtWidgets
 try:
     import meshcat.geometry as g
     import meshcat.visualizer as viz
+
     MESHCAT_AVAILABLE = True
 except ImportError:
     MESHCAT_AVAILABLE = False
@@ -326,7 +327,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 # Force Meshcat to use port 7000 to match Docker exposure
                 # and bind to 0.0.0.0 to allow external connections
                 try:
-                    self.viewer = viz.Visualizer(server_args=['--port', '7000'])
+                    self.viewer = viz.Visualizer(server_args=["--port", "7000"])
                 except TypeError:
                     # Fallback for older meshcat versions that might not
                     # support server_args
@@ -1091,9 +1092,9 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 self.btn_record.setText("Record")
 
             # Initialize Pinocchio MeshcatVisualizer
-# ... (Previous imports kept as is, just sorting logic applied conceptually in file)
+            # ... (Previous imports kept as is, just sorting logic applied conceptually in file)
 
-# Fix Blank line contains whitespace at line 1065 (formerly)
+            # Fix Blank line contains whitespace at line 1065 (formerly)
             if MESHCAT_AVAILABLE and self.viewer is not None:
                 try:
                     self.viewer["robot"].delete()
@@ -1526,8 +1527,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self._draw_ellipsoid_meshcat(
                 "force", pos, eigvecs_f, radii_f * 0.2, 0xFF0000
             )  # Scale for viz
-
-
 
     def _draw_ellipsoid_meshcat(
         self,
