@@ -3,6 +3,8 @@ Output Manager for Golf Modeling Suite
 
 Handles all output operations including saving simulation results,
 managing file organization, and exporting analysis reports.
+
+OBS-001: Migrated to structured logging for better observability.
 """
 
 import json
@@ -16,9 +18,11 @@ from typing import Any, Union
 import numpy as np
 import pandas as pd
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from .common_utils import get_logger, setup_structured_logging
+
+# Configure structured logging
+setup_structured_logging()
+logger = get_logger(__name__)
 
 
 class OutputFormat(Enum):
@@ -77,7 +81,9 @@ class OutputManager:
             "cache": self.base_path / "cache",
         }
 
-        logger.info(f"OutputManager initialized with base path: {self.base_path}")
+        logger.info(
+            "output_manager_initialized", base_path=str(self.base_path), num_directories=len(self.directories)
+        )
 
     def create_output_structure(self) -> None:
         """Create the standard output directory structure."""
@@ -214,11 +220,23 @@ class OutputManager:
                     df = pd.DataFrame(results)
                     df.to_parquet(file_path, index=False)
 
-            logger.info(f"Simulation results saved to: {file_path}")
+            logger.info(
+                "simulation_results_saved",
+                file_path=str(file_path),
+                format=format_type.value,
+                engine=engine,
+            )
             return file_path
 
         except Exception as e:
-            logger.error(f"Error saving simulation results: {e}")
+            logger.error(
+                "simulation_save_failed",
+                filename=filename,
+                format=format_type.value,
+                engine=engine,
+                error=str(e),
+                exc_info=True,
+            )
             raise
 
     def load_simulation_results(
@@ -456,7 +474,11 @@ class OutputManager:
                     except (OSError, PermissionError):
                         continue
 
-        logger.info(f"Cleaned up {cleaned_count} old files")
+        logger.info(
+            "cleanup_completed",
+            files_cleaned=cleaned_count,
+            max_age_days=max_age_days,
+        )
         return cleaned_count
 
     def _generate_html_report(self, data: dict[str, Any], title: str) -> str:
