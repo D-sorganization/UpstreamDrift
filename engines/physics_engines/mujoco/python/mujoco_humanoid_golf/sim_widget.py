@@ -25,7 +25,7 @@ CV2_LIB = None
 INVALID_CV2 = False
 
 
-def get_cv2():
+def get_cv2() -> Any:
     """Lazy import of OpenCV to speed up initial load."""
     global CV2_LIB, INVALID_CV2
     if CV2_LIB is None and not INVALID_CV2:
@@ -239,7 +239,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.loader_thread.finished_loading.connect(self._on_model_loaded_async)
         self.loader_thread.start()
 
-    def _on_model_loaded_async(self, model, data, error_msg) -> None:
+    def _on_model_loaded_async(self, model: Any, data: Any, error_msg: str) -> None:
         """Handle completion of async model loading."""
         if error_msg:
             LOGGER.error("Async load failed: %s", error_msg)
@@ -255,7 +255,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             self.label.setText(f"Error initializing renderer: {e}")
             self.loading_finished.emit(False)
 
-    def _finalize_model_load(self, new_model, new_data) -> None:
+    def _finalize_model_load(self, new_model: Any, new_data: Any) -> None:
         """Finalize setup on main thread after model/data creation."""
         # Create new renderer (must be on main thread with context)
         new_renderer = mujoco.Renderer(
@@ -925,7 +925,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             except (AttributeError, TypeError):
                 pass
 
-    def set_background_color(self, sky_color=None, ground_color=None) -> None:
+    def set_background_color(self, sky_color: Any = None, ground_color: Any = None) -> None:
         if sky_color is not None:
             self.sky_color = np.array(sky_color, dtype=np.float32)
         if ground_color is not None:
