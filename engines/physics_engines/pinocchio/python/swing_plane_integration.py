@@ -27,7 +27,7 @@ logger = setup_logging(__name__)
 class PinocchioSwingPlaneAnalyzer:
     """Pinocchio-specific swing plane analysis integration."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the Pinocchio swing plane analyzer."""
         self.analyzer = SwingPlaneAnalyzer()
         self.logger = logger

@@ -6,6 +6,7 @@ import logging
 import os
 import re
 from pathlib import Path
+from typing import Any
 
 import mujoco
 import numpy as np
@@ -217,7 +218,7 @@ class GripModellingTab(QtWidgets.QWidget):
 
         extracted_bodies = []
 
-        def extract_worldbody_content(filename, body_pattern):
+        def extract_worldbody_content(filename: str, body_pattern: str) -> str:
             content = get_hand_content(filename, body_pattern)
             # Extract worldbody content
             bodies_match = re.search(
@@ -457,12 +458,24 @@ class GripModellingTab(QtWidgets.QWidget):
         spin.setValue(init_val)
 
         # Connect
-        def _on_slider_change(v, s=spin, amin=range_min, amax=range_max, idx=qpos_adr):
+        def _on_slider_change(
+            v: int,
+            s: Any = spin,
+            amin: float = range_min,
+            amax: float = range_max,
+            idx: int = qpos_adr,
+        ) -> None:
             self._on_slider(v, s, amin, amax, idx)
 
         slider.valueChanged.connect(_on_slider_change)
 
-        def _on_spin_change(v, s=slider, amin=range_min, amax=range_max, idx=qpos_adr):
+        def _on_spin_change(
+            v: float,
+            s: Any = slider,
+            amin: float = range_min,
+            amax: float = range_max,
+            idx: int = qpos_adr,
+        ) -> None:
             self._on_spin(v, s, amin, amax, idx)
 
         spin.valueChanged.connect(_on_spin_change)

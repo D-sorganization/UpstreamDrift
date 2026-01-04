@@ -154,7 +154,7 @@ class SwingOptimizer:
         constraints_list = self._setup_constraints()
 
         # Objective function
-        def objective(x) -> float:
+        def objective(x: np.ndarray) -> float:
             """Docstring for objective."""
             return self._evaluate_objective(x)
 
@@ -291,7 +291,7 @@ class SwingOptimizer:
         # Velocity limits
         if self.constraints.joint_velocity_limits:
 
-            def velocity_constraint(x) -> np.ndarray:
+            def velocity_constraint(x: np.ndarray) -> np.ndarray:
                 """Docstring for velocity_constraint."""
                 trajectory = x.reshape(self.num_knot_points, self.model.nv)
                 dt = self.swing_duration / (self.num_knot_points - 1)

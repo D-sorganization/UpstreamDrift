@@ -94,7 +94,7 @@ class ExpressionFunction:
             "omega2": state.omega2,
         }
         # Update names with current state
-        self._evaluator.names = {**self._ALLOWED_NAMES, **context}
+        self._evaluator.names.update(context)
         # Safe evaluation - no code injection possible
         result = self._evaluator.eval(self.expression)
         return float(result)
