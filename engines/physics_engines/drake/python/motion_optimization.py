@@ -125,7 +125,7 @@ class DrakeMotionOptimizer:
         def ball_speed_cost(trajectory: np.ndarray) -> float:
             # Placeholder: compute ball speed from trajectory
             # In real implementation, this would extract ball velocity at impact
-            return -np.max(np.linalg.norm(np.diff(trajectory, axis=0), axis=1))
+            return float(-np.max(np.linalg.norm(np.diff(trajectory, axis=0), axis=1)))
 
         self.add_objective(
             name="ball_speed",
@@ -138,7 +138,7 @@ class DrakeMotionOptimizer:
         def accuracy_cost(trajectory: np.ndarray) -> float:
             # Placeholder: compute lateral deviation from target line
             final_position = trajectory[-1]
-            return abs(final_position[1])  # y-deviation from target line
+            return float(abs(final_position[1]))  # y-deviation from target line
 
         self.add_objective(
             name="accuracy", weight=0.8, cost_function=accuracy_cost, target_value=0.0
@@ -150,7 +150,7 @@ class DrakeMotionOptimizer:
             if len(trajectory) < 3:
                 return 0.0
             second_derivatives = np.diff(trajectory, n=2, axis=0)
-            return np.sum(np.linalg.norm(second_derivatives, axis=1))
+            return float(np.sum(np.linalg.norm(second_derivatives, axis=1)))
 
         self.add_objective(name="smoothness", weight=0.5, cost_function=smoothness_cost)
 
