@@ -157,12 +157,16 @@ def test_gui_load_logic(qapp, mock_c3d_file, mock_ezc3d):
     window.model = model
     window._populate_ui_with_model()
 
-    assert window.list_markers.count() == 2
-    assert window.list_analog.count() == 1
+    # Verify UI state through tabs
+    assert window.marker_plot_tab.list_markers.count() == 2
+    assert window.analog_plot_tab.list_analog.count() == 1
 
     # Verify plotting logic doesn't crash
-    window.list_markers.setCurrentRow(0)  # Select Marker1
-    window.update_marker_plot()
+    window.marker_plot_tab.list_markers.setCurrentRow(0)  # Select Marker1
+    # Note: _populate_ui_with_model calls update_ui, which might need manual trigger in test if signals aren't connected
+    # But C3DViewerMainWindow._populate_ui_with_model calls update_ui -> which should update tabs
+    # Let's explicitly call the tab update method to be sure
+    window.marker_plot_tab.update_plot()
 
     # Clean up
     window.close()
