@@ -1334,7 +1334,7 @@ class StatisticalAnalyzer:
             negative_work = np.trapezoid(neg_power, dx=dt)
         else:
             # Fallback for NumPy versions that still provide trapz
-            trapz_func = getattr(np, "trapz")
+            trapz_func = getattr(np, "trapz")  # noqa: B009
             positive_work = trapz_func(pos_power, dx=dt)
             negative_work = trapz_func(neg_power, dx=dt)
 
@@ -1390,7 +1390,7 @@ class StatisticalAnalyzer:
         if hasattr(np, "trapezoid"):
             net_work = float(np.trapezoid(power, dx=dt))
         else:
-            trapz_func = getattr(np, "trapz")
+            trapz_func = getattr(np, "trapz")  # noqa: B009
             net_work = float(trapz_func(power, dx=dt))
 
         return JointPowerMetrics(
@@ -1444,7 +1444,7 @@ class StatisticalAnalyzer:
             pos_impulse = float(np.trapezoid(pos_data, dx=dt))
             neg_impulse = float(np.trapezoid(neg_data, dx=dt))
         else:
-            trapz_func = getattr(np, "trapz")
+            trapz_func = getattr(np, "trapz")  # noqa: B009
             net_impulse = float(trapz_func(data, dx=dt))
             pos_impulse = float(trapz_func(pos_data, dx=dt))
             neg_impulse = float(trapz_func(neg_data, dx=dt))
