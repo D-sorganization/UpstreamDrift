@@ -100,7 +100,7 @@ except ImportError:
 
         pass
 
-    def build_golf_swing_diagram(*args, **kwargs):  # type: ignore[no-redef, misc]
+    def build_golf_swing_diagram(*args, **kwargs) -> tuple[None, None, None]:  # type: ignore[misc]
         """Placeholder for golf swing diagram builder."""
         return None, None, None
 
