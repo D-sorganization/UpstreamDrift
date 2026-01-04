@@ -21,9 +21,6 @@ def set_random_seed():
     reproducible test results.
     """
     np.random.seed(42)
-    # If using random module
-    import random
-
     random.seed(42)
     yield
     # No cleanup needed - seeds persist only for test session

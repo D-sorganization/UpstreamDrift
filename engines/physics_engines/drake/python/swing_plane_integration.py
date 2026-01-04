@@ -6,7 +6,7 @@ golf swing simulations, providing consistent swing plane analysis across engines
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -27,7 +27,7 @@ logger = setup_logging(__name__)
 class DrakeSwingPlaneAnalyzer:
     """Drake-specific swing plane analysis integration."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the Drake swing plane analyzer."""
         self.analyzer = SwingPlaneAnalyzer()
         self.logger = logger
@@ -66,7 +66,7 @@ class DrakeSwingPlaneAnalyzer:
         return metrics
 
     def analyze_from_drake_context(
-        self, context, plant, club_body_index: int, num_samples: int = 100
+        self, context: Any, plant: Any, club_body_index: int, num_samples: int = 100
     ) -> SwingPlaneMetrics:
         """Analyze swing plane from Drake plant context.
 
@@ -111,7 +111,7 @@ class DrakeSwingPlaneAnalyzer:
         )
 
     def integrate_with_optimization(
-        self, trajectory_optimizer, swing_plane_constraint_weight: float = 1.0
+        self, trajectory_optimizer: Any, swing_plane_constraint_weight: float = 1.0
     ) -> None:
         """Integrate swing plane analysis with Drake trajectory optimization.
 
@@ -137,7 +137,7 @@ class DrakeSwingPlaneAnalyzer:
 
     def visualize_with_meshcat(
         self,
-        meshcat_visualizer,
+        meshcat_visualizer: Any,
         metrics: SwingPlaneMetrics,
         trajectory_positions: np.ndarray,
     ) -> None:

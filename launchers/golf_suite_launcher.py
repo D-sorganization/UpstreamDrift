@@ -128,6 +128,17 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         log_controls = QtWidgets.QHBoxLayout()
         log_controls.addStretch()
 
+        copy_btn = QtWidgets.QPushButton("Copy Log")
+        copy_btn.setIcon(
+            self.style().standardIcon(
+                QtWidgets.QStyle.StandardPixmap.SP_DialogSaveButton
+            )
+        )
+        copy_btn.setToolTip("Copy the simulation log to clipboard")
+        copy_btn.setAccessibleName("Copy Log")
+        copy_btn.clicked.connect(self.copy_log)
+        log_controls.addWidget(copy_btn)
+
         clear_btn = QtWidgets.QPushButton("Clear Log")
         clear_btn.setIcon(
             self.style().standardIcon(
@@ -154,6 +165,14 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
 
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
         self.log_text.append(f"[{timestamp}] {message}")
+
+    def copy_log(self) -> None:
+        """Copy the log content to clipboard."""
+        clipboard = QtWidgets.QApplication.clipboard()
+        if clipboard is not None:
+            clipboard.setText(self.log_text.toPlainText())
+            self.log_message("Log copied to clipboard.")
+            self.status.setText("Log copied")
 
     def clear_log(self) -> None:
         """Clear the log text area."""

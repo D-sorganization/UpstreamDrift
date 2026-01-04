@@ -525,7 +525,17 @@ class OutputManager:
 
 
 # Type alias for simulation results (TYPE-001: More specific than Any)
-SimulationResults = Union[dict[str, Any], pd.DataFrame, np.ndarray]
+# Type alias for simulation results (TYPE-001: Improved type safety)
+SimulationResultScalar = Union[int, float, str, bool, None]
+SimulationResultDict = dict[
+    str,
+    Union[
+        SimulationResultScalar,
+        list[SimulationResultScalar],
+        dict[str, SimulationResultScalar],
+    ],
+]
+SimulationResults = Union[SimulationResultDict, pd.DataFrame, np.ndarray]
 
 # Convenience functions for backward compatibility
 def save_results(

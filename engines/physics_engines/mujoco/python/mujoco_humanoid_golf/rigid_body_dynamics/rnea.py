@@ -7,7 +7,10 @@ Computes the joint forces/torques required to produce a given motion.
 from __future__ import annotations
 
 import numpy as np
-from mujoco_humanoid_golf.rigid_body_dynamics.common import DEFAULT_GRAVITY
+from mujoco_humanoid_golf.rigid_body_dynamics.common import (
+    DEFAULT_GRAVITY,
+    NEG_DEFAULT_GRAVITY,
+)
 from mujoco_humanoid_golf.spatial_algebra import (
     cross_force_fast,
     cross_motion_axis,
@@ -78,13 +81,13 @@ def rnea(  # noqa: PLR0915
         msg = f"qdd must have length {nb}, got {len(qdd)}"
         raise ValueError(msg)
 
-    if f_ext is None:
-        f_ext = np.zeros((6, nb))
-
     # Get gravity vector
     a_grav = model.get("gravity", DEFAULT_GRAVITY)
     # OPTIMIZATION: Pre-compute negative gravity to avoid allocation in loop
-    neg_a_grav = -a_grav
+    if a_grav is DEFAULT_GRAVITY:
+        neg_a_grav = NEG_DEFAULT_GRAVITY
+    else:
+        neg_a_grav = -a_grav
 
     # Initialize arrays
     # OPTIMIZATION: use np.empty instead of np.zeros for arrays that are fully
@@ -208,7 +211,8 @@ def rnea(  # noqa: PLR0915
         # Optimization: Use pre-allocated buffer for cross product
         cross_force_fast(v[:, i], i_v_buf, out=cross_buf)
         f_body += cross_buf
-        f_body -= f_ext[:, i]
+        if f_ext is not None:
+            f_body -= f_ext[:, i]
 
         # Accumulate with any forces already propagated from children
         # (f is initialized to zero, but children may have already propagated forces)

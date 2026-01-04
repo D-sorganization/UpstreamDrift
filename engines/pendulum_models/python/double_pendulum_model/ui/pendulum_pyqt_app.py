@@ -36,6 +36,21 @@ logger = logging.getLogger(__name__)
 
 TIME_STEP = 0.01
 
+# Initialize shared evaluator for constant expressions
+# Reusing the instance avoids overhead of re-registering functions
+_EVALUATOR = SimpleEval()
+_EVALUATOR.functions = {
+    "sin": math.sin,
+    "cos": math.cos,
+    "tan": math.tan,
+    "sqrt": math.sqrt,
+    "log": math.log,
+    "exp": math.exp,
+}
+_EVALUATOR.names = {
+    "pi": math.pi,
+}
+
 
 def _validate_math_ast(node: ast.AST) -> None:
     allowed_nodes = {
@@ -331,19 +346,7 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
         Security: Replaced eval() with simpleeval to eliminate code injection risk.
         """
         try:
-            evaluator = SimpleEval()
-            evaluator.functions = {
-                "sin": math.sin,
-                "cos": math.cos,
-                "tan": math.tan,
-                "sqrt": math.sqrt,
-                "log": math.log,
-                "exp": math.exp,
-            }
-            evaluator.names = {
-                "pi": math.pi,
-            }
-            result = evaluator.eval(expression)
+            result = _EVALUATOR.eval(expression)
             return float(result)
         except (ValueError, TypeError, SyntaxError, NameError):
             logger.exception("Error evaluating expression: %s", expression)

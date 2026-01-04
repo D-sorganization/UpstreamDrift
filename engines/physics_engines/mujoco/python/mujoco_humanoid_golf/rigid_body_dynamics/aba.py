@@ -7,7 +7,10 @@ Computes joint accelerations given applied torques.
 from __future__ import annotations
 
 import numpy as np
-from mujoco_humanoid_golf.rigid_body_dynamics.common import DEFAULT_GRAVITY
+from mujoco_humanoid_golf.rigid_body_dynamics.common import (
+    DEFAULT_GRAVITY,
+    NEG_DEFAULT_GRAVITY,
+)
 from mujoco_humanoid_golf.spatial_algebra import (
     cross_force_fast,
     cross_motion_fast,
@@ -83,13 +86,13 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         msg = f"tau must have length {nb}, got {len(tau)}"
         raise ValueError(msg)
 
-    if f_ext is None:
-        f_ext = np.zeros((6, nb))
-
     # Get gravity vector
     a_grav = model.get("gravity", DEFAULT_GRAVITY)
     # OPTIMIZATION: Pre-compute negative gravity to avoid allocation in loop
-    neg_a_grav = -a_grav
+    if a_grav is DEFAULT_GRAVITY:
+        neg_a_grav = NEG_DEFAULT_GRAVITY
+    else:
+        neg_a_grav = -a_grav
 
     # Initialize arrays
     # OPTIMIZATION: Pre-allocate 3D arrays instead of lists of arrays
@@ -174,7 +177,10 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         # Use fast version to avoid overhead
         cross_force_fast(v[:, i], i_v_buf, out=cross_buf)
         # pa_bias[:, i] = cross_buf - f_ext[:, i]
-        np.subtract(cross_buf, f_ext[:, i], out=pa_bias[:, i])
+        if f_ext is not None:
+            np.subtract(cross_buf, f_ext[:, i], out=pa_bias[:, i])
+        else:
+            pa_bias[:, i] = cross_buf
 
     # --- Pass 2: Backward recursion (articulated-body inertias) ---
     for i in range(nb - 1, -1, -1):

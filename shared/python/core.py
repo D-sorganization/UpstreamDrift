@@ -85,10 +85,19 @@ def setup_structured_logging(
         >>> logger.info("simulation_started", engine="mujoco", duration=2.5)
     """
     global _structured_logging_configured
+    import threading
+
+    # Thread-safe initialization lock
+    _logging_lock = threading.Lock()
 
     if _structured_logging_configured:
-        # Already configured, skip
+        # Fast path check
         return
+
+    with _logging_lock:
+        if _structured_logging_configured:
+            # Double check inside lock
+            return
 
     # Configure standard library logging
     logging.basicConfig(

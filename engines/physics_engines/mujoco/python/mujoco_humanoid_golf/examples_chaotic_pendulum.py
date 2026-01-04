@@ -12,6 +12,7 @@ using the chaotic pendulum model.
 """
 
 import abc
+from typing import Any
 
 import matplotlib.pyplot as plt
 import mujoco
@@ -24,7 +25,7 @@ from .models import CHAOTIC_PENDULUM_XML
 class ChaoticPendulumController(abc.ABC):
     """Base controller class for chaotic pendulum experiments."""
 
-    def __init__(self, model, data) -> None:
+    def __init__(self, model: Any, data: Any) -> None:
         """Docstring for __init__."""
         self.model = model
         self.data = data
@@ -69,7 +70,11 @@ class ChaoticPendulumController(abc.ABC):
     def control(self, time: float) -> tuple[float, float]:
         """Calculate control inputs. Should be overridden."""
 
-    def apply_control(self, base_force, pendulum_torque) -> None:
+    @abc.abstractmethod
+    def reset(self) -> None:
+        """Reset to initial conditions. Should be overridden."""
+
+    def apply_control(self, base_force: float, pendulum_torque: float) -> None:
         """Apply control inputs to the system."""
         self.data.ctrl[0] = base_force
         self.data.ctrl[1] = pendulum_torque
@@ -78,7 +83,7 @@ class ChaoticPendulumController(abc.ABC):
 class FreeOscillationDemo(ChaoticPendulumController):
     """Demonstrate free oscillation with damping."""
 
-    def __init__(self, model, data, initial_angle=np.pi / 6) -> None:
+    def __init__(self, model: Any, data: Any, initial_angle: float = np.pi / 6) -> None:
         """Docstring for __init__."""
         super().__init__(model, data)
         self.initial_angle = initial_angle
@@ -88,7 +93,7 @@ class FreeOscillationDemo(ChaoticPendulumController):
         mujoco.mj_resetData(self.model, self.data)
         self.data.qpos[1] = self.initial_angle  # Set initial angle
 
-    def control(self, time) -> tuple[float, float]:
+    def control(self, time: float) -> tuple[float, float]:
         """No active control - free oscillation."""
         return 0.0, 0.0
 
@@ -96,7 +101,13 @@ class FreeOscillationDemo(ChaoticPendulumController):
 class ResonanceDrivenDemo(ChaoticPendulumController):
     """Demonstrate resonance with sinusoidal base forcing."""
 
-    def __init__(self, model, data, forcing_freq=1.75, forcing_amp=15.0) -> None:
+    def __init__(
+        self,
+        model: Any,
+        data: Any,
+        forcing_freq: float = 1.75,
+        forcing_amp: float = 15.0,
+    ) -> None:
         """Docstring for __init__."""
         super().__init__(model, data)
         self.forcing_freq = forcing_freq  # Hz
@@ -107,7 +118,7 @@ class ResonanceDrivenDemo(ChaoticPendulumController):
         mujoco.mj_resetData(self.model, self.data)
         self.data.qpos[1] = 0.1  # Small initial perturbation
 
-    def control(self, time) -> tuple[float, float]:
+    def control(self, time: float) -> tuple[float, float]:
         """Apply sinusoidal forcing at specified frequency."""
         base_force = self.forcing_amp * np.sin(2 * np.pi * self.forcing_freq * time)
         pendulum_torque = 0.0  # No direct pendulum control
@@ -117,7 +128,14 @@ class ResonanceDrivenDemo(ChaoticPendulumController):
 class PIDStabilizationDemo(ChaoticPendulumController):
     """Stabilize pendulum at upright position using PID control."""
 
-    def __init__(self, model, data, kp=50.0, ki=5.0, kd=15.0) -> None:
+    def __init__(
+        self,
+        model: Any,
+        data: Any,
+        kp: float = 50.0,
+        ki: float = 5.0,
+        kd: float = 15.0,
+    ) -> None:
         """Docstring for __init__."""
         super().__init__(model, data)
         self.kp = kp
@@ -135,7 +153,7 @@ class PIDStabilizationDemo(ChaoticPendulumController):
         self.integral_error = 0.0
         self.prev_error = 0.0
 
-    def control(self, time) -> tuple[float, float]:
+    def control(self, time: float) -> tuple[float, float]:
         """PID control to stabilize at upright (θ = π)."""
         _, theta, _, _theta_dot = self.get_state()
 
@@ -170,7 +188,13 @@ class PIDStabilizationDemo(ChaoticPendulumController):
 class SwingUpControlDemo(ChaoticPendulumController):
     """Energy-based swing-up followed by stabilization."""
 
-    def __init__(self, model, data, k_swingup=3.0, k_stab=50.0) -> None:
+    def __init__(
+        self,
+        model: Any,
+        data: Any,
+        k_swingup: float = 3.0,
+        k_stab: float = 50.0,
+    ) -> None:
         """Docstring for __init__."""
         super().__init__(model, data)
         self.k_swingup = k_swingup
@@ -182,7 +206,7 @@ class SwingUpControlDemo(ChaoticPendulumController):
         mujoco.mj_resetData(self.model, self.data)
         self.data.qpos[1] = 0.0  # Start at bottom
 
-    def control(self, time) -> tuple[float, float]:
+    def control(self, time: float) -> tuple[float, float]:
         """Energy-based swing-up with stabilization."""
         _, theta, _, theta_dot = self.get_state()
 
@@ -217,11 +241,11 @@ class ChaosExplorationDemo(ChaoticPendulumController):
 
     def __init__(
         self,
-        model,
-        data,
-        forcing_freq=2.0,
-        forcing_amp=20.0,
-        initial_angle=0.5,
+        model: Any,
+        data: Any,
+        forcing_freq: float = 2.0,
+        forcing_amp: float = 20.0,
+        initial_angle: float = 0.5,
     ) -> None:
         """Docstring for __init__."""
         super().__init__(model, data)
@@ -234,14 +258,16 @@ class ChaosExplorationDemo(ChaoticPendulumController):
         mujoco.mj_resetData(self.model, self.data)
         self.data.qpos[1] = self.initial_angle
 
-    def control(self, time) -> tuple[float, float]:
+    def control(self, time: float) -> tuple[float, float]:
         """Apply strong forcing to induce chaos."""
         base_force = self.forcing_amp * np.sin(2 * np.pi * self.forcing_freq * time)
         pendulum_torque = 0.0
         return base_force, pendulum_torque
 
 
-def run_simulation(controller, duration=20.0) -> dict[str, np.ndarray]:
+def run_simulation(
+    controller: ChaoticPendulumController, duration: float = 20.0
+) -> dict[str, np.ndarray]:
     """Run simulation with specified controller.
 
     Args:
@@ -304,7 +330,9 @@ def run_simulation(controller, duration=20.0) -> dict[str, np.ndarray]:
     }
 
 
-def plot_results(results, title="Chaotic Pendulum Simulation") -> None:
+def plot_results(
+    results: dict[str, np.ndarray], title: str = "Chaotic Pendulum Simulation"
+) -> None:
     """Plot simulation results."""
     _fig, axes = plt.subplots(3, 2, figsize=(14, 10))
 
