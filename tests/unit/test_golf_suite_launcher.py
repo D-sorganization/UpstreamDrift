@@ -134,6 +134,9 @@ class MockQTextEdit:
     def clear(self):
         pass
 
+    def toPlainText(self):
+        return "Log content"
+
 
 class MockQGroupBox:
     def __init__(self, t="", *args, **kwargs):
@@ -144,6 +147,14 @@ class MockQMessageBox:
     @staticmethod
     def critical(p, t, m):
         pass
+
+
+class MockQClipboard:
+    def __init__(self):
+        self.text = ""
+
+    def setText(self, t):
+        self.text = t
 
 
 # Assign mocks
@@ -158,6 +169,8 @@ mock_widgets.QGroupBox = MockQGroupBox
 mock_widgets.QMessageBox = MockQMessageBox
 mock_widgets.QApplication = MagicMock()
 mock_widgets.QApplication.return_value.exec.return_value = 0
+mock_widgets.QApplication.clipboard.return_value = MockQClipboard()
+
 mock_core.Qt.AlignmentFlag.AlignCenter = 0
 
 mock_qt.QtWidgets = mock_widgets
@@ -261,6 +274,25 @@ class TestGolfSuiteLauncher:
 
         launcher_app.clear_log()
         launcher_app.log_text.clear.assert_called()
+
+    def test_copy_log(self, launcher_app):
+        """Test copying log to clipboard."""
+        launcher_app.log_text = MagicMock()
+        launcher_app.log_text.toPlainText.return_value = "Log content"
+        launcher_app.status = MagicMock()
+
+        launcher_app.copy_log()
+
+        # Check if clipboard.setText was called with the correct content
+        clipboard = mock_widgets.QApplication.clipboard()
+        assert clipboard.text == "Log content"
+
+        # Check log message and status update
+        # The log message includes a timestamp, so we check if the message content is present
+        assert launcher_app.log_text.append.called
+        args = launcher_app.log_text.append.call_args[0]
+        assert "Log copied to clipboard." in args[0]
+        launcher_app.status.setText.assert_called_with("Log copied")
 
     def test_main_function(self, launcher_app):
         """Test main entry point."""
