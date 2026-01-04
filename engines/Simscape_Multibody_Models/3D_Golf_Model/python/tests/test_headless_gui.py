@@ -1,4 +1,3 @@
-
 import os
 from unittest.mock import patch
 
@@ -19,10 +18,12 @@ def app(qtbot):
     qtbot.addWidget(window)
     return window
 
+
 def test_viewer_startup(app):
     """Smoke test: Verify the application starts up without crashing."""
     assert app.windowTitle() == "C3D Motion Analysis Viewer"
     assert app.tabs.count() == 5  # Ensure all 5 tabs are created
+
 
 def test_load_model_ui_update(app, qtbot):
     """Verify UI updates when a model is loaded."""
@@ -43,6 +44,7 @@ def test_load_model_ui_update(app, qtbot):
     # The file label in Overview tab should be updated
     assert "test.c3d" in app.overview_tab.label_file.text()
     assert app.model is model
+
 
 @patch("apps.c3d_viewer.C3DLoaderThread")
 def test_open_file_dialog_cancel(mock_loader, app, monkeypatch):
