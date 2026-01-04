@@ -186,50 +186,6 @@ exclude = [
     "engines/physics_engines/mujoco/docker/",
 ]
 
-[[tool.mypy.overrides]]
-# Temporary overrides for modules that still have untyped definitions
-# Goal: Remove these overrides as files are typed
-module = [
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.meshcat_adapter",
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget",
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.grip_modelling_tab",
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.gui.tabs.controls_tab",
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.examples_chaotic_pendulum",
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.advanced_gui_methods",
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.examples_joint_analysis",
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.linkage_mechanisms.*",
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.motion_optimization",
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.club_configurations",
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export",
-    "engines.physics_engines.drake.python.swing_plane_integration",
-    "engines.physics_engines.drake.python.motion_optimization",
-    "engines.physics_engines.drake.python.src.drake_gui_app",
-    "engines.physics_engines.pinocchio.python.swing_plane_integration",
-    "engines.physics_engines.mujoco.rebuild_docker",
-    "engines.physics_engines.mujoco.test_docker_venv",
-    "engines.physics_engines.mujoco.add_defusedxml_to_robotics_env",
-    "engines.physics_engines.mujoco.add_qt_dependencies",
-    "engines.physics_engines.mujoco.create_myo_placeholders",
-    "engines.physics_engines.mujoco.docker_test_dependencies",
-    "engines.physics_engines.mujoco.fix_linting",
-    "engines.physics_engines.mujoco.head_models",
-    "engines.physics_engines.mujoco.test_dependencies",
-    "engines.physics_engines.mujoco.test_mechanisms",
-    "engines.physics_engines.mujoco.test_new_models"
-]
-disallow_untyped_defs = false
-
-[[tool.mypy.overrides]]
-module = "engines.physics_engines.drake.python.motion_optimization"
-warn_return_any = false
-
-[[tool.mypy.overrides]]
-module = "engines.physics_engines.drake.python.src.drake_gui_app"
-disallow_untyped_defs = false
-
-[[tool.mypy.overrides]]
-module = "engines.physics_engines.pinocchio.python.double_pendulum_model.tests.*"
-disallow_untyped_defs = false
 
 [[tool.mypy.overrides]]
 module = [

@@ -30,7 +30,7 @@ exclude_patterns: list[str] = []
 html_theme = "sphinx_rtd_theme"
 html_static_path = ["_static"]
 
-# -- Autodoc configuration ---------------------------------------------------
+# -- Auto-documentation configuration -------------------------------------------
 autodoc_mock_imports = [
     "mujoco",
     "pydrake",

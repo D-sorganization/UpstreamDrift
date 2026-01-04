@@ -207,6 +207,14 @@ class VisualizationTab(QtWidgets.QWidget):
         force_group = QtWidgets.QGroupBox("Force & Torque Visualization")
         force_layout = QtWidgets.QVBoxLayout(force_group)
 
+        # Isolate Selection
+        self.isolate_forces_cb = QtWidgets.QCheckBox("Isolate to Selected Body")
+        self.isolate_forces_cb.setToolTip(
+            "Only show forces/torques for the currently selected body (via Right-Click)"
+        )
+        self.isolate_forces_cb.stateChanged.connect(self.on_isolate_forces_changed)
+        force_layout.addWidget(self.isolate_forces_cb)
+
         # Torque vectors
         self.show_torques_cb = QtWidgets.QCheckBox("Show Joint Torque Vectors")
         self.show_torques_cb.stateChanged.connect(self.on_show_torques_changed)
@@ -258,7 +266,7 @@ class VisualizationTab(QtWidgets.QWidget):
 
         self.induced_source_combo = QtWidgets.QComboBox()
         self.induced_source_combo.setEditable(True)  # Allow custom actuator names
-        self.induced_source_combo.addItems(["gravity", "actuator"])
+        self.induced_source_combo.addItems(["gravity", "velocity", "total"])
         self.induced_source_combo.setToolTip(
             "Select source or type specific actuator name"
         )
@@ -511,6 +519,12 @@ class VisualizationTab(QtWidgets.QWidget):
             scale * 0.1,
         )
 
+    def on_isolate_forces_changed(self, state: int) -> None:
+        """Handle isolate forces toggle."""
+        enabled = state == QtCore.Qt.CheckState.Checked.value
+        if hasattr(self.sim_widget, "set_isolate_forces_visualization"):
+            self.sim_widget.set_isolate_forces_visualization(enabled)
+
     def on_advanced_vector_changed(self) -> None:
         """Handle advanced vector visualization changes."""
         self.sim_widget.set_advanced_vector_visualization(
@@ -537,6 +551,10 @@ class VisualizationTab(QtWidgets.QWidget):
         if not body_name:
             return
 
+        # Split ID from name if needed (format "ID: Name")
+        if ": " in body_name:
+            body_name = body_name.split(": ", 1)[1]
+
         color = QtWidgets.QColorDialog.getColor(
             QtCore.Qt.GlobalColor.white,
             self,
@@ -556,6 +574,8 @@ class VisualizationTab(QtWidgets.QWidget):
         body_name = self.viz_body_combo.currentText()
         if not body_name:
             return
+        if ": " in body_name:
+            body_name = body_name.split(": ", 1)[1]
 
         self.sim_widget.reset_body_color(body_name)
 
@@ -571,10 +591,11 @@ class VisualizationTab(QtWidgets.QWidget):
         self.nefc_label.setText(f"Constraints: {nefc}")
 
     def update_body_list(self) -> None:
-        """Update body selection list."""
+        """Update body selection list and actuator list."""
         if self.sim_widget.model is None:
             return
 
+        # Update Bodies
         self.viz_body_combo.clear()
         for body_id in range(1, self.sim_widget.model.nbody):
             body_name = mujoco.mj_id2name(
@@ -584,3 +605,23 @@ class VisualizationTab(QtWidgets.QWidget):
             )
             if body_name:
                 self.viz_body_combo.addItem(f"{body_id}: {body_name}")
+
+        # Update Actuators in induced source combo
+        # Keep standard items
+        standard_items = ["gravity", "velocity", "total"]
+        current_text = self.induced_source_combo.currentText()
+
+        self.induced_source_combo.clear()
+        self.induced_source_combo.addItems(standard_items)
+
+        for i in range(self.sim_widget.model.nu):
+            # Actuator name
+            act_name = mujoco.mj_id2name(
+                self.sim_widget.model, mujoco.mjtObj.mjOBJ_ACTUATOR, i
+            )
+            if not act_name:
+                act_name = f"actuator_{i}"
+            self.induced_source_combo.addItem(act_name)
+
+        if current_text:
+            self.induced_source_combo.setCurrentText(current_text)

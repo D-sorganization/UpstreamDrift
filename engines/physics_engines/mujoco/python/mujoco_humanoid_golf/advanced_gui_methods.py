@@ -293,12 +293,12 @@ class AdvancedGuiMethodsMixin:
             # Helper to find index
             model = self.sim_widget.model
 
-            def get_dof_index(joint_name):
+            def get_dof_index(joint_name: str) -> int | None:
                 j_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
                 if j_id == -1:
                     return None
                 # qvel index address
-                return model.jnt_dofadr[j_id]
+                return int(model.jnt_dofadr[j_id])
 
             # Try to map typical chain: Pelvis -> Thorax -> Arm -> Club
             # Adjust names based on actual XML joint names
@@ -373,11 +373,11 @@ class AdvancedGuiMethodsMixin:
             # Let's re-detect roughly.
             model = self.sim_widget.model
 
-            def get_dof_index(joint_name):
+            def get_dof_index(joint_name: str) -> int | None:
                 j_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_JOINT, joint_name)
                 if j_id == -1:
                     return None
-                return model.jnt_dofadr[j_id]
+                return int(model.jnt_dofadr[j_id])
 
             pelvis_idx = None
             torso_idx = None
