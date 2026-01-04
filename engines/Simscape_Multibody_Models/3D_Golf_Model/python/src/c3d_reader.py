@@ -38,12 +38,8 @@ class C3DEvent:
     def __post_init__(self) -> None:
         """Validate event data."""
         if not self.label:
-            # We allow empty labels? Maybe warn, but for now just validation
-            # of types/values
-            pass
-        # Time can be negative (pre-trigger)? C3D spec allows it? Assume yes.
-        # But commonly 0+. strict=True might enforce it.
-        pass
+            raise ValueError("Event label cannot be empty.")
+        # Time can be negative (pre-trigger) per spec, so we allow it.
 
 
 @dataclass(frozen=True)
@@ -70,10 +66,10 @@ class C3DMetadata:
 
         # Check consistency
         if len(self.analog_units) != len(self.analog_labels):
-            # This logic was in _get_analog_details to force match, but here we
-            # validate strictness. However, the reader *fixes* this before
-            # creating Metadata. So we can enforce it here.
-            pass
+            raise ValueError(
+                "analog_units and analog_labels must have the same length: "
+                f"{len(self.analog_units)} units vs {len(self.analog_labels)} labels"
+            )
 
     @property
     def marker_count(self) -> int:

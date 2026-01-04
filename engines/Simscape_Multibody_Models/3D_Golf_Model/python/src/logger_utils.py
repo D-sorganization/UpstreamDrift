@@ -39,7 +39,7 @@ def get_logger(name: str) -> logging.Logger:
     """Get a logger instance with the specified name.
 
     Respects the LOG_LEVEL environment variable (default: INFO).
-    respects LOG_FORMAT environment variable (default: TEXT, can be JSON).
+    Respects LOG_FORMAT environment variable (default: TEXT, can be JSON).
 
     Args:
         name: The name for the logger (usually __name__)
