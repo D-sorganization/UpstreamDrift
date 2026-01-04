@@ -262,7 +262,6 @@ class DraggableModelCard(QFrame):
     """Draggable model card widget with reordering support."""
 
     def __init__(self, model: Any, parent: Any = None):
-        # Only pass parent to QFrame if it's a proper QWidget, otherwise use None
         # Check if parent is actually a QWidget by checking its type
         from unittest.mock import Mock
 

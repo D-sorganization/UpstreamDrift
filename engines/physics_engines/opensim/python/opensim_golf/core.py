@@ -98,10 +98,11 @@ class GolfSwingModel:
     def _run_opensim_simulation(self) -> SimulationResult:
         """Run simulation using OpenSim (Placeholder for actual implementation)."""
         # This would involve setting up the manager, controls, and integrating.
-        # For now, we'll raise NotImplementedError or return dummy data if this
-        # path were active. Since we likely don't have OpenSim in this env, we
-        # focus on the demo model.
-        raise NotImplementedError("OpenSim integration pending environment setup.")
+        # Since we don't have OpenSim in this env, we focus on the demo model.
+        logger.warning(
+            "OpenSim integration pending environment setup. Falling back to demo model."
+        )
+        return self._run_demo_simulation()
 
     def _run_demo_simulation(self) -> SimulationResult:
         """
