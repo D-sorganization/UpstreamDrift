@@ -31,6 +31,8 @@ def test_mujoco_iaa_logic():
     mock_data.qvel = np.array([1.0, 2.0])
     mock_data.qM = np.eye(2).flatten()  # Simplified logic for qM access
     mock_data.qfrc_bias = np.array([10.0, 20.0])  # Term C+G normally
+    mock_data.qfrc_constraint = np.array([0.0, 0.0])  # Constraint forces (nv=2)
+    mock_data.qfrc_actuator = np.array([0.0, 0.0])  # Actuator forces (nv=2)
 
     # Analyzer relies on calling mj_fullM
     def side_effect_fullM(model, M, qM):
