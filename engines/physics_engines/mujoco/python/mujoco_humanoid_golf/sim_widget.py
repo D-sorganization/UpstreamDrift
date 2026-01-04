@@ -113,6 +113,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.show_cf_vectors = False
         self.induced_vector_source = "gravity"
         self.cf_vector_type = "ztcf_accel"  # or 'zvcf_torque'
+        self.isolate_forces_visualization = False
 
         # Ellipsoid Visualization Toggles
         self.show_mobility_ellipsoid = False
@@ -651,6 +652,10 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = enabled
         self.scene_option.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = enabled
 
+    def set_isolate_forces_visualization(self, enabled: bool) -> None:
+        """Toggle whether to show forces only for the selected body."""
+        self.isolate_forces_visualization = enabled
+
     def get_recorder(self) -> SwingRecorder:
         return self.recorder
 
@@ -978,6 +983,10 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         if self.model is None or self.data is None:
             return
 
+        selected_id = None
+        if self.isolate_forces_visualization and self.manipulator:
+            selected_id = self.manipulator.selected_body_id
+
         for i in range(self.model.nu):
             joint_id = self.model.actuator_trnid[i, 0]
             if joint_id < 0 or joint_id >= self.model.njnt:
@@ -985,6 +994,11 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             body_id = self.model.jnt_bodyid[joint_id]
             if body_id < 0 or body_id >= self.model.nbody:
                 continue
+
+            # Isolation check
+            if selected_id is not None and body_id != selected_id:
+                continue
+
             torque = float(self.data.ctrl[i])
             if abs(torque) < 1e-6:
                 continue
@@ -1000,8 +1014,16 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         if self.data is None or self.model is None:
             return
 
+        selected_id = None
+        if self.isolate_forces_visualization and self.manipulator:
+            selected_id = self.manipulator.selected_body_id
+
         external_forces = self.data.cfrc_ext.reshape(-1, 6)
         for body_id in range(1, self.model.nbody):
+            # Isolation check
+            if selected_id is not None and body_id != selected_id:
+                continue
+
             world_force = external_forces[body_id, 3:6]
             magnitude = float(np.linalg.norm(world_force))
             if magnitude < FORCE_VISUALIZATION_THRESHOLD:
@@ -1012,6 +1034,10 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         internal_forces = self.data.cfrc_int.reshape(-1, 6)
         for body_id in range(1, self.model.nbody):
+            # Isolation check
+            if selected_id is not None and body_id != selected_id:
+                continue
+
             joint_force = internal_forces[body_id, 3:6]
             magnitude = float(np.linalg.norm(joint_force))
             if magnitude < FORCE_VISUALIZATION_THRESHOLD:
@@ -1024,6 +1050,10 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         """Draw Induced Acceleration vectors (Magenta)."""
         if self.model is None or self.data is None or self.latest_bio_data is None:
             return
+
+        selected_id = None
+        if self.isolate_forces_visualization and self.manipulator:
+            selected_id = self.manipulator.selected_body_id
 
         # Determine the key to use in the induced_accelerations dict
         key = self.induced_vector_source
@@ -1040,6 +1070,11 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         # Iterate 1-DOF joints
         for j in range(self.model.njnt):
+            # Isolation check via body
+            body_id = self.model.jnt_bodyid[j]
+            if selected_id is not None and body_id != selected_id:
+                continue
+
             qvel_adr = self.model.jnt_dofadr[j]
             if qvel_adr >= len(accels):
                 continue
@@ -1048,7 +1083,6 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             if abs(acc) < 1e-3:
                 continue
 
-            body_id = self.model.jnt_bodyid[j]
             joint_pos = self.data.xpos[body_id].copy()
             joint_axis = self.data.xaxis[3 * j : 3 * j + 3]
 
