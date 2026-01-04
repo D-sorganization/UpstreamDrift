@@ -11,7 +11,7 @@ import os
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, Union
 
 import numpy as np
 import pandas as pd
@@ -502,11 +502,17 @@ class OutputManager:
         return html
 
 
+# Type alias for simulation results (TYPE-001: More specific than Any)
+SimulationResults = Union[dict[str, Any], pd.DataFrame, np.ndarray]
+
 # Convenience functions for backward compatibility
 def save_results(
-    results: Any, filename: str, format_type: str = "csv", engine: str = "mujoco"
+    results: SimulationResults, filename: str, format_type: str = "csv", engine: str = "mujoco"
 ) -> str:
-    """Convenience function for saving results."""
+    """Convenience function for saving results.
+
+    TYPE-001: Replaced Any with Union type for better type safety.
+    """
     manager = OutputManager()
     path = manager.save_simulation_results(
         results, filename, OutputFormat(format_type), engine
@@ -516,7 +522,10 @@ def save_results(
 
 def load_results(
     filename: str, format_type: str = "csv", engine: str = "mujoco"
-) -> Any:
-    """Convenience function for loading results."""
+) -> SimulationResults:
+    """Convenience function for loading results.
+
+    TYPE-001: Replaced Any with Union type for better type safety.
+    """
     manager = OutputManager()
     return manager.load_simulation_results(filename, OutputFormat(format_type), engine)

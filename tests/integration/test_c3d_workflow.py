@@ -1,4 +1,7 @@
-"""Integration tests for C3D workflow: Ingest -> Analysis -> GUI."""
+"""Integration tests for C3D workflow: Ingest -> Analysis -> GUI.
+
+TEST-004: Added @pytest.mark.integration markers for test categorization.
+"""
 
 import sys
 from pathlib import Path
@@ -7,6 +10,9 @@ from unittest.mock import patch
 import numpy as np
 import pandas as pd
 import pytest
+
+# Mark all tests in this file as integration tests
+pytestmark = pytest.mark.integration
 
 # Add source path for imports
 # Adjust based on repository root

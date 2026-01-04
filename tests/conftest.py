@@ -1,5 +1,7 @@
 """
 Pytest configuration and shared fixtures for Golf Modeling Suite tests.
+
+TEST-002: Added random seed initialization for deterministic testing.
 """
 
 import shutil
@@ -7,7 +9,24 @@ import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
 
+import numpy as np
 import pytest
+
+
+@pytest.fixture(scope="session", autouse=True)
+def set_random_seed():
+    """Set random seed for deterministic testing (TEST-002).
+
+    This fixture runs automatically for every test session to ensure
+    reproducible test results.
+    """
+    np.random.seed(42)
+    # If using random module
+    import random
+
+    random.seed(42)
+    yield
+    # No cleanup needed - seeds persist only for test session
 
 
 @pytest.fixture
@@ -20,13 +39,15 @@ def temp_dir():
 
 @pytest.fixture
 def sample_swing_data():
-    """Generate sample swing data for testing."""
-    import numpy as np
+    """Generate sample swing data for testing.
+
+    TEST-002: Deterministic data generation using global random seed.
+    """
     import pandas as pd
 
     time = np.linspace(0, 2.0, 100)  # 2 second swing
 
-    # Simple sinusoidal swing motion
+    # Simple sinusoidal swing motion (deterministic)
     club_angle = np.pi / 4 * np.sin(2 * np.pi * time / 2.0)
     club_velocity = np.gradient(club_angle, time)
 
