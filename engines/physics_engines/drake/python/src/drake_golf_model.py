@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET  # noqa: N817, RUF100
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any  # noqa: ICN003
-from xml.dom import minidom
+import defusedxml.minidom as minidom
 
 import numpy as np
 import numpy.typing as npt

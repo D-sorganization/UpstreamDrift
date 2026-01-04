@@ -190,7 +190,8 @@ class EngineManager:
             import matlab.engine
 
             logger.info("Starting MATLAB Engine (this may take 30-60 seconds)...")
-            engine = matlab.engine.start_matlab()
+            # REL-001: Add timeout to prevent infinite hangs
+            engine = matlab.engine.start_matlab(timeout=60.0)
 
             model_dir = self.engine_paths[engine_type] / "matlab"
             if not model_dir.exists():

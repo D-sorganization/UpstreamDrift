@@ -51,19 +51,21 @@ def load_c3d_file(filepath: str) -> C3DDataModel:
         # Load Points Data
         df_points = reader.points_dataframe(include_time=False)
 
-    # Build markers dict
+    # Build markers dict (PERF-001: Optimized from O(n²) to O(n) using groupby)
     markers: dict[str, MarkerData] = {}
     marker_names = metadata_obj.marker_labels
 
-    for name in marker_names:
-        mask = df_points["marker"] == name
-        sub = df_points.loc[mask]
-
-        if not sub.empty:
-            pos = sub[["x", "y", "z"]].to_numpy()
-            res = sub["residual"].to_numpy()
+    # Group by marker name once - O(n) instead of O(n²)
+    if not df_points.empty:
+        grouped = df_points.groupby("marker")
+        for name, group in grouped:
+            pos = group[["x", "y", "z"]].to_numpy()
+            res = group["residual"].to_numpy()
             markers[name] = MarkerData(name=name, position=pos, residuals=res)
-        else:
+
+    # Add empty markers for labels that had no data
+    for name in marker_names:
+        if name not in markers:
             markers[name] = MarkerData(
                 name=name, position=np.empty((0, 3)), residuals=np.empty((0,))
             )
