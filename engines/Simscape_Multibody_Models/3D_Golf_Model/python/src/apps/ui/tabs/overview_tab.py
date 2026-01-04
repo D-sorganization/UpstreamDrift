@@ -1,5 +1,7 @@
 from PyQt6 import QtWidgets
+
 from ...core.models import C3DDataModel
+
 
 class OverviewTab(QtWidgets.QWidget):
     """Overview tab showing file metadata."""
@@ -37,7 +39,7 @@ class OverviewTab(QtWidgets.QWidget):
             return
 
         self.label_file.setText(f"Loaded file: {model.filepath}")
-        
+
         self.table_metadata.setRowCount(0)
         for key, value in model.metadata.items():
             row = self.table_metadata.rowCount()

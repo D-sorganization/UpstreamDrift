@@ -1,7 +1,9 @@
-from PyQt6 import QtWidgets
 import numpy as np
+from PyQt6 import QtWidgets
+
 from ...core.models import C3DDataModel
 from ..widgets.mpl_canvas import MplCanvas
+
 
 class MarkerPlotTab(QtWidgets.QWidget):
     """Marker 2D plotting tab."""
@@ -43,14 +45,14 @@ class MarkerPlotTab(QtWidgets.QWidget):
         """Update UI with data from the model."""
         self.model = model
         self.list_markers.clear()
-        
+
         if model is None:
             self.canvas_marker.clear_axes()
             return
 
         for name in model.marker_names():
             self.list_markers.addItem(name)
-        
+
         if model.marker_names():
             self.list_markers.setCurrentRow(0)
 
@@ -58,7 +60,7 @@ class MarkerPlotTab(QtWidgets.QWidget):
         """Update the marker plot based on selected marker and component."""
         if self.model is None:
             return
-            
+
         selected_items = self.list_markers.selectedItems()
         if not selected_items:
             self.canvas_marker.clear_axes()

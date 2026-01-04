@@ -57,15 +57,15 @@ def get_logger(name: str) -> logging.Logger:
     # Only add handler if it doesn't already have one and root logger has none
     if not logger_instance.handlers and not logging.getLogger().handlers:
         handler = logging.StreamHandler()
-        
+
         log_format = os.environ.get("LOG_FORMAT", "TEXT").upper()
         if log_format == "JSON":
-            formatter = JSONFormatter()
+            formatter: logging.Formatter = JSONFormatter()
         else:
             formatter = logging.Formatter(
                 "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             )
-        
+
         handler.setFormatter(formatter)
         logger_instance.addHandler(handler)
 

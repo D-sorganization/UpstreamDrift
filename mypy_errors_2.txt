@@ -1,0 +1,2 @@
+engines\Simscape_Multibody_Models\3D_Golf_Model\python\src\logger_utils.py:65: error: Incompatible types in assignment (expression has type "Formatter", variable has type "JSONFormatter")  [assignment]
+Found 1 error in 1 file (checked 2 source files)

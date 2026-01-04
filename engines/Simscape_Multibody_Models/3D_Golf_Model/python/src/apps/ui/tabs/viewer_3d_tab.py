@@ -1,9 +1,12 @@
+from typing import Any
+
+import numpy as np
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
-import numpy as np
-from typing import Any
+
 from ...core.models import C3DDataModel
 from ..widgets.mpl_canvas import MplCanvas
+
 
 class Viewer3DTab(QtWidgets.QWidget):
     """3D marker trajectory viewer tab."""
@@ -49,7 +52,7 @@ class Viewer3DTab(QtWidgets.QWidget):
         """Update UI with data from the model."""
         self.model = model
         self.list_markers_3d.clear()
-        
+
         if model is None:
             self.slider_frame.setMaximum(0)
             self.canvas_3d.clear_axes()
