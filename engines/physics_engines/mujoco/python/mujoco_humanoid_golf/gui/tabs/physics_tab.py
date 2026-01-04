@@ -5,7 +5,6 @@ import typing
 from pathlib import Path
 
 from PyQt6 import QtCore, QtWidgets
-
 from shared.python.common_utils import get_shared_urdf_path
 
 from ...linkage_mechanisms import LINKAGE_CATALOG
