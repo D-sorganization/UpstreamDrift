@@ -191,23 +191,26 @@ class TestLayoutErrorHandling(unittest.TestCase):
     """Test error handling in layout persistence."""
 
     def test_invalid_json_handling(self):
-        """Test handling of invalid JSON in layout file."""
-        temp_file = Path(tempfile.mktemp(suffix=".json"))
+        """Test handling of invalid JSON in layout file.
 
-        # Write invalid JSON
-        with open(temp_file, "w") as f:
-            f.write("{ invalid json content")
+        SEC-007: Replaced tempfile.mktemp with NamedTemporaryFile to prevent TOCTOU attacks.
+        """
+        # Use NamedTemporaryFile with delete=False for explicit cleanup control
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as temp_file:
+            temp_path = Path(temp_file.name)
+            # Write invalid JSON
+            temp_file.write("{ invalid json content")
 
         # Attempt to load should not crash
         try:
-            with open(temp_file, encoding="utf-8") as f:
+            with open(temp_path, encoding="utf-8") as f:
                 json.load(f)
             self.fail("Should have raised JSONDecodeError")
         except json.JSONDecodeError:
             # Expected behavior
             pass
         finally:
-            temp_file.unlink(missing_ok=True)
+            temp_path.unlink(missing_ok=True)
 
     def test_missing_layout_file_handling(self):
         """Test handling when layout file doesn't exist."""

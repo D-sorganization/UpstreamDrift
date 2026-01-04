@@ -10,8 +10,11 @@ from pathlib import Path
 
 
 def get_file_hash(path: Path) -> str:
-    """Calculate the MD5 hash of a file."""
-    hasher = hashlib.md5()
+    """Calculate the SHA-256 hash of a file.
+
+    SEC-006: Replaced MD5 with SHA-256 to prevent collision attacks.
+    """
+    hasher = hashlib.sha256()
     with path.open("rb") as f:
         buf = f.read(65536)
         while len(buf) > 0:
