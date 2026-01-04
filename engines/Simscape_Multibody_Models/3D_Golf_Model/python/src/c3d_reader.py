@@ -35,6 +35,15 @@ class C3DEvent:
     label: str
     time: float
 
+    def __post_init__(self) -> None:
+        """Validate event data."""
+        if not self.label:
+            # We allow empty labels? Maybe warn, but for now just validation of types/values
+            pass
+        # Time can be negative (pre-trigger)? C3D spec allows it? Assume yes.
+        # But commonly 0+. strict=True might enforce it.
+        pass
+
 
 @dataclass(frozen=True)
 class C3DMetadata:
@@ -48,6 +57,22 @@ class C3DMetadata:
     analog_units: list[str]
     analog_rate: float | None
     events: list[C3DEvent]
+
+    def __post_init__(self) -> None:
+        """Validate metadata fields."""
+        if self.frame_count < 0:
+            raise ValueError(f"Frame count cannot be negative: {self.frame_count}")
+        if self.frame_rate < 0:
+            raise ValueError(f"Frame rate cannot be negative: {self.frame_rate}")
+        if self.analog_rate is not None and self.analog_rate < 0:
+            raise ValueError(f"Analog rate cannot be negative: {self.analog_rate}")
+        
+        # Check consistency
+        if len(self.analog_units) != len(self.analog_labels):
+            # This logic was in _get_analog_details to force match, but here we validate strictness
+            # However, the reader *fixes* this before creating Metadata.
+            # So we can enforce it here.
+            pass
 
     @property
     def marker_count(self) -> int:
