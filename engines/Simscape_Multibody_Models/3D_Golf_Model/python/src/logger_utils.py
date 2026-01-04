@@ -54,6 +54,8 @@ def set_seeds(seed: int) -> None:
         Sets seeds for both numpy.random and Python's random module to ensure
         complete reproducibility in scientific computations.
     """
+    if not (0 <= seed <= np.iinfo(np.uint32).max):
+        raise ValueError(f"Seed must be between 0 and {np.iinfo(np.uint32).max}")
     random.seed(seed)
     np.random.seed(seed)
     logger.info("Seeds set: %d", seed)

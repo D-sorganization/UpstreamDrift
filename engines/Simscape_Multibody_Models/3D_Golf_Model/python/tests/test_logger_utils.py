@@ -107,3 +107,14 @@ def test_set_seeds_reproducibility_for_arrays() -> None:
 def test_module_logger_has_handlers() -> None:
     """Test that the module-level logger in logger_utils has handlers configured."""
     assert len(logger_utils.logger.handlers) > 0
+
+
+def test_set_seeds_invalid_input() -> None:
+    """Test that set_seeds raises ValueError for invalid input."""
+    import pytest
+
+    with pytest.raises(ValueError, match="Seed must be between"):
+        set_seeds(-1)
+
+    with pytest.raises(ValueError, match="Seed must be between"):
+        set_seeds(np.iinfo(np.uint32).max + 1)

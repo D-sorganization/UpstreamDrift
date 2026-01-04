@@ -35,5 +35,17 @@ class C3DLoaderThread(QThread):
         try:
             model = load_c3d_file(self.filepath)
             self.loaded.emit(model)
+        except FileNotFoundError:
+            self.failed.emit(f"File not found:\n{self.filepath}")
+        except ImportError as e:
+            self.failed.emit(
+                f"Missing dependency:\n{e}\n\nPlease install 'ezc3d' to load C3D files."
+            )
+        except KeyError as e:
+            self.failed.emit(
+                f"Corrupted or missing metadata:\nKey {e} not found in C3D parameters."
+            )
+        except ValueError as e:
+            self.failed.emit(f"Data inconsistency:\n{e}")
         except Exception as e:
-            self.failed.emit(str(e))
+            self.failed.emit(f"Unexpected error loading file:\n{str(e)}")
