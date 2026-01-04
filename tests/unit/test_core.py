@@ -5,10 +5,8 @@ OBS-001: Added tests for new structured logging functionality.
 """
 
 import logging
-from io import StringIO
 
 import pytest
-import structlog
 
 from shared.python.core import (
     DataFormatError,

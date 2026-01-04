@@ -2,8 +2,9 @@
 
 import logging
 import math
-import defusedxml.minidom as minidom
 from xml.etree.ElementTree import Element, SubElement, tostring
+
+import defusedxml.minidom as minidom
 
 logger = logging.getLogger(__name__)
 
