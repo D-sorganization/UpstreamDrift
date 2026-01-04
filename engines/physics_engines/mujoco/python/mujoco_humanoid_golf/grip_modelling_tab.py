@@ -6,6 +6,7 @@ import logging
 import os
 import re
 from pathlib import Path
+from typing import Any
 
 import mujoco
 import numpy as np
@@ -457,12 +458,24 @@ class GripModellingTab(QtWidgets.QWidget):
         spin.setValue(init_val)
 
         # Connect
-        def _on_slider_change(v: int, s=spin, amin=range_min, amax=range_max, idx=qpos_adr) -> None:
+        def _on_slider_change(
+            v: int,
+            s: Any = spin,
+            amin: float = range_min,
+            amax: float = range_max,
+            idx: int = qpos_adr,
+        ) -> None:
             self._on_slider(v, s, amin, amax, idx)
 
         slider.valueChanged.connect(_on_slider_change)
 
-        def _on_spin_change(v: float, s=slider, amin=range_min, amax=range_max, idx=qpos_adr) -> None:
+        def _on_spin_change(
+            v: float,
+            s: Any = slider,
+            amin: float = range_min,
+            amax: float = range_max,
+            idx: int = qpos_adr,
+        ) -> None:
             self._on_spin(v, s, amin, amax, idx)
 
         spin.valueChanged.connect(_on_spin_change)

@@ -20,8 +20,8 @@ from shared.python.constants import GRAVITY_M_S2
 
 
 def generate_four_bar_linkage_xml(
-    link_lengths=None,
-    link_type="grashof_crank_rocker",
+    link_lengths: list[float] | None = None,
+    link_type: str = "grashof_crank_rocker",
 ) -> str:
     """
     Generate a four-bar linkage mechanism.
@@ -133,9 +133,9 @@ def generate_four_bar_linkage_xml(
 
 
 def generate_slider_crank_xml(
-    crank_length=1.0,
-    rod_length=3.0,
-    orientation="horizontal",
+    crank_length: float = 1.0,
+    rod_length: float = 3.0,
+    orientation: str = "horizontal",
 ) -> str:
     """
     Generate a slider-crank mechanism (basis for piston engines).
@@ -237,7 +237,7 @@ def generate_slider_crank_xml(
 """
 
 
-def generate_scotch_yoke_xml(crank_radius=1.0) -> str:
+def generate_scotch_yoke_xml(crank_radius: float = 1.0) -> str:
     """
     Generate a Scotch yoke mechanism (perfect harmonic motion).
 
@@ -316,7 +316,7 @@ def generate_scotch_yoke_xml(crank_radius=1.0) -> str:
 """
 
 
-def generate_geneva_mechanism_xml(num_slots=6, drive_radius=2.0) -> str:
+def generate_geneva_mechanism_xml(num_slots: int = 6, drive_radius: float = 2.0) -> str:
     """
     Generate a Geneva mechanism (intermittent motion).
 
@@ -392,7 +392,7 @@ def generate_geneva_mechanism_xml(num_slots=6, drive_radius=2.0) -> str:
 """
 
 
-def generate_peaucellier_linkage_xml(scale=1.0) -> str:
+def generate_peaucellier_linkage_xml(scale: float = 1.0) -> str:
     """
     Generate Peaucellier-Lipkin linkage (exact straight-line mechanism).
 
@@ -556,7 +556,7 @@ def generate_chebyshev_linkage_xml() -> str:
 """
 
 
-def generate_pantograph_xml(scale_factor=2.0) -> str:
+def generate_pantograph_xml(scale_factor: float = 2.0) -> str:
     """
     Generate a pantograph mechanism (geometric scaling/copying).
 
@@ -640,7 +640,9 @@ def generate_pantograph_xml(scale_factor=2.0) -> str:
 """
 
 
-def generate_delta_robot_xml(base_radius=2.0, platform_radius=0.5) -> str:
+def generate_delta_robot_xml(
+    base_radius: float = 2.0, platform_radius: float = 0.5
+) -> str:
     """
     Generate a 3-DOF Delta parallel robot (high-speed pick-and-place).
 
@@ -776,7 +778,7 @@ def generate_delta_robot_xml(base_radius=2.0, platform_radius=0.5) -> str:
 """
 
 
-def generate_five_bar_parallel_xml(link_length=1.5) -> str:
+def generate_five_bar_parallel_xml(link_length: float = 1.5) -> str:
     """
     Generate a 5-bar parallel manipulator (2-DOF planar robot).
 
@@ -873,7 +875,9 @@ def generate_five_bar_parallel_xml(link_length=1.5) -> str:
 """
 
 
-def generate_stewart_platform_xml(base_radius=1.5, platform_radius=0.8) -> str:
+def generate_stewart_platform_xml(
+    base_radius: float = 1.5, platform_radius: float = 0.8
+) -> str:
     """
     Generate a Stewart platform (6-DOF parallel manipulator).
 
@@ -1152,7 +1156,7 @@ def generate_watt_linkage_xml() -> str:
 """
 
 
-def generate_oldham_coupling_xml(offset=0.5) -> str:
+def generate_oldham_coupling_xml(offset: float = 0.5) -> str:
     """
     Generate Oldham coupling (parallel shaft coupler with offset).
 
