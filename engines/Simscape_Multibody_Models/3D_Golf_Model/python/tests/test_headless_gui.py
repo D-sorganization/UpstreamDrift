@@ -1,7 +1,6 @@
 
 import os
-import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 from PyQt6 import QtWidgets
@@ -9,8 +8,9 @@ from PyQt6 import QtWidgets
 # Use offscreen platform for headless testing
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
-from apps.c3d_viewer import C3DViewerMainWindow
-from apps.core.models import C3DDataModel
+from apps.c3d_viewer import C3DViewerMainWindow  # noqa: E402
+from apps.core.models import C3DDataModel  # noqa: E402
+
 
 @pytest.fixture
 def app(qtbot):
@@ -35,10 +35,10 @@ def test_load_model_ui_update(app, qtbot):
         analog_rate=1000.0,
         metadata={"Test": "Data"},
     )
-    
+
     # Directly trigger the success handler to bypass threading/file IO
     app._on_load_success(model)
-    
+
     # Check if UI updated (e.g., window title or internal state)
     # The file label in Overview tab should be updated
     assert "test.c3d" in app.overview_tab.label_file.text()
@@ -48,9 +48,11 @@ def test_load_model_ui_update(app, qtbot):
 def test_open_file_dialog_cancel(mock_loader, app, monkeypatch):
     """Test that cancelling the file dialog does nothing."""
     # Mock file dialog to return empty
-    monkeypatch.setattr(QtWidgets.QFileDialog, "getOpenFileName", lambda *args: ("", ""))
-    
+    monkeypatch.setattr(
+        QtWidgets.QFileDialog, "getOpenFileName", lambda *args: ("", "")
+    )
+
     app.open_c3d_file()
-    
+
     # Loader thread should not be started
     mock_loader.assert_not_called()
