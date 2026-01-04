@@ -1092,9 +1092,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 self.btn_record.setText("Record")
 
             # Initialize Pinocchio MeshcatVisualizer
-            # ... (Previous imports kept as is, just sorting logic applied conceptually in file)
-
-            # Fix Blank line contains whitespace at line 1065 (formerly)
+            # Initialize Pinocchio MeshcatVisualizer
+            # (Imports handled at module level)
             if MESHCAT_AVAILABLE and self.viewer is not None:
                 try:
                     self.viewer["robot"].delete()
@@ -1516,7 +1515,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             # Force Matrix = inv(J @ J.T)
             # Eigenvalues of inv(A) are 1/lambda(A)
             # Radii are sqrt(1/lambda) = 1/sqrt(lambda)
-            # We add epsilon to lambda avoids init division by zero
+            # We add epsilon to lambda to avoid division by zero
             mobility_matrix = J @ J.T
             eigvals_f, eigvecs_f = np.linalg.eigh(mobility_matrix)
 
