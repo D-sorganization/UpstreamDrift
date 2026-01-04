@@ -675,6 +675,16 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.btn_overlays.clicked.connect(self._show_overlay_dialog)
         vis_layout.addWidget(self.btn_overlays)
 
+        # Force/Torque Toggles
+        ft_grid = QtWidgets.QGridLayout()
+        self.chk_show_forces = QtWidgets.QCheckBox("Show Forces")
+        self.chk_show_forces.toggled.connect(self._on_visualization_changed)
+        self.chk_show_torques = QtWidgets.QCheckBox("Show Torques")
+        self.chk_show_torques.toggled.connect(self._on_visualization_changed)
+        ft_grid.addWidget(self.chk_show_forces, 0, 0)
+        ft_grid.addWidget(self.chk_show_torques, 0, 1)
+        vis_layout.addLayout(ft_grid)
+
         # Ellipsoid Toggles
         self.chk_mobility = QtWidgets.QCheckBox("Show Mobility Ellipsoid (Green)")
         self.chk_mobility.toggled.connect(self._on_visualization_changed)
@@ -751,6 +761,17 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         self.sliders.clear()
         self.spinboxes.clear()
+
+        # Populate induced source combo with joint names
+        current_text = self.combo_induced_source.currentText()
+        self.combo_induced_source.clear()
+        self.combo_induced_source.addItems(["gravity", "velocity", "total"])
+        for i in range(plant.num_joints()):
+            joint = plant.get_joint(JointIndex(i))
+            if joint.num_velocities() == 1:
+                self.combo_induced_source.addItem(joint.name())
+        if current_text:
+            self.combo_induced_source.setCurrentText(current_text)
 
         # Iterate over joints
         for i in range(plant.num_joints()):
@@ -1039,19 +1060,32 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         if not (self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked()):
             self.meshcat.Delete("overlays/ellipsoids")
 
-        if not (self.chk_induced_vec.isChecked() or self.chk_cf_vec.isChecked()):
+        if not (
+            self.chk_induced_vec.isChecked()
+            or self.chk_cf_vec.isChecked()
+            or self.chk_show_forces.isChecked()
+            or self.chk_show_torques.isChecked()
+        ):
             self.meshcat.Delete("overlays/vectors")
 
         self._update_ellipsoids()
         self._update_vectors()
 
     def _update_vectors(self) -> None:
-        """Draw advanced vectors."""
-        if not self.chk_induced_vec.isChecked() and not self.chk_cf_vec.isChecked():
-            return
-
+        """Draw advanced vectors (Forces, Torques, Induced, CF)."""
         if not self.plant or not self.eval_context:
             return
+
+        # Explicit cleanup of disabled categories
+        if self.meshcat is not None:
+            if not self.chk_show_torques.isChecked():
+                self.meshcat.Delete("overlays/vectors/torques")
+            if not self.chk_show_forces.isChecked():
+                self.meshcat.Delete("overlays/vectors/forces")
+            if not self.chk_induced_vec.isChecked():
+                self.meshcat.Delete("overlays/vectors/induced")
+            if not self.chk_cf_vec.isChecked():
+                self.meshcat.Delete("overlays/vectors/cf")
 
         # Use eval context synced with current state
         plant_context = self.plant.GetMyContextFromRoot(self.context)
@@ -1061,6 +1095,45 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.plant.SetVelocities(
             self.eval_context, self.plant.GetVelocities(plant_context)
         )
+
+        # 1. Standard Torques (Blue)
+        if self.chk_show_torques.isChecked():
+            # Visualize gravity compensation torques (holding torque)
+            tau = self.plant.CalcGravityGeneralizedForces(self.eval_context)
+            self._draw_accel_vectors(-tau, "torques", Rgba(0, 0, 1, 1), scale=0.05)
+
+        # 2. Standard Forces (Green) - Visualize Gravity Force at COM
+        if self.chk_show_forces.isChecked():
+            for i in range(self.plant.num_bodies()):
+                body = self.plant.get_body(BodyIndex(i))
+                if body.name() == "world":
+                    continue
+
+                mass = body.get_mass(self.eval_context)
+                if mass <= 1e-6:
+                    continue
+
+                # Gravity force = mass * g (down Z)
+                # Drake gravity is usually [0, 0, -9.81]
+                gravity = self.plant.gravity_field().gravity_vector()
+                force_vec = gravity * mass
+
+                # Draw at COM
+                X_WB = self.plant.EvalBodyPoseInWorld(self.eval_context, body)
+                com_B = body.CalcCenterOfMassInBodyFrame(self.eval_context)
+                pos_W = X_WB.multiply(com_B)
+
+                scale = 0.01  # Force scale
+                end_pos = pos_W + force_vec * scale
+
+                points = np.vstack([pos_W, end_pos]).T
+                path = f"overlays/vectors/forces/{body.name()}"
+                if self.meshcat is not None:
+                    self.meshcat.SetLineSegments(path, points, 2.0, Rgba(0, 1, 0, 1))
+
+        # 3. Advanced Vectors (Induced / CF)
+        if not (self.chk_induced_vec.isChecked() or self.chk_cf_vec.isChecked()):
+            return
 
         analyzer = DrakeInducedAccelerationAnalyzer(self.plant)
 
@@ -1073,17 +1146,28 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 res = analyzer.compute_components(self.eval_context)
                 accels = res.get(source, accels)
             else:
-                # Specific actuator?
-                try:
-                    act_idx = int(source)
-                    tau = np.zeros(self.plant.num_velocities())
-                    if 0 <= act_idx < len(tau):
-                        tau[act_idx] = 1.0
-                        accels = analyzer.compute_specific_control(
-                            self.eval_context, tau
-                        )
-                except ValueError:
-                    pass
+                # Specific actuator by name or index
+                tau = np.zeros(self.plant.num_velocities())
+                found = False
+                # Try name match
+                if self.plant.HasJointNamed(source):
+                    joint = self.plant.GetJointByName(source)
+                    if joint.num_velocities() == 1:
+                        v_idx = joint.velocity_start()
+                        tau[v_idx] = 1.0
+                        found = True
+
+                if not found:
+                    try:
+                        act_idx = int(source)
+                        if 0 <= act_idx < len(tau):
+                            tau[act_idx] = 1.0
+                            found = True
+                    except ValueError:
+                        pass
+
+                if found:
+                    accels = analyzer.compute_specific_control(self.eval_context, tau)
 
             self._draw_accel_vectors(accels, "induced", Rgba(1, 0, 1, 1))
 
@@ -1102,13 +1186,15 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 self._draw_accel_vectors(vals, "cf", Rgba(1, 1, 0, 1))
 
     def _draw_accel_vectors(
-        self, accels: np.ndarray, name_prefix: str, color: Rgba
+        self,
+        values: np.ndarray,
+        name_prefix: str,
+        color: Rgba,
+        scale: float = 0.1,
     ) -> None:
-        """Draw acceleration vectors at joints."""
+        """Draw vectors at joints (accel, torque, etc)."""
         if not self.meshcat or self.plant is None:
             return
-
-        scale = 0.1  # Visual scale
 
         for i in range(self.plant.num_joints()):
             joint = self.plant.get_joint(JointIndex(i))
@@ -1117,7 +1203,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
             # Map to velocity index
             v_start = joint.velocity_start()
-            val = accels[v_start]
+            val = values[v_start]
             if abs(val) < 1e-3:
                 continue
 
