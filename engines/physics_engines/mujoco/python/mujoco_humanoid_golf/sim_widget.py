@@ -925,7 +925,9 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             except (AttributeError, TypeError):
                 pass
 
-    def set_background_color(self, sky_color: Any = None, ground_color: Any = None) -> None:
+    def set_background_color(
+        self, sky_color: Any = None, ground_color: Any = None
+    ) -> None:
         if sky_color is not None:
             self.sky_color = np.array(sky_color, dtype=np.float32)
         if ground_color is not None:
