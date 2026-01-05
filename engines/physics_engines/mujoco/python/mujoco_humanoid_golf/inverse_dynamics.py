@@ -13,8 +13,8 @@ torques from desired motion. Includes:
 from __future__ import annotations
 
 import csv
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 
 import mujoco
 import numpy as np
@@ -23,9 +23,6 @@ from scipy.linalg import lstsq
 from .kinematic_forces import KinematicForceAnalyzer, MjDataContext
 
 logger = logging.getLogger(__name__)
-
-
-
 
 
 @dataclass
@@ -63,7 +60,6 @@ class InverseDynamicsResult:
     success: bool = True
     manipulability_index: float | None = None
     joint_names: list[str] | None = None
-
 
 
 @dataclass
@@ -168,23 +164,22 @@ class InverseDynamicsSolver:
         # Forward kinematics and dynamics
         # This computes qfrc_bias = C(q,q̇)q̇ + g(q)
         mujoco.mj_forward(self.model, self._perturb_data)
-        
+
         # Compute inverse dynamics
         # This computes qfrc_inverse = M(q)q̈ + C(q,q̇)q̇ + g(q) - ext
         mujoco.mj_inverse(self.model, self._perturb_data)
-        
+
         qfrc_inverse = self._perturb_data.qfrc_inverse.copy()
 
         # Decompose if needed (optional, for result detail)
         # For now, just return total
-        
+
         return InverseDynamicsResult(
             joint_torques=qfrc_inverse,
             success=True,
             is_feasible=True,
             # Fill validation metrics if available
         )
-
 
     def compute_torques_with_posture(
         self,
@@ -199,8 +194,8 @@ class InverseDynamicsSolver:
 
         Uses Null-Space Projection:
             tau_total = tau_primary + (I - J^T(J J^T)^-1 J) * tau_secondary
-            
-        This ensures secondary tasks (like posture) do not interfere with the 
+
+        This ensures secondary tasks (like posture) do not interfere with the
         primary task (e.g. club head trajectory).
 
         Args:
@@ -216,14 +211,13 @@ class InverseDynamicsSolver:
         """
         # 1. Compute Primary Task Torques (using standard Inverse Dynamics)
         # Note: This assumes qacc_primary satisfies the task constraints
-        primary_result = self.compute_required_torques(
-            qpos, qvel, qacc_primary
-        )
-        tau_primary = primary_result.joint_torques # Total generalized force
-
+        primary_result = self.compute_required_torques(qpos, qvel, qacc_primary)
+        tau_primary = primary_result.joint_torques  # Total generalized force
 
         # 2. Compute Jacobian for Primary Task
-        body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, primary_body_name)
+        body_id = mujoco.mj_name2id(
+            self.model, mujoco.mjtObj.mjOBJ_BODY, primary_body_name
+        )
         if body_id == -1:
             # Fallback or error? For now log warning and treat as no task
             logger.warning(
@@ -259,7 +253,6 @@ class InverseDynamicsSolver:
 
         return InverseDynamicsResult(
             joint_torques=tau_total,
-
             success=True,
             is_feasible=True,
             manipulability_index=primary_result.manipulability_index,
