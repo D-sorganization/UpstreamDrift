@@ -3,7 +3,11 @@
 import unittest
 from unittest.mock import MagicMock
 
+import matplotlib
+import matplotlib.backend_bases
 import numpy as np
+
+matplotlib.use("Agg")
 from matplotlib import pyplot as plt
 
 from shared.python.plotting import GolfSwingPlotter
