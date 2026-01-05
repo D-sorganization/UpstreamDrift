@@ -30,6 +30,7 @@ from PyQt6.QtGui import (
     QDropEvent,
     QFont,
     QIcon,
+    QKeyEvent,
     QMouseEvent,
     QPainter,
     QPixmap,
@@ -283,6 +284,7 @@ class DraggableModelCard(QFrame):
         self.setAcceptDrops(initial_accept_drops)
         self.setObjectName("ModelCard")
         self.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.drag_start_position = QPoint()
         self.setup_ui()
 
@@ -404,6 +406,21 @@ class DraggableModelCard(QFrame):
             return "Utility", "#6c757d"  # Gray
 
         return "Unknown", "#6c757d"
+
+    def keyPressEvent(self, event: QKeyEvent | None) -> None:
+        """Handle keyboard interaction."""
+        if not event or not self.parent_launcher:
+            super().keyPressEvent(event)
+            return
+
+        if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter, Qt.Key.Key_Space):
+            self.parent_launcher.select_model(self.model.id)
+            event.accept()
+            # If Enter/Return, also considering launching or just selecting?
+            # Consistent behavior: Space/Enter selects. Double-click launches.
+            # Tab to 'Launch' button and Enter to launch is the standard accessible flow.
+        else:
+            super().keyPressEvent(event)
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse press for selection and drag initiation."""
@@ -1707,6 +1724,9 @@ class GolfLauncher(QMainWindow):
                         border: 2px solid #007acc;
                         border-radius: 10px;
                     }
+                    QFrame#ModelCard:focus {
+                        border: 2px solid #ffffff;
+                    }
                 """
                 )
             else:
@@ -1720,6 +1740,9 @@ class GolfLauncher(QMainWindow):
                     QFrame#ModelCard:hover {
                         border: 1px solid #555555;
                         background-color: #2d2d30;
+                    }
+                    QFrame#ModelCard:focus {
+                        border: 2px solid #007acc;
                     }
                 """
                 )
