@@ -8,7 +8,7 @@ OBS-001: Added structured logging with structlog for production-ready observabil
 
 import logging
 import sys
-from typing import Any
+from typing import Any, cast
 
 import structlog
 
@@ -188,4 +188,4 @@ def get_logger(name: str) -> structlog.stdlib.BoundLogger:
     if not _structured_logging_configured:
         setup_structured_logging()
 
-    return structlog.get_logger(name)
+    return cast(structlog.stdlib.BoundLogger, structlog.get_logger(name))
