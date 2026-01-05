@@ -488,7 +488,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.eval_context = self.plant.CreateDefaultContext()
 
         # Init Manipulability
-        if self.plant and DrakeManipulabilityAnalyzer:
+        if self.plant and DrakeManipulabilityAnalyzer is not None:
             self.manip_analyzer = DrakeManipulabilityAnalyzer(self.plant)
             self._populate_manip_checkboxes()
 
@@ -1744,8 +1744,11 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         # Clear existing
         while self.manip_body_layout.count():
             item = self.manip_body_layout.takeAt(0)
-            if item.widget():
-                item.widget().deleteLater()
+            if item is None:
+                continue
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
         self.manip_checkboxes.clear()
 
         bodies = self.manip_analyzer.find_potential_bodies()
