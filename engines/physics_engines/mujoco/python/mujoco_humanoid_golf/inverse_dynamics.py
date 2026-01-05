@@ -113,6 +113,10 @@ class InverseDynamicsSolver:
             self._jacp_flat = np.zeros(3 * model.nv)
             self._jacr_flat = np.zeros(3 * model.nv)
 
+        # CRITICAL FIX (Phase 1): Dedicated MjData for thread-safe physics
+        # Prevents "Observer Effect" where analysis corrupts visualization state
+        self._perturb_data = mujoco.MjData(model)
+
     def _detect_closed_chains(self) -> bool:
         """Detect if model has closed kinematic chains.
 
@@ -144,26 +148,26 @@ class InverseDynamicsSolver:
         Returns:
             InverseDynamicsResult with computed torques
         """
-        # Set state
-        self.data.qpos[:] = qpos
-        self.data.qvel[:] = qvel
-        self.data.qacc[:] = qacc
+        # Set state (Thread-Safe: use private data)
+        self._perturb_data.qpos[:] = qpos
+        self._perturb_data.qvel[:] = qvel
+        self._perturb_data.qacc[:] = qacc
 
         # Forward kinematics and dynamics
         # This computes qfrc_bias = C(q,q̇)q̇ + g(q)
-        mujoco.mj_forward(self.model, self.data)
+        mujoco.mj_forward(self.model, self._perturb_data)
 
         # Capture total bias (C + g)
-        total_bias = self.data.qfrc_bias.copy()
+        total_bias = self._perturb_data.qfrc_bias.copy()
 
         # For parallel mechanisms, capture constraint forces BEFORE changing state
         constraint_forces = None
         if self.has_constraints:
-            constraint_forces = self.data.qfrc_constraint.copy()
+            constraint_forces = self._perturb_data.qfrc_constraint.copy()
 
         # Get mass matrix M(q)
         m_matrix = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, m_matrix, self.data.qM)
+        mujoco.mj_fullM(self.model, m_matrix, self._perturb_data.qM)
 
         # Compute Gravity g(q) efficiently
         # We need to set velocity to zero to get just gravity.
@@ -172,21 +176,21 @@ class InverseDynamicsSolver:
         # mj_forward computes everything (kinematics, COM, inertia, etc.) which is slow.
         # mj_rne only computes inverse dynamics. When qvel=0 and qacc=0,
         # it returns gravity.
-        qvel_backup = self.data.qvel.copy()
-        self.data.qvel[:] = 0
+        qvel_backup = self._perturb_data.qvel.copy()
+        self._perturb_data.qvel[:] = 0
         # Explicitly zero out spatial velocity (cvel) to ensure RNE uses correct state
         # This is much faster than running mj_fwdVelocity or mj_forward
-        self.data.cvel[:] = 0
+        self._perturb_data.cvel[:] = 0
 
         gravity = np.zeros(self.model.nv)
         # flg_acc=0 means ignore qacc (treat as 0)
-        mujoco.mj_rne(self.model, self.data, 0, gravity)
+        mujoco.mj_rne(self.model, self._perturb_data, 0, gravity)
 
         # Compute Coriolis forces: C(q,q̇)q̇ = Total Bias - Gravity
         coriolis = total_bias - gravity
 
         # Restore velocity (not strictly needed for result but good for consistency)
-        self.data.qvel[:] = qvel_backup
+        self._perturb_data.qvel[:] = qvel_backup
 
         # Inverse dynamics: τ = M q̈ + C q̇ + g - τ_ext
         inertial = m_matrix @ qacc
