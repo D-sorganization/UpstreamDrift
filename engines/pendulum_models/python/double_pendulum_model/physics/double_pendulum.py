@@ -9,13 +9,15 @@ for educational demonstrations of chaos and control.
 
 from __future__ import annotations
 
-import ast
 import math
 import typing
 
 if typing.TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 from dataclasses import dataclass
+
+# Security: Use simpleeval for safe expression evaluation instead of eval()
+from simpleeval import SimpleEval
 
 # Physical constants with documented units and references
 # International gravity standard at 45 degrees latitude (m/s^2)
@@ -44,33 +46,15 @@ Matrix2x2 = tuple[tuple[float, float], tuple[float, float]]
 
 
 class ExpressionFunction:
-    """Safe evaluation of user-provided expressions.
+    """Safe evaluation of user-provided expressions using simpleeval.
 
     The expression can use standard math functions, state variables, and time
-    (``t``). Only a curated subset of ``ast`` nodes are accepted to prevent
-    arbitrary code execution.
+    (``t``). Uses simpleeval library to prevent arbitrary code execution.
+
+    Security: Replaced eval() with simpleeval to eliminate code injection risk.
     """
 
-    _ALLOWED_NODES: typing.ClassVar[set[type[ast.AST]]] = {
-        ast.Expression,
-        ast.BinOp,
-        ast.UnaryOp,
-        ast.Name,
-        ast.Load,
-        ast.Add,
-        ast.Sub,
-        ast.Mult,
-        ast.Div,
-        ast.Pow,
-        ast.Mod,
-        ast.USub,
-        ast.UAdd,
-        ast.Call,
-        ast.Constant,
-        ast.BitXor,
-    }
-
-    _ALLOWED_NAMES: typing.ClassVar[dict[str, typing.Any]] = {
+    _ALLOWED_FUNCTIONS: typing.ClassVar[dict[str, typing.Any]] = {
         name: getattr(math, name)
         for name in (
             "sin",
@@ -84,21 +68,21 @@ class ExpressionFunction:
             "log",
             "log10",
             "exp",
-            "pi",
-            "tau",
             "fabs",
         )
     }
-    _GLOBALS: typing.ClassVar[dict[str, typing.Any]] = {
-        "__builtins__": {},
-        **_ALLOWED_NAMES,
+
+    _ALLOWED_NAMES: typing.ClassVar[dict[str, typing.Any]] = {
+        "pi": math.pi,
+        "tau": math.tau,
     }
 
     def __init__(self, expression: str) -> None:
         self.expression = expression.strip()
-        parsed = ast.parse(self.expression, mode="eval")
-        self._validate_ast(parsed)
-        self._code = compile(parsed, filename="<ExpressionFunction>", mode="eval")
+        # Initialize simpleeval with allowed functions and constants
+        self._evaluator = SimpleEval()
+        self._evaluator.functions = self._ALLOWED_FUNCTIONS.copy()
+        self._evaluator.names = self._ALLOWED_NAMES.copy()
 
     def __call__(self, t: float, state: DoublePendulumState) -> float:
         context: dict[str, float] = {
@@ -108,32 +92,11 @@ class ExpressionFunction:
             "omega1": state.omega1,
             "omega2": state.omega2,
         }
-        # Use _GLOBALS to avoid copying math functions into context on every call
-        result = eval(self._code, self._GLOBALS, context)  # noqa: S307
+        # Update names with current state
+        self._evaluator.names.update(context)
+        # Safe evaluation - no code injection possible
+        result = self._evaluator.eval(self.expression)
         return float(result)
-
-    def _validate_ast(self, node: ast.AST) -> None:
-        for child in ast.walk(node):
-            if type(child) not in self._ALLOWED_NODES:
-                msg = f"Disallowed syntax in expression: {type(child).__name__}"
-                raise ValueError(msg)
-            if isinstance(child, ast.Name) and child.id not in {
-                "t",
-                "theta1",
-                "theta2",
-                "omega1",
-                "omega2",
-                *self._ALLOWED_NAMES,
-            }:
-                msg = f"Use of unknown variable '{child.id}' in expression"
-                raise ValueError(msg)
-            if isinstance(child, ast.Call):
-                if not isinstance(child.func, ast.Name):
-                    msg = "Only direct function calls are permitted"
-                    raise ValueError(msg)  # noqa: TRY004
-                if child.func.id not in self._ALLOWED_NAMES:
-                    msg = f"Function '{child.func.id}' is not permitted"
-                    raise ValueError(msg)
 
 
 @dataclass

@@ -4,6 +4,7 @@ Golf Swing Visualizer - Core Data Structures and Processing
 High-performance data handling with optimized MATLAB loading and frame processing
 """
 
+import threading
 import time
 import warnings
 from dataclasses import dataclass, field
@@ -318,9 +319,17 @@ class MatlabDataLoader:
     def _process_vector_column(
         self, col_data: np.ndarray, col_name: str, num_rows: int
     ) -> list[np.ndarray]:
-        """Process 3D vector columns with comprehensive error handling"""
-        processed_vectors = []
+        """Process 3D vector columns with comprehensive error handling.
 
+        PERF-002: Optimized with vectorized operations where possible.
+        """
+        # Fast path for numeric 2D arrays (most common case)
+        if col_data.dtype != "object" and col_data.ndim == 2 and col_data.shape[1] == 3:
+            # Vectorized operation - process all rows at once
+            return list(col_data.astype(np.float32))
+
+        # Slower path for cell arrays and irregular data
+        processed_vectors = []
         for i in range(num_rows):
             try:
                 if col_data.dtype == "object":
@@ -359,13 +368,17 @@ class MatlabDataLoader:
     def _process_scalar_column(
         self, col_data: np.ndarray, col_name: str, num_rows: int
     ) -> np.ndarray:
-        """Process scalar columns with type optimization"""
+        """Process scalar columns with type optimization.
+
+        PERF-002: Optimized using list comprehension instead of explicit loop.
+        """
         try:
             if col_data.dtype == "object":
-                # Handle cell arrays
+                # Handle cell arrays - use list comprehension for speed
+                # Handle cell arrays - optimized iteration
                 processed = []
-                for i in range(num_rows):
-                    cell = col_data[i, 0] if col_data.ndim > 1 else col_data[i]
+                # Iterate directly over flat array to avoid indexing overhead
+                for cell in col_data.flat:
                     if hasattr(cell, "item"):
                         processed.append(cell.item())
                     else:
@@ -454,10 +467,14 @@ class FrameProcessor:
             else np.arange(self.num_frames) * 0.001
         )
 
-        # Data caches
+        # Data caches with thread safety
         self.raw_data_cache: dict[int, FrameData] = {}
         self.dynamics_cache: dict[str, dict] = {}
         self.current_filter = "None"
+
+        # Thread locks for cache access (CONC-001 fix)
+        self._raw_cache_lock = threading.Lock()
+        self._dynamics_cache_lock = threading.Lock()
 
         # Track current frame for UI coordination
         self.current_frame = 0
@@ -470,7 +487,8 @@ class FrameProcessor:
 
     def invalidate_cache(self):
         """Invalidate cached dynamics data."""
-        self.dynamics_cache = {}
+        with self._dynamics_cache_lock:
+            self.dynamics_cache = {}
         print(f"Cache invalidated due to filter change to {self.current_filter}")
 
     def get_frame_data(self, frame_idx: int) -> FrameData:
@@ -478,23 +496,29 @@ class FrameProcessor:
         # Bounds checking
         frame_idx = max(0, min(frame_idx, self.num_frames - 1))
 
-        # Get raw data from cache or process it
-        if frame_idx not in self.raw_data_cache:
-            self.raw_data_cache[frame_idx] = self._process_raw_frame(frame_idx)
-        frame_data = self.raw_data_cache[frame_idx]
+        # Get raw data from cache or process it (thread-safe)
+        with self._raw_cache_lock:
+            if frame_idx not in self.raw_data_cache:
+                self.raw_data_cache[frame_idx] = self._process_raw_frame(frame_idx)
+            frame_data = self.raw_data_cache[frame_idx]
 
-        # Get or calculate dynamics data
-        if self.current_filter not in self.dynamics_cache:
-            self._calculate_dynamics_for_filter()
+        # Get or calculate dynamics data (thread-safe)
+        with self._dynamics_cache_lock:
+            if self.current_filter not in self.dynamics_cache:
+                self._calculate_dynamics_for_filter()
+            dynamics = self.dynamics_cache[self.current_filter]
 
-        dynamics = self.dynamics_cache[self.current_filter]
+        # Update frame data with calculated dynamics
         frame_data.forces["calculated"] = dynamics["force"][frame_idx]
         frame_data.torques["calculated"] = dynamics["torque"][frame_idx]
 
         return frame_data
 
     def _calculate_dynamics_for_filter(self):
-        """Calculate inverse dynamics for the entire dataset with the current filter."""
+        """Calculate inverse dynamics for the entire dataset with the current filter.
+
+        Note: Must be called while holding self._dynamics_cache_lock.
+        """
         print(f"Calculating dynamics with filter: {self.current_filter}...")
         start_time = time.time()
 

@@ -28,9 +28,27 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from PyQt6 import QtCore, QtWidgets
 
+# Security: Use simpleeval for safe expression evaluation
+from simpleeval import SimpleEval
+
 logger = logging.getLogger(__name__)
 
 TIME_STEP = 0.01
+
+# Initialize shared evaluator for constant expressions
+# Reusing the instance avoids overhead of re-registering functions
+_EVALUATOR = SimpleEval()
+_EVALUATOR.functions = {
+    "sin": math.sin,
+    "cos": math.cos,
+    "tan": math.tan,
+    "sqrt": math.sqrt,
+    "log": math.log,
+    "exp": math.exp,
+}
+_EVALUATOR.names = {
+    "pi": math.pi,
+}
 
 
 def _validate_math_ast(node: ast.AST) -> None:
@@ -322,20 +340,13 @@ class PendulumController(QtWidgets.QWidget):  # type: ignore[misc]
             self._update_plot()
 
     def _safe_eval(self, expression: str) -> float:
+        """Safely evaluate mathematical expression using simpleeval.
+
+        Security: Replaced eval() with simpleeval to eliminate code injection risk.
+        """
         try:
-            tree = ast.parse(expression, mode="eval")
-            _validate_math_ast(tree)
-            return float(
-                eval(  # noqa: S307
-                    compile(tree, filename="<string>", mode="eval"),
-                    {
-                        "__builtins__": {},
-                        "pi": math.pi,
-                        "sin": math.sin,
-                        "cos": math.cos,
-                    },
-                )
-            )
+            result = _EVALUATOR.eval(expression)
+            return float(result)
         except (ValueError, TypeError, SyntaxError, NameError):
             logger.exception("Error evaluating expression: %s", expression)
             return 0.0

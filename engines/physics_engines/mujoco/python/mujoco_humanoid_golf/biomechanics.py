@@ -8,6 +8,7 @@ derived biomechanical quantities.
 from __future__ import annotations
 
 import logging
+from typing import cast
 
 import mujoco
 import numpy as np
@@ -114,7 +115,8 @@ class BiomechanicalAnalyzer:
         self.prev_qvel = self.data.qvel.copy()
         self.prev_time = self.data.time
 
-        return np.array(qacc, dtype=np.float64)
+        # PERF-004: qacc is already a numpy array, no need to copy
+        return cast(np.ndarray, qacc.astype(np.float64, copy=False))
 
     def compute_induced_acceleration(self, source_name: str) -> np.ndarray:
         """Compute induced acceleration for a specific source.
@@ -129,9 +131,9 @@ class BiomechanicalAnalyzer:
         """
         comps = self.induced_analyzer.compute_components()
         if source_name == "gravity":
-            return comps["gravity"]
+            return cast(np.ndarray, comps["gravity"])
         elif source_name == "actuator":
-            return comps["control"]
+            return cast(np.ndarray, comps["control"])
         return np.zeros(self.model.nv)
 
     def compute_counterfactuals(self) -> dict[str, np.ndarray]:
@@ -171,7 +173,10 @@ class BiomechanicalAnalyzer:
             self.data.qvel[:] = qvel_save
             self.data.qacc[:] = qacc_save
 
-        return {"ztcf_accel": a_ztcf, "zvcf_torque": tau_zvcf}
+        return {
+            "ztcf_accel": cast(np.ndarray, a_ztcf),
+            "zvcf_torque": cast(np.ndarray, tau_zvcf),
+        }
 
     def get_club_head_data(
         self,
@@ -401,17 +406,17 @@ class SwingRecorder:
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
         if not self.frames:
-            return np.array([]), np.array([])
+            return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
         times = np.array([f.time for f in self.frames])
         values = [getattr(f, field_name) for f in self.frames]
 
         if all(v is None for v in values):
-            return times, np.array([])
+            return times, np.array([], dtype=np.float64)
 
         valid_indices = [i for i, v in enumerate(values) if v is not None]
         if not valid_indices:
-            return times, np.array([])
+            return times, np.array([], dtype=np.float64)
 
         times = times[valid_indices]
         values = [values[i] for i in valid_indices]
@@ -421,13 +426,13 @@ class SwingRecorder:
         except (ValueError, TypeError):
             return times, values
 
-        return times, values_array
+        return times, cast(np.ndarray, values_array)
 
     def get_induced_acceleration_series(
         self, source_name: str
     ) -> tuple[np.ndarray, np.ndarray]:
         if not self.frames:
-            return np.array([]), np.array([])
+            return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
         times = []
         values = []
@@ -439,9 +444,9 @@ class SwingRecorder:
                 values.append(val)
 
         if not values:
-            return np.array([]), np.array([])
+            return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
-        return np.array(times), np.array(values)
+        return np.array(times, dtype=np.float64), cast(np.ndarray, np.array(values))
 
     def get_num_frames(self) -> int:
         """Get number of recorded frames."""
@@ -566,7 +571,7 @@ class SwingRecorder:
             component_name: 'gravity', 'velocity', 'control', 'constraint', 'total'
         """
         if not self.frames:
-            return np.array([]), np.array([])
+            return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
         times = []
         values = []
@@ -580,13 +585,13 @@ class SwingRecorder:
                 values.append(f.club_induced_accelerations[component_name])
 
         if not values:
-            return np.array([]), np.array([])
+            return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
-        return np.array(times), np.array(values)
+        return np.array(times, dtype=np.float64), cast(np.ndarray, np.array(values))
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         if not self.frames:
-            return np.array([]), np.array([])
+            return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
         times = []
         values = []
@@ -597,6 +602,6 @@ class SwingRecorder:
                 values.append(val)
 
         if not values:
-            return np.array([]), np.array([])
+            return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
-        return np.array(times), np.array(values)
+        return np.array(times, dtype=np.float64), cast(np.ndarray, np.array(values))
