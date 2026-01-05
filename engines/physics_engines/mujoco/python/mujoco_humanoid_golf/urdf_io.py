@@ -98,7 +98,7 @@ class URDFExporter:
 
         # Convert to string
         ET.indent(robot, space="  ")
-        urdf_string = ET.tostring(robot, encoding="unicode", xml_declaration=True)
+        urdf_string = str(ET.tostring(robot, encoding="unicode", xml_declaration=True))
 
         # Save to file
         output_path.write_text(urdf_string, encoding="utf-8")
@@ -605,7 +605,9 @@ class URDFImporter:
 
         # Convert to string
         ET.indent(mujoco_root, space="  ")
-        mujoco_xml = ET.tostring(mujoco_root, encoding="unicode", xml_declaration=True)
+        mujoco_xml = str(
+            ET.tostring(mujoco_root, encoding="unicode", xml_declaration=True)
+        )
 
         logger.info("Imported URDF from %s", urdf_path)
 

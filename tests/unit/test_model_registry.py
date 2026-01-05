@@ -1,13 +1,18 @@
-"""Unit tests for ModelRegistry."""
+"""Unit tests for ModelRegistry.
+
+TEST-004: Added @pytest.mark.unit markers for test categorization.
+"""
 
 import tempfile
 from pathlib import Path
 
+import pytest
 import yaml
 
 from shared.python.model_registry import ModelRegistry
 
 
+@pytest.mark.unit
 class TestModelRegistry:
     """Test cases for ModelRegistry."""
 
