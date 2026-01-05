@@ -1,7 +1,10 @@
-import pytest
 import sys
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 from engines.physics_engines.opensim.python.opensim_golf.core import GolfSwingModel
+
 
 @pytest.fixture
 def mock_opensim_env():
@@ -9,6 +12,7 @@ def mock_opensim_env():
     # We patch sys.modules to return a MagicMock when 'opensim' is imported
     with patch.dict(sys.modules, {"opensim": MagicMock()}):
         yield
+
 
 @pytest.fixture
 def mock_opensim_missing_env():
@@ -19,6 +23,7 @@ def mock_opensim_missing_env():
     # Setting it to None in sys.modules causes ModuleNotFoundError in Python 3.
     with patch.dict(sys.modules, {"opensim": None}):
         yield
+
 
 class TestGolfSwingModel:
     def test_demo_simulation_runs(self):
@@ -43,7 +48,9 @@ class TestGolfSwingModel:
         assert model.use_opensim is True
 
         # Now check the NotImplementedError
-        with pytest.raises(NotImplementedError, match="OpenSim integration pending environment setup"):
+        with pytest.raises(
+            NotImplementedError, match="OpenSim integration pending environment setup"
+        ):
             model._run_opensim_simulation()
 
     def test_load_opensim_failure_fallback_logic(self, mock_opensim_missing_env):
