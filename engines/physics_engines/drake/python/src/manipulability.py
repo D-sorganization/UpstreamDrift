@@ -14,7 +14,6 @@ try:
         Context,
         JacobianWrtVariable,
         MultibodyPlant,
-        RigidTransform,
     )
     DRAKE_AVAILABLE = True
 except ImportError:
