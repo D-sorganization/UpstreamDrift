@@ -211,9 +211,7 @@ def launch_c3d_viewer() -> bool:
         env["PYTHONPATH"] = str(suite_root) + os.pathsep + env.get("PYTHONPATH", "")
 
         logger.info("Launching C3D Motion Viewer...")
-        subprocess.run(
-            [sys.executable, "-m", module_name], cwd=str(src_root), env=env
-        )
+        subprocess.run([sys.executable, "-m", module_name], cwd=str(src_root), env=env)
     except Exception as e:
         logger.error(f"Error launching C3D Viewer: {e}")
         return False
