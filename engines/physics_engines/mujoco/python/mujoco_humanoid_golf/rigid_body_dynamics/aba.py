@@ -107,19 +107,19 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     dof_indices: list[int] = [-1] * nb
 
     # OPTIMIZATION: Use 'F' order so columns are contiguous for matmul 'out' args
-    v = np.empty((6, nb), order='F')  # Spatial velocities
-    c = np.empty((6, nb), order='F')  # Velocity-product accelerations (bias)
+    v = np.empty((6, nb), order="F")  # Spatial velocities
+    c = np.empty((6, nb), order="F")  # Velocity-product accelerations (bias)
 
     # Articulated-body inertias (NB, 6, 6)
     # OPTIMIZATION: Bulk copy is faster than element-wise copy in loop
     ia_articulated = np.array(model["I"], dtype=float)
 
     # OPTIMIZATION: Use 'F' order for these buffers too
-    pa_bias = np.zeros((6, nb), order='F')  # Articulated-body bias forces
-    u_force = np.zeros((6, nb), order='F')  # IA * S
+    pa_bias = np.zeros((6, nb), order="F")  # Articulated-body bias forces
+    u_force = np.zeros((6, nb), order="F")  # IA * S
     d = np.zeros(nb)  # S.T @ U (joint-space inertia)
     u = np.zeros(nb)  # tau - S.T @ pA (bias force)
-    a = np.zeros((6, nb), order='F')  # Spatial accelerations
+    a = np.zeros((6, nb), order="F")  # Spatial accelerations
     qdd = np.zeros(nb)  # Joint accelerations
 
     # Optimization: temporary buffers

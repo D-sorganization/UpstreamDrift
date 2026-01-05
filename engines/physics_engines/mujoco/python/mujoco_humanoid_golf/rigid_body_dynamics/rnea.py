@@ -95,9 +95,9 @@ def rnea(  # noqa: PLR0915
     # OPTIMIZATION: Use 'F' order (Fortran-contiguous) so that columns (6, nb) are
     # contiguous in memory. This allows efficient use of columns as 'out' parameters
     # in matmul/multiply, avoiding internal temporary buffering and copying.
-    v = np.empty((6, nb), order='F')  # Spatial velocities
-    a = np.empty((6, nb), order='F')  # Spatial accelerations
-    f = np.zeros((6, nb), order='F')  # Spatial forces (must be zero for accumulation)
+    v = np.empty((6, nb), order="F")  # Spatial velocities
+    a = np.empty((6, nb), order="F")  # Spatial accelerations
+    f = np.zeros((6, nb), order="F")  # Spatial forces (must be zero for accumulation)
     tau = np.empty(nb)  # Joint torques
 
     # OPTIMIZATION: Pre-allocate buffers
