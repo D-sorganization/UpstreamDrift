@@ -196,9 +196,25 @@ class KinematicForceAnalyzer:
     def __init__(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
         """Initialize kinematic force analyzer.
 
+        MEMORY ALLOCATION (Issue A-004): This initializer allocates a complete
+        MjData structure for scratch computations, which can be several MB for
+        complex models. This is intentional for thread safety and performance,
+        but users should be aware of the memory footprint when creating multiple
+        analyzer instances.
+
+        Memory usage breakdown (approximate):
+        - _perturb_data: ~size_of(MjData) ≈ O(nv² + nbody)
+        - Jacobian buffers: 2 × 3 × nv floats ≈ 24×nv bytes
+        - Total additional memory: ~few MB for typical humanoid models
+
+        For memory-constrained environments, consider:
+        - Reusing a single analyzer instance across analyses
+        - Using lazy initialization (allocate _perturb_data on first use)
+        - Sharing analyzer instances across threads (with proper synchronization)
+
         Args:
             model: MuJoCo model
-            data: MuJoCo data
+            data: MuJoCo data (shared reference, not modified by compute methods)
         """
         self.model = model
         self.data = data
@@ -207,10 +223,13 @@ class KinematicForceAnalyzer:
         self.club_head_id = self._find_body_id("club_head")
         self.club_grip_id = self._find_body_id("club") or self._find_body_id("grip")
 
-        # Optimization: Pre-allocate resources
+        # MEMORY ALLOCATION: Dedicated MjData for state-isolated computations
+        # This prevents race conditions but increases memory footprint
+        # See Issue A-004 for detailed analysis
         self._perturb_data = mujoco.MjData(model)
 
-        # Detect Jacobian API and pre-allocate buffers
+        # Pre-allocate Jacobian buffers to avoid repeated allocation
+        # Detect API version to use correct array shape
         self.nv = model.nv
         try:
             # Try reshaped API (MuJoCo 3.3+ preferred)
@@ -331,6 +350,16 @@ class KinematicForceAnalyzer:
         - Centrifugal terms: Diagonal terms (q̇ᵢ²)
         - Velocity coupling: Off-diagonal terms (q̇ᵢq̇ⱼ)
 
+        ⚠️ PERFORMANCE WARNING: This method uses an approximation that calls
+        compute_coriolis_forces N+1 times, resulting in O(N²) complexity.
+        For high-DOF models, this can be slow.
+
+        RECOMMENDATION: Use the combined compute_coriolis_forces() method instead,
+        which returns the total Coriolis+centrifugal forces efficiently in O(N).
+        Decomposition is rarely needed for most applications.
+
+        See Issue A-002 and B-002 for optimization path using analytical RNE.
+
         Args:
             qpos: Joint positions [nv]
             qvel: Joint velocities [nv]
@@ -338,7 +367,16 @@ class KinematicForceAnalyzer:
         Returns:
             Tuple of (centrifugal_forces [nv], coupling_forces [nv])
         """
-        # Approximate decomposition using finite differences
+        # OPTIMIZATION NOTE: The proper fix is to use mj_rne properties or
+        # implement analytical decomposition. Current implementation is
+        # accurate but slow for high-DOF systems.
+        #
+        # Full analytical solution requires:
+        # - Custom RNE recursion to separate diagonal/off-diagonal terms
+        # - OR use spatial algebra (screw theory) for frame-independent decomposition
+        # - OR skip decomposition and use total Coriolis forces directly
+        #
+        # For most golf swing analyses, the total Coriolis force is sufficient.
 
         centrifugal = np.zeros(self.model.nv)
         coupling = np.zeros(self.model.nv)
@@ -347,6 +385,7 @@ class KinematicForceAnalyzer:
         total_coriolis = self.compute_coriolis_forces(qpos, qvel)
 
         # Estimate centrifugal: vary each velocity independently
+        # This captures diagonal terms of the Coriolis matrix
         for i in range(self.model.nv):
             qvel_single = np.zeros(self.model.nv)
             qvel_single[i] = qvel[i]
@@ -354,7 +393,7 @@ class KinematicForceAnalyzer:
             single_coriolis = self.compute_coriolis_forces(qpos, qvel_single)
             centrifugal += single_coriolis
 
-        # Coupling is the difference
+        # Coupling is the difference (off-diagonal terms)
         coupling = total_coriolis - centrifugal
 
         return centrifugal, coupling

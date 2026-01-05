@@ -434,6 +434,17 @@ class InverseDynamicsSolver:
 
         Maps joint torques to task-space forces: F = (J^T)^{-1} τ
 
+        PERFORMANCE NOTE (Issue B-003): Uses lstsq which is correct but not optimized.
+        For batch processing of trajectories, consider precomputing pseudo-inverses
+        if the robot configuration remains similar. However, since Jacobian depends
+        on qpos (configuration-dependent), caching is only beneficial for repeated
+        calls with identical qpos but different torques (rare in practice).
+
+        Potential optimization for batch processing:
+            # For trajectory analysis (same qpos, varying torques):
+            J_pinv = np.linalg.pinv(jacp.T)  # Compute once
+            ee_forces = J_pinv @ torques_batch  # Reuse for multiple torques
+
         Args:
             qpos: Joint positions [nv]
             qvel: Joint velocities [nv]
@@ -446,7 +457,7 @@ class InverseDynamicsSolver:
         # Compute required torques
         result = self.compute_required_torques(qpos, qvel, qacc)
 
-        # Get Jacobian
+        # Get Jacobian (configuration-dependent, must recompute for each qpos)
         self.data.qpos[:] = qpos
         mujoco.mj_forward(self.model, self.data)
 
@@ -465,7 +476,7 @@ class InverseDynamicsSolver:
             jacp = self._jacp
 
         # Map torques to forces: F = (J^T)^{-1} τ
-        # Use least-squares for redundant/constrained systems
+        # lstsq is robust for redundant/constrained systems (handles rank deficiency)
         ee_force, _residuals, _rank, _s = lstsq(jacp.T, result.joint_torques)
 
         return np.array(ee_force, dtype=np.float64)
