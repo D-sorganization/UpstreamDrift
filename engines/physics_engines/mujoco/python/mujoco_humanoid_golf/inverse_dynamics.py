@@ -13,8 +13,8 @@ torques from desired motion. Includes:
 from __future__ import annotations
 
 import csv
-import logging
 from dataclasses import dataclass
+import logging
 
 import mujoco
 import numpy as np
@@ -263,14 +263,7 @@ class InverseDynamicsSolver:
             success=True,
             is_feasible=True,
             manipulability_index=primary_result.manipulability_index,
-            joint_names=primary_result.joint_names,
-            # Pass through decomposition from primary if relevant, for now just total
         )
-
-
-
-
-
 
     def compute_induced_accelerations(
         self,
