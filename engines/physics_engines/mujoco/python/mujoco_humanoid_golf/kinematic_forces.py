@@ -295,26 +295,46 @@ class KinematicForceAnalyzer:
         Returns:
             Coriolis forces [nv]
         """
-        # FIXED: Use private/scratch data structure to avoid corrupting shared state
+        # PHASE 1 UPGRADE: Use Analytical RNE
+        # This replaces the legacy O(N) forward kinematics approach with
+        # the significantly faster Recursive Newton-Euler algorithm.
+        return self.compute_coriolis_forces_rne(qpos, qvel)
+
+    def compute_coriolis_forces_rne(
+        self, qpos: np.ndarray, qvel: np.ndarray
+    ) -> np.ndarray:
+        """Compute Coriolis forces using analytical RNE (Phase 1).
+
+        This method uses MuJoCo's Recursive Newton-Euler (mj_rne) algorithm
+        which is significantly faster than mj_forward used in the legacy method.
+        It computes the Coriolis terms analytically, avoiding extra overhead
+        of forward kinematics and visual updates.
+
+        Args:
+            qpos: Joint positions [nv]
+            qvel: Joint velocities [nv]
+
+        Returns:
+            Coriolis forces [nv]
+        """
+        # Use private/scratch data structure
         self._perturb_data.qpos[:] = qpos
         self._perturb_data.qvel[:] = qvel
+        # qacc must be zero for RNE to return inverse dynamics forces
+        self._perturb_data.qacc[:] = 0.0
 
-        # Forward kinematics
-        mujoco.mj_forward(self.model, self._perturb_data)
+        # MuJoCo RNE: tau = M(q)qacc + C(q,qvel)qvel + g(q)
+        # With qacc=0, it returns: C(q,qvel)qvel + g(q)
+        bias = np.zeros(self.model.nv)
+        mujoco.mj_rne(self.model, self._perturb_data, 0, bias)
 
-        # In MuJoCo, qfrc_bias = C(q,q̇)q̇ + g(q)
-        # We need to separate Coriolis from gravity
-
-        # Method 1: Compute bias with and without velocity
-        bias_with_velocity = self._perturb_data.qfrc_bias.copy()
-
-        # Compute bias with zero velocity (only gravity)
+        # Now we need to subtract gravity g(q)
+        # RNE with qvel=0, qacc=0 returns g(q)
         self._perturb_data.qvel[:] = 0.0
-        mujoco.mj_forward(self.model, self._perturb_data)
-        gravity_only = self._perturb_data.qfrc_bias.copy()
+        gravity = np.zeros(self.model.nv)
+        mujoco.mj_rne(self.model, self._perturb_data, 0, gravity)
 
-        # Coriolis forces = total bias - gravity
-        return np.asarray(bias_with_velocity - gravity_only)
+        return bias - gravity
 
     def compute_gravity_forces(self, qpos: np.ndarray) -> np.ndarray:
         """Compute gravitational forces.
@@ -344,26 +364,28 @@ class KinematicForceAnalyzer:
     ) -> tuple[np.ndarray, np.ndarray]:
         """Decompose Coriolis forces into centrifugal and velocity coupling.
 
-        Coriolis matrix C(q,q̇) can be decomposed:
-        - Centrifugal terms: Diagonal terms (q̇ᵢ²)
-        - Velocity coupling: Off-diagonal terms (q̇ᵢq̇ⱼ)
+            Coriolis matrix C(q,q̇) can be decomposed:
+            - Centrifugal terms: Diagonal terms (q̇ᵢ²)
+            - Velocity coupling: Off-diagonal terms (q̇ᵢq̇ⱼ)
 
-        ⚠️ PERFORMANCE WARNING: This method uses an approximation that calls
-        compute_coriolis_forces N+1 times, resulting in O(N²) complexity.
-        For high-DOF models, this can be slow.
+            ⚠️ PERFORMANCE NOTE (Phase 1 Implemented):
+        This method iterates N times to separate diagonal vs off-diagonal terms.
+        However, the inner calculation now uses Analytical RNE (`mj_rne`),
+        which is significantly faster than the legacy `mj_forward` approach.
+        Global complexity is O(N^2) but with a much smaller constant factor.
 
-        RECOMMENDATION: Use the combined compute_coriolis_forces() method instead,
-        which returns the total Coriolis+centrifugal forces efficiently in O(N).
-        Decomposition is rarely needed for most applications.
+            RECOMMENDATION: Use the combined compute_coriolis_forces() method instead,
+            which returns the total Coriolis+centrifugal forces efficiently in O(N).
+            Decomposition is rarely needed for most applications.
 
-        See Issue A-002 and B-002 for optimization path using analytical RNE.
+            See Issue A-002 and B-002 for optimization path using analytical RNE.
 
-        Args:
-            qpos: Joint positions [nv]
-            qvel: Joint velocities [nv]
+            Args:
+                qpos: Joint positions [nv]
+                qvel: Joint velocities [nv]
 
-        Returns:
-            Tuple of (centrifugal_forces [nv], coupling_forces [nv])
+            Returns:
+                Tuple of (centrifugal_forces [nv], coupling_forces [nv])
         """
         # OPTIMIZATION NOTE: The proper fix is to use mj_rne properties or
         # implement analytical decomposition. Current implementation is
