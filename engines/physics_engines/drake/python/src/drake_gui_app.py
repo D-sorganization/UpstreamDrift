@@ -267,6 +267,8 @@ class DrakeRecorder:
         q: np.ndarray,
         v: np.ndarray,
         club_pos: np.ndarray | None = None,
+        com_pos: np.ndarray | None = None,
+        angular_momentum: np.ndarray | None = None,
     ) -> None:
         if not self.is_recording:
             return
@@ -277,6 +279,20 @@ class DrakeRecorder:
             self.club_head_pos_history.append(club_pos.copy())
         else:
             self.club_head_pos_history.append(np.zeros(3))
+
+        if com_pos is not None:
+            self.com_position_history.append(com_pos.copy())
+        else:
+            self.com_position_history.append(np.zeros(3))
+
+        if angular_momentum is not None:
+            self.angular_momentum_history.append(angular_momentum.copy())
+        else:
+            self.angular_momentum_history.append(np.zeros(3))
+
+        # Placeholders for now
+        self.ground_forces_history.append(np.zeros(3))
+        self.cop_position_history.append(np.zeros(3))
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
         """Implement RecorderInterface."""
@@ -1041,7 +1057,24 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                             self.recorder.counterfactuals[k] = []
                         self.recorder.counterfactuals[k].append(val)
 
-                self.recorder.record(context.get_time(), q, v, club_pos)
+                # Calculate CoM and Angular Momentum for recording
+                com_pos = None
+                angular_momentum = None
+                if self.plant:
+                    plant_context = self.plant.GetMyContextFromRoot(context)
+                    com_pos = self.plant.CalcCenterOfMassPositionInWorld(plant_context)
+                    angular_momentum = self.plant.CalcSpatialMomentumInWorldAboutPoint(
+                        plant_context, com_pos
+                    ).rotational()
+
+                self.recorder.record(
+                    context.get_time(),
+                    q,
+                    v,
+                    club_pos,
+                    com_pos=com_pos,
+                    angular_momentum=angular_momentum
+                )
                 self.lbl_rec_status.setText(f"Frames: {len(self.recorder.times)}")
 
         # Visualization Update
