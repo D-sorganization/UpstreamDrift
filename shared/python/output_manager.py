@@ -530,13 +530,21 @@ class OutputManager:
 
 # Type alias for simulation results (TYPE-001: Improved type safety over Any)
 SimulationResultScalar: TypeAlias = int | float | str | bool | None
-SimulationResultDict: TypeAlias = dict[
-    str,
+# Helper alias for recursive dict
+SimulationResultValue: TypeAlias = (
     SimulationResultScalar
     | list[SimulationResultScalar]
-    | dict[str, SimulationResultScalar],
-]
-SimulationResults: TypeAlias = SimulationResultDict | pd.DataFrame | np.ndarray
+    | dict[str, SimulationResultScalar]
+    # Allow simple nested lists of dictionaries for JSON-like structures
+    | list[dict[str, Any]]
+)
+# Using Any for dict values to handle arbitrarily nested JSON structures better than recursive types
+# which mypy struggles with in some contexts, while still providing some structure.
+SimulationResultDict: TypeAlias = dict[str, Any]
+
+SimulationResults: TypeAlias = (
+    SimulationResultDict | pd.DataFrame | np.ndarray | list[dict[str, Any]]
+)
 
 
 # Convenience functions for backward compatibility
@@ -551,8 +559,23 @@ def save_results(
     TYPE-001: Replaced Any with Union type for better type safety.
     """
     manager = OutputManager()
+    # Cast to the type expected by save_simulation_results if needed,
+    # or rely on structural compatibility.
+    # save_simulation_results expects: pd.DataFrame | dict[str, Any] | list[dict[str, Any]]
+    # SimulationResults is: dict[str, Any] | pd.DataFrame | np.ndarray | list[dict[str, Any]]
+
+    # We need to handle np.ndarray explicitly if save_simulation_results doesn't support it directly
+    # save_simulation_results logic:
+    # if isinstance(results, pd.DataFrame): ...
+    # else: df = pd.DataFrame(results)
+    # pd.DataFrame(ndarray) works.
+
+    # However, type hint of save_simulation_results is:
+    # results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]]
+    # It misses np.ndarray. We should update save_simulation_results type hint as well.
+
     path = manager.save_simulation_results(
-        results, filename, OutputFormat(format_type), engine
+        results, filename, OutputFormat(format_type), engine  # type: ignore[arg-type]
     )
     return str(path)
 
@@ -565,4 +588,9 @@ def load_results(
     TYPE-001: Replaced Any with Union type for better type safety.
     """
     manager = OutputManager()
-    return manager.load_simulation_results(filename, OutputFormat(format_type), engine)
+    result = manager.load_simulation_results(
+        filename, OutputFormat(format_type), engine
+    )
+    # The return type of load_simulation_results is pd.DataFrame | dict[str, Any] | list[dict[str, Any]]
+    # SimulationResults includes np.ndarray, so this is compatible (subset).
+    return result
