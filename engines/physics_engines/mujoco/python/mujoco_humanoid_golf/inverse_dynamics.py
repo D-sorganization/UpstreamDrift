@@ -481,6 +481,11 @@ class InverseDynamicsSolver:
 
         Checks if computed torques actually produce desired acceleration.
 
+        FIXED: This method now uses static calculation (mj_forward) instead of
+        mj_step to avoid the "Observer Effect" bug where validation would
+        advance simulation time and corrupt subsequent calculations.
+        See Issues A-003 and F-001.
+
         Args:
             qpos: Joint positions [nv]
             qvel: Joint velocities [nv]
@@ -490,36 +495,51 @@ class InverseDynamicsSolver:
         Returns:
             Validation metrics
         """
-        # Apply torques in forward dynamics
-        self.data.qpos[:] = qpos
-        self.data.qvel[:] = qvel
-        self.data.ctrl[: self.model.nu] = computed_torques[: self.model.nu]
+        # Save state to prevent side effects (Issues A-003, F-001)
+        qpos_backup = self.data.qpos.copy()
+        qvel_backup = self.data.qvel.copy()
+        ctrl_backup = self.data.ctrl.copy()
+        time_backup = self.data.time
 
-        # Compute forward dynamics
-        mujoco.mj_forward(self.model, self.data)
-        mujoco.mj_step(self.model, self.data)  # Single step
+        try:
+            # Apply torques in forward dynamics
+            self.data.qpos[:] = qpos
+            self.data.qvel[:] = qvel
+            self.data.ctrl[: self.model.nu] = computed_torques[: self.model.nu]
 
-        # Get resulting acceleration
-        m_matrix = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, m_matrix, self.data.qM)
+            # Compute forward dynamics (static calculation, no time advancement)
+            # FIXED: Removed mj_step which was causing Observer Effect
+            mujoco.mj_forward(self.model, self.data)
 
-        # Acceleration from dynamics: M^{-1}(τ - C q̇ - g)
-        coriolis = self.kinematic_analyzer.compute_coriolis_forces(qpos, qvel)
-        gravity = self.kinematic_analyzer.compute_gravity_forces(qpos)
+            # Get resulting acceleration
+            m_matrix = np.zeros((self.model.nv, self.model.nv))
+            mujoco.mj_fullM(self.model, m_matrix, self.data.qM)
 
-        m_inv = np.linalg.inv(m_matrix)
-        computed_qacc = m_inv @ (computed_torques - coriolis - gravity)
+            # Acceleration from dynamics: M^{-1}(τ - C q̇ - g)
+            coriolis = self.kinematic_analyzer.compute_coriolis_forces(qpos, qvel)
+            gravity = self.kinematic_analyzer.compute_gravity_forces(qpos)
 
-        # Error metrics
-        acc_error = np.linalg.norm(computed_qacc - qacc)
-        relative_error = acc_error / (np.linalg.norm(qacc) + 1e-10)
+            m_inv = np.linalg.inv(m_matrix)
+            computed_qacc = m_inv @ (computed_torques - coriolis - gravity)
 
-        return {
-            "acceleration_error": float(acc_error),
-            "relative_error": float(relative_error),
-            "max_torque": float(np.max(np.abs(computed_torques))),
-            "mean_torque": float(np.mean(np.abs(computed_torques))),
-        }
+            # Error metrics
+            acc_error = np.linalg.norm(computed_qacc - qacc)
+            relative_error = acc_error / (np.linalg.norm(qacc) + 1e-10)
+
+            return {
+                "acceleration_error": float(acc_error),
+                "relative_error": float(relative_error),
+                "max_torque": float(np.max(np.abs(computed_torques))),
+                "mean_torque": float(np.mean(np.abs(computed_torques))),
+            }
+        finally:
+            # Restore state to ensure no side effects
+            self.data.qpos[:] = qpos_backup
+            self.data.qvel[:] = qvel_backup
+            self.data.ctrl[:] = ctrl_backup
+            self.data.time = time_backup
+            # Recompute forward kinematics to sync derived quantities
+            mujoco.mj_forward(self.model, self.data)
 
     def compute_actuator_efficiency(
         self,

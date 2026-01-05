@@ -140,6 +140,9 @@ class KinematicForceAnalyzer:
 
         The term C(q,q̇)q̇ represents Coriolis and centrifugal forces.
 
+        FIXED: Uses dedicated _perturb_data instead of shared self.data to prevent
+        race conditions and state corruption. See Issues A-001 and F-002.
+
         Args:
             qpos: Joint positions [nv]
             qvel: Joint velocities [nv]
@@ -147,28 +150,23 @@ class KinematicForceAnalyzer:
         Returns:
             Coriolis forces [nv]
         """
-        # Set state
-        self.data.qpos[:] = qpos
-        self.data.qvel[:] = qvel
+        # FIXED: Use private/scratch data structure to avoid corrupting shared state
+        self._perturb_data.qpos[:] = qpos
+        self._perturb_data.qvel[:] = qvel
 
         # Forward kinematics
-        mujoco.mj_forward(self.model, self.data)
+        mujoco.mj_forward(self.model, self._perturb_data)
 
         # In MuJoCo, qfrc_bias = C(q,q̇)q̇ + g(q)
         # We need to separate Coriolis from gravity
 
         # Method 1: Compute bias with and without velocity
-        bias_with_velocity = self.data.qfrc_bias.copy()
+        bias_with_velocity = self._perturb_data.qfrc_bias.copy()
 
         # Compute bias with zero velocity (only gravity)
-        qvel_backup = self.data.qvel.copy()
-        self.data.qvel[:] = 0.0
-        mujoco.mj_forward(self.model, self.data)
-        gravity_only = self.data.qfrc_bias.copy()
-
-        # Restore velocity
-        self.data.qvel[:] = qvel_backup
-        mujoco.mj_forward(self.model, self.data)
+        self._perturb_data.qvel[:] = 0.0
+        mujoco.mj_forward(self.model, self._perturb_data)
+        gravity_only = self._perturb_data.qfrc_bias.copy()
 
         # Coriolis forces = total bias - gravity
         return np.asarray(bias_with_velocity - gravity_only)
@@ -176,20 +174,23 @@ class KinematicForceAnalyzer:
     def compute_gravity_forces(self, qpos: np.ndarray) -> np.ndarray:
         """Compute gravitational forces.
 
+        FIXED: Uses dedicated _perturb_data to prevent state corruption.
+        See Issues A-001 and F-002.
+
         Args:
             qpos: Joint positions [nv]
 
         Returns:
             Gravity forces [nv]
         """
-        # Set state with zero velocity
-        self.data.qpos[:] = qpos
-        self.data.qvel[:] = 0.0
+        # FIXED: Use private/scratch data structure
+        self._perturb_data.qpos[:] = qpos
+        self._perturb_data.qvel[:] = 0.0
 
-        mujoco.mj_forward(self.model, self.data)
+        mujoco.mj_forward(self.model, self._perturb_data)
 
         # With zero velocity, qfrc_bias = g(q)
-        return np.asarray(self.data.qfrc_bias.copy())
+        return np.asarray(self._perturb_data.qfrc_bias.copy())
 
     def decompose_coriolis_forces(
         self,
@@ -233,18 +234,21 @@ class KinematicForceAnalyzer:
     def compute_mass_matrix(self, qpos: np.ndarray) -> np.ndarray:
         """Compute configuration-dependent mass matrix M(q).
 
+        FIXED: Uses dedicated _perturb_data to prevent state corruption.
+
         Args:
             qpos: Joint positions [nv]
 
         Returns:
             Mass matrix [nv x nv]
         """
-        self.data.qpos[:] = qpos
-        mujoco.mj_forward(self.model, self.data)
+        # FIXED: Use private data structure
+        self._perturb_data.qpos[:] = qpos
+        mujoco.mj_forward(self.model, self._perturb_data)
 
         # Get full mass matrix
         M = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, M, self.data.qM)
+        mujoco.mj_fullM(self.model, M, self._perturb_data.qM)
 
         return M
 
@@ -288,6 +292,8 @@ class KinematicForceAnalyzer:
         These are the "fictitious" forces experienced in the rotating
         reference frame attached to the golfer.
 
+        FIXED: Uses dedicated _perturb_data to prevent state corruption.
+
         Args:
             qpos: Joint positions [nv]
             qvel: Joint velocities [nv]
@@ -299,20 +305,22 @@ class KinematicForceAnalyzer:
         if self.club_head_id is None:
             return np.zeros(3), np.zeros(3), np.zeros(3)
 
-        # Set state
-        self.data.qpos[:] = qpos
-        self.data.qvel[:] = qvel
-        mujoco.mj_forward(self.model, self.data)
+        # FIXED: Use private data structure for current state
+        self._perturb_data.qpos[:] = qpos
+        self._perturb_data.qvel[:] = qvel
+        mujoco.mj_forward(self.model, self._perturb_data)
 
         # Compute club head Jacobian
-        jacp, _ = self._compute_jacobian(self.club_head_id)
+        jacp, _ = self._compute_jacobian(self.club_head_id, data=self._perturb_data)
         jacp_curr = jacp.copy()  # Save copy as _compute_jacobian reuses buffer
+
+        # Store club position before perturbing state
+        club_pos = self._perturb_data.xpos[self.club_head_id].copy()
 
         # Jacobian time derivative (approximate)
         epsilon = 1e-6
-        # jacp_dot = np.zeros((3, self.model.nv)) # Not needed, computed below
 
-        # Compute Jacobian at perturbed state using pre-allocated data structure
+        # Compute Jacobian at perturbed state
         self._perturb_data.qpos[:] = qpos + epsilon * qvel
         self._perturb_data.qvel[:] = qvel
         mujoco.mj_forward(self.model, self._perturb_data)
@@ -340,7 +348,6 @@ class KinematicForceAnalyzer:
         apparent_force = jacp_curr.T @ joint_coriolis[: self.model.nv]
 
         # Approximate centrifugal as component aligned with position
-        club_pos = self.data.xpos[self.club_head_id].copy()
         centrifugal_direction = club_pos / (np.linalg.norm(club_pos) + 1e-10)
         centrifugal_magnitude = np.dot(apparent_force, centrifugal_direction)
         centrifugal_force = centrifugal_magnitude * centrifugal_direction
@@ -392,6 +399,8 @@ class KinematicForceAnalyzer:
     ) -> dict[str, float]:
         """Decompose kinetic energy into rotational and translational.
 
+        FIXED: Uses dedicated _perturb_data to prevent state corruption.
+
         Args:
             qpos: Joint positions [nv]
             qvel: Joint velocities [nv]
@@ -399,9 +408,10 @@ class KinematicForceAnalyzer:
         Returns:
             Dictionary with kinetic energy components
         """
-        self.data.qpos[:] = qpos
-        self.data.qvel[:] = qvel
-        mujoco.mj_forward(self.model, self.data)
+        # FIXED: Use private data structure
+        self._perturb_data.qpos[:] = qpos
+        self._perturb_data.qvel[:] = qvel
+        mujoco.mj_forward(self.model, self._perturb_data)
 
         rotational_ke = 0.0
         translational_ke = 0.0
@@ -412,7 +422,7 @@ class KinematicForceAnalyzer:
             body_inertia = self.model.body_inertia[i]
 
             # Get body velocity (linear and angular)
-            jacp, jacr = self._compute_jacobian(i)
+            jacp, jacr = self._compute_jacobian(i, data=self._perturb_data)
 
             v_linear = jacp @ qvel
             omega = jacr @ qvel
@@ -501,6 +511,8 @@ class KinematicForceAnalyzer:
         Effective mass determines how difficult it is to accelerate
         in a specific direction.
 
+        FIXED: Uses dedicated _perturb_data to prevent state corruption.
+
         Args:
             qpos: Joint positions [nv]
             direction: Direction vector [3]
@@ -518,14 +530,14 @@ class KinematicForceAnalyzer:
         # Normalize direction
         direction = direction / (np.linalg.norm(direction) + 1e-10)
 
-        # Get mass matrix
+        # Get mass matrix (already uses _perturb_data internally)
         M = self.compute_mass_matrix(qpos)
 
-        # Get Jacobian
-        self.data.qpos[:] = qpos
-        mujoco.mj_forward(self.model, self.data)
+        # FIXED: Use private data structure
+        self._perturb_data.qpos[:] = qpos
+        mujoco.mj_forward(self.model, self._perturb_data)
 
-        jacp, _ = self._compute_jacobian(body_id)
+        jacp, _ = self._compute_jacobian(body_id, data=self._perturb_data)
 
         # Project Jacobian onto direction
         J_dir = direction @ jacp
@@ -544,7 +556,23 @@ class KinematicForceAnalyzer:
     ) -> np.ndarray:
         """Compute centripetal acceleration at a body.
 
-        Centripetal acceleration = v²/r pointing toward center of rotation
+        ⚠️ WARNING - EXPERIMENTAL/BROKEN: This method contains a fundamental physics error.
+        It treats the articulated robot as a point mass in circular motion about the
+        world origin (0,0,0), which is incorrect for multi-body kinematic chains.
+
+        ISSUE: Uses a_c = v²/r with r = distance from origin, ignoring the fact that
+        each body segment has its own angular velocity and rotation center.
+
+        CORRECT APPROACH: Use spatial acceleration a_total = J·q̈ + J̇·q̇ where the
+        "centripetal/coriolis" contribution is the velocity product term J̇·q̇.
+
+        For articulated systems, centripetal acceleration should be computed as:
+        a_c = ω × (ω × r) where ω is derived from the rotational Jacobian.
+
+        DO NOT USE THIS METHOD FOR STRESS ANALYSIS OR SAFETY-CRITICAL APPLICATIONS.
+        Results are physically invalid for articulated chains.
+
+        See Issue B-001 in Assessment B for detailed analysis.
 
         Args:
             qpos: Joint positions [nv]
@@ -552,32 +580,43 @@ class KinematicForceAnalyzer:
             body_id: Body ID (default: club head)
 
         Returns:
-            Centripetal acceleration [3]
+            Centripetal acceleration [3] - INACCURATE, see warning above
         """
+        import warnings
+
+        warnings.warn(
+            "compute_centripetal_acceleration contains a fundamental physics error "
+            "(assumes circular motion about origin). Results are invalid for "
+            "articulated chains. See Assessment B-001 for details.",
+            category=UserWarning,
+            stacklevel=2,
+        )
+
         if body_id is None:
             body_id = self.club_head_id
 
         if body_id is None:
             return np.zeros(3)
 
-        # Get body state
-        self.data.qpos[:] = qpos
-        self.data.qvel[:] = qvel
-        mujoco.mj_forward(self.model, self.data)
+        # FIXED: Use private data structure to prevent state corruption
+        self._perturb_data.qpos[:] = qpos
+        self._perturb_data.qvel[:] = qvel
+        mujoco.mj_forward(self.model, self._perturb_data)
 
         # Body velocity
-        jacp, _ = self._compute_jacobian(body_id)
+        jacp, _ = self._compute_jacobian(body_id, data=self._perturb_data)
 
         v = jacp @ qvel
 
         # Body position (relative to some reference)
-        pos = self.data.xpos[body_id].copy()
+        pos = self._perturb_data.xpos[body_id].copy()
 
         # Centripetal acceleration
         # For circular motion: a_c = v²/r pointing toward center
         # General case: a_c = ω × (ω × r)
 
-        # Approximate: Use velocity squared divided by distance
+        # ⚠️ BROKEN: This approximation assumes circular motion about origin
+        # which is fundamentally wrong for articulated kinematic chains
         speed = np.linalg.norm(v)
         radius = np.linalg.norm(pos)
 
