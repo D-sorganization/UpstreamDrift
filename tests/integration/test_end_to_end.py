@@ -310,7 +310,7 @@ class TestOutputManager:
         suite_root = Path(__file__).parent.parent.parent
         sys.path.insert(0, str(suite_root / "shared" / "python"))
 
-        from output_manager import OutputFormat, OutputManager
+        from shared.python.output_manager import OutputFormat, OutputManager
 
         with tempfile.TemporaryDirectory() as tmpdir:
             manager = OutputManager(tmpdir)

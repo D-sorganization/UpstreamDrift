@@ -275,11 +275,11 @@ class URDFGenerator(QtWidgets.QMainWindow):
 
         # Pretty print
         try:
-            from xml.dom import minidom
+            import defusedxml.minidom as minidom
 
             rough_string = ET.tostring(root, "utf-8")
             reparsed = minidom.parseString(rough_string)
-            return reparsed.toprettyxml(indent="  ")
+            return str(reparsed.toprettyxml(indent="  "))
         except ImportError:
             return str(ET.tostring(root, encoding="unicode"))
 

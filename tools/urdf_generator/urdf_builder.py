@@ -2,8 +2,9 @@
 
 import logging
 import math
-from xml.dom import minidom
 from xml.etree.ElementTree import Element, SubElement, tostring
+
+import defusedxml.minidom as minidom
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +113,7 @@ class URDFBuilder:
         # Pretty print the XML
         rough_string = tostring(robot, encoding="unicode")
         reparsed = minidom.parseString(rough_string)
-        return reparsed.toprettyxml(indent="  ")
+        return str(reparsed.toprettyxml(indent="  "))
 
     def _create_empty_urdf(self) -> str:
         """Create an empty URDF structure.
@@ -130,7 +131,7 @@ class URDFBuilder:
 
         rough_string = tostring(robot, encoding="unicode")
         reparsed = minidom.parseString(rough_string)
-        return reparsed.toprettyxml(indent="  ")
+        return str(reparsed.toprettyxml(indent="  "))
 
     def _add_materials(self, robot: Element) -> None:
         """Add material definitions to the URDF.

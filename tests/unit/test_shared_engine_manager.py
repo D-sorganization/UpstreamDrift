@@ -42,7 +42,9 @@ class TestEngineManager(unittest.TestCase):
         self.mock_matlab_probe_cls = self.matlab_patcher.start()
 
         # Patch setup_logging
-        self.logging_patcher = patch("shared.python.engine_manager.setup_logging")
+        self.logging_patcher = patch(
+            "shared.python.common_utils.setup_structured_logging"
+        )
         self.logging_patcher.start()
 
     def tearDown(self):
