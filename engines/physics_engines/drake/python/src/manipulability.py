@@ -3,8 +3,9 @@
 Computes Force and Mobility ellipsoids/matrices using Drake's MultibodyPlant.
 """
 
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
+
 import numpy as np
 
 # Try to import Drake. If failing, we define dummies or rely on user env.
@@ -15,6 +16,7 @@ try:
         JacobianWrtVariable,
         MultibodyPlant,
     )
+
     DRAKE_AVAILABLE = True
 except ImportError:
     DRAKE_AVAILABLE = False
@@ -31,6 +33,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class EllipsoidParams:
     """Parameters defining an ellipsoid."""
+
     radii: np.ndarray
     axes: np.ndarray  # Column vectors (eigenvectors)
     center: np.ndarray
@@ -39,6 +42,7 @@ class EllipsoidParams:
 @dataclass
 class ManipulabilityResult:
     """Results of manipulability analysis for a single body."""
+
     body_name: str
     cartesian_pos: np.ndarray
     mobility_ellipsoid: EllipsoidParams | None
@@ -115,7 +119,7 @@ class DrakeManipulabilityAnalyzer:
                 body.body_frame(),
                 np.zeros(3),
                 self.world_frame,
-                self.world_frame
+                self.world_frame,
             )
 
             # J is 3 x nv.
@@ -134,11 +138,11 @@ class DrakeManipulabilityAnalyzer:
 
                 # Radii (Velocity) = sqrt(lambda)
                 radii_v = np.sqrt(np.maximum(eigvals_v, 1e-9))
-                
+
                 # Axes are eigenvectors
 
                 # Condition Number
-                cond = radii_v[0] / radii_v[-1] if radii_v[-1] > 1e-9 else float('inf')
+                cond = radii_v[0] / radii_v[-1] if radii_v[-1] > 1e-9 else float("inf")
 
                 # Isotropy (1/cond)
                 isotropy = 1.0 / cond if cond > 0 else 0.0
@@ -166,7 +170,7 @@ class DrakeManipulabilityAnalyzer:
                 force_ellipsoid=EllipsoidParams(radii_f, eigvecs_v, cartesian_pos),
                 condition_number=cond,
                 isotropy=isotropy,
-                manipulability_index=manip_index
+                manipulability_index=manip_index,
             )
             results.append(res)
 
