@@ -15,7 +15,7 @@ import pytest
 
 
 @pytest.fixture(scope="session", autouse=True)
-def set_random_seed():
+def random_seed():
     """Set random seed for deterministic testing (TEST-002).
 
     This fixture runs automatically for every test session to ensure
