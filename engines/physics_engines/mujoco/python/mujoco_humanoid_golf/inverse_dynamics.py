@@ -250,15 +250,8 @@ class InverseDynamicsSolver:
         )
 
 
-        return InverseDynamicsResult(
-            joint_torques=total_torques,
-            constraint_forces=constraint_forces,
-            inertial_torques=inertial,
-            coriolis_torques=coriolis,
-            gravity_torques=gravity,
-            is_feasible=True,
-            residual_norm=0.0,
-        )
+
+
 
     def compute_induced_accelerations(
         self,
