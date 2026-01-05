@@ -27,7 +27,10 @@ dependencies = [
     "scipy>=1.13.1,<2.0.0",
     "sympy>=1.12,<2.0.0",
     "PyQt6>=6.6.0,<7.0.0",
-    "mujoco>=3.2.3,<4.0.0",
+    # MuJoCo 3.3+ required for reshaped Jacobian API (mj_jacBody)
+    # Earlier versions use flat arrays which require fallback handling
+    # See Issue F-003 in Assessment C
+    "mujoco>=3.3.0,<4.0.0",
     "pyyaml>=6.0.1",
     "defusedxml>=0.7.1,<1.0.0",
     "structlog>=24.1.0,<25.0.0",
