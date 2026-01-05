@@ -24,9 +24,9 @@ except Exception:
 
 import numpy as np
 import pinocchio as pin  # type: ignore
-from .manipulability import PinocchioManipulabilityAnalyzer
-
 from PyQt6 import QtCore, QtWidgets
+
+from .manipulability import PinocchioManipulabilityAnalyzer
 
 try:
     import meshcat.geometry as g
@@ -500,7 +500,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         ellip_group.setLayout(ellip_layout)
         vis_layout.addWidget(ellip_group)
-
 
         # Advanced Vectors
         adv_vec_layout = QtWidgets.QHBoxLayout()
@@ -1503,6 +1502,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         # Clear existing
         while self.manip_body_layout.count():
             item = self.manip_body_layout.takeAt(0)
+            if item is None:
+                break
             widget = item.widget()
             if widget:
                 widget.deleteLater()
@@ -1550,12 +1551,12 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         # but that flickers if we do it every frame.
         # However, _update_viewer is called on toggle or update.
         # Let's delete the whole group and redraw.
-        
+
         # NOTE: Deleting the whole group every frame causes flickering or network load?
         # Pinocchio MeshcatVisualizer usually handles set_object/transform efficiently.
         # But to remove stale objects, delete() is needed.
         # We'll rely on the folder structure: overlays/ellipsoids/{body_name}/{type}
-        
+
         # Determine strict list of active drawings
         active_drawings = set()
 
@@ -1564,7 +1565,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self.viewer["overlays/ellipsoids"].delete()
         except Exception:
             pass
-
 
         if self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked():
             # Get selected bodies
@@ -1581,23 +1581,28 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                         continue
 
                     pos = res.velocity_ellipsoid.center
-                    
-                    if self.chk_mobility.isChecked() and res.mobility_matrix is not None:
+
+                    if (
+                        self.chk_mobility.isChecked()
+                        and res.mobility_matrix is not None
+                    ):
                         path_name = f"{res.body_name}/mobility"
                         active_drawings.add(path_name)
-                        
+
                         radii = res.velocity_ellipsoid.radii
                         # Scale down for viz (metrics are usually large)
                         self._draw_ellipsoid_meshcat(
-                            path_name, 
-                            pos, 
-                            res.velocity_ellipsoid.axes, 
-                            radii * 0.5, 
-                            0x00FF00
+                            path_name,
+                            pos,
+                            res.velocity_ellipsoid.axes,
+                            radii * 0.5,
+                            0x00FF00,
                         )
 
-
-                    if self.chk_force_ellip.isChecked() and res.force_matrix is not None:
+                    if (
+                        self.chk_force_ellip.isChecked()
+                        and res.force_matrix is not None
+                    ):
                         path_name = f"{res.body_name}/force"
                         active_drawings.add(path_name)
 
@@ -1608,7 +1613,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                             pos,
                             res.force_ellipsoid.axes,
                             radii * 0.2,
-                            0xFF0000
+                            0xFF0000,
                         )
 
     def _draw_ellipsoid_meshcat(

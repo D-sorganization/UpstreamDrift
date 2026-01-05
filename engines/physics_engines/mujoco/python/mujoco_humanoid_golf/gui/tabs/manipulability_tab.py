@@ -20,7 +20,9 @@ logger = logging.getLogger(__name__)
 class ManipulabilityTab(QtWidgets.QWidget):
     """Tab for manipulating and visualizing force/mobility matrices."""
 
-    def __init__(self, sim_widget: Any, parent: QtWidgets.QWidget | None = None) -> None:
+    def __init__(
+        self, sim_widget: Any, parent: QtWidgets.QWidget | None = None
+    ) -> None:
         super().__init__(parent)
         self.sim_widget = sim_widget
         self.analyzer: ManipulabilityAnalyzer | None = None
@@ -87,7 +89,9 @@ class ManipulabilityTab(QtWidgets.QWidget):
         # SimWidget usually runs on main thread. We can use self.sim_widget.data
         # provided we are careful not to perturb it during a step.
         # Best practice: use the widget's provided data which is synchronized.
-        self.analyzer = ManipulabilityAnalyzer(self.sim_widget.model, self.sim_widget.data)
+        self.analyzer = ManipulabilityAnalyzer(
+            self.sim_widget.model, self.sim_widget.data
+        )
 
         # Populate Body Checkboxes
         self._populate_body_checkboxes()
@@ -96,7 +100,10 @@ class ManipulabilityTab(QtWidgets.QWidget):
         """Clear and repopulate checkboxes based on model bodies."""
         # Clear existing
         for i in reversed(range(self.body_layout.count())):
-            w = self.body_layout.itemAt(i).widget()
+            item = self.body_layout.itemAt(i)
+            if item is None:
+                continue
+            w = item.widget()
             if w:
                 w.setParent(None)
         self.body_checkboxes.clear()
@@ -121,7 +128,6 @@ class ManipulabilityTab(QtWidgets.QWidget):
                 if col > 2:  # 3 columns
                     col = 0
                     row += 1
-
 
     def _update_analysis(self) -> None:
         """Periodic update loop."""
@@ -161,9 +167,9 @@ class ManipulabilityTab(QtWidgets.QWidget):
                     res.velocity_ellipsoid.axes,
                     res.velocity_ellipsoid.radii,
                     color=0x00FF00,
-                    opacity=0.3
+                    opacity=0.3,
                 )
-            
+
             # Draw Force?
             if self.chk_show_force.isChecked() and meshcat:
                 # Force ellipsoid often visualized at same center
@@ -173,7 +179,7 @@ class ManipulabilityTab(QtWidgets.QWidget):
                     res.force_ellipsoid.axes,
                     res.force_ellipsoid.radii,
                     color=0xFF0000,
-                    opacity=0.3
+                    opacity=0.3,
                 )
 
             # Text Report?
@@ -199,4 +205,3 @@ class ManipulabilityTab(QtWidgets.QWidget):
 
         if self.chk_show_matrices.isChecked():
             self.matrix_text.setPlainText("\n".join(report_lines))
-
