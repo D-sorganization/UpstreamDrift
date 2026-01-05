@@ -1,5 +1,6 @@
 """Pinocchio GUI Wrapper (PyQt6 + meshcat)."""
 
+from dataclasses import dataclass
 import logging
 import sys
 import types
@@ -1600,23 +1601,16 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                     if self.chk_force_ellip.isChecked() and res.force_matrix is not None:
                         path_name = f"{res.body_name}/force"
                         active_drawings.add(path_name)
-                        
+
                         radii = res.force_ellipsoid.radii
                         # Scale for viz
                         self._draw_ellipsoid_meshcat(
-                            path_name, 
-                            pos, 
-                            res.force_ellipsoid.axes, 
-                            radii * 0.2, 
+                            path_name,
+                            pos,
+                            res.force_ellipsoid.axes,
+                            radii * 0.2,
                             0xFF0000
                         )
-
-
-
-
-           
-
-
 
     def _draw_ellipsoid_meshcat(
         self,
