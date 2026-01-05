@@ -223,8 +223,10 @@ def test_missing_fields() -> None:
     assert speed_metric is None
 
     # Compare durations when field is missing
+    # When missing, compare_scalars handles 0.0 vs 0.0, so we expect a valid metric with 0 diff
     dur_metric = analyzer.compare_durations()
-    assert dur_metric is None
+    assert dur_metric is not None
+    assert dur_metric.difference == 0.0
 
 
 def test_generate_full_report() -> None:
