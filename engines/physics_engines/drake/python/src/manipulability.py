@@ -69,10 +69,10 @@ class DrakeManipulabilityAnalyzer:
             # Filter dummy/world bodies if needed
             if name != "world" and "dummy" not in name:
                 bodies.append(name)
-        
+
         # Heuristic sort: Put club/hands first
         priority = ["club", "club_head", "right_hand", "left_hand"]
-        
+
         def sort_key(b: str) -> tuple[int, str]:
             for i, p in enumerate(priority):
                 if p in b.lower():
@@ -136,10 +136,10 @@ class DrakeManipulabilityAnalyzer:
                 radii_v = np.sqrt(np.maximum(eigvals_v, 1e-9))
                 
                 # Axes are eigenvectors
-                
+
                 # Condition Number
                 cond = radii_v[0] / radii_v[-1] if radii_v[-1] > 1e-9 else float('inf')
-                
+
                 # Isotropy (1/cond)
                 isotropy = 1.0 / cond if cond > 0 else 0.0
 
@@ -154,7 +154,7 @@ class DrakeManipulabilityAnalyzer:
             # Radii = 1 / sqrt(lambda_v)
             radii_f = 1.0 / np.maximum(radii_v, 1e-9)
             # Axes are same as velocity
-            
+
             # Position
             pose = self.plant.EvalBodyPoseInWorld(context, body)
             cartesian_pos = pose.translation()

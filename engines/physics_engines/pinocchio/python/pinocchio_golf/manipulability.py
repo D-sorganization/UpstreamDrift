@@ -1,7 +1,5 @@
 """Manipulability Analysis Module for Pinocchio Engine."""
 
-from __future__ import annotations
-
 import logging
 from dataclasses import dataclass
 
@@ -57,7 +55,6 @@ class PinocchioManipulabilityAnalyzer:
             return None
 
         fid = self.model.getFrameId(body_name)
-        
         # Ensure data is up to date. If q provided, update kinematics.
         # If q is None, assume data is current.
         if q is not None:

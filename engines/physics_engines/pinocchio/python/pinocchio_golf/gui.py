@@ -1,6 +1,5 @@
 """Pinocchio GUI Wrapper (PyQt6 + meshcat)."""
 
-from dataclasses import dataclass
 import logging
 import sys
 import types

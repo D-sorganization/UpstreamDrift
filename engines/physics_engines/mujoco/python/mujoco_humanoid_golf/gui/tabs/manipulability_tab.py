@@ -113,10 +113,10 @@ class ManipulabilityTab(QtWidgets.QWidget):
                 # Check if default
                 if any(d in name.lower() for d in defaults):
                     chk.setChecked(True)
-                
+
                 self.body_checkboxes[name] = chk
                 self.body_layout.addWidget(chk, row, col)
-                
+
                 col += 1
                 if col > 2:  # 3 columns
                     col = 0
@@ -130,7 +130,7 @@ class ManipulabilityTab(QtWidgets.QWidget):
 
         # Check if we can draw
         meshcat = self.sim_widget.meshcat_adapter
-        
+
         # Prepare text report
         report_lines = []
 
@@ -138,8 +138,10 @@ class ManipulabilityTab(QtWidgets.QWidget):
         # Meshcat updates in-place if names match.
         # But if we uncheck a body, we should hide it.
         # For simplicity, we might iterate all *checked* bodies.
-        
-        active_bodies = [name for name, chk in self.body_checkboxes.items() if chk.isChecked()]
+
+        active_bodies = [
+            name for name, chk in self.body_checkboxes.items() if chk.isChecked()
+        ]
 
         if not active_bodies:
             if meshcat:
@@ -179,11 +181,11 @@ class ManipulabilityTab(QtWidgets.QWidget):
                 report_lines.append(f"=== {name} ===")
                 report_lines.append(f"Cond Number: {res.condition_number:.2f}")
                 report_lines.append(f"Manip Index: {res.manipulability_index:.4f}")
-                
+
                 report_lines.append("Mobility (JJ^T):")
                 with np.printoptions(precision=3, suppress=True):
                     report_lines.append(str(res.mobility_matrix))
-                
+
                 report_lines.append("Force ((JJ^T)^-1):")
                 with np.printoptions(precision=3, suppress=True):
                     report_lines.append(str(res.force_matrix))

@@ -10,8 +10,8 @@ These verifiers are designed to be run alongside simulations to detect 'phantom 
 integration errors, or model definition flaws.
 """
 
-from dataclasses import dataclass
 import logging
+from dataclasses import dataclass
 import mujoco
 import numpy as np
 
@@ -179,8 +179,6 @@ class JacobianTester:
 
         # 3. Finite Difference Jacobian
         jacp_fd = np.zeros((3, self.model.nv))
-
-
 
         for i in range(self.model.nv):
             # Perturb +
