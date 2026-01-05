@@ -1642,10 +1642,10 @@ class GolfSwingPlotter:
         sc = ax.scatter(
             x,
             y,
-            z,
+            zs=z,  # type: ignore[call-arg]
             c=np.abs(deviations),
             cmap="coolwarm",
-            s=20,  # type: ignore[misc]
+            s=20,
             label="Trajectory",
         )
 
