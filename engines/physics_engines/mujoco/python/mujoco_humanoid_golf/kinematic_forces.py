@@ -364,28 +364,28 @@ class KinematicForceAnalyzer:
     ) -> tuple[np.ndarray, np.ndarray]:
         """Decompose Coriolis forces into centrifugal and velocity coupling.
 
-        Coriolis matrix C(q,q̇) can be decomposed:
-        - Centrifugal terms: Diagonal terms (q̇ᵢ²)
-        - Velocity coupling: Off-diagonal terms (q̇ᵢq̇ⱼ)
+            Coriolis matrix C(q,q̇) can be decomposed:
+            - Centrifugal terms: Diagonal terms (q̇ᵢ²)
+            - Velocity coupling: Off-diagonal terms (q̇ᵢq̇ⱼ)
 
-        ⚠️ PERFORMANCE NOTE (Phase 1 Implemented):
-    This method iterates N times to separate diagonal vs off-diagonal terms.
-    However, the inner calculation now uses Analytical RNE (`mj_rne`),
-    which is significantly faster than the legacy `mj_forward` approach.
-    Global complexity is O(N^2) but with a much smaller constant factor.
+            ⚠️ PERFORMANCE NOTE (Phase 1 Implemented):
+        This method iterates N times to separate diagonal vs off-diagonal terms.
+        However, the inner calculation now uses Analytical RNE (`mj_rne`),
+        which is significantly faster than the legacy `mj_forward` approach.
+        Global complexity is O(N^2) but with a much smaller constant factor.
 
-        RECOMMENDATION: Use the combined compute_coriolis_forces() method instead,
-        which returns the total Coriolis+centrifugal forces efficiently in O(N).
-        Decomposition is rarely needed for most applications.
+            RECOMMENDATION: Use the combined compute_coriolis_forces() method instead,
+            which returns the total Coriolis+centrifugal forces efficiently in O(N).
+            Decomposition is rarely needed for most applications.
 
-        See Issue A-002 and B-002 for optimization path using analytical RNE.
+            See Issue A-002 and B-002 for optimization path using analytical RNE.
 
-        Args:
-            qpos: Joint positions [nv]
-            qvel: Joint velocities [nv]
+            Args:
+                qpos: Joint positions [nv]
+                qvel: Joint velocities [nv]
 
-        Returns:
-            Tuple of (centrifugal_forces [nv], coupling_forces [nv])
+            Returns:
+                Tuple of (centrifugal_forces [nv], coupling_forces [nv])
         """
         # OPTIMIZATION NOTE: The proper fix is to use mj_rne properties or
         # implement analytical decomposition. Current implementation is
