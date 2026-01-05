@@ -20,9 +20,12 @@ import mujoco
 import numpy as np
 from scipy.linalg import lstsq
 
+from .kinematic_forces import KinematicForceAnalyzer, MjDataContext
+
 logger = logging.getLogger(__name__)
 
-from .kinematic_forces import KinematicForceAnalyzer, MjDataContext
+
+
 
 
 @dataclass
@@ -55,6 +58,12 @@ class InverseDynamicsResult:
     # Validation metrics
     residual_norm: float = 0.0  # For least-squares solutions
     is_feasible: bool = True  # Whether solution is physically feasible
+
+    # Phase 4 / Advanced Control additions
+    success: bool = True
+    manipulability_index: float | None = None
+    joint_names: list[str] | None = None
+
 
 
 @dataclass
@@ -160,17 +169,22 @@ class InverseDynamicsSolver:
         # This computes qfrc_bias = C(q,q̇)q̇ + g(q)
         mujoco.mj_forward(self.model, self._perturb_data)
         
-        # ... existing logic continues ...
+        # Compute inverse dynamics
+        # This computes qfrc_inverse = M(q)q̈ + C(q,q̇)q̇ + g(q) - ext
+        mujoco.mj_inverse(self.model, self._perturb_data)
         
-        # We need to read the whole file to insert correctly, 
-        # but since I am using replace_file_content, I will append the NEW method 
-        # *after* the current method if I can target the end of the class or method.
-        # Actually, simpler toggle: I will add the method *before* compute_required_torques for now
-        # or rewrite strictly the section around it.
+        qfrc_inverse = self._perturb_data.qfrc_inverse.copy()
+
+        # Decompose if needed (optional, for result detail)
+        # For now, just return total
         
-        # Wait, the instruction says "Insert it after". I cannot see the end of `compute_required_torques` in the view_file above.
-        # I should view the file more extensively to find a good insertion point.
-        pass
+        return InverseDynamicsResult(
+            joint_torques=qfrc_inverse,
+            success=True,
+            is_feasible=True,
+            # Fill validation metrics if available
+        )
+
 
     def compute_torques_with_posture(
         self,
@@ -205,7 +219,8 @@ class InverseDynamicsSolver:
         primary_result = self.compute_required_torques(
             qpos, qvel, qacc_primary
         )
-        tau_primary = primary_result.qfrc_applied # Total generalized force
+        tau_primary = primary_result.joint_torques # Total generalized force
+
 
         # 2. Compute Jacobian for Primary Task
         body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, primary_body_name)
@@ -243,11 +258,15 @@ class InverseDynamicsSolver:
         tau_total = tau_primary + tau_null
 
         return InverseDynamicsResult(
-            qfrc_applied=tau_total,
+            joint_torques=tau_total,
+
             success=True,
+            is_feasible=True,
             manipulability_index=primary_result.manipulability_index,
             joint_names=primary_result.joint_names,
+            # Pass through decomposition from primary if relevant, for now just total
         )
+
 
 
 

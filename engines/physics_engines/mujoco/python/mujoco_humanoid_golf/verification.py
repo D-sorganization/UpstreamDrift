@@ -10,11 +10,11 @@ These verifiers are designed to be run alongside simulations to detect 'phantom 
 integration errors, or model definition flaws.
 """
 
-import logging
 from dataclasses import dataclass
-
+import logging
 import mujoco
 import numpy as np
+
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -84,6 +84,7 @@ class EnergyMonitor:
             power = np.dot(control_torques, self.data.qvel)
             work_increment = power * dt
             self.cumulative_work += work_increment
+
 
         # 3. Store State
         state = EnergyState(
@@ -179,7 +180,7 @@ class JacobianTester:
         # 3. Finite Difference Jacobian
         jacp_fd = np.zeros((3, self.model.nv))
 
-        # unused - self.data.xpos[body_id].copy()
+
 
         for i in range(self.model.nv):
             # Perturb +

@@ -107,20 +107,21 @@ class ManipulabilityTab(QtWidgets.QWidget):
             # Defines defaults to check
             defaults = ["hand", "club", "head", "wrist"]
 
-        row, col = 0, 0
-        for name in relevant_bodies:
-            chk = QtWidgets.QCheckBox(name)
-            # Check if default
-            if any(d in name.lower() for d in defaults):
-                chk.setChecked(True)
-            
-            self.body_checkboxes[name] = chk
-            self.body_layout.addWidget(chk, row, col)
-            
-            col += 1
-            if col > 2:  # 3 columns
-                col = 0
-                row += 1
+            row, col = 0, 0
+            for name in relevant_bodies:
+                chk = QtWidgets.QCheckBox(name)
+                # Check if default
+                if any(d in name.lower() for d in defaults):
+                    chk.setChecked(True)
+                
+                self.body_checkboxes[name] = chk
+                self.body_layout.addWidget(chk, row, col)
+                
+                col += 1
+                if col > 2:  # 3 columns
+                    col = 0
+                    row += 1
+
 
     def _update_analysis(self) -> None:
         """Periodic update loop."""

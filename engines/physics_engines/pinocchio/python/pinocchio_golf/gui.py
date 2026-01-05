@@ -1559,6 +1559,13 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         # Determine strict list of active drawings
         active_drawings = set()
 
+        # Clear previous ellipsoids to prevent ghosting
+        try:
+            self.viewer["overlays/ellipsoids"].delete()
+        except Exception:
+            pass
+
+
         if self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked():
             # Get selected bodies
             selected_bodies = [
@@ -1567,26 +1574,30 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
             # Compute for all selected
             if selected_bodies:
-                results = self.manip_analyzer.compute_metrics(self.q, selected_bodies)
+                # Iterate individually as compute_metrics takes a single body name
+                for body_name in selected_bodies:
+                    res = self.manip_analyzer.compute_metrics(body_name, self.q)
+                    if not res:
+                        continue
 
-                for res in results:
-                    pos = res.cartesian_pos
+                    pos = res.velocity_ellipsoid.center
                     
-                    if self.chk_mobility.isChecked() and res.mobility_ellipsoid:
+                    if self.chk_mobility.isChecked() and res.mobility_matrix is not None:
                         path_name = f"{res.body_name}/mobility"
                         active_drawings.add(path_name)
                         
-                        radii = res.mobility_ellipsoid.radii
+                        radii = res.velocity_ellipsoid.radii
                         # Scale down for viz (metrics are usually large)
                         self._draw_ellipsoid_meshcat(
                             path_name, 
                             pos, 
-                            res.mobility_ellipsoid.axes, 
+                            res.velocity_ellipsoid.axes, 
                             radii * 0.5, 
                             0x00FF00
                         )
 
-                    if self.chk_force_ellip.isChecked() and res.force_ellipsoid:
+
+                    if self.chk_force_ellip.isChecked() and res.force_matrix is not None:
                         path_name = f"{res.body_name}/force"
                         active_drawings.add(path_name)
                         
@@ -1600,47 +1611,11 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                             0xFF0000
                         )
 
-        # Cleanup: This is tricky without tracking previous state.
-        # A simple hack: delete 'ellipsoids' group if NO bodies selected or NO types checked?
-        # Or just overwrite.
-        # To properly clear unchecked bodies, we'd need to track history.
-        # For this implementation, we will Clear All Ellipsoids at the start of _draw_ellipsoids?
-        # self.viewer["overlays/ellipsoids"].delete() 
-        # But we must ensure _draw_ellipsoid_meshcat re-creates the object (geometry) every time?
-        # set_object does that.
-        # Let's try deleting everything first to be safe.
-        try:
-           self.viewer["overlays/ellipsoids"].delete()
-        except:
-           pass
+
+
+
            
-        # Redraw (since we just deleted)
-        # Re-run the loop (since I can't undo the delete without re-drawing)
-        # This is inefficient but robust.
-        if self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked():
-            selected_bodies = [
-                name for name, chk in self.manip_checkboxes.items() if chk.isChecked()
-            ]
-            if selected_bodies:
-                results = self.manip_analyzer.compute_metrics(self.q, selected_bodies)
-                for res in results:
-                    pos = res.cartesian_pos  
-                    if self.chk_mobility.isChecked() and res.mobility_ellipsoid:
-                        self._draw_ellipsoid_meshcat(
-                            f"{res.body_name}/mobility", 
-                            pos, 
-                            res.mobility_ellipsoid.axes, 
-                            res.mobility_ellipsoid.radii * 0.5, 
-                            0x00FF00
-                        )
-                    if self.chk_force_ellip.isChecked() and res.force_ellipsoid:
-                        self._draw_ellipsoid_meshcat(
-                            f"{res.body_name}/force", 
-                            pos, 
-                            res.force_ellipsoid.axes, 
-                            res.force_ellipsoid.radii * 0.2, 
-                            0xFF0000
-                        )
+
 
 
     def _draw_ellipsoid_meshcat(
