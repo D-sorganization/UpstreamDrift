@@ -305,9 +305,82 @@ function updateButtonStates(isRunning) {
   }
 }
 
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  if (toast) {
+    toast.textContent = message;
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), 3000);
+  }
+}
+
 function announce(message) {
   const region = document.getElementById('status-announcer');
   if (region) region.textContent = message;
+  showToast(message);
+}
+
+function copyShareLink() {
+  const inputs = document.querySelectorAll('.grid input');
+  const params = new URLSearchParams();
+  inputs.forEach(input => params.set(input.id, input.value));
+  // Handle file:// protocol where host is empty
+  const origin = window.location.protocol === 'file:' ? window.location.pathname : `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
+  const newUrl = `${origin}?${params.toString()}`;
+
+  try {
+    window.history.replaceState(null, '', newUrl);
+  } catch (e) {
+    // Ignore history errors on file://
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(newUrl).then(() => {
+      announce('Link copied to clipboard');
+    }).catch(() => {
+      fallbackCopy(newUrl);
+    });
+  } else {
+    fallbackCopy(newUrl);
+  }
+}
+
+function fallbackCopy(text) {
+  try {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed'; // Avoid scrolling to bottom
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    const successful = document.execCommand('copy');
+    document.body.removeChild(textArea);
+    if (successful) {
+      announce('Link copied to clipboard');
+      return;
+    }
+  } catch (err) {
+    // Fallback failed
+  }
+  prompt('Copy this link:', text);
+}
+
+function initFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  let changed = false;
+  params.forEach((value, key) => {
+    const input = document.getElementById(key);
+    if (input) {
+      input.value = value;
+      changed = true;
+    }
+  });
+  if (changed) {
+    resetStateFromInputs();
+    updateParamsFromInputs();
+    draw();
+    announce('Configuration loaded from URL');
+  }
 }
 
 function start() {
@@ -343,6 +416,8 @@ document.getElementById('play-pause').addEventListener('click', () => {
   else start();
 });
 
+document.getElementById('share').addEventListener('click', copyShareLink);
+
 ['reset', 'defaults'].forEach(id => document.getElementById(id).addEventListener('click', () => {
   ({ reset, defaults: restoreDefaults })[id]();
 }));
@@ -372,3 +447,4 @@ document.querySelectorAll('.grid input').forEach(input => {
 });
 
 reset();
+initFromUrl();
