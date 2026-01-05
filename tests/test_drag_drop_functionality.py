@@ -416,7 +416,8 @@ class TestC3DViewerIntegration(unittest.TestCase):
 
             # Check the command
             call_args = mock_run.call_args[0][0]
-            self.assertIn("c3d_viewer.py", " ".join(call_args))
+            # Updated to check for module launch pattern
+            self.assertIn("apps.c3d_viewer", " ".join(call_args))
 
 
 class TestURDFGeneratorIntegration(unittest.TestCase):
