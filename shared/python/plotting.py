@@ -2048,7 +2048,7 @@ class GolfSwingPlotter:
         )
 
         # Mark Origin
-        ax.scatter([0], [0], [0], color="black", s=50, marker="o")
+        ax.scatter([0], [0], zs=[0], color="black", s=50, marker="o")  # type: ignore[call-arg]
 
         ax.set_xlabel("Lx (kg m²/s)", fontsize=10, fontweight="bold")
         ax.set_ylabel("Ly (kg m²/s)", fontsize=10, fontweight="bold")
