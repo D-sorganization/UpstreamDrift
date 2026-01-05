@@ -25,10 +25,17 @@ class TestEquipmentModule:
 
         # Check all required fields exist
         required_fields = [
-            "grip_length", "grip_radius", "grip_mass",
-            "shaft_length", "shaft_radius", "shaft_mass",
-            "head_mass", "head_size", "total_length",
-            "club_loft", "flex_stiffness"
+            "grip_length",
+            "grip_radius",
+            "grip_mass",
+            "shaft_length",
+            "shaft_radius",
+            "shaft_mass",
+            "head_mass",
+            "head_size",
+            "total_length",
+            "club_loft",
+            "flex_stiffness",
         ]
 
         for field in required_fields:
@@ -47,26 +54,41 @@ class TestEquipmentModule:
         iron = CLUB_CONFIGS["iron_7"]
 
         # Basic checks
+        assert isinstance(iron["grip_length"], float)
         assert iron["grip_length"] > 0
+        assert isinstance(iron["shaft_length"], float)
         assert iron["shaft_length"] > 0
+        assert isinstance(iron["head_mass"], float)
         assert iron["head_mass"] > 0
+        assert isinstance(iron["total_length"], float)
         assert iron["total_length"] > 0
 
         # Verify loft is higher than driver (7-iron has more loft)
-        assert iron["club_loft"] > CLUB_CONFIGS["driver"]["club_loft"]
+        assert isinstance(iron["club_loft"], float)
+        driver_loft = CLUB_CONFIGS["driver"]["club_loft"]
+        assert isinstance(driver_loft, float)
+        assert iron["club_loft"] > driver_loft
 
     def test_wedge_config(self) -> None:
         """Test wedge configuration."""
         wedge = CLUB_CONFIGS["wedge"]
 
         # Basic checks
+        assert isinstance(wedge["grip_length"], float)
         assert wedge["grip_length"] > 0
+        assert isinstance(wedge["shaft_length"], float)
         assert wedge["shaft_length"] > 0
+        assert isinstance(wedge["head_mass"], float)
         assert wedge["head_mass"] > 0
 
         # Verify wedge has highest loft
-        assert wedge["club_loft"] > CLUB_CONFIGS["iron_7"]["club_loft"]
-        assert wedge["club_loft"] > CLUB_CONFIGS["driver"]["club_loft"]
+        assert isinstance(wedge["club_loft"], float)
+        iron_loft = CLUB_CONFIGS["iron_7"]["club_loft"]
+        driver_loft = CLUB_CONFIGS["driver"]["club_loft"]
+        assert isinstance(iron_loft, float)
+        assert isinstance(driver_loft, float)
+        assert wedge["club_loft"] > iron_loft
+        assert wedge["club_loft"] > driver_loft
 
     def test_get_club_config_driver(self) -> None:
         """Test get_club_config returns driver config correctly."""
@@ -109,24 +131,31 @@ class TestEquipmentModule:
         """Test that equipment values are within realistic ranges."""
         for club_type, config in CLUB_CONFIGS.items():
             # Total length should be reasonable (0.5m to 1.5m)
-            assert 0.5 <= config["total_length"] <= 1.5, (
-                f"{club_type} length {config['total_length']} outside realistic range"
-            )
+            assert isinstance(config["total_length"], float)
+            assert (
+                0.5 <= config["total_length"] <= 1.5
+            ), f"{club_type} length {config['total_length']} outside realistic range"
 
             # Head mass should be reasonable (100g to 500g)
-            assert 0.1 <= config["head_mass"] <= 0.5, (
-                f"{club_type} head mass {config['head_mass']} outside realistic range"
-            )
+            assert isinstance(config["head_mass"], float)
+            assert (
+                0.1 <= config["head_mass"] <= 0.5
+            ), f"{club_type} head mass {config['head_mass']} outside realistic range"
 
             # Club loft should be in degrees converted to radians (0 to 90 degrees = 0 to 1.57 rad)
-            assert 0 <= config["club_loft"] <= 1.6, (
-                f"{club_type} loft {config['club_loft']} outside realistic range"
-            )
+            assert isinstance(config["club_loft"], float)
+            assert (
+                0 <= config["club_loft"] <= 1.6
+            ), f"{club_type} loft {config['club_loft']} outside realistic range"
 
     def test_club_ordering_by_length(self) -> None:
         """Test that clubs follow expected length ordering: driver > 7-iron > wedge."""
         driver_length = CLUB_CONFIGS["driver"]["total_length"]
         iron_length = CLUB_CONFIGS["iron_7"]["total_length"]
         wedge_length = CLUB_CONFIGS["wedge"]["total_length"]
+
+        assert isinstance(driver_length, float)
+        assert isinstance(iron_length, float)
+        assert isinstance(wedge_length, float)
 
         assert driver_length > iron_length > wedge_length
