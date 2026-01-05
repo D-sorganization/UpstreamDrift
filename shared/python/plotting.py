@@ -20,6 +20,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
+
 # Register 3D projection
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
@@ -2043,7 +2044,7 @@ class GolfSwingPlotter:
             [0, lz[max_idx]],
             color="red",
             linewidth=2,
-            label="Peak L"
+            label="Peak L",
         )
 
         # Mark Origin
@@ -2090,7 +2091,7 @@ class GolfSwingPlotter:
             cop_data[:, 1],
             color=self.colors["secondary"],
             linewidth=2,
-            label="CoP"
+            label="CoP",
         )
 
         # Plot CoM Projection (X, Y)
@@ -2100,7 +2101,7 @@ class GolfSwingPlotter:
             color=self.colors["primary"],
             linewidth=2,
             linestyle="--",
-            label="CoM (Proj)"
+            label="CoM (Proj)",
         )
 
         # Connect CoP and CoM at intervals to show "Lean" vector
@@ -2111,7 +2112,7 @@ class GolfSwingPlotter:
                 [cop_data[i, 1], com_data[i, 1]],
                 color="gray",
                 alpha=0.3,
-                linewidth=1
+                linewidth=1,
             )
 
         ax.set_xlabel("X Position (m)", fontsize=12, fontweight="bold")

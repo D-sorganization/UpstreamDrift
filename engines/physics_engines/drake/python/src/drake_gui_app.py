@@ -249,6 +249,10 @@ class DrakeRecorder:
         self.q_history: list[np.ndarray] = []
         self.v_history: list[np.ndarray] = []
         self.club_head_pos_history: list[np.ndarray] = []
+        self.com_position_history: list[np.ndarray] = []
+        self.angular_momentum_history: list[np.ndarray] = []
+        self.ground_forces_history: list[np.ndarray] = []
+        self.cop_position_history: list[np.ndarray] = []
         # Store computed metrics
         self.induced_accelerations: dict[str, list[np.ndarray]] = {}
         self.counterfactuals: dict[str, list[np.ndarray]] = {}
@@ -1073,7 +1077,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                     v,
                     club_pos,
                     com_pos=com_pos,
-                    angular_momentum=angular_momentum
+                    angular_momentum=angular_momentum,
                 )
                 self.lbl_rec_status.setText(f"Frames: {len(self.recorder.times)}")
 
