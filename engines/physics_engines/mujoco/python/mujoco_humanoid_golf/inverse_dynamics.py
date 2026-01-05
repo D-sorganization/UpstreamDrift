@@ -19,7 +19,7 @@ import mujoco
 import numpy as np
 from scipy.linalg import lstsq
 
-from .kinematic_forces import KinematicForceAnalyzer
+from .kinematic_forces import KinematicForceAnalyzer, MjDataContext
 
 
 @dataclass
@@ -434,6 +434,17 @@ class InverseDynamicsSolver:
 
         Maps joint torques to task-space forces: F = (J^T)^{-1} τ
 
+        PERFORMANCE NOTE (Issue B-003): Uses lstsq which is correct but not optimized.
+        For batch processing of trajectories, consider precomputing pseudo-inverses
+        if the robot configuration remains similar. However, since Jacobian depends
+        on qpos (configuration-dependent), caching is only beneficial for repeated
+        calls with identical qpos but different torques (rare in practice).
+
+        Potential optimization for batch processing:
+            # For trajectory analysis (same qpos, varying torques):
+            J_pinv = np.linalg.pinv(jacp.T)  # Compute once
+            ee_forces = J_pinv @ torques_batch  # Reuse for multiple torques
+
         Args:
             qpos: Joint positions [nv]
             qvel: Joint velocities [nv]
@@ -446,7 +457,7 @@ class InverseDynamicsSolver:
         # Compute required torques
         result = self.compute_required_torques(qpos, qvel, qacc)
 
-        # Get Jacobian
+        # Get Jacobian (configuration-dependent, must recompute for each qpos)
         self.data.qpos[:] = qpos
         mujoco.mj_forward(self.model, self.data)
 
@@ -465,7 +476,7 @@ class InverseDynamicsSolver:
             jacp = self._jacp
 
         # Map torques to forces: F = (J^T)^{-1} τ
-        # Use least-squares for redundant/constrained systems
+        # lstsq is robust for redundant/constrained systems (handles rank deficiency)
         ee_force, _residuals, _rank, _s = lstsq(jacp.T, result.joint_torques)
 
         return np.array(ee_force, dtype=np.float64)
@@ -481,6 +492,12 @@ class InverseDynamicsSolver:
 
         Checks if computed torques actually produce desired acceleration.
 
+        FIXED: This method now uses MjDataContext for state isolation and
+        static calculation (mj_forward) instead of mj_step to avoid the
+        "Observer Effect" bug where validation would advance simulation time
+        and corrupt subsequent calculations.
+        See Issues A-003 and F-001.
+
         Args:
             qpos: Joint positions [nv]
             qvel: Joint velocities [nv]
@@ -490,36 +507,39 @@ class InverseDynamicsSolver:
         Returns:
             Validation metrics
         """
-        # Apply torques in forward dynamics
-        self.data.qpos[:] = qpos
-        self.data.qvel[:] = qvel
-        self.data.ctrl[: self.model.nu] = computed_torques[: self.model.nu]
+        # Use context manager for automatic state save/restore (Issues A-003, F-001)
+        with MjDataContext(self.model, self.data):
+            # Apply torques in forward dynamics
+            self.data.qpos[:] = qpos
+            self.data.qvel[:] = qvel
+            self.data.ctrl[: self.model.nu] = computed_torques[: self.model.nu]
 
-        # Compute forward dynamics
-        mujoco.mj_forward(self.model, self.data)
-        mujoco.mj_step(self.model, self.data)  # Single step
+            # Compute forward dynamics (static calculation, no time advancement)
+            # FIXED: Removed mj_step which was causing Observer Effect
+            mujoco.mj_forward(self.model, self.data)
 
-        # Get resulting acceleration
-        m_matrix = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, m_matrix, self.data.qM)
+            # Get resulting acceleration
+            m_matrix = np.zeros((self.model.nv, self.model.nv))
+            mujoco.mj_fullM(self.model, m_matrix, self.data.qM)
 
-        # Acceleration from dynamics: M^{-1}(τ - C q̇ - g)
-        coriolis = self.kinematic_analyzer.compute_coriolis_forces(qpos, qvel)
-        gravity = self.kinematic_analyzer.compute_gravity_forces(qpos)
+            # Acceleration from dynamics: M^{-1}(τ - C q̇ - g)
+            coriolis = self.kinematic_analyzer.compute_coriolis_forces(qpos, qvel)
+            gravity = self.kinematic_analyzer.compute_gravity_forces(qpos)
 
-        m_inv = np.linalg.inv(m_matrix)
-        computed_qacc = m_inv @ (computed_torques - coriolis - gravity)
+            m_inv = np.linalg.inv(m_matrix)
+            computed_qacc = m_inv @ (computed_torques - coriolis - gravity)
 
-        # Error metrics
-        acc_error = np.linalg.norm(computed_qacc - qacc)
-        relative_error = acc_error / (np.linalg.norm(qacc) + 1e-10)
+            # Error metrics
+            acc_error = np.linalg.norm(computed_qacc - qacc)
+            relative_error = acc_error / (np.linalg.norm(qacc) + 1e-10)
 
-        return {
-            "acceleration_error": float(acc_error),
-            "relative_error": float(relative_error),
-            "max_torque": float(np.max(np.abs(computed_torques))),
-            "mean_torque": float(np.mean(np.abs(computed_torques))),
-        }
+            return {
+                "acceleration_error": float(acc_error),
+                "relative_error": float(relative_error),
+                "max_torque": float(np.max(np.abs(computed_torques))),
+                "mean_torque": float(np.mean(np.abs(computed_torques))),
+            }
+        # State is automatically restored here by context manager
 
     def compute_actuator_efficiency(
         self,
