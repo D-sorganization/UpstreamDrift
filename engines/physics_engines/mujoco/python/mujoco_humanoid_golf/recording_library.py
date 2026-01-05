@@ -235,7 +235,9 @@ class RecordingLibrary:
         # Note: We compare absolute paths to avoid copying if source == dest.
         if dest_file.absolute() != data_path.absolute():
             # SEC-006: Use SHA-256 instead of MD5 for consistency
-            timestamp_hash = hashlib.sha256(str(datetime.now()).encode()).hexdigest()[:8]
+            timestamp_hash = hashlib.sha256(str(datetime.now()).encode()).hexdigest()[
+                :8
+            ]
             temp_name = f".tmp_{filename}_{timestamp_hash}"
             temp_dest = self.library_path / temp_name
             try:

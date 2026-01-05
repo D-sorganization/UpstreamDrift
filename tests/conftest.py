@@ -4,6 +4,7 @@ Pytest configuration and shared fixtures for Golf Modeling Suite tests.
 TEST-002: Added random seed initialization for deterministic testing.
 """
 
+import random
 import shutil
 import tempfile
 from pathlib import Path
@@ -40,7 +41,7 @@ def sample_swing_data():
 
     TEST-002: Deterministic data generation using global random seed.
     """
-    import pandas as pd
+    import pandas as pd  # type: ignore[import]
 
     time = np.linspace(0, 2.0, 100)  # 2 second swing
 
