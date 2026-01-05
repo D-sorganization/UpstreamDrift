@@ -528,8 +528,7 @@ class OutputManager:
         return html
 
 
-# Type alias for simulation results (TYPE-001: More specific than Any)
-# Type alias for simulation results (TYPE-001: Improved type safety)
+# Type alias for simulation results (TYPE-001: Improved type safety over Any)
 SimulationResultScalar: TypeAlias = int | float | str | bool | None
 SimulationResultDict: TypeAlias = dict[
     str,
