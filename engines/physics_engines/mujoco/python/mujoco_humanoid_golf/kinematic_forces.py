@@ -54,11 +54,11 @@ def _check_mujoco_version() -> None:
             raise ImportError(msg)
 
         # Success - log version
-        warnings.warn(
-            f"MuJoCo version {version_str} validated successfully",
-            category=UserWarning,
-            stacklevel=2,
-        )
+        # Success - log version
+        import logging
+
+        logger = logging.getLogger(__name__)
+        logger.info(f"MuJoCo version {version_str} validated successfully")
 
     except (AttributeError, ValueError) as e:
         # Could not parse version
@@ -85,7 +85,7 @@ class MjDataContext:
     purity guarantees for analysis methods.
 
     Example:
-        >>> with MjDataContext(data):
+        >>> with MjDataContext(model, data):
         ...     data.qpos[:] = new_positions  # Safe to mutate
         ...     result = compute_something(model, data)
         ... # data.qpos is automatically restored here
@@ -97,12 +97,14 @@ class MjDataContext:
     - Thread-safe computations
     """
 
-    def __init__(self, data: mujoco.MjData) -> None:
+    def __init__(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
         """Initialize context manager.
 
         Args:
+            model: MuJoCo model (needed for forward kinematics)
             data: MuJoCo data structure to protect
         """
+        self.model = model
         self.data = data
         self.qpos_backup: np.ndarray | None = None
         self.qvel_backup: np.ndarray | None = None
@@ -136,18 +138,14 @@ class MjDataContext:
             exc_val: Exception value if raised
             exc_tb: Exception traceback if raised
         """
-        if self.qpos_backup is not None:
-            self.data.qpos[:] = self.qpos_backup
-        if self.qvel_backup is not None:
-            self.data.qvel[:] = self.qvel_backup
-        if self.qacc_backup is not None:
-            self.data.qacc[:] = self.qacc_backup
-        if self.ctrl_backup is not None:
-            self.data.ctrl[:] = self.ctrl_backup
+        self.data.qpos[:] = self.qpos_backup
+        self.data.qvel[:] = self.qvel_backup
+        self.data.qacc[:] = self.qacc_backup
+        self.data.ctrl[:] = self.ctrl_backup
         self.data.time = self.time_backup
 
         # Recompute forward kinematics to sync all derived quantities
-        mujoco.mj_forward(self.data.model, self.data)
+        mujoco.mj_forward(self.model, self.data)
 
 
 @dataclass
@@ -723,7 +721,8 @@ class KinematicForceAnalyzer:
     ) -> np.ndarray:
         """Compute centripetal acceleration at a body.
 
-        ⚠️ WARNING - EXPERIMENTAL/BROKEN: This method contains a fundamental physics error.
+        ⚠️ WARNING - EXPERIMENTAL/BROKEN: This method contains a fundamental
+        physics error.
         It treats the articulated robot as a point mass in circular motion about the
         world origin (0,0,0), which is incorrect for multi-body kinematic chains.
 
@@ -749,7 +748,6 @@ class KinematicForceAnalyzer:
         Returns:
             Centripetal acceleration [3] - INACCURATE, see warning above
         """
-        import warnings
 
         warnings.warn(
             "compute_centripetal_acceleration contains a fundamental physics error "
