@@ -1748,14 +1748,14 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.manip_checkboxes.clear()
 
         bodies = self.manip_analyzer.find_potential_bodies()
-        
+
         cols = 3
         for i, name in enumerate(bodies):
             chk = QtWidgets.QCheckBox(name)
             chk.toggled.connect(self._on_visualization_changed)
             self.manip_checkboxes[name] = chk
             self.manip_body_layout.addWidget(chk, i // cols, i % cols)
-            
+
             # Default check relevant parts
             if any(x in name.lower() for x in ["club", "hand", "wrist"]):
                 chk.setChecked(True)
@@ -1773,15 +1773,15 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         # 1. Clean up old?
         # Meshcat persistent objects stay until deleted.
         # Ideally we delete 'ellipsoids' folder every frame or define objects once.
-        # But scale/shape changes, so we must SetObject again (Ellipsoid object includes radii).
-        
+        # But scale/shape changes, so we must SetObject again (Ellipsoid has radii).
+
         # We'll use a specific path prefix
         prefix = "ellipsoids"
-        
+
         # Check if enabled
         show_m = self.chk_mobility.isChecked()
         show_f = self.chk_force_ellip.isChecked()
-        
+
         if not (show_m or show_f):
             self.meshcat.Delete(prefix)
             return
@@ -1804,24 +1804,24 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 # Drake Ellipsoid(a,b,c)
                 # Radii are axes lengths * 0.5? No, Ellipsoid(a,b,c) takes semi-axes.
                 # radii in params are semi-axes.
-                
+
                 radii = res.mobility_ellipsoid.radii
                 # Scale for viz
                 scale = 0.5
                 radii_viz = radii * scale
-                
+
                 # Check for NaNs or zeros
                 if np.any(radii_viz <= 1e-9) or np.any(np.isnan(radii_viz)):
                     continue
 
                 shape = Ellipsoid(radii_viz[0], radii_viz[1], radii_viz[2])
                 color = Rgba(0.0, 1.0, 0.0, 0.5)
-                
+
                 # Pose
                 # Axes vectors (columns) define the rotation matrix R.
                 R_matrix = RotationMatrix(res.mobility_ellipsoid.axes)
                 X_WE = RigidTransform(R_matrix, res.mobility_ellipsoid.center)
-                
+
                 self.meshcat.SetObject(path, shape, color)
                 self.meshcat.SetTransform(path, X_WE)
             else:
@@ -1833,16 +1833,16 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 radii = res.force_ellipsoid.radii
                 scale = 0.1 # Force ellipsoids can be huge
                 radii_viz = radii * scale
-                
+
                 if np.any(radii_viz <= 1e-9) or np.any(np.isnan(radii_viz)):
                     continue
-                    
+
                 shape = Ellipsoid(radii_viz[0], radii_viz[1], radii_viz[2])
                 color = Rgba(1.0, 0.0, 0.0, 0.5)
-                
+
                 R_matrix = RotationMatrix(res.force_ellipsoid.axes)
                 X_WE = RigidTransform(R_matrix, res.force_ellipsoid.center)
-                
+
                 self.meshcat.SetObject(path, shape, color)
                 self.meshcat.SetTransform(path, X_WE)
             else:
