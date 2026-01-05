@@ -16,10 +16,14 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Protocol
 
+import matplotlib.backend_bases  # noqa: F401
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
+
+# Register 3D projection
+from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
 from shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 
@@ -1642,10 +1646,10 @@ class GolfSwingPlotter:
         sc = ax.scatter(
             x,
             y,
-            z,
+            zs=z,  # type: ignore[call-arg]
             c=np.abs(deviations),
             cmap="coolwarm",
-            s=20,  # type: ignore[misc]
+            s=20,
             label="Trajectory",
         )
 
@@ -1914,6 +1918,211 @@ class GolfSwingPlotter:
         )
         ax.axis("equal")
         fig.colorbar(q, ax=ax, label="Time (s)")
+        fig.tight_layout()
+
+    def plot_grf_butterfly_diagram(
+        self,
+        fig: Figure,
+        skip_steps: int = 5,
+        scale: float = 0.001,
+    ) -> None:
+        """Plot Ground Reaction Force 'Butterfly Diagram'.
+
+        Visualizes GRF vectors originating from the Center of Pressure path.
+
+        Args:
+            fig: Matplotlib figure
+            skip_steps: Step interval for plotting vectors (to reduce clutter)
+            scale: Scale factor for force vectors (m/N)
+        """
+        try:
+            times, cop_data = self.recorder.get_time_series("cop_position")
+            _, grf_data = self.recorder.get_time_series("ground_forces")
+        except (AttributeError, KeyError):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "GRF/CoP Data unavailable", ha="center", va="center")
+            return
+
+        cop_data = np.asarray(cop_data)
+        grf_data = np.asarray(grf_data)
+
+        if len(times) == 0 or cop_data.size == 0 or grf_data.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No GRF Data", ha="center", va="center")
+            return
+
+        # Handle 3D GRF (Fx, Fy, Fz) vs 6D Wrench
+        # We need Fx, Fy, Fz.
+        if grf_data.shape[1] >= 3:
+            fx = grf_data[:, 0]
+            fy = grf_data[:, 1]
+            fz = grf_data[:, 2]
+        else:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Invalid GRF dimensions", ha="center", va="center")
+            return
+
+        # Plot in 3D
+        ax = fig.add_subplot(111, projection="3d")
+
+        # Plot CoP path on ground (Z=0)
+        # Assuming CoP is 3D (x, y, z) or 2D (x, y)
+        cx = cop_data[:, 0]
+        cy = cop_data[:, 1]
+        cz = cop_data[:, 2] if cop_data.shape[1] > 2 else np.zeros_like(cx)
+
+        ax.plot(cx, cy, cz, color="black", linewidth=2, label="CoP Path")
+
+        # Plot Vectors
+        # Downsample
+        indices = range(0, len(times), skip_steps)
+        for i in indices:
+            # Origin
+            ox, oy, oz = cx[i], cy[i], cz[i]
+            # Vector components
+            vx, vy, vz = fx[i], fy[i], fz[i]
+
+            # Draw line
+            ax.plot(
+                [ox, ox + vx * scale],
+                [oy, oy + vy * scale],
+                [oz, oz + vz * scale],
+                color=self.colors["secondary"],
+                alpha=0.6,
+                linewidth=1,
+            )
+
+        ax.set_xlabel("X (m)", fontsize=10, fontweight="bold")
+        ax.set_ylabel("Y (m)", fontsize=10, fontweight="bold")
+        ax.set_zlabel("Force (scaled)", fontsize=10, fontweight="bold")  # type: ignore[attr-defined]
+        ax.set_title("GRF Butterfly Diagram", fontsize=14, fontweight="bold")
+
+        # Determine axis limits to show vectors
+        all_x = np.concatenate([cx, cx + fx * scale])
+        all_y = np.concatenate([cy, cy + fy * scale])
+        all_z = np.concatenate([cz, cz + fz * scale])
+
+        ax.set_xlim(np.min(all_x), np.max(all_x))
+        ax.set_ylim(np.min(all_y), np.max(all_y))
+        ax.set_zlim(np.min(all_z), np.max(all_z))  # type: ignore[attr-defined]
+
+        fig.tight_layout()
+
+    def plot_angular_momentum_3d(self, fig: Figure) -> None:
+        """Plot 3D trajectory of the Angular Momentum vector.
+
+        Visualizes the tip of the angular momentum vector over time.
+
+        Args:
+            fig: Matplotlib figure
+        """
+        times, am_data = self.recorder.get_time_series("angular_momentum")
+        am_data = np.asarray(am_data)
+
+        if len(times) == 0 or am_data.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No Angular Momentum Data", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111, projection="3d")
+
+        lx = am_data[:, 0]
+        ly = am_data[:, 1]
+        lz = am_data[:, 2]
+
+        # Plot trajectory of the tip
+        sc = ax.scatter(lx, ly, lz, c=times, cmap="viridis", s=20)  # type: ignore[misc]
+        ax.plot(lx, ly, lz, color="gray", alpha=0.3)
+
+        # Draw vector from origin for current/max?
+        # Maybe just draw a few representative vectors
+        max_idx = np.argmax(np.linalg.norm(am_data, axis=1))
+
+        # Draw Peak Vector
+        ax.plot(
+            [0, lx[max_idx]],
+            [0, ly[max_idx]],
+            [0, lz[max_idx]],
+            color="red",
+            linewidth=2,
+            label="Peak L",
+        )
+
+        # Mark Origin
+        ax.scatter([0], [0], zs=[0], color="black", s=50, marker="o")  # type: ignore[call-arg]
+
+        ax.set_xlabel("Lx (kg m²/s)", fontsize=10, fontweight="bold")
+        ax.set_ylabel("Ly (kg m²/s)", fontsize=10, fontweight="bold")
+        ax.set_zlabel("Lz (kg m²/s)", fontsize=10, fontweight="bold")  # type: ignore[attr-defined]
+        ax.set_title("3D Angular Momentum Trajectory", fontsize=14, fontweight="bold")
+        ax.legend()
+
+        fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
+        fig.tight_layout()
+
+    def plot_stability_diagram(self, fig: Figure) -> None:
+        """Plot Stability Diagram (CoM vs CoP on Ground Plane).
+
+        Visualizes the relationship between Center of Mass projection and Center of Pressure.
+
+        Args:
+            fig: Matplotlib figure
+        """
+        try:
+            times, cop_data = self.recorder.get_time_series("cop_position")
+            _, com_data = self.recorder.get_time_series("com_position")
+        except (AttributeError, KeyError):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Stability Data unavailable", ha="center", va="center")
+            return
+
+        cop_data = np.asarray(cop_data)
+        com_data = np.asarray(com_data)
+
+        if len(times) == 0 or cop_data.size == 0 or com_data.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No Stability Data", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        # Plot CoP Path
+        ax.plot(
+            cop_data[:, 0],
+            cop_data[:, 1],
+            color=self.colors["secondary"],
+            linewidth=2,
+            label="CoP",
+        )
+
+        # Plot CoM Projection (X, Y)
+        ax.plot(
+            com_data[:, 0],
+            com_data[:, 1],
+            color=self.colors["primary"],
+            linewidth=2,
+            linestyle="--",
+            label="CoM (Proj)",
+        )
+
+        # Connect CoP and CoM at intervals to show "Lean" vector
+        indices = range(0, len(times), len(times) // 10 if len(times) > 10 else 1)
+        for i in indices:
+            ax.plot(
+                [cop_data[i, 0], com_data[i, 0]],
+                [cop_data[i, 1], com_data[i, 1]],
+                color="gray",
+                alpha=0.3,
+                linewidth=1,
+            )
+
+        ax.set_xlabel("X Position (m)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Y Position (m)", fontsize=12, fontweight="bold")
+        ax.set_title("Stability Diagram (CoM vs CoP)", fontsize=14, fontweight="bold")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        ax.axis("equal")
+
         fig.tight_layout()
 
     def plot_radar_chart(
