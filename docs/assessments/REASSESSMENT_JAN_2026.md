@@ -12,6 +12,8 @@ The Golf Modeling Suite is now in **Phase 2: Scientific Verification**.
 Phase 1 (Analytical Performance) has been successfully implemented with the introduction of the `mj_rne` (Recursive Newton-Euler) engine, providing O(N) performance for kinematics. 
 Thread-safety issues in `InverseDynamicsSolver` have been patched.
 
+**Update (Combined PR):** Phase 4 (Advanced Control) has also been integrated, adding Null-Space Posture Control to the solver.
+
 We are now deploying rigorous "Energy Conservation" and "Jacobian Consistency" checks to prove the physics engine's fidelity.
 
 ---
