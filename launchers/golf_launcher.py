@@ -1586,12 +1586,16 @@ class GolfLauncher(QMainWindow):
 
             # Launch in new process with security validation
             try:
+                env = os.environ.copy()
+                env["PYTHONPATH"] = str(suite_root) + os.pathsep + env.get("PYTHONPATH", "")
+
                 creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
                 process = secure_popen(
-                    [sys.executable, str(c3d_script)],
-                    cwd=str(c3d_script.parent),
+                    [sys.executable, "-m", "apps.c3d_viewer"],
+                    cwd=str(c3d_script.parent.parent),
                     suite_root=suite_root,
                     creationflags=creation_flags,
+                    env=env,
                 )
 
                 # Track the process

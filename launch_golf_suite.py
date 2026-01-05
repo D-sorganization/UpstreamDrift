@@ -7,6 +7,7 @@ of the Golf Modeling Suite.
 
 import argparse
 import sys
+import os
 from pathlib import Path
 
 # Add shared utilities to path
@@ -198,10 +199,21 @@ def launch_c3d_viewer() -> bool:
         suite_root = Path(__file__).parent
         c3d_script = suite_root / C3D_VIEWER_SCRIPT
 
-        work_dir = c3d_script.parent
+        # For relative imports to work (from .core.models), we must run as module
+        # c3d_script is .../python/src/apps/c3d_viewer.py
+        # root is .../python/src
+        src_root = c3d_script.parent.parent
+        module_name = "apps.c3d_viewer"
+
+        # Ensure repo root is in PYTHONPATH for 'shared' imports
+        env = os.environ.copy()
+        # Add suite_root (repo root) to PYTHONPATH
+        env["PYTHONPATH"] = str(suite_root) + os.pathsep + env.get("PYTHONPATH", "")
 
         logger.info("Launching C3D Motion Viewer...")
-        subprocess.run([sys.executable, str(c3d_script)], cwd=str(work_dir))
+        subprocess.run(
+            [sys.executable, "-m", module_name], cwd=str(src_root), env=env
+        )
     except Exception as e:
         logger.error(f"Error launching C3D Viewer: {e}")
         return False
