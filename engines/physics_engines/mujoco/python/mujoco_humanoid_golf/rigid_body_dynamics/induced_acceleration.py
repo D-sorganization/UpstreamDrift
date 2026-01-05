@@ -87,7 +87,8 @@ class MuJoCoInducedAccelerationAnalyzer:
         term_C = term_C_plus_G - term_G
 
         # 4. Solve for induced accelerations
-        # OPTIMIZATION: Batch solve linear systems (M * X = B) to reuse matrix decomposition
+        # OPTIMIZATION: Batch solve linear systems (M * X = B) to reuse matrix
+        # decomposition.
         # Stack RHS vectors: [-G, -C, tau, J^T f_c]
 
         if tau_app is not None:

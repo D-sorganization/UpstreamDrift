@@ -58,10 +58,10 @@ def test_mujoco_iaa_logic():
         # In test, we expect G = [0, 5]
         # Verify qvel is 0
         if np.all(data.qvel == 0):
-             result[:] = np.array([0.0, 5.0])
+            result[:] = np.array([0.0, 5.0])
         else:
-             # Just in case, but we shouldn't hit this path with new logic
-             result[:] = np.array([10.0, 20.0])
+            # Just in case, but we shouldn't hit this path with new logic
+            result[:] = np.array([10.0, 20.0])
 
     mujoco.mj_rne.side_effect = side_effect_rne
 
