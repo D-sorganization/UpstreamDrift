@@ -19,7 +19,7 @@ import mujoco
 import numpy as np
 from scipy.linalg import lstsq
 
-from .kinematic_forces import KinematicForceAnalyzer
+from .kinematic_forces import KinematicForceAnalyzer, MjDataContext
 
 
 @dataclass
@@ -481,9 +481,10 @@ class InverseDynamicsSolver:
 
         Checks if computed torques actually produce desired acceleration.
 
-        FIXED: This method now uses static calculation (mj_forward) instead of
-        mj_step to avoid the "Observer Effect" bug where validation would
-        advance simulation time and corrupt subsequent calculations.
+        FIXED: This method now uses MjDataContext for state isolation and
+        static calculation (mj_forward) instead of mj_step to avoid the
+        "Observer Effect" bug where validation would advance simulation time
+        and corrupt subsequent calculations.
         See Issues A-003 and F-001.
 
         Args:
@@ -495,13 +496,8 @@ class InverseDynamicsSolver:
         Returns:
             Validation metrics
         """
-        # Save state to prevent side effects (Issues A-003, F-001)
-        qpos_backup = self.data.qpos.copy()
-        qvel_backup = self.data.qvel.copy()
-        ctrl_backup = self.data.ctrl.copy()
-        time_backup = self.data.time
-
-        try:
+        # Use context manager for automatic state save/restore (Issues A-003, F-001)
+        with MjDataContext(self.data):
             # Apply torques in forward dynamics
             self.data.qpos[:] = qpos
             self.data.qvel[:] = qvel
@@ -532,14 +528,7 @@ class InverseDynamicsSolver:
                 "max_torque": float(np.max(np.abs(computed_torques))),
                 "mean_torque": float(np.mean(np.abs(computed_torques))),
             }
-        finally:
-            # Restore state to ensure no side effects
-            self.data.qpos[:] = qpos_backup
-            self.data.qvel[:] = qvel_backup
-            self.data.ctrl[:] = ctrl_backup
-            self.data.time = time_backup
-            # Recompute forward kinematics to sync derived quantities
-            mujoco.mj_forward(self.model, self.data)
+        # State is automatically restored here by context manager
 
     def compute_actuator_efficiency(
         self,
