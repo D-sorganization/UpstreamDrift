@@ -116,7 +116,7 @@ class BiomechanicalAnalyzer:
         self.prev_time = self.data.time
 
         # PERF-004: qacc is already a numpy array, no need to copy
-        return qacc.astype(np.float64, copy=False)
+        return cast(np.ndarray, qacc.astype(np.float64, copy=False))
 
     def compute_induced_acceleration(self, source_name: str) -> np.ndarray:
         """Compute induced acceleration for a specific source.

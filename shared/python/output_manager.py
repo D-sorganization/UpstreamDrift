@@ -11,10 +11,11 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Iterator
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeAlias
 
 import numpy as np
 import pandas as pd  # type: ignore[import]
@@ -396,7 +397,7 @@ class OutputManager:
             raise
 
     @staticmethod
-    def _fast_dir_scan(directory: Path, max_depth: int = 10):
+    def _fast_dir_scan(directory: Path, max_depth: int = 10) -> Iterator[Path]:
         """Fast directory scanning using os.scandir instead of rglob.
 
         PERF-003: Optimized from rglob to os.scandir for 10-50x speedup.
@@ -409,7 +410,7 @@ class OutputManager:
             Path objects for all files found
         """
 
-        def _scan_recursive(path: Path, depth: int = 0):
+        def _scan_recursive(path: Path, depth: int = 0) -> Iterator[Path]:
             if depth > max_depth:
                 return
 
@@ -529,14 +530,14 @@ class OutputManager:
 
 # Type alias for simulation results (TYPE-001: More specific than Any)
 # Type alias for simulation results (TYPE-001: Improved type safety)
-SimulationResultScalar = int | float | str | bool | None
-SimulationResultDict = dict[
+SimulationResultScalar: TypeAlias = int | float | str | bool | None
+SimulationResultDict: TypeAlias = dict[
     str,
     SimulationResultScalar
     | list[SimulationResultScalar]
     | dict[str, SimulationResultScalar],
 ]
-SimulationResults = SimulationResultDict | pd.DataFrame | np.ndarray
+SimulationResults: TypeAlias = SimulationResultDict | pd.DataFrame | np.ndarray
 
 
 # Convenience functions for backward compatibility
