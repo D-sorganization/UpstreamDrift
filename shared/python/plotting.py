@@ -16,6 +16,7 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING, Any, Protocol
 
+import matplotlib.backend_bases  # noqa: F401
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib.figure import Figure
