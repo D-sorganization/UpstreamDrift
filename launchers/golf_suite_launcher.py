@@ -225,10 +225,11 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
 
 def main() -> None:
     if not PYQT_AVAILABLE:
-        print(
+        # If logger is configured (basic config above), this goes to stderr/stdout
+        logger.error(
             "Error: PyQt6 is not installed. Please install it to use the GUI launcher."
         )
-        print("Try: pip install PyQt6")
+        logger.error("Try: pip install PyQt6")
         sys.exit(1)
 
     app = QtWidgets.QApplication(sys.argv)
