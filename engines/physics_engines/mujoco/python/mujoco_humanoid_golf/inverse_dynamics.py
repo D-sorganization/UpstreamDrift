@@ -508,7 +508,7 @@ class InverseDynamicsSolver:
             Validation metrics
         """
         # Use context manager for automatic state save/restore (Issues A-003, F-001)
-        with MjDataContext(self.data):
+        with MjDataContext(self.model, self.data):
             # Apply torques in forward dynamics
             self.data.qpos[:] = qpos
             self.data.qvel[:] = qvel

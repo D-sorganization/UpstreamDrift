@@ -17,7 +17,7 @@ All three assessments identified a **critical architectural flaw**: shared mutab
 ### 1. **Fix Physics Hallucination in Centripetal Acceleration**
    - **Severity:** BLOCKER
    - **Issue ID:** B-001
-   - **Location:** `kinematic_forces.py:585`
+   - **Location:** `kinematic_forces.py:718`
    - **Problem:** `compute_centripetal_acceleration` uses `a_c = v²/r` assuming circular motion about origin (0,0,0), which is fundamentally wrong for articulated kinematic chains
    - **Impact:** Users relying on this for stress analysis will have invalid data
    - **Fix:**
