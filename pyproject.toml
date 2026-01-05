@@ -189,7 +189,6 @@ exclude = [
     "engines/physics_engines/mujoco/test_mechanisms.py",
     "engines/physics_engines/mujoco/test_new_models.py",
     "engines/physics_engines/mujoco/docker/",
-    "engines/physics_engines/drake/python/src/drake_gui_app.py",
 ]
 
 
