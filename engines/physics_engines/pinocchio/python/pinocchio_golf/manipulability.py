@@ -58,9 +58,9 @@ class PinocchioManipulabilityAnalyzer:
         # Ensure data is up to date. If q provided, update kinematics.
         # If q is None, assume data is current.
         if q is not None:
-             pin.forwardKinematics(self.model, self.data, q)
-             pin.updateFramePlacements(self.model, self.data)
-             pin.computeJointJacobians(self.model, self.data)
+            pin.forwardKinematics(self.model, self.data, q)
+            pin.updateFramePlacements(self.model, self.data)
+            pin.computeJointJacobians(self.model, self.data)
 
         # Get Full Jacobian (6xN), locally world aligned
         try:

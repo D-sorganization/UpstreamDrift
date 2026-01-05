@@ -1735,6 +1735,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         plt.tight_layout()
         plt.show()
+
     def _populate_manip_checkboxes(self) -> None:
         """Populate checkboxes for manipulability analysis."""
         if not self.manip_analyzer or not self.manip_body_layout:
@@ -1831,7 +1832,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             if show_f and res.force_ellipsoid:
                 path = f"{prefix}/{name}/force"
                 radii = res.force_ellipsoid.radii
-                scale = 0.1 # Force ellipsoids can be huge
+                scale = 0.1  # Force ellipsoids can be huge
                 radii_viz = radii * scale
 
                 if np.any(radii_viz <= 1e-9) or np.any(np.isnan(radii_viz)):
