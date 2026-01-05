@@ -12,9 +12,9 @@ integration errors, or model definition flaws.
 
 import logging
 from dataclasses import dataclass
+
 import mujoco
 import numpy as np
-
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -51,13 +51,13 @@ class EnergyMonitor:
         self.cumulative_work = 0.0
         self.prev_time = data.time
 
-    def reset(self):
+    def reset(self) -> None:
         """Reset history and accumulators."""
         self.history.clear()
         self.cumulative_work = 0.0
         self.prev_time = self.data.time
 
-    def record_step(self, control_torques: np.ndarray | None = None):
+    def record_step(self, control_torques: np.ndarray | None = None) -> None:
         """Record energy state after a simulation step.
 
         Args:
@@ -84,7 +84,6 @@ class EnergyMonitor:
             power = np.dot(control_torques, self.data.qvel)
             work_increment = power * dt
             self.cumulative_work += work_increment
-
 
         # 3. Store State
         state = EnergyState(
@@ -203,4 +202,4 @@ class JacobianTester:
         if error > 1e-4:
             logger.error(f"Jacobian Mismatch for body '{body_name}': {error:.2e}")
 
-        return error
+        return float(error)

@@ -1,9 +1,8 @@
-
 import mujoco
 import numpy as np
 import pytest
-
 from mujoco_humanoid_golf.verification import EnergyMonitor, JacobianTester
+
 
 # Helper to create a simple pendulum model if none exists
 def create_pendulum_model():
@@ -18,6 +17,7 @@ def create_pendulum_model():
     </mujoco>
     """
     return mujoco.MjModel.from_xml_string(xml)
+
 
 class TestVerificationEngine:
     """Test suite for Phase 2 Verification Tools."""
@@ -64,7 +64,7 @@ class TestVerificationEngine:
             # Not strictly used by mj_step unless actuator defined
             # but we pass it to record_step manually
             data.ctrl[:] = torque
-            
+
             # Manually apply torque to qfrc_applied to simulate actuation work
             data.qfrc_applied[:] = torque
 
@@ -86,6 +86,7 @@ class TestVerificationEngine:
         error = tester.check_body_jacobian("pendulum", qpos_test)
 
         assert error < 1e-5, f"Jacobian mismatch: {error}"
+
 
 if __name__ == "__main__":
     pytest.main([__file__])
