@@ -86,7 +86,7 @@ class TestSharedPlottingAdvanced(unittest.TestCase):
         self.plotter.plot_stability_diagram(self.fig)
         self.assertTrue(len(self.fig.axes) > 0)
         ax = self.fig.axes[0]
-        self.assertNotEqual(ax.name, "3d") # Should be 2D
+        self.assertNotEqual(ax.name, "3d")  # Should be 2D
         self.assertEqual(ax.get_title(), "Stability Diagram (CoM vs CoP)")
 
     def test_plot_stability_diagram_missing_data(self):
