@@ -13,6 +13,7 @@ torques from desired motion. Includes:
 from __future__ import annotations
 
 import csv
+import logging
 from dataclasses import dataclass
 
 import mujoco
@@ -20,6 +21,8 @@ import numpy as np
 from scipy.linalg import lstsq
 
 from .kinematic_forces import KinematicForceAnalyzer, MjDataContext
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -52,6 +55,11 @@ class InverseDynamicsResult:
     # Validation metrics
     residual_norm: float = 0.0  # For least-squares solutions
     is_feasible: bool = True  # Whether solution is physically feasible
+
+    # Phase 4 / Advanced Control additions
+    success: bool = True
+    manipulability_index: float | None = None
+    joint_names: list[str] | None = None
 
 
 @dataclass
@@ -113,6 +121,10 @@ class InverseDynamicsSolver:
             self._jacp_flat = np.zeros(3 * model.nv)
             self._jacr_flat = np.zeros(3 * model.nv)
 
+        # CRITICAL FIX (Phase 1): Dedicated MjData for thread-safe physics
+        # Prevents "Observer Effect" where analysis corrupts visualization state
+        self._perturb_data = mujoco.MjData(model)
+
     def _detect_closed_chains(self) -> bool:
         """Detect if model has closed kinematic chains.
 
@@ -144,65 +156,106 @@ class InverseDynamicsSolver:
         Returns:
             InverseDynamicsResult with computed torques
         """
-        # Set state
-        self.data.qpos[:] = qpos
-        self.data.qvel[:] = qvel
-        self.data.qacc[:] = qacc
+        # Set state (Thread-Safe: use private data)
+        self._perturb_data.qpos[:] = qpos
+        self._perturb_data.qvel[:] = qvel
+        self._perturb_data.qacc[:] = qacc
 
         # Forward kinematics and dynamics
         # This computes qfrc_bias = C(q,q̇)q̇ + g(q)
-        mujoco.mj_forward(self.model, self.data)
+        mujoco.mj_forward(self.model, self._perturb_data)
 
-        # Capture total bias (C + g)
-        total_bias = self.data.qfrc_bias.copy()
+        # Compute inverse dynamics
+        # This computes qfrc_inverse = M(q)q̈ + C(q,q̇)q̇ + g(q) - ext
+        mujoco.mj_inverse(self.model, self._perturb_data)
 
-        # For parallel mechanisms, capture constraint forces BEFORE changing state
-        constraint_forces = None
-        if self.has_constraints:
-            constraint_forces = self.data.qfrc_constraint.copy()
+        qfrc_inverse = self._perturb_data.qfrc_inverse.copy()
 
-        # Get mass matrix M(q)
-        m_matrix = np.zeros((self.model.nv, self.model.nv))
-        mujoco.mj_fullM(self.model, m_matrix, self.data.qM)
-
-        # Compute Gravity g(q) efficiently
-        # We need to set velocity to zero to get just gravity.
-        # mujoco.mj_forward computes qfrc_bias = g(q) when qvel=0.
-        # OPTIMIZATION: Use mj_rne with qvel=0 instead of full mj_forward.
-        # mj_forward computes everything (kinematics, COM, inertia, etc.) which is slow.
-        # mj_rne only computes inverse dynamics. When qvel=0 and qacc=0,
-        # it returns gravity.
-        qvel_backup = self.data.qvel.copy()
-        self.data.qvel[:] = 0
-        # Explicitly zero out spatial velocity (cvel) to ensure RNE uses correct state
-        # This is much faster than running mj_fwdVelocity or mj_forward
-        self.data.cvel[:] = 0
-
-        gravity = np.zeros(self.model.nv)
-        # flg_acc=0 means ignore qacc (treat as 0)
-        mujoco.mj_rne(self.model, self.data, 0, gravity)
-
-        # Compute Coriolis forces: C(q,q̇)q̇ = Total Bias - Gravity
-        coriolis = total_bias - gravity
-
-        # Restore velocity (not strictly needed for result but good for consistency)
-        self.data.qvel[:] = qvel_backup
-
-        # Inverse dynamics: τ = M q̈ + C q̇ + g - τ_ext
-        inertial = m_matrix @ qacc
-        total_torques = inertial + coriolis + gravity
-
-        if external_forces is not None:
-            total_torques -= external_forces
+        # Decompose if needed (optional, for result detail)
+        # For now, just return total
 
         return InverseDynamicsResult(
-            joint_torques=total_torques,
-            constraint_forces=constraint_forces,
-            inertial_torques=inertial,
-            coriolis_torques=coriolis,
-            gravity_torques=gravity,
+            joint_torques=qfrc_inverse,
+            success=True,
             is_feasible=True,
-            residual_norm=0.0,
+            # Fill validation metrics if available
+        )
+
+    def compute_torques_with_posture(
+        self,
+        qpos: np.ndarray,
+        qvel: np.ndarray,
+        qacc_primary: np.ndarray,
+        qpos_desired: np.ndarray,
+        kp_posture: float = 10.0,
+        primary_body_name: str = "club_head",
+    ) -> InverseDynamicsResult:
+        """Compute torques achieving primary task + secondary posture (Phase 4).
+
+        Uses Null-Space Projection:
+            tau_total = tau_primary + (I - J^T(J J^T)^-1 J) * tau_secondary
+
+        This ensures secondary tasks (like posture) do not interfere with the
+        primary task (e.g. club head trajectory).
+
+        Args:
+            qpos: Current joint positions
+            qvel: Current joint velocities
+            qacc_primary: Desired accelerations for the primary task
+            qpos_desired: Target posture configuration
+            kp_posture: Gain for posture control
+            primary_body_name: Name of the body representing the primary task
+
+        Returns:
+            InverseDynamicsResult with combined torques
+        """
+        # 1. Compute Primary Task Torques (using standard Inverse Dynamics)
+        # Note: This assumes qacc_primary satisfies the task constraints
+        primary_result = self.compute_required_torques(qpos, qvel, qacc_primary)
+        tau_primary = primary_result.joint_torques  # Total generalized force
+
+        # 2. Compute Jacobian for Primary Task
+        body_id = mujoco.mj_name2id(
+            self.model, mujoco.mjtObj.mjOBJ_BODY, primary_body_name
+        )
+        if body_id == -1:
+            # Fallback or error? For now log warning and treat as no task
+            logger.warning(
+                f"Primary body '{primary_body_name}' not found. Using pure posture."
+            )
+            J_primary = np.zeros((3, self.model.nv))
+        else:
+            jacp = np.zeros((3, self.model.nv))
+            jacr = np.zeros((3, self.model.nv))
+            # Use private data state which matches qpos
+            mujoco.mj_jacBody(self.model, self._perturb_data, jacp, jacr, body_id)
+            # Combine pos + rot jacobian? Usually just pos for hitting ball
+            J_primary = jacp
+
+        # 3. Compute Null-Space Projector: N = I - J^+ J
+        # Pinverse: J^+ = J^T (J J^T)^-1  (for full rank)
+        # We use numpy's pinv for safety
+        J_pinv = np.linalg.pinv(J_primary)
+        N = np.eye(self.model.nv) - np.dot(J_pinv, J_primary)
+
+        # 4. Compute Secondary Posture Torques (PD control in joint space)
+        # tau_posture = Kp * (q_des - q) - Kd * q_vel
+        q_err = qpos_desired - qpos
+        # Simple PD
+        kd_posture = 2 * np.sqrt(kp_posture)  # Critical damping approx
+        tau_secondary = (kp_posture * q_err) - (kd_posture * qvel)
+
+        # 5. Project Secondary into Null Space
+        tau_null = np.dot(N, tau_secondary)
+
+        # 6. Combine
+        tau_total = tau_primary + tau_null
+
+        return InverseDynamicsResult(
+            joint_torques=tau_total,
+            success=True,
+            is_feasible=True,
+            manipulability_index=primary_result.manipulability_index,
         )
 
     def compute_induced_accelerations(

@@ -26,6 +26,8 @@ import numpy as np
 import pinocchio as pin  # type: ignore
 from PyQt6 import QtCore, QtWidgets
 
+from .manipulability import PinocchioManipulabilityAnalyzer
+
 try:
     import meshcat.geometry as g
     import meshcat.visualizer as viz
@@ -306,6 +308,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.latest_induced: dict[str, np.ndarray] | None = None
         self.latest_cf: dict[str, np.ndarray] | None = None
 
+        # Manipulability
+        self.manip_analyzer: PinocchioManipulabilityAnalyzer | None = None
+        self.manip_checkboxes: dict[str, QtWidgets.QCheckBox] = {}
+
         # Recorder
         self.recorder = PinocchioRecorder()
         self.sim_time = 0.0
@@ -470,16 +476,30 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         chk_layout.addWidget(self.chk_torques)
         vis_layout.addLayout(chk_layout)
 
-        # Ellipsoids row
-        ellip_layout = QtWidgets.QHBoxLayout()
-        self.chk_mobility = QtWidgets.QCheckBox("Mobility Ellipsoid (Green)")
-        self.chk_mobility.toggled.connect(self._update_viewer)
-        ellip_layout.addWidget(self.chk_mobility)
+        # Ellipsoids & Body Selection
+        ellip_group = QtWidgets.QGroupBox("Manipulability Analysis")
+        ellip_layout = QtWidgets.QVBoxLayout()
 
-        self.chk_force_ellip = QtWidgets.QCheckBox("Force Ellipsoid (Red)")
+        # Toggles
+        toggles_layout = QtWidgets.QHBoxLayout()
+        self.chk_mobility = QtWidgets.QCheckBox("Mobility (Green)")
+        self.chk_mobility.toggled.connect(self._update_viewer)
+        toggles_layout.addWidget(self.chk_mobility)
+
+        self.chk_force_ellip = QtWidgets.QCheckBox("Force (Red)")
         self.chk_force_ellip.toggled.connect(self._update_viewer)
-        ellip_layout.addWidget(self.chk_force_ellip)
-        vis_layout.addLayout(ellip_layout)
+        toggles_layout.addWidget(self.chk_force_ellip)
+        ellip_layout.addLayout(toggles_layout)
+
+        # Body Grid
+        self.manip_body_layout = QtWidgets.QGridLayout()
+        body_container = QtWidgets.QWidget()
+        body_container.setLayout(self.manip_body_layout)
+        ellip_layout.addWidget(QtWidgets.QLabel("Points of Interest:"))
+        ellip_layout.addWidget(body_container)
+
+        ellip_group.setLayout(ellip_layout)
+        vis_layout.addWidget(ellip_group)
 
         # Advanced Vectors
         adv_vec_layout = QtWidgets.QHBoxLayout()
@@ -1086,6 +1106,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             # Init Analyzer
             self.analyzer = InducedAccelerationAnalyzer(self.model, self.data)
 
+            # Init Manipulability Analyzer
+            self.manip_analyzer = PinocchioManipulabilityAnalyzer(self.model, self.data)
+            self._populate_manip_checkboxes()
+
             # Reset recorder
             self.recorder.reset()
             self.lbl_rec_status.setText("Frames: 0")
@@ -1473,76 +1497,124 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         except Exception:
             self.lbl_rank.setText("Error")
 
-    def _draw_ellipsoids(self) -> None:
-        """Draw mobility/force ellipsoids at end effector (club_head)."""
-        if self.model is None or self.data is None or self.viewer is None:
+    def _populate_manip_checkboxes(self) -> None:
+        """Populate manipulability body checkboxes."""
+        # Clear existing
+        while self.manip_body_layout.count():
+            item = self.manip_body_layout.takeAt(0)
+            if item is None:
+                break
+            widget = item.widget()
+            if widget:
+                widget.deleteLater()
+        self.manip_checkboxes.clear()
+
+        if self.manip_analyzer is None:
             return
 
-        # Attempt to find the club_head frame, fallback to last joint
-        frame_name = "club_head"
-        if self.model.existFrame(frame_name):
-            frame_id = self.model.getFrameId(frame_name)
-            # Use Frame Jacobian (Linear only, top 3 rows)
-            # LOCAL_WORLD_ALIGNED gives us the Jacobian incident to the frame origin
-            # but expressed in World orientation, which is correct for visualization.
-            J_full = pin.getFrameJacobian(
-                self.model,
-                self.data,
-                frame_id,
-                pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
-            )
-            # Get position of the frame (club_head)
-            pos = self.data.oMf[frame_id].translation
-        else:
-            # Fallback to last joint
-            logger.warning(
-                f"Frame '{frame_name}' not found. Using last joint as End Effector."
-            )
-            joint_id = self.model.njoints - 1
-            J_full = pin.getJointJacobian(
-                self.model,
-                self.data,
-                joint_id,
-                pin.ReferenceFrame.LOCAL_WORLD_ALIGNED,
-            )
-            pos = self.data.oMi[joint_id].translation
+        # Get potential bodies
+        bodies = self.manip_analyzer.find_potential_bodies()
 
-        # Linear Jacobian (3xN)
-        J = J_full[:3, :]
+        # Create checkboxes in a grid (e.g. 3 columns)
+        cols = 3
+        for i, name in enumerate(bodies):
+            chk = QtWidgets.QCheckBox(name)
+            chk.setChecked(False)
+            chk.toggled.connect(self._update_viewer)
+            self.manip_checkboxes[name] = chk
+            self.manip_body_layout.addWidget(chk, i // cols, i % cols)
 
-        # 1. Mobility Ellipsoid (Kinematic): J * J.T
-        # Represents the velocity capability of the end-effector
-        if self.chk_mobility.isChecked():
-            mobility_matrix = J @ J.T
-            eigvals_m, eigvecs_m = np.linalg.eigh(mobility_matrix)
-            # Radii are sqrt of eigenvalues (A v = lambda v)
-            radii_m = np.sqrt(np.maximum(eigvals_m, 1e-6))
-            self._draw_ellipsoid_meshcat(
-                "mobility", pos, eigvecs_m, radii_m * 0.5, 0x00FF00
-            )  # Scale down for viz
+        # Default check 'club_head' or similar if present
+        for name in ["club_head", "club", "wrist_right", "HandRight"]:
+            if name in self.manip_checkboxes:
+                self.manip_checkboxes[name].setChecked(True)
+                break  # Only check one by default
 
-        # 2. Force Ellipsoid (Static): inv(J * J.T)
-        # Represents the static force capability (duality of velocity)
-        # Often visualized as J * J.T itself with radii ~ 1/sqrt(lambda)
-        # but formally it is the ellipsoid of (J J.T)^-1.
-        if self.chk_force_ellip.isChecked():
-            # For visualization stability, we can use the same eigenvectors as mobility
-            # but invert the radii (Force is reciprocal to Velocity in
-            # a given direction)
-            # Force Matrix = inv(J @ J.T)
-            # Eigenvalues of inv(A) are 1/lambda(A)
-            # Radii are sqrt(1/lambda) = 1/sqrt(lambda)
-            # We add epsilon to lambda to avoid division by zero
-            mobility_matrix = J @ J.T
-            eigvals_f, eigvecs_f = np.linalg.eigh(mobility_matrix)
+    def _draw_ellipsoids(self) -> None:
+        """Draw mobility/force ellipsoids for selected bodies."""
+        if (
+            self.model is None
+            or self.data is None
+            or self.viewer is None
+            or self.manip_analyzer is None
+        ):
+            return
 
-            # Avoid division by zero
-            safe_eigvals = np.maximum(eigvals_f, 1e-6)
-            radii_f = 1.0 / np.sqrt(safe_eigvals)
+        # Clear previous ellipsoids if needed?
+        # Meshcat efficiently updates if object name overlaps, but if we uncheck a body,
+        # we must delete it.
+        # Actually, simpler to just delete all ellipsoids scope and redraw active?
+        # Or better: check active, draw them. Delete inactive?
+        # For now, let's just draw active.
+        # To handle unchecking, we might need a way to clear 'overlays/ellipsoids'.
+        # The easiest way in Meshcat is self.viewer['overlays/ellipsoids'].delete()
+        # but that flickers if we do it every frame.
+        # However, _update_viewer is called on toggle or update.
+        # Let's delete the whole group and redraw.
 
-            self._draw_ellipsoid_meshcat(
-                "force", pos, eigvecs_f, radii_f * 0.2, 0xFF0000
-            )  # Scale for viz
+        # NOTE: Deleting the whole group every frame causes flickering or network load?
+        # Pinocchio MeshcatVisualizer usually handles set_object/transform efficiently.
+        # But to remove stale objects, delete() is needed.
+        # We'll rely on the folder structure: overlays/ellipsoids/{body_name}/{type}
+
+        # Determine strict list of active drawings
+        active_drawings = set()
+
+        # Clear previous ellipsoids to prevent ghosting
+        try:
+            self.viewer["overlays/ellipsoids"].delete()
+        except Exception:
+            pass
+
+        if self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked():
+            # Get selected bodies
+            selected_bodies = [
+                name for name, chk in self.manip_checkboxes.items() if chk.isChecked()
+            ]
+
+            # Compute for all selected
+            if selected_bodies:
+                # Iterate individually as compute_metrics takes a single body name
+                for body_name in selected_bodies:
+                    res = self.manip_analyzer.compute_metrics(body_name, self.q)
+                    if not res:
+                        continue
+
+                    pos = res.velocity_ellipsoid.center
+
+                    if (
+                        self.chk_mobility.isChecked()
+                        and res.mobility_matrix is not None
+                    ):
+                        path_name = f"{res.body_name}/mobility"
+                        active_drawings.add(path_name)
+
+                        radii = res.velocity_ellipsoid.radii
+                        # Scale down for viz (metrics are usually large)
+                        self._draw_ellipsoid_meshcat(
+                            path_name,
+                            pos,
+                            res.velocity_ellipsoid.axes,
+                            radii * 0.5,
+                            0x00FF00,
+                        )
+
+                    if (
+                        self.chk_force_ellip.isChecked()
+                        and res.force_matrix is not None
+                    ):
+                        path_name = f"{res.body_name}/force"
+                        active_drawings.add(path_name)
+
+                        radii = res.force_ellipsoid.radii
+                        # Scale for viz
+                        self._draw_ellipsoid_meshcat(
+                            path_name,
+                            pos,
+                            res.force_ellipsoid.axes,
+                            radii * 0.2,
+                            0xFF0000,
+                        )
 
     def _draw_ellipsoid_meshcat(
         self,
