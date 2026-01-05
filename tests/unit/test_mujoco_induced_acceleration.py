@@ -52,6 +52,19 @@ def test_mujoco_iaa_logic():
 
     mujoco.mj_forward.side_effect = side_effect_forward
 
+    # Mock mj_rne for optimized G calculation
+    def side_effect_rne(model, data, flg_acc, result):
+        # mj_rne with flg_acc=0 computes G if qvel=0.
+        # In test, we expect G = [0, 5]
+        # Verify qvel is 0
+        if np.all(data.qvel == 0):
+            result[:] = np.array([0.0, 5.0])
+        else:
+            # Just in case, but we shouldn't hit this path with new logic
+            result[:] = np.array([10.0, 20.0])
+
+    mujoco.mj_rne.side_effect = side_effect_rne
+
     # Run Test
     analyzer = MuJoCoInducedAccelerationAnalyzer(mock_model, mock_data)
     results = analyzer.compute_components(tau_app=np.array([2.0, 0.0]))
@@ -72,20 +85,8 @@ def test_mujoco_iaa_logic():
     # Verify qvel was restored
     np.testing.assert_array_equal(mock_data.qvel, np.array([1.0, 2.0]))
 
-    # Verify mj_forward called exactly twice (once for G, once for restore)
-    # Actually wait. mj_forward called inside compute_components 2 times (try + finally).
-    # But compute_components logic:
-    # 1. try: mj_forward (for G) -> 1 call
-    # 2. finally: mj_forward (for restore) -> 1 call
-    # Total 2 calls.
-    # What about the initialization? No usage there.
-    # What about line 50 mj_fullM? Not mj_forward.
-
-    # Wait, in logic 2. Compute G(q)
-    # mujoco.mj_forward(self.model, self.data)
-    # finally:
-    # mujoco.mj_forward(self.model, self.data)
-
-    # But we run test flow manually, calling compute_components once.
-    # Yes, 2 calls.
-    assert mujoco.mj_forward.call_count == 2
+    # Verify mj_forward called exactly once (for restore)
+    # The optimization replaces one mj_forward with mj_rne
+    assert mujoco.mj_forward.call_count == 1
+    # Verify mj_rne called once
+    assert mujoco.mj_rne.call_count == 1

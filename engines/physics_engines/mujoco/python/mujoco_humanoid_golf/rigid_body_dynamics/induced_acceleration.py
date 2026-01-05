@@ -57,22 +57,28 @@ class MuJoCoInducedAccelerationAnalyzer:
 
         # 2. Compute G(q) (Gravity Force vector)
         # In MuJoCo qfrc_bias = C + G.
-        # To get G only, we set qvel=0 temporarily.
+        # To get G only, we set qvel=0 and compute inverse dynamics.
+        # OPTIMIZATION: Use mj_rne with flg_acc=0 instead of mj_forward.
+        # mj_rne(..., 0, ...) computes ID(q, qvel, 0) -> C(q,qvel)*qvel + G(q).
+        # Since we set qvel=0, this becomes G(q).
+        # This avoids the overhead of mj_forward (collision, constraints, etc.)
         saved_qvel = self.data.qvel.copy()
-        # We also need to save qacc/cacc if we want to preserve them,
-        # but mj_forward overwrites them anyway.
-        # We assume the caller handles state restoration if needed,
-        # or we restore strictly here. mj_forward updates everything.
+        saved_cvel = self.data.cvel.copy()
 
         try:
             self.data.qvel[:] = 0
-            mujoco.mj_forward(self.model, self.data)
-            term_G = self.data.qfrc_bias.copy()
+            # Explicitly zero cvel to ensure correctness for mj_rne
+            self.data.cvel[:] = 0
+
+            term_G = np.zeros(nv)
+            # flg_acc=0 ignores qacc, so we compute ID(q, 0, 0) = G(q)
+            mujoco.mj_rne(self.model, self.data, 0, term_G)
 
         finally:
-            # Restore qvel
+            # Restore qvel and cvel
             self.data.qvel[:] = saved_qvel
-            # Restore full state dynamics
+            self.data.cvel[:] = saved_cvel
+            # Restore full state dynamics (needed for qfrc_bias calculation below)
             mujoco.mj_forward(self.model, self.data)
 
         # 3. Compute C(q,v) (Coriolis/Centrifugal)
@@ -81,25 +87,30 @@ class MuJoCoInducedAccelerationAnalyzer:
         term_C = term_C_plus_G - term_G
 
         # 4. Solve for induced accelerations
-        # Use simple linear solve (M is usually symmetric positive definite)
-        # qdd = -M^-1 * Force
-
-        acc_g = np.linalg.solve(M, -term_G)
-        acc_c = np.linalg.solve(M, -term_C)
+        # OPTIMIZATION: Batch solve linear systems (M * X = B) to reuse matrix
+        # decomposition.
+        # Stack RHS vectors: [-G, -C, tau, J^T f_c]
 
         if tau_app is not None:
-            acc_t = np.linalg.solve(M, tau_app)
+            tau_vec = tau_app
         else:
-            # Use actual applied controls if not specified?
-            # self.data.qfrc_actuator contains actuator forces
-            # self.data.ctrl contains inputs.
-            # If tau_app is None, we assume we want the *current* actuator contribution.
-            # But qfrc_actuator is force, not torque? No, generalized force.
-            acc_t = np.linalg.solve(M, self.data.qfrc_actuator)
+            # self.data.qfrc_actuator contains generalized actuator forces
+            tau_vec = self.data.qfrc_actuator
 
-        # Constraints
-        # qfrc_constraint contains constraint forces
-        acc_cn = np.linalg.solve(M, self.data.qfrc_constraint)
+        # Stack RHS vectors into a matrix (nv, 4)
+        rhs_stack = np.column_stack(
+            (-term_G, -term_C, tau_vec, self.data.qfrc_constraint)
+        )
+
+        # Solve M * results = rhs_stack
+        # This performs one LU/Cholesky decomposition instead of 4
+        results = np.linalg.solve(M, rhs_stack)
+
+        # Unpack results
+        acc_g = results[:, 0]
+        acc_c = results[:, 1]
+        acc_t = results[:, 2]
+        acc_cn = results[:, 3]
 
         total = acc_g + acc_c + acc_t + acc_cn
 
