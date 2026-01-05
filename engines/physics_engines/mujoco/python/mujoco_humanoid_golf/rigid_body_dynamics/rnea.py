@@ -92,9 +92,12 @@ def rnea(  # noqa: PLR0915
     # Initialize arrays
     # OPTIMIZATION: use np.empty instead of np.zeros for arrays that are fully
     # overwritten
-    v = np.empty((6, nb))  # Spatial velocities
-    a = np.empty((6, nb))  # Spatial accelerations
-    f = np.zeros((6, nb))  # Spatial forces (must be zero for accumulation)
+    # OPTIMIZATION: Use 'F' order (Fortran-contiguous) so that columns (6, nb) are
+    # contiguous in memory. This allows efficient use of columns as 'out' parameters
+    # in matmul/multiply, avoiding internal temporary buffering and copying.
+    v = np.empty((6, nb), order="F")  # Spatial velocities
+    a = np.empty((6, nb), order="F")  # Spatial accelerations
+    f = np.zeros((6, nb), order="F")  # Spatial forces (must be zero for accumulation)
     tau = np.empty(nb)  # Joint torques
 
     # OPTIMIZATION: Pre-allocate buffers
@@ -146,18 +149,16 @@ def rnea(  # noqa: PLR0915
             v[:, i] = vj_velocity
 
             # Optimized a[:, i] = xj_transform @ (-a_grav) + s_subspace * qdd[i]
-            np.matmul(xj_transform, neg_a_grav, out=scratch_vec)
+            # Write directly to a[:, i] to avoid copy
+            np.matmul(xj_transform, neg_a_grav, out=a[:, i])
             # Optimization: Avoid allocation for s_subspace * qdd[i]
-            # scratch_vec += s_subspace * qdd[i]
 
             if dof_idx != -1:
                 # Direct addition to the specific component
-                scratch_vec[dof_idx] += qdd[i]
+                a[dof_idx, i] += qdd[i]
             else:
                 np.multiply(s_subspace, qdd[i], out=cross_buf)
-                scratch_vec += cross_buf
-
-            a[:, i] = scratch_vec
+                a[:, i] += cross_buf
         else:
             # Body i has a parent
             p = model_parent[i]
@@ -168,24 +169,22 @@ def rnea(  # noqa: PLR0915
 
             # Velocity: transform parent velocity and add joint velocity
             # Optimized v[:, i] = xup[i] @ v[:, p] + vj_velocity
-            np.matmul(xup[i], v[:, p], out=scratch_vec)
-            scratch_vec += vj_velocity
-            v[:, i] = scratch_vec
+            # Write directly to v[:, i]
+            np.matmul(xup[i], v[:, p], out=v[:, i])
+            v[:, i] += vj_velocity
 
             # Acceleration: transform parent accel + bias accel + joint accel
             # Optimized a[:, i] = (xup[i] @ a[:, p] + ... )
-            np.matmul(xup[i], a[:, p], out=scratch_vec)
+            # Write directly to a[:, i]
+            np.matmul(xup[i], a[:, p], out=a[:, i])
 
             # Optimization: Avoid allocation for s_subspace * qdd[i]
-            # Use cross_buf as temporary buffer before it's needed for cross_motion
             if dof_idx != -1:
-                # We need to add s_subspace * qdd[i] to scratch_vec
-                # But scratch_vec is also modified by cross_motion result later.
-                # It's safer to add it directly.
-                scratch_vec[dof_idx] += qdd[i]
+                # Direct addition to the specific component
+                a[dof_idx, i] += qdd[i]
             else:
                 np.multiply(s_subspace, qdd[i], out=cross_buf)
-                scratch_vec += cross_buf
+                a[:, i] += cross_buf
 
             # Optimization: Use pre-allocated buffer for cross product
             # Overwrites cross_buf, which is fine as we are done with qdd term
@@ -193,8 +192,7 @@ def rnea(  # noqa: PLR0915
                 cross_motion_axis(v[:, i], dof_idx, qd[i], out=cross_buf)
             else:
                 cross_motion_fast(v[:, i], vj_velocity, out=cross_buf)
-            scratch_vec += cross_buf
-            a[:, i] = scratch_vec
+            a[:, i] += cross_buf
 
     # --- Backward pass: dynamics ---
     for i in range(nb - 1, -1, -1):
@@ -232,6 +230,7 @@ def rnea(  # noqa: PLR0915
         if model_parent[i] != -1:
             p = model_parent[i]
             # Optimized f[:, p] = f[:, p] + xup[i].T @ f[:, i]
+            # Note: f[:, p] is also F-contiguous, so column access is efficient
             np.matmul(xup[i].T, f[:, i], out=scratch_vec)
             f[:, p] += scratch_vec
 
