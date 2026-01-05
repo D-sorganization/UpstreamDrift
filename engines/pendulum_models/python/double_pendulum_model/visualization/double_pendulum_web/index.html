@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Driven Double Pendulum Playground</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="toast.css">
 </head>
 <body>
   <div class="container">
@@ -48,6 +49,10 @@
           <svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 1-4.546 2.914.5.5 0 0 0-.908-.417A6 6 0 1 0 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 0-.41-.192L5.23 2.308a.25.25 0 0 0 0 .384l2.36 1.966A.25.25 0 0 0 8 4.466z"/></svg>
           <span>Defaults</span>
         </button>
+        <button id="share" title="Copy link to current configuration">
+          <svg class="icon" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5z"/></svg>
+          <span>Share</span>
+        </button>
       </div>
       <p class="shortcuts" id="shortcuts"><small>Shortcuts: <strong>Space</strong> (Start/Pause), <strong>R</strong> (Reset)</small></p>
       <div class="readout" id="torques">Torques: --</div>
@@ -55,6 +60,7 @@
     <canvas id="canvas" role="img" aria-label="Double Pendulum Simulation" aria-describedby="shortcuts" tabindex="0" width="900" height="700"></canvas>
   </div>
   <div id="status-announcer" class="sr-only" aria-live="polite"></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="app.js"></script>
 </body>
 </html>
