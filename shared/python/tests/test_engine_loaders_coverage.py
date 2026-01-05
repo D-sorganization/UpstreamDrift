@@ -26,6 +26,7 @@ with patch.dict(
 def test_load_mujoco_success(tmp_path: object) -> None:
     """Test successful loading of MuJoCo engine."""
     from pathlib import Path
+
     path = Path(str(tmp_path))
 
     # Mock internal components needed by load_mujoco_engine
@@ -59,6 +60,7 @@ def test_load_mujoco_success(tmp_path: object) -> None:
 def test_load_drake_missing(tmp_path: object) -> None:
     """Test handling of missing Drake engine."""
     from pathlib import Path
+
     path = Path(str(tmp_path))
     # Use the exact same exception class used by the module under test
 
