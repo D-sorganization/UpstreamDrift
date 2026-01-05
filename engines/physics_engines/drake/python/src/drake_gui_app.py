@@ -109,6 +109,12 @@ except ImportError:
         return None, None, None
 
 
+# Manipulability Import
+try:
+    from .manipulability import DrakeManipulabilityAnalyzer
+except ImportError:
+    DrakeManipulabilityAnalyzer = None  # type: ignore
+
 # Constants
 TIME_STEP_S = 0.001
 MS_PER_SECOND = 1000
