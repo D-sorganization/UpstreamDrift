@@ -7,16 +7,17 @@ managing file organization, and exporting analysis reports.
 OBS-001: Migrated to structured logging for better observability.
 """
 
+from __future__ import annotations
+
 import json
-import logging
 import os
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 import numpy as np
-import pandas as pd
+import pandas as pd  # type: ignore[import]
 
 from .common_utils import get_logger, setup_structured_logging
 
@@ -82,7 +83,9 @@ class OutputManager:
         }
 
         logger.info(
-            "output_manager_initialized", base_path=str(self.base_path), num_directories=len(self.directories)
+            "output_manager_initialized",
+            base_path=str(self.base_path),
+            num_directories=len(self.directories),
         )
 
     def create_output_structure(self) -> None:
@@ -526,20 +529,22 @@ class OutputManager:
 
 # Type alias for simulation results (TYPE-001: More specific than Any)
 # Type alias for simulation results (TYPE-001: Improved type safety)
-SimulationResultScalar = Union[int, float, str, bool, None]
+SimulationResultScalar = int | float | str | bool | None
 SimulationResultDict = dict[
     str,
-    Union[
-        SimulationResultScalar,
-        list[SimulationResultScalar],
-        dict[str, SimulationResultScalar],
-    ],
+    SimulationResultScalar
+    | list[SimulationResultScalar]
+    | dict[str, SimulationResultScalar],
 ]
-SimulationResults = Union[SimulationResultDict, pd.DataFrame, np.ndarray]
+SimulationResults = SimulationResultDict | pd.DataFrame | np.ndarray
+
 
 # Convenience functions for backward compatibility
 def save_results(
-    results: SimulationResults, filename: str, format_type: str = "csv", engine: str = "mujoco"
+    results: SimulationResults,
+    filename: str,
+    format_type: str = "csv",
+    engine: str = "mujoco",
 ) -> str:
     """Convenience function for saving results.
 

@@ -98,6 +98,7 @@ class TestStructuredLogging:
         """Reset structured logging configuration before each test."""
         # Reset the global configuration flag
         import shared.python.core as core_module
+
         core_module._structured_logging_configured = False
 
     def test_setup_structured_logging_basic(self) -> None:

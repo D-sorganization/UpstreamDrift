@@ -9,7 +9,6 @@ for educational demonstrations of chaos and control.
 
 from __future__ import annotations
 
-import ast
 import math
 import typing
 

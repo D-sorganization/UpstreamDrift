@@ -9,8 +9,8 @@ from matplotlib.figure import Figure
 
 from shared.python.comparative_analysis import (
     AlignedSignals,
-    ComparisonMetric,
     ComparativeSwingAnalyzer,
+    ComparisonMetric,
     RecorderInterface,
 )
 from shared.python.comparative_plotting import ComparativePlotter
@@ -39,18 +39,18 @@ class MockRecorder(RecorderInterface):
         self.kinetic_energy = self.club_head_speed**2
 
         # Angular momentum (3D vector)
-        self.angular_momentum = np.column_stack([
-            self.signal,
-            self.signal * 0.5,
-            self.signal * 0.3
-        ])
+        self.angular_momentum = np.column_stack(
+            [self.signal, self.signal * 0.5, self.signal * 0.3]
+        )
 
         # Center of pressure (3D position)
-        self.cop_position = np.column_stack([
-            norm_time,  # x moves forward
-            np.sin(4 * np.pi * norm_time) * 0.1,  # y oscillates
-            np.zeros(100)  # z stays at ground level
-        ])
+        self.cop_position = np.column_stack(
+            [
+                norm_time,  # x moves forward
+                np.sin(4 * np.pi * norm_time) * 0.1,  # y oscillates
+                np.zeros(100),  # z stays at ground level
+            ]
+        )
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
         if hasattr(self, field_name):
@@ -137,11 +137,7 @@ def test_dataclasses() -> None:
     """Test dataclass structures."""
     # ComparisonMetric
     metric = ComparisonMetric(
-        name="test_metric",
-        value_a=10.0,
-        value_b=8.0,
-        difference=2.0,
-        percent_diff=22.2
+        name="test_metric", value_a=10.0, value_b=8.0, difference=2.0, percent_diff=22.2
     )
     assert metric.name == "test_metric"
     assert metric.value_a == 10.0
@@ -157,7 +153,7 @@ def test_dataclasses() -> None:
         signal_b=signal_b,
         error_curve=signal_a - signal_b,
         rms_error=0.5,
-        correlation=0.8
+        correlation=0.8,
     )
     assert len(aligned.times) == 50
     assert aligned.rms_error == 0.5
@@ -235,7 +231,9 @@ def test_generate_full_report() -> None:
     """Test comprehensive report generation with all metrics."""
     rec_a = MockRecorder(amplitude=10.0)
     rec_b = MockRecorder(amplitude=8.0)
-    analyzer = ComparativeSwingAnalyzer(rec_a, rec_b, name_a="Pro Swing", name_b="Amateur Swing")
+    analyzer = ComparativeSwingAnalyzer(
+        rec_a, rec_b, name_a="Pro Swing", name_b="Amateur Swing"
+    )
 
     report = analyzer.generate_comparison_report()
 
@@ -293,9 +291,13 @@ def test_angular_momentum_comparison() -> None:
     report = analyzer.generate_comparison_report()
 
     # Find angular momentum metric
-    am_metric = next((m for m in report["metrics"] if "Angular Momentum" in m.name), None)
+    am_metric = next(
+        (m for m in report["metrics"] if "Angular Momentum" in m.name), None
+    )
     assert am_metric is not None
-    assert am_metric.value_a > am_metric.value_b  # Higher amplitude = higher angular momentum
+    assert (
+        am_metric.value_a > am_metric.value_b
+    )  # Higher amplitude = higher angular momentum
 
 
 def test_cop_path_length_comparison() -> None:

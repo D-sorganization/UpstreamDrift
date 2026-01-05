@@ -5,8 +5,8 @@ import xml.etree.ElementTree as ET  # noqa: N817, RUF100
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any  # noqa: ICN003
-import defusedxml.minidom as minidom
 
+import defusedxml.minidom as minidom
 import numpy as np
 import numpy.typing as npt
 from pydrake.all import (
@@ -612,7 +612,7 @@ class GolfURDFGenerator:
         )
 
         xml_str = ET.tostring(self.root, encoding="utf-8")
-        return minidom.parseString(xml_str).toprettyxml(indent="  ")  # noqa: S318
+        return str(minidom.parseString(xml_str).toprettyxml(indent="  "))  # noqa: S318
 
 
 # -----------------------------

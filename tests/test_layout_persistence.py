@@ -196,7 +196,9 @@ class TestLayoutErrorHandling(unittest.TestCase):
         SEC-007: Replaced tempfile.mktemp with NamedTemporaryFile to prevent TOCTOU attacks.
         """
         # Use NamedTemporaryFile with delete=False for explicit cleanup control
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as temp_file:
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False
+        ) as temp_file:
             temp_path = Path(temp_file.name)
             # Write invalid JSON
             temp_file.write("{ invalid json content")

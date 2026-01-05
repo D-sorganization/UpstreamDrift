@@ -8,10 +8,6 @@ import typing
 from dataclasses import dataclass
 
 import numpy as np  # noqa: TID253
-
-# Security: Use simpleeval for safe expression evaluation
-from simpleeval import SimpleEval
-
 from double_pendulum_model.physics.double_pendulum import (
     DoublePendulumDynamics,
     DoublePendulumParameters,
@@ -31,6 +27,9 @@ from double_pendulum_model.ui.validation import (
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from PyQt6 import QtCore, QtWidgets
+
+# Security: Use simpleeval for safe expression evaluation
+from simpleeval import SimpleEval
 
 logger = logging.getLogger(__name__)
 
