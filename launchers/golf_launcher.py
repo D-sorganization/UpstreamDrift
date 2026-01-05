@@ -1587,7 +1587,9 @@ class GolfLauncher(QMainWindow):
             # Launch in new process with security validation
             try:
                 env = os.environ.copy()
-                env["PYTHONPATH"] = str(suite_root) + os.pathsep + env.get("PYTHONPATH", "")
+                env["PYTHONPATH"] = (
+                    str(suite_root) + os.pathsep + env.get("PYTHONPATH", "")
+                )
 
                 creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
                 process = secure_popen(
