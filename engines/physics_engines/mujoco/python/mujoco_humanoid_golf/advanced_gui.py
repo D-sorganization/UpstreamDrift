@@ -23,6 +23,7 @@ from .gui.tabs.controls_tab import ControlsTab
 from .gui.tabs.manipulation_tab import ManipulationTab
 from .gui.tabs.physics_tab import PhysicsTab
 from .gui.tabs.plotting_tab import PlottingTab
+from .gui.tabs.manipulability_tab import ManipulabilityTab
 from .gui.tabs.visualization_tab import VisualizationTab
 from .sim_widget import MuJoCoSimWidget
 
@@ -109,6 +110,9 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.physics_tab.model_changed.connect(self.controls_tab.on_model_loaded)
         self.physics_tab.model_changed.connect(self.on_model_changed_signal)
         self.physics_tab.mode_changed.connect(self.controls_tab.on_mode_changed)
+        
+        # Connect model loaded signal to manipulability tab
+        self.physics_tab.model_changed.connect(lambda n, c: self.manipulability_tab.on_model_loaded())
 
         # Connect live analysis toggle
         if hasattr(self.controls_tab, "chk_live_analysis"):
@@ -125,6 +129,10 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.tab_widget.addTab(self.plotting_tab, "Plotting")
         self.manipulation_tab = ManipulationTab(self.sim_widget, self)
         self.tab_widget.addTab(self.manipulation_tab, "Interactive Pose")
+
+        # Manipulability & Force Tab
+        self.manipulability_tab = ManipulabilityTab(self.sim_widget, self)
+        self.tab_widget.addTab(self.manipulability_tab, "Manipulability")
 
         # Connect grip modelling tab to simulation widget
         self.grip_modelling_tab.connect_sim_widget(self.sim_widget)
