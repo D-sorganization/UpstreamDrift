@@ -6,8 +6,8 @@ of the Golf Modeling Suite.
 """
 
 import argparse
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add shared utilities to path
