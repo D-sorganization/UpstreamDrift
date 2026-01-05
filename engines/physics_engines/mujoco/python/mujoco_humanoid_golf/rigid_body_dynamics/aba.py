@@ -106,18 +106,20 @@ def aba(  # noqa: C901, PLR0912, PLR0915
     s_subspace: list[np.ndarray] = [None] * nb  # type: ignore[assignment, list-item]
     dof_indices: list[int] = [-1] * nb
 
-    v = np.empty((6, nb))  # Spatial velocities
-    c = np.empty((6, nb))  # Velocity-product accelerations (bias)
+    # OPTIMIZATION: Use 'F' order so columns are contiguous for matmul 'out' args
+    v = np.empty((6, nb), order='F')  # Spatial velocities
+    c = np.empty((6, nb), order='F')  # Velocity-product accelerations (bias)
 
     # Articulated-body inertias (NB, 6, 6)
     # OPTIMIZATION: Bulk copy is faster than element-wise copy in loop
     ia_articulated = np.array(model["I"], dtype=float)
 
-    pa_bias = np.zeros((6, nb))  # Articulated-body bias forces
-    u_force = np.zeros((6, nb))  # IA * S
+    # OPTIMIZATION: Use 'F' order for these buffers too
+    pa_bias = np.zeros((6, nb), order='F')  # Articulated-body bias forces
+    u_force = np.zeros((6, nb), order='F')  # IA * S
     d = np.zeros(nb)  # S.T @ U (joint-space inertia)
     u = np.zeros(nb)  # tau - S.T @ pA (bias force)
-    a = np.zeros((6, nb))  # Spatial accelerations
+    a = np.zeros((6, nb), order='F')  # Spatial accelerations
     qdd = np.zeros(nb)  # Joint accelerations
 
     # Optimization: temporary buffers
@@ -159,10 +161,9 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         else:
             p = model_parent[i]
             # v[:, i] = xup[i] @ v[:, p] + vj_velocity
-            # OPTIMIZATION: Use matmul with out
-            np.matmul(xup[i], v[:, p], out=scratch_vec)
-            scratch_vec += vj_velocity
-            v[:, i] = scratch_vec
+            # OPTIMIZATION: Use matmul with out directly to v[:, i]
+            np.matmul(xup[i], v[:, p], out=v[:, i])
+            v[:, i] += vj_velocity
 
             # OPTIMIZATION: Use pre-allocated buffer for cross product
             # Use fast version to avoid overhead
@@ -280,15 +281,15 @@ def aba(  # noqa: C901, PLR0912, PLR0915
         if model_parent[i] == -1:
             # For base-connected bodies, apply gravity through Xup transform
             # a[:, i] = xup[i] @ (-a_grav) + c[:, i]
-            np.matmul(xup[i], neg_a_grav, out=scratch_vec)
-            scratch_vec += c[:, i]
-            a[:, i] = scratch_vec
+            # Direct write to a[:, i]
+            np.matmul(xup[i], neg_a_grav, out=a[:, i])
+            a[:, i] += c[:, i]
         else:
             p = model_parent[i]
             # a[:, i] = xup[i] @ a[:, p] + c[:, i]
-            np.matmul(xup[i], a[:, p], out=scratch_vec)
-            scratch_vec += c[:, i]
-            a[:, i] = scratch_vec
+            # Direct write to a[:, i]
+            np.matmul(xup[i], a[:, p], out=a[:, i])
+            a[:, i] += c[:, i]
 
         # qdd[i] = (u[i] - u_force[:, i] @ a[:, i]) / d[i]
         qdd[i] = (u[i] - np.dot(u_force[:, i], a[:, i])) / d[i]
