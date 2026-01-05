@@ -20,10 +20,10 @@ from .advanced_gui_methods import AdvancedGuiMethodsMixin
 from .grip_modelling_tab import GripModellingTab
 from .gui.tabs.analysis_tab import AnalysisTab
 from .gui.tabs.controls_tab import ControlsTab
+from .gui.tabs.manipulability_tab import ManipulabilityTab
 from .gui.tabs.manipulation_tab import ManipulationTab
 from .gui.tabs.physics_tab import PhysicsTab
 from .gui.tabs.plotting_tab import PlottingTab
-from .gui.tabs.manipulability_tab import ManipulabilityTab
 from .gui.tabs.visualization_tab import VisualizationTab
 from .sim_widget import MuJoCoSimWidget
 
@@ -110,9 +110,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.physics_tab.model_changed.connect(self.controls_tab.on_model_loaded)
         self.physics_tab.model_changed.connect(self.on_model_changed_signal)
         self.physics_tab.mode_changed.connect(self.controls_tab.on_mode_changed)
-        
+
         # Connect model loaded signal to manipulability tab
-        self.physics_tab.model_changed.connect(lambda n, c: self.manipulability_tab.on_model_loaded())
+        self.physics_tab.model_changed.connect(
+            lambda n, c: self.manipulability_tab.on_model_loaded()
+        )
 
         # Connect live analysis toggle
         if hasattr(self.controls_tab, "chk_live_analysis"):
