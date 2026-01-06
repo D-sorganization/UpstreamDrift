@@ -203,7 +203,6 @@ class TestDriftControlPhysics:
         """Test drift component matches energy-conserving motion."""
         pytest.skip("Requires energy calculation utilities - implement in follow-up")
 
-        # TODO: Verify that drift-only motion conserves energy
         # (modulo damping losses if present)
 
     def test_control_enables_upward_swing(self, simple_pendulum_model):
