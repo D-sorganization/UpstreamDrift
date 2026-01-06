@@ -41,25 +41,6 @@ USED IN:
 - kinematic_forces.py::compute_club_head_apparent_forces()
 """
 
-EPSILON_FINITE_DIFF_CORIOLIS = 1e-6
-"""Finite difference step size for Coriolis matrix estimation [dimensionless].
-
-NOTE: This constant is DEPRECATED as of Phase 1 upgrade. The analytical RNE
-method (compute_coriolis_forces_rne) should be used instead.
-
-HISTORICAL RATIONALE:
-- Used for perturbation-based Coriolis matrix computation
-- Same value as EPSILON_FINITE_DIFF_JACOBIAN for consistency
-
-DEPRECATION PATH:
-- Phase 1: Analytical RNE implemented (complete)
-- Phase 2: Remove finite difference fallback (target: Q2 2026)
-- Phase 3: Delete this constant
-
-SOURCE:
-- Legacy implementation, superseded by mj_rne
-"""
-
 # Singularity Detection Thresholds
 # -----------------------------------------------------------------------------
 
@@ -86,27 +67,6 @@ SOURCE:
 USED IN:
 - kinematic_forces.py::compute_effective_mass()
 - kinematic_forces.py::compute_club_head_apparent_forces()
-"""
-
-EPSILON_ZERO_RADIUS = 1e-6
-"""Minimum radius for centripetal acceleration calculation [meters].
-
-PHYSICAL MEANING:
-- Radius values below 1 mm are treated as zero (prevents division by tiny radii)
-- Corresponds to ~atomic scale, well below physically meaningful distances
-
-WARNING:
-This constant is used in compute_centripetal_acceleration(), which contains a
-fundamental physics error (Issue B-001). Do not use for production calculations.
-
-RATIONALE:
-- Human body segments have dimensions > 1 cm
-- C3D marker precision typically ~0.1 mm
-- 1e-6 m provides 2 orders of magnitude safety margin
-
-USED IN:
-- kinematic_forces.py::compute_centripetal_acceleration() [DEPRECATED - DO NOT USE]
-- kinematic_forces.py::compute_effective_mass()
 """
 
 # Mass Matrix & Dynamics Tolerances
@@ -302,10 +262,8 @@ Values are mean ± 2σ ranges covering ~95% of population
 __all__ = [
     # Finite difference
     "EPSILON_FINITE_DIFF_JACOBIAN",
-    "EPSILON_FINITE_DIFF_CORIOLIS",
     # Singularity detection
     "EPSILON_SINGULARITY_DETECTION",
-    "EPSILON_ZERO_RADIUS",
     # Mass matrix & dynamics
     "EPSILON_MASS_MATRIX_REGULARIZATION",
     "TOLERANCE_ENERGY_CONSERVATION",
