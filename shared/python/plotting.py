@@ -1920,6 +1920,185 @@ class GolfSwingPlotter:
         fig.colorbar(q, ax=ax, label="Time (s)")
         fig.tight_layout()
 
+    def plot_recurrence_plot(
+        self,
+        fig: Figure,
+        recurrence_matrix: np.ndarray,
+        title: str = "Recurrence Plot",
+    ) -> None:
+        """Plot Recurrence Plot (binary matrix).
+
+        Args:
+            fig: Matplotlib figure
+            recurrence_matrix: Binary matrix (N, N)
+            title: Title of the plot
+        """
+        if recurrence_matrix.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No Recurrence Data", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        # Plot binary matrix
+        # Use black points for recurrence (1), white for non-recurrence (0)
+        # cmap="binary" uses 0=white, 1=black? No, usually 0=white, 255=black.
+        # But if values are 0/1, we need to check map.
+        # "Greys" is usually safe (0=white, 1=black).
+        ax.imshow(
+            recurrence_matrix,
+            cmap="Greys",
+            origin="lower",
+            interpolation="none",
+        )
+
+        ax.set_xlabel("Time Step (j)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Time Step (i)", fontsize=12, fontweight="bold")
+        ax.set_title(title, fontsize=14, fontweight="bold")
+        fig.tight_layout()
+
+    def plot_activation_heatmap(
+        self,
+        fig: Figure,
+        data_type: str = "torque",
+    ) -> None:
+        """Plot activation heatmap (Joints vs Time).
+
+        Visualizes magnitude of torque or power for all joints over time.
+
+        Args:
+            fig: Matplotlib figure
+            data_type: 'torque' or 'power'
+        """
+        if data_type == "power":
+            times, data = self.recorder.get_time_series("actuator_powers")
+            title = "Actuator Power Activation"
+            cbar_label = "Power (W)"
+        else:
+            times, data = self.recorder.get_time_series("joint_torques")
+            title = "Joint Torque Activation"
+            cbar_label = "Torque (Nm)"
+
+        data = np.asarray(data)
+
+        if len(times) == 0 or data.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        # Use magnitude for heatmap? Or signed?
+        # Signed is useful to see direction, but "Activation" usually implies magnitude.
+        # Let's use signed with RdBu colormap to show direction (flexion/extension)
+        # or viridis for magnitude.
+        # "Muscle Activation" is usually 0-1 magnitude.
+        # Torque can be negative.
+        # Let's use signed to show effort direction, centered at 0.
+
+        ax = fig.add_subplot(111)
+
+        # Transpose so Time is X-axis, Joints are Y-axis
+        # data is (N_samples, N_joints) -> (N_joints, N_samples)
+        heatmap_data = data.T
+
+        # Determine limits for symmetric colorbar
+        max_val = np.max(np.abs(heatmap_data))
+        if max_val < 1e-6:
+            max_val = 1.0
+
+        # Create meshgrid for pcolormesh
+        # Time edges
+        if len(times) > 1:
+            dt = times[1] - times[0]
+            time_edges = np.concatenate(
+                (
+                    [times[0] - dt / 2],
+                    times[:-1] + np.diff(times) / 2,
+                    [times[-1] + dt / 2],
+                )
+            )
+        else:
+            time_edges = np.array([times[0] - 0.5, times[0] + 0.5])
+
+        # Joint edges
+        joint_edges = np.arange(heatmap_data.shape[0] + 1)
+
+        # Plot
+        im = ax.pcolormesh(
+            time_edges,
+            joint_edges,
+            heatmap_data,
+            cmap="RdBu_r",
+            vmin=-max_val,
+            vmax=max_val,
+            shading="flat",
+        )
+
+        # Set y-ticks to joint names
+        ax.set_yticks(np.arange(heatmap_data.shape[0]) + 0.5)
+        labels = [self.get_joint_name(i) for i in range(heatmap_data.shape[0])]
+        ax.set_yticklabels(labels)
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_title(title, fontsize=14, fontweight="bold")
+        ax.grid(False)  # Heatmap doesn't need grid usually
+
+        cbar = fig.colorbar(im, ax=ax, label=cbar_label)
+        fig.tight_layout()
+
+    def plot_phase_space_density(
+        self,
+        fig: Figure,
+        joint_idx: int = 0,
+        bins: int = 50,
+    ) -> None:
+        """Plot 2D Phase Space Density (Histogram).
+
+        Useful for seeing where the system spends most time in phase space.
+
+        Args:
+            fig: Matplotlib figure
+            joint_idx: Index of joint
+            bins: Number of histogram bins
+        """
+        times, positions = self.recorder.get_time_series("joint_positions")
+        _, velocities = self.recorder.get_time_series("joint_velocities")
+
+        positions = np.asarray(positions)
+        velocities = np.asarray(velocities)
+
+        if (
+            len(times) == 0
+            or positions.ndim < 2
+            or joint_idx >= positions.shape[1]
+            or velocities.ndim < 2
+            or joint_idx >= velocities.shape[1]
+        ):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        pos = np.rad2deg(positions[:, joint_idx])
+        vel = np.rad2deg(velocities[:, joint_idx])
+
+        # 2D Histogram
+        h = ax.hist2d(
+            pos,
+            vel,
+            bins=bins,
+            cmap="inferno",
+            cmin=1,  # Don't plot zero bins
+        )
+
+        joint_name = self.get_joint_name(joint_idx)
+        ax.set_xlabel(f"{joint_name} Angle (deg)", fontsize=12, fontweight="bold")
+        ax.set_ylabel(f"{joint_name} Velocity (deg/s)", fontsize=12, fontweight="bold")
+        ax.set_title(f"Phase Space Density: {joint_name}", fontsize=14, fontweight="bold")
+
+        fig.colorbar(h[3], ax=ax, label="Count")
+        fig.tight_layout()
+
     def plot_grf_butterfly_diagram(
         self,
         fig: Figure,
