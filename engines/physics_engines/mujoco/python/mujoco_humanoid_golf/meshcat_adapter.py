@@ -5,6 +5,7 @@ from typing import Any
 
 import mujoco
 import numpy as np
+from shared.python.biomechanics_data import BiomechanicalData
 
 try:
     import meshcat
@@ -174,9 +175,6 @@ class MuJoCoMeshcatAdapter:
 
         model = self.model
 
-        # Clear previous vectors if not showing?
-        # Meshcat efficiently updates if we overwrite the path.
-        # But if we turn them off, we explicitly delete.
         if not show_force:
             self.vis["overlays/forces"].delete()
         if not show_torque:
@@ -185,25 +183,12 @@ class MuJoCoMeshcatAdapter:
         if not (show_force or show_torque):
             return
 
-        # Iterate over joints (similar to Pinocchio logic)
-        # MuJoCo data.qfrc_constraint / qfrc_actuator?
-        # No, for reaction forces, we likely want `cfrc_ext` (com-based) or `cfrc_int`.
-        # Or simply visualize contact forces?
-        # User asked for "force and torque vectors... at joints"
-        # (implied by Pinocchio parity).
-        # Pinocchio visualized Joint Reaction Forces (`data.f` from RNEA).
-        # In MuJoCo, joint reaction forces are not computed by default unless
-        # inverse dynamics or `mj_rne` is used.
-        # However, `data.cfrc_int` contains interaction forces at bodies.
-
         # Iterate over bodies (skipping world 0)
         for i in range(1, model.nbody):
             body_name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i)
             if not body_name:
                 body_name = f"body_{i}"
 
-            # cfrc_int is (6,) vector: [torque(3), force(3)] at body frame/COM?
-            # documentation: "interaction force/torque exerted by parent on this body"
             if data.cfrc_int is None:
                 continue
             wrench = data.cfrc_int[i]  # type: ignore[index]
@@ -222,6 +207,113 @@ class MuJoCoMeshcatAdapter:
                     f"overlays/torques/{body_name}", pos, t * torque_scale, 0x0000FF
                 )
 
+    def draw_induced_vectors(
+        self,
+        data: mujoco.MjData,
+        bio_data: BiomechanicalData | None,
+        source: str,
+        scale: float = 0.1,
+    ) -> None:
+        """
+        Draws induced acceleration vectors.
+        """
+        if self.vis is None or self.model is None:
+            return
+
+        self.vis["overlays/induced"].delete()
+
+        if bio_data is None:
+            return
+
+        # Determine key
+        key = source
+        if key not in ["gravity", "velocity", "total", "actuator"]:
+            # Custom name logic handled in sim_widget, usually passed as
+            # 'selected_actuator' if the source string didn't match standard keys.
+            # However, bio_data stores it under 'selected_actuator' if calculated
+            # that way. We check if the key exists directly, else try
+            # 'selected_actuator'
+            if key not in bio_data.induced_accelerations:
+                key = "selected_actuator"
+
+        if key not in bio_data.induced_accelerations:
+            return
+
+        accels = bio_data.induced_accelerations[key]
+
+        # Draw vectors at joints (angular acceleration mainly)
+        for j in range(self.model.njnt):
+            # Only visualize 1-DOF joints (Slide=2, Hinge=3)
+            # 0=Free, 1=Ball have multiple DOFs and axes are different
+            jtype = self.model.jnt_type[j]
+            if jtype not in [mujoco.mjtJoint.mjJNT_SLIDE, mujoco.mjtJoint.mjJNT_HINGE]:
+                continue
+
+            body_id = self.model.jnt_bodyid[j]
+            qvel_adr = self.model.jnt_dofadr[j]
+
+            if qvel_adr >= len(accels):
+                continue
+
+            acc = accels[qvel_adr]
+            if abs(acc) < 1e-3:
+                continue
+
+            joint_pos = data.xpos[body_id]
+            joint_axis = data.xaxis[3 * j : 3 * j + 3]
+
+            arrow_len = acc * scale * 0.5
+            arrow_dir = joint_axis * arrow_len
+
+            # Magenta
+            self._draw_arrow(
+                f"overlays/induced/joint_{j}", joint_pos, arrow_dir, 0xFF00FF
+            )
+
+    def draw_cf_vectors(
+        self,
+        data: mujoco.MjData,
+        bio_data: BiomechanicalData | None,
+        cf_type: str,
+        scale: float = 0.1,
+    ) -> None:
+        """
+        Draws Counterfactual vectors.
+        """
+        if self.vis is None or self.model is None:
+            return
+
+        self.vis["overlays/cf"].delete()
+
+        if bio_data is None or cf_type not in bio_data.counterfactuals:
+            return
+
+        values = bio_data.counterfactuals[cf_type]
+
+        for j in range(self.model.njnt):
+            # Only visualize 1-DOF joints
+            jtype = self.model.jnt_type[j]
+            if jtype not in [mujoco.mjtJoint.mjJNT_SLIDE, mujoco.mjtJoint.mjJNT_HINGE]:
+                continue
+
+            qvel_adr = self.model.jnt_dofadr[j]
+            if qvel_adr >= len(values):
+                continue
+
+            val = values[qvel_adr]
+            if abs(val) < 1e-3:
+                continue
+
+            body_id = self.model.jnt_bodyid[j]
+            joint_pos = data.xpos[body_id]
+            joint_axis = data.xaxis[3 * j : 3 * j + 3]
+
+            arrow_len = val * scale * 0.5
+            arrow_dir = joint_axis * arrow_len
+
+            # Yellow
+            self._draw_arrow(f"overlays/cf/joint_{j}", joint_pos, arrow_dir, 0xFFFF00)
+
     def draw_ellipsoid(
         self,
         name: str,
@@ -233,29 +325,13 @@ class MuJoCoMeshcatAdapter:
     ) -> None:
         """
         Draws an ellipsoid at the specified position/orientation.
-
-        Args:
-            name: Unique name for the ellipsoid
-            position: 3D position vector
-            rotation: 3x3 rotation matrix (axes of ellipsoid)
-            radii: Length of principal axes (x, y, z)
-            color: Hex color
-            opacity: Opacity (0-1)
         """
         if self.vis is None:
             return
 
-        # Path for this ellipsoid
         path = f"overlays/ellipsoids/{name}"
-
-        # Create unit sphere and scale it to radii
-        # Meshcat doesn't have explicit Ellipsoid, so we use Scaled Sphere
         material = g.MeshPhongMaterial(color=color, opacity=opacity, transparent=True)
         shape = g.Sphere(radius=1.0)
-
-        # Transformation: T = [Rot | Pos] * Scale
-        # But Meshcat applies scale via object property or transform?
-        # Usually transform matrix can include scale.
 
         T = np.eye(4)
         T[:3, :3] = rotation @ np.diag(radii)

@@ -12,10 +12,11 @@ from __future__ import annotations
 
 import csv
 from dataclasses import asdict, dataclass
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from scipy.signal import find_peaks, savgol_filter
+from scipy.spatial.distance import pdist, squareform
 
 
 @dataclass
@@ -145,6 +146,20 @@ class ImpulseMetrics:
     net_impulse: float  # Integrated force/torque over time
     positive_impulse: float  # Integrated positive force/torque
     negative_impulse: float  # Integrated negative force/torque
+
+
+@dataclass
+class RQAMetrics:
+    """Recurrence Quantification Analysis metrics.
+
+    Quantifies the structure of the recurrence plot.
+    """
+
+    recurrence_rate: float  # Density of recurrence points (RR)
+    determinism: float  # Percentage of recurrence points forming diagonal lines (DET)
+    laminarity: float  # Percentage of recurrence points forming vertical lines (LAM)
+    longest_diagonal_line: int  # L_max
+    trapping_time: float  # Average length of vertical lines (TT)
 
 
 @dataclass
@@ -601,14 +616,12 @@ class StatisticalAnalyzer:
 
         # CoP Path Length
         cop_diff = np.diff(self.cop_position, axis=0)
-        # Reuse distance computation for path length and velocity
+        # OPTIMIZATION: Reuse distance computation for path length and velocity
         cop_dist = np.linalg.norm(cop_diff, axis=1)
         path_length = np.sum(cop_dist)
 
         # CoP Velocity
-        # cop_vel = cop_diff / self.dt
-        # max_vel = np.max(np.linalg.norm(cop_vel, axis=1))
-        # OPTIMIZATION: Use pre-computed distance to avoid redundant allocations and norm calc
+        # OPTIMIZATION: Use pre-computed distance norm to avoid redundant allocations
         max_vel = np.max(cop_dist) / self.dt
 
         # CoP Range
@@ -1486,6 +1499,133 @@ class StatisticalAnalyzer:
 
         dist = np.sqrt(d_pos**2 + d_vel**2)
         return float(np.sum(dist))
+
+    def compute_recurrence_matrix(
+        self,
+        threshold_ratio: float = 0.1,
+        metric: str = "euclidean",
+    ) -> np.ndarray[tuple[int, int], np.dtype[np.int_]]:
+        """Compute Recurrence Plot matrix.
+
+        Constructs a phase space state vector from all joint positions and velocities,
+        normalizes it, and calculates the binary recurrence matrix.
+
+        Args:
+            threshold_ratio: Threshold distance as ratio of max phase space diameter.
+            metric: Distance metric (e.g., 'euclidean', 'cityblock').
+
+        Returns:
+            Binary recurrence matrix (N, N).
+        """
+        if (
+            self.joint_positions.shape[1] == 0
+            or self.joint_velocities.shape[1] == 0
+            or len(self.times) < 2
+        ):
+            return np.array([], dtype=np.int_)
+
+        # 1. Construct State Vector [positions, velocities]
+        # (N, 2*nq)
+        state_vec = np.hstack((self.joint_positions, self.joint_velocities))
+
+        # 2. Normalize features (Z-score) to handle different units/scales
+        mean = np.mean(state_vec, axis=0)
+        std = np.std(state_vec, axis=0)
+        # Avoid division by zero for constant features
+        std[std < 1e-6] = 1.0
+        normalized_state = (state_vec - mean) / std
+
+        # 3. Compute Distance Matrix
+        dists = pdist(normalized_state, metric=metric)
+        dist_matrix = squareform(dists)
+
+        # 4. Determine Threshold
+        if threshold_ratio is None:
+            threshold_ratio = 0.1
+        threshold = threshold_ratio * np.max(dist_matrix)
+
+        # 5. Thresholding
+        recurrence_matrix = (dist_matrix < threshold).astype(np.int_)
+
+        return cast(np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix)
+
+    def compute_rqa_metrics(
+        self,
+        recurrence_matrix: np.ndarray,
+        min_line_length: int = 2,
+    ) -> RQAMetrics | None:
+        """Compute Recurrence Quantification Analysis (RQA) metrics.
+
+        Args:
+            recurrence_matrix: Binary recurrence matrix (N, N)
+            min_line_length: Minimum length to consider a line (diagonal/vertical)
+
+        Returns:
+            RQAMetrics object or None
+        """
+        if recurrence_matrix.size == 0:
+            return None
+
+        N = recurrence_matrix.shape[0]
+        if N < 2:
+            return None
+
+        # 1. Recurrence Rate (RR)
+        # Exclude main diagonal? Often yes, RQA usually excludes LOI (Line of Identity).
+        # But simple density includes it or excludes it. Standard is excluding.
+        # But if matrix includes 1s on diagonal, we subtract N.
+        n_recurrence_points = np.sum(recurrence_matrix) - N
+        rr = n_recurrence_points / (N * N - N) if N > 1 else 0.0
+
+        # 2. Diagonal Lines (Determinism)
+        # Extract diagonals
+        # We need to scan diagonals k=1 to N-1
+        diagonal_lengths: list[int] = []
+        for k in range(1, N):
+            diag = np.diagonal(recurrence_matrix, offset=k)
+            # Find lengths of consecutive 1s
+            # Pad with 0 to find edges
+            d = np.concatenate(([0], diag, [0]))
+            diffs = np.diff(d)
+            starts = np.where(diffs == 1)[0]
+            ends = np.where(diffs == -1)[0]
+            lengths = ends - starts
+            diagonal_lengths.extend(lengths[lengths >= min_line_length])
+
+        n_diag_points = np.sum(diagonal_lengths)
+        det = n_diag_points / n_recurrence_points if n_recurrence_points > 0 else 0.0
+        l_max = np.max(diagonal_lengths) if len(diagonal_lengths) > 0 else 0
+
+        # 3. Vertical Lines (Laminarity)
+        # Scan columns
+        vertical_lengths: list[int] = []
+        for i in range(N):
+            col = recurrence_matrix[:, i].copy()
+            # To be consistent with Recurrence Rate (which excludes LOI),
+            # we should exclude the main diagonal point (i, i) from vertical line analysis?
+            # Standard RQA often includes LOI in RR, but my implementation of RR excludes it.
+            # If we exclude LOI from denominator, we must exclude it from numerator (vertical points).
+            # Let's zero out the diagonal point for vertical line detection to keep it consistent < 1.
+            col[i] = 0
+
+            c = np.concatenate(([0], col, [0]))
+            diffs = np.diff(c)
+            starts = np.where(diffs == 1)[0]
+            ends = np.where(diffs == -1)[0]
+            lengths = ends - starts
+            vertical_lengths.extend(lengths[lengths >= min_line_length])
+
+        n_vert_points = np.sum(vertical_lengths)
+        lam = n_vert_points / n_recurrence_points if n_recurrence_points > 0 else 0.0
+        tt = np.mean(vertical_lengths) if len(vertical_lengths) > 0 else 0.0
+
+        return RQAMetrics(
+            recurrence_rate=float(rr),
+            determinism=float(det),
+            laminarity=float(lam),
+            longest_diagonal_line=int(l_max),
+            trapping_time=float(tt),
+        )
 
     def export_statistics_csv(
         self,
