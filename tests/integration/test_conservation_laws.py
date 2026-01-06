@@ -8,8 +8,8 @@ Tests fundamental physics constraints that must hold for any valid simulation:
 Per Assessment B recommendations and Guideline O3 requirements.
 """
 
-import pytest
 import numpy as np
+import pytest
 
 # Skip if engines not available
 pytest.importorskip("mujoco", reason="MuJoCo required for conservation tests")

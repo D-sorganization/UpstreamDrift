@@ -8,10 +8,11 @@ This module provides automated cross-engine validation to ensure MuJoCo, Drake,
 and Pinocchio produce consistent results within specified tolerances.
 """
 
+import logging
 from dataclasses import dataclass
 from typing import Literal
+
 import numpy as np
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +20,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ValidationResult:
     """Result of cross-engine validation.
-    
+
     Attributes:
         passed: Whether validation passed (deviation within tolerance)
         metric_name: Name of the metric being compared (e.g., "position", "torque")
@@ -29,7 +30,7 @@ class ValidationResult:
         engine2: Name of second engine
         message: Detailed message (empty if passed, error description if failed)
     """
-    
+
     passed: bool
     metric_name: str
     max_deviation: float
@@ -41,14 +42,14 @@ class ValidationResult:
 
 class CrossEngineValidator:
     """Validates numerical consistency across physics engines.
-    
+
     Implements tolerance-based validation per Guideline P3:
     - Positions: ±1e-6 m
     - Velocities: ±1e-5 m/s
     - Accelerations: ±1e-4 m/s²
     - Torques: ±1e-3 N⋅m (or <10% RMS for large magnitudes)
     - Jacobians: ±1e-8 (element-wise)
-    
+
     Example:
         >>> validator = CrossEngineValidator()
         >>> mujoco_pos = np.array([1.0, 2.0, 3.0])
@@ -62,7 +63,7 @@ class CrossEngineValidator:
         >>> print(f"Deviation: {result.max_deviation:.2e}")
         Deviation: 1.00e-07
     """
-    
+
     # Tolerance specifications from Guideline P3
     TOLERANCES = {
         "position": 1e-6,       # meters
@@ -71,7 +72,7 @@ class CrossEngineValidator:
         "torque": 1e-3,         # N⋅m
         "jacobian": 1e-8,       # dimensionless
     }
-    
+
     def compare_states(
         self,
         engine1_name: str,
@@ -81,17 +82,17 @@ class CrossEngineValidator:
         metric: Literal["position", "velocity", "acceleration", "torque", "jacobian"] = "position",
     ) -> ValidationResult:
         """Compare states from two engines against tolerance targets.
-        
+
         Args:
             engine1_name: Name of first engine (e.g., "MuJoCo")
             engine1_state: State array from first engine
             engine2_name: Name of second engine (e.g., "Drake")
             engine2_state: State array from second engine
             metric: Type of metric being compared (determines tolerance)
-        
+
         Returns:
             ValidationResult with pass/fail status and deviation details
-        
+
         Raises:
             ValueError: If metric is not recognized
         """
@@ -99,7 +100,7 @@ class CrossEngineValidator:
             raise ValueError(
                 f"Unknown metric '{metric}'. Valid metrics: {list(self.TOLERANCES.keys())}"
             )
-        
+
         # Shape consistency check
         if engine1_state.shape != engine2_state.shape:
             return ValidationResult(
@@ -111,14 +112,14 @@ class CrossEngineValidator:
                 engine2=engine2_name,
                 message=f"Shape mismatch: {engine1_state.shape} vs {engine2_state.shape}"
             )
-        
+
         # Compute deviation
         deviation = np.abs(engine1_state - engine2_state)
         max_dev = np.max(deviation)
         tol = self.TOLERANCES[metric]
-        
+
         passed = max_dev <= tol
-        
+
         # Detailed logging per Guideline P3
         if not passed:
             logger.error(
@@ -145,7 +146,7 @@ class CrossEngineValidator:
                 f"  Metric: {metric}\n"
                 f"  Max deviation: {max_dev:.2e} < tolerance: {tol:.2e}"
             )
-        
+
         return ValidationResult(
             passed=passed,
             metric_name=metric,
@@ -155,7 +156,7 @@ class CrossEngineValidator:
             engine2=engine2_name,
             message="" if passed else f"Deviation {max_dev:.2e} exceeds tolerance {tol:.2e}"
         )
-    
+
     def compare_torques_with_rms(
         self,
         engine1_name: str,
@@ -165,17 +166,17 @@ class CrossEngineValidator:
         rms_threshold_pct: float = 10.0,
     ) -> ValidationResult:
         """Compare torques with RMS percentage threshold.
-        
+
         For large torque magnitudes, a percentage-based RMS comparison is more
         appropriate than absolute tolerance. Per Guideline P3: <10% RMS difference.
-        
+
         Args:
             engine1_name: Name of first engine
             engine1_torques: Torque array from first engine [N⋅m]
             engine2_name: Name of second engine
             engine2_torques: Torque array from second engine [N⋅m]
             rms_threshold_pct: Maximum allowed RMS difference as percentage (default: 10%)
-        
+
         Returns:
             ValidationResult with RMS comparison details
         """
@@ -189,18 +190,18 @@ class CrossEngineValidator:
                 engine2=engine2_name,
                 message=f"Shape mismatch: {engine1_torques.shape} vs {engine2_torques.shape}"
             )
-        
+
         # RMS difference
         rms_diff = np.sqrt(np.mean((engine1_torques - engine2_torques)**2))
         rms_mag = np.sqrt(np.mean(engine1_torques**2))
-        
+
         if rms_mag < 1e-10:  # Avoid division by zero
             rms_pct = 0.0 if rms_diff < 1e-10 else 100.0
         else:
             rms_pct = 100.0 * rms_diff / rms_mag
-        
+
         passed = rms_pct < rms_threshold_pct
-        
+
         if not passed:
             logger.error(
                 f"❌ Torque RMS difference EXCEEDS threshold (Guideline P3 VIOLATION):\n"
@@ -216,7 +217,7 @@ class CrossEngineValidator:
                 f"  Engines: {engine1_name} vs {engine2_name}\n"
                 f"  RMS difference: {rms_pct:.2f}% < threshold: {rms_threshold_pct:.2f}%"
             )
-        
+
         return ValidationResult(
             passed=passed,
             metric_name="torque_rms",
