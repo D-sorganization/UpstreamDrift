@@ -2094,7 +2094,9 @@ class GolfSwingPlotter:
         joint_name = self.get_joint_name(joint_idx)
         ax.set_xlabel(f"{joint_name} Angle (deg)", fontsize=12, fontweight="bold")
         ax.set_ylabel(f"{joint_name} Velocity (deg/s)", fontsize=12, fontweight="bold")
-        ax.set_title(f"Phase Space Density: {joint_name}", fontsize=14, fontweight="bold")
+        ax.set_title(
+            f"Phase Space Density: {joint_name}", fontsize=14, fontweight="bold"
+        )
 
         fig.colorbar(h[3], ax=ax, label="Count")
         fig.tight_layout()
