@@ -8,6 +8,103 @@ Repository contents (code, config, tests, docs).
 
 Context: The domain is scientific modeling (e.g., biomechanics, robotics, signal processing).
 
+### **MANDATORY SCOPE: Golf Modeling Suite Scientific Components**
+
+You **MUST** explicitly review the scientific correctness, numerical stability, and physical modeling rigor of **ALL** of the following components:
+
+#### Physics Engine Implementations (Primary Scientific Focus)
+1. **MuJoCo Engine** (`engines/physics_engines/mujoco/python/mujoco_humanoid_golf/`):
+   - Forward/inverse dynamics implementation
+   - Manipulability ellipsoid mathematics (`manipulability.py`)
+   - Induced acceleration decomposition (`rigid_body_dynamics/induced_acceleration.py`)
+   - Jacobian computations and conditioning
+   - Numerical integration schemes
+   - Constraint handling and stabilization
+   - Unit consistency (SI units enforcement)
+
+2. **Drake Engine** (`engines/physics_engines/drake/python/`):
+   - MultibodyPlant integration correctness
+   - Manipulability analysis (`src/manipulability.py`)
+   - Induced acceleration (`src/induced_acceleration.py`)
+   - Cross-validation with MuJoCo/Pinocchio
+   - Numerical tolerances and solver settings
+
+3. **Pinocchio Engine** (`engines/physics_engines/pinocchio/python/`):
+   - RNEA (Recursive Newton-Euler) implementation
+   - CRBA (Composite Rigid Body Algorithm)
+   - Counterfactual dynamics (`dtack/sim/dynamics.py`):
+     - Zero-torque counterfactual (ZTCF)
+     - Zero-velocity counterfactual (ZVCF)
+   - Drift-control decomposition correctness
+   - Frame transformations and coordinate systems
+   - Jacobian consistency with other engines
+
+4. **Pendulum Models** (`engines/pendulum_models/python/`):
+   - Symbolic Euler-Lagrange derivations
+   - Closed-form dynamics solutions
+   - Numerical accuracy as reference implementation
+   - Cross-engine validation benchmarks
+
+#### Motion Capture & Biomechanics
+5. **C3D Data Processing** (`engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/c3d_reader.py`):
+   - Unit conversion correctness (mm ↔ m)
+   - Time synchronization and resampling
+   - Residual filtering and NaN handling
+   - Numerical precision in marker trajectories
+
+6. **MATLAB Simscape Models** (`engines/Simscape_Multibody_Models/`):
+   - Simulink integration correctness
+   - Python-MATLAB data exchange precision
+   - Coordinate frame consistency
+   - Numerical solver settings
+
+#### Cross-Engine Validation
+7. **Unified Interface** (`shared/python/interfaces.py`):
+   - API consistency across engines
+   - State representation compatibility
+   - Numerical tolerance specifications
+
+8. **Cross-Engine Tests** (`tests/integration/test_physics_engines_strict.py`):
+   - Tolerance targets for kinematics, dynamics, Jacobians
+   - Deviation reporting and root cause analysis
+   - Reference implementation validation
+
+### Scientific Assessment Requirements
+
+For **EACH** physics engine and scientific component, you must:
+
+**Dimensional Analysis:**
+- Verify all physical quantities have correct units
+- Check for unit mixing (mm/m, deg/rad, N/N·m)
+- Validate dimensional consistency in equations
+- Identify magic numbers without units/sources
+
+**Numerical Stability:**
+- Audit integration schemes (timestep selection, solver order)
+- Check singularity handling (Jacobian conditioning, gimbal lock)
+- Verify NaN/Inf propagation detection
+- Assess floating-point precision loss
+
+**Physical Correctness:**
+- Validate conservation laws (energy, momentum, mass)
+- Check coordinate frame transformations
+- Verify constraint satisfaction (closed loops, joint limits)
+- Assess drift-control decomposition closure (drift + control = total)
+
+**Cross-Engine Consistency:**
+- Compare forward dynamics outputs (positions, velocities, accelerations)
+- Validate inverse dynamics torques across engines
+- Check Jacobian element-wise agreement
+- Verify manipulability metrics consistency
+
+**Vectorization & Performance:**
+- Identify Python loops that should be NumPy operations
+- Check for unnecessary array copies
+- Audit matrix operations (use `solve()` not `inv()`)
+- Verify GIL management for CPU-bound tasks
+
+**Failure to comprehensively assess the scientific rigor of all listed components will result in an incomplete review.**
+
 Your output must be ruthless, structured, and specific
 Do not be polite. Do not generalize. Do not say “looks good.” Every claim must cite exact files, lines, and mathematical operations. Prefer “proof”: numerical failure modes, unit mismatches, memory leaks, or vectorization failures.
 
