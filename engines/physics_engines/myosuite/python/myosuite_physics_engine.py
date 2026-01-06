@@ -221,3 +221,197 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         except Exception as e:
             LOGGER.error("Failed to compute Jacobian for body '%s': %s", body_name, e)
             return None
+
+    # -------- Section F: Drift-Control Decomposition --------
+
+    def compute_drift_acceleration(self) -> np.ndarray:
+        """Compute passive (drift) acceleration with zero muscle activations.
+
+        Section F Implementation: Uses MuJoCo forward dynamics with zero muscle activations
+        to isolate passive dynamics (gravity + Coriolis + constraints).
+
+        Returns:
+            q_ddot_drift: Drift acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        if not self.sim:
+            LOGGER.warning("Simulation not initialized")
+            return np.array([])
+
+        try:
+            import mujoco
+
+            # Save current activations/controls
+            ctrl_saved = self.sim.data.ctrl.copy()
+
+            # Set all muscle activations to zero
+            self.sim.data.ctrl[:] = 0.0
+
+            # Compute forward dynamics
+            mujoco.mj_forward(self.sim.model, self.sim.data)
+
+            # Extract drift acceleration
+            a_drift = self.sim.data.qacc.copy()
+
+            # Restore original controls
+            self.sim.data.ctrl[:] = ctrl_saved
+            mujoco.mj_forward(self.sim.model, self.sim.data)
+
+            return a_drift
+
+        except Exception as e:
+            LOGGER.error(f"Failed to compute drift acceleration: {e}")
+            return np.array([])
+
+    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
+        """Compute control-attributed acceleration from muscle activations.
+
+        Section F Implementation: Computes M(q)^-1 * tau to isolate control component.
+
+        Args:
+            tau: Applied generalized forces (nv,) [N·m or N]
+
+        Returns:
+            q_ddot_control: Control acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        if not self.sim:
+            LOGGER.warning("Simulation not initialized")
+            return np.array([])
+
+        try:
+            # Get mass matrix
+            M = self.compute_mass_matrix()
+            if M.size == 0:
+                return np.array([])
+
+            # Control component: M^-1 * tau
+            a_control = np.linalg.solve(M, tau)
+            return a_control
+
+        except Exception as e:
+            LOGGER.error(f"Failed to compute control acceleration: {e}")
+            return np.zeros_like(tau)
+
+    # -------- Section K: MyoSuite Muscle Integration --------
+
+    def get_muscle_analyzer(self):
+        """Get muscle analyzer for biomechanical analysis.
+
+        Section K: Provides access to muscle-specific analysis capabilities.
+
+        Returns:
+            MyoSuiteMuscleAnalyzer instance or None if sim not ready
+        """
+        if not self.sim:
+            LOGGER.warning("Cannot create muscle analyzer - simulation not initialized")
+            return None
+
+        try:
+            from .muscle_analysis import MyoSuiteMuscleAnalyzer
+
+            return MyoSuiteMuscleAnalyzer(self.sim)
+        except ImportError as e:
+            LOGGER.error(f"Failed to import muscle analyzer: {e}")
+            return None
+
+    def create_grip_model(self):
+        """Create grip modeling interface.
+
+        Section K1: Provides activation-driven grip force analysis.
+
+        Returns:
+            MyoSuiteGripModel instance or None if analyzer not ready
+        """
+        analyzer = self.get_muscle_analyzer()
+        if analyzer is None:
+            LOGGER.warning("Cannot create grip model - muscle analyzer not available")
+            return None
+
+        try:
+            from .muscle_analysis import MyoSuiteGripModel
+
+            return MyoSuiteGripModel(self.sim, analyzer)
+        except ImportError as e:
+            LOGGER.error(f"Failed to import grip model: {e}")
+            return None
+
+    def set_muscle_activations(self, activations: dict[str, float]) -> None:
+        """Set muscle activation levels by name.
+
+        Section K: Neural control interface for muscle-driven simulation.
+
+        Args:
+            activations: Dictionary mapping muscle names to activation [0-1]
+        """
+        analyzer = self.get_muscle_analyzer()
+        if analyzer is None:
+            LOGGER.warning("Cannot set activations - muscle analyzer unavailable")
+            return
+
+        # Map muscle names to actuator indices
+        for muscle_name, activation in activations.items():
+            try:
+                idx = analyzer.muscle_names.index(muscle_name)
+                actuator_id = analyzer.muscle_actuator_ids[idx]
+
+                # Clip to valid range
+                activation_clamped = max(0.0, min(1.0, activation))
+
+                # Set control
+                if actuator_id < len(self.sim.data.ctrl):
+                    self.sim.data.ctrl[actuator_id] = activation_clamped
+
+            except ValueError:
+                LOGGER.warning(f"Muscle '{muscle_name}' not found")
+            except Exception as e:
+                LOGGER.error(f"Failed to set activation for '{muscle_name}': {e}")
+
+    def compute_muscle_induced_accelerations(self) -> dict[str, np.ndarray]:
+        """Compute acceleration contributions from each muscle.
+
+        Section K Requirement: Muscle contribution to joint accelerations.
+
+        Returns:
+            Dictionary mapping muscle names to induced accelerations [rad/s²]
+        """
+        analyzer = self.get_muscle_analyzer()
+        if analyzer is None:
+            return {}
+
+        return analyzer.compute_muscle_induced_accelerations()
+
+    def analyze_muscle_contributions(self):
+        """Full muscle contribution analysis.
+
+        Section K Requirement: Comprehensive muscle reports (forces, moments, power).
+
+        Returns:
+            MyoSuiteMuscleAnalysis object with all muscle metrics
+        """
+        analyzer = self.get_muscle_analyzer()
+        if analyzer is None:
+            LOGGER.warning("Cannot analyze muscles - analyzer not available")
+            return None
+
+        return analyzer.analyze_all()
+
+    def get_muscle_state(self):
+        """Get current muscle state.
+
+        Section K: Muscle state for monitoring and control.
+
+        Returns:
+            MyoSuiteMuscleState with activations, forces, lengths, velocities
+        """
+        analyzer = self.get_muscle_analyzer()
+        if analyzer is None:
+            return None
+
+        from .muscle_analysis import MyoSuiteMuscleState
+
+        return MyoSuiteMuscleState(
+            muscle_names=analyzer.muscle_names,
+            activations=analyzer.get_muscle_activations(),
+            forces=analyzer.get_muscle_forces(),
+            lengths=analyzer.get_muscle_lengths(),
+            velocities=analyzer.get_muscle_velocities(),
+        )
