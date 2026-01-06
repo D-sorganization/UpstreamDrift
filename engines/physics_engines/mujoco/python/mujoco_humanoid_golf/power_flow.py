@@ -418,10 +418,22 @@ class PowerFlowAnalyzer:
         axes[0].plot(times, power, 'b-', linewidth=2)
         axes[0].axhline(y=0, color='gray', linestyle='-', alpha=0.5)
         axes[0].fill_between(
-            times, 0, power, where=(power >= 0), alpha=0.3, color='green', label='Positive (generation)'
+            times,
+            0,
+            power,
+            where=(power >= 0),
+            alpha=0.3,
+            color="green",
+            label="Positive (generation)",
         )
         axes[0].fill_between(
-            times, 0, power, where=(power < 0), alpha=0.3, color='red', label='Negative (absorption)'
+            times,
+            0,
+            power,
+            where=(power < 0),
+            alpha=0.3,
+            color="red",
+            label="Negative (absorption)",
         )
         axes[0].set_ylabel('Power [W]')
         axes[0].legend()

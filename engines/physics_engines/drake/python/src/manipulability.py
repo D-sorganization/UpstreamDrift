@@ -158,7 +158,8 @@ class DrakeManipulabilityAnalyzer:
                         f"❌ Jacobian is singular for {name}: κ={cond:.2e}. "
                         f"Guideline O3 VIOLATION - system at kinematic singularity."
                     )
-                    # Drake: Continue instead of raising to allow processing other bodies
+                    # Drake: Continue instead of raising to allow
+                    # processing other bodies
                     continue
 
                 # Isotropy (1/cond)
