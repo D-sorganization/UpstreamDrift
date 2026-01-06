@@ -177,6 +177,34 @@ class C3DDataReader:
 
         raw_coordinates = np.transpose(points[:3, :, :], axes=(2, 1, 0)).reshape(-1, 3)
         coordinates = raw_coordinates * self._unit_scale(metadata.units, target_units)
+
+        # Guideline P1: Unit Validation - Prevent 1000x errors from mm/m confusion
+        # Biomechanical markers should be in range [0.001m, 10m] (1mm to 10m)
+        if coordinates.size > 0:  # Only validate if we have data
+            min_pos = np.nanmin(coordinates)
+            max_pos = np.nanmax(coordinates)
+
+            if min_pos < 0.001:
+                logger.warning(
+                    "⚠️ Suspiciously small marker positions detected (<%1mm). "
+                    f"Min position: {min_pos:.6f}. "
+                    f"Source units: {metadata.units}, target: {target_units or 'unchanged'}. "
+                    "Guideline P1: Verify unit conversion is correct to avoid 1000x errors."
+                )
+
+            if max_pos > 10.0:
+                logger.error(
+                    "❌ Unrealistic marker positions detected (>10m). "
+                    f"Max position: {max_pos:.2f}. "
+                    f"Source units: {metadata.units}, target: {target_units or 'unchanged'}. "
+                    "Guideline P1 VIOLATION: Likely unit conversion error."
+                )
+                raise ValueError(
+                    f"Marker positions exceed 10m (max: {max_pos:.2f}m) - likely unit error. "
+                    f"Check that source units '{metadata.units}' are correct. "
+                    "Common issue: mm labeled as m or vice versa."
+                )
+
         residuals = points[3, :, :].T.reshape(-1)
 
         if residual_nan_threshold is not None:
