@@ -1,101 +1,34 @@
-r1) Here’s a “drop-in” prompt you can give to any AI reviewer (or a human) to evaluate a large Python project like a top-tier staff/principal engineer doing a brutal architecture + code review. It forces concrete evidence, scoring, prioritization, and actionable fixes—not vibes.
+## Ultra-Critical Python Project Review Prompt - Executive Summary Format
 
----
+You are a **principal/staff-level Python engineer and software architect** doing an **adversarial, evidence-based** review of a large Python project. Your job is to **find weaknesses, risks, and quality gaps** the way a top company's internal review board would. Assume this project may go into production and be maintained for years by multiple engineers.
 
-## Ultra-Critical Python Project Review Prompt (copy/paste)
-
-You are a **principal/staff-level Python engineer and software architect** doing an **adversarial, evidence-based** review of a large Python project. Your job is to **find weaknesses, risks, and quality gaps** the way a top company’s internal review board would. Assume this project may go into production and be maintained for years by multiple engineers.
+**IMPORTANT: Generate an EXECUTIVE SUMMARY format** - focus on actionable findings, critical risks, and concrete remediation plans rather than exhaustive cataloging.
 
 ### Inputs I will provide
 
 * Repository contents (code, config, tests, docs)
+* **Project Design Guidelines**: `docs/project_design_guidelines.qmd` - **MANDATORY reference document**
 * Optional: requirements/feature goals, target users, deployment environment, performance/SLA needs
 
-### **MANDATORY SCOPE: Golf Modeling Suite Project Components**
+### **PRIMARY OBJECTIVE: Gap Analysis Against Design Guidelines**
 
-You **MUST** explicitly review and assess **ALL** of the following project components. Do not skip or superficially cover any area:
+You **MUST** compare the current implementation against the requirements specified in `docs/project_design_guidelines.qmd` (sections A-M for feature requirements, N-S for technical standards). For **EACH** requirement section, explicitly state:
 
-#### Physics Engine Implementations (Primary Focus)
-1. **MuJoCo Engine**: `engines/physics_engines/mujoco/python/mujoco_humanoid_golf/`
-   - Physics engine integration (`physics_engine.py`)
-   - Manipulability analysis (`manipulability.py`)
-   - Induced acceleration (`rigid_body_dynamics/induced_acceleration.py`)
-   - Inverse dynamics (`inverse_dynamics.py`)
-   - Advanced kinematics (`advanced_kinematics.py`, `kinematic_forces.py`)
-   - Motion capture integration (`motion_capture.py`, `motion_optimization.py`)
-   - GUI components (`gui/`, `sim_widget.py`)
-   - Verification and testing (`verification.py`, `tests/`)
+1. **Implementation Status**: Fully implemented / Partially implemented / Not implemented / Non-compliant
+2. **Gap Analysis**: What's missing or deviates from guidelines
+3. **Risk Level**: BLOCKER / CRITICAL / MAJOR / MINOR
+4. **Remediation Priority**: Immediate (48h) / Short-term (2w) / Long-term (6w)
 
-2. **Drake Engine**: `engines/physics_engines/drake/python/`
-   - Physics engine implementation (`drake_physics_engine.py`)
-   - Manipulability analysis (`src/manipulability.py`)
-   - Induced acceleration (`src/induced_acceleration.py`)
-   - GUI application (`src/drake_gui_app.py`)
+**Example Output Format**:
 
-3. **Pinocchio Engine**: `engines/physics_engines/pinocchio/python/`
-   - Physics engine implementation (`pinocchio_physics_engine.py`)
-   - Manipulability analysis (`pinocchio_golf/manipulability.py`)
-   - GUI components (`pinocchio_golf/gui.py`)
-   - DTACK framework (`dtack/` - dynamics, backends, simulation)
-   - Utility modules (`dtack/utils/`)
-
-4. **OpenSim Engine**: `engines/physics_engines/opensim/python/`
-   - Current implementation status and stubs
-   - Integration architecture
-
-5. **MyoSuite Engine**: `engines/physics_engines/myosuite/python/`
-   - Current implementation status and stubs
-   - Muscle model integration plans
-
-#### C3D Motion Capture System
-6. **C3D Reader & Viewer**: `engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/`
-   - C3D data reader (`c3d_reader.py`)
-   - C3D viewer application (`apps/c3d_viewer.py`)
-   - Data services (`apps/services/c3d_loader.py`, `analysis.py`)
-   - UI components (`apps/ui/tabs/`)
-   - Testing (`tests/test_c3d_*.py`)
-
-#### MATLAB Simscape Simulink Models
-7. **Simscape Multibody Models**: `engines/Simscape_Multibody_Models/`
-   - MATLAB model implementations
-   - Python-MATLAB integration
-   - Simulink model architecture
-   - Data plotters and analysis tools
-
-#### Shared Infrastructure
-8. **Shared Python Utilities**: `shared/python/`
-   - Physics engine interfaces (`interfaces.py`)
-   - Common constants and utilities
-   - Cross-engine compatibility layers
-
-9. **URDF Tools**: `tools/urdf_generator/`
-   - URDF builder and generator
-   - Model validation
-   - Cross-engine URDF compatibility
-
-10. **Testing Infrastructure**: `tests/`
-    - Unit tests (`tests/unit/`)
-    - Integration tests (`tests/integration/`)
-    - Cross-engine validation tests
-    - Headless GUI tests
-
-#### Documentation & Standards
-11. **Project Documentation**: `docs/`
-    - Design guidelines (`project_design_guidelines.qmd`)
-    - Assessment results (`assessments/`)
-    - Architecture documentation
-    - User guides and API references
-
-### Assessment Coverage Requirements
-
-For **EACH** of the components listed above, you must:
-- Identify the top 3 risks specific to that component
-- Evaluate architecture and code quality
-- Check for cross-component integration issues
-- Verify testing coverage and quality
-- Assess adherence to project-specific standards (see `docs/project_design_guidelines.qmd`)
-
-**Failure to comprehensively cover all listed components will result in an incomplete assessment.**
+```
+Requirement C1 (Jacobians Everywhere):
+- Status: Partially implemented (MuJoCo ✅, Drake ✅, Pinocchio ✅)
+- Gap: Missing real-time conditioning warnings (guideline C2)
+- Risk: CRITICAL - silent failures near singularities
+- Priority: Immediate - add κ>1e6 warning threshold
+- Fix: 2 hours effort, add to manipulability.py
+```
 
 ### Your output must be ruthless, structured, and specific
 

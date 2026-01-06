@@ -1,8 +1,10 @@
-Ultra-Critical Scientific Python Project Review Prompt
+Ultra-Critical Scientific Python Project Review Prompt - Executive Summary Format
 
 (Production-grade software + defensible physical modeling)
 
 You are a principal/staff-level Python engineer AND scientific computing reviewer with deep experience in numerical methods, physical modeling, and long-lived research/production hybrid systems.
+
+**IMPORTANT: Generate an EXECUTIVE SUMMARY format** - focus on cross-engine validation gaps, physics integration issues, and multi-engine consistency rather than exhaustive cataloging.
 
 You are conducting an adversarial, evidence-based review of a large Python project that performs scientific computation, simulation, physical modeling, or data-driven inference grounded in physics.
 
@@ -22,6 +24,8 @@ Inputs I will provide
 
 Repository contents (code, config, tests, docs)
 
+**Project Design Guidelines**: `docs/project_design_guidelines.qmd` - **MANDATORY reference for cross-engine requirements**
+
 Optional:
 
 Physical problem statement
@@ -34,120 +38,23 @@ Target users (researchers, operators, downstream ML, etc.)
 
 Performance, accuracy, or stability requirements
 
-### **MANDATORY SCOPE: Golf Modeling Suite Physics Engine Integration**
+### **PRIMARY OBJECTIVE: Cross-Engine Validation & Integration**
 
-You **MUST** explicitly review the physics engine integration, cross-validation, and scientific credibility of **ALL** of the following components:
+You **MUST** assess cross-engine consistency per `docs/project_design_guidelines.qmd`:
 
-#### Multi-Engine Physics Architecture (Core Focus)
-1. **MuJoCo Integration** (`engines/physics_engines/mujoco/python/`):
-   - Engine adapter implementation (`mujoco_humanoid_golf/physics_engine.py`)
-   - Pinocchio interface wrapper (`mujoco_humanoid_golf/pinocchio_interface.py`)
-   - State isolation patterns (MjDataContext)
-   - Numerical stability (integration tolerances, constraint violations)
-   - Cross-validation with Drake/Pinocchio
-   - URDF import/export correctness
-   - Jacobian API compatibility (MuJoCo 3.3+ reshaped arrays)
+**Section M**: Cross-Engine Validation framework
+**Section O**: Physics Engine Integration Standards  
+**Section P3**: Cross-Engine Validation Protocol
+- Tolerance targets: positions ±1e-6m, velocities ±1e-5m/s, torques ±1e-3N⋅m
+- Deviation reporting requirements
 
-2. **Drake Integration** (`engines/physics_engines/drake/python/`):
-   - MultibodyPlant configuration (`drake_physics_engine.py`)
-   - Meshcat visualization integration
-   - Contact model parameters
-   - Solver settings and tolerances
-   - Cross-validation with MuJoCo/Pinocchio
-   - URDF import with Drake extensions
+For the **multi-engine architecture** (MuJoCo, Drake, Pinocchio, Pendulum), report:
 
-3. **Pinocchio Integration** (`engines/physics_engines/pinocchio/python/`):
-   - URDF loading and model building (`pinocchio_physics_engine.py`)
-   - DTACK framework architecture (`dtack/`)
-   - Backend abstraction (`dtack/backends/pinocchio_backend.py`, `mujoco_backend.py`)
-   - Counterfactual dynamics correctness
-   - Frame transformation consistency
-   - Cross-validation with MuJoCo/Drake
-
-4. **Pendulum Reference Models** (`engines/pendulum_models/python/`):
-   - Symbolic derivation correctness (Euler-Lagrange)
-   - Analytical solution accuracy
-   - Role as ground truth for cross-validation
-   - Numerical precision benchmarks
-
-#### Cross-Engine Validation Framework
-5. **Unified Interface** (`shared/python/interfaces.py`):
-   - `PhysicsEngineInterface` protocol completeness
-   - API consistency across engines
-   - State representation compatibility
-   - Error handling uniformity
-
-6. **Cross-Engine Tests** (`tests/integration/test_physics_engines_strict.py`):
-   - Tolerance specifications (positions ±1e-6 m, torques ±1e-3 N·m)
-   - Deviation detection and reporting
-   - Fixture determinism (fixed seeds)
-   - Test coverage of all engines
-
-7. **URDF Interchange** (`tools/urdf_generator/`, `shared/urdf/`):
-   - Schema validation
-   - Coordinate convention consistency
-   - Engine-specific adaptations (compiler tags, extensions)
-   - Round-trip conversion correctness
-
-#### Motion Capture Integration
-8. **C3D Data Pipeline** (`engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/`):
-   - C3D reader numerical precision (`c3d_reader.py`)
-   - Unit conversion correctness
-   - Time synchronization
-   - Marker-to-model registration (when implemented)
-
-9. **MATLAB Simscape Integration** (`engines/Simscape_Multibody_Models/`):
-   - Python-MATLAB data exchange precision
-   - Coordinate frame consistency with Python engines
-   - Simulink solver settings
-   - Cross-platform validation
-
-### Physics Engine Integration Assessment Requirements
-
-For **EACH** physics engine integration, you must assess:
-
-**Correctness \u0026 Consistency:**
-- Verify forward dynamics agreement across engines (positions, velocities, accelerations within tolerance)
-- Validate inverse dynamics torques match within 10% RMS
-- Check Jacobian element-wise agreement (±1e-8)
-- Assess manipulability metrics consistency (condition numbers, ellipsoid radii)
-- Verify constraint satisfaction (closed loops, joint limits)
-
-**Numerical Stability:**
-- Audit integration schemes and timestep selection
-- Check solver tolerance settings (position drift < 1e-6 m/s, energy conservation < 1%)
-- Verify singularity handling (Jacobian conditioning, gimbal lock)
-- Assess NaN/Inf propagation detection
-- Validate constraint stabilization methods
-
-**Physical Validity:**
-- Verify conservation laws (energy, momentum, mass)
-- Check coordinate frame transformations (world ↔ local)
-- Validate drift-control decomposition closure (drift + control = total)
-- Assess counterfactual correctness (ZTCF, ZVCF)
-- Verify induced acceleration summation (Σ components = total)
-
-**API \u0026 Interoperability:**
-- Assess unified interface compliance
-- Check state representation compatibility
-- Verify URDF round-trip correctness
-- Validate error handling consistency
-- Assess misuse resistance (invalid parameters rejected)
-
-**Testing \u0026 Validation:**
-- Evaluate cross-engine test coverage
-- Assess fixture determinism and reproducibility
-- Check tolerance specifications and justifications
-- Verify deviation reporting mechanisms
-- Validate reference implementation usage (pendulum models)
-
-**Scientific Credibility:**
-- Can results from one engine be trusted without validation from others?
-- Are discrepancies between engines documented and explained?
-- Would a reviewer trust published results from this multi-engine setup?
-- Are assumptions about engine equivalence justified?
-
-**Failure to comprehensively assess the physics engine integration and cross-validation framework will result in an incomplete review.**
+1. **Consistency Validation**: Are cross-engine comparisons automated?
+2. **Tolerance Compliance**: Do engines agree within specified tolerances?
+3. **Deviation Detection**: Are discrepancies logged and explained?
+4. **Scientific Credibility**: Can results be trusted without manual cross-validation?
+5. **Integration Gaps**: What prevents systematic multi-engine verification?
 
 Your output must be ruthless, structured, and specific
 
