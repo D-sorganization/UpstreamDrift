@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 try:
     import mujoco
+
     MUJOCO_AVAILABLE = True
 except ImportError:
     MUJOCO_AVAILABLE = False
@@ -23,7 +24,9 @@ except ImportError:
 
 # Constants for muscle analysis
 MJDYN_MUSCLE = 2  # MuJoCo dyntype constant for muscle actuators
-FINITE_DIFF_PERTURBATION = 1e-6  # Perturbation for finite difference moment arm computation [rad or m]
+FINITE_DIFF_PERTURBATION = (
+    1e-6  # Perturbation for finite difference moment arm computation [rad or m]
+)
 METABOLIC_ALPHA = 0.25  # Metabolic cost constant (dimensionless) - literature value
 MIN_MVC_GRIP_N = 200.0  # Minimum Maximum Voluntary Contraction grip force [N]
 MAX_MVC_GRIP_N = 800.0  # Maximum Maximum Voluntary Contraction grip force [N]
@@ -88,13 +91,15 @@ class MyoSuiteMuscleAnalyzer:
         """
         self.sim = sim
         self.model = model if model is not None else sim.model
-        self.data = sim.data if hasattr(sim, 'data') else sim
+        self.data = sim.data if hasattr(sim, "data") else sim
 
         # Identify muscle actuators
         self.muscle_actuator_ids = self._identify_muscle_actuators()
         self.muscle_names = self._get_muscle_names()
 
-        logger.info(f"MyoSuite analyzer found {len(self.muscle_names)} muscle actuators")
+        logger.info(
+            f"MyoSuite analyzer found {len(self.muscle_names)} muscle actuators"
+        )
 
     def _identify_muscle_actuators(self) -> list[int]:
         """Identify which actuators are muscles (vs motors/torques).
@@ -113,7 +118,7 @@ class MyoSuiteMuscleAnalyzer:
                 # Access actuator dyntype
                 # In mujoco-py: self.model.actuator_dyntype[i]
                 # In mujoco (newer): self.model.actuator_dyntype[i]
-                if hasattr(self.model, 'actuator_dyntype'):
+                if hasattr(self.model, "actuator_dyntype"):
                     dyntype = self.model.actuator_dyntype[i]
                     if dyntype == MJDYN_MUSCLE:  # mjDYN_MUSCLE
                         muscle_ids.append(i)
@@ -142,9 +147,7 @@ class MyoSuiteMuscleAnalyzer:
         try:
             for actuator_id in self.muscle_actuator_ids:
                 name = mujoco.mj_id2name(
-                    self.model,
-                    mujoco.mjtObj.mjOBJ_ACTUATOR,
-                    actuator_id
+                    self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, actuator_id
                 )
                 if name:
                     names.append(name)
@@ -165,7 +168,7 @@ class MyoSuiteMuscleAnalyzer:
         Returns:
             Array of activations [0-1] for each muscle
         """
-        if not self.data or not hasattr(self.data, 'act'):
+        if not self.data or not hasattr(self.data, "act"):
             logger.warning("Muscle activation data not available")
             return np.zeros(len(self.muscle_names))
 
@@ -198,7 +201,7 @@ class MyoSuiteMuscleAnalyzer:
         Returns:
             Array of muscle forces [N]
         """
-        if not self.data or not hasattr(self.data, 'actuator_force'):
+        if not self.data or not hasattr(self.data, "actuator_force"):
             logger.warning("Actuator force data not available")
             return np.zeros(len(self.muscle_names))
 
@@ -223,7 +226,7 @@ class MyoSuiteMuscleAnalyzer:
         Returns:
             Array of muscle lengths [m]
         """
-        if not self.data or not hasattr(self.data, 'actuator_length'):
+        if not self.data or not hasattr(self.data, "actuator_length"):
             logger.warning("Actuator length data not available")
             return np.zeros(len(self.muscle_names))
 
@@ -248,7 +251,7 @@ class MyoSuiteMuscleAnalyzer:
         Returns:
             Array of muscle velocities [m/s] (negative = shortening)
         """
-        if not self.data or not hasattr(self.data, 'actuator_velocity'):
+        if not self.data or not hasattr(self.data, "actuator_velocity"):
             return np.zeros(len(self.muscle_names))
 
         try:
@@ -393,7 +396,7 @@ class MyoSuiteMuscleAnalyzer:
             # P = F * v + a^2 * F_max * v_max * alpha
             # Where alpha is a metabolic constant (~0.25)
             mechanical_power = F * v
-            activation_cost = (a ** 2) * abs(mechanical_power) * METABOLIC_ALPHA
+            activation_cost = (a**2) * abs(mechanical_power) * METABOLIC_ALPHA
 
             power[muscle_name] = mechanical_power + activation_cost
 
@@ -454,8 +457,8 @@ class MyoSuiteGripModel:
             analyzer: Muscle analyzer for force computation
         """
         self.sim = sim
-        self.model = sim.model if hasattr(sim, 'model') else sim
-        self.data = sim.data if hasattr(sim, 'data') else sim
+        self.model = sim.model if hasattr(sim, "model") else sim
+        self.data = sim.data if hasattr(sim, "data") else sim
         self.analyzer = analyzer
 
     def get_grip_muscles(self) -> list[str]:
@@ -467,8 +470,15 @@ class MyoSuiteGripModel:
             List of muscle names related to grip
         """
         grip_keywords = [
-            'flexor', 'extensor', 'grip', 'hand', 'finger',
-            'thumb', 'index', 'intrinsic', 'lumbrical'
+            "flexor",
+            "extensor",
+            "grip",
+            "hand",
+            "finger",
+            "thumb",
+            "index",
+            "intrinsic",
+            "lumbrical",
         ]
 
         grip_muscles = []
@@ -518,17 +528,19 @@ class MyoSuiteGripModel:
                 grip_activations[muscle_name] = activations[idx]
 
         total_grip_force = sum(grip_forces.values())
-        mean_activation = np.mean(list(grip_activations.values())) if grip_activations else 0.0
+        mean_activation = (
+            np.mean(list(grip_activations.values())) if grip_activations else 0.0
+        )
 
         # Validation: MVC grip force 200-800 N (Section K1)
         within_mvc_range = MIN_MVC_GRIP_N <= total_grip_force <= MAX_MVC_GRIP_N
 
         return {
-            'total_grip_force_N': total_grip_force,
-            'mean_grip_activation': mean_activation,
-            'n_grip_muscles': len(grip_muscles),
-            'grip_muscles': grip_muscles,
-            'within_mvc_range': within_mvc_range,
-            'individual_forces': grip_forces,
-            'individual_activations': grip_activations,
+            "total_grip_force_N": total_grip_force,
+            "mean_grip_activation": mean_activation,
+            "n_grip_muscles": len(grip_muscles),
+            "grip_muscles": grip_muscles,
+            "within_mvc_range": within_mvc_range,
+            "individual_forces": grip_forces,
+            "individual_activations": grip_activations,
         }
