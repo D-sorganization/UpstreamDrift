@@ -18,6 +18,11 @@ except ImportError:
     opensim = None
     logger.warning("OpenSim not installed - muscle analysis unavailable")
 
+# Constants for muscle analysis
+NINETY_DEGREES_RAD = 1.5708  # π/2 radians for 90° rotation
+MIN_PHYSIOLOGICAL_GRIP_N = 50.0  # Minimum physiological grip force per hand [N]
+MAX_PHYSIOLOGICAL_GRIP_N = 200.0  # Maximum physiological grip force per hand [N]
+
 
 @dataclass
 class MuscleAnalysis:
@@ -189,9 +194,8 @@ class OpenSimMuscleAnalyzer:
 
             if muscle_name in moment_arms:
                 coord_idx = 0
-                for coord_name, moment_arm in moment_arms[muscle_name].items():
-                    # Torque = Force * MomentArm
-                    torques[coord_idx] = force * moment_arm
+                for _ in moment_arms[muscle_name].values():
+                    torques[coord_idx] = force * list(moment_arms[muscle_name].values())[coord_idx]
                     coord_idx += 1
 
             muscle_torques[muscle_name] = torques
@@ -328,7 +332,7 @@ class OpenSimGripModel:
             wrap_cylinder.set_translation(opensim.Vec3(location[0], location[1], location[2]))
 
             # Rotation: typically align cylinder with shaft axis (e.g., along Y)
-            wrap_cylinder.set_xyz_body_rotation(opensim.Vec3(0, 1.5708, 0))  # 90° about Y
+            wrap_cylinder.set_xyz_body_rotation(opensim.Vec3(0, NINETY_DEGREES_RAD, 0))  # 90° about Y
 
             # Add to body
             wrap_obj_set = grip_body.getWrapObjectSet()
@@ -386,5 +390,5 @@ class OpenSimGripModel:
             "total_grip_force_N": total_grip_force,
             "n_grip_muscles": len(grip_muscle_names),
             "grip_muscles": grip_muscle_names,
-            "within_physiological_range": 50.0 <= total_grip_force <= 200.0,  # Per hand
+            'within_physiological_range': MIN_PHYSIOLOGICAL_GRIP_N <= total_grip_force <= MAX_PHYSIOLOGICAL_GRIP_N,  # Per hand
         }
