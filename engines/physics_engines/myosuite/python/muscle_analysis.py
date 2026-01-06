@@ -21,6 +21,13 @@ except ImportError:
     MUJOCO_AVAILABLE = False
     logger.warning("MuJoCo not available - muscle analysis limited")
 
+# Constants for muscle analysis
+MJDYN_MUSCLE = 2  # MuJoCo dyntype constant for muscle actuators
+FINITE_DIFF_PERTURBATION = 1e-6  # Perturbation for finite difference moment arm computation [rad or m]
+METABOLIC_ALPHA = 0.25  # Metabolic cost constant (dimensionless) - literature value
+MIN_MVC_GRIP_N = 200.0  # Minimum Maximum Voluntary Contraction grip force [N]
+MAX_MVC_GRIP_N = 800.0  # Maximum Maximum Voluntary Contraction grip force [N]
+
 
 @dataclass
 class MyoSuiteMuscleState:
@@ -108,7 +115,7 @@ class MyoSuiteMuscleAnalyzer:
                 # In mujoco (newer): self.model.actuator_dyntype[i]
                 if hasattr(self.model, 'actuator_dyntype'):
                     dyntype = self.model.actuator_dyntype[i]
-                    if dyntype == 2:  # mjDYN_MUSCLE
+                    if dyntype == MJDYN_MUSCLE:  # mjDYN_MUSCLE
                         muscle_ids.append(i)
                 else:
                     # Fallback: assume all actuators are muscles for MyoSuite
@@ -270,7 +277,7 @@ class MyoSuiteMuscleAnalyzer:
 
         moment_arms = {}
         nv = self.model.nv
-        delta_q = 1e-6  # Small perturbation for finite difference
+        delta_q = FINITE_DIFF_PERTURBATION  # Small perturbation for finite difference
 
         # Save current state
         qpos_original = self.data.qpos.copy()
@@ -386,7 +393,7 @@ class MyoSuiteMuscleAnalyzer:
             # P = F * v + a^2 * F_max * v_max * alpha
             # Where alpha is a metabolic constant (~0.25)
             mechanical_power = F * v
-            activation_cost = (a ** 2) * abs(mechanical_power) * 0.25
+            activation_cost = (a ** 2) * abs(mechanical_power) * METABOLIC_ALPHA
 
             power[muscle_name] = mechanical_power + activation_cost
 
@@ -514,7 +521,7 @@ class MyoSuiteGripModel:
         mean_activation = np.mean(list(grip_activations.values())) if grip_activations else 0.0
 
         # Validation: MVC grip force 200-800 N (Section K1)
-        within_mvc_range = 200.0 <= total_grip_force <= 800.0
+        within_mvc_range = MIN_MVC_GRIP_N <= total_grip_force <= MAX_MVC_GRIP_N
 
         return {
             'total_grip_force_N': total_grip_force,
