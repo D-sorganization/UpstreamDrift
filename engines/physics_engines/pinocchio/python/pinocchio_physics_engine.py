@@ -245,7 +245,8 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         """Compute passive (drift) acceleration with zero control inputs.
 
         Section F Implementation: Uses Pinocchio's ABA (Articulated Body Algorithm)
-        with zero torque to compute passive dynamics due to gravity and Coriolis/centrifugal forces.
+        with zero torque to compute passive dynamics due to gravity and
+        Coriolis/centrifugal forces.
 
         Returns:
             q_ddot_drift: Drift acceleration vector (nv,) [rad/s² or m/s²]
