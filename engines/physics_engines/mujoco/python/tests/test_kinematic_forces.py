@@ -143,8 +143,8 @@ class TestKinematicForceAnalyzer:
 
         # May not have club head in simple model
         if analyzer.club_head_id is not None:
-            coriolis, centrifugal, apparent = analyzer.compute_club_head_apparent_forces(
-                qpos, qvel, qacc
+            coriolis, centrifugal, apparent = (
+                analyzer.compute_club_head_apparent_forces(qpos, qvel, qacc)
             )
 
             assert coriolis.shape == (3,)
