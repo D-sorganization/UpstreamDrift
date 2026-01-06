@@ -79,7 +79,6 @@ This module uses the following numerical constants
 
 - EPSILON_FINITE_DIFF_JACOBIAN = 1e-6: Finite difference step for Jacobian derivatives
 - EPSILON_SINGULARITY_DETECTION = 1e-10: Threshold for detecting ill-conditioning
-- EPSILON_ZERO_RADIUS = 1e-6 [m]: Minimum radius for geometric calculations
 
 See numerical_constants.py for complete documentation of sources and rationale.
 
