@@ -707,12 +707,53 @@ def export_inverse_dynamics_to_csv(
         times: Time array [N]
         results: List of InverseDynamicsResult
         filepath: Output CSV path
+
+    Raises:
+        ValueError: If times and results have mismatched lengths
+        TypeError: If results contains non-InverseDynamicsResult items
+        ValueError: If results list is empty
+
+    Note:
+        FIXED per Assessment A Finding A-007: Added comprehensive input
+        validation to prevent malformed CSV output and silent failures.
     """
+    # Input validation (Assessment A Finding A-007)
+    if not isinstance(times, np.ndarray):
+        raise TypeError(f"times must be numpy array, got {type(times).__name__}")
+
+    if not isinstance(results, list):
+        raise TypeError(f"results must be list, got {type(results).__name__}")
+
+    if len(results) == 0:
+        raise ValueError("Cannot export empty results list")
+
+    if len(times) != len(results):
+        raise ValueError(
+            f"Length mismatch: times has {len(times)} elements, "
+            f"results has {len(results)} elements"
+        )
+
+    # Validate all results are correct type
+    for i, result in enumerate(results):
+        if not isinstance(result, InverseDynamicsResult):
+            raise TypeError(
+                f"results[{i}] is {type(result).__name__}, "
+                f"expected InverseDynamicsResult"
+            )
+
+    # Validate consistency: all results must have same joint count
+    nv = len(results[0].joint_torques)
+    for i, result in enumerate(results):
+        if len(result.joint_torques) != nv:
+            raise ValueError(
+                f"Inconsistent joint count: results[0] has {nv} joints, "
+                f"results[{i}] has {len(result.joint_torques)} joints"
+            )
+
     with open(filepath, "w", newline="") as f:
         writer = csv.writer(f)
 
         # Header
-        nv = len(results[0].joint_torques)
         header = ["time"]
 
         for i in range(nv):
