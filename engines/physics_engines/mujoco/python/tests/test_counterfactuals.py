@@ -183,7 +183,9 @@ class TestZVCF:
         ), "Higher velocity should create larger Coriolis effect"
 
     def test_zvcf_isolates_coriolis_from_gravity(self, simple_pendulum_model):
-        """Test ZVCF: counterfactual has only gravity, observed has gravity + Coriolis."""
+        """Test ZVCF: counterfactual has only gravity, observed has
+        gravity + Coriolis.
+        """
         analyzer = CounterfactualAnalyzer(simple_pendulum_model)
 
         qpos = np.array([np.pi / 4])

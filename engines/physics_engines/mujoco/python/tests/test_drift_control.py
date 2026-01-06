@@ -88,8 +88,10 @@ class TestDriftControlDecomposer:
             result.full_acceleration, result.drift_acceleration, atol=1e-6
         )
 
-    def test_zero_velocity_isolates_gravity(self, simple_pendulum_model):
-        """Test that zero velocity isolates gravity from Coriolis."""
+    def test_zvcf_isolates_coriolis_from_gravity(self, simple_pendulum_model):
+        """Test ZVCF: counterfactual has only gravity, observed has
+        gravity + Coriolis.
+        """
         decomposer = DriftControlDecomposer(simple_pendulum_model)
 
         qpos = np.array([np.pi / 4])
@@ -101,7 +103,10 @@ class TestDriftControlDecomposer:
         # With zero velocity, drift_velocity_component should be near zero
         assert np.allclose(
             result.drift_velocity_component, 0, atol=1e-6
-        ), f"Expected zero Coriolis with zero velocity, got {result.drift_velocity_component}"
+        ), (
+            f"Expected zero Coriolis with zero velocity, "
+            f"got {result.drift_velocity_component}"
+        )
 
         # Drift should be purely gravity
         assert np.allclose(
