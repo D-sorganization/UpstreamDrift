@@ -444,7 +444,30 @@ Required visual layers:
 - Jacobian null directions and singularity indicators
 - Wrenches and power flow arrows
 - Ellipsoids and screw axes
+- Swing plane visualization (instantaneous and FSP)
+- Ground reaction force vectors and COP trajectory
 
+
+#### L1. Multi-Perspective Viewpoint Controls (mandatory)
+
+**Easy viewpoint switching for video comparison and machine learning workflows:**
+
+- **Preset camera views**:
+  - Face-on (down-the-line, looking at golfer's chest)
+  - Down-target-line (DTL, behind golfer looking toward target)
+  - Overhead (bird's eye view)
+  - Right/left side (90° from target line)
+  - Custom angles (user-defined azimuth/elevation)
+- **Camera controls**:
+  - Smooth transitions between preset views
+  - Camera tracking: Follow clubhead, COM, or fixed world position
+  - Synchronized multi-view rendering (2×2 or custom grid)
+- **Video matching support**:
+  - Overlay reference video (semi-transparent)
+  - Calibration tools for camera pose matching)
+  - Export rendered views with same camera parameters as reference video
+- **Use case**: Enable ML-based pose estimation comparison by rendering simulation from same viewpoint as training data
+
 Required exports:
 
 - Standard plots + CSV/NPZ style structured exports
