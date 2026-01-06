@@ -115,16 +115,16 @@ class IndexedAcceleration:
 
         if total_magnitude < 1e-12:
             # Near-zero acceleration - percentages undefined
-            return {
-                key: 0.0
-                for key in [
+            return dict.fromkeys(
+                [
                     "gravity",
                     "coriolis",
                     "applied_torque",
                     "constraint",
                     "external",
-                ]
-            }
+                ],
+                0.0,
+            )
 
         return {
             "gravity": 100.0 * np.linalg.norm(self.gravity) / total_magnitude,
