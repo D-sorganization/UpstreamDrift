@@ -105,7 +105,7 @@ class OpenSimMuscleAnalyzer:
         if opensim is None:
             return {}
 
-        moment_arms = {}
+        moment_arms: dict[str, dict[str, float]] = {}
         coords = self.model.getCoordinateSet()
 
         for i in range(self.n_muscles):
@@ -408,7 +408,7 @@ class OpenSimGripModel:
         return {
             "total_grip_force_N": total_grip_force,
             "n_grip_muscles": len(grip_muscle_names),
-            "grip_muscles": grip_muscle_names,
+            "grip_muscles": grip_muscle_names,  # type: ignore[dict-item]
             "within_physiological_range": MIN_PHYSIOLOGICAL_GRIP_N
             <= total_grip_force
             <= MAX_PHYSIOLOGICAL_GRIP_N,  # Per hand

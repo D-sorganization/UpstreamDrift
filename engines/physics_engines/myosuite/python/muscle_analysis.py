@@ -107,7 +107,7 @@ class MyoSuiteMuscleAnalyzer:
         Returns:
             List of actuator IDs that represent muscles
         """
-        muscle_ids = []
+        muscle_ids: list[int] = []
 
         if not MUJOCO_AVAILABLE:
             return muscle_ids
@@ -139,7 +139,7 @@ class MyoSuiteMuscleAnalyzer:
         Returns:
             List of muscle names
         """
-        names = []
+        names: list[str] = []
 
         if not MUJOCO_AVAILABLE:
             return names
