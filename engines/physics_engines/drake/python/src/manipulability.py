@@ -144,6 +144,23 @@ class DrakeManipulabilityAnalyzer:
                 # Condition Number
                 cond = radii_v[0] / radii_v[-1] if radii_v[-1] > 1e-9 else float("inf")
 
+                # Guideline O3: Singularity Detection & Warnings
+                # Warn on poor conditioning (κ > 1e6), error on singularity (κ > 1e10)
+                if cond > 1e6:
+                    logger.warning(
+                        f"⚠️ High Jacobian condition number for {name}: κ={cond:.2e}. "
+                        f"Near singularity - manipulability metrics may be unreliable. "
+                        f"Guideline O3 warning threshold exceeded."
+                    )
+
+                if cond > 1e10:
+                    logger.error(
+                        f"❌ Jacobian is singular for {name}: κ={cond:.2e}. "
+                        f"Guideline O3 VIOLATION - system at kinematic singularity."
+                    )
+                    # Drake: Continue instead of raising to allow processing other bodies
+                    continue
+
                 # Isotropy (1/cond)
                 isotropy = 1.0 / cond if cond > 0 else 0.0
 
