@@ -132,21 +132,29 @@ class TestKinematicForceAnalyzer:
         assert np.all(np.linalg.eigvals(M) > 0)  # Positive definite
         assert np.all(np.isfinite(M))
 
-    def test_compute_club_head_forces(self, model_and_data) -> None:
-        """Test computing club head forces."""
+    def test_compute_club_head_apparent_forces(self, model_and_data) -> None:
+        """Test computing club head apparent forces."""
         model, data = model_and_data
         analyzer = KinematicForceAnalyzer(model, data)
 
         qpos = data.qpos.copy()
         qvel = np.array([0.1, -0.05])
+        qacc = np.zeros(model.nv)  # qacc needed for apparent force
 
         # May not have club head in simple model
         if analyzer.club_head_id is not None:
-            force_data = analyzer.compute_club_head_forces(qpos, qvel)
+            coriolis, centrifugal, apparent = analyzer.compute_club_head_apparent_forces(
+                qpos, qvel, qacc
+            )
 
-            assert isinstance(force_data, KinematicForceData)
-            assert force_data.coriolis_forces.shape == (model.nv,)
-            assert force_data.gravity_forces.shape == (model.nv,)
+            assert coriolis.shape == (3,)
+            assert centrifugal.shape == (3,)
+            assert apparent.shape == (3,)
+
+            # Check finiteness
+            assert np.all(np.isfinite(coriolis))
+            assert np.all(np.isfinite(centrifugal))
+            assert np.all(np.isfinite(apparent))
 
     def test_analyze_trajectory(self, model_and_data) -> None:
         """Test analyzing trajectory."""
@@ -182,7 +190,10 @@ class TestKinematicForceAnalyzer:
         assert np.isfinite(m_eff)
 
     def test_compute_centripetal_acceleration(self, model_and_data) -> None:
-        """Test computing centripetal acceleration."""
+        """Test computing centripetal acceleration.
+
+        This function is deprecated and should raise NotImplementedError.
+        """
         model, data = model_and_data
         analyzer = KinematicForceAnalyzer(model, data)
 
@@ -190,10 +201,8 @@ class TestKinematicForceAnalyzer:
         qvel = np.array([0.1, -0.05])
         body_id = 1
 
-        acc = analyzer.compute_centripetal_acceleration(qpos, qvel, body_id)
-
-        assert acc.shape == (3,)
-        assert np.all(np.isfinite(acc))
+        with pytest.raises(NotImplementedError, match="fundamental physics error"):
+            analyzer.compute_centripetal_acceleration(qpos, qvel, body_id)
 
     def test_compute_kinematic_power(self, model_and_data) -> None:
         """Test computing kinematic power."""
