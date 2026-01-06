@@ -79,7 +79,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         layout.addSpacing(20)
 
         # Buttons
-        self.btn_mujoco = QtWidgets.QPushButton("Launch MuJoCo Engine")
+        self.btn_mujoco = QtWidgets.QPushButton("Launch &MuJoCo Engine")
         self.btn_mujoco.setMinimumHeight(40)
         self.btn_mujoco.setIcon(
             self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
@@ -89,7 +89,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         self.btn_mujoco.clicked.connect(self._launch_mujoco)
         layout.addWidget(self.btn_mujoco)
 
-        self.btn_drake = QtWidgets.QPushButton("Launch Drake Engine")
+        self.btn_drake = QtWidgets.QPushButton("Launch &Drake Engine")
         self.btn_drake.setMinimumHeight(40)
         self.btn_drake.setIcon(
             self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
@@ -99,7 +99,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         self.btn_drake.clicked.connect(self._launch_drake)
         layout.addWidget(self.btn_drake)
 
-        self.btn_pinocchio = QtWidgets.QPushButton("Launch Pinocchio Engine")
+        self.btn_pinocchio = QtWidgets.QPushButton("Launch &Pinocchio Engine")
         self.btn_pinocchio.setMinimumHeight(40)
         self.btn_pinocchio.setIcon(
             self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
@@ -128,7 +128,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         log_controls = QtWidgets.QHBoxLayout()
         log_controls.addStretch()
 
-        copy_btn = QtWidgets.QPushButton("Copy Log")
+        copy_btn = QtWidgets.QPushButton("&Copy Log")
         copy_btn.setIcon(
             self.style().standardIcon(
                 QtWidgets.QStyle.StandardPixmap.SP_DialogSaveButton
@@ -139,7 +139,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         copy_btn.clicked.connect(self.copy_log)
         log_controls.addWidget(copy_btn)
 
-        clear_btn = QtWidgets.QPushButton("Clear Log")
+        clear_btn = QtWidgets.QPushButton("C&lear Log")
         clear_btn.setIcon(
             self.style().standardIcon(
                 QtWidgets.QStyle.StandardPixmap.SP_DialogResetButton
