@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import csv
 from dataclasses import asdict, dataclass
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from scipy.signal import find_peaks, savgol_filter
@@ -1504,7 +1504,7 @@ class StatisticalAnalyzer:
         self,
         threshold_ratio: float = 0.1,
         metric: str = "euclidean",
-    ) -> np.ndarray:
+    ) -> np.ndarray[tuple[int, int], np.dtype[np.int_]]:
         """Compute Recurrence Plot matrix.
 
         Constructs a phase space state vector from all joint positions and velocities,
@@ -1522,7 +1522,7 @@ class StatisticalAnalyzer:
             or self.joint_velocities.shape[1] == 0
             or len(self.times) < 2
         ):
-            return np.array([])
+            return np.array([], dtype=np.int_)
 
         # 1. Construct State Vector [positions, velocities]
         # (N, 2*nq)
@@ -1545,9 +1545,9 @@ class StatisticalAnalyzer:
         threshold = threshold_ratio * np.max(dist_matrix)
 
         # 5. Thresholding
-        recurrence_matrix = (dist_matrix < threshold).astype(int)
+        recurrence_matrix = (dist_matrix < threshold).astype(np.int_)
 
-        return recurrence_matrix
+        return cast(np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix)
 
     def compute_rqa_metrics(
         self,
@@ -1580,7 +1580,7 @@ class StatisticalAnalyzer:
         # 2. Diagonal Lines (Determinism)
         # Extract diagonals
         # We need to scan diagonals k=1 to N-1
-        diagonal_lengths = []
+        diagonal_lengths: list[int] = []
         for k in range(1, N):
             diag = np.diagonal(recurrence_matrix, offset=k)
             # Find lengths of consecutive 1s
@@ -1598,7 +1598,7 @@ class StatisticalAnalyzer:
 
         # 3. Vertical Lines (Laminarity)
         # Scan columns
-        vertical_lengths = []
+        vertical_lengths: list[int] = []
         for i in range(N):
             col = recurrence_matrix[:, i].copy()
             # To be consistent with Recurrence Rate (which excludes LOI),
