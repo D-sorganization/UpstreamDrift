@@ -274,52 +274,36 @@ Per project guidelines, a release is acceptable only if it can answer:
 
 ---
 
-## Scope Decision Matrix
+## Project Scope Commitment
 
-### Option 1: Reduced Scope (Ship in 2 Weeks)
+**NON-NEGOTIABLE**: Full guideline compliance (19/19 categories)
 
-**SCOPE**: Pure multibody dynamics (no muscles, no trajectory optimization)
+This project exists at the **interface between biomechanics and robotics**. We do not reduce scope to meet deadlines. Every capability in `docs/project_design_guidelines.qmd` is essential to the mission:
 
-**REMOVE FROM GUIDELINES**:
-- Section J: OpenSim Biomechanics
-- Section K: MyoSuite Neural Control
-- Section S: Motion Matching (trajectory optimization)
+- ✅ **Biomechanics** (OpenSim Hill muscles, MyoSuite neural control)
+- ✅ **Robotics** (MuJoCo/Drake/Pinocchio multi-engine validation)
+- ✅ **Scientific rigor** (Counterfactuals, analytical validation, conservation laws)
+- ✅ **Interpretability** (Ellipsoids, drift-control decomposition, indexed acceleration)
 
-**IMPLEMENT**:
-- Phase 1: 48 hours (critical blockers)
-- Phase 2: 2 weeks (validation + ellipsoids)
+### Implementation Timeline (Full Scope)
 
-**TOTAL EFFORT**: **2.5 weeks**
-
-**SHIPPING CRITERIA AFTER PHASES 1+2**:
-- ✅ Answers 5/5 "Definition of Done" questions (for pure dynamics)
-- ✅ Analytical tests prove correctness
-- ✅ Cross-engine validation automated
-- ✅ Ellipsoid visualization operational
-- ✅ Energy/singularity warnings active
-
-**RECOMMENDATION**: **Viable for research labs doing multibody dynamics**
-
----
-
-### Option 2: Full Scope (Ship in 8 Weeks)
-
-**SCOPE**: Complete guideline compliance (biomechanics + muscles + neural control)
+**TOTAL EFFORT**: **8.5 weeks** to production-ready biomechanics + robotics platform
 
 **IMPLEMENT**:
-- Phase 1: 48 hours (critical blockers)
-- Phase 2: 2 weeks (validation + ellipsoids)
-- Phase 3: 6 weeks (OpenSim + MyoSuite integration)
+- **Phase 1** (48 hours): Critical blockers (ZTCF/ZVCF, singularity warnings, energy monitors)
+- **Phase 2** (2 weeks): Scientific validation infrastructure (analytical tests, ellipsoids, nightly CI)
+- **Phase 3** (6 weeks): Biomechanics integration (OpenSim + MyoSuite, the core differentiator)
 
-**TOTAL EFFORT**: **8.5 weeks**
-
-**SHIPPING CRITERIA AFTER ALL PHASES**:
+**SHIPPING CRITERIA**:
 - ✅ Full guideline compliance (19/19 categories)
 - ✅ 6-engine validation (MuJoCo/Drake/Pinocchio/Pendulum/OpenSim/MyoSuite)
-- ✅ Muscle-driven motion analysis
-- ✅ Neural control policy experiments
+- ✅ Muscle-driven motion analysis operational
+- ✅ Neural control policy experiments functional
+- ✅ All "Definition of Done" questions answerable
 
-**RECOMMENDATION**: **Required for biomechanics research labs**
+**TARGET USERS**: Biomechanics researchers, sports science labs, robotics-biomechanics interface investigators
+
+**COMMITMENT**: We ship when it's **right**, not when it's **fast**.
 
 ---
 
@@ -367,27 +351,29 @@ Per project guidelines, a release is acceptable only if it can answer:
 ## Recommended Actions (Priority Order)
 
 ### Immediate (Start Today)
-1. **Decision Meeting**: Reduced scope (2.5w) vs Full scope (8.5w)?
-2. **Resource Allocation**: Assign developer(s) to Phase 1 critical path
-3. **Stakeholder Communication**: Set expectations (what ships when)
+1. **Resource Allocation**: Assign developer(s) to Phase 1 critical path (48h sprint)
+2. **Stakeholder Alignment**: Communicate 8.5-week timeline for full biomechanics + robotics implementation
+3. **Infrastructure Setup**: Prepare development environment for OpenSim/MyoSuite integration
 
 ### Week 1 (Phase 1 Execution)
-1. Implement ZTCF/ZVCF (all engines)
-2. Add Jacobian conditioning warnings
-3. Create troubleshooting documentation
+1. Implement ZTCF/ZVCF counterfactuals (all 4 engines: MuJoCo, Drake, Pinocchio, Pendulum)
+2. Add Jacobian conditioning warnings (prevent silent singularities)
+3. Create cross-engine deviation troubleshooting documentation
 4. Deploy energy conservation monitors
 
 ### Weeks 2-3 (Phase 2 Execution)
-1. Implement analytical benchmark suite
-2. Integrate dimensional analysis (pint)
-3. Deploy ellipsoid visualization
-4. Set up nightly cross-engine CI
+1. Implement analytical benchmark suite (5 tests: pendulum, double pendulum, free fall, rigid body, two-link)
+2. Integrate dimensional analysis library (pint) for unit safety
+3. Deploy ellipsoid visualization (3D rendering via meshcat)
+4. Set up nightly cross-engine CI automation
 
-### Weeks 4-9 (Phase 3 Execution, IF SCOPE REQUIRES)
-1. OpenSim integration
-2. MyoSuite integration
-3. Power flow visualization
-4. Final validation
+### Weeks 4-9 (Phase 3 Execution — Core Differentiator)
+1. **OpenSim Integration** (Weeks 4-6): Hill muscle models, wrapping geometry, activation→force mapping
+2. **MyoSuite Integration** (Weeks 7-8): Neural control policies, RL experiments, hybrid torque/muscle models
+3. **Power Flow Visualization** (Week 9): Inter-segment energy transfer, wrench arrows, exports
+4. **Final Validation** (Week 9): Full 6-engine cross-validation, biomechanical benchmark suite
+
+**COMMITMENT**: No shortcuts. Full implementation of all 19 guideline categories.
 
 ---
 
