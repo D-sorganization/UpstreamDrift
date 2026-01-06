@@ -135,7 +135,9 @@ class IndexedAcceleration:
             "applied_torque": float(
                 100.0 * np.linalg.norm(self.applied_torque) / total_magnitude
             ),
-            "constraint": float(100.0 * np.linalg.norm(self.constraint) / total_magnitude),
+            "constraint": float(
+                100.0 * np.linalg.norm(self.constraint) / total_magnitude
+            ),
             "external": float(100.0 * np.linalg.norm(self.external) / total_magnitude),
         }
 
