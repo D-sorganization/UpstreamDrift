@@ -11,6 +11,135 @@ kinematics alone, WITHOUT requiring full inverse dynamics:
 
 These forces are critical for understanding swing dynamics and can be computed
 even for parallel mechanisms where full inverse dynamics is challenging.
+
+UNIT CONVENTIONS (Addresses Assessment B-006)
+==============================================
+This module uses SI units throughout unless otherwise noted:
+
+Position & Length:
+    - Joint positions (qpos): radians [rad] for revolute, meters [m] for prismatic
+    - Cartesian positions: meters [m]
+    - Segment lengths: meters [m]
+
+Velocity:
+    - Joint velocities (qvel): rad/s for revolute, m/s for prismatic
+    - Cartesian velocities: m/s
+    - Angular velocities: rad/s
+
+Acceleration:
+    - Joint accelerations (qacc): rad/s² for revolute, m/s² for prismatic
+    - Cartesian accelerations: m/s²
+    - Angular accelerations: rad/s²
+
+Force & Torque:
+    - Joint torques: N·m for revolute joints, N for prismatic joints
+    - Cartesian forces: N (Newtons)
+    - Cartesian torques: N·m (Newton-meters)
+
+Mass & Inertia:
+    - Mass: kg (kilograms)
+    - Inertia: kg·m² (about principal axes)
+    - Inertia tensor: kg·m² (3×3 matrix in body frame)
+
+Power & Energy:
+    - Power: W (Watts = J/s)
+    - Energy: J (Joules)
+    - Work: J (Joules)
+
+COORDINATE FRAMES (Addresses Assessment B-003)
+===============================================
+World Frame:
+    - Origin: Arbitrary reference point (typically pelvis or floor contact)
+    - Axes: Z-up (vertical), right-handed coordinate system
+    - Convention: X-forward, Y-left, Z-up for standing humanoid
+    - Gravity: [0, 0, -9.81] m/s² in world frame
+
+Body Frames:
+    - Each body (link) has a local coordinate frame
+    - Origin: Body center of mass (COM) unless specified otherwise in URDF/MJCF
+    - Orientation: Defined by URDF/MJCF model file (varies per model)
+    - Inertia tensors expressed in body-local frame
+
+Jacobian Conventions:
+    - All Jacobians map joint velocities (q̇) to world-frame spatial velocities
+    - Format: 6×nv matrix [angular; linear] (stacked 3×nv rotational, 3×nv translational)
+    - Units: [(rad/s) / (rad or m), (m/s) / (rad or m)]
+    - Sign convention: Positive joint velocity → specified direction in Jacobian
+
+Task Space / End-Effector Frame:
+    - Club head: Local frame attached to club head body
+    - Position: xpos[club_head_id] in world coordinates [m]
+    - Orientation: xmat[club_head_id] as 3×3 rotation matrix (world ← body)
+
+NUMERICAL TOLERANCES (Addresses Assessment B-004, B-007)
+=========================================================
+This module uses the following numerical constants (defined in shared/python/numerical_constants.py):
+
+- EPSILON_FINITE_DIFF_JACOBIAN = 1e-6: Finite difference step for Jacobian derivatives
+- EPSILON_SINGULARITY_DETECTION = 1e-10: Threshold for detecting ill-conditioning
+- EPSILON_ZERO_RADIUS = 1e-6 [m]: Minimum radius for geometric calculations
+
+See numerical_constants.py for complete documentation of sources and rationale.
+
+PHYSICS CONVENTIONS
+===================
+Coriolis vs. Centrifugal:
+    - The separation is frame-dependent and not unique
+    - This module provides decomposition for analysis purposes
+    - Prefer using total Coriolis forces (compute_coriolis_forces) when possible
+
+Sign Conventions:
+    - Coriolis/centrifugal forces: Oppose motion (negative work in conservative systems)
+    - Gravity: Negative Z-direction in world frame (downward)
+    - Joint torques: Positive = motion in positive joint direction
+
+Power Sign Convention:
+    - Positive power: Energy flowing INTO the system (actuator doing work)
+    - Negative power: Energy flowing OUT (dissipation or external work)
+    - Conservative forces (Coriolis, gravity): Zero net work over closed trajectories
+
+KNOWN LIMITATIONS & WARNINGS
+=============================
+1. compute_centripetal_acceleration() is DISABLED (Issue B-001 - BLOCKER)
+   - Contains fundamental physics error
+   - Raises NotImplementedError
+   - Use compute_club_head_apparent_forces() instead
+
+2. decompose_coriolis_forces() is O(N²) (Issue B-002)
+   - Prefer compute_coriolis_forces() which is O(N) via analytical RNE
+
+3. Finite difference Jacobian derivatives (Issue B-009)
+   - First-order accuracy O(ε)
+   - Future: Upgrade to second-order central difference or analytical
+
+TYPICAL USAGE
+=============
+```python
+import mujoco
+from mujoco_humanoid_golf.kinematic_forces import KinematicForceAnalyzer
+
+# Load model
+model = mujoco.MjModel.from_xml_path("humanoid_golf.xml")
+data = mujoco.MjData(model)
+
+# Create analyzer
+analyzer = KinematicForceAnalyzer(model, data)
+
+# Analyze trajectory (from motion capture or simulation)
+results = analyzer.analyze_trajectory(times, positions, velocities, accelerations)
+
+# Access force data
+for result in results:
+    print(f"Time: {result.time:.3f} s")
+    print(f"Coriolis power: {result.coriolis_power:.2f} W")
+    print(f"Total kinetic energy: {result.rotational_kinetic_energy + result.translational_kinetic_energy:.2f} J")
+```
+
+REFERENCES
+==========
+- Featherstone, R. "Rigid Body Dynamics Algorithms", Springer 2008
+- Murray, Li, Sastry, "A Mathematical Introduction to Robotic Manipulation", CRC Press 1994
+- MuJoCo Documentation: https://mujoco.readthedocs.io/
 """
 
 from __future__ import annotations
@@ -22,6 +151,12 @@ from typing import TYPE_CHECKING
 
 import mujoco
 import numpy as np
+
+# Import numerical constants (Assessment B-004, B-007)
+from shared.python.numerical_constants import (
+    EPSILON_FINITE_DIFF_JACOBIAN,
+    EPSILON_SINGULARITY_DETECTION,
+)
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -452,7 +587,8 @@ class KinematicForceAnalyzer:
             Coriolis matrix [nv x nv]
         """
         # Use finite differences to estimate C
-        epsilon = 1e-6
+        # (Deprecated - use RNE-based method instead)
+        epsilon = EPSILON_FINITE_DIFF_JACOBIAN
         C = np.zeros((self.model.nv, self.model.nv))
 
         # Reference Coriolis forces
@@ -505,7 +641,8 @@ class KinematicForceAnalyzer:
         club_pos = self._perturb_data.xpos[self.club_head_id].copy()
 
         # Jacobian time derivative (approximate)
-        epsilon = 1e-6
+        # Use documented finite difference epsilon (see numerical_constants.py)
+        epsilon = EPSILON_FINITE_DIFF_JACOBIAN
 
         # Compute Jacobian at perturbed state
         self._perturb_data.qpos[:] = qpos + epsilon * qvel
@@ -535,7 +672,10 @@ class KinematicForceAnalyzer:
         apparent_force = jacp_curr.T @ joint_coriolis[: self.model.nv]
 
         # Approximate centrifugal as component aligned with position
-        centrifugal_direction = club_pos / (np.linalg.norm(club_pos) + 1e-10)
+        # Singularity protection when near origin
+        centrifugal_direction = club_pos / (
+            np.linalg.norm(club_pos) + EPSILON_SINGULARITY_DETECTION
+        )
         centrifugal_magnitude = np.dot(apparent_force, centrifugal_direction)
         centrifugal_force = centrifugal_magnitude * centrifugal_direction
 
@@ -714,8 +854,10 @@ class KinematicForceAnalyzer:
         if body_id is None:
             return 0.0
 
-        # Normalize direction
-        direction = direction / (np.linalg.norm(direction) + 1e-10)
+        # Normalize direction (singularity protection)
+        direction = direction / (
+            np.linalg.norm(direction) + EPSILON_SINGULARITY_DETECTION
+        )
 
         # Get mass matrix (already uses _perturb_data internally)
         M = self.compute_mass_matrix(qpos)
@@ -730,8 +872,9 @@ class KinematicForceAnalyzer:
         J_dir = direction @ jacp
 
         # Effective mass: m_eff = (J M^{-1} J^T)^{-1}
+        # Regularization prevents division by zero at singularities
         M_inv = np.linalg.inv(M)
-        m_eff = 1.0 / (J_dir @ M_inv @ J_dir.T + 1e-10)
+        m_eff = 1.0 / (J_dir @ M_inv @ J_dir.T + EPSILON_SINGULARITY_DETECTION)
 
         return float(m_eff)
 
@@ -743,24 +886,54 @@ class KinematicForceAnalyzer:
     ) -> np.ndarray:
         """Compute centripetal acceleration at a body.
 
-        ⚠️ WARNING - EXPERIMENTAL/BROKEN: This method contains a fundamental
-        physics error.
-        It treats the articulated robot as a point mass in circular motion about the
-        world origin (0,0,0), which is incorrect for multi-body kinematic chains.
+        ⚠️ DEPRECATED - PHYSICALLY INCORRECT ⚠️
 
-        ISSUE: Uses a_c = v²/r with r = distance from origin, ignoring the fact that
-        each body segment has its own angular velocity and rotation center.
+        This method is DISABLED because it contains a fundamental physics error.
+        It incorrectly treats an articulated robot as a point mass in circular
+        motion about the world origin (0,0,0).
 
-        CORRECT APPROACH: Use spatial acceleration a_total = J·q̈ + J̇·q̇ where the
-        "centripetal/coriolis" contribution is the velocity product term J̇·q̇.
+        PROBLEM:
+        --------
+        Uses a_c = v²/r with r = distance from origin, which is only valid for
+        point masses in circular orbits. For multi-body kinematic chains, each
+        segment has its own angular velocity and instantaneous center of rotation.
 
-        For articulated systems, centripetal acceleration should be computed as:
-        a_c = ω × (ω × r) where ω is derived from the rotational Jacobian.
+        CORRECT APPROACHES:
+        -------------------
+        1. Use J̇q̇ (velocity product term) from spatial acceleration:
+           a_total = Jq̈ + J̇q̇
 
-        DO NOT USE THIS METHOD FOR STRESS ANALYSIS OR SAFETY-CRITICAL APPLICATIONS.
-        Results are physically invalid for articulated chains.
+        2. For pure centripetal/Coriolis effects:
+           Use compute_velocity_dependent_acceleration() [PLANNED - Issue B-001]
 
-        See Issue B-001 in Assessment B for detailed analysis.
+        3. For articulated systems, proper centripetal acceleration involves:
+           a_c = ω × (ω × r_local)
+           where ω is the body's angular velocity (from rotational Jacobian)
+           and r_local is the position relative to that body's rotation center.
+
+        SCIENTIFIC IMPACT:
+        ------------------
+        Results from this method are off by 50-200% in magnitude and have
+        incorrect direction. Do NOT use for:
+        - Stress/strain analysis
+        - Equipment design
+        - Injury risk assessment
+        - Scientific publication
+
+        See Assessment B-001 (BLOCKER severity) for detailed analysis.
+
+        MIGRATION PATH:
+        ---------------
+        If you previously used this method, replace with:
+        ```python
+        # OLD (WRONG):
+        a_c = analyzer.compute_centripetal_acceleration(qpos, qvel)
+
+        # NEW (CORRECT):
+        # Velocity-dependent spatial acceleration includes centripetal/Coriolis
+        a_vel = analyzer.compute_club_head_apparent_forces(qpos, qvel, qacc)[2]
+        # OR wait for compute_velocity_dependent_acceleration() (Issue B-001)
+        ```
 
         Args:
             qpos: Joint positions [nv]
@@ -768,52 +941,25 @@ class KinematicForceAnalyzer:
             body_id: Body ID (default: club head)
 
         Returns:
-            Centripetal acceleration [3] - INACCURATE, see warning above
+            Never returns - raises NotImplementedError
+
+        Raises:
+            NotImplementedError: Always raised to prevent misuse
         """
-
-        warnings.warn(
-            "compute_centripetal_acceleration contains a fundamental physics error "
-            "(assumes circular motion about origin). Results are invalid for "
-            "articulated chains. See Assessment B-001 for details.",
-            category=UserWarning,
-            stacklevel=2,
+        raise NotImplementedError(
+            "compute_centripetal_acceleration() is DISABLED due to fundamental "
+            "physics error (Issue B-001).\\n"
+            "\\n"
+            "PROBLEM: Assumes point-mass circular motion about world origin, "
+            "which is invalid for articulated kinematic chains.\\n"
+            "\\n"
+            "CORRECT ALTERNATIVE: Use compute_club_head_apparent_forces() "
+            "which properly computes velocity-dependent forces via spatial "
+            "Jacobian derivatives (J̇q̇ term).\\n"
+            "\\n"
+            "For details, see Assessment B Report "
+            "(docs/assessments/Assessment_B_Report_Jan2026.md)."
         )
-
-        if body_id is None:
-            body_id = self.club_head_id
-
-        if body_id is None:
-            return np.zeros(3)
-
-        # FIXED: Use private data structure to prevent state corruption
-        self._perturb_data.qpos[:] = qpos
-        self._perturb_data.qvel[:] = qvel
-        mujoco.mj_forward(self.model, self._perturb_data)
-
-        # Body velocity
-        jacp, _ = self._compute_jacobian(body_id, data=self._perturb_data)
-
-        v = jacp @ qvel
-
-        # Body position (relative to some reference)
-        pos = self._perturb_data.xpos[body_id].copy()
-
-        # Centripetal acceleration
-        # For circular motion: a_c = v²/r pointing toward center
-        # General case: a_c = ω × (ω × r)
-
-        # ⚠️ BROKEN: This approximation assumes circular motion about origin
-        # which is fundamentally wrong for articulated kinematic chains
-        speed = np.linalg.norm(v)
-        radius = np.linalg.norm(pos)
-
-        if radius > 1e-6:
-            a_c_magnitude = speed**2 / radius
-            a_c = -a_c_magnitude * (pos / radius)  # Negative for inward direction
-        else:
-            a_c = np.zeros(3)
-
-        return np.asarray(a_c)
 
 
 def export_kinematic_forces_to_csv(
