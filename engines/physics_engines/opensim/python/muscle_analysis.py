@@ -197,12 +197,9 @@ class OpenSimMuscleAnalyzer:
             torques = np.zeros(n_coords)
 
             if muscle_name in moment_arms:
-                coord_idx = 0
-                for _ in moment_arms[muscle_name].values():
-                    torques[coord_idx] = (
-                        force * list(moment_arms[muscle_name].values())[coord_idx]
-                    )
-                    coord_idx += 1
+                moment_arm_values = list(moment_arms[muscle_name].values())
+                for coord_idx, moment_arm in enumerate(moment_arm_values):
+                    torques[coord_idx] = force * moment_arm
 
             muscle_torques[muscle_name] = torques
 

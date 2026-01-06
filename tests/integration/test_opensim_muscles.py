@@ -26,16 +26,6 @@ except ImportError:
     pytest.skip("OpenSim not installed", allow_module_level=True)
 
 
-# Skip entire module if OpenSim not available
-try:
-    import opensim
-
-    if not hasattr(opensim, "Model"):
-        pytest.skip("OpenSim is mocked or unavailable", allow_module_level=True)
-except ImportError:
-    pytest.skip("OpenSim not installed", allow_module_level=True)
-
-
 @pytest.fixture
 def simple_arm_model():
     """Create a simple arm model with muscles for testing."""
