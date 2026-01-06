@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -349,7 +349,7 @@ class ScrewKinematicsAnalyzer:
 
 
 def plot_screw_axis_3d(
-    ax: any,  # type: ignore[valid-type]
+    ax: Any,  # type: ignore[misc]
     screw: ScrewAxis,
     length: float = 0.5,
     color: str = "blue",
