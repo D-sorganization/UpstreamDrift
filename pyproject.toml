@@ -210,7 +210,9 @@ addopts = [
     "--cov-report=term-missing",
     "--cov-report=xml",
     "--cov-report=html",
-    "--cov-fail-under=25",  # Phase 1 Remediation Target (Jan 2026)
+    "--cov-fail-under=60",  # Phase 2 Target (Assessment C-007, Jan 2026)
+    # Increased from 25% to align with project guidelines and Assessment C recommendations
+    # Focus on physics computation paths and critical analysis methods
 ]
 testpaths = [
     "tests",
