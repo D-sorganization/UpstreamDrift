@@ -2042,7 +2042,7 @@ class GolfSwingPlotter:
         ax.set_title(title, fontsize=14, fontweight="bold")
         ax.grid(False)  # Heatmap doesn't need grid usually
 
-        cbar = fig.colorbar(im, ax=ax, label=cbar_label)
+        fig.colorbar(im, ax=ax, label=cbar_label)
         fig.tight_layout()
 
     def plot_phase_space_density(

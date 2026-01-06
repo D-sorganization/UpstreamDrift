@@ -1,7 +1,10 @@
 
 import time
+
 import numpy as np
-from shared.python.statistical_analysis import StatisticalAnalyzer, GRFMetrics
+
+from shared.python.statistical_analysis import StatisticalAnalyzer
+
 
 def benchmark_grf_metrics():
     # Setup data
@@ -34,8 +37,7 @@ def benchmark_grf_metrics():
         analyzer.compute_grf_metrics()
     end_time = time.perf_counter()
 
-    avg_time = (end_time - start_time) / iterations
-    print(f"Average time per call: {avg_time*1000:.4f} ms")
+    (end_time - start_time) / iterations
 
 if __name__ == "__main__":
     benchmark_grf_metrics()
