@@ -383,7 +383,262 @@ A release is acceptable only if the platform can answer, for any swing dataset:
 
 If any of these cannot be answered with reproducible artifacts, the feature is incomplete.
 
-## Appendix: Suggested “Causality Demo” Test Case
+## Project-Specific Technical Standards
+
+This section defines **mandatory technical requirements** specific to the Golf Modeling Suite that extend the general requirements above.
+
+### N. Code Quality & CI/CD Gates (Non-Negotiable)
+
+All code contributions must pass these automated gates before merge:
+
+#### N1. Formatting & Style
+
+- **Black** (line-length=88, Python 3.11+)
+  - Zero tolerance for formatting violations
+  - Pre-commit hooks mandatory
+- **Ruff** linting with strict rule set:
+  - E/W (pycodestyle), F (pyflakes), I (isort), B (bugbear), C4 (comprehensions), UP (pyupgrade), T (print detection)
+  - No `print()` statements outside designated paths (tests, scripts, tools, launchers)
+  - Import order: Standard → Third-party → Local
+
+#### N2. Type Safety
+
+- **Mypy** strict mode for all production code
+  - `disallow_untyped_defs = true`
+  - `check_untyped_defs = true`
+  - `warn_return_any = true`
+- All public functions/methods require type hints (args + return)
+- No `Any` without explicit justification comment
+- No `# type: ignore` without documented reason
+
+#### N3. Testing Requirements
+
+- **Minimum Coverage**: 25% (Phase 1 target, increasing to 60% by Phase 3)
+- **Test Categories** (via pytest markers):
+  - `@pytest.mark.unit`: Fast, isolated tests
+  - `@pytest.mark.integration`: Cross-component tests
+  - `@pytest.mark.slow`: Long-running tests (deselected in CI)
+  - `@pytest.mark.mujoco/drake/pinocchio`: Engine-specific tests
+- **Deterministic Tests**: All tests must use fixed seeds for RNG
+- **No External Dependencies**: Tests must not require network/filesystem access
+- **Headless Compatibility**: GUI tests must run in headless environments (Xvfb)
+
+#### N4. Security & Safety
+
+- **No Banned Patterns**:
+  - `eval()`, `exec()` (security risk)
+  - Mutable default arguments (`def func(items=[])`)
+  - Global variables (except constants)
+  - Bare `except:` clauses
+- **Dependency Scanning**: `pip-audit` must pass (no known vulnerabilities)
+- **CSV Injection Prevention**: All user-provided data exported to CSV must be sanitized
+- **XML Security**: Use `defusedxml` for all XML parsing
+
+### O. Physics Engine Integration Standards
+
+#### O1. Unified Interface Compliance
+
+All physics engines must implement `PhysicsEngineInterface` from `shared/python/interfaces.py`:
+
+```python
+class PhysicsEngineInterface(Protocol):
+    def step(self, dt: float) -> None: ...
+    def reset(self) -> None: ...
+    def get_state(self) -> np.ndarray: ...
+    def set_state(self, state: np.ndarray) -> None: ...
+    def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray: ...
+    # ... (full interface in shared/python/interfaces.py)
+```
+
+#### O2. State Isolation Pattern
+
+- **Thread-Local Data**: Each physics engine instance must use private `MjData`/`MultibodyPlant` contexts
+- **No Shared Mutable State**: Engines must not modify global state
+- **Context Managers**: Use `with MjDataContext(model):` pattern for temporary state modifications
+
+#### O3. Numerical Stability Requirements
+
+- **Integration Tolerances**:
+  - Position drift: < 1e-6 m per second of simulation
+  - Energy conservation: < 1% drift for conservative systems
+  - Constraint violation: < 1e-8 (normalized)
+- **Singularity Detection**:
+  - Jacobian condition number warnings at κ > 1e6
+  - Automatic fallback to pseudoinverse for κ > 1e10
+- **Unit Consistency**:
+  - All internal computations in SI units (m, kg, s, rad)
+  - Explicit conversion at I/O boundaries
+
+### P. Data Handling & Interoperability Standards
+
+#### P1. C3D Data Requirements
+
+- **Mandatory Metadata**: Frame rate, marker labels, units, analog labels
+- **Residual Handling**: NaN for markers with residuals > threshold (default: 10.0 mm)
+- **Time Synchronization**: All data aligned to common timebase (frame 0 = t=0)
+- **Export Formats**: Must support CSV, JSON (records), NPZ
+
+#### P2. URDF Interchange Format
+
+- **Schema Validation**: All generated URDFs must validate against URDF 1.0 schema
+- **Semantic Consistency**:
+  - Right-hand coordinate systems (X-forward, Y-left, Z-up for humanoid)
+  - Inertia tensors in link-local frames
+  - Joint axes normalized to unit vectors
+- **Engine-Specific Adaptations**:
+  - MuJoCo: Auto-generate `<compiler>` tags for coordinate conventions
+  - Drake: Include `<drake:` extensions for contact parameters
+  - Pinocchio: Ensure compatibility with `pin.buildModelFromUrdf()`
+
+#### P3. Cross-Engine Validation Protocol
+
+- **Reference Implementation**: Symbolic pendulum models serve as ground truth
+- **Tolerance Targets** (to be documented in M1):
+  - Kinematics (positions): ± 1e-6 m
+  - Kinematics (velocities): ± 1e-5 m/s
+  - Dynamics (accelerations): ± 1e-4 m/s²
+  - Inverse dynamics (torques): ± 1e-3 N·m
+  - Jacobians: ± 1e-8 (element-wise)
+- **Deviation Reporting**: Any cross-engine discrepancy > tolerance must log warning with:
+  - Engine names
+  - Quantity name
+  - Measured values
+  - Tolerance threshold
+  - Possible causes (e.g., integration method, constraint handling)
+
+### Q. GUI & Visualization Standards
+
+#### Q1. PyQt6 Architecture
+
+- **Model-View Separation**: Business logic in separate modules, not in UI classes
+- **Signal/Slot Hygiene**:
+  - Explicit type annotations for custom signals
+  - No lambda slots (use named methods for debuggability)
+  - Disconnect signals in cleanup methods
+- **Thread Safety**:
+  - Long-running computations in `QThread` workers
+  - GUI updates only from main thread via signals
+  - No blocking operations in event handlers
+
+#### Q2. 3D Visualization Requirements
+
+- **Headless Fallback**: All 3D viewers must detect headless environments and provide:
+  - Offscreen rendering (EGL/OSMesa)
+  - Screenshot export
+  - Graceful degradation message
+- **Frame Rate**: Maintain ≥ 30 FPS for real-time visualization
+- **Coordinate Frame Indicators**:
+  - World frame always visible (toggleable)
+  - Body frames color-coded (X=red, Y=green, Z=blue)
+  - Scale adaptive to model size
+
+#### Q3. Export & Reproducibility
+
+- **Versioned Exports**: All exported data must include:
+  - Schema version
+  - Export timestamp (ISO 8601 UTC)
+  - Software version (`golf-modeling-suite==X.Y.Z`)
+  - Engine name and version
+- **Analysis Bundles** (L2 requirement):
+  - Single archive (.zip or .tar.gz) containing:
+    - Model files (URDF, meshes)
+    - Input data (C3D, initial conditions)
+    - Simulation parameters (timestep, integrator, tolerances)
+    - Output data (states, forces, diagnostics)
+    - Metadata (JSON manifest)
+
+### R. Documentation & Knowledge Management
+
+#### R1. Docstring Standards
+
+- **All Public APIs**: NumPy-style docstrings with:
+  - One-line summary
+  - Extended description (if non-trivial)
+  - Args (with types and units where applicable)
+  - Returns (with type and shape for arrays)
+  - Raises (for expected exceptions)
+  - Examples (for complex functions)
+- **Physical Units**: Always document units in docstrings:
+  ```python
+  def compute_torque(force: float, lever_arm: float) -> float:
+      """Compute torque from force and lever arm.
+      
+      Args:
+          force: Applied force [N]
+          lever_arm: Perpendicular distance [m]
+      
+      Returns:
+          Torque [N·m]
+      """
+  ```
+
+#### R2. Adversarial Review Cycle
+
+- **Quarterly Assessments**: Run standardized audit prompts (A, B, C) from `docs/assessments/`
+- **Prompt A**: Python architecture and software patterns
+- **Prompt B**: Scientific rigor and numerical correctness
+- **Prompt C**: Physics engine integration and cross-validation
+- **Results Storage**: `docs/assessments/Assessment_{A,B,C}_Results.md`
+- **Action Items**: All "CRITICAL" findings must be addressed within 2 weeks
+
+#### R3. Changelog & Migration Guides
+
+- **Breaking Changes**: Require migration guide in `docs/development/`
+- **Deprecation Policy**: 2-release warning period before removal
+- **Version Semantics**: Follow SemVer 2.0.0
+  - MAJOR: Breaking API changes
+  - MINOR: New features, backward-compatible
+  - PATCH: Bug fixes, no API changes
+
+### S. OpenPose Motion Matching Requirements (Ultimate Goal)
+
+These standards apply specifically to the forward dynamics motion matching workflow:
+
+#### S1. Marker-to-Model Registration Pipeline
+
+- **Input**: C3D marker trajectories (≥ 60 Hz recommended)
+- **Output**: Joint angle trajectories (q(t)) + residuals
+- **IK Solver Requirements**:
+  - Constraint-consistent (respect closed loops)
+  - Regularization for redundant DOFs (damped least squares, λ = 0.01)
+  - Per-frame residual reporting (RMS marker error)
+  - Outlier detection (residual > 3σ flagged)
+- **Parameter Estimation**:
+  - Segment lengths from marker geometry
+  - Mass/inertia from anthropometric tables (with uncertainty bounds)
+  - Sensitivity analysis (∂q/∂p for key parameters p)
+
+#### S2. Trajectory Optimization Standards
+
+- **Objective Function**:
+  - Primary: Minimize marker residuals (weighted least squares)
+  - Secondary: Minimize control effort (∫ τ² dt)
+  - Tertiary: Smoothness penalty (∫ q̈² dt)
+- **Constraints**:
+  - Dynamics feasibility (M(q)q̈ + C(q,q̇) + G(q) = τ)
+  - Joint limits (q_min ≤ q ≤ q_max)
+  - Torque limits (|τ| ≤ τ_max, from biomechanical data)
+  - Contact constraints (if ground interaction modeled)
+- **Solver Requirements**:
+  - Support for direct collocation or shooting methods
+  - Warm-start from IK solution
+  - Convergence tolerance: cost reduction < 1e-6 or max 500 iterations
+
+#### S3. Validation Metrics
+
+- **Kinematic Fidelity**:
+  - Marker RMS error < 10 mm (excellent), < 20 mm (acceptable)
+  - Joint angle correlation with IK solution: R² > 0.95
+- **Dynamic Consistency**:
+  - Indexed acceleration closure: |q̈_total - Σ q̈_components| < 1e-3 rad/s²
+  - Energy balance: |ΔE - W_external| < 5% (for conservative phases)
+- **Cross-Engine Agreement**:
+  - Torque profiles: RMS difference < 10% between engines
+  - Clubhead trajectory: position error < 5 mm, velocity error < 0.5 m/s
+
+---
+
+## Appendix: Suggested "Causality Demo" Test Case
 
 A standard benchmark swing (or simplified analog) used to validate every engine:
 
