@@ -111,11 +111,6 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.physics_tab.model_changed.connect(self.on_model_changed_signal)
         self.physics_tab.mode_changed.connect(self.controls_tab.on_mode_changed)
 
-        # Connect model loaded signal to manipulability tab
-        self.physics_tab.model_changed.connect(
-            lambda n, c: self.manipulability_tab.on_model_loaded()
-        )
-
         # Connect live analysis toggle
         if hasattr(self.controls_tab, "chk_live_analysis"):
             self.controls_tab.chk_live_analysis.toggled.connect(
@@ -135,6 +130,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         # Manipulability & Force Tab
         self.manipulability_tab = ManipulabilityTab(self.sim_widget, self)
         self.tab_widget.addTab(self.manipulability_tab, "Manipulability")
+
+        # Connect model loaded signal to manipulability tab
+        self.physics_tab.model_changed.connect(
+            lambda n, c: self.manipulability_tab.on_model_loaded()
+        )
 
         # Connect grip modelling tab to simulation widget
         self.grip_modelling_tab.connect_sim_widget(self.sim_widget)
