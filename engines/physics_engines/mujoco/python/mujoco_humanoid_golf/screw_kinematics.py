@@ -349,7 +349,7 @@ class ScrewKinematicsAnalyzer:
 
 
 def plot_screw_axis_3d(
-    ax,
+    ax: any,  # type: ignore[valid-type]
     screw: ScrewAxis,
     length: float = 0.5,
     color: str = "blue",
@@ -366,8 +366,15 @@ def plot_screw_axis_3d(
         color: Color for the axis
         label: Label for legend
     """
-    analyzer = ScrewKinematicsAnalyzer.__new__(ScrewKinematicsAnalyzer)
-    start, end = analyzer.visualize_screw_axis.__func__(analyzer, screw, length)
+    # Compute visualization points directly without __new__ code smell
+    if screw.is_singular:
+        # Pure translation: draw along velocity direction
+        start = screw.axis_point
+        end = screw.axis_point + screw.axis_direction * length
+    else:
+        # Draw axis segment centered at axis_point
+        start = screw.axis_point - screw.axis_direction * (length / 2)
+        end = screw.axis_point + screw.axis_direction * (length / 2)
 
     # Draw axis as line
     ax.plot(

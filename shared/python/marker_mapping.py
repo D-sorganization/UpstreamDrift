@@ -320,7 +320,7 @@ class MarkerToModelMapper:
         # Apply transformation
         transformed_h = (transformation @ points_h.T).T
 
-        return transformed_h[:, :3]
+        return np.asarray(transformed_h[:, :3])
 
     def plot_registration_diagnostics(
         self,
