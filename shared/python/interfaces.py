@@ -156,3 +156,45 @@ class PhysicsEngine(Protocol):
             Dictionary with keys 'linear', 'angular', 'spatial', or None if body not found.
         """
         ...
+
+    # -------- Section F: Drift-Control Decomposition (Non-Negotiable) --------
+
+    @abstractmethod
+    def compute_drift_acceleration(self) -> np.ndarray:
+        """Compute passive (drift) acceleration with zero control inputs.
+
+        Section F Requirement: Drift component = passive dynamics (Coriolis, centrifugal, gravity, constraints)
+        with all applied torques/muscle activations set to zero.
+
+        Mathematically: q̈_drift = M(q)⁻¹ · (C(q,v)v + g(q))
+
+        This is the answer to: "What would happen if all motors/muscles turned off right now?"
+
+        Returns:
+            q_ddot_drift: Drift acceleration vector (n_v,) [rad/s² or m/s²]
+
+        See Also:
+            - compute_control_acceleration: Control-attributed component
+            - Section F: Superposition requirement (drift + control = full)
+        """
+        ...
+
+    @abstractmethod
+    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
+        """Compute control-attributed acceleration from applied torques/forces only.
+
+        Section F Requirement: Control component = acceleration due solely to actuator torques,
+        excluding passive dynamics.
+
+        Mathematically: q̈_control = M(q)⁻¹ · τ
+
+        Args:
+            tau: Applied generalized forces/torques (n_v,) [N·m or N]
+
+        Returns:
+            q_ddot_control: Control acceleration vector (n_v,) [rad/s² or m/s²]
+
+        Note:
+            For muscle-driven models, tau represents muscle-generated joint torques.
+        """
+        ...
