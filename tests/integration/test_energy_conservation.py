@@ -45,6 +45,10 @@ def simple_pendulum_model() -> tuple[mujoco.MjModel, mujoco.MjData]:
                 <geom type="sphere" size="0.05" mass="1.0"/>
             </body>
         </worldbody>
+
+        <actuator>
+            <motor joint="hinge" name="hinge_motor" gear="1.0"/>
+        </actuator>
     </mujoco>
     """
     model = mujoco.MjModel.from_xml_string(xml)
