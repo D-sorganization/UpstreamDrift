@@ -131,7 +131,9 @@ class TestEnergyConservation:
             energies_list.append(total_energy)
 
         # Verify energy conservation
-        energies: np.ndarray[tuple[int], np.dtype[np.floating]] = np.array(energies_list)
+        energies: np.ndarray[tuple[int], np.dtype[np.floating]] = np.array(
+            energies_list
+        )
         energy_variation = np.std(energies) / np.abs(np.mean(energies))
 
         assert energy_variation < TOLERANCE_ENERGY_CONSERVATION, (
@@ -278,7 +280,9 @@ class TestEnergyConservation:
             times.append(i * dt)
 
         # Compute dE/dt numerically (central difference)
-        energies: np.ndarray[tuple[int], np.dtype[np.floating]] = np.array(energies_list)
+        energies: np.ndarray[tuple[int], np.dtype[np.floating]] = np.array(
+            energies_list
+        )
         de_dt_numeric = np.gradient(energies, dt)
 
         # Compare with actuator power
@@ -344,7 +348,9 @@ class TestConservationLaws:
             angular_momenta_list.append(float(np.linalg.norm(L)))
 
         # Verify angular momentum magnitude is conserved
-        angular_momenta: np.ndarray[tuple[int], np.dtype[np.floating]] = np.array(angular_momenta_list)
+        angular_momenta: np.ndarray[tuple[int], np.dtype[np.floating]] = np.array(
+            angular_momenta_list
+        )
         momentum_variation = np.std(angular_momenta) / np.mean(angular_momenta)
 
         assert momentum_variation < 1e-3, (
