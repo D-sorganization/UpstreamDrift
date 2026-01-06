@@ -6,9 +6,12 @@ Section H2 Implementation: Closure-verified acceleration decomposition.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from shared.python.interfaces import PhysicsEngine
 
 
 @dataclass
@@ -127,13 +130,13 @@ class IndexedAcceleration:
             )
 
         return {
-            "gravity": 100.0 * np.linalg.norm(self.gravity) / total_magnitude,
-            "coriolis": 100.0 * np.linalg.norm(self.coriolis) / total_magnitude,
-            "applied_torque": 100.0
-            * np.linalg.norm(self.applied_torque)
-            / total_magnitude,
-            "constraint": 100.0 * np.linalg.norm(self.constraint) / total_magnitude,
-            "external": 100.0 * np.linalg.norm(self.external) / total_magnitude,
+            "gravity": float(100.0 * np.linalg.norm(self.gravity) / total_magnitude),
+            "coriolis": float(100.0 * np.linalg.norm(self.coriolis) / total_magnitude),
+            "applied_torque": float(
+                100.0 * np.linalg.norm(self.applied_torque) / total_magnitude
+            ),
+            "constraint": float(100.0 * np.linalg.norm(self.constraint) / total_magnitude),
+            "external": float(100.0 * np.linalg.norm(self.external) / total_magnitude),
         }
 
 
@@ -144,7 +147,7 @@ class AccelerationClosureError(Exception):
 
 
 def compute_indexed_acceleration_from_engine(
-    engine: Protocol,  # PhysicsEngine protocol
+    engine: Any,  # PhysicsEngine protocol (avoid circular import)
     tau: np.ndarray,
 ) -> IndexedAcceleration:
     """Compute indexed acceleration using drift-control decomposition.
