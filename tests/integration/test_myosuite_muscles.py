@@ -24,6 +24,7 @@ def myosuite_env_available():
     try:
         import gym  # noqa: F401 - used in try block
         import myosuite  # noqa: F401
+
         return True
     except ImportError:
         pytest.skip("MyoSuite not installed")
@@ -41,7 +42,7 @@ class TestMyoSuiteMuscleAnalyzer:
             env = gym.make("myoElbowPose1D6MRandom-v0")
             env.reset()
 
-            sim = env.sim if hasattr(env, 'sim') else env.unwrapped.sim
+            sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
             from engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteMuscleAnalyzer,
@@ -51,7 +52,9 @@ class TestMyoSuiteMuscleAnalyzer:
 
             # Should have identified some muscles
             assert len(analyzer.muscle_names) > 0, "No muscles found"
-            LOGGER.info(f"Found {len(analyzer.muscle_names)} muscles: {analyzer.muscle_names}")
+            LOGGER.info(
+                f"Found {len(analyzer.muscle_names)} muscles: {analyzer.muscle_names}"
+            )
 
         except Exception as e:
             LOGGER.warning(f"MyoSuite environment test failed: {e}")
@@ -65,7 +68,7 @@ class TestMyoSuiteMuscleAnalyzer:
             env = gym.make("myoElbowPose1D6MRandom-v0")
             env.reset()
 
-            sim = env.sim if hasattr(env, 'sim') else env.unwrapped.sim
+            sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
             from engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteMuscleAnalyzer,
@@ -97,7 +100,7 @@ class TestMyoSuiteMuscleAnalyzer:
                 action = env.action_space.sample()
                 env.step(action)
 
-            sim = env.sim if hasattr(env, 'sim') else env.unwrapped.sim
+            sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
             from engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteMuscleAnalyzer,
@@ -125,7 +128,7 @@ class TestMyoSuiteMuscleAnalyzer:
             env = gym.make("myoElbowPose1D6MRandom-v0")
             env.reset()
 
-            sim = env.sim if hasattr(env, 'sim') else env.unwrapped.sim
+            sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
             from engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteMuscleAnalyzer,
@@ -158,7 +161,7 @@ class TestMyoSuiteMuscleAnalyzer:
                 action = np.ones(env.action_space.shape) * 0.5  # 50% activation
                 env.step(action)
 
-            sim = env.sim if hasattr(env, 'sim') else env.unwrapped.sim
+            sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
             from engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteMuscleAnalyzer,
@@ -172,12 +175,12 @@ class TestMyoSuiteMuscleAnalyzer:
             assert len(induced) == len(analyzer.muscle_names)
 
             # At least some muscles should produce non-zero acceleration
-            non_zero_count = sum(
-                1 for a in induced.values() if not np.allclose(a, 0.0)
-            )
+            non_zero_count = sum(1 for a in induced.values() if not np.allclose(a, 0.0))
             assert non_zero_count > 0, "All induced accelerations are zero"
 
-            LOGGER.info(f"Non-zero induced accelerations: {non_zero_count}/{len(induced)}")
+            LOGGER.info(
+                f"Non-zero induced accelerations: {non_zero_count}/{len(induced)}"
+            )
 
         except Exception as e:
             pytest.skip(f"Induced acceleration test failed: {e}")
@@ -195,7 +198,7 @@ class TestMyoSuiteMuscleAnalyzer:
                 action = env.action_space.sample()
                 env.step(action)
 
-            sim = env.sim if hasattr(env, 'sim') else env.unwrapped.sim
+            sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
             from engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteMuscleAnalyzer,
@@ -216,7 +219,9 @@ class TestMyoSuiteMuscleAnalyzer:
             LOGGER.info("Analysis complete:")
             LOGGER.info(f"  Muscles: {len(analysis.muscle_state.muscle_names)}")
             LOGGER.info(f"  Total torque: {analysis.total_muscle_torque}")
-            LOGGER.info(f"  Activation power: {list(analysis.activation_power.values())[:3]}")
+            LOGGER.info(
+                f"  Activation power: {list(analysis.activation_power.values())[:3]}"
+            )
 
         except Exception as e:
             pytest.skip(f"Comprehensive analysis failed: {e}")
@@ -238,7 +243,7 @@ class TestMyoSuiteGripModel:
                 env = gym.make("myoElbowPose1D6MRandom-v0")
 
             env.reset()
-            sim = env.sim if hasattr(env, 'sim') else env.unwrapped.sim
+            sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
             from engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteGripModel,
@@ -277,7 +282,7 @@ class TestMyoSuiteGripModel:
                 action = np.ones(env.action_space.shape) * 0.7  # 70% grip
                 env.step(action)
 
-            sim = env.sim if hasattr(env, 'sim') else env.unwrapped.sim
+            sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
             from engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteGripModel,
@@ -377,7 +382,9 @@ class TestMyoSuiteEngine:
             if analyzer.muscle_actuator_ids:
                 actuator_id = analyzer.muscle_actuator_ids[0]
                 ctrl_value = engine.sim.data.ctrl[actuator_id]
-                assert 0.7 <= ctrl_value <= 0.9, f"Activation not set correctly: {ctrl_value}"
+                assert (
+                    0.7 <= ctrl_value <= 0.9
+                ), f"Activation not set correctly: {ctrl_value}"
 
         except Exception as e:
             pytest.skip(f"Activation setting test failed: {e}")

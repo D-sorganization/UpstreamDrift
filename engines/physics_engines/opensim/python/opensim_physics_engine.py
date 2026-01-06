@@ -354,6 +354,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
         try:
             from .muscle_analysis import OpenSimMuscleAnalyzer
+
             return OpenSimMuscleAnalyzer(self._model, self._state)
         except ImportError as e:
             logger.error(f"Failed to import muscle analyzer: {e}")
@@ -373,6 +374,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
         try:
             from .muscle_analysis import OpenSimGripModel
+
             return OpenSimGripModel(self._model)
         except ImportError as e:
             logger.error(f"Failed to import grip model: {e}")

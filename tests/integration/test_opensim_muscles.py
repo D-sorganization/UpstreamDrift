@@ -101,10 +101,14 @@ class TestOpenSimMuscleModels:
 
         # At optimal length with full activation, force should be near maximum
         # (exact value depends on velocity and activation dynamics)
-        LOGGER.info(f"Muscle force at optimal length: {F_muscle:.1f} N (F_max={F_max:.1f} N)")
+        LOGGER.info(
+            f"Muscle force at optimal length: {F_muscle:.1f} N (F_max={F_max:.1f} N)"
+        )
 
         # Basic sanity check: force should be positive and reasonable
-        assert 0 < F_muscle <= F_max * 1.5, f"Muscle force {F_muscle} outside expected range"
+        assert (
+            0 < F_muscle <= F_max * 1.5
+        ), f"Muscle force {F_muscle} outside expected range"
 
     def test_activation_dynamics(self, simple_arm_model):
         """Section J: Verify activation dynamics (30-50ms delay)."""

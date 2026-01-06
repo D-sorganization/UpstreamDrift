@@ -307,6 +307,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
         try:
             from .muscle_analysis import MyoSuiteMuscleAnalyzer
+
             return MyoSuiteMuscleAnalyzer(self.sim)
         except ImportError as e:
             LOGGER.error(f"Failed to import muscle analyzer: {e}")
@@ -327,6 +328,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
         try:
             from .muscle_analysis import MyoSuiteGripModel
+
             return MyoSuiteGripModel(self.sim, analyzer)
         except ImportError as e:
             LOGGER.error(f"Failed to import grip model: {e}")
