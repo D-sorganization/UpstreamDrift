@@ -616,14 +616,12 @@ class StatisticalAnalyzer:
 
         # CoP Path Length
         cop_diff = np.diff(self.cop_position, axis=0)
-        # Reuse distance computation for path length and velocity
+        # OPTIMIZATION: Reuse distance computation for path length and velocity
         cop_dist = np.linalg.norm(cop_diff, axis=1)
         path_length = np.sum(cop_dist)
 
         # CoP Velocity
-        # cop_vel = cop_diff / self.dt
-        # max_vel = np.max(np.linalg.norm(cop_vel, axis=1))
-        # OPTIMIZATION: Use pre-computed distance to avoid redundant allocations and norm calc
+        # OPTIMIZATION: Use pre-computed distance norm to avoid redundant allocations
         max_vel = np.max(cop_dist) / self.dt
 
         # CoP Range
