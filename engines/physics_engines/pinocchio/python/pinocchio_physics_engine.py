@@ -238,3 +238,52 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             "angular": cast(np.ndarray, jac_angular),
             "spatial": cast(np.ndarray, J_aligned),
         }
+
+    # -------- Section F: Drift-Control Decomposition --------
+
+    def compute_drift_acceleration(self) -> np.ndarray:
+        """Compute passive (drift) acceleration with zero control inputs.
+
+        Section F Implementation: Uses Pinocchio's ABA (Articulated Body Algorithm)
+        with zero torque to compute passive dynamics due to gravity and
+        Coriolis/centrifugal forces.
+
+        Returns:
+            q_ddot_drift: Drift acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        # Zero torque forward dynamics = drift only
+        tau_zero = np.zeros(self.model.nv)
+        a_drift = pin.aba(self.model, self.data, self.q, self.v, tau_zero)
+
+        return cast(np.ndarray, a_drift)
+
+    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
+        """Compute control-attributed acceleration from applied torques only.
+
+        Section F Implementation: Computes M(q)^-1 * tau to isolate control component.
+
+        Args:
+            tau: Applied generalized forces (nv,) [N·m or N]
+
+        Returns:
+            q_ddot_control: Control acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        # Ensure tau has correct dimensions
+        if len(tau) != self.model.nv:
+            return np.array([])
+
+        # Get mass matrix
+        M = self.compute_mass_matrix()
+        if M.size == 0:
+            return np.array([])
+
+        # Control component: M^-1 * tau
+        a_control = np.linalg.solve(M, tau)
+
+        return a_control

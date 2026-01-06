@@ -207,12 +207,47 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
 
         return cast(np.ndarray, self.data.qfrc_inverse.copy())
 
-    # -------- Section 3: Drift vs Control (Affine View) --------
+    # -------- Section F: Drift-Control Decomposition --------
+
+    def compute_drift_acceleration(self) -> np.ndarray:
+        """Compute passive (drift) acceleration with zero control inputs.
+
+        Section F Implementation: Uses MuJoCo's mj_forward with zero control
+        to compute passive dynamics due to gravity and Coriolis/centrifugal forces.
+
+        Returns:
+            q_ddot_drift: Drift acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        return self.compute_affine_drift()
+
+    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
+        """Compute control-attributed acceleration from applied torques only.
+
+        Section F Implementation: Computes M(q)^-1 * tau to isolate control component.
+
+        Args:
+            tau: Applied generalized forces (nv,) [N·m or N]
+
+        Returns:
+            q_ddot_control: Control acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        # Get mass matrix
+        M = self.compute_mass_matrix()
+
+        # Control component: M^-1 * tau
+        a_control = np.linalg.solve(M, tau)
+
+        return a_control
 
     def compute_affine_drift(self) -> np.ndarray:
         """Compute the 'Drift' vector f(q, qdot).
 
-        acceleration when tau = 0 (and no active control).
+        Legacy method - use compute_drift_acceleration() for Section F compliance.
+
+        Returns acceleration when tau = 0 (and no active control).
         """
         if self.model is None or self.data is None:
             return np.array([])
