@@ -89,7 +89,9 @@ class OpenSimMuscleAnalyzer:
 
         return forces
 
-    def get_moment_arms(self, coordinate_name: str | None = None) -> dict[str, dict[str, float]]:
+    def get_moment_arms(
+        self, coordinate_name: str | None = None
+    ) -> dict[str, dict[str, float]]:
         """Compute muscle moment arms about coordinates.
 
         Section J Requirement: Moment arm analysis for torque computation.
@@ -125,7 +127,9 @@ class OpenSimMuscleAnalyzer:
                         moment_arm = muscle.computeMomentArm(self.state, coord)
                         moment_arms[muscle_name][coord_name] = float(moment_arm)
                     except Exception as e:
-                        logger.debug(f"Could not compute moment arm for {muscle_name} about {coord_name}: {e}")
+                        logger.debug(
+                            f"Could not compute moment arm for {muscle_name} about {coord_name}: {e}"
+                        )
                         moment_arms[muscle_name][coord_name] = 0.0
 
         return moment_arms
@@ -195,7 +199,9 @@ class OpenSimMuscleAnalyzer:
             if muscle_name in moment_arms:
                 coord_idx = 0
                 for _ in moment_arms[muscle_name].values():
-                    torques[coord_idx] = force * list(moment_arms[muscle_name].values())[coord_idx]
+                    torques[coord_idx] = (
+                        force * list(moment_arms[muscle_name].values())[coord_idx]
+                    )
                     coord_idx += 1
 
             muscle_torques[muscle_name] = torques
@@ -329,10 +335,14 @@ class OpenSimGripModel:
             wrap_cylinder.set_length(length)
 
             # Set location in body frame
-            wrap_cylinder.set_translation(opensim.Vec3(location[0], location[1], location[2]))
+            wrap_cylinder.set_translation(
+                opensim.Vec3(location[0], location[1], location[2])
+            )
 
             # Rotation: typically align cylinder with shaft axis (e.g., along Y)
-            wrap_cylinder.set_xyz_body_rotation(opensim.Vec3(0, NINETY_DEGREES_RAD, 0))  # 90° about Y
+            wrap_cylinder.set_xyz_body_rotation(
+                opensim.Vec3(0, NINETY_DEGREES_RAD, 0)
+            )  # 90° about Y
 
             # Add to body
             wrap_obj_set = grip_body.getWrapObjectSet()
@@ -343,7 +353,9 @@ class OpenSimGripModel:
         except Exception as e:
             logger.error(f"Failed to add wrap geometry: {e}")
 
-    def compute_grip_constraint_forces(self, state: opensim.State) -> dict[str, np.ndarray]:
+    def compute_grip_constraint_forces(
+        self, state: opensim.State
+    ) -> dict[str, np.ndarray]:
         """Compute constraint reaction forces at grip via-points.
 
         Section J1 Requirement: Constraint forces at grip attachment points.
@@ -362,7 +374,9 @@ class OpenSimGripModel:
         logger.warning("Grip constraint force computation: Placeholder implementation")
         return {}
 
-    def analyze_grip_forces(self, state: opensim.State, analyzer: OpenSimMuscleAnalyzer) -> dict[str, float]:
+    def analyze_grip_forces(
+        self, state: opensim.State, analyzer: OpenSimMuscleAnalyzer
+    ) -> dict[str, float]:
         """Analyze total grip force from all hand muscles.
 
         Section J1 Validation: Grip force magnitude [N] within physiological range.
@@ -381,14 +395,21 @@ class OpenSimGripModel:
         grip_muscle_names = [
             name
             for name in muscle_forces.keys()
-            if any(keyword in name.lower() for keyword in ["flexor", "extensor", "grip", "hand"])
+            if any(
+                keyword in name.lower()
+                for keyword in ["flexor", "extensor", "grip", "hand"]
+            )
         ]
 
-        total_grip_force = sum(muscle_forces.get(name, 0.0) for name in grip_muscle_names)
+        total_grip_force = sum(
+            muscle_forces.get(name, 0.0) for name in grip_muscle_names
+        )
 
         return {
             "total_grip_force_N": total_grip_force,
             "n_grip_muscles": len(grip_muscle_names),
             "grip_muscles": grip_muscle_names,
-            'within_physiological_range': MIN_PHYSIOLOGICAL_GRIP_N <= total_grip_force <= MAX_PHYSIOLOGICAL_GRIP_N,  # Per hand
+            "within_physiological_range": MIN_PHYSIOLOGICAL_GRIP_N
+            <= total_grip_force
+            <= MAX_PHYSIOLOGICAL_GRIP_N,  # Per hand
         }
