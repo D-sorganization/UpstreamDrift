@@ -113,6 +113,7 @@ class PowerFlowAnalyzer:
 
         # Thread-safe data structure for computations
         import mujoco
+
         self._data = mujoco.MjData(model)
 
     def compute_power_flow(
@@ -231,7 +232,7 @@ class PowerFlowAnalyzer:
             if joint.damping[0] > 0:
                 v_idx = joint.dofadr[0]
                 if v_idx < self.model.nv:
-                    power_diss += joint.damping[0] * qvel[v_idx]**2
+                    power_diss += joint.damping[0] * qvel[v_idx] ** 2
 
         # 5. Energy conservation check
         # dE/dt ≈ P_in - P_diss
@@ -275,7 +276,7 @@ class PowerFlowAnalyzer:
         results = []
 
         for i in range(len(times)):
-            dt = times[i] - times[i-1] if i > 0 else 0.01
+            dt = times[i] - times[i - 1] if i > 0 else 0.01
 
             result = self.compute_power_flow(
                 qpos_traj[i],
@@ -367,7 +368,7 @@ class PowerFlowAnalyzer:
                 if joint.bodyid[0] == i and joint.damping[0] > 0:
                     v_start = joint.dofadr[0]
                     if v_start < self.model.nv:
-                        power_diss += joint.damping[0] * qvel[v_start]**2
+                        power_diss += joint.damping[0] * qvel[v_start] ** 2
 
             # Power balance: in - out - generation + dissipation = 0
             net_balance = (
@@ -415,8 +416,8 @@ class PowerFlowAnalyzer:
         fig, axes = plt.subplots(3, 1, figsize=(10, 8), sharex=True)
 
         # Instantaneous power
-        axes[0].plot(times, power, 'b-', linewidth=2)
-        axes[0].axhline(y=0, color='gray', linestyle='-', alpha=0.5)
+        axes[0].plot(times, power, "b-", linewidth=2)
+        axes[0].axhline(y=0, color="gray", linestyle="-", alpha=0.5)
         axes[0].fill_between(
             times,
             0,
@@ -435,20 +436,20 @@ class PowerFlowAnalyzer:
             color="red",
             label="Negative (absorption)",
         )
-        axes[0].set_ylabel('Power [W]')
+        axes[0].set_ylabel("Power [W]")
         axes[0].legend()
         axes[0].grid(True)
-        axes[0].set_title(f'Joint {joint_idx} Power Flow')
+        axes[0].set_title(f"Joint {joint_idx} Power Flow")
 
         # Cumulative work
-        axes[1].plot(times, work_total, 'g-', linewidth=2)
-        axes[1].set_ylabel('Cumulative Work [J]')
+        axes[1].plot(times, work_total, "g-", linewidth=2)
+        axes[1].set_ylabel("Cumulative Work [J]")
         axes[1].grid(True)
 
         # Total mechanical energy
-        axes[2].plot(times, total_energy, 'k-', linewidth=2)
-        axes[2].set_ylabel('Total ME [J]')
-        axes[2].set_xlabel('Time [s]')
+        axes[2].plot(times, total_energy, "k-", linewidth=2)
+        axes[2].set_ylabel("Total ME [J]")
+        axes[2].set_xlabel("Time [s]")
         axes[2].grid(True)
 
         plt.tight_layout()
