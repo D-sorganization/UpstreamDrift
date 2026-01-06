@@ -7,7 +7,7 @@ This folder contains the comprehensive assessment framework and results for the 
 ### Primary Documents
 
 **Project Guidance**:
-- 📄 **Main Project Guidelines**: `../project_design_guidelines.qmd` (in `docs/` folder)
+- 📄 **Main Project Guidelines**: `project_design_guidelines.qmd` (in this folder)
   - Living mission statement and acceptance checklist
   - Required features (Sections A-M)
   - Technical standards (Sections N-S)
@@ -114,7 +114,7 @@ Per **Guideline R2 (Adversarial Review Cycle)**:
 
 ## Links
 
-- **Project Guidelines**: [../project_design_guidelines.qmd](../project_design_guidelines.qmd)
+- **Project Guidelines**: [project_design_guidelines.qmd](project_design_guidelines.qmd) (in this folder)
 - **Engine Capabilities** (to be created): [../engine_capabilities.md](../engine_capabilities.md)
 - **Pull Request**: [#276](https://github.com/D-sorganization/Golf_Modeling_Suite/pull/276)
 
