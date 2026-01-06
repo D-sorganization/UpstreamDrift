@@ -62,7 +62,8 @@ Body Frames:
 
 Jacobian Conventions:
     - All Jacobians map joint velocities (q̇) to world-frame spatial velocities
-    - Format: 6×nv matrix [angular; linear] (stacked 3×nv rotational, 3×nv translational)
+    - Format: 6×nv matrix [angular; linear]
+      (stacked 3×nv rotational, 3×nv translational)
     - Units: [(rad/s) / (rad or m), (m/s) / (rad or m)]
     - Sign convention: Positive joint velocity → specified direction in Jacobian
 
@@ -73,7 +74,8 @@ Task Space / End-Effector Frame:
 
 NUMERICAL TOLERANCES (Addresses Assessment B-004, B-007)
 =========================================================
-This module uses the following numerical constants (defined in shared/python/numerical_constants.py):
+This module uses the following numerical constants
+(defined in shared/python/numerical_constants.py):
 
 - EPSILON_FINITE_DIFF_JACOBIAN = 1e-6: Finite difference step for Jacobian derivatives
 - EPSILON_SINGULARITY_DETECTION = 1e-10: Threshold for detecting ill-conditioning
@@ -132,13 +134,16 @@ results = analyzer.analyze_trajectory(times, positions, velocities, acceleration
 for result in results:
     print(f"Time: {result.time:.3f} s")
     print(f"Coriolis power: {result.coriolis_power:.2f} W")
-    print(f"Total kinetic energy: {result.rotational_kinetic_energy + result.translational_kinetic_energy:.2f} J")
+    total_ke = (result.rotational_kinetic_energy +
+                result.translational_kinetic_energy)
+    print(f"Total kinetic energy: {total_ke:.2f} J")
 ```
 
 REFERENCES
 ==========
 - Featherstone, R. "Rigid Body Dynamics Algorithms", Springer 2008
-- Murray, Li, Sastry, "A Mathematical Introduction to Robotic Manipulation", CRC Press 1994
+- Murray, Li, Sastry, "A Mathematical Introduction to Robotic Manipulation",
+  CRC Press 1994
 - MuJoCo Documentation: https://mujoco.readthedocs.io/
 """
 
