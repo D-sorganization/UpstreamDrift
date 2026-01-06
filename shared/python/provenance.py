@@ -94,7 +94,7 @@ class ProvenanceInfo:
                     ...     parameters={"dt": 0.001, "integrator": "RK4"}
                     ... )
         """
-        now_utc = datetime.now(timezone.utc)
+        now_utc = datetime.now(timezone.utc)  # noqa: UP017 (mypy compatibility)
         now_local = datetime.now().astimezone()
 
         # Git information (best effort)
