@@ -28,7 +28,8 @@ C3DMapping = dict[str, Any]
 SCHEMA_VERSION = "1.0"
 
 # Guideline P1: Biomechanical marker validation thresholds [m]
-# Source: NIST - Human body dimensions range from ~0.001m (1mm detail) to ~10m (extended reach)
+# Source: NIST - Human body dimensions range from
+# ~0.001m (1mm detail) to ~10m (extended reach)
 BIOMECHANICAL_MARKER_MIN_M = 0.001  # 1mm minimum - detects mm/m confusion
 BIOMECHANICAL_MARKER_MAX_M = 10.0  # 10m maximum - detects unrealistic scales
 
