@@ -123,6 +123,28 @@ class ManipulabilityAnalyzer:
         # Ratio of largest to smallest singular value (sigma_max / sigma_min)
         # = radii_v_max / radii_v_min
         cond_num = radii_v[0] / radii_v[-1] if radii_v[-1] > 1e-9 else float("inf")
+
+        # Guideline O3: Singularity Detection & Warnings
+        # Warn on poor conditioning (κ > 1e6), error on singularity (κ > 1e10)
+        if cond_num > 1e6:
+            logger.warning(
+                f"⚠️ High Jacobian condition number for {body_name}: κ={cond_num:.2e}. "
+                f"Near singularity - manipulability metrics may be unreliable. "
+                f"Guideline O3 warning threshold exceeded. "
+                f"Consider alternative joint configuration or regularization."
+            )
+
+        if cond_num > 1e10:
+            logger.error(
+                f"❌ Jacobian is singular for {body_name}: κ={cond_num:.2e}. "
+                f"Cannot compute reliable manipulability. "
+                f"Guideline O3 VIOLATION - system at or near kinematic singularity."
+            )
+            raise ValueError(
+                f"Jacobian singularity detected for {body_name} (κ={cond_num:.2e}). "
+                f"System is at or near kinematic singularity. Manipulability analysis invalid."
+            )
+
         # Manipulability Index (Volumetric)
         manip_index = np.prod(radii_v)
 
