@@ -8,14 +8,13 @@ Comprehensive test suite validating:
 - Sign conventions (generation vs absorption)
 """
 
-import pytest
-import numpy as np
 import mujoco
-
+import numpy as np
+import pytest
 from mujoco_humanoid_golf.power_flow import (
+    InterSegmentTransfer,
     PowerFlowAnalyzer,
     PowerFlowResult,
-    InterSegmentTransfer,
 )
 
 
