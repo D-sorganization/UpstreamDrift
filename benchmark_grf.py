@@ -1,4 +1,3 @@
-
 import time
 
 import numpy as np
@@ -24,7 +23,7 @@ def benchmark_grf_metrics():
         joint_positions=joint_positions,
         joint_velocities=joint_velocities,
         joint_torques=joint_torques,
-        cop_position=cop_position
+        cop_position=cop_position,
     )
 
     # Warmup
@@ -38,6 +37,7 @@ def benchmark_grf_metrics():
     end_time = time.perf_counter()
 
     (end_time - start_time) / iterations
+
 
 if __name__ == "__main__":
     benchmark_grf_metrics()
