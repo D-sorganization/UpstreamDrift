@@ -31,7 +31,7 @@ We are building a research‑grade platform to model the golf swing as a constra
 ### First principles over convenience
 
 - Equations of motion must be numerically inspectable (and ideally symbolically traceable).
-- Jacobians, mass matrices, constraint forces, null spaces, and conditioning are baseline—never “advanced extras.”
+- Jacobians, mass matrices, constraint forces, null spaces, and conditioning are baseline—never “advanced extras.” The goal of this program is to move forward the understanding of golf related physics modelling, to incorporate advanced robotics concepts to the understanding of the golf swing, and to provide the user with the ultimate package of mathematical analysis capabilities in a beautiful user interface where they have clear access to all the information they would ever want. This is the ultimate information product for the advanced biomechanics / robotics student and practitioner. 
 
 ### Cross‑engine consistency is a feature
 
@@ -39,39 +39,42 @@ We explicitly support and compare results across:
 
 - Drake
 - MuJoCo
-- Pinocchio (with Crocoddyl and Pink)
-- Simscape Multibody
-- OpenSim‑class biomechanics features (embedded)
-- MyoSuite‑style muscle/neural control experiments
+- Pinocchio (with Crocoddyl and Pink extensions / packages). The algorithms of Featherstone are a key feature of our advanced modeling system. We want a high performing clean implementation that is ideal for the application of machine learning techniques to nonlinear control problems. 
+- Matlab Simscape Multibody Models. These can be called programmatically and will require a local license. This is the only paid product withing the programming suite, and should be considered an optional use case for the user. 
+- OpenSim‑class biomechanics features (embedded with full features, advanced analysis capabilities and bringing the best of biomechanics modeling to the ecosystem of this project)
+- MyoSuite‑style muscle/neural control experiments. This is designed to augment the capabilities of OpenSim but to do so in a faster to solve package with slightly different capabilities.
 
-Engine disagreements are diagnostics, not something to paper over.
+Engine disagreements are diagnostics, not something to paper over. Each of these models has different advances features, but we want to make them have as much overlap as we possibly can so that we can generate cross validation opportunities and we can repeat our findings in multiple environments. We want to have easy access for the practitioner to multiple environments that they may use with broadly the same interface. The goal of the program is to do all of the troubleshooting and setup for the practitioner so that they can focus on interpretation of the data. We will deal with the headaches for them and provide the user with a bulletproof and well tested implementation of many different physics and biomechanics modeling engines. We want to bring physical modeling capabilities to the masses in an easy to digest package that computes advanced metrics in as many different ways as possible.
 
 ### Closed chains are the norm
 
-Two hands on one club is the default modeling problem. Loop constraints are first‑class and must be interrogated (Jacobian rank, constraint force magnitudes, etc.).
+Two hands on one club is the default modeling problem. Loop constraints are first‑class and must be interrogated (Jacobian rank, constraint force magnitudes, etc.). The golf swing is a closed chain problem and we need to focus on the advanced techniques that we can use to solve these issues. These are features that are of extreme interest. We want to know and understand the effects of the constraints and how they affect the forces and torques seen throughout the system. We want to explain the null space of the constraint jacobian and we want to understand how we can deal with these loops.
 
 ### Drift vs. control must be separable
 
-We require explicit decomposition of motion and acceleration into drift (passive dynamics) and control (actuation), with counterfactual experiments (ZTCF/ZVCF) baked in.
+We require explicit decomposition of motion and acceleration into drift (passive dynamics) and control (actuation), with counterfactual experiments (ZTCF/ZVCF) baked in. The zero torque counterfactual is a term that represents the drift. It is what the forces and torques in the system would be at any given state if the applied torques (control) were suddenly turned off. Similarly the ZVCF represents the forces and torques that would occur if the golfer - club system was in a given state, but the velocities of all components were set to zero (gravity is also set to zero here as it is a separate contributor that is already included in the drift). What we capture in the ZVCF is the control component. The ZTCF captures the drift. 
 
 ## System Scope
 
 ### Primary workflows
 
 1. **Build or import a model**
-   - URDF authoring/generation (interactive)
-   - Engine adapters (MuJoCo/Pinocchio/Drake/Simscape)
+   - URDF authoring/generation - we need to have a shared module that allows users to construct and pose urdf models and export states of an urdf model into each of the engines. This module needs to allow for branched chains and closed chain instances with the best practices for parallel mechanisms. The user should be allowed to save and share states, as well as load states. The user should be allowed to change dimensions and inertial properties and should be given good suggestions for typical or appropriate values for different body segments.
+   - Engine adapters to adapt the URDF to each engine so that all engines can interact with the same model and perform the same physically (MuJoCo/Pinocchio/Drake/Simscape)
 2. **Ingest experimental data**
-   - C3D (markers + analog + force plates if present)
+   - C3D Interpreter Module Functionality (markers + analog + force plates if present)
+   - This is critical for the interpretation of biomechanical data00
    - Model fitting / registration
 3. **Simulate & optimize**
    - Forward and inverse dynamics
    - Trajectory optimization / planning
+   - Advanced non-linear control approaches built in to each model
 4. **Interpret**
-   - Jacobians, constraints, induced + indexed acceleration
-   - Force/mobility ellipsoids
-   - Drift/control decomposition
-   - ZTCF/ZVCF counterfactuals
+   - Jacobians, constraints, induced acceleration + indexed acceleration analysis
+   - Force/mobility ellipsoids computed at every joint center and the end effector (clubhead).
+   - Work and power calculation at every joint. Advanced analysis of energy flow through the system
+   - Drift/control decomposition of all forces and torques
+   - ZTCF/ZVCF counterfactual computation through advanced simulation strategies
 5. **Validate across engines**
    - Comparable outputs, explicit tolerances, documented deviations
 
