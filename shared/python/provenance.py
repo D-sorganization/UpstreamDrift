@@ -31,7 +31,7 @@ with open('results.csv', 'w') as f:
 import hashlib
 import subprocess
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, TextIO
 
@@ -94,7 +94,7 @@ class ProvenanceInfo:
                     ...     parameters={"dt": 0.001, "integrator": "RK4"}
                     ... )
         """
-        now_utc = datetime.now(datetime.UTC)
+        now_utc = datetime.now(timezone.utc)
         now_local = datetime.now().astimezone()
 
         # Git information (best effort)

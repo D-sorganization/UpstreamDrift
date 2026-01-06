@@ -118,7 +118,7 @@ class TestEnergyConservation:
 
         # Simulate for 2 seconds (dt=0.001s, n_steps=2000)
         n_steps = 2000
-        energies = []
+        energies_list: list[float] = []
 
         for _ in range(n_steps):
             mujoco.mj_step(model, data)
@@ -128,10 +128,10 @@ class TestEnergyConservation:
             pe = -data.qpos[0] * model.body_mass[1] * GRAVITY_STANDARD * 1.0
             total_energy = ke + pe
 
-            energies.append(total_energy)
+            energies_list.append(total_energy)
 
         # Verify energy conservation
-        energies = np.array(energies)
+        energies: np.ndarray[tuple[int], np.dtype[np.floating]] = np.array(energies_list)
         energy_variation = np.std(energies) / np.abs(np.mean(energies))
 
         assert energy_variation < TOLERANCE_ENERGY_CONSERVATION, (
@@ -256,7 +256,7 @@ class TestEnergyConservation:
         dt = 0.001
         n_steps = 500
 
-        energies = []
+        energies_list: list[float] = []
         powers_actuator = []
         times = []
 
@@ -273,12 +273,12 @@ class TestEnergyConservation:
             energy = ke
             power = torque * data.qvel[0]
 
-            energies.append(energy)
+            energies_list.append(energy)
             powers_actuator.append(power)
             times.append(i * dt)
 
         # Compute dE/dt numerically (central difference)
-        energies = np.array(energies)
+        energies: np.ndarray[tuple[int], np.dtype[np.floating]] = np.array(energies_list)
         de_dt_numeric = np.gradient(energies, dt)
 
         # Compare with actuator power
@@ -334,17 +334,17 @@ class TestConservationLaws:
 
         # Simulate free rotation (dt=0.01s, n_steps=1000)
         n_steps = 1000
-        angular_momenta = []
+        angular_momenta_list: list[float] = []
 
         for _ in range(n_steps):
             mujoco.mj_step(model, data)
 
             # Angular momentum (simplified - assumes constant inertia)
             L = data.qvel[3:6].copy()
-            angular_momenta.append(np.linalg.norm(L))
+            angular_momenta_list.append(float(np.linalg.norm(L)))
 
         # Verify angular momentum magnitude is conserved
-        angular_momenta = np.array(angular_momenta)
+        angular_momenta: np.ndarray[tuple[int], np.dtype[np.floating]] = np.array(angular_momenta_list)
         momentum_variation = np.std(angular_momenta) / np.mean(angular_momenta)
 
         assert momentum_variation < 1e-3, (
