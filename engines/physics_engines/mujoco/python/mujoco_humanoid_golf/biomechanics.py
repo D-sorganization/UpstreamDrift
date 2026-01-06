@@ -343,6 +343,23 @@ class BiomechanicalAnalyzer:
                 "velocity": comps["velocity"],
             }
 
+            # Compute specific induced acceleration if requested
+            if selected_actuator_name:
+                act_id = mujoco.mj_name2id(
+                    self.model,
+                    mujoco.mjtObj.mjOBJ_ACTUATOR,
+                    selected_actuator_name,
+                )
+                if act_id != -1:
+                    tau_spec = np.zeros(self.model.nu)
+                    tau_spec[act_id] = 1.0
+                    # Compute components with specific torque
+                    # The 'control' component corresponds to M^-1 * tau_spec
+                    spec_comps = self.induced_analyzer.compute_components(
+                        tau_app=tau_spec
+                    )
+                    induced["selected_actuator"] = spec_comps["control"]
+
             # Compute task space induced accelerations for club head
             if self.club_head_id is not None:
                 # Use actual body name to ensure correct lookup
