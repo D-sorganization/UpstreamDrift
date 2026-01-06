@@ -221,3 +221,37 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         except Exception as e:
             LOGGER.error("Failed to compute Jacobian for body '%s': %s", body_name, e)
             return None
+
+    # -------- Section F: Drift-Control Decomposition --------
+
+    def compute_drift_acceleration(self) -> np.ndarray:
+        """Compute passive (drift) acceleration with zero muscle activations.
+
+        Section F Implementation: Simulates one step with zero action vector
+        to compute passive dynamics.
+
+        Returns:
+            q_ddot_drift: Drift acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        logger.warning("MyoSuite drift-control decomposition: Placeholder implementation")
+        # TODO: Implement proper muscle-based drift computation
+        # For now, return zero acceleration as placeholder
+        if hasattr(self, 'nv'):
+            return np.zeros(self.nv)
+        return np.array([])
+
+    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
+        """Compute control-attributed acceleration from muscle activations.
+
+        Section F Implementation: Maps muscle activations to joint torques,
+        then computes M(q)^-1 * tau.
+
+        Args:
+            tau: Applied generalized forces (nv,) [N·m or N]
+
+        Returns:
+            q_ddot_control: Control acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        logger.warning("MyoSuite control decomposition: Placeholder implementation")
+        # TODO: Implement proper muscle force → joint torque mapping
+        return np.zeros_like(tau)
