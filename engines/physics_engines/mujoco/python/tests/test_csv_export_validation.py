@@ -35,7 +35,7 @@ class TestCSVExportValidation:
     def test_export_validates_non_empty_results(self, tmp_path):
         """Test that results list cannot be empty."""
         times = np.array([])
-        results = []
+        results: list[InverseDynamicsResult] = []
         filepath = tmp_path / "test.csv"
 
         with pytest.raises(ValueError, match="Cannot export empty results list"):
