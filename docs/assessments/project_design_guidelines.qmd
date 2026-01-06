@@ -146,6 +146,32 @@ We require explicit decomposition of motion and acceleration into drift (passive
   - Simscape Multibody
 - Explicit warnings where semantics differ (no silent assumptions).
 
+#### B5. Flexible Beam Shaft Implementation (mandatory)
+
+- Each physics engine must support shaft flexibility modeling options:
+  - Rigid shaft (baseline)
+  - Finite element beam model (distributed compliance)
+  - Modal representation (dominant bending modes)
+- Shaft properties:
+  - Stiffness distribution (EI profile along shaft)
+  - Mass distribution
+  - Damping characteristics
+- Validation requirements:
+  - Static deflection tests (known load → deflection)
+  - Dynamic frequency response (compare to modal analysis)
+  - Cross-engine comparison of shaft deformation
+
+#### B6. Left-Handed Player Support (mandatory)
+
+- Symmetric model flip functionality:
+  - Mirror all kinematic chains about sagittal plane
+  - Preserve joint conventions (sign flips for asymmetric joints)
+  - Automatic handedness detection from model metadata
+- GUI toggle for left/right-handed visualization
+- Validation:
+  - Mirrored model produces mirrored trajectories
+  - Energy/momentum conservation preserved under reflection
+
 ### C. Kinematics, Jacobians, and Constraint Geometry
 
 #### C1. Jacobians everywhere (mandatory, exhaustive)
@@ -227,6 +253,53 @@ For every joint and timestep, log:
 
 - Power transfer between segments (not just system energy).
 - Work decomposition aligned with drift/control/constraint components.
+
+#### E4. Reference Frame Representations (mandatory)
+
+**All forces and torques must be available in multiple reference frames:**
+
+- **Global (world) frame**: Fixed inertial reference
+- **Local (body) frame**: Attached to each segment
+- **Swing plane frame**: Golf-specific task-oriented coordinates
+
+**Swing Plane Reference Frame Requirements:**
+
+- **In-plane component**: Force/torque tangent to instantaneous swing plane
+- **Out-of-plane component**: Force/torque perpendicular to swing plane (normal direction)
+- **About-grip component**: Moment about the golf grip axis (local coordinate along shaft)
+- Real-time plane fitting from:
+  - Clubhead velocity vector
+  - Grip position trajectory
+  - Adjustable time window (user-defined)
+
+**Functional Swing Plane (FSP) — Post-Simulation Analysis:**
+
+- **Definition**: Best-fit plane to clubhead trajectory near impact
+- **Fitting window**: User-adjustable time period (e.g., ±50 ms from impact)
+- **Outputs**:
+  - Plane normal vector and origin
+  - RMS deviation of actual trajectory from plane
+  - Swing plane angle relative to global frame
+- **Integration**: FSP used as reference for final force/torque decomposition
+- **Validation**: Compare FSP to instantaneous swing plane evolution
+
+#### E5. Ground Reaction Forces (mandatory)
+
+**All ground reaction forces must be computed and reported:**
+
+- **Reference frame**: GRF calculated in global (world) frame
+- **Force plate integration**: Support for C3D analog force plate data
+- **Synthetic GRF**: Computed from model contact elements when force plates unavailable
+- **Required outputs**:
+  - Linear impulse: ∫ F_GRF dt (total and per-foot if bilateral)
+  - Angular impulse: ∫ τ_GRF dt about golfer COM
+  - Moment of GRF about total golfer center of mass
+  - Moment of GRF about golfer-club system COM
+  - Center of pressure (COP) trajectory
+- **Cross-engine consistency**:
+  - GRF magnitude tolerance: ± 5% between engines
+  - COP position tolerance: ± 10 mm
+  - Angular impulse tolerance: ± 10%
 
 ### F. Drift–Control Decomposition (Non‑Negotiable)
 
@@ -325,6 +398,43 @@ Required embedded biomechanics features:
   - muscle‑driven vs torque‑driven feasibility
   - energy/effort metrics with transparency
 
+
+### K2. Contact-Based Grip Model (MuJoCo, mandatory)
+
+**Hand-club interface must be modeled via contact mechanics, not rigid constraints:**
+
+- **Implementation**:
+  - MuJoCo contact pairs between hand geometry and grip geometry
+  - Friction cone constraints (static/dynamic friction coefficients)
+  - Normal force distribution across contact points
+- **Required outputs**:
+  - Contact forces at each hand-grip interface point
+  - Slip detection and magnitude
+  - Grip pressure distribution (visualization)
+- **Validation tests**:
+  - Static equilibrium: club weight supported by contact forces
+  - Dynamic swing: contact forces prevent slip within friction limits
+  - Comparison to constraint-based grip (residual force analysis)
+
+### K3. Modular Impact Model (MuJoCo, mandatory)
+
+**Ball-clubface impact must be a separate, interfaceable module:**
+
+- **Module architecture**:
+  - Standalone impact solver (callable from any engine)
+  - Input: Pre-impact state (clubhead velocity, orientation, ball state)
+  - Output: Post-impact state (ball velocity, spin, clubhead rebound)
+- **Physics models supported**:
+  - Rigid body collision (coefficient of restitution)
+  - Compliant contact (spring-damper, Kelvin-Voigt)
+  - Finite-time contact (impulse-momentum with contact duration)
+- **Integration requirements**:
+  - MuJoCo native: Use `mj_forward` with contact detection
+  - Engine-agnostic: Provide Python API for external impact solvers
+- **Validation**:
+  - Compare to high-speed video measurements (when available)
+  - Energy balance: kinetic energy before/after impact
+  - Spin generation models (gear effect, offset impact)
 ### L. Visualization & Reporting (Not Eye Candy)
 
 Required visual layers:
