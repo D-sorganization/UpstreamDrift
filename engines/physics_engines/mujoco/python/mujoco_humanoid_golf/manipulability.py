@@ -142,7 +142,8 @@ class ManipulabilityAnalyzer:
             )
             raise ValueError(
                 f"Jacobian singularity detected for {body_name} (κ={cond_num:.2e}). "
-                f"System is at or near kinematic singularity. Manipulability analysis invalid."
+                f"System is at or near kinematic singularity. "
+                f"Manipulability analysis invalid."
             )
 
         # Manipulability Index (Volumetric)
