@@ -902,6 +902,28 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                     self.force_scale,
                     self.torque_scale,
                 )
+
+                if self.show_induced_vectors:
+                    self.meshcat_adapter.draw_induced_vectors(
+                        self.data,
+                        self.latest_bio_data,
+                        self.induced_vector_source,
+                        self.torque_scale,
+                    )
+                else:
+                    # Passing None clears the vectors
+                    self.meshcat_adapter.draw_induced_vectors(self.data, None, "")
+
+                if self.show_cf_vectors:
+                    self.meshcat_adapter.draw_cf_vectors(
+                        self.data,
+                        self.latest_bio_data,
+                        self.cf_vector_type,
+                        self.torque_scale,
+                    )
+                else:
+                    self.meshcat_adapter.draw_cf_vectors(self.data, None, "")
+
             except Exception:
                 pass
 
