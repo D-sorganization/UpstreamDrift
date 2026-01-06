@@ -1,0 +1,401 @@
+---
+title: "Golf Modeling App — Mission & Required Features"
+subtitle: "A living mission statement and acceptance checklist"
+author: "Project Team"
+date: "2026-01-05"
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: true
+    theme: cosmo
+  pdf:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+## Mission (Non‑Negotiable)
+
+We are building a research‑grade platform to model the golf swing as a constrained, redundant, hybrid multibody system. This is not an animation tool, a curve‑fit engine, or a coaching dashboard. The app must enable physically faithful simulation, cross‑engine verification, and causal interpretation.
+
+**Prime directive:** If a capability does not improve physical fidelity, interpretability, or reproducibility, it does not belong in the product.
+
+## Core Principles
+
+### First principles over convenience
+
+- Equations of motion must be numerically inspectable (and ideally symbolically traceable).
+- Jacobians, mass matrices, constraint forces, null spaces, and conditioning are baseline—never “advanced extras.”
+
+### Cross‑engine consistency is a feature
+
+We explicitly support and compare results across:
+
+- Drake
+- MuJoCo
+- Pinocchio (with Crocoddyl and Pink)
+- Simscape Multibody
+- OpenSim‑class biomechanics features (embedded)
+- MyoSuite‑style muscle/neural control experiments
+
+Engine disagreements are diagnostics, not something to paper over.
+
+### Closed chains are the norm
+
+Two hands on one club is the default modeling problem. Loop constraints are first‑class and must be interrogated (Jacobian rank, constraint force magnitudes, etc.).
+
+### Drift vs. control must be separable
+
+We require explicit decomposition of motion and acceleration into drift (passive dynamics) and control (actuation), with counterfactual experiments (ZTCF/ZVCF) baked in.
+
+## System Scope
+
+### Primary workflows
+
+1. **Build or import a model**
+   - URDF authoring/generation (interactive)
+   - Engine adapters (MuJoCo/Pinocchio/Drake/Simscape)
+2. **Ingest experimental data**
+   - C3D (markers + analog + force plates if present)
+   - Model fitting / registration
+3. **Simulate & optimize**
+   - Forward and inverse dynamics
+   - Trajectory optimization / planning
+4. **Interpret**
+   - Jacobians, constraints, induced + indexed acceleration
+   - Force/mobility ellipsoids
+   - Drift/control decomposition
+   - ZTCF/ZVCF counterfactuals
+5. **Validate across engines**
+   - Comparable outputs, explicit tolerances, documented deviations
+
+### Non‑goals (to stay honest)
+
+- Consumer coaching, “swing tips,” or proprietary scoring.
+- Hiding assumptions behind opaque “efficiency metrics.”
+- Shipping features that cannot be validated or reproduced.
+
+## Required Feature Set (Acceptance Checklist)
+
+> **Rule:** Every item below must be either (a) implemented, (b) explicitly marked “not supported” with a reason, and (c) tested with an acceptance suite.
+
+### A. Data Ingestion & Experimental Alignment
+
+#### A1. C3D reader (mandatory)
+
+- Read markers, analog channels, events, and metadata.
+- Support multiple marker sets and partial/missing markers.
+- Unit normalization + sampling‑rate handling.
+- Optional force‑plate parsing where present.
+- Timebase alignment and resampling utilities.
+
+#### A2. Marker‑to‑model mapping
+
+- Landmark mapping to model frames.
+- Segment pose reconstruction (rigid body fit).
+- Residuals, outlier detection, and diagnostics plots.
+- Logged uncertainty / fit quality metrics.
+
+#### A3. Model fitting & parameter identification
+
+- Fit kinematics (DOFs) to observed trajectories.
+- Parameter estimation options (segment lengths, masses/inertias).
+- Report sensitivity to parameter changes.
+
+### B. Modeling & Interoperability
+
+#### B1. Kinematic modeling
+
+- Trees and closed loops.
+- Revolute, prismatic, and compound joints (universal/spherical via chains).
+- Joint limits, damping, compliance options (where supported).
+
+#### B2. Inertial modeling
+
+- Segment mass properties (mass, COM, inertia tensor).
+- Consistent conventions across engines.
+- Visual vs. collision geometry separation.
+
+#### B3. Interactive URDF generator (mandatory)
+
+- GUI‑driven URDF authoring and editing.
+- Parametric joint and link property editing.
+- Live URDF validation (schema + physics sanity checks).
+- **MuJoCo visualization embedded**:
+  - Real‑time render of the generated model
+  - Collision display toggles
+  - Frame/axis display toggles
+  - Joint limit visualization
+  - Contact visualization (where possible)
+
+#### B4. Engine adapter layer (mandatory)
+
+- Import/export and runtime adapters for:
+  - Drake
+  - MuJoCo
+  - Pinocchio (+ Crocoddyl + Pink)
+  - Simscape Multibody
+- Explicit warnings where semantics differ (no silent assumptions).
+
+### C. Kinematics, Jacobians, and Constraint Geometry
+
+#### C1. Jacobians everywhere (mandatory, exhaustive)
+
+Compute and expose Jacobians for all relevant bodies and task points:
+
+- World‑frame and body‑frame geometric Jacobians (6×N).
+- Linear and angular components separated.
+- Key task points:
+  - Clubhead, multiple points along shaft, grip
+  - Left hand, right hand
+  - Forearms, upper arms, torso segments
+- Closed‑chain, constraint‑consistent Jacobians.
+
+#### C2. Rank/conditioning diagnostics
+
+- Near‑singularity detection (condition number, smallest singular value).
+- Constraint Jacobian rank diagnostics.
+- Null‑space basis extraction and tracking through time.
+
+#### C3. Screw‑theoretic kinematics (required)
+
+- Instantaneous screw axis (ISA) / twist extraction at key task points.
+- Visualization of screw axis and pitch where meaningful.
+
+### D. Dynamics Core (Forward & Inverse)
+
+#### D1. Forward dynamics (mandatory)
+
+- Simulate under applied torques, external wrenches, constraints, gravity.
+- Deterministic integration with logged states.
+- Toggle contributions:
+  - Gravity only
+  - Drift only (no applied torques)
+  - Control only (no drift terms via counterfactual methods)
+  - Constraint force influence isolated (when meaningful)
+
+#### D2. Inverse dynamics (mandatory)
+
+- Constraint‑consistent inverse dynamics.
+- Compute:
+  - Joint torques for a given motion
+  - Constraint reactions (forces/torques)
+- Redundant solution options:
+  - Minimum‑norm torques
+  - Continuity‑regularized torques
+  - Null‑space objective costs
+
+#### D3. Mass & inertia matrices (mandatory)
+
+Expose at runtime:
+
+- Joint‑space inertia matrix \(M(q)\)
+- Bias terms (Coriolis/centrifugal + gravity effects)
+- Operational‑space inertia (task‑space mass matrix) where supported
+- Segment inertia tensors and transforms
+
+### E. Forces, Torques, Wrenches, and Power
+
+#### E1. Joint‑level forces/torques (mandatory)
+
+For every joint and timestep, log:
+
+- Applied torque
+- Reaction torque (constraint/contacts where relevant)
+- Net torque
+- Joint power and cumulative work
+
+#### E2. Segment‑level wrenches (mandatory)
+
+- Spatial wrench on each segment.
+- Contribution breakdown:
+  - parent→child
+  - child→parent
+  - constraints/contacts
+  - external loads
+
+#### E3. Power flow & inter‑segment transfer (required)
+
+- Power transfer between segments (not just system energy).
+- Work decomposition aligned with drift/control/constraint components.
+
+### F. Drift–Control Decomposition (Non‑Negotiable)
+
+We require explicit decomposition of acceleration and power into:
+
+- Drift components:
+  - Coriolis/centrifugal coupling
+  - gravity effects
+  - passive constraint mediation
+- Control components:
+  - actuation (torques or muscles)
+  - control‑dependent constraint interaction
+
+Also required:
+
+- Superposition tests and plots:
+  - drift + control = full
+- Clear API for “turning off” elements for analysis.
+
+### G. Counterfactuals: ZTCF & ZVCF (Mandatory)
+
+#### G1. ZTCF — Zero‑Torque Counterfactual
+
+- Zero applied torques while preserving state (as defined by the experiment).
+- Simulate passive evolution under drift/constraints.
+- Compute delta vs. observed motion and infer torque‑attributed effects.
+
+#### G2. ZVCF — Zero‑Velocity Counterfactual
+
+- Zero joint velocities while preserving configuration.
+- Isolate acceleration/constraint/gravity‑driven motion from momentum effects.
+
+### H. Induced and Indexed Acceleration Analysis (Mandatory)
+
+#### H1. Induced Acceleration Analysis (IAA)
+
+- Decompose acceleration contributions from:
+  - torques (or muscles)
+  - gravity
+  - Coriolis/centrifugal terms
+  - constraints/contacts
+- Support both torque‑driven and muscle‑driven models.
+
+#### H2. Indexed acceleration analysis (“IAA++”)
+
+For every timestep, produce labeled acceleration components indexed by cause:
+
+- Applied torque components
+- Constraint/loop reaction components
+- Gravity components
+- Coriolis/centrifugal components
+- Muscle components (if present)
+
+Must be available in:
+
+- Joint space (\(\ddot q\))
+- Segment COM acceleration
+- Clubhead linear + angular acceleration
+
+**Summation requirement:** indexed components must sum to the measured/simulated acceleration within tolerance.
+
+### I. Mobility and Force Ellipsoids (Mandatory)
+
+Compute and visualize for each segment/task point:
+
+- **Mobility (velocity manipulability) ellipsoids**
+  - time‑varying through swing phases
+  - constraint‑aware where relevant
+- **Force transmission ellipsoids**
+  - mapping joint torques → task forces
+  - constraint‑aware
+
+Ellipsoids must be rendered in 3D with frame context and be exportable.
+
+### J. OpenSim‑Class Biomechanics Features (Embedded)
+
+> We do not merely “export to OpenSim.” We embed comparable analysis capabilities.
+
+Required embedded biomechanics features:
+
+- Hill‑type muscle model support (where used)
+- Tendon compliance options
+- Muscle routing/wrapping geometry support (baseline)
+- Activation → force → joint torque mapping
+- Induced acceleration compatible with muscle contributions
+- Muscle contribution reports (forces, moments, power)
+
+### K. MyoSuite‑Style Muscle + Neural Control Support
+
+- Ability to run muscle‑driven simulations (as alternatives to torque actuation).
+- Support for policy‑driven controllers (RL‑style experiments) as *validation tools*, not hype.
+- Hybrid models:
+  - muscles for proximal segments
+  - torques for distal segments
+- Comparative analysis:
+  - muscle‑driven vs torque‑driven feasibility
+  - energy/effort metrics with transparency
+
+### L. Visualization & Reporting (Not Eye Candy)
+
+Required visual layers:
+
+- Frames, axes, coordinate systems (toggleable)
+- Contacts and constraint forces (where supported)
+- Jacobian null directions and singularity indicators
+- Wrenches and power flow arrows
+- Ellipsoids and screw axes
+
+Required exports:
+
+- Standard plots + CSV/NPZ style structured exports
+- Engine‑agnostic “analysis bundle” exports for reproducibility
+
+### M. Cross‑Engine Validation & Scientific Hygiene
+
+#### M1. Feature × engine support matrix
+
+For each feature above, we must explicitly state per engine:
+
+- Fully supported / partially supported / unsupported
+- Known limitations
+- Numerical tolerance targets
+- Reference tests that validate the behavior
+
+#### M2. Acceptance test suite (mandatory)
+
+- Deterministic seeds and fixtures.
+- “Gold standard” test motions (simple pendulum, double pendulum, closed loop).
+- Cross‑engine comparison tests:
+  - kinematics
+  - dynamics
+  - Jacobians/constraints
+  - counterfactual deltas
+  - indexed acceleration closure
+
+#### M3. Failure reporting is required
+
+The system must detect and report:
+
+- Ill conditioning / near singularities
+- Constraint rank loss
+- Unrealistic force magnitudes
+- Energy drift or integration instability
+- Inconsistent conventions across engine adapters
+
+Silence is unacceptable; it must complain loudly and specifically.
+
+## Definition of Done
+
+A release is acceptable only if the platform can answer, for any swing dataset:
+
+1. **What moved?** (kinematics)
+2. **What caused it?** (indexed + induced acceleration)
+3. **What could have happened instead?** (null space + counterfactuals)
+4. **What was controllable?** (mobility/force ellipsoids)
+5. **What assumptions mattered?** (constraints + inertias + actuation model)
+
+If any of these cannot be answered with reproducible artifacts, the feature is incomplete.
+
+## Appendix: Suggested “Causality Demo” Test Case
+
+A standard benchmark swing (or simplified analog) used to validate every engine:
+
+- Closed‑chain two‑hand club constraint enabled
+- Prescribed kinematics segment (for inverse dynamics)
+- Free swing segment (for drift/counterfactual)
+- Perturbation tests:
+  - torque perturbations
+  - parameter perturbations (mass/inertia/length)
+  - constraint stiffness (if applicable)
+- Required outputs:
+  - ZTCF/ZVCF deltas
+  - induced + indexed acceleration closure
+  - ellipsoid evolution
+  - cross‑engine comparison report
