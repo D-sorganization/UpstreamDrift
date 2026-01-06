@@ -68,15 +68,15 @@ def create_simple_pendulum_mujoco() -> tuple[mujoco.MjModel, mujoco.MjData]:
     <mujoco model="pendulum">
         <compiler angle="radian" autolimits="true"/>
         <option gravity="0 0 -9.81" integrator="RK4" timestep="0.001"/>
-        
+
         <default>
             <joint damping="0.0" frictionloss="0.0"/>
             <geom density="1000"/>
         </default>
-        
+
         <worldbody>
             <light pos="0 0 3" dir="0 0 -1"/>
-            
+
             <body name="pendulum" pos="0 0 1">
                 <joint name="hinge" type="hinge" axis="0 1 0" pos="0 0 0"/>
                 <geom name="rod" type="capsule" fromto="0 0 0 0 0 -0.5" size="0.01"/>
