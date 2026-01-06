@@ -27,6 +27,12 @@ logger = get_logger(__name__)
 C3DMapping = dict[str, Any]
 SCHEMA_VERSION = "1.0"
 
+# Guideline P1: Biomechanical marker validation thresholds [m]
+# Source: NIST - Human body dimensions range from
+# ~0.001m (1mm detail) to ~10m (extended reach)
+BIOMECHANICAL_MARKER_MIN_M = 0.001  # 1mm minimum - detects mm/m confusion
+BIOMECHANICAL_MARKER_MAX_M = 10.0  # 10m maximum - detects unrealistic scales
+
 
 @dataclass(frozen=True)
 class C3DEvent:
@@ -177,6 +183,46 @@ class C3DDataReader:
 
         raw_coordinates = np.transpose(points[:3, :, :], axes=(2, 1, 0)).reshape(-1, 3)
         coordinates = raw_coordinates * self._unit_scale(metadata.units, target_units)
+
+        # Guideline P1: Unit Validation - Prevent 1000x errors from mm/m confusion
+        # Biomechanical markers should be in range [1mm, 10m]
+        if coordinates.size > 0:  # Only validate if we have data
+            min_pos = np.nanmin(coordinates)
+            max_pos = np.nanmax(coordinates)
+
+            # Check for all-NaN data (nanmin/nanmax return NaN)
+            if np.isnan(min_pos) or np.isnan(max_pos):
+                logger.warning(
+                    "All marker coordinates are NaN or non-finite; skipping unit "
+                    "range validation (Guideline P1). Verify upstream data quality "
+                    "and missing-data handling."
+                )
+            else:
+                if min_pos < BIOMECHANICAL_MARKER_MIN_M:
+                    logger.warning(
+                        "⚠️ Suspiciously small marker positions detected (< 1mm). "
+                        f"Min position: {min_pos:.6f}m. "
+                        f"Source units: {metadata.units}, target: "
+                        f"{target_units or 'unchanged'}. "
+                        "Guideline P1: Verify unit conversion is correct to "
+                        "avoid 1000x errors."
+                    )
+
+                if max_pos > BIOMECHANICAL_MARKER_MAX_M:
+                    logger.error(
+                        "❌ Unrealistic marker positions detected (> 10m). "
+                        f"Max position: {max_pos:.2f}m. "
+                        f"Source units: {metadata.units}, target: "
+                        f"{target_units or 'unchanged'}. "
+                        "Guideline P1 VIOLATION: Likely unit conversion error."
+                    )
+                    raise ValueError(
+                        f"Marker positions exceed {BIOMECHANICAL_MARKER_MAX_M}m "
+                        f"(max: {max_pos:.2f}m) - likely unit error. "
+                        f"Check that source units '{metadata.units}' are correct. "
+                        "Common issue: mm labeled as m or vice versa."
+                    )
+
         residuals = points[3, :, :].T.reshape(-1)
 
         if residual_nan_threshold is not None:
