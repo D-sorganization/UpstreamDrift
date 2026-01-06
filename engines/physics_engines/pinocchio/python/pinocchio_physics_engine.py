@@ -274,8 +274,14 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         if self.model is None or self.data is None:
             return np.array([])
 
+        # Ensure tau has correct dimensions
+        if len(tau) != self.model.nv:
+            return np.array([])
+
         # Get mass matrix
         M = self.compute_mass_matrix()
+        if M.size == 0:
+            return np.array([])
 
         # Control component: M^-1 * tau
         a_control = np.linalg.solve(M, tau)
