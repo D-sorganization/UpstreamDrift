@@ -165,6 +165,38 @@ class PendulumPhysicsEngine(PhysicsEngine):
         )
         return np.array([tau1, tau2])
 
+    def compute_drift_acceleration(self) -> np.ndarray:
+        """Compute passive (drift) acceleration with zero control inputs.
+
+        Section F Implementation: Returns acceleration with tau=0.
+        """
+        # Drift = M^-1 * (-(C + G + D))
+        # Or equivalently: solve M*a = -(C + G + D)
+        M = self.compute_mass_matrix()
+        bias = self.compute_bias_forces()
+
+        # M*a_drift + bias = 0 => a_drift = -M^-1 * bias
+        a_drift = np.linalg.solve(M, -bias)
+        return a_drift
+
+    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
+        """Compute control-attributed acceleration from applied torques only.
+
+        Section F Implementation: Returns M^-1 * tau.
+
+        Args:
+            tau: Applied generalized forces (2,) [N·m]
+
+        Returns:
+            Control acceleration vector (2,) [rad/s²]
+        """
+        if len(tau) < 2:
+            return np.array([])
+
+        M = self.compute_mass_matrix()
+        a_control = np.linalg.solve(M, tau)
+        return a_control
+
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
         # Double pendulum Jacobian.
