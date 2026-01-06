@@ -229,6 +229,12 @@ class PlottingTab(QtWidgets.QWidget):
         # Generate appropriate plot
         plot_type = self.plot_combo.currentText()
 
+        # Feedback: Disable button and show loading state
+        self.generate_plot_btn.setEnabled(False)
+        original_text = self.generate_plot_btn.text()
+        self.generate_plot_btn.setText("Generating...")
+        QtWidgets.QApplication.processEvents()  # Force UI update
+
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
         try:
             if plot_type == "Summary Dashboard":
@@ -403,6 +409,9 @@ class PlottingTab(QtWidgets.QWidget):
             logger.error("Plot generation failed: %s", e)
         finally:
             QtWidgets.QApplication.restoreOverrideCursor()
+            self.generate_plot_btn.setText(original_text)
+            self.generate_plot_btn.setEnabled(True)
+
             # Restore simulation state
             if was_running:
                 self.sim_widget.set_running(True)
