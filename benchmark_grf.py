@@ -5,7 +5,7 @@ import numpy as np
 from shared.python.statistical_analysis import StatisticalAnalyzer
 
 
-def benchmark_grf_metrics():
+def benchmark_grf_metrics() -> None:
     # Setup data
     n_samples = 100000
     times = np.linspace(0, 10, n_samples)
