@@ -233,10 +233,12 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         Returns:
             q_ddot_drift: Drift acceleration vector (nv,) [rad/s² or m/s²]
         """
-        logger.warning("MyoSuite drift-control decomposition: Placeholder implementation")
+        logger.warning(
+            "MyoSuite drift-control decomposition: Placeholder implementation"
+        )
         # TODO: Implement proper muscle-based drift computation
         # For now, return zero acceleration as placeholder
-        if hasattr(self, 'nv'):
+        if hasattr(self, "nv"):
             return np.zeros(self.nv)
         return np.array([])
 
