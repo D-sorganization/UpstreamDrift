@@ -13,13 +13,12 @@ import pytest
 # Import test utilities
 from shared.python.indexed_acceleration import (
     AccelerationClosureError,
-    IndexedAcceleration,
     compute_indexed_acceleration_from_engine,
 )
 
 LOGGER = logging.getLogger(__name__)
 
-#TOLERANCE for superposition test
+# TOLERANCE for superposition test
 SUPERPOSITION_TOLERANCE = 1e-5  # rad/s² or m/s²
 
 
@@ -91,7 +90,7 @@ class TestPinocchioDriftControl:
         a_reconstructed = a_drift + a_control
         residual = a_full - a_reconstructed
 
-        LOGGER.info(f"Pinocchio Superposition Test:")
+        LOGGER.info("Pinocchio Superposition Test:")
         LOGGER.info(f"  a_full = {a_full}")
         LOGGER.info(f"  a_drift = {a_drift}")
         LOGGER.info(f"  a_control = {a_control}")
@@ -105,10 +104,11 @@ class TestPinocchioDriftControl:
     def test_zero_control_equals_drift(self, simple_pendulum_urdf):
         """Verify that full dynamics with tau=0 equals drift acceleration."""
         try:
+            import pinocchio as pin
+
             from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                 PinocchioPhysicsEngine,
             )
-            import pinocchio as pin
         except ImportError:
             pytest.skip("Pinocchio not installed")
 
@@ -125,13 +125,14 @@ class TestPinocchioDriftControl:
 
         # Compute full dynamics with zero torque
         tau_zero = np.array([0.0])
-        a_full_zero_tau = pin.aba(engine.model, engine.data, engine.q, engine.v, tau_zero)
+        a_full_zero_tau = pin.aba(
+            engine.model, engine.data, engine.q, engine.v, tau_zero
+        )
 
         residual = a_drift - a_full_zero_tau
 
         assert np.max(np.abs(residual)) < 1e-10, (
-            f"Drift should equal full dynamics with tau=0: "
-            f"residual = {residual}"
+            f"Drift should equal full dynamics with tau=0: " f"residual = {residual}"
         )
 
 
@@ -144,15 +145,16 @@ class TestMuJoCoDriftControl:
         Section F Requirement: a_drift + a_control = a_full
         """
         try:
+            import mujoco
+
             from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
                 MuJoCoPhysicsEngine,
             )
-            import mujoco
         except ImportError:
             pytest.skip("MuJoCo not installed")
 
-        engine = MuJoCoPhysics Engine()
-        
+        engine = MuJoCoPhysicsEngine()
+
         # Convert URDF to MuJoCo XML (MuJoCo can load URDF directly in newer versions)
         try:
             engine.load_from_path(simple_pendulum_urdf)
@@ -172,7 +174,7 @@ class TestMuJoCoDriftControl:
         engine.forward()
         model = engine.get_model()
         data = engine.get_data()
-        
+
         if model is None or data is None:
             pytest.skip("MuJoCo model/data not initialized")
 
@@ -188,7 +190,7 @@ class TestMuJoCoDriftControl:
         a_reconstructed = a_drift + a_control
         residual = a_full - a_reconstructed
 
-        LOGGER.info(f"MuJoCo Superposition Test:")
+        LOGGER.info("MuJoCo Superposition Test:")
         LOGGER.info(f"  a_full = {a_full}")
         LOGGER.info(f"  a_drift = {a_drift}")
         LOGGER.info(f"  a_control = {a_control}")
@@ -206,10 +208,11 @@ class TestIndexedAccelerationClosure:
     def test_pinocchio_closure(self, simple_pendulum_urdf):
         """Verify indexed acceleration components sum to total (Pinocchio)."""
         try:
+            import pinocchio as pin
+
             from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                 PinocchioPhysicsEngine,
             )
-            import pinocchio as pin
         except ImportError:
             pytest.skip("Pinocchio not installed")
 
@@ -296,12 +299,12 @@ class TestCrossEngineDriftControl:
             pytest.skip(f"Engine {engine_name} not yet tested")
 
         # Verify methods exist
-        assert hasattr(engine, "compute_drift_acceleration"), (
-            f"{engine_name} missing compute_drift_acceleration()"
-        )
-        assert hasattr(engine, "compute_control_acceleration"), (
-            f"{engine_name} missing compute_control_acceleration()"
-        )
+        assert hasattr(
+            engine, "compute_drift_acceleration"
+        ), f"{engine_name} missing compute_drift_acceleration()"
+        assert hasattr(
+            engine, "compute_control_acceleration"
+        ), f"{engine_name} missing compute_control_acceleration()"
 
         # Try loading and computing (may fail due to URDF compatibility)
         try:
@@ -314,7 +317,9 @@ class TestCrossEngineDriftControl:
             a_control = engine.compute_control_acceleration(np.array([0.5]))
 
             assert len(a_drift) > 0, f"{engine_name} returned empty drift acceleration"
-            assert len(a_control) > 0, f"{engine_name} returned empty control acceleration"
+            assert (
+                len(a_control) > 0
+            ), f"{engine_name} returned empty control acceleration"
 
         except Exception as e:
             LOGGER.warning(f"{engine_name} failed to load URDF: {e}")
