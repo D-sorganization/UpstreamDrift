@@ -7,4 +7,4 @@ validate scientific correctness.
 Tests are automatically skipped if required engines are not installed.
 """
 
-__all__ = []
+__all__: list[str] = []
