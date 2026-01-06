@@ -21,9 +21,7 @@ class TestCrossEngineValidator:
         state2 = np.array([1.0000001, 2.0000001, 3.0000001])  # 1e-7 deviation
 
         result = validator.compare_states(
-            "MuJoCo", state1,
-            "Drake", state2,
-            metric="position"  # tolerance: 1e-6
+            "MuJoCo", state1, "Drake", state2, metric="position"  # tolerance: 1e-6
         )
 
         assert result.passed
@@ -40,9 +38,7 @@ class TestCrossEngineValidator:
         state2 = np.array([1.001, 2.001, 3.001])  # 1e-3 deviation (exceeds 1e-6)
 
         result = validator.compare_states(
-            "MuJoCo", state1,
-            "Drake", state2,
-            metric="position"
+            "MuJoCo", state1, "Drake", state2, metric="position"
         )
 
         assert not result.passed
@@ -57,9 +53,7 @@ class TestCrossEngineValidator:
         state2 = np.array([1.0, 2.0])  # Different shape
 
         result = validator.compare_states(
-            "MuJoCo", state1,
-            "Drake", state2,
-            metric="position"
+            "MuJoCo", state1, "Drake", state2, metric="position"
         )
 
         assert not result.passed
@@ -98,9 +92,11 @@ class TestCrossEngineValidator:
         torques2 = np.array([10.5, 20.5, 30.5])  # ~5% RMS difference
 
         result = validator.compare_torques_with_rms(
-            "MuJoCo", torques1,
-            "Drake", torques2,
-            rms_threshold_pct=10.0  # 10% threshold
+            "MuJoCo",
+            torques1,
+            "Drake",
+            torques2,
+            rms_threshold_pct=10.0,  # 10% threshold
         )
 
         assert result.passed  # 5% < 10%
@@ -114,9 +110,7 @@ class TestCrossEngineValidator:
         torques2 = np.array([15.0, 25.0, 35.0])  # ~20% RMS difference
 
         result = validator.compare_torques_with_rms(
-            "MuJoCo", torques1,
-            "Drake", torques2,
-            rms_threshold_pct=10.0
+            "MuJoCo", torques1, "Drake", torques2, rms_threshold_pct=10.0
         )
 
         assert not result.passed  # ~20% > 10%
@@ -127,11 +121,13 @@ class TestCrossEngineValidator:
 @pytest.mark.mujoco
 @pytest.mark.drake
 @pytest.mark.skipif(
-    not all([
-        pytest.importorskip("mujoco", reason="MuJoCo not installed"),
-        pytest.importorskip("pydrake", reason="Drake not installed"),
-    ]),
-    reason="Requires both MuJoCo and Drake"
+    not all(
+        [
+            pytest.importorskip("mujoco", reason="MuJoCo not installed"),
+            pytest.importorskip("pydrake", reason="Drake not installed"),
+        ]
+    ),
+    reason="Requires both MuJoCo and Drake",
 )
 class TestCrossEngineValidationIntegration:
     """Integration tests comparing actual MuJoCo and Drake outputs.
@@ -178,7 +174,7 @@ class TestCrossEngineValidationIntegration:
 @pytest.mark.pinocchio
 @pytest.mark.skipif(
     not pytest.importorskip("pinocchio", reason="Pinocchio not installed"),
-    reason="Requires Pinocchio"
+    reason="Requires Pinocchio",
 )
 class TestCrossEngineValidationPinocchio:
     """Integration tests including Pinocchio engine."""

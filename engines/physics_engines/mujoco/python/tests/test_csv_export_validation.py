@@ -1,6 +1,5 @@
 """Tests for CSV export validation per Assessment A Finding A-007."""
 
-
 import numpy as np
 import pytest
 from mujoco_humanoid_golf.inverse_dynamics import (

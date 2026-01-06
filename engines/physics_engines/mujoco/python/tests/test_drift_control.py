@@ -101,9 +101,7 @@ class TestDriftControlDecomposer:
         result = decomposer.decompose(qpos, qvel, ctrl)
 
         # With zero velocity, drift_velocity_component should be near zero
-        assert np.allclose(
-            result.drift_velocity_component, 0, atol=1e-6
-        ), (
+        assert np.allclose(result.drift_velocity_component, 0, atol=1e-6), (
             f"Expected zero Coriolis with zero velocity, "
             f"got {result.drift_velocity_component}"
         )

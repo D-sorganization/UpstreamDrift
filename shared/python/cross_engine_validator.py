@@ -66,11 +66,11 @@ class CrossEngineValidator:
 
     # Tolerance specifications from Guideline P3
     TOLERANCES = {
-        "position": 1e-6,       # meters
-        "velocity": 1e-5,       # m/s
-        "acceleration": 1e-4,   # m/s²
-        "torque": 1e-3,         # N⋅m
-        "jacobian": 1e-8,       # dimensionless
+        "position": 1e-6,  # meters
+        "velocity": 1e-5,  # m/s
+        "acceleration": 1e-4,  # m/s²
+        "torque": 1e-3,  # N⋅m
+        "jacobian": 1e-8,  # dimensionless
     }
 
     def compare_states(
@@ -79,7 +79,9 @@ class CrossEngineValidator:
         engine1_state: np.ndarray,
         engine2_name: str,
         engine2_state: np.ndarray,
-        metric: Literal["position", "velocity", "acceleration", "torque", "jacobian"] = "position",
+        metric: Literal[
+            "position", "velocity", "acceleration", "torque", "jacobian"
+        ] = "position",
     ) -> ValidationResult:
         """Compare states from two engines against tolerance targets.
 
@@ -110,7 +112,7 @@ class CrossEngineValidator:
                 tolerance=self.TOLERANCES[metric],
                 engine1=engine1_name,
                 engine2=engine2_name,
-                message=f"Shape mismatch: {engine1_state.shape} vs {engine2_state.shape}"
+                message=f"Shape mismatch: {engine1_state.shape} vs {engine2_state.shape}",
             )
 
         # Compute deviation
@@ -154,7 +156,9 @@ class CrossEngineValidator:
             tolerance=tol,
             engine1=engine1_name,
             engine2=engine2_name,
-            message="" if passed else f"Deviation {max_dev:.2e} exceeds tolerance {tol:.2e}"
+            message=(
+                "" if passed else f"Deviation {max_dev:.2e} exceeds tolerance {tol:.2e}"
+            ),
         )
 
     def compare_torques_with_rms(
@@ -188,11 +192,11 @@ class CrossEngineValidator:
                 tolerance=rms_threshold_pct,
                 engine1=engine1_name,
                 engine2=engine2_name,
-                message=f"Shape mismatch: {engine1_torques.shape} vs {engine2_torques.shape}"
+                message=f"Shape mismatch: {engine1_torques.shape} vs {engine2_torques.shape}",
             )
 
         # RMS difference
-        rms_diff = np.sqrt(np.mean((engine1_torques - engine2_torques)**2))
+        rms_diff = np.sqrt(np.mean((engine1_torques - engine2_torques) ** 2))
         rms_mag = np.sqrt(np.mean(engine1_torques**2))
 
         if rms_mag < 1e-10:  # Avoid division by zero
@@ -225,5 +229,9 @@ class CrossEngineValidator:
             tolerance=rms_threshold_pct,
             engine1=engine1_name,
             engine2=engine2_name,
-            message="" if passed else f"RMS difference {rms_pct:.2f}% exceeds {rms_threshold_pct:.2f}%"
+            message=(
+                ""
+                if passed
+                else f"RMS difference {rms_pct:.2f}% exceeds {rms_threshold_pct:.2f}%"
+            ),
         )
