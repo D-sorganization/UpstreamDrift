@@ -178,14 +178,18 @@ class DriftControlDecomposer:
         # Decompose control into actuation and constraint-mediated
         # For now, treat all control as actuation (constraints handled separately)
         qacc_control_actuation = qacc_control.copy()
-        qacc_control_constraint = None  # TODO: Extract constraint-mediated control
+        # Note: Constraint-mediated control not yet decomposed (deferred)
+        qacc_control_constraint = None
 
         # Constraint components (if model has constraints)
         qacc_drift_constraint = None
         if self.model.neq > 0:
-            # TODO: Decompose constraint contributions
-            # For now, set to None
-            pass
+            # Note: Constraint decomposition not yet implemented
+            # Constraint forces are included in bias terms but not separately tracked
+            logger.debug(
+                f"Model has {self.model.neq} equality constraints. "
+                "Constraint decomposition not yet implemented."
+            )
 
         # 4. Validate superposition: full = drift + control
         qacc_reconstructed = qacc_drift + qacc_control
