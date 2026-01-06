@@ -228,10 +228,11 @@ class MuJoCoMeshcatAdapter:
         # Determine key
         key = source
         if key not in ["gravity", "velocity", "total", "actuator"]:
-            # Custom name logic handled in sim_widget, usually passed as 'selected_actuator'
-            # if the source string didn't match standard keys.
-            # However, bio_data stores it under 'selected_actuator' if calculated that way.
-            # We check if the key exists directly, else try 'selected_actuator'
+            # Custom name logic handled in sim_widget, usually passed as
+            # 'selected_actuator' if the source string didn't match standard keys.
+            # However, bio_data stores it under 'selected_actuator' if calculated
+            # that way. We check if the key exists directly, else try
+            # 'selected_actuator'
             if key not in bio_data.induced_accelerations:
                 key = "selected_actuator"
 
