@@ -134,23 +134,39 @@ The project guidelines define 5 questions that must be answerable:
 
 ---
 
-## Shipping Recommendations
+## Shipping Commitment
 
-### Reduced Scope Option (Recommended: 2.5 Weeks)
+### Full Scope Implementation (8.5 Weeks)
 
-**SCOPE**: Pure multibody dynamics (MuJoCo/Drake/Pinocchio)  
-**REMOVE**: Sections J (OpenSim), K (MyoSuite), S (Trajectory Optimization)  
-**EFFORT**: 48h (Phase 1) + 2 weeks (Phase 2) = 2.5 weeks  
-**TARGET USERS**: Multibody dynamics researchers, robotics labs  
-**SHIPPING CRITERIA**: All critical blockers resolved, analytical validation complete
+**NON-NEGOTIABLE SCOPE**: Complete guideline compliance (biomechanics + robotics interface)
 
-### Full Scope Option (8.5 Weeks)
+This project exists at the **interface between biomechanics and robotics**. Every feature in the design guidelines is essential. We do not compromise on:
+- ✅ OpenSim biomechanics integration (Hill muscles, wrapping geometry)
+- ✅ MyoSuite neural control (RL policies, hybrid models)  
+- ✅ Cross-engine validation (6 engines fully operational)
+- ✅ Scientific rigor (analytical benchmarks, conservation laws)
 
-**SCOPE**: Complete guideline compliance (biomechanics + muscles)  
-**INCLUDE**: All 19 guideline categories  
-**EFFORT**: 48h (Phase 1) + 2 weeks (Phase 2) + 6 weeks (Phase 3) = 8.5 weeks  
-**TARGET USERS**: Biomechanics research labs, sports science institutions  
-**SHIPPING CRITERIA**: Full 6-engine validation, muscle-driven analysis operational
+**IMPLEMENTATION TIMELINE**:
+- **Phase 1** (48h): ZTCF/ZVCF counterfactuals, singularity warnings, energy monitors
+- **Phase 2** (2 weeks): Analytical validation, ellipsoid visualization, nightly CI, dimensional analysis  
+- **Phase 3** (6 weeks): OpenSim integration, MyoSuite integration, power flow visualization
+
+**TOTAL EFFORT**: **8.5 weeks**
+
+**TARGET USERS**: 
+- Biomechanics research laboratories
+- Sports science institutions  
+- Robotics-biomechanics interface investigators
+- Golf swing analysis researchers
+
+**SHIPPING CRITERIA**:
+- ✅ All 19 guideline categories fully implemented
+- ✅ 6-engine validation operational (MuJoCo/Drake/Pinocchio/Pendulum/OpenSim/MyoSuite)
+- ✅ Muscle-driven motion analysis validated
+- ✅ Neural control experiments functional
+- ✅ All 5 "Definition of Done" questions answerable
+
+**PHILOSOPHY**: **We ship when it's right, not when it's fast.**
 
 ---
 
