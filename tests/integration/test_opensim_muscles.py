@@ -185,10 +185,11 @@ class TestOpenSimMuscleAnalysis:
         model, state = simple_arm_model
 
         try:
+            import opensim
+
             from engines.physics_engines.opensim.python.muscle_analysis import (
                 OpenSimMuscleAnalyzer,
             )
-            import opensim
         except ImportError:
             pytest.skip("Required modules not available")
 
@@ -224,7 +225,7 @@ class TestOpenSimMuscleAnalysis:
         # Run full analysis
         analysis = analyzer.analyze_all()
 
-        LOGGER.info(f"Muscle analysis complete:")
+        LOGGER.info("Muscle analysis complete:")
         LOGGER.info(f"  Forces: {analysis.muscle_forces}")
         LOGGER.info(f"  Activations: {analysis.activation_levels}")
         LOGGER.info(f"  Total torque: {analysis.total_muscle_torque}")

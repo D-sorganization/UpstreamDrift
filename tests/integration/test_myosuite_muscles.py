@@ -22,7 +22,7 @@ LOGGER = logging.getLogger(__name__)
 def myosuite_env_available():
     """Check if MyoSuite is available."""
     try:
-        import gym
+        import gym  # noqa: F401 - used in try block
         import myosuite  # noqa: F401
         return True
     except ImportError:
@@ -36,7 +36,6 @@ class TestMyoSuiteMuscleAnalyzer:
         """Section K: Identify muscle actuators from MuJoCo model."""
         try:
             import gym
-            import mujoco
 
             # Use a simple MyoSuite environment (if available)
             env = gym.make("myoElbowPose1D6MRandom-v0")
@@ -214,7 +213,7 @@ class TestMyoSuiteMuscleAnalyzer:
             assert len(analysis.joint_torques) > 0
             assert len(analysis.total_muscle_torque) > 0
 
-            LOGGER.info(f"Analysis complete:")
+            LOGGER.info("Analysis complete:")
             LOGGER.info(f"  Muscles: {len(analysis.muscle_state.muscle_names)}")
             LOGGER.info(f"  Total torque: {analysis.total_muscle_torque}")
             LOGGER.info(f"  Activation power: {list(analysis.activation_power.values())[:3]}")
@@ -234,7 +233,7 @@ class TestMyoSuiteGripModel:
             # Use hand environment if available
             try:
                 env = gym.make("myoHandPoseRandom-v0")
-            except:
+            except Exception:
                 # Fallback to elbow
                 env = gym.make("myoElbowPose1D6MRandom-v0")
 
@@ -242,8 +241,8 @@ class TestMyoSuiteGripModel:
             sim = env.sim if hasattr(env, 'sim') else env.unwrapped.sim
 
             from engines.physics_engines.myosuite.python.muscle_analysis import (
-                MyoSuiteMuscleAnalyzer,
                 MyoSuiteGripModel,
+                MyoSuiteMuscleAnalyzer,
             )
 
             analyzer = MyoSuiteMuscleAnalyzer(sim)
@@ -268,7 +267,7 @@ class TestMyoSuiteGripModel:
 
             try:
                 env = gym.make("myoHandPoseRandom-v0")
-            except:
+            except Exception:
                 pytest.skip("Hand model not available")
 
             env.reset()
@@ -281,8 +280,8 @@ class TestMyoSuiteGripModel:
             sim = env.sim if hasattr(env, 'sim') else env.unwrapped.sim
 
             from engines.physics_engines.myosuite.python.muscle_analysis import (
-                MyoSuiteMuscleAnalyzer,
                 MyoSuiteGripModel,
+                MyoSuiteMuscleAnalyzer,
             )
 
             analyzer = MyoSuiteMuscleAnalyzer(sim)
