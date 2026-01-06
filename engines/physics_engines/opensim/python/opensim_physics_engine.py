@@ -192,17 +192,51 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         return res
 
     def compute_bias_forces(self) -> np.ndarray:
-        """Compute C(q,u) + G(q)."""
+        """Compute C(q,u) + G(q).
+
+        Uses inverse dynamics with zero acceleration to get bias forces.
+        """
         if not self._model or not self._state:
             return np.array([])
-        logger.warning("OpenSim bias force computation not yet implemented.")
-        return np.array([])
+
+        try:
+            # Bias forces = ID(q, v, 0) = M*0 + C + g = C + g
+            n_u = self._model.getNumSpeeds()
+            zero_acc = np.zeros(n_u)
+            bias = self.compute_inverse_dynamics(zero_acc)
+            return bias
+        except Exception as e:
+            logger.error(f"Failed to compute bias forces: {e}")
+            return np.array([])
 
     def compute_gravity_forces(self) -> np.ndarray:
+        """Compute gravity forces g(q).
+
+        Sets velocities to zero temporarily, then computes bias (which becomes pure gravity).
+        """
         if not self._model or not self._state:
             return np.array([])
-        logger.warning("OpenSim gravity force computation not yet implemented.")
-        return np.array([])
+
+        try:
+            # Save current velocities
+            _, v_saved = self.get_state()
+
+            # Set velocities to zero
+            n_u = self._model.getNumSpeeds()
+            zero_vel = np.zeros(n_u)
+            q_current, _ = self.get_state()
+            self.set_state(q_current, zero_vel)
+
+            # With v=0, bias forces become pure gravity
+            gravity = self.compute_bias_forces()
+
+            # Restore velocities
+            self.set_state(q_current, v_saved)
+
+            return gravity
+        except Exception as e:
+            logger.error(f"Failed to compute gravity forces: {e}")
+            return np.array([])
 
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         if not self._model or not self._state:
@@ -303,3 +337,72 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         a_control = np.linalg.solve(M, tau)
 
         return a_control
+
+    # -------- Section J: Muscle Model Integration --------
+
+    def get_muscle_analyzer(self):
+        """Get muscle analyzer for biomechanical analysis.
+
+        Section J: Provides access to muscle-specific analysis capabilities.
+
+        Returns:
+            OpenSimMuscleAnalyzer instance or None if model/state not ready
+        """
+        if not self._model or not self._state:
+            logger.warning("Cannot create muscle analyzer - model not initialized")
+            return None
+
+        try:
+            from .muscle_analysis import OpenSimMuscleAnalyzer
+            return OpenSimMuscleAnalyzer(self._model, self._state)
+        except ImportError as e:
+            logger.error(f"Failed to import muscle analyzer: {e}")
+            return None
+
+    def create_grip_model(self):
+        """Create grip modeling interface.
+
+        Section J1: Provides grip wrapping geometry and force analysis.
+
+        Returns:
+            OpenSimGripModel instance or None if model not ready
+        """
+        if not self._model:
+            logger.warning("Cannot create grip model - model not initialized")
+            return None
+
+        try:
+            from .muscle_analysis import OpenSimGripModel
+            return OpenSimGripModel(self._model)
+        except ImportError as e:
+            logger.error(f"Failed to import grip model: {e}")
+            return None
+
+    def compute_muscle_induced_accelerations(self) -> dict[str, np.ndarray]:
+        """Compute acceleration contributions from each muscle.
+
+        Section J Requirement: Muscle contribution to joint accelerations.
+
+        Returns:
+            Dictionary mapping muscle names to induced accelerations [rad/s²]
+        """
+        analyzer = self.get_muscle_analyzer()
+        if analyzer is None:
+            return {}
+
+        return analyzer.compute_muscle_induced_accelerations()
+
+    def analyze_muscle_contributions(self):
+        """Full muscle contribution analysis.
+
+        Section J Requirement: Comprehensive muscle reports (forces, moments, power).
+
+        Returns:
+            MuscleAnalysis object with all muscle metrics
+        """
+        analyzer = self.get_muscle_analyzer()
+        if analyzer is None:
+            logger.warning("Cannot analyze muscles - analyzer not available")
+            return None
+
+        return analyzer.analyze_all()
