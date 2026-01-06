@@ -269,6 +269,11 @@ class InverseDynamicsSolver:
         Using M(q)q_ddot = tau - C(q,q_dot)q_dot - G(q)
         q_ddot = M^-1 * (tau - C - G)
 
+        FIXED (Assessment A Finding A-001 - CRITICAL):
+        Now uses self._perturb_data for thread safety instead of modifying
+        shared self.data state. This prevents race conditions during parallel
+        analysis where visualization thread reads from self.data.
+
         Args:
             qpos: Joint positions [nv]
             qvel: Joint velocities [nv]
@@ -277,13 +282,13 @@ class InverseDynamicsSolver:
         Returns:
             InducedAccelerationResult with component accelerations.
         """
-        # Set state
-        self.data.qpos[:] = qpos
-        self.data.qvel[:] = qvel
+        # FIXED: Use private data structure for thread safety (Assessment A-001)
+        self._perturb_data.qpos[:] = qpos
+        self._perturb_data.qvel[:] = qvel
 
         # 1. Compute Mass Matrix M
         mujoco.mj_fullM(
-            self.model, np.zeros((self.model.nv, self.model.nv)), self.data.qM
+            self.model, np.zeros((self.model.nv, self.model.nv)), self._perturb_data.qM
         )
         # However, we can use mj_solveM to solve M*x = y without explicit inverse,
         # which is faster/steadier.
@@ -294,17 +299,17 @@ class InverseDynamicsSolver:
 
         # A. Gravity
         # mj_rne with v=0, a=0 returns G.
-        qvel_backup = self.data.qvel.copy()
-        self.data.qvel[:] = 0
-        self.data.cvel[:] = 0
+        qvel_backup = self._perturb_data.qvel.copy()
+        self._perturb_data.qvel[:] = 0
+        self._perturb_data.cvel[:] = 0
         g_force = np.zeros(self.model.nv)
-        mujoco.mj_rne(self.model, self.data, 0, g_force)
+        mujoco.mj_rne(self.model, self._perturb_data, 0, g_force)
 
         # B. Coriolis (C * qdot)
         # mj_forward computes qfrc_bias = C + G.
-        self.data.qvel[:] = qvel_backup  # Restore
-        mujoco.mj_forward(self.model, self.data)
-        bias_force = self.data.qfrc_bias.copy()
+        self._perturb_data.qvel[:] = qvel_backup  # Restore
+        mujoco.mj_forward(self.model, self._perturb_data)
+        bias_force = self._perturb_data.qfrc_bias.copy()
         c_force = bias_force - g_force
 
         # C. Control Torques
@@ -317,12 +322,12 @@ class InverseDynamicsSolver:
         # We can use mj_mulJacT? Or just assign data.ctrl and run mj_fwdActuation?
         # Actually easier: The user passes 'ctrl' vector.
         # If we just want impact of 'ctrl', we set data.ctrl = ctrl, run actuation.
-        self.data.ctrl[:] = 0
+        self._perturb_data.ctrl[:] = 0
         if len(ctrl) == self.model.nu:
-            self.data.ctrl[:] = ctrl
+            self._perturb_data.ctrl[:] = ctrl
         # Need to compute qfrc_actuation
-        mujoco.mj_fwdActuation(self.model, self.data)
-        tau_force = self.data.qfrc_actuation.copy()
+        mujoco.mj_fwdActuation(self.model, self._perturb_data)
+        tau_force = self._perturb_data.qfrc_actuation.copy()
 
         # Scale external forces if any? ignoring for now as they are not passed.
 
@@ -345,13 +350,13 @@ class InverseDynamicsSolver:
         # mj_solveM overwrites the input vector with the solution.
 
         a_g = f_g.copy()
-        mujoco.mj_solveM(self.model, self.data, a_g)
+        mujoco.mj_solveM(self.model, self._perturb_data, a_g)
 
         a_c = f_c.copy()
-        mujoco.mj_solveM(self.model, self.data, a_c)
+        mujoco.mj_solveM(self.model, self._perturb_data, a_c)
 
         a_t = f_t.copy()
-        mujoco.mj_solveM(self.model, self.data, a_t)
+        mujoco.mj_solveM(self.model, self._perturb_data, a_t)
 
         total = a_g + a_c + a_t
 
@@ -702,12 +707,53 @@ def export_inverse_dynamics_to_csv(
         times: Time array [N]
         results: List of InverseDynamicsResult
         filepath: Output CSV path
+
+    Raises:
+        ValueError: If times and results have mismatched lengths
+        TypeError: If results contains non-InverseDynamicsResult items
+        ValueError: If results list is empty
+
+    Note:
+        FIXED per Assessment A Finding A-007: Added comprehensive input
+        validation to prevent malformed CSV output and silent failures.
     """
+    # Input validation (Assessment A Finding A-007)
+    if not isinstance(times, np.ndarray):
+        raise TypeError(f"times must be numpy array, got {type(times).__name__}")
+
+    if not isinstance(results, list):
+        raise TypeError(f"results must be list, got {type(results).__name__}")
+
+    if len(results) == 0:
+        raise ValueError("Cannot export empty results list")
+
+    if len(times) != len(results):
+        raise ValueError(
+            f"Length mismatch: times has {len(times)} elements, "
+            f"results has {len(results)} elements"
+        )
+
+    # Validate all results are correct type
+    for i, result in enumerate(results):
+        if not isinstance(result, InverseDynamicsResult):
+            raise TypeError(
+                f"results[{i}] is {type(result).__name__}, "
+                f"expected InverseDynamicsResult"
+            )
+
+    # Validate consistency: all results must have same joint count
+    nv = len(results[0].joint_torques)
+    for i, result in enumerate(results):
+        if len(result.joint_torques) != nv:
+            raise ValueError(
+                f"Inconsistent joint count: results[0] has {nv} joints, "
+                f"results[{i}] has {len(result.joint_torques)} joints"
+            )
+
     with open(filepath, "w", newline="") as f:
         writer = csv.writer(f)
 
         # Header
-        nv = len(results[0].joint_torques)
         header = ["time"]
 
         for i in range(nv):
