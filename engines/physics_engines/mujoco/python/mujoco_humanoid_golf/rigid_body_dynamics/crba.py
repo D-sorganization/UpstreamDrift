@@ -55,6 +55,10 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
     # OPTIMIZATION: Avoid allocating initial zero arrays that are immediately discarded
     # We use lists and append to avoid Optional[np.ndarray] types for strict typing
     xup = np.empty((nb, 6, 6))
+    # OPTIMIZATION: Pre-calculate transpose of xup to allow contiguous memory access
+    # in tight loops. xup is C-contiguous, so xup[i].T is strided (slow for np.dot).
+    # xup_T will be C-contiguous, making xup_T[i] fast for np.dot.
+    xup_T = np.empty((nb, 6, 6))
     s_subspace: list[np.ndarray] = []
     dof_indices: list[int] = []  # Cache active DOF indices
 
@@ -80,6 +84,10 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
         dof_indices.append(dof_idx)
         # Optimized xup[i] = xj_transform @ model["Xtree"][i]
         np.matmul(xj_transform, model_xtree[i], out=xup[i])
+        # Populate xup_T for fast usage in loops
+        # xup[i] is C-contiguous, .T is strided. Assigning to xup_T[i] makes it
+        # contiguous
+        xup_T[i][:] = xup[i].T
 
     # --- Backward pass: compute composite inertias ---
     # Initialize composite inertias with body inertias
@@ -100,7 +108,8 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
 
             # 2. Add xup[i].T @ tmp_6x6 to ic_composite[p]
             # Reuse xj_buf as scratch space
-            np.dot(xup[i].T, tmp_6x6, out=xj_buf)
+            # OPTIMIZATION: Use pre-computed contiguous transpose xup_T[i]
+            np.dot(xup_T[i], tmp_6x6, out=xj_buf)
 
             ic_composite[p] += xj_buf
 
@@ -133,8 +142,9 @@ def crba(model: dict, q: np.ndarray) -> np.ndarray:
             p = model_parent[j]
 
             # f_force = xup[j].T @ f_force  # Transform force to parent frame
-            # OPTIMIZATION: Use scratch buffer
-            np.dot(xup[j].T, f_force, out=scratch_vec)
+            # OPTIMIZATION: Use scratch buffer and pre-computed contiguous transpose
+            # This avoids implicit temporary allocation/buffering in np.dot
+            np.dot(xup_T[j], f_force, out=scratch_vec)
             # Swap references to avoid copy (speedup ~15%)
             f_force, scratch_vec = scratch_vec, f_force
 
