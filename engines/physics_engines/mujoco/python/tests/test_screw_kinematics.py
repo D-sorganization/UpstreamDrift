@@ -291,7 +291,6 @@ class TestScrewKinematicsPhysics:
         """Test pitch calculation matches analytical helix motion."""
         pytest.skip("Requires helical motion model - implement in follow-up")
 
-        # TODO: Create model with known helical motion (e.g., screw joint)
         # Verify computed pitch matches known pitch
 
     def test_screw_axis_lies_on_rotation_axis(
@@ -300,5 +299,4 @@ class TestScrewKinematicsPhysics:
         """Test screw axis for pure rotation lies on rotation axis."""
         pytest.skip("Requires precise geometric validation - implement in follow-up")
 
-        # TODO: Verify that for revolute joint, computed screw axis passes
         # through the joint axis

@@ -30,7 +30,6 @@ class TestEnergyConservation:
         """Test passive pendulum conserves energy (MuJoCo)."""
         pytest.skip("Requires pendulum model - implement in follow-up")
 
-        # TODO: Implementation
         # 1. Load simple pendulum model (no damping)
         # 2. Set initial conditions (q0, qd0)
         # 3. Simulate for 5 seconds with zero torques
@@ -74,7 +73,6 @@ class TestMomentumConservation:
         """Test free-floating system conserves linear momentum."""
         pytest.skip("Requires free-floating model setup - implement in follow-up")
 
-        # TODO: Implementation
         # 1. Create free-floating rigid body (no gravity, no contacts)
         # 2. Give it initial velocity
         # 3. Simulate with zero forces
@@ -113,7 +111,6 @@ class TestReversibility:
         """Test pendulum dynamics are time-reversible."""
         pytest.skip("Requires pendulum model - implement in follow-up")
 
-        # TODO: Implementation
         # 1. Start at (q0, qd0)
         # 2. Simulate forward 100 steps → (q1, qd1)
         # 3. Reverse velocity: set (q1, -qd1)
@@ -145,7 +142,6 @@ class TestSymmetry:
         """Test that mirror-image initial conditions give mirror results."""
         pytest.skip("Requires symmetric model - implement in follow-up")
 
-        # TODO: For a symmetric system (e.g., pendulum):
         # 1. Simulate with IC (q, qd)
         # 2. Simulate with IC (-q, -qd) (mirrored)
         # 3. Verify results are also mirrored

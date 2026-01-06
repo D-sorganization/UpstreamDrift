@@ -354,7 +354,6 @@ class TestPowerFlowPhysics:
         """Test energy conservation for passive swing."""
         pytest.skip("Requires time history for dE/dt - implement in follow-up")
 
-        # TODO: Test that for passive pendulum (no damping, no control),
         # total mechanical energy remains constant
 
     def test_work_matches_energy_change(
@@ -363,4 +362,3 @@ class TestPowerFlowPhysics:
         """Test W = ΔE for simple case."""
         pytest.skip("Requires time integration - implement in follow-up")
 
-        # TODO: Integrate work over trajectory and verify it equals energy change

@@ -139,7 +139,6 @@ class TestCrossEngineValidationIntegration:
         """Validate MuJoCo and Drake forward dynamics agree per Guideline P3."""
         pytest.skip("Requires model loading infrastructure - implement in follow-up")
 
-        # TODO: Implementation:
         # 1. Load same URDF in both engines
         # 2. Set identical initial conditions
         # 3. Run forward dynamics for 5 seconds
@@ -151,7 +150,6 @@ class TestCrossEngineValidationIntegration:
         """Validate MuJoCo and Drake inverse dynamics agree per Guideline P3."""
         pytest.skip("Requires model loading infrastructure - implement in follow-up")
 
-        # TODO: Implementation:
         # 1. Load same URDF in both engines
         # 2. Set joint positions, velocities, accelerations
         # 3. Compute inverse dynamics torques
@@ -162,7 +160,6 @@ class TestCrossEngineValidationIntegration:
         """Validate MuJoCo and Drake Jacobians agree per Guideline P3."""
         pytest.skip("Requires model loading infrastructure - implement in follow-up")
 
-        # TODO: Implementation:
         # 1. Load same URDF in both engines
         # 2. Set joint configuration
         # 3. Compute Jacobians for end-effector
@@ -183,7 +180,6 @@ class TestCrossEngineValidationPinocchio:
         """Validate all three engines agree in pairwise comparisons."""
         pytest.skip("Requires model loading infrastructure - implement in follow-up")
 
-        # TODO: Implementation:
         # 1. Load same model in MuJoCo, Drake, Pinocchio
         # 2. Run same simulation
         # 3. Pairwise validation:
