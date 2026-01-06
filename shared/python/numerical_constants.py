@@ -212,7 +212,7 @@ SOURCE:
 - Numerical Linear Algebra, Trefethen & Bau, Lecture 12
 
 USED IN:
-- kinematic_forces.py::compute_effective_mass() (planned, Issue B-008)
+- kinematic_forces.py::compute_effective_mass() (implemented, Assessment B-008)
 - jacobian_utils.py::compute_manipulability()
 """
 
