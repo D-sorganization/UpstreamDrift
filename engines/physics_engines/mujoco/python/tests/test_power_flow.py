@@ -361,4 +361,3 @@ class TestPowerFlowPhysics:
     ) -> None:
         """Test W = ΔE for simple case."""
         pytest.skip("Requires time integration - implement in follow-up")
-
