@@ -7,7 +7,6 @@ import pytest
 from shared.python.marker_mapping import (
     MarkerMapping,
     MarkerToModelMapper,
-    RegistrationResult,
 )
 
 

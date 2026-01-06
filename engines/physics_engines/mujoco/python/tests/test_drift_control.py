@@ -1,9 +1,8 @@
 """Tests for drift-control decomposition (Guideline F - MANDATORY)."""
 
-import pytest
-import numpy as np
 import mujoco
-
+import numpy as np
+import pytest
 from mujoco_humanoid_golf.drift_control import (
     DriftControlDecomposer,
     DriftControlResult,

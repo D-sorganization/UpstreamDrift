@@ -10,11 +10,11 @@ Reference: docs/assessments/project_design_guidelines.qmd Section A2
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
-import logging
 
 if TYPE_CHECKING:
     import mujoco
@@ -188,7 +188,7 @@ class MarkerToModelMapper:
         inlier_mask = np.ones(len(marker_positions), dtype=bool)
         transformation = np.eye(4)
 
-        for iteration in range(max_iterations):
+        for _iteration in range(max_iterations):
             # Get inlier markers
             inlier_observed = marker_positions[inlier_mask]
             inlier_offsets = np.array(

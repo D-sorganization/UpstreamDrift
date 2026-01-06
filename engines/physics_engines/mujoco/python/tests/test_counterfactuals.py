@@ -1,12 +1,10 @@
 """Tests for counterfactual analysis (Guideline G - MANDATORY)."""
 
-import pytest
-import numpy as np
 import mujoco
-
+import numpy as np
+import pytest
 from mujoco_humanoid_golf.counterfactuals import (
     CounterfactualAnalyzer,
-    CounterfactualResult,
 )
 
 
