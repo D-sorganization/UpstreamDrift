@@ -109,6 +109,12 @@ except ImportError:
         return None, None, None
 
 
+# Manipulability Import
+try:
+    from .manipulability import DrakeManipulabilityAnalyzer
+except ImportError:
+    DrakeManipulabilityAnalyzer = None  # type: ignore
+
 # Constants
 TIME_STEP_S = 0.001
 MS_PER_SECOND = 1000
@@ -249,6 +255,10 @@ class DrakeRecorder:
         self.q_history: list[np.ndarray] = []
         self.v_history: list[np.ndarray] = []
         self.club_head_pos_history: list[np.ndarray] = []
+        self.com_position_history: list[np.ndarray] = []
+        self.angular_momentum_history: list[np.ndarray] = []
+        self.ground_forces_history: list[np.ndarray] = []
+        self.cop_position_history: list[np.ndarray] = []
         # Store computed metrics
         self.induced_accelerations: dict[str, list[np.ndarray]] = {}
         self.counterfactuals: dict[str, list[np.ndarray]] = {}
@@ -267,6 +277,8 @@ class DrakeRecorder:
         q: np.ndarray,
         v: np.ndarray,
         club_pos: np.ndarray | None = None,
+        com_pos: np.ndarray | None = None,
+        angular_momentum: np.ndarray | None = None,
     ) -> None:
         if not self.is_recording:
             return
@@ -277,6 +289,20 @@ class DrakeRecorder:
             self.club_head_pos_history.append(club_pos.copy())
         else:
             self.club_head_pos_history.append(np.zeros(3))
+
+        if com_pos is not None:
+            self.com_position_history.append(com_pos.copy())
+        else:
+            self.com_position_history.append(np.zeros(3))
+
+        if angular_momentum is not None:
+            self.angular_momentum_history.append(angular_momentum.copy())
+        else:
+            self.angular_momentum_history.append(np.zeros(3))
+
+        # Placeholders for now
+        self.ground_forces_history.append(np.zeros(3))
+        self.cop_position_history.append(np.zeros(3))
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
         """Implement RecorderInterface."""
@@ -346,6 +372,11 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         self.recorder = DrakeRecorder()
         self.eval_context: Context | None = None  # type: ignore[no-any-unimported]
+
+        # Manipulability
+        self.manip_analyzer: DrakeManipulabilityAnalyzer | None = None
+        self.manip_checkboxes: dict[str, QtWidgets.QCheckBox] = {}
+        self.manip_body_layout: QtWidgets.QGridLayout | None = None
 
         # Model Management
         self.current_urdf_path: str | None = None
@@ -455,6 +486,11 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         # Create evaluation context for analysis
         self.eval_context = self.plant.CreateDefaultContext()
+
+        # Init Manipulability
+        if self.plant and DrakeManipulabilityAnalyzer is not None:
+            self.manip_analyzer = DrakeManipulabilityAnalyzer(self.plant)
+            self._populate_manip_checkboxes()
 
         # Initial State
         self._reset_state()
@@ -704,6 +740,12 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
             "(Can slow down sim)"
         )
         vis_layout.addWidget(self.chk_live_analysis)
+
+        # Manipulability Body Grid
+        manip_group = QtWidgets.QGroupBox("Manipulability Targets")
+        self.manip_body_layout = QtWidgets.QGridLayout()
+        manip_group.setLayout(self.manip_body_layout)
+        vis_layout.addWidget(manip_group)
 
         # Advanced Vectors
         vec_grid = QtWidgets.QGridLayout()
@@ -1041,7 +1083,24 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                             self.recorder.counterfactuals[k] = []
                         self.recorder.counterfactuals[k].append(val)
 
-                self.recorder.record(context.get_time(), q, v, club_pos)
+                # Calculate CoM and Angular Momentum for recording
+                com_pos = None
+                angular_momentum = None
+                if self.plant:
+                    plant_context = self.plant.GetMyContextFromRoot(context)
+                    com_pos = self.plant.CalcCenterOfMassPositionInWorld(plant_context)
+                    angular_momentum = self.plant.CalcSpatialMomentumInWorldAboutPoint(
+                        plant_context, com_pos
+                    ).rotational()
+
+                self.recorder.record(
+                    context.get_time(),
+                    q,
+                    v,
+                    club_pos,
+                    com_pos=com_pos,
+                    angular_momentum=angular_momentum,
+                )
                 self.lbl_rec_status.setText(f"Frames: {len(self.recorder.times)}")
 
         # Visualization Update
@@ -1059,6 +1118,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         if self.visualizer:
             self.visualizer.update_frame_transforms(self.context)
             self.visualizer.update_com_transforms(self.context)
+
+        # Draw Ellipsoids
+        self._draw_ellipsoids()
 
         # Clear old ellipsoids/vectors if needed
         if not (self.chk_mobility.isChecked() or self.chk_force_ellip.isChecked()):
@@ -1673,6 +1735,122 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         plt.tight_layout()
         plt.show()
+
+    def _populate_manip_checkboxes(self) -> None:
+        """Populate checkboxes for manipulability analysis."""
+        if not self.manip_analyzer or not self.manip_body_layout:
+            return
+
+        # Clear existing
+        while self.manip_body_layout.count():
+            item = self.manip_body_layout.takeAt(0)
+            if item is None:
+                continue
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+        self.manip_checkboxes.clear()
+
+        bodies = self.manip_analyzer.find_potential_bodies()
+
+        cols = 3
+        for i, name in enumerate(bodies):
+            chk = QtWidgets.QCheckBox(name)
+            chk.toggled.connect(self._on_visualization_changed)
+            self.manip_checkboxes[name] = chk
+            self.manip_body_layout.addWidget(chk, i // cols, i % cols)
+
+            # Default check relevant parts
+            if any(x in name.lower() for x in ["club", "hand", "wrist"]):
+                chk.setChecked(True)
+
+    def _draw_ellipsoids(self) -> None:
+        """Draw force/mobility ellipsoids using Meshcat."""
+        if (
+            not self.meshcat
+            or not self.manip_analyzer
+            or not self.context
+            or not self.plant
+        ):
+            return
+
+        # 1. Clean up old?
+        # Meshcat persistent objects stay until deleted.
+        # Ideally we delete 'ellipsoids' folder every frame or define objects once.
+        # But scale/shape changes, so we must SetObject again (Ellipsoid has radii).
+
+        # We'll use a specific path prefix
+        prefix = "ellipsoids"
+
+        # Check if enabled
+        show_m = self.chk_mobility.isChecked()
+        show_f = self.chk_force_ellip.isChecked()
+
+        if not (show_m or show_f):
+            self.meshcat.Delete(prefix)
+            return
+
+        # Get selected
+        selected = [n for n, c in self.manip_checkboxes.items() if c.isChecked()]
+        if not selected:
+            self.meshcat.Delete(prefix)
+            return
+
+        # Compute
+        results = self.manip_analyzer.compute_metrics(self.context, selected)
+
+        # Draw
+        for res in results:
+            name = res.body_name
+            # Mobility
+            if show_m and res.mobility_ellipsoid:
+                path = f"{prefix}/{name}/mobility"
+                # Drake Ellipsoid(a,b,c)
+                # Radii are axes lengths * 0.5? No, Ellipsoid(a,b,c) takes semi-axes.
+                # radii in params are semi-axes.
+
+                radii = res.mobility_ellipsoid.radii
+                # Scale for viz
+                scale = 0.5
+                radii_viz = radii * scale
+
+                # Check for NaNs or zeros
+                if np.any(radii_viz <= 1e-9) or np.any(np.isnan(radii_viz)):
+                    continue
+
+                shape = Ellipsoid(radii_viz[0], radii_viz[1], radii_viz[2])
+                color = Rgba(0.0, 1.0, 0.0, 0.5)
+
+                # Pose
+                # Axes vectors (columns) define the rotation matrix R.
+                R_matrix = RotationMatrix(res.mobility_ellipsoid.axes)
+                X_WE = RigidTransform(R_matrix, res.mobility_ellipsoid.center)
+
+                self.meshcat.SetObject(path, shape, color)
+                self.meshcat.SetTransform(path, X_WE)
+            else:
+                self.meshcat.Delete(f"{prefix}/{name}/mobility")
+
+            # Force
+            if show_f and res.force_ellipsoid:
+                path = f"{prefix}/{name}/force"
+                radii = res.force_ellipsoid.radii
+                scale = 0.1  # Force ellipsoids can be huge
+                radii_viz = radii * scale
+
+                if np.any(radii_viz <= 1e-9) or np.any(np.isnan(radii_viz)):
+                    continue
+
+                shape = Ellipsoid(radii_viz[0], radii_viz[1], radii_viz[2])
+                color = Rgba(1.0, 0.0, 0.0, 0.5)
+
+                R_matrix = RotationMatrix(res.force_ellipsoid.axes)
+                X_WE = RigidTransform(R_matrix, res.force_ellipsoid.center)
+
+                self.meshcat.SetObject(path, shape, color)
+                self.meshcat.SetTransform(path, X_WE)
+            else:
+                self.meshcat.Delete(f"{prefix}/{name}/force")
 
 
 def main() -> None:
