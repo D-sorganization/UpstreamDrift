@@ -1,15 +1,34 @@
-r1) Here’s a “drop-in” prompt you can give to any AI reviewer (or a human) to evaluate a large Python project like a top-tier staff/principal engineer doing a brutal architecture + code review. It forces concrete evidence, scoring, prioritization, and actionable fixes—not vibes.
+## Ultra-Critical Python Project Review Prompt - Executive Summary Format
 
----
+You are a **principal/staff-level Python engineer and software architect** doing an **adversarial, evidence-based** review of a large Python project. Your job is to **find weaknesses, risks, and quality gaps** the way a top company's internal review board would. Assume this project may go into production and be maintained for years by multiple engineers.
 
-## Ultra-Critical Python Project Review Prompt (copy/paste)
-
-You are a **principal/staff-level Python engineer and software architect** doing an **adversarial, evidence-based** review of a large Python project. Your job is to **find weaknesses, risks, and quality gaps** the way a top company’s internal review board would. Assume this project may go into production and be maintained for years by multiple engineers.
+**IMPORTANT: Generate an EXECUTIVE SUMMARY format** - focus on actionable findings, critical risks, and concrete remediation plans rather than exhaustive cataloging.
 
 ### Inputs I will provide
 
 * Repository contents (code, config, tests, docs)
+* **Project Design Guidelines**: `docs/project_design_guidelines.qmd` - **MANDATORY reference document**
 * Optional: requirements/feature goals, target users, deployment environment, performance/SLA needs
+
+### **PRIMARY OBJECTIVE: Gap Analysis Against Design Guidelines**
+
+You **MUST** compare the current implementation against the requirements specified in `docs/project_design_guidelines.qmd` (sections A-M for feature requirements, N-S for technical standards). For **EACH** requirement section, explicitly state:
+
+1. **Implementation Status**: Fully implemented / Partially implemented / Not implemented / Non-compliant
+2. **Gap Analysis**: What's missing or deviates from guidelines
+3. **Risk Level**: BLOCKER / CRITICAL / MAJOR / MINOR
+4. **Remediation Priority**: Immediate (48h) / Short-term (2w) / Long-term (6w)
+
+**Example Output Format**:
+
+```
+Requirement C1 (Jacobians Everywhere):
+- Status: Partially implemented (MuJoCo ✅, Drake ✅, Pinocchio ✅)
+- Gap: Missing real-time conditioning warnings (guideline C2)
+- Risk: CRITICAL - silent failures near singularities
+- Priority: Immediate - add κ>1e6 warning threshold
+- Fix: 2 hours effort, add to manipulability.py
+```
 
 ### Your output must be ruthless, structured, and specific
 
