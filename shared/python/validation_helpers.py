@@ -35,11 +35,10 @@ REFERENCES:
 - Assessment C-005: Input validation recommendations
 """
 
+import warnings
 from enum import Enum
-from typing import Any
 
 import numpy as np
-import warnings
 
 
 class ValidationLevel(Enum):
