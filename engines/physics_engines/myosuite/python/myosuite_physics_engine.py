@@ -293,7 +293,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
     # -------- Section K: MyoSuite Muscle Integration --------
 
-    def get_muscle_analyzer(self):
+    def get_muscle_analyzer(self) -> Any | None:
         """Get muscle analyzer for biomechanical analysis.
 
         Section K: Provides access to muscle-specific analysis capabilities.
@@ -313,7 +313,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             LOGGER.error(f"Failed to import muscle analyzer: {e}")
             return None
 
-    def create_grip_model(self):
+    def create_grip_model(self) -> Any | None:
         """Create grip modeling interface.
 
         Section K1: Provides activation-driven grip force analysis.
@@ -377,9 +377,9 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         if analyzer is None:
             return {}
 
-        return analyzer.compute_muscle_induced_accelerations()
+        return dict(analyzer.compute_muscle_induced_accelerations())
 
-    def analyze_muscle_contributions(self):
+    def analyze_muscle_contributions(self) -> Any | None:
         """Full muscle contribution analysis.
 
         Section K Requirement: Comprehensive muscle reports (forces, moments, power).
@@ -394,7 +394,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
         return analyzer.analyze_all()
 
-    def get_muscle_state(self):
+    def get_muscle_state(self) -> Any | None:
         """Get current muscle state.
 
         Section K: Muscle state for monitoring and control.
