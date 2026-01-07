@@ -1,0 +1,437 @@
+"""MyoSuite Physics Engine Implementation.
+
+Wraps MyoSuite (OpenAI Gym-based) environments into the PhysicsEngine protocol.
+Documentation: https://myosuite.readthedocs.io/en/latest/
+"""
+
+from __future__ import annotations
+
+import logging
+from typing import Any
+
+import numpy as np
+
+from shared.python.interfaces import PhysicsEngine
+
+LOGGER = logging.getLogger(__name__)
+
+try:
+    import gym
+    import myosuite  # noqa: F401
+
+    MYOSUITE_AVAILABLE = True
+except ImportError:
+    MYOSUITE_AVAILABLE = False
+    LOGGER.warning("MyoSuite not installed. MyoSuitePhysicsEngine will not function.")
+
+
+class MyoSuitePhysicsEngine(PhysicsEngine):
+    """MyoSuite Engine Wrapper.
+
+    Treats 'model paths' as Gym Environment IDs (e.g. 'myoElbowPose1D6MRandom-v0').
+    Accesses underlying MuJoCo simulation for dynamics where possible.
+    """
+
+    def __init__(self) -> None:
+        """Initialize."""
+        self.env: gym.Env | None = None
+        self.sim: Any = None  # Underlying mujoco simulation object
+        self.env_id: str = ""
+        self._dt = 0.002  # Default
+
+    @property
+    def model_name(self) -> str:
+        return self.env_id if self.env_id else "MyoSuite_NoModel"
+
+    def load_from_path(self, path: str) -> None:
+        """Load environment by ID (passed as path)."""
+        if not MYOSUITE_AVAILABLE:
+            raise ImportError("MyoSuite not installed")
+
+        # Heuristic: if path ends with .xml, user might be confused.
+        # But for MyoSuite, we expect an Env ID.
+        # We'll treat the 'path' argument as the Env ID.
+        env_id = path.strip()
+
+        try:
+            self.env = gym.make(env_id)
+            self.env_id = env_id
+            self.env.reset()
+
+            # Access underlying sim
+            # specific to myosuite/mujoco-py structure
+            if hasattr(self.env, "sim"):
+                self.sim = self.env.sim
+            elif hasattr(self.env, "unwrapped") and hasattr(self.env.unwrapped, "sim"):
+                self.sim = self.env.unwrapped.sim
+            else:
+                LOGGER.warning(
+                    "Could not access underlying MuJoCo sim object in MyoSuite env"
+                )
+
+            if self.sim:
+                self._dt = self.sim.model.opt.timestep
+
+        except Exception as e:
+            LOGGER.error("Failed to load MyoSuite environment '%s': %s", env_id, e)
+            raise
+
+    def load_from_string(self, content: str, extension: str | None = None) -> None:
+        """Loading from string is not supported for Gym environments."""
+        LOGGER.error(
+            "MyoSuite does not support loading from string (requires Env ID registration)"
+        )
+        raise RuntimeError(
+            "MyoSuite does not support loading from string (requires Env ID registration)"
+        )
+
+    def reset(self) -> None:
+        """Reset environment."""
+        if self.env:
+            self.env.reset()
+
+    def step(self, dt: float | None = None) -> None:
+        """Step simulation."""
+        if not self.env:
+            return
+
+        # Gym steps by fixed internal dt (usually frame_skip * model_dt).
+        # We can't easily force arbitrary dt without hacking the sim.
+        # We'll just call step(). Controls should be set beforehand.
+
+        # We need the action.
+        # In PhysicsEngine protocol, set_control() sets the action buffer?
+        # But Gym step() TAKES the action.
+        # This is a protocol mismatch.
+        # Capability: If self.sim is present, we can just step self.sim directly?
+        # But that bypasses MyoSuite's muscle activation dynamics (if implemented in python steps).
+        # MyoSuite generally puts muscle dynamics in the MuJoCo model or usage of sim.step().
+
+        # Strategy: Use sim.step() if available to respect 'PhysicsEngine' low-level vibe,
+        # preserving state.
+        if self.sim:
+            # Handle dt override if possible
+            if dt is not None:
+                old_dt = self.sim.model.opt.timestep
+                self.sim.model.opt.timestep = dt
+                self.sim.step()
+                self.sim.model.opt.timestep = old_dt
+            else:
+                self.sim.step()
+        else:
+            # Fallback to env.step() with zero action if we can't control it
+            # (Bad, but fallback)
+            zero_action = self.env.action_space.sample() * 0
+            self.env.step(zero_action)
+
+    def forward(self) -> None:
+        """Compute forward dynamics."""
+        if self.sim:
+            self.sim.forward()
+
+    def get_state(self) -> tuple[np.ndarray, np.ndarray]:
+        """Get qpos, qvel."""
+        if not self.sim:
+            return np.array([]), np.array([])
+        return (np.array(self.sim.data.qpos[:]), np.array(self.sim.data.qvel[:]))
+
+    def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
+        if not self.sim:
+            return
+
+        # MjSim (mujoco-py) usually allows direct assignment
+        if len(q) == len(self.sim.data.qpos):
+            self.sim.data.qpos[:] = q
+        if len(v) == len(self.sim.data.qvel):
+            self.sim.data.qvel[:] = v
+
+        self.sim.forward()
+
+    def set_control(self, u: np.ndarray) -> None:
+        """Set control (ctrl)."""
+        if not self.sim:
+            return
+
+        if len(u) == self.sim.data.ctrl.shape[0]:
+            self.sim.data.ctrl[:] = u
+
+    def get_time(self) -> float:
+        if self.sim:
+            return float(self.sim.data.time)
+        return 0.0
+
+    def compute_mass_matrix(self) -> np.ndarray:
+        if not self.sim:
+            return np.array([])
+
+        # Try generic mujoco approach assuming 'mujoco' lib is available
+        try:
+            import mujoco
+
+            nv = self.sim.model.nv
+            M = np.zeros((nv, nv))
+            mujoco.mj_fullM(self.sim.model, M, self.sim.data.qM)
+            return M
+        except Exception as e:
+            LOGGER.error("Failed to compute mass matrix: %s", e)
+            return np.array([])
+
+    def compute_bias_forces(self) -> np.ndarray:
+        if self.sim:
+            return np.array(self.sim.data.qfrc_bias)
+        return np.array([])
+
+    def compute_gravity_forces(self) -> np.ndarray:
+        # Not easily exposed separately in basic bindings without extra calc
+        return np.array([])
+
+    def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
+        # Requires calling mj_inverse
+        if not self.sim:
+            return np.array([])
+
+        try:
+            import mujoco
+
+            self.sim.data.qacc[:] = qacc
+            mujoco.mj_inverse(self.sim.model, self.sim.data)
+            return np.array(self.sim.data.qfrc_inverse)
+        except Exception as e:
+            LOGGER.error("Failed to compute inverse dynamics: %s", e)
+            return np.array([])
+
+    def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
+        if not self.sim:
+            return None
+
+        try:
+            import mujoco
+
+            body_id = mujoco.mj_name2id(
+                self.sim.model, mujoco.mjtObj.mjOBJ_BODY, body_name
+            )
+            if body_id == -1:
+                return None
+
+            jacp = np.zeros((3, self.sim.model.nv))
+            jacr = np.zeros((3, self.sim.model.nv))
+            mujoco.mj_jacBody(self.sim.model, self.sim.data, jacp, jacr, body_id)
+
+            return {"linear": jacp, "angular": jacr, "spatial": np.vstack([jacr, jacp])}
+        except Exception as e:
+            LOGGER.error("Failed to compute Jacobian for body '%s': %s", body_name, e)
+            return None
+
+    # -------- Section F: Drift-Control Decomposition --------
+
+    def compute_drift_acceleration(self) -> np.ndarray:
+        """Compute passive (drift) acceleration with zero muscle activations.
+
+        Section F Implementation: Uses MuJoCo forward dynamics with zero muscle activations
+        to isolate passive dynamics (gravity + Coriolis + constraints).
+
+        Returns:
+            q_ddot_drift: Drift acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        if not self.sim:
+            LOGGER.warning("Simulation not initialized")
+            return np.array([])
+
+        try:
+            import mujoco
+
+            # Save current activations/controls
+            ctrl_saved = self.sim.data.ctrl.copy()
+
+            # Set all muscle activations to zero
+            self.sim.data.ctrl[:] = 0.0
+
+            # Compute forward dynamics
+            mujoco.mj_forward(self.sim.model, self.sim.data)
+
+            # Extract drift acceleration
+            a_drift = self.sim.data.qacc.copy()
+
+            # Restore original controls
+            self.sim.data.ctrl[:] = ctrl_saved
+            mujoco.mj_forward(self.sim.model, self.sim.data)
+
+            return a_drift
+
+        except Exception as e:
+            LOGGER.error(f"Failed to compute drift acceleration: {e}")
+            return np.array([])
+
+    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
+        """Compute control-attributed acceleration from muscle activations.
+
+        Section F Implementation: Computes M(q)^-1 * tau to isolate control component.
+
+        Args:
+            tau: Applied generalized forces (nv,) [N·m or N]
+
+        Returns:
+            q_ddot_control: Control acceleration vector (nv,) [rad/s² or m/s²]
+        """
+        if not self.sim:
+            LOGGER.warning("Simulation not initialized")
+            return np.array([])
+
+        try:
+            # Get mass matrix
+            M = self.compute_mass_matrix()
+            if M.size == 0:
+                return np.array([])
+
+            # Control component: M^-1 * tau
+            a_control = np.linalg.solve(M, tau)
+            return a_control
+
+        except Exception as e:
+            LOGGER.error(f"Failed to compute control acceleration: {e}")
+            return np.zeros_like(tau)
+
+    # -------- Section K: MyoSuite Muscle Integration --------
+
+    def get_muscle_analyzer(self):
+        """Get muscle analyzer for biomechanical analysis.
+
+        Section K: Provides access to muscle-specific analysis capabilities.
+
+        Returns:
+            MyoSuiteMuscleAnalyzer instance or None if sim not ready
+        """
+        if not self.sim:
+            LOGGER.warning("Cannot create muscle analyzer - simulation not initialized")
+            return None
+
+        try:
+            from .muscle_analysis import MyoSuiteMuscleAnalyzer
+
+            return MyoSuiteMuscleAnalyzer(self.sim)
+        except ImportError as e:
+            LOGGER.error(f"Failed to import muscle analyzer: {e}")
+            return None
+
+    def create_grip_model(self):
+        """Create grip modeling interface.
+
+        Section K1: Provides activation-driven grip force analysis.
+
+        Returns:
+            MyoSuiteGripModel instance or None if analyzer not ready
+        """
+        analyzer = self.get_muscle_analyzer()
+        if analyzer is None:
+            LOGGER.warning("Cannot create grip model - muscle analyzer not available")
+            return None
+
+        try:
+            from .muscle_analysis import MyoSuiteGripModel
+
+            return MyoSuiteGripModel(self.sim, analyzer)
+        except ImportError as e:
+            LOGGER.error(f"Failed to import grip model: {e}")
+            return None
+
+    def set_muscle_activations(self, activations: dict[str, float]) -> None:
+        """Set muscle activation levels by name.
+
+        Section K: Neural control interface for muscle-driven simulation.
+
+        Args:
+            activations: Dictionary mapping muscle names to activation [0-1]
+        """
+        analyzer = self.get_muscle_analyzer()
+        if analyzer is None:
+            LOGGER.warning("Cannot set activations - muscle analyzer unavailable")
+            return
+
+        # Map muscle names to actuator indices
+        for muscle_name, activation in activations.items():
+            try:
+                idx = analyzer.muscle_names.index(muscle_name)
+                actuator_id = analyzer.muscle_actuator_ids[idx]
+
+                # Clip to valid range
+                activation_clamped = max(0.0, min(1.0, activation))
+
+                # Set control
+                if actuator_id < len(self.sim.data.ctrl):
+                    self.sim.data.ctrl[actuator_id] = activation_clamped
+
+            except ValueError:
+                LOGGER.warning(f"Muscle '{muscle_name}' not found")
+            except Exception as e:
+                LOGGER.error(f"Failed to set activation for '{muscle_name}': {e}")
+
+    def compute_muscle_induced_accelerations(self) -> dict[str, np.ndarray]:
+        """Compute acceleration contributions from each muscle.
+
+        Section K Requirement: Muscle contribution to joint accelerations.
+
+        Returns:
+            Dictionary mapping muscle names to induced accelerations [rad/s²]
+        """
+        analyzer = self.get_muscle_analyzer()
+        if analyzer is None:
+            return {}
+
+        return analyzer.compute_muscle_induced_accelerations()
+
+    def analyze_muscle_contributions(self):
+        """Full muscle contribution analysis.
+
+        Section K Requirement: Comprehensive muscle reports (forces, moments, power).
+
+        Returns:
+            MyoSuiteMuscleAnalysis object with all muscle metrics
+        """
+        analyzer = self.get_muscle_analyzer()
+        if analyzer is None:
+            LOGGER.warning("Cannot analyze muscles - analyzer not available")
+            return None
+
+        return analyzer.analyze_all()
+
+    def get_muscle_state(self):
+        """Get current muscle state.
+
+        Section K: Muscle state for monitoring and control.
+
+        Returns:
+            MyoSuiteMuscleState with activations, forces, lengths, velocities
+        """
+        analyzer = self.get_muscle_analyzer()
+        if analyzer is None:
+            return None
+
+        from .muscle_analysis import MyoSuiteMuscleState
+
+        return MyoSuiteMuscleState(
+            muscle_names=analyzer.muscle_names,
+            activations=analyzer.get_muscle_activations(),
+            forces=analyzer.get_muscle_forces(),
+            lengths=analyzer.get_muscle_lengths(),
+            velocities=analyzer.get_muscle_velocities(),
+        )
+
+    def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
+
+        TODO: Implement ZTCF for this engine.
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__} does not yet implement ZTCF. "
+            f"See pendulum_physics_engine.py for reference."
+        )
+
+    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
+
+        TODO: Implement ZVCF for this engine.
+        """
+        raise NotImplementedError(
+            f"{self.__class__.__name__} does not yet implement ZVCF. "
+            f"See pendulum_physics_engine.py for reference."
+        )
