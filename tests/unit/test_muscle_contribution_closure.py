@@ -14,18 +14,25 @@ References:
       support in normal walking." Gait & Posture.
 """
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 import pytest
 
-try:
+if TYPE_CHECKING:
     from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
         MyoSuitePhysicsEngine,
+    )
+
+try:
+    from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+        MyoSuitePhysicsEngine as _MyoSuitePhysicsEngine,
     )
 
     MYOSUITE_AVAILABLE = True
 except ImportError:
     MYOSUITE_AVAILABLE = False
-    MyoSuitePhysicsEngine = None  # type: ignore
+    _MyoSuitePhysicsEngine = None  # type: ignore
 
 
 @pytest.mark.skipif(not MYOSUITE_AVAILABLE, reason="MyoSuite not installed")
@@ -33,16 +40,14 @@ class TestMuscleContributionClosure:
     """Test that muscle contributions sum to total acceleration (closure property)."""
 
     @pytest.fixture
-    def elbow_engine(self) -> MyoSuitePhysicsEngine:
+    def elbow_engine(self):  # type: ignore
         """Create MyoSuite elbow model for testing."""
-        engine = MyoSuitePhysicsEngine()
+        engine = _MyoSuitePhysicsEngine()
         # Load simple elbow model (1-DOF, 6 muscles)
         engine.load_from_path("myoElbowPose1D6MRandom-v0")
         return engine
 
-    def test_muscle_induced_acceleration_closure_zero_torque(
-        self, elbow_engine: MyoSuitePhysicsEngine
-    ):
+    def test_muscle_induced_acceleration_closure_zero_torque(self, elbow_engine):
         """Verify muscle contributions sum to total when no external torques applied.
 
         Physics:
@@ -94,9 +99,7 @@ class TestMuscleContributionClosure:
             f"\\nThis violates the fundamental closure property of induced acceleration analysis.",
         )
 
-    def test_muscle_contribution_closure_with_gravity(
-        self, elbow_engine: MyoSuitePhysicsEngine
-    ):
+    def test_muscle_contribution_closure_with_gravity(self, elbow_engine):
         """Verify closure holds even with gravitational loading.
 
         This test ensures the decomposition works correctly when passive forces
@@ -133,9 +136,7 @@ class TestMuscleContributionClosure:
             err_msg="Closure property violated under gravitational loading",
         )
 
-    def test_individual_muscle_contributions_physical(
-        self, elbow_engine: MyoSuitePhysicsEngine
-    ):
+    def test_individual_muscle_contributions_physical(self, elbow_engine):
         """Verify individual muscle contributions are physically reasonable.
 
         Each muscle should produce acceleration in its expected direction based on
@@ -165,7 +166,7 @@ class TestMuscleContributionClosure:
         [0.0, 0.25, 0.5, 0.75, 1.0],
     )
     def test_closure_holds_at_different_activations(
-        self, elbow_engine: MyoSuitePhysicsEngine, activation_level: float
+        self, elbow_engine, activation_level: float
     ):
         """Verify closure property at various muscle activation levels.
 
