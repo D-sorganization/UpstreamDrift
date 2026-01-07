@@ -112,14 +112,13 @@ class ConservationMonitor:
         M = self.engine.compute_mass_matrix()
         KE = 0.5 * v.T @ M @ v
 
-        # Potential energy: PE = -∫ g(q) dq
-        # For gravity: PE = m · g · h
-        # Approximation: Use gravity forces to estimate PE
-        # Exact PE would require integrating g(q) along path from reference
-        # For monitoring drift, we use simpler form:
-        # PE ≈ -q^T · g(q) (valid for small angles, exact for rigid bodies)
+        # Exact PE would require integrating g(q) along path from a reference
+        # configuration. For monitoring drift, we use the first-order form:
+        # PE ≈ -q^T · g(q), assuming g(q) is approximately constant over small
+        # displacements (e.g., point masses in a uniform gravity field near a
+        # reference configuration).
         g = self.engine.compute_gravity_forces()
-        PE = -q.T @ g  # Approximation (exact for linear systems)
+        PE = -q.T @ g  # First-order approximation, sufficient for drift monitoring
 
         return EnergySnapshot(time=t, kinetic=float(KE), potential=float(PE))
 
