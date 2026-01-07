@@ -415,14 +415,15 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             lengths=analyzer.get_muscle_lengths(),
             velocities=analyzer.get_muscle_velocities(),
         )
+
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
 
         TODO: Implement ZTCF for this engine.
         """
         raise NotImplementedError(
-            f'{self.__class__.__name__} does not yet implement ZTCF. '
-            f'See pendulum_physics_engine.py for reference.'
+            f"{self.__class__.__name__} does not yet implement ZTCF. "
+            f"See pendulum_physics_engine.py for reference."
         )
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
@@ -431,7 +432,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         TODO: Implement ZVCF for this engine.
         """
         raise NotImplementedError(
-            f'{self.__class__.__name__} does not yet implement ZVCF. '
-            f'See pendulum_physics_engine.py for reference.'
+            f"{self.__class__.__name__} does not yet implement ZVCF. "
+            f"See pendulum_physics_engine.py for reference."
         )
-
