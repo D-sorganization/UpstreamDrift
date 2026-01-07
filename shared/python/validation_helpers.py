@@ -101,11 +101,12 @@ RATIONALE:
 SOURCE: Golf swing literature - club head: 50-60 m/s max
 """
 
+
 MAX_CARTESIAN_ACCELERATION_M_S2 = 10000.0  # m/s² (~1000g)
 """Maximum plausible Cartesian acceleration [m/s²].
 
 RATIONALE:
-- Gravity: 9.81 m/s²
+- Gravity: ~9.81 m/s² (1g)
 - Typical accelerations: 10-100 m/s²
 - Impact events: 100-1000 m/s² (10-100g)
 - 10000 m/s² (1000g) is extreme but possible in collisions

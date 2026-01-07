@@ -143,6 +143,101 @@ We require explicit decomposition of motion and acceleration into drift (passive
   - Simscape Multibody
 - Explicit warnings where semantics differ (no silent assumptions).
 
+#### B5. Model Library with Human Biomechanics and Golf Equipment (mandatory)
+
+A curated library of pre-configured URDF models for rapid prototyping and validated simulations:
+
+**Human Biomechanical Models:**
+- Integration with [human-gazebo repository](https://github.com/gbionics/human-gazebo)
+- High-fidelity human models with detailed STL meshes
+- License: CC-BY-SA 2.0 (properly attributed)
+- Available models:
+  - Human Subject with Meshes: Full body model with realistic geometry
+  - Human Subject with Spinal Cord: Enhanced spinal representation
+- Direct download from repository via GUI or programmatic API
+- Metadata tracking (source, license, version)
+
+**Golf Club Library:**
+- Procedurally generated club URDFs with validated specifications
+- Available clubs:
+  - Driver (45", 10.5° loft, 310g)
+  - 5-Iron (38", 28° loft, 390g)
+  - 7-Iron (36.5", 34° loft, 410g)
+  - 9-Iron (35", 42° loft, 430g)
+  - Sand Wedge (35", 56° loft, 460g)
+  - Putter (34", 3° loft, 370g)
+- Realistic mass distribution:
+  - Separate head, shaft, and grip components
+  - Accurate center of mass and inertia tensors
+  - Compliant with USGA equipment specifications
+- Parametric loft angle and club geometry
+- Auto-generated collision and visual geometry
+
+**Library Management:**
+- `ModelLibrary` class in `tools/urdf_generator/model_library.py`
+- Directory structure: `shared/urdf/{human_models,golf_clubs}/`
+- Mesh asset management: `shared/meshes/{human,golf_clubs}/`
+- Versioned catalog of available models
+- Download tracking and cache management
+
+**GUI Integration:**
+- "Load from Library" dialog (Ctrl+L in URDF Generator)
+- Model browser with category filters (human/golf clubs)
+- Model information display (specs, licensing, provenance)
+- One-click download and URDF generation
+- Seamless integration with existing URDF editor
+
+**Cross-Engine Compatibility:**
+- All library models must work across MuJoCo, Drake, and Pinocchio
+- Validated coordinate conventions and unit consistency
+- Documented engine-specific adaptations where necessary
+
+#### B6. OpenSim-MuJoCo Conversion via MyoConverter (required for biomechanics workflows)
+
+Integration with [MyoConverter](https://github.com/MyoHub/myoconverter) for musculoskeletal model conversion:
+
+**Conversion Capabilities:**
+- Bi-directional OpenSim (.osim) ↔ MuJoCo (.xml) conversion
+- Muscle kinematics and kinetics optimization
+- Automatic tendon routing and wrapping geometry translation
+- Path constraint handling for moving muscle attachment points
+- Hill-type muscle parameter preservation
+
+**Validation Features:**
+- Automated validation PDF report generation
+- Cross-platform comparison (OpenSim vs. MuJoCo)
+- Muscle force-length and force-velocity curve verification
+- Joint range of motion consistency checks
+- Moment arm validation at key configurations
+
+**Integration Points:**
+- `MyoConverter` class in `shared/python/myoconverter_integration.py`
+- Pipeline configuration via kwargs:
+  - `convert_steps`: [1, 2, 3] for full conversion
+  - `muscle_list`: Specific muscles to optimize (or None for all)
+  - `validation`: Enable/disable validation phase
+  - `generate_pdf`: Produce validation report
+  - `add_ground_geom`: Include ground geometry
+- Keyframe initialization helper (models require loading keyframe 0)
+- Example models catalog with URLs to validated conversions
+
+**MyoSuite Compatibility:**
+- Converted models work with MyoSuite for neural control experiments
+- Muscle-driven RL policy training support
+- Integration with existing MyoSuite biomechanics features (Section K)
+
+**Installation \u0026 Documentation:**
+- Installation instructions for Linux (conda), Windows/MacOS (Docker)
+- Citation requirements (Wang et al. 2022, Ikkala \u0026 Hämäläinen 2022)
+- Troubleshooting guide for common conversion issues
+- Example conversion scripts in `examples/` directory
+
+**Quality Requirements:**
+- Converted models must pass energy conservation tests
+- Muscle force contributions must sum to joint torques within tolerance
+- No silent failure modes (all errors logged and reported)
+- Reproducible conversions (deterministic output for same input)
+
 ### C. Kinematics, Jacobians, and Constraint Geometry
 
 #### C1. Jacobians everywhere (mandatory, exhaustive)
