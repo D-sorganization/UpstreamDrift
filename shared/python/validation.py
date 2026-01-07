@@ -17,8 +17,9 @@ Physical validity checks:
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 import numpy as np
 
@@ -86,34 +87,36 @@ def validate_timestep(dt: float) -> None:
         )
 
 
-def validate_inertia_matrix(I: np.ndarray, param_name: str = "inertia") -> None:
+def validate_inertia_matrix(
+    inertia_matrix: np.ndarray, param_name: str = "inertia"
+) -> None:
     """Validate inertia matrix is symmetric positive definite.
 
     Physical requirement: Inertia tensor must be SPD (symmetric positive definite).
     This ensures kinetic energy KE = 0.5·ω^T·I·ω > 0 for all ω ≠ 0.
 
     Args:
-        I: Inertia matrix (3×3) [kg·m²]
+        inertia_matrix: Inertia matrix (3×3) [kg·m²]
         param_name: Parameter name for error messages
 
     Raises:
         PhysicalValidationError: If matrix is not SPD
 
     Example:
-        >>> I = np.diag([1.0, 2.0, 3.0])  # Valid diagonal inertia
-        >>> validate_inertia_matrix(I)  # OK
+        >>> inertia = np.diag([1.0, 2.0, 3.0])  # Valid diagonal inertia
+        >>> validate_inertia_matrix(inertia)  # OK
         >>> I_bad = np.array([[1, 0, 0], [0, -1, 0], [0, 0, 1]])  # Negative eigenvalue
         >>> validate_inertia_matrix(I_bad)  # Raises PhysicalValidationError
     """
-    if I.shape != (3, 3):
+    if inertia_matrix.shape != (3, 3):
         raise PhysicalValidationError(
-            f"Invalid {param_name} shape: {I.shape}\\n"
+            f"Invalid {param_name} shape: {inertia_matrix.shape}\\n"
             f"  Expected: (3, 3) for 3D inertia tensor"
         )
 
     # Check symmetry
-    if not np.allclose(I, I.T, atol=1e-10):
-        asymmetry = np.max(np.abs(I - I.T))
+    if not np.allclose(inertia_matrix, inertia_matrix.T, atol=1e-10):
+        asymmetry = np.max(np.abs(inertia_matrix - inertia_matrix.T))
         raise PhysicalValidationError(
             f"Inertia matrix not symmetric:\\n"
             f"  Max asymmetry: {asymmetry:.2e}\\n"
@@ -121,7 +124,9 @@ def validate_inertia_matrix(I: np.ndarray, param_name: str = "inertia") -> None:
         )
 
     # Check positive definiteness via eigenvalues
-    eigenvalues = np.linalg.eigvalsh(I)  # Hermitian eigenvalues (faster for symmetric)
+    eigenvalues = np.linalg.eigvalsh(
+        inertia_matrix
+    )  # Hermitian eigenvalues (faster for symmetric)
 
     if np.any(eigenvalues <= 0):
         min_eig = eigenvalues.min()
