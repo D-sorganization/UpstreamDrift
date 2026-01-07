@@ -382,6 +382,12 @@ class DraggableModelCard(QFrame):
         chip_layout.addStretch()
         layout.addLayout(chip_layout)
 
+        # Accessibility
+        self.setAccessibleName(self.model.name)
+        self.setAccessibleDescription(
+            f"{self.model.description}. Status: {status_text}"
+        )
+
     def _get_status_info(self) -> tuple[str, str]:
         """Get status text and color based on model type."""
         t = getattr(self.model, "type", "").lower()
