@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 import matplotlib.backend_bases  # noqa: F401
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
 
@@ -215,6 +216,7 @@ class GolfSwingPlotter:
         joint_idx_1: int,
         joint_idx_2: int,
         title: str | None = None,
+        ax: Axes | None = None,
     ) -> None:
         """Plot Angle-Angle diagram (Cyclogram) for two joints.
 
@@ -223,9 +225,13 @@ class GolfSwingPlotter:
             joint_idx_1: Index of first joint (X-axis)
             joint_idx_2: Index of second joint (Y-axis)
             title: Optional title
+            ax: Optional Axes object. If None, creates new subplot(111).
         """
         times, positions = self.recorder.get_time_series("joint_positions")
         positions = np.asarray(positions)
+
+        if ax is None:
+            ax = fig.add_subplot(111)
 
         if (
             len(times) == 0
@@ -233,11 +239,8 @@ class GolfSwingPlotter:
             or joint_idx_1 >= positions.shape[1]
             or joint_idx_2 >= positions.shape[1]
         ):
-            ax = fig.add_subplot(111)
             ax.text(0.5, 0.5, "No data available", ha="center", va="center")
             return
-
-        ax = fig.add_subplot(111)
 
         theta1 = np.rad2deg(positions[:, joint_idx_1])
         theta2 = np.rad2deg(positions[:, joint_idx_2])
@@ -285,6 +288,7 @@ class GolfSwingPlotter:
         fig: Figure,
         coupling_angles: np.ndarray,
         title: str | None = None,
+        ax: Axes | None = None,
     ) -> None:
         """Plot Coupling Angle time series (Vector Coding).
 
@@ -292,6 +296,7 @@ class GolfSwingPlotter:
             fig: Matplotlib figure
             coupling_angles: Array of coupling angles [0, 360)
             title: Optional title
+            ax: Optional Axes object. If None, creates new subplot(111).
 
         Note:
             This method expects pre-calculated coupling angles.
@@ -299,8 +304,10 @@ class GolfSwingPlotter:
         """
         times, _ = self.recorder.get_time_series("joint_positions")
 
-        if len(times) == 0 or len(coupling_angles) == 0:
+        if ax is None:
             ax = fig.add_subplot(111)
+
+        if len(times) == 0 or len(coupling_angles) == 0:
             ax.text(0.5, 0.5, "No data available", ha="center", va="center")
             return
 
@@ -314,8 +321,6 @@ class GolfSwingPlotter:
             plot_times = times[: len(coupling_angles)]
         else:
             plot_times = times
-
-        ax = fig.add_subplot(111)
 
         ax.plot(
             plot_times,
@@ -2311,6 +2316,7 @@ class GolfSwingPlotter:
         fig: Figure,
         metrics: dict[str, float],
         title: str = "Swing DNA",
+        ax: Axes | None = None,
     ) -> None:
         """Plot a radar chart of swing metrics.
 
@@ -2318,13 +2324,16 @@ class GolfSwingPlotter:
             fig: Matplotlib figure
             metrics: Dictionary of metrics. Values should be normalized to [0, 1] or [0, 100].
             title: Chart title
+            ax: Optional Axes object. If None, creates new subplot(111, polar=True).
         """
         labels = list(metrics.keys())
         values = list(metrics.values())
         num_vars = len(labels)
 
+        if ax is None:
+            ax = fig.add_subplot(111, polar=True)
+
         if num_vars < 3:
-            ax = fig.add_subplot(111)
             ax.text(
                 0.5,
                 0.5,
@@ -2342,7 +2351,6 @@ class GolfSwingPlotter:
         angles += angles[:1]
         labels += labels[:1]
 
-        ax = fig.add_subplot(111, polar=True)
         ax.plot(angles, values, color=self.colors["primary"], linewidth=2)
         ax.fill(angles, values, color=self.colors["primary"], alpha=0.25)
 
