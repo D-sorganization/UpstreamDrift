@@ -5,6 +5,7 @@ import math
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 import defusedxml.minidom as minidom
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -18,11 +19,91 @@ class URDFBuilder:
         self.materials: dict[str, dict] = {}
         self.robot_name = "golf_robot"
 
+    def _validate_physical_parameters(self, segment_data: dict) -> None:
+        """Validate physical parameters for correctness.
+
+        Args:
+            segment_data: Segment data dictionary.
+
+        Raises:
+            ValueError: If parameters violate physics constraints.
+        """
+        physics = segment_data.get("physics", {})
+        segment_name = segment_data.get("name", "unknown")
+
+        # Validate mass
+        mass = physics.get("mass", 1.0)
+        if mass <= 0:
+            raise ValueError(
+                f"Mass must be positive\\n"
+                f"Segment: {segment_name}\\n"
+                f"Got: {mass} kg\\n"
+                f"Hint: Check the mass value in the physics properties."
+            )
+
+        # Validate inertia matrix if provided
+        inertia = physics.get("inertia", {})
+        if inertia:
+            # Extract inertia components (assuming diagonal for now)
+            ixx = inertia.get("ixx", 0.1)
+            iyy = inertia.get("iyy", 0.1)
+            izz = inertia.get("izz", 0.1)
+            ixy = inertia.get("ixy", 0.0)
+            ixz = inertia.get("ixz", 0.0)
+            iyz = inertia.get("iyz", 0.0)
+
+            # Build 3x3 inertia matrix
+            I = np.array([[ixx, ixy, ixz], [ixy, iyy, iyz], [ixz, iyz, izz]])
+
+            # Check 1: Positive diagonal elements
+            if ixx <= 0 or iyy <= 0 or izz <= 0:
+                raise ValueError(
+                    f"Inertia diagonal elements must be positive\\n"
+                    f"Segment: {segment_name}\\n"
+                    f"Ixx={ixx:.6f}, Iyy={iyy:.6f}, Izz={izz:.6f}\\n"
+                    f"Hint: Check for negative signs or zero values."
+                )
+
+            # Check 2: Positive-definite via Cholesky decomposition
+            try:
+                np.linalg.cholesky(I)
+            except np.linalg.LinAlgError:
+                raise ValueError(
+                    f"Inertia matrix must be positive-definite\\n"
+                    f"Segment: {segment_name}\\n"
+                    f"Inertia matrix:\\n{I}\\n"
+                    f"Hint: Check off-diagonal elements (ixy, ixz, iyz) for consistency.\\n"
+                    f"The matrix must be symmetric and all eigenvalues positive."
+                )
+
+            # Check 3: Triangle inequality (parallel axis theorem bounds)
+            # For any rigid body: |I_a - I_b| <= I_c <= I_a + I_b
+            if not (abs(ixx - iyy) <= izz <= ixx + iyy):
+                logger.warning(
+                    f"Inertia values may violate triangle inequality\\n"
+                    f"Segment: {segment_name}\\n"
+                    f"Ixx={ixx:.6f}, Iyy={iyy:.6f}, Izz={izz:.6f}\\n"
+                    f"This may indicate an unusual mass distribution."
+                )
+            if not (abs(iyy - izz) <= ixx <= iyy + izz):
+                logger.warning(
+                    f"Inertia values may violate triangle inequality (YZ plane)\\n"
+                    f"Segment: {segment_name}"
+                )
+            if not (abs(ixx - izz) <= iyy <= ixx + izz):
+                logger.warning(
+                    f"Inertia values may violate triangle inequality (XZ plane)\\n"
+                    f"Segment: {segment_name}"
+                )
+
     def add_segment(self, segment_data: dict) -> None:
         """Add a segment to the URDF.
 
         Args:
             segment_data: Dictionary containing segment information.
+
+        Raises:
+            ValueError: If segment data is invalid or physically incorrect.
         """
         # Validate segment data
         if not segment_data.get("name"):
@@ -33,6 +114,9 @@ class URDFBuilder:
             raise ValueError(
                 f"Segment with name '{segment_data['name']}' already exists"
             )
+
+        # Validate physical parameters
+        self._validate_physical_parameters(segment_data)
 
         self.segments.append(segment_data.copy())
 
