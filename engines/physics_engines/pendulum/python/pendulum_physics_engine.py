@@ -215,3 +215,103 @@ class PendulumPhysicsEngine(PhysicsEngine):
         # Placeholder for now as it wasn't strictly required by assessment logic
         # (Pendulum was marked 0/13, so getting core dynamics is huge win).
         return None
+
+    # -------- Section G: Counterfactual Experiments (Implementation) --------
+
+    def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        """Zero-Torque Counterfactual - Guideline G1 Implementation.
+
+        For double pendulum:
+            q̈_ZTCF = M(q)⁻¹ · (-(C(q,v)·v + g(q) + d(q,v)))
+
+        This is the acceleration with all applied torques set to zero.
+        Identical to compute_drift_acceleration() but can use arbitrary (q,v).
+
+        Args:
+            q: Joint positions [rad] (2,)
+            v: Joint velocities [rad/s] (2,)
+
+        Returns:
+            Acceleration with tau=0 [rad/s²] (2,)
+        """
+        if len(q) < 2 or len(v) < 2:
+            return np.array([])
+
+        # Save current state
+        theta1_orig = self.state.theta1
+        theta2_orig = self.state.theta2
+        omega1_orig = self.state.omega1
+        omega2_orig = self.state.omega2
+
+        try:
+            # Set to counterfactual state
+            self.state.theta1 = float(q[0])
+            self.state.theta2 = float(q[1])
+            self.state.omega1 = float(v[0])
+            self.state.omega2 = float(v[1])
+
+            # Compute drift acceleration (which is ZTCF by definition)
+            a_ztcf = self.compute_drift_acceleration()
+
+            return a_ztcf
+
+        finally:
+            # Restore original state
+            self.state.theta1 = theta1_orig
+            self.state.theta2 = theta2_orig
+            self.state.omega1 = omega1_orig
+            self.state.omega2 = omega2_orig
+
+    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        """Zero-Velocity Counterfactual - Guideline G2 Implementation.
+
+        For double pendulum with v=0:
+            q̈_ZVCF = M(q)⁻¹ · (-g(q) + τ)
+
+        Note: Coriolis and damping terms vanish when v=0.
+        Control (τ) is preserved from current state.
+
+        Args:
+            q: Joint positions [rad] (2,)
+
+        Returns:
+            Acceleration with v=0 but τ preserved [rad/s²] (2,)
+        """
+        if len(q) < 2:
+            return np.array([])
+
+        # Save current state
+        theta1_orig = self.state.theta1
+        theta2_orig = self.state.theta2
+        omega1_orig = self.state.omega1
+        omega2_orig = self.state.omega2
+
+        try:
+            # Set to counterfactual configuration with v=0
+            self.state.theta1 = float(q[0])
+            self.state.theta2 = float(q[1])
+            self.state.omega1 = 0.0  # ZVCF: zero velocity
+            self.state.omega2 = 0.0
+
+            # Compute forces with v=0
+            # Coriolis vanishes: c1 = c2 = 0 (depends on v)
+            # Damping vanishes: d1 = d2 = 0 (depends on v)
+            g1, g2 = self.dynamics.gravity_vector(self.state.theta1, self.state.theta2)
+            g = np.array([g1, g2])
+
+            # Control from current state
+            tau = self.control.copy()
+
+            # M * a_zvcf = -g + tau
+            M = self.compute_mass_matrix()
+            a_zvcf = np.linalg.solve(M, -g + tau)
+
+            return a_zvcf
+
+        finally:
+            # Restore original state
+            self.state.theta1 = theta1_orig
+            self.state.theta2 = theta2_orig
+            self.state.omega1 = omega1_orig
+            self.state.omega2 = omega2_orig
+
