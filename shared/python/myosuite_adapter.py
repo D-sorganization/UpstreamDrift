@@ -149,7 +149,7 @@ class MuscleDrivenEnv:
         # Simple joint dynamics (pendulum-like)
         from shared.python.constants import GRAVITY_M_S2
 
-        I_joint = 0.05  # Joint inertia [kg·m²]
+        joint_inertia = 0.05  # Joint inertia [kg·m²]
         b = 0.5  # Damping [N·m·s/rad]
         g_eff = GRAVITY_M_S2  # Effective gravity [m/s²]
         l_eff = 0.3  # Effective length [m]
@@ -158,7 +158,7 @@ class MuscleDrivenEnv:
         tau_total = tau_muscle + tau_gravity - b * self.v
 
         # Integrate
-        a = tau_total / I_joint
+        a = tau_total / joint_inertia
         self.v += a * self.dt
         self.q += self.v * self.dt
 
