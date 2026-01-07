@@ -16,7 +16,8 @@ References:
 
 import numpy as np
 import pytest
-from engines.physics_engines.mujoco.python.myo_suite_physics_engine import (
+
+from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
     MyoSuitePhysicsEngine,
 )
 
