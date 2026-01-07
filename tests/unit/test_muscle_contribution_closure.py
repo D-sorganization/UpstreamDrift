@@ -3,7 +3,7 @@
 Scientific Background:
     Induced Acceleration Analysis decomposes total acceleration into contributions:
         a_total = Σ a_muscle_i + a_passive + a_external
-    
+
     This test verifies the fundamental closure property: the sum of all muscle-induced
     accelerations should equal the total acceleration (when no external torques applied).
 
@@ -16,7 +16,6 @@ References:
 
 import numpy as np
 import pytest
-
 from engines.physics_engines.mujoco.python.myo_suite_physics_engine import (
     MyoSuitePhysicsEngine,
 )
@@ -41,12 +40,12 @@ class TestMuscleContributionClosure:
         Physics:
             With τ_external = 0 and q_init = 0, the system dynamics become:
                 M(q) * a = C(q, q̇) + g(q) + τ_muscle
-            
+
             where τ_muscle = Σ τ_muscle_i for each muscle.
-            
+
             The induced acceleration of muscle i is defined as:
                 a_muscle_i = M(q)^-1 * τ_muscle_i
-            
+
             Closure property requires:
                 Σ a_muscle_i = a_total
         """
@@ -71,7 +70,7 @@ class TestMuscleContributionClosure:
 
         # Sum all muscle contributions
         a_muscle_sum = np.zeros_like(a_total)
-        for muscle_name, a_muscle in induced_accels.items():
+        for _muscle_name, a_muscle in induced_accels.items():
             a_muscle_sum += a_muscle
 
         # Verify closure: Σ a_muscle_i ≈ a_total
@@ -136,9 +135,6 @@ class TestMuscleContributionClosure:
         qd_init = np.zeros(elbow_engine.model.nv)
         elbow_engine.set_state(q_init, qd_init)
 
-        # Get muscle names and expected directions
-        muscle_info = elbow_engine.get_muscle_info()
-
         # Compute induced accelerations
         analyzer = elbow_engine.get_muscle_analyzer()
         induced_accels = analyzer.compute_muscle_induced_accelerations()
@@ -165,7 +161,7 @@ class TestMuscleContributionClosure:
         """
         # Set all muscles to same activation
         elbow_engine.set_muscle_activation(
-            {muscle: activation_level for muscle in elbow_engine.get_muscle_names()}
+            dict.fromkeys(elbow_engine.get_muscle_names(), activation_level)
         )
 
         # Rest of test same as base closure test
