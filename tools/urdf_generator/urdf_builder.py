@@ -50,7 +50,7 @@ class URDFBuilder:
         # Validate inertia matrix if provided
         inertia = physics.get("inertia", {})
         if inertia:
-            # Extract inertia components (assuming diagonal for now)
+            # Extract inertia components (full 3x3 symmetric matrix)
             ixx = inertia.get("ixx", DEFAULT_INERTIA_MOMENT)
             iyy = inertia.get("iyy", DEFAULT_INERTIA_MOMENT)
             izz = inertia.get("izz", DEFAULT_INERTIA_MOMENT)
@@ -75,14 +75,15 @@ class URDFBuilder:
             # Check 2: Positive-definite via Cholesky decomposition
             try:
                 np.linalg.cholesky(inertia_matrix)
-            except np.linalg.LinAlgError:
+            except np.linalg.LinAlgError as e:
+                # Preserve exception chain for debugging eigenvalue issues
                 raise ValueError(
                     f"Inertia matrix must be positive-definite\\n"
                     f"Segment: {segment_name}\\n"
                     f"Inertia matrix:\\n{inertia_matrix}\\n"
                     f"Hint: Check off-diagonal elements (ixy, ixz, iyz) for consistency.\\n"
                     f"The matrix must be symmetric and all eigenvalues positive."
-                ) from None
+                ) from e
 
             # Check 3: Triangle inequality (parallel axis theorem bounds)
             # For any rigid body: |I_a - I_b| <= I_c <= I_a + I_b

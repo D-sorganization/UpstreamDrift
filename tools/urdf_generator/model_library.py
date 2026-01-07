@@ -22,11 +22,10 @@ class ModelLibrary:
 
     # Human-gazebo repository pinned version
     # Pin to specific commit instead of 'master' to prevent upstream changes from breaking
-    # Last verified: January 7, 2026
+    # Last verified: January 7, 2026 (functional with humanSubjectWithMeshes URDF and all meshes)
     # Repository: https://github.com/gbionics/human-gazebo
-    HUMAN_GAZEBO_COMMIT = (
-        "39cfb24fd1e16cdaa24d06b55bd16850f1825fae"  # Latest as of Jan 2026
-    )
+    # Verified functional on 2026-01-07; includes complete humanSubjectWithMeshes URDF and mesh files
+    HUMAN_GAZEBO_COMMIT = "39cfb24fd1e16cdaa24d06b55bd16850f1825fae"
 
     # Human-gazebo repository base URL (pinned to commit)
     HUMAN_GAZEBO_BASE = (
