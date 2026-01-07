@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+from shared.python.constants import GRAVITY_M_S2
 
 # Mock classes that need to be defined before importing the engine
 class MockPhysicsEngine:
@@ -163,10 +164,10 @@ def test_compute_bias_forces(engine):
 def test_compute_gravity_forces(engine):
     engine.model = MagicMock()
     engine.data = MagicMock()
-    engine.data.qfrc_grav = np.array([0.0, -9.81])
+    engine.data.qfrc_grav = np.array([0.0, -GRAVITY_M_S2])
 
     grav = engine.compute_gravity_forces()
-    np.testing.assert_array_equal(grav, np.array([0.0, -9.81]))
+    np.testing.assert_array_equal(grav, np.array([0.0, -GRAVITY_M_S2]))
 
 
 def test_compute_inverse_dynamics(engine):
