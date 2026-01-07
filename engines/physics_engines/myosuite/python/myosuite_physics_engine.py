@@ -43,6 +43,17 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
     def model_name(self) -> str:
         return self.env_id if self.env_id else "MyoSuite_NoModel"
 
+    @property
+    def model(self) -> Any:
+        """Expose underlying MuJoCo model for direct access.
+
+        Returns:
+            MuJoCo model object, or None if not loaded.
+        """
+        if self.sim is not None:
+            return self.sim.model
+        return None
+
     def load_from_path(self, path: str) -> None:
         """Load environment by ID (passed as path)."""
         if not MYOSUITE_AVAILABLE:
@@ -429,3 +440,24 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             f"{self.__class__.__name__} does not yet implement ZVCF. "
             f"See pendulum_physics_engine.py for reference."
         )
+
+    def get_acceleration(self) -> np.ndarray:
+        """Get current acceleration vector.
+
+        Returns:
+            Current joint accelerations (nv,) [rad/s² or m/s²]
+        """
+        if not self.sim:
+            return np.array([])
+        return np.array(self.sim.data.qacc)
+
+    def get_muscle_names(self) -> list[str]:
+        """Get list of muscle names in the model.
+
+        Returns:
+            List of muscle actuator names
+        """
+        analyzer = self.get_muscle_analyzer()
+        if analyzer is None:
+            return []
+        return list(analyzer.muscle_names)
