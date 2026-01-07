@@ -20,14 +20,11 @@ import pytest
 from shared.python.constants import GRAVITY_M_S2
 
 
-class TestBasicContactPhysics:
-    """Test fundamental contact behavior across all engines."""
-
-    @pytest.fixture
-    def ball_urdf(self, tmp_path):
-        """Create a simple ball URDF for contact testing."""
-        # Golf ball: mass = 0.045kg, radius = 0.02135m
-        urdf_content = """<?xml version="1.0"?>
+@pytest.fixture(scope="module")
+def ball_urdf(tmp_path_factory):
+    """Create a simple ball URDF for contact testing."""
+    # Golf ball: mass = 0.045kg, radius = 0.02135m
+    urdf_content = """<?xml version="1.0"?>
 <robot name="ball">
   <link name="world"/>
   <link name="ball">
@@ -48,9 +45,13 @@ class TestBasicContactPhysics:
   </joint>
 </robot>
 """
-        urdf_path = tmp_path / "ball.urdf"
-        urdf_path.write_text(urdf_content)
-        return str(urdf_path)
+    urdf_path = tmp_path_factory.mktemp("data") / "ball.urdf"
+    urdf_path.write_text(urdf_content)
+    return str(urdf_path)
+
+
+class TestBasicContactPhysics:
+    """Test fundamental contact behavior across all engines."""
 
     def test_mujoco_ball_drop_energy_dissipation(self, ball_urdf):
         """Verify MuJoCo contact dissipates energy (ball doesn't bounce forever)."""
