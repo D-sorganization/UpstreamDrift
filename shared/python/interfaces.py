@@ -198,3 +198,81 @@ class PhysicsEngine(Protocol):
             For muscle-driven models, tau represents muscle-generated joint torques.
         """
         ...
+
+    # -------- Section G: Counterfactual Experiments (Mandatory) --------
+
+    @abstractmethod
+    def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
+
+        Compute acceleration with applied torques set to zero, preserving current state.
+        This isolates drift (gravity + Coriolis + constraints) from control effects.
+
+        **Purpose**: Answer "What would happen if all actuators turned off RIGHT NOW?"
+
+        **Physics**: With τ=0, acceleration is purely passive:
+            q̈_ZTCF = M(q)⁻¹ · (C(q,v)·v + g(q) + J^T·λ)
+
+        **Causal Interpretation**:
+            Δa_control = a_full - a_ZTCF
+            This is the acceleration *attributed to* actuator torques.
+
+        **Example Use Case** (Golf Swing):
+            At impact, compute ZTCF to determine how much clubhead acceleration
+            is due to passive dynamics (arm falling under gravity + centrifugal)
+            vs. active muscle torques.
+
+        Args:
+            q: Joint positions (n_v,) [rad or m]
+            v: Joint velocities (n_v,) [rad/s or m/s]
+
+        Returns:
+            q̈_ZTCF: Acceleration under zero applied torque (n_v,) [rad/s² or m/s²]
+
+        Note:
+            State (q, v) is preserved; only applied control is zeroed.
+            Constraints remain active (J^T·λ term preserved).
+
+        See Also:
+            - compute_zvcf: Zero-velocity counterfactual
+            - Section G1: ZTCF definition in design guidelines
+        """
+        ...
+
+    @abstractmethod
+    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
+
+        Compute acceleration with joint velocities set to zero, preserving configuration.
+        This isolates configuration-dependent effects (gravity, constraints)
+        from velocity-dependent effects (Coriolis, centrifugal).
+
+        **Purpose**: Answer "What acceleration would occur if motion FROZE instantaneously?"
+
+        **Physics**: With v=0, acceleration has no velocity-dependent terms:
+            q̈_ZVCF = M(q)⁻¹ · (g(q) + τ + J^T·λ)
+
+        **Causal Interpretation**:
+            Δa_velocity = a_full - a_ZVCF
+            This is the acceleration *attributed to* Coriolis/centrifugal effects.
+
+        **Example Use Case** (Golf Swing):
+            During downswing, compute ZVCF to separate gravitational pull
+            from centrifugal whip effect. At fast velocities, Coriolis dominates.
+
+        Args:
+            q: Joint positions (n_v,) [rad or m]
+
+        Returns:
+            q̈_ZVCF: Acceleration with v=0 (n_v,) [rad/s² or m/s²]
+
+        Note:
+            Only velocity is zeroed; configuration (q) and control (τ) preserved.
+            Centrifugal barrier analysis uses ZVCF to find configurations where
+            q̈(q,0,τ) prevents motion even with applied torque.
+
+        See Also:
+            - compute_ztcf: Zero-torque counterfactual
+            - Section G2: ZVCF definition in design guidelines
+        """
+        ...
