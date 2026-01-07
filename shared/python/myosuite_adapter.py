@@ -24,6 +24,7 @@ Reference:
 
 from __future__ import annotations
 
+import importlib.util
 import logging
 from typing import TYPE_CHECKING, Any
 
@@ -35,12 +36,8 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 # Check for MyoSuite availability
-try:
-    import gym
-
-    MYOSUITE_AVAILABLE = True
-except ImportError:
-    MYOSUITE_AVAILABLE = False
+MYOSUITE_AVAILABLE = importlib.util.find_spec("gym") is not None
+if not MYOSUITE_AVAILABLE:
     logger.warning(
         "MyoSuite/gym not available. Neural control disabled. "
         "Install with: pip install myosuite"
@@ -101,8 +98,12 @@ class MuscleDrivenEnv:
         """
         self.q = np.random.uniform(-np.pi / 4, np.pi / 4)  # Random init
         self.v = 0.0
-        self.muscle_activations = dict.fromkeys(self._get_muscle_names(), 0.01)  # Min activation
-        self.muscle_states = dict.fromkeys(self._get_muscle_names(), (0.12, 0.0))  # Default fiber state
+        self.muscle_activations = dict.fromkeys(
+            self._get_muscle_names(), 0.01
+        )  # Min activation
+        self.muscle_states = dict.fromkeys(
+            self._get_muscle_names(), (0.12, 0.0)
+        )  # Default fiber state
 
         if self.task == "tracking":
             # Time-varying target
@@ -146,7 +147,7 @@ class MuscleDrivenEnv:
             )
 
         # Simple joint dynamics (pendulum-like)
-        I = 0.05  # Joint inertia [kg·m²]
+        I_joint = 0.05  # Joint inertia [kg·m²]
         b = 0.5  # Damping [N·m·s/rad]
         g_eff = 9.81  # Effective gravity [m/s²]
         l_eff = 0.3  # Effective length [m]
@@ -155,7 +156,7 @@ class MuscleDrivenEnv:
         tau_total = tau_muscle + tau_gravity - b * self.v
 
         # Integrate
-        a = tau_total / I
+        a = tau_total / I_joint
         self.v += a * self.dt
         self.q += self.v * self.dt
 

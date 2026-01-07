@@ -17,6 +17,9 @@ Any modification to these constants MUST include:
 3. Impact assessment on dependent calculations
 """
 
+# Source: NIST CODATA 2018 (https://physics.nist.gov/cgi-bin/cuu/Value?gn)
+from shared.python.constants import GRAVITY_M_S2 as GRAVITY_STANDARD
+
 # Finite Difference Parameters
 # -----------------------------------------------------------------------------
 
@@ -201,9 +204,6 @@ PLANNED USE:
 
 # Physical Plausibility Checks
 # -----------------------------------------------------------------------------
-
-# Source: NIST CODATA 2018 (https://physics.nist.gov/cgi-bin/cuu/Value?gn)
-from shared.python.constants import GRAVITY_M_S2 as GRAVITY_STANDARD
 
 """Standard gravitational acceleration (WGS84 ellipsoid at sea level).
 

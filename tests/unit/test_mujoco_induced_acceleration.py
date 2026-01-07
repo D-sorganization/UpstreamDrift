@@ -4,8 +4,6 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 
 
-from shared.python.constants import GRAVITY_M_S2
-
 # Use a patch for the import since mujoco might not be installed
 @patch.dict("sys.modules", {"mujoco": MagicMock()})
 def test_mujoco_iaa_logic():
