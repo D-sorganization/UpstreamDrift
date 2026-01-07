@@ -58,7 +58,7 @@ class MyoConverter:
         output_folder: Path,
         **kwargs: Any,
     ) -> Path | None:
-        """Convert OpenSim model to MuJoCo format.
+        """Convert OpenSim model to MuJoCo format with comprehensive error handling.
 
         Args:
             osim_file: Path to OpenSim .osim model file
@@ -77,10 +77,21 @@ class MyoConverter:
 
         Returns:
             Path to converted MuJoCo XML file, or None if conversion failed
+
+        Raises:
+            RuntimeError: If conversion fails with detailed troubleshooting guidance
         """
         if not self.myoconverter_available:
-            logger.error("MyoConverter not installed. Cannot perform conversion.")
-            return None
+            raise RuntimeError(
+                "MyoConverter not installed\\n"
+                "\\nInstallation instructions:\\n"
+                "  Linux: conda install -c conda-forge myoconverter\\n"
+                "  Windows/Mac: Use Docker (see docs/myoconverter_setup.md)\\n"
+                "\\nVerify installation: python -c 'import myoconverter'"
+            )
+
+        # Pre-flight validation
+        self._validate_inputs(osim_file, geometry_folder, output_folder)
 
         try:
             from myoconverter.O2MPipeline import O2MPipeline
@@ -109,8 +120,13 @@ class MyoConverter:
             logger.info(f"Converting OpenSim model: {osim_file}")
             logger.info(f"Output folder: {output_folder}")
 
-            # Run conversion pipeline
-            O2MPipeline(osim_file_str, geometry_folder_str, output_folder_str, **config)
+            # Run conversion pipeline (wrapped with error context)
+            try:
+                O2MPipeline(
+                    osim_file_str, geometry_folder_str, output_folder_str, **config
+                )
+            except Exception as e:
+                self._handle_conversion_error(e, osim_file, geometry_folder)
 
             # Find converted XML file
             output_path = Path(output_folder)
@@ -121,15 +137,146 @@ class MyoConverter:
                 logger.info(f"Conversion successful: {converted_file}")
                 return converted_file
             else:
-                logger.error("Conversion completed but no output XML file found")
-                return None
+                raise RuntimeError(
+                    "Conversion completed but no output XML file found\\n"
+                    f"Expected file pattern: *_cvt*.xml in {output_folder}\\n"
+                    "\\nPossible causes:\\n"
+                    "1. Conversion failed silently (check logs)\\n"
+                    "2. Output folder permissions issue\\n"
+                    "3. Disk space exhausted"
+                )
 
         except ImportError as e:
-            logger.error(f"Failed to import myoconverter: {e}")
-            return None
-        except Exception as e:
-            logger.error(f"Conversion failed: {e}")
-            return None
+            raise RuntimeError(
+                f"Failed to import myoconverter: {e}\\n"
+                "\\nThis should not happen if installation check passed.\\n"
+                "Try reinstalling: conda install -c conda-forge myoconverter --force-reinstall"
+            ) from e
+
+    def _validate_inputs(
+        self, osim_file: Path, geometry_folder: Path, output_folder: Path
+    ) -> None:
+        """Validate input paths before conversion.
+
+        Args:
+            osim_file: OpenSim model file path
+            geometry_folder: Geometry folder path
+            output_folder: Output folder path
+
+        Raises:
+            FileNotFoundError: If inputs are invalid
+            ValueError: If file format is incorrect
+        """
+        # Check osim file exists
+        if not osim_file.exists():
+            raise FileNotFoundError(
+                f"OpenSim model file not found: {osim_file}\\n"
+                "\\nEnsure the .osim file exists and path is correct.\\n"
+                "Hint: Check for typos in file name or path."
+            )
+
+        # Check it's actually an .osim file
+        if osim_file.suffix.lower() != ".osim":
+            raise ValueError(
+                f"Expected .osim file, got: {osim_file.suffix}\\n"
+                f"File: {osim_file}\\n"
+                "\\nMyoConverter requires OpenSim XML format (.osim extension)."
+            )
+
+        # Validate XML structure
+        try:
+            import xml.etree.ElementTree as ET
+
+            tree = ET.parse(osim_file)
+            root = tree.getroot()
+
+            if root.tag != "OpenSimDocument":
+                raise ValueError(
+                    f"Invalid OpenSim file: root element is '{root.tag}', "
+                    f"expected 'OpenSimDocument'\\n"
+                    f"File: {osim_file}\\n"
+                    "\\nThis file may be corrupted or not a valid OpenSim model.\\n"
+                    "Try opening it in OpenSim GUI to validate."
+                )
+        except ET.ParseError as e:
+            raise ValueError(
+                f"Failed to parse OpenSim XML: {e}\\n"
+                f"File: {osim_file}\\n"
+                "\\nThe file appears to be corrupted.\\n"
+                "Recommendations:\\n"
+                "1. Try opening in OpenSim GUI to check for errors\\n"
+                "2. Verify file wasn't truncated during download\\n"
+                "3. Check file encoding (should be UTF-8)"
+            ) from e
+
+        # Check geometry folder exists
+        if not geometry_folder.exists():
+            logger.warning(
+                f"Geometry folder not found: {geometry_folder}\\n"
+                "Conversion may fail if model references mesh files.\\n"
+                "Consider creating folder and adding required geometries."
+            )
+
+        # Create output folder if needed
+        output_folder.mkdir(parents=True, exist_ok=True)
+        logger.info(f"Output folder ready: {output_folder}")
+
+    def _handle_conversion_error(
+        self, error: Exception, osim_file: Path, geometry_folder: Path
+    ) -> None:
+        """Handle conversion errors with troubleshooting guidance.
+
+        Args:
+            error: Exception from O2MPipeline
+            osim_file: OpenSim model file
+            geometry_folder: Geometry folder
+
+        Raises:
+            RuntimeError: With detailed troubleshooting information
+        """
+        error_msg = str(error).lower()
+
+        # Categorize common errors
+        if "mesh" in error_msg or "geometry" in error_msg:
+            raise RuntimeError(
+                f"Conversion failed due to geometry/mesh issues: {error}\\n"
+                f"\\nTroubleshooting steps:\\n"
+                f"1. Verify all mesh files exist in: {geometry_folder}\\n"
+                f"2. Check mesh file formats (STL, OBJ supported)\\n"
+                f"3. Ensure geometry paths in .osim match actual files\\n"
+                f"4. Try opening model in OpenSim GUI to validate geometry\\n"
+                f"\\nCommon fix: Download geometry from OpenSim model repository"
+            ) from error
+        elif "muscle" in error_msg:
+            raise RuntimeError(
+                f"Conversion failed due to muscle configuration: {error}\\n"
+                f"\\nTroubleshooting steps:\\n"
+                f"1. Check for unsupported muscle types\\n"
+                f"2. Verify muscle path points are valid\\n"
+                f"3. Try converting with muscle_list=[] to skip muscle optimization\\n"
+                f"4. Review muscle definitions in: {osim_file}"
+            ) from error
+        elif "constraint" in error_msg:
+            raise RuntimeError(
+                f"Conversion failed due to constraints: {error}\\n"
+                f"\\nTroubleshooting steps:\\n"
+                f"1. Set treat_as_normal_path_point=True to use different constraint handling\\n"
+                f"2. Check for complex kinematic constraints\\n"
+                f"3. Simplify model or remove unsupported constraints"
+            ) from error
+        else:
+            # Generic error
+            raise RuntimeError(
+                f"Model conversion failed: {error}\\n"
+                f"\\nGeneral troubleshooting:\\n"
+                f"1. Verify .osim file opens in OpenSim GUI\\n"
+                f"2. Check for model compatibility with MyoConverter\\n"
+                f"3. Review conversion logs for detailed error messages\\n"
+                f"4. Try with speedy=True to skip some validation\\n"
+                f"5. Consult: https://myoconverter.readthedocs.io/\\n"
+                f"\\nIf issue persists, create an issue with the .osim file at:\\n"
+                f"https://github.com/MyoHub/myoconverter/issues"
+            ) from error
 
     def load_converted_model_keyframe(self, model_path: Path) -> str:
         """Generate Python code to load converted model with keyframe.
