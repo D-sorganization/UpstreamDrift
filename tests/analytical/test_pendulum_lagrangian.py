@@ -22,6 +22,8 @@ Source: Classical Mechanics (Goldstein, 3rd ed.), Section 1.5
 import numpy as np
 import pytest
 
+from shared.python.constants import GRAVITY_M_S2
+
 # Try to import pendulum engine, skip tests if not available
 pytest.importorskip("engines.physics_engines.pendulum")
 
@@ -50,13 +52,13 @@ class TestPendulumAnalyticalDynamics:
         # Simple pendulum parameters (from DoublePendulumDynamics defaults)
         # Link 1: m1 = 1.0 kg, l1 = 1.0 m
         # Link 2: m2 = 1.0 kg, l2 = 1.0 m
-        # Gravity: g = 9.80665 m/s² (NIST standard)
+        # Gravity: g = GRAVITY_M_S2 m/s² (NIST standard)
 
         self.m1 = 1.0  # kg
         self.l1 = 1.0  # m
         self.m2 = 1.0  # kg
         self.l2 = 1.0  # m
-        self.g = 9.80665  # m/s² (NIST CODATA 2018)
+        self.g = GRAVITY_M_S2  # m/s² (NIST CODATA 2018)
 
     def analytical_single_pendulum_torque(
         self, theta: float, theta_dot: float, theta_ddot: float
@@ -125,7 +127,7 @@ class TestPendulumAnalyticalDynamics:
         Configuration: θ = 0.1 rad, v = 0, a = 0 rad/s²
 
         Analytical solution (static equilibrium, a=0):
-            τ = m·g·l·sin(0.1) ≈ 1.0·9.80665·1.0·0.0998 ≈ 0.978 N·m
+            τ = m·g·l·sin(0.1) ≈ 1.0·GRAVITY_M_S2·1.0·0.0998 ≈ 0.978 N·m
 
         This tests GRAVITY COMPONENT accuracy in small-angle regime.
         """
@@ -156,7 +158,7 @@ class TestPendulumAnalyticalDynamics:
 
         Analytical solution:
             sin(π/2) = 1.0 → max gravity torque
-            τ = m·g·l·1.0 = 1.0·9.80665·1.0 ≈ 9.807 N·m
+            τ = m·g·l·1.0 = 1.0·GRAVITY_M_S2·1.0 ≈ 9.807 N·m
 
         This tests MAXIMUM GRAVITY configuration.
         """
@@ -186,7 +188,7 @@ class TestPendulumAnalyticalDynamics:
 
         Analytical solution:
             I·a = 1.0·1.0²·2.0 = 2.0 N·m (inertial)
-            m·g·l·sin(0.3) = 1.0·9.80665·1.0·0.2955 ≈ 2.898 N·m (gravity)
+            m·g·l·sin(0.3) = 1.0·GRAVITY_M_S2·1.0·0.2955 ≈ 2.898 N·m (gravity)
             τ_total = 2.0 + 2.898 = 4.898 N·m
 
         This tests SUPERPOSITION of inertial + gravity terms.
@@ -219,7 +221,7 @@ class TestPendulumAnalyticalDynamics:
 
         Analytical solution (with Coriolis=0 for single pendulum, v negligible):
             M·a_drift = -g(θ) → a_drift = -m·g·l·sin(θ) / (m·l²)
-            a_drift = -g·sin(θ)/l = -9.80665·sin(0.2)/1.0 ≈ -1.946 rad/s²
+            a_drift = -g·sin(θ)/l = -GRAVITY_M_S2·sin(0.2)/1.0 ≈ -1.946 rad/s²
 
         This tests DRIFT-CONTROL DECOMPOSITION correctness.
         """
@@ -288,7 +290,7 @@ class TestPendulumEnergyConservation:
         self.engine = PendulumPhysicsEngine()
         self.m1 = 1.0  # kg
         self.l1 = 1.0  # m
-        self.g = 9.80665  # m/s²
+        self.g = GRAVITY_M_S2  # m/s²
 
     def compute_total_energy(self, theta: float, theta_dot: float) -> float:
         """Analytical total energy for simple pendulum.
