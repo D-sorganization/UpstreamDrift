@@ -39,7 +39,7 @@ def test_mujoco_pendulum_accuracy():
     # Standard pendulum model with point mass at end of massless rod.
     xml = f"""
     <mujoco>
-        <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
+        <option timestep="0.001" gravity="0 0 -{float(GRAVITY_M_S2)}" integrator="RK4"/>
         <worldbody>
             <body>
                 <joint name="pin" type="hinge" axis="0 1 0" pos="0 0 0"/>
