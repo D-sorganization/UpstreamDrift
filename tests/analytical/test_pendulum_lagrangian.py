@@ -73,7 +73,7 @@ class TestPendulumAnalyticalDynamics:
         """
         I_inertia = self.m1 * self.l1**2  # Inertia [kg·m²]
         gravity_torque = self.m1 * self.g * self.l1 * np.sin(theta)
-        return I_inertia * theta_ddot + gravity_torque
+        return float(I_inertia * theta_ddot + gravity_torque)
 
     def test_inverse_dynamics_vertical_down(self) -> None:
         """Test ID at vertical down (θ=0): pure inertial torque.
@@ -299,7 +299,7 @@ class TestPendulumEnergyConservation:
         I_inertia = self.m1 * self.l1**2
         KE = 0.5 * I_inertia * theta_dot**2
         PE = self.m1 * self.g * self.l1 * (1 - np.cos(theta))
-        return KE + PE
+        return float(KE + PE)
 
     def test_energy_conservation_free_swing(self) -> None:
         """Test energy is conserved during passive swing (no torque).
