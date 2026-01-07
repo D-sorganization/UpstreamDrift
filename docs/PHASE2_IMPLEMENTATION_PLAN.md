@@ -145,7 +145,7 @@ Without closure test, we can't trust decomposition!
    @pytest.mark.parametrize("engine_type", [
        EngineType.MUJOCO,
        EngineType.DRAKE,
-       pytest.param(Eng ineType.PINOCCHIO, marks=pytest.mark.skipif(...))
+       pytest.param(EngineType.PINOCCHIO, marks=pytest.mark.skipif(...))
    ])
    def test_ball_impact_energy(engine_type):
        """Verify contact energy dissipation across engines."""
@@ -329,7 +329,7 @@ Without closure test, we can't trust decomposition!
 **Breakdown**:
 - Architecture: 9.0/10 → 9.2/10 (+0.2) - benchmarks, clean xfails
 - Scientific Rigor: 9.2/10 → 9.7/10 (+0.5) - closure test, contact validation
-- Cross-Engine: 75/10 → 8.2/10 (+0.7) - Pinocchio fixed, contact documented
+- Cross-Engine: 7.5/10 → 8.2/10 (+0.7) - Pinocchio fixed, contact documented
 
 **Ship Readiness**: Production-Ready MVP → **Production-Ready v1.0**
 
