@@ -212,21 +212,6 @@ class AdvancedGuiMethodsMixin:
 
         # 1. Radar Chart
         # This method centers the polar plot usually
-        plotter.plot_radar_chart(fig, metrics)
-        # But wait, plot_radar_chart in shared/python/plotting.py uses
-        # add_subplot(111, polar=True)
-        # which clears the figure. We need to update plot_radar_chart to accept
-        # ax or modify usage.
-        # Actually my implementation of plot_radar_chart used add_subplot(111).
-        # Let's fix that in plotting.py first? Or just show one plot per dialog?
-        # The user requested advanced features.
-
-        # To avoid editing plotting.py again right now and risk breaking stuff,
-        # let's just make tabs in the dialog for different advanced plots.
-
-        # Wait, I cannot use tabs with a single canvas easily unless I redraw.
-        # Let's rebuild the dialog structure.
-
         layout.removeWidget(canvas)
         canvas.deleteLater()
 
@@ -398,26 +383,33 @@ class AdvancedGuiMethodsMixin:
 
             if pelvis_idx is not None and torso_idx is not None:
                 # Create subplots: 1. Angle-Angle, 2. Coupling Angle
-                # gs = fig5.add_gridspec(2, 1)
+                # Use gridspec explicitly to control layout
+                gs = fig5.add_gridspec(2, 1)
+                ax1 = fig5.add_subplot(gs[0, 0])
+                ax2 = fig5.add_subplot(gs[1, 0])
 
-                # Plot Angle-Angle
-                # We need to manually manage subplot placement since plotter methods
-                # use add_subplot(111)
-                # But plotter methods typically take `fig` and call
-                # `fig.add_subplot(111)`.
-                # If we pass a subfigure or modify plotting.py to accept axes,
-                # it would be cleaner.
-                # However, existing plotter clears fig.
-
-                # HACK: The current Plotter design is "One Plot Per Figure" generally.
-                # `plot_angle_angle_diagram` calls `fig.add_subplot(111)`.
-                # So we can't easily put two plots on `fig5`.
-                # We will just plot Angle-Angle for now, as it is the most
-                # visual "Advanced" feature.
-
+                # Plot Angle-Angle (Top)
                 plotter.plot_angle_angle_diagram(
-                    fig5, pelvis_idx, torso_idx, title="Coordination: Pelvis vs Torso"
+                    fig5,
+                    pelvis_idx,
+                    torso_idx,
+                    title="Coordination: Pelvis vs Torso (Angle-Angle)",
+                    ax=ax1,
                 )
+
+                # Plot Coupling Angle (Bottom)
+                # Compute coupling angles first
+                coupling_angles = analyzer.compute_coupling_angles(
+                    pelvis_idx, torso_idx
+                )
+                plotter.plot_coupling_angle(
+                    fig5,
+                    coupling_angles,
+                    title="Coupling Angle (Vector Coding)",
+                    ax=ax2,
+                )
+
+                fig5.tight_layout()
             else:
                 ax = fig5.add_subplot(111)
                 ax.text(
