@@ -20,8 +20,18 @@ logger = logging.getLogger(__name__)
 class ModelLibrary:
     """Manages URDF model library for golf swing simulation."""
 
-    # Human-gazebo repository base URL
-    HUMAN_GAZEBO_BASE = "https://raw.githubusercontent.com/gbionics/human-gazebo/master"
+    # Human-gazebo repository pinned version
+    # Pin to specific commit instead of 'master' to prevent upstream changes from breaking
+    # Last verified: January 7, 2026
+    # Repository: https://github.com/gbionics/human-gazebo
+    HUMAN_GAZEBO_COMMIT = (
+        "39cfb24fd1e16cdaa24d06b55bd16850f1825fae"  # Latest as of Jan 2026
+    )
+
+    # Human-gazebo repository base URL (pinned to commit)
+    HUMAN_GAZEBO_BASE = (
+        f"https://raw.githubusercontent.com/gbionics/human-gazebo/{HUMAN_GAZEBO_COMMIT}"
+    )
 
     # Available human models
     HUMAN_MODELS = {
@@ -31,6 +41,8 @@ class ModelLibrary:
             "urdf_url": f"{HUMAN_GAZEBO_BASE}/humanSubjectWithMeshes/humanSubjectWithMesh.urdf",
             "meshes_base": f"{HUMAN_GAZEBO_BASE}/humanSubjectWithMeshes/meshes",
             "license": "CC-BY-SA 2.0",
+            "commit_sha": HUMAN_GAZEBO_COMMIT,  # Track version
+            "upstream_repo": "https://github.com/gbionics/human-gazebo",
         },
     }
 
