@@ -101,7 +101,6 @@ RATIONALE:
 SOURCE: Golf swing literature - club head: 50-60 m/s max
 """
 
-from shared.python.constants import GRAVITY_M_S2
 
 MAX_CARTESIAN_ACCELERATION_M_S2 = 10000.0  # m/s² (~1000g)
 """Maximum plausible Cartesian acceleration [m/s²].
