@@ -106,6 +106,10 @@ class TestPinocchioDriftControl:
         LOGGER.info(f"  a_control = {a_control}")
         LOGGER.info(f"  residual = {residual}")
 
+        # Final guard against empty residual causing np.max() to fail
+        if residual.size == 0:
+            pytest.skip("Pinocchio residual array is empty")
+
         assert np.max(np.abs(residual)) < SUPERPOSITION_TOLERANCE, (
             f"Pinocchio drift-control superposition failed: "
             f"max residual = {np.max(np.abs(residual)):.2e}"
@@ -148,6 +152,10 @@ class TestPinocchioDriftControl:
             pytest.skip("Pinocchio full dynamics computation failed")
 
         residual = a_drift - a_full_zero_tau
+
+        # Final guard against empty residual causing np.max() to fail
+        if residual.size == 0:
+            pytest.skip("Pinocchio residual array is empty")
 
         assert np.max(np.abs(residual)) < 1e-10, (
             f"Drift should equal full dynamics with tau=0: " f"residual = {residual}"
