@@ -6,6 +6,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
+from shared.python.constants import GRAVITY_M_S2
 from shared.python.engine_manager import EngineManager, EngineType
 from tests.physics_validation.analytical import AnalyticalBallistic
 
@@ -31,9 +32,9 @@ def test_mujoco_ballistic_energy_conservation():
 
     # 1. Setup Simulation
     # Define a simple XML model: a particle falling under gravity
-    xml = """
+    xml = f"""
     <mujoco>
-        <option timestep="0.001" gravity="0 0 -9.81" integrator="RK4"/>
+        <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
         <worldbody>
             <body name="ball" pos="0 0 10">
                 <joint type="free"/>
@@ -47,7 +48,7 @@ def test_mujoco_ballistic_energy_conservation():
     data = mujoco.MjData(model)
 
     # Analytical Solver
-    baseline = AnalyticalBallistic(mass=1.0, g=9.81)
+    baseline = AnalyticalBallistic(mass=1.0, g=GRAVITY_M_S2)
 
     # Initial State
     mujoco.mj_resetData(model, data)
@@ -123,7 +124,7 @@ def test_pinocchio_energy_check():
 
     # Pinocchio calculates potential energy automatically if gravity is set?
     # No, model.gravity needs to be set.
-    model.gravity = pinocchio.Motion(np.array([0, 0, -9.81, 0, 0, 0]))
+    model.gravity = pinocchio.Motion(np.array([0, 0, -GRAVITY_M_S2, 0, 0, 0]))
 
     # Pre-compute initial energy
     pinocchio.computeTotalEnergy(model, data, q, v)
