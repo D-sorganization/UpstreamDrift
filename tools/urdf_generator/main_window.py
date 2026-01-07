@@ -46,6 +46,7 @@ class URDFGeneratorWindow(QMainWindow):
         self._setup_ui()
         self._setup_menu_bar()
         self._setup_status_bar()
+        self._setup_window_icon()
         self._connect_signals()
 
         logger.info("URDF Generator window initialized")
@@ -196,6 +197,16 @@ class URDFGeneratorWindow(QMainWindow):
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
         self.status_bar.showMessage("Ready")
+
+    def _setup_window_icon(self) -> None:
+        """Set up the window icon."""
+        from PyQt6.QtGui import QIcon
+
+        icon_path = Path(__file__).parent / "assets" / "robot_arm_icon.png"
+        if icon_path.exists():
+            self.setWindowIcon(QIcon(str(icon_path)))
+        else:
+            logger.warning(f"Icon file not found: {icon_path}")
 
     def _connect_signals(self) -> None:
         """Connect internal signals."""
