@@ -73,6 +73,12 @@ class CrossEngineValidator:
         "jacobian": 1e-8,  # dimensionless
     }
 
+    # Severity thresholds (Assessment C Finding C-003)
+    # Classify deviation severity by multiples of tolerance
+    WARNING_THRESHOLD = 2.0  # 2× tolerance → warning (acceptable with caution)
+    ERROR_THRESHOLD = 10.0  # 10× tolerance → error (investigation required)
+    BLOCKER_THRESHOLD = 100.0  # 100× tolerance → blocker (fundamental model error)
+
     def compare_states(
         self,
         engine1_name: str,
