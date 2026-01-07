@@ -19,6 +19,9 @@ import pytest
 
 from shared.python.constants import GRAVITY_M_S2
 
+# Contact test constants
+BOUNCE_HEIGHT_THRESHOLD_M = 0.001  # Minimum height (1mm) to consider a bounce occurred
+
 
 @pytest.fixture(scope="module")
 def ball_urdf(tmp_path_factory):
@@ -70,7 +73,8 @@ class TestBasicContactPhysics:
 
         # Drop ball from 1m height
         initial_height = 1.0
-        q_init = np.array([0, 0, initial_height, 1, 0, 0, 0])  # [x,y,z, qw,qx,qy,qz]
+        # State: [x, y, z, qw, qx, qy, qz]; MuJoCo quaternion convention is [qw, qx, qy, qz]
+        q_init = np.array([0, 0, initial_height, 1, 0, 0, 0])
         v_init = np.zeros(6)  # Zero velocity
         engine.set_state(q_init, v_init)
 
@@ -151,6 +155,9 @@ class TestCrossEngineContactComparison:
         engine.set_state(q_init, v_init)
 
         # Simulate first bounce
+        # Duration: 0.5s at 1ms steps captures first impact + rebound for all test drop heights.
+        # Free-fall time from height h: t = sqrt(2h/g). For h=2m (max test height),
+        # t ≈ 0.64s. A 0.5s window is sufficient for the initial bounce in all parametrized cases.
         dt = 0.001
         num_steps = int(0.5 / dt)
         for _ in range(num_steps):
@@ -160,7 +167,7 @@ class TestCrossEngineContactComparison:
         final_height = q_final[2]
 
         # Coefficient of restitution: e = sqrt(h_bounce / h_drop)
-        if final_height > 0.001:  # Bounced
+        if final_height > BOUNCE_HEIGHT_THRESHOLD_M:  # Bounced
             e_measured = np.sqrt(final_height / drop_height)
         else:
             e_measured = 0.0  # Didn't bounce (full dissipation)
