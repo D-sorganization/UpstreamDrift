@@ -77,7 +77,10 @@ class TestBasicContactPhysics:
         E_initial = 0.045 * float(GRAVITY_M_S2) * initial_height  # mgh
 
         # Simulate until ball settles (2 seconds should be enough)
-        engine.simulate(duration=2.0, dt=0.001)
+        dt = 0.001
+        num_steps = int(2.0 / dt)
+        for _ in range(num_steps):
+            engine.step(dt=dt)
 
         # Get final state
         q_final, v_final = engine.get_state()
@@ -148,7 +151,10 @@ class TestCrossEngineContactComparison:
         engine.set_state(q_init, v_init)
 
         # Simulate first bounce
-        engine.simulate(duration=0.5, dt=0.001)
+        dt = 0.001
+        num_steps = int(0.5 / dt)
+        for _ in range(num_steps):
+            engine.step(dt=dt)
 
         q_final, v_final = engine.get_state()
         final_height = q_final[2]
