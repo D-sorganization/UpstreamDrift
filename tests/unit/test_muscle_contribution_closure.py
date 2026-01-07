@@ -59,7 +59,7 @@ class TestMuscleContributionClosure:
         elbow_engine.set_control(np.zeros(elbow_engine.model.nu))
 
         # Get total acceleration from forward dynamics
-        elbow_engine.step(dt=0.001, apply_control=True)
+        elbow_engine.step(dt=0.001)
         a_total = elbow_engine.get_acceleration()
 
         # Get muscle analyzer
@@ -104,7 +104,7 @@ class TestMuscleContributionClosure:
         elbow_engine.set_control(np.zeros(elbow_engine.model.nu))
 
         # Forward dynamics
-        elbow_engine.step(dt=0.001, apply_control=True)
+        elbow_engine.step(dt=0.001)
         a_total = elbow_engine.get_acceleration()
 
         # Muscle-induced accelerations
@@ -138,6 +138,7 @@ class TestMuscleContributionClosure:
 
         # Compute induced accelerations
         analyzer = elbow_engine.get_muscle_analyzer()
+        assert analyzer is not None, "Muscle analyzer not available"
         induced_accels = analyzer.compute_muscle_induced_accelerations()
 
         # Verify each muscle produces non-zero acceleration
@@ -161,7 +162,7 @@ class TestMuscleContributionClosure:
         The closure test should hold regardless of muscle activation state.
         """
         # Set all muscles to same activation
-        elbow_engine.set_muscle_activation(
+        elbow_engine.set_muscle_activations(
             dict.fromkeys(elbow_engine.get_muscle_names(), activation_level)
         )
 
@@ -170,10 +171,11 @@ class TestMuscleContributionClosure:
         qd_init = np.zeros(elbow_engine.model.nv)
         elbow_engine.set_state(q_init, qd_init)
 
-        elbow_engine.step(dt=0.001, apply_control=True)
+        elbow_engine.step(dt=0.001)
         a_total = elbow_engine.get_acceleration()
 
         analyzer = elbow_engine.get_muscle_analyzer()
+        assert analyzer is not None, "Muscle analyzer not available"
         induced_accels = analyzer.compute_muscle_induced_accelerations()
 
         a_muscle_sum = sum(induced_accels.values())
@@ -218,11 +220,12 @@ class TestMuscleContributionComplexModels:
         engine.set_state(q_init, qd_init)
 
         engine.set_control(np.zeros(engine.model.nu))
-        engine.step(dt=0.001, apply_control=True)
+        engine.step(dt=0.001)
 
         a_total = engine.get_acceleration()
 
         analyzer = engine.get_muscle_analyzer()
+        assert analyzer is not None, "Muscle analyzer not available"
         induced_accels = analyzer.compute_muscle_induced_accelerations()
 
         a_muscle_sum = sum(induced_accels.values())
