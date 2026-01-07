@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+from typing import Any
 
 import numpy as np
 
@@ -340,7 +341,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
 
     # -------- Section J: Muscle Model Integration --------
 
-    def get_muscle_analyzer(self):
+    def get_muscle_analyzer(self) -> Any | None:
         """Get muscle analyzer for biomechanical analysis.
 
         Section J: Provides access to muscle-specific analysis capabilities.
@@ -360,7 +361,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             logger.error(f"Failed to import muscle analyzer: {e}")
             return None
 
-    def create_grip_model(self):
+    def create_grip_model(self) -> Any | None:
         """Create grip modeling interface.
 
         Section J1: Provides grip wrapping geometry and force analysis.
@@ -392,9 +393,9 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         if analyzer is None:
             return {}
 
-        return analyzer.compute_muscle_induced_accelerations()
+        return dict(analyzer.compute_muscle_induced_accelerations())
 
-    def analyze_muscle_contributions(self):
+    def analyze_muscle_contributions(self) -> Any | None:
         """Full muscle contribution analysis.
 
         Section J Requirement: Comprehensive muscle reports (forces, moments, power).
