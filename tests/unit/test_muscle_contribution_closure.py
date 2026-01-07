@@ -17,11 +17,18 @@ References:
 import numpy as np
 import pytest
 
-from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
-    MyoSuitePhysicsEngine,
-)
+try:
+    from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+        MyoSuitePhysicsEngine,
+    )
+
+    MYOSUITE_AVAILABLE = True
+except ImportError:
+    MYOSUITE_AVAILABLE = False
+    MyoSuitePhysicsEngine = None  # type: ignore
 
 
+@pytest.mark.skipif(not MYOSUITE_AVAILABLE, reason="MyoSuite not installed")
 class TestMuscleContributionClosure:
     """Test that muscle contributions sum to total acceleration (closure property)."""
 
@@ -195,6 +202,7 @@ class TestMuscleContributionClosure:
 
 
 @pytest.mark.slow
+@pytest.mark.skipif(not MYOSUITE_AVAILABLE, reason="MyoSuite not installed")
 class TestMuscleContributionComplexModels:
     """Test closure property on more complex musculoskeletal models."""
 
