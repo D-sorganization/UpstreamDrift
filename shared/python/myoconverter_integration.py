@@ -236,7 +236,8 @@ class MyoConverter:
         """
         error_msg = str(error).lower()
 
-        # Categorize common errors
+        # Categorize common errors (error patterns tested against myoconverter v0.4.0)
+        # Note: If error messages change in future versions, update categorization logic
         if "mesh" in error_msg or "geometry" in error_msg:
             raise RuntimeError(
                 f"Conversion failed due to geometry/mesh issues: {error}\\n"
