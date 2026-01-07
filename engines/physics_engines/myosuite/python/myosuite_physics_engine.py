@@ -249,8 +249,8 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             # Compute forward dynamics
             mujoco.mj_forward(self.sim.model, self.sim.data)
 
-            # Extract drift acceleration
-            a_drift = self.sim.data.qacc.copy()
+            # Extract drift acceleration (explicit type for mypy)
+            a_drift: np.ndarray = np.array(self.sim.data.qacc)
 
             # Restore original controls
             self.sim.data.ctrl[:] = ctrl_saved
