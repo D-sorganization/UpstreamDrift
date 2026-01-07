@@ -368,7 +368,7 @@ class DrakePhysicsEngine(PhysicsEngine):
             f'{self.__class__.__name__} does not yet implement ZTCF. '
             f'See pendulum_physics_engine.py for reference.'
         )
-    
+
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
         
