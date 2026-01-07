@@ -417,7 +417,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         )
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
         """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
-        
+
         TODO: Implement ZTCF for this engine.
         """
         raise NotImplementedError(
@@ -427,7 +427,7 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
-        
+
         TODO: Implement ZVCF for this engine.
         """
         raise NotImplementedError(
