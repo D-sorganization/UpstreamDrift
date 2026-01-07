@@ -101,7 +101,7 @@ def check_jacobian_conditioning(
             f"  Threshold: {SINGULARITY_FALLBACK_THRESHOLD:.2e}\\n"
             f"  ACTION: Switching to pseudoinverse (damped least squares)\\n"
             f"  Possible causes:\\n"
-            f"    - Near-extended configuration (θ ≈ 0 or θ ≈ πf)\\n"
+            f"    - Near-extended configuration (θ ≈ 0 or θ ≈ π)\\n"
             f"    - Workspace boundary approach\\n"
             f"    - Multiple joints aligned"
         )
