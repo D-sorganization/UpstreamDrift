@@ -27,6 +27,9 @@ except ImportError:
     MYOSUITE_AVAILABLE = False
     _MyoSuitePhysicsEngine = None  # type: ignore
 
+# Skip entire module if MyoSuite not available
+pytestmark = pytest.mark.skipif(not MYOSUITE_AVAILABLE, reason="MyoSuite not installed")
+
 
 @pytest.mark.skipif(not MYOSUITE_AVAILABLE, reason="MyoSuite not installed")
 class TestMuscleContributionClosure:
