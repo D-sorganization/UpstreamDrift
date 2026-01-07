@@ -6,6 +6,7 @@ Verifies that drift + control = full dynamics for all physics engines.
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 import numpy as np
 import pytest
@@ -181,6 +182,9 @@ class TestMuJoCoDriftControl:
         if model is None or data is None:
             pytest.skip("MuJoCo model/data not initialized")
 
+        assert model is not None
+        assert data is not None
+
         # Re-compute forward dynamics to get acceleration
         mujoco.mj_forward(model, data)
         a_full = data.qacc.copy()
@@ -282,6 +286,7 @@ class TestCrossEngineDriftControl:
     @pytest.mark.parametrize("engine_name", ["pinocchio", "mujoco"])
     def test_drift_control_interface(self, engine_name, simple_pendulum_urdf):
         """Verify all engines implement drift-control interface."""
+        engine: Any = None
         if engine_name == "pinocchio":
             try:
                 from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
@@ -302,6 +307,8 @@ class TestCrossEngineDriftControl:
                 pytest.skip(f"{engine_name} not installed")
         else:
             pytest.skip(f"Engine {engine_name} not yet tested")
+
+        assert engine is not None
 
         # Verify methods exist
         assert hasattr(

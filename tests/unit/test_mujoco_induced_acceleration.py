@@ -41,7 +41,7 @@ def test_mujoco_iaa_logic():
     mujoco.mj_fullM.side_effect = side_effect_fullM
 
     # We need to simulate mj_forward changing qfrc_bias based on qvel
-    # When qvel is 0, qfrc_bias = G. Let's say G = [0, 9.8]
+    # When qvel is 0, qfrc_bias = G. Let's say G = [0, GRAVITY_M_S2]
     # When qvel is valid, qfrc_bias = C+G = [10, 20]
 
     def side_effect_forward(model, data):

@@ -11,6 +11,7 @@ if "pydrake.multibody.tree" not in sys.modules:
 import numpy as np
 import pytest
 
+from shared.python.constants import GRAVITY_M_S2
 from shared.python.engine_manager import EngineManager, EngineType
 from tests.physics_validation.analytical import AnalyticalPendulum
 
@@ -36,9 +37,9 @@ def test_mujoco_pendulum_accuracy():
 
     # 1. Model: Simple Pendulum (L=1, m=1)
     # Standard pendulum model with point mass at end of massless rod.
-    xml = """
+    xml = f"""
     <mujoco>
-        <option timestep="0.001" gravity="0 0 -9.81" integrator="RK4"/>
+        <option timestep="0.001" gravity="0 0 -{float(GRAVITY_M_S2)}" integrator="RK4"/>
         <worldbody>
             <body>
                 <joint name="pin" type="hinge" axis="0 1 0" pos="0 0 0"/>
@@ -62,7 +63,9 @@ def test_mujoco_pendulum_accuracy():
     i_sphere = 0.4 * 1.0 * (0.1**2)
     total_inertia = i_rod + i_sphere  # 1.004
 
-    analytical = AnalyticalPendulum(length=1.0, mass=1.0, g=9.81, inertia=total_inertia)
+    analytical = AnalyticalPendulum(
+        length=1.0, mass=1.0, g=GRAVITY_M_S2, inertia=total_inertia
+    )
 
     # 3. Initial Conditions
     # Release from 90 degrees (horizontal)
@@ -177,7 +180,7 @@ def test_drake_pendulum_accuracy():
 
     # 4. Run
     # Run short steps to verify energy
-    analytical = AnalyticalPendulum(length=L, mass=M, g=9.81)
+    analytical = AnalyticalPendulum(length=L, mass=M, g=GRAVITY_M_S2)
 
     duration = 1.0
     dt = 0.01

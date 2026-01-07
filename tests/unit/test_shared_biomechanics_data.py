@@ -3,6 +3,7 @@
 import numpy as np
 
 from shared.python.biomechanics_data import BiomechanicalData
+from shared.python.constants import GRAVITY_M_S2
 
 
 def test_biomechanical_data_initialization() -> None:
@@ -24,14 +25,16 @@ def test_biomechanical_data_with_values() -> None:
         time=1.5,
         joint_positions=np.array([1.0, 2.0]),
         kinetic_energy=100.0,
-        induced_accelerations={"gravity": np.array([0.0, -9.81])},
+        induced_accelerations={"gravity": np.array([0.0, -GRAVITY_M_S2])},
     )
 
     assert data.time == 1.5
     assert np.array_equal(data.joint_positions, np.array([1.0, 2.0]))
     assert data.kinetic_energy == 100.0
     assert "gravity" in data.induced_accelerations
-    assert np.array_equal(data.induced_accelerations["gravity"], np.array([0.0, -9.81]))
+    assert np.array_equal(
+        data.induced_accelerations["gravity"], np.array([0.0, -GRAVITY_M_S2])
+    )
 
 
 def test_biomechanical_data_field_updates() -> None:
