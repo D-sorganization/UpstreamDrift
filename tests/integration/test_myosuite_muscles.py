@@ -369,14 +369,13 @@ class TestMyoSuiteEngine:
 
             # Get muscle names
             analyzer = engine.get_muscle_analyzer()
-            if (
-                analyzer is None
-                or not hasattr(analyzer, "muscle_names")
-                or len(analyzer.muscle_names) == 0
-            ):
+            if analyzer is None:
                 pytest.skip("No muscles available")
 
             assert analyzer is not None
+
+            if not hasattr(analyzer, "muscle_names") or len(analyzer.muscle_names) == 0:
+                pytest.skip("No muscles available")
 
             # Set activation for first muscle
             muscle_name = analyzer.muscle_names[0]
