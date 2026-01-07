@@ -1,0 +1,33 @@
+F401 `gym` imported but unused; consider using `importlib.util.find_spec` to test for availability
+  --> shared\python\myosuite_adapter.py:39:12
+   |
+37 | # Check for MyoSuite availability
+38 | try:
+39 |     import gym
+   |            ^^^
+40 |
+41 |     MYOSUITE_AVAILABLE = True
+   |
+help: Remove unused import: `gym`
+
+E741 Ambiguous variable name: `I`
+   --> shared\python\myosuite_adapter.py:153:9
+    |
+152 |         # Simple joint dynamics (pendulum-like)
+153 |         I = 0.05  # Joint inertia [kg·m²]
+    |         ^
+154 |         b = 0.5  # Damping [N·m·s/rad]
+155 |         g_eff = 9.81  # Effective gravity [m/s²]
+    |
+
+E402 Module level import not at top of file
+   --> shared\python\numerical_constants.py:206:1
+    |
+205 | # Source: NIST CODATA 2018 (https://physics.nist.gov/cgi-bin/cuu/Value?gn)
+206 | from shared.python.constants import GRAVITY_M_S2 as GRAVITY_STANDARD
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+207 |
+208 | """Standard gravitational acceleration (WGS84 ellipsoid at sea level).
+    |
+
+Found 3 errors.
