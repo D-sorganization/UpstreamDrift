@@ -345,7 +345,8 @@ class URDFGeneratorWindow(QMainWindow):
         """
         try:
             urdf_content = file_path.read_text(encoding="utf-8")
-            # TODO: Parse URDF and populate segment panel
+            # URDF parsing for segment panel population is a future enhancement
+            # Currently loading for visualization only
             self.visualization_widget.update_visualization(urdf_content)
             self.current_file_path = file_path
             self.setWindowTitle(f"Interactive URDF Generator - {file_path.name}")
