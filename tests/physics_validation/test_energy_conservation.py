@@ -34,7 +34,7 @@ def test_mujoco_ballistic_energy_conservation():
     # Define a simple XML model: a particle falling under gravity
     xml = f"""
     <mujoco>
-        <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
+        <option timestep="0.001" gravity="0 0 -{float(GRAVITY_M_S2)}" integrator="RK4"/>
         <worldbody>
             <body name="ball" pos="0 0 10">
                 <joint type="free"/>
