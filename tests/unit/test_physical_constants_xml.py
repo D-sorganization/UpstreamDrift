@@ -6,9 +6,9 @@ import numpy as np
 import pytest
 
 from shared.python.constants import (
-    GRAVITY_M_S2,
-    GOLF_BALL_MASS_KG,
     AIR_DENSITY_SEA_LEVEL_KG_M3,
+    GOLF_BALL_MASS_KG,
+    GRAVITY_M_S2,
     PhysicalConstant,
 )
 
@@ -143,7 +143,7 @@ class TestPhysicalConstantXMLSafety:
     def test_prevent_accidental_string_concat(self):
         """Ensure float() prevents string concatenation issues."""
         # Wrong: string concatenation
-        bad_xml = f'<val>" + str(GRAVITY_M_S2) + "</val>'  # Deliberate bad example
+        bad_xml = '<val>" + str(GRAVITY_M_S2) + "</val>'  # Deliberate bad example  # noqa: F841
 
         # Right: numeric interpolation
         good_xml = f"<val>{float(GRAVITY_M_S2)}</val>"
