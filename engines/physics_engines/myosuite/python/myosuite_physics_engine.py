@@ -44,11 +44,11 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         return self.env_id if self.env_id else "MyoSuite_NoModel"
 
     @property
-    def model(self) -> Any:
+    def model(self) -> Any:  # mujoco.MjModel | None when available
         """Expose underlying MuJoCo model for direct access.
 
         Returns:
-            MuJoCo model object, or None if not loaded.
+            MuJoCo model object (mujoco.MjModel), or None if not loaded.
         """
         if self.sim is not None:
             return self.sim.model
