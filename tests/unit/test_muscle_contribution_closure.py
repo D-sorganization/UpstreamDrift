@@ -224,7 +224,7 @@ class TestMuscleContributionComplexModels:
     )
     def test_closure_across_models(self, model_name: str):
         """Verify closure holds for various MyoSuite models."""
-        engine = MyoSuitePhysicsEngine()
+        engine = _MyoSuitePhysicsEngine()
         try:
             engine.load_from_path(model_name)
         except Exception as e:
