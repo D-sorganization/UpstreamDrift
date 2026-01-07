@@ -67,7 +67,7 @@ def check_jacobian_conditioning(
     """
     if J.size == 0 or J.shape[0] == 0 or J.shape[1] == 0:
         logger.warning(f"{body_name}: Empty Jacobian provided")
-        return np.inf
+        return float(np.inf)
 
     # Compute condition number
     # κ = ||J|| · ||J^+|| = σ_max / σ_min
@@ -141,7 +141,7 @@ def get_jacobian_conditioning(
 
     if jac_dict is None:
         logger.warning(f"Body '{body_name}' not found in model")
-        return np.inf
+        return float(np.inf)
 
     # Prefer spatial Jacobian (6×n) if available
     if "spatial" in jac_dict:
@@ -151,7 +151,7 @@ def get_jacobian_conditioning(
         J = jac_dict["linear"]
     else:
         logger.warning(f"No Jacobian data for '{body_name}'")
-        return np.inf
+        return float(np.inf)
 
     return check_jacobian_conditioning(J, body_name, warn=warn)
 
