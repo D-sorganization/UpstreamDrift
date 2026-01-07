@@ -40,9 +40,27 @@ python launchers/golf_suite_launcher.py
 ## Documentation
 
 - **[User Guide](docs/user_guide/README.md)**: Installation, running simulations, and using the GUI.
-- **[Engines](docs/engines/README.md)**: Details on MuJoCo, Drake, Pinocchio, and Simscape models.
+- **[Engines](docs/engines/README.md)**: Details on Mu JoCo, Drake, Pinocchio, and Simscape models.
 - **[Development](docs/development/README.md)**: Contributing, architecture, and testing.
 - **[API Reference](docs/api/README.md)**: Code documentation.
+- **[Engine Selection Guide](docs/engine_selection_guide.md)**: Choose the right physics engine for your needs.
+
+## Engine Compatibility
+
+### ⚠️ Important: Biomechanics Features
+
+**MyoSuite biomechanics (Hill-type muscles, grip modeling) are MuJoCo-only**. This includes:
+- ✅ Human URDF models with muscles
+- ✅ Muscle activation dynamics  
+- ✅ Muscle-induced acceleration analysis
+
+**Other engines (Drake, Pinocchio)** support:
+- ✅ Kinematics and dynamics
+- ✅ Joint-level analysis
+- ✅ URDF loading
+- ❌ Muscle-level biomechanics (not available)
+
+📖 **See [Engine Selection Guide](docs/engine_selection_guide.md) for detailed comparison and migration strategies**.
 
 ## Repository Structure
 
