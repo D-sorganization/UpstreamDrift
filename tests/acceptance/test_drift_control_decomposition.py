@@ -51,7 +51,6 @@ def simple_pendulum_urdf(tmp_path):
 class TestPinocchioDriftControl:
     """Test drift-control decomposition for Pinocchio engine."""
 
-    @pytest.mark.xfail(reason="Array dimension mismatch - needs investigation")
     def test_superposition_simple_pendulum(self, simple_pendulum_urdf):
         """Verify drift + control = full dynamics (Pinocchio).
 
@@ -63,6 +62,8 @@ class TestPinocchioDriftControl:
             )
         except ImportError:
             pytest.skip("Pinocchio not installed")
+
+        import pinocchio as pin
 
         engine = PinocchioPhysicsEngine()
         engine.load_from_path(simple_pendulum_urdf)
@@ -80,7 +81,6 @@ class TestPinocchioDriftControl:
         engine.forward()
         # Pinocchio stores acceleration in engine.a after step/forward
         # We need to compute it explicitly
-        import pinocchio as pin
 
         a_full = pin.aba(engine.model, engine.data, engine.q, engine.v, tau)
 
@@ -103,7 +103,6 @@ class TestPinocchioDriftControl:
             f"max residual = {np.max(np.abs(residual)):.2e}"
         )
 
-    @pytest.mark.xfail(reason="Array dimension mismatch - needs investigation")
     def test_zero_control_equals_drift(self, simple_pendulum_urdf):
         """Verify that full dynamics with tau=0 equals drift acceleration."""
         try:
@@ -142,7 +141,6 @@ class TestPinocchioDriftControl:
 class TestMuJoCoDriftControl:
     """Test drift-control decomposition for MuJoCo engine."""
 
-    @pytest.mark.xfail(reason="Array dimension mismatch - needs investigation")
     def test_superposition_simple_pendulum(self, simple_pendulum_urdf):
         """Verify drift + control = full dynamics (MuJoCo).
 
@@ -212,7 +210,6 @@ class TestMuJoCoDriftControl:
 class TestIndexedAccelerationClosure:
     """Test indexed acceleration closure (Section H2)."""
 
-    @pytest.mark.xfail(reason="Array dimension mismatch - needs investigation")
     def test_pinocchio_closure(self, simple_pendulum_urdf):
         """Verify indexed acceleration components sum to total (Pinocchio)."""
         try:
@@ -247,7 +244,6 @@ class TestIndexedAccelerationClosure:
         except AccelerationClosureError as e:
             pytest.fail(f"Pinocchio indexed acceleration closure failed: {e}")
 
-    @pytest.mark.xfail(reason="Array dimension mismatch - needs investigation")
     def test_contribution_percentages(self, simple_pendulum_urdf):
         """Verify contribution percentage calculation."""
         try:
