@@ -1,0 +1,11 @@
+python\mujoco_golf_pendulum\models.py:1498:89: E501 Line too long (91 > 88)
+     |
+1496 |                 f'{indent}         range="-0.{15+i*5} 0.{15+i*5}" '
+1497 |                 f'damping="{damping:.2f}" stiffness="{stiffness}" armature="0.001"/>',
+1498 |                 f'{indent}  <inertial pos="0 0 -{seg_length/2:.4f}" mass="{seg_mass:.4f}"',
+     |                                                                                         ^^^ E501
+1499 |                 f'{indent}            diaginertia="{seg_mass*seg_length**2/12:.8f} '
+1500 |                 f'{seg_mass*seg_length**2/12:.8f} {seg_mass*shaft_radius**2/2:.8f}"/>',
+     |
+
+Found 1 error.

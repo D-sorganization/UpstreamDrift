@@ -1,0 +1,13 @@
+# MuJoCo Physics Engine Requirements
+# See Issue F-003: Version enforcement prevents API signature mismatches
+
+dm_control>=1.0.14
+# MuJoCo 3.3+ required for reshaped Jacobian API (mj_jacBody)
+# Earlier versions use flat arrays which can cause dimension alignment errors
+mujoco>=3.3.0,<4.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+imageio[ffmpeg]>=2.31.0
+matplotlib>=3.7.0
+pandas>=2.0.0
+PyQt6>=6.5.0

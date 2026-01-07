@@ -1,0 +1,63 @@
+<?xml version="1.0" ?>
+<mujoco model="myoupperbody_placeholder">
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>
+  
+  <visual>
+    <global offwidth="1024" offheight="1024"/>
+    <map znear="0.01" zfar="50"/>
+    <headlight diffuse="0.8 0.8 0.8" ambient="0.3 0.3 0.3"/>
+  </visual>
+
+  <worldbody>
+    <!-- Ground plane -->
+    <geom name="floor" type="plane" size="10 10 0.1" rgba="0.4 0.6 0.3 1"/>
+    
+    <!-- Placeholder message -->
+    <body name="placeholder_info" pos="0 0 0.5">
+      <geom name="info_box" type="box" size="0.5 0.1 0.1" 
+            rgba="1 0.5 0 0.8" mass="1"/>
+      <geom name="info_text" type="box" size="0.6 0.05 0.05" 
+            pos="0 0 0.15" rgba="1 1 0 1"/>
+    </body>
+    
+    <!-- Simple torso -->
+    <body name="torso" pos="0 0 1.0">
+      <freejoint/>
+      <geom name="torso_geom" type="capsule" fromto="0 0 0 0 0 0.4" 
+            size="0.1" rgba="0.7 0.5 0.4 1" mass="20"/>
+      
+      <!-- Simple arms -->
+      <body name="left_arm" pos="-0.15 0 0.3">
+        <joint name="l_shoulder" type="hinge" axis="0 1 0" range="-2 2"/>
+        <geom name="l_upper_arm" type="capsule" fromto="0 0 0 -0.3 0 0" 
+              size="0.03" rgba="0.6 0.4 0.3 1" mass="2"/>
+        
+        <body name="left_forearm" pos="-0.3 0 0">
+          <joint name="l_elbow" type="hinge" axis="0 1 0" range="-2.5 0"/>
+          <geom name="l_forearm" type="capsule" fromto="0 0 0 -0.25 0 0" 
+                size="0.025" rgba="0.6 0.4 0.3 1" mass="1"/>
+        </body>
+      </body>
+      
+      <body name="right_arm" pos="0.15 0 0.3">
+        <joint name="r_shoulder" type="hinge" axis="0 1 0" range="-2 2"/>
+        <geom name="r_upper_arm" type="capsule" fromto="0 0 0 0.3 0 0" 
+              size="0.03" rgba="0.6 0.4 0.3 1" mass="2"/>
+        
+        <body name="right_forearm" pos="0.3 0 0">
+          <joint name="r_elbow" type="hinge" axis="0 1 0" range="-2.5 0"/>
+          <geom name="r_forearm" type="capsule" fromto="0 0 0 0.25 0 0" 
+                size="0.025" rgba="0.6 0.4 0.3 1" mass="1"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <!-- Simplified actuators -->
+    <motor name="l_shoulder_motor" joint="l_shoulder" gear="50"/>
+    <motor name="l_elbow_motor" joint="l_elbow" gear="30"/>
+    <motor name="r_shoulder_motor" joint="r_shoulder" gear="50"/>
+    <motor name="r_elbow_motor" joint="r_elbow" gear="30"/>
+  </actuator>
+</mujoco>

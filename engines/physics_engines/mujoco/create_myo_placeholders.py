@@ -1,0 +1,233 @@
+#!/usr/bin/env python3
+"""Create placeholder MyoSuite models to prevent GUI crashes."""
+
+from pathlib import Path
+
+# Create the myo_sim directory structure
+myo_sim_dir = Path("myo_sim")
+body_dir = myo_sim_dir / "body"
+arm_dir = myo_sim_dir / "arm"
+
+# Create directories
+body_dir.mkdir(parents=True, exist_ok=True)
+arm_dir.mkdir(parents=True, exist_ok=True)
+
+# Simple placeholder XML for upper body model
+myoupperbody_xml = """<?xml version="1.0" ?>
+<mujoco model="myoupperbody_placeholder">
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>
+
+  <visual>
+    <global offwidth="1024" offheight="1024"/>
+    <map znear="0.01" zfar="50"/>
+    <headlight diffuse="0.8 0.8 0.8" ambient="0.3 0.3 0.3"/>
+  </visual>
+
+  <worldbody>
+    <!-- Ground plane -->
+    <geom name="floor" type="plane" size="10 10 0.1" rgba="0.4 0.6 0.3 1"/>
+
+    <!-- Placeholder message -->
+    <body name="placeholder_info" pos="0 0 0.5">
+      <geom name="info_box" type="box" size="0.5 0.1 0.1"
+            rgba="1 0.5 0 0.8" mass="1"/>
+      <geom name="info_text" type="box" size="0.6 0.05 0.05"
+            pos="0 0 0.15" rgba="1 1 0 1"/>
+    </body>
+
+    <!-- Simple torso -->
+    <body name="torso" pos="0 0 1.0">
+      <freejoint/>
+      <geom name="torso_geom" type="capsule" fromto="0 0 0 0 0 0.4"
+            size="0.1" rgba="0.7 0.5 0.4 1" mass="20"/>
+
+      <!-- Simple arms -->
+      <body name="left_arm" pos="-0.15 0 0.3">
+        <joint name="l_shoulder" type="hinge" axis="0 1 0" range="-2 2"/>
+        <geom name="l_upper_arm" type="capsule" fromto="0 0 0 -0.3 0 0"
+              size="0.03" rgba="0.6 0.4 0.3 1" mass="2"/>
+
+        <body name="left_forearm" pos="-0.3 0 0">
+          <joint name="l_elbow" type="hinge" axis="0 1 0" range="-2.5 0"/>
+          <geom name="l_forearm" type="capsule" fromto="0 0 0 -0.25 0 0"
+                size="0.025" rgba="0.6 0.4 0.3 1" mass="1"/>
+        </body>
+      </body>
+
+      <body name="right_arm" pos="0.15 0 0.3">
+        <joint name="r_shoulder" type="hinge" axis="0 1 0" range="-2 2"/>
+        <geom name="r_upper_arm" type="capsule" fromto="0 0 0 0.3 0 0"
+              size="0.03" rgba="0.6 0.4 0.3 1" mass="2"/>
+
+        <body name="right_forearm" pos="0.3 0 0">
+          <joint name="r_elbow" type="hinge" axis="0 1 0" range="-2.5 0"/>
+          <geom name="r_forearm" type="capsule" fromto="0 0 0 0.25 0 0"
+                size="0.025" rgba="0.6 0.4 0.3 1" mass="1"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <!-- Simplified actuators -->
+    <motor name="l_shoulder_motor" joint="l_shoulder" gear="50"/>
+    <motor name="l_elbow_motor" joint="l_elbow" gear="30"/>
+    <motor name="r_shoulder_motor" joint="r_shoulder" gear="50"/>
+    <motor name="r_elbow_motor" joint="r_elbow" gear="30"/>
+  </actuator>
+</mujoco>
+"""
+
+# Simple placeholder XML for full body model
+myobody_xml = """<?xml version="1.0" ?>
+<mujoco model="myobody_placeholder">
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>
+
+  <visual>
+    <global offwidth="1024" offheight="1024"/>
+    <map znear="0.01" zfar="50"/>
+    <headlight diffuse="0.8 0.8 0.8" ambient="0.3 0.3 0.3"/>
+  </visual>
+
+  <worldbody>
+    <!-- Ground plane -->
+    <geom name="floor" type="plane" size="10 10 0.1" rgba="0.4 0.6 0.3 1"/>
+
+    <!-- Placeholder message -->
+    <body name="placeholder_info" pos="0 0 0.5">
+      <geom name="info_box" type="box" size="0.5 0.1 0.1"
+            rgba="1 0.5 0 0.8" mass="1"/>
+    </body>
+
+    <!-- Simple humanoid -->
+    <body name="pelvis" pos="0 0 1.0">
+      <freejoint/>
+      <geom name="pelvis_geom" type="box" size="0.15 0.08 0.08"
+            rgba="0.6 0.5 0.4 1" mass="10"/>
+
+      <!-- Torso -->
+      <body name="torso" pos="0 0 0.1">
+        <joint name="spine" type="hinge" axis="0 0 1" range="-1 1"/>
+        <geom name="torso_geom" type="capsule" fromto="0 0 0 0 0 0.4"
+              size="0.1" rgba="0.7 0.5 0.4 1" mass="20"/>
+
+        <!-- Arms (simplified) -->
+        <body name="left_arm" pos="-0.15 0 0.3">
+          <joint name="l_shoulder" type="hinge" axis="0 1 0" range="-2 2"/>
+          <geom name="l_arm" type="capsule" fromto="0 0 0 -0.5 0 0"
+                size="0.03" rgba="0.6 0.4 0.3 1" mass="3"/>
+        </body>
+
+        <body name="right_arm" pos="0.15 0 0.3">
+          <joint name="r_shoulder" type="hinge" axis="0 1 0" range="-2 2"/>
+          <geom name="r_arm" type="capsule" fromto="0 0 0 0.5 0 0"
+                size="0.03" rgba="0.6 0.4 0.3 1" mass="3"/>
+        </body>
+      </body>
+
+      <!-- Legs -->
+      <body name="left_leg" pos="-0.1 0 -0.1">
+        <joint name="l_hip" type="hinge" axis="1 0 0" range="-1 1"/>
+        <geom name="l_leg" type="capsule" fromto="0 0 0 0 0 -0.8"
+              size="0.04" rgba="0.5 0.5 0.6 1" mass="8"/>
+      </body>
+
+      <body name="right_leg" pos="0.1 0 -0.1">
+        <joint name="r_hip" type="hinge" axis="1 0 0" range="-1 1"/>
+        <geom name="r_leg" type="capsule" fromto="0 0 0 0 0 -0.8"
+              size="0.04" rgba="0.5 0.5 0.6 1" mass="8"/>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <!-- Simplified actuators (much fewer than 290) -->
+    <motor name="spine_motor" joint="spine" gear="100"/>
+    <motor name="l_shoulder_motor" joint="l_shoulder" gear="50"/>
+    <motor name="r_shoulder_motor" joint="r_shoulder" gear="50"/>
+    <motor name="l_hip_motor" joint="l_hip" gear="80"/>
+    <motor name="r_hip_motor" joint="r_hip" gear="80"/>
+  </actuator>
+</mujoco>
+"""
+
+# Simple placeholder XML for arm model
+myoarm_simple_xml = """<?xml version="1.0" ?>
+<mujoco model="myoarm_simple_placeholder">
+  <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>
+
+  <visual>
+    <global offwidth="1024" offheight="1024"/>
+    <map znear="0.01" zfar="50"/>
+    <headlight diffuse="0.8 0.8 0.8" ambient="0.3 0.3 0.3"/>
+  </visual>
+
+  <worldbody>
+    <!-- Ground plane -->
+    <geom name="floor" type="plane" size="10 10 0.1" rgba="0.4 0.6 0.3 1"/>
+
+    <!-- Placeholder message -->
+    <body name="placeholder_info" pos="0 0 0.5">
+      <geom name="info_box" type="box" size="0.5 0.1 0.1"
+            rgba="1 0.5 0 0.8" mass="1"/>
+    </body>
+
+    <!-- Simple torso base -->
+    <body name="base" pos="0 0 1.0">
+      <geom name="base_geom" type="box" size="0.2 0.1 0.1"
+            rgba="0.7 0.5 0.4 1" mass="5"/>
+
+      <!-- Left arm -->
+      <body name="left_arm" pos="-0.2 0 0">
+        <joint name="l_shoulder" type="hinge" axis="0 1 0" range="-2 2"/>
+        <geom name="l_upper_arm" type="capsule" fromto="0 0 0 -0.3 0 0"
+              size="0.03" rgba="0.6 0.4 0.3 1" mass="2"/>
+
+        <body name="left_forearm" pos="-0.3 0 0">
+          <joint name="l_elbow" type="hinge" axis="0 1 0" range="-2.5 0"/>
+          <geom name="l_forearm" type="capsule" fromto="0 0 0 -0.25 0 0"
+                size="0.025" rgba="0.6 0.4 0.3 1" mass="1"/>
+        </body>
+      </body>
+
+      <!-- Right arm -->
+      <body name="right_arm" pos="0.2 0 0">
+        <joint name="r_shoulder" type="hinge" axis="0 1 0" range="-2 2"/>
+        <geom name="r_upper_arm" type="capsule" fromto="0 0 0 0.3 0 0"
+              size="0.03" rgba="0.6 0.4 0.3 1" mass="2"/>
+
+        <body name="right_forearm" pos="0.3 0 0">
+          <joint name="r_elbow" type="hinge" axis="0 1 0" range="-2.5 0"/>
+          <geom name="r_forearm" type="capsule" fromto="0 0 0 0.25 0 0"
+                size="0.025" rgba="0.6 0.4 0.3 1" mass="1"/>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <actuator>
+    <!-- Simplified actuators -->
+    <motor name="l_shoulder_motor" joint="l_shoulder" gear="50"/>
+    <motor name="l_elbow_motor" joint="l_elbow" gear="30"/>
+    <motor name="r_shoulder_motor" joint="r_shoulder" gear="50"/>
+    <motor name="r_elbow_motor" joint="r_elbow" gear="30"/>
+  </actuator>
+</mujoco>
+"""
+
+# Write the placeholder files
+with open(body_dir / "myoupperbody.xml", "w") as f:
+    f.write(myoupperbody_xml)
+
+with open(body_dir / "myobody.xml", "w") as f:
+    f.write(myobody_xml)
+
+with open(arm_dir / "myoarm_simple.xml", "w") as f:
+    f.write(myoarm_simple_xml)
+
+print("Created placeholder MyoSuite models:")
+print(f"  - {body_dir / 'myoupperbody.xml'}")
+print(f"  - {body_dir / 'myobody.xml'}")
+print(f"  - {arm_dir / 'myoarm_simple.xml'}")
+print("\nThese are simplified placeholder models.")
+print("For full MyoSuite functionality, install MyoSuite and use the actual models.")
