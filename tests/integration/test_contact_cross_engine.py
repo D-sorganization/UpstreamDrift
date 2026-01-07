@@ -5,7 +5,7 @@ MuJoCo, Drake, and Pinocchio physics engines.
 
 Contact modeling is inherently engine-specific due to different algorithms:
 - MuJoCo: Soft penalty-based contact (spring-damper)
-- Drake: Compliant + rigid contact models  
+- Drake: Compliant + rigid contact models
 - Pinocchio: Algorithmic contact (constraint-based)
 
 This test suite:
@@ -27,13 +27,13 @@ class TestBasicContactPhysics:
     def ball_urdf(self, tmp_path):
         """Create a simple ball URDF for contact testing."""
         # Golf ball: mass = 0.045kg, radius = 0.02135m
-        urdf_content = f"""<?xml version="1.0"?>
+        urdf_content = """<?xml version="1.0"?>
 <robot name="ball">
   <link name="world"/>
   <link name="ball">
     <inertial>
       <mass value="0.045"/>
-      <inertia ixx="4.1e-6" ixy="0.0" ixz="0.0" 
+      <inertia ixx="4.1e-6" ixy="0.0" ixz="0.0"
                iyy="4.1e-6" iyz="0.0" izz="4.1e-6"/>
     </inertial>
     <collision>
@@ -94,7 +94,9 @@ class TestBasicContactPhysics:
         )
 
         # Ball should be near ground (not still at 1m)
-        assert final_height < 0.1, f"Ball should settle near ground: height={final_height:.3f}m"
+        assert (
+            final_height < 0.1
+        ), f"Ball should settle near ground: height={final_height:.3f}m"
 
         # Log for cross-engine comparison
         restitution_effective = np.sqrt(E_final / E_initial)
@@ -115,6 +117,7 @@ class TestBasicContactPhysics:
         # NOTE: Pinocchio uses constraint-based contact (not soft contact)
         # Energy dissipation model fundamentally different
         # May need separate test methodology
+
 
 class TestCrossEngineContactComparison:
     """Compare contact results across engines where applicable."""
@@ -183,7 +186,7 @@ class TestContactModelDocumentation:
         - Pros: Fast, stable, handles complex geometries
         - Cons: Not perfectly rigid (penetration allowed)
         - Energy: Dissipative (configured via damping)
-        
+
         References:
         - MuJoCo Documentation: Contact Modeling section
         - Todorov (2014): "Convex and smooth formulations..."
@@ -200,9 +203,9 @@ class TestContactModelDocumentation:
           * Point contact (compliant)
           * Hydroelastic (pressure field)
         - Pros: Physically accurate, well-documented
-        - Cons: More complex to configure  
+        - Cons: More complex to configure
         - Energy: Can be conservative or dissipative
-        
+
         References:
         - Drake Documentation: Multibody Dynamics section
         - Elandt et al. (2019): "A pressure field model..."
@@ -219,7 +222,7 @@ class TestContactModelDocumentation:
         - Pros: Mathematically rigorous
         - Cons: Requires explicit contact point specification
         - Energy: Depends on solver configuration
-        
+
         References:
         - Pinocchio Documentation: Dynamics section
         - Carpentier et al. (2019): "Pinocchio: fast algorithms..."
