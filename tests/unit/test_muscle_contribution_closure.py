@@ -109,6 +109,7 @@ class TestMuscleContributionClosure:
 
         # Muscle-induced accelerations
         analyzer = elbow_engine.get_muscle_analyzer()
+        assert analyzer is not None, "Muscle analyzer not available"
         induced_accels = analyzer.compute_muscle_induced_accelerations()
 
         # Sum contributions
