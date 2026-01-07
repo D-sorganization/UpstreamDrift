@@ -314,4 +314,3 @@ class PendulumPhysicsEngine(PhysicsEngine):
             self.state.theta2 = theta2_orig
             self.state.omega1 = omega1_orig
             self.state.omega2 = omega2_orig
-
