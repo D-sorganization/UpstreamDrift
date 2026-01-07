@@ -14,15 +14,8 @@ References:
       support in normal walking." Gait & Posture.
 """
 
-from typing import TYPE_CHECKING
-
 import numpy as np
 import pytest
-
-if TYPE_CHECKING:
-    from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
-        MyoSuitePhysicsEngine,
-    )
 
 try:
     from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
