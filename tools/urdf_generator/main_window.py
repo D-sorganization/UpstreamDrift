@@ -46,6 +46,7 @@ class URDFGeneratorWindow(QMainWindow):
         self._setup_ui()
         self._setup_menu_bar()
         self._setup_status_bar()
+        self._setup_window_icon()
         self._connect_signals()
 
         logger.info("URDF Generator window initialized")
@@ -110,6 +111,11 @@ class URDFGeneratorWindow(QMainWindow):
         open_action.setShortcut("Ctrl+O")
         open_action.triggered.connect(self.open_urdf)
         file_menu.addAction(open_action)
+
+        load_library_action = QAction("Load from &Library...", self)
+        load_library_action.setShortcut("Ctrl+L")
+        load_library_action.triggered.connect(self.load_from_library)
+        file_menu.addAction(load_library_action)
 
         file_menu.addSeparator()
 
@@ -191,6 +197,16 @@ class URDFGeneratorWindow(QMainWindow):
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
         self.status_bar.showMessage("Ready")
+
+    def _setup_window_icon(self) -> None:
+        """Set up the window icon."""
+        from PyQt6.QtGui import QIcon
+
+        icon_path = Path(__file__).parent / "assets" / "robot_arm_icon.png"
+        if icon_path.exists():
+            self.setWindowIcon(QIcon(str(icon_path)))
+        else:
+            logger.warning(f"Icon file not found: {icon_path}")
 
     def _connect_signals(self) -> None:
         """Connect internal signals."""
@@ -276,6 +292,79 @@ class URDFGeneratorWindow(QMainWindow):
             except Exception as e:
                 logger.error(f"Error opening URDF: {e}")
                 QMessageBox.critical(self, "Error", f"Failed to open URDF: {e}")
+
+    def load_from_library(self) -> None:
+        """Load a URDF model from the library."""
+        try:
+            from .model_library import ModelLibrary
+            from .model_loader_dialog import ModelLoaderDialog
+
+            dialog = ModelLoaderDialog(self)
+            dialog.model_selected.connect(self._on_library_model_selected)
+
+            if dialog.exec():
+                selection = dialog.get_selected_model()
+                if selection:
+                    category, model_key = selection
+                    library = ModelLibrary()
+
+                    if category == "golf_clubs":
+                        # Generate golf club URDF
+                        urdf_path = library.generate_golf_club_urdf(model_key)
+                        if urdf_path:
+                            self._load_urdf_file(urdf_path)
+                            self.status_bar.showMessage(
+                                f"Loaded golf club: {model_key}"
+                            )
+                    elif category == "human":
+                        # Load human model URDF
+                        model_dir = library.human_models_path / model_key
+                        urdf_path = model_dir / "model.urdf"
+
+                        if urdf_path.exists():
+                            self._load_urdf_file(urdf_path)
+                            self.status_bar.showMessage(
+                                f"Loaded human model: {model_key}"
+                            )
+                        else:
+                            QMessageBox.information(
+                                self,
+                                "Model Not Downloaded",
+                                "This model has not been downloaded yet.\n"
+                                "Please use the 'Download from human-gazebo' button "
+                                "in the model loader dialog.",
+                            )
+
+        except Exception as e:
+            logger.error(f"Error loading from library: {e}")
+            QMessageBox.critical(self, "Error", f"Failed to load from library: {e}")
+
+    def _on_library_model_selected(self, category: str, model_key: str) -> None:
+        """Handle model selection from library.
+
+        Args:
+            category: Model category ('human' or 'golf_clubs')
+            model_key: Model identifier
+        """
+        logger.info(f"Model selected from library: {category}/{model_key}")
+
+    def _load_urdf_file(self, file_path: Path) -> None:
+        """Load URDF file content and update visualization.
+
+        Args:
+            file_path: Path to URDF file to load
+        """
+        try:
+            urdf_content = file_path.read_text(encoding="utf-8")
+            # URDF parsing for segment panel population is a future enhancement
+            # Currently loading for visualization only
+            self.visualization_widget.update_visualization(urdf_content)
+            self.current_file_path = file_path
+            self.setWindowTitle(f"Interactive URDF Generator - {file_path.name}")
+            logger.info(f"URDF loaded: {file_path}")
+        except Exception as e:
+            logger.error(f"Error loading URDF file: {e}")
+            raise
 
     def save_urdf(self) -> None:
         """Save the current URDF."""

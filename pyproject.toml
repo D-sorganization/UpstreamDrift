@@ -161,6 +161,14 @@ ignore = [
 "engines/pendulum_models/tools/scientific_auditor.py" = ["T201"]
 "engines/Simscape_Multibody_Models/**/matlab/**/*.py" = ["T201"]
 "verification/*" = ["T201"]
+"shared/python/myosuite_adapter.py" = ["T201"]
+"shared/python/muscle_equilibrium.py" = ["T201"]
+"shared/python/activation_dynamics.py" = ["T201"]
+"shared/python/optimization/examples/*.py" = ["T201"]
+"shared/python/hill_muscle.py" = ["T201"]
+"shared/python/multi_muscle.py" = ["T201"]
+"shared/python/numerical_constants.py" = ["T201"]
+"shared/python/opensim_integration.py" = ["T201"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -267,15 +275,3 @@ exclude_lines = [
     "@(abc\\.)?abstractmethod",
 ]
 
-# Temporary mypy relaxations for new muscle analysis code
-# TODO: Remove these and fix properly
-[[tool.mypy.overrides]]
-module = [
-    "engines.physics_engines.opensim.python.muscle_analysis",
-    "engines.physics_engines.myosuite.python.muscle_analysis",
-    "engines.physics_engines.opensim.python.opensim_physics_engine",
-    "engines.physics_engines.myosuite.python.myosuite_physics_engine",
-    "tests.acceptance.test_drift_control_decomposition",
-    "tests.integration.test_physics_engines_strict"
-]
-disable_error_code = ["no-untyped-def", "no-any-return", "var-annotated", "assignment", "abstract"]
