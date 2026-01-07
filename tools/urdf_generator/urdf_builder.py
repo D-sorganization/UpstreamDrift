@@ -9,6 +9,12 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+# Default moment of inertia value (kg·m²) used when inertia parameters are not specified.
+# This value (0.1 kg·m²) represents a reasonable default for small-to-medium rigid bodies
+# in golf biomechanics applications (e.g., club segments, body parts).
+# Reference: Typical inertia values from ergonomic and sports biomechanics literature.
+DEFAULT_INERTIA_MOMENT = 0.1
+
 
 class URDFBuilder:
     """Builder class for creating URDF files with support for parallel configurations."""
@@ -45,15 +51,17 @@ class URDFBuilder:
         inertia = physics.get("inertia", {})
         if inertia:
             # Extract inertia components (assuming diagonal for now)
-            ixx = inertia.get("ixx", 0.1)
-            iyy = inertia.get("iyy", 0.1)
-            izz = inertia.get("izz", 0.1)
+            ixx = inertia.get("ixx", DEFAULT_INERTIA_MOMENT)
+            iyy = inertia.get("iyy", DEFAULT_INERTIA_MOMENT)
+            izz = inertia.get("izz", DEFAULT_INERTIA_MOMENT)
             ixy = inertia.get("ixy", 0.0)
             ixz = inertia.get("ixz", 0.0)
             iyz = inertia.get("iyz", 0.0)
 
             # Build 3x3 inertia matrix
-            I = np.array([[ixx, ixy, ixz], [ixy, iyy, iyz], [ixz, iyz, izz]])
+            inertia_matrix = np.array(
+                [[ixx, ixy, ixz], [ixy, iyy, iyz], [ixz, iyz, izz]]
+            )
 
             # Check 1: Positive diagonal elements
             if ixx <= 0 or iyy <= 0 or izz <= 0:
@@ -66,15 +74,15 @@ class URDFBuilder:
 
             # Check 2: Positive-definite via Cholesky decomposition
             try:
-                np.linalg.cholesky(I)
+                np.linalg.cholesky(inertia_matrix)
             except np.linalg.LinAlgError:
                 raise ValueError(
                     f"Inertia matrix must be positive-definite\\n"
                     f"Segment: {segment_name}\\n"
-                    f"Inertia matrix:\\n{I}\\n"
+                    f"Inertia matrix:\\n{inertia_matrix}\\n"
                     f"Hint: Check off-diagonal elements (ixy, ixz, iyz) for consistency.\\n"
                     f"The matrix must be symmetric and all eigenvalues positive."
-                )
+                ) from None
 
             # Check 3: Triangle inequality (parallel axis theorem bounds)
             # For any rigid body: |I_a - I_b| <= I_c <= I_a + I_b
