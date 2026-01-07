@@ -1,0 +1,157 @@
+/* Dark Theme for Golf Modeling Suite */
+
+/* General Widget Styling */
+QWidget {
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+    font-family: "Segoe UI", "Roboto", sans-serif;
+    font-size: 10pt;
+    /*
+     * Theme Constants:
+     * Accent Color: #007acc
+     * Accent Hover: #0098ff
+     * Accent Pressed: #005c99
+     * Background Dark: #1e1e1e
+     * Background Light: #2b2b2b
+     * Border Color: #3d3d3d
+     */
+}
+
+/* Tab Widget Styling */
+QTabWidget::pane {
+    border: 1px solid #3d3d3d;
+    background: #2b2b2b;
+    border-radius: 4px;
+}
+
+QTabBar::tab {
+    background: #1e1e1e;
+    color: #b0b0b0;
+    padding: 8px 20px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border: 1px solid #3d3d3d;
+    border-bottom: none;
+    margin-right: 2px;
+}
+
+QTabBar::tab:selected {
+    background: #3d3d3d;
+    color: #ffffff;
+    border-bottom: 2px solid #007acc; /* Accent color strip */
+}
+
+QTabBar::tab:hover {
+    background: #333333;
+}
+
+/* Group Box Styling */
+QGroupBox {
+    border: 1px solid #3d3d3d;
+    border-radius: 6px;
+    margin-top: 24px;
+    padding-top: 10px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top center;
+    padding: 0 10px;
+    color: #007acc; /* Accent Color */
+    font-weight: bold;
+}
+
+/* Button Styling */
+QPushButton {
+    background-color: #007acc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    font-weight: bold;
+}
+
+QPushButton:hover {
+    background-color: #0098ff;
+}
+
+QPushButton:pressed {
+    background-color: #005c99;
+}
+
+QPushButton:disabled {
+    background-color: #4a4a4a;
+    color: #808080;
+}
+
+/* Text Inputs and Spin Boxes */
+QLineEdit, QDoubleSpinBox, QSpinBox, QComboBox {
+    background-color: #1e1e1e;
+    border: 1px solid #3d3d3d;
+    border-radius: 3px;
+    padding: 4px;
+    color: #e0e0e0;
+}
+
+QLineEdit:focus, QDoubleSpinBox:focus, QSpinBox:focus, QComboBox:focus {
+    border: 1px solid #007acc;
+}
+
+/* Scroll Bar Styling */
+QScrollBar:vertical {
+    border: none;
+    background: #1e1e1e;
+    width: 10px;
+    margin: 0;
+}
+
+QScrollBar::handle:vertical {
+    background: #4a4a4a;
+    min-height: 20px;
+    border-radius: 5px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: #606060;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+}
+
+/* Sliders */
+QSlider::groove:horizontal {
+    border: 1px solid #3d3d3d;
+    height: 6px;
+    background: #1e1e1e;
+    margin: 2px 0;
+    border-radius: 3px;
+}
+
+QSlider::handle:horizontal {
+    background: #007acc;
+    border: 1px solid #007acc;
+    width: 14px;
+    height: 14px;
+    margin: -5px 0;
+    border-radius: 7px;
+}
+
+QSlider::handle:horizontal:hover {
+    background: #0098ff;
+}
+
+/* Custom Description Labels */
+QLabel#descriptionLabel {
+    color: #a0a0a0;
+    font-style: italic;
+    padding: 5px;
+    background-color: #383838;
+    border-radius: 3px;
+    border: 1px solid #4a4a4a;
+}
+
+QLabel#helpLabel {
+    color: #a0a0a0;
+    font-size: 9pt;
+}

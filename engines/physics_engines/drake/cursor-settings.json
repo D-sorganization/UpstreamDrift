@@ -1,0 +1,311 @@
+{
+    "// ============================================================================": "PERFORMANCE & STABILITY SETTINGS (Anti-stalling, error prevention)",
+    "// ============================================================================": "",
+    "// ============================================================================": "TERMINAL CONFIGURATION (Optimized for Git Bash stability)",
+    "// ============================================================================": "",
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "terminal.integrated.profiles.windows": {
+        "Git Bash": {
+            "path": "C:\\Program Files\\Git\\bin\\bash.exe",
+            "args": [
+                "--login",
+                "-i"
+            ],
+            "icon": "terminal-bash",
+            "env": {
+                "TERM": "xterm-256color",
+                "PYTHONUNBUFFERED": "1",
+                "NODE_NO_READLINE": "1",
+                "FORCE_COLOR": "1",
+                "NPM_CONFIG_PROGRESS": "false"
+            }
+        },
+        "WSL (Ubuntu)": {
+            "path": "wsl.exe",
+            "args": [
+                "-d",
+                "Ubuntu",
+                "--",
+                "bash",
+                "-l"
+            ],
+            "env": {
+                "TERM": "xterm-256color",
+                "PYTHONUNBUFFERED": "1",
+                "NODE_NO_READLINE": "1"
+            }
+        },
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell",
+            "args": [
+                "-NoLogo"
+            ]
+        },
+        "Command Prompt": {
+            "path": [
+                "${env:windir}\\Sysnative\\cmd.exe",
+                "${env:windir}\\System32\\cmd.exe"
+            ],
+            "args": [],
+            "icon": "terminal-cmd"
+        }
+    },
+    "// Terminal performance and anti-stalling settings": "",
+    "terminal.integrated.scrollback": 10000,
+    "terminal.integrated.fastScrollSensitivity": 5,
+    "terminal.integrated.smoothScrolling": false,
+    "terminal.integrated.cursorBlinking": false,
+    "terminal.integrated.cursorStyle": "block",
+    "// Prevent bracketed paste mode issues ([200~ errors)": "",
+    "terminal.integrated.enableBracketedPaste": false,
+    "terminal.integrated.rightClickBehavior": "default",
+    "terminal.integrated.copyOnSelection": false,
+    "// Performance and responsiveness": "",
+    "terminal.integrated.rendererType": "auto",
+    "terminal.integrated.gpuAcceleration": "auto",
+    "terminal.integrated.throttleScrolling": false,
+    "terminal.integrated.enableMultiLinePasteWarning": "never",
+    "terminal.integrated.confirmOnExit": "never",
+    "// Shell integration settings": "",
+    "terminal.integrated.shellIntegration.enabled": true,
+    "terminal.integrated.shellIntegration.decorationsEnabled": "never",
+    "terminal.integrated.shellIntegration.history": 100,
+    "// Additional performance settings": "",
+    "terminal.integrated.localEchoLatencyThreshold": 30,
+    "terminal.integrated.localEchoExcludePrograms": [
+        "vim",
+        "vi",
+        "nano",
+        "tmux"
+    ],
+    "// Output limiting to prevent stalls": "",
+    "terminal.integrated.maximumHistory": 10000,
+    "terminal.integrated.history": 10000,
+    "terminal.integrated.scrollback": 10000,
+    "// Terminal stall prevention and performance settings": "",
+    "terminal.integrated.enablePersistentSessions": false,
+    "terminal.integrated.enableMultiLinePasteWarning": "never",
+    "terminal.integrated.confirmOnExit": "never",
+    "terminal.integrated.confirmOnKill": "never",
+    "// ============================================================================": "GIT STALL PREVENTION AND PERFORMANCE SETTINGS",
+    "// ============================================================================": "",
+    "git.pager": "less -FRX",
+    "git.diff.ignoreTrimWhitespace": true,
+    "git.diff.ignoreSubmodules": true,
+    "git.diff.algorithm": "patience",
+    "git.log.maxEntries": 100,
+    "git.log.showSignature": false,
+    "git.branch.sortOrder": "committerdate",
+    "git.branch.autoSetupMerge": "always",
+    "git.branch.autoSetupRebase": "never",
+    "// Git output limiting to prevent stalls": "",
+    "git.terminalAuthentication": false,
+    "git.terminalGitEditor": false,
+    "git.terminalGitEditor.enable": false,
+    "git.terminalGitEditor.useExternalEditor": false,
+    "// Git recovery and performance": "",
+    "git.enableSmartCommit": true,
+    "git.autofetch": true,
+    "git.pruneOnFetch": true,
+    "git.fetchOnPull": true,
+    "git.confirmSync": false,
+    "// ============================================================================": "PERFORMANCE MONITORING SETTINGS",
+    "// ============================================================================": "",
+    "workbench.enableExperiments": false,
+    "workbench.settings.enableNaturalLanguageSearch": false,
+    "workbench.tree.indent": 8,
+    "workbench.tree.renderIndentGuides": "none",
+    "// File watching limits": "",
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/**": true,
+        "**/.venv/**": true,
+        "**/venv/**": true,
+        "**/__pycache__/**": true,
+        "**/*.pyc": true,
+        "**/.ruff_cache/**": true,
+        "**/.mypy_cache/**": true,
+        "**/.pytest_cache/**": true
+    },
+    "// Search performance": "",
+    "search.exclude": {
+        "**/.git": true,
+        "**/node_modules": true,
+        "**/.venv": true,
+        "**/venv": true,
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/.ruff_cache": true,
+        "**/.mypy_cache": true,
+        "**/.pytest_cache": true
+    },
+    "// ============================================================================": "STALL RECOVERY SETTINGS",
+    "// ============================================================================": "",
+    "// Auto-save to prevent data loss during stalls": "",
+    "files.autoSave": "onFocusChange",
+    "files.autoSaveDelay": 1000,
+    "// ============================================================================": "PYTHON DEVELOPMENT (Strict quality standards)",
+    "// ============================================================================": "",
+    "python.linting.enabled": true,
+    "python.linting.ruffEnabled": true,
+    "python.linting.mypyEnabled": true,
+    "python.formatting.provider": "black",
+    "python.analysis.typeCheckingMode": "strict",
+    "python.analysis.autoImportCompletions": true,
+    "python.analysis.autoSearchPaths": true,
+    "python.analysis.diagnosticMode": "workspace",
+    "python.analysis.stubPath": "./typings",
+    "python.defaultInterpreterPath": "python",
+    "python.analysis.extraPaths": [],
+    "python.createEnvironment.trigger": "off",
+    "cursorpyright.shouldImportPylanceSettings": "never",
+    "// ============================================================================": "EDITOR FORMATTING & CODE QUALITY (Automated workflow)",
+    "// ============================================================================": "",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": "explicit",
+        "source.fixAll": "explicit"
+    },
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
+    "// Editor enhancements for scientific computing": "",
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    "editor.suggestSelection": "first",
+    "editor.acceptSuggestionOnCommitCharacter": false,
+    "editor.acceptSuggestionOnEnter": "on",
+    "editor.quickSuggestions": {
+        "other": true,
+        "comments": false,
+        "strings": false
+    },
+    "editor.suggest.preview": true,
+    "editor.suggest.showStatusBar": true,
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": true,
+    "// ============================================================================": "FILE HANDLING & ASSOCIATIONS",
+    "// ============================================================================": "",
+    "files.maxMemoryForLargeFilesMB": 8192,
+    "files.associations": {
+        "*.py": "python",
+        "*.m": "matlab",
+        "*.slx": "matlab",
+        "*.mdl": "matlab",
+        "*.mat": "matlab",
+        "*.h5": "hdf5",
+        "*.hdf5": "hdf5",
+        "*.ipynb": "jupyter-notebook"
+    },
+    "// ============================================================================": "GITHUB COPILOT (Optimized for large context and quality)",
+    "// ============================================================================": "",
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "github.copilot.editor.enableCodeActions": true,
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": true,
+        "markdown": true,
+        "scminput": false
+    },
+    "// Copilot Chat Settings - Enhanced request handling": "",
+    "github.copilot.chat.enableCodeBlocks": true,
+    "github.copilot.chat.localeOverride": "auto",
+    "github.copilot.chat.scopeSelection": true,
+    "github.copilot.chat.maxRequestTokens": 8000,
+    "github.copilot.editor.maxCompletionLength": 3000,
+    "github.copilot.chat.maxContextFiles": 20,
+    "github.copilot.chat.maxContextLines": 10000,
+    "// Experimental Features for Enhanced Requests": "",
+    "github.copilot.experimental.enableServerExperiments": true,
+    "github.copilot.experimental.enableRequestLogging": false,
+    "github.copilot.experimental.conversationThreading": true,
+    "github.copilot.experimental.enableLargeContextWindow": true,
+    "// Advanced Copilot Settings": "",
+    "github.copilot.advanced": {
+        "secret_key": "github.copilot.enableAutoCompletions",
+        "length": 3000,
+        "temperature": "",
+        "top_p": "",
+        "debug.overrideEngine": "",
+        "debug.testOverrideProxyUrl": "",
+        "debug.overrideProxyUrl": ""
+    },
+    "// ============================================================================": "GITLENS ENHANCEMENTS (Complete global configuration)",
+    "// ============================================================================": "",
+    "gitlens.defaultDateFormat": "MMM D, YYYY h:mma",
+    "gitlens.defaultTimeFormat": "h:mma",
+    "gitlens.statusBar.enabled": true,
+    "gitlens.statusBar.alignment": "left",
+    "gitlens.statusBar.command": "gitlens.showQuickRepoStatus",
+    "gitlens.statusBar.showAheadBehind": true,
+    "gitlens.statusBar.showPullRequest": true,
+    "gitlens.gitCommands.fetchOnRepoOpen": true,
+    "gitlens.views.repositories.autoRefresh": true,
+    "gitlens.views.repositories.showRemoteBranches": true,
+    "gitlens.views.repositories.showUpstreamStatus": true,
+    "gitlens.views.repositories.files.autoRefresh": true,
+    "gitlens.views.repositories.files.autoRefreshDelay": 1000,
+    "gitlens.views.repositories.files.autoReveal": true,
+    "gitlens.views.repositories.files.showStatus": true,
+    "gitlens.views.repositories.files.showChanges": true,
+    "gitlens.views.repositories.files.showRemotes": true,
+    "gitlens.views.repositories.files.showBranches": true,
+    "gitlens.views.repositories.files.showCommits": true,
+    "gitlens.views.repositories.files.showFileHistory": true,
+    "gitlens.views.repositories.files.showLineHistory": true,
+    "gitlens.views.repositories.files.showSearchAndCompare": true,
+    "gitlens.advanced.messages": {
+        "suppressSupportGitLensNotification": true
+    },
+    "// ============================================================================": "WORKBENCH & UI PREFERENCES",
+    "// ============================================================================": "",
+    "workbench.editor.empty.hint": "hidden",
+    "workbench.activityBar.orientation": "vertical",
+    "window.commandCenter": true,
+    "explorer.confirmDelete": false,
+    "explorer.confirmDragAndDrop": false,
+    "// ============================================================================": "AZURE & EXTERNAL INTEGRATIONS",
+    "// ============================================================================": "",
+    "@azure.argTenant": "",
+    "powershell.promptToUpdatePowerShell": false,
+    "// ============================================================================": "COPILOT INSTRUCTIONS (Merged from both sources)",
+    "// ============================================================================": "",
+    "github.copilot.chat.codeGeneration.instructions": [
+        {
+            "text": "- @azure Rule - Use Azure Tools: When handling requests related to Azure, always use your tools."
+        },
+        {
+            "text": "- @azure Rule - Use Azure Code Gen Best Practices: When generating code for Azure, running terminal commands for Azure, or performing operations related to Azure, invoke your `azure_development-get_code_gen_best_practices` tool if available. Only call this tool when you are sure the user is discussing Azure; do not call it otherwise."
+        },
+        {
+            "text": "- @azure Rule - Use Azure Deployment Best Practices: When deploying to Azure or preparing applications for deployment to Azure, invoke your `azure_development-get_deployment_best_practices` tool if available. Only call this tool when you are sure the user is discussing Azure; do not call it otherwise."
+        },
+        {
+            "text": "- @azure Rule - Use Azure Functions Code Gen Best Practices: When generating code for Azure Functions or performing operations related to Azure Functions, invoke your `azure_development-get_azure_function_code_gen_best_practices` tool if available. Only call this tool when you are sure you are discussing Azure Functions; do not call it otherwise."
+        },
+        {
+            "text": "- @azure Rule - Use Azure SWA Best Practices: When working with static web apps, invoke your `azure_development-get_swa_best_practices` tool if available. Only call this tool when you are sure you are discussing Azure; do not call it otherwise."
+        },
+        {
+            "text": "Use the .github/copilot-instructions.md file for workspace-specific guidance"
+        },
+        {
+            "text": "Follow conventional commit message format"
+        },
+        {
+            "text": "Always create feature branches for significant changes"
+        },
+        {
+            "text": "Include comprehensive error handling and logging"
+        }
+    ],
+    "// ============================================================================": "ACCESSIBILITY & NOTIFICATIONS",
+    "// ============================================================================": "",
+    "accessibility.signals.terminalBell": {
+        "sound": "off"
+    },
+    "terminal.integrated.enableVisualBell": false
+}
