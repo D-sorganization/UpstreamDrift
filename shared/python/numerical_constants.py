@@ -203,7 +203,8 @@ PLANNED USE:
 # -----------------------------------------------------------------------------
 
 # Source: NIST CODATA 2018 (https://physics.nist.gov/cgi-bin/cuu/Value?gn)
-GRAVITY_STANDARD = 9.80665  # [m/s²]
+from shared.python.constants import GRAVITY_M_S2 as GRAVITY_STANDARD
+
 """Standard gravitational acceleration (WGS84 ellipsoid at sea level).
 
 USAGE:

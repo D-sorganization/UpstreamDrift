@@ -4,6 +4,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 
 
+from shared.python.constants import GRAVITY_M_S2
+
 # Use a patch for the import since mujoco might not be installed
 @patch.dict("sys.modules", {"mujoco": MagicMock()})
 def test_mujoco_iaa_logic():
@@ -41,7 +43,7 @@ def test_mujoco_iaa_logic():
     mujoco.mj_fullM.side_effect = side_effect_fullM
 
     # We need to simulate mj_forward changing qfrc_bias based on qvel
-    # When qvel is 0, qfrc_bias = G. Let's say G = [0, 9.8]
+    # When qvel is 0, qfrc_bias = G. Let's say G = [0, GRAVITY_M_S2]
     # When qvel is valid, qfrc_bias = C+G = [10, 20]
 
     def side_effect_forward(model, data):

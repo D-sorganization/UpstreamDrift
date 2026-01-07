@@ -11,6 +11,8 @@ Per Assessment B recommendations and Guideline O3 requirements.
 import numpy as np
 import pytest
 
+from shared.python.constants import GRAVITY_M_S2
+
 # Skip if engines not available
 pytest.importorskip("mujoco", reason="MuJoCo required for conservation tests")
 
@@ -170,11 +172,10 @@ class TestConservationHelpers:
     def test_potential_energy_gravity(self):
         """Test PE = m * g * h for simple case."""
         mass = 2.0  # kg
-        g = 9.81  # m/s^2 (Source: Standard gravity)
         height = 3.0  # m
 
-        PE = mass * g * height
-        expected = 2.0 * 9.81 * 3.0  # 58.86
+        PE = mass * GRAVITY_M_S2 * height
+        expected = 2.0 * GRAVITY_M_S2 * 3.0  # 58.86
 
         assert abs(PE - expected) < 1e-10, f"PE={PE:.6f}, expected={expected:.6f}"
 
