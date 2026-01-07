@@ -25,7 +25,10 @@ class TestPhysicalConstantXMLSafety:
         root = ET.fromstring(f"<root>{xml_string}</root>")
 
         # Verify numeric value
-        gravity_attr = root.find("option").get("gravity")
+        option_elem = root.find("option")
+        assert option_elem is not None, "option element not found"
+        gravity_attr = option_elem.get("gravity")
+        assert gravity_attr is not None, "gravity attribute not found"
         assert (
             "PhysicalConstant" not in gravity_attr
         ), "PhysicalConstant.__repr__ leaked into XML"
@@ -50,7 +53,10 @@ class TestPhysicalConstantXMLSafety:
 
         # Parsing may succeed but value is garbage
         root = ET.fromstring(f"<root>{xml_string}</root>")
-        gravity_attr = root.find("option").get("gravity")
+        option_elem = root.find("option")
+        assert option_elem is not None, "option element not found"
+        gravity_attr = option_elem.get("gravity")
+        assert gravity_attr is not None, "gravity attribute not found"
 
         # The string will contain "PhysicalConstant(...)"
         assert "PhysicalConstant" in gravity_attr
@@ -67,7 +73,9 @@ class TestPhysicalConstantXMLSafety:
 
         root = ET.fromstring(mujoco_xml)
         option = root.find("option")
+        assert option is not None, "option element not found"
         gravity = option.get("gravity")
+        assert gravity is not None, "gravity attribute not found"
 
         # Extract numerical value
         gz = float(gravity.split()[-1])
@@ -86,9 +94,25 @@ class TestPhysicalConstantXMLSafety:
         root = ET.fromstring(xml)
 
         # All should have pure numeric values
-        gravity = float(root.find("gravity").get("value"))
-        mass = float(root.find("mass").get("value"))
-        density = float(root.find("air_density").get("value"))
+        gravity_elem = root.find("gravity")
+        mass_elem = root.find("mass")
+        density_elem = root.find("air_density")
+        assert (
+            gravity_elem is not None
+            and mass_elem is not None
+            and density_elem is not None
+        )
+
+        gravity_val = gravity_elem.get("value")
+        mass_val = mass_elem.get("value")
+        density_val = density_elem.get("value")
+        assert (
+            gravity_val is not None and mass_val is not None and density_val is not None
+        )
+
+        gravity = float(gravity_val)
+        mass = float(mass_val)
+        density = float(density_val)
 
         assert 9.0 < gravity < 10.0
         assert 0.04 < mass < 0.05  # ~45g
@@ -103,7 +127,9 @@ class TestPhysicalConstantXMLSafety:
         xml = f'<force value="{g_eff}"/>'
         root = ET.fromstring(xml)
 
-        force = float(root.get("value"))
+        force_val = root.get("value")
+        assert force_val is not None, "value attribute not found"
+        force = float(force_val)
         assert abs(force - (9.80665 * 0.5)) < 0.01
 
     def test_physical_constant_behaves_as_float(self):
@@ -137,7 +163,9 @@ class TestPhysicalConstantXMLSafety:
         xml = f'<mars gravity="{float(custom_gravity)}"/>'
         root = ET.fromstring(xml)
 
-        mars_g = float(root.get("gravity"))
+        mars_g_val = root.get("gravity")
+        assert mars_g_val is not None, "gravity attribute not found"
+        mars_g = float(mars_g_val)
         assert mars_g == pytest.approx(3.71)
 
     def test_prevent_accidental_string_concat(self):
@@ -149,6 +177,7 @@ class TestPhysicalConstantXMLSafety:
         good_xml = f"<val>{float(GRAVITY_M_S2)}</val>"
 
         root = ET.fromstring(good_xml)
+        assert root.text is not None, "element text not found"
         val = float(root.text)
         assert val == pytest.approx(9.80665)
 
@@ -165,6 +194,7 @@ class TestPhysicalConstantEdgeCases:
         xml = f"<tolerance>{float(epsilon)}</tolerance>"
         root = ET.fromstring(xml)
 
+        assert root.text is not None, "element text not found"
         tol = float(root.text)
         assert tol == 1e-15
 
@@ -175,6 +205,7 @@ class TestPhysicalConstantEdgeCases:
         xml = f"<speed>{float(SPEED_OF_LIGHT_M_S)}</speed>"
         root = ET.fromstring(xml)
 
+        assert root.text is not None, "element text not found"
         speed = float(root.text)
         assert speed == 299792458.0
 
@@ -186,6 +217,7 @@ class TestPhysicalConstantEdgeCases:
         xml = f"<gravity_z>{gz}</gravity_z>"
         root = ET.fromstring(xml)
 
+        assert root.text is not None, "element text not found"
         val = float(root.text)
         assert val < 0
         assert val == pytest.approx(-9.80665)
@@ -199,7 +231,9 @@ class TestPhysicalConstantEdgeCases:
         """
 
         root = ET.fromstring(xml)
-        attr_val = float(root.get("gravity_attr"))
+        attr_val_str = root.get("gravity_attr")
+        assert attr_val_str is not None and root.text is not None
+        attr_val = float(attr_val_str)
         text_val = float(root.text.strip())
 
         assert attr_val == pytest.approx(9.80665)
@@ -225,5 +259,6 @@ def test_regression_pr303_gravity_xml_bug():
 
     # Verify fix works
     root = ET.fromstring(fixed_template)
+    assert root.text is not None, "element text not found"
     val = float(root.text)
     assert val == pytest.approx(9.80665)
