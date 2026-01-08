@@ -9,11 +9,12 @@ from shared.python.comparative_plotting import ComparativePlotter
 from shared.python.plotting import GolfSwingPlotter
 from shared.python.statistical_analysis import StatisticalAnalyzer
 
-# sklearn/muscle_analysis is optional
+# sklearn/muscle_analysis is optional - check actual sklearn availability
 try:
-    from shared.python.muscle_analysis import MuscleSynergyAnalyzer
-
-    SKLEARN_AVAILABLE = True
+    from shared.python.muscle_analysis import (
+        SKLEARN_AVAILABLE,
+        MuscleSynergyAnalyzer,
+    )
 except ImportError:
     SKLEARN_AVAILABLE = False
     MuscleSynergyAnalyzer = None  # type: ignore[misc,assignment]
