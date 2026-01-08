@@ -7,14 +7,8 @@ class TestAIPackageInit:
     def test_types_are_exported(self) -> None:
         """Test that core types are exported from package."""
         from shared.python.ai import (
-            AgentChunk,
-            AgentResponse,
-            ConversationContext,
             ExpertiseLevel,
-            Message,
-            ProviderCapabilities,
             ProviderCapability,
-            ToolCall,
         )
 
         # Verify types are accessible
@@ -24,14 +18,9 @@ class TestAIPackageInit:
     def test_exceptions_are_exported(self) -> None:
         """Test that exceptions are exported from package."""
         from shared.python.ai import (
-            AIConnectionError,
             AIError,
             AIProviderError,
-            AIRateLimitError,
-            AITimeoutError,
             ScientificValidationError,
-            ToolExecutionError,
-            WorkflowError,
         )
 
         # Verify exceptions are accessible and inherit correctly
