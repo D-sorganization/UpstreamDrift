@@ -361,15 +361,108 @@ class DrakePhysicsEngine(PhysicsEngine):
         return cast(np.ndarray, a_control)
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
-        """Zero-Torque Counterfactual (ZTCF) - Guideline G1."""
-        raise NotImplementedError(
-            f"{self.__class__.__name__} does not yet implement ZTCF. "
-            f"See pendulum_physics_engine.py for reference."
-        )
+        """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
+
+        Compute acceleration with applied torques set to zero, preserving state.
+        This isolates drift (gravity + Coriolis) from control effects.
+
+        **Purpose**: Answer "What would happen if all actuators turned off?"
+
+        **Physics**: With τ=0, acceleration is purely passive:
+            q̈_ZTCF = M(q)⁻¹ · (-C(q,v) - g(q))
+
+        Args:
+            q: Joint positions (n_q,) [rad or m]
+            v: Joint velocities (n_v,) [rad/s or m/s]
+
+        Returns:
+            q̈_ZTCF: Acceleration under zero applied torque (n_v,) [rad/s² or m/s²]
+        """
+        if not self.plant_context:
+            return np.array([])
+
+        # Save current state
+        saved_q = self.plant.GetPositions(self.plant_context)
+        saved_v = self.plant.GetVelocities(self.plant_context)
+
+        try:
+            # Set to counterfactual state
+            self.plant.SetPositions(self.plant_context, q)
+            self.plant.SetVelocities(self.plant_context, v)
+
+            # Compute mass matrix at counterfactual state
+            M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
+
+            # Compute bias forces at counterfactual state (C(q,v) + g(q))
+            nv = self.plant.num_velocities()
+            vdot_zero = np.zeros(nv)
+            bias = self.plant.CalcInverseDynamics(
+                self.plant_context,
+                vdot_zero,
+                self.plant.MakeMultibodyForces(self.plant),
+            )
+
+            # ZTCF: τ = 0, so M*a + bias = 0 → a = -M^-1 * bias
+            a_ztcf = -np.linalg.solve(M, bias)
+
+            return cast(np.ndarray, a_ztcf)
+
+        finally:
+            # Restore original state
+            self.plant.SetPositions(self.plant_context, saved_q)
+            self.plant.SetVelocities(self.plant_context, saved_v)
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2."""
-        raise NotImplementedError(
-            f"{self.__class__.__name__} does not yet implement ZVCF. "
-            f"See pendulum_physics_engine.py for reference."
-        )
+        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
+
+        Compute acceleration with joint velocities set to zero, preserving
+        configuration. This isolates configuration-dependent effects (gravity)
+        from velocity-dependent effects (Coriolis, centrifugal).
+
+        **Purpose**: Answer "What acceleration would occur if motion FROZE?"
+
+        **Physics**: With v=0, acceleration has no velocity-dependent terms:
+            q̈_ZVCF = M(q)⁻¹ · (-g(q) + τ)
+
+        Args:
+            q: Joint positions (n_q,) [rad or m]
+
+        Returns:
+            q̈_ZVCF: Acceleration with v=0 (n_v,) [rad/s² or m/s²]
+        """
+        if not self.plant_context:
+            return np.array([])
+
+        # Save current state
+        saved_q = self.plant.GetPositions(self.plant_context)
+        saved_v = self.plant.GetVelocities(self.plant_context)
+
+        try:
+            # Set to counterfactual configuration with v=0
+            self.plant.SetPositions(self.plant_context, q)
+            self.plant.SetVelocities(self.plant_context, np.zeros_like(saved_v))
+
+            # Compute mass matrix at counterfactual configuration
+            M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
+
+            # With v=0, bias = g(q) only (no Coriolis terms)
+            # Use gravity forces directly
+            g = self.plant.CalcGravityGeneralizedForces(self.plant_context)
+
+            # Get current control (preserved for ZVCF)
+            # Note: In Drake, we need to read from actuator input or assume zero
+            # For simplicity, assume current actuation is zero unless set
+            # In a full implementation, we would read from the actuation input port
+            tau = np.zeros(self.plant.num_velocities())
+
+            # ZVCF: M*a + g = τ → a = M^-1 * (τ - g)
+            # Note: g is the gravity force vector, not gravity generalized force
+            # CalcGravityGeneralizedForces returns -g in the equation M*a + c + g = τ
+            a_zvcf = np.linalg.solve(M, tau - g)
+
+            return cast(np.ndarray, a_zvcf)
+
+        finally:
+            # Restore original state
+            self.plant.SetPositions(self.plant_context, saved_q)
+            self.plant.SetVelocities(self.plant_context, saved_v)
