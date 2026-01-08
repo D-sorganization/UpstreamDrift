@@ -32,6 +32,12 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
+# Threshold for determining if joint axis is aligned with Y-axis (mirror plane normal)
+# A value of 0.9 means ~25° from Y-axis is considered "aligned"
+Y_AXIS_ALIGNMENT_THRESHOLD = 0.9
+# Threshold for detecting significant Y component in prismatic joint axis
+Y_AXIS_SIGNIFICANCE_THRESHOLD = 0.1
+
 
 class Handedness(Enum):
     """Player handedness enumeration."""
@@ -235,12 +241,12 @@ def mirror_joint_configuration(
         if jtype.lower() == "revolute":
             # Revolute joints: flip if axis is parallel to mirror plane
             # (i.e., has significant X or Z component)
-            if abs(axis_np[1]) < 0.9:  # Not a Y-axis rotation
+            if abs(axis_np[1]) < Y_AXIS_ALIGNMENT_THRESHOLD:  # Not a Y-axis rotation
                 q_mirrored[i] = -q[i]
         elif jtype.lower() == "prismatic":
             # Prismatic joints: flip if axis crosses mirror plane
             # (i.e., has significant Y component)
-            if abs(axis_np[1]) > 0.1:  # Has Y component
+            if abs(axis_np[1]) > Y_AXIS_SIGNIFICANCE_THRESHOLD:  # Has Y component
                 q_mirrored[i] = -q[i]
 
     return q_mirrored
