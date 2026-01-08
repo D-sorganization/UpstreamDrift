@@ -40,6 +40,7 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
 
         self.setWindowTitle("C3D Motion Analysis Viewer")
         self.resize(1400, 900)
+        self.setAcceptDrops(True)
 
         self.model: C3DDataModel | None = None
         self._loader_thread: C3DLoaderThread | None = None
@@ -95,10 +96,15 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         self.analysis_tab = AnalysisTab()
 
         self.tabs.addTab(self.overview_tab, "Overview")
+        self.tabs.setTabToolTip(0, "Metadata and file information")
         self.tabs.addTab(self.marker_plot_tab, "Markers (2D)")
+        self.tabs.setTabToolTip(1, "2D plots of marker trajectories")
         self.tabs.addTab(self.analog_plot_tab, "Analog")
+        self.tabs.setTabToolTip(2, "Analog data visualization")
         self.tabs.addTab(self.viewer3d_tab, "3D Viewer")
+        self.tabs.setTabToolTip(3, "3D interactive view of markers")
         self.tabs.addTab(self.analysis_tab, "Analysis")
+        self.tabs.setTabToolTip(4, "Kinematic analysis and calculations")
 
         self.setCentralWidget(self.tabs)
 
@@ -123,33 +129,42 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
 
     # --------------------------- File I/O ----------------------------------
 
-    def open_c3d_file(self) -> None:
-        """Open a file dialog to load a C3D file."""
-        path, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self,
-            "Open C3D file",
-            "",
-            "C3D files (*.c3d);;All files (*.*)",
-        )
-        if path:
-            # Security validation (F-004)
-            # Allow User Home and Project Root
-            # shared module import must be available
-            from shared.python.security_utils import validate_path
+    def dragEnterEvent(self, event: QtGui.QDragEnterEvent) -> None:
+        """Handle drag enter event."""
+        if event.mimeData().hasUrls():
+            urls = event.mimeData().urls()
+            if len(urls) == 1:
+                path = urls[0].toLocalFile()
+                if path.lower().endswith(".c3d"):
+                    event.acceptProposedAction()
+                    return
+        event.ignore()
 
-            suite_root = Path(__file__).parents[6]
-            allowed = [
-                Path.home(),
-                suite_root,
-            ]
-            try:
-                # We use strict=False to allow checking but log/warn if outside,
-                # or strict=True if we want to block. Review suggested blocking.
-                path = str(validate_path(path, allowed, strict=True))
-            except ValueError as e:
-                QtWidgets.QMessageBox.warning(self, "Security Warning", str(e))
-                return
-        if not path:
+    def dropEvent(self, event: QtGui.QDropEvent) -> None:
+        """Handle drop event."""
+        urls = event.mimeData().urls()
+        if urls:
+            path = urls[0].toLocalFile()
+            self.load_c3d_file_from_path(path)
+
+    def load_c3d_file_from_path(self, path: str) -> None:
+        """Load a C3D file from the given path."""
+        # Security validation (F-004)
+        # Allow User Home and Project Root
+        # shared module import must be available
+        from shared.python.security_utils import validate_path
+
+        suite_root = Path(__file__).parents[6]
+        allowed = [
+            Path.home(),
+            suite_root,
+        ]
+        try:
+            # We use strict=False to allow checking but log/warn if outside,
+            # or strict=True if we want to block. Review suggested blocking.
+            path = str(validate_path(path, allowed, strict=True))
+        except ValueError as e:
+            QtWidgets.QMessageBox.warning(self, "Security Warning", str(e))
             return
 
         if (sb := self.statusBar()) is not None:
@@ -167,6 +182,17 @@ class C3DViewerMainWindow(QtWidgets.QMainWindow):
         # Ensure we cleanup reference when done
         self._loader_thread.finished.connect(self._on_load_finished)
         self._loader_thread.start()
+
+    def open_c3d_file(self) -> None:
+        """Open a file dialog to load a C3D file."""
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self,
+            "Open C3D file",
+            "",
+            "C3D files (*.c3d);;All files (*.*)",
+        )
+        if path:
+            self.load_c3d_file_from_path(path)
 
     def _on_load_success(self, model: C3DDataModel) -> None:
         """Handle successful model load."""

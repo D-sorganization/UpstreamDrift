@@ -115,7 +115,44 @@ def test_c3d_viewer_open_file_ux(qapp: QApplication) -> None:
 
                             filename = os.path.basename(test_path)
                             expected_calls = [
-                                call(f"Loading {filename}..."),
+                                call(f"Loading {filename}... (Async)"),
                                 call(f"Loaded {filename} successfully."),
                             ]
                             mock_show_message.assert_has_calls(expected_calls)
+
+
+def test_c3d_viewer_drag_and_drop(qapp: QApplication) -> None:
+    """
+    Test that drag and drop events trigger file loading.
+    """
+    with patch.dict(sys.modules, {"ezc3d": MagicMock()}):
+        from apps.c3d_viewer import C3DViewerMainWindow
+
+        window = C3DViewerMainWindow()
+        assert window.acceptDrops()
+
+        # Mock the load_c3d_file_from_path method
+        with patch.object(
+            window, "load_c3d_file_from_path"
+        ) as mock_load:
+            # Create a mock drop event
+            from PyQt6.QtCore import QMimeData, QUrl
+            from PyQt6.QtGui import QDropEvent
+
+            mime_data = QMimeData()
+            test_path = "/path/to/drop_test.c3d"
+            mime_data.setUrls([QUrl.fromLocalFile(test_path)])
+
+            # Note: Creating QDropEvent in tests can be tricky without full Qt setup
+            # We can mock the event object instead
+            mock_event = MagicMock()
+            mock_event.mimeData.return_value = mime_data
+
+            window.dropEvent(mock_event)
+
+            # Verify that load was called with the correct path
+            # QUrl.toLocalFile() might return absolute path
+            # We just check if it was called
+            assert mock_load.called
+            args, _ = mock_load.call_args
+            assert str(args[0]).endswith("drop_test.c3d")
