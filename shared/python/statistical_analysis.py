@@ -617,12 +617,12 @@ class StatisticalAnalyzer:
         # CoP Path Length
         # OPTIMIZATION: Manual slicing is slightly faster than np.diff
         cop_diff = self.cop_position[1:] - self.cop_position[:-1]
-        # OPTIMIZATION: hypot is faster than linalg.norm for 2D vectors
-        # If 3D, we fallback to norm or explicit calculation.
+        # OPTIMIZATION: np.hypot is faster than np.linalg.norm for 2D vectors
+        # OPTIMIZATION: Explicit sqrt calculation is faster than np.linalg.norm for 3D
         if cop_diff.shape[1] == 2:
             cop_dist = np.hypot(cop_diff[:, 0], cop_diff[:, 1])
         else:
-            cop_dist = np.linalg.norm(cop_diff, axis=1)
+            cop_dist = np.sqrt(np.sum(cop_diff**2, axis=1))
         path_length = np.sum(cop_dist)
 
         # CoP Velocity
@@ -630,6 +630,7 @@ class StatisticalAnalyzer:
         max_vel = np.max(cop_dist) / self.dt
 
         # CoP Range
+        # Note: Vectorized min/max (axis=0) was found to be slower than separate column access
         x_range = float(
             np.max(self.cop_position[:, 0]) - np.min(self.cop_position[:, 0])
         )
@@ -644,7 +645,8 @@ class StatisticalAnalyzer:
             # Assuming Z is vertical (index 2)
             if self.ground_forces.shape[1] >= 3:
                 peak_vertical = float(np.max(self.ground_forces[:, 2]))
-                shear = np.linalg.norm(self.ground_forces[:, :2], axis=1)
+                # Shear is magnitude of X and Y forces
+                shear = np.hypot(self.ground_forces[:, 0], self.ground_forces[:, 1])
                 peak_shear = float(np.max(shear))
 
         return GRFMetrics(
@@ -1631,6 +1633,113 @@ class StatisticalAnalyzer:
             longest_diagonal_line=int(l_max),
             trapping_time=float(tt),
         )
+
+    def estimate_lyapunov_exponent(
+        self,
+        data: np.ndarray,
+        tau: int = 1,
+        dim: int = 3,
+        window: int = 50,
+    ) -> float:
+        """Estimate the Largest Lyapunov Exponent (LLE) using Rosenstein's algorithm.
+
+        Measures the rate of divergence of nearby trajectories. Positive LLE implies chaos.
+
+        Args:
+            data: 1D time series array
+            tau: Time delay (lag)
+            dim: Embedding dimension
+            window: Minimum temporal separation for nearest neighbors (Theiler window)
+
+        Returns:
+            Estimated LLE (in bits/second if log2 is used, or nats/s if ln)
+            Here we use natural log, so units are 1/s (inverse time units).
+        """
+        N = len(data)
+        if N < window:
+            return 0.0
+
+        # 1. Phase Space Reconstruction
+        # Create embedded vectors M vectors of dimension dim
+        M = N - (dim - 1) * tau
+        if M < 1:
+            return 0.0
+
+        # Construct orbit
+        # orbit[i] = [x(i), x(i+tau), ..., x(i+(dim-1)tau)]
+        # Shape (M, dim)
+        orbit = np.zeros((M, dim))
+        for d in range(dim):
+            orbit[:, d] = data[d * tau : d * tau + M]
+
+        # 2. Find nearest neighbors
+        # For each point j, find nearest neighbor k such that |j-k| > window
+        nearest_neighbors = np.zeros(M, dtype=int)
+
+        # Use simple Euclidean distance search (O(M^2) - slow for large N, but ok for golf swing N~200-500)
+        # Optimization: use KDTree if N is large. For N < 1000, brute force is fine.
+        from scipy.spatial.distance import cdist
+
+        # Compute pairwise distances
+        # To avoid O(M^2) memory, we can iterate
+        # But for typical swing data (e.g. 100Hz * 2s = 200 samples), M ~ 200.
+        # 200x200 matrix is tiny.
+
+        dists_mat = cdist(orbit, orbit, metric="euclidean")
+
+        # Mask neighbors within window
+        np.tri(M, M, k=window) - np.tri(M, M, k=-(window + 1))
+        # Wait, Theiler window means |j-k| > window.
+        # We want to exclude the diagonal band.
+        # Create a mask where |i-j| <= window are set to infinity
+
+        for i in range(M):
+            start = max(0, i - window)
+            end = min(M, i + window + 1)
+            dists_mat[i, start:end] = np.inf
+            dists_mat[i, i] = np.inf  # Self
+
+        # Find nearest indices
+        nearest_neighbors = np.argmin(dists_mat, axis=1)
+
+        # 3. Track divergence
+        # Calculate divergence d_j(i) = ||X_{j+i} - X_{nn(j)+i}||
+        # Average log(d_j(i)) over all j for each i
+
+        # Max steps to track
+        max_steps = (
+            min(M, int(1.0 / self.dt * 0.5)) if self.dt > 0 else 10
+        )  # Track for 0.5s or 10 steps
+
+        divergence = np.zeros(max_steps)
+        counts = np.zeros(max_steps)
+
+        for i in range(max_steps):
+            for j in range(M):
+                # Check bounds
+                idx1 = j + i
+                idx2 = nearest_neighbors[j] + i
+
+                if idx1 < M and idx2 < M:
+                    dist = np.linalg.norm(orbit[idx1] - orbit[idx2])
+                    if dist > 1e-9:
+                        divergence[i] += np.log(dist)
+                        counts[i] += 1
+
+        # Avoid division by zero
+        counts[counts == 0] = 1.0
+        avg_log_dist = divergence / counts
+
+        # 4. Estimate Slope
+        # LLE is the slope of avg_log_dist vs time (i * dt)
+        t_axis = np.arange(max_steps) * self.dt
+
+        # Simple linear regression
+        if len(t_axis) > 1:
+            slope, _ = np.polyfit(t_axis, avg_log_dist, 1)
+            return float(slope)
+
+        return 0.0
 
     def export_statistics_csv(
         self,
