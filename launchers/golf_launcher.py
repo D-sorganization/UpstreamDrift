@@ -67,6 +67,14 @@ from shared.python.secure_subprocess import (
     secure_run,
 )
 
+# Optional AI Assistant import (graceful degradation if not available)
+try:
+    from shared.python.ai.gui import AIAssistantPanel, AISettings, AISettingsDialog
+
+    AI_AVAILABLE = True
+except ImportError:
+    AI_AVAILABLE = False
+
 # Windows-specific subprocess constants
 CREATE_NO_WINDOW: int
 CREATE_NEW_CONSOLE: int
@@ -1288,6 +1296,31 @@ class GolfLauncher(QMainWindow):
         btn_help.clicked.connect(self.open_help)
         top_bar.addWidget(btn_help)
 
+        # AI Assistant Button (if available)
+        if AI_AVAILABLE:
+            self.btn_ai = QPushButton("🤖 AI Assistant")
+            self.btn_ai.setToolTip("Open AI Assistant for help with analysis")
+            self.btn_ai.setCheckable(True)
+            self.btn_ai.clicked.connect(self.toggle_ai_assistant)
+            self.btn_ai.setStyleSheet(
+                """
+                QPushButton {
+                    background-color: #1976d2;
+                    color: white;
+                    padding: 8px 16px;
+                    font-weight: bold;
+                    border-radius: 4px;
+                }
+                QPushButton:hover {
+                    background-color: #1565c0;
+                }
+                QPushButton:checked {
+                    background-color: #0d47a1;
+                }
+                """
+            )
+            top_bar.addWidget(self.btn_ai)
+
         main_layout.addLayout(top_bar)
 
         # --- Model Grid ---
@@ -1357,6 +1390,10 @@ class GolfLauncher(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.help_dock)
         self.help_dock.hide()  # Hidden by default
 
+        # --- AI Assistant Dock ---
+        if AI_AVAILABLE:
+            self._setup_ai_dock()
+
         # Select first model by default if available
         if self.model_order:
             preferred_id = next(
@@ -1364,6 +1401,72 @@ class GolfLauncher(QMainWindow):
                 self.model_order[0],
             )
             self.select_model(preferred_id)
+
+    def _setup_ai_dock(self) -> None:
+        """Set up the AI Assistant dock widget."""
+        if not AI_AVAILABLE:
+            return
+
+        # Create dock widget
+        self.ai_dock = QDockWidget("AI Assistant", self)
+        self.ai_dock.setAllowedAreas(
+            Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
+        )
+        self.ai_dock.setMinimumWidth(400)
+
+        # Create AI panel
+        self.ai_panel = AIAssistantPanel()
+        self.ai_panel.settings_requested.connect(self._open_ai_settings)
+        self.ai_dock.setWidget(self.ai_panel)
+
+        # Add to right side
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.ai_dock)
+        self.ai_dock.hide()  # Hidden by default
+
+        # Connect dock visibility to button state
+        self.ai_dock.visibilityChanged.connect(self._on_ai_dock_visibility_changed)
+
+        # Load and apply saved AI settings
+        try:
+            settings = AISettings.load()
+            self.ai_panel.apply_settings(settings)
+        except Exception as e:
+            logger.warning("Failed to load AI settings: %s", e)
+
+    def toggle_ai_assistant(self, checked: bool) -> None:
+        """Toggle the AI Assistant dock visibility.
+
+        Args:
+            checked: Whether the button is checked.
+        """
+        if not hasattr(self, "ai_dock"):
+            return
+
+        if checked:
+            self.ai_dock.show()
+        else:
+            self.ai_dock.hide()
+
+    def _on_ai_dock_visibility_changed(self, visible: bool) -> None:
+        """Handle AI dock visibility change.
+
+        Args:
+            visible: Whether the dock is visible.
+        """
+        if hasattr(self, "btn_ai"):
+            self.btn_ai.setChecked(visible)
+
+    def _open_ai_settings(self) -> None:
+        """Open the AI settings dialog."""
+        if not AI_AVAILABLE:
+            return
+
+        dialog = AISettingsDialog(self)
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            settings = dialog.get_settings()
+            if hasattr(self, "ai_panel"):
+                self.ai_panel.apply_settings(settings)
+            logger.info("AI settings updated")
 
     def _swap_models(self, source_id: str, target_id: str) -> None:
         """Swap two models in the grid layout."""

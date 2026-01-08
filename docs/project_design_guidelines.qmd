@@ -2,7 +2,7 @@
 title: "Golf Modeling App — Mission & Required Features"
 subtitle: "A living mission statement and acceptance checklist"
 author: "Project Team"
-date: "2026-01-05"
+date: "2026-01-08"
 format:
   html:
     toc: true
@@ -730,6 +730,191 @@ These standards apply specifically to the forward dynamics motion matching workf
 - **Cross-Engine Agreement**:
   - Torque profiles: RMS difference < 10% between engines
   - Clubhead trajectory: position error < 5 mm, velocity error < 0.5 m/s
+
+---
+
+### T. AI Assistant Integration & Accessibility (Non-Negotiable)
+
+This section defines **mandatory requirements** for the AI-first transformation of the Golf Modeling Suite. The goal is to maintain scientific rigor (9.4/10 quality baseline) while democratizing access for non-expert users through AI-guided workflows.
+
+**Prime Directive:** The AI assistant educates and guides; it never bypasses scientific validation.
+
+#### T1. Agent-Agnostic Architecture (mandatory)
+
+The AI integration must support multiple LLM providers without vendor lock-in:
+
+- **Provider Support**:
+  - OpenAI (GPT-4, GPT-4 Turbo)
+  - Anthropic (Claude 3.x)
+  - Google (Gemini)
+  - Ollama (Local, FREE) — must be fully functional
+  - Custom endpoints via adapter interface
+- **Cost Model**:
+  - Zero developer infrastructure cost
+  - Users provide their own API keys
+  - Fully functional without AI (graceful degradation)
+- **Implementation**:
+  - Agent Interface Protocol (AIP) server using JSON-RPC 2.0
+  - Provider adapters translate between AIP and provider APIs
+  - Capability negotiation for provider-specific features
+
+#### T2. Workflow Engine & Guided Execution (mandatory)
+
+Step-by-step workflows for common analyses:
+
+- **Built-in Workflows** (minimum):
+  - `first_analysis`: Complete beginner walkthrough
+  - `c3d_import`: Load and validate motion capture data
+  - `inverse_dynamics`: Compute joint torques
+  - `cross_engine_validation`: Multi-engine comparison
+  - `drift_control_decomposition`: Causal analysis
+- **Workflow Features**:
+  - Validation at each step with clear pass/fail feedback
+  - Error recovery strategies (retry, skip, fallback, ask user)
+  - Progress tracking visualization
+  - Educational content interwoven with execution
+- **Quality Checks**:
+  - Energy conservation verification
+  - Cross-engine consistency checks
+  - Physical plausibility validation (torque limits, etc.)
+
+#### T3. Educational Content System (mandatory)
+
+Progressive disclosure with 4 expertise levels:
+
+- **Expertise Levels**:
+  - **Beginner**: No prior knowledge assumed
+  - **Intermediate**: Basic physics/biomechanics understanding
+  - **Advanced**: Graduate-level comprehension
+  - **Expert**: Research-publication ready
+- **Content Requirements**:
+  - 500+ term glossary with multi-level explanations
+  - Just-in-time concept explanations during workflows
+  - Visual guides and diagrams for complex concepts
+  - Code examples with interpretation
+- **User Progression**:
+  - Track user expertise level
+  - Suggest topics for advancement
+  - Unlock advanced features as proficiency grows
+
+#### T4. Quality Assurance & Result Interpretation (mandatory)
+
+Automated assessment of analysis quality:
+
+- **Validation Checks**:
+  - Energy conservation: |ΔE| < 1% for conservative phases
+  - Torque plausibility: Within biomechanical limits (~500 N·m max)
+  - Cross-engine agreement: Per Section P3 tolerances
+  - Numerical stability: Jacobian condition number warnings
+- **Result Interpretation**:
+  - "Is this good?" assessment for all outputs
+  - Suggested next steps based on results
+  - Confidence indicators and uncertainty visualization
+  - Comparison to expected ranges (where available)
+
+#### T5. User Interface Integration (mandatory)
+
+AI Assistant Panel in the Golf Suite Launcher:
+
+- **Components**:
+  - Conversation interface with history
+  - Workflow progress tracker
+  - Tool execution visualization
+  - Provider configuration dialog
+  - Quick action shortcuts
+- **Accessibility**:
+  - Beginner/Expert mode toggle
+  - Keyboard navigation support
+  - Clear visual hierarchy
+  - Status indicators for AI connection
+
+#### T6. Security, Privacy & Auditability (mandatory)
+
+Strict data handling requirements:
+
+- **API Key Security**:
+  - Store in OS keyring (Windows Credential Manager / macOS Keychain / Linux Secret Service)
+  - Never log API keys
+  - Never transmit to developers
+  - Secure deletion on removal
+- **Data Privacy**:
+  - Conversation history stored locally only
+  - Model files never sent to AI providers (only metadata)
+  - User controls all data transmission
+  - Optional (user-consent) error reporting
+- **Audit Trail**:
+  - Log all AI tool executions
+  - Reproducibility metadata for all analyses
+  - Timestamp and session tracking
+
+#### T7. Implementation Requirements (mandatory)
+
+Technical standards for AI code:
+
+- **Code Quality**:
+  - Black/Ruff/Mypy strict compliance (same as Section N)
+  - Minimum 50% test coverage for AI modules
+  - No banned patterns (`eval`, mutable defaults)
+  - Type hints on all public APIs
+- **Architecture**:
+  - Separation of UI and business logic
+  - Async processing for long operations
+  - Graceful timeout handling
+  - Error messages with educational context
+- **Dependencies**:
+  - Optional AI dependencies (user installs if using AI)
+  - No core functionality degradation without AI
+  - Pinned versions for provider SDKs
+
+#### T8. Success Metrics (mandatory)
+
+Measurable outcomes for AI integration:
+
+- **Accessibility Metrics**:
+  - Time to first successful analysis: <30 minutes for beginners
+  - Beginner success rate: >80% completion
+  - Error recovery rate: >90% with AI guidance
+  - User progression: Beginner → Intermediate in 5 sessions
+- **Technical Metrics**:
+  - AI response latency: <3 seconds (P95)
+  - Workflow completion rate: >95%
+  - Scientific validation pass rate: 100%
+- **Quality Metrics**:
+  - CI/CD pass rate: 100%
+  - Test coverage: >50% for AI modules
+  - Security vulnerabilities: 0
+
+#### T9. Rollout Strategy (recommended)
+
+Phased implementation approach:
+
+- **Phase 1: Core Infrastructure (3 weeks)**:
+  - AIP Server and provider adapters
+  - Tool Registry and Workflow Engine
+  - Basic educational content
+- **Phase 2: GUI Integration (2 weeks)**:
+  - AI Assistant Panel
+  - Configuration dialogs
+  - Workflow visualization
+- **Phase 3: Content Creation (3 weeks)**:
+  - Multi-level explanations
+  - Glossary expansion
+  - Demo workflows
+- **Phase 4: Testing & Refinement (2 weeks)**:
+  - User acceptance testing
+  - Performance optimization
+  - Security audit
+
+#### T10. Non-Negotiable Quality Standards
+
+These standards are absolute and cannot be waived:
+
+1. **Scientific Integrity**: AI suggestions never bypass scientific validation
+2. **Reproducibility**: All AI-assisted analyses must be reproducible
+3. **Transparency**: Users always understand what the AI did
+4. **Educational Accuracy**: Content is scientifically correct and citable
+5. **Privacy Protection**: API keys and user data are never exposed
+6. **Graceful Degradation**: System fully functional without AI features
 
 ---
 
