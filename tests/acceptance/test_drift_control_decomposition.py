@@ -57,13 +57,17 @@ class TestPinocchioDriftControl:
         Section F Requirement: a_drift + a_control = a_full
         """
         try:
+            import pinocchio as pin
+
+            # Verify Pinocchio is actually installed, not just mocked
+            if not hasattr(pin, "__version__"):
+                pytest.skip("Pinocchio is mocked, not actually installed")
+
             from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                 PinocchioPhysicsEngine,
             )
         except ImportError:
             pytest.skip("Pinocchio not installed")
-
-        import pinocchio as pin
 
         engine = PinocchioPhysicsEngine()
         engine.load_from_path(simple_pendulum_urdf)
@@ -122,6 +126,10 @@ class TestPinocchioDriftControl:
         """Verify that full dynamics with tau=0 equals drift acceleration."""
         try:
             import pinocchio as pin
+
+            # Verify Pinocchio is actually installed, not just mocked
+            if not hasattr(pin, "__version__"):
+                pytest.skip("Pinocchio is mocked, not actually installed")
 
             from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                 PinocchioPhysicsEngine,
@@ -247,6 +255,10 @@ class TestIndexedAccelerationClosure:
         try:
             import pinocchio as pin
 
+            # Verify Pinocchio is actually installed, not just mocked
+            if not hasattr(pin, "__version__"):
+                pytest.skip("Pinocchio is mocked, not actually installed")
+
             from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                 PinocchioPhysicsEngine,
             )
@@ -283,6 +295,12 @@ class TestIndexedAccelerationClosure:
     def test_contribution_percentages(self, simple_pendulum_urdf):
         """Verify contribution percentage calculation."""
         try:
+            import pinocchio as pin
+
+            # Verify Pinocchio is actually installed, not just mocked
+            if not hasattr(pin, "__version__"):
+                pytest.skip("Pinocchio is mocked, not actually installed")
+
             from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                 PinocchioPhysicsEngine,
             )
@@ -321,6 +339,12 @@ class TestCrossEngineDriftControl:
         engine: Any = None
         if engine_name == "pinocchio":
             try:
+                import pinocchio as pin
+
+                # Verify Pinocchio is actually installed, not just mocked
+                if not hasattr(pin, "__version__"):
+                    pytest.skip("Pinocchio is mocked, not actually installed")
+
                 from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                     PinocchioPhysicsEngine,
                 )
