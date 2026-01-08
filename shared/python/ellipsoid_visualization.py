@@ -36,6 +36,11 @@ VELOCITY_ELLIPSOID_COLOR = 0x00FF88  # Green for velocity/mobility
 FORCE_ELLIPSOID_COLOR = 0xFF8800  # Orange for force transmission
 SINGULAR_ELLIPSOID_COLOR = 0xFF0000  # Red for near-singular
 
+# Numerical tolerances
+SINGULAR_VALUE_TOLERANCE = 1e-15  # [unitless] Threshold for near-zero singular values
+# Maximum force capability for singular directions (1000x max non-singular radius)
+FORCE_ELLIPSOID_SINGULAR_SCALE = 1000.0
+
 
 @dataclass
 class EllipsoidData:
@@ -121,7 +126,7 @@ def compute_velocity_ellipsoid(
         return None
 
     # Compute condition number
-    if sigma.min() > 1e-15:
+    if sigma.min() > SINGULAR_VALUE_TOLERANCE:
         kappa = sigma.max() / sigma.min()
     else:
         kappa = float("inf")
@@ -184,9 +189,14 @@ def compute_force_ellipsoid(
 
     # Force ellipsoid radii are INVERSE of velocity radii
     # This is because f = J^(-T) @ τ, so force capability is inversely related
-    force_radii = np.where(sigma > 1e-15, 1.0 / sigma, sigma.max() * 1000)
+    # For near-zero singular values, use FORCE_ELLIPSOID_SINGULAR_SCALE * max_radius
+    force_radii = np.where(
+        sigma > SINGULAR_VALUE_TOLERANCE,
+        1.0 / sigma,
+        sigma.max() * FORCE_ELLIPSOID_SINGULAR_SCALE,
+    )
 
-    if sigma.min() > 1e-15:
+    if sigma.min() > SINGULAR_VALUE_TOLERANCE:
         kappa = sigma.max() / sigma.min()
     else:
         kappa = float("inf")
