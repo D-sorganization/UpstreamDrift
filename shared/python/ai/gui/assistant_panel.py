@@ -549,6 +549,9 @@ class AIAssistantPanel(QWidget):
 
     def _scroll_to_bottom(self) -> None:
         """Scroll message area to bottom."""
+        # Guard against being called before _message_area is assigned
+        if not hasattr(self, "_message_area"):
+            return
         scroll = self._message_area
         scrollbar = scroll.verticalScrollBar()
         if scrollbar is not None:
