@@ -533,22 +533,31 @@ def _register_validation_tools(registry: ToolRegistry) -> None:
         """
         import importlib.util
 
+        def _check_module(name: str) -> bool:
+            """Safely check if a module is available."""
+            try:
+                return importlib.util.find_spec(name) is not None
+            except (ValueError, ModuleNotFoundError):
+                # ValueError: __spec__ is not set (partially initialized module)
+                # ModuleNotFoundError: module not found
+                return False
+
         engines = []
 
         # Check MuJoCo (avoid importing due to potential initialization issues)
-        if importlib.util.find_spec("mujoco") is not None:
+        if _check_module("mujoco"):
             engines.append({"name": "MuJoCo", "status": "available"})
         else:
             engines.append({"name": "MuJoCo", "status": "not installed"})
 
         # Check Drake
-        if importlib.util.find_spec("pydrake") is not None:
+        if _check_module("pydrake"):
             engines.append({"name": "Drake", "status": "available"})
         else:
             engines.append({"name": "Drake", "status": "not installed"})
 
         # Check Pinocchio
-        if importlib.util.find_spec("pinocchio") is not None:
+        if _check_module("pinocchio"):
             engines.append({"name": "Pinocchio", "status": "available"})
         else:
             engines.append({"name": "Pinocchio", "status": "not installed"})
