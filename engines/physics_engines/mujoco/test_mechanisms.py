@@ -44,6 +44,7 @@ def test_mechanism_hierarchy(inclined_plane_model: mujoco.MjModel) -> None:
 
 def test_joint_definitions(inclined_plane_model: mujoco.MjModel) -> None:
     """Verify joint types and axes."""
+
     # Helper to get joint ID
     def get_joint_id(name: str) -> int:
         return int(

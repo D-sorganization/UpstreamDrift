@@ -9,6 +9,7 @@ Supports:
 
 from __future__ import annotations
 
+import importlib.util
 import logging
 from pathlib import Path
 from typing import Any
@@ -33,8 +34,6 @@ except ImportError:
     H5PY_AVAILABLE = False
 
 # Check for C3D libraries (imported inside functions when needed)
-import importlib.util
-
 EZC3D_AVAILABLE = importlib.util.find_spec("ezc3d") is not None
 C3D_AVAILABLE = importlib.util.find_spec("c3d") is not None
 
@@ -180,6 +179,7 @@ def export_to_c3d(
         LOGGER.error(f"Failed to export to C3D: {e}")
         return False
 
+
 def export_recording_all_formats(
     base_path: str,
     data_dict: dict[str, Any],
@@ -211,7 +211,7 @@ def export_recording_all_formats(
                     else:
                         json_data[k] = v
 
-                with open(output_path, 'w') as f:
+                with open(output_path, "w") as f:
                     json.dump(json_data, f, indent=2)
                 success = True
 
@@ -221,12 +221,15 @@ def export_recording_all_formats(
 
                 # Flatten dictionary
                 flat_data = {}
-                if 'times' in data_dict:
-                    flat_data['time'] = data_dict['times']
+                if "times" in data_dict:
+                    flat_data["time"] = data_dict["times"]
 
                 for k, v in data_dict.items():
-                    if k == 'times': continue
-                    if isinstance(v, np.ndarray) and len(v) == len(data_dict.get('times', [])):
+                    if k == "times":
+                        continue
+                    if isinstance(v, np.ndarray) and len(v) == len(
+                        data_dict.get("times", [])
+                    ):
                         if v.ndim == 1:
                             flat_data[k] = v
                         elif v.ndim == 2:
@@ -253,6 +256,7 @@ def export_recording_all_formats(
 
     return results
 
+
 def get_available_export_formats() -> dict[str, dict[str, Any]]:
     """Get information about available export formats."""
     return {
@@ -265,7 +269,7 @@ def get_available_export_formats() -> dict[str, dict[str, Any]]:
         "csv": {
             "name": "CSV",
             "extension": ".csv",
-            "available": True, # Pandas assumption
+            "available": True,  # Pandas assumption
             "description": "Comma-Separated Values - spreadsheet compatible",
         },
         "mat": {

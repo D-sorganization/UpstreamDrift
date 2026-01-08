@@ -185,6 +185,8 @@ exclude = [
     "engines/physics_engines/mujoco/docker_test_dependencies.py",
     "engines/physics_engines/mujoco/fix_linting.py",
     "engines/physics_engines/mujoco/docker/",
+    # PR #316: New dashboard module - types to be refined in follow-up PR
+    "shared/python/dashboard/",
 ]
 
 

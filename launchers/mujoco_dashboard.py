@@ -8,7 +8,10 @@ import logging
 import sys
 
 from PyQt6.QtWidgets import QApplication
-from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import MuJoCoPhysicsEngine
+
+from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+    MuJoCoPhysicsEngine,
+)
 from shared.python.dashboard.window import UnifiedDashboardWindow
 
 
@@ -24,10 +27,13 @@ def main() -> None:
     # Load model if possible
     # engine.load_from_path(...)
 
-    window = UnifiedDashboardWindow(engine, title="MuJoCo Golf Analysis Dashboard (Unified)")
+    window = UnifiedDashboardWindow(
+        engine, title="MuJoCo Golf Analysis Dashboard (Unified)"
+    )
     window.show()
 
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

@@ -46,9 +46,7 @@ class MuscleGroup:
         self.muscles: dict[str, HillMuscleModel] = {}
         self.attachments: dict[str, MuscleAttachment] = {}
 
-    def add_muscle(
-        self, name: str, muscle: HillMuscleModel, moment_arm: float
-    ) -> None:
+    def add_muscle(self, name: str, muscle: HillMuscleModel, moment_arm: float) -> None:
         """Add a muscle to the group.
 
         Args:
@@ -84,11 +82,12 @@ class MuscleGroup:
 
             # Create temporary state object for force computation
             from shared.python.hill_muscle import MuscleState
+
             state = MuscleState(
                 activation=activations[name],
                 l_CE=l_CE,
                 v_CE=v_CE,
-                l_MT=0.0 # Not used for force computation in this simplified call
+                l_MT=0.0,  # Not used for force computation in this simplified call
             )
 
             # Compute force
@@ -159,7 +158,9 @@ def create_elbow_muscle_system() -> AntagonistPair:
 
     # Brachialis (synergist)
     brachialis_params = MuscleParameters(F_max=800.0, l_opt=0.12, l_slack=0.10)
-    flexors.add_muscle("brachialis", HillMuscleModel(brachialis_params), moment_arm=0.03)
+    flexors.add_muscle(
+        "brachialis", HillMuscleModel(brachialis_params), moment_arm=0.03
+    )
 
     # Extensors (Triceps)
     extensors = MuscleGroup("Elbow Extensors")
@@ -178,11 +179,7 @@ if __name__ == "__main__":
     extensor_act = {"triceps": 0.2}
 
     # Assume isometric state at optimal lengths
-    states = {
-        "biceps": (0.15, 0.0),
-        "brachialis": (0.12, 0.0),
-        "triceps": (0.18, 0.0)
-    }
+    states = {"biceps": (0.15, 0.0), "brachialis": (0.12, 0.0), "triceps": (0.18, 0.0)}
 
     tau_net = elbow.compute_net_torque(flexor_act, extensor_act, states)
 

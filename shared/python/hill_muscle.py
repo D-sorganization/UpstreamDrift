@@ -105,7 +105,9 @@ class HillMuscleModel:
             return 0.0
         # Typical exponential passive curve
         k_passive = 4.0
-        return float((np.exp(k_passive * (l_norm - 1.0)) - 1.0) / (np.exp(k_passive) - 1.0))
+        return float(
+            (np.exp(k_passive * (l_norm - 1.0)) - 1.0) / (np.exp(k_passive) - 1.0)
+        )
 
     def force_velocity(self, v_norm: float) -> float:
         """Force-velocity relationship (Hill's Hyperbola).
@@ -191,10 +193,7 @@ if __name__ == "__main__":
 
     # Test state
     state = MuscleState(
-        activation=0.8,
-        l_CE=0.15,  # At optimal length
-        v_CE=0.0,   # Isometric
-        l_MT=0.35
+        activation=0.8, l_CE=0.15, v_CE=0.0, l_MT=0.35  # At optimal length  # Isometric
     )
 
     force = muscle.compute_force(state)

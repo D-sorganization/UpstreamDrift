@@ -10,18 +10,18 @@ Provides a unified interface for:
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from PyQt6 import QtCore, QtWidgets
 
-# Updated import to use generic export module
-from shared.python.export import (
-    get_available_export_formats,
-    export_recording_all_formats
-)
 from shared.python.dashboard.recorder import GenericPhysicsRecorder
 from shared.python.dashboard.runner import SimulationRunner
 from shared.python.dashboard.widgets import ControlPanel, LivePlotWidget
+
+# Updated import to use generic export module
+from shared.python.export import (
+    export_recording_all_formats,
+    get_available_export_formats,
+)
 from shared.python.interfaces import PhysicsEngine
 from shared.python.plotting import GolfSwingPlotter, MplCanvas
 
@@ -102,15 +102,17 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
         # Plot Selector
         self.plot_type_combo = QtWidgets.QComboBox()
-        self.plot_type_combo.addItems([
-            "Joint Angles",
-            "Joint Velocities",
-            "Joint Torques",
-            "Energies",
-            "Club Head Speed",
-            "Angular Momentum",
-            "Power Flow"
-        ])
+        self.plot_type_combo.addItems(
+            [
+                "Joint Angles",
+                "Joint Velocities",
+                "Joint Torques",
+                "Energies",
+                "Club Head Speed",
+                "Angular Momentum",
+                "Power Flow",
+            ]
+        )
         layout.addWidget(self.plot_type_combo)
 
         btn_refresh = QtWidgets.QPushButton("Refresh Plot")
@@ -130,13 +132,15 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         layout.addWidget(btn_compute)
 
         self.analysis_combo = QtWidgets.QComboBox()
-        self.analysis_combo.addItems([
-            "ZTCF vs ZVCF",
-            "Induced Acceleration (Gravity)",
-            "Induced Acceleration (Control)",
-            "Club Induced Acceleration Breakdown",
-            "Stability Metrics"
-        ])
+        self.analysis_combo.addItems(
+            [
+                "ZTCF vs ZVCF",
+                "Induced Acceleration (Gravity)",
+                "Induced Acceleration (Control)",
+                "Club Induced Acceleration Breakdown",
+                "Stability Metrics",
+            ]
+        )
         layout.addWidget(self.analysis_combo)
 
         btn_show = QtWidgets.QPushButton("Show Analysis")
@@ -241,18 +245,26 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         try:
             if analysis_type == "ZTCF vs ZVCF":
                 # Plot for Joint 0 as example, or add selector
-                self.plotter.plot_counterfactual_comparison(self.analysis_canvas.fig, "dual", metric_idx=0)
+                self.plotter.plot_counterfactual_comparison(
+                    self.analysis_canvas.fig, "dual", metric_idx=0
+                )
             elif analysis_type == "Induced Acceleration (Gravity)":
-                self.plotter.plot_induced_acceleration(self.analysis_canvas.fig, "gravity")
+                self.plotter.plot_induced_acceleration(
+                    self.analysis_canvas.fig, "gravity"
+                )
             elif analysis_type == "Induced Acceleration (Control)":
-                self.plotter.plot_induced_acceleration(self.analysis_canvas.fig, "control")
+                self.plotter.plot_induced_acceleration(
+                    self.analysis_canvas.fig, "control"
+                )
             elif analysis_type == "Club Induced Acceleration Breakdown":
-                self.plotter.plot_club_induced_acceleration(self.analysis_canvas.fig, breakdown_mode=True)
+                self.plotter.plot_club_induced_acceleration(
+                    self.analysis_canvas.fig, breakdown_mode=True
+                )
             elif analysis_type == "Stability Metrics":
                 self.plotter.plot_stability_metrics(self.analysis_canvas.fig)
         except Exception as e:
             ax = self.analysis_canvas.fig.add_subplot(111)
-            ax.text(0.5, 0.5, f"Error: {e}", ha='center')
+            ax.text(0.5, 0.5, f"Error: {e}", ha="center")
 
         self.analysis_canvas.draw()
 
@@ -267,7 +279,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         selected_formats = []
         for i in range(self.export_formats_list.count()):
             item = self.export_formats_list.item(i)
-            if item.checkState() == QtCore.Qt.CheckState.Checked:
+            if item is not None and item.checkState() == QtCore.Qt.CheckState.Checked:
                 selected_formats.append(item.data(QtCore.Qt.ItemDataRole.UserRole))
 
         data = self.recorder.get_data_dict()

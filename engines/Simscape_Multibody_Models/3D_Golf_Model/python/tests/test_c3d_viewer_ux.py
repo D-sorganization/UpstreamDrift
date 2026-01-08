@@ -132,12 +132,9 @@ def test_c3d_viewer_drag_and_drop(qapp: QApplication) -> None:
         assert window.acceptDrops()
 
         # Mock the load_c3d_file_from_path method
-        with patch.object(
-            window, "load_c3d_file_from_path"
-        ) as mock_load:
+        with patch.object(window, "load_c3d_file_from_path") as mock_load:
             # Create a mock drop event
             from PyQt6.QtCore import QMimeData, QUrl
-            from PyQt6.QtGui import QDropEvent
 
             mime_data = QMimeData()
             test_path = "/path/to/drop_test.c3d"

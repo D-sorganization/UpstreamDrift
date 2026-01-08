@@ -9,6 +9,7 @@ import logging
 import time
 
 from PyQt6 import QtCore
+
 from shared.python.dashboard.recorder import GenericPhysicsRecorder
 from shared.python.interfaces import PhysicsEngine
 

@@ -3,12 +3,12 @@
 Launches the Unified Dashboard with the Drake Physics Engine.
 """
 
+import argparse
 import logging
 import sys
-import argparse
-from pathlib import Path
 
 from PyQt6.QtWidgets import QApplication, QFileDialog
+
 from engines.physics_engines.drake.python.drake_physics_engine import DrakePhysicsEngine
 from shared.python.dashboard.window import UnifiedDashboardWindow
 
@@ -18,7 +18,9 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO)
 
     parser = argparse.ArgumentParser(description="Drake Golf Analysis Dashboard")
-    parser.add_argument("--model", type=str, help="Path to model file (URDF/SDF)", default=None)
+    parser.add_argument(
+        "--model", type=str, help="Path to model file (URDF/SDF)", default=None
+    )
     args = parser.parse_args()
 
     app = QApplication(sys.argv)
@@ -51,6 +53,7 @@ def main() -> None:
     window.show()
 
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

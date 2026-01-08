@@ -7,7 +7,10 @@ import logging
 import sys
 
 from PyQt6.QtWidgets import QApplication
-from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import PinocchioPhysicsEngine
+
+from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+    PinocchioPhysicsEngine,
+)
 from shared.python.dashboard.window import UnifiedDashboardWindow
 
 
@@ -27,6 +30,7 @@ def main() -> None:
     window.show()
 
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

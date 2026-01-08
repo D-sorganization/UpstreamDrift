@@ -9,9 +9,8 @@ from __future__ import annotations
 
 import logging
 
-import numpy as np
-from matplotlib.figure import Figure
 from PyQt6 import QtCore, QtWidgets
+
 from shared.python.dashboard.recorder import GenericPhysicsRecorder
 from shared.python.plotting import MplCanvas
 

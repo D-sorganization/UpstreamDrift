@@ -9,6 +9,7 @@ import logging
 from typing import Any
 
 import numpy as np
+
 from shared.python.interfaces import PhysicsEngine
 
 LOGGER = logging.getLogger(__name__)
@@ -145,9 +146,7 @@ class GenericPhysicsRecorder:
             return np.array([]), np.array([])
         return self.data["induced_accelerations"][source_name]
 
-    def get_counterfactual_series(
-        self, cf_name: str
-    ) -> tuple[np.ndarray, np.ndarray]:
+    def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Get counterfactual series."""
         if cf_name not in self.data["counterfactuals"]:
             return np.array([]), np.array([])
