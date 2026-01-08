@@ -10,8 +10,6 @@ import pytest
 from shared.python.output_manager import (
     OutputFormat,
     OutputManager,
-    load_results,
-    save_results,
 )
 
 
@@ -149,30 +147,25 @@ def test_cleanup_old_files(temp_output_dir):
     assert new_file.exists()
 
 
-def test_convenience_functions(temp_output_dir, monkeypatch):
+def test_convenience_functions(tmp_path, monkeypatch):
     """Test the top-level save_results and load_results functions."""
-    # They create a new OutputManager internally, so we need to patch default path or rely on default
-    # Monkeypatch OutputManager class used in the module
+    # The convenience functions create a new OutputManager internally.
+    # We can test them by using unittest.mock.patch as a context manager.
+    from unittest.mock import MagicMock, patch
 
-    # Actually, OutputManager default uses project root or cwd.
-    # We can just verify they run, but better to control the path.
-    # The convenience functions instantiate OutputManager() without args.
+    import shared.python.output_manager as om_module
 
-    # Let's mock OutputManager in shared.python.output_manager
-    class MockManager:
-        def __init__(self, base_path=None):
-            pass
+    mock_manager_instance = MagicMock()
+    mock_manager_instance.save_simulation_results.return_value = Path("mock_path.csv")
+    mock_manager_instance.load_simulation_results.return_value = "mock_result"
 
-        def save_simulation_results(self, *args):
-            return Path("mock_path.csv")
+    # Use patch as context manager to mock OutputManager class
+    with patch.object(om_module, "OutputManager", return_value=mock_manager_instance):
+        path = om_module.save_results([1, 2], "test")
+        assert str(path) == "mock_path.csv"
 
-        def load_simulation_results(self, *args):
-            return "mock_result"
+        res = om_module.load_results("test")
+        assert res == "mock_result"
 
-    monkeypatch.setattr("shared.python.output_manager.OutputManager", MockManager)
-
-    path = save_results([1, 2], "test")
-    assert path == "mock_path.csv"
-
-    res = load_results("test")
-    assert res == "mock_result"
+    mock_manager_instance.save_simulation_results.assert_called_once()
+    mock_manager_instance.load_simulation_results.assert_called_once()
