@@ -1,0 +1,75 @@
+Windows fatal exception: access violation
+
+Current thread 0x00008894 (most recent call first):
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\ctypes\__init__.py", line 390 in __init__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 210 in _load_all_bundled_plugins
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py", line 217 in <module>
+  File "<frozen importlib._bootstrap>", line 488 in _call_with_frames_removed
+  File "<frozen importlib._bootstrap_external>", line 1026 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "C:\Users\diete\Repositories\Golf_Modeling_Suite\tests\unit\test_urdf_io.py", line 10 in <module>
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\assertion\rewrite.py", line 186 in exec_module
+  File "<frozen importlib._bootstrap>", line 935 in _load_unlocked
+  File "<frozen importlib._bootstrap>", line 1331 in _find_and_load_unlocked
+  File "<frozen importlib._bootstrap>", line 1360 in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1387 in _gcd_import
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\importlib\__init__.py", line 88 in import_module
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\pathlib.py", line 587 in import_path
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 498 in importtestmodule
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 551 in _getobj
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 280 in obj
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 567 in _register_setup_module_fixture
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\python.py", line 554 in collect
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 389 in collect
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 344 in from_call
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 391 in pytest_make_collect_report
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\runner.py", line 567 in collect_one_node
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 839 in _collect_one_node
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 974 in genitems
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 813 in perform_collect
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 353 in pytest_collection
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 342 in _main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 289 in wrap_session
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\main.py", line 336 in pytest_cmdline_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_callers.py", line 121 in _multicall
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_manager.py", line 120 in _hookexec
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\pluggy\_hooks.py", line 512 in __call__
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 175 in main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Lib\site-packages\_pytest\config\__init__.py", line 201 in console_main
+  File "C:\Users\diete\AppData\Local\Programs\Python\Python313\Scripts\pytest.exe\__main__.py", line 7 in <module>
+  File "<frozen runpy>", line 88 in _run_code
+  File "<frozen runpy>", line 198 in _run_module_as_main
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-8.4.1, pluggy-1.6.0
+benchmark: 4.0.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+PyQt6 6.9.1 -- Qt runtime 6.9.1 -- Qt compiled 6.9.0
+rootdir: C:\Users\diete\Repositories\Golf_Modeling_Suite
+configfile: pyproject.toml
+plugins: anyio-4.9.0, benchmark-4.0.0, cov-7.0.0, mock-3.15.1, qt-4.5.0, timeout-2.3.1
+collected 0 items / 1 error
+
+=================================== ERRORS ====================================
+_________________ ERROR collecting tests/unit/test_urdf_io.py _________________
+tests\unit\test_urdf_io.py:10: in <module>
+    import mujoco
+..\..\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py:217: in <module>
+    _load_all_bundled_plugins()
+..\..\AppData\Local\Programs\Python\Python313\Lib\site-packages\mujoco\__init__.py:210: in _load_all_bundled_plugins
+    PLUGIN_HANDLES.append(ctypes.CDLL(os.path.join(directory, filename)))
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+..\..\AppData\Local\Programs\Python\Python313\Lib\ctypes\__init__.py:390: in __init__
+    self._handle = _dlopen(self._name, mode)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+E   OSError: [WinError 1114] A dynamic link library (DLL) initialization routine failed
+=========================== short test summary info ===========================
+ERROR tests/unit/test_urdf_io.py - OSError: [WinError 1114] A dynamic link li...
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+==================== no tests collected, 1 error in 0.89s =====================

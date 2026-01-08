@@ -1543,6 +1543,359 @@ class GolfSwingPlotter:
         fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
         fig.tight_layout()
 
+    def plot_poincare_map_3d(
+        self,
+        fig: Figure,
+        dimensions: list[tuple[str, int]],
+        section_condition: tuple[str, int, float] = ("velocity", 0, 0.0),
+        direction: str = "both",  # 'positive', 'negative', 'both'
+        title: str | None = None,
+    ) -> None:
+        """Plot 3D Poincaré Map (Poincaré Section).
+
+        Visualizes the intersection of the system trajectory with a defined lower-dimensional subspace.
+        Points are plotted when the variable defined in `section_condition` crosses the specified value.
+
+        Args:
+            fig: Matplotlib figure
+            dimensions: List of 3 (data_type, index) tuples for X, Y, Z axes.
+                        data_type can be 'position', 'velocity', 'acceleration', 'torque'.
+            section_condition: Tuple of (data_type, index, value) defining the section plane.
+            direction: Crossing direction ('positive', 'negative', 'both').
+            title: Optional title.
+        """
+        if len(dimensions) != 3:
+            ax = fig.add_subplot(111)
+            ax.text(
+                0.5, 0.5, "Must specify exactly 3 dimensions", ha="center", va="center"
+            )
+            return
+
+        # Helper to get data array
+        def get_data(dtype: str, idx: int) -> np.ndarray | None:
+            if dtype == "position":
+                _, d = self.recorder.get_time_series("joint_positions")
+            elif dtype == "velocity":
+                _, d = self.recorder.get_time_series("joint_velocities")
+            elif dtype == "acceleration":
+                _, d = self.recorder.get_time_series("joint_accelerations")
+            elif dtype == "torque":
+                _, d = self.recorder.get_time_series("joint_torques")
+            else:
+                return None
+            d = np.asarray(d)
+            if d.ndim > 1 and idx < d.shape[1]:
+                return d[:, idx]
+            return None
+
+        # Get condition variable
+        cond_type, cond_idx, cond_val = section_condition
+        cond_data = get_data(cond_type, cond_idx)
+        times, _ = self.recorder.get_time_series("joint_positions")  # Time base
+
+        if cond_data is None or len(cond_data) < 2:
+            ax = fig.add_subplot(111)
+            ax.text(
+                0.5,
+                0.5,
+                f"Condition data {cond_type}[{cond_idx}] unavailable",
+                ha="center",
+                va="center",
+            )
+            return
+
+        # Find crossings
+        # Shifted array
+        diff = cond_data - cond_val
+        crossings = []
+
+        for i in range(len(diff) - 1):
+            if diff[i] * diff[i + 1] <= 0:  # Crossing detected
+                # Check direction
+                if diff[i] < diff[i + 1] and direction in ["positive", "both"]:
+                    crossings.append(i)
+                elif diff[i] > diff[i + 1] and direction in ["negative", "both"]:
+                    crossings.append(i)
+
+        if not crossings:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No section crossings found", ha="center", va="center")
+            return
+
+        # Interpolate state at crossings
+        points = []
+        point_times = []
+
+        for i in crossings:
+            # Linear interpolation factor
+            # y = y0 + (y1-y0) * alpha
+            # 0 = d0 + (d1-d0) * alpha => alpha = -d0 / (d1-d0)
+            denom = diff[i + 1] - diff[i]
+            if abs(denom) < 1e-9:
+                alpha = 0.5
+            else:
+                alpha = -diff[i] / denom
+
+            t_cross = times[i] + alpha * (times[i + 1] - times[i])
+            point_times.append(t_cross)
+
+            pt_coords = []
+            for dim_type, dim_idx in dimensions:
+                data = get_data(dim_type, dim_idx)
+                if data is None:
+                    pt_coords.append(0.0)
+                else:
+                    val = data[i] + alpha * (data[i + 1] - data[i])
+                    # Convert rad to deg for angles?
+                    # Generally yes for plots, but let's be consistent with type
+                    if dim_type in ["position", "velocity", "acceleration"]:
+                        val = np.rad2deg(val)
+                    pt_coords.append(val)
+            points.append(pt_coords)
+
+        points_arr = np.array(points)
+
+        ax = fig.add_subplot(111, projection="3d")
+
+        # Scatter plot
+        sc = ax.scatter(
+            points_arr[:, 0],
+            points_arr[:, 1],
+            points_arr[:, 2],
+            c=point_times,
+            cmap="viridis",
+            s=50,
+            edgecolors="k",
+        )
+
+        # Labels
+        labels = []
+        for dt, di in dimensions:
+            name = self.get_joint_name(di)
+            unit = (
+                "deg"
+                if dt == "position"
+                else "deg/s" if dt == "velocity" else "Nm" if dt == "torque" else ""
+            )
+            labels.append(f"{name} {dt[:3]} ({unit})")
+
+        ax.set_xlabel(labels[0], fontsize=9, fontweight="bold")
+        ax.set_ylabel(labels[1], fontsize=9, fontweight="bold")
+        ax.set_zlabel(labels[2], fontsize=9, fontweight="bold")  # type: ignore
+
+        # Title
+        cond_name = self.get_joint_name(cond_idx)
+        if title is None:
+            title = f"Poincaré Map\nSection: {cond_name} {cond_type} = {cond_val}"
+
+        ax.set_title(title, fontsize=12, fontweight="bold")
+        fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
+        fig.tight_layout()
+
+    def plot_phase_space_reconstruction(
+        self,
+        fig: Figure,
+        joint_idx: int = 0,
+        delay: int = 10,
+        embedding_dim: int = 3,
+        signal_type: str = "position",
+    ) -> None:
+        """Plot Phase Space Reconstruction using Time-Delay Embedding (Takens' Theorem).
+
+        Visualizes the attractor structure from a single scalar time series.
+
+        Args:
+            fig: Matplotlib figure
+            joint_idx: Index of joint to analyze
+            delay: Time delay (lag) in samples
+            embedding_dim: Embedding dimension (2 or 3)
+            signal_type: 'position', 'velocity', or 'torque'
+        """
+        # Get data
+        if signal_type == "position":
+            times, data_full = self.recorder.get_time_series("joint_positions")
+            data_full = np.rad2deg(np.asarray(data_full))
+        elif signal_type == "velocity":
+            times, data_full = self.recorder.get_time_series("joint_velocities")
+            data_full = np.rad2deg(np.asarray(data_full))
+        else:
+            times, data_full = self.recorder.get_time_series("joint_torques")
+            data_full = np.asarray(data_full)
+
+        if len(times) == 0 or data_full.ndim < 2 or joint_idx >= data_full.shape[1]:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        x = data_full[:, joint_idx]
+        N = len(x)
+
+        if N < delay * (embedding_dim - 1) + 1:
+            ax = fig.add_subplot(111)
+            ax.text(
+                0.5,
+                0.5,
+                "Time series too short for embedding",
+                ha="center",
+                va="center",
+            )
+            return
+
+        # Create embedded vectors
+        # X(t) = [x(t), x(t-tau), x(t-2tau)]
+        # Use appropriate slicing
+        # Valid length: N - delay*(dim-1)
+        valid_len = N - delay * (embedding_dim - 1)
+
+        vectors = np.zeros((valid_len, embedding_dim))
+        for d in range(embedding_dim):
+            # For d=0, start at 0, end at valid_len
+            # For d=1, start at delay, end at valid_len + delay
+            # Wait, standard notation x(t), x(t+tau)...
+            # Let's do x(t), x(t+tau), x(t+2tau)
+            start = d * delay
+            end = start + valid_len
+            vectors[:, d] = x[start:end]
+
+        # Time for color
+        plot_times = times[:valid_len]
+
+        if embedding_dim == 3:
+            ax = fig.add_subplot(111, projection="3d")
+            sc = ax.scatter(
+                vectors[:, 0],
+                vectors[:, 1],
+                vectors[:, 2],
+                c=plot_times,
+                cmap="magma",
+                s=10,
+                alpha=0.6,
+            )
+            ax.plot(
+                vectors[:, 0],
+                vectors[:, 1],
+                vectors[:, 2],
+                color="gray",
+                alpha=0.2,
+                linewidth=0.5,
+            )
+
+            ax.set_xlabel("x(t)", fontsize=10)
+            ax.set_ylabel(f"x(t+{delay})", fontsize=10)
+            ax.set_zlabel(f"x(t+{2*delay})", fontsize=10)  # type: ignore
+        else:
+            ax = fig.add_subplot(111)
+            sc = ax.scatter(
+                vectors[:, 0],
+                vectors[:, 1],
+                c=plot_times,
+                cmap="magma",
+                s=10,
+                alpha=0.6,
+            )
+            ax.plot(
+                vectors[:, 0], vectors[:, 1], color="gray", alpha=0.2, linewidth=0.5
+            )
+
+            ax.set_xlabel("x(t)", fontsize=10)
+            ax.set_ylabel(f"x(t+{delay})", fontsize=10)
+
+        joint_name = self.get_joint_name(joint_idx)
+        ax.set_title(
+            f"Reconstructed Phase Space: {joint_name}\n(Lag={delay}, Dim={embedding_dim})",
+            fontsize=12,
+            fontweight="bold",
+        )
+        fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
+        fig.tight_layout()
+
+    def plot_muscle_synergies(
+        self,
+        fig: Figure,
+        synergy_result: Any,  # Expects SynergyResult object
+    ) -> None:
+        """Plot extracted muscle synergies (Weights and Activations).
+
+        Args:
+            fig: Matplotlib figure
+            synergy_result: SynergyResult object from MuscleSynergyAnalyzer
+        """
+        if not hasattr(synergy_result, "weights") or not hasattr(
+            synergy_result, "activations"
+        ):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Invalid SynergyResult object", ha="center", va="center")
+            return
+
+        n_synergies = synergy_result.n_synergies
+        n_muscles = synergy_result.weights.shape[0]
+
+        # Create grid: Left column (Weights), Right column (Activations)
+        # One row per synergy
+        gs = fig.add_gridspec(
+            n_synergies, 2, width_ratios=[1, 2], hspace=0.4, wspace=0.3
+        )
+
+        times, _ = self.recorder.get_time_series("joint_positions")
+        # Ensure times matches activation length
+        if len(times) != synergy_result.activations.shape[1]:
+            # Resample times to match
+            times = np.linspace(
+                times[0], times[-1], synergy_result.activations.shape[1]
+            )
+
+        colors = [
+            self.colors["primary"],
+            self.colors["secondary"],
+            self.colors["tertiary"],
+            self.colors["quaternary"],
+            self.colors["quinary"],
+            self.colors["senary"],
+        ]
+
+        muscle_names = synergy_result.muscle_names or [
+            f"M{i}" for i in range(n_muscles)
+        ]
+
+        for i in range(n_synergies):
+            color = colors[i % len(colors)]
+
+            # 1. Weights (Bar chart)
+            ax_w = fig.add_subplot(gs[i, 0])
+            weights = synergy_result.weights[:, i]
+
+            y_pos = np.arange(n_muscles)
+            ax_w.barh(y_pos, weights, color=color, alpha=0.8)
+            ax_w.set_yticks(y_pos)
+
+            if i == n_synergies - 1:
+                ax_w.set_xlabel("Weight", fontsize=9)
+
+            ax_w.set_yticklabels(muscle_names, fontsize=8)
+            ax_w.invert_yaxis()  # Top-down
+            ax_w.set_title(f"Synergy {i+1} Weights", fontsize=10, fontweight="bold")
+            ax_w.grid(True, axis="x", alpha=0.3)
+
+            # 2. Activation (Time series)
+            ax_h = fig.add_subplot(gs[i, 1])
+            activation = synergy_result.activations[i, :]
+
+            ax_h.plot(times, activation, color=color, linewidth=2)
+            ax_h.fill_between(times, 0, activation, color=color, alpha=0.2)
+
+            if i == n_synergies - 1:
+                ax_h.set_xlabel("Time (s)", fontsize=10)
+
+            ax_h.set_title(f"Synergy {i+1} Activation", fontsize=10, fontweight="bold")
+            ax_h.grid(True, alpha=0.3)
+
+        fig.suptitle(
+            f"Muscle Synergies (VAF: {synergy_result.vaf*100:.1f}%)",
+            fontsize=14,
+            fontweight="bold",
+        )
+        # fig.tight_layout() # Handled by hspace/wspace roughly
+
     def plot_correlation_matrix(
         self,
         fig: Figure,

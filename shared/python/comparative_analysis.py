@@ -253,3 +253,92 @@ class ComparativeSwingAnalyzer:
 
         report = {"swing_a": self.name_a, "swing_b": self.name_b, "metrics": metrics}
         return report
+
+    def compute_dtw_distance(
+        self,
+        field_name: str,
+        joint_idx: int | None = None,
+        radius: int = 10,
+    ) -> tuple[float, list[tuple[int, int]]]:
+        """Compute Dynamic Time Warping (DTW) distance and alignment path.
+
+        DTW measures similarity between two temporal sequences which may vary in speed.
+
+        Args:
+            field_name: Name of data field.
+            joint_idx: Index if multidimensional.
+            radius: Sakoe-Chiba band radius (constraint window).
+
+        Returns:
+            Tuple of (distance, path). Path is list of (i, j) indices.
+        """
+        # Get data
+        _, data_a = self.recorder_a.get_time_series(field_name)
+        _, data_b = self.recorder_b.get_time_series(field_name)
+
+        data_a = np.asarray(data_a)
+        data_b = np.asarray(data_b)
+
+        # Handle dimensions
+        if joint_idx is not None:
+            if data_a.ndim > 1 and joint_idx < data_a.shape[1]:
+                data_a = data_a[:, joint_idx]
+            if data_b.ndim > 1 and joint_idx < data_b.shape[1]:
+                data_b = data_b[:, joint_idx]
+
+        # Simple Euclidean distance
+        # Standardize for scale invariance?
+        # Usually DTW is done on normalized data (z-score) to focus on shape.
+
+        if np.std(data_a) > 1e-6:
+            data_a = (data_a - np.mean(data_a)) / np.std(data_a)
+        if np.std(data_b) > 1e-6:
+            data_b = (data_b - np.mean(data_b)) / np.std(data_b)
+
+        # Implementation of DTW with Sakoe-Chiba band
+        N, M = len(data_a), len(data_b)
+        cost_matrix = np.full((N, M), np.inf)
+
+        cost_matrix[0, 0] = abs(data_a[0] - data_b[0])
+
+        for i in range(N):
+            start = max(0, i - radius)
+            end = min(M, i + radius + 1)
+            for j in range(start, end):
+                if i == 0 and j == 0:
+                    continue
+
+                cost = abs(data_a[i] - data_b[j])
+
+                prev_costs = []
+                if i > 0:
+                    prev_costs.append(cost_matrix[i - 1, j])  # Insertion
+                if j > 0:
+                    prev_costs.append(cost_matrix[i, j - 1])  # Deletion
+                if i > 0 and j > 0:
+                    prev_costs.append(cost_matrix[i - 1, j - 1])  # Match
+
+                if prev_costs:
+                    cost_matrix[i, j] = cost + min(prev_costs)
+
+        distance = float(cost_matrix[N - 1, M - 1])
+
+        # Backtrack to find path
+        path = []
+        i, j = N - 1, M - 1
+        path.append((i, j))
+        while i > 0 or j > 0:
+            options = []
+            if i > 0:
+                options.append((cost_matrix[i - 1, j], (i - 1, j)))
+            if j > 0:
+                options.append((cost_matrix[i, j - 1], (i, j - 1)))
+            if i > 0 and j > 0:
+                options.append((cost_matrix[i - 1, j - 1], (i - 1, j - 1)))
+
+            # Select min cost neighbor
+            _, (i, j) = min(options, key=lambda x: x[0])
+            path.append((i, j))
+
+        path.reverse()
+        return distance, path
