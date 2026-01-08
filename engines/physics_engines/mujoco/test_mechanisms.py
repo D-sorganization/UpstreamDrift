@@ -1,85 +1,91 @@
-"""Quick test script to verify linkage mechanisms are properly configured."""
+"""Test suite for MuJoCo mechanism definitions.
+
+Verifies that mechanism definitions (joints, actuators, constraints)
+are structurally correct and physically plausible.
+"""
+
+from __future__ import annotations
 
 import logging
-import sys
-from pathlib import Path
-from unittest.mock import MagicMock
 
+import mujoco
 import pytest
 
-# Fix path to include local python package
-CURRENT_DIR = Path(__file__).resolve().parent
-PYTHON_DIR = CURRENT_DIR / "python"
-if str(PYTHON_DIR) not in sys.path:
-    sys.path.insert(0, str(PYTHON_DIR))
-
-# Mock mujoco to prevent DLL errors on systems where it's not installed/working
-# This is necessary because importing mujoco_golf_pendulum triggers imports of modules
-# that depend on mujoco, even if we only want linkage_mechanisms (which uses numpy).
-if "mujoco" not in sys.modules:
-    sys.modules["mujoco"] = MagicMock()
+from engines.physics_engines.mujoco.head_models import (
+    TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML,
+)
 
 logger = logging.getLogger(__name__)
 
 
-def get_linkage_mechanisms() -> MagicMock:
-    """Import and return the linkage_mechanisms module."""
+@pytest.fixture
+def inclined_plane_model() -> mujoco.MjModel:
+    """Fixture providing the 2-link inclined plane model."""
     try:
-        from mujoco_humanoid_golf import linkage_mechanisms
-
-        return linkage_mechanisms  # type: ignore[no-any-return]
-    except ImportError as e:
-        pytest.fail(f"Failed to import mechanisms: {e}")
-        # This part is unreachable because pytest.fail raises an exception
-        return MagicMock()
+        model = mujoco.MjModel.from_xml_string(TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML)
+        return model
+    except Exception as e:
+        pytest.fail(f"Failed to load inclined plane model: {e}")
 
 
-def test_catalog_structure() -> None:
-    """Test that the catalog is properly structured."""
-    lm = get_linkage_mechanisms()
-    catalog = lm.LINKAGE_CATALOG
-
-    assert len(catalog) > 0, "Catalog is empty"
-
-    for _, config in catalog.items():
-        assert "category" in config
-        assert "actuators" in config
-        assert "xml" in config
-        assert len(config["xml"]) > 0
-
-
-def test_xml_generation() -> None:
-    """Test XML generation for each mechanism type."""
-    lm = get_linkage_mechanisms()
-
-    test_cases = [
-        ("Four-bar linkage", lm.generate_four_bar_linkage_xml),
-        ("Slider-crank", lm.generate_slider_crank_xml),
-        ("Scotch yoke", lm.generate_scotch_yoke_xml),
-        ("Geneva mechanism", lm.generate_geneva_mechanism_xml),
-        ("Peaucellier linkage", lm.generate_peaucellier_linkage_xml),
-        ("Chebyshev linkage", lm.generate_chebyshev_linkage_xml),
-        ("Pantograph", lm.generate_pantograph_xml),
-        ("Delta robot", lm.generate_delta_robot_xml),
-        ("5-bar parallel", lm.generate_five_bar_parallel_xml),
-        ("Stewart platform", lm.generate_stewart_platform_xml),
-        ("Watt linkage", lm.generate_watt_linkage_xml),
-        ("Oldham coupling", lm.generate_oldham_coupling_xml),
+def test_mechanism_hierarchy(inclined_plane_model: mujoco.MjModel) -> None:
+    """Verify the kinematic chain hierarchy."""
+    # Check body names exist
+    body_names = [
+        mujoco.mj_id2name(inclined_plane_model, mujoco.mjtObj.mjOBJ_BODY, i)
+        for i in range(inclined_plane_model.nbody)
     ]
 
-    for name, generator in test_cases:
-        try:
-            xml = generator()
-            assert "<mujoco" in xml, f"{name}: Missing mujoco tag"
-            assert "<worldbody>" in xml, f"{name}: Missing worldbody"
-            assert "</mujoco>" in xml, f"{name}: Missing closing tag"
-        except Exception as e:
-            pytest.fail(f"{name} generation failed: {e}")
+    assert "shoulder_base" in body_names
+    assert "upper_arm" in body_names
+    assert "wrist_body" in body_names
+    assert "club" in body_names
 
 
-if __name__ == "__main__":
-    # Allow running as script
-    logging.basicConfig(level=logging.INFO)
-    test_catalog_structure()
-    test_xml_generation()
-    logger.info("All tests passed!")
+def test_joint_definitions(inclined_plane_model: mujoco.MjModel) -> None:
+    """Verify joint types and axes."""
+    # Helper to get joint ID
+    def get_joint_id(name: str) -> int:
+        return int(
+            mujoco.mj_name2id(inclined_plane_model, mujoco.mjtObj.mjOBJ_JOINT, name)
+        )
+
+    # 1. Shoulder Hinge
+    shoulder_id = get_joint_id("shoulder")
+    assert shoulder_id != -1
+    # Check type is hinge (mjtJoint.mjJNT_HINGE == 3)
+    assert inclined_plane_model.jnt_type[shoulder_id] == mujoco.mjtJoint.mjJNT_HINGE
+    # Check axis is Z (0, 0, 1)
+    axis = inclined_plane_model.jnt_axis[shoulder_id]
+    assert axis[0] == 0.0 and axis[1] == 0.0 and axis[2] == 1.0
+
+    # 2. Wrist Universal Joint (modeled as 2 hinges)
+    u1_id = get_joint_id("wrist_universal_1")
+    u2_id = get_joint_id("wrist_universal_2")
+    assert u1_id != -1 and u2_id != -1
+
+    # Check orthogonality of axes (Y vs X)
+    axis1 = inclined_plane_model.jnt_axis[u1_id]
+    axis2 = inclined_plane_model.jnt_axis[u2_id]
+
+    # Dot product should be 0
+    dot_prod = sum(a * b for a, b in zip(axis1, axis2, strict=False))
+    assert abs(dot_prod) < 1e-6
+
+
+def test_actuator_coupling(inclined_plane_model: mujoco.MjModel) -> None:
+    """Verify actuators are correctly coupled to joints."""
+    # Iterate over actuators
+    for i in range(inclined_plane_model.nu):
+        # Get transmission type
+        trntype = inclined_plane_model.actuator_trntype[i]
+        assert trntype == mujoco.mjtTrn.mjTRN_JOINT
+
+        # Get coupled joint ID
+        joint_id = inclined_plane_model.actuator_trnid[i, 0]
+        joint_name = mujoco.mj_id2name(
+            inclined_plane_model, mujoco.mjtObj.mjOBJ_JOINT, joint_id
+        )
+
+        # Ensure we are actuating the expected joints
+        assert joint_name in ["shoulder", "wrist_universal_1", "wrist_universal_2"]

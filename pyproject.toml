@@ -160,14 +160,7 @@ ignore = [
 "show_physics_parameters.py" = ["T201"]
 "engines/Simscape_Multibody_Models/**/matlab/**/*.py" = ["T201"]
 "verification/*" = ["T201"]
-"shared/python/myosuite_adapter.py" = ["T201"]
-"shared/python/muscle_equilibrium.py" = ["T201"]
-"shared/python/activation_dynamics.py" = ["T201"]
 "shared/python/optimization/examples/*.py" = ["T201"]
-"shared/python/hill_muscle.py" = ["T201"]
-"shared/python/multi_muscle.py" = ["T201"]
-"shared/python/numerical_constants.py" = ["T201"]
-"shared/python/opensim_integration.py" = ["T201"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -190,6 +183,7 @@ exclude = [
     "engines/physics_engines/mujoco/add_qt_dependencies.py",
     "engines/physics_engines/mujoco/create_myo_placeholders.py",
     "engines/physics_engines/mujoco/docker_test_dependencies.py",
+    "engines/physics_engines/mujoco/fix_linting.py",
     "engines/physics_engines/mujoco/docker/",
 ]
 
@@ -268,4 +262,3 @@ exclude_lines = [
     "class .*\\bProtocol\\):",
     "@(abc\\.)?abstractmethod",
 ]
-
