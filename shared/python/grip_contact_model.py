@@ -129,7 +129,7 @@ def check_friction_cone(
     """
     tangent_magnitude = np.linalg.norm(tangent_force)
     max_tangent = friction_coefficient * abs(normal_force)
-    return tangent_magnitude <= max_tangent
+    return bool(tangent_magnitude <= max_tangent)
 
 
 def compute_slip_direction(
@@ -148,7 +148,7 @@ def compute_slip_direction(
     magnitude = np.linalg.norm(tangent_force)
     if magnitude < 1e-10:
         return np.zeros(3)
-    return tangent_force / magnitude
+    return np.asarray(tangent_force / magnitude)
 
 
 def decompose_contact_force(

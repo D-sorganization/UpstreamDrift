@@ -424,7 +424,7 @@ def compute_gear_effect_spin(
 
     spin = horizontal_spin * up + vertical_spin * horizontal_axis
 
-    return spin
+    return np.asarray(spin)
 
 
 def validate_energy_balance(
