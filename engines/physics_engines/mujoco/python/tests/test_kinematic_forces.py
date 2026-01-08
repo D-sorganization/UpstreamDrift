@@ -1,5 +1,6 @@
 """Comprehensive tests for kinematic forces module."""
 
+import warnings
 import mujoco
 import numpy as np
 import pytest
@@ -179,11 +180,19 @@ class TestKinematicForceAnalyzer:
         model, data = model_and_data
         analyzer = KinematicForceAnalyzer(model, data)
 
-        qpos = data.qpos.copy()
-        direction = np.array([1.0, 0.0, 0.0])
-        body_id = 1
+        # Set a non-zero configuration to avoid singularities
+        qpos = np.array([0.5, 0.5])  # Arbitrary non-zero angles
+        direction = np.array([0.0, 1.0, 0.0])  # Y direction (tangential movement)
 
-        m_eff = analyzer.compute_effective_mass(qpos, direction, body_id)
+        body_id = analyzer._find_body_id("club_body")
+        assert body_id is not None, "club_body not found in model"
+
+        # Filter runtime warning for rank deficient Jacobian (planar robot in 3D world)
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", category=RuntimeWarning, message="Jacobian is rank deficient"
+            )
+            m_eff = analyzer.compute_effective_mass(qpos, direction, body_id)
 
         assert isinstance(m_eff, float)
         assert m_eff >= 0.0
