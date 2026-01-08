@@ -48,12 +48,8 @@ class TestWorkflow:
     def test_add_step(self) -> None:
         """Test adding steps to workflow."""
         workflow = Workflow(id="test", name="Test", description="Test")
-        workflow.add_step(
-            WorkflowStep(id="step1", name="Step 1", description="First")
-        )
-        workflow.add_step(
-            WorkflowStep(id="step2", name="Step 2", description="Second")
-        )
+        workflow.add_step(WorkflowStep(id="step1", name="Step 1", description="First"))
+        workflow.add_step(WorkflowStep(id="step2", name="Step 2", description="Second"))
         assert len(workflow.steps) == 2
         assert workflow.steps[0].id == "step1"
 
@@ -112,9 +108,7 @@ class TestWorkflowEngine:
         engine = WorkflowEngine(registry)
 
         workflow = Workflow(id="test", name="Test", description="Test")
-        workflow.add_step(
-            WorkflowStep(id="step1", name="Step 1", description="First")
-        )
+        workflow.add_step(WorkflowStep(id="step1", name="Step 1", description="First"))
         engine.register_workflow(workflow)
 
         context = ConversationContext()
@@ -139,12 +133,8 @@ class TestWorkflowEngine:
         engine = WorkflowEngine(registry)
 
         workflow = Workflow(id="test", name="Test", description="Test")
-        workflow.add_step(
-            WorkflowStep(id="step1", name="Step 1", description="First")
-        )
-        workflow.add_step(
-            WorkflowStep(id="step2", name="Step 2", description="Second")
-        )
+        workflow.add_step(WorkflowStep(id="step1", name="Step 1", description="First"))
+        workflow.add_step(WorkflowStep(id="step2", name="Step 2", description="Second"))
         engine.register_workflow(workflow)
 
         context = ConversationContext()
@@ -249,12 +239,8 @@ class TestWorkflowEngine:
         engine = WorkflowEngine(registry)
 
         workflow = Workflow(id="test", name="Test Workflow", description="Test")
-        workflow.add_step(
-            WorkflowStep(id="step1", name="Step 1", description="First")
-        )
-        workflow.add_step(
-            WorkflowStep(id="step2", name="Step 2", description="Second")
-        )
+        workflow.add_step(WorkflowStep(id="step1", name="Step 1", description="First"))
+        workflow.add_step(WorkflowStep(id="step2", name="Step 2", description="Second"))
         engine.register_workflow(workflow)
 
         context = ConversationContext()
