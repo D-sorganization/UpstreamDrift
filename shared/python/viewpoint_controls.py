@@ -124,7 +124,7 @@ def spherical_to_cartesian(
     y = distance * np.cos(el) * np.sin(az)
     z = distance * np.sin(el)
 
-    return center + np.array([x, y, z])
+    return np.asarray(center + np.array([x, y, z]))
 
 
 def get_preset_camera_params(
@@ -355,7 +355,7 @@ def compute_tracking_look_at(
         return fixed_position.copy()
 
     # Default fallback
-    return DEFAULT_GOLFER_POSITION + np.array([0.0, 0.0, 1.0])
+    return np.asarray(DEFAULT_GOLFER_POSITION + np.array([0.0, 0.0, 1.0]))
 
 
 def create_multiview_layout(

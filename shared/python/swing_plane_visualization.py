@@ -249,7 +249,7 @@ def compute_trajectory_deviations(
     # Deviation = dot product with normal
     deviations = np.dot(offsets, plane_frame.normal)
 
-    return deviations
+    return np.asarray(deviations)
 
 
 def create_deviation_colormap(
@@ -400,10 +400,12 @@ class SwingPlaneVisualizer:
         Args:
             output_path: Path to output JSON file
         """
+        from typing import Any
+
         output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        scene_data = {
+        scene_data: dict[str, Any] = {
             "instantaneous_plane": None,
             "fsp": None,
             "trajectory": None,
@@ -433,14 +435,13 @@ class SwingPlaneVisualizer:
 
         if self.current_scene.trajectory:
             traj = self.current_scene.trajectory
-            scene_data["trajectory"] = {
+            traj_data: dict[str, Any] = {
                 "points": traj.points.tolist(),
                 "timestamps": traj.timestamps.tolist(),
             }
             if self.current_scene.deviation_heatmap is not None:
-                scene_data["trajectory"][
-                    "colors"
-                ] = self.current_scene.deviation_heatmap.tolist()
+                traj_data["colors"] = self.current_scene.deviation_heatmap.tolist()
+            scene_data["trajectory"] = traj_data
 
         if self.current_scene.plane_metrics:
             m = self.current_scene.plane_metrics
