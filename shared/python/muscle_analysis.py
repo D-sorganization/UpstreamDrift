@@ -13,7 +13,15 @@ import logging
 from dataclasses import dataclass
 
 import numpy as np
-from sklearn.decomposition import NMF
+
+# sklearn is an optional dependency for muscle synergy analysis
+try:
+    from sklearn.decomposition import NMF
+
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+    NMF = None  # type: ignore[misc,assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -98,6 +106,12 @@ class MuscleSynergyAnalyzer:
                 f"Invalid number of synergies: {n_synergies}. Must be between 1 and {self.n_muscles}"
             )
 
+        if not SKLEARN_AVAILABLE:
+            raise ImportError(
+                "sklearn is required for muscle synergy analysis. "
+                "Install with: pip install scikit-learn"
+            )
+
         model = NMF(
             n_components=n_synergies, init="nndsvd", max_iter=max_iter, random_state=42
         )
@@ -150,9 +164,12 @@ class MuscleSynergyAnalyzer:
         Returns:
             SynergyResult for the optimal number of synergies.
         """
-        best_result = None
-
         limit = min(max_synergies, self.n_muscles)
+
+        if limit < 1:
+            raise ValueError("Cannot extract synergies: limit must be >= 1")
+
+        best_result: SynergyResult | None = None
 
         for n in range(1, limit + 1):
             result = self.extract_synergies(n)
@@ -164,5 +181,9 @@ class MuscleSynergyAnalyzer:
                 )
                 return result
 
-        logger.warning(f"VAF threshold not met. Best VAF {best_result.vaf:.4f} with {limit} synergies.")  # type: ignore
-        return best_result  # type: ignore
+        # best_result is guaranteed to be set since limit >= 1
+        assert best_result is not None, "Loop should have set best_result"
+        logger.warning(
+            f"VAF threshold not met. Best VAF {best_result.vaf:.4f} with {limit} synergies."
+        )
+        return best_result
