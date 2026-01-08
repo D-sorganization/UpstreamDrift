@@ -115,10 +115,10 @@ def mirror_position(
         transform = create_mirror_transform()
 
     if position.ndim == 1:
-        return transform.position_mirror @ position
+        return np.asarray(transform.position_mirror @ position)
     else:
         # Handle (N, 3) trajectory
-        return (transform.position_mirror @ position.T).T
+        return np.asarray((transform.position_mirror @ position.T).T)
 
 
 def mirror_velocity(
@@ -138,9 +138,9 @@ def mirror_velocity(
         transform = create_mirror_transform()
 
     if velocity.ndim == 1:
-        return transform.velocity_mirror @ velocity
+        return np.asarray(transform.velocity_mirror @ velocity)
     else:
-        return (transform.velocity_mirror @ velocity.T).T
+        return np.asarray((transform.velocity_mirror @ velocity.T).T)
 
 
 def mirror_rotation_matrix(
@@ -165,7 +165,7 @@ def mirror_rotation_matrix(
         transform = create_mirror_transform()
 
     M = transform.rotation_mirror
-    return M @ rotation @ M
+    return np.asarray(M @ rotation @ M)
 
 
 def mirror_angular_velocity(
@@ -201,9 +201,9 @@ def mirror_angular_velocity(
     )
 
     if omega.ndim == 1:
-        return pseudovector_mirror @ omega
+        return np.asarray(pseudovector_mirror @ omega)
     else:
-        return (pseudovector_mirror @ omega.T).T
+        return np.asarray((pseudovector_mirror @ omega.T).T)
 
 
 def mirror_joint_configuration(

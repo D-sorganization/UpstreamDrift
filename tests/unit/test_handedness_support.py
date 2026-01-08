@@ -182,7 +182,7 @@ class TestHandednessDetection:
 
     def test_defaults_to_right(self) -> None:
         """Should default to right-handed when no metadata."""
-        metadata = {}
+        metadata: dict[str, object] = {}
         result = detect_handedness_from_metadata(metadata)
         assert result == Handedness.RIGHT_HANDED
 
