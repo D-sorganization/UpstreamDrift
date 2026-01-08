@@ -30,9 +30,11 @@ def test_load_mujoco_success(tmp_path: object) -> None:
     path = Path(str(tmp_path))
 
     # Mock internal components needed by load_mujoco_engine
+    # Also need to mock mujoco here because load_mujoco_engine imports it at runtime
     with patch.dict(
         sys.modules,
         {
+            "mujoco": MagicMock(),
             "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine": MagicMock(),
             "shared.python.engine_probes": MagicMock(),
         },

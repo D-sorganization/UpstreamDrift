@@ -86,4 +86,5 @@ def test_validate_path_invalid_format() -> None:
     with patch.object(Path, "resolve", side_effect=Exception("Disk error")):
         result = validate_path("some/path", [Path(".")], strict=False)
         assert isinstance(result, Path)
-        assert str(result) == "some/path"
+        # Compare as Path for cross-platform compatibility (Windows uses backslashes)
+        assert result == Path("some/path")
