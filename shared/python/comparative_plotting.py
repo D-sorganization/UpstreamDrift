@@ -424,3 +424,54 @@ class ComparativePlotter:
             fontsize=14,
             fontweight="bold",
         )
+
+    def plot_dtw_alignment(
+        self,
+        fig: Figure,
+        field_name: str,
+        joint_idx: int | None = None,
+        radius: int = 10,
+    ) -> None:
+        """Plot Dynamic Time Warping alignment path.
+
+        Visualizes the optimal warping path between the two signals.
+
+        Args:
+            fig: Matplotlib figure
+            field_name: Data field name
+            joint_idx: Joint index (optional)
+            radius: Sakoe-Chiba radius used for calculation
+        """
+        dist, path = self.analyzer.compute_dtw_distance(field_name, joint_idx, radius)
+
+        if not path:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "DTW calculation failed", ha="center", va="center")
+            return
+
+        path_arr = np.array(path)
+
+        ax = fig.add_subplot(111)
+        ax.plot(
+            path_arr[:, 0],
+            path_arr[:, 1],
+            color="purple",
+            linewidth=2,
+            label="Optimal Path",
+        )
+
+        # Plot diagonal (perfect alignment)
+        max_idx = max(path_arr[:, 0].max(), path_arr[:, 1].max())
+        ax.plot([0, max_idx], [0, max_idx], "k--", alpha=0.3, label="Linear Match")
+
+        ax.set_xlabel(f"{self.analyzer.name_a} Index", fontsize=10, fontweight="bold")
+        ax.set_ylabel(f"{self.analyzer.name_b} Index", fontsize=10, fontweight="bold")
+        ax.set_title(
+            f"DTW Alignment Path: {field_name}\nDistance: {dist:.2f}",
+            fontsize=12,
+            fontweight="bold",
+        )
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+        ax.set_aspect("equal")
+        fig.tight_layout()
