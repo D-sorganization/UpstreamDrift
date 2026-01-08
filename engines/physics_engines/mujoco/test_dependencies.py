@@ -4,7 +4,7 @@
 import sys
 
 
-def test_imports():
+def test_imports() -> bool:
     """Test all critical imports for the MuJoCo golf model."""
     print("Testing critical dependencies...")
 
