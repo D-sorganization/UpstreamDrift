@@ -310,15 +310,98 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         return sensors
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
-        """Zero-Torque Counterfactual (ZTCF) - Guideline G1."""
-        raise NotImplementedError(
-            f"{self.__class__.__name__} does not yet implement ZTCF. "
-            f"See pendulum_physics_engine.py for reference implementation."
-        )
+        """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
+
+        Compute acceleration with applied torques set to zero, preserving state.
+        This isolates drift (gravity + Coriolis + constraints) from control effects.
+
+        **Purpose**: Answer "What would happen if all actuators turned off RIGHT NOW?"
+
+        **Physics**: With τ=0, acceleration is purely passive:
+            q̈_ZTCF = M(q)⁻¹ · (C(q,v)·v + g(q) + J^T·λ)
+
+        Args:
+            q: Joint positions (n_q,) [rad or m]
+            v: Joint velocities (n_v,) [rad/s or m/s]
+
+        Returns:
+            q̈_ZTCF: Acceleration under zero applied torque (n_v,) [rad/s² or m/s²]
+        """
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        # Save current state and control
+        saved_qpos = self.data.qpos.copy()
+        saved_qvel = self.data.qvel.copy()
+        saved_ctrl = self.data.ctrl.copy()
+
+        try:
+            # Set to counterfactual state
+            self.data.qpos[:] = q
+            self.data.qvel[:] = v
+
+            # Zero out control (ZTCF: zero torque)
+            self.data.ctrl[:] = 0
+
+            # Compute forward dynamics with zero control
+            mujoco.mj_forward(self.model, self.data)
+
+            # Extract acceleration (this is the drift acceleration)
+            a_ztcf = self.data.qacc.copy()
+
+            return cast(np.ndarray, a_ztcf)
+
+        finally:
+            # Restore original state and control
+            self.data.qpos[:] = saved_qpos
+            self.data.qvel[:] = saved_qvel
+            self.data.ctrl[:] = saved_ctrl
+            mujoco.mj_forward(self.model, self.data)
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2."""
-        raise NotImplementedError(
-            f"{self.__class__.__name__} does not yet implement ZVCF. "
-            f"See pendulum_physics_engine.py for reference implementation."
-        )
+        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
+
+        Compute acceleration with joint velocities set to zero, preserving
+        configuration.
+        This isolates configuration-dependent effects (gravity, constraints)
+        from velocity-dependent effects (Coriolis, centrifugal).
+
+        **Purpose**: Answer "What acceleration would occur if motion FROZE
+        instantaneously?"
+
+        **Physics**: With v=0, acceleration has no velocity-dependent terms:
+            q̈_ZVCF = M(q)⁻¹ · (g(q) + τ + J^T·λ)
+
+        Args:
+            q: Joint positions (n_q,) [rad or m]
+
+        Returns:
+            q̈_ZVCF: Acceleration with v=0 (n_v,) [rad/s² or m/s²]
+        """
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        # Save current state
+        saved_qpos = self.data.qpos.copy()
+        saved_qvel = self.data.qvel.copy()
+
+        try:
+            # Set to counterfactual configuration with v=0
+            self.data.qpos[:] = q
+            self.data.qvel[:] = 0  # ZVCF: zero velocity
+
+            # Control is preserved from current state (already in data.ctrl)
+
+            # Compute forward dynamics with zero velocity
+            mujoco.mj_forward(self.model, self.data)
+
+            # Extract acceleration
+            a_zvcf = self.data.qacc.copy()
+
+            return cast(np.ndarray, a_zvcf)
+
+        finally:
+            # Restore original state
+            self.data.qpos[:] = saved_qpos
+            self.data.qvel[:] = saved_qvel
+            mujoco.mj_forward(self.model, self.data)
