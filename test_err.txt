@@ -1,0 +1,143 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.5, pytest-8.4.1, pluggy-1.6.0 -- C:\Users\diete\AppData\Local\Programs\Python\Python313\python.exe
+cachedir: .pytest_cache
+benchmark: 4.0.0 (defaults: timer=time.perf_counter disable_gc=False min_rounds=5 min_time=0.000005 max_time=1.0 calibration_precision=10 warmup=False warmup_iterations=100000)
+PyQt6 6.9.1 -- Qt runtime 6.9.1 -- Qt compiled 6.9.0
+rootdir: C:\Users\diete\Repositories\Golf_Modeling_Suite
+configfile: pyproject.toml
+plugins: anyio-4.9.0, benchmark-4.0.0, cov-7.0.0, mock-3.15.1, qt-4.5.0, timeout-2.3.1
+collecting ... collected 1 item
+
+tests/integration/test_physics_engines_strict.py::TestDrakeStrict::test_jacobian_standardization_mocked FAILED [100%]
+ERROR: Coverage failure: total of 2 is less than fail-under=60
+
+
+================================== FAILURES ===================================
+____________ TestDrakeStrict.test_jacobian_standardization_mocked _____________
+
+self = <tests.integration.test_physics_engines_strict.TestDrakeStrict object at 0x00000205B8725D10>
+
+    def test_jacobian_standardization_mocked(self):
+>       engine = self.DrakePhysicsEngine()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\integration\test_physics_engines_strict.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine object at 0x00000205B8A21550>
+time_step = 0.001
+
+    def __init__(self, time_step: float = DEFAULT_TIME_STEP) -> None:
+        """Initialize the Drake physics engine.
+    
+        Args:
+            time_step: Simulation time step in seconds.
+        """
+        self.builder = DiagramBuilder()
+        self.plant: MultibodyPlant
+        self.scene_graph: Any
+        # AddMultibodyPlantSceneGraph returns (plant, scene_graph)
+>       result = AddMultibodyPlantSceneGraph(self.builder, time_step)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       NameError: name 'AddMultibodyPlantSceneGraph' is not defined
+
+engines\physics_engines\drake\python\drake_physics_engine.py:61: NameError
+=============================== tests coverage ================================
+_______________ coverage: platform win32, python 3.13.5-final-0 _______________
+
+Name                                                  Stmts   Miss  Cover   Missing
+-----------------------------------------------------------------------------------
+launchers\__init__.py                                     0      0   100%
+launchers\drake_dashboard.py                             31     31     0%   6-55
+launchers\golf_launcher.py                             1237   1237     0%   10-2507
+launchers\golf_suite_launcher.py                        142    142     0%   10-238
+launchers\mujoco_dashboard.py                            12     12     0%   7-35
+launchers\pinocchio_dashboard.py                         12     12     0%   6-32
+launchers\unified_launcher.py                            77     77     0%   7-164
+shared\python\__init__.py                                33     11    67%   48-53, 60-64
+shared\python\activation_dynamics.py                     24     24     0%   24-110
+shared\python\ai\__init__.py                              7      7     0%   30-112
+shared\python\ai\adapters\__init__.py                     5      5     0%   24-29
+shared\python\ai\adapters\anthropic_adapter.py          147    147     0%   21-505
+shared\python\ai\adapters\base.py                        32     32     0%   10-244
+shared\python\ai\adapters\ollama_adapter.py             130    130     0%   20-472
+shared\python\ai\adapters\openai_adapter.py             118    118     0%   20-487
+shared\python\ai\education.py                            93     93     0%   12-595
+shared\python\ai\exceptions.py                           42     42     0%   24-251
+shared\python\ai\gui\__init__.py                          3      3     0%   13-23
+shared\python\ai\gui\assistant_panel.py                 260    260     0%   10-663
+shared\python\ai\gui\settings_dialog.py                 321    321     0%   12-614
+shared\python\ai\sample_tools.py                        135    135     0%   14-567
+shared\python\ai\tool_registry.py                       157    157     0%   19-506
+shared\python\ai\types.py                               123    123     0%   9-402
+shared\python\ai\workflow_engine.py                     205    205     0%   15-684
+shared\python\biomechanics_data.py                       29     29     0%   7-76
+shared\python\common_utils.py                            91     79    13%   34-36, 49-56, 71-82, 95-104, 119-128, 146-171, 185-206, 218-240
+shared\python\comparative_analysis.py                   156    156     0%   7-344
+shared\python\comparative_plotting.py                   136    136     0%   6-477
+shared\python\configuration_manager.py                   56     56     0%   6-112
+shared\python\constants.py                               62      0   100%
+shared\python\core.py                                    37     14    62%   41-52, 95, 100, 140-151, 189
+shared\python\cross_engine_validator.py                  45     45     0%   11-231
+shared\python\dashboard\__init__.py                       0      0   100%
+shared\python\dashboard\recorder.py                     115    115     0%   6-249
+shared\python\dashboard\runner.py                        56     56     0%   6-108
+shared\python\dashboard\widgets.py                       78     78     0%   8-131
+shared\python\dashboard\window.py                       165    165     0%   10-292
+shared\python\ellipsoid_visualization.py                158    158     0%   19-451
+shared\python\energy_monitor.py                          72     72     0%   14-265
+shared\python\engine_loaders.py                          86     74    14%   15-53, 60-106, 111-150, 155-174, 179-198
+shared\python\engine_manager.py                         154    128    17%   41-113, 117, 121, 129-145, 149-160, 169-206, 212-246, 250-254, 258-270, 273, 276, 279, 289-308, 311-313, 316-318, 321-354
+shared\python\engine_probes.py                          266    266     0%   7-663
+shared\python\engine_registry.py                         42      4    90%   61, 65, 69, 78
+shared\python\equipment.py                                7      7     0%   8-76
+shared\python\exceptions.py                              10      0   100%
+shared\python\export.py                                 135    135     0%   10-262
+shared\python\flexible_shaft.py                         184    184     0%   19-553
+shared\python\grip_contact_model.py                     154    154     0%   15-485
+shared\python\ground_reaction_forces.py                 175    175     0%   18-543
+shared\python\handedness_support.py                     123    123     0%   21-476
+shared\python\hill_muscle.py                             62     62     0%   19-182
+shared\python\impact_model.py                           156    156     0%   14-530
+shared\python\indexed_acceleration.py                    45     45     0%   6-189
+shared\python\interfaces.py                               4      0   100%
+shared\python\kinematic_sequence.py                      77     77     0%   8-192
+shared\python\manipulability.py                          45     45     0%   15-219
+shared\python\marker_mapping.py                         130    130     0%   11-401
+shared\python\model_registry.py                          49     49     0%   3-113
+shared\python\multi_muscle.py                            51     51     0%   15-170
+shared\python\muscle_analysis.py                         56     56     0%   10-189
+shared\python\muscle_equilibrium.py                      60     60     0%   24-270
+shared\python\myoconverter_integration.py                86     86     0%   19-385
+shared\python\myosuite_adapter.py                       106    106     0%   25-302
+shared\python\numerical_constants.py                     21     21     0%   21-263
+shared\python\optimization\__init__.py                    0      0   100%
+shared\python\optimization\examples\__init__.py           0      0   100%
+shared\python\optimization\examples\optimize_arm.py      87     87     0%   1-169
+shared\python\output_manager.py                         241    241     0%   10-596
+shared\python\physics_parameters.py                     120    120     0%   7-447
+shared\python\plotting.py                              1350   1350     0%   14-3261
+shared\python\pose_estimation\__init__.py                 3      3     0%   7-10
+shared\python\pose_estimation\interface.py               11     11     0%   3-20
+shared\python\pose_estimation\openpose_estimator.py      83     83     0%   7-183
+shared\python\pose_estimation\openpose_gui.py            67     67     0%   6-124
+shared\python\process_worker.py                          68     68     0%   7-121
+shared\python\provenance.py                             106    106     0%   31-316
+shared\python\reference_frames.py                       127    127     0%   13-405
+shared\python\secure_subprocess.py                      100    100     0%   7-253
+shared\python\security_utils.py                          21     21     0%   3-46
+shared\python\signal_processing.py                       32     32     0%   8-131
+shared\python\statistical_analysis.py                   685    685     0%   11-1847
+shared\python\swing_plane_analysis.py                    40     40     0%   9-109
+shared\python\swing_plane_visualization.py              132    132     0%   14-464
+shared\python\validation.py                              63     63     0%   17-272
+shared\python\validation_helpers.py                      67     67     0%   38-333
+shared\python\viewpoint_controls.py                     181    181     0%   19-600
+-----------------------------------------------------------------------------------
+TOTAL                                                 10470  10261     2%
+Coverage HTML written to dir htmlcov
+Coverage XML written to file coverage.xml
+FAIL Required test coverage of 60% not reached. Total coverage: 2.00%
+=========================== short test summary info ===========================
+FAILED tests/integration/test_physics_engines_strict.py::TestDrakeStrict::test_jacobian_standardization_mocked
+============================== 1 failed in 5.71s ==============================
