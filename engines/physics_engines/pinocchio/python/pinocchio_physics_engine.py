@@ -289,15 +289,68 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         return a_control
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
-        """Zero-Torque Counterfactual (ZTCF) - Guideline G1."""
-        raise NotImplementedError(
-            f"{self.__class__.__name__} does not yet implement ZTCF. "
-            f"See pendulum_physics_engine.py for reference."
-        )
+        """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
+
+        Compute acceleration with applied torques set to zero, preserving state.
+        This isolates drift (gravity + Coriolis) from control effects.
+
+        **Purpose**: Answer "What would happen if all actuators turned off?"
+
+        **Physics**: With τ=0, acceleration is purely passive:
+            q̈_ZTCF = ABA(q, v, 0) = M(q)⁻¹ · (-C(q,v) - g(q))
+
+        Args:
+            q: Joint positions (n_q,) [rad or m]
+            v: Joint velocities (n_v,) [rad/s or m/s]
+
+        Returns:
+            q̈_ZTCF: Acceleration under zero applied torque (n_v,) [rad/s² or m/s²]
+        """
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        # Validate dimensions
+        if len(q) != self.model.nq or len(v) != self.model.nv:
+            return np.array([])
+
+        # Use Pinocchio's ABA with zero torque - this is exactly ZTCF
+        tau_zero = np.zeros(self.model.nv)
+        a_ztcf = pin.aba(self.model, self.data, q, v, tau_zero)
+
+        return cast(np.ndarray, a_ztcf)
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2."""
-        raise NotImplementedError(
-            f"{self.__class__.__name__} does not yet implement ZVCF. "
-            f"See pendulum_physics_engine.py for reference."
-        )
+        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
+
+        Compute acceleration with joint velocities set to zero, preserving
+        configuration. This isolates configuration-dependent effects (gravity)
+        from velocity-dependent effects (Coriolis, centrifugal).
+
+        **Purpose**: Answer "What acceleration would occur if motion FROZE?"
+
+        **Physics**: With v=0, acceleration has no velocity-dependent terms:
+            q̈_ZVCF = ABA(q, 0, τ) = M(q)⁻¹ · (-g(q) + τ)
+
+        Args:
+            q: Joint positions (n_q,) [rad or m]
+
+        Returns:
+            q̈_ZVCF: Acceleration with v=0 (n_v,) [rad/s² or m/s²]
+        """
+        if self.model is None or self.data is None:
+            return np.array([])
+
+        # Validate dimensions
+        if len(q) != self.model.nq:
+            return np.array([])
+
+        # Use zero velocity for ZVCF
+        v_zero = np.zeros(self.model.nv)
+
+        # Use current control (preserved for ZVCF)
+        tau = self.tau.copy()
+
+        # Use ABA with zero velocity - this is ZVCF
+        a_zvcf = pin.aba(self.model, self.data, q, v_zero, tau)
+
+        return cast(np.ndarray, a_zvcf)
