@@ -22,17 +22,19 @@ if "mujoco" not in sys.modules:
 logger = logging.getLogger(__name__)
 
 
-def get_linkage_mechanisms():
+def get_linkage_mechanisms() -> MagicMock:
     """Import and return the linkage_mechanisms module."""
     try:
-        from mujoco_golf_pendulum import linkage_mechanisms
+        from mujoco_humanoid_golf import linkage_mechanisms
 
-        return linkage_mechanisms
+        return linkage_mechanisms  # type: ignore[no-any-return]
     except ImportError as e:
         pytest.fail(f"Failed to import mechanisms: {e}")
+        # This part is unreachable because pytest.fail raises an exception
+        return MagicMock()
 
 
-def test_catalog_structure():
+def test_catalog_structure() -> None:
     """Test that the catalog is properly structured."""
     lm = get_linkage_mechanisms()
     catalog = lm.LINKAGE_CATALOG
@@ -46,7 +48,7 @@ def test_catalog_structure():
         assert len(config["xml"]) > 0
 
 
-def test_xml_generation():
+def test_xml_generation() -> None:
     """Test XML generation for each mechanism type."""
     lm = get_linkage_mechanisms()
 
