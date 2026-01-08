@@ -14,15 +14,20 @@ References:
       support in normal walking." Gait & Posture.
 """
 
+import typing
+
 import numpy as np
 import pytest
 
 try:
     from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+        MYOSUITE_AVAILABLE as _INTERNAL_MYOSUITE_AVAILABLE,
+    )
+    from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
         MyoSuitePhysicsEngine as _MyoSuitePhysicsEngine,
     )
 
-    MYOSUITE_AVAILABLE = True
+    MYOSUITE_AVAILABLE = _INTERNAL_MYOSUITE_AVAILABLE
 except ImportError:
     MYOSUITE_AVAILABLE = False
     _MyoSuitePhysicsEngine = None  # type: ignore
@@ -256,11 +261,14 @@ if MYOSUITE_AVAILABLE:
             )
 
 else:
-    # Fallback to ensure some tests are collected even if marked as skipped by pytest
-    class TestMuscleContributionClosure:
-        def test_skipped_no_myosuite(self):
-            pytest.skip("MyoSuite not installed")
+    # Fallback to ensure some tests are collected even if marked as skipped by pytest.
+    # We hide these from Mypy to avoid "Name already defined" [no-redef] errors.
+    if not typing.TYPE_CHECKING:
 
-    class TestMuscleContributionComplexModels:
-        def test_skipped_no_myosuite(self):
-            pytest.skip("MyoSuite not installed")
+        class TestMuscleContributionClosure:
+            def test_skipped_no_myosuite(self) -> None:
+                pytest.skip("MyoSuite not installed")
+
+        class TestMuscleContributionComplexModels:
+            def test_skipped_no_myosuite(self) -> None:
+                pytest.skip("MyoSuite not installed")
