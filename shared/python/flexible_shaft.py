@@ -539,6 +539,7 @@ def create_shaft_model(
     if properties is None:
         properties = create_standard_shaft()
 
+    model: ShaftModel
     if model_type == ShaftFlexModel.RIGID:
         model = RigidShaftModel()
     elif model_type == ShaftFlexModel.MODAL:
