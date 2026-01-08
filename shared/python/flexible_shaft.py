@@ -158,7 +158,7 @@ def compute_section_inertia(
     d_inner = max(d_inner, 0.0)  # Ensure non-negative
 
     inertia = np.pi / 64 * (d_outer**4 - d_inner**4)
-    return inertia
+    return float(inertia)
 
 
 def compute_section_area(
@@ -181,7 +181,7 @@ def compute_section_area(
     d_inner = max(d_inner, 0.0)
 
     A = np.pi / 4 * (d_outer**2 - d_inner**2)
-    return A
+    return float(A)
 
 
 def compute_EI_profile(
