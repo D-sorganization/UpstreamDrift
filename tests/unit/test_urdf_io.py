@@ -2,8 +2,6 @@
 Unit tests for URDF I/O module.
 """
 
-import importlib
-import sys
 import xml.etree.ElementTree as ET
 from unittest.mock import MagicMock, patch
 
@@ -169,17 +167,19 @@ class TestURDFExporter:
 
         mock_mujoco.mj_id2name.side_effect = id2name_side_effect
 
-        with patch.dict(sys.modules, {"mujoco": mock_mujoco}):
-            # Re-import to pick up the mock
-            importlib.reload(
-                sys.modules[
-                    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io"
-                ]
-            )
+        # Use direct patching instead of sys.modules manipulation and reload
+        # to prevent MuJoCo DLL/C-API corruption (Access Violation)
+        with patch(
+            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco",
+            mock_mujoco,
+        ):
             from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
                 URDFExporter,
                 mujoco,
             )
+
+            # Ensure constants that might have been lost are restored if needed
+            # but usually the mock will handle them via getattr
 
             mock_mujoco_model = MagicMock()
             mock_mujoco_model.nbody = 3

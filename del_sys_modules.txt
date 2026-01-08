@@ -1,0 +1,13 @@
+./engines/physics_engines/pinocchio/python/tests/test_tasks.py:18:            del sys.modules["engines.physics_engines.pinocchio.python.dtack.ik.tasks"]
+./launchers/tests/test_unified_launcher.py:149:            del sys.modules["shared.python"].__version__
+./tests/unit/test_drake_gui_app.py:26:            del sys.modules[key]
+./tests/unit/test_golf_launcher_basic.py:118:            del sys.modules["launchers.golf_launcher"]
+./tests/unit/test_golf_launcher_basic.py:132:            del sys.modules["launchers.golf_launcher"]
+./tests/unit/test_lazy_imports.py:90:                del sys.modules[module]
+./tests/unit/test_opensim_physics_engine.py:22:        del sys.modules["opensim"]
+./tests/unit/test_optimize_arm.py:28:            del sys.modules[key]
+./tests/unit/test_process_worker.py:16:            del sys.modules["shared.python.process_worker"]
+./tests/unit/test_shared_engine_probes.py:66:            del sys.modules["mujoco"]
+./tests/unit/test_shared_engine_probes.py:152:            del sys.modules["pydrake.multibody"]
+./tests/unit/test_shared_engine_probes.py:233:            del sys.modules["matlab.engine"]
+./tests/unit/test_shared_engine_probes.py:270:            del sys.modules["opensim"]

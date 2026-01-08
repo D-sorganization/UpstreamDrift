@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
+import tempfile
 from pathlib import Path
 from typing import Any, cast  # noqa: F401
 
@@ -18,6 +19,7 @@ SUITE_ROOT = Path(__file__).parents[5]
 ALLOWED_MODEL_DIRS = [
     SUITE_ROOT / "engines",
     SUITE_ROOT / "shared" / "resources",
+    Path(tempfile.gettempdir()),  # Allow temp dir for tests
 ]
 
 

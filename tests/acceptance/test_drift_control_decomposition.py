@@ -203,13 +203,29 @@ class TestMuJoCoDriftControl:
         except Exception:
             pytest.skip("MuJoCo URDF loading not supported in this version")
 
-        # Set initial state
-        q = np.array([0.1, 0.0])  # MuJoCo might have base joint
-        v = np.array([0.0])
+        # Query actual model dimensions
+        model = engine.get_model()
+        if model is None:
+            pytest.skip("MuJoCo model not initialized")
+
+        # Set initial state based on actual DOFs
+        nq = model.nq
+        nv = model.nv
+        q = np.zeros(nq)
+        q[0] = 0.1  # Set first joint position
+        v = np.zeros(nv)
         engine.set_state(q, v)
 
+        # Check if model has actuators
+        nu = model.nu
+        if nu == 0:
+            pytest.skip(
+                "MuJoCo model has no actuators - cannot test control decomposition"
+            )
+
         # Apply control
-        tau = np.array([0.5])
+        tau = np.zeros(nu)
+        tau[0] = 0.5  # Set first actuator control
         engine.set_control(tau)
 
         # Compute full forward dynamics
