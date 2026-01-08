@@ -29,7 +29,18 @@ def ball_urdf(tmp_path_factory):
     # Golf ball: mass = 0.045kg, radius = 0.02135m
     urdf_content = """<?xml version="1.0"?>
 <robot name="ball">
-  <link name="world"/>
+  <link name="world">
+    <inertial>
+      <mass value="0.0"/>
+      <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
+    </inertial>
+    <collision>
+      <origin xyz="0 0 -0.01"/>
+      <geometry>
+        <box size="10 10 0.02"/>
+      </geometry>
+    </collision>
+  </link>
   <link name="ball">
     <inertial>
       <mass value="0.045"/>
