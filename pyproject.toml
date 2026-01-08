@@ -158,7 +158,6 @@ ignore = [
 "validate_suite.py" = ["T201"]
 "check_system_health.py" = ["T201"]
 "show_physics_parameters.py" = ["T201"]
-"engines/pendulum_models/tools/scientific_auditor.py" = ["T201"]
 "engines/Simscape_Multibody_Models/**/matlab/**/*.py" = ["T201"]
 "verification/*" = ["T201"]
 "shared/python/myosuite_adapter.py" = ["T201"]
