@@ -24,6 +24,9 @@ if TYPE_CHECKING:
 
 LOGGER = logging.getLogger(__name__)
 
+# Geometric computation tolerance
+GEOMETRIC_TOLERANCE = 1e-10  # [unitless] For near-zero vector magnitude checks
+
 
 class ReferenceFrame(Enum):
     """Enumeration of supported reference frames."""
@@ -152,7 +155,7 @@ def fit_instantaneous_swing_plane(
     # Grip axis (shaft direction)
     grip_to_club = clubhead_position - grip_position
     grip_axis_length = np.linalg.norm(grip_to_club)
-    if grip_axis_length < 1e-10:
+    if grip_axis_length < GEOMETRIC_TOLERANCE:
         LOGGER.warning("Grip and clubhead positions too close")
         grip_axis = np.array([0.0, 0.0, 1.0])
     else:
@@ -160,7 +163,7 @@ def fit_instantaneous_swing_plane(
 
     # In-plane X is the velocity direction (tangent to swing)
     vel_magnitude = np.linalg.norm(clubhead_velocity)
-    if vel_magnitude < 1e-10:
+    if vel_magnitude < GEOMETRIC_TOLERANCE:
         LOGGER.warning("Clubhead velocity too small for plane fitting")
         in_plane_x = np.array([1.0, 0.0, 0.0])
     else:
@@ -169,7 +172,7 @@ def fit_instantaneous_swing_plane(
     # Normal is perpendicular to both velocity and grip axis
     normal = np.cross(grip_axis, in_plane_x)
     normal_mag = np.linalg.norm(normal)
-    if normal_mag < 1e-10:
+    if normal_mag < GEOMETRIC_TOLERANCE:
         # Velocity is parallel to shaft - degenerate case
         LOGGER.warning("Degenerate swing plane: velocity parallel to shaft")
         normal = np.array([0.0, 1.0, 0.0])
