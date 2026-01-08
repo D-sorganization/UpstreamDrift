@@ -8,7 +8,6 @@ to ensure it can run in any CI environment to verify LOGIC and PROTOCOL complian
 needing heavy binary dependencies.
 """
 
-import importlib
 import logging
 from unittest.mock import MagicMock, patch
 
@@ -56,27 +55,11 @@ mock_pydrake.DiagramBuilder = MagicMock()
 mock_pydrake.systems.framework.DiagramBuilder = mock_pydrake.DiagramBuilder
 
 # --- Imports with Patch Context ---
-# Use a context manager so patches apply only during engine imports,
-# avoiding long-lived module-level patchers that can leak between tests.
+# Use a context manager so patches apply only during engine imports.
+# NOTE: Do NOT use importlib.reload() here as it can cause numpy to be
+# reloaded, corrupting pandas' C API bindings in later tests.
 
 with patch.dict("sys.modules", module_patches):
-    import engines.physics_engines.drake.python.drake_physics_engine
-    import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
-    import engines.physics_engines.myosuite.python.myosuite_physics_engine
-    import engines.physics_engines.opensim.python.opensim_physics_engine
-    import engines.physics_engines.pendulum.python.pendulum_physics_engine
-    import engines.physics_engines.pinocchio.python.pinocchio_physics_engine
-
-    # Force reload to ensure we get the version using our mocked sys.modules
-    importlib.reload(engines.physics_engines.drake.python.drake_physics_engine)
-    importlib.reload(
-        engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
-    )
-    importlib.reload(engines.physics_engines.myosuite.python.myosuite_physics_engine)
-    importlib.reload(engines.physics_engines.opensim.python.opensim_physics_engine)
-    importlib.reload(engines.physics_engines.pendulum.python.pendulum_physics_engine)
-    importlib.reload(engines.physics_engines.pinocchio.python.pinocchio_physics_engine)
-
     from engines.physics_engines.drake.python.drake_physics_engine import (  # noqa: E402
         DrakePhysicsEngine,
     )
