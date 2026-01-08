@@ -230,13 +230,29 @@ class SpringDamperImpactModel(ImpactModel):
 
     Uses semi-implicit integration of spring-damper contact to
     compute force and velocity evolution during impact.
+
+    Note:
+        This model uses very small timesteps (default 0.1 μs) to handle
+        stiff contact forces (~10 MN/m). The impact duration is typically
+        ~0.5 ms, resulting in ~5000 integration steps per impact.
+        For performance-critical applications, consider the
+        RigidBodyImpactModel or FiniteTimeImpactModel.
+
+    Warning:
+        The spring-damper approach may exhibit numerical instability
+        for very stiff contacts. If you observe blow-up (extreme
+        velocities), try reducing dt or increasing damping_ratio.
+        Implicit integration would provide better stability but is
+        not yet implemented.
     """
 
     def __init__(self, dt: float = 1e-7) -> None:
         """Initialize spring-damper model.
 
         Args:
-            dt: Integration time step [s] (default 0.1 μs for stability)
+            dt: Integration time step [s]. Default: 0.1 μs (1e-7 s).
+                Smaller values increase stability but decrease performance.
+                Typical range: 1e-8 to 1e-6 s.
         """
         self.dt = dt
 
