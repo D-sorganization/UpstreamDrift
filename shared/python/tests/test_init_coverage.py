@@ -1,6 +1,5 @@
 """Tests for shared.python.__init__ coverage."""
 
-import sys
 from unittest.mock import patch
 
 import pytest
@@ -19,17 +18,11 @@ def test_lazy_imports() -> None:
 
 def test_lazy_import_failure() -> None:
     """Test that lazy import failures are handled correctly."""
-    # Patch sys.modules to simulate missing module
-    with patch.dict(sys.modules, clear=True):
-        # We need to remove the module from sys.modules to trigger re-import logic if we were strictly testing import mechanism,
-        # but since shared.python is already imported, we are testing __getattr__ on it.
-        # However, __getattr__ is only called if the attribute is NOT found.
-        # Since we already imported them above, they might be cached.
-        # But for 'pose_estimation', it is not in __all__ explicitly but handled in __getattr__.
-
-        # Let's test a non-existent attribute
-        with pytest.raises(AttributeError, match="has no attribute 'NonExistent'"):
-            _ = shared.python.NonExistent
+    # Test that accessing a non-existent attribute raises AttributeError
+    # NOTE: Do NOT use patch.dict(sys.modules, clear=True) as it corrupts
+    # numpy's C API state, causing pandas datetime errors in later tests
+    with pytest.raises(AttributeError, match="has no attribute 'NonExistent'"):
+        _ = shared.python.NonExistent
 
 
 def test_pose_estimation_import() -> None:
