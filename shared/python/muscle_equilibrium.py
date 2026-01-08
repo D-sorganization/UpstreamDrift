@@ -290,27 +290,27 @@ if __name__ == "__main__":
     l_MT_test = params.l_opt + params.l_slack  # 0.37 m
     activation_test = 0.5
 
-    print("=" * 60)
-    print("Muscle Equilibrium Solver Test")
-    print("=" * 60)
-    print("Muscle parameters:")
-    print(f"  F_max = {params.F_max:.0f} N")
-    print(f"  l_opt = {params.l_opt*100:.1f} cm")
-    print(f"  l_slack = {params.l_slack*100:.1f} cm")
-    print("\\nTest case:")
-    print(f"  l_MT = {l_MT_test*100:.2f} cm")
-    print(f"  activation = {activation_test*100:.0f}%")
+    print("=" * 60)  # noqa: T201
+    print("Muscle Equilibrium Solver Test")  # noqa: T201
+    print("=" * 60)  # noqa: T201
+    print("Muscle parameters:")  # noqa: T201
+    print(f"  F_max = {params.F_max:.0f} N")  # noqa: T201
+    print(f"  l_opt = {params.l_opt*100:.1f} cm")  # noqa: T201
+    print(f"  l_slack = {params.l_slack*100:.1f} cm")  # noqa: T201
+    print("\\nTest case:")  # noqa: T201
+    print(f"  l_MT = {l_MT_test*100:.2f} cm")  # noqa: T201
+    print(f"  activation = {activation_test*100:.0f}%")  # noqa: T201
 
     l_CE_solution = solver.solve_fiber_length(l_MT_test, activation_test)
 
-    print("\\nSolution:")
-    print(f"  l_CE = {l_CE_solution*100:.2f} cm")
-    print(f"  l_CE / l_opt = {l_CE_solution/params.l_opt:.3f}")
+    print("\\nSolution:")  # noqa: T201
+    print(f"  l_CE = {l_CE_solution*100:.2f} cm")  # noqa: T201
+    print(f"  l_CE / l_opt = {l_CE_solution/params.l_opt:.3f}")  # noqa: T201
 
     # Verify equilibrium
     residual = solver._equilibrium_residual(l_CE_solution, l_MT_test, activation_test)
-    print(f"  Residual = {residual:.2e} N (should be ~0)")
+    print(f"  Residual = {residual:.2e} N (should be ~0)")  # noqa: T201
 
-    print("\\n" + "=" * 60)
-    print("✓ Equilibrium solver test complete")
-    print("=" * 60)
+    print("\\n" + "=" * 60)  # noqa: T201
+    print("✓ Equilibrium solver test complete")  # noqa: T201
+    print("=" * 60)  # noqa: T201
