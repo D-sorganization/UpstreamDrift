@@ -617,7 +617,15 @@ class StatisticalAnalyzer:
         # CoP Path Length
         cop_diff = np.diff(self.cop_position, axis=0)
         # OPTIMIZATION: Reuse distance computation for path length and velocity
-        cop_dist = np.linalg.norm(cop_diff, axis=1)
+        # Use manual sqrt(sum(sq)) for 2D/3D vectors which is faster than np.linalg.norm
+        if cop_diff.shape[1] == 2:
+            cop_dist = np.sqrt(cop_diff[:, 0] ** 2 + cop_diff[:, 1] ** 2)
+        elif cop_diff.shape[1] == 3:
+            cop_dist = np.sqrt(
+                cop_diff[:, 0] ** 2 + cop_diff[:, 1] ** 2 + cop_diff[:, 2] ** 2
+            )
+        else:
+            cop_dist = np.linalg.norm(cop_diff, axis=1)
         path_length = np.sum(cop_dist)
 
         # CoP Velocity
@@ -639,7 +647,9 @@ class StatisticalAnalyzer:
             # Assuming Z is vertical (index 2)
             if self.ground_forces.shape[1] >= 3:
                 peak_vertical = float(np.max(self.ground_forces[:, 2]))
-                shear = np.linalg.norm(self.ground_forces[:, :2], axis=1)
+                # Optimize shear calculation (2D norm of first two columns)
+                shear_xy = self.ground_forces[:, :2]
+                shear = np.sqrt(shear_xy[:, 0] ** 2 + shear_xy[:, 1] ** 2)
                 peak_shear = float(np.max(shear))
 
         return GRFMetrics(
