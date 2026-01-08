@@ -1,9 +1,8 @@
-
-import pytest
 import numpy as np
-from unittest.mock import MagicMock
+
 from shared.python.dashboard.recorder import GenericPhysicsRecorder
 from shared.python.interfaces import PhysicsEngine
+
 
 class MockPhysicsEngine(PhysicsEngine):
     def __init__(self):
@@ -15,15 +14,22 @@ class MockPhysicsEngine(PhysicsEngine):
     def model_name(self) -> str:
         return "MockModel"
 
-    def load_from_path(self, path: str) -> None: pass
-    def load_from_string(self, content: str, extension: str | None = None) -> None: pass
-    def reset(self) -> None: pass
+    def load_from_path(self, path: str) -> None:
+        pass
+
+    def load_from_string(self, content: str, extension: str | None = None) -> None:
+        pass
+
+    def reset(self) -> None:
+        pass
+
     def step(self, dt: float | None = None) -> None:
         self.t += 0.01
         self.v += 0.1
         self.q += self.v * 0.01
 
-    def forward(self) -> None: pass
+    def forward(self) -> None:
+        pass
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         return self.q, self.v
@@ -32,20 +38,39 @@ class MockPhysicsEngine(PhysicsEngine):
         self.q = q
         self.v = v
 
-    def set_control(self, u: np.ndarray) -> None: pass
-    def get_time(self) -> float: return self.t
+    def set_control(self, u: np.ndarray) -> None:
+        pass
 
-    def compute_mass_matrix(self) -> np.ndarray: return np.eye(2)
-    def compute_bias_forces(self) -> np.ndarray: return np.zeros(2)
-    def compute_gravity_forces(self) -> np.ndarray: return np.zeros(2)
-    def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray: return np.zeros(2)
-    def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None: return None
+    def get_time(self) -> float:
+        return self.t
 
-    def compute_drift_acceleration(self) -> np.ndarray: return np.zeros(2)
-    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray: return np.zeros(2)
+    def compute_mass_matrix(self) -> np.ndarray:
+        return np.eye(2)
 
-    def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray: return np.zeros(2)
-    def compute_zvcf(self, q: np.ndarray) -> np.ndarray: return np.zeros(2)
+    def compute_bias_forces(self) -> np.ndarray:
+        return np.zeros(2)
+
+    def compute_gravity_forces(self) -> np.ndarray:
+        return np.zeros(2)
+
+    def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
+        return np.zeros(2)
+
+    def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
+        return None
+
+    def compute_drift_acceleration(self) -> np.ndarray:
+        return np.zeros(2)
+
+    def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
+        return np.zeros(2)
+
+    def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
+        return np.zeros(2)
+
+    def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
+        return np.zeros(2)
+
 
 def test_recorder_basic():
     engine = MockPhysicsEngine()
@@ -66,6 +91,7 @@ def test_recorder_basic():
     assert "times" in data
     assert "joint_positions" in data
     assert data["model_name"] == "MockModel"
+
 
 def test_recorder_analysis():
     engine = MockPhysicsEngine()

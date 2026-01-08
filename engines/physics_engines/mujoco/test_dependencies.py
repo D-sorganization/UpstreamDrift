@@ -18,6 +18,7 @@ def test_mujoco_import() -> None:
     """Verify that the mujoco library can be imported."""
     try:
         import mujoco
+
         logger.info(f"MuJoCo version: {mujoco.__version__}")
         assert mujoco.__version__ is not None
     except ImportError:
@@ -37,7 +38,7 @@ def test_numpy_compatibility() -> None:
     # Note: Modern dm_control or mujoco bindings usually support this
     try:
         qpos = data.qpos
-        assert isinstance(qpos, (np.ndarray, object)) # Depending on binding version
+        assert isinstance(qpos, (np.ndarray, object))  # Depending on binding version
     except Exception as e:
         logger.warning(f"Direct numpy access check warning: {e}")
 
