@@ -615,9 +615,14 @@ class StatisticalAnalyzer:
             return None
 
         # CoP Path Length
-        cop_diff = np.diff(self.cop_position, axis=0)
-        # OPTIMIZATION: Reuse distance computation for path length and velocity
-        cop_dist = np.linalg.norm(cop_diff, axis=1)
+        # OPTIMIZATION: Manual slicing is slightly faster than np.diff
+        cop_diff = self.cop_position[1:] - self.cop_position[:-1]
+        # OPTIMIZATION: hypot is faster than linalg.norm for 2D vectors
+        # If 3D, we fallback to norm or explicit calculation.
+        if cop_diff.shape[1] == 2:
+            cop_dist = np.hypot(cop_diff[:, 0], cop_diff[:, 1])
+        else:
+            cop_dist = np.linalg.norm(cop_diff, axis=1)
         path_length = np.sum(cop_dist)
 
         # CoP Velocity
