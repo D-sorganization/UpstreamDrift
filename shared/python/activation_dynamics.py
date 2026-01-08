@@ -162,4 +162,6 @@ if __name__ == "__main__":
     print(  # noqa: T201
         "  Activation is faster (10ms) than deactivation (40ms)"
     )  # noqa: T201
-    print("  This asymmetry is physiologically realistic (Ca²⁺ release vs. pump)")  # noqa: T201
+    print(  # noqa: T201
+        "  This asymmetry is physiologically realistic (Ca²⁺ release vs. pump)"
+    )

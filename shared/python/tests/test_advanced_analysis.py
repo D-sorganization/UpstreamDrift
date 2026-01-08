@@ -83,16 +83,12 @@ def test_phase_space_reconstruction():
     plotter = GolfSwingPlotter(recorder)  # type: ignore
     fig = Figure()
 
-    plotter.plot_phase_space_reconstruction(
-        fig, joint_idx=0, delay=5, embedding_dim=3
-    )
+    plotter.plot_phase_space_reconstruction(fig, joint_idx=0, delay=5, embedding_dim=3)
     assert len(fig.axes) > 0
 
     # Test 2D
     fig.clear()
-    plotter.plot_phase_space_reconstruction(
-        fig, joint_idx=0, delay=5, embedding_dim=2
-    )
+    plotter.plot_phase_space_reconstruction(fig, joint_idx=0, delay=5, embedding_dim=2)
     assert len(fig.axes) > 0
 
 

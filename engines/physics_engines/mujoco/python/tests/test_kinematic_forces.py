@@ -1,6 +1,7 @@
 """Comprehensive tests for kinematic forces module."""
 
 import warnings
+
 import mujoco
 import numpy as np
 import pytest
