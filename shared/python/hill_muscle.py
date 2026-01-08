@@ -122,8 +122,11 @@ class HillMuscleModel:
         """
         # Concentric (shortening)
         if v_norm < 0:
-            # Hill's hyperbola
-            return float((1 + v_norm) / (1 - v_norm / 0.25))
+            # Hill's hyperbola: clamp v_norm to prevent division by zero
+            # The denominator (1 - v_norm / 0.25) = 0 when v_norm = 0.25
+            # Since v_norm < 0 for concentric, we clamp at -0.99 * v_max
+            v_norm_clamped = max(v_norm, -0.99)
+            return float((1 + v_norm_clamped) / (1 - v_norm_clamped / 0.25))
 
         # Eccentric (lengthening)
         # Force increases up to ~1.4x F_max

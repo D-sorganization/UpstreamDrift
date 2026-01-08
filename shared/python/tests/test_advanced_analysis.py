@@ -1,13 +1,22 @@
 """Tests for advanced data analysis and plotting features."""
 
 import numpy as np
+import pytest
 from matplotlib.figure import Figure
 
 from shared.python.comparative_analysis import ComparativeSwingAnalyzer
 from shared.python.comparative_plotting import ComparativePlotter
-from shared.python.muscle_analysis import MuscleSynergyAnalyzer
 from shared.python.plotting import GolfSwingPlotter
 from shared.python.statistical_analysis import StatisticalAnalyzer
+
+# sklearn/muscle_analysis is optional
+try:
+    from shared.python.muscle_analysis import MuscleSynergyAnalyzer
+
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+    MuscleSynergyAnalyzer = None  # type: ignore[misc,assignment]
 
 
 class MockRecorder:
@@ -152,6 +161,7 @@ def test_dtw_analysis():
     assert len(fig.axes) > 0
 
 
+@pytest.mark.skipif(not SKLEARN_AVAILABLE, reason="sklearn not installed")
 def test_muscle_synergies():
     """Test Muscle Synergy Analysis."""
     # Create synthetic synergy data
