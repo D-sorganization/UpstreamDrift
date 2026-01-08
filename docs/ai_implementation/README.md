@@ -34,7 +34,7 @@ Users bring their own API keys or use FREE local Ollama.
 ## Related Documents
 
 - **Project Design Guidelines**: See `docs/assessments/project_design_guidelines.qmd` Section T
-- **Knowledge Base**: See `C:\Users\diete\.gemini\antigravity\knowledge\golf_modeling_suite_architecture\`
+- **Core AI Module**: See `shared/python/ai/` for implementation
 
 ## Implementation Timeline
 

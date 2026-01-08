@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import timezone
-
-import pytest
+from datetime import UTC
 
 from shared.python.ai.types import (
     AgentChunk,
@@ -71,7 +69,7 @@ class TestMessage:
         msg = Message(role="user", content="Hello")
         assert msg.role == "user"
         assert msg.content == "Hello"
-        assert msg.timestamp.tzinfo == timezone.utc
+        assert msg.timestamp.tzinfo == UTC
 
     def test_message_to_dict(self) -> None:
         """Test message serialization."""
