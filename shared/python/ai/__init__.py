@@ -21,12 +21,13 @@ Design Principles:
     5. Privacy-First: API keys in OS keyring, no data to developers
 
 Example:
-    >>> from shared.python.ai import AgentInterfaceProtocol, OllamaAdapter
-    >>> adapter = OllamaAdapter()  # Free local AI
-    >>> aip = AgentInterfaceProtocol.create_with_adapter(adapter)
-    >>> response = aip.process_message("Help me analyze this C3D file")
+    >>> from shared.python.ai import ToolRegistry, WorkflowEngine, EducationSystem
+    >>> registry = ToolRegistry()
+    >>> engine = WorkflowEngine(registry)
+    >>> edu = EducationSystem()
 """
 
+from shared.python.ai.education import EducationSystem, GlossaryEntry
 from shared.python.ai.exceptions import (
     AIConnectionError,
     AIError,
@@ -37,6 +38,13 @@ from shared.python.ai.exceptions import (
     ToolExecutionError,
     WorkflowError,
 )
+from shared.python.ai.tool_registry import (
+    Tool,
+    ToolCategory,
+    ToolParameter,
+    ToolRegistry,
+    get_global_registry,
+)
 from shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
@@ -46,6 +54,18 @@ from shared.python.ai.types import (
     ProviderCapabilities,
     ProviderCapability,
     ToolCall,
+    ToolResult,
+)
+from shared.python.ai.workflow_engine import (
+    RecoveryStrategy,
+    StepResult,
+    StepStatus,
+    ValidationResult,
+    Workflow,
+    WorkflowEngine,
+    WorkflowExecution,
+    WorkflowStep,
+    create_first_analysis_workflow,
 )
 
 __all__ = [
@@ -58,6 +78,26 @@ __all__ = [
     "ProviderCapabilities",
     "ProviderCapability",
     "ToolCall",
+    "ToolResult",
+    # Tool Registry
+    "Tool",
+    "ToolCategory",
+    "ToolParameter",
+    "ToolRegistry",
+    "get_global_registry",
+    # Workflow Engine
+    "RecoveryStrategy",
+    "StepResult",
+    "StepStatus",
+    "ValidationResult",
+    "Workflow",
+    "WorkflowEngine",
+    "WorkflowExecution",
+    "WorkflowStep",
+    "create_first_analysis_workflow",
+    # Education
+    "EducationSystem",
+    "GlossaryEntry",
     # Exceptions
     "AIError",
     "AIProviderError",
