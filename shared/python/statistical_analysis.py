@@ -1439,12 +1439,30 @@ class StatisticalAnalyzer:
             # Energy metrics
             ke = 0.5 * 1.0 * (self.club_head_speed**2)  # Dummy mass 1kg
             # Calculate total work done (vectorized for all joints at once)
-            total_work = 0.0
             n_joints = self.joint_torques.shape[1]
-            for i in range(n_joints):
-                w = self.compute_work_metrics(i)
-                if w:
-                    total_work += w["positive_work"]
+            n_samples = min(
+                self.joint_torques.shape[0],
+                self.joint_velocities.shape[0],
+                len(self.times)
+            )
+
+            if n_samples >= 2:
+                # Vectorized computation: calculate work for all joints at once
+                torques = self.joint_torques[:n_samples, :n_joints]
+                velocities = self.joint_velocities[:n_samples, :n_joints]
+                power = torques * velocities
+                pos_power = np.maximum(power, 0)
+
+                # Integrate positive power across time for each joint
+                if hasattr(np, "trapezoid"):
+                    # NumPy 2.0+
+                    total_work = float(np.trapezoid(pos_power, dx=self.dt, axis=0).sum())
+                else:
+                    # Older NumPy
+                    trapz_func = getattr(np, "trapz")  # noqa: B009
+                    total_work = float(trapz_func(pos_power, dx=self.dt, axis=0).sum())
+            else:
+                total_work = 0.0
 
             if total_work > 0:
                 peak_ke = float(np.max(ke))

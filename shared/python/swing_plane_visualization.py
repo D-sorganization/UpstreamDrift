@@ -275,16 +275,17 @@ def create_deviation_colormap(
     n = len(deviations)
     colors = np.zeros((n, 3))
 
-    # Negative → Blue, Zero → Green, Positive → Red
-    for i, val in enumerate(normalized):
-        if val < 0:
-            # Blue to green
-            colors[i, 1] = 1 + val  # Green increases from 0 to 1
-            colors[i, 2] = -val  # Blue decreases from 1 to 0
-        else:
-            # Green to red
-            colors[i, 0] = val  # Red increases from 0 to 1
-            colors[i, 1] = 1 - val  # Green decreases from 1 to 0
+    # Negative → Blue, Zero → Green, Positive → Red (vectorized)
+    # Use boolean indexing for fast array operations
+    negative_mask = normalized < 0
+
+    # Blue to green for negative values
+    colors[negative_mask, 1] = 1 + normalized[negative_mask]  # Green increases
+    colors[negative_mask, 2] = -normalized[negative_mask]     # Blue decreases
+
+    # Green to red for positive values
+    colors[~negative_mask, 0] = normalized[~negative_mask]      # Red increases
+    colors[~negative_mask, 1] = 1 - normalized[~negative_mask]  # Green decreases
 
     return colors
 

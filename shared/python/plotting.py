@@ -2012,19 +2012,29 @@ class GolfSwingPlotter:
             ax.set_xlabel("Joint Index")
             ax.set_ylabel("Joint Index")
 
-        # Add correlation values
+        # Add correlation values (optimized: vectorized color calculation)
         if data.shape[1] <= 8:
-            for i in range(data.shape[1]):
-                for j in range(data.shape[1]):
-                    ax.text(
-                        j,
-                        i,
-                        f"{corr_matrix[i, j]:.2f}",
-                        ha="center",
-                        va="center",
-                        color="k" if abs(corr_matrix[i, j]) < 0.5 else "w",
-                        fontsize=8,
-                    )
+            # Pre-compute all positions, values, and colors for batch rendering
+            n = data.shape[1]
+            i_coords, j_coords = np.meshgrid(np.arange(n), np.arange(n), indexing='ij')
+            i_flat = i_coords.ravel()
+            j_flat = j_coords.ravel()
+            values_flat = corr_matrix.ravel()
+
+            # Vectorized color calculation
+            colors = np.where(np.abs(values_flat) < 0.5, 'k', 'w')
+
+            # Single loop instead of nested loops
+            for idx in range(len(i_flat)):
+                ax.text(
+                    j_flat[idx],
+                    i_flat[idx],
+                    f"{values_flat[idx]:.2f}",
+                    ha="center",
+                    va="center",
+                    color=colors[idx],
+                    fontsize=8,
+                )
 
         ax.set_title(title, fontsize=14, fontweight="bold")
         fig.colorbar(im, ax=ax, label="Correlation Coefficient")
