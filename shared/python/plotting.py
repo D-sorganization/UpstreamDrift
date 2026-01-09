@@ -188,18 +188,20 @@ class GolfSwingPlotter:
             Tuple of (times, values) arrays
         """
         if not self.enable_cache:
-            return self._get_cached_series(field_name)
+            times, values = self.recorder.get_time_series(field_name)
+            return np.asarray(times), np.asarray(values)
 
         # Check cache first
         if field_name in self._data_cache:
             return self._data_cache[field_name]
 
         # Not in cache, fetch and cache it
-        times, values = self._get_cached_series(field_name)
-        if len(times) > 0:
-            self._data_cache[field_name] = (times, values)
+        times, values = self.recorder.get_time_series(field_name)
+        times_arr, values_arr = np.asarray(times), np.asarray(values)
+        if len(times_arr) > 0:
+            self._data_cache[field_name] = (times_arr, values_arr)
 
-        return times, values
+        return times_arr, values_arr
 
     def clear_cache(self) -> None:
         """Clear the data cache.
