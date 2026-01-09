@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import cast
 
-GRAVITY_M_S2 = 9.81
+from shared.python.constants import GRAVITY_M_S2
 
 CHAOTIC_PENDULUM_XML = rf"""<mujoco model="chaotic_driven_pendulum">
   <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>

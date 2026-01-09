@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -315,14 +316,14 @@ class ModelLibrary:
     <link name="club_head">
         <inertial>
             <mass value="{club_info['head_mass']}"/>
-            <origin xyz="{head_length/2} 0 0" rpy="0 {club_info['loft']*3.14159/180} 0"/>
+            <origin xyz="{head_length/2} 0 0" rpy="0 {club_info['loft']*math.pi/180} 0"/>
             <inertia ixx="{club_info['head_mass'] * (head_width**2 + head_height**2) / 12}"
                      iyy="{club_info['head_mass'] * (head_length**2 + head_height**2) / 12}"
                      izz="{club_info['head_mass'] * (head_length**2 + head_width**2) / 12}"
                      ixy="0" ixz="0" iyz="0"/>
         </inertial>
         <visual>
-            <origin xyz="{head_length/2} 0 0" rpy="0 {club_info['loft']*3.14159/180} 0"/>
+            <origin xyz="{head_length/2} 0 0" rpy="0 {club_info['loft']*math.pi/180} 0"/>
             <geometry>
                 <box size="{head_length} {head_width} {head_height}"/>
             </geometry>
@@ -331,7 +332,7 @@ class ModelLibrary:
             </material>
         </visual>
         <collision>
-            <origin xyz="{head_length/2} 0 0" rpy="0 {club_info['loft']*3.14159/180} 0"/>
+            <origin xyz="{head_length/2} 0 0" rpy="0 {club_info['loft']*math.pi/180} 0"/>
             <geometry>
                 <box size="{head_length} {head_width} {head_height}"/>
             </geometry>
