@@ -233,7 +233,8 @@ class MarkerToModelMapper:
             float(np.max(final_residuals)) if len(final_residuals) > 0 else float("inf")
         )
 
-        outlier_idx = [i for i in range(len(marker_positions)) if not inlier_mask[i]]
+        # Vectorized outlier indexing
+        outlier_idx = np.where(~inlier_mask)[0].tolist()
 
         # Fit quality: exp(-rms/threshold)
         fit_quality = float(np.exp(-rms / 0.01))  # 1cm reference

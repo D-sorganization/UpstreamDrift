@@ -97,6 +97,9 @@ def export_to_hdf5(
         LOGGER.error("h5py required for HDF5 export (pip install h5py)")
         return False
 
+    # Compression threshold: only compress arrays larger than this
+    MIN_SIZE_FOR_COMPRESSION = 100
+
     try:
         with h5py.File(output_path, "w") as f:
             # Create groups for organization
@@ -107,14 +110,12 @@ def export_to_hdf5(
             for key, value in data_dict.items():
                 if isinstance(value, np.ndarray):
                     # Store arrays in timeseries group
-                    # Only compress arrays larger than threshold
-                    min_size_for_compression = 100
                     timeseries_group.create_dataset(
                         key,
                         data=value,
                         compression=(
                             compression
-                            if value.size > min_size_for_compression
+                            if value.size > MIN_SIZE_FOR_COMPRESSION
                             else None
                         ),
                     )
@@ -129,14 +130,12 @@ def export_to_hdf5(
                     subgroup = f.create_group(key)
                     for subkey, subvalue in value.items():
                         if isinstance(subvalue, np.ndarray):
-                            # Only compress arrays larger than threshold
-                            min_size_for_compression = 100
                             subgroup.create_dataset(
                                 subkey,
                                 data=subvalue,
                                 compression=(
                                     compression
-                                    if subvalue.size > min_size_for_compression
+                                    if subvalue.size > MIN_SIZE_FOR_COMPRESSION
                                     else None
                                 ),
                             )
