@@ -86,7 +86,9 @@ class GenericPhysicsRecorder:
         self.data["ground_forces"] = np.zeros((self.max_samples, 3))
 
         self._buffers_initialized = True
-        LOGGER.debug(f"Initialized recorder buffers: nq={nq}, nv={nv}, max_samples={self.max_samples}")
+        LOGGER.debug(
+            f"Initialized recorder buffers: nq={nq}, nv={nv}, max_samples={self.max_samples}"
+        )
 
     def start(self) -> None:
         """Start recording."""
@@ -114,7 +116,9 @@ class GenericPhysicsRecorder:
 
         # Check buffer capacity
         if self.current_idx >= self.max_samples:
-            LOGGER.warning(f"Recorder buffer full at {self.max_samples} samples. Stopping recording.")
+            LOGGER.warning(
+                f"Recorder buffer full at {self.max_samples} samples. Stopping recording."
+            )
             self.is_recording = False
             return
 
@@ -184,14 +188,14 @@ class GenericPhysicsRecorder:
             return np.array([]), np.array([])
 
         # Return views (no copy) up to current_idx
-        times = self.data["times"][:self.current_idx]
+        times = self.data["times"][: self.current_idx]
 
         # Handle different data types
         if isinstance(values, np.ndarray):
-            return times, values[:self.current_idx]
+            return times, values[: self.current_idx]
         elif isinstance(values, list):
             # Legacy support for list-based data
-            return times, np.array(values[:self.current_idx])
+            return times, np.array(values[: self.current_idx])
         else:
             # For dict/other types
             return times, values
@@ -304,7 +308,7 @@ class GenericPhysicsRecorder:
         for k, v in self.data.items():
             if isinstance(v, np.ndarray):
                 # Export only recorded portion
-                export_data[k] = v[:self.current_idx] if v.ndim > 0 else v
+                export_data[k] = v[: self.current_idx] if v.ndim > 0 else v
             elif isinstance(v, list) and v:
                 try:
                     export_data[k] = np.array(v)
