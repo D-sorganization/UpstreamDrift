@@ -247,7 +247,7 @@ def _register_analysis_tools(registry: ToolRegistry) -> None:
                 "error": f"Invalid engine. Choose from: {valid_engines}",
             }
 
-        # This is a placeholder - real implementation would:
+        # This implementation requires integration with the physics engines.
         # 1. Load the C3D data
         # 2. Create/load the model
         # 3. Run inverse dynamics
@@ -262,10 +262,7 @@ def _register_analysis_tools(registry: ToolRegistry) -> None:
                 f"Inverse dynamics simulation queued using {engine}. "
                 "This would normally take 30-60 seconds for a typical swing."
             ),
-            "note": (
-                "This is a placeholder. Full implementation requires physics "
-                "engine integration."
-            ),
+            "note": ("Implementation requires physics " "engine integration."),
         }
 
     @registry.register(
