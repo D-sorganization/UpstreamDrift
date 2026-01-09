@@ -43,6 +43,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         # Selector for data type
         self.combo = QtWidgets.QComboBox()
         self.combo.addItems(self.data_keys)
+        self.combo.setToolTip("Select data to plot")
         self.combo.currentTextChanged.connect(self.set_plot_metric)
         self.layout.addWidget(self.combo)
 
@@ -112,20 +113,33 @@ class ControlPanel(QtWidgets.QGroupBox):
         super().__init__("Simulation Controls")
 
         layout = QtWidgets.QHBoxLayout(self)
+        style = self.style()
 
         self.btn_start = QtWidgets.QPushButton("Start")
+        self.btn_start.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay))
+        self.btn_start.setToolTip("Start simulation playback")
+        self.btn_start.setStatusTip("Start the simulation")
         self.btn_start.clicked.connect(self.start_requested.emit)
         layout.addWidget(self.btn_start)
 
         self.btn_pause = QtWidgets.QPushButton("Pause")
+        self.btn_pause.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause))
+        self.btn_pause.setToolTip("Pause/Resume simulation")
+        self.btn_pause.setStatusTip("Pause or resume the simulation")
         self.btn_pause.setCheckable(True)
         self.btn_pause.clicked.connect(self.pause_requested.emit)
         layout.addWidget(self.btn_pause)
 
         self.btn_stop = QtWidgets.QPushButton("Stop")
+        self.btn_stop.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaStop))
+        self.btn_stop.setToolTip("Stop simulation")
+        self.btn_stop.setStatusTip("Stop the simulation and reset time")
         self.btn_stop.clicked.connect(self.stop_requested.emit)
         layout.addWidget(self.btn_stop)
 
         self.btn_reset = QtWidgets.QPushButton("Reset")
+        self.btn_reset.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload))
+        self.btn_reset.setToolTip("Reset simulation")
+        self.btn_reset.setStatusTip("Reset the simulation to initial state")
         self.btn_reset.clicked.connect(self.reset_requested.emit)
         layout.addWidget(self.btn_reset)
