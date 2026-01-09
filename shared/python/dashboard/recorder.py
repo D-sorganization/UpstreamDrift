@@ -31,7 +31,65 @@ class GenericPhysicsRecorder:
         self.is_recording = False
         self.data: dict[str, Any] = {}
         self._buffers_initialized = False
+
+        # Real-time analysis configuration
+        self.analysis_config = {
+            "ztcf": False,
+            "zvcf": False,
+            "track_drift": False,
+            "track_total_control": False,
+            "induced_accel_sources": [],  # List of int indices to track individually
+        }
+
         self._reset_buffers()
+
+    def set_analysis_config(self, config: dict[str, Any]) -> None:
+        """Update analysis configuration."""
+        self.analysis_config.update(config)
+        LOGGER.info(f"Recorder analysis config updated: {self.analysis_config}")
+
+        # If already recording or initialized, ensure buffers exist for new config
+        if self._buffers_initialized:
+            self._ensure_buffers_allocated()
+
+    def _ensure_buffers_allocated(self) -> None:
+        """Allocate buffers for enabled analysis features if missing."""
+        # Use existing joint velocity buffer to determine dimensions
+        if self.data["joint_velocities"] is None:
+            return  # Cannot allocate without knowing dimensions
+
+        nv = self.data["joint_velocities"].shape[1]
+
+        # Allocate ZTCF if missing
+        if self.analysis_config["ztcf"] and self.data["ztcf_accel"] is None:
+            self.data["ztcf_accel"] = np.zeros((self.max_samples, nv))
+            LOGGER.debug("Allocated ZTCF buffer dynamically.")
+
+        # Allocate ZVCF if missing
+        if self.analysis_config["zvcf"] and self.data["zvcf_accel"] is None:
+            self.data["zvcf_accel"] = np.zeros((self.max_samples, nv))
+            LOGGER.debug("Allocated ZVCF buffer dynamically.")
+
+        # Allocate Drift if missing
+        if self.analysis_config["track_drift"] and self.data["drift_accel"] is None:
+            self.data["drift_accel"] = np.zeros((self.max_samples, nv))
+            LOGGER.debug("Allocated Drift buffer dynamically.")
+
+        # Allocate Control if missing
+        if (
+            self.analysis_config["track_total_control"]
+            and self.data["control_accel"] is None
+        ):
+            self.data["control_accel"] = np.zeros((self.max_samples, nv))
+            LOGGER.debug("Allocated Control buffer dynamically.")
+
+        # Allocate Induced Accel sources if missing
+        for idx in self.analysis_config["induced_accel_sources"]:
+            if idx not in self.data["induced_accelerations"]:
+                self.data["induced_accelerations"][idx] = np.zeros(
+                    (self.max_samples, nv)
+                )
+                LOGGER.debug(f"Allocated Induced Accel buffer for source {idx}.")
 
     def _reset_buffers(self) -> None:
         """Initialize or reset data buffers.
@@ -59,8 +117,13 @@ class GenericPhysicsRecorder:
             "cop_position": None,
             "com_position": None,
             "ground_forces": None,
-            # Storage for computed analyses
-            "induced_accelerations": {},  # Map source -> (times, accel)
+            # Storage for computed analyses (Real-time or Post-hoc)
+            "ztcf_accel": None,
+            "zvcf_accel": None,
+            "drift_accel": None,
+            "control_accel": None,
+            "induced_accelerations": {},  # Map source_idx -> ndarray
+            # Legacy/Post-hoc storage
             "counterfactuals": {},  # Map name -> (times, data)
         }
 
@@ -84,6 +147,20 @@ class GenericPhysicsRecorder:
         self.data["cop_position"] = np.zeros((self.max_samples, 3))
         self.data["com_position"] = np.zeros((self.max_samples, 3))
         self.data["ground_forces"] = np.zeros((self.max_samples, 3))
+
+        # Real-time analysis buffers
+        if self.analysis_config["ztcf"]:
+            self.data["ztcf_accel"] = np.zeros((self.max_samples, nv))
+        if self.analysis_config["zvcf"]:
+            self.data["zvcf_accel"] = np.zeros((self.max_samples, nv))
+        if self.analysis_config["track_drift"]:
+            self.data["drift_accel"] = np.zeros((self.max_samples, nv))
+        if self.analysis_config["track_total_control"]:
+            self.data["control_accel"] = np.zeros((self.max_samples, nv))
+
+        # Individual induced accelerations
+        for idx in self.analysis_config["induced_accel_sources"]:
+            self.data["induced_accelerations"][idx] = np.zeros((self.max_samples, nv))
 
         self._buffers_initialized = True
         LOGGER.debug(
@@ -149,8 +226,56 @@ class GenericPhysicsRecorder:
         except Exception:
             ke = 0.0
 
-        # Store basic data using array indexing (no copy needed, direct assignment)
+        # Real-time Analysis Computations
         idx = self.current_idx
+
+        # ZTCF
+        if self.analysis_config["ztcf"] and self.data["ztcf_accel"] is not None:
+            try:
+                self.data["ztcf_accel"][idx] = self.engine.compute_ztcf(q, v)
+            except Exception:
+                pass
+
+        # ZVCF
+        if self.analysis_config["zvcf"] and self.data["zvcf_accel"] is not None:
+            try:
+                self.data["zvcf_accel"][idx] = self.engine.compute_zvcf(q)
+            except Exception:
+                pass
+
+        # Drift Accel
+        if self.analysis_config["track_drift"] and self.data["drift_accel"] is not None:
+            try:
+                self.data["drift_accel"][idx] = self.engine.compute_drift_acceleration()
+            except Exception:
+                pass
+
+        # Total Control Accel
+        if (
+            self.analysis_config["track_total_control"]
+            and self.data["control_accel"] is not None
+        ):
+            try:
+                self.data["control_accel"][idx] = self.engine.compute_control_acceleration(
+                    tau
+                )
+            except Exception:
+                pass
+
+        # Individual Induced Accelerations
+        for src_idx in self.analysis_config["induced_accel_sources"]:
+            if src_idx in self.data["induced_accelerations"]:
+                try:
+                    # Construct single-source torque vector
+                    tau_single = np.zeros_like(tau)
+                    tau_single[src_idx] = tau[src_idx]
+                    self.data["induced_accelerations"][src_idx][
+                        idx
+                    ] = self.engine.compute_control_acceleration(tau_single)
+                except Exception:
+                    pass
+
+        # Store basic data using array indexing (no copy needed, direct assignment)
         self.data["times"][idx] = t
         self.data["joint_positions"][idx] = q
         self.data["joint_velocities"][idx] = v
