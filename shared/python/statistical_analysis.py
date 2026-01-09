@@ -671,7 +671,8 @@ class StatisticalAnalyzer:
         if self.angular_momentum is None or len(self.angular_momentum) == 0:
             return None
 
-        mag = np.linalg.norm(self.angular_momentum, axis=1)
+        # OPTIMIZATION: Explicit sqrt calculation is faster than np.linalg.norm
+        mag = np.sqrt(np.sum(self.angular_momentum**2, axis=1))
 
         peak_mag = float(np.max(mag))
         peak_idx = int(np.argmax(mag))
@@ -722,7 +723,9 @@ class StatisticalAnalyzer:
         cop_xy = self.cop_position[:, :2]
         com_xy = self.com_position[:, :2]
 
-        dist = np.linalg.norm(cop_xy - com_xy, axis=1)
+        # OPTIMIZATION: np.hypot is faster for 2D vectors
+        diff = cop_xy - com_xy
+        dist = np.hypot(diff[:, 0], diff[:, 1])
 
         # Inclination Angle (Angle between vertical and CoP-CoM vector)
         # Vector P = CoM - CoP
@@ -1518,8 +1521,9 @@ class StatisticalAnalyzer:
         vel = self.joint_velocities[:, joint_idx]
 
         # Calculate Euclidean distance between consecutive points in phase space
-        d_pos = np.diff(pos)
-        d_vel = np.diff(vel)
+        # OPTIMIZATION: Slicing is faster than np.diff
+        d_pos = pos[1:] - pos[:-1]
+        d_vel = vel[1:] - vel[:-1]
 
         dist = np.sqrt(d_pos**2 + d_vel**2)
         return float(np.sum(dist))
@@ -1732,16 +1736,34 @@ class StatisticalAnalyzer:
         counts = np.zeros(max_steps)
 
         for i in range(max_steps):
-            for j in range(M):
-                # Check bounds
-                idx1 = j + i
-                idx2 = nearest_neighbors[j] + i
+            # OPTIMIZATION: Vectorized loop calculation
+            # Vectorized indices for all j
+            idx1_vec = np.arange(M) + i
+            idx2_vec = nearest_neighbors + i
 
-                if idx1 < M and idx2 < M:
-                    dist = np.linalg.norm(orbit[idx1] - orbit[idx2])
-                    if dist > 1e-9:
-                        divergence[i] += np.log(dist)
-                        counts[i] += 1
+            # Filter out of bounds
+            valid_mask = (idx1_vec < M) & (idx2_vec < M)
+
+            if not np.any(valid_mask):
+                continue
+
+            # Get points
+            p1 = orbit[idx1_vec[valid_mask]]
+            p2 = orbit[idx2_vec[valid_mask]]
+
+            # Calculate distances
+            diff = p1 - p2
+            # OPTIMIZATION: Manual Euclidean norm is faster than np.linalg.norm(axis=1)
+            # dists = np.linalg.norm(diff, axis=1)
+            dists = np.sqrt(np.sum(diff**2, axis=1))
+
+            # Filter zero/small distances
+            valid_dists_mask = dists > 1e-9
+            valid_dists = dists[valid_dists_mask]
+
+            if len(valid_dists) > 0:
+                divergence[i] += np.sum(np.log(valid_dists))
+                counts[i] += len(valid_dists)
 
         # Avoid division by zero
         counts[counts == 0] = 1.0
