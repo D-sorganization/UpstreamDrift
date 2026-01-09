@@ -192,15 +192,13 @@ def test_finite_time_model(basic_pre_state, default_impact_params):
     np.testing.assert_array_equal(post_state.ball_velocity, rigid_post.ball_velocity)
 
 
-@pytest.mark.skip(
-    reason="Numerical instability in simple spring-damper integrator causes blow-up"
-)
 def test_spring_damper_model(basic_pre_state, default_impact_params):
     """Test spring damper model produces physical results."""
-    # Use stiffer params for stability in test
+    # Use softer params for stability in test to avoid numerical blow-up
+    # Stiff springs (1e7) require very small dt (<< 1e-6) for stability with simple integrators.
     params = default_impact_params
-    params.contact_stiffness = 1e7
-    params.contact_damping = 100.0
+    params.contact_stiffness = 1e5
+    params.contact_damping = 10.0
 
     model = SpringDamperImpactModel(dt=1e-6)
     post_state = model.solve(basic_pre_state, params)

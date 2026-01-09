@@ -396,7 +396,7 @@ class ProviderConfigWidget(QWidget):
     def get_host(self) -> str:
         """Get Ollama host if applicable."""
         if hasattr(self, "_host_input"):
-            return self._host_input.text().strip()
+            return str(self._host_input.text().strip())
         return "http://localhost:11434"
 
 
