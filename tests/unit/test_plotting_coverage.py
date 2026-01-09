@@ -75,6 +75,7 @@ def test_plot_joint_angles(plotter):
 
     # Test empty data
     plotter.recorder.get_time_series.side_effect = lambda x: ([], [])
+    plotter.clear_cache()  # Must clear cache after modifying recorder
     fig = Figure()
     plotter.plot_joint_angles(fig)
     assert len(fig.axes) > 0
@@ -127,6 +128,7 @@ def test_plot_phase_diagram(plotter):
         np.linspace(0, 1, 10),
         np.random.rand(10, 1),
     )
+    plotter.clear_cache()  # Must clear cache after modifying recorder
     fig = Figure()
     plotter.plot_phase_diagram(fig, joint_idx=5)
     assert len(fig.axes) > 0
@@ -189,6 +191,7 @@ def test_plot_swing_plane(plotter):
         np.array([0, 1]),
         np.random.rand(2, 3),
     )
+    plotter.clear_cache()  # Must clear cache after modifying recorder
     fig = Figure()
     plotter.plot_swing_plane(fig)
     assert "Insufficient data" in fig.axes[0].texts[0].get_text()

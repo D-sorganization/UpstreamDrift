@@ -259,6 +259,7 @@ class TestEllipsoidVisualizer:
 
         assert "test_body" in viz.sequences
         assert len(viz.sequences["test_body"].ellipsoids) == 2
+        viz.finalize_sequences()  # Must finalize to convert timestep list to array
         np.testing.assert_allclose(viz.sequences["test_body"].timesteps, [0.0, 0.1])
 
     def test_manipulability_summary(self, mock_engine: PhysicsEngine) -> None:
