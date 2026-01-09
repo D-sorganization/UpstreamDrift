@@ -31,12 +31,10 @@ from engines.physics_engines.pendulum.python.pendulum_physics_engine import (
     PendulumPhysicsEngine,
 )
 
-# XFAIL: These tests assume m=1kg, l=1m simple pendulum parameters
-# but DoublePendulumDynamics uses golf-specific defaults (different masses)
-# See GitHub Issue #XX - Need to configure engine with test parameters
-pytestmark = pytest.mark.xfail(
-    reason="Parameter mismatch: tests assume m=1kg,l=1m but engine uses golf defaults"
-)
+# TESTS FIXED: Engine is now configured with test-specific parameters in setup_method.
+# pytestmark = pytest.mark.xfail(
+#     reason="Parameter mismatch: tests assume m=1kg,l=1m but engine uses golf defaults"
+# )
 
 
 class TestPendulumAnalyticalDynamics:
@@ -47,12 +45,68 @@ class TestPendulumAnalyticalDynamics:
 
     def setup_method(self) -> None:
         """Initialize pendulum for each test."""
-        self.engine = PendulumPhysicsEngine()
+        # Configure engine with the simple parameters expected by the analytical tests
+        from engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+            DoublePendulumDynamics,
+            DoublePendulumParameters,
+            SegmentProperties,
+            LowerSegmentProperties,
+        )
 
-        # Simple pendulum parameters (from DoublePendulumDynamics defaults)
-        # Link 1: m1 = 1.0 kg, l1 = 1.0 m
-        # Link 2: m2 = 1.0 kg, l2 = 1.0 m
-        # Gravity: g = GRAVITY_M_S2 m/s² (NIST standard)
+        # Create simple pendulum parameters
+        # Link 1: m1 = 1.0 kg, l1 = 1.0 m, COM at tip (L) for simple pendulum equivalent or 1.0 for test?
+        # The analytical formulas in this test assume point mass at length L (I = mL^2)
+        # So COM must be at L, and inertia about COM should be 0 (point mass)
+        # Or more realistically, uniform rod: I = 1/3 mL^2, COM at L/2
+        # The test says: "where I = m·l² (point mass inertia)"
+        # So we configure it as a point mass at the end.
+
+        self.m1 = 1.0
+        self.l1 = 1.0
+
+        # To match "I = m·l²" of a point mass at distance l:
+        # Inertia about pivot = I_com + m*com_dist^2
+        # If COM is at l, then I_pivot = I_com + m*l^2
+        # If I_com = 0 (point mass), then I_pivot = m*l^2
+
+        upper_segment = SegmentProperties(
+            length_m=self.l1,
+            mass_kg=self.m1,
+            center_of_mass_ratio=1.0,  # COM at tip
+            inertia_about_com=0.0,     # Point mass
+        )
+
+        # Link 2 (irrelevant for single pendulum tests but needed for initialization)
+        # To make the double pendulum behave like a single pendulum for Link 1 tests,
+        # we must make Link 2 massless and inertialess.
+        # Use epsilon mass to avoid ZeroDivisionError in center_of_mass_distance calculation
+        epsilon_mass = 1e-10
+        lower_segment = LowerSegmentProperties(
+            length_m=1.0,
+            shaft_mass_kg=epsilon_mass,
+            clubhead_mass_kg=epsilon_mass,
+            shaft_com_ratio=0.5,
+        )
+
+        params = DoublePendulumParameters(
+            upper_segment=upper_segment,
+            lower_segment=lower_segment,
+            plane_inclination_deg=0.0, # Vertical plane
+            damping_shoulder=0.0,
+            damping_wrist=0.0,
+            gravity_enabled=True,
+            constrained_to_plane=True # Uses full gravity if inclination is 0
+        )
+
+        dynamics = DoublePendulumDynamics(parameters=params)
+
+        self.engine = PendulumPhysicsEngine()
+        self.engine.dynamics = dynamics # Inject custom dynamics
+        # Re-wire forcing functions as they are bound to the instance
+        self.engine.dynamics.forcing_functions = (
+            self.engine._get_shoulder_torque,
+            self.engine._get_wrist_torque,
+        )
 
         self.m1 = 1.0  # kg
         self.l1 = 1.0  # m
@@ -287,9 +341,55 @@ class TestPendulumEnergyConservation:
 
     def setup_method(self) -> None:
         """Initialize pendulum."""
+        # Configure engine with the simple parameters expected by the analytical tests
+        from engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+            DoublePendulumDynamics,
+            DoublePendulumParameters,
+            SegmentProperties,
+            LowerSegmentProperties,
+        )
+
+        self.m1 = 1.0
+        self.l1 = 1.0
+
+        upper_segment = SegmentProperties(
+            length_m=self.l1,
+            mass_kg=self.m1,
+            center_of_mass_ratio=1.0,  # COM at tip
+            inertia_about_com=0.0,     # Point mass
+        )
+
+        # Link 2 (irrelevant for single pendulum tests but needed for initialization)
+        # To make the double pendulum behave like a single pendulum,
+        # we must make Link 2 massless and inertialess.
+        # Use epsilon mass to avoid ZeroDivisionError
+        epsilon_mass = 1e-10
+        lower_segment = LowerSegmentProperties(
+            length_m=1.0,
+            shaft_mass_kg=epsilon_mass,
+            clubhead_mass_kg=epsilon_mass,
+            shaft_com_ratio=0.5,
+        )
+
+        params = DoublePendulumParameters(
+            upper_segment=upper_segment,
+            lower_segment=lower_segment,
+            plane_inclination_deg=0.0, # Vertical plane
+            damping_shoulder=0.0,
+            damping_wrist=0.0,
+            gravity_enabled=True,
+            constrained_to_plane=True
+        )
+
+        dynamics = DoublePendulumDynamics(parameters=params)
+
         self.engine = PendulumPhysicsEngine()
-        self.m1 = 1.0  # kg
-        self.l1 = 1.0  # m
+        self.engine.dynamics = dynamics
+        self.engine.dynamics.forcing_functions = (
+            self.engine._get_shoulder_torque,
+            self.engine._get_wrist_torque,
+        )
+
         self.g = GRAVITY_M_S2  # m/s²
 
     def compute_total_energy(self, theta: float, theta_dot: float) -> float:
