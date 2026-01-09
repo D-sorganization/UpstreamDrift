@@ -3331,3 +3331,261 @@ class GolfSwingPlotter:
         )
         ax1.grid(True, alpha=0.3)
         fig.tight_layout()
+
+    def plot_dynamic_correlation(
+        self,
+        fig: Figure,
+        joint_idx_1: int,
+        joint_idx_2: int,
+        window_size: int = 20,
+    ) -> None:
+        """Plot Rolling Correlation between two joint velocities.
+
+        Args:
+            fig: Matplotlib figure
+            joint_idx_1: First joint index
+            joint_idx_2: Second joint index
+            window_size: Window size for rolling correlation
+        """
+        try:
+            from shared.python.statistical_analysis import StatisticalAnalyzer
+        except ImportError:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Analysis module missing", ha="center", va="center")
+            return
+
+        # Fetch data
+        times, positions = self._get_cached_series("joint_positions")
+        _, velocities = self._get_cached_series("joint_velocities")
+        _, torques = self._get_cached_series("joint_torques")
+
+        if len(times) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        # Initialize analyzer
+        analyzer = StatisticalAnalyzer(
+            times=np.asarray(times),
+            joint_positions=np.asarray(positions),
+            joint_velocities=np.asarray(velocities),
+            joint_torques=np.asarray(torques),
+        )
+
+        try:
+            w_times, corrs = analyzer.compute_rolling_correlation(
+                joint_idx_1, joint_idx_2, window_size, data_type="velocity"
+            )
+        except AttributeError:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Method not available", ha="center", va="center")
+            return
+
+        if len(w_times) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Insufficient data for correlation", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+        ax.plot(w_times, corrs, color=self.colors["primary"], linewidth=2)
+
+        name1 = self.get_joint_name(joint_idx_1)
+        name2 = self.get_joint_name(joint_idx_2)
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Correlation Coefficient", fontsize=12, fontweight="bold")
+        ax.set_title(
+            f"Dynamic Correlation: {name1} vs {name2}\n(Window={window_size})",
+            fontsize=14,
+            fontweight="bold",
+        )
+        ax.set_ylim(-1.1, 1.1)
+        ax.grid(True, alpha=0.3, linestyle="--")
+        ax.axhline(0, color="k", linestyle="-", alpha=0.3)
+        fig.tight_layout()
+
+    def plot_synergy_trajectory(
+        self,
+        fig: Figure,
+        synergy_result: Any,
+        dim1: int = 0,
+        dim2: int = 1,
+    ) -> None:
+        """Plot trajectory in synergy space (Activation 1 vs Activation 2).
+
+        Args:
+            fig: Matplotlib figure
+            synergy_result: SynergyResult object
+            dim1: Index of first synergy (X-axis)
+            dim2: Index of second synergy (Y-axis)
+        """
+        if not hasattr(synergy_result, "activations"):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Invalid SynergyResult", ha="center", va="center")
+            return
+
+        activations = synergy_result.activations
+        if activations.shape[0] <= max(dim1, dim2):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Not enough synergies extracted", ha="center", va="center")
+            return
+
+        times, _ = self._get_cached_series("joint_positions")
+        # Match lengths
+        n_samples = min(len(times), activations.shape[1])
+        act1 = activations[dim1, :n_samples]
+        act2 = activations[dim2, :n_samples]
+        plot_times = times[:n_samples]
+
+        ax = fig.add_subplot(111)
+        sc = ax.scatter(act1, act2, c=plot_times, cmap="viridis", s=30, alpha=0.8)
+        ax.plot(act1, act2, color="gray", alpha=0.3, linewidth=1)
+
+        # Mark Start
+        ax.scatter(act1[0], act2[0], color="green", s=100, label="Start")
+        ax.scatter(act1[-1], act2[-1], color="red", s=100, marker="s", label="End")
+
+        ax.set_xlabel(f"Synergy {dim1+1} Activation", fontsize=12, fontweight="bold")
+        ax.set_ylabel(f"Synergy {dim2+1} Activation", fontsize=12, fontweight="bold")
+        ax.set_title("Synergy Space Trajectory", fontsize=14, fontweight="bold")
+        ax.grid(True, alpha=0.3)
+        ax.legend()
+        fig.colorbar(sc, ax=ax, label="Time (s)")
+        fig.tight_layout()
+
+    def plot_3d_vector_field(
+        self,
+        fig: Figure,
+        vector_name: str,
+        position_name: str,
+        skip_steps: int = 5,
+        scale: float = 0.1,
+    ) -> None:
+        """Plot 3D vector field along a trajectory.
+
+        Generalized version of butterfly diagram for any vector series.
+
+        Args:
+            fig: Matplotlib figure
+            vector_name: Name of vector field (e.g., 'angular_momentum', 'ground_forces')
+            position_name: Name of position field (e.g., 'com_position', 'cop_position')
+            skip_steps: Step interval
+            scale: Vector scale factor
+        """
+        try:
+            times, vectors = self._get_cached_series(vector_name)
+            _, positions = self._get_cached_series(position_name)
+        except (AttributeError, KeyError):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, f"Data missing: {vector_name}/{position_name}", ha="center", va="center")
+            return
+
+        vectors = np.asarray(vectors)
+        positions = np.asarray(positions)
+
+        if len(times) == 0 or vectors.shape[1] < 3 or positions.shape[1] < 3:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Invalid dimensions or empty data", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111, projection="3d")
+
+        # Plot Trajectory
+        x = positions[:, 0]
+        y = positions[:, 1]
+        z = positions[:, 2]
+        ax.plot(x, y, z, color="k", alpha=0.3, linewidth=1, label=f"{position_name}")
+
+        # Plot Vectors
+        indices = range(0, len(times), skip_steps)
+        for i in indices:
+            u, v, w = vectors[i, 0], vectors[i, 1], vectors[i, 2]
+            px, py, pz = x[i], y[i], z[i]
+
+            # Draw vector
+            ax.plot(
+                [px, px + u * scale],
+                [py, py + v * scale],
+                [pz, pz + w * scale],
+                color=self.colors["secondary"],
+                linewidth=1.5,
+                alpha=0.6
+            )
+
+        ax.set_title(f"3D Vector Field: {vector_name}", fontsize=14, fontweight="bold")
+        ax.set_xlabel("X", fontweight="bold")
+        ax.set_ylabel("Y", fontweight="bold")
+        ax.set_zlabel("Z", fontweight="bold") # type: ignore
+        fig.tight_layout()
+
+    def plot_local_stability(
+        self,
+        fig: Figure,
+        joint_idx: int = 0,
+        embedding_dim: int = 3,
+        tau: int = 5,
+    ) -> None:
+        """Plot local divergence rate (Local Stability) over time.
+
+        Args:
+            fig: Matplotlib figure
+            joint_idx: Joint index
+            embedding_dim: Embedding dimension
+            tau: Time lag
+        """
+        try:
+            from shared.python.statistical_analysis import StatisticalAnalyzer
+        except ImportError:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Analysis module missing", ha="center", va="center")
+            return
+
+        # Fetch data
+        times, positions = self._get_cached_series("joint_positions")
+        _, velocities = self._get_cached_series("joint_velocities")
+
+        if len(times) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        analyzer = StatisticalAnalyzer(
+            times=np.asarray(times),
+            joint_positions=np.asarray(positions),
+            joint_velocities=np.asarray(velocities),
+            joint_torques=np.zeros_like(positions), # Dummy
+        )
+
+        try:
+            ld_times, ld_rates = analyzer.compute_local_divergence_rate(
+                joint_idx=joint_idx,
+                tau=tau,
+                dim=embedding_dim,
+                window=tau*2, # Theiler window
+                data_type="velocity"
+            )
+        except AttributeError:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Method not implemented", ha="center", va="center")
+            return
+
+        if len(ld_times) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Insufficient data for stability analysis", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+        ax.plot(ld_times, ld_rates, color=self.colors["quaternary"], linewidth=2)
+
+        # Positive divergence rate -> Local Instability
+        # Negative divergence rate -> Local Stability (Converging)
+        ax.fill_between(ld_times, 0, ld_rates, where=(ld_rates > 0), alpha=0.2, color="red", label="Unstable")
+        ax.fill_between(ld_times, 0, ld_rates, where=(ld_rates <= 0), alpha=0.2, color="green", label="Stable")
+
+        name = self.get_joint_name(joint_idx)
+        ax.set_title(f"Local Stability (Divergence Rate): {name}", fontsize=14, fontweight="bold")
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Divergence Rate (1/s)", fontsize=12, fontweight="bold")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        ax.legend()
+        fig.tight_layout()
