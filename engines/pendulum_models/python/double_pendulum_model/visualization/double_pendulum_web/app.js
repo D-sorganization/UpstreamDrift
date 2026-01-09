@@ -61,6 +61,19 @@ function validateExpr(expr) {
 }
 
 function updateParamsFromInputs() {
+  // Validate numeric inputs
+  document.querySelectorAll('input[type="number"]').forEach(input => {
+    if (!input.checkValidity()) {
+      input.classList.add('error');
+      input.setAttribute('title', input.validationMessage);
+      input.setAttribute('aria-invalid', 'true');
+    } else {
+      input.classList.remove('error');
+      input.removeAttribute('title');
+      input.setAttribute('aria-invalid', 'false');
+    }
+  });
+
   params.l1 = Number(document.getElementById('l1').value);
   params.l2 = Number(document.getElementById('l2').value);
   params.m1 = Number(document.getElementById('m1').value);
