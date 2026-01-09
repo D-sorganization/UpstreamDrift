@@ -8,6 +8,7 @@ Contains:
 from __future__ import annotations
 
 import logging
+from typing import Any
 
 from PyQt6 import QtCore, QtWidgets
 
@@ -36,7 +37,7 @@ class LivePlotWidget(QtWidgets.QWidget):
 
         # Setup plot
         self.ax = self.canvas.fig.add_subplot(111)
-        self.line_objects = []
+        self.line_objects: list[Any] = []
         self.data_keys = ["joint_positions", "joint_velocities", "joint_torques"]
         self.current_key = "joint_positions"
 
