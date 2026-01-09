@@ -63,6 +63,12 @@ project_name/
 - Use `unittest` or `pytest`.
 - Write unit tests for individual functions and integration tests for workflows.
 
+### 4. Configuration Compliance (NO DRIFT)
+
+- **Strict Config**: Do not relax `pyproject.toml`, `ruff.toml`, or `mypy.ini` settings to accommodate code.
+- **No Blanket Exclusions**: Do not exclude entire directories or files from linting/typing checks unless they are third-party vendored code.
+- **Fix Code, Not Config**: If a check fails, fix the code. If a suppression is absolutely necessary, use granular inline ignores (e.g., `# type: ignore[error-code]`) with a comment explaining why.
+
 ---
 
 ## 🔢 MATLAB Coding Standards
