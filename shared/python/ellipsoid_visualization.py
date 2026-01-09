@@ -434,10 +434,10 @@ class EllipsoidVisualizer:
         Performance optimization: Avoids O(n²) np.append() overhead.
         """
         for sequence in self.sequences.values():
-            if hasattr(sequence, '_timesteps_list'):
+            if hasattr(sequence, "_timesteps_list"):
                 sequence.timesteps = np.array(sequence._timesteps_list)
                 # Clean up temporary list to save memory
-                delattr(sequence, '_timesteps_list')
+                delattr(sequence, "_timesteps_list")
 
     def export_all_json(self, output_dir: Path | str) -> None:
         """Export all recorded sequences to JSON files.

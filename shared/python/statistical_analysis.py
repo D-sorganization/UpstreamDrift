@@ -1305,7 +1305,7 @@ class StatisticalAnalyzer:
             # Element-wise multiplication across all joints, then sum along joint axis
             total_power = np.sum(
                 self.joint_torques[:, :n_joints] * self.joint_velocities[:, :n_joints],
-                axis=1
+                axis=1,
             )
             peak_power = float(np.max(total_power))
             # Pro might generate > 3000 W?
