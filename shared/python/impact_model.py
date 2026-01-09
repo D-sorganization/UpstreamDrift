@@ -310,8 +310,8 @@ class SpringDamperImpactModel(ImpactModel):
                 f_contact = f_magnitude * n
 
                 # Semi-implicit Euler: update velocities first
-                a_ball = -f_contact / m_ball
-                a_club = f_contact / m_club
+                a_ball = f_contact / m_ball  # Ball pushed away
+                a_club = -f_contact / m_club  # Club pushed back
 
                 v_ball = v_ball + a_ball * self.dt
                 v_club = v_club + a_club * self.dt
@@ -329,7 +329,7 @@ class SpringDamperImpactModel(ImpactModel):
                 # Pre-contact: advance positions
                 x_ball = x_ball + v_ball * self.dt
                 x_club = x_club + v_club * self.dt
-                contact_time += self.dt
+                # Don't increment contact_time here, it's only for contact duration
 
                 # Check if we've reached the ball
                 if np.dot(x_ball - x_club, n) - GOLF_BALL_RADIUS < 0:

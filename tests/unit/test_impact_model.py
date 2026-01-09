@@ -149,9 +149,6 @@ class TestSpringDamperImpactModel:
     scheme (e.g., implicit Euler) is implemented.
     """
 
-    @pytest.mark.xfail(
-        reason="Spring-damper model requires implicit integration for stability"
-    )
     def test_ball_gains_velocity(self) -> None:
         """Spring-damper model should produce finite results."""
         pre_state = PreImpactState(
@@ -173,9 +170,6 @@ class TestSpringDamperImpactModel:
         # Velocity magnitude should be reasonable (not blown up)
         assert np.linalg.norm(result.ball_velocity) < 200  # m/s
 
-    @pytest.mark.xfail(
-        reason="Spring-damper model requires implicit integration for stability"
-    )
     def test_has_contact_duration(self) -> None:
         """Spring-damper model should report non-zero contact duration."""
         pre_state = PreImpactState(
