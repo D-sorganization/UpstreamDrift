@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 try:
     from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
-    class MplCanvas(FigureCanvasQTAgg):  # type: ignore[misc]
+    class MplCanvas(FigureCanvasQTAgg):
         """Matplotlib canvas for embedding in PyQt6."""
 
         def __init__(self, width: float = 8, height: float = 6, dpi: int = 100) -> None:
@@ -897,7 +897,7 @@ class GolfSwingPlotter:
         z = positions[:, 2]
 
         # Color by time
-        sc = ax.scatter(x, y, z, c=times, cmap="viridis", s=20)  # type: ignore[misc]
+        sc = ax.scatter(x, y, z, c=times, cmap="viridis", s=20)
         ax.plot(x, y, z, alpha=0.3, color="gray", linewidth=1)
 
         # Mark start and end
@@ -906,7 +906,7 @@ class GolfSwingPlotter:
             [y[0]],
             [z[0]],
             color="green",
-            s=100,  # type: ignore[misc]
+            s=100,
             marker="o",
             label="Start",
         )
@@ -915,14 +915,14 @@ class GolfSwingPlotter:
             [y[-1]],
             [z[-1]],
             color="red",
-            s=100,  # type: ignore[misc]
+            s=100,
             marker="s",
             label="End",
         )
 
         ax.set_xlabel("X (m)", fontsize=10, fontweight="bold")
         ax.set_ylabel("Y (m)", fontsize=10, fontweight="bold")
-        ax.set_zlabel("Z (m)", fontsize=10, fontweight="bold")  # type: ignore[attr-defined]
+        ax.set_zlabel("Z (m)", fontsize=10, fontweight="bold")
         ax.set_title("Club Head 3D Trajectory", fontsize=14, fontweight="bold")
         ax.legend(loc="best")
         fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
@@ -1593,7 +1593,7 @@ class GolfSwingPlotter:
         acc = np.rad2deg(accelerations[:, joint_idx])
 
         # Color by time
-        sc = ax.scatter(pos, vel, acc, c=times, cmap="viridis", s=20)  # type: ignore[misc]
+        sc = ax.scatter(pos, vel, acc, c=times, cmap="viridis", s=20)
         ax.plot(pos, vel, acc, alpha=0.3, color="gray", linewidth=1)
 
         # Mark start
@@ -1602,7 +1602,7 @@ class GolfSwingPlotter:
             [vel[0]],
             [acc[0]],
             color="green",
-            s=100,  # type: ignore[misc]
+            s=100,
             marker="o",
             label="Start",
         )
@@ -1611,7 +1611,7 @@ class GolfSwingPlotter:
         ax.set_title(f"3D Phase Space: {joint_name}", fontsize=14, fontweight="bold")
         ax.set_xlabel("Position (deg)", fontsize=10, fontweight="bold")
         ax.set_ylabel("Velocity (deg/s)", fontsize=10, fontweight="bold")
-        ax.set_zlabel("Acceleration (deg/s²)", fontsize=10, fontweight="bold")  # type: ignore[attr-defined]
+        ax.set_zlabel("Acceleration (deg/s²)", fontsize=10, fontweight="bold")
         fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
         fig.tight_layout()
 
@@ -1753,7 +1753,7 @@ class GolfSwingPlotter:
 
         ax.set_xlabel(labels[0], fontsize=9, fontweight="bold")
         ax.set_ylabel(labels[1], fontsize=9, fontweight="bold")
-        ax.set_zlabel(labels[2], fontsize=9, fontweight="bold")  # type: ignore
+        ax.set_zlabel(labels[2], fontsize=9, fontweight="bold")
 
         # Title
         cond_name = self.get_joint_name(cond_idx)
@@ -1854,7 +1854,7 @@ class GolfSwingPlotter:
 
             ax.set_xlabel("x(t)", fontsize=10)
             ax.set_ylabel(f"x(t+{delay})", fontsize=10)
-            ax.set_zlabel(f"x(t+{2*delay})", fontsize=10)  # type: ignore
+            ax.set_zlabel(f"x(t+{2*delay})", fontsize=10)
         else:
             ax = fig.add_subplot(111)
             sc = ax.scatter(
@@ -2105,7 +2105,7 @@ class GolfSwingPlotter:
                 - (normal[0] * (xx - centroid[0]) + normal[1] * (yy - centroid[1]))
                 / normal[2]
             )
-            ax.plot_surface(xx, yy, zz, alpha=0.2, color="cyan")  # type: ignore[attr-defined]
+            ax.plot_surface(xx, yy, zz, alpha=0.2, color="cyan")
         else:
             # Vertical plane (rare for golf swing but possible)
             # Cannot plot as z = f(x,y), would need x = f(y,z) or similar
@@ -2114,7 +2114,7 @@ class GolfSwingPlotter:
 
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")
-        ax.set_zlabel("Z (m)")  # type: ignore[attr-defined]
+        ax.set_zlabel("Z (m)")
         ax.set_title(
             f"Swing Plane Analysis\nSteepness: {metrics.steepness_deg:.1f}°, "
             f"RMSE: {metrics.rmse * 100:.1f} cm",
@@ -2605,7 +2605,7 @@ class GolfSwingPlotter:
 
         ax.set_xlabel("X (m)", fontsize=10, fontweight="bold")
         ax.set_ylabel("Y (m)", fontsize=10, fontweight="bold")
-        ax.set_zlabel("Force (scaled)", fontsize=10, fontweight="bold")  # type: ignore[attr-defined]
+        ax.set_zlabel("Force (scaled)", fontsize=10, fontweight="bold")
         ax.set_title("GRF Butterfly Diagram", fontsize=14, fontweight="bold")
 
         # Determine axis limits to show vectors
@@ -2615,7 +2615,7 @@ class GolfSwingPlotter:
 
         ax.set_xlim(np.min(all_x), np.max(all_x))
         ax.set_ylim(np.min(all_y), np.max(all_y))
-        ax.set_zlim(np.min(all_z), np.max(all_z))  # type: ignore[attr-defined]
+        ax.set_zlim(np.min(all_z), np.max(all_z))
 
         fig.tight_layout()
 
@@ -2642,7 +2642,7 @@ class GolfSwingPlotter:
         lz = am_data[:, 2]
 
         # Plot trajectory of the tip
-        sc = ax.scatter(lx, ly, lz, c=times, cmap="viridis", s=20)  # type: ignore[misc]
+        sc = ax.scatter(lx, ly, lz, c=times, cmap="viridis", s=20)
         ax.plot(lx, ly, lz, color="gray", alpha=0.3)
 
         # Draw vector from origin for current/max?
@@ -2660,11 +2660,11 @@ class GolfSwingPlotter:
         )
 
         # Mark Origin
-        ax.scatter([0], [0], zs=[0], color="black", s=50, marker="o")  # type: ignore[call-arg]
+        ax.scatter([0], [0], zs=[0], color="black", s=50, marker="o")
 
         ax.set_xlabel("Lx (kg m²/s)", fontsize=10, fontweight="bold")
         ax.set_ylabel("Ly (kg m²/s)", fontsize=10, fontweight="bold")
-        ax.set_zlabel("Lz (kg m²/s)", fontsize=10, fontweight="bold")  # type: ignore[attr-defined]
+        ax.set_zlabel("Lz (kg m²/s)", fontsize=10, fontweight="bold")
         ax.set_title("3D Angular Momentum Trajectory", fontsize=14, fontweight="bold")
         ax.legend()
 
@@ -2949,7 +2949,7 @@ class GolfSwingPlotter:
                 if idx < torques.shape[1]:
                     impulse = cumulative_trapezoid(
                         torques[:, idx], dx=dt, initial=0
-                    )  # type: ignore[call-overload]
+                    )
                     label = self._get_aligned_label(idx, torques.shape[1])
                     ax.plot(times, impulse, label=label, linewidth=2)
 
@@ -2991,7 +2991,7 @@ class GolfSwingPlotter:
                 self.colors["secondary"],
                 self.colors["tertiary"],
                 "black",
-            ]  # type: ignore[list-item]
+            ]
 
             has_data = False
             times = np.array([])
@@ -3164,7 +3164,7 @@ class GolfSwingPlotter:
         for comp, label, color, style in zip(
             components, labels, colors, styles, strict=False
         ):
-            times, acc_vec = self.recorder.get_club_induced_acceleration_series(comp)  # type: ignore
+            times, acc_vec = self.recorder.get_club_induced_acceleration_series(comp)
 
             if len(times) > 0 and acc_vec.size > 0:
                 # Plot Magnitude

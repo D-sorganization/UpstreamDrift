@@ -181,7 +181,7 @@ class GenericPhysicsRecorder:
         if field_name not in self.data:
             return np.array([]), np.array([])
 
-        values = self.data[field_name]
+        values: Any = self.data[field_name]
 
         # Handle None (uninitialized arrays)
         if values is None or self.current_idx == 0:
@@ -209,13 +209,19 @@ class GenericPhysicsRecorder:
             # Doing it post-hoc is expensive (needs re-simulation).
             # For now, return empty if not recorded.
             return np.array([]), np.array([])
-        return self.data["induced_accelerations"][source_name]
+        # Explicitly cast to tuple to satisfy MyPy
+        result: tuple[np.ndarray, np.ndarray] = self.data["induced_accelerations"][
+            source_name
+        ]
+        return result
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Get counterfactual series."""
         if cf_name not in self.data["counterfactuals"]:
             return np.array([]), np.array([])
-        return self.data["counterfactuals"][cf_name]
+        # Explicitly cast to tuple to satisfy MyPy
+        result: tuple[np.ndarray, np.ndarray] = self.data["counterfactuals"][cf_name]
+        return result
 
     # -------- Analysis Computation --------
 
