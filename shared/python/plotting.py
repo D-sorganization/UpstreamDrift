@@ -897,11 +897,11 @@ class GolfSwingPlotter:
         z = positions[:, 2]
 
         # Color by time
-        sc = ax.scatter(x, y, z, c=times, cmap="viridis", s=20)
+        sc = ax.scatter(x, y, z, c=times, cmap="viridis", s=20)  # type: ignore[misc]
         ax.plot(x, y, z, alpha=0.3, color="gray", linewidth=1)
 
         # Mark start and end
-        ax.scatter(
+        ax.scatter(  # type: ignore[misc]
             [x[0]],
             [y[0]],
             [z[0]],
@@ -910,7 +910,7 @@ class GolfSwingPlotter:
             marker="o",
             label="Start",
         )
-        ax.scatter(
+        ax.scatter(  # type: ignore[misc]
             [x[-1]],
             [y[-1]],
             [z[-1]],
@@ -922,7 +922,7 @@ class GolfSwingPlotter:
 
         ax.set_xlabel("X (m)", fontsize=10, fontweight="bold")
         ax.set_ylabel("Y (m)", fontsize=10, fontweight="bold")
-        ax.set_zlabel("Z (m)", fontsize=10, fontweight="bold")
+        ax.set_zlabel("Z (m)", fontsize=10, fontweight="bold")  # type: ignore[attr-defined]
         ax.set_title("Club Head 3D Trajectory", fontsize=14, fontweight="bold")
         ax.legend(loc="best")
         fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
@@ -1593,11 +1593,11 @@ class GolfSwingPlotter:
         acc = np.rad2deg(accelerations[:, joint_idx])
 
         # Color by time
-        sc = ax.scatter(pos, vel, acc, c=times, cmap="viridis", s=20)
+        sc = ax.scatter(pos, vel, acc, c=times, cmap="viridis", s=20)  # type: ignore[misc]
         ax.plot(pos, vel, acc, alpha=0.3, color="gray", linewidth=1)
 
         # Mark start
-        ax.scatter(
+        ax.scatter(  # type: ignore[misc]
             [pos[0]],
             [vel[0]],
             [acc[0]],
@@ -1611,7 +1611,7 @@ class GolfSwingPlotter:
         ax.set_title(f"3D Phase Space: {joint_name}", fontsize=14, fontweight="bold")
         ax.set_xlabel("Position (deg)", fontsize=10, fontweight="bold")
         ax.set_ylabel("Velocity (deg/s)", fontsize=10, fontweight="bold")
-        ax.set_zlabel("Acceleration (deg/s²)", fontsize=10, fontweight="bold")
+        ax.set_zlabel("Acceleration (deg/s²)", fontsize=10, fontweight="bold")  # type: ignore[attr-defined]
         fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
         fig.tight_layout()
 
@@ -1730,7 +1730,7 @@ class GolfSwingPlotter:
         ax = fig.add_subplot(111, projection="3d")
 
         # Scatter plot
-        sc = ax.scatter(
+        sc = ax.scatter(  # type: ignore[misc]
             points_arr[:, 0],
             points_arr[:, 1],
             points_arr[:, 2],
@@ -1753,7 +1753,7 @@ class GolfSwingPlotter:
 
         ax.set_xlabel(labels[0], fontsize=9, fontweight="bold")
         ax.set_ylabel(labels[1], fontsize=9, fontweight="bold")
-        ax.set_zlabel(labels[2], fontsize=9, fontweight="bold")
+        ax.set_zlabel(labels[2], fontsize=9, fontweight="bold")  # type: ignore[attr-defined]
 
         # Title
         cond_name = self.get_joint_name(cond_idx)
@@ -1834,7 +1834,7 @@ class GolfSwingPlotter:
 
         if embedding_dim == 3:
             ax = fig.add_subplot(111, projection="3d")
-            sc = ax.scatter(
+            sc = ax.scatter(  # type: ignore[misc]
                 vectors[:, 0],
                 vectors[:, 1],
                 vectors[:, 2],
@@ -1854,7 +1854,7 @@ class GolfSwingPlotter:
 
             ax.set_xlabel("x(t)", fontsize=10)
             ax.set_ylabel(f"x(t+{delay})", fontsize=10)
-            ax.set_zlabel(f"x(t+{2*delay})", fontsize=10)
+            ax.set_zlabel(f"x(t+{2*delay})", fontsize=10)  # type: ignore[attr-defined]
         else:
             ax = fig.add_subplot(111)
             sc = ax.scatter(
@@ -2105,7 +2105,7 @@ class GolfSwingPlotter:
                 - (normal[0] * (xx - centroid[0]) + normal[1] * (yy - centroid[1]))
                 / normal[2]
             )
-            ax.plot_surface(xx, yy, zz, alpha=0.2, color="cyan")
+            ax.plot_surface(xx, yy, zz, alpha=0.2, color="cyan")  # type: ignore[attr-defined]
         else:
             # Vertical plane (rare for golf swing but possible)
             # Cannot plot as z = f(x,y), would need x = f(y,z) or similar
@@ -2114,7 +2114,7 @@ class GolfSwingPlotter:
 
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")
-        ax.set_zlabel("Z (m)")
+        ax.set_zlabel("Z (m)")  # type: ignore[attr-defined]
         ax.set_title(
             f"Swing Plane Analysis\nSteepness: {metrics.steepness_deg:.1f}°, "
             f"RMSE: {metrics.rmse * 100:.1f} cm",
@@ -2605,7 +2605,7 @@ class GolfSwingPlotter:
 
         ax.set_xlabel("X (m)", fontsize=10, fontweight="bold")
         ax.set_ylabel("Y (m)", fontsize=10, fontweight="bold")
-        ax.set_zlabel("Force (scaled)", fontsize=10, fontweight="bold")
+        ax.set_zlabel("Force (scaled)", fontsize=10, fontweight="bold")  # type: ignore[attr-defined]
         ax.set_title("GRF Butterfly Diagram", fontsize=14, fontweight="bold")
 
         # Determine axis limits to show vectors
@@ -2615,7 +2615,7 @@ class GolfSwingPlotter:
 
         ax.set_xlim(np.min(all_x), np.max(all_x))
         ax.set_ylim(np.min(all_y), np.max(all_y))
-        ax.set_zlim(np.min(all_z), np.max(all_z))
+        ax.set_zlim(np.min(all_z), np.max(all_z))  # type: ignore[attr-defined]
 
         fig.tight_layout()
 
@@ -2642,7 +2642,7 @@ class GolfSwingPlotter:
         lz = am_data[:, 2]
 
         # Plot trajectory of the tip
-        sc = ax.scatter(lx, ly, lz, c=times, cmap="viridis", s=20)
+        sc = ax.scatter(lx, ly, lz, c=times, cmap="viridis", s=20)  # type: ignore[misc]
         ax.plot(lx, ly, lz, color="gray", alpha=0.3)
 
         # Draw vector from origin for current/max?
@@ -2664,7 +2664,7 @@ class GolfSwingPlotter:
 
         ax.set_xlabel("Lx (kg m²/s)", fontsize=10, fontweight="bold")
         ax.set_ylabel("Ly (kg m²/s)", fontsize=10, fontweight="bold")
-        ax.set_zlabel("Lz (kg m²/s)", fontsize=10, fontweight="bold")
+        ax.set_zlabel("Lz (kg m²/s)", fontsize=10, fontweight="bold")  # type: ignore[attr-defined]
         ax.set_title("3D Angular Momentum Trajectory", fontsize=14, fontweight="bold")
         ax.legend()
 
@@ -3599,7 +3599,7 @@ class GolfSwingPlotter:
             ld_times,
             0,
             ld_rates,
-            where=(ld_rates > 0),
+            where=(ld_rates > 0),  # type: ignore[arg-type]
             alpha=0.2,
             color="red",
             label="Unstable",
@@ -3608,7 +3608,7 @@ class GolfSwingPlotter:
             ld_times,
             0,
             ld_rates,
-            where=(ld_rates <= 0),
+            where=(ld_rates <= 0),  # type: ignore[arg-type]
             alpha=0.2,
             color="green",
             label="Stable",
