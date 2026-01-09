@@ -466,7 +466,7 @@ class AIAssistantPanel(QWidget):
         self._current_worker.finished.connect(self._on_stream_finished)
         self._current_worker.error.connect(self._on_stream_error)
 
-        # Create placeholder message
+        # Create empty assistant message
         self._current_assistant_message = self._add_message("assistant", "")
 
         # Start streaming
