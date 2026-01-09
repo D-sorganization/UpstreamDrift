@@ -1094,6 +1094,162 @@ class StatisticalAnalyzer:
 
         return corr_matrix, labels
 
+    def compute_rolling_correlation(
+        self,
+        joint_idx_1: int,
+        joint_idx_2: int,
+        window_size: int = 20,
+        data_type: str = "velocity",
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Compute rolling correlation between two joints.
+
+        Args:
+            joint_idx_1: First joint index
+            joint_idx_2: Second joint index
+            window_size: Size of rolling window in samples
+            data_type: 'position', 'velocity', or 'torque'
+
+        Returns:
+            Tuple of (times, correlations). Times correspond to window centers.
+        """
+        if data_type == "position":
+            data = self.joint_positions
+        elif data_type == "torque":
+            data = self.joint_torques
+        else:
+            data = self.joint_velocities
+
+        if (
+            data.shape[1] == 0
+            or joint_idx_1 >= data.shape[1]
+            or joint_idx_2 >= data.shape[1]
+            or len(data) < window_size
+        ):
+            return np.array([]), np.array([])
+
+        x = data[:, joint_idx_1]
+        y = data[:, joint_idx_2]
+
+        # Use stride tricks or pandas-like rolling
+        # Implementing manually with vectorized approach for efficiency
+        # Rolling correlation:
+        # corr = (mean(xy) - mean(x)mean(y)) / (std(x)std(y))
+        # But for rolling window.
+
+        # We can use simple loop or strided view. Strided view is fast.
+        from numpy.lib.stride_tricks import sliding_window_view
+
+        x_windows = sliding_window_view(x, window_shape=window_size)
+        y_windows = sliding_window_view(y, window_shape=window_size)
+
+        # shape (N - window + 1, window)
+        # Compute correlation for each window
+        # This can be vectorized:
+        x_mean = np.mean(x_windows, axis=1, keepdims=True)
+        y_mean = np.mean(y_windows, axis=1, keepdims=True)
+
+        x_diff = x_windows - x_mean
+        y_diff = y_windows - y_mean
+
+        numerator = np.sum(x_diff * y_diff, axis=1)
+        denominator = np.sqrt(np.sum(x_diff**2, axis=1) * np.sum(y_diff**2, axis=1))
+
+        # Handle divide by zero (constant signal in window)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            correlations = numerator / denominator
+        correlations[np.isnan(correlations)] = 0.0
+
+        # Time points (center of window)
+        # Indices: 0 to N-window.
+        # Window 0 covers 0..window-1. Center ~ window/2
+        valid_indices = np.arange(len(correlations)) + window_size // 2
+        window_times = self.times[valid_indices]
+
+        return window_times, correlations
+
+    def compute_local_divergence_rate(
+        self,
+        joint_idx: int = 0,
+        tau: int = 1,
+        dim: int = 3,
+        window: int = 50,
+        data_type: str = "velocity",
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Compute local divergence rate over time (Local Lyapunov proxy).
+
+        Instead of a single exponent, this returns a time series showing how
+        fast nearby trajectories are diverging *at each point in time*.
+
+        Args:
+            joint_idx: Joint index
+            tau: Time lag
+            dim: Embedding dimension
+            window: Theiler window
+            data_type: 'position' or 'velocity'
+
+        Returns:
+            Tuple of (times, divergence_rates)
+        """
+        if data_type == "position":
+            data = self.joint_positions[:, joint_idx]
+        else:
+            data = self.joint_velocities[:, joint_idx]
+
+        N = len(data)
+        M = N - (dim - 1) * tau
+        if M < window + 1:
+            return np.array([]), np.array([])
+
+        # 1. Reconstruct Phase Space
+        orbit = np.zeros((M, dim))
+        for d in range(dim):
+            orbit[:, d] = data[d * tau : d * tau + M]
+
+        # 2. Find Nearest Neighbors for each point
+        from scipy.spatial.distance import cdist
+
+        # We compute distance matrix but need to be careful with memory for large N
+        # For typical N=500, 500x500 is fine.
+        dists_mat = cdist(orbit, orbit, metric="euclidean")
+
+        # Apply Theiler window
+        for i in range(M):
+            start = max(0, i - window)
+            end = min(M, i + window + 1)
+            dists_mat[i, start:end] = np.inf
+            dists_mat[i, i] = np.inf
+
+        nearest_neighbors = np.argmin(dists_mat, axis=1)
+        # initial_dists = np.min(dists_mat, axis=1)
+
+        # 3. Compute Divergence Rate for each point
+        # Look ahead a short time (e.g., 5-10 steps) and see how much they separated
+        lookahead = min(10, int(0.1 / self.dt)) if self.dt > 0 else 5
+        divergence_rates = np.zeros(M - lookahead)
+
+        for i in range(M - lookahead):
+            nn_idx = nearest_neighbors[i]
+            if nn_idx >= M - lookahead:
+                continue  # Neighbor too close to end
+
+            # Initial vector
+            dist_0 = np.linalg.norm(orbit[i] - orbit[nn_idx])
+
+            # Final vector
+            dist_t = np.linalg.norm(orbit[i + lookahead] - orbit[nn_idx + lookahead])
+
+            # Rate = (1/t) * ln(dist_t / dist_0)
+            if dist_0 > 1e-9 and dist_t > 1e-9:
+                divergence_rates[i] = np.log(dist_t / dist_0) / (lookahead * self.dt)
+            else:
+                divergence_rates[i] = 0.0
+
+        # Align times
+        # Divergence rate at index i corresponds to time[i] (roughly)
+        valid_times = self.times[: len(divergence_rates)]
+
+        return valid_times, divergence_rates
+
     def compute_coupling_angles(
         self,
         joint_idx_1: int,
