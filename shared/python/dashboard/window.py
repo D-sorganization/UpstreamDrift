@@ -53,7 +53,9 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
         # Status bar
         self.status_label = QtWidgets.QLabel("Ready")
-        self.statusBar().addWidget(self.status_label)
+        status_bar = self.statusBar()
+        if status_bar is not None:
+            status_bar.addWidget(self.status_label)
 
     def _setup_ui(self) -> None:
         """Create and arrange UI components."""
