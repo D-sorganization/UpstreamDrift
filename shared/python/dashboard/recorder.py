@@ -30,31 +30,63 @@ class GenericPhysicsRecorder:
         self.current_idx = 0
         self.is_recording = False
         self.data: dict[str, Any] = {}
+        self._buffers_initialized = False
         self._reset_buffers()
 
     def _reset_buffers(self) -> None:
-        """Initialize or reset data buffers."""
+        """Initialize or reset data buffers.
+
+        Note: Array dimensions are determined on first record_step() call
+        when we have access to actual state dimensions.
+        """
         self.current_idx = 0
+        self._buffers_initialized = False
         self.data = {
-            "times": [],
-            "joint_positions": [],
-            "joint_velocities": [],
-            "joint_accelerations": [],
-            "joint_torques": [],
-            "actuator_powers": [],
-            "kinetic_energy": [],
-            "potential_energy": [],
-            "total_energy": [],
-            "angular_momentum": [],
-            "club_head_position": [],
-            "club_head_speed": [],
-            "cop_position": [],
-            "com_position": [],
-            "ground_forces": [],
+            # Scalars (pre-allocated)
+            "times": np.zeros(self.max_samples),
+            "kinetic_energy": np.zeros(self.max_samples),
+            "potential_energy": np.zeros(self.max_samples),
+            "total_energy": np.zeros(self.max_samples),
+            "club_head_speed": np.zeros(self.max_samples),
+            # Arrays (initialized on first record)
+            "joint_positions": None,
+            "joint_velocities": None,
+            "joint_accelerations": None,
+            "joint_torques": None,
+            "actuator_powers": None,
+            "angular_momentum": None,
+            "club_head_position": None,
+            "cop_position": None,
+            "com_position": None,
+            "ground_forces": None,
             # Storage for computed analyses
             "induced_accelerations": {},  # Map source -> (times, accel)
             "counterfactuals": {},  # Map name -> (times, data)
         }
+
+    def _initialize_array_buffers(self, q: np.ndarray, v: np.ndarray) -> None:
+        """Initialize array buffers with proper dimensions on first record.
+
+        Args:
+            q: Position state vector
+            v: Velocity state vector
+        """
+        nq = len(q)
+        nv = len(v)
+
+        self.data["joint_positions"] = np.zeros((self.max_samples, nq))
+        self.data["joint_velocities"] = np.zeros((self.max_samples, nv))
+        self.data["joint_accelerations"] = np.zeros((self.max_samples, nv))
+        self.data["joint_torques"] = np.zeros((self.max_samples, nv))
+        self.data["actuator_powers"] = np.zeros((self.max_samples, nv))
+        self.data["angular_momentum"] = np.zeros((self.max_samples, 3))
+        self.data["club_head_position"] = np.zeros((self.max_samples, 3))
+        self.data["cop_position"] = np.zeros((self.max_samples, 3))
+        self.data["com_position"] = np.zeros((self.max_samples, 3))
+        self.data["ground_forces"] = np.zeros((self.max_samples, 3))
+
+        self._buffers_initialized = True
+        LOGGER.debug(f"Initialized recorder buffers: nq={nq}, nv={nv}, max_samples={self.max_samples}")
 
     def start(self) -> None:
         """Start recording."""
@@ -80,13 +112,23 @@ class GenericPhysicsRecorder:
         if not self.is_recording:
             return
 
+        # Check buffer capacity
+        if self.current_idx >= self.max_samples:
+            LOGGER.warning(f"Recorder buffer full at {self.max_samples} samples. Stopping recording.")
+            self.is_recording = False
+            return
+
         # Get State
         q, v = self.engine.get_state()
         t = self.engine.get_time()
 
+        # Initialize array buffers on first record
+        if not self._buffers_initialized:
+            self._initialize_array_buffers(q, v)
+
         # Handle control input
         if control_input is not None:
-            tau = control_input.copy()
+            tau = control_input
         else:
             # Try to get from engine if possible, or assume zero/unknown
             # PhysicsEngine doesn't enforce get_control, but we can check if it has a stored one
@@ -103,37 +145,56 @@ class GenericPhysicsRecorder:
         except Exception:
             ke = 0.0
 
-        # Store basic data
-        self.data["times"].append(t)
-        self.data["joint_positions"].append(q.copy())
-        self.data["joint_velocities"].append(v.copy())
-        # Accel?
-        # self.data['joint_accelerations'].append(...)
-        self.data["kinetic_energy"].append(ke)
-        self.data["joint_torques"].append(tau)
+        # Store basic data using array indexing (no copy needed, direct assignment)
+        idx = self.current_idx
+        self.data["times"][idx] = t
+        self.data["joint_positions"][idx] = q
+        self.data["joint_velocities"][idx] = v
+        self.data["kinetic_energy"][idx] = ke
+        self.data["joint_torques"][idx] = tau
 
         self.current_idx += 1
 
     def update_control(self, u: np.ndarray) -> None:
         """Update the last applied control for recording."""
-        if self.is_recording and self.data["joint_torques"]:
-            # Replace the last placeholder
-            self.data["joint_torques"][-1] = u.copy()
+        if self.is_recording and self.current_idx > 0 and self._buffers_initialized:
+            # Replace the last recorded control
+            self.data["joint_torques"][self.current_idx - 1] = u
 
     # -------- RecorderInterface Implementation --------
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
-        """Get time series data for plotting."""
+        """Get time series data for plotting.
+
+        Returns views of the recorded data up to current_idx (no copying).
+
+        Args:
+            field_name: Name of the field to retrieve
+
+        Returns:
+            Tuple of (times, values) as NumPy array views
+        """
         if field_name not in self.data:
             return np.array([]), np.array([])
 
-        times = np.array(self.data["times"])
         values = self.data[field_name]
 
-        if not values:
+        # Handle None (uninitialized arrays)
+        if values is None or self.current_idx == 0:
             return np.array([]), np.array([])
 
-        return times, np.array(values)
+        # Return views (no copy) up to current_idx
+        times = self.data["times"][:self.current_idx]
+
+        # Handle different data types
+        if isinstance(values, np.ndarray):
+            return times, values[:self.current_idx]
+        elif isinstance(values, list):
+            # Legacy support for list-based data
+            return times, np.array(values[:self.current_idx])
+        else:
+            # For dict/other types
+            return times, values
 
     def get_induced_acceleration_series(
         self, source_name: str
@@ -160,14 +221,17 @@ class GenericPhysicsRecorder:
         Replays the trajectory (sets state) and computes metrics frame-by-frame.
         """
         LOGGER.info("Computing post-hoc analysis...")
-        times = self.data["times"]
-        qs = self.data["joint_positions"]
-        vs = self.data["joint_velocities"]
-        taus = self.data["joint_torques"]
 
-        n_frames = len(times)
-        if n_frames == 0:
+        if not self._buffers_initialized or self.current_idx == 0:
+            LOGGER.warning("No data recorded for post-hoc analysis")
             return
+
+        # Use only the recorded portion (up to current_idx)
+        n_frames = self.current_idx
+        times = self.data["times"][:n_frames]
+        qs = self.data["joint_positions"][:n_frames]
+        vs = self.data["joint_velocities"][:n_frames]
+        taus = self.data["joint_torques"][:n_frames]
 
         ztcf_accels = []
         zvcf_accels = []
@@ -232,11 +296,16 @@ class GenericPhysicsRecorder:
         LOGGER.info("Post-hoc analysis complete.")
 
     def get_data_dict(self) -> dict[str, Any]:
-        """Return the raw data dictionary for export."""
-        # Convert lists to arrays for export efficiency
+        """Return the raw data dictionary for export.
+
+        Returns only the recorded portion (up to current_idx) of arrays.
+        """
         export_data = {}
         for k, v in self.data.items():
-            if isinstance(v, list) and v:
+            if isinstance(v, np.ndarray):
+                # Export only recorded portion
+                export_data[k] = v[:self.current_idx] if v.ndim > 0 else v
+            elif isinstance(v, list) and v:
                 try:
                     export_data[k] = np.array(v)
                 except Exception:
@@ -246,4 +315,5 @@ class GenericPhysicsRecorder:
 
         # Add metadata
         export_data["model_name"] = self.engine.model_name
+        export_data["num_frames"] = self.current_idx
         return export_data

@@ -440,6 +440,10 @@ def extract_grf_from_contacts(
     total_moment = np.zeros(3)
     total_weighted_pos = np.zeros(3)
 
+    # Compute gravity forces ONCE outside loop (gravity doesn't change per body)
+    # Performance optimization: Avoids N redundant expensive physics engine calls
+    g = engine.compute_gravity_forces()
+
     for body_name in contact_body_names:
         jac_dict = engine.compute_jacobian(body_name)
         if jac_dict is None:
@@ -448,7 +452,6 @@ def extract_grf_from_contacts(
         # For now, estimate contact force from gravity compensation
         # This is a simplified approach - real implementation would
         # query actual contact forces from the physics engine
-        g = engine.compute_gravity_forces()
 
         # Approximate: GRF opposes gravity at contact points
         # This is a placeholder - real implementation depends on engine API
