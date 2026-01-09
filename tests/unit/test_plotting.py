@@ -255,6 +255,7 @@ class TestGolfSwingPlotter:
                 (times, am) if name == "angular_momentum" else ([], [])
             )
         )
+        plotter.clear_cache()  # Must clear cache after modifying recorder
 
         plotter.plot_angular_momentum(mock_figure)
         ax = mock_figure.add_subplot.return_value
@@ -270,6 +271,7 @@ class TestGolfSwingPlotter:
                 (times, cop) if name == "cop_position" else ([], [])
             )
         )
+        plotter.clear_cache()  # Must clear cache after modifying recorder
 
         plotter.plot_cop_trajectory(mock_figure)
         ax = mock_figure.add_subplot.return_value
@@ -295,6 +297,7 @@ class TestGolfSwingPlotter:
                 (times, powers) if name == "actuator_powers" else ([], [])
             )
         )
+        plotter.clear_cache()  # Must clear cache after modifying recorder
 
         plotter.plot_power_flow(mock_figure)
         ax = mock_figure.add_subplot.return_value
@@ -310,6 +313,7 @@ class TestGolfSwingPlotter:
                 (times, cop) if name == "cop_position" else ([], [])
             )
         )
+        plotter.clear_cache()  # Must clear cache after modifying recorder
 
         plotter.plot_cop_vector_field(mock_figure)
         ax = mock_figure.add_subplot.return_value
