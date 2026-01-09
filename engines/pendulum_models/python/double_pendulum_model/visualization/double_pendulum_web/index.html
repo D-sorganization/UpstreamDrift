@@ -13,8 +13,8 @@
       <h1>Driven Double Pendulum</h1>
       <p>Control-affine model with user-defined torques on a swing plane.</p>
       <div class="grid">
-        <label><span>Shoulder angle (deg)<code class="var-badge">theta1</code></span><input id="theta1" type="number" value="-45"></label>
-        <label><span>Wrist angle (deg)<code class="var-badge">theta2</code></span><input id="theta2" type="number" value="-90"></label>
+        <label><span>Shoulder angle (deg)<code class="var-badge">theta1</code></span><input id="theta1" type="number" value="-45" required></label>
+        <label><span>Wrist angle (deg)<code class="var-badge">theta2</code></span><input id="theta2" type="number" value="-90" required></label>
         <label>Shoulder torque f(t)<input id="tau1" type="text" value="0" aria-describedby="math-hint"></label>
         <div id="tau1-error" class="error-message hidden" role="alert"></div>
         <label>Wrist torque f(t)<input id="tau2" type="text" value="0" aria-describedby="math-hint"></label>
@@ -26,14 +26,14 @@
           </svg>
           Use: <code>t</code>, <code>theta1</code>, <code>theta2</code>, <code>omega1</code>, <code>omega2</code>, <code>Math.*</code>
         </p>
-        <label>Upper length (m)<input id="l1" type="number" value="0.75" step="0.01" min="0"></label>
-        <label>Upper mass (kg)<input id="m1" type="number" value="7.5" step="0.1" min="0"></label>
-        <label>Upper COM ratio<input id="com1" type="number" value="0.45" step="0.01" min="0" max="1"></label>
-        <label>Lower length (m)<input id="l2" type="number" value="1.0" step="0.01" min="0"></label>
-        <label>Shaft mass (kg)<input id="mshaft" type="number" value="0.35" step="0.01" min="0"></label>
-        <label>Clubhead mass (kg)<input id="mhead" type="number" value="0.2" step="0.01" min="0"></label>
-        <label>Shaft COM ratio<input id="com2" type="number" value="0.43" step="0.01" min="0" max="1"></label>
-        <label>Plane incline (deg)<input id="plane" type="number" value="35" step="1"></label>
+        <label>Upper length (m)<input id="l1" type="number" value="0.75" step="0.01" min="0" required></label>
+        <label>Upper mass (kg)<input id="m1" type="number" value="7.5" step="0.1" min="0" required></label>
+        <label>Upper COM ratio<input id="com1" type="number" value="0.45" step="0.01" min="0" max="1" required></label>
+        <label>Lower length (m)<input id="l2" type="number" value="1.0" step="0.01" min="0" required></label>
+        <label>Shaft mass (kg)<input id="mshaft" type="number" value="0.35" step="0.01" min="0" required></label>
+        <label>Clubhead mass (kg)<input id="mhead" type="number" value="0.2" step="0.01" min="0" required></label>
+        <label>Shaft COM ratio<input id="com2" type="number" value="0.43" step="0.01" min="0" max="1" required></label>
+        <label>Plane incline (deg)<input id="plane" type="number" value="35" step="1" required></label>
       </div>
       <div class="buttons">
         <button id="play-pause" title="Start simulation (Space)">
