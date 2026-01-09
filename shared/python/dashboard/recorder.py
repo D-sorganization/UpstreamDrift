@@ -6,7 +6,7 @@ Records state, control, and derived quantities for analysis and plotting.
 from __future__ import annotations
 
 import logging
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 
@@ -84,7 +84,8 @@ class GenericPhysicsRecorder:
             LOGGER.debug("Allocated Control buffer dynamically.")
 
         # Allocate Induced Accel sources if missing
-        for idx in self.analysis_config["induced_accel_sources"]:
+        sources = cast(list[int], self.analysis_config["induced_accel_sources"])
+        for idx in sources:
             if idx not in self.data["induced_accelerations"]:
                 self.data["induced_accelerations"][idx] = np.zeros(
                     (self.max_samples, nv)
@@ -159,7 +160,8 @@ class GenericPhysicsRecorder:
             self.data["control_accel"] = np.zeros((self.max_samples, nv))
 
         # Individual induced accelerations
-        for idx in self.analysis_config["induced_accel_sources"]:
+        sources = cast(list[int], self.analysis_config["induced_accel_sources"])
+        for idx in sources:
             self.data["induced_accelerations"][idx] = np.zeros((self.max_samples, nv))
 
         self._buffers_initialized = True
@@ -256,22 +258,23 @@ class GenericPhysicsRecorder:
             and self.data["control_accel"] is not None
         ):
             try:
-                self.data["control_accel"][idx] = self.engine.compute_control_acceleration(
-                    tau
+                self.data["control_accel"][idx] = (
+                    self.engine.compute_control_acceleration(tau)
                 )
             except Exception:
                 pass
 
         # Individual Induced Accelerations
-        for src_idx in self.analysis_config["induced_accel_sources"]:
+        sources = cast(list[int], self.analysis_config["induced_accel_sources"])
+        for src_idx in sources:
             if src_idx in self.data["induced_accelerations"]:
                 try:
                     # Construct single-source torque vector
                     tau_single = np.zeros_like(tau)
                     tau_single[src_idx] = tau[src_idx]
-                    self.data["induced_accelerations"][src_idx][
-                        idx
-                    ] = self.engine.compute_control_acceleration(tau_single)
+                    self.data["induced_accelerations"][src_idx][idx] = (
+                        self.engine.compute_control_acceleration(tau_single)
+                    )
                 except Exception:
                     pass
 
@@ -435,7 +438,7 @@ class GenericPhysicsRecorder:
 
         Returns only the recorded portion (up to current_idx) of arrays.
         """
-        export_data = {}
+        export_data: dict[str, Any] = {}
         for k, v in self.data.items():
             if isinstance(v, np.ndarray):
                 # Export only recorded portion
