@@ -310,8 +310,10 @@ class SpringDamperImpactModel(ImpactModel):
                 f_contact = f_magnitude * n
 
                 # Semi-implicit Euler: update velocities first
-                a_ball = f_contact / m_ball  # Ball pushed away
-                a_club = -f_contact / m_club  # Club pushed back
+                # Force on ball is in direction of normal (away from club)
+                a_ball = f_contact / m_ball
+                # Force on club is opposite to normal (reaction force)
+                a_club = -f_contact / m_club
 
                 v_ball = v_ball + a_ball * self.dt
                 v_club = v_club + a_club * self.dt

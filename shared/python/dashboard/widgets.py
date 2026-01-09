@@ -8,7 +8,9 @@ Contains:
 from __future__ import annotations
 
 import logging
+from typing import Any
 
+import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
 from shared.python.dashboard.recorder import GenericPhysicsRecorder
@@ -18,7 +20,13 @@ LOGGER = logging.getLogger(__name__)
 
 
 class LivePlotWidget(QtWidgets.QWidget):
-    """Widget for displaying real-time plots of simulation data."""
+    """Widget for displaying real-time plots of simulation data.
+
+    Supports plotting multiple metrics including:
+    - Kinematics (Positions, Velocities)
+    - Dynamics (Torques)
+    - Advanced (ZTCF, Induced Accelerations)
+    """
 
     def __init__(self, recorder: GenericPhysicsRecorder) -> None:
         """Initialize the widget.
@@ -28,47 +36,156 @@ class LivePlotWidget(QtWidgets.QWidget):
         """
         super().__init__()
         self.recorder = recorder
-        self.layout = QtWidgets.QVBoxLayout(self)
+        self._main_layout = QtWidgets.QVBoxLayout(self)
 
         # Create Matplotlib canvas
         self.canvas = MplCanvas(width=5, height=4, dpi=100)
-        self.layout.addWidget(self.canvas)
+        self._main_layout.addWidget(self.canvas)
 
         # Setup plot
         self.ax = self.canvas.fig.add_subplot(111)
-        self.line_objects = []
-        self.data_keys = ["joint_positions", "joint_velocities", "joint_torques"]
+        self.line_objects: list[Any] = []
+
+        # Available metrics
+        self.metric_options = {
+            "Joint Positions": "joint_positions",
+            "Joint Velocities": "joint_velocities",
+            "Joint Torques": "joint_torques",
+            "Kinetic Energy": "kinetic_energy",
+            "Club Head Speed": "club_head_speed",
+            "ZTCF (Zero Torque)": "ztcf_accel",
+            "ZVCF (Zero Velocity)": "zvcf_accel",
+            "Drift Acceleration": "drift_accel",
+            "Total Control Accel": "control_accel",
+            "Induced Accel (Specific Source)": "induced_accel_source",
+        }
         self.current_key = "joint_positions"
+        self.current_label = "Joint Positions"
+
+        # Controls Layout
+        controls_layout = QtWidgets.QHBoxLayout()
 
         # Selector for data type
         self.combo = QtWidgets.QComboBox()
-        self.combo.addItems(self.data_keys)
+        self.combo.addItems(list(self.metric_options.keys()))
+        self.combo.setToolTip("Select data to plot")
         self.combo.currentTextChanged.connect(self.set_plot_metric)
-        self.layout.addWidget(self.combo)
+        controls_layout.addWidget(QtWidgets.QLabel("Metric:"))
+        controls_layout.addWidget(self.combo)
+
+        # Selector for Induced Accel Source (Hidden by default)
+        self.source_spin = QtWidgets.QSpinBox()
+        self.source_spin.setRange(0, 100)  # Assume max 100 joints
+        self.source_spin.setPrefix("Joint Idx: ")
+        self.source_spin.setVisible(False)
+        self.source_spin.valueChanged.connect(self._on_source_changed)
+        controls_layout.addWidget(self.source_spin)
+
+        # Checkbox for enabling computation (if expensive)
+        self.chk_compute = QtWidgets.QCheckBox("Compute Real-time")
+        self.chk_compute.setToolTip(
+            "Enable real-time computation for advanced metrics (ZTCF, etc). May affect performance."
+        )
+        self.chk_compute.stateChanged.connect(self.toggle_computation)
+        controls_layout.addWidget(self.chk_compute)
+
+        self._main_layout.addLayout(controls_layout)
 
         # Initial plot setup
         self.ax.set_title("Live Data")
         self.ax.set_xlabel("Time (s)")
         self.ax.grid(True)
 
-    def set_plot_metric(self, key: str) -> None:
+    def set_plot_metric(self, label: str) -> None:
         """Change the metric being plotted."""
-        self.current_key = key
+        self.current_label = label
+        self.current_key = self.metric_options[label]
+
+        # Show/Hide Source Spinner
+        self.source_spin.setVisible(self.current_key == "induced_accel_source")
+
+        # Update recorder config if needed
+        self._update_recorder_config()
+
+        # Reset plot
         self.ax.clear()
-        self.ax.set_title(f"Live {key}")
+        self.ax.set_title(f"Live {label}")
         self.ax.set_xlabel("Time (s)")
         self.ax.grid(True)
         self.line_objects = []  # Reset lines
         self.update_plot()
 
+    def _on_source_changed(self, value: int) -> None:
+        """Handle source index change."""
+        self._update_recorder_config()
+        # Clear plot as data source changed
+        self.ax.clear()
+        self.line_objects = []
+        self.update_plot()
+
+    def toggle_computation(self, state: int) -> None:
+        """Handle checkbox toggle."""
+        self._update_recorder_config()
+
+    def _update_recorder_config(self) -> None:
+        """Update recorder configuration based on current selection and checkbox."""
+        compute_enabled = self.chk_compute.isChecked()
+        config = {
+            "ztcf": False,
+            "zvcf": False,
+            "track_drift": False,
+            "track_total_control": False,
+            "induced_accel_sources": [],
+        }
+
+        if compute_enabled:
+            if self.current_key == "ztcf_accel":
+                config["ztcf"] = True
+            elif self.current_key == "zvcf_accel":
+                config["zvcf"] = True
+            elif self.current_key == "drift_accel":
+                config["track_drift"] = True
+            elif self.current_key == "control_accel":
+                config["track_total_control"] = True
+            elif self.current_key == "induced_accel_source":
+                # Add the selected source index to the list
+                config["induced_accel_sources"] = [self.source_spin.value()]
+
+        self.recorder.set_analysis_config(config)
+
     def update_plot(self) -> None:
         """Update the plot with the latest data."""
-        times, data = self.recorder.get_time_series(self.current_key)
+        times: np.ndarray = np.array([])
+        data: np.ndarray | None = None
+
+        if self.current_key == "induced_accel_source":
+            # Fetch specific induced acceleration
+            src_idx = self.source_spin.value()
+            if src_idx in self.recorder.data["induced_accelerations"]:
+                # Use internal access or add a specific getter if needed
+                # Ideally GenericPhysicsRecorder should have get_time_series support for this
+                # But it stores it in a dict.
+                # Let's use the helper I added: get_induced_acceleration_series
+                # But that helper takes a name, and we use indices in recorder.
+                # Actually recorder uses indices now.
+                # Let's check recorder.py again.
+                # It uses indices in `induced_accelerations`.
+                if src_idx in self.recorder.data["induced_accelerations"]:
+                    val = self.recorder.data["induced_accelerations"][src_idx]
+                    # val is just the array, times are global
+                    times = self.recorder.data["times"][: self.recorder.current_idx]
+                    data = val[: self.recorder.current_idx]
+        else:
+            # Standard metric
+            times, data = self.recorder.get_time_series(self.current_key)
 
         if len(times) == 0:
             return
 
         # Ensure data is 2D
+        if data is None:
+            return
+
         if data.ndim == 1:
             data = data.reshape(-1, 1)
 
@@ -87,13 +204,15 @@ class LivePlotWidget(QtWidgets.QWidget):
             for i in range(n_dims):
                 (line,) = self.ax.plot([], [], label=f"Dim {i}")
                 self.line_objects.append(line)
-            self.ax.legend(loc="upper right")
-            self.ax.set_title(f"Live {self.current_key}")
+            if n_dims < 10:  # Don't clutter if too many dims
+                self.ax.legend(loc="upper right")
+            self.ax.set_title(f"Live {self.current_label}")
             self.ax.grid(True)
 
         # Update data
         for i, line in enumerate(self.line_objects):
-            line.set_data(times, data[:, i])
+            if i < data.shape[1]:
+                line.set_data(times, data[:, i])
 
         self.ax.relim()
         self.ax.autoscale_view()
@@ -112,20 +231,43 @@ class ControlPanel(QtWidgets.QGroupBox):
         super().__init__("Simulation Controls")
 
         layout = QtWidgets.QHBoxLayout(self)
+        style = self.style()
+        if style is None:
+            return
 
         self.btn_start = QtWidgets.QPushButton("Start")
+        self.btn_start.setIcon(
+            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        )
+        self.btn_start.setToolTip("Start simulation playback")
+        self.btn_start.setStatusTip("Start the simulation")
         self.btn_start.clicked.connect(self.start_requested.emit)
         layout.addWidget(self.btn_start)
 
         self.btn_pause = QtWidgets.QPushButton("Pause")
+        self.btn_pause.setIcon(
+            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause)
+        )
+        self.btn_pause.setToolTip("Pause/Resume simulation")
+        self.btn_pause.setStatusTip("Pause or resume the simulation")
         self.btn_pause.setCheckable(True)
         self.btn_pause.clicked.connect(self.pause_requested.emit)
         layout.addWidget(self.btn_pause)
 
         self.btn_stop = QtWidgets.QPushButton("Stop")
+        self.btn_stop.setIcon(
+            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaStop)
+        )
+        self.btn_stop.setToolTip("Stop simulation")
+        self.btn_stop.setStatusTip("Stop the simulation and reset time")
         self.btn_stop.clicked.connect(self.stop_requested.emit)
         layout.addWidget(self.btn_stop)
 
         self.btn_reset = QtWidgets.QPushButton("Reset")
+        self.btn_reset.setIcon(
+            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload)
+        )
+        self.btn_reset.setToolTip("Reset simulation")
+        self.btn_reset.setStatusTip("Reset the simulation to initial state")
         self.btn_reset.clicked.connect(self.reset_requested.emit)
         layout.addWidget(self.btn_reset)
