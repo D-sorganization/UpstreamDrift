@@ -302,8 +302,7 @@ class GripContactModel:
         """
         n_contacts = len(contact_positions)
 
-        # Pre-allocate list for performance (10-15% faster than dynamic append)
-        contacts = [None] * n_contacts
+        contacts: list[ContactPoint] = []
 
         for i in range(n_contacts):
             # Decompose force
@@ -321,15 +320,17 @@ class GripContactModel:
                 normal_force, tangent_force, slip_velocity, self.params
             )
 
-            contacts[i] = ContactPoint(
-                position=contact_positions[i].copy(),
-                normal=contact_normals[i].copy(),
-                normal_force=normal_force,
-                tangent_force=tangent_force.copy(),
-                slip_velocity=slip_velocity.copy(),
-                state=state,
-                body_name=body_names[i] if i < len(body_names) else "",
-                contact_id=i,
+            contacts.append(
+                ContactPoint(
+                    position=contact_positions[i].copy(),
+                    normal=contact_normals[i].copy(),
+                    normal_force=normal_force,
+                    tangent_force=tangent_force.copy(),
+                    slip_velocity=slip_velocity.copy(),
+                    state=state,
+                    body_name=body_names[i] if i < len(body_names) else "",
+                    contact_id=i,
+                )
             )
 
         # Aggregate statistics
