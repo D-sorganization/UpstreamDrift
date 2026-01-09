@@ -227,6 +227,8 @@ def export_recording_all_formats(
                 for k, v in data_dict.items():
                     if k == "times":
                         continue
+
+                    # Handle direct arrays
                     if isinstance(v, np.ndarray) and len(v) == len(
                         data_dict.get("times", [])
                     ):
@@ -235,6 +237,19 @@ def export_recording_all_formats(
                         elif v.ndim == 2:
                             for i in range(v.shape[1]):
                                 flat_data[f"{k}_{i}"] = v[:, i]
+
+                    # Handle nested dictionaries (e.g. induced_accelerations)
+                    elif isinstance(v, dict):
+                        for sub_k, sub_v in v.items():
+                            if isinstance(sub_v, np.ndarray) and len(sub_v) == len(
+                                data_dict.get("times", [])
+                            ):
+                                full_key = f"{k}_{sub_k}"
+                                if sub_v.ndim == 1:
+                                    flat_data[full_key] = sub_v
+                                elif sub_v.ndim == 2:
+                                    for i in range(sub_v.shape[1]):
+                                        flat_data[f"{full_key}_{i}"] = sub_v[:, i]
 
                 df = pd.DataFrame(flat_data)
                 df.to_csv(output_path, index=False)
