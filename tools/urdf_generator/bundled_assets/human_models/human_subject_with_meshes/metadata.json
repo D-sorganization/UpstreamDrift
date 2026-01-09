@@ -1,0 +1,27 @@
+{
+  "name": "Human Subject with Meshes",
+  "description": "Full human body model with detailed STL meshes for biomechanical simulation",
+  "source": {
+    "repository": "https://github.com/gbionics/human-gazebo",
+    "commit": "master",
+    "path": "humanSubjectWithMeshes/",
+    "download_date": "2026-01-09"
+  },
+  "license": {
+    "type": "CC-BY-SA 2.0",
+    "url": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "attribution": "gbionics/human-gazebo"
+  },
+  "model": {
+    "urdf_file": "model.urdf",
+    "mesh_count": 51,
+    "mesh_format": "STL",
+    "mesh_directory": "meshes/"
+  },
+  "usage": "Use BundledAssets.get_human_model_path('human_subject_with_meshes') to access",
+  "notes": [
+    "This model is bundled in the repository to ensure offline availability",
+    "No runtime downloads required - meshes are stored locally",
+    "For URDF path updates, mesh paths may need adjustment for relative references"
+  ]
+}
