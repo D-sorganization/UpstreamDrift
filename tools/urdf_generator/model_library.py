@@ -4,6 +4,14 @@ This module manages a library of pre-configured URDF models including:
 - Human biomechanical models from human-gazebo repository
 - Golf club models (drivers, irons, putters, wedges)
 - Integration with myoconverter for OpenSim <-> MuJoCo conversion
+
+IMPORTANT: Models should be bundled in the repository when possible.
+Downloading is supported but discouraged - bundled assets ensure:
+1. No runtime network dependencies
+2. Version stability
+3. Reproducible builds
+
+Use BundledAssets from bundled_assets/ for local models.
 """
 
 from __future__ import annotations
@@ -16,6 +24,19 @@ from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+# Try to import bundled assets for local model access
+try:
+    from tools.urdf_generator.bundled_assets import (
+        BundledAssetNotFoundError,
+        BundledAssets,
+    )
+except ImportError:
+    try:
+        from .bundled_assets import BundledAssetNotFoundError, BundledAssets
+    except ImportError:
+        BundledAssets = None  # type: ignore[misc, assignment]
+        BundledAssetNotFoundError = None  # type: ignore[misc, assignment]
 
 
 class ModelLibrary:
@@ -128,8 +149,55 @@ class ModelLibrary:
 
         logger.info(f"Model library initialized at: {self.base_path}")
 
+    def get_human_model(self, model_key: str) -> Path | None:
+        """Get a human model, preferring bundled assets over downloads.
+
+        This method first checks for bundled assets in the repository.
+        If no bundled asset exists, it falls back to the download path
+        (but warns that this is discouraged).
+
+        Args:
+            model_key: Key identifying the model
+
+        Returns:
+            Path to the URDF file, or None if not available
+        """
+        # First, try bundled assets (preferred)
+        if BundledAssets is not None:
+            try:
+                bundled = BundledAssets()
+                # Map model_key to bundled asset name if different
+                bundled_name = model_key.replace("_with_", "_subject_with_")
+                if bundled.is_model_bundled("human_models", bundled_name):
+                    logger.info(f"Using bundled model: {bundled_name}")
+                    return bundled.get_human_model_path(bundled_name)
+                if bundled.is_model_bundled("human_models", model_key):
+                    logger.info(f"Using bundled model: {model_key}")
+                    return bundled.get_human_model_path(model_key)
+            except Exception as e:
+                logger.debug(f"Bundled asset check failed: {e}")
+
+        # Check if model exists locally (previously downloaded)
+        model_dir = self.human_models_path / model_key
+        urdf_path = model_dir / "model.urdf"
+        if urdf_path.exists():
+            logger.info(f"Using cached model: {urdf_path}")
+            return urdf_path
+
+        # Model not found locally
+        logger.warning(
+            f"Model '{model_key}' is not bundled or cached.\n"
+            f"Consider bundling this model in the repository for offline use.\n"
+            f"Use download_human_model() to download if network access is available."
+        )
+        return None
+
     def download_human_model(self, model_key: str, force: bool = False) -> Path | None:
         """Download a human URDF model and its meshes.
+
+        WARNING: Downloading is discouraged. Models should be bundled in the
+        repository for offline use and version stability. Use get_human_model()
+        to prefer bundled assets.
 
         Args:
             model_key: Key identifying the model in HUMAN_MODELS dict
@@ -141,6 +209,12 @@ class ModelLibrary:
         if model_key not in self.HUMAN_MODELS:
             logger.error(f"Unknown human model: {model_key}")
             return None
+
+        # Warn about downloading
+        logger.warning(
+            "Downloading model from network. Consider bundling this model locally.\n"
+            "See: tools/urdf_generator/bundled_assets/README.md"
+        )
 
         model_info = self.HUMAN_MODELS[model_key]
         model_dir = self.human_models_path / model_key
@@ -160,9 +234,16 @@ class ModelLibrary:
                 urdf_content = response.read().decode("utf-8")
                 urdf_path.write_text(urdf_content, encoding="utf-8")
 
-            # Download meshes (this is a placeholder - actual implementation
-            # would parse URDF and download referenced meshes)
-            logger.info(f"Model {model_key} downloaded successfully")
+            # IMPORTANT: Mesh downloads are NOT implemented.
+            # Meshes must be bundled with the repository.
+            # The URDF references mesh files that need to exist locally.
+            logger.warning(
+                f"URDF downloaded but meshes are NOT downloaded.\n"
+                f"The model will not render correctly without mesh files.\n"
+                f"To fix: Bundle mesh files in the repository at:\n"
+                f"  tools/urdf_generator/bundled_assets/human_models/{model_key}/meshes/\n"
+                f"See bundled_assets/README.md for instructions."
+            )
 
             # Save metadata
             metadata_path = model_dir / "metadata.json"
@@ -172,6 +253,7 @@ class ModelLibrary:
                 "description": model_info["description"],
                 "license": model_info["license"],
                 "urdf_file": "model.urdf",
+                "warning": "Meshes not bundled - model may not render correctly",
             }
             metadata_path.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
 

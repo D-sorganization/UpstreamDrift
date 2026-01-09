@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
 OpenSim Golf GUI
-A PyQt6 interface for the OpenSim Golf Model (or its demo fallback).
+A PyQt6 interface for the OpenSim Golf Model.
+
+IMPORTANT: This GUI requires OpenSim to be properly installed.
+There is NO demo or fallback mode - if OpenSim is unavailable,
+clear error dialogs will be shown.
 """
 import sys
 from typing import Any
@@ -11,6 +15,7 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QApplication,
+    QFileDialog,
     QHBoxLayout,
     QLabel,
     QMainWindow,
@@ -29,22 +34,94 @@ except ImportError:
 from matplotlib.figure import Figure
 
 try:
-    from engines.physics_engines.opensim.python.opensim_golf.core import GolfSwingModel
+    from engines.physics_engines.opensim.python.opensim_golf.core import (
+        GolfSwingModel,
+        OpenSimModelLoadError,
+        OpenSimNotInstalledError,
+    )
 except ImportError:
-    from .opensim_golf.core import GolfSwingModel
+    from .opensim_golf.core import (
+        GolfSwingModel,
+        OpenSimModelLoadError,
+        OpenSimNotInstalledError,
+    )
 
 
 class OpenSimGolfGUI(QMainWindow):
-    def __init__(self) -> None:
+    """OpenSim Golf Simulation GUI.
+
+    This GUI requires a valid OpenSim model file. There is NO fallback
+    or demo mode - errors are shown clearly when something fails.
+    """
+
+    def __init__(self, model_path: str | None = None) -> None:
         super().__init__()
         self.setWindowTitle("OpenSim Golf Interface")
         self.resize(1000, 800)
 
-        # Model
-        self.model = GolfSwingModel()
+        # Model state
+        self.model: GolfSwingModel | None = None
+        self.model_path = model_path
         self.result: Any = None
+        self.initialization_error: str | None = None
 
         self.init_ui()
+        self._try_load_model()
+
+    def _try_load_model(self) -> None:
+        """Attempt to load the OpenSim model if a path was provided."""
+        if self.model_path is None:
+            self._show_model_required_message()
+            return
+
+        try:
+            self.model = GolfSwingModel(self.model_path)
+            self._update_status("OpenSim Model Loaded", "green")
+            self.btn_run.setEnabled(True)
+        except OpenSimNotInstalledError as e:
+            self.initialization_error = str(e)
+            self._update_status("ERROR: OpenSim Not Installed", "red")
+            self.btn_run.setEnabled(False)
+            QMessageBox.critical(
+                self,
+                "OpenSim Not Installed",
+                f"OpenSim is required but not installed.\n\n{e}",
+            )
+        except OpenSimModelLoadError as e:
+            self.initialization_error = str(e)
+            self._update_status("ERROR: Model Load Failed", "red")
+            self.btn_run.setEnabled(False)
+            QMessageBox.critical(
+                self,
+                "Model Load Failed",
+                f"Failed to load OpenSim model.\n\n{e}",
+            )
+        except FileNotFoundError as e:
+            self.initialization_error = str(e)
+            self._update_status("ERROR: Model File Not Found", "red")
+            self.btn_run.setEnabled(False)
+            QMessageBox.critical(
+                self,
+                "Model File Not Found",
+                f"The specified model file was not found.\n\n{e}",
+            )
+        except ValueError as e:
+            self.initialization_error = str(e)
+            self._update_status("No Model Loaded", "orange")
+            self.btn_run.setEnabled(False)
+
+    def _show_model_required_message(self) -> None:
+        """Show message that a model is required."""
+        self._update_status("No Model Loaded - Select a .osim File", "orange")
+        self.btn_run.setEnabled(False)
+        self.lbl_details.setText(
+            "Click 'Load Model' to select an OpenSim .osim model file."
+        )
+
+    def _update_status(self, message: str, color: str) -> None:
+        """Update the status label."""
+        self.lbl_status.setText(f"Status: {message}")
+        self.lbl_status.setStyleSheet(f"color: {color}; font-weight: bold;")
 
     def init_ui(self) -> None:
         central = QWidget()
@@ -57,24 +134,26 @@ class OpenSimGolfGUI(QMainWindow):
         header.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(header)
 
-        # Status
-        self.lbl_status = QLabel(
-            "Engine Mode: "
-            + ("OpenSim Core" if self.model.use_opensim else "Demo Fallback")
-        )
+        # Status (no more "Demo Fallback" - only real status)
+        self.lbl_status = QLabel("Status: Initializing...")
         self.lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        if not self.model.use_opensim:
-            self.lbl_status.setStyleSheet("color: orange; font-weight: bold;")
-        else:
-            self.lbl_status.setStyleSheet("color: green; font-weight: bold;")
         layout.addWidget(self.lbl_status)
 
         # Controls
         controls = QHBoxLayout()
 
+        self.btn_load = QPushButton("Load Model")
+        self.btn_load.clicked.connect(self._load_model_dialog)
+        self.btn_load.setFixedWidth(150)
+        self.btn_load.setStyleSheet(
+            "background-color: #6c757d; color: white; padding: 10px; font-weight: bold;"
+        )
+        controls.addWidget(self.btn_load)
+
         self.btn_run = QPushButton("Run Simulation")
         self.btn_run.clicked.connect(self.run_simulation)
         self.btn_run.setFixedWidth(200)
+        self.btn_run.setEnabled(False)  # Disabled until model loaded
         self.btn_run.setStyleSheet(
             "background-color: #007acc; color: white; padding: 10px; font-weight: bold;"
         )
@@ -92,7 +171,28 @@ class OpenSimGolfGUI(QMainWindow):
         self.lbl_details.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.lbl_details)
 
+    def _load_model_dialog(self) -> None:
+        """Open file dialog to select an OpenSim model."""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select OpenSim Model",
+            "",
+            "OpenSim Models (*.osim);;All Files (*)",
+        )
+        if file_path:
+            self.model_path = file_path
+            self._try_load_model()
+
     def run_simulation(self) -> None:
+        if self.model is None:
+            QMessageBox.warning(
+                self,
+                "No Model Loaded",
+                "Please load an OpenSim model first.\n\n"
+                "Click 'Load Model' to select a .osim file.",
+            )
+            return
+
         self.btn_run.setEnabled(False)
         self.lbl_details.setText("Running...")
         QApplication.processEvents()
@@ -102,11 +202,20 @@ class OpenSimGolfGUI(QMainWindow):
             self.plot_results()
             if self.result:
                 self.lbl_details.setText(
-                    f"Simulation Complete. Duration: {self.result.time[-1]:.2f}s, Steps: {len(self.result.time)}"
+                    f"Simulation Complete. Duration: {self.result.time[-1]:.2f}s, "
+                    f"Steps: {len(self.result.time)}"
                 )
+        except NotImplementedError as e:
+            # Clear, informative error - not a silent fallback
+            QMessageBox.warning(
+                self,
+                "Simulation Not Available",
+                f"OpenSim simulation is not yet fully implemented.\n\n{e}",
+            )
+            self.lbl_details.setText("Simulation not available - see error message.")
         except Exception as e:
             QMessageBox.critical(self, "Simulation Error", str(e))
-            self.lbl_details.setText("Error occurred.")
+            self.lbl_details.setText("Error occurred - see error message.")
         finally:
             self.btn_run.setEnabled(True)
 
@@ -153,6 +262,10 @@ class OpenSimGolfGUI(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = OpenSimGolfGUI()
+
+    # Check for command line model path
+    model_path = sys.argv[1] if len(sys.argv) > 1 else None
+
+    window = OpenSimGolfGUI(model_path=model_path)
     window.show()
     sys.exit(app.exec())
