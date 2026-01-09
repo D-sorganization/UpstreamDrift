@@ -29,9 +29,7 @@ class VisualizationWidget(QWidget):
 
         # Use a simple label for now
         # Implement proper 3D visualization with Open3D or OpenGL (future enhancement)
-        self.info_label = QLabel(
-            "3D Visualization\n\n(Implementation in progress)"
-        )
+        self.info_label = QLabel("3D Visualization\n\n(Implementation in progress)")
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.info_label.setStyleSheet(
             """

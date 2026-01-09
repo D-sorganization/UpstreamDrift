@@ -2947,9 +2947,7 @@ class GolfSwingPlotter:
 
             for idx in joint_indices:
                 if idx < torques.shape[1]:
-                    impulse = cumulative_trapezoid(
-                        torques[:, idx], dx=dt, initial=0
-                    )
+                    impulse = cumulative_trapezoid(torques[:, idx], dx=dt, initial=0)
                     label = self._get_aligned_label(idx, torques.shape[1])
                     ax.plot(times, impulse, label=label, linewidth=2)
 
@@ -3383,7 +3381,9 @@ class GolfSwingPlotter:
 
         if len(w_times) == 0:
             ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "Insufficient data for correlation", ha="center", va="center")
+            ax.text(
+                0.5, 0.5, "Insufficient data for correlation", ha="center", va="center"
+            )
             return
 
         ax = fig.add_subplot(111)
@@ -3427,7 +3427,9 @@ class GolfSwingPlotter:
         activations = synergy_result.activations
         if activations.shape[0] <= max(dim1, dim2):
             ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "Not enough synergies extracted", ha="center", va="center")
+            ax.text(
+                0.5, 0.5, "Not enough synergies extracted", ha="center", va="center"
+            )
             return
 
         times, _ = self._get_cached_series("joint_positions")
@@ -3477,7 +3479,13 @@ class GolfSwingPlotter:
             _, positions = self._get_cached_series(position_name)
         except (AttributeError, KeyError):
             ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, f"Data missing: {vector_name}/{position_name}", ha="center", va="center")
+            ax.text(
+                0.5,
+                0.5,
+                f"Data missing: {vector_name}/{position_name}",
+                ha="center",
+                va="center",
+            )
             return
 
         vectors = np.asarray(vectors)
@@ -3485,7 +3493,9 @@ class GolfSwingPlotter:
 
         if len(times) == 0 or vectors.shape[1] < 3 or positions.shape[1] < 3:
             ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "Invalid dimensions or empty data", ha="center", va="center")
+            ax.text(
+                0.5, 0.5, "Invalid dimensions or empty data", ha="center", va="center"
+            )
             return
 
         ax = fig.add_subplot(111, projection="3d")
@@ -3509,13 +3519,13 @@ class GolfSwingPlotter:
                 [pz, pz + w * scale],
                 color=self.colors["secondary"],
                 linewidth=1.5,
-                alpha=0.6
+                alpha=0.6,
             )
 
         ax.set_title(f"3D Vector Field: {vector_name}", fontsize=14, fontweight="bold")
         ax.set_xlabel("X", fontweight="bold")
         ax.set_ylabel("Y", fontweight="bold")
-        ax.set_zlabel("Z", fontweight="bold") # type: ignore
+        ax.set_zlabel("Z", fontweight="bold")  # type: ignore
         fig.tight_layout()
 
     def plot_local_stability(
@@ -3553,7 +3563,7 @@ class GolfSwingPlotter:
             times=np.asarray(times),
             joint_positions=np.asarray(positions),
             joint_velocities=np.asarray(velocities),
-            joint_torques=np.zeros_like(positions), # Dummy
+            joint_torques=np.zeros_like(positions),  # Dummy
         )
 
         try:
@@ -3561,8 +3571,8 @@ class GolfSwingPlotter:
                 joint_idx=joint_idx,
                 tau=tau,
                 dim=embedding_dim,
-                window=tau*2, # Theiler window
-                data_type="velocity"
+                window=tau * 2,  # Theiler window
+                data_type="velocity",
             )
         except AttributeError:
             ax = fig.add_subplot(111)
@@ -3571,7 +3581,13 @@ class GolfSwingPlotter:
 
         if len(ld_times) == 0:
             ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "Insufficient data for stability analysis", ha="center", va="center")
+            ax.text(
+                0.5,
+                0.5,
+                "Insufficient data for stability analysis",
+                ha="center",
+                va="center",
+            )
             return
 
         ax = fig.add_subplot(111)
@@ -3579,11 +3595,29 @@ class GolfSwingPlotter:
 
         # Positive divergence rate -> Local Instability
         # Negative divergence rate -> Local Stability (Converging)
-        ax.fill_between(ld_times, 0, ld_rates, where=(ld_rates > 0), alpha=0.2, color="red", label="Unstable")
-        ax.fill_between(ld_times, 0, ld_rates, where=(ld_rates <= 0), alpha=0.2, color="green", label="Stable")
+        ax.fill_between(
+            ld_times,
+            0,
+            ld_rates,
+            where=(ld_rates > 0),
+            alpha=0.2,
+            color="red",
+            label="Unstable",
+        )
+        ax.fill_between(
+            ld_times,
+            0,
+            ld_rates,
+            where=(ld_rates <= 0),
+            alpha=0.2,
+            color="green",
+            label="Stable",
+        )
 
         name = self.get_joint_name(joint_idx)
-        ax.set_title(f"Local Stability (Divergence Rate): {name}", fontsize=14, fontweight="bold")
+        ax.set_title(
+            f"Local Stability (Divergence Rate): {name}", fontsize=14, fontweight="bold"
+        )
         ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax.set_ylabel("Divergence Rate (1/s)", fontsize=12, fontweight="bold")
         ax.grid(True, alpha=0.3, linestyle="--")

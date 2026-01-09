@@ -10,6 +10,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
+import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
 from shared.python.dashboard.recorder import GenericPhysicsRecorder
@@ -35,11 +36,11 @@ class LivePlotWidget(QtWidgets.QWidget):
         """
         super().__init__()
         self.recorder = recorder
-        self.layout = QtWidgets.QVBoxLayout(self)
+        self._main_layout = QtWidgets.QVBoxLayout(self)
 
         # Create Matplotlib canvas
         self.canvas = MplCanvas(width=5, height=4, dpi=100)
-        self.layout.addWidget(self.canvas)
+        self._main_layout.addWidget(self.canvas)
 
         # Setup plot
         self.ax = self.canvas.fig.add_subplot(111)
@@ -88,7 +89,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.chk_compute.stateChanged.connect(self.toggle_computation)
         controls_layout.addWidget(self.chk_compute)
 
-        self.layout.addLayout(controls_layout)
+        self._main_layout.addLayout(controls_layout)
 
         # Initial plot setup
         self.ax.set_title("Live Data")
@@ -154,8 +155,8 @@ class LivePlotWidget(QtWidgets.QWidget):
 
     def update_plot(self) -> None:
         """Update the plot with the latest data."""
-        times = []
-        data = None
+        times: np.ndarray = np.array([])
+        data: np.ndarray | None = None
 
         if self.current_key == "induced_accel_source":
             # Fetch specific induced acceleration
@@ -231,16 +232,22 @@ class ControlPanel(QtWidgets.QGroupBox):
 
         layout = QtWidgets.QHBoxLayout(self)
         style = self.style()
+        if style is None:
+            return
 
         self.btn_start = QtWidgets.QPushButton("Start")
-        self.btn_start.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay))
+        self.btn_start.setIcon(
+            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        )
         self.btn_start.setToolTip("Start simulation playback")
         self.btn_start.setStatusTip("Start the simulation")
         self.btn_start.clicked.connect(self.start_requested.emit)
         layout.addWidget(self.btn_start)
 
         self.btn_pause = QtWidgets.QPushButton("Pause")
-        self.btn_pause.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause))
+        self.btn_pause.setIcon(
+            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPause)
+        )
         self.btn_pause.setToolTip("Pause/Resume simulation")
         self.btn_pause.setStatusTip("Pause or resume the simulation")
         self.btn_pause.setCheckable(True)
@@ -248,14 +255,18 @@ class ControlPanel(QtWidgets.QGroupBox):
         layout.addWidget(self.btn_pause)
 
         self.btn_stop = QtWidgets.QPushButton("Stop")
-        self.btn_stop.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaStop))
+        self.btn_stop.setIcon(
+            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaStop)
+        )
         self.btn_stop.setToolTip("Stop simulation")
         self.btn_stop.setStatusTip("Stop the simulation and reset time")
         self.btn_stop.clicked.connect(self.stop_requested.emit)
         layout.addWidget(self.btn_stop)
 
         self.btn_reset = QtWidgets.QPushButton("Reset")
-        self.btn_reset.setIcon(style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload))
+        self.btn_reset.setIcon(
+            style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload)
+        )
         self.btn_reset.setToolTip("Reset simulation")
         self.btn_reset.setStatusTip("Reset the simulation to initial state")
         self.btn_reset.clicked.connect(self.reset_requested.emit)
