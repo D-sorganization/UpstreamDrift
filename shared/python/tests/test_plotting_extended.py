@@ -1,28 +1,37 @@
-
-import pytest
-import numpy as np
 from unittest.mock import MagicMock
+
+import numpy as np
+import pytest
 from matplotlib.figure import Figure
+
 from shared.python.plotting import GolfSwingPlotter
 from shared.python.tests.test_plotting import MockRecorder
 
+
 @pytest.fixture
 def extended_plotter():
+    # Seed for reproducible test data generation
+    np.random.seed(42)
     recorder = MockRecorder()
     # Add dummy com data for vector field
     recorder.data["com_position"] = (np.linspace(0, 1, 10), np.random.rand(10, 3))
     return GolfSwingPlotter(recorder, joint_names=["Joint1", "Joint2", "Joint3"])
 
+
 @pytest.fixture
 def fig():
     return Figure()
 
+
 def test_plot_dynamic_correlation(extended_plotter, fig):
-    extended_plotter.plot_dynamic_correlation(fig, joint_idx_1=0, joint_idx_2=1, window_size=5)
+    extended_plotter.plot_dynamic_correlation(
+        fig, joint_idx_1=0, joint_idx_2=1, window_size=5
+    )
     assert len(fig.axes) > 0
     # Check if plot was drawn
     ax = fig.axes[0]
     assert ax.get_title().startswith("Dynamic Correlation")
+
 
 def test_plot_synergy_trajectory(extended_plotter, fig):
     # Mock synergy result
@@ -34,11 +43,18 @@ def test_plot_synergy_trajectory(extended_plotter, fig):
     ax = fig.axes[0]
     assert ax.get_title() == "Synergy Space Trajectory"
 
+
 def test_plot_3d_vector_field(extended_plotter, fig):
     # Setup recorder with necessary data
     # Angular momentum and CoM position
-    extended_plotter.recorder.data["angular_momentum"] = (np.linspace(0, 1, 10), np.random.rand(10, 3))
-    extended_plotter.recorder.data["com_position"] = (np.linspace(0, 1, 10), np.random.rand(10, 3))
+    extended_plotter.recorder.data["angular_momentum"] = (
+        np.linspace(0, 1, 10),
+        np.random.rand(10, 3),
+    )
+    extended_plotter.recorder.data["com_position"] = (
+        np.linspace(0, 1, 10),
+        np.random.rand(10, 3),
+    )
 
     extended_plotter.plot_3d_vector_field(fig, "angular_momentum", "com_position")
     assert len(fig.axes) > 0
@@ -46,15 +62,23 @@ def test_plot_3d_vector_field(extended_plotter, fig):
     ax = fig.axes[0]
     assert ax.get_title().startswith("3D Vector Field")
 
+
 def test_plot_local_stability(extended_plotter, fig):
     # Setup data
-    extended_plotter.recorder.data["joint_velocities"] = (np.linspace(0, 1, 50), np.random.rand(50, 3))
-    extended_plotter.recorder.data["joint_positions"] = (np.linspace(0, 1, 50), np.random.rand(50, 3))
+    extended_plotter.recorder.data["joint_velocities"] = (
+        np.linspace(0, 1, 50),
+        np.random.rand(50, 3),
+    )
+    extended_plotter.recorder.data["joint_positions"] = (
+        np.linspace(0, 1, 50),
+        np.random.rand(50, 3),
+    )
 
     extended_plotter.plot_local_stability(fig, joint_idx=0, tau=1, embedding_dim=2)
     assert len(fig.axes) > 0
     ax = fig.axes[0]
     assert ax.get_title().startswith("Local Stability")
+
 
 def test_plot_dynamic_correlation_insufficient_data(extended_plotter, fig):
     extended_plotter.recorder.data["joint_velocities"] = (np.array([]), np.array([]))

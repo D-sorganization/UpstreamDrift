@@ -31,7 +31,6 @@ from engines.physics_engines.pendulum.python.pendulum_physics_engine import (
     PendulumPhysicsEngine,
 )
 
-
 # TESTS FIXED: Engine is now configured with test-specific parameters in setup_method.
 # pytestmark = pytest.mark.xfail(
 #     reason="Parameter mismatch: tests assume m=1kg,l=1m but engine uses golf defaults"
@@ -50,8 +49,8 @@ class TestPendulumAnalyticalDynamics:
         from engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
             DoublePendulumDynamics,
             DoublePendulumParameters,
-            SegmentProperties,
             LowerSegmentProperties,
+            SegmentProperties,
         )
 
         # Create simple pendulum parameters
@@ -345,8 +344,8 @@ class TestPendulumEnergyConservation:
         from engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
             DoublePendulumDynamics,
             DoublePendulumParameters,
-            SegmentProperties,
             LowerSegmentProperties,
+            SegmentProperties,
         )
 
         self.m1 = 1.0
@@ -356,7 +355,7 @@ class TestPendulumEnergyConservation:
             length_m=self.l1,
             mass_kg=self.m1,
             center_of_mass_ratio=1.0,  # COM at tip
-            inertia_about_com=0.0,     # Point mass
+            inertia_about_com=0.0,  # Point mass
         )
 
         # Link 2 (irrelevant for single pendulum tests but needed for initialization)
@@ -374,11 +373,11 @@ class TestPendulumEnergyConservation:
         params = DoublePendulumParameters(
             upper_segment=upper_segment,
             lower_segment=lower_segment,
-            plane_inclination_deg=0.0, # Vertical plane
+            plane_inclination_deg=0.0,  # Vertical plane
             damping_shoulder=0.0,
             damping_wrist=0.0,
             gravity_enabled=True,
-            constrained_to_plane=True
+            constrained_to_plane=True,
         )
 
         dynamics = DoublePendulumDynamics(parameters=params)
