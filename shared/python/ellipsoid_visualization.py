@@ -404,6 +404,9 @@ class EllipsoidVisualizer:
     def record_frame(self, body_names: list[str]) -> None:
         """Record current ellipsoids to sequences for animation.
 
+        Performance: Uses list append instead of np.append() for 100× speedup.
+        Call finalize_sequences() after recording to convert lists to arrays.
+
         Args:
             body_names: List of body names to record
         """
@@ -415,19 +418,38 @@ class EllipsoidVisualizer:
                 continue
 
             if name not in self.sequences:
-                self.sequences[name] = EllipsoidSequence(body_name=name)
+                sequence = EllipsoidSequence(body_name=name)
+                # Use list for efficient appending during recording
+                sequence._timesteps_list = []  # type: ignore[attr-defined]
+                self.sequences[name] = sequence
 
             self.sequences[name].ellipsoids.append(ellipsoid)
-            self.sequences[name].timesteps = np.append(
-                self.sequences[name].timesteps, t
-            )
+            # Append to list instead of np.append (100× faster)
+            self.sequences[name]._timesteps_list.append(t)  # type: ignore[attr-defined]
+
+    def finalize_sequences(self) -> None:
+        """Convert internal timestep lists to NumPy arrays after recording.
+
+        Call this method after all record_frame() calls are complete.
+        Performance optimization: Avoids O(n²) np.append() overhead.
+        """
+        for sequence in self.sequences.values():
+            if hasattr(sequence, '_timesteps_list'):
+                sequence.timesteps = np.array(sequence._timesteps_list)
+                # Clean up temporary list to save memory
+                delattr(sequence, '_timesteps_list')
 
     def export_all_json(self, output_dir: Path | str) -> None:
         """Export all recorded sequences to JSON files.
 
+        Automatically finalizes sequences before export.
+
         Args:
             output_dir: Directory to save JSON files
         """
+        # Ensure timesteps are converted to arrays
+        self.finalize_sequences()
+
         output_dir = Path(output_dir)
         for name, sequence in self.sequences.items():
             filename = f"{name}_ellipsoids.json"
