@@ -122,8 +122,9 @@ def compute_spectral_arc_length(
     freq_norm = freqs_sel / fc
 
     # Calculate gradient
-    d_mag = np.diff(spectrum_sel)
-    d_freq = np.diff(freq_norm)
+    # Optimization: Manual slicing is faster than np.diff
+    d_mag = spectrum_sel[1:] - spectrum_sel[:-1]
+    d_freq = freq_norm[1:] - freq_norm[:-1]
 
     # Arc length
     sal = -np.sum(np.sqrt(d_freq**2 + d_mag**2))
