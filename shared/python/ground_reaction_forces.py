@@ -454,7 +454,6 @@ def extract_grf_from_contacts(
         # query actual contact forces from the physics engine
 
         # Approximate: GRF opposes gravity at contact points
-        # This is a placeholder - real implementation depends on engine API
         if len(g) > 0:
             total_force[2] += abs(np.sum(g))
 

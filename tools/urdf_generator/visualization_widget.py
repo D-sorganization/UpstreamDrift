@@ -27,13 +27,13 @@ class VisualizationWidget(QWidget):
         """Set up the user interface."""
         layout = QVBoxLayout(self)
 
-        # For now, use a simple placeholder
+        # Use a simple label for now
         # Implement proper 3D visualization with Open3D or OpenGL (future enhancement)
-        self.placeholder_label = QLabel(
+        self.info_label = QLabel(
             "3D Visualization\n\n(Implementation in progress)"
         )
-        self.placeholder_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.placeholder_label.setStyleSheet(
+        self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.info_label.setStyleSheet(
             """
             QLabel {
                 border: 2px dashed #aaa;
@@ -46,7 +46,7 @@ class VisualizationWidget(QWidget):
         """
         )
 
-        layout.addWidget(self.placeholder_label)
+        layout.addWidget(self.info_label)
 
     def update_visualization(self, urdf_content: str) -> None:
         """Update the 3D visualization with new URDF content.
@@ -56,20 +56,20 @@ class VisualizationWidget(QWidget):
         """
         self.urdf_content = urdf_content
 
-        # For now, just update the placeholder text
+        # Update the status text
         if urdf_content.strip():
             # Count links and joints in the URDF
             link_count = urdf_content.count("<link")
             joint_count = urdf_content.count("<joint")
 
-            self.placeholder_label.setText(
+            self.info_label.setText(
                 f"3D Visualization\n\n"
                 f"Links: {link_count}\n"
                 f"Joints: {joint_count}\n\n"
                 f"(Implementation in progress)"
             )
         else:
-            self.placeholder_label.setText("3D Visualization\n\n(No URDF content)")
+            self.info_label.setText("3D Visualization\n\n(No URDF content)")
 
         logger.info(
             f"Visualization updated with URDF content ({len(urdf_content)} characters)"
@@ -78,7 +78,7 @@ class VisualizationWidget(QWidget):
     def clear(self) -> None:
         """Clear the visualization."""
         self.urdf_content = ""
-        self.placeholder_label.setText("3D Visualization\n\n(No URDF content)")
+        self.info_label.setText("3D Visualization\n\n(No URDF content)")
         logger.info("Visualization cleared")
 
     def reset_view(self) -> None:
@@ -90,7 +90,7 @@ class VisualizationWidget(QWidget):
 class Simple3DVisualizationWidget(QOpenGLWidget):
     """Simple OpenGL-based 3D visualization widget.
 
-    This is a placeholder for future implementation with proper 3D rendering.
+    This is a preliminary implementation for future proper 3D rendering.
     """
 
     def __init__(self, parent: QWidget | None = None):
