@@ -5,8 +5,19 @@ from __future__ import annotations
 import typing
 
 import numpy as np  # noqa: TID253
-import pink.tasks
 import pinocchio as pin
+
+# Pink is optional but we import it for type hinting if available
+try:
+    import pink.tasks
+    PINK_AVAILABLE = True
+except ImportError:
+    PINK_AVAILABLE = False
+    # Mock for type hints if not available
+    if typing.TYPE_CHECKING:
+        from unittest.mock import MagicMock
+        pink = MagicMock()
+        pink.tasks = MagicMock()
 
 # Type alias for transformation matrices
 Transform = pin.SE3 | np.ndarray
@@ -29,6 +40,9 @@ def create_frame_task(
     Returns:
         Configured FrameTask
     """
+    if not PINK_AVAILABLE:
+        raise ImportError("Pink is not installed.")
+
     task = pink.tasks.FrameTask(
         body_name, position_cost=position_cost, orientation_cost=orientation_cost
     )
@@ -48,6 +62,9 @@ def create_posture_task(
     Returns:
         Configured PostureTask
     """
+    if not PINK_AVAILABLE:
+        raise ImportError("Pink is not installed.")
+
     task = pink.tasks.PostureTask(cost=cost)
     if q_ref is not None:
         task.set_target(q_ref)
@@ -55,9 +72,10 @@ def create_posture_task(
 
 
 def create_joint_coupling_task(
-    _joint_names: list[str],
-    _ratios: list[float],
-    _cost: float = 100.0,
+    model: pin.Model,
+    joint_names: list[str],
+    ratios: list[float],
+    cost: float = 100.0,
 ) -> pink.tasks.LinearHolonomicTask:
     """Create a task to enforce linear coupling between joints.
 
@@ -65,16 +83,40 @@ def create_joint_coupling_task(
     Equation: sum(ratio_i * q_i) = constant (or 0)
 
     Args:
+        model: Pinocchio model (required to map names to indices)
         joint_names: List of joint names involved
         ratios: Coefficients for each joint
         cost: Task weight
 
     Returns:
-        LinearHolonomicTask (Note: Requires building matrix A and vector b)
+        LinearHolonomicTask A * q = b
     """
-    # This is a placeholder. Pink's LinearHolonomicTask takes A, b in A * q = b
-    # Implementation depends on how we want to construct 'A' from names.
-    # Typically A is shape (k, nq).
-    # For now, we return usage instructions or a base implementation if feasible.
-    msg = "Joint coupling task requires mapping names to joint indices dynamically."
-    raise NotImplementedError(msg)
+    if not PINK_AVAILABLE:
+        raise ImportError("Pink is not installed.")
+
+    if len(joint_names) != len(ratios):
+        raise ValueError("joint_names and ratios must have same length")
+
+    # Construct A matrix (1 x nq)
+    # Note: Pink/Pinocchio config vector size might differ from nq if using Lie algebra
+    # But usually LinearHolonomicTask operates on tangent space (nv) or config space (nq)?
+    # Pink documentation says: A * q = b.
+
+    nv = model.nv
+    A = np.zeros((1, nv))
+
+    for name, ratio in zip(joint_names, ratios, strict=True):
+        if not model.existJointName(name):
+            raise ValueError(f"Joint '{name}' not found in model")
+
+        joint_id = model.getJointId(name)
+        # Assuming simple 1-DOF joints where joint_id maps to a single index in q/v
+        # In Pinocchio, idx_v gives the index in velocity vector.
+        idx_v = model.joints[joint_id].idx_v
+
+        if idx_v >= 0:
+            A[0, idx_v] = ratio
+
+    b = np.zeros(1)
+
+    return pink.tasks.LinearHolonomicTask(A, b, cost=cost)

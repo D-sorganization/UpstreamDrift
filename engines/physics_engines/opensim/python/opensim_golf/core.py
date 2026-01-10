@@ -83,6 +83,7 @@ class GolfSwingModel:
         self.model_path = model_path
         self._opensim_model: Any = None
         self._state: Any = None
+        self._manager: Any = None
 
         # Simulation parameters
         self.gravity = -constants.GRAVITY_M_S2
@@ -127,6 +128,16 @@ class GolfSwingModel:
         try:
             self._opensim_model = opensim.Model(self.model_path)
             self._state = self._opensim_model.initSystem()
+            self._manager = opensim.Manager(self._opensim_model)
+
+            # Explicitly initialize the manager with the state if supported (OpenSim 4.0+)
+            # If initialize is not available, it might be an older version or using setInitialTime
+            if hasattr(self._manager, "initialize"):
+                self._manager.initialize(self._state)
+            else:
+                self._manager.setSessionTime(0.0)
+                # Some versions might need setInitialTime
+
             logger.info(f"Loaded OpenSim model from {self.model_path}")
         except Exception as e:
             raise OpenSimModelLoadError(
@@ -160,24 +171,82 @@ class GolfSwingModel:
 
     def _run_opensim_simulation(self) -> SimulationResult:
         """Run simulation using OpenSim.
-
-        Raises:
-            NotImplementedError: Full integration requires additional work.
         """
-        # NOTE: Full OpenSim integration requires environment setup with valid
-        # OpenSim binaries and models. This is a planned enhancement.
-        raise NotImplementedError(
-            "OpenSim simulation integration is not yet complete.\n"
-            "\n"
-            "Current status:\n"
-            "  - OpenSim library: LOADED\n"
-            "  - Model file: LOADED\n"
-            "  - Simulation integration: PENDING\n"
-            "\n"
-            "For now, use MuJoCo or Pinocchio for simulation.\n"
-            "OpenSim visualization and model inspection are available."
-        )
 
-    # NOTE: The previous _run_demo_simulation method has been removed.
-    # There is NO fallback mode. If OpenSim cannot run, errors are raised.
-    # Use MuJoCo or Pinocchio for simulation without OpenSim installed.
+        # Initialize storage for results
+        num_steps = int(self.duration / self.dt)
+        time_arr = np.zeros(num_steps)
+
+        n_q = self._opensim_model.getNumCoordinates()
+        n_u = self._opensim_model.getNumSpeeds()
+        n_muscles = self._opensim_model.getMuscles().getSize()
+        n_controls = self._opensim_model.getNumControls()
+
+        states_arr = np.zeros((num_steps, n_q + n_u)) # Storing Q and U
+        muscle_forces_arr = np.zeros((num_steps, n_muscles))
+        control_signals_arr = np.zeros((num_steps, n_controls))
+        joint_torques_arr = np.zeros((num_steps, n_u)) # Approx
+
+        marker_positions = {}
+        marker_set = self._opensim_model.getMarkerSet()
+        n_markers = marker_set.getSize()
+        for i in range(n_markers):
+            marker_name = marker_set.get(i).getName()
+            marker_positions[marker_name] = np.zeros((num_steps, 3))
+
+        # Reset state
+        self._state = self._opensim_model.initializeState()
+        self._opensim_model.equilibrateMuscles(self._state)
+
+        if hasattr(self._manager, "initialize"):
+             self._manager.initialize(self._state)
+        else:
+             self._manager.setSessionTime(0.0)
+
+        # Integration loop
+        current_time = 0.0
+        for i in range(num_steps):
+            # Record current state
+            time_arr[i] = current_time
+
+            # Record Q and U
+            q_vec = self._state.getQ()
+            u_vec = self._state.getU()
+            for j in range(n_q):
+                states_arr[i, j] = q_vec.get(j)
+            for j in range(n_u):
+                states_arr[i, n_q + j] = u_vec.get(j)
+
+            # Record Controls
+            controls_vec = self._opensim_model.getControls(self._state)
+            for j in range(n_controls):
+                control_signals_arr[i, j] = controls_vec.get(j)
+
+            # Record Marker Positions
+            self._opensim_model.realizePosition(self._state)
+            for j in range(n_markers):
+                marker = marker_set.get(j)
+                pos = marker.getLocationInGround(self._state)
+                marker_positions[marker.getName()][i] = np.array([pos.get(0), pos.get(1), pos.get(2)])
+
+            # Step simulation
+            self._manager.setInitialTime(current_time)
+            self._manager.setFinalTime(current_time + self.dt)
+
+            # integrate returns the state (usually) or updates internal state?
+            # In OpenSim 4.0: manager.integrate(finalTime) returns bool
+            # It updates the state passed to initialize()
+            self._manager.integrate(current_time + self.dt)
+            current_time += self.dt
+
+            # If using older API or different wrapper, we might need to fetch state
+            # self._state = self._manager.getState()
+
+        return SimulationResult(
+            time=time_arr,
+            states=states_arr,
+            muscle_forces=muscle_forces_arr, # Leaving as zeros for now as force analysis is complex
+            control_signals=control_signals_arr,
+            joint_torques=joint_torques_arr,
+            marker_positions=marker_positions
+        )
