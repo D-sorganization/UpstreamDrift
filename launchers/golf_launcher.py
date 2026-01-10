@@ -397,7 +397,7 @@ class DraggableModelCard(QFrame):
         )
 
     def _get_status_info(self) -> tuple[str, str]:
-        """Get status text and color based on model type."""
+        """Get status text and color based on model type and availability."""
         t = getattr(self.model, "type", "").lower()
 
         if t in [
@@ -413,13 +413,38 @@ class DraggableModelCard(QFrame):
         if t == "mjcf" or path_str.endswith(".xml"):
             return "Viewer", "#17a2b8"  # Info Blue
         elif t in ["opensim", "myosim"]:
-            return "Demo / GUI", "#fd7e14"  # Orange
+            # Check actual availability instead of showing misleading "Demo" status
+            return self._check_engine_availability(t)
         elif t in ["matlab", "matlab_app"]:
             return "External", "#6f42c1"  # Purple
         elif t in ["urdf_generator", "c3d_viewer"]:
             return "Utility", "#6c757d"  # Gray
 
         return "Unknown", "#6c757d"
+
+    def _check_engine_availability(self, engine_type: str) -> tuple[str, str]:
+        """Check if a specific engine is installed and return appropriate status.
+
+        Args:
+            engine_type: The engine type to check ('opensim' or 'myosim').
+
+        Returns:
+            Tuple of (status_text, color_hex).
+        """
+        try:
+            if engine_type == "opensim":
+                import opensim  # noqa: F401
+
+                return "Engine Ready", "#28a745"  # Green
+            elif engine_type == "myosim":
+                import myosuite  # noqa: F401
+
+                return "Engine Ready", "#28a745"  # Green
+        except ImportError:
+            pass
+
+        # Engine not installed - show accurate status
+        return "Needs Setup", "#fd7e14"  # Orange
 
     def keyPressEvent(self, event: QKeyEvent | None) -> None:
         """Handle keyboard interaction."""
@@ -2518,21 +2543,53 @@ if __name__ == "__main__":
     splash = GolfSplashScreen()
     splash.show()
 
-    # Simulate loading process with progress updates
-    splash.show_message("Loading application resources...", 20)
+    # Phase 1: Load application resources
+    splash.show_message("Loading application resources...", 10)
     QApplication.processEvents()
 
-    splash.show_message("Initializing model registry...", 40)
+    # Phase 2: Load model registry (actual work during splash for init + cache warming)
+    splash.show_message("Loading model registry...", 25)
     QApplication.processEvents()
+    try:
+        # Initialize registry during splash to warm caches; instance discarded (GolfLauncher
+        # creates its own instance later). This ensures model scanning happens during splash.
+        _model_registry = ModelRegistry()
+        logger.info(f"Loaded {len(_model_registry.get_all_models())} models")
+    except Exception as e:
+        logger.warning(f"Model registry load warning: {e}")
 
-    splash.show_message("Setting up engine manager...", 60)
+    # Phase 3: Initialize engine manager (actual work - probing can be slow)
+    splash.show_message("Probing physics engines...", 45)
     QApplication.processEvents()
+    try:
+        # Probe engines during splash to warm import caches; instance discarded.
+        # This front-loads the latency of importing MuJoCo/Drake/Pinocchio/OpenSim.
+        _engine_manager = EngineManager()
+        available_engines = _engine_manager.get_available_engines()
+        logger.info(
+            f"Found {len(available_engines)} available engines: {available_engines}"
+        )
+    except Exception as e:
+        logger.warning(f"Engine manager init warning: {e}")
 
-    splash.show_message("Preparing user interface...", 80)
+    # Phase 4: Check optional dependencies
+    splash.show_message("Checking AI assistant...", 65)
+    QApplication.processEvents()
+    if AI_AVAILABLE:
+        logger.info("AI Assistant module available")
+    else:
+        logger.info("AI Assistant not available (optional)")
+
+    # Phase 5: Build UI
+    splash.show_message("Building user interface...", 80)
     QApplication.processEvents()
 
     # Create main window
     window = GolfLauncher()
+
+    # Phase 6: Final setup
+    splash.show_message("Finalizing...", 95)
+    QApplication.processEvents()
 
     splash.show_message("Ready!", 100)
     QApplication.processEvents()
