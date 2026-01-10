@@ -281,10 +281,10 @@ def create_deviation_colormap(
 
     # Blue to green for negative values
     colors[negative_mask, 1] = 1 + normalized[negative_mask]  # Green increases
-    colors[negative_mask, 2] = -normalized[negative_mask]     # Blue decreases
+    colors[negative_mask, 2] = -normalized[negative_mask]  # Blue decreases
 
     # Green to red for positive values
-    colors[~negative_mask, 0] = normalized[~negative_mask]      # Red increases
+    colors[~negative_mask, 0] = normalized[~negative_mask]  # Red increases
     colors[~negative_mask, 1] = 1 - normalized[~negative_mask]  # Green decreases
 
     return colors
