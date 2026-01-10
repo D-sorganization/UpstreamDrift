@@ -40,7 +40,7 @@ def mock_mujoco_model():
     model.jnt_pos = np.array([[0, 0, 0], [1, 0, 0]])
     model.jnt_axis = np.array([[0, 0, 1], [1, 0, 0]])
     model.jnt_limited = np.array([True, False])
-    model.jnt_range = np.array([[-3.14, 3.14], [0, 0]])
+    model.jnt_range = np.array([[-np.pi, np.pi], [0, 0]])
 
     # Geom properties
     model.geom_bodyid = np.array([1, 2])
