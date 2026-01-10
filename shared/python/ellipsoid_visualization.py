@@ -316,22 +316,29 @@ def generate_ellipsoid_mesh(
     # Translate to center
     vertices = rotated.T + ellipsoid.center
 
-    # Generate triangle faces (simple grid triangulation)
+    # Generate triangle faces (simple grid triangulation, vectorized)
     # Grid is (n_meridians + 1) x (n_parallels + 1), so vertices per row = n_parallels + 1
-    faces = []
     n_verts_per_row = n_parallels + 1
     n_rows = n_meridians + 1
-    for i in range(n_rows - 1):
-        for j in range(n_verts_per_row - 1):
-            v0 = i * n_verts_per_row + j
-            v1 = v0 + 1
-            v2 = v0 + n_verts_per_row
-            v3 = v2 + 1
 
-            faces.append([v0, v2, v1])
-            faces.append([v1, v2, v3])
+    # Create grid indices using meshgrid for vectorized face generation
+    i_indices = np.arange(n_rows - 1)
+    j_indices = np.arange(n_verts_per_row - 1)
+    i_grid, j_grid = np.meshgrid(i_indices, j_indices, indexing="ij")
 
-    return vertices, np.array(faces)
+    # Flatten and compute vertex indices
+    v0 = (i_grid * n_verts_per_row + j_grid).ravel()
+    v1 = v0 + 1
+    v2 = v0 + n_verts_per_row
+    v3 = v2 + 1
+
+    # Create faces array (2 triangles per quad)
+    n_quads = len(v0)
+    faces = np.empty((n_quads * 2, 3), dtype=int)
+    faces[0::2] = np.column_stack([v0, v2, v1])  # First triangle of each quad
+    faces[1::2] = np.column_stack([v1, v2, v3])  # Second triangle of each quad
+
+    return vertices, faces
 
 
 def export_ellipsoid_obj(
@@ -354,15 +361,15 @@ def export_ellipsoid_obj(
         f.write(f"# Type: {ellipsoid.ellipsoid_type}\n")
         f.write(f"# Condition number: {ellipsoid.condition_number:.2e}\n\n")
 
-        # Write vertices
-        for v in vertices:
-            f.write(f"v {v[0]:.6f} {v[1]:.6f} {v[2]:.6f}\n")
+        # Write vertices (batched for performance)
+        vertex_lines = [f"v {v[0]:.6f} {v[1]:.6f} {v[2]:.6f}\n" for v in vertices]
+        f.writelines(vertex_lines)
 
         f.write("\n")
 
-        # Write faces (OBJ uses 1-indexed vertices)
-        for face in faces:
-            f.write(f"f {face[0]+1} {face[1]+1} {face[2]+1}\n")
+        # Write faces (OBJ uses 1-indexed vertices, batched for performance)
+        face_lines = [f"f {face[0]+1} {face[1]+1} {face[2]+1}\n" for face in faces]
+        f.writelines(face_lines)
 
     LOGGER.info(f"Exported ellipsoid mesh to {output_path}")
 
