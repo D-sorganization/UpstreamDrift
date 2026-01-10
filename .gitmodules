@@ -1,3 +1,6 @@
 [submodule "shared/models/opensim/opensim-models"]
 	path = shared/models/opensim/opensim-models
 	url = https://github.com/opensim-org/opensim-models.git
+[submodule "shared/models/myosuite/myo_sim"]
+	path = shared/models/myosuite/myo_sim
+	url = https://github.com/MyoHub/myo_sim.git
