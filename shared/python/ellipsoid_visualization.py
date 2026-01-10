@@ -324,7 +324,7 @@ def generate_ellipsoid_mesh(
     # Create grid indices using meshgrid for vectorized face generation
     i_indices = np.arange(n_rows - 1)
     j_indices = np.arange(n_verts_per_row - 1)
-    i_grid, j_grid = np.meshgrid(i_indices, j_indices, indexing='ij')
+    i_grid, j_grid = np.meshgrid(i_indices, j_indices, indexing="ij")
 
     # Flatten and compute vertex indices
     v0 = (i_grid * n_verts_per_row + j_grid).ravel()

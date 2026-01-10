@@ -1443,7 +1443,7 @@ class StatisticalAnalyzer:
             n_samples = min(
                 self.joint_torques.shape[0],
                 self.joint_velocities.shape[0],
-                len(self.times)
+                len(self.times),
             )
 
             if n_samples >= 2:
@@ -1456,7 +1456,9 @@ class StatisticalAnalyzer:
                 # Integrate positive power across time for each joint
                 if hasattr(np, "trapezoid"):
                     # NumPy 2.0+
-                    total_work = float(np.trapezoid(pos_power, dx=self.dt, axis=0).sum())
+                    total_work = float(
+                        np.trapezoid(pos_power, dx=self.dt, axis=0).sum()
+                    )
                 else:
                     # Older NumPy
                     trapz_func = getattr(np, "trapz")  # noqa: B009
