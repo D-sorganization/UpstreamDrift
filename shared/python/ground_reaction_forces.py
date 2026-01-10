@@ -155,7 +155,7 @@ def compute_linear_impulse(
     # Trapezoidal integration for each component
     impulse = np.zeros(3)
     for i in range(3):
-        impulse[i] = np.trapz(forces[:, i], timestamps)
+        impulse[i] = np.trapezoid(forces[:, i], timestamps)
 
     return impulse
 
@@ -193,7 +193,7 @@ def compute_angular_impulse(
     # Trapezoidal integration for each component
     angular_impulse = np.zeros(3)
     for i in range(3):
-        angular_impulse[i] = np.trapz(torques[:, i], timestamps)
+        angular_impulse[i] = np.trapezoid(torques[:, i], timestamps)
 
     return angular_impulse
 
