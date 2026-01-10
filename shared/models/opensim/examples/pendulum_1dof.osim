@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<OpenSimDocument Version="40500">
+    <Model name="pendulum_1dof">
+        <!--
+        Simple 1-DOF Pendulum Model for Cross-Engine Validation
+        
+        Use case: Ground truth comparison between OpenSim, MuJoCo, Drake, Pinocchio
+        
+        Properties:
+        - Single revolute joint (pin)
+        - Point mass at end of massless rod
+        - Gravity: -9.80665 m/s² (NIST standard)
+        - No damping or friction
+        
+        Expected small-angle period: T = 2π√(L/g) ≈ 2.006s for L=1m
+        Note: Uses small-angle approximation (θ << 1); actual period varies with amplitude.
+        -->
+        
+        <!-- Credits -->
+        <credits>Golf Modeling Suite - Cross-Engine Validation Model</credits>
+        <publications />
+        
+        <!-- Gravity -->
+        <gravity>0 -9.80665 0</gravity>
+        
+        <!-- Ground -->
+        <Ground name="ground">
+            <WrapObjectSet>
+                <objects />
+                <groups />
+            </WrapObjectSet>
+            <VisibleObject>
+                <GeometrySet>
+                    <objects />
+                    <groups />
+                </GeometrySet>
+            </VisibleObject>
+        </Ground>
+        
+        <!-- Body Set -->
+        <BodySet>
+            <objects>
+                <Body name="pendulum_link">
+                    <mass>1.0</mass>
+                    <mass_center>0 -0.5 0</mass_center>
+                    <inertia>0.0833333 0 0 0 0.0833333 0</inertia>
+                    <WrapObjectSet>
+                        <objects />
+                        <groups />
+                    </WrapObjectSet>
+                    <VisibleObject>
+                        <geometry_files>pendulum_link.vtp</geometry_files>
+                        <VisibleProperties>
+                            <display_preference>4</display_preference>
+                            <show_normals>false</show_normals>
+                            <show_axes>false</show_axes>
+                            <material_name>DEFAULT</material_name>
+                        </VisibleProperties>
+                    </VisibleObject>
+                </Body>
+            </objects>
+            <groups />
+        </BodySet>
+        
+        <!-- Joint Set -->
+        <JointSet>
+            <objects>
+                <PinJoint name="pin_joint">
+                    <parent_body>ground</parent_body>
+                    <location_in_parent>0 0 0</location_in_parent>
+                    <orientation_in_parent>0 0 0</orientation_in_parent>
+                    <location>0 0 0</location>
+                    <orientation>0 0 0</orientation>
+                    <CoordinateSet>
+                        <objects>
+                            <Coordinate name="angle">
+                                <motion_type>rotational</motion_type>
+                                <default_value>0.1</default_value>
+                                <default_speed_value>0</default_speed_value>
+                                <range>-3.14159 3.14159</range>
+                                <clamped>false</clamped>
+                                <locked>false</locked>
+                            </Coordinate>
+                        </objects>
+                        <groups />
+                    </CoordinateSet>
+                    <reverse>false</reverse>
+                    <body>pendulum_link</body>
+                </PinJoint>
+            </objects>
+            <groups />
+        </JointSet>
+        
+        <!-- Constraint Set (empty) -->
+        <ConstraintSet>
+            <objects />
+            <groups />
+        </ConstraintSet>
+        
+        <!-- Force Set (no muscles, no damping) -->
+        <ForceSet>
+            <objects />
+            <groups />
+        </ForceSet>
+        
+        <!-- Marker Set (optional) -->
+        <MarkerSet>
+            <objects>
+                <Marker name="end_effector">
+                    <body>pendulum_link</body>
+                    <location>0 -1.0 0</location>
+                    <fixed>true</fixed>
+                </Marker>
+            </objects>
+            <groups />
+        </MarkerSet>
+        
+        <!-- Contact Geometry Set (empty) -->
+        <ContactGeometrySet>
+            <objects />
+            <groups />
+        </ContactGeometrySet>
+        
+    </Model>
+</OpenSimDocument>

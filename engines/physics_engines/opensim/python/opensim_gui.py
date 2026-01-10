@@ -64,14 +64,32 @@ class OpenSimGolfGUI(QMainWindow):
         self.model_path = model_path
         self.result: Any = None
         self.initialization_error: str | None = None
+        self._opensim_available: bool = False
+
+        # Check OpenSim availability first
+        self._check_opensim_availability()
 
         self.init_ui()
-        self._try_load_model()
+
+        # Launch in appropriate mode
+        if self.model_path is not None:
+            self._try_load_model()
+        else:
+            self._show_getting_started()
+
+    def _check_opensim_availability(self) -> None:
+        """Check if OpenSim library is available."""
+        try:
+            import opensim  # noqa: F401
+
+            self._opensim_available = True
+        except ImportError:
+            self._opensim_available = False
 
     def _try_load_model(self) -> None:
         """Attempt to load the OpenSim model if a path was provided."""
         if self.model_path is None:
-            self._show_model_required_message()
+            self._show_getting_started()
             return
 
         try:
@@ -110,13 +128,45 @@ class OpenSimGolfGUI(QMainWindow):
             self._update_status("No Model Loaded", "orange")
             self.btn_run.setEnabled(False)
 
-    def _show_model_required_message(self) -> None:
-        """Show message that a model is required."""
-        self._update_status("No Model Loaded - Select a .osim File", "orange")
+    def _show_getting_started(self) -> None:
+        """Show getting started interface when no model is provided.
+
+        This allows users to launch the GUI without a model to explore
+        options, load samples, or learn how to create models.
+        """
+        if self._opensim_available:
+            self._update_status("Ready - Load or Create a Model", "#17a2b8")
+        else:
+            self._update_status("OpenSim Not Installed - Setup Required", "orange")
+
         self.btn_run.setEnabled(False)
-        self.lbl_details.setText(
-            "Click 'Load Model' to select an OpenSim .osim model file."
+        getting_started_text = (
+            "Welcome to OpenSim Golf Simulation!\n\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+            "Getting Started Options:\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+            "1. LOAD EXISTING MODEL\n"
+            "   Click 'Load Model' to open an existing .osim file\n\n"
+            "2. CREATE NEW MODEL\n"
+            "   Use the 'URDF Generator' from the main launcher\n"
+            "   to design a golf swing model\n\n"
+            "3. SAMPLE MODELS\n"
+            "   Check 'shared/models/opensim/' for example files\n\n"
         )
+
+        if not self._opensim_available:
+            getting_started_text += (
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+                "⚠️  OpenSim Installation Required:\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                "Install OpenSim:\n"
+                "  conda install -c opensim-org opensim\n\n"
+                "Or use alternative engines:\n"
+                "  • MuJoCo (pip install mujoco)\n"
+                "  • Pinocchio (pip install pin)\n"
+            )
+
+        self.lbl_details.setText(getting_started_text)
 
     def _update_status(self, message: str, color: str) -> None:
         """Update the status label."""
@@ -158,6 +208,14 @@ class OpenSimGolfGUI(QMainWindow):
             "background-color: #007acc; color: white; padding: 10px; font-weight: bold;"
         )
         controls.addWidget(self.btn_run)
+
+        self.btn_help = QPushButton("Help / Guide")
+        self.btn_help.clicked.connect(self._show_help_dialog)
+        self.btn_help.setFixedWidth(120)
+        self.btn_help.setStyleSheet(
+            "background-color: #17a2b8; color: white; padding: 10px; font-weight: bold;"
+        )
+        controls.addWidget(self.btn_help)
 
         layout.addLayout(controls)
 
@@ -258,6 +316,77 @@ class OpenSimGolfGUI(QMainWindow):
 
         self.fig.tight_layout()
         self.canvas.draw()
+
+    def _show_help_dialog(self) -> None:
+        """Show the Getting Started help dialog."""
+        from pathlib import Path
+
+        from PyQt6.QtWidgets import QDialog, QScrollArea, QTextEdit, QVBoxLayout
+
+        dialog = QDialog(self)
+        dialog.setWindowTitle("OpenSim Golf - Getting Started Guide")
+        dialog.resize(700, 600)
+
+        layout = QVBoxLayout(dialog)
+
+        # Create scrollable text area
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+
+        text_widget = QTextEdit()
+        text_widget.setReadOnly(True)
+
+        # Try to load the markdown file
+        # Path from engines/physics_engines/opensim/python/opensim_gui.py to project root:
+        #   python/ -> opensim/ -> physics_engines/ -> engines/ -> <project root>
+        project_root = Path(__file__).resolve().parents[4]
+        help_path = project_root / "launchers" / "assets" / "opensim_getting_started.md"
+
+        if help_path.exists():
+            try:
+                content = help_path.read_text(encoding="utf-8")
+                text_widget.setMarkdown(content)
+            except Exception:
+                text_widget.setPlainText(self._get_fallback_help())
+        else:
+            text_widget.setPlainText(self._get_fallback_help())
+
+        scroll.setWidget(text_widget)
+        layout.addWidget(scroll)
+
+        # Close button
+        btn_close = QPushButton("Close")
+        btn_close.clicked.connect(dialog.accept)
+        layout.addWidget(btn_close)
+
+        dialog.exec()
+
+    def _get_fallback_help(self) -> str:
+        """Return fallback help text if markdown file is not found."""
+        return """
+OpenSim Golf - Getting Started
+
+PREREQUISITES
+=============
+Install OpenSim:
+  conda install -c opensim-org opensim
+
+Alternative Engines:
+  - MuJoCo: pip install mujoco
+  - Pinocchio: pip install pin
+
+QUICK START
+===========
+1. Click "Load Model" to open a .osim file
+2. Sample models are in: shared/models/opensim/
+3. Click "Run Simulation" after loading
+
+CREATING A NEW MODEL
+====================
+Use the URDF Generator from the main launcher to design models visually.
+
+For more help, see the documentation in docs/ folder.
+        """.strip()
 
 
 if __name__ == "__main__":
