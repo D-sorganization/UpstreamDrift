@@ -19,7 +19,7 @@ pytestmark = pytest.mark.skip(
 class TestMyoSuiteAdapterPlaceholder:
     """Placeholder tests for myosuite_adapter.
 
-    TODO: Implement comprehensive tests for:
+    Future test areas when MyoSuite integration is finalized:
     - MuscleDrivenEnv initialization
     - State/observation handling
     - Muscle activation interface
