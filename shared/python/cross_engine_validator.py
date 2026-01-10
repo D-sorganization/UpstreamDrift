@@ -29,6 +29,7 @@ class ValidationResult:
         engine1: Name of first engine
         engine2: Name of second engine
         message: Detailed message (empty if passed, error description if failed)
+        severity: Classification of deviation severity (PASSED/WARNING/ERROR/BLOCKER)
     """
 
     passed: bool
@@ -38,6 +39,7 @@ class ValidationResult:
     engine1: str
     engine2: str
     message: str
+    severity: str = "PASSED"  # PASSED, WARNING, ERROR, BLOCKER
 
 
 class CrossEngineValidator:
@@ -123,37 +125,24 @@ class CrossEngineValidator:
 
         # Compute deviation
         deviation = np.abs(engine1_state - engine2_state)
-        max_dev = np.max(deviation)
+        max_dev = float(np.max(deviation))
         tol = self.TOLERANCES[metric]
 
-        passed = max_dev <= tol
+        # Classify severity (C-003 remediation)
+        passed, severity = self._classify_severity(max_dev, tol)
 
-        # Detailed logging per Guideline P3
-        if not passed:
-            logger.error(
-                f"❌ Cross-engine deviation EXCEEDS tolerance (Guideline P3 VIOLATION):\n"
-                f"  Engines: {engine1_name} vs {engine2_name}\n"
-                f"  Metric: {metric}\n"
-                f"  Max deviation: {max_dev:.2e}\n"
-                f"  Tolerance threshold: {tol:.2e}\n"
-                f"  Deviation location: index {np.argmax(deviation)}\n"
-                f"  {engine1_name} value at worst index: {engine1_state.flat[np.argmax(deviation)]:.6e}\n"
-                f"  {engine2_name} value at worst index: {engine2_state.flat[np.argmax(deviation)]:.6e}\n"
-                f"  Possible causes:\n"
-                f"    - Integration method differences (MuJoCo=semi-implicit, Drake=RK3)\n"
-                f"    - Timestep size mismatch\n"
-                f"    - Constraint handling differences\n"
-                f"    - Contact model parameters\n"
-                f"    - Joint damping/friction defaults\n"
-                f"  ACTION REQUIRED: Investigate before using results for publication"
-            )
-        else:
-            logger.info(
-                f"✅ Cross-engine validation PASSED:\n"
-                f"  Engines: {engine1_name} vs {engine2_name}\n"
-                f"  Metric: {metric}\n"
-                f"  Max deviation: {max_dev:.2e} < tolerance: {tol:.2e}"
-            )
+        # Log with appropriate severity level
+        self._log_result(
+            severity=severity,
+            engine1_name=engine1_name,
+            engine2_name=engine2_name,
+            metric=metric,
+            max_dev=max_dev,
+            tol=tol,
+            deviation=deviation,
+            engine1_state=engine1_state,
+            engine2_state=engine2_state,
+        )
 
         return ValidationResult(
             passed=passed,
@@ -162,10 +151,93 @@ class CrossEngineValidator:
             tolerance=tol,
             engine1=engine1_name,
             engine2=engine2_name,
-            message=(
-                "" if passed else f"Deviation {max_dev:.2e} exceeds tolerance {tol:.2e}"
-            ),
+            message=self._build_message(severity, max_dev, tol),
+            severity=severity,
         )
+
+    def _classify_severity(self, max_dev: float, tolerance: float) -> tuple[bool, str]:
+        """Classify deviation severity based on threshold multipliers (C-003).
+
+        Args:
+            max_dev: Maximum deviation observed.
+            tolerance: Base tolerance threshold.
+
+        Returns:
+            Tuple of (passed, severity_level).
+        """
+        ratio = max_dev / tolerance if tolerance > 0 else float("inf")
+
+        if ratio <= 1.0:
+            return True, "PASSED"
+        elif ratio <= self.WARNING_THRESHOLD:
+            return True, "WARNING"  # Acceptable with caution
+        elif ratio <= self.ERROR_THRESHOLD:
+            return False, "ERROR"  # Investigation required
+        else:
+            return False, "BLOCKER"  # Fundamental model error
+
+    def _build_message(self, severity: str, max_dev: float, tol: float) -> str:
+        """Build appropriate message based on severity."""
+        if severity == "PASSED":
+            return ""
+        elif severity == "WARNING":
+            return f"Deviation {max_dev:.2e} acceptable but exceeds base tolerance {tol:.2e}"
+        elif severity == "ERROR":
+            return f"Deviation {max_dev:.2e} exceeds tolerance {tol:.2e} - investigation required"
+        else:  # BLOCKER
+            return f"CRITICAL: Deviation {max_dev:.2e} is >{self.BLOCKER_THRESHOLD}× tolerance - fundamental error"
+
+    def _log_result(
+        self,
+        severity: str,
+        engine1_name: str,
+        engine2_name: str,
+        metric: str,
+        max_dev: float,
+        tol: float,
+        deviation: np.ndarray,
+        engine1_state: np.ndarray,
+        engine2_state: np.ndarray,
+    ) -> None:
+        """Log validation result with appropriate severity level."""
+        ratio = max_dev / tol if tol > 0 else float("inf")
+        worst_idx = int(np.argmax(deviation))
+
+        base_msg = (
+            f"Cross-engine validation ({severity}):\n"
+            f"  Engines: {engine1_name} vs {engine2_name}\n"
+            f"  Metric: {metric}\n"
+            f"  Max deviation: {max_dev:.2e} ({ratio:.1f}× tolerance)\n"
+            f"  Tolerance threshold: {tol:.2e}"
+        )
+
+        if severity == "PASSED":
+            logger.info(f"✅ {base_msg}")
+        elif severity == "WARNING":
+            logger.warning(
+                f"⚠️ {base_msg}\n"
+                f"  Status: Acceptable with caution (2-{self.ERROR_THRESHOLD:.0f}× tolerance)"
+            )
+        elif severity == "ERROR":
+            logger.error(
+                f"❌ {base_msg}\n"
+                f"  Deviation location: index {worst_idx}\n"
+                f"  {engine1_name} value: {engine1_state.flat[worst_idx]:.6e}\n"
+                f"  {engine2_name} value: {engine2_state.flat[worst_idx]:.6e}\n"
+                f"  Possible causes:\n"
+                f"    - Integration method differences\n"
+                f"    - Timestep size mismatch\n"
+                f"    - Constraint handling differences\n"
+                f"  ACTION: Investigate before using results"
+            )
+        else:  # BLOCKER
+            logger.critical(
+                f"🚫 BLOCKER - {base_msg}\n"
+                f"  Deviation location: index {worst_idx}\n"
+                f"  {engine1_name} value: {engine1_state.flat[worst_idx]:.6e}\n"
+                f"  {engine2_name} value: {engine2_state.flat[worst_idx]:.6e}\n"
+                f"  FUNDAMENTAL MODEL ERROR - DO NOT USE FOR PUBLICATION"
+            )
 
     def compare_torques_with_rms(
         self,
