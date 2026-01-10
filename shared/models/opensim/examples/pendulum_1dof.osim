@@ -12,7 +12,8 @@
         - Gravity: -9.80665 m/s² (NIST standard)
         - No damping or friction
         
-        Expected period: T = 2π√(L/g) = 2.006s for L=1m
+        Expected small-angle period: T = 2π√(L/g) ≈ 2.006s for L=1m
+        Note: Uses small-angle approximation (θ << 1); actual period varies with amplitude.
         -->
         
         <!-- Credits -->

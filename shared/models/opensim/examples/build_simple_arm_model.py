@@ -25,8 +25,8 @@ Requirements:
     - OpenSim Python package: conda install -c opensim-org opensim
 """
 
+import math
 import sys
-from pathlib import Path
 
 try:
     import opensim as osim
@@ -216,15 +216,17 @@ def main() -> None:
     final_state = run_simulation(arm, duration=10.0)
 
     # Save model to file
-    output_path = Path("SimpleArm.osim")
-    arm.printToXML(str(output_path))
-    print(f"\n3. Model saved to: {output_path.absolute()}")
+    output_path = "SimpleArm.osim"
+    arm.printToXML(output_path)
+    import os
+
+    print(f"\n3. Model saved to: {os.path.abspath(output_path)}")
 
     # Summary
     elbow = arm.getJointSet().get("elbow")
     final_angle = elbow.getCoordinate().getValue(final_state)
     print(
-        f"\n4. Final elbow angle: {final_angle:.3f} rad ({final_angle * 180 / 3.14159:.1f}°)"
+        f"\n4. Final elbow angle: {final_angle:.3f} rad ({math.degrees(final_angle):.1f}°)"
     )
 
     print("\n" + "=" * 60)
