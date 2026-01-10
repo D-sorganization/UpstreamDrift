@@ -74,11 +74,28 @@ engines/physics_engines/opensim/
         └── muscle_analysis.py      # Muscle analysis tools
 
 shared/models/opensim/
-└── examples/
-    ├── arm26.osim                  # Simple arm model (26 muscles)
-    ├── gait2392.osim               # Full-body walking model
-    ├── golf_swing_simple.osim      # Golf-specific model
-    └── README.md                   # Model descriptions
+├── examples/                       # Custom examples and scripts
+│   ├── README.md                   # Model documentation
+│   ├── pendulum_1dof.osim          # Validation model
+│   └── build_simple_arm_model.py   # Example script
+│
+└── opensim-models/                 # Official OpenSim models (submodule)
+    ├── Models/                     # 18 model directories
+    │   ├── Arm26/arm26.osim
+    │   ├── Pendulum/double_pendulum.osim
+    │   ├── Gait2392_Simbody/gait2392.osim
+    │   ├── Rajagopal/Rajagopal2015.osim
+    │   └── ... (14 more models)
+    ├── Geometry/                   # VTP visualization files
+    ├── Tutorials/                  # Official tutorials
+    └── Pipelines/                  # IK/ID/CMC examples
+```
+
+**Note:** The `opensim-models/` directory is a Git submodule pointing to
+`https://github.com/opensim-org/opensim-models`. Update with:
+
+```bash
+git submodule update --remote shared/models/opensim/opensim-models
 ```
 
 ---
