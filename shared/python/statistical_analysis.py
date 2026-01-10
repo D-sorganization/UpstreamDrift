@@ -742,7 +742,8 @@ class StatisticalAnalyzer:
         # dot(v, k) = |v| * |k| * cos(theta)
         # theta = arccos( v_z / |v| )
 
-        vec_norm = np.linalg.norm(vec, axis=1)
+        # OPTIMIZATION: Explicit sqrt sum is faster than np.linalg.norm
+        vec_norm = np.sqrt(np.sum(vec**2, axis=1))
         # Avoid division by zero
         vec_norm[vec_norm < 1e-6] = 1.0
 
@@ -1230,22 +1231,39 @@ class StatisticalAnalyzer:
         lookahead = min(10, int(0.1 / self.dt)) if self.dt > 0 else 5
         divergence_rates = np.zeros(M - lookahead)
 
-        for i in range(M - lookahead):
-            nn_idx = nearest_neighbors[i]
-            if nn_idx >= M - lookahead:
-                continue  # Neighbor too close to end
+        # OPTIMIZATION: Vectorized calculation replacing the loop
+        indices = np.arange(M - lookahead)
+        nn_indices = nearest_neighbors[indices]
 
+        # Filter invalid neighbors (too close to end)
+        valid_mask = nn_indices < (M - lookahead)
+
+        # Further filter to actually compute
+        compute_indices = indices[valid_mask]
+        compute_nn_indices = nn_indices[valid_mask]
+
+        if len(compute_indices) > 0:
             # Initial vector
-            dist_0 = np.linalg.norm(orbit[i] - orbit[nn_idx])
+            diff_0 = orbit[compute_indices] - orbit[compute_nn_indices]
+            # OPTIMIZATION: Explicit sqrt sum is faster than np.linalg.norm
+            dist_0 = np.sqrt(np.sum(diff_0**2, axis=1))
 
             # Final vector
-            dist_t = np.linalg.norm(orbit[i + lookahead] - orbit[nn_idx + lookahead])
+            diff_t = (
+                orbit[compute_indices + lookahead]
+                - orbit[compute_nn_indices + lookahead]
+            )
+            dist_t = np.sqrt(np.sum(diff_t**2, axis=1))
 
-            # Rate = (1/t) * ln(dist_t / dist_0)
-            if dist_0 > 1e-9 and dist_t > 1e-9:
-                divergence_rates[i] = np.log(dist_t / dist_0) / (lookahead * self.dt)
-            else:
-                divergence_rates[i] = 0.0
+            # Rate
+            valid_dists = (dist_0 > 1e-9) & (dist_t > 1e-9)
+
+            final_indices = compute_indices[valid_dists]
+
+            if len(final_indices) > 0:
+                divergence_rates[final_indices] = np.log(
+                    dist_t[valid_dists] / dist_0[valid_dists]
+                ) / (lookahead * self.dt)
 
         # Align times
         # Divergence rate at index i corresponds to time[i] (roughly)
