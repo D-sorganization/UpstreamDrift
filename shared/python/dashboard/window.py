@@ -186,6 +186,14 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         self.control_panel.stop_requested.connect(self.runner.stop)
         self.control_panel.pause_requested.connect(self.runner.toggle_pause)
         self.control_panel.reset_requested.connect(self._reset_simulation)
+        self.control_panel.toggle_playback_requested.connect(self._toggle_playback)
+
+    def _toggle_playback(self) -> None:
+        """Handle toggle playback (e.g., from Space key)."""
+        if self.runner.isRunning():
+            self.runner.toggle_pause()
+        else:
+            self.runner.start()
 
     def _reset_simulation(self) -> None:
         """Reset simulation and recorder."""

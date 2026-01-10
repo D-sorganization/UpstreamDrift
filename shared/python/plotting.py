@@ -31,7 +31,7 @@ from shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    pass  # pragma: no cover
+    from shared.python.statistical_analysis import PCAResult
 
 # Qt backend - optional for headless environments
 try:
@@ -3637,3 +3637,285 @@ class GolfSwingPlotter:
         ax.grid(True, alpha=0.3, linestyle="--")
         ax.legend()
         fig.tight_layout()
+
+    def plot_wavelet_scalogram(
+        self,
+        fig: Figure,
+        joint_idx: int,
+        signal_type: str = "velocity",
+        freq_range: tuple[float, float] = (1.0, 50.0),
+        title_prefix: str = "",
+    ) -> None:
+        """Plot Continuous Wavelet Transform (CWT) scalogram for a joint signal.
+
+        Provides time-frequency analysis of the signal, revealing how frequency
+        content evolves over the swing.
+
+        Args:
+            fig: Matplotlib figure
+            joint_idx: Joint index to analyze
+            signal_type: 'position', 'velocity', or 'torque'
+            freq_range: (min_freq, max_freq) in Hz
+            title_prefix: Optional prefix for titel
+        """
+        try:
+            from shared.python import signal_processing
+        except ImportError:
+            ax = fig.add_subplot(111)
+            ax.text(
+                0.5, 0.5, "Signal Processing module missing", ha="center", va="center"
+            )
+            return
+
+        # Fetch data
+        if signal_type == "position":
+            times, data = self._get_cached_series("joint_positions")
+            title_prefix = title_prefix or "Position"
+        elif signal_type == "torque":
+            times, data = self._get_cached_series("joint_torques")
+            title_prefix = title_prefix or "Torque"
+        else:
+            times, data = self._get_cached_series("joint_velocities")
+            title_prefix = title_prefix or "Velocity"
+
+        data = np.asarray(data)
+
+        if len(times) == 0 or data.ndim < 2 or joint_idx >= data.shape[1]:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        signal_data = data[:, joint_idx]
+        dt = float(np.mean(np.diff(times))) if len(times) > 1 else 0.01
+        fs = 1.0 / dt
+
+        # Compute CWT
+        try:
+            freqs, _, cwt_matrix = signal_processing.compute_cwt(
+                signal_data, fs, freq_range=freq_range
+            )
+        except Exception as e:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, f"CWT Error: {e}", ha="center", va="center")
+            return
+
+        # Plot Power (|CWT|^2)
+        power = np.abs(cwt_matrix) ** 2
+
+        ax = fig.add_subplot(111)
+        # Use pcolormesh: Time vs Frequency
+        T, F = np.meshgrid(times, freqs)
+
+        pcm = ax.pcolormesh(T, F, power, shading="auto", cmap="jet")
+
+        joint_name = self.get_joint_name(joint_idx)
+        ax.set_title(
+            f"Wavelet Scalogram ({title_prefix}): {joint_name}",
+            fontsize=14,
+            fontweight="bold",
+        )
+        ax.set_ylabel("Frequency (Hz)", fontsize=12, fontweight="bold")
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_yscale("log")
+
+        # Adjust Y-ticks for log scale
+        ax.set_yticks([1, 2, 5, 10, 20, 50])
+        from matplotlib.ticker import ScalarFormatter
+
+        ax.yaxis.set_major_formatter(ScalarFormatter())
+
+        cbar = fig.colorbar(pcm, ax=ax)
+        cbar.set_label("Power", rotation=270, labelpad=15)
+        fig.tight_layout()
+
+    def plot_cross_wavelet(
+        self,
+        fig: Figure,
+        joint_idx_1: int,
+        joint_idx_2: int,
+        signal_type: str = "velocity",
+        freq_range: tuple[float, float] = (1.0, 50.0),
+    ) -> None:
+        """Plot Cross Wavelet Transform (XWT) between two signals.
+
+        Shows common power and relative phase (arrows).
+
+        Args:
+            fig: Matplotlib figure
+            joint_idx_1: First joint index
+            joint_idx_2: Second joint index
+            signal_type: 'position', 'velocity', or 'torque'
+            freq_range: (min_freq, max_freq)
+        """
+        try:
+            from shared.python import signal_processing
+        except ImportError:
+            ax = fig.add_subplot(111)
+            ax.text(
+                0.5, 0.5, "Signal Processing module missing", ha="center", va="center"
+            )
+            return
+
+        # Fetch data
+        if signal_type == "position":
+            times, data = self._get_cached_series("joint_positions")
+        elif signal_type == "torque":
+            times, data = self._get_cached_series("joint_torques")
+        else:
+            times, data = self._get_cached_series("joint_velocities")
+
+        data = np.asarray(data)
+        if len(times) == 0 or data.ndim < 2:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        if joint_idx_1 >= data.shape[1] or joint_idx_2 >= data.shape[1]:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Joint index out of bounds", ha="center", va="center")
+            return
+
+        s1 = data[:, joint_idx_1]
+        s2 = data[:, joint_idx_2]
+        dt = float(np.mean(np.diff(times))) if len(times) > 1 else 0.01
+        fs = 1.0 / dt
+
+        # Compute XWT
+        try:
+            freqs, _, xwt_matrix = signal_processing.compute_xwt(
+                s1, s2, fs, freq_range=freq_range
+            )
+        except Exception as e:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, f"XWT Error: {e}", ha="center", va="center")
+            return
+
+        # Cross Power
+        power = np.abs(xwt_matrix)
+        # Phase difference
+        phase = np.angle(xwt_matrix)
+
+        ax = fig.add_subplot(111)
+
+        # Plot Power Heatmap
+        T, F = np.meshgrid(times, freqs)
+        pcm = ax.pcolormesh(T, F, power, shading="auto", cmap="jet")
+
+        # Plot Phase Arrows (decimated)
+        t_skip = max(1, len(times) // 30)
+        f_skip = max(1, len(freqs) // 20)
+
+        ax.quiver(
+            T[::f_skip, ::t_skip],
+            F[::f_skip, ::t_skip],
+            np.cos(phase[::f_skip, ::t_skip]),
+            np.sin(phase[::f_skip, ::t_skip]),
+            units="width",
+            pivot="mid",
+            width=0.005,
+            headwidth=3,
+            color="black",
+            alpha=0.6,
+        )
+
+        name1 = self.get_joint_name(joint_idx_1)
+        name2 = self.get_joint_name(joint_idx_2)
+        ax.set_title(
+            f"Cross Wavelet: {name1} vs {name2}", fontsize=14, fontweight="bold"
+        )
+        ax.set_ylabel("Frequency (Hz)", fontsize=12, fontweight="bold")
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_yscale("log")
+        ax.set_yticks([1, 2, 5, 10, 20, 50])
+        from matplotlib.ticker import ScalarFormatter
+
+        ax.yaxis.set_major_formatter(ScalarFormatter())
+
+        cbar = fig.colorbar(pcm, ax=ax)
+        cbar.set_label("Cross Power", rotation=270, labelpad=15)
+        fig.tight_layout()
+
+    def plot_principal_component_analysis(
+        self,
+        fig: Figure,
+        pca_result: PCAResult,
+        modes_to_plot: int = 3,
+    ) -> None:
+        """Plot PCA/Principal Movements analysis results.
+
+        Shows:
+        1. Explained Variance Ratio (Scree Plot)
+        2. Temporal Scores (Projection of movement onto PCs)
+
+        Args:
+            fig: Matplotlib figure
+            pca_result: PCAResult object from statistical_analysis
+            modes_to_plot: Number of modes to visualize scores for
+        """
+        # Create grid: Scree plot on top, Scores on bottom
+        gs = fig.add_gridspec(2, 1, height_ratios=[1, 2], hspace=0.3)
+
+        # 1. Scree Plot
+        ax1 = fig.add_subplot(gs[0])
+
+        # Cumulative variance
+        cum_var = np.cumsum(pca_result.explained_variance_ratio) * 100
+        n_comps = len(cum_var)
+        x_indices = np.arange(1, n_comps + 1)
+
+        # Bar chart for individual variance
+        ax1.bar(
+            x_indices,
+            pca_result.explained_variance_ratio * 100,
+            alpha=0.6,
+            label="Individual",
+        )
+        # Line for cumulative
+        ax1.plot(x_indices, cum_var, "r-o", linewidth=2, label="Cumulative")
+
+        ax1.set_ylabel("Explained Variance (%)", fontweight="bold")
+        ax1.set_xlabel("Principal Component", fontweight="bold")
+        ax1.set_title("PCA Scree Plot", fontsize=12, fontweight="bold")
+        ax1.set_xticks(x_indices)
+        ax1.legend()
+        ax1.grid(True, alpha=0.3)
+        ax1.set_ylim(0, 105)
+
+        # 2. Temporal Scores
+        ax2 = fig.add_subplot(gs[1])
+
+        # Get time array
+        times, _ = self._get_cached_series("joint_positions")
+        # Ensure length matches scores
+        scores = pca_result.projected_data
+        if len(times) != scores.shape[0]:
+            # Try to match
+            if len(times) > scores.shape[0]:
+                times = times[: scores.shape[0]]
+            else:
+                scores = scores[: len(times)]
+
+        # Plot top modes
+        colors = [
+            self.colors["primary"],
+            self.colors["secondary"],
+            self.colors["tertiary"],
+            self.colors["quaternary"],
+            self.colors["quinary"],
+        ]
+
+        for i in range(min(modes_to_plot, scores.shape[1])):
+            color = colors[i % len(colors)]
+            ax2.plot(times, scores[:, i], label=f"PC {i+1}", linewidth=2, color=color)
+
+        ax2.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax2.set_ylabel("Score (Projection)", fontsize=12, fontweight="bold")
+        ax2.set_title("Principal Movement Scores", fontsize=12, fontweight="bold")
+        ax2.legend()
+        ax2.grid(True, alpha=0.3)
+
+        fig.suptitle(
+            "Principal Component Analysis (Principal Movements)",
+            fontsize=14,
+            fontweight="bold",
+        )
