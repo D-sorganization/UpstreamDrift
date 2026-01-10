@@ -337,9 +337,10 @@ class OpenSimGolfGUI(QMainWindow):
         text_widget.setReadOnly(True)
 
         # Try to load the markdown file
-        help_path = Path(__file__).parent.parent.parent.parent.parent / (
-            "launchers/assets/opensim_getting_started.md"
-        )
+        # Path from engines/physics_engines/opensim/python/opensim_gui.py to project root:
+        #   python/ -> opensim/ -> physics_engines/ -> engines/ -> <project root>
+        project_root = Path(__file__).resolve().parents[4]
+        help_path = project_root / "launchers" / "assets" / "opensim_getting_started.md"
 
         if help_path.exists():
             try:

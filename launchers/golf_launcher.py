@@ -2547,19 +2547,23 @@ if __name__ == "__main__":
     splash.show_message("Loading application resources...", 10)
     QApplication.processEvents()
 
-    # Phase 2: Load model registry (actual work)
+    # Phase 2: Load model registry (actual work during splash for init + cache warming)
     splash.show_message("Loading model registry...", 25)
     QApplication.processEvents()
     try:
+        # Initialize registry during splash to warm caches; instance discarded (GolfLauncher
+        # creates its own instance later). This ensures model scanning happens during splash.
         _model_registry = ModelRegistry()
         logger.info(f"Loaded {len(_model_registry.get_all_models())} models")
     except Exception as e:
         logger.warning(f"Model registry load warning: {e}")
 
-    # Phase 3: Initialize engine manager (actual work - can be slow)
+    # Phase 3: Initialize engine manager (actual work - probing can be slow)
     splash.show_message("Probing physics engines...", 45)
     QApplication.processEvents()
     try:
+        # Probe engines during splash to warm import caches; instance discarded.
+        # This front-loads the latency of importing MuJoCo/Drake/Pinocchio/OpenSim.
         _engine_manager = EngineManager()
         available_engines = _engine_manager.get_available_engines()
         logger.info(
