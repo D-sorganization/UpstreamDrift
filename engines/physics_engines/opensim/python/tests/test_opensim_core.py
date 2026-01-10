@@ -7,7 +7,6 @@ import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
-import numpy as np
 
 from engines.physics_engines.opensim.python.opensim_golf.core import (
     GolfSwingModel,
@@ -134,7 +133,7 @@ class TestGolfSwingModel:
 
         assert result is not None
         assert len(result.time) > 0
-        assert result.states.shape[1] == 4 # 2Q + 2U
+        assert result.states.shape[1] == 4  # 2Q + 2U
         assert result.marker_positions["TestMarker"].shape[1] == 3
 
     def test_use_opensim_always_true(self, mock_opensim_env, temp_model_file):
