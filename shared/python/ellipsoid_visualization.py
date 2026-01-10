@@ -374,6 +374,120 @@ def export_ellipsoid_obj(
     LOGGER.info(f"Exported ellipsoid mesh to {output_path}")
 
 
+def export_ellipsoid_stl(
+    ellipsoid: EllipsoidData,
+    output_path: Path | str,
+    binary: bool = True,
+) -> None:
+    """Export ellipsoid as STL mesh file.
+
+    Args:
+        ellipsoid: EllipsoidData to export
+        output_path: Path to output STL file
+        binary: If True, write binary STL (smaller, faster); else ASCII
+
+    Example:
+        >>> ellipsoid = compute_velocity_ellipsoid(engine, "clubhead")
+        >>> export_ellipsoid_stl(ellipsoid, "clubhead_velocity.stl")
+    """
+    vertices, faces = generate_ellipsoid_mesh(ellipsoid)
+
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if binary:
+        _write_stl_binary(vertices, faces, output_path, ellipsoid)
+    else:
+        _write_stl_ascii(vertices, faces, output_path, ellipsoid)
+
+    LOGGER.info(f"Exported ellipsoid STL to {output_path}")
+
+
+def _write_stl_binary(
+    vertices: np.ndarray,
+    faces: np.ndarray,
+    output_path: Path,
+    ellipsoid: EllipsoidData,
+) -> None:
+    """Write binary STL file."""
+    import struct
+
+    n_triangles = len(faces)
+
+    with open(output_path, "wb") as f:
+        # 80-byte header
+        header = (
+            f"Ellipsoid: {ellipsoid.body_name} ({ellipsoid.ellipsoid_type})".encode(
+                "ascii"
+            )[:80].ljust(80, b"\0")
+        )
+        f.write(header)
+
+        # Number of triangles (uint32)
+        f.write(struct.pack("<I", n_triangles))
+
+        # Write each triangle
+        for face in faces:
+            v0, v1, v2 = vertices[face[0]], vertices[face[1]], vertices[face[2]]
+
+            # Compute face normal
+            edge1 = v1 - v0
+            edge2 = v2 - v0
+            normal = np.cross(edge1, edge2)
+            norm_len = np.linalg.norm(normal)
+            if norm_len > 1e-10:
+                normal = normal / norm_len
+            else:
+                normal = np.array([0.0, 0.0, 1.0])
+
+            # Normal (3 floats)
+            f.write(struct.pack("<3f", *normal))
+            # Vertex 1 (3 floats)
+            f.write(struct.pack("<3f", *v0))
+            # Vertex 2 (3 floats)
+            f.write(struct.pack("<3f", *v1))
+            # Vertex 3 (3 floats)
+            f.write(struct.pack("<3f", *v2))
+            # Attribute byte count (uint16, usually 0)
+            f.write(struct.pack("<H", 0))
+
+
+def _write_stl_ascii(
+    vertices: np.ndarray,
+    faces: np.ndarray,
+    output_path: Path,
+    ellipsoid: EllipsoidData,
+) -> None:
+    """Write ASCII STL file."""
+    with open(output_path, "w") as f:
+        f.write(f"solid {ellipsoid.body_name}_{ellipsoid.ellipsoid_type}_ellipsoid\n")
+
+        for face in faces:
+            v0, v1, v2 = vertices[face[0]], vertices[face[1]], vertices[face[2]]
+
+            # Compute face normal
+            edge1 = v1 - v0
+            edge2 = v2 - v0
+            normal = np.cross(edge1, edge2)
+            norm_len = np.linalg.norm(normal)
+            if norm_len > 1e-10:
+                normal = normal / norm_len
+            else:
+                normal = np.array([0.0, 0.0, 1.0])
+
+            f.write(f"  facet normal {normal[0]:.6e} {normal[1]:.6e} {normal[2]:.6e}\n")
+            f.write("    outer loop\n")
+            f.write(f"      vertex {v0[0]:.6e} {v0[1]:.6e} {v0[2]:.6e}\n")
+            f.write(f"      vertex {v1[0]:.6e} {v1[1]:.6e} {v1[2]:.6e}\n")
+            f.write(f"      vertex {v2[0]:.6e} {v2[1]:.6e} {v2[2]:.6e}\n")
+            f.write("    endloop\n")
+            f.write("  endfacet\n")
+
+        f.write(
+            f"endsolid {ellipsoid.body_name}_{ellipsoid.ellipsoid_type}_ellipsoid\n"
+        )
+
+
 class EllipsoidVisualizer:
     """High-level interface for ellipsoid visualization.
 
