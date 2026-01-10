@@ -2543,21 +2543,49 @@ if __name__ == "__main__":
     splash = GolfSplashScreen()
     splash.show()
 
-    # Simulate loading process with progress updates
-    splash.show_message("Loading application resources...", 20)
+    # Phase 1: Load application resources
+    splash.show_message("Loading application resources...", 10)
     QApplication.processEvents()
 
-    splash.show_message("Initializing model registry...", 40)
+    # Phase 2: Load model registry (actual work)
+    splash.show_message("Loading model registry...", 25)
     QApplication.processEvents()
+    try:
+        _model_registry = ModelRegistry()
+        logger.info(f"Loaded {len(_model_registry.get_all_models())} models")
+    except Exception as e:
+        logger.warning(f"Model registry load warning: {e}")
 
-    splash.show_message("Setting up engine manager...", 60)
+    # Phase 3: Initialize engine manager (actual work - can be slow)
+    splash.show_message("Probing physics engines...", 45)
     QApplication.processEvents()
+    try:
+        _engine_manager = EngineManager()
+        available_engines = _engine_manager.get_available_engines()
+        logger.info(
+            f"Found {len(available_engines)} available engines: {available_engines}"
+        )
+    except Exception as e:
+        logger.warning(f"Engine manager init warning: {e}")
 
-    splash.show_message("Preparing user interface...", 80)
+    # Phase 4: Check optional dependencies
+    splash.show_message("Checking AI assistant...", 65)
+    QApplication.processEvents()
+    if AI_AVAILABLE:
+        logger.info("AI Assistant module available")
+    else:
+        logger.info("AI Assistant not available (optional)")
+
+    # Phase 5: Build UI
+    splash.show_message("Building user interface...", 80)
     QApplication.processEvents()
 
     # Create main window
     window = GolfLauncher()
+
+    # Phase 6: Final setup
+    splash.show_message("Finalizing...", 95)
+    QApplication.processEvents()
 
     splash.show_message("Ready!", 100)
     QApplication.processEvents()
