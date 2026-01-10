@@ -173,6 +173,17 @@ class SwingDNAMetrics:
     power_score: float
 
 
+@dataclass
+class PCAResult:
+    """Result of Principal Component Analysis."""
+
+    components: np.ndarray  # (n_components, n_features) - Eigenvectors
+    explained_variance: np.ndarray  # (n_components,) - Variance of each PC
+    explained_variance_ratio: np.ndarray  # (n_components,) - Ratio of variance
+    projected_data: np.ndarray  # (n_samples, n_components) - Scores
+    mean: np.ndarray  # (n_features,) - Mean of original data
+
+
 class StatisticalAnalyzer:
     """Comprehensive statistical analysis for golf swing data."""
 
@@ -1955,6 +1966,159 @@ class StatisticalAnalyzer:
             return float(slope)
 
         return 0.0
+
+    def compute_principal_component_analysis(
+        self,
+        n_components: int | None = None,
+        data_type: str = "position",
+    ) -> PCAResult | None:
+        """Compute Principal Component Analysis (PCA) on joint data.
+
+        Also known as "Principal Movements" when applied to kinematic data.
+        Identifies the main modes of variation in the movement.
+
+        Args:
+            n_components: Number of components to retain (default: all)
+            data_type: 'position', 'velocity'
+
+        Returns:
+            PCAResult object or None
+        """
+        if data_type == "position":
+            data = self.joint_positions
+        else:
+            data = self.joint_velocities
+
+        if data.shape[1] == 0 or len(data) == 0:
+            return None
+
+        # Center data
+        mean = np.mean(data, axis=0)
+        centered_data = data - mean
+
+        # SVD approach is numerically stable
+        # X = U * S * Vt
+        # Cov = X.T * X / (N-1)
+        # Eigenvectors are rows of Vt (columns of V)
+        # Eigenvalues are S^2 / (N-1)
+
+        try:
+            U, S, Vt = np.linalg.svd(centered_data, full_matrices=False)
+        except np.linalg.LinAlgError:
+            return None
+
+        # Eigenvalues
+        n_samples = data.shape[0]
+        explained_variance = (S**2) / (n_samples - 1)
+        total_var = np.sum(explained_variance)
+        explained_variance_ratio = (
+            explained_variance / total_var if total_var > 0 else np.zeros_like(S)
+        )
+
+        # Components (Eigenvectors)
+        components = Vt
+
+        # Project data (Scores)
+        # Scores = X * V = U * S
+        projected_data = U * S
+
+        if n_components is not None:
+            n_components = min(n_components, len(explained_variance))
+            components = components[:n_components]
+            explained_variance = explained_variance[:n_components]
+            explained_variance_ratio = explained_variance_ratio[:n_components]
+            projected_data = projected_data[:, :n_components]
+
+        return PCAResult(
+            components=components,
+            explained_variance=explained_variance,
+            explained_variance_ratio=explained_variance_ratio,
+            projected_data=projected_data,
+            mean=mean,
+        )
+
+    def compute_principal_movements(
+        self, n_modes: int = 3
+    ) -> tuple[np.ndarray, np.ndarray] | None:
+        """Compute Principal Movements (PMs) from position data.
+
+        Wrapper around PCA specifically for position data to analyze
+        primary coordination modes.
+
+        Args:
+            n_modes: Number of PMs to return
+
+        Returns:
+            (eigenvectors, scores) or None
+        """
+        result = self.compute_principal_component_analysis(
+            n_components=n_modes, data_type="position"
+        )
+        if result:
+            return result.components, result.projected_data
+        return None
+
+    def compute_permutation_entropy(
+        self,
+        data: np.ndarray,
+        order: int = 3,
+        delay: int = 1,
+    ) -> float:
+        """Compute Permutation Entropy.
+
+        Measures complexity of a time series based on ordinal patterns.
+
+        Args:
+            data: 1D time series
+            order: Order of permutation (embedding dimension)
+            delay: Time delay
+
+        Returns:
+            Entropy value (bits)
+        """
+        N = len(data)
+        M = N - (order - 1) * delay
+        if M < 1:
+            return 0.0
+
+        # Create embedding matrix
+        # Shape (M, order)
+        # For efficiency with simple loop or stride
+        # patterns = []
+        # for i in range(M):
+        #     pattern = data[i : i + order * delay : delay]
+        #     patterns.append(tuple(np.argsort(pattern)))
+
+        # Vectorized approach
+        # Create matrix of shape (M, order)
+        matrix = np.zeros((M, order))
+        for i in range(order):
+            matrix[:, i] = data[i * delay : i * delay + M]
+
+        # Get argsort (ranks)
+        ranks = np.argsort(matrix, axis=1)
+
+        # Convert ranks to tuple/bytes to count unique
+        # We can map each row to a unique integer or string
+        # Since order is small (3-5), we can treat rows as base-order numbers?
+        # Actually easier to use unique with axis=0
+        _, counts = np.unique(ranks, axis=0, return_counts=True)
+
+        # Probabilities
+        probs = counts / M
+        probs = probs[probs > 0]
+
+        # Shannon Entropy
+        pe = -np.sum(probs * np.log2(probs))
+
+        # Normalize by log2(factorial(order))?
+        # Standard PE is usually normalized.
+        # factorials = [1, 1, 2, 6, 24, 120, 720...]
+        # max_entropy = np.log2(np.math.factorial(order))
+        # return pe / max_entropy
+
+        # We return raw bits
+        return float(pe)
 
     def export_statistics_csv(
         self,
