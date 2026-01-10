@@ -249,7 +249,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return np.array([])
 
         try:
-            import mujoco
 
             # Save current activations/controls
             ctrl_saved = self.sim.data.ctrl.copy()
@@ -258,14 +257,15 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             self.sim.data.ctrl[:] = 0.0
 
             # Compute forward dynamics
-            mujoco.mj_forward(self.sim.model, self.sim.data)
+            # Use self.sim.forward() for compatibility with mujoco-py MjSim
+            self.sim.forward()
 
             # Extract drift acceleration (explicit type for mypy)
             a_drift: np.ndarray = np.array(self.sim.data.qacc)
 
             # Restore original controls
             self.sim.data.ctrl[:] = ctrl_saved
-            mujoco.mj_forward(self.sim.model, self.sim.data)
+            self.sim.forward()
 
             return a_drift
 
@@ -428,18 +428,83 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         )
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
-        """Zero-Torque Counterfactual (ZTCF) - Guideline G1."""
-        raise NotImplementedError(
-            f"{self.__class__.__name__} does not yet implement ZTCF. "
-            f"See pendulum_physics_engine.py for reference."
-        )
+        """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
+
+        Compute acceleration with applied torques set to zero, preserving current state.
+        This isolates drift (gravity + Coriolis + constraints) from control effects.
+
+        Args:
+            q: Joint positions (n_v,)
+            v: Joint velocities (n_v,)
+
+        Returns:
+            q̈_ZTCF: Acceleration under zero applied torque (n_v,)
+        """
+        if not self.sim:
+            return np.array([])
+
+        try:
+            # Save current state
+            q_saved, v_saved = self.get_state()
+            ctrl_saved = self.sim.data.ctrl.copy()
+
+            # Set desired state
+            self.set_state(q, v)
+
+            # Set zero control
+            self.sim.data.ctrl[:] = 0.0
+
+            # Compute forward dynamics
+            # Use self.sim.forward() to support MjSim
+            self.sim.forward()
+            a_ztcf = np.array(self.sim.data.qacc)
+
+            # Restore state and control
+            self.sim.data.ctrl[:] = ctrl_saved
+            self.set_state(q_saved, v_saved)
+
+            return a_ztcf
+
+        except Exception as e:
+            LOGGER.error(f"Failed to compute ZTCF: {e}")
+            return np.array([])
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2."""
-        raise NotImplementedError(
-            f"{self.__class__.__name__} does not yet implement ZVCF. "
-            f"See pendulum_physics_engine.py for reference."
-        )
+        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
+
+        Compute acceleration with joint velocities set to zero, preserving configuration
+        and controls. This isolates configuration-dependent effects (gravity, constraints).
+
+        Args:
+            q: Joint positions (n_v,)
+
+        Returns:
+            q̈_ZVCF: Acceleration with v=0 (n_v,)
+        """
+        if not self.sim:
+            return np.array([])
+
+        try:
+            # Save current state
+            q_saved, v_saved = self.get_state()
+
+            # Set state with zero velocity
+            n_v = len(v_saved)
+            self.set_state(q, np.zeros(n_v))
+
+            # Controls are preserved in data.ctrl automatically unless we change them
+            # Compute forward dynamics
+            self.sim.forward()
+            a_zvcf = np.array(self.sim.data.qacc)
+
+            # Restore state
+            self.set_state(q_saved, v_saved)
+
+            return a_zvcf
+
+        except Exception as e:
+            LOGGER.error(f"Failed to compute ZVCF: {e}")
+            return np.array([])
 
     def get_acceleration(self) -> np.ndarray:
         """Get current acceleration vector.
