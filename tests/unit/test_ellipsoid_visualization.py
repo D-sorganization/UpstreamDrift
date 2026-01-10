@@ -20,6 +20,7 @@ from shared.python.ellipsoid_visualization import (
     ellipsoid_to_json,
     export_ellipsoid_obj,
     export_ellipsoid_sequence_json,
+    export_ellipsoid_stl,
     generate_ellipsoid_mesh,
 )
 
@@ -213,6 +214,45 @@ class TestEllipsoidExport:
         content = output_file.read_text()
         assert "v " in content  # Has vertices
         assert "f " in content  # Has faces
+
+    def test_stl_binary_export(self, tmp_path: Path) -> None:
+        """Ellipsoid should export to valid binary STL file."""
+        ellipsoid = EllipsoidData(
+            center=np.array([0.0, 0.0, 0.0]),
+            radii=np.array([1.0, 2.0, 0.5]),
+            axes=np.eye(3),
+            body_name="test",
+            ellipsoid_type="velocity",
+        )
+
+        output_file = tmp_path / "test_ellipsoid.stl"
+        export_ellipsoid_stl(ellipsoid, output_file, binary=True)
+
+        assert output_file.exists()
+        # Binary STL has 80-byte header + 4 bytes for triangle count
+        assert output_file.stat().st_size >= 84
+
+    def test_stl_ascii_export(self, tmp_path: Path) -> None:
+        """Ellipsoid should export to valid ASCII STL file."""
+        ellipsoid = EllipsoidData(
+            center=np.array([0.0, 0.0, 0.0]),
+            radii=np.array([1.0, 2.0, 0.5]),
+            axes=np.eye(3),
+            body_name="test",
+            ellipsoid_type="force",
+        )
+
+        output_file = tmp_path / "test_ellipsoid_ascii.stl"
+        export_ellipsoid_stl(ellipsoid, output_file, binary=False)
+
+        assert output_file.exists()
+
+        # Verify ASCII STL structure
+        content = output_file.read_text()
+        assert "solid " in content
+        assert "facet normal" in content
+        assert "vertex" in content
+        assert "endsolid" in content
 
 
 class TestEllipsoidVisualizer:
