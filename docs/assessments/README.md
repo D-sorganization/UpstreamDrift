@@ -143,6 +143,27 @@ These prompts are used quarterly to ensure consistent adversarial review standar
 
 ---
 
+## Implementation and Integration Summaries
+
+Recent implementation summaries documenting completed features and integrations:
+
+- [IMPLEMENTATION_COMPLETE_SUMMARY.md](IMPLEMENTATION_COMPLETE_SUMMARY.md) - Overall implementation status
+- [MYOSUITE_COMPLETE_SUMMARY.md](MYOSUITE_COMPLETE_SUMMARY.md) - MyoSuite integration summary
+- [OPENSIM_COMPLETE_SUMMARY.md](OPENSIM_COMPLETE_SUMMARY.md) - OpenSim integration summary
+- [C3D_VIEWER_AND_PINOCCHIO_INTEGRATION_SUMMARY.md](C3D_VIEWER_AND_PINOCCHIO_INTEGRATION_SUMMARY.md) - C3D viewer and Pinocchio integration
+- [LAUNCHER_FIXES_SUMMARY.md](LAUNCHER_FIXES_SUMMARY.md) - Launcher improvements and fixes
+- [PERFORMANCE_OPTIMIZATIONS_COMPLETE.md](PERFORMANCE_OPTIMIZATIONS_COMPLETE.md) - Performance optimization results
+
+## Review Reports
+
+Critical review reports and audits:
+
+- [ADVERSARIAL_REVIEW_REPORT.md](ADVERSARIAL_REVIEW_REPORT.md) - Adversarial code review findings
+- [ULTRA_CRITICAL_PYTHON_PROJECT_REVIEW.md](ULTRA_CRITICAL_PYTHON_PROJECT_REVIEW.md) - Ultra-critical project review
+- [COMPLIANCE_AUDIT.md](COMPLIANCE_AUDIT.md) - Compliance audit results
+- [PERFORMANCE_ANALYSIS_REPORT.md](PERFORMANCE_ANALYSIS_REPORT.md) - Performance analysis findings
+- [PR_COMPREHENSIVE_ASSESSMENTS_JAN2026.md](PR_COMPREHENSIVE_ASSESSMENTS_JAN2026.md) - Comprehensive PR assessments
+
 ## Archived Assessments
 
 Historical assessment reports have been moved to `archive/` directory:
