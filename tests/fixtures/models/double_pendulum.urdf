@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Double Pendulum URDF - Cross-Engine Validation Model
+  
+  Physics:
+    - Two revolute joints (2-DOF)
+    - Link lengths: L1 = L2 = 0.5 m
+    - Point masses: m1 = m2 = 1.0 kg at each end
+    - Gravity: 9.81 m/s² (Z-down)
+    
+  Use Cases:
+    - Counterfactual analysis (ZTCF/ZVCF)
+    - Coriolis/centrifugal coupling verification
+    - Indexed acceleration decomposition closure
+    - Energy conservation in chaotic regime
+    
+  Equations of Motion (Lagrangian formulation):
+    M(q) = [m1*L1² + m2*(L1² + L2² + 2*L1*L2*cos(q2))   m2*(L2² + L1*L2*cos(q2))]
+           [m2*(L2² + L1*L2*cos(q2))                    m2*L2²                  ]
+    
+    C(q,q̇) contains Coriolis/centrifugal terms with sin(q2) dependence
+    
+    g(q) = [(m1+m2)*g*L1*sin(q1) + m2*g*L2*sin(q1+q2)]
+           [m2*g*L2*sin(q1+q2)                        ]
+           
+  Cross-Engine Validation:
+    - Set identical (q, q̇) in all engines
+    - Compute q̈ via forward dynamics
+    - Verify: |q̈_engine1 - q̈_engine2| < tolerance
+    
+  Sources:
+    - Underactuated Robotics, Tedrake, Ch. 2
+    - Lagrangian Dynamics, Marsden & Ratiu
+-->
+<robot name="double_pendulum">
+  <!-- World Link (fixed base) -->
+  <link name="world"/>
+  
+  <!-- Base Link (upper pivot) -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <sphere radius="0.02"/>
+      </geometry>
+      <material name="pivot_material">
+        <color rgba="0.3 0.3 0.3 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.02"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+    </inertial>
+  </link>
+  
+  <!-- Fixed joint to world -->
+  <joint name="world_to_base" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 2" rpy="0 0 0"/>
+  </joint>
+  
+  <!-- Upper Pendulum Link -->
+  <link name="upper_link">
+    <visual>
+      <origin xyz="0 0 -0.25" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.01" length="0.5"/>
+      </geometry>
+      <material name="upper_material">
+        <color rgba="0.8 0.2 0.2 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.25" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.01" length="0.5"/>
+      </geometry>
+    </collision>
+    <!-- Point mass at end of upper link -->
+    <inertial>
+      <mass value="1.0"/>
+      <origin xyz="0 0 -0.5" rpy="0 0 0"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+  
+  <!-- Upper Joint -->
+  <joint name="upper_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="upper_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-3.14159" upper="3.14159" effort="100" velocity="10"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+  
+  <!-- Lower Pendulum Link -->
+  <link name="lower_link">
+    <visual>
+      <origin xyz="0 0 -0.25" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.01" length="0.5"/>
+      </geometry>
+      <material name="lower_material">
+        <color rgba="0.2 0.8 0.2 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.25" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.01" length="0.5"/>
+      </geometry>
+    </collision>
+    <!-- Point mass at end of lower link -->
+    <inertial>
+      <mass value="1.0"/>
+      <origin xyz="0 0 -0.5" rpy="0 0 0"/>
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+  
+  <!-- Lower Joint -->
+  <joint name="lower_joint" type="revolute">
+    <parent link="upper_link"/>
+    <child link="lower_link"/>
+    <origin xyz="0 0 -0.5" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+    <limit lower="-3.14159" upper="3.14159" effort="100" velocity="10"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+  
+  <!-- End Effector Frame -->
+  <link name="end_effector">
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <material name="end_material">
+        <color rgba="0.2 0.2 0.8 1.0"/>
+      </material>
+    </visual>
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+    </inertial>
+  </link>
+  
+  <joint name="lower_to_end" type="fixed">
+    <parent link="lower_link"/>
+    <child link="end_effector"/>
+    <origin xyz="0 0 -0.5" rpy="0 0 0"/>
+  </joint>
+  
+</robot>

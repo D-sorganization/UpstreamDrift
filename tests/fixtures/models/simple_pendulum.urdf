@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Simple Pendulum URDF - Analytical Reference Model
+  
+  Physics:
+    - Single revolute joint (1-DOF)
+    - Rod length: 1.0 m
+    - Point mass: 1.0 kg at end
+    - Gravity: 9.81 m/s² (Z-down)
+    
+  Analytical Solution (small angle, θ << 1):
+    ω = sqrt(g/L) = sqrt(9.81/1.0) ≈ 3.132 rad/s
+    T = 2π/ω ≈ 2.006 s
+    
+  For θ(0) = 0.1 rad, θ̇(0) = 0:
+    θ(t) = 0.1 * cos(ωt)
+    θ̇(t) = -0.1 * ω * sin(ωt)
+    
+  Equation of Motion:
+    M(q) = m*L² = 1.0 kg·m²
+    g(q) = m*g*L*sin(q) = 9.81*sin(q) N·m
+    τ = M*q̈ + g(q)
+    
+  Cross-Engine Validation Use:
+    - Forward dynamics: compare θ(t) trajectories
+    - Inverse dynamics: compare τ for desired motion
+    - Jacobians: J = [0, 0, 1; L*cos(q), L*sin(q), 0] at end-effector
+    - ZTCF: q̈ = -g*sin(q)/L (drift only)
+    - ZVCF: q̈ = τ/M - g*sin(q)/L (no velocity terms for 1-DOF)
+    
+  Sources:
+    - Classical Mechanics, Goldstein, Ch. 1
+    - Robotics: Modelling, Planning and Control, Siciliano et al., Ch. 3
+-->
+<robot name="simple_pendulum">
+  <!-- World Link (fixed base) -->
+  <link name="world"/>
+  
+  <!-- Base Link (pivot point) -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <sphere radius="0.02"/>
+      </geometry>
+      <material name="pivot_material">
+        <color rgba="0.3 0.3 0.3 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <sphere radius="0.02"/>
+      </geometry>
+    </collision>
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+    </inertial>
+  </link>
+  
+  <!-- Fixed joint to world -->
+  <joint name="world_to_base" type="fixed">
+    <parent link="world"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 2" rpy="0 0 0"/>
+  </joint>
+  
+  <!-- Pendulum Rod -->
+  <link name="pendulum_link">
+    <visual>
+      <origin xyz="0 0 -0.5" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.01" length="1.0"/>
+      </geometry>
+      <material name="rod_material">
+        <color rgba="0.8 0.2 0.2 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <origin xyz="0 0 -0.5" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.01" length="1.0"/>
+      </geometry>
+    </collision>
+    <!-- Inertia of point mass at end of massless rod -->
+    <!-- I = m*L² = 1.0 * 1.0² = 1.0 kg·m² about pivot -->
+    <!-- For URDF, inertia is about COM, which is at -0.5m (center of rod) -->
+    <!-- Treating as point mass at end: COM at z=-1.0, I_com = 0, I_pivot = m*L² -->
+    <!-- Using parallel axis: lumped at end for simplicity -->
+    <inertial>
+      <mass value="1.0"/>
+      <!-- COM at end of rod (point mass approximation) -->
+      <origin xyz="0 0 -1.0" rpy="0 0 0"/>
+      <!-- Point mass has zero rotational inertia about its own COM -->
+      <!-- Small values for numerical stability -->
+      <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+    </inertial>
+  </link>
+  
+  <!-- Pendulum Joint (revolute about Y-axis) -->
+  <joint name="pendulum_joint" type="revolute">
+    <parent link="base_link"/>
+    <child link="pendulum_link"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+    <!-- Rotation about Y-axis (swings in X-Z plane) -->
+    <axis xyz="0 1 0"/>
+    <limit lower="-3.14159" upper="3.14159" effort="100" velocity="10"/>
+    <dynamics damping="0.0" friction="0.0"/>
+  </joint>
+  
+  <!-- End Effector Frame (for Jacobian computation) -->
+  <link name="end_effector">
+    <visual>
+      <geometry>
+        <sphere radius="0.03"/>
+      </geometry>
+      <material name="end_material">
+        <color rgba="0.2 0.2 0.8 1.0"/>
+      </material>
+    </visual>
+    <inertial>
+      <mass value="0.001"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="1e-9" ixy="0" ixz="0" iyy="1e-9" iyz="0" izz="1e-9"/>
+    </inertial>
+  </link>
+  
+  <joint name="pendulum_to_end" type="fixed">
+    <parent link="pendulum_link"/>
+    <child link="end_effector"/>
+    <origin xyz="0 0 -1.0" rpy="0 0 0"/>
+  </joint>
+  
+</robot>
