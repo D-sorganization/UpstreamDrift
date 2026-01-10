@@ -1,21 +1,34 @@
 # Pull Request Documentation
 
-This directory contains documentation related to pull requests and development phases.
+This directory contains documentation for major pull requests submitted to the Golf Modeling Suite.
 
-## Pull Request Descriptions
+## Overview
 
-- [PR_DESCRIPTION.md](PR_DESCRIPTION.md) - Main PR description template
-- [PR_DESKTOP_SHORTCUTS.md](PR_DESKTOP_SHORTCUTS.md) - Desktop shortcuts implementation PR
+PR documentation provides detailed context, implementation notes, and testing information for significant changes to the codebase. This helps maintain project history and facilitates code reviews.
 
-## Phase Documentation
+## Pull Request Phases
 
-- [PR_PHASE1_CRITICAL_FIXES.md](PR_PHASE1_CRITICAL_FIXES.md) - Phase 1: Critical fixes and stabilization
-- [PR_PHASE_1_STABILIZATION.md](PR_PHASE_1_STABILIZATION.md) - Phase 1 stabilization summary
-- [PR_PHASE_2_QUALITY_AND_HYGIENE.md](PR_PHASE_2_QUALITY_AND_HYGIENE.md) - Phase 2: Quality and code hygiene
-- [PR_PHASE_3_COVERAGE.md](PR_PHASE_3_COVERAGE.md) - Phase 3: Test coverage improvements
+The project has gone through several major development phases, each with dedicated PR documentation:
+
+### Phase 1: Stabilization and Critical Fixes
+- [PR_PHASE_1_STABILIZATION.md](PR_PHASE_1_STABILIZATION.md) - Initial stabilization efforts
+- [PR_PHASE1_CRITICAL_FIXES.md](PR_PHASE1_CRITICAL_FIXES.md) - Critical bug fixes and stability improvements
+
+### Phase 2: Quality and Code Hygiene
+- [PR_PHASE_2_QUALITY_AND_HYGIENE.md](PR_PHASE_2_QUALITY_AND_HYGIENE.md) - Code quality improvements, linting, type checking
+
+### Phase 3: Test Coverage
+- [PR_PHASE_3_COVERAGE.md](PR_PHASE_3_COVERAGE.md) - Expanded test coverage and test infrastructure
+
+## Special PRs
+
+### Feature Additions
+- [PR_DESKTOP_SHORTCUTS.md](PR_DESKTOP_SHORTCUTS.md) - Desktop shortcuts for easy launching
+- [PR_DESCRIPTION.md](PR_DESCRIPTION.md) - General PR template and guidelines
 
 ## Related Documentation
 
-- [../AGENTS.md](../AGENTS.md) - AI agent templates and guidelines
-- [../../plans/](../../plans/) - Implementation plans
-- [../../assessments/](../../assessments/) - Assessment reports
+- [Development Guide](../README.md) - General development workflow
+- [Contributing Guide](../contributing.md) - How to contribute code
+- [Testing Guide](../../testing-guide.md) - Testing standards and practices
+- [Historical Records](../../historical/README.md) - Phase summaries and session notes
