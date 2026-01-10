@@ -70,7 +70,10 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.combo.addItems(list(self.metric_options.keys()))
         self.combo.setToolTip("Select data to plot")
         self.combo.currentTextChanged.connect(self.set_plot_metric)
-        controls_layout.addWidget(QtWidgets.QLabel("Metric:"))
+
+        lbl_metric = QtWidgets.QLabel("Metric:")
+        lbl_metric.setBuddy(self.combo)
+        controls_layout.addWidget(lbl_metric)
         controls_layout.addWidget(self.combo)
 
         # Selector for Induced Accel Source (Hidden by default)
@@ -226,6 +229,7 @@ class ControlPanel(QtWidgets.QGroupBox):
     stop_requested = QtCore.pyqtSignal()
     pause_requested = QtCore.pyqtSignal()
     reset_requested = QtCore.pyqtSignal()
+    toggle_playback_requested = QtCore.pyqtSignal()
 
     def __init__(self) -> None:
         super().__init__("Simulation Controls")
@@ -260,9 +264,9 @@ class ControlPanel(QtWidgets.QGroupBox):
         self.btn_stop.setIcon(
             style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaStop)
         )
-        self.btn_stop.setToolTip("Stop simulation (Esc)")
-        self.btn_stop.setShortcut(QtGui.QKeySequence("Esc"))
+        self.btn_stop.setToolTip("Stop simulation (S)")
         self.btn_stop.setStatusTip("Stop the simulation and reset time")
+        self.btn_stop.setShortcut("S")
         self.btn_stop.clicked.connect(self.stop_requested.emit)
         layout.addWidget(self.btn_stop)
 
@@ -270,8 +274,14 @@ class ControlPanel(QtWidgets.QGroupBox):
         self.btn_reset.setIcon(
             style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_BrowserReload)
         )
-        self.btn_reset.setToolTip("Reset simulation (Ctrl+Shift+R)")
-        self.btn_reset.setShortcut(QtGui.QKeySequence("Ctrl+Shift+R"))
+        self.btn_reset.setToolTip("Reset simulation (R)")
         self.btn_reset.setStatusTip("Reset the simulation to initial state")
+        self.btn_reset.setShortcut("R")
         self.btn_reset.clicked.connect(self.reset_requested.emit)
         layout.addWidget(self.btn_reset)
+
+        # Space shortcut for toggle playback (Start/Pause)
+        self.shortcut_space = QtGui.QShortcut(
+            QtGui.QKeySequence(QtCore.Qt.Key.Key_Space), self
+        )
+        self.shortcut_space.activated.connect(self.toggle_playback_requested.emit)
