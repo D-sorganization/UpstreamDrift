@@ -121,6 +121,18 @@ jobs:
           pip install pytest pytest-cov pytest-mock pytest-qt
           # Run tests using pyproject.toml configuration
           xvfb-run pytest -v
+
+      # Cross-Engine Validator Unit Tests (C-001 Remediation)
+      # These run on every PR to catch framework issues immediately
+      - name: Cross-Engine Validation (Unit Tests)
+        run: |
+          echo "## Cross-Engine Validation (Unit Tests)" >> $GITHUB_STEP_SUMMARY
+          xvfb-run pytest tests/integration/test_cross_engine_validation.py::TestCrossEngineValidator -v --tb=short 2>&1 | tee cross-engine-results.txt
+
+          # Report to summary
+          passed=$(grep -c "PASSED" cross-engine-results.txt || echo "0")
+          failed=$(grep -c "FAILED" cross-engine-results.txt || echo "0")
+          echo "✅ Passed: $passed | ❌ Failed: $failed" >> $GITHUB_STEP_SUMMARY
       - uses: codecov/codecov-action@v4
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
