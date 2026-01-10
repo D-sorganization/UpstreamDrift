@@ -170,8 +170,7 @@ class GolfSwingModel:
         return self._run_opensim_simulation()
 
     def _run_opensim_simulation(self) -> SimulationResult:
-        """Run simulation using OpenSim.
-        """
+        """Run simulation using OpenSim."""
 
         # Initialize storage for results
         num_steps = int(self.duration / self.dt)
@@ -182,10 +181,10 @@ class GolfSwingModel:
         n_muscles = self._opensim_model.getMuscles().getSize()
         n_controls = self._opensim_model.getNumControls()
 
-        states_arr = np.zeros((num_steps, n_q + n_u)) # Storing Q and U
+        states_arr = np.zeros((num_steps, n_q + n_u))  # Storing Q and U
         muscle_forces_arr = np.zeros((num_steps, n_muscles))
         control_signals_arr = np.zeros((num_steps, n_controls))
-        joint_torques_arr = np.zeros((num_steps, n_u)) # Approx
+        joint_torques_arr = np.zeros((num_steps, n_u))  # Approx
 
         marker_positions = {}
         marker_set = self._opensim_model.getMarkerSet()
@@ -199,9 +198,9 @@ class GolfSwingModel:
         self._opensim_model.equilibrateMuscles(self._state)
 
         if hasattr(self._manager, "initialize"):
-             self._manager.initialize(self._state)
+            self._manager.initialize(self._state)
         else:
-             self._manager.setSessionTime(0.0)
+            self._manager.setSessionTime(0.0)
 
         # Integration loop
         current_time = 0.0
@@ -227,7 +226,9 @@ class GolfSwingModel:
             for j in range(n_markers):
                 marker = marker_set.get(j)
                 pos = marker.getLocationInGround(self._state)
-                marker_positions[marker.getName()][i] = np.array([pos.get(0), pos.get(1), pos.get(2)])
+                marker_positions[marker.getName()][i] = np.array(
+                    [pos.get(0), pos.get(1), pos.get(2)]
+                )
 
             # Step simulation
             self._manager.setInitialTime(current_time)
@@ -245,8 +246,8 @@ class GolfSwingModel:
         return SimulationResult(
             time=time_arr,
             states=states_arr,
-            muscle_forces=muscle_forces_arr, # Leaving as zeros for now as force analysis is complex
+            muscle_forces=muscle_forces_arr,  # Leaving as zeros for now as force analysis is complex
             control_signals=control_signals_arr,
             joint_torques=joint_torques_arr,
-            marker_positions=marker_positions
+            marker_positions=marker_positions,
         )

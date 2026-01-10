@@ -14,7 +14,7 @@ def main() -> None:
     """Main entry point."""
     launch_dashboard(
         engine_class=MuJoCoPhysicsEngine,
-        title="MuJoCo Golf Analysis Dashboard (Unified)"
+        title="MuJoCo Golf Analysis Dashboard (Unified)",
     )
 
 

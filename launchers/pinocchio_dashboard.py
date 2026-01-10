@@ -12,8 +12,7 @@ from shared.python.dashboard.launcher import launch_dashboard
 def main() -> None:
     """Main entry point."""
     launch_dashboard(
-        engine_class=PinocchioPhysicsEngine,
-        title="Pinocchio Golf Analysis Dashboard"
+        engine_class=PinocchioPhysicsEngine, title="Pinocchio Golf Analysis Dashboard"
     )
 
 

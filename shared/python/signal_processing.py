@@ -139,7 +139,7 @@ def _morlet2_impl(M: int, s: float, w: float = 5.0) -> np.ndarray:
     """
     x = np.arange(0, M) - (M - 1.0) / 2
     x = x / s
-    output = np.exp(1j * w * x) * np.exp(-0.5 * x**2) * np.pi**(-0.25)
+    output: np.ndarray = np.exp(1j * w * x) * np.exp(-0.5 * x**2) * np.pi ** (-0.25)
     return output
 
 

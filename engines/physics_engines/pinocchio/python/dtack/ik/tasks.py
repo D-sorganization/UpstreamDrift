@@ -10,12 +10,14 @@ import pinocchio as pin
 # Pink is optional but we import it for type hinting if available
 try:
     import pink.tasks
+
     PINK_AVAILABLE = True
 except ImportError:
     PINK_AVAILABLE = False
     # Mock for type hints if not available
     if typing.TYPE_CHECKING:
         from unittest.mock import MagicMock
+
         pink = MagicMock()
         pink.tasks = MagicMock()
 
@@ -98,9 +100,9 @@ def create_joint_coupling_task(
         raise ValueError("joint_names and ratios must have same length")
 
     # Construct A matrix (1 x nq)
-    # Note: Pink/Pinocchio config vector size might differ from nq if using Lie algebra
-    # But usually LinearHolonomicTask operates on tangent space (nv) or config space (nq)?
-    # Pink documentation says: A * q = b.
+    # Note: Pink/Pinocchio config vector size might differ from nq
+    # if using Lie algebra. But usually LinearHolonomicTask operates
+    # on tangent space (nv) or config space (nq)? Pink docs: A * q = b.
 
     nv = model.nv
     A = np.zeros((1, nv))

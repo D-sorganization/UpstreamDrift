@@ -203,7 +203,9 @@ class TestUpdate:
         dt = 0.100  # Large time step that might go negative
 
         a_new = dynamics.update(u, a, dt)
-        assert a_new >= dynamics.min_activation, "Activation should be clamped to min_activation"
+        assert (
+            a_new >= dynamics.min_activation
+        ), "Activation should be clamped to min_activation"
 
     def test_single_step_increases_activation(self, dynamics):
         """Test that a single step increases activation when u > a."""
@@ -370,12 +372,12 @@ class TestPhysiologicalRealism:
         """
         dynamics = ActivationDynamics(tau_act=0.010, tau_deact=0.040)
 
-        assert dynamics.tau_deact > dynamics.tau_act, (
-            "Deactivation should be slower than activation (physiological realism)"
-        )
-        assert dynamics.tau_deact / dynamics.tau_act == 4.0, (
-            "Typical ratio is 4:1 (deactivation:activation)"
-        )
+        assert (
+            dynamics.tau_deact > dynamics.tau_act
+        ), "Deactivation should be slower than activation (physiological realism)"
+        assert (
+            dynamics.tau_deact / dynamics.tau_act == 4.0
+        ), "Typical ratio is 4:1 (deactivation:activation)"
 
     def test_minimum_activation_prevents_division_by_zero(self):
         """Test that min_activation prevents numerical issues."""
@@ -389,11 +391,14 @@ class TestPhysiologicalRealism:
         dadt = dynamics.compute_derivative(u, a)
         assert np.isfinite(dadt), "Derivative should be finite at minimum activation"
 
-    @pytest.mark.parametrize("tau_act,tau_deact", [
-        (0.010, 0.040),  # Typical
-        (0.015, 0.050),  # Slower muscle
-        (0.008, 0.030),  # Faster muscle
-    ])
+    @pytest.mark.parametrize(
+        "tau_act,tau_deact",
+        [
+            (0.010, 0.040),  # Typical
+            (0.015, 0.050),  # Slower muscle
+            (0.008, 0.030),  # Faster muscle
+        ],
+    )
     def test_different_muscle_types(self, tau_act, tau_deact):
         """Test that model works with different muscle fiber types.
 

@@ -101,7 +101,9 @@ class TestIndexedAccelerationDataclass:
         total = acc.total
 
         # Should include centrifugal in sum
-        expected = gravity + coriolis + applied_torque + constraint + external + centrifugal
+        expected = (
+            gravity + coriolis + applied_torque + constraint + external + centrifugal
+        )
         np.testing.assert_array_almost_equal(total, expected)
 
     def test_total_with_zero_components(self):

@@ -146,10 +146,7 @@ class TestMonitorInitialize:
     def test_initialize_sets_initial_energy(self):
         """Test that initialize() sets E_initial."""
         engine = MockPhysicsEngine()
-        engine.set_state(
-            q=np.array([1.0, 2.0]),
-            v=np.array([0.5, 0.5])
-        )
+        engine.set_state(q=np.array([1.0, 2.0]), v=np.array([0.5, 0.5]))
         engine.set_mass_matrix(np.eye(2))
         engine.set_gravity_forces(np.array([0.0, -9.81]))
 
@@ -181,10 +178,7 @@ class TestMonitorInitialize:
         # Set up simple state: KE = 0.5 * m * v^2
         m = 2.0
         v_val = 3.0
-        engine.set_state(
-            q=np.array([0.0]),
-            v=np.array([v_val])
-        )
+        engine.set_state(q=np.array([0.0]), v=np.array([v_val]))
         engine.set_mass_matrix(np.array([[m]]))
         engine.set_gravity_forces(np.array([0.0]))
 
@@ -390,7 +384,10 @@ class TestCheckAndWarn:
 
         # Should warn because drift > 1%
         assert drift_pct > 1.0
-        assert "Energy conservation violated" in caplog.text or "conservation" in caplog.text.lower()
+        assert (
+            "Energy conservation violated" in caplog.text
+            or "conservation" in caplog.text.lower()
+        )
 
     def test_critical_error_at_5_percent_drift(self):
         """Test that IntegrationFailureError is raised at 5% drift."""
@@ -434,8 +431,11 @@ class TestCheckAndWarn:
         # Should not warn
         assert drift_pct < 1.0
         # Check no warning in logs (might have other logs, so check specifically)
-        energy_warnings = [record for record in caplog.records
-                          if "energy conservation violated" in record.message.lower()]
+        energy_warnings = [
+            record
+            for record in caplog.records
+            if "energy conservation violated" in record.message.lower()
+        ]
         assert len(energy_warnings) == 0
 
     def test_negative_drift_triggers_warning(self, caplog):
@@ -457,7 +457,10 @@ class TestCheckAndWarn:
             drift_pct = monitor.check_and_warn()
 
         assert drift_pct < -1.0
-        assert "Energy conservation violated" in caplog.text or "conservation" in caplog.text.lower()
+        assert (
+            "Energy conservation violated" in caplog.text
+            or "conservation" in caplog.text.lower()
+        )
 
 
 class TestEstimateMaxStableTimestep:
@@ -466,10 +469,7 @@ class TestEstimateMaxStableTimestep:
     def test_slow_motion_recommendation(self):
         """Test timestep recommendation for slow motion."""
         engine = MockPhysicsEngine()
-        engine.set_state(
-            q=np.array([0.0, 0.0]),
-            v=np.array([0.1, 0.2])  # ||v|| < 1.0
-        )
+        engine.set_state(q=np.array([0.0, 0.0]), v=np.array([0.1, 0.2]))  # ||v|| < 1.0
 
         monitor = ConservationMonitor(engine)
         dt_max = monitor.estimate_max_stable_timestep()
@@ -481,8 +481,7 @@ class TestEstimateMaxStableTimestep:
         """Test timestep recommendation for normal motion."""
         engine = MockPhysicsEngine()
         engine.set_state(
-            q=np.array([0.0, 0.0]),
-            v=np.array([3.0, 4.0])  # ||v|| = 5.0, in [1, 10)
+            q=np.array([0.0, 0.0]), v=np.array([3.0, 4.0])  # ||v|| = 5.0, in [1, 10)
         )
 
         monitor = ConservationMonitor(engine)
@@ -496,7 +495,7 @@ class TestEstimateMaxStableTimestep:
         engine = MockPhysicsEngine()
         engine.set_state(
             q=np.array([0.0, 0.0, 0.0]),
-            v=np.array([50.0, 50.0, 50.0])  # ||v|| ~ 86.6, >> 10
+            v=np.array([50.0, 50.0, 50.0]),  # ||v|| ~ 86.6, >> 10
         )
 
         monitor = ConservationMonitor(engine)
@@ -508,10 +507,7 @@ class TestEstimateMaxStableTimestep:
     def test_zero_velocity(self):
         """Test timestep recommendation with zero velocity."""
         engine = MockPhysicsEngine()
-        engine.set_state(
-            q=np.array([0.0, 0.0]),
-            v=np.array([0.0, 0.0])
-        )
+        engine.set_state(q=np.array([0.0, 0.0]), v=np.array([0.0, 0.0]))
 
         monitor = ConservationMonitor(engine)
         dt_max = monitor.estimate_max_stable_timestep()
@@ -551,7 +547,7 @@ class TestProjectToEnergyManifold:
 
         # Check that energy is restored
         q, v = engine.get_state()
-        E_restored = 0.5 * v[0]**2
+        E_restored = 0.5 * v[0] ** 2
 
         np.testing.assert_allclose(E_restored, 0.5, rtol=1e-6)
 
@@ -624,8 +620,10 @@ class TestProjectToEnergyManifold:
         v_projected_normalized = v_projected / np.linalg.norm(v_projected)
 
         np.testing.assert_allclose(
-            v_projected_normalized, v_initial_normalized, rtol=1e-6,
-            err_msg="Projection should preserve velocity direction"
+            v_projected_normalized,
+            v_initial_normalized,
+            rtol=1e-6,
+            err_msg="Projection should preserve velocity direction",
         )
 
 
