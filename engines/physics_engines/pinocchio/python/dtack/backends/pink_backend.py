@@ -87,7 +87,8 @@ class PINKBackend:
 
             # Solve
             # pink.solve_ik takes (configuration, tasks, dt, solver, ...)
-            # It returns the velocity dq. We need to integrate or pink might return new q?
+            # It returns the velocity dq. We need to integrate
+            # or pink might return new q?
             # Looking at standard pink usage:
             # velocity = pink.solve_ik(configuration, tasks, dt, solver)
             # configuration.integrate_inplace(velocity, dt)
@@ -96,9 +97,12 @@ class PINKBackend:
             velocity = pink.solve_ik(self.configuration, task_list, dt, solver=solver)
 
             # Integrate to get new q
-            q_next = pin.integrate(self.robot.model, q_init, velocity * dt)
+            q_next: npt.NDArray[np.float64] = pin.integrate(
+                self.robot.model, q_init, velocity * dt
+            )
 
-            # Update internal configuration for next step consistency if this object persists state?
+            # Update internal configuration for next step consistency
+            # if this object persists state?
             # method signature implies stateless solve based on q_init,
             # but we can update self.configuration
             self.configuration.q = q_next

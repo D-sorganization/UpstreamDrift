@@ -10,9 +10,10 @@ from __future__ import annotations
 
 import pytest
 
-
 # Mark all tests as requiring myosuite or allow skip
-pytestmark = pytest.mark.skip(reason="MyoSuite integration tests - implement when module structure is finalized")
+pytestmark = pytest.mark.skip(
+    reason="MyoSuite integration tests - implement when module structure is finalized"
+)
 
 
 class TestMyoSuiteAdapterPlaceholder:

@@ -75,7 +75,9 @@ class TestEquilibriumResidual:
         residual = solver._equilibrium_residual(l_CE, l_MT, activation, v_CE=0.0)
 
         # Residual should be very close to zero
-        assert abs(residual) < 1.0, f"Residual should be near zero, got {residual:.6f} N"
+        assert (
+            abs(residual) < 1.0
+        ), f"Residual should be near zero, got {residual:.6f} N"
 
     def test_residual_changes_sign_across_equilibrium(self, standard_muscle):
         """Test that residual changes sign across equilibrium point."""
@@ -98,9 +100,9 @@ class TestEquilibriumResidual:
 
         # Residuals should have opposite signs
         # Note: exact sign depends on force-length curves, but they should differ
-        assert residual_short * residual_long < 0, (
-            "Residuals should have opposite signs across equilibrium"
-        )
+        assert (
+            residual_short * residual_long < 0
+        ), "Residuals should have opposite signs across equilibrium"
 
     def test_residual_with_pennation(self, pennated_muscle):
         """Test residual calculation with pennated muscle."""
@@ -125,7 +127,9 @@ class TestEquilibriumResidual:
         l_CE_static = solver.solve_fiber_length(l_MT, activation, v_CE=0.0)
 
         # Compute residual with velocity
-        residual = solver._equilibrium_residual(l_CE_static, l_MT, activation, v_CE=v_CE)
+        residual = solver._equilibrium_residual(
+            l_CE_static, l_MT, activation, v_CE=v_CE
+        )
 
         # With velocity, residual won't be exactly zero
         # (force-velocity relationship changes fiber force)
@@ -187,9 +191,9 @@ class TestSolveFiberLength:
             assert np.isfinite(l_CE), f"Solution should be finite at l_MT={l_MT}"
 
         # Longer muscle-tendon -> longer fiber (generally)
-        assert solutions[0] < solutions[-1], (
-            "Longer muscle-tendon should have longer fiber"
-        )
+        assert (
+            solutions[0] < solutions[-1]
+        ), "Longer muscle-tendon should have longer fiber"
 
     def test_custom_initial_guess(self, standard_muscle):
         """Test solver with custom initial guess."""
@@ -201,14 +205,14 @@ class TestSolveFiberLength:
         l_CE_default = solver.solve_fiber_length(l_MT, activation)
 
         # Solve with custom guess
-        l_CE_custom = solver.solve_fiber_length(
-            l_MT, activation, initial_guess=0.10
-        )
+        l_CE_custom = solver.solve_fiber_length(l_MT, activation, initial_guess=0.10)
 
         # Should converge to same solution regardless of initial guess
         np.testing.assert_allclose(
-            l_CE_default, l_CE_custom, rtol=1e-4,
-            err_msg="Solution should be independent of initial guess"
+            l_CE_default,
+            l_CE_custom,
+            rtol=1e-4,
+            err_msg="Solution should be independent of initial guess",
         )
 
     def test_zero_activation_uses_passive_force(self, standard_muscle):
@@ -268,9 +272,11 @@ class TestSolveFiberLength:
         assert l_CE < l_MT, "Fiber length cannot exceed total muscle-tendon length"
 
         # Should be within reasonable range of optimal length
-        assert 0.5 * standard_muscle.params.l_opt < l_CE < 2.0 * standard_muscle.params.l_opt, (
-            f"Fiber length should be within 0.5-2.0x optimal length, got {l_CE:.4f}m"
-        )
+        assert (
+            0.5 * standard_muscle.params.l_opt
+            < l_CE
+            < 2.0 * standard_muscle.params.l_opt
+        ), f"Fiber length should be within 0.5-2.0x optimal length, got {l_CE:.4f}m"
 
 
 class TestSolveFiberVelocity:
@@ -330,8 +336,10 @@ class TestSolveFiberVelocity:
 
         # Results should be similar (finite difference approximation)
         np.testing.assert_allclose(
-            v_CE_dt1, v_CE_dt2, rtol=0.1,
-            err_msg="Velocities should be similar for different dt"
+            v_CE_dt1,
+            v_CE_dt2,
+            rtol=0.1,
+            err_msg="Velocities should be similar for different dt",
         )
 
     def test_velocity_with_different_activations(self, standard_muscle):
@@ -372,9 +380,7 @@ class TestComputeEquilibriumState:
         v_MT = 0.0
         activation = 0.5
 
-        l_CE, v_CE = compute_equilibrium_state(
-            standard_muscle, l_MT, v_MT, activation
-        )
+        l_CE, v_CE = compute_equilibrium_state(standard_muscle, l_MT, v_MT, activation)
 
         # Should return valid fiber length and zero velocity
         assert 0.05 < l_CE < 0.20, f"l_CE out of range: {l_CE:.4f}m"
@@ -386,9 +392,7 @@ class TestComputeEquilibriumState:
         v_MT = 0.1  # m/s
         activation = 0.5
 
-        l_CE, v_CE = compute_equilibrium_state(
-            standard_muscle, l_MT, v_MT, activation
-        )
+        l_CE, v_CE = compute_equilibrium_state(standard_muscle, l_MT, v_MT, activation)
 
         # Should return valid values
         assert 0.05 < l_CE < 0.20, f"l_CE out of range: {l_CE:.4f}m"
@@ -414,9 +418,7 @@ class TestComputeEquilibriumState:
         v_MT = 0.0
         activation = 0.5
 
-        result = compute_equilibrium_state(
-            standard_muscle, l_MT, v_MT, activation
-        )
+        result = compute_equilibrium_state(standard_muscle, l_MT, v_MT, activation)
 
         assert isinstance(result, tuple), "Should return a tuple"
         assert len(result) == 2, "Should return (l_CE, v_CE)"
@@ -431,9 +433,7 @@ class TestComputeEquilibriumState:
         v_MT = 0.0
         activation = 0.3
 
-        l_CE, v_CE = compute_equilibrium_state(
-            pennated_muscle, l_MT, v_MT, activation
-        )
+        l_CE, v_CE = compute_equilibrium_state(pennated_muscle, l_MT, v_MT, activation)
 
         # Should work with pennated muscle
         assert 0.05 < l_CE < 0.20, f"l_CE out of range: {l_CE:.4f}m"
@@ -460,9 +460,9 @@ class TestPhysicalRealism:
         l_tendon_long = l_MT_long - l_CE_long
 
         # Longer muscle-tendon should have longer tendon
-        assert l_tendon_long > l_tendon_short, (
-            "Longer muscle-tendon should stretch tendon more"
-        )
+        assert (
+            l_tendon_long > l_tendon_short
+        ), "Longer muscle-tendon should stretch tendon more"
 
     def test_fiber_length_decreases_with_activation(self, standard_muscle):
         """Test that fiber shortens with higher activation (for given l_MT).
@@ -505,8 +505,10 @@ class TestPhysicalRealism:
 
         # Should be balanced (within tolerance)
         np.testing.assert_allclose(
-            F_fiber, F_tendon, rtol=0.01,
-            err_msg="Fiber and tendon forces should balance at equilibrium"
+            F_fiber,
+            F_tendon,
+            rtol=0.01,
+            err_msg="Fiber and tendon forces should balance at equilibrium",
         )
 
     def test_solution_is_stable(self, standard_muscle):
@@ -524,9 +526,9 @@ class TestPhysicalRealism:
         # Change should be small and smooth
         relative_change = abs(l_CE_perturbed - l_CE_nominal) / l_CE_nominal
 
-        assert relative_change < 0.05, (
-            f"Small perturbation caused large change: {relative_change*100:.2f}%"
-        )
+        assert (
+            relative_change < 0.05
+        ), f"Small perturbation caused large change: {relative_change*100:.2f}%"
 
 
 class TestNumericalAccuracy:
@@ -543,9 +545,9 @@ class TestNumericalAccuracy:
 
         # Residual should be much smaller than typical forces
         tolerance_N = 1.0  # 1 N tolerance
-        assert abs(residual) < tolerance_N, (
-            f"Residual {residual:.6f} N exceeds tolerance {tolerance_N} N"
-        )
+        assert (
+            abs(residual) < tolerance_N
+        ), f"Residual {residual:.6f} N exceeds tolerance {tolerance_N} N"
 
     def test_repeated_solves_give_consistent_results(self, standard_muscle):
         """Test that solving the same problem multiple times gives consistent results."""
@@ -561,8 +563,10 @@ class TestNumericalAccuracy:
         # All solutions should be identical (deterministic solver)
         for sol in solutions[1:]:
             np.testing.assert_allclose(
-                sol, solutions[0], rtol=1e-10,
-                err_msg="Repeated solves should give identical results"
+                sol,
+                solutions[0],
+                rtol=1e-10,
+                err_msg="Repeated solves should give identical results",
             )
 
     def test_solver_convergence_with_good_guess(self, standard_muscle):
@@ -581,8 +585,10 @@ class TestNumericalAccuracy:
 
         # Should converge to exact same answer
         np.testing.assert_allclose(
-            l_CE_with_guess, l_CE_answer, rtol=1e-10,
-            err_msg="Perfect initial guess should give exact answer"
+            l_CE_with_guess,
+            l_CE_answer,
+            rtol=1e-10,
+            err_msg="Perfect initial guess should give exact answer",
         )
 
     @pytest.mark.parametrize("activation", [0.0, 0.25, 0.5, 0.75, 1.0])
@@ -631,9 +637,9 @@ class TestEdgeCases:
         l_CE = solver.solve_fiber_length(l_MT, activation)
 
         # Should have stretched fiber (long muscle-tendon)
-        assert l_CE > standard_muscle.params.l_opt, (
-            "Long muscle-tendon should have stretched fiber"
-        )
+        assert (
+            l_CE > standard_muscle.params.l_opt
+        ), "Long muscle-tendon should have stretched fiber"
 
     def test_pennated_muscle_equilibrium(self, pennated_muscle):
         """Test equilibrium with pennation angle."""
