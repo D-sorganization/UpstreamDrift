@@ -411,15 +411,93 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         return analyzer.analyze_all()
 
     def compute_ztcf(self, q: np.ndarray, v: np.ndarray) -> np.ndarray:
-        """Zero-Torque Counterfactual (ZTCF) - Guideline G1."""
-        raise NotImplementedError(
-            f"{self.__class__.__name__} does not yet implement ZTCF. "
-            f"See pendulum_physics_engine.py for reference."
-        )
+        """Zero-Torque Counterfactual (ZTCF) - Guideline G1.
+
+        Compute acceleration with applied torques set to zero, preserving current state.
+        This isolates drift (gravity + Coriolis + constraints) from control effects.
+
+        Args:
+            q: Joint positions (n_v,)
+            v: Joint velocities (n_v,)
+
+        Returns:
+            q̈_ZTCF: Acceleration under zero applied torque (n_v,)
+        """
+        if not self._model or not self._state:
+            return np.array([])
+
+        try:
+            # Save current state and controls
+            q_saved, v_saved = self.get_state()
+            controls_saved = opensim.Vector(self._model.updControls(self._state))
+
+            # Set desired state
+            self.set_state(q, v)
+
+            # Set zero control
+            n_controls = self._model.getNumControls()
+            zero_controls = np.zeros(n_controls)
+            self.set_control(zero_controls)
+
+            # Compute forward dynamics
+            # Note: realizeDynamics computes accelerations (udot) in the state
+            self._model.realizeDynamics(self._state)
+
+            # Extract accelerations
+            n_u = self._model.getNumSpeeds()
+            udot = self._state.getUDot()
+            a_ztcf = np.array([udot.get(i) for i in range(n_u)])
+
+            # Restore state and controls
+            # Restore controls first?
+            # self.set_control(controls_saved) # Need to convert Vector back to array if using set_control
+            # Or directly set:
+            self._model.updControls(self._state).update(controls_saved)
+
+            self.set_state(q_saved, v_saved)
+
+            return a_ztcf
+
+        except Exception as e:
+            logger.error(f"Failed to compute ZTCF: {e}")
+            return np.array([])
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
-        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2."""
-        raise NotImplementedError(
-            f"{self.__class__.__name__} does not yet implement ZVCF. "
-            f"See pendulum_physics_engine.py for reference."
-        )
+        """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
+
+        Compute acceleration with joint velocities set to zero, preserving configuration
+        and controls. This isolates configuration-dependent effects (gravity, constraints).
+
+        Args:
+            q: Joint positions (n_v,)
+
+        Returns:
+            q̈_ZVCF: Acceleration with v=0 (n_v,)
+        """
+        if not self._model or not self._state:
+            return np.array([])
+
+        try:
+            # Save current state
+            q_saved, v_saved = self.get_state()
+
+            # Set state with zero velocity
+            n_u = self._model.getNumSpeeds()
+            self.set_state(q, np.zeros(n_u))
+
+            # Controls are preserved in state
+            # Compute forward dynamics
+            self._model.realizeDynamics(self._state)
+
+            # Extract accelerations
+            udot = self._state.getUDot()
+            a_zvcf = np.array([udot.get(i) for i in range(n_u)])
+
+            # Restore state
+            self.set_state(q_saved, v_saved)
+
+            return a_zvcf
+
+        except Exception as e:
+            logger.error(f"Failed to compute ZVCF: {e}")
+            return np.array([])

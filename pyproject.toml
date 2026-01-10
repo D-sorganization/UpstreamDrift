@@ -109,6 +109,7 @@ extend-exclude = '''
   | __pycache__
   | build
   | dist
+  | shared/models/opensim/opensim-models
 )/
 '''
 
@@ -127,6 +128,8 @@ exclude = [
     "engines/Simscape_Multibody_Models/*/matlab/",
     "**/archive",
     "**/legacy",
+    "shared/models/opensim/opensim-models/",
+    "shared/models/myosuite/myo_sim/",
 ]
 
 [tool.ruff.lint]
@@ -185,6 +188,9 @@ exclude = [
     "engines/physics_engines/mujoco/docker_test_dependencies.py",
     "engines/physics_engines/mujoco/fix_linting.py",
     "engines/physics_engines/mujoco/docker/",
+    "shared/models/opensim/opensim-models/",
+    "shared/models/myosuite/myo_sim/",
+    "verify_implementations.py",
     # Test files - type checking relaxed for tests
     "(^|.*/|.*\\\\)tests/",
 ]

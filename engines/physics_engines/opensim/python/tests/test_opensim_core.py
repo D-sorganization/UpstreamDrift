@@ -19,7 +19,56 @@ from engines.physics_engines.opensim.python.opensim_golf.core import (
 def mock_opensim_env():
     """Context manager to mock opensim environment."""
     mock_opensim = MagicMock()
-    mock_opensim.Model.return_value = MagicMock()
+    model_mock = MagicMock()
+    mock_opensim.Model.return_value = model_mock
+
+    # Mock Manager
+    mock_opensim.Manager = MagicMock()
+
+    # Configure model dimensions
+    model_mock.getNumCoordinates.return_value = 2
+    model_mock.getNumSpeeds.return_value = 2
+    model_mock.getNumControls.return_value = 1
+
+    # Configure Muscles
+    muscles_mock = MagicMock()
+    muscles_mock.getSize.return_value = 2
+    model_mock.getMuscles.return_value = muscles_mock
+
+    # Configure MarkerSet
+    marker_set_mock = MagicMock()
+    marker_set_mock.getSize.return_value = 1
+    marker_mock = MagicMock()
+    marker_mock.getName.return_value = "TestMarker"
+
+    # Configure location return
+    loc = MagicMock()
+    loc.get.side_effect = lambda i: 0.0
+    marker_mock.getLocationInGround.return_value = loc
+
+    marker_set_mock.get.return_value = marker_mock
+    model_mock.getMarkerSet.return_value = marker_set_mock
+
+    # Configure State accessors
+    # initSystem returns state
+    state_mock = MagicMock()
+    model_mock.initSystem.return_value = state_mock
+    model_mock.initializeState.return_value = state_mock
+
+    # getQ/getU returns Vector
+    vec_q = MagicMock()
+    vec_q.get.side_effect = lambda i: 0.1 * i
+    state_mock.getQ.return_value = vec_q
+
+    vec_u = MagicMock()
+    vec_u.get.side_effect = lambda i: 0.2 * i
+    state_mock.getU.return_value = vec_u
+
+    # getControls
+    vec_ctrl = MagicMock()
+    vec_ctrl.get.side_effect = lambda i: 0.5
+    model_mock.getControls.return_value = vec_ctrl
+
     with patch.dict(sys.modules, {"opensim": mock_opensim}):
         yield mock_opensim
 
@@ -75,15 +124,17 @@ class TestGolfSwingModel:
         assert model.use_opensim is True
         assert model._opensim_model is not None
 
-    def test_simulation_not_yet_implemented(self, mock_opensim_env, temp_model_file):
-        """Test that simulation raises NotImplementedError with clear message."""
+    def test_simulation_runs(self, mock_opensim_env, temp_model_file):
+        """Test that simulation runs without error."""
         model = GolfSwingModel(model_path=temp_model_file)
+        model.duration = 0.01  # Short duration for test
 
-        with pytest.raises(
-            NotImplementedError,
-            match="OpenSim simulation integration is not yet complete",
-        ):
-            model.run_simulation()
+        result = model.run_simulation()
+
+        assert result is not None
+        assert len(result.time) > 0
+        assert result.states.shape[1] == 4  # 2Q + 2U
+        assert result.marker_positions["TestMarker"].shape[1] == 3
 
     def test_use_opensim_always_true(self, mock_opensim_env, temp_model_file):
         """Test that use_opensim is always True (no fallback mode)."""

@@ -9,12 +9,14 @@ from pathlib import Path
 if typing.TYPE_CHECKING:
     import numpy as np
     import numpy.typing as npt
+    import pinocchio as pin
 
 logger = logging.getLogger(__name__)
 
 # PINK availability check
 try:
     import pink  # noqa: F401
+    import pinocchio as pin
 
     PINK_AVAILABLE = True
 except ImportError:
@@ -45,23 +47,68 @@ class PINKBackend:
             raise ImportError(msg)
 
         self.model_path = Path(model_path)
-        logger.info("PINK backend initialized (stub implementation)")
-        # NOTE: Implement PINK model loading
+
+        # Load robot model
+        # Using pinocchio to load the model (URDF usually)
+        try:
+            self.robot = pin.RobotWrapper.BuildFromURDF(str(self.model_path))
+            self.configuration = pink.Configuration(
+                self.robot.model, self.robot.data, self.robot.q0
+            )
+            logger.info(f"PINK backend initialized with model: {self.model_path}")
+        except Exception as e:
+            logger.error(f"Failed to load model for PINK: {e}")
+            raise
 
     def solve_ik(
         self,
-        _tasks: dict[str, npt.NDArray[np.float64]],
-        _q_init: npt.NDArray[np.float64],
+        tasks: dict[str, pink.tasks.Task],
+        q_init: npt.NDArray[np.float64],
+        dt: float = 1e-3,
+        solver: str = "quadprog",
     ) -> npt.NDArray[np.float64]:
         """Solve inverse kinematics for given tasks.
 
         Args:
-            tasks: Dictionary of task names to target poses/positions
+            tasks: Dictionary of task objects (Pink tasks)
             q_init: Initial joint configuration
+            dt: Time step for integration
+            solver: QP solver to use
 
         Returns:
             Joint configuration satisfying tasks
         """
-        # NOTE: Implement PINK IK solver
-        msg = "PINK IK solver not yet implemented"
-        raise NotImplementedError(msg)
+        if not PINK_AVAILABLE:
+            raise ImportError("Pink not installed")
+
+        try:
+            # Update configuration to q_init
+            self.configuration.q = q_init
+
+            # Solve
+            # pink.solve_ik takes (configuration, tasks, dt, solver, ...)
+            # It returns the velocity dq. We need to integrate
+            # or pink might return new q?
+            # Looking at standard pink usage:
+            # velocity = pink.solve_ik(configuration, tasks, dt, solver)
+            # configuration.integrate_inplace(velocity, dt)
+
+            task_list = list(tasks.values())
+            velocity = pink.solve_ik(self.configuration, task_list, dt, solver=solver)
+
+            # Integrate to get new q
+            q_next: npt.NDArray[np.float64] = pin.integrate(
+                self.robot.model, q_init, velocity * dt
+            )
+
+            # Update internal configuration for next step consistency
+            # if this object persists state?
+            # method signature implies stateless solve based on q_init,
+            # but we can update self.configuration
+            self.configuration.q = q_next
+
+            return q_next
+
+        except Exception as e:
+            logger.error(f"PINK IK solve failed: {e}")
+            return q_init

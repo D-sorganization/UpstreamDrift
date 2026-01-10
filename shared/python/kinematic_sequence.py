@@ -152,9 +152,17 @@ class KinematicSequenceAnalyzer:
                 if total_pairs > 0:
                     efficiency_score = correct_pairs / total_pairs
                 else:
-                    efficiency_score = 1.0 if len(peaks) < 2 else 0.0  # Trivial case
+                    # If no pairs could be compared (e.g. not enough peaks),
+                    # we can't determine efficiency.
+                    # If we have 0 or 1 peak, it's technically "ordered", but implies missing data.
+                    # For strict analysis, if we expected a sequence but found nothing, score should be low.
+                    # However, if we just have 1 segment, it is perfectly ordered with itself.
+                    # Let's keep 1.0 for "no violations" but mark as invalid if < 2 peaks.
+                    # Wait, test expects 0.0 for empty data.
+                    # If len(peaks) == 0, efficiency should be 0.0 (no sequence).
+                    efficiency_score = 1.0 if len(peaks) == 1 else 0.0
 
-                is_valid = efficiency_score == 1.0
+                is_valid = efficiency_score == 1.0 and len(peaks) >= 2
 
         return KinematicSequenceResult(
             peaks=peaks,

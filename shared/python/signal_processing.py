@@ -130,3 +130,110 @@ def compute_spectral_arc_length(
     sal = -np.sum(np.sqrt(d_freq**2 + d_mag**2))
 
     return float(sal)
+
+
+def _morlet2_impl(M: int, s: float, w: float = 5.0) -> np.ndarray:
+    """Complex Morlet wavelet implementation.
+
+    Fallback if scipy.signal.morlet2 is unavailable.
+    """
+    x = np.arange(0, M) - (M - 1.0) / 2
+    x = x / s
+    output: np.ndarray = np.exp(1j * w * x) * np.exp(-0.5 * x**2) * np.pi ** (-0.25)
+    return output
+
+
+def compute_cwt(
+    data: np.ndarray,
+    fs: float,
+    freq_range: tuple[float, float] = (1.0, 50.0),
+    num_freqs: int = 50,
+    w0: float = 6.0,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Compute Continuous Wavelet Transform using Morlet wavelet.
+
+    Args:
+        data: Input time series
+        fs: Sampling frequency
+        freq_range: (min_freq, max_freq)
+        num_freqs: Number of frequency scales
+        w0: Omega0 parameter for Morlet wavelet (default 6.0)
+
+    Returns:
+        (freqs, times, cwt_matrix)
+        freqs: Array of frequencies
+        times: Array of time points
+        cwt_matrix: Complex CWT coefficients (freqs x time)
+    """
+    # Create frequency vector (log space usually better for wavelets, but linspace ok)
+    # Using logspace for better multiscale analysis
+    min_freq, max_freq = freq_range
+    freqs = np.geomspace(min_freq, max_freq, num=num_freqs)
+
+    # Convert frequencies to scales
+    # For Morlet: scale = w0 * fs / (2 * pi * freq)
+    scales = w0 * fs / (2 * np.pi * freqs)
+
+    cwt_matrix = np.zeros((num_freqs, len(data)), dtype=np.complex128)
+
+    # Use internal implementation or scipy's
+    if hasattr(signal, "morlet2"):
+        morlet_func = signal.morlet2
+    else:
+        morlet_func = _morlet2_impl
+
+    for i, s in enumerate(scales):
+        # Window length for wavelet: typically 6-10 sigmas.
+        # Morlet2 std dev is s.
+        # Support is roughly [-5s, 5s] or so.
+        M = int(2 * 5 * s + 1)  # Sufficient width
+
+        wavelet = morlet_func(M, s, w=w0)
+
+        # Convolve (using 'same' mode to keep length)
+        cwt_matrix[i, :] = signal.fftconvolve(data, wavelet, mode="same")
+
+        # Normalize by 1/sqrt(s)
+        cwt_matrix[i, :] /= np.sqrt(s)
+
+    times = np.arange(len(data)) / fs
+
+    return freqs, times, cwt_matrix
+
+
+def compute_xwt(
+    data1: np.ndarray,
+    data2: np.ndarray,
+    fs: float,
+    freq_range: tuple[float, float] = (1.0, 50.0),
+    num_freqs: int = 50,
+    w0: float = 6.0,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Compute Cross Wavelet Transform.
+
+    XWT = W1 * conj(W2)
+
+    Args:
+        data1: First time series
+        data2: Second time series
+        fs: Sampling frequency
+        freq_range: (min_freq, max_freq)
+        num_freqs: Number of frequency scales
+        w0: Omega0 parameter
+
+    Returns:
+        (freqs, times, xwt_matrix)
+        xwt_matrix is complex. Magnitude is cross-power, Angle is relative phase.
+    """
+    f1, t1, w1 = compute_cwt(data1, fs, freq_range, num_freqs, w0)
+    f2, t2, w2 = compute_cwt(data2, fs, freq_range, num_freqs, w0)
+
+    # Ensure dimensions match
+    min_len = min(w1.shape[1], w2.shape[1])
+    w1 = w1[:, :min_len]
+    w2 = w2[:, :min_len]
+    times = t1[:min_len]
+
+    xwt_matrix = w1 * np.conj(w2)
+
+    return f1, times, xwt_matrix
