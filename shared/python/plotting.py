@@ -2012,19 +2012,23 @@ class GolfSwingPlotter:
             ax.set_xlabel("Joint Index")
             ax.set_ylabel("Joint Index")
 
-        # Add correlation values (optimized: vectorized color calculation)
+        # Add correlation values to heatmap cells
+        # NOTE: Color calculation is vectorized using np.where, but ax.text() must
+        # still be called individually (matplotlib limitation - no batch text API).
+        # The optimization reduces nested loops to a single flat loop with pre-computed
+        # positions and colors, avoiding redundant calculations inside the loop.
         if data.shape[1] <= 8:
-            # Pre-compute all positions, values, and colors for batch rendering
+            # Pre-compute all positions, values, and colors
             n = data.shape[1]
-            i_coords, j_coords = np.meshgrid(np.arange(n), np.arange(n), indexing='ij')
+            i_coords, j_coords = np.meshgrid(np.arange(n), np.arange(n), indexing="ij")
             i_flat = i_coords.ravel()
             j_flat = j_coords.ravel()
             values_flat = corr_matrix.ravel()
 
-            # Vectorized color calculation
-            colors = np.where(np.abs(values_flat) < 0.5, 'k', 'w')
+            # Vectorized color calculation (avoids per-element conditionals in loop)
+            colors = np.where(np.abs(values_flat) < 0.5, "k", "w")
 
-            # Single loop instead of nested loops
+            # Render text annotations (matplotlib requires individual calls)
             for idx in range(len(i_flat)):
                 ax.text(
                     j_flat[idx],
