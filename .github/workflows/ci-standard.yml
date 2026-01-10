@@ -52,7 +52,7 @@ jobs:
 
       - run: pip install mypy types-PyYAML types-requests
       - run: pip install -r requirements.txt
-      - run: mypy . --ignore-missing-imports
+      - run: mypy . --config-file pyproject.toml
 
       # TODO detection now BLOCKING - Jules Auto-Repair will fix
       - name: Verify No Placeholders

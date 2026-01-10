@@ -190,6 +190,7 @@ exclude = [
     "engines/physics_engines/mujoco/docker/",
     "shared/models/opensim/opensim-models/",
     "shared/models/myosuite/myo_sim/",
+    "verify_implementations.py",
     # Test files - type checking relaxed for tests
     "(^|.*/|.*\\\\)tests/",
 ]
