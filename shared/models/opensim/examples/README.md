@@ -12,39 +12,46 @@ This directory contains OpenSim (`.osim`) model files for use with the Golf Mode
 
 ---
 
-## Available Models
+## Official OpenSim Models (Submodule)
 
-### arm26.osim (Beginner)
+The `opensim-models/` directory contains the **official OpenSim models repository** from Stanford/SimTK.
 
-Simple upper arm model - ideal for learning the OpenSim API.
+### Recommended Starting Models
 
-- **Joints:** Shoulder (3 DOF), Elbow (1 DOF)
-- **Muscles:** 26 muscles including biceps, triceps, deltoids
-- **Source:** OpenSim standard distribution
+| Model              | Path                                                        | Description                                 |
+| ------------------ | ----------------------------------------------------------- | ------------------------------------------- |
+| **Arm26**          | `opensim-models/Models/Arm26/arm26.osim`                    | Simple 2-joint arm with 6 muscles per joint |
+| **Pendulum**       | `opensim-models/Models/Pendulum/double_pendulum.osim`       | Simple pendulum for validation              |
+| **DoublePendulum** | `opensim-models/Models/DoublePendulum/double_pendulum.osim` | Two-link pendulum                           |
+| **Gait2392**       | `opensim-models/Models/Gait2392_Simbody/gait2392.osim`      | Full lower body (92 muscles)                |
+| **Rajagopal**      | `opensim-models/Models/Rajagopal/Rajagopal2015.osim`        | Full body model                             |
 
-### pendulum_1dof.osim (Minimal)
+### All Available Models
 
-Single-joint pendulum for basic testing and cross-engine validation.
-
-- **Joints:** Single revolute joint
-- **Masses:** Single point mass
-- **Use case:** Ground truth validation
+```
+opensim-models/Models/
+├── Arm26/              # Upper arm (26 muscles)
+├── BouncingBlock/      # Contact testing
+├── DoublePendulum/     # 2-DOF pendulum
+├── Gait10dof18musc/    # Simplified gait
+├── Gait2354_Simbody/   # 23-DOF gait
+├── Gait2392_Simbody/   # 23-DOF gait (92 muscles)
+├── Hamner/             # Full body running
+├── Jumper/             # Jumping model
+├── Leg39/              # Leg model (39 muscles)
+├── Leg6Dof9Musc/       # Simplified leg
+├── Pendulum/           # Single pendulum
+├── Rajagopal/          # Full body (37 muscles)
+├── SoccerKick/         # Kicking motion
+├── ToyLanding/         # Landing mechanics
+├── Tug_of_War/         # Basic muscle demo
+├── WalkerModel/        # Walking model
+└── WristModel/         # Wrist biomechanics
+```
 
 ---
 
-## Downloading Additional Models
-
-### Official OpenSim Models
-
-```bash
-# Clone the official models repository
-git clone https://github.com/opensim-org/opensim-models.git
-
-# Models are in subdirectories:
-#   opensim-models/Models/Arm26/arm26.osim
-#   opensim-models/Models/Gait2392_Simbody/gait2392.osim
-#   opensim-models/Models/RajagopalModel/Rajagopal2015.osim
-```
+## Custom Models (Local)
 
 ### Model Sources
 
