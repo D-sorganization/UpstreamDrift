@@ -63,6 +63,41 @@ opensim-models/Models/
 
 ---
 
+## Official Tutorials
+
+OpenSim provides comprehensive tutorials at:
+https://opensimconfluence.atlassian.net/wiki/spaces/OpenSim/pages/53088695/Examples+and+Tutorials
+
+### Introductory Examples
+
+| Tutorial                                                                                                                                                                             | Description                |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- |
+| [Tutorial 1 - Musculoskeletal Modeling](https://opensimconfluence.atlassian.net/wiki/spaces/OpenSim/pages/53088700/Tutorial+1+-+Intro+to+Musculoskeletal+Modeling)                   | Introduction to OpenSim    |
+| [Tutorial 2 - Tendon Transfer Surgery](https://opensimconfluence.atlassian.net/wiki/spaces/OpenSim/pages/53088644/Tutorial+2+-+Simulation+and+Analysis+of+a+Tendon+Transfer+Surgery) | Surgery simulation         |
+| [Tutorial 3 - Scaling, IK, ID](https://opensimconfluence.atlassian.net/wiki/spaces/OpenSim/pages/53089741/Tutorial+3+-+Scaling+Inverse+Kinematics+and+Inverse+Dynamics)              | Motion analysis pipeline   |
+| [OpenSense - IMU Data](https://opensimconfluence.atlassian.net/wiki/spaces/OpenSim/pages/53084203/OpenSense+-+Kinematics+with+IMU+Data)                                              | Inertial measurement units |
+| [Soccer Kick Example](https://opensimconfluence.atlassian.net/wiki/spaces/OpenSim/pages/53084205/Soccer+Kick+Example)                                                                | Sport motion analysis      |
+
+### Intermediate Examples
+
+| Tutorial                                                                                                                                      | Description                    |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| [Static Optimization](https://opensimconfluence.atlassian.net/wiki/spaces/OpenSim/pages/53085189/Working+with+Static+Optimization)            | Muscle force estimation        |
+| [Computed Muscle Control](https://opensimconfluence.atlassian.net/wiki/spaces/OpenSim/pages/53088683/Example+-+Computed+Muscle+Control)       | Forward dynamics with tracking |
+| [Joint Reaction Loads](https://opensimconfluence.atlassian.net/wiki/spaces/OpenSim/pages/53088669/Example+-+Estimating+Joint+Reaction+Loads)  | Internal force estimation      |
+| [Joint Moments](https://opensimconfluence.atlassian.net/wiki/spaces/OpenSim/pages/53084241/Computing+Joint+Moments+with+Experimental+Data)    | Inverse dynamics               |
+| [Metabolic Cost](https://opensimconfluence.atlassian.net/wiki/spaces/OpenSim/pages/53088704/Simulation-Based+Design+to+Reduce+Metabolic+Cost) | Energy expenditure             |
+
+### Tutorials in the Submodule
+
+The `opensim-models/Tutorials/` directory contains:
+
+- IK/ID/CMC pipelines with data files
+- Complete workflow examples
+- Setup files for tools
+
+---
+
 ## Model File Format
 
 OpenSim uses XML-based `.osim` files:
