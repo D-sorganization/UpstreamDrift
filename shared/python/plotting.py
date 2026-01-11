@@ -614,9 +614,9 @@ class GolfSwingPlotter:
         # Compute metrics
         cop_xy = cop[:, :2]
         com_xy = com[:, :2]
-        # Optimization: np.hypot is faster for 2D vectors
-        diff_xy = cop_xy - com_xy
-        dist = np.hypot(diff_xy[:, 0], diff_xy[:, 1])
+        # OPTIMIZATION: np.hypot is faster for 2D distance
+        diff = cop_xy - com_xy
+        dist = np.hypot(diff[:, 0], diff[:, 1])
 
         if cop.shape[1] == 2:
             cop_z = np.zeros(len(cop))
@@ -625,7 +625,7 @@ class GolfSwingPlotter:
 
         vec_temp = com - np.column_stack((cop_xy, cop_z))
         vec: np.ndarray[tuple[int, ...], np.dtype[np.float64]] = vec_temp  # type: ignore[assignment]
-        # Optimization: Explicit sqrt sum is faster than np.linalg.norm
+        # OPTIMIZATION: Explicit sqrt sum is faster than np.linalg.norm for small dims
         vec_norm = np.sqrt(np.sum(vec**2, axis=1))
         vec_norm[vec_norm < 1e-6] = 1.0
 
@@ -1230,7 +1230,7 @@ class GolfSwingPlotter:
         times_am, am = self._get_cached_series("angular_momentum")
         am = np.asarray(am)
         if len(times_am) > 0 and am.size > 0:
-            # Optimization: Explicit sqrt sum is faster
+            # OPTIMIZATION: Explicit sqrt sum is faster than np.linalg.norm
             am_mag = np.sqrt(np.sum(am**2, axis=1))
             ax3.plot(
                 times_am,
@@ -1970,197 +1970,6 @@ class GolfSwingPlotter:
             fontsize=14,
             fontweight="bold",
         )
-
-    def plot_joint_stiffness(
-        self,
-        fig: Figure,
-        joint_idx: int = 0,
-        title: str | None = None,
-    ) -> None:
-        """Plot Joint Stiffness (Moment-Angle Loop) with regression analysis.
-
-        Args:
-            fig: Matplotlib figure
-            joint_idx: Joint index
-            title: Optional title
-        """
-        try:
-            from shared.python.statistical_analysis import StatisticalAnalyzer
-        except ImportError:
-            ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "Analysis module missing", ha="center", va="center")
-            return
-
-        # Fetch data
-        times, positions = self._get_cached_series("joint_positions")
-        _, torques = self._get_cached_series("joint_torques")
-
-        positions = np.asarray(positions)
-        torques = np.asarray(torques)
-
-        if len(times) == 0 or positions.ndim < 2 or torques.ndim < 2:
-            ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
-            return
-
-        # Calculate stiffness metrics
-        analyzer = StatisticalAnalyzer(
-            times=np.asarray(times),
-            joint_positions=positions,
-            joint_velocities=np.zeros_like(positions),  # Dummy
-            joint_torques=torques,
-        )
-
-        metrics = analyzer.compute_joint_stiffness(joint_idx)
-        if metrics is None:
-            ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "Could not compute stiffness", ha="center", va="center")
-            return
-
-        angles = positions[:, joint_idx]
-        moment = torques[:, joint_idx]
-
-        ax = fig.add_subplot(111)
-
-        # Plot loop
-        sc = ax.scatter(
-            np.rad2deg(angles), moment, c=times, cmap="viridis", s=30, alpha=0.6
-        )
-        ax.plot(
-            np.rad2deg(angles), moment, alpha=0.3, color="gray", linewidth=1, zorder=1
-        )
-
-        # Plot regression line
-        # y = k*x + c
-        # Generate points for line
-        x_min, x_max = np.min(angles), np.max(angles)
-        x_line = np.linspace(x_min, x_max, 100)
-        y_line = metrics.stiffness * x_line + metrics.intercept
-
-        ax.plot(
-            np.rad2deg(x_line),
-            y_line,
-            "r--",
-            linewidth=2.5,
-            label=f"K = {metrics.stiffness:.1f} Nm/rad",
-            zorder=10,
-        )
-
-        name = self.get_joint_name(joint_idx)
-        ax.set_xlabel(f"{name} Angle (degrees)", fontsize=12, fontweight="bold")
-        ax.set_ylabel(f"{name} Torque (Nm)", fontsize=12, fontweight="bold")
-        ax.set_title(
-            title or f"Quasi-Stiffness: {name}\n($R^2$={metrics.r_squared:.2f})",
-            fontsize=14,
-            fontweight="bold",
-        )
-        ax.legend(loc="best")
-        ax.grid(True, alpha=0.3, linestyle="--")
-        fig.colorbar(sc, ax=ax, label="Time (s)")
-        fig.tight_layout()
-
-    def plot_dynamic_stiffness(
-        self,
-        fig: Figure,
-        joint_idx: int = 0,
-        window_size: int = 20,
-    ) -> None:
-        """Plot Dynamic Stiffness (Slope of Moment-Angle) over time.
-
-        Args:
-            fig: Matplotlib figure
-            joint_idx: Joint index
-            window_size: Rolling window size
-        """
-        try:
-            from shared.python.statistical_analysis import StatisticalAnalyzer
-        except ImportError:
-            ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "Analysis module missing", ha="center", va="center")
-            return
-
-        # Fetch data
-        times, positions = self._get_cached_series("joint_positions")
-        _, torques = self._get_cached_series("joint_torques")
-
-        positions = np.asarray(positions)
-        torques = np.asarray(torques)
-
-        if len(times) == 0:
-            ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
-            return
-
-        analyzer = StatisticalAnalyzer(
-            times=np.asarray(times),
-            joint_positions=positions,
-            joint_velocities=np.zeros_like(positions),  # Dummy
-            joint_torques=torques,
-        )
-
-        try:
-            t_dyn, k_dyn, r2_dyn = analyzer.compute_dynamic_stiffness(
-                joint_idx, window_size
-            )
-        except AttributeError:
-            ax = fig.add_subplot(111)
-            ax.text(0.5, 0.5, "Method not implemented", ha="center", va="center")
-            return
-
-        if len(t_dyn) == 0:
-            ax = fig.add_subplot(111)
-            ax.text(
-                0.5,
-                0.5,
-                "Insufficient data for dynamic stiffness",
-                ha="center",
-                va="center",
-            )
-            return
-
-        ax1 = fig.add_subplot(111)
-
-        # Plot Stiffness
-        line1 = ax1.plot(
-            t_dyn,
-            k_dyn,
-            color=self.colors["primary"],
-            linewidth=2,
-            label="Stiffness (Nm/rad)",
-        )
-        ax1.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
-        ax1.set_ylabel(
-            "Quasi-Stiffness (Nm/rad)",
-            fontsize=12,
-            fontweight="bold",
-            color=self.colors["primary"],
-        )
-        ax1.tick_params(axis="y", labelcolor=self.colors["primary"])
-
-        # Plot R2 on twin axis to show reliability
-        ax2 = ax1.twinx()
-        line2 = ax2.plot(
-            t_dyn,
-            r2_dyn,
-            color="gray",
-            linestyle="--",
-            alpha=0.6,
-            label="Fit Quality ($R^2$)",
-        )
-        ax2.set_ylabel("Fit Quality ($R^2$)", fontsize=12, color="gray")
-        ax2.set_ylim(0, 1.05)
-        ax2.tick_params(axis="y", labelcolor="gray")
-
-        # Combine legends
-        lns = line1 + line2
-        labs = [str(ln.get_label()) for ln in lns]
-        ax1.legend(lns, labs, loc="best")
-
-        name = self.get_joint_name(joint_idx)
-        ax1.set_title(f"Dynamic Stiffness: {name}", fontsize=14, fontweight="bold")
-        ax1.grid(True, alpha=0.3)
-        ax1.axhline(0, color="k", alpha=0.2)
-        fig.tight_layout()
         # fig.tight_layout() # Handled by hspace/wspace roughly
 
     def plot_correlation_matrix(
@@ -2349,7 +2158,7 @@ class GolfSwingPlotter:
             return
 
         # Calculate magnitude
-        # Optimization: Explicit sqrt sum is faster
+        # OPTIMIZATION: Explicit sqrt sum is faster than np.linalg.norm
         am_mag = np.sqrt(np.sum(am_data**2, axis=1))
 
         ax = fig.add_subplot(111)
@@ -2857,9 +2666,8 @@ class GolfSwingPlotter:
 
         # Draw vector from origin for current/max?
         # Maybe just draw a few representative vectors
-        # Optimization: Use pre-calculated magnitude if possible, or explicit
-        am_mag_sq = np.sum(am_data**2, axis=1)
-        max_idx = np.argmax(am_mag_sq)
+        # OPTIMIZATION: Explicit sqrt sum is faster than np.linalg.norm
+        max_idx = np.argmax(np.sum(am_data**2, axis=1))  # No need for sqrt for argmax
 
         # Draw Peak Vector
         ax.plot(
@@ -3304,7 +3112,7 @@ class GolfSwingPlotter:
                     return
             else:
                 # Plot L2 norm for summary
-                # Optimization: Explicit sqrt sum
+                # OPTIMIZATION: Explicit sqrt sum is faster than np.linalg.norm
                 norm = np.sqrt(np.sum(acc**2, axis=1))
                 ax.plot(
                     times,
@@ -3379,7 +3187,7 @@ class GolfSwingPlotter:
 
             if len(times) > 0 and acc_vec.size > 0:
                 # Plot Magnitude
-                # Optimization: Explicit sqrt sum
+                # OPTIMIZATION: Explicit sqrt sum is faster than np.linalg.norm
                 mag = np.sqrt(np.sum(acc_vec**2, axis=1))
 
                 # Check if it's mostly zero
