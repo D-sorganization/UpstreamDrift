@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 # Import core utilities (exceptions, logging) from the lightweight module
+from .constants import DEG_TO_RAD, MPS_TO_MPH, RAD_TO_DEG
 from .core import (
     DataFormatError,
     EngineNotFoundError,
@@ -105,13 +106,16 @@ def save_golf_data(
 
 
 def standardize_joint_angles(
-    angles: "np.ndarray", angle_names: list[str] | None = None
+    angles: "np.ndarray",
+    angle_names: list[str] | None = None,
+    time_step: float = 0.01,
 ) -> "pd.DataFrame":
     """Standardize joint angle data across engines.
 
     Args:
         angles: Joint angle array (time x joints)
         angle_names: Optional joint names
+        time_step: Time step in seconds (default: 0.01s = 100Hz)
 
     Returns:
         Standardized DataFrame with joint angles
@@ -123,7 +127,9 @@ def standardize_joint_angles(
         angle_names = [f"joint_{i}" for i in range(angles.shape[1])]
 
     df = pd.DataFrame(angles, columns=angle_names)
-    df["time"] = np.linspace(0, len(df) * 0.01, len(df))  # Assume 100Hz
+    # Use endpoint=False to generate N time steps from 0 to T-dt
+    # For N=10, dt=0.01, we want 0.00, 0.01, ..., 0.09
+    df["time"] = np.linspace(0, len(df) * time_step, len(df), endpoint=False)
 
     return df
 
@@ -182,25 +188,23 @@ def convert_units(value: float, from_unit: str, to_unit: str) -> float:
     Returns:
         Converted value
     """
-    import numpy as np
-
     # Angle conversions
     if from_unit == "deg" and to_unit == "rad":
-        return float(np.deg2rad(value))
+        return float(value * DEG_TO_RAD)
     elif from_unit == "rad" and to_unit == "deg":
-        return float(np.rad2deg(value))
+        return float(value * RAD_TO_DEG)
 
     # Length conversions
     elif from_unit == "m" and to_unit == "mm":
-        return value * 1000
+        return value * 1000.0
     elif from_unit == "mm" and to_unit == "m":
-        return value / 1000
+        return value / 1000.0
 
     # Velocity conversions
     elif from_unit == "m/s" and to_unit == "mph":
-        return value * 2.237
+        return value * float(MPS_TO_MPH)
     elif from_unit == "mph" and to_unit == "m/s":
-        return value / 2.237
+        return value / float(MPS_TO_MPH)
 
     else:
         raise ValueError(f"Conversion from {from_unit} to {to_unit} not supported")
