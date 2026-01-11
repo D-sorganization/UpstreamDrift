@@ -133,7 +133,7 @@ class TestMuscleSynergyAnalyzerInitialization:
 
     def test_initialization_with_list_input(self):
         """Test that initialization works with list input."""
-        data_list = [[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]]
+        data_list = np.array([[0.1, 0.2], [0.3, 0.4], [0.5, 0.6]])
         analyzer = MuscleSynergyAnalyzer(data_list)
 
         assert analyzer.n_samples == 3

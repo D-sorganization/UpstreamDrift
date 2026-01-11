@@ -56,6 +56,7 @@ class LivePlotWidget(QtWidgets.QWidget):
             "Joint Positions": "joint_positions",
             "Joint Velocities": "joint_velocities",
             "Joint Torques": "joint_torques",
+            "Ground Forces": "ground_forces",
             "Kinetic Energy": "kinetic_energy",
             "Club Head Speed": "club_head_speed",
             "ZTCF (Zero Torque)": "ztcf_accel",
@@ -81,10 +82,25 @@ class LivePlotWidget(QtWidgets.QWidget):
         controls_layout.addWidget(lbl_metric)
         controls_layout.addWidget(self.combo)
 
+        # Plot Mode Selector
+        self.mode_combo = QtWidgets.QComboBox()
+        self.mode_combo.addItems(["All Dimensions", "Single Dimension", "Norm"])
+        self.mode_combo.setToolTip("Select plot mode")
+        self.mode_combo.currentTextChanged.connect(self._on_mode_changed)
+        controls_layout.addWidget(self.mode_combo)
+
+        # Selector for Dimension Index (Hidden by default)
+        self.dim_spin = QtWidgets.QSpinBox()
+        self.dim_spin.setRange(0, 100)  # Assume max 100 dims
+        self.dim_spin.setPrefix("Dim: ")
+        self.dim_spin.setVisible(False)  # Only for Single Dimension mode
+        self.dim_spin.valueChanged.connect(self.update_plot)
+        controls_layout.addWidget(self.dim_spin)
+
         # Selector for Induced Accel Source (Hidden by default)
         self.source_spin = QtWidgets.QSpinBox()
         self.source_spin.setRange(0, 100)  # Assume max 100 joints
-        self.source_spin.setPrefix("Joint Idx: ")
+        self.source_spin.setPrefix("Source Idx: ")
         self.source_spin.setVisible(False)
         self.source_spin.valueChanged.connect(self._on_source_changed)
         controls_layout.addWidget(self.source_spin)
@@ -131,6 +147,13 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.line_objects = []
         self.update_plot()
 
+    def _on_mode_changed(self, mode: str) -> None:
+        """Handle plot mode change."""
+        self.dim_spin.setVisible(mode == "Single Dimension")
+        self.ax.clear()
+        self.line_objects = []
+        self.update_plot()
+
     def toggle_computation(self, state: int) -> None:
         """Handle checkbox toggle."""
         self._update_recorder_config()
@@ -170,19 +193,12 @@ class LivePlotWidget(QtWidgets.QWidget):
             # Fetch specific induced acceleration
             src_idx = self.source_spin.value()
             if src_idx in self.recorder.data["induced_accelerations"]:
-                # Use internal access or add a specific getter if needed
-                # Ideally GenericPhysicsRecorder should have get_time_series support for this
-                # But it stores it in a dict.
-                # Let's use the helper I added: get_induced_acceleration_series
-                # But that helper takes a name, and we use indices in recorder.
-                # Actually recorder uses indices now.
-                # Let's check recorder.py again.
-                # It uses indices in `induced_accelerations`.
-                if src_idx in self.recorder.data["induced_accelerations"]:
-                    val = self.recorder.data["induced_accelerations"][src_idx]
-                    # val is just the array, times are global
-                    times = self.recorder.data["times"][: self.recorder.current_idx]
-                    data = val[: self.recorder.current_idx]
+                val = self.recorder.data["induced_accelerations"][src_idx]
+                times = self.recorder.data["times"][: self.recorder.current_idx]
+                data = val[: self.recorder.current_idx]
+            else:
+                times = np.array([])
+                data = None
         else:
             # Standard metric
             times, data = self.recorder.get_time_series(self.current_key)
@@ -197,6 +213,26 @@ class LivePlotWidget(QtWidgets.QWidget):
         if data.ndim == 1:
             data = data.reshape(-1, 1)
 
+        # Apply filtering based on Plot Mode
+        plot_mode = self.mode_combo.currentText()
+        dim_label = "Dim"
+
+        if plot_mode == "Single Dimension":
+            dim_idx = self.dim_spin.value()
+            if dim_idx < data.shape[1]:
+                data = data[:, dim_idx : dim_idx + 1]
+                dim_label = f"Dim {dim_idx}"
+            else:
+                data = np.zeros((len(data), 1))  # Invalid index fallback
+
+        elif plot_mode == "Norm":
+            # Compute Euclidean norm
+            data = np.linalg.norm(data, axis=1).reshape(-1, 1)
+            dim_label = "Norm"
+
+        # Type assertion: data is guaranteed non-None at this point (we returned early above)
+        assert data is not None
+
         # Limit to recent history to keep it fast
         max_points = 500
         if len(times) > max_points:
@@ -210,9 +246,17 @@ class LivePlotWidget(QtWidgets.QWidget):
             self.ax.clear()
             self.line_objects = []
             for i in range(n_dims):
-                (line,) = self.ax.plot([], [], label=f"Dim {i}")
+                label = (
+                    dim_label
+                    if n_dims == 1
+                    else f"{dim_label} {i}" if plot_mode != "Norm" else "Norm"
+                )
+                if plot_mode == "All Dimensions":
+                    label = f"Dim {i}"
+                (line,) = self.ax.plot([], [], label=label)
                 self.line_objects.append(line)
-            if n_dims < 10:  # Don't clutter if too many dims
+
+            if n_dims < 10 or plot_mode != "All Dimensions":
                 self.ax.legend(loc="upper right")
             self.ax.set_title(f"Live {self.current_label}")
             self.ax.grid(True)
@@ -221,6 +265,13 @@ class LivePlotWidget(QtWidgets.QWidget):
         for i, line in enumerate(self.line_objects):
             if i < data.shape[1]:
                 line.set_data(times, data[:, i])
+
+                # Update label if Single Dimension (to reflect changing index)
+                if plot_mode == "Single Dimension":
+                    line.set_label(dim_label)
+
+        if plot_mode == "Single Dimension":
+            self.ax.legend(loc="upper right")
 
         self.ax.relim()
         self.ax.autoscale_view()

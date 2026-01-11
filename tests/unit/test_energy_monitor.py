@@ -6,6 +6,8 @@ for ensuring physical validity of conservative system integrations.
 
 from __future__ import annotations
 
+from typing import cast
+
 import numpy as np
 import pytest
 
@@ -16,6 +18,7 @@ from shared.python.energy_monitor import (
     EnergySnapshot,
     IntegrationFailureError,
 )
+from shared.python.interfaces import PhysicsEngine
 
 
 class MockPhysicsEngine:
@@ -68,6 +71,15 @@ class MockPhysicsEngine:
         self.time += dt
 
 
+def as_physics_engine(mock: MockPhysicsEngine) -> PhysicsEngine:
+    """Cast mock engine to PhysicsEngine interface for type checking.
+
+    This is a standard pattern (Pattern 20) for test mocks that implement
+    a subset of a Protocol's methods sufficient for the tests.
+    """
+    return cast(PhysicsEngine, mock)
+
+
 class TestEnergySnapshot:
     """Test EnergySnapshot dataclass."""
 
@@ -110,7 +122,7 @@ class TestConservationMonitorInitialization:
     def test_basic_initialization(self):
         """Test basic monitor initialization."""
         engine = MockPhysicsEngine()
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
 
         assert monitor.engine is engine
         assert monitor.E_initial is None
@@ -122,7 +134,7 @@ class TestConservationMonitorInitialization:
         """Test initialization with custom drift thresholds."""
         engine = MockPhysicsEngine()
         monitor = ConservationMonitor(
-            engine,
+            as_physics_engine(engine),
             max_drift_pct=0.5,
             critical_drift_pct=2.0,
         )
@@ -133,7 +145,7 @@ class TestConservationMonitorInitialization:
     def test_default_tolerance_values(self):
         """Test that default tolerance values match Guideline O3."""
         engine = MockPhysicsEngine()
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
 
         # Per Guideline O3
         assert monitor.max_drift_pct == 1.0  # 1% warning threshold
@@ -150,7 +162,7 @@ class TestMonitorInitialize:
         engine.set_mass_matrix(np.eye(2))
         engine.set_gravity_forces(np.array([0.0, -9.81]))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         assert monitor.E_initial is not None
@@ -161,7 +173,7 @@ class TestMonitorInitialize:
         engine = MockPhysicsEngine()
         engine.set_state(np.array([0.0, 0.0]), np.array([1.0, 1.0]))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
 
         # Add some fake history
         monitor.drift_history.append((0.0, 0.5))
@@ -182,11 +194,12 @@ class TestMonitorInitialize:
         engine.set_mass_matrix(np.array([[m]]))
         engine.set_gravity_forces(np.array([0.0]))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # KE = 0.5 * m * v^2 = 0.5 * 2.0 * 3.0^2 = 9.0 J
         expected_KE = 0.5 * m * v_val**2
+        assert monitor.E_initial is not None
         np.testing.assert_allclose(monitor.E_initial, expected_KE, rtol=1e-10)
 
 
@@ -199,7 +212,7 @@ class TestGetEnergySnapshot:
         engine.time = 5.5
         engine.set_state(np.array([0.0, 0.0]), np.array([0.0, 0.0]))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         snapshot = monitor.get_energy_snapshot()
 
         assert snapshot.time == 5.5
@@ -213,7 +226,7 @@ class TestGetEnergySnapshot:
         engine.set_mass_matrix(np.array([[2.0]]))
         engine.set_gravity_forces(np.array([0.0]))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         snapshot = monitor.get_energy_snapshot()
 
         expected_KE = 0.5 * 2.0 * 3.0**2
@@ -228,7 +241,7 @@ class TestGetEnergySnapshot:
         engine.set_mass_matrix(np.array([[1.0]]))
         engine.set_gravity_forces(np.array([-9.81]))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         snapshot = monitor.get_energy_snapshot()
 
         expected_PE = -1.0 * (-9.81)
@@ -247,7 +260,7 @@ class TestGetEnergySnapshot:
         engine.set_mass_matrix(M)
         engine.set_gravity_forces(g)
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         snapshot = monitor.get_energy_snapshot()
 
         # KE = 0.5 * v^T * M * v
@@ -269,7 +282,7 @@ class TestCheckAndWarn:
     def test_requires_initialization(self):
         """Test that check_and_warn() requires initialization first."""
         engine = MockPhysicsEngine()
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
 
         with pytest.raises(RuntimeError, match="not initialized"):
             monitor.check_and_warn()
@@ -281,7 +294,7 @@ class TestCheckAndWarn:
         engine.set_mass_matrix(np.eye(2))
         engine.set_gravity_forces(np.zeros(2))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # No change in state
@@ -298,7 +311,7 @@ class TestCheckAndWarn:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()  # E_initial = 0.5 J
 
         # Change: v = 1.02, KE = 0.5 * 1.02^2 = 0.5202 J (small increase, < 5%)
@@ -321,7 +334,7 @@ class TestCheckAndWarn:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # Change: v = 1.96, KE = 0.5 * 1.96^2 = 1.9208 J (small decrease, < 5%)
@@ -342,7 +355,7 @@ class TestCheckAndWarn:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # Multiple checks
@@ -370,7 +383,7 @@ class TestCheckAndWarn:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # Create exactly 1.1% drift (just above threshold)
@@ -398,7 +411,7 @@ class TestCheckAndWarn:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # Create 6% drift (above critical threshold)
@@ -418,7 +431,7 @@ class TestCheckAndWarn:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # Create 0.5% drift (below threshold)
@@ -446,7 +459,7 @@ class TestCheckAndWarn:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # Create -1.5% drift
@@ -471,7 +484,7 @@ class TestEstimateMaxStableTimestep:
         engine = MockPhysicsEngine()
         engine.set_state(q=np.array([0.0, 0.0]), v=np.array([0.1, 0.2]))  # ||v|| < 1.0
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         dt_max = monitor.estimate_max_stable_timestep()
 
         # For slow motion, should recommend dt = 0.01s
@@ -484,7 +497,7 @@ class TestEstimateMaxStableTimestep:
             q=np.array([0.0, 0.0]), v=np.array([3.0, 4.0])  # ||v|| = 5.0, in [1, 10)
         )
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         dt_max = monitor.estimate_max_stable_timestep()
 
         # For normal motion, should recommend dt = 0.001s
@@ -498,7 +511,7 @@ class TestEstimateMaxStableTimestep:
             v=np.array([50.0, 50.0, 50.0]),  # ||v|| ~ 86.6, >> 10
         )
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         dt_max = monitor.estimate_max_stable_timestep()
 
         # For high-speed motion, should recommend dt = 0.0001s
@@ -509,7 +522,7 @@ class TestEstimateMaxStableTimestep:
         engine = MockPhysicsEngine()
         engine.set_state(q=np.array([0.0, 0.0]), v=np.array([0.0, 0.0]))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         dt_max = monitor.estimate_max_stable_timestep()
 
         # Zero velocity -> slow motion regime
@@ -522,7 +535,7 @@ class TestProjectToEnergyManifold:
     def test_requires_initialization(self):
         """Test that projection requires initialization first."""
         engine = MockPhysicsEngine()
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
 
         with pytest.raises(RuntimeError, match="not initialized"):
             monitor.project_to_energy_manifold()
@@ -536,7 +549,7 @@ class TestProjectToEnergyManifold:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()  # E_initial = 0.5
 
         # Perturb: v = 1.5, E = 1.125 (2.25x increase)
@@ -562,7 +575,7 @@ class TestProjectToEnergyManifold:
         engine.set_mass_matrix(np.eye(2))
         engine.set_gravity_forces(np.zeros(2))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # Perturb velocity
@@ -584,7 +597,7 @@ class TestProjectToEnergyManifold:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # Set energy to near zero
@@ -605,7 +618,7 @@ class TestProjectToEnergyManifold:
         engine.set_mass_matrix(np.eye(2))
         engine.set_gravity_forces(np.zeros(2))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # Perturb magnitude
@@ -660,7 +673,7 @@ class TestPhysicalRealism:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # Simulate conservation (no actual dynamics, just checking)
@@ -678,7 +691,7 @@ class TestPhysicalRealism:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()  # E = 0.5 J
 
         # Create tiny 0.1% drift
@@ -707,7 +720,7 @@ class TestEdgeCases:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # Drift calculation with zero denominator causes division by zero
@@ -727,7 +740,7 @@ class TestEdgeCases:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # Create 1000% drift
@@ -748,7 +761,7 @@ class TestEdgeCases:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.array([-1.0]))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
 
         # Drift calculation should work with negative energy
@@ -764,7 +777,7 @@ class TestEdgeCases:
         engine.set_mass_matrix(np.eye(1))
         engine.set_gravity_forces(np.zeros(1))
 
-        monitor = ConservationMonitor(engine)
+        monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
         E_first = monitor.E_initial
 

@@ -34,12 +34,12 @@ class TestSwingPlaneAnalysis:
         # The normal is not unique. It can be any vector orthogonal to (1, 1, -1).
         # We need points that span a plane.
 
-        points = []
+        points_list: list[list[float]] = []
         for i in range(10):
             x = float(i)
             y = float(i)  # y = x
             z = -x  # z = -x
-            points.append([x, y, z])
+            points_list.append([x, y, z])
 
         # Add a point off the line to define a plane
         # Current line vector v = (1, 1, -1)
@@ -52,8 +52,8 @@ class TestSwingPlaneAnalysis:
         # z: 1*0 - 1*1 = -1
         # Normal ~ (-1, 0, -1) -> (1, 0, 1)
 
-        points.append([1.0, 0.0, -1.0])
-        points = np.array(points)
+        points_list.append([1.0, 0.0, -1.0])
+        points = np.array(points_list)
 
         analyzer = SwingPlaneAnalyzer()
         centroid, normal = analyzer.fit_plane(points)

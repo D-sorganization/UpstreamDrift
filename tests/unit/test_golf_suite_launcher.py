@@ -114,6 +114,9 @@ class MockQPushButton:
     def setAccessibleName(self, n):
         pass
 
+    def setText(self, t):
+        pass
+
 
 class MockQTextEdit:
     def __init__(self, *args, **kwargs):

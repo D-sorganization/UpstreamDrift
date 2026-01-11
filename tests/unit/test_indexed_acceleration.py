@@ -56,6 +56,7 @@ class TestIndexedAccelerationDataclass:
             centrifugal=centrifugal,
         )
 
+        assert acc.centrifugal is not None
         np.testing.assert_array_equal(acc.centrifugal, centrifugal)
 
     def test_total_property_without_centrifugal(self):
