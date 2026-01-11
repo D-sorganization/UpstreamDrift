@@ -537,7 +537,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
 
         modes = self._shaft_modes
         state = self._shaft_modal_state
-        n_stations: int = int(self._shaft_config["n_stations"])
+        n_stations: int = cast(int, self._shaft_config["n_stations"])
 
         # Reconstruct physical deflection from modal amplitudes
         deflection = np.zeros(n_stations)
@@ -550,7 +550,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             velocity += vel * modes["mode_shapes"][i]
 
         # Rotation is derivative of deflection (approximate with finite diff)
-        length: float = float(self._shaft_config["length"])
+        length: float = cast(float, self._shaft_config["length"])
         dx = length / (n_stations - 1)
         rotation = np.gradient(deflection, dx)
 
