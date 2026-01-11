@@ -2,6 +2,7 @@
 
 import logging
 import math
+from enum import Enum
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 import defusedxml.minidom as minidom
@@ -16,6 +17,17 @@ logger = logging.getLogger(__name__)
 DEFAULT_INERTIA_MOMENT = 0.1
 
 
+class Handedness(Enum):
+    """Golfer handedness for model configuration.
+
+    Golf models can be mirrored for left-handed vs right-handed golfers.
+    The default is right-handed.
+    """
+
+    RIGHT = "right"
+    LEFT = "left"
+
+
 class URDFBuilder:
     """Builder class for creating URDF files with support for parallel configurations."""
 
@@ -24,6 +36,7 @@ class URDFBuilder:
         self.segments: list[dict] = []
         self.materials: dict[str, dict] = {}
         self.robot_name = "golf_robot"
+        self.handedness: Handedness = Handedness.RIGHT
 
     def _validate_physical_parameters(self, segment_data: dict) -> None:
         """Validate physical parameters for correctness.
@@ -539,3 +552,99 @@ class URDFBuilder:
                 )
 
         return errors
+
+    def set_handedness(self, handedness: Handedness) -> None:
+        """Set the handedness for the model.
+
+        Args:
+            handedness: Handedness.LEFT or Handedness.RIGHT
+        """
+        self.handedness = handedness
+        logger.info(f"Handedness set to: {handedness.value}")
+
+    def get_handedness(self) -> Handedness:
+        """Get the current handedness setting.
+
+        Returns:
+            Current Handedness value.
+        """
+        return self.handedness
+
+    def mirror_for_handedness(self) -> None:
+        """Mirror all segments for opposite handedness (Task 3.4).
+
+        Mirrors the Y-axis of all segment positions to convert between
+        left-handed and right-handed configurations.
+
+        This method:
+        - Negates the Y position of all segments
+        - Adjusts joint axes as needed
+        - Renames segments with 'left_'/'right_' prefix swap
+        """
+        for segment in self.segments:
+            geometry = segment.get("geometry", {})
+            position = geometry.get("position", {})
+
+            # Mirror Y-axis position
+            if "y" in position:
+                position["y"] = -position["y"]
+
+            # Update geometry
+            segment["geometry"]["position"] = position
+
+            # Mirror joint axes if applicable
+            joint = segment.get("joint", {})
+            axis = joint.get("axis", {})
+            if "y" in axis:
+                axis["y"] = -axis.get("y", 0)
+            joint["axis"] = axis
+            segment["joint"] = joint
+
+            # Handle segment naming for body parts
+            name = segment.get("name", "")
+            if name.startswith("left_"):
+                segment["name"] = name.replace("left_", "right_", 1)
+            elif name.startswith("right_"):
+                segment["name"] = name.replace("right_", "left_", 1)
+
+            # Handle parent naming
+            parent = segment.get("parent", "")
+            if parent and parent.startswith("left_"):
+                segment["parent"] = parent.replace("left_", "right_", 1)
+            elif parent and parent.startswith("right_"):
+                segment["parent"] = parent.replace("right_", "left_", 1)
+
+        # Toggle handedness state
+        if self.handedness == Handedness.RIGHT:
+            self.handedness = Handedness.LEFT
+        else:
+            self.handedness = Handedness.RIGHT
+
+        logger.info(f"Mirrored model for {self.handedness.value}-handed golfer")
+
+    def get_mirrored_urdf(self, target_handedness: Handedness) -> str:
+        """Get URDF mirrored for specified handedness.
+
+        Does not modify the internal state. Returns a mirrored copy if needed.
+
+        Args:
+            target_handedness: Desired handedness for the output.
+
+        Returns:
+            URDF XML string configured for the target handedness.
+        """
+        if target_handedness == self.handedness:
+            return self.get_urdf()
+
+        # Create a copy, mirror it, generate URDF, then restore
+        import copy
+
+        original_segments = copy.deepcopy(self.segments)
+        original_handedness = self.handedness
+
+        try:
+            self.mirror_for_handedness()
+            return self.get_urdf()
+        finally:
+            self.segments = original_segments
+            self.handedness = original_handedness
