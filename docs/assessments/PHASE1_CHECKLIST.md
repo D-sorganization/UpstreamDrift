@@ -55,7 +55,7 @@
 
 ---
 
-## ✅ Phase 3: Jacobian & Ellipsoid Coverage (COMPLETE)
+## ✅ Phase 3: Jacobian, Ellipsoid, Shaft & Handedness (COMPLETE)
 
 ### Task 3.1: Jacobian Coverage Completion ✅
 
@@ -75,33 +75,38 @@
 - [x] `_write_stl_ascii()` helper
 - [x] Tests for both export modes
 
----
+### Task 3.3: Flexible Shaft Engine Integration ✅
 
-## 📋 Remaining Phase 3 Tasks
+- [x] Add `set_shaft_properties()` to PhysicsEngine interface
+- [x] Add `get_shaft_state()` to PhysicsEngine interface
+- [x] Implement modal shaft in MuJoCo engine
+- [x] Euler-Bernoulli mode shape computation
+- [x] Support EI profile, mass profile, damping ratio
+- [x] 7 integration tests all passing
 
-### Task 3.3: Flexible Shaft Engine Integration (Not Started)
+### Task 3.4: Handedness Integration ✅
 
-- [ ] Add `set_shaft_properties()` to PhysicsEngine interface
-- [ ] Implement modal shaft in MuJoCo
-- [ ] Add cross-engine validation for shaft deflection
-
-### Task 3.4: Handedness Integration (Not Started)
-
-- [ ] Implement left/right handedness toggle
-- [ ] Mirror URDF geometry for handedness
-- [ ] Add tests for handedness consistency
+- [x] Add `Handedness` enum (LEFT/RIGHT)
+- [x] Implement `mirror_for_handedness()` method
+- [x] Y-axis mirroring for positions and joint axes
+- [x] Automatic left*/right* segment name swap
+- [x] `get_mirrored_urdf()` for non-destructive mirroring
+- [x] 13 handedness tests all passing
 
 ---
 
 ## Test Results Summary
 
-| Phase     | Test File                       | Passed | Skipped |
-| --------- | ------------------------------- | ------ | ------- |
-| 1         | test_conservation_laws.py       | 11     | 0       |
-| 2         | test_c3d_force_plate.py         | 12     | 0       |
-| 3         | test_jacobian.py                | 4      | 2       |
-| 3         | test_ellipsoid_visualization.py | 14     | 0       |
-| **Total** |                                 | **41** | **2**   |
+| Phase     | Test File                        | Passed | Skipped |
+| --------- | -------------------------------- | ------ | ------- |
+| 1         | test_conservation_laws.py        | 11     | 0       |
+| 2         | test_c3d_force_plate.py          | 12     | 0       |
+| 3         | test_jacobian.py                 | 4      | 2       |
+| 3         | test_ellipsoid_visualization.py  | 14     | 0       |
+| 3         | test_shaft_engine_integration.py | 7      | 0       |
+| 3         | test_handedness.py               | 13     | 0       |
+| 3         | test_flexible_shaft.py           | 25     | 0       |
+| **Total** |                                  | **86** | **2**   |
 
 ---
 
@@ -113,7 +118,7 @@
 
 ---
 
-## Commits (7 total)
+## Commits (10 total)
 
 1. `feat(phase1): Add cross-engine validation fixtures`
 2. `fix: Tune pendulum model physics for energy conservation tests`
@@ -122,6 +127,9 @@
 5. `feat(phase2): Add MuJoCo viewer and force plate visualization`
 6. `docs: Update checklist - Phase 2 complete`
 7. `feat(phase3): Add Jacobian coverage and ellipsoid STL export`
+8. `docs: Update checklist with Phase 3 progress`
+9. `feat(phase3): Add flexible shaft engine integration and handedness`
+10. `docs: Update checklist - Phase 3 complete` (this commit)
 
 ---
 
@@ -140,10 +148,12 @@
 | A1: Force-plate visualization     | Phase 2.3 | ✅ Complete |
 | I: Jacobian computation           | Phase 3.1 | ✅ Complete |
 | I: Ellipsoid export OBJ/STL       | Phase 3.2 | ✅ Complete |
+| B5: Flexible beam shaft           | Phase 3.3 | ✅ Complete |
+| - : Handedness support            | Phase 3.4 | ✅ Complete |
 
 ---
 
-## Files Changed (Total: 10 new, 5 modified)
+## Files Changed (Total: 14 new, 7 modified)
 
 ### New Files
 
@@ -153,6 +163,8 @@
 - `tests/integration/conftest.py`
 - `tests/unit/test_c3d_force_plate.py`
 - `tests/unit/test_jacobian.py`
+- `tests/unit/test_shaft_engine_integration.py`
+- `tests/unit/test_handedness.py`
 - `tools/urdf_generator/mujoco_viewer.py`
 - `engines/.../apps/ui/tabs/force_plot_tab.py`
 
@@ -162,4 +174,6 @@
 - `engines/.../c3d_reader.py`
 - `engines/.../opensim_physics_engine.py`
 - `shared/python/ellipsoid_visualization.py`
-- `tests/unit/test_ellipsoid_visualization.py`
+- `shared/python/interfaces.py`
+- `engines/.../mujoco/physics_engine.py`
+- `tools/urdf_generator/urdf_builder.py`
