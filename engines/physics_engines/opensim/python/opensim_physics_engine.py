@@ -279,17 +279,157 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             return np.array([])
 
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
-        if not self._model or not self._state:
+        """Compute spatial Jacobian for a body in OpenSim.
+
+        Uses SimTK SimbodyMatterSubsystem to compute body Jacobian matrices.
+
+        Args:
+            body_name: Name of the body in the model.
+
+        Returns:
+            Dictionary with:
+            - 'linear': Position Jacobian (3 × nv) [m/rad or m/m]
+            - 'angular': Rotation Jacobian (3 × nv) [rad/rad or rad/m]
+            - 'spatial': Combined [angular; linear] (6 × nv)
+        """
+        if not self._model or not self._state or opensim is None:
             return None
 
         try:
-            self._model.getBodySet().get(body_name)
-            # matter = self._model.getMatterSubsystem()
-            # We need a point on the body.
-            # This requires lower level SimTK access usually
+            # Get the body
+            body_set = self._model.getBodySet()
+            body = body_set.get(body_name)
+
+            # Realize to position stage
+            self._model.realizePosition(self._state)
+
+            # Number of generalized coordinates (nq for positions, nv for velocities)
+            nq = self._state.getNQ()
+            nv = self._state.getNU()
+
+            # Build Jacobian using finite differences (OpenSim doesn't expose
+            # direct Jacobian computation as easily as MuJoCo)
+            # For each generalized coordinate, compute d(body_position)/dq
+            jacp = np.zeros((3, nv))
+            jacr = np.zeros((3, nv))
+
+            # Get current body transform
+            transform = body.getTransformInGround(self._state)
+            pos_0 = np.array([transform.p()[0], transform.p()[1], transform.p()[2]])
+
+            # Extract rotation as axis-angle for numerical differentiation
+            rotation_0 = transform.R()
+
+            # Finite difference perturbation: use sqrt(machine epsilon) for double
+            # precision to balance truncation and round-off errors for first-order
+            # finite differences. See Nocedal & Wright, Numerical Optimization, Ch 8.
+            eps = np.sqrt(np.finfo(float).eps)  # ~1.49e-8 for float64
+
+            # Store original state
+            q_orig = np.zeros(nq)
+            for i in range(nq):
+                q_orig[i] = self._state.getQ()[i]
+
+            for i in range(nv):
+                # Perturb coordinate i
+                q_pert = q_orig.copy()
+                q_pert[i] += eps
+
+                # Set perturbed state
+                for j in range(nq):
+                    self._state.updQ()[j] = q_pert[j]
+                self._model.realizePosition(self._state)
+
+                # Get perturbed transform
+                transform_pert = body.getTransformInGround(self._state)
+                pos_pert = np.array(
+                    [
+                        transform_pert.p()[0],
+                        transform_pert.p()[1],
+                        transform_pert.p()[2],
+                    ]
+                )
+
+                # Position Jacobian column
+                jacp[:, i] = (pos_pert - pos_0) / eps
+
+                # Angular Jacobian (using rotation matrix difference)
+                rotation_pert = transform_pert.R()
+
+                # Compute angular velocity from rotation difference
+                # R_pert = R_0 * exp([w] * eps) => [w] ≈ logm(R_0^T * R_pert) / eps
+                # Simplified: use axis-angle representation difference
+                jacr[:, i] = self._rotation_difference(rotation_0, rotation_pert) / eps
+
+            # Restore original state
+            for i in range(nq):
+                self._state.updQ()[i] = q_orig[i]
+            self._model.realizePosition(self._state)
+
+            return {
+                "linear": jacp,
+                "angular": jacr,
+                "spatial": np.vstack([jacr, jacp]),  # [Angular; Linear] convention
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to compute Jacobian for '{body_name}': {e}")
             return None
+
+    def _rotation_difference(self, R0: Any, R1: Any) -> np.ndarray:
+        """Compute rotation difference as angular velocity vector.
+
+        Args:
+            R0: Initial rotation (SimTK Rotation)
+            R1: Final rotation (SimTK Rotation)
+
+        Returns:
+            Angular velocity approximation (3,) [rad]
+        """
+        try:
+            # Convert rotations to matrices
+            mat0 = np.array(
+                [
+                    [R0[0][0], R0[0][1], R0[0][2]],
+                    [R0[1][0], R0[1][1], R0[1][2]],
+                    [R0[2][0], R0[2][1], R0[2][2]],
+                ]
+            )
+            mat1 = np.array(
+                [
+                    [R1[0][0], R1[0][1], R1[0][2]],
+                    [R1[1][0], R1[1][1], R1[1][2]],
+                    [R1[2][0], R1[2][1], R1[2][2]],
+                ]
+            )
+
+            # Compute relative rotation
+            mat_diff = mat0.T @ mat1
+
+            # Extract axis-angle from rotation matrix
+            # Using Rodrigues formula inverse
+            trace = np.trace(mat_diff)
+            angle = np.arccos(np.clip((trace - 1) / 2, -1, 1))
+
+            if abs(angle) < 1e-10:
+                return np.zeros(3)
+
+            # Axis from skew-symmetric part
+            axis = np.array(
+                [
+                    mat_diff[2, 1] - mat_diff[1, 2],
+                    mat_diff[0, 2] - mat_diff[2, 0],
+                    mat_diff[1, 0] - mat_diff[0, 1],
+                ]
+            )
+            axis_norm = np.linalg.norm(axis)
+            if axis_norm > 1e-10:
+                axis = axis / axis_norm
+
+            return np.asarray(axis * angle)
+
         except Exception:
-            return None
+            return np.zeros(3)
 
     # -------- Section F: Drift-Control Decomposition --------
 

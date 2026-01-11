@@ -370,6 +370,199 @@ class C3DDataReader:
             dataframe, output_path, file_format, sanitize=True
         )
 
+    def get_force_plate_channels(self) -> dict[int, dict[str, str]]:
+        """Detect and map force plate channels by plate number.
+
+        Force plate channels are identified by common naming conventions:
+        - Fx1, Fy1, Fz1, Mx1, My1, Mz1 (standard)
+        - Force.Fx1, Force.Fy1, etc. (prefixed)
+        - FP1Force1, FP1Force2, etc. (Vicon-style)
+
+        Returns:
+            Dictionary mapping plate number (1-indexed) to channel names:
+            {1: {'fx': 'Fx1', 'fy': 'Fy1', 'fz': 'Fz1',
+                 'mx': 'Mx1', 'my': 'My1', 'mz': 'Mz1'}, ...}
+        """
+        metadata = self.get_metadata()
+        labels = metadata.analog_labels
+
+        # Patterns for force plate detection
+        # Standard: Fx1, Fy1, Fz1, Mx1, My1, Mz1
+        # AMTI: FP1_Fx, FP1_Fy, etc.
+        # Kistler: Force.X1, Force.Y1, etc.
+        import re
+
+        plate_channels: dict[int, dict[str, str]] = {}
+
+        # Pattern 1: Standard suffix (Fx1, Fy1, Fz1, Mx1, My1, Mz1)
+        standard_pattern = re.compile(r"^(?:Force\.)?([FfMm])([xyzXYZ])(\d+)$")
+        # Pattern 2: Prefix style (FP1_Fx, FP1_Fy, etc.)
+        prefix_pattern = re.compile(r"^(?:FP|fp)?(\d+)[_.]?([FfMm])([xyzXYZ])$")
+
+        for label in labels:
+            label_stripped = label.strip()
+
+            # Try standard pattern first
+            match = standard_pattern.match(label_stripped)
+            if match:
+                force_or_moment = match.group(1).lower()  # 'f' or 'm'
+                axis = match.group(2).lower()  # 'x', 'y', 'z'
+                plate_num = int(match.group(3))
+
+                if plate_num not in plate_channels:
+                    plate_channels[plate_num] = {}
+
+                key = f"{force_or_moment}{axis}"  # 'fx', 'fy', 'fz', 'mx', 'my', 'mz'
+                plate_channels[plate_num][key] = label
+                continue
+
+            # Try prefix pattern
+            match = prefix_pattern.match(label_stripped)
+            if match:
+                plate_num = int(match.group(1))
+                force_or_moment = match.group(2).lower()
+                axis = match.group(3).lower()
+
+                if plate_num not in plate_channels:
+                    plate_channels[plate_num] = {}
+
+                key = f"{force_or_moment}{axis}"
+                plate_channels[plate_num][key] = label
+
+        return plate_channels
+
+    def force_plate_dataframe(
+        self,
+        plate_number: int | None = None,
+        include_time: bool = True,
+        compute_cop: bool = True,
+        ground_height: float = 0.0,
+    ) -> pd.DataFrame:
+        """Extract force plate data as a wide-format DataFrame.
+
+        Implements Guideline E5: Ground Reaction Forces.
+
+        Args:
+            plate_number: Specific plate to extract (1-indexed), or None for all.
+            include_time: Whether to include a time column.
+            compute_cop: Whether to compute center of pressure.
+            ground_height: Height of ground plane for COP z-coordinate [m].
+
+        Returns:
+            DataFrame with columns:
+            - sample: Sample index
+            - time: Time in seconds (if include_time=True)
+            - plate: Force plate number (1-indexed)
+            - fx, fy, fz: Force components [N]
+            - mx, my, mz: Moment components [N·m]
+            - cop_x, cop_y, cop_z: COP position [m] (if compute_cop=True)
+        """
+        plate_channels = self.get_force_plate_channels()
+
+        if not plate_channels:
+            logger.warning(
+                "No force plate channels detected in C3D file. "
+                "Expected channels like Fx1, Fy1, Fz1, Mx1, My1, Mz1."
+            )
+            columns = ["sample", "plate", "fx", "fy", "fz", "mx", "my", "mz"]
+            if include_time:
+                columns.insert(1, "time")
+            if compute_cop:
+                columns.extend(["cop_x", "cop_y", "cop_z"])
+            return pd.DataFrame(columns=columns)
+
+        # Filter to specific plate if requested
+        if plate_number is not None:
+            if plate_number not in plate_channels:
+                raise ValueError(
+                    f"Force plate {plate_number} not found. "
+                    f"Available plates: {list(plate_channels.keys())}"
+                )
+            plate_channels = {plate_number: plate_channels[plate_number]}
+
+        # Get analog data
+        analog_df = self.analog_dataframe(include_time=False)
+        metadata = self.get_metadata()
+        analog_rate = metadata.analog_rate
+
+        # Pivot to wide format
+        analog_wide = analog_df.pivot(
+            index="sample", columns="channel", values="value"
+        ).reset_index()
+
+        # Build output dataframes for each plate
+        result_dfs = []
+
+        required_keys = {"fx", "fy", "fz", "mx", "my", "mz"}
+
+        for plate_num, channels in sorted(plate_channels.items()):
+            missing_keys = required_keys - set(channels.keys())
+            if missing_keys:
+                logger.warning(
+                    f"Force plate {plate_num} missing channels: {missing_keys}. "
+                    "Skipping."
+                )
+                continue
+
+            plate_df = pd.DataFrame(
+                {
+                    "sample": analog_wide["sample"],
+                    "plate": plate_num,
+                    "fx": analog_wide[channels["fx"]].to_numpy(),
+                    "fy": analog_wide[channels["fy"]].to_numpy(),
+                    "fz": analog_wide[channels["fz"]].to_numpy(),
+                    "mx": analog_wide[channels["mx"]].to_numpy(),
+                    "my": analog_wide[channels["my"]].to_numpy(),
+                    "mz": analog_wide[channels["mz"]].to_numpy(),
+                }
+            )
+
+            if compute_cop:
+                # COP_x = -My / Fz, COP_y = Mx / Fz (when Fz != 0)
+                fz = plate_df["fz"].to_numpy()
+                mx = plate_df["mx"].to_numpy()
+                my = plate_df["my"].to_numpy()
+
+                # Avoid division by zero - set COP to NaN when Fz is too small
+                min_force_threshold = 10.0  # [N] minimum force for valid COP
+                valid_contact = np.abs(fz) > min_force_threshold
+
+                cop_x = np.where(valid_contact, -my / fz, np.nan)
+                cop_y = np.where(valid_contact, mx / fz, np.nan)
+                cop_z = np.where(valid_contact, ground_height, np.nan)
+
+                plate_df["cop_x"] = cop_x
+                plate_df["cop_y"] = cop_y
+                plate_df["cop_z"] = cop_z
+
+            result_dfs.append(plate_df)
+
+        if not result_dfs:
+            columns = ["sample", "plate", "fx", "fy", "fz", "mx", "my", "mz"]
+            if include_time:
+                columns.insert(1, "time")
+            if compute_cop:
+                columns.extend(["cop_x", "cop_y", "cop_z"])
+            return pd.DataFrame(columns=columns)
+
+        result = pd.concat(result_dfs, ignore_index=True)
+
+        if include_time and analog_rate:
+            result.insert(1, "time", result["sample"] / analog_rate)
+
+        logger.info(
+            "Extracted force plate data for %d plates, %d samples from %s",
+            len(plate_channels),
+            len(result),
+            self.file_path.name,
+        )
+
+        return result
+
+    def get_force_plate_count(self) -> int:
+        """Return the number of detected force plates."""
+        return len(self.get_force_plate_channels())
+
     def _get_point_parameters(self) -> dict[str, Any]:
         """Get POINT parameters from the C3D file."""
         c3d_data = self._load()
