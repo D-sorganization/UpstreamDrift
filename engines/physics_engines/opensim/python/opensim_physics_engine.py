@@ -426,7 +426,7 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             if axis_norm > 1e-10:
                 axis = axis / axis_norm
 
-            return axis * angle
+            return np.asarray(axis * angle)
 
         except Exception:
             return np.zeros(3)
