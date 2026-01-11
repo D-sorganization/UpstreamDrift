@@ -614,7 +614,9 @@ class GolfSwingPlotter:
         # Compute metrics
         cop_xy = cop[:, :2]
         com_xy = com[:, :2]
-        dist = np.linalg.norm(cop_xy - com_xy, axis=1)
+        # Optimization: np.hypot is faster for 2D vectors
+        diff_xy = cop_xy - com_xy
+        dist = np.hypot(diff_xy[:, 0], diff_xy[:, 1])
 
         if cop.shape[1] == 2:
             cop_z = np.zeros(len(cop))
@@ -623,7 +625,8 @@ class GolfSwingPlotter:
 
         vec_temp = com - np.column_stack((cop_xy, cop_z))
         vec: np.ndarray[tuple[int, ...], np.dtype[np.float64]] = vec_temp  # type: ignore[assignment]
-        vec_norm = np.linalg.norm(vec, axis=1)
+        # Optimization: Explicit sqrt sum is faster than np.linalg.norm
+        vec_norm = np.sqrt(np.sum(vec**2, axis=1))
         vec_norm[vec_norm < 1e-6] = 1.0
 
         cos_theta = vec[:, 2] / vec_norm
@@ -1227,7 +1230,8 @@ class GolfSwingPlotter:
         times_am, am = self._get_cached_series("angular_momentum")
         am = np.asarray(am)
         if len(times_am) > 0 and am.size > 0:
-            am_mag = np.linalg.norm(am, axis=1)
+            # Optimization: Explicit sqrt sum is faster
+            am_mag = np.sqrt(np.sum(am**2, axis=1))
             ax3.plot(
                 times_am,
                 am_mag,
@@ -2154,7 +2158,8 @@ class GolfSwingPlotter:
             return
 
         # Calculate magnitude
-        am_mag = np.linalg.norm(am_data, axis=1)
+        # Optimization: Explicit sqrt sum is faster
+        am_mag = np.sqrt(np.sum(am_data**2, axis=1))
 
         ax = fig.add_subplot(111)
 
@@ -2661,7 +2666,9 @@ class GolfSwingPlotter:
 
         # Draw vector from origin for current/max?
         # Maybe just draw a few representative vectors
-        max_idx = np.argmax(np.linalg.norm(am_data, axis=1))
+        # Optimization: Use pre-calculated magnitude if possible, or explicit
+        am_mag_sq = np.sum(am_data**2, axis=1)
+        max_idx = np.argmax(am_mag_sq)
 
         # Draw Peak Vector
         ax.plot(
@@ -3106,7 +3113,8 @@ class GolfSwingPlotter:
                     return
             else:
                 # Plot L2 norm for summary
-                norm = np.linalg.norm(acc, axis=1)
+                # Optimization: Explicit sqrt sum
+                norm = np.sqrt(np.sum(acc**2, axis=1))
                 ax.plot(
                     times,
                     norm,
@@ -3180,7 +3188,8 @@ class GolfSwingPlotter:
 
             if len(times) > 0 and acc_vec.size > 0:
                 # Plot Magnitude
-                mag = np.linalg.norm(acc_vec, axis=1)
+                # Optimization: Explicit sqrt sum
+                mag = np.sqrt(np.sum(acc_vec**2, axis=1))
 
                 # Check if it's mostly zero
                 if np.max(mag) > 1e-4 or comp == "total":
