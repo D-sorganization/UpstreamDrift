@@ -303,13 +303,25 @@ class TestCrossEngineValidationIntegration:
         # Compute Jacobians for end effector/pendulum link
         jacobians: dict[str, np.ndarray] = {}
         for eng in available_engines:
-            if eng.engine is not None:
-                # Try different body names that might exist
-                for body_name in ["end_effector", "pendulum_link", "lower_link"]:
-                    jac = eng.engine.compute_jacobian(body_name)
-                    if jac is not None and "spatial" in jac:
-                        jacobians[eng.name] = jac["spatial"]
-                        break
+            if eng.engine is None:
+                continue
+
+            # Prefer engine-provided body names when available to avoid
+            # hardcoding URDF-specific names. Fall back to common names.
+            candidate_names: list[str]
+            if hasattr(eng.engine, "get_body_names"):
+                candidate_names = list(eng.engine.get_body_names())
+            elif hasattr(eng.engine, "body_names"):
+                candidate_names = list(eng.engine.body_names)
+            else:
+                # Fallback for engines without body name API
+                candidate_names = ["end_effector", "pendulum_link", "lower_link"]
+
+            for body_name in candidate_names:
+                jac = eng.engine.compute_jacobian(body_name)
+                if jac is not None and "spatial" in jac:
+                    jacobians[eng.name] = jac["spatial"]
+                    break
 
         if len(jacobians) < 2:
             pytest.skip("Jacobian computation not available in enough engines")

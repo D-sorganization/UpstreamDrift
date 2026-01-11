@@ -3,23 +3,27 @@
 Implements Guideline E5: Ground Reaction Forces.
 """
 
-import os
+from __future__ import annotations
+
 import sys
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
 import pytest
 
-# Setup import path
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-SRC_PATH = os.path.join(
-    PROJECT_ROOT, "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src"
-)
-if SRC_PATH not in sys.path:
-    sys.path.insert(0, SRC_PATH)
-
-from c3d_reader import C3DDataReader, C3DMetadata  # noqa: E402
+# Try direct import first; fall back to path manipulation if not in PYTHONPATH
+try:
+    from c3d_reader import C3DDataReader, C3DMetadata
+except ImportError:
+    # Development path when running tests directly
+    SRC_PATH = Path(__file__).parent.parent.parent / (
+        "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src"
+    )
+    if str(SRC_PATH) not in sys.path:
+        sys.path.insert(0, str(SRC_PATH))
+    from c3d_reader import C3DDataReader, C3DMetadata  # noqa: E402
 
 
 class TestForcePlateChannelDetection:
