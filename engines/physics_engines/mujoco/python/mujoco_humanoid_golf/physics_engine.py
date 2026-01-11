@@ -407,3 +407,153 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             self.data.qpos[:] = saved_qpos
             self.data.qvel[:] = saved_qvel
             mujoco.mj_forward(self.model, self.data)
+
+    # -------- Section B5: Flexible Beam Shaft --------
+
+    def set_shaft_properties(
+        self,
+        length: float,
+        EI_profile: np.ndarray,
+        mass_profile: np.ndarray,
+        damping_ratio: float = 0.02,
+    ) -> bool:
+        """Configure flexible shaft properties (Guideline B5).
+
+        Uses modal representation with first 3 bending modes.
+
+        Args:
+            length: Total shaft length [m]
+            EI_profile: Bending stiffness at each station [N·m²] (n_stations,)
+            mass_profile: Mass per unit length at each station [kg/m] (n_stations,)
+            damping_ratio: Modal damping ratio [unitless]
+
+        Returns:
+            True if successfully configured.
+        """
+        # Store shaft configuration
+        self._shaft_config = {
+            "length": length,
+            "EI_profile": EI_profile.copy(),
+            "mass_profile": mass_profile.copy(),
+            "damping_ratio": damping_ratio,
+            "n_stations": len(EI_profile),
+        }
+
+        # Compute modal parameters using Euler-Bernoulli beam theory
+        n_modes = 3
+        modal_frequencies, mode_shapes = self._compute_shaft_modes(
+            length, EI_profile, mass_profile, n_modes
+        )
+
+        self._shaft_modes = {
+            "frequencies": modal_frequencies,
+            "mode_shapes": mode_shapes,
+            "damping_ratios": np.full(n_modes, damping_ratio),
+        }
+
+        # Initialize modal state
+        self._shaft_modal_state = {
+            "amplitudes": np.zeros(n_modes),
+            "velocities": np.zeros(n_modes),
+        }
+
+        LOGGER.info(
+            f"Configured flexible shaft: length={length:.3f}m, "
+            f"modes={n_modes}, f1={modal_frequencies[0]:.1f}Hz"
+        )
+        return True
+
+    def _compute_shaft_modes(
+        self,
+        length: float,
+        EI_profile: np.ndarray,
+        mass_profile: np.ndarray,
+        n_modes: int,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Compute shaft natural frequencies and mode shapes.
+
+        Uses Euler-Bernoulli beam theory with average properties.
+
+        Args:
+            length: Shaft length [m]
+            EI_profile: Bending stiffness [N·m²]
+            mass_profile: Linear mass density [kg/m]
+            n_modes: Number of modes to compute
+
+        Returns:
+            Tuple of (frequencies [Hz], mode_shapes (n_modes, n_stations))
+        """
+        # Use average properties for simple analytical solution
+        EI_avg = np.mean(EI_profile)
+        mu_avg = np.mean(mass_profile)  # Linear mass density [kg/m]
+
+        # Cantilever beam eigenvalues (β_n * L) for first modes
+        # From Euler-Bernoulli theory: β_n * L = [1.875, 4.694, 7.855, ...]
+        beta_L = np.array([1.875, 4.694, 7.855, 10.996, 14.137])[:n_modes]
+
+        # Natural frequencies: ω_n = β_n² * sqrt(EI/(μL⁴))
+        omega_n = (beta_L / length) ** 2 * np.sqrt(EI_avg / mu_avg)
+        frequencies = omega_n / (2 * np.pi)  # [Hz]
+
+        # Mode shapes at each station (cantilever mode shapes)
+        n_stations = len(EI_profile)
+        x = np.linspace(0, length, n_stations)
+        mode_shapes = np.zeros((n_modes, n_stations))
+
+        for i, beta in enumerate(beta_L / length):
+            # Cantilever mode shape (clamped-free)
+            cosh_bl = np.cosh(beta * length)
+            cos_bl = np.cos(beta * length)
+            sinh_bl = np.sinh(beta * length)
+            sin_bl = np.sin(beta * length)
+
+            sigma = (sinh_bl - sin_bl) / (cosh_bl - cos_bl + 1e-10)
+
+            phi = (
+                np.cosh(beta * x)
+                - np.cos(beta * x)
+                - sigma * (np.sinh(beta * x) - np.sin(beta * x))
+            )
+
+            # Normalize so max(|phi|) = 1
+            phi = phi / (np.abs(phi).max() + 1e-10)
+            mode_shapes[i, :] = phi
+
+        return frequencies, mode_shapes
+
+    def get_shaft_state(self) -> dict[str, np.ndarray] | None:
+        """Get current shaft deformation state.
+
+        Returns:
+            Dictionary with deflection, rotation, velocity, modal_amplitudes,
+            or None if shaft not configured.
+        """
+        if not hasattr(self, "_shaft_config") or not hasattr(
+            self, "_shaft_modal_state"
+        ):
+            return None
+
+        modes = self._shaft_modes
+        state = self._shaft_modal_state
+        n_stations = self._shaft_config["n_stations"]
+
+        # Reconstruct physical deflection from modal amplitudes
+        deflection = np.zeros(n_stations)
+        velocity = np.zeros(n_stations)
+
+        for i, (amp, vel) in enumerate(
+            zip(state["amplitudes"], state["velocities"], strict=True)
+        ):
+            deflection += amp * modes["mode_shapes"][i]
+            velocity += vel * modes["mode_shapes"][i]
+
+        # Rotation is derivative of deflection (approximate with finite diff)
+        dx = self._shaft_config["length"] / (n_stations - 1)
+        rotation = np.gradient(deflection, dx)
+
+        return {
+            "deflection": deflection,
+            "rotation": rotation,
+            "velocity": velocity,
+            "modal_amplitudes": state["amplitudes"].copy(),
+        }

@@ -276,3 +276,58 @@ class PhysicsEngine(Protocol):
             - Section G2: ZVCF definition in design guidelines
         """
         ...
+
+    # ---------------------------------------------------------------------------
+    # Section B5: Flexible Beam Shaft (Optional Interface)
+    # ---------------------------------------------------------------------------
+
+    def set_shaft_properties(
+        self,
+        length: float,
+        EI_profile: np.ndarray,
+        mass_profile: np.ndarray,
+        damping_ratio: float = 0.02,
+    ) -> bool:
+        """Configure flexible shaft properties (Guideline B5).
+
+        This is an OPTIONAL method. Engines that don't support flexible shafts
+        should return False.
+
+        Args:
+            length: Total shaft length [m]
+            EI_profile: Bending stiffness at each station [N·m²] (n_stations,)
+            mass_profile: Mass per unit length at each station [kg/m] (n_stations,)
+            damping_ratio: Modal damping ratio [unitless], default 0.02
+
+        Returns:
+            True if shaft properties were successfully configured, False otherwise.
+
+        Note:
+            The shaft model is engine-dependent:
+            - MuJoCo: Composite body chain with torsional joints
+            - Drake: Multibody with compliant elements
+            - Pinocchio: Modal representation
+
+        Example:
+            >>> from shared.python.flexible_shaft import create_standard_shaft, compute_EI_profile
+            >>> props = create_standard_shaft(ShaftMaterial.GRAPHITE)
+            >>> EI = compute_EI_profile(props)
+            >>> mass = compute_mass_profile(props)
+            >>> success = engine.set_shaft_properties(props.length, EI, mass)
+        """
+        # Default implementation returns False (not supported)
+        return False
+
+    def get_shaft_state(self) -> dict[str, np.ndarray] | None:
+        """Get current shaft deformation state.
+
+        Returns:
+            Dictionary with:
+            - 'deflection': Transverse deflection at each station [m] (n_stations,)
+            - 'rotation': Local rotation at each station [rad] (n_stations,)
+            - 'velocity': Transverse velocity at each station [m/s] (n_stations,)
+            - 'modal_amplitudes': Modal amplitude for each mode (n_modes,)
+
+            Returns None if shaft flexibility is not configured.
+        """
+        return None
