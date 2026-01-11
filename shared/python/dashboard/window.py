@@ -40,6 +40,10 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         """
         super().__init__()
         self.setWindowTitle(title)
+        self.setAccessibleName("Physics Dashboard Main Window")
+        self.setAccessibleDescription(
+            "Main application window containing simulation controls, live plots, and analysis tools."
+        )
         self.resize(1200, 800)
 
         self.engine = engine
@@ -47,15 +51,15 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         self.runner = SimulationRunner(self.engine, self.recorder)
         self.plotter = GolfSwingPlotter(self.recorder)
 
-        # Setup UI
-        self._setup_ui()
-        self._connect_signals()
-
         # Status bar
         self.status_label = QtWidgets.QLabel("Ready")
         status_bar = self.statusBar()
         if status_bar is not None:
             status_bar.addWidget(self.status_label)
+
+        # Setup UI
+        self._setup_ui()
+        self._connect_signals()
 
     def _setup_ui(self) -> None:
         """Create and arrange UI components."""
