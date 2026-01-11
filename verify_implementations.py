@@ -4,6 +4,7 @@ import logging
 import os
 import sys
 import unittest
+from typing import Any, cast
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -35,11 +36,17 @@ class TestPhysicsEngines(unittest.TestCase):
         engine = MyoSuitePhysicsEngine()
         # Mock internal sim
         engine.sim = MagicMock()
-        engine.sim.data.qpos = np.zeros(10)
-        engine.sim.data.qvel = np.zeros(10)
-        engine.sim.data.ctrl = np.zeros(5)
-        engine.sim.data.qacc = np.zeros(10)  # acceleration
-        engine.sim.model.nv = 10
+        # Use cast(Any, ...) to avoid mypy errors with MagicMock assignment
+        sim_data = cast(Any, MagicMock())
+        engine.sim.data = sim_data
+        sim_data.qpos = np.zeros(10)
+        sim_data.qvel = np.zeros(10)
+        sim_data.ctrl = np.zeros(5)
+        sim_data.qacc = np.zeros(10)  # acceleration
+
+        sim_model = cast(Any, MagicMock())
+        engine.sim.model = sim_model
+        sim_model.nv = 10
 
         q = np.ones(10)
         v = np.ones(10)
@@ -55,29 +62,34 @@ class TestPhysicsEngines(unittest.TestCase):
         """Test OpenSim engine has working ZTCF/ZVCF methods."""
         engine = OpenSimPhysicsEngine()
         # Mock internal model/state
-        engine._model = MagicMock()
-        engine._state = MagicMock()
-        engine._model.getNumCoordinates.return_value = 6
-        engine._model.getNumSpeeds.return_value = 6
-        engine._model.getNumControls.return_value = 3
+        # Use cast(Any, ...) to bypass type checking for mocked private attributes
+        model_mock = cast(Any, MagicMock())
+        engine._model = model_mock
+
+        state_mock = cast(Any, MagicMock())
+        engine._state = state_mock
+
+        model_mock.getNumCoordinates.return_value = 6
+        model_mock.getNumSpeeds.return_value = 6
+        model_mock.getNumControls.return_value = 3
 
         # Setup vectors for gets
         q_vec = MagicMock()
         q_vec.get.side_effect = lambda i: 0.0
-        engine._state.getQ.return_value = q_vec
+        state_mock.getQ.return_value = q_vec
 
         u_vec = MagicMock()
         u_vec.get.side_effect = lambda i: 0.0
-        engine._state.getU.return_value = u_vec
+        state_mock.getU.return_value = u_vec
 
         udot_vec = MagicMock()
         udot_vec.get.side_effect = lambda i: 0.0
-        engine._state.getUDot.return_value = udot_vec
+        state_mock.getUDot.return_value = udot_vec
 
         # Setup vector for updControls
         controls_vec = MagicMock()
         controls_vec.size.return_value = 3
-        engine._model.updControls.return_value = controls_vec
+        model_mock.updControls.return_value = controls_vec
 
         q = np.zeros(6)
         v = np.zeros(6)
