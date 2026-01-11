@@ -118,7 +118,7 @@
 
 ---
 
-## Commits (10 total)
+## Commits (13 total)
 
 1. `feat(phase1): Add cross-engine validation fixtures`
 2. `fix: Tune pendulum model physics for energy conservation tests`
@@ -129,7 +129,10 @@
 7. `feat(phase3): Add Jacobian coverage and ellipsoid STL export`
 8. `docs: Update checklist with Phase 3 progress`
 9. `feat(phase3): Add flexible shaft engine integration and handedness`
-10. `docs: Update checklist - Phase 3 complete` (this commit)
+10. `docs: Update checklist - Phase 3 complete`
+11. `refactor: Address all Copilot PR review comments (#347)`
+12. `refactor: Address remaining Copilot review comments`
+13. `docs: Finalize checklist with all Copilot fixes` (this commit)
 
 ---
 
