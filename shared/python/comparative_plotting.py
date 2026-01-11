@@ -475,3 +475,86 @@ class ComparativePlotter:
         ax.grid(True, alpha=0.3)
         ax.set_aspect("equal")
         fig.tight_layout()
+
+    def plot_bland_altman(
+        self,
+        fig: Figure,
+        field_name: str,
+        joint_idx: int | None = None,
+        title: str | None = None,
+    ) -> None:
+        """Plot Bland-Altman diagram (Difference vs Mean).
+
+        Visualizes agreement between two measurement methods.
+
+        Args:
+            fig: Matplotlib figure
+            field_name: Data field name
+            joint_idx: Optional joint index
+            title: Optional title
+        """
+        aligned = self.analyzer.align_signals(field_name, joint_idx=joint_idx)
+
+        if aligned is None:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Data not available", ha="center", va="center")
+            return
+
+        means = (aligned.signal_a + aligned.signal_b) / 2.0
+        diffs = aligned.signal_a - aligned.signal_b
+        mean_diff = np.mean(diffs)
+        std_diff = np.std(diffs)
+
+        ax = fig.add_subplot(111)
+
+        ax.scatter(means, diffs, c=self.colors["a"], alpha=0.5, s=20)
+
+        # Draw mean and Limits of Agreement (LoA = mean +/- 1.96*SD)
+        ax.axhline(mean_diff, color="black", linestyle="-", label="Mean Diff")
+        ax.axhline(
+            mean_diff + 1.96 * std_diff,
+            color="red",
+            linestyle="--",
+            label="Upper LoA (+1.96SD)",
+        )
+        ax.axhline(
+            mean_diff - 1.96 * std_diff,
+            color="red",
+            linestyle="--",
+            label="Lower LoA (-1.96SD)",
+        )
+
+        # Annotate values
+        ax.text(
+            max(means),
+            mean_diff + 1.96 * std_diff,
+            f"{mean_diff + 1.96 * std_diff:.2f}",
+            va="bottom",
+            ha="right",
+            fontsize=9,
+        )
+        ax.text(
+            max(means),
+            mean_diff - 1.96 * std_diff,
+            f"{mean_diff - 1.96 * std_diff:.2f}",
+            va="top",
+            ha="right",
+            fontsize=9,
+        )
+        ax.text(
+            max(means),
+            mean_diff,
+            f"{mean_diff:.2f}",
+            va="bottom",
+            ha="right",
+            fontsize=9,
+        )
+
+        ax.set_xlabel("Mean of two measures", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Difference (A - B)", fontsize=12, fontweight="bold")
+        ax.set_title(
+            title or f"Bland-Altman: {field_name}", fontsize=14, fontweight="bold"
+        )
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3)
+        fig.tight_layout()
