@@ -53,7 +53,7 @@ class MockPhysicsEngine(PhysicsEngine):
     def compute_coriolis_centrifugal_forces(self):
         return np.zeros(2)
 
-    def compute_inverse_dynamics(self, q, v, a):
+    def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         return np.zeros(2)
 
     def compute_forward_dynamics(self, q, v, tau):
@@ -65,15 +65,16 @@ class MockPhysicsEngine(PhysicsEngine):
     def load_from_path(self, path):
         pass
 
-    def load_from_string(self, xml_string):
+    def load_from_string(self, content: str, extension: str | None = None) -> None:
         pass
 
     @property
     def model_name(self):
         return "MockEngine"
 
-    def step(self, dt):
-        self._time += dt
+    def step(self, dt: float | None = None) -> None:
+        if dt is not None:
+            self._time += dt
 
     def reset(self):
         self._time = 0.0

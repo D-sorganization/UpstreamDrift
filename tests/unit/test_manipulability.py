@@ -146,7 +146,7 @@ class TestGetJacobianConditioning:
         J_spatial = np.eye(6)
         engine = MockEngine(jacobian_dict={"spatial": J_spatial})
 
-        kappa = get_jacobian_conditioning(engine, "test_body", warn=False)
+        kappa = get_jacobian_conditioning(engine, "test_body", warn=False)  # type: ignore[arg-type]
 
         assert kappa == pytest.approx(1.0, rel=1e-10)
 
@@ -155,7 +155,7 @@ class TestGetJacobianConditioning:
         J_linear = np.eye(3)
         engine = MockEngine(jacobian_dict={"linear": J_linear})
 
-        kappa = get_jacobian_conditioning(engine, "test_body", warn=False)
+        kappa = get_jacobian_conditioning(engine, "test_body", warn=False)  # type: ignore[arg-type]
 
         assert kappa == pytest.approx(1.0, rel=1e-10)
 
@@ -165,7 +165,7 @@ class TestGetJacobianConditioning:
         J_linear = np.diag([1.0, 1.0, 3.0])  # κ = 3
         engine = MockEngine(jacobian_dict={"spatial": J_spatial, "linear": J_linear})
 
-        kappa = get_jacobian_conditioning(engine, "test_body", warn=False)
+        kappa = get_jacobian_conditioning(engine, "test_body", warn=False)  # type: ignore[arg-type]
 
         # Should use spatial (κ=2) not linear (κ=3)
         assert kappa == pytest.approx(2.0, rel=1e-6)
@@ -175,7 +175,7 @@ class TestGetJacobianConditioning:
         engine = MockEngine(jacobian_dict=None)
 
         with caplog.at_level("WARNING"):
-            kappa = get_jacobian_conditioning(engine, "nonexistent_body", warn=False)
+            kappa = get_jacobian_conditioning(engine, "nonexistent_body", warn=False)  # type: ignore[arg-type]
 
         assert np.isinf(kappa)
         assert "not found" in caplog.text
@@ -185,7 +185,7 @@ class TestGetJacobianConditioning:
         engine = MockEngine(jacobian_dict={})
 
         with caplog.at_level("WARNING"):
-            kappa = get_jacobian_conditioning(engine, "test_body", warn=False)
+            kappa = get_jacobian_conditioning(engine, "test_body", warn=False)  # type: ignore[arg-type]
 
         assert np.isinf(kappa)
         assert "No Jacobian data" in caplog.text

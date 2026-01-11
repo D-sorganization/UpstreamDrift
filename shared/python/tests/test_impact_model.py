@@ -276,4 +276,6 @@ def test_create_impact_model():
     )
 
     with pytest.raises(ValueError):
-        create_impact_model("invalid_type")
+        # Use a type annotation to tell mypy we're testing invalid input
+        invalid_type: ImpactModelType = "invalid_type"  # type: ignore[assignment]
+        create_impact_model(invalid_type)
