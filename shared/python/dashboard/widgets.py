@@ -35,6 +35,11 @@ class LivePlotWidget(QtWidgets.QWidget):
             recorder: The data recorder instance.
         """
         super().__init__()
+        self.setAccessibleName("Live Simulation Plot")
+        self.setAccessibleDescription(
+            "Real-time plot of simulation metrics such as joint positions, velocities, and torques."
+        )
+
         self.recorder = recorder
         self._main_layout = QtWidgets.QVBoxLayout(self)
 
@@ -233,6 +238,10 @@ class ControlPanel(QtWidgets.QGroupBox):
 
     def __init__(self) -> None:
         super().__init__("Simulation Controls")
+        self.setAccessibleName("Simulation Control Panel")
+        self.setAccessibleDescription(
+            "Controls for starting, pausing, stopping, and resetting the simulation playback."
+        )
 
         layout = QtWidgets.QHBoxLayout(self)
         style = self.style()
