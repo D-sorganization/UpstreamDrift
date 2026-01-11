@@ -21,6 +21,7 @@ import numpy as np
 import pytest
 
 from shared.python.constants import GRAVITY_M_S2
+from tests.fixtures.fixtures_lib import _check_mujoco_available
 
 logger = logging.getLogger(__name__)
 
@@ -75,18 +76,6 @@ ACTUATED_PENDULUM_XML = """
 ROD_LENGTH_M = 1.0  # [m]
 ROD_MASS_KG = 1.0  # [kg]
 ROD_INERTIA_KGM2 = (1.0 / 3.0) * ROD_MASS_KG * ROD_LENGTH_M**2  # [kg·m²] about pivot
-
-
-def _check_mujoco_available() -> bool:
-    """Check if MuJoCo is available and not mocked."""
-    try:
-        import mujoco
-
-        if not hasattr(mujoco, "__version__"):
-            return False
-        return True
-    except ImportError:
-        return False
 
 
 def _compute_pendulum_energy(model: Any, data: Any) -> tuple[float, float, float]:

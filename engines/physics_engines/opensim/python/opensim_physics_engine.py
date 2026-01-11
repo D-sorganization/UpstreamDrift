@@ -320,8 +320,10 @@ class OpenSimPhysicsEngine(PhysicsEngine):
             # Extract rotation as axis-angle for numerical differentiation
             rotation_0 = transform.R()
 
-            # Finite difference perturbation
-            eps = 1e-7
+            # Finite difference perturbation: use sqrt(machine epsilon) for double
+            # precision to balance truncation and round-off errors for first-order
+            # finite differences. See Nocedal & Wright, Numerical Optimization, Ch 8.
+            eps = np.sqrt(np.finfo(float).eps)  # ~1.49e-8 for float64
 
             # Store original state
             q_orig = np.zeros(nq)

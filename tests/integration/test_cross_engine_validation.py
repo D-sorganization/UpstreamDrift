@@ -16,14 +16,13 @@ import numpy as np
 import pytest
 
 from shared.python.cross_engine_validator import CrossEngineValidator
-
-from . import conftest
-
-# Re-export for local use
-TOLERANCE_ACCELERATION_M_S2: float = conftest.TOLERANCE_ACCELERATION_M_S2
-TOLERANCE_JACOBIAN: float = conftest.TOLERANCE_JACOBIAN
-compute_accelerations = conftest.compute_accelerations
-set_identical_state = conftest.set_identical_state
+from tests.fixtures.fixtures_lib import (
+    TOLERANCE_ACCELERATION_M_S2,
+    TOLERANCE_JACOBIAN,
+    compute_accelerations,
+    set_identical_state,
+    skip_if_insufficient_engines,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -168,16 +167,6 @@ class TestCrossEngineValidator:
         assert severity == "BLOCKER"
 
 
-def _skip_if_insufficient_engines(engines: list[Any], min_count: int = 2) -> None:
-    """Skip test if insufficient engines are available."""
-    available = [e for e in engines if e.available]
-    if len(available) < min_count:
-        pytest.skip(
-            f"Need at least {min_count} engines for cross-validation, "
-            f"got {len(available)}: {[e.name for e in available]}"
-        )
-
-
 @pytest.mark.integration
 class TestCrossEngineValidationIntegration:
     """Integration tests comparing actual physics engine outputs.
@@ -198,7 +187,7 @@ class TestCrossEngineValidationIntegration:
         Tolerance: acceleration ±1e-4 m/s² per P3.
         """
         engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
-        _skip_if_insufficient_engines(engines)
+        skip_if_insufficient_engines(engines)
 
         validator = CrossEngineValidator()
         available_engines = [e for e in engines if e.available]
@@ -247,7 +236,7 @@ class TestCrossEngineValidationIntegration:
         Tolerance: RMS < 10% per P3.
         """
         engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
-        _skip_if_insufficient_engines(engines)
+        skip_if_insufficient_engines(engines)
 
         validator = CrossEngineValidator()
         available_engines = [e for e in engines if e.available]
@@ -300,7 +289,7 @@ class TestCrossEngineValidationIntegration:
         Tolerance: ±1e-8 element-wise per P3.
         """
         engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
-        _skip_if_insufficient_engines(engines)
+        skip_if_insufficient_engines(engines)
 
         validator = CrossEngineValidator()
         available_engines = [e for e in engines if e.available]
@@ -358,7 +347,7 @@ class TestCrossEngineValidationIntegration:
         Per Guideline G1: ZTCF isolates drift dynamics.
         """
         engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
-        _skip_if_insufficient_engines(engines)
+        skip_if_insufficient_engines(engines)
 
         validator = CrossEngineValidator()
         available_engines = [e for e in engines if e.available]
@@ -411,7 +400,7 @@ class TestCrossEngineValidationIntegration:
         Per Guideline G2: ZVCF isolates configuration-dependent dynamics.
         """
         engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
-        _skip_if_insufficient_engines(engines)
+        skip_if_insufficient_engines(engines)
 
         validator = CrossEngineValidator()
         available_engines = [e for e in engines if e.available]
@@ -460,7 +449,7 @@ class TestCrossEngineValidationIntegration:
     ) -> None:
         """Validate mass matrices agree across engines."""
         engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
-        _skip_if_insufficient_engines(engines)
+        skip_if_insufficient_engines(engines)
 
         validator = CrossEngineValidator()
         available_engines = [e for e in engines if e.available]

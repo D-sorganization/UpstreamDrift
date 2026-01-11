@@ -214,8 +214,11 @@ class MuJoCoOffscreenRenderer:
             self._model = mujoco.MjModel.from_xml_string(mjcf_content)
             self._data = mujoco.MjData(self._model)
 
-            # Create renderer
-            self._renderer = mujoco.Renderer(self._model, self.height, self.width)
+            # Create renderer (args: model, width, height)
+            self._renderer = mujoco.Renderer(self._model, self.width, self.height)
+
+            # Initialize persistent camera for efficiency
+            self._camera = mujoco.MjvCamera()
 
             # Forward kinematics to set initial positions
             mujoco.mj_forward(self._model, self._data)
@@ -239,17 +242,17 @@ class MuJoCoOffscreenRenderer:
             return None
 
         try:
-            # Update camera
+            # Configure camera parameters before scene update
+            self._camera.azimuth = self.azimuth
+            self._camera.elevation = self.elevation
+            self._camera.distance = self.distance
+            self._camera.lookat[:] = self.lookat
+
+            # Update scene with configured camera
             self._renderer.update_scene(
                 self._data,
-                camera=mujoco.MjvCamera(),
+                camera=self._camera,
             )
-
-            # Set camera parameters
-            self._renderer._camera.azimuth = self.azimuth
-            self._renderer._camera.elevation = self.elevation
-            self._renderer._camera.distance = self.distance
-            self._renderer._camera.lookat[:] = self.lookat
 
             # Render to RGB array
             image = self._renderer.render()
