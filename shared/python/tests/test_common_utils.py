@@ -19,6 +19,7 @@ from shared.python.common_utils import (
     save_golf_data,
     standardize_joint_angles,
 )
+from shared.python.constants import MPS_TO_MPH
 
 
 class TestCommonUtils:
@@ -74,6 +75,11 @@ class TestCommonUtils:
         assert "j1" in df.columns
         assert "j2" in df.columns
         assert len(df) == 10
+        assert df["time"].iloc[-1] == pytest.approx(0.09)  # 0 to 9 * 0.01
+
+        # Test with custom time step
+        df_custom = standardize_joint_angles(angles, ["j1", "j2"], time_step=0.001)
+        assert df_custom["time"].iloc[-1] == pytest.approx(0.009)
 
     def test_plot_joint_trajectories(self, tmp_path):
         """Test plotting function."""
@@ -98,7 +104,8 @@ class TestCommonUtils:
         assert convert_units(np.pi, "rad", "deg") == pytest.approx(180)
         assert convert_units(1, "m", "mm") == 1000
         assert convert_units(1000, "mm", "m") == 1
-        assert convert_units(10, "m/s", "mph") == pytest.approx(22.37)
+        # Use constant for precise check
+        assert convert_units(10, "m/s", "mph") == pytest.approx(10 * float(MPS_TO_MPH))
 
         with pytest.raises(ValueError, match="Conversion from.*not supported"):
             convert_units(1, "kg", "lbs")
