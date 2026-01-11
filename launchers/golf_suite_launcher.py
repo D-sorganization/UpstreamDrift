@@ -13,13 +13,14 @@ import sys
 from pathlib import Path
 
 try:
-    from PyQt6 import QtCore, QtWidgets
+    from PyQt6 import QtCore, QtGui, QtWidgets
 
     PYQT_AVAILABLE = True
 except ImportError:
     PYQT_AVAILABLE = False
     QtWidgets = None  # type: ignore
     QtCore = None  # type: ignore
+    QtGui = None  # type: ignore
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("GolfSuiteLauncher")
@@ -128,16 +129,16 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         log_controls = QtWidgets.QHBoxLayout()
         log_controls.addStretch()
 
-        copy_btn = QtWidgets.QPushButton("&Copy Log")
-        copy_btn.setIcon(
+        self.copy_btn = QtWidgets.QPushButton("&Copy Log")
+        self.copy_btn.setIcon(
             self.style().standardIcon(
                 QtWidgets.QStyle.StandardPixmap.SP_DialogSaveButton
             )
         )
-        copy_btn.setToolTip("Copy the simulation log to clipboard")
-        copy_btn.setAccessibleName("Copy Log")
-        copy_btn.clicked.connect(self.copy_log)
-        log_controls.addWidget(copy_btn)
+        self.copy_btn.setToolTip("Copy the simulation log to clipboard")
+        self.copy_btn.setAccessibleName("Copy Log")
+        self.copy_btn.clicked.connect(self.copy_log)
+        log_controls.addWidget(self.copy_btn)
 
         clear_btn = QtWidgets.QPushButton("C&lear Log")
         clear_btn.setIcon(
@@ -172,7 +173,36 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         if clipboard is not None:
             clipboard.setText(self.log_text.toPlainText())
             self.log_message("Log copied to clipboard.")
+
+            # Provide immediate feedback on the button
+            # We use hardcoded defaults for restoration to prevent race conditions
+            # where rapid clicks capture "Copied!" as the original text.
+            default_text = "&Copy Log"
+            default_icon = self.style().standardIcon(
+                QtWidgets.QStyle.StandardPixmap.SP_DialogSaveButton
+            )
+
+            self.copy_btn.setText("Copied!")
+            self.copy_btn.setIcon(
+                self.style().standardIcon(
+                    QtWidgets.QStyle.StandardPixmap.SP_DialogApplyButton
+                )
+            )
+
+            # Restore button after 2 seconds
+            QtCore.QTimer.singleShot(
+                2000, lambda: self._restore_copy_btn(default_text, default_icon)
+            )
+
+            # Status bar update (clear after 3 seconds)
             self.status.setText("Log copied")
+            QtCore.QTimer.singleShot(3000, lambda: self.status.setText("Ready"))
+
+    def _restore_copy_btn(self, text: str, icon: object) -> None:
+        if self.copy_btn:
+            self.copy_btn.setText(text)
+            if icon is not None:
+                self.copy_btn.setIcon(icon)  # type: ignore
 
     def clear_log(self) -> None:
         """Clear the log text area."""
