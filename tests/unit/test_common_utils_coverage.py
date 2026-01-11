@@ -22,8 +22,8 @@ def test_convert_units():
     assert convert_units(np.pi, "rad", "deg") == pytest.approx(180)
     assert convert_units(1, "m", "mm") == 1000
     assert convert_units(1000, "mm", "m") == 1
-    assert convert_units(10, "m/s", "mph") == pytest.approx(22.37)
-    assert convert_units(22.37, "mph", "m/s") == pytest.approx(10)
+    assert convert_units(10, "m/s", "mph") == pytest.approx(22.3694, rel=1e-4)
+    assert convert_units(22.3694, "mph", "m/s") == pytest.approx(10, rel=1e-4)
 
     with pytest.raises(ValueError, match="not supported"):
         convert_units(1, "kg", "lb")
