@@ -487,8 +487,10 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         EI_avg = np.mean(EI_profile)
         mu_avg = np.mean(mass_profile)  # Linear mass density [kg/m]
 
-        # Cantilever beam eigenvalues (β_n * L) for first modes
-        # From Euler-Bernoulli theory: β_n * L = [1.875, 4.694, 7.855, ...]
+        # Cantilever beam eigenvalues (β_n * L) for first bending modes
+        # Standard clamped-free Euler-Bernoulli beam values.
+        # Source: S. S. Rao, "Mechanical Vibrations", 5th ed., Pearson, 2011,
+        # Table 8.2: Dimensionless frequency parameters for cantilever beams.
         beta_L = np.array([1.875, 4.694, 7.855, 10.996, 14.137])[:n_modes]
 
         # Natural frequencies: ω_n = β_n² * sqrt(EI/(μL⁴))

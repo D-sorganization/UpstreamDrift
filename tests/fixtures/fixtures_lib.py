@@ -272,6 +272,13 @@ def compute_accelerations(engines: list[EngineInstance]) -> dict[str, np.ndarray
 
     Returns:
         Dictionary mapping engine names to acceleration arrays.
+
+    Note:
+        This computes drift acceleration (ZTCF) with zero control input.
+        The equations of motion are: M(q) * qacc = tau - bias(q, v)
+        For tau = 0: qacc = -M(q)^{-1} * bias(q, v)
+        The negative sign follows from the bias-force convention used by
+        MuJoCo, Drake, and Pinocchio.
     """
     accelerations = {}
     for eng in engines:
@@ -282,7 +289,28 @@ def compute_accelerations(engines: list[EngineInstance]) -> dict[str, np.ndarray
             M = eng.engine.compute_mass_matrix()
             bias = eng.engine.compute_bias_forces()
             if M.size > 0 and bias.size > 0:
-                # qacc = -M^-1 * bias (for zero control input)
+                # NOTE: The leading minus sign follows the bias-force convention
+                # For tau = 0: M * qacc = -bias => qacc = -M^-1 * bias
                 qacc = -np.linalg.solve(M, bias)
                 accelerations[eng.name] = qacc
     return accelerations
+
+
+def skip_if_insufficient_engines(
+    engines: list[EngineInstance], min_count: int = 2
+) -> None:
+    """Skip test if insufficient engines are available.
+
+    Args:
+        engines: List of engine instances to check.
+        min_count: Minimum required engines (default 2 for cross-validation).
+
+    Raises:
+        pytest.skip: If fewer than min_count engines are available.
+    """
+    available = [e for e in engines if e.available]
+    if len(available) < min_count:
+        pytest.skip(
+            f"Need at least {min_count} engines for cross-validation, "
+            f"got {len(available)}: {[e.name for e in available]}"
+        )
