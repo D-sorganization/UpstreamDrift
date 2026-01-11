@@ -47,15 +47,15 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         self.runner = SimulationRunner(self.engine, self.recorder)
         self.plotter = GolfSwingPlotter(self.recorder)
 
-        # Setup UI
-        self._setup_ui()
-        self._connect_signals()
-
         # Status bar
         self.status_label = QtWidgets.QLabel("Ready")
         status_bar = self.statusBar()
         if status_bar is not None:
             status_bar.addWidget(self.status_label)
+
+        # Setup UI
+        self._setup_ui()
+        self._connect_signals()
 
     def _setup_ui(self) -> None:
         """Create and arrange UI components."""
@@ -113,6 +113,14 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                 "Club Head Speed",
                 "Angular Momentum",
                 "Power Flow",
+                "Joint Power Curves",
+                "Impulse Accumulation",
+                "Phase Diagram (Joint 0)",
+                "Stability Diagram (CoM vs CoP)",
+                "CoP Trajectory",
+                "GRF Butterfly Diagram",
+                "Club Head Trajectory (3D)",
+                "Summary Dashboard",
             ]
         )
         layout.addWidget(self.plot_type_combo)
@@ -212,20 +220,41 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         plot_type = self.plot_type_combo.currentText()
         self.static_canvas.fig.clear()
 
-        if plot_type == "Joint Angles":
-            self.plotter.plot_joint_angles(self.static_canvas.fig)
-        elif plot_type == "Joint Velocities":
-            self.plotter.plot_joint_velocities(self.static_canvas.fig)
-        elif plot_type == "Joint Torques":
-            self.plotter.plot_joint_torques(self.static_canvas.fig)
-        elif plot_type == "Energies":
-            self.plotter.plot_energy_analysis(self.static_canvas.fig)
-        elif plot_type == "Club Head Speed":
-            self.plotter.plot_club_head_speed(self.static_canvas.fig)
-        elif plot_type == "Angular Momentum":
-            self.plotter.plot_angular_momentum(self.static_canvas.fig)
-        elif plot_type == "Power Flow":
-            self.plotter.plot_power_flow(self.static_canvas.fig)
+        try:
+            if plot_type == "Joint Angles":
+                self.plotter.plot_joint_angles(self.static_canvas.fig)
+            elif plot_type == "Joint Velocities":
+                self.plotter.plot_joint_velocities(self.static_canvas.fig)
+            elif plot_type == "Joint Torques":
+                self.plotter.plot_joint_torques(self.static_canvas.fig)
+            elif plot_type == "Energies":
+                self.plotter.plot_energy_analysis(self.static_canvas.fig)
+            elif plot_type == "Club Head Speed":
+                self.plotter.plot_club_head_speed(self.static_canvas.fig)
+            elif plot_type == "Angular Momentum":
+                self.plotter.plot_angular_momentum(self.static_canvas.fig)
+            elif plot_type == "Power Flow":
+                self.plotter.plot_power_flow(self.static_canvas.fig)
+            elif plot_type == "Joint Power Curves":
+                self.plotter.plot_joint_power_curves(self.static_canvas.fig)
+            elif plot_type == "Impulse Accumulation":
+                self.plotter.plot_impulse_accumulation(self.static_canvas.fig)
+            elif plot_type == "Phase Diagram (Joint 0)":
+                self.plotter.plot_phase_diagram(self.static_canvas.fig, joint_idx=0)
+            elif plot_type == "Stability Diagram (CoM vs CoP)":
+                self.plotter.plot_stability_diagram(self.static_canvas.fig)
+            elif plot_type == "CoP Trajectory":
+                self.plotter.plot_cop_trajectory(self.static_canvas.fig)
+            elif plot_type == "GRF Butterfly Diagram":
+                self.plotter.plot_grf_butterfly_diagram(self.static_canvas.fig)
+            elif plot_type == "Club Head Trajectory (3D)":
+                self.plotter.plot_club_head_trajectory(self.static_canvas.fig)
+            elif plot_type == "Summary Dashboard":
+                self.plotter.plot_summary_dashboard(self.static_canvas.fig)
+        except Exception as e:
+            ax = self.static_canvas.fig.add_subplot(111)
+            ax.text(0.5, 0.5, f"Plot Error: {e}", ha="center", va="center")
+            LOGGER.error(f"Error generating static plot '{plot_type}': {e}")
 
         self.static_canvas.draw()
 
