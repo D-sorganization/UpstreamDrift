@@ -3927,3 +3927,177 @@ class GolfSwingPlotter:
             fontsize=14,
             fontweight="bold",
         )
+
+    def plot_joint_stiffness(
+        self,
+        fig: Figure,
+        joint_idx: int = 0,
+        ax: Axes | None = None,
+    ) -> None:
+        """Plot joint stiffness (moment-angle relationship).
+
+        Shows the torque vs. angle relationship for a given joint, including
+        a regression line to estimate stiffness and the path trajectory.
+
+        Args:
+            fig: Matplotlib figure to plot on
+            joint_idx: Index of the joint to analyze
+            ax: Optional Axes object. If None, creates new subplot(111).
+        """
+        times, positions = self._get_cached_series("joint_positions")
+        _, torques = self._get_cached_series("joint_torques")
+
+        positions = np.asarray(positions)
+        torques = np.asarray(torques)
+
+        if ax is None:
+            ax = fig.add_subplot(111)
+
+        if (
+            len(times) == 0
+            or positions.ndim < 2
+            or torques.ndim < 2
+            or joint_idx >= positions.shape[1]
+            or joint_idx >= torques.shape[1]
+        ):
+            ax.text(0.5, 0.5, "Insufficient data", ha="center", va="center")
+            return
+
+        theta = np.rad2deg(positions[:, joint_idx])
+        tau = torques[:, joint_idx]
+
+        # Scatter plot with time coloring
+        sc = ax.scatter(theta, tau, c=times, cmap="viridis", s=30, alpha=0.7)
+
+        # Plot trajectory line
+        ax.plot(theta, tau, color="gray", alpha=0.3, linewidth=1)
+
+        # Linear regression for stiffness
+        if len(theta) > 2:
+            from scipy.stats import linregress
+
+            slope, intercept, r_value, _, _ = linregress(theta, tau)
+            theta_line = np.array([theta.min(), theta.max()])
+            tau_line = slope * theta_line + intercept
+            ax.plot(
+                theta_line,
+                tau_line,
+                "r--",
+                linewidth=2,
+                label=f"K={slope:.2f} Nm/deg, R²={r_value**2:.3f}",
+            )
+            ax.legend(loc="best")
+
+        joint_name = self.get_joint_name(joint_idx)
+        ax.set_xlabel(f"{joint_name} Angle (deg)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Torque (Nm)", fontsize=12, fontweight="bold")
+        ax.set_title(f"Joint Stiffness: {joint_name}", fontsize=14, fontweight="bold")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        fig.colorbar(sc, ax=ax, label="Time (s)")
+        fig.tight_layout()
+
+    def plot_dynamic_stiffness(
+        self,
+        fig: Figure,
+        joint_idx: int = 0,
+        window_size: int = 20,
+    ) -> None:
+        """Plot dynamic (time-varying) stiffness with R² quality metric.
+
+        Computes rolling-window stiffness estimation and plots both
+        stiffness and R² over time using twin axes.
+
+        Args:
+            fig: Matplotlib figure to plot on
+            joint_idx: Index of the joint to analyze
+            window_size: Number of samples for rolling regression window
+        """
+        times, positions = self._get_cached_series("joint_positions")
+        _, torques = self._get_cached_series("joint_torques")
+
+        positions = np.asarray(positions)
+        torques = np.asarray(torques)
+
+        if (
+            len(times) < window_size
+            or positions.ndim < 2
+            or torques.ndim < 2
+            or joint_idx >= positions.shape[1]
+            or joint_idx >= torques.shape[1]
+        ):
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Insufficient data", ha="center", va="center")
+            return
+
+        theta = np.rad2deg(positions[:, joint_idx])
+        tau = torques[:, joint_idx]
+
+        # Compute rolling stiffness
+        from scipy.stats import linregress
+
+        n_windows = len(theta) - window_size + 1
+        t_centers = np.zeros(n_windows)
+        k_values = np.zeros(n_windows)
+        r2_values = np.zeros(n_windows)
+
+        for i in range(n_windows):
+            window_theta = theta[i : i + window_size]
+            window_tau = tau[i : i + window_size]
+            t_centers[i] = times[i + window_size // 2]
+
+            if np.std(window_theta) > 1e-6:  # Avoid degenerate windows
+                slope, _, r_value, _, _ = linregress(window_theta, window_tau)
+                k_values[i] = slope
+                r2_values[i] = r_value**2
+            else:
+                k_values[i] = 0.0
+                r2_values[i] = 0.0
+
+        # Create twin axes plot
+        ax1 = fig.add_subplot(111)
+
+        line1 = ax1.plot(
+            t_centers,
+            k_values,
+            color=self.colors["primary"],
+            linewidth=2,
+            label="Stiffness K",
+        )
+        ax1.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax1.set_ylabel(
+            "Stiffness (Nm/deg)",
+            fontsize=12,
+            fontweight="bold",
+            color=self.colors["primary"],
+        )
+        ax1.tick_params(axis="y", labelcolor=self.colors["primary"])
+
+        ax2 = ax1.twinx()
+        line2 = ax2.plot(
+            t_centers,
+            r2_values,
+            color=self.colors["quaternary"],
+            linewidth=2,
+            linestyle="--",
+            label="R² Quality",
+        )
+        ax2.set_ylabel(
+            "R² Quality",
+            fontsize=12,
+            fontweight="bold",
+            color=self.colors["quaternary"],
+        )
+        ax2.tick_params(axis="y", labelcolor=self.colors["quaternary"])
+        ax2.set_ylim(0, 1.05)
+
+        lns = line1 + line2
+        labs: list[str] = [str(ln.get_label()) for ln in lns]
+        ax1.legend(lns, labs, loc="best")
+
+        joint_name = self.get_joint_name(joint_idx)
+        ax1.set_title(
+            f"Dynamic Stiffness: {joint_name}", fontsize=14, fontweight="bold"
+        )
+        ax1.grid(True, alpha=0.3)
+
+        fig.tight_layout()
