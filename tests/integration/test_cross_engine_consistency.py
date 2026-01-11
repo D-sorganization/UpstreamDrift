@@ -16,51 +16,21 @@ import numpy as np
 import pytest
 
 from shared.python.cross_engine_validator import CrossEngineValidator
-
-from . import conftest
-
-# Re-export for local use
-TOLERANCE_ACCELERATION_M_S2: float = conftest.TOLERANCE_ACCELERATION_M_S2
-compute_accelerations = conftest.compute_accelerations
-set_identical_state = conftest.set_identical_state
+from tests.fixtures.fixtures_lib import (
+    TOLERANCE_ACCELERATION_M_S2,
+    _check_drake_available,
+    _check_mujoco_available,
+    _check_pinocchio_available,
+    compute_accelerations,
+    set_identical_state,
+    skip_if_insufficient_engines,
+)
 
 LOGGER = logging.getLogger(__name__)
 
-
-def _check_mujoco_available() -> bool:
-    """Check if MuJoCo is available and not mocked."""
-    try:
-        import mujoco
-
-        if not hasattr(mujoco, "__version__"):
-            return False
-        return True
-    except ImportError:
-        return False
-
-
-def _check_drake_available() -> bool:
-    """Check if Drake is available and not mocked."""
-    try:
-        import pydrake
-
-        if not hasattr(pydrake, "__version__"):
-            return False
-        return True
-    except ImportError:
-        return False
-
-
-def _check_pinocchio_available() -> bool:
-    """Check if Pinocchio is available and not mocked."""
-    try:
-        import pinocchio
-
-        if not hasattr(pinocchio, "__version__"):
-            return False
-        return True
-    except ImportError:
-        return False
+# Tolerance multiplier for triangulation outlier detection
+# A relaxed 10x threshold is used to identify engines with systematic deviations
+TRIANGULATION_TOLERANCE_MULTIPLIER = 10.0
 
 
 def _get_available_engine_count() -> int:
@@ -73,16 +43,6 @@ def _get_available_engine_count() -> int:
     if _check_pinocchio_available():
         count += 1
     return count
-
-
-def _skip_if_insufficient_engines(engines: list[Any], min_count: int = 2) -> None:
-    """Skip test if insufficient engines are available."""
-    available = [e for e in engines if e.available]
-    if len(available) < min_count:
-        pytest.skip(
-            f"Need at least {min_count} engines for cross-validation, "
-            f"got {len(available)}: {[e.name for e in available]}"
-        )
 
 
 @pytest.mark.integration
@@ -105,7 +65,7 @@ class TestCrossEngineConsistency:
         Tolerance: Position-level (tight) per P3.
         """
         engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
-        _skip_if_insufficient_engines(engines)
+        skip_if_insufficient_engines(engines)
 
         available = [e for e in engines if e.available]
         validator = CrossEngineValidator()
@@ -153,7 +113,7 @@ class TestCrossEngineConsistency:
         Tolerance: Torque-level per P3 (±1e-3 N·m).
         """
         engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
-        _skip_if_insufficient_engines(engines)
+        skip_if_insufficient_engines(engines)
 
         available = [e for e in engines if e.available]
         validator = CrossEngineValidator()
@@ -204,7 +164,7 @@ class TestCrossEngineConsistency:
         With non-zero velocity, includes Coriolis/centrifugal terms.
         """
         engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
-        _skip_if_insufficient_engines(engines)
+        skip_if_insufficient_engines(engines)
 
         available = [e for e in engines if e.available]
         validator = CrossEngineValidator()
@@ -256,7 +216,7 @@ class TestCrossEngineConsistency:
         Per Guideline M2: Gold-standard test motions.
         """
         engines = [mujoco_pendulum, drake_pendulum, pinocchio_pendulum]
-        _skip_if_insufficient_engines(engines)
+        skip_if_insufficient_engines(engines)
 
         available = [e for e in engines if e.available]
         validator = CrossEngineValidator()
@@ -315,11 +275,15 @@ class TestCrossEngineConsistency:
                 )
 
                 # Allow WARNING for trajectory tests (integration differences)
+                # ERROR (>5x tolerance) indicates unacceptable systematic deviation
                 assert pos_result.severity in [
                     "PASSED",
                     "WARNING",
-                    "ERROR",
                 ], f"Trajectory position mismatch: {pos_result.message}"
+                assert vel_result.severity in [
+                    "PASSED",
+                    "WARNING",
+                ], f"Trajectory velocity mismatch: {vel_result.message}"
 
 
 @pytest.mark.integration
