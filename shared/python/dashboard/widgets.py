@@ -230,6 +230,9 @@ class LivePlotWidget(QtWidgets.QWidget):
             data = np.linalg.norm(data, axis=1).reshape(-1, 1)
             dim_label = "Norm"
 
+        # Type assertion: data is guaranteed non-None at this point (we returned early above)
+        assert data is not None
+
         # Limit to recent history to keep it fast
         max_points = 500
         if len(times) > max_points:

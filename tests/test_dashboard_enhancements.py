@@ -1,7 +1,8 @@
-
+# Add repo root to path
+import os
 import sys
 import unittest
-from unittest.mock import MagicMock, patch
+
 import numpy as np
 
 # Mock PyQt6 to run in headless environment
@@ -9,16 +10,15 @@ import numpy as np
 # but we need the classes to exist.
 # The `widgets.py` and `window.py` import PyQt6, so we must rely on installed packages.
 # However, running them in a headless env requires QT_QPA_PLATFORM=offscreen, which is set in memory.
-from PyQt6 import QtWidgets, QtCore
+from PyQt6 import QtWidgets
 
-# Add repo root to path
-import os
 sys.path.append(os.getcwd())
 
 from shared.python.dashboard.recorder import GenericPhysicsRecorder
 from shared.python.dashboard.widgets import LivePlotWidget
 from shared.python.dashboard.window import UnifiedDashboardWindow
 from shared.python.interfaces import PhysicsEngine
+
 
 # Mock Physics Engine
 class MockPhysicsEngine(PhysicsEngine):
@@ -31,8 +31,12 @@ class MockPhysicsEngine(PhysicsEngine):
     def model_name(self) -> str:
         return "MockModel"
 
-    def load_from_path(self, path: str) -> None: pass
-    def load_from_string(self, content: str, extension: str | None = None) -> None: pass
+    def load_from_path(self, path: str) -> None:
+        pass
+
+    def load_from_string(self, content: str, extension: str | None = None) -> None:
+        pass
+
     def reset(self) -> None:
         self._time = 0.0
         self._q = np.zeros(10)
@@ -43,30 +47,62 @@ class MockPhysicsEngine(PhysicsEngine):
         self._q += 0.01
         self._v += 0.01
 
-    def forward(self) -> None: pass
-    def get_state(self): return self._q, self._v
-    def set_state(self, q, v) -> None: self._q = q; self._v = v
-    def set_control(self, u) -> None: pass
-    def get_time(self) -> float: return self._time
-    def compute_mass_matrix(self): return np.eye(10)
-    def compute_bias_forces(self): return np.zeros(10)
-    def compute_gravity_forces(self): return np.zeros(10)
-    def compute_inverse_dynamics(self, qacc): return np.zeros(10)
-    def compute_jacobian(self, body_name): return None
-    def compute_drift_acceleration(self): return np.zeros(10)
-    def compute_control_acceleration(self, tau): return np.zeros(10)
-    def compute_ztcf(self, q, v): return np.zeros(10)
-    def compute_zvcf(self, q): return np.zeros(10)
+    def forward(self) -> None:
+        pass
+
+    def get_state(self):
+        return self._q, self._v
+
+    def set_state(self, q, v) -> None:
+        self._q = q
+        self._v = v
+
+    def set_control(self, u) -> None:
+        pass
+
+    def get_time(self) -> float:
+        return self._time
+
+    def compute_mass_matrix(self):
+        return np.eye(10)
+
+    def compute_bias_forces(self):
+        return np.zeros(10)
+
+    def compute_gravity_forces(self):
+        return np.zeros(10)
+
+    def compute_inverse_dynamics(self, qacc):
+        return np.zeros(10)
+
+    def compute_jacobian(self, body_name):
+        return None
+
+    def compute_drift_acceleration(self):
+        return np.zeros(10)
+
+    def compute_control_acceleration(self, tau):
+        return np.zeros(10)
+
+    def compute_ztcf(self, q, v):
+        return np.zeros(10)
+
+    def compute_zvcf(self, q):
+        return np.zeros(10)
 
 
 class TestDashboardEnhancements(unittest.TestCase):
+    app: QtWidgets.QApplication | None = None
+
     @classmethod
     def setUpClass(cls):
         # Create a QApplication instance for widgets
         if not QtWidgets.QApplication.instance():
             cls.app = QtWidgets.QApplication([])
         else:
-            cls.app = QtWidgets.QApplication.instance()
+            # Cast to QApplication since we know we created QApplication above
+            existing = QtWidgets.QApplication.instance()
+            cls.app = existing if isinstance(existing, QtWidgets.QApplication) else None
 
     def setUp(self):
         self.engine = MockPhysicsEngine()
@@ -75,12 +111,14 @@ class TestDashboardEnhancements(unittest.TestCase):
 
         # Populate recorder with some dummy data
         # self.recorder._initialize_array_buffers(np.zeros(10), np.zeros(10))
-        for i in range(10):
+        for _ in range(10):
             self.engine.step()
             self.recorder.record_step()
 
         # Manually populate induced acceleration for testing
-        self.recorder.data["induced_accelerations"][0] = np.random.rand(100, 10) # Source 0
+        self.recorder.data["induced_accelerations"][0] = np.random.rand(
+            100, 10
+        )  # Source 0
 
     def test_live_plot_widget_modes(self):
         """Test LivePlotWidget new modes."""
@@ -159,6 +197,7 @@ class TestDashboardEnhancements(unittest.TestCase):
                         self.fail(f"Plotting '{option}' raised exception: {e}")
                 else:
                     self.fail(f"Option '{option}' not found in combo box")
+
 
 if __name__ == "__main__":
     unittest.main()
