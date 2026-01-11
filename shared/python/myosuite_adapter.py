@@ -26,12 +26,11 @@ from __future__ import annotations
 
 import importlib.util
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import numpy as np
 
-if TYPE_CHECKING:
-    from shared.python.multi_muscle import AntagonistPair, MuscleGroup
+from shared.python.multi_muscle import AntagonistPair, MuscleGroup
 
 logger = logging.getLogger(__name__)
 
