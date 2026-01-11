@@ -184,6 +184,16 @@ class PCAResult:
     mean: np.ndarray  # (n_features,) - Mean of original data
 
 
+@dataclass
+class JointStiffnessMetrics:
+    """Metrics related to joint stiffness (Moment-Angle relationship)."""
+
+    stiffness: float  # Slope of the regression line (Nm/rad)
+    r_squared: float  # Goodness of fit
+    hysteresis_area: float  # Area inside the loop (Energy dissipated/generated)
+    intercept: float  # Y-intercept of the regression line
+
+
 class StatisticalAnalyzer:
     """Comprehensive statistical analysis for golf swing data."""
 
@@ -2137,6 +2147,245 @@ class StatisticalAnalyzer:
 
         # We return raw bits
         return float(pe)
+
+    def compute_joint_stiffness(
+        self,
+        joint_idx: int,
+        window: slice | None = None,
+    ) -> JointStiffnessMetrics | None:
+        """Compute Quasi-Stiffness from Moment-Angle relationship.
+
+        Stiffness is estimated as the slope of the linear regression of
+        Torque vs Angle. Also computes hysteresis (loop area).
+
+        Args:
+            joint_idx: Joint index
+            window: Optional slice to compute stiffness over a specific phase
+
+        Returns:
+            JointStiffnessMetrics object or None
+        """
+        if (
+            joint_idx >= self.joint_positions.shape[1]
+            or joint_idx >= self.joint_torques.shape[1]
+        ):
+            return None
+
+        angles = self.joint_positions[:, joint_idx]
+        torques = self.joint_torques[:, joint_idx]
+
+        if window:
+            angles = angles[window]
+            torques = torques[window]
+
+        if len(angles) < 2:
+            return None
+
+        # Linear Regression (Torque = k * Angle + c)
+        # k is stiffness (Nm/rad)
+        # Use np.polyfit(deg=1)
+        slope, intercept = np.polyfit(angles, torques, 1)
+
+        # R-squared calculation
+        predicted = slope * angles + intercept
+        residuals = torques - predicted
+        ss_res = np.sum(residuals**2)
+        ss_tot = np.sum((torques - np.mean(torques)) ** 2)
+        r_squared = 1 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
+
+        # Hysteresis Area (Integration using Green's theorem or simple trapezoid)
+        # Area = Integral(Torque dAngle)
+        # Use simple trapezoidal rule on the polygon
+        # Ideally, sort by time (which is implicit)
+        # Area = 0.5 * sum((x_{i+1} + x_i) * (y_{i+1} - y_i)) - this is for y dx
+        # For cyclic loop, this works.
+        # We use numpy trapz
+        if hasattr(np, "trapezoid"):
+            area = float(np.abs(np.trapezoid(torques, x=angles)))
+        else:
+            trapz_func = getattr(np, "trapz")  # noqa: B009
+            area = float(np.abs(trapz_func(torques, x=angles)))
+
+        return JointStiffnessMetrics(
+            stiffness=float(slope),
+            r_squared=float(r_squared),
+            hysteresis_area=area,
+            intercept=float(intercept),
+        )
+
+    def compute_dynamic_stiffness(
+        self,
+        joint_idx: int,
+        window_size: int = 20,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Compute rolling Quasi-Stiffness.
+
+        Args:
+            joint_idx: Joint index
+            window_size: Window size in samples
+
+        Returns:
+            Tuple of (times, stiffness_values, r_squared_values)
+        """
+        if (
+            joint_idx >= self.joint_positions.shape[1]
+            or joint_idx >= self.joint_torques.shape[1]
+        ):
+            return np.array([]), np.array([]), np.array([])
+
+        angles = self.joint_positions[:, joint_idx]
+        torques = self.joint_torques[:, joint_idx]
+
+        if len(angles) < window_size:
+            return np.array([]), np.array([]), np.array([])
+
+        stiffness_list = []
+        r2_list = []
+        time_points = []
+
+        # Simple loop is acceptable for typical swing duration (N~500)
+        # Vectorized rolling regression is possible but complex to implement purely in numpy
+        # without stride tricks overhead.
+        for i in range(len(angles) - window_size + 1):
+            window_angles = angles[i : i + window_size]
+            window_torques = torques[i : i + window_size]
+
+            # Fast linear regression
+            # slope = Cov(x,y) / Var(x)
+            # intercept = mean(y) - slope * mean(x)
+            # R2 = Cov(x,y)^2 / (Var(x) * Var(y))
+            # or corr(x,y)^2
+
+            x_mean = np.mean(window_angles)
+            y_mean = np.mean(window_torques)
+            x_diff = window_angles - x_mean
+            y_diff = window_torques - y_mean
+
+            cov = np.sum(x_diff * y_diff)
+            var_x = np.sum(x_diff**2)
+            var_y = np.sum(y_diff**2)
+
+            if var_x > 1e-9:
+                slope = cov / var_x
+                r2 = (cov**2) / (var_x * var_y) if var_y > 1e-9 else 0.0
+            else:
+                slope = 0.0
+                r2 = 0.0
+
+            stiffness_list.append(slope)
+            r2_list.append(r2)
+            time_points.append(self.times[i + window_size // 2])
+
+        return np.array(time_points), np.array(stiffness_list), np.array(r2_list)
+
+    def compute_fractal_dimension(
+        self,
+        data: np.ndarray,
+        k_max: int = 10,
+    ) -> float:
+        """Compute Fractal Dimension using Higuchi's method.
+
+        Measures the complexity/roughness of the time series.
+
+        Args:
+            data: 1D time series
+            k_max: Maximum interval time (k)
+
+        Returns:
+            Fractal dimension (HFD) approx between 1.0 and 2.0
+        """
+        N = len(data)
+        if N < k_max + 1:
+            return 1.0
+
+        L_k = []
+        x_k = []
+
+        for k in range(1, k_max + 1):
+            L_m_k = 0.0
+            for m in range(k):
+                # Construct series x_m, x_{m+k}, ...
+                # Length floor((N-m-1)/k)
+                idxs = np.arange(m, N, k)
+                if len(idxs) < 2:
+                    continue
+
+                diffs = np.abs(np.diff(data[idxs]))
+                # Standard Higuchi:
+                # L_m(k) = (Sum |x(i+k)-x(i)| ) * (N-1) / ( floor((N-m-1)/k) * k )
+                n_intervals = len(diffs)
+                L_m_k += np.sum(diffs) * (N - 1) / (n_intervals * k)
+
+            # Average over m (divide by k) AND apply Higuchi scaling (divide by k)
+            # So divide by k^2
+            L_k.append(L_m_k / (k * k))
+            x_k.append(np.log(1.0 / k))
+
+        # Slope of log(L(k)) vs log(1/k) is the dimension D
+        y_val = np.log(L_k)
+        slope, _ = np.polyfit(x_k, y_val, 1)
+
+        return float(slope)
+
+    def compute_sample_entropy(
+        self,
+        data: np.ndarray,
+        m: int = 2,
+        r: float = 0.2,
+    ) -> float:
+        """Compute Sample Entropy (SampEn).
+
+        Measures the regularity of a time series. Lower values = more regular.
+
+        Args:
+            data: 1D time series
+            m: Template length (embedding dimension)
+            r: Tolerance (typically 0.2 * std)
+
+        Returns:
+            Sample Entropy value
+        """
+        N = len(data)
+        if N < m + 1:
+            return 0.0
+
+        # Normalize r by standard deviation if it's relative
+        # Typically r is passed as ratio, so we multiply
+        tolerance = r * np.std(data)
+
+        def count_matches(template_len: int) -> int:
+            B = 0
+            # Total possible vectors
+            n_vectors = N - template_len
+
+            # Vectorized distance calculation
+            # Use broadcasting or cdist
+            # Construct matrix X of shape (n_vectors, template_len)
+            X = np.zeros((n_vectors, template_len))
+            for i in range(template_len):
+                X[:, i] = data[i : i + n_vectors]
+
+            # We need pairs (i, j) with i != j
+            # Chebychev distance (max absolute difference)
+            from scipy.spatial.distance import pdist
+
+            dists = pdist(X, metric="chebyshev")
+            # Count matches < tolerance
+            B = np.sum(dists < tolerance)
+
+            return int(B)
+
+        # Count matches for m
+        A = count_matches(m)
+        # Count matches for m+1
+        B = count_matches(m + 1)
+
+        if A == 0 or B == 0:
+            # Entropy undefined or infinite
+            return 0.0  # Or return -log(2/((N-m-1)*(N-m)))?
+
+        # SampEn = -log(B/A)
+        return float(-np.log(B / A))
 
     def export_statistics_csv(
         self,
