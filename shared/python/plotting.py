@@ -56,9 +56,7 @@ except ImportError:
     class MplCanvas:  # type: ignore[no-redef]
         """Matplotlib canvas for embedding in PyQt6 (not available in headless mode)."""
 
-        def __init__(
-            self, width: float = 8, height: float = 6, dpi: int = 100
-        ) -> None:  # noqa: ARG002
+        def __init__(self, width: float = 8, height: float = 6, dpi: int = 100) -> None:  # noqa: ARG002
             """Initialize canvas with figure (implementation for headless environments)."""
             msg = (
                 "MplCanvas requires Qt backend which is not available in headless envs"
@@ -614,7 +612,9 @@ class GolfSwingPlotter:
         # Compute metrics
         cop_xy = cop[:, :2]
         com_xy = com[:, :2]
-        dist = np.linalg.norm(cop_xy - com_xy, axis=1)
+        # OPTIMIZATION: np.hypot is faster than np.linalg.norm for 2D vectors
+        diff_xy = cop_xy - com_xy
+        dist = np.hypot(diff_xy[:, 0], diff_xy[:, 1])
 
         if cop.shape[1] == 2:
             cop_z = np.zeros(len(cop))
@@ -623,7 +623,8 @@ class GolfSwingPlotter:
 
         vec_temp = com - np.column_stack((cop_xy, cop_z))
         vec: np.ndarray[tuple[int, ...], np.dtype[np.float64]] = vec_temp  # type: ignore[assignment]
-        vec_norm = np.linalg.norm(vec, axis=1)
+        # OPTIMIZATION: Explicit sqrt calculation is faster than np.linalg.norm for 3D
+        vec_norm = np.sqrt(np.sum(vec**2, axis=1))
         vec_norm[vec_norm < 1e-6] = 1.0
 
         cos_theta = vec[:, 2] / vec_norm
@@ -1227,7 +1228,8 @@ class GolfSwingPlotter:
         times_am, am = self._get_cached_series("angular_momentum")
         am = np.asarray(am)
         if len(times_am) > 0 and am.size > 0:
-            am_mag = np.linalg.norm(am, axis=1)
+            # OPTIMIZATION: Explicit sqrt calculation is faster
+            am_mag = np.sqrt(np.sum(am**2, axis=1))
             ax3.plot(
                 times_am,
                 am_mag,
@@ -1747,7 +1749,11 @@ class GolfSwingPlotter:
             unit = (
                 "deg"
                 if dt == "position"
-                else "deg/s" if dt == "velocity" else "Nm" if dt == "torque" else ""
+                else "deg/s"
+                if dt == "velocity"
+                else "Nm"
+                if dt == "torque"
+                else ""
             )
             labels.append(f"{name} {dt[:3]} ({unit})")
 
@@ -1854,7 +1860,7 @@ class GolfSwingPlotter:
 
             ax.set_xlabel("x(t)", fontsize=10)
             ax.set_ylabel(f"x(t+{delay})", fontsize=10)
-            ax.set_zlabel(f"x(t+{2*delay})", fontsize=10)  # type: ignore[attr-defined]
+            ax.set_zlabel(f"x(t+{2 * delay})", fontsize=10)  # type: ignore[attr-defined]
         else:
             ax = fig.add_subplot(111)
             sc = ax.scatter(
@@ -1945,7 +1951,7 @@ class GolfSwingPlotter:
 
             ax_w.set_yticklabels(muscle_names, fontsize=8)
             ax_w.invert_yaxis()  # Top-down
-            ax_w.set_title(f"Synergy {i+1} Weights", fontsize=10, fontweight="bold")
+            ax_w.set_title(f"Synergy {i + 1} Weights", fontsize=10, fontweight="bold")
             ax_w.grid(True, axis="x", alpha=0.3)
 
             # 2. Activation (Time series)
@@ -1958,11 +1964,13 @@ class GolfSwingPlotter:
             if i == n_synergies - 1:
                 ax_h.set_xlabel("Time (s)", fontsize=10)
 
-            ax_h.set_title(f"Synergy {i+1} Activation", fontsize=10, fontweight="bold")
+            ax_h.set_title(
+                f"Synergy {i + 1} Activation", fontsize=10, fontweight="bold"
+            )
             ax_h.grid(True, alpha=0.3)
 
         fig.suptitle(
-            f"Muscle Synergies (VAF: {synergy_result.vaf*100:.1f}%)",
+            f"Muscle Synergies (VAF: {synergy_result.vaf * 100:.1f}%)",
             fontsize=14,
             fontweight="bold",
         )
@@ -2154,7 +2162,8 @@ class GolfSwingPlotter:
             return
 
         # Calculate magnitude
-        am_mag = np.linalg.norm(am_data, axis=1)
+        # OPTIMIZATION: Explicit sqrt calculation is faster
+        am_mag = np.sqrt(np.sum(am_data**2, axis=1))
 
         ax = fig.add_subplot(111)
 
@@ -2261,7 +2270,7 @@ class GolfSwingPlotter:
             ax.text(
                 t,
                 i + 0.15,
-                f"{t*1000:.0f} ms",
+                f"{t * 1000:.0f} ms",
                 ha="center",
                 fontsize=10,
                 fontweight="bold",
@@ -2661,7 +2670,8 @@ class GolfSwingPlotter:
 
         # Draw vector from origin for current/max?
         # Maybe just draw a few representative vectors
-        max_idx = np.argmax(np.linalg.norm(am_data, axis=1))
+        # OPTIMIZATION: Explicit sqrt calculation is faster
+        max_idx = np.argmax(np.sqrt(np.sum(am_data**2, axis=1)))
 
         # Draw Peak Vector
         ax.plot(
@@ -3106,7 +3116,8 @@ class GolfSwingPlotter:
                     return
             else:
                 # Plot L2 norm for summary
-                norm = np.linalg.norm(acc, axis=1)
+                # OPTIMIZATION: Explicit sqrt calculation is faster
+                norm = np.sqrt(np.sum(acc**2, axis=1))
                 ax.plot(
                     times,
                     norm,
@@ -3180,7 +3191,8 @@ class GolfSwingPlotter:
 
             if len(times) > 0 and acc_vec.size > 0:
                 # Plot Magnitude
-                mag = np.linalg.norm(acc_vec, axis=1)
+                # OPTIMIZATION: Explicit sqrt calculation is faster
+                mag = np.sqrt(np.sum(acc_vec**2, axis=1))
 
                 # Check if it's mostly zero
                 if np.max(mag) > 1e-4 or comp == "total":
@@ -3461,8 +3473,8 @@ class GolfSwingPlotter:
         ax.scatter(act1[0], act2[0], color="green", s=100, label="Start")
         ax.scatter(act1[-1], act2[-1], color="red", s=100, marker="s", label="End")
 
-        ax.set_xlabel(f"Synergy {dim1+1} Activation", fontsize=12, fontweight="bold")
-        ax.set_ylabel(f"Synergy {dim2+1} Activation", fontsize=12, fontweight="bold")
+        ax.set_xlabel(f"Synergy {dim1 + 1} Activation", fontsize=12, fontweight="bold")
+        ax.set_ylabel(f"Synergy {dim2 + 1} Activation", fontsize=12, fontweight="bold")
         ax.set_title("Synergy Space Trajectory", fontsize=14, fontweight="bold")
         ax.grid(True, alpha=0.3)
         ax.legend()
@@ -3906,7 +3918,7 @@ class GolfSwingPlotter:
 
         for i in range(min(modes_to_plot, scores.shape[1])):
             color = colors[i % len(colors)]
-            ax2.plot(times, scores[:, i], label=f"PC {i+1}", linewidth=2, color=color)
+            ax2.plot(times, scores[:, i], label=f"PC {i + 1}", linewidth=2, color=color)
 
         ax2.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax2.set_ylabel("Score (Projection)", fontsize=12, fontweight="bold")
