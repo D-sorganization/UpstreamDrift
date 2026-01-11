@@ -21,10 +21,13 @@ def mock_pinocchio_env():
 
 def test_create_joint_coupling_task_not_implemented(mock_pinocchio_env):
     """Verify that create_joint_coupling_task raises NotImplementedError."""
+    import pinocchio as pin  # This is the mocked pinocchio
     from engines.physics_engines.pinocchio.python.dtack.ik.tasks import (
         create_joint_coupling_task,
     )
 
     msg = "Joint coupling task requires mapping names to joint indices dynamically"
+    # Create a mock model with necessary attributes
+    mock_model = pin.Model()
     with pytest.raises(NotImplementedError, match=msg):
-        create_joint_coupling_task(["joint1"], [1.0])
+        create_joint_coupling_task(mock_model, ["joint1"], [1.0])
