@@ -6,7 +6,7 @@ for ensuring physical validity of conservative system integrations.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import cast
 
 import numpy as np
 import pytest
@@ -18,9 +18,7 @@ from shared.python.energy_monitor import (
     EnergySnapshot,
     IntegrationFailureError,
 )
-
-if TYPE_CHECKING:
-    from shared.python.interfaces import PhysicsEngine
+from shared.python.interfaces import PhysicsEngine
 
 
 class MockPhysicsEngine:
