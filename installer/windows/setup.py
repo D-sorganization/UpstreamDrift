@@ -154,8 +154,6 @@ def get_available_engines() -> list[str]:
         except ImportError:
             if engine_info_dict["required"]:
                 sys.exit(1)
-            else:
-                pass
 
     return available
 
@@ -165,9 +163,6 @@ available_engines = get_available_engines()
 for engine_id in available_engines:
     engine_modules = PHYSICS_ENGINES[engine_id]["modules"]
     build_exe_options["packages"].extend(engine_modules)  # type: ignore[attr-defined]
-
-for _engine_id in available_engines:
-    pass
 
 # Setup configuration
 setup(
