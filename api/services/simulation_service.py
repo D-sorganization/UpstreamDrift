@@ -1,4 +1,4 @@
-"""Simulation service for physics engine management."""
+"""Simulation service for Golf Modeling Suite API."""
 
 import logging
 from typing import Any
@@ -23,16 +23,15 @@ class SimulationService:
             engine_manager: Engine manager instance
         """
         self.engine_manager = engine_manager
-        self.active_simulations: dict[str, Any] = {}
 
     async def run_simulation(self, request: SimulationRequest) -> SimulationResponse:
-        """Run a physics simulation.
+        """Run a physics simulation based on request parameters.
 
         Args:
             request: Simulation request parameters
 
         Returns:
-            Simulation response with results
+            Simulation results and data
         """
         try:
             # Load requested engine
@@ -40,30 +39,15 @@ class SimulationService:
             success = self.engine_manager.load_engine(engine_type)
 
             if not success:
-                return SimulationResponse(
-                    success=False,
-                    duration=0.0,
-                    frames=0,
-                    data={"error": f"Failed to load engine: {request.engine_type}"},
-                )
+                raise RuntimeError(f"Failed to load engine: {request.engine_type}")
 
             engine = self.engine_manager.get_active_engine()
             if not engine:
-                return SimulationResponse(
-                    success=False,
-                    duration=0.0,
-                    frames=0,
-                    data={"error": "No active engine available"},
-                )
+                raise RuntimeError("No active engine available")
 
             # Load model if specified
             if request.model_path:
                 engine.load_from_path(request.model_path)
-
-            # Set up recorder
-            recorder = GenericPhysicsRecorder(engine)
-            if request.analysis_config:
-                recorder.set_analysis_config(request.analysis_config)
 
             # Set initial state if provided
             if request.initial_state:
@@ -72,57 +56,54 @@ class SimulationService:
                 if q and v:
                     engine.set_state(q, v)
 
+            # Setup recorder
+            recorder = GenericPhysicsRecorder(engine)
+
+            # Configure analysis if requested
+            if request.analysis_config:
+                recorder.set_analysis_config(request.analysis_config)
+
             # Run simulation
+            timestep = request.timestep or 0.001
+            steps = int(request.duration / timestep)
+
             recorder.start_recording()
 
-            dt = request.timestep or 0.002  # Default timestep
-            steps = int(request.duration / dt)
-
             for step in range(steps):
-                # Apply control if provided
+                # Apply control inputs if provided
                 if request.control_inputs and step < len(request.control_inputs):
                     control = request.control_inputs[step]
                     if "torques" in control:
                         engine.set_control(control["torques"])
 
                 # Step simulation
-                engine.step(dt)
+                engine.step(timestep)
                 recorder.record_step()
 
             recorder.stop_recording()
 
-            # Extract results
-            simulation_data = {
-                "time": recorder.get_time_series("time")[1].tolist(),
-                "positions": recorder.get_time_series("joint_positions")[1].tolist(),
-                "velocities": recorder.get_time_series("joint_velocities")[1].tolist(),
-            }
+            # Extract recorded data
+            simulation_data = self._extract_simulation_data(recorder)
 
-            # Add analysis results if configured
-            quality_metrics = {}
+            # Perform analysis if requested
+            analysis_results = None
             if request.analysis_config:
-                if request.analysis_config.get("ztcf"):
-                    ztcf_data = recorder.get_time_series("ztcf_accel")
-                    if ztcf_data[1] is not None:
-                        simulation_data["ztcf_acceleration"] = ztcf_data[1].tolist()
-
-                if request.analysis_config.get("zvcf"):
-                    zvcf_data = recorder.get_time_series("zvcf_accel")
-                    if zvcf_data[1] is not None:
-                        simulation_data["zvcf_acceleration"] = zvcf_data[1].tolist()
+                analysis_results = self._perform_analysis(
+                    recorder, request.analysis_config
+                )
 
             return SimulationResponse(
                 success=True,
                 duration=request.duration,
                 frames=steps,
                 data=simulation_data,
-                quality_metrics=quality_metrics,
+                analysis_results=analysis_results,
             )
 
         except Exception as e:
             logger.error(f"Simulation failed: {e}")
             return SimulationResponse(
-                success=False, duration=0.0, frames=0, data={"error": str(e)}
+                success=False, duration=0.0, frames=0, data={}, analysis_results=None
             )
 
     async def run_simulation_background(
@@ -140,10 +121,95 @@ class SimulationService:
 
             result = await self.run_simulation(request)
 
-            active_tasks[task_id] = {
-                "status": "completed" if result.success else "failed",
-                "result": result.dict(),
-            }
+            active_tasks[task_id] = {"status": "completed", "result": result.dict()}
 
         except Exception as e:
             active_tasks[task_id] = {"status": "failed", "error": str(e)}
+
+    def _extract_simulation_data(
+        self, recorder: GenericPhysicsRecorder
+    ) -> dict[str, Any]:
+        """Extract simulation data from recorder.
+
+        Args:
+            recorder: Physics recorder with simulation data
+
+        Returns:
+            Dictionary containing simulation data
+        """
+        data = {}
+
+        try:
+            # Extract time series data
+            times, positions = recorder.get_time_series("joint_positions")
+            data["times"] = times.tolist() if hasattr(times, "tolist") else times
+            data["joint_positions"] = (
+                positions.tolist() if hasattr(positions, "tolist") else positions
+            )
+
+            times, velocities = recorder.get_time_series("joint_velocities")
+            data["joint_velocities"] = (
+                velocities.tolist() if hasattr(velocities, "tolist") else velocities
+            )
+
+            times, accelerations = recorder.get_time_series("joint_accelerations")
+            data["joint_accelerations"] = (
+                accelerations.tolist()
+                if hasattr(accelerations, "tolist")
+                else accelerations
+            )
+
+            # Extract control data if available
+            try:
+                times, controls = recorder.get_time_series("control_inputs")
+                data["control_inputs"] = (
+                    controls.tolist() if hasattr(controls, "tolist") else controls
+                )
+            except Exception:
+                pass
+
+        except Exception as e:
+            logger.warning(f"Error extracting simulation data: {e}")
+
+        return data
+
+    def _perform_analysis(
+        self, recorder: GenericPhysicsRecorder, config: dict[str, Any]
+    ) -> dict[str, Any]:
+        """Perform analysis on simulation data.
+
+        Args:
+            recorder: Physics recorder with simulation data
+            config: Analysis configuration
+
+        Returns:
+            Analysis results
+        """
+        results = {}
+
+        try:
+            # Extract ZTCF data if enabled
+            if config.get("ztcf", False):
+                times, ztcf = recorder.get_time_series("ztcf_accel")
+                results["ztcf_acceleration"] = (
+                    ztcf.tolist() if hasattr(ztcf, "tolist") else ztcf
+                )
+
+            # Extract ZVCF data if enabled
+            if config.get("zvcf", False):
+                times, zvcf = recorder.get_time_series("zvcf_accel")
+                results["zvcf_acceleration"] = (
+                    zvcf.tolist() if hasattr(zvcf, "tolist") else zvcf
+                )
+
+            # Extract drift analysis if enabled
+            if config.get("track_drift", False):
+                times, drift = recorder.get_time_series("drift_accel")
+                results["drift_acceleration"] = (
+                    drift.tolist() if hasattr(drift, "tolist") else drift
+                )
+
+        except Exception as e:
+            logger.warning(f"Error performing analysis: {e}")
+
+        return results

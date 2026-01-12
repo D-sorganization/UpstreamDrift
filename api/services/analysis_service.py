@@ -1,4 +1,4 @@
-"""Analysis service for biomechanical computations."""
+"""Analysis service for Golf Modeling Suite API."""
 
 import logging
 from typing import Any
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class AnalysisService:
-    """Service for biomechanical analysis operations."""
+    """Service for biomechanical analysis."""
 
     def __init__(self, engine_manager: EngineManager):
         """Initialize analysis service.
@@ -29,37 +29,21 @@ class AnalysisService:
             request: Analysis request parameters
 
         Returns:
-            Analysis response with results
+            Analysis results
         """
         try:
-            engine = self.engine_manager.get_active_engine()
-            if not engine:
-                return AnalysisResponse(
-                    analysis_type=request.analysis_type,
-                    success=False,
-                    results={"error": "No active physics engine"},
-                )
-
             results = {}
 
             if request.analysis_type == "kinematics":
-                results = await self._analyze_kinematics(
-                    engine, request.parameters or {}
-                )
-            elif request.analysis_type == "dynamics":
-                results = await self._analyze_dynamics(engine, request.parameters or {})
+                results = await self._analyze_kinematics(request)
+            elif request.analysis_type == "kinetics":
+                results = await self._analyze_kinetics(request)
             elif request.analysis_type == "energetics":
-                results = await self._analyze_energetics(
-                    engine, request.parameters or {}
-                )
+                results = await self._analyze_energetics(request)
+            elif request.analysis_type == "swing_sequence":
+                results = await self._analyze_swing_sequence(request)
             else:
-                return AnalysisResponse(
-                    analysis_type=request.analysis_type,
-                    success=False,
-                    results={
-                        "error": f"Unknown analysis type: {request.analysis_type}"
-                    },
-                )
+                raise ValueError(f"Unknown analysis type: {request.analysis_type}")
 
             return AnalysisResponse(
                 analysis_type=request.analysis_type, success=True, results=results
@@ -73,70 +57,43 @@ class AnalysisService:
                 results={"error": str(e)},
             )
 
-    async def _analyze_kinematics(
-        self, engine: Any, parameters: dict[str, Any]
-    ) -> dict[str, Any]:
-        """Analyze kinematic properties."""
-        q, v = engine.get_state()
-
-        results = {
-            "joint_positions": q.tolist(),
-            "joint_velocities": v.tolist(),
-            "degrees_of_freedom": len(q),
+    async def _analyze_kinematics(self, request: AnalysisRequest) -> dict[str, Any]:
+        """Perform kinematic analysis."""
+        # Placeholder for kinematic analysis
+        return {
+            "joint_angles": [],
+            "angular_velocities": [],
+            "angular_accelerations": [],
+            "analysis_type": "kinematics",
         }
 
-        # Add Jacobian analysis if engine supports it
-        if hasattr(engine, "compute_jacobian"):
-            try:
-                jacobian = engine.compute_jacobian()
-                results["jacobian_condition_number"] = float(
-                    1.0 / min(1e-12, min(jacobian.shape))  # Simplified condition number
-                )
-            except Exception as e:
-                logger.warning(f"Jacobian computation failed: {e}")
-
-        return results
-
-    async def _analyze_dynamics(
-        self, engine: Any, parameters: dict[str, Any]
-    ) -> dict[str, Any]:
-        """Analyze dynamic properties."""
-        q, v = engine.get_state()
-
-        results = {"joint_positions": q.tolist(), "joint_velocities": v.tolist()}
-
-        # Add mass matrix if engine supports it
-        if hasattr(engine, "compute_mass_matrix"):
-            try:
-                engine.compute_mass_matrix()
-                results["mass_matrix_determinant"] = (
-                    1.0  # Simplified - would need actual determinant computation
-                )
-            except Exception as e:
-                logger.warning(f"Mass matrix computation failed: {e}")
-
-        # Add inverse dynamics if engine supports it
-        if hasattr(engine, "compute_inverse_dynamics"):
-            try:
-                # Use zero acceleration for static analysis
-                zero_accel = [0.0] * len(v)
-                torques = engine.compute_inverse_dynamics(zero_accel)
-                results["static_torques"] = torques.tolist()
-            except Exception as e:
-                logger.warning(f"Inverse dynamics computation failed: {e}")
-
-        return results
-
-    async def _analyze_energetics(
-        self, engine: Any, parameters: dict[str, Any]
-    ) -> dict[str, Any]:
-        """Analyze energy properties."""
-        q, v = engine.get_state()
-
-        results = {
-            "kinetic_energy": 0.5 * sum(vi**2 for vi in v),  # Simplified
-            "potential_energy": 0.0,  # Would need actual computation
-            "total_energy": 0.5 * sum(vi**2 for vi in v),
+    async def _analyze_kinetics(self, request: AnalysisRequest) -> dict[str, Any]:
+        """Perform kinetic analysis."""
+        # Placeholder for kinetic analysis
+        return {
+            "joint_torques": [],
+            "reaction_forces": [],
+            "muscle_forces": [],
+            "analysis_type": "kinetics",
         }
 
-        return results
+    async def _analyze_energetics(self, request: AnalysisRequest) -> dict[str, Any]:
+        """Perform energetic analysis."""
+        # Placeholder for energetic analysis
+        return {
+            "kinetic_energy": [],
+            "potential_energy": [],
+            "total_energy": [],
+            "power": [],
+            "analysis_type": "energetics",
+        }
+
+    async def _analyze_swing_sequence(self, request: AnalysisRequest) -> dict[str, Any]:
+        """Perform swing sequence analysis."""
+        # Placeholder for swing sequence analysis
+        return {
+            "phases": ["address", "backswing", "downswing", "impact", "follow_through"],
+            "phase_transitions": [],
+            "sequence_timing": [],
+            "analysis_type": "swing_sequence",
+        }

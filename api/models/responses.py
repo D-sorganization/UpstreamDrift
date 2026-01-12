@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class EngineStatusResponse(BaseModel):
-    """Response for engine status."""
+    """Response model for engine status."""
 
     engine_type: str = Field(..., description="Engine type identifier")
     status: str = Field(..., description="Current status")
@@ -15,18 +15,22 @@ class EngineStatusResponse(BaseModel):
 
 
 class SimulationResponse(BaseModel):
-    """Response from physics simulation."""
+    """Response model for simulation results."""
 
-    success: bool = Field(..., description="Whether simulation succeeded")
+    success: bool = Field(..., description="Whether simulation completed successfully")
     duration: float = Field(..., description="Actual simulation duration")
     frames: int = Field(..., description="Number of simulation frames")
-    data: dict[str, Any] | None = Field(None, description="Simulation results")
-    quality_metrics: dict[str, Any] | None = Field(None, description="Quality metrics")
+    data: dict[str, Any] = Field(
+        ..., description="Simulation data (states, controls, etc.)"
+    )
+    analysis_results: dict[str, Any] | None = Field(
+        None, description="Analysis results if requested"
+    )
     export_paths: list[str] | None = Field(None, description="Paths to exported files")
 
 
 class VideoAnalysisResponse(BaseModel):
-    """Response from video analysis."""
+    """Response model for video analysis results."""
 
     filename: str = Field(..., description="Original filename")
     total_frames: int = Field(..., description="Total frames in video")
@@ -39,12 +43,22 @@ class VideoAnalysisResponse(BaseModel):
 
 
 class AnalysisResponse(BaseModel):
-    """Response from biomechanical analysis."""
+    """Response model for biomechanical analysis."""
 
     analysis_type: str = Field(..., description="Type of analysis performed")
-    success: bool = Field(..., description="Whether analysis succeeded")
+    success: bool = Field(..., description="Whether analysis completed successfully")
     results: dict[str, Any] = Field(..., description="Analysis results")
     visualizations: list[str] | None = Field(
-        None, description="Generated visualization paths"
+        None, description="Generated visualization files"
     )
-    export_paths: list[str] | None = Field(None, description="Exported data paths")
+    export_path: str | None = Field(None, description="Path to exported results")
+
+
+class TaskStatusResponse(BaseModel):
+    """Response model for asynchronous task status."""
+
+    task_id: str = Field(..., description="Unique task identifier")
+    status: str = Field(..., description="Current task status")
+    progress: float | None = Field(None, description="Progress percentage (0-100)")
+    result: dict[str, Any] | None = Field(None, description="Task result if completed")
+    error: str | None = Field(None, description="Error message if failed")
