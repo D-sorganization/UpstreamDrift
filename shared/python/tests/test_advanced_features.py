@@ -106,6 +106,24 @@ def test_sample_entropy(analyzer):
     samp_en_noise = analyzer.compute_sample_entropy(noise, m=2, r=0.2)
     assert samp_en_noise > 1.0
 
+def test_permutation_entropy(analyzer):
+    """Test Permutation Entropy."""
+    # Sine wave is regular -> low entropy
+    t = np.linspace(0, 1, 200)
+    data = np.sin(2 * np.pi * t)
+
+    # Order 3, Delay 1
+    # For a sine wave, the order of 3 points is quite deterministic
+    pe = analyzer.compute_permutation_entropy(data, order=3, delay=1)
+
+    # Maximum entropy for order 3 is log2(3!) = log2(6) = 2.58
+    # Regular signal should be much lower
+    assert pe < 2.0
+
+    # Random noise -> high entropy (close to max)
+    noise = np.random.rand(200)
+    pe_noise = analyzer.compute_permutation_entropy(noise, order=3, delay=1)
+    assert pe_noise > 2.0
 
 def test_plot_joint_stiffness(sample_data):
     """Test plotting of joint stiffness."""
