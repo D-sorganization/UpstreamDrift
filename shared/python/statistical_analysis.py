@@ -2121,18 +2121,32 @@ class StatisticalAnalyzer:
 
         # Vectorized approach
         # Create matrix of shape (M, order)
-        matrix = np.zeros((M, order))
+        matrix = np.zeros((M, order), dtype=data.dtype)
         for i in range(order):
             matrix[:, i] = data[i * delay : i * delay + M]
 
         # Get argsort (ranks)
         ranks = np.argsort(matrix, axis=1)
 
-        # Convert ranks to tuple/bytes to count unique
-        # We can map each row to a unique integer or string
-        # Since order is small (3-5), we can treat rows as base-order numbers?
-        # Actually easier to use unique with axis=0
-        _, counts = np.unique(ranks, axis=0, return_counts=True)
+        # OPTIMIZATION: Use integer packing instead of axis=0 unique for small orders
+        # np.unique(axis=0) is slow because it involves row-wise comparisons/sorts.
+        # Packing into 1D integers (base-order encoding) allows 1D unique, which is >10x faster.
+        # Ranks are digits 0..order-1.
+        # Safe for order <= 12 (12^12 < 2^63). Default order is 3.
+        if order <= 12:
+            packed = np.zeros(M, dtype=np.int64)
+            # Base-order encoding: rank[0]*order^0 + rank[1]*order^1 ...
+            # Using order^i as weights ensures uniqueness for permutations
+            # (actually base >= order is required, so base=order is sufficient)
+            multiplier = 1
+            for i in range(order):
+                packed += ranks[:, i] * multiplier
+                multiplier *= order
+
+            _, counts = np.unique(packed, return_counts=True)
+        else:
+            # Fallback for very large orders (unlikely in PE context)
+            _, counts = np.unique(ranks, axis=0, return_counts=True)
 
         # Probabilities
         probs = counts / M
@@ -2305,18 +2319,23 @@ class StatisticalAnalyzer:
 
         for k in range(1, k_max + 1):
             L_m_k = 0.0
-            for m in range(k):
-                # Construct series x_m, x_{m+k}, ...
-                # Length floor((N-m-1)/k)
-                idxs = np.arange(m, N, k)
-                if len(idxs) < 2:
-                    continue
+            # OPTIMIZATION: Compute all differences for lag k at once
+            # abs_diffs[i] = |x(i+k) - x(i)|. This avoids creating indices/diffs in the inner loop.
+            abs_diffs = np.abs(data[k:] - data[:-k])
 
-                diffs = np.abs(np.diff(data[idxs]))
+            for m in range(k):
                 # Standard Higuchi:
                 # L_m(k) = (Sum |x(i+k)-x(i)| ) * (N-1) / ( floor((N-m-1)/k) * k )
-                n_intervals = len(diffs)
-                L_m_k += np.sum(diffs) * (N - 1) / (n_intervals * k)
+
+                # Extract differences for this m
+                # Indices in original data: m, m+k, m+2k...
+                # Diffs are |x(m+k)-x(m)|, |x(m+2k)-x(m+k)|...
+                # These correspond to abs_diffs indices: m, m+k, ...
+                m_diffs = abs_diffs[m::k]
+                n_intervals = len(m_diffs)
+
+                if n_intervals > 0:
+                    L_m_k += np.sum(m_diffs) * (N - 1) / (n_intervals * k)
 
             # Average over m (divide by k) AND apply Higuchi scaling (divide by k)
             # So divide by k^2
