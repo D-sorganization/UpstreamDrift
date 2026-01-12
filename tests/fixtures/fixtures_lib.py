@@ -17,6 +17,8 @@ from typing import Any
 import numpy as np
 import pytest
 
+from shared.python.constants import GRAVITY_M_S2
+
 logger = logging.getLogger(__name__)
 
 # Fixture model paths
@@ -26,7 +28,6 @@ DOUBLE_PENDULUM_URDF = FIXTURES_DIR / "double_pendulum.urdf"
 
 # Physical constants for analytical validation
 # Source: NIST CODATA 2018
-GRAVITY_M_S2 = 9.81  # [m/s²] Standard gravity
 
 # Simple pendulum parameters (must match URDF)
 PENDULUM_LENGTH_M = 1.0  # [m] Rod length

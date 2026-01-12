@@ -4,6 +4,7 @@ This tool allows users to graphically create URDF models by adding links and joi
 """
 
 import logging
+import math
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -267,8 +268,8 @@ class URDFGenerator(QtWidgets.QMainWindow):
                 ET.SubElement(
                     joint_elem,
                     "limit",
-                    lower="-3.14",
-                    upper="3.14",
+                    lower=f"{-math.pi}",
+                    upper=f"{math.pi}",
                     effort="100",
                     velocity="10",
                 )
