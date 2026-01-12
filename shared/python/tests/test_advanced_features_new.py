@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from matplotlib.figure import Figure
 
-from shared.python.plotting import GolfSwingPlotter, RecorderInterface
+from shared.python.plotting import GolfSwingPlotter
 from shared.python.signal_processing import compute_jerk, compute_time_shift
 from shared.python.statistical_analysis import StatisticalAnalyzer
 
@@ -26,6 +26,12 @@ class MockRecorder:
             return self.times, self.accelerations
         elif field_name == "joint_torques":
             return self.times, self.torques
+        return [], []
+
+    def get_induced_acceleration_series(self, source_name: str | int):
+        return [], []
+
+    def get_counterfactual_series(self, cf_name: str):
         return [], []
 
 
@@ -85,9 +91,8 @@ class TestAdvancedStatisticalAnalysis:
             joint_positions=joint_pos,
             joint_velocities=joint_vel,
             joint_torques=np.zeros_like(joint_pos),
+            joint_accelerations=joint_acc,
         )
-        # Mock acceleration if analyzer doesn't compute it from velocity
-        analyzer.joint_accelerations = joint_acc
 
         metrics = analyzer.compute_jerk_metrics(0)
         assert metrics is not None
@@ -97,7 +102,7 @@ class TestAdvancedStatisticalAnalysis:
     def test_compute_lag_matrix(self):
         """Test lag matrix computation."""
         t = np.linspace(0, 2, 200)
-        fs = 100.0
+
         x = np.sin(2 * np.pi * 2 * t)
         y = np.sin(2 * np.pi * 2 * (t - 0.1))  # y lags x by 0.1
         z = np.sin(2 * np.pi * 2 * (t - 0.2))  # z lags x by 0.2
