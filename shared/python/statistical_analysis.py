@@ -219,6 +219,7 @@ class StatisticalAnalyzer:
         ground_forces: np.ndarray | None = None,
         com_position: np.ndarray | None = None,
         angular_momentum: np.ndarray | None = None,
+        joint_accelerations: np.ndarray | None = None,
     ) -> None:
         """Initialize analyzer with recorded data.
 
@@ -233,6 +234,7 @@ class StatisticalAnalyzer:
             ground_forces: Ground reaction forces (N, 3) or (N, 6) [optional]
             com_position: Center of Mass position (N, 3) [optional]
             angular_momentum: System angular momentum (N, 3) [optional]
+            joint_accelerations: Joint accelerations (N, nv) [optional]
         """
         self.times = times
         self.joint_positions = joint_positions
@@ -244,6 +246,7 @@ class StatisticalAnalyzer:
         self.ground_forces = ground_forces
         self.com_position = com_position
         self.angular_momentum = angular_momentum
+        self.joint_accelerations = joint_accelerations
 
         self.dt = float(np.mean(np.diff(times))) if len(times) > 1 else 0.0
         self.duration = times[-1] - times[0] if len(times) > 1 else 0.0
@@ -1839,7 +1842,7 @@ class StatisticalAnalyzer:
             diag = np.diagonal(recurrence_matrix, offset=k)
             # Find lengths of consecutive 1s
             # Pad with 0 to find edges
-            d = np.concatenate(([0], diag, [0]))
+            d = np.concatenate((np.array([0]), diag, np.array([0])))
             diffs = np.diff(d)
             starts = np.where(diffs == 1)[0]
             ends = np.where(diffs == -1)[0]
@@ -1862,7 +1865,7 @@ class StatisticalAnalyzer:
             # Let's zero out the diagonal point for vertical line detection to keep it consistent < 1.
             col[i] = 0
 
-            c = np.concatenate(([0], col, [0]))
+            c = np.concatenate((np.array([0]), col, np.array([0])))
             diffs = np.diff(c)
             starts = np.where(diffs == 1)[0]
             ends = np.where(diffs == -1)[0]
@@ -1871,14 +1874,14 @@ class StatisticalAnalyzer:
 
         n_vert_points = np.sum(vertical_lengths)
         lam = n_vert_points / n_recurrence_points if n_recurrence_points > 0 else 0.0
-        tt = np.mean(vertical_lengths) if len(vertical_lengths) > 0 else 0.0
+        tt = float(np.mean(vertical_lengths)) if len(vertical_lengths) > 0 else 0.0
 
         return RQAMetrics(
             recurrence_rate=float(rr),
             determinism=float(det),
             laminarity=float(lam),
             longest_diagonal_line=int(l_max),
-            trapping_time=float(tt),
+            trapping_time=tt,
         )
 
     def estimate_lyapunov_exponent(
@@ -2489,7 +2492,10 @@ class StatisticalAnalyzer:
             JerkMetrics object or None
         """
         # We need acceleration. If not available, compute from velocity.
-        if hasattr(self, "joint_accelerations") and self.joint_accelerations is not None:
+        if (
+            hasattr(self, "joint_accelerations")
+            and self.joint_accelerations is not None
+        ):
             if joint_idx >= self.joint_accelerations.shape[1]:
                 return None
             accel = self.joint_accelerations[:, joint_idx]

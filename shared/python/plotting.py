@@ -807,9 +807,7 @@ class GolfSwingPlotter:
             ax.set_xlabel("Joint Index (Lagging)")
             ax.set_ylabel("Joint Index (Leading)")
 
-        ax.set_title(
-            f"Time Lag Matrix ({data_type})", fontsize=14, fontweight="bold"
-        )
+        ax.set_title(f"Time Lag Matrix ({data_type})", fontsize=14, fontweight="bold")
 
         cbar = fig.colorbar(im, ax=ax)
         cbar.set_label("Time Lag (s)\n(Pos: Row leads Col)", rotation=270, labelpad=20)

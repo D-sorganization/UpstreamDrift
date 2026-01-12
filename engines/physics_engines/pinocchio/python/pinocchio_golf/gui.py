@@ -220,7 +220,7 @@ class PinocchioRecorder:
         return times, values_array
 
     def get_induced_acceleration_series(
-        self, source_name: str
+        self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Extract time series for a specific induced acceleration source.
 
@@ -231,6 +231,9 @@ class PinocchioRecorder:
             Tuple of (times, acceleration_array)
         """
         if not self.frames:
+            return np.array([]), np.array([])
+
+        if not isinstance(source_name, str):
             return np.array([]), np.array([])
 
         times = np.array([f.time for f in self.frames])

@@ -446,7 +446,7 @@ class SwingRecorder:
         return times, cast(np.ndarray, values_array)
 
     def get_induced_acceleration_series(
-        self, source_name: str
+        self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         if not self.frames:
             return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
@@ -455,7 +455,10 @@ class SwingRecorder:
         values = []
 
         for f in self.frames:
-            val = f.induced_accelerations.get(source_name)
+            val = None
+            if isinstance(source_name, str):
+                val = f.induced_accelerations.get(source_name)
+
             if val is not None:
                 times.append(f.time)
                 values.append(val)

@@ -318,10 +318,13 @@ class DrakeRecorder:
         return times, []
 
     def get_induced_acceleration_series(
-        self, source_name: str
+        self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Get induced accelerations."""
-        if source_name not in self.induced_accelerations:
+        if (
+            isinstance(source_name, int)
+            or source_name not in self.induced_accelerations
+        ):
             return np.array([]), np.array([])
 
         times = np.array(self.times)

@@ -31,7 +31,9 @@ class MockRecorder(RecorderInterface):
     def get_time_series(self, field_name: str):
         return self.data.get(field_name, (np.array([]), np.array([])))
 
-    def get_induced_acceleration_series(self, source_name: str):
+    def get_induced_acceleration_series(self, source_name: str | int):
+        if not isinstance(source_name, str):
+            return np.array([]), np.array([])
         return self.induced_acc.get(source_name, (np.array([]), np.array([])))
 
     def get_counterfactual_series(self, cf_name: str):
