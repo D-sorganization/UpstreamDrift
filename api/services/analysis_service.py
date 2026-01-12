@@ -46,7 +46,11 @@ class AnalysisService:
                 raise ValueError(f"Unknown analysis type: {request.analysis_type}")
 
             return AnalysisResponse(
-                analysis_type=request.analysis_type, success=True, results=results
+                analysis_type=request.analysis_type,
+                success=True,
+                results=results,
+                visualizations=[],  # Add required field
+                export_path="",  # Add required field
             )
 
         except Exception as e:
@@ -55,6 +59,8 @@ class AnalysisService:
                 analysis_type=request.analysis_type,
                 success=False,
                 results={"error": str(e)},
+                visualizations=[],  # Add required field
+                export_path="",  # Add required field
             )
 
     async def _analyze_kinematics(self, request: AnalysisRequest) -> dict[str, Any]:

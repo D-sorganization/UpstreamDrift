@@ -91,7 +91,7 @@ active_tasks: dict[str, Any] = {}
 
 
 @app.on_event("startup")
-async def startup_event():
+async def startup_event() -> None:
     """Initialize services on startup."""
     global engine_manager, simulation_service, analysis_service, video_pipeline
 
@@ -120,7 +120,7 @@ async def startup_event():
 
 
 @app.get("/")
-async def root():
+async def root() -> dict[str, str]:
     """Root endpoint with API information."""
     return {
         "message": "Golf Modeling Suite API",
@@ -131,7 +131,7 @@ async def root():
 
 
 @app.get("/health")
-async def health_check():
+async def health_check() -> dict[str, str | int]:
     """Health check endpoint."""
     return {
         "status": "healthy",
@@ -146,7 +146,7 @@ async def health_check():
 
 
 @app.get("/engines", response_model=list[EngineStatusResponse])
-async def get_engines():
+async def get_engines() -> list[EngineStatusResponse]:
     """Get status of all available physics engines."""
     if not engine_manager:
         raise HTTPException(status_code=500, detail="Engine manager not initialized")
@@ -154,11 +154,15 @@ async def get_engines():
     engines = []
     for engine_type in EngineType:
         status = engine_manager.get_engine_status(engine_type)
+        # Check if engine is available by trying to get available engines
+        available_engines = engine_manager.get_available_engines()
+        is_available = engine_type in available_engines
+
         engines.append(
             EngineStatusResponse(
                 engine_type=engine_type.value,
                 status=status.value,
-                is_available=engine_manager.is_engine_available(engine_type),
+                is_available=is_available,
                 description=f"{engine_type.value} physics engine",
             )
         )
@@ -167,23 +171,27 @@ async def get_engines():
 
 
 @app.post("/engines/{engine_type}/load")
-async def load_engine(engine_type: str, model_path: str | None = None):
+async def load_engine(
+    engine_type: str, model_path: str | None = None
+) -> dict[str, str]:
     """Load a specific physics engine with optional model."""
     if not engine_manager:
         raise HTTPException(status_code=500, detail="Engine manager not initialized")
 
     try:
         engine_enum = EngineType(engine_type.upper())
-        success = engine_manager.load_engine(engine_enum)
+        engine_manager._load_engine(engine_enum)  # This method doesn't return success status
 
-        if not success:
+        # Check if engine was loaded successfully
+        engine = engine_manager.get_active_physics_engine()
+        if not engine:
             raise HTTPException(
                 status_code=400, detail=f"Failed to load engine: {engine_type}"
             )
 
         # Load model if provided
         if model_path:
-            engine = engine_manager.get_active_engine()
+            engine = engine_manager.get_active_physics_engine()
             if engine:
                 engine.load_from_path(model_path)
 
@@ -203,7 +211,7 @@ async def load_engine(engine_type: str, model_path: str | None = None):
 
 
 @app.post("/simulate", response_model=SimulationResponse)
-async def run_simulation(request: SimulationRequest):
+async def run_simulation(request: SimulationRequest) -> SimulationResponse:
     """Run a physics simulation."""
     if not simulation_service:
         raise HTTPException(
@@ -223,7 +231,7 @@ async def run_simulation(request: SimulationRequest):
 @app.post("/simulate/async")
 async def run_simulation_async(
     request: SimulationRequest, background_tasks: BackgroundTasks
-):
+) -> dict[str, str]:
     """Start an asynchronous simulation."""
     if not simulation_service:
         raise HTTPException(
@@ -241,7 +249,7 @@ async def run_simulation_async(
 
 
 @app.get("/simulate/status/{task_id}")
-async def get_simulation_status(task_id: str):
+async def get_simulation_status(task_id: str) -> dict[str, Any]:
     """Get status of an asynchronous simulation."""
     if task_id not in active_tasks:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -258,7 +266,7 @@ async def analyze_video(
     estimator_type: str = "mediapipe",
     min_confidence: float = 0.5,
     enable_smoothing: bool = True,
-):
+) -> VideoAnalysisResponse:
     """Analyze golf swing from uploaded video."""
     if not video_pipeline:
         raise HTTPException(status_code=500, detail="Video pipeline not initialized")
@@ -321,7 +329,7 @@ async def analyze_video_async(
     file: UploadFile = File(...),
     estimator_type: str = "mediapipe",
     min_confidence: float = 0.5,
-):
+) -> dict[str, str]:
     """Start asynchronous video analysis."""
     if not video_pipeline:
         raise HTTPException(status_code=500, detail="Video pipeline not initialized")
@@ -352,7 +360,7 @@ async def _process_video_background(
     filename: str,
     estimator_type: str,
     min_confidence: float,
-):
+) -> None:
     """Background task for video processing."""
     try:
         active_tasks[task_id] = {"status": "processing", "progress": 0}
@@ -388,7 +396,7 @@ async def _process_video_background(
 
 
 @app.post("/analyze/biomechanics", response_model=AnalysisResponse)
-async def analyze_biomechanics(request: AnalysisRequest):
+async def analyze_biomechanics(request: AnalysisRequest) -> AnalysisResponse:
     """Perform biomechanical analysis on simulation data."""
     if not analysis_service:
         raise HTTPException(status_code=500, detail="Analysis service not initialized")
@@ -405,7 +413,7 @@ async def analyze_biomechanics(request: AnalysisRequest):
 
 
 @app.get("/export/{task_id}")
-async def export_results(task_id: str, format: str = "json"):
+async def export_results(task_id: str, format: str = "json") -> JSONResponse:
     """Export analysis results in specified format."""
     if task_id not in active_tasks:
         raise HTTPException(status_code=404, detail="Task not found")
