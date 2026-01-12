@@ -1,137 +1,97 @@
-# Assessment H: Maintainability & Technical Debt
+# Assessment H: Error Handling & Debugging
 
-**Assessment Type**: Code Maintainability Audit
-**Rotation Day**: Day 8 (Bi-weekly)
-**Focus**: Cyclomatic complexity, code smells, technical debt, refactoring needs
+## Assessment Overview
 
----
-
-## Objective
-
-Conduct a maintainability audit identifying:
-
-1. High-complexity functions requiring simplification
-2. Code duplication and DRY violations
-3. Technical debt accumulation
-4. Refactoring opportunities
-5. Long-term maintenance risks
+You are a **developer experience engineer** conducting an **adversarial** error handling review. Your job is to identify **cryptic errors, missing context, and debugging friction**.
 
 ---
 
-## Mandatory Deliverables
+## Key Metrics
 
-### 1. Maintainability Summary
-
-- Total files: X
-- Average complexity: X
-- High-complexity functions: X
-- Code duplication: X%
-- Technical debt estimate: X hours
-
-### 2. Maintainability Scorecard
-
-| Category              | Score (0-10) | Weight | Evidence Required    |
-| --------------------- | ------------ | ------ | -------------------- |
-| Cyclomatic Complexity |              | 2x     | radon/flake8 results |
-| Code Duplication      |              | 2x     | jscpd/pylint results |
-| Function Length       |              | 1.5x   | LOC per function     |
-| Coupling              |              | 1.5x   | Import analysis      |
-| Cohesion              |              | 1.5x   | Module analysis      |
-| Naming Quality        |              | 1x     | Identifier review    |
-
-### 3. Technical Debt Register
-
-| ID  | Location | Debt Type | Severity | Effort | Interest | Priority |
-| --- | -------- | --------- | -------- | ------ | -------- | -------- |
-|     |          |           |          |        |          |          |
+| Metric                   | Target | Critical Threshold |
+| ------------------------ | ------ | ------------------ |
+| Actionable Error Rate    | >80%   | <50% = CRITICAL    |
+| Time to Understand Error | <2 min | >10 min = MAJOR    |
+| Recovery Path Documented | 100%   | Missing = MAJOR    |
+| Verbose Mode Available   | Yes    | No = MINOR         |
 
 ---
 
-## Categories to Evaluate
+## Review Categories
 
-### 1. Cyclomatic Complexity
+### A. Error Message Quality
 
-- [ ] No function exceeds complexity 15
-- [ ] Average complexity < 5
-- [ ] Complex functions documented
-- [ ] Refactoring plan for high-complexity
+**Bad vs Good Examples:**
 
-### 2. Code Duplication
+```python
+# BAD
+ValueError: 42
 
-- [ ] Duplication < 5%
-- [ ] No copy-paste anti-patterns
-- [ ] Shared utilities extracted
-- [ ] DRY principle followed
-
-### 3. Function/Method Size
-
-- [ ] Functions < 50 lines average
-- [ ] No function > 100 lines
-- [ ] Single responsibility per function
-- [ ] Clear function boundaries
-
-### 4. Coupling & Cohesion
-
-- [ ] Low coupling between modules
-- [ ] High cohesion within modules
-- [ ] Clear dependency direction
-- [ ] No circular imports
-
-### 5. Dead Code
-
-- [ ] No unreachable code
-- [ ] Unused imports removed
-- [ ] Commented code removed
-- [ ] Deprecated code marked
-
-### 6. Technical Debt Markers
-
-- [ ] TODO count tracked
-- [ ] FIXME count tracked
-- [ ] HACK count tracked
-- [ ] Debt documented and planned
-
----
-
-## Analysis Commands
-
-```bash
-# Cyclomatic complexity with radon
-pip install radon
-radon cc . -a -s -n C  # Show C grade and worse
-
-# Maintainability index
-radon mi . -s
-
-# Code duplication
-pip install jscpd
-jscpd . --reporters console --format "python"
-
-# Dead code detection
-pip install vulture
-vulture . --min-confidence 80
-
-# Combined metrics with wily
-pip install wily
-wily build .
-wily report .
-
-# TODO/FIXME counting
-grep -rn "TODO\|FIXME\|HACK\|XXX" --include="*.py" | wc -l
+# GOOD
+ValueError: Invalid data format in 'input.csv' at row 42.
+  Expected: numeric value in column 'price'
+  Found: 'N/A'
+  Fix: Replace 'N/A' with numeric value or use --skip-invalid flag
 ```
 
+### B. Exception Hierarchy
+
+- Consistent exception types
+- Custom exceptions for domain errors
+- Exception chaining (from e)
+- Appropriate exception granularity
+
+### C. Debugging Support
+
+- Verbose/debug mode available
+- Intermediate state inspection
+- Structured logging
+- Stack trace clarity
+
+### D. Recovery Strategies
+
+- Automatic retry for transient failures
+- Graceful degradation
+- Partial result handling
+- State recovery after crash
+
+### E. Error Documentation
+
+- Error codes documented
+- Troubleshooting guide exists
+- FAQ for common errors
+- Links from error messages to docs
+
 ---
 
-## Complexity Thresholds
+## Error Scenario Testing
 
-| Grade | Complexity | Maintainability |
-| ----- | ---------- | --------------- |
-| A     | 1-5        | Excellent       |
-| B     | 6-10       | Good            |
-| C     | 11-15      | Moderate        |
-| D     | 16-20      | Poor            |
-| F     | 21+        | Unmaintainable  |
+| Scenario           | Current Message | Actionable? | Fix |
+| ------------------ | --------------- | ----------- | --- |
+| Invalid input file | ...             | ✅/❌       | ... |
+| Missing config     | ...             | ✅/❌       | ... |
+| Network failure    | ...             | ✅/❌       | ... |
+| Permission denied  | ...             | ✅/❌       | ... |
+| Out of memory      | ...             | ✅/❌       | ... |
 
 ---
 
-_Assessment H focuses on maintainability. See Assessment A-G for other dimensions._
+## Output Format
+
+### 1. Error Quality Audit
+
+| Error Type     | Current Quality | Fix Priority    |
+| -------------- | --------------- | --------------- |
+| File not found | GOOD/POOR       | High/Medium/Low |
+| Invalid format | GOOD/POOR       | High/Medium/Low |
+| Config error   | GOOD/POOR       | High/Medium/Low |
+
+### 2. Remediation Roadmap
+
+**48 hours:** Top 5 worst error messages
+**2 weeks:** All user-facing errors actionable
+**6 weeks:** Full troubleshooting guide, verbose mode
+
+---
+
+_Assessment H focuses on error handling. See Assessment D for user experience and Assessment G for testing._

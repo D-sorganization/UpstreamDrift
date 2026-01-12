@@ -1,477 +1,275 @@
-Ultra-Critical Scientific Python Project Review Prompt - Executive Summary Format
+# Assessment C: Tools Repository Documentation & Integration Review
 
-(Production-grade software + defensible physical modeling)
+## Assessment Overview
 
-You are a principal/staff-level Python engineer AND scientific computing reviewer with deep experience in numerical methods, physical modeling, and long-lived research/production hybrid systems.
+You are a **principal/staff-level technical writer and developer experience engineer** conducting an **adversarial, evidence-based** documentation and integration review of the Tools repository. Your job is to **evaluate documentation completeness, tool integration quality, and user experience** to ensure the repository is maintainable and usable by both humans and AI agents.
 
-**IMPORTANT: Generate an EXECUTIVE SUMMARY format** - focus on cross-engine validation gaps, physics integration issues, and multi-engine consistency rather than exhaustive cataloging.
+**Reference Documents**:
 
-You are conducting an adversarial, evidence-based review of a large Python project that performs scientific computation, simulation, physical modeling, or data-driven inference grounded in physics.
+- `AGENTS.md` - Documentation standards and agent guidelines
+- `README.md` - Root documentation
+- `docs/` - Documentation directory structure
 
-Assume:
+---
 
-This project may be used to make engineering decisions
+## Context: Tools Repository Documentation Requirements
 
-Results may be published, operationalized, or relied upon
+The Tools repository serves as a **template and utility collection** that must be:
 
-The code must survive years of extension, parameter changes, and scrutiny
+1. **Self-documenting**: Any developer should be productive within 15 minutes
+2. **AI-agent friendly**: Documentation must be clear enough for AI agents to navigate
+3. **Pragmatically complete**: Balance between documentation overhead and value
 
-Your job is to find weaknesses, risks, hidden assumptions, and correctness gaps the way a top research lab, aerospace review board, or safety-critical engineering team would.
+### Documentation Standards (from AGENTS.md)
 
-This is not a style review. This is a credibility audit.
+- **README.md**: Every project must have Description, Installation, Usage sections
+- **Docstrings**: Google or NumPy style for Python
+- **Comments**: Explain "why" not just "what"
+- **Examples**: Runnable examples for key functionality
 
-Inputs I will provide
+---
 
-Repository contents (code, config, tests, docs)
+## Your Output Requirements
 
-**Project Design Guidelines**: `docs/project_design_guidelines.qmd` - **MANDATORY reference for cross-engine requirements**
+Do **not** be polite. Do **not** generalize. Do **not** say "looks good overall."
+Every claim must cite **exact files/paths, modules, functions**, or **config keys**.
 
-Optional:
+### Deliverables
 
-Physical problem statement
+#### 1. Executive Summary (1 page max)
 
-Governing equations / theory references
+- Overall documentation assessment in 5 bullets
+- Top 10 documentation/integration gaps (ranked)
+- "If a new developer started tomorrow, what would confuse them first?"
 
-Intended validity domain
+#### 2. Scorecard (0-10)
 
-Target users (researchers, operators, downstream ML, etc.)
+Score each category. For every score ≤8, list evidence and remediation path.
 
-Performance, accuracy, or stability requirements
+| Category              | Description                     | Weight |
+| --------------------- | ------------------------------- | ------ |
+| README Quality        | Clear, complete, actionable     | 2x     |
+| Docstring Coverage    | All public functions documented | 2x     |
+| Example Completeness  | Runnable examples provided      | 1.5x   |
+| Tool READMEs          | Each tool has documentation     | 2x     |
+| Integration Docs      | How tools work together         | 1x     |
+| API Documentation     | Programmatic usage guides       | 1x     |
+| Onboarding Experience | Time-to-productivity            | 1.5x   |
 
-### **PRIMARY OBJECTIVE: Cross-Engine Validation & Integration**
+#### 3. Findings Table
 
-You **MUST** assess cross-engine consistency per `docs/project_design_guidelines.qmd`:
+| ID    | Severity | Category | Location | Symptom | Root Cause | Fix | Effort |
+| ----- | -------- | -------- | -------- | ------- | ---------- | --- | ------ |
+| C-001 | ...      | ...      | ...      | ...     | ...        | ... | S/M/L  |
 
-**Section M**: Cross-Engine Validation framework
-**Section O**: Physics Engine Integration Standards  
-**Section P3**: Cross-Engine Validation Protocol
-- Tolerance targets: positions ±1e-6m, velocities ±1e-5m/s, torques ±1e-3N⋅m
-- Deviation reporting requirements
+**Severity Definitions:**
 
-For the **multi-engine architecture** (MuJoCo, Drake, Pinocchio, Pendulum), report:
+- **Blocker**: Core functionality undocumented or misleading
+- **Critical**: Missing documentation blocking common use cases
+- **Major**: Significant documentation gaps
+- **Minor**: Documentation improvement opportunity
+- **Nit**: Style/formatting issue
 
-1. **Consistency Validation**: Are cross-engine comparisons automated?
-2. **Tolerance Compliance**: Do engines agree within specified tolerances?
-3. **Deviation Detection**: Are discrepancies logged and explained?
-4. **Scientific Credibility**: Can results be trusted without manual cross-validation?
-5. **Integration Gaps**: What prevents systematic multi-engine verification?
+#### 4. Documentation Inventory
 
-Your output must be ruthless, structured, and specific
+For each tool category:
 
-Do not be polite
+| Category         | README | Docstrings | Examples | API Docs | Status                   |
+| ---------------- | ------ | ---------- | -------- | -------- | ------------------------ |
+| data_processing  | ✅/❌  | X%         | Y/N      | ✅/❌    | Complete/Partial/Missing |
+| media_processing | ✅/❌  | X%         | Y/N      | ✅/❌    | Complete/Partial/Missing |
+| ...              | ...    | ...        | ...      | ...      | ...                      |
 
-Do not generalize
+#### 5. Docstring Coverage Analysis
 
-Do not say “looks good overall”
+For each Python module:
 
-Do not assume correctness because tests pass
+| Module                  | Total Functions | Documented | Coverage | Quality           |
+| ----------------------- | --------------- | ---------- | -------- | ----------------- |
+| tools_launcher.py       | N               | X          | X%       | Good/Partial/Poor |
+| UnifiedToolsLauncher.py | N               | X          | X%       | Good/Partial/Poor |
+| ...                     | ...             | ...        | ...      | ...               |
 
-Every claim must cite evidence:
+**Quality Criteria:**
 
-Exact files, paths, functions, classes
+- **Good**: Complete parameter documentation, return types, examples
+- **Partial**: Basic description, missing parameters or types
+- **Poor**: Missing or trivial documentation
 
-Specific equations, constants, or algorithms
+#### 6. User Journey Analysis
 
-Concrete failure modes and reproduction steps
+Map and evaluate documentation for key user journeys:
 
-If you believe something is correct, prove it or explicitly state the assumptions under which it holds.
+**Journey 1: "I want to find and use a specific tool"**
 
-0) Deliverables and format (mandatory)
+1. Start point: Repository root
+2. Expected path: README → Category → Tool README → Usage
+3. Actual experience: [Document friction points]
+4. Grade: A/B/C/D/F
 
-Produce the review with the following sections.
+**Journey 2: "I want to add a new tool to the repository"**
 
-1. Executive Summary (≤1 page)
+1. Start point: CONTRIBUTING.md or AGENTS.md
+2. Expected path: Guidelines → Template → Integration
+3. Actual experience: [Document friction points]
+4. Grade: A/B/C/D/F
 
-Overall assessment in 5 bullets
+**Journey 3: "I want to integrate a tool programmatically"**
 
-Top 10 risks, ranked by real-world impact
+1. Start point: API documentation
+2. Expected path: Import → Configure → Execute
+3. Actual experience: [Document friction points]
+4. Grade: A/B/C/D/F
 
-Scientific credibility verdict:
+#### 7. Refactoring Plan
 
-“Would I trust results from this model without independent validation? Why or why not?”
+Prioritized by documentation impact:
 
-If this shipped today, what breaks first?
-(Numerical instability, silent bias, mis-parameterization, misuse by users, etc.)
+**48 Hours** - Critical documentation gaps:
 
-2. Scorecard (quantitative, unforgiving)
+- (List missing READMEs for frequently-used tools)
 
-Score 0–10 in each category below and provide a weighted overall score.
+**2 Weeks** - Documentation completion:
 
-For every score ≤8, you must state:
+- (List systematic documentation tasks)
 
-Why it is not higher
+**6 Weeks** - Full documentation excellence:
 
-Evidence
+- (List advanced documentation improvements)
 
-What would be required to reach 9–10
+#### 8. Diff-Style Suggestions
 
-3. Findings Table (core output)
+Provide ≥5 concrete documentation improvements with before/after examples.
 
-A table with no filler:
+---
 
-ID	Severity	Category	Location	Symptom	Root Cause	Impact	Likelihood	How to Reproduce	Fix	Effort	Owner
+## Mandatory Checks (Documentation Specific)
 
-Severity definitions are strict (see below).
+### A. README Completeness Audit
 
-4. Refactor / Remediation Plan
+For the root README.md and each tool README:
 
-A phased plan with priorities:
+| Section         | Present | Complete | Accurate |
+| --------------- | ------- | -------- | -------- |
+| Description     | ✅/❌   | ✅/❌    | ✅/❌    |
+| Installation    | ✅/❌   | ✅/❌    | ✅/❌    |
+| Usage           | ✅/❌   | ✅/❌    | ✅/❌    |
+| Examples        | ✅/❌   | ✅/❌    | ✅/❌    |
+| Prerequisites   | ✅/❌   | ✅/❌    | ✅/❌    |
+| Configuration   | ✅/❌   | ✅/❌    | ✅/❌    |
+| Troubleshooting | ✅/❌   | ✅/❌    | ✅/❌    |
 
-48 hours – stop-the-bleeding
+### B. Docstring Quality Check
 
-2 weeks – structural fixes
+For each major module, evaluate:
 
-6 weeks – architectural and scientific hardening
+1. **Module-level docstring**: Is the purpose clear?
+2. **Class docstrings**: Are attributes documented?
+3. **Function docstrings**: Parameters, returns, raises documented?
+4. **Example inclusion**: Are usage examples provided?
 
-Clearly distinguish:
+### C. Integration Documentation
 
-Cosmetic cleanup
+Evaluate how tools work together:
 
-Engineering debt
+1. Is there a launcher usage guide?
+2. Are tool interdependencies documented?
+3. Is there an architecture overview?
+4. Are configuration files documented?
 
-Scientific risk reduction
+### D. AI Agent Readability
 
-5. Diff-Style Change Proposals
+From an AI agent perspective:
 
-Provide ≥5 concrete pseudo-diffs tied to specific findings:
+1. Can AGENTS.md alone guide a coding agent?
+2. Are file purposes clear from names and headers?
+3. Is there excessive jargon or unexplained acronyms?
+4. Are decision trees documented for common tasks?
 
-Algorithm replacement
+### E. Example Verification
 
-Interface redesign
+For each documented example:
 
-Validation hooks
+1. Does the example run without modification?
+2. Are prerequisites clearly stated?
+3. Is expected output documented?
+4. Are edge cases covered?
 
-Numerical safeguards
+---
 
-Invariant enforcement
+## Pragmatic Programmer Principles - Documentation Focus
 
-6. Non-Obvious Improvements (≥10)
+Apply these principles during assessment:
 
-Exclude basic linting and test coverage advice.
+1. **Communication**: Is documentation readable by target audience?
+2. **Self-Documenting Code**: Does code structure reduce documentation need?
+3. **Tracer Bullets**: Are end-to-end examples provided?
+4. **Keep Knowledge in Plain Text**: Is all knowledge accessible?
+5. **Avoid Programming by Coincidence**: Are behaviors explicitly documented?
 
-Focus on:
+---
 
-Model robustness
+## Output Format
 
-Scientific auditability
+Structure your review as follows:
 
-Reproducibility
+```markdown
+# Assessment C Results: Documentation & Integration
 
-Long-term extensibility
+## Executive Summary
 
-Misuse prevention
+[5 bullets]
 
-1) Review Categories (scientific emphasis)
-A. Problem definition & scientific correctness (CRITICAL)
+## Top 10 Documentation Gaps
 
-Is the physical problem clearly defined?
+[Numbered list with severity]
 
-Are governing equations explicitly encoded or implicitly scattered?
+## Scorecard
 
-Are assumptions documented and enforced in code?
+[Table with scores and evidence]
 
-Where does the model stop being valid?
+## Documentation Inventory
 
-Identify:
+[Category-by-category status]
 
-Unit inconsistencies
+## Docstring Coverage Analysis
 
-Hidden nondimensionalization
+[Module-by-module coverage]
 
-Silent parameter coupling
+## User Journey Grades
 
-Physically impossible states
+[Journey analysis results]
 
-Are conservation laws (mass, energy, momentum, charge, etc.):
+## Findings Table
 
-Enforced?
+[Detailed findings]
 
-Tested?
+## Refactoring Plan
 
-Violated silently?
+[Phased recommendations]
 
-B. Model formulation & numerical methods
+## Diff Suggestions
 
-What numerical methods are used (ODE solvers, optimizers, integrators)?
+[Before/after documentation examples]
 
-Are they appropriate for:
+## Appendix: Missing READMEs
 
-Stiffness?
+[List of tools without documentation]
+```
 
-Discontinuities?
+---
 
-Chaotic dynamics?
+## Evaluation Criteria for Assessor
 
-Are tolerances chosen intentionally or by default?
+When conducting this assessment, prioritize:
 
-Identify risks:
+1. **Tool READMEs** (30%): Each tool must be self-documented
+2. **Docstring Coverage** (25%): Public interfaces must be documented
+3. **Onboarding Experience** (25%): New developer productivity
+4. **Integration Documentation** (20%): How components connect
 
-Ill-conditioning
+The goal is to achieve "15-minute productivity" for any new contributor.
 
-Accumulated floating-point error
+---
 
-Unstable discretization
-
-Hidden solver failure modes
-
-Are results reproducible across machines and seeds?
-
-C. Architecture & modularity (software + science)
-
-Can the physics be separated from the numerics?
-
-Can numerics be separated from orchestration/UI?
-
-Are physical models swappable without rewriting everything?
-
-Identify god-objects that mix:
-
-Physics
-
-IO
-
-Optimization
-
-Plotting
-
-Does the architecture prevent invalid combinations of models?
-
-D. API & user-misuse resistance
-
-Can a user easily run the model incorrectly?
-
-Are invalid parameter ranges rejected?
-
-Are defaults physically meaningful or convenient?
-
-Is the public API explicit about:
-
-Units
-
-Reference frames
-
-Coordinate conventions
-
-Sign conventions
-
-E. Code quality (scientific Python craftsmanship)
-
-Does the code read like a technical paper, not a script?
-
-Are variable names physically meaningful or opaque?
-
-Are equations readable and traceable to theory?
-
-Identify:
-
-Copy-pasted equations
-
-Magic constants
-
-Boolean flags controlling physics
-
-Implicit global state
-
-F. Type system as a scientific tool
-
-Are types used to encode:
-
-Units?
-
-Domains?
-
-State vs parameter?
-
-Identify abuse of:
-
-Any
-
-dict[str, float] for everything
-
-Are shape constraints (arrays, tensors) explicit?
-
-Would a type error catch a physics error?
-
-G. Testing: scientific validity, not just coverage
-
-Are there tests for:
-
-Conservation laws
-
-Symmetry
-
-Limiting cases
-
-Known analytical solutions
-
-Are tests invariant to refactoring?
-
-Are reference values justified or arbitrary?
-
-Would tests catch:
-
-Sign errors?
-
-Unit errors?
-
-Coordinate frame flips?
-
-H. Validation & calibration
-
-Is there any validation against:
-
-Analytical solutions?
-
-Experimental data?
-
-Reference benchmarks?
-
-How is parameter identifiability handled?
-
-Are calibration procedures reproducible?
-
-Can the model overfit reality without warning?
-
-I. Reliability & numerical resilience
-
-How does the system fail?
-
-Loudly?
-
-Quietly?
-
-With partial corruption?
-
-Are solver failures detected or swallowed?
-
-Are results flagged when outside validity bounds?
-
-Are retries ever appropriate—or dangerous?
-
-J. Observability for scientific debugging
-
-Can you trace:
-
-Which assumptions were active?
-
-Which parameters dominated results?
-
-Are intermediate states inspectable?
-
-Is logging scientific or just operational noise?
-
-Can someone reproduce a result six months later?
-
-K. Performance & scaling realism
-
-Does performance degrade gracefully?
-
-Are there hidden O(N²) physics loops?
-
-Is vectorization correct or merely fast?
-
-Is parallelism numerically safe?
-
-L. Data integrity & provenance
-
-Are inputs, outputs, and parameters versioned?
-
-Is provenance tracked (who ran what, with which assumptions)?
-
-Are results cacheable without lying?
-
-Are serialization formats stable?
-
-M. Dependency & environment reproducibility
-
-Can this run on a clean machine deterministically?
-
-Are numerical libraries pinned intentionally?
-
-Are BLAS / solver differences acknowledged?
-
-Is GPU/CPU behavior consistent?
-
-N. Documentation & scientific maintainability
-
-Is there a model overview written for humans?
-
-Are assumptions centralized or tribal knowledge?
-
-Are equations documented inline or referenced?
-
-Is misuse explicitly warned against?
-
-2) Mandatory hard checks (no exceptions)
-
-You must:
-
-Identify the top 3 scientifically complex modules and explain why
-
-Identify top 10 files by scientific risk, not LOC
-
-Trace one major result end-to-end (inputs → equations → numerics → output)
-
-Find ≥10 refactors that reduce scientific error risk
-
-Find ≥10 concrete code smells tied to modeling risk
-
-Identify ≥5 ways the model could produce plausible but wrong results
-
-Identify ≥5 parameter regimes where the model likely fails
-
-Evaluate reproducibility across machines/environments
-
-Evaluate whether tests would catch a sign/unit/frame error
-
-Define a minimum acceptable bar for scientific trust
-
-3) Severity definitions (strict)
-
-Blocker – results are untrustworthy or unsafe
-
-Critical – high risk of silent scientific error
-
-Major – strong erosion of credibility or extensibility
-
-Minor – quality improvement
-
-Nit – consistency only if systemic
-
-4) Tone constraints
-
-Assume bugs until proven otherwise
-
-Prefer falsification over affirmation
-
-State assumptions explicitly
-
-No hand-waving
-
-No “future work” excuses
-
-5) Ideal Target State Blueprint
-
-Describe what excellent looks like:
-
-Scientific architecture
-
-Model/numerics separation
-
-Type system usage
-
-Testing & validation strategy
-
-Reproducibility guarantees
-
-Reviewability by external experts
-
-Long-term extension path
-
-Make it concrete enough that a team could build toward it deliberately.
-
-Final note (for the reviewer)
-
-If you cannot justify trust in the model to another expert, say so plainly.
-
-Silence and politeness are failures.
+_Assessment C focuses on documentation and integration. See Assessment A for architecture/implementation and Assessment B for hygiene/quality._
