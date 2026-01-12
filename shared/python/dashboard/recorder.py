@@ -285,6 +285,14 @@ class GenericPhysicsRecorder:
         self.data["kinetic_energy"][idx] = ke
         self.data["joint_torques"][idx] = tau
 
+        # Ground Forces (from engine, if supported)
+        try:
+            grf = self.engine.compute_contact_forces()
+            if grf is not None and len(grf) == 3:
+                self.data["ground_forces"][idx] = grf
+        except Exception:
+            pass
+
         self.current_idx += 1
 
     def update_control(self, u: np.ndarray) -> None:
@@ -329,7 +337,7 @@ class GenericPhysicsRecorder:
             return times, values
 
     def get_induced_acceleration_series(
-        self, source_name: str
+        self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Get induced acceleration series."""
         if source_name not in self.data["induced_accelerations"]:
@@ -337,10 +345,17 @@ class GenericPhysicsRecorder:
             # Doing it post-hoc is expensive (needs re-simulation).
             # For now, return empty if not recorded.
             return np.array([]), np.array([])
+
+        # Get data
+        data = self.data["induced_accelerations"][source_name]
+
+        # If it's a raw array (real-time buffer), return sliced view
+        if isinstance(data, np.ndarray):
+            return self.data["times"][: self.current_idx], data[: self.current_idx]
+
+        # If it's already a tuple (post-hoc result), return it
         # Explicitly cast to tuple to satisfy MyPy
-        result: tuple[np.ndarray, np.ndarray] = self.data["induced_accelerations"][
-            source_name
-        ]
+        result: tuple[np.ndarray, np.ndarray] = data
         return result
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
