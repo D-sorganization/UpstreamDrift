@@ -244,7 +244,7 @@ class URDFExporter:
                 parent_name,
                 intermediate_link,
                 dof1.get("axis", [1, 0, 0]),
-                dof1.get("limits", [-1.57, 1.57]),
+                dof1.get("limits", [-math.pi / 2, math.pi / 2]),
                 joint.get("damping"),
                 joint_origin,
             )
@@ -264,7 +264,7 @@ class URDFExporter:
                 intermediate_link,
                 seg_name,
                 dof2.get("axis", [0, 1, 0]),
-                dof2.get("limits", [-1.57, 1.57]),
+                dof2.get("limits", [-math.pi / 2, math.pi / 2]),
                 joint.get("damping"),
             )
         )
@@ -318,7 +318,7 @@ class URDFExporter:
                 parent_name,
                 intermediate1,
                 dof1.get("axis", [0, 0, 1]),
-                dof1.get("limits", [-3.14, 3.14]),
+                dof1.get("limits", [-math.pi, math.pi]),
                 joint.get("damping"),
                 joint_origin,
             )
@@ -338,7 +338,7 @@ class URDFExporter:
                 intermediate1,
                 intermediate2,
                 dof2.get("axis", [0, 1, 0]),
-                dof2.get("limits", [-1.57, 1.57]),
+                dof2.get("limits", [-math.pi / 2, math.pi / 2]),
                 joint.get("damping"),
             )
         )
@@ -357,7 +357,7 @@ class URDFExporter:
                 intermediate2,
                 seg_name,
                 dof3.get("axis", [1, 0, 0]),
-                dof3.get("limits", [-1.57, 1.57]),
+                dof3.get("limits", [-math.pi / 2, math.pi / 2]),
                 joint.get("damping"),
             )
         )
