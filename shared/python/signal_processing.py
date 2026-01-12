@@ -7,6 +7,8 @@ analysis, and signal quality assessment.
 
 from __future__ import annotations
 
+from typing import Any, cast
+
 import numpy as np
 from scipy import signal
 
@@ -268,7 +270,7 @@ def compute_jerk(
     if len(data) < window_len:
         # Fallback to simple finite difference if too short
         dt = 1.0 / fs
-        return np.gradient(data, dt)
+        return cast("np.ndarray[Any, Any]", np.gradient(data, dt))
 
     if window_len % 2 == 0:
         window_len += 1
@@ -279,7 +281,7 @@ def compute_jerk(
         data, window_length=window_len, polyorder=polyorder, deriv=1, delta=1.0 / fs
     )
 
-    return jerk
+    return cast("np.ndarray[Any, Any]", jerk)
 
 
 def compute_time_shift(
