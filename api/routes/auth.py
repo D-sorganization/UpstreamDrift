@@ -25,7 +25,9 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 
 
 @router.post("/register", response_model=UserResponse)
-async def register_user(user_data: UserCreate, db: Session = Depends(get_db)) -> UserResponse:
+async def register_user(
+    user_data: UserCreate, db: Session = Depends(get_db)
+) -> UserResponse:
     """Register a new user."""
 
     # Check if user already exists
@@ -55,7 +57,9 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)) ->
 
 
 @router.post("/login", response_model=LoginResponse)
-async def login(login_data: LoginRequest, db: Session = Depends(get_db)) -> LoginResponse:
+async def login(
+    login_data: LoginRequest, db: Session = Depends(get_db)
+) -> LoginResponse:
     """Authenticate user and return tokens."""
 
     # Find user
@@ -67,7 +71,9 @@ async def login(login_data: LoginRequest, db: Session = Depends(get_db)) -> Logi
         )
 
     # Verify password
-    if not security_manager.verify_password(login_data.password, str(user.hashed_password)):
+    if not security_manager.verify_password(
+        login_data.password, str(user.hashed_password)
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -103,7 +109,9 @@ async def login(login_data: LoginRequest, db: Session = Depends(get_db)) -> Logi
 
 
 @router.post("/refresh", response_model=dict)
-async def refresh_token(refresh_token: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+async def refresh_token(
+    refresh_token: str, db: Session = Depends(get_db)
+) -> dict[str, Any]:
     """Refresh access token using refresh token."""
 
     # Verify refresh token
