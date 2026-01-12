@@ -259,7 +259,9 @@ class UsageTracker:
             "video_analyses": {
                 "used": video_analyses_used,
                 "limit": quotas.video_analyses_per_month,
-                "remaining": max(0, quotas.video_analyses_per_month - video_analyses_used),
+                "remaining": max(
+                    0, quotas.video_analyses_per_month - video_analyses_used
+                ),
             },
             "simulations": {
                 "used": simulations_used,
