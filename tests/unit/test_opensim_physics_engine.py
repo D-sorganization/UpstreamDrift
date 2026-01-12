@@ -26,6 +26,8 @@ def teardown_module(module):
 def engine():
     # Reset mock_opensim for each test
     mock_opensim.reset_mock()
+    # Ensure the mock is not None-like
+    mock_opensim.__bool__ = lambda: True
     return OpenSimPhysicsEngine()
 
 

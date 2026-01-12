@@ -150,6 +150,10 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         if not self.sim:
             return
 
+        # Ensure arrays are at least 1D to avoid len() errors on scalars
+        q = np.atleast_1d(q)
+        v = np.atleast_1d(v)
+
         # MjSim (mujoco-py) usually allows direct assignment
         if len(q) == len(self.sim.data.qpos):
             self.sim.data.qpos[:] = q
