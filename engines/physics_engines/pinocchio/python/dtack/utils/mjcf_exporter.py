@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import logging
+import math
 import typing
 from pathlib import Path
 
 import yaml  # type: ignore[import-untyped]
+from shared.python.constants import GRAVITY_M_S2
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +57,8 @@ class MJCFExporter:
 
         # Options
         lines.append(
-            '  <option timestep="0.002" gravity="0 0 -9.81" integrator="RK4"/>'
+            f'  <option timestep="0.002" gravity="0 0 -{GRAVITY_M_S2}" '
+            'integrator="RK4"/>'
         )
 
         # Visual
@@ -113,7 +116,7 @@ class MJCFExporter:
             joint_type = joint.get("type", "hinge")
             if joint_type == "revolute":
                 axis = joint.get("axis", [0, 0, 1])
-                limits = joint.get("limits", [-3.14, 3.14])
+                limits = joint.get("limits", [-math.pi, math.pi])
                 damping = joint.get("damping", 0.0)
                 lines.append(
                     f'{indent}  <joint name="{seg_name}_joint" type="hinge" '
