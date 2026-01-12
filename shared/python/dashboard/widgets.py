@@ -75,6 +75,8 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.combo = QtWidgets.QComboBox()
         self.combo.addItems(list(self.metric_options.keys()))
         self.combo.setToolTip("Select data to plot")
+        self.combo.setStatusTip("Select the simulation metric to plot in real-time")
+        self.combo.setAccessibleName("Metric Selector")
         self.combo.currentTextChanged.connect(self.set_plot_metric)
 
         lbl_metric = QtWidgets.QLabel("Metric:")
@@ -86,6 +88,10 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.mode_combo = QtWidgets.QComboBox()
         self.mode_combo.addItems(["All Dimensions", "Single Dimension", "Norm"])
         self.mode_combo.setToolTip("Select plot mode")
+        self.mode_combo.setStatusTip(
+            "Select how to display the data (All Dimensions, Single Dimension, or Norm)"
+        )
+        self.mode_combo.setAccessibleName("Plot Mode Selector")
         self.mode_combo.currentTextChanged.connect(self._on_mode_changed)
         controls_layout.addWidget(self.mode_combo)
 
@@ -93,6 +99,9 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.dim_spin = QtWidgets.QSpinBox()
         self.dim_spin.setRange(0, 100)  # Assume max 100 dims
         self.dim_spin.setPrefix("Dim: ")
+        self.dim_spin.setToolTip("Select dimension index")
+        self.dim_spin.setStatusTip("Select the specific dimension index to plot")
+        self.dim_spin.setAccessibleName("Dimension Index")
         self.dim_spin.setVisible(False)  # Only for Single Dimension mode
         self.dim_spin.valueChanged.connect(self.update_plot)
         controls_layout.addWidget(self.dim_spin)
@@ -101,6 +110,9 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.source_spin = QtWidgets.QSpinBox()
         self.source_spin.setRange(0, 100)  # Assume max 100 joints
         self.source_spin.setPrefix("Source Idx: ")
+        self.source_spin.setToolTip("Select source index")
+        self.source_spin.setStatusTip("Select the induced acceleration source index")
+        self.source_spin.setAccessibleName("Source Index")
         self.source_spin.setVisible(False)
         self.source_spin.valueChanged.connect(self._on_source_changed)
         controls_layout.addWidget(self.source_spin)
@@ -109,6 +121,9 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.chk_compute = QtWidgets.QCheckBox("Compute Real-time")
         self.chk_compute.setToolTip(
             "Enable real-time computation for advanced metrics (ZTCF, etc). May affect performance."
+        )
+        self.chk_compute.setStatusTip(
+            "Enable or disable real-time computation of advanced metrics"
         )
         self.chk_compute.stateChanged.connect(self.toggle_computation)
         controls_layout.addWidget(self.chk_compute)
