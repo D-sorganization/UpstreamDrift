@@ -97,6 +97,8 @@ class LivePlotWidget(QtWidgets.QWidget):
 
         # Selector for Dimension Index (Hidden by default)
         self.dim_spin = QtWidgets.QSpinBox()
+        self.dim_spin.setAccessibleName("Dimension Index")
+        self.dim_spin.setAccessibleDescription("Select the dimension index to plot")
         self.dim_spin.setRange(0, 100)  # Assume max 100 dims
         self.dim_spin.setPrefix("Dim: ")
         self.dim_spin.setToolTip("Select dimension index")
@@ -108,6 +110,10 @@ class LivePlotWidget(QtWidgets.QWidget):
 
         # Selector for Induced Accel Source (Hidden by default)
         self.source_spin = QtWidgets.QSpinBox()
+        self.source_spin.setAccessibleName("Source Index")
+        self.source_spin.setAccessibleDescription(
+            "Select the source index for induced acceleration"
+        )
         self.source_spin.setRange(0, 100)  # Assume max 100 joints
         self.source_spin.setPrefix("Source Idx: ")
         self.source_spin.setToolTip("Select source index")
