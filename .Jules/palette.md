@@ -13,3 +13,7 @@
 ## 2026-06-15 - [Micro-feedback in Desktop Apps]
 **Learning:** In desktop GUI applications, immediate feedback for invisible actions (like "Copy to Clipboard") significantly reduces user uncertainty. A simple status bar message is often missed; temporarily changing the button's own state (text/icon) captures attention exactly where the user is looking.
 **Action:** For "fire-and-forget" actions like copying to clipboard, implement a temporary "success state" on the triggering element (e.g., change "Copy" to "Copied!" with a checkmark) that reverts automatically after a short delay (e.g., 2s).
+
+## 2026-06-15 - [Search Bar in Grid Layouts]
+**Learning:** When displaying a large grid of items (like models or apps), users struggle to find specific items quickly without a search function. Adding a real-time filter improves discoverability significantly. However, implementing it in a grid layout requires clearing and rebuilding the grid to avoid gaps, rather than just hiding widgets.
+**Action:** When adding search filtering to a `QGridLayout`, implement a robust rebuild method that re-flows the visible items into the grid coordinates from scratch, ensuring a dense, gap-free layout for the filtered results.
