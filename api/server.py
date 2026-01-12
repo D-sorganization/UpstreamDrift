@@ -180,7 +180,9 @@ async def load_engine(
 
     try:
         engine_enum = EngineType(engine_type.upper())
-        engine_manager._load_engine(engine_enum)  # This method doesn't return success status
+        engine_manager._load_engine(
+            engine_enum
+        )  # This method doesn't return success status
 
         # Check if engine was loaded successfully
         engine = engine_manager.get_active_physics_engine()
