@@ -1,6 +1,7 @@
 """Authentication routes for user management."""
 
 from datetime import datetime, timedelta
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -24,7 +25,7 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 
 
 @router.post("/register", response_model=UserResponse)
-async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
+async def register_user(user_data: UserCreate, db: Session = Depends(get_db)) -> UserResponse:
     """Register a new user."""
 
     # Check if user already exists
@@ -54,7 +55,7 @@ async def register_user(user_data: UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=LoginResponse)
-async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
+async def login(login_data: LoginRequest, db: Session = Depends(get_db)) -> LoginResponse:
     """Authenticate user and return tokens."""
 
     # Find user
@@ -66,7 +67,7 @@ async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
         )
 
     # Verify password
-    if not security_manager.verify_password(login_data.password, user.hashed_password):
+    if not security_manager.verify_password(login_data.password, str(user.hashed_password)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",
@@ -102,7 +103,7 @@ async def login(login_data: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/refresh", response_model=dict)
-async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
+async def refresh_token(refresh_token: str, db: Session = Depends(get_db)) -> dict[str, Any]:
     """Refresh access token using refresh token."""
 
     # Verify refresh token
@@ -137,13 +138,13 @@ async def refresh_token(refresh_token: str, db: Session = Depends(get_db)):
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user_info(current_user: User = RequireAuth):
+async def get_current_user_info(current_user: User = RequireAuth) -> UserResponse:
     """Get current user information."""
     return current_user
 
 
 @router.get("/usage", response_model=dict)
-async def get_usage_info(current_user: User = RequireAuth):
+async def get_usage_info(current_user: User = RequireAuth) -> dict[str, Any]:
     """Get current user's usage information."""
     return usage_tracker.get_usage_summary(current_user)
 
