@@ -1,16 +1,14 @@
 from pathlib import Path
+from unittest.mock import patch
 
 import matplotlib
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytest
 
-matplotlib.use("Agg")  # Use non-interactive backend
-from unittest.mock import patch
-
-import matplotlib.pyplot as plt
-
 from shared.python.common_utils import (
+    DataFormatError,
     convert_units,
     ensure_output_dir,
     get_shared_urdf_path,
@@ -21,100 +19,120 @@ from shared.python.common_utils import (
 )
 from shared.python.constants import MPS_TO_MPH
 
+# Use non-interactive backend for plots
+matplotlib.use("Agg")
+
 
 class TestCommonUtils:
-    def test_ensure_output_dir(self, tmp_path):
-        """Test output directory creation."""
-        with patch("shared.python.OUTPUT_ROOT", tmp_path):
-            path = ensure_output_dir("test_engine", "test_subdir")
-            assert path.exists()
-            assert path.name == "test_subdir"
-            assert path.parent.name == "test_engine"
 
-    def test_load_save_golf_data_csv(self, tmp_path):
-        """Test loading and saving CSV data."""
+    @pytest.fixture
+    def mock_output_root(self, tmp_path):
+        """Mock OUTPUT_ROOT in shared.python"""
+        with patch("shared.python.OUTPUT_ROOT", tmp_path):
+            yield tmp_path
+
+    def test_ensure_output_dir(self, mock_output_root):
+        engine_name = "test_engine"
+        path = ensure_output_dir(engine_name)
+
+        assert path.exists()
+        assert path == mock_output_root / engine_name
+
+        subdir_path = ensure_output_dir(engine_name, subdir="run_1")
+        assert subdir_path.exists()
+        assert subdir_path == mock_output_root / engine_name / "run_1"
+
+    def test_load_golf_data_csv(self, tmp_path):
         df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
         csv_path = tmp_path / "test.csv"
-
-        save_golf_data(df, csv_path, format="csv")
-        assert csv_path.exists()
+        df.to_csv(csv_path, index=False)
 
         loaded_df = load_golf_data(csv_path)
         pd.testing.assert_frame_equal(df, loaded_df)
 
-    def test_load_save_golf_data_json(self, tmp_path):
-        """Test loading and saving JSON data."""
+    def test_load_golf_data_json(self, tmp_path):
         df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
         json_path = tmp_path / "test.json"
-
-        save_golf_data(df, json_path, format="json")
-        assert json_path.exists()
+        df.to_json(json_path, orient="records", indent=2)
 
         loaded_df = load_golf_data(json_path)
         pd.testing.assert_frame_equal(df, loaded_df)
 
-    def test_load_unsupported_format(self, tmp_path):
-        """Test error for unsupported formats."""
-        path = tmp_path / "test.xyz"
-        path.touch()
+    def test_load_golf_data_unsupported(self, tmp_path):
+        txt_path = tmp_path / "test.txt"
+        txt_path.touch()
         with pytest.raises(ValueError, match="Unsupported file format"):
-            load_golf_data(path)
+            load_golf_data(txt_path)
 
-    def test_save_unsupported_format(self, tmp_path):
-        """Test error for unsupported formats."""
-        df = pd.DataFrame({"a": [1]})
+    def test_save_golf_data(self, tmp_path):
+        df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
+
+        # Test CSV
+        csv_path = tmp_path / "out.csv"
+        save_golf_data(df, csv_path, format="csv")
+        assert csv_path.exists()
+        pd.testing.assert_frame_equal(pd.read_csv(csv_path), df)
+
+        # Test JSON
+        json_path = tmp_path / "out.json"
+        save_golf_data(df, json_path, format="json")
+        assert json_path.exists()
+        pd.testing.assert_frame_equal(pd.read_json(json_path), df)
+
+        # Test Invalid
         with pytest.raises(ValueError, match="Unsupported format"):
-            save_golf_data(df, tmp_path / "test.txt", format="txt")
+            save_golf_data(df, tmp_path / "out.xyz", format="xyz")
 
     def test_standardize_joint_angles(self):
-        """Test joint angle standardization."""
-        angles = np.zeros((10, 2))
-        df = standardize_joint_angles(angles, ["j1", "j2"])
+        angles = np.array([[0.1, 0.2], [0.2, 0.3], [0.3, 0.4]])
+        df = standardize_joint_angles(angles, time_step=0.1)
 
         assert "time" in df.columns
-        assert "j1" in df.columns
-        assert "j2" in df.columns
-        assert len(df) == 10
-        assert df["time"].iloc[-1] == pytest.approx(0.09)  # 0 to 9 * 0.01
+        assert list(df.columns) == ["joint_0", "joint_1", "time"]
+        assert len(df) == 3
+        # Check time vector
+        expected_time = np.array([0.0, 0.1, 0.2])
+        np.testing.assert_allclose(df["time"].values, expected_time)
 
-        # Test with custom time step
-        df_custom = standardize_joint_angles(angles, ["j1", "j2"], time_step=0.001)
-        assert df_custom["time"].iloc[-1] == pytest.approx(0.009)
+    def test_standardize_joint_angles_custom_names(self):
+        angles = np.array([[0.1], [0.2]])
+        df = standardize_joint_angles(angles, angle_names=["hip"], time_step=1.0)
+        assert list(df.columns) == ["hip", "time"]
 
     def test_plot_joint_trajectories(self, tmp_path):
-        """Test plotting function."""
-        df = pd.DataFrame(
-            {
-                "time": np.linspace(0, 1, 10),
-                "joint_1": np.random.rand(10),
-                "joint_2": np.random.rand(10),
-            }
-        )
+        df = pd.DataFrame({"time": [0, 1, 2], "joint1": [0, 1, 2], "joint2": [2, 1, 0]})
 
-        save_path = tmp_path / "plot.png"
-        fig = plot_joint_trajectories(df, title="Test Plot", save_path=save_path)
-
+        fig = plot_joint_trajectories(df, title="Test Plot")
         assert isinstance(fig, plt.Figure)
+
+        # Test saving
+        save_path = tmp_path / "plot.png"
+        plot_joint_trajectories(df, save_path=save_path)
         assert save_path.exists()
+
         plt.close(fig)
 
     def test_convert_units(self):
-        """Test unit conversion."""
-        assert convert_units(180, "deg", "rad") == pytest.approx(np.pi)
-        assert convert_units(np.pi, "rad", "deg") == pytest.approx(180)
-        assert convert_units(1, "m", "mm") == 1000
-        assert convert_units(1000, "mm", "m") == 1
-        # Use constant for precise check
-        assert convert_units(10, "m/s", "mph") == pytest.approx(10 * float(MPS_TO_MPH))
+        assert np.isclose(convert_units(180, "deg", "rad"), np.pi)
+        assert np.isclose(convert_units(np.pi, "rad", "deg"), 180.0)
 
-        with pytest.raises(ValueError, match="Conversion from.*not supported"):
-            convert_units(1, "kg", "lbs")
+        assert convert_units(1.0, "m", "mm") == 1000.0
+        assert convert_units(1000.0, "mm", "m") == 1.0
+
+        # 1 m/s approx 2.23694 mph
+        assert np.isclose(convert_units(1.0, "m/s", "mph"), float(MPS_TO_MPH))
+
+        with pytest.raises(ValueError):
+            convert_units(1.0, "kg", "lbs")
 
     def test_get_shared_urdf_path(self):
-        """Test getting shared URDF path."""
-        # This relies on actual file structure, which might be tricky to mock reliably
-        # without affecting other tests.
-        # But we can check if it returns None or a Path.
+        # This test relies on the actual repo structure or needs complex mocking.
+        # We'll just verify it returns a Path or None
         path = get_shared_urdf_path()
-        if path is not None:
+        if path:
             assert isinstance(path, Path)
+
+    def test_exceptions_import(self):
+        # Just verify we can instantiate them
+        err = DataFormatError("test")
+        assert str(err) == "test"
