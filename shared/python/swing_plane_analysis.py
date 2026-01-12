@@ -49,7 +49,8 @@ class SwingPlaneAnalyzer:
 
         # SVD
         # The normal vector is the last row of Vh (corresponding to smallest singular value)
-        _, _, vh = np.linalg.svd(centered_points)
+        # OPTIMIZATION: Use full_matrices=False to avoid computing NxN U matrix (huge for large N)
+        _, _, vh = np.linalg.svd(centered_points, full_matrices=False)
         normal = vh[2, :]
 
         # Normalize (just in case)
