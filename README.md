@@ -1,5 +1,10 @@
 # Golf Modeling Suite 🤖⛳
 
+[![CI Standard](https://github.com/D-sorganization/Golf_Modeling_Suite/actions/workflows/ci-standard.yml/badge.svg)](https://github.com/D-sorganization/Golf_Modeling_Suite/actions/workflows/ci-standard.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+
 **A unified platform for golf swing analysis across multiple physics engines and modeling approaches**
 
 > ✅ **STABLE**: The codebase migration is complete. See [Migration Status](docs/plans/migration_status.md) for details.
