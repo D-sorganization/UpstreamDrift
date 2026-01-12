@@ -256,7 +256,7 @@ async def get_simulation_status(task_id: str) -> dict[str, Any]:
     if task_id not in active_tasks:
         raise HTTPException(status_code=404, detail="Task not found")
 
-    return active_tasks[task_id]
+    return dict(active_tasks[task_id])
 
 
 # Video Analysis Endpoints
