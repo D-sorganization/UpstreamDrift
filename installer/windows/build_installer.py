@@ -36,8 +36,6 @@ def check_prerequisites() -> bool:
         hasattr(sys, "base_prefix") and sys.base_prefix != sys.prefix
     ):
         pass
-    else:
-        pass
 
     return True
 
