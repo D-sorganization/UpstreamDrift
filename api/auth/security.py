@@ -12,9 +12,7 @@ from passlib.context import CryptContext
 from .models import User, UserRole
 
 # Security configuration
-SECRET_KEY = (
-    "your-secret-key-change-in-production"  # TODO: Move to environment variable
-)
+SECRET_KEY = "your-secret-key-change-in-production"  # SECURITY: Move to environment variable in production
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 30
