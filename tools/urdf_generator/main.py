@@ -118,6 +118,8 @@ class URDFGenerator(QtWidgets.QMainWindow):
                 "geometry_type": "box",
                 "size": "0.5 0.5 0.1",
                 "color": "0.8 0.8 0.8 1",
+                "mass": "1.0",
+                "inertia": "0.1 0.1 0.1",
             }
         )
         self._refresh_tree()
@@ -237,18 +239,25 @@ class URDFGenerator(QtWidgets.QMainWindow):
             elif g_type == "sphere":
                 ET.SubElement(c_geometry, "sphere", radius=link["size"])
 
-            # Inertial (dummy for now)
+            # Inertial
             inertial = ET.SubElement(link_elem, "inertial")
-            ET.SubElement(inertial, "mass", value="1.0")
+            ET.SubElement(inertial, "mass", value=link.get("mass", "1.0"))
+
+            # Parse inertia
+            inertia_vals = link.get("inertia", "0.1 0.1 0.1").split()
+            ixx = inertia_vals[0] if len(inertia_vals) > 0 else "0.1"
+            iyy = inertia_vals[1] if len(inertia_vals) > 1 else "0.1"
+            izz = inertia_vals[2] if len(inertia_vals) > 2 else "0.1"
+
             ET.SubElement(
                 inertial,
                 "inertia",
-                ixx="0.1",
+                ixx=ixx,
                 ixy="0",
                 ixz="0",
-                iyy="0.1",
+                iyy=iyy,
                 iyz="0",
-                izz="0.1",
+                izz=izz,
             )
 
         for joint in self.joints:
@@ -348,12 +357,29 @@ class URDFGenerator(QtWidgets.QMainWindow):
                         if col is not None:
                             color = col.attrib.get("rgba", color)
 
+                # Parse inertial
+                mass = "1.0"
+                inertia = "0.1 0.1 0.1"
+                inertial_elem = link.find("inertial")
+                if inertial_elem is not None:
+                    mass_elem = inertial_elem.find("mass")
+                    if mass_elem is not None:
+                        mass = mass_elem.attrib.get("value", mass)
+                    inertia_elem = inertial_elem.find("inertia")
+                    if inertia_elem is not None:
+                        ixx = inertia_elem.attrib.get("ixx", "0.1")
+                        iyy = inertia_elem.attrib.get("iyy", "0.1")
+                        izz = inertia_elem.attrib.get("izz", "0.1")
+                        inertia = f"{ixx} {iyy} {izz}"
+
                 self.links.append(
                     {
                         "name": name,
                         "geometry_type": geom_type,
                         "size": size,
                         "color": color,
+                        "mass": mass,
+                        "inertia": inertia,
                     }
                 )
 
@@ -464,6 +490,12 @@ class LinkDialog(QtWidgets.QDialog):
         self.color_input = QtWidgets.QLineEdit("0.8 0.8 0.8 1")
         layout.addRow("Color (rgba):", self.color_input)
 
+        self.mass_input = QtWidgets.QLineEdit("1.0")
+        layout.addRow("Mass (kg):", self.mass_input)
+
+        self.inertia_input = QtWidgets.QLineEdit("0.1 0.1 0.1")
+        layout.addRow("Inertia (ixx iyy izz):", self.inertia_input)
+
         btns = QtWidgets.QDialogButtonBox(
             QtWidgets.QDialogButtonBox.StandardButton.Ok
             | QtWidgets.QDialogButtonBox.StandardButton.Cancel
@@ -478,6 +510,8 @@ class LinkDialog(QtWidgets.QDialog):
             "geometry_type": self.type_combo.currentText(),
             "size": self.size_input.text(),
             "color": self.color_input.text(),
+            "mass": self.mass_input.text(),
+            "inertia": self.inertia_input.text(),
         }
 
 
