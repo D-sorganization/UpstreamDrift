@@ -69,6 +69,20 @@ ruff_report*.txt
 quality_report*.txt
 black_report*.txt
 coverage.xml
+htmlcov/
+
+# Test output debris (prevent accumulation at root)
+test_*.txt
+*_output.txt
+*_results.txt
+*_error*.txt
+ci_log*.txt
+ci*.log
+collect_error.txt
+del_sys_*.txt
+full_results.txt
+out.txt
+run_log.txt
 
 # Generated agent memory
 .jules/bolt.md
