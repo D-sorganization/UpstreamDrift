@@ -58,15 +58,6 @@ class SecurityManager:
         """
         return bool(pwd_context.verify(plain_password, hashed_password))
 
-        Args:
-            plain_password: Plain text password
-            hashed_password: Hashed password from database
-
-        Returns:
-            True if password matches
-        """
-        return pwd_context.verify(plain_password, hashed_password)
-
     def create_access_token(
         self, data: dict[str, Any], expires_delta: timedelta | None = None
     ) -> str:
@@ -129,45 +120,38 @@ class SecurityManager:
 
             return dict(payload)
 
-        except jwt.ExpiredSignatureError:
+        except jwt.ExpiredSignatureError as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token has expired",
                 headers={"WWW-Authenticate": "Bearer"},
-            ) from None
-        except jwt.JWTError:
+            ) from e
+        except jwt.JWTError as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",
                 headers={"WWW-Authenticate": "Bearer"},
-            ) from None
+            ) from e
 
-    def generate_api_key(self) -> tuple[str, str]:
+    def generate_api_key(self) -> str:
         """Generate a new API key.
 
         Returns:
-            Tuple of (api_key, api_key_hash)
+            Generated API key with gms_ prefix
         """
-        # Generate a secure random API key
-        api_key = f"gms_{secrets.token_urlsafe(32)}"
+        key = secrets.token_urlsafe(32)
+        return f"gms_{key}"
 
-        # Hash the API key for storage
-        api_key_hash = hashlib.sha256(api_key.encode()).hexdigest()
-
-        return api_key, api_key_hash
-
-    def verify_api_key(self, api_key: str, stored_hash: str) -> bool:
-        """Verify an API key against its stored hash.
+    def hash_api_key(self, api_key: str) -> str:
+        """Hash an API key for storage.
 
         Args:
-            api_key: API key to verify
-            stored_hash: Stored hash from database
+            api_key: Plain API key
 
         Returns:
-            True if API key is valid
+            Hashed API key
         """
-        api_key_hash = hashlib.sha256(api_key.encode()).hexdigest()
-        return secrets.compare_digest(api_key_hash, stored_hash)
+        return hashlib.sha256(api_key.encode()).hexdigest()
 
 
 class RoleChecker:
@@ -180,8 +164,6 @@ class RoleChecker:
             required_role: Minimum required role
         """
         self.required_role = required_role
-
-        # Define role hierarchy
         self.role_hierarchy = {
             UserRole.FREE: 0,
             UserRole.PROFESSIONAL: 1,
