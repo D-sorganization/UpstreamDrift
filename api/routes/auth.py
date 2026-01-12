@@ -97,7 +97,7 @@ async def login(
     )
 
     # Update last login
-    user.last_login = datetime.utcnow()
+    user.last_login = datetime.utcnow()  # type: ignore[assignment]
     db.commit()
 
     return LoginResponse(
@@ -162,11 +162,12 @@ async def create_api_key(
     api_key_data: APIKeyCreate,
     current_user: User = RequireAuth,
     db: Session = Depends(get_db),
-):
+) -> APIKeyResponse:
     """Create a new API key for the current user."""
 
     # Generate API key
-    api_key, api_key_hash = security_manager.generate_api_key()
+    api_key = security_manager.generate_api_key()
+    api_key_hash = security_manager.hash_api_key(api_key)
 
     # Create API key record
     db_api_key = APIKey(

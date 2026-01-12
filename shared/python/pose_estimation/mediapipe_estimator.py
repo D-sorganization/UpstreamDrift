@@ -189,17 +189,13 @@ class MediaPipeEstimator(PoseEstimator):
             )
 
         # Apply temporal smoothing if enabled
-        smoothed_keypoints_3d: dict[str, np.ndarray[Any, Any]] | None = None
         if self.enable_temporal_smoothing:
-            smoothed_keypoints_3d = self._apply_temporal_smoothing(keypoints_3d)
-
-        # Use smoothed keypoints if available, otherwise original
-        final_keypoints_3d = (
-            smoothed_keypoints_3d if smoothed_keypoints_3d is not None else keypoints_3d
-        )
+            smoothed_keypoints = self._apply_temporal_smoothing(keypoints_3d)
+            if smoothed_keypoints is not None:
+                keypoints_3d = smoothed_keypoints
 
         # Convert keypoints to joint angles
-        joint_angles = self._keypoints_to_joint_angles(final_keypoints_3d)
+        joint_angles = self._keypoints_to_joint_angles(keypoints_3d)
 
         # Calculate overall confidence
         confidence = float(np.mean([landmark.visibility for landmark in landmarks]))
@@ -208,7 +204,7 @@ class MediaPipeEstimator(PoseEstimator):
             joint_angles=joint_angles,
             confidence=confidence,
             timestamp=time.time(),
-            raw_keypoints=final_keypoints_3d,  # Use only 3D keypoints to match expected type
+            raw_keypoints=keypoints_3d,  # Use 3D keypoints
         )
 
     def estimate_from_video(self, video_path: Path) -> list[PoseEstimationResult]:
