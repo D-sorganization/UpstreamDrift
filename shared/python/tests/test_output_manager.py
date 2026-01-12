@@ -161,7 +161,7 @@ def test_convenience_functions(tmp_path, monkeypatch):
 
     # Use patch as context manager to mock OutputManager class
     with patch.object(om_module, "OutputManager", return_value=mock_manager_instance):
-        path = om_module.save_results([1, 2], "test")
+        path = om_module.save_results([{"val": 1}, {"val": 2}], "test")
         assert str(path) == "mock_path.csv"
 
         res = om_module.load_results("test")

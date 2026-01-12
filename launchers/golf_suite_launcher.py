@@ -140,16 +140,16 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         self.copy_btn.clicked.connect(self.copy_log)
         log_controls.addWidget(self.copy_btn)
 
-        clear_btn = QtWidgets.QPushButton("C&lear Log")
-        clear_btn.setIcon(
+        self.clear_btn = QtWidgets.QPushButton("C&lear Log")
+        self.clear_btn.setIcon(
             self.style().standardIcon(
                 QtWidgets.QStyle.StandardPixmap.SP_DialogResetButton
             )
         )
-        clear_btn.setToolTip("Clear the simulation log output")
-        clear_btn.setAccessibleName("Clear Log")
-        clear_btn.clicked.connect(self.clear_log)
-        log_controls.addWidget(clear_btn)
+        self.clear_btn.setToolTip("Clear the simulation log output")
+        self.clear_btn.setAccessibleName("Clear Log")
+        self.clear_btn.clicked.connect(self.clear_log)
+        log_controls.addWidget(self.clear_btn)
 
         log_layout.addLayout(log_controls)
         layout.addWidget(log_group)
@@ -191,23 +191,43 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
 
             # Restore button after 2 seconds
             QtCore.QTimer.singleShot(
-                2000, lambda: self._restore_copy_btn(default_text, default_icon)
+                2000,
+                lambda: self._restore_btn(self.copy_btn, default_text, default_icon),
             )
 
             # Status bar update (clear after 3 seconds)
             self.status.setText("Log copied")
             QtCore.QTimer.singleShot(3000, lambda: self.status.setText("Ready"))
 
-    def _restore_copy_btn(self, text: str, icon: object) -> None:
-        if self.copy_btn:
-            self.copy_btn.setText(text)
+    def _restore_btn(self, btn: QtWidgets.QPushButton, text: str, icon: object) -> None:
+        if btn:
+            btn.setText(text)
             if icon is not None:
-                self.copy_btn.setIcon(icon)  # type: ignore
+                btn.setIcon(icon)  # type: ignore
 
     def clear_log(self) -> None:
         """Clear the log text area."""
         self.log_text.clear()
         self.log_message("Log cleared.")
+
+        # Provide immediate feedback on the button
+        default_text = "C&lear Log"
+        default_icon = self.style().standardIcon(
+            QtWidgets.QStyle.StandardPixmap.SP_DialogResetButton
+        )
+
+        self.clear_btn.setText("Cleared!")
+        self.clear_btn.setIcon(
+            self.style().standardIcon(
+                QtWidgets.QStyle.StandardPixmap.SP_DialogApplyButton
+            )
+        )
+
+        # Restore button after 2 seconds
+        QtCore.QTimer.singleShot(
+            2000,
+            lambda: self._restore_btn(self.clear_btn, default_text, default_icon),
+        )
 
     def _launch_script(self, name: str, path: Path, cwd: Path) -> None:
         self.status.setText(f"Launching {name}...")

@@ -92,7 +92,7 @@ class TestCommonUtils:
         assert len(df) == 3
         # Check time vector
         expected_time = np.array([0.0, 0.1, 0.2])
-        np.testing.assert_allclose(df["time"].values, expected_time)
+        np.testing.assert_allclose(df["time"].to_numpy(), expected_time)
 
     def test_standardize_joint_angles_custom_names(self):
         angles = np.array([[0.1], [0.2]])

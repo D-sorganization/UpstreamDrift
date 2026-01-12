@@ -46,7 +46,7 @@ class MockRecorder(RecorderInterface):
         return self.times, np.zeros_like(self.times)
 
     def get_induced_acceleration_series(
-        self, field_name: str
+        self, field_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Return induced acceleration data series."""
         return self.times, np.zeros_like(self.times)

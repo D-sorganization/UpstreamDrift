@@ -81,12 +81,12 @@ class RecorderInterface(Protocol):
         ...  # pragma: no cover
 
     def get_induced_acceleration_series(
-        self, source_name: str
+        self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Extract time series for a specific induced acceleration source.
 
         Args:
-            source_name: Name of the force source (e.g. 'gravity', 'actuator_1')
+            source_name: Name or index of the force source (e.g. 'gravity', 0)
 
         Returns:
             Tuple of (times, acceleration_array)
@@ -673,6 +673,205 @@ class GolfSwingPlotter:
         ax1.set_title("Postural Stability Metrics", fontsize=14, fontweight="bold")
         ax1.grid(True, alpha=0.3)
 
+        fig.tight_layout()
+
+    def plot_jerk_trajectory(
+        self,
+        fig: Figure,
+        joint_indices: list[int] | None = None,
+    ) -> None:
+        """Plot jerk (rate of change of acceleration) over time.
+
+        Args:
+            fig: Matplotlib figure
+            joint_indices: List of joint indices to plot (None = all)
+        """
+        times, velocities = self._get_cached_series("joint_velocities")
+        _, accelerations = self._get_cached_series("joint_accelerations")
+
+        velocities = np.asarray(velocities)
+        accelerations = np.asarray(accelerations)
+
+        if len(times) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        # Compute jerk if not available
+        dt = np.mean(np.diff(times)) if len(times) > 1 else 0.01
+        fs = 1.0 / dt
+
+        try:
+            from shared.python import signal_processing
+
+            use_sp = True
+        except ImportError:
+            use_sp = False
+
+        ax = fig.add_subplot(111)
+
+        if joint_indices is None:
+            # Default to first few joints if many
+            limit = min(velocities.shape[1], 3)
+            joint_indices = list(range(limit))
+
+        for idx in joint_indices:
+            if idx >= velocities.shape[1]:
+                continue
+
+            # Get acceleration
+            if len(accelerations) > 0 and idx < accelerations.shape[1]:
+                acc = accelerations[:, idx]
+            else:
+                acc = np.gradient(velocities[:, idx], dt)
+
+            # Compute jerk
+            if use_sp:
+                jerk = signal_processing.compute_jerk(acc, fs)
+            else:
+                jerk = np.gradient(acc, dt)
+
+            label = self.get_joint_name(idx)
+            ax.plot(times, jerk, label=label, linewidth=1.5)
+
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Jerk (rad/s³)", fontsize=12, fontweight="bold")
+        ax.set_title("Joint Jerk Trajectory", fontsize=14, fontweight="bold")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        fig.tight_layout()
+
+    def plot_lag_matrix(
+        self,
+        fig: Figure,
+        data_type: str = "velocity",
+        max_lag: float = 0.5,
+    ) -> None:
+        """Plot time lag matrix between joints.
+
+        Args:
+            fig: Matplotlib figure
+            data_type: 'position', 'velocity', 'torque'
+            max_lag: Maximum lag to search (seconds)
+        """
+        try:
+            from shared.python.statistical_analysis import StatisticalAnalyzer
+        except ImportError:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Analysis module missing", ha="center", va="center")
+            return
+
+        # Fetch data
+        times, positions = self._get_cached_series("joint_positions")
+        _, velocities = self._get_cached_series("joint_velocities")
+        _, torques = self._get_cached_series("joint_torques")
+
+        if len(times) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        analyzer = StatisticalAnalyzer(
+            times=np.asarray(times),
+            joint_positions=np.asarray(positions),
+            joint_velocities=np.asarray(velocities),
+            joint_torques=np.asarray(torques),
+        )
+
+        lag_matrix, labels = analyzer.compute_lag_matrix(data_type, max_lag)
+
+        if lag_matrix.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Could not compute lag matrix", ha="center", va="center")
+            return
+
+        ax = fig.add_subplot(111)
+
+        # Plot heatmap
+        # Positive (Red) = Row leads Col?
+        # Matrix[i, j] > 0 means i leads j.
+        # Use RdBu_r: Red for positive (lead), Blue for negative (lag).
+        im = ax.imshow(lag_matrix, cmap="RdBu_r", vmin=-max_lag, vmax=max_lag)
+
+        # Labels
+        if len(labels) <= 12:
+            real_labels = [
+                self.get_joint_name(int(lbl[1:])) if lbl.startswith("J") else lbl
+                for lbl in labels
+            ]
+            ax.set_xticks(np.arange(len(labels)))
+            ax.set_yticks(np.arange(len(labels)))
+            ax.set_xticklabels(real_labels, rotation=45, ha="right")
+            ax.set_yticklabels(real_labels)
+        else:
+            ax.set_xlabel("Joint Index (Lagging)")
+            ax.set_ylabel("Joint Index (Leading)")
+
+        ax.set_title(f"Time Lag Matrix ({data_type})", fontsize=14, fontweight="bold")
+
+        cbar = fig.colorbar(im, ax=ax)
+        cbar.set_label("Time Lag (s)\n(Pos: Row leads Col)", rotation=270, labelpad=20)
+        fig.tight_layout()
+
+    def plot_multiscale_entropy(
+        self,
+        fig: Figure,
+        joint_indices: list[int] | None = None,
+        max_scale: int = 20,
+    ) -> None:
+        """Plot Multiscale Entropy (MSE) curves.
+
+        MSE shows sample entropy at increasing time scales.
+        Higher entropy at large scales indicates complexity.
+        Decay indicates randomness.
+
+        Args:
+            fig: Matplotlib figure
+            joint_indices: List of joint indices
+            max_scale: Maximum scale factor
+        """
+        try:
+            from shared.python.statistical_analysis import StatisticalAnalyzer
+        except ImportError:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Analysis module missing", ha="center", va="center")
+            return
+
+        times, velocities = self._get_cached_series("joint_velocities")
+        velocities = np.asarray(velocities)
+
+        if len(times) == 0 or velocities.size == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        analyzer = StatisticalAnalyzer(
+            times=np.asarray(times),
+            joint_positions=np.zeros_like(velocities),  # Dummy
+            joint_velocities=velocities,
+            joint_torques=np.zeros_like(velocities),  # Dummy
+        )
+
+        ax = fig.add_subplot(111)
+
+        if joint_indices is None:
+            limit = min(velocities.shape[1], 3)
+            joint_indices = list(range(limit))
+
+        for idx in joint_indices:
+            if idx >= velocities.shape[1]:
+                continue
+            data = velocities[:, idx]
+            scales, mse = analyzer.compute_multiscale_entropy(data, max_scale=max_scale)
+
+            label = self.get_joint_name(idx)
+            ax.plot(scales, mse, marker="o", label=label, linewidth=2)
+
+        ax.set_xlabel("Scale Factor (Time)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Sample Entropy", fontsize=12, fontweight="bold")
+        ax.set_title("Multiscale Entropy Analysis", fontsize=14, fontweight="bold")
+        ax.legend(loc="best")
+        ax.grid(True, alpha=0.3, linestyle="--")
         fig.tight_layout()
 
     def plot_joint_velocities(
@@ -2982,7 +3181,7 @@ class GolfSwingPlotter:
     def plot_induced_acceleration(
         self,
         fig: Figure,
-        source_name: str,
+        source_name: str | int,
         joint_idx: int | None = None,
         breakdown_mode: bool = False,
     ) -> None:
@@ -2990,7 +3189,7 @@ class GolfSwingPlotter:
 
         Args:
             fig: Matplotlib figure
-            source_name: Name of the force source (or 'breakdown' for all components)
+            source_name: Name or index of the force source (or 'breakdown' for all components)
             joint_idx: Optional joint index to plot (plots magnitude or all if None)
             breakdown_mode: If True, plots Gravity, Velocity, and Total components
         """

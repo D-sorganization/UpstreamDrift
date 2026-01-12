@@ -24,7 +24,6 @@ Reference:
 
 from __future__ import annotations
 
-import importlib.util
 import logging
 from typing import Any
 
@@ -35,7 +34,13 @@ from shared.python.multi_muscle import AntagonistPair, MuscleGroup
 logger = logging.getLogger(__name__)
 
 # Check for MyoSuite availability
-MYOSUITE_AVAILABLE = importlib.util.find_spec("gym") is not None
+# Check for MyoSuite availability
+try:
+    import gym  # noqa: F401
+
+    MYOSUITE_AVAILABLE = True
+except (ImportError, ValueError):
+    MYOSUITE_AVAILABLE = False
 if not MYOSUITE_AVAILABLE:
     logger.warning(
         "MyoSuite/gym not available. Neural control disabled. "
