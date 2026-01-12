@@ -1,152 +1,69 @@
-# Assessment K: CI/CD Pipeline Health
+# Assessment K: Reproducibility & Provenance
 
-**Assessment Type**: DevOps Infrastructure Audit
-**Rotation Day**: Day 11 (Monthly)
-**Focus**: Build times, reliability, coverage gates, automation maturity
+## Assessment Overview
 
----
-
-## Objective
-
-Conduct a CI/CD pipeline audit identifying:
-
-1. Build time optimization opportunities
-2. Pipeline reliability issues
-3. Coverage and quality gates
-4. Automation gaps
-5. Developer experience friction
+You are a **research engineer** evaluating the codebase for **reproducibility, determinism, and experiment tracking**.
 
 ---
 
-## Mandatory Deliverables
+## Key Metrics
 
-### 1. Pipeline Health Summary
-
-- Average build time: X minutes
-- Pipeline reliability: X%
-- Quality gates: X enabled
-- Automation coverage: X%
-
-### 2. CI/CD Scorecard
-
-| Category       | Score (0-10) | Weight | Evidence Required  |
-| -------------- | ------------ | ------ | ------------------ |
-| Build Speed    |              | 2x     | Average build time |
-| Reliability    |              | 2x     | Success rate       |
-| Quality Gates  |              | 2x     | Gates enabled      |
-| Automation     |              | 1.5x   | Manual steps       |
-| Caching        |              | 1.5x   | Cache hit rate     |
-| Feedback Speed |              | 2x     | Time to feedback   |
-
-### 3. Pipeline Findings
-
-| ID  | Stage | Issue | Impact | Fix | Effort | Priority |
-| --- | ----- | ----- | ------ | --- | ------ | -------- |
-|     |       |       |        |     |        |          |
+| Metric                  | Target     | Critical Threshold          |
+| ----------------------- | ---------- | --------------------------- |
+| Deterministic Execution | 100%       | Any non-determinism = MAJOR |
+| Version Tracking        | Full       | Missing = MAJOR             |
+| Random Seed Handling    | Documented | Uncontrolled = CRITICAL     |
+| Result Reproduction     | Bit-exact  | Variance = MAJOR            |
 
 ---
 
-## Categories to Evaluate
+## Review Categories
 
-### 1. Build Performance
+### A. Determinism
 
-- [ ] Build time < 10 minutes
-- [ ] Parallelization used
-- [ ] Caching implemented
-- [ ] Incremental builds where possible
+- Random seed setting and propagation
+- Floating-point reproducibility
+- Order-independent operations
+- Thread-safe random number generation
 
-### 2. Reliability
+### B. Version Tracking
 
-- [ ] Pipeline success rate > 95%
-- [ ] No flaky tests
-- [ ] Deterministic builds
-- [ ] Retry logic for transient failures
+- Dependency version pinning
+- Model/config versioning
+- Result provenance metadata
 
-### 3. Quality Gates
+### C. Experiment Tracking
 
-- [ ] Linting enforced (Ruff)
-- [ ] Type checking enforced (Mypy)
-- [ ] Formatting enforced (Black)
-- [ ] Test coverage threshold
-- [ ] Security scanning (pip-audit)
+- Parameter logging
+- Result storage
+- Comparison tools
+- MLflow/WandB integration (if applicable)
 
-### 4. Automation
+### D. Reproduction Support
 
-- [ ] All checks automated
-- [ ] No manual approval for standard PRs
-- [ ] Auto-merge for dependencies
-- [ ] Release automation
-
-### 5. Developer Experience
-
-- [ ] Clear failure messages
-- [ ] Fast feedback (< 5 min for lint)
-- [ ] Local reproduction possible
-- [ ] Skip mechanisms for drafts
-
-### 6. Security
-
-- [ ] Secrets management
-- [ ] Dependency scanning
-- [ ] Container scanning (if applicable)
-- [ ] SAST integration
+- "One-click" reproduction scripts
+- Docker/container for environment
+- Sample data availability
+- Validation checksums
 
 ---
 
-## Workflow Analysis
+## Output Format
 
-### GitHub Actions Checklist
+### 1. Reproducibility Audit
 
-- [ ] Workflow triggers appropriate
-- [ ] Job matrix efficient
-- [ ] Actions pinned to SHA
-- [ ] Permissions minimized
-- [ ] Artifacts managed
+| Component    | Deterministic? | Seed Controlled? | Notes |
+| ------------ | -------------- | ---------------- | ----- |
+| Data loading | ✅/❌          | ✅/❌            |       |
+| Computation  | ✅/❌          | ✅/❌            |       |
+| Output       | ✅/❌          | ✅/❌            |       |
 
-### Metrics to Track
+### 2. Remediation Roadmap
 
-| Metric           | Target   | Current |
-| ---------------- | -------- | ------- |
-| Build time       | < 10 min |         |
-| Success rate     | > 95%    |         |
-| Time to feedback | < 5 min  |         |
-| Cache hit rate   | > 80%    |         |
+**48 hours:** Document random seed handling
+**2 weeks:** Full determinism for core workflows
+**6 weeks:** Experiment tracking integration
 
 ---
 
-## Analysis Commands
-
-```bash
-# GitHub Actions workflow analysis
-gh run list --limit 20 --json conclusion,createdAt,updatedAt
-
-# Check workflow completion times
-gh run list --json name,conclusion,createdAt,updatedAt \
-  --jq '.[] | "\(.name): \(.conclusion)"'
-
-# Local CI reproduction
-act -l  # List workflows
-act push  # Run push workflows locally
-```
-
----
-
-## Best Practices
-
-### Pipeline Design
-
-- [ ] Fail fast (lint before test)
-- [ ] Parallel where possible
-- [ ] Cache aggressively
-- [ ] Use matrix builds wisely
-
-### Gates
-
-- [ ] Required checks for main
-- [ ] Branch protection enabled
-- [ ] Status checks required
-- [ ] Review requirements
-
----
-
-_Assessment K focuses on CI/CD. See Assessment A-J for other dimensions._
+_Assessment K focuses on reproducibility. See Assessment G for testing and Assessment L for maintainability._

@@ -1,136 +1,85 @@
-# Assessment G: Dependency Health & Supply Chain
+# Assessment G: Testing & Validation
 
-**Assessment Type**: Dependency Security Audit
-**Rotation Day**: Day 7 (Weekly)
-**Focus**: CVE detection, outdated packages, license compliance, supply chain risk
+## Assessment Overview
 
----
-
-## Objective
-
-Conduct a comprehensive dependency audit identifying:
-
-1. Known vulnerabilities (CVEs) in dependencies
-2. Outdated packages requiring updates
-3. License compatibility issues
-4. Transitive dependency risks
-5. Supply chain attack vectors
+You are a **QA engineer and test architect** conducting an **adversarial** testing review. Your job is to identify **testing gaps, validation failures, and quality risks**.
 
 ---
 
-## Mandatory Deliverables
+## Key Metrics
 
-### 1. Dependency Health Summary
-
-- Total dependencies: X (direct) + Y (transitive)
-- CVEs found: X (Critical/High/Medium/Low)
-- Outdated packages: X of Y
-- License conflicts: X
-
-### 2. Dependency Scorecard
-
-| Category           | Score (0-10) | Weight | Evidence Required      |
-| ------------------ | ------------ | ------ | ---------------------- |
-| CVE Status         |              | 3x     | pip-audit results      |
-| Freshness          |              | 2x     | Outdated package count |
-| License Compliance |              | 2x     | License audit          |
-| Pin Strategy       |              | 1.5x   | Requirements analysis  |
-| Supply Chain       |              | 2x     | Source verification    |
-| Transitive Risk    |              | 1.5x   | Dependency tree depth  |
-
-### 3. Vulnerability Findings
-
-| Package | Version | CVE | CVSS | Status | Fix Version | Priority |
-| ------- | ------- | --- | ---- | ------ | ----------- | -------- |
-|         |         |     |      |        |             |          |
+| Metric                 | Target    | Critical Threshold  |
+| ---------------------- | --------- | ------------------- |
+| Line Coverage          | >80%      | <60% = CRITICAL     |
+| Branch Coverage        | >70%      | <50% = MAJOR        |
+| Test Reliability       | 100% pass | Flaky tests = MAJOR |
+| Critical Path Coverage | 100%      | Any gap = CRITICAL  |
 
 ---
 
-## Categories to Evaluate
+## Review Categories
 
-### 1. Vulnerability Scanning
+### A. Test Coverage Analysis
 
-- [ ] pip-audit run with no critical findings
-- [ ] safety check run
-- [ ] No known CVEs in production dependencies
-- [ ] CVE remediation plan for any findings
+- Line coverage by module
+- Branch coverage by module
+- Uncovered critical paths
+- Dead code identification
 
-### 2. Package Freshness
+### B. Test Quality
 
-- [ ] Dependencies updated within 6 months
-- [ ] Major version updates evaluated
-- [ ] Security patches applied promptly
-- [ ] Changelog reviewed for updates
+- Test isolation (no shared state)
+- Deterministic execution (no random failures)
+- Meaningful assertions (not just "doesn't crash")
+- Edge case coverage
 
-### 3. License Compliance
+### C. Test Types
 
-- [ ] All licenses compatible with project license
-- [ ] No copyleft licenses in proprietary code
-- [ ] License attribution documented
-- [ ] SBOM (Software Bill of Materials) available
+| Type              | Present | Coverage | Notes |
+| ----------------- | ------- | -------- | ----- |
+| Unit tests        | ✅/❌   | X%       |       |
+| Integration tests | ✅/❌   | X%       |       |
+| End-to-end tests  | ✅/❌   | X%       |       |
+| Performance tests | ✅/❌   | X%       |       |
+| Regression tests  | ✅/❌   | X%       |       |
 
-### 4. Pinning Strategy
+### D. Mocking & Fixtures
 
-- [ ] Production dependencies pinned
-- [ ] Hashes used for security
-- [ ] Range constraints appropriate
-- [ ] Lock file maintained
+- Appropriate use of mocks
+- Fixture reusability
+- Test data management
+- External dependency isolation
 
-### 5. Supply Chain Security
+### E. CI Integration
 
-- [ ] Packages from trusted sources (PyPI)
-- [ ] No typosquatting risks
-- [ ] Maintainer activity verified
-- [ ] No abandoned packages
-
-### 6. Transitive Dependencies
-
-- [ ] Dependency tree reviewed
-- [ ] Deep transitive chains identified
-- [ ] Vulnerable transitive deps detected
-- [ ] Minimal dependency principle applied
-
----
-
-## Scan Commands
-
-```bash
-# CVE scanning with pip-audit
-pip install pip-audit
-pip-audit --strict --desc on
-
-# Alternative with safety
-pip install safety
-safety check --full-report
-
-# Check outdated packages
-pip list --outdated
-
-# Generate dependency tree
-pip install pipdeptree
-pipdeptree --warn silence
-
-# License check
-pip install pip-licenses
-pip-licenses --format=markdown
-
-# Generate SBOM
-pip install cyclonedx-bom
-cyclonedx-py requirements requirements.txt -o sbom.json
-```
+- Tests run on every PR
+- Coverage reporting in CI
+- Test time budget
+- Parallel test execution
 
 ---
 
 ## Output Format
 
-### Dependency Health Grade
+### 1. Coverage Report
 
-- **A (9-10)**: No CVEs, all current, compliant licenses
-- **B (7-8)**: No critical CVEs, mostly current
-- **C (5-6)**: Some CVEs, several outdated
-- **D (3-4)**: Critical CVEs present
-- **F (0-2)**: Multiple critical CVEs, abandoned packages
+| Module   | Line % | Branch % | Critical Gaps   |
+| -------- | ------ | -------- | --------------- |
+| module_a | 85%    | 70%      | None            |
+| module_b | 45%    | 30%      | Missing X tests |
+
+### 2. Test Quality Issues
+
+| ID    | Test   | Issue               | Severity | Fix       |
+| ----- | ------ | ------------------- | -------- | --------- |
+| G-001 | test_x | Flaky due to timing | MAJOR    | Add retry |
+
+### 3. Remediation Roadmap
+
+**48 hours:** Fix flaky tests, add critical path coverage
+**2 weeks:** Reach 80% coverage on core modules
+**6 weeks:** Full test suite with integration tests
 
 ---
 
-_Assessment G focuses on dependency health. See Assessment A-F for other dimensions._
+_Assessment G focuses on testing. See Assessment A for architecture and Assessment H for error handling._

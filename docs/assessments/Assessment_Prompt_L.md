@@ -1,137 +1,70 @@
-# Assessment L: Data Privacy & Compliance
+# Assessment L: Long-Term Maintainability
 
-**Assessment Type**: Privacy Audit
-**Rotation Day**: Day 12 (Quarterly)
-**Focus**: PII handling, data retention, GDPR/privacy compliance, consent
+## Assessment Overview
 
----
-
-## Objective
-
-Conduct a data privacy audit identifying:
-
-1. Personal data collection points
-2. Data retention practices
-3. Consent mechanisms
-4. Privacy policy compliance
-5. Data subject rights implementation
+You are a **technical lead** evaluating the codebase for **long-term sustainability, technical debt, and succession planning**.
 
 ---
 
-## Mandatory Deliverables
+## Key Metrics
 
-### 1. Privacy Summary
-
-- PII collected: Yes/No
-- Data categories: X types
-- Retention period: X
-- Privacy policy: Present/Missing
-- Risk level: Low/Medium/High
-
-### 2. Privacy Scorecard
-
-| Category          | Score (0-10) | Weight | Evidence Required  |
-| ----------------- | ------------ | ------ | ------------------ |
-| Data Minimization |              | 2x     | Collection audit   |
-| Consent           |              | 2x     | Consent mechanisms |
-| Retention         |              | 1.5x   | Retention policy   |
-| Security          |              | 2x     | Encryption, access |
-| Rights            |              | 1.5x   | Subject rights     |
-| Documentation     |              | 1x     | Privacy docs       |
-
-### 3. Privacy Findings
-
-| ID  | Data Type | Location | Risk | Compliance Gap | Fix | Priority |
-| --- | --------- | -------- | ---- | -------------- | --- | -------- |
-|     |           |          |      |                |     |          |
+| Metric            | Target     | Critical Threshold |
+| ----------------- | ---------- | ------------------ |
+| Deprecated Deps   | 0          | >3 = MAJOR         |
+| Unmaintained Code | <10%       | >30% = CRITICAL    |
+| Bus Factor        | >2         | 1 = CRITICAL       |
+| Upgrade Path      | Documented | Missing = MAJOR    |
 
 ---
 
-## Categories to Evaluate
+## Review Categories
 
-### 1. Data Collection
+### A. Dependency Health
 
-- [ ] Only necessary data collected
-- [ ] Purpose clearly defined
-- [ ] Legal basis established
-- [ ] No sensitive data without consent
+- Last update dates for dependencies
+- Dependencies nearing EOL
+- Python version compatibility
+- Upgrade path planning (Python 3.12+, NumPy 2.x)
 
-### 2. Consent Management
+### B. Code Aging
 
-- [ ] Consent obtained before collection
-- [ ] Consent freely given
-- [ ] Consent withdrawable
-- [ ] Consent records maintained
+- Files not modified in >1 year
+- Modules without tests
+- Orphaned code (unused but present)
+- Technical debt inventory
 
-### 3. Data Security
+### C. Knowledge Distribution
 
-- [ ] PII encrypted at rest
-- [ ] PII encrypted in transit
-- [ ] Access controls implemented
-- [ ] Audit logging for PII access
+- Modules with single author
+- Documentation for complex areas
+- Onboarding for new maintainers
+- Code review practices
 
-### 4. Data Retention
+### D. Sustainability
 
-- [ ] Retention periods defined
-- [ ] Automatic deletion implemented
-- [ ] Backup retention aligned
-- [ ] Archive policies documented
-
-### 5. Subject Rights (GDPR)
-
-- [ ] Right to access
-- [ ] Right to rectification
-- [ ] Right to erasure
-- [ ] Right to portability
-- [ ] Right to object
-
-### 6. Documentation
-
-- [ ] Privacy policy exists
-- [ ] Data processing records
-- [ ] DPO designated (if required)
-- [ ] DPIA conducted (if required)
+- Automated update tools (Dependabot, Renovate)
+- Maintenance schedule
+- Deprecation tracking
+- Migration guides
 
 ---
 
-## Applicability Assessment
+## Output Format
 
-| Repository   | Collects PII? | Risk Level | Notes                   |
-| ------------ | ------------- | ---------- | ----------------------- |
-| Tools        | ❌ No         | Very Low   | Local file tools        |
-| Games        | ❌ No         | Very Low   | Local games, save files |
-| AffineDrift  | ⚠️ Analytics? | Low        | Check for tracking      |
-| Gasification | ❌ No         | Very Low   | Scientific data only    |
-| Golf Suite   | ❌ No         | Very Low   | Simulation data only    |
+### 1. Maintainability Assessment
 
----
+| Area           | Status   | Risk            | Action |
+| -------------- | -------- | --------------- | ------ |
+| Dependency age | ✅/⚠️/❌ | Low/Medium/High | ...    |
+| Code coverage  | ✅/⚠️/❌ | Low/Medium/High | ...    |
+| Bus factor     | ✅/⚠️/❌ | Low/Medium/High | ...    |
 
-## Analysis Commands
+### 2. Remediation Roadmap
 
-```bash
-# Search for potential PII patterns
-grep -rn "email\|password\|name\|phone\|address\|ssn\|credit" \
-  --include="*.py" --include="*.js" | grep -v test
-
-# Check for tracking/analytics
-grep -rn "analytics\|tracking\|pixel\|gtag\|facebook" \
-  --include="*.js" --include="*.html"
-
-# Check for cookies
-grep -rn "cookie\|localStorage\|sessionStorage" \
-  --include="*.js"
-```
+**48 hours:** Identify critical single-author modules
+**2 weeks:** Update deprecated dependencies
+**6 weeks:** Full technical debt reduction plan
 
 ---
 
-## Compliance Framework Reference
-
-| Regulation | Scope      | Key Requirements     |
-| ---------- | ---------- | -------------------- |
-| GDPR       | EU         | Consent, rights, DPO |
-| CCPA       | California | Disclosure, opt-out  |
-| PIPEDA     | Canada     | Consent, access      |
-
----
-
-_Assessment L focuses on data privacy. See Assessment A-K for other dimensions._
+_Assessment L focuses on maintainability. See Assessment B for code quality and Assessment O for CI/CD._
