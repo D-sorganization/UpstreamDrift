@@ -154,8 +154,13 @@ def compute_linear_impulse(
 
     # Trapezoidal integration for each component
     impulse = np.zeros(3)
+    # Check for np.trapezoid (NumPy 2.0+) or fall back to np.trapz
+    trapz = getattr(np, "trapezoid", getattr(np, "trapz", None))
+    if trapz is None:
+        raise ImportError("NumPy must provide trapezoid() or trapz()")
+
     for i in range(3):
-        impulse[i] = np.trapz(forces[:, i], timestamps)
+        impulse[i] = trapz(forces[:, i], timestamps)
 
     return impulse
 
@@ -192,8 +197,13 @@ def compute_angular_impulse(
 
     # Trapezoidal integration for each component
     angular_impulse = np.zeros(3)
+    # Check for np.trapezoid (NumPy 2.0+) or fall back to np.trapz
+    trapz = getattr(np, "trapezoid", getattr(np, "trapz", None))
+    if trapz is None:
+        raise ImportError("NumPy must provide trapezoid() or trapz()")
+
     for i in range(3):
-        angular_impulse[i] = np.trapz(torques[:, i], timestamps)
+        angular_impulse[i] = trapz(torques[:, i], timestamps)
 
     return angular_impulse
 
