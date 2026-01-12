@@ -1267,24 +1267,25 @@ class StatisticalAnalyzer:
             # Initial vector distances
             # (N_valid, dim)
             diff_0 = orbit[valid_i] - orbit[valid_nn]
-            # Manual Euclidean norm is faster than np.linalg.norm(axis=1)
-            dist_0 = np.sqrt(np.sum(diff_0**2, axis=1))
+            # OPTIMIZATION: Use squared distances to avoid sqrt calls
+            dist_sq_0 = np.sum(diff_0**2, axis=1)
 
             # Final vector distances
             diff_t = orbit[valid_i + lookahead] - orbit[valid_nn + lookahead]
-            dist_t = np.sqrt(np.sum(diff_t**2, axis=1))
+            dist_sq_t = np.sum(diff_t**2, axis=1)
 
-            # Calculate rates where distances are non-zero
-            safe_mask = (dist_0 > 1e-9) & (dist_t > 1e-9)
+            # Calculate rates where distances are non-zero (squared threshold 1e-18 corresponds to 1e-9)
+            safe_mask = (dist_sq_0 > 1e-18) & (dist_sq_t > 1e-18)
 
             # Pre-calculate denominator
             denom = lookahead * self.dt
 
             # Assign valid rates
             # valid_i[safe_mask] maps back to original indices where both neighbor valid and dists valid
+            # Optimization: log(sqrt(a)/sqrt(b)) = 0.5 * log(a/b)
             if denom > 0:
                 divergence_rates[valid_i[safe_mask]] = (
-                    np.log(dist_t[safe_mask] / dist_0[safe_mask]) / denom
+                    0.5 * np.log(dist_sq_t[safe_mask] / dist_sq_0[safe_mask]) / denom
                 )
 
         # Align times
