@@ -116,13 +116,9 @@ class LivePlotWidget(QtWidgets.QWidget):
         )
         self.source_spin.setRange(0, 100)  # Assume max 100 joints
         self.source_spin.setPrefix("Source Idx: ")
-<<<<<<< HEAD
-        self.source_spin.setToolTip("Select source index")
+        self.source_spin.setToolTip("Index of the joint torque source to analyze for induced acceleration.")
         self.source_spin.setStatusTip("Select the induced acceleration source index")
         self.source_spin.setAccessibleName("Source Index")
-=======
-        self.source_spin.setToolTip("Index of the joint torque source to analyze for induced acceleration.")
->>>>>>> origin/enhanced-metrics-display-7116204829782720890
         self.source_spin.setVisible(False)
         self.source_spin.valueChanged.connect(self._on_source_changed)
 
