@@ -2128,11 +2128,17 @@ class StatisticalAnalyzer:
         # Get argsort (ranks)
         ranks = np.argsort(matrix, axis=1)
 
-        # Convert ranks to tuple/bytes to count unique
-        # We can map each row to a unique integer or string
-        # Since order is small (3-5), we can treat rows as base-order numbers?
-        # Actually easier to use unique with axis=0
-        _, counts = np.unique(ranks, axis=0, return_counts=True)
+        # Optimization: Pack ranks into 1D array for faster unique counting
+        # This replaces the slower np.unique(axis=0)
+        # We use base-order encoding: val = sum(rank[i] * order^(order-1-i))
+        # Safe for order <= 12 (fits in int64)
+        if order <= 12:
+            powers = np.power(order, np.arange(order - 1, -1, -1), dtype=np.int64)
+            packed = np.dot(ranks, powers)
+            _, counts = np.unique(packed, return_counts=True)
+        else:
+            # Fallback for large orders (unlikely in practice)
+            _, counts = np.unique(ranks, axis=0, return_counts=True)
 
         # Probabilities
         probs = counts / M
