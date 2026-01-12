@@ -199,9 +199,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
             self.status.setText("Log copied")
             QtCore.QTimer.singleShot(3000, lambda: self.status.setText("Ready"))
 
-    def _restore_btn(
-        self, btn: QtWidgets.QPushButton, text: str, icon: object
-    ) -> None:
+    def _restore_btn(self, btn: QtWidgets.QPushButton, text: str, icon: object) -> None:
         if btn:
             btn.setText(text)
             if icon is not None:
