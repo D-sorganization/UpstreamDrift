@@ -16,6 +16,7 @@ from typing import Any, cast
 
 import numpy as np
 from scipy.signal import find_peaks, savgol_filter
+from scipy.spatial import cKDTree
 from scipy.spatial.distance import pdist, squareform
 
 
@@ -2354,24 +2355,25 @@ class StatisticalAnalyzer:
         tolerance = r * np.std(data)
 
         def count_matches(template_len: int) -> int:
-            B = 0
             # Total possible vectors
             n_vectors = N - template_len
 
-            # Vectorized distance calculation
-            # Use broadcasting or cdist
             # Construct matrix X of shape (n_vectors, template_len)
             X = np.zeros((n_vectors, template_len))
             for i in range(template_len):
                 X[:, i] = data[i : i + n_vectors]
 
-            # We need pairs (i, j) with i != j
-            # Chebychev distance (max absolute difference)
-            from scipy.spatial.distance import pdist
+            # OPTIMIZATION: Use cKDTree for O(N log N) neighbor search instead of O(N^2) pdist
+            # Chebychev distance corresponds to Minkowski p=inf
+            tree = cKDTree(X)
 
-            dists = pdist(X, metric="chebyshev")
-            # Count matches < tolerance
-            B = np.sum(dists < tolerance)
+            # count_neighbors(other, r) counts pairs (i, j) with dist <= r
+            # Querying against itself returns count of pairs in X
+            # This includes self-matches (dist=0) and counts (i, j) and (j, i) separately
+            count = tree.count_neighbors(tree, r=tolerance, p=np.inf)
+
+            # Subtract self-matches (n_vectors) and divide by 2 to get unique pairs i < j
+            B = (count - n_vectors) // 2
 
             return int(B)
 
