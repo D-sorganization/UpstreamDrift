@@ -31,9 +31,11 @@ from PyQt6.QtGui import (
     QFont,
     QIcon,
     QKeyEvent,
+    QKeySequence,
     QMouseEvent,
     QPainter,
     QPixmap,
+    QShortcut,
 )
 from PyQt6.QtWidgets import (
     QApplication,
@@ -46,6 +48,7 @@ from PyQt6.QtWidgets import (
     QGridLayout,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QListWidget,
     QListWidgetItem,
     QMainWindow,
@@ -970,6 +973,7 @@ class GolfLauncher(QMainWindow):
         )  # Track running instances
         self.available_models: dict[str, Any] = {}
         self.special_app_lookup: dict[str, SpecialApp] = {}
+        self.current_filter_text = ""
 
         # Load Registry
         try:
@@ -1286,6 +1290,15 @@ class GolfLauncher(QMainWindow):
         top_bar.addWidget(self.lbl_status)
         top_bar.addStretch()
 
+        # Search Bar
+        self.search_input = QLineEdit()
+        self.search_input.setPlaceholderText("🔍 Search models...")
+        self.search_input.setFixedWidth(200)
+        self.search_input.setToolTip("Filter models by name or description (Ctrl+F)")
+        self.search_input.setAccessibleName("Search models")
+        self.search_input.textChanged.connect(self.update_search_filter)
+        top_bar.addWidget(self.search_input)
+
         # Modify Layout toggle button
         self.btn_modify_layout = QPushButton("🔒 Layout Locked")
         self.btn_modify_layout.setCheckable(True)
@@ -1427,6 +1440,10 @@ class GolfLauncher(QMainWindow):
             )
             self.select_model(preferred_id)
 
+        # Keyboard Shortcut for Search
+        self.shortcut_search = QShortcut(QKeySequence("Ctrl+F"), self)
+        self.shortcut_search.activated.connect(self.search_input.setFocus)
+
     def _setup_ai_dock(self) -> None:
         """Set up the AI Assistant dock widget."""
         if not AI_AVAILABLE:
@@ -1516,6 +1533,11 @@ class GolfLauncher(QMainWindow):
 
         logger.info(f"Swapped models: {source_id} <-> {target_id}")
 
+    def update_search_filter(self, text: str) -> None:
+        """Update the search filter and rebuild grid."""
+        self.current_filter_text = text.lower()
+        self._rebuild_grid()
+
     def _rebuild_grid(self) -> None:
         """Rebuild the grid layout based on current model order."""
         self._sync_model_cards()
@@ -1532,6 +1554,17 @@ class GolfLauncher(QMainWindow):
         row, col = 0, 0
         for model_id in self.model_order:
             if model_id in self.model_cards:
+                # Apply filter
+                if self.current_filter_text:
+                    model = self.model_cards[model_id].model
+                    name = getattr(model, "name", "").lower()
+                    desc = getattr(model, "description", "").lower()
+                    if (
+                        self.current_filter_text not in name
+                        and self.current_filter_text not in desc
+                    ):
+                        continue
+
                 card = self.model_cards[model_id]
                 self.grid_layout.addWidget(card, row, col)
                 col += 1
