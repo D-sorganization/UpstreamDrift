@@ -44,10 +44,19 @@ class SecurityManager:
         Returns:
             Hashed password
         """
-        return pwd_context.hash(password)
+        return str(pwd_context.hash(password))
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """Verify a password against its hash.
+
+        Args:
+            plain_password: Plain text password
+            hashed_password: Hashed password from database
+
+        Returns:
+            True if password matches, False otherwise
+        """
+        return bool(pwd_context.verify(plain_password, hashed_password))
 
         Args:
             plain_password: Plain text password
@@ -78,7 +87,7 @@ class SecurityManager:
             expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
         to_encode.update({"exp": expire, "type": "access"})
-        return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
+        return str(jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm))
 
     def create_refresh_token(self, data: dict[str, Any]) -> str:
         """Create a JWT refresh token.
@@ -92,7 +101,7 @@ class SecurityManager:
         to_encode = data.copy()
         expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
         to_encode.update({"exp": expire, "type": "refresh"})
-        return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
+        return str(jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm))
 
     def verify_token(self, token: str, token_type: str = "access") -> dict[str, Any]:
         """Verify and decode a JWT token.
@@ -118,7 +127,7 @@ class SecurityManager:
                     headers={"WWW-Authenticate": "Bearer"},
                 )
 
-            return payload
+            return dict(payload)
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(
@@ -198,7 +207,7 @@ class RoleChecker:
 class UsageTracker:
     """Tracks and enforces usage quotas."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize usage tracker."""
         pass
 
@@ -218,11 +227,11 @@ class UsageTracker:
         quotas = SUBSCRIPTION_QUOTAS[user_role]
 
         if resource_type == "api_calls":
-            return user.api_calls_this_month < quotas.api_calls_per_month
+            return int(user.api_calls_this_month) < quotas.api_calls_per_month
         elif resource_type == "video_analyses":
-            return user.video_analyses_this_month < quotas.video_analyses_per_month
+            return int(user.video_analyses_this_month) < quotas.video_analyses_per_month
         elif resource_type == "simulations":
-            return user.simulations_this_month < quotas.simulations_per_month
+            return int(user.simulations_this_month) < quotas.simulations_per_month
 
         return False
 
@@ -234,11 +243,11 @@ class UsageTracker:
             resource_type: Type of resource used
         """
         if resource_type == "api_calls":
-            user.api_calls_this_month += 1
+            user.api_calls_this_month = int(user.api_calls_this_month) + 1
         elif resource_type == "video_analyses":
-            user.video_analyses_this_month += 1
+            user.video_analyses_this_month = int(user.video_analyses_this_month) + 1
         elif resource_type == "simulations":
-            user.simulations_this_month += 1
+            user.simulations_this_month = int(user.simulations_this_month) + 1
 
     def get_usage_summary(self, user: User) -> dict[str, Any]:
         """Get usage summary for a user.
@@ -254,28 +263,26 @@ class UsageTracker:
         user_role = UserRole(user.role)
         quotas = SUBSCRIPTION_QUOTAS[user_role]
 
+        api_calls_used = int(user.api_calls_this_month)
+        video_analyses_used = int(user.video_analyses_this_month)
+        simulations_used = int(user.simulations_this_month)
+
         return {
             "subscription_tier": user_role.value,
             "api_calls": {
-                "used": user.api_calls_this_month,
+                "used": api_calls_used,
                 "limit": quotas.api_calls_per_month,
-                "remaining": max(
-                    0, quotas.api_calls_per_month - user.api_calls_this_month
-                ),
+                "remaining": max(0, quotas.api_calls_per_month - api_calls_used),
             },
             "video_analyses": {
-                "used": user.video_analyses_this_month,
+                "used": video_analyses_used,
                 "limit": quotas.video_analyses_per_month,
-                "remaining": max(
-                    0, quotas.video_analyses_per_month - user.video_analyses_this_month
-                ),
+                "remaining": max(0, quotas.video_analyses_per_month - video_analyses_used),
             },
             "simulations": {
-                "used": user.simulations_this_month,
+                "used": simulations_used,
                 "limit": quotas.simulations_per_month,
-                "remaining": max(
-                    0, quotas.simulations_per_month - user.simulations_this_month
-                ),
+                "remaining": max(0, quotas.simulations_per_month - simulations_used),
             },
         }
 

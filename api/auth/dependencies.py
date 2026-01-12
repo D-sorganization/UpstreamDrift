@@ -97,7 +97,7 @@ async def get_current_user_from_api_key(
     from datetime import datetime
 
     api_key_record.last_used = datetime.utcnow()
-    api_key_record.usage_count += 1
+    api_key_record.usage_count = int(api_key_record.usage_count) + 1
     db.commit()
 
     return user
