@@ -1,23 +1,20 @@
 """Verify physics engine implementations for ZTCF/ZVCF methods."""
 
 import logging
-import os
 import sys
-import unittest
 from typing import Any, cast
 from unittest.mock import MagicMock
 
 import numpy as np
+import pytest
 
 # Mock modules if not available
 sys.modules["gym"] = MagicMock()
 sys.modules["myosuite"] = MagicMock()
 sys.modules["opensim"] = MagicMock()
 
-# Add repo root to path
-sys.path.append(os.getcwd())
 
-# Import after mocking - E402 is unavoidable here
+# Import after mocking
 from engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
     MyoSuitePhysicsEngine,
 )
@@ -28,7 +25,7 @@ from engines.physics_engines.opensim.python.opensim_physics_engine import (  # n
 logger = logging.getLogger(__name__)
 
 
-class TestPhysicsEngines(unittest.TestCase):
+class TestPhysicsEngines:
     """Test physics engine ZTCF/ZVCF implementations."""
 
     def test_myosuite_methods(self) -> None:
@@ -56,7 +53,7 @@ class TestPhysicsEngines(unittest.TestCase):
             _zvcf = engine.compute_zvcf(q)
             logger.info("MyoSuite ZTCF/ZVCF implemented successfully")
         except NotImplementedError:
-            self.fail("MyoSuite ZTCF/ZVCF raised NotImplementedError")
+            pytest.fail("MyoSuite ZTCF/ZVCF raised NotImplementedError")
 
     def test_opensim_methods(self) -> None:
         """Test OpenSim engine has working ZTCF/ZVCF methods."""
@@ -99,8 +96,4 @@ class TestPhysicsEngines(unittest.TestCase):
             _zvcf = engine.compute_zvcf(q)
             logger.info("OpenSim ZTCF/ZVCF implemented successfully")
         except NotImplementedError:
-            self.fail("OpenSim ZTCF/ZVCF raised NotImplementedError")
-
-
-if __name__ == "__main__":
-    unittest.main()
+            pytest.fail("OpenSim ZTCF/ZVCF raised NotImplementedError")

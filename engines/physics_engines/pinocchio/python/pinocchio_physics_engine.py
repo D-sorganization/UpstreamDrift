@@ -208,6 +208,43 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         tau = pin.rnea(self.model, self.data, self.q, self.v, qacc)
         return cast(np.ndarray, tau)
 
+    def compute_contact_forces(self) -> np.ndarray:
+        """Compute total contact forces (ground reaction force, GRF).
+
+        Notes:
+            This Pinocchio wrapper currently returns a placeholder zero vector for the
+            GRF. Pinocchio's standard forward dynamics (ABA) does not natively
+            compute contact forces without additional constraint solver setup, which
+            is not currently implemented in this lightweight wrapper.
+
+            If you need accurate GRFs, you would need to implement a constraint
+            dynamics solver or use a physics engine that supports contact natively
+            in its standard step (like MuJoCo).
+
+        Returns:
+            f: (3,) vector representing total ground reaction force (currently
+                always zeros as a placeholder).
+        """
+        if self.data is None:
+            return np.zeros(3)
+
+        # Pinocchio stores constraint forces in data.lambda_c if solver is used.
+        # But for generic forward dynamics (ABA), contact forces are not computed
+        # unless we use a contact solver (like constraint dynamics).
+
+        # If simulation uses simple fwd dynamics without explicit contacts, return 0.
+        # Pinocchio's standard forward dynamics doesn't handle contacts natively
+        # without extra setup (e.g. Proximal or KKT).
+
+        LOGGER.warning(
+            "PinocchioPhysicsEngine.compute_contact_forces currently returns a "
+            "placeholder zero GRF vector. Standard ABA dynamics in Pinocchio do "
+            "not compute contact forces without a constraint solver. "
+            "This is a known limitation of this wrapper."
+        )
+
+        return np.zeros(3)
+
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body."""
         if self.model is None or self.data is None:
