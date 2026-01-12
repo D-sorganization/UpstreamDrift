@@ -18,7 +18,7 @@ BUILD_DIR = INSTALLER_DIR / "build"
 DIST_DIR = INSTALLER_DIR / "dist"
 
 
-def check_prerequisites():
+def check_prerequisites() -> bool:
     """Check that all required tools are available."""
 
     # Check Python version
@@ -42,7 +42,7 @@ def check_prerequisites():
     return True
 
 
-def clean_build_dirs():
+def clean_build_dirs() -> None:
     """Clean previous build artifacts."""
 
     for dir_path in [BUILD_DIR, DIST_DIR]:
@@ -51,7 +51,7 @@ def clean_build_dirs():
         dir_path.mkdir(parents=True, exist_ok=True)
 
 
-def install_dependencies():
+def install_dependencies() -> bool:
     """Install required dependencies for building."""
 
     build_requirements = ["cx_Freeze>=6.15.0", "wheel", "setuptools>=61.0"]
@@ -69,7 +69,7 @@ def install_dependencies():
     return True
 
 
-def detect_physics_engines():
+def detect_physics_engines() -> list[str]:
     """Detect which physics engines are available."""
 
     engines = {
@@ -91,7 +91,7 @@ def detect_physics_engines():
     return available
 
 
-def build_executable():
+def build_executable() -> bool:
     """Build the executable using cx_Freeze."""
 
     # Change to installer directory
@@ -113,7 +113,7 @@ def build_executable():
         os.chdir(original_cwd)
 
 
-def build_msi():
+def build_msi() -> bool:
     """Build the MSI installer."""
 
     # Change to installer directory
@@ -140,7 +140,7 @@ def build_msi():
         os.chdir(original_cwd)
 
 
-def create_installer_info():
+def create_installer_info() -> None:
     """Create installer information file."""
     available_engines = detect_physics_engines()
 
@@ -159,7 +159,7 @@ def create_installer_info():
         json.dump(info, f, indent=2)
 
 
-def main():
+def main() -> None:
     """Main build process."""
     parser = argparse.ArgumentParser(
         description="Build Golf Modeling Suite Windows installer"

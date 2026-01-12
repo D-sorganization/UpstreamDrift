@@ -9,6 +9,7 @@ This script creates a professional Windows MSI installer with:
 
 import sys
 from pathlib import Path
+from typing import Any
 
 from cx_Freeze import Executable, setup
 
@@ -139,18 +140,19 @@ executables = [
 
 
 # Dynamic package inclusion based on available engines
-def get_available_engines():
+def get_available_engines() -> list[str]:
     """Detect which physics engines are available for inclusion."""
     available = []
 
     for engine_id, engine_info in PHYSICS_ENGINES.items():
+        engine_info_dict: dict[str, Any] = engine_info  # type: ignore[assignment]
         try:
             # Try to import the main module
-            main_module = engine_info["modules"][0]
+            main_module = engine_info_dict["modules"][0]
             __import__(main_module)
             available.append(engine_id)
         except ImportError:
-            if engine_info["required"]:
+            if engine_info_dict["required"]:
                 sys.exit(1)
             else:
                 pass
@@ -162,7 +164,7 @@ def get_available_engines():
 available_engines = get_available_engines()
 for engine_id in available_engines:
     engine_modules = PHYSICS_ENGINES[engine_id]["modules"]
-    build_exe_options["packages"].extend(engine_modules)
+    build_exe_options["packages"].extend(engine_modules)  # type: ignore[attr-defined]
 
 for _engine_id in available_engines:
     pass
