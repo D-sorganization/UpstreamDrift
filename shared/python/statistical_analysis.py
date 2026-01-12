@@ -2137,24 +2137,16 @@ class StatisticalAnalyzer:
         # Get argsort (ranks)
         ranks = np.argsort(matrix, axis=1)
 
-        # OPTIMIZATION: Use integer packing instead of axis=0 unique for small orders
-        # np.unique(axis=0) is slow because it involves row-wise comparisons/sorts.
-        # Packing into 1D integers (base-order encoding) allows 1D unique, which is >10x faster.
-        # Ranks are digits 0..order-1.
-        # Safe for order <= 12 (12^12 < 2^63). Default order is 3.
+        # Optimization: Pack ranks into 1D array for faster unique counting
+        # This replaces the slower np.unique(axis=0)
+        # We use base-order encoding: val = sum(rank[i] * order^(order-1-i))
+        # Safe for order <= 12 (fits in int64)
         if order <= 12:
-            packed = np.zeros(M, dtype=np.int64)
-            # Base-order encoding: rank[0]*order^0 + rank[1]*order^1 ...
-            # Using order^i as weights ensures uniqueness for permutations
-            # (actually base >= order is required, so base=order is sufficient)
-            multiplier = 1
-            for i in range(order):
-                packed += ranks[:, i] * multiplier
-                multiplier *= order
-
+            powers = np.power(order, np.arange(order - 1, -1, -1), dtype=np.int64)
+            packed = np.dot(ranks, powers)
             _, counts = np.unique(packed, return_counts=True)
         else:
-            # Fallback for very large orders (unlikely in PE context)
+            # Fallback for large orders (unlikely in practice)
             _, counts = np.unique(ranks, axis=0, return_counts=True)
 
         # Probabilities
