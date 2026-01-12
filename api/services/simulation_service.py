@@ -36,7 +36,9 @@ class SimulationService:
         try:
             # Load requested engine
             engine_type = EngineType(request.engine_type.upper())
-            self.engine_manager._load_engine(engine_type)  # This method doesn't return success status
+            self.engine_manager._load_engine(
+                engine_type
+            )  # This method doesn't return success status
 
             engine = self.engine_manager.get_active_physics_engine()
             if not engine:
