@@ -7,4 +7,13 @@
   ],
   "selected_model": "model_0",
   "window_geometry": {
-    "x":
+    "x": 260,
+    "y": 50,
+    "width": 1400,
+    "height": 900
+  },
+  "options": {
+    "live_visualization": true,
+    "gpu_acceleration": false
+  }
+}

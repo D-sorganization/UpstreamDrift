@@ -29,7 +29,7 @@ class MockRecorder(RecorderInterface):
         """Return counterfactual data series."""
         return np.array([]), np.array([])
 
-    def get_induced_acceleration_series(self, field_name: str):
+    def get_induced_acceleration_series(self, field_name: str | int):
         """Return induced acceleration data series."""
         return np.array([]), np.array([])
 

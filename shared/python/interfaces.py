@@ -157,6 +157,16 @@ class PhysicsEngine(Protocol):
         """
         ...
 
+    def compute_contact_forces(self) -> np.ndarray:
+        """Compute total contact forces (GRF).
+
+        Returns:
+            f: (3,) vector representing total ground reaction force,
+               or (6,) wrench (force + torque) if supported.
+               Default implementation returns zero vector.
+        """
+        return np.zeros(3)
+
     # -------- Section F: Drift-Control Decomposition (Non-Negotiable) --------
 
     @abstractmethod

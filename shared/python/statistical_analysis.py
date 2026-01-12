@@ -195,6 +195,15 @@ class JointStiffnessMetrics:
     intercept: float  # Y-intercept of the regression line
 
 
+@dataclass
+class JerkMetrics:
+    """Metrics related to movement smoothness (Jerk)."""
+
+    peak_jerk: float  # Max absolute jerk
+    rms_jerk: float  # Root mean square jerk
+    dimensionless_jerk: float  # Normalized for duration and amplitude
+
+
 class StatisticalAnalyzer:
     """Comprehensive statistical analysis for golf swing data."""
 
@@ -210,6 +219,7 @@ class StatisticalAnalyzer:
         ground_forces: np.ndarray | None = None,
         com_position: np.ndarray | None = None,
         angular_momentum: np.ndarray | None = None,
+        joint_accelerations: np.ndarray | None = None,
     ) -> None:
         """Initialize analyzer with recorded data.
 
@@ -224,6 +234,7 @@ class StatisticalAnalyzer:
             ground_forces: Ground reaction forces (N, 3) or (N, 6) [optional]
             com_position: Center of Mass position (N, 3) [optional]
             angular_momentum: System angular momentum (N, 3) [optional]
+            joint_accelerations: Joint accelerations (N, nv) [optional]
         """
         self.times = times
         self.joint_positions = joint_positions
@@ -235,6 +246,7 @@ class StatisticalAnalyzer:
         self.ground_forces = ground_forces
         self.com_position = com_position
         self.angular_momentum = angular_momentum
+        self.joint_accelerations = joint_accelerations
 
         self.dt = float(np.mean(np.diff(times))) if len(times) > 1 else 0.0
         self.duration = times[-1] - times[0] if len(times) > 1 else 0.0
@@ -1830,7 +1842,7 @@ class StatisticalAnalyzer:
             diag = np.diagonal(recurrence_matrix, offset=k)
             # Find lengths of consecutive 1s
             # Pad with 0 to find edges
-            d = np.concatenate(([0], diag, [0]))
+            d = np.concatenate((np.array([0]), diag, np.array([0])))
             diffs = np.diff(d)
             starts = np.where(diffs == 1)[0]
             ends = np.where(diffs == -1)[0]
@@ -1853,7 +1865,7 @@ class StatisticalAnalyzer:
             # Let's zero out the diagonal point for vertical line detection to keep it consistent < 1.
             col[i] = 0
 
-            c = np.concatenate(([0], col, [0]))
+            c = np.concatenate((np.array([0]), col, np.array([0])))
             diffs = np.diff(c)
             starts = np.where(diffs == 1)[0]
             ends = np.where(diffs == -1)[0]
@@ -1862,14 +1874,14 @@ class StatisticalAnalyzer:
 
         n_vert_points = np.sum(vertical_lengths)
         lam = n_vert_points / n_recurrence_points if n_recurrence_points > 0 else 0.0
-        tt = np.mean(vertical_lengths) if len(vertical_lengths) > 0 else 0.0
+        tt = float(np.mean(vertical_lengths)) if len(vertical_lengths) > 0 else 0.0
 
         return RQAMetrics(
             recurrence_rate=float(rr),
             determinism=float(det),
             laminarity=float(lam),
             longest_diagonal_line=int(l_max),
-            trapping_time=float(tt),
+            trapping_time=tt,
         )
 
     def estimate_lyapunov_exponent(
@@ -2121,23 +2133,31 @@ class StatisticalAnalyzer:
 
         # Vectorized approach
         # Create matrix of shape (M, order)
-        matrix = np.zeros((M, order))
+        matrix = np.zeros((M, order), dtype=data.dtype)
         for i in range(order):
             matrix[:, i] = data[i * delay : i * delay + M]
 
         # Get argsort (ranks)
         ranks = np.argsort(matrix, axis=1)
 
-        # Optimization: Pack ranks into 1D array for faster unique counting
-        # This replaces the slower np.unique(axis=0)
-        # We use base-order encoding: val = sum(rank[i] * order^(order-1-i))
-        # Safe for order <= 12 (fits in int64)
+        # OPTIMIZATION: Use integer packing instead of axis=0 unique for small orders
+        # np.unique(axis=0) is slow because it involves row-wise comparisons/sorts.
+        # Packing into 1D integers (base-order encoding) allows 1D unique, which is >10x faster.
+        # Ranks are digits 0..order-1.
+        # Safe for order <= 12 (12^12 < 2^63). Default order is 3.
         if order <= 12:
-            powers = np.power(order, np.arange(order - 1, -1, -1), dtype=np.int64)
-            packed = np.dot(ranks, powers)
+            packed = np.zeros(M, dtype=np.int64)
+            # Base-order encoding: rank[0]*order^0 + rank[1]*order^1 ...
+            # Using order^i as weights ensures uniqueness for permutations
+            # (actually base >= order is required, so base=order is sufficient)
+            multiplier = 1
+            for i in range(order):
+                packed += ranks[:, i] * multiplier
+                multiplier *= order
+
             _, counts = np.unique(packed, return_counts=True)
         else:
-            # Fallback for large orders (unlikely in practice)
+            # Fallback for very large orders (unlikely in PE context)
             _, counts = np.unique(ranks, axis=0, return_counts=True)
 
         # Probabilities
@@ -2311,18 +2331,23 @@ class StatisticalAnalyzer:
 
         for k in range(1, k_max + 1):
             L_m_k = 0.0
-            for m in range(k):
-                # Construct series x_m, x_{m+k}, ...
-                # Length floor((N-m-1)/k)
-                idxs = np.arange(m, N, k)
-                if len(idxs) < 2:
-                    continue
+            # OPTIMIZATION: Compute all differences for lag k at once
+            # abs_diffs[i] = |x(i+k) - x(i)|. This avoids creating indices/diffs in the inner loop.
+            abs_diffs = np.abs(data[k:] - data[:-k])
 
-                diffs = np.abs(np.diff(data[idxs]))
+            for m in range(k):
                 # Standard Higuchi:
                 # L_m(k) = (Sum |x(i+k)-x(i)| ) * (N-1) / ( floor((N-m-1)/k) * k )
-                n_intervals = len(diffs)
-                L_m_k += np.sum(diffs) * (N - 1) / (n_intervals * k)
+
+                # Extract differences for this m
+                # Indices in original data: m, m+k, m+2k...
+                # Diffs are |x(m+k)-x(m)|, |x(m+2k)-x(m+k)|...
+                # These correspond to abs_diffs indices: m, m+k, ...
+                m_diffs = abs_diffs[m::k]
+                n_intervals = len(m_diffs)
+
+                if n_intervals > 0:
+                    L_m_k += np.sum(m_diffs) * (N - 1) / (n_intervals * k)
 
             # Average over m (divide by k) AND apply Higuchi scaling (divide by k)
             # So divide by k^2
@@ -2395,6 +2420,181 @@ class StatisticalAnalyzer:
 
         # SampEn = -log(B/A)
         return float(-np.log(B / A))
+
+    def compute_multiscale_entropy(
+        self,
+        data: np.ndarray,
+        max_scale: int = 10,
+        m: int = 2,
+        r: float = 0.15,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Compute Multiscale Entropy (MSE).
+
+        Calculates Sample Entropy at multiple time scales (coarse-graining).
+        MSE accounts for complexity at different resolutions.
+
+        Args:
+            data: 1D time series
+            max_scale: Maximum scale factor (tau)
+            m: Template length
+            r: Tolerance (ratio of std)
+
+        Returns:
+            Tuple of (scales, entropy_values)
+        """
+        mse_values = []
+        scales = np.arange(1, max_scale + 1)
+
+        for scale in scales:
+            # Coarse-graining: average non-overlapping windows of length 'scale'
+            if scale == 1:
+                scaled_data = data
+            else:
+                n_windows = len(data) // scale
+                if n_windows < m + 1:
+                    mse_values.append(0.0)
+                    continue
+                # Reshape and mean
+                # Truncate to multiple of scale
+                truncated = data[: n_windows * scale]
+                reshaped = truncated.reshape(n_windows, scale)
+                scaled_data = np.mean(reshaped, axis=1)
+
+            # Compute SampEn
+            # Standard MSE uses fixed tolerance based on original SD
+            # r_val = r * std_original
+            # compute_sample_entropy uses r_ratio * std_current
+            # So r_ratio = (r * std_original) / std_current
+
+            std_current = np.std(scaled_data)
+            std_original = np.std(data)
+
+            if std_current < 1e-9:
+                mse = 0.0
+            else:
+                r_ratio = (r * std_original) / std_current
+                mse = self.compute_sample_entropy(scaled_data, m=m, r=r_ratio)
+
+            mse_values.append(mse)
+
+        return scales, np.array(mse_values)
+
+    def compute_jerk_metrics(self, joint_idx: int) -> JerkMetrics | None:
+        """Compute jerk metrics for a joint.
+
+        Jerk is the rate of change of acceleration. High jerk implies less smooth
+        movement.
+
+        Args:
+            joint_idx: Joint index
+
+        Returns:
+            JerkMetrics object or None
+        """
+        # We need acceleration. If not available, compute from velocity.
+        if (
+            hasattr(self, "joint_accelerations")
+            and self.joint_accelerations is not None
+        ):
+            if joint_idx >= self.joint_accelerations.shape[1]:
+                return None
+            accel = self.joint_accelerations[:, joint_idx]
+        elif (
+            hasattr(self, "joint_velocities")
+            and self.joint_velocities is not None
+            and self.dt > 0
+        ):
+            if joint_idx >= self.joint_velocities.shape[1]:
+                return None
+            vel = self.joint_velocities[:, joint_idx]
+            accel = np.gradient(vel, self.dt)
+        else:
+            return None
+
+        fs = 1.0 / self.dt if self.dt > 0 else 0.0
+        if fs <= 0:
+            return None
+
+        try:
+            from shared.python import signal_processing
+
+            jerk = signal_processing.compute_jerk(accel, fs)
+        except ImportError:
+            # Fallback
+            jerk = np.gradient(accel, self.dt)
+
+        peak_jerk = float(np.max(np.abs(jerk)))
+        rms_jerk = float(np.sqrt(np.mean(jerk**2)))
+
+        # Dimensionless Jerk (Log dimensionless jerk)
+        # LDJ = - ln( integral(j^2 dt) * D^5 / A^2 )
+        # Normalized by movement duration D and amplitude A (peak-to-peak pos or vel range)
+        # Here we use a simpler dimensionless form: (RMS Jerk * Duration^2) / Peak Velocity
+        # Or standard: Integral(j^2) * D^5 / L^2
+        # Let's return RMS normalized by peak accel?
+        # A common simple metric is Peak Jerk / Peak Accel
+        peak_acc = float(np.max(np.abs(accel)))
+        dim_jerk = peak_jerk / peak_acc if peak_acc > 1e-6 else 0.0
+
+        return JerkMetrics(
+            peak_jerk=peak_jerk,
+            rms_jerk=rms_jerk,
+            dimensionless_jerk=dim_jerk,
+        )
+
+    def compute_lag_matrix(
+        self,
+        data_type: str = "velocity",
+        max_lag: float = 0.5,
+    ) -> tuple[np.ndarray, list[str]]:
+        """Compute time lag matrix between all pairs of joints.
+
+        Args:
+            data_type: 'position', 'velocity', 'torque'
+            max_lag: Maximum lag to search (seconds)
+
+        Returns:
+            Tuple of (lag_matrix, labels).
+            Matrix[i, j] > 0 means i leads j (j lags i).
+            Actually compute_time_shift(x, y) returns tau where y(t) ~ x(t-tau).
+            If tau > 0, y is delayed (lags) relative to x.
+            So Matrix[i, j] = compute_time_shift(J_i, J_j).
+            Positive value => J_j lags J_i (J_i leads).
+        """
+        if data_type == "position":
+            data = self.joint_positions
+        elif data_type == "torque":
+            data = self.joint_torques
+        else:
+            data = self.joint_velocities
+
+        n_joints = data.shape[1]
+        if n_joints == 0:
+            return np.array([]), []
+
+        fs = 1.0 / self.dt if self.dt > 0 else 0.0
+        if fs <= 0:
+            return np.zeros((n_joints, n_joints)), []
+
+        try:
+            from shared.python import signal_processing
+        except ImportError:
+            return np.zeros((n_joints, n_joints)), []
+
+        lag_matrix = np.zeros((n_joints, n_joints))
+
+        # Parallelize? No, n_joints is small (10-30). O(N^2) loop is fine.
+        # Matrix is antisymmetric: Lag(i, j) = -Lag(j, i)
+        for i in range(n_joints):
+            for j in range(i + 1, n_joints):
+                lag = signal_processing.compute_time_shift(
+                    data[:, i], data[:, j], fs, max_lag=max_lag
+                )
+                lag_matrix[i, j] = lag
+                lag_matrix[j, i] = -lag
+
+        labels = [f"J{i}" for i in range(n_joints)]
+        return lag_matrix, labels
 
     def export_statistics_csv(
         self,

@@ -56,7 +56,7 @@ class GuiRecorder(RecorderInterface):
         return times, values
 
     def get_induced_acceleration_series(
-        self, source_name: str
+        self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         if not self.data_store:
             return np.array([]), np.array([])
@@ -64,7 +64,10 @@ class GuiRecorder(RecorderInterface):
         times = []
         values = []
         for d in self.data_store:
-            val = d.induced_accelerations.get(source_name)
+            val = None
+            if isinstance(source_name, str):
+                val = d.induced_accelerations.get(source_name)
+
             if val is not None:
                 times.append(d.time)
                 values.append(val)
