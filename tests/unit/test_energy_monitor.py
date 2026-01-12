@@ -6,8 +6,6 @@ for ensuring physical validity of conservative system integrations.
 
 from __future__ import annotations
 
-from typing import cast
-
 import numpy as np
 import pytest
 
@@ -18,66 +16,10 @@ from shared.python.energy_monitor import (
     EnergySnapshot,
     IntegrationFailureError,
 )
-from shared.python.interfaces import PhysicsEngine
-
-
-class MockPhysicsEngine:
-    """Mock physics engine for testing energy monitor."""
-
-    def __init__(self, n_dof: int = 2):
-        """Initialize mock engine.
-
-        Args:
-            n_dof: Number of degrees of freedom
-        """
-        self.n_dof = n_dof
-        self.time = 0.0
-        self.q = np.zeros(n_dof)
-        self.v = np.zeros(n_dof)
-        self.mass_matrix = np.eye(n_dof)
-        self.gravity_forces = np.zeros(n_dof)
-
-    def get_time(self) -> float:
-        """Get current simulation time."""
-        return self.time
-
-    def get_state(self) -> tuple[np.ndarray, np.ndarray]:
-        """Get current state (q, v)."""
-        return self.q.copy(), self.v.copy()
-
-    def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
-        """Set state (q, v)."""
-        self.q = q.copy()
-        self.v = v.copy()
-
-    def compute_mass_matrix(self) -> np.ndarray:
-        """Compute mass matrix M(q)."""
-        return self.mass_matrix.copy()
-
-    def compute_gravity_forces(self) -> np.ndarray:
-        """Compute gravity forces g(q)."""
-        return self.gravity_forces.copy()
-
-    def set_mass_matrix(self, M: np.ndarray) -> None:
-        """Set mass matrix for testing."""
-        self.mass_matrix = M.copy()
-
-    def set_gravity_forces(self, g: np.ndarray) -> None:
-        """Set gravity forces for testing."""
-        self.gravity_forces = g.copy()
-
-    def advance_time(self, dt: float) -> None:
-        """Advance simulation time."""
-        self.time += dt
-
-
-def as_physics_engine(mock: MockPhysicsEngine) -> PhysicsEngine:
-    """Cast mock engine to PhysicsEngine interface for type checking.
-
-    This is a standard pattern (Pattern 20) for test mocks that implement
-    a subset of a Protocol's methods sufficient for the tests.
-    """
-    return cast(PhysicsEngine, mock)
+from shared.python.tests.mock_physics_engine import (
+    MockPhysicsEngine,
+    as_physics_engine,
+)
 
 
 class TestEnergySnapshot:
@@ -157,10 +99,12 @@ class TestMonitorInitialize:
 
     def test_initialize_sets_initial_energy(self):
         """Test that initialize() sets E_initial."""
+        from shared.python.constants import GRAVITY_M_S2
+
         engine = MockPhysicsEngine()
         engine.set_state(q=np.array([1.0, 2.0]), v=np.array([0.5, 0.5]))
         engine.set_mass_matrix(np.eye(2))
-        engine.set_gravity_forces(np.array([0.0, -9.81]))
+        engine.set_gravity_forces(np.array([0.0, -GRAVITY_M_S2]))
 
         monitor = ConservationMonitor(as_physics_engine(engine))
         monitor.initialize()
@@ -234,27 +178,31 @@ class TestGetEnergySnapshot:
 
     def test_snapshot_computes_potential_energy(self):
         """Test potential energy computation: PE = -q^T * g."""
+        from shared.python.constants import GRAVITY_M_S2
+
         engine = MockPhysicsEngine()
 
-        # q = [1.0], g = [-9.81] -> PE = -1.0 * (-9.81) = 9.81
+        # q = [1.0], g = [-GRAVITY_M_S2] -> PE = -1.0 * (-GRAVITY_M_S2) = GRAVITY_M_S2
         engine.set_state(q=np.array([1.0]), v=np.array([0.0]))
         engine.set_mass_matrix(np.array([[1.0]]))
-        engine.set_gravity_forces(np.array([-9.81]))
+        engine.set_gravity_forces(np.array([-GRAVITY_M_S2]))
 
         monitor = ConservationMonitor(as_physics_engine(engine))
         snapshot = monitor.get_energy_snapshot()
 
-        expected_PE = -1.0 * (-9.81)
+        expected_PE = -1.0 * (-GRAVITY_M_S2)
         np.testing.assert_allclose(snapshot.potential, expected_PE, rtol=1e-10)
 
     def test_snapshot_with_multidof_system(self):
         """Test energy computation for multi-DOF system."""
+        from shared.python.constants import GRAVITY_M_S2
+
         engine = MockPhysicsEngine(n_dof=3)
 
         q = np.array([1.0, 2.0, 3.0])
         v = np.array([0.5, 1.0, 1.5])
         M = np.diag([1.0, 2.0, 3.0])
-        g = np.array([-9.81, -9.81, -9.81])
+        g = np.array([-GRAVITY_M_S2, -GRAVITY_M_S2, -GRAVITY_M_S2])
 
         engine.set_state(q, v)
         engine.set_mass_matrix(M)
@@ -268,8 +216,8 @@ class TestGetEnergySnapshot:
         # = 0.5 * (0.25 + 2.0 + 6.75) = 0.5 * 9.0 = 4.5
         expected_KE = 0.5 * (v * M.diagonal() * v).sum()
 
-        # PE = -q^T * g = -(1.0 * -9.81 + 2.0 * -9.81 + 3.0 * -9.81)
-        # = -(-9.81 - 19.62 - 29.43) = 58.86
+        # PE = -q^T * g = -(1.0 * -GRAVITY_M_S2 + 2.0 * -GRAVITY_M_S2 + 3.0 * -GRAVITY_M_S2)
+        # = -(-GRAVITY_M_S2 - 2*GRAVITY_M_S2 - 3*GRAVITY_M_S2) = 6*GRAVITY_M_S2
         expected_PE = -np.dot(q, g)
 
         np.testing.assert_allclose(snapshot.kinetic, expected_KE, rtol=1e-10)
