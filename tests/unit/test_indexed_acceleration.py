@@ -141,8 +141,10 @@ class TestIndexedAccelerationDataclass:
 
     def test_multidimensional_components(self):
         """Test with multi-DOF system (multiple joints/dimensions)."""
+        from shared.python.constants import GRAVITY_M_S2
+
         n_dof = 5
-        gravity = np.ones(n_dof) * 9.81
+        gravity = np.ones(n_dof) * GRAVITY_M_S2
         coriolis = np.ones(n_dof) * 0.1
         applied_torque = np.ones(n_dof) * 2.0
         constraint = np.zeros(n_dof)
@@ -168,8 +170,10 @@ class TestPhysicalRealism:
 
     def test_gravity_dominant_in_free_fall(self):
         """Test that gravity dominates in free fall scenario."""
+        from shared.python.constants import GRAVITY_M_S2
+
         acc = IndexedAcceleration(
-            gravity=np.array([0.0, 0.0, -9.81]),  # Downward
+            gravity=np.array([0.0, 0.0, -GRAVITY_M_S2]),  # Downward
             coriolis=np.array([0.0, 0.0, 0.0]),
             applied_torque=np.array([0.0, 0.0, 0.0]),
             constraint=np.array([0.0, 0.0, 0.0]),
@@ -200,12 +204,14 @@ class TestPhysicalRealism:
 
     def test_constraint_opposes_motion(self):
         """Test that constraints can oppose other accelerations."""
+        from shared.python.constants import GRAVITY_M_S2
+
         # Example: Ground reaction force opposes gravity
         acc = IndexedAcceleration(
-            gravity=np.array([0.0, 0.0, -9.81]),
+            gravity=np.array([0.0, 0.0, -GRAVITY_M_S2]),
             coriolis=np.zeros(3),
             applied_torque=np.zeros(3),
-            constraint=np.array([0.0, 0.0, 9.81]),  # Exactly cancels gravity
+            constraint=np.array([0.0, 0.0, GRAVITY_M_S2]),  # Exactly cancels gravity
             external=np.zeros(3),
         )
 
