@@ -43,13 +43,19 @@ def test_load_from_path(engine):
         # Mock OpenSim Model and Manager
         mock_model = MagicMock()
         mock_model.getName.return_value = "TestModel"
-        mock_opensim.Model.return_value = mock_model
 
-        engine.load_from_path(path)
+        # Patch the opensim module in the engine module
+        with patch(
+            "engines.physics_engines.opensim.python.opensim_physics_engine.opensim",
+            mock_opensim,
+        ):
+            mock_opensim.Model.return_value = mock_model
 
-        mock_opensim.Model.assert_called_with(path)
-        mock_model.initSystem.assert_called_once()
-        assert engine.model_name == "TestModel"
+            engine.load_from_path(path)
+
+            mock_opensim.Model.assert_called_with(path)
+            mock_model.initSystem.assert_called_once()
+            assert engine.model_name == "TestModel"
 
 
 @patch("tempfile.NamedTemporaryFile")
