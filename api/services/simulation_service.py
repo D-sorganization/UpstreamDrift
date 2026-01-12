@@ -36,14 +36,11 @@ class SimulationService:
         try:
             # Load requested engine
             engine_type = EngineType(request.engine_type.upper())
-            success = self.engine_manager.load_engine(engine_type)
+            self.engine_manager._load_engine(engine_type)  # This method doesn't return success status
 
-            if not success:
-                raise RuntimeError(f"Failed to load engine: {request.engine_type}")
-
-            engine = self.engine_manager.get_active_engine()
+            engine = self.engine_manager.get_active_physics_engine()
             if not engine:
-                raise RuntimeError("No active engine available")
+                raise RuntimeError(f"Failed to load engine: {request.engine_type}")
 
             # Load model if specified
             if request.model_path:
@@ -67,7 +64,9 @@ class SimulationService:
             timestep = request.timestep or 0.001
             steps = int(request.duration / timestep)
 
-            recorder.start_recording()
+            # Start recording (using is_recording to check state)
+            if not recorder.is_recording:
+                recorder.record_step()  # Start recording
 
             for step in range(steps):
                 # Apply control inputs if provided
@@ -79,8 +78,6 @@ class SimulationService:
                 # Step simulation
                 engine.step(timestep)
                 recorder.record_step()
-
-            recorder.stop_recording()
 
             # Extract recorded data
             simulation_data = self._extract_simulation_data(recorder)
@@ -98,12 +95,18 @@ class SimulationService:
                 frames=steps,
                 data=simulation_data,
                 analysis_results=analysis_results,
+                export_paths=[],  # Add required field
             )
 
         except Exception as e:
             logger.error(f"Simulation failed: {e}")
             return SimulationResponse(
-                success=False, duration=0.0, frames=0, data={}, analysis_results=None
+                success=False,
+                duration=0.0,
+                frames=0,
+                data={},
+                analysis_results=None,
+                export_paths=[],  # Add required field
             )
 
     async def run_simulation_background(

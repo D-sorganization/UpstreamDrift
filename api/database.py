@@ -34,7 +34,7 @@ else:
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def create_tables():
+def create_tables() -> None:
     """Create all database tables."""
     Base.metadata.create_all(bind=engine)
 
@@ -48,7 +48,7 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
-def init_db():
+def init_db() -> None:
     """Initialize database with tables and default data."""
     create_tables()
 
