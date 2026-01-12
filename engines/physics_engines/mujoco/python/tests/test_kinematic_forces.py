@@ -199,21 +199,6 @@ class TestKinematicForceAnalyzer:
         assert m_eff >= 0.0
         assert np.isfinite(m_eff)
 
-    def test_compute_centripetal_acceleration(self, model_and_data) -> None:
-        """Test computing centripetal acceleration.
-
-        This function is deprecated and should raise NotImplementedError.
-        """
-        model, data = model_and_data
-        analyzer = KinematicForceAnalyzer(model, data)
-
-        qpos = data.qpos.copy()
-        qvel = np.array([0.1, -0.05])
-        body_id = 1
-
-        with pytest.raises(NotImplementedError, match="fundamental physics error"):
-            analyzer.compute_centripetal_acceleration(qpos, qvel, body_id)
-
     def test_compute_kinematic_power(self, model_and_data) -> None:
         """Test computing kinematic power."""
         model, data = model_and_data
