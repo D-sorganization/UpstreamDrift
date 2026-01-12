@@ -1,216 +1,104 @@
-# Assessment Highlight: Executive Summary Template
+# Assessment Highlight: Executive Summary
 
-**Assessment Type**: Executive Overview
-**Frequency**: Monthly/Quarterly
-**Focus**: High-level quality snapshot across all assessment dimensions
+## Assessment Overview
 
----
-
-## Purpose
-
-This highlight assessment provides a single-page executive summary of repository health, consolidating findings from all 15 assessment categories (A-O) into actionable insights.
+You are an **engineering director** synthesizing findings from all 15 assessments (A-O) into an **executive summary** with prioritized remediation roadmap.
 
 ---
 
-## Assessment Categories Reference
+## Summary Structure
 
-| Code | Assessment                    | Focus                               | Frequency  |
-| ---- | ----------------------------- | ----------------------------------- | ---------- |
-| A    | Architecture & Implementation | Structure, patterns, completeness   | Weekly     |
-| B    | Hygiene, Security & Quality   | Linting, formatting, basic security | Weekly     |
-| C    | Documentation & Integration   | Docs, README, onboarding            | Weekly     |
-| D    | Performance & Optimization    | Speed, memory, algorithms           | Bi-weekly  |
-| E    | Security Deep Dive            | CVE, injection, crypto              | Bi-weekly  |
-| F    | Testing Coverage & Quality    | Tests, coverage, quality            | Weekly     |
-| G    | Dependency Health             | CVEs, outdated, licenses            | Weekly     |
-| H    | Maintainability               | Complexity, tech debt               | Bi-weekly  |
-| I    | Accessibility                 | WCAG, a11y, screen readers          | Monthly    |
-| J    | API Design                    | Interfaces, compatibility           | Monthly    |
-| K    | CI/CD Pipeline                | Build, gates, automation            | Monthly    |
-| L    | Data Privacy                  | PII, GDPR, compliance               | Quarterly  |
-| M    | Scalability                   | Resources, load, efficiency         | Quarterly  |
-| N    | Reliability                   | Errors, recovery, resilience        | Bi-monthly |
-| O    | Usability                     | UX, learnability, satisfaction      | Quarterly  |
+### 1. Overall Score (0-100)
 
----
+Calculate weighted average from all assessments:
 
-## Executive Summary Template
+| Category       | Assessments | Weight |
+| -------------- | ----------- | ------ |
+| Core Technical | A, B, C     | 25%    |
+| User-Facing    | D, E, F     | 25%    |
+| Reliability    | G, H, I     | 20%    |
+| Sustainability | J, K, L     | 15%    |
+| Communication  | M, N, O     | 15%    |
 
-### Repository: [NAME]
+### 2. Top 10 Risks
 
-### Date: [DATE]
+Ranked by (Severity × Impact × Effort-to-fix):
 
-### Overall Grade: [A-F]
+| Rank | Risk | Assessment | Severity | Impact | Recommended Action |
+| ---- | ---- | ---------- | -------- | ------ | ------------------ |
+| 1    | ...  | X          | CRITICAL | High   | ...                |
+| 2    | ...  | X          | MAJOR    | High   | ...                |
 
----
+### 3. Remediation Roadmap
 
-## 🎯 Health Snapshot
+**Phase 1: Critical (48 hours)**
 
-| Dimension                 | Score | Trend | Status |
-| ------------------------- | ----- | ----- | ------ |
-| **Code Quality** (A,B,H)  | /10   | ↑↓→   | 🟢🟡🔴 |
-| **Security** (E,G,L)      | /10   | ↑↓→   | 🟢🟡🔴 |
-| **Testing** (F,K)         | /10   | ↑↓→   | 🟢🟡🔴 |
-| **Documentation** (C,J)   | /10   | ↑↓→   | 🟢🟡🔴 |
-| **Performance** (D,M)     | /10   | ↑↓→   | 🟢🟡🔴 |
-| **User Experience** (I,O) | /10   | ↑↓→   | 🟢🟡🔴 |
-| **Reliability** (N)       | /10   | ↑↓→   | 🟢🟡🔴 |
+- BLOCKER and CRITICAL issues only
 
----
+**Phase 2: Major (2 weeks)**
 
-## 🔴 Critical Issues (Action Required)
+- MAJOR issues affecting user experience
 
-| #   | Issue | Category | Impact | Owner | Due |
-| --- | ----- | -------- | ------ | ----- | --- |
-| 1   |       |          |        |       |     |
-| 2   |       |          |        |       |     |
-| 3   |       |          |        |       |     |
+**Phase 3: Full (6 weeks)**
 
----
+- Complete quality alignment
 
-## 🟡 Warnings (Address Soon)
+### 4. Go/No-Go Criteria
 
-| #   | Issue | Category | Impact | Effort |
-| --- | ----- | -------- | ------ | ------ |
-| 1   |       |          |        |        |
-| 2   |       |          |        |        |
-| 3   |       |          |        |        |
+**Ship when:**
+
+- [ ] All BLOCKER issues resolved
+- [ ] All CRITICAL issues have mitigation
+- [ ] > 80% test coverage
+- [ ] Installation success >90%
+- [ ] First result time <30 min
+
+**DO NOT ship if:**
+
+- Any BLOCKER unresolved
+- Installation fails >20%
+- No tutorials available
+
+### 5. Assessment Highlights
+
+| Assessment      | Score | Key Finding | Priority     |
+| --------------- | ----- | ----------- | ------------ |
+| A: Architecture | X/10  | Summary     | High/Med/Low |
+| B: Code Quality | X/10  | Summary     | High/Med/Low |
+| ...             | ...   | ...         | ...          |
 
 ---
 
-## 🟢 Strengths (Maintain)
+## Output Format
 
-| #   | Strength | Category | Value |
-| --- | -------- | -------- | ----- |
-| 1   |          |          |       |
-| 2   |          |          |       |
-| 3   |          |          |       |
+```markdown
+# Comprehensive Assessment Summary
 
----
+**Overall Score: X/100**
+**Assessment Date: YYYY-MM-DD**
+**Assessed By: [Agent/Human]**
 
-## 📊 Key Metrics
+## Executive Summary
 
-| Metric          | Current | Previous | Target | Trend |
-| --------------- | ------- | -------- | ------ | ----- |
-| Test Count      |         |          |        |       |
-| Coverage %      |         |          |        |       |
-| Ruff Violations |         |          | 0      |       |
-| CVE Count       |         |          | 0      |       |
-| Build Time      |         |          | <10m   |       |
-| Tech Debt (hrs) |         |          |        |       |
+[5-bullet executive summary]
 
----
+## Score Breakdown
 
-## 🎬 Recommended Actions
+[Table of all 15 assessments with scores]
 
-### This Week
+## Critical Risks
 
-1. [ ]
-2. [ ]
-3. [ ]
+[Top 10 risks with mitigation]
 
-### This Month
+## Remediation Roadmap
 
-1. [ ]
-2. [ ]
-3. [ ]
+[Phased plan]
 
-### This Quarter
+## Appendix: Individual Assessment Links
 
-1. [ ]
-2. [ ]
-3. [ ]
-
----
-
-## 📈 Trend Analysis
-
-```
-Score over time (last 4 assessments):
-[Insert trend chart or ASCII]
+[Links to A-O results]
 ```
 
 ---
 
-## 📋 Category Scores
-
-### Tier 1: Critical (Check Weekly)
-
-| Assessment      | Score | Notes |
-| --------------- | ----- | ----- |
-| B: Hygiene      | /10   |       |
-| E: Security     | /10   |       |
-| F: Testing      | /10   |       |
-| G: Dependencies | /10   |       |
-
-### Tier 2: Important (Check Bi-weekly)
-
-| Assessment         | Score | Notes |
-| ------------------ | ----- | ----- |
-| A: Architecture    | /10   |       |
-| D: Performance     | /10   |       |
-| H: Maintainability | /10   |       |
-| N: Reliability     | /10   |       |
-
-### Tier 3: Quality (Check Monthly)
-
-| Assessment       | Score | Notes |
-| ---------------- | ----- | ----- |
-| C: Documentation | /10   |       |
-| J: API Design    | /10   |       |
-| K: CI/CD         | /10   |       |
-| I: Accessibility | /10   |       |
-| O: Usability     | /10   |       |
-
-### Tier 4: Compliance (Check Quarterly)
-
-| Assessment     | Score | Notes |
-| -------------- | ----- | ----- |
-| L: Privacy     | /10   |       |
-| M: Scalability | /10   |       |
-
----
-
-## Trust Statement
-
-> "[Summarize in one sentence whether this repository is production-ready and what the biggest risk is]"
-
----
-
-## Assessment Schedule
-
-| Week    | Mon | Tue | Wed       | Thu | Fri | Sat | Sun |
-| ------- | --- | --- | --------- | --- | --- | --- | --- |
-| 1       | A   | B   | C         | D   | E   | F   | -   |
-| 2       | G   | H   | A         | B   | C   | -   | -   |
-| 3       | K   | J   | D         | E   | F   | G   | -   |
-| 4       | N   | O   | Highlight | -   | -   | -   | -   |
-| Monthly | I   | L   | M         | -   | -   | -   | -   |
-
----
-
-## Appendix: Quick Reference
-
-### Scoring Guide
-
-- **9-10**: Excellent - Exceeds standards
-- **7-8**: Good - Meets standards
-- **5-6**: Acceptable - Minor gaps
-- **3-4**: Poor - Significant gaps
-- **0-2**: Critical - Immediate action needed
-
-### Status Icons
-
-- 🟢 Good (7+)
-- 🟡 Warning (5-6)
-- 🔴 Critical (<5)
-
-### Trend Arrows
-
-- ↑ Improving
-- → Stable
-- ↓ Declining
-
----
-
-_This highlight template consolidates findings from all 15 assessment categories (A-O) into an executive summary._
+_This is the summary assessment. Run after completing all A-O assessments._
