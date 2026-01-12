@@ -135,6 +135,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         layout.addWidget(self.plot_type_combo)
 
         btn_refresh = QtWidgets.QPushButton("Refresh Plot")
+        btn_refresh.setToolTip("Refresh the plot with the latest data")
         btn_refresh.clicked.connect(self.refresh_static_plot)
         layout.addWidget(btn_refresh)
 
@@ -146,9 +147,12 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         """Setup advanced analysis tab."""
         layout = QtWidgets.QVBoxLayout(parent)
 
-        btn_compute = QtWidgets.QPushButton("Compute Analysis (Post-Hoc)")
-        btn_compute.clicked.connect(self.compute_analysis)
-        layout.addWidget(btn_compute)
+        self.btn_compute = QtWidgets.QPushButton("Compute Analysis (Post-Hoc)")
+        self.btn_compute.setToolTip(
+            "Run expensive post-hoc analysis algorithms (ZTCF, etc)"
+        )
+        self.btn_compute.clicked.connect(self.compute_analysis)
+        layout.addWidget(self.btn_compute)
 
         self.analysis_combo = QtWidgets.QComboBox()
         self.analysis_combo.setToolTip("Select the type of analysis to visualize")
@@ -196,6 +200,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         layout.addWidget(self.export_formats_list)
 
         btn_export = QtWidgets.QPushButton("Export Data")
+        btn_export.setToolTip("Export recorded data to file")
         btn_export.clicked.connect(self.export_data)
         layout.addWidget(btn_export)
 
@@ -286,6 +291,8 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
             LOGGER.info("Stopped simulation for analysis safety.")
 
         self.status_label.setText("Computing analysis... (may take a moment)")
+        QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
+        self.btn_compute.setEnabled(False)
         QtWidgets.QApplication.processEvents()
         try:
             self.recorder.compute_analysis_post_hoc()
@@ -293,6 +300,9 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         except Exception as e:
             self.status_label.setText(f"Analysis failed: {e}")
             LOGGER.error("Analysis error: %s", e)
+        finally:
+            QtWidgets.QApplication.restoreOverrideCursor()
+            self.btn_compute.setEnabled(True)
 
     def show_analysis_plot(self) -> None:
         """Show selected analysis plot."""
