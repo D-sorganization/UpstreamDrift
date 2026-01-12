@@ -108,6 +108,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
         # Plot Selector
         self.plot_type_combo = QtWidgets.QComboBox()
+        self.plot_type_combo.setToolTip("Select the type of plot to display")
         self.plot_type_combo.addItems(
             [
                 "Joint Angles",
@@ -127,6 +128,10 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                 "Summary Dashboard",
             ]
         )
+
+        lbl_plot_type = QtWidgets.QLabel("Plot Type:")
+        lbl_plot_type.setBuddy(self.plot_type_combo)
+        layout.addWidget(lbl_plot_type)
         layout.addWidget(self.plot_type_combo)
 
         btn_refresh = QtWidgets.QPushButton("Refresh Plot")
@@ -146,6 +151,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         layout.addWidget(btn_compute)
 
         self.analysis_combo = QtWidgets.QComboBox()
+        self.analysis_combo.setToolTip("Select the type of analysis to visualize")
         self.analysis_combo.addItems(
             [
                 "ZTCF vs ZVCF",
@@ -155,6 +161,10 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                 "Stability Metrics",
             ]
         )
+
+        lbl_analysis_type = QtWidgets.QLabel("Analysis Type:")
+        lbl_analysis_type.setBuddy(self.analysis_combo)
+        layout.addWidget(lbl_analysis_type)
         layout.addWidget(self.analysis_combo)
 
         btn_show = QtWidgets.QPushButton("Show Analysis")
@@ -172,6 +182,10 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         layout.addWidget(info_label)
 
         self.export_formats_list = QtWidgets.QListWidget()
+        self.export_formats_list.setAccessibleName("Export Formats")
+        self.export_formats_list.setAccessibleDescription(
+            "List of available formats for exporting simulation data"
+        )
         formats = get_available_export_formats()
         for fmt, info in formats.items():
             item = QtWidgets.QListWidgetItem(f"{info['name']} ({info['extension']})")
