@@ -194,6 +194,15 @@ class JointStiffnessMetrics:
     intercept: float  # Y-intercept of the regression line
 
 
+@dataclass
+class JerkMetrics:
+    """Metrics related to movement smoothness (Jerk)."""
+
+    peak_jerk: float  # Max absolute jerk
+    rms_jerk: float  # Root mean square jerk
+    dimensionless_jerk: float  # Normalized for duration and amplitude
+
+
 class StatisticalAnalyzer:
     """Comprehensive statistical analysis for golf swing data."""
 
@@ -2386,6 +2395,178 @@ class StatisticalAnalyzer:
 
         # SampEn = -log(B/A)
         return float(-np.log(B / A))
+
+    def compute_multiscale_entropy(
+        self,
+        data: np.ndarray,
+        max_scale: int = 10,
+        m: int = 2,
+        r: float = 0.15,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Compute Multiscale Entropy (MSE).
+
+        Calculates Sample Entropy at multiple time scales (coarse-graining).
+        MSE accounts for complexity at different resolutions.
+
+        Args:
+            data: 1D time series
+            max_scale: Maximum scale factor (tau)
+            m: Template length
+            r: Tolerance (ratio of std)
+
+        Returns:
+            Tuple of (scales, entropy_values)
+        """
+        mse_values = []
+        scales = np.arange(1, max_scale + 1)
+
+        for scale in scales:
+            # Coarse-graining: average non-overlapping windows of length 'scale'
+            if scale == 1:
+                scaled_data = data
+            else:
+                n_windows = len(data) // scale
+                if n_windows < m + 1:
+                    mse_values.append(0.0)
+                    continue
+                # Reshape and mean
+                # Truncate to multiple of scale
+                truncated = data[: n_windows * scale]
+                reshaped = truncated.reshape(n_windows, scale)
+                scaled_data = np.mean(reshaped, axis=1)
+
+            # Compute SampEn
+            # Standard MSE uses fixed tolerance based on original SD
+            # r_val = r * std_original
+            # compute_sample_entropy uses r_ratio * std_current
+            # So r_ratio = (r * std_original) / std_current
+
+            std_current = np.std(scaled_data)
+            std_original = np.std(data)
+
+            if std_current < 1e-9:
+                mse = 0.0
+            else:
+                r_ratio = (r * std_original) / std_current
+                mse = self.compute_sample_entropy(scaled_data, m=m, r=r_ratio)
+
+            mse_values.append(mse)
+
+        return scales, np.array(mse_values)
+
+    def compute_jerk_metrics(self, joint_idx: int) -> JerkMetrics | None:
+        """Compute jerk metrics for a joint.
+
+        Jerk is the rate of change of acceleration. High jerk implies less smooth
+        movement.
+
+        Args:
+            joint_idx: Joint index
+
+        Returns:
+            JerkMetrics object or None
+        """
+        # We need acceleration. If not available, compute from velocity.
+        if hasattr(self, "joint_accelerations") and self.joint_accelerations is not None:
+            if joint_idx >= self.joint_accelerations.shape[1]:
+                return None
+            accel = self.joint_accelerations[:, joint_idx]
+        elif (
+            hasattr(self, "joint_velocities")
+            and self.joint_velocities is not None
+            and self.dt > 0
+        ):
+            if joint_idx >= self.joint_velocities.shape[1]:
+                return None
+            vel = self.joint_velocities[:, joint_idx]
+            accel = np.gradient(vel, self.dt)
+        else:
+            return None
+
+        fs = 1.0 / self.dt if self.dt > 0 else 0.0
+        if fs <= 0:
+            return None
+
+        try:
+            from shared.python import signal_processing
+
+            jerk = signal_processing.compute_jerk(accel, fs)
+        except ImportError:
+            # Fallback
+            jerk = np.gradient(accel, self.dt)
+
+        peak_jerk = float(np.max(np.abs(jerk)))
+        rms_jerk = float(np.sqrt(np.mean(jerk**2)))
+
+        # Dimensionless Jerk (Log dimensionless jerk)
+        # LDJ = - ln( integral(j^2 dt) * D^5 / A^2 )
+        # Normalized by movement duration D and amplitude A (peak-to-peak pos or vel range)
+        # Here we use a simpler dimensionless form: (RMS Jerk * Duration^2) / Peak Velocity
+        # Or standard: Integral(j^2) * D^5 / L^2
+        # Let's return RMS normalized by peak accel?
+        # A common simple metric is Peak Jerk / Peak Accel
+        peak_acc = float(np.max(np.abs(accel)))
+        dim_jerk = peak_jerk / peak_acc if peak_acc > 1e-6 else 0.0
+
+        return JerkMetrics(
+            peak_jerk=peak_jerk,
+            rms_jerk=rms_jerk,
+            dimensionless_jerk=dim_jerk,
+        )
+
+    def compute_lag_matrix(
+        self,
+        data_type: str = "velocity",
+        max_lag: float = 0.5,
+    ) -> tuple[np.ndarray, list[str]]:
+        """Compute time lag matrix between all pairs of joints.
+
+        Args:
+            data_type: 'position', 'velocity', 'torque'
+            max_lag: Maximum lag to search (seconds)
+
+        Returns:
+            Tuple of (lag_matrix, labels).
+            Matrix[i, j] > 0 means i leads j (j lags i).
+            Actually compute_time_shift(x, y) returns tau where y(t) ~ x(t-tau).
+            If tau > 0, y is delayed (lags) relative to x.
+            So Matrix[i, j] = compute_time_shift(J_i, J_j).
+            Positive value => J_j lags J_i (J_i leads).
+        """
+        if data_type == "position":
+            data = self.joint_positions
+        elif data_type == "torque":
+            data = self.joint_torques
+        else:
+            data = self.joint_velocities
+
+        n_joints = data.shape[1]
+        if n_joints == 0:
+            return np.array([]), []
+
+        fs = 1.0 / self.dt if self.dt > 0 else 0.0
+        if fs <= 0:
+            return np.zeros((n_joints, n_joints)), []
+
+        try:
+            from shared.python import signal_processing
+        except ImportError:
+            return np.zeros((n_joints, n_joints)), []
+
+        lag_matrix = np.zeros((n_joints, n_joints))
+
+        # Parallelize? No, n_joints is small (10-30). O(N^2) loop is fine.
+        # Matrix is antisymmetric: Lag(i, j) = -Lag(j, i)
+        for i in range(n_joints):
+            for j in range(i + 1, n_joints):
+                lag = signal_processing.compute_time_shift(
+                    data[:, i], data[:, j], fs, max_lag=max_lag
+                )
+                lag_matrix[i, j] = lag
+                lag_matrix[j, i] = -lag
+
+        labels = [f"J{i}" for i in range(n_joints)]
+        return lag_matrix, labels
 
     def export_statistics_csv(
         self,
