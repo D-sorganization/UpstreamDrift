@@ -243,7 +243,12 @@ def export_recording_all_formats(
                             if isinstance(sub_v, np.ndarray) and len(sub_v) == len(
                                 data_dict.get("times", [])
                             ):
-                                full_key = f"{k}_{sub_k}"
+                                # If sub_k is an int (source index), format nicely
+                                if isinstance(sub_k, int):
+                                    full_key = f"{k}_source_{sub_k}"
+                                else:
+                                    full_key = f"{k}_{sub_k}"
+
                                 if sub_v.ndim == 1:
                                     flat_data[full_key] = sub_v
                                 elif sub_v.ndim == 2:

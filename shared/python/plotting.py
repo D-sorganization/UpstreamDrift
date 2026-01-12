@@ -81,12 +81,12 @@ class RecorderInterface(Protocol):
         ...  # pragma: no cover
 
     def get_induced_acceleration_series(
-        self, source_name: str
+        self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
         """Extract time series for a specific induced acceleration source.
 
         Args:
-            source_name: Name of the force source (e.g. 'gravity', 'actuator_1')
+            source_name: Name or index of the force source (e.g. 'gravity', 0)
 
         Returns:
             Tuple of (times, acceleration_array)
@@ -2982,7 +2982,7 @@ class GolfSwingPlotter:
     def plot_induced_acceleration(
         self,
         fig: Figure,
-        source_name: str,
+        source_name: str | int,
         joint_idx: int | None = None,
         breakdown_mode: bool = False,
     ) -> None:
@@ -2990,7 +2990,7 @@ class GolfSwingPlotter:
 
         Args:
             fig: Matplotlib figure
-            source_name: Name of the force source (or 'breakdown' for all components)
+            source_name: Name or index of the force source (or 'breakdown' for all components)
             joint_idx: Optional joint index to plot (plots magnitude or all if None)
             breakdown_mode: If True, plots Gravity, Velocity, and Total components
         """
