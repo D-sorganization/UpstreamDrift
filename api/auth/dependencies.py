@@ -1,5 +1,7 @@
 """Authentication dependencies for FastAPI endpoints."""
 
+from typing import Callable
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
@@ -96,8 +98,8 @@ async def get_current_user_from_api_key(
     # Update API key usage
     from datetime import datetime
 
-    api_key_record.last_used = datetime.utcnow()
-    api_key_record.usage_count = int(api_key_record.usage_count) + 1
+    api_key_record.last_used = datetime.utcnow()  # type: ignore[assignment]
+    api_key_record.usage_count = int(api_key_record.usage_count) + 1  # type: ignore[assignment]
     db.commit()
 
     return user
@@ -119,7 +121,7 @@ async def get_current_user_flexible(
         return await get_current_user(credentials, db)
 
 
-def require_role(required_role: UserRole):
+def require_role(required_role: UserRole) -> Callable[[User], User]:
     """Dependency factory for role-based access control."""
 
     def role_dependency(
@@ -138,7 +140,7 @@ def require_role(required_role: UserRole):
     return role_dependency
 
 
-def check_usage_quota(resource_type: str):
+def check_usage_quota(resource_type: str) -> Callable[[User, Session], User]:
     """Dependency factory for usage quota checking."""
 
     def quota_dependency(
