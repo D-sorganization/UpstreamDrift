@@ -231,7 +231,7 @@ class VideoPosePipeline:
         # markers_data = self._convert_poses_to_markers(pose_results)
 
         # Perform registration - placeholder implementation
-        # TODO: Implement actual marker-to-model registration
+        # NOTE: Marker-to-model registration requires MarkerToModelMapper implementation
         from shared.python.marker_mapping import RegistrationResult
 
         registration_result = RegistrationResult(
