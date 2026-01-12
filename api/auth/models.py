@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from enum import Enum
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
@@ -10,6 +11,12 @@ from sqlalchemy.sql import func
 
 # Create the base class for SQLAlchemy models
 Base = declarative_base()
+
+if TYPE_CHECKING:
+    # For type checking, we need to tell MyPy that Base is a class
+    from sqlalchemy.ext.declarative import DeclarativeMeta
+
+    Base = DeclarativeMeta
 
 
 class UserRole(str, Enum):
@@ -32,7 +39,7 @@ class SubscriptionStatus(str, Enum):
 
 
 # SQLAlchemy Models
-class User(Base):
+class User(Base):  # type: ignore[misc,valid-type]
     """User database model."""
 
     __tablename__ = "users"
@@ -62,7 +69,7 @@ class User(Base):
     last_login = Column(DateTime(timezone=True), nullable=True)
 
 
-class APIKey(Base):
+class APIKey(Base):  # type: ignore[misc,valid-type]
     """API key database model."""
 
     __tablename__ = "api_keys"
@@ -82,7 +89,7 @@ class APIKey(Base):
     expires_at = Column(DateTime(timezone=True), nullable=True)
 
 
-class Session(Base):
+class Session(Base):  # type: ignore[misc,valid-type]
     """User session database model."""
 
     __tablename__ = "sessions"

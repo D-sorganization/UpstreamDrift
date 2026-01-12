@@ -191,17 +191,17 @@ async def create_api_key(
 @router.get("/api-keys", response_model=list[APIKeyResponse])
 async def list_api_keys(
     current_user: User = RequireAuth, db: Session = Depends(get_db)
-):
+) -> list[APIKeyResponse]:
     """List all API keys for the current user."""
 
     api_keys = db.query(APIKey).filter(APIKey.user_id == current_user.id).all()
-    return api_keys
+    return [APIKeyResponse.from_orm(key) for key in api_keys]
 
 
 @router.delete("/api-keys/{api_key_id}")
 async def delete_api_key(
     api_key_id: int, current_user: User = RequireAuth, db: Session = Depends(get_db)
-):
+) -> dict[str, str]:
     """Delete an API key."""
 
     api_key = (
@@ -228,11 +228,11 @@ async def list_users(
     limit: int = 100,
     current_user: User = RequireAdmin,
     db: Session = Depends(get_db),
-):
+) -> list[UserResponse]:
     """List all users (admin only)."""
 
     users = db.query(User).offset(skip).limit(limit).all()
-    return users
+    return [UserResponse.from_orm(user) for user in users]
 
 
 @router.put("/users/{user_id}/role")
@@ -241,7 +241,7 @@ async def update_user_role(
     new_role: UserRole,
     current_user: User = RequireAdmin,
     db: Session = Depends(get_db),
-):
+) -> dict[str, str]:
     """Update user role (admin only)."""
 
     user = db.query(User).filter(User.id == user_id).first()
@@ -250,7 +250,7 @@ async def update_user_role(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    user.role = new_role.value
+    user.role = new_role.value  # type: ignore[assignment]
     db.commit()
 
     return {"message": f"User role updated to {new_role.value}"}
@@ -262,7 +262,7 @@ async def update_user_status(
     is_active: bool,
     current_user: User = RequireAdmin,
     db: Session = Depends(get_db),
-):
+) -> dict[str, str]:
     """Update user active status (admin only)."""
 
     user = db.query(User).filter(User.id == user_id).first()
@@ -271,7 +271,7 @@ async def update_user_status(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    user.is_active = is_active
+    user.is_active = is_active  # type: ignore[assignment]
     db.commit()
 
     status_text = "activated" if is_active else "deactivated"

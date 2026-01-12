@@ -113,7 +113,7 @@ class MediaPipeEstimator(PoseEstimator):
         self._is_loaded = False
 
         # Temporal smoothing state
-        self.previous_landmarks: np.ndarray | None = None
+        self.previous_landmarks: dict[str, np.ndarray] | None = None
         self.kalman_filters: dict[int, Any] = {}
 
         if not MEDIAPIPE_AVAILABLE:

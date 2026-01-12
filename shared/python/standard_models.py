@@ -88,7 +88,8 @@ class StandardModelManager:
             return default_config
 
         with open(self.config_file) as f:
-            return yaml.safe_load(f)
+            config = yaml.safe_load(f)
+            return config or {}
 
     def get_standard_humanoid_path(self) -> Path:
         """Get path to standard humanoid URDF.
@@ -99,7 +100,7 @@ class StandardModelManager:
         Raises:
             GolfModelingError: If standard humanoid is not available
         """
-        urdf_path = self.suite_root / self.config["standard_humanoid"]["urdf_path"]
+        urdf_path = self.suite_root / str(self.config["standard_humanoid"]["urdf_path"])
 
         if not urdf_path.exists():
             logger.info("Standard humanoid not found, attempting to download...")
@@ -203,8 +204,8 @@ class StandardModelManager:
         if club_type not in self.config["golf_clubs"]:
             raise GolfModelingError(f"Unknown golf club type: {club_type}")
 
-        club_config = self.config["golf_clubs"][club_type]
-        urdf_path = self.suite_root / club_config["urdf_path"]
+        club_config: dict[str, Any] = self.config["golf_clubs"][club_type]
+        urdf_path = self.suite_root / str(club_config["urdf_path"])
 
         if not urdf_path.exists():
             self._generate_golf_club_urdf(club_type, urdf_path)
@@ -213,7 +214,7 @@ class StandardModelManager:
 
     def _generate_golf_club_urdf(self, club_type: str, output_path: Path) -> None:
         """Generate golf club URDF file."""
-        club_config = self.config["golf_clubs"][club_type]
+        club_config: dict[str, Any] = self.config["golf_clubs"][club_type]
 
         # Ensure output directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
