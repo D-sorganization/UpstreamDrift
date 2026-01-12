@@ -6,12 +6,12 @@ from matplotlib.figure import Figure
 
 from shared.python.comparative_analysis import ComparativeSwingAnalyzer
 from shared.python.comparative_plotting import ComparativePlotter
-from shared.python.plotting import GolfSwingPlotter
+from shared.python.plotting import GolfSwingPlotter, RecorderInterface
 from shared.python.signal_processing import compute_jerk, compute_time_shift
 from shared.python.statistical_analysis import StatisticalAnalyzer
 
 
-class MockRecorder:
+class MockRecorder(RecorderInterface):
     def __init__(self, data_dict):
         self.data = data_dict
         # Compatibility with new tests which might pass more args?
@@ -204,7 +204,7 @@ def test_plot_bland_altman(sample_data):
 # --- NEW ADVANCED FEATURE TESTS ---
 
 
-class MockRecorderNew:
+class MockRecorderNew(RecorderInterface):
     def __init__(self, times, positions, velocities, accelerations, torques):
         self.times = times
         self.positions = positions

@@ -4,12 +4,12 @@ import numpy as np
 import pytest
 from matplotlib.figure import Figure
 
-from shared.python.plotting import GolfSwingPlotter
+from shared.python.plotting import GolfSwingPlotter, RecorderInterface
 from shared.python.signal_processing import compute_jerk, compute_time_shift
 from shared.python.statistical_analysis import StatisticalAnalyzer
 
 
-class MockRecorder:
+class MockRecorder(RecorderInterface):
     def __init__(self, times, positions, velocities, accelerations, torques):
         self.times = times
         self.positions = positions
