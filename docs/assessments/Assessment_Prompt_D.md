@@ -1,177 +1,227 @@
-# Assessment D: Performance & Optimization Review
+# Assessment D: User Experience & Developer Journey
 
-**Assessment Type**: Performance & Optimization Audit
-**Rotation Day**: Day 4 (Thursday/Sunday)
-**Focus**: Runtime performance, memory efficiency, algorithmic complexity
+## Assessment Overview
 
----
+You are a **UX researcher and developer advocate** conducting an **adversarial, user-centric** review of this repository. Your job is to identify **friction points, confusion moments, and adoption blockers** that prevent target users from successfully using this tool.
 
-## Objective
-
-Conduct an ultra-critical performance audit identifying:
-
-1. Computational bottlenecks and inefficiencies
-2. Memory leaks and excessive allocations
-3. I/O blocking and async opportunities
-4. Algorithmic complexity issues (O(n²) or worse)
-5. Startup time and lazy loading opportunities
+**IMPORTANT: Assume a competent but BUSY user** with domain expertise but limited Python packaging experience. They have 2 hours to evaluate whether this tool is worth learning.
 
 ---
 
-## Mandatory Deliverables
+## Primary Objective: Time-to-Value Analysis
 
-### 1. Executive Summary (5 sentences max)
+Measure and optimize the **time from clone → first meaningful result**.
 
-- Identify the single worst performance issue
-- Estimate impact (% slowdown, memory waste)
-- State whether production-ready for performance
+### Key Metrics
 
-### 2. Performance Scorecard
-
-| Category             | Score (0-10) | Weight | Evidence Required          |
-| -------------------- | ------------ | ------ | -------------------------- |
-| Startup Time         |              | 1.5x   | Measured in seconds        |
-| Runtime Efficiency   |              | 2x     | Profiling data or analysis |
-| Memory Usage         |              | 2x     | Peak memory, allocations   |
-| I/O Efficiency       |              | 1.5x   | Blocking calls identified  |
-| Algorithm Complexity |              | 2x     | Big-O analysis             |
-| Caching Strategy     |              | 1x     | Cache hits/misses          |
-
-### 3. Performance Findings Table
-
-| ID    | Severity | Category | Location | Issue | Impact | Fix | Effort |
-| ----- | -------- | -------- | -------- | ----- | ------ | --- | ------ |
-| D-001 |          |          |          |       |        |     |        |
-
-### 4. Hot Path Analysis
-
-Identify the 5 most performance-critical code paths.
+| Metric                  | Target                       | Measurement                                   |
+| ----------------------- | ---------------------------- | --------------------------------------------- |
+| Installation Time (P90) | <15 minutes                  | From `git clone` to working environment       |
+| First Result Time (P90) | <30 minutes                  | From working environment to first plot/output |
+| Concept Comprehension   | 75% understand core concepts | After 2-hour tutorial                         |
+| "Would Recommend" Score | >8/10                        | After 2-hour trial                            |
 
 ---
 
-## Categories to Evaluate
+## Review Categories
 
-### 1. Startup Performance
+### A. Installation & Environment Setup
 
-- [ ] Application launch time measured
-- [ ] Lazy loading implemented where appropriate
-- [ ] Import time optimized (no heavy imports at module level)
-- [ ] Database/file connections deferred
+**Tests to Perform:**
 
-### 2. Runtime Efficiency
+1. Fresh Ubuntu 22.04: `pip install -r requirements.txt`
+2. macOS M2: `conda env create -f environment.yml`
+3. Windows 11: `pip install` from source
+4. WSL2: Full development setup
 
-- [ ] Hot loops profiled
-- [ ] NumPy/vectorization used where applicable
-- [ ] String operations optimized (no repeated concatenation)
-- [ ] Generator expressions used for large datasets
+**Failure Modes to Document:**
 
-### 3. Memory Management
+- Missing system dependencies not mentioned
+- Version conflicts between packages
+- Platform-specific failures not documented
+- Slow installation (>30 minutes)
 
-- [ ] No obvious memory leaks
-- [ ] Large data structures use appropriate types
-- [ ] Context managers for resource cleanup
-- [ ] Weak references where appropriate
+**Severity Scoring:**
 
-### 4. I/O Efficiency
+- **BLOCKER**: Installation fails >50% of the time
+- **CRITICAL**: Installation takes >1 hour due to missing docs
+- **MAJOR**: Platform-specific failures not documented
+- **MINOR**: Optional dependencies unclear
 
-- [ ] Async I/O for network operations
-- [ ] Buffered file operations
-- [ ] Connection pooling for databases
-- [ ] Batch operations where possible
+### B. Quick Start & First Success
 
-### 5. Algorithmic Complexity
+**Scenario: New User, Hour 1**
 
-- [ ] No O(n²) or worse in hot paths
-- [ ] Appropriate data structures (dict vs list lookups)
-- [ ] Early exits and short-circuits
-- [ ] Memoization where beneficial
+Evaluate:
 
-### 6. Caching & Optimization
+- How many lines of code for "first useful output"? (Target: <10 lines)
+- How many concepts must user understand? (Target: <5 concepts)
+- How many files must user create/edit? (Target: 0 for examples)
+- Is example data included in the repository?
 
-- [ ] @lru_cache or @cache for expensive pure functions
-- [ ] Results cached where computation is repeated
-- [ ] Precomputation of constants
-- [ ] Compiled regex patterns
+**Questions:**
 
----
+- Can user complete "Hello World" in <10 minutes after installation?
+- Are examples self-contained (no external file dependencies)?
+- Does the first output explain what user is seeing?
 
-## Performance Anti-Patterns to Flag
+### C. Documentation Discoverability
 
-### Critical (Blocker)
+**Navigation Test:**
 
-- Blocking I/O in GUI thread
-- O(n³) or worse complexity in production code
-- Unbounded memory growth
-- Synchronous network calls in hot paths
+User wants to accomplish a specific task:
 
-### Major
+- Path 1: Google search → Should land on relevant doc in <2 clicks
+- Path 2: Browse `docs/` folder → Should find tutorial in <30 seconds
+- Path 3: Read API reference → Should find function signature
 
-- O(n²) loops that could be O(n)
-- Repeated parsing of same data
-- String concatenation in loops
-- Loading entire files into memory unnecessarily
+**Assessment Criteria:**
 
-### Minor
+- Is there a "Common Tasks" index? (How do I...?)
+- Are examples searchable by purpose?
+- Are error messages linked to troubleshooting docs?
 
-- Missing @lru_cache on pure expensive functions
-- Dict comprehension instead of generator when size is large
-- Unnecessary list copies
+**Severity:**
 
----
+- **BLOCKER**: Core feature has zero documentation
+- **CRITICAL**: Feature exists but undiscoverable
+- **MAJOR**: Documentation uses jargon without definitions
 
-## Profiling Commands
+### D. API Ergonomics & Consistency
 
-```bash
-# Python profiling
-python -m cProfile -s cumulative your_script.py
+**Cognitive Load Audit:**
 
-# Memory profiling
-pip install memory_profiler
-python -m memory_profiler your_script.py
+- Count distinct classes user must import for basic workflow
+- Count required vs optional parameters (are defaults sensible?)
+- Identify "magic strings" (engine names, config keys)
+- Check naming consistency (snake_case vs PascalCase)
 
-# Line profiling
-pip install line_profiler
-kernprof -l -v your_script.py
+**Anti-Patterns to Flag:**
 
-# Import time
-python -X importtime your_script.py 2>&1 | head -50
+```python
+# BAD: Too many required params
+engine = Engine(path="/path",
+                enable_contact=True,
+                integrator="RK4",
+                time_step=0.001)
+
+# GOOD: Sensible defaults
+engine = Engine.from_file("model.urdf")
 ```
+
+### E. Error Handling & Debugging
+
+**Failure Scenario Testing:**
+
+- Invalid input file → Does error say what's wrong?
+- Missing dependency → Does it suggest `pip install X`?
+- Configuration error → Does it point to the problematic setting?
+
+**Quality Rubric:**
+
+```python
+# BAD
+RuntimeError: ValueError: 42
+
+# GOOD
+RuntimeError: Configuration file not found at 'config.yaml'.
+  Expected location: ~/.tool/config.yaml
+  Fix: Run 'tool init' to create default configuration
+```
+
+**Metrics:**
+
+- % of exceptions with actionable messages (Target: >80%)
+- Average "time to understand error" (Target: <2 minutes)
+
+### F. Performance Expectations
+
+**User Mental Model:**
+
+- Does documentation warn about long operations?
+- Are there progress indicators for >5 second operations?
+- Is there a "quick mode" for exploration vs "full mode" for production?
+
+**Questions:**
+
+- Can user estimate how long an operation will take?
+- Can user interrupt long operations gracefully?
 
 ---
 
 ## Output Format
 
-### Performance Grade
+### 1. Time-to-Value Metrics
 
-- **A (9-10)**: Production-optimized, sub-second response
-- **B (7-8)**: Acceptable performance, minor optimizations needed
-- **C (5-6)**: Noticeable delays, optimization recommended
-- **D (3-4)**: Performance issues impact usability
-- **F (0-2)**: Unacceptable, blocking issues
+| Stage             | Time (P50) | Time (P90) | Blockers Found |
+| ----------------- | ---------- | ---------- | -------------- |
+| Installation      | X min      | X min      | N issues       |
+| First run         | X min      | X min      | N issues       |
+| First result      | X min      | X min      | N issues       |
+| Understand output | X min      | X min      | N issues       |
+
+### 2. Friction Point Heatmap
+
+| Stage     | Friction Points | Severity | Fix Effort |
+| --------- | --------------- | -------- | ---------- |
+| Install   | Description     | CRITICAL | 2h         |
+| First run | Description     | MAJOR    | 1d         |
+| ...       | ...             | ...      | ...        |
+
+### 3. User Journey Map
+
+```
+[Install] → 😡/😐/😊 (notes)
+[First run] → 😡/😐/😊 (notes)
+[Learn concepts] → 😡/😐/😊 (notes)
+[Custom workflow] → 😡/😐/😊 (notes)
+```
+
+### 4. Remediation Roadmap
+
+**48 hours:**
+
+- (Quick wins for installation and first-run experience)
+
+**2 weeks:**
+
+- (Tutorials, error message improvements)
+
+**6 weeks:**
+
+- (Full onboarding experience, video tutorials)
+
+### 5. Scorecard
+
+| Category              | Score (0-10) | Evidence | Remediation |
+| --------------------- | ------------ | -------- | ----------- |
+| Installation Ease     | X            | ...      | ...         |
+| First-Run Success     | X            | ...      | ...         |
+| Documentation Quality | X            | ...      | ...         |
+| Error Clarity         | X            | ...      | ...         |
+| API Ergonomics        | X            | ...      | ...         |
+| **Overall UX Score**  | **X**        | ...      | ...         |
 
 ---
 
-## Repository-Specific Focus
+## Success Criteria
 
-### For Tools Repository
+**Ship when:**
 
-- Launcher startup time
-- Individual tool load times
-- File processing throughput
+- ✅ 90% install success rate on Ubuntu/macOS/Windows
+- ✅ <30 minutes to first result (P90)
+- ✅ <5 imports required for basic workflow
+- ✅ >80% of errors have actionable messages
+- ✅ Tutorial completion rate >75%
+- ✅ "Would recommend" score >8/10
 
-### For Scientific Repositories (Gasification, Golf Suite)
+**DO NOT ship if:**
 
-- Solver convergence time
-- Matrix operation efficiency
-- Plotting render time
-- Physics engine step time
-
-### For Web/Game Repositories
-
-- Frame rate (target 60 FPS)
-- Asset loading time
-- Input latency
+- ❌ Installation requires >5 manual steps
+- ❌ No example data included
+- ❌ Error messages are internal stack traces
+- ❌ Zero tutorials or walkthroughs
 
 ---
 
-_Assessment D focuses on performance. See Assessment A-C for other quality dimensions._
+_Assessment D focuses on user experience. See Assessment A for architecture and Assessment G for testing._
