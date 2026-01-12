@@ -270,29 +270,49 @@ class DrakePhysicsEngine(PhysicsEngine):
         return cast(np.ndarray, forces)
 
     def compute_contact_forces(self) -> np.ndarray:
-        """Compute total contact forces (GRF).
+        """Compute total contact forces (ground reaction force, GRF).
+
+        Notes:
+            This Drake wrapper currently returns a placeholder zero vector for the
+            GRF. Retrieving precise contact forces in Drake requires querying
+            :class:`ContactResults` from the simulation :class:`Context`, which is
+            typically produced and managed by a :class:`Simulator` and is not
+            readily accessible through this lightweight wrapper interface.
+
+            If you need accurate GRFs, integrate directly with Drake's
+            ``MultibodyPlant`` and ``Simulator`` APIs and accumulate forces from
+            the ``ContactResults`` output.
 
         Returns:
-            f: (3,) vector representing total ground reaction force.
+            f: (3,) vector representing total ground reaction force (currently
+                always zeros as a placeholder).
         """
         if not self.plant_context:
             return np.zeros(3)
 
-        # In Drake, contact forces are typically accessed via GetContactResults
-        # This requires the context to have been updated with contact results
-
+        # In Drake, contact forces are typically accessed via GetContactResults.
+        # This requires the context to have been updated with contact results.
+        #
         # NOTE: This implementation assumes CalcContactResults has been called
         # by simulation or we force it here if possible.
         # But contact results are usually output of Simulator.
-
+        #
         # For simplicity in this wrapper, we try to access generalized contact forces
         # or return zero if not easily accessible without full simulation integration.
-
+        #
         # Placeholder: Retrieving precise GRF in Drake requires querying ContactResults
         # from the Context, summing up forces on 'ground' bodies.
-
+        #
         # As a simplified proxy, we can inspect generalized contact forces if available
         # but that's in joint space.
+
+        LOGGER.warning(
+            "DrakePhysicsEngine.compute_contact_forces currently returns a "
+            "placeholder zero GRF vector. Precise contact forces require querying "
+            "ContactResults from a Simulator-managed Context, which is not exposed "
+            "through this wrapper. For accurate GRFs, use Drake's MultibodyPlant/"
+            "Simulator APIs directly."
+        )
 
         return np.zeros(3)
 
