@@ -1,0 +1,122 @@
+# Standard Models Configuration for Golf Modeling Suite
+# This file defines the standardized models used across all physics engines
+
+standard_humanoid:
+  name: "Standard Humanoid with Meshes"
+  description: "High-fidelity human body model from human-gazebo repository"
+  source: "https://github.com/robotology/human-gazebo"
+  urdf_path: "shared/urdf/human_models/humanSubject06_66dof.urdf"
+  mesh_dir: "shared/meshes/human"
+  license: "CC-BY-SA 2.0"
+  dof: 66
+  mass_kg: 75.0
+  height_m: 1.75
+  features:
+    - "Detailed STL meshes for all body segments"
+    - "Realistic joint limits and dynamics"
+    - "Compatible with all physics engines"
+    - "Validated for biomechanical analysis"
+
+simple_humanoid:
+  name: "Simple Humanoid"
+  description: "Simplified human model for basic testing and development"
+  urdf_path: "shared/urdf/simple_humanoid.urdf"
+  dof: 12
+  mass_kg: 70.0
+  height_m: 1.70
+  features:
+    - "Lightweight for fast simulation"
+    - "Basic joint structure"
+    - "No mesh dependencies"
+
+golf_clubs:
+  driver:
+    name: "Driver"
+    description: "Standard driver with 10.5° loft"
+    urdf_path: "shared/urdf/golf_clubs/driver.urdf"
+    loft_deg: 10.5
+    length_m: 1.143  # 45 inches
+    mass_kg: 0.310
+    features:
+      - "Titanium head simulation"
+      - "Graphite shaft properties"
+      - "Realistic mass distribution"
+  
+  iron_5:
+    name: "5-Iron"
+    description: "Standard 5-iron with 28° loft"
+    urdf_path: "shared/urdf/golf_clubs/5_iron.urdf"
+    loft_deg: 28.0
+    length_m: 0.965  # 38 inches
+    mass_kg: 0.390
+  
+  iron_7:
+    name: "7-Iron"
+    description: "Standard 7-iron with 34° loft"
+    urdf_path: "shared/urdf/golf_clubs/7_iron.urdf"
+    loft_deg: 34.0
+    length_m: 0.927  # 36.5 inches
+    mass_kg: 0.410
+  
+  iron_9:
+    name: "9-Iron"
+    description: "Standard 9-iron with 42° loft"
+    urdf_path: "shared/urdf/golf_clubs/9_iron.urdf"
+    loft_deg: 42.0
+    length_m: 0.889  # 35 inches
+    mass_kg: 0.430
+  
+  sand_wedge:
+    name: "Sand Wedge"
+    description: "Standard sand wedge with 56° loft"
+    urdf_path: "shared/urdf/golf_clubs/sand_wedge.urdf"
+    loft_deg: 56.0
+    length_m: 0.889  # 35 inches
+    mass_kg: 0.460
+  
+  putter:
+    name: "Putter"
+    description: "Standard putter with 3° loft"
+    urdf_path: "shared/urdf/golf_clubs/putter.urdf"
+    loft_deg: 3.0
+    length_m: 0.864  # 34 inches
+    mass_kg: 0.370
+
+# Engine-specific configurations
+engine_compatibility:
+  mujoco:
+    supported_formats: ["urdf", "mjcf"]
+    mesh_formats: ["stl", "obj"]
+    notes: "Automatic URDF to MJCF conversion"
+  
+  drake:
+    supported_formats: ["urdf", "sdf"]
+    mesh_formats: ["stl", "obj", "dae"]
+    notes: "Native URDF support with collision detection"
+  
+  pinocchio:
+    supported_formats: ["urdf"]
+    mesh_formats: ["stl", "dae"]
+    notes: "Efficient rigid body dynamics"
+  
+  opensim:
+    supported_formats: ["osim"]
+    mesh_formats: ["stl", "obj"]
+    notes: "Requires conversion via MyoConverter"
+  
+  myosuite:
+    supported_formats: ["xml"]
+    mesh_formats: ["stl"]
+    notes: "MuJoCo-based with muscle models"
+
+# Default model selection for each engine
+default_models:
+  humanoid: "standard_humanoid"
+  golf_club: "driver"
+  
+# Validation settings
+validation:
+  check_mesh_files: true
+  validate_joint_limits: true
+  test_engine_compatibility: true
+  generate_compatibility_report: true
