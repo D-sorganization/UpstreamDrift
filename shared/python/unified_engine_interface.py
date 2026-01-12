@@ -56,13 +56,13 @@ class UnifiedEngineInterface:
                 engine_type = EngineType(engine_type.upper())
 
             # Load engine
-            success = self.engine_manager.load_engine(engine_type)
-            if not success:
+            self.engine_manager._load_engine(engine_type)
+
+            # Get active engine to check if loading was successful
+            self.current_engine = self.engine_manager.get_active_physics_engine()
+            if not self.current_engine:
                 logger.error(f"Failed to load engine: {engine_type}")
                 return False
-
-            # Get active engine
-            self.current_engine = self.engine_manager.get_active_engine()
             self.current_engine_type = engine_type
 
             if not self.current_engine:
@@ -159,7 +159,7 @@ class UnifiedEngineInterface:
                 if self.current_engine_type
                 else None
             )
-            is_compatible = compatibility.get(current_engine_name, False)
+            is_compatible = compatibility.get(current_engine_name or "", False)
 
             return {
                 "valid": is_compatible,
@@ -181,7 +181,7 @@ class UnifiedEngineInterface:
 
         try:
             # Get basic model info
-            info = {
+            info: dict[str, Any] = {
                 "engine": (
                     self.current_engine_type.value if self.current_engine_type else None
                 ),
