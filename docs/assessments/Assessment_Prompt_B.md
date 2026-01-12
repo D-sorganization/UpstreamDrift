@@ -1,191 +1,296 @@
-Refined Prompt: Scientific Python Project Review - Executive Summary Format
+# Assessment B: Tools Repository Hygiene, Security & Quality Review
 
-You are a Principal Computational Scientist and Staff Software Architect doing an adversarial, evidence-based review of a large Python project focused on scientific computing and physical modeling. Your job is to find weaknesses in both the software engineering (maintainability, performance, security) and the scientific rigor (numerical stability, physical correctness, validation).
+## Assessment Overview
 
-**IMPORTANT: Generate an EXECUTIVE SUMMARY format** - focus on critical numerical issues, physical correctness gaps, and concrete remediation rather than exhaustive cataloging.
+You are a **principal/staff-level Python engineer** conducting an **adversarial, evidence-based** code hygiene and security review of the Tools repository. Your job is to **evaluate linting compliance, repository organization, security posture, and adherence to coding standards** as defined in AGENTS.md.
 
-Assume this project simulates real-world physics and will be used for critical analysis. "Good enough" software that produces physically impossible results is a failure.
+**Reference Documents**:
 
-Inputs I will provide
+- `AGENTS.md` - Coding standards and agent guidelines (MANDATORY)
+- `ruff.toml` - Ruff linting configuration
+- `mypy.ini` - Type checking configuration
+- `.pre-commit-config.yaml` - Pre-commit hooks
 
-Repository contents (code, config, tests, docs).
+---
 
-**Project Design Guidelines**: `docs/project_design_guidelines.qmd` - **MANDATORY reference for scientific requirements**
+## Context: Tools Repository Quality Standards
 
-Context: The domain is scientific modeling (e.g., biomechanics, robotics, signal processing).
+The Tools repository must maintain high hygiene standards as a **replicant template repository** that may be cloned and used across multiple projects.
 
-### **PRIMARY OBJECTIVE: Validate Scientific Requirements from Design Guidelines**
+### Quality Gates (Must Pass)
 
-You **MUST** validate implementation against the scientific requirements in `docs/project_design_guidelines.qmd`:
+| Tool       | Configuration             | Enforcement Level      |
+| ---------- | ------------------------- | ---------------------- |
+| Ruff       | `ruff.toml`               | Strict                 |
+| Black      | Default 88 line-length    | Strict                 |
+| Mypy       | `mypy.ini`                | Strict (where enabled) |
+| Pre-commit | `.pre-commit-config.yaml` | Per-commit             |
 
-**Section D**: Forward/Inverse Dynamics correctness
-**Section E**: Forces, Torques, Wrenches accuracy
-**Section F**: Drift-Control Decomposition correctness
-**Section G**: ZTCF/ZVCF Counterfactual validation
-**Section H**: Induced/Indexed Acceleration closure (must sum to total)
-**Section I**: Manipulability ellipsoid mathematics
+### AGENTS.md Standards (Mandatory Compliance)
 
-For **EACH** scientific requirement, report:
-1. **Numerical Correctness**: Are equations implemented correctly?
-2. **Stability**: Does it handle edge cases (singularities, stiff systems)?
-3. **Validation Status**: Are there tests against analytical solutions?
-4. **Cross-Engine Consistency**: Do engines agree within tolerance?
-5. **Priority Gaps**: What breaks scientific credibility?
+1. **No `print()` statements** - Use `logging` module
+2. **No wildcard imports** - Explicit imports only
+3. **No bare `except:` clauses** - Specific exception types
+4. **Type hints required** - All public functions
+5. **No secrets in code** - Use `.env` and `python-dotenv`
 
-Your output must be ruthless, structured, and specific
-Do not be polite. Do not generalize. Do not say “looks good.” Every claim must cite exact files, lines, and mathematical operations. Prefer “proof”: numerical failure modes, unit mismatches, memory leaks, or vectorization failures.
+---
 
-0) Deliverables and format requirements
-Produce the review with these sections:
+## Your Output Requirements
 
-Executive Summary (1 page max)
+Do **not** be polite. Do **not** generalize. Do **not** say "looks good overall."
+Every claim must cite **exact files/paths, modules, functions**, or **config keys**.
 
-Overall assessment (Architecture + Science).
+### Deliverables
 
-Top 10 Risks (ranked by impact on correctness and maintainability).
+#### 1. Executive Summary (1 page max)
 
-"If we ran a simulation today, what breaks?" (e.g., divergence, NaN explosion, slow-down).
+- Overall hygiene assessment in 5 bullets
+- Top 10 hygiene/security risks (ranked)
+- "If CI/CD ran strict enforcement today, what fails first?"
 
-Scorecard (0–10)
+#### 2. Scorecard (0-10)
 
-Score each category below.
+Score each category. For every score ≤8, list evidence and remediation path.
 
-Scientific Validity and Numerical Stability are weighted double.
+| Category                | Description                     | Weight |
+| ----------------------- | ------------------------------- | ------ |
+| Ruff Compliance         | Zero violations across codebase | 2x     |
+| Mypy Compliance         | Strict type safety              | 2x     |
+| Black Formatting        | Consistent formatting           | 1x     |
+| AGENTS.md Compliance    | All standards met               | 2x     |
+| Security Posture        | No secrets, safe patterns       | 2x     |
+| Repository Organization | Clean, intuitive structure      | 1x     |
+| Dependency Hygiene      | Minimal, pinned, secure         | 1x     |
 
-For scores ≤ 8, list evidence and remediation.
+#### 3. Findings Table
 
-Findings Table
+| ID    | Severity | Category | Location | Symptom | Root Cause | Fix | Effort |
+| ----- | -------- | -------- | -------- | ------- | ---------- | --- | ------ |
+| B-001 | ...      | ...      | ...      | ...     | ...        | ... | S/M/L  |
 
-Columns: ID, Severity (Blocker/Critical/Major/Minor), Category, Location, Physical/Software Symptom, Fix, Effort.
+**Severity Definitions:**
 
-Remediation Plan
+- **Blocker**: Security vulnerability or CI/CD-breaking violation
+- **Critical**: Pervasive hygiene issue affecting multiple files
+- **Major**: Significant deviation from AGENTS.md standards
+- **Minor**: Isolated hygiene issue
+- **Nit**: Style/consistency improvement
 
-Immediate (48h): Fix incorrect math, dangerous defaults, or crash bugs.
+#### 4. Linting Violation Inventory
 
-Short-term (2w): Refactor loops to vectorization, add unit tests, fix typing.
+Run and document:
 
-Long-term (6w): Architectural overhaul, introduction of proper solvers/integrators.
+```bash
+ruff check . --output-format=json
+mypy . --strict
+black --check .
+```
 
-Diff-style suggestions
+| File            | Ruff Violations    | Mypy Errors | Black Issues  |
+| --------------- | ------------------ | ----------- | ------------- |
+| path/to/file.py | E501 (2), F401 (1) | 3 errors    | Not formatted |
+| ...             | ...                | ...         | ...           |
 
-5 concrete code changes (pseudo-diffs). Focus on replacing for loops with NumPy/Pandas vectorization or fixing "magic numbers."
+#### 5. Security Audit
 
-Non-obvious improvements
+Per AGENTS.md Section Safety & Security:
 
-10+ improvements regarding reproducibility (random seeds), dimensional analysis, solver tolerance handling, etc.
+| Check                        | Status | Evidence                        |
+| ---------------------------- | ------ | ------------------------------- |
+| No hardcoded secrets         | ✅/❌  | grep -r "password\|secret\|key" |
+| .env.example exists          | ✅/❌  | File presence                   |
+| No eval()/exec() usage       | ✅/❌  | grep results                    |
+| No pickle without validation | ✅/❌  | grep results                    |
+| Safe file I/O                | ✅/❌  | Path traversal check            |
+| No SQL injection risk        | ✅/❌  | parameterized queries           |
 
-1) Review categories and criteria
-A. Scientific Correctness & Physical Modeling (The Core)
-Dimensional Consistency: Are units handled explicitly (e.g., pint, unyt) or implicitly? Are variables named with units (e.g., torque_nm)? Look for "unit soup" errors.
+#### 6. Refactoring Plan
 
-Coordinate Systems: Are frames of reference (World vs. Local) clear? Are transformations (quaternions, rotation matrices) handled via robust libraries (e.g., scipy.spatial, pinocchio) or hand-rolled implementation?
+Prioritized by hygiene impact:
 
-Conservation Laws: Do the models violate conservation of energy/momentum/mass? Are there phantom forces?
+**48 Hours** - CI/CD blockers:
 
-Magic Numbers: Identify hardcoded constants (e.g., 9.81, 3.14) without citations, sources, or variable definitions.
+- (List critical violations that would block merges)
 
-Discretization: Are time-steps (Δt) handling appropriate? Is the integration scheme (Euler, Runge-Kutta) suitable for the stiffness of the system?
+**2 Weeks** - AGENTS.md compliance:
 
-B. Numerical Stability & Precision
-Floating Point Hygiene: Check for equality comparisons on floats (== vs np.isclose). Look for loss of significance (subtracting two large numbers).
+- (List systematic remediation tasks)
 
-Singularities: Are division-by-zero or sqrt(negative) cases handled in the math? Check for Inverse Kinematics singularities or gimbal lock handling.
+**6 Weeks** - Full hygiene graduation:
 
-Matrix Operations: Check for inefficient inversions (inv(A) * b) vs. solving (solve(A, b)). Check for conditioning issues.
+- (List long-term improvements)
 
-NaN/Inf Handling: Does the code fail fast on NaN, or does it propagate them silently until the end?
+#### 7. Diff-Style Suggestions
 
-C. Architecture & Modularity
-Separation of Concerns: Is the Physics Kernel decoupled from the UI/Visualization and I/O?
+Provide ≥5 concrete hygiene fixes with before/after code examples.
 
-State Management: Is the simulation state mutable global chaos, or encapsulated in classes/dataclasses?
+---
 
-Extensibility: Can I add a new force model or sensor without editing the core solver loop?
+## Mandatory Checks (Hygiene Specific)
 
-Dependency Direction: Does the physics engine depend on the GUI? (It shouldn't).
+### A. AGENTS.md Violations Hunt
 
-D. Code Quality & Python Craftsmanship
-Vectorization vs. Loops: CRITICAL: Identify explicit Python for loops performing math that should be NumPy/Torch vector operations. This is a performance and readability killer.
+For each standard in AGENTS.md, systematically check:
 
-MATLAB-isms: Identify non-idiomatic Python (e.g., using index+1 logic, reliance on global scopes, lack of classes) often seen in scientific ports.
+1. **Print Statements**:
 
-Type Hinting: Are np.ndarray, pd.DataFrame, and Tensor shapes hinted? (e.g., using jaxtyping or nptyping).
+   ```bash
+   grep -rn "print(" --include="*.py" | grep -v "test_" | grep -v "#"
+   ```
 
-Readability: Do variable names match the mathematical notation in the literature (with comments linking to sources)?
+   - Document each occurrence
+   - Propose logging replacement
 
-E. Testing Strategy (Scientific Verification)
-Unit Tests: Do they test math functions against known analytical solutions?
+2. **Wildcard Imports**:
 
-Integration Tests: Do they test full pipelines?
+   ```bash
+   grep -rn "from .* import \*" --include="*.py"
+   ```
 
-Property Tests: Are invariants checked? (e.g., "Mass must always be positive", "Energy cannot increase in a passive system").
+   - Document each occurrence
+   - List specific imports needed
 
-Regression Tests: Are there "Gold Standard" data files to prevent silent numerical drift?
+3. **Bare Except Clauses**:
 
-Deterministic Execution: Are random seeds fixed for reproducibility?
+   ```bash
+   grep -rn "except:" --include="*.py"
+   ```
 
-F. Performance & Scalability
-Bottlenecks: Unnecessary memory copies of large arrays.
+   - Document each occurrence
+   - Propose specific exception types
 
-I/O: Is data loading lazy or eager? (Parquet/HDF5 vs. CSV).
+4. **Missing Type Hints**:
+   - Check public functions in each module
+   - Document untyped interfaces
 
-Parallelism: GIL management. Is multiprocessing or numba used effectively for CPU-bound tasks?
+### B. Repository Organization Audit
 
-G. DevEx, Packaging & Dependencies
-Reproducibility: pyproject.toml / conda environment files. Can I replicate the exact scientific environment?
+Evaluate directory structure per AGENTS.md:
 
-Dependency Bloat: Importing heavy libraries for simple tasks.
+1. Does each tool have proper structure?
 
-Documentation: Does the code document the physics (equations used, assumptions made) alongside the parameters?
+   ```
+   tool_name/
+   ├── __init__.py
+   ├── main.py (or entry point)
+   ├── README.md
+   └── tests/
+   ```
 
-2) Mandatory “hard checks” you must perform
-The "Loop Audit": Find the 3 most expensive Python loops and rewrite them as vectorized NumPy/Tensor operations.
+2. Are there orphaned files at root level?
+3. Is there consistent naming (snake_case)?
+4. Are there files that should be gitignored?
 
-The "Unit Audit": Find 5 instances where units are ambiguous or likely mixed (e.g., mm vs m, degrees vs radians).
+### C. Dependency Security Scan
 
-The "Magic Number Hunt": List every hardcoded number in the physics core and demand extraction to a config/constants file.
+1. Check for known vulnerabilities:
 
-Comparison check: Find every instance of a == b for floats and flag it.
+   ```bash
+   pip-audit (if available)
+   ```
 
-Complexity Analysis: Identify the "God Object" (usually the main Simulation class) and propose how to split it.
+2. Review dependency age and maintenance:
+   - Last update dates
+   - Known security advisories
 
-Input Validation: Verify if the code checks for physical validity (e.g., can I set mass = -5? Can I set time_step = 0?).
+3. Verify pinning strategy:
+   - Are versions pinned appropriately?
+   - Is there a requirements.txt or pyproject.toml?
 
-External Boundaries: Audit how data is ingested (CSV parsing reliability) and exported.
+### D. Git Hygiene
 
-Test Realism: Do tests use realistic physical values or arbitrary integers (e.g., testing a force with 1 vs 9.81)?
+1. Are there large binary files committed?
+2. Is `.gitignore` comprehensive?
+3. Are there any accidentally committed secrets in history?
+4. Is the commit history clean?
 
-Error Handling: Does the system crash with a stack trace or specific error message when the physics explodes?
+### E. Configuration File Audit
 
-Distribution: Can a fresh docker build or pip install run the simulation immediately?
+For each configuration file:
 
-3) Severity definitions
-Blocker: Physically incorrect results (wrong math), silent data corruption, or inability to run.
+| File                      | Valid | Complete | Documented |
+| ------------------------- | ----- | -------- | ---------- |
+| `ruff.toml`               | ✅/❌ | ✅/❌    | ✅/❌      |
+| `mypy.ini`                | ✅/❌ | ✅/❌    | ✅/❌      |
+| `.pre-commit-config.yaml` | ✅/❌ | ✅/❌    | ✅/❌      |
+| `pyproject.toml`          | ✅/❌ | ✅/❌    | ✅/❌      |
 
-Critical: High risk of numerical instability (divergence), security flaws, or major performance blockers (O(N^2) loops).
+---
 
-Major: Poor architecture, "spaghetti code", lack of unit tests for core math, ambiguous units.
+## Pragmatic Programmer Principles - Hygiene Focus
 
-Minor: Inefficient but correct code, poor documentation, styling issues.
+Apply these principles during assessment:
 
-Nit: Style/consistency.
+1. **Broken Windows Theory**: Identify first signs of code decay
+2. **Design by Contract**: Verify pre/postconditions are documented
+3. **Assertive Programming**: Check for appropriate assertions
+4. **Topic Coupling**: Identify modules with too many connections
+5. **Refactor Early, Refactor Often**: Recommend incremental improvements
 
-4) Tone and Behavior
-Skepticism: Assume the math is wrong until the tests prove it right.
+---
 
-Precision: Distinguish between implementation errors (bugs) and modeling errors (wrong equations).
+## Output Format
 
-Constructive: When pointing out non-vectorized code, provide the vectorized equivalent.
+Structure your review as follows:
 
-5) Ideal Target State
-Describe the "Platinum Standard" for this project:
+```markdown
+# Assessment B Results: Hygiene, Security & Quality
 
-Structure: Clean separation of Physics, Solver, and Data layers.
+## Executive Summary
 
-Math: Fully vectorized, typed (with shapes), and unit-aware.
+[5 bullets]
 
-Testing: Automated verification against analytical benchmarks.
+## Top 10 Hygiene Risks
 
-Docs: Live documentation (Jupyter/Sphinx) linking code to theory.
+[Numbered list with severity]
 
-CI/CD: Automated regression testing on physical benchmarks.
+## Scorecard
+
+[Table with scores and evidence]
+
+## Linting Violation Inventory
+
+[Comprehensive violation listing]
+
+## Security Audit
+
+[Security check results]
+
+## AGENTS.md Compliance Report
+
+[Standard-by-standard evaluation]
+
+## Findings Table
+
+[Detailed findings]
+
+## Refactoring Plan
+
+[Phased recommendations]
+
+## Diff Suggestions
+
+[Before/after code examples]
+
+## Appendix: Files Requiring Attention
+
+[Prioritized file list]
+```
+
+---
+
+## Evaluation Criteria for Assessor
+
+When conducting this assessment, prioritize:
+
+1. **Security Issues** (30%): Any secrets, vulnerabilities, or unsafe patterns
+2. **Linting Compliance** (25%): Ruff, Mypy, Black pass rates
+3. **AGENTS.md Compliance** (25%): Adherence to established standards
+4. **Organization Quality** (20%): Clean, maintainable structure
+
+The goal is to achieve zero-violation status across all hygiene metrics.
+
+---
+
+_Assessment B focuses on hygiene and security. See Assessment A for architecture/implementation and Assessment C for documentation/integration._

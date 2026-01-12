@@ -1,196 +1,85 @@
-# Assessment E: Security Deep Dive
+# Assessment E: Performance & Scalability
 
-**Assessment Type**: Security Audit
-**Rotation Day**: Day 5 (Friday)
-**Focus**: Vulnerability detection, secure coding, attack surface analysis
+## Assessment Overview
 
----
-
-## Objective
-
-Conduct an adversarial security audit identifying:
-
-1. Injection vulnerabilities (SQL, command, path)
-2. Authentication and authorization flaws
-3. Data exposure risks
-4. Dependency vulnerabilities (CVEs)
-5. Cryptographic weaknesses
+You are a **performance engineer** conducting an **adversarial, evidence-based** performance review. Your job is to identify **computational bottlenecks, memory issues, and scalability limitations** that impact usability.
 
 ---
 
-## Mandatory Deliverables
+## Key Metrics
 
-### 1. Security Posture Statement
-
-- Overall security rating (Critical/Major/Minor/Good)
-- Number of vulnerabilities by severity
-- Whether production-safe for security
-
-### 2. Security Scorecard
-
-| Category            | Score (0-10) | Weight | Evidence Required        |
-| ------------------- | ------------ | ------ | ------------------------ |
-| Input Validation    |              | 2x     | Injection points audited |
-| Authentication      |              | 2x     | Auth mechanisms reviewed |
-| Data Protection     |              | 2x     | Encryption, PII handling |
-| Dependency Security |              | 2x     | CVE scan results         |
-| Secure Coding       |              | 1.5x   | Anti-patterns identified |
-| Attack Surface      |              | 1.5x   | Entry points enumerated  |
-
-### 3. Vulnerability Findings Table
-
-| ID    | CVSS | Category | Location | Vulnerability | Exploit Scenario | Fix | Priority |
-| ----- | ---- | -------- | -------- | ------------- | ---------------- | --- | -------- |
-| E-001 |      |          |          |               |                  |     |          |
-
-### 4. Attack Surface Map
-
-List all entry points where untrusted data enters the system.
+| Metric              | Target          | Critical Threshold            |
+| ------------------- | --------------- | ----------------------------- |
+| Startup Time        | <3 seconds      | >10 seconds = BLOCKER         |
+| Memory Usage (idle) | <200 MB         | >1 GB = CRITICAL              |
+| Operation Time      | Documented ±20% | Undocumented = MAJOR          |
+| Memory Leaks        | None            | Any confirmed leak = CRITICAL |
 
 ---
 
-## Categories to Evaluate
+## Review Categories
 
-### 1. Injection Prevention
+### A. Startup Performance
 
-- [ ] No `eval()` or `exec()` with user input
-- [ ] No shell command injection (`subprocess` with shell=True)
-- [ ] No SQL injection (parameterized queries only)
-- [ ] No path traversal (validated file paths)
-- [ ] No template injection
+- Time from launch to interactive state
+- Import time for core modules
+- Lazy loading of optional features
+- Cold start vs warm start comparison
 
-### 2. Authentication & Authorization
+### B. Computational Efficiency
 
-- [ ] Credentials not hardcoded
-- [ ] API keys in environment variables
-- [ ] No default passwords
-- [ ] Session management secure (if applicable)
-- [ ] Role-based access implemented (if applicable)
+- CPU profiling of core operations
+- Vectorization vs loops for data operations
+- Parallel execution strategies
+- Caching of expensive computations
 
-### 3. Data Protection
+### C. Memory Management
 
-- [ ] Sensitive data encrypted at rest
-- [ ] TLS for network communications
-- [ ] No PII in logs
-- [ ] Secure deletion of temporary files
-- [ ] No secrets in version control
+- Memory profiling of typical workflows
+- Large dataset handling (1M+ records)
+- Memory cleanup after operations
+- Peak vs steady-state memory usage
 
-### 4. Dependency Security
+### D. I/O Performance
 
-- [ ] pip-audit or safety scan run
-- [ ] No known CVEs in dependencies
-- [ ] Dependencies pinned with hashes
-- [ ] Regular dependency updates
+- File loading times vs file sizes
+- Streaming for large files
+- Network request efficiency (if applicable)
+- Disk write patterns
 
-### 5. Secure Coding Practices
+### E. Scalability Testing
 
-- [ ] Input validation on all entry points
-- [ ] Output encoding for display
-- [ ] Error messages don't leak information
-- [ ] Safe deserialization (no pickle from untrusted)
-- [ ] Safe file operations (atomic writes, proper permissions)
-
-### 6. Cryptography
-
-- [ ] Modern algorithms (AES-256, SHA-256+)
-- [ ] No MD5 or SHA1 for security purposes
-- [ ] Proper key management
-- [ ] Secure random number generation
-
----
-
-## Security Anti-Patterns to Flag
-
-### Critical (CVSS 9.0+)
-
-```python
-# NEVER DO THIS
-eval(user_input)
-exec(user_input)
-subprocess.run(user_input, shell=True)
-pickle.loads(untrusted_data)
-os.system(f"command {user_input}")
-```
-
-### High (CVSS 7.0-8.9)
-
-```python
-# DANGEROUS
-open(user_provided_path)  # Path traversal
-cursor.execute(f"SELECT * WHERE id={user_id}")  # SQL injection
-password = "hardcoded123"  # Hardcoded secrets
-logging.info(f"User password: {password}")  # PII in logs
-```
-
-### Medium (CVSS 4.0-6.9)
-
-```python
-# RISKY
-import pickle  # Insecure serialization
-hashlib.md5(data)  # Weak hash for security
-random.random()  # Not cryptographically secure
-```
-
----
-
-## Scan Commands
-
-```bash
-# Dependency vulnerability scan
-pip install pip-audit
-pip-audit --strict
-
-# Alternative with safety
-pip install safety
-safety check
-
-# Secret scanning
-pip install detect-secrets
-detect-secrets scan
-
-# SAST scanning with bandit
-pip install bandit
-bandit -r . -f json -o security_report.json
-
-# Check for known patterns
-grep -rn "eval\|exec\|subprocess.*shell=True" --include="*.py"
-grep -rn "password\|secret\|api_key\|token" --include="*.py"
-```
+| Data Size    | Expected Time | Memory  | Status |
+| ------------ | ------------- | ------- | ------ |
+| 1K records   | <1s           | <100 MB | ✅/❌  |
+| 10K records  | <5s           | <200 MB | ✅/❌  |
+| 100K records | <30s          | <500 MB | ✅/❌  |
+| 1M records   | <5min         | <2 GB   | ✅/❌  |
 
 ---
 
 ## Output Format
 
-### Security Grade
+### 1. Performance Profile
 
-- **A (9-10)**: Secure by design, no known vulnerabilities
-- **B (7-8)**: Minor issues, safe with precautions
-- **C (5-6)**: Moderate risks, address before production
-- **D (3-4)**: Significant vulnerabilities, not production-safe
-- **F (0-2)**: Critical vulnerabilities, immediate remediation
+| Operation      | P50 Time | P99 Time | Memory Peak | Status |
+| -------------- | -------- | -------- | ----------- | ------ |
+| Startup        | X ms     | X ms     | X MB        | ✅/❌  |
+| Load file      | X ms     | X ms     | X MB        | ✅/❌  |
+| Core operation | X ms     | X ms     | X MB        | ✅/❌  |
 
----
+### 2. Hotspot Analysis
 
-## Repository-Specific Focus
+| Location            | % CPU Time | Issue       | Fix            |
+| ------------------- | ---------- | ----------- | -------------- |
+| `module.function()` | X%         | Description | Recommendation |
 
-### For Tools Repository
+### 3. Remediation Roadmap
 
-- File path handling in tools
-- User input in calculators
-- Script execution safety
-
-### For Scientific Repositories
-
-- Data file parsing security
-- External data ingestion
-- Result export safety
-
-### For Web Repositories
-
-- XSS prevention
-- CSRF protection
-- Cookie security
+**48 hours:** Quick wins (caching, obvious bottlenecks)
+**2 weeks:** Vectorization, parallel execution
+**6 weeks:** Architecture changes for scalability
 
 ---
 
-_Assessment E focuses on security. See Assessment A-D for other quality dimensions._
+_Assessment E focuses on performance. See Assessment A for architecture and Assessment D for user experience._

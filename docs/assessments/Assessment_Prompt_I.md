@@ -1,133 +1,75 @@
-# Assessment I: Accessibility Compliance
+# Assessment I: Security & Input Validation
 
-**Assessment Type**: Accessibility Audit
-**Rotation Day**: Day 9 (Monthly)
-**Focus**: WCAG 2.1 AA compliance, screen reader support, keyboard navigation
+## Assessment Overview
 
----
-
-## Objective
-
-Conduct an accessibility audit identifying:
-
-1. WCAG 2.1 AA compliance gaps
-2. Keyboard navigation issues
-3. Screen reader compatibility
-4. Color contrast violations
-5. Alternative text and ARIA labels
+You are a **security engineer** conducting an **adversarial** security review. Your job is to identify **vulnerabilities, input validation gaps, and security risks**.
 
 ---
 
-## Mandatory Deliverables
+## Key Metrics
 
-### 1. Accessibility Summary
-
-- WCAG Level: Not Tested / A / AA / AAA
-- Critical violations: X
-- Color contrast issues: X
-- Missing alt text: X instances
-- Keyboard traps: X
-
-### 2. Accessibility Scorecard
-
-| Category       | Score (0-10) | Weight | Evidence Required  |
-| -------------- | ------------ | ------ | ------------------ |
-| Perceivable    |              | 2x     | Alt text, contrast |
-| Operable       |              | 2x     | Keyboard, timing   |
-| Understandable |              | 1.5x   | Labels, errors     |
-| Robust         |              | 1.5x   | ARIA, validation   |
-| Screen Reader  |              | 2x     | Testing results    |
-| Keyboard       |              | 2x     | Navigation test    |
-
-### 3. Accessibility Findings
-
-| ID  | WCAG | Category | Element | Issue | Impact | Fix | Priority |
-| --- | ---- | -------- | ------- | ----- | ------ | --- | -------- |
-|     |      |          |         |       |        |     |          |
+| Metric                     | Target           | Critical Threshold |
+| -------------------------- | ---------------- | ------------------ |
+| Dependency Vulnerabilities | 0 high/critical  | Any = BLOCKER      |
+| Input Validation           | 100% user inputs | Any gap = MAJOR    |
+| Secrets Exposure           | 0                | Any = BLOCKER      |
+| Injection Vulnerabilities  | 0                | Any = CRITICAL     |
 
 ---
 
-## Categories to Evaluate
+## Review Categories
 
-### 1. Perceivable (WCAG 1.x)
+### A. Dependency Security
 
-- [ ] All images have alt text
-- [ ] Videos have captions
-- [ ] Color not sole indicator
-- [ ] Contrast ratio ≥ 4.5:1
-- [ ] Text resizable to 200%
+- pip-audit / safety scan results
+- Known CVEs in dependencies
+- Dependency update strategy
+- Minimal dependency policy
 
-### 2. Operable (WCAG 2.x)
+### B. Input Validation
 
-- [ ] All functions keyboard accessible
-- [ ] No keyboard traps
-- [ ] Skip links for navigation
-- [ ] Focus indicators visible
-- [ ] No seizure-inducing content
+- User input sanitization
+- File path validation (path traversal)
+- Command injection prevention
+- SQL/XML/JSON injection prevention
 
-### 3. Understandable (WCAG 3.x)
+### C. Secrets Management
 
-- [ ] Language declared
-- [ ] Navigation consistent
-- [ ] Labels and instructions
-- [ ] Error identification
-- [ ] Input assistance
+- No hardcoded credentials
+- Environment variable usage
+- .gitignore for sensitive files
+- Secure configuration storage
 
-### 4. Robust (WCAG 4.x)
+### D. File Handling
 
-- [ ] Valid HTML/markup
-- [ ] ARIA properly used
-- [ ] Name, Role, Value
-- [ ] Status messages
+- Untrusted file parsing (XML, JSON, pickle)
+- File size limits
+- Temporary file cleanup
+- Permission handling
 
----
+### E. Network Security (if applicable)
 
-## Applicability by Repository
-
-| Repository   | Type             | Accessibility Relevance   |
-| ------------ | ---------------- | ------------------------- |
-| Tools        | Desktop (PyQt6)  | Medium - GUI widgets      |
-| Games        | Desktop (Pygame) | Low - Visual games        |
-| AffineDrift  | Web (Quarto)     | **High** - Web content    |
-| Gasification | Desktop (PyQt6)  | Medium - Scientific UI    |
-| Golf Suite   | Desktop (PyQt6)  | Medium - 3D visualization |
+- HTTPS enforcement
+- Certificate validation
+- Rate limiting
+- Authentication/authorization
 
 ---
 
-## Testing Commands
+## Output Format
 
-### Web (AffineDrift)
+### 1. Vulnerability Report
 
-```bash
-# axe-core automated testing
-npm install -g @axe-core/cli
-axe https://affinedrift.com --dir ./accessibility-report
+| ID    | Type           | Severity | Location  | Fix              |
+| ----- | -------------- | -------- | --------- | ---------------- |
+| I-001 | Dependency CVE | CRITICAL | package-x | Upgrade to 1.2.3 |
 
-# Pa11y
-npm install -g pa11y
-pa11y https://affinedrift.com
+### 2. Remediation Roadmap
 
-# Lighthouse
-npm install -g lighthouse
-lighthouse https://affinedrift.com --only-categories=accessibility
-```
-
-### Desktop (PyQt6/Tkinter)
-
-- Manual screen reader testing (NVDA, JAWS)
-- Keyboard navigation testing
-- High contrast mode testing
+**48 hours:** Critical vulnerabilities
+**2 weeks:** Input validation coverage
+**6 weeks:** Security audit, penetration testing
 
 ---
 
-## WCAG Quick Reference
-
-| Level | Requirement             |
-| ----- | ----------------------- |
-| A     | Minimum (must have)     |
-| AA    | Standard (recommended)  |
-| AAA   | Enhanced (aspirational) |
-
----
-
-_Assessment I focuses on accessibility. See Assessment A-H for other dimensions._
+_Assessment I focuses on security. See Assessment F for deployment and Assessment B for code quality._

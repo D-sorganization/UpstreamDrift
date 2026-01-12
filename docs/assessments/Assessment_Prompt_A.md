@@ -1,250 +1,261 @@
-## Ultra-Critical Python Project Review Prompt - Executive Summary Format
+# Assessment A: Tools Repository Architecture & Implementation Review
 
-You are a **principal/staff-level Python engineer and software architect** doing an **adversarial, evidence-based** review of a large Python project. Your job is to **find weaknesses, risks, and quality gaps** the way a top company's internal review board would. Assume this project may go into production and be maintained for years by multiple engineers.
+## Assessment Overview
 
-**IMPORTANT: Generate an EXECUTIVE SUMMARY format** - focus on actionable findings, critical risks, and concrete remediation plans rather than exhaustive cataloging.
+You are a **principal/staff-level Python engineer and software architect** conducting an **adversarial, evidence-based** architectural review of the Tools repository. Your job is to **evaluate completeness of implementation, performance optimization, and architectural quality** against the project's established standards.
 
-### Inputs I will provide
+**Reference Documents**:
 
-* Repository contents (code, config, tests, docs)
-* **Project Design Guidelines**: `docs/project_design_guidelines.qmd` - **MANDATORY reference document**
-* Optional: requirements/feature goals, target users, deployment environment, performance/SLA needs
+- `AGENTS.md` - Coding standards and agent guidelines
+- `README.md` - Repository structure and purpose
+- `docs/` - Additional architecture documentation
 
-### **PRIMARY OBJECTIVE: Gap Analysis Against Design Guidelines**
+---
 
-You **MUST** compare the current implementation against the requirements specified in `docs/project_design_guidelines.qmd` (sections A-M for feature requirements, N-S for technical standards). For **EACH** requirement section, explicitly state:
+## Context: Tools Repository System
 
-1. **Implementation Status**: Fully implemented / Partially implemented / Not implemented / Non-compliant
-2. **Gap Analysis**: What's missing or deviates from guidelines
-3. **Risk Level**: BLOCKER / CRITICAL / MAJOR / MINOR
-4. **Remediation Priority**: Immediate (48h) / Short-term (2w) / Long-term (6w)
+This is a **polyglot utility monorepo** containing diverse tools organized by category:
 
-**Example Output Format**:
+- **Domain**: Development utilities, data processing, media handling, scientific modeling tools
+- **Technology Stack**: Python 3.11+, MATLAB, JavaScript/HTML/CSS, PowerShell, Batch
+- **Architecture**: Category-based monorepo with unified launcher system
+- **Scale**: 25+ discrete tools across 10+ categories
+
+### Key Components to Evaluate
+
+| Component            | Location                  | Purpose                                |
+| -------------------- | ------------------------- | -------------------------------------- |
+| UnifiedToolsLauncher | `UnifiedToolsLauncher.py` | PyQt6-based GUI launcher               |
+| Legacy Launcher      | `tools_launcher.py`       | Tkinter-based tile launcher            |
+| Data Processing      | `data_processing/`        | Data analysis and transformation tools |
+| Media Processing     | `media_processing/`       | Image and video processing utilities   |
+| Document Processing  | `document_processing/`    | Document handling tools                |
+| Scientific Modeling  | `scientific_modeling/`    | Scientific computation utilities       |
+| Web Applications     | `web_applications/`       | Browser-based tools                    |
+| File Management      | `file_management/`        | File organization utilities            |
+
+---
+
+## Your Output Requirements
+
+Do **not** be polite. Do **not** generalize. Do **not** say "looks good overall."
+Every claim must cite **exact files/paths, modules, functions**, or **config keys**.
+
+### Deliverables
+
+#### 1. Executive Summary (1 page max)
+
+- Overall assessment in 5 bullets
+- Top 10 implementation/architecture risks (ranked)
+- "If we tried to add a new tool category tomorrow, what breaks first?"
+
+#### 2. Scorecard (0-10)
+
+Score each category. For every score ≤8, list evidence and remediation path.
+
+| Category                    | Description                           | Weight |
+| --------------------------- | ------------------------------------- | ------ |
+| Implementation Completeness | Are all tools fully functional?       | 2x     |
+| Architecture Consistency    | Do tools follow common patterns?      | 2x     |
+| Performance Optimization    | Are there obvious performance issues? | 1.5x   |
+| Error Handling              | Are failures handled gracefully?      | 1x     |
+| Type Safety                 | Per AGENTS.md requirements            | 1x     |
+| Testing Coverage            | Are tools tested appropriately?       | 1x     |
+| Launcher Integration        | Do tools integrate with launchers?    | 1x     |
+
+#### 3. Findings Table
+
+| ID    | Severity | Category | Location | Symptom | Root Cause | Fix | Effort |
+| ----- | -------- | -------- | -------- | ------- | ---------- | --- | ------ |
+| A-001 | ...      | ...      | ...      | ...     | ...        | ... | S/M/L  |
+
+**Severity Definitions:**
+
+- **Blocker**: Tool non-functional or fundamentally broken
+- **Critical**: High likelihood of user-facing issues or data loss
+- **Major**: Significant deviation from standards or incomplete implementation
+- **Minor**: Quality improvement, low immediate risk
+- **Nit**: Style/consistency only if systemic
+
+#### 4. Implementation Completeness Audit
+
+For each tool category, evaluate:
+
+| Category         | Tools Count | Fully Implemented | Partial | Broken | Notes |
+| ---------------- | ----------- | ----------------- | ------- | ------ | ----- |
+| data_processing  | N           | X                 | Y       | Z      | ...   |
+| media_processing | N           | X                 | Y       | Z      | ...   |
+| ...              | ...         | ...               | ...     | ...    | ...   |
+
+#### 5. Refactoring Plan
+
+Prioritized by implementation impact:
+
+**48 Hours** - Critical implementation fixes:
+
+- (List specific fixes for broken/blocking tools)
+
+**2 Weeks** - Major implementation completion:
+
+- (List specific incomplete tools to finish)
+
+**6 Weeks** - Full architectural alignment:
+
+- (List strategic improvements)
+
+#### 6. Diff-Style Suggestions
+
+Provide ≥5 concrete code changes that would improve implementation or performance. Each tied to a finding.
+
+---
+
+## Mandatory Checks (Tools Repository Specific)
+
+### A. Launcher Integration Audit
+
+Verify all tools are properly integrated:
+
+1. **UnifiedToolsLauncher.py**: Are all categories represented?
+2. **tools_launcher.py**: Are all tiles functional?
+3. **Desktop Shortcuts**: Do `create_*_shortcut.ps1` scripts work?
+
+For each missing integration, document:
+
+- Tool name and category
+- Expected launcher presence
+- Proposed fix
+
+### B. Tool Functionality Verification
+
+For each tool category:
+
+1. Does `__main__.py` or equivalent entry point exist?
+2. Can the tool be launched independently?
+3. Does the tool have AGENTS.md compliance?
+4. Is there a README explaining usage?
+
+### C. Performance Hotspots
+
+Identify potential performance issues:
+
+1. Large file operations without streaming
+2. Blocking I/O in GUI applications
+3. Unnecessary dependencies loaded at startup
+4. Memory leaks in long-running tools
+
+### D. Cross-Tool Consistency
+
+Evaluate pattern consistency across tools:
+
+1. Do all Python tools use logging instead of print?
+2. Is error handling consistent?
+3. Are configurations handled uniformly?
+4. Is the directory structure consistent?
+
+### E. Dependency Analysis
+
+Per AGENTS.md and Pragmatic Programmer principles:
+
+1. Are dependencies minimal and justified?
+2. Do tools avoid "dependency hell"?
+3. Are there duplicate dependencies across tools?
+4. Is there a consistent versioning strategy?
+
+---
+
+## Specific Files to Examine
+
+### Critical Path Analysis
+
+Trace these execution paths and verify functionality:
+
+**Path 1: Launch Tool via UnifiedToolsLauncher**
 
 ```
-Requirement C1 (Jacobians Everywhere):
-- Status: Partially implemented (MuJoCo ✅, Drake ✅, Pinocchio ✅)
-- Gap: Missing real-time conditioning warnings (guideline C2)
-- Risk: CRITICAL - silent failures near singularities
-- Priority: Immediate - add κ>1e6 warning threshold
-- Fix: 2 hours effort, add to manipulability.py
+UnifiedToolsLauncher.main()
+  → CategoryView.load_tools()
+    → ToolButton.on_click()
+      → subprocess.Popen(tool_path)
 ```
 
-### Your output must be ruthless, structured, and specific
+**Path 2: Launch Tool via Tkinter Launcher**
 
-Do **not** be polite. Do **not** generalize. Do **not** say “looks good overall.”
-Every claim must cite **exact files/paths, modules, functions**, or **config keys**. Prefer “proof”: callouts, examples, failure modes, and how to reproduce. Provide fixes with suggested code patterns.
+```
+tools_launcher.py.main()
+  → TileGrid.create_tiles()
+    → Tile.on_click()
+      → launch_tool(tool_config)
+```
 
----
+**Path 3: Desktop Shortcut Execution**
 
-# 0) Deliverables and format requirements
+```
+.ps1 script execution
+  → pythonw.exe tool_path
+    → Tool.main()
+```
 
-Produce the review with these sections:
+For each path:
 
-1. **Executive Summary (1 page max)**
-
-* Overall assessment in 5 bullets
-* Top 10 risks (ranked)
-* “If we shipped today, what breaks first?” (realistic scenario)
-
-2. **Scorecard**
-   Give a score **0–10** for each category below, plus a weighted overall score.
-   For every score ≤8, list *why*, *evidence*, and *what it would take to reach 9–10*.
-3. **Findings Table (the core output)**
-   A table of findings with:
-
-* ID, Severity (Blocker/Critical/Major/Minor/Nit)
-* Category, Location (path + symbol), Symptom, Root cause
-* Impact, Likelihood, How to reproduce (if applicable)
-* Fix (specific), Effort estimate (S/M/L), Owner type (backend/devops/data/etc.)
-
-4. **Refactor / Remediation Plan**
-
-* A phased plan: **48 hours**, **2 weeks**, **6 weeks**
-* Include “stop-the-bleeding” items vs. long-term architecture
-
-5. **Diff-style suggestions**
-   Provide at least 5 concrete change proposals (pseudo-diffs are fine), each tied to a finding.
-6. **Non-obvious improvements**
-   List 10+ improvements that aren’t typical lint/test suggestions (e.g., dependency hygiene, build reproducibility, observability, API ergonomics, failure isolation, etc.)
+- Document actual vs. expected behavior
+- Identify failure points
+- Note error handling gaps
 
 ---
 
-# 1) Review categories and criteria (be exhaustive)
+## Output Format
 
-## A. Product requirements & correctness
+Structure your review as follows:
 
-* Does the project clearly encode requirements? Where are they documented?
-* Trace “major feature X” to code: entry points, flow, invariants.
-* Identify ambiguous behavior, undefined edge cases, and mismatches between docs and implementation.
-* Look for silent failures, swallowed exceptions, implicit defaults, and “works on my machine” assumptions.
-* Are there explicit correctness properties? Any property tests? Invariants? Assertions?
+```markdown
+# Assessment A Results: Architecture & Implementation
 
-## B. Architecture & modularity (the big one)
+## Executive Summary
 
-* High-level architecture: boundaries, layers, dependency direction, coupling.
-* Evaluate whether modules have a single responsibility.
-* Identify circular dependencies, leaky abstractions, shared mutable state, “god modules,” and tight coupling to frameworks.
-* Are interfaces clean? Are adapters used for external systems?
-* Extensibility: how hard is it to add a new feature without editing 15 files?
+[5 bullets]
 
-## C. API/UX design (library or service)
+## Top 10 Risks
 
-* Public API clarity: naming, consistency, discoverability.
-* Backwards compatibility story, deprecation patterns.
-* Error reporting: are exceptions meaningful? Are error types stable and documented?
-* For CLIs: help text quality, exit codes, flags behavior, config precedence.
-* For services: route consistency, request/response shape, versioning.
+[Numbered list with severity]
 
-## D. Code quality (Python craftsmanship)
+## Scorecard
 
-* Readability, cohesion, DRY vs. over-abstraction.
-* Idiomatic Python: correct use of dataclasses, typing, context managers, iterators/generators.
-* Identify anti-patterns: deep nesting, giant functions, boolean flag arguments, “stringly typed” config everywhere, inheritance misuse, hidden side effects.
-* Naming quality: does the code read like a well-written technical document?
-* Evidence of copy/paste, “action at a distance,” unclear ownership of state.
+[Table with scores and evidence]
 
-## E. Type safety & static analysis
+## Implementation Completeness Audit
 
-* mypy/pyright usage level and strictness.
-* Type coverage of public interfaces and tricky internals.
-* Common type-smell checks: Any abuse, untyped dicts, Optional misuse, implicit None.
-* Are types used to encode domain constraints or ignored?
+[Category-by-category evaluation]
 
-## F. Testing strategy (quality, not just quantity)
+## Findings Table
 
-* Test pyramid: unit vs. integration vs. end-to-end.
-* Coverage of failure modes and edge cases, not just sunny-day paths.
-* Determinism: flaky tests, time/network dependencies, random seeds.
-* Fixtures, factories, test readability, test speed.
-* Mutation testing potential: would tests catch logic inversion?
-* Are there regression tests for known bugs?
+[Detailed findings]
 
-## G. Security (assume hostile input)
+## Refactoring Plan
 
-* Input validation, injection risks, unsafe deserialization, SSRF, path traversal.
-* Secrets handling: env vars, config files, logging secrets, committing credentials.
-* Dependency vulnerabilities and supply-chain risk.
-* Authn/authz (if relevant): session handling, token validation, least privilege.
-* Sandboxing and dangerous operations (shell calls, eval/exec, pickle, yaml.load).
-* Threat model: identify top threats and mitigations.
+[Phased recommendations]
 
-## H. Reliability & resilience (production reality)
+## Diff Suggestions
 
-* Fail-fast vs. degrade gracefully decisions.
-* Retries, timeouts, circuit breakers, idempotency.
-* Backpressure and queue behavior.
-* Crash-only design considerations: can processes restart cleanly?
-* Data corruption and partial writes: atomicity, transactions, exactly-once concerns.
-* Resource cleanup: file handles, subprocesses, DB connections.
+[Code examples]
 
-## I. Observability (can we debug it at 3am?)
+## Appendix: Tool Inventory
 
-* Logging strategy: structured logs, log levels, correlation IDs.
-* Metrics: latency, error rates, saturation, queue sizes.
-* Tracing: OpenTelemetry or equivalent.
-* Meaningful error reporting and breadcrumbs.
-* Are logs actionable or noisy? Any PII leaks?
-
-## J. Performance & scalability
-
-* Big-O concerns: hotspots, N+1 calls, repeated parsing/serialization.
-* Memory use: accidental copies, caching strategy, lifecycle.
-* Concurrency model: threads vs. asyncio vs. processes; correctness with shared state.
-* Profiling hooks and benchmarking.
-* Throughput constraints: IO vs CPU bound; GIL implications.
-* For data pipelines: chunking, streaming, vectorization.
-
-## K. Data integrity & persistence (if applicable)
-
-* Schema migrations, versioning, compatibility.
-* Constraints, indexes, transactional boundaries.
-* Serialization formats: stability, validation, forward/backward compatibility.
-* Idempotency and replay safety.
-
-## L. Dependency management & packaging
-
-* `pyproject.toml` / requirements hygiene.
-* Pinning strategy, lockfiles, reproducible builds.
-* Optional deps and extras separation.
-* License compliance, transitive risk.
-* Avoiding dependency hell: minimal surface area.
-
-## M. DevEx: tooling, CI/CD, and workflow
-
-* Pre-commit, lint, format, type checks, security scanners.
-* CI speed and determinism; caching; parallelism.
-* Release process: versioning, changelog discipline, artifacts.
-* Local dev environment: one-command setup; Docker/devcontainers if needed.
-
-## N. Documentation & maintainability
-
-* README that gets a new dev productive fast.
-* Architecture docs (diagrams, ADRs), “why” not just “what.”
-* Docstrings and examples that match behavior.
-* Runbooks: common failure cases + fixes.
-* Contribution guidelines, coding standards.
-
-## O. Style consistency & design uniformity
-
-* Consistent conventions across modules.
-* Unified error handling strategy.
-* Unified config system and precedence.
-* Unified naming, file layout, and layering.
-
-## P. Compliance / privacy (if relevant)
-
-* PII handling, retention, redaction.
-* Audit logging.
-* Data minimization.
-* GDPR/CCPA-ish considerations if user data exists.
+[Complete list of tools with status]
+```
 
 ---
 
-# 2) Mandatory “hard checks” you must perform
+## Evaluation Criteria for Assessor
 
-1. Identify the **top 3 most complex modules** and explain why they’re complex. Recommend simplifications.
-2. Identify the **top 10 files by risk** (not by LOC): why they’re fragile.
-3. List **all external system boundaries** (DB, network, filesystem, subprocess) and audit how each is handled (timeouts, retries, validation).
-4. Find **at least 10 specific refactors** that would materially reduce bug risk.
-5. Find **at least 10 examples** of code smells with exact locations.
-6. Find **at least 5 potential security issues** (or explicitly argue why not, with evidence).
-7. Find **at least 5 concurrency/async hazards** (or explicitly argue why not).
-8. Evaluate **packaging/distribution**: can a clean machine install and run it deterministically?
-9. Evaluate **test realism**: do tests actually represent production conditions?
-10. Provide a **“minimum acceptable bar”** checklist for shipping.
+When conducting this assessment, prioritize:
+
+1. **Implementation Completeness** (35%): Do all tools work as intended?
+2. **Architectural Integrity** (25%): Are patterns consistent across tools?
+3. **Performance Quality** (20%): Are there obvious performance issues?
+4. **Maintainability** (20%): Can new tools be added easily?
+
+The goal is to identify gaps in implementation and architecture with actionable remediation.
 
 ---
 
-# 3) Severity definitions (use these strictly)
-
-* **Blocker**: unsafe or fundamentally broken; cannot ship.
-* **Critical**: high likelihood of production incident or data/security risk.
-* **Major**: significant maintainability/correctness concerns; should fix soon.
-* **Minor**: quality improvement; low risk.
-* **Nit**: style/consistency; only mention if it’s pervasive.
-
----
-
-# 4) Constraints on your tone and behavior
-
-* Be skeptical: assume bugs exist until proven otherwise.
-* Prefer evidence over speculation.
-* If you lack info (e.g., missing deployment target), state assumptions explicitly and review under multiple plausible scenarios.
-* No hand-waving: every recommendation must include “how” and “where.”
-
----
-
-# 5) End with an “Ideal Target State” blueprint
-
-Describe what “excellent” looks like for this project in:
-
-* repo structure,
-* architecture boundaries,
-* typing/testing standards,
-* CI/CD pipeline,
-* release strategy,
-* ops/observability,
-* and security posture.
-
-Provide a concrete, actionable picture.
+_Assessment A focuses on architecture and implementation. See Assessment B for hygiene/quality and Assessment C for documentation/integration._
