@@ -293,6 +293,37 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             # Standardized to [Angular; Linear] (Drake convention)
         }
 
+    def compute_contact_forces(self) -> np.ndarray:
+        """Compute total contact forces (GRF).
+
+        Returns:
+            f: (3,) vector representing total ground reaction force.
+        """
+        # Sum up all contact forces
+        if self.data is None or self.model is None:
+            return np.zeros(3)
+
+        total_force = np.zeros(3)
+
+        # Iterate over contacts
+        for i in range(self.data.ncon):
+            # Contact force in contact frame
+            c_force = np.zeros(6)
+            mujoco.mj_contactForce(self.model, self.data, i, c_force)
+
+            # Contact frame orientation
+            contact_frame = self.data.contact[i].frame.reshape(3, 3)
+
+            # Transform to world frame (only linear part c_force[0:3])
+            # Note: mj_contactForce returns [normal, tangent1, tangent2, torque...]
+            # The contact frame's X axis is the normal.
+            f_local = c_force[:3]
+            f_world = contact_frame.T @ f_local
+
+            total_force += f_world
+
+        return total_force
+
     def get_sensors(self) -> dict[str, float]:
         """Get all sensor readings."""
         if self.data is None or self.model is None:

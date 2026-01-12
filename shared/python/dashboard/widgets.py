@@ -101,8 +101,16 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.source_spin = QtWidgets.QSpinBox()
         self.source_spin.setRange(0, 100)  # Assume max 100 joints
         self.source_spin.setPrefix("Source Idx: ")
+        self.source_spin.setToolTip("Index of the joint torque source to analyze for induced acceleration.")
         self.source_spin.setVisible(False)
         self.source_spin.valueChanged.connect(self._on_source_changed)
+
+        lbl_source = QtWidgets.QLabel("Source:")
+        lbl_source.setBuddy(self.source_spin)
+        lbl_source.setVisible(False)
+        self.source_label = lbl_source
+
+        controls_layout.addWidget(lbl_source)
         controls_layout.addWidget(self.source_spin)
 
         # Checkbox for enabling computation (if expensive)
@@ -126,7 +134,9 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.current_key = self.metric_options[label]
 
         # Show/Hide Source Spinner
-        self.source_spin.setVisible(self.current_key == "induced_accel_source")
+        is_induced = self.current_key == "induced_accel_source"
+        self.source_spin.setVisible(is_induced)
+        self.source_label.setVisible(is_induced)
 
         # Update recorder config if needed
         self._update_recorder_config()
