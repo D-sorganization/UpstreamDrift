@@ -222,15 +222,16 @@ class VideoPosePipeline:
             Registration result with fitted parameters
         """
         if self.mapper is None:
-            self.mapper = MarkerToModelMapper()
+            # Import here to avoid circular imports
+            from shared.python.marker_to_model_mapper import MarkerToModelMapper
+
+            self.mapper = MarkerToModelMapper(model_path)
 
         # Convert pose keypoints to marker format
         markers_data = self._convert_poses_to_markers(pose_results)
 
-        # Perform registration
-        registration_result = self.mapper.register_markers_to_model(
-            markers_data, model_path
-        )
+        # Perform registration (using correct method name)
+        registration_result = self.mapper.fit_markers_to_model(markers_data)
 
         return registration_result
 
@@ -257,13 +258,17 @@ class VideoPosePipeline:
 
             # Process frame
             try:
-                result = self.estimator.estimate_from_image(frame)
-                result.timestamp = frame_idx / fps
-                results.append(result)
-                processed_count += 1
+                if self.estimator is not None:
+                    result = self.estimator.estimate_from_image(frame)
+                    result.timestamp = frame_idx / fps
+                    results.append(result)
+                    processed_count += 1
 
-                if processed_count % 100 == 0:
-                    logger.info(f"Processed {processed_count} frames")
+                    if processed_count % 100 == 0:
+                        logger.info(f"Processed {processed_count} frames")
+                else:
+                    logger.error("Estimator not initialized")
+                    break
 
             except Exception as e:
                 logger.warning(f"Failed to process frame {frame_idx}: {e}")
@@ -313,7 +318,7 @@ class VideoPosePipeline:
             return True
 
         # Calculate mean and std for each joint angle
-        joint_stats = {}
+        joint_stats: dict[str, list[float]] = {}
         for other_result in all_results:
             for joint_name, angle in other_result.joint_angles.items():
                 if joint_name not in joint_stats:
@@ -346,10 +351,10 @@ class VideoPosePipeline:
         confidences = [r.confidence for r in all_results]
 
         metrics = {
-            "average_confidence": np.mean(confidences),
-            "min_confidence": np.min(confidences),
-            "max_confidence": np.max(confidences),
-            "std_confidence": np.std(confidences),
+            "average_confidence": float(np.mean(confidences)),
+            "min_confidence": float(np.min(confidences)),
+            "max_confidence": float(np.max(confidences)),
+            "std_confidence": float(np.std(confidences)),
             "valid_frame_ratio": len(filtered_results) / len(all_results),
             "total_frames": len(all_results),
             "valid_frames": len(filtered_results),
@@ -402,12 +407,16 @@ class VideoPosePipeline:
 
             # Export using output manager
             output_path = output_dir / f"{base_name}_poses.{self.config.output_format}"
-            self.output_manager.export_data(data_to_export, output_path)
+            self.output_manager.save_simulation_results(
+                data_to_export, str(output_path)
+            )
 
         # Export quality metrics separately
         if self.config.export_quality_metrics:
             metrics_path = output_dir / f"{base_name}_quality.json"
-            self.output_manager.export_data(result.quality_metrics, metrics_path)
+            self.output_manager.save_simulation_results(
+                result.quality_metrics, str(metrics_path)
+            )
 
     def _export_batch_summary(
         self, results: list[VideoProcessingResult], output_dir: Path
@@ -442,5 +451,5 @@ class VideoPosePipeline:
         }
 
         summary_path = output_dir / "batch_summary.json"
-        self.output_manager.export_data(summary, summary_path)
+        self.output_manager.save_simulation_results(summary, str(summary_path))
         logger.info(f"Batch summary exported to: {summary_path}")

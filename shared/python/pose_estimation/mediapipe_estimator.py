@@ -162,7 +162,10 @@ class MediaPipeEstimator(PoseEstimator):
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         # Process the image
-        results = self.pose_detector.process(rgb_image)
+        if self.pose_detector is not None:
+            results = self.pose_detector.process(rgb_image)
+        else:
+            raise RuntimeError("MediaPipe pose detector not initialized")
 
         if results.pose_landmarks is None:
             # No pose detected
@@ -172,8 +175,8 @@ class MediaPipeEstimator(PoseEstimator):
 
         # Extract landmarks
         landmarks = results.pose_landmarks.landmark
-        keypoints_3d = {}
-        keypoints_2d = {}
+        keypoints_3d: dict[str, np.ndarray[Any, Any]] = {}
+        keypoints_2d: dict[str, np.ndarray[Any, Any]] = {}
 
         for idx, landmark in enumerate(landmarks):
             landmark_name = self.LANDMARK_MAP.get(idx, f"landmark_{idx}")
@@ -186,20 +189,26 @@ class MediaPipeEstimator(PoseEstimator):
             )
 
         # Apply temporal smoothing if enabled
+        smoothed_keypoints_3d: dict[str, np.ndarray[Any, Any]] | None = None
         if self.enable_temporal_smoothing:
-            keypoints_3d = self._apply_temporal_smoothing(keypoints_3d)
+            smoothed_keypoints_3d = self._apply_temporal_smoothing(keypoints_3d)
+
+        # Use smoothed keypoints if available, otherwise original
+        final_keypoints_3d = (
+            smoothed_keypoints_3d if smoothed_keypoints_3d is not None else keypoints_3d
+        )
 
         # Convert keypoints to joint angles
-        joint_angles = self._keypoints_to_joint_angles(keypoints_3d)
+        joint_angles = self._keypoints_to_joint_angles(final_keypoints_3d)
 
         # Calculate overall confidence
-        confidence = np.mean([landmark.visibility for landmark in landmarks])
+        confidence = float(np.mean([landmark.visibility for landmark in landmarks]))
 
         return PoseEstimationResult(
             joint_angles=joint_angles,
             confidence=confidence,
             timestamp=time.time(),
-            raw_keypoints={"3d": keypoints_3d, "2d": keypoints_2d},
+            raw_keypoints=final_keypoints_3d,  # Use only 3D keypoints to match expected type
         )
 
     def estimate_from_video(self, video_path: Path) -> list[PoseEstimationResult]:
