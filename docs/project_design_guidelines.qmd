@@ -1,8 +1,8 @@
 ---
-title: "Golf Modeling App — Mission & Required Features"
-subtitle: "A living mission statement and acceptance checklist"
-author: "Project Team"
-date: "2026-01-08"
+title: "Golf Modeling Suite — Professional Platform Design Guidelines"
+subtitle: "Mission, architecture, and standards for customer-facing biomechanical analysis platform"
+author: "Golf Modeling Suite Team"
+date: "2026-01-12"
 format:
   html:
     toc: true
@@ -20,11 +20,118 @@ execute:
   message: false
 ---
 
-## Mission (Non‑Negotiable)
+## Mission & Vision (Updated for Professional Market)
 
-We are building a research‑grade platform to model the golf swing as a constrained, redundant, hybrid multibody system. This is not an animation tool, a curve‑fit engine, or a coaching dashboard. The app must enable physically faithful simulation, cross‑engine verification, and causal interpretation.
+### Core Mission
 
-**Prime directive:** If a capability does not improve physical fidelity, interpretability, or reproducibility, it does not belong in the product.
+We are building a **professional-grade biomechanical analysis platform** that democratizes access to research-quality golf swing modeling. Our platform bridges the gap between $50K+ laboratory equipment and consumer-grade apps by providing:
+
+- **Research-grade physics simulation** across multiple validated engines
+- **Video-based pose estimation** that eliminates expensive motion capture requirements  
+- **Professional API and cloud integration** for modern workflow integration
+- **Cross-engine validation** ensuring scientific reproducibility
+
+**Prime directive:** Every feature must advance either **physical fidelity**, **accessibility**, or **professional usability**. We are not building another coaching app—we are creating the industry standard for biomechanical golf analysis.
+
+### Target Markets (Professional Focus)
+
+1. **Research Institutions** - Universities and labs requiring validated biomechanical analysis
+2. **Equipment Manufacturers** - Club and equipment companies needing R&D simulation tools
+3. **Professional Coaches** - High-level instructors seeking objective swing analysis
+4. **Sports Medicine** - Clinicians analyzing injury risk and movement patterns
+5. **Golf Facilities** - Premium facilities offering advanced fitting and instruction
+
+### Competitive Positioning
+
+| Feature | TrackMan | Sportsbox AI | GEARS Golf | **Golf Modeling Suite** |
+|---------|----------|--------------|------------|-------------------------|
+| Ball flight | ✅ | ❌ | ✅ | ✅ **Physics-based** |
+| Video analysis | ❌ | ✅ | ✅ | ✅ **Multi-estimator** |
+| Biomechanics | Basic | Good | Elite | ✅ **Research-grade** |
+| Multi-physics | ❌ | ❌ | ❌ | ✅ **5 engines** |
+| Open source | ❌ | ❌ | ❌ | ✅ **Transparent** |
+| API access | Limited | ❌ | ❌ | ✅ **Full REST API** |
+| Price point | $20K-$70K | $100/yr | $40K+ | **Free-$500/mo** |
+
+## Professional Platform Architecture
+
+### Tier 1: Core Platform (Always Included)
+
+#### Standardized Model Library
+- **Standard Humanoid URDF**: High-fidelity human model with meshes (human-gazebo based)
+- **Golf Club Library**: Procedurally generated clubs with realistic specifications
+- **Cross-Engine Compatibility**: All models validated across MuJoCo, Drake, Pinocchio
+- **Automatic Model Management**: Download, caching, and validation system
+
+#### Video-Based Pose Estimation
+- **MediaPipe Integration**: Production-ready pose estimation with temporal smoothing
+- **Quality Assessment**: Confidence scoring, outlier detection, batch processing
+- **URDF Parameter Fitting**: Bridge video analysis to physics simulation
+- **Multi-Camera Support**: Calibration and synchronization for multiple viewpoints
+
+#### Ball Flight Physics (Critical Differentiator)
+- **Magnus Effect Simulation**: Spin-induced forces for realistic ball trajectories
+- **Environmental Factors**: Wind, air density, temperature effects
+- **Landing Analysis**: Carry distance, dispersion patterns, impact angles
+- **Shot Tracer Visualization**: Professional-grade trajectory rendering
+
+#### Professional API Layer
+- **FastAPI Server**: REST endpoints for all physics engines and analysis
+- **Async Processing**: Background simulation and video analysis
+- **Authentication Framework**: Token-based access control for enterprise use
+- **Cloud Integration**: S3/Azure storage, containerized deployment
+
+### Tier 2: Physics Engine Modules (User Selectable)
+
+#### MuJoCo Engine (Core - Always Included)
+- **Contact Dynamics**: Advanced collision detection and response
+- **Muscle Simulation**: Integration with MyoSuite for realistic muscle models
+- **Constraint Handling**: Closed-chain dynamics for two-handed golf grip
+- **Performance**: Optimized for real-time simulation
+
+#### Drake Engine (Optional Module)
+- **Trajectory Optimization**: Find optimal swing paths using mathematical optimization
+- **System Analysis**: Stability, controllability, and observability analysis
+- **Manipulation Planning**: Advanced motion planning algorithms
+- **Symbolic Computation**: Analytical derivatives and symbolic manipulation
+
+#### Pinocchio Engine (Optional Module)
+- **High-Performance Dynamics**: Fastest rigid body dynamics computation
+- **Analytical Derivatives**: Exact Jacobians and Hessians for optimization
+- **Constrained Systems**: Efficient handling of kinematic loops
+- **Integration**: Works with Crocoddyl for optimal control
+
+#### MyoSuite Engine (Optional Module)
+- **Realistic Muscle Models**: 290-muscle full-body human simulation
+- **Neural Control**: Integration with reinforcement learning frameworks
+- **Physiological Accuracy**: Hill-type muscle models with activation dynamics
+- **Research Applications**: Ideal for motor control and learning studies
+
+#### OpenSim Engine (Optional Module)
+- **Biomechanical Standards**: Industry-standard musculoskeletal modeling
+- **Clinical Integration**: Compatible with existing biomechanics workflows
+- **Muscle Analysis**: Detailed muscle force and activation analysis
+- **Validation**: Extensively validated against experimental data
+
+### Tier 3: Professional Features
+
+#### Advanced Analysis Suite
+- **Cross-Engine Validation**: Compare results across multiple physics engines
+- **Drift-Control Decomposition**: Separate passive dynamics from active control (ZTCF/ZVCF)
+- **Induced Acceleration Analysis**: Identify which muscles contribute to specific motions
+- **Statistical Analysis**: PCA, correlation analysis, and advanced statistics
+
+#### Professional Visualization
+- **Multi-View Rendering**: Synchronized camera angles (face-on, down-the-line, overhead)
+- **Force Vector Overlays**: Visualize joint torques and reaction forces
+- **Swing Plane Analysis**: Functional swing plane computation and visualization
+- **Export Capabilities**: High-resolution images, videos, and interactive 3D models
+
+#### Enterprise Integration
+- **Database Connectivity**: PostgreSQL, MongoDB integration for large datasets
+- **User Management**: Multi-tenant architecture with role-based access
+- **Audit Logging**: Complete audit trail for regulatory compliance
+- **Custom Branding**: White-label options for equipment manufacturers
 
 ## Core Principles
 
