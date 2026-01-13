@@ -10,7 +10,7 @@ from shared.python.multi_muscle import AntagonistPair, MuscleGroup
 class TestMultiMuscle(unittest.TestCase):
     """Test suite for multi-muscle coordination."""
 
-    def setUp(self):
+    def setUp(self) -> None:
         """Set up test fixtures."""
         self.mock_muscle = MagicMock(spec=HillMuscleModel)
         self.mock_muscle.params = MuscleParameters(F_max=100.0, l_opt=0.1, l_slack=0.2)
@@ -19,7 +19,7 @@ class TestMultiMuscle(unittest.TestCase):
             50.0  # Constant force for simplicity
         )
 
-    def test_muscle_group_add_muscle(self):
+    def test_muscle_group_add_muscle(self) -> None:
         """Test adding muscles to a group."""
         group = MuscleGroup("flexors")
         group.add_muscle("biceps", self.mock_muscle, moment_arm=0.05)
@@ -28,7 +28,7 @@ class TestMultiMuscle(unittest.TestCase):
         self.assertIn("biceps", group.attachments)
         self.assertEqual(group.attachments["biceps"].moment_arm, 0.05)
 
-    def test_muscle_group_compute_net_torque(self):
+    def test_muscle_group_compute_net_torque(self) -> None:
         """Test computing net torque for a group."""
         group = MuscleGroup("flexors")
         group.add_muscle("muscle1", self.mock_muscle, moment_arm=0.05)
@@ -59,7 +59,7 @@ class TestMultiMuscle(unittest.TestCase):
         call2_state = calls[1][0][0]
         self.assertEqual(call2_state.activation, 0.8)
 
-    def test_antagonist_pair_compute_net_torque(self):
+    def test_antagonist_pair_compute_net_torque(self) -> None:
         """Test torque computation for antagonist pair."""
         # Agonist group
         agonist = MuscleGroup("agonist")
@@ -79,7 +79,7 @@ class TestMultiMuscle(unittest.TestCase):
         # Net = 2.5 + (-2.0) = 0.5
         self.assertAlmostEqual(net_torque, 0.5)
 
-    def test_factory_function(self):
+    def test_factory_function(self) -> None:
         """Test the elbow muscle system factory."""
         from shared.python.multi_muscle import create_elbow_muscle_system
 

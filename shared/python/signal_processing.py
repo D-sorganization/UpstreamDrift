@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import cast
 
 import numpy as np
-from scipy import signal, fft
+from scipy import fft, signal
 from scipy.signal import (
     correlate,
     correlation_lags,
