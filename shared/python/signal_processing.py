@@ -345,3 +345,106 @@ def compute_time_shift(
     # So we must negate the result.
 
     return float(-lag_sample / fs)
+
+
+def compute_dtw_distance(
+    series1: np.ndarray,
+    series2: np.ndarray,
+    window: int | None = None,
+) -> float:
+    """Compute Dynamic Time Warping (DTW) distance between two sequences.
+
+    Uses Euclidean distance as the local cost measure.
+    Implements Sakoe-Chiba band constraint if window is specified.
+
+    Args:
+        series1: First sequence (1D array)
+        series2: Second sequence (1D array)
+        window: Sakoe-Chiba band width (None for no constraint)
+
+    Returns:
+        DTW distance (float)
+    """
+    n = len(series1)
+    m = len(series2)
+
+    # Cost matrix initialization
+    # Using infinity for unreachable states
+    dtw_matrix = np.full((n + 1, m + 1), np.inf)
+    dtw_matrix[0, 0] = 0.0
+
+    # Sakoe-Chiba band constraint
+    w = window if window is not None else max(n, m)
+
+    for i in range(1, n + 1):
+        # Determine band limits
+        j_start = max(1, i - w)
+        j_end = min(m + 1, i + w + 1)
+
+        for j in range(j_start, j_end):
+            cost = (series1[i - 1] - series2[j - 1]) ** 2
+            # Take minimum of (match, insertion, deletion)
+            last_min = min(
+                dtw_matrix[i - 1, j],  # Insertion
+                dtw_matrix[i, j - 1],  # Deletion
+                dtw_matrix[i - 1, j - 1],  # Match
+            )
+            dtw_matrix[i, j] = cost + last_min
+
+    return float(np.sqrt(dtw_matrix[n, m]))
+
+
+def compute_dtw_path(
+    series1: np.ndarray,
+    series2: np.ndarray,
+    window: int | None = None,
+) -> tuple[float, list[tuple[int, int]]]:
+    """Compute DTW distance and optimal warping path.
+
+    Args:
+        series1: First sequence
+        series2: Second sequence
+        window: Sakoe-Chiba band width
+
+    Returns:
+        Tuple (distance, path). Path is list of (i, j) indices.
+    """
+    n = len(series1)
+    m = len(series2)
+    dtw_matrix = np.full((n + 1, m + 1), np.inf)
+    dtw_matrix[0, 0] = 0.0
+
+    w = window if window is not None else max(n, m)
+
+    for i in range(1, n + 1):
+        j_start = max(1, i - w)
+        j_end = min(m + 1, i + w + 1)
+        for j in range(j_start, j_end):
+            cost = (series1[i - 1] - series2[j - 1]) ** 2
+            dtw_matrix[i, j] = cost + min(
+                dtw_matrix[i - 1, j],
+                dtw_matrix[i, j - 1],
+                dtw_matrix[i - 1, j - 1],
+            )
+
+    distance = float(np.sqrt(dtw_matrix[n, m]))
+
+    # Backtrack to find path
+    path = []
+    i, j = n, m
+    while i > 0 and j > 0:
+        path.append((i - 1, j - 1))
+        # Find predecessor
+        min_prev = min(
+            dtw_matrix[i - 1, j], dtw_matrix[i, j - 1], dtw_matrix[i - 1, j - 1]
+        )
+        if min_prev == dtw_matrix[i - 1, j - 1]:
+            i -= 1
+            j -= 1
+        elif min_prev == dtw_matrix[i - 1, j]:
+            i -= 1
+        else:
+            j -= 1
+    path.reverse()
+
+    return distance, path
