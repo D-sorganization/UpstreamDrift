@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive assessment framework (A-O) with 15 quality categories
 - MyoSuite integration for musculoskeletal modeling
 - OpenSim tutorials and example scripts
+- AGENTS.md restored to root with Golf-specific guidelines
+- Critical files protection CI workflow (prevents accidental deletion)
+- Expanded pre-commit hooks (trailing whitespace, YAML validation, large file detection)
 
 ### Changed
 
@@ -19,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Removed broken GolfingRobot.png reference
 - Cleaned 30+ debris files from root directory
 - Updated .gitignore to prevent future accumulation
+- Moved utility scripts from root to scripts/ directory
+- Archived pre-Jan11-2026 assessment documents
 
 ### Fixed
 
