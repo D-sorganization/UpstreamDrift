@@ -36,8 +36,8 @@ def test_initialization(launcher):
 
 def test_mainloop(launcher):
     """Test mainloop execution."""
-    # Mock GolfLauncher for lazy loading
-    with patch("launchers.unified_launcher.GolfLauncher") as MockGolfLauncher:
+    # Mock GolfLauncher at its source for lazy loading
+    with patch("launchers.golf_launcher.GolfLauncher") as MockGolfLauncher:
         mock_golf_launcher = MagicMock()
         MockGolfLauncher.return_value = mock_golf_launcher
         launcher.app.exec.return_value = 0
