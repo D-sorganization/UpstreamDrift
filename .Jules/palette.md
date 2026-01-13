@@ -17,3 +17,6 @@
 ## 2026-06-15 - [Search Bar in Grid Layouts]
 **Learning:** When displaying a large grid of items (like models or apps), users struggle to find specific items quickly without a search function. Adding a real-time filter improves discoverability significantly. However, implementing it in a grid layout requires clearing and rebuilding the grid to avoid gaps, rather than just hiding widgets.
 **Action:** When adding search filtering to a `QGridLayout`, implement a robust rebuild method that re-flows the visible items into the grid coordinates from scratch, ensuring a dense, gap-free layout for the filtered results.
+## 2024-05-23 - Web Button Feedback Race Conditions
+**Learning:** When implementing temporary UI feedback (like 'Copied!' status), relying on capturing and restoring `textContent` is dangerous if the user can trigger the action again during the feedback window. It can lead to the temporary state being captured as the 'original' state, corrupting the UI.
+**Action:** Always hardcode the restoration value or check current state before applying feedback in simple UI interactions, rather than dynamically capturing state.
