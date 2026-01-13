@@ -245,9 +245,14 @@ def compute_cwt(
         # Ensure we stay within bounds (though with correct padding, it should be fine)
         if start_idx + n_data <= len(conv_res):
             cwt_matrix[i, :] = conv_res[start_idx : start_idx + n_data]
-        else:
-             # Fallback (should not happen with correct logic)
-             cwt_matrix[i, :] = conv_res[:n_data]
+        # This branch is expected to be unreachable if the padding/FFT sizing logic is correct.
+        # Raise an error rather than silently changing the alignment, so any upstream issue
+        # with convolution length or padding is detected during development.
+        raise RuntimeError(
+            "Unexpected CWT convolution length: "
+            f"start_idx + n_data = {start_idx + n_data}, len(conv_res) = {len(conv_res)}. "
+            "Check wavelet padding and FFT size logic."
+        )
 
         # Normalize by 1/sqrt(s)
         cwt_matrix[i, :] /= np.sqrt(s)

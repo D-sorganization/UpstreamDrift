@@ -12,7 +12,7 @@ Critical gap identified in upgrade assessment - without this, not a complete gol
 
 import logging
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -290,7 +290,6 @@ class BallFlightSimulator:
                     magnus_acc = magnus_acc_mag * cross_product / cross_magnitude
                     total_acc += magnus_acc
 
-        from typing import cast
         return cast(np.ndarray, total_acc)
 
     def _calculate_forces(
