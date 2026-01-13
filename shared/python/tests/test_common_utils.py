@@ -1,5 +1,6 @@
 from pathlib import Path
 from unittest.mock import patch
+from typing import Generator
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -26,12 +27,12 @@ matplotlib.use("Agg")
 class TestCommonUtils:
 
     @pytest.fixture
-    def mock_output_root(self, tmp_path):
+    def mock_output_root(self, tmp_path: Path) -> Generator[Path, None, None]:
         """Mock OUTPUT_ROOT in shared.python"""
         with patch("shared.python.OUTPUT_ROOT", tmp_path):
             yield tmp_path
 
-    def test_ensure_output_dir(self, mock_output_root):
+    def test_ensure_output_dir(self, mock_output_root: Path) -> None:
         engine_name = "test_engine"
         path = ensure_output_dir(engine_name)
 
@@ -42,7 +43,7 @@ class TestCommonUtils:
         assert subdir_path.exists()
         assert subdir_path == mock_output_root / engine_name / "run_1"
 
-    def test_load_golf_data_csv(self, tmp_path):
+    def test_load_golf_data_csv(self, tmp_path: Path) -> None:
         df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
         csv_path = tmp_path / "test.csv"
         df.to_csv(csv_path, index=False)
@@ -50,7 +51,7 @@ class TestCommonUtils:
         loaded_df = load_golf_data(csv_path)
         pd.testing.assert_frame_equal(df, loaded_df)
 
-    def test_load_golf_data_json(self, tmp_path):
+    def test_load_golf_data_json(self, tmp_path: Path) -> None:
         df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
         json_path = tmp_path / "test.json"
         df.to_json(json_path, orient="records", indent=2)
@@ -58,13 +59,13 @@ class TestCommonUtils:
         loaded_df = load_golf_data(json_path)
         pd.testing.assert_frame_equal(df, loaded_df)
 
-    def test_load_golf_data_unsupported(self, tmp_path):
+    def test_load_golf_data_unsupported(self, tmp_path: Path) -> None:
         txt_path = tmp_path / "test.txt"
         txt_path.touch()
         with pytest.raises(ValueError, match="Unsupported file format"):
             load_golf_data(txt_path)
 
-    def test_save_golf_data(self, tmp_path):
+    def test_save_golf_data(self, tmp_path: Path) -> None:
         df = pd.DataFrame({"a": [1, 2], "b": [3, 4]})
 
         # Test CSV
@@ -83,7 +84,7 @@ class TestCommonUtils:
         with pytest.raises(ValueError, match="Unsupported format"):
             save_golf_data(df, tmp_path / "out.xyz", format="xyz")
 
-    def test_standardize_joint_angles(self):
+    def test_standardize_joint_angles(self) -> None:
         angles = np.array([[0.1, 0.2], [0.2, 0.3], [0.3, 0.4]])
         df = standardize_joint_angles(angles, time_step=0.1)
 
@@ -94,12 +95,12 @@ class TestCommonUtils:
         expected_time = np.array([0.0, 0.1, 0.2])
         np.testing.assert_allclose(df["time"].to_numpy(), expected_time)
 
-    def test_standardize_joint_angles_custom_names(self):
+    def test_standardize_joint_angles_custom_names(self) -> None:
         angles = np.array([[0.1], [0.2]])
         df = standardize_joint_angles(angles, angle_names=["hip"], time_step=1.0)
         assert list(df.columns) == ["hip", "time"]
 
-    def test_plot_joint_trajectories(self, tmp_path):
+    def test_plot_joint_trajectories(self, tmp_path: Path) -> None:
         df = pd.DataFrame({"time": [0, 1, 2], "joint1": [0, 1, 2], "joint2": [2, 1, 0]})
 
         fig = plot_joint_trajectories(df, title="Test Plot")
@@ -112,7 +113,7 @@ class TestCommonUtils:
 
         plt.close(fig)
 
-    def test_convert_units(self):
+    def test_convert_units(self) -> None:
         assert np.isclose(convert_units(180, "deg", "rad"), np.pi)
         assert np.isclose(convert_units(np.pi, "rad", "deg"), 180.0)
 
@@ -125,14 +126,14 @@ class TestCommonUtils:
         with pytest.raises(ValueError):
             convert_units(1.0, "kg", "lbs")
 
-    def test_get_shared_urdf_path(self):
+    def test_get_shared_urdf_path(self) -> None:
         # This test relies on the actual repo structure or needs complex mocking.
         # We'll just verify it returns a Path or None
         path = get_shared_urdf_path()
         if path:
             assert isinstance(path, Path)
 
-    def test_exceptions_import(self):
+    def test_exceptions_import(self) -> None:
         # Just verify we can instantiate them
         err = DataFormatError("test")
         assert str(err) == "test"
