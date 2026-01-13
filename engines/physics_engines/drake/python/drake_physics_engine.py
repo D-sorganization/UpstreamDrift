@@ -231,7 +231,8 @@ class DrakePhysicsEngine(PhysicsEngine):
         # Drake has actuators.
         names = []
         for i in range(self.plant.num_actuators()):
-            act = self.plant.get_joint_actuator(pydrake.multibody.tree.JointActuatorIndex(i))
+            actuator_idx = pydrake.multibody.tree.JointActuatorIndex(i)
+            act = self.plant.get_joint_actuator(actuator_idx)
             names.append(act.name())
 
         if not names:

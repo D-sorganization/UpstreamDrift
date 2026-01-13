@@ -202,6 +202,13 @@ exclude = [
     "shared/models/myosuite/myo_sim/",
 ]
 
+# Disable untyped definition checks for test files
+[[tool.mypy.overrides]]
+module = [
+    "tests.*",
+    "*.tests.*"
+]
+disallow_untyped_defs = false
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -223,6 +230,7 @@ testpaths = [
     "shared/python/tests",
     "engines/*/python/tests",
     "engines/*/tests",
+    "engines/physics_engines/*/python/*/tests"
 ]
 python_files = [
     "test_*.py",

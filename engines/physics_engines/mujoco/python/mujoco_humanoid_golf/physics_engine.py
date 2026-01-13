@@ -161,37 +161,11 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         """Get list of joint names."""
         if self.model is None:
             return []
-<<<<<<< HEAD
-
-        names = []
-        for i in range(self.model.nu):  # Use actuators (nu) or joints (nq)?
-            # Usually users are interested in actuated joints for torques.
-            # But the state is q/v.
-            # Let's return joint names corresponding to qvel (dof).
-            # This is complex in MuJoCo because names are on bodies/joints, not DOFs.
-            # However, for controls (nu), we usually have actuators.
-            # Let's try to get actuator names first.
-            name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_ACTUATOR, i)
-            if not name:
-                name = f"actuator_{i}"
-            names.append(name)
-
-        # If no actuators, fallback to joint names (which map to q/v)
-        if not names:
-             for i in range(self.model.njnt):
-                name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, i)
-                if not name:
-                    name = f"joint_{i}"
-                names.append(name)
-
-        return names
-=======
         return [
             mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, i)
             or f"Joint {i}"
             for i in range(self.model.njnt)
         ]
->>>>>>> origin/palette-live-plot-ux-8834889119636346491
 
     # -------- Section 1: Core Dynamics Engine Capabilities --------
 
