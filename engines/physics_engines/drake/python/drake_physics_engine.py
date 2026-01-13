@@ -236,10 +236,10 @@ class DrakePhysicsEngine(PhysicsEngine):
             names.append(act.name())
 
         if not names:
-             # Fallback to bodies/joints? Drake joints can be complex.
-             # Just return generic names based on velocities if no actuators.
-             for i in range(self.plant.num_velocities()):
-                 names.append(f"dof_{i}")
+            # If there are no actuators defined, fall back to generic names
+            # derived from the number of generalized velocities (dofs).
+            for i in range(self.plant.num_velocities()):
+                names.append(f"dof_{i}")
 
         return names
 
