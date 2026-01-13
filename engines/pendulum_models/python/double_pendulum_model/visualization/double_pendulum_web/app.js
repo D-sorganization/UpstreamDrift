@@ -333,6 +333,33 @@ function announce(message) {
   showToast(message);
 }
 
+let shareFeedbackTimeout = null;
+
+function triggerShareFeedback() {
+  const btn = document.getElementById('share');
+  const label = btn.querySelector('span');
+  const iconShare = document.getElementById('icon-share');
+  const iconCheck = document.getElementById('icon-share-check');
+
+  if (iconShare && iconCheck) {
+    // Clear existing timeout to prevent race conditions on rapid clicks
+    if (shareFeedbackTimeout) {
+      clearTimeout(shareFeedbackTimeout);
+    }
+
+    iconShare.classList.add('hidden');
+    iconCheck.classList.remove('hidden');
+    label.textContent = 'Copied!';
+
+    shareFeedbackTimeout = setTimeout(() => {
+      iconShare.classList.remove('hidden');
+      iconCheck.classList.add('hidden');
+      label.textContent = 'Share';
+      shareFeedbackTimeout = null;
+    }, 2000);
+  }
+}
+
 function copyShareLink() {
   const inputs = document.querySelectorAll('.grid input');
   const params = new URLSearchParams();
@@ -350,6 +377,7 @@ function copyShareLink() {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(newUrl).then(() => {
       announce('Link copied to clipboard');
+      triggerShareFeedback();
     }).catch(() => {
       fallbackCopy(newUrl);
     });
@@ -370,6 +398,7 @@ function fallbackCopy(text) {
     document.body.removeChild(textArea);
     if (successful) {
       announce('Link copied to clipboard');
+      triggerShareFeedback();
       return;
     }
   } catch (err) {
