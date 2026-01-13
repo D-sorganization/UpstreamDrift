@@ -7,6 +7,7 @@ This module tests critical security implementations:
 - Secure credential storage
 """
 
+import logging
 import secrets
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
@@ -249,7 +250,6 @@ class TestPasswordSecurity:
 
     def test_password_not_logged(self) -> None:
         """Test that passwords are never logged in plaintext."""
-        import logging
         from io import StringIO
 
         from api import database
@@ -280,8 +280,9 @@ class TestPasswordSecurity:
                     # This should generate a random password but NOT log it
                     try:
                         database.init_db()
-                    except Exception:
-                        pass  # Ignore errors, we just want to check logging
+                    except Exception as e:
+                        # Catch and log expected errors for this specific logging test
+                        logging.getLogger(__name__).debug(f"Caught expected init_db error: {e}")
 
             # Get logged output
             log_output = log_buffer.getvalue()
