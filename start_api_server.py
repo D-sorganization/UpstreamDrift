@@ -46,10 +46,15 @@ def setup_environment() -> tuple[str, int]:
         os.environ["DATABASE_URL"] = f"sqlite:///{db_path}"
         logger.info("📁 Using SQLite database: %s", db_path)
 
-    # Set default secret key if not specified (for development only)
-    if not os.getenv("SECRET_KEY"):
-        os.environ["SECRET_KEY"] = "dev-secret-key-change-in-production"
-        logger.info("🔑 Using default secret key (change for production)")
+    # SECURITY: Check for secret key environment variable
+    if not os.getenv("GOLF_API_SECRET_KEY") and not os.getenv("SECRET_KEY"):
+        logger.warning(
+            "⚠️  SECURITY: No GOLF_API_SECRET_KEY or SECRET_KEY environment variable set!"
+        )
+        logger.warning("   API authentication will fail. Set one for production.")
+        logger.warning(
+            "   Example: export GOLF_API_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
+        )
 
     # Set default host and port
     host = os.getenv("API_HOST", "0.0.0.0")
@@ -88,9 +93,15 @@ def start_server(host: str, port: int) -> None:
     logger.info("   Port: %d", port)
     logger.info("   API Documentation: http://localhost:%d/docs", port)
     logger.info("   Admin Interface: http://localhost:%d/redoc", port)
-    logger.info("📝 Default admin user:")
+    logger.info("📝 Admin credentials:")
     logger.info("   Email: admin@golfmodelingsuite.com")
-    logger.info("   Password: admin123")
+    if os.getenv("GOLF_ADMIN_PASSWORD"):
+        logger.info("   Password: (set via GOLF_ADMIN_PASSWORD environment variable)")
+    else:
+        logger.warning(
+            "   ⚠️  GOLF_ADMIN_PASSWORD not set - a random password will be generated."
+        )
+        logger.warning("   See server logs for temporary password.")
     logger.info("🛑 Press Ctrl+C to stop the server")
 
     try:

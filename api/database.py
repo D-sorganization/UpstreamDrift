@@ -50,6 +50,11 @@ def get_db() -> Generator[Session, None, None]:
 
 def init_db() -> None:
     """Initialize database with tables and default data."""
+    import logging
+    import secrets
+
+    logger = logging.getLogger(__name__)
+
     create_tables()
 
     # Create default admin user if none exists
@@ -60,9 +65,22 @@ def init_db() -> None:
 
         admin_user = db.query(User).filter(User.role == UserRole.ADMIN.value).first()
         if not admin_user:
+            # SECURITY: Get password from environment variable
+            admin_password = os.getenv("GOLF_ADMIN_PASSWORD")
+
+            if not admin_password:
+                # Generate a secure random password if not set
+                admin_password = secrets.token_urlsafe(16)
+                logger.warning(
+                    "SECURITY: No GOLF_ADMIN_PASSWORD environment variable set. "
+                    "Generated temporary admin password. Set GOLF_ADMIN_PASSWORD "
+                    "environment variable for production."
+                )
+                logger.info(f"Temporary admin password: {admin_password}")
+
             admin_user = User(
                 email="admin@golfmodelingsuite.com",
-                hashed_password=security_manager.hash_password("admin123"),
+                hashed_password=security_manager.hash_password(admin_password),
                 full_name="System Administrator",
                 role=UserRole.ADMIN.value,
                 is_active=True,
@@ -70,6 +88,7 @@ def init_db() -> None:
             )
             db.add(admin_user)
             db.commit()
+            logger.info("Admin user created successfully")
 
     finally:
         db.close()
