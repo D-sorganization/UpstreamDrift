@@ -39,15 +39,16 @@ import logging
 import os
 import secrets
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from passlib.context import CryptContext
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 
 from api.auth.models import APIKey, User
 
@@ -102,7 +103,7 @@ Examples:
     return parser.parse_args()
 
 
-def get_database_session(database_url: str | None = None):
+def get_database_session(database_url: str | None = None) -> Session:
     """Create database session.
 
     Args:
@@ -114,13 +115,13 @@ def get_database_session(database_url: str | None = None):
     if database_url is None:
         database_url = os.getenv("DATABASE_URL", "sqlite:///./golf_modeling_suite.db")
 
-    logger.info(f"Connecting to database: {database_url.split('@')[-1]}")  # Hide password
+    logger.info(
+        f"Connecting to database: {database_url.split('@')[-1]}"
+    )  # Hide password
 
     # Create engine
     if database_url.startswith("sqlite"):
-        engine = create_engine(
-            database_url, connect_args={"check_same_thread": False}
-        )
+        engine = create_engine(database_url, connect_args={"check_same_thread": False})
     else:
         engine = create_engine(database_url, pool_pre_ping=True)
 
@@ -139,8 +140,8 @@ def generate_new_api_key() -> str:
 
 
 def migrate_api_keys(
-    db_session, dry_run: bool = False
-) -> list[dict[str, str | int]]:
+    db_session: Session, dry_run: bool = False
+) -> list[dict[str, Any]]:
     """Migrate all API keys from SHA256 to bcrypt.
 
     Args:
@@ -195,9 +196,9 @@ def migrate_api_keys(
         if not dry_run:
             # Update database record
             api_key_record.key_hash = new_key_hash
-            logger.info(f"  ✓ Updated key hash to bcrypt")
+            logger.info("  ✓ Updated key hash to bcrypt")
         else:
-            logger.info(f"  [DRY RUN] Would update key hash to bcrypt")
+            logger.info("  [DRY RUN] Would update key hash to bcrypt")
 
     if not dry_run:
         # Commit all changes
@@ -224,7 +225,7 @@ def save_migration_results(migrations: list[dict], output_file: str) -> None:
         # Write header
         f.write("=" * 80 + "\n")
         f.write("API KEY MIGRATION RESULTS\n")
-        f.write(f"Migration Date: {datetime.now(timezone.utc).isoformat()}\n")
+        f.write(f"Migration Date: {datetime.now(UTC).isoformat()}\n")
         f.write(f"Total Keys Migrated: {len(migrations)}\n")
         f.write("=" * 80 + "\n\n")
 
@@ -245,7 +246,9 @@ def save_migration_results(migrations: list[dict], output_file: str) -> None:
             f.write(f"Key Name:     {migration['key_name']}\n")
             f.write(f"User ID:      {migration['user_id']}\n")
             f.write(f"User Email:   {migration['user_email']}\n")
-            f.write(f"Status:       {'ACTIVE' if migration['is_active'] else 'INACTIVE'}\n")
+            f.write(
+                f"Status:       {'ACTIVE' if migration['is_active'] else 'INACTIVE'}\n"
+            )
             f.write(f"Created:      {migration['created_at']}\n")
             f.write(f"Old Hash:     {migration['old_hash_type']}\n")
             f.write(f"New Hash:     {migration['new_hash_type']}\n")
@@ -253,7 +256,9 @@ def save_migration_results(migrations: list[dict], output_file: str) -> None:
             f.write(f"NEW API KEY:  {migration['new_key']}\n")
             f.write("\n")
             f.write("Action Required:\n")
-            f.write(f"  1. Send this key to {migration['user_email']} via secure channel\n")
+            f.write(
+                f"  1. Send this key to {migration['user_email']} via secure channel\n"
+            )
             f.write("  2. User must update their application with new key\n")
             f.write("  3. User should test authentication\n")
             f.write("\n")
@@ -271,7 +276,7 @@ def save_migration_results(migrations: list[dict], output_file: str) -> None:
     output_path.chmod(0o600)
 
     logger.info(f"✓ Migration results saved to: {output_path.absolute()}")
-    logger.info(f"✓ File permissions set to 0600 (owner read/write only)")
+    logger.info("✓ File permissions set to 0600 (owner read/write only)")
 
 
 def main() -> int:
@@ -297,7 +302,9 @@ def main() -> int:
         if not args.dry_run:
             logger.warning("\n⚠️  WARNING: This is a ONE-WAY migration!")
             logger.warning("Old API keys will be PERMANENTLY INVALIDATED")
-            logger.warning("New keys will be generated and must be distributed to users\n")
+            logger.warning(
+                "New keys will be generated and must be distributed to users\n"
+            )
 
             response = input("Proceed with migration? (yes/no): ")
             if response.lower() != "yes":

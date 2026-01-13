@@ -62,7 +62,9 @@ def setup_environment() -> tuple[str, int]:
 
             environment = os.getenv("ENVIRONMENT", "development").lower()
             if environment == "production":
-                logger.error("Cannot start server with critical security issues in production!")
+                logger.error(
+                    "Cannot start server with critical security issues in production!"
+                )
                 sys.exit(1)
             else:
                 logger.warning("Continuing in development mode despite issues...")

@@ -8,13 +8,13 @@ This module tests critical security implementations:
 """
 
 import secrets
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
 from passlib.context import CryptContext
 
-from api.auth.models import APIKey, User, UserRole
+from api.auth.models import APIKey, User
 from api.auth.security import SecurityManager
 
 
@@ -108,9 +108,10 @@ class TestBcryptAPIKeyVerification:
     @pytest.mark.asyncio
     async def test_api_key_verification_integration(self) -> None:
         """Test full API key verification flow."""
-        from api.auth.dependencies import get_current_user_from_api_key
         from fastapi import HTTPException
         from fastapi.security import HTTPAuthorizationCredentials
+
+        from api.auth.dependencies import get_current_user_from_api_key
 
         pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -138,9 +139,7 @@ class TestBcryptAPIKeyVerification:
         mock_db.query.return_value.filter.return_value.first.return_value = mock_user
 
         # Test with correct API key
-        credentials = HTTPAuthorizationCredentials(
-            scheme="Bearer", credentials=api_key
-        )
+        credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=api_key)
 
         user = await get_current_user_from_api_key(credentials, mock_db)
         assert user == mock_user
@@ -168,7 +167,7 @@ class TestTimezoneAwareJWT:
         token = security_manager.create_access_token(data={"sub": "test_user"})
 
         # Decode token
-        import jwt
+        from jose import jwt
 
         payload = jwt.decode(
             token, security_manager.secret_key, algorithms=[security_manager.algorithm]
@@ -182,8 +181,8 @@ class TestTimezoneAwareJWT:
         assert isinstance(exp_timestamp, (int, float))
 
         # Convert to datetime and verify it's in the future
-        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
-        now = datetime.now(timezone.utc)
+        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=UTC)
+        now = datetime.now(UTC)
 
         assert exp_datetime > now, "Token expiration should be in the future"
         assert exp_datetime.tzinfo is not None, "Expiration should be timezone-aware"
@@ -196,7 +195,7 @@ class TestTimezoneAwareJWT:
         token = security_manager.create_refresh_token(data={"sub": "test_user"})
 
         # Decode token
-        import jwt
+        from jose import jwt
 
         payload = jwt.decode(
             token, security_manager.secret_key, algorithms=[security_manager.algorithm]
@@ -207,8 +206,8 @@ class TestTimezoneAwareJWT:
 
         # Check expiration is timezone-aware
         exp_timestamp = payload["exp"]
-        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
-        now = datetime.now(timezone.utc)
+        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=UTC)
+        now = datetime.now(UTC)
 
         assert exp_datetime > now
         assert exp_datetime.tzinfo is not None
@@ -225,7 +224,7 @@ class TestTimezoneAwareJWT:
         # Check for deprecated utcnow usage
         assert "datetime.utcnow()" not in source, (
             "Code should not use deprecated datetime.utcnow(). "
-            "Use datetime.now(timezone.utc) instead."
+            "Use datetime.now(datetime.UTC) instead."
         )
 
 
@@ -366,12 +365,12 @@ class TestSecurityBestPractices:
         ]
 
         for pattern in suspicious_patterns:
-            assert pattern not in security_source.lower(), (
-                f"Found suspicious pattern in security.py: {pattern}"
-            )
-            assert pattern not in dependencies_source.lower(), (
-                f"Found suspicious pattern in dependencies.py: {pattern}"
-            )
+            assert (
+                pattern not in security_source.lower()
+            ), f"Found suspicious pattern in security.py: {pattern}"
+            assert (
+                pattern not in dependencies_source.lower()
+            ), f"Found suspicious pattern in dependencies.py: {pattern}"
 
     def test_secure_random_generation(self) -> None:
         """Test that secrets module is used for random generation."""
