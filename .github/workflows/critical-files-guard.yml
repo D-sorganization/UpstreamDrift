@@ -1,0 +1,95 @@
+name: Critical Files Guard
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "AGENTS.md"
+      - "README.md"
+      - "CHANGELOG.md"
+      - "LICENSE"
+      - "pyproject.toml"
+      - "conftest.py"
+      - "launch_golf_suite.py"
+      - "setup_golf_suite.py"
+      - "start_api_server.py"
+
+jobs:
+  verify-critical-files:
+    name: Verify Critical Files Exist
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check Critical Files
+        run: |
+          echo "🔍 Verifying critical files exist at repository root..."
+
+          CRITICAL_FILES=(
+            "AGENTS.md"
+            "README.md"
+            "CHANGELOG.md"
+            "LICENSE"
+            "pyproject.toml"
+            "conftest.py"
+            "launch_golf_suite.py"
+            "setup_golf_suite.py"
+            "start_api_server.py"
+          )
+
+          MISSING_FILES=()
+
+          for file in "${CRITICAL_FILES[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ MISSING: $file"
+              MISSING_FILES+=("$file")
+            else
+              echo "✅ Found: $file"
+            fi
+          done
+
+          if [ ${#MISSING_FILES[@]} -ne 0 ]; then
+            echo ""
+            echo "🚨 ERROR: Critical files are missing!"
+            echo "The following files MUST exist at the repository root:"
+            printf '  - %s\n' "${MISSING_FILES[@]}"
+            echo ""
+            echo "These files are protected per AGENTS.md Section 2 (Critical Files)."
+            echo "If this was accidental, please restore the file(s)."
+            echo "If intentional removal is needed, discuss with repository maintainers first."
+            exit 1
+          fi
+
+          echo ""
+          echo "✅ All critical files verified!"
+
+      - name: Check for Deletion Attempts
+        run: |
+          echo "🔍 Checking for deletion attempts in this PR..."
+
+          # Get list of deleted files in this PR
+          git fetch origin ${{ github.base_ref }} --depth=1
+          DELETED=$(git diff --name-status origin/${{ github.base_ref }}...HEAD | grep "^D" | awk '{print $2}')
+
+          CRITICAL_FILES="AGENTS.md README.md CHANGELOG.md LICENSE pyproject.toml conftest.py launch_golf_suite.py setup_golf_suite.py start_api_server.py"
+
+          BLOCKED=false
+
+          for deleted in $DELETED; do
+            for critical in $CRITICAL_FILES; do
+              if [ "$deleted" = "$critical" ]; then
+                echo "🚨 BLOCKED: Attempt to delete protected file: $critical"
+                BLOCKED=true
+              fi
+            done
+          done
+
+          if [ "$BLOCKED" = true ]; then
+            echo ""
+            echo "❌ This PR attempts to delete one or more critical files."
+            echo "This is not allowed without explicit maintainer approval."
+            exit 1
+          fi
+
+          echo "✅ No critical file deletions detected."
