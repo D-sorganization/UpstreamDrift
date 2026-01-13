@@ -35,7 +35,10 @@ if TYPE_CHECKING:
 
 # Qt backend - optional for headless environments
 try:
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+    try:
+        from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
+    except ImportError:
+        from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
 
     class MplCanvas(FigureCanvasQTAgg):
         """Matplotlib canvas for embedding in PyQt6."""
