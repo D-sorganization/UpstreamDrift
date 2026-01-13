@@ -203,13 +203,6 @@ exclude = [
 ]
 
 
-[[tool.mypy.overrides]]
-module = [
-    "*.tests.*",
-    "tests.*",
-]
-disallow_untyped_defs = false
-
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = [
