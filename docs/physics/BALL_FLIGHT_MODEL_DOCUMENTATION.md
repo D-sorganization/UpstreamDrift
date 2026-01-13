@@ -140,7 +140,7 @@ Where:
 - C_L = lift coefficient (function of spin parameter)
 - Direction: ω × v (spin axis cross velocity)
 
-**Spin Parameter**:
+**Spin Parameter (Waterloo/Penner Model)**:
 
 ```
 S = (ω * r) / v
@@ -150,23 +150,40 @@ S = (ω * r) / v
 - r = ball radius [m]
 - v = linear velocity [m/s]
 
-**Lift Coefficient Correlation**:
+**Drag Coefficient (Waterloo/Penner Quadratic Model)**:
 
 ```
-C_L = 0.35 * S^0.6  (capped at 0.32)
+C_D = cd0 + cd1 * S + cd2 * S²
 ```
 
-This empirical formula is tuned against TrackMan/FlightScope trajectory data.
+Default values (tuned against wind tunnel data):
+
+- cd0 = 0.21 (base drag)
+- cd1 = 0.05 (linear spin dependence)
+- cd2 = 0.02 (quadratic spin dependence)
+
+**Lift Coefficient (Waterloo/Penner Quadratic Model)**:
+
+```
+C_L = cl0 + cl1 * S + cl2 * S²
+```
+
+Default values:
+
+- cl0 = 0.00 (no lift at zero spin)
+- cl1 = 0.38 (linear spin dependence)
+- cl2 = 0.08 (quadratic spin dependence)
+- Maximum cap: 0.25
 
 ### 2.3 Physical Constants
 
-| Parameter                | Value   | Units | Source              |
-| ------------------------ | ------- | ----- | ------------------- |
-| Ball mass                | 0.04593 | kg    | USGA Rule           |
-| Ball diameter            | 42.67   | mm    | USGA Rule           |
-| Drag coefficient (base)  | 0.24    | -     | Bearman & Harvey    |
-| Magnus coefficient (max) | 0.32    | -     | Empirical fit       |
-| Air density (sea level)  | 1.225   | kg/m³ | Standard atmosphere |
+| Parameter               | Value   | Units | Source                    |
+| ----------------------- | ------- | ----- | ------------------------- |
+| Ball mass               | 0.04593 | kg    | USGA Rule                 |
+| Ball diameter           | 42.67   | mm    | USGA Rule                 |
+| Drag coefficient (cd0)  | 0.21    | -     | Waterloo wind tunnel data |
+| Lift slope (cl1)        | 0.38    | -     | Waterloo wind tunnel data |
+| Air density (sea level) | 1.225   | kg/m³ | Standard atmosphere       |
 
 ### 2.4 Model Assumptions and Limitations
 
@@ -188,41 +205,46 @@ This empirical formula is tuned against TrackMan/FlightScope trajectory data.
 
 ### 2.5 References: Ball Flight Aerodynamics
 
-1. **Bearman, P.W. & Harvey, J.K. (1976)** - "Golf Ball Aerodynamics"
+**Primary Sources (Waterloo Motion Research Group):**
+
+1. **McPhee, J. et al.** - "Three Dimensional Golf Clubhead Ball Impact Models"
+   _University of Waterloo Motion Research Group_
+   - 3D impulse-momentum impact models
+   - Quadratic coefficient formulas for Cd and Cl
+
+2. **McPhee, J. et al.** - "Development and Comparison of 3D Dynamics Models"
+   _University of Waterloo_
+   - Comparison of impact model approaches
+   - Shaft flexibility effects
+
+3. **Penner, A.R. (2003)** - "The physics of golf"
+   _Reports on Progress in Physics_, 66(2), 131-171
+   - Comprehensive physics review
+   - Coefficient of restitution analysis
+   - Trajectory optimization
+
+**Supporting References:**
+
+4. **Bearman, P.W. & Harvey, J.K. (1976)** - "Golf Ball Aerodynamics"
    _Aeronautical Quarterly_, 27(2), 112-122
    - Foundational work on dimpled sphere aerodynamics
    - Wind tunnel measurements of C_D and C_L vs. spin
 
-2. **Smits, A.J. & Ogg, S. (2004)** - "Aerodynamics of the Golf Ball"
+5. **Smits, A.J. & Ogg, S. (2004)** - "Aerodynamics of the Golf Ball"
    Chapter in _Biomedical Engineering Principles in Sports_
    - Comprehensive treatment of Magnus effect
    - Empirical correlations for lift coefficient
 
-3. **Aoki, K., et al. (2010)** - "Aerodynamic character of golf ball
-   using panel method"
-   _Procedia Engineering_, 2(2), 2455-2460
-   - Numerical simulation validation
-
-4. **TrackMan University** - "The Ball Flight Laws"
+6. **TrackMan University** - "The Ball Flight Laws"
    https://blog.trackmangolf.com
    - Industry-standard ball flight correlations
    - Launch condition to trajectory validation data
 
-5. **MDPI Applied Sciences (2021)** - "Drag and Lift Coefficients of
+7. **MDPI Applied Sciences (2021)** - "Drag and Lift Coefficients of
    Golf Balls: Experimental Investigation"
    https://www.mdpi.com/2076-3417
    - Modern wind tunnel measurements
    - Spin-dependent drag correlation
-
-6. **Physics of Fluids (2010)** - "Wake structure and drag of golf balls"
-   _AIP Publishing_
-   - Detailed boundary layer analysis
-   - Dimple geometry effects
-
-7. **Penner, A.R. (2003)** - "The physics of golf"
-   _Reports on Progress in Physics_, 66(2), 131-171
-   - Comprehensive physics review
-   - Trajectory optimization analysis
 
 ---
 
