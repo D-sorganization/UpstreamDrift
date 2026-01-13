@@ -92,3 +92,9 @@ run_log.txt
 .jules/palette*
 .jules/pallette*
 .jules/sentinel*
+
+# CI/PR artifact files (prevent accumulation at root)
+checks.json
+pr_comments.json
+pr_list.json
+review_comments.json
