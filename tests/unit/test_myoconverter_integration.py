@@ -240,7 +240,7 @@ class TestConvertOsimToMujoco:
     ):
         """Test successful model conversion (requires myoconverter)."""
         # Skip test body if myoconverter not available
-        pytest.skip("Requires myoconverter - placeholder for future testing")
+        pytest.skip("Requires myoconverter - pending implementation")
 
     @pytest.mark.skipif(not MYOCONVERTER_AVAILABLE, reason="myoconverter not installed")
     @patch(
@@ -252,7 +252,7 @@ class TestConvertOsimToMujoco:
     ):
         """Test that custom configuration is passed to pipeline (requires myoconverter)."""
         # Skip test body if myoconverter not available
-        pytest.skip("Requires myoconverter - placeholder for future testing")
+        pytest.skip("Requires myoconverter - pending implementation")
 
 
 class TestHandleConversionError:
@@ -489,7 +489,7 @@ class TestEdgeCases:
     ):
         """Test error when conversion completes but no output file found."""
         # Skip test body if myoconverter not available
-        pytest.skip("Requires myoconverter - placeholder for future testing")
+        pytest.skip("Requires myoconverter - pending implementation")
 
     @patch(
         "shared.python.myoconverter_integration.MyoConverter._check_availability",
