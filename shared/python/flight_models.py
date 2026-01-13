@@ -146,6 +146,28 @@ class UnifiedLaunchConditions:
             ]
         )
 
+    def get_wind_vector(self) -> np.ndarray:
+        """Get wind velocity vector [wx, wy, wz] in m/s.
+
+        Wind direction is where the wind is coming FROM.
+        A headwind (0°) blows against the target direction (-x).
+        A right-to-left crosswind (90°) blows in -y direction.
+
+        Returns:
+            Wind velocity vector in m/s [wx, wy, wz]
+        """
+        if self.wind_speed < 0.01:
+            return np.zeros(3)
+
+        # Wind blows FROM the specified direction
+        # 0° = headwind (against positive X)
+        # 90° = right-to-left crosswind (against positive Y)
+        wx = -self.wind_speed * math.cos(self.wind_direction)
+        wy = -self.wind_speed * math.sin(self.wind_direction)
+        wz = 0.0  # No vertical wind component
+
+        return np.array([wx, wy, wz])
+
 
 @dataclass
 class TrajectoryPoint:
