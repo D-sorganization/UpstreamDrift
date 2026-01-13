@@ -9,10 +9,11 @@ import importlib.util
 import sys
 from pathlib import Path
 
-# Add shared utilities to path
-sys.path.insert(0, str(Path(__file__).parent / "shared" / "python"))
+# Add shared utilities to path (script is in scripts/ directory)
+SUITE_ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(SUITE_ROOT / "shared" / "python"))
 
-from shared.python.common_utils import setup_logging
+from shared.python.common_utils import setup_logging  # noqa: E402
 
 logger = setup_logging(__name__)
 
@@ -21,7 +22,7 @@ def validate_directory_structure() -> bool:
     """Validate that all expected directories exist."""
     logger.info("Validating directory structure...")
 
-    suite_root = Path(__file__).parent
+    suite_root = SUITE_ROOT
     expected_dirs = [
         "engines/Simscape_Multibody_Models/2D_Golf_Model",
         "engines/Simscape_Multibody_Models/3D_Golf_Model",
@@ -72,7 +73,7 @@ def validate_launchers() -> bool:
 
         # Test main launcher
         spec = importlib.util.spec_from_file_location(
-            "launch_golf_suite", Path(__file__).parent / "launch_golf_suite.py"
+            "launch_golf_suite", SUITE_ROOT / "launch_golf_suite.py"
         )
         if spec is None or spec.loader is None:
             raise ImportError("Could not load spec or loader for launch_golf_suite.py")
@@ -133,7 +134,7 @@ def validate_shared_components() -> bool:
             "shared/matlab/golf_suite_help.m",
         ]
 
-        suite_root = Path(__file__).parent
+        suite_root = SUITE_ROOT
         for matlab_file in matlab_files:
             if not (suite_root / matlab_file).exists():
                 logger.error(f"Missing MATLAB file: {matlab_file}")
@@ -155,7 +156,7 @@ def validate_engine_structure() -> bool:
     """Validate that all physics engines have expected structure."""
     logger.info("Validating engine structure...")
 
-    suite_root = Path(__file__).parent
+    suite_root = SUITE_ROOT
     engines = {
         "MuJoCo": "engines/physics_engines/mujoco",
         "Drake": "engines/physics_engines/drake",
@@ -191,7 +192,7 @@ def validate_git_repository() -> bool:
     """Validate that this is a proper Git repository."""
     logger.info("Validating Git repository...")
 
-    suite_root = Path(__file__).parent
+    suite_root = SUITE_ROOT
     git_dir = suite_root / ".git"
 
     if not git_dir.exists():
@@ -214,7 +215,7 @@ def validate_configuration_files() -> bool:
     """Validate that all configuration files are present."""
     logger.info("Validating configuration files...")
 
-    suite_root = Path(__file__).parent
+    suite_root = SUITE_ROOT
     config_files = [
         ".gitignore",
         "README.md",
