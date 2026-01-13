@@ -12,6 +12,19 @@ from typing import Any, cast
 import numpy as np
 from scipy import signal
 
+# Try to import next_fast_len from scipy.fft or scipy.fftpack
+# Fallback to a simple power of 2 function if neither is available
+try:
+    from scipy.fft import next_fast_len
+except ImportError:
+    try:
+        from scipy.fftpack import next_fast_len
+    except ImportError:
+
+        def next_fast_len(target: int) -> int:
+            """Simple fallback for next fast FFT length (power of 2)."""
+            return int(1 << (target - 1).bit_length())
+
 
 def compute_psd(
     data: np.ndarray,
@@ -176,13 +189,29 @@ def compute_cwt(
     # For Morlet: scale = w0 * fs / (2 * pi * freq)
     scales = w0 * fs / (2 * np.pi * freqs)
 
-    cwt_matrix = np.zeros((num_freqs, len(data)), dtype=np.complex128)
+    N = len(data)
+    cwt_matrix = np.zeros((num_freqs, N), dtype=np.complex128)
 
     # Use internal implementation or scipy's
     if hasattr(signal, "morlet2"):
         morlet_func = signal.morlet2
     else:
         morlet_func = _morlet2_impl
+
+    # OPTIMIZATION: FFT-based convolution with pre-calculated input FFT.
+    # Instead of re-computing fft(data) for each scale, we do it once.
+    # We choose an FFT size large enough for the largest wavelet + data.
+
+    # 1. Determine largest wavelet length
+    max_scale = np.max(scales)
+    max_M = int(2 * 5 * max_scale + 1)
+
+    # 2. Optimal FFT size (padding for linear convolution)
+    n_fft = next_fast_len(N + max_M - 1)
+
+    # 3. FFT of data (computed once)
+    # Use numpy.fft to ensure compatibility with older scipy versions
+    data_fft = np.fft.fft(data, n=n_fft)
 
     for i, s in enumerate(scales):
         # Window length for wavelet: typically 6-10 sigmas.
@@ -192,8 +221,23 @@ def compute_cwt(
 
         wavelet = morlet_func(M, s, w=w0)
 
-        # Convolve (using 'same' mode to keep length)
-        cwt_matrix[i, :] = signal.fftconvolve(data, wavelet, mode="same")
+        # 4. FFT of wavelet
+        wavelet_fft = np.fft.fft(wavelet, n=n_fft)
+
+        # 5. Convolution in frequency domain
+        prod = data_fft * wavelet_fft
+
+        # 6. Inverse FFT
+        ret = np.fft.ifft(prod)
+
+        # 7. Center crop (mode='same')
+        # Result of ifft(fft(a, n) * fft(b, n)) is circular convolution of length n.
+        # Since n >= len(a) + len(b) - 1, the first len(a)+len(b)-1 samples match linear convolution.
+        # We want to extract the center part of length N.
+        # Logic for mode='same' centering:
+        # Start index is floor((M - 1) / 2)
+        start = (M - 1) // 2
+        cwt_matrix[i, :] = ret[start : start + N]
 
         # Normalize by 1/sqrt(s)
         cwt_matrix[i, :] /= np.sqrt(s)
