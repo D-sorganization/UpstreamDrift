@@ -33,8 +33,7 @@ class UnifiedLauncher:
                 "PyQt6 is required to run the launcher. Install it with: pip install PyQt6"
             )
 
-        # Import here to avoid circular dependencies
-        from .golf_launcher import GolfLauncher
+
 
         # Create QApplication if it doesn't exist
         # Check if QApplication is None (if import failed, but we raised above)
@@ -47,7 +46,7 @@ class UnifiedLauncher:
             self.app = QApplication(sys.argv)
 
         # Create the actual launcher
-        self.launcher = GolfLauncher()
+        self.launcher = None
 
     def mainloop(self) -> int:
         """Start the launcher main loop.
@@ -55,6 +54,11 @@ class UnifiedLauncher:
         Returns:
             Exit code from the application
         """
+        if self.launcher is None:
+            from .golf_launcher import GolfLauncher
+
+            self.launcher = GolfLauncher()
+
         self.launcher.show()
         if self.app is None:
             logger.error("QApplication failed to initialize.")

@@ -19,6 +19,7 @@ import pytest
 
 # Import TestClient first
 httpx = pytest.importorskip("httpx")
+fastapi = pytest.importorskip("fastapi")
 from fastapi.testclient import TestClient  # noqa: E402
 
 # Try to import app, skip if dependencies unavailable
