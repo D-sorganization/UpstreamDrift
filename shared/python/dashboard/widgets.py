@@ -109,28 +109,30 @@ class LivePlotWidget(QtWidgets.QWidget):
         controls_layout.addWidget(self.dim_spin)
 
         # Selector for Induced Accel Source (Hidden by default)
-        self.source_spin = QtWidgets.QSpinBox()
-        self.source_spin.setAccessibleName("Source Index")
-        self.source_spin.setAccessibleDescription(
-            "Select the source index for induced acceleration"
+        self.source_combo = QtWidgets.QComboBox()
+        self.source_combo.setAccessibleName("Source Selector")
+        self.source_combo.setAccessibleDescription(
+            "Select the source for induced acceleration analysis"
         )
-        self.source_spin.setRange(0, 100)  # Assume max 100 joints
-        self.source_spin.setPrefix("Source Idx: ")
-        self.source_spin.setToolTip(
-            "Index of the joint torque source to analyze for induced acceleration."
+        self.source_combo.setToolTip(
+            "Select the joint torque source to analyze for induced acceleration."
         )
-        self.source_spin.setStatusTip("Select the induced acceleration source index")
-        self.source_spin.setAccessibleName("Source Index")
-        self.source_spin.setVisible(False)
-        self.source_spin.valueChanged.connect(self._on_source_changed)
+        self.source_combo.setStatusTip(
+            "Select the induced acceleration source (joint name)"
+        )
+        self.source_combo.setVisible(False)
+        self.source_combo.currentIndexChanged.connect(self._on_source_changed)
+
+        # Default items if no names provided
+        self.source_combo.addItems([f"Source {i}" for i in range(100)])
 
         lbl_source = QtWidgets.QLabel("Source:")
-        lbl_source.setBuddy(self.source_spin)
+        lbl_source.setBuddy(self.source_combo)
         lbl_source.setVisible(False)
         self.source_label = lbl_source
 
         controls_layout.addWidget(lbl_source)
-        controls_layout.addWidget(self.source_spin)
+        controls_layout.addWidget(self.source_combo)
 
         # Checkbox for enabling computation (if expensive)
         self.chk_compute = QtWidgets.QCheckBox("Compute Real-time")
@@ -150,6 +152,21 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.ax.set_xlabel("Time (s)")
         self.ax.grid(True)
 
+    def set_joint_names(self, names: list[str]) -> None:
+        """Update source selector with human-readable joint names."""
+        if not names:
+            return
+
+        current_idx = self.source_combo.currentIndex()
+        self.source_combo.clear()
+        self.source_combo.addItems(names)
+
+        # Restore index if valid, otherwise 0
+        if 0 <= current_idx < len(names):
+            self.source_combo.setCurrentIndex(current_idx)
+        else:
+            self.source_combo.setCurrentIndex(0)
+
     def set_plot_metric(self, label: str) -> None:
         """Change the metric being plotted."""
         self.current_label = label
@@ -157,7 +174,7 @@ class LivePlotWidget(QtWidgets.QWidget):
 
         # Show/Hide Source Spinner
         is_induced = self.current_key == "induced_accel_source"
-        self.source_spin.setVisible(is_induced)
+        self.source_combo.setVisible(is_induced)
         self.source_label.setVisible(is_induced)
 
         # Update recorder config if needed
@@ -171,8 +188,8 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.line_objects = []  # Reset lines
         self.update_plot()
 
-    def _on_source_changed(self, value: int) -> None:
-        """Handle source index change."""
+    def _on_source_changed(self, index: int) -> None:
+        """Handle source selection change."""
         self._update_recorder_config()
         # Clear plot as data source changed
         self.ax.clear()
@@ -212,7 +229,7 @@ class LivePlotWidget(QtWidgets.QWidget):
                 config["track_total_control"] = True
             elif self.current_key == "induced_accel_source":
                 # Add the selected source index to the list
-                config["induced_accel_sources"] = [self.source_spin.value()]
+                config["induced_accel_sources"] = [self.source_combo.currentIndex()]
 
         self.recorder.set_analysis_config(config)
 
@@ -223,7 +240,7 @@ class LivePlotWidget(QtWidgets.QWidget):
 
         if self.current_key == "induced_accel_source":
             # Fetch specific induced acceleration
-            src_idx = self.source_spin.value()
+            src_idx = self.source_combo.currentIndex()
             if src_idx in self.recorder.data["induced_accelerations"]:
                 val = self.recorder.data["induced_accelerations"][src_idx]
                 times = self.recorder.data["times"][: self.recorder.current_idx]
