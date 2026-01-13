@@ -7,10 +7,17 @@ analysis, and signal quality assessment.
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import cast
 
 import numpy as np
 from scipy import signal
+from scipy.signal import (
+    correlate,
+    correlation_lags,
+    savgol_filter,
+    spectrogram,
+    welch,
+)
 
 # Try to import next_fast_len from scipy.fft or scipy.fftpack
 # Fallback to a simple power of 2 function if neither is available
@@ -43,7 +50,7 @@ def compute_psd(
     Returns:
         tuple: (frequencies, psd_values)
     """
-    freqs, psd = signal.welch(data, fs=fs, window=window, nperseg=nperseg)
+    freqs, psd = welch(data, fs=fs, window=window, nperseg=nperseg)
     return freqs, psd
 
 
@@ -66,7 +73,7 @@ def compute_spectrogram(
     Returns:
         tuple: (frequencies, times, Sxx)
     """
-    f, t, Sxx = signal.spectrogram(
+    f, t, Sxx = spectrogram(
         data,
         fs=fs,
         window=window,
@@ -323,18 +330,18 @@ def compute_jerk(
     if len(data) < window_len:
         # Fallback to simple finite difference if too short
         dt = 1.0 / fs
-        return cast("np.ndarray[Any, Any]", np.gradient(data, dt))
+        return cast("np.ndarray", np.gradient(data, dt))
 
     if window_len % 2 == 0:
         window_len += 1
 
     # deriv=1 means first derivative
     # delta = 1.0/fs (spacing)
-    jerk = signal.savgol_filter(
+    jerk = savgol_filter(
         data, window_length=window_len, polyorder=polyorder, deriv=1, delta=1.0 / fs
     )
 
-    return cast("np.ndarray[Any, Any]", jerk)
+    return cast("np.ndarray", jerk)
 
 
 def compute_time_shift(
@@ -371,8 +378,8 @@ def compute_time_shift(
     if np.std(x) < 1e-9 or np.std(y) < 1e-9:
         return 0.0
 
-    corr = signal.correlate(x, y, mode="full")
-    lags = signal.correlation_lags(len(x), len(y), mode="full")
+    corr = correlate(x, y, mode="full")
+    lags = correlation_lags(len(x), len(y), mode="full")
 
     if max_lag is not None:
         lag_samples = int(max_lag * fs)
