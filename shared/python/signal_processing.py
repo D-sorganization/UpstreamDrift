@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any, cast
 
 import numpy as np
-from scipy import signal
+from scipy import signal, fft
 
 
 def compute_psd(
@@ -176,13 +176,28 @@ def compute_cwt(
     # For Morlet: scale = w0 * fs / (2 * pi * freq)
     scales = w0 * fs / (2 * np.pi * freqs)
 
-    cwt_matrix = np.zeros((num_freqs, len(data)), dtype=np.complex128)
+    n_data = len(data)
+    cwt_matrix = np.zeros((num_freqs, n_data), dtype=np.complex128)
 
     # Use internal implementation or scipy's
     if hasattr(signal, "morlet2"):
         morlet_func = signal.morlet2
     else:
         morlet_func = _morlet2_impl
+
+    # Optimization: Pre-compute FFT of data once to avoid recomputation in fftconvolve
+    # 1. Determine maximum wavelet width (corresponds to smallest frequency / largest scale)
+    min_f = np.min(freqs)
+    max_s = w0 * fs / (2 * np.pi * min_f)
+    max_M = int(2 * 5 * max_s + 1)
+
+    # 2. Determine optimal FFT size for the largest convolution
+    # Padding to N + M - 1 ensures linear convolution avoids circular aliasing
+    target_len = n_data + max_M - 1
+    n_fft = fft.next_fast_len(target_len)
+
+    # 3. Compute FFT of data (must use full fft as we will multiply with complex wavelet)
+    data_fft = fft.fft(data, n=n_fft)
 
     for i, s in enumerate(scales):
         # Window length for wavelet: typically 6-10 sigmas.
@@ -192,8 +207,31 @@ def compute_cwt(
 
         wavelet = morlet_func(M, s, w=w0)
 
-        # Convolve (using 'same' mode to keep length)
-        cwt_matrix[i, :] = signal.fftconvolve(data, wavelet, mode="same")
+        # FFT convolution manually
+        # a. FFT of wavelet
+        wavelet_fft = fft.fft(wavelet, n=n_fft)
+
+        # b. Multiply in frequency domain
+        prod = data_fft * wavelet_fft
+
+        # c. Inverse FFT
+        conv_res = fft.ifft(prod, n=n_fft)
+
+        # d. Center crop to match 'same' mode
+        # The linear convolution (length N+M-1) starts at index 0 because inputs were zero-padded at end.
+        # mode='same' requires extracting the center section of length N from the full convolution.
+        # The center of the full convolution is at index (N+M-1-1)/2.
+        # We want the slice [start, start + N].
+        # start = (N+M-1)//2 - (N-1)//2 (integer math)
+        # Simplified: start = (M-1) // 2
+        start_idx = (M - 1) // 2
+
+        # Ensure we stay within bounds (though with correct padding, it should be fine)
+        if start_idx + n_data <= len(conv_res):
+            cwt_matrix[i, :] = conv_res[start_idx : start_idx + n_data]
+        else:
+             # Fallback (should not happen with correct logic)
+             cwt_matrix[i, :] = conv_res[:n_data]
 
         # Normalize by 1/sqrt(s)
         cwt_matrix[i, :] /= np.sqrt(s)
