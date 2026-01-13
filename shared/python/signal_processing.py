@@ -117,29 +117,38 @@ def compute_spectral_arc_length(
     # Normalize magnitude
     spectrum_norm = spectrum_mag / max_mag
 
-    # Frequency axis
-    freqs = np.fft.fftfreq(n_padded, 1 / fs)
+    # Frequency axis optimization:
+    # Instead of generating full fftfreq and masking (which creates large temporary arrays),
+    # we calculate the index limit directly.
+    # Positive frequencies are at indices 0 to n_padded//2.
+    # df = fs / n_padded
+    df = fs / n_padded
+    if df > 0:
+        limit_idx = int(np.floor(fc / df)) + 1
+    else:
+        limit_idx = 1
 
-    # Select frequencies up to fc
-    mask = (freqs >= 0) & (freqs <= fc)
-    freqs_sel = freqs[mask]
-    spectrum_sel = spectrum_norm[mask]
+    # limit_idx must be at most n_padded // 2 + 1 (Nyquist limit for positive freqs)
+    limit_idx = min(limit_idx, n_padded // 2 + 1)
+
+    # We only need the positive part of spectrum up to fc
+    spectrum_sel = spectrum_norm[:limit_idx]
 
     # Select magnitudes above threshold
     # Note: The original paper defines the support region based on amplitude threshold
     # We apply it to filter out noise
-    valid_indices = spectrum_sel >= amp_th
-    if not np.any(valid_indices):
+    if not np.any(spectrum_sel >= amp_th):
         return 0.0
-
-    # Calculate arc length
-    # Scale frequency to [0, 1] for the integral
-    freq_norm = freqs_sel / fc
 
     # Calculate gradient
     # Optimization: Manual slicing is faster than np.diff
     d_mag = spectrum_sel[1:] - spectrum_sel[:-1]
-    d_freq = freq_norm[1:] - freq_norm[:-1]
+
+    # Optimization: d_freq is constant (df / fc), so we use a scalar instead of an array.
+    # This avoids creating two arrays (freq_norm and d_freq) and performing N subtractions.
+    # freq_norm = freqs_sel / fc
+    # d_freq = freq_norm[1:] - freq_norm[:-1] = df / fc
+    d_freq = df / fc
 
     # Arc length
     sal = -np.sum(np.sqrt(d_freq**2 + d_mag**2))
