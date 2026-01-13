@@ -11,18 +11,22 @@ This addresses the critical 0% API test coverage gap identified in the
 adversarial review (2026-01-13).
 """
 
+import sys
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock
 
 import pytest
-from fastapi.testclient import TestClient
 
-# Mock the heavy dependencies before importing the app
-with patch("shared.python.engine_manager.EngineManager"):
-    with patch("shared.python.video_pose_pipeline.VideoPosePipeline"):
-        from api.server import app
+# Mock heavy dependencies at sys.modules level before importing
+# This prevents import errors when optional dependencies aren't installed
+sys.modules["shared.python.video_pose_pipeline"] = MagicMock()
+sys.modules["shared.python.engine_manager"] = MagicMock()
+
+from fastapi.testclient import TestClient  # noqa: E402
+
+from api.server import app  # noqa: E402
 
 
 @pytest.fixture
