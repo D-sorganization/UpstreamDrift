@@ -132,7 +132,6 @@ class LivePlotWidget(QtWidgets.QWidget):
 
         controls_layout.addWidget(lbl_source)
         controls_layout.addWidget(self.source_combo)
-
         # Snapshot Button
         self.btn_snapshot = QtWidgets.QPushButton("Snapshot")
         self.btn_snapshot.setToolTip("Copy current plot to clipboard")
@@ -174,6 +173,21 @@ class LivePlotWidget(QtWidgets.QWidget):
             # Fallback to generic indices (assume max 100)
             for i in range(100):
                 self.source_combo.addItem(f"Source {i}")
+
+    def set_joint_names(self, names: list[str]) -> None:
+        """Update source selector with human-readable joint names."""
+        if not names:
+            return
+
+        current_idx = self.source_combo.currentIndex()
+        self.source_combo.clear()
+        self.source_combo.addItems(names)
+
+        # Restore index if valid, otherwise 0
+        if 0 <= current_idx < len(names):
+            self.source_combo.setCurrentIndex(current_idx)
+        else:
+            self.source_combo.setCurrentIndex(0)
 
     def set_plot_metric(self, label: str) -> None:
         """Change the metric being plotted."""

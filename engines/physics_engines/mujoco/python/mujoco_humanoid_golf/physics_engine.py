@@ -161,6 +161,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         """Get list of joint names."""
         if self.model is None:
             return []
+<<<<<<< HEAD
 
         names = []
         for i in range(self.model.nu):  # Use actuators (nu) or joints (nq)?
@@ -184,6 +185,13 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
                 names.append(name)
 
         return names
+=======
+        return [
+            mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, i)
+            or f"Joint {i}"
+            for i in range(self.model.njnt)
+        ]
+>>>>>>> origin/palette-live-plot-ux-8834889119636346491
 
     # -------- Section 1: Core Dynamics Engine Capabilities --------
 
