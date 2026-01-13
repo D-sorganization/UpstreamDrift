@@ -59,7 +59,7 @@ class BallProperties:
     @property
     def cross_sectional_area(self) -> float:
         """Cross-sectional area in m²."""
-        return np.pi * self.radius**2
+        return float(np.pi * self.radius**2)
 
 
 @dataclass
