@@ -106,42 +106,46 @@ def _validate_model_path(model_path: str) -> str:
     Raises:
         HTTPException: If path is invalid or contains traversal attempts
     """
-    # Reject obvious path traversal attempts
-    if ".." in model_path or model_path.startswith("/") or model_path.startswith("\\"):
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid path: path traversal not allowed",
-        )
-
-    # Resolve path and check it's within allowed directories
     try:
-        resolved_path = Path(model_path).resolve()
-    except (ValueError, OSError) as e:
+        user_path = Path(model_path)
+    except TypeError as e:
         raise HTTPException(
             status_code=400,
             detail=f"Invalid path: {e}",
         ) from e
 
-    # Check if path is within allowed directories
-    is_allowed = any(
-        str(resolved_path).startswith(str(allowed_dir))
-        for allowed_dir in ALLOWED_MODEL_DIRS
-    )
-
-    if not is_allowed:
+    # Reject absolute paths - user input must be relative
+    if user_path.is_absolute():
         raise HTTPException(
             status_code=400,
-            detail="Path must be within allowed model directories",
+            detail="Invalid path: absolute paths are not allowed",
         )
 
-    # Check if path exists
-    if not resolved_path.exists():
-        raise HTTPException(
-            status_code=404,
-            detail="Model file not found",
-        )
+    # Build candidate paths under each allowed directory and check them
+    for allowed_dir in ALLOWED_MODEL_DIRS:
+        try:
+            candidate = (allowed_dir / user_path).resolve()
+        except (ValueError, OSError) as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid path: {e}",
+            ) from e
 
-    return str(resolved_path)
+        # Ensure the resolved path is still within the allowed directory
+        try:
+            candidate.relative_to(allowed_dir)
+        except ValueError:
+            # Path escaped the allowed directory (traversal attempt)
+            continue
+
+        # Check if this valid candidate exists
+        if candidate.exists():
+            return str(candidate)
+
+    raise HTTPException(
+        status_code=404,
+        detail="Model file not found in allowed directories",
+    )
 
 
 # Global services
