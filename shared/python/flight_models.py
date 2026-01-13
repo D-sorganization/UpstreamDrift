@@ -1339,7 +1339,7 @@ class RospieDLModel(BallFlightModel):
             return np.array([vel[0], vel[1], vel[2], accel[0], accel[1], accel[2]])
 
         def ground_event(t: float, y: np.ndarray) -> float:
-            return y[2]
+            return float(y[2])
 
         ground_event.terminal = True  # type: ignore[attr-defined]
         ground_event.direction = -1  # type: ignore[attr-defined]
