@@ -1,6 +1,7 @@
 """Authentication dependencies for FastAPI endpoints."""
 
 from collections.abc import Callable
+from datetime import UTC
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -100,10 +101,10 @@ async def get_current_user_from_api_key(
         )
 
     # Update API key usage
-    from datetime import datetime, timezone
+    from datetime import datetime
 
     # SECURITY FIX: Use timezone-aware datetime instead of deprecated utcnow()
-    api_key_record.last_used = datetime.now(timezone.utc)  # type: ignore[assignment]
+    api_key_record.last_used = datetime.now(UTC)  # type: ignore[assignment]
     api_key_record.usage_count = int(api_key_record.usage_count) + 1  # type: ignore[assignment]
     db.commit()
 
