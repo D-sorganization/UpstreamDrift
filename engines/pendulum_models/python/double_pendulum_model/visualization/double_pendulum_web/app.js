@@ -333,6 +333,34 @@ function announce(message) {
   showToast(message);
 }
 
+function triggerShareFeedback() {
+  const btn = document.getElementById('share');
+  const label = btn.querySelector('span');
+  const iconShare = document.getElementById('icon-share');
+  const iconCheck = document.getElementById('icon-share-check');
+
+  if (iconShare && iconCheck) {
+    // If already showing feedback, do nothing or extend timer?
+    // Simplest is to prevent re-entry or just overwrite.
+    // However, if we overwrite, we must ensure we don't capture "Copied!" as original text.
+    // Since this is a specific button, we know the original text is "Share".
+
+    iconShare.classList.add('hidden');
+    iconCheck.classList.remove('hidden');
+    label.textContent = 'Copied!';
+
+    // Clear any existing timeout if we want to reset the timer (optional optimization)
+    // For now, just setting a new timeout is fine, but multiple timeouts might cause flickering.
+    // Ideally we should use a dataset attribute to store timeout ID, but simpler:
+
+    setTimeout(() => {
+      iconShare.classList.remove('hidden');
+      iconCheck.classList.add('hidden');
+      label.textContent = 'Share';
+    }, 2000);
+  }
+}
+
 function copyShareLink() {
   const inputs = document.querySelectorAll('.grid input');
   const params = new URLSearchParams();
@@ -350,6 +378,7 @@ function copyShareLink() {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(newUrl).then(() => {
       announce('Link copied to clipboard');
+      triggerShareFeedback();
     }).catch(() => {
       fallbackCopy(newUrl);
     });
@@ -370,6 +399,7 @@ function fallbackCopy(text) {
     document.body.removeChild(textArea);
     if (successful) {
       announce('Link copied to clipboard');
+      triggerShareFeedback();
       return;
     }
   } catch (err) {
