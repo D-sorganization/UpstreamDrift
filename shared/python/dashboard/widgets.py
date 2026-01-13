@@ -18,6 +18,8 @@ from shared.python.plotting import MplCanvas
 
 LOGGER = logging.getLogger(__name__)
 
+MAX_DIMENSIONS = 100
+
 
 class LivePlotWidget(QtWidgets.QWidget):
     """Widget for displaying real-time plots of simulation data.
@@ -99,7 +101,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.dim_spin = QtWidgets.QSpinBox()
         self.dim_spin.setAccessibleName("Dimension Index")
         self.dim_spin.setAccessibleDescription("Select the dimension index to plot")
-        self.dim_spin.setRange(0, 100)  # Assume max 100 dims
+        self.dim_spin.setRange(0, MAX_DIMENSIONS)
         self.dim_spin.setPrefix("Dim: ")
         self.dim_spin.setToolTip("Select dimension index")
         self.dim_spin.setStatusTip("Select the specific dimension index to plot")
@@ -108,31 +110,8 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.dim_spin.valueChanged.connect(self.update_plot)
         controls_layout.addWidget(self.dim_spin)
 
-        # Selector for Induced Accel Source (Hidden by default)
-        self.source_spin = QtWidgets.QSpinBox()
-        self.source_spin.setAccessibleName("Source Index")
-        self.source_spin.setAccessibleDescription(
-            "Select the source index for induced acceleration"
-        )
-        self.source_spin.setRange(0, 100)  # Assume max 100 joints
-        self.source_spin.setPrefix("Source Idx: ")
-        self.source_spin.setToolTip(
-            "Index of the joint torque source to analyze for induced acceleration."
-        )
-        self.source_spin.setStatusTip("Select the induced acceleration source index")
-        self.source_spin.setAccessibleName("Source Index")
-        self.source_spin.setVisible(False)
-        self.source_spin.valueChanged.connect(self._on_source_changed)
-
-        lbl_source = QtWidgets.QLabel("Source:")
-        lbl_source.setBuddy(self.source_spin)
-        lbl_source.setVisible(False)
-        self.source_label = lbl_source
-
-        controls_layout.addWidget(lbl_source)
-        controls_layout.addWidget(self.source_spin)
-
         # Checkbox for enabling computation (if expensive)
+        # Initialize early to avoid AttributeError during signal callbacks
         self.chk_compute = QtWidgets.QCheckBox("Compute Real-time")
         self.chk_compute.setToolTip(
             "Enable real-time computation for advanced metrics (ZTCF, etc). May affect performance."
@@ -141,6 +120,39 @@ class LivePlotWidget(QtWidgets.QWidget):
             "Enable or disable real-time computation of advanced metrics"
         )
         self.chk_compute.stateChanged.connect(self.toggle_computation)
+
+        # Selector for Induced Accel Source (Hidden by default)
+        # Using a ComboBox for user-friendly name selection
+        self.source_combo = QtWidgets.QComboBox()
+        self.source_combo.setAccessibleName("Source Selector")
+        self.source_combo.setAccessibleDescription(
+            "Select the joint torque source to analyze for induced acceleration"
+        )
+        self.source_combo.setToolTip("Select the joint torque source to analyze.")
+        self.source_combo.setStatusTip("Select the induced acceleration source")
+        self.source_combo.setVisible(False)
+        self.source_combo.currentIndexChanged.connect(self._on_source_changed)
+
+        # Populate with joint names if available, or indices
+        self._populate_source_combo()
+
+        lbl_source = QtWidgets.QLabel("Source:")
+        lbl_source.setBuddy(self.source_combo)
+        lbl_source.setVisible(False)
+        self.source_label = lbl_source
+
+        controls_layout.addWidget(lbl_source)
+        controls_layout.addWidget(self.source_combo)
+        # Snapshot Button
+        self.btn_snapshot = QtWidgets.QPushButton("Snapshot")
+        self.btn_snapshot.setToolTip("Copy current plot to clipboard")
+        self.btn_snapshot.setStatusTip(
+            "Capture the current plot image to the clipboard"
+        )
+        self.btn_snapshot.setAccessibleName("Snapshot Button")
+        self.btn_snapshot.clicked.connect(self.copy_snapshot)
+        controls_layout.addWidget(self.btn_snapshot)
+
         controls_layout.addWidget(self.chk_compute)
 
         self._main_layout.addLayout(controls_layout)
@@ -150,15 +162,53 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.ax.set_xlabel("Time (s)")
         self.ax.grid(True)
 
+    def _populate_source_combo(self) -> None:
+        """Populate the source combo box with joint names or indices."""
+        self.source_combo.clear()
+
+        # Try to get joint names from the engine
+        joint_names = []
+        if hasattr(self.recorder.engine, "get_joint_names"):
+            try:
+                joint_names = self.recorder.engine.get_joint_names()  # type: ignore[attr-defined]
+            except Exception:  # noqa: BLE001
+                LOGGER.exception("Failed to get joint names from engine")
+
+        if joint_names:
+            self.source_combo.addItems(joint_names)
+        else:
+            # Fallback to generic indices
+            for i in range(MAX_DIMENSIONS):
+                self.source_combo.addItem(f"Source {i}")
+
+    def set_joint_names(self, names: list[str]) -> None:
+        """Update source selector with human-readable joint names."""
+        if not names:
+            return
+
+        current_idx = self.source_combo.currentIndex()
+        self.source_combo.clear()
+        self.source_combo.addItems(names)
+
+        # Restore index if valid, otherwise 0
+        if 0 <= current_idx < len(names):
+            self.source_combo.setCurrentIndex(current_idx)
+        else:
+            self.source_combo.setCurrentIndex(0)
+
     def set_plot_metric(self, label: str) -> None:
         """Change the metric being plotted."""
         self.current_label = label
         self.current_key = self.metric_options[label]
 
-        # Show/Hide Source Spinner
+        # Show/Hide Source Selector
         is_induced = self.current_key == "induced_accel_source"
-        self.source_spin.setVisible(is_induced)
+        self.source_combo.setVisible(is_induced)
         self.source_label.setVisible(is_induced)
+
+        # Refresh sources if becoming visible (in case model loaded later)
+        if is_induced and self.source_combo.count() == 0:
+            self._populate_source_combo()
 
         # Update recorder config if needed
         self._update_recorder_config()
@@ -171,8 +221,8 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.line_objects = []  # Reset lines
         self.update_plot()
 
-    def _on_source_changed(self, value: int) -> None:
-        """Handle source index change."""
+    def _on_source_changed(self, index: int) -> None:
+        """Handle source selection change."""
         self._update_recorder_config()
         # Clear plot as data source changed
         self.ax.clear()
@@ -212,7 +262,10 @@ class LivePlotWidget(QtWidgets.QWidget):
                 config["track_total_control"] = True
             elif self.current_key == "induced_accel_source":
                 # Add the selected source index to the list
-                config["induced_accel_sources"] = [self.source_spin.value()]
+                # Use currentIndex as source index
+                idx = self.source_combo.currentIndex()
+                if idx >= 0:
+                    config["induced_accel_sources"] = [idx]
 
         self.recorder.set_analysis_config(config)
 
@@ -223,8 +276,8 @@ class LivePlotWidget(QtWidgets.QWidget):
 
         if self.current_key == "induced_accel_source":
             # Fetch specific induced acceleration
-            src_idx = self.source_spin.value()
-            if src_idx in self.recorder.data["induced_accelerations"]:
+            src_idx = self.source_combo.currentIndex()
+            if src_idx >= 0 and src_idx in self.recorder.data["induced_accelerations"]:
                 val = self.recorder.data["induced_accelerations"][src_idx]
                 times = self.recorder.data["times"][: self.recorder.current_idx]
                 data = val[: self.recorder.current_idx]
@@ -308,6 +361,28 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.ax.relim()
         self.ax.autoscale_view()
         self.canvas.draw()
+
+    def copy_snapshot(self) -> None:
+        """Capture the current plot and copy to clipboard."""
+        # Grab the canvas content
+        pixmap = self.canvas.grab()
+
+        # Copy to clipboard
+        clipboard = QtWidgets.QApplication.clipboard()
+        if clipboard:
+            clipboard.setPixmap(pixmap)
+
+        # Visual feedback
+        self.btn_snapshot.setText("Copied!")
+        self.btn_snapshot.setEnabled(False)
+
+        # Restore after 2 seconds
+        QtCore.QTimer.singleShot(2000, self._restore_snapshot_btn)
+
+    def _restore_snapshot_btn(self) -> None:
+        """Restore snapshot button state."""
+        self.btn_snapshot.setText("Snapshot")
+        self.btn_snapshot.setEnabled(True)
 
 
 class ControlPanel(QtWidgets.QGroupBox):

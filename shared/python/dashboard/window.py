@@ -49,7 +49,10 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         self.engine = engine
         self.recorder = GenericPhysicsRecorder(self.engine)
         self.runner = SimulationRunner(self.engine, self.recorder)
-        self.plotter = GolfSwingPlotter(self.recorder)
+        # Resolve joint names from engine if available
+        joint_names = self._resolve_joint_names()
+
+        self.plotter = GolfSwingPlotter(self.recorder, joint_names=joint_names)
 
         # Status bar
         self.status_label = QtWidgets.QLabel("Ready")
@@ -78,6 +81,9 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
 
         # Live Plots
         self.live_plot = LivePlotWidget(self.recorder)
+        if hasattr(self, "plotter") and self.plotter.joint_names:
+            self.live_plot.set_joint_names(self.plotter.joint_names)
+
         left_layout.addWidget(self.live_plot)
 
         main_layout.addWidget(left_panel, stretch=1)
@@ -205,6 +211,19 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         layout.addWidget(btn_export)
 
         layout.addStretch()
+
+    def _resolve_joint_names(self) -> list[str]:
+        """Try to resolve joint names from the engine."""
+        # Check for get_joint_names method (standard interface)
+        if hasattr(self.engine, "get_joint_names"):
+            try:
+                names = self.engine.get_joint_names()  # type: ignore
+                if names:
+                    return names
+            except Exception as e:
+                LOGGER.warning(f"Failed to get joint names from engine: {e}")
+
+        return []
 
     def _connect_signals(self) -> None:
         """Connect internal signals."""

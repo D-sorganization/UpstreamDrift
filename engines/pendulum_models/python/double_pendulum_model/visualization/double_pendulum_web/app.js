@@ -333,6 +333,7 @@ function announce(message) {
   showToast(message);
 }
 
+let shareFeedbackTimeout = null;
 function triggerShareFeedback() {
   const btn = document.getElementById('share');
   const label = btn.querySelector('span');
@@ -340,23 +341,20 @@ function triggerShareFeedback() {
   const iconCheck = document.getElementById('icon-share-check');
 
   if (iconShare && iconCheck) {
-    // If already showing feedback, do nothing or extend timer?
-    // Simplest is to prevent re-entry or just overwrite.
-    // However, if we overwrite, we must ensure we don't capture "Copied!" as original text.
-    // Since this is a specific button, we know the original text is "Share".
+    // Clear existing timeout to prevent race conditions on rapid clicks
+    if (shareFeedbackTimeout) {
+      clearTimeout(shareFeedbackTimeout);
+    }
 
     iconShare.classList.add('hidden');
     iconCheck.classList.remove('hidden');
     label.textContent = 'Copied!';
 
-    // Clear any existing timeout if we want to reset the timer (optional optimization)
-    // For now, just setting a new timeout is fine, but multiple timeouts might cause flickering.
-    // Ideally we should use a dataset attribute to store timeout ID, but simpler:
-
-    setTimeout(() => {
+    shareFeedbackTimeout = setTimeout(() => {
       iconShare.classList.remove('hidden');
       iconCheck.classList.add('hidden');
       label.textContent = 'Share';
+      shareFeedbackTimeout = null;
     }, 2000);
   }
 }
