@@ -17,3 +17,7 @@
 ## 2026-06-15 - [Search Bar in Grid Layouts]
 **Learning:** When displaying a large grid of items (like models or apps), users struggle to find specific items quickly without a search function. Adding a real-time filter improves discoverability significantly. However, implementing it in a grid layout requires clearing and rebuilding the grid to avoid gaps, rather than just hiding widgets.
 **Action:** When adding search filtering to a `QGridLayout`, implement a robust rebuild method that re-flows the visible items into the grid coordinates from scratch, ensuring a dense, gap-free layout for the filtered results.
+
+## 2026-10-24 - [Micro-feedback in Desktop Apps]
+**Learning:** Implementing the "Snapshot" button with self-reverting state ("Snapshot" -> "Copied!" -> "Snapshot") proved to be a simple yet highly effective way to provide confirmation for an invisible action (clipboard copy) without cluttering the UI with dialogs.
+**Action:** Apply this pattern to all clipboard actions or background tasks that complete instantly but lack inherent visual side effects.

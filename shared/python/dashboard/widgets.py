@@ -132,6 +132,14 @@ class LivePlotWidget(QtWidgets.QWidget):
         controls_layout.addWidget(lbl_source)
         controls_layout.addWidget(self.source_spin)
 
+        # Snapshot Button
+        self.btn_snapshot = QtWidgets.QPushButton("Snapshot")
+        self.btn_snapshot.setToolTip("Copy current plot to clipboard")
+        self.btn_snapshot.setStatusTip("Capture the current plot image to the clipboard")
+        self.btn_snapshot.setAccessibleName("Snapshot Button")
+        self.btn_snapshot.clicked.connect(self.copy_snapshot)
+        controls_layout.addWidget(self.btn_snapshot)
+
         # Checkbox for enabling computation (if expensive)
         self.chk_compute = QtWidgets.QCheckBox("Compute Real-time")
         self.chk_compute.setToolTip(
@@ -308,6 +316,28 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.ax.relim()
         self.ax.autoscale_view()
         self.canvas.draw()
+
+    def copy_snapshot(self) -> None:
+        """Capture the current plot and copy to clipboard."""
+        # Grab the canvas content
+        pixmap = self.canvas.grab()
+
+        # Copy to clipboard
+        clipboard = QtWidgets.QApplication.clipboard()
+        if clipboard:
+            clipboard.setPixmap(pixmap)
+
+        # Visual feedback
+        self.btn_snapshot.setText("Copied!")
+        self.btn_snapshot.setEnabled(False)
+
+        # Restore after 2 seconds
+        QtCore.QTimer.singleShot(2000, self._restore_snapshot_btn)
+
+    def _restore_snapshot_btn(self) -> None:
+        """Restore snapshot button state."""
+        self.btn_snapshot.setText("Snapshot")
+        self.btn_snapshot.setEnabled(True)
 
 
 class ControlPanel(QtWidgets.QGroupBox):
