@@ -3,6 +3,10 @@
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
 # Import core utilities (exceptions, logging) from the lightweight module
 from .constants import DEG_TO_RAD, MPS_TO_MPH, RAD_TO_DEG
 from .core import (
@@ -57,7 +61,7 @@ def ensure_output_dir(engine_name: str, subdir: str | None = None) -> Path:
     return output_path
 
 
-def load_golf_data(data_path: str | Path) -> "pd.DataFrame":
+def load_golf_data(data_path: str | Path) -> pd.DataFrame:
     """Load golf swing data from various formats.
 
     Args:
@@ -69,8 +73,6 @@ def load_golf_data(data_path: str | Path) -> "pd.DataFrame":
     Raises:
         ValueError: If file format not supported
     """
-    import pandas as pd
-
     data_path = Path(data_path)
 
     if data_path.suffix.lower() == ".csv":
@@ -84,7 +86,7 @@ def load_golf_data(data_path: str | Path) -> "pd.DataFrame":
 
 
 def save_golf_data(
-    data: "pd.DataFrame", output_path: str | Path, format: str = "csv"
+    data: pd.DataFrame, output_path: str | Path, format: str = "csv"
 ) -> None:
     """Save golf swing data in specified format.
 
@@ -106,10 +108,10 @@ def save_golf_data(
 
 
 def standardize_joint_angles(
-    angles: "np.ndarray",
+    angles: np.ndarray,
     angle_names: list[str] | None = None,
     time_step: float = 0.01,
-) -> "pd.DataFrame":
+) -> pd.DataFrame:
     """Standardize joint angle data across engines.
 
     Args:
@@ -120,9 +122,6 @@ def standardize_joint_angles(
     Returns:
         Standardized DataFrame with joint angles
     """
-    import numpy as np
-    import pandas as pd
-
     if angle_names is None:
         angle_names = [f"joint_{i}" for i in range(angles.shape[1])]
 
@@ -135,10 +134,10 @@ def standardize_joint_angles(
 
 
 def plot_joint_trajectories(
-    data: "pd.DataFrame",
+    data: pd.DataFrame,
     title: str = "Joint Trajectories",
     save_path: Path | None = None,
-) -> "plt.Figure":
+) -> plt.Figure:
     """Create standardized joint trajectory plots.
 
     Args:
@@ -149,8 +148,6 @@ def plot_joint_trajectories(
     Returns:
         Matplotlib figure
     """
-    import matplotlib.pyplot as plt
-
     fig, axes = plt.subplots(2, 2, figsize=(12, 8))
     axes = axes.flatten()
 
