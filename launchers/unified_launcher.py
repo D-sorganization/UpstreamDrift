@@ -7,6 +7,10 @@ that wraps the PyQt-based GolfLauncher implementation.
 import logging
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .golf_launcher import GolfLauncher
 
 try:
     from PyQt6.QtWidgets import QApplication
@@ -43,8 +47,8 @@ class UnifiedLauncher:
         if self.app is None:
             self.app = QApplication(sys.argv)
 
-        # Create the actual launcher
-        self.launcher = None
+        # Create the actual launcher (lazy-loaded in mainloop)
+        self.launcher: GolfLauncher | None = None
 
     def mainloop(self) -> int:
         """Start the launcher main loop.
