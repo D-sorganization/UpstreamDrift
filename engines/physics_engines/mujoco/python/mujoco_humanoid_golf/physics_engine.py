@@ -157,6 +157,16 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             return 0.0
         return float(self.data.time)
 
+    def get_joint_names(self) -> list[str]:
+        """Get list of joint names."""
+        if self.model is None:
+            return []
+        return [
+            mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_JOINT, i)
+            or f"Joint {i}"
+            for i in range(self.model.njnt)
+        ]
+
     # -------- Section 1: Core Dynamics Engine Capabilities --------
 
     def compute_mass_matrix(self) -> np.ndarray:
