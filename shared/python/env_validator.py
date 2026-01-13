@@ -17,9 +17,34 @@ Usage:
 import logging
 import os
 import secrets
-from typing import Any
+from typing import TypedDict
 
 logger = logging.getLogger(__name__)
+
+
+class APIKeyValidationResults(TypedDict):
+    secret_key: bool
+    environment: str | None
+    admin_password: bool
+    issues: list[str]
+    warnings: list[str]
+
+
+class DatabaseKeyValidationResults(TypedDict):
+    database_url: bool
+    database_type: str | None
+    issues: list[str]
+    warnings: list[str]
+
+
+class EnvironmentValidationResults(TypedDict):
+    environment: str
+    api_security: APIKeyValidationResults
+    database: DatabaseKeyValidationResults
+    production_checklist: dict[str, bool]
+    critical_issues: list[str]
+    warnings: list[str]
+    valid: bool
 
 
 class EnvironmentValidationError(Exception):
@@ -78,7 +103,7 @@ def validate_secret_key_strength(key: str, min_length: int = 64) -> bool:
     return True
 
 
-def validate_api_security() -> dict[str, Any]:
+def validate_api_security() -> APIKeyValidationResults:
     """Validate API security configuration.
 
     Returns:
@@ -87,7 +112,7 @@ def validate_api_security() -> dict[str, Any]:
     Raises:
         EnvironmentValidationError: If critical security issues found
     """
-    results = {
+    results: APIKeyValidationResults = {
         "secret_key": False,
         "environment": None,
         "admin_password": False,
@@ -152,13 +177,13 @@ def validate_api_security() -> dict[str, Any]:
     return results
 
 
-def validate_database_config() -> dict[str, Any]:
+def validate_database_config() -> DatabaseKeyValidationResults:
     """Validate database configuration.
 
     Returns:
         Dictionary with validation results
     """
-    results = {
+    results: DatabaseKeyValidationResults = {
         "database_url": False,
         "database_type": None,
         "issues": [],
@@ -201,10 +226,11 @@ def validate_database_config() -> dict[str, Any]:
         )
 
     # Check for credentials in URL (they should be there for remote databases)
-    if results["database_type"] in ["postgresql", "mysql"]:
-        if "@" not in database_url:
+    db_type = results["database_type"]
+    if db_type in ["postgresql", "mysql"]:
+        if database_url and "@" not in database_url:
             results["warnings"].append(
-                f"{results['database_type'].upper()} URL appears to be missing credentials"
+                f"{str(db_type).upper()} URL appears to be missing credentials"
             )
 
     return results
@@ -216,7 +242,7 @@ def validate_production_checklist() -> dict[str, bool]:
     Returns:
         Dictionary mapping checklist items to their status
     """
-    checklist = {}
+    checklist: dict[str, bool] = {}
 
     environment = os.getenv("ENVIRONMENT", "development").lower()
 
@@ -263,7 +289,7 @@ echo 'GOLF_API_SECRET_KEY=[your-generated-key]' >> .env
 """
 
 
-def validate_environment(raise_on_error: bool = True) -> dict[str, Any]:
+def validate_environment(raise_on_error: bool = True) -> EnvironmentValidationResults:
     """Validate all environment configuration.
 
     Args:
@@ -277,10 +303,21 @@ def validate_environment(raise_on_error: bool = True) -> dict[str, Any]:
     """
     logger.info("Validating environment configuration...")
 
-    results = {
+    results: EnvironmentValidationResults = {
         "environment": os.getenv("ENVIRONMENT", "development").lower(),
-        "api_security": {},
-        "database": {},
+        "api_security": {
+            "secret_key": False,
+            "environment": None,
+            "admin_password": False,
+            "issues": [],
+            "warnings": [],
+        },
+        "database": {
+            "database_url": False,
+            "database_type": None,
+            "issues": [],
+            "warnings": [],
+        },
         "production_checklist": {},
         "critical_issues": [],
         "warnings": [],
@@ -341,66 +378,69 @@ def validate_environment(raise_on_error: bool = True) -> dict[str, Any]:
     return results
 
 
-def print_validation_report(results: dict[str, Any]) -> None:
-    """Print a formatted validation report.
+def print_validation_report(results: EnvironmentValidationResults) -> None:
+    """Log a formatted validation report.
 
     Args:
         results: Results from validate_environment()
     """
-    print("\n" + "=" * 80)
-    print("ENVIRONMENT VALIDATION REPORT")
-    print("=" * 80)
+    logger.info("\n" + "=" * 80)
+    logger.info("ENVIRONMENT VALIDATION REPORT")
+    logger.info("=" * 80)
 
     # Environment
-    print(f"\nEnvironment: {results['environment'].upper()}")
+    logger.info(f"\nEnvironment: {results['environment'].upper()}")
 
     # API Security
-    print("\nAPI Security:")
+    logger.info("\nAPI Security:")
     api_sec = results["api_security"]
-    print(f"  Secret Key:      {'✓ SET' if api_sec.get('secret_key') else '✗ NOT SET'}")
-    print(
+    logger.info(
+        f"  Secret Key:      {'✓ SET' if api_sec.get('secret_key') else '✗ NOT SET'}"
+    )
+    logger.info(
         f"  Admin Password:  {'✓ SET' if api_sec.get('admin_password') else '○ Optional'}"
     )
 
     # Database
-    print("\nDatabase:")
+    logger.info("\nDatabase:")
     db = results["database"]
-    print(
+    logger.info(
         f"  Database URL:    {'✓ SET' if db.get('database_url') else '○ Using default'}"
     )
-    print(f"  Database Type:   {db.get('database_type', 'unknown').upper()}")
+    db_type_str = str(db.get("database_type", "unknown")).upper()
+    logger.info(f"  Database Type:   {db_type_str}")
 
     # Production checklist (if applicable)
     if results["environment"] == "production":
-        print("\nProduction Checklist:")
+        logger.info("\nProduction Checklist:")
         checklist = results["production_checklist"]
         for item, status in checklist.items():
             symbol = "✓" if status else "✗"
-            print(f"  {symbol} {item.replace('_', ' ').title()}")
+            logger.info(f"  {symbol} {item.replace('_', ' ').title()}")
 
     # Issues and warnings
     if results["critical_issues"]:
-        print(f"\n❌ CRITICAL ISSUES ({len(results['critical_issues'])}):")
+        logger.info(f"\n❌ CRITICAL ISSUES ({len(results['critical_issues'])}):")
         for issue in results["critical_issues"]:
-            print(f"  - {issue}")
+            logger.info(f"  - {issue}")
 
     if results["warnings"]:
-        print(f"\n⚠️  WARNINGS ({len(results['warnings'])}):")
+        logger.info(f"\n⚠️  WARNINGS ({len(results['warnings'])}):")
         for warning in results["warnings"]:
-            print(f"  - {warning}")
+            logger.info(f"  - {warning}")
 
     # Overall status
-    print("\n" + "=" * 80)
+    logger.info("\n" + "=" * 80)
     if results["valid"]:
-        print("✓ VALIDATION PASSED")
+        logger.info("✓ VALIDATION PASSED")
     else:
-        print("✗ VALIDATION FAILED")
-    print("=" * 80 + "\n")
+        logger.info("✗ VALIDATION FAILED")
+    logger.info("=" * 80 + "\n")
 
     # Help for fixing issues
     if not results["valid"]:
-        print("\nTo fix issues:")
-        print(generate_secure_key_command())
+        logger.info("\nTo fix issues:")
+        logger.info(generate_secure_key_command())
 
 
 if __name__ == "__main__":
