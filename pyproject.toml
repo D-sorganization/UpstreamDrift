@@ -119,6 +119,7 @@ extend-exclude = '''
   | build
   | dist
   | shared/models/opensim/opensim-models
+  | shared/models/myosuite/myo_sim
 )/
 '''
 

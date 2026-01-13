@@ -230,7 +230,7 @@ class VideoPosePipeline:
         # Convert pose keypoints to marker format
         # markers_data = self._convert_poses_to_markers(pose_results)
 
-        # Perform registration - placeholder implementation
+        # Perform registration - skeleton implementation
         # NOTE: Marker-to-model registration requires MarkerToModelMapper implementation
         from shared.python.marker_mapping import RegistrationResult
 
