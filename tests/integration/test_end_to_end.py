@@ -258,7 +258,7 @@ class TestPhysicsParameters:
     def test_show_physics_parameters_script(self):
         """Test show_physics_parameters.py script."""
         suite_root = Path(__file__).parent.parent.parent
-        script = suite_root / "show_physics_parameters.py"
+        script = suite_root / "scripts" / "show_physics_parameters.py"
 
         result = subprocess.run(
             [sys.executable, str(script)],
@@ -281,7 +281,7 @@ class TestValidateSuite:
     def test_validate_suite_runs(self):
         """Test that validate_suite.py runs without errors."""
         suite_root = Path(__file__).parent.parent.parent
-        script = suite_root / "validate_suite.py"
+        script = suite_root / "scripts" / "validate_suite.py"
 
         if not script.exists():
             pytest.skip("validate_suite.py not found")
