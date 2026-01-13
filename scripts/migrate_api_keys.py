@@ -48,6 +48,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from passlib.context import CryptContext
 from sqlalchemy import create_engine
+from sqlalchemy.engine.url import make_url
 from sqlalchemy.orm import Session, sessionmaker
 
 from api.auth.models import APIKey, User
@@ -115,9 +116,13 @@ def get_database_session(database_url: str | None = None) -> Session:
     if database_url is None:
         database_url = os.getenv("DATABASE_URL", "sqlite:///./golf_modeling_suite.db")
 
-    logger.info(
-        f"Connecting to database: {database_url.split('@')[-1]}"
-    )  # Hide password
+    try:
+        url = make_url(database_url)
+        masked_url = url.render_as_string(hide_password=True)
+        logger.info(f"Connecting to database: {masked_url}")
+    except Exception:
+        # Fallback to simple logic if URL parsing fails
+        logger.info(f"Connecting to database: {database_url.split('@')[-1]}")
 
     # Create engine
     if database_url.startswith("sqlite"):
@@ -230,9 +235,11 @@ def save_migration_results(migrations: list[dict], output_file: str) -> None:
         f.write("=" * 80 + "\n\n")
 
         f.write("⚠️  SECURITY WARNING ⚠️\n")
-        f.write("This file contains sensitive API keys!\n")
+        f.write("This file contains metadata for migrated API keys.\n")
+        f.write("New API keys are NOT stored in this file for security.\n")
         f.write("- Distribute keys to users via secure channels ONLY\n")
-        f.write("- Delete this file after keys are distributed\n")
+        f.write("- Full keys were displayed ONCE on the console during migration\n")
+        f.write("- Delete this file after distribution is verified\n")
         f.write("- Never commit this file to version control\n")
         f.write("- Old API keys are now INVALID\n\n")
 
@@ -253,7 +260,7 @@ def save_migration_results(migrations: list[dict], output_file: str) -> None:
             f.write(f"Old Hash:     {migration['old_hash_type']}\n")
             f.write(f"New Hash:     {migration['new_hash_type']}\n")
             f.write("\n")
-            f.write(f"NEW API KEY:  {migration['new_key']}\n")
+            f.write("NEW API KEY:  [NOT STORED IN THIS FILE - SEE CONSOLE OUTPUT]\n")
             f.write("\n")
             f.write("Action Required:\n")
             f.write(
@@ -321,6 +328,26 @@ def main() -> int:
 
         # Save results
         if migrations:
+            # Display new API keys once on console (not written to disk)
+            if not args.dry_run:
+                print("\n" + "=" * 80)
+                print("NEW API KEYS (DISPLAYED ONCE - DO NOT CLOSE WINDOW UNTIL SAVED)")
+                print("=" * 80)
+                print(
+                    "The following API keys are displayed ONLY in this console output.\n"
+                    "They are NOT stored on disk. Distribute them to users via secure\n"
+                    "channels and then securely discard this output.\n"
+                )
+                for idx, migration in enumerate(migrations, 1):
+                    print(f"KEY {idx} of {len(migrations)}")
+                    print("-" * 40)
+                    print(f"Key ID:       {migration['key_id']}")
+                    print(f"Key Name:     {migration['key_name']}")
+                    print(f"User Email:   {migration['user_email']}")
+                    print(f"NEW API KEY:  {migration['new_key']}")
+                    print("-" * 40 + "\n")
+                print("=" * 80 + "\n")
+
             save_migration_results(migrations, args.output)
 
         # Summary
