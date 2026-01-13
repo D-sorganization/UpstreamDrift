@@ -151,7 +151,7 @@ class StandardModelManager:
 
             # Download mesh files (this is a simplified approach - in practice you'd want
             # to download the actual mesh files from the repository)
-            self._create_placeholder_meshes(human_meshes_dir)
+            self._create_temporary_meshes(human_meshes_dir)
 
             logger.info("Standard humanoid model downloaded successfully")
             return True
@@ -160,13 +160,13 @@ class StandardModelManager:
             logger.error(f"Failed to download standard humanoid model: {e}")
             return False
 
-    def _create_placeholder_meshes(self, mesh_dir: Path) -> None:
-        """Create placeholder mesh files for development.
+    def _create_temporary_meshes(self, mesh_dir: Path) -> None:
+        """Create temporary mesh files for development.
 
         In production, this would download actual STL files from human-gazebo.
         """
-        # Create basic placeholder STL files
-        placeholder_meshes = [
+        # Create basic temporary STL files
+        temporary_meshes = [
             "head.stl",
             "torso.stl",
             "pelvis.stl",
@@ -184,13 +184,13 @@ class StandardModelManager:
             "right_foot.stl",
         ]
 
-        for mesh_name in placeholder_meshes:
+        for mesh_name in temporary_meshes:
             mesh_path = mesh_dir / mesh_name
             if not mesh_path.exists():
                 # Create minimal STL file (just header for now)
                 with open(mesh_path, "w") as f:
-                    f.write("solid placeholder\n")
-                    f.write("endsolid placeholder\n")
+                    f.write("solid temporary\n")
+                    f.write("endsolid temporary\n")
 
     def get_golf_club_path(self, club_type: str = "driver") -> Path:
         """Get path to golf club URDF.

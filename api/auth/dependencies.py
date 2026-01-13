@@ -48,7 +48,7 @@ async def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    return user
+    return user  # type: ignore[no-any-return]
 
 
 async def get_current_user_from_api_key(
@@ -102,7 +102,7 @@ async def get_current_user_from_api_key(
     api_key_record.usage_count = int(api_key_record.usage_count) + 1  # type: ignore[assignment]
     db.commit()
 
-    return user
+    return user  # type: ignore[no-any-return]
 
 
 async def get_current_user_flexible(

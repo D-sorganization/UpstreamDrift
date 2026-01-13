@@ -208,6 +208,9 @@ class TestMuJoCoDriftControl:
         if model is None:
             pytest.skip("MuJoCo model not initialized")
 
+        # Explicit assertion for MyPy
+        assert model is not None
+
         # Set initial state based on actual DOFs
         nq = model.nq
         nv = model.nv
