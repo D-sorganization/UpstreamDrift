@@ -290,7 +290,8 @@ class BallFlightSimulator:
                     magnus_acc = magnus_acc_mag * cross_product / cross_magnitude
                     total_acc += magnus_acc
 
-        return total_acc
+        from typing import cast
+        return cast(np.ndarray, total_acc)
 
     def _calculate_forces(
         self, velocity: np.ndarray, launch: LaunchConditions
