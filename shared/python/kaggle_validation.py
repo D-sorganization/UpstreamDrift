@@ -208,8 +208,8 @@ def validate_model_against_dataset(
     else:
         sample = clean
 
-    predictions = []
-    actuals = []
+    predictions_list: list[float] = []
+    actuals_list: list[float] = []
 
     for _, row in sample.iterrows():
         try:
@@ -218,13 +218,13 @@ def validate_model_against_dataset(
                 row["launch_angle_deg"],
                 row["spin_rate_rpm"],
             )
-            predictions.append(pred)
-            actuals.append(row["carry_distance_yards"])
+            predictions_list.append(pred)
+            actuals_list.append(float(row["carry_distance_yards"]))
         except Exception as e:
             logger.warning(f"Prediction failed: {e}")
 
-    predictions = np.array(predictions)
-    actuals = np.array(actuals)
+    predictions = np.array(predictions_list)
+    actuals = np.array(actuals_list)
 
     # Calculate metrics
     errors = predictions - actuals
@@ -233,8 +233,8 @@ def validate_model_against_dataset(
     bias = float(np.mean(errors))
 
     # R² (coefficient of determination)
-    ss_res = np.sum(errors**2)
-    ss_tot = np.sum((actuals - np.mean(actuals)) ** 2)
+    ss_res = float(np.sum(errors**2))
+    ss_tot = float(np.sum((actuals - np.mean(actuals)) ** 2))
     r2 = float(1 - (ss_res / ss_tot)) if ss_tot > 0 else 0.0
 
     # MAPE (mean absolute percentage error)
@@ -292,7 +292,7 @@ def compare_all_models_to_dataset(
                     spin_rate_rpm=spin,
                 )
                 result = m.simulate(launch)
-                return result.carry_distance * 1.09361  # Convert to yards
+                return float(result.carry_distance * 1.09361)  # Convert to yards
 
             return model_func
 
