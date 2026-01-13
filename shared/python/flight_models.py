@@ -354,7 +354,9 @@ class WaterlooPennerModel(BallFlightModel):
             cd = c.cd0 + c.cd1 * spin_ratio + c.cd2 * spin_ratio**2
 
             # Lift coefficient: Cl = cl0 + cl1*S + cl2*S² (capped)
-            cl = min(c.cl_max, c.cl0 + c.cl1 * spin_ratio + c.cl2 * spin_ratio**2)
+            cl = min(
+                c.cl_max, float(c.cl0 + c.cl1 * spin_ratio + c.cl2 * spin_ratio**2)
+            )
 
             # Drag force: F_d = -0.5 * ρ * v² * Cd * A * v_hat
             area = math.pi * launch.ball_radius**2
@@ -379,7 +381,7 @@ class WaterlooPennerModel(BallFlightModel):
             return np.array([vel[0], vel[1], vel[2], accel[0], accel[1], accel[2]])
 
         def ground_event(t: float, y: np.ndarray) -> float:
-            return y[2]  # z position
+            return float(y[2])  # z position
 
         ground_event.terminal = True  # type: ignore[attr-defined]
         ground_event.direction = -1  # type: ignore[attr-defined]
@@ -576,7 +578,7 @@ class MacDonaldHanzelyModel(BallFlightModel):
             return np.array([vel[0], vel[1], vel[2], accel[0], accel[1], accel[2]])
 
         def ground_event(t: float, y: np.ndarray) -> float:
-            return y[2]
+            return float(y[2])
 
         ground_event.terminal = True  # type: ignore[attr-defined]
         ground_event.direction = -1  # type: ignore[attr-defined]
@@ -749,8 +751,9 @@ class NathanModel(BallFlightModel):
                 cd = self.cd_base
             else:
                 # Smooth transition
-                cd = self.cd_low_re - (self.cd_low_re - self.cd_base) * (
-                    re / self.re_critical
+                cd = float(
+                    self.cd_low_re
+                    - (self.cd_low_re - self.cd_base) * (re / self.re_critical)
                 )
 
             # Drag acceleration
@@ -782,7 +785,7 @@ class NathanModel(BallFlightModel):
             return np.array([vel[0], vel[1], vel[2], accel[0], accel[1], accel[2]])
 
         def ground_event(t: float, y: np.ndarray) -> float:
-            return y[2]
+            return float(y[2])
 
         ground_event.terminal = True  # type: ignore[attr-defined]
         ground_event.direction = -1  # type: ignore[attr-defined]
@@ -962,7 +965,7 @@ class BallantyneModel(BallFlightModel):
             return np.array([vel[0], vel[1], vel[2], accel[0], accel[1], accel[2]])
 
         def ground_event(t: float, y: np.ndarray) -> float:
-            return y[2]
+            return float(y[2])
 
         ground_event.terminal = True  # type: ignore[attr-defined]
         ground_event.direction = -1  # type: ignore[attr-defined]
@@ -1126,7 +1129,7 @@ class JColeModel(BallFlightModel):
             # Simple lift model (proportional to spin, capped)
             if omega_mag > 0:
                 spin_param = (omega_mag * launch.ball_radius) / speed
-                cl = min(self.cl_max, 0.5 * spin_param)
+                cl = min(self.cl_max, float(0.5 * spin_param))
 
                 cross = np.cross(spin_axis, vel_unit)
                 cross_mag = np.linalg.norm(cross)
@@ -1142,7 +1145,7 @@ class JColeModel(BallFlightModel):
             return np.array([vel[0], vel[1], vel[2], accel[0], accel[1], accel[2]])
 
         def ground_event(t: float, y: np.ndarray) -> float:
-            return y[2]
+            return float(y[2])
 
         ground_event.terminal = True  # type: ignore[attr-defined]
         ground_event.direction = -1  # type: ignore[attr-defined]
@@ -1319,7 +1322,7 @@ class RospieDLModel(BallFlightModel):
 
             # DL-enhanced lift: Cl = cl_base + cl_spin * S
             if omega_mag > 0:
-                cl = self.cl_base + self.cl_spin * spin_ratio
+                cl = float(self.cl_base + self.cl_spin * spin_ratio)
                 cl = min(0.30, cl)  # Cap from DL training
 
                 cross = np.cross(spin_axis, vel_unit)
@@ -1515,7 +1518,7 @@ class CharryL3Model(BallFlightModel):
             return np.array([vel[0], vel[1], vel[2], accel[0], accel[1], accel[2]])
 
         def ground_event(t: float, y: np.ndarray) -> float:
-            return y[2]
+            return float(y[2])
 
         ground_event.terminal = True  # type: ignore[attr-defined]
         ground_event.direction = -1  # type: ignore[attr-defined]

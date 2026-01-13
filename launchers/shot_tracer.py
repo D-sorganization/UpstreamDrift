@@ -282,7 +282,9 @@ class MultiModelShotTracerWidget(QWidget):
         self.results_table.setHorizontalHeaderLabels(
             ["Model", "Carry (yd)", "Max Height (m)", "Time (s)", "Landing (°)"]
         )
-        self.results_table.horizontalHeader().setStretchLastSection(True)
+        header = self.results_table.horizontalHeader()
+        if header is not None:
+            header.setStretchLastSection(True)
         self.results_table.setMinimumHeight(120)
         results_layout.addWidget(self.results_table)
 
