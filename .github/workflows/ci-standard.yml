@@ -67,10 +67,11 @@ jobs:
             exit 1
           fi
 
+      # SECURITY FIX: Make security audit blocking (fail on vulnerabilities)
       - name: Security Audit
         run: |
           pip install pip-audit
-          pip-audit || true
+          pip-audit
 
       # FIX: Run Python-based MATLAB Quality Check (Works without License)
       # Non-blocking, archives results for legacy support
