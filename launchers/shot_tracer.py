@@ -1,17 +1,19 @@
-"""Shot Tracer Visualization GUI.
+"""Multi-Model Shot Tracer Visualization GUI.
 
-A standalone PyQt6 application for visualizing golf ball trajectories.
-Allows manual input of launch parameters (ball speed, launch angle, spin rate,
-spin axis) and displays the resulting 3D trajectory.
+A standalone PyQt6 application for visualizing golf ball trajectories
+using multiple physics models for comparison.
 
-This serves as both a validation tool for the ball flight model and a
+Supports:
+- Waterloo/Penner model (quadratic Cd/Cl)
+- MacDonald-Hanzely model (1991 physics paper)
+- Nathan model (libgolf-inspired, Reynolds-dependent)
+
+This serves as both a validation tool for comparing models and a
 visualization utility for shot analysis.
 """
 
 import logging
-import math
 import sys
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -24,8 +26,10 @@ from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QApplication,
+    QCheckBox,
     QDoubleSpinBox,
     QFormLayout,
+    QFrame,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -34,6 +38,8 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QSplitter,
     QStatusBar,
+    QTableWidget,
+    QTableWidgetItem,
     QVBoxLayout,
     QWidget,
 )
@@ -45,63 +51,37 @@ try:
     PYQTGRAPH_AVAILABLE = True
 except ImportError:
     PYQTGRAPH_AVAILABLE = False
+    pg = None  # type: ignore[assignment]
+    gl = None  # type: ignore[assignment]
 
-from ball_flight_physics import (
-    BallFlightSimulator,
-    LaunchConditions,
+from flight_models import (
+    FlightModelRegistry,
+    FlightModelType,
+    FlightResult,
+    UnifiedLaunchConditions,
+    compare_models,
 )
 
 logger = logging.getLogger(__name__)
 
-
-@dataclass
-class LaunchParameters:
-    """User-configurable launch parameters for the shot tracer."""
-
-    ball_speed_mph: float = 163.0  # mph
-    launch_angle_deg: float = 11.0  # degrees
-    spin_rate_rpm: float = 2500.0  # rpm
-    azimuth_angle_deg: float = 0.0  # degrees (direction)
-    side_spin_rpm: float = 0.0  # rpm (positive = fade, negative = draw)
-
-    def to_launch_conditions(self) -> LaunchConditions:
-        """Convert to LaunchConditions for the simulator."""
-        # Convert units
-        ball_speed_ms = self.ball_speed_mph * 0.44704  # mph to m/s
-        launch_angle_rad = math.radians(self.launch_angle_deg)
-        azimuth_rad = math.radians(self.azimuth_angle_deg)
-
-        # Calculate spin axis from backspin and sidespin
-        # Backspin axis is perpendicular to flight direction (pointing left)
-        # Sidespin axis is vertical
-        total_spin = math.sqrt(self.spin_rate_rpm**2 + self.side_spin_rpm**2)
-        if total_spin > 0:
-            # Axis is tilted based on ratio of backspin to sidespin
-            backspin_component = self.spin_rate_rpm / total_spin
-            sidespin_component = self.side_spin_rpm / total_spin
-            # Default backspin axis is [0, -1, 0], sidespin tilts it
-            spin_axis = np.array([sidespin_component, -backspin_component, 0.0])
-            spin_axis = spin_axis / np.linalg.norm(spin_axis)
-        else:
-            spin_axis = np.array([0.0, -1.0, 0.0])
-
-        return LaunchConditions(
-            velocity=ball_speed_ms,
-            launch_angle=launch_angle_rad,
-            azimuth_angle=azimuth_rad,
-            spin_rate=total_spin,
-            spin_axis=spin_axis,
-        )
+# Color palette for multiple trajectories
+TRAJECTORY_COLORS = [
+    (1.0, 0.5, 0.0, 1.0),  # Orange - Waterloo/Penner
+    (0.0, 0.7, 1.0, 1.0),  # Cyan - MacDonald-Hanzely
+    (0.0, 1.0, 0.5, 1.0),  # Green - Nathan
+    (1.0, 0.0, 0.5, 1.0),  # Magenta - future models
+    (1.0, 1.0, 0.0, 1.0),  # Yellow - future models
+]
 
 
-class ShotTracerWidget(QWidget):
-    """Main widget for the shot tracer visualization."""
+class MultiModelShotTracerWidget(QWidget):
+    """Main widget for multi-model shot tracer visualization."""
 
     def __init__(self, parent: "QWidget | None" = None) -> None:
         """Initialize the shot tracer widget."""
         super().__init__(parent)
-        self.params = LaunchParameters()
-        self.trajectory: list[Any] = []
+        self.results: dict[str, FlightResult] = {}
+        self.trajectory_plots: dict[str, Any] = {}
         self.animation_timer = QTimer()
         self.animation_index = 0
 
@@ -119,12 +99,12 @@ class ShotTracerWidget(QWidget):
         left_panel = self._create_controls_panel()
         splitter.addWidget(left_panel)
 
-        # Right panel: 3D Visualization
+        # Right panel: Visualization + Results
         right_panel = self._create_visualization_panel()
         splitter.addWidget(right_panel)
 
-        # Set initial sizes (30% controls, 70% visualization)
-        splitter.setSizes([300, 700])
+        # Set initial sizes (35% controls, 65% visualization)
+        splitter.setSizes([350, 650])
 
         main_layout.addWidget(splitter)
 
@@ -135,10 +115,26 @@ class ShotTracerWidget(QWidget):
         layout.setSpacing(10)
 
         # Title
-        title = QLabel("Shot Tracer")
-        title.setFont(QFont("Arial", 16, QFont.Weight.Bold))
+        title = QLabel("Multi-Model Shot Tracer")
+        title.setFont(QFont("Arial", 14, QFont.Weight.Bold))
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(title)
+
+        # Model Selection Group
+        model_group = QGroupBox("Physics Models")
+        model_layout = QVBoxLayout()
+
+        self.model_checkboxes: dict[str, QCheckBox] = {}
+        for model_type in FlightModelType:
+            model = FlightModelRegistry.get_model(model_type)
+            checkbox = QCheckBox(f"{model.name}")
+            checkbox.setToolTip(f"{model.description}\nRef: {model.reference}")
+            checkbox.setChecked(True)  # All models enabled by default
+            self.model_checkboxes[model_type.value] = checkbox
+            model_layout.addWidget(checkbox)
+
+        model_group.setLayout(model_layout)
+        layout.addWidget(model_group)
 
         # Launch Parameters Group
         launch_group = QGroupBox("Launch Parameters")
@@ -147,7 +143,7 @@ class ShotTracerWidget(QWidget):
         # Ball Speed
         self.speed_spin = QDoubleSpinBox()
         self.speed_spin.setRange(50.0, 200.0)
-        self.speed_spin.setValue(self.params.ball_speed_mph)
+        self.speed_spin.setValue(163.0)
         self.speed_spin.setSuffix(" mph")
         self.speed_spin.setDecimals(1)
         form.addRow("Ball Speed:", self.speed_spin)
@@ -155,7 +151,7 @@ class ShotTracerWidget(QWidget):
         # Launch Angle
         self.angle_spin = QDoubleSpinBox()
         self.angle_spin.setRange(-10.0, 45.0)
-        self.angle_spin.setValue(self.params.launch_angle_deg)
+        self.angle_spin.setValue(11.0)
         self.angle_spin.setSuffix("°")
         self.angle_spin.setDecimals(1)
         form.addRow("Launch Angle:", self.angle_spin)
@@ -163,7 +159,7 @@ class ShotTracerWidget(QWidget):
         # Spin Rate
         self.spin_spin = QDoubleSpinBox()
         self.spin_spin.setRange(0.0, 12000.0)
-        self.spin_spin.setValue(self.params.spin_rate_rpm)
+        self.spin_spin.setValue(2500.0)
         self.spin_spin.setSuffix(" rpm")
         self.spin_spin.setDecimals(0)
         form.addRow("Backspin:", self.spin_spin)
@@ -171,25 +167,28 @@ class ShotTracerWidget(QWidget):
         # Azimuth Angle
         self.azimuth_spin = QDoubleSpinBox()
         self.azimuth_spin.setRange(-45.0, 45.0)
-        self.azimuth_spin.setValue(self.params.azimuth_angle_deg)
+        self.azimuth_spin.setValue(0.0)
         self.azimuth_spin.setSuffix("°")
         self.azimuth_spin.setDecimals(1)
         form.addRow("Direction:", self.azimuth_spin)
 
-        # Side Spin
-        self.sidespin_spin = QDoubleSpinBox()
-        self.sidespin_spin.setRange(-5000.0, 5000.0)
-        self.sidespin_spin.setValue(self.params.side_spin_rpm)
-        self.sidespin_spin.setSuffix(" rpm")
-        self.sidespin_spin.setDecimals(0)
-        form.addRow("Sidespin (+fade/-draw):", self.sidespin_spin)
+        # Spin Axis Angle (for sidespin)
+        self.spin_axis_spin = QDoubleSpinBox()
+        self.spin_axis_spin.setRange(-45.0, 45.0)
+        self.spin_axis_spin.setValue(0.0)
+        self.spin_axis_spin.setSuffix("°")
+        self.spin_axis_spin.setDecimals(1)
+        self.spin_axis_spin.setToolTip(
+            "Spin axis tilt: 0° = pure backspin, ±45° = fade/draw"
+        )
+        form.addRow("Spin Axis Tilt:", self.spin_axis_spin)
 
         launch_group.setLayout(form)
         layout.addWidget(launch_group)
 
         # Presets Group
         presets_group = QGroupBox("Club Presets")
-        presets_layout = QVBoxLayout()
+        presets_layout = QHBoxLayout()
 
         driver_btn = QPushButton("Driver")
         driver_btn.clicked.connect(lambda: self._apply_preset("driver"))
@@ -199,7 +198,7 @@ class ShotTracerWidget(QWidget):
         iron7_btn.clicked.connect(lambda: self._apply_preset("7iron"))
         presets_layout.addWidget(iron7_btn)
 
-        pw_btn = QPushButton("Pitching Wedge")
+        pw_btn = QPushButton("PW")
         pw_btn.clicked.connect(lambda: self._apply_preset("pw"))
         presets_layout.addWidget(pw_btn)
 
@@ -209,92 +208,93 @@ class ShotTracerWidget(QWidget):
         # Action Buttons
         button_layout = QHBoxLayout()
 
-        self.simulate_btn = QPushButton("Simulate Flight")
+        self.simulate_btn = QPushButton("Compare Models")
         self.simulate_btn.setStyleSheet(
             "background-color: #4CAF50; color: white; font-weight: bold; padding: 10px;"
         )
         button_layout.addWidget(self.simulate_btn)
 
-        self.animate_btn = QPushButton("Animate")
-        self.animate_btn.setEnabled(False)
-        button_layout.addWidget(self.animate_btn)
+        self.clear_btn = QPushButton("Clear")
+        button_layout.addWidget(self.clear_btn)
 
         layout.addLayout(button_layout)
 
-        # Results Group
-        self.results_group = QGroupBox("Flight Results")
-        results_layout = QFormLayout()
+        # Legend
+        legend_group = QGroupBox("Legend")
+        legend_layout = QVBoxLayout()
 
-        self.carry_label = QLabel("--")
-        results_layout.addRow("Carry Distance:", self.carry_label)
+        self.legend_labels: list[QLabel] = []
+        for i, model_type in enumerate(FlightModelType):
+            model = FlightModelRegistry.get_model(model_type)
+            color = TRAJECTORY_COLORS[i % len(TRAJECTORY_COLORS)]
+            rgb = f"rgb({int(color[0]*255)},{int(color[1]*255)},{int(color[2]*255)})"
+            label = QLabel(f"● {model.name}")
+            label.setStyleSheet(f"color: {rgb}; font-weight: bold;")
+            legend_layout.addWidget(label)
+            self.legend_labels.append(label)
 
-        self.max_height_label = QLabel("--")
-        results_layout.addRow("Max Height:", self.max_height_label)
+        legend_group.setLayout(legend_layout)
+        layout.addWidget(legend_group)
 
-        self.flight_time_label = QLabel("--")
-        results_layout.addRow("Flight Time:", self.flight_time_label)
-
-        self.landing_angle_label = QLabel("--")
-        results_layout.addRow("Landing Angle:", self.landing_angle_label)
-
-        self.results_group.setLayout(results_layout)
-        layout.addWidget(self.results_group)
-
-        # Stretch to push everything to top
         layout.addStretch()
 
         return panel
 
     def _create_visualization_panel(self) -> QWidget:
-        """Create the 3D visualization panel."""
+        """Create the visualization and results panel."""
         panel = QWidget()
         layout = QVBoxLayout(panel)
 
+        # 3D Visualization (top)
         if PYQTGRAPH_AVAILABLE:
-            # Create OpenGL widget for 3D visualization
             self.gl_widget = gl.GLViewWidget()
             self.gl_widget.setCameraPosition(distance=400, elevation=25, azimuth=45)
+            self.gl_widget.setMinimumHeight(400)
 
             # Add grid
             grid = gl.GLGridItem()
-            grid.setSize(300, 50, 1)
+            grid.setSize(300, 100, 1)
             grid.setSpacing(25, 25, 25)
             grid.translate(150, 0, 0)
             self.gl_widget.addItem(grid)
 
-            # Create placeholder for trajectory
-            self.trajectory_line: gl.GLLinePlotItem | None = None
-            self.ball_scatter: gl.GLScatterPlotItem | None = None
-
-            layout.addWidget(self.gl_widget)
+            layout.addWidget(self.gl_widget, stretch=2)
         else:
-            # Fallback 2D visualization using pyqtgraph PlotWidget
-            try:
-                self.plot_widget = pg.PlotWidget()
-                self.plot_widget.setLabel("left", "Height", units="m")
-                self.plot_widget.setLabel("bottom", "Distance", units="m")
-                self.plot_widget.setTitle("Ball Flight Trajectory (Side View)")
-                self.plot_widget.showGrid(x=True, y=True)
-                self.trajectory_curve: pg.PlotDataItem | None = None
-                layout.addWidget(self.plot_widget)
-                self.use_2d_fallback = True
-            except Exception:
-                # Final fallback - just a label
-                label = QLabel(
-                    "3D Visualization requires pyqtgraph with OpenGL support.\n"
-                    "Install with: pip install pyqtgraph PyOpenGL"
-                )
-                label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-                layout.addWidget(label)
-                self.use_2d_fallback = False
+            label = QLabel(
+                "3D Visualization requires pyqtgraph with OpenGL support.\n"
+                "Install with: pip install pyqtgraph PyOpenGL"
+            )
+            label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            layout.addWidget(label, stretch=2)
+
+        # Separator
+        separator = QFrame()
+        separator.setFrameShape(QFrame.Shape.HLine)
+        separator.setFrameShadow(QFrame.Shadow.Sunken)
+        layout.addWidget(separator)
+
+        # Results Table (bottom)
+        results_group = QGroupBox("Model Comparison Results")
+        results_layout = QVBoxLayout()
+
+        self.results_table = QTableWidget()
+        self.results_table.setColumnCount(5)
+        self.results_table.setHorizontalHeaderLabels(
+            ["Model", "Carry (yd)", "Max Height (m)", "Time (s)", "Landing (°)"]
+        )
+        self.results_table.horizontalHeader().setStretchLastSection(True)
+        self.results_table.setMinimumHeight(120)
+        results_layout.addWidget(self.results_table)
+
+        results_group.setLayout(results_layout)
+        layout.addWidget(results_group, stretch=1)
 
         return panel
 
     def _connect_signals(self) -> None:
         """Connect widget signals to handlers."""
-        self.simulate_btn.clicked.connect(self._run_simulation)
-        self.animate_btn.clicked.connect(self._start_animation)
-        self.animation_timer.timeout.connect(self._update_animation)
+        self.simulate_btn.clicked.connect(self._run_comparison)
+        self.clear_btn.clicked.connect(self._clear_visualization)
 
     def _apply_preset(self, club: str) -> None:
         """Apply preset values for a club type."""
@@ -310,135 +310,133 @@ class ShotTracerWidget(QWidget):
             self.angle_spin.setValue(angle)
             self.spin_spin.setValue(spin)
             self.azimuth_spin.setValue(0.0)
-            self.sidespin_spin.setValue(0.0)
+            self.spin_axis_spin.setValue(0.0)
 
-    def _run_simulation(self) -> None:
-        """Run the ball flight simulation with current parameters."""
-        # Update parameters from widgets
-        self.params.ball_speed_mph = self.speed_spin.value()
-        self.params.launch_angle_deg = self.angle_spin.value()
-        self.params.spin_rate_rpm = self.spin_spin.value()
-        self.params.azimuth_angle_deg = self.azimuth_spin.value()
-        self.params.side_spin_rpm = self.sidespin_spin.value()
+    def _get_selected_models(self) -> list[FlightModelType]:
+        """Get list of selected model types."""
+        selected = []
+        for model_type in FlightModelType:
+            checkbox = self.model_checkboxes.get(model_type.value)
+            if checkbox and checkbox.isChecked():
+                selected.append(model_type)
+        return selected
 
-        # Create simulator and run
-        simulator = BallFlightSimulator()
-        launch = self.params.to_launch_conditions()
+    def _run_comparison(self) -> None:
+        """Run all selected models and compare results."""
+        # Create launch conditions
+        launch = UnifiedLaunchConditions.from_imperial(
+            ball_speed_mph=self.speed_spin.value(),
+            launch_angle_deg=self.angle_spin.value(),
+            spin_rate_rpm=self.spin_spin.value(),
+            azimuth_angle_deg=self.azimuth_spin.value(),
+            spin_axis_angle_deg=self.spin_axis_spin.value(),
+        )
+
+        # Get selected models
+        selected_types = self._get_selected_models()
+        if not selected_types:
+            QMessageBox.warning(self, "No Models", "Please select at least one model.")
+            return
+
+        models = [FlightModelRegistry.get_model(t) for t in selected_types]
 
         try:
-            self.trajectory = simulator.simulate_trajectory(launch, max_time=10.0)
-            analysis = simulator.analyze_trajectory(self.trajectory)
-
-            # Update results
-            carry_yards = analysis["carry_distance"] * 1.09361
-            self.carry_label.setText(f"{carry_yards:.1f} yards")
-            self.max_height_label.setText(f"{analysis['max_height']:.1f} m")
-            self.flight_time_label.setText(f"{analysis['flight_time']:.2f} s")
-            self.landing_angle_label.setText(f"{analysis['landing_angle']:.1f}°")
-
-            # Update visualization
+            self.results = compare_models(launch, models)
             self._update_visualization()
-            self.animate_btn.setEnabled(True)
-
+            self._update_results_table()
         except Exception as e:
-            logger.exception("Simulation failed")
+            logger.exception("Comparison failed")
             QMessageBox.warning(self, "Simulation Error", str(e))
 
     def _update_visualization(self) -> None:
-        """Update the 3D visualization with the trajectory."""
-        if not self.trajectory:
+        """Update the 3D visualization with all trajectories."""
+        if not PYQTGRAPH_AVAILABLE:
             return
 
-        # Extract positions
-        positions = np.array([p.position for p in self.trajectory])
+        # Clear old trajectories
+        for plot_item in self.trajectory_plots.values():
+            if plot_item is not None:
+                self.gl_widget.removeItem(plot_item)
+        self.trajectory_plots.clear()
 
-        if PYQTGRAPH_AVAILABLE:
-            # Remove old items
-            if self.trajectory_line is not None:
-                self.gl_widget.removeItem(self.trajectory_line)
-            if self.ball_scatter is not None:
-                self.gl_widget.removeItem(self.ball_scatter)
+        # Plot each model's trajectory
+        for i, (model_name, result) in enumerate(self.results.items()):
+            positions = result.to_position_array()
+            color = TRAJECTORY_COLORS[i % len(TRAJECTORY_COLORS)]
 
-            # Create new trajectory line
-            self.trajectory_line = gl.GLLinePlotItem(
-                pos=positions, color=(1, 0.5, 0, 1), width=3, antialias=True
+            line = gl.GLLinePlotItem(
+                pos=positions, color=color, width=3, antialias=True
             )
-            self.gl_widget.addItem(self.trajectory_line)
+            self.gl_widget.addItem(line)
+            self.trajectory_plots[model_name] = line
 
-            # Add ball at landing position
-            landing_pos = positions[-1:]
-            self.ball_scatter = gl.GLScatterPlotItem(
-                pos=landing_pos, color=(1, 1, 1, 1), size=10
+        # Adjust camera to fit all trajectories
+        if self.results:
+            all_positions = np.vstack(
+                [r.to_position_array() for r in self.results.values()]
             )
-            self.gl_widget.addItem(self.ball_scatter)
-
-            # Center camera on trajectory
+            max_x = np.max(all_positions[:, 0])
             self.gl_widget.setCameraPosition(
-                distance=max(200, positions[:, 0].max() * 1.2),
-                elevation=20,
-                azimuth=45,
-            )
-        elif hasattr(self, "use_2d_fallback") and self.use_2d_fallback:
-            # 2D fallback - plot side view
-            self.plot_widget.clear()
-            self.trajectory_curve = self.plot_widget.plot(
-                positions[:, 0],
-                positions[:, 2],
-                pen=pg.mkPen(color="orange", width=2),
-            )
-            # Add landing point
-            self.plot_widget.plot(
-                [positions[-1, 0]],
-                [positions[-1, 2]],
-                pen=None,
-                symbol="o",
-                symbolBrush="white",
+                distance=max(200, max_x * 1.2), elevation=20, azimuth=45
             )
 
-    def _start_animation(self) -> None:
-        """Start animating the ball flight."""
-        if not self.trajectory:
-            return
+    def _update_results_table(self) -> None:
+        """Update the results comparison table."""
+        self.results_table.setRowCount(len(self.results))
 
-        self.animation_index = 0
-        self.animation_timer.start(20)  # 50 fps
+        for row, (model_name, result) in enumerate(self.results.items()):
+            carry_yd = result.carry_distance * 1.09361
 
-    def _update_animation(self) -> None:
-        """Update animation frame."""
-        if self.animation_index >= len(self.trajectory):
-            self.animation_timer.stop()
-            return
+            self.results_table.setItem(row, 0, QTableWidgetItem(model_name))
+            self.results_table.setItem(row, 1, QTableWidgetItem(f"{carry_yd:.1f}"))
+            self.results_table.setItem(
+                row, 2, QTableWidgetItem(f"{result.max_height:.1f}")
+            )
+            self.results_table.setItem(
+                row, 3, QTableWidgetItem(f"{result.flight_time:.2f}")
+            )
+            self.results_table.setItem(
+                row, 4, QTableWidgetItem(f"{result.landing_angle:.1f}")
+            )
 
-        if PYQTGRAPH_AVAILABLE and self.ball_scatter is not None:
-            pos = self.trajectory[self.animation_index].position
-            self.ball_scatter.setData(pos=np.array([pos]))
+        self.results_table.resizeColumnsToContents()
 
-        self.animation_index += 2  # Skip frames for speed
+    def _clear_visualization(self) -> None:
+        """Clear all trajectories and results."""
+        if PYQTGRAPH_AVAILABLE:
+            for plot_item in self.trajectory_plots.values():
+                if plot_item is not None:
+                    self.gl_widget.removeItem(plot_item)
+            self.trajectory_plots.clear()
+
+        self.results.clear()
+        self.results_table.setRowCount(0)
 
 
-class ShotTracerWindow(QMainWindow):
-    """Main window for the Shot Tracer application."""
+class MultiModelShotTracerWindow(QMainWindow):
+    """Main window for the Multi-Model Shot Tracer application."""
 
     def __init__(self) -> None:
         """Initialize the main window."""
         super().__init__()
-        self.setWindowTitle("Golf Shot Tracer - Ball Flight Visualization")
-        self.setMinimumSize(1200, 800)
+        self.setWindowTitle("Golf Shot Tracer - Multi-Model Comparison")
+        self.setMinimumSize(1300, 900)
 
         # Central widget
-        self.central_widget = ShotTracerWidget()
+        self.central_widget = MultiModelShotTracerWidget()
         self.setCentralWidget(self.central_widget)
 
         # Status bar
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
         self.status_bar.showMessage(
-            "Waterloo/Penner Ball Flight Model | Enter parameters and click 'Simulate Flight'"
+            "Models: Waterloo/Penner, MacDonald-Hanzely, Nathan | "
+            "Select models, enter parameters, and click 'Compare Models'"
         )
 
 
 def main() -> None:
-    """Launch the Shot Tracer application."""
+    """Launch the Multi-Model Shot Tracer application."""
     logging.basicConfig(level=logging.INFO)
 
     app = QApplication(sys.argv)
@@ -463,7 +461,7 @@ def main() -> None:
             left: 10px;
             padding: 0 5px;
         }
-        QDoubleSpinBox, QSpinBox {
+        QDoubleSpinBox, QSpinBox, QComboBox {
             background-color: #3c3c3c;
             border: 1px solid #555;
             border-radius: 3px;
@@ -484,10 +482,24 @@ def main() -> None:
         QLabel {
             color: #ffffff;
         }
+        QCheckBox {
+            color: #ffffff;
+        }
+        QTableWidget {
+            background-color: #3c3c3c;
+            color: #ffffff;
+            gridline-color: #555;
+        }
+        QHeaderView::section {
+            background-color: #2b2b2b;
+            color: #ffffff;
+            padding: 5px;
+            border: 1px solid #555;
+        }
         """
     )
 
-    window = ShotTracerWindow()
+    window = MultiModelShotTracerWindow()
     window.show()
 
     sys.exit(app.exec())
