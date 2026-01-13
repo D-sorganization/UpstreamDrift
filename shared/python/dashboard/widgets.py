@@ -18,6 +18,8 @@ from shared.python.plotting import MplCanvas
 
 LOGGER = logging.getLogger(__name__)
 
+MAX_DIMENSIONS = 100
+
 
 class LivePlotWidget(QtWidgets.QWidget):
     """Widget for displaying real-time plots of simulation data.
@@ -99,7 +101,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.dim_spin = QtWidgets.QSpinBox()
         self.dim_spin.setAccessibleName("Dimension Index")
         self.dim_spin.setAccessibleDescription("Select the dimension index to plot")
-        self.dim_spin.setRange(0, 100)  # Assume max 100 dims
+        self.dim_spin.setRange(0, MAX_DIMENSIONS)
         self.dim_spin.setPrefix("Dim: ")
         self.dim_spin.setToolTip("Select dimension index")
         self.dim_spin.setStatusTip("Select the specific dimension index to plot")
@@ -115,9 +117,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.source_combo.setAccessibleDescription(
             "Select the joint torque source to analyze for induced acceleration"
         )
-        self.source_combo.setToolTip(
-            "Select the joint torque source to analyze."
-        )
+        self.source_combo.setToolTip("Select the joint torque source to analyze.")
         self.source_combo.setStatusTip("Select the induced acceleration source")
         self.source_combo.setVisible(False)
         self.source_combo.currentIndexChanged.connect(self._on_source_changed)
@@ -135,7 +135,9 @@ class LivePlotWidget(QtWidgets.QWidget):
         # Snapshot Button
         self.btn_snapshot = QtWidgets.QPushButton("Snapshot")
         self.btn_snapshot.setToolTip("Copy current plot to clipboard")
-        self.btn_snapshot.setStatusTip("Capture the current plot image to the clipboard")
+        self.btn_snapshot.setStatusTip(
+            "Capture the current plot image to the clipboard"
+        )
         self.btn_snapshot.setAccessibleName("Snapshot Button")
         self.btn_snapshot.clicked.connect(self.copy_snapshot)
         controls_layout.addWidget(self.btn_snapshot)
@@ -151,8 +153,6 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.chk_compute.stateChanged.connect(self.toggle_computation)
         controls_layout.addWidget(self.chk_compute)
 
-
-
         self._main_layout.addLayout(controls_layout)
 
         # Initial plot setup
@@ -167,13 +167,16 @@ class LivePlotWidget(QtWidgets.QWidget):
         # Try to get joint names from the engine
         joint_names = []
         if hasattr(self.recorder.engine, "get_joint_names"):
-             joint_names = self.recorder.engine.get_joint_names()
+            try:
+                joint_names = self.recorder.engine.get_joint_names()  # type: ignore[attr-defined]
+            except Exception:  # noqa: BLE001
+                LOGGER.exception("Failed to get joint names from engine")
 
         if joint_names:
             self.source_combo.addItems(joint_names)
         else:
-            # Fallback to generic indices (assume max 100)
-            for i in range(100):
+            # Fallback to generic indices
+            for i in range(MAX_DIMENSIONS):
                 self.source_combo.addItem(f"Source {i}")
 
     def set_joint_names(self, names: list[str]) -> None:
@@ -234,8 +237,6 @@ class LivePlotWidget(QtWidgets.QWidget):
     def toggle_computation(self, state: int) -> None:
         """Handle checkbox toggle."""
         self._update_recorder_config()
-
-
 
     def _update_recorder_config(self) -> None:
         """Update recorder configuration based on current selection and checkbox."""

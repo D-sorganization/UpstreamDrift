@@ -13,6 +13,7 @@ class TestKinematicSequence:
         # 0.2, 0.4, 0.6, 0.8
 
         from typing import cast
+
         def gaussian(t: np.ndarray, center: float, width: float = 0.1) -> np.ndarray:
             return cast(np.ndarray, np.exp(-((t - center) ** 2) / (2 * width**2)))
 
