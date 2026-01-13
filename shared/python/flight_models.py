@@ -718,7 +718,11 @@ class NathanModel(BallFlightModel):
         v0 = launch.get_initial_velocity()
         omega_vec = launch.get_spin_vector()
         omega_mag_initial = np.linalg.norm(omega_vec)
-        spin_axis = omega_vec / omega_mag_initial if omega_mag_initial > 0 else np.array([0, -1, 0])
+        spin_axis = (
+            omega_vec / omega_mag_initial
+            if omega_mag_initial > 0
+            else np.array([0, -1, 0])
+        )
 
         y0 = np.array([0.0, 0.0, 0.0, v0[0], v0[1], v0[2]])
         area = math.pi * launch.ball_radius**2
@@ -908,7 +912,11 @@ class BallantyneModel(BallFlightModel):
         v0 = launch.get_initial_velocity()
         omega_vec = launch.get_spin_vector()
         omega_mag_initial = np.linalg.norm(omega_vec)
-        spin_axis = omega_vec / omega_mag_initial if omega_mag_initial > 0 else np.array([0, -1, 0])
+        spin_axis = (
+            omega_vec / omega_mag_initial
+            if omega_mag_initial > 0
+            else np.array([0, -1, 0])
+        )
 
         y0 = np.array([0.0, 0.0, 0.0, v0[0], v0[1], v0[2]])
         area = math.pi * launch.ball_radius**2
@@ -1084,7 +1092,11 @@ class JColeModel(BallFlightModel):
         v0 = launch.get_initial_velocity()
         omega_vec = launch.get_spin_vector()
         omega_mag_initial = np.linalg.norm(omega_vec)
-        spin_axis = omega_vec / omega_mag_initial if omega_mag_initial > 0 else np.array([0, -1, 0])
+        spin_axis = (
+            omega_vec / omega_mag_initial
+            if omega_mag_initial > 0
+            else np.array([0, -1, 0])
+        )
 
         y0 = np.array([0.0, 0.0, 0.0, v0[0], v0[1], v0[2]])
         area = math.pi * launch.ball_radius**2
@@ -1269,7 +1281,11 @@ class RospieDLModel(BallFlightModel):
         v0 = launch.get_initial_velocity()
         omega_vec = launch.get_spin_vector()
         omega_mag_initial = np.linalg.norm(omega_vec)
-        spin_axis = omega_vec / omega_mag_initial if omega_mag_initial > 0 else np.array([0, -1, 0])
+        spin_axis = (
+            omega_vec / omega_mag_initial
+            if omega_mag_initial > 0
+            else np.array([0, -1, 0])
+        )
 
         y0 = np.array([0.0, 0.0, 0.0, v0[0], v0[1], v0[2]])
         area = math.pi * launch.ball_radius**2

@@ -14,7 +14,6 @@ Individual shot trajectories have significant variance around these means.
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import ClassVar  # noqa: F401 - Reserved for future use
 
 
 class DataSource(Enum):

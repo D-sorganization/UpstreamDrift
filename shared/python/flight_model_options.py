@@ -29,9 +29,7 @@ class FlightModelOptions:
     altitude_m: float = 0.0  # Altitude above sea level [m]
 
 
-def compute_spin_decay(
-    omega_initial: float, time: float, decay_rate: float
-) -> float:
+def compute_spin_decay(omega_initial: float, time: float, decay_rate: float) -> float:
     """Compute spin rate with exponential decay.
 
     Spin decays as: ω(t) = ω₀ * exp(-λ*t)
