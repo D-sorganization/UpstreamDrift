@@ -104,6 +104,15 @@ class PhysicsEngine(Protocol):
         """Get the current simulation time."""
         ...
 
+    def get_joint_names(self) -> list[str]:
+        """Get list of joint names.
+
+        Returns:
+            List of strings corresponding to the joint names in order.
+            Default implementation returns generic names.
+        """
+        return []
+
     # -------- Dynamics Interface --------
 
     @abstractmethod
