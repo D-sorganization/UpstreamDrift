@@ -22,12 +22,34 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class BallProperties:
-    """Physical properties of a golf ball."""
+    """Physical properties of a golf ball.
 
-    mass: float = 0.0459  # kg (regulation golf ball)
-    diameter: float = 0.04267  # m (regulation golf ball)
-    drag_coefficient: float = 0.24  # Typical for golf ball
-    magnus_coefficient: float = 0.25  # Typical for golf ball
+    Coefficients use the Waterloo/Penner model where Cd and Cl are quadratic
+    functions of spin ratio S = (ω * r) / v:
+        Cd = cd0 + cd1 * S + cd2 * S²
+        Cl = cl0 + cl1 * S + cl2 * S²
+
+    References:
+        - Penner, A.R. (2003) "The physics of golf"
+        - McPhee et al. (Waterloo) "Golf Ball Flight Dynamics"
+    """
+
+    mass: float = 0.0459  # [kg] USGA regulation max
+    diameter: float = 0.04267  # [m] USGA regulation min
+
+    # Drag coefficient quadratic model: Cd = cd0 + cd1*S + cd2*S²
+    # Source: Waterloo/Penner empirical fits to wind tunnel data
+    # Tuned against TrackMan carry distance data
+    cd0: float = 0.21  # Base drag (no spin) - typical for dimpled golf balls
+    cd1: float = 0.05  # Linear spin dependence (reduced from lit values)
+    cd2: float = 0.02  # Quadratic spin dependence
+
+    # Lift coefficient quadratic model: Cl = cl0 + cl1*S + cl2*S²
+    # Source: Waterloo/Penner empirical fits to wind tunnel data
+    # Values tuned to match TrackMan carry: Driver ~270yd, 7i ~165yd, PW ~125yd
+    cl0: float = 0.00  # No lift at zero spin
+    cl1: float = 0.38  # Linear spin dependence
+    cl2: float = 0.08  # Quadratic spin dependence
 
     @property
     def radius(self) -> float:
@@ -42,7 +64,18 @@ class BallProperties:
 
 @dataclass
 class LaunchConditions:
-    """Initial launch conditions for ball flight."""
+    """Initial launch conditions for ball flight.
+
+    Attributes:
+        velocity: Initial ball speed [m/s]
+        launch_angle: Vertical launch angle [radians]
+        azimuth_angle: Horizontal direction [radians], 0 = target line
+        spin_rate: Total spin rate [rpm], positive = backspin
+        spin_axis: Normalized spin axis vector. For backspin producing lift,
+            this should be perpendicular to direction of travel. Default is
+            [0, -1, 0] (pointing left when viewed from behind), which produces
+            upward lift when crossed with forward velocity.
+    """
 
     velocity: float  # m/s - initial ball speed
     launch_angle: float  # radians - vertical launch angle
@@ -53,8 +86,9 @@ class LaunchConditions:
     def __post_init__(self) -> None:
         """Initialize default spin axis if not provided."""
         if self.spin_axis is None:
-            # Default to pure backspin
-            self.spin_axis = np.array([1.0, 0.0, 0.0])
+            # Default to pure backspin (axis points left when viewed from behind)
+            # Cross product: [0,-1,0] × [1,0,0] = [0,0,1] (upward lift)
+            self.spin_axis = np.array([0.0, -1.0, 0.0])
 
 
 @dataclass
@@ -219,43 +253,65 @@ class BallFlightSimulator:
         if speed > 0.1:  # Avoid division by zero
             velocity_unit = relative_velocity / speed
 
-            # Drag force
+            # Calculate spin ratio S = (ω * r) / v (Waterloo/Penner model)
+            if launch.spin_rate > 0:
+                omega = launch.spin_rate * 2 * np.pi / 60  # rad/s
+                spin_ratio: float = float((omega * self.ball.radius) / speed)
+            else:
+                spin_ratio = 0.0
+
+            # Drag force using Waterloo/Penner quadratic model
+            # Cd = cd0 + cd1*S + cd2*S² (Penner, 2003)
+            # Source: Waterloo wind tunnel measurements
+            drag_coefficient: float = (
+                self.ball.cd0
+                + self.ball.cd1 * spin_ratio
+                + self.ball.cd2 * spin_ratio**2
+            )
             drag_magnitude = (
                 0.5
                 * self.environment.air_density
                 * self.ball.cross_sectional_area
-                * self.ball.drag_coefficient
+                * drag_coefficient
                 * speed**2
             )
             forces["drag"] = -drag_magnitude * velocity_unit
 
-            # Magnus force (spin-induced)
-            if launch.spin_rate > 0:
-                # Convert spin rate from rpm to rad/s
-                omega = launch.spin_rate * 2 * np.pi / 60
+            # Lift force using Waterloo/Penner quadratic model
+            # Cl = cl0 + cl1*S + cl2*S² (Penner, 2003)
+            # Source: Waterloo wind tunnel measurements
+            if spin_ratio > 0:
+                lift_coefficient: float = (
+                    self.ball.cl0
+                    + self.ball.cl1 * spin_ratio
+                    + self.ball.cl2 * spin_ratio**2
+                )
+                # Cap at reasonable maximum to prevent unrealistic lift
+                # Higher spin doesn't keep producing proportionally more lift
+                lift_coefficient = min(0.25, lift_coefficient)
 
-                # Magnus force = ρ * V * Γ * (ω × v) / |ω × v|
-                # where Γ is circulation
-                circulation = 4 * np.pi * self.ball.radius**2 * omega
+                # Magnus force magnitude
+                magnus_magnitude = (
+                    0.5
+                    * self.environment.air_density
+                    * self.ball.cross_sectional_area
+                    * lift_coefficient
+                    * speed**2
+                )
 
-                # Cross product of spin axis and velocity
+                # Direction: perpendicular to velocity and spin axis
+                # For backspin with axis along x (horizontal), force is upward
                 if launch.spin_axis is not None:
+                    # Magnus force = omega_vec × v_vec (direction)
+                    # Normalized: (spin_axis × velocity) / |spin_axis × velocity|
                     cross_product = np.cross(launch.spin_axis, velocity_unit)
                     cross_magnitude = float(np.linalg.norm(cross_product))
-                else:
-                    cross_product = np.zeros(3)
-                    cross_magnitude = 0.0
-
-                if cross_magnitude > 0:
-                    magnus_magnitude = (
-                        self.environment.air_density
-                        * speed
-                        * circulation
-                        * self.ball.magnus_coefficient
-                    )
-                    forces["magnus"] = (
-                        magnus_magnitude * cross_product / cross_magnitude
-                    )
+                    if cross_magnitude > 1e-10:
+                        forces["magnus"] = (
+                            magnus_magnitude * cross_product / cross_magnitude
+                        )
+                    else:
+                        forces["magnus"] = np.array([0.0, 0.0, 0.0])
                 else:
                     forces["magnus"] = np.array([0.0, 0.0, 0.0])
             else:
@@ -277,6 +333,10 @@ class BallFlightSimulator:
             Height above ground (event occurs when this reaches zero)
         """
         return float(state[2])  # z-coordinate (height)
+
+    # Set event attributes for solve_ivp (must be set on the function)
+    _ground_contact_event.terminal = True  # type: ignore[attr-defined]
+    _ground_contact_event.direction = -1  # type: ignore[attr-defined]  # Only trigger when descending
 
     def calculate_carry_distance(self, trajectory: list[TrajectoryPoint]) -> float:
         """Calculate carry distance from trajectory.

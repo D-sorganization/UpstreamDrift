@@ -110,6 +110,29 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         self.btn_pinocchio.clicked.connect(self._launch_pinocchio)
         layout.addWidget(self.btn_pinocchio)
 
+        layout.addSpacing(10)
+
+        # Separator
+        separator = QtWidgets.QFrame()
+        separator.setFrameShape(QtWidgets.QFrame.Shape.HLine)
+        separator.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
+        layout.addWidget(separator)
+
+        layout.addSpacing(10)
+
+        # Shot Tracer - Ball Flight Visualization
+        self.btn_shot_tracer = QtWidgets.QPushButton("Launch &Shot Tracer")
+        self.btn_shot_tracer.setMinimumHeight(40)
+        self.btn_shot_tracer.setIcon(
+            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_ArrowForward)
+        )
+        self.btn_shot_tracer.setToolTip(
+            "Launch the ball flight visualization (Waterloo/Penner model)"
+        )
+        self.btn_shot_tracer.setAccessibleName("Launch Shot Tracer")
+        self.btn_shot_tracer.clicked.connect(self._launch_shot_tracer)
+        layout.addWidget(self.btn_shot_tracer)
+
         layout.addSpacing(20)
 
         # Log area
@@ -271,6 +294,12 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         # CWD should be python/ directory of pinocchio engine
         cwd = self.pinocchio_path.parent.parent
         self._launch_script("Pinocchio", self.pinocchio_path, cwd)
+
+    def _launch_shot_tracer(self) -> None:
+        # Shot tracer is in launchers/ directory
+        shot_tracer_path = self.script_dir / "shot_tracer.py"
+        # CWD should be the suite root for imports to work
+        self._launch_script("Shot Tracer", shot_tracer_path, self.suite_root)
 
 
 def main() -> None:
