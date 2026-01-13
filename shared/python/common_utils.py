@@ -1,11 +1,9 @@
 """Common utilities shared across all golf modeling engines."""
 
+from __future__ import annotations
+
 from pathlib import Path
 from typing import TYPE_CHECKING
-
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
 
 # Import core utilities (exceptions, logging) from the lightweight module
 from .constants import DEG_TO_RAD, MPS_TO_MPH, RAD_TO_DEG
@@ -74,6 +72,7 @@ def load_golf_data(data_path: str | Path) -> pd.DataFrame:
         ValueError: If file format not supported
     """
     data_path = Path(data_path)
+    import pandas as pd
 
     if data_path.suffix.lower() == ".csv":
         return pd.read_csv(data_path)
@@ -122,6 +121,9 @@ def standardize_joint_angles(
     Returns:
         Standardized DataFrame with joint angles
     """
+    import numpy as np
+    import pandas as pd
+
     if angle_names is None:
         angle_names = [f"joint_{i}" for i in range(angles.shape[1])]
 
@@ -148,6 +150,8 @@ def plot_joint_trajectories(
     Returns:
         Matplotlib figure
     """
+    import matplotlib.pyplot as plt
+
     fig, axes = plt.subplots(2, 2, figsize=(12, 8))
     axes = axes.flatten()
 
