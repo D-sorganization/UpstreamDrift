@@ -1806,6 +1806,52 @@ class StatisticalAnalyzer:
 
         return cast(np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix)
 
+    def compute_cross_recurrence_matrix(
+        self,
+        joint_idx_1: int,
+        joint_idx_2: int,
+        threshold_ratio: float = 0.1,
+    ) -> np.ndarray[tuple[int, int], np.dtype[np.int_]]:
+        """Compute Cross Recurrence Plot matrix between two joints.
+
+        Args:
+            joint_idx_1: First joint index
+            joint_idx_2: Second joint index
+            threshold_ratio: Threshold distance as ratio of max distance
+
+        Returns:
+            Binary recurrence matrix (N, N)
+        """
+        # Construct state vectors for each joint (pos, vel)
+        # N x 2
+        s1 = np.column_stack(
+            (
+                self.joint_positions[:, joint_idx_1],
+                self.joint_velocities[:, joint_idx_1],
+            )
+        )
+        s2 = np.column_stack(
+            (
+                self.joint_positions[:, joint_idx_2],
+                self.joint_velocities[:, joint_idx_2],
+            )
+        )
+
+        # Normalize
+        s1 = (s1 - np.mean(s1, axis=0)) / (np.std(s1, axis=0) + 1e-9)
+        s2 = (s2 - np.mean(s2, axis=0)) / (np.std(s2, axis=0) + 1e-9)
+
+        # Compute distance matrix between s1 and s2
+        # cdist(s1, s2)
+        from scipy.spatial.distance import cdist
+
+        dist_matrix = cdist(s1, s2, metric="euclidean")
+
+        threshold = threshold_ratio * np.max(dist_matrix)
+        recurrence_matrix = (dist_matrix < threshold).astype(np.int_)
+
+        return cast(np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix)
+
     def compute_rqa_metrics(
         self,
         recurrence_matrix: np.ndarray,
@@ -1883,6 +1929,61 @@ class StatisticalAnalyzer:
             longest_diagonal_line=int(l_max),
             trapping_time=tt,
         )
+
+    def compute_correlation_dimension(
+        self, data: np.ndarray, tau: int = 1, dim: int = 3
+    ) -> float:
+        """Estimate Correlation Dimension (D2) using Grassberger-Procaccia algorithm.
+
+        Args:
+            data: Time series
+            tau: Time delay
+            dim: Embedding dimension
+
+        Returns:
+            Estimated Correlation Dimension (slope of log C(r) vs log r)
+        """
+        N = len(data)
+        M = N - (dim - 1) * tau
+        if M < 20:
+            return 0.0
+
+        # Reconstruct phase space
+        orbit = np.zeros((M, dim))
+        for d in range(dim):
+            orbit[:, d] = data[d * tau : d * tau + M]
+
+        # Calculate pairwise distances (vectorized)
+        from scipy.spatial.distance import pdist
+
+        dists = pdist(orbit, metric="euclidean")
+
+        # Compute Correlation Sum C(r) for various r
+        # Use log-spaced radii
+        # Avoid zero distance
+        dists = dists[dists > 1e-9]
+        if len(dists) == 0:
+            return 0.0
+
+        min_r, max_r = np.min(dists), np.max(dists)
+        radii = np.geomspace(min_r * 2, max_r * 0.5, 20)
+        c_r = []
+
+        for r in radii:
+            count = np.sum(dists < r)
+            c_r.append(count / len(dists))
+
+        # Fit line to log-log plot
+        log_r = np.log(radii)
+        log_c = np.log(c_r)
+
+        # Select linear region (middle 50%)
+        n_points = len(log_r)
+        start = n_points // 4
+        end = 3 * n_points // 4
+
+        slope, _ = np.polyfit(log_r[start:end], log_c[start:end], 1)
+        return float(slope)
 
     def estimate_lyapunov_exponent(
         self,
