@@ -63,7 +63,7 @@ app.add_middleware(
     allowed_hosts=["localhost", "127.0.0.1", "*.golfmodelingsuite.com"],
 )
 
-# CORS middleware with restricted origins for production
+# CORS middleware with restricted origins and headers
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -73,12 +73,76 @@ app.add_middleware(
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["*"],
+    # SECURITY: Restrict headers - do NOT use "*"
+    allow_headers=["Content-Type", "Authorization", "X-API-Key"],
 )
+
+# Maximum file upload size (10 MB)
+MAX_UPLOAD_SIZE_MB = 10
+MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024
 
 # Rate limiting
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
+
+
+# SECURITY: Path validation to prevent path traversal attacks
+ALLOWED_MODEL_DIRS = [
+    Path("shared/models").resolve(),
+    Path("models").resolve(),
+    Path("data").resolve(),
+]
+
+
+def _validate_model_path(model_path: str) -> str:
+    """Validate model path to prevent path traversal attacks.
+
+    Args:
+        model_path: User-provided model path
+
+    Returns:
+        Validated absolute path string
+
+    Raises:
+        HTTPException: If path is invalid or contains traversal attempts
+    """
+    # Reject obvious path traversal attempts
+    if ".." in model_path or model_path.startswith("/") or model_path.startswith("\\"):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid path: path traversal not allowed",
+        )
+
+    # Resolve path and check it's within allowed directories
+    try:
+        resolved_path = Path(model_path).resolve()
+    except (ValueError, OSError) as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid path: {e}",
+        ) from e
+
+    # Check if path is within allowed directories
+    is_allowed = any(
+        str(resolved_path).startswith(str(allowed_dir))
+        for allowed_dir in ALLOWED_MODEL_DIRS
+    )
+
+    if not is_allowed:
+        raise HTTPException(
+            status_code=400,
+            detail="Path must be within allowed model directories",
+        )
+
+    # Check if path exists
+    if not resolved_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="Model file not found",
+        )
+
+    return str(resolved_path)
+
 
 # Global services
 engine_manager: EngineManager | None = None
@@ -191,11 +255,13 @@ async def load_engine(
                 status_code=400, detail=f"Failed to load engine: {engine_type}"
             )
 
-        # Load model if provided
+        # SECURITY: Validate model path to prevent path traversal
         if model_path:
             engine = engine_manager.get_active_physics_engine()
             if engine:
-                engine.load_from_path(model_path)
+                # Validate path: no parent directory traversal, must exist
+                validated_path = _validate_model_path(model_path)
+                engine.load_from_path(validated_path)
 
         return {"message": f"Engine {engine_type} loaded successfully"}
 

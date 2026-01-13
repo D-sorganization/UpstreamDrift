@@ -1,6 +1,8 @@
 """Security utilities for authentication and authorization."""
 
 import hashlib
+import logging
+import os
 import secrets
 from datetime import datetime, timedelta
 from typing import Any
@@ -11,8 +13,28 @@ from passlib.context import CryptContext
 
 from .models import User, UserRole
 
+logger = logging.getLogger(__name__)
+
 # Security configuration
-SECRET_KEY = "your-secret-key-change-in-production"  # SECURITY: Move to environment variable in production
+# SECURITY: Secret key MUST be set via environment variable
+_secret_key_env = os.getenv("GOLF_API_SECRET_KEY") or os.getenv("SECRET_KEY")
+
+if not _secret_key_env:
+    logger.warning(
+        "SECURITY WARNING: No SECRET_KEY or GOLF_API_SECRET_KEY environment "
+        "variable set. API authentication will fail. Set a secure key for production."
+    )
+    # Use a clearly-unsafe placeholder that will cause authentication to fail
+    SECRET_KEY = "UNSAFE-NO-SECRET-KEY-SET-AUTHENTICATION-WILL-FAIL"
+elif len(_secret_key_env) < 32:
+    logger.warning(
+        "SECURITY WARNING: SECRET_KEY is less than 32 characters. "
+        "Use a longer, randomly generated key for production."
+    )
+    SECRET_KEY = _secret_key_env
+else:
+    SECRET_KEY = _secret_key_env
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 30
