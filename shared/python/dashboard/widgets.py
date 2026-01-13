@@ -110,6 +110,17 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.dim_spin.valueChanged.connect(self.update_plot)
         controls_layout.addWidget(self.dim_spin)
 
+        # Checkbox for enabling computation (if expensive)
+        # Initialize early to avoid AttributeError during signal callbacks
+        self.chk_compute = QtWidgets.QCheckBox("Compute Real-time")
+        self.chk_compute.setToolTip(
+            "Enable real-time computation for advanced metrics (ZTCF, etc). May affect performance."
+        )
+        self.chk_compute.setStatusTip(
+            "Enable or disable real-time computation of advanced metrics"
+        )
+        self.chk_compute.stateChanged.connect(self.toggle_computation)
+
         # Selector for Induced Accel Source (Hidden by default)
         # Using a ComboBox for user-friendly name selection
         self.source_combo = QtWidgets.QComboBox()
@@ -142,15 +153,6 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.btn_snapshot.clicked.connect(self.copy_snapshot)
         controls_layout.addWidget(self.btn_snapshot)
 
-        # Checkbox for enabling computation (if expensive)
-        self.chk_compute = QtWidgets.QCheckBox("Compute Real-time")
-        self.chk_compute.setToolTip(
-            "Enable real-time computation for advanced metrics (ZTCF, etc). May affect performance."
-        )
-        self.chk_compute.setStatusTip(
-            "Enable or disable real-time computation of advanced metrics"
-        )
-        self.chk_compute.stateChanged.connect(self.toggle_computation)
         controls_layout.addWidget(self.chk_compute)
 
         self._main_layout.addLayout(controls_layout)
