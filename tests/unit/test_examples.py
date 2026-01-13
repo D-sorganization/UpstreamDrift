@@ -1,6 +1,7 @@
 import importlib.util
 import sys
 from pathlib import Path
+from typing import Any
 from unittest.mock import patch
 
 # Add project root to path
@@ -14,7 +15,7 @@ sys.path.append(str(project_root))
 # Let's verify importability via importlib.
 
 
-def load_module(name, path):
+def load_module(name: str, path: Path) -> Any:
     spec = importlib.util.spec_from_file_location(name, path)
     if spec is None:
         raise ImportError(f"Could not load spec for {name} from {path}")
@@ -30,7 +31,7 @@ example01_path = project_root / "examples" / "01_basic_simulation.py"
 example02_path = project_root / "examples" / "02_parameter_sweeps.py"
 
 
-def test_example_01_runs():
+def test_example_01_runs() -> None:
     """Test Example 01 runs without error (mocked)."""
     # Mock engine manager to simulate missing engine and return False
     with patch("shared.python.engine_manager.EngineManager") as MockManager:
@@ -45,7 +46,7 @@ def test_example_01_runs():
         assert instance.switch_engine.called
 
 
-def test_example_02_runs():
+def test_example_02_runs() -> None:
     """Test Example 02 runs without error."""
     # This example requires registry constants
     # Mock output manager to avoid disk writes in main logic?

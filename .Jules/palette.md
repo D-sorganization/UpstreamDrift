@@ -20,3 +20,7 @@
 ## 2024-05-23 - Web Button Feedback Race Conditions
 **Learning:** When implementing temporary UI feedback (like 'Copied!' status), relying on capturing and restoring `textContent` is dangerous if the user can trigger the action again during the feedback window. It can lead to the temporary state being captured as the 'original' state, corrupting the UI.
 **Action:** Always hardcode the restoration value or check current state before applying feedback in simple UI interactions, rather than dynamically capturing state.
+
+## 2026-10-24 - [Micro-feedback in Desktop Apps]
+**Learning:** Implementing the "Snapshot" button with self-reverting state ("Snapshot" -> "Copied!" -> "Snapshot") proved to be a simple yet highly effective way to provide confirmation for an invisible action (clipboard copy) without cluttering the UI with dialogs.
+**Action:** Apply this pattern to all clipboard actions or background tasks that complete instantly but lack inherent visual side effects.

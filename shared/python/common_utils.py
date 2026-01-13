@@ -1,5 +1,7 @@
 """Common utilities shared across all golf modeling engines."""
 
+from __future__ import annotations
+
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -57,7 +59,7 @@ def ensure_output_dir(engine_name: str, subdir: str | None = None) -> Path:
     return output_path
 
 
-def load_golf_data(data_path: str | Path) -> "pd.DataFrame":
+def load_golf_data(data_path: str | Path) -> pd.DataFrame:
     """Load golf swing data from various formats.
 
     Args:
@@ -69,9 +71,8 @@ def load_golf_data(data_path: str | Path) -> "pd.DataFrame":
     Raises:
         ValueError: If file format not supported
     """
-    import pandas as pd
-
     data_path = Path(data_path)
+    import pandas as pd
 
     if data_path.suffix.lower() == ".csv":
         return pd.read_csv(data_path)
@@ -84,7 +85,7 @@ def load_golf_data(data_path: str | Path) -> "pd.DataFrame":
 
 
 def save_golf_data(
-    data: "pd.DataFrame", output_path: str | Path, format: str = "csv"
+    data: pd.DataFrame, output_path: str | Path, format: str = "csv"
 ) -> None:
     """Save golf swing data in specified format.
 
@@ -106,10 +107,10 @@ def save_golf_data(
 
 
 def standardize_joint_angles(
-    angles: "np.ndarray",
+    angles: np.ndarray,
     angle_names: list[str] | None = None,
     time_step: float = 0.01,
-) -> "pd.DataFrame":
+) -> pd.DataFrame:
     """Standardize joint angle data across engines.
 
     Args:
@@ -135,10 +136,10 @@ def standardize_joint_angles(
 
 
 def plot_joint_trajectories(
-    data: "pd.DataFrame",
+    data: pd.DataFrame,
     title: str = "Joint Trajectories",
     save_path: Path | None = None,
-) -> "plt.Figure":
+) -> plt.Figure:
     """Create standardized joint trajectory plots.
 
     Args:

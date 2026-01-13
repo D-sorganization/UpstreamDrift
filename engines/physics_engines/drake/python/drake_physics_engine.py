@@ -223,6 +223,26 @@ class DrakePhysicsEngine(PhysicsEngine):
             return cast(float, self.context.get_time())
         return 0.0
 
+    def get_joint_names(self) -> list[str]:
+        """Get list of joint names."""
+        if not self.plant:
+            return []
+
+        # Drake has actuators.
+        names = []
+        for i in range(self.plant.num_actuators()):
+            actuator_idx = pydrake.multibody.tree.JointActuatorIndex(i)
+            act = self.plant.get_joint_actuator(actuator_idx)
+            names.append(act.name())
+
+        if not names:
+            # If there are no actuators defined, fall back to generic names
+            # derived from the number of generalized velocities (dofs).
+            for i in range(self.plant.num_velocities()):
+                names.append(f"dof_{i}")
+
+        return names
+
     # -------- Dynamics Interface --------
 
     def compute_mass_matrix(self) -> np.ndarray:

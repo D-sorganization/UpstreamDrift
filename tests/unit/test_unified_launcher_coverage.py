@@ -30,16 +30,26 @@ def launcher(mock_app):
 def test_initialization(launcher):
     """Test UnifiedLauncher initialization."""
     assert launcher.app is not None
-    assert launcher.launcher is not None
+    # launcher.launcher is lazy-loaded, so it's None until mainloop() is called
+    assert launcher.launcher is None
 
 
 def test_mainloop(launcher):
     """Test mainloop execution."""
-    launcher.app.exec.return_value = 0
-    exit_code = launcher.mainloop()
-    assert exit_code == 0
-    launcher.launcher.show.assert_called_once()
-    launcher.app.exec.assert_called_once()
+    # Mock GolfLauncher at its source for lazy loading
+    with patch("launchers.golf_launcher.GolfLauncher") as MockGolfLauncher:
+        mock_golf_launcher = MagicMock()
+        MockGolfLauncher.return_value = mock_golf_launcher
+        launcher.app.exec.return_value = 0
+
+        exit_code = launcher.mainloop()
+
+        assert exit_code == 0
+        # Verify GolfLauncher was instantiated
+        MockGolfLauncher.assert_called_once()
+        # Verify show was called on the golf launcher
+        mock_golf_launcher.show.assert_called_once()
+        launcher.app.exec.assert_called_once()
 
 
 def test_show_status(launcher):

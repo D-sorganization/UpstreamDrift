@@ -160,6 +160,23 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         """Get the current simulation time."""
         return self.time
 
+    def get_joint_names(self) -> list[str]:
+        """Get list of joint names."""
+        if self.model is None:
+            return []
+
+        # Pinocchio model.names is a vector of strings
+        # But it includes "universe" usually.
+        # We want names corresponding to tangent vector v/tau?
+        # Actually model.names corresponds to joints (nq).
+        # Tangent vector corresponds to nv.
+
+        # This is a simplification.
+        names = list(self.model.names)
+        if "universe" in names:
+            names.remove("universe")
+        return names
+
     # -------- Dynamics Interface --------
 
     def compute_mass_matrix(self) -> np.ndarray:
