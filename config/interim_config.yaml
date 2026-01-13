@@ -4,32 +4,34 @@
 
 # Server Configuration
 server:
-  host: "0.0.0.0"  # Listen on all interfaces
+  host: "0.0.0.0" # Listen on all interfaces
   port: 8000
-  reload: true     # Auto-reload on code changes (development)
+  reload: true # Auto-reload on code changes (development)
   log_level: "info"
 
 # Database Configuration
 database:
   # SQLite (default - no setup required)
   url: "sqlite:///./golf_modeling_suite.db"
-  
+
   # PostgreSQL (uncomment for production)
   # url: "postgresql://username:password@localhost/golf_modeling_suite"
-  
+
   # Connection settings
-  echo: false      # Set to true for SQL debugging
+  echo: false # Set to true for SQL debugging
   pool_size: 5
   max_overflow: 10
 
 # Authentication Configuration
 auth:
   # JWT Settings
-  secret_key: "change-this-in-production"  # IMPORTANT: Change for production
+  # SECURITY: Secret key MUST be set via GOLF_API_SECRET_KEY or SECRET_KEY environment variable
+  # Do NOT hardcode secrets in this file
+  secret_key: "${GOLF_API_SECRET_KEY}"
   algorithm: "HS256"
   access_token_expire_minutes: 30
   refresh_token_expire_days: 30
-  
+
   # API Key Settings
   api_key_prefix: "gms_"
   api_key_length: 32
@@ -40,24 +42,24 @@ quotas:
     api_calls_per_month: 1000
     video_analyses_per_month: 5
     simulations_per_month: 10
-    max_simulation_duration: 30      # seconds
-    max_video_length: 60            # seconds
+    max_simulation_duration: 30 # seconds
+    max_video_length: 60 # seconds
     concurrent_requests: 1
-  
+
   professional:
     api_calls_per_month: 50000
     video_analyses_per_month: 500
     simulations_per_month: 1000
-    max_simulation_duration: 300    # 5 minutes
-    max_video_length: 600          # 10 minutes
+    max_simulation_duration: 300 # 5 minutes
+    max_video_length: 600 # 10 minutes
     concurrent_requests: 5
-  
+
   enterprise:
     api_calls_per_month: 1000000
     video_analyses_per_month: 10000
     simulations_per_month: 50000
-    max_simulation_duration: 3600   # 1 hour
-    max_video_length: 3600         # 1 hour
+    max_simulation_duration: 3600 # 1 hour
+    max_video_length: 3600 # 1 hour
     concurrent_requests: 20
 
 # Physics Engines Configuration
@@ -69,16 +71,16 @@ engines:
     - "pinocchio"
     - "myosuite"
     - "opensim"
-  
+
   # Engine-specific settings
   mujoco:
     default_timestep: 0.001
     max_simulation_time: 300
-  
+
   drake:
     default_timestep: 0.001
     max_simulation_time: 300
-  
+
   pinocchio:
     default_timestep: 0.001
     max_simulation_time: 300
@@ -87,16 +89,16 @@ engines:
 video_analysis:
   # Default estimator
   default_estimator: "mediapipe"
-  
+
   # MediaPipe settings
   mediapipe:
     min_detection_confidence: 0.5
     min_tracking_confidence: 0.5
     enable_temporal_smoothing: true
-  
+
   # Processing limits
   max_video_size_mb: 100
-  max_video_duration: 600  # 10 minutes
+  max_video_duration: 600 # 10 minutes
   supported_formats: ["mp4", "avi", "mov", "mkv"]
 
 # Security Configuration
@@ -104,20 +106,21 @@ security:
   # CORS settings
   cors:
     allow_origins:
-      - "http://localhost:3000"    # React development
-      - "http://localhost:8080"    # Vue development
+      - "http://localhost:3000" # React development
+      - "http://localhost:8080" # Vue development
       - "http://127.0.0.1:3000"
       - "http://127.0.0.1:8080"
     allow_credentials: true
     allow_methods: ["GET", "POST", "PUT", "DELETE"]
-    allow_headers: ["*"]
-  
+    # SECURITY: Restrict headers in production
+    allow_headers: ["Content-Type", "Authorization", "X-API-Key"]
+
   # Trusted hosts
   trusted_hosts:
     - "localhost"
     - "127.0.0.1"
     - "*.local"
-  
+
   # Rate limiting
   rate_limiting:
     enabled: true
@@ -128,7 +131,7 @@ security:
 logging:
   level: "INFO"
   format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
-  
+
   # File logging (optional)
   file:
     enabled: false
@@ -137,10 +140,13 @@ logging:
     backup_count: 5
 
 # Default Users (Created on First Startup)
+# SECURITY: Set GOLF_ADMIN_PASSWORD environment variable for production
+# The password below is only used if environment variable is not set
 default_users:
   admin:
     email: "admin@golfmodelingsuite.com"
-    password: "admin123"  # Change this!
+    # SECURITY: Use GOLF_ADMIN_PASSWORD environment variable in production
+    # password is NOT stored here - set via environment variable
     full_name: "System Administrator"
     role: "admin"
     is_active: true
@@ -152,39 +158,39 @@ features:
   physics_simulation: true
   video_analysis: true
   ball_flight_physics: true
-  
+
   # Optional features
   ai_integration: true
   batch_processing: true
-  webhook_notifications: false  # Not implemented yet
-  
+  webhook_notifications: false # Not implemented yet
+
   # Development features
   debug_mode: false
   profiling: false
-  
+
 # Monitoring (Basic)
 monitoring:
-  health_check_interval: 30  # seconds
+  health_check_interval: 30 # seconds
   metrics_collection: true
   error_reporting: true
-  
+
   # Performance monitoring
-  slow_query_threshold: 1.0   # seconds
+  slow_query_threshold: 1.0 # seconds
   slow_request_threshold: 5.0 # seconds
 
 # Storage Configuration
 storage:
   # Temporary files
   temp_dir: "temp"
-  cleanup_interval: 3600  # 1 hour
-  
+  cleanup_interval: 3600 # 1 hour
+
   # User uploads
   upload_dir: "uploads"
   max_upload_size_mb: 100
-  
+
   # Results storage
   results_dir: "results"
-  retention_days: 30  # Auto-cleanup after 30 days
+  retention_days: 30 # Auto-cleanup after 30 days
 
 # Backup Configuration (Optional)
 backup:
