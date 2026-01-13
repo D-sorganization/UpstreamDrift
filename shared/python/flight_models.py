@@ -1311,8 +1311,8 @@ class RospieDLModel(BallFlightModel):
             else:
                 omega_mag = omega_mag_initial
 
-            spin_ratio = (
-                (omega_mag * launch.ball_radius) / speed if omega_mag > 0 else 0
+            spin_ratio = float(
+                (omega_mag * launch.ball_radius) / speed if omega_mag > 0 else 0.0
             )
 
             # DL-enhanced drag: Cd = cd_base + cd_spin * S
