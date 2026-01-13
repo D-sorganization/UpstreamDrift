@@ -487,6 +487,7 @@ class MacDonaldHanzelyModel(BallFlightModel):
         cd: float = 0.225,  # Drag coefficient
         cl: float = 0.20,  # Lift coefficient (per unit spin parameter)
         spin_decay_rate: float = 0.05,  # Spin decay constant [1/s]
+        enable_wind: bool = True,  # Apply wind effects
     ) -> None:
         """Initialize MacDonald-Hanzely model.
 
@@ -494,10 +495,12 @@ class MacDonaldHanzelyModel(BallFlightModel):
             cd: Drag coefficient (constant)
             cl: Lift coefficient scaling
             spin_decay_rate: Exponential spin decay rate
+            enable_wind: If True, include wind in calculations
         """
         self.cd = cd
         self.cl = cl
         self.spin_decay_rate = spin_decay_rate
+        self.enable_wind = enable_wind
 
     @property
     def name(self) -> str:
@@ -532,14 +535,18 @@ class MacDonaldHanzelyModel(BallFlightModel):
         area = math.pi * launch.ball_radius**2
         k_drag = 0.5 * launch.air_density * area * self.cd / launch.ball_mass
 
+        # Wind vector
+        wind_vec = launch.get_wind_vector() if self.enable_wind else np.zeros(3)
+
         def derivatives(t: float, y: np.ndarray) -> np.ndarray:
             vel = y[3:6]
-            speed = np.linalg.norm(vel)
+            vel_rel = vel - wind_vec  # Relative velocity for aero forces
+            speed = np.linalg.norm(vel_rel)
 
             if speed < 0.1:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
-            vel_unit = vel / speed
+            vel_unit = vel_rel / speed
 
             # Drag acceleration: a_d = -k * v² * v_hat
             drag_accel = -k_drag * speed**2 * vel_unit
@@ -667,6 +674,8 @@ class NathanModel(BallFlightModel):
         cd_low_re: float = 0.50,  # Drag below critical Re
         re_critical: float = 1.5e5,  # Critical Reynolds number
         cl_slope: float = 0.35,  # Cl slope with spin parameter
+        enable_wind: bool = True,  # Apply wind effects
+        spin_decay_rate: float | None = None,  # Optional spin decay [1/s]
     ) -> None:
         """Initialize Nathan model with Reynolds-dependent drag.
 
@@ -675,11 +684,15 @@ class NathanModel(BallFlightModel):
             cd_low_re: Drag coefficient below critical Reynolds number
             re_critical: Critical Reynolds number for drag transition
             cl_slope: Linear slope of lift coefficient with spin parameter
+            enable_wind: If True, include wind in calculations
+            spin_decay_rate: If provided, apply exponential spin decay
         """
         self.cd_base = cd_base
         self.cd_low_re = cd_low_re
         self.re_critical = re_critical
         self.cl_slope = cl_slope
+        self.enable_wind = enable_wind
+        self.spin_decay_rate = spin_decay_rate
         # Air kinematic viscosity at 15°C [m²/s]
         self.nu = 1.48e-5
 
@@ -704,21 +717,25 @@ class NathanModel(BallFlightModel):
         """Simulate trajectory using Nathan model."""
         v0 = launch.get_initial_velocity()
         omega_vec = launch.get_spin_vector()
-        omega_mag = np.linalg.norm(omega_vec)
-        spin_axis = omega_vec / omega_mag if omega_mag > 0 else np.array([0, -1, 0])
+        omega_mag_initial = np.linalg.norm(omega_vec)
+        spin_axis = omega_vec / omega_mag_initial if omega_mag_initial > 0 else np.array([0, -1, 0])
 
         y0 = np.array([0.0, 0.0, 0.0, v0[0], v0[1], v0[2]])
         area = math.pi * launch.ball_radius**2
         diameter = 2 * launch.ball_radius
 
+        # Wind vector
+        wind_vec = launch.get_wind_vector() if self.enable_wind else np.zeros(3)
+
         def derivatives(t: float, y: np.ndarray) -> np.ndarray:
             vel = y[3:6]
-            speed = np.linalg.norm(vel)
+            vel_rel = vel - wind_vec
+            speed = np.linalg.norm(vel_rel)
 
             if speed < 0.1:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
-            vel_unit = vel / speed
+            vel_unit = vel_rel / speed
 
             # Reynolds number
             re = speed * diameter / self.nu
@@ -735,6 +752,12 @@ class NathanModel(BallFlightModel):
             # Drag acceleration
             drag_mag = 0.5 * launch.air_density * speed**2 * cd * area
             drag_accel = -drag_mag / launch.ball_mass * vel_unit
+
+            # Spin decay (optional)
+            if self.spin_decay_rate is not None:
+                omega_mag = omega_mag_initial * math.exp(-self.spin_decay_rate * t)
+            else:
+                omega_mag = omega_mag_initial
 
             # Lift coefficient: linear with spin parameter
             if omega_mag > 0:
@@ -847,15 +870,21 @@ class BallantyneModel(BallFlightModel):
         self,
         cd: float = 0.24,  # Fixed drag coefficient
         cl_factor: float = 0.22,  # Lift coefficient factor
+        enable_wind: bool = True,
+        spin_decay_rate: float | None = None,
     ) -> None:
         """Initialize Ballantyne model.
 
         Args:
             cd: Constant drag coefficient
             cl_factor: Lift coefficient per unit spin ratio
+            enable_wind: If True, include wind in calculations
+            spin_decay_rate: If provided, apply exponential spin decay
         """
         self.cd = cd
         self.cl_factor = cl_factor
+        self.enable_wind = enable_wind
+        self.spin_decay_rate = spin_decay_rate
 
     @property
     def name(self) -> str:
@@ -878,29 +907,38 @@ class BallantyneModel(BallFlightModel):
         """Simulate trajectory using Ballantyne model."""
         v0 = launch.get_initial_velocity()
         omega_vec = launch.get_spin_vector()
-        omega_mag = np.linalg.norm(omega_vec)
+        omega_mag_initial = np.linalg.norm(omega_vec)
+        spin_axis = omega_vec / omega_mag_initial if omega_mag_initial > 0 else np.array([0, -1, 0])
 
         y0 = np.array([0.0, 0.0, 0.0, v0[0], v0[1], v0[2]])
         area = math.pi * launch.ball_radius**2
 
+        wind_vec = launch.get_wind_vector() if self.enable_wind else np.zeros(3)
+
         def derivatives(t: float, y: np.ndarray) -> np.ndarray:
             vel = y[3:6]
-            speed = np.linalg.norm(vel)
+            vel_rel = vel - wind_vec
+            speed = np.linalg.norm(vel_rel)
 
             if speed < 0.1:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
-            vel_unit = vel / speed
+            vel_unit = vel_rel / speed
 
             # Constant drag coefficient
             drag_mag = 0.5 * launch.air_density * speed**2 * self.cd * area
             drag_accel = -drag_mag / launch.ball_mass * vel_unit
 
+            # Spin decay
+            if self.spin_decay_rate is not None:
+                omega_mag = omega_mag_initial * math.exp(-self.spin_decay_rate * t)
+            else:
+                omega_mag = omega_mag_initial
+
             # Magnus effect
             if omega_mag > 0:
                 spin_ratio = (omega_mag * launch.ball_radius) / speed
                 cl = self.cl_factor * spin_ratio
-                spin_axis = omega_vec / omega_mag
 
                 cross = np.cross(spin_axis, vel_unit)
                 cross_mag = np.linalg.norm(cross)
@@ -1008,15 +1046,21 @@ class JColeModel(BallFlightModel):
         self,
         cd: float = 0.28,  # Drag coefficient
         cl_max: float = 0.18,  # Maximum lift coefficient
+        enable_wind: bool = True,
+        spin_decay_rate: float | None = None,
     ) -> None:
         """Initialize JCole model.
 
         Args:
             cd: Drag coefficient
             cl_max: Maximum lift coefficient
+            enable_wind: If True, include wind in calculations
+            spin_decay_rate: If provided, apply exponential spin decay
         """
         self.cd = cd
         self.cl_max = cl_max
+        self.enable_wind = enable_wind
+        self.spin_decay_rate = spin_decay_rate
 
     @property
     def name(self) -> str:
@@ -1039,29 +1083,38 @@ class JColeModel(BallFlightModel):
         """Simulate trajectory using JCole model."""
         v0 = launch.get_initial_velocity()
         omega_vec = launch.get_spin_vector()
-        omega_mag = np.linalg.norm(omega_vec)
+        omega_mag_initial = np.linalg.norm(omega_vec)
+        spin_axis = omega_vec / omega_mag_initial if omega_mag_initial > 0 else np.array([0, -1, 0])
 
         y0 = np.array([0.0, 0.0, 0.0, v0[0], v0[1], v0[2]])
         area = math.pi * launch.ball_radius**2
 
+        wind_vec = launch.get_wind_vector() if self.enable_wind else np.zeros(3)
+
         def derivatives(t: float, y: np.ndarray) -> np.ndarray:
             vel = y[3:6]
-            speed = np.linalg.norm(vel)
+            vel_rel = vel - wind_vec
+            speed = np.linalg.norm(vel_rel)
 
             if speed < 0.1:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
-            vel_unit = vel / speed
+            vel_unit = vel_rel / speed
 
             # Simple drag model
             drag_mag = 0.5 * launch.air_density * speed**2 * self.cd * area
             drag_accel = -drag_mag / launch.ball_mass * vel_unit
 
+            # Spin decay
+            if self.spin_decay_rate is not None:
+                omega_mag = omega_mag_initial * math.exp(-self.spin_decay_rate * t)
+            else:
+                omega_mag = omega_mag_initial
+
             # Simple lift model (proportional to spin, capped)
             if omega_mag > 0:
                 spin_param = (omega_mag * launch.ball_radius) / speed
                 cl = min(self.cl_max, 0.5 * spin_param)
-                spin_axis = omega_vec / omega_mag
 
                 cross = np.cross(spin_axis, vel_unit)
                 cross_mag = np.linalg.norm(cross)
@@ -1174,6 +1227,8 @@ class RospieDLModel(BallFlightModel):
         cd_spin: float = 0.08,
         cl_base: float = 0.02,
         cl_spin: float = 0.42,
+        enable_wind: bool = True,
+        spin_decay_rate: float | None = None,
     ) -> None:
         """Initialize Rospie DL model.
 
@@ -1182,11 +1237,15 @@ class RospieDLModel(BallFlightModel):
             cd_spin: Spin-dependent drag component
             cl_base: Base lift coefficient
             cl_spin: Spin-dependent lift component
+            enable_wind: If True, include wind in calculations
+            spin_decay_rate: If provided, apply exponential spin decay
         """
         self.cd_base = cd_base
         self.cd_spin = cd_spin
         self.cl_base = cl_base
         self.cl_spin = cl_spin
+        self.enable_wind = enable_wind
+        self.spin_decay_rate = spin_decay_rate
 
     @property
     def name(self) -> str:
@@ -1209,19 +1268,30 @@ class RospieDLModel(BallFlightModel):
         """Simulate trajectory using Rospie DL model."""
         v0 = launch.get_initial_velocity()
         omega_vec = launch.get_spin_vector()
-        omega_mag = np.linalg.norm(omega_vec)
+        omega_mag_initial = np.linalg.norm(omega_vec)
+        spin_axis = omega_vec / omega_mag_initial if omega_mag_initial > 0 else np.array([0, -1, 0])
 
         y0 = np.array([0.0, 0.0, 0.0, v0[0], v0[1], v0[2]])
         area = math.pi * launch.ball_radius**2
 
+        wind_vec = launch.get_wind_vector() if self.enable_wind else np.zeros(3)
+
         def derivatives(t: float, y: np.ndarray) -> np.ndarray:
             vel = y[3:6]
-            speed = np.linalg.norm(vel)
+            vel_rel = vel - wind_vec
+            speed = np.linalg.norm(vel_rel)
 
             if speed < 0.1:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
-            vel_unit = vel / speed
+            vel_unit = vel_rel / speed
+
+            # Spin decay
+            if self.spin_decay_rate is not None:
+                omega_mag = omega_mag_initial * math.exp(-self.spin_decay_rate * t)
+            else:
+                omega_mag = omega_mag_initial
+
             spin_ratio = (
                 (omega_mag * launch.ball_radius) / speed if omega_mag > 0 else 0
             )
@@ -1235,7 +1305,6 @@ class RospieDLModel(BallFlightModel):
             if omega_mag > 0:
                 cl = self.cl_base + self.cl_spin * spin_ratio
                 cl = min(0.30, cl)  # Cap from DL training
-                spin_axis = omega_vec / omega_mag
 
                 cross = np.cross(spin_axis, vel_unit)
                 cross_mag = np.linalg.norm(cross)
@@ -1347,6 +1416,7 @@ class CharryL3Model(BallFlightModel):
         cd: float = 0.25,  # Drag coefficient
         cl_factor: float = 0.28,  # Lift factor
         spin_decay: float = 0.02,  # Spin decay rate [1/s]
+        enable_wind: bool = True,
     ) -> None:
         """Initialize Charry L3 model.
 
@@ -1354,10 +1424,12 @@ class CharryL3Model(BallFlightModel):
             cd: Drag coefficient
             cl_factor: Lift coefficient scaling
             spin_decay: Exponential spin decay rate
+            enable_wind: If True, include wind in calculations
         """
         self.cd = cd
         self.cl_factor = cl_factor
         self.spin_decay = spin_decay
+        self.enable_wind = enable_wind
 
     @property
     def name(self) -> str:
@@ -1389,14 +1461,17 @@ class CharryL3Model(BallFlightModel):
         y0 = np.array([0.0, 0.0, 0.0, v0[0], v0[1], v0[2]])
         area = math.pi * launch.ball_radius**2
 
+        wind_vec = launch.get_wind_vector() if self.enable_wind else np.zeros(3)
+
         def derivatives(t: float, y: np.ndarray) -> np.ndarray:
             vel = y[3:6]
-            speed = np.linalg.norm(vel)
+            vel_rel = vel - wind_vec
+            speed = np.linalg.norm(vel_rel)
 
             if speed < 0.1:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
-            vel_unit = vel / speed
+            vel_unit = vel_rel / speed
 
             # Drag
             drag_mag = 0.5 * launch.air_density * speed**2 * self.cd * area
