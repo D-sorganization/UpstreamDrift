@@ -104,13 +104,13 @@ class TestBallProperties:
         custom_ball = BallProperties(
             mass=0.05,
             diameter=0.045,
-            drag_coefficient=0.30,
-            magnus_coefficient=0.20,
+            cd0=0.25,  # Custom base drag
+            cl1=0.35,  # Custom lift slope
         )
         assert custom_ball.mass == 0.05
         assert custom_ball.diameter == 0.045
-        assert custom_ball.drag_coefficient == 0.30
-        assert custom_ball.magnus_coefficient == 0.20
+        assert custom_ball.cd0 == 0.25
+        assert custom_ball.cl1 == 0.35
 
 
 # =============================================================================
@@ -129,6 +129,7 @@ class TestLaunchConditions:
         """
         launch = LaunchConditions(velocity=50.0, launch_angle=0.1)
         expected_axis = np.array([0.0, -1.0, 0.0])
+        assert launch.spin_axis is not None
         np.testing.assert_array_almost_equal(launch.spin_axis, expected_axis)
 
     def test_custom_spin_axis(self) -> None:
@@ -137,6 +138,7 @@ class TestLaunchConditions:
         launch = LaunchConditions(
             velocity=50.0, launch_angle=0.1, spin_axis=custom_axis
         )
+        assert launch.spin_axis is not None
         np.testing.assert_array_almost_equal(launch.spin_axis, custom_axis)
 
     def test_zero_spin_rate_allowed(self) -> None:
@@ -163,6 +165,7 @@ class TestEnvironmentalConditions:
         self, default_environment: EnvironmentalConditions
     ) -> None:
         """Test that default wind is zero vector."""
+        assert default_environment.wind_velocity is not None
         np.testing.assert_array_equal(
             default_environment.wind_velocity, np.array([0.0, 0.0, 0.0])
         )
@@ -171,6 +174,7 @@ class TestEnvironmentalConditions:
         """Test custom wind configuration."""
         wind = np.array([5.0, 2.0, 0.0])  # 5 m/s headwind, 2 m/s crosswind
         env = EnvironmentalConditions(wind_velocity=wind)
+        assert env.wind_velocity is not None
         np.testing.assert_array_equal(env.wind_velocity, wind)
 
 
