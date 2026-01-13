@@ -33,8 +33,6 @@ class UnifiedLauncher:
                 "PyQt6 is required to run the launcher. Install it with: pip install PyQt6"
             )
 
-
-
         # Create QApplication if it doesn't exist
         # Check if QApplication is None (if import failed, but we raised above)
         # or if instance() returns None.
