@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import cast
 
 import numpy as np
-from scipy import signal
+from scipy import signal, fft
 from scipy.signal import (
     correlate,
     correlation_lags,
@@ -18,19 +18,6 @@ from scipy.signal import (
     spectrogram,
     welch,
 )
-
-# Try to import next_fast_len from scipy.fft or scipy.fftpack
-# Fallback to a simple power of 2 function if neither is available
-try:
-    from scipy.fft import next_fast_len
-except ImportError:
-    try:
-        from scipy.fftpack import next_fast_len
-    except ImportError:
-
-        def next_fast_len(target: int) -> int:
-            """Simple fallback for next fast FFT length (power of 2)."""
-            return int(1 << (target - 1).bit_length())
 
 
 def compute_psd(
@@ -205,8 +192,8 @@ def compute_cwt(
     # For Morlet: scale = w0 * fs / (2 * pi * freq)
     scales = w0 * fs / (2 * np.pi * freqs)
 
-    N = len(data)
-    cwt_matrix = np.zeros((num_freqs, N), dtype=np.complex128)
+    n_data = len(data)
+    cwt_matrix = np.zeros((num_freqs, n_data), dtype=np.complex128)
 
     # Use internal implementation or scipy's
     if hasattr(signal, "morlet2"):
@@ -214,20 +201,19 @@ def compute_cwt(
     else:
         morlet_func = _morlet2_impl
 
-    # OPTIMIZATION: FFT-based convolution with pre-calculated input FFT.
-    # Instead of re-computing fft(data) for each scale, we do it once.
-    # We choose an FFT size large enough for the largest wavelet + data.
+    # Optimization: Pre-compute FFT of data once to avoid recomputation in fftconvolve
+    # 1. Determine maximum wavelet width (corresponds to smallest frequency / largest scale)
+    min_f = np.min(freqs)
+    max_s = w0 * fs / (2 * np.pi * min_f)
+    max_M = int(2 * 5 * max_s + 1)
 
-    # 1. Determine largest wavelet length
-    max_scale = np.max(scales)
-    max_M = int(2 * 5 * max_scale + 1)
+    # 2. Determine optimal FFT size for the largest convolution
+    # Padding to N + M - 1 ensures linear convolution avoids circular aliasing
+    target_len = n_data + max_M - 1
+    n_fft = fft.next_fast_len(target_len)
 
-    # 2. Optimal FFT size (padding for linear convolution)
-    n_fft = next_fast_len(N + max_M - 1)
-
-    # 3. FFT of data (computed once)
-    # Use numpy.fft to ensure compatibility with older scipy versions
-    data_fft = np.fft.fft(data, n=n_fft)
+    # 3. Compute FFT of data (must use full fft as we will multiply with complex wavelet)
+    data_fft = fft.fft(data, n=n_fft)
 
     for i, s in enumerate(scales):
         # Window length for wavelet: typically 6-10 sigmas.
@@ -237,23 +223,31 @@ def compute_cwt(
 
         wavelet = morlet_func(M, s, w=w0)
 
-        # 4. FFT of wavelet
-        wavelet_fft = np.fft.fft(wavelet, n=n_fft)
+        # FFT convolution manually
+        # a. FFT of wavelet
+        wavelet_fft = fft.fft(wavelet, n=n_fft)
 
-        # 5. Convolution in frequency domain
+        # b. Multiply in frequency domain
         prod = data_fft * wavelet_fft
 
-        # 6. Inverse FFT
-        ret = np.fft.ifft(prod)
+        # c. Inverse FFT
+        conv_res = fft.ifft(prod, n=n_fft)
 
-        # 7. Center crop (mode='same')
-        # Result of ifft(fft(a, n) * fft(b, n)) is circular convolution of length n.
-        # Since n >= len(a) + len(b) - 1, the first len(a)+len(b)-1 samples match linear convolution.
-        # We want to extract the center part of length N.
-        # Logic for mode='same' centering:
-        # Start index is floor((M - 1) / 2)
-        start = (M - 1) // 2
-        cwt_matrix[i, :] = ret[start : start + N]
+        # d. Center crop to match 'same' mode
+        # The linear convolution (length N+M-1) starts at index 0 because inputs were zero-padded at end.
+        # mode='same' requires extracting the center section of length N from the full convolution.
+        # The center of the full convolution is at index (N+M-1-1)/2.
+        # We want the slice [start, start + N].
+        # start = (N+M-1)//2 - (N-1)//2 (integer math)
+        # Simplified: start = (M-1) // 2
+        start_idx = (M - 1) // 2
+
+        # Ensure we stay within bounds (though with correct padding, it should be fine)
+        if start_idx + n_data <= len(conv_res):
+            cwt_matrix[i, :] = conv_res[start_idx : start_idx + n_data]
+        else:
+             # Fallback (should not happen with correct logic)
+             cwt_matrix[i, :] = conv_res[:n_data]
 
         # Normalize by 1/sqrt(s)
         cwt_matrix[i, :] /= np.sqrt(s)
