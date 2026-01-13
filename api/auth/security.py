@@ -18,14 +18,25 @@ logger = logging.getLogger(__name__)
 # Security configuration
 # SECURITY: Secret key MUST be set via environment variable
 _secret_key_env = os.getenv("GOLF_API_SECRET_KEY") or os.getenv("SECRET_KEY")
+_environment = os.getenv("ENVIRONMENT", "development").lower()
 
 if not _secret_key_env:
-    logger.warning(
-        "SECURITY WARNING: No SECRET_KEY or GOLF_API_SECRET_KEY environment "
-        "variable set. API authentication will fail. Set a secure key for production."
-    )
-    # Use a clearly-unsafe placeholder that will cause authentication to fail
-    SECRET_KEY = "UNSAFE-NO-SECRET-KEY-SET-AUTHENTICATION-WILL-FAIL"
+    if _environment == "production":
+        logger.error(
+            "SECURITY ERROR: No SECRET_KEY or GOLF_API_SECRET_KEY environment "
+            "variable set. The server cannot start without a secure secret key."
+        )
+        raise RuntimeError(
+            "SECRET_KEY is not configured. Set GOLF_API_SECRET_KEY or SECRET_KEY "
+            "environment variable to a secure, random value."
+        )
+    else:
+        logger.warning(
+            "SECURITY WARNING: No SECRET_KEY set. Using unsafe placeholder. "
+            "API authentication will fail. Set GOLF_API_SECRET_KEY for production."
+        )
+        # Use a clearly-unsafe placeholder that will cause authentication to fail
+        SECRET_KEY = "UNSAFE-NO-SECRET-KEY-SET-AUTHENTICATION-WILL-FAIL"
 elif len(_secret_key_env) < 32:
     logger.warning(
         "SECURITY WARNING: SECRET_KEY is less than 32 characters. "
