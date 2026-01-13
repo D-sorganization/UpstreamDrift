@@ -151,6 +151,14 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.chk_compute.stateChanged.connect(self.toggle_computation)
         controls_layout.addWidget(self.chk_compute)
 
+        # Snapshot Button
+        self.btn_snapshot = QtWidgets.QPushButton("Snapshot")
+        self.btn_snapshot.setToolTip("Copy the current plot to clipboard")
+        self.btn_snapshot.setStatusTip("Copy the current live plot to the system clipboard")
+        self.btn_snapshot.setAccessibleName("Snapshot")
+        self.btn_snapshot.clicked.connect(self.copy_to_clipboard)
+        controls_layout.addWidget(self.btn_snapshot)
+
         self._main_layout.addLayout(controls_layout)
 
         # Initial plot setup
@@ -232,6 +240,24 @@ class LivePlotWidget(QtWidgets.QWidget):
     def toggle_computation(self, state: int) -> None:
         """Handle checkbox toggle."""
         self._update_recorder_config()
+
+    def copy_to_clipboard(self) -> None:
+        """Copy the current plot to the clipboard."""
+        # Grab the canvas
+        pixmap = self.canvas.grab()
+
+        # Set to clipboard
+        clipboard = QtWidgets.QApplication.clipboard()
+        if clipboard:
+            clipboard.setPixmap(pixmap)
+
+        # Feedback
+        self.btn_snapshot.setText("Copied!")
+        QtCore.QTimer.singleShot(2000, self._restore_snapshot_btn)
+
+    def _restore_snapshot_btn(self) -> None:
+        """Restore snapshot button text."""
+        self.btn_snapshot.setText("Snapshot")
 
     def _update_recorder_config(self) -> None:
         """Update recorder configuration based on current selection and checkbox."""
