@@ -288,9 +288,19 @@ class WaterlooPennerModel(BallFlightModel):
         - Penner, A.R. (2003) "The physics of golf"
     """
 
-    def __init__(self, coefficients: WaterlooPennerCoefficients | None = None) -> None:
-        """Initialize model with optional custom coefficients."""
+    def __init__(
+        self,
+        coefficients: WaterlooPennerCoefficients | None = None,
+        enable_wind: bool = True,
+    ) -> None:
+        """Initialize model with optional custom coefficients.
+
+        Args:
+            coefficients: Custom aerodynamic coefficients
+            enable_wind: If True, include wind effects in trajectory (default: True)
+        """
         self.coefficients = coefficients or WaterlooPennerCoefficients()
+        self.enable_wind = enable_wind
 
     @property
     def name(self) -> str:
@@ -319,15 +329,22 @@ class WaterlooPennerModel(BallFlightModel):
         omega_vec = launch.get_spin_vector()
         omega_mag = np.linalg.norm(omega_vec)
 
+        # Wind vector (constant)
+        wind_vec = launch.get_wind_vector() if self.enable_wind else np.zeros(3)
+
         def derivatives(t: float, y: np.ndarray) -> np.ndarray:
             """Compute derivatives for ODE solver."""
             vel = y[3:6]
-            speed = np.linalg.norm(vel)
+
+            # Relative velocity (velocity minus wind) for aerodynamic forces
+            vel_rel = vel - wind_vec
+            speed = np.linalg.norm(vel_rel)
 
             if speed < 0.1:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
-            vel_unit = vel / speed
+            # Use relative velocity for aerodynamic forces
+            vel_unit = vel_rel / speed
 
             # Spin ratio S = (ω * r) / v
             spin_ratio = (omega_mag * launch.ball_radius) / speed
