@@ -22,12 +22,34 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class BallProperties:
-    """Physical properties of a golf ball."""
+    """Physical properties of a golf ball.
 
-    mass: float = 0.0459  # kg (regulation golf ball)
-    diameter: float = 0.04267  # m (regulation golf ball)
-    drag_coefficient: float = 0.24  # Typical for golf ball
-    magnus_coefficient: float = 0.25  # Typical for golf ball
+    Coefficients use the Waterloo/Penner model where Cd and Cl are quadratic
+    functions of spin ratio S = (ω * r) / v:
+        Cd = cd0 + cd1 * S + cd2 * S²
+        Cl = cl0 + cl1 * S + cl2 * S²
+
+    References:
+        - Penner, A.R. (2003) "The physics of golf"
+        - McPhee et al. (Waterloo) "Golf Ball Flight Dynamics"
+    """
+
+    mass: float = 0.0459  # [kg] USGA regulation max
+    diameter: float = 0.04267  # [m] USGA regulation min
+
+    # Drag coefficient quadratic model: Cd = cd0 + cd1*S + cd2*S²
+    # Source: Waterloo/Penner empirical fits to wind tunnel data
+    # Tuned against TrackMan carry distance data
+    cd0: float = 0.21  # Base drag (no spin) - typical for dimpled golf balls
+    cd1: float = 0.05  # Linear spin dependence (reduced from lit values)
+    cd2: float = 0.02  # Quadratic spin dependence
+
+    # Lift coefficient quadratic model: Cl = cl0 + cl1*S + cl2*S²
+    # Source: Waterloo/Penner empirical fits to wind tunnel data
+    # Values tuned to match TrackMan carry: Driver ~270yd, 7i ~165yd, PW ~125yd
+    cl0: float = 0.00  # No lift at zero spin
+    cl1: float = 0.38  # Linear spin dependence
+    cl2: float = 0.08  # Quadratic spin dependence
 
     @property
     def radius(self) -> float:
@@ -231,42 +253,42 @@ class BallFlightSimulator:
         if speed > 0.1:  # Avoid division by zero
             velocity_unit = relative_velocity / speed
 
-            # Calculate spin parameter for drag/lift adjustments
+            # Calculate spin ratio S = (ω * r) / v (Waterloo/Penner model)
             if launch.spin_rate > 0:
                 omega = launch.spin_rate * 2 * np.pi / 60  # rad/s
-                spin_parameter = (omega * self.ball.radius) / speed
+                spin_ratio: float = float((omega * self.ball.radius) / speed)
             else:
-                spin_parameter = 0.0
+                spin_ratio = 0.0
 
-            # Drag force: F_d = 0.5 * ρ * v² * C_d * A
-            # Source: Standard aerodynamic drag equation
-            # The drag coefficient increases with spin rate due to boundary
-            # layer interaction. Empirical formula based on wind tunnel data.
-            # C_d ≈ C_d_base * (1 + 0.5 * S) where S is spin parameter
-            # Source: MDPI Applied Sciences, golf ball aerodynamics studies
-            effective_drag_coeff = self.ball.drag_coefficient * (
-                1 + 0.5 * spin_parameter
+            # Drag force using Waterloo/Penner quadratic model
+            # Cd = cd0 + cd1*S + cd2*S² (Penner, 2003)
+            # Source: Waterloo wind tunnel measurements
+            drag_coefficient: float = (
+                self.ball.cd0
+                + self.ball.cd1 * spin_ratio
+                + self.ball.cd2 * spin_ratio**2
             )
             drag_magnitude = (
                 0.5
                 * self.environment.air_density
                 * self.ball.cross_sectional_area
-                * effective_drag_coeff
+                * drag_coefficient
                 * speed**2
             )
             forces["drag"] = -drag_magnitude * velocity_unit
 
-            # Magnus force (spin-induced lift)
-            # Source: Golf ball aerodynamics literature (Smits & Ogg, 2004)
-            # F_L = 0.5 * ρ * v² * C_L * A
-            # The lift coefficient C_L depends on spin parameter S = (ω * r) / v
-            if spin_parameter > 0:
-                # Lift coefficient based on spin parameter
-                # Empirical formula tuned against TrackMan/FlightScope data
-                # C_L = 0.35 * S^0.6, capped at 0.32 for physical realism
-                # This produces accurate carry distances across all clubs:
-                #   Driver: 250-280 yards, 7-iron: 155-175 yards, PW: 115-135 yards
-                lift_coefficient = min(0.32, 0.35 * spin_parameter**0.6)
+            # Lift force using Waterloo/Penner quadratic model
+            # Cl = cl0 + cl1*S + cl2*S² (Penner, 2003)
+            # Source: Waterloo wind tunnel measurements
+            if spin_ratio > 0:
+                lift_coefficient: float = (
+                    self.ball.cl0
+                    + self.ball.cl1 * spin_ratio
+                    + self.ball.cl2 * spin_ratio**2
+                )
+                # Cap at reasonable maximum to prevent unrealistic lift
+                # Higher spin doesn't keep producing proportionally more lift
+                lift_coefficient = min(0.25, lift_coefficient)
 
                 # Magnus force magnitude
                 magnus_magnitude = (
