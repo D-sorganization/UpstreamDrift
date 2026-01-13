@@ -53,7 +53,7 @@ class EnvironmentValidationError(Exception):
     pass
 
 
-def validate_secret_key_strength(key: str, min_length: int = 64) -> bool:
+def validate_secret_key_strength(key: str, min_length: int = 64) -> None:
     """Validate that a secret key meets security requirements.
 
     Args:
@@ -61,7 +61,7 @@ def validate_secret_key_strength(key: str, min_length: int = 64) -> bool:
         min_length: Minimum required length (default: 64 characters)
 
     Returns:
-        True if key meets requirements
+        None
 
     Raises:
         EnvironmentValidationError: If key is insufficient
@@ -99,9 +99,6 @@ def validate_secret_key_strength(key: str, min_length: int = 64) -> bool:
                 f"Secret key contains weak pattern: '{pattern}'. "
                 f"Consider generating a stronger key."
             )
-
-    return True
-
 
 def validate_api_security() -> APIKeyValidationResults:
     """Validate API security configuration.
@@ -361,9 +358,15 @@ def validate_environment(raise_on_error: bool = True) -> EnvironmentValidationRe
         logger.info("✓ Environment validation passed")
 
         if results["warnings"]:
-            logger.warning(f"Found {len(results['warnings'])} warnings:")
-            for warning in results["warnings"]:
+            max_warnings = 5
+            total_warnings = len(results["warnings"])
+            logger.warning(
+                f"Found {total_warnings} warnings (showing up to {max_warnings}):"
+            )
+            for warning in results["warnings"][:max_warnings]:
                 logger.warning(f"  - {warning}")
+            if total_warnings > max_warnings:
+                logger.warning(f"  ... and {total_warnings - max_warnings} more")
     else:
         logger.error("✗ Environment validation FAILED")
         logger.error(f"Found {len(results['critical_issues'])} critical issues:")
