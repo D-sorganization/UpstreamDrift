@@ -223,6 +223,25 @@ class DrakePhysicsEngine(PhysicsEngine):
             return cast(float, self.context.get_time())
         return 0.0
 
+    def get_joint_names(self) -> list[str]:
+        """Get list of joint names."""
+        if not self.plant:
+            return []
+
+        # Drake has actuators.
+        names = []
+        for i in range(self.plant.num_actuators()):
+            act = self.plant.get_joint_actuator(pydrake.multibody.tree.JointActuatorIndex(i))
+            names.append(act.name())
+
+        if not names:
+             # Fallback to bodies/joints? Drake joints can be complex.
+             # Just return generic names based on velocities if no actuators.
+             for i in range(self.plant.num_velocities()):
+                 names.append(f"dof_{i}")
+
+        return names
+
     # -------- Dynamics Interface --------
 
     def compute_mass_matrix(self) -> np.ndarray:
