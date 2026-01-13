@@ -12,7 +12,7 @@ Critical gap identified in upgrade assessment - without this, not a complete gol
 
 import logging
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -217,15 +217,80 @@ class BallFlightSimulator:
         """
         velocity = state[3:]
 
-        # Calculate all forces
-        forces = self._calculate_forces(velocity, launch)
-
-        # Total acceleration
-        total_force = np.sum(list(forces.values()), axis=0)
-        acceleration = total_force / self.ball.mass
+        # OPTIMIZATION: Calculate acceleration directly to avoid
+        # dictionary allocation and list summation overhead in the solver loop.
+        acceleration = self._calculate_acceleration(velocity, launch)
 
         # Return derivatives
         return np.concatenate([velocity, acceleration])
+
+    def _calculate_acceleration(
+        self, velocity: np.ndarray, launch: LaunchConditions
+    ) -> np.ndarray:
+        """Calculate total acceleration acting on the ball.
+
+        Optimized for performance in the solver loop.
+        """
+        # Gravity acceleration (constant)
+        gravity_acc = np.array([0.0, 0.0, -self.environment.gravity])
+
+        # Relative velocity (accounting for wind)
+        relative_velocity = velocity - self.environment.wind_velocity
+        # Optimization: use sum(x**2) instead of norm to avoid sqrt if not needed,
+        # but here we need speed.
+        speed_sq = np.sum(relative_velocity**2)
+        speed = np.sqrt(speed_sq)
+
+        if speed <= 0.1:  # Avoid division by zero
+            return gravity_acc
+
+        velocity_unit = relative_velocity / speed
+
+        # Calculate spin ratio S = (ω * r) / v (Waterloo/Penner model)
+        if launch.spin_rate > 0:
+            omega = launch.spin_rate * 2 * np.pi / 60  # rad/s
+            spin_ratio = (omega * self.ball.radius) / speed
+        else:
+            spin_ratio = 0.0
+
+        # Drag force using Waterloo/Penner quadratic model
+        drag_coefficient = (
+            self.ball.cd0 + self.ball.cd1 * spin_ratio + self.ball.cd2 * spin_ratio**2
+        )
+
+        # F_drag = 0.5 * rho * A * Cd * v^2
+        # a_drag = F_drag / m
+        # Precompute constants term: 0.5 * rho * A / m
+        const_term = (
+            0.5 * self.environment.air_density * self.ball.cross_sectional_area
+        ) / self.ball.mass
+
+        drag_acc_mag = const_term * drag_coefficient * speed_sq
+        drag_acc = -drag_acc_mag * velocity_unit
+
+        total_acc = gravity_acc + drag_acc
+
+        # Lift force using Waterloo/Penner quadratic model
+        if spin_ratio > 0:
+            lift_coefficient = (
+                self.ball.cl0
+                + self.ball.cl1 * spin_ratio
+                + self.ball.cl2 * spin_ratio**2
+            )
+            # Cap at reasonable maximum
+            lift_coefficient = min(0.25, lift_coefficient)
+
+            magnus_acc_mag = const_term * lift_coefficient * speed_sq
+
+            # Direction: perpendicular to velocity and spin axis
+            if launch.spin_axis is not None:
+                cross_product = np.cross(launch.spin_axis, velocity_unit)
+                cross_magnitude = np.sqrt(np.sum(cross_product**2))
+                if cross_magnitude > 1e-10:
+                    magnus_acc = magnus_acc_mag * cross_product / cross_magnitude
+                    total_acc += magnus_acc
+
+        return cast(np.ndarray, total_acc)
 
     def _calculate_forces(
         self, velocity: np.ndarray, launch: LaunchConditions
@@ -239,6 +304,11 @@ class BallFlightSimulator:
         Returns:
             Dictionary of force vectors
         """
+        # This method duplicates logic from _calculate_acceleration but returns
+        # the force breakdown. Since it's only called for trajectory point storage
+        # (not in the inner solver loop), the duplication is acceptable for
+        # performance isolation.
+
         forces = {}
 
         # Gravity force
@@ -250,20 +320,16 @@ class BallFlightSimulator:
         relative_velocity = velocity - self.environment.wind_velocity
         speed = np.linalg.norm(relative_velocity)
 
-        if speed > 0.1:  # Avoid division by zero
+        if speed > 0.1:
             velocity_unit = relative_velocity / speed
 
-            # Calculate spin ratio S = (ω * r) / v (Waterloo/Penner model)
             if launch.spin_rate > 0:
-                omega = launch.spin_rate * 2 * np.pi / 60  # rad/s
-                spin_ratio: float = float((omega * self.ball.radius) / speed)
+                omega = launch.spin_rate * 2 * np.pi / 60
+                spin_ratio = float((omega * self.ball.radius) / speed)
             else:
                 spin_ratio = 0.0
 
-            # Drag force using Waterloo/Penner quadratic model
-            # Cd = cd0 + cd1*S + cd2*S² (Penner, 2003)
-            # Source: Waterloo wind tunnel measurements
-            drag_coefficient: float = (
+            drag_coefficient = (
                 self.ball.cd0
                 + self.ball.cd1 * spin_ratio
                 + self.ball.cd2 * spin_ratio**2
@@ -277,20 +343,14 @@ class BallFlightSimulator:
             )
             forces["drag"] = -drag_magnitude * velocity_unit
 
-            # Lift force using Waterloo/Penner quadratic model
-            # Cl = cl0 + cl1*S + cl2*S² (Penner, 2003)
-            # Source: Waterloo wind tunnel measurements
             if spin_ratio > 0:
-                lift_coefficient: float = (
+                lift_coefficient = (
                     self.ball.cl0
                     + self.ball.cl1 * spin_ratio
                     + self.ball.cl2 * spin_ratio**2
                 )
-                # Cap at reasonable maximum to prevent unrealistic lift
-                # Higher spin doesn't keep producing proportionally more lift
                 lift_coefficient = min(0.25, lift_coefficient)
 
-                # Magnus force magnitude
                 magnus_magnitude = (
                     0.5
                     * self.environment.air_density
@@ -299,11 +359,7 @@ class BallFlightSimulator:
                     * speed**2
                 )
 
-                # Direction: perpendicular to velocity and spin axis
-                # For backspin with axis along x (horizontal), force is upward
                 if launch.spin_axis is not None:
-                    # Magnus force = omega_vec × v_vec (direction)
-                    # Normalized: (spin_axis × velocity) / |spin_axis × velocity|
                     cross_product = np.cross(launch.spin_axis, velocity_unit)
                     cross_magnitude = float(np.linalg.norm(cross_product))
                     if cross_magnitude > 1e-10:

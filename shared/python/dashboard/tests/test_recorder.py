@@ -5,7 +5,7 @@ from shared.python.interfaces import PhysicsEngine
 
 
 class MockPhysicsEngine(PhysicsEngine):
-    def __init__(self):
+    def __init__(self) -> None:
         self.q = np.zeros(2)
         self.v = np.zeros(2)
         self.t = 0.0
@@ -72,7 +72,7 @@ class MockPhysicsEngine(PhysicsEngine):
         return np.zeros(2)
 
 
-def test_recorder_basic():
+def test_recorder_basic() -> None:
     engine = MockPhysicsEngine()
     recorder = GenericPhysicsRecorder(engine)
 
@@ -93,7 +93,7 @@ def test_recorder_basic():
     assert data["model_name"] == "MockModel"
 
 
-def test_recorder_analysis():
+def test_recorder_analysis() -> None:
     engine = MockPhysicsEngine()
     recorder = GenericPhysicsRecorder(engine)
 

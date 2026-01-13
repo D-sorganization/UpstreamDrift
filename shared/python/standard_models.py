@@ -12,6 +12,7 @@ from typing import Any
 import yaml
 
 from shared.python.common_utils import GolfModelingError
+from shared.python.constants import DEG_TO_RAD
 
 logger = logging.getLogger(__name__)
 
@@ -297,7 +298,7 @@ class StandardModelManager:
     <parent link="shaft"/>
     <child link="head"/>
     <origin xyz="0 0 {(club_config['length_m'] - 0.35) / 2:.3f}"
-            rpy="0 {club_config['loft_deg'] * 3.14159 / 180:.4f} 0"/>
+            rpy="0 {club_config['loft_deg'] * DEG_TO_RAD:.4f} 0"/>
   </joint>
 
 </robot>"""
