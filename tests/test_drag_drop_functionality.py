@@ -99,7 +99,7 @@ class TestDragDropFunctionality(unittest.TestCase):
         pos = card.drag_start_position
         # Verify drag_start_position was set
         self.assertIsNotNone(pos, "drag_start_position should be set after mouse press")
-        
+
         # Handle both real QPoint objects and Mock objects
         # Real QPoint.x() returns int, Mock.x() returns MagicMock
         if hasattr(pos, "x") and callable(pos.x):
