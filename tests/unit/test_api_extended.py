@@ -216,7 +216,7 @@ class TestVideoAnalysisEndpoints:
         response = client.post(
             "/analyze/video",
             files={"file": ("test.mp4", io.BytesIO(video_content), "video/mp4")},
-            data={"min_confidence": 5.0},  # Out of range
+            data={"min_confidence": "5.0"},  # Out of range - send as string
         )
         # Server should handle this gracefully
         assert response.status_code in [200, 400, 422, 500]
