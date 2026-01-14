@@ -87,7 +87,7 @@ def setup_environment() -> tuple[str, int]:
             )
             logger.warning("   API authentication will fail. Set one for production.")
             logger.warning(
-                "   Example: export GOLF_API_SECRET_KEY=$(python3 -c 'import secrets; print(secrets.token_urlsafe(64))')"
+                '   Example: export GOLF_API_SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(64))")'
             )
 
     # Set default host and port
