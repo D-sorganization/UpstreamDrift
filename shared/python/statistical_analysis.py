@@ -15,7 +15,6 @@ from dataclasses import asdict, dataclass
 from typing import Any, cast
 
 import numpy as np
-from numpy.lib.stride_tricks import sliding_window_view
 from scipy.signal import find_peaks, savgol_filter
 from scipy.spatial import cKDTree
 from scipy.spatial.distance import pdist, squareform
@@ -1175,21 +1174,30 @@ class StatisticalAnalyzer:
         # corr = (mean(xy) - mean(x)mean(y)) / (std(x)std(y))
         # But for rolling window.
 
-        # We can use simple loop or strided view. Strided view is fast.
-        x_windows = sliding_window_view(x, window_shape=window_size)
-        y_windows = sliding_window_view(y, window_shape=window_size)
+        # OPTIMIZATION: Use convolution for O(N) complexity instead of O(N*W)
+        # Reduces memory allocation and computation significantly
+        # Previous implementation used sliding_window_view which created (N, W) views
+        kernel = np.ones(window_size)
+        n = window_size
 
-        # shape (N - window + 1, window)
-        # Compute correlation for each window
-        # This can be vectorized:
-        x_mean = np.mean(x_windows, axis=1, keepdims=True)
-        y_mean = np.mean(y_windows, axis=1, keepdims=True)
+        s_x = np.convolve(x, kernel, mode="valid")
+        s_y = np.convolve(y, kernel, mode="valid")
+        s_xy = np.convolve(x * y, kernel, mode="valid")
+        s_xx = np.convolve(x**2, kernel, mode="valid")
+        s_yy = np.convolve(y**2, kernel, mode="valid")
 
-        x_diff = x_windows - x_mean
-        y_diff = y_windows - y_mean
+        # Numerator: sum((x-mx)(y-my)) = sum(xy) - sum(x)sum(y)/n
+        numerator = s_xy - (s_x * s_y) / n
 
-        numerator = np.sum(x_diff * y_diff, axis=1)
-        denominator = np.sqrt(np.sum(x_diff**2, axis=1) * np.sum(y_diff**2, axis=1))
+        # Denominator terms: sum((x-mx)^2) = sum(x^2) - sum(x)^2/n
+        var_x = s_xx - (s_x**2) / n
+        var_y = s_yy - (s_y**2) / n
+
+        # Clamp variances to be non-negative (handle numerical noise)
+        var_x = np.maximum(var_x, 0)
+        var_y = np.maximum(var_y, 0)
+
+        denominator = np.sqrt(var_x * var_y)
 
         # Handle divide by zero (constant signal in window)
         with np.errstate(divide="ignore", invalid="ignore"):
@@ -2367,24 +2375,24 @@ class StatisticalAnalyzer:
         if len(angles) < window_size:
             return np.array([]), np.array([]), np.array([])
 
-        # OPTIMIZATION: Vectorized rolling regression using sliding_window_view
-        # Creates a view of windows (N-w+1, w) without copying data
-        # Significantly faster (approx 60x) than Python loop for large N
-        window_angles = sliding_window_view(angles, window_size)
-        window_torques = sliding_window_view(torques, window_size)
+        # OPTIMIZATION: Use convolution for O(N) complexity instead of O(N*W)
+        # Significantly faster and memory efficient compared to sliding_window_view
+        kernel = np.ones(window_size)
+        n = window_size
 
-        # Vectorized means (axis=1 is across the window)
-        x_mean = np.mean(window_angles, axis=1, keepdims=True)
-        y_mean = np.mean(window_torques, axis=1, keepdims=True)
+        s_x = np.convolve(angles, kernel, mode="valid")
+        s_y = np.convolve(torques, kernel, mode="valid")
+        s_xy = np.convolve(angles * torques, kernel, mode="valid")
+        s_xx = np.convolve(angles**2, kernel, mode="valid")
+        s_yy = np.convolve(torques**2, kernel, mode="valid")
 
-        # Differences from mean
-        x_diff = window_angles - x_mean
-        y_diff = window_torques - y_mean
+        cov = s_xy - (s_x * s_y) / n
+        var_x = s_xx - (s_x**2) / n
+        var_y = s_yy - (s_y**2) / n
 
-        # Covariance and Variances (sum over axis 1)
-        cov = np.sum(x_diff * y_diff, axis=1)
-        var_x = np.sum(x_diff**2, axis=1)
-        var_y = np.sum(y_diff**2, axis=1)
+        # Clamp variances to be non-negative
+        var_x = np.maximum(var_x, 0)
+        var_y = np.maximum(var_y, 0)
 
         # Calculate Slope and R2
         # Use np.divide and where for safe division
