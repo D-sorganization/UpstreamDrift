@@ -45,7 +45,7 @@ class ConnectionPool:
             self._local.connection = sqlite3.connect(
                 self.db_path, check_same_thread=False
             )
-        return self._local.connection
+        return self._local.connection  # type: ignore[no-any-return]
 
     def close_all(self) -> None:
         """Close all connections (call on shutdown)."""
