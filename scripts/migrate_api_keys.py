@@ -195,6 +195,13 @@ def migrate_api_keys(
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         new_hash = bcrypt.hashpw(new_raw_value.encode("utf-8"), salt).decode("utf-8")
 
+        # PERFORMANCE FIX: Compute prefix hash for fast lookup
+        import hashlib
+
+        key_body = new_raw_value[4:]  # Remove "gms_" prefix
+        prefix = key_body[:8]
+        prefix_hash = hashlib.sha256(prefix.encode()).hexdigest()
+
         # Store metadata separately (no secrets here)
         record_metadata = {
             "entry_id": record.id,
@@ -211,8 +218,11 @@ def migrate_api_keys(
         raw_secrets.append(new_raw_value)
 
         if not dry_run:
-            # Update database record (only hash is stored)
+            # Update database record (hash and prefix)
             record.key_hash = new_hash  # type: ignore[assignment]
+            # Set prefix_hash if column exists
+            if hasattr(record, "prefix_hash"):
+                record.prefix_hash = prefix_hash  # type: ignore[attr-defined]
             logger.info("  ✓ Hash upgraded to bcrypt successfully")
         else:
             logger.info("  [DRY RUN] Would upgrade hash to bcrypt")

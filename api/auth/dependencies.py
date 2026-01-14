@@ -56,7 +56,11 @@ async def get_current_user_from_api_key(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db),
 ) -> User:
-    """Get current user from API key."""
+    """Get current user from API key.
+
+    PERFORMANCE FIX: Uses prefix hash to filter candidates before bcrypt verification,
+    reducing O(n) bcrypt calls to O(1) average case.
+    """
 
     api_key = credentials.credentials
 
@@ -68,38 +72,44 @@ async def get_current_user_from_api_key(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # PERFORMANCE FIX (Issue #2): Use prefix hash for O(1) lookup
-    # Instead of loading ALL keys and iterating with bcrypt (O(n)),
-    # we compute a fast SHA256 prefix hash and filter first.
+    # PERFORMANCE FIX: Compute prefix hash for fast filtering
+    # Use first 8 characters after "gms_" prefix for indexing
     import hashlib
 
-    # Compute prefix hash (SHA256 of first 8 chars after gms_ prefix)
     key_body = api_key[4:]  # Remove "gms_" prefix
-    if len(key_body) >= 8:
-        prefix_data = key_body[:8].encode("utf-8")
-        key_prefix = hashlib.sha256(prefix_data).hexdigest()
-    else:
-        key_prefix = None
+    if len(key_body) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key format",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    # Query with prefix filter - reduces bcrypt calls from O(n) to O(1)
-    if key_prefix:
-        # First try: filter by prefix (fast indexed lookup)
-        candidates = (
+    prefix = key_body[:8]
+    prefix_hash = hashlib.sha256(prefix.encode()).hexdigest()
+
+    # Query only keys matching the prefix hash (if column exists)
+    # Fallback to all active keys if prefix_hash column doesn't exist yet
+    try:
+        active_keys = (
             db.query(APIKey)
-            .filter(APIKey.is_active, APIKey.key_prefix == key_prefix)
+            .filter(APIKey.is_active, APIKey.prefix_hash == prefix_hash)
             .all()
         )
-    else:
-        candidates = []
+    except Exception:
+        # Fallback: prefix_hash column doesn't exist yet (migration pending)
+        # This maintains backward compatibility
+        active_keys = db.query(APIKey).filter(APIKey.is_active).all()
 
-    # Fall back to full scan only if prefix query returns nothing
-    # (handles legacy keys without prefix or migration in progress)
-    if not candidates:
-        # Legacy path: load all active keys (will be removed after migration)
-        candidates = db.query(APIKey).filter(APIKey.is_active).all()
+    if not active_keys:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
+    # Verify with bcrypt (now only 1-2 candidates instead of all keys)
     api_key_record = None
-    for key_candidate in candidates:
+    for key_candidate in active_keys:
         if security_manager.verify_api_key(api_key, str(key_candidate.key_hash)):
             api_key_record = key_candidate
             break
