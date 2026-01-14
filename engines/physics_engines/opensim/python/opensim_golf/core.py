@@ -163,9 +163,6 @@ class GolfSwingModel:
 
         Returns:
             SimulationResult object containing trajectories and forces.
-
-        Raises:
-            NotImplementedError: Full OpenSim simulation integration pending.
         """
         return self._run_opensim_simulation()
 
@@ -178,7 +175,8 @@ class GolfSwingModel:
 
         n_q = self._opensim_model.getNumCoordinates()
         n_u = self._opensim_model.getNumSpeeds()
-        n_muscles = self._opensim_model.getMuscles().getSize()
+        muscles = self._opensim_model.getMuscles()
+        n_muscles = muscles.getSize()
         n_controls = self._opensim_model.getNumControls()
 
         states_arr = np.zeros((num_steps, n_q + n_u))  # Storing Q and U
@@ -221,6 +219,12 @@ class GolfSwingModel:
             for j in range(n_controls):
                 control_signals_arr[i, j] = controls_vec.get(j)
 
+            # Record Muscle Forces
+            # We need to realize Dynamics to get muscle forces
+            self._opensim_model.realizeDynamics(self._state)
+            for j in range(n_muscles):
+                muscle_forces_arr[i, j] = muscles.get(j).getFiberForce(self._state)
+
             # Record Marker Positions
             self._opensim_model.realizePosition(self._state)
             for j in range(n_markers):
@@ -246,7 +250,7 @@ class GolfSwingModel:
         return SimulationResult(
             time=time_arr,
             states=states_arr,
-            muscle_forces=muscle_forces_arr,  # Leaving as zeros for now as force analysis is complex
+            muscle_forces=muscle_forces_arr,
             control_signals=control_signals_arr,
             joint_torques=joint_torques_arr,
             marker_positions=marker_positions,
