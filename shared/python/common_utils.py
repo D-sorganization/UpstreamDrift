@@ -5,9 +5,22 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+# Explicitly import OUTPUT_ROOT from the package to avoid circular dependency issues
+# while keeping the import at module level for clarity.
+# Note: shared/python/__init__.py defines OUTPUT_ROOT but does NOT import this module.
+from shared.python import OUTPUT_ROOT
+
 # Import core utilities (exceptions, logging) from the lightweight module
-from .constants import DEG_TO_RAD, MPS_TO_MPH, RAD_TO_DEG
-from .core import (
+from shared.python.constants import (
+    DEG_TO_RAD,
+    KG_TO_LB,
+    M_TO_FT,
+    M_TO_YARD,
+    MPS_TO_KPH,
+    MPS_TO_MPH,
+    RAD_TO_DEG,
+)
+from shared.python.core import (
     DataFormatError,
     EngineNotFoundError,
     GolfModelingError,
@@ -39,6 +52,31 @@ if TYPE_CHECKING:
     import pandas as pd
 
 
+# Centralized conversion factors for maintainability (DRY, Orthogonality)
+# Format: (from_unit, to_unit): factor
+# Usage: value * factor
+CONVERSION_FACTORS: dict[tuple[str, str], float] = {
+    # Angle
+    ("deg", "rad"): float(DEG_TO_RAD),
+    ("rad", "deg"): float(RAD_TO_DEG),
+    # Length
+    ("m", "mm"): 1000.0,
+    ("mm", "m"): 0.001,
+    ("m", "ft"): float(M_TO_FT),
+    ("ft", "m"): 1.0 / float(M_TO_FT),
+    ("m", "yd"): float(M_TO_YARD),
+    ("yd", "m"): 1.0 / float(M_TO_YARD),
+    # Velocity
+    ("m/s", "mph"): float(MPS_TO_MPH),
+    ("mph", "m/s"): 1.0 / float(MPS_TO_MPH),
+    ("m/s", "km/h"): float(MPS_TO_KPH),
+    ("km/h", "m/s"): 1.0 / float(MPS_TO_KPH),
+    # Mass
+    ("kg", "lb"): float(KG_TO_LB),
+    ("lb", "kg"): 1.0 / float(KG_TO_LB),
+}
+
+
 def ensure_output_dir(engine_name: str, subdir: str | None = None) -> Path:
     """Ensure output directory exists for an engine.
 
@@ -49,8 +87,6 @@ def ensure_output_dir(engine_name: str, subdir: str | None = None) -> Path:
     Returns:
         Path to the output directory
     """
-    from . import OUTPUT_ROOT
-
     output_path = OUTPUT_ROOT / engine_name
     if subdir:
         output_path = output_path / subdir
@@ -74,14 +110,15 @@ def load_golf_data(data_path: str | Path) -> pd.DataFrame:
     data_path = Path(data_path)
     import pandas as pd
 
-    if data_path.suffix.lower() == ".csv":
+    suffix = data_path.suffix.lower()
+    if suffix == ".csv":
         return pd.read_csv(data_path)
-    elif data_path.suffix.lower() in [".xlsx", ".xls"]:
+    elif suffix in [".xlsx", ".xls"]:
         return pd.read_excel(data_path)
-    elif data_path.suffix.lower() == ".json":
+    elif suffix == ".json":
         return pd.read_json(data_path)
     else:
-        raise ValueError(f"Unsupported file format: {data_path.suffix}")
+        raise ValueError(f"Unsupported file format: {suffix}")
 
 
 def save_golf_data(
@@ -95,12 +132,13 @@ def save_golf_data(
         format: Output format ('csv', 'excel', 'json')
     """
     output_path = Path(output_path)
+    format = format.lower()
 
-    if format.lower() == "csv":
+    if format == "csv":
         data.to_csv(output_path, index=False)
-    elif format.lower() == "excel":
+    elif format == "excel":
         data.to_excel(output_path, index=False)
-    elif format.lower() == "json":
+    elif format == "json":
         data.to_json(output_path, orient="records", indent=2)
     else:
         raise ValueError(f"Unsupported format: {format}")
@@ -188,27 +226,18 @@ def convert_units(value: float, from_unit: str, to_unit: str) -> float:
 
     Returns:
         Converted value
+
+    Raises:
+        ValueError: If conversion is not supported
     """
-    # Angle conversions
-    if from_unit == "deg" and to_unit == "rad":
-        return float(value * DEG_TO_RAD)
-    elif from_unit == "rad" and to_unit == "deg":
-        return float(value * RAD_TO_DEG)
+    if from_unit == to_unit:
+        return value
 
-    # Length conversions
-    elif from_unit == "m" and to_unit == "mm":
-        return value * 1000.0
-    elif from_unit == "mm" and to_unit == "m":
-        return value / 1000.0
-
-    # Velocity conversions
-    elif from_unit == "m/s" and to_unit == "mph":
-        return value * float(MPS_TO_MPH)
-    elif from_unit == "mph" and to_unit == "m/s":
-        return value / float(MPS_TO_MPH)
-
-    else:
-        raise ValueError(f"Conversion from {from_unit} to {to_unit} not supported")
+    try:
+        factor = CONVERSION_FACTORS[(from_unit, to_unit)]
+        return value * factor
+    except KeyError:
+        raise ValueError(f"Conversion from {from_unit} to {to_unit} not supported") from None
 
 
 def get_shared_urdf_path() -> Path | None:
