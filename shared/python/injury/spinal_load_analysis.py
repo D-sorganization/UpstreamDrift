@@ -145,7 +145,7 @@ class SpinalLoadAnalyzer:
         body_weight: float,
         height: float | None = None,
         trunk_length: float | None = None,
-        lumbar_segments: list[str] = None,
+        lumbar_segments: list[str] | None = None,
     ):
         """
         Initialize the spinal load analyzer.
@@ -485,10 +485,12 @@ class SpinalLoadAnalyzer:
 
         for segment in result.segments.values():
             if len(segment.compression) > 0:
-                total_compression_impulse += np.trapezoid(segment.compression, dx=dt)
+                total_compression_impulse += float(
+                    np.trapezoid(segment.compression, dx=float(dt))
+                )
             if len(segment.lateral_shear) > 0:
-                total_shear_impulse += np.trapezoid(
-                    np.abs(segment.lateral_shear), dx=dt
+                total_shear_impulse += float(
+                    np.trapezoid(np.abs(segment.lateral_shear), dx=float(dt))
                 )
 
         result.cumulative_compression_impulse = total_compression_impulse
@@ -577,7 +579,7 @@ class SpinalLoadAnalyzer:
         return recommendations
 
 
-def create_example_analysis():
+def create_example_analysis() -> tuple[SpinalLoadAnalyzer, SpinalLoadResult]:
     """Create an example analysis for testing and demonstration."""
     # Create analyzer for 80kg golfer
     analyzer = SpinalLoadAnalyzer(body_weight=80.0, height=1.80)

@@ -234,7 +234,7 @@ class SwingOptimizer:
         golfer: GolferModel,
         club: ClubModel,
         config: OptimizationConfig | None = None,
-    ):
+    ) -> None:
         """
         Initialize the swing optimizer.
 
@@ -250,7 +250,7 @@ class SwingOptimizer:
         # Derived quantities
         self._setup_model()
 
-    def _setup_model(self):
+    def _setup_model(self) -> None:
         """Set up the biomechanical model parameters."""
         # Arm + club length
         self.total_lever = self.golfer.arm_length + self.club.total_length
@@ -731,7 +731,7 @@ class SwingOptimizer:
         }
 
 
-def create_example_optimization():
+def create_example_optimization() -> tuple[SwingOptimizer, OptimizationResult]:
     """Create an example optimization for testing and demonstration."""
     # Create golfer and club models
     golfer = GolferModel(

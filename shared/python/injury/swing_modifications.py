@@ -166,13 +166,13 @@ class SwingModificationRecommender:
         ),
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the swing modification recommender."""
         pass
 
     def recommend(
         self,
-        injury_report=None,
+        injury_report: object = None,
         performance_requirements: dict | None = None,
         current_style: SwingStyle = SwingStyle.MODERN,
     ) -> ModificationPlan:
@@ -287,7 +287,7 @@ class SwingModificationRecommender:
 
         return plan
 
-    def _factor_score(self, factor) -> float:
+    def _factor_score(self, factor: object) -> float:
         """Convert risk factor to score."""
         value = getattr(factor, "value", 0)
         safe = getattr(factor, "threshold_safe", 50)
