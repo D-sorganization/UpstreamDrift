@@ -231,7 +231,9 @@ class TestGolfSwingPlotter:
         # The default mocked data is a spiral, which should fit something.
 
         # Mock SwingPlaneAnalyzer to avoid complex geometry calculations in unit test
-        with patch("shared.python.swing_plane_analysis.SwingPlaneAnalyzer") as MockAnalyzer:
+        with patch(
+            "shared.python.swing_plane_analysis.SwingPlaneAnalyzer"
+        ) as MockAnalyzer:
             instance = MockAnalyzer.return_value
             instance.analyze.return_value.steepness_deg = 45.0
             instance.analyze.return_value.rmse = 0.01
