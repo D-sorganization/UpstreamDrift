@@ -372,6 +372,7 @@ active_tasks: dict[str, Any] = {}  # No TTL, no cleanup, no size limit
 **Impact**: Long-running API servers will exhaust memory as completed tasks accumulate indefinitely.
 
 **Recommendation**:
+
 - Implement TTL-based cleanup (e.g., remove tasks older than 1 hour)
 - Add maximum size limit with LRU eviction
 - Consider using Redis or similar for production deployments
@@ -398,6 +399,7 @@ for key_candidate in active_keys:
 **Impact**: O(n) bcrypt operations where n = total active API keys. With 1000 users having 3 keys each, worst case is 3000 bcrypt verifications.
 
 **Recommendation**:
+
 - Store a fast-hashable prefix (first 8 chars SHA256) for filtering
 - Query: `WHERE prefix_hash = ? AND is_active = true` then verify only matches
 - This reduces bcrypt calls from O(n) to O(1) average case
@@ -432,11 +434,13 @@ user_map = {u.id: u for u in users}
 **Location**: `engines/physics_engines/mujoco/python/mujoco_humanoid_golf/recording_library.py`
 
 **Issue**: Multiple independent `sqlite3.connect()` calls without pooling:
+
 - Line 73, 102, 262, 285, 372, 407, 467
 
 Each method opens/closes connection separately, incurring connection overhead.
 
 **Recommendation**:
+
 - Use a connection pool or singleton connection manager
 - For SQLite, consider using `check_same_thread=False` with thread-local connections
 
