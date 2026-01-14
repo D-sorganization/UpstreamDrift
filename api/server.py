@@ -12,8 +12,7 @@ Built on top of the existing EngineManager and PhysicsEngine protocol.
 import logging
 import tempfile
 import uuid
-from collections import OrderedDict
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -416,9 +415,6 @@ async def run_simulation_async(
             status_code=500, detail="Simulation service not initialized"
         )
 
-    # PERFORMANCE FIX: Cleanup old tasks before creating new one
-    _cleanup_old_tasks()
-
     task_id = str(uuid.uuid4())
 
     # Initialize task with timestamp
@@ -520,9 +516,6 @@ async def analyze_video_async(
     """Start asynchronous video analysis."""
     if not video_pipeline:
         raise HTTPException(status_code=500, detail="Video pipeline not initialized")
-
-    # PERFORMANCE FIX: Cleanup old tasks
-    _cleanup_old_tasks()
 
     task_id = str(uuid.uuid4())
 
