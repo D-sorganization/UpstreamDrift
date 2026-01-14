@@ -101,12 +101,7 @@ Power Sign Convention:
 
 KNOWN LIMITATIONS & WARNINGS
 =============================
-1. compute_centripetal_acceleration() is DISABLED (Issue B-001 - BLOCKER)
-   - Contains fundamental physics error
-   - Raises NotImplementedError
-   - Use compute_club_head_apparent_forces() instead
-
-2. decompose_coriolis_forces() is O(N²) (Issue B-002)
+1. decompose_coriolis_forces() is O(N²) (Issue B-002)
    - Prefer compute_coriolis_forces() which is O(N) via analytical RNE
 
 3. Finite difference Jacobian derivatives (Issue B-009)
