@@ -4,9 +4,9 @@
 
 ## Executive Summary
 
-This review identifies several key technical areas within the codebase that implement sophisticated algorithms for golf swing analysis, ball flight physics, and biomechanics. These areas overlap with known patent landscapes dominated by major golf technology companies (e.g., TrackMan, FlightScope, K-Motion, Titleist Performance Institute, Swing Catalyst).
+This review identifies several key technical areas within the codebase that implement sophisticated algorithms for golf swing analysis, ball flight physics, and biomechanics. These areas overlap with known patent landscapes dominated by major golf technology companies (e.g., TrackMan, FlightScope, K-Motion, Titleist Performance Institute, Swing Catalyst, Mizuno).
 
-## identified Technical Areas of Interest
+## Identified Technical Areas of Interest
 
 The following components contain logic that should be reviewed for potential infringement of method or system patents.
 
@@ -71,6 +71,26 @@ The following components contain logic that should be reviewed for potential inf
     *   **Model Definitions:** The `.osim` model files themselves are often subject to specific licenses (e.g., Creative Commons with attribution, or strictly non-commercial). Using a proprietary model (e.g., a "Full Body Golf Model" developed by a university or company) without a license would be copyright infringement.
     *   **Control Strategies:** The method of applying muscle controls to drive a golf swing simulation (Forward Dynamics) might be covered by research patents.
 
+### 8. Swing Comparison & Scoring (NEW)
+**File:** `shared/python/swing_comparison.py`
+
+*   **Description:** Implements methods to compare a "Student" swing to a "Reference" (Pro) swing, generating similarity scores and metrics.
+*   **Specific Risk Factors:**
+    *   **DTW Scoring:** The use of Dynamic Time Warping (DTW) to align and score golf swings (`score = 100 / (1 + distance)`) is a core component of many patented biofeedback systems (e.g., K-Motion, Zepp, Blast Motion).
+        ```python
+        score = 100.0 / (1.0 + norm_dist)
+        ```
+    *   **Tempo Ratio Scoring:** Calculating a score based on the deviation from a target tempo ratio (e.g., 3:1) is a common feature in patented training aids.
+    *   **"Swing DNA":** The specific term "Swing DNA" and the concept of a multi-axis radar chart for fitting (Speed, Sequence, Stability, etc.) is heavily associated with **Mizuno's Performance Fitting System**. Using this term is a high-risk trademark and potential patent infringement.
+
+### 9. Advanced Chaos & Complexity Metrics (NEW)
+**File:** `shared/python/statistical_analysis.py`
+
+*   **Description:** Implements advanced non-linear dynamics metrics to quantify swing consistency and complexity.
+*   **Specific Risk Factors:**
+    *   **Lyapunov Exponents & Fractal Dimension:** Using these chaos theory metrics (`estimate_lyapunov_exponent`, `compute_fractal_dimension`) to quantify "swing consistency" or "stability" is a niche but existent patent area for advanced biomechanics systems.
+    *   **Recurrence Quantification Analysis (RQA):** The application of RQA (`compute_rqa_metrics`) to diagnose movement pathology or skill level in sports is an area of academic research that has crossed into commercial patents for athlete profiling.
+
 ## Recommendations for Legal Review
 
 1.  **Prior Art Search:** Conduct a search for patents assigned to:
@@ -80,6 +100,9 @@ The following components contain logic that should be reviewed for potential inf
     *   K-Motion Interactive
     *   Swing Catalyst
     *   AboutGolf
-2.  **Review "Gear Effect" Approximations:** Verify if the linear approximation used in `impact_model.py` is a standard textbook formula or derived from a specific proprietary paper/patent.
-3.  **Kinematic Sequence Scoring:** Review the "Efficiency Score" logic in `kinematic_sequence.py` against K-Motion's patents on biofeedback and swing sequencing.
-4.  **OpenSim Model Licensing:** Confirm the source and license of any `.osim` files used or intended to be used with the simulator.
+    *   **Mizuno (specifically regarding "Swing DNA")**
+    *   **Zepp Labs / Blast Motion**
+2.  **Review "Swing DNA" Usage:** **CRITICAL:** The term "Swing DNA" should likely be renamed (e.g., "Swing Profile", "Biometric Signature") to avoid trademark conflict with Mizuno.
+3.  **Review "Gear Effect" Approximations:** Verify if the linear approximation used in `impact_model.py` is a standard textbook formula or derived from a specific proprietary paper/patent.
+4.  **Kinematic Sequence Scoring:** Review the "Efficiency Score" logic in `kinematic_sequence.py` against K-Motion's patents on biofeedback and swing sequencing.
+5.  **OpenSim Model Licensing:** Confirm the source and license of any `.osim` files used or intended to be used with the simulator.
