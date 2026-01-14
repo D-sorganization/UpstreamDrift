@@ -31,7 +31,7 @@ pip install -e ".[dev,engines,analysis]"
 
 ### Install Additional API Dependencies
 ```bash
-pip install fastapi uvicorn sqlalchemy pydantic[email] python-jose[cryptography] passlib[bcrypt] python-multipart slowapi
+pip install fastapi uvicorn sqlalchemy pydantic[email] PyJWT bcrypt python-multipart slowapi
 ```
 
 ## 2. Database Setup

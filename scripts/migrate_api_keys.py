@@ -46,7 +46,7 @@ from typing import Any
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from passlib.context import CryptContext
+import bcrypt
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.orm import Session, sessionmaker
@@ -59,8 +59,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Password context for bcrypt
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Bcrypt cost factor (12 is the recommended minimum for security)
+BCRYPT_ROUNDS = 12
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -184,7 +184,8 @@ def migrate_api_keys(
         new_raw_value = generate_new_api_key()
 
         # Hash with bcrypt
-        new_hash = pwd_context.hash(new_raw_value)
+        salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
+        new_hash = bcrypt.hashpw(new_raw_value.encode("utf-8"), salt).decode("utf-8")
 
         # Store metadata separately (no secrets here)
         record_metadata = {
