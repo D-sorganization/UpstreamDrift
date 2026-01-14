@@ -150,6 +150,8 @@ class BallFlightSimulator:
         """
         self.ball = ball or BallProperties()
         self.environment = environment or EnvironmentalConditions()
+        # Optimization: Pre-allocate gravity vector
+        self._gravity_acc = np.array([0.0, 0.0, -self.environment.gravity])
 
     def simulate_trajectory(
         self, launch: LaunchConditions, max_time: float = 10.0, time_step: float = 0.01
@@ -247,14 +249,13 @@ class BallFlightSimulator:
 
         Optimized for performance in the solver loop.
         """
-        # Gravity acceleration (constant)
-        gravity_acc = np.array([0.0, 0.0, -self.environment.gravity])
+        # Gravity acceleration (constant, pre-allocated)
+        gravity_acc = self._gravity_acc
 
         # Relative velocity (accounting for wind)
         relative_velocity = velocity - self.environment.wind_velocity
-        # Optimization: use sum(x**2) instead of norm to avoid sqrt if not needed,
-        # but here we need speed.
-        speed_sq = np.sum(relative_velocity**2)
+        # Optimization: use dot product instead of sum(x**2) to avoid allocation
+        speed_sq = relative_velocity @ relative_velocity
         speed = np.sqrt(speed_sq)
 
         if speed <= MIN_SPEED_THRESHOLD:
@@ -300,7 +301,8 @@ class BallFlightSimulator:
             # Direction: perpendicular to velocity and spin axis
             if launch.spin_axis is not None:
                 cross_product = np.cross(launch.spin_axis, velocity_unit)
-                cross_magnitude = np.sqrt(np.sum(cross_product**2))
+                # Optimization: use dot product for magnitude
+                cross_magnitude = np.sqrt(cross_product @ cross_product)
                 if cross_magnitude > NUMERICAL_EPSILON:
                     magnus_acc = magnus_acc_mag * cross_product / cross_magnitude
                     total_acc += magnus_acc
