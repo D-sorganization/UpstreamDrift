@@ -12,6 +12,8 @@ Built on top of the existing EngineManager and PhysicsEngine protocol.
 import logging
 import tempfile
 import uuid
+from collections import OrderedDict
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -154,8 +156,35 @@ simulation_service: SimulationService | None = None
 analysis_service: AnalysisService | None = None
 video_pipeline: VideoPosePipeline | None = None
 
-# Background task storage
-active_tasks: dict[str, Any] = {}
+# Background task storage with TTL cleanup
+# PERFORMANCE FIX: Added TTL-based cleanup to prevent memory leak
+from collections import OrderedDict
+from datetime import timedelta
+
+active_tasks: OrderedDict[str, dict[str, Any]] = OrderedDict()
+TASK_TTL_HOURS = 1  # Remove tasks older than 1 hour
+MAX_TASKS = 1000  # Maximum number of tasks to keep
+
+
+def _cleanup_old_tasks() -> None:
+    """Remove tasks older than TTL or exceeding max count."""
+    current_time = datetime.now(UTC)
+    tasks_to_remove = []
+    
+    # Find expired tasks
+    for task_id, task_data in active_tasks.items():
+        if "created_at" in task_data:
+            age = current_time - task_data["created_at"]
+            if age > timedelta(hours=TASK_TTL_HOURS):
+                tasks_to_remove.append(task_id)
+    
+    # Remove expired tasks
+    for task_id in tasks_to_remove:
+        del active_tasks[task_id]
+    
+    # If still over limit, remove oldest tasks (LRU)
+    while len(active_tasks) > MAX_TASKS:
+        active_tasks.popitem(last=False)  # Remove oldest (FIFO)
 
 
 @app.on_event("startup")
@@ -310,7 +339,16 @@ async def run_simulation_async(
             status_code=500, detail="Simulation service not initialized"
         )
 
+    # PERFORMANCE FIX: Cleanup old tasks before creating new one
+    _cleanup_old_tasks()
+    
     task_id = str(uuid.uuid4())
+    
+    # Initialize task with timestamp
+    active_tasks[task_id] = {
+        "status": "started",
+        "created_at": datetime.now(UTC),
+    }
 
     # Add background task
     background_tasks.add_task(
@@ -406,6 +444,9 @@ async def analyze_video_async(
     if not video_pipeline:
         raise HTTPException(status_code=500, detail="Video pipeline not initialized")
 
+    # PERFORMANCE FIX: Cleanup old tasks
+    _cleanup_old_tasks()
+    
     task_id = str(uuid.uuid4())
 
     # Save file and add background task
@@ -413,6 +454,12 @@ async def analyze_video_async(
         content = await file.read()
         temp_file.write(content)
         temp_path = Path(temp_file.name)
+    
+    # Initialize task with timestamp
+    active_tasks[task_id] = {
+        "status": "started",
+        "created_at": datetime.now(UTC),
+    }
 
     background_tasks.add_task(
         _process_video_background,
@@ -435,7 +482,11 @@ async def _process_video_background(
 ) -> None:
     """Background task for video processing."""
     try:
-        active_tasks[task_id] = {"status": "processing", "progress": 0}
+        active_tasks[task_id] = {
+            "status": "processing",
+            "progress": 0,
+            "created_at": active_tasks.get(task_id, {}).get("created_at", datetime.now(UTC)),
+        }
 
         config = VideoProcessingConfig(
             estimator_type=estimator_type, min_confidence=min_confidence
@@ -447,6 +498,7 @@ async def _process_video_background(
         # Store result
         active_tasks[task_id] = {
             "status": "completed",
+            "created_at": active_tasks.get(task_id, {}).get("created_at", datetime.now(UTC)),
             "result": {
                 "filename": filename,
                 "total_frames": result.total_frames,
@@ -457,7 +509,11 @@ async def _process_video_background(
         }
 
     except Exception as e:
-        active_tasks[task_id] = {"status": "failed", "error": str(e)}
+        active_tasks[task_id] = {
+            "status": "failed",
+            "error": str(e),
+            "created_at": active_tasks.get(task_id, {}).get("created_at", datetime.now(UTC)),
+        }
     finally:
         # Clean up temp file
         if video_path.exists():
