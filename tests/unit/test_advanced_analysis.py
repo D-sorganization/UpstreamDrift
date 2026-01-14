@@ -1,4 +1,3 @@
-
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -12,7 +11,7 @@ class TestAdvancedAnalysis:
     def test_compute_poincare_map(self) -> None:
         # Create a simple periodic signal: sin(t), cos(t)
         # Using enough points to get good interpolation
-        t = np.linspace(0, 4*np.pi, 200)
+        t = np.linspace(0, 4 * np.pi, 200)
         pos = np.sin(t).reshape(-1, 1)
         vel = np.cos(t).reshape(-1, 1)
         acc = -np.sin(t).reshape(-1, 1)
@@ -22,12 +21,12 @@ class TestAdvancedAnalysis:
             joint_positions=pos,
             joint_velocities=vel,
             joint_torques=np.zeros_like(pos),
-            joint_accelerations=acc
+            joint_accelerations=acc,
         )
 
         # Section: vel = 0 (peaks/troughs of position)
-        dimensions = [('position', 0), ('velocity', 0), ('acceleration', 0)]
-        section = ('velocity', 0, 0.0)
+        dimensions = [("position", 0), ("velocity", 0), ("acceleration", 0)]
+        section = ("velocity", 0, 0.0)
 
         # Test "both" directions
         result = analyzer.compute_poincare_map(dimensions, section, direction="both")
@@ -46,7 +45,9 @@ class TestAdvancedAnalysis:
         assert np.allclose(points[:, 1], 0.0, atol=0.01)
 
         # Test "positive" direction (slope of vel > 0 => acc > 0 => pos < 0 troughs)
-        result_pos = analyzer.compute_poincare_map(dimensions, section, direction="positive")
+        result_pos = analyzer.compute_poincare_map(
+            dimensions, section, direction="positive"
+        )
         assert result_pos is not None
         points_pos, _ = result_pos
 
@@ -64,7 +65,7 @@ class TestAdvancedAnalysis:
             times=t,
             joint_positions=data.reshape(-1, 1),
             joint_velocities=data.reshape(-1, 1),
-            joint_torques=np.zeros((500, 1))
+            joint_torques=np.zeros((500, 1)),
         )
 
         time_axis, log_div, slope = analyzer.compute_lyapunov_divergence(
@@ -99,8 +100,8 @@ class TestAdvancedAnalysis:
         # Requires dimensions list of strings/ints
         plotter.plot_poincare_map_3d(
             fig,
-            dimensions=[('position', 0), ('velocity', 0), ('acceleration', 0)],
-            section_condition=('velocity', 0, 0.0)
+            dimensions=[("position", 0), ("velocity", 0), ("acceleration", 0)],
+            section_condition=("velocity", 0, 0.0),
         )
         assert fig.add_subplot.called
 

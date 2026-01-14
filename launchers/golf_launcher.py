@@ -707,20 +707,7 @@ class EnvironmentDialog(QDialog):
         actions_layout.addWidget(self.btn_copy_log)
 
         build_layout.addLayout(actions_layout)
-
-        # Console Header with Copy Button
-        console_header = QHBoxLayout()
-        console_header.addWidget(QLabel("Build Log:"))
-        console_header.addStretch()
-
-        self.btn_copy_log = QPushButton("Copy Log")
-        self.btn_copy_log.setToolTip("Copy the build log to clipboard")
-        self.btn_copy_log.setAccessibleName("Copy build log to clipboard")
-        self.btn_copy_log.setFixedWidth(100)
-        self.btn_copy_log.clicked.connect(self.copy_log)
-        console_header.addWidget(self.btn_copy_log)
-
-        build_layout.addLayout(console_header)
+        build_layout.addWidget(QLabel("Build Log:"))
 
         self.console = QTextEdit()
         self.console.setReadOnly(True)
@@ -770,18 +757,27 @@ class EnvironmentDialog(QDialog):
         layout.addWidget(close_btn)
 
     def copy_log(self) -> None:
-        """Copy console log to clipboard with visual feedback."""
+        """Copy the log content to clipboard with temporary visual feedback."""
         clipboard = QApplication.clipboard()
-        if clipboard:
+        if clipboard is not None:
             clipboard.setText(self.console.toPlainText())
 
-            # Feedback
+            # Provide immediate feedback on the button
             original_text = "Copy Log"
             self.btn_copy_log.setText("Copied! ✓")
             self.btn_copy_log.setStyleSheet(self.SUCCESS_BTN_STYLE)
 
-            # Restore after 2 seconds
-            QTimer.singleShot(2000, lambda: self._restore_copy_button(original_text))
+            style = self.style()
+            if style:
+                self.btn_copy_log.setIcon(
+                    style.standardIcon(QStyle.StandardPixmap.SP_DialogApplyButton)
+                )
+
+            # Restore button after 2 seconds
+            QTimer.singleShot(
+                2000,
+                lambda: self._restore_copy_button(original_text),
+            )
 
     def _restore_copy_button(self, original_text: str) -> None:
         """Restore the copy button to its original state."""
@@ -789,6 +785,7 @@ class EnvironmentDialog(QDialog):
         try:
             self.btn_copy_log.setText(original_text)
             self.btn_copy_log.setStyleSheet(self.DEFAULT_BTN_STYLE)
+            self.btn_copy_log.setIcon(QIcon())  # Remove icon
         except RuntimeError:
             # Widget likely deleted
             pass
@@ -808,40 +805,6 @@ class EnvironmentDialog(QDialog):
         """Append text to the log console."""
         self.console.append(text)
         self.console.moveCursor(self.console.textCursor().MoveOperation.End)
-
-    def copy_log(self) -> None:
-        """Copy the log content to clipboard with temporary visual feedback."""
-        clipboard = QApplication.clipboard()
-        if clipboard is not None:
-            clipboard.setText(self.console.toPlainText())
-
-            # Provide immediate feedback on the button
-            default_text = "Copy Log"
-            default_icon = QIcon()  # Empty icon as default
-
-            self.btn_copy_log.setText("Copied!")
-            self.btn_copy_log.setIcon(
-                self.style().standardIcon(
-                    QStyle.StandardPixmap.SP_DialogApplyButton
-                )
-            )
-
-            # Restore button after 2 seconds
-            QTimer.singleShot(
-                2000,
-                lambda: self._restore_btn(self.btn_copy_log, default_text, default_icon),
-            )
-
-    def _restore_btn(self, btn: QPushButton, text: str, icon: QIcon) -> None:
-        """Helper to restore button state."""
-        # Check if button still exists and is visible to avoid race conditions
-        try:
-            if btn and btn.isVisible():
-                btn.setText(text)
-                btn.setIcon(icon)
-        except RuntimeError:
-            # Widget might be deleted in C++ side
-            pass
 
     def build_finished(self, success: bool, msg: str) -> None:
         """Handle build completion."""
@@ -1669,9 +1632,7 @@ class GolfLauncher(QMainWindow):
 
         # Show empty state if needed
         if visible_count == 0 and self.current_filter_text:
-            lbl_empty = QLabel(
-                f"No models found matching '{self.current_filter_text}'"
-            )
+            lbl_empty = QLabel(f"No models found matching '{self.current_filter_text}'")
             lbl_empty.setStyleSheet(
                 "color: #888; font-style: italic; font-size: 16px; margin-top: 50px;"
             )

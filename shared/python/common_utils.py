@@ -237,7 +237,9 @@ def convert_units(value: float, from_unit: str, to_unit: str) -> float:
         factor = CONVERSION_FACTORS[(from_unit, to_unit)]
         return value * factor
     except KeyError:
-        raise ValueError(f"Conversion from {from_unit} to {to_unit} not supported") from None
+        raise ValueError(
+            f"Conversion from {from_unit} to {to_unit} not supported"
+        ) from None
 
 
 def get_shared_urdf_path() -> Path | None:
