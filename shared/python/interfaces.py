@@ -389,7 +389,9 @@ class RecorderInterface(Protocol):
     engine: Any
 
     @abstractmethod
-    def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
+    def get_time_series(
+        self, field_name: str
+    ) -> tuple[np.ndarray, np.ndarray | list[Any]]:
         """Get time series data for a specific field.
 
         Args:

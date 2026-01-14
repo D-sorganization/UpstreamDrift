@@ -204,7 +204,7 @@ def migrate_api_keys(
 
         if not dry_run:
             # Update database record (only hash is stored)
-            record.key_hash = new_hash
+            record.key_hash = new_hash  # type: ignore[assignment]
             logger.info("  ✓ Hash upgraded to bcrypt successfully")
         else:
             logger.info("  [DRY RUN] Would upgrade hash to bcrypt")

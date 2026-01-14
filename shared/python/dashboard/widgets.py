@@ -51,7 +51,7 @@ class LivePlotWidget(QtWidgets.QWidget):
 
         # Setup plot
         self.ax = self.canvas.fig.add_subplot(111)
-        self.ax2 = None  # Secondary axis
+        self.ax2: Axes | None = None  # Secondary axis
         self.line_objects: list[Any] = []
         self.line_objects2: list[Any] = []
 
