@@ -26,7 +26,7 @@ def test_convert_units():
     assert convert_units(22.3694, "mph", "m/s") == pytest.approx(10, rel=1e-4)
 
     with pytest.raises(ValueError, match="not supported"):
-        convert_units(1, "kg", "lb")
+        convert_units(1, "furlongs", "fortnights")
 
 
 def test_ensure_output_dir(tmp_path):

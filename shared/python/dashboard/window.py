@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import logging
 
+import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
 from shared.python.dashboard.recorder import GenericPhysicsRecorder
@@ -24,6 +25,7 @@ from shared.python.export import (
 )
 from shared.python.interfaces import PhysicsEngine
 from shared.python.plotting import GolfSwingPlotter, MplCanvas
+from shared.python.statistical_analysis import StatisticalAnalyzer
 
 LOGGER = logging.getLogger(__name__)
 
@@ -127,10 +129,15 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                 "Joint Power Curves",
                 "Impulse Accumulation",
                 "Phase Diagram (Joint 0)",
+                "Poincaré Map (3D)",
+                "Chaos Analysis (Lyapunov)",
+                "Recurrence Plot",
                 "Stability Diagram (CoM vs CoP)",
                 "CoP Trajectory",
                 "GRF Butterfly Diagram",
                 "Club Head Trajectory (3D)",
+                "Kinematic Sequence (Bars)",
+                "Swing DNA (Radar)",
                 "Summary Dashboard",
             ]
         )
@@ -283,6 +290,31 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                 self.plotter.plot_impulse_accumulation(self.static_canvas.fig)
             elif plot_type == "Phase Diagram (Joint 0)":
                 self.plotter.plot_phase_diagram(self.static_canvas.fig, joint_idx=0)
+            elif plot_type == "Poincaré Map (3D)":
+                # Default: Pos 0, Vel 0, Acc 0. Section: Vel 0 = 0.
+                self.plotter.plot_poincare_map_3d(
+                    self.static_canvas.fig,
+                    dimensions=[("position", 0), ("velocity", 0), ("acceleration", 0)],
+                    section_condition=("velocity", 0, 0.0),
+                    title="Poincaré Map (Joint 0)",
+                )
+            elif plot_type == "Chaos Analysis (Lyapunov)":
+                self.plotter.plot_lyapunov_exponent(self.static_canvas.fig, joint_idx=0)
+            elif plot_type == "Recurrence Plot":
+                # Need to compute matrix
+                times, positions = self.recorder.get_time_series("joint_positions")
+                _, velocities = self.recorder.get_time_series("joint_velocities")
+                if len(times) > 0:
+                    analyzer = StatisticalAnalyzer(
+                        times=np.asarray(times),
+                        joint_positions=np.asarray(positions),
+                        joint_velocities=np.asarray(velocities),
+                        joint_torques=np.zeros_like(positions),
+                    )
+                    rm = analyzer.compute_recurrence_matrix()
+                    self.plotter.plot_recurrence_plot(self.static_canvas.fig, rm)
+                else:
+                    raise ValueError("No data available")
             elif plot_type == "Stability Diagram (CoM vs CoP)":
                 self.plotter.plot_stability_diagram(self.static_canvas.fig)
             elif plot_type == "CoP Trajectory":
@@ -291,6 +323,62 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                 self.plotter.plot_grf_butterfly_diagram(self.static_canvas.fig)
             elif plot_type == "Club Head Trajectory (3D)":
                 self.plotter.plot_club_head_trajectory(self.static_canvas.fig)
+            elif plot_type == "Kinematic Sequence (Bars)":
+                # Heuristic: First few joints in order
+                _, vels = self.recorder.get_time_series("joint_velocities")
+                vels = np.asarray(vels)
+                n_joints = vels.shape[1] if len(vels) > 0 else 0
+                if n_joints >= 3:
+                    # Assume Pelvis (0), Thorax (1), Arm (2)...
+                    indices = {
+                        "Pelvis": 0,
+                        "Thorax": 1,
+                        "Arm": min(2, n_joints - 1),
+                    }
+                    if n_joints > 3:
+                        indices["Club"] = n_joints - 1
+                    self.plotter.plot_kinematic_sequence_bars(
+                        self.static_canvas.fig, indices
+                    )
+                else:
+                    # Fallback
+                    indices = {f"Joint {i}": i for i in range(n_joints)}
+                    self.plotter.plot_kinematic_sequence_bars(
+                        self.static_canvas.fig, indices
+                    )
+            elif plot_type == "Swing DNA (Radar)":
+                times, positions = self.recorder.get_time_series("joint_positions")
+                _, velocities = self.recorder.get_time_series("joint_velocities")
+                _, torques = self.recorder.get_time_series("joint_torques")
+                try:
+                    _, club_speed = self.recorder.get_time_series("club_head_speed")
+                except (KeyError, AttributeError):
+                    club_speed = None
+
+                if len(times) > 0:
+                    analyzer = StatisticalAnalyzer(
+                        times=np.asarray(times),
+                        joint_positions=np.asarray(positions),
+                        joint_velocities=np.asarray(velocities),
+                        joint_torques=np.asarray(torques),
+                        club_head_speed=(
+                            np.asarray(club_speed) if club_speed is not None else None
+                        ),
+                    )
+                    dna = analyzer.compute_swing_profile()
+                    if dna:
+                        metrics = {
+                            "Speed": dna.speed_score,
+                            "Sequence": dna.sequence_score,
+                            "Stability": dna.stability_score,
+                            "Efficiency": dna.efficiency_score,
+                            "Power": dna.power_score,
+                        }
+                        self.plotter.plot_radar_chart(self.static_canvas.fig, metrics)
+                    else:
+                        raise ValueError("Could not compute Swing DNA")
+                else:
+                    raise ValueError("No data available")
             elif plot_type == "Summary Dashboard":
                 self.plotter.plot_summary_dashboard(self.static_canvas.fig)
         except Exception as e:

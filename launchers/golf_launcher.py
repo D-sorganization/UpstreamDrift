@@ -56,6 +56,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QScrollArea,
     QSplashScreen,
+    QStyle,
     QTabWidget,
     QTextEdit,
     QVBoxLayout,
@@ -692,23 +693,21 @@ class EnvironmentDialog(QDialog):
         form.addWidget(self.combo_stage)
         build_layout.addLayout(form)
 
+        # Action Buttons Layout
+        actions_layout = QHBoxLayout()
+
         self.btn_build = QPushButton("Build Environment")
         self.btn_build.clicked.connect(self.start_build)
-        build_layout.addWidget(self.btn_build)
-
-        # Console Header with Copy Button
-        console_header = QHBoxLayout()
-        console_header.addWidget(QLabel("Build Log:"))
-        console_header.addStretch()
+        actions_layout.addWidget(self.btn_build)
 
         self.btn_copy_log = QPushButton("Copy Log")
         self.btn_copy_log.setToolTip("Copy the build log to clipboard")
-        self.btn_copy_log.setAccessibleName("Copy build log to clipboard")
-        self.btn_copy_log.setFixedWidth(100)
+        self.btn_copy_log.setAccessibleName("Copy Log")
         self.btn_copy_log.clicked.connect(self.copy_log)
-        console_header.addWidget(self.btn_copy_log)
+        actions_layout.addWidget(self.btn_copy_log)
 
-        build_layout.addLayout(console_header)
+        build_layout.addLayout(actions_layout)
+        build_layout.addWidget(QLabel("Build Log:"))
 
         self.console = QTextEdit()
         self.console.setReadOnly(True)
@@ -758,18 +757,27 @@ class EnvironmentDialog(QDialog):
         layout.addWidget(close_btn)
 
     def copy_log(self) -> None:
-        """Copy console log to clipboard with visual feedback."""
+        """Copy the log content to clipboard with temporary visual feedback."""
         clipboard = QApplication.clipboard()
-        if clipboard:
+        if clipboard is not None:
             clipboard.setText(self.console.toPlainText())
 
-            # Feedback
+            # Provide immediate feedback on the button
             original_text = "Copy Log"
             self.btn_copy_log.setText("Copied! ✓")
             self.btn_copy_log.setStyleSheet(self.SUCCESS_BTN_STYLE)
 
-            # Restore after 2 seconds
-            QTimer.singleShot(2000, lambda: self._restore_copy_button(original_text))
+            style = self.style()
+            if style:
+                self.btn_copy_log.setIcon(
+                    style.standardIcon(QStyle.StandardPixmap.SP_DialogApplyButton)
+                )
+
+            # Restore button after 2 seconds
+            QTimer.singleShot(
+                2000,
+                lambda: self._restore_copy_button(original_text),
+            )
 
     def _restore_copy_button(self, original_text: str) -> None:
         """Restore the copy button to its original state."""
@@ -777,6 +785,7 @@ class EnvironmentDialog(QDialog):
         try:
             self.btn_copy_log.setText(original_text)
             self.btn_copy_log.setStyleSheet(self.DEFAULT_BTN_STYLE)
+            self.btn_copy_log.setIcon(QIcon())  # Remove icon
         except RuntimeError:
             # Widget likely deleted
             pass
@@ -1337,6 +1346,7 @@ class GolfLauncher(QMainWindow):
         self.search_input.setFixedWidth(200)
         self.search_input.setToolTip("Filter models by name or description (Ctrl+F)")
         self.search_input.setAccessibleName("Search models")
+        self.search_input.setClearButtonEnabled(True)  # Add clear button
         self.search_input.textChanged.connect(self.update_search_filter)
         top_bar.addWidget(self.search_input)
 
@@ -1483,7 +1493,12 @@ class GolfLauncher(QMainWindow):
 
         # Keyboard Shortcut for Search
         self.shortcut_search = QShortcut(QKeySequence("Ctrl+F"), self)
-        self.shortcut_search.activated.connect(self.search_input.setFocus)
+        self.shortcut_search.activated.connect(self._focus_search)
+
+    def _focus_search(self) -> None:
+        """Focus and select all text in search bar."""
+        self.search_input.setFocus()
+        self.search_input.selectAll()
 
     def _setup_ai_dock(self) -> None:
         """Set up the AI Assistant dock widget."""
@@ -1593,6 +1608,7 @@ class GolfLauncher(QMainWindow):
 
         # Re-add widgets in new order
         row, col = 0, 0
+        visible_count = 0
         for model_id in self.model_order:
             if model_id in self.model_cards:
                 # Apply filter
@@ -1606,12 +1622,22 @@ class GolfLauncher(QMainWindow):
                     ):
                         continue
 
+                visible_count += 1
                 card = self.model_cards[model_id]
                 self.grid_layout.addWidget(card, row, col)
                 col += 1
                 if col >= GRID_COLUMNS:
                     col = 0
                     row += 1
+
+        # Show empty state if needed
+        if visible_count == 0 and self.current_filter_text:
+            lbl_empty = QLabel(f"No models found matching '{self.current_filter_text}'")
+            lbl_empty.setStyleSheet(
+                "color: #888; font-style: italic; font-size: 16px; margin-top: 50px;"
+            )
+            lbl_empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.grid_layout.addWidget(lbl_empty, 0, 0, 1, GRID_COLUMNS)
 
     def create_model_card(self, model: Any) -> QFrame:
         """Creates a clickable card widget."""

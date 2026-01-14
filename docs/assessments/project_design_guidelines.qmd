@@ -982,6 +982,69 @@ These standards are absolute and cannot be waived:
 
 ---
 
+## U. Kinematic Sequence & Standard Golf Metrics (Mandatory)
+
+This section specifies the computation of standard kinematic metrics used in golf swing analysis. These are **objective measurements** with explicit definitions, not coaching recommendations.
+
+> **Prime Directive:** We quantify, we do not judge. Report numerical values with units and statistical context. Interpretation is the domain of qualified practitioners.
+
+**Reference Document:** See `DESIGN_GUIDELINES_ADDENDUM_Kinematic_Metrics_Jan2026.md` for complete specifications.
+
+### U1. Kinematic Sequence Analysis (mandatory)
+
+Compute the temporal ordering and magnitudes of peak angular velocities:
+
+- **Segments:** Pelvis, Thorax, Lead Arm, Club
+- **Metrics:** Peak timing (t_peak), peak magnitude (ω_max), inter-segment lags (Δt)
+- **Sequence reporting:** Actual order of peaks (e.g., "Pelvis → Thorax → Arm → Club")
+- **Cross-engine validation:** Timing agreement within ±1 ms
+
+### U2. X-Factor and Separation Metrics (mandatory)
+
+Compute pelvis-thorax separation with explicit methodology:
+
+- **X-Factor at Top (XF_top):** θ_thorax - θ_pelvis at top of backswing
+- **X-Factor Stretch (XFS):** Maximum X-factor during transition phase
+- **X-Factor Rate:** dXF/dt at key phases
+- **Multi-plane separation:** Transverse, frontal, sagittal components
+- **Methodology citation required:** Document which published method is implemented
+
+### U3. Biomechanical Load Quantification (mandatory)
+
+Compute forces and moments on anatomical structures as physical measurements:
+
+- **Spinal loads:** Compression, shear (A-P and lateral), torsion at L3-L4, L4-L5, L5-S1
+- **Joint loads:** Reaction forces and moments at hip, shoulder, elbow, wrist, knee
+- **Normalization:** Report in absolute units (N, N·m) and normalized to body weight (×BW)
+- **Statistical context:** Percentile within reference population (when available)
+
+**Framing requirement:** These are measurements, not diagnoses. Example of appropriate output:
+```
+L4-L5 Peak Compression: 5420 N (5.8× BW)
+  Population context: 86th percentile of amateur dataset (N=347)
+```
+
+### U4. Trajectory Optimization (optional, with constraints)
+
+If trajectory optimization is implemented:
+
+- Present Pareto frontiers of trade-offs, not single "optimal" solutions
+- User selects operating point on trade-off curve
+- No prescription of "correct" technique
+- Clearly state objective function and constraints
+
+### U5. Research Review Requirement
+
+Before implementing any metric in this section:
+
+1. Complete formal research review (template in addendum)
+2. Document which published methodology is implemented
+3. Note known limitations and controversies
+4. Define validation approach
+5. Store review in `docs/assessments/research_reviews/`
+
+---
+
 ## Appendix: Suggested "Causality Demo" Test Case
 
 A standard benchmark swing (or simplified analog) used to validate every engine:

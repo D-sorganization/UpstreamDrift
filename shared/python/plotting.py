@@ -879,7 +879,7 @@ class GolfSwingPlotter:
 
             # Compute jerk
             if use_sp:
-                jerk = signal_processing.compute_jerk(acc, fs)
+                jerk = signal_processing.compute_jerk(acc, float(fs))
             else:
                 jerk = np.gradient(acc, dt)
 
@@ -2117,6 +2117,108 @@ class GolfSwingPlotter:
 
         ax.set_title(title, fontsize=12, fontweight="bold")
         fig.colorbar(sc, ax=ax, label="Time (s)", shrink=0.6)
+        fig.tight_layout()
+
+    def plot_lyapunov_exponent(
+        self,
+        fig: Figure,
+        joint_idx: int = 0,
+        tau: int = 5,
+        dim: int = 3,
+    ) -> None:
+        """Plot divergence of nearest neighbors over time to estimate Lyapunov Exponent.
+
+        The slope of the divergence curve (log(distance) vs time) approximates the
+        Maximum Lyapunov Exponent (MLE).
+
+        Args:
+            fig: Matplotlib figure
+            joint_idx: Index of joint to analyze
+            tau: Time delay
+            dim: Embedding dimension
+        """
+        try:
+            from shared.python.statistical_analysis import StatisticalAnalyzer
+        except ImportError:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Analysis module missing", ha="center", va="center")
+            return
+
+        # Fetch data
+        times, positions = self._get_cached_series("joint_positions")
+        _, velocities = self._get_cached_series("joint_velocities")
+
+        if len(times) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "No data available", ha="center", va="center")
+            return
+
+        analyzer = StatisticalAnalyzer(
+            times=np.asarray(times),
+            joint_positions=np.asarray(positions),
+            joint_velocities=np.asarray(velocities),
+            joint_torques=np.zeros_like(positions),  # Dummy
+        )
+
+        # Extract 1D data for the joint (velocity is usually best for chaos)
+        velocities = np.asarray(velocities)
+        if joint_idx >= velocities.shape[1]:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Joint index out of bounds", ha="center", va="center")
+            return
+
+        data_1d = velocities[:, joint_idx]
+
+        try:
+            time_div, divergence, slope = analyzer.compute_lyapunov_divergence(  # type: ignore[attr-defined]
+                data_1d,
+                tau=tau,
+                dim=dim,
+            )
+        except AttributeError:
+            ax = fig.add_subplot(111)
+            ax.text(0.5, 0.5, "Method not implemented", ha="center", va="center")
+            return
+
+        if len(time_div) == 0:
+            ax = fig.add_subplot(111)
+            ax.text(
+                0.5,
+                0.5,
+                "Insufficient data for Lyapunov analysis",
+                ha="center",
+                va="center",
+            )
+            return
+
+        ax = fig.add_subplot(111)
+        ax.plot(
+            time_div,
+            divergence,
+            "o-",
+            color=self.colors["primary"],
+            markersize=3,
+            label="Divergence",
+        )
+
+        # Plot fit line if available
+        # Re-fit for visualization
+        limit = len(time_div) // 2 if len(time_div) > 10 else len(time_div)
+        if limit > 1:
+            fit_slope, intercept = np.polyfit(time_div[:limit], divergence[:limit], 1)
+            fit_line = fit_slope * time_div + intercept
+            ax.plot(
+                time_div, fit_line, "r--", linewidth=2, label=f"MLE = {fit_slope:.3f}"
+            )
+
+        name = self.get_joint_name(joint_idx)
+        ax.set_title(
+            f"Lyapunov Exponent Estimation: {name}", fontsize=14, fontweight="bold"
+        )
+        ax.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
+        ax.set_ylabel("ln(Divergence)", fontsize=12, fontweight="bold")
+        ax.grid(True, alpha=0.3, linestyle="--")
+        ax.legend()
         fig.tight_layout()
 
     def plot_phase_space_reconstruction(
