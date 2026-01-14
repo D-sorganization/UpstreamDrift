@@ -56,7 +56,11 @@ async def get_current_user_from_api_key(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db),
 ) -> User:
-    """Get current user from API key."""
+    """Get current user from API key.
+    
+    PERFORMANCE FIX: Uses prefix hash to filter candidates before bcrypt verification,
+    reducing O(n) bcrypt calls to O(1) average case.
+    """
 
     api_key = credentials.credentials
 
@@ -68,15 +72,45 @@ async def get_current_user_from_api_key(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # SECURITY FIX: API keys are now stored with bcrypt hashing (slow hash)
-    # We need to query all active API keys and verify each one
-    # This is acceptable because users typically have few API keys
+    # PERFORMANCE FIX: Compute prefix hash for fast filtering
+    # Use first 8 characters after "gms_" prefix for indexing
+    import hashlib
+    
+    key_body = api_key[4:]  # Remove "gms_" prefix
+    if len(key_body) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key format",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    prefix = key_body[:8]
+    prefix_hash = hashlib.sha256(prefix.encode()).hexdigest()
+    
+    # Query only keys matching the prefix hash (if column exists)
+    # Fallback to all active keys if prefix_hash column doesn't exist yet
+    try:
+        active_keys = (
+            db.query(APIKey)
+            .filter(APIKey.is_active, APIKey.prefix_hash == prefix_hash)
+            .all()
+        )
+    except Exception:
+        # Fallback: prefix_hash column doesn't exist yet (migration pending)
+        # This maintains backward compatibility
+        active_keys = db.query(APIKey).filter(APIKey.is_active).all()
+
+    if not active_keys:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Verify with bcrypt (now only 1-2 candidates instead of all keys)
     from passlib.context import CryptContext
 
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-    # Get all active API keys (typically just a few per user)
-    active_keys = db.query(APIKey).filter(APIKey.is_active).all()
 
     api_key_record = None
     for key_candidate in active_keys:

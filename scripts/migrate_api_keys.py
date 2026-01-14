@@ -166,13 +166,18 @@ def migrate_api_keys(
 
     logger.info(f"Found {len(api_records)} API records to migrate")
 
+    # PERFORMANCE FIX: Batch fetch all users to avoid N+1 query
+    user_ids = [r.user_id for r in api_records]
+    users = db_session.query(User).filter(User.id.in_(user_ids)).all()
+    user_map = {u.id: u for u in users}
+
     # Store results in separate lists to break taint chain
     metadata_results: list[dict[str, Any]] = []
     raw_secrets: list[str] = []
 
     for idx, record in enumerate(api_records, 1):
-        # Get user info for context
-        user = db_session.query(User).filter(User.id == record.user_id).first()
+        # Get user info from pre-fetched map (no query)
+        user = user_map.get(record.user_id)
         user_email = user.email if user else "unknown"
 
         logger.info(
@@ -185,6 +190,12 @@ def migrate_api_keys(
 
         # Hash with bcrypt
         new_hash = pwd_context.hash(new_raw_value)
+        
+        # PERFORMANCE FIX: Compute prefix hash for fast lookup
+        import hashlib
+        key_body = new_raw_value[4:]  # Remove "gms_" prefix
+        prefix = key_body[:8]
+        prefix_hash = hashlib.sha256(prefix.encode()).hexdigest()
 
         # Store metadata separately (no secrets here)
         record_metadata = {
@@ -202,8 +213,11 @@ def migrate_api_keys(
         raw_secrets.append(new_raw_value)
 
         if not dry_run:
-            # Update database record (only hash is stored)
+            # Update database record (hash and prefix)
             record.key_hash = new_hash
+            # Set prefix_hash if column exists
+            if hasattr(record, 'prefix_hash'):
+                record.prefix_hash = prefix_hash
             logger.info("  ✓ Hash upgraded to bcrypt successfully")
         else:
             logger.info("  [DRY RUN] Would upgrade hash to bcrypt")
