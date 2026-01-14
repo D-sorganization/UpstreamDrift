@@ -46,15 +46,49 @@ def setup_environment() -> tuple[str, int]:
         os.environ["DATABASE_URL"] = f"sqlite:///{db_path}"
         logger.info("📁 Using SQLite database: %s", db_path)
 
-    # SECURITY: Check for secret key environment variable
-    if not os.getenv("GOLF_API_SECRET_KEY") and not os.getenv("SECRET_KEY"):
-        logger.warning(
-            "⚠️  SECURITY: No GOLF_API_SECRET_KEY or SECRET_KEY environment variable set!"
-        )
-        logger.warning("   API authentication will fail. Set one for production.")
-        logger.warning(
-            "   Example: export GOLF_API_SECRET_KEY=$(python -c 'import secrets; print(secrets.token_urlsafe(32))')"
-        )
+    # SECURITY: Validate environment configuration
+    try:
+        from shared.python.env_validator import validate_environment
+
+        logger.info("🔒 Validating security configuration...")
+
+        # Validate without raising exception (we'll show warnings instead)
+        results = validate_environment(raise_on_error=False)
+
+        if results["critical_issues"]:
+            logger.error("❌ CRITICAL SECURITY ISSUES FOUND:")
+            for issue in results["critical_issues"]:
+                logger.error(f"   - {issue}")
+
+            environment = os.getenv("ENVIRONMENT", "development").lower()
+            if environment == "production":
+                logger.error(
+                    "Cannot start server with critical security issues in production!"
+                )
+                sys.exit(1)
+            else:
+                logger.warning("Continuing in development mode despite issues...")
+
+        if results["warnings"]:
+            logger.warning("⚠️  Security warnings:")
+            for warning in results["warnings"][:5]:  # Show first 5
+                logger.warning(f"   - {warning}")
+
+        if results["valid"]:
+            logger.info("✅ Security configuration validated")
+
+    except ImportError:
+        logger.warning("⚠️  Could not import env_validator (optional)")
+
+        # Fallback to basic checks
+        if not os.getenv("GOLF_API_SECRET_KEY") and not os.getenv("SECRET_KEY"):
+            logger.warning(
+                "⚠️  SECURITY: No GOLF_API_SECRET_KEY or SECRET_KEY environment variable set!"
+            )
+            logger.warning("   API authentication will fail. Set one for production.")
+            logger.warning(
+                '   Example: export GOLF_API_SECRET_KEY=$(python3 -c "import secrets; print(secrets.token_urlsafe(64))")'
+            )
 
     # Set default host and port
     host = os.getenv("API_HOST", "0.0.0.0")

@@ -101,9 +101,9 @@ class TestLauncherIntegration(unittest.TestCase):
 
             for expected in expected_engines:
                 if expected in engine_names:
-                    print(f"✅ Found engine: {expected}")
+                    print(f"[OK] Found engine: {expected}")
                 else:
-                    print(f"⚠️  Engine not found: {expected}")
+                    print(f"[WARN] Engine not found: {expected}")
 
         except Exception as e:
             self.fail(f"Engine discovery failed: {e}")
@@ -139,7 +139,7 @@ class TestLauncherIntegration(unittest.TestCase):
                 result = manager.export_for_engine(engine)
                 self.assertIsInstance(result, dict)
                 self.assertEqual(result["engine"], engine)
-                print(f"✅ {engine} export working")
+                print(f"[OK] {engine} export working")
 
         except ImportError as e:
             self.skipTest(f"URDF generator not available: {e}")
@@ -199,7 +199,7 @@ class TestLauncherCommands(unittest.TestCase):
         if result is not None and result.returncode != 0:
             # Check if it's just a timeout or GUI-related issue
             if "Launching URDF Generator" in result.stdout or result.returncode == -1:
-                print("✅ URDF Generator launch initiated successfully")
+                print("[OK] URDF Generator launch initiated successfully")
             else:
                 self.fail(f"URDF Generator launch failed: {result.stderr}")
         elif result is None:
@@ -213,23 +213,33 @@ class TestLauncherCommands(unittest.TestCase):
         for engine in engines:
             with self.subTest(engine=engine):
                 # Test that command is recognized and doesn't fail immediately
-                result = subprocess.run(
-                    [sys.executable, "launch_golf_suite.py", "--engine", engine],
-                    capture_output=True,
-                    text=True,
-                    timeout=3,  # Short timeout
-                )
+                try:
+                    result = subprocess.run(
+                        [sys.executable, "launch_golf_suite.py", "--engine", engine],
+                        capture_output=True,
+                        text=True,
+                        timeout=5,  # Increased timeout for Windows
+                    )
 
-                # Check for immediate failures (import errors, etc.)
-                if result.returncode != 0 and result.returncode != -1:  # -1 is timeout
-                    if "not ready" in result.stderr or "not available" in result.stderr:
-                        print(
-                            f"⚠️  Engine {engine} not ready (expected in some environments)"
-                        )
+                    # Check for immediate failures (import errors, etc.)
+                    if result.returncode != 0:
+                        if (
+                            "not ready" in result.stderr
+                            or "not available" in result.stderr
+                        ):
+                            print(
+                                f"[WARN] Engine {engine} not ready (expected in some environments)"
+                            )
+                        else:
+                            self.fail(f"Engine {engine} launch failed: {result.stderr}")
                     else:
-                        print(f"❌ Engine {engine} launch failed: {result.stderr}")
-                else:
-                    print(f"✅ Engine {engine} launch command working")
+                        print(f"[OK] Engine {engine} launch command working")
+
+                except subprocess.TimeoutExpired:
+                    # Timeout is good - means GUI started and didn't crash immediately
+                    print(
+                        f"[OK] Engine {engine} launch initiated (timeout as expected)"
+                    )
 
 
 if __name__ == "__main__":

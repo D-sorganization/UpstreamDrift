@@ -1,6 +1,7 @@
 """Authentication dependencies for FastAPI endpoints."""
 
 from collections.abc import Callable
+from datetime import UTC
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
@@ -67,17 +68,21 @@ async def get_current_user_from_api_key(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Hash the provided API key
-    import hashlib
+    # SECURITY FIX: API keys are now stored with bcrypt hashing (slow hash)
+    # We need to query all active API keys and verify each one
+    # This is acceptable because users typically have few API keys
+    from passlib.context import CryptContext
 
-    api_key_hash = hashlib.sha256(api_key.encode()).hexdigest()
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-    # Find API key in database
-    api_key_record = (
-        db.query(APIKey)
-        .filter(APIKey.key_hash == api_key_hash, APIKey.is_active)
-        .first()
-    )
+    # Get all active API keys (typically just a few per user)
+    active_keys = db.query(APIKey).filter(APIKey.is_active).all()
+
+    api_key_record = None
+    for key_candidate in active_keys:
+        if pwd_context.verify(api_key, key_candidate.key_hash):
+            api_key_record = key_candidate
+            break
 
     if not api_key_record:
         raise HTTPException(
@@ -98,7 +103,8 @@ async def get_current_user_from_api_key(
     # Update API key usage
     from datetime import datetime
 
-    api_key_record.last_used = datetime.utcnow()  # type: ignore[assignment]
+    # SECURITY FIX: Use timezone-aware datetime instead of deprecated utcnow()
+    api_key_record.last_used = datetime.now(UTC)  # type: ignore[assignment]
     api_key_record.usage_count = int(api_key_record.usage_count) + 1  # type: ignore[assignment]
     db.commit()
 
