@@ -178,11 +178,11 @@ class GenericPhysicsRecorder:
         new_size = min(
             self._allocated_samples * self._BUFFER_GROWTH_FACTOR, self.max_samples
         )
-        
+
         # Don't grow if we're already at max_samples
         if new_size == self._allocated_samples:
             return False
-            
+
         LOGGER.debug(
             f"Growing recorder buffers: {self._allocated_samples} -> {new_size}"
         )
