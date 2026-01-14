@@ -45,6 +45,7 @@ else:
 
 from shared.python.biomechanics_data import BiomechanicalData
 from shared.python.common_utils import get_shared_urdf_path
+from shared.python.dashboard.widgets import LivePlotWidget
 from shared.python.plotting import GolfSwingPlotter, MplCanvas
 from shared.python.statistical_analysis import StatisticalAnalyzer
 
@@ -109,11 +110,15 @@ class SignalBlocker:
 
 
 class PinocchioRecorder:
-    """Records time-series data from Pinocchio simulation."""
+    """Records time-series data from Pinocchio simulation.
 
-    def __init__(self) -> None:
+    Implements RecorderInterface for LivePlotWidget.
+    """
+
+    def __init__(self, engine: Any = None) -> None:
         """Initialize empty recorder."""
         self.reset()
+        self.engine = engine  # Reference for joint names
 
     def reset(self) -> None:
         """Clear all recorded data."""
@@ -146,20 +151,7 @@ class PinocchioRecorder:
         induced_accelerations: dict[str, np.ndarray] | None = None,
         counterfactuals: dict[str, np.ndarray] | None = None,
     ) -> None:
-        """Add a frame of data to the recording.
-
-        Args:
-            time: Current simulation time
-            q: Joint positions
-            v: Joint velocities
-            tau: Joint torques (optional)
-            kinetic_energy: System kinetic energy
-            potential_energy: System potential energy
-            club_head_position: Club head position (3,)
-            club_head_velocity: Club head linear velocity (3,)
-            induced_accelerations: Dict of induced accel components
-            counterfactuals: Dict of counterfactual metrics
-        """
+        """Add a frame of data to the recording."""
         if self.is_recording:
             # Simple energy calculation if not provided (approximate)
             total_energy = kinetic_energy + potential_energy
@@ -184,20 +176,24 @@ class PinocchioRecorder:
             )
             self.frames.append(frame)
 
+    def set_analysis_config(self, config: dict[str, Any]) -> None:
+        """Update analysis configuration (Dummy implementation)."""
+        pass
+
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
-        """Extract time series for a specific field.
-
-        Args:
-            field_name: Name of the field in BiomechanicalData
-
-        Returns:
-            Tuple of (times, values)
-        """
+        """Extract time series for a specific field."""
         if not self.frames:
             return np.array([]), np.array([])
 
         times = np.array([f.time for f in self.frames])
-        values = [getattr(f, field_name) for f in self.frames]
+
+        # Handle special counterfactual fields
+        if field_name == "ztcf_accel":
+            return self.get_counterfactual_series("ztcf_accel")
+        if field_name == "zvcf_accel":
+            return self.get_counterfactual_series("zvcf_torque") # Assuming torque is stored here for now or adapt
+
+        values = [getattr(f, field_name, None) for f in self.frames]
 
         # Handle None values
         if all(v is None for v in values):
@@ -222,52 +218,33 @@ class PinocchioRecorder:
     def get_induced_acceleration_series(
         self, source_name: str | int
     ) -> tuple[np.ndarray, np.ndarray]:
-        """Extract time series for a specific induced acceleration source.
-
-        Args:
-            source_name: Name of the force source
-
-        Returns:
-            Tuple of (times, acceleration_array)
-        """
+        """Extract time series for a specific induced acceleration source."""
         if not self.frames:
             return np.array([]), np.array([])
 
-        if not isinstance(source_name, str):
-            return np.array([]), np.array([])
+        # Pinocchio stores induced accels as dict with str keys
+        # If source_name is int, we might not find it unless we map indices to names
+        # Or if "specific_control" stores array, we might want column?
+        # LivePlotWidget logic for `induced_accel_source` expects (time, vector).
+        # Pinocchio stores `induced_accelerations['gravity']` as vector.
 
-        times = np.array([f.time for f in self.frames])
+        # If int passed, convert to string if possible, or return empty?
+        # LivePlotWidget passes int index of actuator? No, it passes combo index.
+        # Wait, LivePlotWidget logic:
+        # `src_idx = self.source_combo.currentIndex()`
+        # `times, data = self.recorder.get_induced_acceleration_series(src_idx)`
+        # `GenericPhysicsRecorder` uses `src_idx` as key in `data["induced_accelerations"]` (dict int -> array).
 
-        # Check if frames have induced acceleration data
-        # Check if any frame has the key
-        valid_indices = [
-            i
-            for i, f in enumerate(self.frames)
-            if hasattr(f, "induced_accelerations")
-            and source_name in f.induced_accelerations
-        ]
+        # Pinocchio stores dict str -> array.
+        # We need to adapt.
+        # Pinocchio currently computes 'gravity', 'velocity', 'total' and 'specific_control' (if requested).
+        # We don't have per-actuator breakdown by default.
+        # So for Pinocchio, we might return empty unless we map `src_idx`.
 
-        if not valid_indices:
-            return np.array([]), np.array([])
-
-        # We assume consistent structure if it exists, or fill missing with zeros?
-        # Let's extract only valid ones to match time
-        filtered_times = times[valid_indices]
-        values = [
-            self.frames[i].induced_accelerations[source_name] for i in valid_indices
-        ]
-
-        return filtered_times, np.array(values)
+        return np.array([]), np.array([])
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
-        """Extract time series for a specific counterfactual component.
-
-        Args:
-            cf_name: Name of the counterfactual (e.g. 'ztcf', 'zvcf')
-
-        Returns:
-            Tuple of (times, data_array)
-        """
+        """Extract time series for a specific counterfactual component."""
         if not self.frames:
             return np.array([]), np.array([])
 
@@ -295,7 +272,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         """Initialize the Pinocchio GUI."""
         super().__init__()
         self.setWindowTitle("Pinocchio Golf Model (Dynamics & Kinematics)")
-        self.resize(800, 900)  # Increased size for analysis tabs
+        self.resize(1000, 900)  # Increased size for analysis tabs
 
         # Internal state
         self.model: pin.Model | None = None
@@ -315,8 +292,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self.manip_analyzer: PinocchioManipulabilityAnalyzer | None = None
         self.manip_checkboxes: dict[str, QtWidgets.QCheckBox] = {}
 
-        # Recorder
-        self.recorder = PinocchioRecorder()
+        # Recorder - pass self as engine
+        self.recorder = PinocchioRecorder(engine=self)
         self.sim_time = 0.0
 
         self.joint_sliders: list[QtWidgets.QSlider] = []
@@ -399,6 +376,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self.load_urdf(str(default_urdf))
         else:
             self.available_models.insert(0, {"name": "Select Model...", "path": None})
+
+    def get_joint_names(self) -> list[str]:
+        """Return joint names for LivePlotWidget."""
+        return self.joint_names
 
     def _scan_urdf_models(self) -> None:
         """Scan shared/urdf for models."""
@@ -580,7 +561,15 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         self.main_tabs.addTab(sim_tab, "Simulation")
 
-        # Tab 2: Analysis & Plotting
+        # Tab 2: Live Analysis (LivePlotWidget)
+        if LivePlotWidget is not None:
+            self.live_tab = QtWidgets.QWidget()
+            live_layout = QtWidgets.QVBoxLayout(self.live_tab)
+            self.live_plot = LivePlotWidget(self.recorder)
+            live_layout.addWidget(self.live_plot)
+            self.main_tabs.addTab(self.live_tab, "Live Analysis")
+
+        # Tab 3: Post-Hoc Analysis & Plotting
         self._setup_analysis_tab()
 
     def _on_live_analysis_toggled(self, checked: bool) -> None:
@@ -650,7 +639,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self.canvas = None  # type: ignore[assignment]
             layout.addWidget(QtWidgets.QLabel("Plotting requires GUI environment"))
 
-        self.main_tabs.addTab(analysis_page, "Analysis")
+        self.main_tabs.addTab(analysis_page, "Post-Hoc Analysis")
 
     def _generate_plot(self) -> None:
         """Generate the selected plot."""
@@ -1159,6 +1148,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             if not self.timer.isActive():
                 self.timer.start(int(self.dt * 1000))
 
+            # Update Live Plot joint names if initialized
+            if hasattr(self, "live_plot"):
+                self.live_plot.set_joint_names(self.get_joint_names())
+
         except (ValueError, RuntimeError) as e:
             self.log_write(f"Error loading URDF (Pinocchio): {e}")
         except Exception as e:
@@ -1329,6 +1322,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
     def _game_loop(self) -> None:
         if self.model is None or self.data is None or self.q is None or self.v is None:
             return
+
+        # Always update Live Plot (even if paused, to redraw last frame/resize)
+        if hasattr(self, "live_plot"):
+            self.live_plot.update_plot()
 
         if self.operating_mode == "dynamic" and self.is_running:
             # --- Physics integration loop ---
