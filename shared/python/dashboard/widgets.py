@@ -356,7 +356,12 @@ class LivePlotWidget(QtWidgets.QWidget):
             times, data = self.recorder.get_induced_acceleration_series(src_idx)
         else:
             # Standard metric
-            times, data = self.recorder.get_time_series(key)
+            times, data_raw = self.recorder.get_time_series(key)
+            # Convert to ndarray if it's a list
+            if isinstance(data_raw, list):
+                data = np.array(data_raw) if data_raw else None
+            else:
+                data = data_raw
 
         if len(times) == 0 or data is None:
             return np.array([]), None, dim_label
