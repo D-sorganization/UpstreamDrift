@@ -41,9 +41,11 @@ class GenericPhysicsRecorder:
         self.max_samples = min(max_samples, self._MAX_BUFFER_SIZE)
         self._dynamic_sizing = dynamic_sizing
         # Current allocated size (may be less than max_samples if dynamic_sizing)
-        self._allocated_samples = (
-            self._INITIAL_BUFFER_SIZE if dynamic_sizing else self.max_samples
-        )
+        # Use the smaller of INITIAL_BUFFER_SIZE or max_samples to respect test fixtures
+        if dynamic_sizing:
+            self._allocated_samples = min(self._INITIAL_BUFFER_SIZE, self.max_samples)
+        else:
+            self._allocated_samples = self.max_samples
         self.current_idx = 0
         self.is_recording = False
         self.data: dict[str, Any] = {}
@@ -132,7 +134,7 @@ class GenericPhysicsRecorder:
         self._buffers_initialized = False
         # Reset allocated size if dynamic sizing
         if self._dynamic_sizing:
-            self._allocated_samples = self._INITIAL_BUFFER_SIZE
+            self._allocated_samples = min(self._INITIAL_BUFFER_SIZE, self.max_samples)
         self.data = {
             # Scalars (pre-allocated with current allocated size)
             "times": np.zeros(self._allocated_samples),
@@ -176,6 +178,11 @@ class GenericPhysicsRecorder:
         new_size = min(
             self._allocated_samples * self._BUFFER_GROWTH_FACTOR, self.max_samples
         )
+        
+        # Don't grow if we're already at max_samples
+        if new_size == self._allocated_samples:
+            return False
+            
         LOGGER.debug(
             f"Growing recorder buffers: {self._allocated_samples} -> {new_size}"
         )
@@ -305,7 +312,8 @@ class GenericPhysicsRecorder:
                 LOGGER.debug(
                     f"Grew buffers to {self._allocated_samples} samples at frame {self.current_idx}"
                 )
-            elif self.current_idx >= self.max_samples:
+            else:
+                # Can't grow anymore - at max capacity
                 LOGGER.warning(
                     f"Recorder buffer full at {self.max_samples} samples. Stopping recording."
                 )
