@@ -658,6 +658,9 @@ class DockerBuildThread(QThread):
 class EnvironmentDialog(QDialog):
     """Dialog to manage Docker environment and view dependencies."""
 
+    DEFAULT_BTN_STYLE = ""
+    SUCCESS_BTN_STYLE = "background-color: #28a745; color: white;"
+
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Manage Environment")
@@ -692,6 +695,20 @@ class EnvironmentDialog(QDialog):
         self.btn_build = QPushButton("Build Environment")
         self.btn_build.clicked.connect(self.start_build)
         build_layout.addWidget(self.btn_build)
+
+        # Console Header with Copy Button
+        console_header = QHBoxLayout()
+        console_header.addWidget(QLabel("Build Log:"))
+        console_header.addStretch()
+
+        self.btn_copy_log = QPushButton("Copy Log")
+        self.btn_copy_log.setToolTip("Copy the build log to clipboard")
+        self.btn_copy_log.setAccessibleName("Copy build log to clipboard")
+        self.btn_copy_log.setFixedWidth(100)
+        self.btn_copy_log.clicked.connect(self.copy_log)
+        console_header.addWidget(self.btn_copy_log)
+
+        build_layout.addLayout(console_header)
 
         self.console = QTextEdit()
         self.console.setReadOnly(True)
@@ -739,6 +756,30 @@ class EnvironmentDialog(QDialog):
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.accept)
         layout.addWidget(close_btn)
+
+    def copy_log(self) -> None:
+        """Copy console log to clipboard with visual feedback."""
+        clipboard = QApplication.clipboard()
+        if clipboard:
+            clipboard.setText(self.console.toPlainText())
+
+            # Feedback
+            original_text = "Copy Log"
+            self.btn_copy_log.setText("Copied! ✓")
+            self.btn_copy_log.setStyleSheet(self.SUCCESS_BTN_STYLE)
+
+            # Restore after 2 seconds
+            QTimer.singleShot(2000, lambda: self._restore_copy_button(original_text))
+
+    def _restore_copy_button(self, original_text: str) -> None:
+        """Restore the copy button to its original state."""
+        # Use try-except to handle potential race conditions if dialog is closed
+        try:
+            self.btn_copy_log.setText(original_text)
+            self.btn_copy_log.setStyleSheet(self.DEFAULT_BTN_STYLE)
+        except RuntimeError:
+            # Widget likely deleted
+            pass
 
     def start_build(self) -> None:
         """Start the docker build process."""
