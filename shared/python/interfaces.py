@@ -8,7 +8,7 @@ agnostic of the underlying solver.
 from __future__ import annotations
 
 from abc import abstractmethod
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
 
@@ -103,6 +103,31 @@ class PhysicsEngine(Protocol):
     def get_time(self) -> float:
         """Get the current simulation time."""
         ...
+
+    def get_full_state(self) -> dict[str, Any]:
+        """Get complete state in a single batched call (performance optimization).
+
+        This method reduces the overhead of multiple separate engine queries by
+        returning all commonly-needed state information in one call.
+
+        Returns:
+            Dictionary containing:
+            - 'q': Generalized coordinates (n_q,)
+            - 'v': Generalized velocities (n_v,)
+            - 't': Current simulation time
+            - 'M': Mass matrix (n_v, n_v) - optional, may be None if expensive
+
+        Note:
+            Default implementation calls individual methods. Engines should
+            override this for better performance if they can batch these queries.
+        """
+        q, v = self.get_state()
+        return {
+            'q': q,
+            'v': v,
+            't': self.get_time(),
+            'M': None,  # Default: don't compute expensive mass matrix
+        }
 
     def get_joint_names(self) -> list[str]:
         """Get list of joint names.
