@@ -71,16 +71,13 @@ async def get_current_user_from_api_key(
     # SECURITY FIX: API keys are now stored with bcrypt hashing (slow hash)
     # We need to query all active API keys and verify each one
     # This is acceptable because users typically have few API keys
-    from passlib.context import CryptContext
-
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     # Get all active API keys (typically just a few per user)
     active_keys = db.query(APIKey).filter(APIKey.is_active).all()
 
     api_key_record = None
     for key_candidate in active_keys:
-        if pwd_context.verify(api_key, key_candidate.key_hash):
+        if security_manager.verify_api_key(api_key, str(key_candidate.key_hash)):
             api_key_record = key_candidate
             break
 

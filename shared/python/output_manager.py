@@ -5,13 +5,17 @@ Handles all output operations including saving simulation results,
 managing file organization, and exporting analysis reports.
 
 OBS-001: Migrated to structured logging for better observability.
+
+PERFORMANCE: Added async file I/O support using ThreadPoolExecutor
+to prevent blocking the main thread during large file writes.
 """
 
 from __future__ import annotations
 
 import json
 import os
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
+from concurrent.futures import Future, ThreadPoolExecutor
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
@@ -43,7 +47,29 @@ class OutputManager:
 
     Provides unified interface for saving simulation results, analysis data,
     and generating reports across all physics engines.
+
+    PERFORMANCE: Includes async file I/O support to prevent blocking main thread.
     """
+
+    # PERFORMANCE: Shared executor for async I/O operations
+    _io_executor: ThreadPoolExecutor | None = None
+    _MAX_IO_WORKERS = 4  # Limit concurrent I/O operations
+
+    @classmethod
+    def _get_io_executor(cls) -> ThreadPoolExecutor:
+        """Get or create the shared I/O executor."""
+        if cls._io_executor is None:
+            cls._io_executor = ThreadPoolExecutor(
+                max_workers=cls._MAX_IO_WORKERS, thread_name_prefix="output_io"
+            )
+        return cls._io_executor
+
+    @classmethod
+    def shutdown_executor(cls) -> None:
+        """Shutdown the I/O executor. Call on application exit."""
+        if cls._io_executor is not None:
+            cls._io_executor.shutdown(wait=True)
+            cls._io_executor = None
 
     def __init__(self, base_path: str | Path | None = None):
         """
@@ -242,6 +268,99 @@ class OutputManager:
                 exc_info=True,
             )
             raise
+
+    def save_simulation_results_async(
+        self,
+        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]],
+        filename: str,
+        format_type: OutputFormat = OutputFormat.CSV,
+        engine: str = "mujoco",
+        metadata: dict[str, Any] | None = None,
+        callback: Callable[[Path | Exception], None] | None = None,
+    ) -> Future[Path]:
+        """
+        Save simulation results asynchronously without blocking.
+
+        PERFORMANCE: Uses ThreadPoolExecutor to perform I/O in background.
+        Ideal for large files where blocking would impact simulation performance.
+
+        Args:
+            results: Simulation results data
+            filename: Output filename (without extension)
+            format_type: Output format
+            engine: Physics engine name
+            metadata: Additional metadata to include
+            callback: Optional callback called with Path on success or Exception on failure
+
+        Returns:
+            Future that resolves to the saved file path
+        """
+        executor = self._get_io_executor()
+
+        def _save_task() -> Path:
+            try:
+                path = self.save_simulation_results(
+                    results, filename, format_type, engine, metadata
+                )
+                if callback:
+                    callback(path)
+                return path
+            except Exception as e:
+                if callback:
+                    callback(e)
+                raise
+
+        future = executor.submit(_save_task)
+        logger.debug(
+            "async_save_submitted",
+            filename=filename,
+            format=format_type.value,
+            engine=engine,
+        )
+        return future
+
+    def save_simulation_results_background(
+        self,
+        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]],
+        filename: str,
+        format_type: OutputFormat = OutputFormat.CSV,
+        engine: str = "mujoco",
+        metadata: dict[str, Any] | None = None,
+        on_complete: Callable[[Path], None] | None = None,
+        on_error: Callable[[Exception], None] | None = None,
+    ) -> None:
+        """
+        Fire-and-forget background save with optional callbacks.
+
+        PERFORMANCE: For cases where you don't need the result immediately.
+        Useful for auto-save, checkpointing, or progress exports.
+
+        Args:
+            results: Simulation results data
+            filename: Output filename (without extension)
+            format_type: Output format
+            engine: Physics engine name
+            metadata: Additional metadata to include
+            on_complete: Called with file path on successful save
+            on_error: Called with exception on failure
+        """
+
+        def _callback(result: Path | Exception) -> None:
+            if isinstance(result, Exception):
+                if on_error:
+                    on_error(result)
+                else:
+                    logger.error(
+                        "background_save_failed",
+                        filename=filename,
+                        error=str(result),
+                    )
+            elif on_complete:
+                on_complete(result)
+
+        self.save_simulation_results_async(
+            results, filename, format_type, engine, metadata, callback=_callback
+        )
 
     def load_simulation_results(
         self,

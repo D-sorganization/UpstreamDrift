@@ -61,15 +61,17 @@ We provide a migration script to help:
 ```python
 # scripts/migrate_api_keys.py
 import secrets
+import bcrypt
 from api.database import SessionLocal
 from api.auth.models import APIKey
 from api.auth.security import security_manager
-from passlib.context import CryptContext
+
+# Bcrypt cost factor (12 is the recommended minimum)
+BCRYPT_ROUNDS = 12
 
 def migrate_api_keys():
     """Regenerate all API keys with bcrypt hashing."""
     db = SessionLocal()
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
     try:
         # Get all API keys
@@ -85,7 +87,8 @@ def migrate_api_keys():
             new_key_value = f"gms_{secrets.token_urlsafe(32)}"
 
             # Hash with bcrypt
-            new_key_hash = pwd_context.hash(new_key_value)
+            salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
+            new_key_hash = bcrypt.hashpw(new_key_value.encode("utf-8"), salt).decode("utf-8")
 
             # Update database
             key.key_hash = new_key_hash
