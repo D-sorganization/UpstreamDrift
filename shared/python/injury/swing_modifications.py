@@ -353,7 +353,7 @@ if __name__ == "__main__":
     # Example recommendation
 
     class MockFactor:
-        def __init__(self, name, value, safe, high):
+        def __init__(self, name: str, value: float, safe: float, high: float) -> None:
             self.name = name
             self.value = value
             self.threshold_safe = safe
