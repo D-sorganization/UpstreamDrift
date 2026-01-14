@@ -56,6 +56,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QScrollArea,
     QSplashScreen,
+    QStyle,
     QTabWidget,
     QTextEdit,
     QVBoxLayout,
@@ -689,9 +690,20 @@ class EnvironmentDialog(QDialog):
         form.addWidget(self.combo_stage)
         build_layout.addLayout(form)
 
+        # Action Buttons Layout
+        actions_layout = QHBoxLayout()
+
         self.btn_build = QPushButton("Build Environment")
         self.btn_build.clicked.connect(self.start_build)
-        build_layout.addWidget(self.btn_build)
+        actions_layout.addWidget(self.btn_build)
+
+        self.btn_copy_log = QPushButton("Copy Log")
+        self.btn_copy_log.setToolTip("Copy the build log to clipboard")
+        self.btn_copy_log.setAccessibleName("Copy Log")
+        self.btn_copy_log.clicked.connect(self.copy_log)
+        actions_layout.addWidget(self.btn_copy_log)
+
+        build_layout.addLayout(actions_layout)
 
         self.console = QTextEdit()
         self.console.setReadOnly(True)
@@ -755,6 +767,40 @@ class EnvironmentDialog(QDialog):
         """Append text to the log console."""
         self.console.append(text)
         self.console.moveCursor(self.console.textCursor().MoveOperation.End)
+
+    def copy_log(self) -> None:
+        """Copy the log content to clipboard with temporary visual feedback."""
+        clipboard = QApplication.clipboard()
+        if clipboard is not None:
+            clipboard.setText(self.console.toPlainText())
+
+            # Provide immediate feedback on the button
+            default_text = "Copy Log"
+            default_icon = QIcon()  # Empty icon as default
+
+            self.btn_copy_log.setText("Copied!")
+            self.btn_copy_log.setIcon(
+                self.style().standardIcon(
+                    QStyle.StandardPixmap.SP_DialogApplyButton
+                )
+            )
+
+            # Restore button after 2 seconds
+            QTimer.singleShot(
+                2000,
+                lambda: self._restore_btn(self.btn_copy_log, default_text, default_icon),
+            )
+
+    def _restore_btn(self, btn: QPushButton, text: str, icon: QIcon) -> None:
+        """Helper to restore button state."""
+        # Check if button still exists and is visible to avoid race conditions
+        try:
+            if btn and btn.isVisible():
+                btn.setText(text)
+                btn.setIcon(icon)
+        except RuntimeError:
+            # Widget might be deleted in C++ side
+            pass
 
     def build_finished(self, success: bool, msg: str) -> None:
         """Handle build completion."""
