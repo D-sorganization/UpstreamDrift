@@ -24,10 +24,10 @@ References:
 - Cejka et al. (2024) Biomechanical parameters associated with lower back pain
 """
 
-from .spinal_load_analysis import SpinalLoadAnalyzer, SpinalLoadResult, SpinalRiskLevel
+from .injury_risk import InjuryRiskReport, InjuryRiskScorer, RiskLevel
 from .joint_stress import JointStressAnalyzer, JointStressResult
-from .injury_risk import InjuryRiskScorer, InjuryRiskReport, RiskLevel
-from .swing_modifications import SwingModificationRecommender, SwingModification
+from .spinal_load_analysis import SpinalLoadAnalyzer, SpinalLoadResult, SpinalRiskLevel
+from .swing_modifications import SwingModification, SwingModificationRecommender
 
 __all__ = [
     "SpinalLoadAnalyzer",

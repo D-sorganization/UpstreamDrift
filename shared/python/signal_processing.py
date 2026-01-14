@@ -55,9 +55,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 @jit(nopython=True, cache=True, fastmath=True)
-def _dtw_core(
-    series1: np.ndarray, series2: np.ndarray, window: int
-) -> float:
+def _dtw_core(series1: np.ndarray, series2: np.ndarray, window: int) -> float:
     """Numba-optimized DTW distance computation core.
 
     This inner kernel runs ~100x faster than pure Python due to JIT compilation.

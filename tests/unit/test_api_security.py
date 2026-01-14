@@ -62,7 +62,9 @@ class TestBcryptAPIKeyVerification:
 
         # Verify a different key fails
         wrong_key = f"gms_{secrets.token_urlsafe(32)}"
-        assert not bcrypt_lib.checkpw(wrong_key.encode("utf-8"), key_hash.encode("utf-8"))
+        assert not bcrypt_lib.checkpw(
+            wrong_key.encode("utf-8"), key_hash.encode("utf-8")
+        )
 
     @requires_bcrypt
     def test_api_key_constant_time_comparison(self) -> None:

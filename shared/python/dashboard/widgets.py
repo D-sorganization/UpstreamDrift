@@ -342,9 +342,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.ax.set_xlabel("Time (s)")
         self.ax.grid(True)
 
-    def _get_data_for_key(
-        self, key: str
-    ) -> tuple[np.ndarray, np.ndarray | None, str]:
+    def _get_data_for_key(self, key: str) -> tuple[np.ndarray, np.ndarray | None, str]:
         """Fetch data for a specific key."""
         times: np.ndarray = np.array([])
         data: np.ndarray | None = None
@@ -488,7 +486,7 @@ class LivePlotWidget(QtWidgets.QWidget):
                         # Handle potential time misalignment by assuming sync or taking latest matching length
                         # Real-time usually implies both streams are up to date.
                         # If sizes differ slightly, trim to min
-                        min_len = min(len(times), len(times2))
+                        min(len(times), len(times2))
                         # But wait, we plot against their own time axes usually.
                         # Assuming times ~ times2 for visual simplicity on live plot.
                         line.set_data(times2, data2[:, i])
