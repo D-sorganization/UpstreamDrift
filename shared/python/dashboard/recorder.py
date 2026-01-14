@@ -41,6 +41,14 @@ class GenericPhysicsRecorder:
             "induced_accel_sources": [],  # List of int indices to track individually
         }
 
+        # Performance optimization: Mass matrix caching
+        self._cached_mass_matrix: np.ndarray | None = None
+        self._cached_mass_matrix_q: np.ndarray | None = None
+        self._mass_matrix_cache_tolerance = 1e-6  # Re-compute if q changes significantly
+
+        # Performance optimization: Analysis computation frequency
+        self._analysis_compute_interval = 1  # Compute every N frames (1 = every frame)
+
         self._reset_buffers()
 
     def set_analysis_config(self, config: dict[str, Any]) -> None:
@@ -184,6 +192,32 @@ class GenericPhysicsRecorder:
         self._reset_buffers()
         LOGGER.info("Recorder reset.")
 
+    def _get_cached_mass_matrix(self, q: np.ndarray) -> np.ndarray:
+        """Get mass matrix with caching to avoid redundant O(n³) computations.
+
+        The mass matrix M(q) only depends on configuration q, not velocity.
+        We cache it and only recompute when q changes significantly.
+
+        Args:
+            q: Current configuration vector
+
+        Returns:
+            Mass matrix (n_v, n_v)
+        """
+        need_recompute = (
+            self._cached_mass_matrix is None
+            or self._cached_mass_matrix_q is None
+            or len(q) != len(self._cached_mass_matrix_q)
+            or np.max(np.abs(q - self._cached_mass_matrix_q))
+            > self._mass_matrix_cache_tolerance
+        )
+
+        if need_recompute:
+            self._cached_mass_matrix = self.engine.compute_mass_matrix()
+            self._cached_mass_matrix_q = q.copy()
+
+        return self._cached_mass_matrix  # type: ignore[return-value]
+
     def record_step(self, control_input: np.ndarray | None = None) -> None:
         """Record the current state of the engine.
 
@@ -201,9 +235,17 @@ class GenericPhysicsRecorder:
             self.is_recording = False
             return
 
-        # Get State
-        q, v = self.engine.get_state()
-        t = self.engine.get_time()
+        # PERFORMANCE: Use batched state query if available
+        # This reduces 3 separate engine calls to 1
+        if hasattr(self.engine, "get_full_state"):
+            state = self.engine.get_full_state()
+            q = state["q"]
+            v = state["v"]
+            t = state["t"]
+        else:
+            # Fallback for engines without batched query
+            q, v = self.engine.get_state()
+            t = self.engine.get_time()
 
         # Initialize array buffers on first record
         if not self._buffers_initialized:
@@ -218,9 +260,9 @@ class GenericPhysicsRecorder:
             # For now, default to zero if not provided
             tau = np.zeros(len(v))
 
-        # Energies
+        # PERFORMANCE: Use cached mass matrix instead of computing every frame
         try:
-            M = self.engine.compute_mass_matrix()
+            M = self._get_cached_mass_matrix(q)
             if M.size > 0:
                 ke = 0.5 * v.T @ M @ v
             else:
@@ -269,24 +311,30 @@ class GenericPhysicsRecorder:
                     "Failed to compute control acceleration at frame %d: %s", idx, e
                 )
 
-        # Individual Induced Accelerations
+        # PERFORMANCE: Batched Individual Induced Accelerations
+        # Instead of N separate engine calls, compute M^{-1} once and use matrix ops
         sources = cast(list[int], self.analysis_config["induced_accel_sources"])
-        for src_idx in sources:
-            if src_idx in self.data["induced_accelerations"]:
-                try:
-                    # Construct single-source torque vector
-                    tau_single = np.zeros_like(tau)
-                    tau_single[src_idx] = tau[src_idx]
-                    self.data["induced_accelerations"][src_idx][idx] = (
-                        self.engine.compute_control_acceleration(tau_single)
-                    )
-                except Exception as e:
-                    LOGGER.debug(
-                        "Failed to compute induced acceleration for source %d at frame %d: %s",
-                        src_idx,
-                        idx,
-                        e,
-                    )
+        if sources:
+            try:
+                # Get cached mass matrix and compute its inverse once
+                M = self._get_cached_mass_matrix(q)
+                if M.size > 0:
+                    # Use solve instead of explicit inverse for numerical stability
+                    # For each source, induced_accel = M^{-1} * tau_single
+                    # tau_single has only one non-zero element, so this is just
+                    # scaling the corresponding column of M^{-1}
+                    for src_idx in sources:
+                        if src_idx in self.data["induced_accelerations"]:
+                            # Create single-source torque vector
+                            tau_single = np.zeros_like(tau)
+                            tau_single[src_idx] = tau[src_idx]
+                            # Use solve for numerical stability: M @ accel = tau
+                            accel = np.linalg.solve(M, tau_single)
+                            self.data["induced_accelerations"][src_idx][idx] = accel
+            except Exception as e:
+                LOGGER.debug(
+                    "Failed to compute induced accelerations at frame %d: %s", idx, e
+                )
 
         # Store basic data using array indexing (no copy needed, direct assignment)
         self.data["times"][idx] = t
