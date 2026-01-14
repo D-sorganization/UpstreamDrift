@@ -108,13 +108,9 @@ async def get_current_user_from_api_key(
         )
 
     # Verify with bcrypt (now only 1-2 candidates instead of all keys)
-    from passlib.context import CryptContext
-
-    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
     api_key_record = None
     for key_candidate in active_keys:
-        if pwd_context.verify(api_key, key_candidate.key_hash):
+        if security_manager.verify_api_key(api_key, str(key_candidate.key_hash)):
             api_key_record = key_candidate
             break
 
