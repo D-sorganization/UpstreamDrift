@@ -1,6 +1,5 @@
 """Security utilities for authentication and authorization."""
 
-import hashlib
 import logging
 import os
 import secrets
@@ -176,15 +175,19 @@ class SecurityManager:
         return f"gms_{key}"
 
     def hash_api_key(self, api_key: str) -> str:
-        """Hash an API key for storage.
+        """Hash an API key for storage using bcrypt.
 
         Args:
             api_key: Plain API key
 
         Returns:
-            Hashed API key
+            Bcrypt-hashed API key (slow hash for brute-force resistance)
+
+        Note:
+            SECURITY: Uses bcrypt instead of SHA256 for brute-force resistance.
+            SHA256 is fast and unsuitable for key storage; bcrypt is slow by design.
         """
-        return hashlib.sha256(api_key.encode()).hexdigest()
+        return str(pwd_context.hash(api_key))
 
 
 class RoleChecker:
