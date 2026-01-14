@@ -1337,6 +1337,7 @@ class GolfLauncher(QMainWindow):
         self.search_input.setFixedWidth(200)
         self.search_input.setToolTip("Filter models by name or description (Ctrl+F)")
         self.search_input.setAccessibleName("Search models")
+        self.search_input.setClearButtonEnabled(True)  # Add clear button
         self.search_input.textChanged.connect(self.update_search_filter)
         top_bar.addWidget(self.search_input)
 
@@ -1483,7 +1484,12 @@ class GolfLauncher(QMainWindow):
 
         # Keyboard Shortcut for Search
         self.shortcut_search = QShortcut(QKeySequence("Ctrl+F"), self)
-        self.shortcut_search.activated.connect(self.search_input.setFocus)
+        self.shortcut_search.activated.connect(self._focus_search)
+
+    def _focus_search(self) -> None:
+        """Focus and select all text in search bar."""
+        self.search_input.setFocus()
+        self.search_input.selectAll()
 
     def _setup_ai_dock(self) -> None:
         """Set up the AI Assistant dock widget."""
@@ -1593,6 +1599,7 @@ class GolfLauncher(QMainWindow):
 
         # Re-add widgets in new order
         row, col = 0, 0
+        visible_count = 0
         for model_id in self.model_order:
             if model_id in self.model_cards:
                 # Apply filter
@@ -1606,12 +1613,24 @@ class GolfLauncher(QMainWindow):
                     ):
                         continue
 
+                visible_count += 1
                 card = self.model_cards[model_id]
                 self.grid_layout.addWidget(card, row, col)
                 col += 1
                 if col >= GRID_COLUMNS:
                     col = 0
                     row += 1
+
+        # Show empty state if needed
+        if visible_count == 0 and self.current_filter_text:
+            lbl_empty = QLabel(
+                f"No models found matching '{self.current_filter_text}'"
+            )
+            lbl_empty.setStyleSheet(
+                "color: #888; font-style: italic; font-size: 16px; margin-top: 50px;"
+            )
+            lbl_empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.grid_layout.addWidget(lbl_empty, 0, 0, 1, GRID_COLUMNS)
 
     def create_model_card(self, model: Any) -> QFrame:
         """Creates a clickable card widget."""
