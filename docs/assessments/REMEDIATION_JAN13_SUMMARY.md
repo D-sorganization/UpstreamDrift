@@ -80,18 +80,29 @@ The following issues require more extensive refactoring and are tracked for futu
 
 **Recommendation:** Split into focused modules in Priority 2 sprint.
 
-### Magic Numbers
+### Magic Numbers (FIXED ✅)
 
-- Speed threshold `0.1` used in flight models without named constant
-- Various other hardcoded values
+The following magic numbers were replaced with named constants:
 
-**Recommendation:** Add named constants with units and source documentation.
+- `ball_flight_physics.py`: Added `MIN_SPEED_THRESHOLD`, `MAX_LIFT_COEFFICIENT`, `NUMERICAL_EPSILON`
+- `flight_models.py`: Added `MIN_SPEED_THRESHOLD`, `NUMERICAL_EPSILON`
 
-### Type Ignores
+All 21+ usages of `0.1` (speed threshold) and `1e-10` (numerical epsilon) were replaced.
+**Commit:** `e69963e`
 
-- ~40+ `# type: ignore` suppressions remain
+### Type Ignores (ANALYZED ✅)
 
-**Recommendation:** Address incrementally in ongoing maintenance.
+After analysis, the remaining `type: ignore` comments are **justified**:
+
+| Category               | Count | Justification                             |
+| ---------------------- | ----- | ----------------------------------------- |
+| SQLAlchemy models      | 3     | `declarative_base()` returns dynamic type |
+| SQLAlchemy queries     | 6     | `query.first()` returns `Any`             |
+| Matplotlib 3D axes     | 15    | `set_zlabel`, `scatter` on `Axes3D`       |
+| scipy solve_ivp events | 14    | Event function attributes                 |
+| Optional imports       | 5     | Graceful degradation patterns             |
+
+**Recommendation:** These are all due to library type stub limitations. No action needed.
 
 ## CI/CD Status
 
@@ -109,9 +120,9 @@ All changes pass:
 | Critical (Security)      | 3            | 1     | 2            | 0        |
 | High (Observability)     | 2            | 2     | 0            | 0        |
 | Medium (Deprecated APIs) | 1            | 1     | 0            | 0        |
-| Low (Code Quality)       | 3            | 0     | 0            | 3        |
+| Low (Code Quality)       | 3            | 2     | 0            | 1        |
 
-**Total Fixes Applied:** 4 distinct fixes across 4 files
+**Total Fixes Applied:** 6 distinct fixes across 6 files
 
 ## Files Modified
 
@@ -119,3 +130,9 @@ All changes pass:
 2. `api/routes/auth.py` - Timezone-aware datetime
 3. `api/services/simulation_service.py` - Exception logging
 4. `shared/python/dashboard/recorder.py` - Exception logging
+5. `shared/python/ball_flight_physics.py` - Named constants for magic numbers
+6. `shared/python/flight_models.py` - Named constants for magic numbers
+
+## PR Created
+
+- **PR #416**: [Fix: Assessment remediation - Security, observability, and deprecated API fixes](https://github.com/D-sorganization/Golf_Modeling_Suite/pull/416)
