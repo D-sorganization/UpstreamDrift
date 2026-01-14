@@ -1760,15 +1760,20 @@ class StatisticalAnalyzer:
         self,
         threshold_ratio: float = 0.1,
         metric: str = "euclidean",
+        use_kdtree: bool = True,
     ) -> np.ndarray[tuple[int, int], np.dtype[np.int_]]:
         """Compute Recurrence Plot matrix.
 
         Constructs a phase space state vector from all joint positions and velocities,
         normalizes it, and calculates the binary recurrence matrix.
 
+        PERFORMANCE: When use_kdtree=True (default), uses k-d tree for O(n log n)
+        neighbor finding instead of O(n²) full distance matrix computation.
+
         Args:
             threshold_ratio: Threshold distance as ratio of max phase space diameter.
             metric: Distance metric (e.g., 'euclidean', 'cityblock').
+            use_kdtree: If True, use k-d tree for efficient computation (euclidean only).
 
         Returns:
             Binary recurrence matrix (N, N).
@@ -1791,16 +1796,44 @@ class StatisticalAnalyzer:
         std[std < 1e-6] = 1.0
         normalized_state = (state_vec - mean) / std
 
-        # 3. Compute Distance Matrix
+        n_samples = normalized_state.shape[0]
+
+        # PERFORMANCE: Use k-d tree for O(n log n) neighbor finding
+        if use_kdtree and metric == "euclidean":
+            # Estimate threshold from sample of distances
+            sample_size = min(100, n_samples)
+            sample_idx = np.random.choice(n_samples, sample_size, replace=False)
+            sample_dists = pdist(normalized_state[sample_idx], metric="euclidean")
+            estimated_max = np.max(sample_dists) * 1.2  # Add margin
+            threshold = threshold_ratio * estimated_max
+
+            # Build k-d tree and query neighbors within threshold
+            tree = cKDTree(normalized_state)
+            pairs = tree.query_pairs(r=threshold, output_type="ndarray")
+
+            # Build sparse-like recurrence matrix efficiently
+            recurrence_matrix = np.zeros((n_samples, n_samples), dtype=np.int_)
+            np.fill_diagonal(recurrence_matrix, 1)  # Diagonal is always 1
+
+            if len(pairs) > 0:
+                # pairs is (M, 2) array of index pairs
+                recurrence_matrix[pairs[:, 0], pairs[:, 1]] = 1
+                recurrence_matrix[pairs[:, 1], pairs[:, 0]] = 1  # Symmetric
+
+            return cast(
+                np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix
+            )
+
+        # Fallback: Full O(n²) computation for non-euclidean metrics
         dists = pdist(normalized_state, metric=metric)
         dist_matrix = squareform(dists)
 
-        # 4. Determine Threshold
+        # Determine Threshold
         if threshold_ratio is None:
             threshold_ratio = 0.1
         threshold = threshold_ratio * np.max(dist_matrix)
 
-        # 5. Thresholding
+        # Thresholding
         recurrence_matrix = (dist_matrix < threshold).astype(np.int_)
 
         return cast(np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix)
@@ -1810,13 +1843,18 @@ class StatisticalAnalyzer:
         joint_idx_1: int,
         joint_idx_2: int,
         threshold_ratio: float = 0.1,
+        use_kdtree: bool = True,
     ) -> np.ndarray[tuple[int, int], np.dtype[np.int_]]:
         """Compute Cross Recurrence Plot matrix between two joints.
+
+        PERFORMANCE: When use_kdtree=True, uses k-d tree query_ball_point for
+        more efficient cross-distance computation on large datasets.
 
         Args:
             joint_idx_1: First joint index
             joint_idx_2: Second joint index
             threshold_ratio: Threshold distance as ratio of max distance
+            use_kdtree: If True, use k-d tree for efficient computation.
 
         Returns:
             Binary recurrence matrix (N, N)
@@ -1840,8 +1878,33 @@ class StatisticalAnalyzer:
         s1 = (s1 - np.mean(s1, axis=0)) / (np.std(s1, axis=0) + 1e-9)
         s2 = (s2 - np.mean(s2, axis=0)) / (np.std(s2, axis=0) + 1e-9)
 
-        # Compute distance matrix between s1 and s2
-        # cdist(s1, s2)
+        n_samples = s1.shape[0]
+
+        # PERFORMANCE: Use k-d tree for efficient cross-distance on large datasets
+        if use_kdtree and n_samples > 500:
+            # Estimate threshold from sample
+            sample_size = min(100, n_samples)
+            sample_idx = np.random.choice(n_samples, sample_size, replace=False)
+            from scipy.spatial.distance import cdist
+
+            sample_dists = cdist(s1[sample_idx], s2[sample_idx], metric="euclidean")
+            estimated_max = np.max(sample_dists) * 1.2
+            threshold = threshold_ratio * estimated_max
+
+            # Build k-d tree on s2, query from s1
+            tree = cKDTree(s2)
+            recurrence_matrix = np.zeros((n_samples, n_samples), dtype=np.int_)
+
+            # Query neighbors for each point in s1
+            neighbors = tree.query_ball_point(s1, r=threshold)
+            for i, neighbor_list in enumerate(neighbors):
+                recurrence_matrix[i, neighbor_list] = 1
+
+            return cast(
+                np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix
+            )
+
+        # Fallback: Standard cdist for smaller datasets
         from scipy.spatial.distance import cdist
 
         dist_matrix = cdist(s1, s2, metric="euclidean")
