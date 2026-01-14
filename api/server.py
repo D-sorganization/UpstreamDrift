@@ -108,32 +108,41 @@ def _validate_model_path(model_path: str) -> str:
     Raises:
         HTTPException: If path is invalid or contains traversal attempts
     """
+    # SECURITY: Sanitize user input to prevent path traversal
     try:
         user_path = Path(model_path)
     except TypeError as e:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid path: {e}",
+            detail="Invalid path format",
         ) from e
 
-    # Reject absolute paths - user input must be relative
+    # SECURITY: Reject absolute paths - user input must be relative
     if user_path.is_absolute():
         raise HTTPException(
             status_code=400,
             detail="Invalid path: absolute paths are not allowed",
         )
 
+    # SECURITY: Reject paths with parent directory references
+    if ".." in user_path.parts:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid path: parent directory references not allowed",
+        )
+
     # Build candidate paths under each allowed directory and check them
     for allowed_dir in ALLOWED_MODEL_DIRS:
         try:
+            # SECURITY: Resolve to absolute path and validate it stays within allowed_dir
             candidate = (allowed_dir / user_path).resolve()
         except (ValueError, OSError) as e:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid path: {e}",
+                detail="Invalid path format",
             ) from e
 
-        # Ensure the resolved path is still within the allowed directory
+        # SECURITY: Ensure the resolved path is still within the allowed directory
         try:
             candidate.relative_to(allowed_dir)
         except ValueError:
@@ -142,6 +151,7 @@ def _validate_model_path(model_path: str) -> str:
 
         # Check if this valid candidate exists
         if candidate.exists():
+            # SECURITY: Return only the validated, sanitized path
             return str(candidate)
 
     raise HTTPException(
