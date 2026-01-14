@@ -6,9 +6,9 @@ import secrets
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
+import bcrypt
+import jwt
 from fastapi import HTTPException, status
-from jose import jwt
-from passlib.context import CryptContext
 
 from .models import User, UserRole
 
@@ -49,8 +49,8 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 REFRESH_TOKEN_EXPIRE_DAYS = 30
 
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Bcrypt cost factor (12 is the recommended minimum for security)
+BCRYPT_ROUNDS = 12
 
 
 class SecurityManager:
@@ -74,7 +74,9 @@ class SecurityManager:
         Returns:
             Hashed password
         """
-        return str(pwd_context.hash(password))
+        salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
+        hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+        return hashed.decode("utf-8")
 
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """Verify a password against its hash.
@@ -86,7 +88,12 @@ class SecurityManager:
         Returns:
             True if password matches, False otherwise
         """
-        return bool(pwd_context.verify(plain_password, hashed_password))
+        try:
+            return bcrypt.checkpw(
+                plain_password.encode("utf-8"), hashed_password.encode("utf-8")
+            )
+        except (ValueError, TypeError):
+            return False
 
     def create_access_token(
         self, data: dict[str, Any], expires_delta: timedelta | None = None
@@ -158,7 +165,7 @@ class SecurityManager:
                 detail="Token has expired",
                 headers={"WWW-Authenticate": "Bearer"},
             ) from e
-        except jwt.JWTError as e:
+        except jwt.InvalidTokenError as e:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Could not validate credentials",
@@ -187,7 +194,24 @@ class SecurityManager:
             SECURITY: Uses bcrypt instead of SHA256 for brute-force resistance.
             SHA256 is fast and unsuitable for key storage; bcrypt is slow by design.
         """
-        return str(pwd_context.hash(api_key))
+        salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
+        hashed = bcrypt.hashpw(api_key.encode("utf-8"), salt)
+        return hashed.decode("utf-8")
+
+    def verify_api_key(self, api_key: str, hashed_key: str) -> bool:
+        """Verify an API key against its hash.
+
+        Args:
+            api_key: Plain API key
+            hashed_key: Bcrypt-hashed key from database
+
+        Returns:
+            True if key matches, False otherwise
+        """
+        try:
+            return bcrypt.checkpw(api_key.encode("utf-8"), hashed_key.encode("utf-8"))
+        except (ValueError, TypeError):
+            return False
 
 
 class RoleChecker:
