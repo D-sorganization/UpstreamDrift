@@ -166,7 +166,6 @@ simulation_service: SimulationService | None = None
 analysis_service: AnalysisService | None = None
 video_pipeline: VideoPosePipeline | None = None
 
-<<<<<<< HEAD
 
 class TaskManager:
     """Thread-safe task manager with TTL cleanup and size limits.
