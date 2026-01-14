@@ -190,9 +190,10 @@ def migrate_api_keys(
 
         # Hash with bcrypt
         new_hash = pwd_context.hash(new_raw_value)
-        
+
         # PERFORMANCE FIX: Compute prefix hash for fast lookup
         import hashlib
+
         key_body = new_raw_value[4:]  # Remove "gms_" prefix
         prefix = key_body[:8]
         prefix_hash = hashlib.sha256(prefix.encode()).hexdigest()
@@ -216,7 +217,7 @@ def migrate_api_keys(
             # Update database record (hash and prefix)
             record.key_hash = new_hash
             # Set prefix_hash if column exists
-            if hasattr(record, 'prefix_hash'):
+            if hasattr(record, "prefix_hash"):
                 record.prefix_hash = prefix_hash
             logger.info("  ✓ Hash upgraded to bcrypt successfully")
         else:

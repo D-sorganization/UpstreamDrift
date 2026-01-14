@@ -158,8 +158,6 @@ video_pipeline: VideoPosePipeline | None = None
 
 # Background task storage with TTL cleanup
 # PERFORMANCE FIX: Added TTL-based cleanup to prevent memory leak
-from collections import OrderedDict
-from datetime import timedelta
 
 active_tasks: OrderedDict[str, dict[str, Any]] = OrderedDict()
 TASK_TTL_HOURS = 1  # Remove tasks older than 1 hour
@@ -170,18 +168,18 @@ def _cleanup_old_tasks() -> None:
     """Remove tasks older than TTL or exceeding max count."""
     current_time = datetime.now(UTC)
     tasks_to_remove = []
-    
+
     # Find expired tasks
     for task_id, task_data in active_tasks.items():
         if "created_at" in task_data:
             age = current_time - task_data["created_at"]
             if age > timedelta(hours=TASK_TTL_HOURS):
                 tasks_to_remove.append(task_id)
-    
+
     # Remove expired tasks
     for task_id in tasks_to_remove:
         del active_tasks[task_id]
-    
+
     # If still over limit, remove oldest tasks (LRU)
     while len(active_tasks) > MAX_TASKS:
         active_tasks.popitem(last=False)  # Remove oldest (FIFO)
@@ -341,9 +339,9 @@ async def run_simulation_async(
 
     # PERFORMANCE FIX: Cleanup old tasks before creating new one
     _cleanup_old_tasks()
-    
+
     task_id = str(uuid.uuid4())
-    
+
     # Initialize task with timestamp
     active_tasks[task_id] = {
         "status": "started",
@@ -446,7 +444,7 @@ async def analyze_video_async(
 
     # PERFORMANCE FIX: Cleanup old tasks
     _cleanup_old_tasks()
-    
+
     task_id = str(uuid.uuid4())
 
     # Save file and add background task
@@ -454,7 +452,7 @@ async def analyze_video_async(
         content = await file.read()
         temp_file.write(content)
         temp_path = Path(temp_file.name)
-    
+
     # Initialize task with timestamp
     active_tasks[task_id] = {
         "status": "started",
@@ -485,7 +483,9 @@ async def _process_video_background(
         active_tasks[task_id] = {
             "status": "processing",
             "progress": 0,
-            "created_at": active_tasks.get(task_id, {}).get("created_at", datetime.now(UTC)),
+            "created_at": active_tasks.get(task_id, {}).get(
+                "created_at", datetime.now(UTC)
+            ),
         }
 
         config = VideoProcessingConfig(
@@ -498,7 +498,9 @@ async def _process_video_background(
         # Store result
         active_tasks[task_id] = {
             "status": "completed",
-            "created_at": active_tasks.get(task_id, {}).get("created_at", datetime.now(UTC)),
+            "created_at": active_tasks.get(task_id, {}).get(
+                "created_at", datetime.now(UTC)
+            ),
             "result": {
                 "filename": filename,
                 "total_frames": result.total_frames,
@@ -512,7 +514,9 @@ async def _process_video_background(
         active_tasks[task_id] = {
             "status": "failed",
             "error": str(e),
-            "created_at": active_tasks.get(task_id, {}).get("created_at", datetime.now(UTC)),
+            "created_at": active_tasks.get(task_id, {}).get(
+                "created_at", datetime.now(UTC)
+            ),
         }
     finally:
         # Clean up temp file

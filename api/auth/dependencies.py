@@ -57,7 +57,7 @@ async def get_current_user_from_api_key(
     db: Session = Depends(get_db),
 ) -> User:
     """Get current user from API key.
-    
+
     PERFORMANCE FIX: Uses prefix hash to filter candidates before bcrypt verification,
     reducing O(n) bcrypt calls to O(1) average case.
     """
@@ -75,7 +75,7 @@ async def get_current_user_from_api_key(
     # PERFORMANCE FIX: Compute prefix hash for fast filtering
     # Use first 8 characters after "gms_" prefix for indexing
     import hashlib
-    
+
     key_body = api_key[4:]  # Remove "gms_" prefix
     if len(key_body) < 8:
         raise HTTPException(
@@ -83,10 +83,10 @@ async def get_current_user_from_api_key(
             detail="Invalid API key format",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     prefix = key_body[:8]
     prefix_hash = hashlib.sha256(prefix.encode()).hexdigest()
-    
+
     # Query only keys matching the prefix hash (if column exists)
     # Fallback to all active keys if prefix_hash column doesn't exist yet
     try:

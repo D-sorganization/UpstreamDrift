@@ -156,7 +156,7 @@ def _morlet2_impl(M: int, s: float, w: float = 5.0) -> np.ndarray:
     """Complex Morlet wavelet implementation with caching.
 
     Fallback if scipy.signal.morlet2 is unavailable.
-    
+
     PERFORMANCE FIX: Added LRU cache to avoid recomputing wavelets.
     """
     x = np.arange(0, M) - (M - 1.0) / 2
@@ -421,7 +421,7 @@ def compute_dtw_distance(
 
     Uses Euclidean distance as the local cost measure.
     Implements Sakoe-Chiba band constraint if window is specified.
-    
+
     PERFORMANCE NOTE: This is a pure Python implementation with optimizations.
     For production use with large datasets, consider using:
     - fastdtw library: pip install fastdtw (100x faster)
