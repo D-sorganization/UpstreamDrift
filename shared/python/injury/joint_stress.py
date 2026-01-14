@@ -19,7 +19,6 @@ References:
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 import numpy as np
 
@@ -169,7 +168,7 @@ class JointStressAnalyzer:
         self,
         body_weight: float,
         handedness: str = "right",
-        height: Optional[float] = None,
+        height: float | None = None,
     ):
         """
         Initialize the joint stress analyzer.
@@ -254,8 +253,12 @@ class JointStressAnalyzer:
 
         # Get angle data (use generic if side-specific not available)
         prefix = "hip_lead" if side == JointSide.LEAD else "hip_trail"
-        rotation = joint_angles.get(f"{prefix}_rotation", joint_angles.get("hip_rotation", np.zeros(n_frames)))
-        flexion = joint_angles.get(f"{prefix}_flexion", joint_angles.get("hip_flexion", np.zeros(n_frames)))
+        rotation = joint_angles.get(
+            f"{prefix}_rotation", joint_angles.get("hip_rotation", np.zeros(n_frames))
+        )
+        flexion = joint_angles.get(
+            f"{prefix}_flexion", joint_angles.get("hip_flexion", np.zeros(n_frames))
+        )
 
         # Compute internal rotation range
         rotation_deg = np.degrees(rotation)
@@ -295,7 +298,7 @@ class JointStressAnalyzer:
 
         # Get angle and torque data
         horizontal = joint_angles.get("shoulder_horizontal", np.zeros(n_frames))
-        vertical = joint_angles.get("shoulder_vertical", np.zeros(n_frames))
+        joint_angles.get("shoulder_vertical", np.zeros(n_frames))
 
         # Get torques
         torque = joint_torques.get("shoulder_horizontal", np.zeros(n_frames))
@@ -319,7 +322,9 @@ class JointStressAnalyzer:
         multiplier = 1.2 if side == JointSide.TRAIL else 1.0
         result.risk_score = min(100, max_rc_loading * multiplier)
 
-        result.rom_utilization = min(100, np.max(np.abs(np.degrees(horizontal))) / 180 * 100)
+        result.rom_utilization = min(
+            100, np.max(np.abs(np.degrees(horizontal))) / 180 * 100
+        )
 
         return result
 
@@ -355,7 +360,9 @@ class JointStressAnalyzer:
             result.overload_risk = True
 
         multiplier = 1.3 if side == JointSide.LEAD else 1.0
-        result.risk_score = min(100, (max_valgus / self.ELBOW_VALGUS_TORQUE_LIMIT) * 50 * multiplier)
+        result.risk_score = min(
+            100, (max_valgus / self.ELBOW_VALGUS_TORQUE_LIMIT) * 50 * multiplier
+        )
 
         result.rom_utilization = min(100, np.max(np.degrees(flexion)) / 145 * 100)
 
@@ -374,7 +381,9 @@ class JointStressAnalyzer:
         n_frames = len(time)
 
         # Get wrist angles
-        cock = joint_angles.get("wrist_cock", np.zeros(n_frames))  # Ulnar/radial deviation
+        cock = joint_angles.get(
+            "wrist_cock", np.zeros(n_frames)
+        )  # Ulnar/radial deviation
         rotation = joint_angles.get("wrist_rotation", np.zeros(n_frames))
 
         # Get velocity for impact stress estimation
@@ -442,7 +451,9 @@ class JointStressAnalyzer:
                     f"{name}: Overload risk - reduce intensity or modify technique"
                 )
 
-        summary["total_risk_score"] = sum(score for _, score in risk_scores) / len(risk_scores)
+        summary["total_risk_score"] = sum(score for _, score in risk_scores) / len(
+            risk_scores
+        )
 
         return summary
 
@@ -470,21 +481,13 @@ if __name__ == "__main__":
     joint_torques = {k: 30 * np.gradient(v, dt) for k, v in joint_velocities.items()}
 
     # Analyze all joints
-    results = analyzer.analyze_all_joints(joint_angles, joint_velocities, joint_torques, time)
+    results = analyzer.analyze_all_joints(
+        joint_angles, joint_velocities, joint_torques, time
+    )
 
-    print("=== Joint Stress Analysis ===\n")
-    for name, result in results.items():
-        print(f"{name}:")
-        print(f"  Risk Score: {result.risk_score:.1f}")
-        print(f"  ROM Utilization: {result.rom_utilization:.1f}%")
-        print(f"  Impingement Risk: {result.impingement_risk}")
-        print(f"  Overload Risk: {result.overload_risk}")
-        print()
+    for _name, _result in results.items():
+        pass
 
     summary = analyzer.get_summary(results)
-    print(f"=== Summary ===")
-    print(f"Highest Risk: {summary['highest_risk_joint']} ({summary['highest_risk_score']:.1f})")
-    print(f"Average Risk: {summary['total_risk_score']:.1f}")
-    print(f"Joints at Risk: {summary['joints_at_risk']}")
-    for rec in summary["recommendations"]:
-        print(f"  - {rec}")
+    for _rec in summary["recommendations"]:
+        pass

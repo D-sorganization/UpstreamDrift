@@ -21,9 +21,9 @@ References:
 - MacKenzie (2012) Understanding the role of shaft stiffness
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Callable, Optional
 
 import numpy as np
 from scipy import optimize
@@ -174,7 +174,7 @@ class OptimizationResult:
     message: str
 
     # Optimal trajectory
-    trajectory: Optional[SwingTrajectory] = None
+    trajectory: SwingTrajectory | None = None
 
     # Predicted outcomes
     predicted_clubhead_speed: float = 0.0  # m/s
@@ -233,7 +233,7 @@ class SwingOptimizer:
         self,
         golfer: GolferModel,
         club: ClubModel,
-        config: Optional[OptimizationConfig] = None,
+        config: OptimizationConfig | None = None,
     ):
         """
         Initialize the swing optimizer.
@@ -287,8 +287,8 @@ class SwingOptimizer:
 
     def optimize(
         self,
-        initial_swing: Optional[SwingTrajectory] = None,
-        callback: Optional[Callable[[int, float], None]] = None,
+        initial_swing: SwingTrajectory | None = None,
+        callback: Callable[[int, float], None] | None = None,
     ) -> OptimizationResult:
         """
         Run the optimization to find optimal swing trajectory.
@@ -307,7 +307,7 @@ class SwingOptimizer:
         # Set up the optimization problem
         n_joints = len(self.JOINTS)
         n_nodes = self.config.n_nodes
-        n_vars = n_joints * n_nodes * 2  # angles and velocities
+        n_joints * n_nodes * 2  # angles and velocities
 
         # Initial guess
         if initial_swing is not None:
@@ -517,17 +517,21 @@ class SwingOptimizer:
             # Get relevant angles
             trunk_rot = joint_angles.get("trunk_rotation", np.zeros(n_frames))[i]
             shoulder_h = joint_angles.get("shoulder_horizontal", np.zeros(n_frames))[i]
-            shoulder_v = joint_angles.get("shoulder_vertical", np.zeros(n_frames))[i]
-            elbow = joint_angles.get("elbow_flexion", np.zeros(n_frames))[i]
+            joint_angles.get("shoulder_vertical", np.zeros(n_frames))[i]
+            joint_angles.get("elbow_flexion", np.zeros(n_frames))[i]
             wrist = joint_angles.get("wrist_cock", np.zeros(n_frames))[i]
 
             # Forward kinematics (simplified)
             total_angle = trunk_rot + shoulder_h + wrist
 
             # Position in swing plane
-            position[i, 0] = (arm_length + club_length) * np.sin(total_angle)  # x (forward)
+            position[i, 0] = (arm_length + club_length) * np.sin(
+                total_angle
+            )  # x (forward)
             position[i, 1] = 0  # y (lateral, simplified)
-            position[i, 2] = (arm_length + club_length) * np.cos(total_angle) - club_length  # z (vertical)
+            position[i, 2] = (arm_length + club_length) * np.cos(
+                total_angle
+            ) - club_length  # z (vertical)
 
         # Compute velocity from position
         dt = time[1] - time[0] if len(time) > 1 else 0.001
@@ -565,7 +569,10 @@ class SwingOptimizer:
 
         if OptimizationConstraint.KINEMATIC_CHAIN in self.config.constraints:
             constraints.append(
-                {"type": "ineq", "fun": lambda x: self._kinematic_sequence_constraint(x)}
+                {
+                    "type": "ineq",
+                    "fun": lambda x: self._kinematic_sequence_constraint(x),
+                }
             )
 
         return constraints
@@ -589,7 +596,12 @@ class SwingOptimizer:
 
         # During downswing, peak velocities should occur in order:
         # hip -> trunk -> shoulder -> wrist
-        sequence = ["hip_rotation", "trunk_rotation", "shoulder_horizontal", "wrist_cock"]
+        sequence = [
+            "hip_rotation",
+            "trunk_rotation",
+            "shoulder_horizontal",
+            "wrist_cock",
+        ]
 
         # Find time of peak velocity for each
         peak_times = []
@@ -639,7 +651,7 @@ class SwingOptimizer:
         risk = 0.0
 
         # Check joint velocities (high velocities = higher risk)
-        for joint, vel in trajectory.joint_velocities.items():
+        for _joint, vel in trajectory.joint_velocities.items():
             max_vel = np.max(np.abs(vel))
             if max_vel > 20:  # rad/s
                 risk += 10
@@ -662,10 +674,17 @@ class SwingOptimizer:
     def _compute_energy_cost(self, trajectory: SwingTrajectory) -> float:
         """Compute metabolic energy cost of the swing."""
         total_work = 0.0
-        dt = trajectory.time[1] - trajectory.time[0] if len(trajectory.time) > 1 else 0.001
+        dt = (
+            trajectory.time[1] - trajectory.time[0]
+            if len(trajectory.time) > 1
+            else 0.001
+        )
 
         for joint in self.JOINTS:
-            if joint in trajectory.joint_torques and joint in trajectory.joint_velocities:
+            if (
+                joint in trajectory.joint_torques
+                and joint in trajectory.joint_velocities
+            ):
                 torque = trajectory.joint_torques[joint]
                 velocity = trajectory.joint_velocities[joint]
                 power = torque * velocity
@@ -746,7 +765,6 @@ def create_example_optimization():
     # Create optimizer and run
     optimizer = SwingOptimizer(golfer, club, config)
 
-    print("Running swing optimization...")
     result = optimizer.optimize()
 
     return optimizer, result
@@ -755,24 +773,6 @@ def create_example_optimization():
 if __name__ == "__main__":
     optimizer, result = create_example_optimization()
 
-    print("\n=== Swing Optimization Results ===\n")
-    print(f"Success: {result.success}")
-    print(f"Message: {result.message}")
-    print(f"Iterations: {result.iterations}")
-    print(f"Computation time: {result.computation_time:.2f}s")
-
     if result.success:
-        print(f"\n--- Predicted Performance ---")
-        print(f"Clubhead Speed: {result.predicted_clubhead_speed:.1f} m/s "
-              f"({result.predicted_clubhead_speed * 2.237:.1f} mph)")
-        print(f"Ball Speed: {result.predicted_ball_speed:.1f} m/s "
-              f"({result.predicted_ball_speed * 2.237:.1f} mph)")
-        print(f"Carry Distance: {result.predicted_carry_distance:.0f} m "
-              f"({result.predicted_carry_distance * 1.094:.0f} yards)")
-        print(f"Launch Angle: {result.predicted_launch_angle:.1f}°")
-        print(f"Spin Rate: {result.predicted_spin_rate:.0f} rpm")
 
-        print(f"\n--- Injury Risk ---")
-        print(f"Spinal Compression: {result.peak_spinal_compression:.1f}x body weight")
-        print(f"Spinal Shear: {result.peak_spinal_shear:.1f}x body weight")
-        print(f"Overall Risk Score: {result.injury_risk_score:.0f}/100")
+        pass

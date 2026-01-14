@@ -191,7 +191,8 @@ class PinocchioRecorder:
         if field_name == "ztcf_accel":
             return self.get_counterfactual_series("ztcf_accel")
         if field_name == "zvcf_accel":
-            return self.get_counterfactual_series("zvcf_torque") # Assuming torque is stored here for now or adapt
+            # Assuming torque is stored here for now or adapt
+            return self.get_counterfactual_series("zvcf_torque")
 
         values = [getattr(f, field_name, None) for f in self.frames]
 
@@ -233,11 +234,13 @@ class PinocchioRecorder:
         # Wait, LivePlotWidget logic:
         # `src_idx = self.source_combo.currentIndex()`
         # `times, data = self.recorder.get_induced_acceleration_series(src_idx)`
-        # `GenericPhysicsRecorder` uses `src_idx` as key in `data["induced_accelerations"]` (dict int -> array).
+        # `GenericPhysicsRecorder` uses `src_idx` as key in
+        # `data["induced_accelerations"]` (dict int -> array).
 
         # Pinocchio stores dict str -> array.
         # We need to adapt.
-        # Pinocchio currently computes 'gravity', 'velocity', 'total' and 'specific_control' (if requested).
+        # Pinocchio currently computes 'gravity', 'velocity', 'total'
+        # and 'specific_control' (if requested).
         # We don't have per-actuator breakdown by default.
         # So for Pinocchio, we might return empty unless we map `src_idx`.
 

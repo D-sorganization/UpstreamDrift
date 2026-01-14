@@ -14,9 +14,6 @@ Swing Alternatives:
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
-
-import numpy as np
 
 
 class SwingStyle(Enum):
@@ -47,7 +44,7 @@ class SwingModification:
 class ModificationPlan:
     """Complete modification plan with prioritized changes."""
 
-    primary_modification: Optional[SwingModification] = None
+    primary_modification: SwingModification | None = None
     secondary_modifications: list[SwingModification] = field(default_factory=list)
     estimated_total_risk_reduction: float = 0.0
     estimated_performance_change: float = 0.0
@@ -176,7 +173,7 @@ class SwingModificationRecommender:
     def recommend(
         self,
         injury_report=None,
-        performance_requirements: Optional[dict] = None,
+        performance_requirements: dict | None = None,
         current_style: SwingStyle = SwingStyle.MODERN,
     ) -> ModificationPlan:
         """
@@ -244,7 +241,9 @@ class SwingModificationRecommender:
 
         # Apply performance requirements filter
         if performance_requirements:
-            max_performance_loss = performance_requirements.get("max_performance_loss", 10)
+            max_performance_loss = performance_requirements.get(
+                "max_performance_loss", 10
+            )
             applicable_mods = [
                 (mod, score)
                 for mod, score in applicable_mods
@@ -257,11 +256,14 @@ class SwingModificationRecommender:
             plan.secondary_modifications = [mod for mod, _ in applicable_mods[1:3]]
 
         # Calculate totals
-        plan.estimated_total_risk_reduction = sum(
-            mod.expected_risk_reduction
-            for mod in [plan.primary_modification] + plan.secondary_modifications
-            if mod is not None
-        ) * 0.7  # Discount for overlap
+        plan.estimated_total_risk_reduction = (
+            sum(
+                mod.expected_risk_reduction
+                for mod in [plan.primary_modification] + plan.secondary_modifications
+                if mod is not None
+            )
+            * 0.7
+        )  # Discount for overlap
 
         plan.estimated_performance_change = sum(
             mod.expected_performance_impact
@@ -270,7 +272,9 @@ class SwingModificationRecommender:
         )
 
         # Estimate difficulty
-        num_changes = len([m for m in [plan.primary_modification] + plan.secondary_modifications if m])
+        num_changes = len(
+            [m for m in [plan.primary_modification] + plan.secondary_modifications if m]
+        )
         if num_changes == 1:
             plan.implementation_difficulty = "easy"
             plan.timeline_weeks = 2
@@ -342,15 +346,11 @@ if __name__ == "__main__":
     recommender = SwingModificationRecommender()
 
     # Show style comparison
-    print("=== Swing Style Comparison ===\n")
-    for style, info in recommender.get_style_comparison().items():
-        print(f"{style.value.upper()}:")
-        for key, value in info.items():
-            print(f"  {key}: {value}")
-        print()
+    for _style, info in recommender.get_style_comparison().items():
+        for _key, _value in info.items():
+            pass
 
     # Example recommendation
-    print("=== Example Modification Plan ===\n")
 
     class MockFactor:
         def __init__(self, name, value, safe, high):
@@ -372,13 +372,4 @@ if __name__ == "__main__":
     )
 
     if plan.primary_modification:
-        print(f"Primary: {plan.primary_modification.name}")
-        print(f"  {plan.primary_modification.description}")
-        print(f"  Risk Reduction: {plan.primary_modification.expected_risk_reduction}%")
-        print(f"  Performance Impact: {plan.primary_modification.expected_performance_impact}%")
-        print(f"  Drills: {plan.primary_modification.drill_recommendations}")
-
-    print(f"\nSecondary modifications: {len(plan.secondary_modifications)}")
-    print(f"Total Risk Reduction: {plan.estimated_total_risk_reduction:.0f}%")
-    print(f"Total Performance Change: {plan.estimated_performance_change:.0f}%")
-    print(f"Implementation: {plan.implementation_difficulty} ({plan.timeline_weeks} weeks)")
+        pass

@@ -334,7 +334,8 @@ class DrakeRecorder:
         if field_name == "ztcf_accel":
             return self.get_counterfactual_series("ztcf_accel")
         if field_name == "zvcf_accel":
-            # Drake computes zvcf_torque in example logic, but let's assume we store accels if available
+            # Drake computes zvcf_torque in example logic,
+            # but let's assume we store accels if available
             return self.get_counterfactual_series("zvcf_torque")
 
         # Fallback
@@ -352,11 +353,11 @@ class DrakeRecorder:
             # Or map int to name if possible?
             # For now, return empty if not found.
             if source_name in self.induced_accelerations:
-                 # If stored by int key
-                 vals = self.induced_accelerations[source_name] # type: ignore
-                 times = np.array(self.times)
-                 min_len = min(len(vals), len(times))
-                 return times[:min_len], np.array(vals[:min_len])
+                # If stored by int key
+                vals = self.induced_accelerations[source_name]  # type: ignore
+                times = np.array(self.times)
+                min_len = min(len(vals), len(times))
+                return times[:min_len], np.array(vals[:min_len])
 
             return np.array([]), np.array([])
 
@@ -1132,8 +1133,10 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 # The GUI checkbox logic is:
                 analysis_enabled = self.chk_live_analysis.isChecked()
 
-                # We could also check self.recorder.analysis_config if we implemented it fully
-                # For now, we trust the GUI checkbox as master toggle for performance safety
+                # We could also check self.recorder.analysis_config
+                # if we implemented it fully
+                # For now, we trust the GUI checkbox as master toggle
+                # for performance safety
 
                 if analysis_enabled and self.eval_context:
                     # Update eval context

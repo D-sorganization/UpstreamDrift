@@ -24,7 +24,10 @@ class GenericPhysicsRecorder:
     _MAX_BUFFER_SIZE = 1000000  # Hard cap to prevent runaway memory usage
 
     def __init__(
-        self, engine: PhysicsEngine, max_samples: int = 100000, dynamic_sizing: bool = True
+        self,
+        engine: PhysicsEngine,
+        max_samples: int = 100000,
+        dynamic_sizing: bool = True,
     ) -> None:
         """Initialize recorder.
 
@@ -58,7 +61,9 @@ class GenericPhysicsRecorder:
         # Performance optimization: Mass matrix caching
         self._cached_mass_matrix: np.ndarray | None = None
         self._cached_mass_matrix_q: np.ndarray | None = None
-        self._mass_matrix_cache_tolerance = 1e-6  # Re-compute if q changes significantly
+        self._mass_matrix_cache_tolerance = (
+            1e-6  # Re-compute if q changes significantly
+        )
 
         # Performance optimization: Analysis computation frequency
         self._analysis_compute_interval = 1  # Compute every N frames (1 = every frame)
@@ -537,7 +542,11 @@ class GenericPhysicsRecorder:
             # Include start, end, peaks, and midpoints
             key_indices = np.unique(
                 np.concatenate(
-                    [[0, n_frames - 1], peaks, np.linspace(0, n_frames - 1, 20).astype(int)]
+                    [
+                        [0, n_frames - 1],
+                        peaks,
+                        np.linspace(0, n_frames - 1, 20).astype(int),
+                    ]
                 )
             )
             frame_indices = np.sort(key_indices)
@@ -578,7 +587,9 @@ class GenericPhysicsRecorder:
 
             # Progress logging
             if out_idx > 0 and out_idx % log_interval == 0:
-                LOGGER.debug(f"Post-hoc analysis progress: {out_idx}/{n_compute} frames")
+                LOGGER.debug(
+                    f"Post-hoc analysis progress: {out_idx}/{n_compute} frames"
+                )
 
         # Store results
         self.data["counterfactuals"]["ztcf_accel"] = (computed_times, ztcf_accels)

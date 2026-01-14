@@ -18,7 +18,6 @@ Risk Categories:
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 import numpy as np
 
@@ -117,9 +116,9 @@ class InjuryRiskScorer:
     def score(
         self,
         spinal_result=None,
-        joint_results: Optional[dict] = None,
-        swing_metrics: Optional[dict] = None,
-        training_load: Optional[dict] = None,
+        joint_results: dict | None = None,
+        swing_metrics: dict | None = None,
+        training_load: dict | None = None,
     ) -> InjuryRiskReport:
         """
         Compute comprehensive injury risk score.
@@ -211,7 +210,11 @@ class InjuryRiskScorer:
         # Compute region score
         compression_score = self._value_to_score(compression_bw, 4.0, 6.0) * 1.2
         shear_score = self._value_to_score(shear_bw, 0.5, 1.0) * 1.0
-        x_factor_score = self._value_to_score(getattr(x_factor, "x_factor_stretch", 0), 45, 55) * 0.8 if x_factor else 0
+        x_factor_score = (
+            self._value_to_score(getattr(x_factor, "x_factor_stretch", 0), 45, 55) * 0.8
+            if x_factor
+            else 0
+        )
 
         report.region_scores[InjuryType.LOW_BACK] = (
             compression_score + shear_score + x_factor_score
@@ -329,7 +332,9 @@ class InjuryRiskScorer:
                     description="Backswing:downswing tempo ratio",
                 )
             )
-            report.technique_risk_score += self._value_to_score(tempo_error, 0.5, 1.5) * 0.4
+            report.technique_risk_score += (
+                self._value_to_score(tempo_error, 0.5, 1.5) * 0.4
+            )
 
         # Early extension
         if "early_extension" in swing_metrics:
@@ -345,7 +350,9 @@ class InjuryRiskScorer:
                     description="Pelvis movement toward ball in downswing (cm)",
                 )
             )
-            report.technique_risk_score += self._value_to_score(extension, 5.0, 15.0) * 0.6
+            report.technique_risk_score += (
+                self._value_to_score(extension, 5.0, 15.0) * 0.6
+            )
 
     def _score_training_load_risks(self, training_load: dict, report: InjuryRiskReport):
         """Score training load-related risk factors."""
@@ -428,7 +435,9 @@ class InjuryRiskScorer:
         # Identify top risks
         sorted_factors = sorted(
             self.risk_factors,
-            key=lambda f: self._value_to_score(f.value, f.threshold_safe, f.threshold_high),
+            key=lambda f: self._value_to_score(
+                f.value, f.threshold_safe, f.threshold_high
+            ),
             reverse=True,
         )
         report.top_risks = [f.name for f in sorted_factors[:3]]
@@ -439,7 +448,9 @@ class InjuryRiskScorer:
 
         # Find high-risk modifiable factors
         for factor in self.risk_factors:
-            score = self._value_to_score(factor.value, factor.threshold_safe, factor.threshold_high)
+            score = self._value_to_score(
+                factor.value, factor.threshold_safe, factor.threshold_high
+            )
             if score > 50 and factor.modifiable:
                 if "compression" in factor.name:
                     recommendations.append(
@@ -545,21 +556,11 @@ if __name__ == "__main__":
 
     report = scorer.score(spinal_result, joint_results, swing_metrics, training_load)
 
-    print("=== Injury Risk Report ===\n")
-    print(f"Overall Risk Score: {report.overall_risk_score:.1f}")
-    print(f"Overall Risk Level: {report.overall_risk_level.value.upper()}")
-    print(f"\nAcute Risk: {report.acute_risk_score:.1f}")
-    print(f"Chronic Risk: {report.chronic_risk_score:.1f}")
-    print(f"Technique Risk: {report.technique_risk_score:.1f}")
+    for _region, _score in report.region_scores.items():
+        pass
 
-    print(f"\n--- Region Scores ---")
-    for region, score in report.region_scores.items():
-        print(f"  {region.value}: {score:.1f}")
+    for _risk in report.top_risks:
+        pass
 
-    print(f"\n--- Top Risks ---")
-    for risk in report.top_risks:
-        print(f"  - {risk}")
-
-    print(f"\n--- Recommendations ---")
-    for rec in report.recommendations:
-        print(f"  * {rec}")
+    for _rec in report.recommendations:
+        pass
