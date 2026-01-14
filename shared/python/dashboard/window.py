@@ -137,7 +137,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                 "GRF Butterfly Diagram",
                 "Club Head Trajectory (3D)",
                 "Kinematic Sequence (Bars)",
-                "Swing DNA (Radar)",
+                "Swing Profile (Radar)",
                 "Summary Dashboard",
             ]
         )
@@ -346,7 +346,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                     self.plotter.plot_kinematic_sequence_bars(
                         self.static_canvas.fig, indices
                     )
-            elif plot_type == "Swing DNA (Radar)":
+            elif plot_type == "Swing Profile (Radar)":
                 times, positions = self.recorder.get_time_series("joint_positions")
                 _, velocities = self.recorder.get_time_series("joint_velocities")
                 _, torques = self.recorder.get_time_series("joint_torques")
@@ -376,7 +376,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                         }
                         self.plotter.plot_radar_chart(self.static_canvas.fig, metrics)
                     else:
-                        raise ValueError("Could not compute Swing DNA")
+                        raise ValueError("Could not compute Swing Profile")
                 else:
                     raise ValueError("No data available")
             elif plot_type == "Summary Dashboard":
