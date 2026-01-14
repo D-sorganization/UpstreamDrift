@@ -1,12 +1,12 @@
-import pytest
 import numpy as np
+
 from shared.python.ball_flight_physics import (
     BallFlightSimulator,
-    LaunchConditions,
     BallProperties,
     EnvironmentalConditions,
-    MIN_SPEED_THRESHOLD
+    LaunchConditions,
 )
+
 
 class TestBallFlightPhysics:
     def test_trajectory_simulation(self):
@@ -16,7 +16,7 @@ class TestBallFlightPhysics:
             velocity=70.0,
             launch_angle=np.radians(12.0),
             spin_rate=3000.0,
-            azimuth_angle=0.0
+            azimuth_angle=0.0,
         )
 
         trajectory = simulator.simulate_trajectory(launch)
@@ -37,9 +37,7 @@ class TestBallFlightPhysics:
         """Test trajectory without spin."""
         simulator = BallFlightSimulator()
         launch = LaunchConditions(
-            velocity=50.0,
-            launch_angle=np.radians(45.0),
-            spin_rate=0.0
+            velocity=50.0, launch_angle=np.radians(45.0), spin_rate=0.0
         )
 
         trajectory = simulator.simulate_trajectory(launch)
@@ -53,7 +51,7 @@ class TestBallFlightPhysics:
             velocity=70.0,
             launch_angle=np.radians(10.0),
             spin_rate=3000.0,
-            spin_axis=np.array([0.5, -1.0, 0.0]) / np.linalg.norm([0.5, -1.0, 0.0])
+            spin_axis=np.array([0.5, -1.0, 0.0]) / np.linalg.norm([0.5, -1.0, 0.0]),
         )
 
         trajectory = simulator.simulate_trajectory(launch)
@@ -65,10 +63,7 @@ class TestBallFlightPhysics:
     def test_stop_condition(self):
         """Test that simulation stops at ground."""
         simulator = BallFlightSimulator()
-        launch = LaunchConditions(
-            velocity=10.0,
-            launch_angle=np.radians(45.0)
-        )
+        launch = LaunchConditions(velocity=10.0, launch_angle=np.radians(45.0))
 
         trajectory = simulator.simulate_trajectory(launch)
         # Z should be close to 0 at end
@@ -87,9 +82,7 @@ class TestBallFlightPhysics:
         sim_calm = BallFlightSimulator(ball, env_calm)
 
         launch = LaunchConditions(
-            velocity=70.0,
-            launch_angle=np.radians(10.0),
-            spin_rate=2500.0
+            velocity=70.0, launch_angle=np.radians(10.0), spin_rate=2500.0
         )
 
         traj_wind = sim_wind.simulate_trajectory(launch)

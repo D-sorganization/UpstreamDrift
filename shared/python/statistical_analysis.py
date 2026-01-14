@@ -2708,6 +2708,7 @@ class StatisticalAnalyzer:
             points is (N_crossings, len(dimensions))
             times is (N_crossings,)
         """
+
         # Helper to get data array
         def get_data(dtype: str, idx: int) -> np.ndarray | None:
             if dtype == "position":
@@ -2715,7 +2716,11 @@ class StatisticalAnalyzer:
             elif dtype == "velocity":
                 d = self.joint_velocities
             elif dtype == "acceleration":
-                d = self.joint_accelerations if self.joint_accelerations is not None else np.zeros_like(self.joint_velocities)
+                d = (
+                    self.joint_accelerations
+                    if self.joint_accelerations is not None
+                    else np.zeros_like(self.joint_velocities)
+                )
             elif dtype == "torque":
                 d = self.joint_torques
             else:
