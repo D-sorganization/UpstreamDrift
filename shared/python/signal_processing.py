@@ -101,7 +101,9 @@ def compute_spectral_arc_length(
     n_padded = int(pow(2, np.ceil(np.log2(n)) + pad_level))
 
     # FFT
-    spectrum = np.fft.fft(data, n_padded)
+    # Optimization: Use rfft for real input, computing only positive frequencies.
+    # This is 2x faster and uses 50% less memory than full fft.
+    spectrum = np.fft.rfft(data, n_padded)
     spectrum_mag = np.abs(spectrum)
 
     max_mag = np.max(spectrum_mag)
@@ -112,20 +114,18 @@ def compute_spectral_arc_length(
     spectrum_norm = spectrum_mag / max_mag
 
     # Frequency axis optimization:
-    # Instead of generating full fftfreq and masking (which creates large temporary arrays),
-    # we calculate the index limit directly.
-    # Positive frequencies are at indices 0 to n_padded//2.
-    # df = fs / n_padded
+    # Calculate index limit for cut-off frequency fc.
+    # df = fs / n_padded (same resolution as full FFT)
     df = fs / n_padded
     if df > 0:
         limit_idx = int(np.floor(fc / df)) + 1
     else:
         limit_idx = 1
 
-    # limit_idx must be at most n_padded // 2 + 1 (Nyquist limit for positive freqs)
-    limit_idx = min(limit_idx, n_padded // 2 + 1)
+    # limit_idx must be at most len(spectrum)
+    limit_idx = min(limit_idx, len(spectrum))
 
-    # We only need the positive part of spectrum up to fc
+    # Select frequencies up to fc
     spectrum_sel = spectrum_norm[:limit_idx]
 
     # Select magnitudes above threshold
