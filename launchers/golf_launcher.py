@@ -1552,6 +1552,7 @@ class GolfLauncher(QMainWindow):
 
         # Re-add widgets in new order
         row, col = 0, 0
+        added_count = 0
         for model_id in self.model_order:
             if model_id in self.model_cards:
                 # Apply filter
@@ -1567,10 +1568,22 @@ class GolfLauncher(QMainWindow):
 
                 card = self.model_cards[model_id]
                 self.grid_layout.addWidget(card, row, col)
+                added_count += 1
                 col += 1
                 if col >= GRID_COLUMNS:
                     col = 0
                     row += 1
+
+        # Show empty state if no models match the filter
+        if added_count == 0 and self.current_filter_text:
+            no_results = QLabel(
+                f"No models found matching '{self.current_filter_text}'"
+            )
+            no_results.setStyleSheet(
+                "color: #888888; font-size: 16px; font-style: italic;"
+            )
+            no_results.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            self.grid_layout.addWidget(no_results, 0, 0, 1, GRID_COLUMNS)
 
     def create_model_card(self, model: Any) -> QFrame:
         """Creates a clickable card widget."""
