@@ -172,7 +172,9 @@ def migrate_api_keys(
     user_ids = [r.user_id for r in api_records]
     users = db_session.query(User).filter(User.id.in_(user_ids)).all()
     user_map: dict[int, User] = {u.id: u for u in users}
-    logger.info(f"Loaded {len(user_map)} users in batch (avoided {len(api_records)} queries)")
+    logger.info(
+        f"Loaded {len(user_map)} users in batch (avoided {len(api_records)} queries)"
+    )
 
     # Store results in separate lists to break taint chain
     metadata_results: list[dict[str, Any]] = []
