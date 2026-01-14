@@ -416,7 +416,7 @@ class GripContactModel:
             return {"min_margin": 0.0, "mean_margin": 0.0, "any_slipping": True}
 
         return {
-            "min_margin": float(min(margins)),
+            "min_margin": float(np.min(margins)),  # type: ignore[arg-type]
             "mean_margin": float(np.mean(margins)),
             "any_slipping": any(m < 0 for m in margins),
         }
