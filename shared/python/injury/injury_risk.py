@@ -536,9 +536,7 @@ if __name__ == "__main__":
             x_factor_stretch = 52.0
 
     class MockJointResult:
-        def __init__(
-            self, risk_score: float, impingement_risk: bool = False
-        ) -> None:
+        def __init__(self, risk_score: float, impingement_risk: bool = False) -> None:
             self.risk_score = risk_score
             self.impingement_risk = impingement_risk
 
