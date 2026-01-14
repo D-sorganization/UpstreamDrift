@@ -81,9 +81,11 @@ if TYPE_CHECKING or HAS_QT:
 
 # Shared imports
 try:
+    from shared.python.dashboard.widgets import LivePlotWidget
     from shared.python.plotting import GolfSwingPlotter
     from shared.python.statistical_analysis import StatisticalAnalyzer
 except ImportError:
+    LivePlotWidget = None  # type: ignore[misc, assignment]
     GolfSwingPlotter = None  # type: ignore[misc, assignment]
     StatisticalAnalyzer = None  # type: ignore[misc, assignment]
 
@@ -245,10 +247,19 @@ def setup_logging() -> None:
 
 
 class DrakeRecorder:
-    """Records simulation data for analysis."""
+    """Records simulation data for analysis.
 
-    def __init__(self) -> None:
+    Implements RecorderInterface for LivePlotWidget.
+    """
+
+    def __init__(self, engine: Any = None) -> None:
+        """Initialize recorder.
+
+        Args:
+            engine: Optional reference to the physics engine/app wrapper.
+        """
         self.reset()
+        self.engine = engine  # Reference for joint names
 
     def reset(self) -> None:
         self.times: list[float] = []
@@ -304,6 +315,11 @@ class DrakeRecorder:
         self.ground_forces_history.append(np.zeros(3))
         self.cop_position_history.append(np.zeros(3))
 
+    def set_analysis_config(self, config: dict[str, Any]) -> None:
+        """Update analysis configuration (Dummy implementation for Interface)."""
+        # Drake GUI currently uses UI toggles directly, but we can store this if needed
+        pass
+
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
         """Implement RecorderInterface."""
         times = np.array(self.times)
@@ -313,6 +329,13 @@ class DrakeRecorder:
             return times, np.array(self.q_history)
         if field_name == "joint_velocities":
             return times, np.array(self.v_history)
+
+        # Counterfactuals via standard get_time_series if stored
+        if field_name == "ztcf_accel":
+            return self.get_counterfactual_series("ztcf_accel")
+        if field_name == "zvcf_accel":
+            # Drake computes zvcf_torque in example logic, but let's assume we store accels if available
+            return self.get_counterfactual_series("zvcf_torque")
 
         # Fallback
         return times, []
@@ -325,6 +348,16 @@ class DrakeRecorder:
             isinstance(source_name, int)
             or source_name not in self.induced_accelerations
         ):
+            # If int, maybe we have it stored by int key?
+            # Or map int to name if possible?
+            # For now, return empty if not found.
+            if source_name in self.induced_accelerations:
+                 # If stored by int key
+                 vals = self.induced_accelerations[source_name] # type: ignore
+                 times = np.array(self.times)
+                 min_len = min(len(vals), len(times))
+                 return times[:min_len], np.array(vals[:min_len])
+
             return np.array([]), np.array([])
 
         times = np.array(self.times)
@@ -358,7 +391,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
     def __init__(self) -> None:
         super().__init__()
         self.setWindowTitle("Drake Golf Swing Analysis")
-        self.resize(500, 800)
+        self.resize(1000, 800)  # Resize for more content
 
         # Simulation State
         self.simulator: Simulator | None = None  # type: ignore[no-any-unimported]
@@ -373,7 +406,8 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.sliders: dict[int, QtWidgets.QSlider] = {}  # type: ignore[no-any-unimported]
         self.spinboxes: dict[int, QtWidgets.QDoubleSpinBox] = {}  # type: ignore[no-any-unimported]
 
-        self.recorder = DrakeRecorder()
+        # Pass self as engine to recorder so it can call get_joint_names
+        self.recorder = DrakeRecorder(engine=self)
         self.eval_context: Context | None = None  # type: ignore[no-any-unimported]
 
         # Manipulability
@@ -401,6 +435,19 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self._game_loop)
         self.timer.start(int(self.time_step * MS_PER_SECOND))
+
+    def get_joint_names(self) -> list[str]:
+        """Return joint names for LivePlotWidget."""
+        if not self.plant:
+            return []
+
+        names = []
+        for i in range(self.plant.num_joints()):
+            joint = self.plant.get_joint(JointIndex(i))
+            # Only include 1-DOF joints for simplicity in plotting mapping
+            if joint.num_velocities() == 1:
+                names.append(joint.name())
+        return names
 
     def _scan_urdf_models(self) -> None:
         """Scan shared/urdf for models."""
@@ -498,6 +545,10 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         # Initial State
         self._reset_state()
 
+        # Refresh Recorder Engine ref if plant changed
+        if hasattr(self, "recorder"):
+            self.recorder.engine = self
+
     def _build_custom_urdf_diagram(self, urdf_path: str) -> None:
         """Build a simple diagram for a custom URDF."""
         builder = DiagramBuilder()
@@ -547,6 +598,14 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         # Clear visualizations
         if self.meshcat:
             self.meshcat.Delete("overlays")
+
+        # Reset recorder
+        if hasattr(self, "recorder"):
+            self.recorder.reset()
+            self.lbl_rec_status.setText("Frames: 0")
+            if self.btn_record.isChecked():
+                self.btn_record.setChecked(False)
+                self.btn_record.setText("Record")
 
     def _on_model_changed(self, index: int) -> None:
         """Handle model change."""
@@ -604,8 +663,15 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         layout.addWidget(mode_group)
 
         # 2. Controls Area (Stack)
+        self.main_tab_widget = QtWidgets.QTabWidget()
+        layout.addWidget(self.main_tab_widget)
+
+        # Tab 1: Simulation Controls
+        self.sim_tab = QtWidgets.QWidget()
+        sim_tab_layout = QtWidgets.QVBoxLayout(self.sim_tab)
+
         self.controls_stack = QtWidgets.QStackedWidget()
-        layout.addWidget(self.controls_stack)
+        sim_tab_layout.addWidget(self.controls_stack)
 
         # -- Page 1: Dynamic Controls
         dynamic_page = QtWidgets.QWidget()
@@ -630,7 +696,7 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         dyn_layout.addWidget(self.btn_reset)
 
         # Recording & Analysis
-        analysis_group = QtWidgets.QGroupBox("Analysis")
+        analysis_group = QtWidgets.QGroupBox("Recording & Post-Hoc Analysis")
         analysis_layout = QtWidgets.QVBoxLayout()
 
         rec_row = QtWidgets.QHBoxLayout()
@@ -652,8 +718,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         self.btn_induced_acc.setEnabled(HAS_MATPLOTLIB)
         ind_layout.addWidget(self.btn_induced_acc)
 
-        # Removed conflicting txt_specific_actuator to rely on combo box
-        # in visualization
         analysis_layout.addLayout(ind_layout)
 
         self.btn_counterfactuals = QtWidgets.QPushButton(
@@ -703,6 +767,18 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         kin_layout.addWidget(scroll)
         self.controls_stack.addWidget(kinematic_page)
+
+        self.main_tab_widget.addTab(self.sim_tab, "Simulation Control")
+
+        # Tab 2: Live Analysis (LivePlotWidget)
+        if LivePlotWidget is not None:
+            self.live_tab = QtWidgets.QWidget()
+            live_layout = QtWidgets.QVBoxLayout(self.live_tab)
+            self.live_plot = LivePlotWidget(self.recorder)
+            # Pre-populate joint names
+            self.live_plot.set_joint_names(self.get_joint_names())
+            live_layout.addWidget(self.live_plot)
+            self.main_tab_widget.addTab(self.live_tab, "Live Analysis")
 
         # 3. Visualization Toggles
         vis_group = QtWidgets.QGroupBox("Visualization")
@@ -810,6 +886,10 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
         self.sliders.clear()
         self.spinboxes.clear()
+
+        # Update Live Plot joint names if initialized
+        if hasattr(self, "live_plot"):
+            self.live_plot.set_joint_names(self.get_joint_names())
 
         # Populate induced source combo with joint names
         current_text = self.combo_induced_source.currentText()
@@ -1018,6 +1098,10 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         if not simulator or not context:
             return
 
+        # Always update Live Plot (even if paused, to redraw last frame/resize)
+        if hasattr(self, "live_plot"):
+            self.live_plot.update_plot()
+
         if self.operating_mode == "dynamic" and self.is_running:
             t = context.get_time()
             simulator.AdvanceTo(t + self.time_step)
@@ -1044,8 +1128,14 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                     X_WB = self.plant.EvalBodyPoseInWorld(plant_context, body)
                     club_pos = X_WB.translation()
 
-                # Live Analysis if enabled
-                if self.chk_live_analysis.isChecked() and self.eval_context:
+                # Live Analysis if enabled OR if LivePlotWidget requested it via config
+                # The GUI checkbox logic is:
+                analysis_enabled = self.chk_live_analysis.isChecked()
+
+                # We could also check self.recorder.analysis_config if we implemented it fully
+                # For now, we trust the GUI checkbox as master toggle for performance safety
+
+                if analysis_enabled and self.eval_context:
                     # Update eval context
                     self.plant.SetPositions(self.eval_context, q)
                     self.plant.SetVelocities(self.eval_context, v)
