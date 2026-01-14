@@ -1,10 +1,19 @@
 {
   "model_order": [
-    "model_2",
+    "c3d_viewer",
     "model_1",
-    "model_0",
-    "model_3"
+    "urdf_generator",
+    "model_0"
   ],
-  "selected_model": "model_0",
+  "selected_model": "urdf_generator",
   "window_geometry": {
-    "x": 
+    "x": 260,
+    "y": 66,
+    "width": 1400,
+    "height": 900
+  },
+  "options": {
+    "live_visualization": true,
+    "gpu_acceleration": false
+  }
+}

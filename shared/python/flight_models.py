@@ -38,6 +38,14 @@ GOLF_BALL_AREA = math.pi * GOLF_BALL_RADIUS**2  # [m²] Cross-sectional area
 STD_AIR_DENSITY = 1.225  # [kg/m³] At sea level, 15°C
 STD_GRAVITY = 9.81  # [m/s²]
 
+# Numerical constants
+# Minimum speed threshold for aerodynamic calculations [m/s]
+# Below this speed, aerodynamic forces are negligible and we avoid division by zero.
+MIN_SPEED_THRESHOLD: float = 0.1  # [m/s]
+
+# Small epsilon for numerical stability in vector normalization
+NUMERICAL_EPSILON: float = 1e-10
+
 
 class FlightModelType(Enum):
     """Available ball flight physics models."""
@@ -340,7 +348,7 @@ class WaterlooPennerModel(BallFlightModel):
             vel_rel = vel - wind_vec
             speed = np.linalg.norm(vel_rel)
 
-            if speed < 0.1:
+            if speed < MIN_SPEED_THRESHOLD:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
             # Use relative velocity for aerodynamic forces
@@ -367,7 +375,7 @@ class WaterlooPennerModel(BallFlightModel):
             if omega_mag > 0:
                 cross = np.cross(omega_vec / omega_mag, vel_unit)
                 cross_mag = np.linalg.norm(cross)
-                if cross_mag > 1e-10:
+                if cross_mag > NUMERICAL_EPSILON:
                     magnus_mag = 0.5 * launch.air_density * speed**2 * cl * area
                     magnus_accel = magnus_mag / launch.ball_mass * cross / cross_mag
                 else:
@@ -444,7 +452,7 @@ class WaterlooPennerModel(BallFlightModel):
         if len(trajectory) >= 2:
             final_vel = trajectory[-1].velocity
             horizontal_speed = math.sqrt(final_vel[0] ** 2 + final_vel[1] ** 2)
-            if horizontal_speed > 0.1:
+            if horizontal_speed > MIN_SPEED_THRESHOLD:
                 landing_angle = math.degrees(
                     math.atan2(-final_vel[2], horizontal_speed)
                 )
@@ -545,7 +553,7 @@ class MacDonaldHanzelyModel(BallFlightModel):
             vel_rel = vel - wind_vec  # Relative velocity for aero forces
             speed = np.linalg.norm(vel_rel)
 
-            if speed < 0.1:
+            if speed < MIN_SPEED_THRESHOLD:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
             vel_unit = vel_rel / speed
@@ -564,7 +572,7 @@ class MacDonaldHanzelyModel(BallFlightModel):
 
                 cross = np.cross(spin_axis, vel_unit)
                 cross_mag = np.linalg.norm(cross)
-                if cross_mag > 1e-10:
+                if cross_mag > NUMERICAL_EPSILON:
                     k_lift = 0.5 * launch.air_density * area * cl_effective
                     magnus_accel = (
                         k_lift * speed**2 / launch.ball_mass * cross / cross_mag
@@ -632,7 +640,7 @@ class MacDonaldHanzelyModel(BallFlightModel):
         if len(trajectory) >= 2:
             final_vel = trajectory[-1].velocity
             horizontal_speed = math.sqrt(final_vel[0] ** 2 + final_vel[1] ** 2)
-            if horizontal_speed > 0.1:
+            if horizontal_speed > MIN_SPEED_THRESHOLD:
                 landing_angle = math.degrees(
                     math.atan2(-final_vel[2], horizontal_speed)
                 )
@@ -738,7 +746,7 @@ class NathanModel(BallFlightModel):
             vel_rel = vel - wind_vec
             speed = np.linalg.norm(vel_rel)
 
-            if speed < 0.1:
+            if speed < MIN_SPEED_THRESHOLD:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
             vel_unit = vel_rel / speed
@@ -773,7 +781,7 @@ class NathanModel(BallFlightModel):
 
                 cross = np.cross(spin_axis, vel_unit)
                 cross_mag = np.linalg.norm(cross)
-                if cross_mag > 1e-10:
+                if cross_mag > NUMERICAL_EPSILON:
                     lift_mag = 0.5 * launch.air_density * speed**2 * cl * area
                     magnus_accel = lift_mag / launch.ball_mass * cross / cross_mag
                 else:
@@ -838,7 +846,7 @@ class NathanModel(BallFlightModel):
         if len(trajectory) >= 2:
             final_vel = trajectory[-1].velocity
             horizontal_speed = math.sqrt(final_vel[0] ** 2 + final_vel[1] ** 2)
-            if horizontal_speed > 0.1:
+            if horizontal_speed > MIN_SPEED_THRESHOLD:
                 landing_angle = math.degrees(
                     math.atan2(-final_vel[2], horizontal_speed)
                 )
@@ -931,7 +939,7 @@ class BallantyneModel(BallFlightModel):
             vel_rel = vel - wind_vec
             speed = np.linalg.norm(vel_rel)
 
-            if speed < 0.1:
+            if speed < MIN_SPEED_THRESHOLD:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
             vel_unit = vel_rel / speed
@@ -953,7 +961,7 @@ class BallantyneModel(BallFlightModel):
 
                 cross = np.cross(spin_axis, vel_unit)
                 cross_mag = np.linalg.norm(cross)
-                if cross_mag > 1e-10:
+                if cross_mag > NUMERICAL_EPSILON:
                     lift_mag = 0.5 * launch.air_density * speed**2 * cl * area
                     magnus_accel = lift_mag / launch.ball_mass * cross / cross_mag
                 else:
@@ -1018,7 +1026,7 @@ class BallantyneModel(BallFlightModel):
         if len(trajectory) >= 2:
             final_vel = trajectory[-1].velocity
             horizontal_speed = math.sqrt(final_vel[0] ** 2 + final_vel[1] ** 2)
-            if horizontal_speed > 0.1:
+            if horizontal_speed > MIN_SPEED_THRESHOLD:
                 landing_angle = math.degrees(
                     math.atan2(-final_vel[2], horizontal_speed)
                 )
@@ -1111,7 +1119,7 @@ class JColeModel(BallFlightModel):
             vel_rel = vel - wind_vec
             speed = np.linalg.norm(vel_rel)
 
-            if speed < 0.1:
+            if speed < MIN_SPEED_THRESHOLD:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
             vel_unit = vel_rel / speed
@@ -1133,7 +1141,7 @@ class JColeModel(BallFlightModel):
 
                 cross = np.cross(spin_axis, vel_unit)
                 cross_mag = np.linalg.norm(cross)
-                if cross_mag > 1e-10:
+                if cross_mag > NUMERICAL_EPSILON:
                     lift_mag = 0.5 * launch.air_density * speed**2 * cl * area
                     magnus_accel = lift_mag / launch.ball_mass * cross / cross_mag
                 else:
@@ -1198,7 +1206,7 @@ class JColeModel(BallFlightModel):
         if len(trajectory) >= 2:
             final_vel = trajectory[-1].velocity
             horizontal_speed = math.sqrt(final_vel[0] ** 2 + final_vel[1] ** 2)
-            if horizontal_speed > 0.1:
+            if horizontal_speed > MIN_SPEED_THRESHOLD:
                 landing_angle = math.degrees(
                     math.atan2(-final_vel[2], horizontal_speed)
                 )
@@ -1300,7 +1308,7 @@ class RospieDLModel(BallFlightModel):
             vel_rel = vel - wind_vec
             speed = np.linalg.norm(vel_rel)
 
-            if speed < 0.1:
+            if speed < MIN_SPEED_THRESHOLD:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
             vel_unit = vel_rel / speed
@@ -1327,7 +1335,7 @@ class RospieDLModel(BallFlightModel):
 
                 cross = np.cross(spin_axis, vel_unit)
                 cross_mag = np.linalg.norm(cross)
-                if cross_mag > 1e-10:
+                if cross_mag > NUMERICAL_EPSILON:
                     lift_mag = 0.5 * launch.air_density * speed**2 * cl * area
                     magnus_accel = lift_mag / launch.ball_mass * cross / cross_mag
                 else:
@@ -1392,7 +1400,7 @@ class RospieDLModel(BallFlightModel):
         if len(trajectory) >= 2:
             final_vel = trajectory[-1].velocity
             horizontal_speed = math.sqrt(final_vel[0] ** 2 + final_vel[1] ** 2)
-            if horizontal_speed > 0.1:
+            if horizontal_speed > MIN_SPEED_THRESHOLD:
                 landing_angle = math.degrees(
                     math.atan2(-final_vel[2], horizontal_speed)
                 )
@@ -1487,7 +1495,7 @@ class CharryL3Model(BallFlightModel):
             vel_rel = vel - wind_vec
             speed = np.linalg.norm(vel_rel)
 
-            if speed < 0.1:
+            if speed < MIN_SPEED_THRESHOLD:
                 return np.array([vel[0], vel[1], vel[2], 0, 0, -launch.gravity])
 
             vel_unit = vel_rel / speed
@@ -1506,7 +1514,7 @@ class CharryL3Model(BallFlightModel):
 
                 cross = np.cross(spin_axis, vel_unit)
                 cross_mag = np.linalg.norm(cross)
-                if cross_mag > 1e-10:
+                if cross_mag > NUMERICAL_EPSILON:
                     lift_mag = 0.5 * launch.air_density * speed**2 * cl * area
                     magnus_accel = lift_mag / launch.ball_mass * cross / cross_mag
                 else:
@@ -1571,7 +1579,7 @@ class CharryL3Model(BallFlightModel):
         if len(trajectory) >= 2:
             final_vel = trajectory[-1].velocity
             horizontal_speed = math.sqrt(final_vel[0] ** 2 + final_vel[1] ** 2)
-            if horizontal_speed > 0.1:
+            if horizontal_speed > MIN_SPEED_THRESHOLD:
                 landing_angle = math.degrees(
                     math.atan2(-final_vel[2], horizontal_speed)
                 )
