@@ -164,7 +164,8 @@ class TestGenericPhysicsRecorder:
         recorder.record_step()
 
         assert recorder.data["joint_positions"] is not None
-        assert recorder.data["joint_positions"].shape == (100, 2)
+        # Dynamic buffer sizing: starts at 1000 (or max_samples if smaller)
+        assert recorder.data["joint_positions"].shape == (1000, 2)
 
     def test_buffer_full(self, engine):
         recorder = GenericPhysicsRecorder(engine, max_samples=5)
@@ -173,8 +174,11 @@ class TestGenericPhysicsRecorder:
         for _i in range(10):
             recorder.record_step()
 
+        # With max_samples=5, buffer starts at 5 (min of INITIAL_BUFFER_SIZE and max_samples)
+        # After 5 records, buffer is full and can't grow (already at max_samples)
+        # Recording stops at frame 5
         assert recorder.current_idx == 5
-        assert not recorder.is_recording  # Auto-stopped
+        assert not recorder.is_recording  # Auto-stopped when buffer full
 
     def test_analysis_config_allocation(self, recorder, engine):
         recorder.start()

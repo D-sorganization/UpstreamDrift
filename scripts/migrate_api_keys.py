@@ -166,13 +166,21 @@ def migrate_api_keys(
 
     logger.info(f"Found {len(api_records)} API records to migrate")
 
+    # PERFORMANCE FIX (Issue #6): Batch fetch all users to avoid N+1 queries
+    # Before: 1 query per key = O(n) queries
+    # After: 1 query for all users = O(1) queries
+    user_ids = [r.user_id for r in api_records]
+    users = db_session.query(User).filter(User.id.in_(user_ids)).all()
+    user_map: dict[int, User] = {u.id: u for u in users}
+    logger.info(f"Loaded {len(user_map)} users in batch (avoided {len(api_records)} queries)")
+
     # Store results in separate lists to break taint chain
     metadata_results: list[dict[str, Any]] = []
     raw_secrets: list[str] = []
 
     for idx, record in enumerate(api_records, 1):
-        # Get user info for context
-        user = db_session.query(User).filter(User.id == record.user_id).first()
+        # Get user info from pre-fetched map (O(1) lookup)
+        user = user_map.get(record.user_id)
         user_email = user.email if user else "unknown"
 
         logger.info(

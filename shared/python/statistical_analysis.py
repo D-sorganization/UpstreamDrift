@@ -112,7 +112,6 @@ class StatisticalAnalyzer:
 
         # Performance optimization: Cache for expensive computations
         self._work_metrics_cache: dict[int, dict[str, float]] = {}
-        self._power_metrics_cache: dict[int, JointPowerMetrics] = {}
 
     def compute_summary_stats(self, data: np.ndarray) -> SummaryStatistics:
         """Compute summary statistics for a 1D array.
