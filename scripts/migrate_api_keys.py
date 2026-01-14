@@ -352,8 +352,7 @@ def main() -> int:
             # This ensures CodeQL taint tracking is satisfied as sensitive keys
             # never reach the file-writing function scope.
             metadata_only_migrations = [
-                {k: v for k, v in m.items() if k != "new_key"}
-                for m in migrations
+                {k: v for k, v in m.items() if k != "new_key"} for m in migrations
             ]
             save_migration_results(metadata_only_migrations, args.output)
 
