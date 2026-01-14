@@ -19,6 +19,22 @@ from scipy.integrate import solve_ivp
 
 logger = logging.getLogger(__name__)
 
+# =============================================================================
+# Physical Constants
+# =============================================================================
+
+# Minimum speed threshold for aerodynamic calculations [m/s]
+# Below this speed, aerodynamic forces are negligible and we avoid division by zero.
+# Value: 0.1 m/s ≈ 0.36 km/h - essentially stationary for aerodynamic purposes.
+MIN_SPEED_THRESHOLD: float = 0.1
+
+# Maximum lift coefficient to prevent unrealistic forces
+# Source: Empirical observation from wind tunnel data (Waterloo/Penner)
+MAX_LIFT_COEFFICIENT: float = 0.25
+
+# Small epsilon for numerical stability in vector normalization
+NUMERICAL_EPSILON: float = 1e-10
+
 
 @dataclass
 class BallProperties:
@@ -241,7 +257,7 @@ class BallFlightSimulator:
         speed_sq = np.sum(relative_velocity**2)
         speed = np.sqrt(speed_sq)
 
-        if speed <= 0.1:  # Avoid division by zero
+        if speed <= MIN_SPEED_THRESHOLD:
             return gravity_acc
 
         velocity_unit = relative_velocity / speed
@@ -277,8 +293,7 @@ class BallFlightSimulator:
                 + self.ball.cl1 * spin_ratio
                 + self.ball.cl2 * spin_ratio**2
             )
-            # Cap at reasonable maximum
-            lift_coefficient = min(0.25, lift_coefficient)
+            lift_coefficient = min(MAX_LIFT_COEFFICIENT, lift_coefficient)
 
             magnus_acc_mag = const_term * lift_coefficient * speed_sq
 
@@ -286,7 +301,7 @@ class BallFlightSimulator:
             if launch.spin_axis is not None:
                 cross_product = np.cross(launch.spin_axis, velocity_unit)
                 cross_magnitude = np.sqrt(np.sum(cross_product**2))
-                if cross_magnitude > 1e-10:
+                if cross_magnitude > NUMERICAL_EPSILON:
                     magnus_acc = magnus_acc_mag * cross_product / cross_magnitude
                     total_acc += magnus_acc
 
@@ -320,7 +335,7 @@ class BallFlightSimulator:
         relative_velocity = velocity - self.environment.wind_velocity
         speed = np.linalg.norm(relative_velocity)
 
-        if speed > 0.1:
+        if speed > MIN_SPEED_THRESHOLD:
             velocity_unit = relative_velocity / speed
 
             if launch.spin_rate > 0:
@@ -349,7 +364,7 @@ class BallFlightSimulator:
                     + self.ball.cl1 * spin_ratio
                     + self.ball.cl2 * spin_ratio**2
                 )
-                lift_coefficient = min(0.25, lift_coefficient)
+                lift_coefficient = min(MAX_LIFT_COEFFICIENT, lift_coefficient)
 
                 magnus_magnitude = (
                     0.5
@@ -362,7 +377,7 @@ class BallFlightSimulator:
                 if launch.spin_axis is not None:
                     cross_product = np.cross(launch.spin_axis, velocity_unit)
                     cross_magnitude = float(np.linalg.norm(cross_product))
-                    if cross_magnitude > 1e-10:
+                    if cross_magnitude > NUMERICAL_EPSILON:
                         forces["magnus"] = (
                             magnus_magnitude * cross_product / cross_magnitude
                         )
