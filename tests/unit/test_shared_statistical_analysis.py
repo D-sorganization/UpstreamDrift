@@ -470,7 +470,7 @@ def test_compute_continuous_relative_phase():
     assert crp is not None
 
 
-def test_compute_swing_dna():
+def test_compute_swing_profile():
     # Need speed, torques, velocities, etc.
     N = 100
     times = np.linspace(0, 1, N)
@@ -482,6 +482,6 @@ def test_compute_swing_dna():
         times, np.zeros((N, 1)), vels, torques, club_head_speed=speed
     )
 
-    dna = analyzer.compute_swing_dna()
-    assert dna is not None
-    assert dna.speed_score > 99.0
+    profile = analyzer.compute_swing_profile()
+    assert profile is not None
+    assert profile.speed_score > 99.0

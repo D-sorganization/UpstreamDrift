@@ -615,7 +615,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 "Correlation Matrix",
                 "Induced Accelerations",
                 "Counterfactuals (ZTCF/ZVCF)",
-                "Swing DNA (Radar)",
+                "Swing Profile (Radar)",
                 "Power Flow",
             ]
         )
@@ -696,8 +696,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             self._plot_induced_accelerations()
         elif plot_type == "Counterfactuals (ZTCF/ZVCF)":
             self._plot_counterfactuals()
-        elif plot_type == "Swing DNA (Radar)":
-            self._plot_swing_dna(plotter)
+        elif plot_type == "Swing Profile (Radar)":
+            self._plot_swing_profile(plotter)
         elif plot_type == "Power Flow":
             # Requires power data in recorder
             if any(f.actuator_powers.size > 0 for f in self.recorder.frames):
@@ -708,8 +708,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         self.canvas.draw()
 
-    def _plot_swing_dna(self, plotter: GolfSwingPlotter) -> None:
-        """Plot the Swing DNA radar chart."""
+    def _plot_swing_profile(self, plotter: GolfSwingPlotter) -> None:
+        """Plot the Swing Profile radar chart."""
         # Calculate metrics using StatisticalAnalyzer
         times, positions = self.recorder.get_time_series("joint_positions")
         _, velocities = self.recorder.get_time_series("joint_velocities")
