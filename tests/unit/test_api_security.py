@@ -17,20 +17,19 @@ import pytest
 # Check if bcrypt is available and working
 # bcrypt can fail to load on some CI environments due to missing native libraries
 try:
-    from passlib.context import CryptContext
+    import bcrypt as bcrypt_lib
 
     # Try to actually use bcrypt to detect runtime issues
-    _test_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    _test_context.hash("test")
+    bcrypt_lib.hashpw(b"test", bcrypt_lib.gensalt())
     BCRYPT_AVAILABLE = True
 except (ImportError, ModuleNotFoundError):
-    # passlib is not installed
+    # bcrypt is not installed
     BCRYPT_AVAILABLE = False
-    CryptContext = None  # type: ignore[misc,assignment]
+    bcrypt_lib = None  # type: ignore[misc,assignment]
 except Exception:
     # bcrypt failed to load (native library issue)
     BCRYPT_AVAILABLE = False
-    from passlib.context import CryptContext
+    import bcrypt as bcrypt_lib  # type: ignore[no-redef]
 
 from api.auth.models import APIKey, User
 from api.auth.security import SecurityManager
@@ -48,33 +47,31 @@ class TestBcryptAPIKeyVerification:
     @requires_bcrypt
     def test_api_key_bcrypt_hashing(self) -> None:
         """Test that API keys are hashed with bcrypt."""
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
         # Generate a test API key
         api_key = f"gms_{secrets.token_urlsafe(32)}"
 
         # Hash it with bcrypt
-        key_hash = pwd_context.hash(api_key)
+        salt = bcrypt_lib.gensalt(rounds=12)
+        key_hash = bcrypt_lib.hashpw(api_key.encode("utf-8"), salt).decode("utf-8")
 
         # Verify the hash is bcrypt format (starts with $2b$)
         assert key_hash.startswith("$2b$") or key_hash.startswith("$2a$")
 
         # Verify the key can be verified
-        assert pwd_context.verify(api_key, key_hash)
+        assert bcrypt_lib.checkpw(api_key.encode("utf-8"), key_hash.encode("utf-8"))
 
         # Verify a different key fails
         wrong_key = f"gms_{secrets.token_urlsafe(32)}"
-        assert not pwd_context.verify(wrong_key, key_hash)
+        assert not bcrypt_lib.checkpw(wrong_key.encode("utf-8"), key_hash.encode("utf-8"))
 
     @requires_bcrypt
     def test_api_key_constant_time_comparison(self) -> None:
         """Test that API key verification uses constant-time comparison."""
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
         api_key = f"gms_{secrets.token_urlsafe(32)}"
-        key_hash = pwd_context.hash(api_key)
+        salt = bcrypt_lib.gensalt(rounds=12)
+        key_hash = bcrypt_lib.hashpw(api_key.encode("utf-8"), salt)
 
-        # Bcrypt's verify() uses constant-time comparison internally
+        # Bcrypt's checkpw() uses constant-time comparison internally
         # This test verifies it doesn't leak timing information
         # by ensuring both correct and incorrect keys take similar time
 
@@ -83,14 +80,14 @@ class TestBcryptAPIKeyVerification:
         # Measure correct key verification time
         start = time.perf_counter()
         for _ in range(10):
-            pwd_context.verify(api_key, key_hash)
+            bcrypt_lib.checkpw(api_key.encode("utf-8"), key_hash)
         correct_time = time.perf_counter() - start
 
         # Measure incorrect key verification time
         wrong_key = f"gms_{secrets.token_urlsafe(32)}"
         start = time.perf_counter()
         for _ in range(10):
-            pwd_context.verify(wrong_key, key_hash)
+            bcrypt_lib.checkpw(wrong_key.encode("utf-8"), key_hash)
         incorrect_time = time.perf_counter() - start
 
         # Times should be similar (within 50% of each other)
@@ -118,10 +115,9 @@ class TestBcryptAPIKeyVerification:
     @requires_bcrypt
     def test_bcrypt_cost_factor(self) -> None:
         """Test that bcrypt uses appropriate cost factor (work factor)."""
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
         api_key = f"gms_{secrets.token_urlsafe(32)}"
-        key_hash = pwd_context.hash(api_key)
+        salt = bcrypt_lib.gensalt(rounds=12)
+        key_hash = bcrypt_lib.hashpw(api_key.encode("utf-8"), salt).decode("utf-8")
 
         # Extract bcrypt cost factor from hash
         # Format: $2b$[cost]$[salt][hash]
@@ -129,7 +125,6 @@ class TestBcryptAPIKeyVerification:
         cost_factor = int(parts[2])
 
         # Cost factor should be at least 12 (recommended minimum)
-        # Default passlib bcrypt cost is 12 rounds
         assert cost_factor >= 12, f"Bcrypt cost factor {cost_factor} is too low"
 
     @requires_bcrypt
@@ -141,11 +136,10 @@ class TestBcryptAPIKeyVerification:
 
         from api.auth.dependencies import get_current_user_from_api_key
 
-        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
         # Create test API key
         api_key = f"gms_{secrets.token_urlsafe(32)}"
-        key_hash = pwd_context.hash(api_key)
+        salt = bcrypt_lib.gensalt(rounds=12)
+        key_hash = bcrypt_lib.hashpw(api_key.encode("utf-8"), salt).decode("utf-8")
 
         # Mock database and API key record
         mock_db = MagicMock()
@@ -195,7 +189,7 @@ class TestTimezoneAwareJWT:
         token = security_manager.create_access_token(data={"sub": "test_user"})
 
         # Decode token
-        from jose import jwt
+        import jwt
 
         payload = jwt.decode(
             token, security_manager.secret_key, algorithms=[security_manager.algorithm]
@@ -223,7 +217,7 @@ class TestTimezoneAwareJWT:
         token = security_manager.create_refresh_token(data={"sub": "test_user"})
 
         # Decode token
-        from jose import jwt
+        import jwt
 
         payload = jwt.decode(
             token, security_manager.secret_key, algorithms=[security_manager.algorithm]

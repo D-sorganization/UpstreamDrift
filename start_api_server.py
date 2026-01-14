@@ -30,7 +30,7 @@ def check_dependencies() -> bool:
             logger.error("❌ Missing dependency: %s", module)
             logger.error(
                 "Run: pip install fastapi uvicorn sqlalchemy pydantic[email] "
-                "python-jose[cryptography] passlib[bcrypt] python-multipart slowapi"
+                "PyJWT bcrypt python-multipart slowapi"
             )
             return False
 
