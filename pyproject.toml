@@ -37,7 +37,7 @@ dependencies = [
     "simpleeval>=0.9.13",
     "ezc3d>=1.4.0",
     # API and authentication dependencies
-    "fastapi>=0.104.0,<1.0.0",
+    "fastapi>=0.126.0,<1.0.0",
     "uvicorn[standard]>=0.24.0,<1.0.0",
     "sqlalchemy>=2.0.0,<3.0.0",
     "pydantic[email]>=2.5.0,<3.0.0",
@@ -45,6 +45,11 @@ dependencies = [
     "passlib[bcrypt]>=1.7.4,<2.0.0",
     "python-multipart>=0.0.6,<1.0.0",
     "slowapi>=0.1.9,<1.0.0",
+    "jinja2>=3.1.6",
+    "pypdf>=6.6.0",
+    "urllib3>=2.6.3",
+    "fonttools>=4.60.2",
+    "marshmallow>=3.26.2,<4.0.0",
 ]
 
 [project.optional-dependencies]
