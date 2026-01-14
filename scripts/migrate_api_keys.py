@@ -348,7 +348,14 @@ def main() -> int:
                     print("-" * 40 + "\n")
                 print("=" * 80 + "\n")
 
-            save_migration_results(migrations, args.output)
+            # Create metadata-only version for disk storage (no raw keys)
+            # This ensures CodeQL taint tracking is satisfied as sensitive keys
+            # never reach the file-writing function scope.
+            metadata_only_migrations = [
+                {k: v for k, v in m.items() if k != "new_key"}
+                for m in migrations
+            ]
+            save_migration_results(metadata_only_migrations, args.output)
 
         # Summary
         logger.info("\n" + "=" * 80)
