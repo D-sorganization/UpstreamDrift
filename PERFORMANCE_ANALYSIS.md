@@ -357,6 +357,125 @@ f2, t2, w2 = compute_cwt(data2, fs, freq_range, num_freqs, w0)
 
 ---
 
+## Additional Critical Issues (API/Database Layer)
+
+### 16. Memory Leak - Unbounded Task Dictionary
+
+**Location**: `api/server.py:158`
+
+**Issue**: Background task results stored in global dictionary with no cleanup:
+
+```python
+active_tasks: dict[str, Any] = {}  # No TTL, no cleanup, no size limit
+```
+
+**Impact**: Long-running API servers will exhaust memory as completed tasks accumulate indefinitely.
+
+**Recommendation**:
+- Implement TTL-based cleanup (e.g., remove tasks older than 1 hour)
+- Add maximum size limit with LRU eviction
+- Consider using Redis or similar for production deployments
+
+---
+
+### 17. N+1 API Key Verification (Full Table Scan)
+
+**Location**: `api/auth/dependencies.py:75-82`
+
+**Issue**: API key verification loads ALL active keys and iterates with bcrypt:
+
+```python
+# Loads entire table into memory
+active_keys = db.query(APIKey).filter(APIKey.is_active).all()
+
+for key_candidate in active_keys:
+    # Bcrypt verify is intentionally slow (~100ms each)
+    if security_manager.verify_api_key(api_key, str(key_candidate.key_hash)):
+        api_key_record = key_candidate
+        break
+```
+
+**Impact**: O(n) bcrypt operations where n = total active API keys. With 1000 users having 3 keys each, worst case is 3000 bcrypt verifications.
+
+**Recommendation**:
+- Store a fast-hashable prefix (first 8 chars SHA256) for filtering
+- Query: `WHERE prefix_hash = ? AND is_active = true` then verify only matches
+- This reduces bcrypt calls from O(n) to O(1) average case
+
+---
+
+### 18. N+1 Query in Migration Script
+
+**Location**: `scripts/migrate_api_keys.py:173-175`
+
+**Issue**: User lookup inside loop:
+
+```python
+for idx, record in enumerate(api_records, 1):
+    user = db.session.query(User).filter(User.id == record.user_id).first()
+```
+
+**Impact**: 1000 API keys = 1001 database queries.
+
+**Recommendation**: Use `joinedload` or batch fetch all users first:
+
+```python
+user_ids = [r.user_id for r in api_records]
+users = db.session.query(User).filter(User.id.in_(user_ids)).all()
+user_map = {u.id: u for u in users}
+```
+
+---
+
+### 19. Missing Database Connection Pooling
+
+**Location**: `engines/physics_engines/mujoco/python/mujoco_humanoid_golf/recording_library.py`
+
+**Issue**: Multiple independent `sqlite3.connect()` calls without pooling:
+- Line 73, 102, 262, 285, 372, 407, 467
+
+Each method opens/closes connection separately, incurring connection overhead.
+
+**Recommendation**:
+- Use a connection pool or singleton connection manager
+- For SQLite, consider using `check_same_thread=False` with thread-local connections
+
+---
+
+### 20. Repeated Statistics Queries
+
+**Location**: `engines/physics_engines/mujoco/python/mujoco_humanoid_golf/recording_library.py:471-497`
+
+**Issue**: `get_statistics()` executes 5+ separate queries that could be combined:
+
+```python
+cursor.execute("SELECT COUNT(*) FROM recordings")           # Query 1
+cursor.execute("SELECT AVG(duration) FROM recordings")      # Query 2
+cursor.execute("SELECT club_type, COUNT(*) FROM ...")       # Query 3
+# etc.
+```
+
+**Recommendation**: Combine into single query with multiple aggregations or use subqueries.
+
+---
+
+## Updated Performance Optimization Priority Matrix
+
+| Priority | Issue | Estimated Speedup | Effort |
+|----------|-------|-------------------|--------|
+| 1 | Fix memory leak in active_tasks (#16) | Prevents OOM | Low |
+| 2 | Batch engine calls (#1, #2) | 10-50x | Medium |
+| 3 | API key prefix indexing (#17) | 100-1000x | Medium |
+| 4 | Use optimized DTW library (#4) | 100x | Low |
+| 5 | Cache mass matrix | 5-20x | Low |
+| 6 | Parallelize lag matrix (#3) | 4-8x (cores) | Low |
+| 7 | DB connection pooling (#19) | 2-5x | Low |
+| 8 | Async file I/O (#8) | Non-blocking | Medium |
+| 9 | JIT compile tight loops | 10-100x | Medium |
+| 10 | Sparse recurrence matrices (#7) | 10x memory | Medium |
+
+---
+
 ## Appendix: Files Analyzed
 
 - `shared/python/dashboard/recorder.py`
@@ -367,3 +486,10 @@ f2, t2, w2 = compute_cwt(data2, fs, freq_range, num_freqs, w0)
 - `shared/python/ball_flight_physics.py`
 - `shared/python/ellipsoid_visualization.py`
 - `api/services/simulation_service.py`
+- `api/server.py`
+- `api/auth/dependencies.py`
+- `api/routes/auth.py`
+- `scripts/migrate_api_keys.py`
+- `engines/physics_engines/mujoco/python/mujoco_humanoid_golf/recording_library.py`
+- `tools/urdf_generator/urdf_builder.py`
+- `launchers/golf_launcher.py`
