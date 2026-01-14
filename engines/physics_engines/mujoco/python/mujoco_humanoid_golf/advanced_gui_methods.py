@@ -218,14 +218,14 @@ class AdvancedGuiMethodsMixin:
         tab_widget = QtWidgets.QTabWidget()
         layout.addWidget(tab_widget)
 
-        # Tab 1: Swing DNA
+        # Tab 1: Swing Profile
         dna_widget = QtWidgets.QWidget()
         dna_layout = QtWidgets.QVBoxLayout(dna_widget)
         fig1 = Figure(figsize=(8, 6))
         canvas1 = FigureCanvasQTAgg(fig1)
         dna_layout.addWidget(canvas1)
         plotter.plot_radar_chart(fig1, metrics)
-        tab_widget.addTab(dna_widget, "Swing DNA")
+        tab_widget.addTab(dna_widget, "Swing Profile")
 
         # Tab 2: CoP Field
         cop_widget = QtWidgets.QWidget()
