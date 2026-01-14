@@ -237,7 +237,9 @@ class TestLauncherCommands(unittest.TestCase):
 
                 except subprocess.TimeoutExpired:
                     # Timeout is good - means GUI started and didn't crash immediately
-                    print(f"[OK] Engine {engine} launch initiated (timeout as expected)")
+                    print(
+                        f"[OK] Engine {engine} launch initiated (timeout as expected)"
+                    )
 
 
 if __name__ == "__main__":
