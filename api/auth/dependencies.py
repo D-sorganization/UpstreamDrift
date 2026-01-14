@@ -68,15 +68,38 @@ async def get_current_user_from_api_key(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # SECURITY FIX: API keys are now stored with bcrypt hashing (slow hash)
-    # We need to query all active API keys and verify each one
-    # This is acceptable because users typically have few API keys
+    # PERFORMANCE FIX (Issue #2): Use prefix hash for O(1) lookup
+    # Instead of loading ALL keys and iterating with bcrypt (O(n)),
+    # we compute a fast SHA256 prefix hash and filter first.
+    import hashlib
 
-    # Get all active API keys (typically just a few per user)
-    active_keys = db.query(APIKey).filter(APIKey.is_active).all()
+    # Compute prefix hash (SHA256 of first 8 chars after gms_ prefix)
+    key_body = api_key[4:]  # Remove "gms_" prefix
+    if len(key_body) >= 8:
+        prefix_data = key_body[:8].encode("utf-8")
+        key_prefix = hashlib.sha256(prefix_data).hexdigest()
+    else:
+        key_prefix = None
+
+    # Query with prefix filter - reduces bcrypt calls from O(n) to O(1)
+    if key_prefix:
+        # First try: filter by prefix (fast indexed lookup)
+        candidates = (
+            db.query(APIKey)
+            .filter(APIKey.is_active, APIKey.key_prefix == key_prefix)
+            .all()
+        )
+    else:
+        candidates = []
+
+    # Fall back to full scan only if prefix query returns nothing
+    # (handles legacy keys without prefix or migration in progress)
+    if not candidates:
+        # Legacy path: load all active keys (will be removed after migration)
+        candidates = db.query(APIKey).filter(APIKey.is_active).all()
 
     api_key_record = None
-    for key_candidate in active_keys:
+    for key_candidate in candidates:
         if security_manager.verify_api_key(api_key, str(key_candidate.key_hash)):
             api_key_record = key_candidate
             break
