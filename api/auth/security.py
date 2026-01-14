@@ -4,11 +4,11 @@ import hashlib
 import logging
 import os
 import secrets
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
-import jwt
 from fastapi import HTTPException, status
+from jose import jwt
 from passlib.context import CryptContext
 
 from .models import User, UserRole
@@ -103,10 +103,11 @@ class SecurityManager:
         """
         to_encode = data.copy()
 
+        # SECURITY FIX: Use timezone-aware datetime instead of deprecated utcnow()
         if expires_delta:
-            expire = datetime.utcnow() + expires_delta
+            expire = datetime.now(UTC) + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            expire = datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
         to_encode.update({"exp": expire, "type": "access"})
         return str(jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm))
@@ -121,7 +122,8 @@ class SecurityManager:
             Encoded JWT refresh token
         """
         to_encode = data.copy()
-        expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        # SECURITY FIX: Use timezone-aware datetime instead of deprecated utcnow()
+        expire = datetime.now(UTC) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
         to_encode.update({"exp": expire, "type": "refresh"})
         return str(jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm))
 

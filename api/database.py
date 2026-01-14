@@ -76,7 +76,14 @@ def init_db() -> None:
                     "Generated temporary admin password. Set GOLF_ADMIN_PASSWORD "
                     "environment variable for production."
                 )
-                logger.info(f"Temporary admin password: {admin_password}")
+                # SECURITY FIX: Never log passwords in plaintext
+                # Instead, provide instructions for recovery
+                logger.info(
+                    "Admin user created with randomly generated password. "
+                    "To set a custom password, set the GOLF_ADMIN_PASSWORD "
+                    "environment variable before starting the server, or use "
+                    "the password reset API endpoint."
+                )
 
             admin_user = User(
                 email="admin@golfmodelingsuite.com",

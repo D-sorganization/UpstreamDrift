@@ -67,10 +67,12 @@ jobs:
             exit 1
           fi
 
+      # SECURITY FIX: Make security audit blocking (fail on vulnerabilities)
       - name: Security Audit
         run: |
           pip install pip-audit
-          pip-audit || true
+          # Ignore CVE-2024-23342 (ecdsa) and CVE-2025-53000 (nbconvert) as no fix versions are available presently
+          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2025-53000
 
       # FIX: Run Python-based MATLAB Quality Check (Works without License)
       # Non-blocking, archives results for legacy support
@@ -116,6 +118,8 @@ jobs:
       - run: pip install -r requirements.txt
       - run: pip install -e .[dev]
       - name: Run Tests
+        env:
+          PYTHONPATH: .:${{ github.workspace }}/engines/physics_engines/mujoco/python
         run: |
           # Install test dependencies if not already installed
           pip install pytest pytest-cov pytest-mock pytest-qt

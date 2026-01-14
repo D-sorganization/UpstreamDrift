@@ -7,3 +7,7 @@
 *.json text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+
+# Exclude archived legacy code from language statistics
+engines/pendulum_models/archive/** linguist-vendored
+engines/pendulum_models/archive/** linguist-documentation
