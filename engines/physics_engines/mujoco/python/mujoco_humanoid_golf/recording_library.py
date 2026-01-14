@@ -5,6 +5,8 @@ Provides:
 - Recording organization and search
 - Tagging and filtering
 - Import/export library
+
+PERFORMANCE FIX: Uses connection pooling to avoid repeated connect/disconnect overhead.
 """
 
 from __future__ import annotations
@@ -16,12 +18,40 @@ import logging
 import re
 import shutil
 import sqlite3
+import threading
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 logger = logging.getLogger(__name__)
+
+
+# PERFORMANCE FIX: Thread-local connection pool
+class ConnectionPool:
+    """Thread-safe SQLite connection pool.
+
+    Maintains one connection per thread to avoid connection overhead
+    while ensuring thread safety.
+    """
+
+    def __init__(self, db_path: str):
+        self.db_path = db_path
+        self._local = threading.local()
+
+    def get_connection(self) -> sqlite3.Connection:
+        """Get connection for current thread."""
+        if not hasattr(self._local, "connection") or self._local.connection is None:
+            self._local.connection = sqlite3.connect(
+                self.db_path, check_same_thread=False
+            )
+        return self._local.connection
+
+    def close_all(self) -> None:
+        """Close all connections (call on shutdown)."""
+        if hasattr(self._local, "connection") and self._local.connection:
+            self._local.connection.close()
+            self._local.connection = None
 
 
 @dataclass
@@ -57,7 +87,19 @@ class RecordingLibrary:
         self.library_path.mkdir(exist_ok=True)
 
         self.db_path = self.library_path / "library.db"
+
+        # PERFORMANCE FIX: Use connection pool instead of repeated connect/disconnect
+        self._connection_pool = ConnectionPool(str(self.db_path))
+
         self._init_database()
+
+    def _get_connection(self) -> sqlite3.Connection:
+        """Get database connection from pool."""
+        return self._connection_pool.get_connection()
+
+    def close(self) -> None:
+        """Close all database connections."""
+        self._connection_pool.close_all()
 
     def _is_relative_to(self, path: Path, other: Path) -> bool:
         """Check if path is relative to other (Python < 3.9 compat)."""
@@ -70,7 +112,7 @@ class RecordingLibrary:
 
     def _init_database(self) -> None:
         """Initialize SQLite database."""
-        conn = sqlite3.connect(str(self.db_path))
+        conn = self._get_connection()
         cursor = conn.cursor()
 
         cursor.execute(
@@ -95,11 +137,10 @@ class RecordingLibrary:
         )
 
         conn.commit()
-        conn.close()
 
     def _insert_recording_db(self, metadata: RecordingMetadata) -> int:
         """Insert recording into database."""
-        conn = sqlite3.connect(str(self.db_path))
+        conn = self._get_connection()
         cursor = conn.cursor()
 
         cursor.execute(
@@ -129,7 +170,6 @@ class RecordingLibrary:
 
         recording_id = cursor.lastrowid
         conn.commit()
-        conn.close()
 
         if recording_id is None:
             msg = "Failed to get recording ID from database"
@@ -259,12 +299,11 @@ class RecordingLibrary:
         Returns:
             RecordingMetadata or None if not found
         """
-        conn = sqlite3.connect(str(self.db_path))
+        conn = self._get_connection()
         cursor = conn.cursor()
 
         cursor.execute("SELECT * FROM recordings WHERE id = ?", (recording_id,))
         row = cursor.fetchone()
-        conn.close()
 
         if row:
             return self._row_to_metadata(row)
@@ -282,7 +321,7 @@ class RecordingLibrary:
         if metadata.id is None:
             return False
 
-        conn = sqlite3.connect(str(self.db_path))
+        conn = self._get_connection()
         cursor = conn.cursor()
 
         cursor.execute(
@@ -323,7 +362,6 @@ class RecordingLibrary:
 
         success = cursor.rowcount > 0
         conn.commit()
-        conn.close()
 
         return success
 
@@ -369,14 +407,13 @@ class RecordingLibrary:
                         )
                         # We continue to delete from DB even if file delete fails
 
-        conn = sqlite3.connect(str(self.db_path))
+        conn = self._get_connection()
         cursor = conn.cursor()
 
         cursor.execute("DELETE FROM recordings WHERE id = ?", (recording_id,))
 
         success = cursor.rowcount > 0
         conn.commit()
-        conn.close()
 
         return success
 
@@ -404,7 +441,7 @@ class RecordingLibrary:
         Returns:
             List of matching RecordingMetadata
         """
-        conn = sqlite3.connect(str(self.db_path))
+        conn = self._get_connection()
         cursor = conn.cursor()
 
         query = "SELECT * FROM recordings WHERE 1=1"
@@ -438,7 +475,6 @@ class RecordingLibrary:
 
         cursor.execute(query, params)
         rows = cursor.fetchall()
-        conn.close()
 
         results = [self._row_to_metadata(row) for row in rows]
 
@@ -461,17 +497,35 @@ class RecordingLibrary:
     def get_statistics(self) -> dict[str, Any]:
         """Get library statistics.
 
+        PERFORMANCE FIX: Combined multiple queries into fewer round trips.
+
         Returns:
             Dictionary with statistics
         """
-        conn = sqlite3.connect(str(self.db_path))
+        conn = self._get_connection()
         cursor = conn.cursor()
 
-        # Total recordings
-        cursor.execute("SELECT COUNT(*) FROM recordings")
-        total_count = cursor.fetchone()[0]
+        # PERFORMANCE FIX: Combine basic stats into single query
+        cursor.execute(
+            """
+            SELECT
+                COUNT(*) as total_count,
+                AVG(CASE WHEN rating > 0 THEN rating ELSE NULL END) as avg_rating,
+                MIN(CASE WHEN peak_club_speed > 0
+                    THEN peak_club_speed ELSE NULL END) as min_speed,
+                MAX(CASE WHEN peak_club_speed > 0
+                    THEN peak_club_speed ELSE NULL END) as max_speed,
+                AVG(CASE WHEN peak_club_speed > 0
+                    THEN peak_club_speed ELSE NULL END) as avg_speed
+            FROM recordings
+        """
+        )
+        stats_row = cursor.fetchone()
+        total_count = stats_row[0]
+        avg_rating = stats_row[1] or 0.0
+        speed_stats = (stats_row[2], stats_row[3], stats_row[4])
 
-        # By club type
+        # Group by queries (still need separate queries for these)
         cursor.execute(
             """
             SELECT club_type, COUNT(*) FROM recordings
@@ -480,7 +534,6 @@ class RecordingLibrary:
         )
         by_club = dict(cursor.fetchall())
 
-        # By swing type
         cursor.execute(
             """
             SELECT swing_type, COUNT(*) FROM recordings
@@ -488,21 +541,6 @@ class RecordingLibrary:
         """,
         )
         by_swing_type = dict(cursor.fetchall())
-
-        # Average rating
-        cursor.execute("SELECT AVG(rating) FROM recordings WHERE rating > 0")
-        avg_rating = cursor.fetchone()[0] or 0.0
-
-        # Peak speed stats
-        cursor.execute(
-            """
-            SELECT MIN(peak_club_speed), MAX(peak_club_speed), AVG(peak_club_speed)
-            FROM recordings WHERE peak_club_speed > 0
-        """,
-        )
-        speed_stats = cursor.fetchone()
-
-        conn.close()
 
         return {
             "total_recordings": total_count,
@@ -544,11 +582,10 @@ class RecordingLibrary:
 
         if not merge:
             # Clear existing database
-            conn = sqlite3.connect(str(self.db_path))
+            conn = self._get_connection()
             cursor = conn.cursor()
             cursor.execute("DELETE FROM recordings")
             conn.commit()
-            conn.close()
 
         # Add all recordings
         for rec_dict in data.get("recordings", []):
@@ -585,13 +622,12 @@ class RecordingLibrary:
         if field not in allowed_fields:
             return []
 
-        conn = sqlite3.connect(str(self.db_path))
+        conn = self._get_connection()
         cursor = conn.cursor()
 
         cursor.execute(f"SELECT DISTINCT {field} FROM recordings WHERE {field} != ''")
         values = [row[0] for row in cursor.fetchall()]
 
-        conn.close()
         return sorted(values)
 
     def _row_to_metadata(self, row: tuple) -> RecordingMetadata:

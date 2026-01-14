@@ -16,17 +16,31 @@ LOGGER = logging.getLogger(__name__)
 
 
 class GenericPhysicsRecorder:
-    """Records simulation data from a PhysicsEngine."""
+    """Records simulation data from a PhysicsEngine.
 
-    def __init__(self, engine: PhysicsEngine, max_samples: int = 100000) -> None:
+    PERFORMANCE FIX: Uses dynamic buffer sizing with growth factor
+    to avoid over-allocation for short recordings.
+    """
+
+    def __init__(
+        self,
+        engine: PhysicsEngine,
+        max_samples: int = 100000,
+        initial_capacity: int = 1000,
+    ) -> None:
         """Initialize recorder.
 
         Args:
             engine: The physics engine instance to record from.
-            max_samples: Pre-allocation size for buffers.
+            max_samples: Maximum allocation size for buffers.
+            initial_capacity: Initial buffer size (grows dynamically).
         """
         self.engine = engine
         self.max_samples = max_samples
+        # PERFORMANCE FIX: Start with smaller initial capacity
+        self.initial_capacity = initial_capacity
+        self.current_capacity = initial_capacity
+        self.growth_factor = 1.5  # Grow by 50% when needed
         self.current_idx = 0
         self.is_recording = False
         self.data: dict[str, Any] = {}
@@ -42,6 +56,44 @@ class GenericPhysicsRecorder:
         }
 
         self._reset_buffers()
+
+    def _ensure_capacity(self) -> None:
+        """Ensure buffer has capacity for next sample.
+
+        PERFORMANCE FIX: Dynamically grow buffers when needed.
+        """
+        if self.current_idx >= self.current_capacity:
+            # Calculate new capacity
+            new_capacity = min(
+                int(self.current_capacity * self.growth_factor), self.max_samples
+            )
+
+            if new_capacity <= self.current_capacity:
+                # Hit max_samples limit
+                LOGGER.warning(
+                    f"Recorder buffer full at {self.max_samples} samples. "
+                    "Stopping recording."
+                )
+                self.is_recording = False
+                return
+
+            LOGGER.debug(
+                f"Growing recorder buffers from {self.current_capacity} "
+                f"to {new_capacity} samples"
+            )
+
+            # Resize all buffers
+            for key, arr in self.data.items():
+                if isinstance(arr, np.ndarray):
+                    # Create new larger array
+                    new_shape = list(arr.shape)
+                    new_shape[0] = new_capacity
+                    new_arr = np.zeros(new_shape, dtype=arr.dtype)
+                    # Copy existing data
+                    new_arr[: self.current_capacity] = arr
+                    self.data[key] = new_arr
+
+            self.current_capacity = new_capacity
 
     def set_analysis_config(self, config: dict[str, Any]) -> None:
         """Update analysis configuration."""
@@ -97,16 +149,19 @@ class GenericPhysicsRecorder:
 
         Note: Array dimensions are determined on first record_step() call
         when we have access to actual state dimensions.
+
+        PERFORMANCE FIX: Uses initial_capacity instead of max_samples for allocation.
         """
         self.current_idx = 0
+        self.current_capacity = self.initial_capacity
         self._buffers_initialized = False
         self.data = {
-            # Scalars (pre-allocated)
-            "times": np.zeros(self.max_samples),
-            "kinetic_energy": np.zeros(self.max_samples),
-            "potential_energy": np.zeros(self.max_samples),
-            "total_energy": np.zeros(self.max_samples),
-            "club_head_speed": np.zeros(self.max_samples),
+            # Scalars (pre-allocated with initial capacity)
+            "times": np.zeros(self.current_capacity),
+            "kinetic_energy": np.zeros(self.current_capacity),
+            "potential_energy": np.zeros(self.current_capacity),
+            "total_energy": np.zeros(self.current_capacity),
+            "club_head_speed": np.zeros(self.current_capacity),
             # Arrays (initialized on first record)
             "joint_positions": None,
             "joint_velocities": None,
@@ -138,14 +193,15 @@ class GenericPhysicsRecorder:
         nq = len(q)
         nv = len(v)
 
-        self.data["joint_positions"] = np.zeros((self.max_samples, nq))
-        self.data["joint_velocities"] = np.zeros((self.max_samples, nv))
-        self.data["joint_accelerations"] = np.zeros((self.max_samples, nv))
-        self.data["joint_torques"] = np.zeros((self.max_samples, nv))
-        self.data["actuator_powers"] = np.zeros((self.max_samples, nv))
-        self.data["angular_momentum"] = np.zeros((self.max_samples, 3))
-        self.data["club_head_position"] = np.zeros((self.max_samples, 3))
-        self.data["cop_position"] = np.zeros((self.max_samples, 3))
+        # PERFORMANCE FIX: Use current_capacity instead of max_samples
+        self.data["joint_positions"] = np.zeros((self.current_capacity, nq))
+        self.data["joint_velocities"] = np.zeros((self.current_capacity, nv))
+        self.data["joint_accelerations"] = np.zeros((self.current_capacity, nv))
+        self.data["joint_torques"] = np.zeros((self.current_capacity, nv))
+        self.data["actuator_powers"] = np.zeros((self.current_capacity, nv))
+        self.data["angular_momentum"] = np.zeros((self.current_capacity, 3))
+        self.data["club_head_position"] = np.zeros((self.current_capacity, 3))
+        self.data["cop_position"] = np.zeros((self.current_capacity, 3))
         self.data["com_position"] = np.zeros((self.max_samples, 3))
         self.data["ground_forces"] = np.zeros((self.max_samples, 3))
 
@@ -193,12 +249,11 @@ class GenericPhysicsRecorder:
         if not self.is_recording:
             return
 
-        # Check buffer capacity
-        if self.current_idx >= self.max_samples:
-            LOGGER.warning(
-                f"Recorder buffer full at {self.max_samples} samples. Stopping recording."
-            )
-            self.is_recording = False
+        # PERFORMANCE FIX: Ensure buffer has capacity (dynamic growth)
+        self._ensure_capacity()
+
+        if not self.is_recording:
+            # _ensure_capacity may have stopped recording if max reached
             return
 
         # Get State
