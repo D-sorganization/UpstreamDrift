@@ -180,13 +180,111 @@ class BallFlightSimulator:
             ]
         )
 
+        # Precompute constants to avoid attribute access in loop
+        gravity_acc = np.array([0.0, 0.0, -self.environment.gravity])
+        wind_velocity = self.environment.wind_velocity
+        ball_radius = self.ball.radius
+
+        # Aerodynamic constant: 0.5 * rho * A / m
+        const_term = (
+            0.5 * self.environment.air_density * self.ball.cross_sectional_area
+        ) / self.ball.mass
+
+        # Coefficients
+        cd0, cd1, cd2 = self.ball.cd0, self.ball.cd1, self.ball.cd2
+        cl0, cl1, cl2 = self.ball.cl0, self.ball.cl1, self.ball.cl2
+
+        # Spin parameters
+        has_spin = launch.spin_rate > 0
+        if has_spin:
+            omega = launch.spin_rate * 2 * np.pi / 60  # rad/s
+            spin_axis = launch.spin_axis
+        else:
+            omega = 0.0
+            spin_axis = None
+
+        min_speed_sq = MIN_SPEED_THRESHOLD**2
+
+        # Optimized ODE function closure
+        # NOTE: This function duplicates logic from _equations_of_motion for performance.
+        # Any changes to physics models must be applied to BOTH locations.
+        def ode_func(t: float, state: np.ndarray) -> np.ndarray:
+            # state is [x, y, z, vx, vy, vz]
+            # Velocity view (no copy)
+            velocity = state[3:]
+
+            # Relative velocity
+            rel_vel = velocity - wind_velocity
+            speed_sq = np.sum(rel_vel**2)
+
+            if speed_sq <= min_speed_sq:
+                # If stopped, only gravity acts (or nothing if resting, but here flight)
+                acc = gravity_acc
+                result = np.empty(6, dtype=state.dtype)
+                result[:3] = velocity
+                result[3:] = acc
+                return result
+
+            speed = np.sqrt(speed_sq)
+            vel_unit = rel_vel / speed
+
+            # Spin ratio S = (omega * r) / v
+            if has_spin:
+                spin_ratio = (omega * ball_radius) / speed
+            else:
+                spin_ratio = 0.0
+
+            # Drag
+            cd = cd0 + spin_ratio * (cd1 + spin_ratio * cd2)
+            drag_mag = const_term * cd * speed_sq
+
+            # acc = gravity - drag * unit
+            # Initialize acc with gravity
+            acc_x = gravity_acc[0] - drag_mag * vel_unit[0]
+            acc_y = gravity_acc[1] - drag_mag * vel_unit[1]
+            acc_z = gravity_acc[2] - drag_mag * vel_unit[2]
+
+            # Lift (Magnus)
+            if has_spin and spin_ratio > 0:
+                cl = cl0 + spin_ratio * (cl1 + spin_ratio * cl2)
+                if cl > MAX_LIFT_COEFFICIENT:
+                    cl = MAX_LIFT_COEFFICIENT
+
+                magnus_mag = const_term * cl * speed_sq
+
+                # Cross product: spin_axis x vel_unit
+                if spin_axis is not None:
+                    # Manual cross product is faster for small arrays
+                    c0 = spin_axis[1] * vel_unit[2] - spin_axis[2] * vel_unit[1]
+                    c1 = spin_axis[2] * vel_unit[0] - spin_axis[0] * vel_unit[2]
+                    c2 = spin_axis[0] * vel_unit[1] - spin_axis[1] * vel_unit[0]
+
+                    cross_mag_sq = c0*c0 + c1*c1 + c2*c2
+
+                    if cross_mag_sq > NUMERICAL_EPSILON**2:
+                        cross_mag = np.sqrt(cross_mag_sq)
+                        factor = magnus_mag / cross_mag
+                        acc_x += c0 * factor
+                        acc_y += c1 * factor
+                        acc_z += c2 * factor
+
+            # Construct result
+            result = np.empty(6, dtype=state.dtype)
+            result[0] = velocity[0]
+            result[1] = velocity[1]
+            result[2] = velocity[2]
+            result[3] = acc_x
+            result[4] = acc_y
+            result[5] = acc_z
+            return result
+
         # Time span
         t_span = (0, max_time)
         t_eval = np.arange(0, max_time, time_step)
 
         # Solve ODE
         solution = solve_ivp(
-            fun=lambda t, y: self._equations_of_motion(t, y, launch),
+            fun=ode_func,
             t_span=t_span,
             y0=initial_state,
             t_eval=t_eval,
@@ -197,14 +295,20 @@ class BallFlightSimulator:
 
         # Convert solution to trajectory points
         trajectory = []
-        for i, t in enumerate(solution.t):
-            state = solution.y[:, i]
+        # Pre-fetching attributes to local vars for loop speed
+        sol_t = solution.t
+        sol_y = solution.y
+        ball_mass = self.ball.mass
+
+        for i in range(len(sol_t)):
+            t = sol_t[i]
+            state = sol_y[:, i]
             position = state[:3]
             velocity = state[3:]
 
-            # Calculate forces at this point
+            # Calculate forces at this point (for reporting)
             forces = self._calculate_forces(velocity, launch)
-            acceleration = np.sum(list(forces.values()), axis=0) / self.ball.mass
+            acceleration = np.sum(list(forces.values()), axis=0) / ball_mass
 
             trajectory.append(
                 TrajectoryPoint(
@@ -222,6 +326,11 @@ class BallFlightSimulator:
         self, t: float, state: np.ndarray, launch: LaunchConditions
     ) -> np.ndarray:
         """Equations of motion for golf ball flight.
+
+        NOTE: This method is preserved for backward compatibility and unit testing.
+        The main simulation loop uses an optimized closure `ode_func` inside
+        `simulate_trajectory` which duplicates this logic.
+        Ensure any physics updates are applied to BOTH.
 
         Args:
             t: Current time
