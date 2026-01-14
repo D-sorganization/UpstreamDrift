@@ -100,6 +100,7 @@ def validate_secret_key_strength(key: str, min_length: int = 64) -> None:
                 f"Consider generating a stronger key."
             )
 
+
 def validate_api_security() -> APIKeyValidationResults:
     """Validate API security configuration.
 

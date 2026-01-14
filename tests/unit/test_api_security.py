@@ -282,7 +282,9 @@ class TestPasswordSecurity:
                         database.init_db()
                     except Exception as e:
                         # Catch and log expected errors for this specific logging test
-                        logging.getLogger(__name__).debug(f"Caught expected init_db error: {e}")
+                        logging.getLogger(__name__).debug(
+                            f"Caught expected init_db error: {e}"
+                        )
 
             # Get logged output
             log_output = log_buffer.getvalue()

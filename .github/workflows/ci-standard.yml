@@ -71,7 +71,8 @@ jobs:
       - name: Security Audit
         run: |
           pip install pip-audit
-          pip-audit
+          # Ignore CVE-2024-23342 (ecdsa) and CVE-2025-53000 (nbconvert) as no fix versions are available presently
+          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2025-53000
 
       # FIX: Run Python-based MATLAB Quality Check (Works without License)
       # Non-blocking, archives results for legacy support
