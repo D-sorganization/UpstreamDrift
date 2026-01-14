@@ -492,5 +492,7 @@ if __name__ == "__main__":
         pass
 
     summary = analyzer.get_summary(results)
-    for _rec in summary["recommendations"]:
+    recommendations = summary["recommendations"]
+    assert isinstance(recommendations, list)
+    for _rec in recommendations:
         pass
