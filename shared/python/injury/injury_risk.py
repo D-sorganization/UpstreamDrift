@@ -109,13 +109,13 @@ class InjuryRiskScorer:
         InjuryType.KNEE: 0.05,
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the injury risk scorer."""
         self.risk_factors: list[RiskFactor] = []
 
     def score(
         self,
-        spinal_result=None,
+        spinal_result: object = None,
         joint_results: dict | None = None,
         swing_metrics: dict | None = None,
         training_load: dict | None = None,
@@ -161,7 +161,9 @@ class InjuryRiskScorer:
 
         return report
 
-    def _score_spinal_risks(self, spinal_result, report: InjuryRiskReport):
+    def _score_spinal_risks(
+        self, spinal_result: object, report: InjuryRiskReport
+    ) -> None:
         """Score spinal-related risk factors."""
         # Compression risk
         compression_bw = getattr(spinal_result, "peak_compression_bw", 0)
@@ -220,7 +222,9 @@ class InjuryRiskScorer:
             compression_score + shear_score + x_factor_score
         ) / 3
 
-    def _score_joint_risks(self, joint_results: dict, report: InjuryRiskReport):
+    def _score_joint_risks(
+        self, joint_results: dict, report: InjuryRiskReport
+    ) -> None:
         """Score joint-related risk factors."""
         # Hip risks
         hip_scores = []
@@ -298,7 +302,9 @@ class InjuryRiskScorer:
         if wrist_scores:
             report.region_scores[InjuryType.WRIST] = np.mean(wrist_scores)
 
-    def _score_technique_risks(self, swing_metrics: dict, report: InjuryRiskReport):
+    def _score_technique_risks(
+        self, swing_metrics: dict, report: InjuryRiskReport
+    ) -> None:
         """Score technique-related risk factors."""
         # Kinematic sequence timing
         if "sequence_timing_error" in swing_metrics:
@@ -354,7 +360,9 @@ class InjuryRiskScorer:
                 self._value_to_score(extension, 5.0, 15.0) * 0.6
             )
 
-    def _score_training_load_risks(self, training_load: dict, report: InjuryRiskReport):
+    def _score_training_load_risks(
+        self, training_load: dict, report: InjuryRiskReport
+    ) -> None:
         """Score training load-related risk factors."""
         # Acute:Chronic Workload Ratio
         if "acwr" in training_load:
@@ -405,7 +413,7 @@ class InjuryRiskScorer:
         else:
             return ((value - safe) / (high - safe)) * 100
 
-    def _compute_overall_scores(self, report: InjuryRiskReport):
+    def _compute_overall_scores(self, report: InjuryRiskReport) -> None:
         """Compute overall risk scores from individual factors."""
         # Acute risk from biomechanical loading
         if report.region_scores:
@@ -442,7 +450,7 @@ class InjuryRiskScorer:
         )
         report.top_risks = [f.name for f in sorted_factors[:3]]
 
-    def _generate_recommendations(self, report: InjuryRiskReport):
+    def _generate_recommendations(self, report: InjuryRiskReport) -> None:
         """Generate actionable recommendations based on risk factors."""
         recommendations = []
 

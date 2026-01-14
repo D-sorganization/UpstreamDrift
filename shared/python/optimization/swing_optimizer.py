@@ -322,13 +322,13 @@ class SwingOptimizer:
         constraints = self._build_constraints()
 
         # Objective function
-        def objective(x):
+        def objective(x: np.ndarray) -> float:
             return self._compute_objective(x)
 
         # Run optimization
         iteration_count = [0]
 
-        def scipy_callback(xk):
+        def scipy_callback(xk: np.ndarray) -> None:
             iteration_count[0] += 1
             if callback:
                 obj_val = objective(xk)
