@@ -26,7 +26,6 @@ References:
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Optional
 
 import numpy as np
 
@@ -46,7 +45,9 @@ class SpinalSegment:
 
     name: str  # e.g., "L4-L5", "L5-S1"
     compression: np.ndarray = field(default_factory=lambda: np.array([]))  # N
-    ap_shear: np.ndarray = field(default_factory=lambda: np.array([]))  # N (anterior-posterior)
+    ap_shear: np.ndarray = field(
+        default_factory=lambda: np.array([])
+    )  # N (anterior-posterior)
     lateral_shear: np.ndarray = field(default_factory=lambda: np.array([]))  # N
     torsion: np.ndarray = field(default_factory=lambda: np.array([]))  # Nm
 
@@ -85,10 +86,10 @@ class SpinalLoadResult:
     segments: dict[str, SpinalSegment] = field(default_factory=dict)
 
     # X-factor metrics
-    x_factor: Optional[XFactorMetrics] = None
+    x_factor: XFactorMetrics | None = None
 
     # Crunch factor metrics
-    crunch_factor: Optional[CrunchFactorMetrics] = None
+    crunch_factor: CrunchFactorMetrics | None = None
 
     # Peak values (normalized to body weight)
     peak_compression_bw: float = 0.0  # multiples of body weight
@@ -142,8 +143,8 @@ class SpinalLoadAnalyzer:
     def __init__(
         self,
         body_weight: float,
-        height: Optional[float] = None,
-        trunk_length: Optional[float] = None,
+        height: float | None = None,
+        trunk_length: float | None = None,
         lumbar_segments: list[str] = None,
     ):
         """
@@ -177,8 +178,8 @@ class SpinalLoadAnalyzer:
         joint_velocities: dict[str, np.ndarray],
         joint_torques: dict[str, np.ndarray],
         time: np.ndarray,
-        pelvis_angles: Optional[np.ndarray] = None,
-        thorax_angles: Optional[np.ndarray] = None,
+        pelvis_angles: np.ndarray | None = None,
+        thorax_angles: np.ndarray | None = None,
     ) -> SpinalLoadResult:
         """
         Perform complete spinal load analysis.
@@ -241,7 +242,9 @@ class SpinalLoadAnalyzer:
         pos_ratio = self._lumbar_position_ratios.get(segment_name, 0.3)
 
         # Mass above this segment (head, arms, upper trunk)
-        mass_above = self.body_weight * self._head_arms_trunk_mass_ratio * (1 - pos_ratio)
+        mass_above = (
+            self.body_weight * self._head_arms_trunk_mass_ratio * (1 - pos_ratio)
+        )
         weight_above = mass_above * 9.81
 
         # Initialize arrays
@@ -253,16 +256,16 @@ class SpinalLoadAnalyzer:
         # Get angle arrays (convert to degrees for calculations, use radians input)
         flexion = joint_angles.get("lumbar_flexion", np.zeros(n_frames))
         lateral = joint_angles.get("lumbar_lateral", np.zeros(n_frames))
-        rotation = joint_angles.get("lumbar_rotation", np.zeros(n_frames))
+        joint_angles.get("lumbar_rotation", np.zeros(n_frames))
 
         # Get velocity arrays
-        flexion_vel = joint_velocities.get("lumbar_flexion", np.zeros(n_frames))
-        lateral_vel = joint_velocities.get("lumbar_lateral", np.zeros(n_frames))
+        joint_velocities.get("lumbar_flexion", np.zeros(n_frames))
+        joint_velocities.get("lumbar_lateral", np.zeros(n_frames))
         rotation_vel = joint_velocities.get("lumbar_rotation", np.zeros(n_frames))
 
         # Get torque arrays
         flexion_torque = joint_torques.get("lumbar_flexion", np.zeros(n_frames))
-        lateral_torque = joint_torques.get("lumbar_lateral", np.zeros(n_frames))
+        joint_torques.get("lumbar_lateral", np.zeros(n_frames))
         rotation_torque = joint_torques.get("lumbar_rotation", np.zeros(n_frames))
 
         for i in range(n_frames):
@@ -314,8 +317,12 @@ class SpinalLoadAnalyzer:
         during the transition from backswing to downswing.
         """
         # Assuming angles are [roll, pitch, yaw] where yaw is rotation
-        pelvis_rotation = pelvis_angles[:, 2] if pelvis_angles.ndim > 1 else pelvis_angles
-        thorax_rotation = thorax_angles[:, 2] if thorax_angles.ndim > 1 else thorax_angles
+        pelvis_rotation = (
+            pelvis_angles[:, 2] if pelvis_angles.ndim > 1 else pelvis_angles
+        )
+        thorax_rotation = (
+            thorax_angles[:, 2] if thorax_angles.ndim > 1 else thorax_angles
+        )
 
         # X-factor is thorax rotation minus pelvis rotation
         x_factor_angle = np.degrees(thorax_rotation - pelvis_rotation)
@@ -333,7 +340,9 @@ class SpinalLoadAnalyzer:
         # Estimate transition duration (from peak X-factor to impact)
         # Impact is typically when club is vertical (near end of motion)
         # Approximate as time from peak to end
-        transition_duration = time[-1] - x_factor_stretch_time if len(time) > peak_idx else 0.25
+        transition_duration = (
+            time[-1] - x_factor_stretch_time if len(time) > peak_idx else 0.25
+        )
 
         return XFactorMetrics(
             x_factor_angle=x_factor_angle,
@@ -395,7 +404,9 @@ class SpinalLoadAnalyzer:
             if len(segment.ap_shear) > 0:
                 max_ap_shear = max(max_ap_shear, np.max(np.abs(segment.ap_shear)))
             if len(segment.lateral_shear) > 0:
-                max_lateral_shear = max(max_lateral_shear, np.max(np.abs(segment.lateral_shear)))
+                max_lateral_shear = max(
+                    max_lateral_shear, np.max(np.abs(segment.lateral_shear))
+                )
             if len(segment.torsion) > 0:
                 max_torsion = max(max_torsion, np.max(segment.torsion))
 
@@ -436,7 +447,10 @@ class SpinalLoadAnalyzer:
 
             if x_stretch >= self.X_FACTOR_HIGH or trans_time <= self.TRANSITION_HIGH:
                 result.x_factor_risk = SpinalRiskLevel.CRITICAL
-            elif x_stretch >= self.X_FACTOR_CAUTION or trans_time <= self.TRANSITION_CAUTION:
+            elif (
+                x_stretch >= self.X_FACTOR_CAUTION
+                or trans_time <= self.TRANSITION_CAUTION
+            ):
                 result.x_factor_risk = SpinalRiskLevel.HIGH_RISK
             elif x_stretch >= self.X_FACTOR_SAFE or trans_time <= self.TRANSITION_SAFE:
                 result.x_factor_risk = SpinalRiskLevel.CAUTION
@@ -473,7 +487,9 @@ class SpinalLoadAnalyzer:
             if len(segment.compression) > 0:
                 total_compression_impulse += np.trapezoid(segment.compression, dx=dt)
             if len(segment.lateral_shear) > 0:
-                total_shear_impulse += np.trapezoid(np.abs(segment.lateral_shear), dx=dt)
+                total_shear_impulse += np.trapezoid(
+                    np.abs(segment.lateral_shear), dx=dt
+                )
 
         result.cumulative_compression_impulse = total_compression_impulse
         result.cumulative_shear_impulse = total_shear_impulse
@@ -493,11 +509,16 @@ class SpinalLoadAnalyzer:
         recommendations = []
 
         if result.overall_risk == SpinalRiskLevel.SAFE:
-            recommendations.append("Spinal loads are within safe limits. Maintain current technique.")
+            recommendations.append(
+                "Spinal loads are within safe limits. Maintain current technique."
+            )
             return recommendations
 
         # Compression recommendations
-        if result.compression_risk in [SpinalRiskLevel.HIGH_RISK, SpinalRiskLevel.CRITICAL]:
+        if result.compression_risk in [
+            SpinalRiskLevel.HIGH_RISK,
+            SpinalRiskLevel.CRITICAL,
+        ]:
             recommendations.append(
                 f"High spinal compression detected ({result.peak_compression_bw:.1f}x body weight). "
                 "Consider: reducing trunk flexion angle, strengthening core muscles, "
@@ -513,14 +534,23 @@ class SpinalLoadAnalyzer:
             )
 
         # X-factor recommendations
-        if result.x_factor_risk in [SpinalRiskLevel.HIGH_RISK, SpinalRiskLevel.CRITICAL]:
-            if result.x_factor and result.x_factor.x_factor_stretch > self.X_FACTOR_CAUTION:
+        if result.x_factor_risk in [
+            SpinalRiskLevel.HIGH_RISK,
+            SpinalRiskLevel.CRITICAL,
+        ]:
+            if (
+                result.x_factor
+                and result.x_factor.x_factor_stretch > self.X_FACTOR_CAUTION
+            ):
                 recommendations.append(
                     f"High X-factor stretch ({result.x_factor.x_factor_stretch:.0f}°). "
                     "Consider: allowing more hip turn during backswing, reducing shoulder turn, "
                     "or using a 'classic' swing pattern with less pelvis-thorax separation."
                 )
-            if result.x_factor and result.x_factor.transition_duration < self.TRANSITION_CAUTION:
+            if (
+                result.x_factor
+                and result.x_factor.transition_duration < self.TRANSITION_CAUTION
+            ):
                 recommendations.append(
                     f"Rapid transition ({result.x_factor.transition_duration:.2f}s). "
                     "Consider: slowing the transition from backswing to downswing, "
@@ -560,7 +590,9 @@ def create_example_analysis():
     # Downswing: rapid rotation with lateral bend
     t_top = 0.4  # Time at top of backswing
 
-    lumbar_flexion = np.where(time < t_top, 0.2 * np.sin(np.pi * time / t_top), 0.3 * np.ones_like(time))
+    lumbar_flexion = np.where(
+        time < t_top, 0.2 * np.sin(np.pi * time / t_top), 0.3 * np.ones_like(time)
+    )
 
     lumbar_lateral = np.where(
         time < t_top,
@@ -569,7 +601,9 @@ def create_example_analysis():
     )
 
     lumbar_rotation = np.where(
-        time < t_top, 0.8 * np.sin(np.pi * time / t_top), -1.2 * np.sin(np.pi * (time - t_top) / (1 - t_top))
+        time < t_top,
+        0.8 * np.sin(np.pi * time / t_top),
+        -1.2 * np.sin(np.pi * (time - t_top) / (1 - t_top)),
     )
 
     joint_angles = {
@@ -583,17 +617,27 @@ def create_example_analysis():
     joint_velocities = {key: np.gradient(val, dt) for key, val in joint_angles.items()}
 
     # Estimate torques (simplified: torque proportional to acceleration)
-    joint_torques = {key: 50 * np.gradient(vel, dt) for key, vel in joint_velocities.items()}
+    joint_torques = {
+        key: 50 * np.gradient(vel, dt) for key, vel in joint_velocities.items()
+    }
 
     # Pelvis and thorax angles for X-factor
-    pelvis_rotation = np.where(time < t_top, 0.3 * np.sin(np.pi * time / t_top), -0.5 * np.ones_like(time))
-
-    thorax_rotation = np.where(
-        time < t_top, 0.9 * np.sin(np.pi * time / t_top), -1.2 * np.sin(np.pi * (time - t_top) / (1 - t_top))
+    pelvis_rotation = np.where(
+        time < t_top, 0.3 * np.sin(np.pi * time / t_top), -0.5 * np.ones_like(time)
     )
 
-    pelvis_angles = np.column_stack([np.zeros_like(time), np.zeros_like(time), pelvis_rotation])
-    thorax_angles = np.column_stack([np.zeros_like(time), np.zeros_like(time), thorax_rotation])
+    thorax_rotation = np.where(
+        time < t_top,
+        0.9 * np.sin(np.pi * time / t_top),
+        -1.2 * np.sin(np.pi * (time - t_top) / (1 - t_top)),
+    )
+
+    pelvis_angles = np.column_stack(
+        [np.zeros_like(time), np.zeros_like(time), pelvis_rotation]
+    )
+    thorax_angles = np.column_stack(
+        [np.zeros_like(time), np.zeros_like(time), thorax_rotation]
+    )
 
     # Run analysis
     result = analyzer.analyze(
@@ -612,26 +656,11 @@ if __name__ == "__main__":
     # Run example analysis
     analyzer, result = create_example_analysis()
 
-    print("=== Spinal Load Analysis Results ===\n")
-    print(f"Peak Compression: {result.peak_compression_bw:.2f}x body weight")
-    print(f"Peak A-P Shear: {result.peak_ap_shear_bw:.2f}x body weight")
-    print(f"Peak Lateral Shear: {result.peak_lateral_shear_bw:.2f}x body weight")
-    print(f"Peak Torsion: {result.peak_torsion:.1f} Nm")
-
     if result.x_factor:
-        print(f"\nX-Factor Stretch: {result.x_factor.x_factor_stretch:.1f}°")
-        print(f"Transition Duration: {result.x_factor.transition_duration:.3f}s")
+        pass
 
     if result.crunch_factor:
-        print(f"\nPeak Crunch Factor: {result.crunch_factor.peak_crunch:.1f}")
-        print(f"Asymmetry Ratio: {result.crunch_factor.asymmetry_ratio:.2f}")
+        pass
 
-    print(f"\n=== Risk Assessment ===")
-    print(f"Compression Risk: {result.compression_risk.value}")
-    print(f"Shear Risk: {result.shear_risk.value}")
-    print(f"X-Factor Risk: {result.x_factor_risk.value}")
-    print(f"OVERALL RISK: {result.overall_risk.value.upper()}")
-
-    print("\n=== Recommendations ===")
-    for rec in analyzer.get_recommendations(result):
-        print(f"• {rec}")
+    for _rec in analyzer.get_recommendations(result):
+        pass

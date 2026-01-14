@@ -123,10 +123,10 @@ class PhysicsEngine(Protocol):
         """
         q, v = self.get_state()
         return {
-            'q': q,
-            'v': v,
-            't': self.get_time(),
-            'M': None,  # Default: don't compute expensive mass matrix
+            "q": q,
+            "v": v,
+            "t": self.get_time(),
+            "M": None,  # Default: don't compute expensive mass matrix
         }
 
     def get_joint_names(self) -> list[str]:
@@ -384,6 +384,7 @@ class RecorderInterface(Protocol):
     Allows different backends (MuJoCo, Drake, Pinocchio) to be visualized
     using the same widgets.
     """
+
     # The engine associated with this recorder (optional, but useful for joint names)
     engine: Any
 
