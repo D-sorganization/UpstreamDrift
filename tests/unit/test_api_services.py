@@ -61,6 +61,10 @@ class TestSimulationService:
                 engine_type="mujoco",
                 duration=0.1,
                 timestep=0.01,
+                model_path=None,
+                initial_state=None,
+                control_inputs=None,
+                analysis_config=None,
             )
 
             result = await service.run_simulation(request)
@@ -86,7 +90,10 @@ class TestSimulationService:
                 engine_type="mujoco",
                 duration=0.1,
                 timestep=0.01,
+                model_path=None,
                 initial_state={"positions": [0.0, 0.0], "velocities": [0.0, 0.0]},
+                control_inputs=None,
+                analysis_config=None,
             )
 
             result = await service.run_simulation(request)
@@ -103,6 +110,11 @@ class TestSimulationService:
         request = SimulationRequest(
             engine_type="mujoco",
             duration=0.1,
+            model_path=None,
+            timestep=None,
+            initial_state=None,
+            control_inputs=None,
+            analysis_config=None,
         )
 
         result = await service.run_simulation(request)
@@ -162,11 +174,13 @@ class TestAnalysisService:
         """Test basic biomechanics analysis."""
         request = AnalysisRequest(
             analysis_type="kinematic_sequence",
-            data={
+            data_source="simulation",
+            parameters={
                 "joint_positions": [[0.0, 0.1]],
                 "joint_velocities": [[0.0, 0.1]],
                 "times": [0.0, 0.1],
             },
+            export_format="json",
         )
 
         result = await service.analyze_biomechanics(request)
@@ -179,7 +193,9 @@ class TestAnalysisService:
         """Test analysis with missing required data."""
         request = AnalysisRequest(
             analysis_type="kinematic_sequence",
-            data={},  # Empty data
+            data_source="simulation",
+            parameters={},  # Empty data
+            export_format="json",
         )
 
         # Should handle gracefully
@@ -218,6 +234,11 @@ class TestServiceIntegration:
             sim_request = SimulationRequest(
                 engine_type="mujoco",
                 duration=0.1,
+                model_path=None,
+                timestep=None,
+                initial_state=None,
+                control_inputs=None,
+                analysis_config=None,
             )
             sim_result = await sim_service.run_simulation(sim_request)
 
@@ -225,7 +246,9 @@ class TestServiceIntegration:
             if sim_result.data:
                 analysis_request = AnalysisRequest(
                     analysis_type="kinematic_sequence",
-                    data=sim_result.data,
+                    data_source="simulation",
+                    parameters=sim_result.data,
+                    export_format="json",
                 )
                 analysis_result = await analysis_service.analyze_biomechanics(
                     analysis_request
