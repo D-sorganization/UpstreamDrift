@@ -261,7 +261,7 @@ class BallFlightSimulator:
                     c1 = spin_axis[2] * vel_unit[0] - spin_axis[0] * vel_unit[2]
                     c2 = spin_axis[0] * vel_unit[1] - spin_axis[1] * vel_unit[0]
 
-                    cross_mag_sq = c0*c0 + c1*c1 + c2*c2
+                    cross_mag_sq = c0 * c0 + c1 * c1 + c2 * c2
 
                     if cross_mag_sq > NUMERICAL_EPSILON**2:
                         cross_mag = np.sqrt(cross_mag_sq)

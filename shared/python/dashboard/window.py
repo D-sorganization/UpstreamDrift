@@ -361,9 +361,11 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                         joint_positions=np.asarray(positions),
                         joint_velocities=np.asarray(velocities),
                         joint_torques=np.asarray(torques),
-                        club_head_speed=np.asarray(club_speed) if club_speed is not None else None,
+                        club_head_speed=(
+                            np.asarray(club_speed) if club_speed is not None else None
+                        ),
                     )
-                    dna = analyzer.compute_swing_dna()
+                    dna = analyzer.compute_swing_profile()
                     if dna:
                         metrics = {
                             "Speed": dna.speed_score,

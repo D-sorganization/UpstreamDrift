@@ -106,7 +106,7 @@ class TestDragDropFunctionality(unittest.TestCase):
         try:
             x_val = pos.x() if callable(pos.x) else pos.x
             y_val = pos.y() if callable(pos.y) else pos.y
-            
+
             # Check if we got real values or Mock objects
             if isinstance(x_val, int):
                 self.assertEqual(x_val, 10)
@@ -322,13 +322,13 @@ class TestC3DViewerIntegration(unittest.TestCase):
         try:
             # Test imports that C3D viewer requires
             import ezc3d  # type: ignore[import-not-found]
-            import matplotlib
+            import matplotlib.pyplot as plt
             import numpy as np
 
             # Basic functionality test
             self.assertTrue(hasattr(ezc3d, "c3d"))
             self.assertTrue(hasattr(np, "ndarray"))
-            self.assertTrue(hasattr(matplotlib, "pyplot"))
+            self.assertIsNotNone(plt)
 
         except ImportError as e:
             self.skipTest(f"C3D viewer dependencies not available: {e}")

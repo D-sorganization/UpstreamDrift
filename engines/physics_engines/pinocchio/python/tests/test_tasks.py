@@ -1,8 +1,8 @@
 import sys
 from unittest.mock import MagicMock, patch
 
-import pytest
 import numpy as np
+import pytest
 
 
 @pytest.fixture
@@ -36,12 +36,12 @@ def test_create_joint_coupling_task(mock_pinocchio_env):
     mock_model.getJointId.return_value = 1
     mock_joint = MagicMock()
     mock_joint.idx_v = 5
-    mock_model.joints = [None, mock_joint] # index 1 access
+    mock_model.joints = [None, mock_joint]  # index 1 access
 
     # Call the function
     joint_names = ["joint1"]
     ratios = [1.0]
-    task = create_joint_coupling_task(mock_model, joint_names, ratios)
+    create_joint_coupling_task(mock_model, joint_names, ratios)
 
     # Verify the task was created with correct A matrix
     # The implementation calls pink.tasks.LinearHolonomicTask(A, b, cost=cost)
@@ -55,4 +55,4 @@ def test_create_joint_coupling_task(mock_pinocchio_env):
     assert A_matrix.shape == (1, 10)
     assert A_matrix[0, 5] == 1.0
     assert np.all(b_vector == 0)
-    assert kwargs['cost'] == 100.0
+    assert kwargs["cost"] == 100.0
