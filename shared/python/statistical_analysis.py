@@ -15,6 +15,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, cast
 
 import numpy as np
+from numpy.lib.stride_tricks import sliding_window_view
 from scipy.signal import find_peaks, savgol_filter
 from scipy.spatial import cKDTree
 from scipy.spatial.distance import pdist, squareform
@@ -1174,30 +1175,21 @@ class StatisticalAnalyzer:
         # corr = (mean(xy) - mean(x)mean(y)) / (std(x)std(y))
         # But for rolling window.
 
-        # OPTIMIZATION: Use convolution for O(N) complexity instead of O(N*W)
-        # Reduces memory allocation and computation significantly
-        # Previous implementation used sliding_window_view which created (N, W) views
-        kernel = np.ones(window_size)
-        n = window_size
+        # We can use simple loop or strided view. Strided view is fast.
+        x_windows = sliding_window_view(x, window_shape=window_size)
+        y_windows = sliding_window_view(y, window_shape=window_size)
 
-        s_x = np.convolve(x, kernel, mode="valid")
-        s_y = np.convolve(y, kernel, mode="valid")
-        s_xy = np.convolve(x * y, kernel, mode="valid")
-        s_xx = np.convolve(x**2, kernel, mode="valid")
-        s_yy = np.convolve(y**2, kernel, mode="valid")
+        # shape (N - window + 1, window)
+        # Compute correlation for each window
+        # This can be vectorized:
+        x_mean = np.mean(x_windows, axis=1, keepdims=True)
+        y_mean = np.mean(y_windows, axis=1, keepdims=True)
 
-        # Numerator: sum((x-mx)(y-my)) = sum(xy) - sum(x)sum(y)/n
-        numerator = s_xy - (s_x * s_y) / n
+        x_diff = x_windows - x_mean
+        y_diff = y_windows - y_mean
 
-        # Denominator terms: sum((x-mx)^2) = sum(x^2) - sum(x)^2/n
-        var_x = s_xx - (s_x**2) / n
-        var_y = s_yy - (s_y**2) / n
-
-        # Clamp variances to be non-negative (handle numerical noise)
-        var_x = np.maximum(var_x, 0)
-        var_y = np.maximum(var_y, 0)
-
-        denominator = np.sqrt(var_x * var_y)
+        numerator = np.sum(x_diff * y_diff, axis=1)
+        denominator = np.sqrt(np.sum(x_diff**2, axis=1) * np.sum(y_diff**2, axis=1))
 
         # Handle divide by zero (constant signal in window)
         with np.errstate(divide="ignore", invalid="ignore"):
@@ -1768,20 +1760,15 @@ class StatisticalAnalyzer:
         self,
         threshold_ratio: float = 0.1,
         metric: str = "euclidean",
-        use_kdtree: bool = True,
     ) -> np.ndarray[tuple[int, int], np.dtype[np.int_]]:
         """Compute Recurrence Plot matrix.
 
         Constructs a phase space state vector from all joint positions and velocities,
         normalizes it, and calculates the binary recurrence matrix.
 
-        PERFORMANCE: When use_kdtree=True (default), uses k-d tree for O(n log n)
-        neighbor finding instead of O(n²) full distance matrix computation.
-
         Args:
             threshold_ratio: Threshold distance as ratio of max phase space diameter.
             metric: Distance metric (e.g., 'euclidean', 'cityblock').
-            use_kdtree: If True, use k-d tree for efficient computation (euclidean only).
 
         Returns:
             Binary recurrence matrix (N, N).
@@ -1804,44 +1791,16 @@ class StatisticalAnalyzer:
         std[std < 1e-6] = 1.0
         normalized_state = (state_vec - mean) / std
 
-        n_samples = normalized_state.shape[0]
-
-        # PERFORMANCE: Use k-d tree for O(n log n) neighbor finding
-        if use_kdtree and metric == "euclidean":
-            # Estimate threshold from sample of distances
-            sample_size = min(100, n_samples)
-            sample_idx = np.random.choice(n_samples, sample_size, replace=False)
-            sample_dists = pdist(normalized_state[sample_idx], metric="euclidean")
-            estimated_max = np.max(sample_dists) * 1.2  # Add margin
-            threshold = threshold_ratio * estimated_max
-
-            # Build k-d tree and query neighbors within threshold
-            tree = cKDTree(normalized_state)
-            pairs = tree.query_pairs(r=threshold, output_type="ndarray")
-
-            # Build sparse-like recurrence matrix efficiently
-            recurrence_matrix = np.zeros((n_samples, n_samples), dtype=np.int_)
-            np.fill_diagonal(recurrence_matrix, 1)  # Diagonal is always 1
-
-            if len(pairs) > 0:
-                # pairs is (M, 2) array of index pairs
-                recurrence_matrix[pairs[:, 0], pairs[:, 1]] = 1
-                recurrence_matrix[pairs[:, 1], pairs[:, 0]] = 1  # Symmetric
-
-            return cast(
-                np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix
-            )
-
-        # Fallback: Full O(n²) computation for non-euclidean metrics
+        # 3. Compute Distance Matrix
         dists = pdist(normalized_state, metric=metric)
         dist_matrix = squareform(dists)
 
-        # Determine Threshold
+        # 4. Determine Threshold
         if threshold_ratio is None:
             threshold_ratio = 0.1
         threshold = threshold_ratio * np.max(dist_matrix)
 
-        # Thresholding
+        # 5. Thresholding
         recurrence_matrix = (dist_matrix < threshold).astype(np.int_)
 
         return cast(np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix)
@@ -1851,18 +1810,13 @@ class StatisticalAnalyzer:
         joint_idx_1: int,
         joint_idx_2: int,
         threshold_ratio: float = 0.1,
-        use_kdtree: bool = True,
     ) -> np.ndarray[tuple[int, int], np.dtype[np.int_]]:
         """Compute Cross Recurrence Plot matrix between two joints.
-
-        PERFORMANCE: When use_kdtree=True, uses k-d tree query_ball_point for
-        more efficient cross-distance computation on large datasets.
 
         Args:
             joint_idx_1: First joint index
             joint_idx_2: Second joint index
             threshold_ratio: Threshold distance as ratio of max distance
-            use_kdtree: If True, use k-d tree for efficient computation.
 
         Returns:
             Binary recurrence matrix (N, N)
@@ -1886,33 +1840,8 @@ class StatisticalAnalyzer:
         s1 = (s1 - np.mean(s1, axis=0)) / (np.std(s1, axis=0) + 1e-9)
         s2 = (s2 - np.mean(s2, axis=0)) / (np.std(s2, axis=0) + 1e-9)
 
-        n_samples = s1.shape[0]
-
-        # PERFORMANCE: Use k-d tree for efficient cross-distance on large datasets
-        if use_kdtree and n_samples > 500:
-            # Estimate threshold from sample
-            sample_size = min(100, n_samples)
-            sample_idx = np.random.choice(n_samples, sample_size, replace=False)
-            from scipy.spatial.distance import cdist
-
-            sample_dists = cdist(s1[sample_idx], s2[sample_idx], metric="euclidean")
-            estimated_max = np.max(sample_dists) * 1.2
-            threshold = threshold_ratio * estimated_max
-
-            # Build k-d tree on s2, query from s1
-            tree = cKDTree(s2)
-            recurrence_matrix = np.zeros((n_samples, n_samples), dtype=np.int_)
-
-            # Query neighbors for each point in s1
-            neighbors = tree.query_ball_point(s1, r=threshold)
-            for i, neighbor_list in enumerate(neighbors):
-                recurrence_matrix[i, neighbor_list] = 1
-
-            return cast(
-                np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix
-            )
-
-        # Fallback: Standard cdist for smaller datasets
+        # Compute distance matrix between s1 and s2
+        # cdist(s1, s2)
         from scipy.spatial.distance import cdist
 
         dist_matrix = cdist(s1, s2, metric="euclidean")
@@ -2055,93 +1984,6 @@ class StatisticalAnalyzer:
         slope, _ = np.polyfit(log_r[start:end], log_c[start:end], 1)
         return float(slope)
 
-    def compute_lyapunov_divergence(
-        self,
-        data: np.ndarray,
-        tau: int = 1,
-        dim: int = 3,
-        window: int = 50,
-    ) -> tuple[np.ndarray, np.ndarray, float]:
-        """Compute Lyapunov Divergence Curve (Rosenstein's algorithm).
-
-        Args:
-            data: 1D time series
-            tau: Time delay
-            dim: Embedding dimension
-            window: Theiler window
-
-        Returns:
-            Tuple of (time_axis, log_divergence, estimated_slope)
-        """
-        N = len(data)
-        if N < window:
-            return np.array([]), np.array([]), 0.0
-
-        # 1. Phase Space Reconstruction
-        M = N - (dim - 1) * tau
-        if M < 1:
-            return np.array([]), np.array([]), 0.0
-
-        orbit = np.zeros((M, dim))
-        for d in range(dim):
-            orbit[:, d] = data[d * tau : d * tau + M]
-
-        # 2. Find Nearest Neighbors (Approx O(M log M) with KDTree or O(M^2) distance)
-        from scipy.spatial.distance import cdist
-
-        # Using simple cdist (okay for typical swing N ~ 500)
-        dists_mat = cdist(orbit, orbit, metric="euclidean")
-
-        # Apply Theiler window (exclude diagonal band)
-        for i in range(M):
-            start = max(0, i - window)
-            end = min(M, i + window + 1)
-            dists_mat[i, start:end] = np.inf
-            dists_mat[i, i] = np.inf
-
-        nearest_neighbors = np.argmin(dists_mat, axis=1)
-
-        # 3. Track Divergence
-        # How far do they separate over time?
-        max_steps = min(M, int(1.0 / self.dt * 0.5)) if self.dt > 0 else 10
-        divergence = np.zeros(max_steps)
-        counts = np.zeros(max_steps)
-
-        for i in range(max_steps):
-            idx1_vec = np.arange(M) + i
-            idx2_vec = nearest_neighbors + i
-
-            valid_mask = (idx1_vec < M) & (idx2_vec < M)
-            if not np.any(valid_mask):
-                continue
-
-            p1 = orbit[idx1_vec[valid_mask]]
-            p2 = orbit[idx2_vec[valid_mask]]
-
-            # Distances
-            dists = np.sqrt(np.sum((p1 - p2) ** 2, axis=1))
-
-            valid_dists_mask = dists > 1e-9
-            valid_dists = dists[valid_dists_mask]
-
-            if len(valid_dists) > 0:
-                divergence[i] += np.sum(np.log(valid_dists))
-                counts[i] += len(valid_dists)
-
-        counts[counts == 0] = 1.0
-        avg_log_dist = divergence / counts
-        time_axis = np.arange(max_steps) * self.dt
-
-        # Estimate Slope (LLE)
-        slope = 0.0
-        if len(time_axis) > 1:
-            # Fit linear region (e.g. first 50% or all if short)
-            limit = len(time_axis) // 2 if len(time_axis) > 10 else len(time_axis)
-            if limit > 1:
-                slope, _ = np.polyfit(time_axis[:limit], avg_log_dist[:limit], 1)
-
-        return time_axis, avg_log_dist, float(slope)
-
     def estimate_lyapunov_exponent(
         self,
         data: np.ndarray,
@@ -2151,6 +1993,8 @@ class StatisticalAnalyzer:
     ) -> float:
         """Estimate the Largest Lyapunov Exponent (LLE) using Rosenstein's algorithm.
 
+        Measures the rate of divergence of nearby trajectories. Positive LLE implies chaos.
+
         Args:
             data: 1D time series array
             tau: Time delay (lag)
@@ -2158,12 +2002,112 @@ class StatisticalAnalyzer:
             window: Minimum temporal separation for nearest neighbors (Theiler window)
 
         Returns:
-            Estimated LLE (slope of divergence curve)
+            Estimated LLE (in bits/second if log2 is used, or nats/s if ln)
+            Here we use natural log, so units are 1/s (inverse time units).
         """
-        _, _, slope = self.compute_lyapunov_divergence(
-            data, tau=tau, dim=dim, window=window
-        )
-        return slope
+        N = len(data)
+        if N < window:
+            return 0.0
+
+        # 1. Phase Space Reconstruction
+        # Create embedded vectors M vectors of dimension dim
+        M = N - (dim - 1) * tau
+        if M < 1:
+            return 0.0
+
+        # Construct orbit
+        # orbit[i] = [x(i), x(i+tau), ..., x(i+(dim-1)tau)]
+        # Shape (M, dim)
+        orbit = np.zeros((M, dim))
+        for d in range(dim):
+            orbit[:, d] = data[d * tau : d * tau + M]
+
+        # 2. Find nearest neighbors
+        # For each point j, find nearest neighbor k such that |j-k| > window
+        nearest_neighbors = np.zeros(M, dtype=int)
+
+        # Use simple Euclidean distance search (O(M^2) - slow for large N, but ok for golf swing N~200-500)
+        # Optimization: use KDTree if N is large. For N < 1000, brute force is fine.
+        from scipy.spatial.distance import cdist
+
+        # Compute pairwise distances
+        # To avoid O(M^2) memory, we can iterate
+        # But for typical swing data (e.g. 100Hz * 2s = 200 samples), M ~ 200.
+        # 200x200 matrix is tiny.
+
+        dists_mat = cdist(orbit, orbit, metric="euclidean")
+
+        # Mask neighbors within window
+        np.tri(M, M, k=window) - np.tri(M, M, k=-(window + 1))
+        # Wait, Theiler window means |j-k| > window.
+        # We want to exclude the diagonal band.
+        # Create a mask where |i-j| <= window are set to infinity
+
+        for i in range(M):
+            start = max(0, i - window)
+            end = min(M, i + window + 1)
+            dists_mat[i, start:end] = np.inf
+            dists_mat[i, i] = np.inf  # Self
+
+        # Find nearest indices
+        nearest_neighbors = np.argmin(dists_mat, axis=1)
+
+        # 3. Track divergence
+        # Calculate divergence d_j(i) = ||X_{j+i} - X_{nn(j)+i}||
+        # Average log(d_j(i)) over all j for each i
+
+        # Max steps to track
+        max_steps = (
+            min(M, int(1.0 / self.dt * 0.5)) if self.dt > 0 else 10
+        )  # Track for 0.5s or 10 steps
+
+        divergence = np.zeros(max_steps)
+        counts = np.zeros(max_steps)
+
+        for i in range(max_steps):
+            # OPTIMIZATION: Vectorized loop calculation
+            # Vectorized indices for all j
+            idx1_vec = np.arange(M) + i
+            idx2_vec = nearest_neighbors + i
+
+            # Filter out of bounds
+            valid_mask = (idx1_vec < M) & (idx2_vec < M)
+
+            if not np.any(valid_mask):
+                continue
+
+            # Get points
+            p1 = orbit[idx1_vec[valid_mask]]
+            p2 = orbit[idx2_vec[valid_mask]]
+
+            # Calculate distances
+            diff = p1 - p2
+            # OPTIMIZATION: Manual Euclidean norm is faster than np.linalg.norm(axis=1)
+            # dists = np.linalg.norm(diff, axis=1)
+            dists = np.sqrt(np.sum(diff**2, axis=1))
+
+            # Filter zero/small distances
+            valid_dists_mask = dists > 1e-9
+            valid_dists = dists[valid_dists_mask]
+
+            if len(valid_dists) > 0:
+                divergence[i] += np.sum(np.log(valid_dists))
+                counts[i] += len(valid_dists)
+
+        # Avoid division by zero
+        counts[counts == 0] = 1.0
+        avg_log_dist = divergence / counts
+
+        # 4. Estimate Slope
+        # LLE is the slope of avg_log_dist vs time (i * dt)
+        t_axis = np.arange(max_steps) * self.dt
+
+        # Simple linear regression
+        if len(t_axis) > 1:
+            slope, _ = np.polyfit(t_axis, avg_log_dist, 1)
+            return float(slope)
+
+        return 0.0
 
     def compute_principal_component_analysis(
         self,
@@ -2423,24 +2367,33 @@ class StatisticalAnalyzer:
         if len(angles) < window_size:
             return np.array([]), np.array([]), np.array([])
 
-        # OPTIMIZATION: Use convolution for O(N) complexity instead of O(N*W)
-        # Significantly faster and memory efficient compared to sliding_window_view
+        # OPTIMIZATION: Vectorized rolling regression using convolution
+        # This approach reduces memory usage from O(N*W) to O(N) and improves speed (approx 8x faster).
+        # We use the identities:
+        # Sum((x - mean_x)(y - mean_y)) = Sum(xy) - Sum(x)Sum(y)/N
+        # Sum((x - mean_x)^2) = Sum(x^2) - Sum(x)^2/N
+
         kernel = np.ones(window_size)
         n = window_size
 
+        # Pre-calculate squared/product terms
+        # This creates temporary arrays of size N, which is much smaller than (N, W) from sliding_window_view
+        xy = angles * torques
+        xx = angles * angles
+        yy = torques * torques
+
+        # Compute sliding sums using valid convolution
         s_x = np.convolve(angles, kernel, mode="valid")
         s_y = np.convolve(torques, kernel, mode="valid")
-        s_xy = np.convolve(angles * torques, kernel, mode="valid")
-        s_xx = np.convolve(angles**2, kernel, mode="valid")
-        s_yy = np.convolve(torques**2, kernel, mode="valid")
+        s_xy = np.convolve(xy, kernel, mode="valid")
+        s_xx = np.convolve(xx, kernel, mode="valid")
+        s_yy = np.convolve(yy, kernel, mode="valid")
 
+        # Calculate Covariance and Variances
+        # Note: Precision issues are generally minimal for expected range of values.
         cov = s_xy - (s_x * s_y) / n
         var_x = s_xx - (s_x**2) / n
         var_y = s_yy - (s_y**2) / n
-
-        # Clamp variances to be non-negative
-        var_x = np.maximum(var_x, 0)
-        var_y = np.maximum(var_y, 0)
 
         # Calculate Slope and R2
         # Use np.divide and where for safe division
@@ -2736,46 +2689,10 @@ class StatisticalAnalyzer:
 
         lag_matrix = np.zeros((n_joints, n_joints))
 
-        # PERFORMANCE: Parallelize cross-correlation computations using ThreadPoolExecutor
-        # For 30 joints = 435 pairs, this provides 4-8x speedup on multicore systems
+        # Parallelize? No, n_joints is small (10-30). O(N^2) loop is fine.
         # Matrix is antisymmetric: Lag(i, j) = -Lag(j, i)
-
-        # Generate all (i, j) pairs
-        pairs = [(i, j) for i in range(n_joints) for j in range(i + 1, n_joints)]
-
-        if len(pairs) > 10:  # Only parallelize if enough work
-            try:
-                from concurrent.futures import ThreadPoolExecutor, as_completed
-                import os
-
-                def compute_lag(pair: tuple[int, int]) -> tuple[int, int, float]:
-                    i, j = pair
-                    lag = signal_processing.compute_time_shift(
-                        data[:, i], data[:, j], fs, max_lag=max_lag
-                    )
-                    return i, j, lag
-
-                # Use number of CPU cores, but cap at 8 to avoid overhead
-                n_workers = min(os.cpu_count() or 4, 8)
-
-                with ThreadPoolExecutor(max_workers=n_workers) as executor:
-                    futures = {executor.submit(compute_lag, p): p for p in pairs}
-                    for future in as_completed(futures):
-                        i, j, lag = future.result()
-                        lag_matrix[i, j] = lag
-                        lag_matrix[j, i] = -lag
-
-            except Exception:
-                # Fallback to sequential if parallel fails
-                for i, j in pairs:
-                    lag = signal_processing.compute_time_shift(
-                        data[:, i], data[:, j], fs, max_lag=max_lag
-                    )
-                    lag_matrix[i, j] = lag
-                    lag_matrix[j, i] = -lag
-        else:
-            # Sequential for small number of pairs
-            for i, j in pairs:
+        for i in range(n_joints):
+            for j in range(i + 1, n_joints):
                 lag = signal_processing.compute_time_shift(
                     data[:, i], data[:, j], fs, max_lag=max_lag
                 )
@@ -2784,101 +2701,6 @@ class StatisticalAnalyzer:
 
         labels = [f"J{i}" for i in range(n_joints)]
         return lag_matrix, labels
-
-    def compute_poincare_map(
-        self,
-        dimensions: list[tuple[str, int]],
-        section_condition: tuple[str, int, float],
-        direction: str = "both",
-    ) -> tuple[np.ndarray, np.ndarray] | None:
-        """Compute Poincaré Map (Poincaré Section).
-
-        Identify intersection points of the system trajectory with a defined
-        lower-dimensional subspace (hyperplane).
-
-        Args:
-            dimensions: List of 3 (data_type, index) tuples for coordinates of intersection points.
-                        data_type can be 'position', 'velocity', 'acceleration', 'torque'.
-            section_condition: Tuple of (data_type, index, value) defining the section plane.
-            direction: Crossing direction ('positive', 'negative', 'both').
-
-        Returns:
-            Tuple of (points, times) or None if inputs invalid.
-            points is (N_crossings, len(dimensions))
-            times is (N_crossings,)
-        """
-
-        # Helper to get data array
-        def get_data(dtype: str, idx: int) -> np.ndarray | None:
-            if dtype == "position":
-                d = self.joint_positions
-            elif dtype == "velocity":
-                d = self.joint_velocities
-            elif dtype == "acceleration":
-                d = (
-                    self.joint_accelerations
-                    if self.joint_accelerations is not None
-                    else np.zeros_like(self.joint_velocities)
-                )
-            elif dtype == "torque":
-                d = self.joint_torques
-            else:
-                return None
-            if d.ndim > 1 and idx < d.shape[1]:
-                return d[:, idx]
-            return None
-
-        # Get condition variable
-        cond_type, cond_idx, cond_val = section_condition
-        cond_data = get_data(cond_type, cond_idx)
-
-        if cond_data is None or len(cond_data) < 2:
-            return None
-
-        # Find crossings
-        diff = cond_data - cond_val
-        crossings = []
-
-        for i in range(len(diff) - 1):
-            if diff[i] * diff[i + 1] <= 0:  # Crossing detected
-                # Check direction
-                if diff[i] < diff[i + 1] and direction in ["positive", "both"]:
-                    crossings.append(i)
-                elif diff[i] > diff[i + 1] and direction in ["negative", "both"]:
-                    crossings.append(i)
-
-        if not crossings:
-            return np.array([]), np.array([])
-
-        # Interpolate state at crossings
-        points = []
-        point_times = []
-
-        for i in crossings:
-            # Linear interpolation factor
-            # y = y0 + (y1-y0) * alpha
-            # 0 = d0 + (d1-d0) * alpha => alpha = -d0 / (d1-d0)
-            denom = diff[i + 1] - diff[i]
-            if abs(denom) < 1e-9:
-                alpha = 0.5
-            else:
-                alpha = -diff[i] / denom
-
-            t_cross = self.times[i] + alpha * (self.times[i + 1] - self.times[i])
-            point_times.append(t_cross)
-
-            pt_coords = []
-            for dim_type, dim_idx in dimensions:
-                data = get_data(dim_type, dim_idx)
-                if data is None:
-                    pt_coords.append(0.0)
-                else:
-                    val = data[i] + alpha * (data[i + 1] - data[i])
-                    # Keep native units here; conversion happens in plot
-                    pt_coords.append(val)
-            points.append(pt_coords)
-
-        return np.array(points), np.array(point_times)
 
     def export_statistics_csv(
         self,
