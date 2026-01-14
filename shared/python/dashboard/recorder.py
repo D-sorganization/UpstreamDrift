@@ -225,7 +225,8 @@ class GenericPhysicsRecorder:
                 ke = 0.5 * v.T @ M @ v
             else:
                 ke = 0.0
-        except Exception:
+        except Exception as e:
+            LOGGER.debug("Failed to compute kinetic energy: %s", e)
             ke = 0.0
 
         # Real-time Analysis Computations
@@ -235,22 +236,24 @@ class GenericPhysicsRecorder:
         if self.analysis_config["ztcf"] and self.data["ztcf_accel"] is not None:
             try:
                 self.data["ztcf_accel"][idx] = self.engine.compute_ztcf(q, v)
-            except Exception:
-                pass
+            except Exception as e:
+                LOGGER.debug("Failed to compute ZTCF at frame %d: %s", idx, e)
 
         # ZVCF
         if self.analysis_config["zvcf"] and self.data["zvcf_accel"] is not None:
             try:
                 self.data["zvcf_accel"][idx] = self.engine.compute_zvcf(q)
-            except Exception:
-                pass
+            except Exception as e:
+                LOGGER.debug("Failed to compute ZVCF at frame %d: %s", idx, e)
 
         # Drift Accel
         if self.analysis_config["track_drift"] and self.data["drift_accel"] is not None:
             try:
                 self.data["drift_accel"][idx] = self.engine.compute_drift_acceleration()
-            except Exception:
-                pass
+            except Exception as e:
+                LOGGER.debug(
+                    "Failed to compute drift acceleration at frame %d: %s", idx, e
+                )
 
         # Total Control Accel
         if (
@@ -261,8 +264,10 @@ class GenericPhysicsRecorder:
                 self.data["control_accel"][idx] = (
                     self.engine.compute_control_acceleration(tau)
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                LOGGER.debug(
+                    "Failed to compute control acceleration at frame %d: %s", idx, e
+                )
 
         # Individual Induced Accelerations
         sources = cast(list[int], self.analysis_config["induced_accel_sources"])
@@ -275,8 +280,13 @@ class GenericPhysicsRecorder:
                     self.data["induced_accelerations"][src_idx][idx] = (
                         self.engine.compute_control_acceleration(tau_single)
                     )
-                except Exception:
-                    pass
+                except Exception as e:
+                    LOGGER.debug(
+                        "Failed to compute induced acceleration for source %d at frame %d: %s",
+                        src_idx,
+                        idx,
+                        e,
+                    )
 
         # Store basic data using array indexing (no copy needed, direct assignment)
         self.data["times"][idx] = t
@@ -290,8 +300,8 @@ class GenericPhysicsRecorder:
             grf = self.engine.compute_contact_forces()
             if grf is not None and len(grf) == 3:
                 self.data["ground_forces"][idx] = grf
-        except Exception:
-            pass
+        except Exception as e:
+            LOGGER.debug("Failed to compute ground forces at frame %d: %s", idx, e)
 
         self.current_idx += 1
 
@@ -461,7 +471,8 @@ class GenericPhysicsRecorder:
             elif isinstance(v, list) and v:
                 try:
                     export_data[k] = np.array(v)
-                except Exception:
+                except Exception as e:
+                    LOGGER.debug("Failed to convert list '%s' to numpy array: %s", k, e)
                     export_data[k] = v
             else:
                 export_data[k] = v

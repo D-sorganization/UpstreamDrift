@@ -170,8 +170,8 @@ class SimulationService:
                 data["control_inputs"] = (
                     controls.tolist() if hasattr(controls, "tolist") else controls
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug("Control inputs not available: %s", e)
 
         except Exception as e:
             logger.warning(f"Error extracting simulation data: {e}")
