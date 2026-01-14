@@ -12,6 +12,8 @@ Built on top of the existing EngineManager and PhysicsEngine protocol.
 import logging
 import tempfile
 import uuid
+from collections import OrderedDict
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -106,32 +108,41 @@ def _validate_model_path(model_path: str) -> str:
     Raises:
         HTTPException: If path is invalid or contains traversal attempts
     """
+    # SECURITY: Sanitize user input to prevent path traversal
     try:
         user_path = Path(model_path)
     except TypeError as e:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid path: {e}",
+            detail="Invalid path format",
         ) from e
 
-    # Reject absolute paths - user input must be relative
+    # SECURITY: Reject absolute paths - user input must be relative
     if user_path.is_absolute():
         raise HTTPException(
             status_code=400,
             detail="Invalid path: absolute paths are not allowed",
         )
 
+    # SECURITY: Reject paths with parent directory references
+    if ".." in user_path.parts:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid path: parent directory references not allowed",
+        )
+
     # Build candidate paths under each allowed directory and check them
     for allowed_dir in ALLOWED_MODEL_DIRS:
         try:
+            # SECURITY: Resolve to absolute path and validate it stays within allowed_dir
             candidate = (allowed_dir / user_path).resolve()
         except (ValueError, OSError) as e:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid path: {e}",
+                detail="Invalid path format",
             ) from e
 
-        # Ensure the resolved path is still within the allowed directory
+        # SECURITY: Ensure the resolved path is still within the allowed directory
         try:
             candidate.relative_to(allowed_dir)
         except ValueError:
@@ -140,6 +151,7 @@ def _validate_model_path(model_path: str) -> str:
 
         # Check if this valid candidate exists
         if candidate.exists():
+            # SECURITY: Return only the validated, sanitized path
             return str(candidate)
 
     raise HTTPException(
@@ -154,6 +166,7 @@ simulation_service: SimulationService | None = None
 analysis_service: AnalysisService | None = None
 video_pipeline: VideoPosePipeline | None = None
 
+<<<<<<< HEAD
 
 class TaskManager:
     """Thread-safe task manager with TTL cleanup and size limits.
@@ -404,7 +417,16 @@ async def run_simulation_async(
             status_code=500, detail="Simulation service not initialized"
         )
 
+    # PERFORMANCE FIX: Cleanup old tasks before creating new one
+    _cleanup_old_tasks()
+
     task_id = str(uuid.uuid4())
+
+    # Initialize task with timestamp
+    active_tasks[task_id] = {
+        "status": "started",
+        "created_at": datetime.now(UTC),
+    }
 
     # Add background task
     background_tasks.add_task(
@@ -500,6 +522,9 @@ async def analyze_video_async(
     if not video_pipeline:
         raise HTTPException(status_code=500, detail="Video pipeline not initialized")
 
+    # PERFORMANCE FIX: Cleanup old tasks
+    _cleanup_old_tasks()
+
     task_id = str(uuid.uuid4())
 
     # Save file and add background task
@@ -507,6 +532,12 @@ async def analyze_video_async(
         content = await file.read()
         temp_file.write(content)
         temp_path = Path(temp_file.name)
+
+    # Initialize task with timestamp
+    active_tasks[task_id] = {
+        "status": "started",
+        "created_at": datetime.now(UTC),
+    }
 
     background_tasks.add_task(
         _process_video_background,
@@ -529,7 +560,13 @@ async def _process_video_background(
 ) -> None:
     """Background task for video processing."""
     try:
-        active_tasks[task_id] = {"status": "processing", "progress": 0}
+        active_tasks[task_id] = {
+            "status": "processing",
+            "progress": 0,
+            "created_at": active_tasks.get(task_id, {}).get(
+                "created_at", datetime.now(UTC)
+            ),
+        }
 
         config = VideoProcessingConfig(
             estimator_type=estimator_type, min_confidence=min_confidence
@@ -541,6 +578,9 @@ async def _process_video_background(
         # Store result
         active_tasks[task_id] = {
             "status": "completed",
+            "created_at": active_tasks.get(task_id, {}).get(
+                "created_at", datetime.now(UTC)
+            ),
             "result": {
                 "filename": filename,
                 "total_frames": result.total_frames,
@@ -551,7 +591,13 @@ async def _process_video_background(
         }
 
     except Exception as e:
-        active_tasks[task_id] = {"status": "failed", "error": str(e)}
+        active_tasks[task_id] = {
+            "status": "failed",
+            "error": str(e),
+            "created_at": active_tasks.get(task_id, {}).get(
+                "created_at", datetime.now(UTC)
+            ),
+        }
     finally:
         # Clean up temp file
         if video_path.exists():
