@@ -222,9 +222,7 @@ class InjuryRiskScorer:
             compression_score + shear_score + x_factor_score
         ) / 3
 
-    def _score_joint_risks(
-        self, joint_results: dict, report: InjuryRiskReport
-    ) -> None:
+    def _score_joint_risks(self, joint_results: dict, report: InjuryRiskReport) -> None:
         """Score joint-related risk factors."""
         # Hip risks
         hip_scores = []
