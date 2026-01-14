@@ -1,6 +1,6 @@
 """Authentication routes for user management."""
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -97,7 +97,7 @@ async def login(
     )
 
     # Update last login
-    user.last_login = datetime.utcnow()  # type: ignore[assignment]
+    user.last_login = datetime.now(UTC)  # type: ignore[assignment]
     db.commit()
 
     return LoginResponse(
