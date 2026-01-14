@@ -424,9 +424,9 @@ class JointStressAnalyzer:
 
         return result
 
-    def get_summary(self, results: dict[str, JointStressResult]) -> dict:
+    def get_summary(self, results: dict[str, JointStressResult]) -> dict[str, object]:
         """Get a summary of all joint stress results."""
-        summary = {
+        summary: dict[str, object] = {
             "highest_risk_joint": "",
             "highest_risk_score": 0.0,
             "joints_at_risk": [],
@@ -437,16 +437,19 @@ class JointStressAnalyzer:
         risk_scores = []
         for name, result in results.items():
             risk_scores.append((name, result.risk_score))
-            if result.risk_score > summary["highest_risk_score"]:
+            if result.risk_score > float(summary["highest_risk_score"]):  # type: ignore[arg-type]
                 summary["highest_risk_score"] = result.risk_score
                 summary["highest_risk_joint"] = name
             if result.risk_score > 50:
+                assert isinstance(summary["joints_at_risk"], list)
                 summary["joints_at_risk"].append(name)
             if result.impingement_risk:
+                assert isinstance(summary["recommendations"], list)
                 summary["recommendations"].append(
                     f"{name}: Impingement risk detected - consider ROM exercises"
                 )
             if result.overload_risk:
+                assert isinstance(summary["recommendations"], list)
                 summary["recommendations"].append(
                     f"{name}: Overload risk - reduce intensity or modify technique"
                 )
