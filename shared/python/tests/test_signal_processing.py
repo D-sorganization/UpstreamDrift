@@ -4,9 +4,13 @@ import pytest
 from shared.python.signal_processing import (
     _morlet2_impl,
     compute_cwt,
+    compute_dtw_distance,
+    compute_dtw_path,
+    compute_jerk,
     compute_psd,
     compute_spectral_arc_length,
     compute_spectrogram,
+    compute_time_shift,
     compute_xwt,
 )
 
@@ -121,3 +125,69 @@ class TestSignalProcessing:
         phases = np.angle(xwt[idx_10hz, 20:-20])  # avoid edges
         # Just check it runs and produces output for now
         assert not np.all(phases == 0)
+
+    # --- New Tests ---
+
+    def test_compute_jerk(self):
+        """Test jerk computation."""
+        fs = 100.0
+        t = np.linspace(0, 2, 200)
+
+        # Acceleration: sin(t)
+        # Jerk: cos(t)
+        acc = np.sin(2 * np.pi * t)
+        jerk = compute_jerk(acc, fs, window_len=5, polyorder=2)
+
+        # Check shape
+        assert len(jerk) == len(acc)
+
+        # Check values roughly (Savitzky-Golay is approximation)
+        expected = 2 * np.pi * np.cos(2 * np.pi * t)
+
+        # Ignore boundaries
+        error = np.abs(jerk[10:-10] - expected[10:-10])
+        assert np.mean(error) < 1.0  # Loose tolerance for discrete derivative
+
+    def test_compute_time_shift(self):
+        """Test time shift calculation."""
+        fs = 100.0
+        t = np.linspace(0, 2, 200)
+        x = np.sin(2 * np.pi * 5 * t)
+
+        # Shift y by 10 samples (0.1s)
+        shift_samples = 10
+        y = np.roll(x, shift_samples)
+
+        # y leads x? or lags?
+        # If y is x shifted right (delayed), then y(t) = x(t-tau).
+        # compute_time_shift returns tau > 0 for delay (lag).
+
+        tau = compute_time_shift(x, y, fs)
+
+        expected_lag = shift_samples / fs
+        assert np.isclose(tau, expected_lag, atol=0.02)
+
+    def test_compute_dtw_distance(self):
+        """Test DTW distance."""
+        s1 = np.array([0, 1, 2, 3, 2, 1, 0])
+        s2 = np.array([0, 0, 1, 2, 3, 2, 1, 0])  # s1 stretched/shifted
+
+        dist = compute_dtw_distance(s1, s2)
+
+        # Should be small (perfect match theoretically if purely shifted?)
+        # Euclidean would be large.
+        euclidean = np.linalg.norm(s1 - s2[:7])
+        assert dist < euclidean
+        assert dist >= 0
+
+    def test_compute_dtw_path(self):
+        """Test DTW path."""
+        s1 = np.array([0, 1, 0])
+        s2 = np.array([0, 0, 1, 0])
+
+        dist, path = compute_dtw_path(s1, s2)
+
+        assert dist >= 0
+        assert len(path) >= max(len(s1), len(s2))
+        assert path[0] == (0, 0)
+        assert path[-1] == (len(s1) - 1, len(s2) - 1)
