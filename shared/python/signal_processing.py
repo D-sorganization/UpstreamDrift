@@ -35,10 +35,10 @@ except ImportError:
     NUMBA_AVAILABLE = False
 
     # Create a no-op decorator when numba is not available
-    def jit(*args, **kwargs):  # type: ignore[misc]
+    def jit(*args: object, **kwargs: object) -> object:  # type: ignore[misc]
         """No-op decorator when numba is not installed."""
 
-        def decorator(func):  # type: ignore[misc]
+        def decorator(func: object) -> object:  # type: ignore[misc]
             return func
 
         if len(args) == 1 and callable(args[0]):
@@ -95,7 +95,7 @@ def _dtw_core(series1: np.ndarray, series2: np.ndarray, window: int) -> float:
 
             dtw_matrix[i, j] = cost + min_prev
 
-    return np.sqrt(dtw_matrix[n, m])
+    return float(np.sqrt(dtw_matrix[n, m]))
 
 
 def compute_psd(
@@ -271,7 +271,7 @@ def _get_cached_wavelet(M: int, s_int: int, w0_int: int, n_fft: int) -> np.ndarr
         wavelet = _morlet2_impl(M, s, w=w0)
 
     # Return the FFT
-    return fft.fft(wavelet, n=n_fft)
+    return np.asarray(fft.fft(wavelet, n=n_fft))
 
 
 def compute_cwt(
