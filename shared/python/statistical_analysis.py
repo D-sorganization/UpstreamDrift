@@ -165,8 +165,8 @@ class RQAMetrics:
 
 
 @dataclass
-class SwingDNAMetrics:
-    """Normalized metrics (0-100) for Swing DNA visualization."""
+class SwingProfileMetrics:
+    """Normalized metrics (0-100) for Swing Profile visualization."""
 
     speed_score: float
     sequence_score: float
@@ -1428,14 +1428,14 @@ class StatisticalAnalyzer:
         # but returning raw difference preserves the most info.
         return np.asarray(crp)
 
-    def compute_swing_dna(self) -> SwingDNAMetrics | None:
-        """Compute 'Swing DNA' scores (0-100) for radar chart visualization.
+    def compute_swing_profile(self) -> SwingProfileMetrics | None:
+        """Compute Swing Profile scores (0-100) for radar chart visualization.
 
         Heuristic scoring based on typical professional golf swing data.
         Note: These are rough approximations for visualization purposes.
 
         Returns:
-            SwingDNAMetrics object or None if insufficient data
+            SwingProfileMetrics object or None if insufficient data
         """
         # 1. Speed Score
         # Pro avg club speed ~113 mph. Let's say 120 mph = 100 score.
@@ -1542,7 +1542,7 @@ class StatisticalAnalyzer:
             # Pro might generate > 3000 W?
             power_score = float(min(100.0, (peak_power / 3000.0) * 100.0))
 
-        return SwingDNAMetrics(
+        return SwingProfileMetrics(
             speed_score=float(speed_score),
             sequence_score=float(sequence_score),
             stability_score=float(stability_score),

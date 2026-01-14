@@ -3111,7 +3111,7 @@ class GolfSwingPlotter:
         self,
         fig: Figure,
         metrics: dict[str, float],
-        title: str = "Swing DNA",
+        title: str = "Swing Profile",
         ax: Axes | None = None,
     ) -> None:
         """Plot a radar chart of swing metrics.
