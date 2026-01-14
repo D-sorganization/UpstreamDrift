@@ -29,7 +29,7 @@ class TestAdvancedAnalysis:
         section = ("velocity", 0, 0.0)
 
         # Test "both" directions
-        result = analyzer.compute_poincare_map(dimensions, section, direction="both")
+        result = analyzer.compute_poincare_map(dimensions, section, direction="both")  # type: ignore[attr-defined]
         if result is None:
             pytest.fail("Returned None")
         points, times = result
@@ -45,7 +45,7 @@ class TestAdvancedAnalysis:
         assert np.allclose(points[:, 1], 0.0, atol=0.01)
 
         # Test "positive" direction (slope of vel > 0 => acc > 0 => pos < 0 troughs)
-        result_pos = analyzer.compute_poincare_map(
+        result_pos = analyzer.compute_poincare_map(  # type: ignore[attr-defined]
             dimensions, section, direction="positive"
         )
         assert result_pos is not None
@@ -68,7 +68,7 @@ class TestAdvancedAnalysis:
             joint_torques=np.zeros((500, 1)),
         )
 
-        time_axis, log_div, slope = analyzer.compute_lyapunov_divergence(
+        time_axis, log_div, slope = analyzer.compute_lyapunov_divergence(  # type: ignore[attr-defined]
             data, tau=10, dim=2, window=50
         )
 
