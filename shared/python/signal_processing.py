@@ -436,19 +436,39 @@ def compute_dtw_distance(
     # Sakoe-Chiba band constraint
     w = window if window is not None else max(n, m)
 
+    # Optimization: Pre-compute cost matrix vectorized (broadcasting)
+    # diff_sq[i, j] = (series1[i] - series2[j])^2
+    # series1: (n,), series2: (m,)
+    # series1[:, None]: (n, 1)
+    # series2[None, :]: (1, m)
+    # result: (n, m)
+    # This avoids redundant subtractions and squares in the inner loop.
+    cost_matrix = (series1[:, None] - series2[None, :]) ** 2
+
     for i in range(1, n + 1):
         # Determine band limits
         j_start = max(1, i - w)
         j_end = min(m + 1, i + w + 1)
 
         for j in range(j_start, j_end):
-            cost = (series1[i - 1] - series2[j - 1]) ** 2
+            # Cost lookup (offset by -1 because cost_matrix is 0-indexed)
+            cost = cost_matrix[i - 1, j - 1]
+
             # Take minimum of (match, insertion, deletion)
-            last_min = min(
-                dtw_matrix[i - 1, j],  # Insertion
-                dtw_matrix[i, j - 1],  # Deletion
-                dtw_matrix[i - 1, j - 1],  # Match
-            )
+            # Unrolled min() for performance (avoid function call overhead in tight loop)
+            # m1 = dtw_matrix[i - 1, j]    # Insertion
+            # m2 = dtw_matrix[i, j - 1]    # Deletion
+            # m3 = dtw_matrix[i - 1, j - 1] # Match
+
+            m1 = dtw_matrix[i - 1, j]
+            m2 = dtw_matrix[i, j - 1]
+            m3 = dtw_matrix[i - 1, j - 1]
+
+            if m1 < m2:
+                last_min = m1 if m1 < m3 else m3
+            else:
+                last_min = m2 if m2 < m3 else m3
+
             dtw_matrix[i, j] = cost + last_min
 
     return float(np.sqrt(dtw_matrix[n, m]))
@@ -476,16 +496,25 @@ def compute_dtw_path(
 
     w = window if window is not None else max(n, m)
 
+    # Optimization: Pre-compute cost matrix
+    cost_matrix = (series1[:, None] - series2[None, :]) ** 2
+
     for i in range(1, n + 1):
         j_start = max(1, i - w)
         j_end = min(m + 1, i + w + 1)
         for j in range(j_start, j_end):
-            cost = (series1[i - 1] - series2[j - 1]) ** 2
-            dtw_matrix[i, j] = cost + min(
-                dtw_matrix[i - 1, j],
-                dtw_matrix[i, j - 1],
-                dtw_matrix[i - 1, j - 1],
-            )
+            cost = cost_matrix[i - 1, j - 1]
+            # Unrolled min()
+            m1 = dtw_matrix[i - 1, j]
+            m2 = dtw_matrix[i, j - 1]
+            m3 = dtw_matrix[i - 1, j - 1]
+
+            if m1 < m2:
+                last_min = m1 if m1 < m3 else m3
+            else:
+                last_min = m2 if m2 < m3 else m3
+
+            dtw_matrix[i, j] = cost + last_min
 
     distance = float(np.sqrt(dtw_matrix[n, m]))
 
