@@ -226,7 +226,7 @@ class GenericPhysicsRecorder:
             else:
                 ke = 0.0
         except Exception as e:
-            LOGGER.debug("Failed to compute kinetic energy: %s", e)
+            LOGGER.warning("Failed to compute kinetic energy: %s", e)
             ke = 0.0
 
         # Real-time Analysis Computations
@@ -237,21 +237,21 @@ class GenericPhysicsRecorder:
             try:
                 self.data["ztcf_accel"][idx] = self.engine.compute_ztcf(q, v)
             except Exception as e:
-                LOGGER.debug("Failed to compute ZTCF at frame %d: %s", idx, e)
+                LOGGER.warning("Failed to compute ZTCF at frame %d: %s", idx, e)
 
         # ZVCF
         if self.analysis_config["zvcf"] and self.data["zvcf_accel"] is not None:
             try:
                 self.data["zvcf_accel"][idx] = self.engine.compute_zvcf(q)
             except Exception as e:
-                LOGGER.debug("Failed to compute ZVCF at frame %d: %s", idx, e)
+                LOGGER.warning("Failed to compute ZVCF at frame %d: %s", idx, e)
 
         # Drift Accel
         if self.analysis_config["track_drift"] and self.data["drift_accel"] is not None:
             try:
                 self.data["drift_accel"][idx] = self.engine.compute_drift_acceleration()
             except Exception as e:
-                LOGGER.debug(
+                LOGGER.warning(
                     "Failed to compute drift acceleration at frame %d: %s", idx, e
                 )
 
@@ -265,7 +265,7 @@ class GenericPhysicsRecorder:
                     self.engine.compute_control_acceleration(tau)
                 )
             except Exception as e:
-                LOGGER.debug(
+                LOGGER.warning(
                     "Failed to compute control acceleration at frame %d: %s", idx, e
                 )
 
@@ -281,7 +281,7 @@ class GenericPhysicsRecorder:
                         self.engine.compute_control_acceleration(tau_single)
                     )
                 except Exception as e:
-                    LOGGER.debug(
+                    LOGGER.warning(
                         "Failed to compute induced acceleration for source %d at frame %d: %s",
                         src_idx,
                         idx,
@@ -301,7 +301,7 @@ class GenericPhysicsRecorder:
             if grf is not None and len(grf) == 3:
                 self.data["ground_forces"][idx] = grf
         except Exception as e:
-            LOGGER.debug("Failed to compute ground forces at frame %d: %s", idx, e)
+            LOGGER.warning("Failed to compute ground forces at frame %d: %s", idx, e)
 
         self.current_idx += 1
 
