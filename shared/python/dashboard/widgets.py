@@ -11,6 +11,7 @@ import logging
 from typing import Any
 
 import numpy as np
+from matplotlib.axes import Axes
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from shared.python.interfaces import RecorderInterface
