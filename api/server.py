@@ -556,7 +556,7 @@ async def _process_video_background(
         if task_data is None:
             task_data = {}
         created_at = task_data.get("created_at", datetime.now(UTC))
-        
+
         active_tasks[task_id] = {
             "status": "processing",
             "progress": 0,
@@ -575,7 +575,7 @@ async def _process_video_background(
         if task_data is None:
             task_data = {}
         created_at = task_data.get("created_at", datetime.now(UTC))
-        
+
         active_tasks[task_id] = {
             "status": "completed",
             "created_at": created_at,
@@ -593,7 +593,7 @@ async def _process_video_background(
         if task_data is None:
             task_data = {}
         created_at = task_data.get("created_at", datetime.now(UTC))
-        
+
         active_tasks[task_id] = {
             "status": "failed",
             "error": str(e),
