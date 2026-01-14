@@ -154,8 +154,102 @@ simulation_service: SimulationService | None = None
 analysis_service: AnalysisService | None = None
 video_pipeline: VideoPosePipeline | None = None
 
-# Background task storage
-active_tasks: dict[str, Any] = {}
+
+class TaskManager:
+    """Thread-safe task manager with TTL cleanup and size limits.
+
+    Prevents memory leak from unbounded task accumulation.
+
+    Performance Fix for Issue #1:
+    - Tasks expire after TTL_SECONDS (default 1 hour)
+    - Maximum MAX_TASKS entries with LRU eviction
+    - Automatic cleanup on each access
+    """
+
+    # Configuration constants
+    TTL_SECONDS: int = 3600  # 1 hour
+    MAX_TASKS: int = 1000  # Maximum stored tasks
+
+    def __init__(self) -> None:
+        """Initialize task manager with empty storage."""
+        import threading
+        import time
+
+        self._tasks: dict[str, dict[str, Any]] = {}
+        self._timestamps: dict[str, float] = {}
+        self._lock = threading.Lock()
+        self._time = time  # Store reference for use in methods
+
+    def _cleanup_expired(self) -> None:
+        """Remove expired tasks. Called internally under lock."""
+        current_time = self._time.time()
+        expired_keys = [
+            task_id
+            for task_id, timestamp in self._timestamps.items()
+            if current_time - timestamp > self.TTL_SECONDS
+        ]
+        for task_id in expired_keys:
+            self._tasks.pop(task_id, None)
+            self._timestamps.pop(task_id, None)
+
+    def _enforce_size_limit(self) -> None:
+        """Remove oldest tasks if over limit. Called internally under lock."""
+        if len(self._tasks) <= self.MAX_TASKS:
+            return
+
+        # Sort by timestamp and remove oldest entries
+        sorted_by_age = sorted(self._timestamps.items(), key=lambda x: x[1])
+        to_remove = len(self._tasks) - self.MAX_TASKS
+        for task_id, _ in sorted_by_age[:to_remove]:
+            self._tasks.pop(task_id, None)
+            self._timestamps.pop(task_id, None)
+
+    def set(self, task_id: str, data: dict[str, Any]) -> None:
+        """Store or update a task.
+
+        Args:
+            task_id: Unique task identifier
+            data: Task data dictionary
+        """
+        with self._lock:
+            self._cleanup_expired()
+            self._tasks[task_id] = data
+            self._timestamps[task_id] = self._time.time()
+            self._enforce_size_limit()
+
+    def get(self, task_id: str) -> dict[str, Any] | None:
+        """Retrieve a task by ID.
+
+        Args:
+            task_id: Task identifier
+
+        Returns:
+            Task data or None if not found
+        """
+        with self._lock:
+            self._cleanup_expired()
+            return self._tasks.get(task_id)
+
+    def __contains__(self, task_id: str) -> bool:
+        """Check if task exists."""
+        with self._lock:
+            self._cleanup_expired()
+            return task_id in self._tasks
+
+    def __setitem__(self, task_id: str, data: dict[str, Any]) -> None:
+        """Dict-like setter for backward compatibility."""
+        self.set(task_id, data)
+
+    def __getitem__(self, task_id: str) -> dict[str, Any]:
+        """Dict-like getter for backward compatibility."""
+        result = self.get(task_id)
+        if result is None:
+            raise KeyError(task_id)
+        return result
+
+
+# Background task storage with TTL cleanup (Performance Issue #1 fix)
+active_tasks = TaskManager()
 
 
 @app.on_event("startup")
