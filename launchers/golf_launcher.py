@@ -658,6 +658,30 @@ class DockerBuildThread(QThread):
 class EnvironmentDialog(QDialog):
     """Dialog to manage Docker environment and view dependencies."""
 
+    DEFAULT_BTN_STYLE = """
+        QPushButton {
+            background-color: #444444;
+            color: #cccccc;
+            border: none;
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+        QPushButton:hover {
+            background-color: #555555;
+            color: #ffffff;
+        }
+    """
+
+    SUCCESS_BTN_STYLE = """
+        QPushButton {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+    """
+
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("Manage Environment")
@@ -692,6 +716,19 @@ class EnvironmentDialog(QDialog):
         self.btn_build = QPushButton("Build Environment")
         self.btn_build.clicked.connect(self.start_build)
         build_layout.addWidget(self.btn_build)
+
+        # Console Header with Copy Button
+        console_header = QHBoxLayout()
+        console_header.addWidget(QLabel("Build Log:"))
+        console_header.addStretch()
+
+        self.btn_copy_log = QPushButton("📋 Copy Log")
+        self.btn_copy_log.setToolTip("Copy build log to clipboard")
+        self.btn_copy_log.setCursor(Qt.CursorShape.PointingHandCursor)
+        self.btn_copy_log.clicked.connect(self.copy_log_to_clipboard)
+        self.btn_copy_log.setStyleSheet(self.DEFAULT_BTN_STYLE)
+        console_header.addWidget(self.btn_copy_log)
+        build_layout.addLayout(console_header)
 
         self.console = QTextEdit()
         self.console.setReadOnly(True)
@@ -773,6 +810,33 @@ class EnvironmentDialog(QDialog):
             mbox.setText(msg)
             mbox.setIcon(QMessageBox.Icon.Critical)
         mbox.exec()
+
+    def copy_log_to_clipboard(self) -> None:
+        """Copy console log to clipboard with feedback."""
+        text = self.console.toPlainText()
+        if not text:
+            return
+
+        clipboard = QApplication.clipboard()
+        if clipboard:
+            clipboard.setText(text)
+
+        # Micro-feedback
+        original_text = "📋 Copy Log"
+        self.btn_copy_log.setText("✓ Copied!")
+        self.btn_copy_log.setStyleSheet(self.SUCCESS_BTN_STYLE)
+
+        # Restore after delay
+        QTimer.singleShot(2000, lambda: self._restore_copy_button(original_text))
+
+    def _restore_copy_button(self, original_text: str) -> None:
+        """Restore copy button state."""
+        # Check if button still exists (dialog not closed)
+        try:
+            self.btn_copy_log.setText(original_text)
+            self.btn_copy_log.setStyleSheet(self.DEFAULT_BTN_STYLE)
+        except RuntimeError:
+            pass  # Widget likely deleted
 
 
 class HelpDialog(QDialog):
