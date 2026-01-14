@@ -171,7 +171,7 @@ def migrate_api_keys(
     # After: 1 query for all users = O(1) queries
     user_ids = [r.user_id for r in api_records]
     users = db_session.query(User).filter(User.id.in_(user_ids)).all()
-    user_map: dict[int, User] = {u.id: u for u in users}
+    user_map: dict[int, User] = {int(u.id): u for u in users}  # type: ignore[arg-type]
     logger.info(
         f"Loaded {len(user_map)} users in batch (avoided {len(api_records)} queries)"
     )
@@ -182,7 +182,7 @@ def migrate_api_keys(
 
     for idx, record in enumerate(api_records, 1):
         # Get user info from pre-fetched map (O(1) lookup)
-        user = user_map.get(record.user_id)
+        user = user_map.get(int(record.user_id))  # type: ignore[arg-type]
         user_email = user.email if user else "unknown"
 
         logger.info(

@@ -425,7 +425,7 @@ async def run_simulation_async(
 
     # Add background task
     background_tasks.add_task(
-        simulation_service.run_simulation_background, task_id, request, active_tasks
+        simulation_service.run_simulation_background, task_id, request, active_tasks  # type: ignore[arg-type]
     )
 
     return {"task_id": task_id, "status": "started"}
@@ -552,12 +552,15 @@ async def _process_video_background(
 ) -> None:
     """Background task for video processing."""
     try:
+        task_data = active_tasks.get(task_id)
+        if task_data is None:
+            task_data = {}
+        created_at = task_data.get("created_at", datetime.now(UTC))
+        
         active_tasks[task_id] = {
             "status": "processing",
             "progress": 0,
-            "created_at": active_tasks.get(task_id, {}).get(
-                "created_at", datetime.now(UTC)
-            ),
+            "created_at": created_at,
         }
 
         config = VideoProcessingConfig(
@@ -568,11 +571,14 @@ async def _process_video_background(
         result = pipeline.process_video(video_path)
 
         # Store result
+        task_data = active_tasks.get(task_id)
+        if task_data is None:
+            task_data = {}
+        created_at = task_data.get("created_at", datetime.now(UTC))
+        
         active_tasks[task_id] = {
             "status": "completed",
-            "created_at": active_tasks.get(task_id, {}).get(
-                "created_at", datetime.now(UTC)
-            ),
+            "created_at": created_at,
             "result": {
                 "filename": filename,
                 "total_frames": result.total_frames,
@@ -583,12 +589,15 @@ async def _process_video_background(
         }
 
     except Exception as e:
+        task_data = active_tasks.get(task_id)
+        if task_data is None:
+            task_data = {}
+        created_at = task_data.get("created_at", datetime.now(UTC))
+        
         active_tasks[task_id] = {
             "status": "failed",
             "error": str(e),
-            "created_at": active_tasks.get(task_id, {}).get(
-                "created_at", datetime.now(UTC)
-            ),
+            "created_at": created_at,
         }
     finally:
         # Clean up temp file
