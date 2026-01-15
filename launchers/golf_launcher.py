@@ -698,6 +698,8 @@ class EnvironmentDialog(QDialog):
 
         self.btn_build = QPushButton("Build Environment")
         self.btn_build.clicked.connect(self.start_build)
+        # Store original text for restoration
+        self._original_build_text = self.btn_build.text()
         actions_layout.addWidget(self.btn_build)
 
         self.btn_copy_log = QPushButton("Copy Log")
@@ -794,6 +796,7 @@ class EnvironmentDialog(QDialog):
         """Start the docker build process."""
         target = self.combo_stage.currentText()
         self.btn_build.setEnabled(False)
+        self.btn_build.setText("Building...")
         self.console.clear()
 
         self.build_thread = DockerBuildThread(target)
@@ -809,6 +812,12 @@ class EnvironmentDialog(QDialog):
     def build_finished(self, success: bool, msg: str) -> None:
         """Handle build completion."""
         self.btn_build.setEnabled(True)
+        # Restore original button text
+        if hasattr(self, "_original_build_text"):
+            self.btn_build.setText(self._original_build_text)
+        else:
+            self.btn_build.setText("Build Environment")
+
         mbox = QMessageBox(self)
         mbox.setTextInteractionFlags(
             Qt.TextInteractionFlag.TextSelectableByMouse
