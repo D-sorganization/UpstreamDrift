@@ -29,6 +29,7 @@ from shared.python.pose_estimation.interface import (
     PoseEstimationResult,
     PoseEstimator,
 )
+from shared.python.signal_processing import KalmanFilter
 
 logger = logging.getLogger(__name__)
 
@@ -114,7 +115,7 @@ class MediaPipeEstimator(PoseEstimator):
 
         # Temporal smoothing state
         self.previous_landmarks: dict[str, np.ndarray] | None = None
-        self.kalman_filters: dict[int, Any] = {}
+        self.kalman_filters: dict[str, KalmanFilter] = {}
 
         if not MEDIAPIPE_AVAILABLE:
             logger.warning(
@@ -265,24 +266,48 @@ class MediaPipeEstimator(PoseEstimator):
         Returns:
             Smoothed keypoints
         """
-        # Simple exponential smoothing for now (can be upgraded to Kalman later)
-        if self.previous_landmarks is None:
-            self.previous_landmarks = keypoints_3d.copy()
-            return keypoints_3d
-
         smoothed = {}
-        alpha = 0.7  # Smoothing factor
 
         for landmark_name, current_pos in keypoints_3d.items():
-            if landmark_name in self.previous_landmarks:
-                previous_pos = self.previous_landmarks[landmark_name]
-                smoothed[landmark_name] = (
-                    alpha * current_pos + (1 - alpha) * previous_pos
-                )
-            else:
-                smoothed[landmark_name] = current_pos
+            # Initialize filter if not exists
+            if landmark_name not in self.kalman_filters:
+                # Constant Velocity Model
+                # State: [x, y, z, vx, vy, vz]
+                dt = 1.0  # Normalized time step (assuming constant frame rate)
+                F = np.eye(6)
+                F[0, 3] = dt
+                F[1, 4] = dt
+                F[2, 5] = dt
 
-        self.previous_landmarks = smoothed.copy()
+                H = np.zeros((3, 6))
+                H[0, 0] = 1.0
+                H[1, 1] = 1.0
+                H[2, 2] = 1.0
+
+                # Process noise (uncertainty in model)
+                # Assume constant velocity is mostly true, but allow some deviation
+                Q = np.eye(6) * 1e-4
+
+                # Measurement noise (uncertainty in MediaPipe)
+                # MediaPipe is reasonably accurate but can jitter
+                R = np.eye(3) * 1e-3
+
+                # Initial state
+                x = np.zeros(6)
+                x[:3] = current_pos
+
+                self.kalman_filters[landmark_name] = KalmanFilter(
+                    dim_x=6, dim_z=3, F=F, H=H, Q=Q, R=R, x=x
+                )
+
+            # Predict and Update
+            kf = self.kalman_filters[landmark_name]
+            kf.predict()
+            kf.update(current_pos)
+
+            # Store smoothed position
+            smoothed[landmark_name] = kf.x[:3]
+
         return smoothed
 
     def _keypoints_to_joint_angles(
