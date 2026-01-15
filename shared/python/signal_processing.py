@@ -179,7 +179,8 @@ def compute_spectral_arc_length(
     n_padded = int(pow(2, np.ceil(np.log2(n)) + pad_level))
 
     # FFT
-    # PERFORMANCE: Use rfft for real-valued inputs (approx 2x faster than fft)
+    # PERFORMANCE: Use rfft (real input FFT) to avoid computing negative frequencies
+    # This reduces computation by ~50% and memory usage by ~50%
     spectrum = np.fft.rfft(data, n_padded)
     spectrum_mag = np.abs(spectrum)
 
@@ -193,7 +194,7 @@ def compute_spectral_arc_length(
     # Frequency axis optimization:
     # Instead of generating full fftfreq and masking (which creates large temporary arrays),
     # we calculate the index limit directly.
-    # Positive frequencies are at indices 0 to n_padded//2.
+    # rfft returns positive frequencies at indices 0 to n_padded//2 + 1.
     # df = fs / n_padded
     df = fs / n_padded
     if df > 0:
@@ -202,7 +203,7 @@ def compute_spectral_arc_length(
         limit_idx = 1
 
     # limit_idx must be at most n_padded // 2 + 1 (Nyquist limit for positive freqs)
-    # Note: rfft already returns only positive frequencies (size n_padded//2 + 1)
+    # This matches the size of rfft output exactly.
     limit_idx = min(limit_idx, len(spectrum_mag))
 
     # We only need the positive part of spectrum up to fc
@@ -632,3 +633,86 @@ def compute_dtw_path(
     path.reverse()
 
     return distance, path
+
+
+class KalmanFilter:
+    """Simple linear Kalman filter implementation.
+
+    Supports n-dimensional state and measurement vectors.
+    """
+
+    def __init__(
+        self,
+        dim_x: int,
+        dim_z: int,
+        F: np.ndarray | None = None,
+        H: np.ndarray | None = None,
+        Q: np.ndarray | None = None,
+        R: np.ndarray | None = None,
+        P: np.ndarray | None = None,
+        x: np.ndarray | None = None,
+    ):
+        """Initialize Kalman Filter.
+
+        Args:
+            dim_x: State dimension
+            dim_z: Measurement dimension
+            F: State transition matrix (dim_x, dim_x)
+            H: Measurement function (dim_z, dim_x)
+            Q: Process noise covariance (dim_x, dim_x)
+            R: Measurement noise covariance (dim_z, dim_z)
+            P: Error covariance matrix (dim_x, dim_x)
+            x: Initial state (dim_x,)
+        """
+        self.dim_x = dim_x
+        self.dim_z = dim_z
+
+        # State transition matrix
+        self.F = F if F is not None else np.eye(dim_x)
+
+        # Measurement function
+        self.H = H if H is not None else np.zeros((dim_z, dim_x))
+
+        # Process noise covariance
+        self.Q = Q if Q is not None else np.eye(dim_x)
+
+        # Measurement noise covariance
+        self.R = R if R is not None else np.eye(dim_z)
+
+        # Error covariance
+        self.P = P if P is not None else np.eye(dim_x)
+
+        # State
+        self.x = x if x is not None else np.zeros(dim_x)
+
+    def predict(self) -> None:
+        """Predict next state (prior)."""
+        self.x = self.F @ self.x
+        self.P = self.F @ self.P @ self.F.T + self.Q
+
+    def update(self, z: np.ndarray) -> None:
+        """Update state with measurement (posterior).
+
+        Args:
+            z: Measurement vector
+        """
+        # System uncertainty
+        S = self.H @ self.P @ self.H.T + self.R
+
+        # Kalman gain
+        # Use solve instead of inv for stability
+        try:
+            K = self.P @ self.H.T @ np.linalg.solve(S, np.eye(self.dim_z))
+        except np.linalg.LinAlgError:
+            # Fallback to pseudo-inverse if S is singular
+            K = self.P @ self.H.T @ np.linalg.pinv(S)
+
+        # Residual
+        y = z - self.H @ self.x
+
+        # Update state
+        self.x = self.x + K @ y
+
+        # Update covariance
+        I_mat = np.eye(self.dim_x)
+        self.P = (I_mat - K @ self.H) @ self.P
