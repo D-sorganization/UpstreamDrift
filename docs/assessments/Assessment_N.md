@@ -7,14 +7,13 @@ Plot quality, accessibility, publication-ready.
 
 ## Findings
 *   **Strengths:**
-    *   `LivePlotWidget` is sophisticated, supporting multiple modes (single dim, norm, etc.).
-    *   `c3d_viewer` provides 3D motion capture visualization.
-    *   Export capabilities (CSV, HDF5) are built into `GenericPhysicsRecorder`.
-    *   Usage of `matplotlib` with `PyQt6` is a standard, robust pattern.
+    *   `LivePlotWidget` in `shared/python/dashboard/` supports real-time visualization of high-frequency data (forces, torques).
+    *   The dashboard allows side-by-side comparison of different engines.
+    *   Use of `PyQt6` ensures cross-platform UI consistency.
 
 *   **Weaknesses:**
-    *   Real-time plotting in Python can be slow for high-frequency data (1000Hz+).
+    *   Direct export to video (MP4/GIF) from the visualization widgets appears to be missing or not prominent.
 
 ## Recommendations
-1.  Verify colorblind-accessible palettes are used by default.
-2.  Add "Export to Video" for replay visualization.
+1.  Implement a "Record to Video" feature in the visualization widgets.
+2.  Ensure plots can be exported as high-resolution images (PNG/SVG) for publication.

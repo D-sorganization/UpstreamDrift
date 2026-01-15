@@ -103,7 +103,7 @@ all = [
 ]
 
 [project.scripts]
-golf-suite = "launchers.launch_golf_suite:main"
+golf-suite = "launchers.unified_launcher:launch"
 
 [project.urls]
 Homepage = "https://github.com/D-sorganization/Golf_Modeling_Suite"
