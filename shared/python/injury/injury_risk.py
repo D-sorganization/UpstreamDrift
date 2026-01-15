@@ -562,11 +562,13 @@ if __name__ == "__main__":
 
     report = scorer.score(spinal_result, joint_results, swing_metrics, training_load)
 
-    for _region, _score in report.region_scores.items():
-        pass
+    for region, score in report.region_scores.items():
+        print(f"  {region.value}: {score:.1f}")  # noqa: T201
 
-    for _risk in report.top_risks:
-        pass
+    print("\nTop Risks:")  # noqa: T201
+    for risk in report.top_risks:
+        print(f"  - {risk}")  # noqa: T201
 
-    for _rec in report.recommendations:
-        pass
+    print("\nRecommendations:")  # noqa: T201
+    for rec in report.recommendations:
+        print(f"  - {rec}")  # noqa: T201
