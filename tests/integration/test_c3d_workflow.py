@@ -12,7 +12,7 @@ import pandas as pd
 import pytest
 
 # Mark all tests in this file as integration tests
-pytestmark = pytest.mark.integration
+pytestmark: list[pytest.MarkDecorator] = [pytest.mark.integration]
 
 # Add source path for imports
 # Adjust based on repository root
