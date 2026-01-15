@@ -1,0 +1,131 @@
+# Golf Modeling Suite - Conda Environment
+# ========================================
+#
+# This file provides a robust, cross-platform installation for the Golf Modeling Suite.
+# Using conda ensures binary physics dependencies (MuJoCo, Drake, etc.) work correctly.
+#
+# USAGE:
+#   Full installation (all engines):
+#     conda env create -f environment.yml
+#     conda activate golf-suite
+#
+#   Light installation (UI development, no heavy engines):
+#     conda env create -f environment.yml --name golf-suite-light --prune
+#     # Then comment out the 'engines' section before running
+#
+# ACTIVATION:
+#   conda activate golf-suite
+#
+# UPDATING:
+#   conda env update -f environment.yml --prune
+#
+# TROUBLESHOOTING:
+#   See docs/troubleshooting/installation.md for common issues.
+
+name: golf-suite
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  # ============================================================================
+  # Core Python
+  # ============================================================================
+  - python=3.11
+  - pip>=23.0
+
+  # ============================================================================
+  # Scientific Computing (conda-forge for binary compatibility)
+  # ============================================================================
+  - numpy>=1.26.4,<2.0.0
+  - scipy>=1.13.1,<2.0.0
+  - pandas>=2.2.3,<3.0.0
+  - sympy>=1.12,<2.0.0
+
+  # ============================================================================
+  # Visualization
+  # ============================================================================
+  - matplotlib>=3.8.0,<4.0.0
+
+  # ============================================================================
+  # GUI Framework
+  # ============================================================================
+  - pyqt>=6.6.0
+
+  # ============================================================================
+  # Physics Engines (Binary Dependencies - CRITICAL)
+  # MuJoCo requires specific system libraries that conda handles better than pip
+  # ============================================================================
+  - mujoco>=3.3.0,<4.0.0
+
+  # ============================================================================
+  # Optional: Advanced Physics Engines
+  # Uncomment for full simulation capabilities
+  # ============================================================================
+  # - drake>=1.22.0  # Drake robotics simulation
+  # - pinocchio>=3.0.0  # Rigid body dynamics
+
+  # ============================================================================
+  # Development Tools
+  # ============================================================================
+  - pytest>=8.2.1
+  - pytest-cov>=5.0.0
+  - pytest-mock>=3.14.0
+  - pytest-qt>=4.2.0
+  - black>=24.4.2
+  - mypy>=1.10.0
+  - pre-commit>=4.0.0
+
+  # ============================================================================
+  # Pip-only dependencies
+  # Some packages are only available via pip or have better pip versions
+  # ============================================================================
+  - pip:
+    # API and Web Framework
+    - fastapi>=0.126.0,<1.0.0
+    - uvicorn[standard]>=0.24.0,<1.0.0
+    - slowapi>=0.1.9,<1.0.0
+    - python-multipart>=0.0.6,<1.0.0
+    - httpx>=0.25.0  # For testing
+
+    # Database and Auth
+    - sqlalchemy>=2.0.0,<3.0.0
+    - pydantic[email]>=2.5.0,<3.0.0
+    - python-jose[cryptography]>=3.3.0,<4.0.0
+    - passlib[bcrypt]>=1.7.4,<2.0.0
+
+    # Data Formats
+    - pyyaml>=6.0.1
+    - defusedxml>=0.7.1,<1.0.0
+    - ezc3d>=1.4.0
+
+    # Logging and Security
+    - structlog>=24.1.0,<25.0.0
+    - simpleeval>=0.9.13
+
+    # Linting (specific version for CI compatibility)
+    - ruff==0.14.10
+
+    # Type stubs for mypy
+    - types-PyYAML>=6.0.12.12
+    - pandas-stubs>=2.0.0
+    - types-requests>=2.31.0
+
+    # Install the package itself in editable mode
+    - -e .
+
+# ============================================================================
+# Platform-specific notes:
+#
+# Windows:
+#   - MuJoCo requires Visual C++ Redistributable 2015-2022
+#   - If OpenGL errors occur, update graphics drivers
+#
+# macOS:
+#   - For Apple Silicon (M1/M2), use: CONDA_SUBDIR=osx-arm64 conda env create ...
+#   - Some engines may not have ARM64 builds yet
+#
+# Linux:
+#   - Ensure OpenGL libraries are installed: sudo apt install libgl1-mesa-glx
+#   - For headless servers, use xvfb: xvfb-run pytest
+# ============================================================================

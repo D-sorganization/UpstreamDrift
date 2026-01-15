@@ -12,6 +12,28 @@ from api.database import get_db
 from .models import APIKey, User, UserRole
 from .security import RoleChecker, security_manager, usage_tracker
 
+
+def compute_prefix_hash(prefix: str) -> str:
+    """Compute SHA256 hash of a non-sensitive prefix for database indexing.
+
+    This function is used to create a database index for fast API key lookup.
+    It hashes ONLY the first 8 characters of the key (not the full secret).
+
+    Args:
+        prefix: Non-sensitive 8-character prefix from the API key
+
+    Returns:
+        SHA256 hash of the prefix for database indexing
+
+    Note:
+        This is NOT password hashing. The actual API key authentication
+        uses bcrypt (see security_manager.verify_api_key).
+    """
+    import hashlib
+
+    return hashlib.sha256(prefix.encode()).hexdigest()
+
+
 # Security scheme
 security = HTTPBearer()
 
@@ -56,7 +78,11 @@ async def get_current_user_from_api_key(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db),
 ) -> User:
-    """Get current user from API key."""
+    """Get current user from API key.
+
+    PERFORMANCE FIX: Uses prefix hash to filter candidates before bcrypt verification,
+    reducing O(n) bcrypt calls to O(1) average case.
+    """
 
     api_key = credentials.credentials
 
@@ -68,13 +94,44 @@ async def get_current_user_from_api_key(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # SECURITY FIX: API keys are now stored with bcrypt hashing (slow hash)
-    # We need to query all active API keys and verify each one
-    # This is acceptable because users typically have few API keys
+    # PERFORMANCE FIX: Compute prefix hash for fast filtering
+    # Extract the key body (remove "gms_" prefix)
+    key_body = api_key[4:]
+    if len(key_body) < 8:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key format",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    # Get all active API keys (typically just a few per user)
-    active_keys = db.query(APIKey).filter(APIKey.is_active).all()
+    # Extract ONLY the prefix for indexing (not the full secret)
+    # This prefix is not sensitive - it's just used for database indexing
+    prefix_for_index = key_body[:8]
 
+    # Compute hash of the non-sensitive prefix for database lookup
+    prefix_hash = compute_prefix_hash(prefix_for_index)
+
+    # Query only keys matching the prefix hash (if column exists)
+    # Fallback to all active keys if prefix_hash column doesn't exist yet
+    try:
+        active_keys = (
+            db.query(APIKey)
+            .filter(APIKey.is_active, APIKey.prefix_hash == prefix_hash)
+            .all()
+        )
+    except Exception:
+        # Fallback: prefix_hash column doesn't exist yet (migration pending)
+        # This maintains backward compatibility
+        active_keys = db.query(APIKey).filter(APIKey.is_active).all()
+
+    if not active_keys:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid API key",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Verify with bcrypt (now only 1-2 candidates instead of all keys)
     api_key_record = None
     for key_candidate in active_keys:
         if security_manager.verify_api_key(api_key, str(key_candidate.key_hash)):

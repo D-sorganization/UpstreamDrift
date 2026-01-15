@@ -48,16 +48,21 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          REVIEW_ID: ${{ github.event.review.id }}
+          REVIEWER_LOGIN: ${{ github.event.review.user.login }}
+          REVIEW_BODY: ${{ github.event.review.body }}
+          REVIEW_STATE: ${{ github.event.review.state }}
+          REPO: ${{ github.repository }}
         run: |
-          # FIX: Only get comments from THIS review/user
-          echo "Reviewer: ${{ github.event.review.user.login }}" > feedback.txt
-          echo "Summary: ${{ github.event.review.body }}" >> feedback.txt
+          # SECURITY: Use environment variables instead of direct interpolation
+          echo "Reviewer: $REVIEWER_LOGIN" > feedback.txt
+          echo "Summary: $REVIEW_BODY" >> feedback.txt
 
           echo -e "\nDetailed Inline Comments:" >> feedback.txt
-          gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews/${{ github.event.review.id }}/comments \
+          gh api "repos/$REPO/pulls/$PR_NUMBER/reviews/$REVIEW_ID/comments" \
             --jq '.[] | "- File: " + .path + "\n  Line: " + (.line | tostring) + "\n  Comment: " + .body + "\n"' >> feedback.txt
 
-          if grep -iq "lgtm\|looks good" feedback.txt && [ "${{ github.event.review.state }}" == "APPROVED" ]; then
+          if grep -iq "lgtm\|looks good" feedback.txt && [ "$REVIEW_STATE" == "APPROVED" ]; then
              echo "run_repair=false" >> $GITHUB_OUTPUT
           else
              echo "run_repair=true" >> $GITHUB_OUTPUT
@@ -68,8 +73,11 @@ jobs:
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
         run: |
+          # SECURITY: Use environment variables and read feedback from file
+          FEEDBACK_CONTENT=$(cat feedback.txt)
           jules remote new \
-            --repo ${{ github.repository }} \
-            --session "Address code review feedback on PR #$PR_NUMBER: $(cat feedback.txt)" \
-            --pr $PR_NUMBER
+            --repo "$REPO" \
+            --session "Address code review feedback on PR #$PR_NUMBER: $FEEDBACK_CONTENT" \
+            --pr "$PR_NUMBER"
