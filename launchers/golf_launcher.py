@@ -680,6 +680,7 @@ class DraggableModelCard(QFrame):
         # Status Chip
         status_text, status_color, text_color = self._get_status_info()
         lbl_status = QLabel(status_text)
+        lbl_status.setToolTip(f"Current status: {status_text}")
         lbl_status.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
         lbl_status.setStyleSheet(
             f"background-color: {status_color}; color: {text_color}; padding: 2px 6px; border-radius: 4px;"
@@ -1005,6 +1006,7 @@ class EnvironmentDialog(QDialog):
         form = QHBoxLayout()
         form.addWidget(QLabel("Target Stage:"))
         self.combo_stage = QComboBox()
+        self.combo_stage.setToolTip("Select the build target (stage) for Docker")
         self.combo_stage.addItems(DOCKER_STAGES)
         self.combo_stage.setToolTip("Select the build target (stage) for Docker")
         form.addWidget(self.combo_stage)
