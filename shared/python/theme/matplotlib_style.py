@@ -13,6 +13,8 @@ Usage:
     apply_golf_suite_style(fig)
 """
 
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Any
 
 import matplotlib.pyplot as plt
