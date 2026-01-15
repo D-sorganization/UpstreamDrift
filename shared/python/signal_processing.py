@@ -179,7 +179,8 @@ def compute_spectral_arc_length(
     n_padded = int(pow(2, np.ceil(np.log2(n)) + pad_level))
 
     # FFT
-    # PERFORMANCE: Use rfft for real-valued inputs (approx 2x faster than fft)
+    # PERFORMANCE: Use rfft (real input FFT) to avoid computing negative frequencies
+    # This reduces computation by ~50% and memory usage by ~50%
     spectrum = np.fft.rfft(data, n_padded)
     spectrum_mag = np.abs(spectrum)
 
@@ -193,7 +194,7 @@ def compute_spectral_arc_length(
     # Frequency axis optimization:
     # Instead of generating full fftfreq and masking (which creates large temporary arrays),
     # we calculate the index limit directly.
-    # Positive frequencies are at indices 0 to n_padded//2.
+    # rfft returns positive frequencies at indices 0 to n_padded//2 + 1.
     # df = fs / n_padded
     df = fs / n_padded
     if df > 0:
@@ -202,7 +203,7 @@ def compute_spectral_arc_length(
         limit_idx = 1
 
     # limit_idx must be at most n_padded // 2 + 1 (Nyquist limit for positive freqs)
-    # Note: rfft already returns only positive frequencies (size n_padded//2 + 1)
+    # This matches the size of rfft output exactly.
     limit_idx = min(limit_idx, len(spectrum_mag))
 
     # We only need the positive part of spectrum up to fc
