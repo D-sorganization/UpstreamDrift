@@ -63,13 +63,39 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from shared.python.engine_manager import EngineManager, EngineType
-from shared.python.model_registry import ModelRegistry
+# Lazy imports for heavy modules - these are loaded during async startup
+# to avoid blocking the UI thread during application launch
+EngineManager = None  # Loaded lazily
+EngineType = None  # Loaded lazily
+ModelRegistry = None  # Loaded lazily
+
 from shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
     secure_run,
 )
+
+
+def _lazy_load_engine_manager():
+    """Lazily load EngineManager to speed up initial import."""
+    global EngineManager, EngineType
+    if EngineManager is None:
+        from shared.python.engine_manager import EngineManager as _EM
+        from shared.python.engine_manager import EngineType as _ET
+
+        EngineManager = _EM
+        EngineType = _ET
+    return EngineManager, EngineType
+
+
+def _lazy_load_model_registry():
+    """Lazily load ModelRegistry to speed up initial import."""
+    global ModelRegistry
+    if ModelRegistry is None:
+        from shared.python.model_registry import ModelRegistry as _MR
+
+        ModelRegistry = _MR
+    return ModelRegistry
 
 # Import unified theme system for consistent styling
 try:
@@ -377,6 +403,159 @@ class GolfSplashScreen(QSplashScreen):
         )
         self.repaint()
         QApplication.processEvents()
+
+
+class AsyncStartupWorker(QThread):
+    """Background worker for async application startup.
+
+    This worker performs heavy initialization tasks in a background thread,
+    emitting progress signals to update the splash screen. This keeps the
+    UI responsive during startup.
+
+    Signals:
+        progress: Emitted with (message, percentage) for UI updates
+        finished: Emitted with startup results dict when complete
+        error: Emitted with error message if startup fails
+    """
+
+    progress = pyqtSignal(str, int)
+    finished = pyqtSignal(dict)
+    error = pyqtSignal(str)
+
+    def __init__(self, repos_root: Path) -> None:
+        """Initialize the startup worker.
+
+        Args:
+            repos_root: Root directory of the Golf Modeling Suite
+        """
+        super().__init__()
+        self.repos_root = repos_root
+        self._start_time = 0.0
+
+    def run(self) -> None:
+        """Execute startup tasks in background thread."""
+        self._start_time = time.time()
+        results: dict[str, Any] = {
+            "registry": None,
+            "engine_manager": None,
+            "available_engines": [],
+            "ai_available": False,
+            "docker_available": False,
+            "startup_time_ms": 0,
+        }
+
+        try:
+            # Phase 1: Load model registry
+            self.progress.emit("Loading model registry...", 15)
+            results["registry"] = self._load_registry()
+
+            # Phase 2: Initialize engine manager and probe engines
+            self.progress.emit("Detecting physics engines...", 35)
+            results["engine_manager"], results["available_engines"] = (
+                self._probe_engines()
+            )
+
+            # Phase 3: Check Docker availability
+            self.progress.emit("Checking Docker availability...", 55)
+            results["docker_available"] = self._check_docker()
+
+            # Phase 4: Check AI assistant
+            self.progress.emit("Checking AI assistant...", 70)
+            results["ai_available"] = self._check_ai()
+
+            # Phase 5: Warm up caches
+            self.progress.emit("Warming up caches...", 85)
+            self._warm_caches()
+
+            # Calculate startup time
+            results["startup_time_ms"] = int((time.time() - self._start_time) * 1000)
+
+            self.progress.emit("Ready!", 100)
+            self.finished.emit(results)
+
+        except Exception as e:
+            logger.exception("Startup worker error")
+            self.error.emit(str(e))
+
+    def _load_registry(self) -> Any:
+        """Load the model registry."""
+        try:
+            MR = _lazy_load_model_registry()
+            registry = MR(self.repos_root / "config/models.yaml")
+            model_count = len(registry.get_all_models())
+            logger.info(f"Loaded {model_count} models from registry")
+            return registry
+        except Exception as e:
+            logger.warning(f"Failed to load model registry: {e}")
+            return None
+
+    def _probe_engines(self) -> tuple[Any, list]:
+        """Probe available physics engines."""
+        try:
+            EM, _ = _lazy_load_engine_manager()
+            manager = EM(self.repos_root)
+            available = manager.get_available_engines()
+            logger.info(f"Found {len(available)} engines: {[e.value for e in available]}")
+            return manager, list(available)
+        except Exception as e:
+            logger.warning(f"Failed to probe engines: {e}")
+            return None, []
+
+    def _check_docker(self) -> bool:
+        """Check if Docker is available."""
+        try:
+            secure_run(
+                ["docker", "--version"],
+                timeout=3.0,
+                check=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            logger.info("Docker is available")
+            return True
+        except (SecureSubprocessError, FileNotFoundError, Exception):
+            logger.info("Docker not available")
+            return False
+
+    def _check_ai(self) -> bool:
+        """Check if AI assistant is available."""
+        return AI_AVAILABLE
+
+    def _warm_caches(self) -> None:
+        """Warm up various caches for faster subsequent operations."""
+        # Pre-import commonly used modules
+        try:
+            import numpy  # noqa: F401
+        except ImportError:
+            pass
+
+
+class StartupResults:
+    """Container for async startup results.
+
+    This class holds the results from AsyncStartupWorker and provides
+    a clean interface for GolfLauncher to consume them.
+    """
+
+    def __init__(self) -> None:
+        self.registry: Any = None
+        self.engine_manager: Any = None
+        self.available_engines: list = []
+        self.ai_available: bool = False
+        self.docker_available: bool = False
+        self.startup_time_ms: int = 0
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "StartupResults":
+        """Create StartupResults from worker results dict."""
+        results = cls()
+        results.registry = data.get("registry")
+        results.engine_manager = data.get("engine_manager")
+        results.available_engines = data.get("available_engines", [])
+        results.ai_available = data.get("ai_available", False)
+        results.docker_available = data.get("docker_available", False)
+        results.startup_time_ms = data.get("startup_time_ms", 0)
+        return results
 
 
 class DraggableModelCard(QFrame):
@@ -1092,12 +1271,22 @@ class ContextHelpDock(QDockWidget):
 class GolfLauncher(QMainWindow):
     """Main application window for the launcher."""
 
-    def __init__(self) -> None:
-        """Initialize the main window."""
+    def __init__(self, startup_results: StartupResults | None = None) -> None:
+        """Initialize the main window.
+
+        Args:
+            startup_results: Optional pre-loaded startup results from AsyncStartupWorker.
+                            If provided, skips redundant loading of registry and engines.
+        """
         super().__init__()
         self.setWindowTitle("Golf Modeling Suite - GolfingRobot")
         self.resize(1400, 900)
         self.center_window()
+
+        # Store startup metrics for status display
+        self._startup_time_ms = (
+            startup_results.startup_time_ms if startup_results else 0
+        )
 
         # Set Icon - Use Windows-optimized icon for maximum clarity on Windows
         icon_candidates = [
@@ -1121,7 +1310,9 @@ class GolfLauncher(QMainWindow):
             logger.warning("No icon files found")
 
         # State
-        self.docker_available = False
+        self.docker_available = (
+            startup_results.docker_available if startup_results else False
+        )
         self.selected_model: str | None = None
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []  # Track model order for drag-and-drop
@@ -1133,28 +1324,44 @@ class GolfLauncher(QMainWindow):
         self.special_app_lookup: dict[str, SpecialApp] = {}
         self.current_filter_text = ""
 
-        # Load Registry
-        try:
-            self.registry: ModelRegistry | None = ModelRegistry(
-                REPOS_ROOT / "config/models.yaml"
-            )
-        except ImportError:
-            logger.error("Failed to import ModelRegistry. Registry unavailable.")
-            self.registry = None
+        # Use pre-loaded registry from startup results, or load fresh
+        if startup_results and startup_results.registry is not None:
+            self.registry = startup_results.registry
+            logger.info("Using pre-loaded model registry from async startup")
+        else:
+            # Fallback to loading registry synchronously
+            try:
+                MR = _lazy_load_model_registry()
+                self.registry = MR(REPOS_ROOT / "config/models.yaml")
+            except (ImportError, Exception) as e:
+                logger.error(f"Failed to load ModelRegistry: {e}")
+                self.registry = None
 
-        # Engine Manager for local discovery
-        self.engine_manager: Any = None
-        try:
-            self.engine_manager = EngineManager(REPOS_ROOT)
-        except Exception as e:
-            logger.warning(f"Failed to initialize EngineManager: {e}")
-            self.engine_manager = None
+        # Use pre-loaded engine manager from startup results, or load fresh
+        if startup_results and startup_results.engine_manager is not None:
+            self.engine_manager = startup_results.engine_manager
+            logger.info("Using pre-loaded engine manager from async startup")
+        else:
+            # Fallback to loading engine manager synchronously
+            try:
+                EM, _ = _lazy_load_engine_manager()
+                self.engine_manager = EM(REPOS_ROOT)
+            except Exception as e:
+                logger.warning(f"Failed to initialize EngineManager: {e}")
+                self.engine_manager = None
 
         self._build_available_models()
         self._initialize_model_order()
 
         self.init_ui()
-        self.check_docker()
+
+        # Use pre-loaded Docker status or check asynchronously
+        if startup_results:
+            # Docker status already known from async startup
+            self._apply_docker_status(startup_results.docker_available)
+        else:
+            # Fallback to async check
+            self.check_docker()
 
         # Load saved layout
         self._load_layout()
@@ -1163,6 +1370,25 @@ class GolfLauncher(QMainWindow):
         self.cleanup_timer = QTimer(self)
         self.cleanup_timer.timeout.connect(self._cleanup_processes)
         self.cleanup_timer.start(10000)  # Clean up every 10 seconds
+
+        # Log startup performance
+        if self._startup_time_ms > 0:
+            logger.info(f"Application startup completed in {self._startup_time_ms}ms")
+
+    def _apply_docker_status(self, available: bool) -> None:
+        """Apply Docker availability status to UI.
+
+        Args:
+            available: Whether Docker is available
+        """
+        self.docker_available = available
+        if available:
+            self.lbl_status.setText("● System Ready")
+            self.lbl_status.setStyleSheet("color: #30D158; font-weight: bold;")
+        else:
+            self.lbl_status.setText("● Docker Not Found")
+            self.lbl_status.setStyleSheet("color: #FF375F; font-weight: bold;")
+        self.update_launch_button()
 
     def _build_available_models(self) -> None:
         """Collect all known models and auxiliary applications."""
@@ -2740,70 +2966,105 @@ class GolfLauncher(QMainWindow):
             logger.info(f"Process {key} has terminated")
 
 
-if __name__ == "__main__":
+def main() -> int:
+    """Main entry point with async startup for optimal performance.
+
+    This function implements a true async startup sequence:
+    1. Show splash screen immediately (fast UI response)
+    2. Start background worker for heavy initialization
+    3. Update splash progress from worker signals
+    4. Create main window with pre-loaded resources
+    5. Show main window when ready
+
+    Returns:
+        Exit code from the application
+    """
     app = QApplication(sys.argv)
 
-    # Global Font
-    font = QFont("Segoe UI", 10)
+    # Global Font - use theme system if available
+    if THEME_AVAILABLE:
+        font = get_qfont(size=Sizes.BASE, weight=Weights.NORMAL)
+    else:
+        font = QFont("Segoe UI", 10)
     app.setFont(font)
 
-    # Show splash screen
+    # Show splash screen immediately for fast perceived startup
     splash = GolfSplashScreen()
     splash.show()
-
-    # Phase 1: Load application resources
-    splash.show_message("Loading application resources...", 10)
+    splash.show_message("Initializing...", 5)
     QApplication.processEvents()
 
-    # Phase 2: Load model registry (actual work during splash for init + cache warming)
-    splash.show_message("Loading model registry...", 25)
-    QApplication.processEvents()
-    try:
-        # Initialize registry during splash to warm caches; instance discarded (GolfLauncher
-        # creates its own instance later). This ensures model scanning happens during splash.
-        _model_registry = ModelRegistry()
-        logger.info(f"Loaded {len(_model_registry.get_all_models())} models")
-    except Exception as e:
-        logger.warning(f"Model registry load warning: {e}")
+    # Container for startup results
+    startup_results: StartupResults | None = None
+    startup_error: str | None = None
 
-    # Phase 3: Initialize engine manager (actual work - probing can be slow)
-    splash.show_message("Probing physics engines...", 45)
-    QApplication.processEvents()
-    try:
-        # Probe engines during splash to warm import caches; instance discarded.
-        # This front-loads the latency of importing MuJoCo/Drake/Pinocchio/OpenSim.
-        _engine_manager = EngineManager()
-        available_engines = _engine_manager.get_available_engines()
-        logger.info(
-            f"Found {len(available_engines)} available engines: {available_engines}"
+    def on_progress(message: str, progress: int) -> None:
+        """Handle progress updates from startup worker."""
+        splash.show_message(message, progress)
+
+    def on_finished(results: dict) -> None:
+        """Handle startup completion."""
+        nonlocal startup_results
+        startup_results = StartupResults.from_dict(results)
+
+    def on_error(error: str) -> None:
+        """Handle startup error."""
+        nonlocal startup_error
+        startup_error = error
+        logger.error(f"Async startup failed: {error}")
+
+    # Start async startup worker
+    worker = AsyncStartupWorker(REPOS_ROOT)
+    worker.progress.connect(on_progress)
+    worker.finished.connect(on_finished)
+    worker.error.connect(on_error)
+    worker.start()
+
+    # Process events while waiting for worker to complete
+    # This keeps the splash screen responsive and animations smooth
+    while worker.isRunning():
+        QApplication.processEvents()
+        time.sleep(0.016)  # ~60fps update rate
+
+    # Ensure worker has finished
+    worker.wait()
+
+    # Handle startup error
+    if startup_error:
+        QMessageBox.warning(
+            None,
+            "Startup Warning",
+            f"Some components failed to load:\n{startup_error}\n\n"
+            "The application will continue with limited functionality.",
         )
-    except Exception as e:
-        logger.warning(f"Engine manager init warning: {e}")
 
-    # Phase 4: Check optional dependencies
-    splash.show_message("Checking AI assistant...", 65)
-    QApplication.processEvents()
-    if AI_AVAILABLE:
-        logger.info("AI Assistant module available")
-    else:
-        logger.info("AI Assistant not available (optional)")
-
-    # Phase 5: Build UI
-    splash.show_message("Building user interface...", 80)
+    # Build UI with pre-loaded resources
+    splash.show_message("Building user interface...", 92)
     QApplication.processEvents()
 
-    # Create main window
-    window = GolfLauncher()
+    window = GolfLauncher(startup_results)
 
-    # Phase 6: Final setup
-    splash.show_message("Finalizing...", 95)
-    QApplication.processEvents()
-
+    # Final setup
     splash.show_message("Ready!", 100)
     QApplication.processEvents()
+
+    # Small delay to show "Ready!" message
+    time.sleep(0.15)
 
     # Close splash and show main window
     splash.finish(window)
     window.show()
 
-    sys.exit(app.exec())
+    # Log final startup metrics
+    if startup_results:
+        logger.info(
+            f"Startup complete: {startup_results.startup_time_ms}ms, "
+            f"{len(startup_results.available_engines)} engines, "
+            f"Docker: {startup_results.docker_available}"
+        )
+
+    return app.exec()
+
+
+if __name__ == "__main__":
+    sys.exit(main())
