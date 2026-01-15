@@ -385,6 +385,43 @@ class DrakeRecorder:
 
         return times, np.array(vals)
 
+    def export_to_dict(self) -> dict[str, Any]:
+        """Export all recorded data to a dictionary."""
+        data: dict[str, Any] = {"times": np.array(self.times)}
+
+        def add_series(target: dict, name: str, arr_list: list) -> None:
+            if not arr_list:
+                return
+            arr = np.array(arr_list)
+            if len(arr) != len(self.times):
+                # Simple alignment
+                min_len = min(len(arr), len(self.times))
+                arr = arr[:min_len]
+
+            target[name] = arr
+
+        add_series(data, "joint_positions", self.q_history)
+        add_series(data, "joint_velocities", self.v_history)
+        add_series(data, "club_head_position", self.club_head_pos_history)
+        add_series(data, "com_position", self.com_position_history)
+        add_series(data, "angular_momentum", self.angular_momentum_history)
+        add_series(data, "ground_forces", self.ground_forces_history)
+        add_series(data, "cop_position", self.cop_position_history)
+
+        # Export Induced Accel
+        if self.induced_accelerations:
+            data["induced_accelerations"] = {}
+            for k, v in self.induced_accelerations.items():
+                add_series(data["induced_accelerations"], str(k), v)
+
+        # Export Counterfactuals
+        if self.counterfactuals:
+            data["counterfactuals"] = {}
+            for k, v in self.counterfactuals.items():
+                add_series(data["counterfactuals"], str(k), v)
+
+        return data
+
 
 class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimported]
     """Main GUI Window for Drake Golf Simulation."""
@@ -1697,47 +1734,28 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         plt.show()
 
     def _export_data(self) -> None:
-        """Export recorded data to CSV."""
+        """Export recorded data to multiple formats."""
         if not self.recorder.times:
             QtWidgets.QMessageBox.warning(self, "No Data", "No data to export.")
             return
 
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Save Data", "drake_sim_data.csv", "CSV Files (*.csv)"
+            self, "Save Data", "drake_sim_data", "All Files (*)"
         )
         if not filename:
             return
 
         try:
-            import pandas as pd
+            from shared.python.export import export_recording_all_formats
 
-            data = {"time": self.recorder.times}
+            data_dict = self.recorder.export_to_dict()
+            results = export_recording_all_formats(filename, data_dict)
 
-            def add_series(target: dict, name: str, arr_list: list) -> None:
-                if not arr_list:
-                    return
-                arr = np.array(arr_list)
-                if arr.ndim > 1:
-                    for i in range(arr.shape[1]):
-                        target[f"{name}_{i}"] = arr[:, i]
-                else:
-                    target[name] = arr
+            msg = "Export Results:\n"
+            for fmt, success in results.items():
+                msg += f"{fmt}: {'Success' if success else 'Failed'}\n"
 
-            add_series(data, "q", self.recorder.q_history)
-            add_series(data, "v", self.recorder.v_history)
-            add_series(data, "club_pos", self.recorder.club_head_pos_history)
-
-            # Export Induced Accel
-            for k, v in self.recorder.induced_accelerations.items():
-                # v is list of arrays
-                add_series(data, f"induced_{k}", v)
-
-            # Export Counterfactuals
-            for k, v in self.recorder.counterfactuals.items():
-                add_series(data, f"cf_{k}", v)
-
-            df = pd.DataFrame(data)
-            df.to_csv(filename, index=False)
+            QtWidgets.QMessageBox.information(self, "Export Complete", msg)
             self._update_status(f"Data exported to {filename}")
 
         except Exception as e:

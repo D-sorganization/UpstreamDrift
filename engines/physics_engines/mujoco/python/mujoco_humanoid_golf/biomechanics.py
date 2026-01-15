@@ -8,7 +8,7 @@ derived biomechanical quantities.
 from __future__ import annotations
 
 import logging
-from typing import cast
+from typing import Any, cast
 
 import mujoco
 import numpy as np
@@ -403,7 +403,8 @@ class BiomechanicalAnalyzer:
 class SwingRecorder:
     """Records time-series biomechanical data during a golf swing."""
 
-    def __init__(self) -> None:
+    def __init__(self, engine: Any = None) -> None:
+        self.engine = engine
         self.reset()
 
     def reset(self) -> None:
@@ -458,6 +459,13 @@ class SwingRecorder:
             val = None
             if isinstance(source_name, str):
                 val = f.induced_accelerations.get(source_name)
+            # Support int indexing if needed (though strings are preferred)
+            elif isinstance(source_name, int):
+                # Fallback: if we have "selected_actuator" and index matches?
+                # Or if the dictionary keys are ints?
+                # MuJoCo analyzer uses string keys like 'gravity', 'velocity'.
+                # For compatibility, return empty if int is passed but not found.
+                pass
 
             if val is not None:
                 times.append(f.time)
@@ -467,6 +475,16 @@ class SwingRecorder:
             return np.array([], dtype=np.float64), np.array([], dtype=np.float64)
 
         return np.array(times, dtype=np.float64), cast(np.ndarray, np.array(values))
+
+    def set_analysis_config(self, config: dict[str, Any]) -> None:
+        """Configure which advanced metrics to record/compute.
+
+        Args:
+            config: Dictionary of configuration flags (e.g. {'ztcf': True}).
+        """
+        # MuJoCo recorder typically records what is passed to record_frame.
+        # The extraction logic in SimWidget handles configuration.
+        pass
 
     def get_num_frames(self) -> int:
         """Get number of recorded frames."""

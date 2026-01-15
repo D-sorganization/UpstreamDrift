@@ -7,14 +7,14 @@ Tech debt, dependency aging, bus factor.
 
 ## Findings
 *   **Strengths:**
-    *   Strong separation of concerns prevents "spaghetti code".
-    *   Code is generally clean and linted.
-    *   Shared libraries reduce duplication across apps.
+    *   High modularity and separation of concerns make the codebase easy to navigate.
+    *   Strict typing and linting reduce the risk of bit-rot.
+    *   Use of standard modern libraries (`pathlib`, `pydantic`, `structlog`).
 
 *   **Weaknesses:**
-    *   The "Bus Factor" might be low if only one person understands the complex `ztcf`/`zvcf` math.
-    *   Maintaining support for 5 distinct physics engines is a high maintenance burden.
+    *   Presence of "Legacy" handling for Matlab engines suggests some technical debt.
+    *   Dependencies on multiple complex physics engines (Drake, MuJoCo, Pinocchio) increase the maintenance burden (dependency hell risk).
 
 ## Recommendations
-1.  Ensure "Why" is documented for complex math, not just "How".
-2.  Consider deprecating engines if they fall behind in support (e.g., if MyoSuite stops updating).
+1.  Isolate engine dependencies so that the core suite can run even if one engine fails to install (already partially handled by `EngineManager`).
+2.  Prioritize refactoring the Matlab engine integration to match the Python adapter pattern.

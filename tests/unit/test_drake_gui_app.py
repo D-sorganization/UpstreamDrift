@@ -1,6 +1,5 @@
 """Unit tests for Drake GUI App."""
 
-import importlib.util
 import sys
 from unittest.mock import MagicMock
 
@@ -14,9 +13,13 @@ sys.modules["pydrake.multibody"] = MagicMock()
 sys.modules["pydrake.multibody.plant"] = MagicMock()
 sys.modules["pydrake.multibody.tree"] = MagicMock()
 
-# Import after mocking
-# Check for presence
-HAS_QT = importlib.util.find_spec("PyQt6") is not None
+# Check for PyQt6 GUI library availability (not just module presence)
+try:
+    from PyQt6 import QtWidgets  # noqa: F401
+
+    HAS_QT = True
+except (ImportError, OSError):
+    HAS_QT = False
 
 
 def teardown_module(module):

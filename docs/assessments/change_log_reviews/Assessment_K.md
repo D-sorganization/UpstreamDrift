@@ -1,20 +1,19 @@
 # Assessment K: Reproducibility & Provenance
 
-## Grade: 7/10
+## Grade: 8/10
 
 ## Focus
 Determinism, versioning, experiment tracking.
 
 ## Findings
 *   **Strengths:**
-    *   `provenance.py` exists (based on memory), suggesting metadata capture.
-    *   `GenericPhysicsRecorder` captures comprehensive state (q, v, tau).
-    *   `seed` setting is common in scientific sims (though not explicitly verified in every file, `np.random` usage suggests it).
+    *   Strong emphasis on "scientific hygiene" and provenance in the codebase.
+    *   Structured logging (`structlog`) captures context for runs.
+    *   Launchers log versions and paths.
 
 *   **Weaknesses:**
-    *   Physics engines (MuJoCo, Drake) are deterministic, but floating-point differences across platforms/versions can affect reproducibility.
-    *   Dependency versions are pinned (`<2.0.0`), but not exact hashes (no `requirements.lock` seen, only `pyproject.toml` ranges).
+    *   It's not immediately clear if a `set_seed` method is strictly enforced across all physics engines via the `PhysicsEngine` protocol, which is critical for deterministic simulations.
 
 ## Recommendations
-1.  Generate a `requirements.lock` or `poetry.lock` file.
-2.  Include git commit hash and dirty state in every recorded data file.
+1.  Explicitly add `set_seed(seed: int)` to the `PhysicsEngine` protocol if not already present.
+2.  Ensure every simulation run outputs a "manifest" file with git hash, timestamps, and configuration.

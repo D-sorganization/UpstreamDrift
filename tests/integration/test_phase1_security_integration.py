@@ -14,7 +14,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from launchers.golf_launcher import GolfLauncher
+import pytest
+
 from shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
@@ -22,6 +23,15 @@ from shared.python.secure_subprocess import (
     validate_executable,
     validate_script_path,
 )
+
+# GolfLauncher requires PyQt6, import conditionally
+try:
+    from launchers.golf_launcher import GolfLauncher
+
+    PYQT6_AVAILABLE = True
+except (ImportError, OSError):
+    PYQT6_AVAILABLE = False
+    GolfLauncher = None  # type: ignore[misc, assignment]
 
 
 class TestPhase1SecurityIntegration(unittest.TestCase):
@@ -92,7 +102,9 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         """Test secure_run with valid command."""
         # Test with allowed command
         try:
-            result = secure_run(["python", "--version"], capture_output=True, text=True)
+            result = secure_run(
+                ["python", "--version"], capture_output=True, text=True, timeout=10
+            )
             self.assertEqual(result.returncode, 0)
             self.assertIn("Python", result.stdout)
         except SecureSubprocessError:
@@ -120,7 +132,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
             with secure_popen(
                 ["python", "--version"], stdout=subprocess.PIPE, text=True
             ) as proc:
-                output, _ = proc.communicate()
+                output, _ = proc.communicate(timeout=10)
                 self.assertIn("Python", output)
         except SecureSubprocessError:
             self.skipTest("Python not available or not in whitelist")
@@ -130,6 +142,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         with self.assertRaises(SecureSubprocessError):
             secure_popen(["malicious_exe"])
 
+    @pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not available")
     @patch("shared.python.secure_subprocess.secure_run")
     @patch("launchers.golf_launcher.QApplication")
     @patch("launchers.golf_launcher.QIcon")
@@ -195,7 +208,10 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         with patch("pathlib.Path.exists", return_value=True):
             try:
                 secure_run(
-                    ["python", "--version"], cwd=str(valid_cwd), suite_root=suite_root
+                    ["python", "--version"],
+                    cwd=str(valid_cwd),
+                    suite_root=suite_root,
+                    timeout=10,
                 )
             except SecureSubprocessError as e:
                 if "not allowed" not in str(e):
@@ -219,6 +235,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
                 env=clean_env,
                 capture_output=True,
                 text=True,
+                timeout=10,
             )
             # Should have limited environment variables
             env_count = int(result.stdout.strip())
@@ -270,7 +287,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         def run_subprocess():
             try:
                 result = secure_run(
-                    ["python", "--version"], capture_output=True, text=True
+                    ["python", "--version"], capture_output=True, text=True, timeout=10
                 )
                 results.append(result.returncode)
             except Exception as e:

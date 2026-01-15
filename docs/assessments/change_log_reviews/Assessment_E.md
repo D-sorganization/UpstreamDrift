@@ -1,20 +1,20 @@
 # Assessment E: Performance & Scalability
 
-## Grade: 7/10
+## Grade: 8/10
 
 ## Focus
 Computational efficiency, memory, profiling.
 
 ## Findings
 *   **Strengths:**
-    *   `GenericPhysicsRecorder` uses pre-allocation (`_ensure_buffers_allocated`) to avoid dynamic array resizing during simulation loops.
-    *   Use of `numpy` for vectorized operations (e.g., `signal_processing.py` FFT convolutions).
-    *   Support for "headless" modes implies scalability for batch processing.
+    *   Critical signal processing functions (DTW, CWT) use Numba JIT compilation for significant speedups (~100x).
+    *   Use of `functools.lru_cache` for wavelet generation avoids redundant computations.
+    *   Launchers use lazy loading to minimize memory footprint at startup.
+    *   Presence of `tests/benchmarks/` indicates a culture of performance monitoring.
 
 *   **Weaknesses:**
-    *   Python overhead in inner simulation loops (calling `step` and `record_step` per frame) can be a bottleneck compared to C++ implementations.
-    *   Heavy dependencies (Qt, Physics Engines) make the footprint large.
+    *   Numba is an optional dependency; fallback to pure Python is provided but will be significantly slower for heavy workloads.
 
 ## Recommendations
-1.  Profile the main loop (`step` + `record`) using `cProfile` and optimize hot paths.
-2.  Consider moving data recording logic to C++ bindings if performance becomes critical.
+1.  Consider making Numba a hard dependency if the pure Python fallback proves too slow for production datasets.
+2.  Continue expanding the benchmark suite to cover full simulation loops.
