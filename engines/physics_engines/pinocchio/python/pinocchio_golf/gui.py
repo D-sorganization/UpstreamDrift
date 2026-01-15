@@ -223,28 +223,26 @@ class PinocchioRecorder:
         if not self.frames:
             return np.array([]), np.array([])
 
-        # Pinocchio stores induced accels as dict with str keys
-        # If source_name is int, we might not find it unless we map indices to names
-        # Or if "specific_control" stores array, we might want column?
-        # LivePlotWidget logic for `induced_accel_source` expects (time, vector).
-        # Pinocchio stores `induced_accelerations['gravity']` as vector.
+        times = []
+        values = []
 
-        # If int passed, convert to string if possible, or return empty?
-        # LivePlotWidget passes int index of actuator? No, it passes combo index.
-        # Wait, LivePlotWidget logic:
-        # `src_idx = self.source_combo.currentIndex()`
-        # `times, data = self.recorder.get_induced_acceleration_series(src_idx)`
-        # `GenericPhysicsRecorder` uses `src_idx` as key in
-        # `data["induced_accelerations"]` (dict int -> array).
+        # Map int index to key if possible (unlikely for Pinocchio basic)
+        key = source_name
+        if isinstance(key, int):
+            # Fallback or specific mapping could go here.
+            # Pinocchio primarily uses string keys.
+            pass
 
-        # Pinocchio stores dict str -> array.
-        # We need to adapt.
-        # Pinocchio currently computes 'gravity', 'velocity', 'total'
-        # and 'specific_control' (if requested).
-        # We don't have per-actuator breakdown by default.
-        # So for Pinocchio, we might return empty unless we map `src_idx`.
+        for f in self.frames:
+            val = f.induced_accelerations.get(str(key))
+            if val is not None:
+                times.append(f.time)
+                values.append(val)
 
-        return np.array([]), np.array([])
+        if not values:
+            return np.array([]), np.array([])
+
+        return np.array(times), np.array(values)
 
     def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Extract time series for a specific counterfactual component."""
@@ -266,6 +264,50 @@ class PinocchioRecorder:
         values = [self.frames[i].counterfactuals[cf_name] for i in valid_indices]
 
         return filtered_times, np.array(values)
+
+    def export_to_dict(self) -> dict[str, Any]:
+        """Export all recorded data to a dictionary."""
+        if not self.frames:
+            return {}
+
+        export_data = {}
+
+        # Get basic time series
+        times, positions = self.get_time_series("joint_positions")
+        _, velocities = self.get_time_series("joint_velocities")
+        _, torques = self.get_time_series("joint_torques")
+        _, energies = self.get_time_series("total_energy")
+
+        export_data["time"] = times
+        export_data["joint_positions"] = positions
+        export_data["joint_velocities"] = velocities
+        export_data["joint_torques"] = torques
+        export_data["total_energy"] = energies
+
+        # Export Induced
+        first_frame = self.frames[0]
+        if first_frame.induced_accelerations:
+            all_keys = set()
+            for f in self.frames:
+                all_keys.update(f.induced_accelerations.keys())
+
+            for key in all_keys:
+                _, vals = self.get_induced_acceleration_series(key)
+                if len(vals) > 0:
+                    export_data[f"induced_{key}"] = vals
+
+        # Export Counterfactuals
+        if first_frame.counterfactuals:
+            all_keys = set()
+            for f in self.frames:
+                all_keys.update(f.counterfactuals.keys())
+
+            for key in all_keys:
+                _, vals = self.get_counterfactual_series(key)
+                if len(vals) > 0:
+                    export_data[f"cf_{key}"] = vals
+
+        return export_data
 
 
 class PinocchioGUI(QtWidgets.QMainWindow):
@@ -896,12 +938,12 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             QtWidgets.QApplication.restoreOverrideCursor()
 
     def _export_statistics(self) -> None:
-        """Export all data (Statistics + Time Series) to CSV."""
+        """Export recorded data to multiple formats."""
         if self.recorder.get_num_frames() == 0:
             return
 
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Save Data", "pinocchio_data.csv", "CSV Files (*.csv)"
+            self, "Save Data", "pinocchio_data", "All Files (*)"
         )
         if not filename:
             return
@@ -910,77 +952,16 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         self._ensure_analysis_data_populated()
 
         try:
-            import pandas as pd
+            from shared.python.export import export_recording_all_formats
 
-            # 1. Basic Time Series
-            times, positions = self.recorder.get_time_series("joint_positions")
-            _, velocities = self.recorder.get_time_series("joint_velocities")
-            _, torques = self.recorder.get_time_series("joint_torques")
+            data_dict = self.recorder.export_to_dict()
+            results = export_recording_all_formats(filename, data_dict)
 
-            data = {"time": times}
+            msg = "Export Results:\n"
+            for fmt, success in results.items():
+                msg += f"{fmt}: {'Success' if success else 'Failed'}\n"
 
-            # Helper to add 2D arrays columns
-            def add_cols(name: str, arr: Any) -> None:
-                arr = np.asarray(arr)
-                if arr.ndim > 1:
-                    for i in range(arr.shape[1]):
-                        # Use joint name if available
-                        col_name = (
-                            f"{name}_{self.joint_names[i]}"
-                            if i < len(self.joint_names)
-                            else f"{name}_{i}"
-                        )
-                        data[col_name] = arr[:, i]
-
-            add_cols("q", positions)
-            add_cols("v", velocities)
-            add_cols("tau", torques)
-
-            # 2. Advanced Metrics (Induced & Counterfactuals)
-            # We need to extract them from frames since they are stored as dicts
-            # Assuming all frames have same keys after _ensure_analysis_data_populated
-            first_frame = self.recorder.frames[0]
-
-            # Induced
-            if first_frame.induced_accelerations:
-                # Get all unique keys across all frames to handle dynamic
-                # "specific_control"
-                all_keys: set[str] = set()
-                for f in self.recorder.frames:
-                    all_keys.update(f.induced_accelerations.keys())
-
-                for key in all_keys:
-                    # Extract list of arrays
-                    series = [
-                        f.induced_accelerations.get(
-                            key,
-                            np.zeros_like(
-                                first_frame.induced_accelerations.get(
-                                    "total",
-                                    np.zeros(self.model.nv if self.model else 0),
-                                )
-                            ),
-                        )
-                        for f in self.recorder.frames
-                    ]
-                    add_cols(f"induced_acc_{key}", np.array(series))
-
-            # Counterfactuals
-            if first_frame.counterfactuals:
-                for key in first_frame.counterfactuals.keys():
-                    series = [
-                        f.counterfactuals.get(
-                            key, np.zeros_like(first_frame.counterfactuals[key])
-                        )
-                        for f in self.recorder.frames
-                    ]
-                    add_cols(f"cf_{key}", np.array(series))
-
-            # Create DataFrame
-            df = pd.DataFrame(data)
-
-            # Save
-            df.to_csv(filename, index=False)
+            QtWidgets.QMessageBox.information(self, "Export Complete", msg)
             self.log_write(f"Data exported to {filename}")
 
         except Exception as e:

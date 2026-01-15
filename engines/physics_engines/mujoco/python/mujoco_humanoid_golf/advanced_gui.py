@@ -26,6 +26,7 @@ from .gui.tabs.physics_tab import PhysicsTab
 from .gui.tabs.plotting_tab import PlottingTab
 from .gui.tabs.visualization_tab import VisualizationTab
 from .sim_widget import MuJoCoSimWidget
+from shared.python.dashboard.widgets import LivePlotWidget
 
 logger = logging.getLogger(__name__)
 
@@ -124,6 +125,14 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.tab_widget.addTab(self.analysis_tab, "Analysis")
         self.plotting_tab = PlottingTab(self.sim_widget, self)
         self.tab_widget.addTab(self.plotting_tab, "Plotting")
+
+        # Live Analysis Tab
+        recorder = self.sim_widget.get_recorder()
+        # Ensure recorder has engine reference for joint names
+        recorder.engine = self.sim_widget.engine
+        self.live_plot = LivePlotWidget(recorder)
+        self.tab_widget.addTab(self.live_plot, "Live Analysis")
+
         self.manipulation_tab = ManipulationTab(self.sim_widget, self)
         self.tab_widget.addTab(self.manipulation_tab, "Interactive Pose")
 
@@ -154,6 +163,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
         self.status_timer = QtCore.QTimer(self)
         self.status_timer.timeout.connect(self._update_status_bar)
         self.status_timer.start(200)  # Update every 200ms
+
+        # Connect live plot update to simulation timer
+        # This ensures the plot updates whenever the simulation steps/renders
+        if hasattr(self.sim_widget, "timer"):
+            self.sim_widget.timer.timeout.connect(self.live_plot.update_plot)
 
     @property
     def model_configs(self) -> list[dict]:
