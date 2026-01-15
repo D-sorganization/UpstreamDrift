@@ -380,6 +380,7 @@ class DraggableModelCard(QFrame):
         # Status Chip
         status_text, status_color = self._get_status_info()
         lbl_status = QLabel(status_text)
+        lbl_status.setToolTip(f"Current status: {status_text}")
         lbl_status.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
         lbl_status.setStyleSheet(
             f"background-color: {status_color}; color: white; padding: 2px 6px; border-radius: 4px;"
@@ -689,6 +690,7 @@ class EnvironmentDialog(QDialog):
         form = QHBoxLayout()
         form.addWidget(QLabel("Target Stage:"))
         self.combo_stage = QComboBox()
+        self.combo_stage.setToolTip("Select the build target (stage) for Docker")
         self.combo_stage.addItems(DOCKER_STAGES)
         form.addWidget(self.combo_stage)
         build_layout.addLayout(form)
@@ -697,6 +699,7 @@ class EnvironmentDialog(QDialog):
         actions_layout = QHBoxLayout()
 
         self.btn_build = QPushButton("Build Environment")
+        self.btn_build.setToolTip("Rebuild the Docker container with selected target stage")
         self.btn_build.clicked.connect(self.start_build)
         # Store original text for restoration
         self._original_build_text = self.btn_build.text()
@@ -1386,11 +1389,13 @@ class GolfLauncher(QMainWindow):
         self.btn_customize_tiles.clicked.connect(self.open_layout_manager)
         top_bar.addWidget(self.btn_customize_tiles)
 
-        btn_env = QPushButton("Manage Environment")
+        btn_env = QPushButton("⚙️ Environment")
+        btn_env.setToolTip("Manage Docker environment and dependencies")
         btn_env.clicked.connect(self.open_environment_manager)
         top_bar.addWidget(btn_env)
 
-        btn_help = QPushButton("Help")
+        btn_help = QPushButton("📖 Help")
+        btn_help.setToolTip("View documentation and user guide")
         btn_help.clicked.connect(self.open_help)
         top_bar.addWidget(btn_help)
 
