@@ -5,6 +5,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+# Check for PyQt6 GUI library availability
+try:
+    from PyQt6 import QtWidgets  # noqa: F401
+
+    PYQT6_AVAILABLE = True
+except (ImportError, OSError):
+    PYQT6_AVAILABLE = False
+
 
 class TestSharedModuleLazyImports:
     """Test that shared module doesn't eagerly import heavy dependencies."""
@@ -57,6 +65,7 @@ class TestSharedModuleLazyImports:
         assert not hasattr(common_utils, "pd")
 
 
+@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available")
 class TestPolynomialGeneratorLazyImport:
     """Test lazy import of polynomial generator widget."""
 

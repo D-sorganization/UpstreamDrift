@@ -4,199 +4,192 @@ import sys
 import unittest
 
 import numpy as np
+import pytest
 
-# Mock PyQt6 to run in headless environment
-# We need to ensure QApplication is not actually created or GUI windows shown,
-# but we need the classes to exist.
-# The `widgets.py` and `window.py` import PyQt6, so we must rely on installed packages.
-# However, running them in a headless env requires QT_QPA_PLATFORM=offscreen, which is set in memory.
-from PyQt6 import QtWidgets
+# Skip entire module if PyQt6 GUI libraries are not available
+try:
+    from PyQt6 import QtWidgets
+
+    PYQT6_AVAILABLE = True
+except (ImportError, OSError):
+    PYQT6_AVAILABLE = False
+    QtWidgets = None  # type: ignore[misc, assignment]
+
+pytestmark = pytest.mark.skipif(
+    not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available"
+)
 
 sys.path.append(os.getcwd())
 
-from shared.python.dashboard.recorder import GenericPhysicsRecorder
-from shared.python.dashboard.widgets import LivePlotWidget
-from shared.python.dashboard.window import UnifiedDashboardWindow
-from shared.python.interfaces import PhysicsEngine
+if PYQT6_AVAILABLE:
+    from shared.python.dashboard.recorder import GenericPhysicsRecorder
+    from shared.python.dashboard.widgets import LivePlotWidget
+    from shared.python.dashboard.window import UnifiedDashboardWindow
+    from shared.python.interfaces import PhysicsEngine
 
+    # Mock Physics Engine - only defined when PyQt6 is available
+    class MockPhysicsEngine(PhysicsEngine):
+        def __init__(self):
+            self._time = 0.0
+            self._q = np.zeros(10)
+            self._v = np.zeros(10)
 
-# Mock Physics Engine
-class MockPhysicsEngine(PhysicsEngine):
-    def __init__(self):
-        self._time = 0.0
-        self._q = np.zeros(10)
-        self._v = np.zeros(10)
+        @property
+        def model_name(self) -> str:
+            return "MockModel"
 
-    @property
-    def model_name(self) -> str:
-        return "MockModel"
+        def load_from_path(self, path: str) -> None:
+            pass
 
-    def load_from_path(self, path: str) -> None:
-        pass
+        def load_from_string(self, content: str, extension: str | None = None) -> None:
+            pass
 
-    def load_from_string(self, content: str, extension: str | None = None) -> None:
-        pass
+        def reset(self) -> None:
+            self._time = 0.0
+            self._q = np.zeros(10)
+            self._v = np.zeros(10)
 
-    def reset(self) -> None:
-        self._time = 0.0
-        self._q = np.zeros(10)
-        self._v = np.zeros(10)
+        def step(self, dt: float | None = None) -> None:
+            self._time += dt or 0.01
+            self._q += 0.01
+            self._v += 0.01
 
-    def step(self, dt: float | None = None) -> None:
-        self._time += dt or 0.01
-        self._q += 0.01
-        self._v += 0.01
+        def forward(self) -> None:
+            pass
 
-    def forward(self) -> None:
-        pass
+        def get_state(self):
+            return self._q, self._v
 
-    def get_state(self):
-        return self._q, self._v
+        def set_state(self, q, v) -> None:
+            self._q = q
+            self._v = v
 
-    def set_state(self, q, v) -> None:
-        self._q = q
-        self._v = v
+        def set_control(self, u) -> None:
+            pass
 
-    def set_control(self, u) -> None:
-        pass
+        def get_time(self) -> float:
+            return self._time
 
-    def get_time(self) -> float:
-        return self._time
+        def compute_mass_matrix(self):
+            return np.eye(10)
 
-    def compute_mass_matrix(self):
-        return np.eye(10)
+        def compute_bias_forces(self):
+            return np.zeros(10)
 
-    def compute_bias_forces(self):
-        return np.zeros(10)
+        def compute_gravity_forces(self):
+            return np.zeros(10)
 
-    def compute_gravity_forces(self):
-        return np.zeros(10)
+        def compute_inverse_dynamics(self, qacc):
+            return np.zeros(10)
 
-    def compute_inverse_dynamics(self, qacc):
-        return np.zeros(10)
+        def compute_jacobian(self, body_name):
+            return None
 
-    def compute_jacobian(self, body_name):
-        return None
+        def compute_drift_acceleration(self):
+            return np.zeros(10)
 
-    def compute_drift_acceleration(self):
-        return np.zeros(10)
+        def compute_control_acceleration(self, tau):
+            return np.zeros(10)
 
-    def compute_control_acceleration(self, tau):
-        return np.zeros(10)
+        def compute_ztcf(self, q, v):
+            return np.zeros(10)
 
-    def compute_ztcf(self, q, v):
-        return np.zeros(10)
+        def compute_zvcf(self, q):
+            return np.zeros(10)
 
-    def compute_zvcf(self, q):
-        return np.zeros(10)
+    class TestDashboardEnhancements(unittest.TestCase):
+        app: "QtWidgets.QApplication | None" = None
 
+        @classmethod
+        def setUpClass(cls):
+            # Create a QApplication instance for widgets
+            if not QtWidgets.QApplication.instance():
+                cls.app = QtWidgets.QApplication([])
+            else:
+                # Cast to QApplication since we know we created QApplication above
+                existing = QtWidgets.QApplication.instance()
+                cls.app = (
+                    existing if isinstance(existing, QtWidgets.QApplication) else None
+                )
 
-class TestDashboardEnhancements(unittest.TestCase):
-    app: QtWidgets.QApplication | None = None
+        def setUp(self):
+            self.engine = MockPhysicsEngine()
+            self.recorder = GenericPhysicsRecorder(self.engine)
+            self.recorder.start()
 
-    @classmethod
-    def setUpClass(cls):
-        # Create a QApplication instance for widgets
-        if not QtWidgets.QApplication.instance():
-            cls.app = QtWidgets.QApplication([])
-        else:
-            # Cast to QApplication since we know we created QApplication above
-            existing = QtWidgets.QApplication.instance()
-            cls.app = existing if isinstance(existing, QtWidgets.QApplication) else None
+            # Populate recorder with some dummy data
+            for _ in range(10):
+                self.engine.step()
+                self.recorder.record_step()
 
-    def setUp(self):
-        self.engine = MockPhysicsEngine()
-        self.recorder = GenericPhysicsRecorder(self.engine)
-        self.recorder.start()
+            # Manually populate induced acceleration for testing
+            self.recorder.data["induced_accelerations"][0] = np.random.rand(100, 10)
 
-        # Populate recorder with some dummy data
-        # self.recorder._initialize_array_buffers(np.zeros(10), np.zeros(10))
-        for _ in range(10):
-            self.engine.step()
-            self.recorder.record_step()
+        def test_live_plot_widget_modes(self):
+            """Test LivePlotWidget new modes."""
+            widget = LivePlotWidget(self.recorder)
 
-        # Manually populate induced acceleration for testing
-        self.recorder.data["induced_accelerations"][0] = np.random.rand(
-            100, 10
-        )  # Source 0
+            # Test default mode (All Dimensions)
+            widget.update_plot()
+            # Should have 10 lines
+            self.assertEqual(len(widget.line_objects), 10)
 
-    def test_live_plot_widget_modes(self):
-        """Test LivePlotWidget new modes."""
-        widget = LivePlotWidget(self.recorder)
+            # Test Single Dimension mode
+            widget.mode_combo.setCurrentText("Single Dimension")
+            widget.dim_spin.setValue(2)
+            widget.update_plot()
+            # Should have 1 line (Dim 2)
+            self.assertEqual(len(widget.line_objects), 1)
+            self.assertEqual(widget.line_objects[0].get_label(), "Dim 2")
 
-        # Test default mode (All Dimensions)
-        widget.update_plot()
-        # Should have 10 lines
-        self.assertEqual(len(widget.line_objects), 10)
+            # Test Norm mode
+            widget.mode_combo.setCurrentText("Norm")
+            widget.update_plot()
+            # Should have 1 line (Norm)
+            self.assertEqual(len(widget.line_objects), 1)
+            self.assertEqual(widget.line_objects[0].get_label(), "Norm")
 
-        # Test Single Dimension mode
-        widget.mode_combo.setCurrentText("Single Dimension")
-        widget.dim_spin.setValue(2)
-        widget.update_plot()
-        # Should have 1 line (Dim 2)
-        self.assertEqual(len(widget.line_objects), 1)
-        # Note: Depending on implementation, label might be "Dim 2" or something else.
-        # LivePlotWidget logic for Single Dimension:
-        # if plot_mode == "Single Dimension":
-        #    ...
-        #    dim_label = f"Dim {dim_idx}"
-        # ...
-        # label = dim_label if n_dims == 1 else ...
-        # (line,) = self.ax.plot([], [], label=label)
+        def test_live_plot_ground_forces(self):
+            """Test plotting Ground Forces."""
+            widget = LivePlotWidget(self.recorder)
 
-        self.assertEqual(widget.line_objects[0].get_label(), "Dim 2")
+            # Select Ground Forces
+            widget.set_plot_metric("Ground Forces")
+            widget.update_plot()
 
-        # Test Norm mode
-        widget.mode_combo.setCurrentText("Norm")
-        widget.update_plot()
-        # Should have 1 line (Norm)
-        self.assertEqual(len(widget.line_objects), 1)
-        self.assertEqual(widget.line_objects[0].get_label(), "Norm")
+            # Ground forces in recorder is initialized to shape (max_samples, 3)
+            # So we expect 3 lines
+            self.assertEqual(len(widget.line_objects), 3)
 
-    def test_live_plot_ground_forces(self):
-        """Test plotting Ground Forces."""
-        widget = LivePlotWidget(self.recorder)
+        def test_unified_window_static_plots(self):
+            """Test new static plot options in UnifiedDashboardWindow."""
+            window = UnifiedDashboardWindow(self.engine)
 
-        # Select Ground Forces
-        widget.set_plot_metric("Ground Forces")
-        widget.update_plot()
+            # We just want to ensure these don't raise exceptions when called
+            # with empty or dummy data.
 
-        # Ground forces in recorder is initialized to shape (max_samples, 3)
-        # So we expect 3 lines
-        self.assertEqual(len(widget.line_objects), 3)
+            new_options = [
+                "Joint Power Curves",
+                "Impulse Accumulation",
+                "Phase Diagram (Joint 0)",
+                "Stability Diagram (CoM vs CoP)",
+                "CoP Trajectory",
+                "GRF Butterfly Diagram",
+                "Club Head Trajectory (3D)",
+                "Summary Dashboard",
+            ]
 
-    def test_unified_window_static_plots(self):
-        """Test new static plot options in UnifiedDashboardWindow."""
-        window = UnifiedDashboardWindow(self.engine)
-
-        # We just want to ensure these don't raise exceptions when called
-        # with empty or dummy data.
-
-        new_options = [
-            "Joint Power Curves",
-            "Impulse Accumulation",
-            "Phase Diagram (Joint 0)",
-            "Stability Diagram (CoM vs CoP)",
-            "CoP Trajectory",
-            "GRF Butterfly Diagram",
-            "Club Head Trajectory (3D)",
-            "Summary Dashboard",
-        ]
-
-        for option in new_options:
-            with self.subTest(option=option):
-                # Set combo index (simulated)
-                # But refresh_static_plot reads currentText, so we mock it or set it?
-                # QComboBox.setCurrentText works if item exists
-                idx = window.plot_type_combo.findText(option)
-                if idx >= 0:
-                    window.plot_type_combo.setCurrentIndex(idx)
-                    try:
-                        window.refresh_static_plot()
-                    except Exception as e:
-                        self.fail(f"Plotting '{option}' raised exception: {e}")
-                else:
-                    self.fail(f"Option '{option}' not found in combo box")
+            for option in new_options:
+                with self.subTest(option=option):
+                    idx = window.plot_type_combo.findText(option)
+                    if idx >= 0:
+                        window.plot_type_combo.setCurrentIndex(idx)
+                        try:
+                            window.refresh_static_plot()
+                        except Exception as e:
+                            self.fail(f"Plotting '{option}' raised exception: {e}")
+                    else:
+                        self.fail(f"Option '{option}' not found in combo box")
 
 
 if __name__ == "__main__":
