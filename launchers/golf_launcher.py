@@ -378,14 +378,26 @@ class DraggableModelCard(QFrame):
         layout.addWidget(lbl_desc)
 
         # Status Chip
-        status_text, status_color = self._get_status_info()
+        status_text, status_color, text_color = self._get_status_info()
         lbl_status = QLabel(status_text)
         lbl_status.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
         lbl_status.setStyleSheet(
-            f"background-color: {status_color}; color: white; padding: 2px 6px; border-radius: 4px;"
+            f"background-color: {status_color}; color: {text_color}; padding: 2px 6px; border-radius: 4px;"
         )
         lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl_status.setFixedWidth(80)  # Fixed width for consistency
+
+        # Tooltips for status
+        status_tooltips = {
+            "GUI Ready": "Full graphical interface available (Native/Python)",
+            "Viewer": "Opens in generic passive viewer",
+            "Engine Ready": "Physics engine installed and ready",
+            "External": "Runs in external application (e.g. MATLAB)",
+            "Utility": "Helper tool or utility",
+            "Needs Setup": "Engine dependencies missing - check installation",
+            "Unknown": "Status unknown",
+        }
+        lbl_status.setToolTip(status_tooltips.get(status_text, ""))
 
         # Center the chip
         chip_layout = QHBoxLayout()
@@ -400,10 +412,11 @@ class DraggableModelCard(QFrame):
             f"{self.model.description}. Status: {status_text}"
         )
 
-    def _get_status_info(self) -> tuple[str, str]:
-        """Get status text and color based on model type and availability."""
+    def _get_status_info(self) -> tuple[str, str, str]:
+        """Get status text, bg color, and text color based on model type."""
         t = getattr(self.model, "type", "").lower()
 
+        # Green -> Black text for contrast
         if t in [
             "custom_humanoid",
             "custom_dashboard",
@@ -411,44 +424,46 @@ class DraggableModelCard(QFrame):
             "pinocchio",
             "openpose",
         ]:
-            return "GUI Ready", "#28a745"  # Green
+            return "GUI Ready", "#28a745", "#000000"
 
         path_str = str(getattr(self.model, "path", ""))
+        # Info Blue -> Black text
         if t == "mjcf" or path_str.endswith(".xml"):
-            return "Viewer", "#17a2b8"  # Info Blue
+            return "Viewer", "#17a2b8", "#000000"
         elif t in ["opensim", "myosim"]:
-            # Check actual availability instead of showing misleading "Demo" status
             return self._check_engine_availability(t)
+        # Purple -> White text (OK)
         elif t in ["matlab", "matlab_app"]:
-            return "External", "#6f42c1"  # Purple
+            return "External", "#6f42c1", "#ffffff"
+        # Gray -> White text (OK)
         elif t in ["urdf_generator", "c3d_viewer"]:
-            return "Utility", "#6c757d"  # Gray
+            return "Utility", "#6c757d", "#ffffff"
 
-        return "Unknown", "#6c757d"
+        return "Unknown", "#6c757d", "#ffffff"
 
-    def _check_engine_availability(self, engine_type: str) -> tuple[str, str]:
+    def _check_engine_availability(self, engine_type: str) -> tuple[str, str, str]:
         """Check if a specific engine is installed and return appropriate status.
 
         Args:
             engine_type: The engine type to check ('opensim' or 'myosim').
 
         Returns:
-            Tuple of (status_text, color_hex).
+            Tuple of (status_text, bg_color_hex, text_color_hex).
         """
         try:
             if engine_type == "opensim":
                 import opensim  # noqa: F401
 
-                return "Engine Ready", "#28a745"  # Green
+                return "Engine Ready", "#28a745", "#000000"  # Green -> Black
             elif engine_type == "myosim":
                 import myosuite  # noqa: F401
 
-                return "Engine Ready", "#28a745"  # Green
+                return "Engine Ready", "#28a745", "#000000"  # Green -> Black
         except ImportError:
             pass
 
-        # Engine not installed - show accurate status
-        return "Needs Setup", "#fd7e14"  # Orange
+        # Engine not installed - Orange -> Black text
+        return "Needs Setup", "#fd7e14", "#000000"
 
     def keyPressEvent(self, event: QKeyEvent | None) -> None:
         """Handle keyboard interaction."""
@@ -1504,10 +1519,21 @@ class GolfLauncher(QMainWindow):
         self.shortcut_search = QShortcut(QKeySequence("Ctrl+F"), self)
         self.shortcut_search.activated.connect(self._focus_search)
 
+        # Keyboard Shortcut for Clearing Search (Escape)
+        self.shortcut_clear_search = QShortcut(QKeySequence("Esc"), self)
+        self.shortcut_clear_search.activated.connect(self._clear_search)
+
     def _focus_search(self) -> None:
         """Focus and select all text in search bar."""
         self.search_input.setFocus()
         self.search_input.selectAll()
+
+    def _clear_search(self) -> None:
+        """Clear the search filter and remove focus from search bar."""
+        if self.search_input.text():
+            self.search_input.clear()
+        # Remove focus from search input to return control to the main window
+        self.search_input.clearFocus()
 
     def _setup_ai_dock(self) -> None:
         """Set up the AI Assistant dock widget."""
