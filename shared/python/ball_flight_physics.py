@@ -12,7 +12,7 @@ Critical gap identified in upgrade assessment - without this, not a complete gol
 
 import logging
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -305,7 +305,8 @@ class BallFlightSimulator:
         all_forces = self._calculate_forces(velocities, launch)
 
         # Pre-calculate accelerations from forces
-        total_forces = sum(all_forces.values())
+        # Use np.sum with axis=0 to ensure we sum the arrays correctly
+        total_forces = np.sum(list(all_forces.values()), axis=0)  # type: ignore[arg-type]
         all_accelerations = total_forces / ball_mass
 
         for i in range(len(sol_t)):
@@ -357,9 +358,10 @@ class BallFlightSimulator:
 
         # Relative velocity (accounting for wind)
         wind = self.environment.wind_velocity
+        assert wind is not None
         if is_batch:
             wind = wind[:, np.newaxis]
-            axis = 0
+            axis: int | None = 0
         else:
             axis = None
 
@@ -386,7 +388,8 @@ class BallFlightSimulator:
         if should_compute:
             if is_batch:
                 # Batch processing
-                speed_masked = speed[mask]
+                speed_array = cast(np.ndarray, speed)
+                speed_masked = speed_array[mask]
                 vel_masked = relative_velocity[:, mask]
                 velocity_unit = vel_masked / speed_masked
 
@@ -430,13 +433,17 @@ class BallFlightSimulator:
 
                     if launch.spin_axis is not None:
                         # Cross product of (3,) and (3, M) -> (3, M) with axisa=0, axisb=0, axisc=0
-                        cross_prod = np.cross(launch.spin_axis, velocity_unit, axisa=0, axisb=0, axisc=0)
+                        cross_prod = np.cross(
+                            launch.spin_axis, velocity_unit, axisa=0, axisb=0, axisc=0
+                        )
                         cross_mag = np.linalg.norm(cross_prod, axis=0)
 
                         # Avoid division by zero
                         valid_cross = cross_mag > NUMERICAL_EPSILON
                         factor = np.zeros_like(magnus_mag)
-                        factor[valid_cross] = magnus_mag[valid_cross] / cross_mag[valid_cross]
+                        factor[valid_cross] = (
+                            magnus_mag[valid_cross] / cross_mag[valid_cross]
+                        )
 
                         magnus_force[:, mask] = factor * cross_prod
             else:
@@ -445,37 +452,35 @@ class BallFlightSimulator:
 
                 if launch.spin_rate > 0:
                     omega = launch.spin_rate * 2 * np.pi / 60
-                    spin_ratio = float((omega * self.ball.radius) / speed)
+                    s_ratio = float((omega * self.ball.radius) / speed)
                 else:
-                    spin_ratio = 0.0
+                    s_ratio = 0.0
 
-                drag_coefficient = (
-                    self.ball.cd0
-                    + self.ball.cd1 * spin_ratio
-                    + self.ball.cd2 * spin_ratio**2
+                drag_coef_scalar = (
+                    self.ball.cd0 + self.ball.cd1 * s_ratio + self.ball.cd2 * s_ratio**2
                 )
                 drag_magnitude = (
                     0.5
                     * self.environment.air_density
                     * self.ball.cross_sectional_area
-                    * drag_coefficient
+                    * drag_coef_scalar
                     * speed**2
                 )
                 drag_force = -drag_magnitude * velocity_unit
 
-                if spin_ratio > 0:
-                    lift_coefficient = (
+                if s_ratio > 0:
+                    lift_coef_scalar = (
                         self.ball.cl0
-                        + self.ball.cl1 * spin_ratio
-                        + self.ball.cl2 * spin_ratio**2
+                        + self.ball.cl1 * s_ratio
+                        + self.ball.cl2 * s_ratio**2
                     )
-                    lift_coefficient = min(MAX_LIFT_COEFFICIENT, lift_coefficient)
+                    lift_coef_scalar = min(MAX_LIFT_COEFFICIENT, lift_coef_scalar)
 
                     magnus_magnitude = (
                         0.5
                         * self.environment.air_density
                         * self.ball.cross_sectional_area
-                        * lift_coefficient
+                        * lift_coef_scalar
                         * speed**2
                     )
 

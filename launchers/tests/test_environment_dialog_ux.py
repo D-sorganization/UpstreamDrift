@@ -1,16 +1,16 @@
-
 import sys
 from unittest.mock import MagicMock, patch
+
 import pytest
-from PyQt6.QtWidgets import QApplication, QPushButton, QDialog
+from PyQt6.QtWidgets import QApplication
+
+from launchers.golf_launcher import EnvironmentDialog
 
 # Mocking modules that might cause issues in headless environment
 sys.modules["shared.python.engine_manager"] = MagicMock()
 sys.modules["shared.python.model_registry"] = MagicMock()
 sys.modules["shared.python.secure_subprocess"] = MagicMock()
 
-# Import the class under test
-from launchers.golf_launcher import EnvironmentDialog
 
 @pytest.fixture
 def app():
@@ -20,6 +20,7 @@ def app():
         app = QApplication([])
     return app
 
+
 @pytest.fixture
 def dialog(app):
     """Create the EnvironmentDialog instance with mocked parent."""
@@ -27,6 +28,7 @@ def dialog(app):
         dlg = EnvironmentDialog(None)
         yield dlg
         dlg.close()
+
 
 def test_build_button_feedback(dialog):
     """Test that the build button text changes during build process."""
@@ -38,7 +40,7 @@ def test_build_button_feedback(dialog):
 
     # Start build
     with patch("launchers.golf_launcher.DockerBuildThread") as MockThread:
-        mock_thread_instance = MockThread.return_value
+        _ = MockThread.return_value
 
         dialog.start_build()
 
@@ -53,6 +55,7 @@ def test_build_button_feedback(dialog):
         # Verify button state restored
         assert dialog.btn_build.text() == initial_text
         assert dialog.btn_build.isEnabled() is True
+
 
 def test_build_button_feedback_failure(dialog):
     """Test that the build button text restores even on failure."""

@@ -387,7 +387,7 @@ class DrakeRecorder:
 
     def export_to_dict(self) -> dict[str, Any]:
         """Export all recorded data to a dictionary."""
-        data = {"times": np.array(self.times)}
+        data: dict[str, Any] = {"times": np.array(self.times)}
 
         def add_series(target: dict, name: str, arr_list: list) -> None:
             if not arr_list:

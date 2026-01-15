@@ -421,7 +421,7 @@ class StatisticalAnalyzer:
         search_region_post = smoothed_speed[impact_idx + 1 :]
         mask_post = search_region_post < finish_threshold
         if np.any(mask_post):
-            finish_idx = impact_idx + 1 + int(np.argmax(mask_post))
+            finish_idx = int(impact_idx + 1 + np.argmax(mask_post))
 
         # Define phases
         phase_definitions = [

@@ -15,6 +15,7 @@ import typing
 from pathlib import Path
 
 from PyQt6 import QtCore, QtGui, QtWidgets
+from shared.python.dashboard.widgets import LivePlotWidget
 
 from .advanced_gui_methods import AdvancedGuiMethodsMixin
 from .grip_modelling_tab import GripModellingTab
@@ -26,7 +27,6 @@ from .gui.tabs.physics_tab import PhysicsTab
 from .gui.tabs.plotting_tab import PlottingTab
 from .gui.tabs.visualization_tab import VisualizationTab
 from .sim_widget import MuJoCoSimWidget
-from shared.python.dashboard.widgets import LivePlotWidget
 
 logger = logging.getLogger(__name__)
 

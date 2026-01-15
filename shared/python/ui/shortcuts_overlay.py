@@ -12,10 +12,10 @@ Usage:
 """
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QKeyEvent, QPainter, QPainterPath
+from PyQt6.QtGui import QColor, QFont, QKeyEvent, QPainter
 from PyQt6.QtWidgets import (
     QFrame,
     QGridLayout,
@@ -243,7 +243,7 @@ class ShortcutsOverlay(QWidget):
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         if THEME_AVAILABLE:
-            scroll.setStyleSheet(f"background-color: transparent;")
+            scroll.setStyleSheet("background-color: transparent;")
         else:
             scroll.setStyleSheet("background-color: transparent;")
 
@@ -332,7 +332,7 @@ class ShortcutsOverlay(QWidget):
         layout.addLayout(grid)
         return section
 
-    def paintEvent(self, event) -> None:
+    def paintEvent(self, event: Any) -> None:
         """Paint semi-transparent backdrop."""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -341,14 +341,14 @@ class ShortcutsOverlay(QWidget):
         painter.fillRect(self.rect(), QColor(0, 0, 0, 180))
         painter.end()
 
-    def keyPressEvent(self, event: QKeyEvent) -> None:
+    def keyPressEvent(self, event: QKeyEvent | None) -> None:
         """Handle key press - close on Escape."""
-        if event.key() == Qt.Key.Key_Escape:
+        if event is not None and event.key() == Qt.Key.Key_Escape:
             self.close()
         else:
             super().keyPressEvent(event)
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: Any) -> None:
         """Handle mouse press - close if clicking backdrop."""
         # Find the content frame
         content = self.findChild(QFrame, "shortcutsContent")
