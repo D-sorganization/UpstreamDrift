@@ -63,6 +63,26 @@ logger = logging.getLogger(__name__)
 BCRYPT_ROUNDS = 12
 
 
+def compute_prefix_hash(prefix: str) -> str:
+    """Compute SHA256 hash of a non-sensitive prefix for database indexing.
+
+    This function is used to create a database index for fast API key lookup.
+    It hashes ONLY the first 8 characters of the key (not the full secret).
+
+    Args:
+        prefix: Non-sensitive 8-character prefix from the API key
+
+    Returns:
+        SHA256 hash of the prefix for database indexing
+
+    Note:
+        This is NOT password hashing. The actual API key is hashed with bcrypt.
+    """
+    import hashlib
+
+    return hashlib.sha256(prefix.encode()).hexdigest()
+
+
 def parse_arguments() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
@@ -198,24 +218,9 @@ def migrate_api_keys(
         new_hash = bcrypt.hashpw(new_raw_value.encode("utf-8"), salt).decode("utf-8")
 
         # PERFORMANCE FIX: Compute prefix hash for fast lookup
-        # NOTE: This is NOT password hashing - it's an index for database queries.
-        # The actual API key is hashed with bcrypt (see new_hash above).
-        # We hash only the first 8 characters of the key body (not the full key)
-        # to create a database index that reduces bcrypt calls from O(n) to O(1).
-
         key_body = new_raw_value[4:]  # Remove "gms_" prefix
-        # Extract prefix for indexing (not the full secret)
-        prefix_for_index = key_body[:8]
-
-        # Compute hash of the non-sensitive prefix for database lookup
-        # lgtm[py/weak-sensitive-data-hashing]
-        # CodeQL suppression: This is NOT password hashing. We're hashing only a non-sensitive
-        # 8-character prefix for database indexing. The actual API key is hashed with bcrypt above.
-        import hashlib
-
-        prefix_hash = hashlib.sha256(
-            prefix_for_index.encode()
-        ).hexdigest()  # nosec B324
+        prefix_for_index = key_body[:8]  # Extract prefix for indexing
+        prefix_hash = compute_prefix_hash(prefix_for_index)
 
         # Store metadata separately (no secrets here)
         record_metadata = {
