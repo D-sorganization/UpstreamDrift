@@ -2,9 +2,24 @@ import sys
 from unittest.mock import patch
 
 import pytest
-from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox
 
-from shared.python.pose_estimation.openpose_gui import OpenPoseGUI
+# Skip entire module if PyQt6 GUI libraries are not available
+try:
+    from PyQt6.QtWidgets import QApplication, QFileDialog, QMessageBox
+
+    PYQT6_AVAILABLE = True
+except (ImportError, OSError):
+    PYQT6_AVAILABLE = False
+    QApplication = None  # type: ignore[misc, assignment]
+    QFileDialog = None  # type: ignore[misc, assignment]
+    QMessageBox = None  # type: ignore[misc, assignment]
+
+pytestmark = pytest.mark.skipif(
+    not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available"
+)
+
+if PYQT6_AVAILABLE:
+    from shared.python.pose_estimation.openpose_gui import OpenPoseGUI
 
 
 # Helper fixture to ensure QApplication exists

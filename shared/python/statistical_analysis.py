@@ -407,24 +407,21 @@ class StatisticalAnalyzer:
         # Find takeaway start (first significant movement)
         speed_threshold = 0.1 * smoothed_speed[transition_idx]
         takeaway_idx = 0
-
-        # Vectorized search for first index exceeding threshold
-        pre_transition = smoothed_speed[1:transition_idx]
-        # np.argmax on boolean returns index of first True
-        # If none are True, it returns 0 (which would be incorrect if we didn't check np.any)
-        mask_takeaway = pre_transition > speed_threshold
-        if np.any(mask_takeaway):
-            takeaway_idx = 1 + int(np.argmax(mask_takeaway))
+        # OPTIMIZATION: Use vectorized search instead of loop
+        search_region = smoothed_speed[1:transition_idx]
+        mask = search_region > speed_threshold
+        if np.any(mask):
+            takeaway_idx = 1 + int(np.argmax(mask))
 
         # Find finish (speed drops after impact)
         finish_threshold = 0.3 * smoothed_speed[impact_idx]
         finish_idx = len(smoothed_speed) - 1
 
-        # Vectorized search for first index dropping below threshold
-        post_impact = smoothed_speed[impact_idx + 1 :]
-        mask_finish = post_impact < finish_threshold
-        if np.any(mask_finish):
-            finish_idx = int(impact_idx + 1 + np.argmax(mask_finish))
+        # OPTIMIZATION: Use vectorized search instead of loop
+        search_region_post = smoothed_speed[impact_idx + 1 :]
+        mask_post = search_region_post < finish_threshold
+        if np.any(mask_post):
+            finish_idx = int(impact_idx + 1 + np.argmax(mask_post))
 
         # Define phases
         phase_definitions = [

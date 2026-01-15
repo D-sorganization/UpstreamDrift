@@ -24,3 +24,11 @@
 ## 2026-10-24 - [Micro-feedback in Desktop Apps]
 **Learning:** Implementing the "Snapshot" button with self-reverting state ("Snapshot" -> "Copied!" -> "Snapshot") proved to be a simple yet highly effective way to provide confirmation for an invisible action (clipboard copy) without cluttering the UI with dialogs.
 **Action:** Apply this pattern to all clipboard actions or background tasks that complete instantly but lack inherent visual side effects.
+
+## 2026-10-25 - [Status Chip Contrast]
+**Learning:** Using standard Bootstrap-like colors (Success Green, Info Cyan, Warning Orange) as background for status chips often fails WCAG AA contrast requirements when paired with white text. Green (#28a745) and Cyan (#17a2b8) specifically require black text to pass AAA/AA standards.
+**Action:** When implementing status indicators using standard color palettes, always verify text contrast. Implement logic to switch between black and white text based on the background luminance, rather than defaulting to white.
+
+## 2027-02-28 - [Visual Consistency and Discoverability]
+**Learning:** In a mixed UI where some buttons have emojis/icons and others are text-only, the text-only buttons (like "Manage Environment") fade into the background and feel less "clickable" or important. This is especially true when next to high-contrast elements like search bars or toggle buttons with icons.
+**Action:** Enforce visual consistency by adding icons (or emojis, if that's the established style) to all primary toolbar actions. Pair this with mandatory tooltips for every interactive element to ensure functionality is discoverable without trial and error.
