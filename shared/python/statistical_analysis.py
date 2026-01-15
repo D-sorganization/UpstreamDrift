@@ -1617,15 +1617,22 @@ class StatisticalAnalyzer:
         self,
         threshold_ratio: float = 0.1,
         metric: str = "euclidean",
+        use_sparse: bool = False,
     ) -> np.ndarray[tuple[int, int], np.dtype[np.int_]]:
         """Compute Recurrence Plot matrix.
 
         Constructs a phase space state vector from all joint positions and velocities,
         normalizes it, and calculates the binary recurrence matrix.
 
+        PERFORMANCE FIX: Added use_sparse option for memory-efficient computation
+        using cKDTree for large datasets (>500 samples).
+
         Args:
             threshold_ratio: Threshold distance as ratio of max phase space diameter.
             metric: Distance metric (e.g., 'euclidean', 'cityblock').
+            use_sparse: If True, uses cKDTree for O(n log n) memory-efficient
+                       computation instead of O(n²) dense matrix. Default False
+                       for backward compatibility.
 
         Returns:
             Binary recurrence matrix (N, N).
@@ -1648,6 +1655,36 @@ class StatisticalAnalyzer:
         std[std < 1e-6] = 1.0
         normalized_state = (state_vec - mean) / std
 
+        N = len(normalized_state)
+
+        # PERFORMANCE FIX: Use cKDTree for large datasets to avoid O(n²) memory
+        if use_sparse and metric == "euclidean" and N > 100:
+            # Build KD-tree for efficient neighbor queries
+            tree = cKDTree(normalized_state)
+
+            # Estimate threshold from sample of distances
+            sample_size = min(100, N)
+            sample_indices = np.random.choice(N, sample_size, replace=False)
+            sample_dists = []
+            for i in sample_indices:
+                dists_i, _ = tree.query(normalized_state[i], k=min(10, N))
+                sample_dists.extend(dists_i[1:])  # Exclude self
+            estimated_max = np.max(sample_dists) * 2  # Conservative estimate
+            threshold = threshold_ratio * estimated_max
+
+            # Query neighbors within threshold for each point
+            recurrence_matrix = np.zeros((N, N), dtype=np.int_)
+            for i in range(N):
+                neighbors = tree.query_ball_point(normalized_state[i], threshold)
+                for j in neighbors:
+                    recurrence_matrix[i, j] = 1
+                    recurrence_matrix[j, i] = 1  # Symmetric
+
+            return cast(
+                np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix
+            )
+
+        # Original O(n²) method for small datasets or non-euclidean metrics
         # 3. Compute Distance Matrix
         dists = pdist(normalized_state, metric=metric)
         dist_matrix = squareform(dists)
