@@ -16,7 +16,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  actions: write
+  actions: read
 
 jobs:
   create-hotfix:
@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.failed_branch }}
+          ref: ${{ github.event.repository.default_branch }}
           fetch-depth: 0
 
       - uses: actions/setup-node@v4
@@ -32,10 +32,32 @@ jobs:
       - run: npm install -g @google/jules
       - run: jules auth --token ${{ secrets.JULES_API_KEY }}
 
+      - name: Validate Inputs
+        id: validate
+        env:
+          FAILED_BRANCH: ${{ inputs.failed_branch }}
+          RUN_ID: ${{ inputs.run_id }}
+        run: |
+          # SECURITY: Validate branch name format using environment variables
+          if ! echo "$FAILED_BRANCH" | grep -qE '^[a-zA-Z0-9/_-]+$'; then
+            echo "Invalid branch name format"
+            exit 1
+          fi
+          
+          # SECURITY: Validate run_id is numeric
+          if ! echo "$RUN_ID" | grep -qE '^[0-9]+$'; then
+            echo "Invalid run_id format"
+            exit 1
+          fi
+          
+          echo "validated=true" >> $GITHUB_OUTPUT
+
       - name: Create Hotfix Branch
         id: hotfix
+        if: steps.validate.outputs.validated == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FAILED_BRANCH: ${{ inputs.failed_branch }}
         run: |
           TIMESTAMP=$(date +%Y%m%d-%H%M%S)
           HOTFIX_BRANCH="hotfix/ci-fail-${TIMESTAMP}"
@@ -50,43 +72,54 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TARGET_RUN_ID: ${{ inputs.run_id }}
+          FAILED_BRANCH: ${{ inputs.failed_branch }}
+          HOTFIX_BRANCH: ${{ steps.hotfix.outputs.branch }}
         run: |
-          HOTFIX_BRANCH="${{ steps.hotfix.outputs.branch }}"
-          gh run view $TARGET_RUN_ID --log-failed > logs.txt
+          # SECURITY: Use environment variables instead of direct interpolation
+          gh run view "$TARGET_RUN_ID" --log-failed > logs.txt
 
+          # SECURITY: Read log content safely
           LOG_CONTENT=$(cat logs.txt)
-          PROMPT="URGENT: CI failed on protected branch ${{ inputs.failed_branch }}.
-          Analyze the logs and create a minimal hotfix:
-          1. **Formatting & Linting**: Run 'ruff check . --fix' and 'black .'
-          2. **Import Sorting**: Run 'isort --profile black .'
-          3. **Type Errors**: Add missing type hints or proper type ignores
-          4. **Test Failures**: Fix failing tests (fix implementation, not tests)
-          5. **Coverage**: Generate tests if coverage dropped below 80%
-          6. **Syntax**: Fix any syntax errors or missing imports
-          CRITICAL: This is a hotfix for ${{ inputs.failed_branch }}. Keep changes minimal and focused.
-          CI Failure Logs:
-          $LOG_CONTENT"
-          jules task fix --branch "$HOTFIX_BRANCH" --prompt "$PROMPT"
+          
+          # SECURITY: Create prompt using environment variables
+          cat > prompt.txt << 'PROMPT_EOF'
+URGENT: CI failed on protected branch.
+Analyze the logs and create a minimal hotfix:
+1. **Formatting & Linting**: Run 'ruff check . --fix' and 'black .'
+2. **Import Sorting**: Run 'isort --profile black .'
+3. **Type Errors**: Add missing type hints or proper type ignores
+4. **Test Failures**: Fix failing tests (fix implementation, not tests)
+5. **Coverage**: Generate tests if coverage dropped below 80%
+6. **Syntax**: Fix any syntax errors or missing imports
+CRITICAL: This is a hotfix. Keep changes minimal and focused.
+CI Failure Logs:
+PROMPT_EOF
+          echo "$LOG_CONTENT" >> prompt.txt
+          
+          jules task fix --branch "$HOTFIX_BRANCH" --prompt "$(cat prompt.txt)"
 
       - name: Create Urgent PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FAILED_BRANCH: ${{ inputs.failed_branch }}
+          HOTFIX_BRANCH: ${{ steps.hotfix.outputs.branch }}
+          RUN_ID: ${{ inputs.run_id }}
+          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
-          HOTFIX_BRANCH="${{ steps.hotfix.outputs.branch }}"
-
+          # SECURITY: Use environment variables for all user inputs
           gh pr create \
-            --base "${{ inputs.failed_branch }}" \
+            --base "$FAILED_BRANCH" \
             --head "$HOTFIX_BRANCH" \
-            --title "🚨 Urgent: Fix CI failure on ${{ inputs.failed_branch }}" \
+            --title "🚨 Urgent: Fix CI failure on protected branch" \
             --label "urgent,auto-fix,hotfix" \
             --body "## 🚨 Automated Hotfix for Protected Branch
             
-            **Failed Branch:** \`${{ inputs.failed_branch }}\`
-            **CI Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }}
+            **Failed Branch:** \`$FAILED_BRANCH\`
+            **CI Run:** $REPO_URL/actions/runs/$RUN_ID
             **Created By:** Jules Hotfix-Creator
 
             ### Summary
-            CI failed on the protected branch \`${{ inputs.failed_branch }}\`. This automated hotfix attempts to resolve the issues.
+            CI failed on the protected branch. This automated hotfix attempts to resolve the issues.
 
             ### Changes
             Jules Auto-Repair has analyzed the CI failure logs and applied fixes for:
@@ -104,7 +137,7 @@ jobs:
 
             ### Next Steps
             1. Review the changes in this PR
-            2. If acceptable, merge immediately to restore ${{ inputs.failed_branch }}
+            2. If acceptable, merge immediately to restore the branch
             3. If issues remain, manually fix and push to this branch
 
             ---
