@@ -4,7 +4,22 @@
 # But usually pytest-qt handles this if env var is set.
 # The project has explicit skipping for GUI tests in some places, but let's try standard approach.
 
-from tools.urdf_generator.visualization_widget import VisualizationWidget
+import pytest
+
+# Check for PyQt6 GUI library availability
+try:
+    from PyQt6 import QtWidgets  # noqa: F401
+
+    PYQT6_AVAILABLE = True
+except (ImportError, OSError):
+    PYQT6_AVAILABLE = False
+
+pytestmark = pytest.mark.skipif(
+    not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available"
+)
+
+if PYQT6_AVAILABLE:
+    from tools.urdf_generator.visualization_widget import VisualizationWidget
 
 
 def test_visualization_widget_init(qtbot):

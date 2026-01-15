@@ -5,6 +5,18 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+# Check for PyQt6 GUI library availability
+try:
+    from PyQt6 import QtWidgets  # noqa: F401
+
+    PYQT6_AVAILABLE = True
+except (ImportError, OSError):
+    PYQT6_AVAILABLE = False
+
+pytestmark = pytest.mark.skipif(
+    not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available"
+)
+
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../shared/python"))
 )
@@ -12,10 +24,11 @@ sys.path.insert(
 # Mock flight_models before importing shot_tracer
 sys.modules["flight_models"] = MagicMock()
 
-from launchers.shot_tracer import (  # noqa: E402
-    MultiModelShotTracerWidget,
-    MultiModelShotTracerWindow,
-)
+if PYQT6_AVAILABLE:
+    from launchers.shot_tracer import (  # noqa: E402
+        MultiModelShotTracerWidget,
+        MultiModelShotTracerWindow,
+    )
 
 
 @pytest.fixture
