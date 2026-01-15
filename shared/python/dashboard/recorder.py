@@ -278,12 +278,14 @@ class GenericPhysicsRecorder:
             tau = np.zeros(len(v))
 
         # Energies - use pre-computed M from get_full_state()
-        ke = 0.0
         if M is not None and M.size > 0:
             try:
                 ke = 0.5 * v.T @ M @ v
             except Exception as e:
                 LOGGER.warning("Failed to compute kinetic energy: %s", e)
+                ke = 0.0
+        else:
+            ke = 0.0
 
         # Real-time Analysis Computations
         idx = self.current_idx

@@ -24,6 +24,7 @@ References:
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import cast
 
 import numpy as np
 from scipy import optimize
@@ -452,7 +453,7 @@ class SwingOptimizer:
 
         # Flatten to vector
         x = np.concatenate([angles.flatten(), velocities.flatten()])
-        return x
+        return cast(np.ndarray, x)
 
     def _trajectory_to_vector(self, trajectory: SwingTrajectory) -> np.ndarray:
         """Convert a SwingTrajectory to optimization vector."""
@@ -688,7 +689,12 @@ class SwingOptimizer:
                 torque = trajectory.joint_torques[joint]
                 velocity = trajectory.joint_velocities[joint]
                 power = torque * velocity
-                work = np.trapezoid(np.abs(power), dx=dt)
+                # Handle NumPy 2.0 deprecation of trapz
+                if hasattr(np, "trapezoid"):
+                    work = np.trapezoid(np.abs(power), dx=dt)
+                else:
+                    trapz_func = getattr(np, "trapz")  # noqa: B009
+                    work = trapz_func(np.abs(power), dx=dt)
                 total_work += work
 
         return total_work
