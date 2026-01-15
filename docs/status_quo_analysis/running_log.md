@@ -26,7 +26,24 @@ This document maintains a running log of competitors and companies with similar 
 
 ---
 
-## 2. Sportsbox AI (Rapid Growth)
+## 2. Foresight Sports (Strong Challenger)
+
+**Estimated Market Share:** High (Major competitor to Trackman)
+**Type:** Hardware + Software
+**Core Tech:** Photometric (High-speed Cameras)
+
+### Key Features
+*   **GCQuad / QuadMax:** Uses quadrascopic cameras to measure ball and club performance at impact.
+*   **"Measured vs Calculated":** Markets the accuracy of direct impact measurement (Face Angle, Path, Impact Location) vs Radar's calculation.
+*   **Foresight FSX Play:** Simulation and analysis software.
+
+### Comparison to Golf Modeling Suite
+*   **Overlap:** Ball flight physics (validation data), impact mechanics.
+*   **Differences:** Foresight captures the *result* (kinematics/impact). The Golf Modeling Suite simulates the *cause* (muscle forces, joint torques). We can potentially use Foresight data as ground truth for our impact models.
+
+---
+
+## 3. Sportsbox AI (Rapid Growth)
 
 **Estimated Market Share:** Medium-High (Consumer/Prosumer App Market)
 **Type:** Mobile Application (SaaS)
@@ -34,17 +51,67 @@ This document maintains a running log of competitors and companies with similar 
 
 ### Key Features
 *   **3D from 2D:** Generates a 3D avatar and biomechanical data from a single smartphone camera video.
-*   **Kinematic Measurements:** Tracks "Swing DNA" metrics (turn, sway, lift) without markers.
+*   **Kinematic Measurements:** Tracks metrics like Turn, Sway, Lift without markers.
 *   **Comparison Tools:** Side-by-side comparison with pro golfers (3D models).
 *   **Accessibility:** No hardware required beyond a phone.
 
 ### Comparison to Golf Modeling Suite
-*   **Overlap:** Inverse Kinematics (IK), biomechanical visualization, "Swing DNA" concepts.
-*   **Differences:** Sportsbox is purely kinematic (motion only). The Golf Modeling Suite includes **kinetics** (forces/torques), muscle dynamics, and full physics simulation (MuJoCo/OpenSim). Sportsbox cannot simulate "what if" scenarios involving muscle fatigue or equipment changes in a physics engine.
+*   **Overlap:** Inverse Kinematics (IK), biomechanical visualization, biofeedback.
+*   **Differences:** Sportsbox is purely kinematic. It cannot simulate "what if" scenarios involving muscle fatigue, equipment changes, or forward dynamics. Our suite integrates **MyoSuite** and **OpenSim** for kinetic/dynamic analysis.
 
 ---
 
-## 3. Qualisys / GEARS Golf (High-End Niche)
+## 4. Swing Catalyst (Studio Standard)
+
+**Estimated Market Share:** Medium (Standard in high-end teaching studios)
+**Type:** Hardware (Force Plates) + Software
+**Core Tech:** Force Plates (3D Ground Reaction Forces), Pressure Plates, Video Sync
+
+### Key Features
+*   **Force Data:** Measures Vertical, Horizontal (Shear), and Torque forces.
+*   **Pressure Mapping:** Visualizes Center of Pressure (CoP) trace and weight transfer.
+*   **Video Integration:** Syncs high-speed video with force data.
+
+### Comparison to Golf Modeling Suite
+*   **Overlap:** Ground Reaction Forces (GRF), Inverse Dynamics.
+*   **Differences:** Swing Catalyst *measures* forces; we *calculate* them via Inverse Dynamics or *generate* them via Forward Dynamics. Their data is ideal for validating our GRF predictions.
+
+---
+
+## 5. K-Motion / K-Vest (Coaching Niche)
+
+**Estimated Market Share:** Medium (Established in coaching)
+**Type:** Hardware (Wearable Sensors) + Software
+**Core Tech:** IMU Sensors (3DOF/6DOF), Biofeedback
+
+### Key Features
+*   **Biofeedback:** Audio/Visual cues when a player gets into the correct position/range.
+*   **Kinematic Sequence:** Graphs showing the sequence of energy transfer (Pelvis -> Torso -> Arm -> Club).
+*   **Coaching focused:** Tools designed specifically for instructing students.
+
+### Comparison to Golf Modeling Suite
+*   **Overlap:** Kinematic sequencing, biofeedback loops (our "Swing Comparator" has similar goals).
+*   **Differences:** Hardware-dependent. Our suite replicates biofeedback in software (potential for patent conflict here regarding "Biofeedback" implementation, see Risk Assessment).
+
+---
+
+## 6. Mizuno Swing DNA (Equipment Fitting)
+
+**Estimated Market Share:** Medium (Niche: Shaft Fitting)
+**Type:** Hardware tool + Software
+**Core Tech:** Shaft Optimizer (Strain Gauges)
+
+### Key Features
+*   **Shaft Optimizer:** Measures 5 data points: Clubhead Speed, Tempo, Toe Down, Kick Angle, Release Factor.
+*   **Swing DNA Software:** Maps these metrics to a database of shafts to recommend the best fit.
+
+### Comparison to Golf Modeling Suite
+*   **Overlap:** Shaft deflection physics (Toe Down, Kick Angle).
+*   **Differences:** **Trademark Risk:** We must avoid using the term "Swing DNA" in our UI/Marketing, as it is a Mizuno trademark. Technically, we model these deflection properties from first principles (Finite Element or Segmented Beam in MuJoCo/Drake).
+
+---
+
+## 7. Qualisys / GEARS Golf (High-End Research)
 
 **Estimated Market Share:** Low (Elite Coaching & Research Labs)
 **Type:** Optical Motion Capture Hardware & Software
@@ -53,29 +120,27 @@ This document maintains a running log of competitors and companies with similar 
 ### Key Features
 *   **Gold Standard Accuracy:** Sub-millimeter tracking of body and club.
 *   **Visual3D Integration:** Uses C-Motion's Visual3D for biomechanical modeling and reporting.
-*   **6DOF Tracking:** Full six-degrees-of-freedom tracking for segments and club.
-*   **Force Plate Integration:** Often paired with force plates (AMTI, Kistler) for ground reaction forces.
+*   **6DOF Tracking:** Full six-degrees-of-freedom tracking.
 
 ### Comparison to Golf Modeling Suite
-*   **Overlap:** Biomechanical analysis, rigid body dynamics, ground reaction forces.
-*   **Differences:** Requires expensive lab hardware ($30k+). The Golf Modeling Suite provides similar analytical rigor (via OpenSim/MuJoCo) but is hardware-agnostic (can import mocap data from various sources). Our suite's integration of **MyoSuite** (290 muscles) offers deeper internal loading analysis than standard rigid-body inverse dynamics used in many commercial mocap setups.
+*   **Overlap:** Biomechanical analysis, rigid body dynamics.
+*   **Differences:** Extremely expensive ($30k+). Our suite provides similar analytical rigor via software, allowing import of C3D files from these systems for deeper analysis (muscle modeling) that visual-only systems might lack.
 
 ---
 
-## 4. AnyBody Technology (Specialized Research)
+## 8. AnyBody Technology / SimTK (Academic/Research)
 
 **Estimated Market Share:** Niche (Academic, Medical, Corporate Research)
 **Type:** Simulation Software
 **Core Tech:** Musculoskeletal Modeling (Inverse Dynamics)
 
 ### Key Features
-*   **Full Body Muscle Models:** Extremely detailed muscle recruitment optimization.
-*   **Ergonomics & Device Design:** Used to analyze internal body loads (joint reaction forces, muscle forces).
-*   **Scripting Language:** Uses "AnyScript" for model definition.
+*   **AnyBody:** Full body muscle models, detailed ergonomics, proprietary.
+*   **SimTK (Biomechanics of Golf):** Open-source OpenSim projects.
 
 ### Comparison to Golf Modeling Suite
-*   **Overlap:** Direct competitor to the **OpenSim** and **MyoSuite** integrations in our suite. Both aim to solve the muscle redundancy problem.
-*   **Differences:** AnyBody is expensive commercial software. The Golf Modeling Suite leverages open-source engines (OpenSim, MuJoCo) to democratize this level of analysis. Our suite also adds **forward dynamics** capabilities (robotics control, trajectory optimization) which are less central to AnyBody's inverse-dynamics focused workflow.
+*   **Overlap:** Direct competitor to our **OpenSim** and **MyoSuite** integrations.
+*   **Differences:** AnyBody is expensive/closed. SimTK projects are often fragmented or unmaintained. The **Golf Modeling Suite** consolidates these academic approaches into a unified, maintained, and user-friendly Python platform with cross-engine validation.
 
 ---
 
@@ -83,11 +148,18 @@ This document maintains a running log of competitors and companies with similar 
 
 | Competitor | Primary Focus | Physics Engine | Musculoskeletal | Open Source |
 | :--- | :--- | :--- | :--- | :--- |
-| **Trackman** | Ball/Club Data | N/A (Statistical) | No | No |
+| **Trackman** | Ball Flight / Data | N/A (Statistical) | No | No |
+| **Foresight** | Impact / Launch | N/A (Photometric) | No | No |
 | **Sportsbox AI** | Kinematics (Motion) | N/A (Kinematic) | No | No |
+| **Swing Catalyst**| Ground Forces | N/A (Measurement)| No | No |
+| **K-Motion** | Biofeedback / Seq | N/A (Sensors) | No | No |
 | **Qualisys** | Mocap Accuracy | Visual3D | Rigid Body Only | No |
 | **AnyBody** | Muscle Forces | Proprietary | **Yes** | No |
 | **Golf Modeling Suite** | **Unified Simulation** | **MuJoCo, Drake, OpenSim** | **Yes (MyoSuite)** | **Yes** |
 
-### Strategic positioning
-The **Golf Modeling Suite** occupies a unique "Open Research Platform" niche. It combines the biomechanical depth of **AnyBody**, the robotics/control capabilities of research labs (via **Drake/MuJoCo**), and the accessibility of Python. It is less a competitor to Trackman/Sportsbox (which are data collection tools) and more a downstream **simulation & analysis engine** that could theoretically consume data from them.
+### Strategic Positioning
+The **Golf Modeling Suite** serves as a **"Computational Backend"** for the industry. While competitors focus on *capturing* data (Radar, Camera, IMU, Force Plate), our suite focuses on *simulating and understanding* that data through advanced physics. We are uniquely positioned to:
+1.  **Ingest data** from all above sources (C3D, CSV, FBX).
+2.  **Analyze it** with higher fidelity (Muscle forces, Joint torques) than the capture software provides.
+3.  **Validate it** across multiple physics engines.
+4.  **Optimize it** using robotics control theory (Trajectory Optimization).
