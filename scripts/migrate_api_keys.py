@@ -198,11 +198,17 @@ def migrate_api_keys(
         new_hash = bcrypt.hashpw(new_raw_value.encode("utf-8"), salt).decode("utf-8")
 
         # PERFORMANCE FIX: Compute prefix hash for fast lookup
+        # NOTE: This is NOT password hashing - it's an index for database queries.
+        # The actual API key is hashed with bcrypt (see new_hash above).
+        # We hash only the first 8 characters of the key body (not the full key)
+        # to create a database index that reduces bcrypt calls from O(n) to O(1).
         import hashlib
 
         key_body = new_raw_value[4:]  # Remove "gms_" prefix
-        prefix = key_body[:8]
-        prefix_hash = hashlib.sha256(prefix.encode()).hexdigest()
+        # Extract prefix for indexing (not the full secret)
+        prefix_for_index = key_body[:8]
+        # Hash the prefix to create a database index (this is not the password hash)
+        prefix_hash = hashlib.sha256(prefix_for_index.encode()).hexdigest()
 
         # Store metadata separately (no secrets here)
         record_metadata = {
