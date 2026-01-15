@@ -256,9 +256,13 @@ class GenericPhysicsRecorder:
             # _ensure_capacity may have stopped recording if max reached
             return
 
-        # Get State
-        q, v = self.engine.get_state()
-        t = self.engine.get_time()
+        # PERFORMANCE FIX: Batch state retrieval (was 3 separate calls)
+        # get_full_state() returns q, v, t, and M in a single call
+        full_state = self.engine.get_full_state()
+        q = full_state["q"]
+        v = full_state["v"]
+        t = full_state["t"]
+        M = full_state.get("M")  # May be None for some engines
 
         # Initialize array buffers on first record
         if not self._buffers_initialized:
@@ -273,15 +277,14 @@ class GenericPhysicsRecorder:
             # For now, default to zero if not provided
             tau = np.zeros(len(v))
 
-        # Energies
-        try:
-            M = self.engine.compute_mass_matrix()
-            if M.size > 0:
+        # Energies - use pre-computed M from get_full_state()
+        if M is not None and M.size > 0:
+            try:
                 ke = 0.5 * v.T @ M @ v
-            else:
+            except Exception as e:
+                LOGGER.warning("Failed to compute kinetic energy: %s", e)
                 ke = 0.0
-        except Exception as e:
-            LOGGER.warning("Failed to compute kinetic energy: %s", e)
+        else:
             ke = 0.0
 
         # Real-time Analysis Computations
@@ -324,24 +327,40 @@ class GenericPhysicsRecorder:
                     "Failed to compute control acceleration at frame %d: %s", idx, e
                 )
 
-        # Individual Induced Accelerations
+        # PERFORMANCE FIX: Vectorized induced accelerations
+        # Instead of calling compute_control_acceleration N times (each solving M\tau),
+        # we compute M_inv once and use: accel[src] = M_inv[:, src] * tau[src]
         sources = cast(list[int], self.analysis_config["induced_accel_sources"])
-        for src_idx in sources:
-            if src_idx in self.data["induced_accelerations"]:
-                try:
-                    # Construct single-source torque vector
-                    tau_single = np.zeros_like(tau)
-                    tau_single[src_idx] = tau[src_idx]
-                    self.data["induced_accelerations"][src_idx][idx] = (
-                        self.engine.compute_control_acceleration(tau_single)
-                    )
-                except Exception as e:
-                    LOGGER.warning(
-                        "Failed to compute induced acceleration for source %d at frame %d: %s",
-                        src_idx,
-                        idx,
-                        e,
-                    )
+        if sources and M is not None and M.size > 0:
+            try:
+                # Compute M_inv once for all sources
+                M_inv = np.linalg.inv(M)
+                for src_idx in sources:
+                    if src_idx in self.data["induced_accelerations"]:
+                        # Vectorized: M^{-1} * e_src * tau[src] = M_inv[:, src] * tau[src]
+                        self.data["induced_accelerations"][src_idx][idx] = (
+                            M_inv[:, src_idx] * tau[src_idx]
+                        )
+            except Exception as e:
+                LOGGER.warning(
+                    "Failed to compute induced accelerations at frame %d: %s", idx, e
+                )
+        elif sources:
+            # Fallback to original method if M not available
+            for src_idx in sources:
+                if src_idx in self.data["induced_accelerations"]:
+                    try:
+                        tau_single = np.zeros_like(tau)
+                        tau_single[src_idx] = tau[src_idx]
+                        self.data["induced_accelerations"][src_idx][idx] = (
+                            self.engine.compute_control_acceleration(tau_single)
+                        )
+                    except Exception as e:
+                        LOGGER.warning(
+                            "Failed to compute induced acceleration for source %d: %s",
+                            src_idx,
+                            e,
+                        )
 
         # Store basic data using array indexing (no copy needed, direct assignment)
         self.data["times"][idx] = t

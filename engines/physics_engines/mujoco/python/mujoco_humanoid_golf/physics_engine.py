@@ -166,6 +166,32 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             for i in range(self.model.njnt)
         ]
 
+    def get_full_state(self) -> dict[str, Any]:
+        """Get complete state in a single batched call (performance optimization).
+
+        PERFORMANCE FIX: Returns all commonly-needed state in one call to avoid
+        multiple separate engine queries (was 3+ calls per frame).
+
+        Returns:
+            Dictionary with 'q', 'v', 't', and 'M' (mass matrix).
+        """
+        if self.model is None or self.data is None:
+            return {"q": np.array([]), "v": np.array([]), "t": 0.0, "M": None}
+
+        # Get state (single data access)
+        q = self.data.qpos.copy()
+        v = self.data.qvel.copy()
+        t = float(self.data.time)
+
+        # Compute mass matrix (reuse qM that's already populated)
+        nv = self.model.nv
+        M = np.zeros((nv, nv), dtype=np.float64)
+        if hasattr(mujoco, "mj_makeInertia"):
+            mujoco.mj_makeInertia(self.model, self.data)
+        mujoco.mj_fullM(self.model, M, self.data.qM)
+
+        return {"q": q, "v": v, "t": t, "M": M}
+
     # -------- Section 1: Core Dynamics Engine Capabilities --------
 
     def compute_mass_matrix(self) -> np.ndarray:
