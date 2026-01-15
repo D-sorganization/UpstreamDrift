@@ -16,7 +16,9 @@ Usage:
     btn.set_loading(False)
 """
 
-from PyQt6.QtCore import QPropertyAnimation, QSize, Qt, QTimer
+from typing import Any
+
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QColor, QFont, QPainter, QPen
 from PyQt6.QtWidgets import QHBoxLayout, QPushButton, QSizePolicy, QWidget
 
@@ -67,16 +69,13 @@ class LoadingSpinner(QWidget):
         self._timer.stop()
         self.hide()
 
-    def paintEvent(self, event) -> None:
+    def paintEvent(self, event: Any) -> None:
         """Paint the spinner."""
         if not self._spinning:
             return
 
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
-        # Center point
-        center = self._size // 2
 
         # Draw arc
         pen = QPen()
@@ -97,9 +96,7 @@ class LoadingSpinner(QWidget):
             painter.setPen(pen)
 
             start_angle = (self._angle - i * 30) * 16  # Qt uses 1/16th degrees
-            painter.drawArc(
-                2, 2, self._size - 4, self._size - 4, start_angle, 25 * 16
-            )
+            painter.drawArc(2, 2, self._size - 4, self._size - 4, start_angle, 25 * 16)
 
         painter.end()
 
@@ -166,7 +163,7 @@ class LoadingButton(QPushButton):
         y = (self.height() - self._spinner.height()) // 2
         self._spinner.move(margin, y)
 
-    def resizeEvent(self, event) -> None:
+    def resizeEvent(self, event: Any) -> None:
         """Handle resize - reposition spinner."""
         super().resizeEvent(event)
         if self._loading:

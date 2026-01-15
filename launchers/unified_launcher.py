@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from .golf_launcher import GolfLauncher
+    pass
 
 try:
     from PyQt6.QtWidgets import QApplication

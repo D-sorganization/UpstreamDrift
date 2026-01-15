@@ -8,7 +8,7 @@ derived biomechanical quantities.
 from __future__ import annotations
 
 import logging
-from typing import cast
+from typing import Any, cast
 
 import mujoco
 import numpy as np
@@ -403,7 +403,8 @@ class BiomechanicalAnalyzer:
 class SwingRecorder:
     """Records time-series biomechanical data during a golf swing."""
 
-    def __init__(self) -> None:
+    def __init__(self, engine: Any = None) -> None:
+        self.engine = engine
         self.reset()
 
     def reset(self) -> None:

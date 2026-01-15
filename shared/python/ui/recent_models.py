@@ -13,7 +13,7 @@ Usage:
 import json
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QFont
@@ -23,7 +23,6 @@ from PyQt6.QtWidgets import (
     QLabel,
     QPushButton,
     QScrollArea,
-    QSizePolicy,
     QVBoxLayout,
     QWidget,
 )
@@ -145,17 +144,17 @@ class RecentModelItem(QFrame):
                 "}"
             )
 
-    def enterEvent(self, event) -> None:
+    def enterEvent(self, event: Any) -> None:
         """Show launch button on hover."""
         self.launch_btn.setVisible(True)
         super().enterEvent(event)
 
-    def leaveEvent(self, event) -> None:
+    def leaveEvent(self, event: Any) -> None:
         """Hide launch button when not hovering."""
         self.launch_btn.setVisible(False)
         super().leaveEvent(event)
 
-    def mousePressEvent(self, event) -> None:
+    def mousePressEvent(self, event: Any) -> None:
         """Handle click on entire item."""
         if event.button() == Qt.MouseButton.LeftButton:
             self.clicked.emit(self.model_id)
@@ -315,7 +314,8 @@ class RecentModelsPanel(QFrame):
         """Refresh the displayed list."""
         # Clear existing items (except empty label)
         for i in reversed(range(self.content_layout.count())):
-            widget = self.content_layout.itemAt(i).widget()
+            item = self.content_layout.itemAt(i)
+            widget = item.widget() if item else None
             if widget and widget != self.empty_label:
                 widget.deleteLater()
 
@@ -324,10 +324,10 @@ class RecentModelsPanel(QFrame):
 
         # Add items
         for model_id, display_name in self._recent_models:
-            item = RecentModelItem(model_id, display_name)
-            item.clicked.connect(self._on_item_clicked)
+            model_item = RecentModelItem(model_id, display_name)
+            model_item.clicked.connect(self._on_item_clicked)
             self.content_layout.insertWidget(
-                self.content_layout.count() - 1, item
+                self.content_layout.count() - 1, model_item
             )
 
     def _on_item_clicked(self, model_id: str) -> None:

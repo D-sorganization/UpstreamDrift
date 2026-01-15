@@ -139,7 +139,6 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         # 2. Rotate around X (pitch)
         rad_x = math.radians(self.camera_rotation_x)
         y_r2 = y_r1 * math.cos(rad_x) - z_r1 * math.sin(rad_x)
-        z_r2 = y_r1 * math.sin(rad_x) + z_r1 * math.cos(rad_x)
         x_r2 = x_r1
 
         # 3. Project to screen

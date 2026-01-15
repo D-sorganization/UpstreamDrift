@@ -11,7 +11,10 @@ Design principles:
 """
 
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
+
+if TYPE_CHECKING:
+    from PyQt6.QtGui import QFont
 
 # Cross-platform font stacks
 # Each stack provides platform-specific fonts with sensible fallbacks

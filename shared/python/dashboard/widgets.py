@@ -560,8 +560,8 @@ class LivePlotWidget(QtWidgets.QWidget):
                             f"{self.current_label} (X) vs {self.comparison_label} (Y)"
                         )
                         self.ax.set_title(title)
-                        self.ax.set_xlabel(self.current_label)
-                        self.ax.set_ylabel(self.comparison_label)
+                        self.ax.set_xlabel(self.current_label or "")
+                        self.ax.set_ylabel(self.comparison_label or "")
                         self.ax.grid(True)
 
                         for i in range(n_common_dims):

@@ -11,7 +11,10 @@ Design principles:
 """
 
 from dataclasses import dataclass
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
+
+if TYPE_CHECKING:
+    from PyQt6.QtGui import QColor
 
 
 @dataclass(frozen=True)
@@ -132,7 +135,7 @@ def get_qcolor(hex_color: str) -> "QColor":
     return QColor(hex_color)
 
 
-def get_rgba(hex_color: str, alpha: float = 1.0) -> tuple[int, int, int, float]:
+def get_rgba(hex_color: str, alpha: float = 1.0) -> tuple[float, float, float, float]:
     """Convert hex color to RGBA tuple for matplotlib.
 
     Args:

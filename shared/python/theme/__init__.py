@@ -23,9 +23,9 @@ Usage:
 
 from .colors import (
     CHART_COLORS,
+    DEFAULT_COLORS,
     ColorPalette,
     Colors,
-    DEFAULT_COLORS,
     get_qcolor,
     get_rgba,
 )

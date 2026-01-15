@@ -18,21 +18,17 @@ import json
 import logging
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QDialog,
     QDialogButtonBox,
     QFormLayout,
-    QFrame,
     QGroupBox,
     QHBoxLayout,
     QLabel,
-    QScrollArea,
     QSpinBox,
     QTabWidget,
     QVBoxLayout,
@@ -44,7 +40,7 @@ if TYPE_CHECKING:
 
 # Import theme if available
 try:
-    from shared.python.theme import Colors, Sizes, Weights, get_qfont
+    from shared.python.theme import Colors, Sizes, Weights, get_qfont  # noqa: F401
 
     THEME_AVAILABLE = True
 except ImportError:
@@ -94,7 +90,9 @@ class UserPreferences:
         if PREFS_FILE.exists():
             try:
                 data = json.loads(PREFS_FILE.read_text())
-                return cls(**{k: v for k, v in data.items() if k in cls.__dataclass_fields__})
+                return cls(
+                    **{k: v for k, v in data.items() if k in cls.__dataclass_fields__}
+                )
             except Exception as e:
                 logger.warning(f"Failed to load preferences: {e}")
         return cls()
@@ -151,12 +149,12 @@ class PreferencesDialog(QDialog):
         )
         buttons.accepted.connect(self._on_accept)
         buttons.rejected.connect(self.reject)
-        buttons.button(QDialogButtonBox.StandardButton.Apply).clicked.connect(
-            self._on_apply
-        )
-        buttons.button(
+        if apply_btn := buttons.button(QDialogButtonBox.StandardButton.Apply):
+            apply_btn.clicked.connect(self._on_apply)
+        if restore_btn := buttons.button(
             QDialogButtonBox.StandardButton.RestoreDefaults
-        ).clicked.connect(self._on_restore_defaults)
+        ):
+            restore_btn.clicked.connect(self._on_restore_defaults)
 
         layout.addWidget(buttons)
 
