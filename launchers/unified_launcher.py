@@ -2,6 +2,12 @@
 
 This module provides a consistent interface for launch_golf_suite.py
 that wraps the PyQt-based GolfLauncher implementation.
+
+The launcher now features:
+- Async startup with background worker thread
+- Real progress updates during splash screen
+- Lazy loading of heavy modules (MuJoCo, Drake, etc.)
+- Pre-loaded resources passed to main window (no duplicate loading)
 """
 
 import logging
@@ -28,44 +34,37 @@ class UnifiedLauncher:
 
     This class wraps the PyQt GolfLauncher to provide a consistent
     interface with a mainloop() method as expected by the CLI launcher.
+
+    The mainloop() method now delegates to the golf_launcher.main() function
+    which implements async startup with splash screen for optimal UX.
     """
 
     def __init__(self) -> None:
-        """Initialize the unified launcher."""
+        """Initialize the unified launcher.
+
+        Note: QApplication is created lazily in mainloop() to allow
+        the async startup system to manage the application lifecycle.
+        """
         if not PYQT_AVAILABLE:
             raise ImportError(
                 "PyQt6 is required to run the launcher. Install it with: pip install PyQt6"
             )
 
-        # Create QApplication if it doesn't exist
-        # Check if QApplication is None (if import failed, but we raised above)
-        # or if instance() returns None.
-        if QApplication is None:
-            raise ImportError("PyQt6 not properly imported.")
-
-        self.app = QApplication.instance()
-        if self.app is None:
-            self.app = QApplication(sys.argv)
-
-        # Create the actual launcher (lazy-loaded in mainloop)
-        self.launcher: GolfLauncher | None = None
-
     def mainloop(self) -> int:
-        """Start the launcher main loop.
+        """Start the launcher main loop with async startup.
+
+        This method delegates to golf_launcher.main() which implements:
+        - Immediate splash screen display
+        - Background worker for heavy initialization
+        - Real progress updates during startup
+        - Pre-loaded resources passed to main window
 
         Returns:
             Exit code from the application
         """
-        if self.launcher is None:
-            from .golf_launcher import GolfLauncher
+        from .golf_launcher import main as golf_main
 
-            self.launcher = GolfLauncher()
-
-        self.launcher.show()
-        if self.app is None:
-            logger.error("QApplication failed to initialize.")
-            return 1
-        return int(self.app.exec())
+        return golf_main()
 
     def show_status(self) -> None:
         """Display suite status information.
@@ -155,13 +154,26 @@ class UnifiedLauncher:
 
 # Convenience function for CLI usage
 def launch() -> int:
-    """Launch the Golf Modeling Suite GUI.
+    """Launch the Golf Modeling Suite GUI with async startup.
+
+    This is the recommended entry point for launching the GUI.
+    It uses the async startup system for optimal performance:
+    - Splash screen appears immediately
+    - Heavy modules loaded in background
+    - Progress updates shown during loading
+    - No duplicate resource loading
 
     Returns:
         Exit code
     """
-    launcher = UnifiedLauncher()
-    return launcher.mainloop()
+    if not PYQT_AVAILABLE:
+        print("Error: PyQt6 is required. Install with: pip install PyQt6")
+        return 1
+
+    # Delegate directly to golf_launcher.main() for async startup
+    from .golf_launcher import main as golf_main
+
+    return golf_main()
 
 
 def show_status() -> None:
