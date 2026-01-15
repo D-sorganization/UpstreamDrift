@@ -300,15 +300,23 @@ class BallFlightSimulator:
         sol_y = solution.y
         ball_mass = self.ball.mass
 
+        # Calculate forces for all points at once (vectorized)
+        velocities = sol_y[3:, :]
+        all_forces = self._calculate_forces(velocities, launch)
+
+        # Pre-calculate accelerations from forces
+        total_forces = sum(all_forces.values())
+        all_accelerations = total_forces / ball_mass
+
         for i in range(len(sol_t)):
             t = sol_t[i]
             state = sol_y[:, i]
             position = state[:3]
             velocity = state[3:]
 
-            # Calculate forces at this point (for reporting)
-            forces = self._calculate_forces(velocity, launch)
-            acceleration = np.sum(list(forces.values()), axis=0) / ball_mass
+            # Extract forces for this point from vectorized result
+            forces = {k: v[:, i] for k, v in all_forces.items()}
+            acceleration = all_accelerations[:, i]
 
             trajectory.append(
                 TrajectoryPoint(
@@ -328,7 +336,7 @@ class BallFlightSimulator:
         """Calculate all forces acting on the ball.
 
         Args:
-            velocity: Current velocity vector
+            velocity: Current velocity vector (3,) or batch (3, N)
             launch: Launch conditions for spin
 
         Returns:
@@ -337,72 +345,150 @@ class BallFlightSimulator:
         # Note: This logic must match ode_func in simulate_trajectory.
         # It is used for diagnostic reporting (TrajectoryPoint.forces).
 
+        is_batch = velocity.ndim == 2
         forces = {}
 
         # Gravity force
-        forces["gravity"] = np.array(
-            [0.0, 0.0, -self.ball.mass * self.environment.gravity]
-        )
+        gravity = np.array([0.0, 0.0, -self.ball.mass * self.environment.gravity])
+        if is_batch:
+            forces["gravity"] = np.tile(gravity[:, np.newaxis], (1, velocity.shape[1]))
+        else:
+            forces["gravity"] = gravity
 
         # Relative velocity (accounting for wind)
-        relative_velocity = velocity - self.environment.wind_velocity
-        speed = np.linalg.norm(relative_velocity)
+        wind = self.environment.wind_velocity
+        if is_batch:
+            wind = wind[:, np.newaxis]
+            axis = 0
+        else:
+            axis = None
 
-        if speed > MIN_SPEED_THRESHOLD:
-            velocity_unit = relative_velocity / speed
+        relative_velocity = velocity - wind
+        speed = np.linalg.norm(relative_velocity, axis=axis)
 
-            if launch.spin_rate > 0:
-                omega = launch.spin_rate * 2 * np.pi / 60
-                spin_ratio = float((omega * self.ball.radius) / speed)
-            else:
-                spin_ratio = 0.0
+        # Prepare outputs
+        if is_batch:
+            drag_force = np.zeros_like(velocity)
+            magnus_force = np.zeros_like(velocity)
+        else:
+            drag_force = np.zeros(3)
+            magnus_force = np.zeros(3)
 
-            drag_coefficient = (
-                self.ball.cd0
-                + self.ball.cd1 * spin_ratio
-                + self.ball.cd2 * spin_ratio**2
-            )
-            drag_magnitude = (
-                0.5
-                * self.environment.air_density
-                * self.ball.cross_sectional_area
-                * drag_coefficient
-                * speed**2
-            )
-            forces["drag"] = -drag_magnitude * velocity_unit
+        # Vectorized calculation
+        mask = speed > MIN_SPEED_THRESHOLD
 
-            if spin_ratio > 0:
-                lift_coefficient = (
-                    self.ball.cl0
-                    + self.ball.cl1 * spin_ratio
-                    + self.ball.cl2 * spin_ratio**2
+        # Handle scalar (single vector) case for mask
+        if not is_batch:
+            should_compute = mask
+        else:
+            should_compute = np.any(mask)
+
+        if should_compute:
+            if is_batch:
+                # Batch processing
+                speed_masked = speed[mask]
+                vel_masked = relative_velocity[:, mask]
+                velocity_unit = vel_masked / speed_masked
+
+                if launch.spin_rate > 0:
+                    omega = launch.spin_rate * 2 * np.pi / 60
+                    spin_ratio = (omega * self.ball.radius) / speed_masked
+                else:
+                    spin_ratio = np.zeros_like(speed_masked)
+
+                # Drag
+                drag_coef = (
+                    self.ball.cd0
+                    + self.ball.cd1 * spin_ratio
+                    + self.ball.cd2 * spin_ratio**2
                 )
-                lift_coefficient = min(MAX_LIFT_COEFFICIENT, lift_coefficient)
-
-                magnus_magnitude = (
+                drag_mag = (
                     0.5
                     * self.environment.air_density
                     * self.ball.cross_sectional_area
-                    * lift_coefficient
+                    * drag_coef
+                    * speed_masked**2
+                )
+                drag_force[:, mask] = -drag_mag * velocity_unit
+
+                # Magnus
+                if launch.spin_rate > 0:
+                    lift_coef = (
+                        self.ball.cl0
+                        + self.ball.cl1 * spin_ratio
+                        + self.ball.cl2 * spin_ratio**2
+                    )
+                    lift_coef = np.minimum(MAX_LIFT_COEFFICIENT, lift_coef)
+
+                    magnus_mag = (
+                        0.5
+                        * self.environment.air_density
+                        * self.ball.cross_sectional_area
+                        * lift_coef
+                        * speed_masked**2
+                    )
+
+                    if launch.spin_axis is not None:
+                        # Cross product of (3,) and (3, M) -> (3, M) with axisa=0, axisb=0, axisc=0
+                        cross_prod = np.cross(launch.spin_axis, velocity_unit, axisa=0, axisb=0, axisc=0)
+                        cross_mag = np.linalg.norm(cross_prod, axis=0)
+
+                        # Avoid division by zero
+                        valid_cross = cross_mag > NUMERICAL_EPSILON
+                        factor = np.zeros_like(magnus_mag)
+                        factor[valid_cross] = magnus_mag[valid_cross] / cross_mag[valid_cross]
+
+                        magnus_force[:, mask] = factor * cross_prod
+            else:
+                # Single vector processing (original logic)
+                velocity_unit = relative_velocity / speed
+
+                if launch.spin_rate > 0:
+                    omega = launch.spin_rate * 2 * np.pi / 60
+                    spin_ratio = float((omega * self.ball.radius) / speed)
+                else:
+                    spin_ratio = 0.0
+
+                drag_coefficient = (
+                    self.ball.cd0
+                    + self.ball.cd1 * spin_ratio
+                    + self.ball.cd2 * spin_ratio**2
+                )
+                drag_magnitude = (
+                    0.5
+                    * self.environment.air_density
+                    * self.ball.cross_sectional_area
+                    * drag_coefficient
                     * speed**2
                 )
+                drag_force = -drag_magnitude * velocity_unit
 
-                if launch.spin_axis is not None:
-                    cross_product = np.cross(launch.spin_axis, velocity_unit)
-                    cross_magnitude = float(np.linalg.norm(cross_product))
-                    if cross_magnitude > NUMERICAL_EPSILON:
-                        forces["magnus"] = (
-                            magnus_magnitude * cross_product / cross_magnitude
-                        )
-                    else:
-                        forces["magnus"] = np.array([0.0, 0.0, 0.0])
-                else:
-                    forces["magnus"] = np.array([0.0, 0.0, 0.0])
-            else:
-                forces["magnus"] = np.array([0.0, 0.0, 0.0])
-        else:
-            forces["drag"] = np.array([0.0, 0.0, 0.0])
-            forces["magnus"] = np.array([0.0, 0.0, 0.0])
+                if spin_ratio > 0:
+                    lift_coefficient = (
+                        self.ball.cl0
+                        + self.ball.cl1 * spin_ratio
+                        + self.ball.cl2 * spin_ratio**2
+                    )
+                    lift_coefficient = min(MAX_LIFT_COEFFICIENT, lift_coefficient)
+
+                    magnus_magnitude = (
+                        0.5
+                        * self.environment.air_density
+                        * self.ball.cross_sectional_area
+                        * lift_coefficient
+                        * speed**2
+                    )
+
+                    if launch.spin_axis is not None:
+                        cross_product = np.cross(launch.spin_axis, velocity_unit)
+                        cross_magnitude = float(np.linalg.norm(cross_product))
+                        if cross_magnitude > NUMERICAL_EPSILON:
+                            magnus_force = (
+                                magnus_magnitude * cross_product / cross_magnitude
+                            )
+
+        forces["drag"] = drag_force
+        forces["magnus"] = magnus_force
 
         return forces
 
