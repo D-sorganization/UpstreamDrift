@@ -12,6 +12,28 @@ from api.database import get_db
 from .models import APIKey, User, UserRole
 from .security import RoleChecker, security_manager, usage_tracker
 
+
+def compute_prefix_hash(prefix: str) -> str:
+    """Compute SHA256 hash of a non-sensitive prefix for database indexing.
+
+    This function is used to create a database index for fast API key lookup.
+    It hashes ONLY the first 8 characters of the key (not the full secret).
+
+    Args:
+        prefix: Non-sensitive 8-character prefix from the API key
+
+    Returns:
+        SHA256 hash of the prefix for database indexing
+
+    Note:
+        This is NOT password hashing. The actual API key authentication
+        uses bcrypt (see security_manager.verify_api_key).
+    """
+    import hashlib
+
+    return hashlib.sha256(prefix.encode()).hexdigest()
+
+
 # Security scheme
 security = HTTPBearer()
 
@@ -73,11 +95,6 @@ async def get_current_user_from_api_key(
         )
 
     # PERFORMANCE FIX: Compute prefix hash for fast filtering
-    # NOTE: This is NOT password hashing - it's an index for fast lookup.
-    # The actual API key is verified with bcrypt (see security_manager.verify_api_key below).
-    # We hash only the first 8 characters of the key body (not the full key)
-    # to create a database index that reduces bcrypt calls from O(n) to O(1).
-
     # Extract the key body (remove "gms_" prefix)
     key_body = api_key[4:]
     if len(key_body) < 8:
@@ -92,13 +109,7 @@ async def get_current_user_from_api_key(
     prefix_for_index = key_body[:8]
 
     # Compute hash of the non-sensitive prefix for database lookup
-    # lgtm[py/weak-sensitive-data-hashing]
-    # CodeQL suppression: This is NOT password hashing. We're hashing only a non-sensitive
-    # 8-character prefix for database indexing. The actual API key authentication uses
-    # bcrypt (see security_manager.verify_api_key below).
-    import hashlib
-
-    prefix_hash = hashlib.sha256(prefix_for_index.encode()).hexdigest()  # nosec B324
+    prefix_hash = compute_prefix_hash(prefix_for_index)
 
     # Query only keys matching the prefix hash (if column exists)
     # Fallback to all active keys if prefix_hash column doesn't exist yet
