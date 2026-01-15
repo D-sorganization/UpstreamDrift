@@ -71,6 +71,14 @@ from shared.python.secure_subprocess import (
     secure_run,
 )
 
+# Import unified theme system for consistent styling
+try:
+    from shared.python.theme import Colors, Sizes, Weights, get_display_font, get_qfont
+
+    THEME_AVAILABLE = True
+except ImportError:
+    THEME_AVAILABLE = False
+
 # Optional AI Assistant import (graceful degradation if not available)
 try:
     from shared.python.ai.gui import AIAssistantPanel, AISettings, AISettingsDialog
@@ -187,16 +195,53 @@ SPECIAL_APPS = [
 
 
 class GolfSplashScreen(QSplashScreen):
-    """Custom splash screen for Golf Modeling Suite."""
+    """Custom splash screen for Golf Modeling Suite.
+
+    Features a sophisticated dark theme with:
+    - Professional typography hierarchy
+    - Smooth progress bar with accent color
+    - Proper branding with logo/icon
+    """
+
+    # Splash dimensions - elegant proportions
+    SPLASH_WIDTH = 520
+    SPLASH_HEIGHT = 340
 
     def __init__(self) -> None:
         """Initialize the splash screen."""
-        # Create a splash pixmap
-        splash_pix = QPixmap(600, 400)
-        splash_pix.fill(QColor("#1e1e1e"))
+        # Create a splash pixmap with deep background
+        splash_pix = QPixmap(self.SPLASH_WIDTH, self.SPLASH_HEIGHT)
+
+        # Use theme colors if available, fallback otherwise
+        if THEME_AVAILABLE:
+            bg_color = Colors.BG_DEEP
+        else:
+            bg_color = "#0D0D0D"
+
+        splash_pix.fill(QColor(bg_color))
 
         super().__init__(splash_pix)
         self.setWindowFlag(Qt.WindowType.WindowStaysOnTopHint)
+
+        # Try to load the application icon for the splash
+        self.logo_pixmap: QPixmap | None = None
+        logo_candidates = [
+            ASSETS_DIR / "golf_robot_ultra_sharp.png",
+            ASSETS_DIR / "golf_robot_windows_optimized.png",
+            ASSETS_DIR / "golf_robot_icon_128.png",
+        ]
+        for logo_path in logo_candidates:
+            if logo_path.exists():
+                self.logo_pixmap = QPixmap(str(logo_path))
+                if not self.logo_pixmap.isNull():
+                    # Scale to appropriate size
+                    self.logo_pixmap = self.logo_pixmap.scaled(
+                        64,
+                        64,
+                        Qt.AspectRatioMode.KeepAspectRatio,
+                        Qt.TransformationMode.SmoothTransformation,
+                    )
+                    break
 
         # Add loading message
         self.loading_message = "Initializing Golf Modeling Suite..."
@@ -207,61 +252,124 @@ class GolfSplashScreen(QSplashScreen):
         if painter is None:
             return
 
-        painter.setPen(QColor("#ffffff"))
-        painter.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
+        # Enable antialiasing for smooth rendering
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        painter.setRenderHint(QPainter.RenderHint.TextAntialiasing)
 
-        # Draw title
+        # Get colors from theme or use fallbacks
+        if THEME_AVAILABLE:
+            text_primary = Colors.TEXT_PRIMARY
+            text_secondary = Colors.TEXT_TERTIARY
+            accent = Colors.PRIMARY
+            bg_bar = Colors.BG_ELEVATED
+            text_quaternary = Colors.TEXT_QUATERNARY
+        else:
+            text_primary = "#FFFFFF"
+            text_secondary = "#A0A0A0"
+            accent = "#0A84FF"
+            bg_bar = "#2D2D2D"
+            text_quaternary = "#666666"
+
+        center_x = self.width() // 2
+
+        # Draw logo if available
+        logo_y = 50
+        if self.logo_pixmap and not self.logo_pixmap.isNull():
+            logo_x = center_x - self.logo_pixmap.width() // 2
+            painter.drawPixmap(logo_x, logo_y, self.logo_pixmap)
+            title_y = logo_y + self.logo_pixmap.height() + 20
+        else:
+            title_y = 80
+
+        # Draw title with proper font
+        if THEME_AVAILABLE:
+            title_font = get_display_font(size=Sizes.XXL, weight=Weights.BOLD)
+        else:
+            title_font = QFont("Segoe UI", 24, QFont.Weight.Bold)
+
+        painter.setFont(title_font)
+        painter.setPen(QColor(text_primary))
         painter.drawText(
-            self.rect().adjusted(20, 100, -20, -200),
-            Qt.AlignmentFlag.AlignCenter,
-            "⛳ Golf Modeling Suite",
+            self.rect().adjusted(20, title_y, -20, 0),
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop,
+            "Golf Modeling Suite",
         )
 
         # Draw subtitle
-        painter.setFont(QFont("Segoe UI", 10))
-        painter.setPen(QColor("#cccccc"))
+        if THEME_AVAILABLE:
+            subtitle_font = get_qfont(size=Sizes.MD, weight=Weights.NORMAL)
+        else:
+            subtitle_font = QFont("Segoe UI", 11)
+
+        painter.setFont(subtitle_font)
+        painter.setPen(QColor(text_secondary))
         painter.drawText(
-            self.rect().adjusted(20, 150, -20, -150),
-            Qt.AlignmentFlag.AlignCenter,
+            self.rect().adjusted(20, title_y + 38, -20, 0),
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop,
             "Professional Biomechanics & Robotics Platform",
         )
 
-        # Draw loading message
-        painter.setFont(QFont("Segoe UI", 9))
-        painter.setPen(QColor("#007acc"))
+        # Draw loading message with accent color
+        if THEME_AVAILABLE:
+            status_font = get_qfont(size=Sizes.SM, weight=Weights.MEDIUM)
+        else:
+            status_font = QFont("Segoe UI", 9, QFont.Weight.Medium)
+
+        painter.setFont(status_font)
+        painter.setPen(QColor(accent))
+
+        status_y = self.height() - 90
         painter.drawText(
-            self.rect().adjusted(20, 200, -20, -100),
-            Qt.AlignmentFlag.AlignCenter,
+            self.rect().adjusted(20, status_y, -20, 0),
+            Qt.AlignmentFlag.AlignHCenter | Qt.AlignmentFlag.AlignTop,
             self.loading_message,
         )
 
-        # Draw progress bar
-        bar_width = 400
-        bar_height = 6
+        # Draw progress bar - refined styling
+        bar_width = 360
+        bar_height = 4
         bar_x = (self.width() - bar_width) // 2
-        bar_y = 280
+        bar_y = self.height() - 60
 
-        # Background
+        # Background bar with rounded corners
         painter.setPen(Qt.PenStyle.NoPen)
-        painter.setBrush(QColor("#333333"))
-        painter.drawRoundedRect(bar_x, bar_y, bar_width, bar_height, 3, 3)
+        painter.setBrush(QColor(bg_bar))
+        painter.drawRoundedRect(bar_x, bar_y, bar_width, bar_height, 2, 2)
 
-        # Progress
-        painter.setBrush(QColor("#007acc"))
-        progress_width = int(bar_width * (self.progress / 100))
-        painter.drawRoundedRect(bar_x, bar_y, progress_width, bar_height, 3, 3)
+        # Progress fill with accent color
+        if self.progress > 0:
+            painter.setBrush(QColor(accent))
+            progress_width = int(bar_width * (self.progress / 100))
+            painter.drawRoundedRect(bar_x, bar_y, progress_width, bar_height, 2, 2)
 
-        # Version info
-        painter.setFont(QFont("Segoe UI", 8))
-        painter.setPen(QColor("#666666"))
+        # Version info - bottom right
+        if THEME_AVAILABLE:
+            version_font = get_qfont(size=Sizes.XS, weight=Weights.NORMAL)
+        else:
+            version_font = QFont("Segoe UI", 8)
+
+        painter.setFont(version_font)
+        painter.setPen(QColor(text_quaternary))
         painter.drawText(
-            self.rect().adjusted(20, 0, -20, -20),
+            self.rect().adjusted(20, 0, -16, -12),
             Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignRight,
             "v1.0.0-beta",
         )
 
+        # Copyright - bottom left
+        painter.drawText(
+            self.rect().adjusted(16, 0, -20, -12),
+            Qt.AlignmentFlag.AlignBottom | Qt.AlignmentFlag.AlignLeft,
+            "\u00a9 2024-2025 Golf Modeling Suite",
+        )
+
     def show_message(self, message: str, progress: int) -> None:
-        """Show a message with progress."""
+        """Show a message with progress.
+
+        Args:
+            message: Status message to display
+            progress: Progress percentage (0-100)
+        """
         self.loading_message = message
         self.progress = progress
         self.showMessage(
