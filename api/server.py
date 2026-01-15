@@ -325,10 +325,10 @@ async def get_engines() -> list[EngineStatusResponse]:
         raise HTTPException(status_code=500, detail="Engine manager not initialized")
 
     engines = []
+    # PERFORMANCE FIX: Get available engines once before loop (was called 8+ times)
+    available_engines = engine_manager.get_available_engines()
     for engine_type in EngineType:
         status = engine_manager.get_engine_status(engine_type)
-        # Check if engine is available by trying to get available engines
-        available_engines = engine_manager.get_available_engines()
         is_available = engine_type in available_engines
 
         engines.append(
