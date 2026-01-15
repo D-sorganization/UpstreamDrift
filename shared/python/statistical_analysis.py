@@ -407,18 +407,20 @@ class StatisticalAnalyzer:
         # Find takeaway start (first significant movement)
         speed_threshold = 0.1 * smoothed_speed[transition_idx]
         takeaway_idx = 0
-        for i in range(1, transition_idx):
-            if smoothed_speed[i] > speed_threshold:
-                takeaway_idx = i
-                break
+        # OPTIMIZATION: Use vectorized search instead of loop
+        search_region = smoothed_speed[1:transition_idx]
+        mask = search_region > speed_threshold
+        if np.any(mask):
+            takeaway_idx = 1 + int(np.argmax(mask))
 
         # Find finish (speed drops after impact)
         finish_threshold = 0.3 * smoothed_speed[impact_idx]
         finish_idx = len(smoothed_speed) - 1
-        for i in range(impact_idx + 1, len(smoothed_speed)):
-            if smoothed_speed[i] < finish_threshold:
-                finish_idx = i
-                break
+        # OPTIMIZATION: Use vectorized search instead of loop
+        search_region = smoothed_speed[impact_idx + 1 :]
+        mask = search_region < finish_threshold
+        if np.any(mask):
+            finish_idx = impact_idx + 1 + int(np.argmax(mask))
 
         # Define phases
         phase_definitions = [
