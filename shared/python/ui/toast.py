@@ -17,9 +17,9 @@ Usage:
 """
 
 from enum import Enum, auto
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from PyQt6.QtCore import QPropertyAnimation, QTimer, Qt, pyqtProperty
+from PyQt6.QtCore import QPropertyAnimation, Qt, QTimer
 from PyQt6.QtGui import QColor, QFont, QPainter, QPainterPath
 from PyQt6.QtWidgets import QGraphicsOpacityEffect, QLabel, QVBoxLayout, QWidget
 
@@ -158,7 +158,7 @@ class Toast(QWidget):
         }
         return icons.get(self.toast_type, "")
 
-    def paintEvent(self, event) -> None:
+    def paintEvent(self, event: Any) -> None:
         """Custom paint for rounded background."""
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -255,9 +255,7 @@ class ToastManager:
 
         return x, y
 
-    def _show_toast(
-        self, message: str, toast_type: ToastType, duration: int
-    ) -> Toast:
+    def _show_toast(self, message: str, toast_type: ToastType, duration: int) -> Toast:
         """Create and show a toast notification.
 
         Args:
@@ -278,7 +276,7 @@ class ToastManager:
         self.active_toasts.append(toast)
 
         # Clean up when dismissed
-        def on_destroyed():
+        def on_destroyed() -> None:
             if toast in self.active_toasts:
                 self.active_toasts.remove(toast)
 

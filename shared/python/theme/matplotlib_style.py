@@ -13,7 +13,7 @@ Usage:
     apply_golf_suite_style(fig)
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import matplotlib.pyplot as plt
 
@@ -175,8 +175,8 @@ def create_styled_figure(
     nrows: int = 1,
     ncols: int = 1,
     figsize: tuple[float, float] | None = None,
-    **kwargs,
-) -> tuple["Figure", "plt.Axes"]:
+    **kwargs: Any,
+) -> tuple[Figure, Any]:
     """Create a pre-styled figure with the Golf Suite theme.
 
     Args:

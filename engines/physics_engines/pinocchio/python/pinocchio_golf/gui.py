@@ -270,7 +270,7 @@ class PinocchioRecorder:
         if not self.frames:
             return {}
 
-        export_data = {}
+        export_data: dict[str, Any] = {}
 
         # Get basic time series
         times, positions = self.get_time_series("joint_positions")
@@ -287,7 +287,7 @@ class PinocchioRecorder:
         # Export Induced
         first_frame = self.frames[0]
         if first_frame.induced_accelerations:
-            all_keys = set()
+            all_keys: set[str] = set()
             for f in self.frames:
                 all_keys.update(f.induced_accelerations.keys())
 
@@ -298,11 +298,11 @@ class PinocchioRecorder:
 
         # Export Counterfactuals
         if first_frame.counterfactuals:
-            all_keys = set()
+            all_keys_cf: set[str] = set()
             for f in self.frames:
-                all_keys.update(f.counterfactuals.keys())
+                all_keys_cf.update(f.counterfactuals.keys())
 
-            for key in all_keys:
+            for key in all_keys_cf:
                 _, vals = self.get_counterfactual_series(key)
                 if len(vals) > 0:
                     export_data[f"cf_{key}"] = vals

@@ -19,7 +19,11 @@ import time
 import webbrowser
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any, cast
+
+if TYPE_CHECKING:
+    from shared.python.engine_manager import EngineType
+    from shared.python.ui import ToastManager
 
 from PyQt6.QtCore import QMimeData, QPoint, Qt, QThread, QTimer, pyqtSignal
 from PyQt6.QtGui import (
@@ -63,39 +67,40 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-# Lazy imports for heavy modules - these are loaded during async startup
-# to avoid blocking the UI thread during application launch
-EngineManager = None  # Loaded lazily
-EngineType = None  # Loaded lazily
-ModelRegistry = None  # Loaded lazily
-
 from shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
     secure_run,
 )
 
+# Lazy imports for heavy modules - these are loaded during async startup
+# to avoid blocking the UI thread during application launch
+_EngineManager: Any = None
+_EngineType: Any = None
+_ModelRegistry: Any = None
 
-def _lazy_load_engine_manager():
+
+def _lazy_load_engine_manager() -> tuple[Any, Any]:
     """Lazily load EngineManager to speed up initial import."""
-    global EngineManager, EngineType
-    if EngineManager is None:
+    global _EngineManager, _EngineType
+    if _EngineManager is None:
         from shared.python.engine_manager import EngineManager as _EM
         from shared.python.engine_manager import EngineType as _ET
 
-        EngineManager = _EM
-        EngineType = _ET
-    return EngineManager, EngineType
+        _EngineManager = _EM
+        _EngineType = _ET
+    return _EngineManager, _EngineType
 
 
-def _lazy_load_model_registry():
+def _lazy_load_model_registry() -> Any:
     """Lazily load ModelRegistry to speed up initial import."""
-    global ModelRegistry
-    if ModelRegistry is None:
+    global _ModelRegistry
+    if _ModelRegistry is None:
         from shared.python.model_registry import ModelRegistry as _MR
 
-        ModelRegistry = _MR
-    return ModelRegistry
+        _ModelRegistry = _MR
+    return _ModelRegistry
+
 
 # Import unified theme system for consistent styling
 try:
@@ -117,7 +122,6 @@ except ImportError:
 try:
     from shared.python.ui import (
         PreferencesDialog,
-        RecentModelsPanel,
         ShortcutsOverlay,
         ToastManager,
     )
@@ -508,7 +512,9 @@ class AsyncStartupWorker(QThread):
             EM, _ = _lazy_load_engine_manager()
             manager = EM(self.repos_root)
             available = manager.get_available_engines()
-            logger.info(f"Found {len(available)} engines: {[e.value for e in available]}")
+            logger.info(
+                f"Found {len(available)} engines: {[e.value for e in available]}"
+            )
             return manager, list(available)
         except Exception as e:
             logger.warning(f"Failed to probe engines: {e}")
@@ -559,7 +565,7 @@ class StartupResults:
         self.startup_time_ms: int = 0
 
     @classmethod
-    def from_dict(cls, data: dict) -> "StartupResults":
+    def from_dict(cls, data: dict) -> StartupResults:
         """Create StartupResults from worker results dict."""
         results = cls()
         results.registry = data.get("registry")
@@ -1016,7 +1022,9 @@ class EnvironmentDialog(QDialog):
         actions_layout = QHBoxLayout()
 
         self.btn_build = QPushButton("Build Environment")
-        self.btn_build.setToolTip("Rebuild the Docker container with selected target stage")
+        self.btn_build.setToolTip(
+            "Rebuild the Docker container with selected target stage"
+        )
         self.btn_build.clicked.connect(self.start_build)
         # Store original text for restoration
         self._original_build_text = self.btn_build.text()
@@ -1414,6 +1422,7 @@ class GolfLauncher(QMainWindow):
         self.cleanup_timer.start(10000)  # Clean up every 10 seconds
 
         # Initialize UI components if available
+        self.toast_manager: ToastManager | None = None
         self._init_ui_components()
 
         # Log startup performance
@@ -2482,14 +2491,18 @@ class GolfLauncher(QMainWindow):
 
     def _get_engine_type(self, model_type: str) -> EngineType | None:
         """Map model type to EngineType."""
+        _, ET = _lazy_load_engine_manager()
+        if not ET:
+            return None
+
         if "humanoid" in model_type or "mujoco" in model_type:
-            return EngineType.MUJOCO
+            return cast("EngineType", ET.MUJOCO)
         elif "drake" in model_type:
-            return EngineType.DRAKE
+            return cast("EngineType", ET.DRAKE)
         elif "pinocchio" in model_type:
-            return EngineType.PINOCCHIO
+            return cast("EngineType", ET.PINOCCHIO)
         elif "opensim" in model_type:
-            return EngineType.OPENSIM
+            return cast("EngineType", ET.OPENSIM)
         return None
 
     def apply_styles(self) -> None:

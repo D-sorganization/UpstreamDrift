@@ -1,8 +1,5 @@
 """Tests for URDF visualization widget."""
 
-import pytest
-from PyQt6.QtWidgets import QApplication
-
 # Skip tests if running headless without X11/Wayland, unless using offscreen platform
 # But usually pytest-qt handles this if env var is set.
 # The project has explicit skipping for GUI tests in some places, but let's try standard approach.
