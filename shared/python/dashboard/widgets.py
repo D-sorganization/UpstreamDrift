@@ -16,10 +16,68 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 
 from shared.python.interfaces import RecorderInterface
 from shared.python.plotting import MplCanvas
+from shared.python.signal_processing import compute_psd
 
 LOGGER = logging.getLogger(__name__)
 
 MAX_DIMENSIONS = 100
+
+
+class FrequencyAnalysisDialog(QtWidgets.QDialog):
+    """Dialog for frequency domain analysis (PSD)."""
+
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget | None = None,
+        data: np.ndarray | None = None,
+        fs: float = 100.0,
+        label: str = "Data",
+    ) -> None:
+        super().__init__(parent)
+        self.setWindowTitle(f"Frequency Analysis - {label}")
+        self.resize(600, 400)
+        layout = QtWidgets.QVBoxLayout(self)
+
+        self.canvas = MplCanvas(width=5, height=4, dpi=100)
+        layout.addWidget(self.canvas)
+
+        if data is None or len(data) == 0:
+            lbl = QtWidgets.QLabel("No data available.")
+            layout.addWidget(lbl)
+            return
+
+        # Handle dimensions: (Time, Dims)
+        # compute_psd expects (Dims, Time) or we handle the output.
+        # welch defaults to axis=-1.
+        data_t = data.T
+        if data_t.ndim == 1:
+            data_t = data_t.reshape(1, -1)
+
+        # Compute PSD
+        freqs, psd = compute_psd(data_t, fs=fs)
+        # psd is (Dims, Freqs)
+
+        self.ax = self.canvas.fig.add_subplot(111)
+        self.ax.set_title(f"PSD: {label}")
+        self.ax.set_xlabel("Frequency (Hz)")
+        self.ax.set_ylabel("Power Spectral Density (dB/Hz)")
+        self.ax.grid(True)
+
+        n_dims = psd.shape[0]
+        # Limit number of lines to avoid clutter
+        limit_dims = min(n_dims, 10)
+
+        for i in range(limit_dims):
+            # Convert to dB
+            # Avoid log(0)
+            psd_db = 10 * np.log10(psd[i] + 1e-12)
+            label_str = f"Dim {i}" if n_dims > 1 else "PSD"
+            self.ax.semilogx(freqs, psd_db, label=label_str)
+
+        if n_dims > 1:
+            self.ax.legend()
+
+        self.canvas.draw()
 
 
 class LivePlotWidget(QtWidgets.QWidget):
@@ -29,6 +87,8 @@ class LivePlotWidget(QtWidgets.QWidget):
     - Kinematics (Positions, Velocities)
     - Dynamics (Torques)
     - Advanced (ZTCF, Induced Accelerations)
+    - Parametric (X-Y) plots
+    - Frequency Analysis
     """
 
     def __init__(self, recorder: RecorderInterface) -> None:
@@ -77,6 +137,13 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.comparison_key: str | None = None
         self.comparison_label: str | None = None
 
+        # Stats Labels
+        self.lbl_stats = QtWidgets.QLabel(
+            "Mean: 0.00 | Std: 0.00 | Min: 0.00 | Max: 0.00"
+        )
+        self.lbl_stats.setStyleSheet("font-family: monospace;")
+        self._main_layout.addWidget(self.lbl_stats)
+
         # Controls Layout
         controls_layout = QtWidgets.QHBoxLayout()
 
@@ -105,6 +172,12 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.combo_compare.setEnabled(False)
         self.combo_compare.currentTextChanged.connect(self._set_comparison_metric)
         controls_layout.addWidget(self.combo_compare)
+
+        # X-Y Plot Mode (Parametric)
+        self.chk_xy = QtWidgets.QCheckBox("X-Y Plot")
+        self.chk_xy.setToolTip("Plot Primary Metric (X) vs Secondary Metric (Y)")
+        self.chk_xy.stateChanged.connect(self._toggle_xy_mode)
+        controls_layout.addWidget(self.chk_xy)
 
         # Plot Mode Selector
         self.mode_combo = QtWidgets.QComboBox()
@@ -172,6 +245,12 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.btn_snapshot.setAccessibleName("Snapshot Button")
         self.btn_snapshot.clicked.connect(self.copy_snapshot)
         controls_layout.addWidget(self.btn_snapshot)
+
+        # Frequency Analysis Button
+        self.btn_freq = QtWidgets.QPushButton("Freq Analysis")
+        self.btn_freq.setToolTip("Show Power Spectral Density (PSD) of current view")
+        self.btn_freq.clicked.connect(self.show_freq_analysis)
+        controls_layout.addWidget(self.btn_freq)
 
         controls_layout.addWidget(self.chk_compute)
 
@@ -278,6 +357,15 @@ class LivePlotWidget(QtWidgets.QWidget):
         self._reset_plot()
         self.update_plot()
 
+    def _toggle_xy_mode(self, state: int) -> None:
+        """Handle X-Y mode toggle."""
+        is_xy = self.chk_xy.isChecked()
+        if is_xy and not self.chk_compare.isChecked():
+            # Force enable comparison if not already enabled
+            self.chk_compare.setChecked(True)
+        self._reset_plot()
+        self.update_plot()
+
     def _on_mode_changed(self, mode: str) -> None:
         """Handle plot mode change."""
         self.dim_spin.setVisible(mode == "Single Dimension")
@@ -326,6 +414,8 @@ class LivePlotWidget(QtWidgets.QWidget):
     def _reset_plot(self) -> None:
         """Clear the axes and lines."""
         self.ax.clear()
+
+        # Always remove secondary axis first to avoid stacking
         if self.ax2:
             self.ax2.remove()
             self.ax2 = None
@@ -334,13 +424,25 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.line_objects2 = []
 
         title = f"Live {self.current_label}"
-        if self.comparison_label:
-            title += f" vs {self.comparison_label}"
-            # Create secondary axis
-            self.ax2 = self.ax.twinx()
+
+        is_xy = self.chk_xy.isChecked()
+
+        if is_xy:
+            if self.comparison_label:
+                title = f"{self.current_label} (X) vs {self.comparison_label} (Y)"
+                self.ax.set_xlabel(self.current_label)
+                self.ax.set_ylabel(self.comparison_label)
+            else:
+                title += " (X-Y Mode - Select Comparison)"
+                self.ax.set_xlabel(self.current_label)
+        else:
+            if self.comparison_label:
+                title += f" vs {self.comparison_label}"
+                # Create secondary axis
+                self.ax2 = self.ax.twinx()
+            self.ax.set_xlabel("Time (s)")
 
         self.ax.set_title(title)
-        self.ax.set_xlabel("Time (s)")
         self.ax.grid(True)
 
     def _get_data_for_key(self, key: str) -> tuple[np.ndarray, np.ndarray | None, str]:
@@ -392,6 +494,7 @@ class LivePlotWidget(QtWidgets.QWidget):
         times, data, dim_label = self._get_data_for_key(self.current_key)
 
         if len(times) == 0 or data is None:
+            # Update stats even if empty?
             return
 
         # Limit to recent history to keep it fast
@@ -400,8 +503,74 @@ class LivePlotWidget(QtWidgets.QWidget):
             times = times[-max_points:]
             data = data[-max_points:]
 
+        # Update Statistics
+        if data.size > 0:
+            mean_val = np.mean(data)
+            std_val = np.std(data)
+            min_val = np.min(data)
+            max_val = np.max(data)
+            self.lbl_stats.setText(
+                f"Mean: {mean_val:.2f} | Std: {std_val:.2f} | Min: {min_val:.2f} | Max: {max_val:.2f}"
+            )
+
         n_dims = data.shape[1]
         plot_mode = self.mode_combo.currentText()
+        is_xy = self.chk_xy.isChecked()
+
+        # Handle X-Y Plot Mode
+        if is_xy:
+            if self.comparison_key:
+                times2, data2, dim_label2 = self._get_data_for_key(self.comparison_key)
+                if len(times2) > 0 and data2 is not None:
+                    # Sync lengths
+                    if len(times2) > max_points:
+                        times2 = times2[-max_points:]
+                        data2 = data2[-max_points:]
+
+                    min_len = min(len(data), len(data2))
+                    data = data[:min_len]
+                    data2 = data2[:min_len]
+
+                    # Initialize lines if needed
+                    # If dimensions mismatch, we can only plot matching dimensions
+                    n_common_dims = min(n_dims, data2.shape[1])
+
+                    if len(self.line_objects) != n_common_dims:
+                        self.ax.clear()
+                        self.line_objects = []
+                        # No secondary axis in XY mode (same plot)
+
+                        title = (
+                            f"{self.current_label} (X) vs {self.comparison_label} (Y)"
+                        )
+                        self.ax.set_title(title)
+                        self.ax.set_xlabel(self.current_label)
+                        self.ax.set_ylabel(self.comparison_label)
+                        self.ax.grid(True)
+
+                        for i in range(n_common_dims):
+                            label = f"Dim {i}" if n_common_dims > 1 else "Trajectory"
+                            if plot_mode == "Single Dimension":
+                                label = f"Dim {dim_label} vs {dim_label2}"
+                            elif plot_mode == "Norm":
+                                label = "Norm vs Norm"
+
+                            (line,) = self.ax.plot([], [], label=label)
+                            self.line_objects.append(line)
+
+                        if n_common_dims < 10 or plot_mode != "All Dimensions":
+                            self.ax.legend(loc="upper right")
+
+                    # Update lines
+                    for i, line in enumerate(self.line_objects):
+                        line.set_data(data[:, i], data2[:, i])
+
+                    self.ax.relim()
+                    self.ax.autoscale_view()
+                    self.canvas.draw()
+            return
+
+        # Standard Time Series Plot
 
         # Initialize lines for primary axis
         if len(self.line_objects) != n_dims:
@@ -409,11 +578,6 @@ class LivePlotWidget(QtWidgets.QWidget):
             self.ax.clear()
             self.line_objects = []
             if self.ax2:
-                # If we cleared ax, ax2 is gone or detached?
-                # Actually ax.clear() clears ax content. ax2 remains attached but needs clearing?
-                # Standard practice: if we clear primary, we likely need to redraw everything.
-                # But here we just want to update lines.
-                # If n_dims changed, we rebuild everything.
                 if self.ax2:
                     self.ax2.clear()
                 self.line_objects2 = []
@@ -489,18 +653,27 @@ class LivePlotWidget(QtWidgets.QWidget):
                 # Update secondary lines
                 for i, line in enumerate(self.line_objects2):
                     if i < data2.shape[1]:
-                        # Handle potential time misalignment by assuming sync or taking latest matching length
-                        # Real-time usually implies both streams are up to date.
-                        # If sizes differ slightly, trim to min
-                        min(len(times), len(times2))
-                        # But wait, we plot against their own time axes usually.
-                        # Assuming times ~ times2 for visual simplicity on live plot.
                         line.set_data(times2, data2[:, i])
 
                 self.ax2.relim()
                 self.ax2.autoscale_view()
 
         self.canvas.draw()
+
+    def show_freq_analysis(self) -> None:
+        """Show Frequency Analysis Dialog."""
+        times, data, _ = self._get_data_for_key(self.current_key)
+        if len(times) == 0:
+            return
+
+        # Estimate fs
+        if len(times) > 1:
+            fs = 1.0 / np.mean(np.diff(times))
+        else:
+            fs = 100.0
+
+        dlg = FrequencyAnalysisDialog(self, data, fs, self.current_label)
+        dlg.exec()
 
     def copy_snapshot(self) -> None:
         """Capture the current plot and copy to clipboard."""
