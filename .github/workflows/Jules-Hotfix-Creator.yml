@@ -34,15 +34,18 @@ jobs:
 
       - name: Validate Inputs
         id: validate
+        env:
+          FAILED_BRANCH: ${{ inputs.failed_branch }}
+          RUN_ID: ${{ inputs.run_id }}
         run: |
-          # SECURITY: Validate branch name format
-          if ! echo "${{ inputs.failed_branch }}" | grep -qE '^[a-zA-Z0-9/_-]+$'; then
+          # SECURITY: Validate branch name format using environment variables
+          if ! echo "$FAILED_BRANCH" | grep -qE '^[a-zA-Z0-9/_-]+$'; then
             echo "Invalid branch name format"
             exit 1
           fi
           
           # SECURITY: Validate run_id is numeric
-          if ! echo "${{ inputs.run_id }}" | grep -qE '^[0-9]+$'; then
+          if ! echo "$RUN_ID" | grep -qE '^[0-9]+$'; then
             echo "Invalid run_id format"
             exit 1
           fi
