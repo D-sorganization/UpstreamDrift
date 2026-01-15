@@ -31,9 +31,21 @@ if str(SRC_PATH) not in sys.path:
 try:
     from apps.c3d_viewer import C3DDataModel, C3DViewerMainWindow
     from c3d_reader import C3DDataReader
-except ImportError:
-    # Allow test collection to fail gracefully if paths are wrong, but they should be right
-    raise
+
+    PYQT6_AVAILABLE = True
+except (ImportError, OSError):
+    # GUI libraries may not be available (missing libEGL etc.) - skip gracefully
+    PYQT6_AVAILABLE = False
+    C3DDataModel = None  # type: ignore[misc, assignment]
+    C3DViewerMainWindow = None  # type: ignore[misc, assignment]
+    C3DDataReader = None  # type: ignore[misc, assignment]
+
+# Skip all tests if PyQt6 is not available
+if not PYQT6_AVAILABLE:
+    pytestmark = [
+        pytest.mark.integration,
+        pytest.mark.skip(reason="PyQt6 GUI libraries not available"),
+    ]
 
 
 @pytest.fixture

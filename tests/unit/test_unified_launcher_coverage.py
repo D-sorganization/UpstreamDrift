@@ -3,8 +3,19 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Mock PyQt6 first
-with patch.dict(sys.modules, {"PyQt6.QtWidgets": MagicMock(), "PyQt6": MagicMock()}):
+# Check for PyQt6 GUI library availability
+try:
+    from PyQt6 import QtWidgets  # noqa: F401
+
+    PYQT6_AVAILABLE = True
+except (ImportError, OSError):
+    PYQT6_AVAILABLE = False
+
+pytestmark = pytest.mark.skipif(
+    not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available"
+)
+
+if PYQT6_AVAILABLE:
     from launchers.unified_launcher import UnifiedLauncher
 
 

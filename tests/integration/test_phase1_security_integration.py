@@ -14,7 +14,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from launchers.golf_launcher import GolfLauncher
+import pytest
+
 from shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
@@ -22,6 +23,15 @@ from shared.python.secure_subprocess import (
     validate_executable,
     validate_script_path,
 )
+
+# GolfLauncher requires PyQt6, import conditionally
+try:
+    from launchers.golf_launcher import GolfLauncher
+
+    PYQT6_AVAILABLE = True
+except (ImportError, OSError):
+    PYQT6_AVAILABLE = False
+    GolfLauncher = None  # type: ignore[misc, assignment]
 
 
 class TestPhase1SecurityIntegration(unittest.TestCase):
@@ -130,6 +140,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         with self.assertRaises(SecureSubprocessError):
             secure_popen(["malicious_exe"])
 
+    @pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not available")
     @patch("shared.python.secure_subprocess.secure_run")
     @patch("launchers.golf_launcher.QApplication")
     @patch("launchers.golf_launcher.QIcon")
