@@ -684,7 +684,7 @@ class LivePlotWidget(QtWidgets.QWidget):
 
         # Estimate fs
         if len(times) > 1:
-            fs = 1.0 / np.mean(np.diff(times))
+            fs: float = float(1.0 / np.mean(np.diff(times)))
         else:
             fs = 100.0
 
