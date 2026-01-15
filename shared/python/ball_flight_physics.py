@@ -12,7 +12,7 @@ Critical gap identified in upgrade assessment - without this, not a complete gol
 
 import logging
 from dataclasses import dataclass
-from typing import Any, cast
+from typing import Any
 
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -150,8 +150,6 @@ class BallFlightSimulator:
         """
         self.ball = ball or BallProperties()
         self.environment = environment or EnvironmentalConditions()
-        # Optimization: Pre-allocate gravity vector
-        self._gravity_acc = np.array([0.0, 0.0, -self.environment.gravity])
 
     def simulate_trajectory(
         self, launch: LaunchConditions, max_time: float = 10.0, time_step: float = 0.01
@@ -208,8 +206,7 @@ class BallFlightSimulator:
         min_speed_sq = MIN_SPEED_THRESHOLD**2
 
         # Optimized ODE function closure
-        # NOTE: This function duplicates logic from _equations_of_motion for performance.
-        # Any changes to physics models must be applied to BOTH locations.
+        # Contains the authoritative physics model for flight dynamics.
         def ode_func(t: float, state: np.ndarray) -> np.ndarray:
             # state is [x, y, z, vx, vy, vz]
             # Velocity view (no copy)
@@ -324,100 +321,6 @@ class BallFlightSimulator:
 
         return trajectory
 
-    def _equations_of_motion(
-        self, t: float, state: np.ndarray, launch: LaunchConditions
-    ) -> np.ndarray:
-        """Equations of motion for golf ball flight.
-
-        NOTE: This method is preserved for backward compatibility and unit testing.
-        The main simulation loop uses an optimized closure `ode_func` inside
-        `simulate_trajectory` which duplicates this logic.
-        Ensure any physics updates are applied to BOTH.
-
-        Args:
-            t: Current time
-            state: Current state [x, y, z, vx, vy, vz]
-            launch: Launch conditions for spin calculations
-
-        Returns:
-            State derivatives [vx, vy, vz, ax, ay, az]
-        """
-        velocity = state[3:]
-
-        # OPTIMIZATION: Calculate acceleration directly to avoid
-        # dictionary allocation and list summation overhead in the solver loop.
-        acceleration = self._calculate_acceleration(velocity, launch)
-
-        # Return derivatives
-        return np.concatenate([velocity, acceleration])
-
-    def _calculate_acceleration(
-        self, velocity: np.ndarray, launch: LaunchConditions
-    ) -> np.ndarray:
-        """Calculate total acceleration acting on the ball.
-
-        Optimized for performance in the solver loop.
-        """
-        # Gravity acceleration (constant, pre-allocated)
-        gravity_acc = self._gravity_acc
-
-        # Relative velocity (accounting for wind)
-        relative_velocity = velocity - self.environment.wind_velocity
-        # Optimization: use dot product instead of sum(x**2) to avoid allocation
-        speed_sq = relative_velocity @ relative_velocity
-        speed = np.sqrt(speed_sq)
-
-        if speed <= MIN_SPEED_THRESHOLD:
-            return gravity_acc
-
-        velocity_unit = relative_velocity / speed
-
-        # Calculate spin ratio S = (ω * r) / v (Waterloo/Penner model)
-        if launch.spin_rate > 0:
-            omega = launch.spin_rate * 2 * np.pi / 60  # rad/s
-            spin_ratio = (omega * self.ball.radius) / speed
-        else:
-            spin_ratio = 0.0
-
-        # Drag force using Waterloo/Penner quadratic model
-        drag_coefficient = (
-            self.ball.cd0 + self.ball.cd1 * spin_ratio + self.ball.cd2 * spin_ratio**2
-        )
-
-        # F_drag = 0.5 * rho * A * Cd * v^2
-        # a_drag = F_drag / m
-        # Precompute constants term: 0.5 * rho * A / m
-        const_term = (
-            0.5 * self.environment.air_density * self.ball.cross_sectional_area
-        ) / self.ball.mass
-
-        drag_acc_mag = const_term * drag_coefficient * speed_sq
-        drag_acc = -drag_acc_mag * velocity_unit
-
-        total_acc = gravity_acc + drag_acc
-
-        # Lift force using Waterloo/Penner quadratic model
-        if spin_ratio > 0:
-            lift_coefficient = (
-                self.ball.cl0
-                + self.ball.cl1 * spin_ratio
-                + self.ball.cl2 * spin_ratio**2
-            )
-            lift_coefficient = min(MAX_LIFT_COEFFICIENT, lift_coefficient)
-
-            magnus_acc_mag = const_term * lift_coefficient * speed_sq
-
-            # Direction: perpendicular to velocity and spin axis
-            if launch.spin_axis is not None:
-                cross_product = np.cross(launch.spin_axis, velocity_unit)
-                # Optimization: use dot product for magnitude
-                cross_magnitude = np.sqrt(cross_product @ cross_product)
-                if cross_magnitude > NUMERICAL_EPSILON:
-                    magnus_acc = magnus_acc_mag * cross_product / cross_magnitude
-                    total_acc += magnus_acc
-
-        return cast(np.ndarray, total_acc)
-
     def _calculate_forces(
         self, velocity: np.ndarray, launch: LaunchConditions
     ) -> dict[str, np.ndarray]:
@@ -430,10 +333,8 @@ class BallFlightSimulator:
         Returns:
             Dictionary of force vectors
         """
-        # This method duplicates logic from _calculate_acceleration but returns
-        # the force breakdown. Since it's only called for trajectory point storage
-        # (not in the inner solver loop), the duplication is acceptable for
-        # performance isolation.
+        # Note: This logic must match ode_func in simulate_trajectory.
+        # It is used for diagnostic reporting (TrajectoryPoint.forces).
 
         forces = {}
 
