@@ -113,6 +113,19 @@ try:
 except ImportError:
     AI_AVAILABLE = False
 
+# Optional UI components import (graceful degradation)
+try:
+    from shared.python.ui import (
+        PreferencesDialog,
+        RecentModelsPanel,
+        ShortcutsOverlay,
+        ToastManager,
+    )
+
+    UI_COMPONENTS_AVAILABLE = True
+except ImportError:
+    UI_COMPONENTS_AVAILABLE = False
+
 # Windows-specific subprocess constants
 CREATE_NO_WINDOW: int
 CREATE_NEW_CONSOLE: int
@@ -1371,9 +1384,70 @@ class GolfLauncher(QMainWindow):
         self.cleanup_timer.timeout.connect(self._cleanup_processes)
         self.cleanup_timer.start(10000)  # Clean up every 10 seconds
 
+        # Initialize UI components if available
+        self._init_ui_components()
+
         # Log startup performance
         if self._startup_time_ms > 0:
             logger.info(f"Application startup completed in {self._startup_time_ms}ms")
+
+    def _init_ui_components(self) -> None:
+        """Initialize optional UI components (toast, shortcuts, etc.)."""
+        # Toast notification manager
+        if UI_COMPONENTS_AVAILABLE:
+            self.toast_manager = ToastManager(self)
+
+            # Setup keyboard shortcuts
+            self._setup_keyboard_shortcuts()
+        else:
+            self.toast_manager = None
+
+    def _setup_keyboard_shortcuts(self) -> None:
+        """Set up global keyboard shortcuts."""
+        # Ctrl+? or F1 for shortcuts overlay
+        shortcut_help = QShortcut(QKeySequence("Ctrl+?"), self)
+        shortcut_help.activated.connect(self._show_shortcuts_overlay)
+
+        shortcut_f1 = QShortcut(QKeySequence("F1"), self)
+        shortcut_f1.activated.connect(self._show_shortcuts_overlay)
+
+        # Ctrl+, for preferences
+        shortcut_prefs = QShortcut(QKeySequence("Ctrl+,"), self)
+        shortcut_prefs.activated.connect(self._show_preferences)
+
+        # Ctrl+Q to quit
+        shortcut_quit = QShortcut(QKeySequence("Ctrl+Q"), self)
+        shortcut_quit.activated.connect(self.close)
+
+    def _show_shortcuts_overlay(self) -> None:
+        """Show the keyboard shortcuts overlay."""
+        if UI_COMPONENTS_AVAILABLE:
+            overlay = ShortcutsOverlay(self)
+            overlay.show()
+            overlay.setFocus()
+
+    def _show_preferences(self) -> None:
+        """Show the preferences dialog."""
+        if UI_COMPONENTS_AVAILABLE:
+            dialog = PreferencesDialog(self)
+            dialog.exec()
+
+    def show_toast(self, message: str, toast_type: str = "info") -> None:
+        """Show a toast notification.
+
+        Args:
+            message: Message to display
+            toast_type: Type of toast ("success", "error", "warning", "info")
+        """
+        if self.toast_manager:
+            if toast_type == "success":
+                self.toast_manager.show_success(message)
+            elif toast_type == "error":
+                self.toast_manager.show_error(message)
+            elif toast_type == "warning":
+                self.toast_manager.show_warning(message)
+            else:
+                self.toast_manager.show_info(message)
 
     def _apply_docker_status(self, available: bool) -> None:
         """Apply Docker availability status to UI.
