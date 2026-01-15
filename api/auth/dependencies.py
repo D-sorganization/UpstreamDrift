@@ -73,7 +73,10 @@ async def get_current_user_from_api_key(
         )
 
     # PERFORMANCE FIX: Compute prefix hash for fast filtering
-    # Use first 8 characters after "gms_" prefix for indexing
+    # NOTE: This is NOT password hashing - it's an index for fast lookup.
+    # The actual API key is verified with bcrypt (see security_manager.verify_api_key below).
+    # We hash only the first 8 characters of the key body (not the full key)
+    # to create a database index that reduces bcrypt calls from O(n) to O(1).
     import hashlib
 
     key_body = api_key[4:]  # Remove "gms_" prefix
@@ -84,8 +87,10 @@ async def get_current_user_from_api_key(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    prefix = key_body[:8]
-    prefix_hash = hashlib.sha256(prefix.encode()).hexdigest()
+    # Extract prefix for indexing (not the full secret)
+    prefix_for_index = key_body[:8]
+    # Hash the prefix to create a database index (this is not the password hash)
+    prefix_hash = hashlib.sha256(prefix_for_index.encode()).hexdigest()
 
     # Query only keys matching the prefix hash (if column exists)
     # Fallback to all active keys if prefix_hash column doesn't exist yet
