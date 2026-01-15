@@ -96,20 +96,36 @@ class RecorderInterface(Protocol):
         ...  # pragma: no cover
 
 
-# Default color scheme for professional plots
-DEFAULT_COLORS = {
-    "primary": "#1f77b4",
-    "secondary": "#ff7f0e",
-    "tertiary": "#2ca02c",
-    "quaternary": "#d62728",
-    "quinary": "#9467bd",
-    "senary": "#8c564b",
-    "accent": "#e377c2",
-    "dark": "#7f7f7f",
-    "grid": "#cccccc",
-}
+# Import color scheme from unified theme system
+# This ensures consistent colors across all visualizations
+try:
+    from shared.python.theme.colors import CHART_COLORS, DEFAULT_COLORS
+except ImportError:
+    # Fallback for when theme module is not available
+    DEFAULT_COLORS = {
+        "primary": "#0A84FF",
+        "secondary": "#FF9F0A",
+        "tertiary": "#30D158",
+        "quaternary": "#FF375F",
+        "quinary": "#BF5AF2",
+        "senary": "#AC8E68",
+        "accent": "#64D2FF",
+        "dark": "#A0A0A0",
+        "grid": "#333333",
+    }
+    CHART_COLORS = [
+        "#0A84FF",
+        "#30D158",
+        "#FF9F0A",
+        "#FF375F",
+        "#BF5AF2",
+        "#64D2FF",
+        "#FFD60A",
+        "#AC8E68",
+    ]
 
 __all__ = [
+    "CHART_COLORS",
     "DEFAULT_COLORS",
     "MplCanvas",
     "RecorderInterface",
