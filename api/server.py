@@ -12,6 +12,7 @@ Built on top of the existing EngineManager and PhysicsEngine protocol.
 import logging
 import tempfile
 import uuid
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -106,32 +107,41 @@ def _validate_model_path(model_path: str) -> str:
     Raises:
         HTTPException: If path is invalid or contains traversal attempts
     """
+    # SECURITY: Sanitize user input to prevent path traversal
     try:
         user_path = Path(model_path)
     except TypeError as e:
         raise HTTPException(
             status_code=400,
-            detail=f"Invalid path: {e}",
+            detail="Invalid path format",
         ) from e
 
-    # Reject absolute paths - user input must be relative
+    # SECURITY: Reject absolute paths - user input must be relative
     if user_path.is_absolute():
         raise HTTPException(
             status_code=400,
             detail="Invalid path: absolute paths are not allowed",
         )
 
+    # SECURITY: Reject paths with parent directory references
+    if ".." in user_path.parts:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid path: parent directory references not allowed",
+        )
+
     # Build candidate paths under each allowed directory and check them
     for allowed_dir in ALLOWED_MODEL_DIRS:
         try:
+            # SECURITY: Resolve to absolute path and validate it stays within allowed_dir
             candidate = (allowed_dir / user_path).resolve()
         except (ValueError, OSError) as e:
             raise HTTPException(
                 status_code=400,
-                detail=f"Invalid path: {e}",
+                detail="Invalid path format",
             ) from e
 
-        # Ensure the resolved path is still within the allowed directory
+        # SECURITY: Ensure the resolved path is still within the allowed directory
         try:
             candidate.relative_to(allowed_dir)
         except ValueError:
@@ -140,6 +150,7 @@ def _validate_model_path(model_path: str) -> str:
 
         # Check if this valid candidate exists
         if candidate.exists():
+            # SECURITY: Return only the validated, sanitized path
             return str(candidate)
 
     raise HTTPException(
@@ -154,8 +165,102 @@ simulation_service: SimulationService | None = None
 analysis_service: AnalysisService | None = None
 video_pipeline: VideoPosePipeline | None = None
 
-# Background task storage
-active_tasks: dict[str, Any] = {}
+
+class TaskManager:
+    """Thread-safe task manager with TTL cleanup and size limits.
+
+    Prevents memory leak from unbounded task accumulation.
+
+    Performance Fix for Issue #1:
+    - Tasks expire after TTL_SECONDS (default 1 hour)
+    - Maximum MAX_TASKS entries with LRU eviction
+    - Automatic cleanup on each access
+    """
+
+    # Configuration constants
+    TTL_SECONDS: int = 3600  # 1 hour
+    MAX_TASKS: int = 1000  # Maximum stored tasks
+
+    def __init__(self) -> None:
+        """Initialize task manager with empty storage."""
+        import threading
+        import time
+
+        self._tasks: dict[str, dict[str, Any]] = {}
+        self._timestamps: dict[str, float] = {}
+        self._lock = threading.Lock()
+        self._time = time  # Store reference for use in methods
+
+    def _cleanup_expired(self) -> None:
+        """Remove expired tasks. Called internally under lock."""
+        current_time = self._time.time()
+        expired_keys = [
+            task_id
+            for task_id, timestamp in self._timestamps.items()
+            if current_time - timestamp > self.TTL_SECONDS
+        ]
+        for task_id in expired_keys:
+            self._tasks.pop(task_id, None)
+            self._timestamps.pop(task_id, None)
+
+    def _enforce_size_limit(self) -> None:
+        """Remove oldest tasks if over limit. Called internally under lock."""
+        if len(self._tasks) <= self.MAX_TASKS:
+            return
+
+        # Sort by timestamp and remove oldest entries
+        sorted_by_age = sorted(self._timestamps.items(), key=lambda x: x[1])
+        to_remove = len(self._tasks) - self.MAX_TASKS
+        for task_id, _ in sorted_by_age[:to_remove]:
+            self._tasks.pop(task_id, None)
+            self._timestamps.pop(task_id, None)
+
+    def set(self, task_id: str, data: dict[str, Any]) -> None:
+        """Store or update a task.
+
+        Args:
+            task_id: Unique task identifier
+            data: Task data dictionary
+        """
+        with self._lock:
+            self._cleanup_expired()
+            self._tasks[task_id] = data
+            self._timestamps[task_id] = self._time.time()
+            self._enforce_size_limit()
+
+    def get(self, task_id: str) -> dict[str, Any] | None:
+        """Retrieve a task by ID.
+
+        Args:
+            task_id: Task identifier
+
+        Returns:
+            Task data or None if not found
+        """
+        with self._lock:
+            self._cleanup_expired()
+            return self._tasks.get(task_id)
+
+    def __contains__(self, task_id: str) -> bool:
+        """Check if task exists."""
+        with self._lock:
+            self._cleanup_expired()
+            return task_id in self._tasks
+
+    def __setitem__(self, task_id: str, data: dict[str, Any]) -> None:
+        """Dict-like setter for backward compatibility."""
+        self.set(task_id, data)
+
+    def __getitem__(self, task_id: str) -> dict[str, Any]:
+        """Dict-like getter for backward compatibility."""
+        result = self.get(task_id)
+        if result is None:
+            raise KeyError(task_id)
+        return result
+
+
+# Background task storage with TTL cleanup (Performance Issue #1 fix)
+active_tasks = TaskManager()
 
 
 @app.on_event("startup")
@@ -312,9 +417,15 @@ async def run_simulation_async(
 
     task_id = str(uuid.uuid4())
 
+    # Initialize task with timestamp
+    active_tasks[task_id] = {
+        "status": "started",
+        "created_at": datetime.now(UTC),
+    }
+
     # Add background task
     background_tasks.add_task(
-        simulation_service.run_simulation_background, task_id, request, active_tasks
+        simulation_service.run_simulation_background, task_id, request, active_tasks  # type: ignore[arg-type]
     )
 
     return {"task_id": task_id, "status": "started"}
@@ -414,6 +525,12 @@ async def analyze_video_async(
         temp_file.write(content)
         temp_path = Path(temp_file.name)
 
+    # Initialize task with timestamp
+    active_tasks[task_id] = {
+        "status": "started",
+        "created_at": datetime.now(UTC),
+    }
+
     background_tasks.add_task(
         _process_video_background,
         task_id,
@@ -435,7 +552,16 @@ async def _process_video_background(
 ) -> None:
     """Background task for video processing."""
     try:
-        active_tasks[task_id] = {"status": "processing", "progress": 0}
+        task_data = active_tasks.get(task_id)
+        if task_data is None:
+            task_data = {}
+        created_at = task_data.get("created_at", datetime.now(UTC))
+
+        active_tasks[task_id] = {
+            "status": "processing",
+            "progress": 0,
+            "created_at": created_at,
+        }
 
         config = VideoProcessingConfig(
             estimator_type=estimator_type, min_confidence=min_confidence
@@ -445,8 +571,14 @@ async def _process_video_background(
         result = pipeline.process_video(video_path)
 
         # Store result
+        task_data = active_tasks.get(task_id)
+        if task_data is None:
+            task_data = {}
+        created_at = task_data.get("created_at", datetime.now(UTC))
+
         active_tasks[task_id] = {
             "status": "completed",
+            "created_at": created_at,
             "result": {
                 "filename": filename,
                 "total_frames": result.total_frames,
@@ -457,7 +589,16 @@ async def _process_video_background(
         }
 
     except Exception as e:
-        active_tasks[task_id] = {"status": "failed", "error": str(e)}
+        task_data = active_tasks.get(task_id)
+        if task_data is None:
+            task_data = {}
+        created_at = task_data.get("created_at", datetime.now(UTC))
+
+        active_tasks[task_id] = {
+            "status": "failed",
+            "error": str(e),
+            "created_at": created_at,
+        }
     finally:
         # Clean up temp file
         if video_path.exists():

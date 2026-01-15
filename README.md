@@ -63,13 +63,35 @@ For detailed documentation, please visit the **[Documentation Hub](docs/README.m
 
 ### Installation
 
+**Recommended: Conda** (handles binary dependencies like MuJoCo)
+
 ```bash
 git clone https://github.com/D-sorganization/Golf_Modeling_Suite.git
 cd Golf_Modeling_Suite
-git lfs install
-git lfs pull
-pip install -r requirements.txt
+git lfs install && git lfs pull
+
+# Create conda environment (most reliable)
+conda env create -f environment.yml
+conda activate golf-suite
+
+# Verify installation
+python scripts/verify_installation.py
 ```
+
+**Alternative: Pip**
+
+```bash
+pip install -e ".[dev,engines]"
+```
+
+**Light Installation** (for UI development without heavy physics engines)
+
+```bash
+pip install -e .
+export GOLF_USE_MOCK_ENGINE=1
+```
+
+📖 **Troubleshooting**: See [docs/troubleshooting/installation.md](docs/troubleshooting/installation.md) for common issues.
 
 ### Launching the Suite
 

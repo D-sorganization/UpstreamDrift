@@ -63,6 +63,26 @@ logger = logging.getLogger(__name__)
 BCRYPT_ROUNDS = 12
 
 
+def compute_prefix_hash(prefix: str) -> str:
+    """Compute SHA256 hash of a non-sensitive prefix for database indexing.
+
+    This function is used to create a database index for fast API key lookup.
+    It hashes ONLY the first 8 characters of the key (not the full secret).
+
+    Args:
+        prefix: Non-sensitive 8-character prefix from the API key
+
+    Returns:
+        SHA256 hash of the prefix for database indexing
+
+    Note:
+        This is NOT password hashing. The actual API key is hashed with bcrypt.
+    """
+    import hashlib
+
+    return hashlib.sha256(prefix.encode()).hexdigest()
+
+
 def parse_arguments() -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
@@ -166,13 +186,23 @@ def migrate_api_keys(
 
     logger.info(f"Found {len(api_records)} API records to migrate")
 
+    # PERFORMANCE FIX (Issue #6): Batch fetch all users to avoid N+1 queries
+    # Before: 1 query per key = O(n) queries
+    # After: 1 query for all users = O(1) queries
+    user_ids = [r.user_id for r in api_records]
+    users = db_session.query(User).filter(User.id.in_(user_ids)).all()
+    user_map: dict[int, User] = {int(u.id): u for u in users}  # type: ignore[arg-type]
+    logger.info(
+        f"Loaded {len(user_map)} users in batch (avoided {len(api_records)} queries)"
+    )
+
     # Store results in separate lists to break taint chain
     metadata_results: list[dict[str, Any]] = []
     raw_secrets: list[str] = []
 
     for idx, record in enumerate(api_records, 1):
-        # Get user info for context
-        user = db_session.query(User).filter(User.id == record.user_id).first()
+        # Get user info from pre-fetched map (O(1) lookup)
+        user = user_map.get(int(record.user_id))  # type: ignore[arg-type]
         user_email = user.email if user else "unknown"
 
         logger.info(
@@ -186,6 +216,11 @@ def migrate_api_keys(
         # Hash with bcrypt
         salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
         new_hash = bcrypt.hashpw(new_raw_value.encode("utf-8"), salt).decode("utf-8")
+
+        # PERFORMANCE FIX: Compute prefix hash for fast lookup
+        key_body = new_raw_value[4:]  # Remove "gms_" prefix
+        prefix_for_index = key_body[:8]  # Extract prefix for indexing
+        prefix_hash = compute_prefix_hash(prefix_for_index)
 
         # Store metadata separately (no secrets here)
         record_metadata = {
@@ -203,8 +238,11 @@ def migrate_api_keys(
         raw_secrets.append(new_raw_value)
 
         if not dry_run:
-            # Update database record (only hash is stored)
+            # Update database record (hash and prefix)
             record.key_hash = new_hash  # type: ignore[assignment]
+            # Set prefix_hash if column exists
+            if hasattr(record, "prefix_hash"):
+                record.prefix_hash = prefix_hash  # type: ignore[attr-defined]
             logger.info("  ✓ Hash upgraded to bcrypt successfully")
         else:
             logger.info("  [DRY RUN] Would upgrade hash to bcrypt")

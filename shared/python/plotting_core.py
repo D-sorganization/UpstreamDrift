@@ -9,6 +9,9 @@ This module provides comprehensive plotting capabilities including:
 - Induced Accelerations
 - Counterfactual Data (ZTCF, ZVCF)
 - Advanced Coordination and Stability Visualizations
+
+Note: The base module (shared.python.plotting.base) also contains
+MplCanvas and RecorderInterface for import convenience.
 """
 
 from __future__ import annotations
@@ -106,6 +109,14 @@ class RecorderInterface(Protocol):
             Tuple of (times, data_array)
         """
         ...  # pragma: no cover
+
+
+# Re-export for backward compatibility
+__all__ = [
+    "GolfSwingPlotter",
+    "MplCanvas",
+    "RecorderInterface",
+]
 
 
 class GolfSwingPlotter:
