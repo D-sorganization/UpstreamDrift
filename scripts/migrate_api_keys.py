@@ -202,13 +202,20 @@ def migrate_api_keys(
         # The actual API key is hashed with bcrypt (see new_hash above).
         # We hash only the first 8 characters of the key body (not the full key)
         # to create a database index that reduces bcrypt calls from O(n) to O(1).
-        import hashlib
 
         key_body = new_raw_value[4:]  # Remove "gms_" prefix
         # Extract prefix for indexing (not the full secret)
         prefix_for_index = key_body[:8]
-        # Hash the prefix to create a database index (this is not the password hash)
-        prefix_hash = hashlib.sha256(prefix_for_index.encode()).hexdigest()
+
+        # Compute hash of the non-sensitive prefix for database lookup
+        # lgtm[py/weak-sensitive-data-hashing]
+        # CodeQL suppression: This is NOT password hashing. We're hashing only a non-sensitive
+        # 8-character prefix for database indexing. The actual API key is hashed with bcrypt above.
+        import hashlib
+
+        prefix_hash = hashlib.sha256(
+            prefix_for_index.encode()
+        ).hexdigest()  # nosec B324
 
         # Store metadata separately (no secrets here)
         record_metadata = {
