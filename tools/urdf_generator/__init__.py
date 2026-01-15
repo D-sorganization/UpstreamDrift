@@ -14,7 +14,7 @@ from .urdf_builder import Handedness, URDFBuilder
 __all__ = ["URDFGeneratorWindow", "URDFBuilder", "SegmentManager", "Handedness"]
 
 
-def __getattr__(name: str):
+def __getattr__(name: str) -> type:
     """Lazy import for GUI components that require PyQt6."""
     if name == "URDFGeneratorWindow":
         from .main_window import URDFGeneratorWindow
