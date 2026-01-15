@@ -997,6 +997,8 @@ class EnvironmentDialog(QDialog):
         actions_layout = QHBoxLayout()
 
         self.btn_build = QPushButton("Build Environment")
+        # Save original text for restoration
+        self.btn_build_original_text = self.btn_build.text()
         self.btn_build.clicked.connect(self.start_build)
         # Store original text for restoration
         self._original_build_text = self.btn_build.text()
