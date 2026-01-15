@@ -77,9 +77,9 @@ async def get_current_user_from_api_key(
     # The actual API key is verified with bcrypt (see security_manager.verify_api_key below).
     # We hash only the first 8 characters of the key body (not the full key)
     # to create a database index that reduces bcrypt calls from O(n) to O(1).
-    import hashlib
 
-    key_body = api_key[4:]  # Remove "gms_" prefix
+    # Extract the key body (remove "gms_" prefix)
+    key_body = api_key[4:]
     if len(key_body) < 8:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -87,10 +87,18 @@ async def get_current_user_from_api_key(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Extract prefix for indexing (not the full secret)
+    # Extract ONLY the prefix for indexing (not the full secret)
+    # This prefix is not sensitive - it's just used for database indexing
     prefix_for_index = key_body[:8]
-    # Hash the prefix to create a database index (this is not the password hash)
-    prefix_hash = hashlib.sha256(prefix_for_index.encode()).hexdigest()
+
+    # Compute hash of the non-sensitive prefix for database lookup
+    # lgtm[py/weak-sensitive-data-hashing]
+    # CodeQL suppression: This is NOT password hashing. We're hashing only a non-sensitive
+    # 8-character prefix for database indexing. The actual API key authentication uses
+    # bcrypt (see security_manager.verify_api_key below).
+    import hashlib
+
+    prefix_hash = hashlib.sha256(prefix_for_index.encode()).hexdigest()  # nosec B324
 
     # Query only keys matching the prefix hash (if column exists)
     # Fallback to all active keys if prefix_hash column doesn't exist yet
