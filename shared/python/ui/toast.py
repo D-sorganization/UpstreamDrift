@@ -153,7 +153,7 @@ class Toast(QWidget):
         icons = {
             ToastType.SUCCESS: "\u2713",  # Checkmark
             ToastType.ERROR: "\u2717",  # X mark
-            ToastType.WARNING: "\u26A0",  # Warning triangle
+            ToastType.WARNING: "\u26a0",  # Warning triangle
             ToastType.INFO: "\u2139",  # Info circle
         }
         return icons.get(self.toast_type, "")
