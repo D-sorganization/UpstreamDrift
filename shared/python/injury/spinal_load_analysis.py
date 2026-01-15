@@ -485,13 +485,27 @@ class SpinalLoadAnalyzer:
 
         for segment in result.segments.values():
             if len(segment.compression) > 0:
-                total_compression_impulse += float(
-                    np.trapezoid(segment.compression, dx=float(dt))
-                )
+                # Handle NumPy 2.0 deprecation of trapz
+                if hasattr(np, "trapezoid"):
+                    total_compression_impulse += float(
+                        np.trapezoid(segment.compression, dx=float(dt))
+                    )
+                else:
+                    trapz_func = getattr(np, "trapz")  # noqa: B009
+                    total_compression_impulse += float(
+                        trapz_func(segment.compression, dx=float(dt))
+                    )
             if len(segment.lateral_shear) > 0:
-                total_shear_impulse += float(
-                    np.trapezoid(np.abs(segment.lateral_shear), dx=float(dt))
-                )
+                # Handle NumPy 2.0 deprecation of trapz
+                if hasattr(np, "trapezoid"):
+                    total_shear_impulse += float(
+                        np.trapezoid(np.abs(segment.lateral_shear), dx=float(dt))
+                    )
+                else:
+                    trapz_func = getattr(np, "trapz")  # noqa: B009
+                    total_shear_impulse += float(
+                        trapz_func(np.abs(segment.lateral_shear), dx=float(dt))
+                    )
 
         result.cumulative_compression_impulse = total_compression_impulse
         result.cumulative_shear_impulse = total_shear_impulse

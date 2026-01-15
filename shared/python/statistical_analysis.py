@@ -1662,9 +1662,10 @@ class StatisticalAnalyzer:
             # Build KD-tree for efficient neighbor queries
             tree = cKDTree(normalized_state)
 
-            # Estimate threshold from sample of distances
+            # Estimate threshold from sample of distances (using a seeded RNG for reproducibility)
             sample_size = min(100, N)
-            sample_indices = np.random.choice(N, sample_size, replace=False)
+            rng = np.random.default_rng(0)
+            sample_indices = rng.choice(N, sample_size, replace=False)
             sample_dists = []
             for i in sample_indices:
                 dists_i, _ = tree.query(normalized_state[i], k=min(10, N))
@@ -1677,8 +1678,10 @@ class StatisticalAnalyzer:
             for i in range(N):
                 neighbors = tree.query_ball_point(normalized_state[i], threshold)
                 for j in neighbors:
-                    recurrence_matrix[i, j] = 1
-                    recurrence_matrix[j, i] = 1  # Symmetric
+                    # Only set each unordered pair (i, j) once to avoid redundant writes
+                    if j >= i:
+                        recurrence_matrix[i, j] = 1
+                        recurrence_matrix[j, i] = 1  # Symmetric
 
             return cast(
                 np.ndarray[tuple[int, int], np.dtype[np.int_]], recurrence_matrix
