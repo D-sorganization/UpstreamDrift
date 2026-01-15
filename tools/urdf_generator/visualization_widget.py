@@ -1,9 +1,10 @@
 """3D visualization widget for URDF preview."""
 
 import logging
+import math
 
 from PyQt6.QtCore import QPointF, Qt, QTimer
-from PyQt6.QtGui import QMouseEvent, QWheelEvent
+from PyQt6.QtGui import QColor, QMouseEvent, QPainter, QPen, QWheelEvent
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
@@ -27,23 +28,23 @@ class VisualizationWidget(QWidget):
         """Set up the user interface."""
         layout = QVBoxLayout(self)
 
-        # Use a simple label for now
-        # Implement proper 3D visualization with Open3D or OpenGL (future enhancement)
-        self.info_label = QLabel("3D Visualization\n\n(Implementation in progress)")
+        # 3D Visualization Widget
+        self.gl_widget = Simple3DVisualizationWidget()
+        layout.addWidget(self.gl_widget)
+
+        # Info Label (below the 3D view)
+        self.info_label = QLabel("No URDF content loaded")
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.info_label.setStyleSheet(
             """
             QLabel {
-                border: 2px dashed #aaa;
-                border-radius: 10px;
                 background-color: #f5f5f5;
-                font-size: 16px;
-                color: #666;
-                padding: 20px;
+                color: #333;
+                padding: 5px;
+                border-top: 1px solid #ddd;
             }
         """
         )
-
         layout.addWidget(self.info_label)
 
     def update_visualization(self, urdf_content: str) -> None:
@@ -61,13 +62,13 @@ class VisualizationWidget(QWidget):
             joint_count = urdf_content.count("<joint")
 
             self.info_label.setText(
-                f"3D Visualization\n\n"
-                f"Links: {link_count}\n"
-                f"Joints: {joint_count}\n\n"
-                f"(Implementation in progress)"
+                f"Links: {link_count} | Joints: {joint_count} (Rendering not implemented)"
             )
         else:
-            self.info_label.setText("3D Visualization\n\n(No URDF content)")
+            self.info_label.setText("No URDF content loaded")
+
+        # Force update of the GL widget to reflect changes (if we were parsing URDF)
+        self.gl_widget.update()
 
         logger.info(
             f"Visualization updated with URDF content ({len(urdf_content)} characters)"
@@ -76,12 +77,13 @@ class VisualizationWidget(QWidget):
     def clear(self) -> None:
         """Clear the visualization."""
         self.urdf_content = ""
-        self.info_label.setText("3D Visualization\n\n(No URDF content)")
+        self.info_label.setText("No URDF content loaded")
+        self.gl_widget.update()
         logger.info("Visualization cleared")
 
     def reset_view(self) -> None:
         """Reset the 3D view to default position."""
-        # Implement view reset (future enhancement)
+        self.gl_widget.reset_view()
         logger.info("View reset requested")
 
 
@@ -114,8 +116,7 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
 
     def initializeGL(self) -> None:
         """Initialize OpenGL."""
-        # OpenGL context initialization will be implemented when 3D rendering is added
-        # This will include setting up shaders, buffers, and rendering pipeline for 3D URDF visualization
+        # We use QPainter for simple 2.5D visualization since PyOpenGL might not be present
         pass
 
     def resizeGL(self, width: int, height: int) -> None:
@@ -125,13 +126,93 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
             width: New width.
             height: New height.
         """
-        # Implement OpenGL resize handling (future enhancement)
         pass
 
+    def project_point(self, x: float, y: float, z: float) -> tuple[float, float]:
+        """Project 3D point to 2D screen coordinates."""
+        # 1. Rotate around Y (yaw)
+        rad_y = math.radians(self.camera_rotation_y)
+        x_r1 = x * math.cos(rad_y) - z * math.sin(rad_y)
+        z_r1 = x * math.sin(rad_y) + z * math.cos(rad_y)
+        y_r1 = y
+
+        # 2. Rotate around X (pitch)
+        rad_x = math.radians(self.camera_rotation_x)
+        y_r2 = y_r1 * math.cos(rad_x) - z_r1 * math.sin(rad_x)
+        z_r2 = y_r1 * math.sin(rad_x) + z_r1 * math.cos(rad_x)
+        x_r2 = x_r1
+
+        # 3. Project to screen
+        # Use simple orthographic-like projection scaled by distance
+        scale = self.camera_distance * 40.0
+        screen_x = x_r2 * scale
+        screen_y = -y_r2 * scale  # Flip Y for screen coordinates (up is negative Y)
+
+        return screen_x, screen_y
+
     def paintGL(self) -> None:
-        """Paint the OpenGL scene."""
-        # Implement OpenGL rendering (future enhancement)
-        pass
+        """Paint the OpenGL scene using QPainter for fallback visualization."""
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+
+        # Draw background
+        painter.fillRect(self.rect(), QColor(40, 40, 40))
+
+        # Center of the widget
+        center_x = self.width() / 2
+        center_y = self.height() / 2
+
+        painter.translate(center_x, center_y)
+
+        # Draw Grid
+        painter.setPen(QPen(QColor(80, 80, 80), 1))
+        grid_size = 5
+        grid_step = 1.0
+
+        # Draw lines parallel to X and Z
+        for i in range(-grid_size, grid_size + 1):
+            val = i * grid_step
+
+            # Line parallel to Z (varying Z, fixed X)
+            x1, y1 = self.project_point(val, 0, -grid_size * grid_step)
+            x2, y2 = self.project_point(val, 0, grid_size * grid_step)
+            painter.drawLine(int(x1), int(y1), int(x2), int(y2))
+
+            # Line parallel to X (varying X, fixed Z)
+            x1, y1 = self.project_point(-grid_size * grid_step, 0, val)
+            x2, y2 = self.project_point(grid_size * grid_step, 0, val)
+            painter.drawLine(int(x1), int(y1), int(x2), int(y2))
+
+        # Draw Axes
+        origin_x, origin_y = self.project_point(0, 0, 0)
+
+        # X Axis - Red
+        painter.setPen(QPen(QColor(255, 100, 100), 2))
+        ax_x, ax_y = self.project_point(1.5, 0, 0)
+        painter.drawLine(int(origin_x), int(origin_y), int(ax_x), int(ax_y))
+        painter.drawText(int(ax_x), int(ax_y), "X")
+
+        # Y Axis - Green (Up)
+        painter.setPen(QPen(QColor(100, 255, 100), 2))
+        ay_x, ay_y = self.project_point(0, 1.5, 0)
+        painter.drawLine(int(origin_x), int(origin_y), int(ay_x), int(ay_y))
+        painter.drawText(int(ay_x), int(ay_y), "Y")
+
+        # Z Axis - Blue
+        painter.setPen(QPen(QColor(100, 100, 255), 2))
+        az_x, az_y = self.project_point(0, 0, 1.5)
+        painter.drawLine(int(origin_x), int(origin_y), int(az_x), int(az_y))
+        painter.drawText(int(az_x), int(az_y), "Z")
+
+        # Draw overlay info (reset transform)
+        painter.resetTransform()
+        painter.setPen(QColor(255, 255, 255))
+        painter.drawText(10, 20, f"Zoom: {self.camera_distance:.1f}x")
+        painter.drawText(
+            10,
+            35,
+            f"Rot: {self.camera_rotation_x:.1f}, {self.camera_rotation_y:.1f}",
+        )
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse press events.
@@ -178,12 +259,20 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         """
         if event is not None:
             delta = event.angleDelta().y()
+            # Inverse logic for more intuitive zoom (scroll up = zoom in)
             zoom_factor = 1.1 if delta > 0 else 0.9
 
             self.camera_distance *= zoom_factor
-            self.camera_distance = max(1.0, min(20.0, self.camera_distance))
+            self.camera_distance = max(0.1, min(10.0, self.camera_distance))
 
             self.update()
+
+    def reset_view(self) -> None:
+        """Reset camera view."""
+        self.camera_distance = 1.0
+        self.camera_rotation_x = 0.0
+        self.camera_rotation_y = 0.0
+        self.update()
 
 
 # Implement proper 3D visualization using one of these approaches:
