@@ -66,7 +66,8 @@ def optimize_png(path: Path, quality: int = 85, aggressive: bool = False) -> int
 
     original_size = path.stat().st_size
 
-    with Image.open(path) as img:
+    with Image.open(path) as img_file:
+        img: Image.Image = img_file.copy()
         # Convert to RGB if RGBA with no transparency
         if img.mode == "RGBA":
             # Check if image actually uses transparency

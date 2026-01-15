@@ -89,7 +89,7 @@ class RecentModelItem(QFrame):
         layout.addStretch()
 
         # Launch button (appears on hover)
-        self.launch_btn = QPushButton("\u25B6")  # Play symbol
+        self.launch_btn = QPushButton("\u25b6")  # Play symbol
         self.launch_btn.setFixedSize(24, 24)
         self.launch_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.launch_btn.clicked.connect(lambda: self.clicked.emit(self.model_id))
@@ -205,7 +205,7 @@ class RecentModelsPanel(QFrame):
         header_layout.addStretch()
 
         # Collapse button
-        self.collapse_btn = QPushButton("\u25BC")  # Down arrow
+        self.collapse_btn = QPushButton("\u25bc")  # Down arrow
         self.collapse_btn.setFixedSize(20, 20)
         self.collapse_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.collapse_btn.clicked.connect(self._toggle_collapse)
@@ -289,7 +289,7 @@ class RecentModelsPanel(QFrame):
         """Toggle collapsed state."""
         self._collapsed = not self._collapsed
         self.content.setVisible(not self._collapsed)
-        self.collapse_btn.setText("\u25B6" if self._collapsed else "\u25BC")
+        self.collapse_btn.setText("\u25b6" if self._collapsed else "\u25bc")
 
     def _load_recent(self) -> None:
         """Load recent models from storage."""

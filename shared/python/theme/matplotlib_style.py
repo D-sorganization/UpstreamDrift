@@ -110,7 +110,7 @@ GOLF_SUITE_STYLE = {
 }
 
 
-def apply_golf_suite_style(fig: "Figure | None" = None) -> None:
+def apply_golf_suite_style(fig: Figure | None = None) -> None:
     """Apply the Golf Suite professional style to matplotlib.
 
     Args:
@@ -134,7 +134,7 @@ def apply_golf_suite_style(fig: "Figure | None" = None) -> None:
             _style_axes(ax)
 
 
-def _style_axes(ax: "plt.Axes") -> None:
+def _style_axes(ax: plt.Axes) -> None:
     """Apply styling to a specific axes object.
 
     Args:
@@ -204,7 +204,7 @@ def create_styled_figure(
     return fig, axes
 
 
-def style_for_export(fig: "Figure", dpi: int = 200) -> None:
+def style_for_export(fig: Figure, dpi: int = 200) -> None:
     """Prepare a figure for high-quality export.
 
     Args:
