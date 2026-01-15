@@ -7,12 +7,17 @@ Learning curve, examples, video guides.
 
 ## Findings
 *   **Strengths:**
-    *   `launchers/` act as runnable examples.
-    *   The project aims to be an educational platform for biomechanics.
+    *   The User Guide in `docs/user_guide/` is comprehensive.
+    *   Launchers include tooltips and status checks to guide the user.
+    *   The `UnifiedLauncher` simplifies the initial experience.
 
 *   **Weaknesses:**
-    *   Lack of "Step-by-Step" tutorial for a user's first swing analysis.
-    *   No video guides found (though not expected in a repo, links would be good).
+    *   There is a lack of interactive tutorials (e.g., Jupyter Notebooks) that would allow users to experiment with the API incrementally.
+    *   Video guides (referenced as a target in the README/Assessment prompt) are not present in the repository.
 
 ## Recommendations
-1.  Add a `tutorials/` folder with Jupyter notebooks showing how to use `GenericPhysicsRecorder` programmatically.
+1.  Create a `tutorials/` directory with Jupyter notebooks covering:
+    *   Basic API usage.
+    *   Loading and visualizing a model.
+    *   Running a simple simulation.
+2.  Consider recording short screencasts and linking them in the README.
