@@ -14,6 +14,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+from shared.python.export import export_recording_all_formats
 from shared.python.interfaces import RecorderInterface
 from shared.python.plotting import MplCanvas
 
@@ -173,6 +174,13 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.btn_snapshot.clicked.connect(self.copy_snapshot)
         controls_layout.addWidget(self.btn_snapshot)
 
+        # Export Button
+        self.btn_export = QtWidgets.QPushButton("Export Data")
+        self.btn_export.setToolTip("Export recording to CSV/JSON/MAT")
+        self.btn_export.setStatusTip("Export the full recorded data set")
+        self.btn_export.clicked.connect(self.export_data)
+        controls_layout.addWidget(self.btn_export)
+
         controls_layout.addWidget(self.chk_compute)
 
         self._main_layout.addLayout(controls_layout)
@@ -314,12 +322,15 @@ class LivePlotWidget(QtWidgets.QWidget):
                 elif key == "control_accel":
                     config["track_total_control"] = True
                 elif key == "induced_accel_source":
-                    # Add the selected source index to the list
-                    idx = self.source_combo.currentIndex()
-                    if idx >= 0:
-                        # Append if not already there
-                        if idx not in config["induced_accel_sources"]:
-                            config["induced_accel_sources"].append(idx)
+                    # Add the selected source identifier (name if possible, else index)
+                    source_val: str | int = self.source_combo.currentIndex()
+                    txt = self.source_combo.currentText()
+                    # If text looks like a name (not just 'Source X'), use it
+                    if txt and not txt.startswith("Source "):
+                        source_val = txt
+
+                    if source_val not in config["induced_accel_sources"]:
+                        config["induced_accel_sources"].append(source_val)
 
         self.recorder.set_analysis_config(config)
 
@@ -351,9 +362,14 @@ class LivePlotWidget(QtWidgets.QWidget):
 
         if key == "induced_accel_source":
             # Fetch specific induced acceleration
-            src_idx = self.source_combo.currentIndex()
+            src_val: str | int = self.source_combo.currentIndex()
+            txt = self.source_combo.currentText()
+            # Prefer name if available and not generic
+            if txt and not txt.startswith("Source "):
+                src_val = txt
+
             # Use specific interface
-            times, data = self.recorder.get_induced_acceleration_series(src_idx)
+            times, data = self.recorder.get_induced_acceleration_series(src_val)
         else:
             # Standard metric
             times, data_raw = self.recorder.get_time_series(key)
@@ -523,6 +539,40 @@ class LivePlotWidget(QtWidgets.QWidget):
         """Restore snapshot button state."""
         self.btn_snapshot.setText("Snapshot")
         self.btn_snapshot.setEnabled(True)
+
+    def export_data(self) -> None:
+        """Export recorded data."""
+        # Try to get data dictionary
+        data_dict = {}
+        if hasattr(self.recorder, "export_to_dict"):
+            data_dict = self.recorder.export_to_dict()  # type: ignore
+        elif hasattr(self.recorder, "frames"):
+            # Try to build minimal dict from frames if accessible
+            # This is specific to some recorder implementations, risky but helpful fallback
+            pass
+
+        if not data_dict:
+            # Fallback: Scrape metric options?
+            # Or just warn
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Export Warning",
+                "Recorder does not support full export. Exporting only current plot data is not yet implemented.",
+            )
+            return
+
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            self, "Export Data", "swing_data", "All Files (*)"
+        )
+        if not filename:
+            return
+
+        results = export_recording_all_formats(filename, data_dict)
+        msg = "Export Results:\n"
+        for fmt, success in results.items():
+            msg += f"{fmt}: {'Success' if success else 'Failed'}\n"
+
+        QtWidgets.QMessageBox.information(self, "Export Complete", msg)
 
 
 class ControlPanel(QtWidgets.QGroupBox):
