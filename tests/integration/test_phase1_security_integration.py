@@ -92,7 +92,9 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         """Test secure_run with valid command."""
         # Test with allowed command
         try:
-            result = secure_run(["python", "--version"], capture_output=True, text=True)
+            result = secure_run(
+                ["python", "--version"], capture_output=True, text=True, timeout=10
+            )
             self.assertEqual(result.returncode, 0)
             self.assertIn("Python", result.stdout)
         except SecureSubprocessError:
@@ -120,7 +122,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
             with secure_popen(
                 ["python", "--version"], stdout=subprocess.PIPE, text=True
             ) as proc:
-                output, _ = proc.communicate()
+                output, _ = proc.communicate(timeout=10)
                 self.assertIn("Python", output)
         except SecureSubprocessError:
             self.skipTest("Python not available or not in whitelist")
@@ -195,7 +197,10 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         with patch("pathlib.Path.exists", return_value=True):
             try:
                 secure_run(
-                    ["python", "--version"], cwd=str(valid_cwd), suite_root=suite_root
+                    ["python", "--version"],
+                    cwd=str(valid_cwd),
+                    suite_root=suite_root,
+                    timeout=10,
                 )
             except SecureSubprocessError as e:
                 if "not allowed" not in str(e):
@@ -219,6 +224,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
                 env=clean_env,
                 capture_output=True,
                 text=True,
+                timeout=10,
             )
             # Should have limited environment variables
             env_count = int(result.stdout.strip())
@@ -270,7 +276,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         def run_subprocess():
             try:
                 result = secure_run(
-                    ["python", "--version"], capture_output=True, text=True
+                    ["python", "--version"], capture_output=True, text=True, timeout=10
                 )
                 results.append(result.returncode)
             except Exception as e:
