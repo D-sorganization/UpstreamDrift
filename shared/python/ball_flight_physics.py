@@ -214,7 +214,8 @@ class BallFlightSimulator:
 
             # Relative velocity
             rel_vel = velocity - wind_velocity
-            speed_sq = np.sum(rel_vel**2)
+            # Optimization: use dot product instead of sum(x**2) to avoid allocation
+            speed_sq = rel_vel @ rel_vel
 
             if speed_sq <= min_speed_sq:
                 # If stopped, only gravity acts (or nothing if resting, but here flight)
