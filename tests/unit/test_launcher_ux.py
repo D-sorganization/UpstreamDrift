@@ -6,6 +6,7 @@ Test suite for Golf Modeling Suite UX improvements.
 import sys
 import unittest
 from pathlib import Path
+from typing import cast
 from unittest.mock import Mock, patch  # noqa: F401
 
 # Add repo root to sys.path to allow importing modules
@@ -15,7 +16,6 @@ sys.path.insert(0, str(REPO_ROOT))
 try:
     from PyQt6.QtCore import Qt  # noqa: F401
     from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QWidget  # noqa: F401
-    from typing import cast
 
     PYQT_AVAILABLE = True
 except ImportError:
