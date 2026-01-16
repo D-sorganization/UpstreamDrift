@@ -360,8 +360,9 @@ class DrakeRecorder:
                 min_len = min(len(vals), len(times))
                 return times[:min_len], np.array(vals[:min_len])
 
-            if isinstance(source_name, int) and source_name in self.induced_accelerations:
-                 # Check for int key specifically (less common in json serialization but possible in dict)
+            is_int_key = isinstance(source_name, int)
+            if is_int_key and source_name in self.induced_accelerations:
+                # Check for int key (less common in json but possible in dict)
                 vals = self.induced_accelerations[source_name]  # type: ignore
                 times = np.array(self.times)
                 min_len = min(len(vals), len(times))
