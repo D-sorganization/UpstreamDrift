@@ -42,6 +42,15 @@ TARGET_POSE = {
 }
 
 
+def np_encoder(object):
+    """JSON encoder for NumPy types."""
+    if isinstance(object, np.generic):
+        return object.item()
+    if isinstance(object, np.ndarray):
+        return object.tolist()
+    raise TypeError
+
+
 class BaseController:
     def get_action(self, physics) -> np.ndarray:
         """Get the control action."""
@@ -465,11 +474,28 @@ def run_simulation(
             pixels = physics.render(height=480, width=640, camera_id=camera_id)
             frames.append(pixels)
 
-            # Compute IAA
+            # Compute IAA & CF
             iaa = iaa_helper.compute_induced_accelerations(physics)
-            # iaa is dict: gravity, coriolis, control (arrays of shape [nv])
+            cf = iaa_helper.compute_counterfactuals(physics)
+            mass_matrix = iaa_helper.get_mass_matrix(physics)
 
-            # Log Data
+            # Emit Data Stream
+            try:
+                packet = {
+                    "time": physics.data.time,
+                    "qpos": physics.data.qpos,
+                    "qvel": physics.data.qvel,
+                    "qfrc_actuator": physics.data.qfrc_actuator,
+                    "iaa": iaa,
+                    "cf": cf,
+                    "mass_matrix": mass_matrix
+                }
+                print(f"DATA_JSON:{json.dumps(packet, default=np_encoder)}", flush=True)
+            except Exception as e:
+                # Avoid crashing loop on serialization error, just log
+                print(f"DEBUG: Data serialization failed: {e}", flush=True)
+
+            # Log Data (CSV)
             row = [physics.data.time]
             for j in TARGET_POSE:
                 try:
@@ -490,14 +516,6 @@ def run_simulation(
                 for j in TARGET_POSE:
                     try:
                         # Find DOF address
-                        # Assuming dm_control physics.named.data.qpos works with names
-                        # We need index for array access.
-                        # Using named access is safer if available?
-                        # But returns scalar.
-                        # We have raw arrays in iaa result.
-                        # joint name -> dof index
-                        # physics.named.model.jnt_dofadr[j] usually works if supported
-                        # Or manual lookup:
                         j_id = physics.model.name2id(j, "joint")
                         dof_adr = physics.model.jnt_dofadr[j_id]
 

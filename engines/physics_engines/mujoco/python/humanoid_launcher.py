@@ -1,5 +1,6 @@
 import csv
 import datetime
+import json
 import logging
 import os
 import platform
@@ -7,6 +8,9 @@ import subprocess
 import sys
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Any
+
+import numpy as np
 
 # Third-party imports
 try:
@@ -49,6 +53,8 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from shared.python.configuration_manager import ConfigurationManager  # noqa: E402
+from shared.python.dashboard.widgets import LivePlotWidget  # noqa: E402
+from shared.python.interfaces import RecorderInterface  # noqa: E402
 from shared.python.process_worker import ProcessWorker  # noqa: E402
 
 # Polynomial generator widget imported lazily to avoid MuJoCo DLL issues
@@ -61,8 +67,84 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Default Configuration
-# Logger initialized above
+
+class RemoteRecorder(RecorderInterface):
+    """Recorder that stores data received from remote process."""
+
+    def __init__(self) -> None:
+        self.reset()
+
+    def reset(self) -> None:
+        self.data: dict[str, Any] = {
+            "times": [],
+            "joint_positions": [],
+            "joint_velocities": [],
+            "joint_torques": [],
+            "ztcf_accel": [],
+            "zvcf_accel": [],
+            "induced_accelerations": {},
+        }
+
+    def process_packet(self, packet: dict) -> None:
+        try:
+            t = packet["time"]
+            self.data["times"].append(t)
+            self.data["joint_positions"].append(np.array(packet["qpos"]))
+            self.data["joint_velocities"].append(np.array(packet["qvel"]))
+            if "qfrc_actuator" in packet:
+                self.data["joint_torques"].append(np.array(packet["qfrc_actuator"]))
+            else:
+                self.data["joint_torques"].append(np.zeros_like(packet["qvel"]))
+
+            iaa = packet.get("iaa", {})
+            for src, val in iaa.items():
+                if src not in self.data["induced_accelerations"]:
+                    self.data["induced_accelerations"][src] = []
+                self.data["induced_accelerations"][src].append(np.array(val))
+
+            cf = packet.get("cf", {})
+            if "ztcf" in cf:
+                self.data["ztcf_accel"].append(np.array(cf["ztcf"]))
+            if "zvcf" in cf:
+                self.data["zvcf_accel"].append(np.array(cf["zvcf"]))
+        except Exception as e:
+            logging.error(f"Error processing packet: {e}")
+
+    def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray]:
+        if not self.data["times"]:
+            return np.array([]), np.array([])
+        times = np.array(self.data["times"])
+
+        if field_name == "joint_positions":
+            return times, np.array(self.data["joint_positions"])
+        elif field_name == "joint_velocities":
+            return times, np.array(self.data["joint_velocities"])
+        elif field_name == "joint_torques":
+            return times, np.array(self.data["joint_torques"])
+        elif field_name == "ztcf_accel":
+            return times, np.array(self.data["ztcf_accel"])
+        elif field_name == "zvcf_accel":
+            return times, np.array(self.data["zvcf_accel"])
+
+        return times, np.array([])
+
+    def get_induced_acceleration_series(
+        self, source_name: str | int
+    ) -> tuple[np.ndarray, np.ndarray]:
+        if not self.data["times"]:
+            return np.array([]), np.array([])
+        times = np.array(self.data["times"])
+
+        key = str(source_name)
+        if key in self.data["induced_accelerations"]:
+            return times, np.array(self.data["induced_accelerations"][key])
+        return times, np.array([])
+
+    def set_analysis_config(self, config: dict) -> None:
+        pass  # Config driven by simulation loop
+
+    def export_to_dict(self) -> dict[str, Any]:
+        return self.data
 
 
 class ModernDarkPalette(QPalette):
@@ -107,6 +189,7 @@ class HumanoidLauncher(QMainWindow):
         self.config = self.config_manager.load()
 
         self.simulation_thread: ProcessWorker | None = None
+        self.recorder = RemoteRecorder()
 
         # Load Config - Already done above
         # self.load_config()
@@ -149,6 +232,7 @@ class HumanoidLauncher(QMainWindow):
         self.setup_sim_tab()
         self.setup_appearance_tab()
         self.setup_equip_tab()
+        self.setup_live_analysis_tab()
 
         main_layout.addWidget(self.tabs)
 
@@ -299,6 +383,17 @@ class HumanoidLauncher(QMainWindow):
         layout.addStretch()
 
         self.tabs.addTab(tab, "Simulation")
+
+    def setup_live_analysis_tab(self) -> None:
+        """Setup the live analysis tab with plot widget."""
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        layout.setContentsMargins(10, 10, 10, 10)
+
+        self.live_plot = LivePlotWidget(self.recorder)
+        layout.addWidget(self.live_plot)
+
+        self.tabs.addTab(tab, "Live Analysis")
 
     def enable_results(self, enabled: bool) -> None:
         self.btn_video.setEnabled(enabled)
@@ -470,6 +565,21 @@ class HumanoidLauncher(QMainWindow):
         parent_layout.addWidget(log_group)
 
     def log(self, msg: str) -> None:
+        # Check for JSON data stream
+        if msg.startswith("DATA_JSON:"):
+            try:
+                json_str = msg.split("DATA_JSON:", 1)[1]
+                data = json.loads(json_str)
+                self.recorder.process_packet(data)
+                self.live_plot.update_plot()
+            except Exception as e:
+                # Fallback logging if parsing fails
+                timestamp = datetime.datetime.now().strftime("%H:%M:%S")
+                self.txt_log.append(
+                    f"[{timestamp}] Error parsing stream: {e}"
+                )
+            return
+
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")
         self.txt_log.append(f"[{timestamp}] {msg}")
         self.txt_log.ensureCursorVisible()
@@ -840,6 +950,9 @@ class HumanoidLauncher(QMainWindow):
     def start_simulation(self) -> None:
         self.save_config()
         self.log("Starting simulation...")
+
+        # Reset recorder data for new run
+        self.recorder.reset()
 
         cmd, env = self.get_simulation_command()
 
