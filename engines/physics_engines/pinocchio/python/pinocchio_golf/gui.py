@@ -1376,17 +1376,21 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                             sources_to_compute.append(txt)
 
                         # From config
-                        if hasattr(self.recorder, 'analysis_config') and isinstance(self.recorder.analysis_config, dict):
-                            sources = self.recorder.analysis_config.get('induced_accel_sources', [])
+                        has_config = hasattr(self.recorder, 'analysis_config')
+                        config = getattr(self.recorder, 'analysis_config', None)
+                        if has_config and isinstance(config, dict):
+                            sources = config.get('induced_accel_sources', [])
                             if isinstance(sources, list):
                                 sources_to_compute.extend(sources)
 
                         unique_sources = set()
                         for s in sources_to_compute:
-                            if s: unique_sources.add(str(s))
+                            if s:
+                                unique_sources.add(str(s))
 
                         for src in unique_sources:
-                            if src in ["gravity", "velocity", "total"]: continue
+                            if src in ["gravity", "velocity", "total"]:
+                                continue
 
                             # Attempt to parse as comma-separated vector OR Joint Name
                             spec_tau = np.zeros(self.model.nv)
