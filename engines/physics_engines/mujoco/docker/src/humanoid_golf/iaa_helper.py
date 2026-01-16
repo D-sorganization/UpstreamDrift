@@ -1,11 +1,12 @@
 from typing import Any
 
+import numpy as np
+
 
 def compute_induced_accelerations(physics: Any) -> dict[str, Any]:
     """Compute induced accelerations (Gravity, Velocity, Control) for current state."""
     results: dict[str, Any] = {}
     try:
-        import numpy as np
         from dm_control.mujoco.wrapper.mjbindings import mjlib
     except ImportError:
         return results
@@ -142,7 +143,6 @@ def compute_counterfactuals(physics: Any) -> dict[str, Any]:
 def get_mass_matrix(physics: Any) -> Any:
     """Compute dense Mass Matrix M(q)."""
     try:
-        import numpy as np
         from dm_control.mujoco.wrapper.mjbindings import mjlib
     except ImportError:
         return None
@@ -160,8 +160,6 @@ def get_mass_matrix(physics: Any) -> Any:
 
 def _solve_m(model: Any, data: Any, dst: Any, src: Any, mjlib: Any) -> None:
     """Helper to safely call mj_solveM with correct shapes."""
-    import numpy as np
-
     # Clean inputs
     dst_clean = np.ascontiguousarray(dst, dtype=np.float64)
     src_clean = np.ascontiguousarray(src, dtype=np.float64)
