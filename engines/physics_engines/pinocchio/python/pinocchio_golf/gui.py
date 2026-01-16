@@ -119,6 +119,7 @@ class PinocchioRecorder:
         """Initialize empty recorder."""
         self.reset()
         self.engine = engine  # Reference for joint names
+        self.analysis_config: dict[str, Any] = {}
 
     def reset(self) -> None:
         """Clear all recorded data."""
@@ -177,8 +178,8 @@ class PinocchioRecorder:
             self.frames.append(frame)
 
     def set_analysis_config(self, config: dict[str, Any]) -> None:
-        """Update analysis configuration (Dummy implementation)."""
-        pass
+        """Update analysis configuration."""
+        self.analysis_config = config
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
         """Extract time series for a specific field."""
@@ -227,14 +228,16 @@ class PinocchioRecorder:
         values = []
 
         # Map int index to key if possible (unlikely for Pinocchio basic)
-        key = source_name
-        if isinstance(key, int):
-            # Fallback or specific mapping could go here.
-            # Pinocchio primarily uses string keys.
-            pass
+        key = str(source_name)
 
         for f in self.frames:
-            val = f.induced_accelerations.get(str(key))
+            val = f.induced_accelerations.get(key)
+            # Try int key if str fails
+            if val is None and isinstance(source_name, int):
+                # But dict keys are likely strings?
+                # Let's check sim loop
+                pass
+
             if val is not None:
                 times.append(f.time)
                 values.append(val)
@@ -1366,24 +1369,50 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                         induced = self.analyzer.compute_components(self.q, self.v, tau)
                         self.latest_induced = induced
 
-                        # Check for specific torque override from UI
+                        # Check for specific torque override from UI or Config
+                        sources_to_compute = []
                         txt = self.combo_induced.currentText()
-                        if txt and txt not in ["gravity", "velocity", "total"]:
+                        if txt:
+                            sources_to_compute.append(txt)
+
+                        # From config
+                        if hasattr(self.recorder, 'analysis_config') and isinstance(self.recorder.analysis_config, dict):
+                            sources = self.recorder.analysis_config.get('induced_accel_sources', [])
+                            if isinstance(sources, list):
+                                sources_to_compute.extend(sources)
+
+                        unique_sources = set()
+                        for s in sources_to_compute:
+                            if s: unique_sources.add(str(s))
+
+                        for src in unique_sources:
+                            if src in ["gravity", "velocity", "total"]: continue
+
                             # Attempt to parse as comma-separated vector OR Joint Name
                             spec_tau = np.zeros(self.model.nv)
                             found_joint = False
 
                             # Check if it's a joint name
-                            if self.model.existJointName(txt):
-                                j_id = self.model.getJointId(txt)
+                            if self.model.existJointName(src):
+                                j_id = self.model.getJointId(src)
                                 joint = self.model.joints[j_id]
                                 if joint.nv == 1:
                                     spec_tau[joint.idx_v] = 1.0
                                     found_joint = True
 
+                            # Check if it's an int index
                             if not found_joint:
                                 try:
-                                    parts = [float(x) for x in txt.split(",")]
+                                    act_idx = int(src)
+                                    if 0 <= act_idx < self.model.nv:
+                                        spec_tau[act_idx] = 1.0
+                                        found_joint = True
+                                except ValueError:
+                                    pass
+
+                            if not found_joint:
+                                try:
+                                    parts = [float(x) for x in src.split(",")]
                                     if len(parts) == self.model.nv:
                                         spec_tau = np.array(parts)
                                         found_joint = True
@@ -1394,7 +1423,8 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                                 spec_acc = self.analyzer.compute_specific_control(
                                     self.q, spec_tau
                                 )
-                                induced["specific_control"] = spec_acc
+                                # Store result using source string as key
+                                induced[src] = spec_acc
 
                         if hasattr(self.analyzer, "compute_counterfactuals"):
                             counterfactuals = self.analyzer.compute_counterfactuals(
@@ -1481,39 +1511,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
         except Exception:
             self.lbl_rank.setText("Error")
 
-    def _populate_manip_checkboxes(self) -> None:
-        """Populate manipulability body checkboxes."""
-        # Clear existing
-        while self.manip_body_layout.count():
-            item = self.manip_body_layout.takeAt(0)
-            if item is None:
-                break
-            widget = item.widget()
-            if widget:
-                widget.deleteLater()
-        self.manip_checkboxes.clear()
-
-        if self.manip_analyzer is None:
-            return
-
-        # Get potential bodies
-        bodies = self.manip_analyzer.find_potential_bodies()
-
-        # Create checkboxes in a grid (e.g. 3 columns)
-        cols = 3
-        for i, name in enumerate(bodies):
-            chk = QtWidgets.QCheckBox(name)
-            chk.setChecked(False)
-            chk.toggled.connect(self._update_viewer)
-            self.manip_checkboxes[name] = chk
-            self.manip_body_layout.addWidget(chk, i // cols, i % cols)
-
-        # Default check 'club_head' or similar if present
-        for name in ["club_head", "club", "wrist_right", "HandRight"]:
-            if name in self.manip_checkboxes:
-                self.manip_checkboxes[name].setChecked(True)
-                break  # Only check one by default
-
     def _draw_ellipsoids(self) -> None:
         """Draw mobility/force ellipsoids for selected bodies."""
         if (
@@ -1523,26 +1520,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             or self.manip_analyzer is None
         ):
             return
-
-        # Clear previous ellipsoids if needed?
-        # Meshcat efficiently updates if object name overlaps, but if we uncheck a body,
-        # we must delete it.
-        # Actually, simpler to just delete all ellipsoids scope and redraw active?
-        # Or better: check active, draw them. Delete inactive?
-        # For now, let's just draw active.
-        # To handle unchecking, we might need a way to clear 'overlays/ellipsoids'.
-        # The easiest way in Meshcat is self.viewer['overlays/ellipsoids'].delete()
-        # but that flickers if we do it every frame.
-        # However, _update_viewer is called on toggle or update.
-        # Let's delete the whole group and redraw.
-
-        # NOTE: Deleting the whole group every frame causes flickering or network load?
-        # Pinocchio MeshcatVisualizer usually handles set_object/transform efficiently.
-        # But to remove stale objects, delete() is needed.
-        # We'll rely on the folder structure: overlays/ellipsoids/{body_name}/{type}
-
-        # Determine strict list of active drawings
-        active_drawings = set()
 
         # Clear previous ellipsoids to prevent ghosting
         try:
@@ -1571,7 +1548,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                         and res.mobility_matrix is not None
                     ):
                         path_name = f"{res.body_name}/mobility"
-                        active_drawings.add(path_name)
 
                         radii = res.velocity_ellipsoid.radii
                         # Scale down for viz (metrics are usually large)
@@ -1588,7 +1564,6 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                         and res.force_matrix is not None
                     ):
                         path_name = f"{res.body_name}/force"
-                        active_drawings.add(path_name)
 
                         radii = res.force_ellipsoid.radii
                         # Scale for viz
@@ -1684,16 +1659,20 @@ class PinocchioGUI(QtWidgets.QMainWindow):
             # We don't have it pre-calculated in 'latest_induced' from the loop
             # unless we add logic there.
             # But we can calculate it on fly for visualization if q is current.
-            txt = source
-            if txt and self.analyzer and self.q is not None:
-                try:
-                    parts = [float(x) for x in txt.split(",")]
-                    tau = np.zeros(self.model.nv)
-                    min_len = min(len(parts), len(tau))
-                    tau[:min_len] = parts[:min_len]
-                    accels = self.analyzer.compute_specific_control(self.q, tau)
-                except ValueError:
-                    pass
+            # (Loop updated to push to latest_induced, so this might be covered)
+            if source in self.latest_induced:
+                accels = self.latest_induced[source]
+            else:
+                txt = source
+                if txt and self.analyzer and self.q is not None:
+                    try:
+                        parts = [float(x) for x in txt.split(",")]
+                        tau = np.zeros(self.model.nv)
+                        min_len = min(len(parts), len(tau))
+                        tau[:min_len] = parts[:min_len]
+                        accels = self.analyzer.compute_specific_control(self.q, tau)
+                    except ValueError:
+                        pass
 
         scale = self.spin_torque_scale.value()  # Use torque scale for now
 
