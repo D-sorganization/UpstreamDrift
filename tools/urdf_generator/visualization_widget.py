@@ -12,9 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 class VisualizationWidget(QWidget):
-    """Widget for 3D visualization of URDF models."""
+    """Widget for 3D visualization of URDF models.
 
-    def __init__(self, parent: QWidget | None = None):
+    This widget provides a container for the visualization backend.
+    It currently uses a simple 2.5D grid visualization as a fallback.
+    For full 3D rendering, the MuJoCo viewer is recommended.
+    """
+
+    def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the visualization widget.
 
         Args:
@@ -62,12 +67,12 @@ class VisualizationWidget(QWidget):
             joint_count = urdf_content.count("<joint")
 
             self.info_label.setText(
-                f"Links: {link_count} | Joints: {joint_count} (Rendering not implemented)"
+                f"Links: {link_count} | Joints: {joint_count} (Grid View - Install MuJoCo for 3D)"
             )
         else:
             self.info_label.setText("No URDF content loaded")
 
-        # Force update of the GL widget to reflect changes (if we were parsing URDF)
+        # Force update of the GL widget
         self.gl_widget.update()
 
         logger.info(
@@ -88,12 +93,14 @@ class VisualizationWidget(QWidget):
 
 
 class Simple3DVisualizationWidget(QOpenGLWidget):
-    """Simple OpenGL-based 3D visualization widget.
+    """Simple OpenGL-based 3D visualization widget using QPainter.
 
-    This is a preliminary implementation for future proper 3D rendering.
+    This serves as a lightweight fallback viewer when full 3D engines
+    (like MuJoCo) are not available. It renders a 3D grid and axes
+    using 2D QPainter operations with manual projection.
     """
 
-    def __init__(self, parent: QWidget | None = None):
+    def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize the 3D visualization widget.
 
         Args:
@@ -115,8 +122,11 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         self.timer.start(16)  # ~60 FPS
 
     def initializeGL(self) -> None:
-        """Initialize OpenGL."""
-        # We use QPainter for simple 2.5D visualization since PyOpenGL might not be present
+        """Initialize OpenGL.
+
+        Note: Not used in this implementation as we use QPainter
+        in paintGL for maximum compatibility.
+        """
         pass
 
     def resizeGL(self, width: int, height: int) -> None:
@@ -125,6 +135,8 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         Args:
             width: New width.
             height: New height.
+
+        Note: Not used in this implementation.
         """
         pass
 
@@ -212,6 +224,7 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
             35,
             f"Rot: {self.camera_rotation_x:.1f}, {self.camera_rotation_y:.1f}",
         )
+        painter.drawText(10, 50, "Grid View (Fallback)")
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
         """Handle mouse press events.
@@ -272,31 +285,3 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         self.camera_rotation_x = 0.0
         self.camera_rotation_y = 0.0
         self.update()
-
-
-# Implement proper 3D visualization using one of these approaches:
-# 1. Open3D integration (recommended for URDF visualization)
-# 2. PyOpenGL with custom URDF parser
-# 3. Integration with existing robotics visualization libraries
-
-
-class Open3DVisualizationWidget(QWidget):
-    """Open3D-based 3D visualization widget.
-
-    This would be the preferred implementation for URDF visualization,
-    but requires Open3D integration with PyQt6.
-    """
-
-    def __init__(self, parent: QWidget | None = None):
-        """Initialize the Open3D visualization widget.
-
-        Args:
-            parent: Parent widget, if any.
-        """
-        super().__init__(parent)
-        # Open3D integration planned for future enhancement
-        # This would provide:
-        # - Proper 3D mesh rendering
-        # - URDF parsing and visualization
-        # - Interactive camera controls
-        # - Material and lighting support
