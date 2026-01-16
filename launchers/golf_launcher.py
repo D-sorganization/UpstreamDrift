@@ -2673,6 +2673,13 @@ class GolfLauncher(QMainWindow):
         launch_locally = is_local_fit
 
         try:
+            # Provide immediate visual feedback
+            self.btn_launch.setText("LAUNCHING... 🚀")
+            self.btn_launch.setEnabled(False)
+
+            # Restore button state after delay
+            QTimer.singleShot(2000, lambda: self.update_launch_button())
+
             if launch_locally:
                 if model.type == "custom_humanoid":
                     self._custom_launch_humanoid(path)
