@@ -95,7 +95,40 @@ This document maintains a running log of competitors and companies with similar 
 
 ---
 
-## 6. Mizuno Swing DNA (Equipment Fitting)
+## 6. FlightScope (Established Radar Competitor)
+
+**Estimated Market Share:** High (Strong in Consumer & Pro markets)
+**Type:** Hardware + Software
+**Core Tech:** 3D Doppler Tracking, Fusion Tracking (Radar + Camera)
+
+### Key Features
+*   **Fusion Tracking:** Combines 3D Radar with Image Processing for high accuracy.
+*   **Mevo+:** Highly popular consumer-grade launch monitor/simulator.
+*   **Environmental Optimizer:** Adjusts data for weather conditions (humidity, altitude).
+
+### Comparison to Golf Modeling Suite
+*   **Overlap:** Ball flight trajectory physics (drag, lift, environmental effects).
+*   **Differences:** FlightScope is a data provider. Our suite can utilize its output (CSV export) as initial conditions for trajectory simulations or inverse dynamics validation.
+
+---
+
+## 7. Full Swing (Simulator Focus)
+
+**Estimated Market Share:** High (Residential & Commercial Simulators)
+**Type:** Simulator Hardware
+**Core Tech:** Infrared Line Scan (HyperClear), High-speed Ion3 Camera
+
+### Key Features
+*   **Real-time Feedback:** Known for zero-latency ball flight in simulation.
+*   **PGA Tour Partner:** Official licensee, emphasizing realism and entertainment.
+
+### Comparison to Golf Modeling Suite
+*   **Overlap:** Virtual Golf Simulation environment.
+*   **Differences:** Full Swing optimizes for *visual* realism and game feel (entertainment). Our suite optimizes for *biomechanical* realism (scientific accuracy).
+
+---
+
+## 8. Mizuno Swing DNA (Equipment Fitting)
 
 **Estimated Market Share:** Medium (Niche: Shaft Fitting)
 **Type:** Hardware tool + Software
@@ -111,7 +144,7 @@ This document maintains a running log of competitors and companies with similar 
 
 ---
 
-## 7. Qualisys / GEARS Golf (High-End Research)
+## 9. Qualisys / GEARS Golf (High-End Research)
 
 **Estimated Market Share:** Low (Elite Coaching & Research Labs)
 **Type:** Optical Motion Capture Hardware & Software
@@ -128,7 +161,7 @@ This document maintains a running log of competitors and companies with similar 
 
 ---
 
-## 8. AnyBody Technology / SimTK (Academic/Research)
+## 10. AnyBody Technology / SimTK (Academic/Research)
 
 **Estimated Market Share:** Niche (Academic, Medical, Corporate Research)
 **Type:** Simulation Software
@@ -153,6 +186,8 @@ This document maintains a running log of competitors and companies with similar 
 | **Sportsbox AI** | Kinematics (Motion) | N/A (Kinematic) | No | No |
 | **Swing Catalyst**| Ground Forces | N/A (Measurement)| No | No |
 | **K-Motion** | Biofeedback / Seq | N/A (Sensors) | No | No |
+| **FlightScope** | Radar Tracking | N/A (Doppler) | No | No |
+| **Full Swing** | Entertainment Sim | N/A (Optical) | No | No |
 | **Qualisys** | Mocap Accuracy | Visual3D | Rigid Body Only | No |
 | **AnyBody** | Muscle Forces | Proprietary | **Yes** | No |
 | **Golf Modeling Suite** | **Unified Simulation** | **MuJoCo, Drake, OpenSim** | **Yes (MyoSuite)** | **Yes** |
