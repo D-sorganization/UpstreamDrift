@@ -7,19 +7,14 @@ Note: These tests require mujoco and PyQt6 to be installed. Tests are skipped
 if dependencies are missing rather than using extensive mocking.
 """
 
-import sys
-from unittest.mock import MagicMock, patch
+from importlib.util import find_spec
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 
-# Check for required dependencies at module level
-try:
-    import mujoco
-
-    MUJOCO_AVAILABLE = True
-except ImportError:
-    MUJOCO_AVAILABLE = False
+# Check for required dependencies at module level using importlib.util.find_spec
+MUJOCO_AVAILABLE = find_spec("mujoco") is not None
 
 try:
     from PyQt6.QtWidgets import QApplication
