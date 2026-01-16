@@ -11,12 +11,9 @@ from pathlib import Path
 import pytest
 
 # Check PyQt6 availability for launcher tests
-try:
-    from PyQt6.QtWidgets import QApplication
+import importlib.util
 
-    PYQT6_AVAILABLE = True
-except ImportError:
-    PYQT6_AVAILABLE = False
+PYQT6_AVAILABLE = importlib.util.find_spec("PyQt6") is not None
 
 
 class TestLauncherIntegration:
