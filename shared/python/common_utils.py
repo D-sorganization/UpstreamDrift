@@ -44,6 +44,7 @@ __all__ = [
     "plot_joint_trajectories",
     "convert_units",
     "get_shared_urdf_path",
+    "normalize_z_score",
 ]
 
 if TYPE_CHECKING:
@@ -142,6 +143,21 @@ def save_golf_data(
         data.to_json(output_path, orient="records", indent=2)
     else:
         raise ValueError(f"Unsupported format: {format}")
+
+
+def normalize_z_score(data: np.ndarray, epsilon: float = 1e-9) -> np.ndarray:
+    """Normalize data using Z-score standardization.
+
+    Args:
+        data: Input array
+        epsilon: Small constant to avoid division by zero
+
+    Returns:
+        Normalized array
+    """
+    import numpy as np
+
+    return (data - np.mean(data)) / (np.std(data) + epsilon)
 
 
 def standardize_joint_angles(
