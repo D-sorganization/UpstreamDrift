@@ -177,6 +177,11 @@ MODEL_IMAGES = {
 
 DOCKER_STAGES = ["all", "mujoco", "pinocchio", "drake", "base"]
 
+# UI feedback timing constants
+LAUNCH_FEEDBACK_DURATION_MS = (
+    2000  # Duration to show feedback messages (e.g., "Copied!")
+)
+
 
 @dataclass
 class SpecialApp:
@@ -1103,9 +1108,9 @@ class EnvironmentDialog(QDialog):
                     style.standardIcon(QStyle.StandardPixmap.SP_DialogApplyButton)
                 )
 
-            # Restore button after 2 seconds
+            # Restore button after feedback duration
             QTimer.singleShot(
-                2000,
+                LAUNCH_FEEDBACK_DURATION_MS,
                 lambda: self._restore_copy_button(original_text),
             )
 
@@ -2708,7 +2713,9 @@ class GolfLauncher(QMainWindow):
             self.btn_launch.setEnabled(False)
 
             # Restore button state after delay
-            QTimer.singleShot(2000, lambda: self.update_launch_button())
+            QTimer.singleShot(
+                LAUNCH_FEEDBACK_DURATION_MS, lambda: self.update_launch_button()
+            )
 
             if launch_locally:
                 if model.type == "custom_humanoid":

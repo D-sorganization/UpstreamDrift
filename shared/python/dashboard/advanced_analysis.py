@@ -22,6 +22,32 @@ from shared.python.signal_processing import (
 
 LOGGER = logging.getLogger(__name__)
 
+# Numerical constants for signal processing
+LOG_EPSILON = 1e-12  # Small epsilon to avoid log(0) in dB calculations
+DB_CONVERSION = 10  # Decibel conversion factor: dB = 10 * log10(power)
+
+
+def _validate_dimension_index(dim_idx: int, *arrays: np.ndarray) -> bool:
+    """Validate that a dimension index is valid for all provided arrays.
+
+    Args:
+        dim_idx: The dimension index to validate.
+        *arrays: Variable number of numpy arrays to check against.
+
+    Returns:
+        True if the dimension index is valid for all arrays, False otherwise.
+    """
+    for arr in arrays:
+        if arr is None:
+            return False
+        if arr.ndim < 2:
+            # 1D arrays only have dim 0
+            if dim_idx > 0:
+                return False
+        elif dim_idx >= arr.shape[1]:
+            return False
+    return True
+
 
 class SpectrogramTab(QtWidgets.QWidget):
     """Tab for Spectrogram Analysis."""
@@ -80,9 +106,12 @@ class SpectrogramTab(QtWidgets.QWidget):
     def update_plot(self) -> None:
         self.ax.clear()
 
-        times, data = self.recorder.get_time_series(self.current_key)
-        if isinstance(data, list):
-            data = np.array(data) if data else None
+        times, raw_data = self.recorder.get_time_series(self.current_key)
+        data: np.ndarray | None
+        if isinstance(raw_data, list):
+            data = np.array(raw_data) if raw_data else None
+        else:
+            data = raw_data
 
         if data is None or len(times) == 0:
             self.ax.text(0.5, 0.5, "No Data", ha="center", va="center")
@@ -93,8 +122,8 @@ class SpectrogramTab(QtWidgets.QWidget):
             data = data.reshape(-1, 1)
 
         dim_idx = self.spin_dim.value()
-        if dim_idx >= data.shape[1]:
-            dim_idx = 0  # Fallback
+        if not _validate_dimension_index(dim_idx, data):
+            dim_idx = 0  # Fallback to first dimension if invalid
 
         signal_data = data[:, dim_idx]
 
@@ -107,7 +136,9 @@ class SpectrogramTab(QtWidgets.QWidget):
         f, t, Sxx = compute_spectrogram(signal_data, fs)
 
         # Plot
-        self.ax.pcolormesh(t, f, 10 * np.log10(Sxx + 1e-12), shading="gouraud")
+        self.ax.pcolormesh(
+            t, f, DB_CONVERSION * np.log10(Sxx + LOG_EPSILON), shading="gouraud"
+        )
         self.ax.set_ylabel("Frequency [Hz]")
         self.ax.set_xlabel("Time [sec]")
         self.ax.set_title(f"Spectrogram: {self.current_key} (Dim {dim_idx})")
@@ -149,14 +180,20 @@ class PhasePlaneTab(QtWidgets.QWidget):
 
         # Fetch Position and Velocity
         # Assuming generic recorder has these keys or we standardized them
-        t_pos, pos = self.recorder.get_time_series("joint_positions")
-        t_vel, vel = self.recorder.get_time_series("joint_velocities")
+        t_pos, raw_pos = self.recorder.get_time_series("joint_positions")
+        t_vel, raw_vel = self.recorder.get_time_series("joint_velocities")
 
         # Helper to convert list to array
-        if isinstance(pos, list):
-            pos = np.array(pos) if pos else None
-        if isinstance(vel, list):
-            vel = np.array(vel) if vel else None
+        pos: np.ndarray | None
+        vel: np.ndarray | None
+        if isinstance(raw_pos, list):
+            pos = np.array(raw_pos) if raw_pos else None
+        else:
+            pos = raw_pos
+        if isinstance(raw_vel, list):
+            vel = np.array(raw_vel) if raw_vel else None
+        else:
+            vel = raw_vel
 
         if pos is None or vel is None or len(t_pos) == 0:
             self.ax.text(
@@ -171,7 +208,7 @@ class PhasePlaneTab(QtWidgets.QWidget):
         vel = vel[:min_len]
 
         dim_idx = self.spin_dim.value()
-        if dim_idx >= pos.shape[1] or dim_idx >= vel.shape[1]:
+        if not _validate_dimension_index(dim_idx, pos, vel):
             self.ax.text(
                 0.5, 0.5, f"Dimension {dim_idx} out of bounds", ha="center", va="center"
             )
@@ -265,13 +302,19 @@ class CoherenceTab(QtWidgets.QWidget):
         key1 = self.metric_options[self.combo1.currentText()]
         key2 = self.metric_options[self.combo2.currentText()]
 
-        t1, d1 = self.recorder.get_time_series(key1)
-        t2, d2 = self.recorder.get_time_series(key2)
+        t1, raw_d1 = self.recorder.get_time_series(key1)
+        t2, raw_d2 = self.recorder.get_time_series(key2)
 
-        if isinstance(d1, list):
-            d1 = np.array(d1) if d1 else None
-        if isinstance(d2, list):
-            d2 = np.array(d2) if d2 else None
+        d1: np.ndarray | None
+        d2: np.ndarray | None
+        if isinstance(raw_d1, list):
+            d1 = np.array(raw_d1) if raw_d1 else None
+        else:
+            d1 = raw_d1
+        if isinstance(raw_d2, list):
+            d2 = np.array(raw_d2) if raw_d2 else None
+        else:
+            d2 = raw_d2
 
         if d1 is None or d2 is None or len(t1) == 0:
             self.ax.text(0.5, 0.5, "No Data", ha="center", va="center")
@@ -285,7 +328,7 @@ class CoherenceTab(QtWidgets.QWidget):
         t1 = t1[:min_len]
 
         dim_idx = self.spin_dim.value()
-        if dim_idx >= d1.shape[1] or dim_idx >= d2.shape[1]:
+        if not _validate_dimension_index(dim_idx, d1, d2):
             self.ax.text(0.5, 0.5, "Dimension out of bounds", ha="center", va="center")
             self.canvas.draw()
             return

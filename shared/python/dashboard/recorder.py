@@ -425,9 +425,13 @@ class GenericPhysicsRecorder:
     ) -> tuple[np.ndarray, np.ndarray]:
         """Get induced acceleration series."""
         if source_name not in self.data["induced_accelerations"]:
-            # Compute on demand if not cached?
-            # Doing it post-hoc is expensive (needs re-simulation).
-            # For now, return empty if not recorded.
+            # Log when parsing/lookup fails for induced acceleration source
+            LOGGER.warning(
+                "Induced acceleration source '%s' not found in recorded data. "
+                "Available sources: %s. Returning empty series.",
+                source_name,
+                list(self.data["induced_accelerations"].keys()),
+            )
             return np.array([]), np.array([])
 
         # Get data

@@ -47,10 +47,11 @@ __all__ = [
     "normalize_z_score",
 ]
 
+import numpy as np
+import pandas as pd
+
 if TYPE_CHECKING:
     import matplotlib.pyplot as plt
-    import numpy as np
-    import pandas as pd
 
 
 # Centralized conversion factors for maintainability (DRY, Orthogonality)
@@ -155,9 +156,8 @@ def normalize_z_score(data: np.ndarray, epsilon: float = 1e-9) -> np.ndarray:
     Returns:
         Normalized array
     """
-    import numpy as np
-
-    return (data - np.mean(data)) / (np.std(data) + epsilon)
+    result = (data - np.mean(data)) / (np.std(data) + epsilon)
+    return np.asarray(result)
 
 
 def standardize_joint_angles(

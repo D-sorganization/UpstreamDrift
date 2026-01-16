@@ -233,6 +233,8 @@ addopts = [
     "--cov-fail-under=10",  # Reduced from 60% - current coverage is ~15%
     # Phase 2 Goal: Gradually increase to 60% as test coverage improves
     # Focus on physics computation paths and critical analysis methods
+    "-m", "not slow",  # Skip slow tests by default - run with -m slow for full suite
+    "--timeout=120",  # 120 second timeout per test to prevent hanging
 ]
 testpaths = [
     "tests",
@@ -258,6 +260,8 @@ markers = [
     "mujoco: marks tests requiring MuJoCo",
     "drake: marks tests requiring Drake",
     "pinocchio: marks tests requiring Pinocchio",
+    "requires_gl: marks tests requiring OpenGL/display",
+    "benchmark: marks benchmark tests",
 ]
 
 [tool.coverage.run]

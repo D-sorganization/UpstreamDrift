@@ -25,6 +25,11 @@ except ImportError:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("GolfSuiteLauncher")
 
+# UI feedback timing constants
+LAUNCH_FEEDBACK_DURATION_MS = (
+    2000  # Duration to show feedback messages (e.g., "Copied!")
+)
+
 
 class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type: ignore[misc]
     def __init__(self) -> None:
@@ -212,9 +217,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
                 )
             )
 
-            # Restore button after 2 seconds
+            # Restore button after feedback duration
             QtCore.QTimer.singleShot(
-                2000,
+                LAUNCH_FEEDBACK_DURATION_MS,
                 lambda: self._restore_btn(self.copy_btn, default_text, default_icon),
             )
 
@@ -246,9 +251,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
             )
         )
 
-        # Restore button after 2 seconds
+        # Restore button after feedback duration
         QtCore.QTimer.singleShot(
-            2000,
+            LAUNCH_FEEDBACK_DURATION_MS,
             lambda: self._restore_btn(self.clear_btn, default_text, default_icon),
         )
 

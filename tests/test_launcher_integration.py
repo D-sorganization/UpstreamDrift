@@ -109,7 +109,13 @@ class TestLauncherIntegration(unittest.TestCase):
             self.fail(f"Engine discovery failed: {e}")
 
     def test_grid_constants(self):
-        """Test that grid constants are set correctly."""
+        """Test that grid constants are set correctly.
+
+        Note: These tests could be improved by using Qt's objectName property
+        on widgets for more reliable widget lookup in automated tests. However,
+        the current approach works and changing it would require updating
+        the launcher UI code. Consider using setObjectName() in future refactors.
+        """
         try:
             from launchers.golf_launcher import GRID_COLUMNS, MODEL_IMAGES
 

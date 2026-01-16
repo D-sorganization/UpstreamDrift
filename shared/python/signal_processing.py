@@ -55,11 +55,15 @@ _LOGGER = logging.getLogger(__name__)
 # =============================================================================
 
 
-@jit(nopython=True, cache=True, fastmath=True)
+@jit(nopython=True, cache=True)
 def _dtw_core(series1: np.ndarray, series2: np.ndarray, window: int) -> float:
     """Numba-optimized DTW distance computation core.
 
     This inner kernel runs ~100x faster than pure Python due to JIT compilation.
+
+    Note: fastmath=True was intentionally removed as it can introduce numerical
+    instability in DTW distance calculations due to non-IEEE-compliant floating
+    point optimizations.
 
     Args:
         series1: First sequence (1D float64 array)
@@ -99,11 +103,15 @@ def _dtw_core(series1: np.ndarray, series2: np.ndarray, window: int) -> float:
     return float(np.sqrt(dtw_matrix[n, m]))
 
 
-@jit(nopython=True, cache=True, fastmath=True)
+@jit(nopython=True, cache=True)
 def _dtw_path_core(
     series1: np.ndarray, series2: np.ndarray, window: int
 ) -> tuple[float, np.ndarray, np.ndarray]:
     """Numba-optimized DTW path computation core.
+
+    Note: fastmath=True was intentionally removed as it can introduce numerical
+    instability in DTW distance calculations due to non-IEEE-compliant floating
+    point optimizations.
 
     Args:
         series1: First sequence (1D float64 array)
@@ -149,8 +157,11 @@ def _dtw_path_core(
     distance = float(np.sqrt(dtw_matrix[n, m]))
 
     # Backtrack
-    # Max path length is n + m
-    max_len = n + m
+    # Path length is at most max(n, m) + abs(n - m) = max(n, m) + |n - m|
+    # In practice, typical paths are closer to max(n, m) in length.
+    # We use max(n, m) as the initial allocation to reduce memory waste,
+    # since n + m over-allocates by approximately min(n, m) elements.
+    max_len = max(n, m)
     path_i = np.empty(max_len, dtype=np.int32)
     path_j = np.empty(max_len, dtype=np.int32)
 

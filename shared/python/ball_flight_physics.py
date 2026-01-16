@@ -261,9 +261,25 @@ class BallFlightSimulator:
                 return result
 
             speed = np.sqrt(speed_sq)
-            # PERFORMANCE: Avoid normalizing velocity here to save divisions.
-            # We use rel_vel directly for drag and Magnus calculations.
-            # vel_unit = rel_vel / speed  <-- REMOVED to save 3 divisions/step
+            # PERFORMANCE OPTIMIZATION: Algebraic transformation to avoid velocity normalization
+            #
+            # Traditional approach:
+            #   vel_unit = rel_vel / speed
+            #   drag_force = 0.5 * rho * A * Cd * speed^2 * vel_unit
+            #              = 0.5 * rho * A * Cd * speed^2 * (rel_vel / speed)
+            #              = 0.5 * rho * A * Cd * speed * rel_vel
+            #
+            # By algebraically simplifying, we can compute:
+            #   drag_factor = const_term * Cd * speed
+            #   drag_accel = -drag_factor * rel_vel
+            #
+            # This eliminates 3 divisions per timestep (one per velocity component)
+            # while producing mathematically identical results. The same optimization
+            # applies to the Magnus force calculation where we use the unnormalized
+            # cross product and adjust the magnitude accordingly.
+            #
+            # See also: flight_models.py uses vel_unit directly for clarity in
+            # educational/reference implementations.
 
             # Spin ratio S = (omega * r) / v
             if has_spin:
