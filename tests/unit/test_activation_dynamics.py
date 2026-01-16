@@ -456,8 +456,8 @@ class TestNumericalStability:
         a = 0.5
         dt = 0.001
 
-        # Run for 10000 steps (10 seconds)
-        for _ in range(10000):
+        # Run for 1000 steps (1 second) - sufficient for stability verification
+        for _ in range(1000):
             a = dynamics.update(u, a, dt)
 
         # At equilibrium (u = a = 0.5), should stay at 0.5

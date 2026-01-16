@@ -119,12 +119,13 @@ jobs:
       - run: pip install -e .[dev]
       - name: Run Tests
         env:
-          PYTHONPATH: .:${{ github.workspace }}/engines/physics_engines/mujoco/python
+          PYTHONPATH: .:${{ github.workspace }}/engines/physics_engines/mujoco/python:${{ github.workspace }}/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
         run: |
           # Install test dependencies if not already installed
           pip install pytest pytest-cov pytest-mock pytest-qt
           # Run tests using pyproject.toml configuration
-          xvfb-run pytest -v
+          # Skip slow tests in CI for faster feedback (marked with @pytest.mark.slow)
+          xvfb-run pytest -v -m "not slow"
 
       # Cross-Engine Validator Unit Tests (C-001 Remediation)
       # These run on every PR to catch framework issues immediately

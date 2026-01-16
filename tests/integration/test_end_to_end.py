@@ -10,10 +10,19 @@ from pathlib import Path
 
 import pytest
 
+# Check PyQt6 availability for launcher tests
+try:
+    from PyQt6.QtWidgets import QApplication
+
+    PYQT6_AVAILABLE = True
+except ImportError:
+    PYQT6_AVAILABLE = False
+
 
 class TestLauncherIntegration:
     """Integration tests for launcher functionality."""
 
+    @pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not available")
     def test_launch_golf_suite_imports(self):
         """Verify launch_golf_suite can import UnifiedLauncher."""
         # Add project root to path
