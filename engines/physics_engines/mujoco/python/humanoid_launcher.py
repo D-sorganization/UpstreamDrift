@@ -71,6 +71,10 @@ logger = logging.getLogger(__name__)
 class RemoteRecorder(RecorderInterface):
     """Recorder that stores data received from remote process."""
 
+    # Engine reference required by RecorderInterface protocol.
+    # For remote recording, no direct engine access is available.
+    engine: Any = None
+
     def __init__(self) -> None:
         self.reset()
 
