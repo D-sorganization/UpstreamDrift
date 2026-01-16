@@ -123,6 +123,11 @@ class SpectrogramTab(QtWidgets.QWidget):
 
         dim_idx = self.spin_dim.value()
         if not _validate_dimension_index(dim_idx, data):
+            LOGGER.warning(
+                "Dimension index %d out of bounds for data shape %s, falling back to 0",
+                dim_idx,
+                data.shape,
+            )
             dim_idx = 0  # Fallback to first dimension if invalid
 
         signal_data = data[:, dim_idx]

@@ -232,11 +232,10 @@ class PinocchioRecorder:
 
         for f in self.frames:
             val = f.induced_accelerations.get(key)
-            # Try int key if str fails
+            # Try int key if str fails - convert int to string key since
+            # dict keys are stored as strings by convention
             if val is None and isinstance(source_name, int):
-                # But dict keys are likely strings?
-                # Let's check sim loop
-                pass
+                val = f.induced_accelerations.get(str(source_name))
 
             if val is not None:
                 times.append(f.time)

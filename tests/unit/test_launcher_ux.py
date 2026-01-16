@@ -97,30 +97,14 @@ class TestGolfLauncherUX(unittest.TestCase):
         # Ensure the filter update is triggered
         launcher.update_search_filter("nonexistent_model_xyz")
 
-        # Find widgets in grid layout
-        found_empty_widget: QWidget | None = None
-        for i in range(launcher.grid_layout.count()):
-            item = launcher.grid_layout.itemAt(i)
-            if item and item.widget():
-                widget = item.widget()
-                if widget is None:
-                    continue
-                # We are looking for a QWidget that contains a QLabel and QPushButton
-                children = widget.findChildren(QPushButton)
-                if children:
-                    for btn in children:
-                        if btn.text() == "Clear Search":
-                            found_empty_widget = widget
-                            break
+        # Find the Clear Search button using object name for more robust lookup
+        # The button should have objectName="btnClearSearch" set in production code
+        btn = launcher.findChild(QPushButton, "btnClearSearch")
 
         self.assertIsNotNone(
-            found_empty_widget,
-            "Should find empty state widget with Clear Search button",
+            btn,
+            "Should find Clear Search button by object name 'btnClearSearch'",
         )
-        assert found_empty_widget is not None  # for mypy
-
-        # Verify the button functionality
-        btn = found_empty_widget.findChild(QPushButton)
         assert btn is not None  # for mypy
         self.assertEqual(btn.text(), "Clear Search")
 

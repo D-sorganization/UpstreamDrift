@@ -175,9 +175,6 @@ def standardize_joint_angles(
     Returns:
         Standardized DataFrame with joint angles
     """
-    import numpy as np
-    import pandas as pd
-
     if angle_names is None:
         angle_names = [f"joint_{i}" for i in range(angles.shape[1])]
 
