@@ -32,3 +32,7 @@
 ## 2027-02-28 - [Visual Consistency and Discoverability]
 **Learning:** In a mixed UI where some buttons have emojis/icons and others are text-only, the text-only buttons (like "Manage Environment") fade into the background and feel less "clickable" or important. This is especially true when next to high-contrast elements like search bars or toggle buttons with icons.
 **Action:** Enforce visual consistency by adding icons (or emojis, if that's the established style) to all primary toolbar actions. Pair this with mandatory tooltips for every interactive element to ensure functionality is discoverable without trial and error.
+
+## 2027-05-15 - [Actionable Empty States]
+**Learning:** When a search filter returns zero results, a static "No results found" message is a dead end that forces the user to shift focus back to the search input to recover. Providing a "Clear Search" button directly within the empty state keeps the user in the flow and allows for immediate recovery with a single click.
+**Action:** Always include a reset action (e.g., "Clear Filters", "Show All") within empty state views when the empty state is caused by user-applied filters.
