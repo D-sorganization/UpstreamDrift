@@ -52,7 +52,9 @@ class TestDockerBuild(unittest.TestCase):
     @unittest.skipUnless(_is_docker_available(), "Docker not available")
     def test_docker_available(self):
         """Test that Docker is available for building."""
-        result = subprocess.run(["docker", "--version"], capture_output=True, text=True)
+        result = subprocess.run(
+            ["docker", "--version"], capture_output=True, text=True, timeout=10
+        )
         self.assertEqual(result.returncode, 0)
         self.assertIn("Docker version", result.stdout)
 
