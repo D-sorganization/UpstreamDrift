@@ -263,6 +263,7 @@ markers = [
     "pinocchio: marks tests requiring Pinocchio",
     "requires_gl: marks tests requiring OpenGL/display",
     "benchmark: marks benchmark tests",
+    "asyncio: marks tests as async/await tests",
 ]
 
 [tool.coverage.run]
