@@ -4,6 +4,7 @@ These tests verify end-to-end functionality without heavy mocking,
 ensuring the suite works in real-world scenarios.
 """
 
+import importlib.util
 import subprocess
 import sys
 from pathlib import Path
@@ -11,8 +12,6 @@ from pathlib import Path
 import pytest
 
 # Check PyQt6 availability for launcher tests
-import importlib.util
-
 PYQT6_AVAILABLE = importlib.util.find_spec("PyQt6") is not None
 
 
