@@ -9,6 +9,7 @@ Tests cover:
 """
 
 import math
+from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
@@ -401,6 +402,28 @@ class TestForceCalculations:
         magnus = forces.get("magnus", np.zeros(3))
         np.testing.assert_array_almost_equal(magnus, np.zeros(3))
 
+    def test_calculate_forces_vectorized(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test calculate_forces with vectorized input."""
+        # Create dummy velocity batch (3, 5)
+        vel = np.zeros((3, 5))
+        vel[0, :] = 50.0  # x velocity
+
+        forces = simulator._calculate_forces(vel, driver_launch)
+        assert forces["drag"].shape == (3, 5)
+        assert forces["magnus"].shape == (3, 5)
+        assert forces["gravity"].shape == (3, 5)
+
+    def test_calculate_forces_scalar_speed_threshold(
+        self, simulator: BallFlightSimulator, driver_launch: LaunchConditions
+    ) -> None:
+        """Test calculate_forces with velocity below speed threshold."""
+        vel = np.array([0.05, 0.0, 0.0])  # Below 0.1 m/s
+        forces = simulator._calculate_forces(vel, driver_launch)
+        np.testing.assert_array_equal(forces["drag"], np.zeros(3))
+        np.testing.assert_array_equal(forces["magnus"], np.zeros(3))
+
 
 # =============================================================================
 # Metric Calculation Tests
@@ -490,6 +513,22 @@ class TestTrajectoryAnalysis:
         # Landing angle should be between 0 and 90 degrees
         # For a driver, typically 35-50 degrees
         assert 0 < analysis["landing_angle"] < 90
+
+    def test_calculate_landing_angle_empty(
+        self, simulator: BallFlightSimulator
+    ) -> None:
+        assert simulator._calculate_landing_angle([]) == 0.0
+
+    def test_calculate_landing_angle_vertical_drop(
+        self, simulator: BallFlightSimulator
+    ) -> None:
+        # Create a trajectory dropping straight down
+        p1 = MagicMock(velocity=np.array([0.0, 0.0, -10.0]))
+        p2 = MagicMock(velocity=np.array([0.0, 0.0, -20.0]))
+        assert simulator._calculate_landing_angle([p1, p2]) == 90.0
+
+    def test_calculate_apex_time_empty(self, simulator: BallFlightSimulator) -> None:
+        assert simulator._calculate_apex_time([]) == 0.0
 
 
 # =============================================================================

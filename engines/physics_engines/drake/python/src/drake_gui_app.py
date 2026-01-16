@@ -260,6 +260,7 @@ class DrakeRecorder:
         """
         self.reset()
         self.engine = engine  # Reference for joint names
+        self.analysis_config: dict[str, Any] = {}
 
     def reset(self) -> None:
         self.times: list[float] = []
@@ -316,9 +317,8 @@ class DrakeRecorder:
         self.cop_position_history.append(np.zeros(3))
 
     def set_analysis_config(self, config: dict[str, Any]) -> None:
-        """Update analysis configuration (Dummy implementation for Interface)."""
-        # Drake GUI currently uses UI toggles directly, but we can store this if needed
-        pass
+        """Update analysis configuration."""
+        self.analysis_config = config
 
     def get_time_series(self, field_name: str) -> tuple[np.ndarray, np.ndarray | list]:
         """Implement RecorderInterface."""
@@ -352,8 +352,17 @@ class DrakeRecorder:
             # If int, maybe we have it stored by int key?
             # Or map int to name if possible?
             # For now, return empty if not found.
-            if source_name in self.induced_accelerations:
-                # If stored by int key
+            key = str(source_name)
+            if key in self.induced_accelerations:
+                # If stored by int key or str(int) key
+                vals = self.induced_accelerations[key]  # type: ignore
+                times = np.array(self.times)
+                min_len = min(len(vals), len(times))
+                return times[:min_len], np.array(vals[:min_len])
+
+            is_int_key = isinstance(source_name, int)
+            if is_int_key and source_name in self.induced_accelerations:
+                # Check for int key (less common in json but possible in dict)
                 vals = self.induced_accelerations[source_name]  # type: ignore
                 times = np.array(self.times)
                 min_len = min(len(vals), len(times))
@@ -1170,11 +1179,6 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                 # The GUI checkbox logic is:
                 analysis_enabled = self.chk_live_analysis.isChecked()
 
-                # We could also check self.recorder.analysis_config
-                # if we implemented it fully
-                # For now, we trust the GUI checkbox as master toggle
-                # for performance safety
-
                 if analysis_enabled and self.eval_context:
                     # Update eval context
                     self.plant.SetPositions(self.eval_context, q)
@@ -1186,21 +1190,58 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                     res = analyzer.compute_components(self.eval_context)
 
                     # Check for specific actuator selection
+                    sources_to_compute = []
+
+                    # 1. From GUI combo
                     if self.chk_induced_vec.isChecked():
-                        source = self.combo_induced_source.currentText()
-                        # If specific actuator selected, compute and record it
-                        if source not in ["gravity", "velocity", "total"]:
+                        sources_to_compute.append(
+                            self.combo_induced_source.currentText()
+                        )
+
+                    # 2. From LivePlotWidget config
+                    if hasattr(self.recorder, "analysis_config") and isinstance(
+                        self.recorder.analysis_config, dict
+                    ):
+                        sources = self.recorder.analysis_config.get(
+                            "induced_accel_sources", []
+                        )
+                        if isinstance(sources, list):
+                            sources_to_compute.extend(sources)
+
+                    # Deduplicate and compute specific sources
+                    unique_sources = set()
+                    for src in sources_to_compute:
+                        if src:
+                            unique_sources.add(str(src))
+
+                    for source in unique_sources:
+                        if source in ["gravity", "velocity", "total"]:
+                            continue
+
+                        # Compute specific
+                        try:
+                            # Check if source is integer index or name
+                            act_idx = -1
                             try:
                                 act_idx = int(source)
-                                tau = np.zeros(self.plant.num_velocities())
-                                if 0 <= act_idx < len(tau):
-                                    tau[act_idx] = 1.0
-                                    accels = analyzer.compute_specific_control(
-                                        self.eval_context, tau
-                                    )
-                                    res["specific_control"] = accels
                             except ValueError:
-                                pass
+                                # Try name match
+                                if self.plant.HasJointNamed(source):
+                                    joint = self.plant.GetJointByName(source)
+                                    if joint.num_velocities() == 1:
+                                        act_idx = joint.velocity_start()
+
+                            if act_idx >= 0:
+                                tau_vec = np.zeros(self.plant.num_velocities())
+                                if 0 <= act_idx < len(tau_vec):
+                                    tau_vec[act_idx] = 1.0
+                                    accels = analyzer.compute_specific_control(
+                                        self.eval_context, tau_vec
+                                    )
+                                    # Store result using source string as key
+                                    res[source] = accels
+                        except Exception:
+                            pass
 
                     # We need to append to recorder lists
                     # DrakeRecorder uses dict[str, list[np.ndarray]]
