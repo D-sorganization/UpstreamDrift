@@ -63,6 +63,7 @@ dev = [
     "pytest-mock>=3.14.0",
     "pytest-qt>=4.2.0",
     "pytest-benchmark>=4.0.0",
+    "pytest-timeout>=2.3.0",  # Required for --timeout option
     "httpx>=0.25.0",  # Required for FastAPI TestClient
     "pip-audit>=2.7.0",
     "ruff==0.14.10",
