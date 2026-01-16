@@ -120,7 +120,9 @@ class TestMuJoCoSimWidget:
         # Reset and verify
         widget.reset_state()
         np.testing.assert_array_almost_equal(
-            widget.data.qpos, initial_qpos, err_msg="State should return to initial after reset"
+            widget.data.qpos,
+            initial_qpos,
+            err_msg="State should return to initial after reset",
         )
 
         widget.close()
@@ -222,7 +224,9 @@ class TestHumanoidLauncher:
         expected_attrs = ["centralWidget", "menuBar", "statusBar"]
         found_attrs = [attr for attr in expected_attrs if hasattr(launcher, attr)]
 
-        assert len(found_attrs) > 0, "Launcher should have at least one standard widget attribute"
+        assert (
+            len(found_attrs) > 0
+        ), "Launcher should have at least one standard widget attribute"
 
         launcher.close()
 
