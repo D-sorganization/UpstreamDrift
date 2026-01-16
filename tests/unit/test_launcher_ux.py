@@ -15,6 +15,7 @@ sys.path.insert(0, str(REPO_ROOT))
 try:
     from PyQt6.QtCore import Qt  # noqa: F401
     from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QWidget  # noqa: F401
+    from typing import cast
 
     PYQT_AVAILABLE = True
 except ImportError:
@@ -33,7 +34,7 @@ class TestGolfLauncherUX(unittest.TestCase):
         if not QApplication.instance():
             cls.app = QApplication([])
         else:
-            cls.app = QApplication.instance()
+            cls.app = cast(QApplication, QApplication.instance())
 
     def setUp(self):
         """Set up test fixtures."""
@@ -97,11 +98,13 @@ class TestGolfLauncherUX(unittest.TestCase):
         launcher.update_search_filter("nonexistent_model_xyz")
 
         # Find widgets in grid layout
-        found_empty_widget = None
+        found_empty_widget: QWidget | None = None
         for i in range(launcher.grid_layout.count()):
             item = launcher.grid_layout.itemAt(i)
             if item and item.widget():
                 widget = item.widget()
+                if widget is None:
+                    continue
                 # We are looking for a QWidget that contains a QLabel and QPushButton
                 children = widget.findChildren(QPushButton)
                 if children:
@@ -114,9 +117,11 @@ class TestGolfLauncherUX(unittest.TestCase):
             found_empty_widget,
             "Should find empty state widget with Clear Search button",
         )
+        assert found_empty_widget is not None  # for mypy
 
         # Verify the button functionality
         btn = found_empty_widget.findChild(QPushButton)
+        assert btn is not None  # for mypy
         self.assertEqual(btn.text(), "Clear Search")
 
         # Verify clicking it clears the search
