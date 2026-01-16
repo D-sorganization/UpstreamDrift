@@ -1087,7 +1087,7 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
             # Init Manipulability Analyzer
             self.manip_analyzer = PinocchioManipulabilityAnalyzer(self.model, self.data)
-            self._populate_manip_checkboxes()
+            self._populate_manipulability_checkboxes()
 
             # Reset recorder
             self.recorder.reset()
@@ -1224,6 +1224,35 @@ class PinocchioGUI(QtWidgets.QMainWindow):
 
         self.joint_sliders.append(slider)
         self.joint_spinboxes.append(spin)
+
+    def _populate_manipulability_checkboxes(self) -> None:
+        """Populate checkboxes for manipulability analysis body selection."""
+        if self.manip_analyzer is None:
+            return
+
+        # Clear existing checkboxes
+        while self.manip_body_layout.count():
+            item = self.manip_body_layout.takeAt(0)
+            if item is None:
+                continue
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+        self.manip_checkboxes.clear()
+
+        # Get potential bodies from analyzer
+        bodies = self.manip_analyzer.find_potential_bodies()
+
+        cols = 3
+        for i, name in enumerate(bodies):
+            chk = QtWidgets.QCheckBox(name)
+            chk.toggled.connect(self._update_viewer)
+            self.manip_checkboxes[name] = chk
+            self.manip_body_layout.addWidget(chk, i // cols, i % cols)
+
+            # Default check relevant parts
+            if any(x in name.lower() for x in ["club", "hand", "wrist"]):
+                chk.setChecked(True)
 
     def _sync_kinematic_controls(self) -> None:
         """Synchronize sliders/spinboxes with current model state q."""
