@@ -14,6 +14,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+from shared.python.dashboard.advanced_analysis import AdvancedAnalysisDialog
 from shared.python.export import export_recording_all_formats
 from shared.python.interfaces import RecorderInterface
 from shared.python.plotting import MplCanvas
@@ -252,6 +253,14 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.btn_freq.setToolTip("Show Power Spectral Density (PSD) of current view")
         self.btn_freq.clicked.connect(self.show_freq_analysis)
         controls_layout.addWidget(self.btn_freq)
+
+        # Advanced Analysis Button
+        self.btn_advanced = QtWidgets.QPushButton("Advanced...")
+        self.btn_advanced.setToolTip(
+            "Show Advanced Analysis Tools (Spectrogram, Phase Plane, Coherence)"
+        )
+        self.btn_advanced.clicked.connect(self.show_advanced_analysis)
+        controls_layout.addWidget(self.btn_advanced)
 
         # Export Button
         self.btn_export = QtWidgets.QPushButton("Export Data")
@@ -610,7 +619,9 @@ class LivePlotWidget(QtWidgets.QWidget):
                 label = (
                     dim_label
                     if n_dims == 1
-                    else f"{dim_label} {i}" if plot_mode != "Norm" else "Norm"
+                    else f"{dim_label} {i}"
+                    if plot_mode != "Norm"
+                    else "Norm"
                 )
                 if plot_mode == "All Dimensions":
                     label = f"Dim {i}"
@@ -689,6 +700,16 @@ class LivePlotWidget(QtWidgets.QWidget):
             fs = 100.0
 
         dlg = FrequencyAnalysisDialog(self, data, fs, self.current_label)
+        dlg.exec()
+
+    def show_advanced_analysis(self) -> None:
+        """Show Advanced Analysis Dialog."""
+        dlg = AdvancedAnalysisDialog(
+            self,
+            self.recorder,
+            current_key=self.current_key,
+            comparison_key=self.comparison_key,
+        )
         dlg.exec()
 
     def copy_snapshot(self) -> None:
