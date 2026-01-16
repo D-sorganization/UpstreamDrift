@@ -24,6 +24,10 @@ LOGGER = logging.getLogger(__name__)
 
 MAX_DIMENSIONS = 100
 
+# Numerical constants for signal processing
+LOG_EPSILON = 1e-12  # Small epsilon to avoid log(0) in dB calculations
+DB_CONVERSION = 10  # Decibel conversion factor: dB = 10 * log10(power)
+
 
 class FrequencyAnalysisDialog(QtWidgets.QDialog):
     """Dialog for frequency domain analysis (PSD)."""
@@ -70,9 +74,9 @@ class FrequencyAnalysisDialog(QtWidgets.QDialog):
         limit_dims = min(n_dims, 10)
 
         for i in range(limit_dims):
-            # Convert to dB
-            # Avoid log(0)
-            psd_db = 10 * np.log10(psd[i] + 1e-12)
+            # Convert to dB (using named constants for clarity)
+            # LOG_EPSILON avoids log(0), DB_CONVERSION = 10 for power to dB
+            psd_db = DB_CONVERSION * np.log10(psd[i] + LOG_EPSILON)
             label_str = f"Dim {i}" if n_dims > 1 else "PSD"
             self.ax.semilogx(freqs, psd_db, label=label_str)
 
