@@ -575,9 +575,7 @@ class HumanoidLauncher(QMainWindow):
             except Exception as e:
                 # Fallback logging if parsing fails
                 timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-                self.txt_log.append(
-                    f"[{timestamp}] Error parsing stream: {e}"
-                )
+                self.txt_log.append(f"[{timestamp}] Error parsing stream: {e}")
             return
 
         timestamp = datetime.datetime.now().strftime("%H:%M:%S")

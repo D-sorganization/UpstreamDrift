@@ -488,7 +488,7 @@ def run_simulation(
                     "qfrc_actuator": physics.data.qfrc_actuator,
                     "iaa": iaa,
                     "cf": cf,
-                    "mass_matrix": mass_matrix
+                    "mass_matrix": mass_matrix,
                 }
                 print(f"DATA_JSON:{json.dumps(packet, default=np_encoder)}", flush=True)
             except Exception as e:

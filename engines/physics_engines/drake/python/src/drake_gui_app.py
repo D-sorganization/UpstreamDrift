@@ -1194,7 +1194,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
 
                     # 1. From GUI combo
                     if self.chk_induced_vec.isChecked():
-                        sources_to_compute.append(self.combo_induced_source.currentText())
+                        sources_to_compute.append(
+                            self.combo_induced_source.currentText()
+                        )
 
                     # 2. From LivePlotWidget config
                     if hasattr(self.recorder, "analysis_config") and isinstance(

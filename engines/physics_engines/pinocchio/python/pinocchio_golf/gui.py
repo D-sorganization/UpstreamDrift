@@ -1376,10 +1376,10 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                             sources_to_compute.append(txt)
 
                         # From config
-                        has_config = hasattr(self.recorder, 'analysis_config')
-                        config = getattr(self.recorder, 'analysis_config', None)
+                        has_config = hasattr(self.recorder, "analysis_config")
+                        config = getattr(self.recorder, "analysis_config", None)
                         if has_config and isinstance(config, dict):
-                            sources = config.get('induced_accel_sources', [])
+                            sources = config.get("induced_accel_sources", [])
                             if isinstance(sources, list):
                                 sources_to_compute.extend(sources)
 
