@@ -115,16 +115,23 @@ def analyze_coordinate_system():
     ]
 
     print("\nMotion analysis:")
-    largest_mid_axis = (
-        "X"
-        if mid_motion_ranges[0] == max(mid_motion_ranges)
-        else "Y" if mid_motion_ranges[1] == max(mid_motion_ranges) else "Z"
-    )
-    largest_club_axis = (
-        "X"
-        if club_motion_ranges[0] == max(club_motion_ranges)
-        else "Y" if club_motion_ranges[1] == max(club_motion_ranges) else "Z"
-    )
+    # Determine the axis with largest motion range using explicit if-elif-else
+    # for clarity (avoiding nested ternary operators)
+    max_mid_range = max(mid_motion_ranges)
+    if mid_motion_ranges[0] == max_mid_range:
+        largest_mid_axis = "X"
+    elif mid_motion_ranges[1] == max_mid_range:
+        largest_mid_axis = "Y"
+    else:
+        largest_mid_axis = "Z"
+
+    max_club_range = max(club_motion_ranges)
+    if club_motion_ranges[0] == max_club_range:
+        largest_club_axis = "X"
+    elif club_motion_ranges[1] == max_club_range:
+        largest_club_axis = "Y"
+    else:
+        largest_club_axis = "Z"
     print(f"  Mid-hands largest motion: {largest_mid_axis}")
     print(f"  Club head largest motion: {largest_club_axis}")
 
