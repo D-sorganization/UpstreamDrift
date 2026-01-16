@@ -15,6 +15,7 @@ sys.path.insert(0, str(REPO_ROOT))
 try:
     from PyQt6.QtCore import Qt  # noqa: F401
     from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QWidget  # noqa: F401
+
     PYQT_AVAILABLE = True
 except ImportError:
     PYQT_AVAILABLE = False
@@ -54,6 +55,7 @@ class TestGolfLauncherUX(unittest.TestCase):
                 if model.id == model_id:
                     return model
             return None
+
         self.mock_registry.get_model.side_effect = mock_get_model
 
     @patch("launchers.golf_launcher.GolfLauncher._load_layout")
@@ -108,7 +110,10 @@ class TestGolfLauncherUX(unittest.TestCase):
                             found_empty_widget = widget
                             break
 
-        self.assertIsNotNone(found_empty_widget, "Should find empty state widget with Clear Search button")
+        self.assertIsNotNone(
+            found_empty_widget,
+            "Should find empty state widget with Clear Search button",
+        )
 
         # Verify the button functionality
         btn = found_empty_widget.findChild(QPushButton)
@@ -121,6 +126,7 @@ class TestGolfLauncherUX(unittest.TestCase):
         self.assertEqual(launcher.search_input.text(), "")
         # Check if filter text is cleared
         self.assertEqual(launcher.current_filter_text, "")
+
 
 if __name__ == "__main__":
     unittest.main()
