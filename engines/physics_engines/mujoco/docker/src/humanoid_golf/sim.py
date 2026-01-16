@@ -48,7 +48,7 @@ def np_encoder(object):
         return object.item()
     if isinstance(object, np.ndarray):
         return object.tolist()
-    raise TypeError
+    raise TypeError(f"Object of type {type(object).__name__} is not JSON serializable")
 
 
 class BaseController:

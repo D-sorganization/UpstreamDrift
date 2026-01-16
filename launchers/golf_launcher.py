@@ -2108,7 +2108,8 @@ class GolfLauncher(QMainWindow):
 
             # Action button
             btn_clear = QPushButton("Clear Search")
-            btn_clear.setFixedWidth(140)
+            btn_clear.setObjectName("btnClearSearch")
+            btn_clear.setMinimumWidth(140)
             btn_clear.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_clear.clicked.connect(self._clear_search)
             btn_clear.setToolTip("Clear the search filter (Esc)")
