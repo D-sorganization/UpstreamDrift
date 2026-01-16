@@ -228,9 +228,15 @@ class BallFlightSimulator:
         if has_spin:
             omega = launch.spin_rate * 2 * np.pi / 60  # rad/s
             spin_axis = launch.spin_axis
+            # Pre-fetch spin axis components for speed if available
+            if spin_axis is not None:
+                sax, say, saz = spin_axis[0], spin_axis[1], spin_axis[2]
+            else:
+                sax, say, saz = 0.0, 0.0, 0.0
         else:
             omega = 0.0
             spin_axis = None
+            sax, say, saz = 0.0, 0.0, 0.0
 
         min_speed_sq = MIN_SPEED_THRESHOLD**2
 
@@ -255,7 +261,9 @@ class BallFlightSimulator:
                 return result
 
             speed = np.sqrt(speed_sq)
-            vel_unit = rel_vel / speed
+            # PERFORMANCE: Avoid normalizing velocity here to save divisions.
+            # We use rel_vel directly for drag and Magnus calculations.
+            # vel_unit = rel_vel / speed  <-- REMOVED to save 3 divisions/step
 
             # Spin ratio S = (omega * r) / v
             if has_spin:
@@ -267,14 +275,16 @@ class BallFlightSimulator:
             # Note: We duplicate logic slightly here vs self.ball.calculate_drag_coefficient
             # to keep this inner loop optimized (avoid method call overhead + closure access)
             # However, the formula matches BallProperties.calculate_drag_coefficient
+            # drag_force = drag_mag * vel_unit = (const * cd * speed^2) * (rel_vel / speed)
+            #            = (const * cd * speed) * rel_vel
             cd = cd0 + spin_ratio * (cd1 + spin_ratio * cd2)
-            drag_mag = const_term * cd * speed_sq
+            # Optimization: Calculate factor for rel_vel instead of unit vector
+            drag_factor = const_term * cd * speed
 
-            # acc = gravity - drag * unit
-            # Initialize acc with gravity
-            acc_x = gravity_acc[0] - drag_mag * vel_unit[0]
-            acc_y = gravity_acc[1] - drag_mag * vel_unit[1]
-            acc_z = gravity_acc[2] - drag_mag * vel_unit[2]
+            # acc = gravity - drag
+            acc_x = gravity_acc[0] - drag_factor * rel_vel[0]
+            acc_y = gravity_acc[1] - drag_factor * rel_vel[1]
+            acc_z = gravity_acc[2] - drag_factor * rel_vel[2]
 
             # Lift (Magnus)
             if has_spin and spin_ratio > 0:
@@ -285,21 +295,28 @@ class BallFlightSimulator:
 
                 magnus_mag = const_term * cl * speed_sq
 
-                # Cross product: spin_axis x vel_unit
+                # Cross product: spin_axis x rel_vel (NOT vel_unit)
                 if spin_axis is not None:
-                    # Manual cross product is faster for small arrays
-                    c0 = spin_axis[1] * vel_unit[2] - spin_axis[2] * vel_unit[1]
-                    c1 = spin_axis[2] * vel_unit[0] - spin_axis[0] * vel_unit[2]
-                    c2 = spin_axis[0] * vel_unit[1] - spin_axis[1] * vel_unit[0]
+                    # Manual cross product with unnormalized velocity
+                    # c_unnorm = spin_axis x rel_vel
+                    # Optimization: Use pre-fetched scalar components
+                    c0_u = say * rel_vel[2] - saz * rel_vel[1]
+                    c1_u = saz * rel_vel[0] - sax * rel_vel[2]
+                    c2_u = sax * rel_vel[1] - say * rel_vel[0]
 
-                    cross_mag_sq = c0 * c0 + c1 * c1 + c2 * c2
+                    cross_mag_sq_u = c0_u * c0_u + c1_u * c1_u + c2_u * c2_u
 
-                    if cross_mag_sq > NUMERICAL_EPSILON**2:
-                        cross_mag = np.sqrt(cross_mag_sq)
-                        factor = magnus_mag / cross_mag
-                        acc_x += c0 * factor
-                        acc_y += c1 * factor
-                        acc_z += c2 * factor
+                    if cross_mag_sq_u > NUMERICAL_EPSILON**2:
+                        # Force direction is cross_prod_u / |cross_prod_u|
+                        # Force magnitude is magnus_mag
+                        # Force vector = magnus_mag * cross_prod_u / |cross_prod_u|
+                        # We have |cross_prod_u| = cross_mag_u
+                        cross_mag_u = np.sqrt(cross_mag_sq_u)
+                        factor = magnus_mag / cross_mag_u
+
+                        acc_x += c0_u * factor
+                        acc_y += c1_u * factor
+                        acc_z += c2_u * factor
 
             # Construct result
             result = np.empty(6, dtype=state.dtype)
