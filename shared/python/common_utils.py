@@ -44,12 +44,14 @@ __all__ = [
     "plot_joint_trajectories",
     "convert_units",
     "get_shared_urdf_path",
+    "normalize_z_score",
 ]
+
+import numpy as np
+import pandas as pd
 
 if TYPE_CHECKING:
     import matplotlib.pyplot as plt
-    import numpy as np
-    import pandas as pd
 
 
 # Centralized conversion factors for maintainability (DRY, Orthogonality)
@@ -144,6 +146,20 @@ def save_golf_data(
         raise ValueError(f"Unsupported format: {format}")
 
 
+def normalize_z_score(data: np.ndarray, epsilon: float = 1e-9) -> np.ndarray:
+    """Normalize data using Z-score standardization.
+
+    Args:
+        data: Input array
+        epsilon: Small constant to avoid division by zero
+
+    Returns:
+        Normalized array
+    """
+    result = (data - np.mean(data)) / (np.std(data) + epsilon)
+    return np.asarray(result)
+
+
 def standardize_joint_angles(
     angles: np.ndarray,
     angle_names: list[str] | None = None,
@@ -159,9 +175,6 @@ def standardize_joint_angles(
     Returns:
         Standardized DataFrame with joint angles
     """
-    import numpy as np
-    import pandas as pd
-
     if angle_names is None:
         angle_names = [f"joint_{i}" for i in range(angles.shape[1])]
 

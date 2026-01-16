@@ -11,8 +11,12 @@ from typing import Any
 
 import numpy as np
 
-from shared.python import signal_processing
+from shared.python import common_utils, signal_processing
 from shared.python.statistical_analysis import StatisticalAnalyzer
+
+# Constants for scoring
+EPSILON = 1e-9
+SIMILARITY_SCORE_CONSTANT = 100.0
 
 
 @dataclass
@@ -124,8 +128,8 @@ class SwingComparator:
         # Normalize (Z-score) to compare shape independent of magnitude offset/scale?
         # Or Min-Max?
         # Z-score is standard for shape comparison
-        s1_norm = (s1 - np.mean(s1)) / (np.std(s1) + 1e-9)
-        s2_norm = (s2 - np.mean(s2)) / (np.std(s2) + 1e-9)
+        s1_norm = common_utils.normalize_z_score(s1, EPSILON)
+        s2_norm = common_utils.normalize_z_score(s2, EPSILON)
 
         # Compute DTW
         dist, path = signal_processing.compute_dtw_path(s1_norm, s2_norm)
@@ -137,7 +141,7 @@ class SwingComparator:
         # Empirical: norm_dist 0 -> 100.
         # norm_dist 1.0 (1 std dev avg error) -> maybe 50?
         # Score = 100 / (1 + dist)
-        score = 100.0 / (1.0 + norm_dist)
+        score = SIMILARITY_SCORE_CONSTANT / (1.0 + norm_dist)
 
         return DTWResult(
             distance=dist,

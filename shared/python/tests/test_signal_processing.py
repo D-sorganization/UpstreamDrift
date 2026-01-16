@@ -3,6 +3,7 @@ import pytest
 
 from shared.python.signal_processing import (
     _morlet2_impl,
+    compute_coherence,
     compute_cwt,
     compute_dtw_distance,
     compute_dtw_path,
@@ -125,6 +126,19 @@ class TestSignalProcessing:
         phases = np.angle(xwt[idx_10hz, 20:-20])  # avoid edges
         # Just check it runs and produces output for now
         assert not np.all(phases == 0)
+
+    def test_compute_coherence(self, sample_data):
+        t, data1, fs = sample_data
+        # data2 is data1 + noise
+        data2 = data1 + 0.1 * np.random.randn(len(data1))
+
+        freqs, coh = compute_coherence(data1, data2, fs=fs, nperseg=64)
+
+        assert len(freqs) == len(coh)
+
+        # Coherence at signal frequency (10Hz) should be high
+        idx_10hz = np.argmin(np.abs(freqs - 10.0))
+        assert coh[idx_10hz] > 0.8  # Strong correlation
 
     # --- New Tests ---
 

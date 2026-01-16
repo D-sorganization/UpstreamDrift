@@ -1,11 +1,12 @@
 from typing import Any
 
+import numpy as np
+
 
 def compute_induced_accelerations(physics: Any) -> dict[str, Any]:
     """Compute induced accelerations (Gravity, Velocity, Control) for current state."""
     results: dict[str, Any] = {}
     try:
-        import numpy as np
         from dm_control.mujoco.wrapper.mjbindings import mjlib
     except ImportError:
         return results
@@ -76,47 +77,9 @@ def compute_induced_accelerations(physics: Any) -> dict[str, Any]:
     neg_g_force = -g_force
     neg_c_force = -c_force
 
-    def safe_solveM(m_ptr: Any, d_ptr: Any, dst: Any, src: Any) -> None:
-        """Try calling mj_solveM with different array shapes to satisfy binding."""
-        # Clean inputs
-        dst_clean = np.ascontiguousarray(dst, dtype=np.float64)
-        src_clean = np.ascontiguousarray(src, dtype=np.float64)
-
-        # Shapes to try: Flat, Column, Row
-        shapes_to_try = [
-            dst_clean.shape,  # (nv,)
-            (dst_clean.shape[0], 1),  # (nv, 1)
-            (1, dst_clean.shape[0]),  # (1, nv)
-        ]
-
-        last_err = None
-        success = False
-
-        for shape in shapes_to_try:
-            try:
-                # Reshape views (cheap)
-                d_view = dst_clean.reshape(shape)
-                s_view = src_clean.reshape(shape)
-
-                # Attempt call
-                mjlib.mj_solveM(m_ptr, d_ptr, d_view, s_view)
-
-                # If successful, copy result back to original destination
-                # (Handle flatten/shape mismatch by flat copy)
-                dst[:] = d_view.flatten()
-                success = True
-                break
-            except TypeError as e:
-                last_err = e
-            except Exception as e:
-                last_err = e  # type: ignore[assignment]
-
-        if not success and last_err is not None:
-            raise last_err
-
-    safe_solveM(model.ptr, data.ptr, acc_g, neg_g_force)
-    safe_solveM(model.ptr, data.ptr, acc_c, neg_c_force)
-    safe_solveM(model.ptr, data.ptr, acc_t, tau_control)
+    _solve_m(model, data, acc_g, neg_g_force, mjlib)
+    _solve_m(model, data, acc_c, neg_c_force, mjlib)
+    _solve_m(model, data, acc_t, tau_control, mjlib)
 
     # Restore State fully
     data.qpos[:] = qpos_backup
@@ -124,19 +87,111 @@ def compute_induced_accelerations(physics: Any) -> dict[str, Any]:
     data.qacc[:] = qacc_backup
     data.ctrl[:] = ctrl_backup
 
-    # Extract results for named joints
-    # Convert vectors to dictionary mapping joint_name -> (g, c, t, total)
-    # physics.named.data.qacc accesses by name, but we have raw arrays.
-    # We need to map joint name to DOFindices.
-
-    # Assuming standard joints (1 DOF).
-    # Multi-DOF joints (root) have multiple qacc indices.
-
-    # We'll just return the full arrays for the caller to parse,
-    # OR parse them here using physics.model names.
-
-    # Creating a dict of values for target joints only to save space
-    # The caller (run_simulation) has TARGET_POSE keys.
-    # We can access physics.model.jnt_dofadr to find address in qacc/qfrc.
-
     return {"gravity": acc_g, "coriolis": acc_c, "control": acc_t}
+
+
+def compute_counterfactuals(physics: Any) -> dict[str, Any]:
+    """Compute Zero-Torque (ZTCF) and Zero-Velocity (ZVCF) accelerations."""
+    results: dict[str, Any] = {}
+    try:
+        from dm_control.mujoco.wrapper.mjbindings import mjlib
+    except ImportError:
+        return results
+
+    model = physics.model
+    data = physics.data
+
+    # Backup State
+    qpos_backup = data.qpos.copy()
+    qvel_backup = data.qvel.copy()
+    qacc_backup = data.qacc.copy()
+    ctrl_backup = data.ctrl.copy()
+
+    # --- ZTCF: Zero Torque Counterfactual ---
+    # a_ztcf = M^-1 * (-C - G) = Drift
+    # This is effectively forward dynamics with ctrl=0.
+    data.ctrl[:] = 0
+    # We must call mj_forward to recompute everything (actuation=0, bias, etc)
+    mjlib.mj_forward(model.ptr, data.ptr)
+    ztcf_accel = data.qacc.copy()
+
+    # Restore for ZVCF
+    data.qpos[:] = qpos_backup
+    data.qvel[:] = qvel_backup
+    data.ctrl[:] = ctrl_backup
+
+    # --- ZVCF: Zero Velocity Counterfactual ---
+    # a_zvcf = M^-1 * (tau_v0 - G)
+    # Set v=0
+    data.qvel[:] = 0
+    # Keep control inputs same (u), but recompute forces (if velocity dependent)
+    mjlib.mj_forward(model.ptr, data.ptr)
+    zvcf_accel = data.qacc.copy()
+
+    # Restore State
+    data.qpos[:] = qpos_backup
+    data.qvel[:] = qvel_backup
+    data.qacc[:] = qacc_backup
+    data.ctrl[:] = ctrl_backup
+    # Re-run forward to ensure data structure is consistent with current state
+    # (Optional but good practice if caller expects consistency)
+    mjlib.mj_forward(model.ptr, data.ptr)
+
+    return {"ztcf": ztcf_accel, "zvcf": zvcf_accel}
+
+
+def get_mass_matrix(physics: Any) -> Any:
+    """Compute dense Mass Matrix M(q)."""
+    try:
+        from dm_control.mujoco.wrapper.mjbindings import mjlib
+    except ImportError:
+        return None
+
+    model = physics.model
+    data = physics.data
+    nv = model.ptr.nv
+    M = np.zeros((nv, nv), dtype=np.float64)
+
+    # Ensure qM is updated (mj_forward usually does this, but explicit call is safer)
+    # mj_fullM reads from data.qM
+    mjlib.mj_fullM(model.ptr, M, data.ptr.qM)
+    return M
+
+
+def _solve_m(model: Any, data: Any, dst: Any, src: Any, mjlib: Any) -> None:
+    """Helper to safely call mj_solveM with correct shapes."""
+    # Clean inputs
+    dst_clean = np.ascontiguousarray(dst, dtype=np.float64)
+    src_clean = np.ascontiguousarray(src, dtype=np.float64)
+
+    # Shapes to try: Flat, Column, Row
+    shapes_to_try = [
+        dst_clean.shape,  # (nv,)
+        (dst_clean.shape[0], 1),  # (nv, 1)
+        (1, dst_clean.shape[0]),  # (1, nv)
+    ]
+
+    last_err = None
+    success = False
+
+    for shape in shapes_to_try:
+        try:
+            # Reshape views (cheap)
+            d_view = dst_clean.reshape(shape)
+            s_view = src_clean.reshape(shape)
+
+            # Attempt call
+            mjlib.mj_solveM(model.ptr, data.ptr, d_view, s_view)
+
+            # If successful, copy result back to original destination
+            # (Handle flatten/shape mismatch by flat copy)
+            dst[:] = d_view.flatten()
+            success = True
+            break
+        except TypeError as e:
+            last_err = e
+        except Exception as e:
+            last_err = e  # type: ignore[assignment]
+
+    if not success and last_err is not None:
+        raise last_err

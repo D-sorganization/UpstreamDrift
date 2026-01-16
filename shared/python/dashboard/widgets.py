@@ -14,6 +14,7 @@ import numpy as np
 from matplotlib.axes import Axes
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+from shared.python.dashboard.advanced_analysis import AdvancedAnalysisDialog
 from shared.python.export import export_recording_all_formats
 from shared.python.interfaces import RecorderInterface
 from shared.python.plotting import MplCanvas
@@ -22,6 +23,10 @@ from shared.python.signal_processing import compute_psd
 LOGGER = logging.getLogger(__name__)
 
 MAX_DIMENSIONS = 100
+
+# Numerical constants for signal processing
+LOG_EPSILON = 1e-12  # Small epsilon to avoid log(0) in dB calculations
+DB_CONVERSION = 10  # Decibel conversion factor: dB = 10 * log10(power)
 
 
 class FrequencyAnalysisDialog(QtWidgets.QDialog):
@@ -69,9 +74,9 @@ class FrequencyAnalysisDialog(QtWidgets.QDialog):
         limit_dims = min(n_dims, 10)
 
         for i in range(limit_dims):
-            # Convert to dB
-            # Avoid log(0)
-            psd_db = 10 * np.log10(psd[i] + 1e-12)
+            # Convert to dB (using named constants for clarity)
+            # LOG_EPSILON avoids log(0), DB_CONVERSION = 10 for power to dB
+            psd_db = DB_CONVERSION * np.log10(psd[i] + LOG_EPSILON)
             label_str = f"Dim {i}" if n_dims > 1 else "PSD"
             self.ax.semilogx(freqs, psd_db, label=label_str)
 
@@ -252,6 +257,14 @@ class LivePlotWidget(QtWidgets.QWidget):
         self.btn_freq.setToolTip("Show Power Spectral Density (PSD) of current view")
         self.btn_freq.clicked.connect(self.show_freq_analysis)
         controls_layout.addWidget(self.btn_freq)
+
+        # Advanced Analysis Button
+        self.btn_advanced = QtWidgets.QPushButton("Advanced...")
+        self.btn_advanced.setToolTip(
+            "Show Advanced Analysis Tools (Spectrogram, Phase Plane, Coherence)"
+        )
+        self.btn_advanced.clicked.connect(self.show_advanced_analysis)
+        controls_layout.addWidget(self.btn_advanced)
 
         # Export Button
         self.btn_export = QtWidgets.QPushButton("Export Data")
@@ -689,6 +702,16 @@ class LivePlotWidget(QtWidgets.QWidget):
             fs = 100.0
 
         dlg = FrequencyAnalysisDialog(self, data, fs, self.current_label)
+        dlg.exec()
+
+    def show_advanced_analysis(self) -> None:
+        """Show Advanced Analysis Dialog."""
+        dlg = AdvancedAnalysisDialog(
+            self,
+            self.recorder,
+            current_key=self.current_key,
+            comparison_key=self.comparison_key,
+        )
         dlg.exec()
 
     def copy_snapshot(self) -> None:

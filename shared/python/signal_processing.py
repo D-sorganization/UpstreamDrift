@@ -19,6 +19,7 @@ from typing import cast
 import numpy as np
 from scipy import fft, signal
 from scipy.signal import (
+    coherence,
     correlate,
     correlation_lags,
     savgol_filter,
@@ -54,11 +55,15 @@ _LOGGER = logging.getLogger(__name__)
 # =============================================================================
 
 
-@jit(nopython=True, cache=True, fastmath=True)
+@jit(nopython=True, cache=True)
 def _dtw_core(series1: np.ndarray, series2: np.ndarray, window: int) -> float:
     """Numba-optimized DTW distance computation core.
 
     This inner kernel runs ~100x faster than pure Python due to JIT compilation.
+
+    Note: fastmath=True was intentionally removed as it can introduce numerical
+    instability in DTW distance calculations due to non-IEEE-compliant floating
+    point optimizations.
 
     Args:
         series1: First sequence (1D float64 array)
@@ -98,6 +103,97 @@ def _dtw_core(series1: np.ndarray, series2: np.ndarray, window: int) -> float:
     return float(np.sqrt(dtw_matrix[n, m]))
 
 
+@jit(nopython=True, cache=True)
+def _dtw_path_core(
+    series1: np.ndarray, series2: np.ndarray, window: int
+) -> tuple[float, np.ndarray, np.ndarray]:
+    """Numba-optimized DTW path computation core.
+
+    Note: fastmath=True was intentionally removed as it can introduce numerical
+    instability in DTW distance calculations due to non-IEEE-compliant floating
+    point optimizations.
+
+    Args:
+        series1: First sequence (1D float64 array)
+        series2: Second sequence (1D float64 array)
+        window: Sakoe-Chiba band width (-1 for none)
+
+    Returns:
+        tuple: (distance, path_i, path_j)
+        path_i, path_j are arrays of indices (reversed order)
+    """
+    n = len(series1)
+    m = len(series2)
+
+    # Use large float instead of inf for numba compatibility
+    INF = 1e30
+
+    # Allocate cost matrix
+    dtw_matrix = np.full((n + 1, m + 1), INF, dtype=np.float64)
+    dtw_matrix[0, 0] = 0.0
+
+    w = window if window >= 0 else max(n, m)
+
+    for i in range(1, n + 1):
+        j_start = max(1, i - w)
+        j_end = min(m + 1, i + w + 1)
+
+        for j in range(j_start, j_end):
+            cost = (series1[i - 1] - series2[j - 1]) ** 2
+
+            # Find minimum of previous cells
+            min_prev = dtw_matrix[i - 1, j]  # Insertion
+
+            val_del = dtw_matrix[i, j - 1]  # Deletion
+            if val_del < min_prev:
+                min_prev = val_del
+
+            val_match = dtw_matrix[i - 1, j - 1]  # Match
+            if val_match < min_prev:
+                min_prev = val_match
+
+            dtw_matrix[i, j] = cost + min_prev
+
+    distance = float(np.sqrt(dtw_matrix[n, m]))
+
+    # Backtrack
+    # Path length is at most max(n, m) + abs(n - m) = max(n, m) + |n - m|
+    # In practice, typical paths are closer to max(n, m) in length.
+    # We use max(n, m) as the initial allocation to reduce memory waste,
+    # since n + m over-allocates by approximately min(n, m) elements.
+    max_len = max(n, m)
+    path_i = np.empty(max_len, dtype=np.int32)
+    path_j = np.empty(max_len, dtype=np.int32)
+
+    idx = 0
+    i, j = n, m
+    while i > 0 and j > 0:
+        path_i[idx] = i - 1
+        path_j[idx] = j - 1
+        idx += 1
+
+        v_ins = dtw_matrix[i - 1, j]
+        v_del = dtw_matrix[i, j - 1]
+        v_match = dtw_matrix[i - 1, j - 1]
+
+        # Preference order for backtracking: Match, then Insertion, then Deletion
+        min_val = v_match
+        if v_ins < min_val:
+            min_val = v_ins
+        if v_del < min_val:
+            min_val = v_del
+
+        if min_val == v_match:
+            i -= 1
+            j -= 1
+        elif min_val == v_ins:
+            i -= 1
+        else:
+            j -= 1
+
+    return distance, path_i[:idx], path_j[:idx]
+
+
 def compute_psd(
     data: np.ndarray,
     fs: float,
@@ -117,6 +213,29 @@ def compute_psd(
     """
     freqs, psd = welch(data, fs=fs, window=window, nperseg=nperseg)
     return freqs, psd
+
+
+def compute_coherence(
+    x: np.ndarray,
+    y: np.ndarray,
+    fs: float,
+    window: str = "hann",
+    nperseg: int | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Compute Magnitude Squared Coherence.
+
+    Args:
+        x: First time series
+        y: Second time series
+        fs: Sampling frequency in Hz
+        window: Window function to use (default: 'hann')
+        nperseg: Length of each segment (default: None -> 256)
+
+    Returns:
+        tuple: (frequencies, coherence_values)
+    """
+    freqs, coh = coherence(x, y, fs=fs, window=window, nperseg=nperseg)
+    return freqs, coh
 
 
 def compute_spectrogram(
@@ -594,45 +713,23 @@ def compute_dtw_path(
     Returns:
         Tuple (distance, path). Path is list of (i, j) indices.
     """
-    n = len(series1)
-    m = len(series2)
-    dtw_matrix = np.full((n + 1, m + 1), np.inf)
-    dtw_matrix[0, 0] = 0.0
+    # Ensure inputs are float64 arrays for Numba
+    s1 = np.asarray(series1, dtype=np.float64)
+    s2 = np.asarray(series2, dtype=np.float64)
 
-    w = window if window is not None else max(n, m)
+    w_val = window if window is not None else -1
 
-    for i in range(1, n + 1):
-        j_start = max(1, i - w)
-        j_end = min(m + 1, i + w + 1)
-        for j in range(j_start, j_end):
-            cost = (series1[i - 1] - series2[j - 1]) ** 2
-            dtw_matrix[i, j] = cost + min(
-                dtw_matrix[i - 1, j],
-                dtw_matrix[i, j - 1],
-                dtw_matrix[i - 1, j - 1],
-            )
+    # Use Numba kernel (which works as pure python too via no-op jit)
+    dist, pi, pj = _dtw_path_core(s1, s2, w_val)
 
-    distance = float(np.sqrt(dtw_matrix[n, m]))
-
-    # Backtrack to find path
+    # Convert structure to list of tuples
+    # pi, pj are in reverse order from backtracking
     path = []
-    i, j = n, m
-    while i > 0 and j > 0:
-        path.append((i - 1, j - 1))
-        # Find predecessor
-        min_prev = min(
-            dtw_matrix[i - 1, j], dtw_matrix[i, j - 1], dtw_matrix[i - 1, j - 1]
-        )
-        if min_prev == dtw_matrix[i - 1, j - 1]:
-            i -= 1
-            j -= 1
-        elif min_prev == dtw_matrix[i - 1, j]:
-            i -= 1
-        else:
-            j -= 1
-    path.reverse()
+    # Loop backwards to reverse
+    for k in range(len(pi) - 1, -1, -1):
+        path.append((int(pi[k]), int(pj[k])))
 
-    return distance, path
+    return dist, path
 
 
 class KalmanFilter:
