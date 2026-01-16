@@ -129,7 +129,7 @@ class SpectrogramTab(QtWidgets.QWidget):
 
         # Estimate fs
         if len(times) > 1:
-            fs = 1.0 / np.mean(np.diff(times))
+            fs = float(1.0 / np.mean(np.diff(times)))
         else:
             fs = 100.0
 
@@ -337,7 +337,7 @@ class CoherenceTab(QtWidgets.QWidget):
         y = d2[:, dim_idx]
 
         if len(t1) > 1:
-            fs = 1.0 / np.mean(np.diff(t1))
+            fs = float(1.0 / np.mean(np.diff(t1)))
         else:
             fs = 100.0
 
