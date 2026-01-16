@@ -67,6 +67,35 @@ class BallProperties:
     cl1: float = 0.38  # Linear spin dependence
     cl2: float = 0.08  # Quadratic spin dependence
 
+    def calculate_drag_coefficient(
+        self, spin_ratio: float | np.ndarray
+    ) -> float | np.ndarray:
+        """Calculate drag coefficient based on spin ratio.
+
+        Args:
+            spin_ratio: Spin ratio (omega * r / v)
+
+        Returns:
+            Drag coefficient Cd
+        """
+        return self.cd0 + self.cd1 * spin_ratio + self.cd2 * spin_ratio**2
+
+    def calculate_lift_coefficient(
+        self, spin_ratio: float | np.ndarray
+    ) -> float | np.ndarray:
+        """Calculate lift coefficient based on spin ratio.
+
+        Args:
+            spin_ratio: Spin ratio (omega * r / v)
+
+        Returns:
+            Lift coefficient Cl (clamped to MAX_LIFT_COEFFICIENT)
+        """
+        cl = self.cl0 + self.cl1 * spin_ratio + self.cl2 * spin_ratio**2
+        if isinstance(cl, np.ndarray):
+            return np.minimum(MAX_LIFT_COEFFICIENT, cl)
+        return min(MAX_LIFT_COEFFICIENT, cl)
+
     @property
     def radius(self) -> float:
         """Ball radius in meters."""
@@ -235,6 +264,9 @@ class BallFlightSimulator:
                 spin_ratio = 0.0
 
             # Drag
+            # Note: We duplicate logic slightly here vs self.ball.calculate_drag_coefficient
+            # to keep this inner loop optimized (avoid method call overhead + closure access)
+            # However, the formula matches BallProperties.calculate_drag_coefficient
             cd = cd0 + spin_ratio * (cd1 + spin_ratio * cd2)
             drag_mag = const_term * cd * speed_sq
 
@@ -246,6 +278,7 @@ class BallFlightSimulator:
 
             # Lift (Magnus)
             if has_spin and spin_ratio > 0:
+                # Matches BallProperties.calculate_lift_coefficient
                 cl = cl0 + spin_ratio * (cl1 + spin_ratio * cl2)
                 if cl > MAX_LIFT_COEFFICIENT:
                     cl = MAX_LIFT_COEFFICIENT
@@ -400,11 +433,7 @@ class BallFlightSimulator:
                     spin_ratio = np.zeros_like(speed_masked)
 
                 # Drag
-                drag_coef = (
-                    self.ball.cd0
-                    + self.ball.cd1 * spin_ratio
-                    + self.ball.cd2 * spin_ratio**2
-                )
+                drag_coef = self.ball.calculate_drag_coefficient(spin_ratio)
                 drag_mag = (
                     0.5
                     * self.environment.air_density
@@ -416,12 +445,7 @@ class BallFlightSimulator:
 
                 # Magnus
                 if launch.spin_rate > 0:
-                    lift_coef = (
-                        self.ball.cl0
-                        + self.ball.cl1 * spin_ratio
-                        + self.ball.cl2 * spin_ratio**2
-                    )
-                    lift_coef = np.minimum(MAX_LIFT_COEFFICIENT, lift_coef)
+                    lift_coef = self.ball.calculate_lift_coefficient(spin_ratio)
 
                     magnus_mag = (
                         0.5
@@ -456,9 +480,7 @@ class BallFlightSimulator:
                 else:
                     s_ratio = 0.0
 
-                drag_coef_scalar = (
-                    self.ball.cd0 + self.ball.cd1 * s_ratio + self.ball.cd2 * s_ratio**2
-                )
+                drag_coef_scalar = self.ball.calculate_drag_coefficient(s_ratio)
                 drag_magnitude = (
                     0.5
                     * self.environment.air_density
@@ -469,12 +491,7 @@ class BallFlightSimulator:
                 drag_force = -drag_magnitude * velocity_unit
 
                 if s_ratio > 0:
-                    lift_coef_scalar = (
-                        self.ball.cl0
-                        + self.ball.cl1 * s_ratio
-                        + self.ball.cl2 * s_ratio**2
-                    )
-                    lift_coef_scalar = min(MAX_LIFT_COEFFICIENT, lift_coef_scalar)
+                    lift_coef_scalar = self.ball.calculate_lift_coefficient(s_ratio)
 
                     magnus_magnitude = (
                         0.5
