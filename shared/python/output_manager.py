@@ -216,7 +216,7 @@ class OutputManager:
                     elif isinstance(obj, datetime):
                         return obj.isoformat()
                     raise TypeError(
-                        f"Object of type {type(obj)} is not JSON serializable"
+                        f"Object of type {type(obj).__name__} is not JSON serializable"
                     )
 
                 output_data = {
@@ -492,7 +492,7 @@ class OutputManager:
                     elif isinstance(obj, datetime):
                         return obj.isoformat()
                     raise TypeError(
-                        f"Object of type {type(obj)} is not JSON serializable"
+                        f"Object of type {type(obj).__name__} is not JSON serializable"
                     )
 
                 with open(file_path, "w") as f:

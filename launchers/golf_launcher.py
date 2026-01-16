@@ -177,6 +177,11 @@ MODEL_IMAGES = {
 
 DOCKER_STAGES = ["all", "mujoco", "pinocchio", "drake", "base"]
 
+# UI feedback timing constants
+LAUNCH_FEEDBACK_DURATION_MS = (
+    2000  # Duration to show feedback messages (e.g., "Copied!")
+)
+
 
 @dataclass
 class SpecialApp:
@@ -1103,9 +1108,9 @@ class EnvironmentDialog(QDialog):
                     style.standardIcon(QStyle.StandardPixmap.SP_DialogApplyButton)
                 )
 
-            # Restore button after 2 seconds
+            # Restore button after feedback duration
             QTimer.singleShot(
-                2000,
+                LAUNCH_FEEDBACK_DURATION_MS,
                 lambda: self._restore_copy_button(original_text),
             )
 
@@ -2091,12 +2096,43 @@ class GolfLauncher(QMainWindow):
 
         # Show empty state if needed
         if visible_count == 0 and self.current_filter_text:
+            empty_widget = QWidget()
+            empty_layout = QVBoxLayout(empty_widget)
+            empty_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            empty_layout.setContentsMargins(0, 50, 0, 0)
+
             lbl_empty = QLabel(f"No models found matching '{self.current_filter_text}'")
-            lbl_empty.setStyleSheet(
-                "color: #888; font-style: italic; font-size: 16px; margin-top: 50px;"
-            )
+            lbl_empty.setStyleSheet("color: #888; font-style: italic; font-size: 16px;")
             lbl_empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            self.grid_layout.addWidget(lbl_empty, 0, 0, 1, GRID_COLUMNS)
+            empty_layout.addWidget(lbl_empty)
+
+            # Action button
+            btn_clear = QPushButton("Clear Search")
+            btn_clear.setObjectName("btnClearSearch")
+            btn_clear.setMinimumWidth(140)
+            btn_clear.setCursor(Qt.CursorShape.PointingHandCursor)
+            btn_clear.clicked.connect(self._clear_search)
+            btn_clear.setToolTip("Clear the search filter (Esc)")
+            btn_clear.setStyleSheet(
+                """
+                QPushButton {
+                    background-color: #333333;
+                    color: #eeeeee;
+                    border: 1px solid #555555;
+                    border-radius: 4px;
+                    padding: 8px 16px;
+                }
+                QPushButton:hover {
+                    background-color: #444444;
+                    border-color: #007acc;
+                }
+                """
+            )
+
+            empty_layout.addSpacing(15)
+            empty_layout.addWidget(btn_clear, 0, Qt.AlignmentFlag.AlignCenter)
+
+            self.grid_layout.addWidget(empty_widget, 0, 0, 1, GRID_COLUMNS)
 
     def create_model_card(self, model: Any) -> QFrame:
         """Creates a clickable card widget."""
@@ -2673,6 +2709,15 @@ class GolfLauncher(QMainWindow):
         launch_locally = is_local_fit
 
         try:
+            # Provide immediate visual feedback
+            self.btn_launch.setText("LAUNCHING... 🚀")
+            self.btn_launch.setEnabled(False)
+
+            # Restore button state after delay
+            QTimer.singleShot(
+                LAUNCH_FEEDBACK_DURATION_MS, lambda: self.update_launch_button()
+            )
+
             if launch_locally:
                 if model.type == "custom_humanoid":
                     self._custom_launch_humanoid(path)
