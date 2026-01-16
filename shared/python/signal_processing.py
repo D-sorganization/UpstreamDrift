@@ -19,6 +19,7 @@ from typing import cast
 import numpy as np
 from scipy import fft, signal
 from scipy.signal import (
+    coherence,
     correlate,
     correlation_lags,
     savgol_filter,
@@ -117,6 +118,29 @@ def compute_psd(
     """
     freqs, psd = welch(data, fs=fs, window=window, nperseg=nperseg)
     return freqs, psd
+
+
+def compute_coherence(
+    x: np.ndarray,
+    y: np.ndarray,
+    fs: float,
+    window: str = "hann",
+    nperseg: int | None = None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Compute Magnitude Squared Coherence.
+
+    Args:
+        x: First time series
+        y: Second time series
+        fs: Sampling frequency in Hz
+        window: Window function to use (default: 'hann')
+        nperseg: Length of each segment (default: None -> 256)
+
+    Returns:
+        tuple: (frequencies, coherence_values)
+    """
+    freqs, coh = coherence(x, y, fs=fs, window=window, nperseg=nperseg)
+    return freqs, coh
 
 
 def compute_spectrogram(
