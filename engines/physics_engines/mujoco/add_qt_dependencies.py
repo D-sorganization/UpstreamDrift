@@ -7,7 +7,7 @@ import sys
 import tempfile
 
 
-def create_qt_dockerfile():
+def create_qt_dockerfile() -> str:
     """Create Dockerfile to add Qt system dependencies."""
     dockerfile_content = """# Add Qt system dependencies to robotics_env
 FROM robotics_env:latest
@@ -40,7 +40,7 @@ RUN /opt/mujoco-env/bin/pip install "PyQt6>=6.6.0" "PyQt6-Qt6>=6.6.0"
     return dockerfile_content
 
 
-def update_robotics_env_qt():
+def update_robotics_env_qt() -> bool:
     """Update robotics_env with Qt dependencies."""
     print("🎨 Adding Qt dependencies to robotics_env...")
 
@@ -68,7 +68,7 @@ def update_robotics_env_qt():
             return False
 
 
-def test_qt_environment():
+def test_qt_environment() -> bool:
     """Test Qt functionality in the updated environment."""
     print("\n🧪 Testing Qt environment...")
 
@@ -123,7 +123,7 @@ def test_qt_environment():
         return False
 
 
-def main():
+def main() -> int:
     """Main function."""
     print("🤖 Qt Dependencies Installer for Robotics Environment")
     print("=" * 60)

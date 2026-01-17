@@ -183,6 +183,7 @@ ignore = [
 "check_system_health.py" = ["T201"]
 "show_physics_parameters.py" = ["T201"]
 "engines/Simscape_Multibody_Models/**/matlab/**/*.py" = ["T201"]
+"engines/physics_engines/mujoco/*.py" = ["T201"]
 "verification/*" = ["T201"]
 "shared/python/optimization/examples/*.py" = ["T201"]
 
@@ -201,13 +202,6 @@ exclude = [
     "engines/pendulum_models/Pendulum Models/Pendulums_Model/",
     "legacy",
     "archive",
-    "engines/physics_engines/mujoco/rebuild_docker.py",
-    "engines/physics_engines/mujoco/test_docker_venv.py",
-    "engines/physics_engines/mujoco/add_defusedxml_to_robotics_env.py",
-    "engines/physics_engines/mujoco/add_qt_dependencies.py",
-    "engines/physics_engines/mujoco/docker_test_dependencies.py",
-    "engines/physics_engines/mujoco/fix_linting.py",
-    "engines/physics_engines/mujoco/docker/",
     "shared/models/opensim/opensim-models/",
     "shared/models/myosuite/myo_sim/",
 ]
