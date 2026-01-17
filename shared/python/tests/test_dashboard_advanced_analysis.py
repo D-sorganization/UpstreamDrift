@@ -77,7 +77,7 @@ def test_advanced_analysis_dialog(recorder, qtbot):
     dlg = AdvancedAnalysisDialog(None, recorder)
     qtbot.addWidget(dlg)
 
-    assert dlg.tabs.count() == 3
+    assert dlg.tabs.count() == 6
     assert isinstance(dlg.tab_spectrogram, SpectrogramTab)
     assert isinstance(dlg.tab_phase, PhasePlaneTab)
     assert isinstance(dlg.tab_coherence, CoherenceTab)
