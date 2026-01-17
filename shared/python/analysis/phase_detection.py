@@ -1,9 +1,10 @@
 """Swing phase detection analysis module."""
 
+from typing import cast
+
 import numpy as np
 from scipy.signal import savgol_filter
 
-from typing import cast
 from shared.python.analysis.dataclasses import SummaryStatistics, SwingPhase
 
 
@@ -28,7 +29,7 @@ class PhaseDetectionMixin:
             t_start = float(times[0]) if times is not None and len(times) > 0 else 0.0
             t_end = float(times[-1]) if times is not None and len(times) > 0 else 0.0
             idx_end = len(times) - 1 if times is not None and len(times) > 0 else 0
-            
+
             return [
                 SwingPhase(
                     name="Complete Swing",
@@ -113,14 +114,14 @@ class PhaseDetectionMixin:
         ]
 
         if times is None:
-             # Should not happen if other logic holds, but safe fallback
-             times = np.zeros(0)
+            # Should not happen if other logic holds, but safe fallback
+            times = np.zeros(0)
 
         for name, start_idx_raw, end_idx_raw in phase_definitions:
             # Type cast to handle tuple unpacking
             start_idx_val = int(cast(int, start_idx_raw))
             end_idx_val = int(cast(int, end_idx_raw))
-            
+
             # Ensure indices are within bounds
             max_idx = len(times) - 1
             start_idx = int(max(0, min(start_idx_val, max_idx)))
@@ -133,7 +134,11 @@ class PhaseDetectionMixin:
                     end_time=float(times[end_idx]) if max_idx >= 0 else 0.0,
                     start_index=int(start_idx),
                     end_index=int(end_idx),
-                    duration=float(times[end_idx] - times[start_idx]) if max_idx >= 0 else 0.0,
+                    duration=(
+                        float(times[end_idx] - times[start_idx])
+                        if max_idx >= 0
+                        else 0.0
+                    ),
                 ),
             )
 

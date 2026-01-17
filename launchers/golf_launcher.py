@@ -428,8 +428,6 @@ class GolfSplashScreen(QSplashScreen):
         QApplication.processEvents()
 
 
-
-
 class AsyncStartupWorker(QThread):
     """Background worker for async application startup."""
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import numpy as np
 from scipy.signal import savgol_filter
+
 from shared.python.analysis.dataclasses import PeakInfo
 
 
@@ -22,8 +23,6 @@ class SwingMetricsMixin:
     joint_positions: np.ndarray
     club_head_speed: np.ndarray | None
     dt: float
-
-
 
     def compute_range_of_motion(self, joint_idx: int) -> tuple[float, float, float]:
         """Compute range of motion for a joint.
@@ -138,10 +137,9 @@ class SwingMetricsMixin:
 
         return x_factor_velocity, peak_stretch_rate
 
-
     def find_club_head_speed_peak(self) -> PeakInfo | None:
-         """Abstract method expected to be implemented by host or other mixin."""
-         pass
+        """Abstract method expected to be implemented by host or other mixin."""
+        pass
 
     def detect_impact_time(self) -> float | None:
         """Detect ball impact time.
