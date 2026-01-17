@@ -53,11 +53,10 @@ class TestMuJoCoSimWidget:
 
         widget = MuJoCoSimWidget(width=640, height=480, fps=30)
 
-        # Verify initialization parameters - check both actual size and minimum constraints
-        assert widget.width() == 640, f"Widget width should be 640, got {widget.width()}"
-        assert widget.minimumWidth() <= 640, "Minimum width should not exceed requested width"
-        assert widget.height() == 480, f"Widget height should be 480, got {widget.height()}"
-        assert widget.minimumHeight() <= 480, "Minimum height should not exceed requested height"
+        # Verify initialization parameters - check minimum size constraints
+        # Note: Qt widgets may not have exact size until shown; verify minimum constraints are set
+        assert widget.minimumWidth() == 640, f"Minimum width should be 640, got {widget.minimumWidth()}"
+        assert widget.minimumHeight() == 480, f"Minimum height should be 480, got {widget.minimumHeight()}"
         assert hasattr(widget, "model")
         assert hasattr(widget, "data")
 
@@ -118,13 +117,16 @@ class TestMuJoCoSimWidget:
             widget.data is not None
         ), "Model data should be loaded after load_model_from_xml"
 
-        # Capture initial state
+        # First call reset_state to get the widget's canonical initial state
+        # (reset_state sets qpos[0] = 0.2 for 1-DOF models)
+        widget.reset_state()
+        assert widget.data is not None, "Model data should exist after reset"
         initial_qpos = widget.data.qpos.copy()
 
-        # Modify state
+        # Modify state to something different
         widget.data.qpos[0] = 1.5  # Set joint angle to 1.5 rad
 
-        # Reset and verify
+        # Reset and verify it returns to the canonical initial state
         widget.reset_state()
         assert widget.data is not None, "Model data should exist after reset"
         np.testing.assert_array_almost_equal(
@@ -172,7 +174,7 @@ class TestMuJoCoSimWidget:
 
         widget.close()
 
-    def test_get_dof_info_returns_dict(self, qapp):
+    def test_get_dof_info_returns_list(self, qapp):
         """Test that get_dof_info returns meaningful DOF information."""
         from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.sim_widget import (
             MuJoCoSimWidget,
@@ -194,9 +196,13 @@ class TestMuJoCoSimWidget:
 
         dof_info = widget.get_dof_info()
 
-        # Verify DOF info structure - should be a dict mapping joint names to info
-        assert isinstance(dof_info, dict), "DOF info should be a dict"
+        # Verify DOF info structure - returns list of (name, (min, max), value) tuples
+        assert isinstance(dof_info, list), "DOF info should be a list"
         assert len(dof_info) >= 1, "Should have at least one DOF"
+        # Verify tuple structure for first DOF
+        first_dof = dof_info[0]
+        assert len(first_dof) == 3, "Each DOF should be (name, (min, max), value)"
+        assert isinstance(first_dof[0], str), "DOF name should be a string"
 
         widget.close()
 
