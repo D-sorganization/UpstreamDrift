@@ -3237,7 +3237,7 @@ def main() -> int:
             f"Docker: {startup_results.docker_available}"
         )
 
-    return app.exec()
+    return cast(int, app.exec())
 
 
 if __name__ == "__main__":
