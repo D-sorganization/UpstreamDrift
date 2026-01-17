@@ -55,8 +55,12 @@ class TestMuJoCoSimWidget:
 
         # Verify initialization parameters - check minimum size constraints
         # Note: Qt widgets may not have exact size until shown; verify minimum constraints are set
-        assert widget.minimumWidth() == 640, f"Minimum width should be 640, got {widget.minimumWidth()}"
-        assert widget.minimumHeight() == 480, f"Minimum height should be 480, got {widget.minimumHeight()}"
+        assert (
+            widget.minimumWidth() == 640
+        ), f"Minimum width should be 640, got {widget.minimumWidth()}"
+        assert (
+            widget.minimumHeight() == 480
+        ), f"Minimum height should be 480, got {widget.minimumHeight()}"
         assert hasattr(widget, "model")
         assert hasattr(widget, "data")
 
