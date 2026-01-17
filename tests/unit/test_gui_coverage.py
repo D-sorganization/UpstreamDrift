@@ -53,9 +53,11 @@ class TestMuJoCoSimWidget:
 
         widget = MuJoCoSimWidget(width=640, height=480, fps=30)
 
-        # Verify initialization parameters
-        assert widget.width() == 640 or widget.minimumWidth() <= 640
-        assert widget.height() == 480 or widget.minimumHeight() <= 480
+        # Verify initialization parameters - check both actual size and minimum constraints
+        assert widget.width() == 640, f"Widget width should be 640, got {widget.width()}"
+        assert widget.minimumWidth() <= 640, "Minimum width should not exceed requested width"
+        assert widget.height() == 480, f"Widget height should be 480, got {widget.height()}"
+        assert widget.minimumHeight() <= 480, "Minimum height should not exceed requested height"
         assert hasattr(widget, "model")
         assert hasattr(widget, "data")
 
@@ -152,14 +154,21 @@ class TestMuJoCoSimWidget:
         """
         widget.load_model_from_xml(model_xml)
 
-        # Test various camera views
+        # Test various camera views - track which succeed and fail
+        successful_views = []
+        failed_views = []
         for view in ["front", "side", "top", "perspective"]:
             try:
                 widget.set_camera(view)
-                # No exception means success
+                successful_views.append(view)
             except ValueError:
-                # Some views may not be implemented - that's acceptable
-                pass
+                # Some views may not be implemented - record these explicitly
+                failed_views.append(view)
+
+        assert successful_views, (
+            "At least one camera view should be set successfully; "
+            f"failed views: {failed_views}"
+        )
 
         widget.close()
 
@@ -185,10 +194,9 @@ class TestMuJoCoSimWidget:
 
         dof_info = widget.get_dof_info()
 
-        # Verify DOF info structure
-        assert isinstance(dof_info, (dict, list)), "DOF info should be dict or list"
-        if isinstance(dof_info, dict):
-            assert len(dof_info) >= 1, "Should have at least one DOF"
+        # Verify DOF info structure - should be a dict mapping joint names to info
+        assert isinstance(dof_info, dict), "DOF info should be a dict"
+        assert len(dof_info) >= 1, "Should have at least one DOF"
 
         widget.close()
 
@@ -225,14 +233,13 @@ class TestHumanoidLauncher:
 
         launcher = HumanoidLauncher()
 
-        # Check for typical launcher attributes
-        # These are informational - we don't fail if they're missing
+        # Check for typical launcher attributes - all should be present for a proper Qt app
         expected_attrs = ["centralWidget", "menuBar", "statusBar"]
-        found_attrs = [attr for attr in expected_attrs if hasattr(launcher, attr)]
+        missing_attrs = [attr for attr in expected_attrs if not hasattr(launcher, attr)]
 
         assert (
-            len(found_attrs) > 0
-        ), "Launcher should have at least one standard widget attribute"
+            not missing_attrs
+        ), f"Launcher is missing expected widget attributes: {missing_attrs}"
 
         launcher.close()
 
