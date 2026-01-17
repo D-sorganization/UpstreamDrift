@@ -22,6 +22,30 @@ models:
 
   - id: "urdf_generator"
     name: "URDF Generator"
-    description: "Create custom robot models."
+    description: "Interactive URDF model builder"
     type: "special_app"
-    path: "tools/urdf_generator/main_window.py"
+    path: "tools/urdf_generator/launch_urdf_generator.py"
+
+  - id: "c3d_viewer"
+    name: "C3D Motion Viewer"
+    description: "C3D motion capture file viewer and analyzer"
+    type: "special_app"
+    path: "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
+
+  - id: "matlab_dataset_gui"
+    name: "Dataset Generator GUI"
+    description: "MATLAB forward dynamics dataset generator"
+    type: "special_app"
+    path: "engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/Dataset_GUI.m"
+
+  - id: "matlab_golf_gui"
+    name: "Golf Swing Analysis GUI"
+    description: "MATLAB plotting suite with skeleton visualization"
+    type: "special_app"
+    path: "engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/main_scripts/golf_swing_analysis_gui.m"
+
+  - id: "matlab_code_analyzer"
+    name: "MATLAB Code Analyzer"
+    description: "Static analysis and code quality dashboard"
+    type: "special_app"
+    path: "engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/code_analysis_gui/launchCodeAnalyzer.m"

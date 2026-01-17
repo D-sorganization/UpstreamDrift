@@ -17,7 +17,6 @@ import sys
 import threading
 import time
 import webbrowser
-from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
 
@@ -67,7 +66,6 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from launchers.model_registry import get_model_registry
 from shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
@@ -184,63 +182,8 @@ LAUNCH_FEEDBACK_DURATION_MS = (
 )
 
 
-@dataclass
-class SpecialApp:
-    id: str
-    name: str
-    description: str
-    type: str
-    path: str
-
-
-SPECIAL_APPS = [
-    SpecialApp(
-        id="urdf_generator",
-        name="URDF Generator",
-        description="Interactive URDF model builder",
-        type="utility",
-        path="tools/urdf_generator/launch_urdf_generator.py",
-    ),
-    SpecialApp(
-        id="c3d_viewer",
-        name="C3D Motion Viewer",
-        description="C3D motion capture file viewer and analyzer",
-        type="utility",
-        path=(
-            "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
-        ),
-    ),
-    SpecialApp(
-        id="matlab_dataset_gui",
-        name="Dataset Generator GUI",
-        description="MATLAB forward dynamics dataset generator",
-        type="matlab_app",
-        path=(
-            "engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/"
-            "dataset_generator/Dataset_GUI.m"
-        ),
-    ),
-    SpecialApp(
-        id="matlab_golf_gui",
-        name="Golf Swing Analysis GUI",
-        description="MATLAB plotting suite with skeleton visualization",
-        type="matlab_app",
-        path=(
-            "engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/"
-            "golf_gui/2D GUI/main_scripts/golf_swing_analysis_gui.m"
-        ),
-    ),
-    SpecialApp(
-        id="matlab_code_analyzer",
-        name="MATLAB Code Analyzer",
-        description="Static analysis and code quality dashboard",
-        type="matlab_app",
-        path=(
-            "engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/"
-            "code_analysis_gui/launchCodeAnalyzer.m"
-        ),
-    ),
-]
+# SpecialApp class and SPECIAL_APPS list removed in Phase 3.3.
+# All models and apps are now loaded via ModelRegistry from config/models.yaml.
 
 
 class GolfSplashScreen(QSplashScreen):
@@ -477,7 +420,8 @@ class AsyncStartupWorker(QThread):
 
     def _load_registry(self) -> None:
         """Load the model registry."""
-        registry = get_model_registry()
+        ModelRegistry = _lazy_load_model_registry()
+        registry = ModelRegistry()
         registry.load(self.repos_root)
         self.results.registry = registry
 
@@ -485,8 +429,8 @@ class AsyncStartupWorker(QThread):
         """Probe available physics engines."""
         EngineManager, _ = _lazy_load_engine_manager()
         self.results.engine_manager = EngineManager(self.repos_root)
-        # In a real impl, we would probe here.
-        pass
+        # Probe all engines to cache their status
+        self.results.engine_manager.probe_all_engines()
 
     def _check_docker(self) -> bool:
         """Check if Docker is available."""
@@ -1341,7 +1285,7 @@ class GolfLauncher(QMainWindow):
             {}
         )  # Track running instances
         self.available_models: dict[str, Any] = {}
-        self.special_app_lookup: dict[str, SpecialApp] = {}
+        self.special_app_lookup: dict[str, Any] = {}
         self.current_filter_text = ""
 
         # Use pre-loaded registry from startup results, or load fresh
@@ -1478,10 +1422,8 @@ class GolfLauncher(QMainWindow):
         if self.registry:
             for model in self.registry.get_all_models():
                 self.available_models[model.id] = model
-
-        for app in SPECIAL_APPS:
-            self.available_models[app.id] = app
-            self.special_app_lookup[app.id] = app
+                if model.type in ("special_app", "utility", "matlab_app"):
+                    self.special_app_lookup[model.id] = model
 
     def _initialize_model_order(self) -> None:
         """Set a sensible default grid ordering."""
@@ -2200,11 +2142,13 @@ class GolfLauncher(QMainWindow):
             import sys
             from pathlib import Path
 
-            # Path to URDF generator
+            # Path to URDF generator from registry
+            app_spec = self._get_model("urdf_generator")
+            if not app_spec:
+                raise ValueError("URDF Generator application not found in registry")
+
             suite_root = Path(__file__).parent.parent.resolve()
-            urdf_script = (
-                suite_root / "tools" / "urdf_generator" / "launch_urdf_generator.py"
-            ).resolve()
+            urdf_script = (suite_root / app_spec.path).resolve()
 
             # Security Check: Prevent path traversal
             if not urdf_script.is_relative_to(suite_root):
@@ -2266,18 +2210,13 @@ class GolfLauncher(QMainWindow):
             import sys
             from pathlib import Path
 
-            # Path to C3D viewer
+            # Path to C3D viewer from registry
+            app_spec = self._get_model("c3d_viewer")
+            if not app_spec:
+                raise ValueError("C3D Viewer application not found in registry")
+
             suite_root = Path(__file__).parent.parent.resolve()
-            c3d_script = (
-                suite_root
-                / "engines"
-                / "Simscape_Multibody_Models"
-                / "3D_Golf_Model"
-                / "python"
-                / "src"
-                / "apps"
-                / "c3d_viewer.py"
-            ).resolve()
+            c3d_script = (suite_root / app_spec.path).resolve()
 
             # Security Check: Prevent path traversal
             if not c3d_script.is_relative_to(suite_root):
@@ -2333,7 +2272,7 @@ class GolfLauncher(QMainWindow):
                 self, "Launch Error", f"Failed to launch C3D Viewer:\n{e}"
             )
 
-    def _launch_matlab_app(self, app: SpecialApp) -> None:
+    def _launch_matlab_app(self, app: Any) -> None:
         """Launch a MATLAB-based application using batch mode."""
 
         app_id = getattr(app, "id", "matlab_app")

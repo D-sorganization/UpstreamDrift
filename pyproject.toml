@@ -54,6 +54,9 @@ dependencies = [
     "marshmallow>=3.26.2,<4.0.0",
     # cryptography for JWT signatures (updated for CVE-2024-26130)
     "cryptography>=44.0.1,<47.0.0",
+    # Dependencies from consolidated requirements.txt files
+    "dm_control>=1.0.14",
+    "lxml>=4.6.0",
 ]
 
 [project.optional-dependencies]
@@ -64,6 +67,7 @@ dev = [
     "pytest-qt>=4.2.0",
     "pytest-benchmark>=4.0.0",
     "pytest-timeout>=2.3.0",  # Required for --timeout option
+    "pytest-asyncio>=0.23.0", # Added from root requirements.txt
     "httpx>=0.25.0",  # Required for FastAPI TestClient
     "pip-audit>=2.7.0",
     "ruff==0.14.10",
@@ -223,6 +227,7 @@ addopts = [
     "--strict-config",
     "--cov=shared",
     "--cov=launchers",
+    "--cov=engines", # Added for broader coverage
     "--cov-report=term-missing",
     "--cov-report=xml",
     "--cov-report=html",
@@ -265,7 +270,7 @@ markers = [
 # Coverage focused on shared components and launchers
 # Engine implementations have their own test suites in engines/*/tests
 # We focus on testing actual behavior, not achieving arbitrary coverage %
-source = ["shared", "launchers"]
+source = ["shared", "launchers", "engines"]
 omit = [
     "*/tests/*",
     "*/test_*",
