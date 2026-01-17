@@ -7,7 +7,7 @@ import sys
 import tempfile
 
 
-def create_minimal_dockerfile():
+def create_minimal_dockerfile() -> str:
     """Create a minimal Dockerfile to add defusedxml to robotics_env."""
     dockerfile_content = """# Add defusedxml to existing robotics_env
 FROM robotics_env:latest
@@ -22,7 +22,7 @@ ENV VIRTUAL_ENV="/opt/mujoco-env"
     return dockerfile_content
 
 
-def update_robotics_env():
+def update_robotics_env() -> bool:
     """Update the robotics_env image with defusedxml."""
     print("🔧 Adding defusedxml to existing robotics_env Docker image...")
 
@@ -56,7 +56,7 @@ def update_robotics_env():
             return False
 
 
-def test_updated_environment():
+def test_updated_environment() -> bool:
     """Test that defusedxml is now available in the updated environment."""
     print("\n🧪 Testing updated robotics_env...")
 
@@ -135,7 +135,7 @@ def test_updated_environment():
         return False
 
 
-def main():
+def main() -> int:
     """Main function."""
     print("🤖 Robotics Environment Updater")
     print("=" * 50)
