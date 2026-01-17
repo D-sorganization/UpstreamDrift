@@ -40,6 +40,7 @@ except ImportError:
         """No-op decorator when numba is not installed."""
 
         def decorator(func: object) -> object:  # type: ignore[misc]
+            """Return the function unchanged."""
             return func
 
         if len(args) == 1 and callable(args[0]):
@@ -210,6 +211,8 @@ def compute_psd(
     Returns:
         tuple: (frequencies, psd_values)
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
     freqs, psd = welch(data, fs=fs, window=window, nperseg=nperseg)
     return freqs, psd
 
@@ -233,6 +236,8 @@ def compute_coherence(
     Returns:
         tuple: (frequencies, coherence_values)
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
     freqs, coh = coherence(x, y, fs=fs, window=window, nperseg=nperseg)
     return freqs, coh
 
@@ -256,6 +261,8 @@ def compute_spectrogram(
     Returns:
         tuple: (frequencies, times, Sxx)
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
     f, t, Sxx = spectrogram(
         data,
         fs=fs,
@@ -288,6 +295,9 @@ def compute_spectral_arc_length(
     Returns:
         float: SAL value (negative dimensionless metric)
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
+
     # Number of points
     n = len(data)
     if n == 0:
@@ -421,9 +431,15 @@ def compute_cwt(
         times: Array of time points
         cwt_matrix: Complex CWT coefficients (freqs x time)
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
+
     # Create frequency vector (log space usually better for wavelets, but linspace ok)
     # Using logspace for better multiscale analysis
     min_freq, max_freq = freq_range
+    if min_freq <= 0:
+        raise ValueError(f"Minimum frequency must be positive, got {min_freq}")
+
     freqs = np.geomspace(min_freq, max_freq, num=num_freqs)
 
     # Convert frequencies to scales
@@ -562,6 +578,9 @@ def compute_jerk(
     Returns:
         Jerk time series (same length as input)
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
+
     if len(data) < window_len:
         # Fallback to simple finite difference if too short
         dt = 1.0 / fs
@@ -600,6 +619,9 @@ def compute_time_shift(
     Returns:
         Time shift in seconds.
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
+
     if len(x) != len(y):
         # Truncate to min length
         n = min(len(x), len(y))

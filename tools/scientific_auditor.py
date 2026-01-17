@@ -7,6 +7,9 @@ RISKS = []
 
 
 class ScienceAuditor(ast.NodeVisitor):
+    def __init__(self, filename: str) -> None:
+        self.filename = filename
+
     def visit_BinOp(self, node: ast.BinOp) -> None:  # noqa: N802
         # 1. Division Safety
         # Use simple nested if to avoid complex boolean expression lint struggles or
@@ -16,6 +19,7 @@ class ScienceAuditor(ast.NodeVisitor):
         ):
             RISKS.append(
                 {
+                    "file": self.filename,
                     "line": node.lineno,
                     "type": "Singularity Risk",
                     "msg": "Division by variable detected. Check denominator.",
@@ -37,6 +41,7 @@ class ScienceAuditor(ast.NodeVisitor):
             ):
                 RISKS.append(
                     {
+                        "file": self.filename,
                         "line": node.lineno,
                         "type": "Unit Ambiguity",
                         "msg": (
@@ -59,7 +64,7 @@ def main() -> None:
 
         try:
             with py_file.open(encoding="utf-8") as source:
-                ScienceAuditor().visit(ast.parse(source.read()))
+                ScienceAuditor(str(py_file)).visit(ast.parse(source.read()))
         except Exception as e:  # noqa: BLE001
             # Log error but continue scanning
             # We catch generic Exception because ast.parse can raise
