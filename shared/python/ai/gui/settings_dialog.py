@@ -35,6 +35,7 @@ from PyQt6.QtWidgets import (
 )
 
 if TYPE_CHECKING:
+    # Import removed to avoid circular dependency
     pass
 
 logger = logging.getLogger(__name__)
