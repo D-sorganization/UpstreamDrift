@@ -200,6 +200,7 @@ exclude = [
     "engines/matlab_simscape/",
     "engines/Simscape_Multibody_Models/",
     "engines/pendulum_models/Pendulum Models/Pendulums_Model/",
+    "engines/physics_engines/mujoco/docker/",
     "legacy",
     "archive",
     "shared/models/opensim/opensim-models/",
