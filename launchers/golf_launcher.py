@@ -433,6 +433,7 @@ class AsyncStartupWorker(QThread):
 
     progress_signal = pyqtSignal(str, int)  # Message, Progress %
     finished_signal = pyqtSignal(object)  # StartupResults
+    error_signal = pyqtSignal(str)  # Error message
 
     def __init__(self, repos_root: Path):
         super().__init__()
@@ -470,6 +471,7 @@ class AsyncStartupWorker(QThread):
 
         except Exception as e:
             logger.error(f"Startup failed: {e}", exc_info=True)
+            self.error_signal.emit(str(e))
             # Emit partial results even on failure
             self.finished_signal.emit(self.results)
 
@@ -3140,10 +3142,10 @@ def main() -> int:
         """Handle progress updates from startup worker."""
         splash.show_message(message, progress)
 
-    def on_finished(results: dict) -> None:
+    def on_finished(results: StartupResults) -> None:
         """Handle startup completion."""
         nonlocal startup_results
-        startup_results = StartupResults.from_dict(results)
+        startup_results = results
 
     def on_error(error: str) -> None:
         """Handle startup error."""
@@ -3153,9 +3155,9 @@ def main() -> int:
 
     # Start async startup worker
     worker = AsyncStartupWorker(REPOS_ROOT)
-    worker.progress.connect(on_progress)
-    worker.finished.connect(on_finished)
-    worker.error.connect(on_error)
+    worker.progress_signal.connect(on_progress)
+    worker.finished_signal.connect(on_finished)
+    worker.error_signal.connect(on_error)
     worker.start()
 
     # Process events while waiting for worker to complete
