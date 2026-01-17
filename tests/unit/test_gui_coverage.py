@@ -111,6 +111,11 @@ class TestMuJoCoSimWidget:
         """
         widget.load_model_from_xml(model_xml)
 
+        # Verify model and data are loaded
+        assert (
+            widget.data is not None
+        ), "Model data should be loaded after load_model_from_xml"
+
         # Capture initial state
         initial_qpos = widget.data.qpos.copy()
 
@@ -119,6 +124,7 @@ class TestMuJoCoSimWidget:
 
         # Reset and verify
         widget.reset_state()
+        assert widget.data is not None, "Model data should exist after reset"
         np.testing.assert_array_almost_equal(
             widget.data.qpos,
             initial_qpos,
