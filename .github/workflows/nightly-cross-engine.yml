@@ -18,7 +18,7 @@ on:
   schedule:
     # Run at 2 AM UTC daily
     - cron: '0 2 * * *'
-  
+
   workflow_dispatch:  # Allow manual trigger
     inputs:
       engines:
@@ -30,31 +30,31 @@ jobs:
   cross-engine-validation:
     runs-on: ubuntu-latest
     timeout-minutes: 60
-    
+
     strategy:
       fail-fast: false
       matrix:
         python-version: ['3.11']
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e .[dev]
-          
+
           # Install physics engines
           pip install mujoco>=3.3.0
           pip install drake
           pip install pin  # Pinocchio
-      
+
       - name: Run cross-engine validation tests
         id: validation
         run: |
@@ -65,27 +65,27 @@ jobs:
             --cov=shared/python/cross_engine_validator \
             --cov-report=xml:coverage/cross-engine-coverage.xml
         continue-on-error: true
-      
+
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cross-engine-test-results
           path: test-results/
-      
+
       - name: Upload coverage
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cross-engine-coverage
           path: coverage/
-      
+
       - name: Check for WARNING-level deviations
         id: check_warnings
         run: |
           # Parse test output for WARNING threshold exceedances (2× tolerance)
           # Flag if any validation exceeds WARNING but not ERROR
-          
+
           if grep -q "WARNING.*deviation" test-results/cross-engine-junit.xml; then
             echo "has_warnings=true" >> $GITHUB_OUTPUT
             echo "⚠️ Cross-engine deviations detected (WARNING level)" >> $GITHUB_STEP_SUMMARY
@@ -93,7 +93,7 @@ jobs:
             echo "has_warnings=false" >> $GITHUB_OUTPUT
             echo "✅ All cross-engine validations within tolerance" >> $GITHUB_STEP_SUMMARY
           fi
-      
+
       - name: Check for ERROR-level deviations
         id: check_errors
         run: |
@@ -105,24 +105,24 @@ jobs:
           else
             echo "has_errors=false" >> $GITHUB_OUTPUT
           fi
-      
+
       - name: Generate deviation summary
         if: always()
         run: |
           python -c "
           import xml.etree.ElementTree as ET
           import sys
-          
+
           # Parse JUnit XML for deviation metrics
           tree = ET.parse('test-results/cross-engine-junit.xml')
           root = tree.getroot()
-          
+
           print('## Cross-Engine Validation Summary')
           print(f'- **Tests run**: {root.attrib[\"tests\"]}')
           print(f'- **Failures**: {root.attrib[\"failures\"]}')
           print(f'- **Errors**: {root.attrib[\"errors\"]}')
           print(f'- **Skipped**: {root.attrib[\"skipped\"]}')
-          
+
           # Extract max deviation from test outputs
           for testcase in root.findall('.//testcase'):
             if 'deviation' in testcase.attrib.get('name', ''):
@@ -134,7 +134,7 @@ jobs:
               else:
                 print('  - Status: ✅ PASSED')
           " >> $GITHUB_STEP_SUMMARY
-      
+
       - name: Send notification on ERROR
         if: steps.check_errors.outputs.has_errors == 'true'
         uses: actions/github-script@v7
@@ -145,27 +145,27 @@ jobs:
               repo: context.repo.repo,
               title: '🚨 Nightly Cross-Engine Validation FAILED',
               body: `## Critical Cross-Engine Deviation Detected
-              
+
               The nightly cross-engine validation has detected deviations exceeding the ERROR threshold (10× tolerance).
-              
+
               **Action Required:**
               1. Review test results in [workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
               2. Investigate which engines diverged
               3. Check for recent engine updates or integration changes
               4. Run local validation: \`pytest tests/integration/test_cross_engine_validation.py -v\`
-              
+
               **Possible Causes:**
               - Engine library version upgrade
               - Integration timestep changes
               - Model definition drift
               - Constraint handling differences
-              
+
               This issue will auto-close if next nightly run passes.
-              
+
               Guideline P3 Compliance: **VIOLATION**`,
               labels: ['bug', 'cross-engine', 'ci-failure', 'priority-high']
             })
-      
+
       - name: Send notification on WARNING
         if: steps.check_warnings.outputs.has_warnings == 'true' && steps.check_errors.outputs.has_errors == 'false'
         uses: actions/github-script@v7
@@ -177,18 +177,18 @@ jobs:
               repo: context.repo.repo,
               title: '⚠️ Cross-Engine Validation - WARNING Level Deviations',
               body: `## Cross-Engine Deviations Detected (Acceptable but Monitor)
-              
+
               The nightly validation detected deviations between 2-10× tolerance (WARNING level).
-              
+
               **Status:** Acceptable but should be monitored for trends.
-              
+
               **Review:**
               - [Workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
               - Check if deviation is increasing over time
               - Document expected deviation sources
-              
+
               This is informational - no immediate action required unless trend continues.
-              
+
               Guideline P3 Compliance: **ACCEPTABLE WITH CAUTION**`,
               labels: ['monitoring', 'cross-engine', 'low-priority']
             })
@@ -197,14 +197,14 @@ jobs:
     needs: cross-engine-validation
     if: always()
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Download test results
         uses: actions/download-artifact@v4
         with:
           name: cross-engine-test-results
           path: test-results/
-      
+
       - name: Generate validation dashboard
         run: |
           # TODO: Generate HTML dashboard showing:
@@ -212,6 +212,6 @@ jobs:
           # - Per-engine comparison matrix
           # - Worst-case deviations by metric type
           # - Pass/fail rate over time
-          
+
           echo "Dashboard generation placeholder"
           # Future: Upload to GitHub Pages or artifact storage

@@ -12,6 +12,8 @@ from typing import TYPE_CHECKING, Any, Protocol
 import numpy as np
 from scipy import interpolate
 
+from shared.python import signal_processing
+
 if TYPE_CHECKING:
     pass  # pragma: no cover
 
@@ -273,11 +275,11 @@ class ComparativeSwingAnalyzer:
             Tuple of (distance, path). Path is list of (i, j) indices.
         """
         # Get data
-        _, data_a = self.recorder_a.get_time_series(field_name)
-        _, data_b = self.recorder_b.get_time_series(field_name)
+        _, data_a_raw = self.recorder_a.get_time_series(field_name)
+        _, data_b_raw = self.recorder_b.get_time_series(field_name)
 
-        data_a = np.asarray(data_a)
-        data_b = np.asarray(data_b)
+        data_a: np.ndarray = np.asarray(data_a_raw)
+        data_b: np.ndarray = np.asarray(data_b_raw)
 
         # Handle dimensions
         if joint_idx is not None:
@@ -295,58 +297,8 @@ class ComparativeSwingAnalyzer:
         if np.std(data_b) > 1e-6:
             data_b = (data_b - np.mean(data_b)) / np.std(data_b)
 
-        # Implementation of DTW with Sakoe-Chiba band
-        N, M = len(data_a), len(data_b)
-        cost_matrix = np.full((N, M), np.inf)
-
-        cost_matrix[0, 0] = abs(data_a[0] - data_b[0])
-
-        for i in range(N):
-            start = max(0, i - radius)
-            end = min(M, i + radius + 1)
-            for j in range(start, end):
-                if i == 0 and j == 0:
-                    continue
-
-                cost = abs(data_a[i] - data_b[j])
-
-                # Direct min computation without list allocation (40-50% faster)
-                min_cost = np.inf
-                if i > 0:
-                    min_cost = min(min_cost, cost_matrix[i - 1, j])  # Insertion
-                if j > 0:
-                    min_cost = min(min_cost, cost_matrix[i, j - 1])  # Deletion
-                if i > 0 and j > 0:
-                    min_cost = min(min_cost, cost_matrix[i - 1, j - 1])  # Match
-
-                if min_cost != np.inf:
-                    cost_matrix[i, j] = cost + min_cost
-
-        distance = float(cost_matrix[N - 1, M - 1])
-
-        # Backtrack to find path
-        path = []
-        i, j = N - 1, M - 1
-        path.append((i, j))
-        while i > 0 or j > 0:
-            # Direct min comparison without list allocation
-            min_cost = np.inf
-            next_i, next_j = i, j
-
-            if i > 0 and cost_matrix[i - 1, j] < min_cost:
-                min_cost = cost_matrix[i - 1, j]
-                next_i, next_j = i - 1, j
-
-            if j > 0 and cost_matrix[i, j - 1] < min_cost:
-                min_cost = cost_matrix[i, j - 1]
-                next_i, next_j = i, j - 1
-
-            if i > 0 and j > 0 and cost_matrix[i - 1, j - 1] < min_cost:
-                min_cost = cost_matrix[i - 1, j - 1]
-                next_i, next_j = i - 1, j - 1
-
-            i, j = next_i, next_j
-            path.append((i, j))
-
-        path.reverse()
-        return distance, path
+        # Implementation via centralized signal processing module
+        # Note: This uses Squared Euclidean distance (L2) whereas the previous
+        # implementation used Absolute Difference (L1). L2 is standard for DTW.
+        # This implementation is also potentially Numba-accelerated.
+        return signal_processing.compute_dtw_path(data_a, data_b, window=radius)

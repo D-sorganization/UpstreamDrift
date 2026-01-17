@@ -83,7 +83,14 @@ def is_legitimate_pass_context(lines: list[str], line_num: int) -> bool:
             return False
         if prev_line.endswith(":") and any(
             keyword in prev_line
-            for keyword in ["try:", "except", "finally:", "with ", "if __name__"]
+            for keyword in [
+                "try:",
+                "except",
+                "finally:",
+                "with ",
+                "if __name__",
+                "if TYPE_CHECKING",
+            ]
         ):
             return True
 

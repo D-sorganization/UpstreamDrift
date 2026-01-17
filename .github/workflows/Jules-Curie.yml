@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Find Large Files (>10MB)
         id: large_files
         run: |
           find . -type f -size +10M -not -path "./.git/*" > large_files.txt
-          
+
       - name: Curie Journal Entry
         run: |
           echo "## $(date +'%Y-%m-%d') - Monthly Hygiene Check" >> .jules/curie.md
