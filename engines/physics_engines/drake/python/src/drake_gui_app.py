@@ -1176,8 +1176,23 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
                     club_pos = X_WB.translation()
 
                 # Live Analysis if enabled OR if LivePlotWidget requested it via config
-                # The GUI checkbox logic is:
-                analysis_enabled = self.chk_live_analysis.isChecked()
+                config_requests_analysis = False
+                if hasattr(self.recorder, "analysis_config") and isinstance(
+                    self.recorder.analysis_config, dict
+                ):
+                    cfg = self.recorder.analysis_config
+                    if (
+                        cfg.get("ztcf")
+                        or cfg.get("zvcf")
+                        or cfg.get("track_drift")
+                        or cfg.get("track_total_control")
+                        or cfg.get("induced_accel_sources")
+                    ):
+                        config_requests_analysis = True
+
+                analysis_enabled = (
+                    self.chk_live_analysis.isChecked() or config_requests_analysis
+                )
 
                 if analysis_enabled and self.eval_context:
                     # Update eval context
