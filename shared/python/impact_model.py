@@ -113,6 +113,8 @@ class ImpactParameters:
     contact_damping: float = 1e3  # [N·s/m]
     friction_coefficient: float = 0.4
     gear_effect_factor: float = 0.5
+    gear_effect_h_scale: float = 100.0
+    gear_effect_v_scale: float = 50.0
 
 
 class ImpactModel(ABC):
@@ -401,6 +403,8 @@ def compute_gear_effect_spin(
     clubhead_velocity: np.ndarray,
     clubface_normal: np.ndarray,
     gear_factor: float = 0.5,
+    h_scale: float = 100.0,
+    v_scale: float = 50.0,
 ) -> np.ndarray:
     """Compute spin from gear effect for off-center impact.
 
@@ -413,6 +417,8 @@ def compute_gear_effect_spin(
         clubhead_velocity: Clubhead velocity at impact [m/s] (3,)
         clubface_normal: Clubface normal vector [unitless] (3,)
         gear_factor: Gear effect amplification (0-1)
+        h_scale: Scaling factor for horizontal offset
+        v_scale: Scaling factor for vertical offset
 
     Returns:
         Additional spin from gear effect [rad/s] (3,)
@@ -427,8 +433,8 @@ def compute_gear_effect_spin(
 
     # Gear effect spin rate (empirical relationship)
     # Higher offset = more spin, proportional to speed
-    horizontal_spin = -gear_factor * h_offset * speed * 100  # [rad/s]
-    vertical_spin = gear_factor * v_offset * speed * 50  # [rad/s]
+    horizontal_spin = -gear_factor * h_offset * speed * h_scale  # [rad/s]
+    vertical_spin = gear_factor * v_offset * speed * v_scale  # [rad/s]
 
     # Convert to 3D spin vector
     # Assuming clubface normal is approximately in X direction

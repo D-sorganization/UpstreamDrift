@@ -34,7 +34,7 @@ class KinematicSequenceResult:
     peaks: list[SegmentPeak]
     sequence_order: list[str]  # Names in order of peak time
     expected_order: list[str] | None
-    efficiency_score: float  # 0.0 to 1.0
+    sequence_consistency: float  # 0.0 to 1.0 (adherence to expected order)
     timing_gaps: dict[str, float] = field(
         default_factory=dict
     )  # Time diff between peaks
@@ -115,7 +115,7 @@ class KinematicSequenceAnalyzer:
             timing_gaps[gap_name] = next_peak.time - current.time
 
         # 5. Evaluate against expected order
-        efficiency_score = 0.0
+        sequence_consistency = 0.0
         is_valid = False
 
         if self.expected_order:
@@ -125,7 +125,7 @@ class KinematicSequenceAnalyzer:
             ]
 
             if not relevant_expected:
-                efficiency_score = 0.0
+                sequence_consistency = 0.0
                 is_valid = False
             else:
                 # Calculate simple match score
@@ -150,25 +150,25 @@ class KinematicSequenceAnalyzer:
                             correct_pairs += 1
 
                 if total_pairs > 0:
-                    efficiency_score = correct_pairs / total_pairs
+                    sequence_consistency = correct_pairs / total_pairs
                 else:
                     # If no pairs could be compared (e.g. not enough peaks),
-                    # we can't determine efficiency.
+                    # we can't determine consistency.
                     # If we have 0 or 1 peak, it's technically "ordered", but implies missing data.
                     # For strict analysis, if we expected a sequence but found nothing, score should be low.
                     # However, if we just have 1 segment, it is perfectly ordered with itself.
                     # Let's keep 1.0 for "no violations" but mark as invalid if < 2 peaks.
                     # Wait, test expects 0.0 for empty data.
-                    # If len(peaks) == 0, efficiency should be 0.0 (no sequence).
-                    efficiency_score = 1.0 if len(peaks) == 1 else 0.0
+                    # If len(peaks) == 0, consistency should be 0.0 (no sequence).
+                    sequence_consistency = 1.0 if len(peaks) == 1 else 0.0
 
-                is_valid = efficiency_score == 1.0 and len(peaks) >= 2
+                is_valid = sequence_consistency == 1.0 and len(peaks) >= 2
 
         return KinematicSequenceResult(
             peaks=peaks,
             sequence_order=actual_order,
             expected_order=self.expected_order,
-            efficiency_score=efficiency_score,
+            sequence_consistency=sequence_consistency,
             timing_gaps=timing_gaps,
             is_valid_sequence=is_valid,
         )
