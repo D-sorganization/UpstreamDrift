@@ -24,7 +24,7 @@ class TestPhysicsConsistency:
     @pytest.mark.skipif(drake is None, reason="Drake not installed")
     def test_pendulum_consistency_mujoco_drake(self):
         """Verify simple pendulum dynamics match between MuJoCo and Drake."""
-        # TODO: Implement shared pendulum model loading and stepping
+        # Issue #126: Implement shared pendulum model loading and stepping
         # For now, this serves as the scaffold requested by Issue #126
         pass
 
@@ -32,5 +32,5 @@ class TestPhysicsConsistency:
     @pytest.mark.skipif(pin is None, reason="Pinocchio not installed")
     def test_pendulum_consistency_mujoco_pinocchio(self):
         """Verify simple pendulum dynamics match between MuJoCo and Pinocchio."""
-        # TODO: Implement shared pendulum model loading and stepping
+        # Issue #126: Implement shared pendulum model loading and stepping
         pass
