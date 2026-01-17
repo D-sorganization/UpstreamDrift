@@ -1391,8 +1391,22 @@ class PinocchioGUI(QtWidgets.QMainWindow):
                 induced = None
                 counterfactuals = None
 
-                # Check "Live Analysis" toggle
-                if self.chk_live_analysis.isChecked():
+                # Check "Live Analysis" toggle or Recorder Config
+                config_requests_analysis = False
+                if hasattr(self.recorder, "analysis_config") and isinstance(
+                    self.recorder.analysis_config, dict
+                ):
+                    cfg = self.recorder.analysis_config
+                    if (
+                        cfg.get("ztcf")
+                        or cfg.get("zvcf")
+                        or cfg.get("track_drift")
+                        or cfg.get("track_total_control")
+                        or cfg.get("induced_accel_sources")
+                    ):
+                        config_requests_analysis = True
+
+                if self.chk_live_analysis.isChecked() or config_requests_analysis:
                     if self.analyzer and self.q is not None and self.v is not None:
                         induced = self.analyzer.compute_components(self.q, self.v, tau)
                         self.latest_induced = induced
