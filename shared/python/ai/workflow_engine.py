@@ -18,13 +18,15 @@ import logging
 import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum, auto
 from typing import Any
 
 from shared.python.ai.exceptions import WorkflowError
 from shared.python.ai.tool_registry import ToolRegistry
 from shared.python.ai.types import ConversationContext, ExpertiseLevel, ToolResult
+
+UTC = timezone.utc  # noqa: UP017
 
 logger = logging.getLogger(__name__)
 
