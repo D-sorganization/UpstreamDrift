@@ -40,6 +40,7 @@ except ImportError:
         """No-op decorator when numba is not installed."""
 
         def decorator(func: object) -> object:  # type: ignore[misc]
+            """Return the function unchanged."""
             return func
 
         if len(args) == 1 and callable(args[0]):
@@ -61,6 +62,11 @@ def _dtw_core(series1: np.ndarray, series2: np.ndarray, window: int) -> float:
 
     This inner kernel runs ~100x faster than pure Python due to JIT compilation.
 
+    PERFORMANCE OPTIMIZATION:
+    Uses O(M) space instead of O(NM) by storing only two rows.
+    This significantly reduces memory allocation overhead and improves
+    cache locality, especially when Numba is not available.
+
     Note: fastmath=True was intentionally removed as it can introduce numerical
     instability in DTW distance calculations due to non-IEEE-compliant floating
     point optimizations.
@@ -79,11 +85,20 @@ def _dtw_core(series1: np.ndarray, series2: np.ndarray, window: int) -> float:
     # Use large float instead of inf for numba compatibility
     INF = 1e30
 
-    # Allocate cost matrix
-    dtw_matrix = np.full((n + 1, m + 1), INF, dtype=np.float64)
-    dtw_matrix[0, 0] = 0.0
+    # Allocate cost rows (O(M) space)
+    # prev_row stores the costs for the previous iteration (i-1)
+    prev_row = np.full(m + 1, INF, dtype=np.float64)
+    prev_row[0] = 0.0
+
+    # curr_row stores costs for current iteration (i)
+    curr_row = np.full(m + 1, INF, dtype=np.float64)
 
     for i in range(1, n + 1):
+        # Reset curr_row for current iteration
+        # We need to ensure cells outside the band/calculated area are INF
+        # Since we reuse the array, filling with INF is safest.
+        curr_row.fill(INF)
+
         # Sakoe-Chiba band limits
         j_start = max(1, i - window)
         j_end = min(m + 1, i + window + 1)
@@ -91,16 +106,31 @@ def _dtw_core(series1: np.ndarray, series2: np.ndarray, window: int) -> float:
         for j in range(j_start, j_end):
             cost = (series1[i - 1] - series2[j - 1]) ** 2
 
-            # Take minimum of three options
-            min_prev = dtw_matrix[i - 1, j]  # Insertion
-            if dtw_matrix[i, j - 1] < min_prev:
-                min_prev = dtw_matrix[i, j - 1]  # Deletion
-            if dtw_matrix[i - 1, j - 1] < min_prev:
-                min_prev = dtw_matrix[i - 1, j - 1]  # Match
+            # Find minimum of previous cells
+            # prev_row[j] corresponds to dtw_matrix[i-1, j] (Insertion)
+            min_prev = prev_row[j]
 
-            dtw_matrix[i, j] = cost + min_prev
+            # curr_row[j-1] corresponds to dtw_matrix[i, j-1] (Deletion)
+            val_del = curr_row[j - 1]
+            if val_del < min_prev:
+                min_prev = val_del
 
-    return float(np.sqrt(dtw_matrix[n, m]))
+            # prev_row[j-1] corresponds to dtw_matrix[i-1, j-1] (Match)
+            val_match = prev_row[j - 1]
+            if val_match < min_prev:
+                min_prev = val_match
+
+            curr_row[j] = cost + min_prev
+
+        # Swap rows for next iteration
+        # prev_row takes values of curr_row for next step (where it will be i-1)
+        # curr_row becomes the scratch buffer
+        temp = prev_row
+        prev_row = curr_row
+        curr_row = temp
+
+    # After loop, result is in prev_row[m] (because we swapped at end of loop)
+    return float(np.sqrt(prev_row[m]))
 
 
 @jit(nopython=True, cache=True)
@@ -157,11 +187,9 @@ def _dtw_path_core(
     distance = float(np.sqrt(dtw_matrix[n, m]))
 
     # Backtrack
-    # Path length is at most max(n, m) + abs(n - m) = max(n, m) + |n - m|
-    # In practice, typical paths are closer to max(n, m) in length.
-    # We use max(n, m) as the initial allocation to reduce memory waste,
-    # since n + m over-allocates by approximately min(n, m) elements.
-    max_len = max(n, m)
+    # BUG FIX: Path length can be up to n + m in worst case (zig-zag).
+    # Previous allocation of max(n, m) caused IndexError on noisy data.
+    max_len = n + m
     path_i = np.empty(max_len, dtype=np.int32)
     path_j = np.empty(max_len, dtype=np.int32)
 
@@ -211,6 +239,8 @@ def compute_psd(
     Returns:
         tuple: (frequencies, psd_values)
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
     freqs, psd = welch(data, fs=fs, window=window, nperseg=nperseg)
     return freqs, psd
 
@@ -234,6 +264,8 @@ def compute_coherence(
     Returns:
         tuple: (frequencies, coherence_values)
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
     freqs, coh = coherence(x, y, fs=fs, window=window, nperseg=nperseg)
     return freqs, coh
 
@@ -257,6 +289,8 @@ def compute_spectrogram(
     Returns:
         tuple: (frequencies, times, Sxx)
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
     f, t, Sxx = spectrogram(
         data,
         fs=fs,
@@ -289,6 +323,9 @@ def compute_spectral_arc_length(
     Returns:
         float: SAL value (negative dimensionless metric)
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
+
     # Number of points
     n = len(data)
     if n == 0:
@@ -422,9 +459,15 @@ def compute_cwt(
         times: Array of time points
         cwt_matrix: Complex CWT coefficients (freqs x time)
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
+
     # Create frequency vector (log space usually better for wavelets, but linspace ok)
     # Using logspace for better multiscale analysis
     min_freq, max_freq = freq_range
+    if min_freq <= 0:
+        raise ValueError(f"Minimum frequency must be positive, got {min_freq}")
+
     freqs = np.geomspace(min_freq, max_freq, num=num_freqs)
 
     # Convert frequencies to scales
@@ -563,6 +606,9 @@ def compute_jerk(
     Returns:
         Jerk time series (same length as input)
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
+
     if len(data) < window_len:
         # Fallback to simple finite difference if too short
         dt = 1.0 / fs
@@ -601,6 +647,9 @@ def compute_time_shift(
     Returns:
         Time shift in seconds.
     """
+    if fs <= 0:
+        raise ValueError(f"Sampling frequency must be positive, got {fs}")
+
     if len(x) != len(y):
         # Truncate to min length
         n = min(len(x), len(y))

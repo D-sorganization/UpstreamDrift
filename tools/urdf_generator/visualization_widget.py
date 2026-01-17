@@ -127,7 +127,6 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
         Note: Not used in this implementation as we use QPainter
         in paintGL for maximum compatibility.
         """
-        pass
 
     def resizeGL(self, width: int, height: int) -> None:
         """Handle OpenGL resize.
@@ -138,7 +137,6 @@ class Simple3DVisualizationWidget(QOpenGLWidget):
 
         Note: Not used in this implementation.
         """
-        pass
 
     def project_point(self, x: float, y: float, z: float) -> tuple[float, float]:
         """Project 3D point to 2D screen coordinates."""

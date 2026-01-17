@@ -25,11 +25,11 @@ jobs:
 
           for PR in $PRS; do
             STATE=$(gh pr view $PR --json mergeable --jq '.mergeable')
-            
+
             if [ "$STATE" == "CONFLICTING" ]; then
               # FIX: Robustly count comments containing the keyword
               ATTEMPTS=$(gh pr view $PR --json comments --jq '[.comments[] | select(.body | contains("conflict resolution attempt"))] | length')
-              
+
               # Default to 0 if null/empty
               ATTEMPTS=${ATTEMPTS:-0}
 
@@ -40,7 +40,7 @@ jobs:
 
               jules task fix \
                 --pr $PR \
-                --prompt "Merge conflict detected. Resolve textual conflicts ONLY. 
+                --prompt "Merge conflict detected. Resolve textual conflicts ONLY.
                 1. Merge 'origin/main'.
                 2. Do NOT change logic or function signatures.
                 3. This is conflict resolution attempt #$((ATTEMPTS+1))."

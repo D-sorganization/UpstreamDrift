@@ -691,14 +691,12 @@ class DraggableModelCard(QFrame):
         # Status Chip
         status_text, status_color, text_color = self._get_status_info()
         lbl_status = QLabel(status_text)
-        lbl_status.setToolTip(f"Current status: {status_text}")
         lbl_status.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
         lbl_status.setStyleSheet(
             f"background-color: {status_color}; color: {text_color}; padding: 2px 6px; border-radius: 4px;"
         )
         lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
         lbl_status.setFixedWidth(80)  # Fixed width for consistency
-        lbl_status.setToolTip(f"Current availability status: {status_text}")
 
         # Tooltips for status
         status_tooltips = {
@@ -710,7 +708,9 @@ class DraggableModelCard(QFrame):
             "Needs Setup": "Engine dependencies missing - check installation",
             "Unknown": "Status unknown",
         }
-        lbl_status.setToolTip(status_tooltips.get(status_text, ""))
+        # Use descriptive tooltip if available, otherwise fallback to basic status text
+        tooltip = status_tooltips.get(status_text, f"Current status: {status_text}")
+        lbl_status.setToolTip(tooltip)
 
         # Center the chip
         chip_layout = QHBoxLayout()
@@ -1026,19 +1026,21 @@ class EnvironmentDialog(QDialog):
         # Action Buttons Layout
         actions_layout = QHBoxLayout()
 
-        self.btn_build = QPushButton("Build Environment")
+        self.btn_build = QPushButton("🐳 Build Environment")
         self.btn_build.setToolTip(
             "Rebuild the Docker container with selected target stage"
         )
         self.btn_build.clicked.connect(self.start_build)
+        self.btn_build.setCursor(Qt.CursorShape.PointingHandCursor)
         # Store original text for restoration
         self._original_build_text = self.btn_build.text()
         actions_layout.addWidget(self.btn_build)
 
-        self.btn_copy_log = QPushButton("Copy Log")
+        self.btn_copy_log = QPushButton("📋 Copy Log")
         self.btn_copy_log.setToolTip("Copy the build log to clipboard")
         self.btn_copy_log.setAccessibleName("Copy Log")
         self.btn_copy_log.clicked.connect(self.copy_log)
+        self.btn_copy_log.setCursor(Qt.CursorShape.PointingHandCursor)
         actions_layout.addWidget(self.btn_copy_log)
 
         build_layout.addLayout(actions_layout)
@@ -1098,7 +1100,7 @@ class EnvironmentDialog(QDialog):
             clipboard.setText(self.console.toPlainText())
 
             # Provide immediate feedback on the button
-            original_text = "Copy Log"
+            original_text = "📋 Copy Log"
             self.btn_copy_log.setText("Copied! ✓")
             self.btn_copy_log.setStyleSheet(self.SUCCESS_BTN_STYLE)
 
@@ -1822,10 +1824,11 @@ class GolfLauncher(QMainWindow):
         )
         top_bar.addWidget(self.btn_modify_layout)
 
-        self.btn_customize_tiles = QPushButton("Edit Tiles")
+        self.btn_customize_tiles = QPushButton("🧩 Edit Tiles")
         self.btn_customize_tiles.setEnabled(False)
         self.btn_customize_tiles.setToolTip("Add or remove launcher tiles in edit mode")
         self.btn_customize_tiles.clicked.connect(self.open_layout_manager)
+        self.btn_customize_tiles.setCursor(Qt.CursorShape.PointingHandCursor)
         top_bar.addWidget(self.btn_customize_tiles)
 
         btn_env = QPushButton("⚙️ Environment")
@@ -2107,7 +2110,7 @@ class GolfLauncher(QMainWindow):
             empty_layout.addWidget(lbl_empty)
 
             # Action button
-            btn_clear = QPushButton("Clear Search")
+            btn_clear = QPushButton("❌ Clear Search")
             btn_clear.setObjectName("btnClearSearch")
             btn_clear.setMinimumWidth(140)
             btn_clear.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -3237,7 +3240,7 @@ def main() -> int:
             f"Docker: {startup_results.docker_available}"
         )
 
-    return app.exec()
+    return cast(int, app.exec())
 
 
 if __name__ == "__main__":
