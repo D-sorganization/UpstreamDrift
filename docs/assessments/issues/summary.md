@@ -1,6 +1,33 @@
-# Assessment Issues Summary
+# Issue Tracking Summary
 
-## Binary Bloat
+**Last Updated:** January 17, 2026
+**Maintainer:** D-sorganization Team
+
+## Active GitHub Issues
+
+| Issue # | Title | Priority | Status |
+| ------- | ----- | -------- | ------ |
+| [#496](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/496) | Fix module reload corruption in cross-engine tests | 🔴 Critical | Open |
+| [#495](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/495) | Add tests for Injury Analysis Module | 🟢 Medium | Open |
+| [#494](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/494) | Add tests for AI/Workflow Engine | 🟢 Medium | Open |
+| [#130](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/130) | Phase 4.2: Lazy Import Implementation | 🟢 Medium | Open |
+| [#129](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/129) | Phase 4.1: Async Engine Loading | 🟡 High | Open |
+| [#128](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/128) | Phase 3.3: Launcher Configuration Abstraction | 🟢 Medium | Open |
+| [#127](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/127) | Phase 3.2: Architecture Documentation | 🟢 Low | Open |
+| [#126](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/126) | Phase 3.1: Cross-Engine Integration Tests | 🟡 High | Open |
+| [#125](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/125) | Phase 2.3: Constants Normalization | 🟢 Low | Open |
+| [#124](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/124) | Phase 2.2: Archive & Legacy Cleanup | 🟡 High | Open |
+| [#123](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/123) | Phase 2.1: GUI Refactoring (SRP) | 🟡 High | Open |
+| [#122](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/122) | Phase 1.4: Fix Python Version Metadata | 🟢 Low | Open |
+| [#121](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/121) | Phase 1.3: Implement Duplicate File Prevention | 🟢 Medium | Open |
+| [#120](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/120) | Phase 1.2: Consolidate Dependency Management | 🟡 High | Open |
+| [#119](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/119) | Phase 1.1: Fix Pytest Coverage Configuration | 🟢 Medium | Open |
+
+---
+
+## Assessment Issues Summary (Historical)
+
+### Binary Bloat
 - **Issue**: The repository contains large binary files (`.stl` meshes) in `tools/urdf_generator/bundled_assets/`.
 - **Status**: Ignored / Retained.
 - **Justification**:
