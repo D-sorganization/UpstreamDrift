@@ -275,11 +275,11 @@ class ComparativeSwingAnalyzer:
             Tuple of (distance, path). Path is list of (i, j) indices.
         """
         # Get data
-        _, data_a = self.recorder_a.get_time_series(field_name)
-        _, data_b = self.recorder_b.get_time_series(field_name)
+        _, data_a_raw = self.recorder_a.get_time_series(field_name)
+        _, data_b_raw = self.recorder_b.get_time_series(field_name)
 
-        data_a = np.asarray(data_a)
-        data_b = np.asarray(data_b)
+        data_a: np.ndarray = np.asarray(data_a_raw)
+        data_b: np.ndarray = np.asarray(data_b_raw)
 
         # Handle dimensions
         if joint_idx is not None:
