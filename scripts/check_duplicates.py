@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 
-def get_file_hash(filepath):
+def get_file_hash(filepath: Path | str) -> str:
     """Calculate MD5 hash of a file."""
     hasher = hashlib.md5()
     with open(filepath, "rb") as f:
@@ -15,10 +15,12 @@ def get_file_hash(filepath):
     return hasher.hexdigest()
 
 
-def find_duplicates(root_dir, extension=".py"):
+def find_duplicates(
+    root_dir: Path | str, extension: str = ".py"
+) -> list[tuple[Path, Path]]:
     """Find files with duplicate content."""
-    hashes = {}
-    duplicates = []
+    hashes: dict[str, Path] = {}
+    duplicates: list[tuple[Path, Path]] = []
 
     for root, dirs, files in os.walk(root_dir):
         # Skip hidden directories and virtualenvs
@@ -46,9 +48,11 @@ def find_duplicates(root_dir, extension=".py"):
     return duplicates
 
 
-def find_duplicate_names(root_dir, targets):
+def find_duplicate_names(
+    root_dir: Path | str, targets: list[str]
+) -> dict[str, list[Path]]:
     """Find multiple occurrences of specific filenames."""
-    counts = {name: [] for name in targets}
+    counts: dict[str, list[Path]] = {name: [] for name in targets}
 
     for root, dirs, files in os.walk(root_dir):
         # Skip hidden directories
@@ -62,7 +66,7 @@ def find_duplicate_names(root_dir, targets):
     return {k: v for k, v in counts.items() if len(v) > 1}
 
 
-def main():
+def main() -> None:
     root_dir = Path(".")
 
     # 1. Check for duplicate content in Python files
