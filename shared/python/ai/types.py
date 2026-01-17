@@ -10,9 +10,11 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from enum import Enum, auto
 from typing import Any
+
+UTC = timezone.utc  # noqa: UP017
 
 
 class ExpertiseLevel(Enum):

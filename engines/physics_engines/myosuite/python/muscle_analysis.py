@@ -370,7 +370,7 @@ class MyoSuiteMuscleAnalyzer:
             mujoco.mj_fullM(self.model, M, self.data.qM)
         except (TypeError, AttributeError):
             # Handle mocked objects - return identity matrix as fallback
-            M = np.eye(nv_int)
+            M = np.eye(nv_int)  # type: ignore[assignment]
 
         # Get muscle torques
         muscle_torques = self.compute_muscle_joint_torques()
