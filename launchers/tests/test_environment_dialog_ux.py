@@ -35,7 +35,7 @@ def test_build_button_feedback(dialog):
 
     # Initial state
     initial_text = dialog.btn_build.text()
-    assert initial_text == "Build Environment"
+    assert initial_text == "🐳 Build Environment"
     assert dialog.btn_build.isEnabled() is True
 
     # Start build
@@ -72,5 +72,5 @@ def test_build_button_feedback_failure(dialog):
             dialog.build_finished(False, "Failed")
 
         # Verify button state restored
-        assert dialog.btn_build.text() == "Build Environment"
+        assert dialog.btn_build.text() == "🐳 Build Environment"
         assert dialog.btn_build.isEnabled() is True
