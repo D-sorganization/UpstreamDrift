@@ -115,11 +115,14 @@ jobs:
 
       # Option 1: Use Jules if available
       - name: Address Comments with Jules
-        if: steps.analyze.outputs.has_comments == 'true' && env.JULES_API_KEY != ''
+        if: steps.analyze.outputs.has_comments == 'true'
         env:
           JULES_TOKEN: ${{ secrets.JULES_API_KEY }}
-          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
         run: |
+          if [ -z "$JULES_TOKEN" ]; then
+            echo "JULES_API_KEY not configured, skipping Jules"
+            exit 0
+          fi
           npm install -g @google/jules || true
           jules auth --token $JULES_TOKEN
 
@@ -136,11 +139,22 @@ jobs:
           )"
 
       # Option 2: Use Claude API directly (requires ANTHROPIC_API_KEY secret)
+      # Only runs if Jules was skipped (no JULES_API_KEY) and ANTHROPIC_API_KEY is set
       - name: Address Comments with Claude API
-        if: steps.analyze.outputs.has_comments == 'true' && env.ANTHROPIC_API_KEY != '' && env.JULES_API_KEY == ''
+        if: steps.analyze.outputs.has_comments == 'true'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          JULES_TOKEN: ${{ secrets.JULES_API_KEY }}
         run: |
+          # Skip if Jules already ran or if no Anthropic key
+          if [ -n "$JULES_TOKEN" ]; then
+            echo "Jules handled this, skipping Claude API"
+            exit 0
+          fi
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "ANTHROPIC_API_KEY not configured, skipping"
+            exit 0
+          fi
           pip install anthropic
 
           python3 << 'PYEOF'

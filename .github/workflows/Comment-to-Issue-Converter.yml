@@ -139,14 +139,15 @@ jobs:
                   created_at = comment.get('created_at', '')
                   html_url = comment.get('html_url', '')
 
-                  # Categorize by author
-                  if author == 'Copilot':
+                  # Categorize by author (case-insensitive checks for bot names)
+                  author_lower = author.lower()
+                  if 'copilot' in author_lower:
                       source = 'GitHub Copilot'
                       label = 'copilot-review'
                   elif author == 'google-labs-jules' or (author == 'github-actions[bot]' and 'jules' in body.lower()):
                       source = 'Jules'
                       label = 'jules-review'
-                  elif 'cursor' in author.lower() or 'bugbot' in author.lower():
+                  elif 'cursor' in author_lower or 'bugbot' in author_lower:
                       source = 'Cursor/BugBot'
                       label = 'cursor-review'
                   else:
