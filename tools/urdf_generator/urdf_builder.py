@@ -521,6 +521,15 @@ class URDFBuilder:
 
         # Check for circular dependencies
         def has_circular_dependency(segment_name: str, visited: set) -> bool:
+            """Check for circular dependencies in the segment hierarchy.
+
+            Args:
+                segment_name: Name of the current segment.
+                visited: Set of visited segment names.
+
+            Returns:
+                True if a circular dependency is detected.
+            """
             if segment_name in visited:
                 return True
 

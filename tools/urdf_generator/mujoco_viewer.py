@@ -32,6 +32,8 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+GRAVITY_M_S2 = 9.810
+
 # MuJoCo is optional - gracefully handle missing
 try:
     import mujoco
@@ -74,7 +76,7 @@ class URDFToMJCFConverter:
         # Build MJCF
         mjcf_parts = [
             f'<mujoco model="{robot_name}">',
-            '  <option gravity="0 0 -9.81" timestep="0.002"/>',
+            f'  <option gravity="0 0 -{GRAVITY_M_S2}" timestep="0.002"/>',
             '  <compiler angle="radian" inertiafromgeom="auto"/>',
             "",
             "  <worldbody>",
@@ -156,9 +158,9 @@ class URDFToMJCFConverter:
     @staticmethod
     def _get_default_mjcf() -> str:
         """Return a default MJCF scene for empty/invalid URDF."""
-        return """
+        return f"""
 <mujoco model="default">
-  <option gravity="0 0 -9.81" timestep="0.002"/>
+  <option gravity="0 0 -{GRAVITY_M_S2}" timestep="0.002"/>
   <worldbody>
     <light name="light" pos="0 0 3" dir="0 0 -1"/>
     <geom type="plane" size="2 2 0.1" rgba="0.8 0.8 0.8 1"/>
