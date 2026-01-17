@@ -1026,19 +1026,21 @@ class EnvironmentDialog(QDialog):
         # Action Buttons Layout
         actions_layout = QHBoxLayout()
 
-        self.btn_build = QPushButton("Build Environment")
+        self.btn_build = QPushButton("🐳 Build Environment")
         self.btn_build.setToolTip(
             "Rebuild the Docker container with selected target stage"
         )
         self.btn_build.clicked.connect(self.start_build)
+        self.btn_build.setCursor(Qt.CursorShape.PointingHandCursor)
         # Store original text for restoration
         self._original_build_text = self.btn_build.text()
         actions_layout.addWidget(self.btn_build)
 
-        self.btn_copy_log = QPushButton("Copy Log")
+        self.btn_copy_log = QPushButton("📋 Copy Log")
         self.btn_copy_log.setToolTip("Copy the build log to clipboard")
         self.btn_copy_log.setAccessibleName("Copy Log")
         self.btn_copy_log.clicked.connect(self.copy_log)
+        self.btn_copy_log.setCursor(Qt.CursorShape.PointingHandCursor)
         actions_layout.addWidget(self.btn_copy_log)
 
         build_layout.addLayout(actions_layout)
@@ -1098,7 +1100,7 @@ class EnvironmentDialog(QDialog):
             clipboard.setText(self.console.toPlainText())
 
             # Provide immediate feedback on the button
-            original_text = "Copy Log"
+            original_text = "📋 Copy Log"
             self.btn_copy_log.setText("Copied! ✓")
             self.btn_copy_log.setStyleSheet(self.SUCCESS_BTN_STYLE)
 
@@ -1822,10 +1824,11 @@ class GolfLauncher(QMainWindow):
         )
         top_bar.addWidget(self.btn_modify_layout)
 
-        self.btn_customize_tiles = QPushButton("Edit Tiles")
+        self.btn_customize_tiles = QPushButton("✏️ Edit Tiles")
         self.btn_customize_tiles.setEnabled(False)
         self.btn_customize_tiles.setToolTip("Add or remove launcher tiles in edit mode")
         self.btn_customize_tiles.clicked.connect(self.open_layout_manager)
+        self.btn_customize_tiles.setCursor(Qt.CursorShape.PointingHandCursor)
         top_bar.addWidget(self.btn_customize_tiles)
 
         btn_env = QPushButton("⚙️ Environment")
