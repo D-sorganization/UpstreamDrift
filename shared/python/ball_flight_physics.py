@@ -549,7 +549,7 @@ class BallFlightSimulator:
         else:
             # Fallback: Use shared core function with solve_ivp
             def ode_func(t: float, state: np.ndarray) -> np.ndarray:
-                return _flight_dynamics_core(
+                return _flight_dynamics_core(  # type: ignore[no-any-return]
                     state,
                     gravity_acc,
                     wind_velocity,

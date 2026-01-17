@@ -24,10 +24,20 @@ class MockRecorder:
             y = np.sin(2 * np.pi * t)
             z = t
             data = np.column_stack([x, y, z])
-        elif key in ["joint_positions", "joint_velocities", "joint_torques", "actuator_forces"]:
+        elif key in [
+            "joint_positions",
+            "joint_velocities",
+            "joint_torques",
+            "actuator_forces",
+        ]:
             # 2D Array (N, 2)
             data = np.column_stack([base, base * 0.5])
-        elif key in ["club_head_speed", "kinetic_energy", "total_energy", "control_accel"]:
+        elif key in [
+            "club_head_speed",
+            "kinetic_energy",
+            "total_energy",
+            "control_accel",
+        ]:
             # Scalar (N,) or (N, 1)
             data = base * 10.0
         elif key in ["left_foot_force", "right_foot_force"]:

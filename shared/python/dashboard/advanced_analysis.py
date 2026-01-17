@@ -12,7 +12,6 @@ Contains widgets and a dialog for advanced signal processing analysis:
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 import numpy as np
 from PyQt6 import QtWidgets
@@ -255,7 +254,9 @@ class WaveletTab(QtWidgets.QWidget):
         self.ax.set_ylabel("Frequency [Hz]")
         self.ax.set_xlabel("Time [sec]")
         self.ax.set_yscale("log")
-        self.ax.set_title(f"Wavelet Transform (CWT): {self.current_key} (Dim {dim_idx})")
+        self.ax.set_title(
+            f"Wavelet Transform (CWT): {self.current_key} (Dim {dim_idx})"
+        )
 
         self.canvas.draw()
 
@@ -287,7 +288,7 @@ class SwingPlaneTab(QtWidgets.QWidget):
         pos: np.ndarray | None = np.array(raw_pos) if raw_pos is not None else None
 
         if pos is None or len(times) == 0 or pos.ndim != 2 or pos.shape[1] != 3:
-            ax3d.text2D(0.5, 0.5, "No 3D Club Head Data", transform=ax3d.transAxes)
+            ax3d.text2D(0.5, 0.5, "No 3D Club Head Data", transform=ax3d.transAxes)  # type: ignore[attr-defined]
             self.canvas.draw()
             return
 
@@ -295,16 +296,16 @@ class SwingPlaneTab(QtWidgets.QWidget):
         try:
             metrics = self.analyzer.analyze(pos)
         except ValueError:
-            ax3d.text2D(0.5, 0.5, "Insufficient points", transform=ax3d.transAxes)
+            ax3d.text2D(0.5, 0.5, "Insufficient points", transform=ax3d.transAxes)  # type: ignore[attr-defined]
             self.canvas.draw()
             return
 
         # 1. 3D Plot
-        ax3d.scatter(pos[:, 0], pos[:, 1], pos[:, 2], c=times, cmap="viridis", s=5)
+        ax3d.scatter(pos[:, 0], pos[:, 1], pos[:, 2], c=times, cmap="viridis")
         ax3d.set_title("Club Head Trajectory & Fitted Plane")
         ax3d.set_xlabel("X")
         ax3d.set_ylabel("Y")
-        ax3d.set_zlabel("Z")
+        ax3d.set_zlabel("Z")  # type: ignore[attr-defined]
 
         # Draw Plane
         # Generate grid around centroid
@@ -322,7 +323,7 @@ class SwingPlaneTab(QtWidgets.QWidget):
 
         if abs(normal[2]) > 0.001:
             zz = (-normal[0] * xx - normal[1] * yy - d) / normal[2]
-            ax3d.plot_surface(xx, yy, zz, alpha=0.2, color="blue")
+            ax3d.plot_surface(xx, yy, zz, alpha=0.2, color="blue")  # type: ignore[attr-defined]
         else:
             # Vertical plane, maybe just skip drawing surface or handle differently
             pass
@@ -346,7 +347,7 @@ class SwingPlaneTab(QtWidgets.QWidget):
                 f"Max Dev: {metrics.max_deviation*100:.1f} cm",
             )
         )
-        props = dict(boxstyle="round", facecolor="wheat", alpha=0.5)
+        props = {"boxstyle": "round", "facecolor": "wheat", "alpha": 0.5}
         ax_dev.text(
             0.05,
             0.95,
@@ -401,7 +402,9 @@ class CorrelationTab(QtWidgets.QWidget):
 
         for label, key in metrics_map.items():
             _, raw_vals = self.recorder.get_time_series(key)
-            vals: np.ndarray | None = np.array(raw_vals) if raw_vals is not None else None
+            vals: np.ndarray | None = (
+                np.array(raw_vals) if raw_vals is not None else None
+            )
 
             if vals is None or len(vals) == 0:
                 continue
@@ -427,7 +430,7 @@ class CorrelationTab(QtWidgets.QWidget):
         feature_names = list(data_dict.keys())
         matrix_list = []
         for name in feature_names:
-            matrix_list.append(data_dict[name][:min_len])
+            matrix_list.append(data_dict[name][: int(min_len)])
 
         X = np.column_stack(matrix_list)  # (N, F)
 
@@ -454,7 +457,7 @@ class CorrelationTab(QtWidgets.QWidget):
         # Annotate
         for i in range(len(feature_names)):
             for j in range(len(feature_names)):
-                text = self.ax.text(
+                self.ax.text(
                     j,
                     i,
                     f"{corr_mat[i, j]:.2f}",
