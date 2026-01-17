@@ -405,6 +405,7 @@ class SwingRecorder:
 
     def __init__(self, engine: Any = None) -> None:
         self.engine = engine
+        self.analysis_config: dict[str, Any] = {}
         self.reset()
 
     def reset(self) -> None:
@@ -482,9 +483,7 @@ class SwingRecorder:
         Args:
             config: Dictionary of configuration flags (e.g. {'ztcf': True}).
         """
-        # MuJoCo recorder typically records what is passed to record_frame.
-        # The extraction logic in SimWidget handles configuration.
-        pass
+        self.analysis_config = config
 
     def get_num_frames(self) -> int:
         """Get number of recorded frames."""
