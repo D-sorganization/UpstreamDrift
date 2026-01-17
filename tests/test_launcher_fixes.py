@@ -276,12 +276,12 @@ class TestGolfLauncherGrid(unittest.TestCase):
     @patch("launchers.golf_launcher.GolfLauncher._load_layout")
     @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
     @patch("launchers.golf_launcher.ContextHelpDock")
-    @patch("launchers.golf_launcher.ModelRegistry")
-    @patch("launchers.golf_launcher.EngineManager")
+    @patch("launchers.golf_launcher._lazy_load_model_registry")
+    @patch("launchers.golf_launcher._lazy_load_engine_manager")
     def test_model_order_tracking(
         self,
-        mock_engine_manager: Mock,
-        mock_registry_class: Mock,
+        mock_lazy_load: Mock,
+        mock_lazy_registry: Mock,
         mock_help_dock: Mock,
         mock_add_dock_widget: Mock,
         mock_load_layout: Mock,
@@ -289,8 +289,13 @@ class TestGolfLauncherGrid(unittest.TestCase):
         """Test that model order is properly tracked."""
         from launchers.golf_launcher import GolfLauncher
 
-        mock_registry_class.return_value = self.mock_registry
-        mock_engine_manager.return_value = Mock()
+        # _lazy_load_model_registry returns the ModelRegistry class
+        mock_class = Mock()
+        mock_class.return_value = self.mock_registry
+        mock_lazy_registry.return_value = mock_class
+
+        # _lazy_load_engine_manager returns (EngineManager, EngineType)
+        mock_lazy_load.return_value = (Mock(), Mock())
 
         mock_help_dock.side_effect = None
         launcher = GolfLauncher()
@@ -305,20 +310,24 @@ class TestGolfLauncherGrid(unittest.TestCase):
 
     @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
     @patch("launchers.golf_launcher.ContextHelpDock")
-    @patch("launchers.golf_launcher.ModelRegistry")
-    @patch("launchers.golf_launcher.EngineManager")
+    @patch("launchers.golf_launcher._lazy_load_model_registry")
+    @patch("launchers.golf_launcher._lazy_load_engine_manager")
     def test_model_swap_functionality(
         self,
-        mock_engine_manager: Mock,
-        mock_registry_class: Mock,
+        mock_lazy_load: Mock,
+        mock_lazy_registry: Mock,
         mock_help_dock: Mock,
         mock_add_dock_widget: Mock,
     ) -> None:
         """Test model swapping functionality."""
         from launchers.golf_launcher import GolfLauncher
 
-        mock_registry_class.return_value = self.mock_registry
-        mock_engine_manager.return_value = Mock()
+        # _lazy_load_model_registry returns the ModelRegistry class
+        mock_class = Mock()
+        mock_class.return_value = self.mock_registry
+        mock_lazy_registry.return_value = mock_class
+
+        mock_lazy_load.return_value = (Mock(), Mock())
         mock_help_dock.side_effect = None
 
         launcher = GolfLauncher()

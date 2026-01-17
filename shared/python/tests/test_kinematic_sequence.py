@@ -35,7 +35,7 @@ class TestKinematicSequence:
         result = analyzer.analyze(data, times)
 
         assert result.is_valid_sequence
-        assert result.efficiency_score == 1.0
+        assert result.sequence_consistency == 1.0
         assert result.sequence_order == ["Pelvis", "Torso", "Arm", "Club"]
         assert len(result.peaks) == 4
         assert result.peaks[3].name == "Club"  # Last peak
@@ -76,7 +76,7 @@ class TestKinematicSequence:
         result = analyzer.analyze(data, times)
 
         assert not result.is_valid_sequence
-        assert result.efficiency_score < 1.0
+        assert result.sequence_consistency < 1.0
         assert result.sequence_order == ["Pelvis", "Arm", "Torso", "Club"]
 
     def test_missing_data(self) -> None:
@@ -88,7 +88,7 @@ class TestKinematicSequence:
         result = analyzer.analyze(data, times)
 
         assert len(result.peaks) == 0
-        assert result.efficiency_score == 0.0
+        assert result.sequence_consistency == 0.0
 
     def test_subset_of_segments(self) -> None:
         """Test with only a subset of expected segments."""
@@ -106,7 +106,7 @@ class TestKinematicSequence:
         result = analyzer.analyze(data, times)
 
         assert result.is_valid_sequence  # Subsets that respect order are valid
-        assert result.efficiency_score == 1.0
+        assert result.sequence_consistency == 1.0
         assert result.sequence_order == ["Pelvis", "Club"]
 
     def test_extract_velocities_helper(self) -> None:
