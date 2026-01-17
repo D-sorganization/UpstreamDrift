@@ -276,8 +276,8 @@ class TestGolfLauncherGrid(unittest.TestCase):
     @patch("launchers.golf_launcher.GolfLauncher._load_layout")
     @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
     @patch("launchers.golf_launcher.ContextHelpDock")
-    @patch("launchers.golf_launcher.ModelRegistry")
-    @patch("launchers.golf_launcher.EngineManager")
+    @patch("shared.python.model_registry.ModelRegistry")
+    @patch("shared.python.engine_manager.EngineManager")
     def test_model_order_tracking(
         self,
         mock_engine_manager: Mock,
@@ -305,8 +305,8 @@ class TestGolfLauncherGrid(unittest.TestCase):
 
     @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
     @patch("launchers.golf_launcher.ContextHelpDock")
-    @patch("launchers.golf_launcher.ModelRegistry")
-    @patch("launchers.golf_launcher.EngineManager")
+    @patch("shared.python.model_registry.ModelRegistry")
+    @patch("shared.python.engine_manager.EngineManager")
     def test_model_swap_functionality(
         self,
         mock_engine_manager: Mock,
