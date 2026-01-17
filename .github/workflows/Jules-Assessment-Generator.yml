@@ -4,7 +4,7 @@ on:
   workflow_call:
   workflow_dispatch:
   schedule:
-    - cron: "0 2 * * 0"  # Weekly on Sundays at 2 AM UTC
+    - cron: "0 0 * * 0"  # Weekly on Sundays at midnight UTC (matches Control Tower)
 
 permissions:
   contents: write

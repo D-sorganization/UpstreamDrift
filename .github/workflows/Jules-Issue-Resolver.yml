@@ -19,7 +19,7 @@ on:
           - high
           - medium
   schedule:
-    - cron: "0 7 * * *"  # Daily at 7 AM UTC (after assessments run)
+    - cron: "0 3 * * *"  # Daily at 3 AM UTC (within midnight-4 AM window)
 
 permissions:
   contents: write

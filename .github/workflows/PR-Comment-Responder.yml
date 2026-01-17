@@ -22,8 +22,8 @@ permissions:
 
 jobs:
   respond-to-comments:
-    # Only run on PR comments (not issue comments) or manual dispatch
-    if: github.event_name == 'workflow_dispatch' || github.event.issue.pull_request != null
+    # Run on PR comments (from issue_comment), review comments (from pull_request_review_comment), or manual dispatch
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request_review_comment' || github.event.issue.pull_request != null
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +41,8 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             PR_NUMBER="${{ inputs.pr_number }}"
+          elif [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
+            PR_NUMBER="${{ github.event.pull_request.number }}"
           else
             PR_NUMBER="${{ github.event.issue.number }}"
           fi

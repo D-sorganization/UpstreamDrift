@@ -10,7 +10,7 @@ on:
         default: '2'
         type: string
   schedule:
-    - cron: "0 3 * * *"  # Daily at 3 AM UTC
+    - cron: "30 0 * * *"  # Daily at 12:30 AM UTC (matches Control Tower)
 
 permissions:
   contents: write

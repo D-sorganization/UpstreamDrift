@@ -21,7 +21,7 @@ on:
     - cron: "30 3 * * *"  # 3:30 AM - PR Compiler (consolidate PRs)
 
 concurrency:
-  group: jules-control-tower-${{ github.run_id }}
+  group: jules-control-tower-${{ github.repository }}
   cancel-in-progress: false
 
 permissions:
@@ -65,7 +65,7 @@ jobs:
               const now = new Date();
               const hour = now.getUTCHours();
               const minute = now.getUTCMinutes();
-              const day = now.getDay();
+              const day = now.getUTCDay();
 
               if (hour === 0 && minute < 30) {
                 target = "assessment-generator";
