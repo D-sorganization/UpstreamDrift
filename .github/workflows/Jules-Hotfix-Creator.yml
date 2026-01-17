@@ -43,13 +43,13 @@ jobs:
             echo "Invalid branch name format"
             exit 1
           fi
-          
+
           # SECURITY: Validate run_id is numeric
           if ! echo "$RUN_ID" | grep -qE '^[0-9]+$'; then
             echo "Invalid run_id format"
             exit 1
           fi
-          
+
           echo "validated=true" >> $GITHUB_OUTPUT
 
       - name: Create Hotfix Branch
@@ -80,7 +80,7 @@ jobs:
 
           # SECURITY: Read log content safely
           LOG_CONTENT=$(cat logs.txt)
-          
+
           # SECURITY: Create prompt using environment variables
           cat > prompt.txt << 'PROMPT_EOF'
 URGENT: CI failed on protected branch.
@@ -95,7 +95,7 @@ CRITICAL: This is a hotfix. Keep changes minimal and focused.
 CI Failure Logs:
 PROMPT_EOF
           echo "$LOG_CONTENT" >> prompt.txt
-          
+
           jules task fix --branch "$HOTFIX_BRANCH" --prompt "$(cat prompt.txt)"
 
       - name: Create Urgent PR
@@ -113,7 +113,7 @@ PROMPT_EOF
             --title "🚨 Urgent: Fix CI failure on protected branch" \
             --label "urgent,auto-fix,hotfix" \
             --body "## 🚨 Automated Hotfix for Protected Branch
-            
+
             **Failed Branch:** \`$FAILED_BRANCH\`
             **CI Run:** $REPO_URL/actions/runs/$RUN_ID
             **Created By:** Jules Hotfix-Creator
