@@ -14,8 +14,17 @@ is still available via:
 
 For new code, prefer importing specific dataclasses:
     from shared.python.analysis.dataclasses import PeakInfo, SummaryStatistics
+    from shared.python.analysis.basic_stats import BasicStatsMixin
+    from shared.python.analysis.swing_metrics import SwingMetricsMixin
+    from shared.python.analysis.energy_metrics import EnergyMetricsMixin
+    from shared.python.analysis.phase_detection import PhaseDetectionMixin
+    from shared.python.analysis.grf_metrics import GRFMetricsMixin
+    from shared.python.analysis.stability_metrics import StabilityMetricsMixin
+    from shared.python.analysis.angular_momentum import AngularMomentumMetricsMixin
 """
 
+from shared.python.analysis.angular_momentum import AngularMomentumMetricsMixin
+from shared.python.analysis.basic_stats import BasicStatsMixin
 from shared.python.analysis.dataclasses import (
     AngularMomentumMetrics,
     CoordinationMetrics,
@@ -33,6 +42,11 @@ from shared.python.analysis.dataclasses import (
     SwingPhase,
     SwingProfileMetrics,
 )
+from shared.python.analysis.energy_metrics import EnergyMetricsMixin
+from shared.python.analysis.grf_metrics import GRFMetricsMixin
+from shared.python.analysis.phase_detection import PhaseDetectionMixin
+from shared.python.analysis.stability_metrics import StabilityMetricsMixin
+from shared.python.analysis.swing_metrics import SwingMetricsMixin
 
 __all__ = [
     # Dataclasses
@@ -51,4 +65,12 @@ __all__ = [
     "SummaryStatistics",
     "SwingPhase",
     "SwingProfileMetrics",
+    # Mixins
+    "BasicStatsMixin",
+    "SwingMetricsMixin",
+    "EnergyMetricsMixin",
+    "PhaseDetectionMixin",
+    "GRFMetricsMixin",
+    "StabilityMetricsMixin",
+    "AngularMomentumMetricsMixin",
 ]
