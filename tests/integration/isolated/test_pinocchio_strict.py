@@ -1,8 +1,6 @@
-
-import logging
 from unittest.mock import MagicMock, patch
+
 import numpy as np
-import pytest
 
 # --- Global Mocking Setup (Duplicated for Isolation) ---
 mock_pinocchio = MagicMock()
@@ -12,16 +10,18 @@ module_patches = {
     "pinocchio": mock_pinocchio,
 }
 
+
 class TestPinocchioStrict:
     def setup_method(self):
         """Inject mock pinocchio into the module namespace."""
         self.patcher = patch.dict("sys.modules", module_patches)
         self.patcher.start()
-        
+
         import engines.physics_engines.pinocchio.python.pinocchio_physics_engine as mod
+
         self.mod = mod
         self.PinocchioPhysicsEngine = mod.PinocchioPhysicsEngine
-        
+
         # Test Constants
         self.TEST_LINEAR_VAL = 1.0
         self.TEST_ANGULAR_VAL = 2.0

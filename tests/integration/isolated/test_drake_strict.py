@@ -1,8 +1,7 @@
-
 import logging
 from unittest.mock import MagicMock, patch
+
 import numpy as np
-import pytest
 
 # --- Global Mocking Setup (Duplicated for Isolation) ---
 mock_pydrake = MagicMock()
@@ -23,32 +22,34 @@ module_patches = {
 mock_pydrake.DiagramBuilder = MagicMock()
 mock_pydrake.systems.framework.DiagramBuilder = mock_pydrake.DiagramBuilder
 
+
 class TestDrakeStrict:
     def setup_method(self):
         """Inject mock pydrake into the module namespace."""
         # Use patch.dict context for the import to apply patches
         with patch.dict("sys.modules", module_patches):
             # We must import inside the patch context to ensure the module picks up the mocks
-            # Note: In an isolated process, we don't strictly need reload(), 
+            # Note: In an isolated process, we don't strictly need reload(),
             # but we do need to ensure duplicate imports don't mess things up if run repeatedly.
             import engines.physics_engines.drake.python.drake_physics_engine as mod
-            
+
             # Since we are in a fresh process (ideally), just importing might be enough.
             # But the 'mod' variable scope is what we need.
             pass
 
         # Re-import to capture reference (it will use the sys.modules cache we just populated/patched?)
-        # Actually, simpler: define the class execution *inside* the patch if possible, 
+        # Actually, simpler: define the class execution *inside* the patch if possible,
         # or just rely on sys.modules remaining patched if we don't exit context?
         # The correct way for this test harness:
-        
+
         self.patcher = patch.dict("sys.modules", module_patches)
         self.patcher.start()
-        
+
         import engines.physics_engines.drake.python.drake_physics_engine as mod
+
         self.mod = mod
         self.DrakePhysicsEngine = mod.DrakePhysicsEngine
-        
+
         # Test Constants
         self.TEST_LINEAR_VAL = 1.0
         self.TEST_ANGULAR_VAL = 2.0

@@ -8,11 +8,9 @@ to ensure it can run in any CI environment to verify LOGIC and PROTOCOL complian
 needing heavy binary dependencies.
 """
 
-import logging
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-import pytest
 
 # --- Global Mocking Setup ---
 # We must mock these libs BEFORE importing the engines, because some engines
@@ -147,9 +145,6 @@ class TestMuJoCoStrict:
 
         sensors = engine.get_sensors()
         assert sensors["sensor_0"] == 0.123
-
-
-
 
 
 class TestOpenSimStrict:

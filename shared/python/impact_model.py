@@ -331,8 +331,8 @@ class SpringDamperImpactModel(ImpactModel):
                 break
             else:
                 # Pre-contact: advance positions
-                x_ball = x_ball + v_ball * self.dt
-                x_club = x_club + v_club * self.dt
+                x_ball = x_ball + v_ball * self.dt  # type: ignore[assignment]
+                x_club = x_club + v_club * self.dt  # type: ignore[assignment]
                 # Don't increment contact_time here, it's only for contact duration
 
                 # Check if we've reached the ball
