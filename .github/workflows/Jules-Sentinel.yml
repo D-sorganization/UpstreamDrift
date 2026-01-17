@@ -1,0 +1,102 @@
+name: Jules Sentinel (Security Audit)
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 5 * * 1"  # Weekly on Mondays at 5 AM UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  security-events: write
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: |
+          pip install safety bandit pip-audit semgrep || true
+          npm install -g @google/jules
+
+      - name: Run Security Scanners
+        run: |
+          mkdir -p reports
+
+          echo "Running pip-audit..."
+          pip-audit --format json -o reports/pip_audit.json 2>/dev/null || echo "[]" > reports/pip_audit.json
+
+          echo "Running bandit..."
+          bandit -r . -f json -o reports/bandit.json --exclude './.venv,./venv,./env,./.git' 2>/dev/null || echo "[]" > reports/bandit.json
+
+          echo "Running semgrep..."
+          semgrep --config=auto --json -o reports/semgrep.json . 2>/dev/null || echo "{}" > reports/semgrep.json
+
+      - name: Jules Sentinel Analysis
+        env:
+          JULES_TOKEN: ${{ secrets.JULES_API_KEY }}
+        run: |
+          jules auth --token $JULES_TOKEN
+
+          jules task fix --prompt "$(cat << 'PROMPT_EOF'
+          You are the SENTINEL security agent.
+
+          ## Your Mission
+          Analyze the security audit reports in ./reports/ and document findings.
+
+          ## Input Files
+          - reports/pip_audit.json - Dependency vulnerabilities
+          - reports/bandit.json - Python security issues
+          - reports/semgrep.json - Code pattern analysis
+
+          ## DO NOT MODIFY CODE directly. Instead:
+
+          ### For HIGH severity findings:
+          1. Create a GitHub Issue with labels: security, high-priority, jules:sentinel
+          2. Include CVE numbers if available
+          3. Provide remediation steps
+
+          ### For MEDIUM severity findings:
+          1. Add to .jules/sentinel.md journal with details
+          2. Create GitHub Issue with label: security, jules:sentinel
+
+          ### For LOW severity findings:
+          1. Document in .jules/sentinel.md only
+
+          ## Journal Entry Format
+          Update .jules/sentinel.md with:
+          ```
+          ## YYYY-MM-DD - Security Audit
+
+          **Scan Results:**
+          - Dependencies: X vulnerabilities (H/M/L)
+          - Code Analysis: Y issues (H/M/L)
+          - Pattern Scan: Z findings
+
+          **Issues Created:** #num, #num
+          **Deferred:** [list any deferred items with justification]
+          ```
+
+          CRITICAL: This is a READ-ONLY audit. Do not fix code - only document and create issues.
+          PROMPT_EOF
+          )"
+
+      - name: Commit Journal
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs(sentinel): weekly security audit"
+          file_pattern: ".jules/sentinel.md"

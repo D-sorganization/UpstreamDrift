@@ -1,0 +1,91 @@
+name: Jules Code Quality Reviewer (Worker)
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      days_to_review:
+        description: 'Number of days of git history to review'
+        required: false
+        default: '2'
+        type: string
+  schedule:
+    - cron: "0 3 * * *"  # Daily at 3 AM UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt || true
+          npm install -g @google/jules
+
+      - name: Gather Git History
+        id: history
+        env:
+          DAYS: ${{ inputs.days_to_review || '2' }}
+        run: |
+          mkdir -p .jules/review_data
+          SINCE_DATE=$(date -d "$DAYS days ago" +%Y-%m-%d)
+
+          git log --since="$SINCE_DATE" --pretty=format:'%H|%an|%s|%ad' --date=short > .jules/review_data/commits.txt
+          git log --since="$SINCE_DATE" -p --no-color > .jules/review_data/diffs.txt
+
+          COMMIT_COUNT=$(git log --since="$SINCE_DATE" --oneline | wc -l)
+          echo "commit_count=$COMMIT_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Jules Code Quality Review
+        if: steps.history.outputs.commit_count > 0
+        env:
+          JULES_TOKEN: ${{ secrets.JULES_API_KEY }}
+          DAYS: ${{ inputs.days_to_review || '2' }}
+        run: |
+          jules auth --token $JULES_TOKEN
+          DATE=$(date +%Y-%m-%d)
+          mkdir -p docs/assessments/changelog_reviews
+
+          jules task fix --prompt "$(cat << 'PROMPT_EOF'
+          You are the CODE QUALITY REVIEWER agent.
+
+          Review git history in .jules/review_data/ for the last few days.
+
+          ## Review For:
+          1. Coherent plan alignment with project guidelines
+          2. Damaging or breaking changes
+          3. Truncated/incomplete work
+          4. Placeholders (TODO, FIXME, NotImplemented)
+          5. Workarounds or hacks
+          6. CI/CD gaming (modifying tests to pass, disabling checks)
+
+          ## Output:
+          1. Save report to: docs/assessments/changelog_reviews/Code_Quality_Review_$(date +%Y-%m-%d).md
+          2. Update docs/assessments/Code_Quality_Review_Latest.md
+          3. For CRITICAL issues: Create GitHub Issue with label 'jules:code-quality,critical'
+
+          DO NOT over-flag minor issues. Focus on real problems.
+          PROMPT_EOF
+          )"
+
+      - name: Commit Results
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs(review): code quality review $(date +%Y-%m-%d)"
+          file_pattern: "docs/assessments/**/*.md"

@@ -1,0 +1,94 @@
+name: Jules Assessment Generator (Worker)
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * 0"  # Weekly on Sundays at 2 AM UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  generate-assessments:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt || true
+          npm install -g @google/jules
+
+      - name: Archive Existing Assessments
+        run: |
+          mkdir -p docs/assessments/archive
+          DATE=$(date +%Y-%m-%d)
+
+          for file in docs/assessments/Assessment_*.md; do
+            [ -f "$file" ] && mv "$file" "docs/assessments/archive/$(basename "$file" .md)_archived_$DATE.md"
+          done
+
+          [ -f "docs/assessments/Comprehensive_Assessment.md" ] && \
+            mv "docs/assessments/Comprehensive_Assessment.md" \
+               "docs/assessments/archive/Comprehensive_Assessment_archived_$DATE.md"
+
+      - name: Jules Assessment Generation
+        env:
+          JULES_TOKEN: ${{ secrets.JULES_API_KEY }}
+        run: |
+          jules auth --token $JULES_TOKEN
+          DATE=$(date +%Y-%m-%d)
+
+          jules task fix --prompt "$(cat << 'PROMPT_EOF'
+          You are the ASSESSMENT GENERATOR agent.
+
+          ## Mission
+          Review the repository against assessment criteria and generate graded assessments.
+
+          ## Categories (A-O)
+          A: Code Structure, B: Documentation, C: Test Coverage, D: Error Handling,
+          E: Performance, F: Security, G: Dependencies, H: CI/CD, I: Code Style,
+          J: API Design, K: Data Handling, L: Logging, M: Configuration, N: Scalability, O: Maintainability
+
+          ## Output
+          1. Create docs/assessments/Assessment_X_$DATE.md for each category with grade 0-10
+          2. Create docs/assessments/Comprehensive_Assessment_$DATE.md with:
+             - Grade table
+             - Weighted average (Code 25%, Testing 15%, Docs 10%, Security 15%, Perf 15%, Ops 10%, Design 10%)
+             - Top 5 recommendations
+
+          3. For grades below 5: Create GitHub Issue with label 'jules:assessment,needs-attention'
+
+          ## Quick Fixes
+          Make easy, safe, non-breaking fixes with HIGH confidence. Document as AUTO-FIXED.
+          PROMPT_EOF
+          )"
+
+      - name: Commit Results
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs(assessment): weekly assessment $(date +%Y-%m-%d)"
+          file_pattern: "docs/assessments/**/*.md"
+
+      - name: Create Summary Issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          gh issue create \
+            --title "Weekly Assessment Report - $DATE" \
+            --body "Weekly assessment complete. Review docs/assessments/Comprehensive_Assessment_$DATE.md" \
+            --label "jules:assessment,tracking" || true

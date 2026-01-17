@@ -1,0 +1,155 @@
+name: Jules Patent Reviewer (IP Risk Assessment)
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 3"  # Weekly on Wednesdays at 6 AM UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  patent-review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Jules
+        run: npm install -g @google/jules
+
+      - name: Gather Patent-Sensitive Code
+        run: |
+          mkdir -p .jules/patent_data
+          mkdir -p docs/legal/patents
+
+          # Find files with patent-sensitive implementations
+          grep -rl "dtw\|time.warp\|kinematic.sequence\|gear.effect\|smash.factor" \
+            --include="*.py" . --exclude-dir=".git" --exclude-dir="venv" \
+            > .jules/patent_data/patent_sensitive.txt 2>/dev/null || true
+
+          # Find scoring/comparison algorithms
+          grep -rl "similarity\|score.*=.*100\|compare.*swing\|match.*pattern" \
+            --include="*.py" . --exclude-dir=".git" --exclude-dir="venv" \
+            > .jules/patent_data/scoring_algorithms.txt 2>/dev/null || true
+
+          # Copy existing patent analysis
+          find docs -name "*patent*" -o -name "*PATENT*" | head -10 | while read f; do
+            cp "$f" .jules/patent_data/ 2>/dev/null || true
+          done
+
+      - name: Jules Patent Review
+        env:
+          JULES_TOKEN: ${{ secrets.JULES_API_KEY }}
+        run: |
+          jules auth --token $JULES_TOKEN
+          DATE=$(date +%Y-%m-%d)
+
+          jules task fix --prompt "$(cat << 'PROMPT_EOF'
+          You are the PATENT REVIEWER - an IP risk assessment specialist.
+
+          ## Your Mission
+          Maintain and update a comprehensive patent risk assessment document.
+
+          ## Target Document
+          Create/Update: docs/legal/patents/PATENT_REVIEW.md
+
+          This should be a SINGLE, COMPREHENSIVE document that is continuously refined.
+          Add "Last Updated: $DATE" at the top.
+
+          ## Review Framework
+
+          ### 1. Known Patent Risks
+
+          #### High Risk Areas
+          Document implementations that may infringe on:
+          - K-Motion / K-Vest patents (3D biofeedback, kinematic sequence)
+          - Zepp/Blast patents (swing comparison scoring)
+          - TrackMan patents (radar ball tracking methods)
+          - Foresight patents (photometric measurement)
+          - TPI patents (kinematic efficiency scoring)
+
+          For each risk:
+          | Area | Patent(s) | Our Implementation | Risk Level | Mitigation |
+          |------|-----------|-------------------|------------|------------|
+
+          #### Medium Risk Areas
+          - Sensor fusion algorithms
+          - Specific scoring formulas
+          - Visualization methods
+          - Comparison algorithms
+
+          #### Low Risk Areas
+          - General physics (public domain)
+          - Standard statistical methods
+          - Open algorithms with citations
+
+          ### 2. Code-Specific Analysis
+
+          Review files identified in .jules/patent_data/ for:
+          - Specific formulas that may be patented
+          - Algorithm implementations matching patent claims
+          - Constants/magic numbers from proprietary sources
+          - Method names matching trademarked terms
+
+          ### 3. Trademark Concerns
+
+          | Term | Owner | Status | Alternative |
+          |------|-------|--------|-------------|
+          | Kinematic Sequence | TPI | Avoid | "Movement Sequence" |
+          | Swing DNA | Zepp | Remediated | "Swing Profile" |
+          | Smash Factor | TrackMan | Generic now | OK to use |
+
+          ### 4. Prior Art Documentation
+
+          For implementations that ARE safe, document:
+          - Academic paper citations
+          - Public domain algorithms
+          - Our original innovations
+          - Prior art that invalidates competitor patents
+
+          ### 5. Risk Mitigation Actions
+
+          For each identified risk, document:
+          1. Current Status (remediated/pending/accepted)
+          2. Recommended Changes (if needed)
+          3. Alternative Implementations
+          4. Legal Review Needed (yes/no)
+
+          ### 6. Change Log
+
+          Track changes to the patent landscape:
+          - New patents filed by competitors
+          - Patents expired (now safe to use)
+          - Our remediation actions
+
+          ## Output Requirements
+
+          1. Update the master PATENT_REVIEW.md document
+          2. Create docs/legal/patents/patent_alerts_$DATE.md for NEW issues only
+          3. For HIGH risk items needing immediate action:
+             - Create GitHub Issue with label 'legal,patent-risk,critical'
+
+          ## Important Notes
+
+          - This is NOT legal advice - recommend professional review for critical items
+          - Err on the side of caution when assessing risk
+          - Document our original innovations as potential defensive IP
+
+          DO NOT MAKE CODE CHANGES. This is a LEGAL REVIEW workflow.
+          PROMPT_EOF
+          )"
+
+      - name: Commit Review
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs(legal): update patent risk assessment"
+          file_pattern: "docs/legal/patents/*.md"
