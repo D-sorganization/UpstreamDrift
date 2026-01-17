@@ -40,7 +40,7 @@ def test_kinematic_sequence_ideal():
     result = analyzer.analyze(data, times)
 
     assert result.is_valid_sequence
-    assert result.efficiency_score == 1.0
+    assert result.sequence_consistency == 1.0
     assert result.sequence_order == ["Pelvis", "Torso", "Arm", "Club"]
 
     # Check peaks
@@ -74,7 +74,7 @@ def test_kinematic_sequence_out_of_order():
     result = analyzer.analyze(data, times)
 
     assert not result.is_valid_sequence
-    assert result.efficiency_score < 1.0
+    assert result.sequence_consistency < 1.0
     # Expected pairs: P<T, P<A, P<C, T<A, T<C, A<C (6 pairs)
     # Actual: P(0.2), C(0.25), T(0.3), A(0.4)
     # Pairs:
@@ -82,7 +82,7 @@ def test_kinematic_sequence_out_of_order():
     # T<A (ok), T<C (FAIL: T=0.3 > C=0.25)
     # A<C (FAIL: A=0.4 > C=0.25)
     # Correct pairs: 4/6 = 0.666
-    assert np.isclose(result.efficiency_score, 4 / 6, atol=0.01)
+    assert np.isclose(result.sequence_consistency, 4 / 6, atol=0.01)
     assert result.sequence_order == ["Pelvis", "Club", "Torso", "Arm"]
 
 
@@ -111,4 +111,4 @@ def test_empty_data():
     result = analyzer.analyze({}, np.array([]))
 
     assert len(result.peaks) == 0
-    assert result.efficiency_score == 0.0
+    assert result.sequence_consistency == 0.0

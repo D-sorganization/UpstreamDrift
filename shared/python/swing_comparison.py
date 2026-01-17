@@ -138,10 +138,9 @@ class SwingComparator:
         norm_dist = dist / len(path)
 
         # Similarity Score (0-100)
-        # Empirical: norm_dist 0 -> 100.
-        # norm_dist 1.0 (1 std dev avg error) -> maybe 50?
-        # Score = 100 / (1 + dist)
-        score = SIMILARITY_SCORE_CONSTANT / (1.0 + norm_dist)
+        # Using exponential decay to avoid patent conflicts with specific algebraic forms.
+        # norm_dist is Z-score error. 1.0 means ~1 std dev avg error.
+        score = SIMILARITY_SCORE_CONSTANT * np.exp(-norm_dist)
 
         return DTWResult(
             distance=dist,
