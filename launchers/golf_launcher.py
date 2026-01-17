@@ -66,7 +66,6 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from launchers.model_registry import ModelSpec, get_model_registry
 from shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
@@ -421,7 +420,8 @@ class AsyncStartupWorker(QThread):
 
     def _load_registry(self) -> None:
         """Load the model registry."""
-        registry = get_model_registry()
+        ModelRegistry = _lazy_load_model_registry()
+        registry = ModelRegistry()
         registry.load(self.repos_root)
         self.results.registry = registry
 
@@ -429,8 +429,8 @@ class AsyncStartupWorker(QThread):
         """Probe available physics engines."""
         EngineManager, _ = _lazy_load_engine_manager()
         self.results.engine_manager = EngineManager(self.repos_root)
-        # In a real impl, we would probe here.
-        pass
+        # Probe all engines to cache their status
+        self.results.engine_manager.probe_all_engines()
 
     def _check_docker(self) -> bool:
         """Check if Docker is available."""
@@ -1285,7 +1285,7 @@ class GolfLauncher(QMainWindow):
             {}
         )  # Track running instances
         self.available_models: dict[str, Any] = {}
-        self.special_app_lookup: dict[str, ModelSpec] = {}
+        self.special_app_lookup: dict[str, Any] = {}
         self.current_filter_text = ""
 
         # Use pre-loaded registry from startup results, or load fresh
@@ -2272,7 +2272,7 @@ class GolfLauncher(QMainWindow):
                 self, "Launch Error", f"Failed to launch C3D Viewer:\n{e}"
             )
 
-    def _launch_matlab_app(self, app: ModelSpec) -> None:
+    def _launch_matlab_app(self, app: Any) -> None:
         """Launch a MATLAB-based application using batch mode."""
 
         app_id = getattr(app, "id", "matlab_app")
