@@ -5,6 +5,7 @@ from shared.python.ball_flight_physics import (
     BallProperties,
     EnvironmentalConditions,
     LaunchConditions,
+    compute_aerodynamic_forces,
 )
 
 
@@ -144,3 +145,34 @@ class TestBallFlightPhysics:
             assert np.allclose(
                 point.acceleration, expected_acc, atol=1e-5
             ), f"Acceleration mismatch at t={point.time}"
+
+    def test_compute_aerodynamic_forces_kernel(self):
+        """Test the shared physics kernel directly."""
+        ball = BallProperties()
+        velocity = np.array([50.0, 0.0, 0.0])
+        wind = np.zeros(3)
+        rho = 1.2
+        area = ball.cross_sectional_area
+        radius = ball.radius
+        spin = 3000.0
+        axis = np.array([0.0, -1.0, 0.0])
+
+        # Scalar call
+        drag, magnus = compute_aerodynamic_forces(
+            velocity, wind, rho, area, radius, ball, spin, axis
+        )
+        assert drag.shape == (3,)
+        assert magnus.shape == (3,)
+        assert drag[0] < 0  # Drag opposes velocity
+        assert magnus[2] > 0  # Backspin -> Lift
+
+        # Vectorized call
+        vel_batch = np.array([[50.0, 50.0], [0.0, 0.0], [0.0, 0.0]])  # (3, 2)
+        wind_batch = np.zeros((3, 2))
+
+        drag_b, magnus_b = compute_aerodynamic_forces(
+            vel_batch, wind_batch, rho, area, radius, ball, spin, axis
+        )
+        assert drag_b.shape == (3, 2)
+        assert np.allclose(drag_b[:, 0], drag)
+        assert np.allclose(drag_b[:, 1], drag)
