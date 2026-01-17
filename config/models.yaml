@@ -1,105 +1,27 @@
 models:
-  # --- Primary Engines (Row 1) ---
-  - id: mujoco_humanoid
-    name: "MuJoCo Humanoid"
-    description: "High-fidelity whole-body biomechanics simulation. Features a 23-DOF humanoid model with active muscle sites, ground reaction force (GRF) visualization, and detailed contact dynamics. Ideal for analyzing kinetic chains and joint torque generation during the swing."
-    type: "custom_humanoid"
-    path: "engines/physics_engines/mujoco"
+  - id: "humanoid_2d"
+    name: "2D Humanoid 3L"
+    description: "Simplified planar model."
+    type: "engine_managed"
+    path: "engines/physics_engines/mujoco/models/humanoid_2d_3link.xml"
+    engine_type: "mujoco"
 
-  - id: drake_golf
-    name: "Drake Golf Model"
-    description: "Control-theoretic golf robot focusing on trajectory optimization. Utilizes Drake's rigorous multibody dynamics and constraint solvers to generate physically consistent swing paths. Features stabilizing controllers and inverse dynamics solvers."
-    type: "drake"
-    path: "engines/physics_engines/drake"
+  - id: "humanoid_7dof"
+    name: "7-DOF Spatial Model"
+    description: "Full spatial whole-body model."
+    type: "engine_managed"
+    path: "engines/physics_engines/mujoco/models/humanoid_7dof.xml"
+    engine_type: "mujoco"
 
-  - id: pinocchio_golf
-    name: "Pinocchio Golf Model"
-    description: "Ultra-fast rigid body dynamics engine based on Featherstone's spatial algebra. Specialized for rapid iteration and derivative computation. Validates kinematic chains and provides baseline capabilities for trajectory optimization algorithms."
-    type: "pinocchio"
-    path: "engines/physics_engines/pinocchio"
-
-  - id: opensim_golf
-    name: "OpenSim Golf"
-    description: "Musculoskeletal modeling engine for biomechanical analysis. Focuses on muscle forces, moment arms, and physiological constraints."
-    type: "opensim"
-    path: "engines/physics_engines/opensim"
-
-  # --- Primary Engines (Row 2) ---
-  - id: myosim_suite
-    name: "MyoSim Suite"
-    description: "Rigid-body physics engine powered by MuJoCo, integrated via MyoSuite Gym environments. Provides access to official MyoSuite musculoskeletal models."
-    type: "myosuite"
-    path: "engines/physics_engines/myosuite"
-
-  - id: openpose_analysis
-    name: "OpenPose Analysis"
-    description: "Vision-based pose estimation pipeline. Extracts 2D joint centers from video inputs for kinematic analysis."
-    type: "openpose"
-    path: "shared/python/pose_estimation"
-
-  - id: mujoco_dashboard
-    name: "MuJoCo Dashboard"
-    description: "Interactive research workbench for comparative analysis. Switch instantly between double-pendulum, wrist-cocking, and full-body models. Includes real-time plots for phase space trajectories, energy conservation verification, and parameter tuning sliders."
-    type: "custom_dashboard"
-    path: "engines/physics_engines/mujoco"
-
-  - id: matlab_simscape
-    name: "Matlab Simscape"
-    description: "Simscape Multibody models for control design and validation. Requires local MATLAB installation."
-    type: "matlab"
-    path: "engines/Simscape_Multibody_Models"
-
-  # --- Example Models (Row 3+) ---
-  - id: basic_swing
-    name: "Basic Swing"
-    description: "Basic swing with shoulder and wrist joints. Simplest realistic model."
-    type: "mjcf"
-    path: "engines/physics_engines/mujoco/models/basic_swing.xml"
-
-  - id: simple_pendulum
+  - id: "pendulum_simple"
     name: "Simple Pendulum"
-    description: "Simple driven pendulum showing chaotic behavior."
-    type: "mjcf"
+    description: "Basic single link pendulum test."
+    type: "engine_managed"
     path: "engines/physics_engines/mujoco/models/simple_pendulum.xml"
+    engine_type: "mujoco"
 
-  - id: arm_mechanics
-    name: "Arm Mechanics"
-    description: "Adds elbow joint for more realistic arm mechanics."
-    type: "mjcf"
-    path: "engines/physics_engines/mujoco/models/arm_mechanics.xml"
-
-  - id: spine_rotation
-    name: "Spine Rotation"
-    description: "Upper body model with spine rotation and both arms."
-    type: "mjcf"
-    path: "engines/physics_engines/mujoco/models/spine_rotation.xml"
-
-  - id: full_body
-    name: "Full Body"
-    description: "Full body model including leg drive and weight transfer."
-    type: "mjcf"
-    path: "engines/physics_engines/mujoco/models/full_body.xml"
-
-  - id: detailed_shoulders
-    name: "Detailed Shoulders"
-    description: "Most detailed model with scapulae, 3-DOF shoulders, flexible shaft."
-    type: "mjcf"
-    path: "engines/physics_engines/mujoco/models/detailed_shoulders.xml"
-
-  - id: muscle_arms
-    name: "Muscle Arms"
-    description: "Both arms with muscle actuation. Good for arm mechanics study."
-    type: "mjcf"
-    path: "engines/physics_engines/mujoco/models/muscle_arms.xml"
-
-  - id: muscle_upper
-    name: "Muscle Upper Body"
-    description: "Muscle-actuated upper body. Independent muscle control."
-    type: "mjcf"
-    path: "engines/physics_engines/mujoco/models/muscle_upper.xml"
-
-  - id: musculoskeletal
-    name: "Complete Musculoskeletal"
-    description: "Complete musculoskeletal model. Very complex - for advanced users."
-    type: "mjcf"
-    path: "engines/physics_engines/mujoco/models/musculoskeletal.xml"
+  - id: "urdf_generator"
+    name: "URDF Generator"
+    description: "Create custom robot models."
+    type: "special_app"
+    path: "tools/urdf_generator/main_window.py"
