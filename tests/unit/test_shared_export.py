@@ -55,7 +55,9 @@ class TestSharedExport:
         assert "hdf5" in formats
         assert formats["json"]["extension"] == ".json"
 
-    def test_export_to_matlab_success(self, tmp_path: Path, sample_data: dict[str, Any]) -> None:
+    def test_export_to_matlab_success(
+        self, tmp_path: Path, sample_data: dict[str, Any]
+    ) -> None:
         """Test successful export to MATLAB .mat file."""
         output_path = str(tmp_path / "test.mat")
 
@@ -78,20 +80,26 @@ class TestSharedExport:
                 assert "nested_dict_sub_array" in data_dict
                 assert "nested_dict_sub_scalar" in data_dict
 
-    def test_export_to_matlab_missing_dependency(self, tmp_path: Path, sample_data: dict[str, Any]) -> None:
+    def test_export_to_matlab_missing_dependency(
+        self, tmp_path: Path, sample_data: dict[str, Any]
+    ) -> None:
         """Test behavior when scipy is missing."""
         with patch("shared.python.export.SCIPY_AVAILABLE", False):
             success = export_to_matlab(str(tmp_path / "test.mat"), sample_data)
             assert success is False
 
-    def test_export_to_matlab_exception(self, tmp_path: Path, sample_data: dict[str, Any]) -> None:
+    def test_export_to_matlab_exception(
+        self, tmp_path: Path, sample_data: dict[str, Any]
+    ) -> None:
         """Test exception handling during export."""
         with patch("shared.python.export.savemat", side_effect=Exception("Disk full")):
             with patch("shared.python.export.SCIPY_AVAILABLE", True):
                 success = export_to_matlab(str(tmp_path / "test.mat"), sample_data)
                 assert success is False
 
-    def test_export_to_hdf5_success(self, tmp_path: Path, sample_data: dict[str, Any]) -> None:
+    def test_export_to_hdf5_success(
+        self, tmp_path: Path, sample_data: dict[str, Any]
+    ) -> None:
         """Test successful export to HDF5 file."""
         output_path = str(tmp_path / "test.h5")
 
@@ -113,13 +121,17 @@ class TestSharedExport:
                 # We can't easily check all calls because of how create_group is reused for different groups
                 # But we can verify that create_dataset was called on *some* group
 
-    def test_export_to_hdf5_missing_dependency(self, tmp_path: Path, sample_data: dict[str, Any]) -> None:
+    def test_export_to_hdf5_missing_dependency(
+        self, tmp_path: Path, sample_data: dict[str, Any]
+    ) -> None:
         """Test behavior when h5py is missing."""
         with patch("shared.python.export.H5PY_AVAILABLE", False):
             success = export_to_hdf5(str(tmp_path / "test.h5"), sample_data)
             assert success is False
 
-    def test_export_to_hdf5_exception(self, tmp_path: Path, sample_data: dict[str, Any]) -> None:
+    def test_export_to_hdf5_exception(
+        self, tmp_path: Path, sample_data: dict[str, Any]
+    ) -> None:
         """Test exception handling during HDF5 export."""
         with patch("shared.python.export.h5py") as mock_h5py:
             mock_h5py.File.side_effect = Exception("File locked")
@@ -127,13 +139,13 @@ class TestSharedExport:
                 success = export_to_hdf5(str(tmp_path / "test.h5"), sample_data)
                 assert success is False
 
-    def test_export_recording_all_formats_json(self, tmp_path: Path, sample_data: dict[str, Any]) -> None:
+    def test_export_recording_all_formats_json(
+        self, tmp_path: Path, sample_data: dict[str, Any]
+    ) -> None:
         """Test JSON export via generic function."""
         base_path = str(tmp_path / "recording")
 
-        results = export_recording_all_formats(
-            base_path, sample_data, formats=["json"]
-        )
+        results = export_recording_all_formats(base_path, sample_data, formats=["json"])
 
         assert results["json"] is True
         json_path = tmp_path / "recording.json"
@@ -146,19 +158,20 @@ class TestSharedExport:
             # Check nested dict handling
             assert data["nested_dict"]["sub_scalar"] == 100
 
-    def test_export_recording_all_formats_csv(self, tmp_path: Path, sample_data: dict[str, Any]) -> None:
+    def test_export_recording_all_formats_csv(
+        self, tmp_path: Path, sample_data: dict[str, Any]
+    ) -> None:
         """Test CSV export via generic function."""
         base_path = str(tmp_path / "recording")
 
-        results = export_recording_all_formats(
-            base_path, sample_data, formats=["csv"]
-        )
+        results = export_recording_all_formats(base_path, sample_data, formats=["csv"])
 
         assert results["csv"] is True
         csv_path = tmp_path / "recording.csv"
         assert csv_path.exists()
 
         import pandas as pd
+
         df = pd.read_csv(csv_path)
 
         assert "time" in df.columns
@@ -171,16 +184,18 @@ class TestSharedExport:
         assert "induced_accelerations_source_0" in df.columns
         assert "induced_accelerations_gravity" in df.columns
 
-    def test_export_recording_all_formats_partial_failure(self, tmp_path: Path, sample_data: dict[str, Any]) -> None:
+    def test_export_recording_all_formats_partial_failure(
+        self, tmp_path: Path, sample_data: dict[str, Any]
+    ) -> None:
         """Test that failure in one format doesn't stop others."""
         base_path = str(tmp_path / "recording")
 
         # Mock export_to_matlab to fail
         with patch("shared.python.export.export_to_matlab", return_value=False):
-             # Mock json dump to succeed (real file IO)
-             results = export_recording_all_formats(
+            # Mock json dump to succeed (real file IO)
+            results = export_recording_all_formats(
                 base_path, sample_data, formats=["json", "mat"]
-             )
+            )
 
-             assert results["json"] is True
-             assert results["mat"] is False
+            assert results["json"] is True
+            assert results["mat"] is False
