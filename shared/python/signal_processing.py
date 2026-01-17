@@ -157,11 +157,10 @@ def _dtw_path_core(
     distance = float(np.sqrt(dtw_matrix[n, m]))
 
     # Backtrack
-    # Path length is at most max(n, m) + abs(n - m) = max(n, m) + |n - m|
+    # Path length is at most n + m.
     # In practice, typical paths are closer to max(n, m) in length.
-    # We use max(n, m) as the initial allocation to reduce memory waste,
-    # since n + m over-allocates by approximately min(n, m) elements.
-    max_len = max(n, m)
+    # We use n + m to ensure sufficient allocation.
+    max_len = n + m
     path_i = np.empty(max_len, dtype=np.int32)
     path_j = np.empty(max_len, dtype=np.int32)
 
