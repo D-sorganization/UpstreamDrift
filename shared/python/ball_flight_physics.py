@@ -12,7 +12,7 @@ Critical gap identified in upgrade assessment - without this, not a complete gol
 
 import logging
 from dataclasses import dataclass
-from typing import Any, cast
+from typing import Any
 
 import numpy as np
 from scipy.integrate import solve_ivp
@@ -163,6 +163,155 @@ class TrajectoryPoint:
     forces: dict[str, np.ndarray]  # Force breakdown
 
 
+def compute_aerodynamic_forces(
+    velocity: np.ndarray,
+    wind_velocity: np.ndarray,
+    air_density: float,
+    ball_area: float,
+    ball_radius: float,
+    ball_props: BallProperties,
+    spin_rate: float,
+    spin_axis: np.ndarray | None,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Compute aerodynamic drag and Magnus forces.
+
+    This function unifies the physics calculation logic for both the ODE solver (scalar)
+    and the post-processing analysis (vectorized). It implements the algebraic optimizations
+    that avoid unnecessary divisions and normalizations.
+
+    Args:
+        velocity: Ball velocity vector (3,) or (3, N)
+        wind_velocity: Wind velocity vector (3,) or (3, N)
+        air_density: Air density [kg/m^3]
+        ball_area: Cross-sectional area [m^2]
+        ball_radius: Ball radius [m]
+        ball_props: Ball properties (coefficients)
+        spin_rate: Spin rate [rpm]
+        spin_axis: Normalized spin axis vector (3,)
+
+    Returns:
+        tuple: (drag_force, magnus_force)
+    """
+    is_batch = velocity.ndim == 2
+
+    # Prepare outputs
+    if is_batch:
+        drag_force = np.zeros_like(velocity)
+        magnus_force = np.zeros_like(velocity)
+    else:
+        drag_force = np.zeros(3)
+        magnus_force = np.zeros(3)
+
+    # Relative velocity
+    # Optimization: If wind is zero, we could skip subtraction, but it's cheap
+    relative_velocity = velocity - wind_velocity
+
+    # Calculate speed squared (avoid sqrt if possible, but we need speed for Re/SpinRatio)
+    if is_batch:
+        speed_sq = np.sum(relative_velocity**2, axis=0)
+    else:
+        speed_sq = np.dot(relative_velocity, relative_velocity)
+
+    # Mask for min speed
+    min_speed_sq = MIN_SPEED_THRESHOLD**2
+    if is_batch:
+        mask = speed_sq > min_speed_sq
+        if not np.any(mask):
+            return drag_force, magnus_force
+    else:
+        if speed_sq <= min_speed_sq:
+            return drag_force, magnus_force
+        mask = True  # Scalar case, just proceed
+
+    # Get valid data (masked)
+    if is_batch:
+        # We need to cast mask to expected type for numpy indexing if needed, but bool is fine
+        speed_masked_sq = speed_sq[mask]
+        speed_masked = np.sqrt(speed_masked_sq)
+        rel_vel_masked = relative_velocity[:, mask]
+    else:
+        speed_masked = np.sqrt(speed_sq)
+        rel_vel_masked = relative_velocity
+
+    # Spin ratio S = (omega * r) / v
+    if spin_rate > 0:
+        omega = spin_rate * 2 * np.pi / 60
+        spin_ratio = (omega * ball_radius) / speed_masked
+    else:
+        # Create zero array/scalar matching shape
+        if is_batch:
+            spin_ratio = np.zeros_like(speed_masked)
+        else:
+            spin_ratio = 0.0
+
+    # Constant term for force magnitude: 0.5 * rho * A
+    # (Note: ode_func used const_term / mass, here we compute Force, so no mass division yet)
+    force_const = 0.5 * air_density * ball_area
+
+    # --- Drag Calculation ---
+    # Drag Force = - (0.5 * rho * A * Cd * speed^2) * (rel_vel / speed)
+    #            = - (0.5 * rho * A * Cd * speed) * rel_vel
+    cd = ball_props.calculate_drag_coefficient(spin_ratio)
+    drag_factor = force_const * cd * speed_masked
+
+    if is_batch:
+        # Broadcast drag_factor (N,) to (3, N)
+        drag_force[:, mask] = -drag_factor * rel_vel_masked
+    else:
+        drag_force = -drag_factor * rel_vel_masked
+
+    # --- Magnus Calculation ---
+    if spin_rate > 0:
+        cl = ball_props.calculate_lift_coefficient(spin_ratio)
+        # Magnus Magnitude = 0.5 * rho * A * Cl * speed^2
+        magnus_mag = force_const * cl * (speed_masked**2)
+
+        if spin_axis is not None:
+            # Magnus Direction = normalize(spin_axis x rel_vel)
+            # (Note: spin_axis x (rel_vel/speed) is same direction as spin_axis x rel_vel)
+
+            if is_batch:
+                # Vectorized cross product
+                # spin_axis is (3,), rel_vel_masked is (3, N)
+                # We can't use np.cross easily with broadcasting (3,) x (3,N) -> (3,N)
+                # without transposing or reshaping.
+                # Manual cross product is faster and clearer here.
+                sx, sy, sz = spin_axis
+                vx = rel_vel_masked[0]
+                vy = rel_vel_masked[1]
+                vz = rel_vel_masked[2]
+
+                c0 = sy * vz - sz * vy
+                c1 = sz * vx - sx * vz
+                c2 = sx * vy - sy * vx
+
+                cross_mag_sq = c0 * c0 + c1 * c1 + c2 * c2
+                cross_mag = np.sqrt(cross_mag_sq)
+
+                valid_cross = cross_mag > NUMERICAL_EPSILON
+                # Avoid division by zero
+                # We need to map valid_cross (subset of mask) back to mask
+                # But here we are already inside the 'mask' subset.
+                # So valid_cross is relative to speed_masked.
+
+                factor = np.zeros_like(magnus_mag)
+                factor[valid_cross] = magnus_mag[valid_cross] / cross_mag[valid_cross]
+
+                magnus_force[0, mask] = factor * c0
+                magnus_force[1, mask] = factor * c1
+                magnus_force[2, mask] = factor * c2
+
+            else:
+                # Scalar cross product
+                cross_prod = np.cross(spin_axis, rel_vel_masked)
+                cross_mag = np.linalg.norm(cross_prod)
+
+                if cross_mag > NUMERICAL_EPSILON:
+                    magnus_force = magnus_mag * (cross_prod / cross_mag)
+
+    return drag_force, magnus_force
+
+
 class BallFlightSimulator:
     """Physics-based golf ball flight simulator."""
 
@@ -209,150 +358,50 @@ class BallFlightSimulator:
             ]
         )
 
-        # Precompute constants to avoid attribute access in loop
+        # Precompute constants
         gravity_acc = np.array([0.0, 0.0, -self.environment.gravity])
         wind_velocity = self.environment.wind_velocity
-        ball_radius = self.ball.radius
+        if wind_velocity is None:
+            wind_velocity = np.zeros(3)
+        ball_mass = self.ball.mass
 
-        # Aerodynamic constant: 0.5 * rho * A / m
-        const_term = (
-            0.5 * self.environment.air_density * self.ball.cross_sectional_area
-        ) / self.ball.mass
-
-        # Coefficients
-        cd0, cd1, cd2 = self.ball.cd0, self.ball.cd1, self.ball.cd2
-        cl0, cl1, cl2 = self.ball.cl0, self.ball.cl1, self.ball.cl2
-
-        # Spin parameters
-        has_spin = launch.spin_rate > 0
-        if has_spin:
-            omega = launch.spin_rate * 2 * np.pi / 60  # rad/s
-            spin_axis = launch.spin_axis
-            # Pre-fetch spin axis components for speed if available
-            if spin_axis is not None:
-                sax, say, saz = spin_axis
-            else:
-                sax, say, saz = 0.0, 0.0, 0.0
-        else:
-            omega = 0.0
-            spin_axis = None
-            sax, say, saz = 0.0, 0.0, 0.0
-
-        min_speed_sq = MIN_SPEED_THRESHOLD**2
+        # Pre-fetch properties to avoid self access in loop if possible,
+        # but for compute_aerodynamic_forces we pass self.ball.
+        # We pass self.ball which is a dataclass.
 
         # Optimized ODE function closure
-        # Contains the authoritative physics model for flight dynamics.
         def ode_func(t: float, state: np.ndarray) -> np.ndarray:
             # state is [x, y, z, vx, vy, vz]
-            # Velocity view (no copy)
             velocity = state[3:]
 
-            # Relative velocity
-            rel_vel = velocity - wind_velocity
-            # Optimization: use dot product instead of sum(x**2) to avoid allocation
-            speed_sq = rel_vel @ rel_vel
+            # Compute aerodynamic forces using the shared kernel
+            # Note: This function calls the shared kernel which is robust but maybe
+            # has slightly more overhead than the previous fully inlined version.
+            # However, it respects DRY and reduces bug risk.
+            # Given Python overhead, the function call cost is small compared to
+            # the safety benefit.
+            drag_force, magnus_force = compute_aerodynamic_forces(
+                velocity=velocity,
+                wind_velocity=wind_velocity,
+                air_density=self.environment.air_density,
+                ball_area=self.ball.cross_sectional_area,
+                ball_radius=self.ball.radius,
+                ball_props=self.ball,
+                spin_rate=launch.spin_rate,
+                spin_axis=launch.spin_axis,
+            )
 
-            if speed_sq <= min_speed_sq:
-                # If stopped, only gravity acts (or nothing if resting, but here flight)
-                acc = gravity_acc
-                result = np.empty(6, dtype=state.dtype)
-                result[:3] = velocity
-                result[3:] = acc
-                return result
+            # Acceleration = Gravity + (Drag + Magnus) / Mass
+            total_aero_force = drag_force + magnus_force
+            acc = gravity_acc + total_aero_force / ball_mass
 
-            speed = np.sqrt(speed_sq)
-            # PERFORMANCE OPTIMIZATION: Algebraic transformation to avoid velocity normalization
-            #
-            # Traditional approach:
-            #   vel_unit = rel_vel / speed
-            #   drag_force = 0.5 * rho * A * Cd * speed^2 * vel_unit
-            #              = 0.5 * rho * A * Cd * speed^2 * (rel_vel / speed)
-            #              = 0.5 * rho * A * Cd * speed * rel_vel
-            #
-            # By algebraically simplifying, we can compute:
-            #   drag_factor = const_term * Cd * speed
-            #   drag_accel = -drag_factor * rel_vel
-            #
-            # This eliminates 3 divisions per timestep (one per velocity component)
-            # while producing mathematically identical results. The same optimization
-            # applies to the Magnus force calculation where we use the unnormalized
-            # cross product and adjust the magnitude accordingly.
-            #
-            # Performance impact: ~15-20% speedup in ODE evaluations (measured via
-            # pytest-benchmark on typical 1000-point trajectories).
-            #
-            # See also: flight_models.py uses vel_unit directly for clarity in
-            # educational/reference implementations.
-
-            # Spin ratio S = (omega * r) / v
-            if has_spin:
-                spin_ratio = (omega * ball_radius) / speed
-            else:
-                spin_ratio = 0.0
-
-            # Drag
-            # Note: We duplicate logic slightly here vs self.ball.calculate_drag_coefficient
-            # to keep this inner loop optimized (avoid method call overhead + closure access)
-            # However, the formula matches BallProperties.calculate_drag_coefficient
-            # drag_force = drag_mag * vel_unit = (const * cd * speed^2) * (rel_vel / speed)
-            #            = (const * cd * speed) * rel_vel
-            cd = cd0 + spin_ratio * (cd1 + spin_ratio * cd2)
-            # Optimization: Calculate factor for rel_vel instead of unit vector
-            drag_factor = const_term * cd * speed
-
-            # acc = gravity - drag
-            acc_x = gravity_acc[0] - drag_factor * rel_vel[0]
-            acc_y = gravity_acc[1] - drag_factor * rel_vel[1]
-            acc_z = gravity_acc[2] - drag_factor * rel_vel[2]
-
-            # Lift (Magnus)
-            if has_spin and spin_ratio > 0:
-                # Matches BallProperties.calculate_lift_coefficient
-                cl = cl0 + spin_ratio * (cl1 + spin_ratio * cl2)
-                if cl > MAX_LIFT_COEFFICIENT:
-                    cl = MAX_LIFT_COEFFICIENT
-
-                magnus_mag = const_term * cl * speed_sq
-
-                # ALGEBRAIC TRANSFORMATION for Magnus force:
-                # Traditional: cross_unit = normalize(spin_axis x vel_unit)
-                #              magnus = magnus_mag * cross_unit
-                # Optimized:   cross_unnorm = spin_axis x rel_vel
-                #              cross_unit = cross_unnorm / |cross_unnorm|
-                #              magnus = magnus_mag * cross_unit
-                # Since |spin_axis x vel_unit| = |spin_axis x (rel_vel/speed)| = |cross_unnorm|/speed,
-                # the direction is preserved and we avoid normalizing velocity first.
-                # Cross product: spin_axis x rel_vel (NOT vel_unit)
-                if spin_axis is not None:
-                    # Manual cross product with unnormalized velocity
-                    # c_unnorm = spin_axis x rel_vel
-                    # Optimization: Use pre-fetched scalar components
-                    c0_u = say * rel_vel[2] - saz * rel_vel[1]
-                    c1_u = saz * rel_vel[0] - sax * rel_vel[2]
-                    c2_u = sax * rel_vel[1] - say * rel_vel[0]
-
-                    cross_mag_sq_u = c0_u * c0_u + c1_u * c1_u + c2_u * c2_u
-
-                    if cross_mag_sq_u > NUMERICAL_EPSILON**2:
-                        # Force direction is cross_prod_u / |cross_prod_u|
-                        # Force magnitude is magnus_mag
-                        # Force vector = magnus_mag * cross_prod_u / |cross_prod_u|
-                        # We have |cross_prod_u| = cross_mag_u
-                        cross_mag_u = np.sqrt(cross_mag_sq_u)
-                        factor = magnus_mag / cross_mag_u
-
-                        acc_x += c0_u * factor
-                        acc_y += c1_u * factor
-                        acc_z += c2_u * factor
+            # Stop if underground (though event handles this)
+            # The event function handles termination, but simple check helps if needed.
 
             # Construct result
             result = np.empty(6, dtype=state.dtype)
-            result[0] = velocity[0]
-            result[1] = velocity[1]
-            result[2] = velocity[2]
-            result[3] = acc_x
-            result[4] = acc_y
-            result[5] = acc_z
+            result[:3] = velocity
+            result[3:] = acc
             return result
 
         # Time span
@@ -372,10 +421,8 @@ class BallFlightSimulator:
 
         # Convert solution to trajectory points
         trajectory = []
-        # Pre-fetching attributes to local vars for loop speed
         sol_t = solution.t
         sol_y = solution.y
-        ball_mass = self.ball.mass
 
         # Calculate forces for all points at once (vectorized)
         velocities = sol_y[3:, :]
@@ -383,6 +430,7 @@ class BallFlightSimulator:
 
         # Pre-calculate accelerations from forces
         # Use np.sum with axis=0 to ensure we sum the arrays correctly
+        # all_forces is a dict of arrays (3, N)
         total_forces = np.sum(list(all_forces.values()), axis=0)  # type: ignore[arg-type]
         all_accelerations = total_forces / ball_mass
 
@@ -420,157 +468,41 @@ class BallFlightSimulator:
         Returns:
             Dictionary of force vectors
         """
-        # Note: This logic must match ode_func in simulate_trajectory.
-        # It is used for diagnostic reporting (TrajectoryPoint.forces).
-
-        is_batch = velocity.ndim == 2
-        forces = {}
-
-        # Gravity force
-        gravity = np.array([0.0, 0.0, -self.ball.mass * self.environment.gravity])
-        if is_batch:
-            forces["gravity"] = np.tile(gravity[:, np.newaxis], (1, velocity.shape[1]))
-        else:
-            forces["gravity"] = gravity
-
-        # Relative velocity (accounting for wind)
+        # DRY: Use the shared kernel
         wind = self.environment.wind_velocity
-        assert wind is not None
-        if is_batch:
-            wind = wind[:, np.newaxis]
-            axis: int | None = 0
-        else:
-            axis = None
-
-        relative_velocity = velocity - wind
-        speed = np.linalg.norm(relative_velocity, axis=axis)
-
-        # Prepare outputs
-        if is_batch:
-            drag_force = np.zeros_like(velocity)
-            magnus_force = np.zeros_like(velocity)
-        else:
-            drag_force = np.zeros(3)
-            magnus_force = np.zeros(3)
-
-        # Vectorized calculation
-        mask = speed > MIN_SPEED_THRESHOLD
-
-        # Handle scalar (single vector) case for mask
-        if not is_batch:
-            should_compute = mask
-        else:
-            should_compute = np.any(mask)
-
-        if should_compute:
-            if is_batch:
-                # Batch processing
-                speed_array = cast(np.ndarray, speed)
-                speed_masked = speed_array[mask]
-                vel_masked = relative_velocity[:, mask]
-                velocity_unit = vel_masked / speed_masked
-
-                if launch.spin_rate > 0:
-                    omega = launch.spin_rate * 2 * np.pi / 60
-                    spin_ratio = (omega * self.ball.radius) / speed_masked
-                else:
-                    spin_ratio = np.zeros_like(speed_masked)
-
-                # Drag
-                drag_coef = self.ball.calculate_drag_coefficient(spin_ratio)
-                drag_mag = (
-                    0.5
-                    * self.environment.air_density
-                    * self.ball.cross_sectional_area
-                    * drag_coef
-                    * speed_masked**2
-                )
-                drag_force[:, mask] = -drag_mag * velocity_unit
-
-                # Magnus
-                if launch.spin_rate > 0:
-                    lift_coef = self.ball.calculate_lift_coefficient(spin_ratio)
-
-                    magnus_mag = (
-                        0.5
-                        * self.environment.air_density
-                        * self.ball.cross_sectional_area
-                        * lift_coef
-                        * speed_masked**2
-                    )
-
-                    if launch.spin_axis is not None:
-                        # Optimization: Manual cross product and magnitude calculation
-                        # This avoids large array allocations and is ~3-4x faster than np.cross
-                        # spin_axis is (3,), velocity_unit is (3, M)
-                        sx, sy, sz = launch.spin_axis
-                        vx = velocity_unit[0]
-                        vy = velocity_unit[1]
-                        vz = velocity_unit[2]
-
-                        # Compute cross product components manually
-                        c0 = sy * vz - sz * vy
-                        c1 = sz * vx - sx * vz
-                        c2 = sx * vy - sy * vx
-
-                        # Compute magnitude squared then sqrt
-                        cross_mag_sq = c0 * c0 + c1 * c1 + c2 * c2
-                        cross_mag = np.sqrt(cross_mag_sq)
-
-                        # Avoid division by zero
-                        valid_cross = cross_mag > NUMERICAL_EPSILON
-                        factor = np.zeros_like(magnus_mag)
-                        factor[valid_cross] = (
-                            magnus_mag[valid_cross] / cross_mag[valid_cross]
-                        )
-
-                        # Direct assignment to result array avoids allocating intermediate (3, M) array
-                        magnus_force[0, mask] = factor * c0
-                        magnus_force[1, mask] = factor * c1
-                        magnus_force[2, mask] = factor * c2
+        if wind is None:
+            if velocity.ndim == 2:
+                wind = np.zeros((3, 1))
             else:
-                # Single vector processing (original logic)
-                velocity_unit = relative_velocity / speed
+                wind = np.zeros(3)
+        elif velocity.ndim == 2 and wind.ndim == 1:
+            wind = wind[:, np.newaxis]
 
-                if launch.spin_rate > 0:
-                    omega = launch.spin_rate * 2 * np.pi / 60
-                    s_ratio = float((omega * self.ball.radius) / speed)
-                else:
-                    s_ratio = 0.0
+        drag_force, magnus_force = compute_aerodynamic_forces(
+            velocity=velocity,
+            wind_velocity=wind,
+            air_density=self.environment.air_density,
+            ball_area=self.ball.cross_sectional_area,
+            ball_radius=self.ball.radius,
+            ball_props=self.ball,
+            spin_rate=launch.spin_rate,
+            spin_axis=launch.spin_axis,
+        )
 
-                drag_coef_scalar = self.ball.calculate_drag_coefficient(s_ratio)
-                drag_magnitude = (
-                    0.5
-                    * self.environment.air_density
-                    * self.ball.cross_sectional_area
-                    * drag_coef_scalar
-                    * speed**2
-                )
-                drag_force = -drag_magnitude * velocity_unit
+        # Gravity
+        gravity_acc = np.array([0.0, 0.0, -self.environment.gravity])
+        if velocity.ndim == 2:
+            gravity_force = np.tile(
+                gravity_acc[:, np.newaxis] * self.ball.mass, (1, velocity.shape[1])
+            )
+        else:
+            gravity_force = gravity_acc * self.ball.mass
 
-                if s_ratio > 0:
-                    lift_coef_scalar = self.ball.calculate_lift_coefficient(s_ratio)
-
-                    magnus_magnitude = (
-                        0.5
-                        * self.environment.air_density
-                        * self.ball.cross_sectional_area
-                        * lift_coef_scalar
-                        * speed**2
-                    )
-
-                    if launch.spin_axis is not None:
-                        cross_product = np.cross(launch.spin_axis, velocity_unit)
-                        cross_magnitude = float(np.linalg.norm(cross_product))
-                        if cross_magnitude > NUMERICAL_EPSILON:
-                            magnus_force = (
-                                magnus_magnitude * cross_product / cross_magnitude
-                            )
-
-        forces["drag"] = drag_force
-        forces["magnus"] = magnus_force
-
-        return forces
+        return {
+            "gravity": gravity_force,
+            "drag": drag_force,
+            "magnus": magnus_force,
+        }
 
     def _ground_contact_event(self, t: float, state: np.ndarray) -> float:
         """Event function to detect ground contact.
