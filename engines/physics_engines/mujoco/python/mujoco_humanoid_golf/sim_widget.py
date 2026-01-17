@@ -819,23 +819,55 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 if self.telemetry is not None:
                     self.telemetry.record_step(self.data)
 
-            # Determine selected actuator if any
-            selected_actuator = None
-            if self.show_induced_vectors and self.induced_vector_source not in [
-                "gravity",
-                "actuator",
-            ]:
-                selected_actuator = self.induced_vector_source
+            # Check recorder analysis config to see if advanced metrics are requested
+            # by LivePlotWidget or other consumers.
+            config_requests_analysis = False
+            config_selected_actuator = None
+
+            if hasattr(self.recorder, "analysis_config") and isinstance(
+                self.recorder.analysis_config, dict
+            ):
+                cfg = self.recorder.analysis_config
+                # Check flags
+                if (
+                    cfg.get("ztcf")
+                    or cfg.get("zvcf")
+                    or cfg.get("track_drift")
+                    or cfg.get("track_total_control")
+                ):
+                    config_requests_analysis = True
+
+                # Check requested sources
+                sources = cfg.get("induced_accel_sources", [])
+                if sources:
+                    config_requests_analysis = True
+                    # Pick first non-standard source as selected actuator
+                    for src in sources:
+                        if src not in ["gravity", "velocity", "total", "actuator"]:
+                            config_selected_actuator = str(src)
+                            break
+
+            # Determine compute flag
+            should_compute = self.enable_live_analysis or config_requests_analysis
+
+            # Determine selected actuator (prioritize config, fall back to UI)
+            selected_actuator = config_selected_actuator
+            if selected_actuator is None:
+                if self.show_induced_vectors and self.induced_vector_source not in [
+                    "gravity",
+                    "actuator",
+                ]:
+                    selected_actuator = self.induced_vector_source
 
             if self.analyzer is not None and self.recorder.is_recording:
                 bio_data = self.analyzer.extract_full_state(
                     selected_actuator_name=selected_actuator,
-                    compute_advanced_metrics=self.enable_live_analysis,
+                    compute_advanced_metrics=should_compute,
                 )
                 self.recorder.record_frame(bio_data)
                 self.latest_bio_data = bio_data
-            elif self.enable_live_analysis and self.analyzer:
-                # Even if not recording, compute metrics for visualization if enabled
+            elif should_compute and self.analyzer:
+                # Even if not recording, compute metrics for visualization if needed
                 self.latest_bio_data = self.analyzer.extract_full_state(
                     selected_actuator_name=selected_actuator,
                     compute_advanced_metrics=True,

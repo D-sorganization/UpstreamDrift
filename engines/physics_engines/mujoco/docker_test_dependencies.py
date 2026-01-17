@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 
-def test_python_environment():
+def test_python_environment() -> None:
     """Test the Python environment and paths."""
     print("🐍 Python Environment Diagnostics")
     print("=" * 50)
@@ -25,7 +25,7 @@ def test_python_environment():
     print()
 
 
-def test_pip_list():
+def test_pip_list() -> None:
     """Show all installed packages."""
     print("📦 Installed Packages")
     print("=" * 50)
@@ -44,7 +44,7 @@ def test_pip_list():
     print()
 
 
-def test_specific_imports():
+def test_specific_imports() -> bool:
     """Test specific problematic imports."""
     print("🔍 Testing Specific Imports")
     print("=" * 50)
@@ -100,7 +100,7 @@ def test_specific_imports():
     return True
 
 
-def test_environment_activation():
+def test_environment_activation() -> None:
     """Test if the virtual environment is properly activated."""
     print("🔧 Environment Activation Test")
     print("=" * 50)
@@ -136,7 +136,7 @@ def test_environment_activation():
         print(f"❌ Virtual environment python not found: {venv_python}")
 
 
-def main():
+def main() -> int:
     """Main diagnostic function."""
     print("🔬 Docker Container Dependency Diagnostics")
     print("=" * 60)

@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-def rebuild_docker_image():
+def rebuild_docker_image() -> bool:
     """Rebuild the robotics_env Docker image."""
     print("🔧 Rebuilding Docker image with updated dependencies...")
 
@@ -48,7 +48,7 @@ def rebuild_docker_image():
         return False
 
 
-def main():
+def main() -> int:
     """Main entry point."""
     print("🐳 MuJoCo Golf Model - Docker Image Rebuilder")
     print("=" * 50)

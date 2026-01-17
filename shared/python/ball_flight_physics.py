@@ -17,6 +17,26 @@ from typing import Any, cast
 import numpy as np
 from scipy.integrate import solve_ivp
 
+# Performance: Optional Numba JIT compilation
+try:
+    from numba import jit
+
+    NUMBA_AVAILABLE = True
+except ImportError:
+    NUMBA_AVAILABLE = False
+
+    # Create a no-op decorator when numba is not available
+    def jit(*args: object, **kwargs: object) -> object:  # type: ignore[misc]
+        """No-op decorator when numba is not installed."""
+
+        def decorator(func: object) -> object:  # type: ignore[misc]
+            return func
+
+        if len(args) == 1 and callable(args[0]):
+            return args[0]
+        return decorator
+
+
 logger = logging.getLogger(__name__)
 
 # =============================================================================
@@ -163,6 +183,260 @@ class TrajectoryPoint:
     forces: dict[str, np.ndarray]  # Force breakdown
 
 
+@jit(nopython=True, cache=True)
+def _flight_dynamics_core(
+    state: np.ndarray,
+    gravity_acc: np.ndarray,
+    wind_velocity: np.ndarray,
+    ball_radius: float,
+    const_term: float,
+    cd0: float,
+    cd1: float,
+    cd2: float,
+    cl0: float,
+    cl1: float,
+    cl2: float,
+    has_spin: bool,
+    omega: float,
+    has_spin_axis: bool,
+    sax: float,
+    say: float,
+    saz: float,
+    min_speed_sq: float,
+    max_lift_coeff: float,
+    numerical_epsilon: float,
+) -> np.ndarray:
+    """Core flight dynamics calculation (optimized)."""
+    # state is [x, y, z, vx, vy, vz]
+    # Velocity view (no copy)
+    velocity = state[3:]
+
+    # Relative velocity
+    rel_vel = velocity - wind_velocity
+    # Optimization: use dot product instead of sum(x**2) to avoid allocation
+    speed_sq = rel_vel @ rel_vel
+
+    if speed_sq <= min_speed_sq:
+        # If stopped, only gravity acts (or nothing if resting, but here flight)
+        acc = gravity_acc
+        result = np.empty(6, dtype=state.dtype)
+        result[:3] = velocity
+        result[3:] = acc
+        return result
+
+    speed = np.sqrt(speed_sq)
+
+    # Spin ratio S = (omega * r) / v
+    if has_spin:
+        spin_ratio = (omega * ball_radius) / speed
+    else:
+        spin_ratio = 0.0
+
+    # Drag
+    cd = cd0 + spin_ratio * (cd1 + spin_ratio * cd2)
+    # Optimization: Calculate factor for rel_vel instead of unit vector
+    drag_factor = const_term * cd * speed
+
+    # acc = gravity - drag
+    acc_x = gravity_acc[0] - drag_factor * rel_vel[0]
+    acc_y = gravity_acc[1] - drag_factor * rel_vel[1]
+    acc_z = gravity_acc[2] - drag_factor * rel_vel[2]
+
+    # Lift (Magnus)
+    if has_spin and spin_ratio > 0:
+        cl = cl0 + spin_ratio * (cl1 + spin_ratio * cl2)
+        if cl > max_lift_coeff:
+            cl = max_lift_coeff
+
+        magnus_mag = const_term * cl * speed_sq
+
+        # Cross product: spin_axis x rel_vel (NOT vel_unit)
+        if has_spin_axis:
+            # Manual cross product with unnormalized velocity
+            # c_unnorm = spin_axis x rel_vel
+            # Optimization: Use pre-fetched scalar components
+            c0_u = say * rel_vel[2] - saz * rel_vel[1]
+            c1_u = saz * rel_vel[0] - sax * rel_vel[2]
+            c2_u = sax * rel_vel[1] - say * rel_vel[0]
+
+            cross_mag_sq_u = c0_u * c0_u + c1_u * c1_u + c2_u * c2_u
+
+            if cross_mag_sq_u > numerical_epsilon**2:
+                # Force direction is cross_prod_u / |cross_prod_u|
+                # Force magnitude is magnus_mag
+                # Force vector = magnus_mag * cross_prod_u / |cross_prod_u|
+                # We have |cross_prod_u| = cross_mag_u
+                cross_mag_u = np.sqrt(cross_mag_sq_u)
+                factor = magnus_mag / cross_mag_u
+
+                acc_x += c0_u * factor
+                acc_y += c1_u * factor
+                acc_z += c2_u * factor
+
+    # Construct result
+    result = np.empty(6, dtype=state.dtype)
+    result[0] = velocity[0]
+    result[1] = velocity[1]
+    result[2] = velocity[2]
+    result[3] = acc_x
+    result[4] = acc_y
+    result[5] = acc_z
+    return result
+
+
+@jit(nopython=True, cache=True)
+def _solve_rk4(
+    initial_state: np.ndarray,
+    dt: float,
+    max_time: float,
+    gravity_acc: np.ndarray,
+    wind_velocity: np.ndarray,
+    ball_radius: float,
+    const_term: float,
+    cd0: float,
+    cd1: float,
+    cd2: float,
+    cl0: float,
+    cl1: float,
+    cl2: float,
+    has_spin: bool,
+    omega: float,
+    has_spin_axis: bool,
+    sax: float,
+    say: float,
+    saz: float,
+    min_speed_sq: float,
+    max_lift_coeff: float,
+    numerical_epsilon: float,
+) -> np.ndarray:
+    """Numba-optimized RK4 solver with fixed time step."""
+    # Estimate max steps
+    max_steps = int(max_time / dt) + 1
+    out_states = np.empty((max_steps, 7), dtype=np.float64)
+
+    current_state = initial_state.copy()
+    time_val = 0.0
+
+    out_states[0, 0] = time_val
+    out_states[0, 1:] = current_state
+
+    step_count = 1
+
+    for i in range(1, max_steps):
+        # RK4 Integration
+        k1 = _flight_dynamics_core(
+            current_state,
+            gravity_acc,
+            wind_velocity,
+            ball_radius,
+            const_term,
+            cd0,
+            cd1,
+            cd2,
+            cl0,
+            cl1,
+            cl2,
+            has_spin,
+            omega,
+            has_spin_axis,
+            sax,
+            say,
+            saz,
+            min_speed_sq,
+            max_lift_coeff,
+            numerical_epsilon,
+        )
+
+        y_k1 = current_state + 0.5 * dt * k1
+        k2 = _flight_dynamics_core(
+            y_k1,
+            gravity_acc,
+            wind_velocity,
+            ball_radius,
+            const_term,
+            cd0,
+            cd1,
+            cd2,
+            cl0,
+            cl1,
+            cl2,
+            has_spin,
+            omega,
+            has_spin_axis,
+            sax,
+            say,
+            saz,
+            min_speed_sq,
+            max_lift_coeff,
+            numerical_epsilon,
+        )
+
+        y_k2 = current_state + 0.5 * dt * k2
+        k3 = _flight_dynamics_core(
+            y_k2,
+            gravity_acc,
+            wind_velocity,
+            ball_radius,
+            const_term,
+            cd0,
+            cd1,
+            cd2,
+            cl0,
+            cl1,
+            cl2,
+            has_spin,
+            omega,
+            has_spin_axis,
+            sax,
+            say,
+            saz,
+            min_speed_sq,
+            max_lift_coeff,
+            numerical_epsilon,
+        )
+
+        y_k3 = current_state + dt * k3
+        k4 = _flight_dynamics_core(
+            y_k3,
+            gravity_acc,
+            wind_velocity,
+            ball_radius,
+            const_term,
+            cd0,
+            cd1,
+            cd2,
+            cl0,
+            cl1,
+            cl2,
+            has_spin,
+            omega,
+            has_spin_axis,
+            sax,
+            say,
+            saz,
+            min_speed_sq,
+            max_lift_coeff,
+            numerical_epsilon,
+        )
+
+        current_state += (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
+        time_val += dt
+
+        out_states[i, 0] = time_val
+        out_states[i, 1:] = current_state
+        step_count += 1
+
+        # Ground check (z <= 0)
+        # Note: We stop exactly when we go below zero, without interpolation
+        # for maximum speed. The original solve_ivp uses an event function
+        # which might be more precise, but for visualization/analytics
+        # at 100Hz (dt=0.01), this is usually sufficient.
+        if current_state[2] <= 0:
+            break
+
+    return out_states[:step_count]
+
+
 class BallFlightSimulator:
     """Physics-based golf ball flight simulator."""
 
@@ -231,150 +505,92 @@ class BallFlightSimulator:
             # Pre-fetch spin axis components for speed if available
             if spin_axis is not None:
                 sax, say, saz = spin_axis
+                has_spin_axis = True
             else:
                 sax, say, saz = 0.0, 0.0, 0.0
+                has_spin_axis = False
         else:
             omega = 0.0
             spin_axis = None
+            has_spin_axis = False
             sax, say, saz = 0.0, 0.0, 0.0
 
         min_speed_sq = MIN_SPEED_THRESHOLD**2
 
-        # Optimized ODE function closure
-        # Contains the authoritative physics model for flight dynamics.
-        def ode_func(t: float, state: np.ndarray) -> np.ndarray:
-            # state is [x, y, z, vx, vy, vz]
-            # Velocity view (no copy)
-            velocity = state[3:]
+        if NUMBA_AVAILABLE:
+            # Use JIT-compiled RK4 solver
+            solution_arr = _solve_rk4(
+                initial_state,
+                time_step,
+                max_time,
+                gravity_acc,
+                wind_velocity,
+                ball_radius,
+                const_term,
+                cd0,
+                cd1,
+                cd2,
+                cl0,
+                cl1,
+                cl2,
+                has_spin,
+                omega,
+                has_spin_axis,
+                sax,
+                say,
+                saz,
+                min_speed_sq,
+                MAX_LIFT_COEFFICIENT,
+                NUMERICAL_EPSILON,
+            )
+            # solution_arr is (steps, 7) -> [time, x, y, z, vx, vy, vz]
+            sol_t = solution_arr[:, 0]
+            sol_y = solution_arr[:, 1:].T  # (6, steps)
+        else:
+            # Fallback: Use shared core function with solve_ivp
+            def ode_func(t: float, state: np.ndarray) -> np.ndarray:
+                return _flight_dynamics_core(  # type: ignore[no-any-return]
+                    state,
+                    gravity_acc,
+                    wind_velocity,
+                    ball_radius,
+                    const_term,
+                    cd0,
+                    cd1,
+                    cd2,
+                    cl0,
+                    cl1,
+                    cl2,
+                    has_spin,
+                    omega,
+                    has_spin_axis,
+                    sax,
+                    say,
+                    saz,
+                    min_speed_sq,
+                    MAX_LIFT_COEFFICIENT,
+                    NUMERICAL_EPSILON,
+                )
 
-            # Relative velocity
-            rel_vel = velocity - wind_velocity
-            # Optimization: use dot product instead of sum(x**2) to avoid allocation
-            speed_sq = rel_vel @ rel_vel
+            # Time span
+            t_span = (0, max_time)
+            t_eval = np.arange(0, max_time, time_step)
 
-            if speed_sq <= min_speed_sq:
-                # If stopped, only gravity acts (or nothing if resting, but here flight)
-                acc = gravity_acc
-                result = np.empty(6, dtype=state.dtype)
-                result[:3] = velocity
-                result[3:] = acc
-                return result
-
-            speed = np.sqrt(speed_sq)
-            # PERFORMANCE OPTIMIZATION: Algebraic transformation to avoid velocity normalization
-            #
-            # Traditional approach:
-            #   vel_unit = rel_vel / speed
-            #   drag_force = 0.5 * rho * A * Cd * speed^2 * vel_unit
-            #              = 0.5 * rho * A * Cd * speed^2 * (rel_vel / speed)
-            #              = 0.5 * rho * A * Cd * speed * rel_vel
-            #
-            # By algebraically simplifying, we can compute:
-            #   drag_factor = const_term * Cd * speed
-            #   drag_accel = -drag_factor * rel_vel
-            #
-            # This eliminates 3 divisions per timestep (one per velocity component)
-            # while producing mathematically identical results. The same optimization
-            # applies to the Magnus force calculation where we use the unnormalized
-            # cross product and adjust the magnitude accordingly.
-            #
-            # Performance impact: ~15-20% speedup in ODE evaluations (measured via
-            # pytest-benchmark on typical 1000-point trajectories).
-            #
-            # See also: flight_models.py uses vel_unit directly for clarity in
-            # educational/reference implementations.
-
-            # Spin ratio S = (omega * r) / v
-            if has_spin:
-                spin_ratio = (omega * ball_radius) / speed
-            else:
-                spin_ratio = 0.0
-
-            # Drag
-            # Note: We duplicate logic slightly here vs self.ball.calculate_drag_coefficient
-            # to keep this inner loop optimized (avoid method call overhead + closure access)
-            # However, the formula matches BallProperties.calculate_drag_coefficient
-            # drag_force = drag_mag * vel_unit = (const * cd * speed^2) * (rel_vel / speed)
-            #            = (const * cd * speed) * rel_vel
-            cd = cd0 + spin_ratio * (cd1 + spin_ratio * cd2)
-            # Optimization: Calculate factor for rel_vel instead of unit vector
-            drag_factor = const_term * cd * speed
-
-            # acc = gravity - drag
-            acc_x = gravity_acc[0] - drag_factor * rel_vel[0]
-            acc_y = gravity_acc[1] - drag_factor * rel_vel[1]
-            acc_z = gravity_acc[2] - drag_factor * rel_vel[2]
-
-            # Lift (Magnus)
-            if has_spin and spin_ratio > 0:
-                # Matches BallProperties.calculate_lift_coefficient
-                cl = cl0 + spin_ratio * (cl1 + spin_ratio * cl2)
-                if cl > MAX_LIFT_COEFFICIENT:
-                    cl = MAX_LIFT_COEFFICIENT
-
-                magnus_mag = const_term * cl * speed_sq
-
-                # ALGEBRAIC TRANSFORMATION for Magnus force:
-                # Traditional: cross_unit = normalize(spin_axis x vel_unit)
-                #              magnus = magnus_mag * cross_unit
-                # Optimized:   cross_unnorm = spin_axis x rel_vel
-                #              cross_unit = cross_unnorm / |cross_unnorm|
-                #              magnus = magnus_mag * cross_unit
-                # Since |spin_axis x vel_unit| = |spin_axis x (rel_vel/speed)| = |cross_unnorm|/speed,
-                # the direction is preserved and we avoid normalizing velocity first.
-                # Cross product: spin_axis x rel_vel (NOT vel_unit)
-                if spin_axis is not None:
-                    # Manual cross product with unnormalized velocity
-                    # c_unnorm = spin_axis x rel_vel
-                    # Optimization: Use pre-fetched scalar components
-                    c0_u = say * rel_vel[2] - saz * rel_vel[1]
-                    c1_u = saz * rel_vel[0] - sax * rel_vel[2]
-                    c2_u = sax * rel_vel[1] - say * rel_vel[0]
-
-                    cross_mag_sq_u = c0_u * c0_u + c1_u * c1_u + c2_u * c2_u
-
-                    if cross_mag_sq_u > NUMERICAL_EPSILON**2:
-                        # Force direction is cross_prod_u / |cross_prod_u|
-                        # Force magnitude is magnus_mag
-                        # Force vector = magnus_mag * cross_prod_u / |cross_prod_u|
-                        # We have |cross_prod_u| = cross_mag_u
-                        cross_mag_u = np.sqrt(cross_mag_sq_u)
-                        factor = magnus_mag / cross_mag_u
-
-                        acc_x += c0_u * factor
-                        acc_y += c1_u * factor
-                        acc_z += c2_u * factor
-
-            # Construct result
-            result = np.empty(6, dtype=state.dtype)
-            result[0] = velocity[0]
-            result[1] = velocity[1]
-            result[2] = velocity[2]
-            result[3] = acc_x
-            result[4] = acc_y
-            result[5] = acc_z
-            return result
-
-        # Time span
-        t_span = (0, max_time)
-        t_eval = np.arange(0, max_time, time_step)
-
-        # Solve ODE
-        solution = solve_ivp(
-            fun=ode_func,
-            t_span=t_span,
-            y0=initial_state,
-            t_eval=t_eval,
-            method="RK45",
-            events=self._ground_contact_event,
-            dense_output=True,
-        )
+            # Solve ODE
+            solution = solve_ivp(
+                fun=ode_func,
+                t_span=t_span,
+                y0=initial_state,
+                t_eval=t_eval,
+                method="RK45",
+                events=self._ground_contact_event,
+                dense_output=True,
+            )
+            sol_t = solution.t
+            sol_y = solution.y
 
         # Convert solution to trajectory points
         trajectory = []
-        # Pre-fetching attributes to local vars for loop speed
-        sol_t = solution.t
-        sol_y = solution.y
         ball_mass = self.ball.mass
 
         # Calculate forces for all points at once (vectorized)

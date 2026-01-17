@@ -111,3 +111,34 @@ def test_missing_data_report():
 
     report = analyzer.generate_comparison_report()
     assert len(report["metrics"]) == 0
+
+
+def test_compute_dtw_distance(sample_data):
+    data_a, data_b = sample_data
+    rec_a = MockRecorder(data_a)
+    rec_b = MockRecorder(data_b)
+
+    analyzer = ComparativeSwingAnalyzer(rec_a, rec_b)
+
+    # Test DTW on club_head_speed
+    dist, path = analyzer.compute_dtw_distance("club_head_speed", radius=5)
+
+    assert isinstance(dist, float)
+    assert dist >= 0.0
+    assert isinstance(path, list)
+    assert len(path) > 0
+    assert isinstance(path[0], tuple)
+    assert len(path[0]) == 2
+    # Ensure path starts at end (backtracked) or matches expectation of N, M
+    # signal_processing.compute_dtw_path returns path from end (backtracked) BUT reversed before return?
+    # Let's check signal_processing code:
+    # "pi, pj are in reverse order ... Loop backwards to reverse" -> It returns forward path!
+    # "path.append((int(pi[k]), int(pj[k])))"
+
+    # So path[0] should be (0, 0)
+    assert path[0] == (0, 0)
+
+    # Path should end at (N-1, M-1)
+    N = len(data_a["club_head_speed"][0])
+    M = len(data_b["club_head_speed"][0])
+    assert path[-1] == (N - 1, M - 1)

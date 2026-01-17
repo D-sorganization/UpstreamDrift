@@ -6,7 +6,7 @@ import subprocess
 import sys
 
 
-def test_docker_venv():
+def test_docker_venv() -> bool:
     """Test if Docker container properly uses the virtual environment."""
     print("🐳 Testing Docker Container Virtual Environment")
     print("=" * 60)
@@ -140,7 +140,7 @@ def test_docker_venv():
     return True
 
 
-def main():
+def main() -> int:
     """Main function."""
     success = test_docker_venv()
 
