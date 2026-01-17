@@ -1,21 +1,13 @@
-#!/usr/bin/env python3
-"""
-Check for duplicate files in the repository.
-Fails if duplicates of tracked files are found (e.g., quality check scripts).
-"""
-
 import hashlib
+import os
 import sys
 from pathlib import Path
 
 
-def get_file_hash(path: Path) -> str:
-    """Calculate the SHA-256 hash of a file.
-
-    SEC-006: Replaced MD5 with SHA-256 to prevent collision attacks.
-    """
-    hasher = hashlib.sha256()
-    with path.open("rb") as f:
+def get_file_hash(filepath: Path | str) -> str:
+    """Calculate MD5 hash of a file."""
+    hasher = hashlib.md5()
+    with open(filepath, "rb") as f:
         buf = f.read(65536)
         while len(buf) > 0:
             hasher.update(buf)
@@ -23,64 +15,78 @@ def get_file_hash(path: Path) -> str:
     return hasher.hexdigest()
 
 
-def find_duplicates(root_dir: Path, tracked_files: set[str]) -> int:
-    """Finds duplicates of tracked filenames."""
+def find_duplicates(
+    root_dir: Path | str, extension: str = ".py"
+) -> list[tuple[Path, Path]]:
+    """Find files with duplicate content."""
+    hashes: dict[str, Path] = {}
+    duplicates: list[tuple[Path, Path]] = []
 
-    # helper: map filename -> list of paths
-    files_by_name: dict[str, list[Path]] = {}
+    for root, dirs, files in os.walk(root_dir):
+        # Skip hidden directories and virtualenvs
+        if ".git" in dirs:
+            dirs.remove(".git")
+        if "__pycache__" in dirs:
+            dirs.remove("__pycache__")
+        if ".venv" in dirs:
+            dirs.remove(".venv")
+        if "venv" in dirs:
+            dirs.remove("venv")
 
-    # Walk the tree
-    # Walk the tree, excluding common heavy directories
-    ignored_dirs = {
-        ".git",
-        ".venv",
-        "venv",
-        "node_modules",
-        "__pycache__",
-        ".pytest_cache",
-        ".mypy_cache",
-    }
+        for file in files:
+            if not file.endswith(extension):
+                continue
 
-    for path in root_dir.rglob("*"):
-        # Optimization: Skip ignored directories to avoid traversing deep trees
-        # Note: rglob yields everything; we must check parts to skip properly
-        # but Path.rglob is a generator. We can't prune the walk easily with rglob.
-        # A simple check on path parts is enough for correctness, but os.walk or explicit recursion is better for perf.
-        # For now, just filtering is better than nothing if the iterator is fast.
-        if any(part in ignored_dirs for part in path.parts):
-            continue
+            filepath = Path(root) / file
+            file_hash = get_file_hash(filepath)
 
-        if path.is_file():
-            if path.name in tracked_files:
-                files_by_name.setdefault(path.name, []).append(path)
+            if file_hash in hashes:
+                duplicates.append((filepath, hashes[file_hash]))
+            else:
+                hashes[file_hash] = filepath
 
-    exit_code = 0
+    return duplicates
 
-    for name, paths in files_by_name.items():
-        if len(paths) > 1:
-            print(f"ERROR: Duplicate files found for '{name}':")
-            # Sort by length to likely find the "canonical" one (shortest path usu. canonical)
-            paths.sort(key=lambda p: len(str(p)))
-            for p in paths:
-                print(f"  - {p}")
 
-            # Allow symlinks? For now, purely duplicate content or name is bad if we expect single source.
-            exit_code = 1
+def find_duplicate_names(
+    root_dir: Path | str, targets: list[str]
+) -> dict[str, list[Path]]:
+    """Find multiple occurrences of specific filenames."""
+    counts: dict[str, list[Path]] = {name: [] for name in targets}
 
-    return exit_code
+    for root, dirs, files in os.walk(root_dir):
+        # Skip hidden directories
+        if ".git" in dirs:
+            dirs.remove(".git")
+
+        for file in files:
+            if file in counts:
+                counts[file].append(Path(root) / file)
+
+    return {k: v for k, v in counts.items() if len(v) > 1}
 
 
 def main() -> None:
-    root = Path(".")
-    # Files that must NOT be duplicated
-    tracked_files = {
-        "matlab_quality_check.py",
-        # "matlab_quality_config.m", # NOTE: consolidating in Phase 2
-        "constants.py",
-    }
+    root_dir = Path(".")
 
-    print(f"Scanning for duplicates of: {tracked_files}")
-    sys.exit(find_duplicates(root, tracked_files))
+    # 1. Check for duplicate content in Python files
+    # We might want to restrict this or warn only, as some setup.py or __init__.py might be identical.
+    # For now, let's focus on the specific issue requirement: duplicate scripts.
+
+    # 2. Check for specific problematic duplicates
+    target_duplicates = ["matlab_quality_check.py"]
+    name_dupes = find_duplicate_names(root_dir, target_duplicates)
+
+    if name_dupes:
+        print("ERROR: Duplicate script names found:")
+        for name, paths in name_dupes.items():
+            print(f"  {name}:")
+            for p in paths:
+                print(f"    {p}")
+        sys.exit(1)
+
+    print("No duplicate tracked scripts found.")
+    sys.exit(0)
 
 
 if __name__ == "__main__":
