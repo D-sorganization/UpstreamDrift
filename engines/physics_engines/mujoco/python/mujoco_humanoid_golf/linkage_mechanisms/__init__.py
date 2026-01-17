@@ -327,8 +327,6 @@ def generate_geneva_mechanism_xml(num_slots: int = 6, drive_radius: float = 2.0)
     drive_radius : float
         Radius of the drive wheel
     """
-    360.0 / num_slots
-
     return f"""
 <mujoco model="geneva_mechanism">
     <option timestep="0.002" gravity="0 0 -{GRAVITY_M_S2}"/>
