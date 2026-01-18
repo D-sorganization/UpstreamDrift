@@ -97,17 +97,17 @@ export GOLF_USE_MOCK_ENGINE=1
 
 ```bash
 # Unified launcher (recommended) - select engine and model
-python launchers/golf_launcher.py
+python3 launchers/golf_launcher.py
 
 # MuJoCo-specific launcher with advanced GUI
 cd engines/physics_engines/mujoco/python
-python -m mujoco_golf_pendulum
+python3 -m mujoco_golf_pendulum
 
 # Drake launcher
-python engines/physics_engines/drake/python/golf_swing_launcher.py
+python3 engines/physics_engines/drake/python/golf_swing_launcher.py
 
 # Pinocchio launcher
-python engines/physics_engines/pinocchio/python/golf_swing_launcher.py
+python3 engines/physics_engines/pinocchio/python/golf_swing_launcher.py
 ```
 
 ## Available Physics Engines
