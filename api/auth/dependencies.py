@@ -1,6 +1,8 @@
 """Authentication dependencies for FastAPI endpoints."""
 
 from collections.abc import Callable
+
+# Python 3.10 compatibility: UTC was added in 3.11
 from datetime import UTC
 
 from fastapi import Depends, HTTPException, status

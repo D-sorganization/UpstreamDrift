@@ -12,6 +12,8 @@ Built on top of the existing EngineManager and PhysicsEngine protocol.
 import logging
 import tempfile
 import uuid
+
+# Python 3.10 compatibility: UTC was added in 3.11
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
