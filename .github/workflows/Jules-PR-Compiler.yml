@@ -1,0 +1,233 @@
+name: Jules PR Compiler (Consolidate Open PRs)
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run - report only, no changes'
+        required: false
+        default: false
+        type: boolean
+  schedule:
+    - cron: "30 3 * * *"  # Daily at 3:30 AM UTC (overnight schedule)
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  compile-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Analyze Open PRs
+        id: analyze
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mkdir -p .jules/pr_compiler
+
+          # Get all open PRs created by jules-bot or with jules labels
+          gh pr list --state open --limit 100 --json number,title,labels,headRefName,author,createdAt,body \
+            --jq '[.[] | select(.author.login == "github-actions" or (.labels | map(.name) | any(startswith("jules:"))))]' \
+            > .jules/pr_compiler/open_prs.json
+
+          # Count PRs
+          PR_COUNT=$(cat .jules/pr_compiler/open_prs.json | jq 'length')
+          echo "pr_count=$PR_COUNT" >> $GITHUB_OUTPUT
+
+          if [ "$PR_COUNT" -lt 2 ]; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "Not enough PRs to compile (found $PR_COUNT, need at least 2)"
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Group PRs by category based on labels
+          cat .jules/pr_compiler/open_prs.json | jq -r '
+            group_by(.labels | map(.name) | map(select(startswith("jules:"))) | first // "jules:other")
+            | map({
+                category: .[0].labels | map(.name) | map(select(startswith("jules:"))) | first // "jules:other",
+                prs: map({number, title, branch: .headRefName})
+              })
+          ' > .jules/pr_compiler/grouped_prs.json
+
+      - name: Skip if Not Enough PRs
+        if: steps.analyze.outputs.skip == 'true'
+        run: |
+          echo "✅ Not enough open Jules PRs to compile."
+          echo "📊 Found: ${{ steps.analyze.outputs.pr_count }} PRs (need at least 2)"
+
+      - name: Identify Compilable Groups
+        if: steps.analyze.outputs.skip != 'true'
+        id: groups
+        run: |
+          # Find groups with 2+ PRs that can be compiled
+          python3 << 'PYEOF'
+          import json
+          import os
+
+          with open('.jules/pr_compiler/grouped_prs.json', 'r') as f:
+              groups = json.load(f)
+
+          compilable = []
+          for group in groups:
+              if len(group.get('prs', [])) >= 2:
+                  compilable.append(group)
+
+          with open('.jules/pr_compiler/compilable_groups.json', 'w') as f:
+              json.dump(compilable, f, indent=2)
+
+          if compilable:
+              print(f"Found {len(compilable)} groups to compile:")
+              for g in compilable:
+                  print(f"  - {g['category']}: {len(g['prs'])} PRs")
+              with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
+                  f.write(f"has_compilable=true\n")
+                  f.write(f"group_count={len(compilable)}\n")
+          else:
+              print("No groups have enough PRs to compile")
+              with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
+                  f.write("has_compilable=false\n")
+          PYEOF
+
+      - name: Compile PRs
+        if: steps.analyze.outputs.skip != 'true' && steps.groups.outputs.has_compilable == 'true' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Process each compilable group
+          python3 << 'PYEOF'
+          import json
+          import subprocess
+          import os
+          from datetime import datetime
+
+          with open('.jules/pr_compiler/compilable_groups.json', 'r') as f:
+              groups = json.load(f)
+
+          for group in groups:
+              category = group['category']
+              prs = group['prs']
+
+              print(f"\n{'='*60}")
+              print(f"Compiling {len(prs)} PRs for category: {category}")
+              print(f"{'='*60}")
+
+              # Create compiled branch name
+              date_str = datetime.now().strftime('%Y%m%d')
+              category_short = category.replace('jules:', '').replace('-', '_')
+              compiled_branch = f"jules/compiled-{category_short}-{date_str}"
+
+              # Start from main
+              subprocess.run(['git', 'checkout', 'main'], check=True)
+              subprocess.run(['git', 'pull', 'origin', 'main'], check=True)
+
+              # Create compiled branch
+              subprocess.run(['git', 'checkout', '-b', compiled_branch], check=True)
+
+              # Track which PRs we successfully merged
+              merged_prs = []
+              failed_prs = []
+
+              for pr in prs:
+                  pr_num = pr['number']
+                  pr_branch = pr['branch']
+                  pr_title = pr['title']
+
+                  print(f"\n  Merging PR #{pr_num}: {pr_title}")
+
+                  try:
+                      # Fetch and merge the PR branch
+                      subprocess.run(['git', 'fetch', 'origin', pr_branch], check=True)
+                      result = subprocess.run(
+                          ['git', 'merge', f'origin/{pr_branch}', '--no-edit', '-m', f'Merge PR #{pr_num}: {pr_title}'],
+                          capture_output=True, text=True
+                      )
+
+                      if result.returncode == 0:
+                          merged_prs.append(pr)
+                          print(f"    ✅ Successfully merged")
+                      else:
+                          # Merge conflict - abort and skip
+                          subprocess.run(['git', 'merge', '--abort'], check=False)
+                          failed_prs.append(pr)
+                          print(f"    ❌ Merge conflict - skipped")
+
+                  except Exception as e:
+                      failed_prs.append(pr)
+                      print(f"    ❌ Failed: {e}")
+                      subprocess.run(['git', 'merge', '--abort'], check=False)
+
+              if merged_prs:
+                  # Push compiled branch
+                  subprocess.run(['git', 'push', 'origin', compiled_branch], check=True)
+
+                  # Create compiled PR
+                  pr_numbers = ', '.join([f"#{p['number']}" for p in merged_prs])
+                  closes_lines = '\n'.join([f"Closes #{p['number']}" for p in merged_prs])
+
+                  body = f"""## Compiled PR
+
+          This PR compiles {len(merged_prs)} individual PRs into a single reviewable unit.
+
+          ### Included PRs
+          {chr(10).join([f"- #{p['number']}: {p['title']}" for p in merged_prs])}
+
+          ### Auto-Close
+          When this PR is merged, the following PRs will be automatically closed:
+          {closes_lines}
+
+          {'### Failed to Merge' + chr(10) + chr(10).join([f"- #{p['number']}: {p['title']} (merge conflict)" for p in failed_prs]) if failed_prs else ''}
+
+          ---
+          🤖 Generated with Jules PR Compiler
+          """
+
+                  result = subprocess.run([
+                      'gh', 'pr', 'create',
+                      '--title', f"[Compiled] {category}: {len(merged_prs)} PRs - {date_str}",
+                      '--body', body,
+                      '--label', f'{category},jules:compiled'
+                  ], capture_output=True, text=True)
+
+                  if result.returncode == 0:
+                      print(f"\n✅ Created compiled PR for {category}")
+                      print(result.stdout)
+                  else:
+                      print(f"\n❌ Failed to create PR: {result.stderr}")
+
+              # Return to main for next group
+              subprocess.run(['git', 'checkout', 'main'], check=True)
+
+          PYEOF
+
+      - name: Dry Run Report
+        if: steps.analyze.outputs.skip != 'true' && inputs.dry_run == true
+        run: |
+          echo "## Dry Run Report"
+          echo ""
+          echo "### Open Jules PRs (${{ steps.analyze.outputs.pr_count }} total)"
+          cat .jules/pr_compiler/open_prs.json | jq -r '.[] | "- #\(.number): \(.title)"'
+          echo ""
+          echo "### Grouped by Category"
+          cat .jules/pr_compiler/grouped_prs.json | jq -r '.[] | "**\(.category)**: \(.prs | length) PRs"'
+          echo ""
+          if [ -f .jules/pr_compiler/compilable_groups.json ]; then
+            echo "### Compilable Groups"
+            cat .jules/pr_compiler/compilable_groups.json | jq -r '.[] | "- \(.category): \(.prs | length) PRs ready to compile"'
+          fi
+
+      - name: Cleanup Merged PR Branches
+        if: steps.analyze.outputs.skip != 'true' && steps.groups.outputs.has_compilable == 'true' && inputs.dry_run != true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Note: Individual PRs are closed via "Closes #N" in the compiled PR body
+          # This step just cleans up tracking
+          echo "Individual PRs will be auto-closed when the compiled PR is merged."
+          echo "Branch cleanup happens automatically via GitHub's branch deletion on PR merge."
