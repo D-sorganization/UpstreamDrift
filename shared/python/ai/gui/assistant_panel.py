@@ -10,8 +10,15 @@ responses with markdown rendering.
 from __future__ import annotations
 
 import logging
-from datetime import UTC, datetime
+import sys
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
+
+# Python 3.10 compatibility: UTC was added in 3.11
+if sys.version_info >= (3, 11):
+    from datetime import UTC
+else:
+    UTC = timezone.utc
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QKeySequence, QShortcut

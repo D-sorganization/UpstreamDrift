@@ -2,7 +2,14 @@
 
 from __future__ import annotations
 
-from datetime import UTC
+import sys
+from datetime import timezone
+
+# Python 3.10 compatibility: UTC was added in 3.11
+if sys.version_info >= (3, 11):
+    from datetime import UTC
+else:
+    UTC = timezone.utc
 
 from shared.python.ai.types import (
     AgentChunk,

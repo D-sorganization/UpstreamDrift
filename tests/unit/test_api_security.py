@@ -9,10 +9,17 @@ This module tests critical security implementations:
 
 import logging
 import secrets
-from datetime import UTC, datetime
+import sys
+from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+# Python 3.10 compatibility: UTC was added in 3.11
+if sys.version_info >= (3, 11):
+    from datetime import UTC
+else:
+    UTC = timezone.utc
 
 # Check if bcrypt is available and working
 # bcrypt can fail to load on some CI environments due to missing native libraries

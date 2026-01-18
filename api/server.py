@@ -10,11 +10,18 @@ Built on top of the existing EngineManager and PhysicsEngine protocol.
 """
 
 import logging
+import sys
 import tempfile
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+# Python 3.10 compatibility: UTC was added in 3.11
+if sys.version_info >= (3, 11):
+    from datetime import UTC
+else:
+    UTC = timezone.utc
 
 import uvicorn
 from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile

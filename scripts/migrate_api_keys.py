@@ -39,9 +39,15 @@ import logging
 import os
 import secrets
 import sys
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+# Python 3.10 compatibility: UTC was added in 3.11
+if sys.version_info >= (3, 11):
+    from datetime import UTC
+else:
+    UTC = timezone.utc
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
