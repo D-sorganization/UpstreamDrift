@@ -1,5 +1,7 @@
 name: Jules Test Generator (Worker)
-on: workflow_call
+
+on:
+  workflow_call:
 
 jobs:
   generate-tests:
