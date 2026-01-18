@@ -3,12 +3,10 @@
 import logging
 import os
 import secrets
-import sys
-from datetime import datetime, timedelta, timezone
-from typing import Any
 
 # Python 3.10 compatibility: UTC was added in 3.11
-from datetime import UTC
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import bcrypt
 import jwt

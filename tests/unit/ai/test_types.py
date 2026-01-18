@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-import sys
-from datetime import timezone
-
 # Python 3.10 compatibility: UTC was added in 3.11
 from datetime import UTC
 

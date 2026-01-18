@@ -18,11 +18,10 @@ import logging
 import re
 import subprocess
 import sys
-from datetime import datetime, timezone
-from pathlib import Path
 
 # Python 3.10 compatibility: UTC was added in 3.11
-from datetime import UTC
+from datetime import UTC, datetime
+from pathlib import Path
 
 # Constants
 MATLAB_SCRIPT_TIMEOUT_SECONDS: int = 300  # 5 minutes - allows time for large codebases

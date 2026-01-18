@@ -1,11 +1,9 @@
 """Authentication routes for user management."""
 
-import sys
-from datetime import datetime, timedelta, timezone
-from typing import Any
 
 # Python 3.10 compatibility: UTC was added in 3.11
-from datetime import UTC
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
