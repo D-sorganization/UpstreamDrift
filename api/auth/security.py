@@ -338,3 +338,54 @@ class UsageTracker:
 # Global instances
 security_manager = SecurityManager()
 usage_tracker = UsageTracker()
+
+
+class AuthCache:
+    """Thread-safe cache for API authentication results to avoid expensive BCrypt hashing.
+
+    Fixes Performance Issue: N+1 Auth checks.
+    """
+
+    TTL_SECONDS = 300  # 5 minutes cache
+
+    def __init__(self) -> None:
+        import threading
+        import time
+
+        self._cache: dict[str, tuple[Any, float]] = {}
+        self._lock = threading.Lock()
+        self._time = time
+
+    def get(self, api_key: str) -> Any | None:
+        """Get cached user_id for API key."""
+        # Use fast hash of the key itself as cache key
+        # (We don't store the key, just its hash for lookup)
+        cache_key = self._hash_key(api_key)
+
+        with self._lock:
+            if cache_key in self._cache:
+                result, timestamp = self._cache[cache_key]
+                if self._time.time() - timestamp < self.TTL_SECONDS:
+                    return result
+                else:
+                    del self._cache[cache_key]
+        return None
+
+    def set(self, api_key: str, result: Any) -> None:
+        """Cache auth result."""
+        cache_key = self._hash_key(api_key)
+        with self._lock:
+            # Simple cleanup of size if needed, but 300s TTL is self-limiting mostly
+            if len(self._cache) > 10000:
+                # Random eviction or clear
+                self._cache.clear()
+            self._cache[cache_key] = (result, self._time.time())
+
+    def _hash_key(self, key: str) -> str:
+        # Fast non-cryptographic hash for map lookup (the key itself is secret)
+        import hashlib
+
+        return hashlib.sha256(key.encode()).hexdigest()
+
+
+auth_cache = AuthCache()
