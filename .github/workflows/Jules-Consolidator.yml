@@ -1,0 +1,169 @@
+name: Jules Consolidator (Daily PR Merge)
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run - analyze only'
+        required: false
+        default: 'false'
+        type: boolean
+      exclude_prs:
+        description: 'Comma-separated PR numbers to exclude'
+        required: false
+        default: ''
+        type: string
+  schedule:
+    - cron: "0 2 * * 1-5"  # 2 AM UTC, Monday-Friday (within midnight-4 AM window)
+
+concurrency:
+  group: jules-consolidator
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      pr_count: ${{ steps.list.outputs.count }}
+      pr_list: ${{ steps.list.outputs.prs }}
+      should_consolidate: ${{ steps.list.outputs.should_consolidate }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: List Consolidatable PRs
+        id: list
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EXCLUDE_PRS: ${{ inputs.exclude_prs }}
+        run: |
+          prs=$(gh pr list --base main --state open --json number,title,author,labels,mergeable \
+            --jq '[.[] | select(
+              (.labels | map(.name) | contains(["wip"]) | not) and
+              (.labels | map(.name) | contains(["do-not-consolidate"]) | not) and
+              (.labels | map(.name) | contains(["blocked"]) | not) and
+              (.mergeable != "CONFLICTING")
+            )]')
+
+          if [ -n "$EXCLUDE_PRS" ]; then
+            for num in $(echo $EXCLUDE_PRS | tr ',' ' '); do
+              prs=$(echo "$prs" | jq --arg n "$num" '[.[] | select(.number != ($n | tonumber))]')
+            done
+          fi
+
+          count=$(echo "$prs" | jq 'length')
+          echo "count=$count" >> $GITHUB_OUTPUT
+          echo "prs=$(echo "$prs" | jq -c '.')" >> $GITHUB_OUTPUT
+
+          if [ "$count" -gt 1 ]; then
+            echo "should_consolidate=true" >> $GITHUB_OUTPUT
+          else
+            echo "should_consolidate=false" >> $GITHUB_OUTPUT
+          fi
+
+          echo "### PR Discovery" >> $GITHUB_STEP_SUMMARY
+          echo "Found **$count** PRs eligible for consolidation" >> $GITHUB_STEP_SUMMARY
+
+  consolidate:
+    needs: discover
+    if: needs.discover.outputs.should_consolidate == 'true' && inputs.dry_run != 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      consolidated_pr: ${{ steps.create_pr.outputs.pr_number }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "jules-bot"
+          git config user.email "jules-bot@users.noreply.github.com"
+
+      - name: Create Consolidation Branch
+        run: |
+          BRANCH_NAME="consolidated-prs-$(date +%Y-%m-%d)"
+          git checkout -b "$BRANCH_NAME" origin/main
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Merge PRs
+        id: merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_LIST: ${{ needs.discover.outputs.pr_list }}
+        run: |
+          included=""
+          excluded=""
+
+          for row in $(echo "$PR_LIST" | jq -r '.[] | @base64'); do
+            _jq() { echo ${row} | base64 --decode | jq -r ${1}; }
+            pr_num=$(_jq '.number')
+            pr_title=$(_jq '.title')
+
+            if gh pr checkout "$pr_num" --detach 2>/dev/null; then
+              git checkout "$BRANCH_NAME"
+              if git merge FETCH_HEAD --no-edit -m "Merge PR #$pr_num: $pr_title"; then
+                included="$included $pr_num"
+              else
+                git merge --abort
+                excluded="$excluded $pr_num"
+              fi
+            else
+              excluded="$excluded $pr_num"
+            fi
+          done
+
+          echo "included=$included" >> $GITHUB_OUTPUT
+          echo "excluded=$excluded" >> $GITHUB_OUTPUT
+
+      - name: Push and Create PR
+        id: create_pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          INCLUDED: ${{ steps.merge.outputs.included }}
+          EXCLUDED: ${{ steps.merge.outputs.excluded }}
+        run: |
+          git push origin "$BRANCH_NAME"
+          DATE=$(date +%Y-%m-%d)
+
+          BODY="## Daily Consolidation - $DATE
+
+          ### Included PRs
+          $INCLUDED
+
+          ### Excluded PRs (if any)
+          $EXCLUDED
+
+          ---
+          *Automated by Jules Consolidator*"
+
+          pr_url=$(gh pr create \
+            --title "Daily Consolidation - $DATE" \
+            --body "$BODY" \
+            --label "jules:consolidation" \
+            --base main \
+            --head "$BRANCH_NAME")
+
+          echo "pr_number=$(echo "$pr_url" | grep -oP '\d+$')" >> $GITHUB_OUTPUT
+
+      - name: Update Journal
+        run: |
+          mkdir -p .jules
+          DATE=$(date +%Y-%m-%d)
+          echo "## $DATE - Daily Consolidation" >> .jules/consolidator.md
+          echo "**PRs Merged**: ${{ steps.merge.outputs.included }}" >> .jules/consolidator.md
+          echo "**Excluded**: ${{ steps.merge.outputs.excluded }}" >> .jules/consolidator.md
+          echo "" >> .jules/consolidator.md
+
+      - name: Commit Journal
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs(consolidator): daily consolidation log"
+          file_pattern: ".jules/consolidator.md"

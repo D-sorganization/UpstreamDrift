@@ -1,0 +1,137 @@
+name: Manual Run All Workflows
+
+on:
+  workflow_dispatch:
+    inputs:
+      workflows:
+        description: 'Which workflows to run'
+        required: true
+        type: choice
+        options:
+          - all
+          - assessments-only
+          - fixes-only
+          - pr-compiler-only
+      dry_run:
+        description: 'Dry run (no commits/PRs)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  dispatch-workflows:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch Assessment Generator
+        if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'Jules-Assessment-Generator.yml',
+              ref: 'main'
+            });
+            console.log('Dispatched Assessment Generator');
+
+      - name: Wait for Assessment
+        if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
+        run: sleep 10
+
+      - name: Dispatch Code Quality Reviewer
+        if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'Jules-Code-Quality-Reviewer.yml',
+              ref: 'main'
+            });
+            console.log('Dispatched Code Quality Reviewer');
+
+      - name: Wait for Quality Review
+        if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
+        run: sleep 10
+
+      - name: Dispatch Completist
+        if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'Jules-Completist.yml',
+              ref: 'main'
+            });
+            console.log('Dispatched Completist');
+
+      - name: Wait for Completist
+        if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
+        run: sleep 10
+
+      - name: Dispatch Sentinel
+        if: inputs.workflows == 'all' || inputs.workflows == 'assessments-only'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'Jules-Sentinel.yml',
+              ref: 'main'
+            });
+            console.log('Dispatched Sentinel');
+
+      - name: Wait for Sentinel
+        if: inputs.workflows == 'all'
+        run: sleep 10
+
+      - name: Dispatch Issue Resolver
+        if: inputs.workflows == 'all' || inputs.workflows == 'fixes-only'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'Jules-Issue-Resolver.yml',
+              ref: 'main'
+            });
+            console.log('Dispatched Issue Resolver');
+
+      - name: Wait for Issue Resolver
+        if: inputs.workflows == 'all' || inputs.workflows == 'fixes-only'
+        run: sleep 10
+
+      - name: Dispatch PR Compiler
+        if: inputs.workflows == 'all' || inputs.workflows == 'fixes-only' || inputs.workflows == 'pr-compiler-only'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const dry_run = '${{ inputs.dry_run }}' === 'true';
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'Jules-PR-Compiler.yml',
+              ref: 'main',
+              inputs: { dry_run: dry_run.toString() }
+            });
+            console.log('Dispatched PR Compiler');
+
+      - name: Summary
+        run: |
+          echo "## Workflows Dispatched" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Mode: ${{ inputs.workflows }}" >> $GITHUB_STEP_SUMMARY
+          echo "Dry Run: ${{ inputs.dry_run }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check the Actions tab to monitor progress of individual workflows." >> $GITHUB_STEP_SUMMARY

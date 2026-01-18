@@ -1,0 +1,127 @@
+name: Jules Code Quality Fixer (Worker)
+
+on:
+  workflow_call:
+    inputs:
+      assessment_file:
+        description: 'Path to assessment file'
+        required: false
+        type: string
+        default: 'docs/assessments/Code_Quality_Review_Latest.md'
+  workflow_dispatch:
+    inputs:
+      assessment_file:
+        description: 'Path to assessment file'
+        required: false
+        default: 'docs/assessments/Code_Quality_Review_Latest.md'
+        type: string
+      dry_run:
+        description: 'Dry run - analyze only'
+        required: false
+        default: 'false'
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: jules-code-quality-fixer-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  fix-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt || true
+          pip install ruff black mypy || true
+          npm install -g @google/jules
+
+      - name: Check Assessment File
+        id: check
+        env:
+          ASSESSMENT_FILE: ${{ inputs.assessment_file || 'docs/assessments/Code_Quality_Review_Latest.md' }}
+        run: |
+          if [ -f "$ASSESSMENT_FILE" ]; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Fix Branch
+        if: steps.check.outputs.found == 'true' && inputs.dry_run != 'true'
+        run: |
+          BRANCH_NAME="jules/code-quality-fixes-$(date +%Y%m%d-%H%M)"
+          git checkout -b "$BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Jules Code Quality Fixer
+        if: steps.check.outputs.found == 'true'
+        env:
+          JULES_TOKEN: ${{ secrets.JULES_API_KEY }}
+          ASSESSMENT_FILE: ${{ inputs.assessment_file || 'docs/assessments/Code_Quality_Review_Latest.md' }}
+        run: |
+          jules auth --token $JULES_TOKEN
+
+          jules task fix --prompt "$(cat << 'PROMPT_EOF'
+          You are the CODE QUALITY FIXER agent.
+
+          ## Mission
+          Fix issues in: $ASSESSMENT_FILE
+
+          ## Priority: CRITICAL > HIGH > MEDIUM > LOW
+
+          ## Rules:
+          - DO NOT modify test assertions to make tests pass
+          - DO NOT disable linting rules without justification
+          - Run: ruff check . --fix && black . && mypy . --ignore-missing-imports
+
+          ## Output:
+          1. Update docs/assessments/issues/summary.md
+          2. Create docs/assessments/issues/fix_report_$(date +%Y-%m-%d).md
+          3. Document ignored issues in docs/assessments/issues/ignored_issues.md
+
+          Quality over quantity. Fix correctly, not quickly.
+          PROMPT_EOF
+          )"
+
+      - name: Run Linters
+        if: steps.check.outputs.found == 'true' && inputs.dry_run != 'true'
+        continue-on-error: true
+        run: |
+          ruff check . --fix || true
+          black . || true
+
+      - name: Commit and Create PR
+        if: steps.check.outputs.found == 'true' && inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git add -A
+          if ! git diff --staged --quiet; then
+            git commit -m "fix: code quality improvements
+
+          Co-Authored-By: Jules <jules-bot@users.noreply.github.com>"
+
+            git push origin "$BRANCH_NAME"
+
+            gh pr create \
+              --title "Code Quality Fixes - $(date +%Y-%m-%d)" \
+              --body "Automated code quality fixes from assessment review." \
+              --label "jules:code-quality,automated-fix"
+          fi

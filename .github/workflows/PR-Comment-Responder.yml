@@ -1,0 +1,231 @@
+name: PR Comment Responder
+
+# This workflow triggers when comments are added to PRs
+# It can be configured to use Claude API or other AI services
+
+on:
+  issue_comment:
+    types: [created]
+  pull_request_review_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review comments on'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+jobs:
+  respond-to-comments:
+    # Run on PR comments (from issue_comment), review comments (from pull_request_review_comment), or manual dispatch
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request_review_comment' || github.event.issue.pull_request != null
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Get PR Details
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            PR_NUMBER="${{ inputs.pr_number }}"
+          elif [ "${{ github.event_name }}" = "pull_request_review_comment" ]; then
+            PR_NUMBER="${{ github.event.pull_request.number }}"
+          else
+            PR_NUMBER="${{ github.event.issue.number }}"
+          fi
+
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+          # Get PR details
+          gh pr view $PR_NUMBER --json headRefName,title,body,comments,reviewComments \
+            > .pr_details.json
+
+          # Get the branch
+          BRANCH=$(cat .pr_details.json | jq -r '.headRefName')
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+      - name: Analyze Comments
+        id: analyze
+        run: |
+          python3 << 'PYEOF'
+          import json
+          import os
+
+          with open('.pr_details.json', 'r') as f:
+              pr = json.load(f)
+
+          # Collect all comments that might need response
+          actionable_comments = []
+
+          # Check review comments (inline code comments)
+          for comment in pr.get('reviewComments', []):
+              body = comment.get('body', '').lower()
+              # Look for actionable patterns
+              if any(word in body for word in ['please', 'should', 'could you', 'can you', 'fix', 'change', 'update', 'add', 'remove', '?']):
+                  actionable_comments.append({
+                      'type': 'review',
+                      'path': comment.get('path', ''),
+                      'line': comment.get('line', 0),
+                      'body': comment.get('body', '')
+                  })
+
+          # Check PR comments
+          for comment in pr.get('comments', []):
+              body = comment.get('body', '').lower()
+              if any(word in body for word in ['please', 'should', 'could you', 'can you', 'fix', 'change', 'update', 'add', 'remove', '?']):
+                  actionable_comments.append({
+                      'type': 'pr',
+                      'body': comment.get('body', '')
+                  })
+
+          with open('.actionable_comments.json', 'w') as f:
+              json.dump(actionable_comments, f, indent=2)
+
+          count = len(actionable_comments)
+          print(f"Found {count} actionable comments")
+
+          with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
+              f.write(f"count={count}\n")
+              f.write(f"has_comments={'true' if count > 0 else 'false'}\n")
+          PYEOF
+
+      - name: Skip if No Actionable Comments
+        if: steps.analyze.outputs.has_comments != 'true'
+        run: |
+          echo "No actionable comments found. Exiting."
+
+      - name: Checkout PR Branch
+        if: steps.analyze.outputs.has_comments == 'true'
+        run: |
+          git fetch origin ${{ steps.pr.outputs.branch }}
+          git checkout ${{ steps.pr.outputs.branch }}
+
+      # Option 1: Use Jules if available
+      - name: Address Comments with Jules
+        if: steps.analyze.outputs.has_comments == 'true'
+        env:
+          JULES_TOKEN: ${{ secrets.JULES_API_KEY }}
+        run: |
+          if [ -z "$JULES_TOKEN" ]; then
+            echo "JULES_API_KEY not configured, skipping Jules"
+            exit 0
+          fi
+          npm install -g @google/jules || true
+          jules auth --token $JULES_TOKEN
+
+          jules task fix --prompt "$(cat << 'PROMPT_EOF'
+          Review and address the PR comments in .actionable_comments.json
+
+          For each comment:
+          1. Understand what change is being requested
+          2. Make the appropriate code change
+          3. Keep changes minimal and focused
+
+          Do NOT respond to comments that are just acknowledgments or thank-yous.
+          PROMPT_EOF
+          )"
+
+      # Option 2: Use Claude API directly (requires ANTHROPIC_API_KEY secret)
+      # Only runs if Jules was skipped (no JULES_API_KEY) and ANTHROPIC_API_KEY is set
+      - name: Address Comments with Claude API
+        if: steps.analyze.outputs.has_comments == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          JULES_TOKEN: ${{ secrets.JULES_API_KEY }}
+        run: |
+          # Skip if Jules already ran or if no Anthropic key
+          if [ -n "$JULES_TOKEN" ]; then
+            echo "Jules handled this, skipping Claude API"
+            exit 0
+          fi
+          if [ -z "$ANTHROPIC_API_KEY" ]; then
+            echo "ANTHROPIC_API_KEY not configured, skipping"
+            exit 0
+          fi
+          pip install anthropic
+
+          python3 << 'PYEOF'
+          import anthropic
+          import json
+          import subprocess
+          import os
+
+          client = anthropic.Anthropic()
+
+          with open('.actionable_comments.json', 'r') as f:
+              comments = json.load(f)
+
+          # Read relevant files mentioned in comments
+          files_to_read = set()
+          for c in comments:
+              if c.get('path'):
+                  files_to_read.add(c['path'])
+
+          file_contents = {}
+          for path in files_to_read:
+              try:
+                  with open(path, 'r') as f:
+                      file_contents[path] = f.read()
+              except:
+                  pass
+
+          prompt = f"""You are a code reviewer assistant. Address these PR comments by suggesting specific code changes.
+
+          Comments to address:
+          {json.dumps(comments, indent=2)}
+
+          Relevant file contents:
+          {json.dumps(file_contents, indent=2)}
+
+          For each comment, provide:
+          1. The file path
+          2. The exact change needed (as a diff or replacement)
+          3. Brief explanation
+
+          Format your response as JSON with structure:
+          {{"changes": [{{"file": "path", "old": "old code", "new": "new code", "explanation": "why"}}]}}
+          """
+
+          message = client.messages.create(
+              model="claude-sonnet-4-20250514",
+              max_tokens=4096,
+              messages=[{"role": "user", "content": prompt}]
+          )
+
+          print(message.content[0].text)
+          # Note: In a full implementation, you would parse the response
+          # and apply the changes automatically
+          PYEOF
+
+      - name: Commit Changes
+        if: steps.analyze.outputs.has_comments == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git add -A
+          if ! git diff --staged --quiet; then
+            git commit -m "Address PR review comments
+
+          Automated response to reviewer feedback.
+
+          Co-Authored-By: Claude <noreply@anthropic.com>"
+
+            git push origin ${{ steps.pr.outputs.branch }}
+
+            gh pr comment ${{ steps.pr.outputs.pr_number }} --body "I've addressed the review comments. Please take another look! 🔍"
+          else
+            echo "No changes made"
+          fi
