@@ -30,8 +30,14 @@ REFERENCES:
 - Project Guidelines: docs/project_design_guidelines.qmd (Section P: Cross-Engine Validation)
 """
 
+from typing import TYPE_CHECKING, Any
+
 import numpy as np
 import pytest
+
+if TYPE_CHECKING:
+    import mujoco
+    import pinocchio
 
 # Test if Pinocchio is available
 pinocchio_available = False
@@ -58,7 +64,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def create_simple_pendulum_mujoco() -> tuple[mujoco.MjModel, mujoco.MjData]:
+def create_simple_pendulum_mujoco() -> tuple[Any, Any]:
     """Create a simple pendulum model in MuJoCo.
 
     Returns:

@@ -39,6 +39,8 @@ import logging
 import os
 import secrets
 import sys
+
+# Python 3.10 compatibility: UTC was added in 3.11
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any

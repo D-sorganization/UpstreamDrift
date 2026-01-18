@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+# Python 3.10 compatibility: UTC was added in 3.11
 from datetime import UTC
 
 from shared.python.ai.types import (

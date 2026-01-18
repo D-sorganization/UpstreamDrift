@@ -1,5 +1,6 @@
 """Authentication routes for user management."""
 
+# Python 3.10 compatibility: UTC was added in 3.11
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
