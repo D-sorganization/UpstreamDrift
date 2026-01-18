@@ -1,0 +1,147 @@
+name: Jules Completist (Incomplete Implementation Auditor)
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 1 * * *"  # Daily at 1 AM UTC (matches Control Tower)
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  audit-completeness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt || true
+          npm install -g @google/jules
+
+      - name: Scan for Incomplete Patterns
+        id: scan
+        run: |
+          mkdir -p .jules/completist_data
+
+          # Find TODO/FIXME/XXX comments
+          grep -rn "TODO\|FIXME\|XXX\|HACK\|TEMP" --include="*.py" --include="*.ts" --include="*.js" . \
+            --exclude-dir=".git" --exclude-dir="venv" --exclude-dir="node_modules" \
+            > .jules/completist_data/todo_markers.txt 2>/dev/null || true
+
+          # Find NotImplementedError
+          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
+            --exclude-dir=".git" --exclude-dir="venv" \
+            > .jules/completist_data/not_implemented.txt 2>/dev/null || true
+
+          # Find stub functions (empty or just pass/...)
+          grep -rn "def .*:$" -A 2 --include="*.py" . \
+            --exclude-dir=".git" --exclude-dir="venv" \
+            | grep -B 1 "pass$\|\.\.\.$ " \
+            > .jules/completist_data/stub_functions.txt 2>/dev/null || true
+
+          # Find incomplete docstrings
+          grep -rn '""".*TODO\|""".*WIP\|# TODO:' --include="*.py" . \
+            --exclude-dir=".git" --exclude-dir="venv" \
+            > .jules/completist_data/incomplete_docs.txt 2>/dev/null || true
+
+          # Find abstract methods without implementations
+          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
+            --exclude-dir=".git" --exclude-dir="venv" \
+            > .jules/completist_data/abstract_methods.txt 2>/dev/null || true
+
+          # Count findings
+          TODO_COUNT=$(wc -l < .jules/completist_data/todo_markers.txt 2>/dev/null || echo "0")
+          NOT_IMPL_COUNT=$(wc -l < .jules/completist_data/not_implemented.txt 2>/dev/null || echo "0")
+          echo "todo_count=$TODO_COUNT" >> $GITHUB_OUTPUT
+          echo "not_impl_count=$NOT_IMPL_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Jules Completist Analysis
+        env:
+          JULES_TOKEN: ${{ secrets.JULES_API_KEY }}
+        run: |
+          jules auth --token $JULES_TOKEN
+          DATE=$(date +%Y-%m-%d)
+
+          jules task fix --prompt "$(cat << 'PROMPT_EOF'
+          You are the COMPLETIST agent - an auditor for incomplete implementations.
+
+          ## Your Mission
+          Identify and catalog all incomplete, partial, or placeholder implementations in the codebase.
+
+          ## Input Data
+          Review these files in .jules/completist_data/:
+          - todo_markers.txt - TODO/FIXME/XXX comments
+          - not_implemented.txt - NotImplementedError and pass statements
+          - stub_functions.txt - Empty or stub functions
+          - incomplete_docs.txt - Incomplete documentation
+          - abstract_methods.txt - Abstract methods needing implementation
+
+          ## Analysis Categories
+
+          ### 1. Critical Incomplete (Blocking Features)
+          Functions that:
+          - Raise NotImplementedError in core paths
+          - Have pass statements in non-test code
+          - Are called but don't return meaningful results
+
+          ### 2. Feature Gaps
+          - TODO comments indicating missing features
+          - Partial implementations (e.g., only handles some cases)
+          - Mock data instead of real calculations
+
+          ### 3. Technical Debt
+          - FIXME comments
+          - HACK/TEMP markers
+          - Workarounds that should be proper implementations
+
+          ### 4. Documentation Gaps
+          - Functions without docstrings
+          - Incomplete parameter documentation
+          - Missing return type annotations
+
+          ## Output Files
+
+          1. Create docs/assessments/completist/Completist_Report_$DATE.md with:
+             - Executive Summary (counts by category)
+             - Critical Incomplete (priority list)
+             - Feature Gap Matrix (module -> missing features)
+             - Technical Debt Register
+             - Recommended Implementation Order
+
+          2. Update docs/assessments/completist/COMPLETIST_LATEST.md (overwrite)
+
+          3. For CRITICAL incomplete items blocking core functionality:
+             - Create GitHub Issue with label 'incomplete-implementation,critical'
+
+          ## Prioritization Criteria
+          Rate each finding by:
+          - User Impact (1-5): Does this affect users?
+          - Test Coverage (1-5): Is this tested elsewhere?
+          - Complexity (1-5): How hard to complete?
+
+          DO NOT MAKE CODE CHANGES. This is an AUDIT workflow.
+          Your job is to identify and document, not fix.
+          PROMPT_EOF
+          )"
+
+      - name: Commit Report
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs(completist): daily incomplete implementation audit"
+          file_pattern: |
+            docs/assessments/completist/*.md
+            .jules/completist.md
