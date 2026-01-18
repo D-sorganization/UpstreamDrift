@@ -18,12 +18,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-logger = logging.getLogger(__name__)
+from shared.python.physics_constants import (
+    FEET_TO_METERS,
+    MPH_TO_MPS,
+    YARDS_TO_METERS,
+)
 
-# Unit conversions
-MPH_TO_MPS = 0.44704
-YARDS_TO_METERS = 0.9144
-FEET_TO_METERS = 0.3048
+logger = logging.getLogger(__name__)
 
 
 @dataclass
