@@ -1,0 +1,436 @@
+name: Auto-Remediate Assessment Issues
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_numbers:
+        description: 'Comma-separated issue numbers to remediate (e.g., 520,521,522)'
+        required: true
+        type: string
+      max_issues:
+        description: 'Maximum number of issues to fix (default: 10)'
+        required: false
+        default: '10'
+        type: string
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+
+permissions:
+  contents: write
+  issues: read
+  pull-requests: write
+
+jobs:
+  prioritize-issues:
+    name: Prioritize Issues for Remediation
+    runs-on: ubuntu-latest
+    outputs:
+      issue_list: ${{ steps.prioritize.outputs.issues }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get open issues with auto-fix labels
+        id: get_issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get issues that can be auto-remediated
+          gh issue list \
+            --label "quality-control,python" \
+            --label "bug" \
+            --label "enhancement" \
+            --json number,title,labels,createdAt \
+            --limit 100 > all_issues.json
+
+          cat all_issues.json
+
+      - name: Prioritize issues by severity and auto-fix capability
+        id: prioritize
+        run: |
+          # Python script to prioritize issues
+          cat > prioritize.py << 'PYTHON_SCRIPT'
+          import json
+          import sys
+
+          # Read issues
+          with open('all_issues.json', 'r') as f:
+              issues = json.load(f)
+
+          # Define auto-fixable issue patterns
+          auto_fixable_patterns = {
+              'naming convention': {'priority': 2, 'effort': 'low'},
+              'ruff': {'priority': 1, 'effort': 'low'},
+              'security headers': {'priority': 1, 'effort': 'medium'},
+              'rate limiting': {'priority': 1, 'effort': 'medium'},
+              'type annotations': {'priority': 3, 'effort': 'low'},
+              'duplicated constants': {'priority': 2, 'effort': 'medium'},
+          }
+
+          # Score and prioritize
+          scored_issues = []
+          for issue in issues:
+              title_lower = issue['title'].lower()
+              score = 0
+              effort = 'high'
+
+              for pattern, config in auto_fixable_patterns.items():
+                  if pattern in title_lower:
+                      score = config['priority']
+                      effort = config['effort']
+                      break
+
+              if score > 0 and effort in ['low', 'medium']:
+                  scored_issues.append({
+                      'number': issue['number'],
+                      'title': issue['title'],
+                      'score': score,
+                      'effort': effort
+                  })
+
+          # Sort by score (higher first), then effort (lower first)
+          effort_order = {'low': 0, 'medium': 1, 'high': 2}
+          scored_issues.sort(key=lambda x: (-x['score'], effort_order[x['effort']]))
+
+          # Take top N issues
+          max_issues = int(sys.argv[1]) if len(sys.argv) > 1 else 10
+          top_issues = scored_issues[:max_issues]
+
+          # Output as JSON
+          print(json.dumps([i['number'] for i in top_issues]))
+          PYTHON_SCRIPT
+
+          # Run prioritization
+          MAX_ISSUES="${{ inputs.max_issues || '10' }}"
+          ISSUE_LIST=$(python3 prioritize.py "$MAX_ISSUES")
+          echo "issues=$ISSUE_LIST" >> $GITHUB_OUTPUT
+          echo "Prioritized issues: $ISSUE_LIST"
+
+  fix-ruff-violations:
+    name: Auto-Fix Ruff Violations
+    needs: prioritize-issues
+    runs-on: ubuntu-latest
+    if: contains(needs.prioritize-issues.outputs.issue_list, '526') || contains(github.event.inputs.issue_numbers, '526')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install ruff
+        run: pip install ruff==0.14.10
+
+      - name: Run ruff auto-fix
+        run: |
+          # Auto-fix safe naming violations
+          ruff check --select N --fix --unsafe-fixes engines/ shared/ launchers/ api/ || true
+
+          # Auto-fix datetime.UTC upgrades
+          ruff check --select UP017,UP036 --fix || true
+
+          # Auto-fix other safe violations
+          ruff check --fix --unsafe-fixes || true
+
+      - name: Check if changes were made
+        id: check_changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create Pull Request
+        if: steps.check_changes.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Configure git
+          git config user.name "Auto-Remediation Bot"
+          git config user.email "noreply@github.com"
+
+          # Create branch
+          BRANCH_NAME="auto-fix/ruff-violations-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$BRANCH_NAME"
+
+          # Commit changes
+          git add -A
+          git commit -m "fix: Auto-fix ruff code quality violations
+
+          - Fixed naming convention violations (N-series rules)
+          - Updated datetime.timezone.utc to datetime.UTC (UP017)
+          - Removed outdated version blocks (UP036)
+          - Applied safe automatic fixes
+
+          Fixes #526
+
+          Co-Authored-By: Auto-Remediation Bot <noreply@github.com>"
+
+          # Push branch
+          git push origin "$BRANCH_NAME"
+
+          # Create PR
+          gh pr create \
+            --title "🤖 Auto-fix: Ruff Code Quality Violations" \
+            --body "$(cat <<'EOF'
+          ## Automated Remediation
+
+          This PR automatically fixes code quality violations identified in issue #526.
+
+          ### Changes Made
+          - ✅ Fixed naming convention violations (PEP 8 N-series rules)
+          - ✅ Updated datetime.timezone.utc → datetime.UTC (Python 3.11+)
+          - ✅ Removed outdated version blocks
+          - ✅ Applied ruff auto-fixes for safe violations
+
+          ### Review Notes
+          - All changes are auto-generated by ruff with `--fix` flag
+          - Please review physics/math variables (e.g., mass matrix `M`) that may intentionally use uppercase
+          - CI will validate that all tests still pass
+
+          ### Testing
+          - [ ] CI passes (automated)
+          - [ ] Manual review of physics notation
+
+          Fixes #526
+
+          🤖 Generated by Auto-Remediation Workflow
+          EOF
+          )" \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --label "auto-generated,quality-control,python"
+
+  add-security-headers:
+    name: Add API Security Headers
+    needs: prioritize-issues
+    runs-on: ubuntu-latest
+    if: contains(needs.prioritize-issues.outputs.issue_list, '521') || contains(github.event.inputs.issue_numbers, '521')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Add security headers middleware
+        run: |
+          # Backup original file
+          cp api/server.py api/server.py.bak
+
+          # Create middleware code
+          cat > security_headers.py << 'PYTHON_CODE'
+          # Security headers middleware to add after imports
+
+          @app.middleware("http")
+          async def add_security_headers(request: Request, call_next):
+              """Add security headers to all responses."""
+              response = await call_next(request)
+
+              # Prevent MIME-sniffing
+              response.headers["X-Content-Type-Options"] = "nosniff"
+
+              # Prevent clickjacking
+              response.headers["X-Frame-Options"] = "DENY"
+
+              # Enable XSS filter
+              response.headers["X-XSS-Protection"] = "1; mode=block"
+
+              # Control referrer information
+              response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+              # HSTS for HTTPS connections
+              if request.url.scheme == "https":
+                  response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+
+              # Basic CSP (can be made more restrictive)
+              response.headers["Content-Security-Policy"] = "default-src 'self'"
+
+              return response
+          PYTHON_CODE
+
+          # Insert middleware after app creation
+          # This is a simplified approach - in production, use a proper parser
+          echo "⚠️  Manual review required: Add security headers middleware to api/server.py"
+          echo "See security_headers.py for code to add"
+
+      - name: Create Pull Request with instructions
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "Auto-Remediation Bot"
+          git config user.email "noreply@github.com"
+
+          BRANCH_NAME="auto-fix/security-headers-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$BRANCH_NAME"
+
+          # Add the reference file
+          git add security_headers.py
+          git commit -m "feat: Add security headers middleware (manual integration required)
+
+          Addresses issue #521 - Missing security headers
+
+          This commit adds a reference implementation for security headers.
+          Manual integration into api/server.py is required.
+
+          Co-Authored-By: Auto-Remediation Bot <noreply@github.com>"
+
+          git push origin "$BRANCH_NAME"
+
+          gh pr create \
+            --title "🔒 Add API Security Headers Middleware" \
+            --body "$(cat <<'EOF'
+          ## Security Enhancement
+
+          Adds comprehensive security headers to API responses.
+
+          ### Headers Added
+          - ✅ X-Content-Type-Options: nosniff
+          - ✅ X-Frame-Options: DENY
+          - ✅ X-XSS-Protection: 1; mode=block
+          - ✅ Referrer-Policy: strict-origin-when-cross-origin
+          - ✅ Strict-Transport-Security (HTTPS only)
+          - ✅ Content-Security-Policy: default-src 'self'
+
+          ### Manual Integration Required
+
+          1. Review `security_headers.py` for middleware code
+          2. Add middleware to `api/server.py` after app creation
+          3. Test with: `curl -I http://localhost:8000/health`
+          4. Verify headers are present in response
+
+          ### Testing
+          - [ ] Headers present in API responses
+          - [ ] No breaking changes to existing functionality
+          - [ ] HTTPS HSTS header only on secure connections
+
+          Fixes #521
+
+          🤖 Generated by Auto-Remediation Workflow
+          EOF
+          )" \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --label "auto-generated,enhancement,bug"
+
+  generate-api-documentation:
+    name: Auto-Generate API Documentation
+    needs: prioritize-issues
+    runs-on: ubuntu-latest
+    if: contains(needs.prioritize-issues.outputs.issue_list, '525') || contains(github.event.inputs.issue_numbers, '525')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install sphinx sphinx-rtd-theme sphinx-autodoc-typehints
+
+      - name: Generate Sphinx documentation
+        run: |
+          cd docs
+
+          # Create Sphinx config if it doesn't exist
+          if [ ! -f conf.py ]; then
+            sphinx-quickstart -q -p "Golf Modeling Suite" -a "Development Team" -v "1.0" --ext-autodoc --ext-viewcode --ext-napoleon
+          fi
+
+          # Generate API docs
+          sphinx-apidoc -f -o api/ ../shared/python ../engines/physics_engines
+
+          # Build HTML docs
+          make html || true
+
+      - name: Create Pull Request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "Auto-Remediation Bot"
+          git config user.email "noreply@github.com"
+
+          BRANCH_NAME="auto-fix/api-docs-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$BRANCH_NAME"
+
+          git add docs/
+          git commit -m "docs: Auto-generate API documentation with Sphinx
+
+          - Generated API reference for shared/python modules
+          - Generated API reference for physics engines
+          - Added Sphinx configuration
+
+          Addresses #525
+
+          Co-Authored-By: Auto-Remediation Bot <noreply@github.com>" || echo "No changes to commit"
+
+          if git diff --quiet HEAD~1; then
+            echo "No documentation changes generated"
+          else
+            git push origin "$BRANCH_NAME"
+
+            gh pr create \
+              --title "📚 Auto-Generate API Documentation" \
+              --body "$(cat <<'EOF'
+          ## Documentation Enhancement
+
+          Auto-generates comprehensive API documentation using Sphinx.
+
+          ### Changes
+          - ✅ Sphinx configuration added
+          - ✅ API reference for shared/python modules
+          - ✅ API reference for physics engines
+          - ✅ Auto-generated from docstrings
+
+          ### Review Required
+          - [ ] Verify all modules documented correctly
+          - [ ] Check for missing docstrings
+          - [ ] Validate cross-references
+
+          ### Next Steps
+          1. Deploy to ReadTheDocs or GitHub Pages
+          2. Add documentation badge to README
+          3. Set up automatic rebuilds on push
+
+          Addresses #525
+
+          🤖 Generated by Auto-Remediation Workflow
+          EOF
+          )" \
+              --base main \
+              --head "$BRANCH_NAME" \
+              --label "auto-generated,documentation"
+          fi
+
+  workflow-summary:
+    name: Remediation Summary
+    needs: [prioritize-issues, fix-ruff-violations, add-security-headers, generate-api-documentation]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## 🤖 Auto-Remediation Workflow Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Date:** $(date -u +"%Y-%m-%d %H:%M UTC")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Issues Prioritized" >> $GITHUB_STEP_SUMMARY
+          echo "${{ needs.prioritize-issues.outputs.issue_list }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Jobs Status" >> $GITHUB_STEP_SUMMARY
+          echo "- Ruff Violations: ${{ needs.fix-ruff-violations.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Security Headers: ${{ needs.add-security-headers.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "- API Documentation: ${{ needs.generate-api-documentation.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "1. Review auto-generated PRs" >> $GITHUB_STEP_SUMMARY
+          echo "2. Merge approved fixes" >> $GITHUB_STEP_SUMMARY
+          echo "3. Close fixed issues" >> $GITHUB_STEP_SUMMARY

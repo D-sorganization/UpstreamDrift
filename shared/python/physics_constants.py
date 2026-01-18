@@ -112,6 +112,7 @@ HUMIDITY_PERCENT = PhysicalConstant(50.0, "%", "Standard", "Standard relative hu
 # Conversion factors (exact)
 MPS_TO_KPH = PhysicalConstant(3.6, "(km/h)/(m/s)", "Exact", "m/s to km/h")
 MPS_TO_MPH = PhysicalConstant(2.23694, "mph/(m/s)", "NIST", "m/s to mph")
+MPH_TO_MPS = PhysicalConstant(0.44704, "(m/s)/mph", "NIST", "mph to m/s")
 DEG_TO_RAD = PhysicalConstant(
     math.pi / 180, "rad/deg", "Mathematical", "Degrees to radians"
 )
@@ -120,7 +121,11 @@ RAD_TO_DEG = PhysicalConstant(
 )
 KG_TO_LB = PhysicalConstant(2.20462262185, "lb/kg", "NIST", "Kilograms to pounds")
 M_TO_FT = PhysicalConstant(3.28084, "ft/m", "NIST", "Meters to feet")
+FT_TO_M = PhysicalConstant(0.3048, "m/ft", "NIST", "Feet to meters")
+FEET_TO_METERS = FT_TO_M  # Alias for compatibility
 M_TO_YARD = PhysicalConstant(1.09361, "yd/m", "NIST", "Meters to yards")
+YARD_TO_M = PhysicalConstant(0.9144, "m/yd", "NIST", "Yards to meters")
+YARDS_TO_METERS = YARD_TO_M  # Alias for compatibility
 
 # Material properties
 GRAPHITE_DENSITY_KG_M3 = PhysicalConstant(
