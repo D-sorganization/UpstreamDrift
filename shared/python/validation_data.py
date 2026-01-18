@@ -15,6 +15,8 @@ Individual shot trajectories have significant variance around these means.
 from dataclasses import dataclass
 from enum import Enum
 
+from shared.python.physics_constants import MPH_TO_MPS, YARDS_TO_METERS
+
 
 class DataSource(Enum):
     """Source of validation data."""
@@ -82,10 +84,6 @@ class ValidationDataPoint:
 # PGA Tour TrackMan Averages (2023-2024)
 # Source: trackman.com, Golf Monthly
 # =============================================================================
-
-# Unit conversions
-MPH_TO_MPS = 0.44704
-YARDS_TO_METERS = 0.9144
 
 PGA_TOUR_2024: list[ValidationDataPoint] = [
     # Driver
