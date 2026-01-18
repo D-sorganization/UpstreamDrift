@@ -8,10 +8,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any
 
 # Python 3.10 compatibility: UTC was added in 3.11
-if sys.version_info >= (3, 11):
-    from datetime import UTC
-else:
-    UTC = timezone.utc
+from datetime import UTC
 
 import bcrypt
 import jwt

@@ -22,10 +22,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # Python 3.10 compatibility: UTC was added in 3.11
-if sys.version_info >= (3, 11):
-    from datetime import UTC
-else:
-    UTC = timezone.utc
+from datetime import UTC
 
 # Constants
 MATLAB_SCRIPT_TIMEOUT_SECONDS: int = 300  # 5 minutes - allows time for large codebases
