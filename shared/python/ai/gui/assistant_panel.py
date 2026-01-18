@@ -10,6 +10,8 @@ responses with markdown rendering.
 from __future__ import annotations
 
 import logging
+
+# Python 3.10 compatibility: UTC was added in 3.11
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
