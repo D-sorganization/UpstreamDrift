@@ -197,6 +197,27 @@ class SpinalLoadAnalyzer:
             SpinalLoadResult containing all computed metrics and risk assessments
         """
         result = SpinalLoadResult(time=time)
+        n_frames = len(time)
+
+        # Validate input shapes
+        for name, arr in joint_angles.items():
+            if len(arr) != n_frames:
+                raise ValueError(
+                    f"Joint angle '{name}' length ({len(arr)}) "
+                    f"does not match time length ({n_frames})"
+                )
+        for name, arr in joint_velocities.items():
+            if len(arr) != n_frames:
+                raise ValueError(
+                    f"Joint velocity '{name}' length ({len(arr)}) "
+                    f"does not match time length ({n_frames})"
+                )
+        for name, arr in joint_torques.items():
+            if len(arr) != n_frames:
+                raise ValueError(
+                    f"Joint torque '{name}' length ({len(arr)}) "
+                    f"does not match time length ({n_frames})"
+                )
 
         # Calculate loads on each spinal segment
         for segment_name in self.lumbar_segments:
