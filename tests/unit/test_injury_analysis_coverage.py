@@ -64,10 +64,7 @@ def test_technique_risks(scorer):
     # Check recommendation
     # Note: Recommendations logic checks score > 50.
     # _value_to_score(20, 5, 15) -> 100 (>50)
-    assert any(
-        "early extension" in str(report.recommendations).lower()
-        for r in report.recommendations
-    )  # Logic inside recommendation text might differ, checking generic availability logic
+    assert any("early extension" in r.lower() for r in report.recommendations)
 
 
 def test_training_load_spike(scorer):

@@ -31,13 +31,18 @@ from api.database import get_db
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
-# Rate limiter for auth endpoints (Issue #522)
+# Rate limiting constants for auth endpoints (Issue #522)
 # Protects against credential stuffing and brute force attacks
+REGISTRATION_RATE_LIMIT = "3/hour"
+LOGIN_RATE_LIMIT = "5/minute"
+
+# Use shared limiter - registered with app.state in server.py
+# This ensures proper rate limiting across all routes
 limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/register", response_model=UserResponse)
-@limiter.limit("3/hour")  # SECURITY: Limit registration to prevent account farming
+@limiter.limit(REGISTRATION_RATE_LIMIT)  # SECURITY: Limit registration to prevent account farming
 async def register_user(
     request: Request, user_data: UserCreate, db: Session = Depends(get_db)
 ) -> UserResponse:
@@ -70,7 +75,7 @@ async def register_user(
 
 
 @router.post("/login", response_model=LoginResponse)
-@limiter.limit("5/minute")  # SECURITY: Limit login attempts to prevent brute force
+@limiter.limit(LOGIN_RATE_LIMIT)  # SECURITY: Limit login attempts to prevent brute force
 async def login(
     request: Request, login_data: LoginRequest, db: Session = Depends(get_db)
 ) -> LoginResponse:

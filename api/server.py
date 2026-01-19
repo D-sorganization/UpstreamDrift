@@ -20,6 +20,7 @@ try:
     from datetime import UTC
 except ImportError:
     UTC = timezone.utc  # noqa: UP017
+from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Any, cast
 
@@ -98,7 +99,9 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty
 
 # SECURITY: Security headers middleware (Issue #521)
 @app.middleware("http")
-async def add_security_headers(request: Request, call_next: Any) -> Response:
+async def add_security_headers(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     """Add security headers to all responses.
 
     Implements OWASP recommended security headers to prevent:
@@ -131,9 +134,32 @@ async def add_security_headers(request: Request, call_next: Any) -> Response:
     return cast(Response, response)
 
 
+def _add_security_headers_to_response(response: Response, request: Request) -> Response:
+    """Add security headers to a response (used for early-return responses).
+
+    Args:
+        response: The response to add headers to
+        request: The original request (needed for HTTPS check)
+
+    Returns:
+        Response with security headers added
+    """
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    if request.url.scheme == "https":
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
+    return response
+
+
 # SECURITY: Upload size limit middleware (Issue #545)
 @app.middleware("http")
-async def validate_upload_size(request: Request, call_next: Any) -> Response:
+async def validate_upload_size(
+    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+) -> Response:
     """Reject requests exceeding upload size limits.
 
     Prevents DoS attacks via large file uploads by checking Content-Length
@@ -142,14 +168,22 @@ async def validate_upload_size(request: Request, call_next: Any) -> Response:
     content_length = request.headers.get("content-length")
 
     if content_length:
-        content_length_int = int(content_length)
+        try:
+            content_length_int = int(content_length)
+        except ValueError:
+            response = JSONResponse(
+                status_code=400,
+                content={"detail": "Invalid Content-Length header"},
+            )
+            return _add_security_headers_to_response(response, request)
         if content_length_int > MAX_UPLOAD_SIZE_BYTES:
-            return JSONResponse(
+            response = JSONResponse(
                 status_code=413,
                 content={
                     "detail": f"Request too large. Maximum size is {MAX_UPLOAD_SIZE_MB}MB"
                 },
             )
+            return _add_security_headers_to_response(response, request)
 
     return cast(Response, await call_next(request))
 
