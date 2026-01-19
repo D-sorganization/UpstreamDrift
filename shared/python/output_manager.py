@@ -150,7 +150,7 @@ class OutputManager:
 
     def save_simulation_results(
         self,
-        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]],
+        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]] | np.ndarray,
         filename: str,
         format_type: OutputFormat = OutputFormat.CSV,
         engine: str = "mujoco",
