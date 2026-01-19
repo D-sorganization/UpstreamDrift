@@ -62,7 +62,9 @@ except ImportError:
     class MplCanvas:  # type: ignore[no-redef]
         """Matplotlib canvas for embedding in PyQt6 (not available in headless mode)."""
 
-        def __init__(self, width: float = 8, height: float = 6, dpi: int = 100) -> None:  # noqa: ARG002
+        def __init__(
+            self, width: float = 8, height: float = 6, dpi: int = 100
+        ) -> None:  # noqa: ARG002
             """Initialize canvas with figure (implementation for headless environments)."""
             msg = (
                 "MplCanvas requires Qt backend which is not available in headless envs"
@@ -2111,11 +2113,7 @@ class GolfSwingPlotter:
             unit = (
                 "deg"
                 if dt == "position"
-                else "deg/s"
-                if dt == "velocity"
-                else "Nm"
-                if dt == "torque"
-                else ""
+                else "deg/s" if dt == "velocity" else "Nm" if dt == "torque" else ""
             )
             labels.append(f"{name} {dt[:3]} ({unit})")
 

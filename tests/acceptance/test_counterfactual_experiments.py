@@ -87,9 +87,9 @@ class TestZTCFCounterfactual:
 
         # Verify non-zero result (pendulum with gravity)
         assert a_ztcf.size > 0, "ZTCF should return non-empty result"
-        assert not np.allclose(a_ztcf, 0, atol=1e-10), (
-            "ZTCF should be non-zero with gravity"
-        )
+        assert not np.allclose(
+            a_ztcf, 0, atol=1e-10
+        ), "ZTCF should be non-zero with gravity"
 
     def test_ztcf_preserves_engine_state(self, pendulum_engine: PhysicsEngine) -> None:
         """Computing ZTCF should not modify the engine's internal state."""
@@ -152,9 +152,9 @@ class TestZVCFCounterfactual:
 
         # ZVCF should be different from ZTCF due to removed Coriolis
         # (unless by coincidence they cancel, which is unlikely)
-        assert not np.allclose(a_ztcf, a_zvcf, atol=0.01), (
-            "ZVCF should differ from ZTCF when velocity is non-zero"
-        )
+        assert not np.allclose(
+            a_ztcf, a_zvcf, atol=0.01
+        ), "ZVCF should differ from ZTCF when velocity is non-zero"
 
     def test_zvcf_at_rest_configuration(self, pendulum_engine: PhysicsEngine) -> None:
         """ZVCF at vertical (θ=0) should show gravity effect.

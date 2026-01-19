@@ -274,7 +274,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
         try:
             # Launch detached process
             # Use same python interpreter
-            process = subprocess.Popen([sys.executable, str(path)], cwd=str(cwd))  # noqa: S603
+            process = subprocess.Popen(
+                [sys.executable, str(path)], cwd=str(cwd)
+            )  # noqa: S603
             self.log_message(f"{name} launched successfully (PID: {process.pid})")
             self.status.setText(f"{name} Launched")
         except (OSError, subprocess.SubprocessError) as e:

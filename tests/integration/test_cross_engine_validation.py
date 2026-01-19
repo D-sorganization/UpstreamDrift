@@ -347,9 +347,10 @@ class TestCrossEngineValidationIntegration:
                     f"tolerance={TOLERANCE_JACOBIAN:.2e}"
                 )
                 # Allow some tolerance for numerical differences
-                assert result.severity in ["PASSED", "WARNING"], (
-                    f"Jacobian mismatch between {name1} and {name2}: {result.message}"
-                )
+                assert result.severity in [
+                    "PASSED",
+                    "WARNING",
+                ], f"Jacobian mismatch between {name1} and {name2}: {result.message}"
 
     def test_ztcf_counterfactual_agreement(
         self,

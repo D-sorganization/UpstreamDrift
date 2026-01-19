@@ -442,9 +442,9 @@ class TestPhysicalPlausibility:
             result = model.simulate(driver_launch)
 
             # Landing angle should be positive (descending)
-            assert result.landing_angle > 0, (
-                f"{model.name} landing: {result.landing_angle}"
-            )
+            assert (
+                result.landing_angle > 0
+            ), f"{model.name} landing: {result.landing_angle}"
             # Should be less than 90°
             assert result.landing_angle < 90
 

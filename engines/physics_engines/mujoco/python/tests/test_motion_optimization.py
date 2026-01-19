@@ -195,9 +195,9 @@ class TestSwingOptimizer:
         assert result.optimal_trajectory.shape[0] == optimizer.num_knot_points
         # optimal_velocities comes from _simulate_trajectory which returns
         # all simulation steps
-        assert result.optimal_velocities.shape[0] > 0, (
-            "Should have at least one timestep"
-        )
+        assert (
+            result.optimal_velocities.shape[0] > 0
+        ), "Should have at least one timestep"
         assert result.optimal_velocities.shape[1] == model.nv
         assert np.all(np.isfinite(result.optimal_trajectory))
 

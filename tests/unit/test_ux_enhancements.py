@@ -179,9 +179,9 @@ def test_status_info_contrast(mocked_launcher_module):
         assert bg == exp_bg, f"Background color mismatch for {m_type}"
 
         # This assertion defines our requirement for the new feature
-        assert text_color == exp_text, (
-            f"Text color mismatch for {m_type}. Expected {exp_text}, got {text_color}"
-        )
+        assert (
+            text_color == exp_text
+        ), f"Text color mismatch for {m_type}. Expected {exp_text}, got {text_color}"
 
 
 @pytest.mark.skip(reason="QShortcut mocking with complex imports is flaky")

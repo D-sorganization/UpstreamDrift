@@ -623,9 +623,7 @@ class LivePlotWidget(QtWidgets.QWidget):
                 label = (
                     dim_label
                     if n_dims == 1
-                    else f"{dim_label} {i}"
-                    if plot_mode != "Norm"
-                    else "Norm"
+                    else f"{dim_label} {i}" if plot_mode != "Norm" else "Norm"
                 )
                 if plot_mode == "All Dimensions":
                     label = f"Dim {i}"

@@ -75,9 +75,9 @@ class TestEquilibriumResidual:
         residual = solver._equilibrium_residual(l_CE, l_MT, activation, v_CE=0.0)
 
         # Residual should be very close to zero
-        assert abs(residual) < 1.0, (
-            f"Residual should be near zero, got {residual:.6f} N"
-        )
+        assert (
+            abs(residual) < 1.0
+        ), f"Residual should be near zero, got {residual:.6f} N"
 
     def test_residual_changes_sign_across_equilibrium(self, standard_muscle):
         """Test that residual changes sign across equilibrium point."""
@@ -100,9 +100,9 @@ class TestEquilibriumResidual:
 
         # Residuals should have opposite signs
         # Note: exact sign depends on force-length curves, but they should differ
-        assert residual_short * residual_long < 0, (
-            "Residuals should have opposite signs across equilibrium"
-        )
+        assert (
+            residual_short * residual_long < 0
+        ), "Residuals should have opposite signs across equilibrium"
 
     def test_residual_with_pennation(self, pennated_muscle):
         """Test residual calculation with pennated muscle."""
@@ -191,9 +191,9 @@ class TestSolveFiberLength:
             assert np.isfinite(l_CE), f"Solution should be finite at l_MT={l_MT}"
 
         # Longer muscle-tendon -> longer fiber (generally)
-        assert solutions[0] < solutions[-1], (
-            "Longer muscle-tendon should have longer fiber"
-        )
+        assert (
+            solutions[0] < solutions[-1]
+        ), "Longer muscle-tendon should have longer fiber"
 
     def test_custom_initial_guess(self, standard_muscle):
         """Test solver with custom initial guess."""
@@ -460,9 +460,9 @@ class TestPhysicalRealism:
         l_tendon_long = l_MT_long - l_CE_long
 
         # Longer muscle-tendon should have longer tendon
-        assert l_tendon_long > l_tendon_short, (
-            "Longer muscle-tendon should stretch tendon more"
-        )
+        assert (
+            l_tendon_long > l_tendon_short
+        ), "Longer muscle-tendon should stretch tendon more"
 
     def test_fiber_length_decreases_with_activation(self, standard_muscle):
         """Test that fiber shortens with higher activation (for given l_MT).
@@ -526,9 +526,9 @@ class TestPhysicalRealism:
         # Change should be small and smooth
         relative_change = abs(l_CE_perturbed - l_CE_nominal) / l_CE_nominal
 
-        assert relative_change < 0.05, (
-            f"Small perturbation caused large change: {relative_change * 100:.2f}%"
-        )
+        assert (
+            relative_change < 0.05
+        ), f"Small perturbation caused large change: {relative_change * 100:.2f}%"
 
 
 class TestNumericalAccuracy:
@@ -545,9 +545,9 @@ class TestNumericalAccuracy:
 
         # Residual should be much smaller than typical forces
         tolerance_N = 1.0  # 1 N tolerance
-        assert abs(residual) < tolerance_N, (
-            f"Residual {residual:.6f} N exceeds tolerance {tolerance_N} N"
-        )
+        assert (
+            abs(residual) < tolerance_N
+        ), f"Residual {residual:.6f} N exceeds tolerance {tolerance_N} N"
 
     def test_repeated_solves_give_consistent_results(self, standard_muscle):
         """Test that solving the same problem multiple times gives consistent results."""
@@ -637,9 +637,9 @@ class TestEdgeCases:
         l_CE = solver.solve_fiber_length(l_MT, activation)
 
         # Should have stretched fiber (long muscle-tendon)
-        assert l_CE > standard_muscle.params.l_opt, (
-            "Long muscle-tendon should have stretched fiber"
-        )
+        assert (
+            l_CE > standard_muscle.params.l_opt
+        ), "Long muscle-tendon should have stretched fiber"
 
     def test_pennated_muscle_equilibrium(self, pennated_muscle):
         """Test equilibrium with pennation angle."""

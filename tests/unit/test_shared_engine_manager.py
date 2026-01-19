@@ -22,11 +22,15 @@ class TestEngineManager(unittest.TestCase):
         # Patch engine probes individually
         self.mujoco_patcher = patch("shared.python.engine_probes.MuJoCoProbe")
         self.mock_mujoco_probe_cls = self.mujoco_patcher.start()
-        self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = True
+        self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = (
+            True
+        )
 
         self.drake_patcher = patch("shared.python.engine_probes.DrakeProbe")
         self.mock_drake_probe_cls = self.drake_patcher.start()
-        self.mock_drake_probe_cls.return_value.probe.return_value.is_available.return_value = True
+        self.mock_drake_probe_cls.return_value.probe.return_value.is_available.return_value = (
+            True
+        )
 
         self.pinocchio_patcher = patch("shared.python.engine_probes.PinocchioProbe")
         self.mock_pinocchio_probe_cls = self.pinocchio_patcher.start()
@@ -120,7 +124,9 @@ class TestEngineManager(unittest.TestCase):
         manager.engine_paths[EngineType.MUJOCO] = Path("/mock/mujoco")
 
         # Configure probe specifically for this test
-        self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = True
+        self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = (
+            True
+        )
 
         mock_mujoco_pkg = MagicMock()
         mock_mujoco_pkg.__version__ = "3.2.3"
