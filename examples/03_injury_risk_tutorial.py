@@ -22,7 +22,6 @@ repo_root = Path(__file__).parent.parent
 sys.path.append(str(repo_root))
 
 
-
 from shared.python.injury.injury_risk import (  # noqa: E402
     InjuryRiskScorer,
 )
@@ -44,9 +43,7 @@ def run_tutorial() -> None:
     spinal_analyzer, spinal_result = create_example_analysis()
 
     logger.info(f"   Peak Compression: {spinal_result.peak_compression_bw:.1f}x BW")
-    logger.info(
-        f"   Overall Spinal Risk: {spinal_result.overall_risk.value.upper()}"
-    )
+    logger.info(f"   Overall Spinal Risk: {spinal_result.overall_risk.value.upper()}")
 
     # 2. Joint Stress Analysis
     # ------------------------
