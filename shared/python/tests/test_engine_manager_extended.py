@@ -56,7 +56,6 @@ def engine_manager(mock_suite_root):
         patch("shared.python.engine_probes.MatlabProbe") as MockMatlab,
         patch("shared.python.engine_probes.PendulumProbe") as MockPendulum,
     ):
-
         manager = EngineManager(mock_suite_root)
 
         # Store mocks in manager for tests to access if needed (though not standard)

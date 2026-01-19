@@ -150,7 +150,7 @@ class OutputManager:
 
     def save_simulation_results(
         self,
-        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]],
+        results: pd.DataFrame | dict[str, Any] | list[dict[str, Any]] | np.ndarray,
         filename: str,
         format_type: OutputFormat = OutputFormat.CSV,
         engine: str = "mujoco",
@@ -694,7 +694,10 @@ def save_results(
     # It misses np.ndarray. We should update save_simulation_results type hint as well.
 
     path = manager.save_simulation_results(
-        results, filename, OutputFormat(format_type), engine  # type: ignore[arg-type]
+        results,
+        filename,
+        OutputFormat(format_type),
+        engine,  # type: ignore[arg-type]
     )
     return str(path)
 

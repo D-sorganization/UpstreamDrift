@@ -322,7 +322,7 @@ if __name__ == "__main__":
 
     print("\\nEnvironment created:")  # noqa: T201
     print(f"  Task: {env.task}")  # noqa: T201
-    print(f"  Timestep: {env.dt*1000:.1f} ms")  # noqa: T201
+    print(f"  Timestep: {env.dt * 1000:.1f} ms")  # noqa: T201
     print(f"  Muscles: {len(env._get_muscle_names())}")  # noqa: T201
 
     # Test manual control (no training)

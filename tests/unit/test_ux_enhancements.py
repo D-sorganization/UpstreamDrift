@@ -191,7 +191,6 @@ def test_escape_shortcut_logic(mocked_launcher_module):
         patch("launchers.golf_launcher.QShortcut") as MockShortcut,
         patch("launchers.golf_launcher.QKeySequence") as MockKeySequence,
     ):
-
         # Setup QKeySequence to return identifiable mocks
         def key_seq_side_effect(arg):
             m = MagicMock()

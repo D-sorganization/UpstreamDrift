@@ -209,7 +209,6 @@ class OllamaAdapter(BaseAgentAdapter):
         messages = self._format_messages(context, message, tools)
 
         try:
-
             with client.stream(
                 "POST",
                 f"{self._host}/api/chat",
@@ -302,8 +301,7 @@ class OllamaAdapter(BaseAgentAdapter):
             if not available:
                 if not model_names:
                     return False, (
-                        f"No models installed. Pull one with: "
-                        f"ollama pull {self._model}"
+                        f"No models installed. Pull one with: ollama pull {self._model}"
                     )
                 return False, (
                     f"Model '{self._model}' not found. "

@@ -263,8 +263,7 @@ class AnthropicAdapter(BaseAgentAdapter):
 
         except AIProviderError:
             return False, (
-                "anthropic package not installed. "
-                "Install with: pip install anthropic"
+                "anthropic package not installed. Install with: pip install anthropic"
             )
         except Exception as e:
             error_str = str(e).lower()
