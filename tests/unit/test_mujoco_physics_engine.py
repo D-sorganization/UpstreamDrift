@@ -32,18 +32,24 @@ def mock_mujoco_dependencies():
 @pytest.fixture(scope="module")
 def MuJoCoPhysicsEngineClass(mock_mujoco_dependencies):
     """Fixture to provide the MuJoCoPhysicsEngine class with mocked dependencies."""
-    import importlib
+    # Ensure module is imported
+    import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine as mod
 
-    import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
+    # Manually patch the module's globals to use our mocks
+    mock_mujoco, mock_interfaces = mock_mujoco_dependencies
 
-    importlib.reload(
-        engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
-    )
-    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
-        MuJoCoPhysicsEngine,
-    )
+    # Save originals
+    original_mujoco = getattr(mod, "mujoco", None)
 
-    return MuJoCoPhysicsEngine
+    # Inject mocks
+    mod.mujoco = mock_mujoco
+    # Note: interfaces might not be imported directly in this module, but patching mostly for safety
+
+    yield mod.MuJoCoPhysicsEngine
+
+    # Restore
+    if original_mujoco:
+        mod.mujoco = original_mujoco
 
 
 @pytest.fixture
