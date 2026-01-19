@@ -694,7 +694,10 @@ def save_results(
     # It misses np.ndarray. We should update save_simulation_results type hint as well.
 
     path = manager.save_simulation_results(
-        results, filename, OutputFormat(format_type), engine  # type: ignore[arg-type]
+        results,
+        filename,
+        OutputFormat(format_type),
+        engine,  # type: ignore[arg-type]
     )
     return str(path)
 

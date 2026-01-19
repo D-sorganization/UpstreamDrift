@@ -179,9 +179,9 @@ def test_status_info_contrast(mocked_launcher_module):
         assert bg == exp_bg, f"Background color mismatch for {m_type}"
 
         # This assertion defines our requirement for the new feature
-        assert (
-            text_color == exp_text
-        ), f"Text color mismatch for {m_type}. Expected {exp_text}, got {text_color}"
+        assert text_color == exp_text, (
+            f"Text color mismatch for {m_type}. Expected {exp_text}, got {text_color}"
+        )
 
 
 @pytest.mark.skip(reason="QShortcut mocking with complex imports is flaky")
@@ -191,7 +191,6 @@ def test_escape_shortcut_logic(mocked_launcher_module):
         patch("launchers.golf_launcher.QShortcut") as MockShortcut,
         patch("launchers.golf_launcher.QKeySequence") as MockKeySequence,
     ):
-
         # Setup QKeySequence to return identifiable mocks
         def key_seq_side_effect(arg):
             m = MagicMock()

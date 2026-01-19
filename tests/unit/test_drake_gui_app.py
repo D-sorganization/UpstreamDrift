@@ -31,7 +31,6 @@ def teardown_module(module):
 
 @pytest.mark.skipif(not HAS_QT, reason="PyQt6 not available")
 class TestDrakeGUIApp:
-
     def test_compute_specific_control(self):
         """Test compute_specific_control in DrakeInducedAccelerationAnalyzer."""
         # Import inside test to ensure mocks apply

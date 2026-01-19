@@ -299,9 +299,7 @@ class TestPasswordSecurity:
                     mock_session.return_value = mock_db
 
                     # Mock query to return no admin user
-                    mock_db.query.return_value.filter.return_value.first.return_value = (
-                        None
-                    )
+                    mock_db.query.return_value.filter.return_value.first.return_value = None
 
                     # This should generate a random password but NOT log it
                     try:
@@ -394,12 +392,12 @@ class TestSecurityBestPractices:
         ]
 
         for pattern in suspicious_patterns:
-            assert (
-                pattern not in security_source.lower()
-            ), f"Found suspicious pattern in security.py: {pattern}"
-            assert (
-                pattern not in dependencies_source.lower()
-            ), f"Found suspicious pattern in dependencies.py: {pattern}"
+            assert pattern not in security_source.lower(), (
+                f"Found suspicious pattern in security.py: {pattern}"
+            )
+            assert pattern not in dependencies_source.lower(), (
+                f"Found suspicious pattern in dependencies.py: {pattern}"
+            )
 
     def test_secure_random_generation(self) -> None:
         """Test that secrets module is used for random generation."""

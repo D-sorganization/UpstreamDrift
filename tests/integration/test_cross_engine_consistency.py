@@ -200,8 +200,7 @@ class TestCrossEngineConsistency:
                     f"deviation={result.max_deviation:.2e}"
                 )
                 assert result.severity in ["PASSED", "WARNING"], (
-                    f"Bias force mismatch between {name1} and {name2}: "
-                    f"{result.message}"
+                    f"Bias force mismatch between {name1} and {name2}: {result.message}"
                 )
 
     def test_forward_dynamics_trajectory_consistency(
@@ -385,6 +384,6 @@ class TestThreeWayTriangulation:
 
         # For now, just verify that at least two engines agree closely
         min_deviation = min(deviations.values()) if deviations else float("inf")
-        assert (
-            min_deviation < agreement_threshold
-        ), f"No engine pair agrees within threshold: min deviation={min_deviation:.2e}"
+        assert min_deviation < agreement_threshold, (
+            f"No engine pair agrees within threshold: min deviation={min_deviation:.2e}"
+        )

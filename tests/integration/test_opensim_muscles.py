@@ -115,9 +115,9 @@ class TestOpenSimMuscleModels:
         )
 
         # Basic sanity check: force should be positive and reasonable
-        assert (
-            0 < F_muscle <= F_max * 1.5
-        ), f"Muscle force {F_muscle} outside expected range"
+        assert 0 < F_muscle <= F_max * 1.5, (
+            f"Muscle force {F_muscle} outside expected range"
+        )
 
     def test_activation_dynamics(self, simple_arm_model):
         """Section J: Verify activation dynamics (30-50ms delay)."""

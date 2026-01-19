@@ -386,12 +386,12 @@ class TestCrossEngineDriftControl:
         assert engine is not None
 
         # Verify methods exist
-        assert hasattr(
-            engine, "compute_drift_acceleration"
-        ), f"{engine_name} missing compute_drift_acceleration()"
-        assert hasattr(
-            engine, "compute_control_acceleration"
-        ), f"{engine_name} missing compute_control_acceleration()"
+        assert hasattr(engine, "compute_drift_acceleration"), (
+            f"{engine_name} missing compute_drift_acceleration()"
+        )
+        assert hasattr(engine, "compute_control_acceleration"), (
+            f"{engine_name} missing compute_control_acceleration()"
+        )
 
         # Try loading and computing (may fail due to URDF compatibility)
         try:
@@ -404,9 +404,9 @@ class TestCrossEngineDriftControl:
             a_control = engine.compute_control_acceleration(np.array([0.5]))
 
             assert len(a_drift) > 0, f"{engine_name} returned empty drift acceleration"
-            assert (
-                len(a_control) > 0
-            ), f"{engine_name} returned empty control acceleration"
+            assert len(a_control) > 0, (
+                f"{engine_name} returned empty control acceleration"
+            )
 
         except Exception as e:
             LOGGER.warning(f"{engine_name} failed to load URDF: {e}")

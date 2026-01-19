@@ -427,7 +427,10 @@ async def run_simulation_async(
 
     # Add background task
     background_tasks.add_task(
-        simulation_service.run_simulation_background, task_id, request, active_tasks  # type: ignore[arg-type]
+        simulation_service.run_simulation_background,
+        task_id,
+        request,
+        active_tasks,  # type: ignore[arg-type]
     )
 
     return {"task_id": task_id, "status": "started"}

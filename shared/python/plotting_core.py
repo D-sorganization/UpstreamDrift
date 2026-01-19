@@ -62,9 +62,7 @@ except ImportError:
     class MplCanvas:  # type: ignore[no-redef]
         """Matplotlib canvas for embedding in PyQt6 (not available in headless mode)."""
 
-        def __init__(
-            self, width: float = 8, height: float = 6, dpi: int = 100
-        ) -> None:  # noqa: ARG002
+        def __init__(self, width: float = 8, height: float = 6, dpi: int = 100) -> None:  # noqa: ARG002
             """Initialize canvas with figure (implementation for headless environments)."""
             msg = (
                 "MplCanvas requires Qt backend which is not available in headless envs"
@@ -2113,7 +2111,11 @@ class GolfSwingPlotter:
             unit = (
                 "deg"
                 if dt == "position"
-                else "deg/s" if dt == "velocity" else "Nm" if dt == "torque" else ""
+                else "deg/s"
+                if dt == "velocity"
+                else "Nm"
+                if dt == "torque"
+                else ""
             )
             labels.append(f"{name} {dt[:3]} ({unit})")
 
@@ -2322,7 +2324,7 @@ class GolfSwingPlotter:
 
             ax.set_xlabel("x(t)", fontsize=10)
             ax.set_ylabel(f"x(t+{delay})", fontsize=10)
-            ax.set_zlabel(f"x(t+{2*delay})", fontsize=10)  # type: ignore[attr-defined]
+            ax.set_zlabel(f"x(t+{2 * delay})", fontsize=10)  # type: ignore[attr-defined]
         else:
             ax = fig.add_subplot(111)
             sc = ax.scatter(
@@ -2413,7 +2415,7 @@ class GolfSwingPlotter:
 
             ax_w.set_yticklabels(muscle_names, fontsize=8)
             ax_w.invert_yaxis()  # Top-down
-            ax_w.set_title(f"Synergy {i+1} Weights", fontsize=10, fontweight="bold")
+            ax_w.set_title(f"Synergy {i + 1} Weights", fontsize=10, fontweight="bold")
             ax_w.grid(True, axis="x", alpha=0.3)
 
             # 2. Activation (Time series)
@@ -2426,11 +2428,13 @@ class GolfSwingPlotter:
             if i == n_synergies - 1:
                 ax_h.set_xlabel("Time (s)", fontsize=10)
 
-            ax_h.set_title(f"Synergy {i+1} Activation", fontsize=10, fontweight="bold")
+            ax_h.set_title(
+                f"Synergy {i + 1} Activation", fontsize=10, fontweight="bold"
+            )
             ax_h.grid(True, alpha=0.3)
 
         fig.suptitle(
-            f"Muscle Synergies (VAF: {synergy_result.vaf*100:.1f}%)",
+            f"Muscle Synergies (VAF: {synergy_result.vaf * 100:.1f}%)",
             fontsize=14,
             fontweight="bold",
         )
@@ -2730,7 +2734,7 @@ class GolfSwingPlotter:
             ax.text(
                 t,
                 i + 0.15,
-                f"{t*1000:.0f} ms",
+                f"{t * 1000:.0f} ms",
                 ha="center",
                 fontsize=10,
                 fontweight="bold",
@@ -3933,8 +3937,8 @@ class GolfSwingPlotter:
         ax.scatter(act1[0], act2[0], color="green", s=100, label="Start")
         ax.scatter(act1[-1], act2[-1], color="red", s=100, marker="s", label="End")
 
-        ax.set_xlabel(f"Synergy {dim1+1} Activation", fontsize=12, fontweight="bold")
-        ax.set_ylabel(f"Synergy {dim2+1} Activation", fontsize=12, fontweight="bold")
+        ax.set_xlabel(f"Synergy {dim1 + 1} Activation", fontsize=12, fontweight="bold")
+        ax.set_ylabel(f"Synergy {dim2 + 1} Activation", fontsize=12, fontweight="bold")
         ax.set_title("Synergy Space Trajectory", fontsize=14, fontweight="bold")
         ax.grid(True, alpha=0.3)
         ax.legend()
@@ -4378,7 +4382,7 @@ class GolfSwingPlotter:
 
         for i in range(min(modes_to_plot, scores.shape[1])):
             color = colors[i % len(colors)]
-            ax2.plot(times, scores[:, i], label=f"PC {i+1}", linewidth=2, color=color)
+            ax2.plot(times, scores[:, i], label=f"PC {i + 1}", linewidth=2, color=color)
 
         ax2.set_xlabel("Time (s)", fontsize=12, fontweight="bold")
         ax2.set_ylabel("Score (Projection)", fontsize=12, fontweight="bold")

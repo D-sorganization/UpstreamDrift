@@ -38,7 +38,11 @@ class TestCrossEngineValidator:
         state2 = np.array([1.0000001, 2.0000001, 3.0000001])  # 1e-7 deviation
 
         result = validator.compare_states(
-            "MuJoCo", state1, "Drake", state2, metric="position"  # tolerance: 1e-6
+            "MuJoCo",
+            state1,
+            "Drake",
+            state2,
+            metric="position",  # tolerance: 1e-6
         )
 
         assert result.passed
@@ -344,8 +348,7 @@ class TestCrossEngineValidationIntegration:
                 )
                 # Allow some tolerance for numerical differences
                 assert result.severity in ["PASSED", "WARNING"], (
-                    f"Jacobian mismatch between {name1} and {name2}: "
-                    f"{result.message}"
+                    f"Jacobian mismatch between {name1} and {name2}: {result.message}"
                 )
 
     def test_ztcf_counterfactual_agreement(

@@ -113,14 +113,16 @@ class TestBasicContactPhysics:
         )
 
         # Ball should be near ground (not still at 1m)
-        assert (
-            final_height < 0.1
-        ), f"Ball should settle near ground: height={final_height:.3f}m"
+        assert final_height < 0.1, (
+            f"Ball should settle near ground: height={final_height:.3f}m"
+        )
 
         # Log for cross-engine comparison
         restitution_effective = np.sqrt(E_final / E_initial)
         print(f"MuJoCo - Effective restitution: {restitution_effective:.3f}")
-        print(f"MuJoCo - Energy dissipated: {(E_initial - E_final)/E_initial*100:.1f}%")
+        print(
+            f"MuJoCo - Energy dissipated: {(E_initial - E_final) / E_initial * 100:.1f}%"
+        )
 
     @pytest.mark.slow
     def test_drake_ball_drop_energy_dissipation(self, ball_urdf):

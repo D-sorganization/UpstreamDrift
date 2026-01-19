@@ -178,9 +178,9 @@ class TestJacobianShape:
 
                 # Verify shape (6×nv)
                 assert J.shape[0] == 6, f"Expected 6 rows, got {J.shape[0]}"
-                assert (
-                    J.shape[1] == model.nv
-                ), f"Expected {model.nv} cols, got {J.shape[1]}"
+                assert J.shape[1] == model.nv, (
+                    f"Expected {model.nv} cols, got {J.shape[1]}"
+                )
 
         finally:
             Path(urdf_path).unlink(missing_ok=True)
@@ -267,9 +267,9 @@ class TestJacobianConsistency:
             pin_model = pin.buildModelFromUrdf(urdf_path)
 
             # Both should have same number of DOF
-            assert (
-                mj_model.nv == pin_model.nv
-            ), f"DOF mismatch: MuJoCo={mj_model.nv}, Pinocchio={pin_model.nv}"
+            assert mj_model.nv == pin_model.nv, (
+                f"DOF mismatch: MuJoCo={mj_model.nv}, Pinocchio={pin_model.nv}"
+            )
 
         finally:
             Path(urdf_path).unlink(missing_ok=True)

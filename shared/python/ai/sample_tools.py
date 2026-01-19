@@ -262,7 +262,7 @@ def _register_analysis_tools(registry: ToolRegistry) -> None:
                 f"Inverse dynamics simulation queued using {engine}. "
                 "This would normally take 30-60 seconds for a typical swing."
             ),
-            "note": ("Implementation requires physics " "engine integration."),
+            "note": ("Implementation requires physics engine integration."),
         }
 
     @registry.register(

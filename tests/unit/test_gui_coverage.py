@@ -55,12 +55,12 @@ class TestMuJoCoSimWidget:
 
         # Verify initialization parameters - check minimum size constraints
         # Note: Qt widgets may not have exact size until shown; verify minimum constraints are set
-        assert (
-            widget.minimumWidth() == 640
-        ), f"Minimum width should be 640, got {widget.minimumWidth()}"
-        assert (
-            widget.minimumHeight() == 480
-        ), f"Minimum height should be 480, got {widget.minimumHeight()}"
+        assert widget.minimumWidth() == 640, (
+            f"Minimum width should be 640, got {widget.minimumWidth()}"
+        )
+        assert widget.minimumHeight() == 480, (
+            f"Minimum height should be 480, got {widget.minimumHeight()}"
+        )
         assert hasattr(widget, "model")
         assert hasattr(widget, "data")
 
@@ -117,9 +117,9 @@ class TestMuJoCoSimWidget:
         widget.load_model_from_xml(model_xml)
 
         # Verify model and data are loaded
-        assert (
-            widget.data is not None
-        ), "Model data should be loaded after load_model_from_xml"
+        assert widget.data is not None, (
+            "Model data should be loaded after load_model_from_xml"
+        )
 
         # First call reset_state to get the widget's canonical initial state
         # (reset_state sets qpos[0] = 0.2 for 1-DOF models)
@@ -247,9 +247,9 @@ class TestHumanoidLauncher:
         expected_attrs = ["centralWidget", "menuBar", "statusBar"]
         missing_attrs = [attr for attr in expected_attrs if not hasattr(launcher, attr)]
 
-        assert (
-            not missing_attrs
-        ), f"Launcher is missing expected widget attributes: {missing_attrs}"
+        assert not missing_attrs, (
+            f"Launcher is missing expected widget attributes: {missing_attrs}"
+        )
 
         launcher.close()
 

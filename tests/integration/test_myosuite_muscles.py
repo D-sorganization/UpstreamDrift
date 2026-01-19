@@ -390,9 +390,9 @@ class TestMyoSuiteEngine:
             ):
                 actuator_id = analyzer.muscle_actuator_ids[0]
                 ctrl_value = engine.sim.data.ctrl[actuator_id]
-                assert (
-                    0.7 <= ctrl_value <= 0.9
-                ), f"Activation not set correctly: {ctrl_value}"
+                assert 0.7 <= ctrl_value <= 0.9, (
+                    f"Activation not set correctly: {ctrl_value}"
+                )
 
         except Exception as e:
             pytest.skip(f"Activation setting test failed: {e}")

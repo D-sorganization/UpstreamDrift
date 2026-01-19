@@ -56,9 +56,9 @@ class TestPowerFlowBasics:
 
         # P = τ · ω = 3.0 * 2.0 = 6.0 Watts
         expected_power = 6.0
-        assert (
-            abs(result.joint_powers[0] - expected_power) < 1e-6
-        ), f"Expected power {expected_power}, got {result.joint_powers[0]}"
+        assert abs(result.joint_powers[0] - expected_power) < 1e-6, (
+            f"Expected power {expected_power}, got {result.joint_powers[0]}"
+        )
 
     def test_power_sign_positive_when_aligned(
         self, simple_pendulum_model: mujoco.MjModel
@@ -74,9 +74,9 @@ class TestPowerFlowBasics:
         result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
 
         # Both positive → power positive (generation)
-        assert (
-            result.joint_powers[0] > 0
-        ), "Power should be positive when torque and velocity are aligned"
+        assert result.joint_powers[0] > 0, (
+            "Power should be positive when torque and velocity are aligned"
+        )
 
     def test_power_sign_negative_when_opposed(
         self, simple_pendulum_model: mujoco.MjModel
@@ -92,9 +92,9 @@ class TestPowerFlowBasics:
         result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
 
         # Opposite signs → power negative (absorption/braking)
-        assert (
-            result.joint_powers[0] < 0
-        ), "Power should be negative when torque opposes velocity"
+        assert result.joint_powers[0] < 0, (
+            "Power should be negative when torque opposes velocity"
+        )
 
     def test_zero_velocity_gives_zero_power(
         self, simple_pendulum_model: mujoco.MjModel
@@ -110,9 +110,9 @@ class TestPowerFlowBasics:
         result = analyzer.compute_power_flow(qpos, qvel, qacc, tau)
 
         # v = 0 → P = 0 regardless of torque
-        assert (
-            abs(result.joint_powers[0]) < 1e-10
-        ), "Power should be zero when velocity is zero"
+        assert abs(result.joint_powers[0]) < 1e-10, (
+            "Power should be zero when velocity is zero"
+        )
 
 
 class TestWorkCalculations:
@@ -134,9 +134,9 @@ class TestWorkCalculations:
 
         # W = P · dt = 6.0 * 0.1 = 0.6 Joules
         expected_work = 6.0 * 0.1
-        assert (
-            abs(result.joint_work_total[0] - expected_work) < 1e-6
-        ), f"Expected work {expected_work}, got {result.joint_work_total[0]}"
+        assert abs(result.joint_work_total[0] - expected_work) < 1e-6, (
+            f"Expected work {expected_work}, got {result.joint_work_total[0]}"
+        )
 
     def test_work_decomposition_sums_to_total(
         self, simple_pendulum_model: mujoco.MjModel
@@ -164,9 +164,9 @@ class TestWorkCalculations:
 
         # Work components should sum to total
         work_sum = result.joint_work_drift[0] + result.joint_work_control[0]
-        assert (
-            abs(result.joint_work_total[0] - work_sum) < 1e-6
-        ), "Drift + control work should equal total work"
+        assert abs(result.joint_work_total[0] - work_sum) < 1e-6, (
+            "Drift + control work should equal total work"
+        )
 
 
 class TestEnergyCalculations:
@@ -212,9 +212,9 @@ class TestEnergyCalculations:
         pe_low = np.sum(result_low.segment_potential_energy)
         pe_high = np.sum(result_high.segment_potential_energy)
 
-        assert (
-            pe_high > pe_low
-        ), f"Higher position should have higher PE: {pe_high} vs {pe_low}"
+        assert pe_high > pe_low, (
+            f"Higher position should have higher PE: {pe_high} vs {pe_low}"
+        )
 
     def test_total_mechanical_energy_is_ke_plus_pe(
         self, simple_pendulum_model: mujoco.MjModel
@@ -233,9 +233,9 @@ class TestEnergyCalculations:
         total_pe = np.sum(result.segment_potential_energy)
         expected_me = total_ke + total_pe
 
-        assert (
-            abs(result.total_mechanical_energy - expected_me) < 1e-6
-        ), "Total ME should equal KE + PE"
+        assert abs(result.total_mechanical_energy - expected_me) < 1e-6, (
+            "Total ME should equal KE + PE"
+        )
 
 
 class TestSystemPowerMetrics:
@@ -256,9 +256,9 @@ class TestSystemPowerMetrics:
 
         # Single joint with positive power
         expected_power_in = 3.0 * 2.0  # 6.0 W
-        assert (
-            abs(result.power_in - expected_power_in) < 1e-6
-        ), f"Expected power_in {expected_power_in}, got {result.power_in}"
+        assert abs(result.power_in - expected_power_in) < 1e-6, (
+            f"Expected power_in {expected_power_in}, got {result.power_in}"
+        )
 
     def test_power_dissipation_from_damping(
         self, simple_pendulum_model: mujoco.MjModel
@@ -276,9 +276,9 @@ class TestSystemPowerMetrics:
         # Damping = 0.1, velocity = 2.0
         # P_diss = b * ω² = 0.1 * 4.0 = 0.4 W
         expected_diss = 0.1 * 2.0**2
-        assert (
-            abs(result.power_dissipation - expected_diss) < 1e-6
-        ), f"Expected dissipation {expected_diss}, got {result.power_dissipation}"
+        assert abs(result.power_dissipation - expected_diss) < 1e-6, (
+            f"Expected dissipation {expected_diss}, got {result.power_dissipation}"
+        )
 
 
 class TestTrajectoryAnalysis:

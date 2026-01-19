@@ -229,7 +229,7 @@ class TestPendulumAnalyticalDynamics:
             err_msg=f"Engine max gravity torque DEVIATES!\\n"
             f"  θ = π/2 (horizontal)\\n"
             f"  τ_engine = {tau_engine[0]:.8e} N·m\\n"
-            f"  τ_analytical = {tau_analytical:.8e} N·m (expected ≈ m·g·l = {self.m1*self.g*self.l1:.6f})",
+            f"  τ_analytical = {tau_analytical:.8e} N·m (expected ≈ m·g·l = {self.m1 * self.g * self.l1:.6f})",
         )
 
     def test_inverse_dynamics_combined_inertial_gravity(self) -> None:
@@ -447,9 +447,9 @@ class TestPendulumEnergyConservation:
         # Energy drift percentage
         drift_pct = abs(E_final - E_initial) / abs(E_initial) * 100
 
-        assert (
-            drift_pct < 2.0
-        ), f"Energy drift EXCEEDS 2% tolerance (Guideline O3)!\\n  E_initial = {E_initial:.6f} J\\n  E_final = {E_final:.6f} J\\n  Drift: {drift_pct:.2f}% (tolerance: 2.0%)\\n  This indicates integration error or damping leakage."
+        assert drift_pct < 2.0, (
+            f"Energy drift EXCEEDS 2% tolerance (Guideline O3)!\\n  E_initial = {E_initial:.6f} J\\n  E_final = {E_final:.6f} J\\n  Drift: {drift_pct:.2f}% (tolerance: 2.0%)\\n  This indicates integration error or damping leakage."
+        )
 
 
 # Run tests if executed as script
