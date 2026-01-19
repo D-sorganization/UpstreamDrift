@@ -7,7 +7,7 @@ from typing import Any
 try:
     from datetime import UTC
 except ImportError:
-    UTC = timezone.utc
+    UTC = timezone.utc  # noqa: UP017
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from slowapi import Limiter

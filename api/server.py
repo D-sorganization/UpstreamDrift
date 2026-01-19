@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 try:
     from datetime import UTC
 except ImportError:
-    UTC = timezone.utc
+    UTC = timezone.utc  # noqa: UP017
 from pathlib import Path
 from typing import Any, cast
 

@@ -8,7 +8,7 @@ from datetime import timezone
 try:
     from datetime import UTC
 except ImportError:
-    UTC = timezone.utc
+    UTC = timezone.utc  # noqa: UP017
 
 from shared.python.ai.types import (
     AgentChunk,
