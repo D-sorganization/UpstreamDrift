@@ -331,15 +331,15 @@ class ModelLibrary:
     <!-- Grip -->
     <link name="grip">
         <inertial>
-            <mass value="{club_info['grip_mass']}"/>
-            <origin xyz="0 0 {grip_length/2}" rpy="0 0 0"/>
-            <inertia ixx="{club_info['grip_mass'] * (3*grip_radius**2 + grip_length**2) / 12}"
-                     iyy="{club_info['grip_mass'] * (3*grip_radius**2 + grip_length**2) / 12}"
-                     izz="{club_info['grip_mass'] * grip_radius**2 / 2}"
+            <mass value="{club_info["grip_mass"]}"/>
+            <origin xyz="0 0 {grip_length / 2}" rpy="0 0 0"/>
+            <inertia ixx="{club_info["grip_mass"] * (3 * grip_radius**2 + grip_length**2) / 12}"
+                     iyy="{club_info["grip_mass"] * (3 * grip_radius**2 + grip_length**2) / 12}"
+                     izz="{club_info["grip_mass"] * grip_radius**2 / 2}"
                      ixy="0" ixz="0" iyz="0"/>
         </inertial>
         <visual>
-            <origin xyz="0 0 {grip_length/2}" rpy="0 0 0"/>
+            <origin xyz="0 0 {grip_length / 2}" rpy="0 0 0"/>
             <geometry>
                 <cylinder length="{grip_length}" radius="{grip_radius}"/>
             </geometry>
@@ -348,7 +348,7 @@ class ModelLibrary:
             </material>
         </visual>
         <collision>
-            <origin xyz="0 0 {grip_length/2}" rpy="0 0 0"/>
+            <origin xyz="0 0 {grip_length / 2}" rpy="0 0 0"/>
             <geometry>
                 <cylinder length="{grip_length}" radius="{grip_radius}"/>
             </geometry>
@@ -364,15 +364,15 @@ class ModelLibrary:
     <!-- Shaft -->
     <link name="shaft">
         <inertial>
-            <mass value="{club_info['shaft_mass']}"/>
-            <origin xyz="0 0 {shaft_length/2}" rpy="0 0 0"/>
-            <inertia ixx="{club_info['shaft_mass'] * (3*shaft_radius**2 + shaft_length**2) / 12}"
-                     iyy="{club_info['shaft_mass'] * (3*shaft_radius**2 + shaft_length**2) / 12}"
-                     izz="{club_info['shaft_mass'] * shaft_radius**2 / 2}"
+            <mass value="{club_info["shaft_mass"]}"/>
+            <origin xyz="0 0 {shaft_length / 2}" rpy="0 0 0"/>
+            <inertia ixx="{club_info["shaft_mass"] * (3 * shaft_radius**2 + shaft_length**2) / 12}"
+                     iyy="{club_info["shaft_mass"] * (3 * shaft_radius**2 + shaft_length**2) / 12}"
+                     izz="{club_info["shaft_mass"] * shaft_radius**2 / 2}"
                      ixy="0" ixz="0" iyz="0"/>
         </inertial>
         <visual>
-            <origin xyz="0 0 {shaft_length/2}" rpy="0 0 0"/>
+            <origin xyz="0 0 {shaft_length / 2}" rpy="0 0 0"/>
             <geometry>
                 <cylinder length="{shaft_length}" radius="{shaft_radius}"/>
             </geometry>
@@ -381,7 +381,7 @@ class ModelLibrary:
             </material>
         </visual>
         <collision>
-            <origin xyz="0 0 {shaft_length/2}" rpy="0 0 0"/>
+            <origin xyz="0 0 {shaft_length / 2}" rpy="0 0 0"/>
             <geometry>
                 <cylinder length="{shaft_length}" radius="{shaft_radius}"/>
             </geometry>
@@ -397,15 +397,15 @@ class ModelLibrary:
     <!-- Club Head -->
     <link name="club_head">
         <inertial>
-            <mass value="{club_info['head_mass']}"/>
-            <origin xyz="{head_length/2} 0 0" rpy="0 {club_info['loft']*math.pi/180} 0"/>
-            <inertia ixx="{club_info['head_mass'] * (head_width**2 + head_height**2) / 12}"
-                     iyy="{club_info['head_mass'] * (head_length**2 + head_height**2) / 12}"
-                     izz="{club_info['head_mass'] * (head_length**2 + head_width**2) / 12}"
+            <mass value="{club_info["head_mass"]}"/>
+            <origin xyz="{head_length / 2} 0 0" rpy="0 {club_info["loft"] * math.pi / 180} 0"/>
+            <inertia ixx="{club_info["head_mass"] * (head_width**2 + head_height**2) / 12}"
+                     iyy="{club_info["head_mass"] * (head_length**2 + head_height**2) / 12}"
+                     izz="{club_info["head_mass"] * (head_length**2 + head_width**2) / 12}"
                      ixy="0" ixz="0" iyz="0"/>
         </inertial>
         <visual>
-            <origin xyz="{head_length/2} 0 0" rpy="0 {club_info['loft']*math.pi/180} 0"/>
+            <origin xyz="{head_length / 2} 0 0" rpy="0 {club_info["loft"] * math.pi / 180} 0"/>
             <geometry>
                 <box size="{head_length} {head_width} {head_height}"/>
             </geometry>
@@ -414,7 +414,7 @@ class ModelLibrary:
             </material>
         </visual>
         <collision>
-            <origin xyz="{head_length/2} 0 0" rpy="0 {club_info['loft']*math.pi/180} 0"/>
+            <origin xyz="{head_length / 2} 0 0" rpy="0 {club_info["loft"] * math.pi / 180} 0"/>
             <geometry>
                 <box size="{head_length} {head_width} {head_height}"/>
             </geometry>

@@ -442,7 +442,8 @@ class TestEstimateMaxStableTimestep:
         """Test timestep recommendation for normal motion."""
         engine = MockPhysicsEngine()
         engine.set_state(
-            q=np.array([0.0, 0.0]), v=np.array([3.0, 4.0])  # ||v|| = 5.0, in [1, 10)
+            q=np.array([0.0, 0.0]),
+            v=np.array([3.0, 4.0]),  # ||v|| = 5.0, in [1, 10)
         )
 
         monitor = ConservationMonitor(as_physics_engine(engine))

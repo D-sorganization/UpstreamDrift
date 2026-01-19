@@ -350,3 +350,88 @@ powershell -Command "gh run list --branch [BRANCH_NAME] --limit 5"
 # View specific run:
 powershell -Command "gh run view [RUN_ID]"
 ```
+
+---
+
+## 🔍 Pre-Commit Quality Checks (MANDATORY)
+
+### Before Creating ANY PR:
+
+**CRITICAL**: All code MUST pass linting checks locally before pushing. Failing to do so wastes CI resources and blocks PRs.
+
+```bash
+# Python files - run ALL of these before committing:
+ruff check .                    # Linting errors
+ruff check --fix .              # Auto-fix what can be fixed
+ruff format .                   # Format code
+black .                         # Additional formatting
+mypy .                          # Type checking (if configured)
+
+# Verify no issues remain:
+ruff check . && echo "✓ All checks passed"
+```
+
+### Common Python Linting Issues to Avoid:
+
+1. **Trailing whitespace on blank lines** (W293) - Use editor setting to strip trailing whitespace
+2. **Unsorted imports** (I001) - Run `ruff check --fix` to auto-sort
+3. **Line too long** (E501) - Break long lines, especially in data structures
+4. **Missing type hints** - Add type annotations to function signatures
+
+### Workflow/YAML Validation:
+
+Before modifying GitHub Actions workflows, validate syntax:
+
+```bash
+# Check YAML syntax (requires yq or python-yaml)
+python -c "import yaml; yaml.safe_load(open('.github/workflows/your-workflow.yml'))"
+
+# Or use actionlint if available
+actionlint .github/workflows/
+```
+
+---
+
+## ⚠️ Shell Scripting in Workflows (CRITICAL)
+
+### Common Pitfalls to Avoid:
+
+1. **Unquoted variables with spaces**:
+   ```bash
+   # ❌ WRONG - breaks if TARGET contains spaces
+   basename $TARGET
+
+   # ✅ CORRECT - always quote variables
+   basename "$TARGET"
+   ```
+
+2. **jq null coalescing operator**:
+   ```bash
+   # ❌ WRONG - // gets misinterpreted by shell
+   jq 'first // "default"'
+
+   # ✅ CORRECT - use if-then-else instead
+   jq 'first | if . == null then "default" else . end'
+   ```
+
+3. **Heredocs in YAML**:
+   ```yaml
+   # ✅ CORRECT - use literal block scalar for multi-line
+   run: |
+     cat << 'EOF'
+     Content here
+     EOF
+   ```
+
+### Testing Workflow Changes:
+
+Before pushing workflow changes:
+
+1. **Validate YAML syntax** locally
+2. **Test shell commands** in isolation
+3. **Check for unquoted variables** that might contain spaces
+4. **Review jq expressions** for shell quoting issues
+
+### Reference Documentation:
+
+See `Repository_Management/workflow-fixes/` for documented fixes and patterns to avoid.

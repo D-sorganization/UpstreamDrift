@@ -112,7 +112,6 @@ class ActivationDynamics:
 
 # Example usage / validation
 if __name__ == "__main__":
-
     dynamics = ActivationDynamics(tau_act=0.010, tau_deact=0.040)
     dt = 0.001  # 1 ms
     duration = 0.200  # 200 ms
@@ -132,7 +131,7 @@ if __name__ == "__main__":
     print("Activation Dynamics Test")  # noqa: T201
     print("=" * 60)  # noqa: T201
     print("\\nTest 1: Step response (0 → 1)")  # noqa: T201
-    print(f"  τ_act = {dynamics.tau_act*1000:.1f} ms")  # noqa: T201
+    print(f"  τ_act = {dynamics.tau_act * 1000:.1f} ms")  # noqa: T201
 
     print("\\n  Time [ms]  Activation [%]")  # noqa: T201
     print("  ---------  --------------")  # noqa: T201
@@ -144,16 +143,16 @@ if __name__ == "__main__":
 
         # Print check points
         if i % 20 == 0 and i < 120:
-            print(f"  {i*dt*1000:5.0f}      {a*100:5.1f}")  # noqa: T201
+            print(f"  {i * dt * 1000:5.0f}      {a * 100:5.1f}")  # noqa: T201
 
     print("\\nTest 2: Deactivation (1 → 0)")  # noqa: T201
-    print(f"  τ_deact = {dynamics.tau_deact*1000:.1f} ms")  # noqa: T201
+    print(f"  τ_deact = {dynamics.tau_deact * 1000:.1f} ms")  # noqa: T201
     print("\\n  Time [ms]  Activation [%]")  # noqa: T201
     print("  ---------  --------------")  # noqa: T201
 
     # Print check points for deactivation
     for i in range(100, 160, 10):
-        print(f"  {i*dt*1000:5.0f}      {a_response[i]*100:5.1f}")  # noqa: T201
+        print(f"  {i * dt * 1000:5.0f}      {a_response[i] * 100:5.1f}")  # noqa: T201
 
     print("\\n" + "=" * 60)  # noqa: T201
     print("✓ Activation dynamics test complete")  # noqa: T201

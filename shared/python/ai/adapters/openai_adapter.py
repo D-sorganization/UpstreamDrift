@@ -293,7 +293,7 @@ class OpenAIAdapter(BaseAgentAdapter):
 
         except AIProviderError:
             return False, (
-                "openai package not installed. " "Install with: pip install openai"
+                "openai package not installed. Install with: pip install openai"
             )
         except Exception as e:
             error_str = str(e).lower()

@@ -222,7 +222,7 @@ class StandardModelManager:
 
         # Generate URDF content
         urdf_content = f"""<?xml version="1.0"?>
-<robot name="{club_config['name'].lower().replace(' ', '_')}">
+<robot name="{club_config["name"].lower().replace(" ", "_")}">
 
   <!-- Base link (grip) -->
   <link name="grip">
@@ -249,7 +249,7 @@ class StandardModelManager:
   <link name="shaft">
     <visual>
       <geometry>
-        <cylinder radius="0.006" length="{club_config['length_m'] - 0.35:.3f}"/>
+        <cylinder radius="0.006" length="{club_config["length_m"] - 0.35:.3f}"/>
       </geometry>
       <material name="steel">
         <color rgba="0.7 0.7 0.7 1"/>
@@ -257,7 +257,7 @@ class StandardModelManager:
     </visual>
     <collision>
       <geometry>
-        <cylinder radius="0.006" length="{club_config['length_m'] - 0.35:.3f}"/>
+        <cylinder radius="0.006" length="{club_config["length_m"] - 0.35:.3f}"/>
       </geometry>
     </collision>
     <inertial>
@@ -282,7 +282,7 @@ class StandardModelManager:
       </geometry>
     </collision>
     <inertial>
-      <mass value="{club_config['mass_kg'] - 0.110:.3f}"/>
+      <mass value="{club_config["mass_kg"] - 0.110:.3f}"/>
       <inertia ixx="0.0005" iyy="0.0008" izz="0.0005" ixy="0" ixz="0" iyz="0"/>
     </inertial>
   </link>
@@ -297,8 +297,8 @@ class StandardModelManager:
   <joint name="shaft_to_head" type="fixed">
     <parent link="shaft"/>
     <child link="head"/>
-    <origin xyz="0 0 {(club_config['length_m'] - 0.35) / 2:.3f}"
-            rpy="0 {club_config['loft_deg'] * DEG_TO_RAD:.4f} 0"/>
+    <origin xyz="0 0 {(club_config["length_m"] - 0.35) / 2:.3f}"
+            rpy="0 {club_config["loft_deg"] * DEG_TO_RAD:.4f} 0"/>
   </joint>
 
 </robot>"""

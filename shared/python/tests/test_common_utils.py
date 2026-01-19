@@ -25,7 +25,6 @@ matplotlib.use("Agg")
 
 
 class TestCommonUtils:
-
     @pytest.fixture
     def mock_output_root(self, tmp_path: Path) -> Generator[Path, None, None]:
         """Mock OUTPUT_ROOT in shared.python"""

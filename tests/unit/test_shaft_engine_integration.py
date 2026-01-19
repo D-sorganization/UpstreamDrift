@@ -54,7 +54,9 @@ class TestMuJoCoShaftIntegration:
         return engine
 
     @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
-    def test_set_shaft_properties_returns_true(self, engine: "MuJoCoPhysicsEngine") -> None:  # type: ignore[name-defined]
+    def test_set_shaft_properties_returns_true(
+        self, engine: "MuJoCoPhysicsEngine"
+    ) -> None:  # type: ignore[name-defined]
         """set_shaft_properties should return True when configured."""
         length = 1.143  # [m] Standard driver shaft
         n_stations = 11
@@ -66,7 +68,9 @@ class TestMuJoCoShaftIntegration:
         assert result is True
 
     @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
-    def test_get_shaft_state_none_before_config(self, engine: "MuJoCoPhysicsEngine") -> None:  # type: ignore[name-defined]
+    def test_get_shaft_state_none_before_config(
+        self, engine: "MuJoCoPhysicsEngine"
+    ) -> None:  # type: ignore[name-defined]
         """get_shaft_state should return None before configuration."""
         result = engine.get_shaft_state()
 

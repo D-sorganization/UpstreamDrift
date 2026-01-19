@@ -59,7 +59,6 @@ class TestPinocchioGUI:
                 "engines.physics_engines.pinocchio.python.pinocchio_golf.gui.get_shared_urdf_path"
             ) as mock_urdf,
         ):
-
             mock_urdf.return_value.exists.return_value = False
 
             # Late import to ensure mocks apply

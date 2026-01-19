@@ -262,9 +262,9 @@ class TestCrossEngineMassMatrix:
 
             assert rel_error[0, 0] < 1e-6, (
                 f"Mass matrix mismatch at θ={theta:.3f}: "
-                f"MuJoCo={M_mujoco[0,0]:.6e}, "
-                f"Pinocchio={M_pinocchio[0,0]:.6e}, "
-                f"rel_error={rel_error[0,0]:.2e}"
+                f"MuJoCo={M_mujoco[0, 0]:.6e}, "
+                f"Pinocchio={M_pinocchio[0, 0]:.6e}, "
+                f"rel_error={rel_error[0, 0]:.2e}"
             )
 
     def test_mass_matrix_positive_definite(self) -> None:

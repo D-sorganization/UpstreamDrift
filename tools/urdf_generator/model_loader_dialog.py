@@ -219,20 +219,20 @@ class ModelLoaderDialog(QDialog):
             model_info: Model information dictionary
         """
         if category == "human":
-            info_text = f"""Name: {model_info['name']}
-Description: {model_info['description']}
-License: {model_info['license']}
+            info_text = f"""Name: {model_info["name"]}
+Description: {model_info["description"]}
+License: {model_info["license"]}
 
 Repository: https://github.com/gbionics/human-gazebo
 """
         else:  # golf_clubs
-            info_text = f"""Club: {model_info['name']}
-Loft: {model_info['loft']}°
-Length: {model_info['length']*100:.1f} cm ({model_info['length']/0.0254:.1f} inches)
-Total Mass: {model_info['mass']*1000:.1f} g
-  - Head: {model_info['head_mass']*1000:.1f} g
-  - Shaft: {model_info['shaft_mass']*1000:.1f} g
-  - Grip: {model_info['grip_mass']*1000:.1f} g
+            info_text = f"""Club: {model_info["name"]}
+Loft: {model_info["loft"]}°
+Length: {model_info["length"] * 100:.1f} cm ({model_info["length"] / 0.0254:.1f} inches)
+Total Mass: {model_info["mass"] * 1000:.1f} g
+  - Head: {model_info["head_mass"] * 1000:.1f} g
+  - Shaft: {model_info["shaft_mass"] * 1000:.1f} g
+  - Grip: {model_info["grip_mass"] * 1000:.1f} g
 
 The URDF will be automatically generated with realistic geometry and inertial properties.
 """

@@ -196,7 +196,10 @@ if __name__ == "__main__":
 
     # Test state
     state = MuscleState(
-        activation=0.8, l_CE=0.15, v_CE=0.0, l_MT=0.35  # At optimal length  # Isometric
+        activation=0.8,
+        l_CE=0.15,
+        v_CE=0.0,
+        l_MT=0.35,  # At optimal length  # Isometric
     )
 
     force = muscle.compute_force(state)
@@ -206,10 +209,10 @@ if __name__ == "__main__":
     F_muscle = muscle.compute_force(state)
 
     print("Biceps muscle force test:")  # noqa: T201
-    print(f"  Activation: {state.activation*100:.0f}%")  # noqa: T201
+    print(f"  Activation: {state.activation * 100:.0f}%")  # noqa: T201
     print(  # noqa: T201
         f"  Fiber length: {state.l_CE:.3f} m (opt: {biceps_params.l_opt:.3f} m)"
     )
     print(f"  Fiber velocity: {state.v_CE:.3f} m/s")  # noqa: T201
     print(f"  Force: {F_muscle:.1f} N (max: {biceps_params.F_max:.0f} N)")  # noqa: T201
-    print(f"  Force/F_max: {F_muscle/biceps_params.F_max*100:.1f}%")  # noqa: T201
+    print(f"  Force/F_max: {F_muscle / biceps_params.F_max * 100:.1f}%")  # noqa: T201

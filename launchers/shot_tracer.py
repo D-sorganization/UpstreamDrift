@@ -227,7 +227,7 @@ class MultiModelShotTracerWidget(QWidget):
         for i, model_type in enumerate(FlightModelType):
             model = FlightModelRegistry.get_model(model_type)
             color = TRAJECTORY_COLORS[i % len(TRAJECTORY_COLORS)]
-            rgb = f"rgb({int(color[0]*255)},{int(color[1]*255)},{int(color[2]*255)})"
+            rgb = f"rgb({int(color[0] * 255)},{int(color[1] * 255)},{int(color[2] * 255)})"
             label = QLabel(f"● {model.name}")
             label.setStyleSheet(f"color: {rgb}; font-weight: bold;")
             legend_layout.addWidget(label)

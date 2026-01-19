@@ -301,7 +301,6 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             return np.array([])
 
         try:
-
             # Save current activations/controls
             ctrl_saved = self.sim.data.ctrl.copy()
 

@@ -155,7 +155,7 @@ class EquilibriumSolver:
                 logger.warning(
                     f"Equilibrium solver converged but residual is large:\\n"
                     f"  l_CE = {l_CE_solution:.6f} m\\n"
-                    f"  Residual = {residual:.2f} N ({abs(residual)/self.muscle.params.F_max*100:.2f}% of F_max)\\n"
+                    f"  Residual = {residual:.2f} N ({abs(residual) / self.muscle.params.F_max * 100:.2f}% of F_max)\\n"
                     f"  This may indicate numerical issues or invalid configuration"
                 )
 
@@ -295,17 +295,17 @@ if __name__ == "__main__":
     print("=" * 60)  # noqa: T201
     print("Muscle parameters:")  # noqa: T201
     print(f"  F_max = {params.F_max:.0f} N")  # noqa: T201
-    print(f"  l_opt = {params.l_opt*100:.1f} cm")  # noqa: T201
-    print(f"  l_slack = {params.l_slack*100:.1f} cm")  # noqa: T201
+    print(f"  l_opt = {params.l_opt * 100:.1f} cm")  # noqa: T201
+    print(f"  l_slack = {params.l_slack * 100:.1f} cm")  # noqa: T201
     print("\\nTest case:")  # noqa: T201
-    print(f"  l_MT = {l_MT_test*100:.2f} cm")  # noqa: T201
-    print(f"  activation = {activation_test*100:.0f}%")  # noqa: T201
+    print(f"  l_MT = {l_MT_test * 100:.2f} cm")  # noqa: T201
+    print(f"  activation = {activation_test * 100:.0f}%")  # noqa: T201
 
     l_CE_solution = solver.solve_fiber_length(l_MT_test, activation_test)
 
     print("\\nSolution:")  # noqa: T201
-    print(f"  l_CE = {l_CE_solution*100:.2f} cm")  # noqa: T201
-    print(f"  l_CE / l_opt = {l_CE_solution/params.l_opt:.3f}")  # noqa: T201
+    print(f"  l_CE = {l_CE_solution * 100:.2f} cm")  # noqa: T201
+    print(f"  l_CE / l_opt = {l_CE_solution / params.l_opt:.3f}")  # noqa: T201
 
     # Verify equilibrium
     residual = solver._equilibrium_residual(l_CE_solution, l_MT_test, activation_test)

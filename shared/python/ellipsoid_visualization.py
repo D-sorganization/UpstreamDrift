@@ -368,7 +368,9 @@ def export_ellipsoid_obj(
         f.write("\n")
 
         # Write faces (OBJ uses 1-indexed vertices, batched for performance)
-        face_lines = [f"f {face[0]+1} {face[1]+1} {face[2]+1}\n" for face in faces]
+        face_lines = [
+            f"f {face[0] + 1} {face[1] + 1} {face[2] + 1}\n" for face in faces
+        ]
         f.writelines(face_lines)
 
     LOGGER.info(f"Exported ellipsoid mesh to {output_path}")

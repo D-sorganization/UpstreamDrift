@@ -382,8 +382,8 @@ class MarkerToModelMapper:
 Registration Summary:
 ────────────────────
 Success: {result.success}
-RMS Error: {result.rms_error*1000:.2f} mm
-Max Error: {result.max_error*1000:.2f} mm
+RMS Error: {result.rms_error * 1000:.2f} mm
+Max Error: {result.max_error * 1000:.2f} mm
 Fit Quality: {result.fit_quality:.3f}
 Markers Used: {result.num_markers_used}
 Outliers: {len(result.outlier_indices)}

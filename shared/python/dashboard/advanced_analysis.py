@@ -343,8 +343,8 @@ class SwingPlaneTab(QtWidgets.QWidget):
             (
                 f"Steepness: {metrics.steepness_deg:.1f}°",
                 f"Direction: {metrics.direction_deg:.1f}°",
-                f"RMSE: {metrics.rmse*100:.1f} cm",
-                f"Max Dev: {metrics.max_deviation*100:.1f} cm",
+                f"RMSE: {metrics.rmse * 100:.1f} cm",
+                f"Max Dev: {metrics.max_deviation * 100:.1f} cm",
             )
         )
         props = {"boxstyle": "round", "facecolor": "wheat", "alpha": 0.5}

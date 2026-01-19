@@ -548,8 +548,7 @@ def validate_grf_cross_engine(
     for metric, passed in results.items():
         status = "✓ PASS" if passed else "✗ FAIL"
         LOGGER.info(
-            f"GRF Cross-Engine [{engine_name_a} vs {engine_name_b}] "
-            f"{metric}: {status}"
+            f"GRF Cross-Engine [{engine_name_a} vs {engine_name_b}] {metric}: {status}"
         )
 
     return results

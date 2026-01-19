@@ -1,0 +1,84 @@
+{
+  "timestamp": "2026-01-19T08:43:04.860077",
+  "overall_score": 7.0,
+  "category_scores": {
+    "K": {
+      "score": 7.0,
+      "name": "Reproducibility & Provenance",
+      "weight": 1.0
+    },
+    "D": {
+      "score": 7.0,
+      "name": "User Experience",
+      "weight": 1.5
+    },
+    "C": {
+      "score": 7.0,
+      "name": "Documentation & Integration",
+      "weight": 1.5
+    },
+    "A": {
+      "score": 7.0,
+      "name": "Architecture & Implementation",
+      "weight": 2.0
+    },
+    "N": {
+      "score": 7.0,
+      "name": "Visualization & Export",
+      "weight": 1.0
+    },
+    "L": {
+      "score": 7.0,
+      "name": "Long-Term Maintainability",
+      "weight": 1.5
+    },
+    "O": {
+      "score": 7.0,
+      "name": "CI/CD & DevOps",
+      "weight": 2.0
+    },
+    "F": {
+      "score": 7.0,
+      "name": "Installation & Deployment",
+      "weight": 1.0
+    },
+    "M": {
+      "score": 7.0,
+      "name": "Educational Resources",
+      "weight": 1.0
+    },
+    "I": {
+      "score": 7.0,
+      "name": "Security & Input Validation",
+      "weight": 2.0
+    },
+    "J": {
+      "score": 7.0,
+      "name": "Extensibility & Plugins",
+      "weight": 1.0
+    },
+    "G": {
+      "score": 7.0,
+      "name": "Testing & Validation",
+      "weight": 2.0
+    },
+    "H": {
+      "score": 7.0,
+      "name": "Error Handling",
+      "weight": 1.0
+    },
+    "E": {
+      "score": 7.0,
+      "name": "Performance & Scalability",
+      "weight": 1.5
+    },
+    "B": {
+      "score": 7.0,
+      "name": "Hygiene, Security & Quality",
+      "weight": 2.0
+    }
+  },
+  "critical_issues": [],
+  "total_issues": 0,
+  "reports_analyzed": 15
+}
