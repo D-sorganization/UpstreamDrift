@@ -199,10 +199,10 @@ class TestCrossEngineConsistency:
                     f"Bias forces {name1} vs {name2}: "
                     f"deviation={result.max_deviation:.2e}"
                 )
-                assert result.severity in ["PASSED", "WARNING"], (
-                    f"Bias force mismatch between {name1} and {name2}: "
-                    f"{result.message}"
-                )
+                assert result.severity in [
+                    "PASSED",
+                    "WARNING",
+                ], f"Bias force mismatch between {name1} and {name2}: {result.message}"
 
     def test_forward_dynamics_trajectory_consistency(
         self,

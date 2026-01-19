@@ -780,5 +780,4 @@ if __name__ == "__main__":
     optimizer, result = create_example_optimization()
 
     if result.success:
-
         pass

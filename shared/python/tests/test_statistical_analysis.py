@@ -16,7 +16,6 @@ from shared.python.statistical_analysis import (
 
 
 class TestStatisticalAnalyzer:
-
     @pytest.fixture
     def sample_data(self):
         # Create synthetic data

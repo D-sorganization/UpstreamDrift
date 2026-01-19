@@ -39,7 +39,6 @@ def mock_flight_models():
         patch("launchers.shot_tracer.compare_models") as mock_compare,
         patch("launchers.shot_tracer.FlightModelType") as mock_type,
     ):
-
         # Setup FlightModelType enum-like behavior
         mock_type.WATERLOO_PENNER.value = "waterloo_penner"
         mock_type.MACDONALD_HANZELY.value = "macdonald_hanzely"

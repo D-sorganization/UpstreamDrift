@@ -446,7 +446,7 @@ class AIAssistantPanel(QWidget):
         """
         if not self._adapter:
             self._add_system_message(
-                "⚠️ No AI provider configured. " "Click ⚙️ to set up a provider."
+                "⚠️ No AI provider configured. Click ⚙️ to set up a provider."
             )
             return
 

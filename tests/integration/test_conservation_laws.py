@@ -457,7 +457,7 @@ class TestWorkEnergyTheorem:
         relative_error = error / max(abs(delta_E), TOLERANCE_ABS)
         assert (
             relative_error < TOLERANCE_REL
-        ), f"Work-energy mismatch: {relative_error*100:.2f}% > {TOLERANCE_REL*100}%"
+        ), f"Work-energy mismatch: {relative_error * 100:.2f}% > {TOLERANCE_REL * 100}%"
 
 
 @pytest.mark.unit
