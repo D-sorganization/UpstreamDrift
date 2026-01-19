@@ -1,6 +1,6 @@
 # Technical Debt - Golf Modeling Suite
 
-Last Updated: 2026-01-17
+Last Updated: 2026-01-19
 
 ## Code Quality
 
@@ -9,7 +9,7 @@ Last Updated: 2026-01-17
 - **Component**: `shared/python/`
 - **Description**: Shared utilities have low test coverage (target: 40%)
 - **Suggested Fix**: Add tests for utility functions incrementally
-- **GitHub Issue**: TBD
+- **GitHub Issue**: #540
 
 ## Architecture
 
@@ -37,7 +37,7 @@ Last Updated: 2026-01-17
   - Long trajectory simulations
   - Complex optimization tests
 - **Suggested Fix**: Add marker-based timeouts for specific test categories
-- **GitHub Issue**: TBD
+- **GitHub Issue**: #541
 
 ## Documentation
 
@@ -46,4 +46,20 @@ Last Updated: 2026-01-17
 - **Component**: Test documentation
 - **Description**: No documentation for running full swing analysis tests
 - **Suggested Fix**: Add E2E test guide to docs
-- **GitHub Issue**: TBD
+- **GitHub Issue**: #542
+
+### [LOW] Missing Environment Variable Template
+- **Status**: Open
+- **Component**: `.env.example`, setup documentation
+- **Description**: No standardized template for required API environment variables
+- **Suggested Fix**: Add `.env.example` and document configuration
+- **GitHub Issue**: #546
+
+## Repository Hygiene
+
+### [LOW] Coverage Artifacts Not Ignored
+- **Status**: Open
+- **Component**: `.gitignore`
+- **Description**: `.coverage.*` artifacts can be committed accidentally
+- **Suggested Fix**: Add `.coverage.*` to `.gitignore`
+- **GitHub Issue**: #547
