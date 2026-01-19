@@ -8,6 +8,7 @@ env/
 .ipynb_checkpoints/
 .coverage
 *.coverage
+.coverage.*
 build/
 dist/
 

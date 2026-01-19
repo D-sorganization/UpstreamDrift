@@ -3,7 +3,12 @@
 from collections.abc import Callable
 
 # Python 3.10 compatibility: UTC was added in 3.11
-from datetime import UTC
+from datetime import timezone
+
+try:
+    from datetime import UTC
+except ImportError:
+    UTC = timezone.utc  # noqa: UP017
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer

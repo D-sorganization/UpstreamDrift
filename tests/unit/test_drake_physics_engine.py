@@ -37,16 +37,28 @@ def mock_drake_dependencies():
 @pytest.fixture(scope="module")
 def DrakePhysicsEngineClass(mock_drake_dependencies):
     """Fixture to provide the DrakePhysicsEngine class with mocked dependencies."""
-    import importlib
+    # Ensure module is imported
+    import engines.physics_engines.drake.python.drake_physics_engine as mod
 
-    import engines.physics_engines.drake.python.drake_physics_engine
+    # Manually patch the module's globals to use our mocks
+    # This avoids reload() which corrupts sys.modules state
+    mock_pydrake, mock_interfaces = mock_drake_dependencies
 
-    importlib.reload(engines.physics_engines.drake.python.drake_physics_engine)
-    from engines.physics_engines.drake.python.drake_physics_engine import (
-        DrakePhysicsEngine,
-    )
+    # Save originals
+    original_pydrake = getattr(mod, "pydrake", None)
+    original_interfaces = getattr(mod, "interfaces", None)
 
-    return DrakePhysicsEngine
+    # Inject mocks
+    mod.pydrake = mock_pydrake  # type: ignore[attr-defined]
+    mod.interfaces = mock_interfaces  # type: ignore[attr-defined]
+
+    yield mod.DrakePhysicsEngine
+
+    # Restore (optional but good practice)
+    if original_pydrake:
+        mod.pydrake = original_pydrake  # type: ignore[attr-defined]
+    if original_interfaces:
+        mod.interfaces = original_interfaces  # type: ignore[attr-defined]
 
 
 @pytest.fixture
