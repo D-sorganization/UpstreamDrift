@@ -250,7 +250,7 @@ class TestTimezoneAwareJWT:
         # Check for deprecated utcnow usage
         assert "datetime.utcnow()" not in source, (
             "Code should not use deprecated datetime.utcnow(). "
-            "Use datetime.now(datetime.UTC) instead."
+            "Use datetime.now(timezone.utc) instead."
         )
 
 
