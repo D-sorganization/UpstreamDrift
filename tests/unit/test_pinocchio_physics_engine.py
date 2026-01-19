@@ -26,16 +26,23 @@ def mock_pinocchio_dependencies():
 @pytest.fixture(scope="module")
 def PinocchioPhysicsEngineClass(mock_pinocchio_dependencies):
     """Fixture to provide the PinocchioPhysicsEngine class with mocked dependencies."""
-    import importlib
+    # Ensure module is imported
+    import engines.physics_engines.pinocchio.python.pinocchio_physics_engine as mod
 
-    import engines.physics_engines.pinocchio.python.pinocchio_physics_engine
-
-    importlib.reload(engines.physics_engines.pinocchio.python.pinocchio_physics_engine)
-    from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
-        PinocchioPhysicsEngine,
-    )
-
-    return PinocchioPhysicsEngine
+    # Manually patch the module's globals
+    mock_pin, mock_interfaces = mock_pinocchio_dependencies
+    
+    # Save originals
+    original_pin = getattr(mod, "pin", None)
+    
+    # Inject mocks
+    setattr(mod, "pin", mock_pin)
+    
+    yield mod.PinocchioPhysicsEngine
+    
+    # Restore
+    if original_pin:
+        setattr(mod, "pin", original_pin)
 
 
 @pytest.fixture

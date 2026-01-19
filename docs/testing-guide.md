@@ -116,28 +116,30 @@ def test_mujoco_drake_comparison():
 
 ## Anti-Patterns to Avoid
 
-### 1. Module-Level Mocking
-
+### 1. Module-Level Mocking & Reloading (Issue #496)
 ```python
-# ❌ BAD - Mocks entire dependency tree
+# ❌ BAD - Mocks entire dependency tree via sys.modules
 sys.modules["mujoco"] = MagicMock()
-sys.modules["pydrake"] = MagicMock()
-sys.modules["pinocchio"] = MagicMock()
 
-from engines.mujoco_engine import MuJoCoEngine
-
-def test_engine():
-    engine = MuJoCoEngine()
-    engine.step()  # Calls mock.step(), tests nothing
+# ❌ BAD - Reloads module to apply patches
+importlib.reload(my_module)
 ```
 
 **Why it's bad:**
-- Tests that Python can import files, not that code works
-- No real dependencies are used
-- Cannot catch integration issues
-- False sense of security
+- `sys.modules` patching persists across tests unless carefully cleaned up.
+- `importlib.reload()` is **DANGEROUS** in a test suite. It re-executes module-level code, which can:
+    - Re-initialize C-extensions (numpy/pandas), causing segfaults or API mismatch.
+    - Reset global state that other tests rely on.
+    - Result in two versions of the same class (Foo != Foo), breaking `isinstance` checks.
 
 **Fix:**
+Use direct dependency injection or manual patching of the module object:
+```python
+# ✅ GOOD - Patch the specific attribute on the imported module object
+import my_module
+with patch.object(my_module, 'dependency', new=mock_dep):
+    run_test()
+```
 ```python
 # ✅ GOOD - Use skipif for optional dependencies
 @pytest.mark.skipif(not HAS_MUJOCO, reason="MuJoCo not installed")
