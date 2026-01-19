@@ -37,13 +37,18 @@ jobs:
           mkdir -p docs/assessments/archive
           DATE=$(date +%Y-%m-%d)
 
+          # Archive individual assessments if they exist
           for file in docs/assessments/Assessment_*.md; do
-            [ -f "$file" ] && mv "$file" "docs/assessments/archive/$(basename "$file" .md)_archived_$DATE.md"
+            [ -f "$file" ] && mv "$file" "docs/assessments/archive/$(basename "$file" .md)_archived_$DATE.md" || true
           done
 
-          [ -f "docs/assessments/Comprehensive_Assessment.md" ] && \
+          # Archive comprehensive assessment if it exists
+          if [ -f "docs/assessments/Comprehensive_Assessment.md" ]; then
             mv "docs/assessments/Comprehensive_Assessment.md" \
                "docs/assessments/archive/Comprehensive_Assessment_archived_$DATE.md"
+          fi
+
+          echo "Archive step completed successfully"
 
       - name: Jules Assessment Generation
         env:
