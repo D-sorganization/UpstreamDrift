@@ -98,8 +98,8 @@ def generate_summary(
     """
     logger.info(f"Generating assessment summary from {len(input_reports)} reports...")
 
-    # Category mapping
-    categories = {
+    # Category mapping with typed values
+    categories: dict[str, dict[str, str | float]] = {
         "A": {"name": "Architecture & Implementation", "weight": 2.0},
         "B": {"name": "Hygiene, Security & Quality", "weight": 2.0},
         "C": {"name": "Documentation & Integration", "weight": 1.5},
@@ -135,7 +135,7 @@ def generate_summary(
 
     for assessment_id, score in scores.items():
         if assessment_id in categories:
-            weight = categories[assessment_id]["weight"]
+            weight = float(categories[assessment_id]["weight"])
             total_weighted_score += score * weight
             total_weight += weight
 
@@ -258,7 +258,7 @@ def main() -> int:
     args = parser.parse_args()
 
     # Expand wildcards if needed
-    input_reports = []
+    input_reports: list[Path] = []
     for pattern in args.input:
         if "*" in str(pattern):
             # Expand glob pattern

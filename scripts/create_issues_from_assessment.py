@@ -36,7 +36,8 @@ def get_existing_issues() -> list[dict[str, Any]]:
             text=True,
             check=True,
         )
-        return json.loads(result.stdout)
+        issues: list[dict[str, Any]] = json.loads(result.stdout)
+        return issues
     except Exception as e:
         logger.warning(f"Could not fetch existing issues: {e}")
         return []
