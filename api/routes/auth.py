@@ -42,7 +42,9 @@ limiter = Limiter(key_func=get_remote_address)
 
 
 @router.post("/register", response_model=UserResponse)
-@limiter.limit(REGISTRATION_RATE_LIMIT)  # SECURITY: Limit registration to prevent account farming
+@limiter.limit(
+    REGISTRATION_RATE_LIMIT
+)  # SECURITY: Limit registration to prevent account farming
 async def register_user(
     request: Request, user_data: UserCreate, db: Session = Depends(get_db)
 ) -> UserResponse:
@@ -75,7 +77,9 @@ async def register_user(
 
 
 @router.post("/login", response_model=LoginResponse)
-@limiter.limit(LOGIN_RATE_LIMIT)  # SECURITY: Limit login attempts to prevent brute force
+@limiter.limit(
+    LOGIN_RATE_LIMIT
+)  # SECURITY: Limit login attempts to prevent brute force
 async def login(
     request: Request, login_data: LoginRequest, db: Session = Depends(get_db)
 ) -> LoginResponse:
