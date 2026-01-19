@@ -1,6 +1,6 @@
 # Known Issues - Golf Modeling Suite
 
-Last Updated: 2026-01-17
+Last Updated: 2026-01-19
 
 ## Test Infrastructure
 
@@ -16,14 +16,14 @@ Last Updated: 2026-01-17
 - **Component**: `pyproject.toml`
 - **Description**: Main repo coverage reduced from 60% to 10% while recovery is in progress
 - **Suggested Fix**: Incrementally add tests and restore threshold
-- **GitHub Issue**: TBD
+- **GitHub Issue**: #533
 
 ### [LOW] Inconsistent Coverage Requirements
 - **Status**: Open
 - **Component**: Engine-specific pyproject.toml files
 - **Description**: Different engines have different coverage requirements (Main: 10%, MuJoCo: 60%, Drake: 90%, Pinocchio: 90%)
 - **Suggested Fix**: Standardize coverage requirements across all engines
-- **GitHub Issue**: TBD
+- **GitHub Issue**: #534
 
 ## Missing Test Coverage
 
@@ -53,21 +53,21 @@ Last Updated: 2026-01-17
 - **Component**: `shared/python/dashboard/`
 - **Description**: All dashboard widgets have only mocked coverage tests, no functional tests
 - **Suggested Fix**: Add integration tests for dashboard components
-- **GitHub Issue**: TBD
+- **GitHub Issue**: #535
 
 ### [MEDIUM] Swing Optimizer Untested
 - **Status**: Open
 - **Component**: `shared/python/optimization/swing_optimizer.py`
 - **Description**: No tests for swing optimization module
 - **Suggested Fix**: Add unit tests with known optimization scenarios
-- **GitHub Issue**: TBD
+- **GitHub Issue**: #536
 
 ### [MEDIUM] MediaPipe Estimator Untested
 - **Status**: Open
 - **Component**: `shared/python/pose/mediapipe_estimator.py`
 - **Description**: No tests for MediaPipe pose estimation
 - **Suggested Fix**: Add tests with sample images/video
-- **GitHub Issue**: TBD
+- **GitHub Issue**: #537
 
 ## Platform Issues
 
@@ -76,14 +76,37 @@ Last Updated: 2026-01-17
 - **Component**: Platform-specific tests
 - **Description**: Some tests fail on Windows due to DLL initialization issues
 - **Suggested Fix**: Add proper DLL path configuration or skip on Windows
-- **GitHub Issue**: TBD
+- **GitHub Issue**: #538
 
 ### [LOW] Linux Requires Xvfb for GUI Tests
 - **Status**: Open
 - **Component**: CI configuration
 - **Description**: GUI tests on Linux require Xvfb wrapper
 - **Suggested Fix**: Document requirement and ensure CI uses xvfb-run
-- **GitHub Issue**: TBD
+- **GitHub Issue**: #539
+
+## API Security & Operations
+
+### [CRITICAL] API Endpoints Unauthenticated
+- **Status**: Open
+- **Component**: `api/server.py`, `api/routes/auth.py`
+- **Description**: Auth router is not mounted and core endpoints do not require authentication or API keys
+- **Suggested Fix**: Include auth router and apply `RequireAuth` dependencies to protected endpoints
+- **GitHub Issue**: #543
+
+### [HIGH] Database Initialization Not Invoked
+- **Status**: Open
+- **Component**: `api/database.py`, `start_api_server.py`
+- **Description**: Database initialization exists but is not called during API startup
+- **Suggested Fix**: Invoke `init_db()` on startup or before server run
+- **GitHub Issue**: #544
+
+### [HIGH] Upload Size Limit Not Enforced
+- **Status**: Open
+- **Component**: `api/server.py`
+- **Description**: Video upload endpoints read full payloads without enforcing MAX_UPLOAD_SIZE_BYTES
+- **Suggested Fix**: Enforce size limit via Content-Length checks or streaming guards
+- **GitHub Issue**: #545
 
 ## CI/CD
 
