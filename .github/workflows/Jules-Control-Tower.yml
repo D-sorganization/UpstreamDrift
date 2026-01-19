@@ -9,16 +9,42 @@ on:
     workflows: ["CI Standard"]
     types: [completed]
   schedule:
-    # OVERNIGHT SCHEDULE - All work done before morning (midnight-4 AM UTC)
-    - cron: "0 0 * * *"   # Midnight - Assessment Generator
-    - cron: "30 0 * * *"  # 12:30 AM - Code Quality Reviewer
-    - cron: "0 1 * * *"   # 1 AM - Completist (incomplete impl)
-    - cron: "30 1 * * *"  # 1:30 AM - Sentinel (security) + Physics Auditor (Tue/Fri)
-    - cron: "0 2 * * 1"   # 2 AM Mon - Competitor Analysis
-    - cron: "0 2 * * 3"   # 2 AM Wed - Patent Review
-    - cron: "30 2 * * *"  # 2:30 AM - Tech Custodian
-    - cron: "0 3 * * *"   # 3 AM - Issue Resolver (daily fix)
-    - cron: "30 3 * * *"  # 3:30 AM - PR Compiler (consolidate PRs)
+    # OVERNIGHT SCHEDULE - PST times (UTC-8)
+    - cron: "0 8 * * *"   # Midnight PST - Assessment Generator
+    - cron: "30 8 * * *"  # 12:30 AM PST - Code Quality Reviewer
+    - cron: "0 9 * * *"   # 1 AM PST - Completist
+    - cron: "30 9 * * *"  # 1:30 AM PST - Sentinel / Physics Auditor (Tue/Fri)
+    - cron: "0 10 * * 1"  # 2 AM PST Mon - Competitor Analysis
+    - cron: "0 10 * * 3"  # 2 AM PST Wed - Patent Review
+    - cron: "30 10 * * *" # 2:30 AM PST - Tech Custodian
+    - cron: "0 11 * * *"  # 3 AM PST - Issue Resolver
+    - cron: "30 11 * * *" # 3:30 AM PST - PR Compiler
+    - cron: "0 12 * * *"  # 4 AM PST - Code Quality Fixer
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Worker to dispatch (auto uses schedule routing)"
+        required: false
+        default: "auto"
+        type: choice
+        options:
+          - auto
+          - assessment-generator
+          - code-quality-reviewer
+          - code-quality-fixer
+          - completist
+          - sentinel
+          - physics-auditor
+          - competitor-analyst
+          - patent-reviewer
+          - tech-custodian
+          - issue-resolver
+          - pr-compiler
+
+# SAFEGUARD: Maximum iterations to prevent infinite repair loops
+env:
+  MAX_REPAIR_ITERATIONS: 3
+  MAX_ITERATIONS_WINDOW_HOURS: 1
 
 concurrency:
   group: jules-control-tower-${{ github.repository }}
@@ -28,11 +54,13 @@ permissions:
   contents: write
   pull-requests: write
   actions: write
+  issues: write
+  security-events: write
 
 jobs:
   triage:
     runs-on: ubuntu-latest
-    if: github.actor != 'jules-bot'
+    # Removed global actor check to allow scheduled runs even if file modified by bot
     outputs:
       target: ${{ steps.decide.outputs.target }}
     steps:
@@ -43,16 +71,55 @@ jobs:
           curl -fsS -H "x-goog-api-key: $API_KEY" \
             https://jules.google/api/v1/health || echo "::warning::Jules API health check failed, continuing anyway."
 
+      # SAFEGUARD: Check if we've exceeded max repair iterations in the time window
+      - name: Check Iteration Limits
+        id: check-limits
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Checking repair iteration limits..."
+          BRANCH="${{ github.event.workflow_run.head_branch }}"
+          HOURS_AGO=$(date -u -d "${{ env.MAX_ITERATIONS_WINDOW_HOURS }} hours ago" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-${{ env.MAX_ITERATIONS_WINDOW_HOURS }}H +%Y-%m-%dT%H:%M:%SZ)
+
+          FAILURE_COUNT=$(gh run list \
+            --workflow="CI Standard" \
+            --branch="$BRANCH" \
+            --limit=20 \
+            --json conclusion,createdAt,status \
+            --jq "[.[] | select(.conclusion == \"failure\" and .createdAt > \"$HOURS_AGO\")] | length" \
+            2>/dev/null || echo "0")
+
+          if [ "$FAILURE_COUNT" -ge "${{ env.MAX_REPAIR_ITERATIONS }}" ]; then
+            echo "::error::Max repair iterations reached. Manual intervention required."
+            echo "exceeded=true" >> $GITHUB_OUTPUT
+          else
+            echo "exceeded=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Analyze Event Context
         id: decide
-        uses: actions/github-script@v7
+        if: steps.check-limits.outcome == 'skipped' || steps.check-limits.outputs.exceeded != 'true'
+        uses: actions/github-script@v8
         with:
           script: |
             const event = context.eventName;
+            const actor = context.actor;
+            const schedule = context.payload.schedule;
+            const day = new Date().getUTCDay();
+            const manualTarget = context.payload.inputs?.target;
             let target = "none";
 
+            console.log(`Event: ${event}, Actor: ${actor}, Schedule: ${schedule}`);
+
+            // 0. MANUAL DISPATCH - Honor explicit target selection
+            if (event === "workflow_dispatch" && manualTarget && manualTarget !== "auto") {
+              target = manualTarget;
+              console.log(`Manual dispatch: ${target}`);
+            }
             // 1. CI FAILURE -> AUTO-REPAIR or HOTFIX-CREATOR
-            if (event === "workflow_run" && context.payload.workflow_run.conclusion === "failure") {
+            else if (event === "workflow_run" && context.payload.workflow_run.conclusion === "failure") {
+               // Allow bot to trigger repair (handled by check-limits loop protection)
                const failedBranch = context.payload.workflow_run.head_branch;
                if (failedBranch === "main" || failedBranch === "master") {
                   target = "hotfix-creator";
@@ -60,51 +127,95 @@ jobs:
                   target = "auto-repair";
                }
             }
-            // 2. SCHEDULED RUNS - Route by hour:minute (overnight schedule midnight-4 AM)
-            else if (event === "schedule") {
-              const now = new Date();
-              const hour = now.getUTCHours();
-              const minute = now.getUTCMinutes();
-              const day = now.getUTCDay();
+            // 2. SCHEDULED RUNS - Route by cron pattern (deterministic)
+            else if (event === "schedule" || (event === "workflow_dispatch" && (!manualTarget || manualTarget === "auto"))) {
+              // Primary: Match exact cron pattern for deterministic routing
+              if (schedule) {
+                switch (schedule) {
+                  case "0 8 * * *":
+                    target = "assessment-generator";
+                    break;
+                  case "30 8 * * *":
+                    target = "code-quality-reviewer";
+                    break;
+                  case "0 9 * * *":
+                    target = "completist";
+                    break;
+                  case "30 9 * * *":
+                    // Physics auditor on Tue/Fri, Sentinel other days
+                    target = (day === 2 || day === 5) ? "physics-auditor" : "sentinel";
+                    break;
+                  case "0 10 * * 1":
+                    target = "competitor-analyst";
+                    break;
+                  case "0 10 * * 3":
+                    target = "patent-reviewer";
+                    break;
+                  case "30 10 * * *":
+                    target = "tech-custodian";
+                    break;
+                  case "0 11 * * *":
+                    target = "issue-resolver";
+                    break;
+                  case "30 11 * * *":
+                    target = "pr-compiler";
+                    break;
+                  case "0 12 * * *":
+                    target = "code-quality-fixer";
+                    break;
+                  default:
+                    target = "none";
+                }
+              }
 
-              if (hour === 0 && minute < 30) {
-                target = "assessment-generator";
-              } else if (hour === 0 && minute >= 30) {
-                target = "code-quality-reviewer";
-              } else if (hour === 1 && minute < 30) {
-                target = "completist";
-              } else if (hour === 1 && minute >= 30) {
-                // Physics auditor on Tue/Fri, Sentinel other days
-                if (day === 2 || day === 5) {
-                  target = "physics-auditor";
-                } else {
-                  target = "sentinel";
-                }
-              } else if (hour === 2 && minute < 30) {
-                if (day === 1) {
-                  target = "competitor-analyst";
-                } else if (day === 3) {
-                  target = "patent-reviewer";
-                } else {
+              // Fallback: UTC time-based routing (for workflow_dispatch with auto)
+              if (target === "none") {
+                const now = new Date();
+                const hour = now.getUTCHours();
+                const minute = now.getUTCMinutes();
+
+                if (hour === 8 && minute < 30) {
+                  target = "assessment-generator";
+                } else if (hour === 8 && minute >= 30) {
+                  target = "code-quality-reviewer";
+                } else if (hour === 9 && minute < 30) {
+                  target = "completist";
+                } else if (hour === 9 && minute >= 30) {
+                  target = (day === 2 || day === 5) ? "physics-auditor" : "sentinel";
+                } else if (hour === 10 && minute < 30) {
+                  if (day === 1) target = "competitor-analyst";
+                  else if (day === 3) target = "patent-reviewer";
+                  else target = "tech-custodian";
+                } else if (hour === 10 && minute >= 30) {
                   target = "tech-custodian";
+                } else if (hour === 11 && minute < 30) {
+                  target = "issue-resolver";
+                } else if (hour === 11 && minute >= 30) {
+                  target = "pr-compiler";
+                } else if (hour === 12) {
+                  target = "code-quality-fixer";
+                } else {
+                  target = "none";
                 }
-              } else if (hour === 2 && minute >= 30) {
-                target = "tech-custodian";
-              } else if (hour === 3 && minute < 30) {
-                target = "issue-resolver";
-              } else if (hour === 3 && minute >= 30) {
-                target = "pr-compiler";
-              } else {
-                target = "none";
               }
             }
             // 3. PUSH TO MAIN -> DOCS
             else if (event === "push" && context.ref === "refs/heads/main") {
-              target = "doc-scribe";
+              if (actor === 'jules-bot' || actor === 'jules-ai[bot]' || actor === 'google-labs-jules[bot]') {
+                 console.log("Ignoring push by bot to prevent doc-scribe loops.");
+                 target = "none";
+              } else {
+                 target = "doc-scribe";
+              }
             }
             // 4. NEW PR -> TEST GENERATOR
             else if (event === "pull_request" && context.payload.action === 'opened') {
-               target = "test-generator";
+               if (actor === 'jules-bot' || actor === 'jules-ai[bot]' || actor === 'google-labs-jules[bot]') {
+                  console.log("Ignoring PR open by bot.");
+                  target = "none";
+               } else {
+                  target = "test-generator";
+               }
             }
             // 5. PR CLOSED -> ARCHIVIST
             else if (event === "pull_request" && context.payload.action === 'closed' && context.payload.pull_request.merged) {
@@ -132,12 +243,6 @@ jobs:
     with:
       run_id: ${{ github.event.workflow_run.id }}
       failed_branch: ${{ github.event.workflow_run.head_branch }}
-    secrets: inherit
-
-  call-auditor:
-    needs: triage
-    if: needs.triage.outputs.target == 'scientific-auditor'
-    uses: ./.github/workflows/Jules-Scientific-Auditor.yml
     secrets: inherit
 
   call-scribe:
@@ -174,6 +279,12 @@ jobs:
     needs: triage
     if: needs.triage.outputs.target == 'code-quality-reviewer'
     uses: ./.github/workflows/Jules-Code-Quality-Reviewer.yml
+    secrets: inherit
+
+  call-code-quality-fixer:
+    needs: triage
+    if: needs.triage.outputs.target == 'code-quality-fixer'
+    uses: ./.github/workflows/Jules-Code-Quality-Fixer.yml
     secrets: inherit
 
   call-assessment-generator:
