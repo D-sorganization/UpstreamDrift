@@ -7,6 +7,7 @@ IMPORTANT: This GUI requires OpenSim to be properly installed.
 There is NO demo or fallback mode - if OpenSim is unavailable,
 clear error dialogs will be shown.
 """
+
 import sys
 from typing import Any
 

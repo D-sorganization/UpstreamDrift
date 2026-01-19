@@ -41,10 +41,10 @@ pip install -e ".[dev]"
 ### Before Committing
 
 ```bash
-black .
-ruff check . --fix
-mypy .
-pytest
+python3 -m black .
+python3 -m ruff check . --fix
+python3 -m mypy .
+python3 -m pytest
 ```
 
 ## 🎯 Physics Engine Guidelines

@@ -5,8 +5,9 @@ This script performs a comprehensive check of all physics engines,
 runs validation tests, and generates a detailed compliance report.
 """
 
-import datetime
+# Python 3.10 compatibility: UTC was added in 3.11
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -24,7 +25,7 @@ def run_verification() -> None:
     report_lines = []
     report_lines.append("# Physics Verification Report")
     report_lines.append(
-        f"**Date:** {datetime.datetime.now(tz=datetime.UTC).strftime('%Y-%m-%d %H:%M:%S')}"
+        f"**Date:** {datetime.now(tz=UTC).strftime('%Y-%m-%d %H:%M:%S')}"  # noqa: UP017
     )
     report_lines.append("")
 

@@ -3,6 +3,7 @@
 OpenPose Analysis GUI
 A user interface for configuring and running OpenPose estimation.
 """
+
 import sys
 
 from PyQt6.QtCore import Qt, QTimer

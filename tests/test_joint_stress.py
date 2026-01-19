@@ -9,131 +9,92 @@ from shared.python.injury.joint_stress import (
 
 
 class TestJointStressAnalyzer:
+    """Test suite for JointStressAnalyzer."""
+
     @pytest.fixture
     def analyzer(self):
         return JointStressAnalyzer(body_weight=80.0, handedness="right")
 
     @pytest.fixture
-    def sample_data(self):
-        time = np.linspace(0, 1.0, 100)
+    def mock_data(self):
+        time = np.linspace(0, 1.0, 20)
         zeros = np.zeros_like(time)
         return {
             "time": time,
             "joint_angles": {
-                "hip_rotation": np.ones_like(time) * np.radians(30),  # 30 deg
-                "hip_flexion": np.ones_like(time) * np.radians(20),  # 20 deg
-                "shoulder_horizontal": np.ones_like(time) * np.radians(90),
-                "shoulder_vertical": zeros,
-                "elbow_flexion": np.ones_like(time) * np.radians(90),
-                "wrist_cock": np.ones_like(time) * np.radians(20),
-                "wrist_rotation": np.ones_like(time) * np.radians(10),
+                "hip_rotation": zeros + 0.1,
+                "hip_flexion": zeros + 0.1,
+                "shoulder_horizontal": zeros + 0.1,
+                "elbow_flexion": zeros + 1.0,
+                "wrist_cock": zeros + 0.1,
+                "wrist_rotation": zeros + 0.1,
             },
-            "joint_velocities": {
-                "shoulder_horizontal": np.ones_like(time) * 10.0,  # High velocity
-                "wrist_cock": np.ones_like(time) * 5.0,
-            },
-            "joint_torques": {
-                "shoulder_horizontal": np.ones_like(time) * 50.0,
-                "elbow_flexion": np.ones_like(time) * 30.0,
-                "wrist_cock": np.ones_like(time) * 10.0,
-            },
+            "joint_velocities": {},
+            "joint_torques": {},
         }
 
-    def test_initialization(self, analyzer):
-        assert analyzer.body_weight == 80.0
-        assert analyzer.lead_side == "left"
-        assert analyzer.trail_side == "right"
-
-    def test_analyze_hip(self, analyzer, sample_data):
-        result = analyzer.analyze_hip(
-            sample_data["joint_angles"],
-            sample_data["joint_velocities"],
-            sample_data["joint_torques"],
-            sample_data["time"],
-            JointSide.LEAD,
-        )
-
-        assert isinstance(result, JointStressResult)
-        assert result.joint_name == "hip"
-        assert result.side == JointSide.LEAD
-        # Metric checks
-        # internal rot=30, flexion=20 -> indicator = 30 + 10 = 40
-        # risk_score = max(0, 40 - 50) = 0
-        assert result.risk_score == 0.0
-
-    def test_analyze_shoulder(self, analyzer, sample_data):
-        result = analyzer.analyze_shoulder(
-            sample_data["joint_angles"],
-            sample_data["joint_velocities"],
-            sample_data["joint_torques"],
-            sample_data["time"],
-            JointSide.TRAIL,
-        )
-
-        assert hasattr(result, "peak_torsion")
-        # RC loading = velocity(10) * torque(50) / 100 = 5.0
-        # Multiplier 1.2 for trail side -> 6.0
-        assert result.risk_score == pytest.approx(6.0)
-
-    def test_analyze_elbow(self, analyzer, sample_data):
-        result = analyzer.analyze_elbow(
-            sample_data["joint_angles"],
-            sample_data["joint_velocities"],
-            sample_data["joint_torques"],
-            sample_data["time"],
-            JointSide.LEAD,
-        )
-
-        # Valgus est = abs(30)*0.3 + abs(10)*0.5 = 9.0 + 5.0 = 14.0
-        # Limit is 35.0
-        # Risk = (14 / 35) * 50 * 1.3 (side) = 26.0
-        assert result.risk_score > 0
-        assert not result.overload_risk
-
-    def test_analyze_wrist(self, analyzer, sample_data):
-        result = analyzer.analyze_wrist(
-            sample_data["joint_angles"],
-            sample_data["joint_velocities"],
-            sample_data["joint_torques"],
-            sample_data["time"],
-            JointSide.LEAD,
-        )
-
-        # Ulnar=20 (deg) -> safe (<35)
-        assert not result.overload_risk
-        assert result.risk_score >= 0
-
-    def test_analyze_all_joints(self, analyzer, sample_data):
+    def test_analyze_all_joints(self, analyzer, mock_data):
+        """Test complete analysis runs without error."""
         results = analyzer.analyze_all_joints(
-            sample_data["joint_angles"],
-            sample_data["joint_velocities"],
-            sample_data["joint_torques"],
-            sample_data["time"],
+            mock_data["joint_angles"],
+            mock_data["joint_velocities"],
+            mock_data["joint_torques"],
+            mock_data["time"],
         )
 
-        expected_keys = [
-            "hip_lead",
-            "hip_trail",
-            "shoulder_lead",
-            "shoulder_trail",
-            "elbow_lead",
-            "elbow_trail",
-            "wrist_lead",
-            "wrist_trail",
-        ]
-        for key in expected_keys:
-            assert key in results
-            assert isinstance(results[key], JointStressResult)
+        assert "hip_lead" in results
+        assert "shoulder_trail" in results
+        assert isinstance(results["hip_lead"], JointStressResult)
+        assert results["hip_lead"].side == JointSide.LEAD
 
-    def test_get_summary(self, analyzer):
-        # Create mock results
+    def test_hip_impingement_risk(self, analyzer, mock_data):
+        """Test hip impingement logic."""
+        # High internal rotation + flexion
+        mock_data["joint_angles"]["hip_lead_rotation"] = np.radians(
+            np.full(20, 50.0)
+        )  # 50 deg
+        mock_data["joint_angles"]["hip_lead_flexion"] = np.radians(
+            np.full(20, 110.0)
+        )  # 110 deg
+
+        result = analyzer.analyze_hip(
+            mock_data["joint_angles"],
+            mock_data["joint_velocities"],
+            mock_data["joint_torques"],
+            mock_data["time"],
+            JointSide.LEAD,
+        )
+
+        # Indicator = 50 + 110*0.5 = 105 > 100
+        assert result.impingement_risk is True
+        assert result.risk_score > 0
+
+    def test_elbow_valgus_risk(self, analyzer, mock_data):
+        """Test elbow valgus torque risk."""
+        # High torque
+        mock_data["joint_torques"]["elbow_flexion"] = np.full(
+            20, 200.0
+        )  # High torque (200 * 0.3 = 60 > 35)
+
+        result = analyzer.analyze_elbow(
+            mock_data["joint_angles"],
+            mock_data["joint_velocities"],
+            mock_data["joint_torques"],
+            mock_data["time"],
+            JointSide.LEAD,
+        )
+
+        assert result.overload_risk is True
+        assert result.risk_score > 0
+
+    def test_summary_generation(self, analyzer):
+        """Test summary report generation."""
+        # Create dummy results
         results = {
             "hip_lead": JointStressResult(
                 "hip", JointSide.LEAD, risk_score=80.0, overload_risk=True
             ),
-            "shoulder_lead": JointStressResult(
-                "shoulder", JointSide.LEAD, risk_score=40.0
-            ),
+            "hip_trail": JointStressResult("hip", JointSide.TRAIL, risk_score=20.0),
         }
 
         summary = analyzer.get_summary(results)

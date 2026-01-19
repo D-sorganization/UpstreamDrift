@@ -338,3 +338,64 @@ class UsageTracker:
 # Global instances
 security_manager = SecurityManager()
 usage_tracker = UsageTracker()
+
+
+class AuthCache:
+    """Thread-safe cache for API authentication results to avoid expensive BCrypt hashing.
+
+    Fixes Performance Issue: N+1 Auth checks.
+    """
+
+    TTL_SECONDS = 300  # 5 minutes cache
+
+    def __init__(self) -> None:
+        import threading
+        import time
+
+        self._cache: dict[str, tuple[Any, float]] = {}
+        self._lock = threading.Lock()
+        self._time = time
+
+    def get(self, api_key: str) -> Any | None:
+        """Get cached user_id for API key."""
+        # Generate a fast lookup token for the cache
+        # (We don't store the key, just a derived token for lookup)
+        cache_key = self._cache_lookup_token(api_key)
+
+        with self._lock:
+            if cache_key in self._cache:
+                result, timestamp = self._cache[cache_key]
+                if self._time.time() - timestamp < self.TTL_SECONDS:
+                    return result
+                else:
+                    del self._cache[cache_key]
+        return None
+
+    def set(self, api_key: str, result: Any) -> None:
+        """Cache auth result."""
+        cache_key = self._cache_lookup_token(api_key)
+        with self._lock:
+            # Simple cleanup of size if needed, but 300s TTL is self-limiting mostly
+            if len(self._cache) > 10000:
+                # Random eviction or clear
+                self._cache.clear()
+            self._cache[cache_key] = (result, self._time.time())
+
+    def _cache_lookup_token(self, token_value: str) -> str:
+        """Generate a fast lookup token for the auth cache.
+
+        SECURITY NOTE: This is NOT used for password/key storage or protection.
+        The actual API key verification uses bcrypt (see verify_api_key method).
+        This is purely a fast dictionary lookup key to avoid repeated bcrypt calls.
+
+        We use Python's built-in hash for speed. The actual security comes from:
+        1. Short TTL (5 minutes) limiting exposure window
+        2. bcrypt verification on cache miss
+        3. The token_value itself is never stored, only this derived lookup key
+        """
+        # Use a combination of hash and length to create a lookup key
+        # This is intentionally NOT cryptographic - it's for cache performance only
+        return f"{hash(token_value)}:{len(token_value)}"
+
+
+auth_cache = AuthCache()
