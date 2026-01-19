@@ -1,27 +1,28 @@
 
+from unittest.mock import MagicMock, Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
+
+from shared.python.ai.exceptions import WorkflowError
+from shared.python.ai.types import ConversationContext, ExpertiseLevel, ToolResult
 from shared.python.ai.workflow_engine import (
-    WorkflowEngine,
-    Workflow,
-    WorkflowStep,
     StepStatus,
-    RecoveryStrategy,
-    ValidationResult,
+    Workflow,
+    WorkflowEngine,
     WorkflowExecution,
+    WorkflowStep,
     create_first_analysis_workflow,
 )
-from shared.python.ai.types import ToolResult, ConversationContext, ExpertiseLevel
-from shared.python.ai.exceptions import WorkflowError
+
 
 class TestAIWorkflowEngine:
-    
+
     @pytest.fixture
     def mock_tool_registry(self):
         registry = Mock()
         registry.execute.return_value = ToolResult(
             tool_call_id="mock_id",
-            success=True, 
+            success=True,
             result={"data": "test"}
         )
         return registry
@@ -56,9 +57,9 @@ class TestAIWorkflowEngine:
         engine.register_workflow(basic_workflow)
         context = MagicMock(spec=ConversationContext)
         initial_state = {"key": "value"}
-        
+
         execution = engine.start_workflow("test_workflow", context, initial_state)
-        
+
         assert isinstance(execution, WorkflowExecution)
         assert execution.workflow_id == "test_workflow"
         assert execution.status == StepStatus.RUNNING
@@ -76,20 +77,20 @@ class TestAIWorkflowEngine:
         engine.register_workflow(basic_workflow)
         context = MagicMock(spec=ConversationContext)
         execution = engine.start_workflow("test_workflow", context)
-        
+
         # Step 1
         assert not engine.is_complete(execution)
         result1 = engine.execute_next_step(execution)
         assert result1.status == StepStatus.COMPLETED
         assert result1.step_id == "step1"
         assert execution.current_step_index == 1
-        
+
         # Step 2
         result2 = engine.execute_next_step(execution)
         assert result2.status == StepStatus.COMPLETED
         assert result2.step_id == "step2"
         assert execution.current_step_index == 2
-        
+
         # Check completion
         assert engine.is_complete(execution)
         assert execution.status == StepStatus.COMPLETED
@@ -98,28 +99,28 @@ class TestAIWorkflowEngine:
         """Test executing a step that requires a tool."""
         wf = Workflow(id="tool_wf", name="Tool WF", description="desc")
         tool_step = WorkflowStep(
-            id="tool_step", 
-            name="Tool Step", 
+            id="tool_step",
+            name="Tool Step",
             description="Run a tool",
             tool_name="my_tool",
             tool_arguments={"arg": 1}
         )
         wf.add_step(tool_step)
         engine.register_workflow(wf)
-        
+
         context = MagicMock(spec=ConversationContext)
         execution = engine.start_workflow("tool_wf", context, initial_state={"existing": "data"})
-        
+
         # Execute
         result = engine.execute_next_step(execution)
-        
+
         assert result.status == StepStatus.COMPLETED
         mock_tool_registry.execute.assert_called_with("my_tool", {"existing": "data", "arg": 1})
 
     def test_step_condition_skip(self, engine):
         """Test skipping a step based on condition."""
         wf = Workflow(id="cond_wf", name="Conditional WF", description="desc")
-        
+
         # Step that only runs if 'run_me' is True
         step1 = WorkflowStep(
             id="conditional_step",
@@ -129,10 +130,10 @@ class TestAIWorkflowEngine:
         )
         wf.add_step(step1)
         engine.register_workflow(wf)
-        
+
         context = MagicMock(spec=ConversationContext)
         execution = engine.start_workflow("cond_wf", context, initial_state={"run_me": False})
-        
+
         result = engine.execute_next_step(execution)
         assert result.status == StepStatus.SKIPPED
         assert engine.is_complete(execution)
