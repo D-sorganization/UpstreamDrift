@@ -87,7 +87,7 @@ async def get_current_user_from_api_key(
     """
 
     api_key = credentials.credentials
-    
+
     # Check if it's an API key (starts with gms_)
     if not api_key.startswith("gms_"):
         raise HTTPException(
@@ -98,6 +98,7 @@ async def get_current_user_from_api_key(
 
     # Performance: Check cache first
     from .security import auth_cache
+
     cached_key_id = auth_cache.get(api_key)
     api_key_record = None
 
@@ -157,7 +158,7 @@ async def get_current_user_from_api_key(
                 detail="Invalid API key",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        
+
         # Cache the success for next time
         auth_cache.set(api_key, api_key_record.id)
 

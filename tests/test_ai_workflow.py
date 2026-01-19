@@ -1,4 +1,3 @@
-
 from unittest.mock import MagicMock, Mock
 
 import pytest
@@ -21,9 +20,7 @@ class TestAIWorkflowEngine:
     def mock_tool_registry(self):
         registry = Mock()
         registry.execute.return_value = ToolResult(
-            tool_call_id="mock_id",
-            success=True,
-            result={"data": "test"}
+            tool_call_id="mock_id", success=True, result={"data": "test"}
         )
         return registry
 
@@ -37,7 +34,7 @@ class TestAIWorkflowEngine:
             id="test_workflow",
             name="Test Workflow",
             description="A simple test workflow",
-            expertise_level=ExpertiseLevel.BEGINNER
+            expertise_level=ExpertiseLevel.BEGINNER,
         )
         step1 = WorkflowStep(id="step1", name="Step 1", description="First step")
         step2 = WorkflowStep(id="step2", name="Step 2", description="Second step")
@@ -103,19 +100,23 @@ class TestAIWorkflowEngine:
             name="Tool Step",
             description="Run a tool",
             tool_name="my_tool",
-            tool_arguments={"arg": 1}
+            tool_arguments={"arg": 1},
         )
         wf.add_step(tool_step)
         engine.register_workflow(wf)
 
         context = MagicMock(spec=ConversationContext)
-        execution = engine.start_workflow("tool_wf", context, initial_state={"existing": "data"})
+        execution = engine.start_workflow(
+            "tool_wf", context, initial_state={"existing": "data"}
+        )
 
         # Execute
         result = engine.execute_next_step(execution)
 
         assert result.status == StepStatus.COMPLETED
-        mock_tool_registry.execute.assert_called_with("my_tool", {"existing": "data", "arg": 1})
+        mock_tool_registry.execute.assert_called_with(
+            "my_tool", {"existing": "data", "arg": 1}
+        )
 
     def test_step_condition_skip(self, engine):
         """Test skipping a step based on condition."""
@@ -126,13 +127,15 @@ class TestAIWorkflowEngine:
             id="conditional_step",
             name="Conditional",
             description="Runs if true",
-            condition=lambda state: state.get("run_me", False)
+            condition=lambda state: state.get("run_me", False),
         )
         wf.add_step(step1)
         engine.register_workflow(wf)
 
         context = MagicMock(spec=ConversationContext)
-        execution = engine.start_workflow("cond_wf", context, initial_state={"run_me": False})
+        execution = engine.start_workflow(
+            "cond_wf", context, initial_state={"run_me": False}
+        )
 
         result = engine.execute_next_step(execution)
         assert result.status == StepStatus.SKIPPED

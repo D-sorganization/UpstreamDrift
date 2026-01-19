@@ -1,4 +1,3 @@
-
 import numpy as np
 import pytest
 
@@ -67,14 +66,14 @@ class TestSpinalLoadAnalysis:
     def test_example_analysis(self):
         """Test the integrated example function."""
         analyzer, result = create_example_analysis()
-        
+
         assert hasattr(result, "x_factor")
         assert result.x_factor is not None
         assert result.crunch_factor is not None
-        
+
         # Verify risks are calculated
         assert isinstance(result.overall_risk, SpinalRiskLevel)
-        
+
         # Verify recommendations
         recs = analyzer.get_recommendations(result)
         assert isinstance(recs, list)
@@ -90,37 +89,39 @@ class TestSpinalLoadAnalysis:
         # moment_arm = 0.05
         # needed_muscle_force = (6.0 * 80 * 9.81)
         # needed_torque = needed_muscle_force * 0.05
-        
+
         high_torque = (6.5 * 80 * 9.81) * 0.05
-        
+
         example_data["joint_torques"]["lumbar_flexion"][:] = high_torque
-        
+
         result = analyzer.analyze(
             joint_angles=example_data["joint_angles"],
             joint_velocities=example_data["joint_velocities"],
             joint_torques=example_data["joint_torques"],
             time=example_data["time"],
         )
-        
+
         assert result.peak_compression_bw >= 6.0
-        assert result.compression_risk in [SpinalRiskLevel.HIGH_RISK, SpinalRiskLevel.CRITICAL]
+        assert result.compression_risk in [
+            SpinalRiskLevel.HIGH_RISK,
+            SpinalRiskLevel.CRITICAL,
+        ]
 
     def test_input_validation_shapes(self, analyzer):
         """Test handling of mismatched array shapes (should likely raise error)."""
         time_short = np.linspace(0, 1.0, 10)
-        time_long = np.linspace(0, 1.0, 20)
-        
-        angles = {"lumbar_flexion": np.zeros(10)} # Matches short
-        velocities = {"lumbar_flexion": np.zeros(20)} # Mismatch
-        
+
+        angles = {"lumbar_flexion": np.zeros(10)}  # Matches short
+        velocities = {"lumbar_flexion": np.zeros(20)}  # Mismatch
+
         # The current implementation might not explicitly check, so it might fail with ValueError
         # or operate on mismatched arrays depending on numpy behavior.
         # Ideally it should raise ValueError.
-        
+
         with pytest.raises((ValueError, IndexError)):
             analyzer.analyze(
                 joint_angles=angles,
                 joint_velocities=velocities,
                 joint_torques={"lumbar_flexion": np.zeros(10)},
-                time=time_short
+                time=time_short,
             )
