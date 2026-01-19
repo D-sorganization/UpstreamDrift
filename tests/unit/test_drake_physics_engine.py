@@ -43,22 +43,22 @@ def DrakePhysicsEngineClass(mock_drake_dependencies):
     # Manually patch the module's globals to use our mocks
     # This avoids reload() which corrupts sys.modules state
     mock_pydrake, mock_interfaces = mock_drake_dependencies
-    
+
     # Save originals
     original_pydrake = getattr(mod, "pydrake", None)
     original_interfaces = getattr(mod, "interfaces", None)
-    
+
     # Inject mocks
-    setattr(mod, "pydrake", mock_pydrake)
-    setattr(mod, "interfaces", mock_interfaces)
-    
+    mod.pydrake = mock_pydrake  # type: ignore[attr-defined]
+    mod.interfaces = mock_interfaces  # type: ignore[attr-defined]
+
     yield mod.DrakePhysicsEngine
-    
+
     # Restore (optional but good practice)
     if original_pydrake:
-        setattr(mod, "pydrake", original_pydrake)
+        mod.pydrake = original_pydrake  # type: ignore[attr-defined]
     if original_interfaces:
-        setattr(mod, "interfaces", original_interfaces)
+        mod.interfaces = original_interfaces  # type: ignore[attr-defined]
 
 
 @pytest.fixture

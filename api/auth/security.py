@@ -5,7 +5,12 @@ import os
 import secrets
 
 # Python 3.10 compatibility: UTC was added in 3.11
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+try:
+    from datetime import UTC
+except ImportError:
+    UTC = timezone.utc
 from typing import Any
 
 import bcrypt

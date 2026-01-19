@@ -24,7 +24,7 @@ IGNORE_DIRS = {
     ".jules",
     "archive",
     "opensim-models",  # Vendored OpenSim models often have duplicate outputs
-    "myo_sim",         # Vendored MyoSuite models
+    "myo_sim",  # Vendored MyoSuite models
 }
 
 # Files that are allowed to be duplicated (e.g., generic names)
@@ -41,7 +41,15 @@ ALLOWED_DUPLICATES = {
 
 # Extensions to likely ignore for duplication checks (data files)
 IGNORE_EXTENSIONS = {
-    ".sto", ".mot", ".xml", ".stl", ".vtp", ".obj", ".osim", ".msg", ".srv"
+    ".sto",
+    ".mot",
+    ".xml",
+    ".stl",
+    ".vtp",
+    ".obj",
+    ".osim",
+    ".msg",
+    ".srv",
 }
 
 
@@ -94,7 +102,7 @@ def find_duplicates(root_dir: Path) -> int:
             # Filter out empty files
             if paths[0].stat().st_size == 0:
                 continue
-                
+
             print(f"\nHash: {file_hash[:8]}...")
             for p in paths:
                 print(f"  {p.relative_to(root_dir)}")

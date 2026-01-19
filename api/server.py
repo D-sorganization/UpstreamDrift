@@ -14,7 +14,12 @@ import tempfile
 import uuid
 
 # Python 3.10 compatibility: UTC was added in 3.11
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+try:
+    from datetime import UTC
+except ImportError:
+    UTC = timezone.utc
 from pathlib import Path
 from typing import Any, cast
 

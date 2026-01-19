@@ -37,19 +37,19 @@ def MuJoCoPhysicsEngineClass(mock_mujoco_dependencies):
 
     # Manually patch the module's globals to use our mocks
     mock_mujoco, mock_interfaces = mock_mujoco_dependencies
-    
+
     # Save originals
     original_mujoco = getattr(mod, "mujoco", None)
-    
+
     # Inject mocks
-    setattr(mod, "mujoco", mock_mujoco)
+    mod.mujoco = mock_mujoco
     # Note: interfaces might not be imported directly in this module, but patching mostly for safety
-    
+
     yield mod.MuJoCoPhysicsEngine
-    
+
     # Restore
     if original_mujoco:
-        setattr(mod, "mujoco", original_mujoco)
+        mod.mujoco = original_mujoco
 
 
 @pytest.fixture

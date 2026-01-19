@@ -31,18 +31,18 @@ def PinocchioPhysicsEngineClass(mock_pinocchio_dependencies):
 
     # Manually patch the module's globals
     mock_pin, mock_interfaces = mock_pinocchio_dependencies
-    
+
     # Save originals
     original_pin = getattr(mod, "pin", None)
-    
+
     # Inject mocks
-    setattr(mod, "pin", mock_pin)
-    
+    mod.pin = mock_pin
+
     yield mod.PinocchioPhysicsEngine
-    
+
     # Restore
     if original_pin:
-        setattr(mod, "pin", original_pin)
+        mod.pin = original_pin
 
 
 @pytest.fixture
