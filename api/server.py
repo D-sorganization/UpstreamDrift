@@ -16,13 +16,13 @@ import uuid
 # Python 3.10 compatibility: UTC was added in 3.11
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import uvicorn
-from fastapi import BackgroundTasks, FastAPI, File, HTTPException, UploadFile
+from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
@@ -31,6 +31,7 @@ from shared.python.engine_manager import EngineManager
 from shared.python.engine_registry import EngineType
 from shared.python.video_pose_pipeline import VideoPosePipeline, VideoProcessingConfig
 
+from .database import init_db
 from .models.requests import (
     AnalysisRequest,
     SimulationRequest,
@@ -41,6 +42,7 @@ from .models.responses import (
     SimulationResponse,
     VideoAnalysisResponse,
 )
+from .routes import auth as auth_routes
 from .services.analysis_service import AnalysisService
 from .services.simulation_service import SimulationService
 
@@ -87,6 +89,64 @@ MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024
 # Rate limiting
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
+
+
+# SECURITY: Security headers middleware (Issue #521)
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next: Any) -> Response:
+    """Add security headers to all responses.
+
+    Implements OWASP recommended security headers to prevent:
+    - MIME-sniffing attacks (X-Content-Type-Options)
+    - Clickjacking (X-Frame-Options)
+    - XSS attacks (X-XSS-Protection)
+    - Referrer information leakage (Referrer-Policy)
+    - Downgrade attacks (Strict-Transport-Security)
+    """
+    response = await call_next(request)
+
+    # Prevent MIME-sniffing attacks
+    response.headers["X-Content-Type-Options"] = "nosniff"
+
+    # Prevent clickjacking
+    response.headers["X-Frame-Options"] = "DENY"
+
+    # XSS filter (legacy browsers)
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+
+    # Control referrer information
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    # Force HTTPS (only for HTTPS connections)
+    if request.url.scheme == "https":
+        response.headers["Strict-Transport-Security"] = (
+            "max-age=31536000; includeSubDomains"
+        )
+
+    return cast(Response, response)
+
+
+# SECURITY: Upload size limit middleware (Issue #545)
+@app.middleware("http")
+async def validate_upload_size(request: Request, call_next: Any) -> Response:
+    """Reject requests exceeding upload size limits.
+
+    Prevents DoS attacks via large file uploads by checking Content-Length
+    header before processing the request body.
+    """
+    content_length = request.headers.get("content-length")
+
+    if content_length:
+        content_length_int = int(content_length)
+        if content_length_int > MAX_UPLOAD_SIZE_BYTES:
+            return JSONResponse(
+                status_code=413,
+                content={
+                    "detail": f"Request too large. Maximum size is {MAX_UPLOAD_SIZE_MB}MB"
+                },
+            )
+
+    return cast(Response, await call_next(request))
 
 
 # SECURITY: Path validation to prevent path traversal attacks
@@ -271,6 +331,11 @@ async def startup_event() -> None:
     global engine_manager, simulation_service, analysis_service, video_pipeline
 
     try:
+        # Initialize database (Issue #544)
+        logger.info("Initializing database...")
+        init_db()
+        logger.info("Database initialized successfully")
+
         # Initialize engine manager
         engine_manager = EngineManager()
         logger.info("Engine manager initialized")
@@ -292,6 +357,10 @@ async def startup_event() -> None:
     except Exception as e:
         logger.error(f"Failed to initialize API: {e}")
         raise
+
+
+# Include authentication router (Issue #543)
+app.include_router(auth_routes.router)
 
 
 @app.get("/")

@@ -323,7 +323,35 @@ tests/
 
 ## Running Tests
 
+### Platform-Specific Requirements (Issue #539)
+
+#### Linux
+
+GUI tests require a display or virtual framebuffer. If running on a headless system:
+
 ```bash
+# Install Xvfb
+sudo apt-get install xvfb
+
+# Run tests with virtual display
+xvfb-run pytest tests/unit/test_launcher_ux.py
+
+# Or run all tests with display
+xvfb-run pytest
+```
+
+#### Windows
+
+Some tests may require specific DLLs for physics engines. Ensure the following are installed:
+- Visual C++ Redistributable
+- MuJoCo dependencies (if testing MuJoCo engine)
+
+#### macOS
+
+GUI tests should work out of the box if running in a graphical session.
+
+### Basic Commands
+
 # Run all tests
 pytest
 

@@ -4,7 +4,9 @@
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
 from api.auth.dependencies import RequireAdmin, RequireAuth
@@ -24,10 +26,15 @@ from api.database import get_db
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
+# Rate limiter for auth endpoints (Issue #522)
+# Protects against credential stuffing and brute force attacks
+limiter = Limiter(key_func=get_remote_address)
+
 
 @router.post("/register", response_model=UserResponse)
+@limiter.limit("3/hour")  # SECURITY: Limit registration to prevent account farming
 async def register_user(
-    user_data: UserCreate, db: Session = Depends(get_db)
+    request: Request, user_data: UserCreate, db: Session = Depends(get_db)
 ) -> UserResponse:
     """Register a new user."""
 
@@ -58,8 +65,9 @@ async def register_user(
 
 
 @router.post("/login", response_model=LoginResponse)
+@limiter.limit("5/minute")  # SECURITY: Limit login attempts to prevent brute force
 async def login(
-    login_data: LoginRequest, db: Session = Depends(get_db)
+    request: Request, login_data: LoginRequest, db: Session = Depends(get_db)
 ) -> LoginResponse:
     """Authenticate user and return tokens."""
 
