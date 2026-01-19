@@ -338,8 +338,9 @@ class LivePlotWidget(QtWidgets.QWidget):
         enabled = self.chk_compare.isChecked()
         self.combo_compare.setEnabled(enabled)
         if enabled:
-            self.comparison_label = self.combo_compare.currentText()
-            self.comparison_key = self.metric_options[self.comparison_label]
+            label = self.combo_compare.currentText()
+            self.comparison_label = label
+            self.comparison_key = self.metric_options[label]
         else:
             self.comparison_key = None
             self.comparison_label = None
