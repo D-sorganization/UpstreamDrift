@@ -30,7 +30,7 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt || true
-          npm install -g @google/jules
+          sudo apt-get install -y jq
 
       - name: Archive Existing Assessments
         run: |
@@ -50,14 +50,35 @@ jobs:
 
           echo "Archive step completed successfully"
 
-      - name: Jules Assessment Generation
+      - name: Jules Assessment Generation (REST API)
         env:
-          JULES_TOKEN: ${{ secrets.JULES_API_KEY }}
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          jules auth --token $JULES_TOKEN
+          set -e
           DATE=$(date +%Y-%m-%d)
+          REPO="${{ github.repository }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
 
-          jules task fix --prompt "$(cat << 'PROMPT_EOF'
+          # Check if API key is configured
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured. Skipping Jules assessment generation."
+            exit 0
+          fi
+
+          echo "Looking up repository source..."
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.repository.fullName == \"$REPO\") | .name" | head -1)
+
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Repository $REPO not found in Jules sources. Ensure Jules GitHub App is installed."
+            exit 0
+          fi
+
+          echo "Found source: $SOURCE_ID"
+
+          # Create assessment session
+          PROMPT=$(cat << 'PROMPT_EOF'
           You are the ASSESSMENT GENERATOR agent.
 
           ## Mission
@@ -69,8 +90,8 @@ jobs:
           J: API Design, K: Data Handling, L: Logging, M: Configuration, N: Scalability, O: Maintainability
 
           ## Output
-          1. Create docs/assessments/Assessment_X_$DATE.md for each category with grade 0-10
-          2. Create docs/assessments/Comprehensive_Assessment_$DATE.md with:
+          1. Create docs/assessments/Assessment_X_CATEGORY.md for each category with grade 0-10
+          2. Create docs/assessments/Comprehensive_Assessment.md with:
              - Grade table
              - Weighted average (Code 25%, Testing 15%, Docs 10%, Security 15%, Perf 15%, Ops 10%, Design 10%)
              - Top 5 recommendations
@@ -80,7 +101,55 @@ jobs:
           ## Quick Fixes
           Make easy, safe, non-breaking fixes with HIGH confidence. Document as AUTO-FIXED.
           PROMPT_EOF
-          )"
+          )
+
+          echo "Creating Jules session..."
+          SESSION_RESPONSE=$(curl -sf -X POST \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{\"source\": \"$SOURCE_ID\", \"prompt\": $(echo "$PROMPT" | jq -Rs .)}" \
+            "$API_BASE/sessions")
+
+          SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
+          if [ -z "$SESSION_ID" ] || [ "$SESSION_ID" = "null" ]; then
+            echo "::error::Failed to create Jules session"
+            echo "$SESSION_RESPONSE"
+            exit 1
+          fi
+
+          echo "Created session: $SESSION_ID"
+
+          # Poll for session completion (max 30 minutes)
+          MAX_WAIT=1800
+          POLL_INTERVAL=30
+          ELAPSED=0
+
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
+            STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
+
+            echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
+
+            case "$STATE" in
+              "COMPLETED"|"SUBMITTED")
+                echo "Session completed successfully!"
+                break
+                ;;
+              "FAILED"|"CANCELLED")
+                echo "::error::Session $STATE"
+                exit 1
+                ;;
+            esac
+
+            sleep $POLL_INTERVAL
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
+
+          if [ $ELAPSED -ge $MAX_WAIT ]; then
+            echo "::warning::Session timed out after ${MAX_WAIT}s. Check Jules dashboard for results."
+          fi
+
+          echo "Assessment generation complete. Jules will create a PR with the results."
 
       - name: Create PR with Assessment Results
         env:
