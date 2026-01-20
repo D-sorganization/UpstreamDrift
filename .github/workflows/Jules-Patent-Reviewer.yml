@@ -50,186 +50,186 @@ jobs:
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
         run: |
-                    set -e
-                    DATE=$(date +%Y-%m-%d)
-                    REPO="${{ github.repository }}"
-                    API_BASE="https://jules.googleapis.com/v1alpha"
+          set -e
+          DATE=$(date +%Y-%m-%d)
+          REPO="${{ github.repository }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
           
-                    # Check if API key is configured
-                    if [ -z "$JULES_API_KEY" ]; then
-                      echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
-                      exit 0
-                    fi
+          # Check if API key is configured
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
+            exit 0
+          fi
           
-                    echo "Looking up repository source..."
-                    SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          echo "Looking up repository source..."
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
           
-                    OWNER=$(echo "$REPO" | cut -d'/' -f1)
-                    REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
           
-                    SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
           
-                    if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
-                      echo "::warning::Repository $REPO not found in Jules sources."
-                      exit 0
-                    fi
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Repository $REPO not found in Jules sources."
+            exit 0
+          fi
           
-                    echo "Found source: $SOURCE_ID"
+          echo "Found source: $SOURCE_ID"
           
-                    # Create session prompt
-                    PROMPT=$(cat << 'PROMPT_EOF'
+          # Create session prompt
+          PROMPT=$(cat << 'PROMPT_EOF'
           '
-                    You are the PATENT REVIEWER - an IP risk assessment specialist.
+          You are the PATENT REVIEWER - an IP risk assessment specialist.
           
-                    ## Your Mission
-                    Maintain and update a comprehensive patent risk assessment document.
+          ## Your Mission
+          Maintain and update a comprehensive patent risk assessment document.
           
-                    ## Target Document
-                    Create/Update: docs/legal/patents/PATENT_REVIEW.md
+          ## Target Document
+          Create/Update: docs/legal/patents/PATENT_REVIEW.md
           
-                    This should be a SINGLE, COMPREHENSIVE document that is continuously refined.
-                    Add "Last Updated: $DATE" at the top.
+          This should be a SINGLE, COMPREHENSIVE document that is continuously refined.
+          Add "Last Updated: $DATE" at the top.
           
-                    ## Review Framework
+          ## Review Framework
           
-                    ### 1. Known Patent Risks
+          ### 1. Known Patent Risks
           
-                    #### High Risk Areas
-                    Document implementations that may infringe on:
-                    - K-Motion / K-Vest patents (3D biofeedback, kinematic sequence)
-                    - Zepp/Blast patents (swing comparison scoring)
-                    - TrackMan patents (radar ball tracking methods)
-                    - Foresight patents (photometric measurement)
-                    - TPI patents (kinematic efficiency scoring)
+          #### High Risk Areas
+          Document implementations that may infringe on:
+          - K-Motion / K-Vest patents (3D biofeedback, kinematic sequence)
+          - Zepp/Blast patents (swing comparison scoring)
+          - TrackMan patents (radar ball tracking methods)
+          - Foresight patents (photometric measurement)
+          - TPI patents (kinematic efficiency scoring)
           
-                    For each risk:
-                    | Area | Patent(s) | Our Implementation | Risk Level | Mitigation |
-                    |------|-----------|-------------------|------------|------------|
+          For each risk:
+          | Area | Patent(s) | Our Implementation | Risk Level | Mitigation |
+          |------|-----------|-------------------|------------|------------|
           
-                    #### Medium Risk Areas
-                    - Sensor fusion algorithms
-                    - Specific scoring formulas
-                    - Visualization methods
-                    - Comparison algorithms
+          #### Medium Risk Areas
+          - Sensor fusion algorithms
+          - Specific scoring formulas
+          - Visualization methods
+          - Comparison algorithms
           
-                    #### Low Risk Areas
-                    - General physics (public domain)
-                    - Standard statistical methods
-                    - Open algorithms with citations
+          #### Low Risk Areas
+          - General physics (public domain)
+          - Standard statistical methods
+          - Open algorithms with citations
           
-                    ### 2. Code-Specific Analysis
+          ### 2. Code-Specific Analysis
           
-                    Review files identified in .jules/patent_data/ for:
-                    - Specific formulas that may be patented
-                    - Algorithm implementations matching patent claims
-                    - Constants/magic numbers from proprietary sources
-                    - Method names matching trademarked terms
+          Review files identified in .jules/patent_data/ for:
+          - Specific formulas that may be patented
+          - Algorithm implementations matching patent claims
+          - Constants/magic numbers from proprietary sources
+          - Method names matching trademarked terms
           
-                    ### 3. Trademark Concerns
+          ### 3. Trademark Concerns
           
-                    | Term | Owner | Status | Alternative |
-                    |------|-------|--------|-------------|
-                    | Kinematic Sequence | TPI | Avoid | "Movement Sequence" |
-                    | Swing DNA | Zepp | Remediated | "Swing Profile" |
-                    | Smash Factor | TrackMan | Generic now | OK to use |
+          | Term | Owner | Status | Alternative |
+          |------|-------|--------|-------------|
+          | Kinematic Sequence | TPI | Avoid | "Movement Sequence" |
+          | Swing DNA | Zepp | Remediated | "Swing Profile" |
+          | Smash Factor | TrackMan | Generic now | OK to use |
           
-                    ### 4. Prior Art Documentation
+          ### 4. Prior Art Documentation
           
-                    For implementations that ARE safe, document:
-                    - Academic paper citations
-                    - Public domain algorithms
-                    - Our original innovations
-                    - Prior art that invalidates competitor patents
+          For implementations that ARE safe, document:
+          - Academic paper citations
+          - Public domain algorithms
+          - Our original innovations
+          - Prior art that invalidates competitor patents
           
-                    ### 5. Risk Mitigation Actions
+          ### 5. Risk Mitigation Actions
           
-                    For each identified risk, document:
-                    1. Current Status (remediated/pending/accepted)
-                    2. Recommended Changes (if needed)
-                    3. Alternative Implementations
-                    4. Legal Review Needed (yes/no)
+          For each identified risk, document:
+          1. Current Status (remediated/pending/accepted)
+          2. Recommended Changes (if needed)
+          3. Alternative Implementations
+          4. Legal Review Needed (yes/no)
           
-                    ### 6. Change Log
+          ### 6. Change Log
           
-                    Track changes to the patent landscape:
-                    - New patents filed by competitors
-                    - Patents expired (now safe to use)
-                    - Our remediation actions
+          Track changes to the patent landscape:
+          - New patents filed by competitors
+          - Patents expired (now safe to use)
+          - Our remediation actions
           
-                    ## Output Requirements
+          ## Output Requirements
           
-                    1. Update the master PATENT_REVIEW.md document
-                    2. Create docs/legal/patents/patent_alerts_$DATE.md for NEW issues only
-                    3. For HIGH risk items needing immediate action:
-                       - Create GitHub Issue with label 'legal,patent-risk,critical'
+          1. Update the master PATENT_REVIEW.md document
+          2. Create docs/legal/patents/patent_alerts_$DATE.md for NEW issues only
+          3. For HIGH risk items needing immediate action:
+             - Create GitHub Issue with label 'legal,patent-risk,critical'
           
-                    ## Important Notes
+          ## Important Notes
           
-                    - This is NOT legal advice - recommend professional review for critical items
-                    - Err on the side of caution when assessing risk
-                    - Document our original innovations as potential defensive IP
+          - This is NOT legal advice - recommend professional review for critical items
+          - Err on the side of caution when assessing risk
+          - Document our original innovations as potential defensive IP
           
-                    DO NOT MAKE CODE CHANGES. This is a LEGAL REVIEW workflow.
-                    PROMPT_EOF
-                    )
+          DO NOT MAKE CODE CHANGES. This is a LEGAL REVIEW workflow.
+          PROMPT_EOF
+          )
           
-                    echo "Creating Jules session..."
-                    REQUEST_JSON=$(jq -n \
-                      --arg prompt "$PROMPT" \
-                      --arg source "$SOURCE_ID" \
-                      '{
-                        prompt: $prompt,
-                        sourceContext: {
-                          source: $source,
-                          githubRepoContext: {
-                            startingBranch: "main"
-                          }
-                        },
-                        automationMode: "AUTO_CREATE_PR"
-                      }')
+          echo "Creating Jules session..."
+          REQUEST_JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            --arg source "$SOURCE_ID" \
+            '{
+              prompt: $prompt,
+              sourceContext: {
+                source: $source,
+                githubRepoContext: {
+                  startingBranch: "main"
+                }
+              },
+              automationMode: "AUTO_CREATE_PR"
+            }')
           
-                    echo "Request: $REQUEST_JSON"
+          echo "Request: $REQUEST_JSON"
           
-                    HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
-                      -H "X-Goog-Api-Key: $JULES_API_KEY" \
-                      -H "Content-Type: application/json" \
-                      -d "$REQUEST_JSON" \
-                      "$API_BASE/sessions")
+          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_JSON" \
+            "$API_BASE/sessions")
           
-                    SESSION_RESPONSE=$(cat /tmp/session_response.json)
-                    echo "HTTP Status: $HTTP_CODE"
+          SESSION_RESPONSE=$(cat /tmp/session_response.json)
+          echo "HTTP Status: $HTTP_CODE"
           
-                    if [ "$HTTP_CODE" != "200" ]; then
-                      echo "::error::Jules API returned HTTP $HTTP_CODE"
-                      exit 1
-                    fi
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Jules API returned HTTP $HTTP_CODE"
+            exit 1
+          fi
           
-                    SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
-                    echo "Created session: $SESSION_ID"
+          SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
+          echo "Created session: $SESSION_ID"
           
-                    # Poll for completion
-                    MAX_WAIT=1800
-                    POLL_INTERVAL=30
-                    ELAPSED=0
+          # Poll for completion
+          MAX_WAIT=1800
+          POLL_INTERVAL=30
+          ELAPSED=0
           
-                    while [ $ELAPSED -lt $MAX_WAIT ]; do
-                      SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
-                      STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
-                      echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
+            STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
+            echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
           
-                      case "$STATE" in
-                        "COMPLETED"|"SUBMITTED")
-                          echo "Session completed successfully!"
-                          break
-                          ;;
-                        "FAILED"|"CANCELLED")
-                          echo "::error::Session $STATE"
-                          exit 1
-                          ;;
-                      esac
-                      sleep $POLL_INTERVAL
-                      ELAPSED=$((ELAPSED + POLL_INTERVAL))
-                    done
+            case "$STATE" in
+              "COMPLETED"|"SUBMITTED")
+                echo "Session completed successfully!"
+                break
+                ;;
+              "FAILED"|"CANCELLED")
+                echo "::error::Session $STATE"
+                exit 1
+                ;;
+            esac
+            sleep $POLL_INTERVAL
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
           
 
 
