@@ -1,3 +1,4 @@
+
 name: Convert Review Comments to Issues
 
 # Converts PR review comments (from Copilot, Cursor, Jules, etc.) into GitHub Issues
@@ -32,13 +33,13 @@ jobs:
   process-comments:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Collect Review Comments
         id: collect
@@ -139,15 +140,14 @@ jobs:
                   created_at = comment.get('created_at', '')
                   html_url = comment.get('html_url', '')
 
-                  # Categorize by author (case-insensitive checks for bot names)
-                  author_lower = author.lower()
-                  if 'copilot' in author_lower:
+                  # Categorize by author
+                  if author == 'Copilot':
                       source = 'GitHub Copilot'
                       label = 'copilot-review'
                   elif author == 'google-labs-jules' or (author == 'github-actions[bot]' and 'jules' in body.lower()):
                       source = 'Jules'
                       label = 'jules-review'
-                  elif 'cursor' in author_lower or 'bugbot' in author_lower:
+                  elif 'cursor' in author.lower() or 'bugbot' in author.lower():
                       source = 'Cursor/BugBot'
                       label = 'cursor-review'
                   else:
@@ -290,11 +290,7 @@ jobs:
           git add docs/review_archive/ .github/review_comments/comment_tracking.json || true
 
           if ! git diff --staged --quiet; then
-            git commit -m "docs: archive review comments from PRs
-
-          Archived ${{ steps.process.outputs.archived_count }} comments.
-          Created ${{ steps.process.outputs.created_count }} issues."
-
+            git commit -m "docs: archive review comments from PRs"
             git push
           else
             echo "No changes to commit"
