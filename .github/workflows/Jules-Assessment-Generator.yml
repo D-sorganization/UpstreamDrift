@@ -112,16 +112,26 @@ jobs:
           )
 
           echo "Creating Jules session..."
-          SESSION_RESPONSE=$(curl -sf -X POST \
+          # Use -s to suppress progress but capture both stdout and stderr
+          # Use -w to get HTTP status code
+          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
             -H "X-Goog-Api-Key: $JULES_API_KEY" \
             -H "Content-Type: application/json" \
             -d "{\"source\": \"$SOURCE_ID\", \"prompt\": $(echo "$PROMPT" | jq -Rs .)}" \
             "$API_BASE/sessions")
 
+          SESSION_RESPONSE=$(cat /tmp/session_response.json)
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response: $SESSION_RESPONSE"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Jules API returned HTTP $HTTP_CODE"
+            exit 1
+          fi
+
           SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
           if [ -z "$SESSION_ID" ] || [ "$SESSION_ID" = "null" ]; then
-            echo "::error::Failed to create Jules session"
-            echo "$SESSION_RESPONSE"
+            echo "::error::Failed to create Jules session - no session ID in response"
             exit 1
           fi
 
