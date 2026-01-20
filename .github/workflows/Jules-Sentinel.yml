@@ -48,52 +48,138 @@ jobs:
 
       - name: Jules Sentinel Analysis
         env:
-          JULES_TOKEN: ${{ secrets.JULES_API_KEY }}
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
         run: |
-          jules auth --token $JULES_TOKEN
+                    set -e
+                    DATE=$(date +%Y-%m-%d)
+                    REPO="${{ github.repository }}"
+                    API_BASE="https://jules.googleapis.com/v1alpha"
+          
+                    # Check if API key is configured
+                    if [ -z "$JULES_API_KEY" ]; then
+                      echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
+                      exit 0
+                    fi
+          
+                    echo "Looking up repository source..."
+                    SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          
+                    OWNER=$(echo "$REPO" | cut -d'/' -f1)
+                    REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+          
+                    SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+          
+                    if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+                      echo "::warning::Repository $REPO not found in Jules sources."
+                      exit 0
+                    fi
+          
+                    echo "Found source: $SOURCE_ID"
+          
+                    # Create session prompt
+                    PROMPT=$(cat << 'PROMPT_EOF'
+          '
+                    You are the SENTINEL security agent.
+          
+                    ## Your Mission
+                    Analyze the security audit reports in ./reports/ and document findings.
+          
+                    ## Input Files
+                    - reports/pip_audit.json - Dependency vulnerabilities
+                    - reports/bandit.json - Python security issues
+                    - reports/semgrep.json - Code pattern analysis
+          
+                    ## DO NOT MODIFY CODE directly. Instead:
+          
+                    ### For HIGH severity findings:
+                    1. Create a GitHub Issue with labels: security, high-priority, jules:sentinel
+                    2. Include CVE numbers if available
+                    3. Provide remediation steps
+          
+                    ### For MEDIUM severity findings:
+                    1. Add to .jules/sentinel.md journal with details
+                    2. Create GitHub Issue with label: security, jules:sentinel
+          
+                    ### For LOW severity findings:
+                    1. Document in .jules/sentinel.md only
+          
+                    ## Journal Entry Format
+                    Update .jules/sentinel.md with:
+                    ```
+                    ## YYYY-MM-DD - Security Audit
+          
+                    **Scan Results:**
+                    - Dependencies: X vulnerabilities (H/M/L)
+                    - Code Analysis: Y issues (H/M/L)
+                    - Pattern Scan: Z findings
+          
+                    **Issues Created:** #num, #num
+                    **Deferred:** [list any deferred items with justification]
+                    ```
+          
+                    CRITICAL: This is a READ-ONLY audit. Do not fix code - only document and create issues.
+                    PROMPT_EOF
+                    )
+          
+                    echo "Creating Jules session..."
+                    REQUEST_JSON=$(jq -n \
+                      --arg prompt "$PROMPT" \
+                      --arg source "$SOURCE_ID" \
+                      '{
+                        prompt: $prompt,
+                        sourceContext: {
+                          source: $source,
+                          githubRepoContext: {
+                            startingBranch: "main"
+                          }
+                        },
+                        automationMode: "AUTO_CREATE_PR"
+                      }')
+          
+                    echo "Request: $REQUEST_JSON"
+          
+                    HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+                      -H "X-Goog-Api-Key: $JULES_API_KEY" \
+                      -H "Content-Type: application/json" \
+                      -d "$REQUEST_JSON" \
+                      "$API_BASE/sessions")
+          
+                    SESSION_RESPONSE=$(cat /tmp/session_response.json)
+                    echo "HTTP Status: $HTTP_CODE"
+          
+                    if [ "$HTTP_CODE" != "200" ]; then
+                      echo "::error::Jules API returned HTTP $HTTP_CODE"
+                      exit 1
+                    fi
+          
+                    SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
+                    echo "Created session: $SESSION_ID"
+          
+                    # Poll for completion
+                    MAX_WAIT=1800
+                    POLL_INTERVAL=30
+                    ELAPSED=0
+          
+                    while [ $ELAPSED -lt $MAX_WAIT ]; do
+                      SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
+                      STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
+                      echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
+          
+                      case "$STATE" in
+                        "COMPLETED"|"SUBMITTED")
+                          echo "Session completed successfully!"
+                          break
+                          ;;
+                        "FAILED"|"CANCELLED")
+                          echo "::error::Session $STATE"
+                          exit 1
+                          ;;
+                      esac
+                      sleep $POLL_INTERVAL
+                      ELAPSED=$((ELAPSED + POLL_INTERVAL))
+                    done
+          
 
-          jules task fix --prompt "$(cat << 'PROMPT_EOF'
-          You are the SENTINEL security agent.
-
-          ## Your Mission
-          Analyze the security audit reports in ./reports/ and document findings.
-
-          ## Input Files
-          - reports/pip_audit.json - Dependency vulnerabilities
-          - reports/bandit.json - Python security issues
-          - reports/semgrep.json - Code pattern analysis
-
-          ## DO NOT MODIFY CODE directly. Instead:
-
-          ### For HIGH severity findings:
-          1. Create a GitHub Issue with labels: security, high-priority, jules:sentinel
-          2. Include CVE numbers if available
-          3. Provide remediation steps
-
-          ### For MEDIUM severity findings:
-          1. Add to .jules/sentinel.md journal with details
-          2. Create GitHub Issue with label: security, jules:sentinel
-
-          ### For LOW severity findings:
-          1. Document in .jules/sentinel.md only
-
-          ## Journal Entry Format
-          Update .jules/sentinel.md with:
-          ```
-          ## YYYY-MM-DD - Security Audit
-
-          **Scan Results:**
-          - Dependencies: X vulnerabilities (H/M/L)
-          - Code Analysis: Y issues (H/M/L)
-          - Pattern Scan: Z findings
-
-          **Issues Created:** #num, #num
-          **Deferred:** [list any deferred items with justification]
-          ```
-
-          CRITICAL: This is a READ-ONLY audit. Do not fix code - only document and create issues.
-          PROMPT_EOF
-          )"
 
       - name: Commit Journal
         uses: stefanzweifel/git-auto-commit-action@v5

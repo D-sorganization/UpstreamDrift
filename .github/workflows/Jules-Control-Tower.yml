@@ -9,17 +9,16 @@ on:
     workflows: ["CI Standard"]
     types: [completed]
   schedule:
-    # OVERNIGHT SCHEDULE - PST times (UTC-8)
+    # OVERNIGHT SCHEDULE - All work done before morning (midnight-6 AM PST / 8 AM-2 PM UTC)
     - cron: "0 8 * * *"   # Midnight PST - Assessment Generator
     - cron: "30 8 * * *"  # 12:30 AM PST - Code Quality Reviewer
-    - cron: "0 9 * * *"   # 1 AM PST - Completist
-    - cron: "30 9 * * *"  # 1:30 AM PST - Sentinel / Physics Auditor (Tue/Fri)
-    - cron: "0 10 * * 1"  # 2 AM PST Mon - Competitor Analysis
-    - cron: "0 10 * * 3"  # 2 AM PST Wed - Patent Review
-    - cron: "30 10 * * *" # 2:30 AM PST - Tech Custodian
-    - cron: "0 11 * * *"  # 3 AM PST - Issue Resolver
-    - cron: "30 11 * * *" # 3:30 AM PST - PR Compiler
-    - cron: "0 12 * * *"  # 4 AM PST - Code Quality Fixer
+    - cron: "0 9 * * *"   # 1 AM PST - Completist (incomplete impl)
+    - cron: "30 9 * * *"  # 1:30 AM PST - Layman's Terms Writer
+    - cron: "0 10 * * *"  # 2 AM PST - Critics Comments Writer
+    - cron: "30 10 * * *" # 2:30 AM PST - Sentinel (security)
+    - cron: "0 11 * * *"  # 3 AM PST - Tech Custodian / Thesis Defender (Thu)
+    - cron: "30 11 * * *" # 3:30 AM PST - Issue Resolver (daily fix)
+    - cron: "0 12 * * *"  # 4 AM PST - PR Compiler (consolidate PRs)
   workflow_dispatch:
     inputs:
       target:
@@ -31,13 +30,12 @@ on:
           - auto
           - assessment-generator
           - code-quality-reviewer
-          - code-quality-fixer
           - completist
+          - laymans-terms-writer
+          - critics-comments-writer
           - sentinel
-          - physics-auditor
-          - competitor-analyst
-          - patent-reviewer
           - tech-custodian
+          - thesis-defender
           - issue-resolver
           - pr-compiler
 
@@ -64,13 +62,6 @@ jobs:
     outputs:
       target: ${{ steps.decide.outputs.target }}
     steps:
-      - name: Fast API Ping (Optional)
-        env:
-          API_KEY: ${{ secrets.JULES_API_KEY }}
-        run: |
-          curl -fsS -H "x-goog-api-key: $API_KEY" \
-            https://jules.google/api/v1/health || echo "::warning::Jules API health check failed, continuing anyway."
-
       # SAFEGUARD: Check if we've exceeded max repair iterations in the time window
       - name: Check Iteration Limits
         id: check-limits
@@ -127,8 +118,9 @@ jobs:
                   target = "auto-repair";
                }
             }
-            // 2. SCHEDULED RUNS - Route by cron pattern (deterministic)
+            // 2. SCHEDULED RUNS - Route by cron pattern (deterministic) with UTC time fallback
             else if (event === "schedule" || (event === "workflow_dispatch" && (!manualTarget || manualTarget === "auto"))) {
+              // Always run schedules regardless of actor
               // Primary: Match exact cron pattern for deterministic routing
               if (schedule) {
                 switch (schedule) {
@@ -142,33 +134,29 @@ jobs:
                     target = "completist";
                     break;
                   case "30 9 * * *":
-                    // Physics auditor on Tue/Fri, Sentinel other days
-                    target = (day === 2 || day === 5) ? "physics-auditor" : "sentinel";
+                    target = "laymans-terms-writer";
                     break;
-                  case "0 10 * * 1":
-                    target = "competitor-analyst";
-                    break;
-                  case "0 10 * * 3":
-                    target = "patent-reviewer";
+                  case "0 10 * * *":
+                    target = "critics-comments-writer";
                     break;
                   case "30 10 * * *":
-                    target = "tech-custodian";
+                    target = "sentinel";
                     break;
                   case "0 11 * * *":
-                    target = "issue-resolver";
+                    target = day === 4 ? "thesis-defender" : "tech-custodian";
                     break;
                   case "30 11 * * *":
-                    target = "pr-compiler";
+                    target = "issue-resolver";
                     break;
                   case "0 12 * * *":
-                    target = "code-quality-fixer";
+                    target = "pr-compiler";
                     break;
                   default:
                     target = "none";
                 }
               }
 
-              // Fallback: UTC time-based routing (for workflow_dispatch with auto)
+              // Fallback: UTC time-based routing (for workflow_dispatch with auto or edge cases)
               if (target === "none") {
                 const now = new Date();
                 const hour = now.getUTCHours();
@@ -181,19 +169,17 @@ jobs:
                 } else if (hour === 9 && minute < 30) {
                   target = "completist";
                 } else if (hour === 9 && minute >= 30) {
-                  target = (day === 2 || day === 5) ? "physics-auditor" : "sentinel";
+                  target = "laymans-terms-writer";
                 } else if (hour === 10 && minute < 30) {
-                  if (day === 1) target = "competitor-analyst";
-                  else if (day === 3) target = "patent-reviewer";
-                  else target = "tech-custodian";
+                  target = "critics-comments-writer";
                 } else if (hour === 10 && minute >= 30) {
-                  target = "tech-custodian";
+                  target = "sentinel";
                 } else if (hour === 11 && minute < 30) {
-                  target = "issue-resolver";
+                  target = day === 4 ? "thesis-defender" : "tech-custodian";
                 } else if (hour === 11 && minute >= 30) {
-                  target = "pr-compiler";
+                  target = "issue-resolver";
                 } else if (hour === 12) {
-                  target = "code-quality-fixer";
+                  target = "pr-compiler";
                 } else {
                   target = "none";
                 }
@@ -201,7 +187,7 @@ jobs:
             }
             // 3. PUSH TO MAIN -> DOCS
             else if (event === "push" && context.ref === "refs/heads/main") {
-              if (actor === 'jules-bot' || actor === 'jules-ai[bot]' || actor === 'google-labs-jules[bot]') {
+              if (actor === 'jules-bot' || actor === 'jules-ai[bot]') {
                  console.log("Ignoring push by bot to prevent doc-scribe loops.");
                  target = "none";
               } else {
@@ -210,7 +196,7 @@ jobs:
             }
             // 4. NEW PR -> TEST GENERATOR
             else if (event === "pull_request" && context.payload.action === 'opened') {
-               if (actor === 'jules-bot' || actor === 'jules-ai[bot]' || actor === 'google-labs-jules[bot]') {
+               if (actor === 'jules-bot' || actor === 'jules-ai[bot]') {
                   console.log("Ignoring PR open by bot.");
                   target = "none";
                } else {
@@ -281,16 +267,16 @@ jobs:
     uses: ./.github/workflows/Jules-Code-Quality-Reviewer.yml
     secrets: inherit
 
-  call-code-quality-fixer:
-    needs: triage
-    if: needs.triage.outputs.target == 'code-quality-fixer'
-    uses: ./.github/workflows/Jules-Code-Quality-Fixer.yml
-    secrets: inherit
-
   call-assessment-generator:
     needs: triage
     if: needs.triage.outputs.target == 'assessment-generator'
     uses: ./.github/workflows/Jules-Assessment-Generator.yml
+    secrets: inherit
+
+  call-thesis-defender:
+    needs: triage
+    if: needs.triage.outputs.target == 'thesis-defender'
+    uses: ./.github/workflows/Jules-Thesis-Defender.yml
     secrets: inherit
 
   call-issue-resolver:
@@ -305,22 +291,16 @@ jobs:
     uses: ./.github/workflows/Jules-Completist.yml
     secrets: inherit
 
-  call-physics-auditor:
+  call-laymans-terms-writer:
     needs: triage
-    if: needs.triage.outputs.target == 'physics-auditor'
-    uses: ./.github/workflows/Jules-Physics-Auditor.yml
+    if: needs.triage.outputs.target == 'laymans-terms-writer'
+    uses: ./.github/workflows/Jules-Laymans-Terms-Writer.yml
     secrets: inherit
 
-  call-competitor-analyst:
+  call-critics-comments-writer:
     needs: triage
-    if: needs.triage.outputs.target == 'competitor-analyst'
-    uses: ./.github/workflows/Jules-Competitor-Analyst.yml
-    secrets: inherit
-
-  call-patent-reviewer:
-    needs: triage
-    if: needs.triage.outputs.target == 'patent-reviewer'
-    uses: ./.github/workflows/Jules-Patent-Reviewer.yml
+    if: needs.triage.outputs.target == 'critics-comments-writer'
+    uses: ./.github/workflows/Jules-Critics-Comments.yml
     secrets: inherit
 
   call-pr-compiler:

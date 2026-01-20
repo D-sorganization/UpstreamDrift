@@ -71,72 +71,157 @@ jobs:
 
       - name: Jules Completist Analysis
         env:
-          JULES_TOKEN: ${{ secrets.JULES_API_KEY }}
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
         run: |
-          jules auth --token $JULES_TOKEN
-          DATE=$(date +%Y-%m-%d)
+                    set -e
+                    DATE=$(date +%Y-%m-%d)
+                    REPO="${{ github.repository }}"
+                    API_BASE="https://jules.googleapis.com/v1alpha"
+          
+                    # Check if API key is configured
+                    if [ -z "$JULES_API_KEY" ]; then
+                      echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
+                      exit 0
+                    fi
+          
+                    echo "Looking up repository source..."
+                    SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          
+                    OWNER=$(echo "$REPO" | cut -d'/' -f1)
+                    REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+          
+                    SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+          
+                    if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+                      echo "::warning::Repository $REPO not found in Jules sources."
+                      exit 0
+                    fi
+          
+                    echo "Found source: $SOURCE_ID"
+          
+                    # Create session prompt
+                    PROMPT=$(cat << 'PROMPT_EOF'
+          '
+                    You are the COMPLETIST agent - an auditor for incomplete implementations.
+          
+                    ## Your Mission
+                    Identify and catalog all incomplete, partial, or placeholder implementations in the codebase.
+          
+                    ## Input Data
+                    Review these files in .jules/completist_data/:
+                    - todo_markers.txt - TODO/FIXME/XXX comments
+                    - not_implemented.txt - NotImplementedError and pass statements
+                    - stub_functions.txt - Empty or stub functions
+                    - incomplete_docs.txt - Incomplete documentation
+                    - abstract_methods.txt - Abstract methods needing implementation
+          
+                    ## Analysis Categories
+          
+                    ### 1. Critical Incomplete (Blocking Features)
+                    Functions that:
+                    - Raise NotImplementedError in core paths
+                    - Have pass statements in non-test code
+                    - Are called but don't return meaningful results
+          
+                    ### 2. Feature Gaps
+                    - TODO comments indicating missing features
+                    - Partial implementations (e.g., only handles some cases)
+                    - Mock data instead of real calculations
+          
+                    ### 3. Technical Debt
+                    - FIXME comments
+                    - HACK/TEMP markers
+                    - Workarounds that should be proper implementations
+          
+                    ### 4. Documentation Gaps
+                    - Functions without docstrings
+                    - Incomplete parameter documentation
+                    - Missing return type annotations
+          
+                    ## Output Files
+          
+                    1. Create docs/assessments/completist/Completist_Report_$DATE.md with:
+                       - Executive Summary (counts by category)
+                       - Critical Incomplete (priority list)
+                       - Feature Gap Matrix (module -> missing features)
+                       - Technical Debt Register
+                       - Recommended Implementation Order
+          
+                    2. Update docs/assessments/completist/COMPLETIST_LATEST.md (overwrite)
+          
+                    3. For CRITICAL incomplete items blocking core functionality:
+                       - Create GitHub Issue with label 'incomplete-implementation,critical'
+          
+                    ## Prioritization Criteria
+                    Rate each finding by:
+                    - User Impact (1-5): Does this affect users?
+                    - Test Coverage (1-5): Is this tested elsewhere?
+                    - Complexity (1-5): How hard to complete?
+          
+                    DO NOT MAKE CODE CHANGES. This is an AUDIT workflow.
+                    Your job is to identify and document, not fix.
+                    PROMPT_EOF
+                    )
+          
+                    echo "Creating Jules session..."
+                    REQUEST_JSON=$(jq -n \
+                      --arg prompt "$PROMPT" \
+                      --arg source "$SOURCE_ID" \
+                      '{
+                        prompt: $prompt,
+                        sourceContext: {
+                          source: $source,
+                          githubRepoContext: {
+                            startingBranch: "main"
+                          }
+                        },
+                        automationMode: "AUTO_CREATE_PR"
+                      }')
+          
+                    echo "Request: $REQUEST_JSON"
+          
+                    HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+                      -H "X-Goog-Api-Key: $JULES_API_KEY" \
+                      -H "Content-Type: application/json" \
+                      -d "$REQUEST_JSON" \
+                      "$API_BASE/sessions")
+          
+                    SESSION_RESPONSE=$(cat /tmp/session_response.json)
+                    echo "HTTP Status: $HTTP_CODE"
+          
+                    if [ "$HTTP_CODE" != "200" ]; then
+                      echo "::error::Jules API returned HTTP $HTTP_CODE"
+                      exit 1
+                    fi
+          
+                    SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
+                    echo "Created session: $SESSION_ID"
+          
+                    # Poll for completion
+                    MAX_WAIT=1800
+                    POLL_INTERVAL=30
+                    ELAPSED=0
+          
+                    while [ $ELAPSED -lt $MAX_WAIT ]; do
+                      SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
+                      STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
+                      echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
+          
+                      case "$STATE" in
+                        "COMPLETED"|"SUBMITTED")
+                          echo "Session completed successfully!"
+                          break
+                          ;;
+                        "FAILED"|"CANCELLED")
+                          echo "::error::Session $STATE"
+                          exit 1
+                          ;;
+                      esac
+                      sleep $POLL_INTERVAL
+                      ELAPSED=$((ELAPSED + POLL_INTERVAL))
+                    done
+          
 
-          jules task fix --prompt "$(cat << 'PROMPT_EOF'
-          You are the COMPLETIST agent - an auditor for incomplete implementations.
-
-          ## Your Mission
-          Identify and catalog all incomplete, partial, or placeholder implementations in the codebase.
-
-          ## Input Data
-          Review these files in .jules/completist_data/:
-          - todo_markers.txt - TODO/FIXME/XXX comments
-          - not_implemented.txt - NotImplementedError and pass statements
-          - stub_functions.txt - Empty or stub functions
-          - incomplete_docs.txt - Incomplete documentation
-          - abstract_methods.txt - Abstract methods needing implementation
-
-          ## Analysis Categories
-
-          ### 1. Critical Incomplete (Blocking Features)
-          Functions that:
-          - Raise NotImplementedError in core paths
-          - Have pass statements in non-test code
-          - Are called but don't return meaningful results
-
-          ### 2. Feature Gaps
-          - TODO comments indicating missing features
-          - Partial implementations (e.g., only handles some cases)
-          - Mock data instead of real calculations
-
-          ### 3. Technical Debt
-          - FIXME comments
-          - HACK/TEMP markers
-          - Workarounds that should be proper implementations
-
-          ### 4. Documentation Gaps
-          - Functions without docstrings
-          - Incomplete parameter documentation
-          - Missing return type annotations
-
-          ## Output Files
-
-          1. Create docs/assessments/completist/Completist_Report_$DATE.md with:
-             - Executive Summary (counts by category)
-             - Critical Incomplete (priority list)
-             - Feature Gap Matrix (module -> missing features)
-             - Technical Debt Register
-             - Recommended Implementation Order
-
-          2. Update docs/assessments/completist/COMPLETIST_LATEST.md (overwrite)
-
-          3. For CRITICAL incomplete items blocking core functionality:
-             - Create GitHub Issue with label 'incomplete-implementation,critical'
-
-          ## Prioritization Criteria
-          Rate each finding by:
-          - User Impact (1-5): Does this affect users?
-          - Test Coverage (1-5): Is this tested elsewhere?
-          - Complexity (1-5): How hard to complete?
-
-          DO NOT MAKE CODE CHANGES. This is an AUDIT workflow.
-          Your job is to identify and document, not fix.
-          PROMPT_EOF
-          )"
 
       - name: Commit Report
         uses: stefanzweifel/git-auto-commit-action@v5
