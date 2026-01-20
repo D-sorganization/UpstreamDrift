@@ -98,8 +98,8 @@ def generate_summary(
     """
     logger.info(f"Generating assessment summary from {len(input_reports)} reports...")
 
-    # Category mapping with typed values
-    categories: dict[str, dict[str, str | float]] = {
+    # Category mapping
+    categories = {
         "A": {"name": "Architecture & Implementation", "weight": 2.0},
         "B": {"name": "Hygiene, Security & Quality", "weight": 2.0},
         "C": {"name": "Documentation & Integration", "weight": 1.5},
@@ -135,16 +135,14 @@ def generate_summary(
 
     for assessment_id, score in scores.items():
         if assessment_id in categories:
-            weight = float(categories[assessment_id]["weight"])
+            weight = categories[assessment_id]["weight"]
             total_weighted_score += score * weight
             total_weight += weight
 
     overall_score = total_weighted_score / total_weight if total_weight > 0 else 7.0
 
     # Count critical issues
-    critical_issues = [
-        i for i in all_issues if i["severity"] in ("BLOCKER", "CRITICAL")
-    ]
+    critical_issues = [i for i in all_issues if i["severity"] in ("BLOCKER", "CRITICAL")]
 
     # Generate markdown summary
     md_content = f"""# Comprehensive Assessment Summary
@@ -179,7 +177,9 @@ Found {len(critical_issues)} critical issues requiring immediate attention:
 """
 
     for i, issue in enumerate(critical_issues[:10], 1):
-        md_content += f"{i}. **[{issue['severity']}]** {issue['description']} (Source: {issue['source']})\n"
+        md_content += (
+            f"{i}. **[{issue['severity']}]** {issue['description']} (Source: {issue['source']})\n"
+        )
 
     md_content += """
 ## Recommendations
@@ -210,11 +210,7 @@ Recommended: 30 days from today
         "timestamp": datetime.now().isoformat(),
         "overall_score": round(overall_score, 2),
         "category_scores": {
-            k: {
-                "score": v,
-                "name": categories[k]["name"],
-                "weight": categories[k]["weight"],
-            }
+            k: {"score": v, "name": categories[k]["name"], "weight": categories[k]["weight"]}
             for k, v in scores.items()
             if k in categories
         },
@@ -232,8 +228,7 @@ Recommended: 30 days from today
     return 0
 
 
-def main() -> int:
-    """Parse CLI arguments and generate assessment summary."""
+def main():
     parser = argparse.ArgumentParser(description="Generate assessment summary")
     parser.add_argument(
         "--input",
@@ -258,7 +253,7 @@ def main() -> int:
     args = parser.parse_args()
 
     # Expand wildcards if needed
-    input_reports: list[Path] = []
+    input_reports = []
     for pattern in args.input:
         if "*" in str(pattern):
             # Expand glob pattern

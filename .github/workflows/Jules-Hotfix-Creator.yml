@@ -75,28 +75,107 @@ jobs:
           FAILED_BRANCH: ${{ inputs.failed_branch }}
           HOTFIX_BRANCH: ${{ steps.hotfix.outputs.branch }}
         run: |
-          # SECURITY: Use environment variables instead of direct interpolation
-          gh run view "$TARGET_RUN_ID" --log-failed > logs.txt
+                    set -e
+                    DATE=$(date +%Y-%m-%d)
+                    REPO="${{ github.repository }}"
+                    API_BASE="https://jules.googleapis.com/v1alpha"
+          
+                    # Check if API key is configured
+                    if [ -z "$JULES_API_KEY" ]; then
+                      echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
+                      exit 0
+                    fi
+          
+                    echo "Looking up repository source..."
+                    SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          
+                    OWNER=$(echo "$REPO" | cut -d'/' -f1)
+                    REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+          
+                    SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+          
+                    if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+                      echo "::warning::Repository $REPO not found in Jules sources."
+                      exit 0
+                    fi
+          
+                    echo "Found source: $SOURCE_ID"
+          
+                    # Create session prompt
+                    PROMPT=$(cat << 'PROMPT_EOF'
+          '
+          URGENT: CI failed on protected branch.
+          Analyze the logs and create a minimal hotfix:
+          1. **Formatting & Linting**: Run 'ruff check . --fix' and 'black .'
+          2. **Import Sorting**: Run 'isort --profile black .'
+          3. **Type Errors**: Add missing type hints or proper type ignores
+          4. **Test Failures**: Fix failing tests (fix implementation, not tests)
+          5. **Coverage**: Generate tests if coverage dropped below 80%
+          6. **Syntax**: Fix any syntax errors or missing imports
+          CRITICAL: This is a hotfix. Keep changes minimal and focused.
+          CI Failure Logs:
+                    PROMPT_EOF
+                    )
+          
+                    echo "Creating Jules session..."
+                    REQUEST_JSON=$(jq -n \
+                      --arg prompt "$PROMPT" \
+                      --arg source "$SOURCE_ID" \
+                      '{
+                        prompt: $prompt,
+                        sourceContext: {
+                          source: $source,
+                          githubRepoContext: {
+                            startingBranch: "main"
+                          }
+                        },
+                        automationMode: "AUTO_CREATE_PR"
+                      }')
+          
+                    echo "Request: $REQUEST_JSON"
+          
+                    HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+                      -H "X-Goog-Api-Key: $JULES_API_KEY" \
+                      -H "Content-Type: application/json" \
+                      -d "$REQUEST_JSON" \
+                      "$API_BASE/sessions")
+          
+                    SESSION_RESPONSE=$(cat /tmp/session_response.json)
+                    echo "HTTP Status: $HTTP_CODE"
+          
+                    if [ "$HTTP_CODE" != "200" ]; then
+                      echo "::error::Jules API returned HTTP $HTTP_CODE"
+                      exit 1
+                    fi
+          
+                    SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
+                    echo "Created session: $SESSION_ID"
+          
+                    # Poll for completion
+                    MAX_WAIT=1800
+                    POLL_INTERVAL=30
+                    ELAPSED=0
+          
+                    while [ $ELAPSED -lt $MAX_WAIT ]; do
+                      SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
+                      STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
+                      echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
+          
+                      case "$STATE" in
+                        "COMPLETED"|"SUBMITTED")
+                          echo "Session completed successfully!"
+                          break
+                          ;;
+                        "FAILED"|"CANCELLED")
+                          echo "::error::Session $STATE"
+                          exit 1
+                          ;;
+                      esac
+                      sleep $POLL_INTERVAL
+                      ELAPSED=$((ELAPSED + POLL_INTERVAL))
+                    done
+          
 
-          # SECURITY: Read log content safely
-          LOG_CONTENT=$(cat logs.txt)
-
-          # SECURITY: Create prompt using environment variables
-          cat > prompt.txt << 'PROMPT_EOF'
-URGENT: CI failed on protected branch.
-Analyze the logs and create a minimal hotfix:
-1. **Formatting & Linting**: Run 'ruff check . --fix' and 'black .'
-2. **Import Sorting**: Run 'isort --profile black .'
-3. **Type Errors**: Add missing type hints or proper type ignores
-4. **Test Failures**: Fix failing tests (fix implementation, not tests)
-5. **Coverage**: Generate tests if coverage dropped below 80%
-6. **Syntax**: Fix any syntax errors or missing imports
-CRITICAL: This is a hotfix. Keep changes minimal and focused.
-CI Failure Logs:
-PROMPT_EOF
-          echo "$LOG_CONTENT" >> prompt.txt
-
-          jules task fix --branch "$HOTFIX_BRANCH" --prompt "$(cat prompt.txt)"
 
       - name: Create Urgent PR
         env:
