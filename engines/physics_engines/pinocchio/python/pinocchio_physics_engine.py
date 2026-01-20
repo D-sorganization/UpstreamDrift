@@ -177,6 +177,33 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             names.remove("universe")
         return names
 
+    def get_full_state(self) -> dict[str, Any]:
+        """Get complete state in a single batched call (performance optimization).
+
+        PERFORMANCE FIX: Returns all commonly-needed state in one call to avoid
+        multiple separate engine queries.
+
+        Returns:
+            Dictionary with 'q', 'v', 't', and 'M' (mass matrix).
+        """
+        if self.model is None or self.data is None:
+            return {"q": np.array([]), "v": np.array([]), "t": 0.0, "M": None}
+
+        # Get state
+        q = self.q.copy()
+        v = self.v.copy()
+        t = self.time
+
+        # Compute mass matrix
+        # CRBA computes the upper triangular part of the joint space inertia matrix
+        pin.crba(self.model, self.data, self.q)
+
+        # Symmetrize
+        M = self.data.M.copy()
+        M = np.triu(M) + np.triu(M, 1).T
+
+        return {"q": q, "v": v, "t": t, "M": M}
+
     # -------- Dynamics Interface --------
 
     def compute_mass_matrix(self) -> np.ndarray:

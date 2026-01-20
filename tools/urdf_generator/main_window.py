@@ -419,7 +419,8 @@ class URDFGeneratorWindow(QMainWindow):
             try:
                 # Get MuJoCo-optimized URDF
                 urdf_content = self.urdf_builder.get_urdf()
-                # Add MuJoCo-specific optimizations (future enhancement)
+                # Note: Currently exporting generic URDF which MuJoCo can read directly.
+                # Specific <mujoco> tags can be added here if needed in future.
 
                 Path(file_path).write_text(urdf_content, encoding="utf-8")
                 self.status_bar.showMessage(f"Exported for MuJoCo: {file_path}")
@@ -443,7 +444,8 @@ class URDFGeneratorWindow(QMainWindow):
             try:
                 # Get Drake-optimized URDF
                 urdf_content = self.urdf_builder.get_urdf()
-                # Add Drake-specific optimizations (future enhancement)
+                # Note: Currently exporting generic URDF. Drake requires standard URDF.
+                # Collision tags are already handled by URDFBuilder.
 
                 Path(file_path).write_text(urdf_content, encoding="utf-8")
                 self.status_bar.showMessage(f"Exported for Drake: {file_path}")
@@ -467,7 +469,7 @@ class URDFGeneratorWindow(QMainWindow):
             try:
                 # Get Pinocchio-optimized URDF
                 urdf_content = self.urdf_builder.get_urdf()
-                # Add Pinocchio-specific optimizations (future enhancement)
+                # Note: Pinocchio uses standard URDF loader. No specific tags needed.
 
                 Path(file_path).write_text(urdf_content, encoding="utf-8")
                 self.status_bar.showMessage(f"Exported for Pinocchio: {file_path}")

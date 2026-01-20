@@ -243,6 +243,29 @@ class DrakePhysicsEngine(PhysicsEngine):
 
         return names
 
+    def get_full_state(self) -> dict[str, Any]:
+        """Get complete state in a single batched call (performance optimization).
+
+        PERFORMANCE FIX: Returns all commonly-needed state in one call to avoid
+        multiple separate engine queries.
+
+        Returns:
+            Dictionary with 'q', 'v', 't', and 'M' (mass matrix).
+        """
+        if not self.plant_context:
+            return {"q": np.array([]), "v": np.array([]), "t": 0.0, "M": None}
+
+        # Get state
+        q = self.plant.GetPositions(self.plant_context)
+        v = self.plant.GetVelocities(self.plant_context)
+        t = float(self.context.get_time()) if self.context else 0.0
+
+        # Compute mass matrix
+        # Note: CalcMassMatrixViaInverseDynamics is efficient in Drake
+        M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
+
+        return {"q": q, "v": v, "t": t, "M": M}
+
     # -------- Dynamics Interface --------
 
     def compute_mass_matrix(self) -> np.ndarray:

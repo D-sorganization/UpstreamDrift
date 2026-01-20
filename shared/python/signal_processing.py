@@ -27,6 +27,14 @@ from scipy.signal import (
     welch,
 )
 
+# Performance: Optional fastdtw
+try:
+    from fastdtw import fastdtw
+
+    FASTDTW_AVAILABLE = True
+except ImportError:
+    FASTDTW_AVAILABLE = False
+
 # Performance: Optional Numba JIT compilation
 try:
     from numba import jit
@@ -724,6 +732,13 @@ def compute_dtw_distance(
         s1 = np.asarray(series1, dtype=np.float64)
         s2 = np.asarray(series2, dtype=np.float64)
         return float(_dtw_core(s1, s2, w))
+
+    # PERFORMANCE: Use fastdtw if available (approximate linear time)
+    # fastdtw uses a multi-level approach to speed up DTW
+    # Only use if Numba is NOT available, as Numba provides exact calculation efficiently
+    if FASTDTW_AVAILABLE and not NUMBA_AVAILABLE and window is None:
+        distance, _ = fastdtw(series1, series2, dist=2)  # dist=2 means euclidean
+        return float(distance)
 
     # Fallback: Pure Python implementation
     dtw_matrix = np.full((n + 1, m + 1), np.inf)
