@@ -74,184 +74,184 @@ jobs:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
           FOCUS_AREA: ${{ inputs.focus_area || 'all' }}
         run: |
-                    set -e
-                    DATE=$(date +%Y-%m-%d)
-                    REPO="${{ github.repository }}"
-                    API_BASE="https://jules.googleapis.com/v1alpha"
+          set -e
+          DATE=$(date +%Y-%m-%d)
+          REPO="${{ github.repository }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
           
-                    # Check if API key is configured
-                    if [ -z "$JULES_API_KEY" ]; then
-                      echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
-                      exit 0
-                    fi
+          # Check if API key is configured
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
+            exit 0
+          fi
           
-                    echo "Looking up repository source..."
-                    SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          echo "Looking up repository source..."
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
           
-                    OWNER=$(echo "$REPO" | cut -d'/' -f1)
-                    REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
           
-                    SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
           
-                    if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
-                      echo "::warning::Repository $REPO not found in Jules sources."
-                      exit 0
-                    fi
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Repository $REPO not found in Jules sources."
+            exit 0
+          fi
           
-                    echo "Found source: $SOURCE_ID"
+          echo "Found source: $SOURCE_ID"
           
-                    # Create session prompt
-                    PROMPT=$(cat << 'PROMPT_EOF'
+          # Create session prompt
+          PROMPT=$(cat << 'PROMPT_EOF'
           '
-                    You are the PHYSICS AUDITOR - a technical expert in:
-                    - Golf biomechanics and human movement science
-                    - Projectile physics and aerodynamics
-                    - Equipment engineering (clubs, balls, shafts)
-                    - Statistical modeling and uncertainty quantification
+          You are the PHYSICS AUDITOR - a technical expert in:
+          - Golf biomechanics and human movement science
+          - Projectile physics and aerodynamics
+          - Equipment engineering (clubs, balls, shafts)
+          - Statistical modeling and uncertainty quantification
           
-                    ## Your Mission
-                    Perform a rigorous technical audit of the physics implementations.
-                    Focus area: $FOCUS_AREA
+          ## Your Mission
+          Perform a rigorous technical audit of the physics implementations.
+          Focus area: $FOCUS_AREA
           
-                    ## Review Criteria
+          ## Review Criteria
           
-                    ### 1. Mathematical Correctness
-                    - Verify formulas match established physics
-                    - Check unit consistency (SI vs imperial conversions)
-                    - Validate numerical methods (integration, interpolation)
-                    - Ensure proper handling of edge cases (divide by zero, NaN)
+          ### 1. Mathematical Correctness
+          - Verify formulas match established physics
+          - Check unit consistency (SI vs imperial conversions)
+          - Validate numerical methods (integration, interpolation)
+          - Ensure proper handling of edge cases (divide by zero, NaN)
           
-                    ### 2. Physical Plausibility
-                    - Check parameter ranges against real-world data
-                    - Verify outputs are physically reasonable
-                    - Look for missing physical effects
-                    - Identify oversimplifications that matter
+          ### 2. Physical Plausibility
+          - Check parameter ranges against real-world data
+          - Verify outputs are physically reasonable
+          - Look for missing physical effects
+          - Identify oversimplifications that matter
           
-                    ### 3. Biomechanics Accuracy
-                    - Kinematic sequence calculations
-                    - Joint angle conventions (Euler vs quaternion issues)
-                    - Ground reaction force modeling
-                    - Energy transfer calculations
+          ### 3. Biomechanics Accuracy
+          - Kinematic sequence calculations
+          - Joint angle conventions (Euler vs quaternion issues)
+          - Ground reaction force modeling
+          - Energy transfer calculations
           
-                    ### 4. Ball Flight Physics
-                    - Drag/lift coefficient models
-                    - Magnus effect implementation
-                    - Wind effects
-                    - Spin decay models
-                    - Launch conditions to landing calculations
+          ### 4. Ball Flight Physics
+          - Drag/lift coefficient models
+          - Magnus effect implementation
+          - Wind effects
+          - Spin decay models
+          - Launch conditions to landing calculations
           
-                    ### 5. Equipment Models
-                    - Gear effect calculations
-                    - Moment of inertia usage
-                    - CG location effects
-                    - Shaft flex modeling
-                    - Club-ball interaction
+          ### 5. Equipment Models
+          - Gear effect calculations
+          - Moment of inertia usage
+          - CG location effects
+          - Shaft flex modeling
+          - Club-ball interaction
           
-                    ### 6. Statistical Methods
-                    - Proper use of regression techniques
-                    - Uncertainty propagation
-                    - Sample size considerations
-                    - Correlation vs causation issues
+          ### 6. Statistical Methods
+          - Proper use of regression techniques
+          - Uncertainty propagation
+          - Sample size considerations
+          - Correlation vs causation issues
           
-                    ## Expert References
-                    Cross-reference implementations against:
-                    - TrackMan white papers (public domain summaries)
-                    - Cochran & Stobbs "Search for the Perfect Swing"
-                    - Jorgensen "The Physics of Golf"
-                    - TPI kinematic sequence research
-                    - R&A/USGA equipment standards
+          ## Expert References
+          Cross-reference implementations against:
+          - TrackMan white papers (public domain summaries)
+          - Cochran & Stobbs "Search for the Perfect Swing"
+          - Jorgensen "The Physics of Golf"
+          - TPI kinematic sequence research
+          - R&A/USGA equipment standards
           
-                    ## Output
+          ## Output
           
-                    Create docs/assessments/physics/Physics_Audit_$DATE.md with:
+          Create docs/assessments/physics/Physics_Audit_$DATE.md with:
           
-                    ### Executive Summary
-                    - Overall physics fidelity score (1-10)
-                    - Critical issues count
-                    - Confidence in results
+          ### Executive Summary
+          - Overall physics fidelity score (1-10)
+          - Critical issues count
+          - Confidence in results
           
-                    ### Findings by Category
-                    For each finding:
-                    - File and line number
-                    - Issue description
-                    - Expected physics
-                    - Actual implementation
-                    - Impact assessment
-                    - Recommended fix
+          ### Findings by Category
+          For each finding:
+          - File and line number
+          - Issue description
+          - Expected physics
+          - Actual implementation
+          - Impact assessment
+          - Recommended fix
           
-                    ### Validation Recommendations
-                    - Test cases needed
-                    - Real-world data to validate against
-                    - Expert review areas
+          ### Validation Recommendations
+          - Test cases needed
+          - Real-world data to validate against
+          - Expert review areas
           
-                    ### Citations Needed
-                    List implementations that need academic citations
+          ### Citations Needed
+          List implementations that need academic citations
           
-                    Create GitHub Issues for:
-                    - Physics errors affecting output accuracy (label: physics-error, critical)
-                    - Missing important physical effects (label: physics-gap, high)
+          Create GitHub Issues for:
+          - Physics errors affecting output accuracy (label: physics-error, critical)
+          - Missing important physical effects (label: physics-gap, high)
           
-                    DO NOT MAKE CODE CHANGES. This is an AUDIT workflow.
-                    PROMPT_EOF
-                    )
+          DO NOT MAKE CODE CHANGES. This is an AUDIT workflow.
+          PROMPT_EOF
+          )
           
-                    echo "Creating Jules session..."
-                    REQUEST_JSON=$(jq -n \
-                      --arg prompt "$PROMPT" \
-                      --arg source "$SOURCE_ID" \
-                      '{
-                        prompt: $prompt,
-                        sourceContext: {
-                          source: $source,
-                          githubRepoContext: {
-                            startingBranch: "main"
-                          }
-                        },
-                        automationMode: "AUTO_CREATE_PR"
-                      }')
+          echo "Creating Jules session..."
+          REQUEST_JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            --arg source "$SOURCE_ID" \
+            '{
+              prompt: $prompt,
+              sourceContext: {
+                source: $source,
+                githubRepoContext: {
+                  startingBranch: "main"
+                }
+              },
+              automationMode: "AUTO_CREATE_PR"
+            }')
           
-                    echo "Request: $REQUEST_JSON"
+          echo "Request: $REQUEST_JSON"
           
-                    HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
-                      -H "X-Goog-Api-Key: $JULES_API_KEY" \
-                      -H "Content-Type: application/json" \
-                      -d "$REQUEST_JSON" \
-                      "$API_BASE/sessions")
+          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_JSON" \
+            "$API_BASE/sessions")
           
-                    SESSION_RESPONSE=$(cat /tmp/session_response.json)
-                    echo "HTTP Status: $HTTP_CODE"
+          SESSION_RESPONSE=$(cat /tmp/session_response.json)
+          echo "HTTP Status: $HTTP_CODE"
           
-                    if [ "$HTTP_CODE" != "200" ]; then
-                      echo "::error::Jules API returned HTTP $HTTP_CODE"
-                      exit 1
-                    fi
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Jules API returned HTTP $HTTP_CODE"
+            exit 1
+          fi
           
-                    SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
-                    echo "Created session: $SESSION_ID"
+          SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
+          echo "Created session: $SESSION_ID"
           
-                    # Poll for completion
-                    MAX_WAIT=1800
-                    POLL_INTERVAL=30
-                    ELAPSED=0
+          # Poll for completion
+          MAX_WAIT=1800
+          POLL_INTERVAL=30
+          ELAPSED=0
           
-                    while [ $ELAPSED -lt $MAX_WAIT ]; do
-                      SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
-                      STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
-                      echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
+            STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
+            echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
           
-                      case "$STATE" in
-                        "COMPLETED"|"SUBMITTED")
-                          echo "Session completed successfully!"
-                          break
-                          ;;
-                        "FAILED"|"CANCELLED")
-                          echo "::error::Session $STATE"
-                          exit 1
-                          ;;
-                      esac
-                      sleep $POLL_INTERVAL
-                      ELAPSED=$((ELAPSED + POLL_INTERVAL))
-                    done
+            case "$STATE" in
+              "COMPLETED"|"SUBMITTED")
+                echo "Session completed successfully!"
+                break
+                ;;
+              "FAILED"|"CANCELLED")
+                echo "::error::Session $STATE"
+                exit 1
+                ;;
+            esac
+            sleep $POLL_INTERVAL
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
           
 
 
