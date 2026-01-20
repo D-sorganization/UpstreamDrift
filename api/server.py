@@ -10,6 +10,7 @@ Built on top of the existing EngineManager and PhysicsEngine protocol.
 """
 
 import logging
+import os
 import tempfile
 import uuid
 
@@ -69,9 +70,13 @@ app = FastAPI(
 )
 
 # Security middleware
+# AUTO-FIXED: Make ALLOWED_HOSTS configurable via environment variable
+allowed_hosts = os.getenv(
+    "ALLOWED_HOSTS", "localhost,127.0.0.1,*.golfmodelingsuite.com"
+).split(",")
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["localhost", "127.0.0.1", "*.golfmodelingsuite.com"],
+    allowed_hosts=allowed_hosts,
 )
 
 # CORS middleware with restricted origins and headers
