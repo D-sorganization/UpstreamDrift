@@ -49,9 +49,9 @@ jobs:
 
           # Group PRs by category based on labels
           cat .jules/pr_compiler/open_prs.json | jq -r '
-            group_by(.labels | map(.name) | map(select(startswith("jules:"))) | first | if . == null then "jules:other" else . end)
+            group_by(.labels | map(.name) | map(select(startswith("jules:"))) | first // "jules:other")
             | map({
-                category: .[0].labels | map(.name) | map(select(startswith("jules:"))) | first | if . == null then "jules:other" else . end,
+                category: (.[0].labels | map(.name) | map(select(startswith("jules:"))) | first // "jules:other"),
                 prs: map({number, title, branch: .headRefName})
               })
           ' > .jules/pr_compiler/grouped_prs.json
