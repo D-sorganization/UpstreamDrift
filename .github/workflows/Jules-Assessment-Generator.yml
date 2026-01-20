@@ -112,12 +112,29 @@ jobs:
           )
 
           echo "Creating Jules session..."
+          # Build the request JSON with sourceContext (per Jules API docs)
+          REQUEST_JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            --arg source "$SOURCE_ID" \
+            '{
+              prompt: $prompt,
+              sourceContext: {
+                source: $source,
+                githubRepoContext: {
+                  startingBranch: "main"
+                }
+              },
+              automationMode: "AUTO_CREATE_PR"
+            }')
+
+          echo "Request: $REQUEST_JSON"
+
           # Use -s to suppress progress but capture both stdout and stderr
           # Use -w to get HTTP status code
           HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
             -H "X-Goog-Api-Key: $JULES_API_KEY" \
             -H "Content-Type: application/json" \
-            -d "{\"source\": \"$SOURCE_ID\", \"prompt\": $(echo "$PROMPT" | jq -Rs .)}" \
+            -d "$REQUEST_JSON" \
             "$API_BASE/sessions")
 
           SESSION_RESPONSE=$(cat /tmp/session_response.json)
