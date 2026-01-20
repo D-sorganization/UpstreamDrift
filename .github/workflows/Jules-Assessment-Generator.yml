@@ -68,10 +68,18 @@ jobs:
 
           echo "Looking up repository source..."
           SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
-          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.repository.fullName == \"$REPO\") | .name" | head -1)
+
+          # Parse owner/repo from github.repository (format: "owner/repo")
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+
+          # Jules API uses githubRepo.owner and githubRepo.repo fields
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
 
           if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
-            echo "::warning::Repository $REPO not found in Jules sources. Ensure Jules GitHub App is installed."
+            echo "::warning::Repository $REPO not found in Jules sources."
+            echo "Available sources:"
+            echo "$SOURCES" | jq -r '.sources[] | "\(.githubRepo.owner)/\(.githubRepo.repo)"' 2>/dev/null || echo "(none or error parsing)"
             exit 0
           fi
 
