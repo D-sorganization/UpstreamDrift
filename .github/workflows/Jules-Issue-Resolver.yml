@@ -88,138 +88,138 @@ jobs:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
           MAX_ISSUES: ${{ inputs.max_issues || '5' }}
         run: |
-                    set -e
-                    DATE=$(date +%Y-%m-%d)
-                    REPO="${{ github.repository }}"
-                    API_BASE="https://jules.googleapis.com/v1alpha"
+          set -e
+          DATE=$(date +%Y-%m-%d)
+          REPO="${{ github.repository }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
           
-                    # Check if API key is configured
-                    if [ -z "$JULES_API_KEY" ]; then
-                      echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
-                      exit 0
-                    fi
+          # Check if API key is configured
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
+            exit 0
+          fi
           
-                    echo "Looking up repository source..."
-                    SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          echo "Looking up repository source..."
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
           
-                    OWNER=$(echo "$REPO" | cut -d'/' -f1)
-                    REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
           
-                    SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
           
-                    if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
-                      echo "::warning::Repository $REPO not found in Jules sources."
-                      exit 0
-                    fi
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Repository $REPO not found in Jules sources."
+            exit 0
+          fi
           
-                    echo "Found source: $SOURCE_ID"
+          echo "Found source: $SOURCE_ID"
           
-                    # Create session prompt
-                    PROMPT=$(cat << 'PROMPT_EOF'
+          # Create session prompt
+          PROMPT=$(cat << 'PROMPT_EOF'
           '
-                    You are the ISSUE RESOLVER agent. Your mission is to FIX identified issues, not just document them.
+          You are the ISSUE RESOLVER agent. Your mission is to FIX identified issues, not just document them.
           
-                    ## Input Data
-                    Review these sources in .jules/resolver_data/:
-                    - priority_issues.json - GitHub Issues marked critical/high-priority
-                    - summary.md - Assessment issue tracking
-                    - Code_Quality_Review_Latest.md - Recent quality review findings
+          ## Input Data
+          Review these sources in .jules/resolver_data/:
+          - priority_issues.json - GitHub Issues marked critical/high-priority
+          - summary.md - Assessment issue tracking
+          - Code_Quality_Review_Latest.md - Recent quality review findings
           
-                    ## Your Mission
-                    1. Identify the TOP $MAX_ISSUES priority items that can be fixed
-                    2. ACTUALLY FIX THEM - make the code changes
-                    3. Document each fix clearly
+          ## Your Mission
+          1. Identify the TOP $MAX_ISSUES priority items that can be fixed
+          2. ACTUALLY FIX THEM - make the code changes
+          3. Document each fix clearly
           
-                    ## Priority Order
-                    1. CRITICAL issues (breaking/security)
-                    2. HIGH priority (functionality gaps)
-                    3. Code quality issues flagged as important
+          ## Priority Order
+          1. CRITICAL issues (breaking/security)
+          2. HIGH priority (functionality gaps)
+          3. Code quality issues flagged as important
           
-                    ## Fix Guidelines
-                    - Make minimal, targeted changes
-                    - DO NOT break existing functionality
-                    - Run linters after changes: ruff check . --fix && black .
-                    - Add or update tests if needed
-                    - DO NOT modify test assertions just to pass
+          ## Fix Guidelines
+          - Make minimal, targeted changes
+          - DO NOT break existing functionality
+          - Run linters after changes: ruff check . --fix && black .
+          - Add or update tests if needed
+          - DO NOT modify test assertions just to pass
           
-                    ## For Each Fix
-                    1. Identify the issue/file/line
-                    2. Implement the fix
-                    3. Add a comment in the code if non-obvious
-                    4. Document in docs/assessments/issues/resolved/
+          ## For Each Fix
+          1. Identify the issue/file/line
+          2. Implement the fix
+          3. Add a comment in the code if non-obvious
+          4. Document in docs/assessments/issues/resolved/
           
-                    ## Output
-                    Create docs/assessments/issues/resolved/resolver_report_$(date +%Y-%m-%d).md with:
-                    - Issues addressed
-                    - Changes made
-                    - Issues deferred (with reason)
-                    - New issues discovered
+          ## Output
+          Create docs/assessments/issues/resolved/resolver_report_$(date +%Y-%m-%d).md with:
+          - Issues addressed
+          - Changes made
+          - Issues deferred (with reason)
+          - New issues discovered
           
-                    ## Closing Issues
-                    If your fix completely resolves a GitHub Issue, include "Fixes #NUM" in your changes
-                    so the PR will auto-close the issue when merged.
+          ## Closing Issues
+          If your fix completely resolves a GitHub Issue, include "Fixes #NUM" in your changes
+          so the PR will auto-close the issue when merged.
           
-                    IMPORTANT: You are authorized to make code changes. This is not a review - it's a FIX operation.
-                    PROMPT_EOF
-                    )
+          IMPORTANT: You are authorized to make code changes. This is not a review - it's a FIX operation.
+          PROMPT_EOF
+          )
           
-                    echo "Creating Jules session..."
-                    REQUEST_JSON=$(jq -n \
-                      --arg prompt "$PROMPT" \
-                      --arg source "$SOURCE_ID" \
-                      '{
-                        prompt: $prompt,
-                        sourceContext: {
-                          source: $source,
-                          githubRepoContext: {
-                            startingBranch: "main"
-                          }
-                        },
-                        automationMode: "AUTO_CREATE_PR"
-                      }')
+          echo "Creating Jules session..."
+          REQUEST_JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            --arg source "$SOURCE_ID" \
+            '{
+              prompt: $prompt,
+              sourceContext: {
+                source: $source,
+                githubRepoContext: {
+                  startingBranch: "main"
+                }
+              },
+              automationMode: "AUTO_CREATE_PR"
+            }')
           
-                    echo "Request: $REQUEST_JSON"
+          echo "Request: $REQUEST_JSON"
           
-                    HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
-                      -H "X-Goog-Api-Key: $JULES_API_KEY" \
-                      -H "Content-Type: application/json" \
-                      -d "$REQUEST_JSON" \
-                      "$API_BASE/sessions")
+          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_JSON" \
+            "$API_BASE/sessions")
           
-                    SESSION_RESPONSE=$(cat /tmp/session_response.json)
-                    echo "HTTP Status: $HTTP_CODE"
+          SESSION_RESPONSE=$(cat /tmp/session_response.json)
+          echo "HTTP Status: $HTTP_CODE"
           
-                    if [ "$HTTP_CODE" != "200" ]; then
-                      echo "::error::Jules API returned HTTP $HTTP_CODE"
-                      exit 1
-                    fi
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Jules API returned HTTP $HTTP_CODE"
+            exit 1
+          fi
           
-                    SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
-                    echo "Created session: $SESSION_ID"
+          SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
+          echo "Created session: $SESSION_ID"
           
-                    # Poll for completion
-                    MAX_WAIT=1800
-                    POLL_INTERVAL=30
-                    ELAPSED=0
+          # Poll for completion
+          MAX_WAIT=1800
+          POLL_INTERVAL=30
+          ELAPSED=0
           
-                    while [ $ELAPSED -lt $MAX_WAIT ]; do
-                      SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
-                      STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
-                      echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
+            STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
+            echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
           
-                      case "$STATE" in
-                        "COMPLETED"|"SUBMITTED")
-                          echo "Session completed successfully!"
-                          break
-                          ;;
-                        "FAILED"|"CANCELLED")
-                          echo "::error::Session $STATE"
-                          exit 1
-                          ;;
-                      esac
-                      sleep $POLL_INTERVAL
-                      ELAPSED=$((ELAPSED + POLL_INTERVAL))
-                    done
+            case "$STATE" in
+              "COMPLETED"|"SUBMITTED")
+                echo "Session completed successfully!"
+                break
+                ;;
+              "FAILED"|"CANCELLED")
+                echo "::error::Session $STATE"
+                exit 1
+                ;;
+            esac
+            sleep $POLL_INTERVAL
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
           
 
 
