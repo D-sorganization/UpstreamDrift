@@ -74,8 +74,7 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         self.mode = "view"  # view, draw, add_points, drag
 
         # Dark Theme Palette
-        self.setStyleSheet(
-            """
+        self.setStyleSheet("""
             QWidget {
                 background-color: #2b2b2b;
                 color: #ffffff;
@@ -140,8 +139,7 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
             QPushButton#fitBtn:hover {
                 background-color: #388e3c;
             }
-        """
-        )
+        """)
 
         # UI Setup
         self._setup_ui()
