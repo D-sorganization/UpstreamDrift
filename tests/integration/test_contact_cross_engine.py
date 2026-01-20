@@ -120,7 +120,9 @@ class TestBasicContactPhysics:
         # Log for cross-engine comparison
         restitution_effective = np.sqrt(E_final / E_initial)
         print(f"MuJoCo - Effective restitution: {restitution_effective:.3f}")
-        print(f"MuJoCo - Energy dissipated: {(E_initial - E_final)/E_initial*100:.1f}%")
+        print(
+            f"MuJoCo - Energy dissipated: {(E_initial - E_final) / E_initial * 100:.1f}%"
+        )
 
     @pytest.mark.slow
     def test_drake_ball_drop_energy_dissipation(self, ball_urdf):

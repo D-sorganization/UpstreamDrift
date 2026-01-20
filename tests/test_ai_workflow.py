@@ -15,7 +15,6 @@ from shared.python.ai.workflow_engine import (
 
 
 class TestAIWorkflowEngine:
-
     @pytest.fixture
     def mock_tool_registry(self):
         registry = Mock()

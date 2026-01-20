@@ -504,6 +504,21 @@ class InjuryRiskScorer:
                             "Training load too low: Gradually increase practice to maintain "
                             "tissue resilience."
                         )
+                elif "early_extension" in factor.name:
+                    recommendations.append(
+                        "Early extension detected: Improve glute activation and hip internal rotation "
+                        "stability to maintain posture through impact."
+                    )
+                elif "kinematic_sequence" in factor.name:
+                    recommendations.append(
+                        "Kinematic sequence error: Drill correct transition sequence "
+                        "(hips -> torso -> arms -> club) to reduce load and increase power."
+                    )
+                elif "swing_tempo" in factor.name:
+                    recommendations.append(
+                        "Tempo mismatch: Practice with a metronome (3:1 ratio) to smooth out "
+                        "transition forces."
+                    )
 
         # Add general recommendations based on overall risk
         if report.overall_risk_level in [RiskLevel.HIGH, RiskLevel.VERY_HIGH]:

@@ -229,7 +229,7 @@ class TestPendulumAnalyticalDynamics:
             err_msg=f"Engine max gravity torque DEVIATES!\\n"
             f"  θ = π/2 (horizontal)\\n"
             f"  τ_engine = {tau_engine[0]:.8e} N·m\\n"
-            f"  τ_analytical = {tau_analytical:.8e} N·m (expected ≈ m·g·l = {self.m1*self.g*self.l1:.6f})",
+            f"  τ_analytical = {tau_analytical:.8e} N·m (expected ≈ m·g·l = {self.m1 * self.g * self.l1:.6f})",
         )
 
     def test_inverse_dynamics_combined_inertial_gravity(self) -> None:

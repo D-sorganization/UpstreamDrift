@@ -198,7 +198,6 @@ class TestMediaPipeEstimator:
         # We patch module attributes to simulate missing mediapipe
         with patch.object(mediapipe_estimator, "MEDIAPIPE_AVAILABLE", False):
             with patch.object(mediapipe_estimator, "mp", None):
-
                 # Initialize should check MEDIAPIPE_AVAILABLE but only warn
                 # The __init__ in the code warns but doesn't raise
                 with patch(

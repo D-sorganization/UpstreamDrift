@@ -195,7 +195,9 @@ class VideoPosePipeline:
         results = []
 
         for i, video_path in enumerate(video_paths):
-            logger.info(f"Processing batch {i+1}/{len(video_paths)}: {video_path.name}")
+            logger.info(
+                f"Processing batch {i + 1}/{len(video_paths)}: {video_path.name}"
+            )
 
             try:
                 result = self.process_video(video_path, output_dir)

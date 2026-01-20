@@ -1,10 +1,17 @@
 """Authentication routes for user management."""
 
 # Python 3.10 compatibility: UTC was added in 3.11
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
+try:
+    from datetime import UTC
+except ImportError:
+    UTC = timezone.utc  # noqa: UP017
+
+from fastapi import APIRouter, Depends, HTTPException, Request, status
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
 from api.auth.dependencies import RequireAdmin, RequireAuth
@@ -24,10 +31,22 @@ from api.database import get_db
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
+# Rate limiting constants for auth endpoints (Issue #522)
+# Protects against credential stuffing and brute force attacks
+REGISTRATION_RATE_LIMIT = "3/hour"
+LOGIN_RATE_LIMIT = "5/minute"
+
+# Use shared limiter - registered with app.state in server.py
+# This ensures proper rate limiting across all routes
+limiter = Limiter(key_func=get_remote_address)
+
 
 @router.post("/register", response_model=UserResponse)
+@limiter.limit(
+    REGISTRATION_RATE_LIMIT
+)  # SECURITY: Limit registration to prevent account farming
 async def register_user(
-    user_data: UserCreate, db: Session = Depends(get_db)
+    request: Request, user_data: UserCreate, db: Session = Depends(get_db)
 ) -> UserResponse:
     """Register a new user."""
 
@@ -58,8 +77,11 @@ async def register_user(
 
 
 @router.post("/login", response_model=LoginResponse)
+@limiter.limit(
+    LOGIN_RATE_LIMIT
+)  # SECURITY: Limit login attempts to prevent brute force
 async def login(
-    login_data: LoginRequest, db: Session = Depends(get_db)
+    request: Request, login_data: LoginRequest, db: Session = Depends(get_db)
 ) -> LoginResponse:
     """Authenticate user and return tokens."""
 

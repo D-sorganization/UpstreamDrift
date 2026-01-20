@@ -58,7 +58,6 @@ class TestTorqueFitting:
             patch("matplotlib.pyplot.plot"),
             patch("numpy.save") as mock_save,
         ):
-
             # Setup args
             mock_args.return_value = MagicMock(csv="data.csv", degree=2, out="out.npy")
 

@@ -12,7 +12,12 @@ from __future__ import annotations
 import logging
 
 # Python 3.10 compatibility: UTC was added in 3.11
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+
+try:
+    from datetime import UTC
+except ImportError:
+    UTC = timezone.utc  # noqa: UP017
 from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
@@ -446,7 +451,7 @@ class AIAssistantPanel(QWidget):
         """
         if not self._adapter:
             self._add_system_message(
-                "⚠️ No AI provider configured. " "Click ⚙️ to set up a provider."
+                "⚠️ No AI provider configured. Click ⚙️ to set up a provider."
             )
             return
 

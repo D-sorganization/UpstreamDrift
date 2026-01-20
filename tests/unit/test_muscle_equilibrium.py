@@ -528,7 +528,7 @@ class TestPhysicalRealism:
 
         assert (
             relative_change < 0.05
-        ), f"Small perturbation caused large change: {relative_change*100:.2f}%"
+        ), f"Small perturbation caused large change: {relative_change * 100:.2f}%"
 
 
 class TestNumericalAccuracy:
