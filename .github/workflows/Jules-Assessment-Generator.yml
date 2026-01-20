@@ -4,7 +4,7 @@ on:
   workflow_call:
   workflow_dispatch:
   schedule:
-    - cron: "0 0 * * 0"  # Weekly on Sundays at midnight UTC (matches Control Tower)
+    - cron: "0 0 * * *"  # Daily at midnight UTC (overnight window)
 
 permissions:
   contents: write
@@ -15,15 +15,15 @@ jobs:
   generate-assessments:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.11"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: "20"
 
@@ -78,7 +78,7 @@ jobs:
           )"
 
       - name: Commit Results
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "docs(assessment): weekly assessment $(date +%Y-%m-%d)"
           file_pattern: "docs/assessments/**/*.md"
