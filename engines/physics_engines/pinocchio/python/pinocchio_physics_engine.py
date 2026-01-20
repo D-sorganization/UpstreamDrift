@@ -6,7 +6,7 @@ Wraps pinocchio to provide a compliant PhysicsEngine interface.
 from __future__ import annotations
 
 import logging
-from typing import cast
+from typing import Any, cast
 
 import numpy as np
 

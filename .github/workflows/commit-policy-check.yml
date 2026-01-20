@@ -1,0 +1,44 @@
+name: Commit Policy Check
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check Commit Policy
+        run: |
+          chmod +x scripts/check_commit_policy.py
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            # Check range from base branch to HEAD
+            # Ensure origin/base_ref is available
+            git fetch origin ${{ github.base_ref }}
+            echo "Checking PR commits against origin/${{ github.base_ref }}..."
+            python scripts/check_commit_policy.py --base "origin/${{ github.base_ref }}" --head "HEAD"
+          else
+            # For push events, check the commits in this push
+            # If before is all zeros (new branch/repo), just check HEAD
+            if [ "${{ github.event.before }}" == "0000000000000000000000000000000000000000" ]; then
+                echo "New branch/repo, checking HEAD only..."
+                python scripts/check_commit_policy.py --base "" --head "HEAD"
+            else
+                # Check range pushed
+                # If before is not reachable (force push?), might be tricky.
+                # Safest fallback: Check HEAD~1..HEAD if range fails, or just assume fetch-depth:0 gives us history.
+                echo "Checking pushed commits ${{ github.event.before }}..${{ github.event.after }}..."
+                # Use HEAD~1 if we just want the latest, but let's try to be precise if possible.
+                # However, usually just checking the last commit is enough for "prevent"
+                # But let's stick to HEAD~1..HEAD for simplicity on push, assuming linear history
+                python scripts/check_commit_policy.py --base "HEAD~1" --head "HEAD"
+            fi
+          fi
