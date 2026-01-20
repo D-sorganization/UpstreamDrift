@@ -95,6 +95,9 @@ jobs:
             exit 0
           fi
 
+          # Delete remote branch if it exists (from previous run today)
+          git push origin --delete "$BRANCH" 2>/dev/null || true
+
           # Create a new branch for the assessment
           git checkout -b "$BRANCH"
 
