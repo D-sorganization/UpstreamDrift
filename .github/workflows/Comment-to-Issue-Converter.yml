@@ -1,3 +1,4 @@
+
 name: Convert Review Comments to Issues
 
 # Converts PR review comments (from Copilot, Cursor, Jules, etc.) into GitHub Issues
@@ -32,13 +33,13 @@ jobs:
   process-comments:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
-          python-version: "3.11"
+          python-version: "3.12"
 
       - name: Collect Review Comments
         id: collect
@@ -122,7 +123,7 @@ jobs:
               review_file = comments_dir / f'pr_{pr_num}_review_comments.json'
               if review_file.exists():
                   with open(review_file, 'r') as f:
-                      review_comments = json.load(f)
+            review_comments = json.load(f)
               else:
                   review_comments = []
 
@@ -130,7 +131,7 @@ jobs:
               for comment in review_comments:
                   comment_id = str(comment.get('id', ''))
                   if comment_id in tracking['processed_comments']:
-                      continue
+            continue
 
                   author = comment.get('user', {}).get('login', 'unknown')
                   body = comment.get('body', '')
@@ -139,54 +140,53 @@ jobs:
                   created_at = comment.get('created_at', '')
                   html_url = comment.get('html_url', '')
 
-                  # Categorize by author (case-insensitive checks for bot names)
-                  author_lower = author.lower()
-                  if 'copilot' in author_lower:
-                      source = 'GitHub Copilot'
-                      label = 'copilot-review'
+                  # Categorize by author
+                  if author == 'Copilot':
+            source = 'GitHub Copilot'
+            label = 'copilot-review'
                   elif author == 'google-labs-jules' or (author == 'github-actions[bot]' and 'jules' in body.lower()):
-                      source = 'Jules'
-                      label = 'jules-review'
-                  elif 'cursor' in author_lower or 'bugbot' in author_lower:
-                      source = 'Cursor/BugBot'
-                      label = 'cursor-review'
+            source = 'Jules'
+            label = 'jules-review'
+                  elif 'cursor' in author.lower() or 'bugbot' in author.lower():
+            source = 'Cursor/BugBot'
+            label = 'cursor-review'
                   else:
-                      source = f'Reviewer ({author})'
-                      label = 'human-review'
+            source = f'Reviewer ({author})'
+            label = 'human-review'
 
                   # Determine if this is actionable (has a suggestion)
                   has_suggestion = '```suggestion' in body
                   is_actionable = has_suggestion or any(word in body.lower() for word in
-                      ['should', 'could', 'fix', 'change', 'update', 'remove', 'add', 'consider'])
+            ['should', 'could', 'fix', 'change', 'update', 'remove', 'add', 'consider'])
 
                   # Archive to markdown
                   archive_entry = {
-                      'pr_number': pr_num,
-                      'pr_title': pr_title,
-                      'comment_id': comment_id,
-                      'source': source,
-                      'author': author,
-                      'file': file_path,
-                      'line': line,
-                      'body': body,
-                      'url': html_url,
-                      'created_at': created_at,
-                      'has_suggestion': has_suggestion,
-                      'is_actionable': is_actionable
+            'pr_number': pr_num,
+            'pr_title': pr_title,
+            'comment_id': comment_id,
+            'source': source,
+            'author': author,
+            'file': file_path,
+            'line': line,
+            'body': body,
+            'url': html_url,
+            'created_at': created_at,
+            'has_suggestion': has_suggestion,
+            'is_actionable': is_actionable
                   }
                   archived_comments.append(archive_entry)
 
                   # Create issue if actionable and not archive_only
                   if is_actionable and not archive_only:
-                      # Check if issue already exists for this comment
-                      if comment_id in tracking['created_issues']:
-                          continue
+            # Check if issue already exists for this comment
+            if comment_id in tracking['created_issues']:
+                continue
 
-                      issue_title = f"[{source}] {file_path}:{line} - Review feedback"
-                      if len(issue_title) > 100:
-                          issue_title = issue_title[:97] + "..."
+            issue_title = f"[{source}] {file_path}:{line} - Review feedback"
+            if len(issue_title) > 100:
+                issue_title = issue_title[:97] + "..."
 
-                      issue_body = f"""## Review Comment from {source}
+            issue_body = f"""## Review Comment from {source}
 
           **Source PR:** #{pr_num} - {pr_title}
           **File:** `{file_path}` (line {line})
@@ -212,28 +212,28 @@ jobs:
           *This issue was auto-generated from a PR review comment.*
           """
 
-                      # Create the issue
-                      try:
-                          result = subprocess.run([
-                              'gh', 'issue', 'create',
-                              '--title', issue_title,
-                              '--body', issue_body,
-                              '--label', f'{label},review-feedback,auto-generated'
-                          ], capture_output=True, text=True)
+            # Create the issue
+            try:
+                result = subprocess.run([
+                    'gh', 'issue', 'create',
+                    '--title', issue_title,
+                    '--body', issue_body,
+                    '--label', f'{label},review-feedback,auto-generated'
+                ], capture_output=True, text=True)
 
-                          if result.returncode == 0:
-                              issue_url = result.stdout.strip()
-                              created_issues.append({
-                                  'comment_id': comment_id,
-                                  'issue_url': issue_url,
-                                  'source': source
-                              })
-                              tracking['created_issues'][comment_id] = issue_url
-                              print(f"Created issue: {issue_url}")
-                          else:
-                              print(f"Failed to create issue: {result.stderr}")
-                      except Exception as e:
-                          print(f"Error creating issue: {e}")
+                if result.returncode == 0:
+                    issue_url = result.stdout.strip()
+                    created_issues.append({
+                        'comment_id': comment_id,
+                        'issue_url': issue_url,
+                        'source': source
+                    })
+                    tracking['created_issues'][comment_id] = issue_url
+                    print(f"Created issue: {issue_url}")
+                else:
+                    print(f"Failed to create issue: {result.stderr}")
+            except Exception as e:
+                print(f"Error creating issue: {e}")
 
                   # Mark as processed
                   tracking['processed_comments'].append(comment_id)
@@ -250,19 +250,19 @@ jobs:
                   # Group by source
                   by_source = {}
                   for c in archived_comments:
-                      src = c['source']
-                      if src not in by_source:
-                          by_source[src] = []
-                      by_source[src].append(c)
+            src = c['source']
+            if src not in by_source:
+                by_source[src] = []
+            by_source[src].append(c)
 
                   for source, comments in by_source.items():
-                      f.write(f"## {source} ({len(comments)} comments)\n\n")
-                      for c in comments:
-                          f.write(f"### PR #{c['pr_number']}: {c['file']}:{c['line']}\n\n")
-                          f.write(f"**Actionable:** {'Yes' if c['is_actionable'] else 'No'}\n")
-                          f.write(f"**Has Suggestion:** {'Yes' if c['has_suggestion'] else 'No'}\n\n")
-                          f.write(f"```\n{c['body'][:500]}{'...' if len(c['body']) > 500 else ''}\n```\n\n")
-                          f.write(f"[View on GitHub]({c['url']})\n\n---\n\n")
+            f.write(f"## {source} ({len(comments)} comments)\n\n")
+            for c in comments:
+                f.write(f"### PR #{c['pr_number']}: {c['file']}:{c['line']}\n\n")
+                f.write(f"**Actionable:** {'Yes' if c['is_actionable'] else 'No'}\n")
+                f.write(f"**Has Suggestion:** {'Yes' if c['has_suggestion'] else 'No'}\n\n")
+                f.write(f"```\n{c['body'][:500]}{'...' if len(c['body']) > 500 else ''}\n```\n\n")
+                f.write(f"[View on GitHub]({c['url']})\n\n---\n\n")
 
               print(f"Archived {len(archived_comments)} comments to {archive_md}")
 
@@ -290,11 +290,7 @@ jobs:
           git add docs/review_archive/ .github/review_comments/comment_tracking.json || true
 
           if ! git diff --staged --quiet; then
-            git commit -m "docs: archive review comments from PRs
-
-          Archived ${{ steps.process.outputs.archived_count }} comments.
-          Created ${{ steps.process.outputs.created_count }} issues."
-
+            git commit -m "docs: archive review comments from PRs"
             git push
           else
             echo "No changes to commit"

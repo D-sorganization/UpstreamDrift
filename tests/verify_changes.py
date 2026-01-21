@@ -1,9 +1,8 @@
 # Adjust path
 import os
+import subprocess
 import sys
 import unittest
-import subprocess
-from pathlib import Path
 
 sys.path.append(os.getcwd())
 
@@ -15,36 +14,55 @@ class TestVerification(unittest.TestCase):
 
         # 1. Check MuJoCo
         try:
-            from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import MuJoCoPhysicsEngine
+            from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+                MuJoCoPhysicsEngine,
+            )
+
             engine = MuJoCoPhysicsEngine()
-            self.assertTrue(hasattr(engine, 'get_full_state'), "MuJoCo engine missing get_full_state")
+            self.assertTrue(
+                hasattr(engine, "get_full_state"),
+                "MuJoCo engine missing get_full_state",
+            )
             print("✅ MuJoCoPhysicsEngine.get_full_state verified.")
         except ImportError:
             print("⚠️ Skipping MuJoCo check (dependencies missing)")
 
         # 2. Check Drake
         try:
-            from engines.physics_engines.drake.python.drake_physics_engine import DrakePhysicsEngine
+            from engines.physics_engines.drake.python.drake_physics_engine import (
+                DrakePhysicsEngine,
+            )
+
             # We can't instantiate easily without pydrake context, but checking class attr is enough if implemented
-            self.assertTrue(hasattr(DrakePhysicsEngine, 'get_full_state'), "Drake engine missing get_full_state")
+            self.assertTrue(
+                hasattr(DrakePhysicsEngine, "get_full_state"),
+                "Drake engine missing get_full_state",
+            )
             print("✅ DrakePhysicsEngine.get_full_state verified.")
         except ImportError:
-             print("⚠️ Skipping Drake check (dependencies missing)")
+            print("⚠️ Skipping Drake check (dependencies missing)")
 
         # 3. Check Pinocchio
         try:
-            from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import PinocchioPhysicsEngine
-            self.assertTrue(hasattr(PinocchioPhysicsEngine, 'get_full_state'), "Pinocchio engine missing get_full_state")
+            from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+                PinocchioPhysicsEngine,
+            )
+
+            self.assertTrue(
+                hasattr(PinocchioPhysicsEngine, "get_full_state"),
+                "Pinocchio engine missing get_full_state",
+            )
             print("✅ PinocchioPhysicsEngine.get_full_state verified.")
         except ImportError:
-             print("⚠️ Skipping Pinocchio check (dependencies missing)")
+            print("⚠️ Skipping Pinocchio check (dependencies missing)")
 
     def test_signal_processing_optimizations(self):
         """Verify signal processing fallbacks."""
         print("\nVerifying Signal Processing...")
         try:
             from shared.python import signal_processing
-            self.assertTrue(hasattr(signal_processing, 'compute_dtw_distance'))
+
+            self.assertTrue(hasattr(signal_processing, "compute_dtw_distance"))
             print("✅ compute_dtw_distance available.")
 
             # Check if flags are set (not crashing)
@@ -65,7 +83,7 @@ class TestVerification(unittest.TestCase):
         files_to_check = [
             "engines/physics_engines/drake/python/drake_physics_engine.py",
             "engines/physics_engines/pinocchio/python/pinocchio_physics_engine.py",
-            "shared/python/signal_processing.py"
+            "shared/python/signal_processing.py",
         ]
 
         for file_path in files_to_check:
@@ -73,14 +91,17 @@ class TestVerification(unittest.TestCase):
                 result = subprocess.run(
                     [sys.executable, tool_path, file_path],
                     capture_output=True,
-                    text=True
+                    text=True,
                 )
                 if result.returncode == 0:
-                     print(f"✅ {file_path} passed quality check.")
+                    print(f"✅ {file_path} passed quality check.")
                 else:
-                     print(f"❌ {file_path} FAILED quality check:\n{result.stdout}\n{result.stderr}")
-                     # We don't fail the test here to let others run, but ideally we should
-                     # self.fail(f"Code quality check failed for {file_path}")
+                    print(
+                        f"❌ {file_path} FAILED quality check:\n{result.stdout}\n{result.stderr}"
+                    )
+                    # We don't fail the test here to let others run, but ideally we should
+                    # self.fail(f"Code quality check failed for {file_path}")
+
 
 if __name__ == "__main__":
     unittest.main()
