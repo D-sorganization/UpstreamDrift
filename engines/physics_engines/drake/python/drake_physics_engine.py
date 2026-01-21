@@ -36,6 +36,7 @@ except ImportError:
 
 from shared.python import constants
 from shared.python.interfaces import PhysicsEngine
+from shared.python.inertia_ellipse import BodyInertiaData
 
 LOGGER = logging.getLogger(__name__)
 
@@ -556,3 +557,91 @@ class DrakePhysicsEngine(PhysicsEngine):
             # Restore original state
             self.plant.SetPositions(self.plant_context, saved_q)
             self.plant.SetVelocities(self.plant_context, saved_v)
+
+    # -------- Inertia Ellipse Visualization Support --------
+
+    def get_body_names(self) -> list[str]:
+        """Get list of all body names in the model.
+
+        Returns:
+            List of body name strings
+        """
+        if not self.plant:
+            return []
+
+        names = []
+        # Iterate over all model instances and collect body names
+        for model_idx in range(self.plant.num_model_instances()):
+            try:
+                model_instance = pydrake.multibody.tree.ModelInstanceIndex(model_idx)
+                for body_idx in self.plant.GetBodyIndices(model_instance):
+                    body = self.plant.get_body(body_idx)
+                    name = body.name()
+                    if name and name not in names and name != "world":
+                        names.append(name)
+            except Exception:
+                pass
+
+        return names
+
+    def get_body_inertia_data(self, body_name: str) -> BodyInertiaData | None:
+        """Get inertia data for a specific body.
+
+        Args:
+            body_name: Name of the body
+
+        Returns:
+            BodyInertiaData for the body, or None if not found
+        """
+        if not self.plant_context:
+            return None
+
+        try:
+            body = self.plant.GetBodyByName(body_name)
+        except Exception:
+            return None
+
+        # Get spatial inertia
+        spatial_inertia = body.default_spatial_inertia()
+
+        # Extract mass
+        mass = float(spatial_inertia.get_mass())
+
+        # Get center of mass in body frame
+        com_body = np.array(spatial_inertia.get_com())
+
+        # Get rotational inertia about COM in body frame
+        # UnitInertia is I/m, so multiply by mass to get actual inertia
+        unit_inertia = spatial_inertia.get_unit_inertia()
+        rotational_inertia = unit_inertia.CopyToFullMatrix3()
+        inertia_local = mass * np.array(rotational_inertia)
+
+        # Get body pose in world frame
+        body_pose = self.plant.EvalBodyPoseInWorld(self.plant_context, body)
+        rotation = np.array(body_pose.rotation().matrix())
+        position = np.array(body_pose.translation())
+
+        # Transform COM to world frame
+        com_world = position + rotation @ com_body
+
+        return BodyInertiaData(
+            name=body_name,
+            mass=mass,
+            com_world=com_world,
+            inertia_local=inertia_local,
+            rotation=rotation,
+        )
+
+    def get_all_body_inertia_data(self) -> list[BodyInertiaData]:
+        """Get inertia data for all bodies in the model.
+
+        Returns:
+            List of BodyInertiaData for all bodies
+        """
+        body_names = self.get_body_names()
+        result = []
+        for name in body_names:
+            data = self.get_body_inertia_data(name)
+            if data is not None:
+                result.append(data)
+        return result

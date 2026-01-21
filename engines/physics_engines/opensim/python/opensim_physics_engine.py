@@ -9,6 +9,7 @@ from typing import Any
 import numpy as np
 
 from shared.python.interfaces import PhysicsEngine
+from shared.python.inertia_ellipse import BodyInertiaData
 
 # Configure logging
 logger = logging.getLogger(__name__)
@@ -641,3 +642,112 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         except Exception as e:
             logger.error(f"Failed to compute ZVCF: {e}")
             return np.array([])
+
+    # -------- Inertia Ellipse Visualization Support --------
+
+    def get_body_names(self) -> list[str]:
+        """Get list of all body names in the model.
+
+        Returns:
+            List of body name strings
+        """
+        if not self._model or opensim is None:
+            return []
+
+        names = []
+        body_set = self._model.getBodySet()
+        for i in range(body_set.getSize()):
+            body = body_set.get(i)
+            names.append(body.getName())
+
+        return names
+
+    def get_body_inertia_data(self, body_name: str) -> BodyInertiaData | None:
+        """Get inertia data for a specific body.
+
+        Args:
+            body_name: Name of the body
+
+        Returns:
+            BodyInertiaData for the body, or None if not found
+        """
+        if not self._model or not self._state or opensim is None:
+            return None
+
+        try:
+            body_set = self._model.getBodySet()
+            body = body_set.get(body_name)
+
+            # Realize to position stage to get current poses
+            self._model.realizePosition(self._state)
+
+            # Get mass
+            mass = body.getMass()
+            if mass < 1e-10:
+                return None
+
+            # Get center of mass in body frame
+            com_body = body.getMassCenter()
+            com_local = np.array([com_body.get(i) for i in range(3)])
+
+            # Get inertia tensor in body frame (about COM)
+            # OpenSim stores inertia as [Ixx, Iyy, Izz, Ixy, Ixz, Iyz]
+            inertia_vec = body.getInertia()
+            # Build symmetric inertia matrix
+            # Note: OpenSim returns central principal moments (Ixx, Iyy, Izz)
+            # and products of inertia (Ixy, Ixz, Iyz)
+            Ixx = inertia_vec.get(0)
+            Iyy = inertia_vec.get(1)
+            Izz = inertia_vec.get(2)
+            Ixy = inertia_vec.get(3)
+            Ixz = inertia_vec.get(4)
+            Iyz = inertia_vec.get(5)
+
+            inertia_local = np.array([
+                [Ixx, Ixy, Ixz],
+                [Ixy, Iyy, Iyz],
+                [Ixz, Iyz, Izz]
+            ])
+
+            # Get body transform in ground frame
+            transform = body.getTransformInGround(self._state)
+
+            # Extract rotation matrix
+            rotation_simtk = transform.R()
+            rotation = np.array([
+                [rotation_simtk[i][j] for j in range(3)]
+                for i in range(3)
+            ])
+
+            # Extract position (translation)
+            position_simtk = transform.p()
+            position = np.array([position_simtk[i] for i in range(3)])
+
+            # Transform COM to world frame
+            com_world = position + rotation @ com_local
+
+            return BodyInertiaData(
+                name=body_name,
+                mass=mass,
+                com_world=com_world,
+                inertia_local=inertia_local,
+                rotation=rotation,
+            )
+
+        except Exception as e:
+            logger.error(f"Failed to get inertia data for '{body_name}': {e}")
+            return None
+
+    def get_all_body_inertia_data(self) -> list[BodyInertiaData]:
+        """Get inertia data for all bodies in the model.
+
+        Returns:
+            List of BodyInertiaData for all bodies
+        """
+        body_names = self.get_body_names()
+        result = []
+        for name in body_names:
+            data = self.get_body_inertia_data(name)
+            if data is not None:
+                result.append(data)
+        return result

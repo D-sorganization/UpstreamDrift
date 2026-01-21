@@ -18,6 +18,7 @@ except ImportError:
 
 from shared.python import constants
 from shared.python.interfaces import PhysicsEngine
+from shared.python.inertia_ellipse import BodyInertiaData
 
 LOGGER = logging.getLogger(__name__)
 
@@ -435,3 +436,112 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         a_zvcf = pin.aba(self.model, self.data, q, v_zero, tau)
 
         return cast(np.ndarray, a_zvcf)
+
+    # -------- Inertia Ellipse Visualization Support --------
+
+    def get_body_names(self) -> list[str]:
+        """Get list of all body names in the model.
+
+        Returns:
+            List of body name strings (frame names for bodies)
+        """
+        if self.model is None:
+            return []
+
+        names = []
+        # In Pinocchio, we use frames to identify bodies
+        for i in range(self.model.nframes):
+            frame = self.model.frames[i]
+            # Only include BODY type frames
+            if frame.type == pin.FrameType.BODY:
+                name = frame.name
+                if name and name != "universe":
+                    names.append(name)
+
+        return names
+
+    def get_body_inertia_data(self, body_name: str) -> BodyInertiaData | None:
+        """Get inertia data for a specific body.
+
+        Args:
+            body_name: Name of the body (frame name)
+
+        Returns:
+            BodyInertiaData for the body, or None if not found
+        """
+        if self.model is None or self.data is None:
+            return None
+
+        # Ensure kinematics are computed
+        self.forward()
+
+        # Find the frame
+        if not self.model.existFrame(body_name):
+            LOGGER.debug(f"Frame '{body_name}' not found in model")
+            return None
+
+        frame_id = self.model.getFrameId(body_name)
+        frame = self.model.frames[frame_id]
+
+        # Get the parent joint's inertia
+        # In Pinocchio, inertia is associated with joints, not frames directly
+        parent_joint = frame.parentJoint
+
+        # Get joint inertia (in joint frame)
+        # Pinocchio's model.inertias is a list of Inertia objects
+        if parent_joint < len(self.model.inertias):
+            inertia = self.model.inertias[parent_joint]
+        else:
+            return None
+
+        # Extract mass
+        mass = float(inertia.mass)
+        if mass < 1e-10:
+            return None
+
+        # Get lever (COM position in joint frame)
+        com_local = np.array(inertia.lever)
+
+        # Get inertia tensor in local frame (about COM)
+        # Pinocchio stores inertia about the origin, need to shift to COM
+        inertia_origin = np.array(inertia.inertia)
+
+        # The inertia in Pinocchio is about the joint origin
+        # We need to use parallel axis theorem to get inertia about COM
+        # I_origin = I_com + m * (|c|^2 * I - c * c^T)
+        # So I_com = I_origin - m * (|c|^2 * I - c * c^T)
+        c = com_local
+        c_sq = np.dot(c, c)
+        parallel_axis = mass * (c_sq * np.eye(3) - np.outer(c, c))
+        inertia_local = inertia_origin - parallel_axis
+
+        # Get frame placement in world
+        # oMf is the transform from world origin to frame
+        frame_placement = self.data.oMf[frame_id]
+        rotation = np.array(frame_placement.rotation)
+        position = np.array(frame_placement.translation)
+
+        # Transform COM to world frame
+        com_world = position + rotation @ com_local
+
+        return BodyInertiaData(
+            name=body_name,
+            mass=mass,
+            com_world=com_world,
+            inertia_local=inertia_local,
+            rotation=rotation,
+        )
+
+    def get_all_body_inertia_data(self) -> list[BodyInertiaData]:
+        """Get inertia data for all bodies in the model.
+
+        Returns:
+            List of BodyInertiaData for all bodies
+        """
+        body_names = self.get_body_names()
+        result = []
+        for name in body_names:
+            data = self.get_body_inertia_data(name)
+            if data is not None:
+                result.append(data)
+        return result

@@ -12,6 +12,7 @@ from typing import Any
 import numpy as np
 
 from shared.python.interfaces import PhysicsEngine
+from shared.python.inertia_ellipse import BodyInertiaData
 
 LOGGER = logging.getLogger(__name__)
 
@@ -593,3 +594,102 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         if analyzer is None:
             return []
         return list(analyzer.muscle_names)
+
+    # -------- Inertia Ellipse Visualization Support --------
+
+    def get_body_names(self) -> list[str]:
+        """Get list of all body names in the model.
+
+        Returns:
+            List of body name strings
+        """
+        if not self.sim:
+            return []
+
+        try:
+            import mujoco
+
+            names = []
+            model = self.sim.model
+
+            # Handle both real MuJoCo objects and mocks
+            if hasattr(model, "nbody") and not callable(model.nbody):
+                nbody = model.nbody
+            else:
+                return []
+
+            for i in range(nbody):
+                name = mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_BODY, i)
+                if name:
+                    names.append(name)
+
+            return names
+
+        except Exception as e:
+            LOGGER.error(f"Failed to get body names: {e}")
+            return []
+
+    def get_body_inertia_data(self, body_name: str) -> BodyInertiaData | None:
+        """Get inertia data for a specific body.
+
+        Args:
+            body_name: Name of the body
+
+        Returns:
+            BodyInertiaData for the body, or None if not found
+        """
+        if not self.sim:
+            return None
+
+        try:
+            import mujoco
+
+            model = self.sim.model
+            data = self.sim.data
+
+            body_id = mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, body_name)
+            if body_id == -1:
+                return None
+
+            # Get body mass
+            mass = float(model.body_mass[body_id])
+
+            # Get body center of mass in world frame
+            # xipos is the position of the body's center of mass in world frame
+            com_world = np.array(data.xipos[body_id])
+
+            # Get body inertia tensor in local frame (diagonal)
+            inertia_diag = np.array(model.body_inertia[body_id])
+
+            # Build diagonal inertia tensor
+            inertia_local = np.diag(inertia_diag)
+
+            # Get body orientation in world frame
+            # ximat is the 3x3 rotation matrix of the body frame
+            rotation = np.array(data.ximat[body_id]).reshape(3, 3)
+
+            return BodyInertiaData(
+                name=body_name,
+                mass=mass,
+                com_world=com_world,
+                inertia_local=inertia_local,
+                rotation=rotation,
+            )
+
+        except Exception as e:
+            LOGGER.error(f"Failed to get inertia data for '{body_name}': {e}")
+            return None
+
+    def get_all_body_inertia_data(self) -> list[BodyInertiaData]:
+        """Get inertia data for all bodies in the model.
+
+        Returns:
+            List of BodyInertiaData for all bodies
+        """
+        body_names = self.get_body_names()
+        result = []
+        for name in body_names:
+            data = self.get_body_inertia_data(name)
+            if data is not None:
+                result.append(data)
+        return result

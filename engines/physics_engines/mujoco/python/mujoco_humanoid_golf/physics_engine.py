@@ -10,6 +10,7 @@ import mujoco
 import numpy as np
 from shared.python.interfaces import PhysicsEngine
 from shared.python.security_utils import validate_path
+from shared.python.inertia_ellipse import BodyInertiaData
 
 LOGGER = logging.getLogger(__name__)
 
@@ -626,3 +627,81 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             "velocity": velocity,
             "modal_amplitudes": state["amplitudes"].copy(),
         }
+
+    # -------- Inertia Ellipse Visualization Support --------
+
+    def get_body_names(self) -> list[str]:
+        """Get list of all body names in the model.
+
+        Returns:
+            List of body name strings
+        """
+        if self.model is None:
+            return []
+
+        names = []
+        for i in range(self.model.nbody):
+            name = mujoco.mj_id2name(self.model, mujoco.mjtObj.mjOBJ_BODY, i)
+            if name:
+                names.append(name)
+        return names
+
+    def get_body_inertia_data(self, body_name: str) -> BodyInertiaData | None:
+        """Get inertia data for a specific body.
+
+        Args:
+            body_name: Name of the body
+
+        Returns:
+            BodyInertiaData for the body, or None if not found
+        """
+        if self.model is None or self.data is None:
+            return None
+
+        body_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, body_name)
+        if body_id == -1:
+            return None
+
+        # Get body mass
+        mass = float(self.model.body_mass[body_id])
+
+        # Get body center of mass in world frame
+        # xipos is the position of the body's center of mass in world frame
+        com_world = self.data.xipos[body_id].copy()
+
+        # Get body inertia tensor in local frame
+        # body_inertia is stored as diagonal elements [ixx, iyy, izz]
+        # For MuJoCo, body_inertia is the diagonal of the inertia matrix
+        # in the body's inertial frame (which may differ from body frame)
+        inertia_diag = self.model.body_inertia[body_id].copy()
+
+        # Build diagonal inertia tensor (MuJoCo stores diagonal for aligned frames)
+        # The full tensor would need body_iquat for off-diagonal terms in general
+        # but MuJoCo assumes diagonal inertia in the inertial frame
+        inertia_local = np.diag(inertia_diag)
+
+        # Get body orientation in world frame
+        # ximat is the 3x3 rotation matrix of the body frame in world
+        rotation = self.data.ximat[body_id].reshape(3, 3).copy()
+
+        return BodyInertiaData(
+            name=body_name,
+            mass=mass,
+            com_world=com_world,
+            inertia_local=inertia_local,
+            rotation=rotation,
+        )
+
+    def get_all_body_inertia_data(self) -> list[BodyInertiaData]:
+        """Get inertia data for all bodies in the model.
+
+        Returns:
+            List of BodyInertiaData for all bodies
+        """
+        body_names = self.get_body_names()
+        result = []
+        for name in body_names:
+            data = self.get_body_inertia_data(name)
+            if data is not None:
+                result.append(data)
+        return result

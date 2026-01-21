@@ -8,6 +8,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
 from shared.python.common_utils import GolfModelingError
+from shared.python.inertia_ellipse import InertiaEllipseConfig, SegmentGroup
 
 
 @dataclass
@@ -59,6 +60,20 @@ class SimulationConfig:
         }
     )
 
+    # Inertia Ellipse Visualization
+    inertia_ellipse_enabled: bool = False
+    inertia_ellipse_segment_group: str = "full_body"  # full_body, full_body_with_club, upper_body, upper_body_with_club
+    inertia_ellipse_show_individual: bool = False
+    inertia_ellipse_show_composite: bool = True
+    inertia_ellipse_opacity: float = 0.5
+    inertia_ellipse_scale: float = 1.0
+    inertia_ellipse_color_individual: list[float] = field(
+        default_factory=lambda: [0.2, 0.6, 1.0, 0.5]  # Light blue
+    )
+    inertia_ellipse_color_composite: list[float] = field(
+        default_factory=lambda: [1.0, 0.4, 0.2, 0.6]  # Orange
+    )
+
     def validate(self) -> None:
         """Validate configuration values."""
         if self.height_m <= 0:
@@ -69,6 +84,59 @@ class SimulationConfig:
             raise GolfModelingError("club_length must be positive")
         if self.control_mode not in ["pd", "lqr", "poly"]:
             raise GolfModelingError(f"Invalid control_mode: {self.control_mode}")
+
+        # Validate inertia ellipse settings
+        valid_segment_groups = [
+            "full_body", "full_body_with_club",
+            "upper_body", "upper_body_with_club",
+            "lower_body", "left_arm", "right_arm",
+            "torso", "club_only", "custom"
+        ]
+        if self.inertia_ellipse_segment_group not in valid_segment_groups:
+            raise GolfModelingError(
+                f"Invalid inertia_ellipse_segment_group: {self.inertia_ellipse_segment_group}"
+            )
+
+        if not 0 <= self.inertia_ellipse_opacity <= 1:
+            raise GolfModelingError("inertia_ellipse_opacity must be between 0 and 1")
+
+        if self.inertia_ellipse_scale <= 0:
+            raise GolfModelingError("inertia_ellipse_scale must be positive")
+
+    def get_inertia_ellipse_config(self) -> InertiaEllipseConfig:
+        """Convert simulation config to InertiaEllipseConfig object.
+
+        Returns:
+            InertiaEllipseConfig instance based on current settings
+        """
+        # Map string to SegmentGroup enum
+        segment_group_map = {
+            "full_body": SegmentGroup.FULL_BODY,
+            "full_body_with_club": SegmentGroup.FULL_BODY_WITH_CLUB,
+            "upper_body": SegmentGroup.UPPER_BODY,
+            "upper_body_with_club": SegmentGroup.UPPER_BODY_WITH_CLUB,
+            "lower_body": SegmentGroup.LOWER_BODY,
+            "left_arm": SegmentGroup.LEFT_ARM,
+            "right_arm": SegmentGroup.RIGHT_ARM,
+            "torso": SegmentGroup.TORSO,
+            "club_only": SegmentGroup.CLUB_ONLY,
+            "custom": SegmentGroup.CUSTOM,
+        }
+
+        segment_group = segment_group_map.get(
+            self.inertia_ellipse_segment_group, SegmentGroup.FULL_BODY
+        )
+
+        return InertiaEllipseConfig(
+            enabled=self.inertia_ellipse_enabled,
+            segment_group=segment_group,
+            show_individual=self.inertia_ellipse_show_individual,
+            show_composite=self.inertia_ellipse_show_composite,
+            opacity=self.inertia_ellipse_opacity,
+            color_individual=self.inertia_ellipse_color_individual,
+            color_composite=self.inertia_ellipse_color_composite,
+            scale_factor=self.inertia_ellipse_scale,
+        )
 
 
 class ConfigurationManager:
