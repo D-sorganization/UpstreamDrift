@@ -302,6 +302,25 @@ This section defines the active agents within the Jules "Control Tower" Architec
 - **Write:** Merge resolution commits.
 - **Constraint:** Prioritizes "Incoming" changes unless specified otherwise.
 
+### 7. Tech-Debt-Assessor (Accountant)
+
+**Role:** Technical Debt Tracker
+**Workflow:** `.github/workflows/Jules-Tech-Debt-Assessor.yml`
+**Triggered By:** Weekly schedule (Sunday 5 AM PST) or manual dispatch
+**Capabilities:**
+
+- **Read-Only:** Analyzes codebase without modifications
+- **Output:** Generates comprehensive debt reports in `docs/assessments/tech_debt/`
+- **Metrics Tracked:**
+  - Code complexity (Radon cyclomatic complexity)
+  - Incomplete implementations (NotImplementedError, stubs)
+  - Type annotation coverage (MyPy)
+  - Dead code (Vulture)
+  - Security debt (Bandit, pip-audit)
+  - Linting violations (Ruff)
+  - Test coverage gaps
+- **Issues:** Creates/updates GitHub issues for debt scores > 50
+
 ---
 
 ## 🛠️ GitHub CLI & Workflow Reference
