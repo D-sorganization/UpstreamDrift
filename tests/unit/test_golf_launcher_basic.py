@@ -120,9 +120,8 @@ def mocked_launcher_module():
         # Import the module
         import launchers.golf_launcher
 
-        # If it was already imported before, we might need to reload it to ensure
-        # it picks up the mocked Qt modules
-        reload(launchers.golf_launcher)
+        # reload() is unnecessary and dangerous for C-extensions because we already
+        # deleted the module from sys.modules above, forcing a fresh import.
 
         yield launchers.golf_launcher
 

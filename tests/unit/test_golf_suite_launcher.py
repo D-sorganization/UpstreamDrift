@@ -187,10 +187,10 @@ with patch.dict(
     # Force reload to ensure it uses our mocks if it was already loaded
     import sys
 
-    from launchers import golf_suite_launcher
-
-    # Avoid importlib.reload()
+    # Use sys.modules.pop instead of reload to avoid C-extension corruption
     sys.modules.pop("launchers.golf_suite_launcher", None)
+
+    from launchers import golf_suite_launcher
 
 
 @pytest.fixture
