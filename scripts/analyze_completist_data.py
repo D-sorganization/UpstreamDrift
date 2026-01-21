@@ -182,9 +182,7 @@ def generate_report() -> None:
     report_content += (
         f"2. Fill in missing features marked with {MARKER_T_D} in core logic.\n"
     )
-    report_content += (
-        f"3. Resolve Technical Debt ({MARKER_F_M}) to ensure stability.\n"
-    )
+    report_content += f"3. Resolve Technical Debt ({MARKER_F_M}) to ensure stability.\n"
     report_content += "4. Add docstrings to public interfaces.\n"
 
     # Issues to be created section
