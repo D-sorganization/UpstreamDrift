@@ -1,5 +1,5 @@
-./tools/urdf_generator/visualization_widget.py:122 initializeGL
-./tools/urdf_generator/visualization_widget.py:129 resizeGL
+./tools/urdf_generator/visualization_widget.py:124 initializeGL
+./tools/urdf_generator/visualization_widget.py:131 resizeGL
 ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_gui_application.py:279 _on_position_changed
 ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:138 _calculate_scaling_factors
 ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:359 _compile_ground_shaders
@@ -10,7 +10,7 @@
 ./engines/physics_engines/drake/python/tests/test_drake_visualizer.py:30 __init__
 ./engines/physics_engines/drake/python/tests/test_drake_visualizer.py:41 __init__
 ./engines/physics_engines/mujoco/python/humanoid_launcher.py:147 set_analysis_config
-./engines/physics_engines/mujoco/python/humanoid_launcher.py:732 load_config
+./engines/physics_engines/mujoco/python/humanoid_launcher.py:734 load_config
 ./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py:70 control
 ./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py:74 reset
 ./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/pinocchio_interface.py:157 sync_pinocchio_to_mujoco
