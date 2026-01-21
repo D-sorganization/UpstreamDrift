@@ -140,7 +140,7 @@ extend-exclude = '''
 '''
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py311"
 line-length = 88
 exclude = [
     ".git",
