@@ -92,7 +92,6 @@ run_log.txt
 .jules/bolt*
 .jules/palette*
 .jules/pallette*
-.jules/sentinel*
 
 # CI/PR artifact files (prevent accumulation at root)
 checks.json
