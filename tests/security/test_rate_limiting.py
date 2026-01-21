@@ -1,13 +1,14 @@
-import pytest
 from fastapi.testclient import TestClient
+
 from api.server import app
 
 client = TestClient(app)
 
+
 def test_rate_limiting():
     # Attempt to hit the login endpoint multiple times
     # Assuming limit is something like 5/minute
-    
+
     # Just a basic check that the endpoint exists first
     response = client.post("/api/auth/login", json={"username": "test", "password": "wrong"})
     assert response.status_code in [401, 429]
