@@ -2,7 +2,7 @@ from fastapi.testclient import TestClient
 
 from api.server import app
 
-client = TestClient(app)
+client = TestClient(app, base_url="http://localhost")
 
 
 def test_rate_limiting():
@@ -10,7 +10,9 @@ def test_rate_limiting():
     # Assuming limit is something like 5/minute
 
     # Just a basic check that the endpoint exists first
-    response = client.post("/api/auth/login", json={"username": "test", "password": "wrong"})
+    response = client.post(
+        "/auth/login", json={"email": "test@example.com", "password": "wrong"}
+    )
     assert response.status_code in [401, 429]
 
     # Note: Actual rate limit testing requires knowing the specific limit
