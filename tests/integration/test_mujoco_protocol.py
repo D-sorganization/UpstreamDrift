@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import importlib
+import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -23,11 +23,12 @@ class TestMuJoCoProtocol(unittest.TestCase):
         self.mock_mujoco.MjModel.from_xml_path = MagicMock()
         self.mock_mujoco.MjData = MagicMock()
 
-        # 3. Import (and force reload) the engine module to ensure it binds to our mock
-        # We must reload because previous tests might have loaded the real/other version
-        import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine as physics_module
-
-        importlib.reload(physics_module)
+        # 3. Import the engine module to ensure it binds to our mock
+        # We remove it from sys.modules first to force a fresh import that sees our mock
+        module_name = (
+            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine"
+        )
+        sys.modules.pop(module_name, None)
 
         # 4. Get the class
         from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
