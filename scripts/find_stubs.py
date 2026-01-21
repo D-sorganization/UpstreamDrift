@@ -1,8 +1,9 @@
 import ast
 import os
+from typing import TextIO
 
 
-def is_stub(node):
+def is_stub(node: ast.AST) -> bool:
     """Check if a function node is a stub."""
     if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
         return False
@@ -13,7 +14,8 @@ def is_stub(node):
     if (
         body
         and isinstance(body[0], ast.Expr)
-        and isinstance(body[0].value, (ast.Str, ast.Constant))
+        and isinstance(body[0].value, ast.Constant)
+        and isinstance(body[0].value.value, str)
     ):
         body = body[1:]
 
@@ -24,7 +26,11 @@ def is_stub(node):
         stmt = body[0]
         if isinstance(stmt, ast.Pass):
             return True
-        if isinstance(stmt, ast.Expr) and isinstance(stmt.value, ast.Ellipsis):  # ...
+        if (
+            isinstance(stmt, ast.Expr)
+            and isinstance(stmt.value, ast.Constant)
+            and stmt.value.value is Ellipsis
+        ):  # ...
             return True
         if isinstance(stmt, ast.Raise):
             # Check if raising Not Implemented Error
@@ -41,7 +47,7 @@ def is_stub(node):
     return False
 
 
-def check_file(filepath, stubs_file, docs_file):
+def check_file(filepath: str, stubs_file: TextIO, docs_file: TextIO) -> None:
     """Check a file for stubs and missing documentation."""
     try:
         with open(filepath, encoding="utf-8") as f:
@@ -67,7 +73,7 @@ def check_file(filepath, stubs_file, docs_file):
                     stubs_file.write(f"{filepath}:{node.lineno} {node.name}\n")
 
 
-def main():
+def main() -> None:
     """Main execution function."""
     root_dir = "."
     stubs_path = ".jules/completist_data/stub_functions.txt"
