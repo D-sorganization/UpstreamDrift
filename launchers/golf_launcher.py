@@ -129,7 +129,7 @@ try:
 except ImportError:
     UI_COMPONENTS_AVAILABLE = False
 
-# Windows-specific subprocess constants
+# Windows-specific subprocess constants.
 CREATE_NO_WINDOW: int
 CREATE_NEW_CONSOLE: int
 
