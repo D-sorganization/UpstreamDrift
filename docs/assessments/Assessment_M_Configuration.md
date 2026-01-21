@@ -1,17 +1,21 @@
-# Assessment M: Configuration
+# Assessment: Configuration (Category M)
 
-## Grade: 10/10
+## Executive Summary
+**Grade: 9/10**
 
-## Summary
-Configuration is managed effectively using standard Python tooling and environment variables.
+Configuration is centralized and follows 12-factor app principles (environment variables). `pyproject.toml` handles tool config well.
 
 ## Strengths
-- **Tool Configuration**: `pyproject.toml` centralizes configuration for black, ruff, mypy, pytest, and coverage.
-- **Environment Support**: `.env.example` indicates support for environment-based configuration (likely via `pydantic-settings` or `python-dotenv`).
-- **Separation**: Configuration is separated from code, following 12-Factor App principles.
+1.  **Env Vars:** Sensitive data (secrets, DB URL) via environment.
+2.  **Centralized:** `pyproject.toml` allows single-file config for most tools.
+3.  **Validation:** Config validation logic exists (e.g., `_validate_model_path`).
 
 ## Weaknesses
-- None identified.
+1.  **Defaults:** Some defaults (like allowed hosts) are hardcoded in code as fallbacks, which is acceptable but requires care.
 
 ## Recommendations
-- Ensure that sensitive defaults (like `SECRET_KEY` if used) are explicitly unsafe in development to prevent accidental production use.
+1.  **Pydantic Settings:** Use `pydantic-settings` for robust environment variable loading and validation.
+
+## Detailed Analysis
+- **Static:** `pyproject.toml`.
+- **Runtime:** Environment variables.

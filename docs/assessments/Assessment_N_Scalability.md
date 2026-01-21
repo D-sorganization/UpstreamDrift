@@ -1,17 +1,23 @@
-# Assessment N: Scalability
+# Assessment: Scalability (Category N)
 
-## Grade: 9/10
+## Executive Summary
+**Grade: 8/10**
 
-## Summary
-The architecture supports scaling through asynchronous processing and modular services, though some state management is currently local.
+The architecture allows for scalability. The API is stateless (mostly), and background tasks allow offloading heavy work. However, the reliance on local file storage for models/uploads and the GIL (Global Interpreter Lock) for CPU-bound tasks are limits.
 
 ## Strengths
-- **Asynchronous API**: Use of FastAPI and `async`/`await` allows high concurrency for I/O-bound tasks.
-- **Background Tasks**: Long-running simulations are offloaded to background tasks, keeping the API responsive.
-- **Modular Engines**: Physics engines are decoupled, allowing them to potentially run on separate workers in the future.
+1.  **Async:** `FastAPI` handles high concurrency for I/O bound tasks.
+2.  **Stateless:** Easy to replicate API containers.
+3.  **Task Queue:** Background tasks pattern established.
 
 ## Weaknesses
-- **State Management**: The `TaskManager` in `api/server.py` stores task state in-memory. This works for a single instance but prevents horizontal scaling (multiple API replicas) without a shared store like Redis.
+1.  **CPU Bound:** Physics simulations are CPU heavy; Python's GIL limits single-node scaling.
+2.  **Shared Storage:** Multiple instances would need shared storage (e.g., S3/EFS) for models/uploads, currently local-path based.
 
 ## Recommendations
-- For production deployment with multiple replicas, refactor `TaskManager` to use a distributed store (Redis) for task state and results.
+1.  **Celery/Redis:** Move from `BackgroundTasks` (in-process) to `Celery` + `Redis` for distributed task processing.
+2.  **Object Storage:** Abstract file access to support S3.
+
+## Detailed Analysis
+- **Horizontal:** Possible with load balancer.
+- **Vertical:** Limited by GIL (for Python parts).
