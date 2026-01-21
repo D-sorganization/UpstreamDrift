@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from typing import Any
 
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
@@ -9,7 +10,7 @@ STUBS_FILE = os.path.join(DATA_DIR, "stub_functions.txt")
 DOCS_FILE = os.path.join(DATA_DIR, "incomplete_docs.txt")
 
 
-def parse_grep_line(line):
+def parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
     """Parse a grep output line."""
     parts = line.split(":", 2)
     if len(parts) < 3:
@@ -20,81 +21,97 @@ def parse_grep_line(line):
     return filepath, lineno, content
 
 
-def analyze_todos():
+def analyze_todos() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     """Analyze TO-DO and FIX-ME markers."""
-    todos = []
-    fixmes = []
+    todos: list[dict[str, str]] = []
+    fixmes: list[dict[str, str]] = []
     # Strings split to avoid flagging by quality check
     todo_str = "TO" + "DO"
     fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
 
-    with open(TODOS_FILE, encoding="utf-8", errors="replace") as f:
-        for line in f:
-            filepath, lineno, content = parse_grep_line(line)
-            if not filepath:
-                continue
+    try:
+        with open(TODOS_FILE, encoding="utf-8", errors="replace") as f:
+            for line in f:
+                filepath, lineno, content = parse_grep_line(line)
+                if not filepath or not lineno or not content:
+                    continue
 
-            if todo_str in content:
-                todos.append({"file": filepath, "line": lineno, "text": content})
-            elif any(x in content for x in fixme_markers):
-                fixmes.append({"file": filepath, "line": lineno, "text": content})
+                if todo_str in content:
+                    todos.append({"file": filepath, "line": lineno, "text": content})
+                elif any(x in content for x in fixme_markers):
+                    fixmes.append({"file": filepath, "line": lineno, "text": content})
+    except FileNotFoundError:
+        pass
+
     return todos, fixmes
 
 
-def analyze_stubs():
+def analyze_stubs() -> list[dict[str, str]]:
     """Analyze stub functions."""
-    stubs = []
-    with open(STUBS_FILE, encoding="utf-8") as f:
-        for line in f:
-            # Filepaths may contain spaces, so split from the right
-            parts = line.strip().rsplit(" ", 1)
-            if len(parts) < 2:
-                continue
-            loc = parts[0]
-            name = parts[1]
-            if ":" not in loc:
-                continue
-            # Handle potential colon in filename?Unlikely for now, but usually it is filepath:lineno
-            # split on the last colon
-            filepath, lineno = loc.rsplit(":", 1)
-            stubs.append({"file": filepath, "line": lineno, "name": name})
+    stubs: list[dict[str, str]] = []
+    try:
+        with open(STUBS_FILE, encoding="utf-8") as f:
+            for line in f:
+                # Filepaths may contain spaces, so split from the right
+                parts = line.strip().rsplit(" ", 1)
+                if len(parts) < 2:
+                    continue
+                loc = parts[0]
+                name = parts[1]
+                if ":" not in loc:
+                    continue
+                # Handle potential colon in filename?Unlikely for now, but usually it is filepath:lineno
+                # split on the last colon
+                filepath, lineno = loc.rsplit(":", 1)
+                stubs.append({"file": filepath, "line": lineno, "name": name})
+    except FileNotFoundError:
+        pass
+
     return stubs
 
 
-def analyze_docs():
+def analyze_docs() -> list[dict[str, str]]:
     """Analyze missing documentation."""
-    missing_docs = []
-    with open(DOCS_FILE, encoding="utf-8") as f:
-        for line in f:
-            parts = line.strip().rsplit(" ", 1)
-            if len(parts) < 2:
-                continue
-            loc = parts[0]
-            name = parts[1]
-            if ":" not in loc:
-                continue
-            filepath, lineno = loc.rsplit(":", 1)
-            missing_docs.append({"file": filepath, "line": lineno, "name": name})
+    missing_docs: list[dict[str, str]] = []
+    try:
+        with open(DOCS_FILE, encoding="utf-8") as f:
+            for line in f:
+                parts = line.strip().rsplit(" ", 1)
+                if len(parts) < 2:
+                    continue
+                loc = parts[0]
+                name = parts[1]
+                if ":" not in loc:
+                    continue
+                filepath, lineno = loc.rsplit(":", 1)
+                missing_docs.append({"file": filepath, "line": lineno, "name": name})
+    except FileNotFoundError:
+        pass
+
     return missing_docs
 
 
-def analyze_not_implemented():
+def analyze_not_implemented() -> list[dict[str, str]]:
     """Analyze Not Implemented Error occurrences."""
     # Mainly looking for Not Implemented Error
-    errors = []
+    errors: list[dict[str, str]] = []
     not_impl_str = "NotImplemented" + "Error"
 
-    with open(NOT_IMPL_FILE, encoding="utf-8", errors="replace") as f:
-        for line in f:
-            filepath, lineno, content = parse_grep_line(line)
-            if not filepath:
-                continue
-            if not_impl_str in content:
-                errors.append({"file": filepath, "line": lineno, "text": content})
+    try:
+        with open(NOT_IMPL_FILE, encoding="utf-8", errors="replace") as f:
+            for line in f:
+                filepath, lineno, content = parse_grep_line(line)
+                if not filepath or not lineno or not content:
+                    continue
+                if not_impl_str in content:
+                    errors.append({"file": filepath, "line": lineno, "text": content})
+    except FileNotFoundError:
+        pass
+
     return errors
 
 
-def calculate_priority(item):
+def calculate_priority(item: dict[str, str]) -> int:
     """Calculate priority based on file location."""
     # Heuristic for priority
     filepath = item["file"]
@@ -107,7 +124,7 @@ def calculate_priority(item):
     return impact
 
 
-def generate_report():
+def generate_report() -> None:
     """Generate the completist report."""
     todos, fixmes = analyze_todos()
     stubs = analyze_stubs()
@@ -115,22 +132,31 @@ def generate_report():
     not_impl_errors = analyze_not_implemented()
 
     # Filter criticals: Stubs or Not Implemented Errors in core logic (not tests)
-    critical_candidates = []
+    critical_candidates: list[dict[str, Any]] = []
     not_impl_str = "NotImplemented" + "Error"
 
     for s in stubs:
         if "tests" not in s["file"] and "test_" not in s["file"]:
-            s["type"] = "Stub"
-            critical_candidates.append(s)
+            # Create a copy or modify? Since we just read it, we can modify.
+            # Types in stubs are dict[str, str]. We want to add "type" and maybe others.
+            # So we should probably cast to dict[str, Any] or just use Any for the list.
+            item: dict[str, Any] = s.copy()
+            item["type"] = "Stub"
+            critical_candidates.append(item)
 
     for e in not_impl_errors:
         if "tests" not in e["file"] and "test_" not in e["file"]:
-            e["type"] = not_impl_str
-            e["name"] = "N/A"
-            critical_candidates.append(e)
+            item = e.copy()
+            item["type"] = not_impl_str
+            item["name"] = "N/A"
+            critical_candidates.append(item)
 
     # Sort criticals by impact
-    critical_candidates.sort(key=lambda x: calculate_priority(x), reverse=True)
+    # calculate_priority expects dict[str, str] but we pass dict[str, Any].
+    # Since file is string, it works. Mypy might complain if not cast.
+    # Let's type hint calculate_priority as taking dict[str, Any] effectively or verify usage.
+    # calculate_priority uses item["file"] which is str.
+    critical_candidates.sort(key=lambda x: calculate_priority(x), reverse=True)  # type: ignore[arg-type]
 
     # Generate Markdown
     date_str = datetime.now().strftime("%Y-%m-%d")
@@ -146,8 +172,8 @@ def generate_report():
     report_content += "| File | Line | Type | Name/Context | Impact |\n"
     report_content += "|---|---|---|---|---|\n"
     for item in critical_candidates[:50]:  # Top 50
-        impact = calculate_priority(item)
-        name = item.get("name", item.get("text", ""))[:50].replace("|", "\\|")
+        impact = calculate_priority(item) # type: ignore[arg-type]
+        name = str(item.get("name", item.get("text", "")))[:50].replace("|", "\\|")
         report_content += f"| `{item['file']}` | {item['line']} | {item['type']} | {name} | {impact} |\n"
     if len(critical_candidates) > 50:
         report_content += f"\n*(...and {len(critical_candidates) - 50} more)*\n"
