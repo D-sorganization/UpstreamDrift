@@ -86,7 +86,7 @@ jobs:
           
           # Create session prompt
           PROMPT=$(cat << 'PROMPT_EOF'
-          '
+
           You are the CODE QUALITY REVIEWER agent.
           
           Review git history in .jules/review_data/ for the last few days.
