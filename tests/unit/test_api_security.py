@@ -364,11 +364,23 @@ class TestSecretKeyValidation:
         """Test that secret key can be set via environment variable."""
         with patch.dict("os.environ", {"GOLF_API_SECRET_KEY": "x" * 64}):
             # Reload the module to pick up new environment variable
-            import importlib
+            import os
+            import sys
+
+            # Verify env var is set correctly
+            assert os.environ.get("GOLF_API_SECRET_KEY") == "x" * 64
+
+            # Avoid importlib.reload()
+            if "api.auth.security" in sys.modules:
+                del sys.modules["api.auth.security"]
+
+            # Also ensure parent package doesn't hold stale reference
+            if "api.auth" in sys.modules:
+                import api.auth
+                if hasattr(api.auth, "security"):
+                    delattr(api.auth, "security")
 
             from api.auth import security
-
-            importlib.reload(security)
 
             # Check it uses the environment variable
             assert security.SECRET_KEY == "x" * 64

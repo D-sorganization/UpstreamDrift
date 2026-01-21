@@ -1,6 +1,5 @@
 """Integration tests for GolfLauncher."""
 
-import importlib
 import os
 import sys
 import tempfile
@@ -212,9 +211,11 @@ models:
 
             # Create Launcher
             # Force reload to ensure no mocks from unit tests persist
-            import launchers.golf_launcher
+            import sys
 
-            importlib.reload(launchers.golf_launcher)
+
+            # Avoid importlib.reload() as it corrupts C-extensions/Qt bindings
+            sys.modules.pop("launchers.golf_launcher", None)
             from launchers.golf_launcher import GolfLauncher as FreshGolfLauncher
 
             launcher = FreshGolfLauncher()
