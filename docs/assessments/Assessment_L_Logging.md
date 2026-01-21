@@ -1,17 +1,15 @@
-# Assessment L: Logging
+# Assessment: Logging (Category L)
 
-## Grade: 8/10
+## Grade: 4/10
 
-## Summary
-Logging is implemented using the standard library `logging` module, with proper configuration at the application entry point.
-
-## Strengths
-- **Usage**: Modules use `logging.getLogger(__name__)` to allow granular control.
-- **Configuration**: `api/server.py` sets up basic logging.
-- **Linting**: Tools are configured to flag `print` statements (`flake8-print`), enforcing the use of proper logging.
-
-## Weaknesses
-- **Consistency**: `structlog` is listed in dependencies, but the sampled code (`api/server.py`, `signal_processing.py`) uses the standard `logging` library. This suggests a potential mix of logging styles or underutilization of structured logging capabilities.
+## Analysis
+Logging is a significant weakness in the current codebase.
+- **Print Statements**: There are **1,346** occurrences of `print()` in the codebase, compared to only **395** calls to `logging.`.
+- **Configuration**: While `api/server.py` and `golf_launcher.py` configure logging, many modules rely on `print` for debugging and status updates.
+- **Risk**: `print` statements clutter stdout, cannot be easily filtered or piped to files in production, and lack timestamp/severity context.
+- **CI Ignores**: `pyproject.toml` has numerous `T201` (print found) ignores to make the linter pass, masking the debt.
 
 ## Recommendations
-- Standardize on `structlog` for application-level logging to produce machine-readable (JSON) logs, which are easier to query in production environments.
+1. **Migration**:Systematically replace `print()` with `logger.info()`, `logger.debug()`, etc., across the codebase.
+2. **Standardization**: Ensure every module does `logger = logging.getLogger(__name__)`.
+3. **Structured Logging**: Consider using `structlog` (which is in dependencies) more consistently for machine-readable logs.

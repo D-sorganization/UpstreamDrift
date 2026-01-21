@@ -1,17 +1,13 @@
-# Assessment N: Scalability
+# Assessment: Scalability (Category N)
 
-## Grade: 9/10
+## Grade: 7/10
 
-## Summary
-The architecture supports scaling through asynchronous processing and modular services, though some state management is currently local.
-
-## Strengths
-- **Asynchronous API**: Use of FastAPI and `async`/`await` allows high concurrency for I/O-bound tasks.
-- **Background Tasks**: Long-running simulations are offloaded to background tasks, keeping the API responsive.
-- **Modular Engines**: Physics engines are decoupled, allowing them to potentially run on separate workers in the future.
-
-## Weaknesses
-- **State Management**: The `TaskManager` in `api/server.py` stores task state in-memory. This works for a single instance but prevents horizontal scaling (multiple API replicas) without a shared store like Redis.
+## Analysis
+The system has some scalable characteristics but is limited by stateful components.
+- **Async**: The API uses `async/await` and background tasks for long-running operations, allowing high concurrency for I/O bound tasks.
+- **Statelessness**: The REST API is mostly stateless, but the `active_tasks` dictionary is in-memory, preventing simple load balancing across multiple worker processes without sticky sessions or an external store (Redis).
+- **Physics**: Physics simulations are CPU-bound and run locally or in Docker containers. Scaling this requires an orchestration layer (like Kubernetes) to manage worker containers, which is partially implied by the Docker support but not fully realized.
 
 ## Recommendations
-- For production deployment with multiple replicas, refactor `TaskManager` to use a distributed store (Redis) for task state and results.
+1. **Redis**: Replace in-memory `active_tasks` with Redis to allow multiple API workers.
+2. **Task Queue**: Move simulation jobs to a proper task queue (Celery/RQ) instead of FastAPI `BackgroundTasks` for better reliability and scaling.

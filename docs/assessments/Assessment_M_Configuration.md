@@ -1,17 +1,14 @@
-# Assessment M: Configuration
+# Assessment: Configuration (Category M)
 
-## Grade: 10/10
+## Grade: 8/10
 
-## Summary
-Configuration is managed effectively using standard Python tooling and environment variables.
-
-## Strengths
-- **Tool Configuration**: `pyproject.toml` centralizes configuration for black, ruff, mypy, pytest, and coverage.
-- **Environment Support**: `.env.example` indicates support for environment-based configuration (likely via `pydantic-settings` or `python-dotenv`).
-- **Separation**: Configuration is separated from code, following 12-Factor App principles.
-
-## Weaknesses
-- None identified.
+## Analysis
+Configuration management is standard and effective.
+- **Centralization**: `pyproject.toml` serves as the single source of truth for build, test, and lint configuration.
+- **Environment**: The API uses environment variables (e.g., `ALLOWED_HOSTS`) for deployment-specific settings.
+- **Runtime**: The launcher uses a JSON config file (`layout.json`) for user preferences, stored in a dot-folder.
+- **Models**: `models.yaml` (referenced in launcher code) manages model registry configuration.
 
 ## Recommendations
-- Ensure that sensitive defaults (like `SECRET_KEY` if used) are explicitly unsafe in development to prevent accidental production use.
+1. **Validation**: Use Pydantic `BaseSettings` for all configuration loading (API does this, ensure launcher/shared libs do too) to enforce type safety.
+2. **Secrets**: Ensure `models.yaml` or other configs never accidentally store secrets (none found, but good to enforce).

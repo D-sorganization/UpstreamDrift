@@ -1,18 +1,16 @@
-# Assessment A: Code Structure
+# Assessment: Code Structure (Category A)
 
-## Grade: 10/10
+## Grade: 7/10
 
-## Summary
-The codebase demonstrates exemplary code structure with clear separation of concerns, modular design, and a logical directory hierarchy.
+## Analysis
+The codebase exhibits a generally sound modular architecture, separating shared logic (`shared/`), physics engines (`engines/`), and API services (`api/`). The use of a `PhysicsEngine` protocol to standardize interactions across different engines (MuJoCo, Drake, Pinocchio) is a strong architectural decision that promotes decoupling.
 
-## Strengths
-- **Modular Architecture**: Distinct separation between `api`, `engines`, `shared`, and `tools` allows for independent development and testing of components.
-- **Protocol-based Design**: usage of `EngineManager` and protocols for physics engines facilitates easy addition of new engines (MuJoCo, Drake, etc.) without modifying core logic.
-- **Shared Utilities**: Common logic is centralized in `shared/python`, preventing code duplication across different engine implementations.
-- **API Layering**: The FastAPI application (`api/server.py`) is cleanly separated from the business logic (`services/`), which in turn relies on the domain layer (`engines/`).
-
-## Weaknesses
-- None identified. The structure is well-suited for the project's complexity.
+However, the repository suffers from significant monolithic file issues. Several key files are excessively large, violating the Single Responsibility Principle:
+- `shared/python/plotting_core.py`: ~4,500 lines. This "God Class" handles too many distinct visualization types.
+- `launchers/golf_launcher.py`: ~3,100 lines. Mixes UI logic, process management, and Docker handling.
+- `shared/python/statistical_analysis.py`: ~2,200 lines.
 
 ## Recommendations
-- Continue enforcing this structure during PR reviews to prevent architectural drift.
+1. **Refactor `plotting_core.py`**: Split `GolfSwingPlotter` into smaller, domain-specific plotters (e.g., `KinematicPlotter`, `EnergyPlotter`, `PhaseSpacePlotter`) and use composition or mixins.
+2. **Decompose `golf_launcher.py`**: Extract Docker management and process handling into dedicated service modules in `shared/python`.
+3. **Enforce Line Limits**: Consider adding a linter rule to warn on files exceeding 1000 lines to prevent future regression.
