@@ -3,7 +3,6 @@ Unit tests for basic golf launcher functionality (Docker threads).
 """
 
 import sys
-from importlib import reload
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest

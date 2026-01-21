@@ -214,7 +214,6 @@ models:
             # Note: We use sys.modules.pop instead of importlib.reload to avoid
             # corruption of C-extension bindings (like PyQt/MuJoCo)
             sys.modules.pop("launchers.golf_launcher", None)
-            import launchers.golf_launcher
             from launchers.golf_launcher import GolfLauncher as FreshGolfLauncher
 
             launcher = FreshGolfLauncher()
