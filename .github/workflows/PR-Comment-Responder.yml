@@ -50,12 +50,17 @@ jobs:
           echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
 
           # Get PR details
-          gh pr view $PR_NUMBER --json headRefName,title,body,comments,reviewComments \
+          gh pr view $PR_NUMBER --json headRefName,headRepository,headRepositoryOwner,isCrossRepository,title,body,comments,reviewComments \
             > .pr_details.json
 
           # Get the branch
           BRANCH=$(cat .pr_details.json | jq -r '.headRefName')
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+          IS_FORK=$(cat .pr_details.json | jq -r '.isCrossRepository // false')
+          HEAD_REPO=$(cat .pr_details.json | jq -r '.headRepository.nameWithOwner // ""')
+          echo "is_fork=$IS_FORK" >> $GITHUB_OUTPUT
+          echo "head_repo=$HEAD_REPO" >> $GITHUB_OUTPUT
 
       - name: Analyze Comments
         id: analyze
@@ -107,15 +112,21 @@ jobs:
         run: |
           echo "No actionable comments found. Exiting."
 
+      - name: Skip Forked PRs
+        if: steps.analyze.outputs.has_comments == 'true' && steps.pr.outputs.is_fork == 'true'
+        run: |
+          echo "PR is from a fork. Skipping branch checkout and push-based automation."
+
       - name: Checkout PR Branch
-        if: steps.analyze.outputs.has_comments == 'true'
+        if: steps.analyze.outputs.has_comments == 'true' && steps.pr.outputs.is_fork != 'true'
         run: |
           git fetch origin ${{ steps.pr.outputs.branch }}
           git checkout ${{ steps.pr.outputs.branch }}
 
       # Option 1: Use Jules if available
       - name: Address Comments with Jules
-        if: steps.analyze.outputs.has_comments == 'true'
+        id: jules
+        if: steps.analyze.outputs.has_comments == 'true' && steps.pr.outputs.is_fork != 'true'
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
         run: |
@@ -127,6 +138,7 @@ jobs:
           # Check if API key is configured
           if [ -z "$JULES_API_KEY" ]; then
             echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
+            echo "ran=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           
@@ -140,6 +152,7 @@ jobs:
           
           if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
             echo "::warning::Repository $REPO not found in Jules sources."
+            echo "ran=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           
@@ -147,7 +160,6 @@ jobs:
           
           # Create session prompt
           PROMPT=$(cat << 'PROMPT_EOF'
-          '
           Review and address the PR comments in .actionable_comments.json
           
           For each comment:
@@ -197,6 +209,7 @@ jobs:
           MAX_WAIT=1800
           POLL_INTERVAL=30
           ELAPSED=0
+          JULES_DONE=false
           
           while [ $ELAPSED -lt $MAX_WAIT ]; do
             SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
@@ -205,6 +218,7 @@ jobs:
           
             case "$STATE" in
               "COMPLETED"|"SUBMITTED")
+                JULES_DONE=true
                 echo "Session completed successfully!"
                 break
                 ;;
@@ -217,21 +231,24 @@ jobs:
             ELAPSED=$((ELAPSED + POLL_INTERVAL))
           done
           
+          if [ "$JULES_DONE" = "true" ]; then
+            echo "ran=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::Jules session timed out after ${MAX_WAIT}s."
+            echo "ran=false" >> "$GITHUB_OUTPUT"
+          fi
+
 
 
       # Option 2: Use Claude API directly (requires ANTHROPIC_API_KEY secret)
       # Only runs if Jules was skipped (no JULES_API_KEY) and ANTHROPIC_API_KEY is set
       - name: Address Comments with Claude API
-        if: steps.analyze.outputs.has_comments == 'true'
+        if: steps.analyze.outputs.has_comments == 'true' && steps.pr.outputs.is_fork != 'true' && steps.jules.outputs.ran != 'true'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
         run: |
-          # Skip if Jules already ran or if no Anthropic key
-          if [ -n "$JULES_TOKEN" ]; then
-            echo "Jules handled this, skipping Claude API"
-            exit 0
-          fi
+          # Skip if no Anthropic key
           if [ -z "$ANTHROPIC_API_KEY" ]; then
             echo "ANTHROPIC_API_KEY not configured, skipping"
             exit 0
@@ -292,7 +309,7 @@ jobs:
           PYEOF
 
       - name: Commit Changes
-        if: steps.analyze.outputs.has_comments == 'true'
+        if: steps.analyze.outputs.has_comments == 'true' && steps.pr.outputs.is_fork != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -306,7 +323,7 @@ jobs:
 
             git push origin ${{ steps.pr.outputs.branch }}
 
-            gh pr comment ${{ steps.pr.outputs.pr_number }} --body "I've addressed the review comments. Please take another look! 🔍"
+            gh pr comment ${{ steps.pr.outputs.pr_number }} --body "I've addressed the review comments. Please take another look!"
           else
             echo "No changes made"
           fi
