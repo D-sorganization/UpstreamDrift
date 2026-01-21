@@ -6,8 +6,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 # Import OUTPUT_ROOT from constants to avoid circular dependency
-from shared.python.constants import OUTPUT_ROOT
-
 # Import core utilities (exceptions, logging) from the lightweight module
 from shared.python.constants import (
     DEG_TO_RAD,
@@ -16,6 +14,7 @@ from shared.python.constants import (
     M_TO_YARD,
     MPS_TO_KPH,
     MPS_TO_MPH,
+    OUTPUT_ROOT,
     RAD_TO_DEG,
 )
 from shared.python.core import (
