@@ -8,7 +8,6 @@ These tests demonstrate proper integration testing:
 - Test end-to-end workflows
 """
 
-import importlib
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -112,7 +111,6 @@ class TestMuJoCoEngineIntegration:
         try:
             import mujoco  # noqa: F401
 
-            importlib.reload(mujoco)
             return True
         except (ImportError, OSError):
             pytest.skip("MuJoCo not installed or DLL load failed")
@@ -125,14 +123,13 @@ class TestMuJoCoEngineIntegration:
         - Loads actual URDF file
         - Verifies real physics engine behavior
         """
-        import importlib
-
-        import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
-
-        # Force reload to ensure we are using the REAL engine module, not the one cached with Mocks
-        importlib.reload(
-            engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
+        module_name = (
+            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine"
         )
+
+        # Ensure we are using the REAL engine module, not one cached with Mocks
+        # Instead of reload (dangerous), we remove from sys.modules to force fresh import
+        sys.modules.pop(module_name, None)
 
         from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
             MuJoCoPhysicsEngine,
@@ -161,14 +158,12 @@ class TestMuJoCoEngineIntegration:
         GOOD PRACTICE: Tests actual physics simulation, not mocks.
         Verifies that state changes over time as expected.
         """
-        import importlib
-
-        import engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
-
-        # Force reload here too to ensure we get the clean import
-        importlib.reload(
-            engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine
+        module_name = (
+            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine"
         )
+
+        # Ensure we get the clean import
+        sys.modules.pop(module_name, None)
 
         from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
             MuJoCoPhysicsEngine,
