@@ -185,11 +185,12 @@ with patch.dict(
     {"PyQt6": mock_qt, "PyQt6.QtWidgets": mock_widgets, "PyQt6.QtCore": mock_core},
 ):
     # Force reload to ensure it uses our mocks if it was already loaded
-    import importlib
+    import sys
 
     from launchers import golf_suite_launcher
 
-    importlib.reload(golf_suite_launcher)
+    # Avoid importlib.reload()
+    sys.modules.pop("launchers.golf_suite_launcher", None)
 
 
 @pytest.fixture
