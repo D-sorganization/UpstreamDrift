@@ -43,7 +43,9 @@ def is_stub(node: Any) -> bool:
     return False
 
 
-def check_file(filepath: str, stubs_file: io.TextIOWrapper, docs_file: io.TextIOWrapper) -> None:
+def check_file(
+    filepath: str, stubs_file: io.TextIOWrapper, docs_file: io.TextIOWrapper
+) -> None:
     """Check a file for stubs and missing documentation."""
     try:
         with open(filepath, encoding="utf-8") as f:
