@@ -78,7 +78,7 @@ jobs:
           
           # Create session prompt
           PROMPT=$(cat << 'PROMPT_EOF'
-          '
+
           You are the SENTINEL security agent.
           
           ## Your Mission
