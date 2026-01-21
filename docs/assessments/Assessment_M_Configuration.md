@@ -1,18 +1,21 @@
-# Assessment M: Configuration
+# Assessment: Configuration (Category M)
 
-## Grade: 8/10
+## Executive Summary
+**Grade: 9/10**
 
-## Summary
-Configuration is managed via `pyproject.toml` and environment variables. The "No Drift" policy in `AGENTS.md` is a strong governance mechanism.
+Configuration is centralized and follows 12-factor app principles (environment variables). `pyproject.toml` handles tool config well.
 
 ## Strengths
-- **Centralized Config**: `pyproject.toml` is the single source of truth for tools.
-- **Environment Variables**: `.env` support (implied by `python-dotenv` usage in docs) for secrets.
-- **Constants**: `shared/python/constants.py` centralizes hardcoded values.
+1.  **Env Vars:** Sensitive data (secrets, DB URL) via environment.
+2.  **Centralized:** `pyproject.toml` allows single-file config for most tools.
+3.  **Validation:** Config validation logic exists (e.g., `_validate_model_path`).
 
 ## Weaknesses
-- **Complexity**: The sheer number of config options in `pyproject.toml` can be overwhelming.
-- **Dynamic Config**: Some configuration (like engine options) is passed as dictionaries, which can lack validation compared to typed config classes.
+1.  **Defaults:** Some defaults (like allowed hosts) are hardcoded in code as fallbacks, which is acceptable but requires care.
 
 ## Recommendations
-1. **Typed Configuration**: Use `pydantic-settings` for all application configuration (not just API).
+1.  **Pydantic Settings:** Use `pydantic-settings` for robust environment variable loading and validation.
+
+## Detailed Analysis
+- **Static:** `pyproject.toml`.
+- **Runtime:** Environment variables.
