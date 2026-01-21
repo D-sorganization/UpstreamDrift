@@ -143,16 +143,16 @@ jobs:
                     target = "sentinel";
                     break;
                   case "0 11 * * *":
-          target = day === 4 ? "thesis-defender" : "tech-custodian";
-          break;
+                    target = day === 4 ? "thesis-defender" : "tech-custodian";
+                    break;
                   case "30 11 * * *":
-          target = "issue-resolver";
-          break;
+                    target = "issue-resolver";
+                    break;
                   case "0 12 * * *":
-          target = "pr-compiler";
-          break;
+                    target = "pr-compiler";
+                    break;
                   default:
-          target = "none";
+                    target = "none";
                 }
               }
 
