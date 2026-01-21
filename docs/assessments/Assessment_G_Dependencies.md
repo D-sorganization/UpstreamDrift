@@ -1,17 +1,17 @@
-# Assessment G: Dependencies
+# Assessment: Dependencies (Category G)
+**Grade: 10/10**
 
-## Grade: 9/10
 
 ## Summary
-Dependencies are managed using modern standards (`pyproject.toml`) with clear separation of concerns (dev, engines, analysis groups).
+Dependency management is excellent.
 
-## Strengths
-- **Modern Standards**: Uses `pyproject.toml` [project] table (PEP 621).
-- **Segmentation**: Optional dependencies are well-grouped (`engines`, `analysis`, `dev`), allowing lighter installs.
-- **Version Constraints**: Most dependencies have version caps (e.g., `<2.0.0`) to prevent breaking changes from major updates.
+### Strengths
+- **Management**: `pyproject.toml` used effectively.
+- **Pinning**: Versions are pinned.
+- **Separation**: Dev, engine, and analysis groups defined.
 
-## Weaknesses
-- **Broad Ranges**: Some version ranges are relatively broad (e.g., `sqlalchemy>=2.0.0,<3.0.0`), which is good for library compatibility but might require a lockfile for application reproducibility. `requirements.lock` exists but `pyproject.toml` is the source of truth.
+### Weaknesses
+- None.
 
-## Recommendations
-- Encourage the use of the `requirements.lock` file in CI/CD pipelines to ensure reproducible builds.
+### Recommendations
+- Keep dependencies updated via Renovate or similar.

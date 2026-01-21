@@ -1,5 +1,11 @@
-# Assessment: Test Coverage (Category C)
-**Grade: 4/10**
+---
+title: Improve Test Coverage
+labels: jules:assessment, needs-attention
+---
+
+# Issue: Low Score in Test Coverage
+
+Current Grade: 4/10
 
 
 ## Summary
