@@ -13,7 +13,9 @@ def test_rate_limiting():
     # Just a basic check that the endpoint exists first
     # Use email instead of username to match API expectation
     # Update path to match correct API route (no /api prefix in app)
-    response = client.post("/auth/login", json={"email": "test@example.com", "password": "wrong"})
+    response = client.post(
+        "/auth/login", json={"email": "test@example.com", "password": "wrong"}
+    )
     assert response.status_code in [401, 429]
 
     # Note: Actual rate limit testing requires knowing the specific limit
