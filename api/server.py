@@ -389,12 +389,21 @@ async def startup_event() -> None:
         analysis_service = AnalysisService(engine_manager)
 
         # Initialize video pipeline with default config
-        video_config = VideoProcessingConfig(
-            estimator_type="mediapipe",
-            min_confidence=0.5,
-            enable_temporal_smoothing=True,
-        )
-        video_pipeline = VideoPosePipeline(video_config)
+        try:
+            video_config = VideoProcessingConfig(
+                estimator_type="mediapipe",
+                min_confidence=0.5,
+                enable_temporal_smoothing=True,
+            )
+            video_pipeline = VideoPosePipeline(video_config)
+        except ImportError as e:
+            logger.warning(
+                f"Video pipeline initialization failed: {e}. Video analysis endpoints will not function."
+            )
+            video_pipeline = None
+        except Exception as e:
+            logger.error(f"Unexpected error initializing video pipeline: {e}")
+            video_pipeline = None
 
         logger.info("Golf Modeling Suite API started successfully")
 
