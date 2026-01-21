@@ -1,5 +1,7 @@
 import os
 from datetime import datetime
+from typing import Any
+from collections.abc import Mapping
 
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
@@ -9,7 +11,7 @@ STUBS_FILE = os.path.join(DATA_DIR, "stub_functions.txt")
 DOCS_FILE = os.path.join(DATA_DIR, "incomplete_docs.txt")
 
 
-def parse_grep_line(line):
+def parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
     """Parse a grep output line."""
     parts = line.split(":", 2)
     if len(parts) < 3:
@@ -20,7 +22,7 @@ def parse_grep_line(line):
     return filepath, lineno, content
 
 
-def analyze_todos():
+def analyze_todos() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     """Analyze TO-DO and FIX-ME markers."""
     todos = []
     fixmes = []
@@ -31,17 +33,17 @@ def analyze_todos():
     with open(TODOS_FILE, encoding="utf-8", errors="replace") as f:
         for line in f:
             filepath, lineno, content = parse_grep_line(line)
-            if not filepath:
+            if not filepath or not content:
                 continue
 
             if todo_str in content:
-                todos.append({"file": filepath, "line": lineno, "text": content})
+                todos.append({"file": filepath, "line": str(lineno), "text": content})
             elif any(x in content for x in fixme_markers):
-                fixmes.append({"file": filepath, "line": lineno, "text": content})
+                fixmes.append({"file": filepath, "line": str(lineno), "text": content})
     return todos, fixmes
 
 
-def analyze_stubs():
+def analyze_stubs() -> list[dict[str, str]]:
     """Analyze stub functions."""
     stubs = []
     with open(STUBS_FILE, encoding="utf-8") as f:
@@ -61,7 +63,7 @@ def analyze_stubs():
     return stubs
 
 
-def analyze_docs():
+def analyze_docs() -> list[dict[str, str]]:
     """Analyze missing documentation."""
     missing_docs = []
     with open(DOCS_FILE, encoding="utf-8") as f:
@@ -78,7 +80,7 @@ def analyze_docs():
     return missing_docs
 
 
-def analyze_not_implemented():
+def analyze_not_implemented() -> list[dict[str, str]]:
     """Analyze Not Implemented Error occurrences."""
     # Mainly looking for Not Implemented Error
     errors = []
@@ -87,17 +89,17 @@ def analyze_not_implemented():
     with open(NOT_IMPL_FILE, encoding="utf-8", errors="replace") as f:
         for line in f:
             filepath, lineno, content = parse_grep_line(line)
-            if not filepath:
+            if not filepath or not content:
                 continue
             if not_impl_str in content:
-                errors.append({"file": filepath, "line": lineno, "text": content})
+                errors.append({"file": filepath, "line": str(lineno), "text": content})
     return errors
 
 
-def calculate_priority(item):
+def calculate_priority(item: Mapping[str, Any]) -> int:
     """Calculate priority based on file location."""
     # Heuristic for priority
-    filepath = item["file"]
+    filepath = str(item.get("file", ""))
     impact = 1
     if "shared/python" in filepath or "engines/" in filepath:
         impact = 5
@@ -107,7 +109,7 @@ def calculate_priority(item):
     return impact
 
 
-def generate_report():
+def generate_report() -> None:
     """Generate the completist report."""
     todos, fixmes = analyze_todos()
     stubs = analyze_stubs()
@@ -115,19 +117,23 @@ def generate_report():
     not_impl_errors = analyze_not_implemented()
 
     # Filter criticals: Stubs or Not Implemented Errors in core logic (not tests)
-    critical_candidates = []
+    critical_candidates: list[dict[str, Any]] = []
     not_impl_str = "NotImplemented" + "Error"
 
     for s in stubs:
         if "tests" not in s["file"] and "test_" not in s["file"]:
-            s["type"] = "Stub"
-            critical_candidates.append(s)
+            # Create a new dict to avoid modifying the original list in place with new keys
+            # effectively changing the type structure if strict
+            item = dict(s)
+            item["type"] = "Stub"
+            critical_candidates.append(item)
 
     for e in not_impl_errors:
         if "tests" not in e["file"] and "test_" not in e["file"]:
-            e["type"] = not_impl_str
-            e["name"] = "N/A"
-            critical_candidates.append(e)
+            item = dict(e)
+            item["type"] = not_impl_str
+            item["name"] = "N/A"
+            critical_candidates.append(item)
 
     # Sort criticals by impact
     critical_candidates.sort(key=lambda x: calculate_priority(x), reverse=True)
@@ -147,7 +153,7 @@ def generate_report():
     report_content += "|---|---|---|---|---|\n"
     for item in critical_candidates[:50]:  # Top 50
         impact = calculate_priority(item)
-        name = item.get("name", item.get("text", ""))[:50].replace("|", "\\|")
+        name = str(item.get("name", item.get("text", "")))[:50].replace("|", "\\|")
         report_content += f"| `{item['file']}` | {item['line']} | {item['type']} | {name} | {impact} |\n"
     if len(critical_candidates) > 50:
         report_content += f"\n*(...and {len(critical_candidates) - 50} more)*\n"
@@ -155,22 +161,22 @@ def generate_report():
     report_content += "\n## Feature Gap Matrix (Top 20 TODOs)\n"
     report_content += "| File | Line | Content |\n"
     report_content += "|---|---|---|\n"
-    for item in todos[:20]:
-        text = item["text"][:100].replace("|", "\\|")
-        report_content += f"| `{item['file']}` | {item['line']} | {text} |\n"
+    for t_item in todos[:20]:
+        text = t_item["text"][:100].replace("|", "\\|")
+        report_content += f"| `{t_item['file']}` | {t_item['line']} | {text} |\n"
 
     report_content += "\n## Technical Debt Register (Top 20)\n"
     report_content += "| File | Line | Content |\n"
     report_content += "|---|---|---|\n"
-    for item in fixmes[:20]:
-        text = item["text"][:100].replace("|", "\\|")
-        report_content += f"| `{item['file']}` | {item['line']} | {text} |\n"
+    for f_item in fixmes[:20]:
+        text = f_item["text"][:100].replace("|", "\\|")
+        report_content += f"| `{f_item['file']}` | {f_item['line']} | {text} |\n"
 
     report_content += "\n## Documentation Gaps (Top 20)\n"
     report_content += "| File | Line | Symbol |\n"
     report_content += "|---|---|---|\n"
-    for item in missing_docs[:20]:
-        report_content += f"| `{item['file']}` | {item['line']} | {item['name']} |\n"
+    for d_item in missing_docs[:20]:
+        report_content += f"| `{d_item['file']}` | {d_item['line']} | {d_item['name']} |\n"
 
     report_content += "\n## Recommended Implementation Order\n"
     report_content += (
