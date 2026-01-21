@@ -1,6 +1,5 @@
 """Integration tests for GolfLauncher."""
 
-import importlib
 import os
 import sys
 import tempfile

@@ -58,11 +58,67 @@ jobs:
           TARGET_RUN_ID: ${{ inputs.run_id }}
         run: |
           BRANCH="${{ steps.verify.outputs.branch }}"
-          gh run view $TARGET_RUN_ID --log-failed > logs.txt
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured. Skipping Jules auto-repair."
+            exit 0
+          fi
 
-          # New CLI Syntax
-          # We use --repo to target this specific repository context
-          jules remote new \
-            --repo ${{ github.repository }} \
-            --session "CI Failure on branch '$BRANCH'. Fix these errors: $(cat logs.txt)" \
-            --branch "$BRANCH"
+          gh run view $TARGET_RUN_ID --log-failed > logs.txt
+          LOG_CONTENT=$(cat logs.txt)
+
+          # REST API Implementation (Migration from CLI)
+          REPO="${{ github.repository }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
+          
+          echo "Looking up repository source..."
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+          
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+          
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Repository $REPO not found in Jules sources."
+            exit 0
+          fi
+          
+          echo "Found source: $SOURCE_ID"
+
+          # Create session prompt
+          # We use jq to safely escape the log content for JSON
+          REQUEST_JSON=$(jq -n \
+            --arg source "$SOURCE_ID" \
+            --arg branch "$BRANCH" \
+            --arg logs "$LOG_CONTENT" \
+            '{
+              prompt: ("You are the AUTO REPAIR agent. A CI workflow failed on branch " + $branch + ". Here are the logs:\n\n" + $logs + "\n\nAnalyze the errors and FIX the code."),
+              sourceContext: {
+                source: $source,
+                githubRepoContext: {
+                  startingBranch: $branch
+                }
+              },
+              automationMode: "AUTO_CREATE_PR"
+            }')
+          
+          echo "Creating Jules session..."
+          
+          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_JSON" \
+            "$API_BASE/sessions")
+          
+          SESSION_RESPONSE=$(cat /tmp/session_response.json)
+          echo "HTTP Status: $HTTP_CODE"
+          
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Jules API returned HTTP $HTTP_CODE"
+            echo "Response: $SESSION_RESPONSE"
+            exit 1
+          fi
+          
+          SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
+          echo "Created session: $SESSION_ID"
+

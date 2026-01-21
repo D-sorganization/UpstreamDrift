@@ -185,7 +185,7 @@ with patch.dict(
     {"PyQt6": mock_qt, "PyQt6.QtWidgets": mock_widgets, "PyQt6.QtCore": mock_core},
 ):
     # Force reload to ensure it uses our mocks if it was already loaded
-    import importlib
+    import sys
 
     # Use sys.modules.pop instead of reload to avoid C-extension corruption
     sys.modules.pop("launchers.golf_suite_launcher", None)
