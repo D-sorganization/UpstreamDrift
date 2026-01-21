@@ -7,6 +7,20 @@ from pathlib import Path
 
 from shared.python.physics_constants import *  # noqa: F403
 
+# Project Root Paths
+SUITE_ROOT = Path(__file__).resolve().parent.parent.parent
+ENGINES_ROOT = SUITE_ROOT / "engines"
+SHARED_ROOT = SUITE_ROOT / "shared"
+OUTPUT_ROOT = SUITE_ROOT / "output"
+
+# Physics engine paths
+MUJOCO_ROOT = ENGINES_ROOT / "physics_engines" / "mujoco"
+DRAKE_ROOT = ENGINES_ROOT / "physics_engines" / "drake"
+PINOCCHIO_ROOT = ENGINES_ROOT / "physics_engines" / "pinocchio"
+MATLAB_2D_ROOT = ENGINES_ROOT / "Simscape_Multibody_Models" / "2D_Golf_Model"
+MATLAB_3D_ROOT = ENGINES_ROOT / "Simscape_Multibody_Models" / "3D_Golf_Model"
+PENDULUM_ROOT = ENGINES_ROOT / "pendulum_models"
+
 # Numerical constants (Solver specific)
 EPSILON: float = 1e-15
 MAX_ITERATIONS: int = 10000
