@@ -1,17 +1,16 @@
-# Assessment M: Configuration
+# Assessment: Configuration (Category M)
+**Grade: 8/10**
 
-## Grade: 10/10
 
 ## Summary
-Configuration is managed effectively using standard Python tooling and environment variables.
+Configuration is managed via files and environment variables.
 
-## Strengths
-- **Tool Configuration**: `pyproject.toml` centralizes configuration for black, ruff, mypy, pytest, and coverage.
-- **Environment Support**: `.env.example` indicates support for environment-based configuration (likely via `pydantic-settings` or `python-dotenv`).
-- **Separation**: Configuration is separated from code, following 12-Factor App principles.
+### Strengths
+- **Env Vars**: Critical secrets (passwords) via env.
+- **Files**: `pyproject.toml`, `config/` used.
 
-## Weaknesses
-- None identified.
+### Weaknesses
+- **Fragmentation**: Some config in `config/`, some in `pyproject.toml`, some in `shared/python/constants.py`.
 
-## Recommendations
-- Ensure that sensitive defaults (like `SECRET_KEY` if used) are explicitly unsafe in development to prevent accidental production use.
+### Recommendations
+- Centralize configuration management further.

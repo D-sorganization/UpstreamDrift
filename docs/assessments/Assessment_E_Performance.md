@@ -1,18 +1,16 @@
-# Assessment E: Performance
+# Assessment: Performance (Category E)
+**Grade: 8/10**
 
-## Grade: 10/10
 
 ## Summary
-Performance is a first-class citizen in this codebase, with explicit optimizations for computationally intensive tasks and scalable architecture for the API.
+Performance considerations are evident, with optimizations in critical paths.
 
-## Strengths
-- **Numerical Optimization**: Use of `numba` for JIT compilation of tight loops (DTW) and critical math functions.
-- **Algorithmic Efficiency**: Optimized implementations (e.g., O(M) space DTW, cached wavelets for CWT).
-- **Asynchronous Processing**: The API uses `FastAPI` with `async/await` and `BackgroundTasks` for long-running simulations, keeping the main thread responsive.
-- **Caching**: `functools.lru_cache` is used effectively for expensive computations like wavelet generation.
+### Strengths
+- **Optimizations**: usage of `numba` for physics calculations.
+- **Async**: `FastAPI` usage for concurrency.
 
-## Weaknesses
-- None identified.
+### Weaknesses
+- **Potential Bottlenecks**: Heavy physics sims might block if not carefully managed (though `numba` helps).
 
-## Recommendations
-- Continue profiling critical paths using the `pytest-benchmark` plugin already present in dependencies.
+### Recommendations
+- Profile the physics engines under load.

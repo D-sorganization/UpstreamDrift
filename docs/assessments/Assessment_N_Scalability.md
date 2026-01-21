@@ -1,17 +1,16 @@
-# Assessment N: Scalability
+# Assessment: Scalability (Category N)
+**Grade: 6/10**
 
-## Grade: 9/10
 
 ## Summary
-The architecture supports scaling through asynchronous processing and modular services, though some state management is currently local.
+Scalability is adequate for a desktop/single-server suite but limited for cloud scale.
 
-## Strengths
-- **Asynchronous API**: Use of FastAPI and `async`/`await` allows high concurrency for I/O-bound tasks.
-- **Background Tasks**: Long-running simulations are offloaded to background tasks, keeping the API responsive.
-- **Modular Engines**: Physics engines are decoupled, allowing them to potentially run on separate workers in the future.
+### Strengths
+- **Async**: FastAPI handles concurrent I/O.
 
-## Weaknesses
-- **State Management**: The `TaskManager` in `api/server.py` stores task state in-memory. This works for a single instance but prevents horizontal scaling (multiple API replicas) without a shared store like Redis.
+### Weaknesses
+- **Task Queue**: Lack of a distributed task queue (Celery/Redis) limits background processing of heavy physics sims.
+- **State**: In-process background tasks are not persistent.
 
-## Recommendations
-- For production deployment with multiple replicas, refactor `TaskManager` to use a distributed store (Redis) for task state and results.
+### Recommendations
+- **Task Queue**: Integrate Celery or similar for heavy lifting.

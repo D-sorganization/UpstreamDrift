@@ -7,7 +7,7 @@
 
 **A unified platform for golf swing analysis across multiple physics engines and modeling approaches**
 
-> ✅ **STABLE**: The codebase migration is complete. See [Migration Status](docs/plans/migration_status.md) for details.
+> ✅ **STABLE**: The codebase migration is complete. See [Migration Status](docs/plans/COMPREHENSIVE_IMPLEMENTATION_PLAN_2026.md) for details.
 
 ## Overview
 
