@@ -46,9 +46,9 @@ Historical records preserve the development journey of the Golf Modeling Suite, 
 ## Related Documentation
 
 - [Assessments](../assessments/README.md) - Recent project assessments and reviews
-- [Plans](../plans/README.md) - Current and future development plans
-- [Development PRs](../development/prs/README.md) - Pull request documentation
-- [Technical Documentation](../technical/README.md) - Technical reports and analyses
+- [Plans](../../plans/README.md) - Current and future development plans
+- [Development PRs](../../development/prs/README.md) - Pull request documentation
+- [Technical Documentation](../../technical/README.md) - Technical reports and analyses
 
 ## Archive Policy
 

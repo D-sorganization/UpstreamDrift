@@ -33,6 +33,7 @@ This directory contains implementation plans, roadmaps, and strategic documentat
 
 ## Related Documentation
 
-- [../assessments/](../assessments/) - Assessment reports and implementation summaries
+- [../internal/assessments/](../internal/assessments/) - Assessment reports and implementation summaries
 - [../development/prs/](../development/prs/) - Pull request documentation
-- [../historical/](../historical/) - Historical phase summaries
+- [../internal/historical/](../internal/historical/) - Historical phase summaries
+- [../reports/](../reports/) - Project reports and analysis
