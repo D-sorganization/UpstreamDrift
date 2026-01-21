@@ -1,8 +1,10 @@
 name: CI Standard
 on:
   push:
+    branches: ["**"]
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
