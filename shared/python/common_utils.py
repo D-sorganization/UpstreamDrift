@@ -5,10 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-# Explicitly import OUTPUT_ROOT from the package to avoid circular dependency issues
-# while keeping the import at module level for clarity.
-# Note: shared/python/__init__.py defines OUTPUT_ROOT but does NOT import this module.
-from shared.python import OUTPUT_ROOT
+# Import OUTPUT_ROOT from constants to avoid circular dependency
+from shared.python.constants import OUTPUT_ROOT
 
 # Import core utilities (exceptions, logging) from the lightweight module
 from shared.python.constants import (

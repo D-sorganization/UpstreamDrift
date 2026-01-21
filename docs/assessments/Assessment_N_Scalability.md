@@ -1,17 +1,18 @@
 # Assessment N: Scalability
 
-## Grade: 9/10
+## Grade: 7/10
 
 ## Summary
-The architecture supports scaling through asynchronous processing and modular services, though some state management is currently local.
+The system is designed with some scalability in mind (asynchronous API, batched physics queries). However, the monolithic nature of the physics engines and some code files limits horizontal scalability.
 
 ## Strengths
-- **Asynchronous API**: Use of FastAPI and `async`/`await` allows high concurrency for I/O-bound tasks.
-- **Background Tasks**: Long-running simulations are offloaded to background tasks, keeping the API responsive.
-- **Modular Engines**: Physics engines are decoupled, allowing them to potentially run on separate workers in the future.
+- **Async API**: Handles concurrent requests reasonably well.
+- **Stateless Engines**: The `PhysicsEngine` protocol encourages statelessness (or at least manageable state), allowing for potential pool management.
 
 ## Weaknesses
-- **State Management**: The `TaskManager` in `api/server.py` stores task state in-memory. This works for a single instance but prevents horizontal scaling (multiple API replicas) without a shared store like Redis.
+- **Vertical Scaling**: Physics simulations are CPU-bound and often single-threaded per instance.
+- **Monoliths**: Large files and tight coupling make it hard to split the service into microservices if needed.
 
 ## Recommendations
-- For production deployment with multiple replicas, refactor `TaskManager` to use a distributed store (Redis) for task state and results.
+1. **Worker Queues**: Move simulation tasks to a robust job queue (e.g., Celery/Redis) instead of just in-memory `BackgroundTasks`.
+2. **Horizontal Scaling**: Containerize the engine service to run multiple instances behind a load balancer.
