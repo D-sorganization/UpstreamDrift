@@ -9,17 +9,8 @@ on:
         required: false
         default: '5'
         type: string
-      priority_filter:
-        description: 'Minimum priority (critical, high, medium)'
-        required: false
-        default: 'high'
-        type: choice
-        options:
-          - critical
-          - high
-          - medium
   schedule:
-    - cron: "0 3 * * *"  # Daily at 3 AM UTC (within midnight-4 AM window)
+    - cron: "30 2 * * *"  # Daily at 2:30 AM UTC (overnight window)
 
 permissions:
   contents: write
@@ -59,23 +50,14 @@ jobs:
         run: |
           mkdir -p .jules/resolver_data
 
-          # Get open issues sorted by priority labels
           gh issue list --state open --limit 50 --json number,title,labels,body \
-            --jq '[.[] | select(.labels | map(.name) | (contains(["critical"]) or contains(["high-priority"]) or contains(["jules:code-quality"]) or contains(["needs-attention"])))]' \
+            --jq '[.[] | select(.labels | map(.name) | (contains(["critical"]) or contains(["high-priority"])))]' \
             > .jules/resolver_data/priority_issues.json
 
-          # Also read assessment summaries
-          if [ -f "docs/assessments/issues/summary.md" ]; then
-            cp docs/assessments/issues/summary.md .jules/resolver_data/
-          fi
+          [ -f "docs/assessments/issues/summary.md" ] && cp docs/assessments/issues/summary.md .jules/resolver_data/
+          [ -f "docs/assessments/Code_Quality_Review_Latest.md" ] && cp docs/assessments/Code_Quality_Review_Latest.md .jules/resolver_data/
 
-          if [ -f "docs/assessments/Code_Quality_Review_Latest.md" ]; then
-            cp docs/assessments/Code_Quality_Review_Latest.md .jules/resolver_data/
-          fi
-
-          ISSUE_COUNT=$(cat .jules/resolver_data/priority_issues.json | jq 'length')
-          echo "issue_count=$ISSUE_COUNT" >> $GITHUB_OUTPUT
-          echo "Found $ISSUE_COUNT priority issues"
+          echo "issue_count=$(cat .jules/resolver_data/priority_issues.json | jq 'length')" >> $GITHUB_OUTPUT
 
       - name: Create Fix Branch
         run: |
@@ -116,49 +98,15 @@ jobs:
           
           # Create session prompt
           PROMPT=$(cat << 'PROMPT_EOF'
-          You are the ISSUE RESOLVER agent. Your mission is to FIX identified issues, not just document them.
+          '
+          You are the ISSUE RESOLVER agent. FIX identified issues from .jules/resolver_data/.
           
-          ## Input Data
-          Review these sources in .jules/resolver_data/:
-          - priority_issues.json - GitHub Issues marked critical/high-priority
-          - summary.md - Assessment issue tracking
-          - Code_Quality_Review_Latest.md - Recent quality review findings
-          
-          ## Your Mission
-          1. Identify the TOP $MAX_ISSUES priority items that can be fixed
-          2. ACTUALLY FIX THEM - make the code changes
-          3. Document each fix clearly
-          
-          ## Priority Order
-          1. CRITICAL issues (breaking/security)
-          2. HIGH priority (functionality gaps)
-          3. Code quality issues flagged as important
-          
-          ## Fix Guidelines
-          - Make minimal, targeted changes
-          - DO NOT break existing functionality
-          - Run linters after changes: ruff check . --fix && black .
-          - Add or update tests if needed
-          - DO NOT modify test assertions just to pass
-          
-          ## For Each Fix
-          1. Identify the issue/file/line
-          2. Implement the fix
-          3. Add a comment in the code if non-obvious
+          1. Identify TOP $MAX_ISSUES priority items
+          2. ACTUALLY FIX THEM - make code changes
+          3. Run: ruff check . --fix && black .
           4. Document in docs/assessments/issues/resolved/
           
-          ## Output
-          Create docs/assessments/issues/resolved/resolver_report_$(date +%Y-%m-%d).md with:
-          - Issues addressed
-          - Changes made
-          - Issues deferred (with reason)
-          - New issues discovered
-          
-          ## Closing Issues
-          If your fix completely resolves a GitHub Issue, include "Fixes #NUM" in your changes
-          so the PR will auto-close the issue when merged.
-          
-          IMPORTANT: You are authorized to make code changes. This is not a review - it's a FIX operation.
+          Include "Fixes #NUM" for issues you completely resolve.
           PROMPT_EOF
           )
           
@@ -174,7 +122,7 @@ jobs:
                   startingBranch: "main"
                 }
               },
-              automationMode: "AUTO_CREATE_PR"
+              # automationMode: "AUTO_CREATE_PR"
             }')
           
           echo "Request: $REQUEST_JSON"
@@ -239,35 +187,19 @@ jobs:
 
           git add -A
           if ! git diff --staged --quiet; then
-            git commit -m "fix: resolve priority issues from daily assessment
+            git commit -m "fix: resolve priority issues
 
           Co-Authored-By: Jules <jules-bot@users.noreply.github.com>"
-
             git push origin "$BRANCH_NAME"
-
-            PR_BODY="$(cat << 'EOF'
-          ## Daily Issue Resolution
-
-          This PR addresses priority issues identified in assessments and GitHub Issues.
-
-          ### Review Checklist
-          - [ ] Fixes don't break existing functionality
-          - [ ] Tests pass
-          - [ ] Changes are minimal and targeted
-
-          See `docs/assessments/issues/resolved/` for detailed fix report.
-
-          ---
-          *Generated by Jules Issue Resolver*
-          EOF
-          )"
-            gh pr create \
-              --title "Issue Resolution - $(date +%Y-%m-%d)" \
-              --body "$PR_BODY" \
+            gh pr create --title "Issue Resolution - $(date +%Y-%m-%d)" \
+              --body "Daily issue resolution from assessments." \
               --label "jules:issue-resolver,automated-fix" || \
-            gh pr create \
-              --title "Issue Resolution - $(date +%Y-%m-%d)" \
-              --body "$PR_BODY"
-          else
-            echo "No changes to commit"
+            gh pr create --title "Issue Resolution - $(date +%Y-%m-%d)" \
+              --body "Daily issue resolution from assessments."
+
+            # Post-processing: Remove reviewers to reduce noise
+            PR_NUM=$(gh pr list --head "$BRANCH_NAME" --json number -q '.[0].number')
+            if [ -n "$PR_NUM" ]; then
+               gh pr edit "$PR_NUM" --remove-reviewer "dieterolson" || true
+            fi
           fi
