@@ -51,7 +51,7 @@ def check_file(filepath: str, stubs_file: TextIO, docs_file: TextIO) -> None:
         with open(filepath, encoding="utf-8") as f:
             content = f.read()
         tree = ast.parse(content)
-    except Exception as e:
+    except Exception:
         # print(f"Error parsing {filepath}: {e}")
         return
 
