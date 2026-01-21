@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from typing import Any
 
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
@@ -9,7 +10,7 @@ STUBS_FILE = os.path.join(DATA_DIR, "stub_functions.txt")
 DOCS_FILE = os.path.join(DATA_DIR, "incomplete_docs.txt")
 
 
-def parse_grep_line(line):
+def parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
     """Parse a grep output line."""
     parts = line.split(":", 2)
     if len(parts) < 3:
@@ -20,7 +21,7 @@ def parse_grep_line(line):
     return filepath, lineno, content
 
 
-def analyze_todos():
+def analyze_todos() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     """Analyze TO-DO and FIX-ME markers."""
     todos = []
     fixmes = []
@@ -31,7 +32,7 @@ def analyze_todos():
     with open(TODOS_FILE, encoding="utf-8", errors="replace") as f:
         for line in f:
             filepath, lineno, content = parse_grep_line(line)
-            if not filepath:
+            if not filepath or not lineno or not content:
                 continue
 
             if todo_str in content:
@@ -41,7 +42,7 @@ def analyze_todos():
     return todos, fixmes
 
 
-def analyze_stubs():
+def analyze_stubs() -> list[dict[str, str]]:
     """Analyze stub functions."""
     stubs = []
     with open(STUBS_FILE, encoding="utf-8") as f:
@@ -61,7 +62,7 @@ def analyze_stubs():
     return stubs
 
 
-def analyze_docs():
+def analyze_docs() -> list[dict[str, str]]:
     """Analyze missing documentation."""
     missing_docs = []
     with open(DOCS_FILE, encoding="utf-8") as f:
@@ -78,7 +79,7 @@ def analyze_docs():
     return missing_docs
 
 
-def analyze_not_implemented():
+def analyze_not_implemented() -> list[dict[str, str]]:
     """Analyze Not Implemented Error occurrences."""
     # Mainly looking for Not Implemented Error
     errors = []
@@ -87,14 +88,14 @@ def analyze_not_implemented():
     with open(NOT_IMPL_FILE, encoding="utf-8", errors="replace") as f:
         for line in f:
             filepath, lineno, content = parse_grep_line(line)
-            if not filepath:
+            if not filepath or not lineno or not content:
                 continue
             if not_impl_str in content:
                 errors.append({"file": filepath, "line": lineno, "text": content})
     return errors
 
 
-def calculate_priority(item):
+def calculate_priority(item: dict[str, Any]) -> int:
     """Calculate priority based on file location."""
     # Heuristic for priority
     filepath = item["file"]
@@ -107,7 +108,7 @@ def calculate_priority(item):
     return impact
 
 
-def generate_report():
+def generate_report() -> None:
     """Generate the completist report."""
     todos, fixmes = analyze_todos()
     stubs = analyze_stubs()
@@ -115,19 +116,23 @@ def generate_report():
     not_impl_errors = analyze_not_implemented()
 
     # Filter criticals: Stubs or Not Implemented Errors in core logic (not tests)
-    critical_candidates = []
+    critical_candidates: list[dict[str, Any]] = []
     not_impl_str = "NotImplemented" + "Error"
 
     for s in stubs:
         if "tests" not in s["file"] and "test_" not in s["file"]:
-            s["type"] = "Stub"
-            critical_candidates.append(s)
+            # Need to create a copy or modify safely if we want strict typing but s is a dict, so it's mutable
+            # We are modifying 's' which is from 'stubs' list.
+            s_copy: dict[str, Any] = s.copy()
+            s_copy["type"] = "Stub"
+            critical_candidates.append(s_copy)
 
     for e in not_impl_errors:
         if "tests" not in e["file"] and "test_" not in e["file"]:
-            e["type"] = not_impl_str
-            e["name"] = "N/A"
-            critical_candidates.append(e)
+            e_copy: dict[str, Any] = e.copy()
+            e_copy["type"] = not_impl_str
+            e_copy["name"] = "N/A"
+            critical_candidates.append(e_copy)
 
     # Sort criticals by impact
     critical_candidates.sort(key=lambda x: calculate_priority(x), reverse=True)
