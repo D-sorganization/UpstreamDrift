@@ -1,0 +1,207 @@
+name: Jules Thesis Defender (Worker)
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      critique_path:
+        description: 'Path to critique document(s)'
+        required: false
+        default: 'docs/critiques/'
+        type: string
+  push:
+    paths:
+      - 'docs/critiques/**'
+      - 'docs/reviews/**'
+      - 'docs/objections/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  defend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Install Jules
+        run: npm install -g @google/jules
+
+      - name: Find Critique Documents
+        id: find
+        run: |
+          mkdir -p docs/critiques docs/defenses
+
+          CRITIQUES=""
+          for dir in docs/critiques docs/reviews docs/objections; do
+            if [ -d "$dir" ]; then
+              for file in "$dir"/*.md; do
+                [ -f "$file" ] && CRITIQUES="$CRITIQUES $file"
+              done
+            fi
+          done
+
+          if [ -z "$CRITIQUES" ]; then
+            echo "found=false" >> $GITHUB_OUTPUT
+          else
+            echo "found=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Jules Thesis Defender Analysis
+        if: steps.find.outputs.found == 'true'
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+        run: |
+          set -e
+          DATE=$(date +%Y-%m-%d)
+          REPO="${{ github.repository }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
+          
+          # Check if API key is configured
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
+            exit 0
+          fi
+          
+          echo "Looking up repository source..."
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+          
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+          
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Repository $REPO not found in Jules sources."
+            exit 0
+          fi
+          
+          echo "Found source: $SOURCE_ID"
+          
+          # Create session prompt
+          PROMPT=$(cat << 'PROMPT_EOF'
+          '
+          You are the THESIS DEFENDER agent for AffineDrift.
+          
+          ## Core Mandate
+          Act like a skeptical critic, then help preemptively defend with precise counterarguments.
+          
+          ## Analyze critique documents in:
+          - docs/critiques/
+          - docs/reviews/
+          - docs/objections/
+          
+          ## Process
+          
+          ### 1. ANALYZE - Classify each critique as:
+          conceptual, mathematical, empirical, methodological, or philosophical
+          
+          ### 2. IDENTIFY for each:
+          - Legitimate weaknesses
+          - Misunderstandings
+          - Category errors
+          - Unstated assumptions by critic
+          
+          ### 3. PROPOSE DEFENSE:
+          - Clarifications
+          - Added derivations
+          - Explicit assumptions
+          - Boundary conditions
+          - Preemptive counterarguments
+          
+          ## Output
+          
+          1. docs/defenses/critique_response_table_$DATE.md
+             | Critique | Type | Validity | Response | Injection Point |
+          
+          2. docs/defenses/defense_paragraphs_$DATE.md
+             Paste-ready paragraphs, organized by injection location
+          
+          3. docs/defenses/defense_report_$DATE.md
+             Executive summary, strongest critiques, areas to strengthen
+          
+          ## Constraints
+          - DO NOT be argumentative or dismissive
+          - DO NOT over-defend weak points - acknowledge limits
+          - Preserve scientific tone and rigor
+          - Be fair to critics
+          
+          For genuine weaknesses: Create Issue with label 'thesis-defense,needs-work'
+          PROMPT_EOF
+          )
+          
+          echo "Creating Jules session..."
+          REQUEST_JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            --arg source "$SOURCE_ID" \
+            '{
+              prompt: $prompt,
+              sourceContext: {
+                source: $source,
+                githubRepoContext: {
+                  startingBranch: "main"
+                }
+              },
+              automationMode: "AUTO_CREATE_PR"
+            }')
+          
+          echo "Request: $REQUEST_JSON"
+          
+          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_JSON" \
+            "$API_BASE/sessions")
+          
+          SESSION_RESPONSE=$(cat /tmp/session_response.json)
+          echo "HTTP Status: $HTTP_CODE"
+          
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Jules API returned HTTP $HTTP_CODE"
+            exit 1
+          fi
+          
+          SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
+          echo "Created session: $SESSION_ID"
+          
+          # Poll for completion
+          MAX_WAIT=1800
+          POLL_INTERVAL=30
+          ELAPSED=0
+          
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
+            STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
+            echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
+          
+            case "$STATE" in
+              "COMPLETED"|"SUBMITTED")
+                echo "Session completed successfully!"
+                break
+                ;;
+              "FAILED"|"CANCELLED")
+                echo "::error::Session $STATE"
+                exit 1
+                ;;
+            esac
+            sleep $POLL_INTERVAL
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
+          
+
+
+      - name: Commit Defense Materials
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "docs(defense): thesis defense analysis $(date +%Y-%m-%d)"
+          file_pattern: |
+            docs/defenses/*.md
+            .jules/*.md
