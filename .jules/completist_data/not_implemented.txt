@@ -1,0 +1,25 @@
+./tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/Simscape_Multibody_Models/2D_Golf_Model/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/Simscape_Multibody_Models/2D_Golf_Model/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/Simscape_Multibody_Models/3D_Golf_Model/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/Simscape_Multibody_Models/3D_Golf_Model/scripts/quality-check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:136:        """Test detection of NotImplementedError."""
+./engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:137:        lines = ["def function():\n", "    raise NotImplementedError\n"]
+./engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:142:        assert any("NotImplementedError" in issue[1] for issue in issues)
+./engines/pendulum_models/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/pendulum_models/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/physics_engines/opensim/python/opensim_gui.py:267:        except NotImplementedError as e:
+./engines/physics_engines/pinocchio/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/physics_engines/drake/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/physics_engines/drake/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/physics_engines/mujoco/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./.github/workflows/Jules-Completist.yml:45:          # Find NotImplementedError
+./.github/workflows/Jules-Completist.yml:46:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
+./.github/workflows/Jules-Completist.yml:113:          - not_implemented.txt - NotImplementedError and pass statements
+./.github/workflows/Jules-Completist.yml:122:          - Raise NotImplementedError in core paths
+./.github/copilot-instructions.md:10:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
+./pyproject.toml:290:    "raise NotImplementedError",
+./tests/integration/test_physics_interfaces.py:55:        except NotImplementedError:
+./tests/integration/test_physics_interfaces.py:56:            pytest.fail("MyoSuite ZTCF/ZVCF raised NotImplementedError")
+./tests/integration/test_physics_interfaces.py:98:        except NotImplementedError:
+./tests/integration/test_physics_interfaces.py:99:            pytest.fail("OpenSim ZTCF/ZVCF raised NotImplementedError")
