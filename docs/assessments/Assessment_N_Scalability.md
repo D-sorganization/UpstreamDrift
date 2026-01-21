@@ -1,18 +1,23 @@
-# Assessment N: Scalability
+# Assessment: Scalability (Category N)
 
-## Grade: 7/10
+## Executive Summary
+**Grade: 8/10**
 
-## Summary
-The system is designed with some scalability in mind (asynchronous API, batched physics queries). However, the monolithic nature of the physics engines and some code files limits horizontal scalability.
+The architecture allows for scalability. The API is stateless (mostly), and background tasks allow offloading heavy work. However, the reliance on local file storage for models/uploads and the GIL (Global Interpreter Lock) for CPU-bound tasks are limits.
 
 ## Strengths
-- **Async API**: Handles concurrent requests reasonably well.
-- **Stateless Engines**: The `PhysicsEngine` protocol encourages statelessness (or at least manageable state), allowing for potential pool management.
+1.  **Async:** `FastAPI` handles high concurrency for I/O bound tasks.
+2.  **Stateless:** Easy to replicate API containers.
+3.  **Task Queue:** Background tasks pattern established.
 
 ## Weaknesses
-- **Vertical Scaling**: Physics simulations are CPU-bound and often single-threaded per instance.
-- **Monoliths**: Large files and tight coupling make it hard to split the service into microservices if needed.
+1.  **CPU Bound:** Physics simulations are CPU heavy; Python's GIL limits single-node scaling.
+2.  **Shared Storage:** Multiple instances would need shared storage (e.g., S3/EFS) for models/uploads, currently local-path based.
 
 ## Recommendations
-1. **Worker Queues**: Move simulation tasks to a robust job queue (e.g., Celery/Redis) instead of just in-memory `BackgroundTasks`.
-2. **Horizontal Scaling**: Containerize the engine service to run multiple instances behind a load balancer.
+1.  **Celery/Redis:** Move from `BackgroundTasks` (in-process) to `Celery` + `Redis` for distributed task processing.
+2.  **Object Storage:** Abstract file access to support S3.
+
+## Detailed Analysis
+- **Horizontal:** Possible with load balancer.
+- **Vertical:** Limited by GIL (for Python parts).
