@@ -1,25 +1,341 @@
+./tools/urdf_generator/bundled_assets/__init__.py:32:    pass
 ./tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./tools/code_quality_check.py:192:                    pass
+./tools/code_quality_check.py:283:        pass
 ./engines/Simscape_Multibody_Models/2D_Golf_Model/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/Simscape_Multibody_Models/2D_Golf_Model/tools/code_quality_check.py:180:                    pass
+./engines/Simscape_Multibody_Models/2D_Golf_Model/tools/code_quality_check.py:271:        pass
 ./engines/Simscape_Multibody_Models/2D_Golf_Model/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
 ./engines/Simscape_Multibody_Models/3D_Golf_Model/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/Simscape_Multibody_Models/3D_Golf_Model/tools/code_quality_check.py:180:                    pass
+./engines/Simscape_Multibody_Models/3D_Golf_Model/tools/code_quality_check.py:271:        pass
 ./engines/Simscape_Multibody_Models/3D_Golf_Model/scripts/quality-check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/__init__.py:34:    pass
 ./engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:136:        """Test detection of NotImplementedError."""
 ./engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:137:        lines = ["def function():\n", "    raise NotImplementedError\n"]
 ./engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:142:        assert any("NotImplementedError" in issue[1] for issue in issues)
+./engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:255:        pass
+./engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:297:    pass
+./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_gui_application.py:282:        pass
+./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_wiffle_main.py:618:            pass
+./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_main_application.py:735:            pass
+./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:142:        pass
+./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:211:            pass
+./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:223:            pass
+./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:362:        pass
+./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:420:        pass
+./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:426:        pass
+./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:431:        pass
+./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:436:        pass
 ./engines/pendulum_models/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/pendulum_models/tools/code_quality_check.py:180:                    pass
+./engines/pendulum_models/tools/code_quality_check.py:271:        pass
 ./engines/pendulum_models/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/physics_engines/myosuite/python/myosuite_physics_engine.py:179:                pass  # Skip if assignment fails in test environment
+./engines/physics_engines/myosuite/python/myosuite_physics_engine.py:184:            pass  # Skip if forward fails in test environment
+./engines/physics_engines/myosuite/python/myosuite_physics_engine.py:204:                pass  # Skip if assignment fails in test environment
+./engines/physics_engines/myosuite/python/myosuite_physics_engine.py:431:                    pass
+./engines/physics_engines/opensim/python/opensim_golf/core.py:25:    pass
+./engines/physics_engines/opensim/python/opensim_golf/core.py:31:    pass
 ./engines/physics_engines/opensim/python/opensim_gui.py:267:        except NotImplementedError as e:
 ./engines/physics_engines/pinocchio/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/physics_engines/pinocchio/tools/code_quality_check.py:180:                    pass
+./engines/physics_engines/pinocchio/tools/code_quality_check.py:271:        pass
+./engines/physics_engines/pinocchio/python/pinocchio_physics_engine.py:17:    pass
+./engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py:23:    pass
+./engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py:856:                pass
+./engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py:1457:                                    pass
+./engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py:1466:                                    pass
+./engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py:1574:            pass
+./engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py:1721:                        pass
+./engines/physics_engines/pinocchio/python/dtack/gui/main_window.py:37:                pass
+./engines/physics_engines/pinocchio/python/dtack/gui/main_window.py:54:                pass
 ./engines/physics_engines/drake/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/physics_engines/drake/tools/code_quality_check.py:180:                    pass
+./engines/physics_engines/drake/tools/code_quality_check.py:271:        pass
 ./engines/physics_engines/drake/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/physics_engines/drake/python/drake_physics_engine.py:35:    pass
+./engines/physics_engines/drake/python/src/drake_gui_app.py:103:        pass
+./engines/physics_engines/drake/python/src/drake_gui_app.py:1259:                            pass
+./engines/physics_engines/drake/python/src/drake_gui_app.py:1422:                        pass
+./engines/physics_engines/drake/python/src/drake_gui_app.py:1676:                pass
+./engines/physics_engines/drake/python/tests/test_drake_visualizer.py:31:        pass
+./engines/physics_engines/drake/python/tests/test_drake_visualizer.py:42:        pass
 ./engines/physics_engines/mujoco/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./engines/physics_engines/mujoco/tools/code_quality_check.py:180:                    pass
+./engines/physics_engines/mujoco/tools/code_quality_check.py:271:        pass
+./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/__main__.py:19:    pass
+./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/biomechanics.py:469:                pass
+./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/meshcat_adapter.py:53:                pass
+./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py:960:                pass
+./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/sim_widget.py:980:                pass
+./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/gui/tabs/manipulation_tab.py:388:            pass
+./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/video_export.py:336:            pass
+./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/video_export.py:428:                    pass
+./engines/physics_engines/mujoco/python/humanoid_launcher.py:148:        pass  # Config driven by simulation loop
+./engines/physics_engines/mujoco/python/humanoid_launcher.py:736:        pass
+./engines/physics_engines/mujoco/python/tests/test_video_export.py:197:            pass
+./engines/physics_engines/mujoco/python/tests/test_pinocchio_interface.py:219:            pass
+./engines/physics_engines/mujoco/docker/example_dynamic_stance.py:58:            pass
+./engines/physics_engines/mujoco/docker/example_dynamic_stance.py:309:                pass
+./engines/physics_engines/mujoco/docker/src/humanoid_golf/visualization.py:178:                pass  # Body doesn't exist
+./engines/physics_engines/mujoco/docker/src/humanoid_golf/visualization.py:198:                pass
+./engines/physics_engines/mujoco/docker/src/humanoid_golf/visualization.py:204:        pass
+./engines/physics_engines/mujoco/docker/src/humanoid_golf/visualization.py:213:                pass
+./engines/physics_engines/mujoco/docker/src/humanoid_golf/sim.py:85:                pass
+./engines/physics_engines/mujoco/docker/src/humanoid_golf/sim.py:117:            pass
+./engines/physics_engines/mujoco/docker/src/humanoid_golf/sim.py:147:                    pass
+./engines/physics_engines/mujoco/docker/src/humanoid_golf/sim.py:184:                pass
+./engines/physics_engines/mujoco/docker/src/humanoid_golf/sim.py:322:            pass
+./engines/physics_engines/mujoco/docker/src/humanoid_golf/sim.py:395:                        pass
+./engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py:48:            pass
+./engines/physics_engines/mujoco/docker/gui/deepmind_control_suite_MuJoCo_GUI.py:1155:                        pass
+./engines/physics_engines/mujoco/docker/example_golf_swing.py:156:                    pass
+./engines/physics_engines/mujoco/test_dependencies.py:57:        pass
+./engines/physics_engines/pendulum/python/pendulum_physics_engine.py:96:        pass
+./engines/physics_engines/tests/test_induced_acceleration.py:134:        pass
 ./.github/workflows/Jules-Completist.yml:45:          # Find NotImplementedError
 ./.github/workflows/Jules-Completist.yml:46:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
 ./.github/workflows/Jules-Completist.yml:113:          - not_implemented.txt - NotImplementedError and pass statements
 ./.github/workflows/Jules-Completist.yml:122:          - Raise NotImplementedError in core paths
+./.github/workflows/PR-Comment-Responder.yml:281:                  pass
 ./.github/copilot-instructions.md:10:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
+./scripts/check_duplicates.py:93:                    pass  # Skip if cannot read
 ./pyproject.toml:290:    "raise NotImplementedError",
+./launchers/golf_launcher.py:461:            pass
+./launchers/golf_launcher.py:683:            pass
+./launchers/golf_launcher.py:741:            pass
+./launchers/golf_launcher.py:1035:            pass
+./launchers/unified_launcher.py:19:    pass
+./launchers/unified_launcher.py:141:            pass
+./launchers/unified_launcher.py:149:            pass
+./launchers/tests/test_unified_launcher.py:94:            pass
+./conftest.py:4:    pass
+./api/auth/security.py:263:        pass
+./installer/windows/build_installer.py:38:        pass
+./installer/windows/build_installer.py:87:            pass
+./tests/cross_engine/test_mujoco_vs_pinocchio.py:49:    pass
+./tests/cross_engine/test_mujoco_vs_pinocchio.py:58:    pass
+./tests/test_pinocchio_ecosystem.py:67:                    pass
+./tests/test_layout_persistence.py:213:            pass
+./tests/acceptance/test_counterfactual_experiments.py:309:            pass
 ./tests/integration/test_physics_interfaces.py:55:        except NotImplementedError:
 ./tests/integration/test_physics_interfaces.py:56:            pytest.fail("MyoSuite ZTCF/ZVCF raised NotImplementedError")
 ./tests/integration/test_physics_interfaces.py:98:        except NotImplementedError:
 ./tests/integration/test_physics_interfaces.py:99:            pytest.fail("OpenSim ZTCF/ZVCF raised NotImplementedError")
+./tests/integration/test_physics_consistency.py:29:        pass
+./tests/integration/test_physics_consistency.py:36:        pass
+./tests/integration/isolated/test_drake_strict.py:38:            pass
+./tests/integration/test_engine_integration.py:107:                pass
+./tests/integration/test_phase1_security_integration.py:253:            pass
+./tests/integration/test_golf_launcher_integration.py:25:        pass
+./tests/integration/test_golf_launcher_integration.py:31:        pass
+./tests/integration/test_golf_launcher_integration.py:34:        pass
+./tests/integration/test_golf_launcher_integration.py:37:        pass
+./tests/integration/test_golf_launcher_integration.py:40:        pass
+./tests/integration/test_golf_launcher_integration.py:43:        pass
+./tests/integration/test_golf_launcher_integration.py:46:        pass
+./tests/integration/test_golf_launcher_integration.py:49:        pass
+./tests/integration/test_golf_launcher_integration.py:52:        pass
+./tests/integration/test_golf_launcher_integration.py:55:        pass
+./tests/integration/test_golf_launcher_integration.py:58:        pass
+./tests/integration/test_golf_launcher_integration.py:61:        pass
+./tests/integration/test_golf_launcher_integration.py:82:    pass
+./tests/integration/test_golf_launcher_integration.py:86:    pass
+./tests/integration/test_golf_launcher_integration.py:96:        pass
+./tests/integration/test_golf_launcher_integration.py:99:        pass
+./tests/integration/test_golf_launcher_integration.py:102:        pass
+./tests/integration/test_golf_launcher_integration.py:246:        pass
+./tests/integration/test_conservation_laws.py:537:            pass
+./tests/integration/test_real_engine_loading.py:216:                pass
+./tests/integration/test_real_engine_loading.py:229:                pass
+./tests/integration/test_real_engine_loading.py:242:                pass
+./tests/integration/test_real_engine_loading.py:272:                    pass
+./tests/test_tool_registry.py:59:            pass
+./tests/test_tool_registry.py:72:            pass
+./tests/test_tool_registry.py:87:            pass
+./tests/test_tool_registry.py:91:            pass
+./tests/unit/test_pinocchio_physics_engine.py:9:    pass
+./tests/unit/ai/test_tool_registry.py:242:            pass
+./tests/unit/test_muscle_equilibrium.py:628:            pass
+./tests/unit/test_shaft_engine_integration.py:23:    pass
+./tests/unit/test_mujoco_physics_engine.py:12:    pass
+./tests/unit/test_muscle_analysis.py:478:                pass
+./tests/unit/test_jacobian.py:21:    pass
+./tests/unit/test_jacobian.py:28:    pass
+./tests/unit/test_jacobian.py:35:    pass
+./tests/unit/test_jacobian.py:42:    pass
+./tests/unit/test_shared_signal_processing.py:197:        pass
+./tests/unit/test_common_utils_coverage.py:61:        pass
+./tests/unit/test_golf_launcher_logic.py:33:        pass
+./tests/unit/test_golf_launcher_logic.py:36:        pass
+./tests/unit/test_golf_launcher_logic.py:39:        pass
+./tests/unit/test_golf_launcher_logic.py:42:        pass
+./tests/unit/test_golf_launcher_logic.py:45:        pass
+./tests/unit/test_golf_launcher_logic.py:48:        pass
+./tests/unit/test_golf_launcher_logic.py:51:        pass
+./tests/unit/test_golf_launcher_logic.py:54:        pass
+./tests/unit/test_golf_launcher_logic.py:57:        pass
+./tests/unit/test_golf_launcher_logic.py:60:        pass
+./tests/unit/test_golf_launcher_logic.py:63:        pass
+./tests/unit/test_golf_launcher_logic.py:66:        pass
+./tests/unit/test_golf_launcher_logic.py:69:        pass
+./tests/unit/test_golf_launcher_logic.py:72:        pass
+./tests/unit/test_golf_launcher_logic.py:75:        pass
+./tests/unit/test_golf_launcher_logic.py:78:        pass
+./tests/unit/test_golf_launcher_logic.py:84:        pass
+./tests/unit/test_golf_launcher_logic.py:111:        pass
+./tests/unit/test_golf_launcher_logic.py:134:        pass
+./tests/unit/test_golf_launcher_logic.py:137:        pass
+./tests/unit/test_golf_launcher_logic.py:152:        pass
+./tests/unit/test_golf_launcher_logic.py:161:    pass
+./tests/unit/test_golf_launcher_logic.py:165:    pass
+./tests/unit/test_golf_launcher_logic.py:169:    pass
+./tests/unit/test_golf_launcher_logic.py:173:    pass
+./tests/unit/test_golf_launcher_logic.py:185:        pass
+./tests/unit/test_ux_enhancements.py:10:        pass
+./tests/unit/test_ux_enhancements.py:13:        pass
+./tests/unit/test_ux_enhancements.py:16:        pass
+./tests/unit/test_ux_enhancements.py:19:        pass
+./tests/unit/test_ux_enhancements.py:22:        pass
+./tests/unit/test_ux_enhancements.py:25:        pass
+./tests/unit/test_ux_enhancements.py:28:        pass
+./tests/unit/test_ux_enhancements.py:36:        pass
+./tests/unit/test_ux_enhancements.py:39:        pass
+./tests/unit/test_ux_enhancements.py:42:        pass
+./tests/unit/test_ux_enhancements.py:45:        pass
+./tests/unit/test_ux_enhancements.py:48:        pass
+./tests/unit/test_ux_enhancements.py:51:        pass
+./tests/unit/test_ux_enhancements.py:54:        pass
+./tests/unit/test_ux_enhancements.py:57:        pass
+./tests/unit/test_ux_enhancements.py:65:        pass
+./tests/unit/test_ux_enhancements.py:68:        pass
+./tests/unit/test_ux_enhancements.py:71:        pass
+./tests/unit/test_ux_enhancements.py:74:        pass
+./tests/unit/test_ux_enhancements.py:79:        pass
+./tests/unit/test_ux_enhancements.py:82:        pass
+./tests/unit/test_ux_enhancements.py:85:        pass
+./tests/unit/test_ux_enhancements.py:88:        pass
+./tests/unit/test_ux_enhancements.py:93:        pass
+./tests/unit/test_ux_enhancements.py:96:        pass
+./tests/unit/test_launchers.py:94:                    pass  # Help typically causes SystemExit
+./tests/unit/test_golf_suite_launcher.py:33:        pass
+./tests/unit/test_golf_suite_launcher.py:36:        pass
+./tests/unit/test_golf_suite_launcher.py:39:        pass
+./tests/unit/test_golf_suite_launcher.py:42:        pass
+./tests/unit/test_golf_suite_launcher.py:45:        pass
+./tests/unit/test_golf_suite_launcher.py:53:        pass
+./tests/unit/test_golf_suite_launcher.py:58:        pass
+./tests/unit/test_golf_suite_launcher.py:61:        pass
+./tests/unit/test_golf_suite_launcher.py:64:        pass
+./tests/unit/test_golf_suite_launcher.py:67:        pass
+./tests/unit/test_golf_suite_launcher.py:70:        pass
+./tests/unit/test_golf_suite_launcher.py:75:        pass
+./tests/unit/test_golf_suite_launcher.py:78:        pass
+./tests/unit/test_golf_suite_launcher.py:81:        pass
+./tests/unit/test_golf_suite_launcher.py:86:        pass
+./tests/unit/test_golf_suite_launcher.py:89:        pass
+./tests/unit/test_golf_suite_launcher.py:95:        pass
+./tests/unit/test_golf_suite_launcher.py:98:        pass
+./tests/unit/test_golf_suite_launcher.py:106:        pass
+./tests/unit/test_golf_suite_launcher.py:109:        pass
+./tests/unit/test_golf_suite_launcher.py:112:        pass
+./tests/unit/test_golf_suite_launcher.py:115:        pass
+./tests/unit/test_golf_suite_launcher.py:118:        pass
+./tests/unit/test_golf_suite_launcher.py:123:        pass
+./tests/unit/test_golf_suite_launcher.py:126:        pass
+./tests/unit/test_golf_suite_launcher.py:129:        pass
+./tests/unit/test_golf_suite_launcher.py:132:        pass
+./tests/unit/test_golf_suite_launcher.py:135:        pass
+./tests/unit/test_golf_suite_launcher.py:138:        pass
+./tests/unit/test_golf_suite_launcher.py:146:        pass
+./tests/unit/test_golf_suite_launcher.py:152:        pass
+./tests/unit/test_golf_suite_launcher.py:222:        pass
+./tests/unit/test_drake_physics_engine.py:9:    pass
+./tests/unit/test_lazy_imports.py:106:            pass
+./tests/unit/test_lazy_imports.py:172:        pass
+./tests/unit/test_launcher_x11_logic.py:57:                pass
+./tests/unit/test_golf_launcher_basic.py:16:        pass
+./tests/unit/test_golf_launcher_basic.py:23:        pass
+./tests/unit/test_golf_launcher_basic.py:27:        pass
+./tests/unit/test_golf_launcher_basic.py:50:        pass
+./tests/unit/test_golf_launcher_basic.py:54:        pass
+./tests/unit/test_golf_launcher_basic.py:60:        pass
+./tests/unit/test_golf_launcher_basic.py:66:        pass
+./tests/unit/test_golf_launcher_basic.py:70:        pass
+./tests/unit/test_golf_launcher_basic.py:76:        pass
+./tests/unit/test_golf_launcher_basic.py:80:        pass
+./tests/unit/test_shared_output_manager.py:32:                pass
+./tests/unit/test_shared_engine_probes.py:147:            pass
+./tests/test_dashboard_enhancements.py:42:            pass
+./tests/test_dashboard_enhancements.py:45:            pass
+./tests/test_dashboard_enhancements.py:58:            pass
+./tests/test_dashboard_enhancements.py:68:            pass
+./shared/models/myosuite/examples/train_elbow_policy.py:133:                pass  # Headless mode
+./shared/python/energy_monitor.py:265:    pass
+./shared/python/manipulability.py:41:    pass
+./shared/python/ai/exceptions.py:99:    pass
+./shared/python/ai/gui/settings_dialog.py:39:    pass
+./shared/python/validation.py:34:    pass
+./shared/python/ui/recent_models.py:31:    pass
+./shared/python/ui/loading_button.py:241:            pass
+./shared/python/ui/preferences_dialog.py:14:        pass
+./shared/python/common_utils.py:287:        pass
+./shared/python/video_pose_pipeline.py:388:        pass
+./shared/python/indexed_acceleration.py:148:    pass
+./shared/python/impact_model.py:25:    pass
+./shared/python/grip_contact_model.py:25:    pass
+./shared/python/analysis/swing_metrics.py:142:        pass
+./shared/python/optimization/swing_optimizer.py:783:        pass
+./shared/python/injury/joint_stress.py:492:        pass
+./shared/python/injury/joint_stress.py:498:        pass
+./shared/python/injury/swing_modifications.py:171:        pass
+./shared/python/injury/swing_modifications.py:351:            pass
+./shared/python/injury/swing_modifications.py:375:        pass
+./shared/python/viewpoint_controls.py:29:    pass
+./shared/python/output_manager.py:202:                    pass
+./shared/python/output_manager.py:546:                pass
+./shared/python/provenance.py:125:            pass
+./shared/python/engine_probes.py:505:                    pass
+./shared/python/exceptions.py:11:    pass
+./shared/python/exceptions.py:17:    pass
+./shared/python/exceptions.py:23:    pass
+./shared/python/exceptions.py:29:    pass
+./shared/python/exceptions.py:35:    pass
+./shared/python/handedness_support.py:31:    pass
+./shared/python/plotting_core.py:2597:            pass  # pragma: no cover
+./shared/python/plotting_core.py:3516:                pass
+./shared/python/pose_estimation/interface.py:30:        pass
+./shared/python/pose_estimation/interface.py:42:        pass
+./shared/python/pose_estimation/interface.py:54:        pass
+./shared/python/comparative_analysis.py:18:    pass  # pragma: no cover
+./shared/python/env_validator.py:53:    pass
+./shared/python/flexible_shaft.py:30:    pass
+./shared/python/secure_subprocess.py:40:    pass
+./shared/python/secure_subprocess.py:160:                pass
+./shared/python/secure_subprocess.py:232:                pass
+./shared/python/process_worker.py:17:            pass
+./shared/python/process_worker.py:23:            pass
+./shared/python/process_worker.py:26:            pass
+./shared/python/process_worker.py:30:            pass
+./shared/python/process_worker.py:33:            pass
+./shared/python/swing_plane_visualization.py:32:    pass
+./shared/python/unified_engine_interface.py:200:                pass
+./shared/python/dashboard/advanced_analysis.py:329:            pass
+./shared/python/dashboard/widgets.py:749:            pass
+./shared/python/dashboard/tests/test_widgets.py:29:        pass
+./shared/python/dashboard/tests/test_widgets.py:32:        pass
+./shared/python/dashboard/tests/test_widgets.py:35:        pass
+./shared/python/dashboard/tests/test_widgets.py:38:        pass
+./shared/python/dashboard/tests/test_widgets.py:41:        pass
+./shared/python/dashboard/tests/test_recorder.py:18:        pass
+./shared/python/dashboard/tests/test_recorder.py:21:        pass
+./shared/python/dashboard/tests/test_recorder.py:24:        pass
+./shared/python/dashboard/tests/test_recorder.py:32:        pass
+./shared/python/dashboard/tests/test_recorder.py:42:        pass
+./shared/python/reference_frames.py:23:    pass
+./shared/python/tests/test_dashboard_recorder.py:26:        pass
+./shared/python/tests/test_dashboard_recorder.py:29:        pass
+./shared/python/tests/test_dashboard_recorder.py:66:        pass
+./shared/python/tests/test_dashboard_recorder.py:69:        pass
+./shared/python/validation_helpers.py:55:    pass

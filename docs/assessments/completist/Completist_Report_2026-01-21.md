@@ -17,7 +17,7 @@
 | `./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py` | 428 | Stub | _create_arrow_geometry | 5 |
 | `./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py` | 433 | Stub | _setup_lighting | 5 |
 | `./engines/physics_engines/mujoco/python/humanoid_launcher.py` | 147 | Stub | set_analysis_config | 5 |
-| `./engines/physics_engines/mujoco/python/humanoid_launcher.py` | 732 | Stub | load_config | 5 |
+| `./engines/physics_engines/mujoco/python/humanoid_launcher.py` | 734 | Stub | load_config | 5 |
 | `./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py` | 70 | Stub | control | 5 |
 | `./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py` | 74 | Stub | reset | 5 |
 | `./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/pinocchio_interface.py` | 157 | Stub | sync_pinocchio_to_mujoco | 5 |
@@ -104,7 +104,7 @@
 | `./.github/workflows/Jules-Conflict-Fix.yml` | 36 | if [ "$ATTEMPTS" -gt 3 ]; then |
 | `./.github/workflows/Jules-Conflict-Fix.yml` | 37 | echo "Too many attempts ($ATTEMPTS) for PR $PR. Skipping." |
 | `./.github/workflows/Jules-Conflict-Fix.yml` | 46 | 3. This is conflict resolution attempt #$((ATTEMPTS+1))." |
-| `./scripts/analyze_completist_data.py` | 27 | fixme_markers = ['FIX' + 'ME', 'XXX', 'HACK', 'TEMP'] |
+| `./scripts/analyze_completist_data.py` | 29 | fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"] |
 | `./shared/models/opensim/opensim-models/Copy_of_Tutorial_7_Set_up_OpenSim_Moco_in_Google_Colab.ipynb` | 725 | "image/png": "iVBORw0KGgoAAAANSUhEUgAAAioAAAHHCAYAAACRAnNyAAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcn |
 | `./shared/models/opensim/opensim-models/Tutorials/doc/styles/site.css` | 3404 | html body { /* HACK: Temporary fix for CONF-15412 */ |
 | `./shared/python/physics_constants.py` | 106 | TEMPERATURE_C = PhysicalConstant(20.0, "C", "Standard", "Standard temperature") |

@@ -55,11 +55,11 @@
 ./.github/copilot-instructions.md:10:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
 ./WORKFLOW_AND_AGENTS_REPORT.md:6:- CI Standard: quality gate (ruff, black, mypy, TODO/FIXME check, pip-audit, MATLAB quality report), tests with xvfb, cross-engine unit test, optional codecov.
 ./WORKFLOW_AND_AGENTS_REPORT.md:61:- Document TODO/FIXME policy as "must map to a GitHub issue ID" to align with CI placeholder checks.
-./scripts/analyze_completist_data.py:6:TODOS_FILE = os.path.join(DATA_DIR, 'todo_markers.txt')
-./scripts/analyze_completist_data.py:27:    fixme_markers = ['FIX' + 'ME', 'XXX', 'HACK', 'TEMP']
-./scripts/analyze_completist_data.py:29:    with open(TODOS_FILE, encoding='utf-8', errors='replace') as f:
-./scripts/analyze_completist_data.py:134:    report_content += f"- **Feature Gaps (TODOs)**: {len(todos)}\n"
-./scripts/analyze_completist_data.py:148:    report_content += "\n## Feature Gap Matrix (Top 20 TODOs)\n"
+./scripts/analyze_completist_data.py:6:TODOS_FILE = os.path.join(DATA_DIR, "todo_markers.txt")
+./scripts/analyze_completist_data.py:29:    fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
+./scripts/analyze_completist_data.py:31:    with open(TODOS_FILE, encoding="utf-8", errors="replace") as f:
+./scripts/analyze_completist_data.py:141:    report_content += f"- **Feature Gaps (TODOs)**: {len(todos)}\n"
+./scripts/analyze_completist_data.py:155:    report_content += "\n## Feature Gap Matrix (Top 20 TODOs)\n"
 ./shared/models/opensim/opensim-models/CMakeLists.txt:31:        RENAME run_forward.xml) # TODO inconsistent filename; which should we use?
 ./shared/models/opensim/opensim-models/CMakeLists.txt:45:# TODO subject01_metabolics* files?
 ./shared/models/opensim/opensim-models/CMakeLists.txt:82:    # TODO should we copy over the OutputReference folder?
