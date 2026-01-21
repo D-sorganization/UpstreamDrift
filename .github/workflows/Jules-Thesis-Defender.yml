@@ -1,52 +1,62 @@
-name: Jules Sentinel (Security Audit)
+name: Jules Thesis Defender (Worker)
 
 on:
   workflow_call:
   workflow_dispatch:
-  schedule:
-    - cron: "0 3 * * 1"  # Weekly on Mondays at 3 AM UTC (within midnight-4 AM window)
+    inputs:
+      critique_path:
+        description: 'Path to critique document(s)'
+        required: false
+        default: 'docs/critiques/'
+        type: string
+  push:
+    paths:
+      - 'docs/critiques/**'
+      - 'docs/reviews/**'
+      - 'docs/objections/**'
 
 permissions:
   contents: write
   pull-requests: write
   issues: write
-  security-events: write
 
 jobs:
-  security-audit:
+  defend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: "20"
 
-      - name: Install Dependencies
+      - name: Install Jules
+        run: npm install -g @google/jules
+
+      - name: Find Critique Documents
+        id: find
         run: |
-          pip install safety bandit pip-audit semgrep || true
-          npm install -g @google/jules
+          mkdir -p docs/critiques docs/defenses
 
-      - name: Run Security Scanners
-        run: |
-          mkdir -p reports
+          CRITIQUES=""
+          for dir in docs/critiques docs/reviews docs/objections; do
+            if [ -d "$dir" ]; then
+              for file in "$dir"/*.md; do
+                [ -f "$file" ] && CRITIQUES="$CRITIQUES $file"
+              done
+            fi
+          done
 
-          echo "Running pip-audit..."
-          pip-audit --format json -o reports/pip_audit.json 2>/dev/null || echo "[]" > reports/pip_audit.json
+          if [ -z "$CRITIQUES" ]; then
+            echo "found=false" >> $GITHUB_OUTPUT
+          else
+            echo "found=true" >> $GITHUB_OUTPUT
+          fi
 
-          echo "Running bandit..."
-          bandit -r . -f json -o reports/bandit.json --exclude './.venv,./venv,./env,./.git' 2>/dev/null || echo "[]" > reports/bandit.json
-
-          echo "Running semgrep..."
-          semgrep --config=auto --json -o reports/semgrep.json . 2>/dev/null || echo "{}" > reports/semgrep.json
-
-      - name: Jules Sentinel Analysis
+      - name: Jules Thesis Defender Analysis
+        if: steps.find.outputs.found == 'true'
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
         run: |
@@ -78,46 +88,53 @@ jobs:
           
           # Create session prompt
           PROMPT=$(cat << 'PROMPT_EOF'
-
-          You are the SENTINEL security agent.
+          '
+          You are the THESIS DEFENDER agent for AffineDrift.
           
-          ## Your Mission
-          Analyze the security audit reports in ./reports/ and document findings.
+          ## Core Mandate
+          Act like a skeptical critic, then help preemptively defend with precise counterarguments.
           
-          ## Input Files
-          - reports/pip_audit.json - Dependency vulnerabilities
-          - reports/bandit.json - Python security issues
-          - reports/semgrep.json - Code pattern analysis
+          ## Analyze critique documents in:
+          - docs/critiques/
+          - docs/reviews/
+          - docs/objections/
           
-          ## DO NOT MODIFY CODE directly. Instead:
+          ## Process
           
-          ### For HIGH severity findings:
-          1. Create a GitHub Issue with labels: security, high-priority, jules:sentinel
-          2. Include CVE numbers if available
-          3. Provide remediation steps
+          ### 1. ANALYZE - Classify each critique as:
+          conceptual, mathematical, empirical, methodological, or philosophical
           
-          ### For MEDIUM severity findings:
-          1. Add to .jules/sentinel.md journal with details
-          2. Create GitHub Issue with label: security, jules:sentinel
+          ### 2. IDENTIFY for each:
+          - Legitimate weaknesses
+          - Misunderstandings
+          - Category errors
+          - Unstated assumptions by critic
           
-          ### For LOW severity findings:
-          1. Document in .jules/sentinel.md only
+          ### 3. PROPOSE DEFENSE:
+          - Clarifications
+          - Added derivations
+          - Explicit assumptions
+          - Boundary conditions
+          - Preemptive counterarguments
           
-          ## Journal Entry Format
-          Update .jules/sentinel.md with:
-          ```
-          ## YYYY-MM-DD - Security Audit
+          ## Output
           
-          **Scan Results:**
-          - Dependencies: X vulnerabilities (H/M/L)
-          - Code Analysis: Y issues (H/M/L)
-          - Pattern Scan: Z findings
+          1. docs/defenses/critique_response_table_$DATE.md
+             | Critique | Type | Validity | Response | Injection Point |
           
-          **Issues Created:** #num, #num
-          **Deferred:** [list any deferred items with justification]
-          ```
+          2. docs/defenses/defense_paragraphs_$DATE.md
+             Paste-ready paragraphs, organized by injection location
           
-          CRITICAL: This is a READ-ONLY audit. Do not fix code - only document and create issues.
+          3. docs/defenses/defense_report_$DATE.md
+             Executive summary, strongest critiques, areas to strengthen
+          
+          ## Constraints
+          - DO NOT be argumentative or dismissive
+          - DO NOT over-defend weak points - acknowledge limits
+          - Preserve scientific tone and rigor
+          - Be fair to critics
+          
+          For genuine weaknesses: Create Issue with label 'thesis-defense,needs-work'
           PROMPT_EOF
           )
           
@@ -181,8 +198,10 @@ jobs:
           
 
 
-      - name: Commit Journal
-        uses: stefanzweifel/git-auto-commit-action@v5
+      - name: Commit Defense Materials
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
-          commit_message: "docs(sentinel): weekly security audit"
-          file_pattern: ".jules/sentinel.md"
+          commit_message: "docs(defense): thesis defense analysis $(date +%Y-%m-%d)"
+          file_pattern: |
+            docs/defenses/*.md
+            .jules/*.md

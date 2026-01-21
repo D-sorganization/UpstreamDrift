@@ -1,0 +1,426 @@
+name: Jules Layman's Terms Writer
+
+on:
+  workflow_call:
+    inputs:
+      target_file:
+        description: 'Specific .qmd file to update (leave empty for all)'
+        required: false
+        type: string
+      mode:
+        description: 'Mode: create (new sections) or refine (improve existing)'
+        required: false
+        default: 'auto'
+        type: string
+  workflow_dispatch:
+    inputs:
+      target_file:
+        description: 'Specific .qmd file to update (leave empty for all)'
+        required: false
+        type: string
+      mode:
+        description: 'Mode: create (new sections) or refine (improve existing)'
+        required: false
+        default: 'auto'
+        type: choice
+        options:
+          - auto
+          - create
+          - refine
+  schedule:
+    - cron: "30 1 * * *"  # Daily at 1:30 AM UTC (overnight schedule)
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  write-laymans-terms:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt || true
+          npm install -g @google/jules
+
+      - name: Initialize Review Tracking
+        run: |
+          mkdir -p .jules/laymans_data
+          mkdir -p .jules/review_logs
+
+          # Initialize or load review log
+          REVIEW_LOG=".jules/review_logs/laymans_reviews.json"
+          if [ ! -f "$REVIEW_LOG" ]; then
+            echo '{}' > "$REVIEW_LOG"
+          fi
+          echo "REVIEW_LOG=$REVIEW_LOG" >> $GITHUB_ENV
+
+      - name: Scan Articles for Layman's Terms Status
+        id: scan
+        run: |
+          # Find all article .qmd files
+          find articles -name "*.qmd" -type f > .jules/laymans_data/all_articles.txt 2>/dev/null || true
+
+          # Find articles WITH "In Layman's Terms" sections
+          grep -l "laymans-terms" articles/*.qmd > .jules/laymans_data/has_laymans.txt 2>/dev/null || true
+
+          # Find articles WITHOUT "In Layman's Terms" sections
+          comm -23 <(sort .jules/laymans_data/all_articles.txt) <(sort .jules/laymans_data/has_laymans.txt) \
+            > .jules/laymans_data/missing_laymans.txt 2>/dev/null || true
+
+          # Copy the template for reference
+          cp _templates/partials/laymans-terms.html .jules/laymans_data/ 2>/dev/null || true
+
+          MISSING_COUNT=$(wc -l < .jules/laymans_data/missing_laymans.txt 2>/dev/null | tr -d ' ' || echo "0")
+          HAS_COUNT=$(wc -l < .jules/laymans_data/has_laymans.txt 2>/dev/null | tr -d ' ' || echo "0")
+          TOTAL_COUNT=$(wc -l < .jules/laymans_data/all_articles.txt 2>/dev/null | tr -d ' ' || echo "0")
+
+          echo "missing_count=$MISSING_COUNT" >> $GITHUB_OUTPUT
+          echo "has_count=$HAS_COUNT" >> $GITHUB_OUTPUT
+          echo "total_count=$TOTAL_COUNT" >> $GITHUB_OUTPUT
+
+          # Determine mode
+          if [ "${{ inputs.mode }}" = "auto" ] || [ -z "${{ inputs.mode }}" ]; then
+            if [ "$MISSING_COUNT" -gt 0 ]; then
+              echo "mode=create" >> $GITHUB_OUTPUT
+            else
+              echo "mode=refine" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check Review Counts and Select Target
+        id: select
+        env:
+          MODE: ${{ steps.scan.outputs.mode }}
+        run: |
+          REVIEW_LOG="${{ env.REVIEW_LOG }}"
+          MAX_REVIEWS=5
+
+          # Python script to select next article to work on
+          python3 << 'PYEOF'
+          import json
+          import os
+          import sys
+
+          review_log_path = os.environ.get('REVIEW_LOG', '.jules/review_logs/laymans_reviews.json')
+          max_reviews = 5
+          mode = os.environ.get('MODE', 'create')
+
+          # Load review log
+          try:
+              with open(review_log_path, 'r') as f:
+                  reviews = json.load(f)
+          except:
+              reviews = {}
+
+          # Load article lists
+          if mode == "create":
+              list_file = ".jules/laymans_data/missing_laymans.txt"
+          else:
+              list_file = ".jules/laymans_data/has_laymans.txt"
+
+          try:
+              with open(list_file, 'r') as f:
+                  articles = [line.strip() for line in f if line.strip()]
+          except:
+              articles = []
+
+          # Find articles needing work (under max reviews)
+          needs_work = []
+          fully_reviewed = []
+
+          for article in articles:
+              count = reviews.get(article, 0)
+              if count < max_reviews:
+                  needs_work.append((article, count))
+              else:
+                  fully_reviewed.append(article)
+
+          # Sort by review count (lowest first)
+          needs_work.sort(key=lambda x: x[1])
+
+          if needs_work:
+              target = needs_work[0][0]
+              current_count = needs_work[0][1]
+              print(f"Selected: {target} (review {current_count + 1}/{max_reviews})")
+
+              with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
+                  f.write(f"target={target}\n")
+                  f.write(f"current_review={current_count + 1}\n")
+                  f.write(f"skip=false\n")
+                  f.write(f"remaining={len(needs_work)}\n")
+          else:
+              print("All articles have been reviewed 5 times. Nothing to do.")
+              with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
+                  f.write("skip=true\n")
+                  f.write(f"fully_reviewed={len(fully_reviewed)}\n")
+          PYEOF
+
+      - name: Skip if Complete
+        if: steps.select.outputs.skip == 'true'
+        run: |
+          echo "✅ All articles have completed their review cycles (5 reviews each)."
+          echo "📊 Fully reviewed: ${{ steps.select.outputs.fully_reviewed }} articles"
+          echo "No work needed today. Exiting gracefully."
+
+      - name: Create Working Branch
+        if: steps.select.outputs.skip != 'true'
+        run: |
+          BRANCH_NAME="jules/laymans-terms-$(date +%Y%m%d-%H%M)"
+          git checkout -b "$BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Jules Layman's Terms Writer
+        if: steps.select.outputs.skip != 'true'
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          TARGET_FILE: ${{ steps.select.outputs.target }}
+          MODE: ${{ steps.scan.outputs.mode }}
+          REVIEW_NUM: ${{ steps.select.outputs.current_review }}
+        run: |
+          set -e
+          DATE=$(date +%Y-%m-%d)
+          REPO="${{ github.repository }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
+          
+          # Check if API key is configured
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
+            exit 0
+          fi
+          
+          echo "Looking up repository source..."
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+          
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+          
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Repository $REPO not found in Jules sources."
+            exit 0
+          fi
+          
+          echo "Found source: $SOURCE_ID"
+          
+          # Create session prompt
+          PROMPT=$(cat << 'PROMPT_EOF'
+          '
+          You are the LAYMAN'S TERMS WRITER for AffineDrift - a technical golf science website.
+          
+          ## Current Task
+          - MODE: $MODE
+          - TARGET: $TARGET_FILE
+          - REVIEW: $REVIEW_NUM of 5
+          
+          ## Mode-Specific Instructions
+          
+          ### If MODE = "create":
+          Add a NEW "In Layman's Terms" section to the target article.
+          Follow the HTML template exactly.
+          
+          ### If MODE = "refine":
+          IMPROVE the existing section. This is review $REVIEW_NUM:
+          - Review 1-2: Focus on CLARITY - simplify complex explanations
+          - Review 3: Focus on ANALOGIES - make them more relatable
+          - Review 4: Focus on COMPLETENESS - ensure all key concepts covered
+          - Review 5: Final POLISH - grammar, flow, accessibility
+          
+          ## HTML Structure (MUST FOLLOW EXACTLY)
+          ```html
+          <section class="laymans-terms">
+            <button class="laymans-terms-header" aria-expanded="false">
+              <h2>In Layman's Terms</h2>
+              <span class="laymans-terms-icon">▼</span>
+            </button>
+            <div class="laymans-terms-content">
+              <div class="laymans-terms-inner">
+                <p class="laymans-terms-intro">
+                  [Brief intro about what you'll learn]
+                </p>
+          
+                <div class="laymans-item">
+                  <h3>[Topic Title]</h3>
+                  <p>[Simple explanation - avoid jargon]</p>
+                  <div class="analogy">
+          <strong>Think of it like:</strong> [Relatable everyday analogy]
+                  </div>
+                </div>
+          
+                <div class="key-takeaway">
+                  <strong>Key Takeaway:</strong> [One sentence summary]
+                </div>
+              </div>
+            </div>
+          </section>
+          ```
+          
+          ## Writing Guidelines
+          1. Read the FULL article to understand the technical content
+          2. Identify 3-5 key concepts that need simplification
+          3. Use everyday analogies (cooking, sports, driving, etc.)
+          4. Avoid ALL technical jargon in explanations
+          5. Make it accessible to someone with no golf or physics background
+          6. Place the section AFTER the main content, BEFORE any references
+          
+          ## Quality Checks
+          - Every laymans-item MUST have an analogy
+          - Analogies should be relatable (not golf-specific)
+          - Key takeaway should be actionable or memorable
+          - Keep explanations under 3 sentences each
+          
+          IMPORTANT: You ARE authorized to modify .qmd files.
+          ONLY modify the target file: $TARGET_FILE
+          PROMPT_EOF
+          )
+          
+          echo "Creating Jules session..."
+          REQUEST_JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            --arg source "$SOURCE_ID" \
+            '{
+              prompt: $prompt,
+              sourceContext: {
+                source: $source,
+                githubRepoContext: {
+                  startingBranch: "main"
+                }
+              },
+              automationMode: "AUTO_CREATE_PR"
+            }')
+          
+          echo "Request: $REQUEST_JSON"
+          
+          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_JSON" \
+            "$API_BASE/sessions")
+          
+          SESSION_RESPONSE=$(cat /tmp/session_response.json)
+          echo "HTTP Status: $HTTP_CODE"
+          
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Jules API returned HTTP $HTTP_CODE"
+            exit 1
+          fi
+          
+          SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
+          echo "Created session: $SESSION_ID"
+          
+          # Poll for completion
+          MAX_WAIT=1800
+          POLL_INTERVAL=30
+          ELAPSED=0
+          
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
+            STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
+            echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
+          
+            case "$STATE" in
+              "COMPLETED"|"SUBMITTED")
+                echo "Session completed successfully!"
+                break
+                ;;
+              "FAILED"|"CANCELLED")
+                echo "::error::Session $STATE"
+                exit 1
+                ;;
+            esac
+            sleep $POLL_INTERVAL
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
+          
+
+
+      - name: Update Review Log
+        if: steps.select.outputs.skip != 'true'
+        env:
+          TARGET: ${{ steps.select.outputs.target }}
+        run: |
+          python3 << 'PYEOF'
+          import json
+          import os
+
+          review_log_path = os.environ.get('REVIEW_LOG', '.jules/review_logs/laymans_reviews.json')
+          target = os.environ.get('TARGET', '')
+
+          try:
+              with open(review_log_path, 'r') as f:
+                  reviews = json.load(f)
+          except:
+              reviews = {}
+
+          reviews[target] = reviews.get(target, 0) + 1
+
+          with open(review_log_path, 'w') as f:
+              json.dump(reviews, f, indent=2)
+
+          print(f"Updated {target}: now at {reviews[target]} reviews")
+          PYEOF
+
+      - name: Commit and Create PR
+        if: steps.select.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git add -A
+          if ! git diff --staged --quiet; then
+            MODE="${{ steps.scan.outputs.mode }}"
+            REVIEW="${{ steps.select.outputs.current_review }}"
+            TARGET="${{ steps.select.outputs.target }}"
+
+            if [ "$MODE" = "create" ]; then
+              MSG="content(laymans): add In Layman's Terms to $(basename "$TARGET")"
+            else
+              MSG="content(laymans): refine section (review $REVIEW/5) - $(basename "$TARGET")"
+            fi
+
+            git commit -m "$MSG
+
+          Automated update by Jules Layman's Terms Writer.
+
+          Co-Authored-By: Jules <jules-bot@users.noreply.github.com>"
+
+            git push origin "$BRANCH_NAME"
+
+            gh pr create \
+              --title "Content: Layman's Terms - $(basename "$TARGET") [$MODE $REVIEW/5]" \
+              --body "$(cat << EOF
+          ## Summary
+          **Mode**: $MODE | **Review**: $REVIEW of 5 | **Target**: $TARGET
+
+          $(if [ "$MODE" = "create" ]; then echo "Added new 'In Layman's Terms' section."; else echo "Refined existing section (iteration $REVIEW)."; fi)
+
+          ## Remaining Work
+          - Articles needing work: ${{ steps.select.outputs.remaining }}
+
+          ## Review Checklist
+          - [ ] Explanations are accurate but simplified
+          - [ ] Analogies are relatable and helpful
+          - [ ] HTML structure matches template
+          - [ ] No technical jargon in layman sections
+
+          🤖 Generated with Jules Layman's Terms Writer
+          EOF
+          )" \
+              --label "jules:content,laymans-terms"
+          else
+            echo "No changes to commit"
+          fi
