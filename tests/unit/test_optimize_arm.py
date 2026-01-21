@@ -13,7 +13,7 @@ import casadi as ca  # noqa: E402
 import pinocchio as pin  # noqa: E402
 import pinocchio.casadi as cpin  # noqa: E402
 
-# Avoid importlib.reload()
+# Use sys.modules.pop instead of reload to avoid C-extension corruption
 sys.modules.pop("shared.python.optimization.examples.optimize_arm", None)
 from shared.python.optimization.examples.optimize_arm import main  # noqa: E402
 
