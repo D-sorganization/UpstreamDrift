@@ -142,26 +142,26 @@ jobs:
                   print(f"\n  Merging PR #{pr_num}: {pr_title}")
 
                   try:
-            # Fetch and merge the PR branch
-            subprocess.run(['git', 'fetch', 'origin', pr_branch], check=True)
-            result = subprocess.run(
-                ['git', 'merge', f'origin/{pr_branch}', '--no-edit', '-m', f'Merge PR #{pr_num}: {pr_title}'],
-                capture_output=True, text=True
-            )
+                      # Fetch and merge the PR branch
+                      subprocess.run(['git', 'fetch', 'origin', pr_branch], check=True)
+                      result = subprocess.run(
+                          ['git', 'merge', f'origin/{pr_branch}', '--no-edit', '-m', f'Merge PR #{pr_num}: {pr_title}'],
+                          capture_output=True, text=True
+                      )
 
-            if result.returncode == 0:
-                merged_prs.append(pr)
-                print(f"    ✅ Successfully merged")
-            else:
-                # Merge conflict - abort and skip
-                subprocess.run(['git', 'merge', '--abort'], check=False)
-                failed_prs.append(pr)
-                print(f"    ❌ Merge conflict - skipped")
+                      if result.returncode == 0:
+                          merged_prs.append(pr)
+                          print(f"    ✅ Successfully merged")
+                      else:
+                          # Merge conflict - abort and skip
+                                    subprocess.run(['git', 'merge', '--abort'], check=False)
+                                    failed_prs.append(pr)
+                          print(f"    ❌ Merge conflict - skipped")
 
                   except Exception as e:
-            failed_prs.append(pr)
-            print(f"    ❌ Failed: {e}")
-            subprocess.run(['git', 'merge', '--abort'], check=False)
+                      failed_prs.append(pr)
+                      print(f"    ❌ Failed: {e}")
+                      subprocess.run(['git', 'merge', '--abort'], check=False)
 
               if merged_prs:
                   # Push compiled branch
@@ -188,17 +188,17 @@ jobs:
           🤖 Generated with Jules PR Compiler
           """
 
-                  result = subprocess.run([
+                            result = subprocess.run([
             'gh', 'pr', 'create',
             '--title', f"[Compiled] {category}: {len(merged_prs)} PRs - {date_str}",
             '--body', body,
             '--label', f'{category},jules:compiled'
                   ], capture_output=True, text=True)
 
-                  if result.returncode == 0:
+                            if result.returncode == 0:
             print(f"\n✅ Created compiled PR for {category}")
             print(result.stdout)
-                  else:
+                            else:
             print(f"\n❌ Failed to create PR: {result.stderr}")
 
               # Return to main for next group

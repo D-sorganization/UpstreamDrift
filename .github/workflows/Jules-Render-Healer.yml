@@ -18,6 +18,40 @@ jobs:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
           DEPLOY_URL: ${{ github.event.deployment_status.target_url }}
         run: |
-          jules remote new \
-            --repo ${{ github.repository }} \
-            --session "Production deployment failed at $DEPLOY_URL. Analyze the configuration and fix the crash."
+          # REST API Implementation
+          REPO="${{ github.repository }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
+          
+          echo "Looking up repository source..."
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+          
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+          
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Repository $REPO not found in Jules sources."
+            exit 0
+          fi
+
+          REQUEST_JSON=$(jq -n \
+            --arg source "$SOURCE_ID" \
+            --arg url "$DEPLOY_URL" \
+            '{
+              prompt: ("You are the RENDER HEALER agent. Analyize the production deployment crash at " + $url + ". Fix the configuration."),
+              sourceContext: {
+                source: $source,
+                githubRepoContext: {
+                  startingBranch: "main"
+                }
+              },
+              automationMode: "AUTO_CREATE_PR"
+            }')
+          
+          # Fire and forget session creation
+          curl -sf -X POST -H "X-Goog-Api-Key: $JULES_API_KEY" \
+             -H "Content-Type: application/json" \
+             -d "$REQUEST_JSON" \
+             "$API_BASE/sessions"
+
