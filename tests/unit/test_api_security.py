@@ -377,6 +377,7 @@ class TestSecretKeyValidation:
             # Also ensure parent package doesn't hold stale reference
             if "api.auth" in sys.modules:
                 import api.auth
+
                 if hasattr(api.auth, "security"):
                     delattr(api.auth, "security")
 
