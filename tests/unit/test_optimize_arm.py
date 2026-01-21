@@ -9,15 +9,12 @@ sys.modules["casadi"] = MagicMock()
 sys.modules["pinocchio"] = MagicMock()
 sys.modules["pinocchio.casadi"] = MagicMock()
 
-import importlib  # noqa: E402
-
 import casadi as ca  # noqa: E402
 import pinocchio as pin  # noqa: E402
 import pinocchio.casadi as cpin  # noqa: E402
 
-import shared.python.optimization.examples.optimize_arm as optimize_arm_module  # noqa: E402
-
-importlib.reload(optimize_arm_module)  # noqa: E402
+# Use sys.modules.pop instead of reload to avoid C-extension corruption
+sys.modules.pop("shared.python.optimization.examples.optimize_arm", None)
 from shared.python.optimization.examples.optimize_arm import main  # noqa: E402
 
 
