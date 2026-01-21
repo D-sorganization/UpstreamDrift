@@ -13,8 +13,12 @@ import time
 from pathlib import Path
 from typing import Any, ClassVar
 
-import cv2
 import numpy as np
+
+try:
+    import cv2
+except ImportError:
+    cv2 = None
 
 # Try to import mediapipe. If not found, we will fall back to mock/error behavior
 try:
@@ -156,6 +160,9 @@ class MediaPipeEstimator(PoseEstimator):
         Returns:
             PoseEstimationResult containing joint angles and keypoints
         """
+        if cv2 is None:
+            raise RuntimeError("OpenCV (cv2) is not installed. Cannot estimate pose.")
+
         if not self._is_loaded:
             raise RuntimeError("Model not loaded. Call load_model() first.")
 
@@ -217,6 +224,9 @@ class MediaPipeEstimator(PoseEstimator):
         Returns:
             List of results for each frame with temporal smoothing
         """
+        if cv2 is None:
+            raise RuntimeError("OpenCV (cv2) is not installed. Cannot process video.")
+
         if not self._is_loaded:
             raise RuntimeError("Model not loaded. Call load_model() first.")
 
