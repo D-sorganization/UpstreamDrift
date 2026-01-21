@@ -125,34 +125,34 @@ jobs:
               if (schedule) {
                 switch (schedule) {
                   case "0 8 * * *":
-                    target = "assessment-generator";
-                    break;
+          target = "assessment-generator";
+          break;
                   case "30 8 * * *":
-                    target = "code-quality-reviewer";
-                    break;
+          target = "code-quality-reviewer";
+          break;
                   case "0 9 * * *":
-                    target = "completist";
-                    break;
+          target = "completist";
+          break;
                   case "30 9 * * *":
-                    target = "laymans-terms-writer";
-                    break;
+          target = "laymans-terms-writer";
+          break;
                   case "0 10 * * *":
-                    target = "critics-comments-writer";
-                    break;
+          target = "critics-comments-writer";
+          break;
                   case "30 10 * * *":
-                    target = "sentinel";
-                    break;
+          target = "sentinel";
+          break;
                   case "0 11 * * *":
-                    target = day === 4 ? "thesis-defender" : "tech-custodian";
-                    break;
+          target = day === 4 ? "thesis-defender" : "tech-custodian";
+          break;
                   case "30 11 * * *":
-                    target = "issue-resolver";
-                    break;
+          target = "issue-resolver";
+          break;
                   case "0 12 * * *":
-                    target = "pr-compiler";
-                    break;
+          target = "pr-compiler";
+          break;
                   default:
-                    target = "none";
+          target = "none";
                 }
               }
 
