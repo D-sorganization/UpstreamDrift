@@ -389,12 +389,17 @@ async def startup_event() -> None:
         analysis_service = AnalysisService(engine_manager)
 
         # Initialize video pipeline with default config
-        video_config = VideoProcessingConfig(
-            estimator_type="mediapipe",
-            min_confidence=0.5,
-            enable_temporal_smoothing=True,
-        )
-        video_pipeline = VideoPosePipeline(video_config)
+        try:
+            video_config = VideoProcessingConfig(
+                estimator_type="mediapipe",
+                min_confidence=0.5,
+                enable_temporal_smoothing=True,
+            )
+            video_pipeline = VideoPosePipeline(video_config)
+            logger.info("Video pose pipeline initialized successfully")
+        except Exception as e:
+            logger.warning(f"Video pose pipeline could not be initialized: {e}")
+            video_pipeline = None
 
         logger.info("Golf Modeling Suite API started successfully")
 
