@@ -1,6 +1,6 @@
 import ast
 import os
-from typing import Any, IO
+from typing import IO, Any
 
 
 def is_stub(node: Any) -> bool:
