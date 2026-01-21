@@ -2,7 +2,7 @@
 title: "Golf Modeling Suite — Professional Platform Design Guidelines"
 subtitle: "Mission, architecture, and standards for customer-facing biomechanical analysis platform"
 author: "Golf Modeling Suite Team"
-date: "2026-01-12"
+date: "2026-01-21"
 format:
   html:
     toc: true
@@ -32,6 +32,17 @@ We are building a **professional-grade biomechanical analysis platform** that de
 - **Cross-engine validation** ensuring scientific reproducibility
 
 **Prime directive:** Every feature must advance either **physical fidelity**, **accessibility**, or **professional usability**. We are not building another coaching app—we are creating the industry standard for biomechanical golf analysis.
+
+### Scope Evolution
+
+While golf swing analysis remains the primary use case, the platform's architecture and capabilities are intentionally designed to support **general-purpose robotics and biomechanical analysis**. The underlying physics engines, Jacobian computations, manipulability ellipsoids, and drift-control decomposition techniques are domain-agnostic and applicable to:
+
+- **General humanoid robotics** — Full-body motion planning and control
+- **Rehabilitation biomechanics** — Clinical gait and movement analysis
+- **Industrial manipulation** — Robot arm trajectory optimization
+- **Sports science broadly** — Any multi-segment kinematic chain analysis
+
+This generalization is a feature, not scope creep. The golf swing—with its closed-chain constraints, high velocities, and precision requirements—serves as an excellent benchmark problem that exercises the full capabilities of the platform.
 
 ### Target Markets (Professional Focus)
 
@@ -487,7 +498,7 @@ Must be available in:
 
 **Summation requirement:** indexed components must sum to the measured/simulated acceleration within tolerance.
 
-### I. Mobility and Force Ellipsoids (Mandatory)
+### I. Mobility and Force Ellipsoids (Mandatory) — IMPLEMENTED
 
 Compute and visualize for each segment/task point:
 
@@ -499,6 +510,64 @@ Compute and visualize for each segment/task point:
   - constraint‑aware
 
 Ellipsoids must be rendered in 3D with frame context and be exportable.
+
+#### I1. Implementation Status (January 2026)
+
+**Module Location:** `shared/python/ellipsoid_visualization.py`
+
+**Core Data Structures:**
+
+- `EllipsoidData`: Dataclass containing center position, principal radii (singular values), principal axes (rotation matrix), condition number κ = r_max / r_min, and timestep
+- `EllipsoidSequence`: Time-varying sequence for animation with efficient list-based recording
+
+**Computation Functions:**
+
+| Function | Description | Mathematical Basis |
+|----------|-------------|-------------------|
+| `compute_velocity_ellipsoid()` | Velocity manipulability ellipsoid | SVD of Jacobian: J = UΣV^T, radii = singular values |
+| `compute_force_ellipsoid()` | Force transmission ellipsoid | Dual of velocity: radii = 1/σ (inverse singular values) |
+
+**Key Features:**
+
+- **SVD-based computation**: Uses singular value decomposition for numerically stable ellipsoid extraction
+- **Condition number monitoring**: Reports κ = σ_max / σ_min for singularity detection
+- **Singular direction handling**: Near-zero singular values (< 1e-15) scaled to avoid numerical instability
+- **Cross-engine compatibility**: Works with any engine implementing `PhysicsEngineInterface.compute_jacobian()`
+
+**Export Formats:**
+
+| Format | Function | Use Case |
+|--------|----------|----------|
+| JSON | `export_ellipsoid_sequence_json()` | Data analysis, web visualization |
+| OBJ | `export_ellipsoid_obj()` | 3D modeling software import |
+| STL (binary/ASCII) | `export_ellipsoid_stl()` | CAD/3D printing applications |
+
+**High-Level API:**
+
+```python
+# Example usage
+from shared.python.ellipsoid_visualization import EllipsoidVisualizer
+
+visualizer = EllipsoidVisualizer(engine)
+visualizer.update_ellipsoids(["clubhead", "right_hand", "left_hand"])
+visualizer.record_frame(["clubhead"])  # For time-varying animation
+visualizer.finalize_sequences()        # Convert to arrays after recording
+visualizer.export_all_json("output/ellipsoids/")
+
+# Get summary statistics
+summary = visualizer.get_manipulability_summary("clubhead")
+# Returns: max_radius, min_radius, manipulability_index, condition_number, isotropy
+```
+
+**Mesh Generation:**
+
+- UV-sphere mesh with configurable resolution (default: 16 meridians × 12 parallels)
+- Transformed by principal radii and axes
+- Face normals computed for proper shading
+
+**Reference:** Yoshikawa, T. (1985). "Manipulability of Robotic Mechanisms." The International Journal of Robotics Research, 4(2), 3-9.
+
+**Testing:** `tests/unit/test_ellipsoid_visualization.py` (9 tests covering SVD computation, force/velocity duality, mesh generation, JSON export, and visualizer workflow)
 
 ### J. OpenSim‑Class Biomechanics Features (Embedded)
 
