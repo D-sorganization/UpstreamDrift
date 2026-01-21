@@ -1,8 +1,10 @@
 import ast
 import os
+import io
+from typing import Any
 
 
-def is_stub(node):
+def is_stub(node: Any) -> bool:
     """Check if a function node is a stub."""
     if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
         return False
@@ -41,7 +43,7 @@ def is_stub(node):
     return False
 
 
-def check_file(filepath, stubs_file, docs_file):
+def check_file(filepath: str, stubs_file: io.TextIOWrapper, docs_file: io.TextIOWrapper) -> None:
     """Check a file for stubs and missing documentation."""
     try:
         with open(filepath, encoding="utf-8") as f:
@@ -67,7 +69,7 @@ def check_file(filepath, stubs_file, docs_file):
                     stubs_file.write(f"{filepath}:{node.lineno} {node.name}\n")
 
 
-def main():
+def main() -> None:
     """Main execution function."""
     root_dir = "."
     stubs_path = ".jules/completist_data/stub_functions.txt"
