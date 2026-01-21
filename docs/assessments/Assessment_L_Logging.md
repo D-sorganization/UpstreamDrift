@@ -1,17 +1,22 @@
-# Assessment L: Logging
+# Assessment: Logging (Category L)
 
-## Grade: 9/10
+## Executive Summary
+**Grade: 8/10**
 
-## Summary
-Logging is excellent. The `core.py` module defines `setup_structured_logging` using `structlog`, providing JSON output for production and readable output for dev.
+Logging is present in all major modules. The project uses the standard `logging` library. Some modules use `structlog` (mentioned in dependencies), but usage in sampled files was standard logging.
 
 ## Strengths
-- **Structured Logging**: Uses `structlog` for machine-readable logs.
-- **Contextual Info**: Logs include timestamps, log levels, and can include arbitrary context.
-- **Centralized Config**: A single setup function ensures consistency.
+1.  **Presence:** Logs are ubiquitous in key flows.
+2.  **Levels:** Appropriate use of INFO, ERROR, etc.
 
 ## Weaknesses
-- **Adoption**: Need to ensure all modules use `get_logger` and not `print` or raw `logging`. `ruff` checks for `print` statements, which is good.
+1.  **Consistency:** Mixture of `structlog` (in deps) and standard `logging` (in code).
+2.  **Context:** Standard logging doesn't always capture structured context easily without extra work.
 
 ## Recommendations
-1. **Audit Logs**: Periodically review logs to ensure they contain useful debugging info without being too verbose.
+1.  **Standardize on Structlog:** Fully migrate to `structlog` for JSON-formatted, queryable logs in production.
+2.  **Correlation IDs:** Ensure request IDs are propagated through logs.
+
+## Detailed Analysis
+- **Library:** `logging` (mostly).
+- **Config:** Basic config in entry points.
