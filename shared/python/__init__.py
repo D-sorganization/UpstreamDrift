@@ -13,27 +13,22 @@ __author__ = "Golf Modeling Suite Team"
 # This allows the launcher to run and provide helpful error messages
 # about missing dependencies only when specific features are used.
 
-from pathlib import Path  # Lightweight, always available
 from typing import Any
 
-# Suite-wide constants
-SUITE_ROOT = Path(__file__).parent.parent.parent
-ENGINES_ROOT = SUITE_ROOT / "engines"
-SHARED_ROOT = SUITE_ROOT / "shared"
-OUTPUT_ROOT = SUITE_ROOT / "output"
-
-# Physics engine paths
-MUJOCO_ROOT = ENGINES_ROOT / "physics_engines" / "mujoco"
-DRAKE_ROOT = ENGINES_ROOT / "physics_engines" / "drake"
-PINOCCHIO_ROOT = ENGINES_ROOT / "physics_engines" / "pinocchio"
-MATLAB_2D_ROOT = ENGINES_ROOT / "Simscape_Multibody_Models" / "2D_Golf_Model"
-MATLAB_3D_ROOT = ENGINES_ROOT / "Simscape_Multibody_Models" / "3D_Golf_Model"
-PENDULUM_ROOT = ENGINES_ROOT / "pendulum_models"
-
-# Import key classes for easier access
-# NOTE: We now import from .core to avoid heavy dependencies in __init__
-from .core import GolfModelingError, setup_logging  # noqa: E402
-from .engine_manager import EngineManager, EngineStatus, EngineType  # noqa: E402
+# Suite-wide constants and paths are now in constants.py
+from .constants import (
+    DRAKE_ROOT,
+    ENGINES_ROOT,
+    MATLAB_2D_ROOT,
+    MATLAB_3D_ROOT,
+    MUJOCO_ROOT,
+    OUTPUT_ROOT,
+    PENDULUM_ROOT,
+    SHARED_ROOT,
+    SUITE_ROOT,
+)
+from .core import GolfModelingError, setup_logging
+from .engine_manager import EngineManager, EngineStatus, EngineType
 
 # Heavy imports are made available through lazy loading
 _HEAVY_IMPORTS = {

@@ -1,17 +1,18 @@
 # Assessment M: Configuration
 
-## Grade: 10/10
+## Grade: 8/10
 
 ## Summary
-Configuration is managed effectively using standard Python tooling and environment variables.
+Configuration is managed via `pyproject.toml` and environment variables. The "No Drift" policy in `AGENTS.md` is a strong governance mechanism.
 
 ## Strengths
-- **Tool Configuration**: `pyproject.toml` centralizes configuration for black, ruff, mypy, pytest, and coverage.
-- **Environment Support**: `.env.example` indicates support for environment-based configuration (likely via `pydantic-settings` or `python-dotenv`).
-- **Separation**: Configuration is separated from code, following 12-Factor App principles.
+- **Centralized Config**: `pyproject.toml` is the single source of truth for tools.
+- **Environment Variables**: `.env` support (implied by `python-dotenv` usage in docs) for secrets.
+- **Constants**: `shared/python/constants.py` centralizes hardcoded values.
 
 ## Weaknesses
-- None identified.
+- **Complexity**: The sheer number of config options in `pyproject.toml` can be overwhelming.
+- **Dynamic Config**: Some configuration (like engine options) is passed as dictionaries, which can lack validation compared to typed config classes.
 
 ## Recommendations
-- Ensure that sensitive defaults (like `SECRET_KEY` if used) are explicitly unsafe in development to prevent accidental production use.
+1. **Typed Configuration**: Use `pydantic-settings` for all application configuration (not just API).

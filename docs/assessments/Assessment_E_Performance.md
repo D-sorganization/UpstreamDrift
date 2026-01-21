@@ -1,18 +1,19 @@
 # Assessment E: Performance
 
-## Grade: 10/10
+## Grade: 7/10
 
 ## Summary
-Performance is a first-class citizen in this codebase, with explicit optimizations for computationally intensive tasks and scalable architecture for the API.
+The system includes several performance optimizations, such as batched state retrieval (`get_full_state`) and asynchronous processing for long-running simulations. However, large files and heavy dependencies suggest potential startup time and memory usage issues.
 
 ## Strengths
-- **Numerical Optimization**: Use of `numba` for JIT compilation of tight loops (DTW) and critical math functions.
-- **Algorithmic Efficiency**: Optimized implementations (e.g., O(M) space DTW, cached wavelets for CWT).
-- **Asynchronous Processing**: The API uses `FastAPI` with `async/await` and `BackgroundTasks` for long-running simulations, keeping the main thread responsive.
-- **Caching**: `functools.lru_cache` is used effectively for expensive computations like wavelet generation.
+- **Batch Operations**: The `PhysicsEngine` protocol includes `get_full_state` to minimize Python-C context switching.
+- **Asynchronous API**: `api/server.py` uses `BackgroundTasks` for simulations and video processing, keeping the API responsive.
+- **Memory Management**: The `TaskManager` in `api/server.py` implements TTL and size limits to prevent memory leaks.
 
 ## Weaknesses
-- None identified.
+- **Import Overhead**: Heavy libraries (`pandas`, `matplotlib`) can slow down CLI tool startup (mitigated by lazy imports in `__init__.py`).
+- **Numba Usage**: While Numba is used, improper JIT compilation of callbacks (as noted in memory) can lead to performance regressions.
 
 ## Recommendations
-- Continue profiling critical paths using the `pytest-benchmark` plugin already present in dependencies.
+1. **Profile Startup Time**: Measure and optimize the import time for common CLI tools.
+2. **Review Numba Integration**: Ensure Numba is applied to entire loops, not just callbacks, to maximize speedup.

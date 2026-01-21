@@ -1,17 +1,19 @@
 # Assessment G: Dependencies
 
-## Grade: 9/10
+## Grade: 7/10
 
 ## Summary
-Dependencies are managed using modern standards (`pyproject.toml`) with clear separation of concerns (dev, engines, analysis groups).
+Dependencies are managed via `pyproject.toml`, which is modern and standard. However, the project relies on a massive set of heavy libraries (`mujoco`, `drake`, `pinocchio`, `opencv`), which creates a "Dependency Hell" scenario for installation and testing.
 
 ## Strengths
-- **Modern Standards**: Uses `pyproject.toml` [project] table (PEP 621).
-- **Segmentation**: Optional dependencies are well-grouped (`engines`, `analysis`, `dev`), allowing lighter installs.
-- **Version Constraints**: Most dependencies have version caps (e.g., `<2.0.0`) to prevent breaking changes from major updates.
+- **Modern Management**: `pyproject.toml` is used effectively.
+- **Optional Groups**: Dependencies are grouped (`dev`, `engines`, `analysis`), allowing for lighter installs (though `engines` are often implicitly required).
 
 ## Weaknesses
-- **Broad Ranges**: Some version ranges are relatively broad (e.g., `sqlalchemy>=2.0.0,<3.0.0`), which is good for library compatibility but might require a lockfile for application reproducibility. `requirements.lock` exists but `pyproject.toml` is the source of truth.
+- **Heavy Footprint**: The full suite requires multiple large physics engines, making the environment difficult to reproduce.
+- **Circular Dependencies**: The circular import issue (now fixed) was a symptom of tight coupling.
+- **Compatibility**: Ensuring `mujoco`, `drake`, and `pinocchio` coexist in the same environment is challenging.
 
 ## Recommendations
-- Encourage the use of the `requirements.lock` file in CI/CD pipelines to ensure reproducible builds.
+1. **Containerization**: Rely heavily on Docker (which is present) to provide a stable environment.
+2. **Abstract Interfaces**: Strengthen the decoupling so that `shared` code can run with *zero* engine dependencies installed.

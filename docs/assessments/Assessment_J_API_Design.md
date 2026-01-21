@@ -1,18 +1,19 @@
 # Assessment J: API Design
 
-## Grade: 10/10
+## Grade: 8/10
 
 ## Summary
-The API is well-designed, leveraging modern frameworks to provide a type-safe, documented, and intuitive interface.
+The API is built with FastAPI, adhering to RESTful principles. Endpoints are logical (`/engines`, `/simulate`, `/analyze`). Data models (`pydantic`) ensure request/response validation.
 
 ## Strengths
-- **Framework Choice**: FastAPI is an excellent choice for high-performance, async-capable APIs with automatic documentation.
-- **Resource Design**: Endpoints are logically grouped by resource (`/engines`, `/simulate`, `/analyze`) and use appropriate HTTP verbs.
-- **Type Safety**: Pydantic models (implied by FastAPI usage and `models/` directory) ensure request/response validation.
-- **Async Support**: Endpoints like `/simulate/async` clearly indicate support for long-running operations.
+- **FastAPI**: Modern, fast, and type-safe framework.
+- **RESTful Structure**: Resources are correctly modeled.
+- **Async Support**: Long-running tasks are handled asynchronously with status polling.
 
 ## Weaknesses
-- None identified.
+- **Versioning**: API is currently v1, but explicit versioning in the URL path (e.g., `/api/v1/`) is not strictly followed in all routes (root is just `/`).
+- **Response Consistency**: Need to ensure all error responses follow a strict schema (e.g., `{"error": {"code": "...", "message": "..."}}`).
 
 ## Recommendations
-- Ensure API versioning (e.g., `/api/v1/`) is considered if breaking changes are anticipated in the future.
+1. **URL Versioning**: Move all endpoints under `/api/v1/`.
+2. **HATEOAS**: Consider adding links to responses to guide API consumers.

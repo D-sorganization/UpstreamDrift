@@ -1,17 +1,17 @@
 # Assessment L: Logging
 
-## Grade: 8/10
+## Grade: 9/10
 
 ## Summary
-Logging is implemented using the standard library `logging` module, with proper configuration at the application entry point.
+Logging is excellent. The `core.py` module defines `setup_structured_logging` using `structlog`, providing JSON output for production and readable output for dev.
 
 ## Strengths
-- **Usage**: Modules use `logging.getLogger(__name__)` to allow granular control.
-- **Configuration**: `api/server.py` sets up basic logging.
-- **Linting**: Tools are configured to flag `print` statements (`flake8-print`), enforcing the use of proper logging.
+- **Structured Logging**: Uses `structlog` for machine-readable logs.
+- **Contextual Info**: Logs include timestamps, log levels, and can include arbitrary context.
+- **Centralized Config**: A single setup function ensures consistency.
 
 ## Weaknesses
-- **Consistency**: `structlog` is listed in dependencies, but the sampled code (`api/server.py`, `signal_processing.py`) uses the standard `logging` library. This suggests a potential mix of logging styles or underutilization of structured logging capabilities.
+- **Adoption**: Need to ensure all modules use `get_logger` and not `print` or raw `logging`. `ruff` checks for `print` statements, which is good.
 
 ## Recommendations
-- Standardize on `structlog` for application-level logging to produce machine-readable (JSON) logs, which are easier to query in production environments.
+1. **Audit Logs**: Periodically review logs to ensure they contain useful debugging info without being too verbose.
