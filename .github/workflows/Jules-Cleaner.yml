@@ -1,0 +1,54 @@
+name: Jules Cleaner (Supersede & Close)
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  cleanup:
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'jules:consolidation')
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: write
+    steps:
+      - name: Supersede and Close PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          CONSOLIDATED_PR_NUM: ${{ github.event.pull_request.number }}
+        run: |
+          # Extract PR numbers. Expecting "Consolidated PRs: #123 #124" or similar
+          # We use regex to find #\d+ patterns in the body
+          
+          echo "Analyzing Consolidated PR #$CONSOLIDATED_PR_NUM..."
+          
+          # Extract all numbers prefixed with # from the body
+          prs=$(echo "$PR_BODY" | grep -o '#[0-9]\+' | tr -d '#')
+          
+          for pr_num in $prs; do
+            # Skip self-reference if present
+            if [ "$pr_num" == "$CONSOLIDATED_PR_NUM" ]; then
+              continue
+            fi
+            
+            echo "Processing original PR #$pr_num..."
+            
+            # Check if PR is still open
+            state=$(gh pr view "$pr_num" --json state -q .state)
+            
+            if [ "$state" == "OPEN" ]; then
+              echo "  Closing PR #$pr_num as superseded..."
+              
+              # Add comment
+              gh pr comment "$pr_num" --body "Superseded by Consolidated PR #$CONSOLIDATED_PR_NUM. This branch will be deleted."
+              
+              # Close PR
+              gh pr close "$pr_num" --comment "Auto-closing: consolidated into #$CONSOLIDATED_PR_NUM"
+              
+              # Delete branch (gh pr close --delete-branch doesn't always work if not merged, do it explicitly)
+              gh pr close "$pr_num" --delete-branch || echo "  Could not delete branch for #$pr_num (maybe already deleted)"
+            else
+              echo "  PR #$pr_num is already $state. skipping."
+            fi
+          done
