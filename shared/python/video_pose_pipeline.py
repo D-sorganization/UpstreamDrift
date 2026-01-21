@@ -13,8 +13,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import cv2
 import numpy as np
+
+try:
+    import cv2
+except ImportError:
+    cv2 = None  # type: ignore
 
 from shared.python.marker_mapping import MarkerToModelMapper, RegistrationResult
 from shared.python.output_manager import OutputManager
@@ -81,6 +85,10 @@ class VideoPosePipeline:
 
     def _load_estimator(self) -> None:
         """Load the specified pose estimator."""
+        if cv2 is None:
+            logger.warning("OpenCV not installed. Video processing capabilities disabled.")
+            return
+
         try:
             if self.config.estimator_type == "mediapipe":
                 from shared.python.pose_estimation.mediapipe_estimator import (
@@ -122,6 +130,9 @@ class VideoPosePipeline:
         Returns:
             VideoProcessingResult with pose estimates and quality metrics
         """
+        if cv2 is None:
+            raise RuntimeError("OpenCV not installed. Cannot process video.")
+
         if not video_path.exists():
             raise FileNotFoundError(f"Video file not found: {video_path}")
 
@@ -254,6 +265,9 @@ class VideoPosePipeline:
         self, video_path: Path, max_frames: int
     ) -> list[PoseEstimationResult]:
         """Process video frame by frame (fallback method)."""
+        if cv2 is None:
+            return []
+
         results = []
         cap = cv2.VideoCapture(str(video_path))
         fps = cap.get(cv2.CAP_PROP_FPS)
