@@ -14,6 +14,7 @@ adversarial review (2026-01-13).
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -32,7 +33,7 @@ except ImportError as e:
 @pytest.fixture
 def client() -> Generator[TestClient, None, None]:
     """Create a test client for the API."""
-    with TestClient(app) as test_client:
+    with TestClient(app, base_url="http://localhost") as test_client:
         yield test_client
 
 
@@ -107,12 +108,15 @@ class TestVideoAnalysisEndpoints:
             f.write(b"This is not a video")
             temp_path = Path(f.name)
         try:
-            with open(temp_path, "rb") as f:
-                response = client.post(
-                    "/analyze/video",
-                    files={"file": ("test.txt", f, "text/plain")},
-                )
-            assert response.status_code == 400
+            # Mock video_pipeline to ensure we hit the content type check
+            # even if dependencies are missing in the test environment
+            with patch("api.server.video_pipeline", MagicMock()):
+                with open(temp_path, "rb") as f:
+                    response = client.post(
+                        "/analyze/video",
+                        files={"file": ("test.txt", f, "text/plain")},
+                    )
+                assert response.status_code == 400
         finally:
             temp_path.unlink()
 
