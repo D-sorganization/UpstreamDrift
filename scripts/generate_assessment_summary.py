@@ -14,7 +14,7 @@ import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -99,7 +99,7 @@ def generate_summary(
     logger.info(f"Generating assessment summary from {len(input_reports)} reports...")
 
     # Category mapping
-    categories: dict[str, dict[str, Union[str, float]]] = {
+    categories: dict[str, dict[str, str | float]] = {
         "A": {"name": "Architecture & Implementation", "weight": 2.0},
         "B": {"name": "Hygiene, Security & Quality", "weight": 2.0},
         "C": {"name": "Documentation & Integration", "weight": 1.5},
