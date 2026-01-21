@@ -77,16 +77,16 @@ jobs:
 
               for pattern, config in auto_fixable_patterns.items():
                   if pattern in title_lower:
-                      score = config['priority']
-                      effort = config['effort']
-                      break
+            score = config['priority']
+            effort = config['effort']
+            break
 
               if score > 0 and effort in ['low', 'medium']:
                   scored_issues.append({
-                      'number': issue['number'],
-                      'title': issue['title'],
-                      'score': score,
-                      'effort': effort
+            'number': issue['number'],
+            'title': issue['title'],
+            'score': score,
+            'effort': effort
                   })
 
           # Sort by score (higher first), then effort (lower first)
