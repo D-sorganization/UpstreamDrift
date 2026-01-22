@@ -14,7 +14,7 @@ import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -80,6 +80,11 @@ def extract_issues_from_report(report_path: Path) -> list[dict[str, Any]]:
     return issues
 
 
+class CategoryInfo(TypedDict):
+    name: str
+    weight: float
+
+
 def generate_summary(
     input_reports: list[Path],
     output_md: Path,
@@ -99,7 +104,7 @@ def generate_summary(
     logger.info(f"Generating assessment summary from {len(input_reports)} reports...")
 
     # Category mapping
-    categories = {
+    categories: dict[str, CategoryInfo] = {
         "A": {"name": "Architecture & Implementation", "weight": 2.0},
         "B": {"name": "Hygiene, Security & Quality", "weight": 2.0},
         "C": {"name": "Documentation & Integration", "weight": 1.5},
@@ -118,7 +123,7 @@ def generate_summary(
     }
 
     # Collect scores and issues
-    scores = {}
+    scores: dict[str, float] = {}
     all_issues = []
 
     for report in input_reports:
@@ -232,7 +237,7 @@ Recommended: 30 days from today
     return 0
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Generate assessment summary")
     parser.add_argument(
         "--input",
@@ -257,7 +262,7 @@ def main():
     args = parser.parse_args()
 
     # Expand wildcards if needed
-    input_reports = []
+    input_reports: list[Path] = []
     for pattern in args.input:
         if "*" in str(pattern):
             # Expand glob pattern
@@ -266,13 +271,13 @@ def main():
             input_reports.append(pattern)
 
     # Filter to existing files
-    input_reports = [p for p in input_reports if p.exists() and p.is_file()]
+    filtered_reports = [p for p in input_reports if p.exists() and p.is_file()]
 
-    if not input_reports:
+    if not filtered_reports:
         logger.error("No valid input reports found")
-        return 1
+        sys.exit(1)
 
-    exit_code = generate_summary(input_reports, args.output, args.json_output)
+    exit_code = generate_summary(filtered_reports, args.output, args.json_output)
     sys.exit(exit_code)
 
 
