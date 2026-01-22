@@ -1,0 +1,84 @@
+{
+  "timestamp": "2026-01-22T00:37:41.631714",
+  "overall_score": 7.07,
+  "category_scores": {
+    "B": {
+      "score": 7.0,
+      "name": "Hygiene, Security & Quality",
+      "weight": 2.0
+    },
+    "L": {
+      "score": 7.0,
+      "name": "Long-Term Maintainability",
+      "weight": 1.5
+    },
+    "O": {
+      "score": 7.0,
+      "name": "CI/CD & DevOps",
+      "weight": 2.0
+    },
+    "M": {
+      "score": 8.0,
+      "name": "Educational Resources",
+      "weight": 1.0
+    },
+    "I": {
+      "score": 8.0,
+      "name": "Security & Input Validation",
+      "weight": 2.0
+    },
+    "D": {
+      "score": 7.0,
+      "name": "User Experience",
+      "weight": 1.5
+    },
+    "G": {
+      "score": 8.0,
+      "name": "Testing & Validation",
+      "weight": 2.0
+    },
+    "K": {
+      "score": 7.0,
+      "name": "Reproducibility & Provenance",
+      "weight": 1.0
+    },
+    "H": {
+      "score": 8.0,
+      "name": "Error Handling",
+      "weight": 1.0
+    },
+    "F": {
+      "score": 6.0,
+      "name": "Installation & Deployment",
+      "weight": 1.0
+    },
+    "C": {
+      "score": 6.0,
+      "name": "Documentation & Integration",
+      "weight": 1.5
+    },
+    "E": {
+      "score": 7.0,
+      "name": "Performance & Scalability",
+      "weight": 1.5
+    },
+    "J": {
+      "score": 7.0,
+      "name": "Extensibility & Plugins",
+      "weight": 1.0
+    },
+    "N": {
+      "score": 7.0,
+      "name": "Visualization & Export",
+      "weight": 1.0
+    },
+    "A": {
+      "score": 6.0,
+      "name": "Architecture & Implementation",
+      "weight": 2.0
+    }
+  },
+  "critical_issues": [],
+  "total_issues": 0,
+  "reports_analyzed": 15
+}
