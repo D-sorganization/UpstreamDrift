@@ -86,7 +86,9 @@ class VideoPosePipeline:
     def _load_estimator(self) -> None:
         """Load the specified pose estimator."""
         if cv2 is None:
-            logger.warning("OpenCV not installed. Video processing capabilities disabled.")
+            logger.warning(
+                "OpenCV not installed. Video processing capabilities disabled."
+            )
             return
 
         try:
