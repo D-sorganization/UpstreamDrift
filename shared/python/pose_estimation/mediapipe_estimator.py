@@ -13,8 +13,15 @@ import time
 from pathlib import Path
 from typing import Any, ClassVar
 
-import cv2
 import numpy as np
+
+try:
+    import cv2
+
+    CV2_AVAILABLE = True
+except ImportError:
+    cv2 = None
+    CV2_AVAILABLE = False
 
 # Try to import mediapipe. If not found, we will fall back to mock/error behavior
 try:
@@ -159,6 +166,9 @@ class MediaPipeEstimator(PoseEstimator):
         if not self._is_loaded:
             raise RuntimeError("Model not loaded. Call load_model() first.")
 
+        if not CV2_AVAILABLE:
+            raise RuntimeError("OpenCV (cv2) not installed.")
+
         # Convert BGR to RGB for MediaPipe
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
@@ -219,6 +229,9 @@ class MediaPipeEstimator(PoseEstimator):
         """
         if not self._is_loaded:
             raise RuntimeError("Model not loaded. Call load_model() first.")
+
+        if not CV2_AVAILABLE:
+            raise RuntimeError("OpenCV (cv2) not installed.")
 
         results = []
         cap = cv2.VideoCapture(str(video_path))

@@ -13,8 +13,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import cv2
 import numpy as np
+
+try:
+    import cv2
+
+    CV2_AVAILABLE = True
+except ImportError:
+    cv2 = None
+    CV2_AVAILABLE = False
 
 from shared.python.marker_mapping import MarkerToModelMapper, RegistrationResult
 from shared.python.output_manager import OutputManager
@@ -127,6 +134,9 @@ class VideoPosePipeline:
 
         if self.estimator is None:
             raise RuntimeError("Estimator not loaded")
+
+        if not CV2_AVAILABLE:
+            raise RuntimeError("OpenCV (cv2) not installed. Cannot process video.")
 
         logger.info(f"Processing video: {video_path}")
 
@@ -254,6 +264,9 @@ class VideoPosePipeline:
         self, video_path: Path, max_frames: int
     ) -> list[PoseEstimationResult]:
         """Process video frame by frame (fallback method)."""
+        if not CV2_AVAILABLE:
+            raise RuntimeError("OpenCV (cv2) not installed.")
+
         results = []
         cap = cv2.VideoCapture(str(video_path))
         fps = cap.get(cv2.CAP_PROP_FPS)
