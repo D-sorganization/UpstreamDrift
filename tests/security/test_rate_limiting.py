@@ -4,9 +4,7 @@ pytest.importorskip("cv2", reason="OpenCV (cv2) required for api.server")
 
 from fastapi.testclient import TestClient
 
-
 from api.server import app
-
 
 client = TestClient(app)
 
