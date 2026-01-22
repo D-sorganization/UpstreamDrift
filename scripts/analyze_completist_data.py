@@ -1,7 +1,7 @@
 import os
+from collections.abc import Mapping
 from datetime import datetime
 from typing import Any
-from collections.abc import Mapping
 
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
