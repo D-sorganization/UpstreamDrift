@@ -1,0 +1,259 @@
+name: Jules Ideas Generator (Research Topics)
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      focus_area:
+        description: 'Focus area for idea generation'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - biomechanics
+          - ball_flight
+          - equipment
+          - statistics
+          - simulation
+          - control_theory
+  schedule:
+    - cron: "0 3 * * 3"  # Wednesdays at 3 AM UTC (within midnight-4 AM window)
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate-ideas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Jules
+        run: npm install -g @google/jules
+
+      - name: Gather Context
+        run: |
+          mkdir -p .jules/ideas_data
+
+          # Copy existing IDEAS.md for context
+          if [ -f "docs/IDEAS.md" ]; then
+            cp docs/IDEAS.md .jules/ideas_data/
+          fi
+
+          # Find recent changes to physics/biomechanics files
+          git log --oneline --since="30 days ago" --name-only -- "*.py" | \
+            grep -E "physics|biomech|ball|swing|trajectory|muscle" | \
+            sort -u > .jules/ideas_data/recent_changes.txt 2>/dev/null || true
+
+          # List current features for gap analysis
+          find . -name "*.py" -type f \
+            ! -path "./.git/*" ! -path "./venv/*" ! -path "./.venv/*" \
+            -exec grep -l "def " {} \; | head -50 \
+            > .jules/ideas_data/feature_files.txt 2>/dev/null || true
+
+          # Gather academic references already cited
+          grep -rh "doi\|arxiv\|journal\|ISBN" docs/ --include="*.md" \
+            > .jules/ideas_data/existing_citations.txt 2>/dev/null || true
+
+      - name: Jules Ideas Generation
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          FOCUS_AREA: ${{ inputs.focus_area || 'all' }}
+        run: |
+          set -e
+          DATE=$(date +%Y-%m-%d)
+          REPO="${{ github.repository }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
+
+          # Check if API key is configured
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
+            exit 0
+          fi
+
+          echo "Looking up repository source..."
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Repository $REPO not found in Jules sources."
+            exit 0
+          fi
+
+          echo "Found source: $SOURCE_ID"
+
+          # Create session prompt
+          PROMPT=$(cat << 'PROMPT_EOF'
+          You are the IDEAS GENERATOR - a research specialist in golf science and biomechanics.
+
+          ## Your Mission
+          Augment and update the IDEAS.md document with new scientific research topics,
+          technical resources, and implementation ideas relevant to the Golf Modeling Suite.
+
+          ## Target Document
+          Update: docs/IDEAS.md
+
+          This is a RUNNING LOG that grows over time. ADD new ideas, do not remove existing ones
+          unless they are duplicates or have been implemented.
+
+          ## Focus Area
+          Current focus: $FOCUS_AREA
+
+          ## Research Domains
+
+          ### 1. Biomechanics & Human Movement
+          - Kinematic analysis techniques
+          - Musculoskeletal modeling advances
+          - Injury prevention research
+          - Motor learning and skill acquisition
+          - EMG and muscle activation studies
+
+          ### 2. Ball Flight Physics
+          - Aerodynamics research (drag, lift, Magnus effect)
+          - Launch condition optimization
+          - Environmental factor modeling
+          - Spin dynamics and decay
+
+          ### 3. Equipment Science
+          - Club dynamics and shaft behavior
+          - Ball construction physics
+          - Fitting science and optimization
+          - Material science advances
+
+          ### 4. Statistical Methods
+          - Performance analytics
+          - Machine learning applications
+          - Data collection methodologies
+          - Predictive modeling
+
+          ### 5. Simulation Technology
+          - Real-time rendering techniques
+          - VR/AR integration possibilities
+          - Multi-physics coupling
+          - Validation methodologies
+
+          ### 6. Control Theory
+          - Trajectory optimization
+          - Motor control models
+          - Reinforcement learning for golf
+          - Robotic validation systems
+
+          ## Guidelines
+
+          1. **Scientific Only**: All ideas must be grounded in physics, biomechanics,
+             statistics, or engineering. NO opinions or subjective assessments.
+
+          2. **Cite Sources**: When possible, reference:
+             - Academic journals (Journal of Sports Sciences, Sports Engineering)
+             - Research institutions (TPI, R&A, USGA)
+             - Published books (Cochran & Stobbs, Jorgensen)
+             - Technical documentation (TrackMan, equipment manufacturers)
+
+          3. **Actionable Ideas**: Each idea should be specific enough to implement.
+             Include what data would be needed and expected outcomes.
+
+          4. **Gap Analysis**: Review existing codebase features and identify
+             scientific capabilities that could be added.
+
+          5. **No Duplicates**: Check existing ideas before adding new ones.
+
+          ## Output Format
+
+          Add new entries to appropriate sections in docs/IDEAS.md:
+          - Use consistent markdown formatting
+          - Add bold topic headers with brief descriptions
+          - Include implementation complexity notes where helpful
+          - Update the "Last Updated" date at top
+          - Add entry to Workflow Log table at bottom
+
+          ## Example Entry Format
+
+          ### Topic Category
+          - **Topic Name**: Brief scientific description of the research topic
+            or technique, including what it measures and why it matters
+
+          ## Important
+
+          - DO NOT MAKE CODE CHANGES. This is a RESEARCH workflow.
+          - DO NOT express opinions or make subjective judgments
+          - ONLY add scientifically grounded, factual content
+          - PRESERVE all existing content unless clearly outdated
+          PROMPT_EOF
+          )
+
+          echo "Creating Jules session..."
+          REQUEST_JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            --arg source "$SOURCE_ID" \
+            '{
+              prompt: $prompt,
+              sourceContext: {
+                source: $source,
+                githubRepoContext: {
+                  startingBranch: "main"
+                }
+              },
+              automationMode: "AUTO_CREATE_PR"
+            }')
+
+          echo "Request: $REQUEST_JSON"
+
+          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_JSON" \
+            "$API_BASE/sessions")
+
+          SESSION_RESPONSE=$(cat /tmp/session_response.json)
+          echo "HTTP Status: $HTTP_CODE"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Jules API returned HTTP $HTTP_CODE"
+            exit 1
+          fi
+
+          SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
+          echo "Created session: $SESSION_ID"
+
+          # Poll for completion
+          MAX_WAIT=1800
+          POLL_INTERVAL=30
+          ELAPSED=0
+
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
+            STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
+            echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
+
+            case "$STATE" in
+              "COMPLETED"|"SUBMITTED")
+                echo "Session completed successfully!"
+                break
+                ;;
+              "FAILED"|"CANCELLED")
+                echo "::error::Session $STATE"
+                exit 1
+                ;;
+            esac
+            sleep $POLL_INTERVAL
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
+
+
+      - name: Commit Ideas Updates
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs(ideas): augment research topics and resources"
+          file_pattern: "docs/IDEAS.md"
