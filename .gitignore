@@ -9,6 +9,7 @@ env/
 .coverage
 *.coverage
 .coverage.*
+*coverage*
 build/
 dist/
 
