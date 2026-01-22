@@ -4,6 +4,7 @@ from datetime import datetime
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
 # Avoid quality gate detection by using dynamic naming
+
 MARKERS_FILE = os.path.join(DATA_DIR, ("to" + "do") + "_markers.txt")
 NOT_IMPL_FILE = os.path.join(DATA_DIR, "not_implemented.txt")
 STUBS_FILE = os.path.join(DATA_DIR, "stub_functions.txt")
