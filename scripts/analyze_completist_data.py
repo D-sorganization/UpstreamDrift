@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from typing import Any, Mapping
 
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
@@ -9,7 +10,7 @@ STUBS_FILE = os.path.join(DATA_DIR, "stub_functions.txt")
 DOCS_FILE = os.path.join(DATA_DIR, "incomplete_docs.txt")
 
 
-def parse_grep_line(line):
+def parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
     """Parse a grep output line."""
     parts = line.split(":", 2)
     if len(parts) < 3:
@@ -20,10 +21,10 @@ def parse_grep_line(line):
     return filepath, lineno, content
 
 
-def analyze_todos():
+def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Analyze TO-DO and FIX-ME markers."""
-    todos = []
-    fixmes = []
+    todos: list[dict[str, Any]] = []
+    fixmes: list[dict[str, Any]] = []
     # Strings split to avoid flagging by quality check
     todo_str = "TO" + "DO"
     fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
@@ -31,7 +32,7 @@ def analyze_todos():
     with open(TODOS_FILE, encoding="utf-8", errors="replace") as f:
         for line in f:
             filepath, lineno, content = parse_grep_line(line)
-            if not filepath:
+            if not filepath or content is None:
                 continue
 
             if todo_str in content:
@@ -41,9 +42,9 @@ def analyze_todos():
     return todos, fixmes
 
 
-def analyze_stubs():
+def analyze_stubs() -> list[dict[str, Any]]:
     """Analyze stub functions."""
-    stubs = []
+    stubs: list[dict[str, Any]] = []
     with open(STUBS_FILE, encoding="utf-8") as f:
         for line in f:
             # Filepaths may contain spaces, so split from the right
@@ -61,9 +62,9 @@ def analyze_stubs():
     return stubs
 
 
-def analyze_docs():
+def analyze_docs() -> list[dict[str, Any]]:
     """Analyze missing documentation."""
-    missing_docs = []
+    missing_docs: list[dict[str, Any]] = []
     with open(DOCS_FILE, encoding="utf-8") as f:
         for line in f:
             parts = line.strip().rsplit(" ", 1)
@@ -78,23 +79,23 @@ def analyze_docs():
     return missing_docs
 
 
-def analyze_not_implemented():
+def analyze_not_implemented() -> list[dict[str, Any]]:
     """Analyze Not Implemented Error occurrences."""
     # Mainly looking for Not Implemented Error
-    errors = []
+    errors: list[dict[str, Any]] = []
     not_impl_str = "NotImplemented" + "Error"
 
     with open(NOT_IMPL_FILE, encoding="utf-8", errors="replace") as f:
         for line in f:
             filepath, lineno, content = parse_grep_line(line)
-            if not filepath:
+            if not filepath or content is None:
                 continue
             if not_impl_str in content:
                 errors.append({"file": filepath, "line": lineno, "text": content})
     return errors
 
 
-def calculate_priority(item):
+def calculate_priority(item: Mapping[str, Any]) -> int:
     """Calculate priority based on file location."""
     # Heuristic for priority
     filepath = item["file"]
@@ -107,7 +108,7 @@ def calculate_priority(item):
     return impact
 
 
-def generate_report():
+def generate_report() -> None:
     """Generate the completist report."""
     todos, fixmes = analyze_todos()
     stubs = analyze_stubs()
