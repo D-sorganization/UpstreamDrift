@@ -14,7 +14,7 @@ import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, TypedDict
+from typing import Any, TypedDict
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -104,7 +104,7 @@ def generate_summary(
     logger.info(f"Generating assessment summary from {len(input_reports)} reports...")
 
     # Category mapping
-    categories: Dict[str, CategoryInfo] = {
+    categories: dict[str, CategoryInfo] = {
         "A": {"name": "Architecture & Implementation", "weight": 2.0},
         "B": {"name": "Hygiene, Security & Quality", "weight": 2.0},
         "C": {"name": "Documentation & Integration", "weight": 1.5},

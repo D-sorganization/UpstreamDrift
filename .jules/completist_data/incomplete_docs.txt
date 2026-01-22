@@ -240,7 +240,8 @@
 ./scripts/check_system_health.py:29 check_docker_image
 ./scripts/check_system_health.py:42 check_nvidia_docker
 ./scripts/check_system_health.py:61 main
-./scripts/generate_assessment_summary.py:235 main
+./scripts/generate_assessment_summary.py:83 CategoryInfo
+./scripts/generate_assessment_summary.py:240 main
 ./scripts/verify_physics.py:62 Plugin
 ./scripts/verify_physics.py:66 pytest_runtest_logreport
 ./scripts/validate_physics.py:98 main

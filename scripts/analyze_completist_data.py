@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Optional, List, Dict, Tuple, Any
+from typing import Any
 
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
@@ -10,7 +10,7 @@ STUBS_FILE = os.path.join(DATA_DIR, "stub_functions.txt")
 DOCS_FILE = os.path.join(DATA_DIR, "incomplete_docs.txt")
 
 
-def parse_grep_line(line: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+def parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
     """Parse a grep output line."""
     parts = line.split(":", 2)
     if len(parts) < 3:
@@ -21,10 +21,10 @@ def parse_grep_line(line: str) -> Tuple[Optional[str], Optional[str], Optional[s
     return filepath, lineno, content
 
 
-def analyze_todos() -> Tuple[List[Dict[str, str]], List[Dict[str, str]]]:
+def analyze_todos() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
     """Analyze TO-DO and FIX-ME markers."""
-    todos: List[Dict[str, str]] = []
-    fixmes: List[Dict[str, str]] = []
+    todos: list[dict[str, str]] = []
+    fixmes: list[dict[str, str]] = []
     # Strings split to avoid flagging by quality check
     todo_str = "TO" + "DO"
     fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
@@ -46,9 +46,9 @@ def analyze_todos() -> Tuple[List[Dict[str, str]], List[Dict[str, str]]]:
     return todos, fixmes
 
 
-def analyze_stubs() -> List[Dict[str, Any]]:
+def analyze_stubs() -> list[dict[str, Any]]:
     """Analyze stub functions."""
-    stubs: List[Dict[str, Any]] = []
+    stubs: list[dict[str, Any]] = []
     try:
         with open(STUBS_FILE, encoding="utf-8") as f:
             for line in f:
@@ -70,9 +70,9 @@ def analyze_stubs() -> List[Dict[str, Any]]:
     return stubs
 
 
-def analyze_docs() -> List[Dict[str, str]]:
+def analyze_docs() -> list[dict[str, str]]:
     """Analyze missing documentation."""
-    missing_docs: List[Dict[str, str]] = []
+    missing_docs: list[dict[str, str]] = []
     try:
         with open(DOCS_FILE, encoding="utf-8") as f:
             for line in f:
@@ -91,10 +91,10 @@ def analyze_docs() -> List[Dict[str, str]]:
     return missing_docs
 
 
-def analyze_not_implemented() -> List[Dict[str, Any]]:
+def analyze_not_implemented() -> list[dict[str, Any]]:
     """Analyze Not Implemented Error occurrences."""
     # Mainly looking for Not Implemented Error
-    errors: List[Dict[str, Any]] = []
+    errors: list[dict[str, Any]] = []
     not_impl_str = "NotImplemented" + "Error"
 
     try:
@@ -111,7 +111,7 @@ def analyze_not_implemented() -> List[Dict[str, Any]]:
     return errors
 
 
-def calculate_priority(item: Dict[str, Any]) -> int:
+def calculate_priority(item: dict[str, Any]) -> int:
     """Calculate priority based on file location."""
     # Heuristic for priority
     filepath = item["file"]
@@ -132,7 +132,7 @@ def generate_report() -> None:
     not_impl_errors = analyze_not_implemented()
 
     # Filter criticals: Stubs or Not Implemented Errors in core logic (not tests)
-    critical_candidates: List[Dict[str, Any]] = []
+    critical_candidates: list[dict[str, Any]] = []
     not_impl_str = "NotImplemented" + "Error"
 
     for s in stubs:
