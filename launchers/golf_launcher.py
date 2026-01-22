@@ -1656,7 +1656,33 @@ class GolfLauncher(QMainWindow):
             self.setGeometry(x, y, w, h)
 
     def closeEvent(self, event: QCloseEvent | None) -> None:
-        """Handle window close event to save layout."""
+        """Handle window close event to save layout.
+
+        UX FIX: Added confirmation dialog when processes are still running
+        to prevent accidental termination of simulations.
+        """
+        # Check for running processes
+        running_count = sum(
+            1 for p in self.running_processes.values() if p.poll() is None
+        )
+
+        if running_count > 0:
+            # UX FIX: Confirm before closing with running processes
+            reply = QMessageBox.question(
+                self,
+                "Confirm Exit",
+                f"There {'is' if running_count == 1 else 'are'} {running_count} "
+                f"running process{'es' if running_count > 1 else ''}.\n\n"
+                "Closing will terminate all running simulations.\n"
+                "Are you sure you want to exit?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if reply == QMessageBox.StandardButton.No:
+                if event:
+                    event.ignore()
+                return
+
         self._save_layout()
 
         # Stop cleanup timer
