@@ -36,7 +36,7 @@ def get_existing_issues() -> list[dict[str, Any]]:
             text=True,
             check=True,
         )
-        return json.loads(result.stdout)
+        return list(json.loads(result.stdout))
     except Exception as e:
         logger.warning(f"Could not fetch existing issues: {e}")
         return []
@@ -283,7 +283,7 @@ This issue was identified during automated repository assessment and requires at
     return 0
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description="Create GitHub issues from assessment")
     parser.add_argument(
         "--input",
