@@ -69,6 +69,7 @@ dev = [
     "pytest-benchmark>=4.0.0",
     "pytest-timeout>=2.3.0",  # Required for --timeout option
     "pytest-asyncio>=0.23.0", # Added from root requirements.txt
+    "pytest-xdist>=3.5.0",    # Parallel test execution for faster CI
     "httpx>=0.25.0",  # Required for FastAPI TestClient
     "pip-audit>=2.7.0",
     "ruff==0.14.10",
