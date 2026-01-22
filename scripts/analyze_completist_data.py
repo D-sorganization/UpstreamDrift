@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from typing import Optional, List, Dict, Tuple, Any
 
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
@@ -9,7 +10,7 @@ STUBS_FILE = os.path.join(DATA_DIR, "stub_functions.txt")
 DOCS_FILE = os.path.join(DATA_DIR, "incomplete_docs.txt")
 
 
-def parse_grep_line(line):
+def parse_grep_line(line: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
     """Parse a grep output line."""
     parts = line.split(":", 2)
     if len(parts) < 3:
@@ -20,81 +21,97 @@ def parse_grep_line(line):
     return filepath, lineno, content
 
 
-def analyze_todos():
+def analyze_todos() -> Tuple[List[Dict[str, str]], List[Dict[str, str]]]:
     """Analyze TO-DO and FIX-ME markers."""
-    todos = []
-    fixmes = []
+    todos: List[Dict[str, str]] = []
+    fixmes: List[Dict[str, str]] = []
     # Strings split to avoid flagging by quality check
     todo_str = "TO" + "DO"
     fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
 
-    with open(TODOS_FILE, encoding="utf-8", errors="replace") as f:
-        for line in f:
-            filepath, lineno, content = parse_grep_line(line)
-            if not filepath:
-                continue
+    try:
+        with open(TODOS_FILE, encoding="utf-8", errors="replace") as f:
+            for line in f:
+                filepath, lineno, content = parse_grep_line(line)
+                if not filepath or not lineno or not content:
+                    continue
 
-            if todo_str in content:
-                todos.append({"file": filepath, "line": lineno, "text": content})
-            elif any(x in content for x in fixme_markers):
-                fixmes.append({"file": filepath, "line": lineno, "text": content})
+                if todo_str in content:
+                    todos.append({"file": filepath, "line": lineno, "text": content})
+                elif any(x in content for x in fixme_markers):
+                    fixmes.append({"file": filepath, "line": lineno, "text": content})
+    except FileNotFoundError:
+        pass  # Files might not exist yet
+
     return todos, fixmes
 
 
-def analyze_stubs():
+def analyze_stubs() -> List[Dict[str, Any]]:
     """Analyze stub functions."""
-    stubs = []
-    with open(STUBS_FILE, encoding="utf-8") as f:
-        for line in f:
-            # Filepaths may contain spaces, so split from the right
-            parts = line.strip().rsplit(" ", 1)
-            if len(parts) < 2:
-                continue
-            loc = parts[0]
-            name = parts[1]
-            if ":" not in loc:
-                continue
-            # Handle potential colon in filename?Unlikely for now, but usually it is filepath:lineno
-            # split on the last colon
-            filepath, lineno = loc.rsplit(":", 1)
-            stubs.append({"file": filepath, "line": lineno, "name": name})
+    stubs: List[Dict[str, Any]] = []
+    try:
+        with open(STUBS_FILE, encoding="utf-8") as f:
+            for line in f:
+                # Filepaths may contain spaces, so split from the right
+                parts = line.strip().rsplit(" ", 1)
+                if len(parts) < 2:
+                    continue
+                loc = parts[0]
+                name = parts[1]
+                if ":" not in loc:
+                    continue
+                # Handle potential colon in filename?Unlikely for now, but usually it is filepath:lineno
+                # split on the last colon
+                filepath, lineno = loc.rsplit(":", 1)
+                stubs.append({"file": filepath, "line": lineno, "name": name})
+    except FileNotFoundError:
+        pass
+
     return stubs
 
 
-def analyze_docs():
+def analyze_docs() -> List[Dict[str, str]]:
     """Analyze missing documentation."""
-    missing_docs = []
-    with open(DOCS_FILE, encoding="utf-8") as f:
-        for line in f:
-            parts = line.strip().rsplit(" ", 1)
-            if len(parts) < 2:
-                continue
-            loc = parts[0]
-            name = parts[1]
-            if ":" not in loc:
-                continue
-            filepath, lineno = loc.rsplit(":", 1)
-            missing_docs.append({"file": filepath, "line": lineno, "name": name})
+    missing_docs: List[Dict[str, str]] = []
+    try:
+        with open(DOCS_FILE, encoding="utf-8") as f:
+            for line in f:
+                parts = line.strip().rsplit(" ", 1)
+                if len(parts) < 2:
+                    continue
+                loc = parts[0]
+                name = parts[1]
+                if ":" not in loc:
+                    continue
+                filepath, lineno = loc.rsplit(":", 1)
+                missing_docs.append({"file": filepath, "line": lineno, "name": name})
+    except FileNotFoundError:
+        pass
+
     return missing_docs
 
 
-def analyze_not_implemented():
+def analyze_not_implemented() -> List[Dict[str, Any]]:
     """Analyze Not Implemented Error occurrences."""
     # Mainly looking for Not Implemented Error
-    errors = []
+    errors: List[Dict[str, Any]] = []
     not_impl_str = "NotImplemented" + "Error"
 
-    with open(NOT_IMPL_FILE, encoding="utf-8", errors="replace") as f:
-        for line in f:
-            filepath, lineno, content = parse_grep_line(line)
-            if not filepath:
-                continue
-            if not_impl_str in content:
-                errors.append({"file": filepath, "line": lineno, "text": content})
+    try:
+        with open(NOT_IMPL_FILE, encoding="utf-8", errors="replace") as f:
+            for line in f:
+                filepath, lineno, content = parse_grep_line(line)
+                if not filepath or not lineno or not content:
+                    continue
+                if not_impl_str in content:
+                    errors.append({"file": filepath, "line": lineno, "text": content})
+    except FileNotFoundError:
+        pass
+
     return errors
 
 
-def calculate_priority(item):
+def calculate_priority(item: Dict[str, Any]) -> int:
     """Calculate priority based on file location."""
     # Heuristic for priority
     filepath = item["file"]
@@ -107,7 +124,7 @@ def calculate_priority(item):
     return impact
 
 
-def generate_report():
+def generate_report() -> None:
     """Generate the completist report."""
     todos, fixmes = analyze_todos()
     stubs = analyze_stubs()
@@ -115,7 +132,7 @@ def generate_report():
     not_impl_errors = analyze_not_implemented()
 
     # Filter criticals: Stubs or Not Implemented Errors in core logic (not tests)
-    critical_candidates = []
+    critical_candidates: List[Dict[str, Any]] = []
     not_impl_str = "NotImplemented" + "Error"
 
     for s in stubs:
