@@ -9,9 +9,9 @@ import importlib.util
 import sys
 from pathlib import Path
 
-# Add shared utilities to path (script is in scripts/ directory)
+# Add suite root to path (script is in scripts/ directory)
 SUITE_ROOT = Path(__file__).parent.parent
-sys.path.insert(0, str(SUITE_ROOT / "shared" / "python"))
+sys.path.insert(0, str(SUITE_ROOT))
 
 from shared.python.common_utils import setup_logging  # noqa: E402
 
@@ -219,7 +219,7 @@ def validate_configuration_files() -> bool:
     config_files = [
         ".gitignore",
         "README.md",
-        "docs/plans/migration_status.md",
+        "docs/plans/REMEDIATION_PLAN.md",
     ]
 
     for config_file in config_files:

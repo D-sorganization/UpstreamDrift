@@ -266,7 +266,7 @@ def test_launcher_handles_missing_file_on_launch(launcher_env):
     # GolfLauncher is expected to check the path exists before invoking subprocess.
     with (
         patch("launchers.golf_launcher.subprocess.Popen") as mock_popen,
-        patch("PyQt6.QtWidgets.QMessageBox.critical") as mock_msg,
+        patch("launchers.golf_launcher.QMessageBox.critical") as mock_msg,
     ):
         launcher.launch_simulation()
 

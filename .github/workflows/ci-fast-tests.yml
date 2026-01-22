@@ -1,0 +1,230 @@
+name: CI Fast Tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: 'Enable debug mode (verbose output)'
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Hard cutoff: 10 minutes total for testing
+  # Individual test timeout: 30 seconds (allows ~20 tests to fail before hitting limit)
+  TEST_TIMEOUT_PER_TEST: 30
+  PYTHONUNBUFFERED: 1
+
+jobs:
+  fast-tests:
+    name: Fast Tests (10 min cutoff)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10  # HARD CUTOFF: 10 minutes total
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libegl1 libgl1 xvfb \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libxcb-xkb1
+
+      - name: Install Python Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Run Fast Unit Tests (Parallel)
+        env:
+          PYTHONPATH: .:${{ github.workspace }}/engines/physics_engines/mujoco/python:${{ github.workspace }}/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "⏱️ Hard cutoff: 10 minutes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Run tests with:
+          # - Parallel execution (-n auto uses all CPU cores)
+          # - 30 second timeout per test
+          # - Skip slow tests
+          # - Fail fast on first error (-x) for quicker feedback
+          # - Short traceback for faster output
+          xvfb-run --auto-servernum pytest \
+            -n auto \
+            --timeout=${{ env.TEST_TIMEOUT_PER_TEST }} \
+            --timeout-method=thread \
+            -m "not slow and not benchmark" \
+            --tb=short \
+            -q \
+            tests/unit/ \
+            2>&1 | tee test-results.txt || TEST_EXIT_CODE=$?
+
+          # Report results
+          if [ -f test-results.txt ]; then
+            passed=$(grep -oP '\d+(?= passed)' test-results.txt | tail -1 || echo "0")
+            failed=$(grep -oP '\d+(?= failed)' test-results.txt | tail -1 || echo "0")
+            skipped=$(grep -oP '\d+(?= skipped)' test-results.txt | tail -1 || echo "0")
+            echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| ✅ Passed | ${passed:-0} |" >> $GITHUB_STEP_SUMMARY
+            echo "| ❌ Failed | ${failed:-0} |" >> $GITHUB_STEP_SUMMARY
+            echo "| ⏭️ Skipped | ${skipped:-0} |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          exit ${TEST_EXIT_CODE:-0}
+
+      - name: Upload Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fast-test-results
+          path: test-results.txt
+          retention-days: 7
+
+  integration-tests:
+    name: Integration Tests (10 min cutoff)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10  # HARD CUTOFF: 10 minutes total
+    needs: fast-tests  # Only run if unit tests pass
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: 'pip'
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libegl1 libgl1 xvfb \
+            libxkbcommon-x11-0 \
+            libxcb-cursor0 \
+            libxcb-icccm4 \
+            libxcb-image0 \
+            libxcb-keysyms1 \
+            libxcb-randr0 \
+            libxcb-render-util0 \
+            libxcb-shape0 \
+            libxcb-xinerama0 \
+            libxcb-xkb1
+
+      - name: Install Python Dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Run Integration Tests
+        env:
+          PYTHONPATH: .:${{ github.workspace }}/engines/physics_engines/mujoco/python:${{ github.workspace }}/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          echo "## Integration Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Integration tests with:
+          # - Parallel execution
+          # - 60 second timeout (integration tests may be slower)
+          # - Skip slow and benchmark tests
+          xvfb-run --auto-servernum pytest \
+            -n auto \
+            --timeout=60 \
+            --timeout-method=thread \
+            -m "not slow and not benchmark" \
+            --tb=short \
+            -q \
+            tests/integration/ \
+            2>&1 | tee integration-results.txt || TEST_EXIT_CODE=$?
+
+          # Report results
+          if [ -f integration-results.txt ]; then
+            passed=$(grep -oP '\d+(?= passed)' integration-results.txt | tail -1 || echo "0")
+            failed=$(grep -oP '\d+(?= failed)' integration-results.txt | tail -1 || echo "0")
+            echo "| Metric | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| ✅ Passed | ${passed:-0} |" >> $GITHUB_STEP_SUMMARY
+            echo "| ❌ Failed | ${failed:-0} |" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          exit ${TEST_EXIT_CODE:-0}
+
+      - name: Upload Integration Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: integration-test-results
+          path: integration-results.txt
+          retention-days: 7
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [fast-tests, integration-tests]
+    if: always()
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate Summary
+        run: |
+          echo "# 🧪 Test Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏱️ **Time Constraint**: 10 minutes per job (hard cutoff)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "## Job Status" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Fast Tests | ${{ needs.fast-tests.result == 'success' && '✅ Passed' || needs.fast-tests.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Integration Tests | ${{ needs.integration-tests.result == 'success' && '✅ Passed' || needs.integration-tests.result == 'failure' && '❌ Failed' || '⏭️ Skipped' }} |" >> $GITHUB_STEP_SUMMARY

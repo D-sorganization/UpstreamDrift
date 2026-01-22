@@ -5,7 +5,16 @@ from enum import Enum
 from typing import TYPE_CHECKING
 
 from pydantic import BaseModel, EmailStr, Field
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
+from sqlalchemy import (
+    Boolean,
+    CheckConstraint,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 
@@ -44,24 +53,46 @@ class User(Base):  # type: ignore[misc,valid-type]
 
     __tablename__ = "users"
 
+    # DATA INTEGRITY: Add check constraints for enums and non-negative values
+    __table_args__ = (
+        CheckConstraint(
+            f"role IN ('{UserRole.FREE.value}', '{UserRole.PROFESSIONAL.value}', "
+            f"'{UserRole.ENTERPRISE.value}', '{UserRole.ADMIN.value}')",
+            name="valid_user_role",
+        ),
+        CheckConstraint(
+            f"subscription_status IN ('{SubscriptionStatus.ACTIVE.value}', "
+            f"'{SubscriptionStatus.CANCELED.value}', '{SubscriptionStatus.PAST_DUE.value}', "
+            f"'{SubscriptionStatus.TRIALING.value}', '{SubscriptionStatus.INCOMPLETE.value}')",
+            name="valid_subscription_status",
+        ),
+        CheckConstraint("api_calls_this_month >= 0", name="non_negative_api_calls"),
+        CheckConstraint(
+            "video_analyses_this_month >= 0", name="non_negative_video_analyses"
+        ),
+        CheckConstraint("simulations_this_month >= 0", name="non_negative_simulations"),
+    )
+
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(255), nullable=True)
     organization = Column(String(255), nullable=True)
-    role = Column(String(50), default=UserRole.FREE.value)
-    is_active = Column(Boolean, default=True)
-    is_verified = Column(Boolean, default=False)
+    role = Column(String(50), default=UserRole.FREE.value, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    is_verified = Column(Boolean, default=False, nullable=False)
 
     # Subscription info
-    subscription_status = Column(String(50), default=SubscriptionStatus.TRIALING.value)
+    subscription_status = Column(
+        String(50), default=SubscriptionStatus.TRIALING.value, nullable=False
+    )
     subscription_id = Column(String(255), nullable=True)  # Stripe subscription ID
     customer_id = Column(String(255), nullable=True)  # Stripe customer ID
 
-    # Usage tracking
-    api_calls_this_month = Column(Integer, default=0)
-    video_analyses_this_month = Column(Integer, default=0)
-    simulations_this_month = Column(Integer, default=0)
+    # Usage tracking (with non-negative constraint via __table_args__)
+    api_calls_this_month = Column(Integer, default=0, nullable=False)
+    video_analyses_this_month = Column(Integer, default=0, nullable=False)
+    simulations_this_month = Column(Integer, default=0, nullable=False)
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -80,17 +111,25 @@ class APIKey(Base):  # type: ignore[misc,valid-type]
 
     __tablename__ = "api_keys"
 
+    # DATA INTEGRITY: Add check constraint for non-negative usage count
+    __table_args__ = (
+        CheckConstraint("usage_count >= 0", name="non_negative_usage_count"),
+    )
+
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, nullable=False, index=True)
+    # DATA INTEGRITY: Add ForeignKey constraint to ensure user exists
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     key_hash = Column(String(255), unique=True, index=True, nullable=False)
     # Performance Issue #2 fix: Fast lookup prefix (SHA256 of first 8 chars)
     key_prefix = Column(String(64), index=True, nullable=True)
     name = Column(String(255), nullable=False)  # User-friendly name
-    is_active = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=True, nullable=False)
 
-    # Usage tracking
+    # Usage tracking (with non-negative constraint via __table_args__)
     last_used = Column(DateTime(timezone=True), nullable=True)
-    usage_count = Column(Integer, default=0)
+    usage_count = Column(Integer, default=0, nullable=False)
 
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -103,7 +142,10 @@ class Session(Base):  # type: ignore[misc,valid-type]
     __tablename__ = "sessions"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, nullable=False, index=True)
+    # DATA INTEGRITY: Add ForeignKey constraint to ensure user exists
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
     session_token = Column(String(255), unique=True, index=True, nullable=False)
     refresh_token = Column(String(255), unique=True, index=True, nullable=True)
 
