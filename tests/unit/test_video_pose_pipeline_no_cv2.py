@@ -1,6 +1,8 @@
 import sys
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 
 def test_missing_cv2():
     # Ensure cv2 is not in sys.modules
@@ -23,7 +25,7 @@ def test_missing_cv2():
         assert video_pose_pipeline.cv2 is None
 
         # Instantiate pipeline mocking _load_estimator
-        with patch.object(video_pose_pipeline.VideoPosePipeline, "_load_estimator") as mock_load:
+        with patch.object(video_pose_pipeline.VideoPosePipeline, "_load_estimator"):
             pipeline = video_pose_pipeline.VideoPosePipeline()
             # Set a dummy estimator to bypass "Estimator not loaded" check
             pipeline.estimator = MagicMock()
@@ -31,9 +33,9 @@ def test_missing_cv2():
             # Now test that methods requiring cv2 raise RuntimeError
 
             # process_video
-            with pytest.raises(RuntimeError, match="OpenCV \(cv2\) is not installed"):
+            with pytest.raises(RuntimeError, match=r"OpenCV \(cv2\) is not installed"):
                 pipeline.process_video(MagicMock())
 
             # _process_frames_individually
-            with pytest.raises(RuntimeError, match="OpenCV \(cv2\) is not installed"):
+            with pytest.raises(RuntimeError, match=r"OpenCV \(cv2\) is not installed"):
                 pipeline._process_frames_individually(MagicMock(), 10)

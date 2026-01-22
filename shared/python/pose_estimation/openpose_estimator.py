@@ -160,7 +160,7 @@ class OpenPoseEstimator(PoseEstimator):
         try:
             import cv2
         except ImportError:
-            raise RuntimeError("OpenCV (cv2) is not installed. Cannot process video.")
+            raise RuntimeError("OpenCV (cv2) is not installed. Cannot process video.") from None
 
         results = []
         cap = cv2.VideoCapture(str(video_path))
