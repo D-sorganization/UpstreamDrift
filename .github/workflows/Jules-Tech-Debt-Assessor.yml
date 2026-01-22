@@ -1,0 +1,547 @@
+name: Jules Tech Debt Assessor (Worker)
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      create_issues:
+        description: 'Create GitHub issues for critical debt'
+        required: false
+        default: true
+        type: boolean
+      threshold_critical:
+        description: 'Threshold for critical debt items'
+        required: false
+        default: '10'
+        type: string
+  schedule:
+    - cron: "0 13 * * 0"  # Weekly on Sunday at 5 AM PST / 1 PM UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: jules-tech-debt-assessor-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  assess-technical-debt:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: |
+          pip install ruff==0.14.10 mypy bandit radon pip-audit vulture
+          pip install -e .[dev] || pip install -r requirements.txt || true
+          sudo apt-get install -y jq bc
+
+      - name: Create Report Directory
+        run: mkdir -p docs/assessments/tech_debt
+
+      - name: Analyze Code Complexity
+        id: complexity
+        run: |
+          echo "## Code Complexity Analysis" > /tmp/complexity_report.md
+          echo "" >> /tmp/complexity_report.md
+          echo "### High Complexity Functions (Cyclomatic Complexity > 10)" >> /tmp/complexity_report.md
+          echo "" >> /tmp/complexity_report.md
+
+          # Run radon for cyclomatic complexity
+          HIGH_CC_COUNT=0
+          echo '```' >> /tmp/complexity_report.md
+          radon cc . -a -s --total-average -nc 2>/dev/null | while read line; do
+            # Filter only C, D, E, F grades (complexity > 10)
+            if echo "$line" | grep -qE "^\s+[CDEF]\s"; then
+              echo "$line" >> /tmp/complexity_report.md
+              HIGH_CC_COUNT=$((HIGH_CC_COUNT + 1))
+            elif echo "$line" | grep -qE "^Average complexity"; then
+              echo "$line" >> /tmp/complexity_report.md
+            fi
+          done
+          echo '```' >> /tmp/complexity_report.md
+
+          # Get maintainability index
+          echo "" >> /tmp/complexity_report.md
+          echo "### Maintainability Index (Low scores < 20 need attention)" >> /tmp/complexity_report.md
+          echo "" >> /tmp/complexity_report.md
+          echo '```' >> /tmp/complexity_report.md
+          radon mi . -s --min C 2>/dev/null | head -50 >> /tmp/complexity_report.md || echo "No low maintainability files found"
+          echo '```' >> /tmp/complexity_report.md
+
+          # Count high complexity functions
+          CC_COUNT=$(radon cc . -a -s --total-average -nc 2>/dev/null | grep -cE "^\s+[CDEF]\s" || echo "0")
+          echo "high_cc_count=$CC_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Analyze Incomplete Implementations
+        id: incomplete
+        run: |
+          echo "## Incomplete Implementations" > /tmp/incomplete_report.md
+          echo "" >> /tmp/incomplete_report.md
+
+          # Find NotImplementedError patterns
+          echo "### NotImplementedError Placeholders" >> /tmp/incomplete_report.md
+          echo "" >> /tmp/incomplete_report.md
+          echo '```' >> /tmp/incomplete_report.md
+          grep -rn "raise NotImplementedError" --include="*.py" . 2>/dev/null | grep -v "__pycache__" | grep -v ".git" | head -30 >> /tmp/incomplete_report.md || echo "None found"
+          echo '```' >> /tmp/incomplete_report.md
+
+          # Find pass-only functions
+          echo "" >> /tmp/incomplete_report.md
+          echo "### Empty Function Bodies (pass only)" >> /tmp/incomplete_report.md
+          echo "" >> /tmp/incomplete_report.md
+          echo '```' >> /tmp/incomplete_report.md
+          grep -rn -A1 "def " --include="*.py" . 2>/dev/null | grep -B1 "^\s*pass$" | grep "def " | head -30 >> /tmp/incomplete_report.md || echo "None found"
+          echo '```' >> /tmp/incomplete_report.md
+
+          # Find stub comments
+          echo "" >> /tmp/incomplete_report.md
+          echo "### Stub/Placeholder Comments" >> /tmp/incomplete_report.md
+          echo "" >> /tmp/incomplete_report.md
+          echo '```' >> /tmp/incomplete_report.md
+          grep -rniE "(stub|placeholder|implement later|will be implemented|not yet implemented)" --include="*.py" . 2>/dev/null | grep -v "__pycache__" | head -30 >> /tmp/incomplete_report.md || echo "None found"
+          echo '```' >> /tmp/incomplete_report.md
+
+          # Count incomplete implementations
+          NOT_IMPL_COUNT=$(grep -rc "raise NotImplementedError" --include="*.py" . 2>/dev/null | grep -v ":0$" | wc -l || echo "0")
+          STUB_COUNT=$(grep -rciE "(stub|placeholder|implement later)" --include="*.py" . 2>/dev/null | grep -v ":0$" | wc -l || echo "0")
+          echo "not_impl_count=$NOT_IMPL_COUNT" >> $GITHUB_OUTPUT
+          echo "stub_count=$STUB_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Analyze Type Coverage
+        id: types
+        run: |
+          echo "## Type Annotation Coverage" > /tmp/types_report.md
+          echo "" >> /tmp/types_report.md
+
+          # Run mypy and capture summary
+          echo "### MyPy Analysis" >> /tmp/types_report.md
+          echo "" >> /tmp/types_report.md
+          echo '```' >> /tmp/types_report.md
+          mypy . --config-file pyproject.toml 2>&1 | tail -20 >> /tmp/types_report.md || echo "MyPy check completed with errors"
+          echo '```' >> /tmp/types_report.md
+
+          # Find bare type: ignore comments (without specific error codes)
+          echo "" >> /tmp/types_report.md
+          echo "### Bare Type Ignores (should use specific error codes)" >> /tmp/types_report.md
+          echo "" >> /tmp/types_report.md
+          echo '```' >> /tmp/types_report.md
+          grep -rn "# type: ignore$" --include="*.py" . 2>/dev/null | grep -v "__pycache__" | head -20 >> /tmp/types_report.md || echo "None found"
+          echo '```' >> /tmp/types_report.md
+
+          # Count type issues
+          TYPE_ERRORS=$(mypy . --config-file pyproject.toml 2>&1 | grep -c "error:" || echo "0")
+          BARE_IGNORES=$(grep -rc "# type: ignore$" --include="*.py" . 2>/dev/null | grep -v ":0$" | wc -l || echo "0")
+          echo "type_errors=$TYPE_ERRORS" >> $GITHUB_OUTPUT
+          echo "bare_ignores=$BARE_IGNORES" >> $GITHUB_OUTPUT
+
+      - name: Analyze Dead Code
+        id: deadcode
+        run: |
+          echo "## Dead Code Analysis" > /tmp/deadcode_report.md
+          echo "" >> /tmp/deadcode_report.md
+
+          echo "### Potentially Unused Code (Vulture Analysis)" >> /tmp/deadcode_report.md
+          echo "" >> /tmp/deadcode_report.md
+          echo '```' >> /tmp/deadcode_report.md
+          vulture . --min-confidence 80 2>/dev/null | head -50 >> /tmp/deadcode_report.md || echo "No dead code detected"
+          echo '```' >> /tmp/deadcode_report.md
+
+          # Count dead code items
+          DEAD_CODE_COUNT=$(vulture . --min-confidence 80 2>/dev/null | wc -l || echo "0")
+          echo "dead_code_count=$DEAD_CODE_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Analyze Security Debt
+        id: security
+        run: |
+          echo "## Security Debt" > /tmp/security_report.md
+          echo "" >> /tmp/security_report.md
+
+          # Bandit security analysis
+          echo "### Bandit Security Scan (Medium+ Severity)" >> /tmp/security_report.md
+          echo "" >> /tmp/security_report.md
+          echo '```' >> /tmp/security_report.md
+          bandit -r . -ll -q --exclude "./.git,./tests,./archive,./legacy" 2>/dev/null | head -100 >> /tmp/security_report.md || echo "No security issues found"
+          echo '```' >> /tmp/security_report.md
+
+          # pip-audit for dependency vulnerabilities
+          echo "" >> /tmp/security_report.md
+          echo "### Dependency Vulnerabilities" >> /tmp/security_report.md
+          echo "" >> /tmp/security_report.md
+          echo '```' >> /tmp/security_report.md
+          pip-audit 2>&1 | head -50 >> /tmp/security_report.md || echo "Audit completed"
+          echo '```' >> /tmp/security_report.md
+
+          # Count security issues
+          SECURITY_ISSUES=$(bandit -r . -ll -q --exclude "./.git,./tests,./archive,./legacy" -f json 2>/dev/null | jq '.results | length' || echo "0")
+          echo "security_issues=$SECURITY_ISSUES" >> $GITHUB_OUTPUT
+
+      - name: Analyze Linting Debt
+        id: linting
+        run: |
+          echo "## Linting Debt" > /tmp/linting_report.md
+          echo "" >> /tmp/linting_report.md
+
+          # Ruff comprehensive check
+          echo "### Ruff Violations by Category" >> /tmp/linting_report.md
+          echo "" >> /tmp/linting_report.md
+          echo '```' >> /tmp/linting_report.md
+          ruff check . --statistics 2>/dev/null | head -30 >> /tmp/linting_report.md || echo "No violations"
+          echo '```' >> /tmp/linting_report.md
+
+          # Top files with most issues
+          echo "" >> /tmp/linting_report.md
+          echo "### Files with Most Violations" >> /tmp/linting_report.md
+          echo "" >> /tmp/linting_report.md
+          echo '```' >> /tmp/linting_report.md
+          ruff check . --output-format text 2>/dev/null | cut -d: -f1 | sort | uniq -c | sort -rn | head -15 >> /tmp/linting_report.md || echo "No violations"
+          echo '```' >> /tmp/linting_report.md
+
+          # Count total violations
+          LINT_COUNT=$(ruff check . --output-format text 2>/dev/null | wc -l || echo "0")
+          echo "lint_count=$LINT_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Analyze Test Coverage Debt
+        id: coverage
+        run: |
+          echo "## Test Coverage Debt" > /tmp/coverage_report.md
+          echo "" >> /tmp/coverage_report.md
+
+          # Current coverage configuration
+          echo "### Coverage Configuration" >> /tmp/coverage_report.md
+          echo "" >> /tmp/coverage_report.md
+          echo "- **Current Minimum:** 10% (per pyproject.toml)" >> /tmp/coverage_report.md
+          echo "- **Target:** 60%" >> /tmp/coverage_report.md
+          echo "- **Gap:** 50 percentage points" >> /tmp/coverage_report.md
+          echo "" >> /tmp/coverage_report.md
+
+          # Find untested modules
+          echo "### Modules Without Test Files" >> /tmp/coverage_report.md
+          echo "" >> /tmp/coverage_report.md
+          echo '```' >> /tmp/coverage_report.md
+          for module in shared/python/*.py; do
+            if [ -f "$module" ]; then
+              basename=$(basename "$module" .py)
+              if [ "$basename" != "__init__" ]; then
+                if ! find tests -name "test_${basename}*.py" -o -name "${basename}_test.py" 2>/dev/null | grep -q .; then
+                  echo "$module (no test file found)"
+                fi
+              fi
+            fi
+          done | head -30 >> /tmp/coverage_report.md
+          echo '```' >> /tmp/coverage_report.md
+
+          # Count untested modules
+          UNTESTED_COUNT=$(for module in shared/python/*.py; do
+            if [ -f "$module" ]; then
+              basename=$(basename "$module" .py)
+              if [ "$basename" != "__init__" ]; then
+                if ! find tests -name "test_${basename}*.py" -o -name "${basename}_test.py" 2>/dev/null | grep -q .; then
+                  echo "$module"
+                fi
+              fi
+            fi
+          done | wc -l || echo "0")
+          echo "untested_modules=$UNTESTED_COUNT" >> $GITHUB_OUTPUT
+
+      - name: Generate Comprehensive Report
+        id: report
+        env:
+          HIGH_CC: ${{ steps.complexity.outputs.high_cc_count }}
+          NOT_IMPL: ${{ steps.incomplete.outputs.not_impl_count }}
+          STUB: ${{ steps.incomplete.outputs.stub_count }}
+          TYPE_ERRORS: ${{ steps.types.outputs.type_errors }}
+          BARE_IGNORES: ${{ steps.types.outputs.bare_ignores }}
+          DEAD_CODE: ${{ steps.deadcode.outputs.dead_code_count }}
+          SECURITY: ${{ steps.security.outputs.security_issues }}
+          LINT: ${{ steps.linting.outputs.lint_count }}
+          UNTESTED: ${{ steps.coverage.outputs.untested_modules }}
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          REPORT_FILE="docs/assessments/tech_debt/Technical_Debt_Report_${DATE}.md"
+
+          # Calculate debt score (lower is better)
+          DEBT_SCORE=$(echo "scale=2; ($HIGH_CC * 3) + ($NOT_IMPL * 5) + ($STUB * 2) + ($TYPE_ERRORS / 10) + ($BARE_IGNORES * 2) + ($DEAD_CODE / 5) + ($SECURITY * 10) + ($LINT / 20) + ($UNTESTED * 3)" | bc)
+
+          # Determine severity level
+          if [ "$(echo "$DEBT_SCORE > 100" | bc)" -eq 1 ]; then
+            SEVERITY="🔴 CRITICAL"
+            SEVERITY_EMOJI="🔴"
+          elif [ "$(echo "$DEBT_SCORE > 50" | bc)" -eq 1 ]; then
+            SEVERITY="🟠 HIGH"
+            SEVERITY_EMOJI="🟠"
+          elif [ "$(echo "$DEBT_SCORE > 20" | bc)" -eq 1 ]; then
+            SEVERITY="🟡 MODERATE"
+            SEVERITY_EMOJI="🟡"
+          else
+            SEVERITY="🟢 LOW"
+            SEVERITY_EMOJI="🟢"
+          fi
+
+          cat > "$REPORT_FILE" << EOF
+          # Technical Debt Assessment Report
+
+          **Generated:** ${DATE}
+          **Overall Debt Score:** ${DEBT_SCORE} ${SEVERITY}
+          **Automated Assessment by:** Jules Tech Debt Assessor
+
+          ---
+
+          ## Executive Summary
+
+          | Category | Count | Weight | Score Impact |
+          |----------|-------|--------|--------------|
+          | High Complexity Functions | ${HIGH_CC:-0} | x3 | $(echo "$HIGH_CC * 3" | bc) |
+          | NotImplementedError | ${NOT_IMPL:-0} | x5 | $(echo "$NOT_IMPL * 5" | bc) |
+          | Stub/Placeholder Comments | ${STUB:-0} | x2 | $(echo "$STUB * 2" | bc) |
+          | Type Errors | ${TYPE_ERRORS:-0} | /10 | $(echo "scale=2; $TYPE_ERRORS / 10" | bc) |
+          | Bare Type Ignores | ${BARE_IGNORES:-0} | x2 | $(echo "$BARE_IGNORES * 2" | bc) |
+          | Dead Code Items | ${DEAD_CODE:-0} | /5 | $(echo "scale=2; $DEAD_CODE / 5" | bc) |
+          | Security Issues | ${SECURITY:-0} | x10 | $(echo "$SECURITY * 10" | bc) |
+          | Lint Violations | ${LINT:-0} | /20 | $(echo "scale=2; $LINT / 20" | bc) |
+          | Untested Modules | ${UNTESTED:-0} | x3 | $(echo "$UNTESTED * 3" | bc) |
+          | **Total Debt Score** | | | **${DEBT_SCORE}** |
+
+          ---
+
+          ## Severity Thresholds
+
+          - 🟢 **LOW** (0-20): Healthy codebase, routine maintenance only
+          - 🟡 **MODERATE** (21-50): Manageable debt, schedule regular cleanup
+          - 🟠 **HIGH** (51-100): Significant debt, prioritize reduction
+          - 🔴 **CRITICAL** (>100): Urgent attention required
+
+          ---
+
+          EOF
+
+          # Append section reports
+          cat /tmp/complexity_report.md >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+          echo "---" >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+
+          cat /tmp/incomplete_report.md >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+          echo "---" >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+
+          cat /tmp/types_report.md >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+          echo "---" >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+
+          cat /tmp/deadcode_report.md >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+          echo "---" >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+
+          cat /tmp/security_report.md >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+          echo "---" >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+
+          cat /tmp/linting_report.md >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+          echo "---" >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+
+          cat /tmp/coverage_report.md >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+          echo "---" >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+
+          # Add recommendations
+          cat >> "$REPORT_FILE" << 'RECOMMENDATIONS'
+          ## Prioritized Recommendations
+
+          ### Immediate Actions (This Sprint)
+
+          1. **Security Issues**: Address any security vulnerabilities identified by Bandit
+          2. **Critical Complexity**: Refactor functions with cyclomatic complexity > 20
+          3. **Incomplete Implementations**: Complete or remove NotImplementedError stubs
+
+          ### Short-term (Next 2 Sprints)
+
+          4. **Type Coverage**: Add specific error codes to bare `# type: ignore` comments
+          5. **Test Coverage**: Add tests for critical untested modules
+          6. **Dead Code**: Remove unused functions and variables identified by Vulture
+
+          ### Long-term (Quarterly Goals)
+
+          7. **Test Coverage Target**: Increase from 10% to 60%
+          8. **Complexity Reduction**: Aim for average complexity below 5
+          9. **Documentation**: Ensure all public APIs have docstrings
+
+          ---
+
+          ## Tracking History
+
+          See previous reports in `docs/assessments/tech_debt/` for trend analysis.
+
+          ---
+
+          *This report is generated automatically by the Jules Tech Debt Assessor workflow.*
+          *For questions or to dispute findings, open an issue with label `tech-debt-review`.*
+          RECOMMENDATIONS
+
+          echo "report_file=$REPORT_FILE" >> $GITHUB_OUTPUT
+          echo "debt_score=$DEBT_SCORE" >> $GITHUB_OUTPUT
+          echo "severity=$SEVERITY" >> $GITHUB_OUTPUT
+          echo "severity_emoji=$SEVERITY_EMOJI" >> $GITHUB_OUTPUT
+
+      - name: Update Latest Report Link
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          cat > docs/assessments/tech_debt/README.md << EOF
+          # Technical Debt Reports
+
+          This directory contains automated technical debt assessments generated weekly by the Jules Tech Debt Assessor.
+
+          ## Latest Report
+
+          **[Technical Debt Report - ${DATE}](Technical_Debt_Report_${DATE}.md)**
+
+          ## Report Schedule
+
+          - **Frequency:** Weekly (Sunday 5 AM PST / 1 PM UTC)
+          - **Trigger:** Automated via Jules Control Tower
+
+          ## Understanding the Debt Score
+
+          The debt score is calculated using weighted factors:
+
+          | Factor | Weight | Rationale |
+          |--------|--------|-----------|
+          | Security Issues | x10 | Highest priority - potential vulnerabilities |
+          | NotImplementedError | x5 | Incomplete features affect stability |
+          | High Complexity | x3 | Makes code hard to maintain and test |
+          | Untested Modules | x3 | Risk of undetected regressions |
+          | Bare Type Ignores | x2 | May mask real type errors |
+          | Stub Comments | x2 | Indicates incomplete work |
+          | Type Errors | /10 | Divided to normalize large counts |
+          | Dead Code | /5 | Lower priority, cosmetic cleanup |
+          | Lint Violations | /20 | Style issues, lowest severity |
+
+          ## Severity Levels
+
+          - 🟢 **LOW** (0-20): Healthy - routine maintenance
+          - 🟡 **MODERATE** (21-50): Manageable - schedule cleanup
+          - 🟠 **HIGH** (51-100): Significant - prioritize reduction
+          - 🔴 **CRITICAL** (>100): Urgent - immediate attention
+
+          ## Historical Reports
+
+          Reports are archived with date stamps for trend analysis.
+          EOF
+
+      - name: Create GitHub Issue for Critical Debt
+        if: inputs.create_issues != false
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEBT_SCORE: ${{ steps.report.outputs.debt_score }}
+          SEVERITY: ${{ steps.report.outputs.severity }}
+          REPORT_FILE: ${{ steps.report.outputs.report_file }}
+        run: |
+          # Only create issue if debt score is high
+          if [ "$(echo "$DEBT_SCORE > 50" | bc)" -eq 1 ]; then
+            DATE=$(date +%Y-%m-%d)
+
+            # Check if similar issue already exists
+            EXISTING=$(gh issue list --label "tech-debt,automated" --state open --json number -q '.[0].number' || echo "")
+
+            if [ -n "$EXISTING" ]; then
+              echo "Updating existing tech debt issue #$EXISTING"
+              gh issue comment "$EXISTING" --body "## Weekly Tech Debt Update - ${DATE}
+
+          **Debt Score:** ${DEBT_SCORE} ${SEVERITY}
+
+          [View Full Report](https://github.com/${{ github.repository }}/blob/main/${REPORT_FILE})
+
+          *Automated update by Jules Tech Debt Assessor*"
+            else
+              echo "Creating new tech debt tracking issue"
+              gh issue create \
+                --title "Tech Debt Tracker - Score: ${DEBT_SCORE} ${SEVERITY}" \
+                --body "## Technical Debt Assessment - ${DATE}
+
+          **Overall Debt Score:** ${DEBT_SCORE} ${SEVERITY}
+
+          This issue tracks the overall technical debt in the repository. The debt score is calculated weekly based on:
+
+          - Security vulnerabilities
+          - Incomplete implementations
+          - Code complexity
+          - Test coverage gaps
+          - Type annotation issues
+          - Linting violations
+
+          [View Full Report](https://github.com/${{ github.repository }}/blob/main/${REPORT_FILE})
+
+          ## Action Items
+
+          - [ ] Review and prioritize debt items
+          - [ ] Assign owners for critical issues
+          - [ ] Schedule cleanup work in upcoming sprints
+
+          ---
+          *This issue is updated weekly by the Jules Tech Debt Assessor workflow.*
+          *Close this issue when debt score falls below 50.*" \
+                --label "tech-debt,automated,maintenance"
+            fi
+          fi
+
+      - name: Commit and Push Report
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add docs/assessments/tech_debt/
+
+          if ! git diff --staged --quiet; then
+            DATE=$(date +%Y-%m-%d)
+            git commit -m "docs: weekly technical debt assessment ${DATE}
+
+          Debt Score: ${{ steps.report.outputs.debt_score }} ${{ steps.report.outputs.severity }}
+
+          [skip ci]"
+            git push origin HEAD
+          else
+            echo "No changes to commit"
+          fi
+
+      - name: Job Summary
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          # Technical Debt Assessment Complete
+
+          **Date:** ${DATE}
+          **Debt Score:** ${{ steps.report.outputs.debt_score }} ${{ steps.report.outputs.severity }}
+
+          ## Key Metrics
+
+          | Metric | Count |
+          |--------|-------|
+          | High Complexity Functions | ${{ steps.complexity.outputs.high_cc_count }} |
+          | Security Issues | ${{ steps.security.outputs.security_issues }} |
+          | Type Errors | ${{ steps.types.outputs.type_errors }} |
+          | Lint Violations | ${{ steps.linting.outputs.lint_count }} |
+          | Untested Modules | ${{ steps.coverage.outputs.untested_modules }} |
+
+          [View Full Report](https://github.com/${{ github.repository }}/blob/main/${{ steps.report.outputs.report_file }})
+          EOF
