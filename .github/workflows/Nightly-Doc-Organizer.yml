@@ -1,0 +1,69 @@
+name: Nightly Documentation Organizer
+
+on:
+  schedule:
+    - cron: "0 5 * * *"  # 5 AM UTC (9 PM PST, before the main overnight run starts at midnight)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  organize-docs:
+    runs-on: ubuntu-latest
+    if: vars.WORKFLOWS_PAUSED != 'true'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Organize Review Archive
+        run: |
+          mkdir -p docs/review_archive
+          # Group files by month if there are many
+          # For now, just ensuring the directory is clean and structured
+          echo "Organizing review archive..."
+          find docs/review_archive -name "*.md" -maxdepth 1 -mtime +30 -exec gzip {} \; || true
+
+      - name: Update Workflow Documentation
+        run: |
+          mkdir -p docs/maintenance
+          cat > docs/maintenance/WORKFLOWS.md << 'EOF'
+          # Repository Workflows
+
+          This document lists all active GEI (GitHub Engineering Infrastructure) workflows and their status.
+
+          ## core Workflows
+          - **CI Standard**: Main CI pipeline for formatting, linting, and tests.
+          - **CI Fast Tests**: Parallelized fast test suite (10 min cutoff).
+          - **Maintenance Global Control**: Manual toggle to pause/resume all automated workflows.
+          - **Nightly Documentation Organizer**: (This workflow) Maintains repo structure and docs.
+
+          ## Jules AI Agent Workflows
+          - **Jules Control Tower**: Central dispatcher for all Jules tasks.
+          - **Jules PR Compiler**: Consolidates multiple small Jules PRs into themed PRs.
+          - **Jules Assessment Generator**: Performs nightly codebase health audits.
+          - **Jules Issue Resolver**: Automatically attempts to fix high-priority issues.
+          - **Jules Tech Debt Assessor**: Identifies and categorizes technical debt.
+
+          ## Review & Issue Management
+          - **Comment-to-Issue-Converter**: Converts PR review comments into actionable issues.
+          - **PR-Comment-Responder**: Allows AI to respond to human feedback on PRs.
+
+          ## How to Pause Workflows
+          If you need to stop automated runs (e.g., for major refactorting), run the **Maintenance Global Control** workflow and select "pause". This sets the `WORKFLOWS_PAUSED` repository variable to `true`.
+          EOF
+
+      - name: Cleanup Temporary Files
+        run: |
+          # Clean up any leftover jules data or temp files
+          rm -rf .jules/temp_* || true
+          rm -rf .jules/debug_* || true
+
+      - name: Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: nightly documentation organization and workflow update"
+          file_pattern: "docs/maintenance/WORKFLOWS.md docs/review_archive/*"
