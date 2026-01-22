@@ -62,17 +62,37 @@ class TestLoggerUtils:
 
     def test_set_seeds_default(self) -> None:
         """Test setting seeds with default value."""
+        import numpy as np
+        import random
+
+        # Set seeds
         logger_utils.set_seeds()
-        # Verify seeds were set (we can't easily test the actual values)
-        # but we can check no exceptions were raised
-        assert True
+
+        # Verify numpy's random state was set by checking reproducibility
+        # Setting the same seed should give the same random values
+        logger_utils.set_seeds(42)  # Use known seed
+        first_value = np.random.random()
+
+        logger_utils.set_seeds(42)  # Reset to same seed
+        second_value = np.random.random()
+
+        assert first_value == second_value, "Seed setting should produce reproducible results"
 
     def test_set_seeds_custom(self) -> None:
         """Test setting seeds with custom value."""
+        import numpy as np
+
         custom_seed = 12345
         logger_utils.set_seeds(custom_seed)
-        # Verify seeds were set
-        assert True
+
+        # Record value
+        first_value = np.random.random()
+
+        # Reset to same seed should reproduce the same sequence
+        logger_utils.set_seeds(custom_seed)
+        second_value = np.random.random()
+
+        assert first_value == second_value, "Custom seed should produce reproducible results"
 
     def test_get_logger(self) -> None:
         """Test getting a logger instance."""
@@ -83,8 +103,14 @@ class TestLoggerUtils:
     def test_setup_logging(self) -> None:
         """Test logging setup."""
         logger_utils.setup_logging()
-        # Verify logging was configured
-        assert True
+
+        # Verify logging was configured by checking root logger has handlers
+        root_logger = logging.getLogger()
+        # After setup_logging, there should be at least one handler
+        # or the logging level should be configured
+        assert root_logger.level != logging.NOTSET or len(root_logger.handlers) > 0, (
+            "setup_logging should configure the logging system"
+        )
 
 
 class TestNegativeCases:
