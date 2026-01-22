@@ -1,6 +1,6 @@
 import os
-from datetime import datetime
 from collections.abc import Mapping
+from datetime import datetime
 from typing import Any
 
 DATA_DIR = ".jules/completist_data"
