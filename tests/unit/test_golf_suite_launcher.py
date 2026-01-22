@@ -221,9 +221,9 @@ class TestGolfSuiteLauncher:
         assert launcher_app is not None, "Launcher should be instantiated"
 
         # Verify PYQT_AVAILABLE flag is set correctly for testing
-        assert golf_suite_launcher.PYQT_AVAILABLE is True, (
-            "PYQT_AVAILABLE should be True for launcher logic tests"
-        )
+        assert (
+            golf_suite_launcher.PYQT_AVAILABLE is True
+        ), "PYQT_AVAILABLE should be True for launcher logic tests"
 
         # Verify launcher has essential UI components (as mocked)
         assert hasattr(launcher_app, "log_text"), "Launcher should have log_text widget"
