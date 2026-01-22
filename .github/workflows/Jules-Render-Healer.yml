@@ -1,7 +1,7 @@
 name: Jules Render Healer
 on:
   deployment_status:
-    state: [failure]
+
 
 jobs:
   fix-deploy:
