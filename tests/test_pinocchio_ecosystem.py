@@ -55,14 +55,17 @@ class TestPinocchioEcosystem(unittest.TestCase):
             self.assertTrue(hasattr(pink, "__file__"))
 
             # Test that Pink has expected modules
+            # SECURITY FIX: Use importlib instead of exec() to prevent code injection
+            import importlib
+
             expected_modules = ["tasks", "solvers"]
             for module_name in expected_modules:
                 try:
                     module = getattr(pink, module_name, None)
                     if module is None:
-                        # Try importing as submodule
-                        exec(f"import pink.{module_name}")
-                except (AttributeError, ImportError):
+                        # Try importing as submodule (safe import)
+                        importlib.import_module(f"pink.{module_name}")
+                except (AttributeError, ImportError, ModuleNotFoundError):
                     # Some modules might not be available in all Pink versions
                     pass
 

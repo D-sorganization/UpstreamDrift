@@ -3,8 +3,10 @@
 import sys
 from pathlib import Path
 
-# Add shared to path (script is in scripts/ directory)
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
+# Add project root to path (script is in scripts/ directory)
+root = Path(__file__).parent.parent
+sys.path.insert(0, str(root))
+sys.path.insert(0, str(root / "shared" / "python"))
 
 from physics_parameters import get_registry
 

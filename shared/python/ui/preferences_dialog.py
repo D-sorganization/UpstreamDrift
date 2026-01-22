@@ -29,6 +29,7 @@ from PyQt6.QtWidgets import (
     QGroupBox,
     QHBoxLayout,
     QLabel,
+    QMessageBox,
     QSpinBox,
     QTabWidget,
     QVBoxLayout,
@@ -343,7 +344,23 @@ class PreferencesDialog(QDialog):
         self.accept()
 
     def _on_restore_defaults(self) -> None:
-        """Restore default settings."""
+        """Restore default settings with confirmation dialog.
+
+        UX FIX: Added confirmation to prevent accidental preference loss.
+        """
+        # UX FIX: Confirm before restoring defaults
+        reply = QMessageBox.question(
+            self,
+            "Restore Default Settings",
+            "This will reset all preferences to their default values.\n\n"
+            "Your current settings will be lost. Continue?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
         defaults = UserPreferences()
 
         # Update UI

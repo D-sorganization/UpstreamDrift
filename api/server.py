@@ -93,9 +93,33 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization", "X-API-Key"],
 )
 
-# Maximum file upload size (10 MB)
-MAX_UPLOAD_SIZE_MB = 10
-MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024
+# ============================================================================
+# API Configuration Constants
+# Centralized configuration to avoid magic numbers throughout the codebase
+# ============================================================================
+
+# Maximum file upload size: 10MB (10 * 1024 * 1024)
+MAX_UPLOAD_SIZE_BYTES = 10485760
+
+# HSTS (HTTP Strict Transport Security) max age in seconds (1 year)
+HSTS_MAX_AGE_SECONDS = 31536000
+
+# Default pagination limit for API responses
+DEFAULT_PAGINATION_LIMIT = 100
+
+# Maximum pose data entries to return in video analysis response
+MAX_POSE_DATA_ENTRIES = 100
+
+# Valid pose estimator types
+VALID_ESTIMATOR_TYPES = {"mediapipe", "openpose", "movenet"}
+
+# Valid export formats implementation currently supports
+VALID_EXPORT_FORMATS = {"json"}
+
+# Confidence score range
+MIN_CONFIDENCE = 0.0
+MAX_CONFIDENCE = 1.0
+DEFAULT_CONFIDENCE = 0.5
 
 # Rate limiting
 app.state.limiter = limiter
@@ -133,7 +157,7 @@ async def add_security_headers(
     # Force HTTPS (only for HTTPS connections)
     if request.url.scheme == "https":
         response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains"
+            f"max-age={HSTS_MAX_AGE_SECONDS}; includeSubDomains"
         )
 
     return cast(Response, response)
@@ -155,7 +179,7 @@ def _add_security_headers_to_response(response: Response, request: Request) -> R
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     if request.url.scheme == "https":
         response.headers["Strict-Transport-Security"] = (
-            "max-age=31536000; includeSubDomains"
+            f"max-age={HSTS_MAX_AGE_SECONDS}; includeSubDomains"
         )
     return response
 
@@ -572,10 +596,27 @@ async def analyze_video(
     if not video_pipeline:
         raise HTTPException(status_code=500, detail="Video pipeline not initialized")
 
+    # INPUT VALIDATION: Validate estimator type
+    if estimator_type not in VALID_ESTIMATOR_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid estimator_type '{estimator_type}'. "
+            f"Must be one of: {', '.join(sorted(VALID_ESTIMATOR_TYPES))}",
+        )
+
+    # INPUT VALIDATION: Validate confidence range
+    if not (MIN_CONFIDENCE <= min_confidence <= MAX_CONFIDENCE):
+        raise HTTPException(
+            status_code=400,
+            detail=f"min_confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}",
+        )
+
     # Validate file type
     if not file.content_type or not file.content_type.startswith("video/"):
         raise HTTPException(status_code=400, detail="File must be a video")
 
+    # SECURITY FIX: Use try/finally to ensure temp file cleanup even on exceptions
+    temp_path: Path | None = None
     try:
         # Save uploaded file temporarily
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
@@ -594,9 +635,6 @@ async def analyze_video(
         # Process video
         result = pipeline.process_video(temp_path)
 
-        # Clean up temp file
-        temp_path.unlink()
-
         # Convert to response format
         response = VideoAnalysisResponse(
             filename=file.filename or "unknown",
@@ -611,7 +649,9 @@ async def analyze_video(
                     "joint_angles": pose.joint_angles,
                     "keypoints": pose.raw_keypoints or {},
                 }
-                for pose in result.pose_results[:100]  # Limit response size
+                for pose in result.pose_results[
+                    :MAX_POSE_DATA_ENTRIES
+                ]  # Limit response size
             ],
         )
 
@@ -622,6 +662,15 @@ async def analyze_video(
         raise HTTPException(
             status_code=500, detail=f"Video analysis failed: {str(e)}"
         ) from e
+    finally:
+        # Ensure temp file is always cleaned up
+        if temp_path is not None and temp_path.exists():
+            try:
+                temp_path.unlink()
+            except OSError as cleanup_error:
+                logger.warning(
+                    f"Failed to clean up temp file {temp_path}: {cleanup_error}"
+                )
 
 
 @app.post("/analyze/video/async")
@@ -634,6 +683,25 @@ async def analyze_video_async(
     """Start asynchronous video analysis."""
     if not video_pipeline:
         raise HTTPException(status_code=500, detail="Video pipeline not initialized")
+
+    # INPUT VALIDATION: Validate estimator type
+    if estimator_type not in VALID_ESTIMATOR_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid estimator_type '{estimator_type}'. "
+            f"Must be one of: {', '.join(sorted(VALID_ESTIMATOR_TYPES))}",
+        )
+
+    # INPUT VALIDATION: Validate confidence range
+    if not (MIN_CONFIDENCE <= min_confidence <= MAX_CONFIDENCE):
+        raise HTTPException(
+            status_code=400,
+            detail=f"min_confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}",
+        )
+
+    # Validate file type
+    if not file.content_type or not file.content_type.startswith("video/"):
+        raise HTTPException(status_code=400, detail="File must be a video")
 
     task_id = str(uuid.uuid4())
 
@@ -746,6 +814,14 @@ async def analyze_biomechanics(request: AnalysisRequest) -> AnalysisResponse:
 @app.get("/export/{task_id}")
 async def export_results(task_id: str, format: str = "json") -> JSONResponse:
     """Export analysis results in specified format."""
+    # INPUT VALIDATION: Validate export format
+    if format not in VALID_EXPORT_FORMATS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid format '{format}'. "
+            f"Must be one of: {', '.join(sorted(VALID_EXPORT_FORMATS))}",
+        )
+
     if task_id not in active_tasks:
         raise HTTPException(status_code=404, detail="Task not found")
 
@@ -759,6 +835,18 @@ async def export_results(task_id: str, format: str = "json") -> JSONResponse:
 
 
 if __name__ == "__main__":
+    # SECURITY FIX: Only enable auto-reload in development mode
+    # Auto-reload in production can enable code injection attacks
+    environment = os.getenv("ENVIRONMENT", "development").lower()
+    enable_reload = environment == "development"
+
+    if enable_reload:
+        logger.warning("⚠️  Running with auto-reload enabled (development mode)")
+
     uvicorn.run(
-        "api.server:app", host="0.0.0.0", port=8000, reload=True, log_level="info"
+        "api.server:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=enable_reload,
+        log_level="info",
     )
