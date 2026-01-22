@@ -1,0 +1,55 @@
+name: Maintenance Global Control
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        default: 'pause'
+        type: choice
+        options:
+          - pause
+          - resume
+      reason:
+        description: 'Reason for pause/resume'
+        required: false
+        default: 'Maintenance'
+
+jobs:
+  control:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update Pause State
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [ "${{ inputs.action }}" == "pause" ]; then
+            echo "Paused by workflow dispatch" > .github/WORKFLOWS_PAUSED
+            echo "Reason: ${{ inputs.reason }}" >> .github/WORKFLOWS_PAUSED
+            git add .github/WORKFLOWS_PAUSED
+            git commit -m "chore(maintenance): pause workflows [${{ inputs.reason }}]"
+            git push
+          else
+            rm -f .github/WORKFLOWS_PAUSED
+            git add .github/WORKFLOWS_PAUSED || true
+            git commit -m "chore(maintenance): resume workflows"
+            git push
+          fi
+
+          echo "## 📢 Global Workflow Control" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ inputs.action }}" == "pause" ]; then
+            echo "- **Status:** ⏸️ **PAUSED**" >> $GITHUB_STEP_SUMMARY
+            echo "- **Reason:** ${{ inputs.reason }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- **Status:** ▶️ **RESUMED**" >> $GITHUB_STEP_SUMMARY
+          fi

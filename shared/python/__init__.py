@@ -24,6 +24,7 @@ from .constants import (
     MUJOCO_ROOT,
     OUTPUT_ROOT,
     PENDULUM_ROOT,
+    PINOCCHIO_ROOT,
     SHARED_ROOT,
     SUITE_ROOT,
 )
