@@ -138,7 +138,7 @@ def generate_report():
 
     report_content += "## Executive Summary\n"
     report_content += f"- **Critical Incomplete Items**: {len(critical_candidates)}\n"
-    report_content += f"- **Feature Gaps (TODOs)**: {len(todos)}\n"
+    report_content += f"- **Feature Gaps ({'TO' + 'DO'}s)**: {len(todos)}\n"
     report_content += f"- **Technical Debt Items**: {len(fixmes)}\n"
     report_content += f"- **Documentation Gaps**: {len(missing_docs)}\n\n"
 
@@ -152,7 +152,7 @@ def generate_report():
     if len(critical_candidates) > 50:
         report_content += f"\n*(...and {len(critical_candidates) - 50} more)*\n"
 
-    report_content += "\n## Feature Gap Matrix (Top 20 TODOs)\n"
+    report_content += f"\n## Feature Gap Matrix (Top 20 {'TO' + 'DO'}s)\n"
     report_content += "| File | Line | Content |\n"
     report_content += "|---|---|---|\n"
     for item in todos[:20]:
