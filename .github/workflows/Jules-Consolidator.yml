@@ -27,6 +27,7 @@ permissions:
 
 jobs:
   discover:
+    if: false  # DISABLED TO PREVENT PR EXPLOSION - Re-enable after fixing cleanup logic
     runs-on: ubuntu-latest
     outputs:
       pr_count: ${{ steps.list.outputs.count }}
