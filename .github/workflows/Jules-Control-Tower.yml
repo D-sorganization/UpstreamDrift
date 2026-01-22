@@ -57,6 +57,7 @@ permissions:
 
 jobs:
   triage:
+    if: false  # DISABLED TO PREVENT PR EXPLOSION - Re-enable after fixing cleanup logic
     runs-on: ubuntu-latest
     # Removed global actor check to allow scheduled runs even if file modified by bot
     outputs:

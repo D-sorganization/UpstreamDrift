@@ -12,6 +12,7 @@ on:
 
 jobs:
   fix:
+    if: false  # DISABLED TO PREVENT PR EXPLOSION - Re-enable after fixing cleanup logic
     runs-on: ubuntu-latest
     # Prevent multiple repairs on same branch simultaneously
     concurrency:

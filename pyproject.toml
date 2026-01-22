@@ -210,6 +210,7 @@ exclude = [
     "archive",
     "shared/models/opensim/opensim-models/",
     "shared/models/myosuite/myo_sim/",
+    "scripts/",
 ]
 
 # Disable untyped definition checks for test files

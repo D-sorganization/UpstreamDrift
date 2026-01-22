@@ -19,6 +19,7 @@ permissions:
 
 jobs:
   review:
+    if: false  # DISABLED TO PREVENT PR EXPLOSION - Re-enable after fixing cleanup logic
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
