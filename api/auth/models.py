@@ -4,18 +4,15 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import DeclarativeMeta, declarative_base
 from sqlalchemy.sql import func
 
 # Create the base class for SQLAlchemy models
 Base = declarative_base()
 
 if TYPE_CHECKING:
-    # For type checking, we need to tell MyPy that Base is a class
-    from sqlalchemy.ext.declarative import DeclarativeMeta
-
     Base = DeclarativeMeta
 
 
@@ -156,8 +153,7 @@ class UserResponse(UserBase):
     created_at: datetime
     last_login: datetime | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class LoginRequest(BaseModel):
@@ -197,8 +193,7 @@ class APIKeyResponse(BaseModel):
     created_at: datetime
     expires_at: datetime | None = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UsageQuotas(BaseModel):
