@@ -1,6 +1,5 @@
 import os
 from datetime import datetime
-from typing import Any
 
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
