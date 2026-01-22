@@ -222,7 +222,9 @@ This section defines the active agents within the Jules "Control Tower" Architec
 **Workflow:** `.github/workflows/Jules-Scientific-Auditor.yml`
 **Triggered By:** Nightly Schedule
 **Capabilities:**
--  **Read/Write:** Analyzes mathematical correctness; can commit reports to `docs/assessments/` or open GitHub Issues.
+- **Read/Write:** Analyzes mathematical correctness; can commit reports to `docs/assessments/` or open GitHub Issues.
+- **Justification:** This agent requires limited write access only to publish audit artifacts (reports and issues) so that all mathematical reviews are transparent, reproducible, and traceable over time. It remains strictly read-only with respect to source, configuration, and test code.
+- **Constraints:** MUST NOT modify application source code, configuration files, or tests; MAY ONLY create or update files under `docs/assessments/` and open or comment on GitHub Issues/PRs to recommend changes.
 
 ### 6. Conflict-Fix (Diplomat)
 **Role:** Merge Conflict Resolver
@@ -369,7 +371,7 @@ See `Repository_Management/workflow-fixes/` for documented fixes and patterns to
 ### 🔄 Workflow & Automation Governance
 
 Agents must refer to the [Workflow Tracking Document](docs/workflows/WORKFLOW_TRACKING.md) to understand available tools.
-All workflows follow the [Governing Workflow Guidance](../../Repository_Management/docs/architecture/WORKFLOW_GOVERNANCE.md).
+All workflows follow the Governing Workflow Guidance documented in the `Repository_Management` repository (see `docs/architecture/WORKFLOW_GOVERNANCE.md` in that repository).
 The **GitHub Issue Tracker** is the primary authority for tasking and gap remediation. Check existing issues before starting work.
 
 ---
