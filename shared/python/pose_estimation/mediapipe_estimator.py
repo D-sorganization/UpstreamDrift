@@ -13,7 +13,11 @@ import time
 from pathlib import Path
 from typing import Any, ClassVar
 
-import cv2
+try:
+    import cv2
+except ImportError:
+    cv2 = None
+
 import numpy as np
 
 # Try to import mediapipe. If not found, we will fall back to mock/error behavior
@@ -121,6 +125,10 @@ class MediaPipeEstimator(PoseEstimator):
             logger.warning(
                 "MediaPipe library not found. MediaPipeEstimator will not function."
             )
+        if cv2 is None:
+            logger.warning(
+                "OpenCV library not found. MediaPipeEstimator will not function."
+            )
 
     def load_model(self, model_path: Path | None = None) -> None:
         """Initialize the MediaPipe Pose model.
@@ -158,6 +166,9 @@ class MediaPipeEstimator(PoseEstimator):
         """
         if not self._is_loaded:
             raise RuntimeError("Model not loaded. Call load_model() first.")
+
+        if cv2 is None:
+            raise ImportError("OpenCV is not installed.")
 
         # Convert BGR to RGB for MediaPipe
         rgb_image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -219,6 +230,9 @@ class MediaPipeEstimator(PoseEstimator):
         """
         if not self._is_loaded:
             raise RuntimeError("Model not loaded. Call load_model() first.")
+
+        if cv2 is None:
+            raise ImportError("OpenCV is not installed.")
 
         results = []
         cap = cv2.VideoCapture(str(video_path))
