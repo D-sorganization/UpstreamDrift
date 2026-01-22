@@ -46,7 +46,7 @@ def grep_count(pattern, file_pattern="**/*.py"):
     for p in REPO_ROOT.glob(file_pattern):
         if p.is_file():
             try:
-                with open(p, "r", encoding="utf-8", errors="ignore") as f:
+                with open(p, encoding="utf-8", errors="ignore") as f:
                     content = f.read()
                     if regex.search(content):
                         count += 1
