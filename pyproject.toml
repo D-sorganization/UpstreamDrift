@@ -118,8 +118,8 @@ Repository = "https://github.com/D-sorganization/Golf_Modeling_Suite"
 Issues = "https://github.com/D-sorganization/Golf_Modeling_Suite/issues"
 
 [tool.setuptools.packages.find]
-where = ["."]
-include = ["shared*", "engines*", "launchers*", "tools*"]
+where = ["src"]
+include = ["shared*", "engines*", "launchers*", "tools*", "api*", "config*"]
 exclude = ["tests*", "docs*"]
 
 [tool.black]
