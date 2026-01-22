@@ -35,6 +35,7 @@ on:
           - critics-comments-writer
           - sentinel
           - tech-custodian
+          - tech-debt-assessor
           - thesis-defender
           - issue-resolver
           - pr-compiler
@@ -308,4 +309,10 @@ jobs:
     needs: triage
     if: needs.triage.outputs.target == 'pr-compiler'
     uses: ./.github/workflows/Jules-PR-Compiler.yml
+    secrets: inherit
+
+  call-tech-debt-assessor:
+    needs: triage
+    if: needs.triage.outputs.target == 'tech-debt-assessor'
+    uses: ./.github/workflows/Jules-Tech-Debt-Assessor.yml
     secrets: inherit
