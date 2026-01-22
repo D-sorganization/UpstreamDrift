@@ -18,7 +18,7 @@ on:
           - simulation
           - control_theory
   schedule:
-    - cron: "0 3 * * 3"  # Wednesdays at 3 AM UTC (within midnight-4 AM window)
+    - cron: "0 3 * * 3"  # Wednesdays at 03:00 UTC (within the 00:00–04:00 UTC window)
 
 permissions:
   contents: write
@@ -95,7 +95,7 @@ jobs:
           echo "Found source: $SOURCE_ID"
 
           # Create session prompt
-          PROMPT=$(cat << 'PROMPT_EOF'
+          PROMPT=$(cat << PROMPT_EOF
           You are the IDEAS GENERATOR - a research specialist in golf science and biomechanics.
 
           ## Your Mission

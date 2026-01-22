@@ -98,9 +98,8 @@ app.add_middleware(
 # Centralized configuration to avoid magic numbers throughout the codebase
 # ============================================================================
 
-# Maximum file upload size
-MAX_UPLOAD_SIZE_MB = 10
-MAX_UPLOAD_SIZE_BYTES = MAX_UPLOAD_SIZE_MB * 1024 * 1024
+# Maximum file upload size: 10MB (10 * 1024 * 1024)
+MAX_UPLOAD_SIZE_BYTES = 10485760
 
 # HSTS (HTTP Strict Transport Security) max age in seconds (1 year)
 HSTS_MAX_AGE_SECONDS = 31536000
@@ -114,8 +113,8 @@ MAX_POSE_DATA_ENTRIES = 100
 # Valid pose estimator types
 VALID_ESTIMATOR_TYPES = {"mediapipe", "openpose", "movenet"}
 
-# Valid export formats
-VALID_EXPORT_FORMATS = {"json", "csv", "hdf5", "parquet"}
+# Valid export formats implementation currently supports
+VALID_EXPORT_FORMATS = {"json"}
 
 # Confidence score range
 MIN_CONFIDENCE = 0.0
