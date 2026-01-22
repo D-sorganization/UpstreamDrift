@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from typing import Any, List, Dict, Tuple, Optional
+from typing import Any
 
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
@@ -10,7 +10,7 @@ STUBS_FILE = os.path.join(DATA_DIR, "stub_functions.txt")
 DOCS_FILE = os.path.join(DATA_DIR, "incomplete_docs.txt")
 
 
-def parse_grep_line(line: str) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+def parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
     """Parse a grep output line."""
     parts = line.split(":", 2)
     if len(parts) < 3:
@@ -21,7 +21,7 @@ def parse_grep_line(line: str) -> Tuple[Optional[str], Optional[str], Optional[s
     return filepath, lineno, content
 
 
-def analyze_todos() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Analyze TO-DO and FIX-ME markers."""
     todos = []
     fixmes = []
@@ -42,7 +42,7 @@ def analyze_todos() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
     return todos, fixmes
 
 
-def analyze_stubs() -> List[Dict[str, Any]]:
+def analyze_stubs() -> list[dict[str, Any]]:
     """Analyze stub functions."""
     stubs = []
     with open(STUBS_FILE, encoding="utf-8") as f:
@@ -62,7 +62,7 @@ def analyze_stubs() -> List[Dict[str, Any]]:
     return stubs
 
 
-def analyze_docs() -> List[Dict[str, Any]]:
+def analyze_docs() -> list[dict[str, Any]]:
     """Analyze missing documentation."""
     missing_docs = []
     with open(DOCS_FILE, encoding="utf-8") as f:
@@ -79,7 +79,7 @@ def analyze_docs() -> List[Dict[str, Any]]:
     return missing_docs
 
 
-def analyze_not_implemented() -> List[Dict[str, Any]]:
+def analyze_not_implemented() -> list[dict[str, Any]]:
     """Analyze Not Implemented Error occurrences."""
     # Mainly looking for Not Implemented Error
     errors = []
@@ -95,7 +95,7 @@ def analyze_not_implemented() -> List[Dict[str, Any]]:
     return errors
 
 
-def calculate_priority(item: Dict[str, Any]) -> int:
+def calculate_priority(item: dict[str, Any]) -> int:
     """Calculate priority based on file location."""
     # Heuristic for priority
     filepath = item["file"]
