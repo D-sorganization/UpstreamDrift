@@ -127,7 +127,9 @@ class VideoPosePipeline:
             VideoProcessingResult with pose estimates and quality metrics
         """
         if cv2 is None:
-            raise RuntimeError("OpenCV (cv2) is not installed. Video processing is unavailable.")
+            raise RuntimeError(
+                "OpenCV (cv2) is not installed. Video processing is unavailable."
+            )
 
         if not video_path.exists():
             raise FileNotFoundError(f"Video file not found: {video_path}")
