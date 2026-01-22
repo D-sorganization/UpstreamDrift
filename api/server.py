@@ -650,7 +650,9 @@ async def analyze_video(
                     "joint_angles": pose.joint_angles,
                     "keypoints": pose.raw_keypoints or {},
                 }
-                for pose in result.pose_results[:MAX_POSE_DATA_ENTRIES]  # Limit response size
+                for pose in result.pose_results[
+                    :MAX_POSE_DATA_ENTRIES
+                ]  # Limit response size
             ],
         )
 
@@ -667,7 +669,9 @@ async def analyze_video(
             try:
                 temp_path.unlink()
             except OSError as cleanup_error:
-                logger.warning(f"Failed to clean up temp file {temp_path}: {cleanup_error}")
+                logger.warning(
+                    f"Failed to clean up temp file {temp_path}: {cleanup_error}"
+                )
 
 
 @app.post("/analyze/video/async")
