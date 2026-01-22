@@ -157,7 +157,10 @@ class OpenPoseEstimator(PoseEstimator):
 
     def estimate_from_video(self, video_path: Path) -> list[PoseEstimationResult]:
         """Process a video file."""
-        import cv2
+        try:
+            import cv2
+        except ImportError:
+            raise RuntimeError("OpenCV (cv2) is not installed. Cannot process video.")
 
         results = []
         cap = cv2.VideoCapture(str(video_path))
