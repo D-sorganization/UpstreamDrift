@@ -250,15 +250,15 @@ jobs:
                   # Group by source
                   by_source = {}
                   for c in archived_comments:
-            src = c['source']
-            if src not in by_source:
-                by_source[src] = []
-            by_source[src].append(c)
+                      src = c['source']
+                      if src not in by_source:
+                          by_source[src] = []
+                      by_source[src].append(c)
 
                   for source, comments in by_source.items():
-            f.write(f"## {source} ({len(comments)} comments)\n\n")
-            for c in comments:
-                f.write(f"### PR #{c['pr_number']}: {c['file']}:{c['line']}\n\n")
+                      f.write(f"## {source} ({len(comments)} comments)\n\n")
+                      for c in comments:
+                          f.write(f"### PR #{c['pr_number']}: {c['file']}:{c['line']}\n\n")
                 f.write(f"**Actionable:** {'Yes' if c['is_actionable'] else 'No'}\n")
                 f.write(f"**Has Suggestion:** {'Yes' if c['has_suggestion'] else 'No'}\n\n")
                 f.write(f"```\n{c['body'][:500]}{'...' if len(c['body']) > 500 else ''}\n```\n\n")
