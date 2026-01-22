@@ -176,7 +176,9 @@ def generate_report() -> None:
     report_content += "| File | Line | Symbol |\n"
     report_content += "|---|---|---|\n"
     for d_item in missing_docs[:20]:
-        report_content += f"| `{d_item['file']}` | {d_item['line']} | {d_item['name']} |\n"
+        report_content += (
+            f"| `{d_item['file']}` | {d_item['line']} | {d_item['name']} |\n"
+        )
 
     report_content += "\n## Recommended Implementation Order\n"
     report_content += (
