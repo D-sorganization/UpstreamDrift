@@ -1,6 +1,7 @@
 import os
+from collections.abc import Mapping
 from datetime import datetime
-from typing import Optional, Any, Mapping
+from typing import Any
 
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
@@ -10,7 +11,7 @@ STUBS_FILE = os.path.join(DATA_DIR, "stub_functions.txt")
 DOCS_FILE = os.path.join(DATA_DIR, "incomplete_docs.txt")
 
 
-def parse_grep_line(line: str) -> tuple[Optional[str], Optional[str], Optional[str]]:
+def parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
     """Parse a grep output line."""
     parts = line.split(":", 2)
     if len(parts) < 3:
