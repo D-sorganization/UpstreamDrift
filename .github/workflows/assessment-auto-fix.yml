@@ -39,6 +39,7 @@ jobs:
   analyze-assessment-issues:
     name: Analyze Assessment Issues
     runs-on: ubuntu-latest
+    if: hashFiles('.github/WORKFLOWS_PAUSED') == ''
     outputs:
       top_issues: ${{ steps.prioritize.outputs.top_issues }}
       code_quality_issues: ${{ steps.prioritize.outputs.code_quality }}
