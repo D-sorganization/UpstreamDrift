@@ -33,13 +33,13 @@ jobs:
   process-comments:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.11"
 
       - name: Collect Review Comments
         id: collect
@@ -188,29 +188,29 @@ jobs:
 
                       issue_body = f"""## Review Comment from {source}
 
-          **Source PR:** #{pr_num} - {pr_title}
-          **File:** `{file_path}` (line {line})
-          **Original Comment:** {html_url}
+**Source PR:** #{pr_num} - {pr_title}
+**File:** `{file_path}` (line {line})
+**Original Comment:** {html_url}
 
-          ---
+---
 
-          ### Feedback
+### Feedback
 
-          {body}
+{body}
 
-          ---
+---
 
-          ### Context
+### Context
 
-          - **PR Author:** @{pr_author}
-          - **Branch:** `{pr_branch}`
-          - **Reviewed by:** {author}
-          - **Date:** {created_at}
+- **PR Author:** @{pr_author}
+- **Branch:** `{pr_branch}`
+- **Reviewed by:** {author}
+- **Date:** {created_at}
 
-          ---
+---
 
-          *This issue was auto-generated from a PR review comment.*
-          """
+*This issue was auto-generated from a PR review comment.*
+"""
 
                       # Create the issue
                       try:
@@ -259,10 +259,10 @@ jobs:
                       f.write(f"## {source} ({len(comments)} comments)\n\n")
                       for c in comments:
                           f.write(f"### PR #{c['pr_number']}: {c['file']}:{c['line']}\n\n")
-                f.write(f"**Actionable:** {'Yes' if c['is_actionable'] else 'No'}\n")
-                f.write(f"**Has Suggestion:** {'Yes' if c['has_suggestion'] else 'No'}\n\n")
-                f.write(f"```\n{c['body'][:500]}{'...' if len(c['body']) > 500 else ''}\n```\n\n")
-                f.write(f"[View on GitHub]({c['url']})\n\n---\n\n")
+                          f.write(f"**Actionable:** {'Yes' if c['is_actionable'] else 'No'}\n")
+                          f.write(f"**Has Suggestion:** {'Yes' if c['has_suggestion'] else 'No'}\n\n")
+                          f.write(f"```\n{c['body'][:500]}{'...' if len(c['body']) > 500 else ''}\n```\n\n")
+                          f.write(f"[View on GitHub]({c['url']})\n\n---\n\n")
 
               print(f"Archived {len(archived_comments)} comments to {archive_md}")
 
