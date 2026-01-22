@@ -45,7 +45,6 @@ class TestDrakeStrict:
         self.patcher = patch.dict("sys.modules", module_patches)
         self.patcher.start()
 
-
         self.mod = mod
         self.DrakePhysicsEngine = mod.DrakePhysicsEngine
 
