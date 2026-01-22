@@ -190,9 +190,7 @@ def generate_report() -> None:
         "The following critical items block core functionality and require issues:\n\n"
     )
     for item in critical_candidates[:5]:
-        report_content += (
-            f"- **[CRITICAL] {item['file']}: {item.get('type', 'Unknown')} at line {item['line']}**\n"
-        )
+        report_content += f"- **[CRITICAL] {item['file']}: {item.get('type', 'Unknown')} at line {item['line']}**\n"
 
     # Write files
     os.makedirs(REPORT_DIR, exist_ok=True)
