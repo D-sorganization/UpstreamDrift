@@ -54,7 +54,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         """Test secure subprocess validates against whitelist."""
         # Test allowed executable
         try:
-            result = validate_executable("python")
+            result = validate_executable("python3")
             self.assertIsNotNone(result)
         except SecureSubprocessError:
             self.fail("python should be allowed")
@@ -75,7 +75,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
     def test_secure_subprocess_path_validation(self) -> None:
         """Test secure subprocess validates script paths."""
         # Create test paths
-        suite_root = Path.cwd()
+        suite_root = Path(__file__).resolve().parent.parent.parent
         valid_script = suite_root / "tools" / "test_script.py"
         invalid_script = Path("/tmp/malicious_script.py")
 
@@ -103,7 +103,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         # Test with allowed command
         try:
             result = secure_run(
-                ["python", "--version"], capture_output=True, text=True, timeout=10
+                ["python3", "--version"], capture_output=True, text=True, timeout=10
             )
             self.assertEqual(result.returncode, 0)
             self.assertIn("Python", result.stdout)
@@ -130,7 +130,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         # Test with valid command
         try:
             with secure_popen(
-                ["python", "--version"], stdout=subprocess.PIPE, text=True
+                ["python3", "--version"], stdout=subprocess.PIPE, text=True
             ) as proc:
                 output, _ = proc.communicate(timeout=10)
                 self.assertIn("Python", output)
@@ -193,7 +193,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
             "tools/../../../etc/passwd",
         ]
 
-        suite_root = Path.cwd()
+        suite_root = Path(__file__).resolve().parent.parent.parent
         for path in malicious_paths:
             with self.subTest(path=path):
                 with self.assertRaises(SecureSubprocessError):
@@ -201,26 +201,29 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
 
     def test_working_directory_validation(self) -> None:
         """Test working directory validation."""
-        suite_root = Path.cwd()
+        suite_root = Path(__file__).resolve().parent.parent.parent
 
         # Test valid working directory (within suite)
         valid_cwd = suite_root / "tools"
+        print(f"DEBUG: suite_root={suite_root}")
+        print(f"DEBUG: valid_cwd={valid_cwd}")
         with patch("pathlib.Path.exists", return_value=True):
             try:
                 secure_run(
-                    ["python", "--version"],
+                    ["python3", "--version"],
                     cwd=str(valid_cwd),
                     suite_root=suite_root,
                     timeout=10,
                 )
             except SecureSubprocessError as e:
+                print(f"DEBUG: CAUGHT ERROR: {e}")
                 if "not allowed" not in str(e):
                     raise  # Re-raise if not about executable whitelist
 
         # Test invalid working directory (outside suite) - use a clearly invalid path
         invalid_cwd = "C:\\Windows\\System32" if os.name == "nt" else "/etc"
         with self.assertRaises(SecureSubprocessError) as context:
-            secure_run(["python", "--version"], cwd=invalid_cwd, suite_root=suite_root)
+            secure_run(["python3", "--version"], cwd=invalid_cwd, suite_root=suite_root)
 
         self.assertIn("Working directory outside suite", str(context.exception))
 
@@ -231,7 +234,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
 
         try:
             result = secure_run(
-                ["python", "-c", "import os; print(len(os.environ))"],
+                ["python3", "-c", "import os; print(len(os.environ))"],
                 env=clean_env,
                 capture_output=True,
                 text=True,
@@ -261,7 +264,9 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         try:
             # Test with very short timeout
             with self.assertRaises((subprocess.TimeoutExpired, SecureSubprocessError)):
-                secure_run(["python", "-c", "import time; time.sleep(10)"], timeout=0.1)
+                secure_run(
+                    ["python3", "-c", "import time; time.sleep(10)"], timeout=0.1
+                )
         except SecureSubprocessError:
             self.skipTest("Python not available or not in whitelist")
 
@@ -287,7 +292,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         def run_subprocess():
             try:
                 result = secure_run(
-                    ["python", "--version"], capture_output=True, text=True, timeout=10
+                    ["python3", "--version"], capture_output=True, text=True, timeout=10
                 )
                 results.append(result.returncode)
             except Exception as e:

@@ -26,7 +26,9 @@ ALLOWED_SCRIPT_DIRECTORIES = [
 # Allowed executables (whitelist approach)
 ALLOWED_EXECUTABLES = [
     "python",
+    "python3",
     "python.exe",
+    "python3.exe",
     "matlab",
     "matlab.exe",
     "docker",
@@ -164,7 +166,7 @@ def secure_popen(
         cwd_path = Path(cwd).resolve()
         if suite_root:
             suite_root_abs = suite_root.resolve()
-            if not str(cwd_path).startswith(str(suite_root_abs)):
+            if not cwd_path.is_relative_to(suite_root_abs):
                 raise SecureSubprocessError(
                     f"Working directory outside suite: {cwd_path}"
                 )
@@ -236,7 +238,7 @@ def secure_run(
         cwd_path = Path(cwd).resolve()
         if suite_root:
             suite_root_abs = suite_root.resolve()
-            if not str(cwd_path).startswith(str(suite_root_abs)):
+            if not cwd_path.is_relative_to(suite_root_abs):
                 raise SecureSubprocessError(
                     f"Working directory outside suite: {cwd_path}"
                 )

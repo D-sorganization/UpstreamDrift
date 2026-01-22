@@ -9,12 +9,15 @@ on:
       debug_enabled:
         description: 'Enable debug mode (verbose output)'
         required: false
-        default: 'false'
+        default: false
         type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 env:
   # Hard cutoff: 10 minutes total for testing
@@ -87,7 +90,6 @@ jobs:
             --timeout=${{ env.TEST_TIMEOUT_PER_TEST }} \
             --timeout-method=thread \
             -m "not slow and not benchmark" \
-            -x \
             --tb=short \
             -q \
             tests/unit/ \

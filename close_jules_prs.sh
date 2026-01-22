@@ -1,7 +1,13 @@
 #!/bin/bash
 # Close all Jules-generated PRs as they're superseded by consolidated PR #624
 
-cd /home/dieterolson/Linux_Golf_Modeling_Suite/Golf_Modeling_Suite
+# Find repository root dynamically
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+if [ -z "$REPO_ROOT" ]; then
+    echo "Error: Must be run from within the repository." >&2
+    exit 1
+fi
+cd "$REPO_ROOT"
 
 echo "Closing Jules PRs in Golf Suite (superseded by #624)..."
 
