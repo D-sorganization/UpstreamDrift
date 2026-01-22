@@ -170,18 +170,21 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
                 # Fallback for mocked objects or unusual cases
                 self.sim.data.qpos[:] = q
                 self.sim.data.qvel[:] = v
-        except (TypeError, AttributeError):
+        except (TypeError, AttributeError) as e:
             # Handle mocked objects or other edge cases
+            LOGGER.debug(f"Primary state assignment failed (may be mocked): {e}")
             try:
                 self.sim.data.qpos[:] = q
                 self.sim.data.qvel[:] = v
-            except Exception:
-                pass  # Skip if assignment fails in test environment
+            except Exception as fallback_error:
+                # Log instead of silent pass - helps debugging test failures
+                LOGGER.debug(f"Fallback state assignment failed: {fallback_error}")
 
         try:
             self.sim.forward()
-        except Exception:
-            pass  # Skip if forward fails in test environment
+        except Exception as forward_error:
+            # Log instead of silent pass - helps debugging test failures
+            LOGGER.debug(f"Forward dynamics failed (may be mocked): {forward_error}")
 
     def set_control(self, u: np.ndarray) -> None:
         """Set control (ctrl)."""
@@ -196,12 +199,14 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
             else:
                 # Fallback for mocked objects
                 self.sim.data.ctrl[:] = u
-        except (TypeError, AttributeError):
+        except (TypeError, AttributeError) as e:
             # Handle mocked objects or other edge cases
+            LOGGER.debug(f"Primary control assignment failed (may be mocked): {e}")
             try:
                 self.sim.data.ctrl[:] = u
-            except Exception:
-                pass  # Skip if assignment fails in test environment
+            except Exception as fallback_error:
+                # Log instead of silent pass - helps debugging test failures
+                LOGGER.debug(f"Fallback control assignment failed: {fallback_error}")
 
     def get_time(self) -> float:
         if self.sim:

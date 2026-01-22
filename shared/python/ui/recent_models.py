@@ -21,6 +21,7 @@ from PyQt6.QtWidgets import (
     QFrame,
     QHBoxLayout,
     QLabel,
+    QMessageBox,
     QPushButton,
     QScrollArea,
     QVBoxLayout,
@@ -357,10 +358,28 @@ class RecentModelsPanel(QFrame):
         self._refresh_list()
 
     def clear_recent(self) -> None:
-        """Clear all recent models."""
-        self._recent_models = []
-        self._save_recent()
-        self._refresh_list()
+        """Clear all recent models with confirmation dialog.
+
+        UX FIX: Added confirmation to prevent accidental history loss.
+        """
+        if not self._recent_models:
+            return  # Nothing to clear
+
+        # UX FIX: Confirm before clearing recent models
+        reply = QMessageBox.question(
+            self,
+            "Clear Recent Models",
+            f"This will clear {len(self._recent_models)} recent model(s) from history.\n\n"
+            "This action cannot be undone. Continue?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No,
+        )
+
+        if reply == QMessageBox.StandardButton.Yes:
+            self._recent_models = []
+            self._save_recent()
+            self._refresh_list()
+            logger.info("Recent models history cleared")
 
 
 __all__ = ["RecentModelItem", "RecentModelsPanel"]

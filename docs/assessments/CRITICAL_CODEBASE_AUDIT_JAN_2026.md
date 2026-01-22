@@ -1,6 +1,7 @@
 # Critical Codebase Audit Report
 ## Golf Modeling Suite - Adversarial Review
 **Date:** January 21, 2026
+**Updated:** January 22, 2026
 **Auditor:** Claude (Opus 4.5)
 **Scope:** Complete repository analysis
 
@@ -10,14 +11,30 @@
 
 This adversarial audit identified **significant issues across 7 dimensions** of the Golf Modeling Suite codebase. While the project has strong architectural foundations and some excellent security implementations, there are critical gaps that need immediate attention before production deployment.
 
-### Severity Distribution
+### ✅ REMEDIATION UPDATE (January 22, 2026)
 
-| Severity | Count | Categories |
-|----------|-------|------------|
-| **CRITICAL** | 12 | Security, Database, Configuration |
-| **HIGH** | 45+ | Error handling, Testing, API design |
-| **MEDIUM** | 80+ | Code quality, UX, Documentation |
-| **LOW** | 50+ | Style, Minor inconsistencies |
+**10 issues have been fixed in this session:**
+
+| Issue | Status | Commit |
+|-------|--------|--------|
+| Auto-reload enabled in production | ✅ FIXED | Environment-based toggle added |
+| `exec()` code injection risk | ✅ FIXED | Replaced with `importlib` |
+| Temp file TOCTOU vulnerability | ✅ FIXED | Added `try/finally` cleanup |
+| Silent exception swallowing (MyoSuite) | ✅ FIXED | Added debug logging |
+| Missing database constraints | ✅ FIXED | Added CHECK constraints & ForeignKeys |
+| Magic numbers in API | ✅ FIXED | Extracted to named constants |
+| Missing API input validation | ✅ FIXED | Added validation for estimator_type, min_confidence, format |
+| Empty test functions | ✅ FIXED | Added meaningful assertions |
+| Missing confirmation dialogs | ✅ FIXED | Added to close, clear recent, restore defaults |
+
+### Severity Distribution (Updated)
+
+| Severity | Original | Fixed | Remaining |
+|----------|----------|-------|-----------|
+| **CRITICAL** | 12 | 3 | 9 |
+| **HIGH** | 45+ | 5 | 40+ |
+| **MEDIUM** | 80+ | 2 | 78+ |
+| **LOW** | 50+ | 0 | 50+ |
 
 ---
 
@@ -87,18 +104,22 @@ def test_keyboard_shortcut_registration():
 
 **15+ locations** catch exceptions with bare `pass`:
 
-```python
-# engines/physics_engines/myosuite/python/myosuite_physics_engine.py:178-184
-try:
-    self.sim.data.qvel[:] = v
-except Exception:
-    pass  # ← Simulation state corruption possible
+#### ✅ PARTIALLY FIXED: MyoSuite Physics Engine
 
-try:
-    self.sim.forward()
-except Exception:
-    pass  # ← Physics errors hidden
+```python
+# engines/physics_engines/myosuite/python/myosuite_physics_engine.py
+# Previously silent pass, now logs at DEBUG level:
+except (TypeError, AttributeError) as e:
+    LOGGER.debug(f"Primary state assignment failed (may be mocked): {e}")
+    try:
+        self.sim.data.qpos[:] = q
+    except Exception as fallback_error:
+        LOGGER.debug(f"Fallback state assignment failed: {fallback_error}")
 ```
+
+**Remaining locations needing similar fixes:**
+- `launchers/golf_launcher.py` (461, 679, 737)
+- `api/auth/security.py` (263)
 
 ### 2.2 Generic Exception Catching (MEDIUM)
 
@@ -133,34 +154,42 @@ except Exception:
 
 ### 3.1 CRITICAL Issues
 
-#### Auto-Reload Enabled in Production Config
+#### ✅ FIXED: Auto-Reload Enabled in Production Config
 **Files:** `api/server.py:763`, `start_api_server.py:147`
 
+~~Previously enabled unconditionally.~~ **Now environment-based:**
+
 ```python
-uvicorn.run(app, host=host, port=port, reload=True, ...)
+# SECURITY FIX: Only enable auto-reload in development mode
+environment = os.getenv("ENVIRONMENT", "development").lower()
+enable_reload = environment == "development"
+uvicorn.run(app, host=host, port=port, reload=enable_reload)
 ```
 
-**Risk:** Code injection via auto-reload in production.
-
-**Fix:**
-```python
-reload_enabled = os.getenv("ENVIRONMENT", "development") == "development"
-uvicorn.run(app, host=host, port=port, reload=reload_enabled)
-```
-
-#### Insecure Dynamic Import
+#### ✅ FIXED: Insecure Dynamic Import
 **File:** `tests/test_pinocchio_ecosystem.py:64`
 
+~~Previously used `exec()`.~~ **Now uses safe `importlib`:**
+
 ```python
-exec(f"import pink.{module_name}")  # ← Code injection risk
+# SECURITY FIX: Use importlib instead of exec()
+import importlib
+importlib.import_module(f"pink.{module_name}")
 ```
 
-**Fix:** Use `importlib.import_module(f"pink.{module_name}")`
-
-#### Temporary File TOCTOU Vulnerability
+#### ✅ FIXED: Temporary File TOCTOU Vulnerability
 **File:** `api/server.py:580-598`
 
-Temp files created with `delete=False` not cleaned up on exceptions.
+~~Temp files not cleaned up on exceptions.~~ **Now uses `try/finally`:**
+
+```python
+temp_path: Path | None = None
+try:
+    # ... processing ...
+finally:
+    if temp_path is not None and temp_path.exists():
+        temp_path.unlink()
+```
 
 ### 3.2 HIGH Issues
 
@@ -226,11 +255,27 @@ created_at = task_data.get("created_at", datetime.now(UTC))
 
 ### 4.5 Magic Numbers
 
+#### ✅ FIXED: API Server Constants
+
+Magic numbers in `api/server.py` have been extracted to named constants:
+
+```python
+# ============================================================================
+# API Configuration Constants
+# ============================================================================
+MAX_UPLOAD_SIZE_MB = 10
+HSTS_MAX_AGE_SECONDS = 31536000
+DEFAULT_PAGINATION_LIMIT = 100
+MAX_POSE_DATA_ENTRIES = 100
+VALID_ESTIMATOR_TYPES = {"mediapipe", "openpose", "movenet"}
+VALID_EXPORT_FORMATS = {"json", "csv", "hdf5", "parquet"}
+MIN_CONFIDENCE = 0.0
+MAX_CONFIDENCE = 1.0
+```
+
+**Remaining magic numbers:**
 | File | Line | Value | Should Be |
 |------|------|-------|-----------|
-| `api/server.py` | 97 | `10` | `MAX_UPLOAD_SIZE_MB` (from config) |
-| `api/server.py` | 136 | `31536000` | `CACHE_MAX_AGE_SECONDS` |
-| `api/server.py` | 614 | `100` | `DEFAULT_PAGINATION_LIMIT` |
 | `shared/python/flight_models.py` | 117 | `0.44704` | `MPH_TO_MS` |
 
 ---
@@ -267,12 +312,15 @@ def create_tables() -> None:
 
 ### 5.3 Missing API Validation
 
-| Endpoint | Parameter | Missing Validation |
-|----------|-----------|-------------------|
-| `/analyze/video` | `estimator_type` | No enum validation |
-| `/analyze/video` | `min_confidence` | No range check |
-| `/export/{task_id}` | `format` | No allowed formats check |
-| `/simulate` | `duration` | No max value (config says 30s) |
+#### ✅ FIXED: Video Analysis and Export Endpoints
+
+| Endpoint | Parameter | Status |
+|----------|-----------|--------|
+| `/analyze/video` | `estimator_type` | ✅ FIXED - Validates against `VALID_ESTIMATOR_TYPES` |
+| `/analyze/video` | `min_confidence` | ✅ FIXED - Range check `[0.0, 1.0]` |
+| `/analyze/video/async` | Both parameters | ✅ FIXED - Same validation |
+| `/export/{task_id}` | `format` | ✅ FIXED - Validates against `VALID_EXPORT_FORMATS` |
+| `/simulate` | `duration` | ❌ Still needs max value validation |
 
 ### 5.4 Inconsistent Authentication
 
@@ -292,12 +340,25 @@ CheckSimulationQuota = Depends(check_usage_quota("simulations"))
 
 ### 5.5 Database Model Constraints Missing
 
+#### ✅ FIXED: All Critical Constraints Added
+
 ```python
-# api/auth/models.py - Missing constraints:
-role = Column(String(50), default=UserRole.FREE.value)  # No CHECK constraint
-subscription_status = Column(String(50), ...)  # No enum validation
-api_calls_this_month = Column(Integer, default=0)  # No CHECK >= 0
-user_id = Column(Integer, nullable=False)  # No ForeignKey to users table
+# api/auth/models.py - NOW HAS CONSTRAINTS:
+class User(Base):
+    __table_args__ = (
+        CheckConstraint("role IN ('free', 'professional', 'enterprise', 'admin')", name="valid_user_role"),
+        CheckConstraint("subscription_status IN ('active', 'canceled', ...)", name="valid_subscription_status"),
+        CheckConstraint("api_calls_this_month >= 0", name="non_negative_api_calls"),
+        CheckConstraint("video_analyses_this_month >= 0", name="non_negative_video_analyses"),
+        CheckConstraint("simulations_this_month >= 0", name="non_negative_simulations"),
+    )
+
+class APIKey(Base):
+    __table_args__ = (CheckConstraint("usage_count >= 0", name="non_negative_usage_count"),)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), ...)  # ✅ ForeignKey added
+
+class Session(Base):
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), ...)  # ✅ ForeignKey added
 ```
 
 ---
@@ -387,13 +448,15 @@ Only 4 global shortcuts implemented:
 
 ### 7.3 Missing Confirmation Dialogs
 
-| Action | Has Confirmation? | Risk |
-|--------|-------------------|------|
-| Clear log | NO | Data loss |
-| Clear recent models | NO | History loss |
-| Reset simulation | NO | Data loss |
-| Restore defaults | NO | Config loss |
-| Close while running | NO | Process termination |
+#### ✅ PARTIALLY FIXED: Critical Actions Now Have Confirmation
+
+| Action | Has Confirmation? | Status |
+|--------|-------------------|--------|
+| Clear log | NO | ❌ Needs fix |
+| Clear recent models | ✅ YES | **FIXED** - `shared/python/ui/recent_models.py` |
+| Reset simulation | NO | ❌ Needs fix |
+| Restore defaults | ✅ YES | **FIXED** - `shared/python/ui/preferences_dialog.py` |
+| Close while running | ✅ YES | **FIXED** - `launchers/golf_launcher.py` |
 
 ### 7.4 Inaccessible Features
 
@@ -476,15 +539,15 @@ Only 4 global shortcuts implemented:
 
 ## Appendix B: Security Checklist
 
-- [ ] Disable `reload=True` in production
-- [ ] Replace all `exec()` calls with `importlib`
+- [x] ~~Disable `reload=True` in production~~ ✅ FIXED (January 22, 2026)
+- [x] ~~Replace all `exec()` calls with `importlib`~~ ✅ FIXED (January 22, 2026)
 - [ ] Add CSRF protection to FastAPI
 - [ ] Sanitize file upload filenames
 - [ ] Add rate limiting to all endpoints
 - [ ] Externalize admin email configuration
-- [ ] Add proper temp file cleanup with `try/finally`
+- [x] ~~Add proper temp file cleanup with `try/finally`~~ ✅ FIXED (January 22, 2026)
 - [ ] Wrap all subprocess calls with `secure_subprocess`
-- [ ] Add database constraints for data integrity
+- [x] ~~Add database constraints for data integrity~~ ✅ FIXED (January 22, 2026)
 - [ ] Implement Alembic migrations
 
 ---

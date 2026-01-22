@@ -139,12 +139,22 @@ def start_server(host: str, port: int) -> None:
     logger.info("🛑 Press Ctrl+C to stop the server")
 
     try:
+        # SECURITY FIX: Only enable auto-reload in development mode
+        # Auto-reload in production can enable code injection attacks
+        environment = os.getenv("ENVIRONMENT", "development").lower()
+        enable_reload = environment == "development"
+
+        if enable_reload:
+            logger.warning("⚠️  Running with auto-reload enabled (development mode)")
+        else:
+            logger.info("🔒 Running in production mode (auto-reload disabled)")
+
         # Start the server
         uvicorn.run(
             app,
             host=host,
             port=port,
-            reload=True,  # Auto-reload on code changes
+            reload=enable_reload,
             log_level="info",
         )
 

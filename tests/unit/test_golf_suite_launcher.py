@@ -217,10 +217,17 @@ class TestGolfSuiteLauncher:
 
     def test_initialization(self, launcher_app):
         """Test UI initialization."""
-        # Check title set on mock
-        # Since MockQMainWindow.__init__ is empty, we can't check super calls unless we mock init
-        # But we can check attributes if the class set them
-        pass
+        # Verify launcher instance was created with essential attributes
+        assert launcher_app is not None, "Launcher should be instantiated"
+
+        # Verify PYQT_AVAILABLE flag is set correctly for testing
+        assert golf_suite_launcher.PYQT_AVAILABLE is True, (
+            "PYQT_AVAILABLE should be True for launcher logic tests"
+        )
+
+        # Verify launcher has essential UI components (as mocked)
+        assert hasattr(launcher_app, "log_text"), "Launcher should have log_text widget"
+        assert hasattr(launcher_app, "status"), "Launcher should have status widget"
 
     def test_launch_mujoco(self, launcher_app, mock_subprocess):
         """Test launching MuJoCo engine."""
