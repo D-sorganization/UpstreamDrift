@@ -125,7 +125,8 @@ class UnifiedLauncher:
         try:
             from shared.python import __version__
 
-            return __version__
+            version_str: str = __version__  # type: ignore[assignment]
+            return version_str
         except (ImportError, AttributeError):
             pass
 

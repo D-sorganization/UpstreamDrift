@@ -339,7 +339,8 @@ class StatisticalAnalyzer(
         try:
             from shared.python import signal_processing
 
-            return signal_processing.compute_psd(data, fs, window=window)
+            result = signal_processing.compute_psd(data, fs, window=window)
+            return result  # type: ignore[no-any-return]
         except ImportError:
             # Fallback if shared module not found
             from scipy import signal
@@ -363,7 +364,8 @@ class StatisticalAnalyzer(
         try:
             from shared.python import signal_processing
 
-            return signal_processing.compute_spectral_arc_length(data, fs)
+            result = signal_processing.compute_spectral_arc_length(data, fs)
+            return result  # type: ignore[no-any-return]
         except ImportError:
             return 0.0
 
