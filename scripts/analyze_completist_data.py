@@ -1,4 +1,6 @@
+import glob
 import os
+import re
 from collections import defaultdict
 from collections.abc import Mapping
 from datetime import datetime
@@ -6,6 +8,7 @@ from typing import Any, TypedDict, cast
 
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
+ISSUES_DIR = "docs/assessments/issues"
 
 # Input files
 MARKERS_FILE = os.path.join(DATA_DIR, "todo_markers.txt")
@@ -225,13 +228,9 @@ def calculate_metrics(item: Mapping[str, Any]) -> tuple[int, int, int]:
 
     # Impact Heuristic (1-5)
     impact = 1
-    if (
-        "src/shared/python" in filepath
-        or "src/engines/" in filepath
-        or "src/api/" in filepath
-    ):
+    if "shared/python" in filepath or "engines/" in filepath or "api/" in filepath:
         impact = 5
-    elif "src/tools/" in filepath:
+    elif "tools/" in filepath:
         impact = 3
     elif "tests/" in filepath:
         impact = 1
@@ -240,7 +239,7 @@ def calculate_metrics(item: Mapping[str, Any]) -> tuple[int, int, int]:
     coverage = 1
     if "tests/" in filepath:
         coverage = 5
-    elif "src/shared/python" in filepath:
+    elif "shared/python" in filepath:
         coverage = 3
     else:
         coverage = 2
@@ -259,6 +258,97 @@ def calculate_metrics(item: Mapping[str, Any]) -> tuple[int, int, int]:
         complexity = 5  # Needs implementation in subclasses
 
     return impact, coverage, complexity
+
+
+def get_next_issue_id() -> int:
+    """Get the next available issue ID."""
+    os.makedirs(ISSUES_DIR, exist_ok=True)
+    existing_issues = glob.glob(os.path.join(ISSUES_DIR, "Issue_*.md")) + glob.glob(
+        os.path.join(ISSUES_DIR, "ISSUE_*.md")
+    )
+
+    max_id = 0
+    for issue_path in existing_issues:
+        basename = os.path.basename(issue_path)
+        match = re.search(r"(\d+)", basename)
+        if match:
+            try:
+                issue_id = int(match.group(1))
+                if issue_id > max_id:
+                    max_id = issue_id
+            except ValueError:
+                continue
+    return max_id + 1
+
+
+def create_issue_file(item: Mapping[str, Any], issue_id: int) -> str:
+    """Create a markdown issue file."""
+    os.makedirs(ISSUES_DIR, exist_ok=True)
+
+    item_type = str(item.get("type", "Incomplete Implementation"))
+    file_p = str(item["file"])
+    line_p = str(item["line"])
+    text = str(item.get("text", ""))
+    name = str(item.get("name", ""))
+    context = name if name else text
+
+    # Sanitize title
+    title = f"Incomplete {item_type} in {os.path.basename(file_p)}:{line_p}"
+
+    # Format filename
+    filename_title = re.sub(r"[^\w]", "_", title).strip("_")
+
+    # Check for duplicates (idempotency)
+    existing_pattern = os.path.join(ISSUES_DIR, f"Issue_*_{filename_title}.md")
+    existing_files = glob.glob(existing_pattern)
+    if existing_files:
+        return existing_files[0]
+
+    filename = f"Issue_{issue_id:03d}_{filename_title}.md"
+    filepath = os.path.join(ISSUES_DIR, filename)
+
+    # Determine labels
+    labels = ["incomplete-implementation", "critical"]
+    impact, coverage, complexity = calculate_metrics(item)
+    if impact >= 5:
+        labels.append("high-impact")
+
+    content = f"""---
+title: "{title}"
+labels: {labels}
+assignee: "unassigned"
+status: "open"
+---
+
+# Issue Description
+
+Found critical incomplete implementation in `{file_p}` at line {line_p}.
+
+## Context
+
+**Type**: {item_type}
+**Location**: `{file_p}:{line_p}`
+
+```python
+{context}
+```
+
+## Audit Metrics
+
+- **User Impact**: {impact}/5
+- **Test Coverage**: {coverage}/5
+- **Complexity**: {complexity}/5
+
+## Recommendation
+
+This item blocks core functionality or represents a significant gap.
+Please implement the missing functionality or properly document why it is incomplete.
+"""
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(content)
+
+    return filepath
 
 
 def generate_report() -> None:
@@ -308,9 +398,7 @@ def generate_report() -> None:
     report_content += "|---|---|---|---|---|---|\n"
     for item in critical_candidates[:50]:
         impact, coverage, complexity = calculate_metrics(item)
-        name = cast(str, item.get("name", item.get("text", "")))[:40].replace(
-            "|", "\\|"
-        )
+        # name calculation removed as it was unused
         file_p = item["file"]
         line_p = item["line"]
         type_p = item.get("type", "")
@@ -370,23 +458,17 @@ def generate_report() -> None:
         report_content += "No critical issues found needing immediate creation.\n"
     else:
         report_content += (
-            "Run the following commands to create issues (if configured):\n\n"
+            "The following issue files were created in `docs/assessments/issues/`:\n\n"
         )
-        report_content += "```bash\n"
+
+        next_id = get_next_issue_id()
         for item in issues_to_create[:10]:
-            item_type = item.get("type", "Issue")
-            file_p = item["file"]
-            line_p = item["line"]
-            name = cast(str, item.get("name", item.get("text", "")))[:50].strip()
-            title = f"[Incomplete] {item_type} in {file_p}:{line_p}"
-            body = f"Found {item_type} in {file_p} at line {line_p}.\\nContext: {name}"
-            # Escaping for bash
-            title_esc = title.replace('"', '\\"')
-            body_esc = body.replace('"', '\\"')
-            report_content += f'gh issue create --title "{title_esc}" --body "{body_esc}" --label "incomplete-implementation,critical"\n'
-        report_content += "```\n"
+            created_path = create_issue_file(item, next_id)
+            report_content += f"- Created `{created_path}`\n"
+            next_id += 1
+
         if len(issues_to_create) > 10:
-            report_content += f"\n*(...and {len(issues_to_create) - 10} more)*\n"
+            report_content += f"\n*(...and {len(issues_to_create) - 10} more skipped to avoid flooding)*\n"
 
     os.makedirs(REPORT_DIR, exist_ok=True)
     report_filename = f"Completist_Report_{date_str}.md"
