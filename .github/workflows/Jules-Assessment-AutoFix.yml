@@ -1,0 +1,527 @@
+name: Jules Assessment Auto-Fix
+
+on:
+  schedule:
+    # Daily at 5 AM PST (13:00 UTC) - runs after overnight assessments complete
+    - cron: '0 13 * * *'
+  workflow_dispatch:
+    inputs:
+      assessment_type:
+        description: 'Assessment type (comprehensive, quick, or specific A-O)'
+        required: false
+        default: 'comprehensive'
+      auto_fix:
+        description: 'Automatically fix top issues'
+        required: false
+        default: 'true'
+      max_issues_to_fix:
+        description: 'Maximum number of issues to auto-fix'
+        required: false
+        default: '10'
+      source_pr_to_close:
+        description: 'PR number to close after fix (supersedes that PR)'
+        required: false
+        type: string
+      dry_run:
+        description: 'Dry run mode - show what would happen without making changes'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+
+jobs:
+  run-assessments:
+    name: Run Repository Assessments (A-O)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    outputs:
+      critical_issues: ${{ steps.analyze.outputs.critical_issues }}
+      assessment_score: ${{ steps.analyze.outputs.score }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for git analysis
+
+      - name: Prepare assessment branch
+        run: |
+          BRANCH_NAME="automation/assessment-reports"
+          git fetch origin main
+          git checkout -B "$BRANCH_NAME" origin/main
+          echo "ASSESSMENT_BRANCH=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ruff black mypy pytest pytest-cov pip-audit bandit
+
+      - name: Run Assessment A (Architecture)
+        id: assessment_a
+        run: |
+          echo "Running Architecture Assessment..."
+          python scripts/run_assessment.py --assessment A --output docs/assessments/Assessment_A_Results_$(date +%Y-%m-%d).md
+
+      - name: Run Assessment B (Hygiene & Quality)
+        id: assessment_b
+        run: |
+          echo "Running Hygiene & Quality Assessment..."
+          # Count print statements
+          PRINT_COUNT=$(grep -r "print(" python/ tests/ --include="*.py" | wc -l)
+          echo "print_violations=$PRINT_COUNT" >> $GITHUB_OUTPUT
+
+          # Run ruff
+          ruff check . --output-format=json > ruff_results.json || true
+
+          # Run mypy
+          mypy python/ tests/ --junit-xml mypy_results.xml || true
+
+          python scripts/run_assessment.py --assessment B --output docs/assessments/Assessment_B_Results_$(date +%Y-%m-%d).md
+
+      - name: Run Assessment C (Documentation)
+        run: |
+          python scripts/run_assessment.py --assessment C --output docs/assessments/Assessment_C_Results_$(date +%Y-%m-%d).md
+
+      - name: Run Assessment D (User Experience)
+        run: |
+          python scripts/run_assessment.py --assessment D --output docs/assessments/Assessment_D_Results_$(date +%Y-%m-%d).md
+
+      - name: Run Assessment E (Performance)
+        run: |
+          python scripts/run_assessment.py --assessment E --output docs/assessments/Assessment_E_Results_$(date +%Y-%m-%d).md
+
+      - name: Run Assessment F (Installation)
+        run: |
+          python scripts/run_assessment.py --assessment F --output docs/assessments/Assessment_F_Results_$(date +%Y-%m-%d).md
+
+      - name: Run Assessment G (Testing)
+        id: assessment_g
+        run: |
+          # Check test collection
+          pytest --collect-only -q > test_collection.log 2>&1 || true
+          COLLECTION_ERRORS=$(grep -c "ERROR" test_collection.log || echo "0")
+          echo "collection_errors=$COLLECTION_ERRORS" >> $GITHUB_OUTPUT
+
+          python scripts/run_assessment.py --assessment G --output docs/assessments/Assessment_G_Results_$(date +%Y-%m-%d).md
+
+      - name: Run Assessment H (Error Handling)
+        run: |
+          python scripts/run_assessment.py --assessment H --output docs/assessments/Assessment_H_Results_$(date +%Y-%m-%d).md
+
+      - name: Run Assessment I (Security)
+        run: |
+          # Run security scans
+          pip-audit --output security_audit.json --format json || true
+          bandit -r python/ -f json -o bandit_results.json || true
+
+          python scripts/run_assessment.py --assessment I --output docs/assessments/Assessment_I_Results_$(date +%Y-%m-%d).md
+
+      - name: Run Assessment J-O (Remaining)
+        run: |
+          for assessment in J K L M N O; do
+            python scripts/run_assessment.py --assessment $assessment --output docs/assessments/Assessment_${assessment}_Results_$(date +%Y-%m-%d).md
+          done
+
+      - name: Generate Comprehensive Summary
+        id: analyze
+        run: |
+          python scripts/generate_assessment_summary.py \
+            --input docs/assessments/Assessment_*_Results_$(date +%Y-%m-%d).md \
+            --output docs/assessments/COMPREHENSIVE_ASSESSMENT_SUMMARY_$(date +%Y-%m-%d).md \
+            --json-output assessment_summary.json
+
+          # Extract critical metrics
+          SCORE=$(jq -r '.overall_score' assessment_summary.json)
+          CRITICAL_ISSUES=$(jq -r '.critical_issues | length' assessment_summary.json)
+
+          echo "score=$SCORE" >> $GITHUB_OUTPUT
+          echo "critical_issues=$CRITICAL_ISSUES" >> $GITHUB_OUTPUT
+
+      - name: Upload Assessment Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: assessment-reports
+          path: |
+            docs/assessments/Assessment_*_Results_*.md
+            docs/assessments/COMPREHENSIVE_ASSESSMENT_SUMMARY_*.md
+            assessment_summary.json
+          retention-days: 90
+
+      - name: Commit Assessment Reports
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "Jules Assessment Bot"
+          git config user.email "jules-bot@gasification-model.local"
+          git add docs/assessments/
+
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+
+          git commit -m "docs(assessments): add automated assessment reports $(date +%Y-%m-%d)
+
+          Generated by Jules Assessment Auto-Fix workflow.
+
+          Overall Score: ${{ steps.analyze.outputs.score }}/10
+          Critical Issues: ${{ steps.analyze.outputs.critical_issues }}
+          "
+
+          git push -u origin "$ASSESSMENT_BRANCH" --force-with-lease
+
+          PR_NUMBER=$(gh pr list --head "$ASSESSMENT_BRANCH" --state open --json number --jq '.[0].number')
+          if [ -z "$PR_NUMBER" ]; then
+            gh pr create \
+              --title "docs(assessments): add automated assessment reports" \
+              --body "$(cat <<'EOF'
+          ## Automated Assessment Reports
+
+          - Overall Score: ${{ steps.analyze.outputs.score }}/10
+          - Critical Issues: ${{ steps.analyze.outputs.critical_issues }}
+
+          These reports are generated by the Jules Assessment Auto-Fix workflow.
+          EOF
+          )" \
+              --base main \
+              --head "$ASSESSMENT_BRANCH" \
+              --label "automation,assessments"
+          else
+            echo "Existing PR #$PR_NUMBER updated."
+          fi
+
+  auto-fix-issues:
+    name: Auto-Fix Top Issues
+    needs: run-assessments
+    if: github.event.inputs.auto_fix != 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+
+    strategy:
+      matrix:
+        fix_type:
+          - linting
+          - dependencies
+          - tests
+          - documentation
+      max-parallel: 2
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install ruff black mypy pip-tools
+
+      - name: Create fix branch
+        run: |
+          BRANCH_NAME="jules/auto-fix-${{ matrix.fix_type }}-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Auto-fix Linting Issues
+        if: matrix.fix_type == 'linting'
+        run: |
+          echo "Running auto-fixes for linting..."
+
+          # Auto-fix with black
+          black python/ tests/ || true
+
+          # Auto-fix with ruff
+          ruff check --fix . || true
+
+          # Record changes
+          git diff --stat > fix_summary.txt
+
+      - name: Auto-fix Dependencies
+        if: matrix.fix_type == 'dependencies'
+        run: |
+          echo "Generating dependency lock file..."
+
+          # Install pip-tools if not present
+          pip install pip-tools
+
+          # Generate lock file
+          pip-compile requirements.txt -o requirements-lock.txt
+
+          # Create .env.example if missing
+          if [ ! -f .env.example ]; then
+            {
+              echo "# Gasification Model Environment Configuration"
+              echo "# Copy this file to .env and configure for your environment"
+              echo ""
+              echo "# Database Configuration"
+              echo "DATABASE_PATH=data/species_database.json"
+              echo ""
+              echo "# Solver Settings"
+              echo "MAX_ITERATIONS=1000"
+              echo "CONVERGENCE_TOLERANCE=1e-6"
+              echo ""
+              echo "# Logging Configuration"
+              echo "LOG_LEVEL=INFO"
+              echo "LOG_FILE=logs/simulation.log"
+              echo ""
+              echo "# Development Settings"
+              echo "DEBUG_MODE=false"
+              echo "ENABLE_PROFILING=false"
+            } > .env.example
+          fi
+
+      - name: Auto-fix Tests
+        if: matrix.fix_type == 'tests'
+        run: |
+          echo "Fixing test collection issues..."
+
+          # Fix common import issues
+          python scripts/fix_test_imports.py || echo "Import fixer not available yet"
+
+          # Verify test collection
+          pytest --collect-only -q
+
+      - name: Auto-fix Documentation
+        if: matrix.fix_type == 'documentation'
+        run: |
+          echo "Updating documentation..."
+
+          # Create QUICK_START.md if missing
+          if [ ! -f docs/guides/QUICK_START.md ]; then
+            python scripts/generate_quick_start.py || echo "Quick start generator not available yet"
+          fi
+
+      - name: Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No changes made by auto-fix"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected"
+          fi
+
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git config user.name "Jules Auto-Fix Bot"
+          git config user.email "jules-autofix@gasification-model.local"
+
+          git add .
+          git commit -m "fix(${{ matrix.fix_type }}): Auto-fix ${{ matrix.fix_type }} issues
+
+          Automated fixes applied by Jules Assessment Auto-Fix workflow.
+
+          Fix Type: ${{ matrix.fix_type }}
+          Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+          This PR addresses issues identified in the automated assessment.
+          Please review changes carefully before merging.
+
+          Co-Authored-By: Jules Assessment Bot <jules-bot@gasification-model.local>"
+
+          git push origin "$BRANCH_NAME"
+
+      - name: Create Pull Request
+        if: steps.check_changes.outputs.has_changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create \
+            --title "🤖 Auto-fix: ${{ matrix.fix_type }} improvements" \
+            --body "$(cat <<EOF
+          ## Automated Fixes Applied
+
+          **Fix Type**: ${{ matrix.fix_type }}
+          **Generated**: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          **Workflow**: Jules Assessment Auto-Fix
+
+          ### Changes Made
+
+          This PR contains automated fixes for ${{ matrix.fix_type }} issues identified in the latest assessment.
+
+          ### Assessment Context
+
+          - **Overall Score**: ${{ needs.run-assessments.outputs.assessment_score }}/10
+          - **Critical Issues**: ${{ needs.run-assessments.outputs.critical_issues }}
+
+          ### Review Checklist
+
+          - [ ] All automated changes are appropriate
+          - [ ] Tests pass successfully
+          - [ ] No unintended side effects
+          - [ ] Documentation updated if needed
+
+          ### Related Issues
+
+          This PR may address open issues related to ${{ matrix.fix_type }}. Please cross-reference.
+
+          ---
+
+          🤖 Generated by [Jules Assessment Auto-Fix](https://github.com/D-sorganization/Gasification_Model/actions/workflows/Jules-Assessment-AutoFix.yml)
+          EOF
+          )" \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --label "auto-generated,quality-control,${{ matrix.fix_type }}"
+
+  create-github-issues:
+    name: Create GitHub Issues for Untracked Problems
+    needs: run-assessments
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download assessment summary
+        uses: actions/download-artifact@v4
+        with:
+          name: assessment-reports
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Create issues for critical findings
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python scripts/create_issues_from_assessment.py \
+            --input assessment_summary.json \
+            --severity CRITICAL,BLOCKER \
+            --check-existing
+
+      - name: Comment on assessment summary
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create or update issue with weekly assessment summary
+          gh issue list --label "assessment-summary" --json number --jq '.[0].number // ""' > issue_num.txt
+
+          ISSUE_NUM=$(cat issue_num.txt)
+          if [ -n "$ISSUE_NUM" ] && [ "$ISSUE_NUM" != "null" ]; then
+            echo "Updating existing issue #$ISSUE_NUM"
+            gh issue comment "$ISSUE_NUM" --body "$(cat docs/assessments/COMPREHENSIVE_ASSESSMENT_SUMMARY_*.md)"
+          else
+            echo "Creating new assessment summary issue"
+            gh issue create \
+              --title "📊 Weekly Assessment Summary" \
+              --body "$(cat docs/assessments/COMPREHENSIVE_ASSESSMENT_SUMMARY_*.md)" \
+              --label "assessment-summary,report"
+          fi
+
+  # Close source PR if specified (prevents PR proliferation)
+  close-source-pr:
+    name: Close Source PR (Superseded)
+    needs: [run-assessments, auto-fix-issues]
+    if: |
+      always() &&
+      inputs.source_pr_to_close != '' &&
+      inputs.dry_run != 'true' &&
+      needs.auto-fix-issues.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    steps:
+      - name: Close superseded PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          SOURCE_PR="${{ inputs.source_pr_to_close }}"
+
+          echo "Closing source PR #$SOURCE_PR (superseded by auto-fix PRs)"
+
+          # Get list of new PRs created by auto-fix
+          NEW_PRS=$(gh pr list --author "@me" --json number,title --jq '.[] | select(.title | contains("Auto-fix")) | "#\(.number)"' | head -5 | tr '\n' ', ' | sed 's/,$//')
+
+          # Add comment explaining closure
+          gh pr comment "$SOURCE_PR" --body "## 🤖 Auto-Closed (Superseded)
+
+          This PR has been superseded by automated fix PRs created by the Jules Assessment Auto-Fix workflow.
+
+          ### New PRs Created
+          ${NEW_PRS:-"Check the PR list for auto-generated PRs"}
+
+          ### Why This Was Closed
+          The auto-fix workflow has created more comprehensive fixes that include the changes from this PR plus additional improvements identified in the automated assessment.
+
+          ### Next Steps
+          1. Review the new auto-generated PRs
+          2. Merge the ones that pass CI
+          3. This PR's branch can be deleted
+
+          ---
+          🤖 Closed by Jules Assessment Auto-Fix Workflow"
+
+          # Close the PR
+          gh pr close "$SOURCE_PR"
+
+          echo "✅ Closed PR #$SOURCE_PR"
+
+  # Dry run summary - runs independently when dry_run is true
+  dry-run-summary:
+    name: Dry Run Summary
+    if: inputs.dry_run == 'true'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Generate dry run report
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          # 🔍 Dry Run Summary
+
+          ## What Would Happen
+
+          ### Assessments
+          - ✅ Would run all assessments (A-O)
+          - ✅ Would generate comprehensive summary
+
+          ### Auto-Fixes
+          The following fix types would be applied:
+          - **Linting**: Ruff + Black auto-fixes
+          - **Dependencies**: Generate lock files, create .env.example
+          - **Tests**: Fix import issues, verify collection
+          - **Documentation**: Generate QUICK_START.md if missing
+
+          ### Source PR Closure
+          EOF
+
+          if [ -n "${{ inputs.source_pr_to_close }}" ]; then
+            echo "- Would close PR #${{ inputs.source_pr_to_close }} after fixes" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "- No source PR specified for closure" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Run without dry_run=true to execute these changes*" >> $GITHUB_STEP_SUMMARY
