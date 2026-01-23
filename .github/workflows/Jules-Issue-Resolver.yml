@@ -191,10 +191,10 @@ jobs:
 
           Co-Authored-By: Jules <jules-bot@users.noreply.github.com>"
             git push origin "$BRANCH_NAME"
-            gh pr create --title "Issue Resolution - $(date +%Y-%m-%d)" \
+            gh pr create --title "[Jules/Issue-Resolver] Issue Resolution - $(date +%Y-%m-%d)" \
               --body "Daily issue resolution from assessments." \
               --label "jules:issue-resolver,automated-fix" || \
-            gh pr create --title "Issue Resolution - $(date +%Y-%m-%d)" \
+            gh pr create --title "[Jules/Issue-Resolver] Issue Resolution - $(date +%Y-%m-%d)" \
               --body "Daily issue resolution from assessments."
 
             # Post-processing: Remove reviewers to reduce noise

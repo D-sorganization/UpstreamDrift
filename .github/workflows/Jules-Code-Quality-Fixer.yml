@@ -171,7 +171,7 @@ jobs:
             git push -u origin "$BRANCH_NAME"
 
             gh pr create \
-              --title "Code Quality Fixes - $(date +%Y-%m-%d)" \
+              --title "[Jules/Code-Quality-Fixer] Code Quality Fixes - $(date +%Y-%m-%d)" \
               --body "Automated code quality fixes" \
               --base main \
               --head "$BRANCH_NAME" \

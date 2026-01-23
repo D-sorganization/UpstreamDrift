@@ -16,48 +16,60 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  actions: read
+  actions: write
 
 jobs:
   create-hotfix:
     runs-on: ubuntu-latest
     steps:
+      - name: Validate failed branch
+        id: branch
+        run: |
+          FAILED_BRANCH='${{ inputs.failed_branch }}'
+          if [ -z "$FAILED_BRANCH" ]; then
+            echo "::error::Failed branch is empty."
+            exit 1
+          fi
+          if ! echo "$FAILED_BRANCH" | grep -Eq '^[A-Za-z0-9._/-]+$'; then
+            echo "::error::Failed branch contains invalid characters."
+            exit 1
+          fi
+          if [[ "$FAILED_BRANCH" == -* ]]; then
+            echo "::error::Failed branch must not start with '-'."
+            exit 1
+          fi
+          echo "failed_branch=$FAILED_BRANCH" >> "$GITHUB_OUTPUT"
+
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch }}
+          ref: ${{ steps.branch.outputs.failed_branch }}
           fetch-depth: 0
 
+      - name: Validate Jules API Key
+        id: jules
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+        run: |
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured. Skipping hotfix automation."
+            echo "enabled=false" >> $GITHUB_OUTPUT
+          else
+            echo "enabled=true" >> $GITHUB_OUTPUT
+          fi
+
       - uses: actions/setup-node@v4
+        if: steps.jules.outputs.enabled == 'true'
         with: { node-version: "20" }
       - run: npm install -g @google/jules
+        if: steps.jules.outputs.enabled == 'true'
       - run: jules auth --token ${{ secrets.JULES_API_KEY }}
-
-      - name: Validate Inputs
-        id: validate
-        env:
-          FAILED_BRANCH: ${{ inputs.failed_branch }}
-          RUN_ID: ${{ inputs.run_id }}
-        run: |
-          # SECURITY: Validate branch name format using environment variables
-          if ! echo "$FAILED_BRANCH" | grep -qE '^[a-zA-Z0-9/_-]+$'; then
-            echo "Invalid branch name format"
-            exit 1
-          fi
-
-          # SECURITY: Validate run_id is numeric
-          if ! echo "$RUN_ID" | grep -qE '^[0-9]+$'; then
-            echo "Invalid run_id format"
-            exit 1
-          fi
-
-          echo "validated=true" >> $GITHUB_OUTPUT
+        if: steps.jules.outputs.enabled == 'true'
 
       - name: Create Hotfix Branch
         id: hotfix
-        if: steps.validate.outputs.validated == 'true'
+        if: steps.jules.outputs.enabled == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FAILED_BRANCH: ${{ inputs.failed_branch }}
         run: |
           TIMESTAMP=$(date +%Y%m%d-%H%M%S)
           HOTFIX_BRANCH="hotfix/ci-fail-${TIMESTAMP}"
@@ -69,155 +81,72 @@ jobs:
           echo "branch=$HOTFIX_BRANCH" >> $GITHUB_OUTPUT
 
       - name: Fetch CI Logs & Auto-Fix
+        if: steps.jules.outputs.enabled == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TARGET_RUN_ID: ${{ inputs.run_id }}
-          FAILED_BRANCH: ${{ inputs.failed_branch }}
-          HOTFIX_BRANCH: ${{ steps.hotfix.outputs.branch }}
         run: |
-          set -e
-          DATE=$(date +%Y-%m-%d)
-          REPO="${{ github.repository }}"
-          API_BASE="https://jules.googleapis.com/v1alpha"
-          
-          # Check if API key is configured
-          if [ -z "$JULES_API_KEY" ]; then
-            echo "::warning::JULES_API_KEY not configured. Skipping Jules task."
-            exit 0
-          fi
-          
-          echo "Looking up repository source..."
-          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
-          
-          OWNER=$(echo "$REPO" | cut -d'/' -f1)
-          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
-          
-          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
-          
-          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
-            echo "::warning::Repository $REPO not found in Jules sources."
-            exit 0
-          fi
-          
-          echo "Found source: $SOURCE_ID"
-          
-          # Create session prompt
-          PROMPT=$(cat << 'PROMPT_EOF'
-          '
-          URGENT: CI failed on protected branch.
-          Analyze the logs and create a minimal hotfix:
-          1. **Formatting & Linting**: Run 'ruff check . --fix' and 'black .'
-          2. **Import Sorting**: Run 'isort --profile black .'
-          3. **Type Errors**: Add missing type hints or proper type ignores
-          4. **Test Failures**: Fix failing tests (fix implementation, not tests)
-          5. **Coverage**: Generate tests if coverage dropped below 80%
-          6. **Syntax**: Fix any syntax errors or missing imports
-          CRITICAL: This is a hotfix. Keep changes minimal and focused.
-          CI Failure Logs:
-          PROMPT_EOF
-          )
-          
-          echo "Creating Jules session..."
-          REQUEST_JSON=$(jq -n \
-            --arg prompt "$PROMPT" \
-            --arg source "$SOURCE_ID" \
-            '{
-              prompt: $prompt,
-              sourceContext: {
-                source: $source,
-                githubRepoContext: {
-                  startingBranch: "main"
-                }
-              },
-              automationMode: "AUTO_CREATE_PR"
-            }')
-          
-          echo "Request: $REQUEST_JSON"
-          
-          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
-            -H "X-Goog-Api-Key: $JULES_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d "$REQUEST_JSON" \
-            "$API_BASE/sessions")
-          
-          SESSION_RESPONSE=$(cat /tmp/session_response.json)
-          echo "HTTP Status: $HTTP_CODE"
-          
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "::error::Jules API returned HTTP $HTTP_CODE"
-            exit 1
-          fi
-          
-          SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
-          echo "Created session: $SESSION_ID"
-          
-          # Poll for completion
-          MAX_WAIT=1800
-          POLL_INTERVAL=30
-          ELAPSED=0
-          
-          while [ $ELAPSED -lt $MAX_WAIT ]; do
-            SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
-            STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
-            echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
-          
-            case "$STATE" in
-              "COMPLETED"|"SUBMITTED")
-                echo "Session completed successfully!"
-                break
-                ;;
-              "FAILED"|"CANCELLED")
-                echo "::error::Session $STATE"
-                exit 1
-                ;;
-            esac
-            sleep $POLL_INTERVAL
-            ELAPSED=$((ELAPSED + POLL_INTERVAL))
-          done
-          
+          HOTFIX_BRANCH="${{ steps.hotfix.outputs.branch }}"
+          FAILED_BRANCH="${{ steps.branch.outputs.failed_branch }}"
+          gh run view $TARGET_RUN_ID --log-failed > logs.txt
 
+          LOG_CONTENT=$(cat logs.txt)
+          PROMPT=$(printf '%s\n' \
+            "URGENT: CI failed on protected branch $FAILED_BRANCH." \
+            "Analyze the logs and create a minimal hotfix:" \
+            "1. **Formatting & Linting**: Run 'ruff check . --fix' and 'black .'" \
+            "2. **Import Sorting**: Run 'isort --profile black .'" \
+            "3. **Type Errors**: Add missing type hints or proper type ignores" \
+            "4. **Test Failures**: Fix failing tests (fix implementation, not tests)" \
+            "5. **Coverage**: Generate tests if coverage dropped below 80%" \
+            "6. **Syntax**: Fix any syntax errors or missing imports" \
+            "CRITICAL: This is a hotfix for $FAILED_BRANCH. Keep changes minimal and focused." \
+            "CI Failure Logs:" \
+            "$LOG_CONTENT")
+          jules task fix --branch "$HOTFIX_BRANCH" --prompt "$PROMPT"
 
       - name: Create Urgent PR
+        if: steps.jules.outputs.enabled == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FAILED_BRANCH: ${{ inputs.failed_branch }}
-          HOTFIX_BRANCH: ${{ steps.hotfix.outputs.branch }}
-          RUN_ID: ${{ inputs.run_id }}
-          REPO_URL: ${{ github.server_url }}/${{ github.repository }}
         run: |
-          # SECURITY: Use environment variables for all user inputs
+          HOTFIX_BRANCH="${{ steps.hotfix.outputs.branch }}"
+          FAILED_BRANCH="${{ steps.branch.outputs.failed_branch }}"
+
           gh pr create \
             --base "$FAILED_BRANCH" \
             --head "$HOTFIX_BRANCH" \
-            --title "🚨 Urgent: Fix CI failure on protected branch" \
+            --title "[Jules/Hotfix-Creator] 🚨 Urgent: Fix CI failure on $FAILED_BRANCH" \
             --label "urgent,auto-fix,hotfix" \
-            --body "## 🚨 Automated Hotfix for Protected Branch
-
-            **Failed Branch:** \`$FAILED_BRANCH\`
-            **CI Run:** $REPO_URL/actions/runs/$RUN_ID
-            **Created By:** Jules Hotfix-Creator
-
-            ### Summary
-            CI failed on the protected branch. This automated hotfix attempts to resolve the issues.
-
-            ### Changes
-            Jules Auto-Repair has analyzed the CI failure logs and applied fixes for:
-            - Code formatting and linting issues
-            - Type checking errors
-            - Test failures
-            - Coverage gaps
-            - Syntax errors
-
-            ### Review Checklist
-            - [ ] Verify all CI checks pass
-            - [ ] Review changes are minimal and focused
-            - [ ] Confirm no unintended side effects
-            - [ ] Merge immediately if changes look correct
-
-            ### Next Steps
-            1. Review the changes in this PR
-            2. If acceptable, merge immediately to restore the branch
-            3. If issues remain, manually fix and push to this branch
-
-            ---
-            *This is an automated hotfix. Please review carefully before merging.*"
+            --body "$(printf '%s\n' \
+            "## Automated Hotfix for Protected Branch" \
+            "" \
+            "**Failed Branch:** $FAILED_BRANCH" \
+            "**CI Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run_id }}" \
+            "**Created By:** Jules Hotfix-Creator" \
+            "" \
+            "### Summary" \
+            "CI failed on the protected branch $FAILED_BRANCH. This automated hotfix attempts to resolve the issues." \
+            "" \
+            "### Changes" \
+            "Jules Auto-Repair has analyzed the CI failure logs and applied fixes for:" \
+            "- Code formatting and linting issues" \
+            "- Type checking errors" \
+            "- Test failures" \
+            "- Coverage gaps" \
+            "- Syntax errors" \
+            "" \
+            "### Review Checklist" \
+            "- [ ] Verify all CI checks pass" \
+            "- [ ] Review changes are minimal and focused" \
+            "- [ ] Confirm no unintended side effects" \
+            "- [ ] Merge immediately if changes look correct" \
+            "" \
+            "### Next Steps" \
+            "1. Review the changes in this PR" \
+            "2. If acceptable, merge immediately to restore ${{ inputs.failed_branch }}" \
+            "3. If issues remain, manually fix and push to this branch" \
+            "" \
+            "---" \
+            "This is an automated hotfix. Please review carefully before merging." \
+            )"
