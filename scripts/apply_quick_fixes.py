@@ -9,6 +9,7 @@ Current fixes:
 import os
 from pathlib import Path
 
+
 def add_missing_init_files():
     """Add missing __init__.py files to package directories."""
 
@@ -55,6 +56,7 @@ def add_missing_init_files():
                     print(f"Error creating {init_path}: {e}")
 
     print(f"\nTotal fixed: {fixed_count} missing __init__.py files.")
+
 
 if __name__ == "__main__":
     add_missing_init_files()
