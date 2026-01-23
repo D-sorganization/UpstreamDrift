@@ -170,10 +170,12 @@ class ModelLibrary:
                 bundled_name = model_key.replace("_with_", "_subject_with_")
                 if bundled.is_model_bundled("human_models", bundled_name):
                     logger.info(f"Using bundled model: {bundled_name}")
-                    return bundled.get_human_model_path(bundled_name)
+                    path = bundled.get_human_model_path(bundled_name)
+                    return path  # type: ignore[no-any-return]
                 if bundled.is_model_bundled("human_models", model_key):
                     logger.info(f"Using bundled model: {model_key}")
-                    return bundled.get_human_model_path(model_key)
+                    path = bundled.get_human_model_path(model_key)
+                    return path  # type: ignore[no-any-return]
             except Exception as e:
                 logger.debug(f"Bundled asset check failed: {e}")
 
