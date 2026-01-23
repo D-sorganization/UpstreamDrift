@@ -65,9 +65,9 @@ class TestLauncherIntegration(unittest.TestCase):
     def test_shared_modules_importable(self):
         """Test that shared modules can be imported."""
         try:
-            from shared.python.configuration_manager import ConfigurationManager
-            from shared.python.engine_manager import EngineManager
-            from shared.python.process_worker import ProcessWorker
+            from src.shared.python.configuration_manager import ConfigurationManager
+            from src.shared.python.engine_manager import EngineManager
+            from src.shared.python.process_worker import ProcessWorker
 
             # Test basic instantiation with required arguments
             config_manager = ConfigurationManager(Path("dummy_config.json"))
@@ -87,7 +87,7 @@ class TestLauncherIntegration(unittest.TestCase):
     def test_engine_discovery(self):
         """Test that engines are discovered correctly."""
         try:
-            from shared.python.engine_manager import EngineManager
+            from src.shared.python.engine_manager import EngineManager
 
             manager = EngineManager()
             engines = manager.get_available_engines()
@@ -117,7 +117,7 @@ class TestLauncherIntegration(unittest.TestCase):
         the launcher UI code. Consider using setObjectName() in future refactors.
         """
         try:
-            from launchers.golf_launcher import GRID_COLUMNS, MODEL_IMAGES
+            from src.launchers.golf_launcher import GRID_COLUMNS, MODEL_IMAGES
 
             self.assertEqual(GRID_COLUMNS, 4, "Grid should be 3x4")
             self.assertIn(
@@ -132,7 +132,7 @@ class TestLauncherIntegration(unittest.TestCase):
     def test_urdf_generator_engine_support(self):
         """Test URDF generator multi-engine support."""
         try:
-            from tools.urdf_generator.segment_manager import SegmentManager
+            from src.tools.urdf_generator.segment_manager import SegmentManager
 
             manager = SegmentManager()
 

@@ -25,7 +25,7 @@ from src.shared.python.ellipsoid_visualization import (
 )
 
 if TYPE_CHECKING:
-    from shared.python.interfaces import PhysicsEngine
+    from src.shared.python.interfaces import PhysicsEngine
 
 
 class TestEllipsoidComputation:

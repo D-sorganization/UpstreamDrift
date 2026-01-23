@@ -16,7 +16,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 if PYQT6_AVAILABLE:
-    from launchers.unified_launcher import UnifiedLauncher
+    from src.launchers.unified_launcher import UnifiedLauncher
 
 
 @pytest.fixture
@@ -111,7 +111,7 @@ def test_get_version(launcher):
 def test_cli_launch():
     """Test CLI launch function."""
     with patch("launchers.unified_launcher.UnifiedLauncher") as MockLauncher:
-        from launchers.unified_launcher import launch
+        from src.launchers.unified_launcher import launch
 
         MockLauncher.return_value.mainloop.return_value = 0
         assert launch() == 0

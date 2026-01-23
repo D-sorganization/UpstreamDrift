@@ -173,7 +173,7 @@ class TestURDFExporter:
             "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco",
             mock_mujoco,
         ):
-            from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
+            from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
                 URDFExporter,
                 mujoco,
             )

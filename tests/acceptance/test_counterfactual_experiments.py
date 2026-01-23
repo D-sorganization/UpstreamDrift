@@ -20,7 +20,7 @@ import numpy as np
 import pytest
 
 if TYPE_CHECKING:
-    from shared.python.interfaces import PhysicsEngine
+    from src.shared.python.interfaces import PhysicsEngine
 
 LOGGER = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class TestZTCFCounterfactual:
     @pytest.fixture
     def pendulum_engine(self) -> PhysicsEngine:
         """Create a pendulum engine for testing."""
-        from engines.physics_engines.pendulum.python.pendulum_physics_engine import (
+        from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
             PendulumPhysicsEngine,
         )
 
@@ -121,7 +121,7 @@ class TestZVCFCounterfactual:
     @pytest.fixture
     def pendulum_engine(self) -> PhysicsEngine:
         """Create a pendulum engine for testing."""
-        from engines.physics_engines.pendulum.python.pendulum_physics_engine import (
+        from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
             PendulumPhysicsEngine,
         )
 
@@ -208,7 +208,7 @@ class TestCausalDecomposition:
     @pytest.fixture
     def pendulum_engine(self) -> PhysicsEngine:
         """Create a pendulum engine for testing."""
-        from engines.physics_engines.pendulum.python.pendulum_physics_engine import (
+        from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
             PendulumPhysicsEngine,
         )
 
@@ -300,7 +300,7 @@ class TestCounterfactualCrossEngine:
 
         # Always include Pendulum (reference implementation)
         try:
-            from engines.physics_engines.pendulum.python.pendulum_physics_engine import (
+            from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
                 PendulumPhysicsEngine,
             )
 

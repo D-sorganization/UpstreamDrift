@@ -81,7 +81,7 @@ class TestMultiMuscle(unittest.TestCase):
 
     def test_factory_function(self) -> None:
         """Test the elbow muscle system factory."""
-        from shared.python.multi_muscle import create_elbow_muscle_system
+        from src.shared.python.multi_muscle import create_elbow_muscle_system
 
         elbow = create_elbow_muscle_system()
         self.assertIsInstance(elbow, AntagonistPair)

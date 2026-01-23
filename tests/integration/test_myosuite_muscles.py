@@ -44,7 +44,7 @@ class TestMyoSuiteMuscleAnalyzer:
 
             sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
-            from engines.physics_engines.myosuite.python.muscle_analysis import (
+            from src.engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteMuscleAnalyzer,
             )
 
@@ -70,7 +70,7 @@ class TestMyoSuiteMuscleAnalyzer:
 
             sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
-            from engines.physics_engines.myosuite.python.muscle_analysis import (
+            from src.engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteMuscleAnalyzer,
             )
 
@@ -102,7 +102,7 @@ class TestMyoSuiteMuscleAnalyzer:
 
             sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
-            from engines.physics_engines.myosuite.python.muscle_analysis import (
+            from src.engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteMuscleAnalyzer,
             )
 
@@ -130,7 +130,7 @@ class TestMyoSuiteMuscleAnalyzer:
 
             sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
-            from engines.physics_engines.myosuite.python.muscle_analysis import (
+            from src.engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteMuscleAnalyzer,
             )
 
@@ -163,7 +163,7 @@ class TestMyoSuiteMuscleAnalyzer:
 
             sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
-            from engines.physics_engines.myosuite.python.muscle_analysis import (
+            from src.engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteMuscleAnalyzer,
             )
 
@@ -200,7 +200,7 @@ class TestMyoSuiteMuscleAnalyzer:
 
             sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
-            from engines.physics_engines.myosuite.python.muscle_analysis import (
+            from src.engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteMuscleAnalyzer,
             )
 
@@ -245,7 +245,7 @@ class TestMyoSuiteGripModel:
             env.reset()
             sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
-            from engines.physics_engines.myosuite.python.muscle_analysis import (
+            from src.engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteGripModel,
                 MyoSuiteMuscleAnalyzer,
             )
@@ -284,7 +284,7 @@ class TestMyoSuiteGripModel:
 
             sim = env.sim if hasattr(env, "sim") else env.unwrapped.sim
 
-            from engines.physics_engines.myosuite.python.muscle_analysis import (
+            from src.engines.physics_engines.myosuite.python.muscle_analysis import (
                 MyoSuiteGripModel,
                 MyoSuiteMuscleAnalyzer,
             )
@@ -310,7 +310,7 @@ class TestMyoSuiteEngine:
     def test_drift_control_with_muscles(self, myosuite_env_available):
         """Section F + K: Verify drift-control works with muscle model."""
         try:
-            from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+            from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
                 MyoSuitePhysicsEngine,
             )
 
@@ -339,7 +339,7 @@ class TestMyoSuiteEngine:
     def test_muscle_analyzer_integration(self, myosuite_env_available):
         """Section K: Verify engine provides muscle analyzer."""
         try:
-            from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+            from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
                 MyoSuitePhysicsEngine,
             )
 
@@ -360,7 +360,7 @@ class TestMyoSuiteEngine:
     def test_muscle_activation_setting(self, myosuite_env_available):
         """Section K: Set muscle activations by name."""
         try:
-            from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+            from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
                 MyoSuitePhysicsEngine,
             )
 

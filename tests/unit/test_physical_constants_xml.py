@@ -200,7 +200,7 @@ class TestPhysicalConstantEdgeCases:
 
     def test_very_large_physical_constant(self):
         """Large constants (e.g., speed of light) format correctly."""
-        from shared.python.constants import SPEED_OF_LIGHT_M_S
+        from src.shared.python.constants import SPEED_OF_LIGHT_M_S
 
         xml = f"<speed>{float(SPEED_OF_LIGHT_M_S)}</speed>"
         root = ET.fromstring(xml)

@@ -70,7 +70,7 @@ class TestBasicContactPhysics:
     def test_mujoco_ball_drop_energy_dissipation(self, ball_urdf):
         """Verify MuJoCo contact dissipates energy (ball doesn't bounce forever)."""
         try:
-            from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+            from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
                 MuJoCoPhysicsEngine,
             )
         except ImportError:
@@ -150,7 +150,7 @@ class TestCrossEngineContactComparison:
     def test_mujoco_restitution_coefficient(self, ball_urdf, drop_height):
         """Measure MuJoCo's effective coefficient of restitution at various heights."""
         try:
-            from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+            from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
                 MuJoCoPhysicsEngine,
             )
         except ImportError:

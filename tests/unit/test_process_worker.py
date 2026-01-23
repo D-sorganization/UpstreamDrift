@@ -15,7 +15,7 @@ def mock_pyqt6():
         if "shared.python.process_worker" in sys.modules:
             del sys.modules["shared.python.process_worker"]
 
-        from shared.python.process_worker import ProcessWorker
+        from src.shared.python.process_worker import ProcessWorker
 
         yield ProcessWorker
 

@@ -16,7 +16,7 @@ mock_anthropic_module = MagicMock()
 @pytest.fixture
 def mock_openai_adapter():
     with patch.dict(sys.modules, {"openai": mock_openai_module}):
-        from shared.python.ai.adapters.openai_adapter import OpenAIAdapter
+        from src.shared.python.ai.adapters.openai_adapter import OpenAIAdapter
 
         yield OpenAIAdapter(api_key="test-key")
 
@@ -24,7 +24,7 @@ def mock_openai_adapter():
 @pytest.fixture
 def mock_anthropic_adapter():
     with patch.dict(sys.modules, {"anthropic": mock_anthropic_module}):
-        from shared.python.ai.adapters.anthropic_adapter import AnthropicAdapter
+        from src.shared.python.ai.adapters.anthropic_adapter import AnthropicAdapter
 
         yield AnthropicAdapter(api_key="test-key")
 

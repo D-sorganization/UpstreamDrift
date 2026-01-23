@@ -20,7 +20,7 @@ sys.modules["pydrake.all"] = MagicMock()
 sys.path.insert(0, str(Path(__file__).parents[2]))
 
 try:
-    from engines.physics_engines.drake.python.drake_physics_engine import (
+    from src.engines.physics_engines.drake.python.drake_physics_engine import (
         DrakePhysicsEngine,
     )
 except ImportError:

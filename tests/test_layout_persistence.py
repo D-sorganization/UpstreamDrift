@@ -96,7 +96,7 @@ class TestLayoutPersistence(unittest.TestCase):
 
     def test_config_directory_creation(self):
         """Test that config directory is created if it doesn't exist."""
-        from launchers.golf_launcher import CONFIG_DIR
+        from src.launchers.golf_launcher import CONFIG_DIR
 
         # The constant should point to a valid path structure
         self.assertIsInstance(CONFIG_DIR, Path)
@@ -164,7 +164,7 @@ class TestLayoutConstants(unittest.TestCase):
     def test_config_paths_defined(self):
         """Test that config paths are properly defined."""
         try:
-            from launchers.golf_launcher import CONFIG_DIR, LAYOUT_CONFIG_FILE
+            from src.launchers.golf_launcher import CONFIG_DIR, LAYOUT_CONFIG_FILE
 
             self.assertIsInstance(CONFIG_DIR, Path)
             self.assertIsInstance(LAYOUT_CONFIG_FILE, Path)
@@ -179,7 +179,7 @@ class TestLayoutConstants(unittest.TestCase):
     def test_grid_columns_constant(self):
         """Test that grid columns constant is correct."""
         try:
-            from launchers.golf_launcher import GRID_COLUMNS
+            from src.launchers.golf_launcher import GRID_COLUMNS
 
             self.assertEqual(GRID_COLUMNS, 4, "Grid should be 3x4")
 

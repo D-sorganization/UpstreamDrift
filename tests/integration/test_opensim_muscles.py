@@ -155,7 +155,7 @@ class TestOpenSimMuscleAnalysis:
         model, state = simple_arm_model
 
         try:
-            from engines.physics_engines.opensim.python.muscle_analysis import (
+            from src.engines.physics_engines.opensim.python.muscle_analysis import (
                 OpenSimMuscleAnalyzer,
             )
         except ImportError:
@@ -176,7 +176,7 @@ class TestOpenSimMuscleAnalysis:
         model, state = simple_arm_model
 
         try:
-            from engines.physics_engines.opensim.python.muscle_analysis import (
+            from src.engines.physics_engines.opensim.python.muscle_analysis import (
                 OpenSimMuscleAnalyzer,
             )
         except ImportError:
@@ -200,7 +200,7 @@ class TestOpenSimMuscleAnalysis:
         try:
             import opensim
 
-            from engines.physics_engines.opensim.python.muscle_analysis import (
+            from src.engines.physics_engines.opensim.python.muscle_analysis import (
                 OpenSimMuscleAnalyzer,
             )
         except ImportError:
@@ -227,7 +227,7 @@ class TestOpenSimMuscleAnalysis:
         model, state = simple_arm_model
 
         try:
-            from engines.physics_engines.opensim.python.muscle_analysis import (
+            from src.engines.physics_engines.opensim.python.muscle_analysis import (
                 OpenSimMuscleAnalyzer,
             )
         except ImportError:
@@ -255,7 +255,7 @@ class TestOpenSimEngine:
     def test_bias_force_computation(self):
         """Verify bias force computation uses inverse dynamics."""
         try:
-            from engines.physics_engines.opensim.python.opensim_physics_engine import (
+            from src.engines.physics_engines.opensim.python.opensim_physics_engine import (
                 OpenSimPhysicsEngine,
             )
         except ImportError:
@@ -273,7 +273,7 @@ class TestOpenSimEngine:
     def test_gravity_force_computation(self):
         """Verify gravity force isolation."""
         try:
-            from engines.physics_engines.opensim.python.opensim_physics_engine import (
+            from src.engines.physics_engines.opensim.python.opensim_physics_engine import (
                 OpenSimPhysicsEngine,
             )
         except ImportError:
@@ -288,7 +288,7 @@ class TestOpenSimEngine:
     def test_muscle_analyzer_integration(self):
         """Verify engine provides muscle analyzer."""
         try:
-            from engines.physics_engines.opensim.python.opensim_physics_engine import (
+            from src.engines.physics_engines.opensim.python.opensim_physics_engine import (
                 OpenSimPhysicsEngine,
             )
         except ImportError:
@@ -305,7 +305,7 @@ class TestOpenSimEngine:
         model, state = simple_arm_model
 
         try:
-            from engines.physics_engines.opensim.python.opensim_physics_engine import (
+            from src.engines.physics_engines.opensim.python.opensim_physics_engine import (
                 OpenSimPhysicsEngine,
             )
         except ImportError:
@@ -333,7 +333,7 @@ class TestOpenSimGripModel:
         model, _ = simple_arm_model
 
         try:
-            from engines.physics_engines.opensim.python.muscle_analysis import (
+            from src.engines.physics_engines.opensim.python.muscle_analysis import (
                 OpenSimGripModel,
             )
         except ImportError:
@@ -349,7 +349,7 @@ class TestOpenSimGripModel:
         model, _ = simple_arm_model
 
         try:
-            from engines.physics_engines.opensim.python.muscle_analysis import (
+            from src.engines.physics_engines.opensim.python.muscle_analysis import (
                 OpenSimGripModel,
             )
         except ImportError:

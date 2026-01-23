@@ -10,9 +10,9 @@ import pytest
 
 # Skip if API dependencies not available
 try:
-    from api.models.requests import AnalysisRequest, SimulationRequest
-    from api.services.analysis_service import AnalysisService
-    from api.services.simulation_service import SimulationService
+    from src.api.models.requests import AnalysisRequest, SimulationRequest
+    from src.api.services.analysis_service import AnalysisService
+    from src.api.services.simulation_service import SimulationService
 except ImportError as e:
     pytest.skip(f"Cannot import API services: {e}", allow_module_level=True)
 

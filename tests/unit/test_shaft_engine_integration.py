@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 if TYPE_CHECKING:
-    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
         MuJoCoPhysicsEngine,
     )
 
@@ -32,7 +32,7 @@ class TestMuJoCoShaftIntegration:
         if not MUJOCO_AVAILABLE:
             pytest.skip("MuJoCo not installed")
 
-        from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
             MuJoCoPhysicsEngine,
         )
 
@@ -149,7 +149,7 @@ class TestShaftInterfaceDefault:
 
     def test_interface_default_returns_false(self) -> None:
         """PhysicsEngine default implementation should return False."""
-        from shared.python.interfaces import PhysicsEngine
+        from src.shared.python.interfaces import PhysicsEngine
 
         # Check that the protocol method has a default that returns False
         # This test verifies the interface definition

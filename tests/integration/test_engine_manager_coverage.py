@@ -42,7 +42,7 @@ class TestEngineManagerCoverage:
         mock_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
         # Mock the registry to return a working factory
-        from shared.python.engine_registry import get_registry
+        from src.shared.python.engine_registry import get_registry
 
         registry = get_registry()
         mock_factory = MagicMock()
@@ -78,7 +78,7 @@ class TestEngineManagerCoverage:
         mock_manager.engine_status[EngineType.MUJOCO] = EngineStatus.AVAILABLE
 
         # Mock the registry to return a factory that raises an error
-        from shared.python.engine_registry import get_registry
+        from src.shared.python.engine_registry import get_registry
 
         registry = get_registry()
 
