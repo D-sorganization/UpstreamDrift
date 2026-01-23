@@ -205,7 +205,9 @@ models:
         # initialization while the logic we care about (graceful handling of
         # missing assets) is still executed.
         # Check if we should skip due to CI environment
-        is_ci = os.environ.get("CI") == "true" or os.environ.get("GITHUB_ACTIONS") == "true"
+        is_ci = (
+            os.environ.get("CI") == "true" or os.environ.get("GITHUB_ACTIONS") == "true"
+        )
         has_display = os.environ.get("DISPLAY") is not None
 
         if is_ci and not has_display:
@@ -219,8 +221,14 @@ models:
             patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
             patch("src.launchers.golf_launcher.ASSETS_DIR", new=temp_path),
             patch("launchers.golf_launcher.ASSETS_DIR", new=temp_path),
-            patch("src.shared.python.ai.gui.assistant_panel.AIAssistantPanel", return_value=mock_ai_panel),
-            patch("src.launchers.golf_launcher.AIAssistantPanel", return_value=mock_ai_panel),
+            patch(
+                "src.shared.python.ai.gui.assistant_panel.AIAssistantPanel",
+                return_value=mock_ai_panel,
+            ),
+            patch(
+                "src.launchers.golf_launcher.AIAssistantPanel",
+                return_value=mock_ai_panel,
+            ),
         ):
             MockRegistry.return_value = temp_registry
 
