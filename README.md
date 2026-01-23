@@ -93,6 +93,17 @@ export GOLF_USE_MOCK_ENGINE=1
 
 📖 **Troubleshooting**: See [docs/troubleshooting/installation.md](docs/troubleshooting/installation.md) for common issues.
 
+### Development Setup
+
+Use the Makefile for common development tasks:
+
+```bash
+make help      # Show available targets
+make install   # Install dependencies
+make check     # Run linters and tests
+make format    # Format code with black and ruff
+```
+
 ### Launching the Suite
 
 ```bash

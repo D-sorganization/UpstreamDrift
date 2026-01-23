@@ -33,12 +33,26 @@ pip install -e ".[dev]"
 
 - **Formatter**: Black (default settings)
 - **Linter**: Ruff
-- **Type Checker**: MyPy (strict mode)
-- Use type hints for all functions
+- **Type Checker**: MyPy (see note below)
+- Use type hints for all new functions
 - Use `logging` instead of `print()`
 - Follow existing patterns in the codebase
 
+> **Note on Type Checking**: While MyPy is part of our quality toolchain, strict type checking
+> is not yet fully enforced across the legacy codebase. New code should include type hints.
+
 ### Before Committing
+
+Use the Makefile for convenience:
+
+```bash
+make format   # Format with black and ruff
+make lint     # Run ruff and mypy
+make test     # Run pytest
+make check    # Run all checks
+```
+
+Or run commands directly:
 
 ```bash
 python3 -m black .
