@@ -1,5 +1,4 @@
 import numpy as np
-
 from shared.python.dashboard.recorder import GenericPhysicsRecorder
 from shared.python.interfaces import PhysicsEngine
 

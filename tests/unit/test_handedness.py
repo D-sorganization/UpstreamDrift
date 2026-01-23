@@ -4,7 +4,6 @@ Task 3.4: Handedness Integration tests.
 """
 
 import pytest
-
 from tools.urdf_generator.urdf_builder import Handedness, URDFBuilder
 
 

@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from shared.python.manipulability import (
     CATASTROPHIC_SINGULARITY_THRESHOLD,
     SINGULARITY_FALLBACK_THRESHOLD,

@@ -20,7 +20,7 @@
 # See the License for the specific language governing permissions and         #
 # limitations under the License.                                              #
 # --------------------------------------------------------------------------- #
-# Get a handle to the current model and create a new copy 
+# Get a handle to the current model and create a new copy
 baseModel = getCurrentModel()
 ankleSpringModel = baseModel.clone()
 ankleSpringModel.setName(baseModel.getName()+'_ankle_spring')

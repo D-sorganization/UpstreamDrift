@@ -1,7 +1,6 @@
 """Unit tests for shared biomechanics data structures."""
 
 import numpy as np
-
 from shared.python.biomechanics_data import BiomechanicalData
 from shared.python.constants import GRAVITY_M_S2
 

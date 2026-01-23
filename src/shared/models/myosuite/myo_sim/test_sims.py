@@ -1,5 +1,6 @@
-import unittest
 import os
+import unittest
+
 import mujoco
 
 model_paths = [
@@ -66,7 +67,7 @@ class TestSims(unittest.TestCase):
             else:
                 fullpath = os.path.join(os.path.dirname(__file__), model_path)
             if not os.path.exists(fullpath):
-                raise IOError("File %s does not exist" % fullpath)
+                raise OSError(f"File {fullpath} does not exist")
 
             # load model
             if model_path.endswith(".mjb"):
@@ -86,7 +87,7 @@ class TestSims(unittest.TestCase):
     def test_sims(self):
 
         for model_path in model_paths:
-            print("Testing: {}".format(model_path))
+            print(f"Testing: {model_path}")
             self.get_sim(model_path)
 
 

@@ -75,51 +75,37 @@ class UnifiedLauncher:
 
         manager = EngineManager()
 
-        print("\n" + "=" * 60)
-        print("Golf Modeling Suite - Status Report")
-        print("=" * 60 + "\n")
 
         # Show available engines
-        print("Available Engines:")
-        print("-" * 60)
 
         engines = manager.get_available_engines()
         if engines:
-            for engine in engines:
-                print(f"  [OK] {engine.value.upper()}")
+            for _engine in engines:
+                pass
         else:
-            print("  [MISSING] No engines available")
+            pass
 
-        print()
 
         # Show suite root
         from shared.python import SUITE_ROOT
 
-        print(f"Suite Root: {SUITE_ROOT}")
-        print()
 
         # Show launcher paths
-        print("Launcher Paths:")
-        print("-" * 60)
 
         launcher_dir = Path(__file__).parent
         for launcher_file in launcher_dir.glob("*_launcher.py"):
             if launcher_file.name != "unified_launcher.py":
-                print(f"  • {launcher_file.name}")
+                pass
 
-        print()
 
         # Show engine directories
-        print("Engine Directories:")
-        print("-" * 60)
 
         engines_dir = SUITE_ROOT / "engines"
         if engines_dir.exists():
             for engine_dir in engines_dir.iterdir():
                 if engine_dir.is_dir() and not engine_dir.name.startswith("."):
-                    print(f"  • {engine_dir.name}")
+                    pass
 
-        print("\n" + "=" * 60 + "\n")
 
     def get_version(self) -> str:
         """Get suite version from package metadata.
@@ -167,7 +153,6 @@ def launch() -> int:
         Exit code
     """
     if not PYQT_AVAILABLE:
-        print("Error: PyQt6 is required. Install with: pip install PyQt6")
         return 1
 
     # Delegate directly to golf_launcher.main() for async startup

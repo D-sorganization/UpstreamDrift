@@ -238,12 +238,12 @@ def validate_physical_bounds(func: F) -> F:
                 continue
 
             # Mass validation
-            if "mass" in param_name.lower() and isinstance(param_value, (int, float)):
+            if "mass" in param_name.lower() and isinstance(param_value, int | float):
                 validate_mass(float(param_value), param_name)
 
             # Timestep validation
             if param_name in ("dt", "timestep") and isinstance(
-                param_value, (int, float)
+                param_value, int | float
             ):
                 validate_timestep(float(param_value))
 
@@ -262,7 +262,7 @@ def validate_physical_bounds(func: F) -> F:
 
             # Friction validation
             if "friction" in param_name.lower() and isinstance(
-                param_value, (int, float)
+                param_value, int | float
             ):
                 validate_friction_coefficient(float(param_value), param_name)
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from shared.python.ai.tool_registry import (
     Tool,
     ToolCategory,

@@ -1,11 +1,11 @@
 """Unit tests for CRBA algorithm."""
 
 import numpy as np
+from shared.python.constants import GRAVITY_M_S2
 
 from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.crba import (
     crba,
 )
-from shared.python.constants import GRAVITY_M_S2
 
 
 def create_random_model(num_bodies=5):

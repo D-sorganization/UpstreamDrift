@@ -6,7 +6,6 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
-
 from shared.python.common_utils import (
     convert_units,
     ensure_output_dir,

@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
-
 from shared.python.output_manager import (
     OutputFormat,
     OutputManager,

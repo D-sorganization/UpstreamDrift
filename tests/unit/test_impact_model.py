@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from shared.python.impact_model import (
     GOLF_BALL_MASS,
     GOLF_BALL_RADIUS,

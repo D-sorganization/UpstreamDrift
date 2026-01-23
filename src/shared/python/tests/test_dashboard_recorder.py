@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from shared.python.dashboard.recorder import GenericPhysicsRecorder
 from shared.python.interfaces import PhysicsEngine
 

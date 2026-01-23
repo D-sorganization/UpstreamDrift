@@ -1,5 +1,4 @@
 import pytest
-
 from shared.python.ai.tool_registry import ToolCategory, ToolRegistry
 
 

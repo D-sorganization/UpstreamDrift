@@ -21,7 +21,6 @@ Source: Classical Mechanics (Goldstein, 3rd ed.), Section 1.5
 
 import numpy as np
 import pytest
-
 from shared.python.constants import GRAVITY_M_S2
 
 # Try to import pendulum engine, skip tests if not available

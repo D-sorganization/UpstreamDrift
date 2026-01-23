@@ -5,7 +5,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from shared.python.common_utils import GolfModelingError
 from shared.python.engine_loaders import (
     LOADER_MAP,

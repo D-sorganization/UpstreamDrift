@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-
 from shared.python.engine_manager import EngineManager
 from shared.python.engine_registry import EngineType
 from shared.python.interfaces import PhysicsEngine

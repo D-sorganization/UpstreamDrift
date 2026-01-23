@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
-
 from shared.python.constants import GRAVITY_M_S2
 
 

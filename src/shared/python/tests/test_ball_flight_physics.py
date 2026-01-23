@@ -1,5 +1,4 @@
 import numpy as np
-
 from shared.python.ball_flight_physics import (
     BallFlightSimulator,
     BallProperties,

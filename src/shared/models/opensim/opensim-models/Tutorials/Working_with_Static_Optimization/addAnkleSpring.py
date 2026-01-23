@@ -1,4 +1,4 @@
-# Get a handle to the current model and create a new copy 
+# Get a handle to the current model and create a new copy
 baseModel = getCurrentModel()
 ankleSpringModel = baseModel.clone()
 ankleSpringModel.setName(baseModel.getName()+'_ankle_spring')

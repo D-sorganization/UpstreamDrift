@@ -15,7 +15,6 @@ from typing import Any
 
 import cv2
 import numpy as np
-
 from shared.python.marker_mapping import MarkerToModelMapper, RegistrationResult
 from shared.python.output_manager import OutputManager
 from shared.python.pose_estimation.interface import PoseEstimationResult, PoseEstimator

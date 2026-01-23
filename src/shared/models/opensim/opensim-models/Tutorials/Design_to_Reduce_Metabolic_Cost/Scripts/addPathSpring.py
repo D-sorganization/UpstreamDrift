@@ -20,7 +20,7 @@
 # See the License for the specific language governing permissions and         #
 # limitations under the License.                                              #
 # --------------------------------------------------------------------------- #
-# Get a handle to the current model and create a new copy 
+# Get a handle to the current model and create a new copy
 baseModel = getCurrentModel()
 pathSpringModel = baseModel.clone()
 pathSpringModel.setName(baseModel.getName()+'_path_spring')

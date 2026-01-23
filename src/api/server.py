@@ -21,6 +21,7 @@ try:
     from datetime import UTC
 except ImportError:
     UTC = timezone.utc  # noqa: UP017
+
 from collections.abc import Awaitable, Callable
 from pathlib import Path
 from typing import Any, cast
@@ -34,9 +35,12 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from shared.python.engine_manager import EngineManager
-from shared.python.engine_registry import EngineType
-from shared.python.video_pose_pipeline import VideoPosePipeline, VideoProcessingConfig
+from src.shared.python.engine_manager import EngineManager
+from src.shared.python.engine_registry import EngineType
+from src.shared.python.video_pose_pipeline import (
+    VideoPosePipeline,
+    VideoProcessingConfig,
+)
 
 from .database import init_db
 from .models.requests import (

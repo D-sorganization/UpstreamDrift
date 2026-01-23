@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-
 from shared.python import constants
 
 # Configure logging

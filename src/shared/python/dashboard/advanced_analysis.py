@@ -15,7 +15,6 @@ import logging
 
 import numpy as np
 from PyQt6 import QtWidgets
-
 from shared.python.interfaces import RecorderInterface
 from shared.python.plotting import MplCanvas
 from shared.python.signal_processing import (

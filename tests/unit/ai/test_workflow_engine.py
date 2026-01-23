@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from shared.python.ai.exceptions import WorkflowError
 from shared.python.ai.tool_registry import ToolRegistry
 from shared.python.ai.types import ConversationContext, ExpertiseLevel

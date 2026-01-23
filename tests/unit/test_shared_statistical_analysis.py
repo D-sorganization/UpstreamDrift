@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from shared.python.statistical_analysis import StatisticalAnalyzer, SwingPhase
 
 

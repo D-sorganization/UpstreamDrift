@@ -65,7 +65,6 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-
 from shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
@@ -1614,7 +1613,7 @@ class GolfLauncher(QMainWindow):
             if hasattr(current_width, "return_value"):  # Handle MagicMock
                 current_width = 1280
             width = (
-                int(current_width) if isinstance(current_width, (int, float)) else 1280
+                int(current_width) if isinstance(current_width, int | float) else 1280
             )
 
             w = width if width > 100 else 1280
@@ -1624,7 +1623,7 @@ class GolfLauncher(QMainWindow):
             if hasattr(current_height, "return_value"):  # Handle MagicMock
                 current_height = 800
             height = (
-                int(current_height) if isinstance(current_height, (int, float)) else 800
+                int(current_height) if isinstance(current_height, int | float) else 800
             )
             h = height if height > 100 else 800
 
@@ -1632,25 +1631,25 @@ class GolfLauncher(QMainWindow):
             screen_x = screen_geo.x()
             if hasattr(screen_x, "return_value"):
                 screen_x = 0
-            screen_x = int(screen_x) if isinstance(screen_x, (int, float)) else 0
+            screen_x = int(screen_x) if isinstance(screen_x, int | float) else 0
 
             screen_y = screen_geo.y()
             if hasattr(screen_y, "return_value"):
                 screen_y = 0
-            screen_y = int(screen_y) if isinstance(screen_y, (int, float)) else 0
+            screen_y = int(screen_y) if isinstance(screen_y, int | float) else 0
 
             screen_width = screen_geo.width()
             if hasattr(screen_width, "return_value"):
                 screen_width = 1920
             screen_width = (
-                int(screen_width) if isinstance(screen_width, (int, float)) else 1920
+                int(screen_width) if isinstance(screen_width, int | float) else 1920
             )
 
             screen_height = screen_geo.height()
             if hasattr(screen_height, "return_value"):
                 screen_height = 1080
             screen_height = (
-                int(screen_height) if isinstance(screen_height, (int, float)) else 1080
+                int(screen_height) if isinstance(screen_height, int | float) else 1080
             )
 
             x = screen_x + (screen_width - w) // 2

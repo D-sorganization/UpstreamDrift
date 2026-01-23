@@ -3,7 +3,6 @@
 import math
 
 import pytest
-
 from shared.python.flight_model_options import (
     DEFAULT_OPTIONS,
     FlightModelOptions,

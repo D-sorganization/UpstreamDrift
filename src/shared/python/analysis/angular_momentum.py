@@ -1,7 +1,6 @@
 """Angular momentum metrics analysis module."""
 
 import numpy as np
-
 from shared.python.analysis.dataclasses import AngularMomentumMetrics
 
 

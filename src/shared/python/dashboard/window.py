@@ -13,7 +13,6 @@ import logging
 
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
-
 from shared.python.dashboard.recorder import GenericPhysicsRecorder
 from shared.python.dashboard.runner import SimulationRunner
 from shared.python.dashboard.widgets import ControlPanel, LivePlotWidget

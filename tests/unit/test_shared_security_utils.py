@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pytest
-
 from shared.python.security_utils import validate_path
 
 

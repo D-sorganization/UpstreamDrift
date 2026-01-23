@@ -9,7 +9,6 @@ import logging
 from typing import Any, cast
 
 import numpy as np
-
 from shared.python.interfaces import PhysicsEngine
 
 LOGGER = logging.getLogger(__name__)
