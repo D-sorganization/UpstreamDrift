@@ -166,7 +166,7 @@
 | `./engines/pendulum_models/tools/scientific_auditor.py` | 52 | main |
 
 ## Recommended Implementation Order
-1. Address Critical Incomplete items in `shared/python` and `engines/`.
+1. Address Critical Incomplete items in `src/shared/python` and `src/engines/`.
 2. Fill in missing features marked with TODO in core logic.
 3. Resolve Technical Debt (FIXME) to ensure stability.
 4. Add docstrings to public interfaces.
@@ -174,19 +174,17 @@
 ## Issues to be Created
 The following critical items block core functionality and require issues with label 'incomplete-implementation,critical':
 
-Run the following commands to create issues (if configured):
+The following issue files were created in `docs/assessments/issues/`:
 
-```bash
-gh issue create --title "[Incomplete] Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_gui_application.py:279" --body "Found Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/integrated_golf_gui_r0/golf_gui_application.py at line 279.\nContext: _on_position_changed" --label "incomplete-implementation,critical"
-gh issue create --title "[Incomplete] Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:138" --body "Found Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py at line 138.\nContext: _calculate_scaling_factors" --label "incomplete-implementation,critical"
-gh issue create --title "[Incomplete] Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:359" --body "Found Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py at line 359.\nContext: _compile_ground_shaders" --label "incomplete-implementation,critical"
-gh issue create --title "[Incomplete] Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:417" --body "Found Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py at line 417.\nContext: _create_sphere_geometry" --label "incomplete-implementation,critical"
-gh issue create --title "[Incomplete] Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:422" --body "Found Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py at line 422.\nContext: _create_club_geometry" --label "incomplete-implementation,critical"
-gh issue create --title "[Incomplete] Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:428" --body "Found Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py at line 428.\nContext: _create_arrow_geometry" --label "incomplete-implementation,critical"
-gh issue create --title "[Incomplete] Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py:433" --body "Found Stub in ./engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/Simscape Multibody Data Plotters/Python Version/golf_gui_r0/golf_visualizer_implementation.py at line 433.\nContext: _setup_lighting" --label "incomplete-implementation,critical"
-gh issue create --title "[Incomplete] Stub in ./engines/physics_engines/mujoco/python/humanoid_launcher.py:147" --body "Found Stub in ./engines/physics_engines/mujoco/python/humanoid_launcher.py at line 147.\nContext: set_analysis_config" --label "incomplete-implementation,critical"
-gh issue create --title "[Incomplete] Stub in ./engines/physics_engines/mujoco/python/humanoid_launcher.py:732" --body "Found Stub in ./engines/physics_engines/mujoco/python/humanoid_launcher.py at line 732.\nContext: load_config" --label "incomplete-implementation,critical"
-gh issue create --title "[Incomplete] Stub in ./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py:70" --body "Found Stub in ./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py at line 70.\nContext: control" --label "incomplete-implementation,critical"
-```
+- Created `docs/assessments/issues/Issue_021_Incomplete_Stub_in_golf_gui_application_py.md`
+- Created `docs/assessments/issues/Issue_022_Incomplete_Stub_in_golf_visualizer_implementation_py.md`
+- Created `docs/assessments/issues/Issue_023_Incomplete_Stub_in_golf_visualizer_implementation_py.md`
+- Created `docs/assessments/issues/Issue_024_Incomplete_Stub_in_golf_visualizer_implementation_py.md`
+- Created `docs/assessments/issues/Issue_025_Incomplete_Stub_in_golf_visualizer_implementation_py.md`
+- Created `docs/assessments/issues/Issue_026_Incomplete_Stub_in_golf_visualizer_implementation_py.md`
+- Created `docs/assessments/issues/Issue_027_Incomplete_Stub_in_golf_visualizer_implementation_py.md`
+- Created `docs/assessments/issues/Issue_028_Incomplete_Stub_in_humanoid_launcher_py.md`
+- Created `docs/assessments/issues/Issue_029_Incomplete_Stub_in_humanoid_launcher_py.md`
+- Created `docs/assessments/issues/Issue_030_Incomplete_Stub_in_examples_chaotic_pendulum_py.md`
 
-*(...and 70 more)*
+*(...and 70 more skipped to avoid flooding)*
