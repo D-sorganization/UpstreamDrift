@@ -72,7 +72,7 @@ dev = [
     "pytest-xdist>=3.5.0",    # Parallel test execution for faster CI
     "httpx>=0.25.0",  # Required for FastAPI TestClient
     "pip-audit>=2.7.0",
-    "ruff==0.14.10",
+    "ruff==0.14.14",
     "black>=24.4.2",
     "mypy>=1.10.0",
     "pre-commit>=4.0.0",
