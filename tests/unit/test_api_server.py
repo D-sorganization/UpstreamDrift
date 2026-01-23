@@ -14,6 +14,7 @@ adversarial review (2026-01-13).
 import tempfile
 from collections.abc import Generator
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -29,10 +30,17 @@ except ImportError as e:
     pytest.skip(f"Cannot import api.server: {e}", allow_module_level=True)
 
 
+@pytest.fixture(autouse=True)
+def mock_video_pipeline():
+    """Mock VideoPosePipeline to avoid MediaPipe dependency."""
+    with patch("src.api.server.VideoPosePipeline") as mock:
+        yield mock
+
+
 @pytest.fixture
 def client() -> Generator[TestClient, None, None]:
     """Create a test client for the API."""
-    with TestClient(app) as test_client:
+    with TestClient(app, base_url="http://localhost") as test_client:
         yield test_client
 
 
@@ -124,6 +132,13 @@ class TestExportEndpoints:
         """Test exporting non-existent task."""
         response = client.get("/export/non-existent-task-id")
         assert response.status_code == 404
+
+    def test_export_invalid_format(self, client: TestClient) -> None:
+        """Test exporting with invalid format."""
+        # 'csv' is currently not supported (VALID_EXPORT_FORMATS = {'json'})
+        response = client.get("/export/some-task?format=csv")
+        assert response.status_code == 400
+        assert "Invalid format" in response.json()["detail"]
 
 
 class TestSecurityFeatures:
