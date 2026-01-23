@@ -29,9 +29,28 @@ permissions:
   pull-requests: read
   issues: write
 
+# HARDENING: Prevent concurrent runs and limit frequency
+concurrency:
+  group: comment-to-issue-${{ github.repository }}
+  cancel-in-progress: false
+
+env:
+  # HARDENING: Rate limit - max issues to create per run
+  MAX_ISSUES_PER_RUN: 5
+
 jobs:
   process-comments:
     runs-on: ubuntu-latest
+    # HARDENING: Skip bot-triggered events to prevent cascades
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.actor != 'github-actions[bot]' &&
+       github.actor != 'dependabot[bot]' &&
+       github.actor != 'renovate[bot]' &&
+       github.actor != 'jules-bot' &&
+       github.actor != 'jules-ai[bot]' &&
+       github.actor != 'google-labs-jules' &&
+       github.actor != 'copilot-pull-request-reviewer[bot]')
     steps:
       - uses: actions/checkout@v4
         with:
@@ -39,7 +58,7 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: "3.11"
 
       - name: Collect Review Comments
         id: collect
@@ -188,29 +207,29 @@ jobs:
 
                       issue_body = f"""## Review Comment from {source}
 
-                      **Source PR:** #{pr_num} - {pr_title}
-                      **File:** `{file_path}` (line {line})
-                      **Original Comment:** {html_url}
+**Source PR:** #{pr_num} - {pr_title}
+**File:** `{file_path}` (line {line})
+**Original Comment:** {html_url}
 
-                      ---
+---
 
-                      ### Feedback
+### Feedback
 
-                      {body}
+{body}
 
-                      ---
+---
 
-                      ### Context
+### Context
 
-                      - **PR Author:** @{pr_author}
-                      - **Branch:** `{pr_branch}`
-                      - **Reviewed by:** {author}
-                      - **Date:** {created_at}
+- **PR Author:** @{pr_author}
+- **Branch:** `{pr_branch}`
+- **Reviewed by:** {author}
+- **Date:** {created_at}
 
-                      ---
+---
 
-                      *This issue was auto-generated from a PR review comment.*
-                      """
+*This issue was auto-generated from a PR review comment.*
+"""
 
                       # Create the issue
                       try:

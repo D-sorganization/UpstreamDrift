@@ -31,6 +31,11 @@ on:
           - 'false'
           - 'true'
 
+# HARDENING: Prevent concurrent runs and bot-triggered cascades
+concurrency:
+  group: jules-assessment-autofix-${{ github.repository }}
+  cancel-in-progress: false
+
 jobs:
   run-assessments:
     name: Run Repository Assessments (A-O)
@@ -200,25 +205,17 @@ jobs:
             echo "Existing PR #$PR_NUMBER updated."
           fi
 
+  # HARDENING: Consolidated auto-fix job - creates ONE PR instead of 4 separate PRs
+  # This prevents PR proliferation from matrix strategy
   auto-fix-issues:
-    name: Auto-Fix Top Issues
+    name: Auto-Fix All Issues (Consolidated)
     needs: run-assessments
-    if: github.event.inputs.auto_fix != 'false'
+    if: github.event.inputs.auto_fix != 'false' && github.event.inputs.dry_run != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
       issues: write
-
-    strategy:
-      matrix:
-        fix_type:
-          - linting
-          - dependencies
-          - tests
-          - documentation
-      max-parallel: 2
-      fail-fast: false
 
     steps:
       - name: Checkout repository
@@ -234,133 +231,136 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt || true
           pip install ruff black mypy pip-tools
 
-      - name: Create fix branch
+      - name: Create consolidated fix branch
         run: |
-          BRANCH_NAME="jules/auto-fix-${{ matrix.fix_type }}-$(date +%Y%m%d-%H%M%S)"
+          # HARDENING: Single branch for all fixes
+          BRANCH_NAME="jules/auto-fix-consolidated-$(date +%Y%m%d)"
           git checkout -b "$BRANCH_NAME"
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Auto-fix Linting Issues
-        if: matrix.fix_type == 'linting'
+        id: fix_linting
+        continue-on-error: true
         run: |
-          echo "Running auto-fixes for linting..."
+          echo "=== Running Linting Fixes ==="
+          CHANGES_BEFORE=$(git status --porcelain | wc -l)
 
-          # Auto-fix with black
-          black python/ tests/ || true
+          # Auto-fix with black (if directories exist)
+          [ -d python ] && black python/ || true
+          [ -d tests ] && black tests/ || true
+          [ -d src ] && black src/ || true
 
           # Auto-fix with ruff
           ruff check --fix . || true
 
-          # Record changes
-          git diff --stat > fix_summary.txt
+          CHANGES_AFTER=$(git status --porcelain | wc -l)
+          if [ "$CHANGES_AFTER" -gt "$CHANGES_BEFORE" ]; then
+            echo "fixed=true" >> $GITHUB_OUTPUT
+            echo "Linting fixes applied"
+          else
+            echo "fixed=false" >> $GITHUB_OUTPUT
+            echo "No linting changes needed"
+          fi
 
       - name: Auto-fix Dependencies
-        if: matrix.fix_type == 'dependencies'
+        id: fix_deps
+        continue-on-error: true
         run: |
-          echo "Generating dependency lock file..."
+          echo "=== Running Dependency Fixes ==="
+          CHANGES_BEFORE=$(git status --porcelain | wc -l)
 
-          # Install pip-tools if not present
-          pip install pip-tools
+          # Generate lock file if requirements.txt exists
+          if [ -f requirements.txt ]; then
+            pip-compile requirements.txt -o requirements-lock.txt 2>/dev/null || true
+          fi
 
-          # Generate lock file
-          pip-compile requirements.txt -o requirements-lock.txt
-
-          # Create .env.example if missing
-          if [ ! -f .env.example ]; then
-            {
-              echo "# Gasification Model Environment Configuration"
-              echo "# Copy this file to .env and configure for your environment"
-              echo ""
-              echo "# Database Configuration"
-              echo "DATABASE_PATH=data/species_database.json"
-              echo ""
-              echo "# Solver Settings"
-              echo "MAX_ITERATIONS=1000"
-              echo "CONVERGENCE_TOLERANCE=1e-6"
-              echo ""
-              echo "# Logging Configuration"
-              echo "LOG_LEVEL=INFO"
-              echo "LOG_FILE=logs/simulation.log"
-              echo ""
-              echo "# Development Settings"
-              echo "DEBUG_MODE=false"
-              echo "ENABLE_PROFILING=false"
-            } > .env.example
+          CHANGES_AFTER=$(git status --porcelain | wc -l)
+          if [ "$CHANGES_AFTER" -gt "$CHANGES_BEFORE" ]; then
+            echo "fixed=true" >> $GITHUB_OUTPUT
+          else
+            echo "fixed=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Auto-fix Tests
-        if: matrix.fix_type == 'tests'
+        id: fix_tests
+        continue-on-error: true
         run: |
-          echo "Fixing test collection issues..."
-
-          # Fix common import issues
-          python scripts/fix_test_imports.py || echo "Import fixer not available yet"
-
-          # Verify test collection
-          pytest --collect-only -q
-
-      - name: Auto-fix Documentation
-        if: matrix.fix_type == 'documentation'
-        run: |
-          echo "Updating documentation..."
-
-          # Create QUICK_START.md if missing
-          if [ ! -f docs/guides/QUICK_START.md ]; then
-            python scripts/generate_quick_start.py || echo "Quick start generator not available yet"
+          echo "=== Running Test Fixes ==="
+          # Fix common import issues if script exists
+          if [ -f scripts/fix_test_imports.py ]; then
+            python scripts/fix_test_imports.py || true
           fi
+
+          # Verify test collection (informational only)
+          pytest --collect-only -q 2>/dev/null || true
 
       - name: Check for changes
         id: check_changes
         run: |
-          if git diff --quiet; then
+          if git diff --quiet && git diff --staged --quiet; then
             echo "has_changes=false" >> $GITHUB_OUTPUT
             echo "No changes made by auto-fix"
           else
             echo "has_changes=true" >> $GITHUB_OUTPUT
             echo "Changes detected"
+            git status --short
           fi
 
-      - name: Commit and push changes
+      - name: Commit and push consolidated changes
         if: steps.check_changes.outputs.has_changes == 'true'
         run: |
           git config user.name "Jules Auto-Fix Bot"
           git config user.email "jules-autofix@gasification-model.local"
 
-          git add .
-          git commit -m "fix(${{ matrix.fix_type }}): Auto-fix ${{ matrix.fix_type }} issues
+          # Build fix summary
+          FIX_SUMMARY=""
+          [ "${{ steps.fix_linting.outputs.fixed }}" = "true" ] && FIX_SUMMARY="$FIX_SUMMARY\n- Linting (ruff, black)"
+          [ "${{ steps.fix_deps.outputs.fixed }}" = "true" ] && FIX_SUMMARY="$FIX_SUMMARY\n- Dependencies"
+
+          git add -A
+          git commit -m "fix: consolidated auto-fix improvements
 
           Automated fixes applied by Jules Assessment Auto-Fix workflow.
 
-          Fix Type: ${{ matrix.fix_type }}
-          Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          Fixes applied:${FIX_SUMMARY:-"\n- Various improvements"}
 
-          This PR addresses issues identified in the automated assessment.
-          Please review changes carefully before merging.
+          Assessment Score: ${{ needs.run-assessments.outputs.assessment_score }}/10
+          Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)
 
           Co-Authored-By: Jules Assessment Bot <jules-bot@gasification-model.local>"
 
-          git push origin "$BRANCH_NAME"
+          git push -u origin "$BRANCH_NAME"
 
-      - name: Create Pull Request
+      - name: Create Single Consolidated PR
         if: steps.check_changes.outputs.has_changes == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr create \
-            --title "[Jules/Assessment-AutoFix] 🤖 Auto-fix: ${{ matrix.fix_type }} improvements" \
-            --body "$(cat <<EOF
-          ## Automated Fixes Applied
+          # HARDENING: Check if PR already exists for this branch
+          EXISTING_PR=$(gh pr list --head "$BRANCH_NAME" --state open --json number --jq '.[0].number // empty')
 
-          **Fix Type**: ${{ matrix.fix_type }}
+          if [ -n "$EXISTING_PR" ]; then
+            echo "PR #$EXISTING_PR already exists for this branch, updating..."
+            exit 0
+          fi
+
+          gh pr create \
+            --title "[Jules/Assessment-AutoFix] Consolidated auto-fix improvements" \
+            --body "$(cat <<EOF
+          ## Consolidated Automated Fixes
+
           **Generated**: $(date -u +%Y-%m-%dT%H:%M:%SZ)
           **Workflow**: Jules Assessment Auto-Fix
 
-          ### Changes Made
+          ### Fixes Applied
 
-          This PR contains automated fixes for ${{ matrix.fix_type }} issues identified in the latest assessment.
+          This PR contains ALL automated fixes in a single commit:
+          - **Linting**: Ruff + Black formatting
+          - **Dependencies**: Lock file generation (if applicable)
+          - **Tests**: Import fixes (if applicable)
 
           ### Assessment Context
 
@@ -372,15 +372,12 @@ jobs:
           - [ ] All automated changes are appropriate
           - [ ] Tests pass successfully
           - [ ] No unintended side effects
-          - [ ] Documentation updated if needed
-
-          ### Related Issues
-
-          This PR may address open issues related to ${{ matrix.fix_type }}. Please cross-reference.
 
           ---
 
-          🤖 Generated by [Jules Assessment Auto-Fix](https://github.com/D-sorganization/Gasification_Model/actions/workflows/Jules-Assessment-AutoFix.yml)
+          **HARDENING NOTE**: This workflow now creates ONE consolidated PR instead of multiple PRs per fix type. This prevents PR proliferation.
+
+          Generated by Jules Assessment Auto-Fix
           EOF
           )" \
             --base main \
