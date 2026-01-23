@@ -243,7 +243,9 @@ models:
 
                 # Create Launcher
                 # Import after patches are in place
-                from src.launchers.golf_launcher import GolfLauncher as FreshGolfLauncher
+                from src.launchers.golf_launcher import (
+                    GolfLauncher as FreshGolfLauncher,
+                )
 
                 launcher = FreshGolfLauncher()
                 yield launcher, model_xml
