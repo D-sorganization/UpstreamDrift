@@ -21,13 +21,6 @@ concurrency:
   group: jules-issue-resolver-${{ github.repository }}
   cancel-in-progress: false
 
-# HARDENING: Explicit rate limits
-env:
-  # Maximum issues to process per run (prevents runaway processing)
-  DEFAULT_MAX_ISSUES: 5
-  # Maximum PRs this workflow can have open at once
-  MAX_OPEN_PRS: 3
-
 jobs:
   resolve-issues:
     runs-on: ubuntu-latest
@@ -64,46 +57,37 @@ jobs:
           [ -f "docs/assessments/issues/summary.md" ] && cp docs/assessments/issues/summary.md .jules/resolver_data/
           [ -f "docs/assessments/Code_Quality_Review_Latest.md" ] && cp docs/assessments/Code_Quality_Review_Latest.md .jules/resolver_data/
 
-          ISSUE_COUNT=$(cat .jules/resolver_data/priority_issues.json | jq 'length')
-          echo "issue_count=$ISSUE_COUNT" >> $GITHUB_OUTPUT
+          echo "issue_count=$(cat .jules/resolver_data/priority_issues.json | jq 'length')" >> $GITHUB_OUTPUT
 
-          # HARDENING: Early exit if no priority issues
-          if [ "$ISSUE_COUNT" -eq 0 ]; then
-            echo "::notice::No priority issues found. Skipping resolution."
-            echo "should_continue=false" >> $GITHUB_OUTPUT
-          else
-            echo "Found $ISSUE_COUNT priority issues to process"
-            echo "should_continue=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Check Open PR Limit
-        id: pr_check
-        if: steps.gather.outputs.should_continue == 'true'
+      - name: Find or Create Fix Branch
+        id: branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # HARDENING: Prevent PR proliferation
-          OPEN_PRS=$(gh pr list --author "github-actions[bot]" --state open --json number,title \
-            --jq '[.[] | select(.title | contains("Issue-Resolver"))] | length')
+          # Check for existing open PR from this workflow
+          EXISTING_PR=$(gh pr list --state open --json number,headRefName,title \
+            --jq '[.[] | select(.headRefName | startswith("jules/issue-resolver-"))] | .[0]')
 
-          echo "Open Issue-Resolver PRs: $OPEN_PRS"
-
-          if [ "$OPEN_PRS" -ge "${{ env.MAX_OPEN_PRS }}" ]; then
-            echo "::warning::Max open PRs (${{ env.MAX_OPEN_PRS }}) reached. Skipping to prevent proliferation."
-            echo "should_continue=false" >> $GITHUB_OUTPUT
+          if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
+            # Reuse existing branch
+            BRANCH_NAME=$(echo "$EXISTING_PR" | jq -r '.headRefName')
+            PR_NUM=$(echo "$EXISTING_PR" | jq -r '.number')
+            echo "Found existing PR #$PR_NUM on branch $BRANCH_NAME - will push updates"
+            git fetch origin "$BRANCH_NAME" || true
+            git checkout -B "$BRANCH_NAME" "origin/$BRANCH_NAME" 2>/dev/null || git checkout -b "$BRANCH_NAME"
+            echo "reusing_pr=true" >> $GITHUB_OUTPUT
+            echo "existing_pr_num=$PR_NUM" >> $GITHUB_OUTPUT
           else
-            echo "should_continue=true" >> $GITHUB_OUTPUT
+            # Create new branch
+            BRANCH_NAME="jules/issue-resolver-$(date +%Y%m%d-%H%M)"
+            git checkout -b "$BRANCH_NAME"
+            echo "reusing_pr=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create Fix Branch
-        if: steps.gather.outputs.should_continue == 'true' && steps.pr_check.outputs.should_continue == 'true'
-        run: |
-          BRANCH_NAME="jules/issue-resolver-$(date +%Y%m%d-%H%M)"
-          git checkout -b "$BRANCH_NAME"
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Jules Issue Resolution
-        if: steps.gather.outputs.should_continue == 'true' && steps.pr_check.outputs.should_continue == 'true'
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
           MAX_ISSUES: ${{ inputs.max_issues || '5' }}
@@ -209,16 +193,16 @@ jobs:
 
 
       - name: Run Linters
-        if: steps.gather.outputs.should_continue == 'true' && steps.pr_check.outputs.should_continue == 'true'
         continue-on-error: true
         run: |
           ruff check . --fix || true
           black . || true
 
-      - name: Commit and Create PR
-        if: steps.gather.outputs.should_continue == 'true' && steps.pr_check.outputs.should_continue == 'true'
+      - name: Commit and Create/Update PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REUSING_PR: ${{ steps.branch.outputs.reusing_pr }}
+          EXISTING_PR_NUM: ${{ steps.branch.outputs.existing_pr_num }}
         run: |
           mkdir -p docs/assessments/issues/resolved
 
@@ -231,11 +215,20 @@ jobs:
 
           Co-Authored-By: Jules <jules-bot@users.noreply.github.com>"
             git push origin "$BRANCH_NAME"
-            gh pr create --title "[Jules/Issue-Resolver] Issue Resolution - $(date +%Y-%m-%d)" \
-              --body "Daily issue resolution from assessments."
+
+            if [ "$REUSING_PR" = "true" ] && [ -n "$EXISTING_PR_NUM" ]; then
+              # Update existing PR description with latest run info
+              gh pr comment "$EXISTING_PR_NUM" --body "Updated with additional fixes - $(date +%Y-%m-%d %H:%M)"
+              echo "Updated existing PR #$EXISTING_PR_NUM"
+              PR_NUM="$EXISTING_PR_NUM"
+            else
+              # Create new PR
+              gh pr create --title "[Jules/Issue-Resolver] Issue Resolution - $(date +%Y-%m-%d)" \
+                --body "Daily issue resolution from assessments. This PR will be iteratively updated as more issues are fixed."
+              PR_NUM=$(gh pr list --head "$BRANCH_NAME" --json number -q '.[0].number')
+            fi
 
             # Post-processing: Remove reviewers to reduce noise
-            PR_NUM=$(gh pr list --head "$BRANCH_NAME" --json number -q '.[0].number')
             if [ -n "$PR_NUM" ]; then
                gh pr edit "$PR_NUM" --remove-reviewer "dieterolson" || true
             fi
