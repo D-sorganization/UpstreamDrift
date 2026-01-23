@@ -34,8 +34,8 @@ except ImportError:
     # Just to allow linting/static analysis if pydrake is missing
     pass
 
-from shared.python import constants
-from shared.python.interfaces import PhysicsEngine
+from src.shared.python import constants
+from src.shared.python.interfaces import PhysicsEngine
 
 LOGGER = logging.getLogger(__name__)
 

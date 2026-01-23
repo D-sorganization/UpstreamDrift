@@ -17,9 +17,9 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from shared.python.ai.education import EducationSystem
-from shared.python.ai.tool_registry import ToolCategory, ToolRegistry
-from shared.python.ai.types import ExpertiseLevel
+from src.shared.python.ai.education import EducationSystem
+from src.shared.python.ai.tool_registry import ToolCategory, ToolRegistry
+from src.shared.python.ai.types import ExpertiseLevel
 
 logger = logging.getLogger(__name__)
 

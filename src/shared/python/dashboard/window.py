@@ -13,18 +13,19 @@ import logging
 
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
-from shared.python.dashboard.recorder import GenericPhysicsRecorder
-from shared.python.dashboard.runner import SimulationRunner
-from shared.python.dashboard.widgets import ControlPanel, LivePlotWidget
+
+from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
+from src.shared.python.dashboard.runner import SimulationRunner
+from src.shared.python.dashboard.widgets import ControlPanel, LivePlotWidget
 
 # Updated import to use generic export module
-from shared.python.export import (
+from src.shared.python.export import (
     export_recording_all_formats,
     get_available_export_formats,
 )
-from shared.python.interfaces import PhysicsEngine
-from shared.python.plotting import GolfSwingPlotter, MplCanvas
-from shared.python.statistical_analysis import StatisticalAnalyzer
+from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.plotting import GolfSwingPlotter, MplCanvas
+from src.shared.python.statistical_analysis import StatisticalAnalyzer
 
 LOGGER = logging.getLogger(__name__)
 

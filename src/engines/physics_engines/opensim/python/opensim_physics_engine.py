@@ -7,7 +7,8 @@ import os
 from typing import Any
 
 import numpy as np
-from shared.python.interfaces import PhysicsEngine
+
+from src.shared.python.interfaces import PhysicsEngine
 
 # Configure logging
 logger = logging.getLogger(__name__)

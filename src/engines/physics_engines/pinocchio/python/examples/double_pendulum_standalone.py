@@ -21,7 +21,8 @@ from typing import Any
 import numpy as np
 import numpy.typing as npt
 from scipy.integrate import solve_ivp
-from shared.python.constants import GRAVITY_M_S2
+
+from src.shared.python.constants import GRAVITY_M_S2
 
 # ---------------------------------------------------------------------------
 # Physical parameters for the double pendulum

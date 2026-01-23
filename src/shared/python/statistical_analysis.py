@@ -21,11 +21,12 @@ import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
 from scipy.spatial import cKDTree
 from scipy.spatial.distance import pdist, squareform
-from shared.python.analysis.angular_momentum import AngularMomentumMetricsMixin
-from shared.python.analysis.basic_stats import BasicStatsMixin
+
+from src.shared.python.analysis.angular_momentum import AngularMomentumMetricsMixin
+from src.shared.python.analysis.basic_stats import BasicStatsMixin
 
 # Import dataclasses from modular package
-from shared.python.analysis.dataclasses import (
+from src.shared.python.analysis.dataclasses import (
     AngularMomentumMetrics,
     CoordinationMetrics,
     GRFMetrics,
@@ -42,11 +43,11 @@ from shared.python.analysis.dataclasses import (
     SwingPhase,
     SwingProfileMetrics,
 )
-from shared.python.analysis.energy_metrics import EnergyMetricsMixin
-from shared.python.analysis.grf_metrics import GRFMetricsMixin
-from shared.python.analysis.phase_detection import PhaseDetectionMixin
-from shared.python.analysis.stability_metrics import StabilityMetricsMixin
-from shared.python.analysis.swing_metrics import SwingMetricsMixin
+from src.shared.python.analysis.energy_metrics import EnergyMetricsMixin
+from src.shared.python.analysis.grf_metrics import GRFMetricsMixin
+from src.shared.python.analysis.phase_detection import PhaseDetectionMixin
+from src.shared.python.analysis.stability_metrics import StabilityMetricsMixin
+from src.shared.python.analysis.swing_metrics import SwingMetricsMixin
 
 # Re-export for backward compatibility
 __all__ = [

@@ -20,12 +20,13 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
-from shared.python.reference_frames import (
+
+from src.shared.python.reference_frames import (
     SwingPlaneFrame,
     fit_functional_swing_plane,
     fit_instantaneous_swing_plane,
 )
-from shared.python.swing_plane_analysis import SwingPlaneAnalyzer, SwingPlaneMetrics
+from src.shared.python.swing_plane_analysis import SwingPlaneAnalyzer, SwingPlaneMetrics
 
 if TYPE_CHECKING:
     pass

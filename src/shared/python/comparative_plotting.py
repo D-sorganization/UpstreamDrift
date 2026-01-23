@@ -10,7 +10,8 @@ from typing import Any
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
-from shared.python.comparative_analysis import ComparativeSwingAnalyzer
+
+from src.shared.python.comparative_analysis import ComparativeSwingAnalyzer
 
 
 class ComparativePlotter:

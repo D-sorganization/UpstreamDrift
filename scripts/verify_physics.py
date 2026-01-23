@@ -17,7 +17,7 @@ import pytest
 ROOT_DIR = Path(__file__).parent.parent
 sys.path.append(str(ROOT_DIR))
 
-from shared.python.engine_manager import EngineManager  # noqa: E402
+from src.shared.python.engine_manager import EngineManager  # noqa: E402
 
 
 def run_verification() -> None:

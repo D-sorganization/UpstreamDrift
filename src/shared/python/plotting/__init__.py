@@ -18,13 +18,13 @@ For new code, prefer importing from specific modules:
 """
 
 # Import base components
-from shared.python.plotting.base import (
+from src.shared.python.plotting.base import (
     MplCanvas,
     RecorderInterface,
 )
 
 # Import main plotter class from core module
-from shared.python.plotting_core import GolfSwingPlotter
+from src.shared.python.plotting_core import GolfSwingPlotter
 
 __all__ = [
     "GolfSwingPlotter",

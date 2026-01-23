@@ -4,7 +4,8 @@ from typing import cast
 
 import numpy as np
 from scipy.signal import savgol_filter
-from shared.python.analysis.dataclasses import SummaryStatistics, SwingPhase
+
+from src.shared.python.analysis.dataclasses import SummaryStatistics, SwingPhase
 
 
 class PhaseDetectionMixin:

@@ -17,7 +17,7 @@ VALIDATION LEVELS:
 USAGE:
 ------
 ```python
-from shared.python.validation_helpers import validate_joint_state, ValidationLevel
+from src.shared.python.validation_helpers import validate_joint_state, ValidationLevel
 
 # Strict validation (raises on any issue)
 validate_joint_state(qpos, q

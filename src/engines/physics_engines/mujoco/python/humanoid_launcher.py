@@ -52,10 +52,10 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from shared.python.configuration_manager import ConfigurationManager  # noqa: E402
-from shared.python.dashboard.widgets import LivePlotWidget  # noqa: E402
-from shared.python.interfaces import RecorderInterface  # noqa: E402
-from shared.python.process_worker import ProcessWorker  # noqa: E402
+from src.shared.python.configuration_manager import ConfigurationManager  # noqa: E402
+from src.shared.python.dashboard.widgets import LivePlotWidget  # noqa: E402
+from src.shared.python.interfaces import RecorderInterface  # noqa: E402
+from src.shared.python.process_worker import ProcessWorker  # noqa: E402
 
 # Polynomial generator widget imported lazily to avoid MuJoCo DLL issues
 # Import happens in open_polynomial_generator() only when needed

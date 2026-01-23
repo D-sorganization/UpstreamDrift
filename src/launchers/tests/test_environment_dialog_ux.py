@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from PyQt6.QtWidgets import QApplication
 
-from launchers.golf_launcher import EnvironmentDialog
+from src.launchers.golf_launcher import EnvironmentDialog
 
 # Mocking modules that might cause issues in headless environment
 sys.modules["shared.python.engine_manager"] = MagicMock()

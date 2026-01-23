@@ -10,8 +10,8 @@ Example:
     >>> settings_dialog = AISettingsDialog()
 """
 
-from shared.python.ai.gui.assistant_panel import AIAssistantPanel
-from shared.python.ai.gui.settings_dialog import (
+from src.shared.python.ai.gui.assistant_panel import AIAssistantPanel
+from src.shared.python.ai.gui.settings_dialog import (
     AIProvider,
     AISettings,
     AISettingsDialog,

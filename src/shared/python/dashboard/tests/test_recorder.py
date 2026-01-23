@@ -1,6 +1,7 @@
 import numpy as np
-from shared.python.dashboard.recorder import GenericPhysicsRecorder
-from shared.python.interfaces import PhysicsEngine
+
+from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
+from src.shared.python.interfaces import PhysicsEngine
 
 
 class MockPhysicsEngine(PhysicsEngine):

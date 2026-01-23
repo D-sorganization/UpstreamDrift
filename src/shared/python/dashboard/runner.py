@@ -9,8 +9,9 @@ import logging
 import time
 
 from PyQt6 import QtCore
-from shared.python.dashboard.recorder import GenericPhysicsRecorder
-from shared.python.interfaces import PhysicsEngine
+
+from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
+from src.shared.python.interfaces import PhysicsEngine
 
 LOGGER = logging.getLogger(__name__)
 

@@ -3,9 +3,13 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 from matplotlib.figure import Figure
-from shared.python.comparative_analysis import AlignedSignals, ComparativeSwingAnalyzer
-from shared.python.comparative_plotting import ComparativePlotter
-from shared.python.plotting import RecorderInterface
+
+from src.shared.python.comparative_analysis import (
+    AlignedSignals,
+    ComparativeSwingAnalyzer,
+)
+from src.shared.python.comparative_plotting import ComparativePlotter
+from src.shared.python.plotting import RecorderInterface
 
 
 class MockRecorder(RecorderInterface):

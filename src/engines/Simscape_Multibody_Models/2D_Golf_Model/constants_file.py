@@ -4,4 +4,4 @@ This file is maintained for backward compatibility.
 """
 
 # Re-export everything from the central source of truth
-from shared.python.physics_constants import *  # noqa: F403
+from src.shared.python.physics_constants import *  # noqa: F403

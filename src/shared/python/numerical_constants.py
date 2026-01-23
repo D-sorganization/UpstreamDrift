@@ -18,7 +18,7 @@ Any modification to these constants MUST include:
 """
 
 # Source: NIST CODATA 2018 (https://physics.nist.gov/cgi-bin/cuu/Value?gn)
-from shared.python.constants import GRAVITY_M_S2 as GRAVITY_STANDARD
+from src.shared.python.constants import GRAVITY_M_S2 as GRAVITY_STANDARD
 
 # Finite Difference Parameters
 # -----------------------------------------------------------------------------

@@ -7,7 +7,7 @@ import pytest
 # causing issues in headless env if not careful.
 sys.modules["launchers.golf_launcher"] = MagicMock()
 
-from launchers.unified_launcher import UnifiedLauncher, launch  # noqa: E402
+from src.launchers.unified_launcher import UnifiedLauncher, launch  # noqa: E402
 
 
 @pytest.fixture
