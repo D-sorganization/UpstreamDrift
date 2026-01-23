@@ -195,8 +195,7 @@ jobs:
           EOF
           )" \
               --base main \
-              --head "$ASSESSMENT_BRANCH" \
-              --label "automation,assessments"
+              --head "$ASSESSMENT_BRANCH"
           else
             echo "Existing PR #$PR_NUMBER updated."
           fi
@@ -385,8 +384,7 @@ jobs:
           EOF
           )" \
             --base main \
-            --head "$BRANCH_NAME" \
-            --label "auto-generated,quality-control,${{ matrix.fix_type }}"
+            --head "$BRANCH_NAME"
 
   create-github-issues:
     name: Create GitHub Issues for Untracked Problems
@@ -433,8 +431,7 @@ jobs:
             echo "Creating new assessment summary issue"
             gh issue create \
               --title "📊 Weekly Assessment Summary" \
-              --body "$(cat docs/assessments/COMPREHENSIVE_ASSESSMENT_SUMMARY_*.md)" \
-              --label "assessment-summary,report"
+              --body "$(cat docs/assessments/COMPREHENSIVE_ASSESSMENT_SUMMARY_*.md)"
           fi
 
   # Close source PR if specified (prevents PR proliferation)
