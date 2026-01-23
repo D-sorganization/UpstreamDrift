@@ -4,7 +4,8 @@ Unit tests for shared.python.statistical_analysis module.
 
 import numpy as np
 import pytest
-from shared.python.statistical_analysis import StatisticalAnalyzer
+
+from src.shared.python.statistical_analysis import StatisticalAnalyzer
 
 
 @pytest.fixture

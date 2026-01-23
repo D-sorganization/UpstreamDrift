@@ -8,7 +8,7 @@ import pytest
 # Add repo root to path
 sys.path.insert(0, str(Path(__file__).parents[1]))
 
-from shared.python.common_utils import get_shared_urdf_path
+from src.shared.python.common_utils import get_shared_urdf_path
 
 # Check if display is available for Qt tests
 HAS_DISPLAY = os.environ.get("DISPLAY") is not None or sys.platform == "win32"

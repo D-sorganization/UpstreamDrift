@@ -10,7 +10,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
-from shared.python.ellipsoid_visualization import (
+
+from src.shared.python.ellipsoid_visualization import (
     EllipsoidData,
     EllipsoidSequence,
     EllipsoidVisualizer,

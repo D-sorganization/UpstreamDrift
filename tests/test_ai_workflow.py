@@ -1,9 +1,10 @@
 from unittest.mock import MagicMock, Mock
 
 import pytest
-from shared.python.ai.exceptions import WorkflowError
-from shared.python.ai.types import ConversationContext, ExpertiseLevel, ToolResult
-from shared.python.ai.workflow_engine import (
+
+from src.shared.python.ai.exceptions import WorkflowError
+from src.shared.python.ai.types import ConversationContext, ExpertiseLevel, ToolResult
+from src.shared.python.ai.workflow_engine import (
     StepStatus,
     Workflow,
     WorkflowEngine,

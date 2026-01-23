@@ -4,7 +4,7 @@ Ensures valid values, units, and citation metadata.
 
 import math
 
-from shared.python import physics_constants as pc
+from src.shared.python import physics_constants as pc
 
 
 def test_mathematical_constants():

@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from shared.python.ground_reaction_forces import (
+
+from src.shared.python.ground_reaction_forces import (
     FootSide,
     GRFAnalyzer,
     GRFTimeSeries,

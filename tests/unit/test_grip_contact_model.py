@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from shared.python.grip_contact_model import (
+
+from src.shared.python.grip_contact_model import (
     ContactPoint,
     ContactState,
     GripContactModel,

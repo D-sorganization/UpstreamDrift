@@ -1,7 +1,8 @@
 """Unit tests for kinematic sequence analysis."""
 
 import numpy as np
-from shared.python.kinematic_sequence import KinematicSequenceAnalyzer
+
+from src.shared.python.kinematic_sequence import KinematicSequenceAnalyzer
 
 
 class MockRecorder:

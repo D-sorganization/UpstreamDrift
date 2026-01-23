@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from shared.python.ai.sample_tools import (
+from src.shared.python.ai.sample_tools import (
     register_golf_suite_tools,
 )
-from shared.python.ai.tool_registry import ToolCategory, ToolRegistry
+from src.shared.python.ai.tool_registry import ToolCategory, ToolRegistry
 
 
 class TestRegisterGolfSuiteTools:

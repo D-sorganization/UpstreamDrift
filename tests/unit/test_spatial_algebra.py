@@ -5,7 +5,7 @@ Unit tests for spatial algebra module.
 import numpy as np
 import pytest
 
-from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.spatial_algebra import (
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.spatial_algebra import (
     inertia,
     joints,
     spatial_vectors,

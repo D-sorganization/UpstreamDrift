@@ -7,7 +7,8 @@ OBS-001: Added tests for new structured logging functionality.
 import logging
 
 import pytest
-from shared.python.core import (
+
+from src.shared.python.core import (
     DataFormatError,
     EngineNotFoundError,
     GolfModelingError,

@@ -12,7 +12,7 @@ import numpy as np
 import pytest
 
 # Import test utilities
-from shared.python.indexed_acceleration import (
+from src.shared.python.indexed_acceleration import (
     AccelerationClosureError,
     compute_indexed_acceleration_from_engine,
 )

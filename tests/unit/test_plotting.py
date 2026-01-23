@@ -13,8 +13,8 @@ from matplotlib.figure import Figure
 # The plotting module itself handles importing MplCanvas with a try-except,
 # so we just need to ensure matplotlib.figure.Figure is available or mocked.
 # But for unit testing, we want to mock plotting calls anyway.
-from shared.python.constants import GRAVITY_M_S2
-from shared.python.plotting import GolfSwingPlotter, RecorderInterface
+from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.plotting import GolfSwingPlotter, RecorderInterface
 
 
 @pytest.fixture
