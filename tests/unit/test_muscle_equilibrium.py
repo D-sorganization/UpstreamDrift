@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from shared.python.hill_muscle import HillMuscleModel, MuscleParameters
-from shared.python.muscle_equilibrium import (
+
+from src.shared.python.hill_muscle import HillMuscleModel, MuscleParameters
+from src.shared.python.muscle_equilibrium import (
     EquilibriumSolver,
     compute_equilibrium_state,
 )

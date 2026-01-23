@@ -3,7 +3,8 @@
 from pathlib import Path
 
 import pytest
-from shared.python.security_utils import validate_path
+
+from src.shared.python.security_utils import validate_path
 
 
 def test_validate_path_with_tmp_path(tmp_path: Path) -> None:

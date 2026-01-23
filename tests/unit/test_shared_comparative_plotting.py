@@ -3,12 +3,13 @@ from unittest.mock import MagicMock
 import matplotlib.figure
 import numpy as np
 import pytest
-from shared.python.comparative_analysis import (
+
+from src.shared.python.comparative_analysis import (
     AlignedSignals,
     ComparativeSwingAnalyzer,
     ComparisonMetric,
 )
-from shared.python.comparative_plotting import ComparativePlotter
+from src.shared.python.comparative_plotting import ComparativePlotter
 
 
 class TestComparativePlotter:

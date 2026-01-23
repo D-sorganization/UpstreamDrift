@@ -10,7 +10,7 @@ try:
 except ImportError:
     UTC = timezone.utc  # noqa: UP017
 
-from shared.python.ai.types import (
+from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
     ConversationContext,

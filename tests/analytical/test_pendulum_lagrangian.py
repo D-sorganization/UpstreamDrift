@@ -21,12 +21,13 @@ Source: Classical Mechanics (Goldstein, 3rd ed.), Section 1.5
 
 import numpy as np
 import pytest
-from shared.python.constants import GRAVITY_M_S2
+
+from src.shared.python.constants import GRAVITY_M_S2
 
 # Try to import pendulum engine, skip tests if not available
 pytest.importorskip("engines.physics_engines.pendulum")
 
-from engines.physics_engines.pendulum.python.pendulum_physics_engine import (
+from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
     PendulumPhysicsEngine,
 )
 

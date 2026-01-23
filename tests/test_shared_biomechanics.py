@@ -2,9 +2,10 @@
 
 import numpy as np
 import pytest
-from shared.python.biomechanics_data import BiomechanicalData
-from shared.python.plotting import GolfSwingPlotter, RecorderInterface
-from shared.python.statistical_analysis import (
+
+from src.shared.python.biomechanics_data import BiomechanicalData
+from src.shared.python.plotting import GolfSwingPlotter, RecorderInterface
+from src.shared.python.statistical_analysis import (
     StatisticalAnalyzer,
     SummaryStatistics,
     SwingPhase,

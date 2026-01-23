@@ -13,7 +13,8 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-from shared.python.engine_manager import EngineManager, EngineType
+
+from src.shared.python.engine_manager import EngineManager, EngineType
 
 # Check if Drake is available
 try:

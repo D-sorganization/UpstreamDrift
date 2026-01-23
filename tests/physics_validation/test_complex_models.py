@@ -5,7 +5,8 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from shared.python.engine_manager import EngineManager, EngineType
+
+from src.shared.python.engine_manager import EngineManager, EngineType
 
 logger = logging.getLogger(__name__)
 

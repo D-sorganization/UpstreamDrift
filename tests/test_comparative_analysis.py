@@ -6,13 +6,14 @@ TEST-001: Enhanced test coverage for comparative_analysis.py.
 import numpy as np
 import pytest
 from matplotlib.figure import Figure
-from shared.python.comparative_analysis import (
+
+from src.shared.python.comparative_analysis import (
     AlignedSignals,
     ComparativeSwingAnalyzer,
     ComparisonMetric,
     RecorderInterface,
 )
-from shared.python.comparative_plotting import ComparativePlotter
+from src.shared.python.comparative_plotting import ComparativePlotter
 
 
 class MockRecorder(RecorderInterface):

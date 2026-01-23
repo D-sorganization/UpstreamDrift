@@ -8,7 +8,8 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from shared.python.indexed_acceleration import IndexedAcceleration
+
+from src.shared.python.indexed_acceleration import IndexedAcceleration
 
 
 class TestIndexedAccelerationDataclass:

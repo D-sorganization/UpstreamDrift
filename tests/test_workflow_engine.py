@@ -2,8 +2,9 @@ from collections import namedtuple
 from unittest.mock import Mock
 
 import pytest
-from shared.python.ai.tool_registry import ToolRegistry, ToolResult
-from shared.python.ai.workflow_engine import (
+
+from src.shared.python.ai.tool_registry import ToolRegistry, ToolResult
+from src.shared.python.ai.workflow_engine import (
     ExpertiseLevel,
     RecoveryStrategy,
     StepStatus,

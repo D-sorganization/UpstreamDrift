@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 from matplotlib.figure import Figure
-from shared.python.plotting import GolfSwingPlotter
+from src.shared.python.plotting import GolfSwingPlotter
 
 
 @pytest.fixture

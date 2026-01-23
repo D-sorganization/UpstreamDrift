@@ -11,8 +11,9 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
-from shared.python.multi_muscle import MuscleGroup
-from shared.python.myosuite_adapter import MuscleDrivenEnv, train_muscle_policy
+
+from src.shared.python.multi_muscle import MuscleGroup
+from src.shared.python.myosuite_adapter import MuscleDrivenEnv, train_muscle_policy
 
 
 @pytest.fixture

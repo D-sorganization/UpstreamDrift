@@ -1,5 +1,5 @@
 import pytest
-from shared.python.injury.injury_risk import InjuryRiskScorer, InjuryType, RiskLevel
+from src.shared.python.injury.injury_risk import InjuryRiskScorer, InjuryType, RiskLevel
 
 
 class MockSpinalResult:

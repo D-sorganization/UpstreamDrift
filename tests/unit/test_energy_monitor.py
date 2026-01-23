@@ -8,14 +8,15 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from shared.python.energy_monitor import (
+
+from src.shared.python.energy_monitor import (
     ENERGY_DRIFT_CRITICAL_PCT,
     ENERGY_DRIFT_TOLERANCE_PCT,
     ConservationMonitor,
     EnergySnapshot,
     IntegrationFailureError,
 )
-from shared.python.tests.mock_physics_engine import (
+from src.shared.python.tests.mock_physics_engine import (
     MockPhysicsEngine,
     as_physics_engine,
 )

@@ -3,8 +3,8 @@
 import unittest
 from unittest.mock import MagicMock
 
-from shared.python.hill_muscle import HillMuscleModel, MuscleParameters
-from shared.python.multi_muscle import AntagonistPair, MuscleGroup
+from src.shared.python.hill_muscle import HillMuscleModel, MuscleParameters
+from src.shared.python.multi_muscle import AntagonistPair, MuscleGroup
 
 
 class TestMultiMuscle(unittest.TestCase):

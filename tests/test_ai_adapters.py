@@ -2,7 +2,8 @@ import sys
 from unittest.mock import MagicMock, Mock, patch
 
 import pytest
-from shared.python.ai.types import (
+
+from src.shared.python.ai.types import (
     ConversationContext,
     ExpertiseLevel,
 )
