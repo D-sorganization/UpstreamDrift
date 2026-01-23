@@ -1,5 +1,4 @@
 import pytest
-
 from shared.python.injury.injury_risk import InjuryRiskScorer, InjuryType, RiskLevel
 
 

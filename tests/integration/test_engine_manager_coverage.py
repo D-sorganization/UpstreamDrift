@@ -6,7 +6,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
-
 from shared.python.engine_manager import (
     EngineManager,
     EngineStatus,
