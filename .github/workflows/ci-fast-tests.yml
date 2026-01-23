@@ -42,7 +42,7 @@ jobs:
           cache: 'pip'
 
       - name: Cache pip dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
@@ -83,7 +83,6 @@ jobs:
           # - Parallel execution (-n auto uses all CPU cores)
           # - 30 second timeout per test
           # - Skip slow tests
-          # - Fail fast on first error (-x) for quicker feedback
           # - Short traceback for faster output
           xvfb-run --auto-servernum pytest \
             -n auto \
@@ -134,7 +133,7 @@ jobs:
           cache: 'pip'
 
       - name: Cache pip dependencies
-        uses: actions/cache@v5
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
@@ -212,7 +211,7 @@ jobs:
 
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
 
