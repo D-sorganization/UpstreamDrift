@@ -225,7 +225,11 @@ def calculate_metrics(item: Mapping[str, Any]) -> tuple[int, int, int]:
 
     # Impact Heuristic (1-5)
     impact = 1
-    if "src/shared/python" in filepath or "src/engines/" in filepath or "src/api/" in filepath:
+    if (
+        "src/shared/python" in filepath
+        or "src/engines/" in filepath
+        or "src/api/" in filepath
+    ):
         impact = 5
     elif "src/tools/" in filepath:
         impact = 3
@@ -343,9 +347,7 @@ def generate_report() -> None:
         report_content += f"| `{item['file']}` | {item['line']} | {item['name']} |\n"
 
     report_content += "\n## Recommended Implementation Order\n"
-    report_content += (
-        "1. Address Critical Incomplete items in `src/shared/python` and `src/engines/`.\n"
-    )
+    report_content += "1. Address Critical Incomplete items in `src/shared/python` and `src/engines/`.\n"
     report_content += (
         f"2. Fill in missing features marked with {'TO' + 'DO'} in core logic.\n"
     )
