@@ -34,7 +34,7 @@ class TestDrakeGUIApp:
     def test_compute_specific_control(self):
         """Test compute_specific_control in DrakeInducedAccelerationAnalyzer."""
         # Import inside test to ensure mocks apply
-        from engines.physics_engines.drake.python.src.drake_gui_app import (
+        from src.engines.physics_engines.drake.python.src.drake_gui_app import (
             DrakeInducedAccelerationAnalyzer,
         )
 

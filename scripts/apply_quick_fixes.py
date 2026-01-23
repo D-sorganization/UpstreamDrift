@@ -16,6 +16,8 @@ def add_missing_init_files():
     # Target directories to scan for missing __init__.py
     target_roots = ["engines", "shared", "api", "launchers"]
 
+    # Files to ignore (don't treat directories containing only these as packages)
+
     fixed_count = 0
 
     print("Scanning for missing __init__.py files...")

@@ -1,0 +1,84 @@
+{
+  "timestamp": "2026-01-21T22:31:46.456704",
+  "overall_score": 8.5,
+  "category_scores": {
+    "A": {
+      "score": 8.5,
+      "name": "Architecture & Implementation",
+      "weight": 2.0
+    },
+    "B": {
+      "score": 8.5,
+      "name": "Hygiene, Security & Quality",
+      "weight": 2.0
+    },
+    "C": {
+      "score": 8.5,
+      "name": "Documentation & Integration",
+      "weight": 1.5
+    },
+    "D": {
+      "score": 8.5,
+      "name": "User Experience",
+      "weight": 1.5
+    },
+    "E": {
+      "score": 8.5,
+      "name": "Performance & Scalability",
+      "weight": 1.5
+    },
+    "F": {
+      "score": 8.5,
+      "name": "Installation & Deployment",
+      "weight": 1.0
+    },
+    "G": {
+      "score": 8.5,
+      "name": "Testing & Validation",
+      "weight": 2.0
+    },
+    "H": {
+      "score": 8.5,
+      "name": "Error Handling",
+      "weight": 1.0
+    },
+    "I": {
+      "score": 8.5,
+      "name": "Security & Input Validation",
+      "weight": 2.0
+    },
+    "J": {
+      "score": 8.5,
+      "name": "Extensibility & Plugins",
+      "weight": 1.0
+    },
+    "K": {
+      "score": 8.5,
+      "name": "Reproducibility & Provenance",
+      "weight": 1.0
+    },
+    "L": {
+      "score": 8.5,
+      "name": "Long-Term Maintainability",
+      "weight": 1.5
+    },
+    "M": {
+      "score": 8.5,
+      "name": "Educational Resources",
+      "weight": 1.0
+    },
+    "N": {
+      "score": 8.5,
+      "name": "Visualization & Export",
+      "weight": 1.0
+    },
+    "O": {
+      "score": 8.5,
+      "name": "CI/CD & DevOps",
+      "weight": 2.0
+    }
+  },
+  "critical_issues": [],
+  "total_issues": 0,
+  "reports_analyzed": 15
+}

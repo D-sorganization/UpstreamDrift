@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 import numpy as np
 import pytest
 
-from shared.python.constants import (
+from src.shared.python.constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
     GOLF_BALL_MASS_KG,
     GRAVITY_M_S2,
@@ -137,9 +137,9 @@ class TestPhysicalConstantXMLSafety:
         g = GRAVITY_M_S2
 
         # Arithmetic
-        assert isinstance(g * 2.0, (int, float))
-        assert isinstance(g + 1.0, (int, float))
-        assert isinstance(g / 2.0, (int, float))
+        assert isinstance(g * 2.0, int | float)
+        assert isinstance(g + 1.0, int | float)
+        assert isinstance(g / 2.0, int | float)
 
         # Comparisons
         assert g > 9.0
@@ -200,7 +200,7 @@ class TestPhysicalConstantEdgeCases:
 
     def test_very_large_physical_constant(self):
         """Large constants (e.g., speed of light) format correctly."""
-        from shared.python.constants import SPEED_OF_LIGHT_M_S
+        from src.shared.python.constants import SPEED_OF_LIGHT_M_S
 
         xml = f"<speed>{float(SPEED_OF_LIGHT_M_S)}</speed>"
         root = ET.fromstring(xml)

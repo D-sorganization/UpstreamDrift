@@ -19,7 +19,7 @@ pytestmark = pytest.mark.skipif(
 )
 
 if PYQT6_AVAILABLE:
-    from tools.urdf_generator.visualization_widget import VisualizationWidget
+    from src.tools.urdf_generator.visualization_widget import VisualizationWidget
 
 
 def test_visualization_widget_init(qtbot):

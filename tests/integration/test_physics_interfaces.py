@@ -15,10 +15,10 @@ sys.modules["opensim"] = MagicMock()
 
 
 # Import after mocking
-from engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
+from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
     MyoSuitePhysicsEngine,
 )
-from engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
+from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
     OpenSimPhysicsEngine,
 )
 

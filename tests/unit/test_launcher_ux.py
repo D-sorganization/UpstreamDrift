@@ -73,7 +73,7 @@ class TestGolfLauncherUX(unittest.TestCase):
         mock_load_layout,
     ):
         """Test that empty search state shows actionable UI."""
-        from launchers.golf_launcher import GolfLauncher
+        from src.launchers.golf_launcher import GolfLauncher
 
         # Mock lazy loaders
         mock_EM = Mock()

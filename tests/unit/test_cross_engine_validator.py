@@ -4,7 +4,7 @@ import unittest
 
 import numpy as np
 
-from shared.python.cross_engine_validator import (
+from src.shared.python.cross_engine_validator import (
     CrossEngineValidator,
 )
 

@@ -11,8 +11,8 @@ if "pydrake.multibody.tree" not in sys.modules:
 import numpy as np
 import pytest
 
-from shared.python.constants import GRAVITY_M_S2
-from shared.python.engine_manager import EngineManager, EngineType
+from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.engine_manager import EngineManager, EngineType
 from tests.physics_validation.analytical import AnalyticalPendulum
 
 logger = logging.getLogger(__name__)

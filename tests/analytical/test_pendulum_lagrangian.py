@@ -22,12 +22,12 @@ Source: Classical Mechanics (Goldstein, 3rd ed.), Section 1.5
 import numpy as np
 import pytest
 
-from shared.python.constants import GRAVITY_M_S2
+from src.shared.python.constants import GRAVITY_M_S2
 
 # Try to import pendulum engine, skip tests if not available
 pytest.importorskip("engines.physics_engines.pendulum")
 
-from engines.physics_engines.pendulum.python.pendulum_physics_engine import (
+from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
     PendulumPhysicsEngine,
 )
 
@@ -46,7 +46,7 @@ class TestPendulumAnalyticalDynamics:
     def setup_method(self) -> None:
         """Initialize pendulum for each test."""
         # Configure engine with the simple parameters expected by the analytical tests
-        from engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+        from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
             DoublePendulumDynamics,
             DoublePendulumParameters,
             LowerSegmentProperties,
@@ -341,7 +341,7 @@ class TestPendulumEnergyConservation:
     def setup_method(self) -> None:
         """Initialize pendulum."""
         # Configure engine with the simple parameters expected by the analytical tests
-        from engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+        from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
             DoublePendulumDynamics,
             DoublePendulumParameters,
             LowerSegmentProperties,

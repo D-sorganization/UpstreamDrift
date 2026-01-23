@@ -8,14 +8,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: { fetch-depth: 2 }
+        with: { fetch-depth: 0 }
 
       - name: Identify New/Modified Files
         id: files
         run: |
-          # FIX: Ensure we catch files in src/ or python/ that are NOT tests
-          # Using git diff with explicit path filters is safer than grep
-          CHANGED_FILES=$(git diff --name-only HEAD^ HEAD -- 'src/**/*.py' 'python/**/*.py' ':!tests/*' ':!*test_*.py' || true)
+          # Use origin/${{ github.base_ref }}...HEAD if base_ref exists (PR), else HEAD^
+          if [ -n "${{ github.base_ref }}" ]; then
+            BASE="origin/${{ github.base_ref }}"
+          else
+            BASE="HEAD^"
+          fi
+          
+          CHANGED_FILES=$(git diff --name-only $BASE HEAD -- 'src/**/*.py' ':!**/tests/*' ':!**/test_*.py' || true)
 
           if [ -z "$CHANGED_FILES" ]; then
             echo "No relevant source files changed."

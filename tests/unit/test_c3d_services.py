@@ -20,6 +20,7 @@ except (ImportError, OSError):
 REPO_ROOT = Path(__file__).resolve().parents[2]  # tests/unit -> tests -> root
 SRC_PATH = (
     REPO_ROOT
+    / "src"
     / "engines"
     / "Simscape_Multibody_Models"
     / "3D_Golf_Model"

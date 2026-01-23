@@ -16,7 +16,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from shared.python.secure_subprocess import (
+from src.shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
     secure_run,
@@ -26,7 +26,7 @@ from shared.python.secure_subprocess import (
 
 # GolfLauncher requires PyQt6, import conditionally
 try:
-    from launchers.golf_launcher import GolfLauncher
+    from src.launchers.golf_launcher import GolfLauncher
 
     PYQT6_AVAILABLE = True
 except (ImportError, OSError):
