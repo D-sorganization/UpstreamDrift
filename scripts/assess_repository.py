@@ -36,11 +36,11 @@ CATEGORIES = {
 }
 
 
-def count_files(pattern):
+def count_files(pattern: str) -> int:
     return len(list(REPO_ROOT.glob(pattern)))
 
 
-def grep_count(pattern, file_pattern="**/*.py"):
+def grep_count(pattern: str, file_pattern: str = "**/*.py") -> int:
     count = 0
     regex = re.compile(pattern)
     for p in REPO_ROOT.glob(file_pattern):
@@ -55,7 +55,13 @@ def grep_count(pattern, file_pattern="**/*.py"):
     return count
 
 
-def generate_report(category_code, category_name, score, findings, recommendations):
+def generate_report(
+    category_code: str,
+    category_name: str,
+    score: float,
+    findings: list[str],
+    recommendations: list[str],
+) -> Path:
     filename = f"Assessment_{category_code}_{category_name.replace(' ', '_')}.md"
     filepath = DOCS_DIR / filename
 
@@ -84,7 +90,7 @@ def generate_report(category_code, category_name, score, findings, recommendatio
     return filepath
 
 
-def assess_A():
+def assess_A() -> Path:
     # Code Structure
     findings = []
     score = 8.0
@@ -104,7 +110,7 @@ def assess_A():
     return generate_report("A", CATEGORIES["A"], score, findings, recs)
 
 
-def assess_B():
+def assess_B() -> Path:
     # Documentation
     findings = []
     score = 7.0
@@ -132,7 +138,7 @@ def assess_B():
     return generate_report("B", CATEGORIES["B"], score, findings, recs)
 
 
-def assess_C():
+def assess_C() -> Path:
     # Test Coverage
     findings = []
     score = 6.0
@@ -151,7 +157,7 @@ def assess_C():
     return generate_report("C", CATEGORIES["C"], score, findings, recs)
 
 
-def assess_D():
+def assess_D() -> Path:
     # Error Handling
     findings = []
     score = 7.0
@@ -169,7 +175,7 @@ def assess_D():
     return generate_report("D", CATEGORIES["D"], score, findings, recs)
 
 
-def assess_E():
+def assess_E() -> Path:
     # Performance
     findings = []
     score = 7.5
@@ -185,7 +191,7 @@ def assess_E():
     return generate_report("E", CATEGORIES["E"], score, findings, recs)
 
 
-def assess_F():
+def assess_F() -> Path:
     # Security
     findings = []
     score = 8.0
@@ -206,7 +212,7 @@ def assess_F():
     return generate_report("F", CATEGORIES["F"], score, findings, recs)
 
 
-def assess_G():
+def assess_G() -> Path:
     # Dependencies
     findings = []
     score = 8.5
@@ -224,7 +230,7 @@ def assess_G():
     return generate_report("G", CATEGORIES["G"], score, findings, recs)
 
 
-def assess_H():
+def assess_H() -> Path:
     # CI/CD
     findings = []
     score = 8.0
@@ -243,7 +249,7 @@ def assess_H():
     return generate_report("H", CATEGORIES["H"], score, findings, recs)
 
 
-def assess_I():
+def assess_I() -> Path:
     # Code Style
     findings = []
     score = 8.0
@@ -259,7 +265,7 @@ def assess_I():
     return generate_report("I", CATEGORIES["I"], score, findings, recs)
 
 
-def assess_J():
+def assess_J() -> Path:
     # API Design
     findings = []
     score = 7.5
@@ -282,7 +288,7 @@ def assess_J():
     return generate_report("J", CATEGORIES["J"], score, findings, recs)
 
 
-def assess_K():
+def assess_K() -> Path:
     # Data Handling
     findings = []
     score = 7.0
@@ -293,7 +299,7 @@ def assess_K():
     return generate_report("K", CATEGORIES["K"], score, findings, recs)
 
 
-def assess_L():
+def assess_L() -> Path:
     # Logging
     findings = []
     score = 7.0
@@ -315,7 +321,7 @@ def assess_L():
     return generate_report("L", CATEGORIES["L"], score, findings, recs)
 
 
-def assess_M():
+def assess_M() -> Path:
     # Configuration
     findings = []
     score = 7.5
@@ -327,7 +333,7 @@ def assess_M():
     return generate_report("M", CATEGORIES["M"], score, findings, recs)
 
 
-def assess_N():
+def assess_N() -> Path:
     # Scalability
     findings = []
     score = 7.0
@@ -341,7 +347,7 @@ def assess_N():
     return generate_report("N", CATEGORIES["N"], score, findings, recs)
 
 
-def assess_O():
+def assess_O() -> Path:
     # Maintainability
     findings = []
     score = 7.5
@@ -352,7 +358,7 @@ def assess_O():
     return generate_report("O", CATEGORIES["O"], score, findings, recs)
 
 
-def run_all_assessments():
+def run_all_assessments() -> list[Path]:
     assessors = [
         assess_A,
         assess_B,
@@ -382,7 +388,7 @@ def run_all_assessments():
     return reports
 
 
-def generate_issues_locally(json_path):
+def generate_issues_locally(json_path: Path) -> None:
     """Read summary JSON and create issue markdown files for low scores."""
     try:
         with open(json_path) as f:
@@ -425,7 +431,7 @@ The assessment for this category returned a score below 5/10. This indicates sig
         print(f"Error generating local issues: {e}")
 
 
-def main():
+def main() -> None:
     print("Starting repository assessment...")
 
     # 1. Run individual assessments
