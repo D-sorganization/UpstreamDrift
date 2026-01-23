@@ -71,7 +71,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
     def test_mujoco_humanoid_command(self):
         """Test MuJoCo humanoid Docker command generation."""
-        from launchers.golf_launcher import GolfLauncher
+        from src.launchers.golf_launcher import GolfLauncher
 
         # Create launcher instance without full initialization
         launcher = GolfLauncher.__new__(GolfLauncher)
@@ -137,7 +137,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
     def test_drake_command(self):
         """Test Drake Docker command generation."""
-        from launchers.golf_launcher import GolfLauncher
+        from src.launchers.golf_launcher import GolfLauncher
 
         launcher = GolfLauncher.__new__(GolfLauncher)
         launcher.chk_live = Mock()
@@ -204,7 +204,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
     def test_pinocchio_command(self):
         """Test Pinocchio Docker command generation."""
-        from launchers.golf_launcher import GolfLauncher
+        from src.launchers.golf_launcher import GolfLauncher
 
         launcher = GolfLauncher.__new__(GolfLauncher)
         launcher.chk_live = Mock()
@@ -257,7 +257,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
     def test_display_configuration_windows(self):
         """Test Windows display configuration."""
-        from launchers.golf_launcher import GolfLauncher
+        from src.launchers.golf_launcher import GolfLauncher
 
         launcher = GolfLauncher.__new__(GolfLauncher)
         launcher.chk_live = Mock()
@@ -301,7 +301,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
 
     def test_gpu_acceleration_option(self):
         """Test GPU acceleration option."""
-        from launchers.golf_launcher import GolfLauncher
+        from src.launchers.golf_launcher import GolfLauncher
 
         launcher = GolfLauncher.__new__(GolfLauncher)
         launcher.chk_live = Mock()

@@ -15,7 +15,7 @@ HAS_DISPLAY = os.environ.get("DISPLAY") is not None or sys.platform == "win32"
 
 # Try to import PyQt6 and URDFGenerator, skip tests if not available
 try:
-    from tools.urdf_generator.main import URDFGenerator
+    from src.tools.urdf_generator.main import URDFGenerator
 
     PYQT6_AVAILABLE = True
 except ImportError:

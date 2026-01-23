@@ -12,7 +12,7 @@ def test_lazy_imports_engine_manager():
             del sys.modules[mod]
 
     # Import the manager
-    from shared.python.engine_manager import EngineManager
+    from src.shared.python.engine_manager import EngineManager
 
     # Verify heavy modules are NOT loaded
     for mod in heavy_modules:

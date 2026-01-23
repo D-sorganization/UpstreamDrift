@@ -131,7 +131,7 @@ class TestMuJoCoEngineIntegration:
         # Instead of reload (dangerous), we remove from sys.modules to force fresh import
         sys.modules.pop(module_name, None)
 
-        from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
             MuJoCoPhysicsEngine,
         )
 
@@ -165,7 +165,7 @@ class TestMuJoCoEngineIntegration:
         # Ensure we get the clean import
         sys.modules.pop(module_name, None)
 
-        from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
             MuJoCoPhysicsEngine,
         )
 
@@ -205,7 +205,7 @@ class TestCrossEngineConsistency:
         # Check MuJoCo
         if not is_mock("mujoco"):
             try:
-                from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+                from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
                     MuJoCoPhysicsEngine,
                 )
 
@@ -218,7 +218,7 @@ class TestCrossEngineConsistency:
         # Check Drake
         if not is_mock("pydrake"):
             try:
-                from engines.physics_engines.drake.python.drake_physics_engine import (
+                from src.engines.physics_engines.drake.python.drake_physics_engine import (
                     DrakePhysicsEngine,
                 )
 
@@ -231,7 +231,7 @@ class TestCrossEngineConsistency:
         # Check Pinocchio
         if not is_mock("pinocchio"):
             try:
-                from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+                from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                     PinocchioPhysicsEngine,
                 )
 

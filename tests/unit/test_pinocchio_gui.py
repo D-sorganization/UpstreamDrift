@@ -62,7 +62,7 @@ class TestPinocchioGUI:
             mock_urdf.return_value.exists.return_value = False
 
             # Late import to ensure mocks apply
-            from engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (
+            from src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (
                 PinocchioGUI,
             )
 

@@ -26,7 +26,7 @@ from src.shared.python.secure_subprocess import (
 
 # GolfLauncher requires PyQt6, import conditionally
 try:
-    from launchers.golf_launcher import GolfLauncher
+    from src.launchers.golf_launcher import GolfLauncher
 
     PYQT6_AVAILABLE = True
 except (ImportError, OSError):

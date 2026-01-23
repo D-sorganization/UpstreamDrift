@@ -246,7 +246,7 @@ class TestTimezoneAwareJWT:
         """Test that code doesn't use deprecated datetime.utcnow()."""
         import inspect
 
-        from api.auth import security
+        from src.api.auth import security
 
         # Get source code of security module
         source = inspect.getsource(security)
@@ -353,7 +353,7 @@ class TestSecretKeyValidation:
 
     def test_secret_key_length_validation(self) -> None:
         """Test that secret keys are validated for length."""
-        from api.auth.security import SECRET_KEY
+        from src.api.auth.security import SECRET_KEY
 
         # In production, secret key should be long enough
         # For testing, we accept the unsafe placeholder
@@ -381,7 +381,7 @@ class TestSecretKeyValidation:
                 if hasattr(api.auth, "security"):
                     delattr(api.auth, "security")
 
-            from api.auth import security
+            from src.api.auth import security
 
             # Check it uses the environment variable
             assert security.SECRET_KEY == "x" * 64
@@ -394,7 +394,7 @@ class TestSecurityBestPractices:
         """Test that no secrets are hardcoded in auth modules."""
         import inspect
 
-        from api.auth import dependencies, security
+        from src.api.auth import dependencies, security
 
         # Get source code
         security_source = inspect.getsource(security)
