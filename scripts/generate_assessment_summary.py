@@ -14,7 +14,7 @@ import re
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
@@ -99,7 +99,7 @@ def generate_summary(
     logger.info(f"Generating assessment summary from {len(input_reports)} reports...")
 
     # Category mapping
-    categories: dict[str, dict[str, Any]] = {
+    categories = {
         "A": {"name": "Architecture & Implementation", "weight": 2.0},
         "B": {"name": "Hygiene, Security & Quality", "weight": 2.0},
         "C": {"name": "Documentation & Integration", "weight": 1.5},
@@ -118,7 +118,7 @@ def generate_summary(
     }
 
     # Collect scores and issues
-    scores: dict[str, float] = {}
+    scores = {}
     all_issues = []
 
     for report in input_reports:
@@ -135,16 +135,14 @@ def generate_summary(
 
     for assessment_id, score in scores.items():
         if assessment_id in categories:
-            weight = cast(float, categories[assessment_id]["weight"])
+            weight = categories[assessment_id]["weight"]
             total_weighted_score += score * weight
             total_weight += weight
 
     overall_score = total_weighted_score / total_weight if total_weight > 0 else 7.0
 
     # Count critical issues
-    critical_issues = [
-        i for i in all_issues if i["severity"] in ("BLOCKER", "CRITICAL")
-    ]
+    critical_issues = [i for i in all_issues if i["severity"] in ("BLOCKER", "CRITICAL")]
 
     # Generate markdown summary
     md_content = f"""# Comprehensive Assessment Summary
@@ -169,10 +167,7 @@ Repository assessment completed across all {len(scores)} categories.
         if assessment_id in categories:
             cat_info = categories[assessment_id]
             score = scores[assessment_id]
-            md_content += (
-                f"| **{assessment_id}** | {cat_info['name']} "
-                f"| {score:.1f} | {cat_info['weight']}x |\n"
-            )
+            md_content += f"| **{assessment_id}** | {cat_info['name']} | {score:.1f} | {cat_info['weight']}x |\n"
 
     md_content += f"""
 ## Critical Issues
@@ -183,8 +178,7 @@ Found {len(critical_issues)} critical issues requiring immediate attention:
 
     for i, issue in enumerate(critical_issues[:10], 1):
         md_content += (
-            f"{i}. **[{issue['severity']}]** {issue['description']} "
-            f"(Source: {issue['source']})\n"
+            f"{i}. **[{issue['severity']}]** {issue['description']} (Source: {issue['source']})\n"
         )
 
     md_content += """
@@ -216,11 +210,7 @@ Recommended: 30 days from today
         "timestamp": datetime.now().isoformat(),
         "overall_score": round(overall_score, 2),
         "category_scores": {
-            k: {
-                "score": v,
-                "name": categories[k]["name"],
-                "weight": categories[k]["weight"],
-            }
+            k: {"score": v, "name": categories[k]["name"], "weight": categories[k]["weight"]}
             for k, v in scores.items()
             if k in categories
         },
@@ -238,7 +228,7 @@ Recommended: 30 days from today
     return 0
 
 
-def main() -> int:
+def main():
     """Parse CLI arguments and generate assessment summary."""
     parser = argparse.ArgumentParser(description="Generate assessment summary")
     parser.add_argument(
@@ -264,7 +254,7 @@ def main() -> int:
     args = parser.parse_args()
 
     # Expand wildcards if needed
-    input_reports: list[Path] = []
+    input_reports = []
     for pattern in args.input:
         if "*" in str(pattern):
             # Expand glob pattern
@@ -279,8 +269,9 @@ def main() -> int:
         logger.error("No valid input reports found")
         return 1
 
-    return generate_summary(input_reports, args.output, args.json_output)
+    exit_code = generate_summary(input_reports, args.output, args.json_output)
+    return exit_code
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main() or 0)
