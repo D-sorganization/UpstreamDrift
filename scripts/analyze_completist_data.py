@@ -190,7 +190,7 @@ def generate_report() -> None:
     # Sort criticals
     critical_candidates.sort(key=lambda x: calculate_metrics(x)[0], reverse=True)
 
-    # Group TODOs
+    # Group items by module
     module_todos: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for t in todos:
         mod = get_module_from_path(cast(str, t["file"]))
