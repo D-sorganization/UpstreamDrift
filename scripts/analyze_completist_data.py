@@ -1,9 +1,8 @@
 import os
-import re
-from datetime import datetime
 from collections import defaultdict
-from typing import Any, TypedDict, cast
 from collections.abc import Mapping
+from datetime import datetime
+from typing import Any, TypedDict, cast
 
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
@@ -15,12 +14,14 @@ STUBS_FILE = os.path.join(DATA_DIR, "stub_functions.txt")
 DOCS_FILE = os.path.join(DATA_DIR, "incomplete_docs.txt")
 ABSTRACT_FILE = os.path.join(DATA_DIR, "abstract_methods.txt")
 
+
 class Finding(TypedDict):
     file: str
     line: str
     text: str
-    name: str | None # Optional
-    type: str | None # Optional
+    name: str | None  # Optional
+    type: str | None  # Optional
+
 
 def parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
     """Parse a grep output line."""
@@ -31,6 +32,7 @@ def parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
     lineno = parts[1]
     content = parts[2].strip()
     return filepath, lineno, content
+
 
 def get_module_from_path(filepath: str) -> str:
     """Extract a module name from a filepath."""
@@ -45,6 +47,7 @@ def get_module_from_path(filepath: str) -> str:
     elif len(parts) > 0:
         return parts[0]
     return "root"
+
 
 def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Analyze TO-DO and FIX-ME markers."""
@@ -66,6 +69,7 @@ def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
                     fixmes.append({"file": filepath, "line": lineno, "text": content})
     return todos, fixmes
 
+
 def analyze_stubs() -> list[dict[str, Any]]:
     """Analyze stub functions."""
     stubs: list[dict[str, Any]] = []
@@ -82,6 +86,7 @@ def analyze_stubs() -> list[dict[str, Any]]:
                 filepath, lineno = loc.rsplit(":", 1)
                 stubs.append({"file": filepath, "line": lineno, "name": name})
     return stubs
+
 
 def analyze_docs() -> list[dict[str, Any]]:
     """Analyze missing documentation."""
@@ -100,6 +105,7 @@ def analyze_docs() -> list[dict[str, Any]]:
                 missing_docs.append({"file": filepath, "line": lineno, "name": name})
     return missing_docs
 
+
 def analyze_not_implemented() -> list[dict[str, Any]]:
     """Analyze Not Implemented Error occurrences."""
     errors: list[dict[str, Any]] = []
@@ -115,6 +121,7 @@ def analyze_not_implemented() -> list[dict[str, Any]]:
                     errors.append({"file": filepath, "line": lineno, "text": content})
     return errors
 
+
 def analyze_abstract_methods() -> list[dict[str, Any]]:
     """Analyze Abstract Methods."""
     abstracts: list[dict[str, Any]] = []
@@ -125,8 +132,11 @@ def analyze_abstract_methods() -> list[dict[str, Any]]:
                 if not filepath or not lineno or content is None:
                     continue
                 if "@abstractmethod" in content:
-                    abstracts.append({"file": filepath, "line": lineno, "text": content})
+                    abstracts.append(
+                        {"file": filepath, "line": lineno, "text": content}
+                    )
     return abstracts
+
 
 def calculate_metrics(item: Mapping[str, Any]) -> tuple[int, int, int]:
     """Calculate User Impact, Test Coverage, Complexity."""
@@ -152,6 +162,7 @@ def calculate_metrics(item: Mapping[str, Any]) -> tuple[int, int, int]:
     complexity = 3
 
     return impact, coverage, complexity
+
 
 def generate_report() -> None:
     """Generate the completist report."""
@@ -179,7 +190,7 @@ def generate_report() -> None:
     # Sort criticals
     critical_candidates.sort(key=lambda x: calculate_metrics(x)[0], reverse=True)
 
-    # Group TODOs
+    # Group items by module
     module_todos: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for t in todos:
         mod = get_module_from_path(cast(str, t["file"]))
@@ -197,11 +208,12 @@ def generate_report() -> None:
     report_content += f"- **Abstract Methods**: {len(abstract_methods)}\n\n"
 
     report_content += "## Critical Incomplete (Priority List)\n"
-    report_content += "| File | Line | Type | User Impact | Test Coverage | Complexity |\n"
+    report_content += (
+        "| File | Line | Type | User Impact | Test Coverage | Complexity |\n"
+    )
     report_content += "|---|---|---|---|---|---|\n"
     for item in critical_candidates[:50]:
         impact, coverage, complexity = calculate_metrics(item)
-        name = cast(str, item.get("name", item.get("text", "")))[:40].replace("|", "\\|")
         file_p = item["file"]
         line_p = item["line"]
         type_p = item.get("type", "")
@@ -209,7 +221,7 @@ def generate_report() -> None:
     if len(critical_candidates) > 50:
         report_content += f"\n*(...and {len(critical_candidates) - 50} more)*\n"
 
-    report_content += f"\n## Feature Gap Matrix (Module -> Missing Features)\n"
+    report_content += "\n## Feature Gap Matrix (Module -> Missing Features)\n"
 
     sorted_modules = sorted(module_todos.items(), key=lambda x: len(x[1]), reverse=True)
 
@@ -221,7 +233,7 @@ def generate_report() -> None:
             text = cast(str, item["text"])[:80].replace("|", "\\|")
             report_content += f"| {item['line']} | {text} |\n"
         if len(items) > 5:
-             report_content += f"| ... | *({len(items)-5} more)* |\n"
+            report_content += f"| ... | *({len(items)-5} more)* |\n"
 
     report_content += "\n## Technical Debt Register (Top 20)\n"
     report_content += "| File | Line | Content |\n"
@@ -249,9 +261,7 @@ def generate_report() -> None:
     report_content += "4. Add docstrings to public interfaces.\n"
 
     report_content += "\n## Issues to be Created\n"
-    report_content += (
-        "The following critical items block core functionality and require issues with label 'incomplete-implementation,critical':\n\n"
-    )
+    report_content += "The following critical items block core functionality and require issues with label 'incomplete-implementation,critical':\n\n"
     for item in critical_candidates[:5]:
         impact, _, _ = calculate_metrics(item)
         if impact >= 4:
@@ -272,6 +282,7 @@ def generate_report() -> None:
         f.write(report_content)
 
     print(f"Reports generated: {report_path}, {latest_path}")
+
 
 if __name__ == "__main__":
     generate_report()
