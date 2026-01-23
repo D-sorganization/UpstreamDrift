@@ -1021,7 +1021,7 @@ def main():
 
     # Print summary
     print(f"\n{'=' * 60}")
-    print(f"PRAGMATIC PROGRAMMER REVIEW SUMMARY")
+    print("PRAGMATIC PROGRAMMER REVIEW SUMMARY")
     print(f"{'=' * 60}")
     print(f"Overall Score: {results['overall_score']:.1f}/10")
     print(f"Critical Issues: {results['issue_summary']['CRITICAL']}")
