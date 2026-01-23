@@ -124,12 +124,12 @@ def extract_functions(content: str) -> list[dict]:
                         "name": node.name,
                         "lineno": node.lineno,
                         "args": len(node.args.args),
-                        "body_lines": node.end_lineno - node.lineno + 1
-                        if hasattr(node, "end_lineno")
-                        else 0,
-                        "has_docstring": (
-                            ast.get_docstring(node) is not None
+                        "body_lines": (
+                            node.end_lineno - node.lineno + 1
+                            if hasattr(node, "end_lineno")
+                            else 0
                         ),
+                        "has_docstring": (ast.get_docstring(node) is not None),
                     }
                 )
     except SyntaxError:
@@ -301,7 +301,7 @@ def check_reversibility(root_path: Path) -> list[dict]:
     # Check for hardcoded configs
     config_patterns = [
         (r'host\s*=\s*["\'][^"\']+["\']', "Hardcoded host"),
-        (r'port\s*=\s*\d+', "Hardcoded port"),
+        (r"port\s*=\s*\d+", "Hardcoded port"),
         (r'password\s*=\s*["\'][^"\']+["\']', "Hardcoded password"),
         (r'api_key\s*=\s*["\'][^"\']+["\']', "Hardcoded API key"),
         (r'database\s*=\s*["\'][^"\']+["\']', "Hardcoded database"),
@@ -507,9 +507,7 @@ def check_testing(root_path: Path) -> list[dict]:
 
     # Find source files
     source_files = find_python_files(root_path)
-    source_files = [
-        f for f in source_files if "test" not in str(f).lower()
-    ]
+    source_files = [f for f in source_files if "test" not in str(f).lower()]
 
     # Calculate test ratio
     test_ratio = len(test_files) / max(len(source_files), 1)
@@ -583,9 +581,7 @@ def check_documentation(root_path: Path, files: list[Path]) -> list[dict]:
             }
         )
     else:
-        readme_content = readme_files[0].read_text(
-            encoding="utf-8", errors="ignore"
-        )
+        readme_content = readme_files[0].read_text(encoding="utf-8", errors="ignore")
         if len(readme_content) < 500:
             issues.append(
                 {
@@ -776,9 +772,10 @@ def run_review(root_path: Path) -> dict[str, Any]:
 
     # Calculate weighted overall score
     total_weight = sum(p["weight"] for p in PRINCIPLES.values())
-    overall = sum(
-        scores[pid] * PRINCIPLES[pid]["weight"] for pid in PRINCIPLES
-    ) / total_weight
+    overall = (
+        sum(scores[pid] * PRINCIPLES[pid]["weight"] for pid in PRINCIPLES)
+        / total_weight
+    )
 
     return {
         "timestamp": datetime.now().isoformat(),
@@ -819,8 +816,14 @@ def generate_markdown_report(results: dict[str, Any], output_path: Path) -> None
 """
 
     for pid, info in results["principle_scores"].items():
-        status = "Pass" if info["score"] >= 7 else "Needs Work" if info["score"] >= 4 else "Critical"
-        md += f"| {info['name']} | {info['score']:.1f} | {info['weight']}x | {status} |\n"
+        status = (
+            "Pass"
+            if info["score"] >= 7
+            else "Needs Work" if info["score"] >= 4 else "Critical"
+        )
+        md += (
+            f"| {info['name']} | {info['score']:.1f} | {info['weight']}x | {status} |\n"
+        )
 
     md += f"""
 ## Issue Summary
@@ -867,9 +870,7 @@ def generate_markdown_report(results: dict[str, Any], output_path: Path) -> None
     logger.info(f"Report saved to: {output_path}")
 
 
-def create_github_issues(
-    results: dict[str, Any], dry_run: bool = False
-) -> list[dict]:
+def create_github_issues(results: dict[str, Any], dry_run: bool = False) -> list[dict]:
     """Create GitHub issues for critical and major findings."""
     issues_to_create = []
 
@@ -934,15 +935,17 @@ Based on principles from "The Pragmatic Programmer" by David Thomas and Andrew H
     for issue_data in issues_to_create[:10]:  # Limit to 10 issues per run
         try:
             cmd = [
-                "gh", "issue", "create",
-                "--title", issue_data["title"],
-                "--body", issue_data["body"],
+                "gh",
+                "issue",
+                "create",
+                "--title",
+                issue_data["title"],
+                "--body",
+                issue_data["body"],
             ]
             # Try with labels first
             label_cmd = cmd + ["--label", ",".join(issue_data["labels"])]
-            result = subprocess.run(
-                label_cmd, capture_output=True, text=True
-            )
+            result = subprocess.run(label_cmd, capture_output=True, text=True)
             if result.returncode != 0:
                 # Retry without labels
                 result = subprocess.run(cmd, capture_output=True, text=True)
