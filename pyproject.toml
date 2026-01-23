@@ -52,7 +52,7 @@ dependencies = [
     "pypdf>=6.6.0",
     "urllib3>=2.6.3",
     "fonttools>=4.60.2",
-    "marshmallow>=3.26.2,<4.0.0",
+    "marshmallow>=3.26.2,<5.0.0",
     # cryptography for JWT signatures (updated for CVE-2024-26130)
     "cryptography>=44.0.1,<47.0.0",
     # Dependencies from consolidated requirements.txt files
