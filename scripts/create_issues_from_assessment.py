@@ -23,7 +23,15 @@ def get_existing_issues() -> list[dict[str, Any]]:
     """Fetch existing GitHub issues."""
     try:
         result = subprocess.run(
-            ["gh", "issue", "list", "--limit", "200", "--json", "number,title,state,labels"],
+            [
+                "gh",
+                "issue",
+                "list",
+                "--limit",
+                "200",
+                "--json",
+                "number,title,state,labels",
+            ],
             capture_output=True,
             text=True,
             check=True,
@@ -82,9 +90,21 @@ def create_github_issue(
         else:
             # Try without labels if label creation failed
             if "label" in result.stderr.lower():
-                cmd_no_labels = ["gh", "issue", "create", "--title", title, "--body", body]
-                result = subprocess.run(cmd_no_labels, capture_output=True, text=True, check=True)
-                logger.info(f"✓ Created issue (without labels): {result.stdout.strip()}")
+                cmd_no_labels = [
+                    "gh",
+                    "issue",
+                    "create",
+                    "--title",
+                    title,
+                    "--body",
+                    body,
+                ]
+                result = subprocess.run(
+                    cmd_no_labels, capture_output=True, text=True, check=True
+                )
+                logger.info(
+                    f"✓ Created issue (without labels): {result.stdout.strip()}"
+                )
                 return True
             logger.error(f"✗ Failed to create issue '{title}': {result.stderr}")
             return False
@@ -184,7 +204,9 @@ def process_assessment_findings(
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Create GitHub issues from assessment findings")
+    parser = argparse.ArgumentParser(
+        description="Create GitHub issues from assessment findings"
+    )
     parser.add_argument(
         "--input",
         required=True,
