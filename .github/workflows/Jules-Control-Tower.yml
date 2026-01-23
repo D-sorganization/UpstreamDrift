@@ -13,10 +13,8 @@ on:
     - cron: "0 8 * * *"   # Midnight PST - Assessment Generator
     - cron: "30 8 * * *"  # 12:30 AM PST - Code Quality Reviewer
     - cron: "0 9 * * *"   # 1 AM PST - Completist (incomplete impl)
-    - cron: "30 9 * * *"  # 1:30 AM PST - Layman's Terms Writer
-    - cron: "0 10 * * *"  # 2 AM PST - Critics Comments Writer
     - cron: "30 10 * * *" # 2:30 AM PST - Sentinel (security)
-    - cron: "0 11 * * *"  # 3 AM PST - Tech Custodian / Thesis Defender (Thu)
+    - cron: "0 11 * * *"  # 3 AM PST - Tech Custodian
     - cron: "30 11 * * *" # 3:30 AM PST - Issue Resolver (daily fix)
     - cron: "0 12 * * *"  # 4 AM PST - PR Compiler (consolidate PRs)
   workflow_dispatch:
@@ -31,12 +29,8 @@ on:
           - assessment-generator
           - code-quality-reviewer
           - completist
-          - laymans-terms-writer
-          - critics-comments-writer
           - sentinel
           - tech-custodian
-          - tech-debt-assessor
-          - thesis-defender
           - issue-resolver
           - pr-compiler
 
@@ -58,7 +52,6 @@ permissions:
 
 jobs:
   triage:
-    if: vars.WORKFLOWS_PAUSED != 'true'
     runs-on: ubuntu-latest
     # Removed global actor check to allow scheduled runs even if file modified by bot
     outputs:
@@ -99,7 +92,6 @@ jobs:
             const event = context.eventName;
             const actor = context.actor;
             const schedule = context.payload.schedule;
-            const day = new Date().getUTCDay();
             const manualTarget = context.payload.inputs?.target;
             let target = "none";
 
@@ -127,34 +119,28 @@ jobs:
               if (schedule) {
                 switch (schedule) {
                   case "0 8 * * *":
-                    target = "assessment-generator";
-                    break;
+          target = "assessment-generator";
+          break;
                   case "30 8 * * *":
-                    target = "code-quality-reviewer";
-                    break;
+          target = "code-quality-reviewer";
+          break;
                   case "0 9 * * *":
-                    target = "completist";
-                    break;
-                  case "30 9 * * *":
-                    target = "laymans-terms-writer";
-                    break;
-                  case "0 10 * * *":
-                    target = "critics-comments-writer";
-                    break;
+          target = "completist";
+          break;
                   case "30 10 * * *":
-                    target = "sentinel";
-                    break;
+          target = "sentinel";
+          break;
                   case "0 11 * * *":
-                    target = day === 4 ? "thesis-defender" : "tech-custodian";
-                    break;
+          target = "tech-custodian";
+          break;
                   case "30 11 * * *":
-                    target = "issue-resolver";
-                    break;
+          target = "issue-resolver";
+          break;
                   case "0 12 * * *":
-                    target = "pr-compiler";
-                    break;
+          target = "pr-compiler";
+          break;
                   default:
-                    target = "none";
+          target = "none";
                 }
               }
 
@@ -170,14 +156,10 @@ jobs:
                   target = "code-quality-reviewer";
                 } else if (hour === 9 && minute < 30) {
                   target = "completist";
-                } else if (hour === 9 && minute >= 30) {
-                  target = "laymans-terms-writer";
-                } else if (hour === 10 && minute < 30) {
-                  target = "critics-comments-writer";
                 } else if (hour === 10 && minute >= 30) {
                   target = "sentinel";
                 } else if (hour === 11 && minute < 30) {
-                  target = day === 4 ? "thesis-defender" : "tech-custodian";
+                  target = "tech-custodian";
                 } else if (hour === 11 && minute >= 30) {
                   target = "issue-resolver";
                 } else if (hour === 12) {
@@ -275,12 +257,6 @@ jobs:
     uses: ./.github/workflows/Jules-Assessment-Generator.yml
     secrets: inherit
 
-  call-thesis-defender:
-    needs: triage
-    if: needs.triage.outputs.target == 'thesis-defender'
-    uses: ./.github/workflows/Jules-Thesis-Defender.yml
-    secrets: inherit
-
   call-issue-resolver:
     needs: triage
     if: needs.triage.outputs.target == 'issue-resolver'
@@ -293,26 +269,8 @@ jobs:
     uses: ./.github/workflows/Jules-Completist.yml
     secrets: inherit
 
-  call-laymans-terms-writer:
-    needs: triage
-    if: needs.triage.outputs.target == 'laymans-terms-writer'
-    uses: ./.github/workflows/Jules-Laymans-Terms-Writer.yml
-    secrets: inherit
-
-  call-critics-comments-writer:
-    needs: triage
-    if: needs.triage.outputs.target == 'critics-comments-writer'
-    uses: ./.github/workflows/Jules-Critics-Comments.yml
-    secrets: inherit
-
   call-pr-compiler:
     needs: triage
     if: needs.triage.outputs.target == 'pr-compiler'
     uses: ./.github/workflows/Jules-PR-Compiler.yml
-    secrets: inherit
-
-  call-tech-debt-assessor:
-    needs: triage
-    if: needs.triage.outputs.target == 'tech-debt-assessor'
-    uses: ./.github/workflows/Jules-Tech-Debt-Assessor.yml
     secrets: inherit
