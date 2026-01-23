@@ -50,7 +50,7 @@ jobs:
           echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
 
           # Get PR details
-          gh pr view $PR_NUMBER --json headRefName,headRepository,headRepositoryOwner,isCrossRepository,title,body,comments,reviewComments \
+          gh pr view $PR_NUMBER --json headRefName,headRepository,headRepositoryOwner,isCrossRepository,title,body,comments,reviews \
             > .pr_details.json
 
           # Get the branch
@@ -76,7 +76,7 @@ jobs:
           actionable_comments = []
 
           # Check review comments (inline code comments)
-          for comment in pr.get('reviewComments', []):
+          for comment in pr.get('reviews', []):
               body = comment.get('body', '').lower()
               # Look for actionable patterns
               if any(word in body for word in ['please', 'should', 'could you', 'can you', 'fix', 'change', 'update', 'add', 'remove', '?']):
