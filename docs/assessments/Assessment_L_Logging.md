@@ -5,8 +5,8 @@
 
 ## Findings
 
-- Found 201 logging calls.
-- Found 118 print calls.
+- Found 203 logging calls.
+- Found 112 print calls.
 
 ## Recommendations
 

@@ -5,7 +5,7 @@
 
 ## Findings
 
-- Found 334 try blocks and 318 except blocks.
+- Found 332 try blocks and 317 except blocks.
 
 ## Recommendations
 

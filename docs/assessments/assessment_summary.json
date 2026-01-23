@@ -1,6 +1,15 @@
 {
-  "timestamp": "2026-01-23T00:27:46.841928",
+  "timestamp": "2026-01-23T08:16:47.221979",
   "overall_score": 7.14,
+  "group_scores": {
+    "Code Quality": 7.625,
+    "Testing": 6.0,
+    "Documentation": 7.0,
+    "Security": 7.0,
+    "Performance": 7.25,
+    "Ops & Config": 7.75,
+    "Design": 7.25
+  },
   "category_scores": {
     "A": {
       "score": 8.0,
@@ -63,16 +72,88 @@
       "name": "Maintainability"
     }
   },
-  "group_scores": {
-    "Code Quality": 7.5,
-    "Testing": 6.0,
-    "Documentation": 7.0,
-    "Security": 7.0,
-    "Performance": 7.25,
-    "Ops & Config": 7.75,
-    "Design": 7.5
-  },
-  "critical_issues": [],
-  "total_issues": 0,
-  "reports_analyzed": 15
+  "reports_analyzed": 15,
+  "total_issues": 20,
+  "issues": [
+    {
+      "description": "Source directory structure exists (src/ or shared/).",
+      "source": "Assessment_A_Code_Structure"
+    },
+    {
+      "description": "Engines directory found, indicating modular architecture.",
+      "source": "Assessment_A_Code_Structure"
+    },
+    {
+      "description": "Root README.md exists.",
+      "source": "Assessment_B_Documentation"
+    },
+    {
+      "description": "README.md is reasonably detailed.",
+      "source": "Assessment_B_Documentation"
+    },
+    {
+      "description": "docs/ directory exists.",
+      "source": "Assessment_B_Documentation"
+    },
+    {
+      "description": "Found 166 test files in tests/ directory.",
+      "source": "Assessment_C_Test_Coverage"
+    },
+    {
+      "description": "Found 332 try blocks and 317 except blocks.",
+      "source": "Assessment_D_Error_Handling"
+    },
+    {
+      "description": "Profiling tools usage detected.",
+      "source": "Assessment_E_Performance"
+    },
+    {
+      "description": "Potential hardcoded secrets found in 61 files (needs verification).",
+      "source": "Assessment_F_Security"
+    },
+    {
+      "description": "Dependency definition files found.",
+      "source": "Assessment_G_Dependencies"
+    },
+    {
+      "description": "Found 48 GitHub Actions workflows.",
+      "source": "Assessment_H_CICD"
+    },
+    {
+      "description": "Ruff configuration found.",
+      "source": "Assessment_I_Code_Style"
+    },
+    {
+      "description": "api/ directory exists.",
+      "source": "Assessment_J_API_Design"
+    },
+    {
+      "description": "FastAPI usage detected.",
+      "source": "Assessment_J_API_Design"
+    },
+    {
+      "description": "Assessed data handling patterns.",
+      "source": "Assessment_K_Data_Handling"
+    },
+    {
+      "description": "Found 203 logging calls.",
+      "source": "Assessment_L_Logging"
+    },
+    {
+      "description": "Found 112 print calls.",
+      "source": "Assessment_L_Logging"
+    },
+    {
+      "description": "Found 12 configuration files (yaml/toml).",
+      "source": "Assessment_M_Configuration"
+    },
+    {
+      "description": "Scalability assessment based on architecture.",
+      "source": "Assessment_N_Scalability"
+    },
+    {
+      "description": "Maintainability assessment.",
+      "source": "Assessment_O_Maintainability"
+    }
+  ]
 }

@@ -96,7 +96,7 @@ def assess_A():
         findings.append("No standard 'src' or 'shared' directory found.")
         score -= 2
 
-    engines_exists = (REPO_ROOT / "engines").exists()
+    engines_exists = (REPO_ROOT / "engines").exists() or (REPO_ROOT / "src" / "engines").exists()
     if engines_exists:
         findings.append("Engines directory found, indicating modular architecture.")
 
@@ -265,9 +265,13 @@ def assess_J():
     score = 7.5
 
     api_dir = REPO_ROOT / "api"
-    if api_dir.exists():
+    src_api_dir = REPO_ROOT / "src" / "api"
+
+    if api_dir.exists() or src_api_dir.exists():
         findings.append("api/ directory exists.")
-        fastapi = grep_count("FastAPI", "api/**/*.py")
+        fastapi = grep_count("FastAPI", "api/**/*.py") + grep_count(
+            "FastAPI", "src/api/**/*.py"
+        )
         if fastapi > 0:
             findings.append("FastAPI usage detected.")
     else:
