@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from shared.python.ellipsoid_visualization import (
+from src.shared.python.ellipsoid_visualization import (
     EllipsoidData,
     EllipsoidSequence,
     EllipsoidVisualizer,
@@ -25,7 +25,7 @@ from shared.python.ellipsoid_visualization import (
 )
 
 if TYPE_CHECKING:
-    from shared.python.interfaces import PhysicsEngine
+    from src.shared.python.interfaces import PhysicsEngine
 
 
 class TestEllipsoidComputation:

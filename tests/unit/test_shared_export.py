@@ -13,7 +13,7 @@ sys.path.insert(
     str(Path(__file__).resolve().parents[2]),
 )
 
-from shared.python.export import (
+from src.shared.python.export import (
     export_recording_all_formats,
     export_to_hdf5,
     export_to_matlab,

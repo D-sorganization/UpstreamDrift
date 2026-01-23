@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from shared.python.model_registry import ModelRegistry
+from src.shared.python.model_registry import ModelRegistry
 
 # Mock PyQt6 for headless/CI environment where DLLs are broken/missing
 # This must happen BEFORE importing modules that use PyQt6
@@ -161,6 +161,7 @@ def qapp():
 @pytest.fixture
 def launcher_env(qapp):
     """Setup launcher environment with temp config."""
+
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
 
@@ -203,25 +204,64 @@ models:
         # icon files are found, so Qt never attempts heavy-weight icon
         # initialization while the logic we care about (graceful handling of
         # missing assets) is still executed.
-        with (
-            patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
-            patch("launchers.golf_launcher.ASSETS_DIR", new=temp_path),
-        ):
-            MockRegistry.return_value = temp_registry
+        # Check if we should skip due to CI environment
+        is_ci = (
+            os.environ.get("CI") == "true" or os.environ.get("GITHUB_ACTIONS") == "true"
+        )
+        has_display = os.environ.get("DISPLAY") is not None
 
-            # Create Launcher
-            # Force reload to ensure no mocks from unit tests persist
-            # Note: We use sys.modules.pop instead of importlib.reload to avoid
-            # corruption of C-extension bindings (like PyQt/MuJoCo)
-            sys.modules.pop("launchers.golf_launcher", None)
-            from launchers.golf_launcher import GolfLauncher as FreshGolfLauncher
+        if is_ci and not has_display:
+            pytest.skip("Skipping Qt-dependent test in headless CI environment")
 
-            launcher = FreshGolfLauncher()
-            yield launcher, model_xml
+        # Mock AIAssistantPanel before importing to prevent Qt crashes
+        # Clear modules first so patches take effect
+        sys.modules.pop("launchers.golf_launcher", None)
+        sys.modules.pop("src.launchers.golf_launcher", None)
+        sys.modules.pop("src.shared.python.ai.gui.assistant_panel", None)
+        sys.modules.pop("src.shared.python.ai.gui", None)
+        sys.modules.pop("shared.python.ai.gui", None)
+        sys.modules.pop("shared.python.ai.gui.assistant_panel", None)
+
+        mock_ai_panel = MagicMock()
+        mock_ai_panel.settings_requested = MagicMock()
+
+        # Patch AIAssistantPanel BEFORE importing golf_launcher
+        # The import happens at module level, so we need the patch in place first
+        ai_panel_patcher = patch(
+            "shared.python.ai.gui.AIAssistantPanel",
+            return_value=mock_ai_panel,
+        )
+        ai_panel_patcher.start()
+
+        try:
+            with (
+                patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
+                patch("src.launchers.golf_launcher.ASSETS_DIR", new=temp_path),
+                patch("launchers.golf_launcher.ASSETS_DIR", new=temp_path),
+            ):
+                MockRegistry.return_value = temp_registry
+
+                # Create Launcher
+                # Import after patches are in place
+                from src.launchers.golf_launcher import (
+                    GolfLauncher as FreshGolfLauncher,
+                )
+
+                launcher = FreshGolfLauncher()
+                yield launcher, model_xml
+        finally:
+            ai_panel_patcher.stop()
 
 
 def test_launcher_detects_real_model_files(launcher_env):
     """Test that launcher correctly loads and identifies valid/invalid paths."""
+    # Skip in CI environments where Qt might crash
+    is_ci = os.environ.get("CI") == "true" or os.environ.get("GITHUB_ACTIONS") == "true"
+    has_display = os.environ.get("DISPLAY") is not None
+
+    if is_ci and not has_display:
+        pytest.skip("Skipping Qt-dependent test in headless CI environment")
+
     launcher, model_path = launcher_env
 
     # 1. Verify model loaded from registry (UI cards)

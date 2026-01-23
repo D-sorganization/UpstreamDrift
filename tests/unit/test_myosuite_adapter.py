@@ -12,8 +12,8 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from shared.python.multi_muscle import MuscleGroup
-from shared.python.myosuite_adapter import MuscleDrivenEnv, train_muscle_policy
+from src.shared.python.multi_muscle import MuscleGroup
+from src.shared.python.myosuite_adapter import MuscleDrivenEnv, train_muscle_policy
 
 
 @pytest.fixture
@@ -59,7 +59,7 @@ class TestMuscleDrivenEnv:
 
         assert isinstance(obs, np.ndarray)
         assert isinstance(reward, float)
-        assert isinstance(done, (bool, np.bool_))
+        assert isinstance(done, bool | np.bool_)
         assert isinstance(info, dict)
 
         assert "tau_muscle" in info

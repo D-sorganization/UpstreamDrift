@@ -11,7 +11,7 @@ import pytest
 mock_opensim = MagicMock()
 sys.modules["opensim"] = mock_opensim
 
-from engines.physics_engines.opensim.python.opensim_physics_engine import (
+from src.engines.physics_engines.opensim.python.opensim_physics_engine import (
     OpenSimPhysicsEngine,  # noqa: E402
 )
 

@@ -20,7 +20,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-from shared.python.constants import GRAVITY_M_S2
+from src.shared.python.constants import GRAVITY_M_S2
 from tests.fixtures.fixtures_lib import _check_mujoco_available
 
 logger = logging.getLogger(__name__)

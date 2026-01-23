@@ -37,8 +37,8 @@ except Exception:
     BCRYPT_AVAILABLE = False
     import bcrypt as bcrypt_lib  # type: ignore[no-redef]
 
-from api.auth.models import APIKey, User
-from api.auth.security import SecurityManager
+from src.api.auth.models import APIKey, User
+from src.api.auth.security import SecurityManager
 
 # Skip marker for bcrypt-dependent tests
 requires_bcrypt = pytest.mark.skipif(
@@ -142,7 +142,7 @@ class TestBcryptAPIKeyVerification:
         from fastapi import HTTPException
         from fastapi.security import HTTPAuthorizationCredentials
 
-        from api.auth.dependencies import get_current_user_from_api_key
+        from src.api.auth.dependencies import get_current_user_from_api_key
 
         # Create test API key
         api_key = f"gms_{secrets.token_urlsafe(32)}"
@@ -208,7 +208,7 @@ class TestTimezoneAwareJWT:
 
         # The exp should be a timestamp (Unix epoch)
         exp_timestamp = payload["exp"]
-        assert isinstance(exp_timestamp, (int, float))
+        assert isinstance(exp_timestamp, int | float)
 
         # Convert to datetime and verify it's in the future
         exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=UTC)
@@ -246,7 +246,7 @@ class TestTimezoneAwareJWT:
         """Test that code doesn't use deprecated datetime.utcnow()."""
         import inspect
 
-        from api.auth import security
+        from src.api.auth import security
 
         # Get source code of security module
         source = inspect.getsource(security)
@@ -353,7 +353,7 @@ class TestSecretKeyValidation:
 
     def test_secret_key_length_validation(self) -> None:
         """Test that secret keys are validated for length."""
-        from api.auth.security import SECRET_KEY
+        from src.api.auth.security import SECRET_KEY
 
         # In production, secret key should be long enough
         # For testing, we accept the unsafe placeholder
@@ -381,7 +381,7 @@ class TestSecretKeyValidation:
                 if hasattr(api.auth, "security"):
                     delattr(api.auth, "security")
 
-            from api.auth import security
+            from src.api.auth import security
 
             # Check it uses the environment variable
             assert security.SECRET_KEY == "x" * 64
@@ -394,7 +394,7 @@ class TestSecurityBestPractices:
         """Test that no secrets are hardcoded in auth modules."""
         import inspect
 
-        from api.auth import dependencies, security
+        from src.api.auth import dependencies, security
 
         # Get source code
         security_source = inspect.getsource(security)

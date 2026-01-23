@@ -25,7 +25,7 @@ class TestLauncherIntegration:
         suite_root = Path(__file__).parent.parent.parent
         sys.path.insert(0, str(suite_root))
 
-        from launchers.unified_launcher import UnifiedLauncher
+        from src.launchers.unified_launcher import UnifiedLauncher
 
         launcher = UnifiedLauncher()
         assert launcher is not None
@@ -69,7 +69,7 @@ class TestLauncherIntegration:
         from unittest.mock import patch
 
         # Import inside the test to avoid circular dependencies
-        from launchers.unified_launcher import UnifiedLauncher
+        from src.launchers.unified_launcher import UnifiedLauncher
 
         # Patch GolfLauncher to avoid instantiation issues (StopIteration from side_effects)
         with patch("launchers.golf_launcher.GolfLauncher") as _:
@@ -88,7 +88,7 @@ class TestEngineProbes:
         suite_root = Path(__file__).parent.parent.parent
         sys.path.insert(0, str(suite_root))
 
-        from shared.python.engine_manager import EngineManager
+        from src.shared.python.engine_manager import EngineManager
 
         manager = EngineManager()
 
@@ -103,8 +103,8 @@ class TestEngineProbes:
 
         from unittest.mock import MagicMock, patch
 
-        from shared.python.engine_manager import EngineManager
-        from shared.python.engine_probes import ProbeStatus
+        from src.shared.python.engine_manager import EngineManager
+        from src.shared.python.engine_probes import ProbeStatus
 
         # Mock mujoco to avoid DLL errors in CI
         with patch.dict(sys.modules, {"mujoco": MagicMock(__version__="3.0.0")}):
@@ -127,7 +127,7 @@ class TestEngineProbes:
 
         from unittest.mock import MagicMock, patch
 
-        from shared.python.engine_manager import EngineManager
+        from src.shared.python.engine_manager import EngineManager
 
         # Mock mujoco to avoid DLL errors in CI
         with patch.dict(sys.modules, {"mujoco": MagicMock(__version__="3.0.0")}):
@@ -148,8 +148,8 @@ class TestEngineProbes:
 
         from unittest.mock import MagicMock, patch
 
-        from shared.python.engine_manager import EngineManager
-        from shared.python.engine_probes import ProbeStatus
+        from src.shared.python.engine_manager import EngineManager
+        from src.shared.python.engine_probes import ProbeStatus
 
         # Mock mujoco to avoid DLL errors in CI
         with patch.dict(sys.modules, {"mujoco": MagicMock(__version__="3.0.0")}):
@@ -315,7 +315,7 @@ class TestOutputManager:
         suite_root = Path(__file__).parent.parent.parent
         sys.path.insert(0, str(suite_root / "shared" / "python"))
 
-        from shared.python.output_manager import OutputFormat, OutputManager
+        from src.shared.python.output_manager import OutputFormat, OutputManager
 
         with tempfile.TemporaryDirectory() as tmpdir:
             manager = OutputManager(tmpdir)

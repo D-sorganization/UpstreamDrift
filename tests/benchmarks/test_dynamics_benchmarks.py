@@ -14,20 +14,20 @@ MUJOCO_PYTHON_PATH = REPO_ROOT / "engines" / "physics_engines" / "mujoco" / "pyt
 if str(MUJOCO_PYTHON_PATH) not in sys.path:
     sys.path.append(str(MUJOCO_PYTHON_PATH))
 
-from shared.python.constants import GRAVITY_M_S2  # noqa: E402
+from src.shared.python.constants import GRAVITY_M_S2  # noqa: E402
 
 # Check if pytest-benchmark is installed, otherwise skip
 if importlib.util.find_spec("pytest_benchmark") is None:
     pytest.skip("pytest-benchmark not installed", allow_module_level=True)
 
 try:
-    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.aba import (  # noqa: E402
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.aba import (  # noqa: E402
         aba,
     )
-    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.crba import (  # noqa: E402
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.crba import (  # noqa: E402
         crba,
     )
-    from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.rnea import (  # noqa: E402, I001
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.rnea import (  # noqa: E402, I001
         rnea,
     )
 except ImportError:

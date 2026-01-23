@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from shared.python.ai.tool_registry import (
+from src.shared.python.ai.tool_registry import (
     Tool,
     ToolCategory,
     ToolParameter,
@@ -263,7 +263,7 @@ class TestToolRegistry:
 
     def test_execute_not_found(self) -> None:
         """Test executing non-existent tool raises error."""
-        from shared.python.ai.exceptions import ToolExecutionError
+        from src.shared.python.ai.exceptions import ToolExecutionError
 
         registry = ToolRegistry()
         with pytest.raises(ToolExecutionError):

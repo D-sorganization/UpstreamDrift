@@ -4,7 +4,7 @@ import mujoco
 import numpy as np
 import pytest
 
-from shared.python.marker_mapping import (
+from src.shared.python.marker_mapping import (
     MarkerMapping,
     MarkerToModelMapper,
 )

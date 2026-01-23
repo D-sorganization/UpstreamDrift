@@ -12,7 +12,7 @@ import numpy as np
 import pytest
 
 # Import test utilities
-from shared.python.indexed_acceleration import (
+from src.shared.python.indexed_acceleration import (
     AccelerationClosureError,
     compute_indexed_acceleration_from_engine,
 )
@@ -63,7 +63,7 @@ class TestPinocchioDriftControl:
             if not hasattr(pin, "__version__"):
                 pytest.skip("Pinocchio is mocked, not actually installed")
 
-            from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+            from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                 PinocchioPhysicsEngine,
             )
         except ImportError:
@@ -131,7 +131,7 @@ class TestPinocchioDriftControl:
             if not hasattr(pin, "__version__"):
                 pytest.skip("Pinocchio is mocked, not actually installed")
 
-            from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+            from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                 PinocchioPhysicsEngine,
             )
         except ImportError:
@@ -189,7 +189,7 @@ class TestMuJoCoDriftControl:
         try:
             import mujoco
 
-            from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+            from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
                 MuJoCoPhysicsEngine,
             )
         except ImportError:
@@ -278,7 +278,7 @@ class TestIndexedAccelerationClosure:
             if not hasattr(pin, "__version__"):
                 pytest.skip("Pinocchio is mocked, not actually installed")
 
-            from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+            from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                 PinocchioPhysicsEngine,
             )
         except ImportError:
@@ -320,7 +320,7 @@ class TestIndexedAccelerationClosure:
             if not hasattr(pin, "__version__"):
                 pytest.skip("Pinocchio is mocked, not actually installed")
 
-            from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+            from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                 PinocchioPhysicsEngine,
             )
         except ImportError:
@@ -364,7 +364,7 @@ class TestCrossEngineDriftControl:
                 if not hasattr(pin, "__version__"):
                     pytest.skip("Pinocchio is mocked, not actually installed")
 
-                from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+                from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                     PinocchioPhysicsEngine,
                 )
 
@@ -373,7 +373,7 @@ class TestCrossEngineDriftControl:
                 pytest.skip(f"{engine_name} not installed")
         elif engine_name == "mujoco":
             try:
-                from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+                from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
                     MuJoCoPhysicsEngine,
                 )
 

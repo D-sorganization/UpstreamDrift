@@ -1,6 +1,6 @@
 import pytest
 
-from shared.python.ai.tool_registry import ToolCategory, ToolRegistry
+from src.shared.python.ai.tool_registry import ToolCategory, ToolRegistry
 
 
 class TestToolRegistry:

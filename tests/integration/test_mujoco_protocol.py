@@ -31,7 +31,7 @@ class TestMuJoCoProtocol(unittest.TestCase):
         sys.modules.pop(module_name, None)
 
         # 4. Get the class
-        from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
             MuJoCoPhysicsEngine,
         )
 

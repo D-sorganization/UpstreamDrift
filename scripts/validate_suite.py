@@ -13,7 +13,7 @@ from pathlib import Path
 SUITE_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(SUITE_ROOT))
 
-from shared.python.common_utils import setup_logging  # noqa: E402
+from src.shared.python.common_utils import setup_logging  # noqa: E402
 
 logger = setup_logging(__name__)
 

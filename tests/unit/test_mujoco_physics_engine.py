@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from shared.python.constants import GRAVITY_M_S2
+from src.shared.python.constants import GRAVITY_M_S2
 
 
 # Mock classes that need to be defined before importing the engine

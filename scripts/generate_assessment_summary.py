@@ -286,6 +286,7 @@ Recommended: 30 days from today
 
 
 def main():
+    """Parse CLI arguments and generate assessment summary."""
     parser = argparse.ArgumentParser(description="Generate assessment summary")
     parser.add_argument(
         "--input",
@@ -326,8 +327,8 @@ def main():
         return 1
 
     exit_code = generate_summary(input_reports, args.output, args.json_output)
-    sys.exit(exit_code)
+    return exit_code
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main() or 0)

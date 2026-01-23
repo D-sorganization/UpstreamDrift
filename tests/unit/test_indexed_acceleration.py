@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from shared.python.indexed_acceleration import IndexedAcceleration
+from src.shared.python.indexed_acceleration import IndexedAcceleration
 
 
 class TestIndexedAccelerationDataclass:
@@ -141,7 +141,7 @@ class TestIndexedAccelerationDataclass:
 
     def test_multidimensional_components(self):
         """Test with multi-DOF system (multiple joints/dimensions)."""
-        from shared.python.constants import GRAVITY_M_S2
+        from src.shared.python.constants import GRAVITY_M_S2
 
         n_dof = 5
         gravity = np.ones(n_dof) * GRAVITY_M_S2
@@ -170,7 +170,7 @@ class TestPhysicalRealism:
 
     def test_gravity_dominant_in_free_fall(self):
         """Test that gravity dominates in free fall scenario."""
-        from shared.python.constants import GRAVITY_M_S2
+        from src.shared.python.constants import GRAVITY_M_S2
 
         acc = IndexedAcceleration(
             gravity=np.array([0.0, 0.0, -GRAVITY_M_S2]),  # Downward
@@ -204,7 +204,7 @@ class TestPhysicalRealism:
 
     def test_constraint_opposes_motion(self):
         """Test that constraints can oppose other accelerations."""
-        from shared.python.constants import GRAVITY_M_S2
+        from src.shared.python.constants import GRAVITY_M_S2
 
         # Example: Ground reaction force opposes gravity
         acc = IndexedAcceleration(

@@ -15,7 +15,7 @@ sys.path.insert(
 # Skip entire module if cv2 is not available (optional dependency)
 cv2 = pytest.importorskip("cv2", reason="OpenCV (cv2) not installed")
 
-from shared.python.pose_estimation import mediapipe_estimator  # noqa: E402
+from src.shared.python.pose_estimation import mediapipe_estimator  # noqa: E402
 
 
 class TestMediaPipeEstimator:

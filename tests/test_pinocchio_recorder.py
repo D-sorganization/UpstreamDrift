@@ -5,7 +5,7 @@ import pytest
 pytest.importorskip("pinocchio")
 
 try:
-    from engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (  # noqa: E402
+    from src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (  # noqa: E402
         PinocchioRecorder,
     )
 except ImportError:

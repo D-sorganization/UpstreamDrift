@@ -25,7 +25,7 @@ sys.path.insert(
 sys.modules["flight_models"] = MagicMock()
 
 if PYQT6_AVAILABLE:
-    from launchers.shot_tracer import (  # noqa: E402
+    from src.launchers.shot_tracer import (  # noqa: E402
         MultiModelShotTracerWidget,
         MultiModelShotTracerWindow,
     )

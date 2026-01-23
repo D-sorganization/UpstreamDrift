@@ -7,7 +7,7 @@ sys.path.insert(
     str(Path(__file__).resolve().parents[2]),
 )
 
-from shared.python.numerical_constants import (
+from src.shared.python.numerical_constants import (
     CONDITION_NUMBER_CRITICAL_THRESHOLD,
     CONDITION_NUMBER_WARNING_THRESHOLD,
     EPSILON_FINITE_DIFF_JACOBIAN,

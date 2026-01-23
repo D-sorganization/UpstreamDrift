@@ -20,10 +20,10 @@ import numpy as np
 import pytest
 
 try:
-    from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+    from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
         MYOSUITE_AVAILABLE as _INTERNAL_MYOSUITE_AVAILABLE,
     )
-    from engines.physics_engines.myosuite.python.myosuite_physics_engine import (
+    from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
         MyoSuitePhysicsEngine as _MyoSuitePhysicsEngine,
     )
 

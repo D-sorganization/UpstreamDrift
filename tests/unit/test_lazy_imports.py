@@ -48,7 +48,7 @@ class TestSharedModuleLazyImports:
 
     def test_output_manager_imports_dependencies(self):
         """Verify output_manager.py imports numpy and pandas directly."""
-        from shared.python import output_manager
+        from src.shared.python import output_manager
 
         # These should be available in the module
         assert hasattr(output_manager, "np")
@@ -57,7 +57,7 @@ class TestSharedModuleLazyImports:
     def test_common_utils_lazy_imports(self):
         """Verify common_utils.py does NOT import heavy dependencies at module level."""
         # Avoid deleting from sys.modules as it causes pandas C-API errors.
-        from shared.python import common_utils
+        from src.shared.python import common_utils
 
         # These should NOT be available in the module at top level (they are local or lazy)
         assert not hasattr(common_utils, "plt")

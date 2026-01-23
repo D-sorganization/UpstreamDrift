@@ -5,8 +5,8 @@ from unittest.mock import patch
 
 import numpy as np
 
-from shared.python.statistical_analysis import StatisticalAnalyzer
-from shared.python.swing_comparison import (
+from src.shared.python.statistical_analysis import StatisticalAnalyzer
+from src.shared.python.swing_comparison import (
     ComparisonMetric,
     DTWResult,
     SwingComparator,

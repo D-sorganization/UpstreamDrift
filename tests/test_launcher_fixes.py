@@ -33,7 +33,7 @@ class TestSharedModuleImports(unittest.TestCase):
     def test_configuration_manager_import(self) -> None:
         """Test configuration manager import."""
         try:
-            from shared.python.configuration_manager import ConfigurationManager
+            from src.shared.python.configuration_manager import ConfigurationManager
 
             # Test that we can instantiate it with required config_path
             config_manager = ConfigurationManager(Path("dummy_config.json"))
@@ -47,7 +47,7 @@ class TestSharedModuleImports(unittest.TestCase):
     def test_process_worker_import(self) -> None:
         """Test process worker import."""
         try:
-            from shared.python.process_worker import ProcessWorker
+            from src.shared.python.process_worker import ProcessWorker
 
             # Test that we can instantiate it with required cmd
             worker = ProcessWorker(["echo", "test"])
@@ -58,7 +58,7 @@ class TestSharedModuleImports(unittest.TestCase):
     def test_engine_manager_import(self) -> None:
         """Test engine manager import."""
         try:
-            from shared.python.engine_manager import EngineManager, EngineType
+            from src.shared.python.engine_manager import EngineManager, EngineType
 
             # Test that we can instantiate it
             manager = EngineManager()
@@ -74,7 +74,7 @@ class TestEngineManager(unittest.TestCase):
 
     def setUp(self) -> None:
         """Set up test fixtures."""
-        from shared.python.engine_manager import EngineManager
+        from src.shared.python.engine_manager import EngineManager
 
         self.manager = EngineManager()
 
@@ -93,7 +93,7 @@ class TestEngineManager(unittest.TestCase):
     @patch("shared.python.engine_manager.EngineManager.get_probe_result")
     def test_probe_system(self, mock_get_result: MagicMock) -> None:
         """Test engine probe system."""
-        from shared.python.engine_manager import EngineType
+        from src.shared.python.engine_manager import EngineType
 
         # Setup mock return
         mock_result = MagicMock()
@@ -139,7 +139,7 @@ class TestDraggableModelCard(unittest.TestCase):
 
     def test_draggable_card_creation(self) -> None:
         """Test that draggable model cards can be created."""
-        from launchers.golf_launcher import DraggableModelCard
+        from src.launchers.golf_launcher import DraggableModelCard
 
         card = DraggableModelCard(self.mock_model, self.mock_launcher)
         self.assertIsNotNone(card)
@@ -149,7 +149,7 @@ class TestDraggableModelCard(unittest.TestCase):
 
     def test_mouse_press_selection(self) -> None:
         """Test that mouse press selects the model."""
-        from launchers.golf_launcher import DraggableModelCard
+        from src.launchers.golf_launcher import DraggableModelCard
 
         card = DraggableModelCard(self.mock_model, self.mock_launcher)
 
@@ -180,7 +180,7 @@ class TestDraggableModelCard(unittest.TestCase):
 
     def test_double_click_launch(self) -> None:
         """Test that double-click launches the model."""
-        from launchers.golf_launcher import DraggableModelCard
+        from src.launchers.golf_launcher import DraggableModelCard
 
         card = DraggableModelCard(self.mock_model, self.mock_launcher)
 
@@ -194,7 +194,7 @@ class TestDraggableModelCard(unittest.TestCase):
 
     def test_drag_enter_event(self) -> None:
         """Test drag enter event handling."""
-        from launchers.golf_launcher import DraggableModelCard
+        from src.launchers.golf_launcher import DraggableModelCard
 
         card = DraggableModelCard(self.mock_model, self.mock_launcher)
 
@@ -212,7 +212,7 @@ class TestDraggableModelCard(unittest.TestCase):
 
     def test_drop_event_swap(self) -> None:
         """Test drop event triggers model swap."""
-        from launchers.golf_launcher import DraggableModelCard
+        from src.launchers.golf_launcher import DraggableModelCard
 
         card = DraggableModelCard(self.mock_model, self.mock_launcher)
 
@@ -287,7 +287,7 @@ class TestGolfLauncherGrid(unittest.TestCase):
         mock_load_layout: Mock,
     ) -> None:
         """Test that model order is properly tracked."""
-        from launchers.golf_launcher import GolfLauncher
+        from src.launchers.golf_launcher import GolfLauncher
 
         # _lazy_load_model_registry returns the ModelRegistry class
         mock_class = Mock()
@@ -320,7 +320,7 @@ class TestGolfLauncherGrid(unittest.TestCase):
         mock_add_dock_widget: Mock,
     ) -> None:
         """Test model swapping functionality."""
-        from launchers.golf_launcher import GolfLauncher
+        from src.launchers.golf_launcher import GolfLauncher
 
         # _lazy_load_model_registry returns the ModelRegistry class
         mock_class = Mock()
@@ -369,7 +369,7 @@ class TestDockerConfiguration(unittest.TestCase):
 
     def test_docker_launch_command_structure(self) -> None:
         """Test Docker launch command structure."""
-        from launchers.golf_launcher import GolfLauncher
+        from src.launchers.golf_launcher import GolfLauncher
 
         # Mock the launcher
         launcher = GolfLauncher.__new__(GolfLauncher)  # Create without __init__
@@ -467,7 +467,7 @@ class TestLauncherIntegration(unittest.TestCase):
     def test_unified_launcher_import(self, mock_golf_launcher: Mock) -> None:
         """Test that unified launcher can be imported."""
         try:
-            from launchers.unified_launcher import UnifiedLauncher
+            from src.launchers.unified_launcher import UnifiedLauncher
 
             # Test that we can instantiate it
             launcher = UnifiedLauncher()

@@ -15,7 +15,7 @@ from typing import Any
 import numpy as np
 import pytest
 
-from shared.python.cross_engine_validator import CrossEngineValidator
+from src.shared.python.cross_engine_validator import CrossEngineValidator
 from tests.fixtures.fixtures_lib import (
     TOLERANCE_ACCELERATION_M_S2,
     TOLERANCE_JACOBIAN,

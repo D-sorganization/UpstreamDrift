@@ -5,7 +5,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from shared.python.signal_processing import (
+from src.shared.python.signal_processing import (
     KalmanFilter,
     compute_cwt,
     compute_dtw_distance,

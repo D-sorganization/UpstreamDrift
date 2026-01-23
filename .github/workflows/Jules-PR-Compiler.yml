@@ -123,13 +123,27 @@ jobs:
               category_short = category.replace('jules:', '').replace('-', '_')
               compiled_branch = f"jules/compiled-{category_short}-{date_str}"
 
+              # Check if a compiled PR for this category already exists
+              # Note: This checks if ANY PR with this category label is open.
+              # We only want to skip if it's already part of a compiled PR.
+              existing_compiled = subprocess.run([
+                  'gh', 'pr', 'list',
+                  '--state', 'open',
+                  '--label', f'{category},jules:compiled',
+                  '--json', 'number',
+                  '--jq', 'length'
+              ], capture_output=True, text=True)
+
+              if existing_compiled.returncode == 0 and int(existing_compiled.stdout.strip() or 0) > 0:
+                  print(f"  ⚠️ Skipping category {category}: Compiled PR already exists.")
+                  continue # Skip this category if a compiled PR exists
+
               # Start from main
               subprocess.run(['git', 'checkout', 'main'], check=True)
               subprocess.run(['git', 'pull', 'origin', 'main'], check=True)
 
               # Create compiled branch
               subprocess.run(['git', 'checkout', '-b', compiled_branch], check=True)
-
               merged_prs = []
               failed_prs = []
 
@@ -138,20 +152,6 @@ jobs:
                   pr_branch = pr['branch']
                   pr_title = pr['title']
 
-                  # Check if a compiled PR for this category already exists
-                  # Note: This checks if ANY PR with this category label is open.
-                  # We only want to skip if it's already part of a compiled PR.
-                  existing_compiled = subprocess.run([
-                      'gh', 'pr', 'list',
-                      '--state', 'open',
-                      '--label', f'{category},jules:compiled',
-                      '--json', 'number',
-                      '--jq', 'length'
-                  ], capture_output=True, text=True)
-
-                  if existing_compiled.returncode == 0 and int(existing_compiled.stdout.strip() or 0) > 0:
-                      print(f"  ⚠️ Skipping category {category}: Compiled PR already exists.")
-                      break # Skip the entire group if a compiled PR exists
 
                   print(f"\n  Merging PR #{pr_num}: {pr_title}")
 
@@ -168,8 +168,8 @@ jobs:
                           print(f"    ✅ Successfully merged")
                       else:
                           # Merge conflict - abort and skip
-                                    subprocess.run(['git', 'merge', '--abort'], check=False)
-                                    failed_prs.append(pr)
+                          subprocess.run(['git', 'merge', '--abort'], check=False)
+                          failed_prs.append(pr)
                           print(f"    ❌ Merge conflict - skipped")
 
                   except Exception as e:
@@ -202,18 +202,18 @@ jobs:
           🤖 Generated with Jules PR Compiler
           """
 
-                            result = subprocess.run([
-            'gh', 'pr', 'create',
-            '--title', f"[Compiled] {category}: {len(merged_prs)} PRs - {date_str}",
-            '--body', body,
-            '--label', f'{category},jules:compiled'
+                  result = subprocess.run([
+                      'gh', 'pr', 'create',
+                      '--title', f"[Compiled] {category}: {len(merged_prs)} PRs - {date_str}",
+                      '--body', body,
+                      '--label', f'{category},jules:compiled'
                   ], capture_output=True, text=True)
 
-                            if result.returncode == 0:
-            print(f"\n✅ Created compiled PR for {category}")
-            print(result.stdout)
-                            else:
-            print(f"\n❌ Failed to create PR: {result.stderr}")
+                  if result.returncode == 0:
+                      print(f"\n✅ Created compiled PR for {category}")
+                      print(result.stdout)
+                  else:
+                      print(f"\n❌ Failed to create PR: {result.stderr}")
 
               # Return to main for next group
               subprocess.run(['git', 'checkout', 'main'], check=True)

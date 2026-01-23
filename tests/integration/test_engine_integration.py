@@ -17,7 +17,7 @@ import pytest
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from shared.python.engine_manager import (  # noqa: E402
+from src.shared.python.engine_manager import (  # noqa: E402
     EngineManager,
     EngineStatus,
     EngineType,
@@ -92,7 +92,7 @@ class TestEngineIntegration:
                 probe_result = probe.is_available()  # type: ignore[attr-defined]
 
                 # Result should be a dict or have expected attributes
-                assert isinstance(probe_result, (dict, bool, type(None)))
+                assert isinstance(probe_result, dict | bool | type(None))
 
                 # If probe says available, engine should be in available list
                 available_engines = manager.get_available_engines()

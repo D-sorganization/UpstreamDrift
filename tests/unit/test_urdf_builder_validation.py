@@ -2,7 +2,7 @@
 
 import pytest
 
-from tools.urdf_generator.urdf_builder import URDFBuilder
+from src.tools.urdf_generator.urdf_builder import URDFBuilder
 
 
 class TestPhysicalValidation:
