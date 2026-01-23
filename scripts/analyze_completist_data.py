@@ -21,8 +21,9 @@ EXCLUDED_PATHS = [
     ".jules/",
     "CRITICAL_PROJECT_REVIEW.md",
     "WORKFLOW_AND_AGENTS_REPORT.md",
-    "pyproject.toml"
+    "pyproject.toml",
 ]
+
 
 class Finding(TypedDict):
     file: str
@@ -45,6 +46,7 @@ def is_excluded(filepath: str) -> bool:
         if fp.startswith(excl) or excl in fp:
             return True
     return False
+
 
 def parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
     """Parse a grep output line."""
@@ -90,7 +92,14 @@ def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
                     continue
 
                 if todo_str in content:
-                    todos.append({"file": filepath, "line": lineno, "text": content, "type": "TODO"})
+                    todos.append(
+                        {
+                            "file": filepath,
+                            "line": lineno,
+                            "text": content,
+                            "type": "TODO",
+                        }
+                    )
                 elif any(x in content for x in fixme_markers):
                     # Identify specific marker
                     marker = "FIXME"
@@ -98,7 +107,14 @@ def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
                         if m in content:
                             marker = m
                             break
-                    fixmes.append({"file": filepath, "line": lineno, "text": content, "type": marker})
+                    fixmes.append(
+                        {
+                            "file": filepath,
+                            "line": lineno,
+                            "text": content,
+                            "type": marker,
+                        }
+                    )
     return todos, fixmes
 
 
@@ -120,7 +136,9 @@ def analyze_stubs() -> list[dict[str, Any]]:
                 if is_excluded(filepath):
                     continue
 
-                stubs.append({"file": filepath, "line": lineno, "name": name, "type": "Stub"})
+                stubs.append(
+                    {"file": filepath, "line": lineno, "name": name, "type": "Stub"}
+                )
     return stubs
 
 
@@ -142,7 +160,9 @@ def analyze_docs() -> list[dict[str, Any]]:
                 if is_excluded(filepath):
                     continue
 
-                missing_docs.append({"file": filepath, "line": lineno, "name": name, "type": "DocGap"})
+                missing_docs.append(
+                    {"file": filepath, "line": lineno, "name": name, "type": "DocGap"}
+                )
     return missing_docs
 
 
@@ -162,7 +182,14 @@ def analyze_not_implemented() -> list[dict[str, Any]]:
                     continue
 
                 if not_impl_str in content:
-                    errors.append({"file": filepath, "line": lineno, "text": content, "type": not_impl_str})
+                    errors.append(
+                        {
+                            "file": filepath,
+                            "line": lineno,
+                            "text": content,
+                            "type": not_impl_str,
+                        }
+                    )
     return errors
 
 
@@ -180,7 +207,14 @@ def analyze_abstract_methods() -> list[dict[str, Any]]:
                     continue
 
                 if "@abstractmethod" in content:
-                    abstracts.append({"file": filepath, "line": lineno, "text": content, "type": "Abstract"})
+                    abstracts.append(
+                        {
+                            "file": filepath,
+                            "line": lineno,
+                            "text": content,
+                            "type": "Abstract",
+                        }
+                    )
     return abstracts
 
 
@@ -210,15 +244,15 @@ def calculate_metrics(item: Mapping[str, Any]) -> tuple[int, int, int]:
     # Complexity Heuristic (1-5)
     complexity = 3
     if "Stub" in item_type or "NotImplemented" in item_type:
-        complexity = 4 # Harder to fix, missing logic
+        complexity = 4  # Harder to fix, missing logic
     elif "FIXME" in item_type:
-        complexity = 2 # Usually a correction/refactor
+        complexity = 2  # Usually a correction/refactor
     elif "TODO" in item_type:
-        complexity = 3 # New feature or logic
+        complexity = 3  # New feature or logic
     elif "DocGap" in item_type:
-        complexity = 1 # Just documentation
+        complexity = 1  # Just documentation
     elif "Abstract" in item_type:
-        complexity = 5 # Needs implementation in subclasses
+        complexity = 5  # Needs implementation in subclasses
 
     return impact, coverage, complexity
 
@@ -318,9 +352,7 @@ def generate_report() -> None:
     report_content += "4. Add docstrings to public interfaces.\n"
 
     report_content += "\n## Issues to be Created\n"
-    report_content += (
-        "The following critical items block core functionality and require issues with label 'incomplete-implementation,critical':\n\n"
-    )
+    report_content += "The following critical items block core functionality and require issues with label 'incomplete-implementation,critical':\n\n"
 
     # Filter criticals for Issue creation (Impact >= 4)
     issues_to_create = []
@@ -332,7 +364,9 @@ def generate_report() -> None:
     if not issues_to_create:
         report_content += "No critical issues found needing immediate creation.\n"
     else:
-        report_content += "Run the following commands to create issues (if configured):\n\n"
+        report_content += (
+            "Run the following commands to create issues (if configured):\n\n"
+        )
         report_content += "```bash\n"
         for item in issues_to_create[:10]:
             item_type = item.get("type", "Issue")
@@ -347,7 +381,7 @@ def generate_report() -> None:
             report_content += f'gh issue create --title "{title_esc}" --body "{body_esc}" --label "incomplete-implementation,critical"\n'
         report_content += "```\n"
         if len(issues_to_create) > 10:
-             report_content += f"\n*(...and {len(issues_to_create) - 10} more)*\n"
+            report_content += f"\n*(...and {len(issues_to_create) - 10} more)*\n"
 
     os.makedirs(REPORT_DIR, exist_ok=True)
     report_filename = f"Completist_Report_{date_str}.md"
