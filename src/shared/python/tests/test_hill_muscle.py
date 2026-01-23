@@ -2,7 +2,8 @@
 
 import numpy as np
 import pytest
-from shared.python.hill_muscle import (
+
+from src.shared.python.hill_muscle import (
     HillMuscleModel,
     MuscleParameters,
     MuscleState,

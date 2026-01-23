@@ -1,7 +1,8 @@
 """Ground Reaction Force (GRF) and Center of Pressure (CoP) metrics analysis module."""
 
 import numpy as np
-from shared.python.analysis.dataclasses import GRFMetrics
+
+from src.shared.python.analysis.dataclasses import GRFMetrics
 
 
 class GRFMetricsMixin:

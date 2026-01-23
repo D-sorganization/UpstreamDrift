@@ -2,7 +2,8 @@
 
 import numpy as np
 import pytest
-from shared.python.dashboard.advanced_analysis import (
+
+from src.shared.python.dashboard.advanced_analysis import (
     AdvancedAnalysisDialog,
     CoherenceTab,
     PhasePlaneTab,

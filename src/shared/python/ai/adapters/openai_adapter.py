@@ -26,14 +26,14 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-from shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
-from shared.python.ai.exceptions import (
+from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
+from src.shared.python.ai.exceptions import (
     AIConnectionError,
     AIProviderError,
     AIRateLimitError,
     AITimeoutError,
 )
-from shared.python.ai.types import (
+from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
     ConversationContext,

@@ -15,7 +15,7 @@ Individual shot trajectories have significant variance around these means.
 from dataclasses import dataclass
 from enum import Enum
 
-from shared.python.physics_constants import MPH_TO_MPS, YARDS_TO_METERS
+from src.shared.python.physics_constants import MPH_TO_MPS, YARDS_TO_METERS
 
 
 class DataSource(Enum):

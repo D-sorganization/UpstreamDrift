@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 from scipy.signal import find_peaks
-from shared.python.analysis.dataclasses import PeakInfo, SummaryStatistics
+
+from src.shared.python.analysis.dataclasses import PeakInfo, SummaryStatistics
 
 
 class BasicStatsMixin:

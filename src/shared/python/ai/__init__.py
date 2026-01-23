@@ -27,8 +27,8 @@ Example:
     >>> edu = EducationSystem()
 """
 
-from shared.python.ai.education import EducationSystem, GlossaryEntry
-from shared.python.ai.exceptions import (
+from src.shared.python.ai.education import EducationSystem, GlossaryEntry
+from src.shared.python.ai.exceptions import (
     AIConnectionError,
     AIError,
     AIProviderError,
@@ -38,14 +38,14 @@ from shared.python.ai.exceptions import (
     ToolExecutionError,
     WorkflowError,
 )
-from shared.python.ai.tool_registry import (
+from src.shared.python.ai.tool_registry import (
     Tool,
     ToolCategory,
     ToolParameter,
     ToolRegistry,
     get_global_registry,
 )
-from shared.python.ai.types import (
+from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
     ConversationContext,
@@ -56,7 +56,7 @@ from shared.python.ai.types import (
     ToolCall,
     ToolResult,
 )
-from shared.python.ai.workflow_engine import (
+from src.shared.python.ai.workflow_engine import (
     RecoveryStrategy,
     StepResult,
     StepStatus,

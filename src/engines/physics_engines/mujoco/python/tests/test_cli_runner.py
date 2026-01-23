@@ -6,7 +6,8 @@ import json
 from typing import TYPE_CHECKING
 
 import pytest
-from shared.python import constants
+
+from src.shared.python import constants
 
 if TYPE_CHECKING:
     from pathlib import Path

@@ -3,9 +3,10 @@
 import numpy as np
 import pytest
 from matplotlib.figure import Figure
-from shared.python.plotting import GolfSwingPlotter, RecorderInterface
-from shared.python.signal_processing import compute_jerk, compute_time_shift
-from shared.python.statistical_analysis import StatisticalAnalyzer
+
+from src.shared.python.plotting import GolfSwingPlotter, RecorderInterface
+from src.shared.python.signal_processing import compute_jerk, compute_time_shift
+from src.shared.python.statistical_analysis import StatisticalAnalyzer
 
 
 class MockRecorder(RecorderInterface):

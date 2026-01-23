@@ -21,10 +21,10 @@ Example:
     ...     response = adapter.send_message("Hello", context, tools)
 """
 
-from shared.python.ai.adapters.anthropic_adapter import AnthropicAdapter
-from shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
-from shared.python.ai.adapters.ollama_adapter import OllamaAdapter
-from shared.python.ai.adapters.openai_adapter import OpenAIAdapter
+from src.shared.python.ai.adapters.anthropic_adapter import AnthropicAdapter
+from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
+from src.shared.python.ai.adapters.ollama_adapter import OllamaAdapter
+from src.shared.python.ai.adapters.openai_adapter import OpenAIAdapter
 
 __all__ = [
     "BaseAgentAdapter",

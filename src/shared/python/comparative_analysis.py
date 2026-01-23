@@ -11,7 +11,8 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 from scipy import interpolate
-from shared.python import signal_processing
+
+from src.shared.python import signal_processing
 
 if TYPE_CHECKING:
     pass  # pragma: no cover

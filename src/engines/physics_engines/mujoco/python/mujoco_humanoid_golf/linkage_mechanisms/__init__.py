@@ -16,7 +16,8 @@ Categories:
 """
 
 import numpy as np
-from shared.python.constants import GRAVITY_M_S2
+
+from src.shared.python.constants import GRAVITY_M_S2
 
 
 def generate_four_bar_linkage_xml(

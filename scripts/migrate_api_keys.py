@@ -49,10 +49,11 @@ from typing import Any
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import bcrypt
-from api.auth.models import APIKey, User
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.orm import Session, sessionmaker
+
+from src.api.auth.models import APIKey, User
 
 # Configure logging
 logging.basicConfig(

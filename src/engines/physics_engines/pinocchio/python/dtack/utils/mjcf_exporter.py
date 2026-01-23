@@ -8,7 +8,8 @@ import typing
 from pathlib import Path
 
 import yaml  # type: ignore[import-untyped]
-from shared.python.constants import GRAVITY_M_S2
+
+from src.shared.python.constants import GRAVITY_M_S2
 
 logger = logging.getLogger(__name__)
 

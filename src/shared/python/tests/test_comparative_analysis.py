@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
-from shared.python.comparative_analysis import (
+
+from src.shared.python.comparative_analysis import (
     AlignedSignals,
     ComparativeSwingAnalyzer,
     RecorderInterface,

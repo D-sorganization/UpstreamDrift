@@ -8,8 +8,9 @@ from typing import Any, cast  # noqa: F401
 
 import mujoco
 import numpy as np
-from shared.python.interfaces import PhysicsEngine
-from shared.python.security_utils import validate_path
+
+from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.security_utils import validate_path
 
 LOGGER = logging.getLogger(__name__)
 

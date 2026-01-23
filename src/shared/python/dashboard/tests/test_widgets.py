@@ -2,8 +2,9 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
-from shared.python.dashboard.widgets import FrequencyAnalysisDialog, LivePlotWidget
-from shared.python.interfaces import RecorderInterface
+
+from src.shared.python.dashboard.widgets import FrequencyAnalysisDialog, LivePlotWidget
+from src.shared.python.interfaces import RecorderInterface
 
 
 class MockRecorder(RecorderInterface):

@@ -18,7 +18,7 @@ try:
 except ImportError:
     op = None
 
-from shared.python.pose_estimation.interface import (
+from src.shared.python.pose_estimation.interface import (
     PoseEstimationResult,
     PoseEstimator,
 )

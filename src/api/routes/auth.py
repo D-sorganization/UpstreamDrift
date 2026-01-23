@@ -14,8 +14,8 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
-from api.auth.dependencies import RequireAdmin, RequireAuth
-from api.auth.models import (
+from src.api.auth.dependencies import RequireAdmin, RequireAuth
+from src.api.auth.models import (
     APIKey,
     APIKeyCreate,
     APIKeyResponse,
@@ -26,8 +26,8 @@ from api.auth.models import (
     UserResponse,
     UserRole,
 )
-from api.auth.security import security_manager, usage_tracker
-from api.database import get_db
+from src.api.auth.security import security_manager, usage_tracker
+from src.api.database import get_db
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 

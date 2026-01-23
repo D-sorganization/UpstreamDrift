@@ -65,7 +65,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
-from shared.python.secure_subprocess import (
+
+from src.shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
     secure_run,

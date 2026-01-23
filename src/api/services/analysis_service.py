@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-from shared.python.engine_manager import EngineManager
+from src.shared.python.engine_manager import EngineManager
 
 from ..models.requests import AnalysisRequest
 from ..models.responses import AnalysisResponse

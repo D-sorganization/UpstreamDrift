@@ -10,7 +10,8 @@ import logging
 from typing import Any
 
 import numpy as np
-from shared.python.interfaces import PhysicsEngine
+
+from src.shared.python.interfaces import PhysicsEngine
 
 LOGGER = logging.getLogger(__name__)
 

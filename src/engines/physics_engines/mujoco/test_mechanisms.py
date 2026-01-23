@@ -11,7 +11,7 @@ import logging
 import mujoco
 import pytest
 
-from engines.physics_engines.mujoco.head_models import (
+from src.engines.physics_engines.mujoco.head_models import (
     TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML,
 )
 

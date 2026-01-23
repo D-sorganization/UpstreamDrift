@@ -4,7 +4,7 @@ import mujoco
 import numpy as np
 import pytest
 
-from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry import (
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.telemetry import (
     TelemetryRecorder,
     export_telemetry_csv,
     export_telemetry_json,

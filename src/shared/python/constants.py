@@ -5,7 +5,7 @@ Physics constants are delegated to shared.python.physics_constants.
 
 from pathlib import Path
 
-from shared.python.physics_constants import *  # noqa: F403
+from src.shared.python.physics_constants import *  # noqa: F403
 
 # Project Root Paths
 SUITE_ROOT = Path(__file__).resolve().parent.parent.parent

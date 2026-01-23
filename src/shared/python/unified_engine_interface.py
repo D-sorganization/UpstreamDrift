@@ -12,10 +12,11 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-from shared.python.engine_manager import EngineManager
-from shared.python.engine_registry import EngineType
-from shared.python.interfaces import PhysicsEngine
-from shared.python.standard_models import StandardModelManager
+
+from src.shared.python.engine_manager import EngineManager
+from src.shared.python.engine_registry import EngineType
+from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.standard_models import StandardModelManager
 
 logger = logging.getLogger(__name__)
 

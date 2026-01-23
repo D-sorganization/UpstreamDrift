@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass, field
 
-from shared.python.ai.types import ExpertiseLevel
+from src.shared.python.ai.types import ExpertiseLevel
 
 logger = logging.getLogger(__name__)
 

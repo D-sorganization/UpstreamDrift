@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytest
-from shared.python.common_utils import (
+
+from src.shared.python.common_utils import (
     DataFormatError,
     convert_units,
     ensure_output_dir,
@@ -17,7 +18,7 @@ from shared.python.common_utils import (
     save_golf_data,
     standardize_joint_angles,
 )
-from shared.python.constants import MPS_TO_MPH
+from src.shared.python.constants import MPS_TO_MPH
 
 # Use non-interactive backend for plots
 matplotlib.use("Agg")

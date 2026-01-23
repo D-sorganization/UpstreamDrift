@@ -9,7 +9,7 @@ import numpy as np
 if typing.TYPE_CHECKING:
     import collections.abc
 
-from shared.python.constants import GRAVITY_M_S2
+from src.shared.python.constants import GRAVITY_M_S2
 
 GRAVITATIONAL_ACCELERATION = GRAVITY_M_S2
 DAMPING_DEFAULT = (0.35, 0.3, 0.25)

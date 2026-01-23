@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-from shared.python.ai.types import (
+from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
     ConversationContext,

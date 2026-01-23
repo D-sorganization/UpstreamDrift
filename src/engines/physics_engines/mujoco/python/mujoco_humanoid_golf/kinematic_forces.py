@@ -152,7 +152,7 @@ import mujoco
 import numpy as np
 
 # Import numerical constants (Assessment B-004, B-007)
-from shared.python.numerical_constants import (
+from src.shared.python.numerical_constants import (
     EPSILON_FINITE_DIFF_JACOBIAN,
     EPSILON_SINGULARITY_DETECTION,
 )

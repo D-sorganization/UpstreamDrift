@@ -8,12 +8,12 @@ from __future__ import annotations
 import logging
 
 import numpy as np
-from shared.python.interfaces import PhysicsEngine
 
-from engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
     DoublePendulumDynamics,
     DoublePendulumState,
 )
+from src.shared.python.interfaces import PhysicsEngine
 
 LOGGER = logging.getLogger(__name__)
 

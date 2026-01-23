@@ -25,11 +25,11 @@ except ImportError:
     mp = None
     MEDIAPIPE_AVAILABLE = False
 
-from shared.python.pose_estimation.interface import (
+from src.shared.python.pose_estimation.interface import (
     PoseEstimationResult,
     PoseEstimator,
 )
-from shared.python.signal_processing import KalmanFilter
+from src.shared.python.signal_processing import KalmanFilter
 
 logger = logging.getLogger(__name__)
 

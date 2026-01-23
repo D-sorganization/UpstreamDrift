@@ -9,7 +9,7 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from tools.urdf_generator.main_window import main  # noqa: E402
+from src.tools.urdf_generator.main_window import main  # noqa: E402
 
 if __name__ == "__main__":
     # Set up logging
