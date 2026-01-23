@@ -29,13 +29,18 @@ help:
 # Install dependencies
 install:
 	pip install -r requirements.txt
-	pip install -e . || true
+	@if [ -f pyproject.toml ] || [ -f setup.py ]; then \
+		echo "Installing package in editable mode..."; \
+		pip install -e .; \
+	else \
+		echo "Skipping editable install: no pyproject.toml or setup.py found."; \
+	fi
 
 # Run linters
 lint:
 	@echo "Running ruff check..."
 	ruff check .
-	@echo "Running mypy (errors are advisory)..."
+	@echo "Running mypy (errors are advisory; see CONTRIBUTING.md)..."
 	mypy . --config-file pyproject.toml || true
 
 # Format code
@@ -74,7 +79,7 @@ docs:
 # Clean build artifacts
 clean:
 	@echo "Cleaning build artifacts..."
-	find . -type d \( -name "__pycache__" -o -name ".pytest_cache" -o -name ".mypy_cache" -o -name ".ruff_cache" -o -name "*.egg-info" \) -exec rm -rf {} + 2>/dev/null || true
+	find . -type d \( -name "__pycache__" -o -name ".pytest_cache" -o -name ".mypy_cache" -o -name ".ruff_cache" -o -name "*.egg-info" \) -print0 2>/dev/null | xargs -0 rm -rf || true
 	find . -type f \( -name "*.pyc" -o -name "*_output.txt" -o -name "*_temp.txt" \) -delete 2>/dev/null || true
 	rm -rf build/ dist/ .coverage htmlcov/ 2>/dev/null || true
 	@echo "Clean complete."
