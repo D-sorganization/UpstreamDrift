@@ -222,7 +222,6 @@ Repository assessment completed across all {len(scores)} categories.
         score = group_scores.get(g_name, 0.0)
         md_content += f"| {g_name} | {info['weight']*100:.0f}% | {score:.1f} |\n"
 
-
     md_content += f"""
 ## Critical Issues
 
