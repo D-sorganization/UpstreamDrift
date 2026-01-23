@@ -3,13 +3,11 @@
 Assess repository against 15 categories (A-O) and generate reports.
 """
 
-import os
-import re
-import sys
 import json
+import re
 import subprocess
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 # Setup paths
 REPO_ROOT = Path(__file__).parent.parent
@@ -37,8 +35,10 @@ CATEGORIES = {
     "O": "Maintainability",
 }
 
+
 def count_files(pattern):
     return len(list(REPO_ROOT.glob(pattern)))
+
 
 def grep_count(pattern, file_pattern="**/*.py"):
     count = 0
@@ -46,13 +46,14 @@ def grep_count(pattern, file_pattern="**/*.py"):
     for p in REPO_ROOT.glob(file_pattern):
         if p.is_file():
             try:
-                with open(p, "r", encoding="utf-8", errors="ignore") as f:
+                with open(p, encoding="utf-8", errors="ignore") as f:
                     content = f.read()
                     if regex.search(content):
                         count += 1
             except Exception:
                 pass
     return count
+
 
 def generate_report(category_code, category_name, score, findings, recommendations):
     filename = f"Assessment_{category_code}_{category_name.replace(' ', '_')}.md"
@@ -82,6 +83,7 @@ def generate_report(category_code, category_name, score, findings, recommendatio
     print(f"Generated {filepath}")
     return filepath
 
+
 def assess_A():
     # Code Structure
     findings = []
@@ -100,6 +102,7 @@ def assess_A():
 
     recs = ["Ensure all new code follows the modular engine structure."]
     return generate_report("A", CATEGORIES["A"], score, findings, recs)
+
 
 def assess_B():
     # Documentation
@@ -128,6 +131,7 @@ def assess_B():
     recs = ["Expand documentation for individual engines."]
     return generate_report("B", CATEGORIES["B"], score, findings, recs)
 
+
 def assess_C():
     # Test Coverage
     findings = []
@@ -146,6 +150,7 @@ def assess_C():
     recs = ["Increase test coverage for shared modules.", "Add integration tests."]
     return generate_report("C", CATEGORIES["C"], score, findings, recs)
 
+
 def assess_D():
     # Error Handling
     findings = []
@@ -163,6 +168,7 @@ def assess_D():
     recs = ["Ensure specific exceptions are caught.", "Avoid bare except clauses."]
     return generate_report("D", CATEGORIES["D"], score, findings, recs)
 
+
 def assess_E():
     # Performance
     findings = []
@@ -178,6 +184,7 @@ def assess_E():
     recs = ["Implement performance benchmarks for physics engines."]
     return generate_report("E", CATEGORIES["E"], score, findings, recs)
 
+
 def assess_F():
     # Security
     findings = []
@@ -185,13 +192,19 @@ def assess_F():
 
     secrets = grep_count(r"password|secret|key\s*=", "**/*.py")
     if secrets > 0:
-        findings.append(f"Potential hardcoded secrets found in {secrets} files (needs verification).")
+        findings.append(
+            f"Potential hardcoded secrets found in {secrets} files (needs verification)."
+        )
         score -= 1
     else:
         findings.append("No obvious hardcoded secrets patterns found.")
 
-    recs = ["Run bandit security analysis regularly.", "Use environment variables for all secrets."]
+    recs = [
+        "Run bandit security analysis regularly.",
+        "Use environment variables for all secrets.",
+    ]
     return generate_report("F", CATEGORIES["F"], score, findings, recs)
+
 
 def assess_G():
     # Dependencies
@@ -209,6 +222,7 @@ def assess_G():
 
     recs = ["Pin dependency versions.", "Audit dependencies for vulnerabilities."]
     return generate_report("G", CATEGORIES["G"], score, findings, recs)
+
 
 def assess_H():
     # CI/CD
@@ -228,6 +242,7 @@ def assess_H():
     recs = ["Ensure CI runs on all PRs.", "Add CD pipelines for releases."]
     return generate_report("H", CATEGORIES["H"], score, findings, recs)
 
+
 def assess_I():
     # Code Style
     findings = []
@@ -242,6 +257,7 @@ def assess_I():
 
     recs = ["Enforce linting in CI.", "Use black for formatting."]
     return generate_report("I", CATEGORIES["I"], score, findings, recs)
+
 
 def assess_J():
     # API Design
@@ -261,6 +277,7 @@ def assess_J():
     recs = ["Document API endpoints using OpenAPI.", "Version API endpoints."]
     return generate_report("J", CATEGORIES["J"], score, findings, recs)
 
+
 def assess_K():
     # Data Handling
     findings = []
@@ -270,6 +287,7 @@ def assess_K():
 
     recs = ["Validate input data schemas.", "Sanitize database inputs."]
     return generate_report("K", CATEGORIES["K"], score, findings, recs)
+
 
 def assess_L():
     # Logging
@@ -286,8 +304,12 @@ def assess_L():
         findings.append("High usage of print statements detected.")
         score -= 1
 
-    recs = ["Replace print statements with structured logging.", "Configure log levels."]
+    recs = [
+        "Replace print statements with structured logging.",
+        "Configure log levels.",
+    ]
     return generate_report("L", CATEGORIES["L"], score, findings, recs)
+
 
 def assess_M():
     # Configuration
@@ -300,6 +322,7 @@ def assess_M():
     recs = ["Centralize configuration management.", "Use .env for local overrides."]
     return generate_report("M", CATEGORIES["M"], score, findings, recs)
 
+
 def assess_N():
     # Scalability
     findings = []
@@ -307,8 +330,12 @@ def assess_N():
 
     findings.append("Scalability assessment based on architecture.")
 
-    recs = ["Consider async processing for heavy loads.", "Implement caching strategies."]
+    recs = [
+        "Consider async processing for heavy loads.",
+        "Implement caching strategies.",
+    ]
     return generate_report("N", CATEGORIES["N"], score, findings, recs)
+
 
 def assess_O():
     # Maintainability
@@ -320,11 +347,24 @@ def assess_O():
     recs = ["Refactor large functions.", "Keep dependencies updated."]
     return generate_report("O", CATEGORIES["O"], score, findings, recs)
 
+
 def run_all_assessments():
     assessors = [
-        assess_A, assess_B, assess_C, assess_D, assess_E,
-        assess_F, assess_G, assess_H, assess_I, assess_J,
-        assess_K, assess_L, assess_M, assess_N, assess_O
+        assess_A,
+        assess_B,
+        assess_C,
+        assess_D,
+        assess_E,
+        assess_F,
+        assess_G,
+        assess_H,
+        assess_I,
+        assess_J,
+        assess_K,
+        assess_L,
+        assess_M,
+        assess_N,
+        assess_O,
     ]
 
     reports = []
@@ -336,6 +376,7 @@ def run_all_assessments():
             print(f"Error running assessment: {e}")
 
     return reports
+
 
 def generate_issues_locally(json_path):
     """Read summary JSON and create issue markdown files for low scores."""
@@ -379,6 +420,7 @@ The assessment for this category returned a score below 5/10. This indicates sig
     except Exception as e:
         print(f"Error generating local issues: {e}")
 
+
 def main():
     print("Starting repository assessment...")
 
@@ -395,9 +437,12 @@ def main():
     cmd = [
         "python3",
         str(REPO_ROOT / "scripts" / "generate_assessment_summary.py"),
-        "--input", *input_reports,
-        "--output", str(summary_md),
-        "--json-output", str(summary_json)
+        "--input",
+        *input_reports,
+        "--output",
+        str(summary_md),
+        "--json-output",
+        str(summary_json),
     ]
 
     print("Generating summary...")
@@ -408,6 +453,7 @@ def main():
     generate_issues_locally(summary_json)
 
     print("Assessment complete.")
+
 
 if __name__ == "__main__":
     main()

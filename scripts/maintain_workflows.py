@@ -23,7 +23,7 @@ def refactor_workflow(filepath):
             if match:
                 # Add the if check if not already present
                 # Use hashFiles to check for the pause file
-                pause_check = "    if: hashFiles('.github/WORKFLOWS_PAUSED') == ''"
+                # pause_check = "    if: hashFiles('.github/WORKFLOWS_PAUSED') == ''"
 
                 # We need to be careful if there's already an 'if:'
                 # If there's an existing 'if:', we should combine them
