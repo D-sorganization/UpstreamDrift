@@ -214,6 +214,14 @@ models:
             pytest.skip("Skipping Qt-dependent test in headless CI environment")
 
         # Mock AIAssistantPanel before importing to prevent Qt crashes
+        # Clear modules first so patches take effect
+        sys.modules.pop("launchers.golf_launcher", None)
+        sys.modules.pop("src.launchers.golf_launcher", None)
+        sys.modules.pop("src.shared.python.ai.gui.assistant_panel", None)
+        sys.modules.pop("src.shared.python.ai.gui", None)
+        sys.modules.pop("shared.python.ai.gui", None)
+        sys.modules.pop("shared.python.ai.gui.assistant_panel", None)
+
         mock_ai_panel = MagicMock()
         mock_ai_panel.settings_requested = MagicMock()
 
@@ -221,6 +229,10 @@ models:
             patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
             patch("src.launchers.golf_launcher.ASSETS_DIR", new=temp_path),
             patch("launchers.golf_launcher.ASSETS_DIR", new=temp_path),
+            patch(
+                "shared.python.ai.gui.AIAssistantPanel",
+                return_value=mock_ai_panel,
+            ),
             patch(
                 "src.shared.python.ai.gui.assistant_panel.AIAssistantPanel",
                 return_value=mock_ai_panel,
@@ -233,12 +245,7 @@ models:
             MockRegistry.return_value = temp_registry
 
             # Create Launcher
-            # Force reload to ensure no mocks from unit tests persist
-            # Note: We use sys.modules.pop instead of importlib.reload to avoid
-            # corruption of C-extension bindings (like PyQt/MuJoCo)
-            sys.modules.pop("launchers.golf_launcher", None)
-            sys.modules.pop("src.launchers.golf_launcher", None)
-            sys.modules.pop("src.shared.python.ai.gui.assistant_panel", None)
+            # Import after patches are in place
             from src.launchers.golf_launcher import GolfLauncher as FreshGolfLauncher
 
             launcher = FreshGolfLauncher()
