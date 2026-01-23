@@ -137,12 +137,12 @@ class TestBcryptAPIKeyVerification:
 
     @requires_bcrypt
     @pytest.mark.skip(reason="pytest-asyncio not installed in CI environment")
-      async def test_api_key_verification_integration(self) -> None:
-          """Test full API key verification flow."""
-          from fastapi import HTTPException
-          from fastapi.security import HTTPAuthorizationCredentials
+    async def test_api_key_verification_integration(self) -> None:
+        """Test full API key verification flow."""
+        from fastapi import HTTPException
+        from fastapi.security import HTTPAuthorizationCredentials
 
-          from src.api.auth.dependencies import get_current_user_from_api_key
+        from src.api.auth.dependencies import get_current_user_from_api_key
 
         # Create test API key
         api_key = f"gms_{secrets.token_urlsafe(32)}"
