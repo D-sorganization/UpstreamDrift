@@ -5,6 +5,8 @@ Physics Validation Runner
 Automated script to run physics validation tests within the Golf Modeling Suite.
 Designed to be run from CI/CD or inside a Docker container.
 
+Refactored to use shared script utilities (DRY principle).
+
 Usage:
     python scripts/validate_physics.py \
         [--engine {mujoco,drake,pinocchio,all}] \
@@ -12,49 +14,62 @@ Usage:
 """
 
 import argparse
-import logging
-import os
-import subprocess
 import sys
 from pathlib import Path
 
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)],
-)
-logger = logging.getLogger("PhysicsValidator")
+from scripts.script_utils import get_repo_root, run_pytest, setup_script_logging
 
-REPO_ROOT = Path(__file__).resolve().parent.parent
+logger = setup_script_logging("PhysicsValidator")
+
+# Test file configuration - maps test types to relative paths
+TEST_FILES: dict[str, list[str]] = {
+    "analytical": [
+        "tests/physics_validation/test_energy_conservation.py",
+        "tests/physics_validation/test_pendulum_accuracy.py",
+    ],
+    "complex": [
+        "tests/physics_validation/test_complex_models.py",
+    ],
+}
 
 
-def get_test_files(test_type: str) -> list[str]:
-    """Return list of test files based on filter."""
-    base_dir = REPO_ROOT / "tests" / "physics_validation"
+def get_test_files(test_type: str) -> list[Path]:
+    """Return list of test files based on filter.
 
-    files = []
+    Args:
+        test_type: Filter for test type (analytical, complex, or all).
 
-    if test_type in ["analytical", "all"]:
-        files.append(str(base_dir / "test_energy_conservation.py"))
-        files.append(str(base_dir / "test_pendulum_accuracy.py"))
+    Returns:
+        List of test file paths.
+    """
+    repo_root = get_repo_root()
+    files: list[Path] = []
 
-    if test_type in ["complex", "all"]:
-        files.append(str(base_dir / "test_complex_models.py"))
+    if test_type == "all":
+        types_to_include = list(TEST_FILES.keys())
+    else:
+        types_to_include = [test_type]
+
+    for t in types_to_include:
+        if t in TEST_FILES:
+            files.extend(repo_root / f for f in TEST_FILES[t])
 
     return files
 
 
 def run_tests(engine_filter: str, test_type: str) -> bool:
-    """Run pytest on selected tests."""
+    """Run pytest on selected tests.
+
+    Args:
+        engine_filter: Engine to target (tests auto-skip if missing).
+        test_type: Type of validation tests to run.
+
+    Returns:
+        True if tests passed, False otherwise.
+    """
     logger.info(
         f"Starting Physics Validation (Engine: {engine_filter}, Type: {test_type})"
     )
-
-    # Ensure PYTHONPATH includes repo root
-    env = os.environ.copy()
-    pythonpath = env.get("PYTHONPATH", "")
-    env["PYTHONPATH"] = f"{REPO_ROOT}{os.pathsep}{pythonpath}"
 
     test_files = get_test_files(test_type)
 
@@ -62,40 +77,13 @@ def run_tests(engine_filter: str, test_type: str) -> bool:
         logger.warning("No test files found for the given criteria.")
         return False
 
-    # Build command
-    cmd = [sys.executable, "-m", "pytest"]
-    cmd.extend(test_files)
-    cmd.append("-v")  # Verbose
-
-    # If engine filter is specific, we might skip tests
-    # (handled by valid skipping in pytest files)
-    # But checking 'is_engine_available' inside tests is the robust way.
-    # We can pass markers if we had them, but for now we rely on the internal skips.
-
-    logger.info(f"Executing: {' '.join(cmd)}")
-
-    try:
-        result = subprocess.run(
-            cmd,
-            env=env,
-            cwd=REPO_ROOT,
-            capture_output=False,  # Stream directly to stdout/stderr
-            check=False,
-        )
-
-        if result.returncode == 0:
-            logger.info("Physics Validation PASSED")
-            return True
-        else:
-            logger.error(f"Physics Validation FAILED (Exit Code: {result.returncode})")
-            return False
-
-    except Exception as e:
-        logger.error(f"Execution failed: {e}")
-        return False
+    # Engine filtering is handled by skips within pytest files
+    # based on 'is_engine_available' checks
+    return run_pytest(test_files, verbose=True, logger=logger)
 
 
 def main() -> None:
+    """Main entry point."""
     parser = argparse.ArgumentParser(description="Run Physics Validation Suite")
     parser.add_argument(
         "--engine",
