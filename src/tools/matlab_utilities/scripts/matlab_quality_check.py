@@ -566,7 +566,6 @@ def main() -> None:
             for _i, _issue in enumerate(issues, 1):
                 pass
 
-
     # Exit with appropriate code
     # In strict mode, fail if any issues are found; otherwise fail only if checks
     # didn't pass

@@ -146,9 +146,8 @@ def main() -> int:
     sum(r["size_kb"] for r in results)
     needs_opt = [r for r in results if r["needs_optimization"]]
 
-
     if needs_opt:
-        for info in sorted(needs_opt, key=lambda x: -x["size_kb"]):
+        for _info in sorted(needs_opt, key=lambda x: -x["size_kb"]):
             pass
 
     if args.dry_run:
