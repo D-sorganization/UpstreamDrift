@@ -9,7 +9,6 @@ implement Newtonian mechanics.
 
 import numpy as np
 import pytest
-
 from shared.python.numerical_constants import (
     GRAVITY_STANDARD,
     TOLERANCE_ENERGY_CONSERVATION,

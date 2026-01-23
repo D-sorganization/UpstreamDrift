@@ -10,7 +10,6 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-
 from shared.python.common_utils import GolfModelingError
 from shared.python.constants import DEG_TO_RAD
 

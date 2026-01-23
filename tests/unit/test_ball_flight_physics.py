@@ -13,7 +13,6 @@ from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
-
 from shared.python.ball_flight_physics import (
     BallFlightSimulator,
     BallProperties,

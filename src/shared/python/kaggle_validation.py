@@ -17,7 +17,6 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-
 from shared.python.physics_constants import (
     FEET_TO_METERS,
     MPH_TO_MPS,

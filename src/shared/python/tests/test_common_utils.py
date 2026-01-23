@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytest
-
 from shared.python.common_utils import (
     DataFormatError,
     convert_units,

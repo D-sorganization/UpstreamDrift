@@ -212,8 +212,9 @@ class TestLauncherIntegration:
             },
         ):
             try:
-                import launch_golf_suite
                 import launchers.golf_suite_launcher
+
+                import launch_golf_suite
 
                 # Both modules should be importable
                 assert launch_golf_suite is not None

@@ -21,7 +21,6 @@ import numpy as np
 from numpy.lib.stride_tricks import sliding_window_view
 from scipy.spatial import cKDTree
 from scipy.spatial.distance import pdist, squareform
-
 from shared.python.analysis.angular_momentum import AngularMomentumMetricsMixin
 from shared.python.analysis.basic_stats import BasicStatsMixin
 

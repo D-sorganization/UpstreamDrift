@@ -4,7 +4,6 @@ import logging
 import sys
 
 from PyQt6.QtWidgets import QApplication
-
 from shared.python.dashboard.window import UnifiedDashboardWindow
 from shared.python.interfaces import PhysicsEngine
 

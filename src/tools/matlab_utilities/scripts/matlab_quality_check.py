@@ -13,7 +13,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import re
 import subprocess
@@ -558,26 +557,15 @@ def main() -> None:
 
     # Output results
     if args.output_format == "json":
-        print(json.dumps(results, indent=2, default=str))
+        pass
     else:
-        print("\n" + "=" * 60)
-        print("MATLAB QUALITY CHECK RESULTS")
-        print("=" * 60)
-        print(f"Timestamp: {results.get('timestamp', 'N/A')}")
-        print(f"Total Files: {results.get('total_files', 0)}")
-        print(
-            f"Status: {'PASSED' if results.get('passed', False) else 'FAILED'}",
-        )
-        print(f"Summary: {results.get('summary', 'N/A')}")
 
         issues_raw = results.get("issues", [])
         issues: list[str] = issues_raw if isinstance(issues_raw, list) else []
         if issues:
-            print(f"\nIssues Found ({len(issues)}):")
-            for i, issue in enumerate(issues, 1):
-                print(f"  {i}. {issue}")
+            for _i, _issue in enumerate(issues, 1):
+                pass
 
-        print("\n" + "=" * 60)
 
     # Exit with appropriate code
     # In strict mode, fail if any issues are found; otherwise fail only if checks

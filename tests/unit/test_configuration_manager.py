@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from shared.python.common_utils import GolfModelingError
 from shared.python.configuration_manager import ConfigurationManager, SimulationConfig
 

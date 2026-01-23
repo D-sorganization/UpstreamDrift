@@ -4,7 +4,6 @@ TEST-001: Added test coverage for equipment.py (previously 0% coverage).
 """
 
 import pytest
-
 from shared.python.equipment import CLUB_CONFIGS, get_club_config
 
 

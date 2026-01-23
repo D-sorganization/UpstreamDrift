@@ -16,10 +16,10 @@ if typing.TYPE_CHECKING:
     from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 
+from shared.python.constants import GRAVITY_M_S2
+
 # Security: Use simpleeval for safe expression evaluation instead of eval()
 from simpleeval import SimpleEval
-
-from shared.python.constants import GRAVITY_M_S2
 
 # Physical constants with documented units and references
 # International gravity standard at 45 degrees latitude (m/s^2)

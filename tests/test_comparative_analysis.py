@@ -6,7 +6,6 @@ TEST-001: Enhanced test coverage for comparative_analysis.py.
 import numpy as np
 import pytest
 from matplotlib.figure import Figure
-
 from shared.python.comparative_analysis import (
     AlignedSignals,
     ComparativeSwingAnalyzer,

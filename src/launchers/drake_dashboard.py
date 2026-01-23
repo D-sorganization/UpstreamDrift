@@ -7,9 +7,9 @@ import argparse
 import sys
 
 from PyQt6.QtWidgets import QApplication, QFileDialog
+from shared.python.dashboard.launcher import launch_dashboard
 
 from engines.physics_engines.drake.python.drake_physics_engine import DrakePhysicsEngine
-from shared.python.dashboard.launcher import launch_dashboard
 
 
 def main() -> None:

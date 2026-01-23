@@ -9,7 +9,6 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-
 from shared.python.reference_frames import SwingPlaneFrame
 from shared.python.swing_plane_visualization import (
     SwingPlaneVisualizer,
