@@ -7,9 +7,7 @@ based on actual code analysis.
 """
 
 import argparse
-import json
 import logging
-import os
 import subprocess
 import sys
 from datetime import datetime
@@ -22,7 +20,10 @@ logger = logging.getLogger(__name__)
 # Assessment definitions
 ASSESSMENTS = {
     "A": {"name": "Architecture", "description": "Code structure and organization"},
-    "B": {"name": "Hygiene & Quality", "description": "Linting, formatting, code quality"},
+    "B": {
+        "name": "Hygiene & Quality",
+        "description": "Linting, formatting, code quality",
+    },
     "C": {"name": "Documentation", "description": "README, docstrings, comments"},
     "D": {"name": "User Experience", "description": "CLI, API usability"},
     "E": {"name": "Performance", "description": "Efficiency, optimization"},
@@ -45,7 +46,16 @@ def find_python_files() -> list[Path]:
     for pattern in ["**/*.py"]:
         python_files.extend(Path(".").glob(pattern))
     # Exclude common non-source directories
-    excluded = {".git", "__pycache__", ".venv", "venv", "node_modules", ".tox", "build", "dist"}
+    excluded = {
+        ".git",
+        "__pycache__",
+        ".venv",
+        "venv",
+        "node_modules",
+        ".tox",
+        "build",
+        "dist",
+    }
     return [f for f in python_files if not any(p in f.parts for p in excluded)]
 
 
@@ -57,7 +67,11 @@ def run_ruff_check() -> dict:
             capture_output=True,
             text=True,
         )
-        return {"exit_code": result.returncode, "output": result.stdout, "errors": result.stderr}
+        return {
+            "exit_code": result.returncode,
+            "output": result.stdout,
+            "errors": result.stderr,
+        }
     except FileNotFoundError:
         return {"exit_code": -1, "output": "", "errors": "ruff not installed"}
 
@@ -70,7 +84,10 @@ def run_black_check() -> dict:
             capture_output=True,
             text=True,
         )
-        return {"exit_code": result.returncode, "files_to_format": result.stdout.count("would reformat")}
+        return {
+            "exit_code": result.returncode,
+            "files_to_format": result.stdout.count("would reformat"),
+        }
     except FileNotFoundError:
         return {"exit_code": -1, "files_to_format": 0, "errors": "black not installed"}
 
@@ -136,8 +153,12 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
     elif assessment_id == "B":  # Hygiene & Quality
         ruff_result = run_ruff_check()
         black_result = run_black_check()
-        findings.append(f"- Ruff check: {'✓ passed' if ruff_result['exit_code'] == 0 else '✗ issues found'}")
-        findings.append(f"- Black formatting: {'✓ formatted' if black_result['exit_code'] == 0 else '✗ needs formatting'}")
+        findings.append(
+            f"- Ruff check: {'✓ passed' if ruff_result['exit_code'] == 0 else '✗ issues found'}"
+        )
+        findings.append(
+            f"- Black formatting: {'✓ formatted' if black_result['exit_code'] == 0 else '✗ needs formatting'}"
+        )
         if ruff_result["exit_code"] != 0:
             score -= 2
         if black_result["exit_code"] != 0:
@@ -156,7 +177,7 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
     elif assessment_id == "G":  # Testing
         test_count = count_test_files()
         findings.append(f"- Test files found: {test_count}")
-        findings.append(f"- Test coverage: Run pytest --cov for details")
+        findings.append("- Test coverage: Run pytest --cov for details")
         if test_count == 0:
             score -= 5
         elif test_count < 5:
