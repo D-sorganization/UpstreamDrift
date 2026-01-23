@@ -1,3 +1,12 @@
+# Pre-commit.ci configuration (Issue #767)
+ci:
+  autofix_prs: true
+  autofix_commit_msg: "style: auto-fix pre-commit hooks"
+  autoupdate_branch: ""
+  autoupdate_commit_msg: "chore: update pre-commit hooks"
+  autoupdate_schedule: weekly
+  skip: [pip-audit, no-todos-fixmes]  # Skip hooks that need full env or are slow
+
 repos:
   # Standard pre-commit hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -13,18 +22,19 @@ repos:
       - id: check-merge-conflict
       - id: detect-private-key
 
-  # Code formatting
+  # Code formatting (Issue #780: align with CI)
   - repo: https://github.com/psf/black
     rev: 25.12.0
     hooks:
       - id: black
 
-  # Linting
+  # Linting and formatting (Issue #780: add ruff-format)
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.10
     hooks:
       - id: ruff
         args: [--fix]
+      - id: ruff-format
 
   # Type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -33,3 +43,26 @@ repos:
       - id: mypy
         additional_dependencies: [types-all]
         args: [--ignore-missing-imports]
+
+  # Security: Dependency vulnerability scanning (Issue #780: align with CI)
+  - repo: https://github.com/pypa/pip-audit
+    rev: v2.7.3
+    hooks:
+      - id: pip-audit
+        args: [--ignore-vuln, CVE-2024-23342, --ignore-vuln, CVE-2025-53000]
+
+  # TODO/FIXME detection (Issue #780: align with CI placeholder checks)
+  - repo: local
+    hooks:
+      - id: no-todos-fixmes
+        name: Check for TODO/FIXME
+        entry: >
+          bash -c 'if grep -rn --include="*.py" -E "TODO|FIXME"
+          --exclude-dir=".git" --exclude-dir=".mypy_cache"
+          --exclude-dir=".ruff_cache" --exclude-dir="__pycache__"
+          --exclude-dir="archive" . 2>/dev/null; then
+          echo "ERROR: Found TODO/FIXME placeholders. Create GitHub issues instead.";
+          exit 1; fi'
+        language: system
+        pass_filenames: false
+        types: [python]
