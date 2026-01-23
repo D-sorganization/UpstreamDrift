@@ -181,7 +181,7 @@ def check_dry_violations(files: list[Path]) -> list[dict]:
                 magic_strings[string].append((file_path, line_no))
 
     # Report duplicates
-    for chunk_hash, locations in code_blocks.items():
+    for _chunk_hash, locations in code_blocks.items():
         if len(locations) > 1:
             files_involved = list(set(str(loc[0]) for loc in locations))
             issues.append(
@@ -755,7 +755,7 @@ def run_review(root_path: Path) -> dict[str, Any]:
 
     # Calculate scores per principle
     scores = {}
-    for principle_id, principle_info in PRINCIPLES.items():
+    for principle_id, _principle_info in PRINCIPLES.items():
         principle_issues = [i for i in all_issues if i["principle"] == principle_id]
 
         # Start with 10, deduct based on severity
@@ -815,7 +815,7 @@ def generate_markdown_report(results: dict[str, Any], output_path: Path) -> None
 |-----------|-------|--------|--------|
 """
 
-    for pid, info in results["principle_scores"].items():
+    for _pid, info in results["principle_scores"].items():
         status = (
             "Pass"
             if info["score"] >= 7
