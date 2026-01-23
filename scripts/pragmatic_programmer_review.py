@@ -181,7 +181,7 @@ def check_dry_violations(files: list[Path]) -> list[dict]:
     # Report duplicates
     for _chunk_hash, locations in code_blocks.items():
         if len(locations) > 1:
-            files_involved = list(set(str(loc[0]) for loc in locations))
+            files_involved = list({str(loc[0]) for loc in locations})
             issues.append(
                 {
                     "principle": "DRY",
@@ -202,7 +202,7 @@ def check_dry_violations(files: list[Path]) -> list[dict]:
                     "severity": "MINOR",
                     "title": f"Magic number '{num}' repeated {len(locations)} times",
                     "description": "Repeated numeric literals should be constants",
-                    "files": list(set(str(loc[0]) for loc in locations[:3])),
+                    "files": list({str(loc[0]) for loc in locations[:3]}),
                     "recommendation": "Define as named constant",
                 }
             )
@@ -277,7 +277,7 @@ def check_orthogonality(files: list[Path]) -> list[dict]:
                 "severity": "MAJOR",
                 "title": f"Excessive global state ({len(global_vars)} globals)",
                 "description": "Global variables create hidden dependencies",
-                "files": list(set(g["file"] for g in global_vars[:5])),
+                "files": list({g["file"] for g in global_vars[:5]}),
                 "recommendation": "Use dependency injection or encapsulation",
             }
         )
@@ -394,7 +394,7 @@ def check_quality(files: list[Path]) -> list[dict]:
                 "severity": "MINOR",
                 "title": f"Technical debt: {len(todos)} unfinished task comments",
                 "description": "Accumulated work markers indicate incomplete work",
-                "files": list(set(str(t[0]) for t in todos[:5])),
+                "files": list({str(t[0]) for t in todos[:5]}),
                 "recommendation": "Address or create issues for pending tasks",
             }
         )
@@ -406,7 +406,7 @@ def check_quality(files: list[Path]) -> list[dict]:
                 "severity": "MAJOR",
                 "title": f"Known bugs: {len(fixmes)} fix-needed comments",
                 "description": "Fix markers indicate known problems",
-                "files": list(set(str(f[0]) for f in fixmes[:5])),
+                "files": list({str(f[0]) for f in fixmes[:5]}),
                 "recommendation": "Fix or create issues for known bugs",
             }
         )
@@ -469,7 +469,7 @@ def check_robustness(files: list[Path]) -> list[dict]:
                 "severity": "CRITICAL",
                 "title": f"Bare except clauses ({len(bare_excepts)} found)",
                 "description": "Bare 'except:' catches all exceptions including KeyboardInterrupt",
-                "files": list(set(str(b[0]) for b in bare_excepts[:5])),
+                "files": list({str(b[0]) for b in bare_excepts[:5]}),
                 "recommendation": "Specify exception types explicitly",
             }
         )
@@ -481,7 +481,7 @@ def check_robustness(files: list[Path]) -> list[dict]:
                 "severity": "MAJOR",
                 "title": f"Overly broad exception handling ({len(broad_excepts)} found)",
                 "description": "Catching 'Exception' hides specific errors",
-                "files": list(set(str(b[0]) for b in broad_excepts[:5])),
+                "files": list({str(b[0]) for b in broad_excepts[:5]}),
                 "recommendation": "Catch specific exception types",
             }
         )
