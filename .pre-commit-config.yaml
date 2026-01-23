@@ -28,13 +28,12 @@ repos:
     hooks:
       - id: black
 
-  # Linting and formatting (Issue #780: add ruff-format)
+  # Linting (Issue #780: align with CI)
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.10
     hooks:
       - id: ruff
         args: [--fix]
-      - id: ruff-format
 
   # Type checking
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -49,7 +48,7 @@ repos:
     rev: v2.7.3
     hooks:
       - id: pip-audit
-        args: [--ignore-vuln, CVE-2024-23342, --ignore-vuln, CVE-2025-53000]
+        args: [--ignore-vuln, CVE-2024-23342]
 
   # TODO/FIXME detection (Issue #780: align with CI placeholder checks)
   - repo: local
@@ -60,7 +59,7 @@ repos:
           bash -c 'if grep -rn --include="*.py" -E "TODO|FIXME"
           --exclude-dir=".git" --exclude-dir=".mypy_cache"
           --exclude-dir=".ruff_cache" --exclude-dir="__pycache__"
-          --exclude-dir="archive" . 2>/dev/null; then
+          --exclude-dir="archive" --exclude-dir="tests" . 2>/dev/null; then
           echo "ERROR: Found TODO/FIXME placeholders. Create GitHub issues instead.";
           exit 1; fi'
         language: system

@@ -47,15 +47,16 @@ jobs:
       - name: Security Audit
         run: |
           pip install pip-audit
-          # Ignore CVE-2024-23342 (ecdsa) and CVE-2025-53000 (nbconvert) as no fix versions are available presently
-          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2025-53000
+          # Ignore CVE-2024-23342 (ecdsa) as no fix version is available presently
+          pip-audit --ignore-vuln CVE-2024-23342
 
       # SECURITY: Bandit static security analysis (Issue #782)
       - name: Bandit Security Scan
         run: |
-          bandit -r . -x ./tests,./archive,./legacy,./.git -ll -ii --format txt || true
-          echo "## Security Scan Results" >> $GITHUB_STEP_SUMMARY
-          bandit -r . -x ./tests,./archive,./legacy,./.git -ll -ii --format txt >> $GITHUB_STEP_SUMMARY 2>&1 || true
+          bandit_output="$(bandit -r . -x ./tests,./archive,./legacy,./.git -ll -ii --format txt 2>&1 || true)"
+          echo "$bandit_output"
+          echo "## Security Scan Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "$bandit_output" >> "$GITHUB_STEP_SUMMARY"
 
       # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
       - name: Code Quality Check
