@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from shared.python.signal_processing import (
     _morlet2_impl,
     compute_coherence,

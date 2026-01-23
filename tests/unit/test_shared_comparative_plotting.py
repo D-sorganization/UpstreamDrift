@@ -3,7 +3,6 @@ from unittest.mock import MagicMock
 import matplotlib.figure
 import numpy as np
 import pytest
-
 from shared.python.comparative_analysis import (
     AlignedSignals,
     ComparativeSwingAnalyzer,

@@ -42,7 +42,7 @@ from java.awt import BorderLayout
 # ------------------------------------------------------------------------------
 def ComputeAndPlotMomentArms(coordIndex):
 	coordName = coordList[coordIndex]
-	
+
 	col_labels = motionStorage.getColumnLabels()
 	ncols = col_labels.getSize()-1
 	ncoords = currentModel.getCoordinateSet().getSize()
@@ -50,25 +50,25 @@ def ComputeAndPlotMomentArms(coordIndex):
 	inDegrees = motionStorage.isInDegrees()
 	if (inDegrees):
 		currentModel.getSimbodyEngine().convertDegreesToRadians(motionStorage)
-	
+
 	coord_inds = modeling.ArrayInt(ncoords, -1)
 	for i in range(0, ncoords):
 		coord_inds.set(i, motionStorage.getStateIndex(currentModel.
 			getCoordinateSet().get(i).getName()))
-	
+
 	# Create a zero-sized array, but pre-allocate the capacity to hold all the
 	# results.
 	momentArms = modeling.ArrayDouble(0.0, 0, nt)
 	times = modeling.ArrayDouble(0.0, 0, nt)
 	motionStorage.getTimeColumn(times)
-	
+
 	momentArmFunctions = modeling.FunctionSet()
-	
+
 	for i in range(0, pathForceNames.getSize()):
 		momentArmFunctions.adoptAndAppend(modeling.PiecewiseLinearFunction())
 		momentArmFunctions.get(i).setName(pathForceNames.getitem(i) + '.' +
 			coordName)
-	
+
 	# For each instant in the motion file, update the coordinate values inside
 	# the state and compute the moment arms for the path force about the
 	# coordinate of interest.
@@ -77,15 +77,15 @@ def ComputeAndPlotMomentArms(coordIndex):
 		stateVec = motionStorage.getStateVector(i)
 		time = stateVec.getTime()
 		data = stateVec.getData()
-		
+
 		# Set the time on the state.
 		state.setTime(time)
-		
+
 		# Set the coordinate values on the state from the storage data.
 		for j in range(0, ncoords):
 			coord = currentModel.getCoordinateSet().get(j)
 			coord.setValue(state, data.getitem(coord_inds.getitem(j)))
-		
+
 		for k in range(0, pathForceNames.getSize()):
 			force = modeling.PathSpring.safeDownCast(forces.get(pathForceNames.getitem(k)))
 			if (force == None):
@@ -95,14 +95,14 @@ def ComputeAndPlotMomentArms(coordIndex):
 			ma = force.computeMomentArm(state, ma_coord)
 			modeling.PiecewiseLinearFunction.safeDownCast(momentArmFunctions.
 				get(k)).addPoint(time, ma)
-	
+
 	# Plot moment arm curves
 	momentArmPlot = createPlotterPanel("Moment Arms")
 	momentArmPlot.setMinX(times.getitem(0))
 	momentArmPlot.setMaxX(times.getitem(nt-1))
 	momentArmPlot.setXAxisLabel(coordName + ' (rad)')
 	momentArmPlot.setYAxisLabel('Moment Arm (m)')
-	
+
 	for k in range(0, pathForceNames.getSize()):
 		hasNonZero = False
 		idx = 0
@@ -112,7 +112,7 @@ def ComputeAndPlotMomentArms(coordIndex):
 				momentArmFunctions.get(k)).getY(idx) != 0):
 				hasNonZero = True
 			idx = idx + 1
-		
+
 		if (hasNonZero):
 			addFunctionCurve(momentArmPlot, momentArmFunctions.get(k))
 
@@ -129,7 +129,7 @@ class CoordinateChooser:
 		coordName = self.data[coordIndex]
 		self.frame.setVisible(False)
 		ComputeAndPlotMomentArms(coordIndex)
-	
+
 	def __init__(self):
 		# Populate and display window for selecting a coordinate from the
 		# specified motion (kinematics) file.
@@ -137,19 +137,19 @@ class CoordinateChooser:
 		self.frame.setSize(350,100)
 		self.frame.setLayout(BorderLayout())
 		self.frame.setLocationRelativeTo(None)
-		
+
 		self.data = coordList
 		self.cb = JComboBox(self.data, preferredSize=(200,25))
 		self.frame.add(self.cb, BorderLayout.WEST)
-		
+
 		btn = JButton('OK', preferredSize=(75,25),
 			actionPerformed=self.buttonPressed)
 		self.frame.add(btn, BorderLayout.EAST)
-		
+
 		self.label = JLabel('Please select the coordinate to use in the \
 			moment arm calculations', preferredSize=(325,50))
 		self.frame.add(self.label, BorderLayout.NORTH)
-		
+
 		self.frame.setVisible(True)
 
 
@@ -184,15 +184,15 @@ for i in range(0, forces.getSize()):
 # Obtain a file containing the motion to use for computing moment arms.
 motionFile = utils.FileUtils.getInstance().browseForFilename(".sto",
 	"Please select the storage/motion file with kinematics to compute moment \
-		arms.", 1);
+		arms.", 1)
 print motionFile
 
 if (motionFile != None):
 	motionStorage = modeling.Storage(motionFile)
-	
+
 	# Generate list of coordinates.
 	coordList = []
 	for i in range(0, currentModel.getCoordinateSet().getSize()):
 		coordList.append(currentModel.getCoordinateSet().get(i).getName())
-	
+
 	CoordinateChooser()

@@ -8,7 +8,6 @@ from pathlib import Path
 
 import pytest
 import yaml
-
 from shared.python.model_registry import ModelRegistry
 
 

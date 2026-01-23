@@ -27,7 +27,7 @@ import org.opensim.utils as utils
 
 # Obtain Directory containing CMC results
 #resultsFolderCMC = getInstallDir() + "/Models/gait10dof18musc/CMC/ResultsCMC"
-resultsFolderCMC = utils.FileUtils.getInstance().browseForFolder("Select the folder with CMC Results",1);
+resultsFolderCMC = utils.FileUtils.getInstance().browseForFolder("Select the folder with CMC Results",1)
 
 ####################################
 # Plot kinematics errors

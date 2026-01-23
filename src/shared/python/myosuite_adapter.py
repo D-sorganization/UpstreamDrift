@@ -28,7 +28,6 @@ import logging
 from typing import Any
 
 import numpy as np
-
 from shared.python.multi_muscle import AntagonistPair, MuscleGroup
 
 logger = logging.getLogger(__name__)

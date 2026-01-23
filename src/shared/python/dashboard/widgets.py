@@ -13,7 +13,6 @@ from typing import Any
 import numpy as np
 from matplotlib.axes import Axes
 from PyQt6 import QtCore, QtGui, QtWidgets
-
 from shared.python.dashboard.advanced_analysis import AdvancedAnalysisDialog
 from shared.python.export import export_recording_all_formats
 from shared.python.interfaces import RecorderInterface

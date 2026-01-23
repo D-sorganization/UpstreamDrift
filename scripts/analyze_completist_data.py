@@ -267,7 +267,6 @@ def generate_report() -> None:
 
     # Filter criticals (Stubs and NotImplemented in core code)
     critical_candidates = []
-    not_impl_str = "NotImplemented" + "Error"
 
     for s in stubs:
         if "tests" not in s["file"] and "test_" not in s["file"]:

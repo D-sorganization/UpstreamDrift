@@ -48,22 +48,23 @@ myModel.setName(oldModel.getName()+"_probed")
 #   - second column is either the slow-twitch ratio (in the range [0,1]) or
 #     "-1" if the slow-twitch ratio is unknown for that muscle
 import org.opensim.utils as utils
+
 fn = utils.FileUtils.getInstance().browseForFilename(".txt",
     "Please select the file containing the slow-twitch fiber ratios", True)
-f = open(fn, "r")
+f = open(fn)
 
-twitchRatios = dict()
+twitchRatios = {}
 for line in f:
     # The file is space-delimited.
     row = line.split(" ")
-    
+
     # Ensure there are exactly two columns in each row.
     if len(row) != 2:
         raise Exception("There must be 2 columns in each row of the file.")
-    
+
     muscleName = row[0]
     twitchRatio = float(row[1])
-    
+
     # Place this row into the "twitchRatios" map.
     twitchRatios[muscleName] = twitchRatio
 
@@ -104,16 +105,16 @@ wholeBodyProbe.setName("metabolics")
 # probe.
 for iMuscle in range(myModel.getMuscles().getSize()):
     thisMuscle = myModel.getMuscles().get(iMuscle)
-    
+
     # Get the slow-twitch ratio from the data we read earlier. Start with
     # the default value.
     slowTwitchRatio = defaultTwitchRatio
-    
+
     # Set the slow-twitch ratio to the physiological value, if it is known.
     for key, val in twitchRatios.items():
         if thisMuscle.getName().startswith(key) and val != -1:
             slowTwitchRatio = val
-    
+
     # Add this muscle to the whole-body probe. The arguments are muscle
     # name, slow-twitch ratio, and muscle mass. Note that the muscle mass
     # is ignored unless we set useProvidedMass to True.

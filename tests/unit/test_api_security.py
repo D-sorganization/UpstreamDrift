@@ -139,10 +139,9 @@ class TestBcryptAPIKeyVerification:
     @pytest.mark.skip(reason="pytest-asyncio not installed in CI environment")
     async def test_api_key_verification_integration(self) -> None:
         """Test full API key verification flow."""
+        from api.auth.dependencies import get_current_user_from_api_key
         from fastapi import HTTPException
         from fastapi.security import HTTPAuthorizationCredentials
-
-        from api.auth.dependencies import get_current_user_from_api_key
 
         # Create test API key
         api_key = f"gms_{secrets.token_urlsafe(32)}"
@@ -208,7 +207,7 @@ class TestTimezoneAwareJWT:
 
         # The exp should be a timestamp (Unix epoch)
         exp_timestamp = payload["exp"]
-        assert isinstance(exp_timestamp, (int, float))
+        assert isinstance(exp_timestamp, int | float)
 
         # Convert to datetime and verify it's in the future
         exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=UTC)

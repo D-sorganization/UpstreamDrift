@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-
 from shared.python.energy_monitor import (
     ENERGY_DRIFT_CRITICAL_PCT,
     ENERGY_DRIFT_TOLERANCE_PCT,

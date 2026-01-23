@@ -32,7 +32,6 @@ def check_dependencies() -> bool:
 
         return True
     except ImportError:
-        print("Error: Pillow is required. Install with: pip install Pillow")
         return False
 
 
@@ -141,40 +140,30 @@ def main() -> int:
 
     assets_dir = Path(__file__).parent
 
-    print("Analyzing assets...")
     results = analyze_assets(assets_dir)
 
     # Report findings
-    total_size = sum(r["size_kb"] for r in results)
+    sum(r["size_kb"] for r in results)
     needs_opt = [r for r in results if r["needs_optimization"]]
 
-    print(f"\nTotal assets: {len(results)}")
-    print(f"Total size: {total_size:.1f} KB")
-    print(f"Need optimization: {len(needs_opt)}")
 
     if needs_opt:
-        print("\nFiles needing optimization:")
         for info in sorted(needs_opt, key=lambda x: -x["size_kb"]):
-            print(f"  {info['path'].name}: {info['size_kb']:.1f}KB - {info['reason']}")
+            pass
 
     if args.dry_run:
-        print("\nDry run - no changes made.")
         return 0
 
     if not needs_opt:
-        print("\nAll assets are optimized!")
         return 0
 
     # Optimize files
-    print("\nOptimizing...")
     total_saved = 0
     for info in needs_opt:
         if info["path"].suffix.lower() == ".png":
             saved = optimize_png(info["path"], aggressive=args.aggressive)
             total_saved += saved
-            print(f"  {info['path'].name}: saved {saved / 1024:.1f} KB")
 
-    print(f"\nTotal saved: {total_saved / 1024:.1f} KB")
     return 0
 
 

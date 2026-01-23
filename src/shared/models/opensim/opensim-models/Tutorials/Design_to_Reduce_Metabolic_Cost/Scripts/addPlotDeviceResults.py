@@ -25,12 +25,13 @@
 # Script assumes the prefix walk_subject for the CMC results
 
 # Utils contains tools to browse for files and folders
-import org.opensim.utils as utils
 import os
+
+import org.opensim.utils as utils
 
 # Obtain Directory containing device results
 #resultsFolderCMC = getInstallDir() + "/Models/gait10dof18musc/CMC/ResultsCMC"
-resultsFolderCMC = utils.FileUtils.getInstance().browseForFolder("Select the folder with device CMC Results",1);
+resultsFolderCMC = utils.FileUtils.getInstance().browseForFolder("Select the folder with device CMC Results",1)
 
 # Obtain the legend name
 #legendName = "Device"

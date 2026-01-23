@@ -3,7 +3,6 @@
 import numpy as np
 import pytest
 from matplotlib.figure import Figure
-
 from shared.python.comparative_analysis import ComparativeSwingAnalyzer
 from shared.python.comparative_plotting import ComparativePlotter
 from shared.python.plotting import GolfSwingPlotter, RecorderInterface

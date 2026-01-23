@@ -9,7 +9,6 @@ import numpy as np
 
 matplotlib.use("Agg")
 from matplotlib import pyplot as plt
-
 from shared.python.plotting import GolfSwingPlotter
 
 

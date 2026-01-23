@@ -28,7 +28,6 @@ from matplotlib.patches import Rectangle
 
 # Register 3D projection
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
-
 from shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 
 logger = logging.getLogger(__name__)

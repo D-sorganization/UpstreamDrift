@@ -9,7 +9,7 @@ def remove_normals_node(vtp_content):
     return re.sub(_normals_pattern, '', vtp_content)
 
 def remove_normals_from_vtp(vtp_path):
-    with open(vtp_path, 'r', newline='') as fd:
+    with open(vtp_path, newline='') as fd:
         vtp_content = fd.read()
 
     modified_vtp_content = remove_normals_node(vtp_content)

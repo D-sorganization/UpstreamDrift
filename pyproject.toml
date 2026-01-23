@@ -151,12 +151,12 @@ exclude = [
     "__pycache__",
     "build",
     "dist",
-    "engines/matlab_simscape/",
-    "engines/Simscape_Multibody_Models/*/matlab/",
+    "src/engines/matlab_simscape/",
+    "src/engines/Simscape_Multibody_Models/*/matlab/",
     "**/archive",
     "**/legacy",
-    "shared/models/opensim/opensim-models/",
-    "shared/models/myosuite/myo_sim/",
+    "src/shared/models/opensim/opensim-models/",
+    "src/shared/models/myosuite/myo_sim/",
 ]
 
 [tool.ruff.lint]

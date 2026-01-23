@@ -7,7 +7,6 @@ import os
 from typing import Any
 
 import numpy as np
-
 from shared.python.interfaces import PhysicsEngine
 
 # Configure logging

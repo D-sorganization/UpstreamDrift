@@ -4,7 +4,6 @@ import unittest
 from unittest.mock import patch
 
 import numpy as np
-
 from shared.python.statistical_analysis import StatisticalAnalyzer
 from shared.python.swing_comparison import (
     ComparisonMetric,

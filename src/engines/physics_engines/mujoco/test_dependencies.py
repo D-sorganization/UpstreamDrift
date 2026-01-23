@@ -38,7 +38,7 @@ def test_numpy_compatibility() -> None:
     # Note: Modern dm_control or mujoco bindings usually support this
     try:
         qpos = data.qpos
-        assert isinstance(qpos, (np.ndarray, object))  # Depending on binding version
+        assert isinstance(qpos, np.ndarray | object)  # Depending on binding version
     except Exception as e:
         logger.warning(f"Direct numpy access check warning: {e}")
 

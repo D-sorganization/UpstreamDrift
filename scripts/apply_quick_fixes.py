@@ -17,7 +17,6 @@ def add_missing_init_files():
     target_roots = ["engines", "shared", "api", "launchers"]
 
     # Files to ignore (don't treat directories containing only these as packages)
-    ignore_files = {".DS_Store", "__pycache__"}
 
     fixed_count = 0
 
@@ -28,7 +27,7 @@ def add_missing_init_files():
         if not root_path.exists():
             continue
 
-        for dirpath, dirnames, filenames in os.walk(root_path):
+        for dirpath, _dirnames, filenames in os.walk(root_path):
             path_obj = Path(dirpath)
 
             # Skip hidden directories
