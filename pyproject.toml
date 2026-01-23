@@ -23,7 +23,7 @@ classifiers = [
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=1.26.4,<3.0.0",
-    "pandas>=2.2.3,<4.0.0",
+    "pandas>=2.2.3,<3.0.0",
     "matplotlib>=3.8.0,<4.0.0",
     "scipy>=1.13.1,<2.0.0",
     "sympy>=1.12,<2.0.0",
@@ -34,7 +34,7 @@ dependencies = [
     "mujoco>=3.3.0,<4.0.0",
     "pyyaml>=6.0.1",
     "defusedxml>=0.7.1,<1.0.0",
-    "structlog>=24.1.0,<26.0.0",
+    "structlog>=24.1.0,<25.0.0",
     "simpleeval>=0.9.13",
     "ezc3d>=1.4.0",
     # API and authentication dependencies
@@ -45,14 +45,14 @@ dependencies = [
     # SECURITY: Replaced python-jose (CVE-2024-33663, CVE-2024-33664) with PyJWT
     "PyJWT>=2.10.1,<3.0.0",
     # SECURITY: Replaced passlib (abandoned since 2020) with bcrypt directly
-    "bcrypt>=4.1.0,<6.0.0",
+    "bcrypt>=4.1.0,<5.0.0",
     "python-multipart>=0.0.6,<1.0.0",
     "slowapi>=0.1.9,<1.0.0",
     "jinja2>=3.1.6",
     "pypdf>=6.6.0",
     "urllib3>=2.6.3",
     "fonttools>=4.60.2",
-    "marshmallow>=3.26.2,<5.0.0",
+    "marshmallow>=3.26.2,<4.0.0",
     # cryptography for JWT signatures (updated for CVE-2024-26130)
     "cryptography>=44.0.1,<47.0.0",
     # Dependencies from consolidated requirements.txt files
@@ -72,7 +72,7 @@ dev = [
     "pytest-xdist>=3.5.0",    # Parallel test execution for faster CI
     "httpx>=0.25.0",  # Required for FastAPI TestClient
     "pip-audit>=2.7.0",
-    "ruff==0.14.14",
+    "ruff==0.14.10",
     "black>=24.4.2",
     "mypy>=1.10.0",
     "pre-commit>=4.0.0",

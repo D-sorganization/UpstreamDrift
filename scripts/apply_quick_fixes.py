@@ -9,12 +9,14 @@ Current fixes:
 import os
 from pathlib import Path
 
-
 def add_missing_init_files():
     """Add missing __init__.py files to package directories."""
 
     # Target directories to scan for missing __init__.py
     target_roots = ["engines", "shared", "api", "launchers"]
+
+    # Files to ignore (don't treat directories containing only these as packages)
+    ignore_files = {".DS_Store", "__pycache__"}
 
     fixed_count = 0
 
@@ -25,7 +27,7 @@ def add_missing_init_files():
         if not root_path.exists():
             continue
 
-        for dirpath, _dirnames, filenames in os.walk(root_path):
+        for dirpath, dirnames, filenames in os.walk(root_path):
             path_obj = Path(dirpath)
 
             # Skip hidden directories
@@ -53,7 +55,6 @@ def add_missing_init_files():
                     print(f"Error creating {init_path}: {e}")
 
     print(f"\nTotal fixed: {fixed_count} missing __init__.py files.")
-
 
 if __name__ == "__main__":
     add_missing_init_files()

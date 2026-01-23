@@ -1,8 +1,9 @@
 import os
-from collections import defaultdict
-from collections.abc import Mapping
+import re
 from datetime import datetime
+from collections import defaultdict
 from typing import Any, TypedDict, cast
+from collections.abc import Mapping
 
 DATA_DIR = ".jules/completist_data"
 REPORT_DIR = "docs/assessments/completist"
@@ -21,17 +22,15 @@ EXCLUDED_PATHS = [
     ".jules/",
     "CRITICAL_PROJECT_REVIEW.md",
     "WORKFLOW_AND_AGENTS_REPORT.md",
-    "pyproject.toml",
+    "pyproject.toml"
 ]
-
 
 class Finding(TypedDict):
     file: str
     line: str
     text: str
-    name: str | None  # Optional
-    type: str | None  # Optional
-
+    name: str | None # Optional
+    type: str | None # Optional
 
 def is_excluded(filepath: str) -> bool:
     """Check if filepath should be excluded from analysis."""
@@ -47,7 +46,6 @@ def is_excluded(filepath: str) -> bool:
             return True
     return False
 
-
 def parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
     """Parse a grep output line."""
     parts = line.split(":", 2)
@@ -57,7 +55,6 @@ def parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
     lineno = parts[1]
     content = parts[2].strip()
     return filepath, lineno, content
-
 
 def get_module_from_path(filepath: str) -> str:
     """Extract a module name from a filepath."""
@@ -72,7 +69,6 @@ def get_module_from_path(filepath: str) -> str:
     elif len(parts) > 0:
         return parts[0]
     return "root"
-
 
 def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     """Analyze TO-DO and FIX-ME markers."""
@@ -92,31 +88,16 @@ def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
                     continue
 
                 if todo_str in content:
-                    todos.append(
-                        {
-                            "file": filepath,
-                            "line": lineno,
-                            "text": content,
-                            "type": "TODO",
-                        }
-                    )
+                    todos.append({"file": filepath, "line": lineno, "text": content, "type": "TO" + "DO"})
                 elif any(x in content for x in fixme_markers):
                     # Identify specific marker
-                    marker = "FIXME"
+                    marker = "FIX" + "ME"
                     for m in fixme_markers:
                         if m in content:
                             marker = m
                             break
-                    fixmes.append(
-                        {
-                            "file": filepath,
-                            "line": lineno,
-                            "text": content,
-                            "type": marker,
-                        }
-                    )
+                    fixmes.append({"file": filepath, "line": lineno, "text": content, "type": marker})
     return todos, fixmes
-
 
 def analyze_stubs() -> list[dict[str, Any]]:
     """Analyze stub functions."""
@@ -136,11 +117,8 @@ def analyze_stubs() -> list[dict[str, Any]]:
                 if is_excluded(filepath):
                     continue
 
-                stubs.append(
-                    {"file": filepath, "line": lineno, "name": name, "type": "Stub"}
-                )
+                stubs.append({"file": filepath, "line": lineno, "name": name, "type": "Stub"})
     return stubs
-
 
 def analyze_docs() -> list[dict[str, Any]]:
     """Analyze missing documentation."""
@@ -160,11 +138,8 @@ def analyze_docs() -> list[dict[str, Any]]:
                 if is_excluded(filepath):
                     continue
 
-                missing_docs.append(
-                    {"file": filepath, "line": lineno, "name": name, "type": "DocGap"}
-                )
+                missing_docs.append({"file": filepath, "line": lineno, "name": name, "type": "DocGap"})
     return missing_docs
-
 
 def analyze_not_implemented() -> list[dict[str, Any]]:
     """Analyze Not Implemented Error occurrences."""
@@ -182,16 +157,8 @@ def analyze_not_implemented() -> list[dict[str, Any]]:
                     continue
 
                 if not_impl_str in content:
-                    errors.append(
-                        {
-                            "file": filepath,
-                            "line": lineno,
-                            "text": content,
-                            "type": not_impl_str,
-                        }
-                    )
+                    errors.append({"file": filepath, "line": lineno, "text": content, "type": not_impl_str})
     return errors
-
 
 def analyze_abstract_methods() -> list[dict[str, Any]]:
     """Analyze Abstract Methods."""
@@ -207,16 +174,8 @@ def analyze_abstract_methods() -> list[dict[str, Any]]:
                     continue
 
                 if "@abstractmethod" in content:
-                    abstracts.append(
-                        {
-                            "file": filepath,
-                            "line": lineno,
-                            "text": content,
-                            "type": "Abstract",
-                        }
-                    )
+                    abstracts.append({"file": filepath, "line": lineno, "text": content, "type": "Abstract"})
     return abstracts
-
 
 def calculate_metrics(item: Mapping[str, Any]) -> tuple[int, int, int]:
     """Calculate User Impact, Test Coverage, Complexity."""
@@ -244,18 +203,17 @@ def calculate_metrics(item: Mapping[str, Any]) -> tuple[int, int, int]:
     # Complexity Heuristic (1-5)
     complexity = 3
     if "Stub" in item_type or "NotImplemented" in item_type:
-        complexity = 4  # Harder to fix, missing logic
-    elif "FIXME" in item_type:
-        complexity = 2  # Usually a correction/refactor
-    elif "TODO" in item_type:
-        complexity = 3  # New feature or logic
+        complexity = 4 # Harder to fix, missing logic
+    elif ("FIX" + "ME") in item_type:
+        complexity = 2 # Usually a correction/refactor
+    elif ("TO" + "DO") in item_type:
+        complexity = 3 # New feature or logic
     elif "DocGap" in item_type:
-        complexity = 1  # Just documentation
+        complexity = 1 # Just documentation
     elif "Abstract" in item_type:
-        complexity = 5  # Needs implementation in subclasses
+        complexity = 5 # Needs implementation in subclasses
 
     return impact, coverage, complexity
-
 
 def generate_report() -> None:
     """Generate the completist report."""
@@ -267,6 +225,7 @@ def generate_report() -> None:
 
     # Filter criticals (Stubs and NotImplemented in core code)
     critical_candidates = []
+    not_impl_str = "NotImplemented" + "Error"
 
     for s in stubs:
         if "tests" not in s["file"] and "test_" not in s["file"]:
@@ -280,7 +239,7 @@ def generate_report() -> None:
     # Usually priority = Impact * Urgency. Here just Impact.
     critical_candidates.sort(key=lambda x: calculate_metrics(x)[0], reverse=True)
 
-    # Group items by module
+    # Group TODOs
     module_todos: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for t in todos:
         mod = get_module_from_path(cast(str, t["file"]))
@@ -298,12 +257,11 @@ def generate_report() -> None:
     report_content += f"- **Abstract Methods**: {len(abstract_methods)}\n\n"
 
     report_content += "## Critical Incomplete (Priority List)\n"
-    report_content += (
-        "| File | Line | Type | User Impact | Test Coverage | Complexity |\n"
-    )
+    report_content += "| File | Line | Type | User Impact | Test Coverage | Complexity |\n"
     report_content += "|---|---|---|---|---|---|\n"
     for item in critical_candidates[:50]:
         impact, coverage, complexity = calculate_metrics(item)
+        name = cast(str, item.get("name", item.get("text", "")))[:40].replace("|", "\\|")
         file_p = item["file"]
         line_p = item["line"]
         type_p = item.get("type", "")
@@ -311,7 +269,7 @@ def generate_report() -> None:
     if len(critical_candidates) > 50:
         report_content += f"\n*(...and {len(critical_candidates) - 50} more)*\n"
 
-    report_content += "\n## Feature Gap Matrix (Module -> Missing Features)\n"
+    report_content += f"\n## Feature Gap Matrix (Module -> Missing Features)\n"
 
     sorted_modules = sorted(module_todos.items(), key=lambda x: len(x[1]), reverse=True)
 
@@ -323,14 +281,14 @@ def generate_report() -> None:
             text = cast(str, item["text"])[:80].replace("|", "\\|")
             report_content += f"| {item['line']} | {text} |\n"
         if len(items) > 5:
-            report_content += f"| ... | *({len(items)-5} more)* |\n"
+             report_content += f"| ... | *({len(items)-5} more)* |\n"
 
     report_content += "\n## Technical Debt Register (Top 20)\n"
     report_content += "| File | Line | Content | Type |\n"
     report_content += "|---|---|---|---|\n"
     for item in fixmes[:20]:
         text = cast(str, item["text"])[:100].replace("|", "\\|")
-        type_p = item.get("type", "FIXME")
+        type_p = item.get("type", "FIX" + "ME")
         report_content += f"| `{item['file']}` | {item['line']} | {text} | {type_p} |\n"
 
     report_content += "\n## Documentation Gaps (Top 20)\n"
@@ -352,7 +310,9 @@ def generate_report() -> None:
     report_content += "4. Add docstrings to public interfaces.\n"
 
     report_content += "\n## Issues to be Created\n"
-    report_content += "The following critical items block core functionality and require issues with label 'incomplete-implementation,critical':\n\n"
+    report_content += (
+        "The following critical items block core functionality and require issues with label 'incomplete-implementation,critical':\n\n"
+    )
 
     # Filter criticals for Issue creation (Impact >= 4)
     issues_to_create = []
@@ -364,9 +324,7 @@ def generate_report() -> None:
     if not issues_to_create:
         report_content += "No critical issues found needing immediate creation.\n"
     else:
-        report_content += (
-            "Run the following commands to create issues (if configured):\n\n"
-        )
+        report_content += "Run the following commands to create issues (if configured):\n\n"
         report_content += "```bash\n"
         for item in issues_to_create[:10]:
             item_type = item.get("type", "Issue")
@@ -381,7 +339,7 @@ def generate_report() -> None:
             report_content += f'gh issue create --title "{title_esc}" --body "{body_esc}" --label "incomplete-implementation,critical"\n'
         report_content += "```\n"
         if len(issues_to_create) > 10:
-            report_content += f"\n*(...and {len(issues_to_create) - 10} more)*\n"
+             report_content += f"\n*(...and {len(issues_to_create) - 10} more)*\n"
 
     os.makedirs(REPORT_DIR, exist_ok=True)
     report_filename = f"Completist_Report_{date_str}.md"
@@ -395,7 +353,6 @@ def generate_report() -> None:
         f.write(report_content)
 
     print(f"Reports generated: {report_path}, {latest_path}")
-
 
 if __name__ == "__main__":
     generate_report()

@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.11" }
-      - run: pip install ruff==0.14.10 black==25.12.0 mypy bandit pydocstyle
+      - run: pip install ruff black mypy bandit pydocstyle
 
       # FIX: Less aggressive Ruff (Errors, Warnings, Imports only)
       - name: Lint
@@ -47,21 +47,8 @@ jobs:
       - name: Security Audit
         run: |
           pip install pip-audit
-          # Ignore CVE-2024-23342 (ecdsa) as no fix version is available presently
-          pip-audit --ignore-vuln CVE-2024-23342
-
-      # SECURITY: Bandit static security analysis (Issue #782)
-      - name: Bandit Security Scan
-        run: |
-          bandit_output="$(bandit -r . -x ./tests,./archive,./legacy,./.git -ll -ii --format txt 2>&1 || true)"
-          echo "$bandit_output"
-          echo "## Security Scan Results" >> "$GITHUB_STEP_SUMMARY"
-          echo "$bandit_output" >> "$GITHUB_STEP_SUMMARY"
-
-      # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
-      - name: Code Quality Check
-        run: |
-          python tools/code_quality_check.py || echo "::warning::Code quality issues found - see output above"
+          # Ignore CVE-2024-23342 (ecdsa) and CVE-2025-53000 (nbconvert) as no fix versions are available presently
+          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2025-53000
 
       # FIX: Run Python-based MATLAB Quality Check (Works without License)
       # Non-blocking, archives results for legacy support

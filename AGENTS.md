@@ -244,7 +244,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 ### 1. The Control Tower (Orchestrator)
 
 **Role:** Air Traffic Controller
-**Workflow:** `.github/workflows/Jules-Control-Tower.yml`
+**Workflow:** `.github/workflows/jules-control-tower.yml`
 **Responsibilities:**
 
 - **Sole Trigger:** The only agent that listens to GitHub events (Push, PR, Schedule).
@@ -254,8 +254,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 ### 2. Auto-Repair (Medic)
 
 **Role:** Fixer of Broken Builds
-**Workflow:** `.github/workflows/Jules-Auto-Repair.yml`
-**Status:** ⚠️ **CURRENTLY DISABLED** (to prevent PR explosion - see workflow for details)
+**Workflow:** `.github/workflows/jules-auto-repair.yml`
 **Triggered By:** CI Failure (Standard CI)
 **Capabilities:**
 
@@ -266,7 +265,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 ### 3. Test-Generator (Architect)
 
 **Role:** Quality Assurance Engineer
-**Workflow:** `.github/workflows/Jules-Test-Generator.yml`
+**Workflow:** `.github/workflows/jules-test-generator.yml`
 **Triggered By:** New PR with `.py` changes
 **Capabilities:**
 
@@ -276,7 +275,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 ### 4. Doc-Scribe (Librarian)
 
 **Role:** Documentation Maintainer
-**Workflow:** `.github/workflows/Jules-Documentation-Scribe.yml`
+**Workflow:** `.github/workflows/jules-documentation-scribe.yml`
 **Triggered By:** Push to `main`
 **Capabilities:**
 
@@ -286,7 +285,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 ### 5. Scientific-Auditor (The Professor)
 
 **Role:** Peer Reviewer
-**Workflow:** `.github/workflows/Jules-Physics-Auditor.yml`
+**Workflow:** `.github/workflows/jules-scientific-auditor.yml`
 **Triggered By:** Nightly Schedule
 **Capabilities:**
 
@@ -296,7 +295,7 @@ This section defines the active agents within the Jules "Control Tower" Architec
 ### 6. Conflict-Fix (Diplomat)
 
 **Role:** Merge Conflict Resolver
-**Workflow:** `.github/workflows/Jules-Conflict-Fix.yml`
+**Workflow:** `.github/workflows/jules-conflict-fix.yml`
 **Triggered By:** Manual dispatch or specific conflict events (if configured)
 **Capabilities:**
 
@@ -321,16 +320,6 @@ This section defines the active agents within the Jules "Control Tower" Architec
   - Linting violations (Ruff)
   - Test coverage gaps
 - **Issues:** Creates/updates GitHub issues for debt scores > 50
-
-### 8. CI/CD Workflows (Core Pipelines)
-
-The following workflows run on every PR and push:
-
-- **`ci-standard.yml`** - Main quality gate (Ruff, Black, MyPy, security audit, TODO/FIXME detection)
-- **`ci-fast-tests.yml`** - Parallel unit & integration tests with 10-minute hard cutoff
-- **`critical-files-guard.yml`** - Prevents deletion of protected files
-
-**Note:** CI is NOT driven by `ci.yml` - use the workflows above.
 
 ---
 
