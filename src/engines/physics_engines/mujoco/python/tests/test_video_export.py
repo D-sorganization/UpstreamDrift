@@ -9,7 +9,7 @@ import pytest
 sys.modules["cv2"] = MagicMock()
 sys.modules["imageio"] = MagicMock()
 
-from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export import (  # noqa: E402
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.video_export import (  # noqa: E402, E501
     VideoExporter,
     VideoFormat,
     create_metrics_overlay,
