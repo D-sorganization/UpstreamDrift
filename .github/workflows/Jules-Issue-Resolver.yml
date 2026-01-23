@@ -21,6 +21,13 @@ concurrency:
   group: jules-issue-resolver-${{ github.repository }}
   cancel-in-progress: false
 
+# HARDENING: Explicit rate limits
+env:
+  # Maximum issues to process per run (prevents runaway processing)
+  DEFAULT_MAX_ISSUES: 5
+  # Maximum PRs this workflow can have open at once
+  MAX_OPEN_PRS: 3
+
 jobs:
   resolve-issues:
     runs-on: ubuntu-latest
@@ -57,15 +64,46 @@ jobs:
           [ -f "docs/assessments/issues/summary.md" ] && cp docs/assessments/issues/summary.md .jules/resolver_data/
           [ -f "docs/assessments/Code_Quality_Review_Latest.md" ] && cp docs/assessments/Code_Quality_Review_Latest.md .jules/resolver_data/
 
-          echo "issue_count=$(cat .jules/resolver_data/priority_issues.json | jq 'length')" >> $GITHUB_OUTPUT
+          ISSUE_COUNT=$(cat .jules/resolver_data/priority_issues.json | jq 'length')
+          echo "issue_count=$ISSUE_COUNT" >> $GITHUB_OUTPUT
+
+          # HARDENING: Early exit if no priority issues
+          if [ "$ISSUE_COUNT" -eq 0 ]; then
+            echo "::notice::No priority issues found. Skipping resolution."
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+          else
+            echo "Found $ISSUE_COUNT priority issues to process"
+            echo "should_continue=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check Open PR Limit
+        id: pr_check
+        if: steps.gather.outputs.should_continue == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # HARDENING: Prevent PR proliferation
+          OPEN_PRS=$(gh pr list --author "github-actions[bot]" --state open --json number,title \
+            --jq '[.[] | select(.title | contains("Issue-Resolver"))] | length')
+
+          echo "Open Issue-Resolver PRs: $OPEN_PRS"
+
+          if [ "$OPEN_PRS" -ge "${{ env.MAX_OPEN_PRS }}" ]; then
+            echo "::warning::Max open PRs (${{ env.MAX_OPEN_PRS }}) reached. Skipping to prevent proliferation."
+            echo "should_continue=false" >> $GITHUB_OUTPUT
+          else
+            echo "should_continue=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Create Fix Branch
+        if: steps.gather.outputs.should_continue == 'true' && steps.pr_check.outputs.should_continue == 'true'
         run: |
           BRANCH_NAME="jules/issue-resolver-$(date +%Y%m%d-%H%M)"
           git checkout -b "$BRANCH_NAME"
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
 
       - name: Jules Issue Resolution
+        if: steps.gather.outputs.should_continue == 'true' && steps.pr_check.outputs.should_continue == 'true'
         env:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
           MAX_ISSUES: ${{ inputs.max_issues || '5' }}
@@ -171,12 +209,14 @@ jobs:
 
 
       - name: Run Linters
+        if: steps.gather.outputs.should_continue == 'true' && steps.pr_check.outputs.should_continue == 'true'
         continue-on-error: true
         run: |
           ruff check . --fix || true
           black . || true
 
       - name: Commit and Create PR
+        if: steps.gather.outputs.should_continue == 'true' && steps.pr_check.outputs.should_continue == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -191,9 +231,6 @@ jobs:
 
           Co-Authored-By: Jules <jules-bot@users.noreply.github.com>"
             git push origin "$BRANCH_NAME"
-            gh pr create --title "[Jules/Issue-Resolver] Issue Resolution - $(date +%Y-%m-%d)" \
-              --body "Daily issue resolution from assessments." \
-              --label "jules:issue-resolver,automated-fix" || \
             gh pr create --title "[Jules/Issue-Resolver] Issue Resolution - $(date +%Y-%m-%d)" \
               --body "Daily issue resolution from assessments."
 
