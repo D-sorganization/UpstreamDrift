@@ -8,7 +8,7 @@
 #   make test     - Run tests
 #   make clean    - Clean build artifacts
 
-.PHONY: help lint format test clean install check all docs
+.PHONY: help lint format test test-unit test-int clean install check all docs
 
 # Default target
 help:
@@ -26,12 +26,12 @@ help:
 	@echo "  make all       - Install, format, lint, test"
 	@echo ""
 
-# Install dependencies
+# Install dependencies (including dev tools: ruff, black, mypy, pytest)
 install:
 	pip install -r requirements.txt
 	@if [ -f pyproject.toml ] || [ -f setup.py ]; then \
-		echo "Installing package in editable mode..."; \
-		pip install -e .; \
+		echo "Installing package in editable mode with dev dependencies..."; \
+		pip install -e ".[dev]"; \
 	else \
 		echo "Skipping editable install: no pyproject.toml or setup.py found."; \
 	fi
