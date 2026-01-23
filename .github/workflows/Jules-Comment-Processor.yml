@@ -1,0 +1,351 @@
+name: Jules Comment Processor
+
+# Processes queued PR comments in bulk
+# Runs on schedule to prevent workflow cascades
+# Called by Control Tower or can run manually
+
+on:
+  workflow_call:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run - show what would be processed without acting'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'false'
+          - 'true'
+  schedule:
+    - cron: "0 3 * * *"  # Daily at 3 AM UTC
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: read
+
+concurrency:
+  group: jules-comment-processor-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  process-comments:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check Queue
+        id: queue
+        run: |
+          QUEUE_FILE=".jules/pending/pr_comments.json"
+
+          if [ ! -f "$QUEUE_FILE" ]; then
+            echo "No queue file found. Nothing to process."
+            echo "has_comments=false" >> $GITHUB_OUTPUT
+            echo "count=0" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Count pending comments
+          COUNT=$(python3 -c "import json; q=json.load(open('$QUEUE_FILE')); print(len(q.get('comments', [])))")
+
+          echo "Found $COUNT pending comments"
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+
+          if [ "$COUNT" -eq 0 ]; then
+            echo "has_comments=false" >> $GITHUB_OUTPUT
+          else
+            echo "has_comments=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Skip if Empty
+        if: steps.queue.outputs.has_comments != 'true'
+        run: |
+          echo "No pending comments to process."
+          echo "Queue is empty - exiting gracefully."
+
+      - name: Analyze and Deduplicate Queue
+        id: analyze
+        if: steps.queue.outputs.has_comments == 'true'
+        run: |
+          python3 << 'PYEOF'
+          import json
+          import os
+          from collections import defaultdict
+
+          QUEUE_FILE = ".jules/pending/pr_comments.json"
+
+          with open(QUEUE_FILE, 'r') as f:
+              queue = json.load(f)
+
+          comments = queue.get('comments', [])
+
+          # Group by PR number
+          by_pr = defaultdict(list)
+          for c in comments:
+              pr_num = c.get('pr_number')
+              if pr_num:
+                  by_pr[pr_num].append(c)
+
+          # Deduplicate (same author + similar body within same PR)
+          deduplicated = []
+          seen_keys = set()
+
+          for pr_num, pr_comments in by_pr.items():
+              for c in pr_comments:
+                  # Create a key based on PR, author, and first 100 chars of body
+                  body_snippet = c.get('body', '')[:100]
+                  key = f"{pr_num}:{c.get('author')}:{body_snippet}"
+
+                  if key not in seen_keys:
+                      seen_keys.add(key)
+                      deduplicated.append(c)
+
+          print(f"Original: {len(comments)} comments")
+          print(f"After deduplication: {len(deduplicated)} comments")
+          print(f"Across {len(by_pr)} PRs")
+
+          # Save deduplicated list for processing
+          with open('.jules/pending/to_process.json', 'w') as f:
+              json.dump({
+                  "comments": deduplicated,
+                  "by_pr": {str(k): v for k, v in by_pr.items()},
+                  "pr_count": len(by_pr),
+                  "comment_count": len(deduplicated)
+              }, f, indent=2)
+
+          # Write outputs
+          with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
+              f.write(f"original_count={len(comments)}\n")
+              f.write(f"dedup_count={len(deduplicated)}\n")
+              f.write(f"pr_count={len(by_pr)}\n")
+              f.write(f"prs={','.join(str(p) for p in by_pr.keys())}\n")
+          PYEOF
+
+      - name: Dry Run Summary
+        if: steps.queue.outputs.has_comments == 'true' && inputs.dry_run == 'true'
+        run: |
+          echo "## Dry Run Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Original comments**: ${{ steps.analyze.outputs.original_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "**After deduplication**: ${{ steps.analyze.outputs.dedup_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Unique PRs**: ${{ steps.analyze.outputs.pr_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "**PR numbers**: ${{ steps.analyze.outputs.prs }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Comments to Process" >> $GITHUB_STEP_SUMMARY
+          cat .jules/pending/to_process.json >> $GITHUB_STEP_SUMMARY
+
+          echo "Dry run complete - no actions taken"
+
+      - name: Create Processing Branch
+        if: steps.queue.outputs.has_comments == 'true' && inputs.dry_run != 'true'
+        run: |
+          BRANCH_NAME="jules/comment-fixes-$(date +%Y%m%d-%H%M)"
+          git checkout -b "$BRANCH_NAME"
+          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+
+      - name: Process Comments with Jules
+        id: jules
+        if: steps.queue.outputs.has_comments == 'true' && inputs.dry_run != 'true'
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+        run: |
+          set -e
+          REPO="${{ github.repository }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
+
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured. Skipping Jules processing."
+            echo "ran=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Get source ID
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
+
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Repository $REPO not found in Jules sources."
+            echo "ran=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Found source: $SOURCE_ID"
+
+          # Build comprehensive prompt with all comments
+          COMMENTS_JSON=$(cat .jules/pending/to_process.json)
+
+          PROMPT=$(cat << PROMPT_EOF
+          You are processing a batch of PR review comments that have been collected over time.
+          Your task is to address each comment by making appropriate code changes.
+
+          ## Comments to Address
+
+          $COMMENTS_JSON
+
+          ## Instructions
+
+          1. For each comment, understand what change is being requested
+          2. Make the appropriate code changes
+          3. Group changes by file when possible
+          4. Keep changes minimal and focused on what was requested
+          5. Do NOT respond to comments that are:
+             - Just acknowledgments or thank-yous
+             - Questions that don't require code changes
+             - Already addressed in earlier comments
+
+          ## Important
+
+          - Make changes directly to the files
+          - Do NOT create new PRs - changes will be committed to the branch: $BRANCH_NAME
+          - Focus on code quality and addressing the reviewer's concerns
+          PROMPT_EOF
+          )
+
+          echo "Creating Jules session for batch processing..."
+          REQUEST_JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            --arg source "$SOURCE_ID" \
+            --arg branch "$BRANCH_NAME" \
+            '{
+              prompt: $prompt,
+              sourceContext: {
+                source: $source,
+                githubRepoContext: {
+                  startingBranch: $branch
+                }
+              }
+            }')
+
+          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_JSON" \
+            "$API_BASE/sessions")
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::warning::Jules API returned HTTP $HTTP_CODE"
+            cat /tmp/session_response.json
+            echo "ran=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          SESSION_ID=$(cat /tmp/session_response.json | jq -r '.name')
+          echo "Created session: $SESSION_ID"
+
+          # Poll for completion
+          MAX_WAIT=1800
+          POLL_INTERVAL=30
+          ELAPSED=0
+
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            SESSION_STATUS=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
+            STATE=$(echo "$SESSION_STATUS" | jq -r '.state')
+            echo "Session state: $STATE (elapsed: ${ELAPSED}s)"
+
+            case "$STATE" in
+              "COMPLETED"|"SUBMITTED")
+                echo "Session completed successfully!"
+                echo "ran=true" >> "$GITHUB_OUTPUT"
+                break
+                ;;
+              "FAILED"|"CANCELLED")
+                echo "::warning::Session $STATE"
+                echo "ran=false" >> "$GITHUB_OUTPUT"
+                exit 0
+                ;;
+            esac
+            sleep $POLL_INTERVAL
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
+
+      - name: Clear Processed Queue
+        if: steps.queue.outputs.has_comments == 'true' && inputs.dry_run != 'true'
+        run: |
+          # Archive processed comments
+          mkdir -p .jules/processed
+          ARCHIVE_FILE=".jules/processed/comments_$(date +%Y%m%d_%H%M%S).json"
+          cp .jules/pending/pr_comments.json "$ARCHIVE_FILE"
+
+          # Clear the queue
+          echo '{"comments": [], "last_cleared": "'$(date -u +"%Y-%m-%dT%H:%M:%SZ")'"}' > .jules/pending/pr_comments.json
+
+          echo "Archived processed comments to $ARCHIVE_FILE"
+          echo "Queue cleared"
+
+      - name: Commit and Create PR
+        if: steps.queue.outputs.has_comments == 'true' && inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Clean up temp files
+          rm -f .jules/pending/to_process.json
+
+          git add -A
+
+          if ! git diff --staged --quiet; then
+            git commit -m "$(cat <<EOF
+          fix: address batch PR review comments
+
+          Processed ${{ steps.analyze.outputs.dedup_count }} comments across ${{ steps.analyze.outputs.pr_count }} PRs.
+
+          PRs addressed: #${{ steps.analyze.outputs.prs }}
+
+          Co-Authored-By: Jules <jules-bot@users.noreply.github.com>
+          EOF
+          )"
+
+            git push -u origin "$BRANCH_NAME"
+
+            # Create single PR for all changes
+            gh pr create \
+              --title "[Jules/Comment-Processor] Address batch PR review comments" \
+              --body "$(cat <<EOF
+          ## Summary
+
+          This PR addresses **${{ steps.analyze.outputs.dedup_count }}** review comments collected from **${{ steps.analyze.outputs.pr_count }}** PRs.
+
+          ### PRs with comments addressed
+          $(echo "${{ steps.analyze.outputs.prs }}" | tr ',' '\n' | while read pr; do echo "- #$pr"; done)
+
+          ### Processing Details
+          - Original comments collected: ${{ steps.analyze.outputs.original_count }}
+          - After deduplication: ${{ steps.analyze.outputs.dedup_count }}
+          - Processed by: Jules Comment Processor (batch)
+
+          ## Review Checklist
+          - [ ] Changes address the original comments
+          - [ ] No unintended side effects
+          - [ ] Code quality maintained
+
+          ---
+          Processed by [Jules Comment Processor](https://github.com/${{ github.repository }}/actions/workflows/Jules-Comment-Processor.yml)
+          EOF
+          )"
+
+            echo "PR created for batch comment fixes"
+          else
+            echo "No changes made by Jules - queue cleared anyway"
+          fi
+
+      - name: Summary
+        if: steps.queue.outputs.has_comments == 'true' && inputs.dry_run != 'true'
+        run: |
+          echo "## Comment Processing Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Comments processed**: ${{ steps.analyze.outputs.dedup_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PRs addressed**: ${{ steps.analyze.outputs.pr_count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR numbers**: ${{ steps.analyze.outputs.prs }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Queue has been cleared. Processed comments archived." >> $GITHUB_STEP_SUMMARY
