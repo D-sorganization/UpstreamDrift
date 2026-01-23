@@ -99,7 +99,7 @@ class TestMonitorInitialize:
 
     def test_initialize_sets_initial_energy(self):
         """Test that initialize() sets E_initial."""
-        from shared.python.constants import GRAVITY_M_S2
+        from src.shared.python.constants import GRAVITY_M_S2
 
         engine = MockPhysicsEngine()
         engine.set_state(q=np.array([1.0, 2.0]), v=np.array([0.5, 0.5]))
@@ -178,7 +178,7 @@ class TestGetEnergySnapshot:
 
     def test_snapshot_computes_potential_energy(self):
         """Test potential energy computation: PE = -q^T * g."""
-        from shared.python.constants import GRAVITY_M_S2
+        from src.shared.python.constants import GRAVITY_M_S2
 
         engine = MockPhysicsEngine()
 
@@ -195,7 +195,7 @@ class TestGetEnergySnapshot:
 
     def test_snapshot_with_multidof_system(self):
         """Test energy computation for multi-DOF system."""
-        from shared.python.constants import GRAVITY_M_S2
+        from src.shared.python.constants import GRAVITY_M_S2
 
         engine = MockPhysicsEngine(n_dof=3)
 

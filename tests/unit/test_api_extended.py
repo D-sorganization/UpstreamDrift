@@ -23,7 +23,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 # Try to import app, skip if dependencies unavailable
 try:
-    from api.server import ALLOWED_MODEL_DIRS, _validate_model_path, app
+    from src.api.server import ALLOWED_MODEL_DIRS, _validate_model_path, app
 except ImportError as e:
     pytest.skip(f"Cannot import api.server: {e}", allow_module_level=True)
 

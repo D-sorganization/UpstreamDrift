@@ -22,10 +22,10 @@ pytestmark = pytest.mark.skipif(
 sys.path.append(os.getcwd())
 
 if PYQT6_AVAILABLE:
-    from shared.python.dashboard.recorder import GenericPhysicsRecorder
-    from shared.python.dashboard.widgets import LivePlotWidget
-    from shared.python.dashboard.window import UnifiedDashboardWindow
-    from shared.python.interfaces import PhysicsEngine
+    from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
+    from src.shared.python.dashboard.widgets import LivePlotWidget
+    from src.shared.python.dashboard.window import UnifiedDashboardWindow
+    from src.shared.python.interfaces import PhysicsEngine
 
     # Mock Physics Engine - only defined when PyQt6 is available
     class MockPhysicsEngine(PhysicsEngine):

@@ -24,7 +24,7 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 # Try to import app, skip if dependencies unavailable
 try:
-    from api.server import app
+    from src.api.server import app
 except ImportError as e:
     pytest.skip(f"Cannot import api.server: {e}", allow_module_level=True)
 

@@ -46,7 +46,7 @@ class TestPendulumAnalyticalDynamics:
     def setup_method(self) -> None:
         """Initialize pendulum for each test."""
         # Configure engine with the simple parameters expected by the analytical tests
-        from engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+        from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
             DoublePendulumDynamics,
             DoublePendulumParameters,
             LowerSegmentProperties,
@@ -341,7 +341,7 @@ class TestPendulumEnergyConservation:
     def setup_method(self) -> None:
         """Initialize pendulum."""
         # Configure engine with the simple parameters expected by the analytical tests
-        from engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
+        from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
             DoublePendulumDynamics,
             DoublePendulumParameters,
             LowerSegmentProperties,

@@ -55,7 +55,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
 
     def test_drake_engine_initialization(self) -> None:
         """Test Drake engine initializes correctly."""
-        from engines.physics_engines.drake.python.drake_physics_engine import (
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
         )
 
@@ -102,7 +102,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
             mock_pydrake.systems.analysis.Simulator.return_value = mock_simulator
 
             # Import and test loading
-            from engines.physics_engines.drake.python.drake_physics_engine import (
+            from src.engines.physics_engines.drake.python.drake_physics_engine import (
                 DrakePhysicsEngine,
             )
 
@@ -135,7 +135,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         mock_builder_instance = MagicMock()
         mock_builder.return_value = mock_builder_instance
 
-        from engines.physics_engines.drake.python.drake_physics_engine import (
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
         )
 
@@ -170,7 +170,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         mock_plant_context = MagicMock()
         mock_simulator = MagicMock()
 
-        from engines.physics_engines.drake.python.drake_physics_engine import (
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
         )
 
@@ -214,7 +214,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         mock_plant.num_velocities.return_value = 3
         mock_plant.MakeMultibodyForces.return_value = MagicMock()
 
-        from engines.physics_engines.drake.python.drake_physics_engine import (
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
         )
 
@@ -258,7 +258,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
 
         mock_context.get_time.return_value = 0.0
 
-        from engines.physics_engines.drake.python.drake_physics_engine import (
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
         )
 
@@ -295,7 +295,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         mock_builder_instance = MagicMock()
         mock_builder.return_value = mock_builder_instance
 
-        from engines.physics_engines.drake.python.drake_physics_engine import (
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
         )
 
@@ -341,7 +341,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
             mock_parser_class.return_value = mock_parser_instance
             mock_parser_instance.AddModels.side_effect = Exception("File not found")
 
-            from engines.physics_engines.drake.python.drake_physics_engine import (
+            from src.engines.physics_engines.drake.python.drake_physics_engine import (
                 DrakePhysicsEngine,
             )
 
@@ -377,7 +377,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         mock_plant.GetPositions.return_value = np.array([1.0, 2.0])
         mock_plant.GetVelocities.return_value = np.array([3.0, 4.0])
 
-        from engines.physics_engines.drake.python.drake_physics_engine import (
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
         )
 
@@ -414,7 +414,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         mock_builder_instance = MagicMock()
         mock_builder.return_value = mock_builder_instance
 
-        from engines.physics_engines.drake.python.drake_physics_engine import (
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
         )
 

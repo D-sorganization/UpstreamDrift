@@ -145,7 +145,7 @@ def mujoco_pendulum(simple_pendulum_path: Path) -> EngineInstance:
         return EngineInstance(name="MuJoCo", engine=None, available=False)
 
     try:
-        from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+        from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
             MuJoCoPhysicsEngine,
         )
 
@@ -169,7 +169,7 @@ def drake_pendulum(simple_pendulum_path: Path) -> EngineInstance:
         return EngineInstance(name="Drake", engine=None, available=False)
 
     try:
-        from engines.physics_engines.drake.python.drake_physics_engine import (
+        from src.engines.physics_engines.drake.python.drake_physics_engine import (
             DrakePhysicsEngine,
         )
 
@@ -193,7 +193,7 @@ def pinocchio_pendulum(simple_pendulum_path: Path) -> EngineInstance:
         return EngineInstance(name="Pinocchio", engine=None, available=False)
 
     try:
-        from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+        from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
             PinocchioPhysicsEngine,
         )
 
