@@ -50,6 +50,18 @@ jobs:
           # Ignore CVE-2024-23342 (ecdsa) and CVE-2025-53000 (nbconvert) as no fix versions are available presently
           pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2025-53000
 
+      # SECURITY: Bandit static security analysis (Issue #782)
+      - name: Bandit Security Scan
+        run: |
+          bandit -r . -x ./tests,./archive,./legacy,./.git -ll -ii --format txt || true
+          echo "## Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          bandit -r . -x ./tests,./archive,./legacy,./.git -ll -ii --format txt >> $GITHUB_STEP_SUMMARY 2>&1 || true
+
+      # Code Quality Check (Issue #781) - checks for placeholders, magic numbers, etc.
+      - name: Code Quality Check
+        run: |
+          python tools/code_quality_check.py || echo "::warning::Code quality issues found - see output above"
+
       # FIX: Run Python-based MATLAB Quality Check (Works without License)
       # Non-blocking, archives results for legacy support
       - name: MATLAB Quality Check
