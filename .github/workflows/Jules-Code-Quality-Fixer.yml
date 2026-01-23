@@ -46,11 +46,33 @@ jobs:
           pip install ruff black mypy || true
           npm install -g @google/jules
 
-      - name: Create Fix Branch
+      - name: Find or Create Fix Branch
+        id: branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH_NAME="jules/code-quality-fix-$(date +%Y%m%d-%H%M%S)"
-          git checkout -b "$BRANCH_NAME"
+          # Check for existing open PR from this workflow
+          EXISTING_PR=$(gh pr list --state open --json number,headRefName,title \
+            --jq '[.[] | select(.headRefName | startswith("jules/code-quality-fix-"))] | .[0]')
+
+          if [ -n "$EXISTING_PR" ] && [ "$EXISTING_PR" != "null" ]; then
+            # Reuse existing branch
+            BRANCH_NAME=$(echo "$EXISTING_PR" | jq -r '.headRefName')
+            PR_NUM=$(echo "$EXISTING_PR" | jq -r '.number')
+            echo "Found existing PR #$PR_NUM on branch $BRANCH_NAME - will push updates"
+            git fetch origin "$BRANCH_NAME" || true
+            git checkout -B "$BRANCH_NAME" "origin/$BRANCH_NAME" 2>/dev/null || git checkout -b "$BRANCH_NAME"
+            echo "reusing_pr=true" >> $GITHUB_OUTPUT
+            echo "existing_pr_num=$PR_NUM" >> $GITHUB_OUTPUT
+          else
+            # Create new branch
+            BRANCH_NAME="jules/code-quality-fix-$(date +%Y%m%d-%H%M%S)"
+            git checkout -b "$BRANCH_NAME"
+            echo "reusing_pr=false" >> $GITHUB_OUTPUT
+          fi
+
           echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Check and Fix
         if: inputs.dry_run != 'true'
@@ -163,22 +185,37 @@ jobs:
           ruff check . --fix || true
           black . || true
 
+      - name: Commit and Create/Update PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REUSING_PR: ${{ steps.branch.outputs.reusing_pr }}
+          EXISTING_PR_NUM: ${{ steps.branch.outputs.existing_pr_num }}
+        run: |
           git add -A
           if ! git diff --staged --quiet; then
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
-            git commit -m "fix: code quality improvements"
+            git commit -m "fix: code quality improvements
+
+          Co-Authored-By: Jules <jules-bot@users.noreply.github.com>"
             git push -u origin "$BRANCH_NAME"
 
-            gh pr create \
-              --title "[Jules/Code-Quality-Fixer] Code Quality Fixes - $(date +%Y-%m-%d)" \
-              --body "Automated code quality fixes" \
-              --base main \
-              --head "$BRANCH_NAME" \
-              --label "jules:code-quality,automated-fix"
-            
+            if [ "$REUSING_PR" = "true" ] && [ -n "$EXISTING_PR_NUM" ]; then
+              # Update existing PR with comment
+              gh pr comment "$EXISTING_PR_NUM" --body "Updated with additional fixes - $(date +%Y-%m-%d %H:%M)"
+              echo "Updated existing PR #$EXISTING_PR_NUM"
+              PR_NUM="$EXISTING_PR_NUM"
+            else
+              # Create new PR
+              gh pr create \
+                --title "[Jules/Code-Quality-Fixer] Code Quality Fixes - $(date +%Y-%m-%d)" \
+                --body "Automated code quality fixes. This PR will be iteratively updated." \
+                --base main \
+                --head "$BRANCH_NAME"
+              PR_NUM=$(gh pr list --head "$BRANCH_NAME" --json number -q '.[0].number')
+            fi
+
             # Post-processing: Remove reviewers to reduce noise
-            PR_NUM=$(gh pr list --head "$BRANCH_NAME" --json number -q '.[0].number')
             if [ -n "$PR_NUM" ]; then
                gh pr edit "$PR_NUM" --remove-reviewer "dieterolson" || true
             fi
