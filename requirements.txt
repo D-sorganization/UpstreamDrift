@@ -1,0 +1,32 @@
+# Core Scientific Computing
+numpy>=2.0.1
+pandas>=2.2.2
+scipy>=1.13.1
+matplotlib>=3.9.0
+sympy>=1.12
+
+# Testing & Quality Assurance
+pytest>=8.2.0
+pytest-cov
+ruff
+mypy
+types-PyYAML
+types-requests
+
+# GUI & Desktop Applications
+PyQt6>=6.7.0
+pygame>=2.0.0
+PyOpenGL>=3.1.5
+PyOpenGL_accelerate>=3.1.5
+
+# Web Applications
+flask>=3.0.0
+
+# Security & Encryption
+cryptography
+
+# Data Formats & Configuration
+pyyaml>=6.0.1
+
+# Web Automation & Testing
+playwright>=1.40.0
