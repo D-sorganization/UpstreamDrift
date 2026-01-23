@@ -1,5 +1,5 @@
 ---
-title: "Incomplete Stub in golf_gui_application.py"
+title: "Incomplete Stub in golf_gui_application.py:279"
 labels: ['incomplete-implementation', 'critical', 'high-impact']
 assignee: "unassigned"
 status: "open"

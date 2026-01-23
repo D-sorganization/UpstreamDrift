@@ -176,15 +176,15 @@ The following critical items block core functionality and require issues with la
 
 The following issue files were created in `docs/assessments/issues/`:
 
-- Created `docs/assessments/issues/Issue_021_Incomplete_Stub_in_golf_gui_application_py.md`
-- Created `docs/assessments/issues/Issue_022_Incomplete_Stub_in_golf_visualizer_implementation_py.md`
-- Created `docs/assessments/issues/Issue_023_Incomplete_Stub_in_golf_visualizer_implementation_py.md`
-- Created `docs/assessments/issues/Issue_024_Incomplete_Stub_in_golf_visualizer_implementation_py.md`
-- Created `docs/assessments/issues/Issue_025_Incomplete_Stub_in_golf_visualizer_implementation_py.md`
-- Created `docs/assessments/issues/Issue_026_Incomplete_Stub_in_golf_visualizer_implementation_py.md`
-- Created `docs/assessments/issues/Issue_027_Incomplete_Stub_in_golf_visualizer_implementation_py.md`
-- Created `docs/assessments/issues/Issue_028_Incomplete_Stub_in_humanoid_launcher_py.md`
-- Created `docs/assessments/issues/Issue_029_Incomplete_Stub_in_humanoid_launcher_py.md`
-- Created `docs/assessments/issues/Issue_030_Incomplete_Stub_in_examples_chaotic_pendulum_py.md`
+- Created `docs/assessments/issues/Issue_021_Incomplete_Stub_in_golf_gui_application_py_279.md`
+- Created `docs/assessments/issues/Issue_022_Incomplete_Stub_in_golf_visualizer_implementation_py_138.md`
+- Created `docs/assessments/issues/Issue_023_Incomplete_Stub_in_golf_visualizer_implementation_py_359.md`
+- Created `docs/assessments/issues/Issue_024_Incomplete_Stub_in_golf_visualizer_implementation_py_417.md`
+- Created `docs/assessments/issues/Issue_025_Incomplete_Stub_in_golf_visualizer_implementation_py_422.md`
+- Created `docs/assessments/issues/Issue_026_Incomplete_Stub_in_golf_visualizer_implementation_py_428.md`
+- Created `docs/assessments/issues/Issue_027_Incomplete_Stub_in_golf_visualizer_implementation_py_433.md`
+- Created `docs/assessments/issues/Issue_028_Incomplete_Stub_in_humanoid_launcher_py_147.md`
+- Created `docs/assessments/issues/Issue_029_Incomplete_Stub_in_humanoid_launcher_py_732.md`
+- Created `docs/assessments/issues/Issue_030_Incomplete_Stub_in_examples_chaotic_pendulum_py_70.md`
 
 *(...and 70 more skipped to avoid flooding)*

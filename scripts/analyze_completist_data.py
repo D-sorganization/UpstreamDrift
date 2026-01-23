@@ -293,10 +293,17 @@ def create_issue_file(item: Mapping[str, Any], issue_id: int) -> str:
     context = name if name else text
 
     # Sanitize title
-    title = f"Incomplete {item_type} in {os.path.basename(file_p)}"
+    title = f"Incomplete {item_type} in {os.path.basename(file_p)}:{line_p}"
 
     # Format filename
     filename_title = re.sub(r"[^\w]", "_", title).strip("_")
+
+    # Check for duplicates (idempotency)
+    existing_pattern = os.path.join(ISSUES_DIR, f"Issue_*_{filename_title}.md")
+    existing_files = glob.glob(existing_pattern)
+    if existing_files:
+        return existing_files[0]
+
     filename = f"Issue_{issue_id:03d}_{filename_title}.md"
     filepath = os.path.join(ISSUES_DIR, filename)
 
