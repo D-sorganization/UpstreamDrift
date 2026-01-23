@@ -1,0 +1,145 @@
+name: Jules PR Cleanup
+
+# Cleans up stale Jules-generated PRs that are no longer being worked on
+# Preserves PRs that are actively being iterated on (recent commits)
+
+on:
+  schedule:
+    - cron: "0 5 * * 0"  # Weekly on Sundays at 5 AM UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run - show what would be closed without acting'
+        required: false
+        default: 'true'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
+      max_age_days:
+        description: 'Close PRs older than this many days'
+        required: false
+        default: '7'
+        type: string
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: jules-pr-cleanup-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    name: Cleanup Stale Jules PRs
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Find Stale Jules PRs
+        id: find
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAX_AGE_DAYS: ${{ inputs.max_age_days || '7' }}
+        run: |
+          echo "Looking for stale Jules PRs..."
+
+          # Calculate cutoff date
+          CUTOFF_DATE=$(date -d "-${MAX_AGE_DAYS} days" +%Y-%m-%dT%H:%M:%SZ)
+          echo "Cutoff date: $CUTOFF_DATE"
+
+          # Find Jules-generated PRs (by branch name pattern)
+          JULES_PRS=$(gh pr list --state open --json number,title,headRefName,updatedAt,labels \
+            --jq "[.[] | select(
+              (.headRefName | test(\"^jules/|^fix/.*jules|^fix/pragmatic|^fix/code-quality\")) and
+              (.updatedAt < \"$CUTOFF_DATE\") and
+              (.labels | map(.name) | contains([\"jules-keep\"]) | not)
+            )]")
+
+          echo "Found PRs: $JULES_PRS"
+
+          # Count and save
+          COUNT=$(echo "$JULES_PRS" | jq 'length')
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+          echo "$JULES_PRS" > /tmp/stale_prs.json
+
+          echo "Found $COUNT stale Jules PRs"
+
+      - name: Check CI Status
+        id: check_ci
+        if: steps.find.outputs.count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Checking CI status for stale PRs..."
+
+          PRS_TO_CLOSE="[]"
+
+          while read -r pr_json; do
+            PR_NUM=$(echo "$pr_json" | jq -r '.number')
+            PR_TITLE=$(echo "$pr_json" | jq -r '.title')
+
+            # Check if CI is failing
+            CI_STATUS=$(gh pr checks "$PR_NUM" --json bucket --jq '[.[] | .bucket] | if contains(["fail"]) then "failing" else "passing" end' 2>/dev/null || echo "unknown")
+
+            echo "PR #$PR_NUM: CI=$CI_STATUS"
+
+            # Only close if CI is failing or unknown (abandoned)
+            if [ "$CI_STATUS" = "failing" ] || [ "$CI_STATUS" = "unknown" ]; then
+              PRS_TO_CLOSE=$(echo "$PRS_TO_CLOSE" | jq --argjson pr "$pr_json" '. + [$pr]')
+            else
+              echo "  Skipping - CI is passing, PR may still be valid"
+            fi
+          done < <(jq -c '.[]' /tmp/stale_prs.json)
+
+          echo "$PRS_TO_CLOSE" > /tmp/prs_to_close.json
+          COUNT=$(echo "$PRS_TO_CLOSE" | jq 'length')
+          echo "close_count=$COUNT" >> $GITHUB_OUTPUT
+
+      - name: Close Stale PRs
+        if: steps.check_ci.outputs.close_count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DRY_RUN: ${{ inputs.dry_run || 'true' }}
+        run: |
+          CLOSED=0
+
+          while read -r pr_json; do
+            PR_NUM=$(echo "$pr_json" | jq -r '.number')
+            PR_TITLE=$(echo "$pr_json" | jq -r '.title')
+            PR_BRANCH=$(echo "$pr_json" | jq -r '.headRefName')
+
+            if [ "$DRY_RUN" = "true" ]; then
+              echo "[DRY RUN] Would close PR #$PR_NUM: $PR_TITLE"
+            else
+              echo "Closing PR #$PR_NUM: $PR_TITLE"
+              gh pr close "$PR_NUM" --comment "Auto-closed: Stale Jules-generated PR with failing CI.
+
+If this PR is still needed, you can:
+1. Reopen it and push new commits
+2. Add the \`jules-keep\` label to prevent auto-closure
+
+This cleanup runs weekly to prevent PR accumulation."
+
+              # Also delete the branch
+              gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/$PR_BRANCH" 2>/dev/null || true
+
+              CLOSED=$((CLOSED + 1))
+            fi
+          done < <(jq -c '.[]' /tmp/prs_to_close.json)
+
+          echo "Closed $CLOSED PRs"
+          echo "closed=$CLOSED" >> $GITHUB_OUTPUT
+
+      - name: Summary
+        run: |
+          echo "## Jules PR Cleanup Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Stale PRs found**: ${{ steps.find.outputs.count }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PRs with failing CI**: ${{ steps.check_ci.outputs.close_count || 0 }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Dry run**: ${{ inputs.dry_run || 'true' }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ inputs.dry_run || 'true' }}" = "true" ]; then
+            echo "Run with \`dry_run=false\` to actually close stale PRs." >> $GITHUB_STEP_SUMMARY
+          fi
