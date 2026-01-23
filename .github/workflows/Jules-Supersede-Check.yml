@@ -1,0 +1,143 @@
+name: Jules Supersede Check
+
+# When main branch is updated (manually or via merge), check if any open Jules PRs
+# are now superseded by the changes and close them automatically.
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: jules-supersede-check-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  check-superseded:
+    name: Check for Superseded Jules PRs
+    runs-on: ubuntu-latest
+    # Skip if the push was from a Jules workflow (avoid closing our own PRs)
+    if: |
+      !contains(github.event.head_commit.message, 'Co-Authored-By: Jules') &&
+      !startsWith(github.event.head_commit.message, '[Jules/')
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 50  # Get recent history for comparison
+
+      - name: Find Related Jules PRs
+        id: find
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Checking for superseded Jules PRs after push to main..."
+
+          # Get files changed in this push
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only HEAD HEAD 2>/dev/null || echo "")
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No changed files detected, skipping"
+            echo "superseded_prs=[]" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "Changed files in this push:"
+          echo "$CHANGED_FILES"
+
+          # Find open Jules PRs
+          JULES_PRS=$(gh pr list --state open --json number,title,headRefName,files \
+            --jq '[.[] | select(.headRefName | test("^jules/|^fix/.*jules|^fix/pragmatic|^fix/code-quality"))]')
+
+          echo "Found $(echo "$JULES_PRS" | jq 'length') open Jules PRs"
+
+          SUPERSEDED_PRS="[]"
+
+          # Check each Jules PR for overlap
+          while read -r pr_json; do
+            [ -z "$pr_json" ] && continue
+
+            PR_NUM=$(echo "$pr_json" | jq -r '.number')
+            PR_TITLE=$(echo "$pr_json" | jq -r '.title')
+            PR_BRANCH=$(echo "$pr_json" | jq -r '.headRefName')
+
+            # Get files changed in the PR
+            PR_FILES=$(gh pr view "$PR_NUM" --json files --jq '.files[].path' 2>/dev/null || echo "")
+
+            if [ -z "$PR_FILES" ]; then
+              continue
+            fi
+
+            # Check for overlap
+            OVERLAP=0
+            TOTAL_PR_FILES=$(echo "$PR_FILES" | wc -l)
+
+            while read -r pr_file; do
+              if echo "$CHANGED_FILES" | grep -qF "$pr_file"; then
+                OVERLAP=$((OVERLAP + 1))
+              fi
+            done <<< "$PR_FILES"
+
+            # If >50% of PR files were changed in main, consider it superseded
+            if [ $TOTAL_PR_FILES -gt 0 ]; then
+              OVERLAP_PERCENT=$((OVERLAP * 100 / TOTAL_PR_FILES))
+              echo "PR #$PR_NUM: $OVERLAP/$TOTAL_PR_FILES files overlap ($OVERLAP_PERCENT%)"
+
+              if [ $OVERLAP_PERCENT -ge 50 ]; then
+                echo "  -> Marking as superseded"
+                SUPERSEDED_PRS=$(echo "$SUPERSEDED_PRS" | jq --arg num "$PR_NUM" --arg title "$PR_TITLE" --arg branch "$PR_BRANCH" \
+                  '. + [{"number": ($num | tonumber), "title": $title, "branch": $branch}]')
+              fi
+            fi
+          done < <(echo "$JULES_PRS" | jq -c '.[]')
+
+          echo "superseded_prs=$(echo "$SUPERSEDED_PRS" | jq -c '.')" >> $GITHUB_OUTPUT
+          echo "superseded_count=$(echo "$SUPERSEDED_PRS" | jq 'length')" >> $GITHUB_OUTPUT
+
+      - name: Close Superseded PRs
+        if: steps.find.outputs.superseded_count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Closing superseded Jules PRs..."
+
+          COMMIT_SHA="${{ github.sha }}"
+          COMMIT_MSG="${{ github.event.head_commit.message }}"
+
+          # Truncate commit message for display
+          COMMIT_MSG_SHORT=$(echo "$COMMIT_MSG" | head -n1 | cut -c1-60)
+
+          echo '${{ steps.find.outputs.superseded_prs }}' | jq -c '.[]' | while read -r pr_json; do
+            PR_NUM=$(echo "$pr_json" | jq -r '.number')
+            PR_TITLE=$(echo "$pr_json" | jq -r '.title')
+            PR_BRANCH=$(echo "$pr_json" | jq -r '.branch')
+
+            echo "Closing PR #$PR_NUM: $PR_TITLE"
+
+            gh pr close "$PR_NUM" --comment "Auto-closed: This PR has been superseded by changes merged to main.
+
+**Superseding commit**: $COMMIT_SHA
+**Commit message**: $COMMIT_MSG_SHORT
+
+The changes in this PR overlap significantly with what was just merged. If this PR still contains valuable changes not covered by the merge, you can reopen it.
+
+To prevent auto-closure, add the \`jules-keep\` label."
+
+            # Delete the branch
+            gh api -X DELETE "repos/${{ github.repository }}/git/refs/heads/$PR_BRANCH" 2>/dev/null || true
+
+            echo "  Closed PR #$PR_NUM and deleted branch $PR_BRANCH"
+          done
+
+      - name: Summary
+        run: |
+          echo "## Jules Supersede Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger**: Push to main" >> $GITHUB_STEP_SUMMARY
+          echo "**Superseded PRs found**: ${{ steps.find.outputs.superseded_count || 0 }}" >> $GITHUB_STEP_SUMMARY
