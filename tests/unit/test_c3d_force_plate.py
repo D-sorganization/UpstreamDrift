@@ -19,7 +19,7 @@ try:
 except ImportError:
     # Development path when running tests directly
     SRC_PATH = Path(__file__).parent.parent.parent / (
-        "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src"
+        "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src"
     )
     if str(SRC_PATH) not in sys.path:
         sys.path.insert(0, str(SRC_PATH))
