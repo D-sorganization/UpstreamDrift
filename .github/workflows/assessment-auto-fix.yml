@@ -113,17 +113,17 @@ jobs:
               text = (issue.get('title', '') + ' ' + issue.get('body', '')).lower()
 
               for category, patterns in fix_patterns.items():
-                  for pattern_config in patterns:
-            if re.search(pattern_config['pattern'], text, re.IGNORECASE):
-                score = (5 - pattern_config['priority']) * 10 + (5 - pattern_config['effort'])
-                categorized[category].append({
-                    'number': issue['number'],
-                    'title': issue['title'],
-                    'score': score,
-                    'priority': pattern_config['priority'],
-                    'effort': pattern_config['effort']
-                })
-                break
+              for pattern_config in patterns:
+                  if re.search(pattern_config['pattern'], text, re.IGNORECASE):
+                      score = (5 - pattern_config['priority']) * 10 + (5 - pattern_config['effort'])
+                      categorized[category].append({
+                          'number': issue['number'],
+                          'title': issue['title'],
+                          'score': score,
+                          'priority': pattern_config['priority'],
+                          'effort': pattern_config['effort']
+                      })
+                      break
 
           # Sort each category by score
           for category in categorized:
