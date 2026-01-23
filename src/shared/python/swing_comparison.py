@@ -10,8 +10,9 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
-from shared.python import common_utils, signal_processing
-from shared.python.statistical_analysis import StatisticalAnalyzer
+
+from src.shared.python import common_utils, signal_processing
+from src.shared.python.statistical_analysis import StatisticalAnalyzer
 
 # Constants for scoring
 EPSILON = 1e-9

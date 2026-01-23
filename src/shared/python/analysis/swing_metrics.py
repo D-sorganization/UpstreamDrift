@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 from scipy.signal import savgol_filter
-from shared.python.analysis.dataclasses import PeakInfo
+
+from src.shared.python.analysis.dataclasses import PeakInfo
 
 
 class SwingMetricsMixin:

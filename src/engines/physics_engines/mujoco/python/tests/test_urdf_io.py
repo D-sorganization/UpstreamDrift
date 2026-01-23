@@ -5,7 +5,7 @@ import mujoco
 import numpy as np
 import pytest
 
-from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
+from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
     URDFExporter,
     URDFImporter,
     export_model_to_urdf,

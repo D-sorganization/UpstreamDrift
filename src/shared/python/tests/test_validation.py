@@ -2,7 +2,8 @@
 
 import numpy as np
 import pytest
-from shared.python.validation import (
+
+from src.shared.python.validation import (
     PhysicalValidationError,
     validate_friction_coefficient,
     validate_inertia_matrix,

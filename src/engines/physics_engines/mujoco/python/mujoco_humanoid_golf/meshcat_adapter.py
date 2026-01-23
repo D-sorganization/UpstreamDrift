@@ -5,7 +5,8 @@ from typing import Any
 
 import mujoco
 import numpy as np
-from shared.python.biomechanics_data import BiomechanicalData
+
+from src.shared.python.biomechanics_data import BiomechanicalData
 
 try:
     import meshcat

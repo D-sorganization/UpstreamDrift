@@ -40,7 +40,7 @@ if TYPE_CHECKING:
     from shared.python.ai.adapters.base import BaseAgentAdapter
     from shared.python.ai.gui.settings_dialog import AISettings
 
-from shared.python.ai.types import ConversationContext, ExpertiseLevel
+from src.shared.python.ai.types import ConversationContext, ExpertiseLevel
 
 logger = logging.getLogger(__name__)
 

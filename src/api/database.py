@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from api.auth.models import Base
+from src.api.auth.models import Base
 
 # Database configuration
 DATABASE_URL = os.getenv(

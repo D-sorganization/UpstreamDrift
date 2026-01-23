@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 # Import OUTPUT_ROOT from constants to avoid circular dependency
 # Import core utilities (exceptions, logging) from the lightweight module
-from shared.python.constants import (
+from src.shared.python.constants import (
     DEG_TO_RAD,
     KG_TO_LB,
     M_TO_FT,
@@ -17,7 +17,7 @@ from shared.python.constants import (
     OUTPUT_ROOT,
     RAD_TO_DEG,
 )
-from shared.python.core import (
+from src.shared.python.core import (
     DataFormatError,
     EngineNotFoundError,
     GolfModelingError,

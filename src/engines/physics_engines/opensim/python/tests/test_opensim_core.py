@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from engines.physics_engines.opensim.python.opensim_golf.core import (
+from src.engines.physics_engines.opensim.python.opensim_golf.core import (
     GolfSwingModel,
     OpenSimModelLoadError,
     OpenSimNotInstalledError,

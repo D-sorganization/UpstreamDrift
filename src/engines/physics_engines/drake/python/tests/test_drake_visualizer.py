@@ -48,7 +48,7 @@ mock_pydrake.Sphere = MagicMock()
 mock_pydrake.Rgba = MagicMock()
 
 
-from engines.physics_engines.drake.python.src.drake_visualizer import (  # noqa: E402
+from src.engines.physics_engines.drake.python.src.drake_visualizer import (  # noqa: E402
     DrakeVisualizer,
 )
 

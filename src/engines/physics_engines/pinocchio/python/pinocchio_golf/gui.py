@@ -43,11 +43,11 @@ if MESHCAT_AVAILABLE:
 else:
     MeshcatVisualizer = object  # Dummy class if missing
 
-from shared.python.biomechanics_data import BiomechanicalData
-from shared.python.common_utils import get_shared_urdf_path
-from shared.python.dashboard.widgets import LivePlotWidget
-from shared.python.plotting import GolfSwingPlotter, MplCanvas
-from shared.python.statistical_analysis import StatisticalAnalyzer
+from src.shared.python.biomechanics_data import BiomechanicalData
+from src.shared.python.common_utils import get_shared_urdf_path
+from src.shared.python.dashboard.widgets import LivePlotWidget
+from src.shared.python.plotting import GolfSwingPlotter, MplCanvas
+from src.shared.python.statistical_analysis import StatisticalAnalyzer
 
 try:
     from .induced_acceleration import InducedAccelerationAnalyzer

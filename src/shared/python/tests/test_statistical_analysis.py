@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
-from shared.python.statistical_analysis import (
+
+from src.shared.python.statistical_analysis import (
     CoordinationMetrics,
     GRFMetrics,
     JointStiffnessMetrics,

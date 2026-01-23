@@ -7,7 +7,8 @@ Demonstrates RNEA, CRBA, and ABA algorithms on a simple 2-link planar robot.
 import numpy as np
 from mujoco_humanoid_golf.rigid_body_dynamics import aba, crba, rnea
 from mujoco_humanoid_golf.spatial_algebra import mci, xlt
-from shared.python import constants
+
+from src.shared.python import constants
 
 
 def create_2link_model() -> dict:

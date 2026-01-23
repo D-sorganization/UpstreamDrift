@@ -7,7 +7,7 @@ import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-from shared.python.common_utils import GolfModelingError
+from src.shared.python.common_utils import GolfModelingError
 
 
 @dataclass

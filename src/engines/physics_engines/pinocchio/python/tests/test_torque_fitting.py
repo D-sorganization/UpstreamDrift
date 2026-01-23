@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 # Test fit_torque_poly
-from engines.physics_engines.pinocchio.python.pinocchio_golf.torque_fitting import (
+from src.engines.physics_engines.pinocchio.python.pinocchio_golf.torque_fitting import (
     evaluate_torque_poly,
     fit_torque_poly,
     main,

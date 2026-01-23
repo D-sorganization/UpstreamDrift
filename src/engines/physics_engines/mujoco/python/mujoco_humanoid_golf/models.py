@@ -8,9 +8,9 @@ from __future__ import annotations
 
 from typing import cast
 
-from shared.python import constants
-from shared.python.equipment import CLUB_CONFIGS
-from shared.python.physics_parameters import get_registry
+from src.shared.python import constants
+from src.shared.python.equipment import CLUB_CONFIGS
+from src.shared.python.physics_parameters import get_registry
 
 GRAVITY_M_S2 = float(constants.GRAVITY_M_S2)
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)

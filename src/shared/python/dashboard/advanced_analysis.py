@@ -15,14 +15,15 @@ import logging
 
 import numpy as np
 from PyQt6 import QtWidgets
-from shared.python.interfaces import RecorderInterface
-from shared.python.plotting import MplCanvas
-from shared.python.signal_processing import (
+
+from src.shared.python.interfaces import RecorderInterface
+from src.shared.python.plotting import MplCanvas
+from src.shared.python.signal_processing import (
     compute_coherence,
     compute_cwt,
     compute_spectrogram,
 )
-from shared.python.swing_plane_analysis import SwingPlaneAnalyzer
+from src.shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 
 LOGGER = logging.getLogger(__name__)
 
