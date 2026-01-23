@@ -114,7 +114,7 @@ def generate_summary(
 
     # Group definitions and weights
     # Groups: Code Quality, Testing, Documentation, Security, Performance, Ops & Config, Design
-    groups = {
+    groups: dict[str, dict[str, Any]] = {
         "Code Quality": {"weight": 0.25, "categories": ["A", "D", "I", "O"]},
         "Testing": {"weight": 0.15, "categories": ["C"]},
         "Documentation": {"weight": 0.10, "categories": ["B"]},
@@ -142,8 +142,8 @@ def generate_summary(
     total_weight = 0.0
 
     for group_name, info in groups.items():
-        cats = info["categories"]
-        weight = info["weight"]
+        cats = cast(list[str], info["categories"])
+        weight = cast(float, info["weight"])
 
         # Calculate average score for the group
         group_sum = 0.0
@@ -188,8 +188,8 @@ Repository assessment completed across all {len(scores)} categories.
 
     for group_name, info in groups.items():
         score = group_scores.get(group_name, 0.0)
-        weight = info["weight"]
-        cats_str = ", ".join(info["categories"])
+        weight = cast(float, info["weight"])
+        cats_str = ", ".join(cast(list[str], info["categories"]))
         md_content += f"| **{group_name}** | {weight*100:.0f}% | {cats_str} | {score:.2f} |\n"
 
     md_content += """
