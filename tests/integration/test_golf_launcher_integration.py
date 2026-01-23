@@ -161,6 +161,10 @@ def qapp():
 @pytest.fixture
 def launcher_env(qapp):
     """Setup launcher environment with temp config."""
+    # Skip in CI environments where Qt might crash
+    if os.environ.get("CI") and not os.environ.get("DISPLAY"):
+        pytest.skip("Skipping Qt-dependent test in headless CI environment")
+
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
 
@@ -205,6 +209,7 @@ models:
         # missing assets) is still executed.
         with (
             patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
+            patch("src.launchers.golf_launcher.ASSETS_DIR", new=temp_path),
             patch("launchers.golf_launcher.ASSETS_DIR", new=temp_path),
         ):
             MockRegistry.return_value = temp_registry
@@ -214,6 +219,7 @@ models:
             # Note: We use sys.modules.pop instead of importlib.reload to avoid
             # corruption of C-extension bindings (like PyQt/MuJoCo)
             sys.modules.pop("launchers.golf_launcher", None)
+            sys.modules.pop("src.launchers.golf_launcher", None)
             from src.launchers.golf_launcher import GolfLauncher as FreshGolfLauncher
 
             launcher = FreshGolfLauncher()
