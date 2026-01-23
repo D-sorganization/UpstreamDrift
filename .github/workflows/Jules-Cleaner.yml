@@ -6,8 +6,9 @@ on:
 
 jobs:
   cleanup:
-    if: false  # DISABLED TO PREVENT PR EXPLOSION - Re-enable after fixing cleanup logic
-    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'jules:consolidation')
+    # DISABLED TO PREVENT PR EXPLOSION - Re-enable after fixing cleanup logic
+    # Original condition: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'jules:consolidation')
+    if: false
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
