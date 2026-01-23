@@ -1,5 +1,5 @@
 ---
-title: "Incomplete Stub in examples_chaotic_pendulum.py"
+title: "Incomplete Stub in humanoid_launcher.py:147"
 labels: ['incomplete-implementation', 'critical', 'high-impact']
 assignee: "unassigned"
 status: "open"
@@ -7,15 +7,15 @@ status: "open"
 
 # Issue Description
 
-Found critical incomplete implementation in `./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py` at line 70.
+Found critical incomplete implementation in `./engines/physics_engines/mujoco/python/humanoid_launcher.py` at line 147.
 
 ## Context
 
 **Type**: Stub
-**Location**: `./engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py:70`
+**Location**: `./engines/physics_engines/mujoco/python/humanoid_launcher.py:147`
 
 ```python
-control
+set_analysis_config
 ```
 
 ## Audit Metrics

@@ -1,5 +1,5 @@
 ---
-title: "Incomplete Stub in humanoid_launcher.py"
+title: "Incomplete Stub in humanoid_launcher.py:732"
 labels: ['incomplete-implementation', 'critical', 'high-impact']
 assignee: "unassigned"
 status: "open"
@@ -7,15 +7,15 @@ status: "open"
 
 # Issue Description
 
-Found critical incomplete implementation in `./engines/physics_engines/mujoco/python/humanoid_launcher.py` at line 147.
+Found critical incomplete implementation in `./engines/physics_engines/mujoco/python/humanoid_launcher.py` at line 732.
 
 ## Context
 
 **Type**: Stub
-**Location**: `./engines/physics_engines/mujoco/python/humanoid_launcher.py:147`
+**Location**: `./engines/physics_engines/mujoco/python/humanoid_launcher.py:732`
 
 ```python
-set_analysis_config
+load_config
 ```
 
 ## Audit Metrics
