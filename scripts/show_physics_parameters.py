@@ -8,7 +8,7 @@ root = Path(__file__).parent.parent
 sys.path.insert(0, str(root))
 sys.path.insert(0, str(root / "shared" / "python"))
 
-from physics_parameters import get_registry
+from physics_parameters import get_registry  # noqa: E402
 
 
 def main() -> None:
