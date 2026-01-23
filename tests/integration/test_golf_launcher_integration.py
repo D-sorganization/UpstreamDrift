@@ -207,14 +207,14 @@ models:
         # Check if we should skip due to CI environment
         is_ci = os.environ.get("CI") == "true" or os.environ.get("GITHUB_ACTIONS") == "true"
         has_display = os.environ.get("DISPLAY") is not None
-        
+
         if is_ci and not has_display:
             pytest.skip("Skipping Qt-dependent test in headless CI environment")
-        
+
         # Mock AIAssistantPanel before importing to prevent Qt crashes
         mock_ai_panel = MagicMock()
         mock_ai_panel.settings_requested = MagicMock()
-        
+
         with (
             patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
             patch("src.launchers.golf_launcher.ASSETS_DIR", new=temp_path),
@@ -242,10 +242,10 @@ def test_launcher_detects_real_model_files(launcher_env):
     # Skip in CI environments where Qt might crash
     is_ci = os.environ.get("CI") == "true" or os.environ.get("GITHUB_ACTIONS") == "true"
     has_display = os.environ.get("DISPLAY") is not None
-    
+
     if is_ci and not has_display:
         pytest.skip("Skipping Qt-dependent test in headless CI environment")
-    
+
     launcher, model_path = launcher_env
 
     # 1. Verify model loaded from registry (UI cards)
