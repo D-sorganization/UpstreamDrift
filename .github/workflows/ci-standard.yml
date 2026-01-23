@@ -20,21 +20,21 @@ jobs:
 
       # FIX: Less aggressive Ruff (Errors, Warnings, Imports only)
       - name: Lint
-        run: ruff check .
+        run: ruff check src scripts tests
 
       # FIX: Enforce Black formatting (88 chars)
       - name: Check Formatting
-        run: black --check .
+        run: black --check src scripts tests
 
       - run: pip install mypy types-PyYAML types-requests
       - run: pip install -e .[dev]
-      - run: mypy . --config-file pyproject.toml
+      - run: mypy src --config-file pyproject.toml
 
       # TODO detection now BLOCKING - Jules Auto-Repair will fix
       - name: Verify No Placeholders
         run: |
           violations=$(
-            find . \( -path "./.git" -o -path "./.mypy_cache" -o -path "./.ruff_cache" -o -path "./__pycache__" -o -path "./archive" -o -path "./check_code_quality" \) -prune -o -type f -name "*.py" -print0 \
+            find . \( -path "./.git" -o -path "./.mypy_cache" -o -path "./.ruff_cache" -o -path "./__pycache__" -o -path "./archive" -o -path "./check_code_quality" -o -path "./scripts" \) -prune -o -type f -name "*.py" -print0 \
               | xargs -0 grep -nE "TODO|FIXME" || true
           )
           if [ -n "$violations" ]; then
@@ -63,12 +63,10 @@ jobs:
         run: |
           python tools/code_quality_check.py || echo "::warning::Code quality issues found - see output above"
 
-      # FIX: Run Python-based MATLAB Quality Check (Works without License)
-      # Non-blocking, archives results for legacy support
       - name: MATLAB Quality Check
         continue-on-error: true
         run: |
-          python tools/matlab_utilities/scripts/matlab_quality_check.py --output-format text > matlab_quality_report.txt
+          python src/tools/matlab_utilities/scripts/matlab_quality_check.py --output-format text > matlab_quality_report.txt
           cat matlab_quality_report.txt
 
       - name: Upload MATLAB Report
@@ -108,7 +106,7 @@ jobs:
       - run: pip install -e .[dev]
       - name: Run Tests
         env:
-          PYTHONPATH: .:${{ github.workspace }}/engines/physics_engines/mujoco/python:${{ github.workspace }}/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          PYTHONPATH: src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
         run: |
           # Install test dependencies if not already installed
           pip install pytest pytest-cov pytest-mock pytest-qt

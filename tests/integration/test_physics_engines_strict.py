@@ -59,13 +59,13 @@ mock_pydrake.systems.framework.DiagramBuilder = mock_pydrake.DiagramBuilder
 # reloaded, corrupting pandas' C API bindings in later tests.
 
 with patch.dict("sys.modules", module_patches):
-    from engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
+    from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (  # noqa: E402
         MyoSuitePhysicsEngine,
     )
-    from engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
+    from src.engines.physics_engines.opensim.python.opensim_physics_engine import (  # noqa: E402
         OpenSimPhysicsEngine,
     )
-    from engines.physics_engines.pendulum.python.pendulum_physics_engine import (  # noqa: E402
+    from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (  # noqa: E402
         PendulumPhysicsEngine,
     )
 

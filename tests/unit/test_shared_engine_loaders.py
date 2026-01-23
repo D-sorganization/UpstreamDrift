@@ -6,14 +6,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from shared.python.common_utils import GolfModelingError
-from shared.python.engine_loaders import (
+from src.shared.python.common_utils import GolfModelingError
+from src.shared.python.engine_loaders import (
     LOADER_MAP,
     load_drake_engine,
     load_mujoco_engine,
     load_pinocchio_engine,
 )
-from shared.python.engine_registry import EngineType
+from src.shared.python.engine_registry import EngineType
 
 
 @pytest.fixture

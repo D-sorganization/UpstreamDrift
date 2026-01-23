@@ -9,7 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from shared.python.muscle_analysis import (
+from src.shared.python.muscle_analysis import (
     SKLEARN_AVAILABLE,
     MuscleSynergyAnalyzer,
     SynergyResult,

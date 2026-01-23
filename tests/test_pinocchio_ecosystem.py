@@ -199,7 +199,7 @@ class TestPinocchioConstants(unittest.TestCase):
     def test_pinocchio_constants_defined(self) -> None:
         """Test that Pinocchio-related constants are properly defined."""
         try:
-            from shared.python.constants import PINOCCHIO_LAUNCHER_SCRIPT
+            from src.shared.python.constants import PINOCCHIO_LAUNCHER_SCRIPT
 
             self.assertIsInstance(PINOCCHIO_LAUNCHER_SCRIPT, Path)
             expected_path = (
@@ -213,7 +213,7 @@ class TestPinocchioConstants(unittest.TestCase):
     def test_pinocchio_docker_stages(self) -> None:
         """Test that Pinocchio is included in Docker stages."""
         try:
-            from launchers.golf_launcher import DOCKER_STAGES
+            from src.launchers.golf_launcher import DOCKER_STAGES
 
             self.assertIn("pinocchio", DOCKER_STAGES)
 

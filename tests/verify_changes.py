@@ -14,7 +14,7 @@ class TestVerification(unittest.TestCase):
 
         # 1. Check MuJoCo
         try:
-            from engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
+            from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
                 MuJoCoPhysicsEngine,
             )
 
@@ -29,7 +29,7 @@ class TestVerification(unittest.TestCase):
 
         # 2. Check Drake
         try:
-            from engines.physics_engines.drake.python.drake_physics_engine import (
+            from src.engines.physics_engines.drake.python.drake_physics_engine import (
                 DrakePhysicsEngine,
             )
 
@@ -44,7 +44,7 @@ class TestVerification(unittest.TestCase):
 
         # 3. Check Pinocchio
         try:
-            from engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
+            from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                 PinocchioPhysicsEngine,
             )
 
@@ -60,7 +60,7 @@ class TestVerification(unittest.TestCase):
         """Verify signal processing fallbacks."""
         print("\nVerifying Signal Processing...")
         try:
-            from shared.python import signal_processing
+            from src.shared.python import signal_processing
 
             self.assertTrue(hasattr(signal_processing, "compute_dtw_distance"))
             print("✅ compute_dtw_distance available.")

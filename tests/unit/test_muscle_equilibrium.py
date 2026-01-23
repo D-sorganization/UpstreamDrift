@@ -9,8 +9,8 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from shared.python.hill_muscle import HillMuscleModel, MuscleParameters
-from shared.python.muscle_equilibrium import (
+from src.shared.python.hill_muscle import HillMuscleModel, MuscleParameters
+from src.shared.python.muscle_equilibrium import (
     EquilibriumSolver,
     compute_equilibrium_state,
 )
@@ -425,7 +425,7 @@ class TestComputeEquilibriumState:
 
         l_CE, v_CE = result
         assert isinstance(l_CE, float), "l_CE should be float"
-        assert isinstance(v_CE, (float, int)), "v_CE should be numeric"
+        assert isinstance(v_CE, float | int), "v_CE should be numeric"
 
     def test_different_muscle_parameters(self, pennated_muscle):
         """Test with different muscle (pennated)."""

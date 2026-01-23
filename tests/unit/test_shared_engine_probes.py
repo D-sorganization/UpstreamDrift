@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from shared.python.engine_probes import (
+from src.shared.python.engine_probes import (
     DrakeProbe,
     EngineProbe,
     EngineProbeResult,
@@ -243,7 +243,7 @@ def test_opensim_probe_success(tmp_path):
     (engine_dir / "python/opensim_golf").mkdir(parents=True)
     (engine_dir / "python/opensim_physics_engine.py").touch()
 
-    from shared.python.engine_probes import OpenSimProbe
+    from src.shared.python.engine_probes import OpenSimProbe
 
     with patch.dict(sys.modules, {"opensim": MagicMock(__version__="4.0")}):
         probe = OpenSimProbe(tmp_path)
@@ -253,7 +253,7 @@ def test_opensim_probe_success(tmp_path):
 
 
 def test_opensim_probe_missing_dir(tmp_path):
-    from shared.python.engine_probes import OpenSimProbe
+    from src.shared.python.engine_probes import OpenSimProbe
 
     with patch.dict(sys.modules, {"opensim": MagicMock(__version__="4.0")}):
         probe = OpenSimProbe(tmp_path)
@@ -263,7 +263,7 @@ def test_opensim_probe_missing_dir(tmp_path):
 
 
 def test_opensim_probe_not_installed(tmp_path):
-    from shared.python.engine_probes import OpenSimProbe
+    from src.shared.python.engine_probes import OpenSimProbe
 
     with patch.dict(sys.modules):
         if "opensim" in sys.modules:

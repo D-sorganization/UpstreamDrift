@@ -177,7 +177,7 @@ class TestLauncherUtilities:
         """Test logging configuration."""
         try:
             # Should be able to import logging utilities
-            from shared.python.common_utils import setup_logging
+            from src.shared.python.common_utils import setup_logging
 
             logger = setup_logging("test_launcher")
             assert logger is not None
@@ -213,11 +213,11 @@ class TestLauncherIntegration:
         ):
             try:
                 import launch_golf_suite
-                import launchers.golf_suite_launcher
+                import src.launchers.golf_suite_launcher
 
                 # Both modules should be importable
                 assert launch_golf_suite is not None
-                assert launchers.golf_suite_launcher is not None
+                assert src.launchers.golf_suite_launcher is not None
 
             except ImportError as e:
                 pytest.skip(f"Launcher integration not available: {e}")
@@ -226,7 +226,7 @@ class TestLauncherIntegration:
     def test_shared_utilities_integration(self):
         """Test integration with shared utilities."""
         try:
-            from shared.python.common_utils import GolfModelingError, setup_logging
+            from src.shared.python.common_utils import GolfModelingError, setup_logging
 
             # Test error handling
             assert issubclass(GolfModelingError, Exception)

@@ -5,7 +5,7 @@ from typing import Any
 
 def is_stub(node: Any) -> bool:
     """Check if a function node is a stub."""
-    if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+    if not isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
         return False
 
     body = node.body
@@ -14,7 +14,7 @@ def is_stub(node: Any) -> bool:
     if (
         body
         and isinstance(body[0], ast.Expr)
-        and isinstance(body[0].value, (ast.Str, ast.Constant))
+        and isinstance(body[0].value, ast.Str | ast.Constant)
     ):
         body = body[1:]
 
@@ -53,7 +53,7 @@ def check_file(filepath: str, stubs_file: Any, docs_file: Any) -> None:
         return
 
     for node in ast.walk(tree):
-        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef | ast.ClassDef):
             # Check docs
             if not ast.get_docstring(node):
                 # Skip private members (starting with _)
@@ -63,7 +63,7 @@ def check_file(filepath: str, stubs_file: Any, docs_file: Any) -> None:
                         docs_file.write(f"{filepath}:{node.lineno} {node.name}\n")
 
             # Check stubs (functions only)
-            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
                 if is_stub(node):
                     stubs_file.write(f"{filepath}:{node.lineno} {node.name}\n")
 

@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from shared.python.myoconverter_integration import (
+from src.shared.python.myoconverter_integration import (
     MyoConverter,
     install_myoconverter_instructions,
 )

@@ -266,7 +266,7 @@ class TestGolfLauncherLogic:
     @patch("launchers.golf_launcher.DockerCheckThread")
     def test_initialization(self, mock_thread, mock_registry):
         """Test proper initialization of the launcher."""
-        from launchers.golf_launcher import GolfLauncher
+        from src.launchers.golf_launcher import GolfLauncher
 
         # Setup mock registry
         registry_instance = mock_registry.return_value
@@ -291,7 +291,7 @@ class TestGolfLauncherLogic:
     @patch("launchers.golf_launcher.DockerCheckThread")
     def test_model_selection_updates_ui(self, mock_thread, mock_registry):
         """Test that selecting a model updates the launch button."""
-        from launchers.golf_launcher import GolfLauncher
+        from src.launchers.golf_launcher import GolfLauncher
 
         # Setup registry with one model
         mock_model = Mock()
@@ -333,7 +333,7 @@ class TestGolfLauncherLogic:
     @patch("launchers.golf_launcher.DockerCheckThread")
     def test_launch_simulation_constructs_command(self, mock_thread, mock_registry):
         """Test launch simulation logic."""
-        from launchers.golf_launcher import GolfLauncher
+        from src.launchers.golf_launcher import GolfLauncher
 
         mock_model = Mock()
         mock_model.name = "Test Model"
@@ -378,7 +378,7 @@ class TestGolfLauncherLogic:
     @patch("launchers.golf_launcher.DockerCheckThread")
     def test_launch_generic_mjcf(self, mock_thread, mock_registry):
         """Test launching a generic MJCF file."""
-        from launchers.golf_launcher import GolfLauncher
+        from src.launchers.golf_launcher import GolfLauncher
 
         mock_model = Mock()
         mock_model.name = "Generic MJCF"

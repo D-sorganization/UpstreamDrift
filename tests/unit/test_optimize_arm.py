@@ -15,7 +15,7 @@ import pinocchio.casadi as cpin  # noqa: E402
 
 # Use sys.modules.pop instead of reload to avoid C-extension corruption
 sys.modules.pop("shared.python.optimization.examples.optimize_arm", None)
-from shared.python.optimization.examples.optimize_arm import main  # noqa: E402
+from src.shared.python.optimization.examples.optimize_arm import main  # noqa: E402
 
 
 def teardown_module(module):

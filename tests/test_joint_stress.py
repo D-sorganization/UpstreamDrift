@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from shared.python.injury.joint_stress import (
+from src.shared.python.injury.joint_stress import (
     JointSide,
     JointStressAnalyzer,
     JointStressResult,
