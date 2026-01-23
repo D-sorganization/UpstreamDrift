@@ -184,7 +184,7 @@ jobs:
           PR_NUMBER=$(gh pr list --head "$ASSESSMENT_BRANCH" --state open --json number --jq '.[0].number')
           if [ -z "$PR_NUMBER" ]; then
             gh pr create \
-              --title "docs(assessments): add automated assessment reports" \
+              --title "[Jules/Assessment-AutoFix] docs(assessments): automated assessment reports" \
               --body "$(cat <<'EOF'
           ## Automated Assessment Reports
 
@@ -350,7 +350,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr create \
-            --title "🤖 Auto-fix: ${{ matrix.fix_type }} improvements" \
+            --title "[Jules/Assessment-AutoFix] 🤖 Auto-fix: ${{ matrix.fix_type }} improvements" \
             --body "$(cat <<EOF
           ## Automated Fixes Applied
 
