@@ -3,11 +3,15 @@
 
 This script provides a command-line interface to launch any component
 of the Golf Modeling Suite.
+
+Refactored to address DRY violations (Pragmatic Programmer principle).
 """
 
 import argparse
 import os
+import subprocess
 import sys
+from dataclasses import dataclass
 from pathlib import Path
 
 # Add shared utilities to path
@@ -27,6 +31,166 @@ from shared.python.constants import (
 logger = setup_logging(__name__)
 
 
+@dataclass(frozen=True)
+class EngineConfig:
+    """Configuration for launching a physics engine.
+
+    This dataclass encapsulates all engine-specific launch parameters,
+    eliminating duplicate code across engine launchers (DRY principle).
+    """
+
+    name: str
+    script_path: Path
+    module_name: str | None = None  # If set, run as module instead of script
+    needs_validation: bool = True
+    work_dir_offset: int = 2  # How many parents up from script to get work_dir
+
+
+# Engine configuration registry - centralizes all engine launch parameters
+ENGINE_CONFIGS: dict[str, EngineConfig] = {
+    "mujoco": EngineConfig(
+        name="MuJoCo",
+        script_path=MUJOCO_LAUNCHER_SCRIPT,
+        module_name=None,
+        needs_validation=True,
+        work_dir_offset=2,
+    ),
+    "drake": EngineConfig(
+        name="Drake",
+        script_path=DRAKE_LAUNCHER_SCRIPT,
+        module_name="src.drake_gui_app",
+        needs_validation=True,
+        work_dir_offset=2,
+    ),
+    "pinocchio": EngineConfig(
+        name="Pinocchio",
+        script_path=PINOCCHIO_LAUNCHER_SCRIPT,
+        module_name="pinocchio_golf.gui",
+        needs_validation=True,
+        work_dir_offset=2,
+    ),
+}
+
+
+def _validate_and_get_workdir(script_path: Path, offset: int = 2) -> Path:
+    """Validate script existence and return working directory.
+
+    Args:
+        script_path: Path to the script to launch.
+        offset: Number of parent directories to traverse for work_dir.
+
+    Returns:
+        Path to the validated working directory.
+
+    Raises:
+        GolfModelingError: If script or workdir does not exist.
+    """
+    if not script_path.exists():
+        raise GolfModelingError(f"Script not found: {script_path}")
+
+    work_dir = script_path
+    for _ in range(offset):
+        work_dir = work_dir.parent
+
+    if not work_dir.exists():
+        raise GolfModelingError(f"Working directory not found: {work_dir}")
+
+    return work_dir
+
+
+def _run_subprocess(
+    script_path: Path,
+    work_dir: Path,
+    module_name: str | None = None,
+    env: dict | None = None,
+) -> None:
+    """Run a subprocess with consistent error handling.
+
+    Args:
+        script_path: Path to the script to run.
+        work_dir: Working directory for the subprocess.
+        module_name: If provided, run as Python module instead of script.
+        env: Optional environment variables.
+    """
+    if module_name:
+        cmd = [sys.executable, "-m", module_name]
+    else:
+        cmd = [sys.executable, str(script_path)]
+
+    subprocess.run(cmd, cwd=str(work_dir), env=env)
+
+
+def _validate_engine(engine_key: str) -> bool:
+    """Validate that a physics engine is ready to launch.
+
+    Args:
+        engine_key: Engine identifier (mujoco, drake, pinocchio).
+
+    Returns:
+        True if engine is ready, False otherwise.
+    """
+    from shared.python.engine_manager import EngineManager, EngineType
+
+    suite_root = Path(__file__).parent
+    manager = EngineManager(suite_root)
+
+    engine_type_map = {
+        "mujoco": EngineType.MUJOCO,
+        "drake": EngineType.DRAKE,
+        "pinocchio": EngineType.PINOCCHIO,
+    }
+
+    engine_type = engine_type_map.get(engine_key)
+    if not engine_type:
+        logger.error(f"Unknown engine type: {engine_key}")
+        return False
+
+    probe_result = manager.get_probe_result(engine_type)
+    if not probe_result.is_available():
+        config = ENGINE_CONFIGS[engine_key]
+        logger.error(f"{config.name} not ready:\n{probe_result.diagnostic_message}")
+        logger.info(f"Fix: {probe_result.get_fix_instructions()}")
+        return False
+
+    return True
+
+
+def _launch_physics_engine(engine_key: str) -> bool:
+    """Generic physics engine launcher.
+
+    This function eliminates duplicate code across launch_mujoco, launch_drake,
+    and launch_pinocchio by using configuration-driven launching.
+
+    Args:
+        engine_key: Engine identifier (mujoco, drake, pinocchio).
+
+    Returns:
+        True if launch succeeded, False otherwise.
+    """
+    config = ENGINE_CONFIGS.get(engine_key)
+    if not config:
+        logger.error(f"Unknown engine: {engine_key}")
+        return False
+
+    try:
+        suite_root = Path(__file__).parent
+
+        # Validate engine if required
+        if config.needs_validation and not _validate_engine(engine_key):
+            return False
+
+        script_path = suite_root / config.script_path
+        work_dir = _validate_and_get_workdir(script_path, config.work_dir_offset)
+
+        logger.info(f"Launching {config.name} engine...")
+        _run_subprocess(script_path, work_dir, config.module_name)
+        return True
+
+    except Exception as e:
+        logger.error(f"Error launching {config.name}: {e}")
+        return False
+
+
 def launch_gui_launcher() -> int | None:
     """Launch the GUI-based unified launcher."""
     try:
@@ -38,10 +202,10 @@ def launch_gui_launcher() -> int | None:
     except ImportError as e:
         logger.error(f"Could not import GUI launcher: {e}")
         logger.info("Try: pip install PyQt6")
-        return False
+        return None
     except Exception as e:
         logger.error(f"Error launching GUI: {e}")
-        return False
+        return None
 
 
 def launch_local_launcher() -> bool:
@@ -51,6 +215,7 @@ def launch_local_launcher() -> bool:
 
         logger.info("Starting local launcher...")
         main()
+        return True
     except ImportError as e:
         logger.error(f"Could not import local launcher: {e}")
         logger.info("Try: pip install PyQt6")
@@ -58,164 +223,100 @@ def launch_local_launcher() -> bool:
     except Exception as e:
         logger.error(f"Error launching local GUI: {e}")
         return False
-    return True
 
 
-def _validate_and_get_workdir(script_path: Path) -> Path:
-    """Validate script existence and return working directory.
-
-    Args:
-        script_path: Path to the script to launch.
-
-    Returns:
-        Path to the validated working directory (parent of parent).
-
-    Raises:
-        GolfModelingError: If script or workdir does not exist.
-    """
-    if not script_path.exists():
-        raise GolfModelingError(f"Script not found: {script_path}")
-
-    work_dir = script_path.parent.parent
-    if not work_dir.exists():
-        raise GolfModelingError(f"Working directory not found: {work_dir}")
-
-    return work_dir
-
-
+# Thin wrappers for backwards compatibility
 def launch_mujoco() -> bool:
     """Launch MuJoCo engine directly with validation."""
-    try:
-        import subprocess
-
-        from shared.python.engine_manager import EngineManager, EngineType
-
-        suite_root = Path(__file__).parent
-        manager = EngineManager(suite_root)
-
-        # Validate engine is ready
-        probe_result = manager.get_probe_result(EngineType.MUJOCO)
-        if not probe_result.is_available():
-            logger.error(f"MuJoCo not ready:\n{probe_result.diagnostic_message}")
-            logger.info(f"Fix: {probe_result.get_fix_instructions()}")
-            return False
-
-        mujoco_script = suite_root / MUJOCO_LAUNCHER_SCRIPT
-
-        work_dir = _validate_and_get_workdir(mujoco_script)
-
-        logger.info("Launching MuJoCo engine...")
-        subprocess.run([sys.executable, str(mujoco_script)], cwd=str(work_dir))
-    except Exception as e:
-        logger.error(f"Error launching MuJoCo: {e}")
-        return False
-    return True
+    return _launch_physics_engine("mujoco")
 
 
 def launch_drake() -> bool:
     """Launch Drake engine directly with validation."""
-    try:
-        import subprocess
-
-        from shared.python.engine_manager import EngineManager, EngineType
-
-        suite_root = Path(__file__).parent
-        manager = EngineManager(suite_root)
-
-        # Validate engine is ready
-        probe_result = manager.get_probe_result(EngineType.DRAKE)
-        if not probe_result.is_available():
-            logger.error(f"Drake not ready:\n{probe_result.diagnostic_message}")
-            logger.info(f"Fix: {probe_result.get_fix_instructions()}")
-            return False
-
-        drake_script = suite_root / DRAKE_LAUNCHER_SCRIPT
-
-        work_dir = _validate_and_get_workdir(drake_script)
-
-        logger.info("Launching Drake engine...")
-        # Run as module to support relative imports within the src package
-        subprocess.run([sys.executable, "-m", "src.drake_gui_app"], cwd=str(work_dir))
-    except Exception as e:
-        logger.error(f"Error launching Drake: {e}")
-        return False
-    return True
+    return _launch_physics_engine("drake")
 
 
 def launch_pinocchio() -> bool:
     """Launch Pinocchio engine directly with validation."""
-    try:
-        import subprocess
-
-        from shared.python.engine_manager import EngineManager, EngineType
-
-        suite_root = Path(__file__).parent
-        manager = EngineManager(suite_root)
-
-        # Validate engine is ready
-        probe_result = manager.get_probe_result(EngineType.PINOCCHIO)
-        if not probe_result.is_available():
-            logger.error(f"Pinocchio not ready:\n{probe_result.diagnostic_message}")
-            logger.info(f"Fix: {probe_result.get_fix_instructions()}")
-            return False
-
-        pinocchio_script = suite_root / PINOCCHIO_LAUNCHER_SCRIPT
-
-        work_dir = _validate_and_get_workdir(pinocchio_script)
-
-        logger.info("Launching Pinocchio engine...")
-        # Run as module to support relative imports within the package
-        subprocess.run([sys.executable, "-m", "pinocchio_golf.gui"], cwd=str(work_dir))
-    except Exception as e:
-        logger.error(f"Error launching Pinocchio: {e}")
-        return False
-    return True
+    return _launch_physics_engine("pinocchio")
 
 
 def launch_urdf_generator() -> bool:
     """Launch the Graphic URDF Generator."""
     try:
-        import subprocess
-
         suite_root = Path(__file__).parent
         generator_script = suite_root / URDF_GENERATOR_SCRIPT
 
-        work_dir = suite_root
-
         logger.info("Launching URDF Generator...")
-        # Run as module or script. Running as script is fine here.
-        subprocess.run([sys.executable, str(generator_script)], cwd=str(work_dir))
+        _run_subprocess(generator_script, suite_root)
+        return True
     except Exception as e:
         logger.error(f"Error launching URDF Generator: {e}")
         return False
-    return True
 
 
 def launch_c3d_viewer() -> bool:
     """Launch the C3D Motion Viewer."""
     try:
-        import subprocess
-
         suite_root = Path(__file__).parent
         c3d_script = suite_root / C3D_VIEWER_SCRIPT
 
         # For relative imports to work (from .core.models), we must run as module
-        # c3d_script is .../python/src/apps/c3d_viewer.py
-        # root is .../python/src
         src_root = c3d_script.parent.parent
         module_name = "apps.c3d_viewer"
 
         # Ensure repo root is in PYTHONPATH for 'shared' imports
         env = os.environ.copy()
-        # Add suite_root (repo root) to PYTHONPATH
         env["PYTHONPATH"] = str(suite_root) + os.pathsep + env.get("PYTHONPATH", "")
 
         logger.info("Launching C3D Motion Viewer...")
-        subprocess.run([sys.executable, "-m", module_name], cwd=str(src_root), env=env)
+        _run_subprocess(c3d_script, src_root, module_name, env)
+        return True
     except Exception as e:
         logger.error(f"Error launching C3D Viewer: {e}")
         return False
-    return True
+
+
+def _show_basic_status() -> None:
+    """Show basic status (fallback)."""
+    suite_root = Path(__file__).parent
+
+    # Define component paths for status checks - consolidates duplicate dict patterns
+    component_checks = {
+        "Available Engines": {
+            "MuJoCo": suite_root / "engines" / "physics_engines" / "mujoco",
+            "Drake": suite_root / "engines" / "physics_engines" / "drake",
+            "Pinocchio": suite_root / "engines" / "physics_engines" / "pinocchio",
+            "2D MATLAB": suite_root
+            / "engines"
+            / "Simscape_Multibody_Models"
+            / "2D_Golf_Model",
+            "3D MATLAB": suite_root
+            / "engines"
+            / "Simscape_Multibody_Models"
+            / "3D_Golf_Model",
+            "Pendulum": suite_root / "engines" / "pendulum_models",
+        },
+        "Launchers": {
+            "GUI Launcher": suite_root / GUI_LAUNCHER_SCRIPT,
+            "Local Launcher": suite_root / LOCAL_LAUNCHER_SCRIPT,
+        },
+        "Shared Components": {
+            "Python Utils": suite_root / "shared" / "python",
+            "MATLAB Utils": suite_root / "shared" / "matlab",
+            "Requirements": suite_root / "shared" / "python" / "requirements.txt",
+        },
+    }
+
+    logger.info("")
+    logger.info("=== Golf Modeling Suite Status ===")
+    logger.info(f"Suite Root: {suite_root}")
+
+    for section_name, components in component_checks.items():
+        logger.info(f"\n{section_name}:")
+        for name, path in components.items():
+            status = "[OK]" if path.exists() else "[MISSING]"
+            logger.info(f"  {status} {name}: {path}")
 
 
 def show_status() -> None:
@@ -226,63 +327,8 @@ def show_status() -> None:
         launcher = UnifiedLauncher()
         launcher.show_status()
     except Exception as e:
-        # Fallback to basic status if UnifiedLauncher fails
         logger.warning(f"Could not use UnifiedLauncher for status: {e}")
         _show_basic_status()
-
-
-def _show_basic_status() -> None:
-    """Show basic status (fallback)."""
-    suite_root = Path(__file__).parent
-
-    lines = ["", "=== Golf Modeling Suite Status ===", f"Suite Root: {suite_root}"]
-
-    # Check engines
-    engines = {
-        "MuJoCo": suite_root / "engines" / "physics_engines" / "mujoco",
-        "Drake": suite_root / "engines" / "physics_engines" / "drake",
-        "Pinocchio": suite_root / "engines" / "physics_engines" / "pinocchio",
-        "2D MATLAB": suite_root
-        / "engines"
-        / "Simscape_Multibody_Models"
-        / "2D_Golf_Model",
-        "3D MATLAB": suite_root
-        / "engines"
-        / "Simscape_Multibody_Models"
-        / "3D_Golf_Model",
-        "Pendulum": suite_root / "engines" / "pendulum_models",
-    }
-
-    lines.append("\nAvailable Engines:")
-    for name, path in engines.items():
-        status = "[OK]" if path.exists() else "[MISSING]"
-        lines.append(f"  {status} {name}: {path}")
-
-    # Check launchers
-    launchers = {
-        "GUI Launcher": suite_root / GUI_LAUNCHER_SCRIPT,
-        "Local Launcher": suite_root / LOCAL_LAUNCHER_SCRIPT,
-    }
-
-    lines.append("\nLaunchers:")
-    for name, path in launchers.items():
-        status = "[OK]" if path.exists() else "[MISSING]"
-        lines.append(f"  {status} {name}: {path}")
-
-    lines.append("\nShared Components:")
-    shared_components = {
-        "Python Utils": suite_root / "shared" / "python",
-        "MATLAB Utils": suite_root / "shared" / "matlab",
-        "Requirements": suite_root / "shared" / "python" / "requirements.txt",
-    }
-
-    for name, path in shared_components.items():
-        status = "[OK]" if path.exists() else "[MISSING]"
-        lines.append(f"  {status} {name}: {path}")
-
-    # Log the complete report
-    for line in lines:
-        logger.info(line)
 
 
 def main() -> int:
@@ -307,7 +353,7 @@ Examples:
 
     parser.add_argument(
         "--engine",
-        choices=["mujoco", "drake", "pinocchio"],
+        choices=list(ENGINE_CONFIGS.keys()),
         help="Launch specific physics engine directly",
     )
 
@@ -333,12 +379,7 @@ Examples:
         elif args.c3d_viewer:
             launch_c3d_viewer()
         elif args.engine:
-            if args.engine == "mujoco":
-                launch_mujoco()
-            elif args.engine == "drake":
-                launch_drake()
-            elif args.engine == "pinocchio":
-                launch_pinocchio()
+            _launch_physics_engine(args.engine)
         elif args.local:
             launch_local_launcher()
         else:
