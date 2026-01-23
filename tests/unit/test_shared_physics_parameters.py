@@ -4,7 +4,7 @@ import json
 import unittest
 from unittest.mock import mock_open, patch
 
-from shared.python.physics_parameters import (
+from src.shared.python.physics_parameters import (
     ParameterCategory,
     PhysicsParameter,
     PhysicsParameterRegistry,

@@ -37,8 +37,8 @@ except Exception:
     BCRYPT_AVAILABLE = False
     import bcrypt as bcrypt_lib  # type: ignore[no-redef]
 
-from api.auth.models import APIKey, User
-from api.auth.security import SecurityManager
+from src.api.auth.models import APIKey, User
+from src.api.auth.security import SecurityManager
 
 # Skip marker for bcrypt-dependent tests
 requires_bcrypt = pytest.mark.skipif(

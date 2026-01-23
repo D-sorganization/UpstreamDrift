@@ -1,6 +1,6 @@
 """Unit tests for shared exceptions."""
 
-from shared.python.exceptions import (
+from src.shared.python.exceptions import (
     ArrayDimensionError,
     DataFormatError,
     EngineNotFoundError,

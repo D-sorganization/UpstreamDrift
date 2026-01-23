@@ -18,7 +18,7 @@ import pytest
 project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-from shared.python.engine_manager import EngineManager, EngineStatus  # noqa: E402
+from src.shared.python.engine_manager import EngineManager, EngineStatus  # noqa: E402
 
 
 # Helper to check if a module is mocked (from unit tests polluting sys.modules)

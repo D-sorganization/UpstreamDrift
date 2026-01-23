@@ -4,7 +4,8 @@ import xml.etree.ElementTree as ET
 
 import numpy as np
 import pytest
-from shared.python.constants import (
+
+from src.shared.python.constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,
     GOLF_BALL_MASS_KG,
     GRAVITY_M_S2,

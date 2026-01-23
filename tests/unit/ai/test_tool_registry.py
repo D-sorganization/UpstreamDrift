@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import pytest
-from shared.python.ai.tool_registry import (
+
+from src.shared.python.ai.tool_registry import (
     Tool,
     ToolCategory,
     ToolParameter,

@@ -1,7 +1,8 @@
 """Analytical solutions for physics validation baselines."""
 
 import numpy as np
-from shared.python.constants import GRAVITY_M_S2
+
+from src.shared.python.constants import GRAVITY_M_S2
 
 
 class AnalyticalPendulum:

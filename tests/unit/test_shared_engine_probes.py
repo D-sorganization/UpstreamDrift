@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from shared.python.engine_probes import (
+from src.shared.python.engine_probes import (
     DrakeProbe,
     EngineProbe,
     EngineProbeResult,

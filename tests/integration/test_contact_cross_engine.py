@@ -16,7 +16,8 @@ This test suite:
 
 import numpy as np
 import pytest
-from shared.python.constants import GRAVITY_M_S2
+
+from src.shared.python.constants import GRAVITY_M_S2
 
 # Contact test constants
 BOUNCE_HEIGHT_THRESHOLD_M = 0.001  # Minimum height (1mm) to consider a bounce occurred

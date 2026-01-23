@@ -1,8 +1,9 @@
 """Unit tests for shared biomechanics data structures."""
 
 import numpy as np
-from shared.python.biomechanics_data import BiomechanicalData
-from shared.python.constants import GRAVITY_M_S2
+
+from src.shared.python.biomechanics_data import BiomechanicalData
+from src.shared.python.constants import GRAVITY_M_S2
 
 
 def test_biomechanical_data_initialization() -> None:

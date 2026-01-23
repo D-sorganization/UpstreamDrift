@@ -11,7 +11,7 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 # ruff: noqa: E402
-from shared.python.secure_subprocess import (
+from src.shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
     secure_run,

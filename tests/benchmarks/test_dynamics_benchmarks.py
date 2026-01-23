@@ -14,7 +14,7 @@ MUJOCO_PYTHON_PATH = REPO_ROOT / "engines" / "physics_engines" / "mujoco" / "pyt
 if str(MUJOCO_PYTHON_PATH) not in sys.path:
     sys.path.append(str(MUJOCO_PYTHON_PATH))
 
-from shared.python.constants import GRAVITY_M_S2  # noqa: E402
+from src.shared.python.constants import GRAVITY_M_S2  # noqa: E402
 
 # Check if pytest-benchmark is installed, otherwise skip
 if importlib.util.find_spec("pytest_benchmark") is None:

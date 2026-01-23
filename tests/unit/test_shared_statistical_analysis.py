@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
-from shared.python.statistical_analysis import StatisticalAnalyzer, SwingPhase
+
+from src.shared.python.statistical_analysis import StatisticalAnalyzer, SwingPhase
 
 
 @pytest.fixture

@@ -22,8 +22,10 @@ mock_op_module = MagicMock()
 sys.modules["shared.python.pose_estimation.openpose_estimator"] = mock_op_module
 
 
-from shared.python.pose_estimation.interface import PoseEstimationResult  # noqa: E402
-from shared.python.video_pose_pipeline import (  # noqa: E402
+from src.shared.python.pose_estimation.interface import (
+    PoseEstimationResult,  # noqa: E402
+)
+from src.shared.python.video_pose_pipeline import (  # noqa: E402
     VideoPosePipeline,
     VideoProcessingConfig,
     VideoProcessingResult,

@@ -3,7 +3,8 @@
 import math
 
 import pytest
-from shared.python.flight_model_options import (
+
+from src.shared.python.flight_model_options import (
     DEFAULT_OPTIONS,
     FlightModelOptions,
     compute_air_density_at_altitude,

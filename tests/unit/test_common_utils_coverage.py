@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pandas as pd
 import pytest
-from shared.python.common_utils import (
+from src.shared.python.common_utils import (
     convert_units,
     ensure_output_dir,
     get_shared_urdf_path,

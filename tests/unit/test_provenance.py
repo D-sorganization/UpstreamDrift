@@ -5,7 +5,8 @@ from datetime import datetime
 from unittest.mock import mock_open, patch
 
 import numpy as np
-from shared.python.provenance import (
+
+from src.shared.python.provenance import (
     ProvenanceInfo,
     add_provenance_header_file,
     add_provenance_to_csv,

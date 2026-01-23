@@ -4,7 +4,8 @@ import unittest
 from unittest.mock import mock_open, patch
 
 import yaml
-from shared.python.model_registry import ModelConfig, ModelRegistry
+
+from src.shared.python.model_registry import ModelConfig, ModelRegistry
 
 
 class TestModelRegistry(unittest.TestCase):

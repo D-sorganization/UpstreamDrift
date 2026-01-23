@@ -7,7 +7,7 @@ import pytest
 
 # We import the module under test normally
 # dependencies will be handled by patching attributes or local imports
-from shared.python.pose_estimation.openpose_estimator import (
+from src.shared.python.pose_estimation.openpose_estimator import (
     OpenPoseEstimator,
 )
 

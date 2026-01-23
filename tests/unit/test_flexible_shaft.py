@@ -7,7 +7,8 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from shared.python.flexible_shaft import (
+
+from src.shared.python.flexible_shaft import (
     GRAPHITE_DENSITY,
     GRAPHITE_E,
     SHAFT_LENGTH_DRIVER,
