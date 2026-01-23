@@ -23,7 +23,15 @@ def get_existing_issues() -> list[dict[str, Any]]:
     """Fetch existing GitHub issues."""
     try:
         result = subprocess.run(
-            ["gh", "issue", "list", "--limit", "200", "--json", "number,title,state,labels"],
+            [
+                "gh",
+                "issue",
+                "list",
+                "--limit",
+                "200",
+                "--json",
+                "number,title,state,labels",
+            ],
             capture_output=True,
             text=True,
             check=True,
@@ -157,7 +165,11 @@ def process_assessment_findings(
         """Classify issue into a category."""
         text = (source_name + " " + description).lower()
 
-        if "architecture" in text or "implementation" in text or "Assessment_A" in source_name:
+        if (
+            "architecture" in text
+            or "implementation" in text
+            or "Assessment_A" in source_name
+        ):
             return "Architecture"
         elif "quality" in text or "hygiene" in text or "Assessment_B" in source_name:
             return "Code Quality"
@@ -167,7 +179,11 @@ def process_assessment_findings(
             return "User Experience"
         elif "performance" in text or "Assessment_E" in source_name:
             return "Performance"
-        elif "installation" in text or "deployment" in text or "Assessment_F" in source_name:
+        elif (
+            "installation" in text
+            or "deployment" in text
+            or "Assessment_F" in source_name
+        ):
             return "Installation"
         elif "test" in text or "Assessment_G" in source_name:
             return "Testing"
