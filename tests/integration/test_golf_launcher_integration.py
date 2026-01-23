@@ -225,31 +225,30 @@ models:
         mock_ai_panel = MagicMock()
         mock_ai_panel.settings_requested = MagicMock()
 
-        with (
-            patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
-            patch("src.launchers.golf_launcher.ASSETS_DIR", new=temp_path),
-            patch("launchers.golf_launcher.ASSETS_DIR", new=temp_path),
-            patch(
-                "shared.python.ai.gui.AIAssistantPanel",
-                return_value=mock_ai_panel,
-            ),
-            patch(
-                "src.shared.python.ai.gui.assistant_panel.AIAssistantPanel",
-                return_value=mock_ai_panel,
-            ),
-            patch(
-                "src.launchers.golf_launcher.AIAssistantPanel",
-                return_value=mock_ai_panel,
-            ),
-        ):
-            MockRegistry.return_value = temp_registry
+        # Patch AIAssistantPanel BEFORE importing golf_launcher
+        # The import happens at module level, so we need the patch in place first
+        ai_panel_patcher = patch(
+            "shared.python.ai.gui.AIAssistantPanel",
+            return_value=mock_ai_panel,
+        )
+        ai_panel_patcher.start()
 
-            # Create Launcher
-            # Import after patches are in place
-            from src.launchers.golf_launcher import GolfLauncher as FreshGolfLauncher
+        try:
+            with (
+                patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
+                patch("src.launchers.golf_launcher.ASSETS_DIR", new=temp_path),
+                patch("launchers.golf_launcher.ASSETS_DIR", new=temp_path),
+            ):
+                MockRegistry.return_value = temp_registry
 
-            launcher = FreshGolfLauncher()
-            yield launcher, model_xml
+                # Create Launcher
+                # Import after patches are in place
+                from src.launchers.golf_launcher import GolfLauncher as FreshGolfLauncher
+
+                launcher = FreshGolfLauncher()
+                yield launcher, model_xml
+        finally:
+            ai_panel_patcher.stop()
 
 
 def test_launcher_detects_real_model_files(launcher_env):
