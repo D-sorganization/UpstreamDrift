@@ -211,10 +211,10 @@ class TestLauncherIntegration:
                 "PyQt6.QtWidgets": Mock(QWidget=type("QWidget", (), {})),
             },
         ):
-            try:
-                import launchers.golf_suite_launcher
+              try:
+                  import launch_golf_suite
 
-                import launch_golf_suite
+                  import src.launchers.golf_suite_launcher
 
                 # Both modules should be importable
                 assert launch_golf_suite is not None
