@@ -47,7 +47,7 @@ def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
         else:
             logger.warning(f"Default MuJoCo model not found at {model_path}")
 
-        return engine
+        return engine  # type: ignore[no-any-return]
 
     except ImportError as e:
         raise GolfModelingError(
@@ -100,7 +100,7 @@ def load_drake_engine(suite_root: Path) -> PhysicsEngine:
         else:
             logger.warning(f"Default URDF not found at {urdf_path}")
 
-        return engine
+        return engine  # type: ignore[no-any-return]
 
     except ImportError as e:
         raise GolfModelingError("Drake requirements not met.") from e
@@ -144,7 +144,7 @@ def load_pinocchio_engine(suite_root: Path) -> PhysicsEngine:
         else:
             logger.warning(f"Default Pinocchio model not found at {model_path}")
 
-        return engine
+        return engine  # type: ignore[no-any-return]
 
     except ImportError as e:
         raise GolfModelingError("Pinocchio requirements not met.") from e
@@ -168,7 +168,8 @@ def load_opensim_engine(suite_root: Path) -> PhysicsEngine:
                 f"Fix: {result.get_fix_instructions()}"
             )
 
-        return OpenSimPhysicsEngine()
+        engine = OpenSimPhysicsEngine()
+        return engine  # type: ignore[no-any-return]
 
     except ImportError as e:
         raise GolfModelingError("OpenSim requirements not met.") from e
@@ -192,7 +193,7 @@ def load_myosim_engine(suite_root: Path) -> PhysicsEngine:
                 f"Fix: {result.get_fix_instructions()}"
             )
 
-        return MyoSuitePhysicsEngine()
+        return MyoSuitePhysicsEngine()  # type: ignore[no-any-return]
 
     except ImportError as e:
         raise GolfModelingError("MyoSim requirements not met.") from e

@@ -251,7 +251,7 @@ class VideoPosePipeline:
             condition_number=0.0,
         )
 
-        return registration_result
+        return registration_result  # type: ignore[no-any-return]
 
     def _process_frames_individually(
         self, video_path: Path, max_frames: int
