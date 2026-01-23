@@ -16,7 +16,9 @@ import numpy as np
 import pytest
 
 # Add shared directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / "src" / "shared" / "python"))
+sys.path.insert(
+    0, str(Path(__file__).parent.parent.parent / "src" / "shared" / "python")
+)
 
 from flight_models import (
     BallantyneModel,
