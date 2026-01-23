@@ -12,45 +12,6 @@
 
 ---
 
-## ⛳ Golf Modeling Suite Specific Guidelines
-
-### 1. Multi-Physics Engine Architecture
-
-This repository implements a **multi-engine physics abstraction**. All physics code MUST:
-
-- Implement the `PhysicsEngine` Protocol defined in `shared/python/interfaces.py`
-- Support cross-engine validation (results must be comparable across MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite)
-- Follow the engine pattern in `engines/physics_engines/[engine_name]/`
-
-### 2. Critical Files (DO NOT DELETE)
-
-The following files are **protected** and must exist at the repository root:
-
-- `AGENTS.md` - This file (agent guidelines)
-- `README.md` - Project documentation
-- `CHANGELOG.md` - Version history
-- `LICENSE` - Legal terms
-- `pyproject.toml` - Project configuration
-- `conftest.py` - Pytest configuration
-
-### 3. Scientific Rigor Requirements
-
-- All physics constants MUST include units and source citations
-- Cross-engine validation is REQUIRED before merging physics changes
-- Analytical benchmarks are preferred over cross-engine agreement alone
-
-### 4. Entry Points
-
-Essential entry points at root level (do NOT move):
-
-- `launch_golf_suite.py` - Main GUI launcher
-- `setup_golf_suite.py` - Installation/setup
-- `start_api_server.py` - REST API server
-
-Utility scripts belong in `scripts/` directory.
-
----
-
 ## 🛡️ Safety & Security (CRITICAL)
 
 1. **Secrets Management**:
@@ -102,12 +63,6 @@ project_name/
 - Use `unittest` or `pytest`.
 - Write unit tests for individual functions and integration tests for workflows.
 
-### 4. Configuration Compliance (NO DRIFT)
-
-- **Strict Config**: Do not relax `pyproject.toml`, `ruff.toml`, or `mypy.ini` settings to accommodate code.
-- **No Blanket Exclusions**: Do not exclude entire directories or files from linting/typing checks unless they are third-party vendored code.
-- **Fix Code, Not Config**: If a check fails, fix the code. If a suppression is absolutely necessary, use granular inline ignores (e.g., `# type: ignore[error-code]`) with a comment explaining why.
-
 ---
 
 ## 🔢 MATLAB Coding Standards
@@ -151,18 +106,6 @@ Use **Conventional Commits** format:
 - `develop`: Integration branch.
 - `feature/name`: New features.
 - `hotfix/name`: Critical bug fixes.
-
----
-
-## 🚫 Pull Requests & Merging (CRITICAL)
-
-1.  **NO Auto-Merging**:
-    - Agents **MUST NOT** merge their own Pull Requests.
-    - Agents **MUST NOT** push directly to protected branches (`main`, `master`).
-    - All changes must go through a proper Pull Request.
-2.  **Human Approval Required**:
-    - Merging requires explicit human approval or a command from the USER.
-    - Exception: Automated maintenance scripts explicitly authorized by the Control Tower workflow.
 
 ---
 
@@ -242,110 +185,77 @@ If sensitive data is accidentally committed:
 This section defines the active agents within the Jules "Control Tower" Architecture. All agents must operate within their defined scope.
 
 ### 1. The Control Tower (Orchestrator)
-
 **Role:** Air Traffic Controller
-**Workflow:** `.github/workflows/jules-control-tower.yml`
+**Workflow:** `.github/workflows/Jules-Control-Tower.yml`
 **Responsibilities:**
-
-- **Sole Trigger:** The only agent that listens to GitHub events (Push, PR, Schedule).
-- **Decision Maker:** Analyzes the event context (Triage) and dispatches the appropriate specialized worker.
-- **Loop Prevention:** Enforces `if: github.actor != 'jules-bot'` to prevent infinite recursion.
+-  **Orchestrator:** Coordinates specialized agent workflows. Note that CI and Guard workflows run independently.
+-  **Decision Maker:** Analyzes the event context (Triage) and dispatches the appropriate specialized worker.
+-  **Loop Prevention:** Enforces `if: github.actor != 'jules-bot'` to prevent infinite recursion.
 
 ### 2. Auto-Repair (Medic)
-
 **Role:** Fixer of Broken Builds
-**Workflow:** `.github/workflows/jules-auto-repair.yml`
+**Workflow:** `.github/workflows/Jules-Auto-Repair.yml`
 **Triggered By:** CI Failure (Standard CI)
 **Capabilities:**
-
-- **Read:** CI Failure Logs
-- **Write:** Fixes to syntax, imports, and simple logic errors.
-- **Constraint:** limited retries (max 2) to prevent "flailing".
+-  **Read:** CI Failure Logs
+-  **Write:** Fixes to syntax, imports, and simple logic errors.
+-  **Constraint:** limited retries (max 3) to prevent "flailing".
 
 ### 3. Test-Generator (Architect)
-
 **Role:** Quality Assurance Engineer
-**Workflow:** `.github/workflows/jules-test-generator.yml`
+**Workflow:** `.github/workflows/Jules-Test-Generator.yml`
 **Triggered By:** New PR with `.py` changes
 **Capabilities:**
-
-- **Write:** New test files in `tests/`.
-- **Constraint:** Must not modify existing application code, only add tests.
+-  **Write:** New test files in `tests/`.
+-  **Constraint:** Must not modify existing application code, only add tests.
 
 ### 4. Doc-Scribe (Librarian)
-
 **Role:** Documentation Maintainer
-**Workflow:** `.github/workflows/jules-documentation-scribe.yml`
+**Workflow:** `.github/workflows/Jules-Documentation-Scribe.yml`
 **Triggered By:** Push to `main`
 **Capabilities:**
-
-- **Write:** Updates to `docs/` and markdown files.
-- **Mode:** "CodeWiki" - treats the codebase as a living encyclopedia.
+-  **Write:** Updates to `docs/` and markdown files.
+-  **Mode:** "CodeWiki" - treats the codebase as a living encyclopedia.
 
 ### 5. Scientific-Auditor (The Professor)
-
 **Role:** Peer Reviewer
-**Workflow:** `.github/workflows/jules-scientific-auditor.yml`
+**Workflow:** `.github/workflows/Jules-Scientific-Auditor.yml`
 **Triggered By:** Nightly Schedule
 **Capabilities:**
-
-- **Read-Only:** CANNOT modify code.
-- **Output:** Comments on PRs or Issues regarding mathematical correctness and physics fidelity.
+- **Read/Write:** Analyzes mathematical correctness; can commit reports to `docs/assessments/` or open GitHub Issues.
+- **Justification:** This agent requires limited write access only to publish audit artifacts (reports and issues) so that all mathematical reviews are transparent, reproducible, and traceable over time. It remains strictly read-only with respect to source, configuration, and test code.
+- **Constraints:** MUST NOT modify application source code, configuration files, or tests; MAY ONLY create or update files under `docs/assessments/` and open or comment on GitHub Issues/PRs to recommend changes.
 
 ### 6. Conflict-Fix (Diplomat)
-
 **Role:** Merge Conflict Resolver
-**Workflow:** `.github/workflows/jules-conflict-fix.yml`
+**Workflow:** `.github/workflows/Jules-Conflict-Fix.yml`
 **Triggered By:** Manual dispatch or specific conflict events (if configured)
 **Capabilities:**
-
-- **Write:** Merge resolution commits.
-- **Constraint:** Prioritizes "Incoming" changes unless specified otherwise.
-
-### 7. Tech-Debt-Assessor (Accountant)
-
-**Role:** Technical Debt Tracker
-**Workflow:** `.github/workflows/Jules-Tech-Debt-Assessor.yml`
-**Triggered By:** Weekly schedule (Sunday 5 AM PST) or manual dispatch
-**Capabilities:**
-
-- **Read-Only:** Analyzes codebase without modifications
-- **Output:** Generates comprehensive debt reports in `docs/assessments/tech_debt/`
-- **Metrics Tracked:**
-  - Code complexity (Radon cyclomatic complexity)
-  - Incomplete implementations (NotImplementedError, stubs)
-  - Type annotation coverage (MyPy)
-  - Dead code (Vulture)
-  - Security debt (Bandit, pip-audit)
-  - Linting violations (Ruff)
-  - Test coverage gaps
-- **Issues:** Creates/updates GitHub issues for debt scores > 50
+-  **Write:** Merge resolution commits.
+-  **Constraint:** Prioritizes "Incoming" changes unless specified otherwise.
 
 ---
 
 ## 🛠️ GitHub CLI & Workflow Reference
 
-Always use GitHub CLI for making pull requests.
-Whenever you finish a task for the user, push it to remote.
-NEVER try to use GitKraken or anything other than GitHub CLI for Pull request creation.
+Always use Github CLI for making pull requests. 
+Whenever you finish a task for the user, push it to remote. 
+NEVER try to use GitKraken or anything other than Github CLI for Pull request creation. 
 All pull requests should be verified to pass the ruff, black, and mypy requirements in the ci / cd pipeline before they are created.
 
 ### For PR Creation:
-
 - Always check if PR already exists first using `gh pr list --state open`
 - Use simple, concise titles and descriptions for initial creation
 - Wrap GitHub CLI commands in powershell `-Command "..."`
 - Use single quotes inside double quotes for string parameters
 
 ### For PR Management:
-
 - Use `gh pr view [number]` to get PR details and status
 - Use `gh pr checks [number]` to see CI/CD status
 - Use `gh run list --branch [branch-name]` to see workflow runs
 - Check for failing checks and address them systematically
 
 ### For CI/CD Issue Resolution:
-
 - Identify failing checks using `gh pr checks`
 - Examine workflow run logs using `gh run view [run-id]`
 - Make fixes on the same branch and push to update the PR
@@ -454,3 +364,20 @@ Before pushing workflow changes:
 ### Reference Documentation:
 
 See `Repository_Management/workflow-fixes/` for documented fixes and patterns to avoid.
+
+---
+
+
+### 🔄 Workflow & Automation Governance
+
+Agents must refer to the [Workflow Tracking Document](docs/workflows/WORKFLOW_TRACKING.md) to understand available tools.
+All workflows follow the Governing Workflow Guidance documented in the `Repository_Management` repository (see `docs/architecture/WORKFLOW_GOVERNANCE.md` in that repository).
+The **GitHub Issue Tracker** is the primary authority for tasking and gap remediation. Check existing issues before starting work.
+
+---
+
+
+### 📂 Repository Decluttering & Organization
+To maintain a clean repository root, all development-related documentation (summaries, plans, analysis reports, technical debt assessments, etc.) MUST be stored in the `docs/development/` directory. 
+- **DO NOT** create new `.md` files in the root unless they are critical project-wide files (e.g., README, AGENTS, CHANGELOG).
+- Prefer creating issues for task tracking rather than temporary markdown files.
