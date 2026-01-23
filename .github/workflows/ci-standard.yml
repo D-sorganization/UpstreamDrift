@@ -47,8 +47,10 @@ jobs:
       - name: Security Audit
         run: |
           pip install pip-audit
-          # Ignore CVE-2024-23342 (ecdsa) as no fix version is available presently
-          pip-audit --ignore-vuln CVE-2024-23342
+          # Ignore CVEs with no fix version available presently:
+          # - CVE-2024-23342 (ecdsa): No fix version available
+          # - CVE-2026-0994 (protobuf): No fix version available - transitive dep from dm_control
+          pip-audit --ignore-vuln CVE-2024-23342 --ignore-vuln CVE-2026-0994
 
       # SECURITY: Bandit static security analysis (Issue #782)
       - name: Bandit Security Scan
