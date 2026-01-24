@@ -435,7 +435,11 @@ class TestModuleAccessibility(unittest.TestCase):
     def test_mujoco_module_accessibility(self):
         """Test MuJoCo module structure for container access."""
         mujoco_python_path = (
-            get_src_root() / "engines" / "physics_engines" / "mujoco" / "python"
+            get_src_root()
+            / "engines"
+            / "physics_engines"
+            / "mujoco"
+            / "python"
         )
 
         if mujoco_python_path.exists():
