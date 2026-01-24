@@ -7,27 +7,24 @@ Note: These tests require mujoco and PyQt6 to be installed. Tests are skipped
 if dependencies are missing rather than using extensive mocking.
 """
 
-from importlib.util import find_spec
 from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
 
-# Check for required dependencies at module level using importlib.util.find_spec
-MUJOCO_AVAILABLE = find_spec("mujoco") is not None
+from src.shared.python.engine_availability import (
+    MUJOCO_AVAILABLE,
+    PYQT6_AVAILABLE,
+)
 
-try:
+if PYQT6_AVAILABLE:
     from PyQt6.QtWidgets import QApplication
-
-    PYQT_AVAILABLE = True
-except ImportError:
-    PYQT_AVAILABLE = False
 
 
 @pytest.fixture(scope="module")
 def qapp():
     """Create a QApplication instance for tests that need it."""
-    if not PYQT_AVAILABLE:
+    if not PYQT6_AVAILABLE:
         pytest.skip("PyQt6 not available")
     # Check if QApplication already exists
     app = QApplication.instance()
@@ -37,7 +34,7 @@ def qapp():
 
 
 @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
-@pytest.mark.skipif(not PYQT_AVAILABLE, reason="PyQt6 not installed")
+@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not installed")
 class TestMuJoCoSimWidget:
     """Tests for the MuJoCoSimWidget class.
 
@@ -212,7 +209,7 @@ class TestMuJoCoSimWidget:
 
 
 @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
-@pytest.mark.skipif(not PYQT_AVAILABLE, reason="PyQt6 not installed")
+@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not installed")
 class TestHumanoidLauncher:
     """Tests for the HumanoidLauncher application.
 
@@ -255,7 +252,7 @@ class TestHumanoidLauncher:
 
 
 @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
-@pytest.mark.skipif(not PYQT_AVAILABLE, reason="PyQt6 not installed")
+@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not installed")
 class TestControlsTab:
     """Tests for the ControlsTab widget."""
 

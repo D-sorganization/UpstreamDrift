@@ -1,12 +1,14 @@
 """Common launcher utilities for the unified dashboard."""
 
-import logging
 import sys
 
 from PyQt6.QtWidgets import QApplication
 
 from src.shared.python.dashboard.window import UnifiedDashboardWindow
 from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.logging_config import configure_gui_logging, get_logger
+
+logger = get_logger(__name__)
 
 
 def launch_dashboard(
@@ -25,7 +27,7 @@ def launch_dashboard(
         engine_args: Optional positional arguments for the engine constructor.
         engine_kwargs: Optional keyword arguments for the engine constructor.
     """
-    logging.basicConfig(level=logging.INFO)
+    configure_gui_logging()
 
     app = QApplication.instance()
     if app is None:
@@ -37,15 +39,15 @@ def launch_dashboard(
     try:
         engine = engine_class(*args, **kwargs)
     except Exception as e:
-        logging.error(f"Failed to initialize engine {engine_class.__name__}: {e}")
+        logger.error(f"Failed to initialize engine {engine_class.__name__}: {e}")
         return
 
     if model_path:
         try:
-            logging.info(f"Loading model: {model_path}")
+            logger.info(f"Loading model: {model_path}")
             engine.load_from_path(model_path)
         except Exception as e:
-            logging.error(f"Failed to load model: {e}")
+            logger.error(f"Failed to load model: {e}")
             # Continue with empty engine, but warn
 
     window = UnifiedDashboardWindow(engine, title=title)

@@ -9,21 +9,20 @@ by the central nervous system to simplify control.
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
 
 import numpy as np
 
-# sklearn is an optional dependency for muscle synergy analysis
-try:
-    from sklearn.decomposition import NMF
+from src.shared.python.engine_availability import SKLEARN_AVAILABLE
+from src.shared.python.logging_config import get_logger
 
-    SKLEARN_AVAILABLE = True
-except ImportError:
-    SKLEARN_AVAILABLE = False
+# sklearn is an optional dependency for muscle synergy analysis
+if SKLEARN_AVAILABLE:
+    from sklearn.decomposition import NMF
+else:
     NMF = None  # type: ignore[misc,assignment]
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

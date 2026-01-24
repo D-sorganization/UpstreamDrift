@@ -4,8 +4,8 @@ This module consolidates common patterns used across scripts to address
 DRY violations identified by Pragmatic Programmer reviews.
 
 Common Patterns Consolidated:
-- Logging setup
-- Repository root detection
+- Logging setup (delegated to src.shared.python.logging_config)
+- Repository root detection (delegated to src.shared.python.path_utils)
 - PYTHONPATH environment setup
 - Subprocess execution with consistent error handling
 """
@@ -19,40 +19,32 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-
-def get_repo_root() -> Path:
-    """Get the repository root directory.
-
-    Works from any script location within the repository.
-
-    Returns:
-        Path to the repository root.
-    """
-    # Scripts are in {repo_root}/scripts/
-    return Path(__file__).resolve().parent.parent
+# Import centralized utilities
+from src.shared.python.logging_config import LogLevel, get_logger, setup_logging
+from src.shared.python.path_utils import get_repo_root
 
 
 def setup_script_logging(
     name: str,
     level: int = logging.INFO,
-    format_string: str = "%(asctime)s - %(levelname)s - %(message)s",
+    format_string: str | None = None,
 ) -> logging.Logger:
     """Configure logging for a script with consistent formatting.
+
+    This function delegates to the centralized logging_config module.
 
     Args:
         name: Logger name (typically __name__).
         level: Logging level.
-        format_string: Log message format.
+        format_string: Log message format (optional, uses default if None).
 
     Returns:
         Configured logger instance.
     """
-    logging.basicConfig(
-        level=level,
-        format=format_string,
-        handlers=[logging.StreamHandler(sys.stdout)],
-    )
-    return logging.getLogger(name)
+    # Convert int level to LogLevel if needed
+    log_level = LogLevel(level) if level in [e.value for e in LogLevel] else level
+    setup_logging(level=log_level, format_string=format_string, stream=sys.stdout)
+    return get_logger(name)
 
 
 def get_pythonpath_env(additional_paths: Sequence[Path] | None = None) -> dict:

@@ -130,7 +130,9 @@ def create_high_quality_favicon() -> bool:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    from src.shared.python.logging_config import setup_logging
+
+    setup_logging(use_simple_format=True)
 
     if create_high_quality_favicon():
         logging.info("Successfully created all high-quality icon files!")

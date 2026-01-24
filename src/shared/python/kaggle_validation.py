@@ -342,9 +342,9 @@ def print_validation_report(results: dict[str, dict[str, float]]) -> None:
 
 
 if __name__ == "__main__":
-    import logging
+    from src.shared.python.logging_config import setup_logging
 
-    logging.basicConfig(level=logging.INFO)
+    setup_logging()
 
     # Load and analyze dataset
     df = load_kaggle_dataset()

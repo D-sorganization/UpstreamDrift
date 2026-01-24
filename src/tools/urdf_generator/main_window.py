@@ -522,15 +522,14 @@ class URDFGeneratorWindow(QMainWindow):
 
 def main() -> None:
     """Main entry point for the URDF Generator."""
+    from src.shared.python.logging_config import configure_gui_logging
+
     app = QApplication(sys.argv)
     app.setApplicationName("URDF Generator")
     app.setApplicationVersion("1.0.0")
 
     # Set up logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    )
+    configure_gui_logging()
 
     window = URDFGeneratorWindow()
     window.show()

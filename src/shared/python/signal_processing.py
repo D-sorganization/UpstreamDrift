@@ -13,7 +13,6 @@ Performance optimizations:
 from __future__ import annotations
 
 import functools
-import logging
 from typing import cast
 
 import numpy as np
@@ -27,22 +26,19 @@ from scipy.signal import (
     welch,
 )
 
-# Performance: Optional fastdtw
-try:
+from src.shared.python.engine_availability import (
+    FASTDTW_AVAILABLE,
+    NUMBA_AVAILABLE,
+)
+from src.shared.python.logging_config import get_logger
+
+# Import optional libraries based on availability
+if FASTDTW_AVAILABLE:
     from fastdtw import fastdtw
 
-    FASTDTW_AVAILABLE = True
-except ImportError:
-    FASTDTW_AVAILABLE = False
-
-# Performance: Optional Numba JIT compilation
-try:
+if NUMBA_AVAILABLE:
     from numba import jit
-
-    NUMBA_AVAILABLE = True
-except ImportError:
-    NUMBA_AVAILABLE = False
-
+else:
     # Create a no-op decorator when numba is not available
     def jit(*args: object, **kwargs: object) -> object:  # type: ignore[misc]
         """No-op decorator when numba is not installed."""
@@ -56,7 +52,7 @@ except ImportError:
         return decorator
 
 
-_LOGGER = logging.getLogger(__name__)
+_LOGGER = get_logger(__name__)
 
 
 # =============================================================================

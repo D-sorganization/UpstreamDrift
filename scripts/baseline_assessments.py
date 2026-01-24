@@ -1,8 +1,9 @@
-import logging
 from pathlib import Path
 
-logging.basicConfig(level=logging.INFO, format="%(message)s")
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_config import get_logger, setup_logging
+
+setup_logging(use_simple_format=True)
+logger = get_logger(__name__)
 
 repo_name = "Golf Modeling Suite"
 date = "2026-01-22"

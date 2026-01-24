@@ -14,13 +14,14 @@ Works with both meshcat for WebGL rendering and export to standard formats.
 from __future__ import annotations
 
 import json
-import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.io_utils import ensure_directory
+from src.shared.python.logging_config import get_logger
 from src.shared.python.reference_frames import (
     SwingPlaneFrame,
     fit_functional_swing_plane,
@@ -31,7 +32,7 @@ from src.shared.python.swing_plane_analysis import SwingPlaneAnalyzer, SwingPlan
 if TYPE_CHECKING:
     pass
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = get_logger(__name__)
 
 # Visualization defaults
 DEFAULT_PLANE_SIZE = 1.5  # [m] half-width of visualized plane
@@ -404,7 +405,7 @@ class SwingPlaneVisualizer:
         from typing import Any
 
         output_path = Path(output_path)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+        ensure_directory(output_path.parent)
 
         scene_data: dict[str, Any] = {
             "instantaneous_plane": None,

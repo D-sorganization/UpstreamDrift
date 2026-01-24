@@ -61,7 +61,7 @@ def generate_report(category_code, category_name, score, findings, recommendatio
 
     content = f"""# Assessment {category_code}: {category_name}
 
-**Date**: {datetime.now().strftime('%Y-%m-%d')}
+**Date**: {datetime.now().strftime("%Y-%m-%d")}
 **Score**: {score}/10
 
 ## Findings
@@ -402,7 +402,7 @@ labels: jules:assessment, needs-attention
 # {title}
 
 **Score**: {score}/10
-**Category**: {cat_code} - {info.get('name')}
+**Category**: {cat_code} - {info.get("name")}
 
 ## Description
 The assessment for this category returned a score below 5/10. This indicates significant issues that need to be addressed.
