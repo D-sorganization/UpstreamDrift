@@ -15,13 +15,22 @@ from src.shared.python.physics_parameters import get_registry
 GRAVITY_M_S2 = float(constants.GRAVITY_M_S2)
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
 
-# Retrieve physics parameters
+# Retrieve physics parameters with fallback to centralized constants
 _registry = get_registry()
 _ball_mass_param = _registry.get("BALL_MASS")
 _ball_radius_param = _registry.get("BALL_RADIUS")
 
-BALL_MASS = float(_ball_mass_param.value) if _ball_mass_param else 0.04593
-BALL_RADIUS = float(_ball_radius_param.value) if _ball_radius_param else 0.021335
+# Use centralized constants as fallbacks instead of magic numbers
+BALL_MASS = (
+    float(_ball_mass_param.value)
+    if _ball_mass_param
+    else float(constants.GOLF_BALL_MASS_KG)
+)
+BALL_RADIUS = (
+    float(_ball_radius_param.value)
+    if _ball_radius_param
+    else float(constants.GOLF_BALL_RADIUS_M)
+)
 
 
 CHAOTIC_PENDULUM_XML = rf"""<mujoco model="chaotic_driven_pendulum">

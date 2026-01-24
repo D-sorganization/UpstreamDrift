@@ -8,10 +8,21 @@ from __future__ import annotations
 
 from typing import cast
 
-from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.constants import (
+    DEFAULT_TIME_STEP,
+    GOLF_BALL_MASS_KG,
+    GOLF_BALL_RADIUS_M,
+    GRAVITY_M_S2,
+)
+
+# Convert to float for use in f-strings
+_BALL_MASS = float(GOLF_BALL_MASS_KG)
+_BALL_RADIUS = float(GOLF_BALL_RADIUS_M)
+_BALL_RADIUS_INNER = _BALL_RADIUS * 0.998  # For dimple visualization
+_TIME_STEP = float(DEFAULT_TIME_STEP)
 
 CHAOTIC_PENDULUM_XML = rf"""<mujoco model="chaotic_driven_pendulum">
-  <option timestep="0.001" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
+  <option timestep="{_TIME_STEP}" gravity="0 0 -{GRAVITY_M_S2}" integrator="RK4"/>
 
   <visual>
     <global offwidth="1024" offheight="1024"/>
@@ -336,8 +347,8 @@ UPPER_BODY_GOLF_SWING_XML = rf"""<mujoco model="golf_upper_body_swing">
     <!-- Ball positioned at address -->
     <body name="ball" pos="0 0.1 0.02">
       <freejoint/>
-      <geom name="ball_geom" type="sphere" size="0.02135"
-            rgba="1 1 1 1" mass="0.04593"
+      <geom name="ball_geom" type="sphere" size="{_BALL_RADIUS}"
+            rgba="1 1 1 1" mass="{_BALL_MASS}"
             condim="3" friction="0.8 0.005 0.0001"/>
     </body>
   </worldbody>
@@ -593,8 +604,8 @@ FULL_BODY_GOLF_SWING_XML = rf"""
     <!-- Golf ball -->
     <body name="ball" pos="0 0.15 0.02135">
       <freejoint/>
-      <geom name="ball_geom" type="sphere" size="0.02135"
-            rgba="1 1 1 1" mass="0.04593"
+      <geom name="ball_geom" type="sphere" size="{_BALL_RADIUS}"
+            rgba="1 1 1 1" mass="{_BALL_MASS}"
             condim="3" friction="0.8 0.005 0.0001"/>
     </body>
   </worldbody>
@@ -1232,14 +1243,14 @@ ADVANCED_BIOMECHANICAL_GOLF_SWING_XML = rf"""
     </body>
 
     <!-- Golf Ball -->
-    <body name="ball" pos="0 0.20 0.02135">
+    <body name="ball" pos="0 0.20 {_BALL_RADIUS}">
       <freejoint/>
-      <inertial pos="0 0 0" mass="0.04593"
+      <inertial pos="0 0 0" mass="{_BALL_MASS}"
                 diaginertia="0.000017 0.000017 0.000017"/>
-      <geom name="ball_geom" type="sphere" size="0.02135"
+      <geom name="ball_geom" type="sphere" size="{_BALL_RADIUS}"
             rgba="1 1 1 1" condim="3" friction="0.8 0.005 0.0001"/>
       <!-- Dimple visualization (cosmetic) -->
-      <geom name="ball_detail" type="sphere" size="0.0214"
+      <geom name="ball_detail" type="sphere" size="{_BALL_RADIUS_INNER}"
             rgba="0.95 0.95 0.95 0.3"/>
     </body>
   </worldbody>
