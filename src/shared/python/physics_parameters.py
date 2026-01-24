@@ -435,7 +435,7 @@ class PhysicsParameterRegistry:
 _registry: PhysicsParameterRegistry | None = None
 
 
-def get_registry() -> PhysicsParameterRegistry:
+def get_parameter_registry() -> PhysicsParameterRegistry:
     """Get the global physics parameter registry.
 
     Returns:
@@ -445,3 +445,7 @@ def get_registry() -> PhysicsParameterRegistry:
     if _registry is None:
         _registry = PhysicsParameterRegistry()
     return _registry
+
+
+# Backwards compatibility alias (deprecated - use get_parameter_registry instead)
+get_registry = get_parameter_registry

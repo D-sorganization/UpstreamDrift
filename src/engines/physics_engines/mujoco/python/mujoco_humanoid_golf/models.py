@@ -10,13 +10,13 @@ from typing import cast
 
 from src.shared.python import constants
 from src.shared.python.equipment import CLUB_CONFIGS
-from src.shared.python.physics_parameters import get_registry
+from src.shared.python.physics_parameters import get_parameter_registry
 
 GRAVITY_M_S2 = float(constants.GRAVITY_M_S2)
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
 
 # Retrieve physics parameters with fallback to centralized constants
-_registry = get_registry()
+_registry = get_parameter_registry()
 _ball_mass_param = _registry.get("BALL_MASS")
 _ball_radius_param = _registry.get("BALL_RADIUS")
 
