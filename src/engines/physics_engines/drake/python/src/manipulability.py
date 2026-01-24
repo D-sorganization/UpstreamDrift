@@ -3,10 +3,11 @@
 Computes Force and Mobility ellipsoids/matrices using Drake's MultibodyPlant.
 """
 
-import logging
 from dataclasses import dataclass
 
 import numpy as np
+
+from src.shared.python.logging_config import get_logger
 
 # Try to import Drake. If failing, we define dummies or rely on user env.
 try:
@@ -27,7 +28,7 @@ except ImportError:
     JacobianWrtVariable = object
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

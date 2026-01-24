@@ -10,13 +10,13 @@ This module provides a comprehensive interface with:
 
 from __future__ import annotations
 
-import logging
 import typing
 from pathlib import Path
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.dashboard.widgets import LivePlotWidget
+from src.shared.python.logging_config import get_logger
 
 from ...advanced_gui_methods import AdvancedGuiMethodsMixin
 from ...grip_modelling_tab import GripModellingTab
@@ -29,7 +29,7 @@ from ..tabs.physics_tab import PhysicsTab
 from ..tabs.plotting_tab import PlottingTab
 from ..tabs.visualization_tab import VisualizationTab
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin):

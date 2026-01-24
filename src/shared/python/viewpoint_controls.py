@@ -18,17 +18,18 @@ Camera convention:
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.logging_config import get_logger
+
 if TYPE_CHECKING:
     pass
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class CameraPreset(Enum):

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 import typing
 from dataclasses import dataclass
 
@@ -10,10 +9,12 @@ import pink
 import pinocchio as pin
 from pink import Task
 
+from src.shared.python.logging_config import get_logger
+
 if typing.TYPE_CHECKING:
     import numpy as np
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

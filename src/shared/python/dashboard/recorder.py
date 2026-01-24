@@ -5,14 +5,14 @@ Records state, control, and derived quantities for analysis and plotting.
 
 from __future__ import annotations
 
-import logging
 from typing import Any, cast
 
 import numpy as np
 
 from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.logging_config import get_logger
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class GenericPhysicsRecorder:
@@ -70,14 +70,14 @@ class GenericPhysicsRecorder:
 
             if new_capacity <= self.current_capacity:
                 # Hit max_samples limit
-                LOGGER.warning(
+                logger.warning(
                     f"Recorder buffer full at {self.max_samples} samples. "
                     "Stopping recording."
                 )
                 self.is_recording = False
                 return
 
-            LOGGER.debug(
+            logger.debug(
                 f"Growing recorder buffers from {self.current_capacity} "
                 f"to {new_capacity} samples"
             )
@@ -98,7 +98,7 @@ class GenericPhysicsRecorder:
     def set_analysis_config(self, config: dict[str, Any]) -> None:
         """Update analysis configuration."""
         self.analysis_config.update(config)
-        LOGGER.info(f"Recorder analysis config updated: {self.analysis_config}")
+        logger.info(f"Recorder analysis config updated: {self.analysis_config}")
 
         # If already recording or initialized, ensure buffers exist for new config
         if self._buffers_initialized:
@@ -115,17 +115,17 @@ class GenericPhysicsRecorder:
         # Allocate ZTCF if missing
         if self.analysis_config["ztcf"] and self.data["ztcf_accel"] is None:
             self.data["ztcf_accel"] = np.zeros((self.max_samples, nv))
-            LOGGER.debug("Allocated ZTCF buffer dynamically.")
+            logger.debug("Allocated ZTCF buffer dynamically.")
 
         # Allocate ZVCF if missing
         if self.analysis_config["zvcf"] and self.data["zvcf_accel"] is None:
             self.data["zvcf_accel"] = np.zeros((self.max_samples, nv))
-            LOGGER.debug("Allocated ZVCF buffer dynamically.")
+            logger.debug("Allocated ZVCF buffer dynamically.")
 
         # Allocate Drift if missing
         if self.analysis_config["track_drift"] and self.data["drift_accel"] is None:
             self.data["drift_accel"] = np.zeros((self.max_samples, nv))
-            LOGGER.debug("Allocated Drift buffer dynamically.")
+            logger.debug("Allocated Drift buffer dynamically.")
 
         # Allocate Control if missing
         if (
@@ -133,7 +133,7 @@ class GenericPhysicsRecorder:
             and self.data["control_accel"] is None
         ):
             self.data["control_accel"] = np.zeros((self.max_samples, nv))
-            LOGGER.debug("Allocated Control buffer dynamically.")
+            logger.debug("Allocated Control buffer dynamically.")
 
         # Allocate Induced Accel sources if missing
         sources = cast(list[int], self.analysis_config["induced_accel_sources"])
@@ -142,7 +142,7 @@ class GenericPhysicsRecorder:
                 self.data["induced_accelerations"][idx] = np.zeros(
                     (self.max_samples, nv)
                 )
-                LOGGER.debug(f"Allocated Induced Accel buffer for source {idx}.")
+                logger.debug(f"Allocated Induced Accel buffer for source {idx}.")
 
     def _reset_buffers(self) -> None:
         """Initialize or reset data buffers.
@@ -221,24 +221,24 @@ class GenericPhysicsRecorder:
             self.data["induced_accelerations"][idx] = np.zeros((self.max_samples, nv))
 
         self._buffers_initialized = True
-        LOGGER.debug(
+        logger.debug(
             f"Initialized recorder buffers: nq={nq}, nv={nv}, max_samples={self.max_samples}"
         )
 
     def start(self) -> None:
         """Start recording."""
         self.is_recording = True
-        LOGGER.info("Recording started.")
+        logger.info("Recording started.")
 
     def stop(self) -> None:
         """Stop recording."""
         self.is_recording = False
-        LOGGER.info("Recording stopped. Recorded %d frames.", self.current_idx)
+        logger.info("Recording stopped. Recorded %d frames.", self.current_idx)
 
     def reset(self) -> None:
         """Clear all recorded data."""
         self._reset_buffers()
-        LOGGER.info("Recorder reset.")
+        logger.info("Recorder reset.")
 
     def record_step(self, control_input: np.ndarray | None = None) -> None:
         """Record the current state of the engine.
@@ -282,7 +282,7 @@ class GenericPhysicsRecorder:
             try:
                 ke = 0.5 * v.T @ M @ v
             except Exception as e:
-                LOGGER.warning("Failed to compute kinetic energy: %s", e)
+                logger.warning("Failed to compute kinetic energy: %s", e)
                 ke = 0.0
         else:
             ke = 0.0
@@ -295,21 +295,21 @@ class GenericPhysicsRecorder:
             try:
                 self.data["ztcf_accel"][idx] = self.engine.compute_ztcf(q, v)
             except Exception as e:
-                LOGGER.warning("Failed to compute ZTCF at frame %d: %s", idx, e)
+                logger.warning("Failed to compute ZTCF at frame %d: %s", idx, e)
 
         # ZVCF
         if self.analysis_config["zvcf"] and self.data["zvcf_accel"] is not None:
             try:
                 self.data["zvcf_accel"][idx] = self.engine.compute_zvcf(q)
             except Exception as e:
-                LOGGER.warning("Failed to compute ZVCF at frame %d: %s", idx, e)
+                logger.warning("Failed to compute ZVCF at frame %d: %s", idx, e)
 
         # Drift Accel
         if self.analysis_config["track_drift"] and self.data["drift_accel"] is not None:
             try:
                 self.data["drift_accel"][idx] = self.engine.compute_drift_acceleration()
             except Exception as e:
-                LOGGER.warning(
+                logger.warning(
                     "Failed to compute drift acceleration at frame %d: %s", idx, e
                 )
 
@@ -323,7 +323,7 @@ class GenericPhysicsRecorder:
                     self.engine.compute_control_acceleration(tau)
                 )
             except Exception as e:
-                LOGGER.warning(
+                logger.warning(
                     "Failed to compute control acceleration at frame %d: %s", idx, e
                 )
 
@@ -342,7 +342,7 @@ class GenericPhysicsRecorder:
                             M_inv[:, src_idx] * tau[src_idx]
                         )
             except Exception as e:
-                LOGGER.warning(
+                logger.warning(
                     "Failed to compute induced accelerations at frame %d: %s", idx, e
                 )
         elif sources:
@@ -356,7 +356,7 @@ class GenericPhysicsRecorder:
                             self.engine.compute_control_acceleration(tau_single)
                         )
                     except Exception as e:
-                        LOGGER.warning(
+                        logger.warning(
                             "Failed to compute induced acceleration for source %d: %s",
                             src_idx,
                             e,
@@ -375,7 +375,7 @@ class GenericPhysicsRecorder:
             if grf is not None and len(grf) == 3:
                 self.data["ground_forces"][idx] = grf
         except Exception as e:
-            LOGGER.warning("Failed to compute ground forces at frame %d: %s", idx, e)
+            logger.warning("Failed to compute ground forces at frame %d: %s", idx, e)
 
         self.current_idx += 1
 
@@ -426,7 +426,7 @@ class GenericPhysicsRecorder:
         """Get induced acceleration series."""
         if source_name not in self.data["induced_accelerations"]:
             # Log when parsing/lookup fails for induced acceleration source
-            LOGGER.warning(
+            logger.warning(
                 "Induced acceleration source '%s' not found in recorded data. "
                 "Available sources: %s. Returning empty series.",
                 source_name,
@@ -461,10 +461,10 @@ class GenericPhysicsRecorder:
 
         Replays the trajectory (sets state) and computes metrics frame-by-frame.
         """
-        LOGGER.info("Computing post-hoc analysis...")
+        logger.info("Computing post-hoc analysis...")
 
         if not self._buffers_initialized or self.current_idx == 0:
-            LOGGER.warning("No data recorded for post-hoc analysis")
+            logger.warning("No data recorded for post-hoc analysis")
             return
 
         # Use only the recorded portion (up to current_idx)
@@ -534,7 +534,7 @@ class GenericPhysicsRecorder:
             np.array(drift_accels) + np.array(control_accels),
         )
 
-        LOGGER.info("Post-hoc analysis complete.")
+        logger.info("Post-hoc analysis complete.")
 
     def get_data_dict(self) -> dict[str, Any]:
         """Return the raw data dictionary for export.
@@ -550,7 +550,7 @@ class GenericPhysicsRecorder:
                 try:
                     export_data[k] = np.array(v)
                 except Exception as e:
-                    LOGGER.debug("Failed to convert list '%s' to numpy array: %s", k, e)
+                    logger.debug("Failed to convert list '%s' to numpy array: %s", k, e)
                     export_data[k] = v
             else:
                 export_data[k] = v

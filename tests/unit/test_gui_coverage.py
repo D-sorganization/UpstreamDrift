@@ -16,9 +16,10 @@ from src.shared.python.engine_availability import (
     MUJOCO_AVAILABLE,
     PYQT6_AVAILABLE,
 )
+from src.shared.python.gui_utils import get_qapp
 
 if PYQT6_AVAILABLE:
-    from PyQt6.QtWidgets import QApplication
+    pass
 
 
 @pytest.fixture(scope="module")
@@ -27,9 +28,7 @@ def qapp():
     if not PYQT6_AVAILABLE:
         pytest.skip("PyQt6 not available")
     # Check if QApplication already exists
-    app = QApplication.instance()
-    if app is None:
-        app = QApplication([])
+    app = get_qapp()
     yield app
 
 

@@ -24,15 +24,15 @@ Reference:
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 import numpy as np
 
 from src.shared.python.engine_availability import MYOSUITE_AVAILABLE
+from src.shared.python.logging_config import get_logger
 from src.shared.python.multi_muscle import AntagonistPair, MuscleGroup
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Log warning if MyoSuite not available
 if not MYOSUITE_AVAILABLE:

@@ -10,14 +10,15 @@ These verifiers are designed to be run alongside simulations to detect 'phantom 
 integration errors, or model definition flaws.
 """
 
-import logging
 from dataclasses import dataclass
 
 import mujoco
 import numpy as np
 
+from src.shared.python.logging_config import get_logger
+
 # Configure logging
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

@@ -8,7 +8,9 @@ import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-project_root = Path(__file__).parent.parent.parent
+from src.shared.python.path_utils import get_repo_root
+
+project_root = get_repo_root()
 sys.path.insert(0, str(project_root))
 
 from src.shared.python.engine_manager import (  # noqa: E402

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import logging
 import os
 import tempfile
 from pathlib import Path
@@ -10,9 +9,10 @@ import mujoco
 import numpy as np
 
 from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.logging_config import get_logger
 from src.shared.python.security_utils import validate_path
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Model directories allowed for loading (relative to suite root)
 # Hardening: Prevent loading from arbitrary system paths
@@ -61,7 +61,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             self.data = mujoco.MjData(self.model)
             self.xml_path = None
         except Exception as e:
-            LOGGER.error("Failed to load model from XML string: %s", e)
+            logger.error("Failed to load model from XML string: %s", e)
             raise
 
     def load_from_path(self, path: str) -> None:
@@ -76,7 +76,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             self.data = mujoco.MjData(self.model)
             self.xml_path = path_str
         except Exception as e:
-            LOGGER.error("Failed to load model from path %s: %s", path, e)
+            logger.error("Failed to load model from path %s: %s", path, e)
             raise
 
     def set_model_data(self, model: mujoco.MjModel, data: mujoco.MjData) -> None:
@@ -234,7 +234,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             return np.array([])
 
         if len(qacc) != self.model.nv:
-            LOGGER.error("Dimension mismatch for qacc")
+            logger.error("Dimension mismatch for qacc")
             return np.array([])
 
         # Copy qacc to data
@@ -524,7 +524,7 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             "velocities": np.zeros(n_modes),
         }
 
-        LOGGER.info(
+        logger.info(
             f"Configured flexible shaft: length={length:.3f}m, "
             f"modes={n_modes}, f1={modal_frequencies[0]:.1f}Hz"
         )

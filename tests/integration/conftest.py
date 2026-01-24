@@ -10,10 +10,11 @@ to all integration tests via pytest's automatic fixture discovery.
 from __future__ import annotations
 
 import sys
-from pathlib import Path
+
+from src.shared.python.path_utils import get_src_root
 
 # Add fixtures directory to path
-FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
+FIXTURES_DIR = get_src_root() / "fixtures"
 sys.path.insert(0, str(FIXTURES_DIR))
 
 # Re-export all fixtures from the fixtures library

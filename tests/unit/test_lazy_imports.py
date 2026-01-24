@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.gui_utils import get_qapp
 
 
 class TestSharedModuleLazyImports:
@@ -66,12 +67,10 @@ class TestPolynomialGeneratorLazyImport:
     @pytest.fixture
     def mock_launcher(self):
         """Create a mock launcher instance."""
-        from PyQt6.QtWidgets import QApplication, QMainWindow
+        from PyQt6.QtWidgets import QMainWindow
 
         # Ensure QApplication exists
-        app = QApplication.instance()
-        if app is None:
-            app = QApplication([])
+        get_qapp()
 
         launcher = QMainWindow()
         # Use type ignore to avoid MyPy attribute errors

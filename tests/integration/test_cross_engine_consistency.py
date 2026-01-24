@@ -9,13 +9,13 @@ Per Guideline M2/P3: Cross-engine validation with explicit tolerances.
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 import numpy as np
 import pytest
 
 from src.shared.python.cross_engine_validator import CrossEngineValidator
+from src.shared.python.logging_config import get_logger
 from tests.fixtures.fixtures_lib import (
     TOLERANCE_ACCELERATION_M_S2,
     _check_drake_available,
@@ -26,7 +26,7 @@ from tests.fixtures.fixtures_lib import (
     skip_if_insufficient_engines,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Tolerance multiplier for triangulation outlier detection
 # A relaxed 10x threshold is used to identify engines with systematic deviations
@@ -93,7 +93,7 @@ class TestCrossEngineConsistency:
                 result = validator.compare_states(
                     name1, results[name1], name2, results[name2], metric="position"
                 )
-                LOGGER.info(
+                logger.info(
                     f"Mass matrix {name1} vs {name2}: "
                     f"deviation={result.max_deviation:.2e}"
                 )
@@ -132,7 +132,7 @@ class TestCrossEngineConsistency:
                     if g.size > 0:
                         results[eng.name] = g
                 except Exception as e:
-                    LOGGER.warning(f"Gravity forces failed for {eng.name}: {e}")
+                    logger.warning(f"Gravity forces failed for {eng.name}: {e}")
 
         if len(results) < 2:
             pytest.skip("Gravity forces not available in enough engines")
@@ -144,7 +144,7 @@ class TestCrossEngineConsistency:
                 result = validator.compare_states(
                     name1, results[name1], name2, results[name2], metric="torque"
                 )
-                LOGGER.info(
+                logger.info(
                     f"Gravity forces {name1} vs {name2}: "
                     f"deviation={result.max_deviation:.2e}"
                 )
@@ -183,7 +183,7 @@ class TestCrossEngineConsistency:
                     if bias.size > 0:
                         results[eng.name] = bias
                 except Exception as e:
-                    LOGGER.warning(f"Bias forces failed for {eng.name}: {e}")
+                    logger.warning(f"Bias forces failed for {eng.name}: {e}")
 
         if len(results) < 2:
             pytest.skip("Bias forces not available in enough engines")
@@ -195,7 +195,7 @@ class TestCrossEngineConsistency:
                 result = validator.compare_states(
                     name1, results[name1], name2, results[name2], metric="torque"
                 )
-                LOGGER.info(
+                logger.info(
                     f"Bias forces {name1} vs {name2}: "
                     f"deviation={result.max_deviation:.2e}"
                 )
@@ -260,7 +260,7 @@ class TestCrossEngineConsistency:
                 pos_result = validator.compare_states(
                     name1, q1, name2, q2, metric="position"
                 )
-                LOGGER.info(
+                logger.info(
                     f"Trajectory position {name1} vs {name2}: "
                     f"deviation={pos_result.max_deviation:.2e}"
                 )
@@ -269,7 +269,7 @@ class TestCrossEngineConsistency:
                 vel_result = validator.compare_states(
                     name1, v1, name2, v2, metric="velocity"
                 )
-                LOGGER.info(
+                logger.info(
                     f"Trajectory velocity {name1} vs {name2}: "
                     f"deviation={vel_result.max_deviation:.2e}"
                 )
@@ -343,7 +343,7 @@ class TestThreeWayTriangulation:
                     metric="acceleration",
                 )
                 deviations[(name1, name2)] = result.max_deviation
-                LOGGER.info(
+                logger.info(
                     f"Triangulation {name1} vs {name2}: "
                     f"deviation={result.max_deviation:.2e}, "
                     f"severity={result.severity}"
@@ -378,7 +378,7 @@ class TestThreeWayTriangulation:
                 other_pair: tuple[str, str] = (sorted_other[0], sorted_other[1])
                 if other_pair in deviations:
                     if deviations[other_pair] < agreement_threshold:
-                        LOGGER.warning(
+                        logger.warning(
                             f"Triangulation identified {engine_name} as outlier: "
                             f"disagrees with both {other_engines[0]} and {other_engines[1]}"
                         )

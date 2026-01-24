@@ -7,8 +7,9 @@ Tests Docker container setup, PYTHONPATH configuration, and module accessibility
 
 import subprocess
 import unittest
-from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
+
+from src.shared.python.path_utils import get_src_root
 
 
 def _is_docker_available() -> bool:
@@ -25,7 +26,7 @@ class TestDockerBuild(unittest.TestCase):
 
     def test_dockerfile_syntax(self):
         """Test that Dockerfile has valid syntax."""
-        dockerfile_path = Path(__file__).parent.parent / "Dockerfile"
+        dockerfile_path = get_src_root() / "Dockerfile"
         self.assertTrue(dockerfile_path.exists())
 
         content = dockerfile_path.read_text()
@@ -38,7 +39,7 @@ class TestDockerBuild(unittest.TestCase):
 
     def test_dockerfile_pythonpath_setup(self):
         """Test that Dockerfile sets up PYTHONPATH correctly."""
-        dockerfile_path = Path(__file__).parent.parent / "Dockerfile"
+        dockerfile_path = get_src_root() / "Dockerfile"
         content = dockerfile_path.read_text()
 
         # Verify PYTHONPATH includes all required directories
@@ -97,7 +98,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
         mock_suite_root = MagicMock()
         mock_suite_root.__str__ = Mock(return_value="/mock/suite/root")  # type: ignore[method-assign]
         # When Path(__file__) is called, return something that eventually leads to mock_suite_root
-        # Path(__file__).parent.parent -> mock_suite_root
+        # get_src_root() -> mock_suite_root
         mock_file_path = MagicMock()
         mock_file_path.parent.parent = mock_suite_root
         mock_path_cls.return_value = mock_file_path
@@ -344,7 +345,7 @@ class TestContainerEnvironment(unittest.TestCase):
 
     def test_pythonpath_environment_variable(self):
         """Test PYTHONPATH environment variable setup."""
-        dockerfile_path = Path(__file__).parent.parent / "Dockerfile"
+        dockerfile_path = get_src_root() / "Dockerfile"
         content = dockerfile_path.read_text()
 
         # Find PYTHONPATH line
@@ -367,7 +368,7 @@ class TestContainerEnvironment(unittest.TestCase):
 
     def test_workspace_directory_creation(self):
         """Test workspace directory structure creation."""
-        dockerfile_path = Path(__file__).parent.parent / "Dockerfile"
+        dockerfile_path = get_src_root() / "Dockerfile"
         content = dockerfile_path.read_text()
 
         # Check for workspace directory creation
@@ -376,7 +377,7 @@ class TestContainerEnvironment(unittest.TestCase):
 
     def test_conda_environment_setup(self):
         """Test conda environment configuration."""
-        dockerfile_path = Path(__file__).parent.parent / "Dockerfile"
+        dockerfile_path = get_src_root() / "Dockerfile"
         content = dockerfile_path.read_text()
 
         # Verify base image and package installation
@@ -395,7 +396,7 @@ class TestModuleAccessibility(unittest.TestCase):
 
     def test_shared_module_structure(self):
         """Test shared module directory structure."""
-        shared_path = Path(__file__).parent.parent / "shared" / "python"
+        shared_path = get_src_root() / "shared" / "python"
         self.assertTrue(shared_path.exists(), "Shared python directory should exist")
 
         # Check for key modules
@@ -412,7 +413,7 @@ class TestModuleAccessibility(unittest.TestCase):
 
     def test_engine_directory_structure(self):
         """Test engine directory structure."""
-        engines_path = Path(__file__).parent.parent / "engines"
+        engines_path = get_src_root() / "engines"
         self.assertTrue(engines_path.exists(), "Engines directory should exist")
 
         # Check for physics engines
@@ -434,7 +435,7 @@ class TestModuleAccessibility(unittest.TestCase):
     def test_mujoco_module_accessibility(self):
         """Test MuJoCo module structure for container access."""
         mujoco_python_path = (
-            Path(__file__).parent.parent
+            get_src_root()
             / "engines"
             / "physics_engines"
             / "mujoco"

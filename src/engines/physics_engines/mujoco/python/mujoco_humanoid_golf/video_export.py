@@ -9,13 +9,14 @@ This module provides professional video export capabilities:
 
 from __future__ import annotations
 
-import logging
 from enum import Enum
 from pathlib import Path
 from typing import TYPE_CHECKING, Any  # noqa: ICN003
 
 import mujoco as mj
 import numpy as np
+
+from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -35,7 +36,7 @@ except ImportError:
     IMAGEIO_AVAILABLE = False
 
 # Configure logging
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class VideoFormat(Enum):

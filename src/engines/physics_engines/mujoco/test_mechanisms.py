@@ -6,16 +6,15 @@ are structurally correct and physically plausible.
 
 from __future__ import annotations
 
-import logging
-
 import mujoco
 import pytest
 
 from src.engines.physics_engines.mujoco.head_models import (
     TWO_LINK_INCLINED_PLANE_UNIVERSAL_XML,
 )
+from src.shared.python.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @pytest.fixture

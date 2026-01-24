@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import logging
 import typing
 from pathlib import Path
 
 from PyQt6 import QtCore, QtWidgets
 
 from src.shared.python.common_utils import get_shared_urdf_path
+from src.shared.python.logging_config import get_logger
 
 from ...linkage_mechanisms import LINKAGE_CATALOG
 from ...models import (
@@ -25,7 +25,7 @@ from ...sim_widget import MuJoCoSimWidget
 if typing.TYPE_CHECKING:
     from ..advanced_gui import AdvancedGolfAnalysisWindow
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class PhysicsTab(QtWidgets.QWidget):

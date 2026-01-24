@@ -15,6 +15,7 @@ from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.gui_utils import get_qapp
 from src.shared.python.path_utils import setup_import_paths
 
 # Setup import paths for testing
@@ -22,7 +23,6 @@ setup_import_paths()
 
 if PYQT6_AVAILABLE:
     from PyQt6.QtCore import QPoint
-    from PyQt6.QtWidgets import QApplication
 
 
 class TestSharedModuleImports(unittest.TestCase):
@@ -116,10 +116,7 @@ class TestDraggableModelCard(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
-        if not QApplication.instance():
-            cls.app = QApplication([])
-        else:
-            cls.app = QApplication.instance()
+        get_qapp()  # Simplified with utility
 
     def setUp(self) -> None:
         """Set up test fixtures."""
@@ -239,10 +236,7 @@ class TestGolfLauncherGrid(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
-        if not QApplication.instance():
-            cls.app = QApplication([])
-        else:
-            cls.app = QApplication.instance()
+        get_qapp()  # Simplified with utility
 
     def setUp(self) -> None:
         """Set up test fixtures."""

@@ -1,14 +1,14 @@
 """Unit tests for Pinocchio GUI logic."""
 
-import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.gui_utils import get_qapp
 
 if PYQT6_AVAILABLE:
-    from PyQt6 import QtWidgets
+    pass
 
 
 @pytest.fixture(autouse=True, scope="module")
@@ -34,9 +34,7 @@ class TestPinocchioGUI:
     @pytest.fixture
     def qapp(self):
         """Ensure QApplication exists."""
-        app = QtWidgets.QApplication.instance()
-        if app is None:
-            app = QtWidgets.QApplication(sys.argv)
+        app = get_qapp()
         return app
 
     @pytest.fixture

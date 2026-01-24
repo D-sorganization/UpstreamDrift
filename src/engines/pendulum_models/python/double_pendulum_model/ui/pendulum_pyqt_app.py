@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import ast
 import functools
-import logging
 import math
 import typing
 from dataclasses import dataclass
@@ -31,7 +30,9 @@ from PyQt6 import QtCore, QtWidgets
 # Security: Use simpleeval for safe expression evaluation
 from simpleeval import SimpleEval
 
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 TIME_STEP = 0.01
 

@@ -1,12 +1,13 @@
 """Model registry for managing physics models and special applications."""
 
-import logging
 from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
 
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass

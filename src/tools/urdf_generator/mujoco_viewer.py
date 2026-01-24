@@ -8,7 +8,6 @@ Provides real-time URDF preview via MJCF conversion.
 
 from __future__ import annotations
 
-import logging
 import subprocess
 import sys
 import tempfile
@@ -27,12 +26,14 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.logging_config import get_logger
+
 if TYPE_CHECKING:
     from typing import Any
 
 from src.shared.python.engine_availability import MUJOCO_AVAILABLE
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 GRAVITY_M_S2 = 9.810
 

@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING
 
 import mujoco
 from PyQt6 import QtCore, QtGui, QtWidgets
 
+from src.shared.python.logging_config import get_logger
+
 if TYPE_CHECKING:
     from ...sim_widget import MuJoCoSimWidget
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class VisualizationTab(QtWidgets.QWidget):

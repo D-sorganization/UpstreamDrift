@@ -1,13 +1,14 @@
 """Engine loader functions."""
 
-import logging
 from pathlib import Path
+
+from src.shared.python.logging_config import get_logger
 
 from .common_utils import GolfModelingError
 from .engine_registry import EngineType
 from .interfaces import PhysicsEngine
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def load_mujoco_engine(suite_root: Path) -> PhysicsEngine:
