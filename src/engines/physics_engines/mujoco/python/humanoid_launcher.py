@@ -11,15 +11,6 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-
-# Third-party imports
-try:
-    import matplotlib.pyplot as plt
-
-    HAS_MATPLOTLIB = True
-except ImportError:
-    HAS_MATPLOTLIB = False
-
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QPalette
 from PyQt6.QtWidgets import (
@@ -46,26 +37,30 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-# Ensure shared modules are importable
-PROJECT_ROOT = Path(__file__).parent.parent.parent.parent.parent
-# Add Project Root to sys.path so 'shared' package is discoverable
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+from src.shared.python.configuration_manager import ConfigurationManager
+from src.shared.python.dashboard.widgets import LivePlotWidget
+from src.shared.python.engine_availability import MATPLOTLIB_AVAILABLE
+from src.shared.python.interfaces import RecorderInterface
+from src.shared.python.logging_config import configure_gui_logging, get_logger
+from src.shared.python.path_utils import get_repo_root
+from src.shared.python.process_worker import ProcessWorker
 
-from src.shared.python.configuration_manager import ConfigurationManager  # noqa: E402
-from src.shared.python.dashboard.widgets import LivePlotWidget  # noqa: E402
-from src.shared.python.interfaces import RecorderInterface  # noqa: E402
-from src.shared.python.process_worker import ProcessWorker  # noqa: E402
+# Use centralized availability flag
+HAS_MATPLOTLIB = MATPLOTLIB_AVAILABLE
+
+# Third-party imports based on availability
+if HAS_MATPLOTLIB:
+    import matplotlib.pyplot as plt
 
 # Polynomial generator widget imported lazily to avoid MuJoCo DLL issues
 # Import happens in open_polynomial_generator() only when needed
 
+# Get project root using centralized path utilities
+PROJECT_ROOT = get_repo_root()
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+# Configure logging using centralized module
+configure_gui_logging()
+logger = get_logger(__name__)
 
 
 class RemoteRecorder(RecorderInterface):
@@ -224,12 +219,14 @@ class HumanoidLauncher(QMainWindow):
 
         # Tabs
         self.tabs = QTabWidget()
-        self.tabs.setStyleSheet("""
+        self.tabs.setStyleSheet(
+            """
             QTabWidget::pane { border: 1px solid #444; background: #2b2b2b; }
             QTabBar::tab { background: #333; color: #ccc; padding: 10px 20px; }
             QTabBar::tab:selected { background: #0078d4; color: white; }
             QTabBar::tab:hover { background: #444; }
-        """)
+        """
+        )
 
         self.setup_sim_tab()
         self.setup_appearance_tab()
@@ -1066,7 +1063,8 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Global Stylesheet for Rounded Buttons and Modern Look
-    app.setStyleSheet("""
+    app.setStyleSheet(
+        """
         QPushButton {
             border-radius: 5px;
             padding: 5px;
@@ -1112,7 +1110,8 @@ if __name__ == "__main__":
         QMessageBox QLabel {
             color: white; /* White text on dark background */
         }
-    """)
+    """
+    )
 
     window = HumanoidLauncher()
     window.show()

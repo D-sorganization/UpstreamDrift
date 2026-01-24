@@ -1,7 +1,11 @@
 import sys
 import unittest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
+
+from src.shared.python.path_utils import setup_import_paths
+
+# Setup import paths for testing
+setup_import_paths()
 
 # Mock pydrake structure before import
 mock_pydrake = MagicMock()
@@ -15,9 +19,6 @@ sys.modules["pydrake.multibody.plant"] = MagicMock()
 sys.modules["pydrake.geometry"] = MagicMock()
 sys.modules["pydrake.math"] = MagicMock()
 sys.modules["pydrake.all"] = MagicMock()
-
-# Add repo root to path
-sys.path.insert(0, str(Path(__file__).parents[2]))
 
 try:
     from src.engines.physics_engines.drake.python.drake_physics_engine import (

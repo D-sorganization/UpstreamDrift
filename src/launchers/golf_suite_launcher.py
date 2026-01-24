@@ -7,23 +7,23 @@ or accessible via `sys.executable`.
 It does NOT use Docker. For Docker support, use `golf_launcher.py`.
 """
 
-import logging
 import subprocess
 import sys
 from pathlib import Path
 
-try:
-    from PyQt6 import QtCore, QtGui, QtWidgets
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.logging_config import configure_gui_logging, get_logger
 
-    PYQT_AVAILABLE = True
-except ImportError:
-    PYQT_AVAILABLE = False
+# Configure logging for GUI application
+configure_gui_logging()
+logger = get_logger("GolfSuiteLauncher")
+
+if PYQT6_AVAILABLE:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+else:
     QtWidgets = None  # type: ignore
     QtCore = None  # type: ignore
     QtGui = None  # type: ignore
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("GolfSuiteLauncher")
 
 # UI feedback timing constants
 LAUNCH_FEEDBACK_DURATION_MS = (
@@ -31,9 +31,9 @@ LAUNCH_FEEDBACK_DURATION_MS = (
 )
 
 
-class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type: ignore[misc]
+class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # type: ignore[misc]
     def __init__(self) -> None:
-        if not PYQT_AVAILABLE:
+        if not PYQT6_AVAILABLE:
             raise ImportError("PyQt6 is required to run this launcher.")
         super().__init__()
         self.setWindowTitle("Golf Modeling Suite - Local Launcher")
@@ -308,7 +308,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT_AVAILABLE else object):  # type
 
 
 def main() -> None:
-    if not PYQT_AVAILABLE:
+    if not PYQT6_AVAILABLE:
         # If logger is configured (basic config above), this goes to stderr/stdout
         logger.error(
             "Error: PyQt6 is not installed. Please install it to use the GUI launcher."

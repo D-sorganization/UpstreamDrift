@@ -35,7 +35,6 @@ Version: 1.0.0
 """
 
 import argparse
-import logging
 import os
 import secrets
 import sys
@@ -56,10 +55,10 @@ from sqlalchemy.orm import Session, sessionmaker
 from src.api.auth.models import APIKey, User
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_config import get_logger, setup_logging
+
+setup_logging()
+logger = get_logger(__name__)
 
 # Bcrypt cost factor (12 is the recommended minimum for security)
 BCRYPT_ROUNDS = 12

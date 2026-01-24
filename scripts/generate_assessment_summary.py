@@ -9,16 +9,17 @@ This script aggregates all A-O assessment results and creates:
 
 import argparse
 import json
-import logging
 import re
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_config import get_logger, setup_logging
+
+# Configure logging using centralized module
+setup_logging(use_simple_format=True)
+logger = get_logger(__name__)
 
 
 def extract_score_from_report(report_path: Path) -> float:
@@ -181,7 +182,7 @@ Repository assessment completed across all {len(scores)} categories.
     for group_name, group_info in groups.items():
         score = group_scores.get(group_name, 0.0)
         cats = ", ".join(group_info["cats"])
-        md_content += f"| **{group_name}** | {group_info['weight']*100:.0f}% | {score:.1f} | {cats} |\n"
+        md_content += f"| **{group_name}** | {group_info['weight'] * 100:.0f}% | {score:.1f} | {cats} |\n"
 
     md_content += """
 ### Individual Category Scores

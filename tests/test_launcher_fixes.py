@@ -9,22 +9,20 @@ Tests cover:
 - Engine detection and management
 """
 
-import sys
 import unittest
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
-# Add shared modules to path for testing
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.path_utils import setup_import_paths
 
-try:
+# Setup import paths for testing
+setup_import_paths()
+
+if PYQT6_AVAILABLE:
     from PyQt6.QtCore import QPoint
     from PyQt6.QtWidgets import QApplication
-
-    PYQT_AVAILABLE = True
-except ImportError:
-    PYQT_AVAILABLE = False
 
 
 class TestSharedModuleImports(unittest.TestCase):
@@ -109,7 +107,7 @@ class TestEngineManager(unittest.TestCase):
             self.assertTrue(hasattr(probe_result, "diagnostic_message"))
 
 
-@unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
+@unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
 class TestDraggableModelCard(unittest.TestCase):
     """Test drag-and-drop functionality in model cards."""
 
@@ -232,7 +230,7 @@ class TestDraggableModelCard(unittest.TestCase):
         event.acceptProposedAction.assert_called_once()
 
 
-@unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
+@unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
 class TestGolfLauncherGrid(unittest.TestCase):
     """Test golf launcher grid functionality."""
 
@@ -493,7 +491,7 @@ if __name__ == "__main__":
     ]
 
     # Add PyQt tests only if available
-    if PYQT_AVAILABLE:
+    if PYQT6_AVAILABLE:
         test_classes.extend(
             [
                 TestDraggableModelCard,

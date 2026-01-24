@@ -415,7 +415,7 @@ def generate_report() -> None:
             text = cast(str, item["text"])[:80].replace("|", "\\|")
             report_content += f"| {item['line']} | {text} |\n"
         if len(items) > 5:
-            report_content += f"| ... | *({len(items)-5} more)* |\n"
+            report_content += f"| ... | *({len(items) - 5} more)* |\n"
 
     report_content += "\n## Technical Debt Register (Top 20)\n"
     report_content += "| File | Line | Content | Type |\n"

@@ -1,10 +1,11 @@
 """Manual verification of the Unified Platform pipeline."""
 
-import logging
 import sys
 from pathlib import Path
 
 import numpy as np
+
+from src.shared.python.logging_config import get_logger, setup_logging
 
 # Add project root to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -20,8 +21,8 @@ from dtack.utils.matlab_importer import MATLABImporter
 
 
 def main() -> None:
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger("VerifyWorkflow")
+    setup_logging()
+    logger = get_logger("VerifyWorkflow")
 
     logger.info("1. Verifying Pinocchio Installation...")
 

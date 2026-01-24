@@ -13,7 +13,6 @@ Usage:
 from __future__ import annotations
 
 import argparse
-import logging
 import re
 import subprocess
 import sys
@@ -22,16 +21,15 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
+from src.shared.python.logging_config import get_logger, setup_logging
+
+# Set up logging
+setup_logging()
+logger = get_logger(__name__)
+
 # Constants
 MATLAB_SCRIPT_TIMEOUT_SECONDS: int = 300  # 5 minutes - allows time for large codebases
 MIN_DOCSTRING_LENGTH: int = 3  # Minimum length for a valid docstring comment
-
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-)
-logger = logging.getLogger(__name__)
 
 
 class MATLABQualityChecker:
@@ -559,7 +557,6 @@ def main() -> None:
     if args.output_format == "json":
         pass
     else:
-
         issues_raw = results.get("issues", [])
         issues: list[str] = issues_raw if isinstance(issues_raw, list) else []
         if issues:
