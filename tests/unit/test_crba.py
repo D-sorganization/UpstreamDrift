@@ -4,14 +4,14 @@ import numpy as np
 import pytest
 
 from src.shared.python.constants import GRAVITY_M_S2
-from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+from src.shared.python.engine_availability import MUJOCO_AVAILABLE, skip_if_unavailable
 
-if not MUJOCO_AVAILABLE:
-    pytest.skip("MuJoCo not installed", allow_module_level=True)
+pytestmark = skip_if_unavailable("mujoco")
 
-from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.crba import (
-    crba,
-)
+if MUJOCO_AVAILABLE:
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.crba import (
+        crba,
+    )
 
 
 def create_random_model(num_bodies=5):

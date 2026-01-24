@@ -1,4 +1,3 @@
-# ruff: noqa: E402
 """Unit tests for ProcessWorker."""
 
 import sys
@@ -6,12 +5,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.engine_availability import PYQT6_AVAILABLE, skip_if_unavailable
 
 # Skip entire module if PyQt6 is not available - the ProcessWorker tests require
 # proper Qt mocking that doesn't work reliably when PyQt6 is missing
-if not PYQT6_AVAILABLE:
-    pytest.skip("PyQt6 not installed", allow_module_level=True)
+pytestmark = skip_if_unavailable("pyqt6")
 
 
 @pytest.fixture

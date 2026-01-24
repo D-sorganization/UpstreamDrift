@@ -5,11 +5,13 @@ import numpy as np
 import pytest
 
 from src.shared.python.constants import GRAVITY_M_S2
-from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+from src.shared.python.engine_availability import (
+    MUJOCO_AVAILABLE,
+    skip_if_unavailable,
+)
 
 # Skip entire module if MuJoCo is not available
-if not MUJOCO_AVAILABLE:
-    pytest.skip("MuJoCo not installed", allow_module_level=True)
+pytestmark = skip_if_unavailable("mujoco")
 
 
 # Mock classes that need to be defined before importing the engine
