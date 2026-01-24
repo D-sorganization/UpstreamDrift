@@ -9,6 +9,14 @@ import pytest
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
 from src.shared.python.path_utils import get_simscape_model_path
 
+# Check if pytest-qt is available
+try:
+    import pytestqt  # noqa: F401
+
+    PYTEST_QT_AVAILABLE = True
+except ImportError:
+    PYTEST_QT_AVAILABLE = False
+
 # Add source directory to path using centralized path utility
 SRC_PATH = get_simscape_model_path("3D_Golf_Model")
 if str(SRC_PATH) not in sys.path:
@@ -140,7 +148,10 @@ def test_load_c3d_file_not_found(mock_exists):
 # ---------------------------------------------------------------------------
 
 
-@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available")
+@pytest.mark.skipif(
+    not PYQT6_AVAILABLE or not PYTEST_QT_AVAILABLE,
+    reason="PyQt6 or pytest-qt not available",
+)
 def test_loader_thread(qtbot):
     """Test that thread emits signals."""
     # Since we can't reliably import the module statically due to path issues,
