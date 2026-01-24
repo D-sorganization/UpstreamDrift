@@ -37,7 +37,7 @@ logger = get_logger(__name__)
 def run_command(
     cmd: list[str],
     cwd: str | Path | None = None,
-    timeout: float | None = None,
+    timeout: float | None = 300.0,
     capture_output: bool = True,
 ) -> subprocess.CompletedProcess | None:
     """Run command synchronously with error handling.
@@ -45,7 +45,7 @@ def run_command(
     Args:
         cmd: Command and arguments as list
         cwd: Working directory
-        timeout: Timeout in seconds
+        timeout: Timeout in seconds (default: 300.0)
         capture_output: Whether to capture stdout/stderr
 
     Returns:
@@ -58,13 +58,10 @@ def run_command(
     """
     logger.debug(f"Running command: {' '.join(cmd)}")
 
-    # Default timeout of 300 seconds (5 minutes) if not specified
-    effective_timeout = timeout if timeout is not None else 300.0
-
     result = secure_run(
         cmd,
         cwd=str(cwd) if cwd else None,
-        timeout=effective_timeout,
+        timeout=timeout,
         capture_output=capture_output,
     )
 
@@ -343,7 +340,7 @@ class CommandRunner:
             delay: Delay between attempts in seconds
 
         Returns:
-            CompletedProcess object or None if all attempts failed
+            CompletedProcess object or None if failed after all attempts
         """
         for attempt in range(max_attempts):
             result = self.run(cmd)
