@@ -290,16 +290,17 @@ def setup_import_paths(additional_paths: list[str | Path] | None = None) -> None
 
 
 def get_simscape_model_path(model_name: str = "3D_Golf_Model") -> Path:
-    """Get the path to Simscape model directory.
+    """Get the path to Simscape model python/src directory.
 
     Args:
         model_name: Name of the model directory (default: "3D_Golf_Model")
 
     Returns:
-        Path to Simscape model directory
+        Path to Simscape model python/src directory for imports
 
     Example:
         simscape_path = get_simscape_model_path()
+        custom_path = get_simscape_model_path("Custom_Model")
     """
     return (
         get_src_root()
