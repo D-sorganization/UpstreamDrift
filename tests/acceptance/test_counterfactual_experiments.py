@@ -23,7 +23,7 @@ from src.shared.python.logging_config import get_logger
 # Check if pendulum engine dependencies are available
 try:
     from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
-        PendulumPhysicsEngine as _PendulumPhysicsEngine,  # noqa: F401
+        PendulumPhysicsEngine as _PendulumPhysicsEngine,
     )
 
     PENDULUM_ENGINE_AVAILABLE = True

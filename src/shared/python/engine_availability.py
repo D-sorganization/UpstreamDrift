@@ -487,10 +487,11 @@ _ENGINE_FLAGS: dict[str, bool] = {
     "parquet": PARQUET_AVAILABLE,
     "hdf5": HDF5_AVAILABLE,
     "h5py": HDF5_AVAILABLE,  # Alias
-    "ezc3d": EZC3D_AVAILABLE,
-    "c3d": EZC3D_AVAILABLE,  # Alias for ezc3d (backwards compatible)
-    "c3d_pkg": C3D_AVAILABLE,  # c3d package (different from ezc3d)
-    "c3d_any": EZC3D_AVAILABLE or C3D_AVAILABLE,  # Either C3D library
+    # C3D file format libraries (two packages exist: ezc3d and c3d)
+    "ezc3d": EZC3D_AVAILABLE,  # ezc3d package (recommended)
+    "c3d": EZC3D_AVAILABLE,  # Backwards-compatible alias for ezc3d
+    "c3d_pkg": C3D_AVAILABLE,  # c3d package (alternative to ezc3d)
+    "c3d_any": EZC3D_AVAILABLE or C3D_AVAILABLE,  # Either C3D library available
     "yaml": YAML_AVAILABLE,
     "pyyaml": YAML_AVAILABLE,  # Alias
     # GUI frameworks
