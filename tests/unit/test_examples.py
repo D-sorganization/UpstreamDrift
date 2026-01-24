@@ -36,7 +36,7 @@ example02_path = project_root / "examples" / "02_parameter_sweeps.py"
 def test_example_01_runs() -> None:
     """Test Example 01 runs without error (mocked)."""
     # Mock engine manager to simulate missing engine and return False
-    with patch("shared.python.engine_manager.EngineManager") as MockManager:
+    with patch("src.shared.python.engine_manager.EngineManager") as MockManager:
         instance = MockManager.return_value
         instance.switch_engine.return_value = False
 
@@ -55,7 +55,7 @@ def test_example_02_runs() -> None:
     # Actually it writes to project_root/output by default.
     # We should mock OutputManager to prevent clutter or use temp dir.
 
-    with patch("shared.python.output_manager.OutputManager") as MockOutput:
+    with patch("src.shared.python.output_manager.OutputManager") as MockOutput:
         mod = load_module("ex02", example02_path)
         mod.main()
 

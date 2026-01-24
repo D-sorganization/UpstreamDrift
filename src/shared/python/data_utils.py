@@ -55,7 +55,7 @@ def load_csv_data(
     path_obj = validate_file_exists(path, "CSV file")
     logger.debug(f"Loading CSV data from {path}")
 
-    data = pd.read_csv(path_obj, **kwargs)
+    data: pd.DataFrame = pd.read_csv(path_obj, **kwargs)
     logger.info(f"Loaded {len(data)} rows from {path}")
 
     return data
@@ -109,7 +109,7 @@ def load_json_data(
     logger.debug(f"Loading JSON data from {path}")
 
     with path_obj.open("r", encoding="utf-8") as f:
-        data = json.load(f)
+        data: dict[str, Any] | list[Any] = json.load(f)
 
     logger.info(f"Loaded JSON data from {path}")
     return data
@@ -165,13 +165,13 @@ def load_numpy_data(
     logger.debug(f"Loading numpy data from {path}")
 
     if path_obj.suffix == ".npz":
-        data = np.load(path_obj)
+        data: np.ndarray = np.load(path_obj)  # type: ignore[assignment]
         logger.info(f"Loaded npz archive from {path}")
     else:
         data = np.load(path_obj)
         logger.info(f"Loaded numpy array from {path} with shape {data.shape}")
 
-    return data
+    return data  # type: ignore[return-value]
 
 
 @log_errors("Failed to save numpy data", reraise=False)
@@ -264,6 +264,7 @@ class DataLoader:
 
         logger.info(f"Loading data from {self.path} (format: {self._format})")
 
+        data: Any
         if self._format == "csv":
             data = load_csv_data(self.path, **kwargs)
         elif self._format == "json":
@@ -395,9 +396,13 @@ def resample_data(
         # Interpolate
         resampled_data = {}
         for col in data.columns:
-            resampled_data[col] = np.interp(new_time, time, data[col].values)
+            resampled_data[col] = np.interp(
+                new_time, time, data[col].values  # type: ignore[arg-type]
+            )
 
         return pd.DataFrame(resampled_data, index=new_time)
     else:
         # Use pandas resample for datetime index
-        return data.resample(f"{1000 / target_rate:.0f}ms").interpolate(method=method)
+        return data.resample(f"{1000 / target_rate:.0f}ms").interpolate(
+            method=method  # type: ignore[arg-type]
+        )

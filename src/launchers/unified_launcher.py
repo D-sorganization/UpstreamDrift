@@ -70,7 +70,7 @@ class UnifiedLauncher:
 
         Shows available engines, their status, and configuration.
         """
-        from shared.python.engine_manager import EngineManager
+        from src.shared.python.engine_manager import EngineManager
 
         manager = EngineManager()
 
@@ -84,7 +84,7 @@ class UnifiedLauncher:
             pass
 
         # Show suite root
-        from shared.python import SUITE_ROOT
+        from src.shared.python import SUITE_ROOT
 
         # Show launcher paths
 
@@ -122,7 +122,7 @@ class UnifiedLauncher:
 
         # Try shared package (development mode)
         try:
-            from shared.python import __version__
+            from src.shared.python import __version__
 
             version_str: str = __version__  # type: ignore[assignment]
             return version_str

@@ -132,15 +132,19 @@ class TestLauncherUtilities:
     def test_path_resolution(self):
         """Test path resolution utilities."""
         # Test that we can resolve paths correctly
-        current_file = Path(__file__)
-        project_root = current_file.parent.parent.parent
+        project_root = get_repo_root()
 
-        # Should be able to find key directories
-        expected_dirs = ["engines", "shared", "launchers", "output"]
+        # Should be able to find key directories (launchers is inside src/)
+        expected_dirs = ["engines", "shared", "output"]
+        expected_src_dirs = ["launchers"]
 
         for dir_name in expected_dirs:
             dir_path = project_root / dir_name
             assert dir_path.exists(), f"Directory {dir_name} should exist"
+
+        for dir_name in expected_src_dirs:
+            dir_path = project_root / "src" / dir_name
+            assert dir_path.exists(), f"Directory src/{dir_name} should exist"
 
     def test_engine_path_construction(self):
         """Test construction of engine paths."""
@@ -199,7 +203,7 @@ class TestLauncherIntegration:
 
         # Test that launcher files exist
         main_launcher = project_root / "launch_golf_suite.py"
-        suite_launcher = project_root / "launchers" / "golf_suite_launcher.py"
+        suite_launcher = project_root / "src" / "launchers" / "golf_suite_launcher.py"
 
         assert main_launcher.exists()
         assert suite_launcher.exists()

@@ -67,7 +67,7 @@ class TestSwingComparison(unittest.TestCase):
             self.assertAlmostEqual(metric.difference, 0.3)
             self.assertAlmostEqual(metric.percent_diff, 10.0)
 
-    @patch("shared.python.signal_processing.compute_dtw_path")
+    @patch("src.shared.python.signal_processing.compute_dtw_path")
     def test_compute_kinematic_similarity(self, mock_dtw):
         """Test kinematic similarity with mocked DTW."""
         # Mock DTW result (dist, path)

@@ -197,8 +197,8 @@ class TestGridLayout(unittest.TestCase):
 
         self.assertEqual(GRID_COLUMNS, 4, "Grid should be 3x4 layout")
 
-    @patch("launchers.golf_launcher.ModelRegistry")
-    @patch("launchers.golf_launcher.EngineManager")
+    @patch("src.launchers.golf_launcher.ModelRegistry")
+    @patch("src.launchers.golf_launcher.EngineManager")
     def test_model_order_with_urdf_generator_and_c3d_viewer(
         self, mock_engine_manager: Mock, mock_registry_class: Mock
     ) -> None:
@@ -248,10 +248,10 @@ class TestGridLayout(unittest.TestCase):
             self.assertEqual(launcher.model_order[-2], "urdf_generator")
             self.assertEqual(launcher.model_order[-1], "c3d_viewer")
 
-    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
-    @patch("launchers.golf_launcher.ContextHelpDock")
-    @patch("launchers.golf_launcher.ModelRegistry")
-    @patch("launchers.golf_launcher.EngineManager")
+    @patch("src.launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
+    @patch("src.launchers.golf_launcher.ContextHelpDock")
+    @patch("src.launchers.golf_launcher.ModelRegistry")
+    @patch("src.launchers.golf_launcher.EngineManager")
     def test_model_swap_preserves_special_tiles(
         self,
         mock_engine_manager: Mock,
@@ -347,12 +347,14 @@ class TestC3DViewerIntegration(unittest.TestCase):
 
         # Mock the C3D viewer script path and subprocess
         with (
-            patch("shared.python.constants.C3D_VIEWER_SCRIPT") as mock_script_path,
-            patch("launchers.golf_launcher.os.name", "nt"),
-            patch("launchers.golf_launcher.logger") as mock_logger,
-            patch("launchers.golf_launcher.QMessageBox"),
-            patch("launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
-            patch("shared.python.secure_subprocess.secure_popen") as mock_secure_popen,
+            patch("src.shared.python.constants.C3D_VIEWER_SCRIPT") as mock_script_path,
+            patch("src.launchers.golf_launcher.os.name", "nt"),
+            patch("src.launchers.golf_launcher.logger") as mock_logger,
+            patch("src.launchers.golf_launcher.QMessageBox"),
+            patch("src.launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
+            patch(
+                "src.shared.python.secure_subprocess.secure_popen"
+            ) as mock_secure_popen,
         ):
             # Setup script path mock
             mock_script_path.exists.return_value = True
@@ -391,7 +393,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
         # Mock missing file
         with (
             patch("pathlib.Path.exists", return_value=False),
-            patch("launchers.golf_launcher.QMessageBox") as mock_msgbox,
+            patch("src.launchers.golf_launcher.QMessageBox") as mock_msgbox,
         ):
             launcher._launch_c3d_viewer()
 
@@ -475,12 +477,16 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
 
         # Mock the URDF generator script path and subprocess
         with (
-            patch("shared.python.constants.URDF_GENERATOR_SCRIPT") as mock_script_path,
-            patch("launchers.golf_launcher.os.name", "nt"),
-            patch("launchers.golf_launcher.logger") as mock_logger,
-            patch("launchers.golf_launcher.QMessageBox"),
-            patch("launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
-            patch("shared.python.secure_subprocess.secure_popen") as mock_secure_popen,
+            patch(
+                "src.shared.python.constants.URDF_GENERATOR_SCRIPT"
+            ) as mock_script_path,
+            patch("src.launchers.golf_launcher.os.name", "nt"),
+            patch("src.launchers.golf_launcher.logger") as mock_logger,
+            patch("src.launchers.golf_launcher.QMessageBox"),
+            patch("src.launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
+            patch(
+                "src.shared.python.secure_subprocess.secure_popen"
+            ) as mock_secure_popen,
         ):
             # Setup script path mock
             mock_script_path.exists.return_value = True
@@ -519,7 +525,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
         # Mock missing file
         with (
             patch("pathlib.Path.exists", return_value=False),
-            patch("launchers.golf_launcher.QMessageBox") as mock_msgbox,
+            patch("src.launchers.golf_launcher.QMessageBox") as mock_msgbox,
         ):
             launcher._launch_urdf_generator()
 

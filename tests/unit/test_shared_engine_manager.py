@@ -1,5 +1,6 @@
 """Unit tests for shared engine manager."""
 
+import sys
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -20,30 +21,30 @@ class TestEngineManager(unittest.TestCase):
         self.mock_root = Path("/mock/root")
 
         # Patch engine probes individually
-        self.mujoco_patcher = patch("shared.python.engine_probes.MuJoCoProbe")
+        self.mujoco_patcher = patch("src.shared.python.engine_probes.MuJoCoProbe")
         self.mock_mujoco_probe_cls = self.mujoco_patcher.start()
         self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = (
             True
         )
 
-        self.drake_patcher = patch("shared.python.engine_probes.DrakeProbe")
+        self.drake_patcher = patch("src.shared.python.engine_probes.DrakeProbe")
         self.mock_drake_probe_cls = self.drake_patcher.start()
         self.mock_drake_probe_cls.return_value.probe.return_value.is_available.return_value = (
             True
         )
 
-        self.pinocchio_patcher = patch("shared.python.engine_probes.PinocchioProbe")
+        self.pinocchio_patcher = patch("src.shared.python.engine_probes.PinocchioProbe")
         self.mock_pinocchio_probe_cls = self.pinocchio_patcher.start()
 
-        self.pendulum_patcher = patch("shared.python.engine_probes.PendulumProbe")
+        self.pendulum_patcher = patch("src.shared.python.engine_probes.PendulumProbe")
         self.mock_pendulum_probe_cls = self.pendulum_patcher.start()
 
-        self.matlab_patcher = patch("shared.python.engine_probes.MatlabProbe")
+        self.matlab_patcher = patch("src.shared.python.engine_probes.MatlabProbe")
         self.mock_matlab_probe_cls = self.matlab_patcher.start()
 
         # Patch setup_logging
         self.logging_patcher = patch(
-            "shared.python.common_utils.setup_structured_logging"
+            "src.shared.python.common_utils.setup_structured_logging"
         )
         self.logging_patcher.start()
 
@@ -132,21 +133,39 @@ class TestEngineManager(unittest.TestCase):
         mock_mujoco_pkg.__version__ = "3.2.3"
         mock_mujoco_pkg.MjModel.from_xml_path.return_value = MagicMock()
 
-        with patch.dict("sys.modules", {"mujoco": mock_mujoco_pkg}):
-            with patch(
-                "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
+        # Create mock physics engine class
+        mock_engine_cls = MagicMock()
+        mock_engine_instance = MagicMock()
+        mock_engine_cls.return_value = mock_engine_instance
+
+        # Mock the physics_engine module
+        mock_physics_engine_mod = MagicMock()
+        mock_physics_engine_mod.MuJoCoPhysicsEngine = mock_engine_cls
+
+        # Add the full module hierarchy to sys.modules
+        with patch.dict(
+            sys.modules,
+            {
+                "mujoco": mock_mujoco_pkg,
+                "engines": MagicMock(),
+                "engines.physics_engines": MagicMock(),
+                "engines.physics_engines.mujoco": MagicMock(),
+                "engines.physics_engines.mujoco.python": MagicMock(),
+                "engines.physics_engines.mujoco.python.mujoco_humanoid_golf": MagicMock(),
+                "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine": mock_physics_engine_mod,
+            },
+        ):
+            with (
+                patch("pathlib.Path.exists", return_value=True),
+                patch("pathlib.Path.glob", return_value=[Path("model.xml")]),
             ):
-                with (
-                    patch("pathlib.Path.exists", return_value=True),
-                    patch("pathlib.Path.glob", return_value=[Path("model.xml")]),
-                ):
-                    # Use the actual method that exists in EngineManager
-                    manager._load_engine(EngineType.MUJOCO)
-                    # Check that the engine was loaded successfully
-                    self.assertEqual(
-                        manager.engine_status[EngineType.MUJOCO], EngineStatus.LOADED
-                    )
-                    self.assertIsNotNone(manager.active_physics_engine)
+                # Use the actual method that exists in EngineManager
+                manager._load_engine(EngineType.MUJOCO)
+                # Check that the engine was loaded successfully
+                self.assertEqual(
+                    manager.engine_status[EngineType.MUJOCO], EngineStatus.LOADED
+                )
+                self.assertIsNotNone(manager.active_physics_engine)
 
     def test_get_engine_info(self):
         """Test information retrieval."""

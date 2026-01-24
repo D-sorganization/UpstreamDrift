@@ -53,7 +53,7 @@ class TestSignalProcessing:
 
     def test_compute_psd_mock(self):
         """Test PSD computation using mock to verify call arguments."""
-        with patch("shared.python.signal_processing.welch") as mock_welch:
+        with patch("src.shared.python.signal_processing.welch") as mock_welch:
             rng = np.random.default_rng(42)
             mock_welch.return_value = (np.arange(129), rng.random(129))
             freqs, psd = compute_psd(self.signal, self.fs, nperseg=256)
@@ -74,7 +74,7 @@ class TestSignalProcessing:
     def test_compute_spectrogram_mock(self):
         """Test Spectrogram computation using mock."""
         data = np.sin(2 * np.pi * 20 * self.t + 2 * np.pi * 40 * self.t**2)
-        with patch("shared.python.signal_processing.spectrogram") as mock_spec:
+        with patch("src.shared.python.signal_processing.spectrogram") as mock_spec:
             rng = np.random.default_rng(42)
             mock_spec.return_value = (
                 np.arange(10),

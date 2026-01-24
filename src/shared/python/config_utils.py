@@ -60,7 +60,7 @@ def load_json_config(
         return {}
 
     with open(path_obj, encoding="utf-8") as f:
-        config = json.load(f)
+        config: dict[str, Any] = json.load(f)
 
     logger.debug(f"Loaded configuration from {path}")
     return config

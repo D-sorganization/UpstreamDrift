@@ -257,15 +257,15 @@ class TestGolfLauncherLogic:
 
         # Remove from sys.modules to force a fresh import that picks up the mocks
         # This avoids potential ImportErrors with reload() if the module wasn't previously loaded
-        sys.modules.pop("launchers.golf_launcher", None)
+        sys.modules.pop("src.launchers.golf_launcher", None)
 
-        import launchers.golf_launcher  # noqa: F401
+        import src.launchers.golf_launcher  # noqa: F401
 
         yield
         # patch.dict handles sys.modules restoration automatically
 
-    @patch("shared.python.model_registry.ModelRegistry")
-    @patch("launchers.golf_launcher.DockerCheckThread")
+    @patch("src.shared.python.model_registry.ModelRegistry")
+    @patch("src.launchers.golf_launcher.DockerCheckThread")
     def test_initialization(self, mock_thread, mock_registry):
         """Test proper initialization of the launcher."""
         from src.launchers.golf_launcher import GolfLauncher
@@ -289,8 +289,8 @@ class TestGolfLauncherLogic:
         assert hasattr(launcher, "grid_layout")
         assert hasattr(launcher, "btn_launch")
 
-    @patch("shared.python.model_registry.ModelRegistry")
-    @patch("launchers.golf_launcher.DockerCheckThread")
+    @patch("src.shared.python.model_registry.ModelRegistry")
+    @patch("src.launchers.golf_launcher.DockerCheckThread")
     def test_model_selection_updates_ui(self, mock_thread, mock_registry):
         """Test that selecting a model updates the launch button."""
         from src.launchers.golf_launcher import GolfLauncher
@@ -331,8 +331,8 @@ class TestGolfLauncherLogic:
         # The button text should contain the NAME, upper case
         assert "TEST MODEL" in launcher.btn_launch.text()
 
-    @patch("shared.python.model_registry.ModelRegistry")
-    @patch("launchers.golf_launcher.DockerCheckThread")
+    @patch("src.shared.python.model_registry.ModelRegistry")
+    @patch("src.launchers.golf_launcher.DockerCheckThread")
     def test_launch_simulation_constructs_command(self, mock_thread, mock_registry):
         """Test launch simulation logic."""
         from src.launchers.golf_launcher import GolfLauncher
@@ -354,7 +354,7 @@ class TestGolfLauncherLogic:
         launcher.select_model("test_model")
 
         # Mock subprocess
-        with patch("launchers.golf_launcher.subprocess.Popen") as mock_popen:
+        with patch("src.launchers.golf_launcher.subprocess.Popen") as mock_popen:
             with patch.object(Path, "exists", return_value=True):
                 with patch("os.name", "posix"):
                     # We need to verify _launch_docker_container is called essentially
@@ -376,8 +376,8 @@ class TestGolfLauncherLogic:
                     idx = args.index("-w")
                     assert args[idx + 1] == "/workspace"
 
-    @patch("shared.python.model_registry.ModelRegistry")
-    @patch("launchers.golf_launcher.DockerCheckThread")
+    @patch("src.shared.python.model_registry.ModelRegistry")
+    @patch("src.launchers.golf_launcher.DockerCheckThread")
     def test_launch_generic_mjcf(self, mock_thread, mock_registry):
         """Test launching a generic MJCF file."""
         from src.launchers.golf_launcher import GolfLauncher
@@ -398,7 +398,7 @@ class TestGolfLauncherLogic:
         launcher.docker_available = True
         launcher.select_model("generic_mjcf")
 
-        with patch("launchers.golf_launcher.subprocess.Popen") as mock_popen:
+        with patch("src.launchers.golf_launcher.subprocess.Popen") as mock_popen:
             with patch.object(Path, "exists", return_value=True):
                 launcher.launch_simulation()
 

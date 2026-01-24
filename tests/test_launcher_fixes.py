@@ -88,7 +88,7 @@ class TestEngineManager(unittest.TestCase):
             self.assertIsInstance(path, Path)
             # Note: Not all engines may be installed, so we don't require existence
 
-    @patch("shared.python.engine_manager.EngineManager.get_probe_result")
+    @patch("src.shared.python.engine_manager.EngineManager.get_probe_result")
     def test_probe_system(self, mock_get_result: MagicMock) -> None:
         """Test engine probe system."""
         from src.shared.python.engine_manager import EngineType
@@ -265,11 +265,11 @@ class TestGolfLauncherGrid(unittest.TestCase):
 
         self.mock_registry.get_model.side_effect = mock_get_model
 
-    @patch("launchers.golf_launcher.GolfLauncher._load_layout")
-    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
-    @patch("launchers.golf_launcher.ContextHelpDock")
-    @patch("launchers.golf_launcher._lazy_load_model_registry")
-    @patch("launchers.golf_launcher._lazy_load_engine_manager")
+    @patch("src.launchers.golf_launcher.GolfLauncher._load_layout")
+    @patch("src.launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
+    @patch("src.launchers.golf_launcher.ContextHelpDock")
+    @patch("src.launchers.golf_launcher._lazy_load_model_registry")
+    @patch("src.launchers.golf_launcher._lazy_load_engine_manager")
     def test_model_order_tracking(
         self,
         mock_lazy_load: Mock,
@@ -300,10 +300,10 @@ class TestGolfLauncherGrid(unittest.TestCase):
         )  # 4 mock models + 5 special models = 9
         self.assertEqual(len(launcher.model_order), expected_count)
 
-    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
-    @patch("launchers.golf_launcher.ContextHelpDock")
-    @patch("launchers.golf_launcher._lazy_load_model_registry")
-    @patch("launchers.golf_launcher._lazy_load_engine_manager")
+    @patch("src.launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
+    @patch("src.launchers.golf_launcher.ContextHelpDock")
+    @patch("src.launchers.golf_launcher._lazy_load_model_registry")
+    @patch("src.launchers.golf_launcher._lazy_load_engine_manager")
     def test_model_swap_functionality(
         self,
         mock_lazy_load: Mock,
@@ -389,9 +389,9 @@ class TestDockerConfiguration(unittest.TestCase):
         with (
             patch("subprocess.Popen") as mock_popen,
             patch("os.name", "nt"),
-            patch("launchers.golf_launcher.logger"),
-            patch("launchers.golf_launcher.Path", MagicMock()),
-            patch("launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
+            patch("src.launchers.golf_launcher.logger"),
+            patch("src.launchers.golf_launcher.Path", MagicMock()),
+            patch("src.launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
             mock_repos_root.__str__.return_value = "/mock/repo/root"  # type: ignore[attr-defined]
             launcher._launch_docker_container(mock_model, mock_path)
@@ -455,7 +455,7 @@ class TestLauncherIntegration(unittest.TestCase):
         self.assertIn("def launch_drake", content)
         self.assertIn("def launch_pinocchio", content)
 
-    @patch("launchers.golf_launcher.GolfLauncher")
+    @patch("src.launchers.golf_launcher.GolfLauncher")
     def test_unified_launcher_import(self, mock_golf_launcher: Mock) -> None:
         """Test that unified launcher can be imported."""
         try:

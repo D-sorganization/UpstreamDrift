@@ -113,21 +113,21 @@ def mocked_launcher_module():
     with patch.dict(sys.modules, mock_modules):
         # Remove launchers.golf_launcher from sys.modules if it exists
         # to ensure it gets re-imported using our mocks
-        if "launchers.golf_launcher" in sys.modules:
-            del sys.modules["launchers.golf_launcher"]
+        if "src.launchers.golf_launcher" in sys.modules:
+            del sys.modules["src.launchers.golf_launcher"]
 
         # Import the module
-        import launchers.golf_launcher
+        import src.launchers.golf_launcher
 
         # reload() is unnecessary and dangerous for C-extensions because we already
         # deleted the module from sys.modules above, forcing a fresh import.
 
-        yield launchers.golf_launcher
+        yield src.launchers.golf_launcher
 
         # Cleanup: Remove the module from sys.modules so subsequent tests
         # import the clean/real version
-        if "launchers.golf_launcher" in sys.modules:
-            del sys.modules["launchers.golf_launcher"]
+        if "src.launchers.golf_launcher" in sys.modules:
+            del sys.modules["src.launchers.golf_launcher"]
 
 
 class TestDockerThreads:

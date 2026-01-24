@@ -228,16 +228,15 @@ models:
         # Patch AIAssistantPanel BEFORE importing golf_launcher
         # The import happens at module level, so we need the patch in place first
         ai_panel_patcher = patch(
-            "shared.python.ai.gui.AIAssistantPanel",
+            "src.shared.python.ai.gui.AIAssistantPanel",
             return_value=mock_ai_panel,
         )
         ai_panel_patcher.start()
 
         try:
             with (
-                patch("shared.python.model_registry.ModelRegistry") as MockRegistry,
+                patch("src.shared.python.model_registry.ModelRegistry") as MockRegistry,
                 patch("src.launchers.golf_launcher.ASSETS_DIR", new=temp_path),
-                patch("launchers.golf_launcher.ASSETS_DIR", new=temp_path),
             ):
                 MockRegistry.return_value = temp_registry
 
@@ -305,8 +304,8 @@ def test_launcher_handles_missing_file_on_launch(launcher_env):
     # Attempt launch while mocking subprocess to avoid any real execution.
     # GolfLauncher is expected to check the path exists before invoking subprocess.
     with (
-        patch("launchers.golf_launcher.subprocess.Popen") as mock_popen,
-        patch("launchers.golf_launcher.QMessageBox.critical") as mock_msg,
+        patch("src.launchers.golf_launcher.subprocess.Popen") as mock_popen,
+        patch("src.launchers.golf_launcher.QMessageBox.critical") as mock_msg,
     ):
         launcher.launch_simulation()
 

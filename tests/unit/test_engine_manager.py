@@ -199,8 +199,8 @@ class TestEngineManager:
         result = manager.validate_engine_configuration(EngineType.MUJOCO)
         assert result is False
 
-    @patch("shared.python.engine_manager.logger")
-    @patch("shared.python.engine_manager.get_registry")
+    @patch("src.shared.python.engine_manager.logger")
+    @patch("src.shared.python.engine_manager.get_registry")
     def test_engine_loading_error_handling(self, mock_get_registry, mock_logger):
         """Test error handling during engine loading."""
         with tempfile.TemporaryDirectory() as temp_dir:

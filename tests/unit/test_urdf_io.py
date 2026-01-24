@@ -5,9 +5,15 @@ Unit tests for URDF I/O module.
 import xml.etree.ElementTree as ET
 from unittest.mock import MagicMock, patch
 
-import mujoco
 import numpy as np
 import pytest
+
+from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+
+if not MUJOCO_AVAILABLE:
+    pytest.skip("MuJoCo not installed", allow_module_level=True)
+
+import mujoco
 
 from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
     URDFImporter,

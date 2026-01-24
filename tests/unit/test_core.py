@@ -29,8 +29,9 @@ class TestExceptions:
 
     def test_engine_not_found_error(self) -> None:
         """Test EngineNotFoundError inherits from GolfModelingError."""
-        error = EngineNotFoundError("Drake not found")
-        assert str(error) == "Drake not found"
+        error = EngineNotFoundError("Drake")
+        # New error format wraps the engine name
+        assert "Drake" in str(error)
         assert isinstance(error, GolfModelingError)
         assert isinstance(error, Exception)
 
@@ -97,7 +98,7 @@ class TestStructuredLogging:
     def setup_method(self) -> None:
         """Reset structured logging configuration before each test."""
         # Reset the global configuration flag
-        import shared.python.core as core_module
+        import src.shared.python.core as core_module
 
         core_module._structured_logging_configured = False
 

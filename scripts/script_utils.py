@@ -19,9 +19,21 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
+# Add project root to path first (script is in scripts/ directory)
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_PROJECT_ROOT = _SCRIPT_DIR.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+if str(_PROJECT_ROOT / "src") not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT / "src"))
+
 # Import centralized utilities
-from src.shared.python.logging_config import LogLevel, get_logger, setup_logging
-from src.shared.python.path_utils import get_repo_root
+from src.shared.python.logging_config import (  # noqa: E402
+    LogLevel,
+    get_logger,
+    setup_logging,
+)
+from src.shared.python.path_utils import get_repo_root  # noqa: E402
 
 
 def setup_script_logging(

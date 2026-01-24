@@ -124,17 +124,17 @@ def mocked_launcher_module():
         "PyQt6.QtCore": mock_qt_core,
         "PyQt6.QtGui": mock_qt_gui,
         "PyQt6.QtWidgets": mock_qt_widgets,
-        "shared.python.engine_manager": MagicMock(),
-        "shared.python.model_registry": MagicMock(),
-        "shared.python.secure_subprocess": MagicMock(),
+        "src.shared.python.engine_manager": MagicMock(),
+        "src.shared.python.model_registry": MagicMock(),
+        "src.shared.python.secure_subprocess": MagicMock(),
     }
 
     with patch.dict(sys.modules, mock_modules):
-        if "launchers.golf_launcher" in sys.modules:
-            del sys.modules["launchers.golf_launcher"]
-        import launchers.golf_launcher
+        if "src.launchers.golf_launcher" in sys.modules:
+            del sys.modules["src.launchers.golf_launcher"]
+        import src.launchers.golf_launcher
 
-        yield launchers.golf_launcher
+        yield src.launchers.golf_launcher
 
 
 def test_status_info_contrast(mocked_launcher_module):
@@ -188,8 +188,8 @@ def test_status_info_contrast(mocked_launcher_module):
 def test_escape_shortcut_logic(mocked_launcher_module):
     """Test that GolfLauncher sets up the Escape shortcut."""
     with (
-        patch("launchers.golf_launcher.QShortcut") as MockShortcut,
-        patch("launchers.golf_launcher.QKeySequence") as MockKeySequence,
+        patch("src.launchers.golf_launcher.QShortcut") as MockShortcut,
+        patch("src.launchers.golf_launcher.QKeySequence") as MockKeySequence,
     ):
         # Setup QKeySequence to return identifiable mocks
         def key_seq_side_effect(arg):

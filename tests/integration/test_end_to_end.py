@@ -73,7 +73,7 @@ class TestLauncherIntegration:
         from src.launchers.unified_launcher import UnifiedLauncher
 
         # Patch GolfLauncher to avoid instantiation issues (StopIteration from side_effects)
-        with patch("launchers.golf_launcher.GolfLauncher") as _:
+        with patch("src.launchers.golf_launcher.GolfLauncher") as _:
             launcher = UnifiedLauncher()
 
             # Should not raise exception

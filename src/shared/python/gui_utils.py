@@ -22,7 +22,7 @@ Usage:
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtGui import QIcon
@@ -59,9 +59,11 @@ def get_qapp(args: list[str] | None = None) -> QApplication:
         window.show()
         app.exec()
     """
-    app = get_qapp()
-    logger.debug("Created new QApplication instance")
-    return app
+    app = QApplication.instance()
+    if app is None:
+        app = QApplication(args if args else [])
+        logger.debug("Created new QApplication instance")
+    return cast(QApplication, app)
 
 
 def get_default_icon() -> QIcon | None:
@@ -159,7 +161,9 @@ class BaseApplicationWindow(QMainWindow):
                 self.setWindowIcon(icon)
 
         # Create status bar
-        self.statusBar().showMessage("Ready")
+        status_bar = self.statusBar()
+        if status_bar:
+            status_bar.showMessage("Ready")
 
         logger.debug(f"Initialized {self.__class__.__name__}: {title}")
 
@@ -170,7 +174,9 @@ class BaseApplicationWindow(QMainWindow):
             message: Message to display
             timeout: Timeout in milliseconds (0 = no timeout)
         """
-        self.statusBar().showMessage(message, timeout)
+        status_bar = self.statusBar()
+        if status_bar:
+            status_bar.showMessage(message, timeout)
 
     def show_error(self, title: str, message: str) -> None:
         """Show error dialog.

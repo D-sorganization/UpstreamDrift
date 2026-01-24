@@ -8,11 +8,18 @@ runs validation tests, and generates a detailed compliance report.
 # Python 3.10 compatibility: UTC was added in 3.11
 import sys
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 import pytest
 
-from src.shared.python.path_utils import get_src_root
+# Add project root to path first (script is in scripts/ directory)
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_PROJECT_ROOT = _SCRIPT_DIR.parent
+sys.path.insert(0, str(_PROJECT_ROOT))
+sys.path.insert(0, str(_PROJECT_ROOT / "src"))
+
+from src.shared.python.path_utils import get_src_root  # noqa: E402
 
 # Add root to path
 ROOT_DIR = get_src_root()

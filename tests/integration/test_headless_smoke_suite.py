@@ -83,7 +83,9 @@ class TestHeadlessSuite:
             # Since open_c3d_file does local import of validate_path, we might need to rely on
             # the fact that it resolves the path.
 
-            with patch("shared.python.security_utils.validate_path") as mock_validate:
+            with patch(
+                "src.shared.python.security_utils.validate_path"
+            ) as mock_validate:
                 # Mock validate to return the input path as absolute
                 abs_path = os.path.abspath("test_capture.c3d")
                 mock_validate.return_value = abs_path

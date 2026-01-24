@@ -46,11 +46,11 @@ class TestGolfLauncherUX(unittest.TestCase):
 
         self.mock_registry.get_model.side_effect = mock_get_model
 
-    @patch("launchers.golf_launcher.GolfLauncher._load_layout")
-    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
-    @patch("launchers.golf_launcher.ContextHelpDock")
-    @patch("launchers.golf_launcher._lazy_load_model_registry")
-    @patch("launchers.golf_launcher._lazy_load_engine_manager")
+    @patch("src.launchers.golf_launcher.GolfLauncher._load_layout")
+    @patch("src.launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
+    @patch("src.launchers.golf_launcher.ContextHelpDock")
+    @patch("src.launchers.golf_launcher._lazy_load_model_registry")
+    @patch("src.launchers.golf_launcher._lazy_load_engine_manager")
     def test_empty_state_ux(
         self,
         mock_lazy_load_engine_manager,

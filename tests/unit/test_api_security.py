@@ -20,6 +20,17 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+# Check if sqlalchemy is available
+try:
+    import sqlalchemy  # noqa: F401
+
+    SQLALCHEMY_AVAILABLE = True
+except ImportError:
+    SQLALCHEMY_AVAILABLE = False
+
+if not SQLALCHEMY_AVAILABLE:
+    pytest.skip("SQLAlchemy not installed", allow_module_level=True)
+
 # Check if bcrypt is available and working
 # bcrypt can fail to load on some CI environments due to missing native libraries
 try:

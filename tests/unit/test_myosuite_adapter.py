@@ -44,7 +44,7 @@ class TestMuscleDrivenEnv:
         assert len(obs) == 2 + 2  # q, v, + 2 muscles
         assert env.step_count == 0
 
-    @patch("shared.python.activation_dynamics.ActivationDynamics")
+    @patch("src.shared.python.activation_dynamics.ActivationDynamics")
     def test_step(self, mock_dynamics_cls, mock_muscle_system):
         """Test environment step."""
         # Mock ActivationDynamics
@@ -108,14 +108,14 @@ class TestMuscleDrivenEnv:
 class TestTrainMusclePolicy:
     """Tests for train_muscle_policy function."""
 
-    @patch("shared.python.myosuite_adapter.MYOSUITE_AVAILABLE", False)
+    @patch("src.shared.python.myosuite_adapter.MYOSUITE_AVAILABLE", False)
     def test_train_policy_unavailable(self, mock_muscle_system):
         """Test training when MyoSuite is not available."""
         env = MuscleDrivenEnv(mock_muscle_system)
         model = train_muscle_policy(env)
         assert model is None
 
-    @patch("shared.python.myosuite_adapter.MYOSUITE_AVAILABLE", True)
+    @patch("src.shared.python.myosuite_adapter.MYOSUITE_AVAILABLE", True)
     def test_train_policy_available(self, mock_muscle_system):
         """Test training when MyoSuite is available."""
         # We need to mock stable_baselines3 import

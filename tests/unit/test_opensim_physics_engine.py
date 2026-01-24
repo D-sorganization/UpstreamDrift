@@ -44,18 +44,29 @@ def test_load_from_path(engine):
         mock_model = MagicMock()
         mock_model.getName.return_value = "TestModel"
 
-        # Patch the opensim module in the engine module
-        with patch(
-            "engines.physics_engines.opensim.python.opensim_physics_engine.opensim",
-            mock_opensim,
+        # Need to add the engines module hierarchy to sys.modules for patching to work
+        with patch.dict(
+            sys.modules,
+            {
+                "engines": MagicMock(),
+                "engines.physics_engines": MagicMock(),
+                "engines.physics_engines.opensim": MagicMock(),
+                "engines.physics_engines.opensim.python": MagicMock(),
+                "engines.physics_engines.opensim.python.opensim_physics_engine": MagicMock(),
+            },
         ):
-            mock_opensim.Model.return_value = mock_model
+            # Patch the opensim module in the engine module
+            with patch(
+                "engines.physics_engines.opensim.python.opensim_physics_engine.opensim",
+                mock_opensim,
+            ):
+                mock_opensim.Model.return_value = mock_model
 
-            engine.load_from_path(path)
+                engine.load_from_path(path)
 
-            mock_opensim.Model.assert_called_with(path)
-            mock_model.initSystem.assert_called_once()
-            assert engine.model_name == "TestModel"
+                mock_opensim.Model.assert_called_with(path)
+                mock_model.initSystem.assert_called_once()
+                assert engine.model_name == "TestModel"
 
 
 @patch("tempfile.NamedTemporaryFile")
