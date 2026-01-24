@@ -10,7 +10,6 @@ Features:
 from __future__ import annotations
 
 import json
-import logging
 import os
 import subprocess
 import sys
@@ -19,6 +18,8 @@ import time
 import webbrowser
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, cast
+
+from src.shared.python.logging_config import configure_gui_logging, get_logger
 
 if TYPE_CHECKING:
     from shared.python.engine_manager import EngineType
@@ -144,11 +145,9 @@ else:
     CREATE_NO_WINDOW = 0
     CREATE_NEW_CONSOLE = 0
 
-# Configure Logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
-)
-logger = logging.getLogger(__name__)
+# Configure Logging using centralized module
+configure_gui_logging()
+logger = get_logger(__name__)
 
 # Constants
 REPOS_ROOT = Path(__file__).parent.parent.resolve()

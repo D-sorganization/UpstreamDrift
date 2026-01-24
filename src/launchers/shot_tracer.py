@@ -12,16 +12,10 @@ This serves as both a validation tool for comparing models and a
 visualization utility for shot analysis.
 """
 
-import logging
 import sys
-from pathlib import Path
 from typing import Any
 
 import numpy as np
-
-# Add shared directory to path
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
-
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
@@ -44,6 +38,12 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.logging_config import configure_gui_logging, get_logger
+from src.shared.python.path_utils import setup_import_paths
+
+# Setup import paths for flight_models import
+setup_import_paths()
+
 try:
     import pyqtgraph as pg
     import pyqtgraph.opengl as gl
@@ -54,7 +54,7 @@ except ImportError:
     pg = None  # type: ignore[assignment]
     gl = None  # type: ignore[assignment]
 
-from flight_models import (
+from flight_models import (  # noqa: E402
     FlightModelRegistry,
     FlightModelType,
     FlightResult,
@@ -62,7 +62,7 @@ from flight_models import (
     compare_models,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Color palette for multiple trajectories
 TRAJECTORY_COLORS = [
@@ -439,7 +439,7 @@ class MultiModelShotTracerWindow(QMainWindow):
 
 def main() -> None:
     """Launch the Multi-Model Shot Tracer application."""
-    logging.basicConfig(level=logging.INFO)
+    configure_gui_logging()
 
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
