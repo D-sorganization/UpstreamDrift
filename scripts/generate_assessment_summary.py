@@ -55,24 +55,20 @@ def extract_issues_from_report(report_path: Path) -> list[dict[str, Any]]:
         with open(report_path) as f:
             content = f.read()
 
-        # Look for severity markers
-        severity_patterns = {
-            "BLOCKER": r"BLOCKER:?\s*(.+)",
-            "CRITICAL": r"CRITICAL:?\s*(.+)",
-            "MAJOR": r"MAJOR:?\s*(.+)",
-            "MINOR": r"MINOR:?\s*(.+)",
-        }
-
-        for severity, pattern in severity_patterns.items():
-            matches = re.finditer(pattern, content, re.MULTILINE)
-            for match in matches:
-                issues.append(
-                    {
-                        "severity": severity,
-                        "description": match.group(1).strip(),
-                        "source": report_path.stem,
-                    }
-                )
+        # Look for findings
+        # Simple extraction of bullets under "Findings"
+        findings_section = re.search(r"## Findings\n(.*?)\n##", content, re.DOTALL)
+        if findings_section:
+            findings_text = findings_section.group(1)
+            for line in findings_text.split("\n"):
+                if line.strip().startswith("- "):
+                    issues.append(
+                        {
+                            "severity": "MAJOR",  # Defaulting to MAJOR as script doesn't discern yet
+                            "description": line.strip()[2:],
+                            "source": report_path.stem,
+                        }
+                    )
 
     except Exception as e:
         logger.warning(f"Could not extract issues from {report_path}: {e}")
@@ -98,23 +94,34 @@ def generate_summary(
     """
     logger.info(f"Generating assessment summary from {len(input_reports)} reports...")
 
-    # Category mapping
+    # Category mapping (A-O)
     categories = {
-        "A": {"name": "Architecture & Implementation", "weight": 2.0},
-        "B": {"name": "Hygiene, Security & Quality", "weight": 2.0},
-        "C": {"name": "Documentation & Integration", "weight": 1.5},
-        "D": {"name": "User Experience", "weight": 1.5},
-        "E": {"name": "Performance & Scalability", "weight": 1.5},
-        "F": {"name": "Installation & Deployment", "weight": 1.0},
-        "G": {"name": "Testing & Validation", "weight": 2.0},
-        "H": {"name": "Error Handling", "weight": 1.0},
-        "I": {"name": "Security & Input Validation", "weight": 2.0},
-        "J": {"name": "Extensibility & Plugins", "weight": 1.0},
-        "K": {"name": "Reproducibility & Provenance", "weight": 1.0},
-        "L": {"name": "Long-Term Maintainability", "weight": 1.5},
-        "M": {"name": "Educational Resources", "weight": 1.0},
-        "N": {"name": "Visualization & Export", "weight": 1.0},
-        "O": {"name": "CI/CD & DevOps", "weight": 2.0},
+        "A": "Code Structure",
+        "B": "Documentation",
+        "C": "Test Coverage",
+        "D": "Error Handling",
+        "E": "Performance",
+        "F": "Security",
+        "G": "Dependencies",
+        "H": "CI/CD",
+        "I": "Code Style",
+        "J": "API Design",
+        "K": "Data Handling",
+        "L": "Logging",
+        "M": "Configuration",
+        "N": "Scalability",
+        "O": "Maintainability",
+    }
+
+    # Weight Groups
+    groups = {
+        "Code Quality": {"weight": 0.25, "cats": ["A", "D", "I", "O"]},
+        "Testing": {"weight": 0.15, "cats": ["C"]},
+        "Documentation": {"weight": 0.10, "cats": ["B"]},
+        "Security": {"weight": 0.15, "cats": ["F", "K"]},
+        "Performance": {"weight": 0.15, "cats": ["E", "N"]},
+        "Ops & Config": {"weight": 0.10, "cats": ["G", "H", "L", "M"]},
+        "Design": {"weight": 0.10, "cats": ["J"]},
     }
 
     # Collect scores and issues
@@ -122,8 +129,8 @@ def generate_summary(
     all_issues = []
 
     for report in input_reports:
-        # Extract assessment ID from filename (e.g., Assessment_A_Results_2026-01-17.md)
-        match = re.search(r"Assessment_([A-O])_Results", report.name)
+        # Extract assessment ID from filename (e.g., Assessment_A_Code_Structure.md)
+        match = re.search(r"Assessment_([A-O])_", report.name)
         if match:
             assessment_id = match.group(1)
             scores[assessment_id] = extract_score_from_report(report)
@@ -131,20 +138,27 @@ def generate_summary(
 
     # Calculate weighted average
     total_weighted_score = 0.0
-    total_weight = 0.0
+    total_weight_used = 0.0
 
-    for assessment_id, score in scores.items():
-        if assessment_id in categories:
-            weight = categories[assessment_id]["weight"]
-            total_weighted_score += score * weight
-            total_weight += weight
+    group_scores = {}
 
-    overall_score = total_weighted_score / total_weight if total_weight > 0 else 7.0
+    for group_name, group_info in groups.items():
+        cat_scores = []
+        for cat in group_info["cats"]:
+            if cat in scores:
+                cat_scores.append(scores[cat])
 
-    # Count critical issues
-    critical_issues = [
-        i for i in all_issues if i["severity"] in ("BLOCKER", "CRITICAL")
-    ]
+        if cat_scores:
+            avg_group_score = sum(cat_scores) / len(cat_scores)
+            group_scores[group_name] = avg_group_score
+            total_weighted_score += avg_group_score * group_info["weight"]
+            total_weight_used += group_info["weight"]
+        else:
+            group_scores[group_name] = 0.0
+
+    overall_score = (
+        total_weighted_score / total_weight_used if total_weight_used > 0 else 0.0
+    )
 
     # Generate markdown summary
     md_content = f"""# Comprehensive Assessment Summary
@@ -159,39 +173,44 @@ Repository assessment completed across all {len(scores)} categories.
 
 ### Overall Health: {overall_score:.1f}/10
 
-### Category Scores
+### Weighted Average Breakdown
 
-| Category | Name | Score | Weight |
-|----------|------|-------|--------|
+| Group | Weight | Score | Categories |
+|-------|--------|-------|------------|
+"""
+    for group_name, group_info in groups.items():
+        score = group_scores.get(group_name, 0.0)
+        cats = ", ".join(group_info["cats"])
+        md_content += f"| **{group_name}** | {group_info['weight']*100:.0f}% | {score:.1f} | {cats} |\n"
+
+    md_content += """
+### Individual Category Scores
+
+| Category | Name | Score |
+|----------|------|-------|
 """
 
-    for assessment_id in sorted(scores.keys()):
-        if assessment_id in categories:
-            cat_info = categories[assessment_id]
-            score = scores[assessment_id]
-            md_content += f"| **{assessment_id}** | {cat_info['name']} | {score:.1f} | {cat_info['weight']}x |\n"
+    for cat_code in sorted(categories.keys()):
+        name = categories[cat_code]
+        score = scores.get(cat_code, 0.0)
+        md_content += f"| **{cat_code}** | {name} | {score:.1f} |\n"
 
     md_content += f"""
-## Critical Issues
+## Findings Summary
 
-Found {len(critical_issues)} critical issues requiring immediate attention:
+Found {len(all_issues)} issues across all categories.
 
 """
-
-    for i, issue in enumerate(critical_issues[:10], 1):
-        md_content += f"{i}. **[{issue['severity']}]** {issue['description']} (Source: {issue['source']})\n"
+    # Simply list top 10 findings if available
+    for i, issue in enumerate(all_issues[:10], 1):
+        md_content += f"{i}. {issue['description']} (Source: {issue['source']})\n"
 
     md_content += """
 ## Recommendations
 
-1. Address all BLOCKER issues immediately
-2. Create action plan for CRITICAL issues
-3. Schedule remediation for MAJOR issues
-4. Monitor trends in assessment scores
-
-## Next Assessment
-
-Recommended: 30 days from today
+1. Address categories with scores below 5.0 immediately.
+2. Focus on improving Code Quality and Security as they carry high weight.
+3. Maintain documentation to ensure project longevity.
 
 ---
 
@@ -206,19 +225,21 @@ Recommended: 30 days from today
     logger.info(f"✓ Markdown summary saved to {output_md}")
 
     # Generate JSON metrics
+    # Reconstruct category_scores format expected by assess_repository.py
+    # assess_repository.py uses: category_scores[cat_code] = { "score": X, "name": Y }
+
+    category_scores_json = {}
+    for cat_code, name in categories.items():
+        category_scores_json[cat_code] = {
+            "score": scores.get(cat_code, 0.0),
+            "name": name,
+        }
+
     json_data = {
         "timestamp": datetime.now().isoformat(),
         "overall_score": round(overall_score, 2),
-        "category_scores": {
-            k: {
-                "score": v,
-                "name": categories[k]["name"],
-                "weight": categories[k]["weight"],
-            }
-            for k, v in scores.items()
-            if k in categories
-        },
-        "critical_issues": critical_issues,
+        "category_scores": category_scores_json,
+        "group_scores": group_scores,
         "total_issues": len(all_issues),
         "reports_analyzed": len(input_reports),
     }
