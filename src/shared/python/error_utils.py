@@ -272,7 +272,9 @@ def format_type_error(
     Example:
         raise TypeError(format_type_error("position", "ndarray", type(value)))
     """
-    expected = expected_type if isinstance(expected_type, str) else expected_type.__name__
+    expected = (
+        expected_type if isinstance(expected_type, str) else expected_type.__name__
+    )
     actual = actual_type if isinstance(actual_type, str) else actual_type.__name__
     return f"Invalid type for '{field}': expected {expected}, got {actual}"
 
