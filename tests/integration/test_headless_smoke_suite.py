@@ -4,6 +4,7 @@ This suite ensures that the application can initialize and perform basic operati
 without a physical display, suitable for CI/CD environments.
 """
 
+import os
 from unittest.mock import MagicMock, patch
 
 import pytest

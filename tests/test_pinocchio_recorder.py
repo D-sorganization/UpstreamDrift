@@ -9,9 +9,14 @@ from src.shared.python.engine_availability import (
 pytestmark = skip_if_unavailable("pinocchio")
 
 if PINOCCHIO_AVAILABLE:
-    from src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (
-        PinocchioRecorder,
-    )
+    try:
+        from src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (
+            PinocchioRecorder,
+        )
+    except ImportError:
+        import pytest
+
+        pytest.skip("Pinocchio GUI dependencies missing", allow_module_level=True)
 
 
 def test_pinocchio_recorder_basic():

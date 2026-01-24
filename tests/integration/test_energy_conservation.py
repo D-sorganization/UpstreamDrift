@@ -7,6 +7,8 @@ These tests validate that the physics engine and analysis tools correctly
 implement Newtonian mechanics.
 """
 
+from __future__ import annotations
+
 import numpy as np
 import pytest
 
