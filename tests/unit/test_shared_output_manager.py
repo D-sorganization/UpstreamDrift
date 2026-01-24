@@ -132,7 +132,7 @@ class TestOutputManager(unittest.TestCase):
         self.manager.create_output_structure()
 
         # We use strict mocking to avoid filesystem timestamp issues and OS errors with mocks
-        with patch("shared.python.output_manager.datetime") as mock_datetime:
+        with patch("src.shared.python.output_manager.datetime") as mock_datetime:
             # Fix "now" to a future time to ensure created files appear old
             fixed_now = datetime(2099, 1, 10, 12, 0, 0)
             mock_datetime.now.return_value = fixed_now

@@ -3,6 +3,13 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+from src.shared.python.engine_availability import PINOCCHIO_AVAILABLE
+
+# Skip entire module if Pinocchio is not installed - mocking pinocchio at module level
+# is unreliable and leads to AttributeError on patched module globals
+if not PINOCCHIO_AVAILABLE:
+    pytest.skip("Pinocchio not installed", allow_module_level=True)
+
 
 # Mock classes that need to be defined before importing the engine
 class MockPhysicsEngine:

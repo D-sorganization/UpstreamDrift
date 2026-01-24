@@ -23,7 +23,7 @@ def test_engine_initialization(mock_engine_manager):
     # engine_status might be all UNAVAILABLE if paths don't exist
 
 
-@patch("shared.python.engine_probes.MuJoCoProbe.probe")
+@patch("src.shared.python.engine_probes.MuJoCoProbe.probe")
 def test_mujoco_loading_success(mock_probe, mock_engine_manager):
     """Test successful MuJoCo loading."""
     # Mock probe result
@@ -40,7 +40,7 @@ def test_mujoco_loading_success(mock_probe, mock_engine_manager):
     with patch.dict("sys.modules", {"mujoco": mock_mujoco_pkg}):
         # We also need to mock the PhysicsEngine import inside switch_engine
         with patch(
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
+            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
         ):
             with patch("pathlib.Path.exists", return_value=True):
                 with patch("pathlib.Path.glob", return_value=[Path("model.xml")]):
@@ -56,7 +56,7 @@ def test_mujoco_loading_success(mock_probe, mock_engine_manager):
                     assert mock_engine_manager.active_physics_engine is not None
 
 
-@patch("shared.python.engine_probes.MuJoCoProbe.probe")
+@patch("src.shared.python.engine_probes.MuJoCoProbe.probe")
 def test_mujoco_loading_failure_missing_dependency(mock_probe, mock_engine_manager):
     """Test MuJoCo loading failure when dependency is missing."""
     # Mock probe result failure
@@ -80,8 +80,8 @@ def test_mujoco_loading_failure_missing_dependency(mock_probe, mock_engine_manag
         "pydrake.geometry": MagicMock(),
     },
 )
-@patch("engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine")
-@patch("shared.python.engine_probes.DrakeProbe.probe")
+@patch("src.engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine")
+@patch("src.shared.python.engine_probes.DrakeProbe.probe")
 def test_drake_loading_success(mock_probe, mock_drake_class, mock_engine_manager):
     """Test successful Drake loading."""
     mock_probe.return_value.is_available.return_value = True
@@ -102,9 +102,9 @@ def test_drake_loading_success(mock_probe, mock_drake_class, mock_engine_manager
 
 
 @patch(
-    "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
+    "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
 )
-@patch("shared.python.engine_probes.PinocchioProbe.probe")
+@patch("src.shared.python.engine_probes.PinocchioProbe.probe")
 def test_pinocchio_loading_success(
     mock_probe, mock_pin_engine_class, mock_engine_manager
 ):

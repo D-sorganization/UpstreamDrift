@@ -16,9 +16,9 @@ def mock_engine_manager():
     return EngineManager(Path("/mock/suite/root"))
 
 
-@patch("shared.python.engine_probes.MuJoCoProbe.probe")
+@patch("src.shared.python.engine_probes.MuJoCoProbe.probe")
 @patch(
-    "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
+    "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
 )
 def test_mujoco_loads_default_model(
     mock_mujoco_engine_cls, mock_probe, mock_engine_manager
@@ -45,9 +45,9 @@ def test_mujoco_loads_default_model(
             assert str(args[0]).endswith("simple_pendulum.xml")
 
 
-@patch("shared.python.engine_probes.PinocchioProbe.probe")
+@patch("src.shared.python.engine_probes.PinocchioProbe.probe")
 @patch(
-    "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
+    "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
 )
 def test_pinocchio_loads_default_model(
     mock_pin_engine_cls, mock_probe, mock_engine_manager
@@ -66,8 +66,8 @@ def test_pinocchio_loads_default_model(
             assert str(args[0]).endswith("golfer.urdf")
 
 
-@patch("shared.python.engine_probes.DrakeProbe.probe")
-@patch("engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine")
+@patch("src.shared.python.engine_probes.DrakeProbe.probe")
+@patch("src.engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine")
 def test_drake_loads_default_model(
     mock_drake_engine_cls, mock_probe, mock_engine_manager
 ):

@@ -56,7 +56,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_draggable_card_initialization(self) -> None:
         """Test that draggable model cards initialize correctly."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.src.launchers.golf_launcher import DraggableModelCard
 
         # Case 1: Parent has layout_edit_mode = True
         self.mock_launcher.layout_edit_mode = True
@@ -78,7 +78,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_mouse_press_initializes_drag(self) -> None:
         """Test that mouse press initializes drag position."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.src.launchers.golf_launcher import DraggableModelCard
 
         self.mock_launcher.layout_edit_mode = True
         card = DraggableModelCard(self.mock_models[0], self.mock_launcher)
@@ -112,7 +112,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_drop_event_triggers_swap(self) -> None:
         """Test that drop events trigger model swapping."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.src.launchers.golf_launcher import DraggableModelCard
 
         self.mock_launcher.layout_edit_mode = True
         card = DraggableModelCard(self.mock_models[0], self.mock_launcher)
@@ -143,7 +143,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_drop_event_ignores_invalid_data(self) -> None:
         """Test that drop events ignore invalid mime data."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.src.launchers.golf_launcher import DraggableModelCard
 
         card = DraggableModelCard(self.mock_models[0], self.mock_launcher)
 
@@ -164,7 +164,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_double_click_launches_model(self) -> None:
         """Test that double-click launches the model."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.src.launchers.golf_launcher import DraggableModelCard
 
         self.mock_launcher.launch_simulation = Mock()
 
@@ -193,17 +193,17 @@ class TestGridLayout(unittest.TestCase):
 
     def test_grid_columns_constant(self) -> None:
         """Test that grid columns is set to 4."""
-        from src.launchers.golf_launcher import GRID_COLUMNS
+        from src.src.launchers.golf_launcher import GRID_COLUMNS
 
         self.assertEqual(GRID_COLUMNS, 4, "Grid should be 3x4 layout")
 
-    @patch("launchers.golf_launcher.ModelRegistry")
-    @patch("launchers.golf_launcher.EngineManager")
+    @patch("src.launchers.golf_launcher.ModelRegistry")
+    @patch("src.launchers.golf_launcher.EngineManager")
     def test_model_order_with_urdf_generator_and_c3d_viewer(
         self, mock_engine_manager: Mock, mock_registry_class: Mock
     ) -> None:
         """Test that URDF generator and C3D viewer are added to model order."""
-        from src.launchers.golf_launcher import GolfLauncher
+        from src.src.launchers.golf_launcher import GolfLauncher
 
         # Mock registry with test models
         mock_registry = Mock()
@@ -248,10 +248,10 @@ class TestGridLayout(unittest.TestCase):
             self.assertEqual(launcher.model_order[-2], "urdf_generator")
             self.assertEqual(launcher.model_order[-1], "c3d_viewer")
 
-    @patch("launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
-    @patch("launchers.golf_launcher.ContextHelpDock")
-    @patch("launchers.golf_launcher.ModelRegistry")
-    @patch("launchers.golf_launcher.EngineManager")
+    @patch("src.launchers.golf_launcher.GolfLauncher.addDockWidget", create=True)
+    @patch("src.launchers.golf_launcher.ContextHelpDock")
+    @patch("src.launchers.golf_launcher.ModelRegistry")
+    @patch("src.launchers.golf_launcher.EngineManager")
     def test_model_swap_preserves_special_tiles(
         self,
         mock_engine_manager: Mock,
@@ -260,7 +260,7 @@ class TestGridLayout(unittest.TestCase):
         mock_add_dock_widget: Mock,
     ) -> None:
         """Test that model swapping works with URDF generator and C3D viewer."""
-        from src.launchers.golf_launcher import GolfLauncher
+        from src.src.launchers.golf_launcher import GolfLauncher
 
         mock_registry = Mock()
         mock_registry.get_all_models.return_value = []
@@ -327,7 +327,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
 
     def test_c3d_viewer_constants(self) -> None:
         """Test that C3D viewer constants are properly defined."""
-        from src.shared.python.constants import C3D_VIEWER_SCRIPT
+        from src.src.shared.python.constants import C3D_VIEWER_SCRIPT
 
         self.assertIsInstance(C3D_VIEWER_SCRIPT, Path)
         # Use Path.as_posix() to get forward slashes on all platforms
@@ -339,7 +339,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
     @unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
     def test_c3d_viewer_launch_method(self) -> None:
         """Test C3D viewer launch method."""
-        from src.launchers.golf_launcher import GolfLauncher
+        from src.src.launchers.golf_launcher import GolfLauncher
 
         # Create launcher instance without full initialization
         launcher = GolfLauncher.__new__(GolfLauncher)
@@ -347,12 +347,12 @@ class TestC3DViewerIntegration(unittest.TestCase):
 
         # Mock the C3D viewer script path and subprocess
         with (
-            patch("shared.python.constants.C3D_VIEWER_SCRIPT") as mock_script_path,
-            patch("launchers.golf_launcher.os.name", "nt"),
-            patch("launchers.golf_launcher.logger") as mock_logger,
-            patch("launchers.golf_launcher.QMessageBox"),
-            patch("launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
-            patch("shared.python.secure_subprocess.secure_popen") as mock_secure_popen,
+            patch("src.shared.python.constants.C3D_VIEWER_SCRIPT") as mock_script_path,
+            patch("src.launchers.golf_launcher.os.name", "nt"),
+            patch("src.launchers.golf_launcher.logger") as mock_logger,
+            patch("src.launchers.golf_launcher.QMessageBox"),
+            patch("src.launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
+            patch("src.shared.python.secure_subprocess.secure_popen") as mock_secure_popen,
         ):
             # Setup script path mock
             mock_script_path.exists.return_value = True
@@ -383,7 +383,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
     @unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
     def test_c3d_viewer_missing_file_handling(self) -> None:
         """Test handling when C3D viewer file is missing."""
-        from src.launchers.golf_launcher import GolfLauncher
+        from src.src.launchers.golf_launcher import GolfLauncher
 
         launcher = GolfLauncher.__new__(GolfLauncher)
         launcher.running_processes = {}
@@ -391,7 +391,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
         # Mock missing file
         with (
             patch("pathlib.Path.exists", return_value=False),
-            patch("launchers.golf_launcher.QMessageBox") as mock_msgbox,
+            patch("src.launchers.golf_launcher.QMessageBox") as mock_msgbox,
         ):
             launcher._launch_c3d_viewer()
 
@@ -467,7 +467,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
     @unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
     def test_urdf_generator_launch_method(self) -> None:
         """Test URDF generator launch method."""
-        from src.launchers.golf_launcher import GolfLauncher
+        from src.src.launchers.golf_launcher import GolfLauncher
 
         # Create launcher instance without full initialization
         launcher = GolfLauncher.__new__(GolfLauncher)
@@ -475,12 +475,12 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
 
         # Mock the URDF generator script path and subprocess
         with (
-            patch("shared.python.constants.URDF_GENERATOR_SCRIPT") as mock_script_path,
-            patch("launchers.golf_launcher.os.name", "nt"),
-            patch("launchers.golf_launcher.logger") as mock_logger,
-            patch("launchers.golf_launcher.QMessageBox"),
-            patch("launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
-            patch("shared.python.secure_subprocess.secure_popen") as mock_secure_popen,
+            patch("src.shared.python.constants.URDF_GENERATOR_SCRIPT") as mock_script_path,
+            patch("src.launchers.golf_launcher.os.name", "nt"),
+            patch("src.launchers.golf_launcher.logger") as mock_logger,
+            patch("src.launchers.golf_launcher.QMessageBox"),
+            patch("src.launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
+            patch("src.shared.python.secure_subprocess.secure_popen") as mock_secure_popen,
         ):
             # Setup script path mock
             mock_script_path.exists.return_value = True
@@ -511,7 +511,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
     @unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
     def test_urdf_generator_missing_file_handling(self) -> None:
         """Test handling when URDF generator file is missing."""
-        from src.launchers.golf_launcher import GolfLauncher
+        from src.src.launchers.golf_launcher import GolfLauncher
 
         launcher = GolfLauncher.__new__(GolfLauncher)
         launcher.running_processes = {}
@@ -519,7 +519,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
         # Mock missing file
         with (
             patch("pathlib.Path.exists", return_value=False),
-            patch("launchers.golf_launcher.QMessageBox") as mock_msgbox,
+            patch("src.launchers.golf_launcher.QMessageBox") as mock_msgbox,
         ):
             launcher._launch_urdf_generator()
 
@@ -532,14 +532,14 @@ class TestModelImageHandling(unittest.TestCase):
 
     def test_urdf_generator_image_mapping(self) -> None:
         """Test that URDF generator has image mapping."""
-        from src.launchers.golf_launcher import MODEL_IMAGES
+        from src.src.launchers.golf_launcher import MODEL_IMAGES
 
         self.assertIn("URDF Generator", MODEL_IMAGES)
         self.assertEqual(MODEL_IMAGES["URDF Generator"], "urdf_icon.png")
 
     def test_c3d_viewer_image_mapping(self) -> None:
         """Test that C3D viewer has image mapping."""
-        from src.launchers.golf_launcher import MODEL_IMAGES
+        from src.src.launchers.golf_launcher import MODEL_IMAGES
 
         self.assertIn("C3D Motion Viewer", MODEL_IMAGES)
         self.assertEqual(MODEL_IMAGES["C3D Motion Viewer"], "c3d_icon.png")
@@ -556,7 +556,7 @@ class TestModelImageHandling(unittest.TestCase):
         mock_model.description = "Test"
 
         # The image selection logic should work
-        from src.launchers.golf_launcher import MODEL_IMAGES
+        from src.src.launchers.golf_launcher import MODEL_IMAGES
 
         # Direct lookup should work
         img_name = MODEL_IMAGES.get(mock_model.name)

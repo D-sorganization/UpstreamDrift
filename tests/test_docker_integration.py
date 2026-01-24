@@ -6,10 +6,11 @@ Tests Docker container setup, PYTHONPATH configuration, and module accessibility
 """
 
 import subprocess
+import sys
 import unittest
 from unittest.mock import MagicMock, Mock, patch
 
-from src.shared.python.path_utils import get_src_root
+from src.shared.python.path_utils import get_repo_root, get_src_root
 
 
 def _is_docker_available() -> bool:
@@ -26,8 +27,10 @@ class TestDockerBuild(unittest.TestCase):
 
     def test_dockerfile_syntax(self):
         """Test that Dockerfile has valid syntax."""
-        dockerfile_path = get_src_root() / "Dockerfile"
-        self.assertTrue(dockerfile_path.exists())
+        dockerfile_path = get_repo_root() / "Dockerfile"
+        self.assertTrue(
+            dockerfile_path.exists(), f"Dockerfile not found at {dockerfile_path}"
+        )
 
         content = dockerfile_path.read_text()
 
@@ -39,7 +42,7 @@ class TestDockerBuild(unittest.TestCase):
 
     def test_dockerfile_pythonpath_setup(self):
         """Test that Dockerfile sets up PYTHONPATH correctly."""
-        dockerfile_path = get_src_root() / "Dockerfile"
+        dockerfile_path = get_repo_root() / "Dockerfile"
         content = dockerfile_path.read_text()
 
         # Verify PYTHONPATH includes all required directories
@@ -70,6 +73,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
         self.mock_launcher.chk_live = Mock()
         self.mock_launcher.chk_gpu = Mock()
 
+    @unittest.skipIf(sys.platform != "win32", "Windows-specific test")
     def test_mujoco_humanoid_command(self):
         """Test MuJoCo humanoid Docker command generation."""
         from src.launchers.golf_launcher import GolfLauncher
@@ -136,6 +140,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             self.assertIn("python humanoid_launcher.py", command_str)
             self.assertNotIn("bash -c", command_str)
 
+    @unittest.skipIf(sys.platform != "win32", "Windows-specific test")
     def test_drake_command(self):
         """Test Drake Docker command generation."""
         from src.launchers.golf_launcher import GolfLauncher
@@ -203,6 +208,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             )
             self.assertIn("python -m src.drake_gui_app", command_str)
 
+    @unittest.skipIf(sys.platform != "win32", "Windows-specific test")
     def test_pinocchio_command(self):
         """Test Pinocchio Docker command generation."""
         from src.launchers.golf_launcher import GolfLauncher
@@ -256,6 +262,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             self.assertIn("python pinocchio_golf/gui.py", command_str)
             self.assertNotIn("bash -c", command_str)
 
+    @unittest.skipIf(sys.platform != "win32", "Windows-specific test")
     def test_display_configuration_windows(self):
         """Test Windows display configuration."""
         from src.launchers.golf_launcher import GolfLauncher
@@ -300,6 +307,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
             self.assertIn("-e PYOPENGL_PLATFORM=glx", command_str)
             self.assertIn("-e QT_QPA_PLATFORM=xcb", command_str)
 
+    @unittest.skipIf(sys.platform != "win32", "Windows-specific test")
     def test_gpu_acceleration_option(self):
         """Test GPU acceleration option."""
         from src.launchers.golf_launcher import GolfLauncher
@@ -345,7 +353,7 @@ class TestContainerEnvironment(unittest.TestCase):
 
     def test_pythonpath_environment_variable(self):
         """Test PYTHONPATH environment variable setup."""
-        dockerfile_path = get_src_root() / "Dockerfile"
+        dockerfile_path = get_repo_root() / "Dockerfile"
         content = dockerfile_path.read_text()
 
         # Find PYTHONPATH line
@@ -368,7 +376,7 @@ class TestContainerEnvironment(unittest.TestCase):
 
     def test_workspace_directory_creation(self):
         """Test workspace directory structure creation."""
-        dockerfile_path = get_src_root() / "Dockerfile"
+        dockerfile_path = get_repo_root() / "Dockerfile"
         content = dockerfile_path.read_text()
 
         # Check for workspace directory creation
@@ -377,7 +385,7 @@ class TestContainerEnvironment(unittest.TestCase):
 
     def test_conda_environment_setup(self):
         """Test conda environment configuration."""
-        dockerfile_path = get_src_root() / "Dockerfile"
+        dockerfile_path = get_repo_root() / "Dockerfile"
         content = dockerfile_path.read_text()
 
         # Verify base image and package installation

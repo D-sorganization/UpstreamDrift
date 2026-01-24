@@ -15,7 +15,7 @@ if PYQT6_AVAILABLE:
 
 @pytest.fixture
 def mock_app():
-    with patch("launchers.unified_launcher.QApplication") as MockApp:
+    with patch("src.launchers.unified_launcher.QApplication") as MockApp:
         mock_app_instance = MockApp.instance.return_value
         if mock_app_instance is None:
             mock_app_instance = MockApp.return_value
@@ -27,7 +27,7 @@ def mock_app():
 def launcher(mock_app):
     # Patch the GolfLauncher class where it is defined, so when it is imported
     # by UnifiedLauncher it uses the mock.
-    with patch("launchers.golf_launcher.GolfLauncher"):
+    with patch("src.launchers.golf_launcher.GolfLauncher"):
         launcher = UnifiedLauncher()
         return launcher
 
@@ -42,7 +42,7 @@ def test_initialization(launcher):
 def test_mainloop(launcher):
     """Test mainloop execution."""
     # Mock GolfLauncher at its source for lazy loading
-    with patch("launchers.golf_launcher.GolfLauncher") as MockGolfLauncher:
+    with patch("src.launchers.golf_launcher.GolfLauncher") as MockGolfLauncher:
         mock_golf_launcher = MagicMock()
         MockGolfLauncher.return_value = mock_golf_launcher
         launcher.app.exec.return_value = 0
@@ -60,7 +60,7 @@ def test_mainloop(launcher):
 def test_show_status(launcher):
     """Test show_status output."""
     with (
-        patch("shared.python.engine_manager.EngineManager") as MockEngineManager,
+        patch("src.shared.python.engine_manager.EngineManager") as MockEngineManager,
         patch("builtins.print") as mock_print,
     ):
         mock_manager = MockEngineManager.return_value
@@ -104,7 +104,7 @@ def test_get_version(launcher):
 
 def test_cli_launch():
     """Test CLI launch function."""
-    with patch("launchers.unified_launcher.UnifiedLauncher") as MockLauncher:
+    with patch("src.launchers.unified_launcher.UnifiedLauncher") as MockLauncher:
         from src.launchers.unified_launcher import launch
 
         MockLauncher.return_value.mainloop.return_value = 0

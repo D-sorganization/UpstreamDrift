@@ -31,7 +31,7 @@ def test_convert_units():
 
 def test_ensure_output_dir(tmp_path):
     """Test output directory creation."""
-    with patch("shared.python.OUTPUT_ROOT", tmp_path / "outputs"):
+    with patch("src.shared.python.OUTPUT_ROOT", tmp_path / "outputs"):
         path = ensure_output_dir("test_engine", "run1")
         assert path.exists()
         assert path.name == "run1"

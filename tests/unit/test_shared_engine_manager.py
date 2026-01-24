@@ -20,30 +20,30 @@ class TestEngineManager(unittest.TestCase):
         self.mock_root = Path("/mock/root")
 
         # Patch engine probes individually
-        self.mujoco_patcher = patch("shared.python.engine_probes.MuJoCoProbe")
+        self.mujoco_patcher = patch("src.shared.python.engine_probes.MuJoCoProbe")
         self.mock_mujoco_probe_cls = self.mujoco_patcher.start()
         self.mock_mujoco_probe_cls.return_value.probe.return_value.is_available.return_value = (
             True
         )
 
-        self.drake_patcher = patch("shared.python.engine_probes.DrakeProbe")
+        self.drake_patcher = patch("src.shared.python.engine_probes.DrakeProbe")
         self.mock_drake_probe_cls = self.drake_patcher.start()
         self.mock_drake_probe_cls.return_value.probe.return_value.is_available.return_value = (
             True
         )
 
-        self.pinocchio_patcher = patch("shared.python.engine_probes.PinocchioProbe")
+        self.pinocchio_patcher = patch("src.shared.python.engine_probes.PinocchioProbe")
         self.mock_pinocchio_probe_cls = self.pinocchio_patcher.start()
 
-        self.pendulum_patcher = patch("shared.python.engine_probes.PendulumProbe")
+        self.pendulum_patcher = patch("src.shared.python.engine_probes.PendulumProbe")
         self.mock_pendulum_probe_cls = self.pendulum_patcher.start()
 
-        self.matlab_patcher = patch("shared.python.engine_probes.MatlabProbe")
+        self.matlab_patcher = patch("src.shared.python.engine_probes.MatlabProbe")
         self.mock_matlab_probe_cls = self.matlab_patcher.start()
 
         # Patch setup_logging
         self.logging_patcher = patch(
-            "shared.python.common_utils.setup_structured_logging"
+            "src.shared.python.common_utils.setup_structured_logging"
         )
         self.logging_patcher.start()
 
@@ -134,7 +134,7 @@ class TestEngineManager(unittest.TestCase):
 
         with patch.dict("sys.modules", {"mujoco": mock_mujoco_pkg}):
             with patch(
-                "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
+                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
             ):
                 with (
                     patch("pathlib.Path.exists", return_value=True),

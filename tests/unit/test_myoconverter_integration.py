@@ -51,7 +51,7 @@ def temp_output_folder(tmp_path):
 class TestMyoConverterInitialization:
     """Test MyoConverter initialization."""
 
-    @patch("shared.python.myoconverter_integration.MyoConverter._check_availability")
+    @patch("src.shared.python.myoconverter_integration.MyoConverter._check_availability")
     def test_initialization_when_available(self, mock_check):
         """Test initialization when myoconverter is available."""
         mock_check.return_value = True
@@ -61,7 +61,7 @@ class TestMyoConverterInitialization:
         assert converter.myoconverter_available is True
         mock_check.assert_called_once()
 
-    @patch("shared.python.myoconverter_integration.MyoConverter._check_availability")
+    @patch("src.shared.python.myoconverter_integration.MyoConverter._check_availability")
     def test_initialization_when_unavailable(self, mock_check, caplog):
         """Test initialization when myoconverter is not available."""
         mock_check.return_value = False
@@ -89,7 +89,7 @@ class TestCheckAvailability:
     def test_availability_when_not_installed(self):
         """Test that check returns False when import fails."""
         with patch(
-            "shared.python.myoconverter_integration.MyoConverter._check_availability",
+            "src.shared.python.myoconverter_integration.MyoConverter._check_availability",
             return_value=False,
         ):
             converter = MyoConverter()

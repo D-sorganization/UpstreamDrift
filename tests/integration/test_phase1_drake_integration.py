@@ -57,10 +57,10 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         engine = DrakePhysicsEngine()
         self.assertIsNotNone(engine)
 
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.pydrake")
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.pydrake")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
     @patch(
-        "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
+        "src.engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
     )
     def test_drake_engine_loading_success(
         self, mock_add_plant, mock_builder, mock_pydrake
@@ -87,7 +87,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
 
         # Mock Parser class
         with patch(
-            "engines.physics_engines.drake.python.drake_physics_engine.Parser"
+            "src.engines.physics_engines.drake.python.drake_physics_engine.Parser"
         ) as mock_parser_class:
             mock_parser_instance = MagicMock()
             mock_parser_class.return_value = mock_parser_instance
@@ -112,10 +112,10 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
             mock_parser_instance.AddModels.assert_called_once_with(str(self.urdf_path))
             mock_plant.Finalize.assert_called_once()
 
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.pydrake")
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.pydrake")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
     @patch(
-        "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
+        "src.engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
     )
     def test_drake_engine_loading_file_not_found(
         self, mock_add_plant, mock_builder, mock_pydrake
@@ -142,10 +142,10 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
             with self.assertRaises(FileNotFoundError):
                 engine.load_from_path("nonexistent_file.urdf")
 
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.pydrake")
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.pydrake")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
     @patch(
-        "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
+        "src.engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
     )
     def test_drake_engine_reset_functionality(
         self, mock_add_plant, mock_builder, mock_pydrake
@@ -187,10 +187,10 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         mock_plant.SetDefaultVelocities.assert_called_once_with(mock_plant_context)
         mock_simulator.Initialize.assert_called_once()
 
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.pydrake")
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.pydrake")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
     @patch(
-        "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
+        "src.engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
     )
     def test_drake_engine_forward_computation(
         self, mock_add_plant, mock_builder, mock_pydrake
@@ -228,10 +228,10 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         )
         mock_plant.CalcInverseDynamics.assert_called_once()
 
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.pydrake")
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.pydrake")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
     @patch(
-        "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
+        "src.engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
     )
     def test_drake_engine_step_with_caching(
         self, mock_add_plant, mock_builder, mock_pydrake
@@ -272,10 +272,10 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         # Verify simulator advance was called
         mock_simulator.AdvanceTo.assert_called_once()
 
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.pydrake")
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.pydrake")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
     @patch(
-        "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
+        "src.engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
     )
     def test_drake_engine_error_handling_no_model(
         self, mock_add_plant, mock_builder, mock_pydrake
@@ -309,11 +309,11 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         # Test time
         self.assertEqual(engine.get_time(), 0.0)
 
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.LOGGER")
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.pydrake")
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.LOGGER")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.pydrake")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
     @patch(
-        "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
+        "src.engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
     )
     def test_drake_engine_logging(
         self, mock_add_plant, mock_builder, mock_pydrake, mock_logger
@@ -330,7 +330,7 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
 
         # Mock Parser to raise exception
         with patch(
-            "engines.physics_engines.drake.python.drake_physics_engine.Parser"
+            "src.engines.physics_engines.drake.python.drake_physics_engine.Parser"
         ) as mock_parser_class:
             mock_parser_instance = MagicMock()
             mock_parser_class.return_value = mock_parser_instance
@@ -350,10 +350,10 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
             # Verify error was logged
             mock_logger.error.assert_called()
 
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.pydrake")
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.pydrake")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
     @patch(
-        "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
+        "src.engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
     )
     def test_drake_state_management(
         self, mock_add_plant, mock_builder, mock_pydrake
@@ -391,10 +391,10 @@ class TestPhase1DrakeIntegration(unittest.TestCase):
         np.testing.assert_array_equal(q, np.array([1.0, 2.0]))
         np.testing.assert_array_equal(v, np.array([3.0, 4.0]))
 
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.pydrake")
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.pydrake")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder")
     @patch(
-        "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
+        "src.engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
     )
     def test_drake_engine_model_name_property(
         self, mock_add_plant, mock_builder, mock_pydrake

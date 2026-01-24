@@ -35,9 +35,9 @@ def test_loader_map() -> None:
 def test_load_mujoco_engine_success(mock_suite_root: Path) -> None:
     """Test successful loading of MuJoCo engine."""
     with (
-        patch("shared.python.engine_probes.MuJoCoProbe") as mock_probe_cls,
+        patch("src.shared.python.engine_probes.MuJoCoProbe") as mock_probe_cls,
         patch(
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
+            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
         ) as mock_engine_cls,
     ):
         # Setup Probe
@@ -61,7 +61,7 @@ def test_load_mujoco_engine_success(mock_suite_root: Path) -> None:
 @patch.dict(sys.modules, {"mujoco": MagicMock()})
 def test_load_mujoco_engine_not_available(mock_suite_root: Path) -> None:
     """Test MuJoCo engine loading when probe fails."""
-    with patch("shared.python.engine_probes.MuJoCoProbe") as mock_probe_cls:
+    with patch("src.shared.python.engine_probes.MuJoCoProbe") as mock_probe_cls:
         # Setup Probe to fail
         mock_probe = mock_probe_cls.return_value
         mock_result = MagicMock()
@@ -79,9 +79,9 @@ def test_load_mujoco_engine_not_available(mock_suite_root: Path) -> None:
 def test_load_drake_engine_success(mock_suite_root: Path) -> None:
     """Test successful loading of Drake engine."""
     with (
-        patch("shared.python.engine_probes.DrakeProbe") as mock_probe_cls,
+        patch("src.shared.python.engine_probes.DrakeProbe") as mock_probe_cls,
         patch(
-            "engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine"
+            "src.engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine"
         ) as mock_engine_cls,
     ):
         # Setup Probe
@@ -100,9 +100,9 @@ def test_load_drake_engine_success(mock_suite_root: Path) -> None:
 def test_load_pinocchio_engine_success(mock_suite_root: Path) -> None:
     """Test successful loading of Pinocchio engine."""
     with (
-        patch("shared.python.engine_probes.PinocchioProbe") as mock_probe_cls,
+        patch("src.shared.python.engine_probes.PinocchioProbe") as mock_probe_cls,
         patch(
-            "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
+            "src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
         ) as mock_engine_cls,
     ):
         # Setup Probe

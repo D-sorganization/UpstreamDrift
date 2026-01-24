@@ -24,10 +24,10 @@ if PYQT6_AVAILABLE:
 @pytest.fixture
 def mock_flight_models():
     with (
-        patch("launchers.shot_tracer.FlightModelRegistry") as mock_registry,
-        patch("launchers.shot_tracer.UnifiedLaunchConditions") as mock_launch,
-        patch("launchers.shot_tracer.compare_models") as mock_compare,
-        patch("launchers.shot_tracer.FlightModelType") as mock_type,
+        patch("src.launchers.shot_tracer.FlightModelRegistry") as mock_registry,
+        patch("src.launchers.shot_tracer.UnifiedLaunchConditions") as mock_launch,
+        patch("src.launchers.shot_tracer.compare_models") as mock_compare,
+        patch("src.launchers.shot_tracer.FlightModelType") as mock_type,
     ):
         # Setup FlightModelType enum-like behavior
         mock_type.WATERLOO_PENNER.value = "waterloo_penner"
