@@ -1,31 +1,21 @@
-# Ensure shared/python is in sys.path for imports within shot_tracer
-import os
+"""Unit tests for shot tracer module."""
+
 import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Check for PyQt6 GUI library availability
-try:
-    from PyQt6 import QtWidgets  # noqa: F401
-
-    PYQT6_AVAILABLE = True
-except (ImportError, OSError):
-    PYQT6_AVAILABLE = False
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
 
 pytestmark = pytest.mark.skipif(
     not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available"
-)
-
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../shared/python"))
 )
 
 # Mock flight_models before importing shot_tracer
 sys.modules["flight_models"] = MagicMock()
 
 if PYQT6_AVAILABLE:
-    from src.launchers.shot_tracer import (  # noqa: E402
+    from src.launchers.shot_tracer import (
         MultiModelShotTracerWidget,
         MultiModelShotTracerWindow,
     )

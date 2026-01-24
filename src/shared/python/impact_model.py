@@ -21,19 +21,27 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .physics_constants import (
+    DRIVER_COR,
+    GOLF_BALL_MASS_KG,
+    GOLF_BALL_MOMENT_OF_INERTIA_KG_M2,
+    GOLF_BALL_RADIUS_M,
+    TYPICAL_CONTACT_DURATION_S,
+)
+
 if TYPE_CHECKING:
     pass
 
 LOGGER = logging.getLogger(__name__)
 
-# Physical constants for golf ball
-GOLF_BALL_MASS = 0.0459  # [kg] Maximum mass per USGA rules
-GOLF_BALL_RADIUS = 0.02135  # [m] Minimum radius per USGA rules
-GOLF_BALL_MOMENT_INERTIA = (2 / 5) * GOLF_BALL_MASS * GOLF_BALL_RADIUS**2  # [kg·m²]
+# Physical constants for golf ball (re-exported from centralized module)
+GOLF_BALL_MASS: float = float(GOLF_BALL_MASS_KG)
+GOLF_BALL_RADIUS: float = float(GOLF_BALL_RADIUS_M)
+GOLF_BALL_MOMENT_INERTIA: float = float(GOLF_BALL_MOMENT_OF_INERTIA_KG_M2)
 
-# Default impact parameters
-DEFAULT_COR = 0.78  # Coefficient of restitution for driver
-DEFAULT_CONTACT_DURATION = 0.0005  # [s] 500 μs typical contact time
+# Default impact parameters (re-exported from centralized module)
+DEFAULT_COR: float = float(DRIVER_COR)
+DEFAULT_CONTACT_DURATION: float = float(TYPICAL_CONTACT_DURATION_S)
 
 
 class ImpactModelType(Enum):

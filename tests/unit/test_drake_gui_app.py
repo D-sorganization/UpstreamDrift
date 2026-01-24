@@ -6,20 +6,14 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
+
 # Mock modules before importing
 sys.modules["pydrake"] = MagicMock()
 sys.modules["pydrake.all"] = MagicMock()
 sys.modules["pydrake.multibody"] = MagicMock()
 sys.modules["pydrake.multibody.plant"] = MagicMock()
 sys.modules["pydrake.multibody.tree"] = MagicMock()
-
-# Check for PyQt6 GUI library availability (not just module presence)
-try:
-    from PyQt6 import QtWidgets  # noqa: F401
-
-    HAS_QT = True
-except (ImportError, OSError):
-    HAS_QT = False
 
 
 def teardown_module(module):
@@ -29,7 +23,7 @@ def teardown_module(module):
             del sys.modules[key]
 
 
-@pytest.mark.skipif(not HAS_QT, reason="PyQt6 not available")
+@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not available")
 class TestDrakeGUIApp:
     def test_compute_specific_control(self):
         """Test compute_specific_control in DrakeInducedAccelerationAnalyzer."""

@@ -63,6 +63,24 @@ GOLF_BALL_MASS_KG = PhysicalConstant(
 GOLF_BALL_DIAMETER_M = PhysicalConstant(
     0.04267, "m", "USGA Rule 5-2", "Minimum golf ball diameter (1.680 in)"
 )
+GOLF_BALL_RADIUS_M = PhysicalConstant(
+    GOLF_BALL_DIAMETER_M / 2,
+    "m",
+    "USGA Rule 5-2",
+    "Minimum golf ball radius (derived)",
+)
+GOLF_BALL_CROSS_SECTIONAL_AREA_M2 = PhysicalConstant(
+    PI * (GOLF_BALL_DIAMETER_M / 2) ** 2,
+    "m^2",
+    "Derived",
+    "Golf ball cross-sectional area",
+)
+GOLF_BALL_MOMENT_OF_INERTIA_KG_M2 = PhysicalConstant(
+    (2 / 5) * GOLF_BALL_MASS_KG * (GOLF_BALL_DIAMETER_M / 2) ** 2,
+    "kg*m^2",
+    "Solid sphere approximation",
+    "Golf ball moment of inertia",
+)
 GOLF_BALL_DRAG_COEFFICIENT = PhysicalConstant(
     0.25,
     "dimensionless",
@@ -149,3 +167,17 @@ SPIN_DECAY_RATE_S = PhysicalConstant(0.05, "1/s", "Trackman Data", "Spin decay r
 AIR_VISCOSITY_KG_M_S = PhysicalConstant(
     1.789e-5, "kg/(m s)", "ISO 2533", "Dynamic viscosity of air at 15C"
 )
+
+# Impact parameters
+DRIVER_COR = PhysicalConstant(
+    0.78, "dimensionless", "USGA Rule Limit", "Coefficient of restitution for driver"
+)
+TYPICAL_CONTACT_DURATION_S = PhysicalConstant(
+    0.0005, "s", "High-speed video studies", "Typical ball-clubface contact time"
+)
+
+# Numerical thresholds for aerodynamic calculations
+MIN_SPEED_THRESHOLD_M_S = PhysicalConstant(
+    0.1, "m/s", "Numerical", "Minimum speed for aerodynamic force calculation"
+)
+NUMERICAL_EPSILON: float = 1e-10  # For vector normalization

@@ -4,47 +4,41 @@ TEST-004: Added @pytest.mark.integration markers for test categorization.
 """
 
 import sys
-from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
 import pandas as pd
 import pytest
 
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.path_utils import get_simscape_model_path
+
 # Mark all tests in this file as integration tests
 pytestmark: list[pytest.MarkDecorator] = [pytest.mark.integration]
 
-# Add source path for imports
-# Adjust based on repository root
-REPO_ROOT = Path(__file__).resolve().parents[2]
-SRC_PATH = (
-    REPO_ROOT
-    / "engines"
-    / "Simscape_Multibody_Models"
-    / "3D_Golf_Model"
-    / "python"
-    / "src"
-)
+# Add source path for imports using centralized path utility
+SRC_PATH = get_simscape_model_path("3D_Golf_Model")
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-try:
-    from apps.c3d_viewer import C3DDataModel, C3DViewerMainWindow
-    from c3d_reader import C3DDataReader
+# Import C3D modules if PyQt6 is available
+C3D_IMPORTS_AVAILABLE = False
+if PYQT6_AVAILABLE:
+    try:
+        from apps.c3d_viewer import C3DDataModel, C3DViewerMainWindow
+        from c3d_reader import C3DDataReader
 
-    PYQT6_AVAILABLE = True
-except (ImportError, OSError):
-    # GUI libraries may not be available (missing libEGL etc.) - skip gracefully
-    PYQT6_AVAILABLE = False
+        C3D_IMPORTS_AVAILABLE = True
+    except (ImportError, OSError):
+        pass
+
+if not C3D_IMPORTS_AVAILABLE:
     C3DDataModel = None  # type: ignore[misc, assignment]
     C3DViewerMainWindow = None  # type: ignore[misc, assignment]
     C3DDataReader = None  # type: ignore[misc, assignment]
-
-# Skip all tests if PyQt6 is not available
-if not PYQT6_AVAILABLE:
     pytestmark = [
         pytest.mark.integration,
-        pytest.mark.skip(reason="PyQt6 GUI libraries not available"),
+        pytest.mark.skip(reason="PyQt6 GUI libraries or C3D modules not available"),
     ]
 
 

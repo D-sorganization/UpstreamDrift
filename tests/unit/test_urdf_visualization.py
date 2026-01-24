@@ -1,18 +1,8 @@
 """Tests for URDF visualization widget."""
 
-# Skip tests if running headless without X11/Wayland, unless using offscreen platform
-# But usually pytest-qt handles this if env var is set.
-# The project has explicit skipping for GUI tests in some places, but let's try standard approach.
-
 import pytest
 
-# Check for PyQt6 GUI library availability
-try:
-    from PyQt6 import QtWidgets  # noqa: F401
-
-    PYQT6_AVAILABLE = True
-except (ImportError, OSError):
-    PYQT6_AVAILABLE = False
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
 
 pytestmark = pytest.mark.skipif(
     not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available"

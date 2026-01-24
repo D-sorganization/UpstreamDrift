@@ -1,25 +1,20 @@
-# Add repo root to path
-import os
-import sys
+"""Tests for dashboard enhancements."""
+
 import unittest
 
 import numpy as np
 import pytest
 
-# Skip entire module if PyQt6 GUI libraries are not available
-try:
-    from PyQt6 import QtWidgets
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
 
-    PYQT6_AVAILABLE = True
-except (ImportError, OSError):
-    PYQT6_AVAILABLE = False
+if PYQT6_AVAILABLE:
+    from PyQt6 import QtWidgets
+else:
     QtWidgets = None  # type: ignore[misc, assignment]
 
 pytestmark = pytest.mark.skipif(
     not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available"
 )
-
-sys.path.append(os.getcwd())
 
 if PYQT6_AVAILABLE:
     from src.shared.python.dashboard.recorder import GenericPhysicsRecorder

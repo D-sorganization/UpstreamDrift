@@ -10,6 +10,7 @@ implement Newtonian mechanics.
 import numpy as np
 import pytest
 
+from src.shared.python.engine_availability import MUJOCO_AVAILABLE
 from src.shared.python.numerical_constants import (
     GRAVITY_STANDARD,
     TOLERANCE_ENERGY_CONSERVATION,
@@ -17,11 +18,10 @@ from src.shared.python.numerical_constants import (
 )
 
 # Skip these tests if MuJoCo is not available
-# Note: MuJoCo may have platform-specific loading issues on Windows
-try:
-    import mujoco  # noqa: E402
-except (ImportError, OSError) as e:
-    pytest.skip(f"MuJoCo not available or failed to load: {e}", allow_module_level=True)
+if not MUJOCO_AVAILABLE:
+    pytest.skip("MuJoCo not available", allow_module_level=True)
+
+import mujoco  # noqa: E402
 
 
 @pytest.fixture
