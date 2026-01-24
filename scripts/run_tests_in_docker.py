@@ -3,34 +3,31 @@ Dockerized Physics Verification Runner.
 
 This script builds the Golf Modeling Suite development container (if needed)
 and runs the physics verification suite inside it to ensure environment consistency.
+
+Refactored to use shared script utilities (DRY principle).
 """
 
-import subprocess
 import sys
-from pathlib import Path
 
+from scripts.script_utils import get_repo_root, run_command, setup_script_logging
 
-def run_command(cmd: list[str], cwd: Path | None = None) -> None:
-    """Run a subprocess command and stream output."""
-    try:
-        subprocess.run(cmd, cwd=cwd, check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error running command: {' '.join(cmd)}")
-        sys.exit(e.returncode)
+logger = setup_script_logging("DockerRunner")
 
 
 def main() -> None:
     """Main execution flow."""
-    root_dir = Path(__file__).parent.parent.resolve()
-    dockerfile_path = root_dir / "engines" / "physics_engines" / "mujoco" / "Dockerfile"
+    root_dir = get_repo_root()
+    dockerfile_path = (
+        root_dir / "src" / "engines" / "physics_engines" / "mujoco" / "Dockerfile"
+    )
 
     if not dockerfile_path.exists():
-        print(f"Error: Dockerfile not found at {dockerfile_path}")
+        logger.error(f"Dockerfile not found at {dockerfile_path}")
         sys.exit(1)
 
     image_name = "golf-suite-dev"
 
-    print(f"--- Building Docker Image: {image_name} ---")
+    logger.info(f"Building Docker Image: {image_name}")
     # Build image
     build_cmd = [
         "docker",
@@ -41,9 +38,12 @@ def main() -> None:
         str(dockerfile_path),
         str(root_dir),
     ]
-    run_command(build_cmd, cwd=root_dir)
+    result = run_command(build_cmd, cwd=root_dir, check=False, logger=logger)
+    if result.returncode != 0:
+        logger.error("Docker build failed")
+        sys.exit(result.returncode)
 
-    print("\n--- Running Verification Suite in Docker ---")
+    logger.info("Running Verification Suite in Docker")
     # Run container
     # Mount root_dir to /workspace
     # Workdir /workspace
@@ -61,8 +61,12 @@ def main() -> None:
         "scripts/verify_physics.py",
     ]
 
-    print(f"Executing: {' '.join(run_cmd)}")
-    run_command(run_cmd)
+    result = run_command(run_cmd, logger=logger)
+    if result.returncode != 0:
+        logger.error("Verification failed")
+        sys.exit(result.returncode)
+
+    logger.info("Verification completed successfully")
 
 
 if __name__ == "__main__":

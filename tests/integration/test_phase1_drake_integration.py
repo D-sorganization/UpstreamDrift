@@ -5,6 +5,8 @@ This module tests the complete Drake engine integration including:
 - State management (reset, forward, step)
 - Error handling and logging
 - Integration with the engine manager
+
+Refactored to use shared engine availability module (DRY principle).
 """
 
 import tempfile
@@ -14,15 +16,8 @@ from unittest.mock import MagicMock, patch
 
 import numpy as np
 
+from src.shared.python.engine_availability import DRAKE_AVAILABLE
 from src.shared.python.engine_manager import EngineManager, EngineType
-
-# Check if Drake is available
-try:
-    import pydrake  # noqa: F401
-
-    DRAKE_AVAILABLE = True
-except ImportError:
-    DRAKE_AVAILABLE = False
 
 
 @unittest.skipUnless(DRAKE_AVAILABLE, "Drake not available")

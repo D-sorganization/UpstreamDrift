@@ -29,18 +29,12 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.engine_availability import MYOSUITE_AVAILABLE
 from src.shared.python.multi_muscle import AntagonistPair, MuscleGroup
 
 logger = logging.getLogger(__name__)
 
-# Check for MyoSuite availability
-# Check for MyoSuite availability
-try:
-    import gym  # noqa: F401
-
-    MYOSUITE_AVAILABLE = True
-except (ImportError, ValueError):
-    MYOSUITE_AVAILABLE = False
+# Log warning if MyoSuite not available
 if not MYOSUITE_AVAILABLE:
     logger.warning(
         "MyoSuite/gym not available. Neural control disabled. "

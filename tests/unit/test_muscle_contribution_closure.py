@@ -12,6 +12,8 @@ References:
       dynamical simulations." Journal of Biomechanics.
     - Anderson, F. C., & Pandy, M. G. (2003). "Individual muscle contributions to
       support in normal walking." Gait & Posture.
+
+Refactored to use shared engine availability module (DRY principle).
 """
 
 import typing
@@ -19,17 +21,13 @@ import typing
 import numpy as np
 import pytest
 
-try:
-    from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
-        MYOSUITE_AVAILABLE as _INTERNAL_MYOSUITE_AVAILABLE,
-    )
+from src.shared.python.engine_availability import MYOSUITE_AVAILABLE
+
+if MYOSUITE_AVAILABLE:
     from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
         MyoSuitePhysicsEngine as _MyoSuitePhysicsEngine,
     )
-
-    MYOSUITE_AVAILABLE = _INTERNAL_MYOSUITE_AVAILABLE
-except ImportError:
-    MYOSUITE_AVAILABLE = False
+else:
     _MyoSuitePhysicsEngine = None  # type: ignore
 
 # Skip entire module if MyoSuite not available
