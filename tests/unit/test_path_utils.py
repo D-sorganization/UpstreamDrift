@@ -3,8 +3,6 @@
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
 from src.shared.python.path_utils import (
     ensure_directory,
     find_file_in_parents,
