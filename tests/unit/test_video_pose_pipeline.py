@@ -6,7 +6,6 @@ import numpy as np
 import pytest
 
 from src.shared.python.engine_availability import (
-    MEDIAPIPE_AVAILABLE,
     skip_if_unavailable,
 )
 

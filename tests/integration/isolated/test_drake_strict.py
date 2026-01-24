@@ -2,10 +2,8 @@ import logging
 from unittest.mock import MagicMock, patch
 
 import numpy as np
-import pytest
 
 from src.shared.python.engine_availability import (
-    DRAKE_AVAILABLE,
     skip_if_unavailable,
 )
 

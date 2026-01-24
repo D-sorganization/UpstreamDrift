@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from src.shared.python.engine_availability import (
     PINOCCHIO_AVAILABLE,
