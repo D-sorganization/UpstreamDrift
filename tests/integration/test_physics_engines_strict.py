@@ -23,6 +23,7 @@ mock_pinocchio = MagicMock()
 mock_opensim = MagicMock()
 mock_gym = MagicMock()
 mock_myosuite = MagicMock()
+mock_simpleeval = MagicMock()
 
 # Setup specific mock behaviors required for import time or basic init
 mock_mujoco.MjModel = MagicMock()
@@ -45,6 +46,7 @@ module_patches = {
     "opensim": mock_opensim,
     "gym": mock_gym,
     "myosuite": mock_myosuite,
+    "simpleeval": mock_simpleeval,
 }
 
 # Ensure DiagramBuilder is available via two paths depending on how it's imported
