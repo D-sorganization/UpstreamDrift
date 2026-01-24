@@ -141,7 +141,7 @@ class FlightResult:
     flight_time: float = 0.0
     landing_angle: float = 0.0
     lateral_deviation: float = 0.0
-    
+
     def to_position_array(self) -> np.ndarray:
         """Convert trajectory to Nx3 position array."""
         if not self.trajectory:
@@ -370,11 +370,11 @@ class MacDonaldHanzelyModel(BallFlightModel):
 
 class PlaceholderModel(BallFlightModel):
     """Placeholder for unimplemented models."""
-    
+
     def __init__(self, name: str, description: str = "Not implemented"):
         self._name = name
         self._description = description
-        
+
     @property
     def name(self) -> str:
         return self._name
@@ -396,7 +396,7 @@ class PlaceholderModel(BallFlightModel):
 
 class FlightModelRegistry:
     """Registry for managing flight models."""
-    
+
     _models: dict[FlightModelType, BallFlightModel] = {}
 
     @classmethod
@@ -404,7 +404,7 @@ class FlightModelRegistry:
         if not cls._models:
             cls._initialize()
         return cls._models[model_type]
-    
+
     @classmethod
     def get_all_models(cls) -> list[BallFlightModel]:
         if not cls._models:
@@ -415,13 +415,23 @@ class FlightModelRegistry:
     def _initialize(cls) -> None:
         cls._models[FlightModelType.WATERLOO_PENNER] = WaterlooPennerModel()
         cls._models[FlightModelType.MACDONALD_HANZELY] = MacDonaldHanzelyModel()
-        
+
         # Placeholders for missing implementations
-        cls._models[FlightModelType.NATHAN] = PlaceholderModel("Nathan", "Nathan model (Placeholder)")
-        cls._models[FlightModelType.BALLANTYNE] = PlaceholderModel("Ballantyne", "Ballantyne model (Placeholder)")
-        cls._models[FlightModelType.JCOLE] = PlaceholderModel("J. Cole", "J. Cole model (Placeholder)")
-        cls._models[FlightModelType.ROSPIE_DL] = PlaceholderModel("Rospie DL", "Rospie DL model (Placeholder)")
-        cls._models[FlightModelType.CHARRY_L3] = PlaceholderModel("Charry L3", "Charry L3 model (Placeholder)")
+        cls._models[FlightModelType.NATHAN] = PlaceholderModel(
+            "Nathan", "Nathan model (Placeholder)"
+        )
+        cls._models[FlightModelType.BALLANTYNE] = PlaceholderModel(
+            "Ballantyne", "Ballantyne model (Placeholder)"
+        )
+        cls._models[FlightModelType.JCOLE] = PlaceholderModel(
+            "J. Cole", "J. Cole model (Placeholder)"
+        )
+        cls._models[FlightModelType.ROSPIE_DL] = PlaceholderModel(
+            "Rospie DL", "Rospie DL model (Placeholder)"
+        )
+        cls._models[FlightModelType.CHARRY_L3] = PlaceholderModel(
+            "Charry L3", "Charry L3 model (Placeholder)"
+        )
 
 
 def compare_models(
