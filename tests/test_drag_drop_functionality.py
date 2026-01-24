@@ -23,7 +23,6 @@ setup_import_paths()
 if PYQT6_AVAILABLE:
     from PyQt6.QtCore import QMimeData, QPoint, QPointF, Qt
     from PyQt6.QtGui import QDropEvent
-    from PyQt6.QtWidgets import QApplication
 
 
 @unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")

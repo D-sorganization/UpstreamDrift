@@ -18,7 +18,7 @@ from src.shared.python.engine_availability import (
 )
 
 if PYQT6_AVAILABLE:
-    from PyQt6.QtWidgets import QApplication
+    pass
 
 
 @pytest.fixture(scope="module")

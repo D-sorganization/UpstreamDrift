@@ -1,6 +1,5 @@
 """Unit tests for Pinocchio GUI logic."""
 
-import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -8,7 +7,7 @@ import pytest
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
 
 if PYQT6_AVAILABLE:
-    from PyQt6 import QtWidgets
+    pass
 
 
 @pytest.fixture(autouse=True, scope="module")

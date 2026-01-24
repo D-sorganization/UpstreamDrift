@@ -139,7 +139,6 @@ def test_export_workflow(mock_c3d_file, mock_ezc3d, tmp_path):
 @pytest.fixture(scope="session")
 def qapp():
     """Manage a single QApplication instance for the test session."""
-    from PyQt6.QtWidgets import QApplication
 
     app = get_qapp()
     yield app

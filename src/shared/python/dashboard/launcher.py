@@ -2,11 +2,8 @@
 
 import sys
 
-from PyQt6.QtWidgets import QApplication
-from src.shared.python.gui_utils import get_qapp
-
-
 from src.shared.python.dashboard.window import UnifiedDashboardWindow
+from src.shared.python.gui_utils import get_qapp
 from src.shared.python.interfaces import PhysicsEngine
 from src.shared.python.logging_config import configure_gui_logging, get_logger
 

@@ -66,7 +66,7 @@ class TestPolynomialGeneratorLazyImport:
     @pytest.fixture
     def mock_launcher(self):
         """Create a mock launcher instance."""
-        from PyQt6.QtWidgets import QApplication, QMainWindow
+        from PyQt6.QtWidgets import QMainWindow
 
         # Ensure QApplication exists
         app = get_qapp()

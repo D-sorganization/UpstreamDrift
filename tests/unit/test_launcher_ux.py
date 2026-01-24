@@ -2,7 +2,6 @@
 """Test suite for Golf Modeling Suite UX improvements."""
 
 import unittest
-from typing import cast
 from unittest.mock import Mock, patch  # noqa: F401
 
 from src.shared.python.engine_availability import PYQT6_AVAILABLE

@@ -22,7 +22,6 @@ setup_import_paths()
 
 if PYQT6_AVAILABLE:
     from PyQt6.QtCore import QPoint
-    from PyQt6.QtWidgets import QApplication
 
 
 class TestSharedModuleImports(unittest.TestCase):
