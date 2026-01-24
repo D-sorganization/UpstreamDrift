@@ -50,35 +50,39 @@ def test_run_success(mock_popen, worker):
 
     mock_popen.return_value = process
 
-    # Check that signals are emitted
-    # In fallback mode, pyqtSignal is a class with emit method that does nothing by default.
-    # We need to mock the emit method on the instance signals to verify calls.
+    # Use signal spies to capture emitted signals
+    # Since PyQt6 signals have read-only emit, we connect to slots
+    log_messages: list[str] = []
+    finished_calls: list[tuple[int, str]] = []
 
-    # The class defines log_signal = pyqtSignal(str)
-    # worker.log_signal is an instance of the fallback pyqtSignal class
-
-    # We can patch the emit method on the instance attributes
-    worker.log_signal.emit = MagicMock()
-    worker.finished_signal.emit = MagicMock()
+    worker.log_signal.connect(log_messages.append)
+    worker.finished_signal.connect(lambda code, msg: finished_calls.append((code, msg)))
 
     worker.run()
 
-    worker.log_signal.emit.assert_any_call("Running command: echo hello")
-    worker.log_signal.emit.assert_any_call("line1")
-    worker.log_signal.emit.assert_any_call("line2")
-    worker.finished_signal.emit.assert_called_with(0, "")
+    # Verify log messages were emitted
+    assert "Running command: echo hello" in log_messages
+    assert "line1" in log_messages
+    assert "line2" in log_messages
+
+    # Verify finished signal was emitted
+    assert len(finished_calls) == 1
+    assert finished_calls[0] == (0, "")
 
 
 @patch("subprocess.Popen")
 def test_run_failure(mock_popen, worker):
     mock_popen.side_effect = OSError("Command not found")
 
-    worker.log_signal.emit = MagicMock()
-    worker.finished_signal.emit = MagicMock()
+    # Use signal spies to capture emitted signals
+    finished_calls: list[tuple[int, str]] = []
+    worker.finished_signal.connect(lambda code, msg: finished_calls.append((code, msg)))
 
     worker.run()
 
-    worker.finished_signal.emit.assert_called_with(-1, "Command not found")
+    # Verify finished signal was emitted with error
+    assert len(finished_calls) == 1
+    assert finished_calls[0] == (-1, "Command not found")
 
 
 @patch("subprocess.Popen")

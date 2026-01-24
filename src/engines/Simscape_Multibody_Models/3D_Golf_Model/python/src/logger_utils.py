@@ -78,6 +78,7 @@ def set_seeds(seed: int = DEFAULT_SEED) -> None:
     logger.info("Seeds set to %d", seed)
 
 
+@contextmanager
 def log_execution_time(
     operation_name: str, logger_obj: logging.Logger | None = None
 ) -> Generator[None, None, None]:
@@ -103,7 +104,3 @@ def log_execution_time(
             operation_name,
             duration,
         )
-
-
-# Apply decorator for proper context manager behavior
-log_execution_time = contextmanager(log_execution_time)
