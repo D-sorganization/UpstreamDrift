@@ -62,6 +62,7 @@ YAML_AVAILABLE: bool = False
 PYQT6_AVAILABLE: bool = False
 PYQT5_AVAILABLE: bool = False
 PYSIDE6_AVAILABLE: bool = False
+PYTEST_QT_AVAILABLE: bool = False
 
 # Additional optional library flags
 PIL_AVAILABLE: bool = False
@@ -176,6 +177,14 @@ try:
     PYSIDE6_AVAILABLE = True
     del _PySide6Widgets
 except (ImportError, OSError):
+    pass
+
+# Check pytest-qt (for Qt widget testing)
+try:
+    import pytestqt  # noqa: F401
+
+    PYTEST_QT_AVAILABLE = True
+except ImportError:
     pass
 
 # Derived availability flags
@@ -488,6 +497,8 @@ _ENGINE_FLAGS: dict[str, bool] = {
     "pyqt5": PYQT5_AVAILABLE,
     "pyside6": PYSIDE6_AVAILABLE,
     "qt": QT_AVAILABLE,
+    "pytest_qt": PYTEST_QT_AVAILABLE,
+    "pytestqt": PYTEST_QT_AVAILABLE,  # Alias
     # Image/Video processing
     "pil": PIL_AVAILABLE,
     "pillow": PIL_AVAILABLE,  # Alias

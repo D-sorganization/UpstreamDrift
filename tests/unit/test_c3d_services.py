@@ -1,26 +1,18 @@
 """Unit tests for C3D services."""
 
-import sys
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
-from src.shared.python.path_utils import get_simscape_model_path
-
-# Check if pytest-qt is available
-try:
-    import pytestqt  # noqa: F401
-
-    PYTEST_QT_AVAILABLE = True
-except ImportError:
-    PYTEST_QT_AVAILABLE = False
+from src.shared.python.engine_availability import (
+    PYQT6_AVAILABLE,
+    PYTEST_QT_AVAILABLE,
+)
+from src.shared.python.path_utils import get_simscape_model_path, setup_import_paths
 
 # Add source directory to path using centralized path utility
-SRC_PATH = get_simscape_model_path("3D_Golf_Model")
-if str(SRC_PATH) not in sys.path:
-    sys.path.insert(0, str(SRC_PATH))
+setup_import_paths(additional_paths=[get_simscape_model_path("3D_Golf_Model")])
 
 # Now we can import apps.*
 try:
