@@ -10,23 +10,22 @@ The launcher now features:
 - Pre-loaded resources passed to main window (no duplicate loading)
 """
 
-import logging
 import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.logging_config import get_logger
+
 if TYPE_CHECKING:
     pass
 
-try:
+if PYQT6_AVAILABLE:
     from PyQt6.QtWidgets import QApplication
-
-    PYQT_AVAILABLE = True
-except ImportError:
-    PYQT_AVAILABLE = False
+else:
     QApplication = None  # type: ignore
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class UnifiedLauncher:
@@ -45,7 +44,7 @@ class UnifiedLauncher:
         Note: QApplication is created lazily in mainloop() to allow
         the async startup system to manage the application lifecycle.
         """
-        if not PYQT_AVAILABLE:
+        if not PYQT6_AVAILABLE:
             raise ImportError(
                 "PyQt6 is required to run the launcher. Install it with: pip install PyQt6"
             )
@@ -148,7 +147,7 @@ def launch() -> int:
     Returns:
         Exit code
     """
-    if not PYQT_AVAILABLE:
+    if not PYQT6_AVAILABLE:
         return 1
 
     # Delegate directly to golf_launcher.main() for async startup
