@@ -1,11 +1,27 @@
 """Project-wide constants and configuration.
 
 Physics constants are delegated to shared.python.physics_constants.
+Pre-computed float values are provided to avoid repeated conversions.
 """
 
 from pathlib import Path
 
 from .physics_constants import *  # noqa: F403
+from .physics_constants import (
+    GOLF_BALL_DIAMETER_M,
+    GOLF_BALL_MASS_KG,
+    GOLF_BALL_MOMENT_OF_INERTIA_KG_M2,
+    GOLF_BALL_RADIUS_M,
+    GRAVITY_M_S2,
+)
+
+# Pre-computed float values for commonly used constants
+# (Avoids repeated float() conversions from PhysicalConstant in multiple modules)
+GRAVITY_FLOAT: float = float(GRAVITY_M_S2)
+GOLF_BALL_MASS_FLOAT: float = float(GOLF_BALL_MASS_KG)
+GOLF_BALL_RADIUS_FLOAT: float = float(GOLF_BALL_RADIUS_M)
+GOLF_BALL_DIAMETER_FLOAT: float = float(GOLF_BALL_DIAMETER_M)
+GOLF_BALL_MOMENT_INERTIA_FLOAT: float = float(GOLF_BALL_MOMENT_OF_INERTIA_KG_M2)
 
 # Project Root Paths
 SUITE_ROOT = Path(__file__).resolve().parent.parent.parent
