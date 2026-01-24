@@ -251,7 +251,7 @@ def get_mujoco_python_root() -> Path:
     return get_src_root() / "engines" / "physics_engines" / "mujoco" / "python"
 
 
-def setup_import_paths() -> None:
+def setup_import_paths(additional_paths: list[str | Path] | None = None) -> None:
     """Set up Python import paths for the Golf Modeling Suite.
 
     This function adds necessary directories to sys.path to enable
@@ -260,9 +260,15 @@ def setup_import_paths() -> None:
 
     This is a DRY replacement for scattered sys.path.insert calls.
 
+    Args:
+        additional_paths: Optional list of additional paths to add to sys.path
+
     Example:
         from src.shared.python.path_utils import setup_import_paths
         setup_import_paths()
+
+        # With additional paths
+        setup_import_paths(additional_paths=["/custom/path"])
     """
     import sys
 
@@ -272,6 +278,10 @@ def setup_import_paths() -> None:
         str(get_mujoco_python_root()),
         str(get_mujoco_python_root() / "mujoco_humanoid_golf"),
     ]
+
+    # Add any additional paths specified
+    if additional_paths:
+        paths_to_add.extend(str(p) for p in additional_paths)
 
     for path in paths_to_add:
         if path not in sys.path:
