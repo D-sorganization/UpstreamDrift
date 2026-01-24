@@ -9,12 +9,14 @@ runs validation tests, and generates a detailed compliance report.
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
+from src.shared.python.path_utils import get_repo_root, get_src_root
+
 from typing import Any
 
 import pytest
 
 # Add root to path
-ROOT_DIR = Path(__file__).parent.parent
+ROOT_DIR = get_src_root()
 sys.path.append(str(ROOT_DIR))
 
 from src.shared.python.engine_manager import EngineManager  # noqa: E402

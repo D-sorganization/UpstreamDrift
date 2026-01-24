@@ -42,10 +42,12 @@ import sys
 # Python 3.10 compatibility: UTC was added in 3.11
 from datetime import UTC, datetime
 from pathlib import Path
+from src.shared.python.path_utils import get_repo_root, get_src_root
+
 from typing import Any
 
 # Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(get_src_root()))
 
 import bcrypt
 from sqlalchemy import create_engine

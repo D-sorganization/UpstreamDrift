@@ -4,10 +4,12 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from src.shared.python.path_utils import get_repo_root, get_src_root
+
 from unittest.mock import MagicMock, patch
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent
+project_root = get_repo_root()
 sys.path.insert(0, str(project_root))
 
 # ruff: noqa: E402

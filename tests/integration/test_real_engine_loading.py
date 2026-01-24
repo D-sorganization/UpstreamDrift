@@ -10,12 +10,14 @@ These tests demonstrate proper integration testing:
 
 import sys
 from pathlib import Path
+from src.shared.python.path_utils import get_repo_root, get_src_root
+
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 # Add project root to path
-project_root = Path(__file__).parent.parent.parent
+project_root = get_repo_root()
 sys.path.insert(0, str(project_root))
 
 from src.shared.python.engine_manager import EngineManager, EngineStatus  # noqa: E402
@@ -31,7 +33,7 @@ def is_mock(module_name: str) -> bool:
 
 
 # Test assets
-ASSET_DIR = Path(__file__).parent.parent / "assets"
+ASSET_DIR = get_src_root() / "assets"
 SIMPLE_ARM_URDF = ASSET_DIR / "simple_arm.urdf"
 
 

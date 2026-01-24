@@ -8,6 +8,8 @@ import hashlib
 import sys
 from collections import defaultdict
 from pathlib import Path
+from src.shared.python.path_utils import get_repo_root, get_src_root
+
 
 # Directories to ignore
 IGNORE_DIRS = {
@@ -136,5 +138,5 @@ def find_duplicates(root_dir: Path) -> int:
 
 
 if __name__ == "__main__":
-    root_dir = Path(__file__).parent.parent
+    root_dir = get_src_root()
     sys.exit(find_duplicates(root_dir))

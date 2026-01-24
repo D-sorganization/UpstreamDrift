@@ -8,9 +8,11 @@ are properly migrated and functional.
 import importlib.util
 import sys
 from pathlib import Path
+from src.shared.python.path_utils import get_repo_root, get_src_root
+
 
 # Add suite root to path (script is in scripts/ directory)
-SUITE_ROOT = Path(__file__).parent.parent
+SUITE_ROOT = get_src_root()
 sys.path.insert(0, str(SUITE_ROOT))
 
 from src.shared.python.common_utils import setup_logging  # noqa: E402

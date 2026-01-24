@@ -24,6 +24,7 @@ import argparse
 import re
 import sys
 from pathlib import Path
+from typing import Callable
 
 # Add repo root to path
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -214,7 +215,9 @@ class DRYRefactorer:
             logger.error(f"Failed to refactor QApplication in {file_path}: {e}")
             return False
 
-    def process_directory(self, directory: Path, refactor_func) -> int:
+    def process_directory(
+        self, directory: Path, refactor_func: Callable[[Path], bool]
+    ) -> int:
         """Process all Python files in directory with given refactor function."""
         count = 0
         for py_file in directory.rglob("*.py"):
@@ -224,6 +227,119 @@ class DRYRefactorer:
             if refactor_func(py_file):
                 count += 1
         return count
+
+    def refactor_array_validation(self, file_path: Path) -> bool:
+        """Replace repeated array shape validation with validation_utils."""
+        try:
+            content = file_path.read_text(encoding="utf-8")
+            original_content = content
+
+            # Check if file already uses validation_utils
+            if "from src.shared.python.validation_utils import" in content:
+                return False
+
+            # Pattern: if array.shape != expected_shape: raise ValueError
+            pattern = r"if\s+(\w+)\.shape\s*!=\s*\(([^)]+)\):\s*\n\s+raise\s+ValueError\([^)]+\)"
+
+            matches = list(re.finditer(pattern, content))
+            if not matches:
+                return False
+
+            # Add import
+            if "import numpy as np" in content:
+                numpy_import = re.search(r"^import numpy as np$", content, re.MULTILINE)
+                if numpy_import:
+                    insert_pos = numpy_import.end()
+                    import_line = (
+                        "\nfrom src.shared.python.validation_utils import "
+                        "validate_array_shape\n"
+                    )
+                    content = content[:insert_pos] + import_line + content[insert_pos:]
+
+            # Replace patterns
+            for match in reversed(matches):  # Reverse to maintain positions
+                array_name = match.group(1)
+                shape = match.group(2)
+                replacement = (
+                    f'validate_array_shape({array_name}, ({shape}), "{array_name}")'
+                )
+                content = (
+                    content[: match.start()] + replacement + content[match.end() :]
+                )
+
+            if content != original_content:
+                file_path.write_text(content, encoding="utf-8")
+                self.changes_made += 1
+                logger.info(
+                    f"✓ Refactored array validation in {file_path.relative_to(self.repo_root)}"
+                )
+                return True
+
+            return False
+
+        except Exception as e:
+            logger.error(f"Failed to refactor array validation in {file_path}: {e}")
+            return False
+
+    def refactor_path_resolution(self, file_path: Path) -> bool:
+        """Replace repeated Path(__file__).parent patterns with utilities."""
+        try:
+            content = file_path.read_text(encoding="utf-8")
+            original_content = content
+
+            # Skip if already uses path utilities
+            if "from src.shared.python.path_utils import" in content:
+                return False
+
+            # Pattern: project_root = Path(__file__).parent.parent.parent
+            patterns = [
+                (
+                    r"(\w+)\s*=\s*Path\(__file__\)\.parent\.parent\.parent",
+                    r"\1 = get_repo_root()",
+                ),
+                (
+                    r"(\w+)\s*=\s*Path\(__file__\)\.parent\.parent",
+                    r"\1 = get_src_root()",
+                ),
+                (
+                    r"Path\(__file__\)\.parent\.parent\.parent",
+                    "get_repo_root()",
+                ),
+                (r"Path\(__file__\)\.parent\.parent", "get_src_root()"),
+            ]
+
+            needs_import = False
+            for pattern, replacement in patterns:
+                if re.search(pattern, content):
+                    content = re.sub(pattern, replacement, content)
+                    needs_import = True
+
+            if needs_import:
+                # Add import after pathlib import
+                pathlib_import = re.search(
+                    r"^from pathlib import Path$", content, re.MULTILINE
+                )
+                if pathlib_import:
+                    insert_pos = pathlib_import.end()
+                    import_line = (
+                        "\nfrom src.shared.python.path_utils import "
+                        "get_repo_root, get_src_root\n"
+                    )
+                    content = content[:insert_pos] + import_line + content[insert_pos:]
+
+            if content != original_content:
+                file_path.write_text(content, encoding="utf-8")
+                self.changes_made += 1
+                logger.info(
+                    f"✓ Refactored path resolution in {file_path.relative_to(self.repo_root)}"
+                )
+                return True
+
+            return False
+
+        except Exception as e:
+            logger.error(f"Failed to refactor path resolution in {file_path}: {e}")
+            return False
 
 
 def refactor_logging_phase(repo_root: Path) -> int:
@@ -308,14 +424,66 @@ def refactor_qapp_phase(repo_root: Path) -> int:
     return total_changes
 
 
-def main():
+def refactor_array_validation_phase(repo_root: Path) -> int:
+    """Phase 4: Consolidate array validation patterns."""
+    logger.info("=" * 60)
+    logger.info("PHASE 4: Array Validation Consolidation")
+    logger.info("=" * 60)
+
+    refactorer = DRYRefactorer(repo_root)
+
+    directories = [
+        repo_root / "src",
+        repo_root / "tests",
+    ]
+
+    total_changes = 0
+    for directory in directories:
+        if directory.exists():
+            logger.info(f"\nProcessing {directory.relative_to(repo_root)}...")
+            changes = refactorer.process_directory(
+                directory, refactorer.refactor_array_validation
+            )
+            total_changes += changes
+
+    logger.info(f"\n✓ Phase 4 complete: {total_changes} files refactored")
+    return total_changes
+
+
+def refactor_path_resolution_phase(repo_root: Path) -> int:
+    """Phase 5: Consolidate path resolution patterns."""
+    logger.info("=" * 60)
+    logger.info("PHASE 5: Path Resolution Consolidation")
+    logger.info("=" * 60)
+
+    refactorer = DRYRefactorer(repo_root)
+
+    directories = [
+        repo_root / "tests",
+        repo_root / "scripts",
+    ]
+
+    total_changes = 0
+    for directory in directories:
+        if directory.exists():
+            logger.info(f"\nProcessing {directory.relative_to(repo_root)}...")
+            changes = refactorer.process_directory(
+                directory, refactorer.refactor_path_resolution
+            )
+            total_changes += changes
+
+    logger.info(f"\n✓ Phase 5 complete: {total_changes} files refactored")
+    return total_changes
+
+
+def main() -> int:
     """Main entry point."""
     parser = argparse.ArgumentParser(
         description="Refactor DRY and orthogonality violations"
     )
     parser.add_argument(
         "--phase",
-        choices=["all", "logging", "paths", "qapp"],
+        choices=["all", "logging", "paths", "qapp", "validation", "pathres"],
         default="all",
         help="Which refactoring phase to run",
     )
@@ -340,6 +508,12 @@ def main():
 
     if args.phase in ["all", "qapp"]:
         total_changes += refactor_qapp_phase(REPO_ROOT)
+
+    if args.phase in ["all", "validation"]:
+        total_changes += refactor_array_validation_phase(REPO_ROOT)
+
+    if args.phase in ["all", "pathres"]:
+        total_changes += refactor_path_resolution_phase(REPO_ROOT)
 
     logger.info("=" * 60)
     logger.info(f"TOTAL CHANGES: {total_changes} files modified")

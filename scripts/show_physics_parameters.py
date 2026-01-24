@@ -2,9 +2,11 @@
 
 import sys
 from pathlib import Path
+from src.shared.python.path_utils import get_repo_root, get_src_root
+
 
 # Add project root to path (script is in scripts/ directory)
-root = Path(__file__).parent.parent
+root = get_src_root()
 sys.path.insert(0, str(root))
 sys.path.insert(0, str(root / "shared" / "python"))
 

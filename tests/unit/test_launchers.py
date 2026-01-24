@@ -5,12 +5,14 @@ Unit tests for launcher functionality.
 import os
 import sys
 from pathlib import Path
+from src.shared.python.path_utils import get_repo_root, get_src_root
+
 from unittest.mock import Mock, patch
 
 import pytest
 
 # Add the project root to the path for imports
-project_root = Path(__file__).parent.parent.parent
+project_root = get_repo_root()
 sys.path.insert(0, str(project_root))
 
 
@@ -142,7 +144,7 @@ class TestLauncherUtilities:
 
     def test_engine_path_construction(self):
         """Test construction of engine paths."""
-        project_root = Path(__file__).parent.parent.parent
+        project_root = get_repo_root()
 
         # Test MuJoCo path
         mujoco_path = (
@@ -193,7 +195,7 @@ class TestLauncherIntegration:
     @pytest.mark.integration
     def test_launcher_module_integration(self):
         """Test integration between launcher modules."""
-        project_root = Path(__file__).parent.parent.parent
+        project_root = get_repo_root()
 
         # Test that launcher files exist
         main_launcher = project_root / "launch_golf_suite.py"
