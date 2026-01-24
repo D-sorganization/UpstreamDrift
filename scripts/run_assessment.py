@@ -193,11 +193,11 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
     score = max(0, min(10, score))
 
     # Generate report
-    report_content = f"""# Assessment {assessment_id}: {assessment['name']}
+    report_content = f"""# Assessment {assessment_id}: {assessment["name"]}
 
 **Date**: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-**Assessment**: {assessment_id} - {assessment['name']}
-**Description**: {assessment['description']}
+**Assessment**: {assessment_id} - {assessment["name"]}
+**Description**: {assessment["description"]}
 **Generated**: Automated via Jules Assessment Auto-Fix workflow
 
 ## Score: {score}/10

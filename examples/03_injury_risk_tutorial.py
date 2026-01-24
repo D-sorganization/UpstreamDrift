@@ -21,15 +21,15 @@ repo_root = Path(__file__).parent.parent
 sys.path.append(str(repo_root))
 
 
-from shared.python.injury.injury_risk import (  # noqa: E402
+from src.shared.python.injury.injury_risk import (  # noqa: E402
     InjuryRiskScorer,
 )
-from shared.python.injury.spinal_load_analysis import (  # noqa: E402
+from src.shared.python.injury.spinal_load_analysis import (  # noqa: E402
     create_example_analysis,
 )
 
 # Setup logger for tutorial
-from shared.python.logging_config import get_logger, setup_logging  # noqa: E402
+from src.shared.python.logging_config import get_logger, setup_logging  # noqa: E402
 
 setup_logging(use_simple_format=True)
 logger = get_logger("tutorial")

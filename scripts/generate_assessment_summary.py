@@ -182,7 +182,7 @@ Repository assessment completed across all {len(scores)} categories.
     for group_name, group_info in groups.items():
         score = group_scores.get(group_name, 0.0)
         cats = ", ".join(group_info["cats"])
-        md_content += f"| **{group_name}** | {group_info['weight']*100:.0f}% | {score:.1f} | {cats} |\n"
+        md_content += f"| **{group_name}** | {group_info['weight'] * 100:.0f}% | {score:.1f} | {cats} |\n"
 
     md_content += """
 ### Individual Category Scores

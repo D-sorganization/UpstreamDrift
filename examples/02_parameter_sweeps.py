@@ -17,9 +17,9 @@ project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
 # Configure logging
-from shared.python.logging_config import get_logger, setup_logging  # noqa: E402
-from shared.python.output_manager import OutputManager  # noqa: E402
-from shared.python.physics_parameters import (  # noqa: E402
+from src.shared.python.logging_config import get_logger, setup_logging  # noqa: E402
+from src.shared.python.output_manager import OutputManager  # noqa: E402
+from src.shared.python.physics_parameters import (  # noqa: E402
     ParameterCategory,
     get_registry,
 )

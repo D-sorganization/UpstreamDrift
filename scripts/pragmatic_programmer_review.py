@@ -808,11 +808,11 @@ def generate_markdown_report(results: dict[str, Any], output_path: Path) -> None
     """Generate a markdown report from the assessment results."""
     md = f"""# Pragmatic Programmer Review
 
-**Repository**: {results['repository']}
-**Date**: {results['timestamp'][:10]}
-**Files Analyzed**: {results['python_files_analyzed']}
+**Repository**: {results["repository"]}
+**Date**: {results["timestamp"][:10]}
+**Files Analyzed**: {results["python_files_analyzed"]}
 
-## Overall Score: {results['overall_score']:.1f}/10
+## Overall Score: {results["overall_score"]:.1f}/10
 
 ## Principle Scores
 
@@ -833,9 +833,9 @@ def generate_markdown_report(results: dict[str, Any], output_path: Path) -> None
     md += f"""
 ## Issue Summary
 
-- **Critical**: {results['issue_summary']['CRITICAL']}
-- **Major**: {results['issue_summary']['MAJOR']}
-- **Minor**: {results['issue_summary']['MINOR']}
+- **Critical**: {results["issue_summary"]["CRITICAL"]}
+- **Major**: {results["issue_summary"]["MAJOR"]}
+- **Minor**: {results["issue_summary"]["MINOR"]}
 
 ## Detailed Findings
 
@@ -887,17 +887,17 @@ def create_github_issues(results: dict[str, Any], dry_run: bool = False) -> list
 
         body = f"""## Pragmatic Programmer Review Finding
 
-**Principle**: {PRINCIPLES[issue['principle']]['name']}
-**Severity**: {issue['severity']}
-**Identified**: {results['timestamp'][:10]}
+**Principle**: {PRINCIPLES[issue["principle"]]["name"]}
+**Severity**: {issue["severity"]}
+**Identified**: {results["timestamp"][:10]}
 
 ### Description
 
-{issue['description']}
+{issue["description"]}
 
 ### Recommendation
 
-{issue['recommendation']}
+{issue["recommendation"]}
 
 ### Affected Files
 

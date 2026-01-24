@@ -557,7 +557,6 @@ def main() -> None:
     if args.output_format == "json":
         pass
     else:
-
         issues_raw = results.get("issues", [])
         issues: list[str] = issues_raw if isinstance(issues_raw, list) else []
         if issues:

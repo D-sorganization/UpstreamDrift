@@ -90,7 +90,6 @@ def main() -> None:
         open(stubs_path, "w", encoding="utf-8") as stubs_file,
         open(docs_path, "w", encoding="utf-8") as docs_file,
     ):
-
         for root, dirs, files in os.walk(root_dir):
             dirs[:] = [d for d in dirs if d not in exclude_dirs]
 

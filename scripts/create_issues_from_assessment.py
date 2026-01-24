@@ -233,7 +233,7 @@ def process_assessment_findings(
 **Severity**: {severity}
 **Category**: {category}
 **Source**: {source}
-**Identified**: {summary.get('timestamp', 'Unknown')}
+**Identified**: {summary.get("timestamp", "Unknown")}
 
 ### Problem
 
@@ -247,7 +247,7 @@ This issue was identified during automated repository assessment and requires at
 ### References
 
 - Assessment Report: {source}
-- Full Assessment: docs/assessments/COMPREHENSIVE_ASSESSMENT_SUMMARY_{summary.get('timestamp', '')[:10]}.md
+- Full Assessment: docs/assessments/COMPREHENSIVE_ASSESSMENT_SUMMARY_{summary.get("timestamp", "")[:10]}.md
 
 ### Next Steps
 
