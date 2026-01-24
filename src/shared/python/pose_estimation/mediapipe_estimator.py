@@ -6,6 +6,8 @@ implementing the standardized PoseEstimator interface with enhanced features:
 - Temporal smoothing with Kalman filtering
 - Multi-person detection support
 - Confidence-based filtering
+
+Refactored to use shared engine availability module (DRY principle).
 """
 
 import logging
@@ -16,14 +18,13 @@ from typing import Any, ClassVar
 import cv2
 import numpy as np
 
-# Try to import mediapipe. If not found, we will fall back to mock/error behavior
-try:
-    import mediapipe as mp
+from src.shared.python.engine_availability import MEDIAPIPE_AVAILABLE
 
-    MEDIAPIPE_AVAILABLE = True
-except ImportError:
+# Import mediapipe if available
+if MEDIAPIPE_AVAILABLE:
+    import mediapipe as mp
+else:
     mp = None
-    MEDIAPIPE_AVAILABLE = False
 
 from src.shared.python.pose_estimation.interface import (
     PoseEstimationResult,

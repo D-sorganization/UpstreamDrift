@@ -1,6 +1,8 @@
 """Drake Physics Engine wrapper implementation.
 
 Wraps pydrake.multibody to provide a compliant PhysicsEngine interface.
+
+Refactored to use shared engine availability module (DRY principle).
 """
 
 from __future__ import annotations
@@ -10,10 +12,10 @@ from typing import Any, cast
 
 import numpy as np
 
-# Pydrake imports likely to fail if not installed, requiring try/except block
-# in a real environment, but here we assume the environment satisfies requirements
-# or that this module is only imported when safe.
-try:
+from src.shared.python.engine_availability import DRAKE_AVAILABLE
+
+# Pydrake imports - only import if available
+if DRAKE_AVAILABLE:
     import pydrake.math  # noqa: F401
     import pydrake.multibody.parsing as mbparsing  # noqa: F401
     import pydrake.multibody.plant as mbp  # noqa: F401
@@ -30,9 +32,6 @@ try:
         RigidTransform,  # noqa: F401
         RotationMatrix,  # noqa: F401
     )
-except ImportError:
-    # Just to allow linting/static analysis if pydrake is missing
-    pass
 
 from src.shared.python import constants
 from src.shared.python.interfaces import PhysicsEngine

@@ -1,6 +1,8 @@
 """Tests for flexible shaft engine integration.
 
 Task 3.3: Flexible Shaft Engine Integration tests.
+
+Refactored to use shared engine availability module (DRY principle).
 """
 
 from typing import TYPE_CHECKING
@@ -8,19 +10,12 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
+from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+
 if TYPE_CHECKING:
     from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
         MuJoCoPhysicsEngine,
     )
-
-# Engine availability
-MUJOCO_AVAILABLE = False
-try:
-    import mujoco  # noqa: F401
-
-    MUJOCO_AVAILABLE = True
-except ImportError:
-    pass
 
 
 class TestMuJoCoShaftIntegration:

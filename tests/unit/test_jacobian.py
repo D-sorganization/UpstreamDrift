@@ -2,45 +2,17 @@
 
 Implements Task 3.1: Jacobian Coverage Completion per Phase 3 roadmap.
 Verifies Jacobian shape (6×nv), structure, and cross-engine consistency.
+
+Refactored to use shared engine availability module (DRY principle).
 """
 
 import numpy as np
 import pytest
 
-# Engine availability flags
-MUJOCO_AVAILABLE = False
-PINOCCHIO_AVAILABLE = False
-OPENSIM_AVAILABLE = False
-MYOSUITE_AVAILABLE = False
-
-try:
-    import mujoco  # noqa: F401
-
-    MUJOCO_AVAILABLE = True
-except ImportError:
-    pass
-
-try:
-    import pinocchio  # noqa: F401
-
-    PINOCCHIO_AVAILABLE = True
-except ImportError:
-    pass
-
-try:
-    import opensim  # noqa: F401
-
-    OPENSIM_AVAILABLE = True
-except ImportError:
-    pass
-
-try:
-    import myosuite  # noqa: F401
-
-    MYOSUITE_AVAILABLE = True
-except ImportError:
-    pass
-
+from src.shared.python.engine_availability import (
+    MUJOCO_AVAILABLE,
+    PINOCCHIO_AVAILABLE,
+)
 
 # Simple inline URDF for Jacobian tests (2-DOF planar arm)
 SIMPLE_ARM_URDF = """<?xml version="1.0"?>
