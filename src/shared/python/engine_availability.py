@@ -62,6 +62,21 @@ PYQT6_AVAILABLE: bool = False
 PYQT5_AVAILABLE: bool = False
 PYSIDE6_AVAILABLE: bool = False
 
+# Additional optional library flags
+PIL_AVAILABLE: bool = False
+CV2_AVAILABLE: bool = False
+STRUCTLOG_AVAILABLE: bool = False
+GYMNASIUM_AVAILABLE: bool = False
+GYM_AVAILABLE: bool = False
+URDFPY_AVAILABLE: bool = False
+TRIMESH_AVAILABLE: bool = False
+MOVIEPY_AVAILABLE: bool = False
+CX_FREEZE_AVAILABLE: bool = False
+JSONSCHEMA_AVAILABLE: bool = False
+COLORAMA_AVAILABLE: bool = False
+TQDM_AVAILABLE: bool = False
+REQUESTS_AVAILABLE: bool = False
+
 # Check NumPy (almost always available but good to check)
 try:
     import numpy  # noqa: F401
@@ -250,6 +265,113 @@ try:
 except ImportError:
     pass
 
+# Check PIL/Pillow
+try:
+    from PIL import Image  # noqa: F401
+
+    PIL_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check OpenCV
+try:
+    import cv2  # noqa: F401
+
+    CV2_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check structlog
+try:
+    import structlog  # noqa: F401
+
+    STRUCTLOG_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check gymnasium (new OpenAI Gym)
+try:
+    import gymnasium  # noqa: F401
+
+    GYMNASIUM_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check gym (legacy OpenAI Gym)
+try:
+    import gym  # noqa: F401
+
+    GYM_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check urdfpy
+try:
+    import urdfpy  # noqa: F401
+
+    URDFPY_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check trimesh
+try:
+    import trimesh  # noqa: F401
+
+    TRIMESH_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check moviepy
+try:
+    import moviepy  # noqa: F401
+
+    MOVIEPY_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check cx_Freeze (for installers)
+try:
+    import cx_Freeze  # noqa: F401
+
+    CX_FREEZE_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check jsonschema
+try:
+    import jsonschema  # noqa: F401
+
+    JSONSCHEMA_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check colorama
+try:
+    import colorama  # noqa: F401
+
+    COLORAMA_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check tqdm
+try:
+    import tqdm  # noqa: F401
+
+    TQDM_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check requests
+try:
+    import requests  # noqa: F401
+
+    REQUESTS_AVAILABLE = True
+except ImportError:
+    pass
+
+# Derived availability flags
+GYM_ANY_AVAILABLE: bool = GYMNASIUM_AVAILABLE or GYM_AVAILABLE
+
 # Mapping of engine names to availability flags
 _ENGINE_FLAGS: dict[str, bool] = {
     # Physics engines
@@ -288,6 +410,25 @@ _ENGINE_FLAGS: dict[str, bool] = {
     "pyqt5": PYQT5_AVAILABLE,
     "pyside6": PYSIDE6_AVAILABLE,
     "qt": QT_AVAILABLE,
+    # Image/Video processing
+    "pil": PIL_AVAILABLE,
+    "pillow": PIL_AVAILABLE,  # Alias
+    "cv2": CV2_AVAILABLE,
+    "opencv": CV2_AVAILABLE,  # Alias
+    "moviepy": MOVIEPY_AVAILABLE,
+    # Robotics/Simulation
+    "urdfpy": URDFPY_AVAILABLE,
+    "trimesh": TRIMESH_AVAILABLE,
+    "gymnasium": GYMNASIUM_AVAILABLE,
+    "gym": GYM_AVAILABLE,
+    "gym_any": GYM_ANY_AVAILABLE,
+    # Utilities
+    "structlog": STRUCTLOG_AVAILABLE,
+    "cx_freeze": CX_FREEZE_AVAILABLE,
+    "jsonschema": JSONSCHEMA_AVAILABLE,
+    "colorama": COLORAMA_AVAILABLE,
+    "tqdm": TQDM_AVAILABLE,
+    "requests": REQUESTS_AVAILABLE,
 }
 
 

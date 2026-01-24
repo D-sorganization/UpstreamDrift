@@ -9,6 +9,7 @@ Usage:
         get_repo_root,
         get_src_root,
         get_simscape_model_path,
+        setup_import_paths,
     )
 
     # Get repository root
@@ -19,8 +20,14 @@ Usage:
 
     # Get Simscape model path
     model_path = get_simscape_model_path("3D_Golf_Model")
+
+    # Setup sys.path for imports (typically in test files)
+    setup_import_paths()
 """
 
+from __future__ import annotations
+
+import sys
 from functools import lru_cache
 from pathlib import Path
 
@@ -136,3 +143,85 @@ def get_physics_engine_python_path(engine_name: str) -> Path:
         PosixPath('.../src/engines/physics_engines/mujoco/python')
     """
     return get_physics_engine_path(engine_name) / "python"
+
+
+def setup_import_paths(
+    *,
+    include_repo_root: bool = True,
+    include_src: bool = True,
+    include_engines: bool = False,
+    additional_paths: list[Path | str] | None = None,
+) -> list[Path]:
+    """Setup sys.path for imports across the Golf Modeling Suite.
+
+    This function consolidates the common pattern of adding project paths
+    to sys.path, eliminating duplicate code in test files and scripts.
+
+    Args:
+        include_repo_root: Whether to add the repository root to sys.path.
+        include_src: Whether to add the src directory to sys.path.
+        include_engines: Whether to add the engines directory to sys.path.
+        additional_paths: Additional paths to add to sys.path.
+
+    Returns:
+        List of paths that were added to sys.path.
+
+    Example:
+        # In a test file:
+        from src.shared.python.path_utils import setup_import_paths
+        setup_import_paths()
+
+        # With additional paths:
+        setup_import_paths(additional_paths=["/custom/path"])
+
+        # For engine-specific tests:
+        setup_import_paths(include_engines=True)
+    """
+    added_paths: list[Path] = []
+
+    if include_repo_root:
+        repo_root = get_repo_root()
+        if str(repo_root) not in sys.path:
+            sys.path.insert(0, str(repo_root))
+            added_paths.append(repo_root)
+
+    if include_src:
+        src_root = get_src_root()
+        if str(src_root) not in sys.path:
+            sys.path.insert(0, str(src_root))
+            added_paths.append(src_root)
+
+    if include_engines:
+        engines_root = get_engines_root()
+        if str(engines_root) not in sys.path:
+            sys.path.insert(0, str(engines_root))
+            added_paths.append(engines_root)
+
+    if additional_paths:
+        for path in additional_paths:
+            path_obj = Path(path) if isinstance(path, str) else path
+            if str(path_obj) not in sys.path:
+                sys.path.insert(0, str(path_obj))
+                added_paths.append(path_obj)
+
+    return added_paths
+
+
+def get_project_root_from_file(file_path: str | Path, levels_up: int = 0) -> Path:
+    """Get a parent directory from a file path.
+
+    This is a utility to help refactor existing PROJECT_ROOT patterns
+    that use Path(__file__).resolve().parents[N].
+
+    Args:
+        file_path: The __file__ of the calling module.
+        levels_up: Number of directory levels to go up.
+
+    Returns:
+        The resolved parent path.
+
+    Example:
+        # Instead of: PROJECT_ROOT = Path(__file__).resolve().parents[3]
+        # Use: PROJECT_ROOT = get_project_root_from_file(__file__, 3)
+    """
+    return Path(file_path).resolve().parents[levels_up]

@@ -9,27 +9,24 @@ Tests cover:
 - Error handling in drag operations
 """
 
-import sys
 import unittest
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
-# Add repo root and shared modules to path for testing
-sys.path.insert(0, str(Path(__file__).parent.parent))
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.path_utils import setup_import_paths
 
-try:
+# Setup import paths for testing
+setup_import_paths()
+
+if PYQT6_AVAILABLE:
     from PyQt6.QtCore import QMimeData, QPoint, QPointF, Qt
     from PyQt6.QtGui import QDropEvent
     from PyQt6.QtWidgets import QApplication
 
-    PYQT_AVAILABLE = True
-except ImportError:
-    PYQT_AVAILABLE = False
 
-
-@unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
+@unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
 class TestDragDropFunctionality(unittest.TestCase):
     """Test drag-and-drop functionality in model cards."""
 
@@ -186,7 +183,7 @@ class TestDragDropFunctionality(unittest.TestCase):
         self.mock_launcher.launch_model_direct.assert_called_with("test_model_0")
 
 
-@unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
+@unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
 class TestGridLayout(unittest.TestCase):
     """Test 3x3 grid layout functionality."""
 
@@ -345,7 +342,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
             "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py",
         )
 
-    @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
+    @unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
     def test_c3d_viewer_launch_method(self) -> None:
         """Test C3D viewer launch method."""
         from src.launchers.golf_launcher import GolfLauncher
@@ -389,7 +386,7 @@ class TestC3DViewerIntegration(unittest.TestCase):
             # 2. Only security validation failed (which is expected in test environment)
             self.assertTrue(success or mock_logger.error.called)
 
-    @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
+    @unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
     def test_c3d_viewer_missing_file_handling(self) -> None:
         """Test handling when C3D viewer file is missing."""
         from src.launchers.golf_launcher import GolfLauncher
@@ -473,7 +470,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
         except ImportError as e:
             self.skipTest(f"URDF generator not available: {e}")
 
-    @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
+    @unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
     def test_urdf_generator_launch_method(self) -> None:
         """Test URDF generator launch method."""
         from src.launchers.golf_launcher import GolfLauncher
@@ -517,7 +514,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
             # 2. Only security validation failed (which is expected in test environment)
             self.assertTrue(success or mock_logger.error.called)
 
-    @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
+    @unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
     def test_urdf_generator_missing_file_handling(self) -> None:
         """Test handling when URDF generator file is missing."""
         from src.launchers.golf_launcher import GolfLauncher
@@ -587,7 +584,7 @@ if __name__ == "__main__":
     ]
 
     # Add PyQt tests only if available
-    if PYQT_AVAILABLE:
+    if PYQT6_AVAILABLE:
         test_classes.extend(
             [
                 TestDragDropFunctionality,
