@@ -110,7 +110,7 @@ def compute_file_hash(content: str) -> str:
         if line:
             lines.append(line)
     normalized = "\n".join(lines)
-    return hashlib.md5(normalized.encode()).hexdigest()
+    return hashlib.md5(normalized.encode(), usedforsecurity=False).hexdigest()
 
 
 def extract_functions(content: str) -> list[dict]:

@@ -210,7 +210,7 @@ class MockEngine:
         engine.step()
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize mock engine."""
         self.model_name_str = "MockModel"
         self.is_loaded = False

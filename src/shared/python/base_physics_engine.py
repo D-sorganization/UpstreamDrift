@@ -235,7 +235,7 @@ class ModelLoadingMixin:
 class SimulationMixin:
     """Mixin providing common simulation utilities."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize simulation state."""
         self._simulation_time: float = 0.0
         self._step_count: int = 0

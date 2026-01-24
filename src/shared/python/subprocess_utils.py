@@ -58,10 +58,13 @@ def run_command(
     """
     logger.debug(f"Running command: {' '.join(cmd)}")
 
+    # Default timeout of 300 seconds (5 minutes) if not specified
+    effective_timeout = timeout if timeout is not None else 300.0
+
     result = secure_run(
         cmd,
         cwd=str(cwd) if cwd else None,
-        timeout=timeout,
+        timeout=effective_timeout,
         capture_output=capture_output,
     )
 
@@ -90,7 +93,7 @@ class ProcessManager:
         manager.stop_all()
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize process manager."""
         self.processes: dict[str, subprocess.Popen] = {}
         self._lock = threading.Lock()
@@ -242,7 +245,7 @@ class ProcessManager:
         """
         return {name: self.is_running(name) for name in self.processes}
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Cleanup on deletion."""
         self.stop_all()
 

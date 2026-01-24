@@ -159,7 +159,9 @@ class BaseApplicationWindow(QMainWindow):
                 self.setWindowIcon(icon)
 
         # Create status bar
-        self.statusBar().showMessage("Ready")
+        status_bar = self.statusBar()
+        if status_bar:
+            status_bar.showMessage("Ready")
 
         logger.debug(f"Initialized {self.__class__.__name__}: {title}")
 
@@ -170,7 +172,9 @@ class BaseApplicationWindow(QMainWindow):
             message: Message to display
             timeout: Timeout in milliseconds (0 = no timeout)
         """
-        self.statusBar().showMessage(message, timeout)
+        status_bar = self.statusBar()
+        if status_bar:
+            status_bar.showMessage(message, timeout)
 
     def show_error(self, title: str, message: str) -> None:
         """Show error dialog.
