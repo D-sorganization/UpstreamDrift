@@ -11,6 +11,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
+from .environment import get_env
+
 
 class ProbeStatus(Enum):
     """Status of an engine probe."""
@@ -637,9 +639,7 @@ class OpenPoseProbe(EngineProbe):
 
         # Check for models dir
         # We check environment variable OPENPOSE_MODELS or standard windows paths
-        import os
-
-        model_path_env = os.environ.get("OPENPOSE_MODELS")
+        model_path_env = get_env("OPENPOSE_MODELS")
         default_path = Path("C:/openpose/models")
 
         models_found = False
