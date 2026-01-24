@@ -240,6 +240,19 @@ addopts = [
     "-m", "not slow",  # Skip slow tests by default - run with -m slow for full suite
     "--timeout=120",  # 120 second timeout per test to prevent hanging
 ]
+# DRY: Centralized Python path configuration (eliminates sys.path in conftest.py files)
+pythonpath = [
+    ".",
+    "src",
+    "src/shared/python",
+    "src/engines/physics_engines/mujoco/python",
+    "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf",
+    "src/engines/physics_engines/pinocchio/python",
+    "src/engines/physics_engines/drake/python",
+    "src/engines/Simscape_Multibody_Models/2D_Golf_Model/python/src",
+    "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src",
+    "tests/fixtures",
+]
 testpaths = [
     "tests",
     "shared/python/tests",

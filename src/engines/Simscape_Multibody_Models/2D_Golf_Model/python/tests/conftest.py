@@ -1,13 +1,7 @@
-"""Pytest configuration for tests.
+"""Pytest configuration for 2D Golf Model tests.
 
-This file sets up the test environment, including PYTHONPATH configuration
-to ensure imports work correctly in both local and CI environments.
+Path configuration is centralized in pyproject.toml [tool.pytest.ini_options].
+This follows DRY principles from The Pragmatic Programmer.
 """
 
-import sys
-from pathlib import Path
-
-# Add python/src to PYTHONPATH for test imports
-src_path = Path(__file__).parent.parent / "src"
-if str(src_path) not in sys.path:
-    sys.path.insert(0, str(src_path))
+# No sys.path manipulation needed - handled by pyproject.toml pythonpath
