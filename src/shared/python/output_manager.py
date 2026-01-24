@@ -574,7 +574,9 @@ class OutputManager:
             if directory.exists():
                 for file_path in self._fast_dir_scan(directory):
                     try:
-                        file_time = datetime.fromtimestamp(file_path.stat().st_mtime).astimezone()
+                        file_time = datetime.fromtimestamp(
+                            file_path.stat().st_mtime
+                        ).astimezone()
                         if file_time < temp_cutoff:
                             file_path.unlink()
                             cleaned_count += 1
@@ -589,7 +591,9 @@ class OutputManager:
             if directory.exists():
                 for file_path in self._fast_dir_scan(directory):
                     try:
-                        file_time = datetime.fromtimestamp(file_path.stat().st_mtime).astimezone()
+                        file_time = datetime.fromtimestamp(
+                            file_path.stat().st_mtime
+                        ).astimezone()
                         if file_time < cutoff_date:
                             # Move to archive instead of deleting
                             archive_dir = self.base_path / "archive"

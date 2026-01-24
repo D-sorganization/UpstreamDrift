@@ -543,15 +543,13 @@ class DraggableModelCard(QFrame):
         lbl_img.setFixedSize(200, 200)
         lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
         # Ensure the image container has proper styling for centering
-        lbl_img.setStyleSheet(
-            """
+        lbl_img.setStyleSheet("""
             QLabel {
                 border: none;
                 background: transparent;
                 text-align: center;
             }
-        """
-        )
+        """)
 
         if img_path and img_path.exists():
             pixmap = QPixmap(str(img_path))
@@ -565,8 +563,7 @@ class DraggableModelCard(QFrame):
             lbl_img.setPixmap(pixmap)
         else:
             lbl_img.setText("No Image")
-            lbl_img.setStyleSheet(
-                """
+            lbl_img.setStyleSheet("""
                 QLabel {
                     color: #666;
                     font-style: italic;
@@ -574,8 +571,7 @@ class DraggableModelCard(QFrame):
                     background: transparent;
                     text-align: center;
                 }
-            """
-            )
+            """)
 
         layout.addWidget(lbl_img)
 
@@ -968,8 +964,7 @@ class EnvironmentDialog(QDialog):
         # Determine dependencies text (mocked logic or reading Dockerfile)
         self.txt_deps = QTextEdit()
         self.txt_deps.setReadOnly(True)
-        self.txt_deps.setHtml(
-            """
+        self.txt_deps.setHtml("""
         <h3>Core Dependencies</h3>
         <ul>
             <li><b>MuJoCo:</b> Physics Engine (Latest)</li>
@@ -989,8 +984,7 @@ class EnvironmentDialog(QDialog):
             <li><b>OpenGL/EGL:</b> Hardware Accelerated Rendering</li>
             <li><b>X11:</b> Display Server Support</li>
         </ul>
-        """
-        )
+        """)
         dep_layout.addWidget(self.txt_deps)
         tabs.addTab(tab_deps, "Dependencies")
 
@@ -1739,8 +1733,7 @@ class GolfLauncher(QMainWindow):
         self.btn_modify_layout.setChecked(False)
         self.btn_modify_layout.setToolTip("Toggle to enable/disable tile rearrangement")
         self.btn_modify_layout.clicked.connect(self.toggle_layout_mode)
-        self.btn_modify_layout.setStyleSheet(
-            """
+        self.btn_modify_layout.setStyleSheet("""
             QPushButton {
                 background-color: #444444;
                 color: #cccccc;
@@ -1750,8 +1743,7 @@ class GolfLauncher(QMainWindow):
                 background-color: #007acc;
                 color: white;
             }
-            """
-        )
+            """)
         top_bar.addWidget(self.btn_modify_layout)
 
         self.btn_customize_tiles = QPushButton("🧩 Edit Tiles")
@@ -1777,8 +1769,7 @@ class GolfLauncher(QMainWindow):
             self.btn_ai.setToolTip("Open AI Assistant for help with analysis")
             self.btn_ai.setCheckable(True)
             self.btn_ai.clicked.connect(self.toggle_ai_assistant)
-            self.btn_ai.setStyleSheet(
-                """
+            self.btn_ai.setStyleSheet("""
                 QPushButton {
                     background-color: #1976d2;
                     color: white;
@@ -1792,8 +1783,7 @@ class GolfLauncher(QMainWindow):
                 QPushButton:checked {
                     background-color: #0d47a1;
                 }
-                """
-            )
+                """)
             top_bar.addWidget(self.btn_ai)
 
         main_layout.addLayout(top_bar)
@@ -2046,8 +2036,7 @@ class GolfLauncher(QMainWindow):
             btn_clear.setCursor(Qt.CursorShape.PointingHandCursor)
             btn_clear.clicked.connect(self._clear_search)
             btn_clear.setToolTip("Clear the search filter (Esc)")
-            btn_clear.setStyleSheet(
-                """
+            btn_clear.setStyleSheet("""
                 QPushButton {
                     background-color: #333333;
                     color: #eeeeee;
@@ -2059,8 +2048,7 @@ class GolfLauncher(QMainWindow):
                     background-color: #444444;
                     border-color: #007acc;
                 }
-                """
-            )
+                """)
 
             empty_layout.addSpacing(15)
             empty_layout.addWidget(btn_clear, 0, Qt.AlignmentFlag.AlignCenter)
@@ -2376,8 +2364,7 @@ class GolfLauncher(QMainWindow):
         # Update Styles for draggable cards
         for m_id, card in self.model_cards.items():
             if m_id == model_id:
-                card.setStyleSheet(
-                    """
+                card.setStyleSheet("""
                     QFrame#ModelCard {
                         background-color: #333333;
                         border: 2px solid #007acc;
@@ -2386,11 +2373,9 @@ class GolfLauncher(QMainWindow):
                     QFrame#ModelCard:focus {
                         border: 2px solid #ffffff;
                     }
-                """
-                )
+                """)
             else:
-                card.setStyleSheet(
-                    """
+                card.setStyleSheet("""
                     QFrame#ModelCard {
                         background-color: #252526;
                         border: 1px solid #3e3e42;
@@ -2403,8 +2388,7 @@ class GolfLauncher(QMainWindow):
                     QFrame#ModelCard:focus {
                         border: 2px solid #007acc;
                     }
-                """
-                )
+                """)
 
         self.update_launch_button(model_name)
 
@@ -2473,8 +2457,7 @@ class GolfLauncher(QMainWindow):
 
     def apply_styles(self) -> None:
         """Apply custom stylesheets."""
-        self.setStyleSheet(
-            """
+        self.setStyleSheet("""
             QMainWindow, QWidget {
                 background-color: #1e1e1e;
                 color: #ffffff;
@@ -2547,8 +2530,7 @@ class GolfLauncher(QMainWindow):
                 border-radius: 5px;
                 padding: 5px;
             }
-        """
-        )
+        """)
 
     def check_docker(self) -> None:
         """Start the docker check thread."""
