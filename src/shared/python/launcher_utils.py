@@ -77,10 +77,14 @@ def git_sync_repository(repo_path: Path | None = None) -> bool:
 
         # 2. Pull (fast-forward if possible)
         # We don't use --ff-only to allow for quiet merges if safe
-        run_command(["git", "pull"], cwd=repo_path)
-
-        logger.info("Repository sync complete.")
-        return True
+        pull_result = run_command(["git", "pull"], cwd=repo_path)
+        
+        if pull_result and pull_result.returncode == 0:
+            logger.info("Repository sync complete.")
+            return True
+        else:
+            logger.warning("Git pull failed.")
+            return False
     except Exception as e:
         logger.warning(f"Git sync failed (might be offline or have conflicts): {e}")
         return False
