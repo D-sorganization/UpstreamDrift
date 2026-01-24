@@ -9,12 +9,14 @@ from src.shared.python.engine_manager import (
     EngineStatus,
     EngineType,
 )
+from src.shared.python.path_utils import get_src_root
 
 
 @pytest.fixture
 def mock_engine_manager():
-    """Fixture to provide EngineManager with mocked root."""
-    return EngineManager(Path("/mock/suite/root"))
+    """Fixture to provide EngineManager with actual repo root to pass security validation."""
+    # Use actual src root so paths pass security validation checks
+    return EngineManager(get_src_root())
 
 
 def test_engine_initialization(mock_engine_manager):

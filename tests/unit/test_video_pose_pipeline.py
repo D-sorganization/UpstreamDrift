@@ -7,6 +7,12 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+from src.shared.python.engine_availability import MEDIAPIPE_AVAILABLE
+
+# Skip entire module if MediaPipe is not available
+if not MEDIAPIPE_AVAILABLE:
+    pytest.skip("MediaPipe not installed", allow_module_level=True)
+
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../shared/python"))
 )
