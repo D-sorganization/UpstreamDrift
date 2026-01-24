@@ -17,9 +17,7 @@ import pytest
 from src.shared.python.path_utils import get_repo_root
 
 # Add shared directory to path
-sys.path.insert(
-    0, str(get_repo_root() / "src" / "shared" / "python")
-)
+sys.path.insert(0, str(get_repo_root() / "src" / "shared" / "python"))
 
 from flight_models import (
     BallantyneModel,
