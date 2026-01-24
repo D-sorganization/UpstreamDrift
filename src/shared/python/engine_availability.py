@@ -144,25 +144,28 @@ except ImportError:
 
 # Check PyQt6
 try:
-    from PyQt6 import QtWidgets  # noqa: F401
+    from PyQt6 import QtWidgets as _PyQt6Widgets  # noqa: F401
 
     PYQT6_AVAILABLE = True
+    del _PyQt6Widgets
 except (ImportError, OSError):
     pass
 
 # Check PyQt5
 try:
-    from PyQt5 import QtWidgets  # noqa: F401
+    from PyQt5 import QtWidgets as _PyQt5Widgets  # noqa: F401
 
     PYQT5_AVAILABLE = True
+    del _PyQt5Widgets
 except (ImportError, OSError):
     pass
 
 # Check PySide6
 try:
-    from PySide6 import QtWidgets  # noqa: F401
+    from PySide6 import QtWidgets as _PySide6Widgets  # noqa: F401
 
     PYSIDE6_AVAILABLE = True
+    del _PySide6Widgets
 except (ImportError, OSError):
     pass
 

@@ -207,21 +207,39 @@ def setup_import_paths(
     return added_paths
 
 
-def get_project_root_from_file(file_path: str | Path, levels_up: int = 0) -> Path:
-    """Get a parent directory from a file path.
+def get_ancestor_path_from_file(file_path: str | Path, levels_up: int = 0) -> Path:
+    """Get an ancestor directory from a file path.
 
-    This is a utility to help refactor existing PROJECT_ROOT patterns
-    that use Path(__file__).resolve().parents[N].
+    This is a utility to help refactor existing patterns that use
+    ``Path(__file__).resolve().parents[N]``.
 
     Args:
-        file_path: The __file__ of the calling module.
-        levels_up: Number of directory levels to go up.
+        file_path: The ``__file__`` of the calling module (or any file path).
+        levels_up: Number of directory levels to go up (0 for the immediate parent).
 
     Returns:
-        The resolved parent path.
+        The resolved ancestor path at ``levels_up``.
 
     Example:
         # Instead of: PROJECT_ROOT = Path(__file__).resolve().parents[3]
-        # Use: PROJECT_ROOT = get_project_root_from_file(__file__, 3)
+        # Use: PROJECT_ROOT = get_ancestor_path_from_file(__file__, 3)
     """
     return Path(file_path).resolve().parents[levels_up]
+
+
+def get_project_root_from_file(file_path: str | Path, levels_up: int = 0) -> Path:
+    """Deprecated alias for :func:`get_ancestor_path_from_file`.
+
+    .. deprecated::
+        The name of this function is misleading because it returns an arbitrary
+        ancestor directory based on ``levels_up``, not necessarily a project root.
+        New code should use :func:`get_ancestor_path_from_file` instead.
+
+    Args:
+        file_path: The ``__file__`` of the calling module.
+        levels_up: Number of directory levels to go up.
+
+    Returns:
+        The resolved ancestor path.
+    """
+    return get_ancestor_path_from_file(file_path=file_path, levels_up=levels_up)
