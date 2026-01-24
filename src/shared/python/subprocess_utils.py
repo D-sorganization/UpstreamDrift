@@ -61,7 +61,7 @@ def run_command(
     result = secure_run(
         cmd,
         cwd=str(cwd) if cwd else None,
-        timeout=timeout,
+        timeout=timeout if timeout is not None else 300.0,
         capture_output=capture_output,
     )
 
