@@ -1,19 +1,15 @@
-import sys
 from collections.abc import Generator
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-# Ensure repo root is in path
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[2]),
-)
+from src.shared.python.engine_availability import CV2_AVAILABLE, skip_if_unavailable
+
+# Import paths configured at test runner level via pyproject.toml/conftest.py
 
 # Skip entire module if cv2 is not available (optional dependency)
-cv2 = pytest.importorskip("cv2", reason="OpenCV (cv2) not installed")
+pytestmark = skip_if_unavailable("cv2")
 
 from src.shared.python.pose_estimation import mediapipe_estimator  # noqa: E402
 

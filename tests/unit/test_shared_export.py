@@ -1,17 +1,11 @@
 import json
-import sys
-from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-# Ensure repo root is in path
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[2]),
-)
+# Import paths configured at test runner level via pyproject.toml/conftest.py
 
 from src.shared.python.export import (
     export_recording_all_formats,

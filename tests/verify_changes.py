@@ -1,10 +1,6 @@
-# Adjust path
-import os
+# Import paths configured at test runner level via pyproject.toml/conftest.py
 import subprocess
-import sys
 import unittest
-
-sys.path.append(os.getcwd())
 
 
 class TestVerification(unittest.TestCase):
