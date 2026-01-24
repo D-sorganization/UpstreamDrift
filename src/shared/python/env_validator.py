@@ -14,12 +14,20 @@ Usage:
     validate_database_config()
 """
 
-import logging
-import os
 import secrets
 from typing import TypedDict
 
-logger = logging.getLogger(__name__)
+from src.shared.python.environment import (
+    get_admin_password,
+    get_database_url,
+    get_environment,
+    get_secret_key,
+    is_production,
+)
+from src.shared.python.error_utils import EnvironmentError as EnvironmentValidationError
+from src.shared.python.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class APIKeyValidationResults(TypedDict):
@@ -45,12 +53,6 @@ class EnvironmentValidationResults(TypedDict):
     critical_issues: list[str]
     warnings: list[str]
     valid: bool
-
-
-class EnvironmentValidationError(Exception):
-    """Raised when environment validation fails."""
-
-    pass
 
 
 def validate_secret_key_strength(key: str, min_length: int = 64) -> None:
@@ -118,8 +120,8 @@ def validate_api_security() -> APIKeyValidationResults:
         "warnings": [],
     }
 
-    # Check environment
-    environment = os.getenv("ENVIRONMENT", "development").lower()
+    # Check environment using centralized function
+    environment = get_environment()
     results["environment"] = environment
 
     if environment not in ["development", "staging", "production"]:
@@ -128,16 +130,17 @@ def validate_api_security() -> APIKeyValidationResults:
             f"Expected: development, staging, or production"
         )
 
-    # Validate secret key
-    secret_key = os.getenv("GOLF_API_SECRET_KEY") or os.getenv("SECRET_KEY")
+    # Validate secret key using centralized function
+    secret_key = get_secret_key()
 
     if not secret_key:
-        if environment == "production":
+        if is_production():
             results["issues"].append(
                 "CRITICAL: No GOLF_API_SECRET_KEY or SECRET_KEY set in production!"
             )
             raise EnvironmentValidationError(
-                "GOLF_API_SECRET_KEY is required for production"
+                "GOLF_API_SECRET_KEY",
+                "GOLF_API_SECRET_KEY is required for production",
             )
         else:
             results["warnings"].append(
@@ -148,17 +151,17 @@ def validate_api_security() -> APIKeyValidationResults:
             validate_secret_key_strength(secret_key)
             results["secret_key"] = True
         except EnvironmentValidationError as e:
-            if environment == "production":
+            if is_production():
                 results["issues"].append(f"CRITICAL: {e}")
                 raise
             else:
                 results["warnings"].append(str(e))
 
-    # Check admin password
-    admin_password = os.getenv("GOLF_ADMIN_PASSWORD")
+    # Check admin password using centralized function
+    admin_password = get_admin_password()
 
     if not admin_password:
-        if environment == "production":
+        if is_production():
             results["warnings"].append(
                 "No GOLF_ADMIN_PASSWORD set. A random password will be generated. "
                 "Set this variable to use a custom admin password."
@@ -188,7 +191,7 @@ def validate_database_config() -> DatabaseKeyValidationResults:
         "warnings": [],
     }
 
-    database_url = os.getenv("DATABASE_URL")
+    database_url = get_database_url(default="")
 
     if not database_url:
         results["warnings"].append(
@@ -204,8 +207,7 @@ def validate_database_config() -> DatabaseKeyValidationResults:
     if database_url.startswith("sqlite"):
         results["database_type"] = "sqlite"
 
-        environment = os.getenv("ENVIRONMENT", "development").lower()
-        if environment == "production":
+        if is_production():
             results["warnings"].append(
                 "SQLite is not recommended for production. "
                 "Consider using PostgreSQL for better concurrency and reliability."
@@ -242,23 +244,19 @@ def validate_production_checklist() -> dict[str, bool]:
     """
     checklist: dict[str, bool] = {}
 
-    environment = os.getenv("ENVIRONMENT", "development").lower()
-
     # Only enforce for production
-    if environment != "production":
+    if not is_production():
         return checklist
 
     # Required for production
-    checklist["secret_key_set"] = bool(
-        os.getenv("GOLF_API_SECRET_KEY") or os.getenv("SECRET_KEY")
-    )
-    checklist["environment_set"] = environment == "production"
+    checklist["secret_key_set"] = bool(get_secret_key())
+    checklist["environment_set"] = is_production()
     checklist["https_recommended"] = True  # Can't check from env, assume true
 
     # Recommended for production
-    database_url = os.getenv("DATABASE_URL", "")
+    database_url = get_database_url(default="")
     checklist["postgresql_database"] = database_url.startswith("postgresql")
-    checklist["admin_password_set"] = bool(os.getenv("GOLF_ADMIN_PASSWORD"))
+    checklist["admin_password_set"] = bool(get_admin_password())
 
     return checklist
 
@@ -302,7 +300,7 @@ def validate_environment(raise_on_error: bool = True) -> EnvironmentValidationRe
     logger.info("Validating environment configuration...")
 
     results: EnvironmentValidationResults = {
-        "environment": os.getenv("ENVIRONMENT", "development").lower(),
+        "environment": get_environment(),
         "api_security": {
             "secret_key": False,
             "environment": None,
@@ -346,7 +344,7 @@ def validate_environment(raise_on_error: bool = True) -> EnvironmentValidationRe
         results["valid"] = False
 
     # Validate production checklist (if in production)
-    if results["environment"] == "production":
+    if is_production():
         results["production_checklist"] = validate_production_checklist()
 
         # Check critical items
