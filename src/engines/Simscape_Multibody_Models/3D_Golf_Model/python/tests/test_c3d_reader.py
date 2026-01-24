@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import importlib.util
 import warnings
 from pathlib import Path
 from typing import Any
@@ -12,14 +11,10 @@ import numpy.typing as npt
 import pytest
 
 from src.c3d_reader import C3DDataReader, C3DEvent, load_tour_average_reader
+from src.shared.python.engine_availability import EZC3D_AVAILABLE, skip_if_unavailable
 
 # Skip tests if ezc3d is not available (e.g., Python 3.9)
-EZC3D_AVAILABLE = importlib.util.find_spec("ezc3d") is not None
-
-pytestmark = pytest.mark.skipif(
-    not EZC3D_AVAILABLE,
-    reason="ezc3d requires Python >=3.10",
-)
+pytestmark = skip_if_unavailable("ezc3d")
 
 EXPECTED_MARKER_COUNT = 38
 EXPECTED_FRAME_COUNT = 654

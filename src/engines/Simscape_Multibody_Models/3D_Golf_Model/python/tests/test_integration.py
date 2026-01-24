@@ -1,6 +1,5 @@
 """Integration tests for the main package."""
 
-import importlib.util
 import logging
 import random
 
@@ -19,8 +18,8 @@ from src.c3d_reader import (
     load_tour_average_reader,
 )
 
-# Skip C3D-related tests if ezc3d is not available (e.g., Python 3.9)
-EZC3D_AVAILABLE = importlib.util.find_spec("ezc3d") is not None
+# Use centralized availability check
+from src.shared.python.engine_availability import EZC3D_AVAILABLE
 
 
 class TestPackageIntegration:

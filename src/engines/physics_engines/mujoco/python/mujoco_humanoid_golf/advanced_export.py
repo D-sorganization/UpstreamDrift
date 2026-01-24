@@ -13,26 +13,12 @@ from typing import Any
 
 import numpy as np
 
-# Import optional dependencies with fallbacks
-try:
-    from scipy.io import savemat
-
-    SCIPY_AVAILABLE = True
-except ImportError:
-    SCIPY_AVAILABLE = False
-
-try:
-    import h5py
-
-    H5PY_AVAILABLE = True
-except ImportError:
-    H5PY_AVAILABLE = False
-
-# Check for C3D libraries (imported inside functions when needed)
-import importlib.util
-
-EZC3D_AVAILABLE = importlib.util.find_spec("ezc3d") is not None
-C3D_AVAILABLE = importlib.util.find_spec("c3d") is not None
+from src.shared.python.engine_availability import (
+    C3D_AVAILABLE,
+    EZC3D_AVAILABLE,
+    HDF5_AVAILABLE as H5PY_AVAILABLE,
+    SCIPY_AVAILABLE,
+)
 
 
 def export_to_matlab(

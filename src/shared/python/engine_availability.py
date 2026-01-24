@@ -55,6 +55,7 @@ PYARROW_AVAILABLE: bool = False
 FASTPARQUET_AVAILABLE: bool = False
 HDF5_AVAILABLE: bool = False
 EZC3D_AVAILABLE: bool = False
+C3D_AVAILABLE: bool = False
 YAML_AVAILABLE: bool = False
 
 # GUI library flags
@@ -131,6 +132,14 @@ try:
     import ezc3d  # noqa: F401
 
     EZC3D_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check c3d (alternative C3D library)
+try:
+    import c3d  # noqa: F401
+
+    C3D_AVAILABLE = True
 except ImportError:
     pass
 
@@ -470,7 +479,8 @@ _ENGINE_FLAGS: dict[str, bool] = {
     "hdf5": HDF5_AVAILABLE,
     "h5py": HDF5_AVAILABLE,  # Alias
     "ezc3d": EZC3D_AVAILABLE,
-    "c3d": EZC3D_AVAILABLE,  # Alias
+    "c3d": C3D_AVAILABLE,  # c3d package (different from ezc3d)
+    "c3d_any": EZC3D_AVAILABLE or C3D_AVAILABLE,  # Either C3D library
     "yaml": YAML_AVAILABLE,
     "pyyaml": YAML_AVAILABLE,  # Alias
     # GUI frameworks
