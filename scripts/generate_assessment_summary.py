@@ -59,14 +59,16 @@ def extract_issues_from_report(report_path: Path) -> list[dict[str, Any]]:
         # Simple extraction of bullets under "Findings"
         findings_section = re.search(r"## Findings\n(.*?)\n##", content, re.DOTALL)
         if findings_section:
-             findings_text = findings_section.group(1)
-             for line in findings_text.split('\n'):
-                 if line.strip().startswith("- "):
-                     issues.append({
-                         "severity": "MAJOR", # Defaulting to MAJOR as script doesn't discern yet
-                         "description": line.strip()[2:],
-                         "source": report_path.stem,
-                     })
+            findings_text = findings_section.group(1)
+            for line in findings_text.split("\n"):
+                if line.strip().startswith("- "):
+                    issues.append(
+                        {
+                            "severity": "MAJOR",  # Defaulting to MAJOR as script doesn't discern yet
+                            "description": line.strip()[2:],
+                            "source": report_path.stem,
+                        }
+                    )
 
     except Exception as e:
         logger.warning(f"Could not extract issues from {report_path}: {e}")
@@ -154,7 +156,9 @@ def generate_summary(
         else:
             group_scores[group_name] = 0.0
 
-    overall_score = total_weighted_score / total_weight_used if total_weight_used > 0 else 0.0
+    overall_score = (
+        total_weighted_score / total_weight_used if total_weight_used > 0 else 0.0
+    )
 
     # Generate markdown summary
     md_content = f"""# Comprehensive Assessment Summary
@@ -226,10 +230,10 @@ Found {len(all_issues)} issues across all categories.
 
     category_scores_json = {}
     for cat_code, name in categories.items():
-         category_scores_json[cat_code] = {
-             "score": scores.get(cat_code, 0.0),
-             "name": name
-         }
+        category_scores_json[cat_code] = {
+            "score": scores.get(cat_code, 0.0),
+            "name": name,
+        }
 
     json_data = {
         "timestamp": datetime.now().isoformat(),
