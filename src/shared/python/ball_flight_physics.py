@@ -12,7 +12,7 @@ Refactored to address DRY and Orthogonality violations (Pragmatic Programmer).
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import cast
 
 import numpy as np
@@ -80,7 +80,7 @@ class LaunchConditions:
     launch_angle: float
     azimuth_angle: float = 0.0
     spin_rate: float = 0.0
-    spin_axis: np.ndarray = np.array([0.0, -1.0, 0.0])
+    spin_axis: np.ndarray = field(default_factory=lambda: np.array([0.0, -1.0, 0.0]))
 
 
 @dataclass(frozen=True)
@@ -88,7 +88,7 @@ class EnvironmentalConditions:
     """Environmental settings."""
 
     air_density: float = AIR_DENSITY_SEA_LEVEL_KG_M3
-    wind_velocity: np.ndarray = np.array([0.0, 0.0, 0.0])
+    wind_velocity: np.ndarray = field(default_factory=lambda: np.array([0.0, 0.0, 0.0]))
     gravity: float = GRAVITY_M_S2
 
 

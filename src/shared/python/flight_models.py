@@ -68,6 +68,30 @@ class UnifiedLaunchConditions:
     wind_speed: float = 0.0
     wind_direction: float = 0.0
 
+    @classmethod
+    def from_imperial(
+        cls,
+        ball_speed_mph: float,
+        launch_angle_deg: float,
+        spin_rate_rpm: float,
+        azimuth_angle_deg: float = 0.0,
+        spin_axis_angle_deg: float = 0.0,
+        wind_speed_mph: float = 0.0,
+        wind_direction_deg: float = 0.0,
+    ) -> UnifiedLaunchConditions:
+        """Create launch conditions from imperial units."""
+        from src.shared.python.physics_constants import MPH_TO_MPS
+
+        return cls(
+            ball_speed=ball_speed_mph * MPH_TO_MPS,
+            launch_angle=math.radians(launch_angle_deg),
+            azimuth_angle=math.radians(azimuth_angle_deg),
+            spin_rate=spin_rate_rpm,
+            spin_axis_angle=math.radians(spin_axis_angle_deg),
+            wind_speed=wind_speed_mph * MPH_TO_MPS,
+            wind_direction=math.radians(wind_direction_deg),
+        )
+
     def get_initial_velocity(self) -> np.ndarray:
         ca, sa = math.cos(self.azimuth_angle), math.sin(self.azimuth_angle)
         cv, sv = math.cos(self.launch_angle), math.sin(self.launch_angle)
@@ -117,6 +141,12 @@ class FlightResult:
     flight_time: float = 0.0
     landing_angle: float = 0.0
     lateral_deviation: float = 0.0
+    
+    def to_position_array(self) -> np.ndarray:
+        """Convert trajectory to Nx3 position array."""
+        if not self.trajectory:
+            return np.zeros((0, 3))
+        return np.array([p.position for p in self.trajectory])
 
 
 class BallFlightModel(ABC):
@@ -336,3 +366,69 @@ class MacDonaldHanzelyModel(BallFlightModel):
             return np.array([v_val[0], v_val[1], v_val[2], acc[0], acc[1], acc[2]])
 
         return self._run_ode_simulation(launch, derivatives, max_time, dt)
+
+
+class PlaceholderModel(BallFlightModel):
+    """Placeholder for unimplemented models."""
+    
+    def __init__(self, name: str, description: str = "Not implemented"):
+        self._name = name
+        self._description = description
+        
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def description(self) -> str:
+        return self._description
+
+    @property
+    def reference(self) -> str:
+        return "N/A"
+
+    def simulate(
+        self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> FlightResult:
+        # Return empty result
+        return FlightResult([], self._name)
+
+
+class FlightModelRegistry:
+    """Registry for managing flight models."""
+    
+    _models: dict[FlightModelType, BallFlightModel] = {}
+
+    @classmethod
+    def get_model(cls, model_type: FlightModelType) -> BallFlightModel:
+        if not cls._models:
+            cls._initialize()
+        return cls._models[model_type]
+    
+    @classmethod
+    def get_all_models(cls) -> list[BallFlightModel]:
+        if not cls._models:
+            cls._initialize()
+        return list(cls._models.values())
+
+    @classmethod
+    def _initialize(cls) -> None:
+        cls._models[FlightModelType.WATERLOO_PENNER] = WaterlooPennerModel()
+        cls._models[FlightModelType.MACDONALD_HANZELY] = MacDonaldHanzelyModel()
+        
+        # Placeholders for missing implementations
+        cls._models[FlightModelType.NATHAN] = PlaceholderModel("Nathan", "Nathan model (Placeholder)")
+        cls._models[FlightModelType.BALLANTYNE] = PlaceholderModel("Ballantyne", "Ballantyne model (Placeholder)")
+        cls._models[FlightModelType.JCOLE] = PlaceholderModel("J. Cole", "J. Cole model (Placeholder)")
+        cls._models[FlightModelType.ROSPIE_DL] = PlaceholderModel("Rospie DL", "Rospie DL model (Placeholder)")
+        cls._models[FlightModelType.CHARRY_L3] = PlaceholderModel("Charry L3", "Charry L3 model (Placeholder)")
+
+
+def compare_models(
+    launch: UnifiedLaunchConditions, models: list[BallFlightModel]
+) -> dict[str, FlightResult]:
+    """Compare multiple models for the same launch conditions."""
+    results = {}
+    for model in models:
+        results[model.name] = model.simulate(launch)
+    return results
