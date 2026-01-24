@@ -185,8 +185,6 @@ def set_seeds(seed: int = DEFAULT_SEED) -> None:
     # Set NumPy seed if available
     if NUMPY_AVAILABLE and np is not None:
         np.random.seed(seed)
-        # Also use the new Generator API
-        np.random.default_rng(seed)
 
     # Set PyTorch seeds if PyTorch is available
     if TORCH_AVAILABLE and torch is not None:

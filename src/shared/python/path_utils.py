@@ -177,7 +177,40 @@ def relative_to_repo(path: Path | str) -> Path:
         return path
 
 
-# Aliases for backward compatibility
-REPO_ROOT = property(lambda self: get_repo_root())
-PROJECT_ROOT = property(lambda self: get_repo_root())
-ROOT_DIR = property(lambda self: get_repo_root())
+def get_simscape_model_path(model_name: str) -> Path:
+    """Get the path to a Simscape Multibody Model's Python source directory.
+
+    Args:
+        model_name: Name of the model ("2D_Golf_Model" or "3D_Golf_Model").
+
+    Returns:
+        Path to the model's python/src directory.
+
+    Raises:
+        ValueError: If model_name is not recognized.
+    """
+    valid_models = {"2D_Golf_Model", "3D_Golf_Model"}
+    if model_name not in valid_models:
+        raise ValueError(
+            f"Unknown Simscape model: {model_name}. Valid models: {valid_models}"
+        ) from None
+
+    return (
+        get_src_root()
+        / "engines"
+        / "Simscape_Multibody_Models"
+        / model_name
+        / "python"
+        / "src"
+    )
+
+
+# Lazy-initialized aliases for backward compatibility
+# These are initialized on first access to avoid import-time side effects
+def _get_repo_root_lazy() -> Path:
+    """Lazy wrapper for backward compatibility."""
+    return get_repo_root()
+
+
+# Note: These are functions, not constants, to allow lazy initialization.
+# For direct Path access, call get_repo_root() instead.

@@ -3,25 +3,18 @@
 Refactored to use centralized conftest.py for path setup (DRY principle).
 """
 
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
+from src.shared.python.path_utils import get_simscape_model_path
+
 # Path setup is now centralized in tests/conftest.py
 # PyQt6 availability can be checked via the pyqt6_available fixture
 
-# Get SRC_PATH for error messages (now provided by conftest)
-SRC_PATH = (
-    Path(__file__).resolve().parents[2]
-    / "src"
-    / "engines"
-    / "Simscape_Multibody_Models"
-    / "3D_Golf_Model"
-    / "python"
-    / "src"
-)
+# Get SRC_PATH for error messages using centralized path utility
+SRC_PATH = get_simscape_model_path("3D_Golf_Model")
 
 # Check for PyQt6 GUI library availability
 try:
