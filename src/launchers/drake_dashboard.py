@@ -7,6 +7,8 @@ import argparse
 import sys
 
 from PyQt6.QtWidgets import QApplication, QFileDialog
+from src.shared.python.gui_utils import get_qapp
+
 
 from src.engines.physics_engines.drake.python.drake_physics_engine import (
     DrakePhysicsEngine,
@@ -26,9 +28,7 @@ def main() -> None:
 
     if not model_path:
         # Ensure QApplication exists for QFileDialog
-        app = QApplication.instance()
-        if app is None:
-            app = QApplication(sys.argv)
+        app = get_qapp()
 
         dialog = QFileDialog()
         dialog.setNameFilter("Model Files (*.urdf *.sdf *.xml)")

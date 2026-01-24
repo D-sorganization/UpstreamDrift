@@ -34,9 +34,7 @@ class TestPinocchioGUI:
     @pytest.fixture
     def qapp(self):
         """Ensure QApplication exists."""
-        app = QtWidgets.QApplication.instance()
-        if app is None:
-            app = QtWidgets.QApplication(sys.argv)
+        app = get_qapp()
         return app
 
     @pytest.fixture

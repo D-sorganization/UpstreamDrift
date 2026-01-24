@@ -9,9 +9,7 @@ from PyQt6 import QtWidgets
 
 @pytest.fixture(scope="module")
 def app() -> QtWidgets.QApplication:
-    app = QtWidgets.QApplication.instance()
-    if app is None:
-        app = QtWidgets.QApplication(["test", "-platform", "offscreen"])
+    app = get_qapp()
     return typing.cast(QtWidgets.QApplication, app)
 
 

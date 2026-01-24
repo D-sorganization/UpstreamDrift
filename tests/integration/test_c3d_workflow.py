@@ -141,9 +141,7 @@ def qapp():
     """Manage a single QApplication instance for the test session."""
     from PyQt6.QtWidgets import QApplication
 
-    app = QApplication.instance()
-    if app is None:
-        app = QApplication([])
+    app = get_qapp()
     yield app
 
 

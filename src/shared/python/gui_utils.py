@@ -59,9 +59,7 @@ def get_qapp(args: list[str] | None = None) -> QApplication:
         window.show()
         app.exec()
     """
-    app = QApplication.instance()
-    if app is None:
-        app = QApplication(args or [])
+    app = get_qapp()
         logger.debug("Created new QApplication instance")
     return app
 

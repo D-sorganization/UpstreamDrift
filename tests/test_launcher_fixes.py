@@ -116,10 +116,7 @@ class TestDraggableModelCard(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
-        if not QApplication.instance():
-            cls.app = QApplication([])
-        else:
-            cls.app = QApplication.instance()
+        app = get_qapp()  # Simplified with utility
 
     def setUp(self) -> None:
         """Set up test fixtures."""
@@ -239,10 +236,7 @@ class TestGolfLauncherGrid(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
-        if not QApplication.instance():
-            cls.app = QApplication([])
-        else:
-            cls.app = QApplication.instance()
+        app = get_qapp()  # Simplified with utility
 
     def setUp(self) -> None:
         """Set up test fixtures."""

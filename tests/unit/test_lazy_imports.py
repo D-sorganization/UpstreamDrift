@@ -69,9 +69,7 @@ class TestPolynomialGeneratorLazyImport:
         from PyQt6.QtWidgets import QApplication, QMainWindow
 
         # Ensure QApplication exists
-        app = QApplication.instance()
-        if app is None:
-            app = QApplication([])
+        app = get_qapp()
 
         launcher = QMainWindow()
         # Use type ignore to avoid MyPy attribute errors

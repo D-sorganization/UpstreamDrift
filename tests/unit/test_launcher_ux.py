@@ -21,10 +21,7 @@ class TestGolfLauncherUX(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up QApplication for GUI tests."""
-        if not QApplication.instance():
-            cls.app = QApplication([])
-        else:
-            cls.app = cast(QApplication, QApplication.instance())
+        app = get_qapp()  # Simplified with utility
 
     def setUp(self):
         """Set up test fixtures."""

@@ -27,9 +27,7 @@ def qapp():
     if not PYQT6_AVAILABLE:
         pytest.skip("PyQt6 not available")
     # Check if QApplication already exists
-    app = QApplication.instance()
-    if app is None:
-        app = QApplication([])
+    app = get_qapp()
     yield app
 
 

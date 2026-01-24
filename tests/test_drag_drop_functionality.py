@@ -35,10 +35,7 @@ class TestDragDropFunctionality(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
-        if not QApplication.instance():
-            cls.app = QApplication([])
-        else:
-            cls.app = QApplication.instance()
+        app = get_qapp()  # Simplified with utility
 
     def setUp(self) -> None:
         """Set up test fixtures."""
@@ -192,10 +189,7 @@ class TestGridLayout(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
-        if not QApplication.instance():
-            cls.app = QApplication([])
-        else:
-            cls.app = QApplication.instance()
+        app = get_qapp()  # Simplified with utility
 
     def test_grid_columns_constant(self) -> None:
         """Test that grid columns is set to 4."""

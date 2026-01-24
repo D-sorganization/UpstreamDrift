@@ -3,6 +3,8 @@
 import sys
 
 from PyQt6.QtWidgets import QApplication
+from src.shared.python.gui_utils import get_qapp
+
 
 from src.shared.python.dashboard.window import UnifiedDashboardWindow
 from src.shared.python.interfaces import PhysicsEngine
@@ -29,9 +31,7 @@ def launch_dashboard(
     """
     configure_gui_logging()
 
-    app = QApplication.instance()
-    if app is None:
-        app = QApplication(sys.argv)
+    app = get_qapp()
 
     args = engine_args or []
     kwargs = engine_kwargs or {}

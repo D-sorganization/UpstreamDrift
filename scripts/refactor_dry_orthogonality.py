@@ -7,15 +7,17 @@ violations across the Golf Modeling Suite codebase.
 Phases:
 1. Logging standardization
 2. Path utilities consolidation
-3. Error handling patterns
-4. Engine interface refactoring
-5. GUI initialization patterns
-6. Configuration management
+3. QApplication pattern consolidation
+4. Error handling patterns
+5. Engine interface refactoring
+6. GUI initialization patterns
+7. Configuration management
 
 Usage:
     python scripts/refactor_dry_orthogonality.py --phase all
     python scripts/refactor_dry_orthogonality.py --phase logging
     python scripts/refactor_dry_orthogonality.py --phase paths
+    python scripts/refactor_dry_orthogonality.py --phase qapp
 """
 
 import argparse
@@ -27,7 +29,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-from src.shared.python.logging_config import get_logger
+from src.shared.python.logging_config import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
 
@@ -158,6 +160,60 @@ class DRYRefactorer:
             logger.error(f"Failed to refactor paths in {file_path}: {e}")
             return False
 
+    def refactor_qapp_patterns(self, file_path: Path) -> bool:
+        """Replace QApplication.instance() patterns with get_qapp()."""
+        try:
+            content = file_path.read_text(encoding="utf-8")
+            original_content = content
+
+            # Check if file uses QApplication
+            if "QApplication" not in content:
+                return False
+
+            # Pattern 1: app = QApplication.instance(); if app is None: app = QApplication(...)
+            pattern1 = r"(\s+)app = (?:QApplication|QtWidgets\.QApplication)\.instance\(\)\s*\n\s+if app is None:\s*\n\s+app = (?:QApplication|QtWidgets\.QApplication)\([^\)]*\)"
+
+            # Pattern 2: if not QApplication.instance(): cls.app = QApplication(...) else: cls.app = QApplication.instance()
+            pattern2 = r"if not (?:QApplication|QtWidgets\.QApplication)\.instance\(\):\s*\n\s+(?:cls\.)?app = (?:QApplication|QtWidgets\.QApplication)\([^\)]*\)\s*\n\s+else:\s*\n\s+(?:cls\.)?app = (?:cast\([^,]+,\s*)?(?:QApplication|QtWidgets\.QApplication)\.instance\(\)\)?"
+
+            has_pattern = bool(re.search(pattern1, content)) or bool(
+                re.search(pattern2, content)
+            )
+
+            if not has_pattern:
+                return False
+
+            # Replace patterns with get_qapp()
+            content = re.sub(pattern1, r"\1app = get_qapp()", content)
+            content = re.sub(
+                pattern2, r"app = get_qapp()  # Simplified with utility", content
+            )
+
+            # Add import if not present
+            if "from src.shared.python.gui_utils import" not in content:
+                # Find PyQt6 imports
+                pyqt_import = re.search(
+                    r"^from PyQt6\.QtWidgets import.*$", content, re.MULTILINE
+                )
+                if pyqt_import:
+                    insert_pos = pyqt_import.end()
+                    import_line = "\nfrom src.shared.python.gui_utils import get_qapp\n"
+                    content = content[:insert_pos] + import_line + content[insert_pos:]
+
+            if content != original_content:
+                file_path.write_text(content, encoding="utf-8")
+                self.changes_made += 1
+                logger.info(
+                    f"✓ Refactored QApplication in {file_path.relative_to(self.repo_root)}"
+                )
+                return True
+
+            return False
+
+        except Exception as e:
+            logger.error(f"Failed to refactor QApplication in {file_path}: {e}")
+            return False
+
     def process_directory(self, directory: Path, refactor_func) -> int:
         """Process all Python files in directory with given refactor function."""
         count = 0
@@ -226,6 +282,32 @@ def refactor_paths_phase(repo_root: Path) -> int:
     return total_changes
 
 
+def refactor_qapp_phase(repo_root: Path) -> int:
+    """Phase 3: Consolidate QApplication patterns."""
+    logger.info("=" * 60)
+    logger.info("PHASE 3: QApplication Pattern Consolidation")
+    logger.info("=" * 60)
+
+    refactorer = DRYRefactorer(repo_root)
+
+    directories = [
+        repo_root / "src",
+        repo_root / "tests",
+    ]
+
+    total_changes = 0
+    for directory in directories:
+        if directory.exists():
+            logger.info(f"\nProcessing {directory.relative_to(repo_root)}...")
+            changes = refactorer.process_directory(
+                directory, refactorer.refactor_qapp_patterns
+            )
+            total_changes += changes
+
+    logger.info(f"\n✓ Phase 3 complete: {total_changes} files refactored")
+    return total_changes
+
+
 def main():
     """Main entry point."""
     parser = argparse.ArgumentParser(
@@ -233,7 +315,7 @@ def main():
     )
     parser.add_argument(
         "--phase",
-        choices=["all", "logging", "paths"],
+        choices=["all", "logging", "paths", "qapp"],
         default="all",
         help="Which refactoring phase to run",
     )
@@ -255,6 +337,9 @@ def main():
 
     if args.phase in ["all", "paths"]:
         total_changes += refactor_paths_phase(REPO_ROOT)
+
+    if args.phase in ["all", "qapp"]:
+        total_changes += refactor_qapp_phase(REPO_ROOT)
 
     logger.info("=" * 60)
     logger.info(f"TOTAL CHANGES: {total_changes} files modified")
