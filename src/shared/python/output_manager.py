@@ -25,6 +25,13 @@ import numpy as np
 import pandas as pd  # type: ignore[import]
 
 from .common_utils import get_logger, setup_structured_logging
+from .datetime_utils import (
+    format_datetime,
+    now_local,
+    timestamp_display,
+    timestamp_filename,
+    timestamp_iso,
+)
 
 # Configure structured logging
 setup_structured_logging()
@@ -184,7 +191,7 @@ class OutputManager:
 
         # Add timestamp if not in filename (only for files without timestamps)
         if not any(char.isdigit() for char in filename) and "test_" not in filename:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            timestamp = timestamp_filename(utc=False)
             filename = f"{filename}_{timestamp}"
 
         # Add extension based on format
@@ -214,7 +221,7 @@ class OutputManager:
                     elif isinstance(obj, np.integer | np.floating):
                         return float(obj)
                     elif isinstance(obj, datetime):
-                        return obj.isoformat()
+                        return format_datetime(obj, "iso")
                     raise TypeError(
                         f"Object of type {type(obj).__name__} is not JSON serializable"
                     )
@@ -222,7 +229,7 @@ class OutputManager:
                 output_data = {
                     "metadata": metadata or {},
                     "results": results,
-                    "timestamp": datetime.now().isoformat(),
+                    "timestamp": timestamp_iso(utc=False),
                     "engine": engine,
                 }
 
@@ -477,7 +484,7 @@ class OutputManager:
         report_dir = self.directories["reports"] / format_type
         report_dir.mkdir(parents=True, exist_ok=True)
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        timestamp = timestamp_filename(utc=False)
         filename = f"{report_name}_{timestamp}.{format_type}"
         file_path = report_dir / filename
 
@@ -490,7 +497,7 @@ class OutputManager:
                     elif isinstance(obj, np.integer | np.floating):
                         return float(obj)
                     elif isinstance(obj, datetime):
-                        return obj.isoformat()
+                        return format_datetime(obj, "iso")
                     raise TypeError(
                         f"Object of type {type(obj).__name__} is not JSON serializable"
                     )
@@ -557,11 +564,11 @@ class OutputManager:
         Returns:
             Number of files cleaned up
         """
-        cutoff_date = datetime.now() - timedelta(days=max_age_days)
+        cutoff_date = now_local() - timedelta(days=max_age_days)
         cleaned_count = 0
 
         # Clean temporary files more aggressively (1 day)
-        temp_cutoff = datetime.now() - timedelta(days=1)
+        temp_cutoff = now_local() - timedelta(days=1)
 
         for directory in [self.directories["cache"] / "temp"]:
             if directory.exists():
@@ -606,7 +613,7 @@ class OutputManager:
 
     def _generate_html_report(self, data: dict[str, Any], title: str) -> str:
         """Generate basic HTML report."""
-        timestamp_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        timestamp_str = timestamp_display(utc=False)
         html = f"""
         <!DOCTYPE html>
         <html>
