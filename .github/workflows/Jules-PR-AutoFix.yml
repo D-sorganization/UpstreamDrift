@@ -1,0 +1,241 @@
+name: Jules PR AutoFix (Direct Push)
+
+# This workflow pushes fixes DIRECTLY to PR branches (like Cursor bugbot)
+# instead of creating separate PRs for fixes.
+#
+# Triggered when CI fails on a PR - fixes are committed directly to the PR branch
+
+on:
+  workflow_run:
+    workflows: ["CI Standard"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to fix (leave empty for auto-detect)'
+        required: false
+        type: string
+      dry_run:
+        description: 'Dry run - show changes without committing'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+
+# Prevent concurrent fixes on the same branch
+concurrency:
+  group: pr-autofix-${{ github.event.workflow_run.head_branch || github.event.inputs.branch || github.ref }}
+  cancel-in-progress: false
+
+env:
+  # Maximum fix attempts per branch in a time window (prevents infinite loops)
+  MAX_FIX_ATTEMPTS: 3
+  FIX_WINDOW_HOURS: 2
+
+jobs:
+  direct-fix:
+    name: Fix and Push to PR Branch
+    runs-on: ubuntu-latest
+    # Only run on failures (not success) for workflow_run events
+    # For manual dispatch, always run
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'failure')
+
+    steps:
+      - name: Get Branch Info
+        id: branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -n "${{ github.event.inputs.branch }}" ]; then
+            BRANCH="${{ github.event.inputs.branch }}"
+          else
+            BRANCH="${{ github.event.workflow_run.head_branch }}"
+          fi
+
+          echo "Target branch: $BRANCH"
+
+          # GUARD: Don't fix protected branches directly
+          if [[ "$BRANCH" == "main" || "$BRANCH" == "master" ]]; then
+            echo "Cannot auto-fix protected branch '$BRANCH'. Use hotfix workflow instead."
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Check if this branch has an open PR
+          PR_INFO=$(gh pr list --repo "${{ github.repository }}" --head "$BRANCH" --state open --json number,headRefName --jq '.[0] // empty')
+
+          if [ -z "$PR_INFO" ]; then
+            echo "No open PR found for branch '$BRANCH'. Skipping."
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          PR_NUMBER=$(echo "$PR_INFO" | jq -r '.number')
+          echo "Found PR #$PR_NUMBER for branch $BRANCH"
+
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          echo "skip=false" >> $GITHUB_OUTPUT
+
+      - name: Check Fix Attempt Limits
+        id: limits
+        if: steps.branch.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.branch.outputs.branch }}
+        run: |
+          # Count recent autofix commits on this branch to prevent loops
+          HOURS_AGO=$(date -u -d "${{ env.FIX_WINDOW_HOURS }} hours ago" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-${{ env.FIX_WINDOW_HOURS }}H +%Y-%m-%dT%H:%M:%SZ)
+
+          # Count commits with autofix signature in the time window
+          FIX_COUNT=$(gh api "repos/${{ github.repository }}/commits?sha=$BRANCH&since=$HOURS_AGO" \
+            --jq '[.[] | select(.commit.message | test("\\[AutoFix\\]|Jules PR AutoFix"))] | length' 2>/dev/null || echo "0")
+
+          echo "Found $FIX_COUNT autofix commits in last ${{ env.FIX_WINDOW_HOURS }} hours"
+
+          if [ "$FIX_COUNT" -ge "${{ env.MAX_FIX_ATTEMPTS }}" ]; then
+            echo "::warning::Max fix attempts (${{ env.MAX_FIX_ATTEMPTS }}) reached for branch $BRANCH. Manual intervention required."
+            echo "exceeded=true" >> $GITHUB_OUTPUT
+          else
+            echo "exceeded=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout PR Branch
+        if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.branch.outputs.branch }}
+          fetch-depth: 0
+          # Use a token that can push to the branch
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Linting Tools
+        if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
+        run: |
+          pip install ruff black
+
+      - name: Apply Auto-Fixes
+        id: fix
+        if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
+        run: |
+          echo "=== Applying Auto-Fixes ==="
+
+          # Track changes
+          CHANGES_MADE=""
+
+          # Run ruff fix
+          echo "Running ruff check --fix..."
+          if ruff check --fix . 2>&1; then
+            if ! git diff --quiet; then
+              CHANGES_MADE="$CHANGES_MADE ruff"
+            fi
+          fi
+
+          # Run black formatting
+          echo "Running black..."
+          if black . 2>&1; then
+            if ! git diff --quiet; then
+              CHANGES_MADE="$CHANGES_MADE black"
+            fi
+          fi
+
+          # Check if any changes were made
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes needed - code is already clean"
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+          else
+            echo "Changes made by:$CHANGES_MADE"
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "tools=$CHANGES_MADE" >> $GITHUB_OUTPUT
+            git diff --stat
+          fi
+
+      - name: Commit and Push Fixes
+        if: |
+          steps.branch.outputs.skip != 'true' &&
+          steps.limits.outputs.exceeded != 'true' &&
+          steps.fix.outputs.has_changes == 'true' &&
+          github.event.inputs.dry_run != 'true'
+        env:
+          BRANCH: ${{ steps.branch.outputs.branch }}
+          PR_NUMBER: ${{ steps.branch.outputs.pr_number }}
+          TOOLS: ${{ steps.fix.outputs.tools }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          git commit -m "[AutoFix] Apply linting fixes ($TOOLS)
+
+          Automated fixes applied directly to PR #$PR_NUMBER branch.
+          Tools used:$TOOLS
+
+          This commit was created by Jules PR AutoFix workflow.
+          Similar to Cursor bugbot, fixes are pushed directly to the PR branch.
+
+          Co-Authored-By: Jules AutoFix <jules-bot@users.noreply.github.com>"
+
+          # Push directly to the PR branch
+          git push origin "$BRANCH"
+
+          echo "✅ Fixes pushed directly to branch $BRANCH (PR #$PR_NUMBER)"
+
+      - name: Add PR Comment
+        if: |
+          steps.branch.outputs.skip != 'true' &&
+          steps.limits.outputs.exceeded != 'true' &&
+          steps.fix.outputs.has_changes == 'true' &&
+          github.event.inputs.dry_run != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.branch.outputs.pr_number }}
+          TOOLS: ${{ steps.fix.outputs.tools }}
+        run: |
+          gh pr comment "$PR_NUMBER" --body "## 🔧 AutoFix Applied
+
+          I've pushed linting fixes directly to this PR branch.
+
+          **Tools used:**$TOOLS
+
+          The CI should re-run automatically. If issues persist, manual intervention may be needed.
+
+          ---
+          *This is an automated fix by Jules PR AutoFix (similar to Cursor bugbot)*"
+
+      - name: Dry Run Summary
+        if: github.event.inputs.dry_run == 'true' && steps.fix.outputs.has_changes == 'true'
+        run: |
+          echo "## 🔍 Dry Run - Changes Would Be Made" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Tools:${{ steps.fix.outputs.tools }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Diff:" >> $GITHUB_STEP_SUMMARY
+          echo '```diff' >> $GITHUB_STEP_SUMMARY
+          git diff >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Generate Summary
+        if: always()
+        run: |
+          echo "## Jules PR AutoFix Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ steps.branch.outputs.branch || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR:** #${{ steps.branch.outputs.pr_number || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Skipped:** ${{ steps.branch.outputs.skip }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Limit Exceeded:** ${{ steps.limits.outputs.exceeded || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Changes Made:** ${{ steps.fix.outputs.has_changes || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.fix.outputs.has_changes }}" == "true" ]; then
+            echo "- **Tools Used:**${{ steps.fix.outputs.tools }}" >> $GITHUB_STEP_SUMMARY
+          fi
