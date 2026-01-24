@@ -3,6 +3,7 @@ Unit tests for launcher functionality.
 """
 
 import os
+import sys
 from pathlib import Path
 from unittest.mock import Mock, patch
 

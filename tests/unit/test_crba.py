@@ -1,7 +1,7 @@
 """Unit tests for CRBA algorithm."""
 
 import numpy as np
-import pytest
+import pytest  # noqa: F401 - required for pytestmark
 
 from src.shared.python.constants import GRAVITY_M_S2
 from src.shared.python.engine_availability import MUJOCO_AVAILABLE, skip_if_unavailable
