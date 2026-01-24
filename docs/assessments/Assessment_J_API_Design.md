@@ -1,12 +1,11 @@
 # Assessment J: API Design
 
-**Date**: 2026-01-23
-**Score**: 7.5/10
+**Date**: 2026-01-24
+**Score**: 5.5/10
 
 ## Findings
 
-- api/ directory exists.
-- FastAPI usage detected.
+- No api/ directory.
 
 ## Recommendations
 
