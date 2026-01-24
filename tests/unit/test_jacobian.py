@@ -12,6 +12,7 @@ import pytest
 from src.shared.python.engine_availability import (
     MUJOCO_AVAILABLE,
     PINOCCHIO_AVAILABLE,
+    skip_if_unavailable,
 )
 
 # Simple inline URDF for Jacobian tests (2-DOF planar arm)
@@ -92,7 +93,7 @@ SIMPLE_ARM_MJCF = """
 class TestJacobianShape:
     """Tests for Jacobian shape compliance."""
 
-    @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
+    @skip_if_unavailable("mujoco")
     def test_mujoco_jacobian_shape(self) -> None:
         """Test MuJoCo Jacobian returns correct shape (3×nv, 3×nv, 6×nv)."""
         import mujoco
@@ -119,7 +120,7 @@ class TestJacobianShape:
         # Verify nv matches expected (2 DOF)
         assert model.nv == 2, f"Expected 2 DOF, got {model.nv}"
 
-    @pytest.mark.skipif(not PINOCCHIO_AVAILABLE, reason="Pinocchio not installed")
+    @skip_if_unavailable("pinocchio")
     def test_pinocchio_jacobian_shape(self) -> None:
         """Test Pinocchio Jacobian returns correct shape (6×nv)."""
         # Load URDF
@@ -161,7 +162,7 @@ class TestJacobianShape:
 class TestJacobianStructure:
     """Tests for Jacobian structural correctness."""
 
-    @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
+    @skip_if_unavailable("mujoco")
     def test_mujoco_jacobian_nonzero(self) -> None:
         """Test MuJoCo Jacobian has expected non-zero entries."""
         import mujoco
@@ -190,7 +191,7 @@ class TestJacobianStructure:
         # Verify Y-axis rotation coupling (angular Jacobian Y-row)
         assert np.any(jacr[1, :] != 0), "Y-axis rotation should be non-zero"
 
-    @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
+    @skip_if_unavailable("mujoco")
     def test_jacobian_zero_position(self) -> None:
         """Test Jacobian at zero configuration."""
         import mujoco
@@ -250,7 +251,7 @@ class TestJacobianConsistency:
 class TestJacobianNumericalValidation:
     """Numerical validation of Jacobians via finite differences."""
 
-    @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
+    @skip_if_unavailable("mujoco")
     def test_jacobian_finite_difference_validation(self) -> None:
         """Validate Jacobian against finite difference approximation."""
         import mujoco

@@ -1,35 +1,22 @@
 import pytest
 
-try:
-    import mujoco
-except ImportError:
-    mujoco = None
-
-try:
-    import pydrake.all as drake
-except ImportError:
-    drake = None
-
-try:
-    import pinocchio as pin
-except ImportError:
-    pin = None
+from src.shared.python.engine_availability import skip_if_unavailable
 
 
 @pytest.mark.integration
 class TestPhysicsConsistency:
     """Cross-engine consistency checks."""
 
-    @pytest.mark.skipif(mujoco is None, reason="MuJoCo not installed")
-    @pytest.mark.skipif(drake is None, reason="Drake not installed")
+    @skip_if_unavailable("mujoco")
+    @skip_if_unavailable("drake")
     def test_pendulum_consistency_mujoco_drake(self):
         """Verify simple pendulum dynamics match between MuJoCo and Drake."""
         # Issue #126: Implement shared pendulum model loading and stepping
         # For now, this serves as the scaffold requested by Issue #126
         pass
 
-    @pytest.mark.skipif(mujoco is None, reason="MuJoCo not installed")
-    @pytest.mark.skipif(pin is None, reason="Pinocchio not installed")
+    @skip_if_unavailable("mujoco")
+    @skip_if_unavailable("pinocchio")
     def test_pendulum_consistency_mujoco_pinocchio(self):
         """Verify simple pendulum dynamics match between MuJoCo and Pinocchio."""
         # Issue #126: Implement shared pendulum model loading and stepping

@@ -3,18 +3,16 @@
 import unittest
 
 import numpy as np
-import pytest
+import pytest  # noqa: F401 - required for pytestmark
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.engine_availability import PYQT6_AVAILABLE, skip_if_unavailable
 
 if PYQT6_AVAILABLE:
     from PyQt6 import QtWidgets
 else:
     QtWidgets = None  # type: ignore[misc, assignment]
 
-pytestmark = pytest.mark.skipif(
-    not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available"
-)
+pytestmark = skip_if_unavailable("pyqt6")
 
 if PYQT6_AVAILABLE:
     from src.shared.python.dashboard.recorder import GenericPhysicsRecorder

@@ -28,6 +28,8 @@ Requirements:
 import math
 import sys
 
+from src.shared.python.constants import GRAVITY_M_S2
+
 try:
     import opensim as osim
 except ImportError:
@@ -47,8 +49,8 @@ def build_simple_arm_model() -> osim.Model:
     arm = osim.Model()
     arm.setName("SimpleArm")
 
-    # Gravity
-    arm.setGravity(osim.Vec3(0, -9.80665, 0))
+    # Gravity - use centralized constant for DRY
+    arm.setGravity(osim.Vec3(0, -GRAVITY_M_S2, 0))
 
     # ---------------------------------------------------------------------------
     # Create bodies

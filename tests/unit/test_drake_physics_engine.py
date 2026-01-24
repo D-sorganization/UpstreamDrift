@@ -3,12 +3,13 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import DRAKE_AVAILABLE
+from src.shared.python.engine_availability import (
+    skip_if_unavailable,
+)
 
 # Skip entire module if Drake is not installed - mocking pydrake at module level
 # is unreliable and leads to AttributeError on patched module globals
-if not DRAKE_AVAILABLE:
-    pytest.skip("Drake (pydrake) not installed", allow_module_level=True)
+pytestmark = skip_if_unavailable("drake")
 
 
 # Mock classes that need to be defined before importing the engine

@@ -1,11 +1,4 @@
-import sys
-from pathlib import Path
-
-# Ensure repo root is in path
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[2]),
-)
+# Import paths configured at test runner level via pyproject.toml/conftest.py
 
 from src.shared.python.numerical_constants import (
     CONDITION_NUMBER_CRITICAL_THRESHOLD,

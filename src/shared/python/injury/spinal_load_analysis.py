@@ -29,6 +29,8 @@ from enum import Enum
 
 import numpy as np
 
+from src.shared.python.constants import GRAVITY_M_S2
+
 
 class SpinalRiskLevel(Enum):
     """Risk level categories for spinal loading."""
@@ -157,7 +159,7 @@ class SpinalLoadAnalyzer:
             lumbar_segments: List of segment names to analyze (default: L3-L4 to L5-S1)
         """
         self.body_weight = body_weight
-        self.body_weight_N = body_weight * 9.81  # Convert to Newtons
+        self.body_weight_N = body_weight * GRAVITY_M_S2  # Convert to Newtons
 
         self.height = height
         self.trunk_length = trunk_length or (0.288 * height if height else 0.50)
@@ -266,7 +268,7 @@ class SpinalLoadAnalyzer:
         mass_above = (
             self.body_weight * self._head_arms_trunk_mass_ratio * (1 - pos_ratio)
         )
-        weight_above = mass_above * 9.81
+        weight_above = mass_above * GRAVITY_M_S2
 
         # Initialize arrays
         compression = np.zeros(n_frames)

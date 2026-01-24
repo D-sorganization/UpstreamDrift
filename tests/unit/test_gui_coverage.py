@@ -13,8 +13,8 @@ import numpy as np
 import pytest
 
 from src.shared.python.engine_availability import (
-    MUJOCO_AVAILABLE,
     PYQT6_AVAILABLE,
+    skip_if_unavailable,
 )
 from src.shared.python.gui_utils import get_qapp
 
@@ -32,8 +32,8 @@ def qapp():
     yield app
 
 
-@pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
-@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not installed")
+@skip_if_unavailable("mujoco")
+@skip_if_unavailable("pyqt6")
 class TestMuJoCoSimWidget:
     """Tests for the MuJoCoSimWidget class.
 
@@ -207,8 +207,8 @@ class TestMuJoCoSimWidget:
         widget.close()
 
 
-@pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
-@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not installed")
+@skip_if_unavailable("mujoco")
+@skip_if_unavailable("pyqt6")
 class TestHumanoidLauncher:
     """Tests for the HumanoidLauncher application.
 
@@ -250,8 +250,8 @@ class TestHumanoidLauncher:
         launcher.close()
 
 
-@pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
-@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not installed")
+@skip_if_unavailable("mujoco")
+@skip_if_unavailable("pyqt6")
 class TestControlsTab:
     """Tests for the ControlsTab widget."""
 

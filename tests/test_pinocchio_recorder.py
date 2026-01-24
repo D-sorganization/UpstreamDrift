@@ -1,15 +1,23 @@
 import numpy as np
 import pytest
 
-# Skip test module if pinocchio is not installed
-pytest.importorskip("pinocchio")
+from src.shared.python.engine_availability import (
+    PINOCCHIO_AVAILABLE,
+    skip_if_unavailable,
+)
 
-try:
-    from src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (  # noqa: E402
-        PinocchioRecorder,
-    )
-except ImportError:
-    pytest.skip("Pinocchio GUI dependencies missing", allow_module_level=True)
+# Skip test module if pinocchio is not installed
+pytestmark = skip_if_unavailable("pinocchio")
+
+if PINOCCHIO_AVAILABLE:
+    try:
+        from src.engines.physics_engines.pinocchio.python.pinocchio_golf.gui import (
+            PinocchioRecorder,
+        )
+    except ImportError:
+        import pytest
+
+        pytest.skip("Pinocchio GUI dependencies missing", allow_module_level=True)
 
 
 def test_pinocchio_recorder_basic():

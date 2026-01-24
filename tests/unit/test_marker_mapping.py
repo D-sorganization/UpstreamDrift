@@ -1,14 +1,19 @@
 """Tests for marker-to-model mapping (Guideline A2 - Mandatory)."""
 
+from __future__ import annotations
+
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+from src.shared.python.engine_availability import (
+    MUJOCO_AVAILABLE,
+    skip_if_unavailable,
+)
 
-if not MUJOCO_AVAILABLE:
-    pytest.skip("MuJoCo not installed", allow_module_level=True)
+pytestmark = skip_if_unavailable("mujoco")
 
-import mujoco
+if MUJOCO_AVAILABLE:
+    import mujoco
 
 from src.shared.python.marker_mapping import (
     MarkerMapping,
