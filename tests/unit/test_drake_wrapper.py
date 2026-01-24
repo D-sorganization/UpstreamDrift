@@ -36,10 +36,10 @@ class TestDrakeWrapper(unittest.TestCase):
 
         # Patch dependencies used in __init__
         self.patcher1 = patch(
-            "engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder"
+            "src.engines.physics_engines.drake.python.drake_physics_engine.DiagramBuilder"
         )
         self.patcher2 = patch(
-            "engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
+            "src.engines.physics_engines.drake.python.drake_physics_engine.AddMultibodyPlantSceneGraph"
         )
 
         self.mock_builder_cls = self.patcher1.start()
@@ -63,7 +63,7 @@ class TestDrakeWrapper(unittest.TestCase):
         # Simulator starts None
         self.engine.simulator = None
 
-    @patch("engines.physics_engines.drake.python.drake_physics_engine.analysis")
+    @patch("src.engines.physics_engines.drake.python.drake_physics_engine.analysis")
     def test_step_caching(self, mock_analysis):
         """Test that Simulator is cached and reused in step()."""
         mock_simulator_class = mock_analysis.Simulator

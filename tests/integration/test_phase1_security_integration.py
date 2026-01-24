@@ -141,9 +141,9 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
             secure_popen(["malicious_exe"])
 
     @pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not available")
-    @patch("shared.python.secure_subprocess.secure_run")
-    @patch("launchers.golf_launcher.QApplication")
-    @patch("launchers.golf_launcher.QIcon")
+    @patch("src.shared.python.secure_subprocess.secure_run")
+    @patch("src.launchers.golf_launcher.QApplication")
+    @patch("src.launchers.golf_launcher.QIcon")
     def test_golf_launcher_security_integration(
         self, mock_qicon, mock_qapp, mock_secure_run
     ) -> None:
@@ -244,7 +244,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         except SecureSubprocessError:
             self.skipTest("Python not available or not in whitelist")
 
-    @patch("shared.python.secure_subprocess.logger")
+    @patch("src.shared.python.secure_subprocess.logger")
     def test_security_logging(self, mock_logger) -> None:
         """Test security-related logging."""
         # Test blocked executable logging

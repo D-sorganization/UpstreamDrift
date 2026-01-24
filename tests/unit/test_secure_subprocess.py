@@ -93,7 +93,7 @@ class TestSecureSubprocess(unittest.TestCase):
         with self.assertRaises(SecureSubprocessError):
             validate_script_path(nonexistent, self.suite_root)
 
-    @patch("shared.python.secure_subprocess.subprocess.Popen")
+    @patch("src.shared.python.secure_subprocess.subprocess.Popen")
     def test_secure_popen_valid_command(self, mock_popen):
         """Test secure_popen with valid command."""
         mock_process = MagicMock()
@@ -118,7 +118,7 @@ class TestSecureSubprocess(unittest.TestCase):
         with self.assertRaises(SecureSubprocessError):
             secure_popen(["echo", "test"], shell=True, suite_root=self.suite_root)
 
-    @patch("shared.python.secure_subprocess.subprocess.run")
+    @patch("src.shared.python.secure_subprocess.subprocess.run")
     def test_secure_run_valid_command(self, mock_run):
         """Test secure_run with valid command."""
         mock_result = MagicMock()

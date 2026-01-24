@@ -184,11 +184,11 @@ class BasePhysicsEngine(PhysicsEngine):
         """Check if engine is initialized with a model."""
         return self._is_initialized
 
-    def get_state(self) -> EngineState | None:
+    def get_state(self) -> EngineState | None:  # type: ignore[override]
         """Get current engine state."""
         return self.state
 
-    def set_state(self, state: EngineState) -> None:
+    def set_state(self, state: EngineState) -> None:  # type: ignore[override]
         """Set engine state."""
         self.state = state
 
@@ -235,7 +235,7 @@ class ModelLoadingMixin:
 class SimulationMixin:
     """Mixin providing common simulation utilities."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize simulation state."""
         self._simulation_time: float = 0.0
         self._step_count: int = 0

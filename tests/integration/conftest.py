@@ -11,10 +11,10 @@ from __future__ import annotations
 
 import sys
 
-from src.shared.python.path_utils import get_src_root
+from src.shared.python.path_utils import get_tests_root
 
 # Add fixtures directory to path
-FIXTURES_DIR = get_src_root() / "fixtures"
+FIXTURES_DIR = get_tests_root() / "fixtures"
 sys.path.insert(0, str(FIXTURES_DIR))
 
 # Re-export all fixtures from the fixtures library

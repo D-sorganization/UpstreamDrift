@@ -225,3 +225,112 @@ def find_file_in_parents(
 
     logger.debug(f"Could not find {filename} in parent directories")
     return None
+
+
+def get_shared_python_root() -> Path:
+    """Get the shared python directory root.
+
+    Returns:
+        Path to src/shared/python directory
+
+    Example:
+        shared_python = get_shared_python_root()
+    """
+    return get_src_root() / "shared" / "python"
+
+
+def get_mujoco_python_root() -> Path:
+    """Get the MuJoCo python directory root.
+
+    Returns:
+        Path to mujoco python directory
+
+    Example:
+        mujoco_python = get_mujoco_python_root()
+    """
+    return get_src_root() / "engines" / "physics_engines" / "mujoco" / "python"
+
+
+def setup_import_paths(additional_paths: list[str | Path] | None = None) -> None:
+    """Set up Python import paths for the Golf Modeling Suite.
+
+    This function adds necessary directories to sys.path to enable
+    proper imports across the codebase. It should be called at the
+    start of scripts that need access to shared modules.
+
+    This is a DRY replacement for scattered sys.path.insert calls.
+
+    Args:
+        additional_paths: Optional list of additional paths to add to sys.path
+
+    Example:
+        from src.shared.python.path_utils import setup_import_paths
+        setup_import_paths()
+
+        # With additional paths
+        setup_import_paths(additional_paths=["/custom/path"])
+    """
+    import sys
+
+    paths_to_add = [
+        str(get_src_root()),
+        str(get_shared_python_root()),
+        str(get_mujoco_python_root()),
+        str(get_mujoco_python_root() / "mujoco_humanoid_golf"),
+    ]
+
+    # Add any additional paths specified
+    if additional_paths:
+        paths_to_add.extend(str(p) for p in additional_paths)
+
+    for path in paths_to_add:
+        if path not in sys.path:
+            sys.path.insert(0, path)
+            logger.debug(f"Added to sys.path: {path}")
+
+
+def get_simscape_model_path(model_name: str = "3D_Golf_Model") -> Path:
+    """Get the path to Simscape model python/src directory.
+
+    Args:
+        model_name: Name of the model directory (default: "3D_Golf_Model")
+
+    Returns:
+        Path to Simscape model python/src directory for imports
+
+    Example:
+        simscape_path = get_simscape_model_path()
+        custom_path = get_simscape_model_path("Custom_Model")
+    """
+    return (
+        get_src_root()
+        / "engines"
+        / "Simscape_Multibody_Models"
+        / model_name
+        / "python"
+        / "src"
+    )
+
+
+def get_pinocchio_python_root() -> Path:
+    """Get the Pinocchio python directory root.
+
+    Returns:
+        Path to pinocchio python directory
+
+    Example:
+        pinocchio_python = get_pinocchio_python_root()
+    """
+    return get_src_root() / "engines" / "physics_engines" / "pinocchio" / "python"
+
+
+def get_drake_python_root() -> Path:
+    """Get the Drake python directory root.
+
+    Returns:
+        Path to drake python directory
+
+    Example:
+        drake_python = get_drake_python_root()
+    """
+    return get_src_root() / "engines" / "physics_engines" / "drake" / "python"

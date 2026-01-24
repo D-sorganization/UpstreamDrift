@@ -97,7 +97,7 @@ class TestOutputManager:
     def test_auto_path_resolution(self):
         """Test automatic path resolution when base_path is None."""
         # Use patch to mock Path behavior
-        with patch("shared.python.output_manager.Path") as MockPath:
+        with patch("src.shared.python.output_manager.Path") as MockPath:
             # We want to simulate a case where we start somewhere and find the root
 
             # Setup a mock structure: /project/engines exists
@@ -334,7 +334,7 @@ class TestOutputManager:
     def test_convenience_functions(self, temp_output_dir, sample_data):
         """Test global convenience functions."""
         # We need to patch OutputManager to use our temp dir
-        with patch("shared.python.output_manager.OutputManager") as MockManager:
+        with patch("src.shared.python.output_manager.OutputManager") as MockManager:
             instance = MockManager.return_value
             instance.save_simulation_results.return_value = Path("test.csv")
 

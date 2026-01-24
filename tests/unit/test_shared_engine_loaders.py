@@ -31,11 +31,22 @@ def test_loader_map() -> None:
     assert EngineType.MYOSIM in LOADER_MAP
 
 
-@patch.dict(sys.modules, {"mujoco": MagicMock()})
+@patch.dict(
+    sys.modules,
+    {
+        "mujoco": MagicMock(),
+        "engines": MagicMock(),
+        "engines.physics_engines": MagicMock(),
+        "engines.physics_engines.mujoco": MagicMock(),
+        "engines.physics_engines.mujoco.python": MagicMock(),
+        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf": MagicMock(),
+        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine": MagicMock(),
+    },
+)
 def test_load_mujoco_engine_success(mock_suite_root: Path) -> None:
     """Test successful loading of MuJoCo engine."""
     with (
-        patch("shared.python.engine_probes.MuJoCoProbe") as mock_probe_cls,
+        patch("src.shared.python.engine_probes.MuJoCoProbe") as mock_probe_cls,
         patch(
             "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine.MuJoCoPhysicsEngine"
         ) as mock_engine_cls,
@@ -61,7 +72,7 @@ def test_load_mujoco_engine_success(mock_suite_root: Path) -> None:
 @patch.dict(sys.modules, {"mujoco": MagicMock()})
 def test_load_mujoco_engine_not_available(mock_suite_root: Path) -> None:
     """Test MuJoCo engine loading when probe fails."""
-    with patch("shared.python.engine_probes.MuJoCoProbe") as mock_probe_cls:
+    with patch("src.shared.python.engine_probes.MuJoCoProbe") as mock_probe_cls:
         # Setup Probe to fail
         mock_probe = mock_probe_cls.return_value
         mock_result = MagicMock()
@@ -70,16 +81,26 @@ def test_load_mujoco_engine_not_available(mock_suite_root: Path) -> None:
         mock_result.get_fix_instructions.return_value = "Install it"
         mock_probe.probe.return_value = mock_result
 
-        # Run
-        with pytest.raises(GolfModelingError, match="MuJoCo not ready"):
+        # Run - matches actual error message from engine_loaders
+        with pytest.raises(GolfModelingError, match="MuJoCo requirements not met"):
             load_mujoco_engine(mock_suite_root)
 
 
-@patch.dict(sys.modules, {"pydrake": MagicMock()})
+@patch.dict(
+    sys.modules,
+    {
+        "pydrake": MagicMock(),
+        "engines": MagicMock(),
+        "engines.physics_engines": MagicMock(),
+        "engines.physics_engines.drake": MagicMock(),
+        "engines.physics_engines.drake.python": MagicMock(),
+        "engines.physics_engines.drake.python.drake_physics_engine": MagicMock(),
+    },
+)
 def test_load_drake_engine_success(mock_suite_root: Path) -> None:
     """Test successful loading of Drake engine."""
     with (
-        patch("shared.python.engine_probes.DrakeProbe") as mock_probe_cls,
+        patch("src.shared.python.engine_probes.DrakeProbe") as mock_probe_cls,
         patch(
             "engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine"
         ) as mock_engine_cls,
@@ -96,11 +117,21 @@ def test_load_drake_engine_success(mock_suite_root: Path) -> None:
         assert engine == mock_engine_cls.return_value
 
 
-@patch.dict(sys.modules, {"pinocchio": MagicMock()})
+@patch.dict(
+    sys.modules,
+    {
+        "pinocchio": MagicMock(),
+        "engines": MagicMock(),
+        "engines.physics_engines": MagicMock(),
+        "engines.physics_engines.pinocchio": MagicMock(),
+        "engines.physics_engines.pinocchio.python": MagicMock(),
+        "engines.physics_engines.pinocchio.python.pinocchio_physics_engine": MagicMock(),
+    },
+)
 def test_load_pinocchio_engine_success(mock_suite_root: Path) -> None:
     """Test successful loading of Pinocchio engine."""
     with (
-        patch("shared.python.engine_probes.PinocchioProbe") as mock_probe_cls,
+        patch("src.shared.python.engine_probes.PinocchioProbe") as mock_probe_cls,
         patch(
             "engines.physics_engines.pinocchio.python.pinocchio_physics_engine.PinocchioPhysicsEngine"
         ) as mock_engine_cls,

@@ -32,6 +32,11 @@ from src.shared.python.secure_subprocess import secure_run
 
 logger = get_logger(__name__)
 
+# Default timeout for subprocess operations (5 minutes)
+# This ensures long-running processes don't hang indefinitely while allowing
+# reasonable time for complex operations like model loading or simulation runs.
+DEFAULT_SUBPROCESS_TIMEOUT: float = 300.0
+
 
 @log_errors("Command execution failed", reraise=False, default_return=None)
 def run_command(
@@ -45,7 +50,9 @@ def run_command(
     Args:
         cmd: Command and arguments as list
         cwd: Working directory
-        timeout: Timeout in seconds
+        timeout: Timeout in seconds. If None, uses DEFAULT_SUBPROCESS_TIMEOUT (300s).
+            Pass a specific value to override, or use a very large value for
+            effectively unlimited execution time.
         capture_output: Whether to capture stdout/stderr
 
     Returns:
@@ -56,12 +63,13 @@ def run_command(
         if result and result.returncode == 0:
             print(result.stdout)
     """
-    logger.debug(f"Running command: {' '.join(cmd)}")
+    effective_timeout = timeout if timeout is not None else DEFAULT_SUBPROCESS_TIMEOUT
+    logger.debug(f"Running command: {' '.join(cmd)} (timeout={effective_timeout}s)")
 
     result = secure_run(
         cmd,
         cwd=str(cwd) if cwd else None,
-        timeout=timeout,
+        timeout=effective_timeout,
         capture_output=capture_output,
     )
 
@@ -90,7 +98,7 @@ class ProcessManager:
         manager.stop_all()
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize process manager."""
         self.processes: dict[str, subprocess.Popen] = {}
         self._lock = threading.Lock()
@@ -242,7 +250,7 @@ class ProcessManager:
         """
         return {name: self.is_running(name) for name in self.processes}
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Cleanup on deletion."""
         self.stop_all()
 
@@ -340,7 +348,7 @@ class CommandRunner:
             delay: Delay between attempts in seconds
 
         Returns:
-            CompletedProcess object or None if all attempts failed
+            CompletedProcess object or None if failed after all attempts
         """
         for attempt in range(max_attempts):
             result = self.run(cmd)

@@ -15,7 +15,7 @@ from src.shared.python.pose_estimation.openpose_estimator import (
 @pytest.fixture
 def op_mock():
     mock_op = MagicMock()
-    with patch("shared.python.pose_estimation.openpose_estimator.op", mock_op):
+    with patch("src.shared.python.pose_estimation.openpose_estimator.op", mock_op):
         yield mock_op
 
 

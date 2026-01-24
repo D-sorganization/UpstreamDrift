@@ -138,8 +138,12 @@ class SwingMetricsMixin:
         return x_factor_velocity, peak_stretch_rate
 
     def find_club_head_speed_peak(self) -> PeakInfo | None:
-        """Abstract method expected to be implemented by host or other mixin."""
-        pass
+        """Find peak club head speed - delegates to BasicStatsMixin.
+
+        This method is expected to be provided by BasicStatsMixin in the MRO.
+        """
+        # Call the parent implementation from BasicStatsMixin
+        return super().find_club_head_speed_peak()  # type: ignore[misc]
 
     def detect_impact_time(self) -> float | None:
         """Detect ball impact time.
