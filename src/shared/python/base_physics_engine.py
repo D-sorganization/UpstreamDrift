@@ -184,11 +184,11 @@ class BasePhysicsEngine(PhysicsEngine):
         """Check if engine is initialized with a model."""
         return self._is_initialized
 
-    def get_state(self) -> EngineState | None:
+    def get_state(self) -> EngineState | None:  # type: ignore[override]
         """Get current engine state."""
         return self.state
 
-    def set_state(self, state: EngineState) -> None:
+    def set_state(self, state: EngineState) -> None:  # type: ignore[override]
         """Set engine state."""
         self.state = state
 
