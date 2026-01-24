@@ -22,8 +22,8 @@ from typing import TYPE_CHECKING, Any, cast
 from src.shared.python.logging_config import configure_gui_logging, get_logger
 
 if TYPE_CHECKING:
-    from shared.python.engine_manager import EngineType
-    from shared.python.ui import ToastManager
+    from src.shared.python.engine_manager import EngineType
+    from src.shared.python.ui import ToastManager
 
 from PyQt6.QtCore import QMimeData, QPoint, Qt, QThread, QTimer, pyqtSignal
 from PyQt6.QtGui import (
@@ -84,8 +84,8 @@ def _lazy_load_engine_manager() -> tuple[Any, Any]:
     """Lazily load EngineManager to speed up initial import."""
     global _EngineManager, _EngineType
     if _EngineManager is None:
-        from shared.python.engine_manager import EngineManager as _EM
-        from shared.python.engine_manager import EngineType as _ET
+        from src.shared.python.engine_manager import EngineManager as _EM
+        from src.shared.python.engine_manager import EngineType as _ET
 
         _EngineManager = _EM
         _EngineType = _ET
@@ -96,7 +96,7 @@ def _lazy_load_model_registry() -> Any:
     """Lazily load ModelRegistry to speed up initial import."""
     global _ModelRegistry
     if _ModelRegistry is None:
-        from shared.python.model_registry import ModelRegistry as _MR
+        from src.shared.python.model_registry import ModelRegistry as _MR
 
         _ModelRegistry = _MR
     return _ModelRegistry
@@ -104,7 +104,7 @@ def _lazy_load_model_registry() -> Any:
 
 # Import unified theme system for consistent styling
 try:
-    from shared.python.theme import Colors, Sizes, Weights, get_display_font, get_qfont
+    from src.shared.python.theme import Colors, Sizes, Weights, get_display_font, get_qfont
 
     THEME_AVAILABLE = True
 except ImportError:
@@ -112,7 +112,7 @@ except ImportError:
 
 # Optional AI Assistant import (graceful degradation if not available)
 try:
-    from shared.python.ai.gui import AIAssistantPanel, AISettings, AISettingsDialog
+    from src.shared.python.ai.gui import AIAssistantPanel, AISettings, AISettingsDialog
 
     AI_AVAILABLE = True
 except ImportError:
@@ -120,7 +120,7 @@ except ImportError:
 
 # Optional UI components import (graceful degradation)
 try:
-    from shared.python.ui import (
+    from src.shared.python.ui import (
         PreferencesDialog,
         ShortcutsOverlay,
         ToastManager,
