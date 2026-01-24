@@ -1,0 +1,280 @@
+name: Jules DRY & Orthogonality
+
+# This workflow analyzes DRY (Don't Repeat Yourself) and orthogonality
+# violations and creates GitHub issues to track refactoring work.
+#
+# Schedule:
+# - Daily at 6 AM UTC for main repos (Golf, Gasification, AffineDrift, Tools)
+# - Can be triggered manually with workflow_dispatch
+#
+# Note: Creates issues instead of PRs to avoid CI blocking on TODO comments
+
+on:
+  schedule:
+    # Daily at 6 AM UTC
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+    inputs:
+      target_category:
+        description: 'Category to analyze (all, path, logging, datetime, exceptions, config, imports, env)'
+        required: false
+        default: 'all'
+      create_issues:
+        description: 'Create GitHub issues for violations'
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: dry-orthogonality-${{ github.repository }}
+  cancel-in-progress: false
+
+env:
+  # Loop prevention - max consecutive bot runs
+  MAX_BOT_RUNS: 3
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    outputs:
+      violations_found: ${{ steps.analyze.outputs.violations_found }}
+      summary: ${{ steps.analyze.outputs.summary }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+
+      - name: Check for Bot Loop
+        id: check-loop
+        run: |
+          bot_count=0
+          for commit in $(git log --format="%ae" -n ${{ env.MAX_BOT_RUNS }}); do
+            if [[ "$commit" == *"bot"* ]] || [[ "$commit" == *"github-actions"* ]]; then
+              ((bot_count++))
+            else
+              break
+            fi
+          done
+
+          if [ $bot_count -ge ${{ env.MAX_BOT_RUNS }} ]; then
+            echo "::warning::Loop prevention: $bot_count consecutive bot commits"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup Python
+        if: steps.check-loop.outputs.skip != 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Analyze DRY Violations
+        id: analyze
+        if: steps.check-loop.outputs.skip != 'true'
+        run: |
+          cat > /tmp/analyze_dry.py << 'SCRIPT'
+          import os
+          import re
+          import json
+          from pathlib import Path
+          from collections import defaultdict
+
+          def find_python_files(root_dir):
+              exclude_dirs = {'.git', '__pycache__', '.mypy_cache', '.ruff_cache',
+                            'node_modules', 'venv', '.venv', 'env', 'archive', 'legacy'}
+              python_files = []
+              for root, dirs, files in os.walk(root_dir):
+                  dirs[:] = [d for d in dirs if d not in exclude_dirs]
+                  for f in files:
+                      if f.endswith('.py'):
+                          python_files.append(Path(root) / f)
+              return python_files
+
+          def analyze_file(file_path):
+              violations = defaultdict(list)
+              try:
+                  content = file_path.read_text(encoding='utf-8', errors='ignore')
+                  lines = content.split('\n')
+
+                  for i, line in enumerate(lines, 1):
+                      if re.search(r'os\.environ\.get\(', line):
+                          violations['env'].append(i)
+                      if re.search(r'datetime\.now\(\)|\.strftime\(|\.isoformat\(\)', line):
+                          violations['datetime'].append(i)
+                      if re.search(r'logging\.(basicConfig|getLogger)\(', line):
+                          violations['logging'].append(i)
+                      if re.search(r'Path\([^)]+\)|os\.path\.(join|dirname|basename)', line):
+                          violations['path'].append(i)
+                      if re.search(r'except\s+ImportError', line):
+                          violations['imports'].append(i)
+                      if re.search(r'(json|yaml)\.(load|dump|safe_load|safe_dump)\(', line):
+                          violations['config'].append(i)
+                      if re.search(r'class\s+\w+(Error|Exception)\s*\(', line):
+                          violations['exceptions'].append(i)
+              except:
+                  pass
+              return violations
+
+          def main():
+              target = os.environ.get('TARGET_CATEGORY', 'all')
+              python_files = find_python_files('.')
+
+              all_violations = {}
+              category_counts = defaultdict(int)
+              category_files = defaultdict(list)
+
+              for f in python_files:
+                  violations = analyze_file(f)
+                  if any(violations.values()):
+                      all_violations[str(f)] = violations
+                      for cat, lines in violations.items():
+                          category_counts[cat] += len(lines)
+                          if str(f) not in category_files[cat]:
+                              category_files[cat].append(str(f))
+
+              categories = ['path', 'logging', 'imports', 'datetime', 'config', 'exceptions', 'env']
+
+              # Build summary
+              summary = {
+                  'total_violations': sum(category_counts.values()),
+                  'total_files': len(all_violations),
+                  'categories': {}
+              }
+
+              for cat in categories:
+                  summary['categories'][cat] = {
+                      'count': category_counts[cat],
+                      'files': len(category_files[cat]),
+                      'top_files': category_files[cat][:5]
+                  }
+
+              violations_found = sum(category_counts.values()) > 0
+
+              # Output
+              print(json.dumps({
+                  'violations_found': str(violations_found).lower(),
+                  'summary': json.dumps(summary)
+              }))
+
+              # GitHub Step Summary
+              with open(os.environ.get('GITHUB_STEP_SUMMARY', '/dev/null'), 'a') as f:
+                  f.write("## DRY Violation Analysis\n\n")
+                  f.write(f"**Total Violations:** {sum(category_counts.values())}\n")
+                  f.write(f"**Files Affected:** {len(all_violations)}\n\n")
+                  f.write("| Category | Violations | Files |\n")
+                  f.write("|----------|------------|-------|\n")
+                  for cat in categories:
+                      f.write(f"| {cat} | {category_counts[cat]} | {len(category_files[cat])} |\n")
+
+          if __name__ == '__main__':
+              main()
+          SCRIPT
+
+          result=$(TARGET_CATEGORY="${{ inputs.target_category || 'all' }}" python /tmp/analyze_dry.py)
+          echo "Result: $result"
+
+          violations_found=$(echo "$result" | python3 -c "import sys,json; d=json.loads(sys.stdin.read()); print(d['violations_found'])")
+          summary=$(echo "$result" | python3 -c "import sys,json; d=json.loads(sys.stdin.read()); print(d['summary'])")
+
+          echo "violations_found=$violations_found" >> $GITHUB_OUTPUT
+          echo "summary<<EOF" >> $GITHUB_OUTPUT
+          echo "$summary" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  create-issues:
+    needs: analyze
+    if: needs.analyze.outputs.violations_found == 'true' && inputs.create_issues != false
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        category: [path, logging, imports, datetime, config, exceptions, env]
+      max-parallel: 1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create/Update Issue for ${{ matrix.category }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CATEGORY: ${{ matrix.category }}
+          SUMMARY: ${{ needs.analyze.outputs.summary }}
+        run: |
+          # Parse summary for this category
+          count=$(echo "$SUMMARY" | python3 -c "import sys,json; d=json.loads(sys.stdin.read()); print(d['categories']['$CATEGORY']['count'])")
+          files=$(echo "$SUMMARY" | python3 -c "import sys,json; d=json.loads(sys.stdin.read()); print(d['categories']['$CATEGORY']['files'])")
+
+          if [ "$count" -eq 0 ]; then
+            echo "No violations for $CATEGORY"
+            exit 0
+          fi
+
+          top_files=$(echo "$SUMMARY" | python3 -c "import sys,json; d=json.loads(sys.stdin.read()); print('\n'.join(['- ' + f for f in d['categories']['$CATEGORY']['top_files']]))")
+
+          # Recommendations based on category
+          case "$CATEGORY" in
+            datetime) recommendation="Use \`datetime_utils.py\`: \`timestamp_filename()\`, \`timestamp_iso()\`, \`now_utc()\`" ;;
+            logging) recommendation="Use centralized \`logging_config.py\`: \`get_logger()\`, \`setup_logging()\`" ;;
+            env) recommendation="Use \`environment.py\`: \`get_env()\`, \`get_env_bool()\`, \`get_env_int()\`" ;;
+            path) recommendation="Use \`path_utils.py\`: \`get_project_root()\`, \`ensure_directory()\`" ;;
+            imports) recommendation="Use \`engine_availability.py\` or create \`optional_imports.py\`" ;;
+            config) recommendation="Use \`io_utils.py\`: \`load_json()\`, \`save_json()\`, \`load_yaml()\`" ;;
+            exceptions) recommendation="Consolidate into \`error_utils.py\`, extend from \`GolfSuiteError\`" ;;
+          esac
+
+          issue_body="## DRY Violation: \`$CATEGORY\` patterns
+
+          **Violations:** $count
+          **Files Affected:** $files
+
+          ### Top Files to Refactor
+          $top_files
+
+          ### Recommended Action
+          $recommendation
+
+          ### Priority
+          $(if [ "$count" -gt 100 ]; then echo "HIGH - Many violations"; elif [ "$count" -gt 50 ]; then echo "MEDIUM"; else echo "LOW"; fi)
+
+          ---
+          *Auto-generated by Jules DRY & Orthogonality workflow on $(date -u +%Y-%m-%d)*"
+
+          # Check for existing issue
+          existing=$(gh issue list --label "dry-violation" --label "$CATEGORY" --state open --limit 1 --json number --jq '.[0].number' 2>/dev/null || echo "")
+
+          if [ -n "$existing" ] && [ "$existing" != "null" ]; then
+            echo "Updating existing issue #$existing"
+            gh issue comment "$existing" --body "### Updated Analysis ($(date -u +%Y-%m-%d))
+
+          **Current Count:** $count violations in $files files
+
+          Top files:
+          $top_files"
+          else
+            echo "Creating new issue for $CATEGORY"
+            gh issue create \
+              --title "DRY: Refactor \`$CATEGORY\` patterns ($count violations)" \
+              --body "$issue_body" \
+              --label "dry-violation,$CATEGORY,automated,tech-debt" || echo "Failed to create issue"
+          fi
+
+  summary:
+    needs: [analyze, create-issues]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Final Summary
+        env:
+          SUMMARY: ${{ needs.analyze.outputs.summary }}
+        run: |
+          echo "## DRY & Orthogonality Workflow Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -n "$SUMMARY" ]; then
+            total=$(echo "$SUMMARY" | python3 -c "import sys,json; print(json.loads(sys.stdin.read())['total_violations'])" 2>/dev/null || echo "0")
+            files=$(echo "$SUMMARY" | python3 -c "import sys,json; print(json.loads(sys.stdin.read())['total_files'])" 2>/dev/null || echo "0")
+            echo "**Total Violations Found:** $total" >> $GITHUB_STEP_SUMMARY
+            echo "**Files Affected:** $files" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Issues have been created/updated for each violation category." >> $GITHUB_STEP_SUMMARY
