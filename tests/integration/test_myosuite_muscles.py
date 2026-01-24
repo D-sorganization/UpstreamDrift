@@ -6,6 +6,8 @@ Verifies:
 - Muscle-induced acceleration analysis
 - Grip modeling via hand muscle forces
 - Cross-validation with OpenSim
+
+Refactored to use shared engine availability module (DRY principle).
 """
 
 from __future__ import annotations
@@ -15,19 +17,17 @@ import logging
 import numpy as np
 import pytest
 
+from src.shared.python.engine_availability import MYOSUITE_AVAILABLE
+
 LOGGER = logging.getLogger(__name__)
 
 
 @pytest.fixture
 def myosuite_env_available():
     """Check if MyoSuite is available."""
-    try:
-        import gym  # noqa: F401 - used in try block
-        import myosuite  # noqa: F401
-
-        return True
-    except ImportError:
+    if not MYOSUITE_AVAILABLE:
         pytest.skip("MyoSuite not installed")
+    return True
 
 
 class TestMyoSuiteMuscleAnalyzer:

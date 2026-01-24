@@ -5,6 +5,8 @@ Verifies:
 - Activation → force →torque pipeline
 - Muscle-induced acceleration analysis
 - Grip wrapping geometry
+
+Refactored to use shared engine availability module (DRY principle).
 """
 
 from __future__ import annotations
@@ -14,24 +16,24 @@ import logging
 import numpy as np
 import pytest
 
+from src.shared.python.engine_availability import OPENSIM_AVAILABLE
+
 LOGGER = logging.getLogger(__name__)
 
 # Skip entire module if OpenSim not available
-try:
+if not OPENSIM_AVAILABLE:
+    pytest.skip("OpenSim not installed", allow_module_level=True)
+else:
     import opensim
 
     if not hasattr(opensim, "Model"):
         pytest.skip("OpenSim is mocked or unavailable", allow_module_level=True)
-except ImportError:
-    pytest.skip("OpenSim not installed", allow_module_level=True)
 
 
 @pytest.fixture
 def simple_arm_model():
     """Create a simple arm model with muscles for testing."""
-    try:
-        import opensim
-    except ImportError:
+    if not OPENSIM_AVAILABLE:
         pytest.skip("OpenSim not installed")
 
     # Create a simple arm model

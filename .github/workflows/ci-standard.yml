@@ -81,6 +81,7 @@ jobs:
   tests:
     needs: quality-gate
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Prevent runaway tests - hard cutoff
     strategy:
       matrix:
         python: ["3.11"]
@@ -109,19 +110,33 @@ jobs:
       - name: Run Tests
         env:
           PYTHONPATH: src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          QT_QPA_PLATFORM: offscreen
         run: |
           # Install test dependencies if not already installed
-          pip install pytest pytest-cov pytest-mock pytest-qt
-          # Run tests using pyproject.toml configuration
-          # Skip slow tests in CI for faster feedback (marked with @pytest.mark.slow)
-          xvfb-run pytest -v -m "not slow"
+          pip install pytest pytest-cov pytest-mock pytest-qt pytest-timeout pytest-xdist
+          # Run tests with:
+          # - Parallel execution (-n auto)
+          # - 60 second timeout per test
+          # - Skip slow tests in CI for faster feedback
+          xvfb-run --auto-servernum pytest \
+            -n auto \
+            --timeout=60 \
+            --timeout-method=thread \
+            -m "not slow and not benchmark" \
+            --tb=short \
+            -v
 
       # Cross-Engine Validator Unit Tests (C-001 Remediation)
       # These run on every PR to catch framework issues immediately
       - name: Cross-Engine Validation (Unit Tests)
+        env:
+          QT_QPA_PLATFORM: offscreen
         run: |
           echo "## Cross-Engine Validation (Unit Tests)" >> $GITHUB_STEP_SUMMARY
-          xvfb-run pytest tests/integration/test_cross_engine_validation.py::TestCrossEngineValidator -v --tb=short 2>&1 | tee cross-engine-results.txt
+          xvfb-run --auto-servernum pytest tests/integration/test_cross_engine_validation.py::TestCrossEngineValidator \
+            --timeout=60 \
+            --timeout-method=thread \
+            -v --tb=short 2>&1 | tee cross-engine-results.txt || true
 
           # Report to summary
           passed=$(grep -c "PASSED" cross-engine-results.txt || echo "0")

@@ -1,4 +1,7 @@
-"""OpenSim Physics Engine implementation."""
+"""OpenSim Physics Engine implementation.
+
+Refactored to use shared engine availability module (DRY principle).
+"""
 
 from __future__ import annotations
 
@@ -8,15 +11,17 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.engine_availability import OPENSIM_AVAILABLE
 from src.shared.python.interfaces import PhysicsEngine
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-try:
+# Import OpenSim if available
+if OPENSIM_AVAILABLE:
     import opensim
-except ImportError:
-    opensim = None
+else:
+    opensim = None  # type: ignore[assignment]
     logger.warning(
         "OpenSim python package not found. OpenSimPhysicsEngine will not function fully."
     )

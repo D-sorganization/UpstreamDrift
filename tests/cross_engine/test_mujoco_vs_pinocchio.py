@@ -35,18 +35,14 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
+from src.shared.python.engine_availability import PINOCCHIO_AVAILABLE
+
 if TYPE_CHECKING:
     import mujoco
     import pinocchio
 
-# Test if Pinocchio is available
-pinocchio_available = False
-try:
-    import pinocchio
-
-    pinocchio_available = True
-except ImportError:
-    pass
+# Use shared engine availability (DRY principle)
+pinocchio_available = PINOCCHIO_AVAILABLE
 
 # Test if MuJoCo is available
 mujoco_available = False

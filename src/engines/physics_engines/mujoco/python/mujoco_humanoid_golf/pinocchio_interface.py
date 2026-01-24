@@ -26,6 +26,8 @@ from pathlib import Path
 import mujoco
 import numpy as np
 
+from src.shared.python.engine_availability import PINOCCHIO_AVAILABLE
+
 from .urdf_io import export_model_to_urdf
 
 logger = logging.getLogger(__name__)
@@ -33,16 +35,11 @@ logger = logging.getLogger(__name__)
 # Constants
 FREEJOINT_DOF_COUNT: int = 7  # DOF count for freejoint (3 pos + 4 quat)
 
-# Try to import Pinocchio
-try:
+# Log warning if Pinocchio not available
+if not PINOCCHIO_AVAILABLE:
+    logger.warning("Pinocchio not available. Install with: pip install pin")
+else:
     import pinocchio as pin
-
-    PINOCCHIO_AVAILABLE = True
-except ImportError:
-    PINOCCHIO_AVAILABLE = False
-    logger.warning(
-        "Pinocchio not available. Install with: pip install pin",
-    )
 
 
 class PinocchioWrapper:

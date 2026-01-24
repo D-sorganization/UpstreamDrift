@@ -189,16 +189,14 @@ class ManipulationTab(QtWidgets.QWidget):
         # Clear all constraints button
         self.clear_constraints_btn = QtWidgets.QPushButton("Clear All Constraints")
         self.clear_constraints_btn.clicked.connect(self.on_clear_constraints)
-        self.clear_constraints_btn.setStyleSheet(
-            """
+        self.clear_constraints_btn.setStyleSheet("""
             QPushButton {
                 background-color: #d62728;
             }
             QPushButton:hover {
                 background-color: #a81f20;
             }
-        """
-        )
+        """)
         constraint_layout.addWidget(self.clear_constraints_btn)
 
         # Constrained bodies list
