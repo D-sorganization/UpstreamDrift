@@ -16,6 +16,7 @@ from typing import Any, cast
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from src.shared.python.constants import GRAVITY_M_S2
 from src.shared.python.engine_availability import NUMBA_AVAILABLE
 from src.shared.python.logging_config import get_logger
 
@@ -160,7 +161,7 @@ class EnvironmentalConditions:
 
     air_density: float = 1.225  # kg/m³ at sea level, 15°C
     wind_velocity: np.ndarray | None = None  # m/s - wind vector [x, y, z]
-    gravity: float = 9.81  # m/s²
+    gravity: float = GRAVITY_M_S2  # DRY: Use centralized constant
     temperature: float = 15.0  # °C
     altitude: float = 0.0  # m above sea level
 
