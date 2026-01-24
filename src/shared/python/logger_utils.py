@@ -75,9 +75,9 @@ except ImportError:
         """Setup basic logging configuration."""
         logging.basicConfig(level=level, format=LOG_FORMAT)
 
-    def set_seeds(seed: int = DEFAULT_SEED) -> None:
+    def set_seeds(seed: int = DEFAULT_SEED, *, validate: bool = True) -> None:
         """Set random seeds for reproducibility."""
-        if seed < 0:
+        if validate and seed < 0:
             raise ValueError("expected non-negative integer for seed")
         random.seed(seed)
         try:
@@ -90,21 +90,24 @@ except ImportError:
     @contextmanager
     def log_execution_time(
         operation_name: str,
+        logger_obj: logging.Logger | None = None,
     ) -> Generator[None, None, None]:
         """Context manager to log the duration of an operation.
 
         Args:
             operation_name: Logical name of the operation being timed
+            logger_obj: Specific logger to use, or module logger if None
 
         Yields:
             None
         """
+        logr = logger_obj or get_logger(__name__)
         start_time = time.perf_counter()
         try:
             yield
         finally:
             duration = time.perf_counter() - start_time
-            get_logger(__name__).info(
+            logr.info(
                 "Telemetry: %s took %.4f seconds",
                 operation_name,
                 duration,
