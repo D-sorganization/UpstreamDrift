@@ -1,0 +1,208 @@
+name: Code Metrics
+
+# Informational code quality metrics - never fails CI
+# Reports complexity (radon) and duplication (jscpd) metrics
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  schedule:
+    # Weekly on Sundays at 4 AM UTC
+    - cron: '0 4 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  complexity-metrics:
+    name: Complexity Analysis (radon)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install radon
+        run: pip install radon
+
+      - name: Run Cyclomatic Complexity Analysis
+        id: cc
+        run: |
+          echo "## Cyclomatic Complexity Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Get complexity grades
+          echo "### Complexity Distribution" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          radon cc src -a -s 2>&1 | tail -20 >> $GITHUB_STEP_SUMMARY || echo "No Python files found" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Count by grade
+          echo "### Grade Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Grade | Count | Description |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|-------------|" >> $GITHUB_STEP_SUMMARY
+
+          a_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - A" || echo "0")
+          b_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - B" || echo "0")
+          c_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - C" || echo "0")
+          d_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - D" || echo "0")
+          e_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - E" || echo "0")
+          f_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - F" || echo "0")
+
+          echo "| A | $a_count | Simple (1-5) |" >> $GITHUB_STEP_SUMMARY
+          echo "| B | $b_count | Low (6-10) |" >> $GITHUB_STEP_SUMMARY
+          echo "| C | $c_count | Moderate (11-20) |" >> $GITHUB_STEP_SUMMARY
+          echo "| D | $d_count | High (21-30) |" >> $GITHUB_STEP_SUMMARY
+          echo "| E | $e_count | Very High (31-40) |" >> $GITHUB_STEP_SUMMARY
+          echo "| F | $f_count | Extreme (41+) |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Show worst offenders (D, E, F grades)
+          echo "### High Complexity Functions (Grade C or worse)" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          radon cc src -a -nc --min C 2>&1 | head -50 >> $GITHUB_STEP_SUMMARY || echo "None found" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Run Maintainability Index
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Maintainability Index" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Rating | Range | Description |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|-------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| A | 20-100 | Highly maintainable |" >> $GITHUB_STEP_SUMMARY
+          echo "| B | 10-19 | Moderate |" >> $GITHUB_STEP_SUMMARY
+          echo "| C | 0-9 | Difficult to maintain |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          echo "### Low Maintainability Files (B or C)" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          radon mi src -s --min B 2>&1 | head -30 >> $GITHUB_STEP_SUMMARY || echo "All files highly maintainable" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Run Raw Metrics
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Raw Metrics Summary" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          radon raw src -s 2>&1 | tail -15 >> $GITHUB_STEP_SUMMARY || echo "No metrics available" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  duplication-metrics:
+    name: Duplication Analysis (jscpd)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install jscpd
+        run: npm install -g jscpd
+
+      - name: Run Duplication Analysis
+        run: |
+          echo "## Code Duplication Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Create jscpd config
+          cat > .jscpd.json << 'EOF'
+          {
+            "threshold": 0,
+            "reporters": ["console", "json"],
+            "ignore": [
+              "**/node_modules/**",
+              "**/.git/**",
+              "**/venv/**",
+              "**/.venv/**",
+              "**/archive/**",
+              "**/legacy/**",
+              "**/__pycache__/**",
+              "**/*.min.js",
+              "**/*.min.css"
+            ],
+            "format": ["python", "javascript", "typescript", "matlab"],
+            "absolute": true,
+            "gitignore": true
+          }
+          EOF
+
+          # Run jscpd and capture output
+          jscpd src --output ./jscpd-report 2>&1 || true
+
+          echo "### Duplication Summary" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f "./jscpd-report/jscpd-report.json" ]; then
+            # Parse JSON report
+            total_lines=$(cat ./jscpd-report/jscpd-report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('statistics',{}).get('total',{}).get('lines',0))" 2>/dev/null || echo "0")
+            dup_lines=$(cat ./jscpd-report/jscpd-report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('statistics',{}).get('total',{}).get('duplicatedLines',0))" 2>/dev/null || echo "0")
+            dup_percent=$(cat ./jscpd-report/jscpd-report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(f\"{d.get('statistics',{}).get('total',{}).get('percentage',0):.2f}\")" 2>/dev/null || echo "0")
+            clones=$(cat ./jscpd-report/jscpd-report.json | python3 -c "import sys,json; d=json.load(sys.stdin); print(len(d.get('duplicates',[])))" 2>/dev/null || echo "0")
+
+            echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+            echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| Total Lines Analyzed | $total_lines |" >> $GITHUB_STEP_SUMMARY
+            echo "| Duplicated Lines | $dup_lines |" >> $GITHUB_STEP_SUMMARY
+            echo "| Duplication Percentage | ${dup_percent}% |" >> $GITHUB_STEP_SUMMARY
+            echo "| Clone Instances | $clones |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # Show top clones if any
+            if [ "$clones" != "0" ]; then
+              echo "### Top Duplications" >> $GITHUB_STEP_SUMMARY
+              echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+              cat ./jscpd-report/jscpd-report.json | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+for i, dup in enumerate(d.get('duplicates', [])[:10]):
+    first = dup.get('firstFile', {})
+    second = dup.get('secondFile', {})
+    lines = dup.get('lines', 0)
+    print(f\"{i+1}. {lines} lines duplicated:\")
+    print(f\"   {first.get('name','')}:{first.get('startLoc',{}).get('line','')}\")
+    print(f\"   {second.get('name','')}:{second.get('startLoc',{}).get('line','')}\")
+    print()
+" 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "Could not parse duplicates" >> $GITHUB_STEP_SUMMARY
+              echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+            fi
+          else
+            echo "No duplication report generated" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check scripts directory
+        run: |
+          if [ -d "scripts" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Scripts Directory Duplication" >> $GITHUB_STEP_SUMMARY
+            jscpd scripts --reporters console 2>&1 | tail -20 >> $GITHUB_STEP_SUMMARY || true
+          fi
+
+  summary:
+    name: Metrics Summary
+    needs: [complexity-metrics, duplication-metrics]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Final Summary
+        run: |
+          echo "## Code Metrics Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "This is an **informational report** - it does not block CI." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Recommendations" >> $GITHUB_STEP_SUMMARY
+          echo "- **Complexity**: Refactor functions with Grade C or worse" >> $GITHUB_STEP_SUMMARY
+          echo "- **Duplication**: Extract common code into shared utilities" >> $GITHUB_STEP_SUMMARY
+          echo "- **Maintainability**: Focus on files with MI score below 20" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Generated by Code Metrics workflow*" >> $GITHUB_STEP_SUMMARY
