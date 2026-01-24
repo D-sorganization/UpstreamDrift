@@ -1,21 +1,18 @@
-# Ensure shared/python is in sys.path
-import os
 import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
 from src.shared.python.engine_availability import MEDIAPIPE_AVAILABLE
+from src.shared.python.path_utils import ensure_repo_root_in_path, get_repo_root
 
 # Skip entire module if MediaPipe is not available
 if not MEDIAPIPE_AVAILABLE:
     pytest.skip("MediaPipe not installed", allow_module_level=True)
 
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../shared/python"))
-)
+# Ensure repo root is in path once at module level (DRY principle)
+ensure_repo_root_in_path()
 
 # Mock cv2 before importing video_pose_pipeline
 sys.modules["cv2"] = MagicMock()

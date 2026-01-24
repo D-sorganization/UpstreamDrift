@@ -2,16 +2,14 @@
 Unit tests for EngineManager functionality.
 """
 
-# Add the project root to the path for imports
-import sys
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from src.shared.python.path_utils import get_repo_root
+from src.shared.python.path_utils import ensure_repo_root_in_path
 
-project_root = get_repo_root()
-sys.path.insert(0, str(project_root))
+# Ensure repo root is in path once at module level (DRY principle)
+ensure_repo_root_in_path()
 
 from src.shared.python.engine_manager import (  # noqa: E402
     EngineManager,

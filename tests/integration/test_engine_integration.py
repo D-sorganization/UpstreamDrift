@@ -6,17 +6,15 @@ filesystem and engine discovery system. They use real filesystem operations
 instead of mocks to test actual integration.
 """
 
-import sys
 from typing import Any
 from unittest.mock import Mock
 
 import pytest
 
-from src.shared.python.path_utils import get_repo_root
+from src.shared.python.path_utils import ensure_repo_root_in_path
 
-# Add the project root to the path for imports
-project_root = get_repo_root()
-sys.path.insert(0, str(project_root))
+# Ensure repo root is in path once at module level (DRY principle)
+ensure_repo_root_in_path()
 
 from src.shared.python.engine_manager import (  # noqa: E402
     EngineManager,

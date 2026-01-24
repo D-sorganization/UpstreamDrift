@@ -1,16 +1,13 @@
-import sys
 from collections.abc import Generator
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-# Ensure repo root is in path
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[2]),
-)
+from src.shared.python.path_utils import ensure_repo_root_in_path
+
+# Ensure repo root is in path once at module level (DRY principle)
+ensure_repo_root_in_path()
 
 # Skip entire module if cv2 is not available (optional dependency)
 cv2 = pytest.importorskip("cv2", reason="OpenCV (cv2) not installed")

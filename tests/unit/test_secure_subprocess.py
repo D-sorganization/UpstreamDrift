@@ -6,11 +6,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from src.shared.python.path_utils import get_repo_root
+from src.shared.python.path_utils import ensure_repo_root_in_path
 
-# Add project root to path
-project_root = get_repo_root()
-sys.path.insert(0, str(project_root))
+# Ensure repo root is in path once at module level (DRY principle)
+ensure_repo_root_in_path()
 
 # ruff: noqa: E402
 from src.shared.python.secure_subprocess import (

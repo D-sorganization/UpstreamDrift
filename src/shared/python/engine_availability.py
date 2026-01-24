@@ -62,6 +62,9 @@ PYQT6_AVAILABLE: bool = False
 PYQT5_AVAILABLE: bool = False
 PYSIDE6_AVAILABLE: bool = False
 
+# Testing library flags
+PYTEST_QT_AVAILABLE: bool = False
+
 # Additional optional library flags
 PIL_AVAILABLE: bool = False
 CV2_AVAILABLE: bool = False
@@ -167,6 +170,14 @@ try:
     PYSIDE6_AVAILABLE = True
     del _PySide6Widgets
 except (ImportError, OSError):
+    pass
+
+# Check pytest-qt (for GUI testing)
+try:
+    import pytestqt  # noqa: F401
+
+    PYTEST_QT_AVAILABLE = True
+except ImportError:
     pass
 
 # Derived availability flags
@@ -490,6 +501,9 @@ _ENGINE_FLAGS: dict[str, bool] = {
     "gymnasium": GYMNASIUM_AVAILABLE,
     "gym": GYM_AVAILABLE,
     "gym_any": GYM_ANY_AVAILABLE,
+    # Testing
+    "pytest_qt": PYTEST_QT_AVAILABLE,
+    "pytestqt": PYTEST_QT_AVAILABLE,  # Alias
     # Utilities
     "structlog": STRUCTLOG_AVAILABLE,
     "cx_freeze": CX_FREEZE_AVAILABLE,

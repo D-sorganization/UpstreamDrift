@@ -3,17 +3,15 @@ Unit tests for launcher functionality.
 """
 
 import os
-import sys
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
 
-from src.shared.python.path_utils import get_repo_root
+from src.shared.python.path_utils import ensure_repo_root_in_path, get_repo_root
 
-# Add the project root to the path for imports
-project_root = get_repo_root()
-sys.path.insert(0, str(project_root))
+# Ensure repo root is in path once at module level (DRY principle)
+ensure_repo_root_in_path()
 
 
 class TestLauncherModule:

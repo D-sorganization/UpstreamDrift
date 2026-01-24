@@ -334,3 +334,47 @@ def get_drake_python_root() -> Path:
         drake_python = get_drake_python_root()
     """
     return get_src_root() / "engines" / "physics_engines" / "drake" / "python"
+
+
+def ensure_repo_root_in_path() -> Path:
+    """Ensure the repository root is in sys.path.
+
+    This is a DRY helper for test files that need to import from the repo.
+    Call this once at module level instead of repeating sys.path.insert.
+
+    Returns:
+        Path to repository root
+
+    Example:
+        from src.shared.python.path_utils import ensure_repo_root_in_path
+        ensure_repo_root_in_path()
+        # Now imports from src.* work
+    """
+    import sys
+
+    repo_root = get_repo_root()
+    repo_root_str = str(repo_root)
+    if repo_root_str not in sys.path:
+        sys.path.insert(0, repo_root_str)
+        logger.debug(f"Added repo root to sys.path: {repo_root_str}")
+    return repo_root
+
+
+def ensure_path_in_sys_path(path: Path | str) -> None:
+    """Ensure a path is in sys.path.
+
+    This is a DRY helper for adding arbitrary paths to sys.path.
+
+    Args:
+        path: Path to add to sys.path
+
+    Example:
+        from src.shared.python.path_utils import ensure_path_in_sys_path
+        ensure_path_in_sys_path(get_simscape_model_path())
+    """
+    import sys
+
+    path_str = str(path)
+    if path_str not in sys.path:
+        sys.path.insert(0, path_str)
+        logger.debug(f"Added to sys.path: {path_str}")

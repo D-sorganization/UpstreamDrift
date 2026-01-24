@@ -1,17 +1,14 @@
 import json
-import sys
-from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-# Ensure repo root is in path
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[2]),
-)
+from src.shared.python.path_utils import ensure_repo_root_in_path
+
+# Ensure repo root is in path once at module level (DRY principle)
+ensure_repo_root_in_path()
 
 from src.shared.python.export import (
     export_recording_all_formats,

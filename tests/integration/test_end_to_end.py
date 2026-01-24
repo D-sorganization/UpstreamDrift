@@ -10,7 +10,16 @@ import sys
 
 import pytest
 
-from src.shared.python.path_utils import get_repo_root
+from src.shared.python.path_utils import (
+    ensure_path_in_sys_path,
+    ensure_repo_root_in_path,
+    get_repo_root,
+)
+
+# Ensure repo root is in path once at module level (DRY principle)
+ensure_repo_root_in_path()
+# Also add src/shared/python for physics_parameters module (allows direct import)
+ensure_path_in_sys_path(get_repo_root() / "src" / "shared" / "python")
 
 # Check PyQt6 availability for launcher tests
 PYQT6_AVAILABLE = importlib.util.find_spec("PyQt6") is not None
@@ -22,10 +31,6 @@ class TestLauncherIntegration:
     @pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not available")
     def test_launch_golf_suite_imports(self):
         """Verify launch_golf_suite can import UnifiedLauncher."""
-        # Add project root to path
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root))
-
         from src.launchers.unified_launcher import UnifiedLauncher
 
         launcher = UnifiedLauncher()
@@ -64,9 +69,6 @@ class TestLauncherIntegration:
     )
     def test_unified_launcher_show_status(self):
         """Test UnifiedLauncher.show_status() method."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root))
-
         from unittest.mock import patch
 
         # Import inside the test to avoid circular dependencies
@@ -86,9 +88,6 @@ class TestEngineProbes:
 
     def test_engine_manager_probes_available(self):
         """Verify EngineManager has probe functionality."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root))
-
         from src.shared.python.engine_manager import EngineManager
 
         manager = EngineManager()
@@ -99,9 +98,6 @@ class TestEngineProbes:
 
     def test_probe_all_engines(self):
         """Test probing all engines."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root))
-
         from unittest.mock import MagicMock, patch
 
         from src.shared.python.engine_manager import EngineManager
@@ -123,9 +119,6 @@ class TestEngineProbes:
 
     def test_diagnostic_report_generation(self):
         """Test generating diagnostic report."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root))
-
         from unittest.mock import MagicMock, patch
 
         from src.shared.python.engine_manager import EngineManager
@@ -144,9 +137,6 @@ class TestEngineProbes:
 
     def test_at_least_one_engine_available(self):
         """Verify at least one engine is available or properly diagnosed."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root))
-
         from unittest.mock import MagicMock, patch
 
         from src.shared.python.engine_manager import EngineManager
@@ -176,9 +166,6 @@ class TestPhysicsParameters:
 
     def test_physics_parameters_accessible(self):
         """Verify physics parameters are accessible."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root / "shared" / "python"))
-
         from physics_parameters import get_registry
 
         registry = get_registry()
@@ -188,9 +175,6 @@ class TestPhysicsParameters:
 
     def test_ball_parameters_present(self):
         """Test that ball parameters are defined."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root / "shared" / "python"))
-
         from physics_parameters import get_registry
 
         registry = get_registry()
@@ -208,9 +192,6 @@ class TestPhysicsParameters:
 
     def test_gravity_parameter(self):
         """Test gravity parameter."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root / "shared" / "python"))
-
         from physics_parameters import get_registry
 
         registry = get_registry()
@@ -223,9 +204,6 @@ class TestPhysicsParameters:
 
     def test_parameter_validation(self):
         """Test parameter validation."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root / "shared" / "python"))
-
         from physics_parameters import get_registry
 
         registry = get_registry()
@@ -246,9 +224,6 @@ class TestPhysicsParameters:
 
     def test_parameter_categories(self):
         """Test parameter categorization."""
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root / "shared" / "python"))
-
         from physics_parameters import ParameterCategory, get_registry
 
         registry = get_registry()
@@ -312,9 +287,6 @@ class TestOutputManager:
     def test_output_manager_real_save_load(self):
         """Test OutputManager with real file I/O."""
         import tempfile
-
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root / "shared" / "python"))
 
         from src.shared.python.output_manager import OutputFormat, OutputManager
 
