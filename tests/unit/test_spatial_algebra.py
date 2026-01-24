@@ -5,17 +5,17 @@ Unit tests for spatial algebra module.
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+from src.shared.python.engine_availability import MUJOCO_AVAILABLE, skip_if_unavailable
 
-if not MUJOCO_AVAILABLE:
-    pytest.skip("MuJoCo not installed", allow_module_level=True)
+pytestmark = skip_if_unavailable("mujoco")
 
-from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.spatial_algebra import (
-    inertia,
-    joints,
-    spatial_vectors,
-    transforms,
-)
+if MUJOCO_AVAILABLE:
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.spatial_algebra import (
+        inertia,
+        joints,
+        spatial_vectors,
+        transforms,
+    )
 
 
 class TestSpatialVectors:

@@ -3,11 +3,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.engine_availability import PYQT6_AVAILABLE, skip_if_unavailable
 
-pytestmark = pytest.mark.skipif(
-    not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available"
-)
+pytestmark = skip_if_unavailable("pyqt6")
 
 if PYQT6_AVAILABLE:
     from src.launchers.unified_launcher import UnifiedLauncher

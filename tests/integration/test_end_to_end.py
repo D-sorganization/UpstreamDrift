@@ -4,27 +4,24 @@ These tests verify end-to-end functionality without heavy mocking,
 ensuring the suite works in real-world scenarios.
 """
 
-import importlib.util
 import subprocess
 import sys
 
 import pytest
 
-from src.shared.python.path_utils import get_repo_root
+from src.shared.python.engine_availability import skip_if_unavailable
+from src.shared.python.path_utils import get_repo_root, setup_import_paths
 
-# Check PyQt6 availability for launcher tests
-PYQT6_AVAILABLE = importlib.util.find_spec("PyQt6") is not None
+# Import paths configured at test runner level
+setup_import_paths()
 
 
 class TestLauncherIntegration:
     """Integration tests for launcher functionality."""
 
-    @pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not available")
+    @skip_if_unavailable("pyqt6")
     def test_launch_golf_suite_imports(self):
         """Verify launch_golf_suite can import UnifiedLauncher."""
-        # Add project root to path
-        suite_root = get_repo_root()
-        sys.path.insert(0, str(suite_root))
 
         from src.launchers.unified_launcher import UnifiedLauncher
 

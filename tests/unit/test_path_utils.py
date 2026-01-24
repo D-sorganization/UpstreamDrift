@@ -346,11 +346,9 @@ class TestSetupImportPaths:
         """Test that paths are added to sys.path."""
         import sys
 
-        original_path = sys.path.copy()
         setup_import_paths()
 
         # Should have added some paths
-        # Restore doesn't matter for this test as paths remain
         src_root = str(get_src_root())
         assert src_root in sys.path
 

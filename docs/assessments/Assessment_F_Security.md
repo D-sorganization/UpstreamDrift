@@ -5,7 +5,7 @@
 
 ## Findings
 
-- Potential hardcoded secrets found in 61 files (needs verification).
+- Potential hardcoded secrets found in 63 files (needs verification).
 
 ## Recommendations
 

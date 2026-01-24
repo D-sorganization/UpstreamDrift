@@ -17,6 +17,11 @@ import numpy as np
 import pytest
 
 from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.engine_availability import (
+    DRAKE_AVAILABLE,
+    MUJOCO_AVAILABLE,
+    PINOCCHIO_AVAILABLE,
+)
 from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -62,41 +67,20 @@ class EngineInstance:
     available: bool
 
 
+# DRY: Use centralized availability flags from engine_availability module
 def _check_mujoco_available() -> bool:
-    """Check if MuJoCo is available and not mocked."""
-    try:
-        import mujoco
-
-        # Check if it's a real module (not mocked)
-        if not hasattr(mujoco, "__version__"):
-            return False
-        return True
-    except ImportError:
-        return False
+    """Check if MuJoCo is available (delegates to engine_availability)."""
+    return MUJOCO_AVAILABLE
 
 
 def _check_drake_available() -> bool:
-    """Check if Drake is available and not mocked."""
-    try:
-        import pydrake
-
-        if not hasattr(pydrake, "__version__"):
-            return False
-        return True
-    except ImportError:
-        return False
+    """Check if Drake is available (delegates to engine_availability)."""
+    return DRAKE_AVAILABLE
 
 
 def _check_pinocchio_available() -> bool:
-    """Check if Pinocchio is available and not mocked."""
-    try:
-        import pinocchio
-
-        if not hasattr(pinocchio, "__version__"):
-            return False
-        return True
-    except ImportError:
-        return False
+    """Check if Pinocchio is available (delegates to engine_availability)."""
+    return PINOCCHIO_AVAILABLE
 
 
 @pytest.fixture

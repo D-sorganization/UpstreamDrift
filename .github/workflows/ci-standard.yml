@@ -109,7 +109,7 @@ jobs:
       - run: pip install -e .[dev]
       - name: Run Tests
         env:
-          PYTHONPATH: src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
+          PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
         run: |
           # Install test dependencies if not already installed
@@ -130,6 +130,7 @@ jobs:
       # These run on every PR to catch framework issues immediately
       - name: Cross-Engine Validation (Unit Tests)
         env:
+          PYTHONPATH: .:src:src/engines/physics_engines/mujoco/python:src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf
           QT_QPA_PLATFORM: offscreen
         run: |
           echo "## Cross-Engine Validation (Unit Tests)" >> $GITHUB_STEP_SUMMARY

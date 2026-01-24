@@ -9,34 +9,29 @@ Supports:
 
 from __future__ import annotations
 
-import importlib.util
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
+from src.shared.python.engine_availability import (
+    C3D_AVAILABLE,
+    EZC3D_AVAILABLE,
+    SCIPY_AVAILABLE,
+)
+from src.shared.python.engine_availability import (
+    HDF5_AVAILABLE as H5PY_AVAILABLE,
+)
 from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 
-# Import optional dependencies with fallbacks
-try:
+# Conditional imports for optional dependencies
+if SCIPY_AVAILABLE:
     from scipy.io import savemat
 
-    SCIPY_AVAILABLE = True
-except ImportError:
-    SCIPY_AVAILABLE = False
-
-try:
+if H5PY_AVAILABLE:
     import h5py
-
-    H5PY_AVAILABLE = True
-except ImportError:
-    H5PY_AVAILABLE = False
-
-# Check for C3D libraries (imported inside functions when needed)
-EZC3D_AVAILABLE = importlib.util.find_spec("ezc3d") is not None
-C3D_AVAILABLE = importlib.util.find_spec("c3d") is not None
 
 
 def export_to_matlab(

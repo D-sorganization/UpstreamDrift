@@ -8,10 +8,10 @@ import re
 import subprocess
 from datetime import datetime
 
-from src.shared.python.path_utils import get_src_root
+from src.shared.python.path_utils import get_repo_root
 
 # Setup paths
-REPO_ROOT = get_src_root()
+REPO_ROOT = get_repo_root()
 DOCS_DIR = REPO_ROOT / "docs" / "assessments"
 ISSUES_DIR = DOCS_DIR / "issues"
 

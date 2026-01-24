@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+from src.shared.python.engine_availability import MUJOCO_AVAILABLE, skip_if_unavailable
 
 if TYPE_CHECKING:
     from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
@@ -48,7 +48,7 @@ class TestMuJoCoShaftIntegration:
         engine.load_from_string(simple_model)
         return engine
 
-    @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
+    @skip_if_unavailable("mujoco")
     def test_set_shaft_properties_returns_true(
         self, engine: "MuJoCoPhysicsEngine"
     ) -> None:  # type: ignore[name-defined]
@@ -62,7 +62,7 @@ class TestMuJoCoShaftIntegration:
 
         assert result is True
 
-    @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
+    @skip_if_unavailable("mujoco")
     def test_get_shaft_state_none_before_config(
         self, engine: "MuJoCoPhysicsEngine"
     ) -> None:  # type: ignore[name-defined]
@@ -71,7 +71,7 @@ class TestMuJoCoShaftIntegration:
 
         assert result is None
 
-    @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
+    @skip_if_unavailable("mujoco")
     def test_get_shaft_state_after_config(self, engine: "MuJoCoPhysicsEngine") -> None:  # type: ignore[name-defined]
         """get_shaft_state should return dict after configuration."""
         n_stations = 11
@@ -89,7 +89,7 @@ class TestMuJoCoShaftIntegration:
         assert "velocity" in state
         assert "modal_amplitudes" in state
 
-    @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
+    @skip_if_unavailable("mujoco")
     def test_shaft_state_correct_shape(self, engine: "MuJoCoPhysicsEngine") -> None:  # type: ignore[name-defined]
         """Shaft state arrays should have correct shape."""
         n_stations = 11
@@ -107,7 +107,7 @@ class TestMuJoCoShaftIntegration:
         assert len(state["velocity"]) == n_stations
         assert len(state["modal_amplitudes"]) == 3  # Default 3 modes
 
-    @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
+    @skip_if_unavailable("mujoco")
     def test_initial_deflection_zero(self, engine: "MuJoCoPhysicsEngine") -> None:  # type: ignore[name-defined]
         """Initial shaft deflection should be zero."""
         n_stations = 11
@@ -123,7 +123,7 @@ class TestMuJoCoShaftIntegration:
         np.testing.assert_allclose(state["deflection"], 0.0)
         np.testing.assert_allclose(state["velocity"], 0.0)
 
-    @pytest.mark.skipif(not MUJOCO_AVAILABLE, reason="MuJoCo not installed")
+    @skip_if_unavailable("mujoco")
     def test_damping_ratio_stored(self, engine: "MuJoCoPhysicsEngine") -> None:  # type: ignore[name-defined]
         """Damping ratio should be stored in configuration."""
         n_stations = 11

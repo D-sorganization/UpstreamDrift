@@ -355,10 +355,8 @@ def validate_numeric(
         raise ValueError(f"{name} cannot be infinite")
 
 
-class ValidationError(Exception):
-    """Custom exception for validation errors."""
-
-    pass
+# Import from centralized error_utils module (DRY principle)
+from src.shared.python.error_utils import ValidationError  # noqa: E402, F811
 
 
 def validate_all(*validations: tuple[Callable[..., None], tuple, dict]) -> None:
@@ -387,6 +385,7 @@ def validate_all(*validations: tuple[Callable[..., None], tuple, dict]) -> None:
 
     if errors:
         raise ValidationError(
-            f"Validation failed with {len(errors)} error(s):\n"
-            + "\n".join(f"  - {error}" for error in errors)
+            "multiple_errors",
+            message=f"Validation failed with {len(errors)} error(s):\n"
+            + "\n".join(f"  - {error}" for error in errors),
         )

@@ -105,11 +105,16 @@ class ValidationError(GolfSuiteError):
         value: Any = None,
         reason: str | None = None,
         valid_values: list[Any] | None = None,
+        message: str | None = None,
     ):
         self.field = field
         self.value = value
         self.reason = reason
         self.valid_values = valid_values
+
+        if message is not None:
+            super().__init__(message)
+            return
 
         message = f"Validation failed for '{field}'"
         if value is not None:

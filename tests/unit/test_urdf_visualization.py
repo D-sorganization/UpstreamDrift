@@ -2,15 +2,10 @@
 
 import pytest
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
-
-# Check if pytest-qt is available
-try:
-    import pytestqt  # noqa: F401
-
-    PYTEST_QT_AVAILABLE = True
-except ImportError:
-    PYTEST_QT_AVAILABLE = False
+from src.shared.python.engine_availability import (
+    PYQT6_AVAILABLE,
+    PYTEST_QT_AVAILABLE,
+)
 
 pytestmark = pytest.mark.skipif(
     not PYQT6_AVAILABLE or not PYTEST_QT_AVAILABLE,

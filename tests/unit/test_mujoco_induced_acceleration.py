@@ -1,20 +1,16 @@
-import sys
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+
+from src.shared.python.path_utils import setup_import_paths
+
+# Import paths configured at test runner level and with setup_import_paths
+setup_import_paths()
 
 
 # Use a patch for the import since mujoco might not be installed
 @patch.dict("sys.modules", {"mujoco": MagicMock()})
 def test_mujoco_iaa_logic():
-    # Add the mujoco python directory to sys.path so we can import mujoco_humanoid_golf
-    from pathlib import Path
-
-    root_path = Path.cwd()
-    target_path = root_path / "engines" / "physics_engines" / "mujoco" / "python"
-
-    if str(target_path) not in sys.path:
-        sys.path.append(str(target_path))
 
     # Now we can import the module
     import mujoco

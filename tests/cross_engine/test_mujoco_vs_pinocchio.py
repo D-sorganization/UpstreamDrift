@@ -35,27 +35,18 @@ from typing import TYPE_CHECKING, Any
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import PINOCCHIO_AVAILABLE
+from src.shared.python.engine_availability import (
+    MUJOCO_AVAILABLE,
+    PINOCCHIO_AVAILABLE,
+)
 
 if TYPE_CHECKING:
     import mujoco
     import pinocchio
 
-# Use shared engine availability (DRY principle)
-pinocchio_available = PINOCCHIO_AVAILABLE
-
-# Test if MuJoCo is available
-mujoco_available = False
-try:
-    import mujoco
-
-    mujoco_available = True
-except ImportError:
-    pass
-
 # Skip all tests if either engine is missing
 pytestmark = pytest.mark.skipif(
-    not (pinocchio_available and mujoco_available),
+    not (PINOCCHIO_AVAILABLE and MUJOCO_AVAILABLE),
     reason="Requires both MuJoCo and Pinocchio",
 )
 

@@ -29,6 +29,8 @@ from typing import cast
 import numpy as np
 from scipy import optimize
 
+from src.shared.python.constants import GRAVITY_M_S2
+
 
 class OptimizationObjective(Enum):
     """Available optimization objectives."""
@@ -710,7 +712,7 @@ class SwingOptimizer:
 
         # Carry distance (simplified model)
         launch_angle = self.club.loft_angle  # Simplified
-        carry = (ball_speed**2 * np.sin(2 * np.radians(launch_angle))) / 9.81
+        carry = (ball_speed**2 * np.sin(2 * np.radians(launch_angle))) / GRAVITY_M_S2
         carry *= 0.9  # Air resistance reduction factor
 
         # Spin rate (simplified)

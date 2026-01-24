@@ -143,7 +143,7 @@ class SwingMetricsMixin:
         This method is expected to be provided by BasicStatsMixin in the MRO.
         """
         # Call the parent implementation from BasicStatsMixin
-        return super().find_club_head_speed_peak()  # type: ignore[misc]
+        return super().find_club_head_speed_peak()  # type: ignore[misc, no-any-return]
 
     def detect_impact_time(self) -> float | None:
         """Detect ball impact time.

@@ -14,7 +14,10 @@ import time
 from pathlib import Path
 from typing import Any, ClassVar
 
-import cv2
+try:
+    import cv2
+except ImportError:
+    cv2 = None
 import numpy as np
 
 from src.shared.python.engine_availability import MEDIAPIPE_AVAILABLE
@@ -131,6 +134,9 @@ class MediaPipeEstimator(PoseEstimator):
         """
         if not MEDIAPIPE_AVAILABLE:
             raise ImportError("MediaPipe module is not installed.")
+
+        if cv2 is None:
+            raise ImportError("OpenCV (cv2) is not installed.")
 
         try:
             mp_pose = mp.solutions.pose

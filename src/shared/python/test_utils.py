@@ -25,6 +25,7 @@ from typing import Any, TypeVar
 import numpy as np
 import pytest
 
+from src.shared.python.constants import GRAVITY_M_S2
 from src.shared.python.engine_manager import EngineManager, EngineType
 from src.shared.python.logging_config import get_logger
 
@@ -260,7 +261,7 @@ class MockEngine:
 def create_simple_pendulum_xml(
     length: float = 1.0,
     mass: float = 1.0,
-    gravity: float = 9.81,
+    gravity: float = GRAVITY_M_S2,  # DRY: Use centralized constant
 ) -> str:
     """Create simple pendulum model XML for testing.
 

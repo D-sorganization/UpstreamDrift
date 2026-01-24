@@ -5,7 +5,7 @@
 
 ## Findings
 
-- Found 52 GitHub Actions workflows.
+- Found 56 GitHub Actions workflows.
 
 ## Recommendations
 

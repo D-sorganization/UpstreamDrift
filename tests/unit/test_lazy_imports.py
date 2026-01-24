@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.engine_availability import skip_if_unavailable
 from src.shared.python.gui_utils import get_qapp
 
 
@@ -47,7 +47,7 @@ class TestSharedModuleLazyImports:
         assert hasattr(common_utils, "pd")  # pandas is imported
 
 
-@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available")
+@skip_if_unavailable("pyqt6")
 class TestPolynomialGeneratorLazyImport:
     """Test lazy import of polynomial generator widget."""
 

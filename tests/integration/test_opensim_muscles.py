@@ -14,19 +14,19 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import OPENSIM_AVAILABLE
+from src.shared.python.engine_availability import (
+    OPENSIM_AVAILABLE,
+    skip_if_unavailable,
+)
 from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 
 # Skip entire module if OpenSim not available
-if not OPENSIM_AVAILABLE:
-    pytest.skip("OpenSim not installed", allow_module_level=True)
-else:
-    import opensim
+pytestmark = skip_if_unavailable("opensim")
 
-    if not hasattr(opensim, "Model"):
-        pytest.skip("OpenSim is mocked or unavailable", allow_module_level=True)
+if OPENSIM_AVAILABLE:
+    import opensim
 
 
 @pytest.fixture
