@@ -13,7 +13,7 @@
       "reason": "syntax error while parsing AST from file"
     }
   ],
-  "generated_at": "2026-01-21T05:32:03Z",
+  "generated_at": "2026-01-21T05:25:28Z",
   "metrics": {
     "./api/__init__.py": {
       "CONFIDENCE.HIGH": 0,
