@@ -22,6 +22,13 @@ from src.shared.python.engine_availability import (
     HDF5_AVAILABLE as H5PY_AVAILABLE,
 )
 
+# Conditional imports for optional dependencies
+if SCIPY_AVAILABLE:
+    from scipy.io import savemat
+
+if H5PY_AVAILABLE:
+    import h5py
+
 
 def export_to_matlab(
     output_path: str,

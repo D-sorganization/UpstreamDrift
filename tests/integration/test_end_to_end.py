@@ -5,6 +5,7 @@ ensuring the suite works in real-world scenarios.
 """
 
 import subprocess
+import sys
 
 import pytest
 

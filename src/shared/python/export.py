@@ -26,6 +26,13 @@ from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 
+# Conditional imports for optional dependencies
+if SCIPY_AVAILABLE:
+    from scipy.io import savemat
+
+if H5PY_AVAILABLE:
+    import h5py
+
 
 def export_to_matlab(
     output_path: str,
