@@ -36,13 +36,13 @@ if YAML_AVAILABLE:
     import yaml
 
 
-class IOError(Exception):
+class IOUtilsError(Exception):
     """Base exception for I/O operations."""
 
     pass
 
 
-class FileNotFoundError(IOError):
+class FileNotFoundIOError(IOUtilsError):
     """File not found error with helpful message."""
 
     def __init__(self, path: Path | str, operation: str = "read"):
@@ -54,7 +54,7 @@ class FileNotFoundError(IOError):
         )
 
 
-class ParseError(IOError):
+class FileParseError(IOUtilsError):
     """File parsing error with helpful message."""
 
     def __init__(self, path: Path | str, format_type: str, details: str = ""):
@@ -103,8 +103,8 @@ def load_json(
         Parsed JSON data.
 
     Raises:
-        FileNotFoundError: If file doesn't exist and strict is True.
-        ParseError: If JSON parsing fails.
+        FileNotFoundIOError: If file doesn't exist and strict is True.
+        FileParseError: If JSON parsing fails.
 
     Example:
         config = load_json("config.json")
@@ -114,14 +114,14 @@ def load_json(
 
     if not file_path.exists():
         if strict:
-            raise FileNotFoundError(file_path, "read")
+            raise FileNotFoundIOError(file_path, "read")
         return default
 
     try:
         with file_path.open("r", encoding=encoding) as f:
             return json.load(f)
     except json.JSONDecodeError as e:
-        raise ParseError(file_path, "JSON", str(e)) from e
+        raise FileParseError(file_path, "JSON", str(e)) from e
 
 
 def save_json(
@@ -186,8 +186,8 @@ def load_yaml(
         Parsed YAML data.
 
     Raises:
-        FileNotFoundError: If file doesn't exist and strict is True.
-        ParseError: If YAML parsing fails.
+        FileNotFoundIOError: If file doesn't exist and strict is True.
+        FileParseError: If YAML parsing fails.
         ImportError: If PyYAML is not installed.
 
     Example:
@@ -204,7 +204,7 @@ def load_yaml(
 
     if not file_path.exists():
         if strict:
-            raise FileNotFoundError(file_path, "read")
+            raise FileNotFoundIOError(file_path, "read")
         return default
 
     yaml_loader = loader or yaml.SafeLoader
@@ -213,7 +213,7 @@ def load_yaml(
         with file_path.open("r", encoding=encoding) as f:
             return yaml.load(f, Loader=yaml_loader)
     except yaml.YAMLError as e:
-        raise ParseError(file_path, "YAML", str(e)) from e
+        raise FileParseError(file_path, "YAML", str(e)) from e
 
 
 def save_yaml(
@@ -299,7 +299,7 @@ def read_text(
 
     if not file_path.exists():
         if strict:
-            raise FileNotFoundError(file_path, "read")
+            raise FileNotFoundIOError(file_path, "read")
         return default or ""
 
     return file_path.read_text(encoding=encoding)
@@ -357,9 +357,9 @@ def get_file_size(path: Path | str) -> int:
         File size in bytes.
 
     Raises:
-        FileNotFoundError: If file doesn't exist.
+        FileNotFoundIOError: If file doesn't exist.
     """
     file_path = Path(path)
     if not file_path.exists():
-        raise FileNotFoundError(file_path, "stat")
+        raise FileNotFoundIOError(file_path, "stat")
     return file_path.stat().st_size

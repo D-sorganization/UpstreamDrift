@@ -39,10 +39,10 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.logging_config import configure_gui_logging, get_logger
-from src.shared.python.path_utils import setup_import_paths
+from src.shared.python.path_utils import get_shared_python_root, setup_import_paths
 
 # Setup import paths for flight_models import
-setup_import_paths()
+setup_import_paths(additional_paths=[get_shared_python_root()])
 
 try:
     import pyqtgraph as pg
