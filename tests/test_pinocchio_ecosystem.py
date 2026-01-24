@@ -9,12 +9,13 @@ Tests cover:
 - Docker environment compatibility
 """
 
-import sys
 import unittest
 from pathlib import Path
 
-# Add shared modules to path for testing
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
+from src.shared.python.path_utils import setup_import_paths
+
+# Setup import paths for testing
+setup_import_paths()
 
 
 class TestPinocchioEcosystem(unittest.TestCase):

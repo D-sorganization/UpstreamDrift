@@ -3,7 +3,6 @@
 Launches the MuJoCo, Drake, and Pinocchio golf model GUIs from a single interface.
 """
 
-import logging
 import os
 import subprocess
 import sys
@@ -11,8 +10,10 @@ from pathlib import Path
 
 from PyQt6 import QtCore, QtWidgets
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger("GolfSuiteLauncher")
+from src.shared.python.logging_config import configure_gui_logging, get_logger
+
+configure_gui_logging()
+logger = get_logger("GolfSuiteLauncher")
 
 
 class GolfLauncher(QtWidgets.QMainWindow):

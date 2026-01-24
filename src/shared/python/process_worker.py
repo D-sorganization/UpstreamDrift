@@ -8,9 +8,11 @@ import subprocess
 import threading
 from typing import Any
 
-try:
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
+
+if PYQT6_AVAILABLE:
     from PyQt6.QtCore import QThread, pyqtSignal
-except ImportError:
+else:
     # Fallback for headless environments or non-PyQt usage
     class QThread:  # type: ignore[no-redef]
         def __init__(self, parent: Any = None) -> None:

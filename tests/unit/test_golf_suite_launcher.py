@@ -206,8 +206,8 @@ def mock_subprocess():
 @pytest.fixture
 def launcher_app():
     """Fixture to create the launcher instance."""
-    # Ensure PYQT_AVAILABLE is True for logic testing
-    golf_suite_launcher.PYQT_AVAILABLE = True
+    # Ensure PYQT6_AVAILABLE is True for logic testing
+    golf_suite_launcher.PYQT6_AVAILABLE = True
     app = golf_suite_launcher.GolfLauncher()
     return app
 
@@ -220,10 +220,10 @@ class TestGolfSuiteLauncher:
         # Verify launcher instance was created with essential attributes
         assert launcher_app is not None, "Launcher should be instantiated"
 
-        # Verify PYQT_AVAILABLE flag is set correctly for testing
+        # Verify PYQT6_AVAILABLE flag is set correctly for testing
         assert (
-            golf_suite_launcher.PYQT_AVAILABLE is True
-        ), "PYQT_AVAILABLE should be True for launcher logic tests"
+            golf_suite_launcher.PYQT6_AVAILABLE is True
+        ), "PYQT6_AVAILABLE should be True for launcher logic tests"
 
         # Verify launcher has essential UI components (as mocked)
         assert hasattr(launcher_app, "log_text"), "Launcher should have log_text widget"
@@ -317,10 +317,10 @@ class TestGolfSuiteLauncher:
 
         # Mock sys.exit
         with patch("sys.exit") as mock_exit:
-            golf_suite_launcher.PYQT_AVAILABLE = True
+            golf_suite_launcher.PYQT6_AVAILABLE = True
 
             # Print for debug (captured in verbose output if needed)
-            print(f"DEBUG: PYQT_AVAILABLE={golf_suite_launcher.PYQT_AVAILABLE}")
+            print(f"DEBUG: PYQT6_AVAILABLE={golf_suite_launcher.PYQT6_AVAILABLE}")
 
             golf_suite_launcher.main()
 

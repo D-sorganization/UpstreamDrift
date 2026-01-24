@@ -19,17 +19,19 @@ References:
 from __future__ import annotations
 
 import json
-import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.io_utils import ensure_directory
+from src.shared.python.logging_config import get_logger
+
 if TYPE_CHECKING:
     from shared.python.interfaces import PhysicsEngine
 
-LOGGER = logging.getLogger(__name__)
+LOGGER = get_logger(__name__)
 
 # Default colors (RGBA as 0-1 floats converted to hex for meshcat)
 VELOCITY_ELLIPSOID_COLOR = 0x00FF88  # Green for velocity/mobility
@@ -252,7 +254,7 @@ def export_ellipsoid_sequence_json(
     }
 
     output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_directory(output_path.parent)
 
     with open(output_path, "w") as f:
         json.dump(data, f, indent=2)
@@ -354,7 +356,7 @@ def export_ellipsoid_obj(
     vertices, faces = generate_ellipsoid_mesh(ellipsoid)
 
     output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_directory(output_path.parent)
 
     with open(output_path, "w") as f:
         f.write(f"# Ellipsoid for {ellipsoid.body_name}\n")
@@ -395,7 +397,7 @@ def export_ellipsoid_stl(
     vertices, faces = generate_ellipsoid_mesh(ellipsoid)
 
     output_path = Path(output_path)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
+    ensure_directory(output_path.parent)
 
     if binary:
         _write_stl_binary(vertices, faces, output_path, ellipsoid)

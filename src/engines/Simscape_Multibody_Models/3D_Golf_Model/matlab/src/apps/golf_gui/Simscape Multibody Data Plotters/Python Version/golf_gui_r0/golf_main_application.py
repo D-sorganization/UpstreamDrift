@@ -4,18 +4,15 @@ Golf Swing Visualizer - Main Application Entry Point
 Complete integration of all components with enhanced features and error handling
 """
 
-import logging
 import sys
 import time
 from pathlib import Path
 
+from src.shared.python.logging_config import configure_gui_logging, get_logger
+
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.FileHandler("golf_visualizer.log"), logging.StreamHandler()],
-)
-logger = logging.getLogger(__name__)
+configure_gui_logging()
+logger = get_logger(__name__)
 
 # Import PyQt6 with error handling
 try:

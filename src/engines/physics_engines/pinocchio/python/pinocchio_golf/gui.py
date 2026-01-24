@@ -1,33 +1,24 @@
 """Pinocchio GUI Wrapper (PyQt6 + meshcat)."""
 
-import logging
 import sys
 import types
 from pathlib import Path
 from typing import Any
 
-# Add suite root to sys.path to allow imports from shared.
-# Instead of assuming a fixed directory depth, search upwards for a repository marker.
-try:
-    current_path = Path(__file__).resolve()
-    suite_root: Path | None = None
-    for parent in current_path.parents:
-        if (parent / ".git").exists() or (parent / ".antigravityignore").exists():
-            suite_root = parent
-            break
-
-    if suite_root and str(suite_root) not in sys.path:
-        sys.path.insert(0, str(suite_root))
-except Exception:
-    # If detection fails, fall back to existing sys.path configuration or do nothing
-    pass
-
 import numpy as np
 import pinocchio as pin  # type: ignore
 from PyQt6 import QtCore, QtWidgets
 
+from src.shared.python.biomechanics_data import BiomechanicalData
+from src.shared.python.common_utils import get_shared_urdf_path
+from src.shared.python.dashboard.widgets import LivePlotWidget
+from src.shared.python.logging_config import configure_gui_logging, get_logger
+from src.shared.python.plotting import GolfSwingPlotter, MplCanvas
+from src.shared.python.statistical_analysis import StatisticalAnalyzer
+
 from .manipulability import PinocchioManipulabilityAnalyzer
 
+# Check meshcat availability
 try:
     import meshcat.geometry as g
     import meshcat.visualizer as viz
@@ -43,12 +34,6 @@ if MESHCAT_AVAILABLE:
 else:
     MeshcatVisualizer = object  # Dummy class if missing
 
-from src.shared.python.biomechanics_data import BiomechanicalData
-from src.shared.python.common_utils import get_shared_urdf_path
-from src.shared.python.dashboard.widgets import LivePlotWidget
-from src.shared.python.plotting import GolfSwingPlotter, MplCanvas
-from src.shared.python.statistical_analysis import StatisticalAnalyzer
-
 try:
     from .induced_acceleration import InducedAccelerationAnalyzer
 except ImportError:
@@ -57,11 +42,9 @@ except ImportError:
         InducedAccelerationAnalyzer,
     )
 
-# Set up logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+# Set up logging using centralized module
+configure_gui_logging()
+logger = get_logger(__name__)
 
 
 class LogPanel(QtWidgets.QTextEdit):

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 import os
 import sys
 import webbrowser
@@ -11,24 +10,28 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-# Qt imports
-try:
-    from PyQt6 import QtCore, QtGui, QtWidgets
+from src.shared.python.engine_availability import (
+    MATPLOTLIB_AVAILABLE,
+    PYQT6_AVAILABLE,
+)
+from src.shared.python.logging_config import configure_gui_logging, get_logger
 
-    HAS_QT = True
-except ImportError:
-    HAS_QT = False
+# Use centralized availability flags
+HAS_QT = PYQT6_AVAILABLE
+HAS_MATPLOTLIB = MATPLOTLIB_AVAILABLE
+
+# Qt imports
+if HAS_QT:
+    from PyQt6 import QtCore, QtGui, QtWidgets
+else:
     QtCore = None  # type: ignore[misc, assignment]
     QtGui = None  # type: ignore[misc, assignment]
     QtWidgets = None  # type: ignore[misc, assignment]
 
 # Matplotlib imports
-try:
+if HAS_MATPLOTLIB:
     import matplotlib.pyplot as plt
-
-    HAS_MATPLOTLIB = True
-except ImportError:
-    HAS_MATPLOTLIB = False
+else:
     plt = None  # type: ignore[misc, assignment]
 
 # Drake imports
@@ -133,7 +136,7 @@ STYLE_BUTTON_RUN = "QPushButton { background-color: #4CAF50; color: white; }"
 STYLE_BUTTON_STOP = "QPushButton { background-color: #f44336; color: white; }"
 
 # Logger
-LOGGER = logging.getLogger(__name__)
+LOGGER = get_logger(__name__)
 
 
 # Placeholder for missing classes
@@ -243,7 +246,7 @@ class DrakeInducedAccelerationAnalyzer:
 
 def setup_logging() -> None:
     """Setup logging configuration."""
-    logging.basicConfig(level=logging.INFO)
+    configure_gui_logging()
 
 
 class DrakeRecorder:

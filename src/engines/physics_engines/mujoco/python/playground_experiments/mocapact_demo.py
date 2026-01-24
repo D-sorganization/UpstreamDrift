@@ -7,12 +7,13 @@ demonstrates how to access its humanoid model and dataset tools.
 MoCapAct uses a specialized version of the dm_control humanoid.
 """
 
-import logging
 from pathlib import Path
 
+from src.shared.python.logging_config import get_logger, setup_logging
+
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+setup_logging()
+logger = get_logger(__name__)
 
 
 def check_mocapact_installation() -> bool:

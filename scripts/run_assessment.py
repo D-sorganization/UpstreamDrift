@@ -7,15 +7,16 @@ based on actual code analysis.
 """
 
 import argparse
-import logging
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_config import get_logger, setup_logging
+
+# Configure logging using centralized module
+setup_logging(use_simple_format=True)
+logger = get_logger(__name__)
 
 # Assessment definitions
 ASSESSMENTS = {
@@ -192,11 +193,11 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
     score = max(0, min(10, score))
 
     # Generate report
-    report_content = f"""# Assessment {assessment_id}: {assessment['name']}
+    report_content = f"""# Assessment {assessment_id}: {assessment["name"]}
 
 **Date**: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-**Assessment**: {assessment_id} - {assessment['name']}
-**Description**: {assessment['description']}
+**Assessment**: {assessment_id} - {assessment["name"]}
+**Description**: {assessment["description"]}
 **Generated**: Automated via Jules Assessment Auto-Fix workflow
 
 ## Score: {score}/10

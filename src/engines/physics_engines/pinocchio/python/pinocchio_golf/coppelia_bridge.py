@@ -5,7 +5,6 @@ Continuously pulls joint states from CoppeliaSim and displays the corresponding
 configuration in Pinocchio's Meshcat visualizer.
 """
 
-import logging
 import time
 
 import numpy as np
@@ -14,11 +13,11 @@ import pinocchio as pin
 from pinocchio.visualize import MeshcatVisualizer
 from zmqRemoteApi import RemoteAPIClient
 
+from src.shared.python.logging_config import configure_gui_logging, get_logger
+
 # Set up logging
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+configure_gui_logging()
+logger = get_logger(__name__)
 
 # === CONFIG ===========================================================
 

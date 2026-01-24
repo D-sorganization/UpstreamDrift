@@ -10,21 +10,19 @@ This module implements research-grade ball flight physics including:
 Critical gap identified in upgrade assessment - without this, not a complete golf tool.
 """
 
-import logging
 from dataclasses import dataclass
 from typing import Any, cast
 
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from src.shared.python.engine_availability import NUMBA_AVAILABLE
+from src.shared.python.logging_config import get_logger
+
 # Performance: Optional Numba JIT compilation
-try:
+if NUMBA_AVAILABLE:
     from numba import jit
-
-    NUMBA_AVAILABLE = True
-except ImportError:
-    NUMBA_AVAILABLE = False
-
+else:
     # Create a no-op decorator when numba is not available
     def jit(*args: object, **kwargs: object) -> object:  # type: ignore[misc]
         """No-op decorator when numba is not installed."""
@@ -37,7 +35,7 @@ except ImportError:
         return decorator
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # =============================================================================
 # Physical Constants

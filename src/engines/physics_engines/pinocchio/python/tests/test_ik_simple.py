@@ -1,12 +1,11 @@
 """Simple verification test for PinkSolver."""
 
-import logging
-
 import numpy as np
 import pytest
 
+from src.shared.python.logging_config import get_logger, setup_logging
+
 pin = pytest.importorskip("pinocchio")
-logger = logging.getLogger(__name__)
 
 try:
     from dtack.ik.pink_solver import PinkSolver
@@ -15,7 +14,7 @@ except ImportError:
     pytest.skip("dtack.ik dependencies missing", allow_module_level=True)
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def test_ik_convergence() -> None:
@@ -77,5 +76,5 @@ def test_ik_convergence() -> None:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    setup_logging()
     test_ik_convergence()

@@ -18,11 +18,13 @@ Note: MyoConverter requires specific dependencies. Install via:
 
 from __future__ import annotations
 
-import logging
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger(__name__)
+from src.shared.python.io_utils import ensure_directory
+from src.shared.python.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class MyoConverter:
@@ -218,7 +220,7 @@ class MyoConverter:
             )
 
         # Create output folder if needed
-        output_folder.mkdir(parents=True, exist_ok=True)
+        ensure_directory(output_folder)
         logger.info(f"Output folder ready: {output_folder}")
 
     def _handle_conversion_error(

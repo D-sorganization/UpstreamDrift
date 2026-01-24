@@ -8,22 +8,20 @@ This example demonstrates how to:
 4. Save results
 """
 
-import logging
-import sys
 import time
-from pathlib import Path
 
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.append(str(project_root))
+from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.engine_manager import EngineManager, EngineType
+from src.shared.python.logging_config import get_logger, setup_logging
+from src.shared.python.output_manager import OutputManager
+from src.shared.python.path_utils import get_repo_root
 
-from shared.python.constants import GRAVITY_M_S2  # noqa: E402
-from shared.python.engine_manager import EngineManager, EngineType  # noqa: E402
-from shared.python.output_manager import OutputManager  # noqa: E402
+# Configure logging using centralized module
+setup_logging()
+logger = get_logger(__name__)
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# Get project root using centralized path utilities
+project_root = get_repo_root()
 
 
 def main() -> None:

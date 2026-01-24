@@ -1,10 +1,11 @@
 import math
-import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
+from src.shared.python.path_utils import setup_import_paths
+
+# Setup import paths - add the pendulum model Python directory
+_PENDULUM_PYTHON_ROOT = Path(__file__).resolve().parents[3]
+setup_import_paths(additional_paths=[_PENDULUM_PYTHON_ROOT])
 
 from double_pendulum_model.physics.double_pendulum import (  # noqa: E402
     DoublePendulumDynamics,

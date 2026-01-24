@@ -1,28 +1,20 @@
 #!/usr/bin/env python3
 """Launch script for the Interactive URDF Generator."""
 
-import logging
 import sys
-from pathlib import Path
+
+from src.shared.python.logging_config import configure_gui_logging, get_logger
+from src.shared.python.path_utils import setup_import_paths
 
 # Add the project root to the Python path
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
+setup_import_paths()
 
 from src.tools.urdf_generator.main_window import main  # noqa: E402
 
 if __name__ == "__main__":
     # Set up logging
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler(project_root / "urdf_generator.log"),
-        ],
-    )
-
-    logger = logging.getLogger(__name__)
+    configure_gui_logging()
+    logger = get_logger(__name__)
     logger.info("Starting Interactive URDF Generator")
 
     try:

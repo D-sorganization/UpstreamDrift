@@ -8,7 +8,6 @@ This module provides a complete pipeline for processing golf swing videos:
 - Quality assessment and filtering
 """
 
-import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -16,6 +15,8 @@ from typing import Any
 import cv2
 import numpy as np
 
+from src.shared.python.io_utils import ensure_directory
+from src.shared.python.logging_config import get_logger
 from src.shared.python.marker_mapping import MarkerToModelMapper, RegistrationResult
 from src.shared.python.output_manager import OutputManager
 from src.shared.python.pose_estimation.interface import (
@@ -23,7 +24,7 @@ from src.shared.python.pose_estimation.interface import (
     PoseEstimator,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -392,7 +393,7 @@ class VideoPosePipeline:
 
     def _export_results(self, result: VideoProcessingResult, output_dir: Path) -> None:
         """Export processing results to files."""
-        output_dir.mkdir(parents=True, exist_ok=True)
+        ensure_directory(output_dir)
 
         base_name = result.video_path.stem
 

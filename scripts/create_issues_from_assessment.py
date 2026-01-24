@@ -8,15 +8,16 @@ for untracked critical findings.
 
 import argparse
 import json
-import logging
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_config import get_logger, setup_logging
+
+# Configure logging using centralized module
+setup_logging(use_simple_format=True)
+logger = get_logger(__name__)
 
 
 def get_existing_issues() -> list[dict[str, Any]]:
@@ -232,7 +233,7 @@ def process_assessment_findings(
 **Severity**: {severity}
 **Category**: {category}
 **Source**: {source}
-**Identified**: {summary.get('timestamp', 'Unknown')}
+**Identified**: {summary.get("timestamp", "Unknown")}
 
 ### Problem
 
@@ -246,7 +247,7 @@ This issue was identified during automated repository assessment and requires at
 ### References
 
 - Assessment Report: {source}
-- Full Assessment: docs/assessments/COMPREHENSIVE_ASSESSMENT_SUMMARY_{summary.get('timestamp', '')[:10]}.md
+- Full Assessment: docs/assessments/COMPREHENSIVE_ASSESSMENT_SUMMARY_{summary.get("timestamp", "")[:10]}.md
 
 ### Next Steps
 

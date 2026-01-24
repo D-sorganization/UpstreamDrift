@@ -10,22 +10,16 @@ Tests cover:
 """
 
 import json
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import Mock
 
-# Add shared modules to path for testing
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.path_utils import setup_import_paths
 
-try:
-    # Check if PyQt6 is available for GUI tests
-    import importlib.util
-
-    PYQT_AVAILABLE = importlib.util.find_spec("PyQt6") is not None
-except ImportError:
-    PYQT_AVAILABLE = False
+# Setup import paths for testing
+setup_import_paths()
 
 
 class TestLayoutPersistence(unittest.TestCase):
@@ -104,7 +98,7 @@ class TestLayoutPersistence(unittest.TestCase):
             str(CONFIG_DIR).endswith("launcher"), "Should end with launcher directory"
         )
 
-    @unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
+    @unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
     def test_layout_save_load_integration(self):
         """Test integration of save and load functionality."""
         # This test would require mocking the entire GolfLauncher

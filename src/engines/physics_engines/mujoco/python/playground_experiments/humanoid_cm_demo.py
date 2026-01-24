@@ -1,37 +1,32 @@
-import logging
 from pathlib import Path
 
+from src.shared.python.engine_availability import (
+    DM_CONTROL_AVAILABLE,
+    MUJOCO_AVAILABLE,
+    PINOCCHIO_AVAILABLE,
+)
+from src.shared.python.logging_config import get_logger, setup_logging
+
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+setup_logging()
+logger = get_logger(__name__)
 
-# Try to import dm_control
-try:
+# Import available engines
+if DM_CONTROL_AVAILABLE:
     from dm_control import suite
-
-    DM_CONTROL_AVAILABLE = True
-except ImportError:
-    DM_CONTROL_AVAILABLE = False
+else:
     logger.warning(
         "dm_control not found. Please install it via the Dockerfile updates."
     )
 
-# Try to import pinocchio
-try:
+if PINOCCHIO_AVAILABLE:
     import pinocchio as pin
-
-    PINOCCHIO_AVAILABLE = True
-except ImportError:
-    PINOCCHIO_AVAILABLE = False
+else:
     logger.warning("Pinocchio not available.")
 
-# Try to import mujoco
-try:
+if MUJOCO_AVAILABLE:
     import mujoco
-
-    MUJOCO_AVAILABLE = True
-except ImportError:
-    MUJOCO_AVAILABLE = False
+else:
     logger.warning("Mujoco not available.")
 
 

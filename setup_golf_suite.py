@@ -7,7 +7,6 @@ This script combines the best practices from various utility scripts into a sing
 robust setup procedure.
 """
 
-import logging
 import os
 import platform
 import subprocess
@@ -15,12 +14,10 @@ import sys
 from pathlib import Path
 
 # Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s - %(message)s",
-    datefmt="%H:%M:%S",
-)
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_config import get_logger, setup_logging
+
+setup_logging()
+logger = get_logger(__name__)
 
 
 def check_dependencies() -> bool:

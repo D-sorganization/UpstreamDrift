@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 """Validate all MuJoCo golf swing models."""
 
-import logging
 import sys
 
-try:
+from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+from src.shared.python.logging_config import get_logger, setup_logging
+
+if MUJOCO_AVAILABLE:
     import mujoco
-except ImportError:
+else:
     mujoco = None
 
 from mujoco_humanoid_golf.models import (
@@ -18,8 +20,8 @@ from mujoco_humanoid_golf.models import (
 )
 
 # Configure logging to output only the message
-logging.basicConfig(level=logging.INFO, format="%(message)s")
-logger = logging.getLogger(__name__)
+setup_logging(use_simple_format=True)
+logger = get_logger(__name__)
 
 if mujoco is None:
     logger.info("✗ MuJoCo not installed. Install with: pip install mujoco>=3.0.0")
