@@ -1,126 +1,89 @@
 #!/usr/bin/env python3
-"""
-Golf Modeling Suite - Unified Setup Script
+"""Golf Modeling Suite - Unified Setup Script.
+
 Syncs repository state, generates optimized icons, and creates desktop shortcuts.
 
-This script combines the best practices from various utility scripts into a single
-robust setup procedure.
+Refactored to address DRY and Orthogonality violations identified in the
+Pragmatic Programmer assessment (2026-01-23).
 """
 
-import os
+from __future__ import annotations
+
 import platform
 import subprocess
 import sys
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from PIL.Image import Image as PILImage
 
 # Configure logging
+from src.shared.python.launcher_utils import (
+    check_python_dependencies,
+    get_repo_root,
+    git_sync_repository,
+)
 from src.shared.python.logging_config import get_logger, setup_logging
 
 setup_logging()
 logger = get_logger(__name__)
 
 
-def check_dependencies() -> bool:
-    """Ensure required dependencies are installed."""
-    try:
-        import PIL  # noqa: F401
+def _apply_icon_optimizations(img: PILImage, size: int) -> PILImage:
+    """Apply size-specific optimizations to an icon image.
 
-        return True
-    except ImportError:
-        logger.error("Pillow is not installed.")
-        logger.info("Attempting to install Pillow...")
-        try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "Pillow"])
-            logger.info("Pillow installed successfully.")
-            return True
-        except subprocess.CalledProcessError:
-            logger.error("Failed to install Pillow. Please run: pip install Pillow")
-            return False
+    Args:
+        img: Resized image.
+        size: Target size in pixels.
 
+    Returns:
+        Optimized PIL Image.
+    """
+    from PIL import ImageEnhance, ImageFilter
 
-def git_sync() -> bool:
-    """Sync the repository with remote."""
-    logger.info("Syncing repository with remote...")
-    try:
-        # Fetch all changes
-        subprocess.check_call(["git", "fetch", "--all"], cwd=Path(__file__).parent)
-
-        # Check if we are behind
-        # Note: We won't strictly enforce a pull if it causes conflicts, but we will try.
-        # Simple fast-forward pull
-        subprocess.check_call(["git", "pull"], cwd=Path(__file__).parent)
-        logger.info("Repository synced successfully.")
-        return True
-    except subprocess.CalledProcessError as e:
-        logger.warning(f"Git sync failed (might be offline or have conflicts): {e}")
-        # We proceed anyway as we might be setting up a local-only dev environment
-        return False
-    except FileNotFoundError:
-        logger.warning("Git command not found. Skipping sync.")
-        return False
+    if size <= 32:
+        # Small icons need aggressive sharpening and contrast
+        enhancer = ImageEnhance.Contrast(img)
+        img = enhancer.enhance(1.2)
+        img = img.filter(ImageFilter.UnsharpMask(radius=0.5, percent=200, threshold=0))
+        img = img.filter(ImageFilter.SHARPEN)
+    elif size <= 64:
+        # Medium icons need moderate sharpening
+        img = img.filter(ImageFilter.UnsharpMask(radius=0.8, percent=125, threshold=2))
+    return img
 
 
 def create_optimized_icon(source_path: Path, output_path: Path) -> bool:
-    """
-    Generate a Windows-optimized .ico file with correct mipmaps and sharpening.
+    """Generate a Windows-optimized .ico file with correct mipmaps and sharpening.
 
-    Implements 'fundamentally correct' icon generation logic:
-    - High-quality downsampling (Lanczos)
-    - Specific unsharp masking for small sizes (16px, 32px)
-    - Contrast enhancement for visibility
+    Orthogonality: Decouples image processing from file system management.
     """
-    from PIL import Image, ImageEnhance, ImageFilter
-
     if not source_path.exists():
         logger.error(f"Source image not found: {source_path}")
         return False
 
     try:
+        from PIL import Image
+
         img = Image.open(source_path)
         if img.mode != "RGBA":
+            # Type ignore because PIL types can be complex
             img = img.convert("RGBA")  # type: ignore[assignment]
 
-        # Define standard Windows icon sizes
         sizes = [256, 128, 64, 48, 32, 24, 16]
         icon_images = []
 
         for size in sizes:
-            # High-quality resize
             resized = img.resize((size, size), Image.Resampling.LANCZOS)
+            optimized = _apply_icon_optimizations(resized, size)
+            icon_images.append(optimized)
 
-            # Apply specific optimizations based on size
-            if size <= 32:
-                # Small icons need aggressive sharpening and contrast
-                # 1. Contrast boost
-                enhancer = ImageEnhance.Contrast(resized)
-                resized = enhancer.enhance(1.2)
-
-                # 2. Unsharp mask (radius 0.5 for fine details)
-                resized = resized.filter(
-                    ImageFilter.UnsharpMask(radius=0.5, percent=200, threshold=0)
-                )
-
-                # 3. Final sharpen
-                resized = resized.filter(ImageFilter.SHARPEN)
-
-            elif size <= 64:
-                # Medium icons need moderate sharpening
-                resized = resized.filter(
-                    ImageFilter.UnsharpMask(radius=0.8, percent=125, threshold=2)
-                )
-
-            icon_images.append(resized)
+        # Sort by size descending (standard practice for ICO)
+        icon_images.sort(key=lambda x: x.width, reverse=True)
 
         # Ensure output directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        # Save as ICO (first image is largest, but PIL handles 'sizes' arg)
-        # We append the rest. Note: PIL saves the first image in the list as one entry,
-        # then appends others. It's best to pass the largest as 'img' and duplicates of others if needed,
-        # or just pass the first and append the rest.
-
-        # Sort by size descending (standard practice, ensuring 256 is first)
-        icon_images.sort(key=lambda x: x.width, reverse=True)
 
         icon_images[0].save(
             output_path,
@@ -141,14 +104,9 @@ def create_shortcut_windows(
     target_script: str, working_dir: Path, icon_path: Path, description: str
 ) -> bool:
     """Create a desktop shortcut using PowerShell interaction."""
-    desktop_path = Path(os.environ["USERPROFILE"]) / "Desktop"
-    shortcut_path = desktop_path / "Golf Modeling Suite.lnk"
-
     python_exe = sys.executable
 
     # PowerShell script to create shortcut
-    # Use single quotes for strings to avoid escaping issues
-    # Let PowerShell resolve the Desktop path dynamically to handle moved folders/OneDrive
     ps_script = f"""
     $WshShell = New-Object -comObject WScript.Shell
     $Desktop = [Environment]::GetFolderPath("Desktop")
@@ -168,90 +126,76 @@ def create_shortcut_windows(
             check=True,
             capture_output=True,
         )
-        logger.info(f"Shortcut created successfully at: {shortcut_path}")
+        logger.info("Desktop shortcut created successfully.")
         return True
     except subprocess.CalledProcessError as e:
         error_msg = (
-            e.stderr.decode("utf-8", errors="replace")
-            if e.stderr
-            else "No error output"
+            e.stderr.decode("utf-8", errors="replace") if e.stderr else "Unknown error"
         )
-        logger.error(f"Failed to create shortcut: {e}")
-        logger.error(f"PowerShell Error Output: {error_msg}")
+        logger.error(f"Failed to create shortcut: {e}\n{error_msg}")
         return False
 
 
-def main() -> int:
-    logger.info("Initializing Golf Modeling Suite setup...")
-
-    # 1. Sync
-    git_sync()
-
-    # 2. Check Dependencies
-    if not check_dependencies():
-        return 1
-
-    # 3. Resolve Paths
-    repo_root = Path(__file__).parent.absolute()
-
-    # Try multiple potential source images, prioritizing high-res ones
+def _find_source_image(repo_root: Path) -> Path | None:
+    """Find the best available source image for icon generation."""
     potential_sources = [
         repo_root / "GolfingRobot.png",
         repo_root / "launchers" / "assets" / "golf_robot_cropped.png",
         repo_root / "launchers" / "assets" / "golf_icon.png",
         repo_root / "launchers" / "assets" / "golf_robot_icon.png",
     ]
-
-    source_icon = None
     for src in potential_sources:
         if src.exists():
-            source_icon = src
             logger.info(f"Using source image: {src.name}")
-            break
+            return src
+    return None
 
+
+def main() -> int:
+    """Main setup procedure.
+
+    Broken down to address God Function violation (Orthogonality).
+    """
+    logger.info("Initializing Golf Modeling Suite setup...")
+
+    # 1. Sync repository
+    git_sync_repository()
+
+    # 2. Check dependencies
+    if not check_python_dependencies(["PIL"], install_missing=True):
+        return 1
+
+    # 3. Resolve Paths
+    repo_root = get_repo_root()
+    source_icon = _find_source_image(repo_root)
     output_icon = repo_root / "launchers" / "assets" / "golf_suite_unified.ico"
-    target_script = repo_root / "launch_golf_suite.py"
+    target_launch_script = repo_root / "launch_golf_suite.py"
 
     # 4. Generate Icon
     if source_icon:
-        if not create_optimized_icon(source_icon, output_icon):
-            logger.warning(
-                "Icon generation failed. Shortcut will use default python icon or fail."
-            )
-    else:
-        logger.error("No suitable source image found for icon generation.")
-        # Try to use an existing ICO if generation fails but one exists
-        if output_icon.exists():
-            logger.info("Using existing unified icon.")
-        else:
-            fallback = repo_root / "launchers" / "assets" / "golf_robot_icon.ico"
-            if fallback.exists():
-                output_icon = fallback
-                logger.info("Using fallback existing icon.")
+        create_optimized_icon(source_icon, output_icon)
+    elif not output_icon.exists():
+        # Fallback to existing icon if generation impossible
+        fallback = repo_root / "launchers" / "assets" / "golf_robot_icon.ico"
+        if fallback.exists():
+            output_icon = fallback
+            logger.info("Using fallback existing icon.")
 
-    # 5. Create Shortcut
+    # 5. Create Desktop Shortcut (Windows only)
     if platform.system() == "Windows":
-        # Check if target_script is in repo_root to use relative path
         try:
-            rel_script = target_script.relative_to(repo_root)
-            # Use simple quoted string for filename
-            script_arg = f"{rel_script}"
+            script_path = str(target_launch_script.relative_to(repo_root))
         except ValueError:
-            # Fallback to absolute if not relative
-            script_arg = str(target_script)
+            script_path = str(target_launch_script)
 
-        # Simplify - use raw strings for python to avoid escaping issues in f-string
         create_shortcut_windows(
-            target_script=script_arg,
+            target_script=script_path,
             working_dir=repo_root,
             icon_path=output_icon if output_icon.exists() else Path(""),
             description="Launch the Unified Golf Modeling Suite",
         )
     else:
-        logger.warning(
-            f"Shortcut creation for {platform.system()} is not fully implemented in this unified script yet."
-        )
-        logger.info("Please verify the existing 'launch_golf_suite.py' works manually.")
+        logger.info(f"Desktop integration for {platform.system()} not yet implemented.")
 
     logger.info("Setup complete!")
     return 0
