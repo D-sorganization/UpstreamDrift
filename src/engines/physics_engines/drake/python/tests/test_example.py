@@ -2,22 +2,20 @@
 
 This module contains comprehensive tests for all package functionality,
 including positive tests, negative tests, and edge cases.
+
+Path configuration is handled by pyproject.toml [tool.pytest.ini_options].
 """
 
 import logging
 import math
-import sys
-from pathlib import Path
 
 import pytest
 
-# Add repo root to path to allow importing shared
-repo_root = Path(__file__).resolve().parents[5]
-sys.path.insert(0, str(repo_root))
-sys.path.insert(0, str(Path(__file__).parent.parent))
+from src.shared.python import constants
+from src.shared.python.logging_config import get_logger
 
-from src import logger_utils  # type: ignore[attr-defined]  # noqa: E402
-from src.shared.python import constants  # noqa: E402
+# For backwards compatibility with tests using logger_utils
+logger_utils = type("logger_utils", (), {"get_logger": get_logger})()
 
 
 class TestConstants:

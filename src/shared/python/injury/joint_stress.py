@@ -22,6 +22,8 @@ from enum import Enum
 
 import numpy as np
 
+from src.shared.python.constants import GRAVITY_M_S2
+
 
 class JointSide(Enum):
     """Which side of the body (for bilateral joints)."""
@@ -179,7 +181,7 @@ class JointStressAnalyzer:
             height: Height in m (optional)
         """
         self.body_weight = body_weight
-        self.body_weight_N = body_weight * 9.81
+        self.body_weight_N = body_weight * GRAVITY_M_S2
         self.handedness = handedness
         self.height = height
 

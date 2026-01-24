@@ -8,18 +8,18 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+from src.shared.python.engine_availability import MUJOCO_AVAILABLE, skip_if_unavailable
 
-if not MUJOCO_AVAILABLE:
-    pytest.skip("MuJoCo not installed", allow_module_level=True)
+pytestmark = skip_if_unavailable("mujoco")
 
-import mujoco
+if MUJOCO_AVAILABLE:
+    import mujoco
 
-from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
-    URDFImporter,
-    export_model_to_urdf,
-    import_urdf_to_mujoco,
-)
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
+        URDFImporter,
+        export_model_to_urdf,
+        import_urdf_to_mujoco,
+    )
 
 
 @pytest.fixture

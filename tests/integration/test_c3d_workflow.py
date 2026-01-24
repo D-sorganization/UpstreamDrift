@@ -3,7 +3,6 @@
 TEST-004: Added @pytest.mark.integration markers for test categorization.
 """
 
-import sys
 from unittest.mock import patch
 
 import numpy as np
@@ -12,15 +11,13 @@ import pytest
 
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
 from src.shared.python.gui_utils import get_qapp
-from src.shared.python.path_utils import get_simscape_model_path
+from src.shared.python.path_utils import get_simscape_model_path, setup_import_paths
 
 # Mark all tests in this file as integration tests
 pytestmark: list[pytest.MarkDecorator] = [pytest.mark.integration]
 
-# Add source path for imports using centralized path utility
-SRC_PATH = get_simscape_model_path("3D_Golf_Model")
-if str(SRC_PATH) not in sys.path:
-    sys.path.insert(0, str(SRC_PATH))
+# Setup import paths using centralized utility
+setup_import_paths(additional_paths=[get_simscape_model_path()])
 
 # Import C3D modules if PyQt6 is available
 C3D_IMPORTS_AVAILABLE = False

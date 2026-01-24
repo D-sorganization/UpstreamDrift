@@ -13,13 +13,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.path_utils import get_repo_root, get_src_root
-
-# Add project root to path
-project_root = get_repo_root()
-sys.path.insert(0, str(project_root))
-
-from src.shared.python.engine_manager import EngineManager, EngineStatus  # noqa: E402
+from src.shared.python.engine_manager import EngineManager, EngineStatus
+from src.shared.python.path_utils import get_src_root
 
 
 # Helper to check if a module is mocked (from unit tests polluting sys.modules)

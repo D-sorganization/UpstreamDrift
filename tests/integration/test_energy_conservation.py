@@ -7,10 +7,15 @@ These tests validate that the physics engine and analysis tools correctly
 implement Newtonian mechanics.
 """
 
+from __future__ import annotations
+
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+from src.shared.python.engine_availability import (
+    MUJOCO_AVAILABLE,
+    skip_if_unavailable,
+)
 from src.shared.python.numerical_constants import (
     GRAVITY_STANDARD,
     TOLERANCE_ENERGY_CONSERVATION,
@@ -18,10 +23,10 @@ from src.shared.python.numerical_constants import (
 )
 
 # Skip these tests if MuJoCo is not available
-if not MUJOCO_AVAILABLE:
-    pytest.skip("MuJoCo not available", allow_module_level=True)
+pytestmark = skip_if_unavailable("mujoco")
 
-import mujoco  # noqa: E402
+if MUJOCO_AVAILABLE:
+    import mujoco
 
 
 @pytest.fixture

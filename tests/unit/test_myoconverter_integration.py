@@ -13,7 +13,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.engine_availability import MYOCONVERTER_AVAILABLE
+from src.shared.python.engine_availability import (
+    skip_if_unavailable,
+)
 from src.shared.python.myoconverter_integration import (
     MyoConverter,
     install_myoconverter_instructions,
@@ -229,7 +231,7 @@ class TestConvertOsimToMujoco:
                 temp_osim_file, temp_geometry_folder, temp_output_folder
             )
 
-    @pytest.mark.skipif(not MYOCONVERTER_AVAILABLE, reason="myoconverter not installed")
+    @skip_if_unavailable("myoconverter")
     @patch(
         "shared.python.myoconverter_integration.MyoConverter._check_availability",
         return_value=True,
@@ -241,7 +243,7 @@ class TestConvertOsimToMujoco:
         # Skip test body if myoconverter not available
         pytest.skip("Requires myoconverter - pending implementation")
 
-    @pytest.mark.skipif(not MYOCONVERTER_AVAILABLE, reason="myoconverter not installed")
+    @skip_if_unavailable("myoconverter")
     @patch(
         "shared.python.myoconverter_integration.MyoConverter._check_availability",
         return_value=True,
@@ -478,7 +480,7 @@ class TestInstallMyoconverterInstructions:
 class TestEdgeCases:
     """Test edge cases and error conditions."""
 
-    @pytest.mark.skipif(not MYOCONVERTER_AVAILABLE, reason="myoconverter not installed")
+    @skip_if_unavailable("myoconverter")
     @patch(
         "shared.python.myoconverter_integration.MyoConverter._check_availability",
         return_value=True,

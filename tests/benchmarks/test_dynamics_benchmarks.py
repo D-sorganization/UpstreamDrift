@@ -1,37 +1,34 @@
 """Benchmark tests for physics dynamics."""
 
 import importlib.util
-import sys
-from pathlib import Path
 
 import numpy as np
 import pytest
 
-# Fix for CI: Add the MuJoCo engine python path to sys.path
-# This handles the case where the project is not installed as a package
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-MUJOCO_PYTHON_PATH = REPO_ROOT / "engines" / "physics_engines" / "mujoco" / "python"
-if str(MUJOCO_PYTHON_PATH) not in sys.path:
-    sys.path.append(str(MUJOCO_PYTHON_PATH))
+from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+from src.shared.python.path_utils import setup_import_paths
 
-from src.shared.python.constants import GRAVITY_M_S2  # noqa: E402
+# Import paths configured at test runner level via pyproject.toml/conftest.py
+# This is a fallback for benchmark runners that may not use the full test setup
+setup_import_paths()
 
 # Check if pytest-benchmark is installed, otherwise skip
 if importlib.util.find_spec("pytest_benchmark") is None:
     pytest.skip("pytest-benchmark not installed", allow_module_level=True)
 
-try:
-    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.aba import (  # noqa: E402
+if MUJOCO_AVAILABLE:
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.aba import (
         aba,
     )
-    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.crba import (  # noqa: E402
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.crba import (
         crba,
     )
-    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.rnea import (  # noqa: E402, I001
+    from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.rigid_body_dynamics.rnea import (
         rnea,
     )
-except ImportError:
-    pytest.skip("MuJoCo dynamics modules not found", allow_module_level=True)
+else:
+    pytest.skip("MuJoCo dynamics modules not available", allow_module_level=True)
 
 
 def create_random_model(num_bodies=10):
