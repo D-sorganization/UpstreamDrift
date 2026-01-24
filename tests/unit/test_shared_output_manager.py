@@ -129,21 +129,21 @@ class TestOutputManager(unittest.TestCase):
 
     def test_cleanup_old_files(self):
         """Test cleaning up old files."""
+        from datetime import timezone
+
         self.manager.create_output_structure()
 
-        # We use strict mocking to avoid filesystem timestamp issues and OS errors with mocks
-        with patch("src.shared.python.output_manager.datetime") as mock_datetime:
-            # Fix "now" to a future time to ensure created files appear old
-            fixed_now = datetime(2099, 1, 10, 12, 0, 0)
-            mock_datetime.now.return_value = fixed_now
-            mock_datetime.fromtimestamp.side_effect = datetime.fromtimestamp
+        # Create a file in the temp directory
+        old_file = self.manager.directories["cache"] / "temp" / "old.txt"
+        old_file.parent.mkdir(parents=True, exist_ok=True)
+        old_file.touch()
 
-            # Create a file that we will pretend is old
-            old_file = self.manager.directories["cache"] / "temp" / "old.txt"
-            old_file.parent.mkdir(parents=True, exist_ok=True)
-            old_file.touch()
-
-            # Also mock unlink to verify it was called
+        # Mock now_local to return a future date so the file appears old
+        # The cleanup function uses now_local() for cutoff calculation
+        # Use timezone-aware datetime since now_local returns timezone-aware
+        fixed_now = datetime(2099, 1, 10, 12, 0, 0, tzinfo=timezone.utc)
+        with patch("src.shared.python.output_manager.now_local", return_value=fixed_now):
+            # Also mock unlink to verify it was called and avoid actual deletion
             with patch.object(Path, "unlink") as mock_unlink:
                 cleaned = self.manager.cleanup_old_files()
 
