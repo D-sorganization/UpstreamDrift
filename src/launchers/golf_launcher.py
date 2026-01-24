@@ -104,7 +104,13 @@ def _lazy_load_model_registry() -> Any:
 
 # Import unified theme system for consistent styling
 try:
-    from src.shared.python.theme import Colors, Sizes, Weights, get_display_font, get_qfont
+    from src.shared.python.theme import (
+        Colors,
+        Sizes,
+        Weights,
+        get_display_font,
+        get_qfont,
+    )
 
     THEME_AVAILABLE = True
 except ImportError:

@@ -41,9 +41,7 @@ def test_mainloop(launcher):
 def test_show_status(launcher):
     """Test show_status method."""
     # Mock the EngineManager to avoid actual engine initialization
-    with patch(
-        "src.shared.python.engine_manager.EngineManager"
-    ) as MockEngineManager:
+    with patch("src.shared.python.engine_manager.EngineManager") as MockEngineManager:
         mock_manager = MockEngineManager.return_value
         mock_manager.get_available_engines.return_value = []
 

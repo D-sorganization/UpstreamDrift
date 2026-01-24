@@ -92,6 +92,7 @@ class TestPolynomialGeneratorLazyImport:
             from mujoco_humanoid_golf.polynomial_generator import (
                 PolynomialGeneratorWidget,  # noqa: F401
             )
+
             # If we got here, the import succeeded - skip the error handling test
             pytest.skip("mujoco_humanoid_golf is available, cannot test ImportError")
         except ImportError as e:
