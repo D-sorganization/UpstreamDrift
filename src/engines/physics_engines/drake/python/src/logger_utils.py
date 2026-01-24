@@ -20,6 +20,8 @@ if TYPE_CHECKING:
 try:
     from src.shared.python.logging_config import (
         DEFAULT_LOG_FORMAT as LOG_FORMAT,
+    )
+    from src.shared.python.logging_config import (
         get_logger,
         setup_logging,
     )
