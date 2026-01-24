@@ -4,7 +4,6 @@ This module provides standardized model loading across all physics engines,
 ensuring consistent biomechanical models for cross-engine validation.
 """
 
-import logging
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -13,8 +12,10 @@ import yaml
 
 from src.shared.python.common_utils import GolfModelingError
 from src.shared.python.constants import DEG_TO_RAD
+from src.shared.python.io_utils import ensure_directory
+from src.shared.python.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class StandardModelManager:
@@ -35,8 +36,8 @@ class StandardModelManager:
         self.config_file = self.models_dir / "standard_models.yaml"
 
         # Ensure directories exist
-        self.models_dir.mkdir(parents=True, exist_ok=True)
-        self.meshes_dir.mkdir(parents=True, exist_ok=True)
+        ensure_directory(self.models_dir)
+        ensure_directory(self.meshes_dir)
 
         # Load configuration
         self.config = self._load_config()
