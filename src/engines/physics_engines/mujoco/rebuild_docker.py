@@ -35,7 +35,11 @@ def rebuild_docker_image() -> bool:
 
     logger.info("This may take several minutes...")
 
-    result = run_command(cmd, cwd=docker_dir, logger=logger)
+    try:
+        result = run_command(cmd, cwd=docker_dir, logger=logger)
+    except FileNotFoundError:
+        logger.error("Docker not found. Please install Docker Desktop.")
+        return False
 
     if result.returncode == 0:
         logger.info("Docker image rebuilt successfully!")

@@ -38,7 +38,7 @@ def main() -> None:
         str(dockerfile_path),
         str(root_dir),
     ]
-    result = run_command(build_cmd, cwd=root_dir, check=True, logger=logger)
+    result = run_command(build_cmd, cwd=root_dir, check=False, logger=logger)
     if result.returncode != 0:
         logger.error("Docker build failed")
         sys.exit(result.returncode)
