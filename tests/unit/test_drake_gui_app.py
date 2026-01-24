@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.engine_availability import PYQT6_AVAILABLE, skip_if_unavailable
 
 # Mock modules before importing
 sys.modules["pydrake"] = MagicMock()
@@ -23,7 +23,7 @@ def teardown_module(module):
             del sys.modules[key]
 
 
-@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not available")
+@skip_if_unavailable("pyqt6")
 class TestDrakeGUIApp:
     def test_compute_specific_control(self):
         """Test compute_specific_control in DrakeInducedAccelerationAnalyzer."""

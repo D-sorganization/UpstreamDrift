@@ -4,21 +4,14 @@ This suite ensures that the application can initialize and perform basic operati
 without a physical display, suitable for CI/CD environments.
 """
 
-import os
-import sys
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Ensure specific paths are in sys.path for import resolution
-# This replicates the setup in test_c3d_services.py
-PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
-SRC_PATH = os.path.join(
-    PROJECT_ROOT, "engines/Simscape_Multibody_Models/3D_Golf_Model/python/src"
-)
+from src.shared.python.path_utils import get_simscape_model_path, setup_import_paths
 
-if SRC_PATH not in sys.path:
-    sys.path.insert(0, SRC_PATH)
+# Setup import paths including Simscape model
+setup_import_paths(additional_paths=[get_simscape_model_path()])
 
 
 # Conditional import to handle potential import errors gracefully during collection

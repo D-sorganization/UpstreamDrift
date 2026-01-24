@@ -21,7 +21,7 @@ import typing
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import MYOSUITE_AVAILABLE
+from src.shared.python.engine_availability import MYOSUITE_AVAILABLE, skip_if_unavailable
 
 if MYOSUITE_AVAILABLE:
     from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (
@@ -31,12 +31,12 @@ else:
     _MyoSuitePhysicsEngine = None  # type: ignore
 
 # Skip entire module if MyoSuite not available
-pytestmark = pytest.mark.skipif(not MYOSUITE_AVAILABLE, reason="MyoSuite not installed")
+pytestmark = skip_if_unavailable("myosuite")
 
 
 if MYOSUITE_AVAILABLE:
 
-    @pytest.mark.skipif(not MYOSUITE_AVAILABLE, reason="MyoSuite not installed")
+    @skip_if_unavailable("myosuite")
     class TestMuscleContributionClosure:
         """Test that muscle contributions sum to total acceleration (closure property)."""
 
@@ -210,7 +210,7 @@ if MYOSUITE_AVAILABLE:
             )
 
     @pytest.mark.slow
-    @pytest.mark.skipif(not MYOSUITE_AVAILABLE, reason="MyoSuite not installed")
+    @skip_if_unavailable("myosuite")
     class TestMuscleContributionComplexModels:
         """Test closure property on more complex musculoskeletal models."""
 

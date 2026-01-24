@@ -9,6 +9,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from src.shared.python.engine_availability import skip_if_unavailable
 from src.shared.python.muscle_analysis import (
     SKLEARN_AVAILABLE,
     MuscleSynergyAnalyzer,
@@ -151,7 +152,7 @@ class TestMuscleSynergyAnalyzerInitialization:
         assert analyzer.data.shape == (n_samples, n_muscles)
 
 
-@pytest.mark.skipif(not SKLEARN_AVAILABLE, reason="scikit-learn not installed")
+@skip_if_unavailable("sklearn")
 class TestExtractSynergies:
     """Test extract_synergies method."""
 
@@ -302,7 +303,7 @@ class TestExtractSynergies:
         ), f"VAF should be near 1.0 for rank-1 data, got {result.vaf}"
 
 
-@pytest.mark.skipif(not SKLEARN_AVAILABLE, reason="scikit-learn not installed")
+@skip_if_unavailable("sklearn")
 class TestFindOptimalSynergies:
     """Test find_optimal_synergies method."""
 
@@ -513,7 +514,7 @@ class TestEdgeCases:
             assert result.activations.shape == (2, n_samples)
 
 
-@pytest.mark.skipif(not SKLEARN_AVAILABLE, reason="scikit-learn not installed")
+@skip_if_unavailable("sklearn")
 class TestNumericalAccuracy:
     """Test numerical accuracy and consistency."""
 

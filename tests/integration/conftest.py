@@ -9,13 +9,11 @@ to all integration tests via pytest's automatic fixture discovery.
 
 from __future__ import annotations
 
-import sys
+from src.shared.python.path_utils import get_tests_root, setup_import_paths
 
-from src.shared.python.path_utils import get_tests_root
-
-# Add fixtures directory to path
+# Setup standard import paths and add fixtures directory
 FIXTURES_DIR = get_tests_root() / "fixtures"
-sys.path.insert(0, str(FIXTURES_DIR))
+setup_import_paths(additional_paths=[FIXTURES_DIR])
 
 # Re-export all fixtures from the fixtures library
 # This makes them available to all tests in this directory

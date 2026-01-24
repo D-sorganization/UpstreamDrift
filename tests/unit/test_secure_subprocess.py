@@ -1,18 +1,10 @@
 """Tests for secure subprocess utilities."""
 
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from src.shared.python.path_utils import get_repo_root
-
-# Add project root to path
-project_root = get_repo_root()
-sys.path.insert(0, str(project_root))
-
-# ruff: noqa: E402
 from src.shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,

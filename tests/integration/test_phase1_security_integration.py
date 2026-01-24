@@ -16,7 +16,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.engine_availability import PYQT6_AVAILABLE, skip_if_unavailable
 from src.shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
@@ -140,7 +140,7 @@ class TestPhase1SecurityIntegration(unittest.TestCase):
         with self.assertRaises(SecureSubprocessError):
             secure_popen(["malicious_exe"])
 
-    @pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not available")
+    @skip_if_unavailable("pyqt6")
     @patch("src.shared.python.secure_subprocess.secure_run")
     @patch("src.launchers.golf_launcher.QApplication")
     @patch("src.launchers.golf_launcher.QIcon")
