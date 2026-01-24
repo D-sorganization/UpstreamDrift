@@ -50,12 +50,12 @@ jobs:
           echo "| Grade | Count | Description |" >> $GITHUB_STEP_SUMMARY
           echo "|-------|-------|-------------|" >> $GITHUB_STEP_SUMMARY
 
-          a_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - A" || echo "0")
-          b_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - B" || echo "0")
-          c_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - C" || echo "0")
-          d_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - D" || echo "0")
-          e_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - E" || echo "0")
-          f_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - F" || echo "0")
+          a_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - A" || true)
+          b_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - B" || true)
+          c_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - C" || true)
+          d_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - D" || true)
+          e_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - E" || true)
+          f_count=$(radon cc src -a -nc 2>/dev/null | grep -c " - F" || true)
 
           echo "| A | $a_count | Simple (1-5) |" >> $GITHUB_STEP_SUMMARY
           echo "| B | $b_count | Low (6-10) |" >> $GITHUB_STEP_SUMMARY
