@@ -13,7 +13,15 @@ import pytest
 # PyQt6 availability can be checked via the pyqt6_available fixture
 
 # Get SRC_PATH for error messages (now provided by conftest)
-SRC_PATH = Path(__file__).resolve().parents[2] / "src" / "engines" / "Simscape_Multibody_Models" / "3D_Golf_Model" / "python" / "src"
+SRC_PATH = (
+    Path(__file__).resolve().parents[2]
+    / "src"
+    / "engines"
+    / "Simscape_Multibody_Models"
+    / "3D_Golf_Model"
+    / "python"
+    / "src"
+)
 
 # Check for PyQt6 GUI library availability
 try:

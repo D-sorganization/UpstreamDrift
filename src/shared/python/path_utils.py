@@ -155,7 +155,9 @@ def get_engine_path(engine_name: str) -> Path:
             f"Unknown engine: {engine_name}. Valid engines: {valid_engines}"
         ) from None
 
-    return get_src_root() / "engines" / "physics_engines" / engine_name.lower() / "python"
+    return (
+        get_src_root() / "engines" / "physics_engines" / engine_name.lower() / "python"
+    )
 
 
 def relative_to_repo(path: Path | str) -> Path:

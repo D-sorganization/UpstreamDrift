@@ -121,7 +121,9 @@ def pyqt6_available() -> bool:
 # Skip markers based on engine availability
 def pytest_configure(config: pytest.Config) -> None:
     """Configure custom pytest markers."""
-    config.addinivalue_line("markers", "slow: mark test as slow (deselect with '-m \"not slow\"')")
+    config.addinivalue_line(
+        "markers", "slow: mark test as slow (deselect with '-m \"not slow\"')"
+    )
     config.addinivalue_line("markers", "benchmark: mark test as benchmark")
     config.addinivalue_line("markers", "integration: mark test as integration test")
     config.addinivalue_line("markers", "mujoco: mark test as requiring MuJoCo")
