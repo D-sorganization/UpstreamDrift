@@ -77,6 +77,15 @@ COLORAMA_AVAILABLE: bool = False
 TQDM_AVAILABLE: bool = False
 REQUESTS_AVAILABLE: bool = False
 
+# Scientific computing and ML library flags
+NUMBA_AVAILABLE: bool = False
+FASTDTW_AVAILABLE: bool = False
+SKLEARN_AVAILABLE: bool = False
+PYQTGRAPH_AVAILABLE: bool = False
+SYMPY_AVAILABLE: bool = False
+SKIMAGE_AVAILABLE: bool = False
+SEABORN_AVAILABLE: bool = False
+
 # Check NumPy (almost always available but good to check)
 try:
     import numpy  # noqa: F401
@@ -369,6 +378,62 @@ try:
 except ImportError:
     pass
 
+# Check Numba (JIT compilation)
+try:
+    import numba  # noqa: F401
+
+    NUMBA_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check fastdtw (Dynamic Time Warping)
+try:
+    import fastdtw  # noqa: F401
+
+    FASTDTW_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check scikit-learn
+try:
+    import sklearn  # noqa: F401
+
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check pyqtgraph
+try:
+    import pyqtgraph  # noqa: F401
+
+    PYQTGRAPH_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check SymPy (symbolic math)
+try:
+    import sympy  # noqa: F401
+
+    SYMPY_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check scikit-image
+try:
+    import skimage  # noqa: F401
+
+    SKIMAGE_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check seaborn
+try:
+    import seaborn  # noqa: F401
+
+    SEABORN_AVAILABLE = True
+except ImportError:
+    pass
+
 # Derived availability flags
 GYM_ANY_AVAILABLE: bool = GYMNASIUM_AVAILABLE or GYM_AVAILABLE
 
@@ -429,6 +494,16 @@ _ENGINE_FLAGS: dict[str, bool] = {
     "colorama": COLORAMA_AVAILABLE,
     "tqdm": TQDM_AVAILABLE,
     "requests": REQUESTS_AVAILABLE,
+    # Scientific computing and ML
+    "numba": NUMBA_AVAILABLE,
+    "fastdtw": FASTDTW_AVAILABLE,
+    "sklearn": SKLEARN_AVAILABLE,
+    "scikit-learn": SKLEARN_AVAILABLE,  # Alias
+    "pyqtgraph": PYQTGRAPH_AVAILABLE,
+    "sympy": SYMPY_AVAILABLE,
+    "skimage": SKIMAGE_AVAILABLE,
+    "scikit-image": SKIMAGE_AVAILABLE,  # Alias
+    "seaborn": SEABORN_AVAILABLE,
 }
 
 

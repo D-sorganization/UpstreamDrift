@@ -7,15 +7,16 @@ based on actual code analysis.
 """
 
 import argparse
-import logging
 import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_config import get_logger, setup_logging
+
+# Configure logging using centralized module
+setup_logging(use_simple_format=True)
+logger = get_logger(__name__)
 
 # Assessment definitions
 ASSESSMENTS = {
