@@ -195,7 +195,9 @@ class BallFlightModel(ABC):
             TrajectoryPoint(float(t), sol.sol(t)[:3], sol.sol(t)[3:]) for t in t_eval
         ]
         if sol.t[-1] not in t_eval:
-            points.append(TrajectoryPoint(float(sol.t[-1]), sol.y[:3, -1], sol.y[3:, -1]))
+            points.append(
+                TrajectoryPoint(float(sol.t[-1]), sol.y[:3, -1], sol.y[3:, -1])
+            )
 
         return self._compute_metrics(points)
 

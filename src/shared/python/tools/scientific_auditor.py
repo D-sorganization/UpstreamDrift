@@ -30,7 +30,9 @@ class ScienceAuditor(ast.NodeVisitor):
         # 1. Division Safety
         if isinstance(node.op, ast.Div):
             # Check if denominator is a variable or a zero constant
-            is_constant_nonzero = isinstance(node.right, ast.Constant) and node.right.value != 0
+            is_constant_nonzero = (
+                isinstance(node.right, ast.Constant) and node.right.value != 0
+            )
             if not is_constant_nonzero:
                 self.risks.append(
                     {
@@ -53,7 +55,10 @@ class ScienceAuditor(ast.NodeVisitor):
 
         if func_name in trig_functions:
             # Flag if the argument is a numeric constant (likely ambiguous units)
-            if any(isinstance(arg, ast.Constant) and isinstance(arg.value, (int, float)) for arg in node.args):
+            if any(
+                isinstance(arg, ast.Constant) and isinstance(arg.value, (int, float))
+                for arg in node.args
+            ):
                 self.risks.append(
                     {
                         "line": node.lineno,

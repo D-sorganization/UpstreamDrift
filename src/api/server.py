@@ -427,7 +427,9 @@ async def startup_event() -> None:
             )
             video_pipeline = VideoPosePipeline(video_config)
         except Exception as e:
-            logger.warning(f"Video pipeline initialization failed (video features disabled): {e}")
+            logger.warning(
+                f"Video pipeline initialization failed (video features disabled): {e}"
+            )
             video_pipeline = None
 
         logger.info("Golf Modeling Suite API started successfully")
