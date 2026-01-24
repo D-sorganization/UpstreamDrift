@@ -14,11 +14,12 @@ Features:
 
 from __future__ import annotations
 
-import logging
 from pathlib import Path
 
 import numpy as np  # noqa: TID253
 import numpy.typing as npt  # noqa: TID253
+
+from src.shared.python.logging_config import get_logger
 
 try:
     from scipy.io import loadmat
@@ -35,7 +36,7 @@ try:
 except ImportError:
     MESHCAT_AVAILABLE = False
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class RobNealDataViewer:

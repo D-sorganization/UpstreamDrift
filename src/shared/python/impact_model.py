@@ -13,13 +13,14 @@ The module is engine-agnostic with Python API for external solvers.
 
 from __future__ import annotations
 
-import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING
 
 import numpy as np
+
+from src.shared.python.logging_config import get_logger
 
 from .physics_constants import (
     DRIVER_COR,
@@ -32,7 +33,7 @@ from .physics_constants import (
 if TYPE_CHECKING:
     pass
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Physical constants for golf ball (re-exported from centralized module)
 GOLF_BALL_MASS: float = float(GOLF_BALL_MASS_KG)

@@ -11,7 +11,6 @@ Usage:
 """
 
 import json
-import logging
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -28,6 +27,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.logging_config import get_logger
+
 if TYPE_CHECKING:
     pass
 
@@ -39,7 +40,7 @@ try:
 except ImportError:
     THEME_AVAILABLE = False
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Recent models storage
 RECENT_FILE = Path.home() / ".golf_modeling_suite" / "recent_models.json"

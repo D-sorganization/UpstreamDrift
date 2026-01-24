@@ -13,15 +13,15 @@ Example:
 
 from __future__ import annotations
 
-import logging
 from pathlib import Path
 from typing import Any
 
 from src.shared.python.ai.education import EducationSystem
 from src.shared.python.ai.tool_registry import ToolCategory, ToolRegistry
 from src.shared.python.ai.types import ExpertiseLevel
+from src.shared.python.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Singleton education system for explanation tools
 _education_system: EducationSystem | None = None

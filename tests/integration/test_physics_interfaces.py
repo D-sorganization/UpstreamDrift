@@ -1,12 +1,13 @@
 """Verify physics engine implementations for ZTCF/ZVCF methods."""
 
-import logging
 import sys
 from typing import Any, cast
 from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
+
+from src.shared.python.logging_config import get_logger
 
 # Mock modules if not available
 sys.modules["gym"] = MagicMock()
@@ -22,7 +23,7 @@ from src.engines.physics_engines.opensim.python.opensim_physics_engine import ( 
     OpenSimPhysicsEngine,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class TestPhysicsEngines:

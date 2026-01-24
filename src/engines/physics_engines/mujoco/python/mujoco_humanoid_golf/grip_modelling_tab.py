@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 import os
 import re
 from pathlib import Path
@@ -12,9 +11,11 @@ import mujoco
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
+from src.shared.python.logging_config import get_logger
+
 from .sim_widget import MuJoCoSimWidget
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class GripModellingTab(QtWidgets.QWidget):

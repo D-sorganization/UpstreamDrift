@@ -16,16 +16,17 @@ Physical validity checks:
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Callable
 from functools import wraps
 from typing import Any, TypeVar
 
 import numpy as np
 
+from src.shared.python.logging_config import get_logger
+
 from .error_utils import ValidationError
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 F = TypeVar("F", bound=Callable[..., Any])
 

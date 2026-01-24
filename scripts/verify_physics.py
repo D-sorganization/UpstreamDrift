@@ -8,13 +8,14 @@ runs validation tests, and generates a detailed compliance report.
 # Python 3.10 compatibility: UTC was added in 3.11
 import sys
 from datetime import UTC, datetime
-from pathlib import Path
 from typing import Any
 
 import pytest
 
+from src.shared.python.path_utils import get_src_root
+
 # Add root to path
-ROOT_DIR = Path(__file__).parent.parent
+ROOT_DIR = get_src_root()
 sys.path.append(str(ROOT_DIR))
 
 from src.shared.python.engine_manager import EngineManager  # noqa: E402

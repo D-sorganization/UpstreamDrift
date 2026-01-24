@@ -10,7 +10,6 @@ implementing the standardized PoseEstimator interface with enhanced features:
 Refactored to use shared engine availability module (DRY principle).
 """
 
-import logging
 import time
 from pathlib import Path
 from typing import Any, ClassVar
@@ -19,6 +18,7 @@ import cv2
 import numpy as np
 
 from src.shared.python.engine_availability import MEDIAPIPE_AVAILABLE
+from src.shared.python.logging_config import get_logger
 
 # Import mediapipe if available
 if MEDIAPIPE_AVAILABLE:
@@ -32,7 +32,7 @@ from src.shared.python.pose_estimation.interface import (
 )
 from src.shared.python.signal_processing import KalmanFilter
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MediaPipeEstimator(PoseEstimator):

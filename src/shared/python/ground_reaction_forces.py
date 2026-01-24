@@ -17,19 +17,20 @@ Cross-engine consistency thresholds:
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.logging_config import get_logger
+
 from .physics_constants import GRAVITY_M_S2
 
 if TYPE_CHECKING:
     from shared.python.interfaces import PhysicsEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Cross-engine validation tolerances (from Guideline E5)
 GRF_MAGNITUDE_TOLERANCE = 0.05  # 5% relative tolerance
@@ -520,7 +521,7 @@ def validate_grf_cross_engine(
             np.all(force_rel_diff < GRF_MAGNITUDE_TOLERANCE)
         )
     else:
-        LOGGER.warning("GRF data lengths differ, skipping force comparison")
+        logger.warning("GRF data lengths differ, skipping force comparison")
         results["force_magnitude"] = False
 
     # COP position comparison
@@ -549,7 +550,7 @@ def validate_grf_cross_engine(
     # Log results
     for metric, passed in results.items():
         status = "✓ PASS" if passed else "✗ FAIL"
-        LOGGER.info(
+        logger.info(
             f"GRF Cross-Engine [{engine_name_a} vs {engine_name_b}] {metric}: {status}"
         )
 

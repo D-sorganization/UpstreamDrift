@@ -19,7 +19,6 @@ Usage:
 
 from __future__ import annotations
 
-import logging
 import tempfile
 from pathlib import Path
 
@@ -27,10 +26,11 @@ import mujoco
 import numpy as np
 
 from src.shared.python.engine_availability import PINOCCHIO_AVAILABLE
+from src.shared.python.logging_config import get_logger
 
 from .urdf_io import export_model_to_urdf
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Constants
 FREEJOINT_DOF_COUNT: int = 7  # DOF count for freejoint (3 pos + 4 quat)

@@ -12,6 +12,7 @@ import pytest
 
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
 from src.shared.python.path_utils import get_simscape_model_path
+from src.shared.python.gui_utils import get_qapp
 
 # Mark all tests in this file as integration tests
 pytestmark: list[pytest.MarkDecorator] = [pytest.mark.integration]
@@ -139,11 +140,8 @@ def test_export_workflow(mock_c3d_file, mock_ezc3d, tmp_path):
 @pytest.fixture(scope="session")
 def qapp():
     """Manage a single QApplication instance for the test session."""
-    from PyQt6.QtWidgets import QApplication
 
-    app = QApplication.instance()
-    if app is None:
-        app = QApplication([])
+    app = get_qapp()
     yield app
 
 

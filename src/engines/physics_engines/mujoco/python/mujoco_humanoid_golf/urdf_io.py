@@ -14,7 +14,6 @@ Features:
 from __future__ import annotations
 
 import contextlib
-import logging
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
@@ -24,8 +23,9 @@ import numpy as np
 
 from src.shared.python.constants import GRAVITY_M_S2 as GRAVITY_STANDARD_M_S2
 from src.shared.python.constants import PI, PI_HALF
+from src.shared.python.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Joint type mappings between MuJoCo and URDF
 MJCF_TO_URDF_JOINT_TYPES = {

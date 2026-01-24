@@ -14,15 +14,16 @@ Per Guideline C2:
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING
 
 import numpy as np
 
+from src.shared.python.logging_config import get_logger
+
 if TYPE_CHECKING:
     from shared.python.interfaces import PhysicsEngine
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Thresholds from Guideline C2
 SINGULARITY_WARNING_THRESHOLD = 1e6  # [dimensionless]

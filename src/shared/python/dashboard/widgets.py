@@ -7,7 +7,6 @@ Contains:
 
 from __future__ import annotations
 
-import logging
 from typing import Any
 
 import numpy as np
@@ -17,10 +16,11 @@ from PyQt6 import QtCore, QtGui, QtWidgets
 from src.shared.python.dashboard.advanced_analysis import AdvancedAnalysisDialog
 from src.shared.python.export import export_recording_all_formats
 from src.shared.python.interfaces import RecorderInterface
+from src.shared.python.logging_config import get_logger
 from src.shared.python.plotting import MplCanvas
 from src.shared.python.signal_processing import compute_psd
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 MAX_DIMENSIONS = 100
 
@@ -294,7 +294,7 @@ class LivePlotWidget(QtWidgets.QWidget):
             try:
                 joint_names = self.recorder.engine.get_joint_names()
             except Exception:  # noqa: BLE001
-                LOGGER.exception("Failed to get joint names from engine")
+                logger.exception("Failed to get joint names from engine")
 
         if joint_names:
             self.source_combo.addItems(joint_names)

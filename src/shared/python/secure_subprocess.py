@@ -6,13 +6,14 @@ command injection and other security vulnerabilities.
 
 from __future__ import annotations
 
-import logging
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 # Allowed script directories (whitelist approach)
 ALLOWED_SCRIPT_DIRECTORIES = [

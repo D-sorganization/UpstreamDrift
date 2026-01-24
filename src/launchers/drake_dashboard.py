@@ -4,14 +4,14 @@ Launches the Unified Dashboard with the Drake Physics Engine.
 """
 
 import argparse
-import sys
 
-from PyQt6.QtWidgets import QApplication, QFileDialog
+from PyQt6.QtWidgets import QFileDialog
 
 from src.engines.physics_engines.drake.python.drake_physics_engine import (
     DrakePhysicsEngine,
 )
 from src.shared.python.dashboard.launcher import launch_dashboard
+from src.shared.python.gui_utils import get_qapp
 
 
 def main() -> None:
@@ -26,9 +26,7 @@ def main() -> None:
 
     if not model_path:
         # Ensure QApplication exists for QFileDialog
-        app = QApplication.instance()
-        if app is None:
-            app = QApplication(sys.argv)
+        get_qapp()
 
         dialog = QFileDialog()
         dialog.setNameFilter("Model Files (*.urdf *.sdf *.xml)")

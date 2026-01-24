@@ -10,14 +10,15 @@ Tests all seven flight models for:
 
 import math
 import sys
-from pathlib import Path
 
 import numpy as np
 import pytest
 
+from src.shared.python.path_utils import get_repo_root
+
 # Add shared directory to path
 sys.path.insert(
-    0, str(Path(__file__).parent.parent.parent / "src" / "shared" / "python")
+    0, str(get_repo_root() / "src" / "shared" / "python")
 )
 
 from flight_models import (

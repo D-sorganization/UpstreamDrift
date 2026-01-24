@@ -1,11 +1,12 @@
 """Security utilities for authentication and authorization."""
 
-import logging
 import os
 import secrets
 
 # Python 3.10 compatibility: UTC was added in 3.11
 from datetime import datetime, timedelta, timezone
+
+from src.shared.python.logging_config import get_logger
 
 try:
     from datetime import UTC
@@ -19,7 +20,7 @@ from fastapi import HTTPException, status
 
 from .models import User, UserRole
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Security configuration
 # SECURITY: Secret key MUST be set via environment variable
