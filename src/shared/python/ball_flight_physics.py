@@ -16,7 +16,7 @@ from typing import Any, cast
 import numpy as np
 from scipy.integrate import solve_ivp
 
-from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.constants import AIR_DENSITY_SEA_LEVEL_KG_M3, GRAVITY_M_S2
 from src.shared.python.engine_availability import NUMBA_AVAILABLE
 from src.shared.python.logging_config import get_logger
 
@@ -159,7 +159,7 @@ class LaunchConditions:
 class EnvironmentalConditions:
     """Environmental conditions affecting ball flight."""
 
-    air_density: float = 1.225  # kg/m³ at sea level, 15°C
+    air_density: float = AIR_DENSITY_SEA_LEVEL_KG_M3  # kg/m³ at sea level, 15°C
     wind_velocity: np.ndarray | None = None  # m/s - wind vector [x, y, z]
     gravity: float = GRAVITY_M_S2  # DRY: Use centralized constant
     temperature: float = 15.0  # °C
