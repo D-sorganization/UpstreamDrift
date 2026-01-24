@@ -29,7 +29,7 @@ except ImportError:
     C3D_APPS_AVAILABLE = False
 
 if not C3D_APPS_AVAILABLE:
-    pytest.skip(f"Could not import apps from {SRC_PATH}", allow_module_level=True)
+    pytest.skip("Could not import C3D apps", allow_module_level=True)
 
 
 # ---------------------------------------------------------------------------
