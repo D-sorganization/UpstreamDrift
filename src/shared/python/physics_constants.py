@@ -8,6 +8,13 @@ All constants must include:
 
 import math
 
+# Common source citations (DRY principle)
+_SRC_INDUSTRY_STANDARD = "Industry Standard"
+_SRC_WINTER_2009 = "Winter 2009"
+_SRC_ANTHROPOMETRY = "Anthropometry"
+_SRC_DERIVED = "Derived"
+_SRC_PHYSICS = "Physics"
+
 
 class PhysicalConstant(float):
     """A float subclass that carries physical unit and provenance metadata."""
@@ -174,6 +181,62 @@ DRIVER_COR = PhysicalConstant(
 )
 TYPICAL_CONTACT_DURATION_S = PhysicalConstant(
     0.0005, "s", "High-speed video studies", "Typical ball-clubface contact time"
+)
+
+# Golf club component masses (typical driver)
+GOLF_GRIP_MASS_KG = PhysicalConstant(
+    0.050, "kg", _SRC_INDUSTRY_STANDARD, "Typical golf grip mass (50g)"
+)
+GOLF_SHAFT_MASS_KG = PhysicalConstant(
+    0.065, "kg", _SRC_INDUSTRY_STANDARD, "Typical graphite driver shaft mass (65g)"
+)
+GOLF_CLUBHEAD_MASS_KG = PhysicalConstant(
+    0.200, "kg", _SRC_INDUSTRY_STANDARD, "Typical driver head mass (200g)"
+)
+GOLF_CLUB_TOTAL_MASS_KG = PhysicalConstant(
+    0.315, "kg", _SRC_DERIVED, "Total driver mass (grip + shaft + head)"
+)
+
+# Biomechanics constants (average adult male)
+HAND_MASS_KG = PhysicalConstant(
+    0.4, "kg", _SRC_WINTER_2009, "Average hand mass (0.6% body mass for 67kg person)"
+)
+FOREARM_MASS_KG = PhysicalConstant(
+    1.5, "kg", _SRC_WINTER_2009, "Average forearm mass (2.2% body mass)"
+)
+UPPER_ARM_MASS_KG = PhysicalConstant(
+    2.5, "kg", _SRC_WINTER_2009, "Average upper arm mass (3.7% body mass)"
+)
+TORSO_MASS_KG = PhysicalConstant(
+    35.0, "kg", _SRC_WINTER_2009, "Average torso mass (52% body mass)"
+)
+
+# Segment lengths (average adult male, 1.75m height)
+HAND_LENGTH_M = PhysicalConstant(0.19, "m", _SRC_ANTHROPOMETRY, "Average hand length")
+FOREARM_LENGTH_M = PhysicalConstant(
+    0.27, "m", _SRC_ANTHROPOMETRY, "Average forearm length"
+)
+UPPER_ARM_LENGTH_M = PhysicalConstant(
+    0.30, "m", _SRC_ANTHROPOMETRY, "Average upper arm length"
+)
+
+# Segment radii for collision geometry
+TORSO_RADIUS_M = PhysicalConstant(
+    0.14, "m", _SRC_ANTHROPOMETRY, "Average torso radius for collision"
+)
+ARM_SEGMENT_RADIUS_M = PhysicalConstant(
+    0.035, "m", _SRC_ANTHROPOMETRY, "Average arm segment radius"
+)
+HAND_RADIUS_M = PhysicalConstant(
+    0.025, "m", _SRC_ANTHROPOMETRY, "Average hand radius for collision"
+)
+
+# Inertia scaling factor (rod about end)
+DEFAULT_ARM_INERTIA_SCALING = PhysicalConstant(
+    1.0 / 12.0,
+    "dimensionless",
+    _SRC_PHYSICS,
+    "Moment of inertia scaling for uniform rod",
 )
 
 # Numerical thresholds for aerodynamic calculations
