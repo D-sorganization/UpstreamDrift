@@ -60,14 +60,14 @@ jobs:
         run: |
           # Check recent commits for loop indicators
           loop_count=0
-          for msg in $(git log --format="%s" -n 5); do
+          while IFS= read -r msg; do
             if [[ "$msg" == *"[skip ci]"* ]] || [[ "$msg" == *"[ci skip]"* ]]; then
               continue
             fi
             if [[ "$msg" == *"trigger-ci"* ]] || [[ "$msg" == *"bot-ci-trigger"* ]]; then
               ((loop_count++))
             fi
-          done
+          done < <(git log --format="%s" -n 5)
 
           if [ $loop_count -ge 3 ]; then
             echo "skip=true" >> $GITHUB_OUTPUT
@@ -120,7 +120,7 @@ jobs:
               more_prs=$(gh pr list --author "$author" --state open --json number --jq '.[].number' 2>/dev/null || echo "")
               for pr in $more_prs; do
                 checks=$(gh pr checks "$pr" 2>/dev/null || echo "")
-                if [ -z "$checks" ] || ! echo "$checks" | grep -qE "(quality-gate|ci-standard)"; then
+                if [ -z "$checks" ] || ! echo "$checks" | grep -qE "(quality-gate|ci-standard|CI Standard)"; then
                   prs_to_trigger="$prs_to_trigger $pr"
                 fi
               done
@@ -146,12 +146,11 @@ jobs:
             echo "Triggering CI for PR #$pr"
 
             # Method 1: Try to trigger workflow_dispatch on ci-standard
-            gh workflow run ci-standard.yml \
+            if ! gh workflow run ci-standard.yml \
               --ref "$(gh pr view $pr --json headRefName --jq '.headRefName')" \
-              2>/dev/null || true
+              2>/dev/null; then
 
             # Method 2: If workflow_dispatch fails, add empty commit to trigger
-            if [ $? -ne 0 ]; then
               echo "workflow_dispatch failed, trying empty commit method"
 
               # Get PR branch

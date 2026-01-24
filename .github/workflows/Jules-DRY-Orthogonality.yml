@@ -118,6 +118,13 @@ jobs:
 
           def main():
               target = os.environ.get('TARGET_CATEGORY', 'all')
+              
+              all_cats = ['path', 'logging', 'imports', 'datetime', 'config', 'exceptions', 'env']
+              if target != 'all' and target in all_cats:
+                  categories = [target]
+              else:
+                  categories = all_cats
+
               python_files = find_python_files('.')
 
               all_violations = {}
@@ -126,14 +133,15 @@ jobs:
 
               for f in python_files:
                   violations = analyze_file(f)
+                  # Filter violations based on target category
+                  violations = {k: v for k, v in violations.items() if k in categories}
+                  
                   if any(violations.values()):
                       all_violations[str(f)] = violations
                       for cat, lines in violations.items():
                           category_counts[cat] += len(lines)
                           if str(f) not in category_files[cat]:
                               category_files[cat].append(str(f))
-
-              categories = ['path', 'logging', 'imports', 'datetime', 'config', 'exceptions', 'env']
 
               # Build summary
               summary = {
