@@ -1,6 +1,8 @@
 """Pinocchio Physics Engine wrapper implementation.
 
 Wraps pinocchio to provide a compliant PhysicsEngine interface.
+
+Refactored to use shared engine availability module (DRY principle).
 """
 
 from __future__ import annotations
@@ -10,11 +12,11 @@ from typing import Any, cast
 
 import numpy as np
 
-# Pinocchio imports likely to fail if not installed
-try:
+from src.shared.python.engine_availability import PINOCCHIO_AVAILABLE
+
+# Pinocchio imports - only import if available
+if PINOCCHIO_AVAILABLE:
     import pinocchio as pin
-except ImportError:
-    pass
 
 from src.shared.python import constants
 from src.shared.python.interfaces import PhysicsEngine

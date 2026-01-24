@@ -30,18 +30,17 @@ from PyQt6.QtWidgets import (
 if TYPE_CHECKING:
     from typing import Any
 
+from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+
 logger = logging.getLogger(__name__)
 
 GRAVITY_M_S2 = 9.810
 
 # MuJoCo is optional - gracefully handle missing
-try:
+if MUJOCO_AVAILABLE:
     import mujoco
-
-    MUJOCO_AVAILABLE = True
-except ImportError:
+else:
     mujoco = None  # type: ignore[assignment]
-    MUJOCO_AVAILABLE = False
 
 
 class URDFToMJCFConverter:

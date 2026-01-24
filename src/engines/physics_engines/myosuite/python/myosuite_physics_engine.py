@@ -2,6 +2,8 @@
 
 Wraps MyoSuite (OpenAI Gym-based) environments into the PhysicsEngine protocol.
 Documentation: https://myosuite.readthedocs.io/en/latest/
+
+Refactored to use shared engine availability module (DRY principle).
 """
 
 from __future__ import annotations
@@ -11,18 +13,17 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.engine_availability import MYOSUITE_AVAILABLE
 from src.shared.python.interfaces import PhysicsEngine
 
 LOGGER = logging.getLogger(__name__)
 
-try:
+# Log warning if MyoSuite not available
+if not MYOSUITE_AVAILABLE:
+    LOGGER.warning("MyoSuite not installed. MyoSuitePhysicsEngine will not function.")
+else:
     import gym
     import myosuite  # noqa: F401
-
-    MYOSUITE_AVAILABLE = True
-except ImportError:
-    MYOSUITE_AVAILABLE = False
-    LOGGER.warning("MyoSuite not installed. MyoSuitePhysicsEngine will not function.")
 
 
 class MyoSuitePhysicsEngine(PhysicsEngine):

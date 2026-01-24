@@ -1,6 +1,8 @@
 """Tests for MyoConverter integration module.
 
 Tests the OpenSim to MuJoCo model conversion interface and error handling.
+
+Refactored to use shared engine availability module (DRY principle).
 """
 
 from __future__ import annotations
@@ -11,18 +13,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from src.shared.python.engine_availability import MYOCONVERTER_AVAILABLE
 from src.shared.python.myoconverter_integration import (
     MyoConverter,
     install_myoconverter_instructions,
 )
-
-# Note: Some tests will be skipped if myoconverter not installed
-try:
-    import myoconverter  # noqa: F401
-
-    MYOCONVERTER_AVAILABLE = True
-except ImportError:
-    MYOCONVERTER_AVAILABLE = False
 
 
 @pytest.fixture
