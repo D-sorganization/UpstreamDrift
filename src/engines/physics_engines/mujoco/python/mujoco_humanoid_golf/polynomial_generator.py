@@ -11,7 +11,6 @@ for joint control. It allows users to:
 
 from __future__ import annotations
 
-import logging
 import sys
 from functools import partial
 
@@ -22,9 +21,11 @@ from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from PyQt6 import QtCore, QtWidgets
 
+from src.shared.python.logging_config import configure_gui_logging, get_logger
+
 # Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+configure_gui_logging()
+logger = get_logger(__name__)
 
 
 class MplCanvas(FigureCanvasQTAgg):

@@ -1,12 +1,14 @@
 """Quick test script to verify new models load correctly."""
 
-import logging
 import sys
 
-sys.path.insert(0, "python")
+from src.shared.python.logging_config import get_logger, setup_logging
+from src.shared.python.path_utils import setup_import_paths
 
-import mujoco as mj
-from mujoco_golf_pendulum.models import (
+setup_import_paths()
+
+import mujoco as mj  # noqa: E402
+from mujoco_golf_pendulum.models import (  # noqa: E402
     ADVANCED_BIOMECHANICAL_GOLF_SWING_XML,
     CLUB_CONFIGS,
     GIMBAL_JOINT_DEMO_XML,
@@ -15,8 +17,8 @@ from mujoco_golf_pendulum.models import (
     generate_rigid_club_xml,
 )
 
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO, format="%(message)s")
+setup_logging(use_simple_format=True)
+logger = get_logger(__name__)
 
 
 def test_model(name: str, xml_string: str) -> bool:

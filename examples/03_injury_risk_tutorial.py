@@ -12,7 +12,6 @@ We will:
 4. Generate a comprehensive report
 """
 
-import logging
 import sys
 from pathlib import Path
 
@@ -30,8 +29,10 @@ from shared.python.injury.spinal_load_analysis import (  # noqa: E402
 )
 
 # Setup logger for tutorial
-logging.basicConfig(level=logging.INFO, format="%(message)s")
-logger = logging.getLogger("tutorial")
+from shared.python.logging_config import get_logger, setup_logging  # noqa: E402
+
+setup_logging(use_simple_format=True)
+logger = get_logger("tutorial")
 
 
 def run_tutorial() -> None:

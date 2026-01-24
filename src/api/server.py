@@ -9,7 +9,6 @@ Provides REST API endpoints for:
 Built on top of the existing EngineManager and PhysicsEngine protocol.
 """
 
-import logging
 import os
 import tempfile
 import uuid
@@ -37,6 +36,9 @@ from slowapi.util import get_remote_address
 
 from src.shared.python.engine_manager import EngineManager
 from src.shared.python.engine_registry import EngineType
+
+# Configure logging - use centralized logging config
+from src.shared.python.logging_config import get_logger, setup_logging
 from src.shared.python.video_pose_pipeline import (
     VideoPosePipeline,
     VideoProcessingConfig,
@@ -57,9 +59,8 @@ from .routes import auth as auth_routes
 from .services.analysis_service import AnalysisService
 from .services.simulation_service import SimulationService
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+setup_logging()
+logger = get_logger(__name__)
 
 # Rate limiting
 limiter = Limiter(key_func=get_remote_address)

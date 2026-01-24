@@ -185,7 +185,9 @@ def create_cropped_robot_icon() -> bool:
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
+    from src.shared.python.logging_config import setup_logging
+
+    setup_logging(use_simple_format=True)
 
     if create_cropped_robot_icon():
         logging.info("Successfully created cropped robot icons!")

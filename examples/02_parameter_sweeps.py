@@ -7,7 +7,6 @@ This example demonstrates how to:
 3. Export detailed analysis results
 """
 
-import logging
 import sys
 from pathlib import Path
 
@@ -17,15 +16,16 @@ import numpy as np
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
+# Configure logging
+from shared.python.logging_config import get_logger, setup_logging  # noqa: E402
 from shared.python.output_manager import OutputManager  # noqa: E402
 from shared.python.physics_parameters import (  # noqa: E402
     ParameterCategory,
     get_registry,
 )
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+setup_logging()
+logger = get_logger(__name__)
 
 
 def main() -> None:
