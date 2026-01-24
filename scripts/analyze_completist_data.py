@@ -94,7 +94,7 @@ def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
                 if is_excluded(filepath):
                     continue
 
-                if todo_str in content:
+                if re.search(r"\b" + todo_str + r"\b", content):
                     todos.append(
                         {
                             "file": filepath,
@@ -103,21 +103,18 @@ def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
                             "type": "TODO",
                         }
                     )
-                elif any(x in content for x in fixme_markers):
-                    # Identify specific marker
-                    marker = "FIXME"
+                else:
                     for m in fixme_markers:
-                        if m in content:
-                            marker = m
+                        if re.search(r"\b" + m + r"\b", content):
+                            fixmes.append(
+                                {
+                                    "file": filepath,
+                                    "line": lineno,
+                                    "text": content,
+                                    "type": m,
+                                }
+                            )
                             break
-                    fixmes.append(
-                        {
-                            "file": filepath,
-                            "line": lineno,
-                            "text": content,
-                            "type": marker,
-                        }
-                    )
     return todos, fixmes
 
 
