@@ -7,8 +7,17 @@ import pytest
 
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
 
+# Check if pytest-qt is available
+try:
+    import pytestqt  # noqa: F401
+
+    PYTEST_QT_AVAILABLE = True
+except ImportError:
+    PYTEST_QT_AVAILABLE = False
+
 pytestmark = pytest.mark.skipif(
-    not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available"
+    not PYQT6_AVAILABLE or not PYTEST_QT_AVAILABLE,
+    reason="PyQt6 or pytest-qt not available",
 )
 
 # Mock flight_models before importing shot_tracer
@@ -24,10 +33,10 @@ if PYQT6_AVAILABLE:
 @pytest.fixture
 def mock_flight_models():
     with (
-        patch("launchers.shot_tracer.FlightModelRegistry") as mock_registry,
-        patch("launchers.shot_tracer.UnifiedLaunchConditions") as mock_launch,
-        patch("launchers.shot_tracer.compare_models") as mock_compare,
-        patch("launchers.shot_tracer.FlightModelType") as mock_type,
+        patch("src.launchers.shot_tracer.FlightModelRegistry") as mock_registry,
+        patch("src.launchers.shot_tracer.UnifiedLaunchConditions") as mock_launch,
+        patch("src.launchers.shot_tracer.compare_models") as mock_compare,
+        patch("src.launchers.shot_tracer.FlightModelType") as mock_type,
     ):
         # Setup FlightModelType enum-like behavior
         mock_type.WATERLOO_PENNER.value = "waterloo_penner"

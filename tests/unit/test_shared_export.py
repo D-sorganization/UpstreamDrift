@@ -62,8 +62,8 @@ class TestSharedExport:
         output_path = str(tmp_path / "test.mat")
 
         # Mock scipy.io.savemat
-        with patch("shared.python.export.savemat") as mock_savemat:
-            with patch("shared.python.export.SCIPY_AVAILABLE", True):
+        with patch("src.shared.python.export.savemat") as mock_savemat:
+            with patch("src.shared.python.export.SCIPY_AVAILABLE", True):
                 success = export_to_matlab(output_path, sample_data)
                 assert success is True
                 mock_savemat.assert_called_once()
@@ -84,7 +84,7 @@ class TestSharedExport:
         self, tmp_path: Path, sample_data: dict[str, Any]
     ) -> None:
         """Test behavior when scipy is missing."""
-        with patch("shared.python.export.SCIPY_AVAILABLE", False):
+        with patch("src.shared.python.export.SCIPY_AVAILABLE", False):
             success = export_to_matlab(str(tmp_path / "test.mat"), sample_data)
             assert success is False
 
@@ -92,8 +92,10 @@ class TestSharedExport:
         self, tmp_path: Path, sample_data: dict[str, Any]
     ) -> None:
         """Test exception handling during export."""
-        with patch("shared.python.export.savemat", side_effect=Exception("Disk full")):
-            with patch("shared.python.export.SCIPY_AVAILABLE", True):
+        with patch(
+            "src.shared.python.export.savemat", side_effect=Exception("Disk full")
+        ):
+            with patch("src.shared.python.export.SCIPY_AVAILABLE", True):
                 success = export_to_matlab(str(tmp_path / "test.mat"), sample_data)
                 assert success is False
 
@@ -103,29 +105,34 @@ class TestSharedExport:
         """Test successful export to HDF5 file."""
         output_path = str(tmp_path / "test.h5")
 
-        # Mock h5py.File
-        with patch("shared.python.export.h5py") as mock_h5py:
-            with patch("shared.python.export.H5PY_AVAILABLE", True):
-                mock_file = MagicMock()
-                mock_h5py.File.return_value.__enter__.return_value = mock_file
+        # Mock h5py via sys.modules since it's imported at module level
+        mock_h5py = MagicMock()
+        mock_file = MagicMock()
+        mock_h5py.File.return_value.__enter__.return_value = mock_file
 
+        # Need to patch in sys.modules first so the attribute exists on the module
+        with patch.dict(sys.modules, {"h5py": mock_h5py}):
+            # Reload module to pick up the mocked h5py
+            import src.shared.python.export as export_module
+
+            export_module.h5py = mock_h5py
+            export_module.H5PY_AVAILABLE = True
+            try:
                 success = export_to_hdf5(output_path, sample_data)
                 assert success is True
 
                 # Verify group creation
                 mock_file.create_group.assert_any_call("timeseries")
                 mock_file.create_group.assert_any_call("metadata")
-
-                # Verify dataset creation (via groups)
-                _ = mock_file.create_group.return_value
-                # We can't easily check all calls because of how create_group is reused for different groups
-                # But we can verify that create_dataset was called on *some* group
+            finally:
+                # Cleanup
+                delattr(export_module, "h5py")
 
     def test_export_to_hdf5_missing_dependency(
         self, tmp_path: Path, sample_data: dict[str, Any]
     ) -> None:
         """Test behavior when h5py is missing."""
-        with patch("shared.python.export.H5PY_AVAILABLE", False):
+        with patch("src.shared.python.export.H5PY_AVAILABLE", False):
             success = export_to_hdf5(str(tmp_path / "test.h5"), sample_data)
             assert success is False
 
@@ -133,11 +140,20 @@ class TestSharedExport:
         self, tmp_path: Path, sample_data: dict[str, Any]
     ) -> None:
         """Test exception handling during HDF5 export."""
-        with patch("shared.python.export.h5py") as mock_h5py:
-            mock_h5py.File.side_effect = Exception("File locked")
-            with patch("shared.python.export.H5PY_AVAILABLE", True):
+        mock_h5py = MagicMock()
+        mock_h5py.File.side_effect = Exception("File locked")
+
+        # Need to patch in sys.modules first so the attribute exists on the module
+        with patch.dict(sys.modules, {"h5py": mock_h5py}):
+            import src.shared.python.export as export_module
+
+            export_module.h5py = mock_h5py
+            export_module.H5PY_AVAILABLE = True
+            try:
                 success = export_to_hdf5(str(tmp_path / "test.h5"), sample_data)
                 assert success is False
+            finally:
+                delattr(export_module, "h5py")
 
     def test_export_recording_all_formats_json(
         self, tmp_path: Path, sample_data: dict[str, Any]
@@ -191,7 +207,7 @@ class TestSharedExport:
         base_path = str(tmp_path / "recording")
 
         # Mock export_to_matlab to fail
-        with patch("shared.python.export.export_to_matlab", return_value=False):
+        with patch("src.shared.python.export.export_to_matlab", return_value=False):
             # Mock json dump to succeed (real file IO)
             results = export_recording_all_formats(
                 base_path, sample_data, formats=["json", "mat"]

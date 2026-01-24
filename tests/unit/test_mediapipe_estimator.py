@@ -53,7 +53,8 @@ class TestMediaPipeEstimator:
             with patch.object(mediapipe_estimator, "mp", mock_mediapipe):
                 # We also need to patch cv2 since it's used in methods
                 with patch(
-                    "shared.python.pose_estimation.mediapipe_estimator.cv2", MagicMock()
+                    "src.shared.python.pose_estimation.mediapipe_estimator.cv2",
+                    MagicMock(),
                 ):
                     estimator = mediapipe_estimator.MediaPipeEstimator(
                         min_detection_confidence=0.7
@@ -91,7 +92,9 @@ class TestMediaPipeEstimator:
         image = np.zeros((100, 100, 3), dtype=np.uint8)
 
         # Ensure cv2 is mocked correctly in the module
-        with patch("shared.python.pose_estimation.mediapipe_estimator.cv2") as mock_cv2:
+        with patch(
+            "src.shared.python.pose_estimation.mediapipe_estimator.cv2"
+        ) as mock_cv2:
             mock_cv2.cvtColor.return_value = image  # Return same image
 
             result = estimator_instance.estimate_from_image(image)
@@ -108,7 +111,9 @@ class TestMediaPipeEstimator:
         estimator_instance.load_model()
 
         # Mock cv2.VideoCapture via the module import
-        with patch("shared.python.pose_estimation.mediapipe_estimator.cv2") as mock_cv2:
+        with patch(
+            "src.shared.python.pose_estimation.mediapipe_estimator.cv2"
+        ) as mock_cv2:
             mock_cap = MagicMock()
             mock_cv2.VideoCapture.return_value = mock_cap
             mock_cap.isOpened.return_value = True
@@ -136,7 +141,9 @@ class TestMediaPipeEstimator:
 
         image = np.zeros((100, 100, 3), dtype=np.uint8)
 
-        with patch("shared.python.pose_estimation.mediapipe_estimator.cv2") as mock_cv2:
+        with patch(
+            "src.shared.python.pose_estimation.mediapipe_estimator.cv2"
+        ) as mock_cv2:
             mock_cv2.cvtColor.return_value = image
 
             # Process first frame
@@ -184,7 +191,9 @@ class TestMediaPipeEstimator:
 
         image = np.zeros((100, 100, 3), dtype=np.uint8)
 
-        with patch("shared.python.pose_estimation.mediapipe_estimator.cv2") as mock_cv2:
+        with patch(
+            "src.shared.python.pose_estimation.mediapipe_estimator.cv2"
+        ) as mock_cv2:
             mock_cv2.cvtColor.return_value = image
 
             result = estimator_instance.estimate_from_image(image)
@@ -201,7 +210,7 @@ class TestMediaPipeEstimator:
                 # Initialize should check MEDIAPIPE_AVAILABLE but only warn
                 # The __init__ in the code warns but doesn't raise
                 with patch(
-                    "shared.python.pose_estimation.mediapipe_estimator.logger"
+                    "src.shared.python.pose_estimation.mediapipe_estimator.logger"
                 ) as mock_logger:
                     estimator = mediapipe_estimator.MediaPipeEstimator()
                     mock_logger.warning.assert_called()

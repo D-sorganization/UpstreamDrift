@@ -42,10 +42,10 @@ def mocked_launcher():
     mock_modules["PyQt6.QtWidgets"].QCheckBox = MockQCheckBox
 
     with patch.dict(sys.modules, mock_modules):
-        import launchers.golf_launcher
+        import src.launchers.golf_launcher
 
         # Patch the class to avoid __init__ doing GUI stuff
-        class TestLauncher(launchers.golf_launcher.GolfLauncher):
+        class TestLauncher(src.launchers.golf_launcher.GolfLauncher):
             def __init__(self):
                 self.chk_live: MockQCheckBox = MockQCheckBox(checked=True)  # type: ignore[assignment]
                 self.chk_gpu: MockQCheckBox = MockQCheckBox(checked=False)  # type: ignore[assignment]
@@ -78,7 +78,7 @@ def test_live_view_environment_flags(mocked_launcher):
     with (
         patch("os.name", "nt"),
         patch("subprocess.Popen") as mock_popen,
-        patch("launchers.golf_launcher.Path", mock_path_cls),
+        patch("src.launchers.golf_launcher.Path", mock_path_cls),
     ):
         # Create a dummy model
         model = MockModel("custom_humanoid")
@@ -123,7 +123,7 @@ def test_headless_environment_flags(mocked_launcher):
     with (
         patch("os.name", "nt"),
         patch("subprocess.Popen") as mock_popen,
-        patch("launchers.golf_launcher.Path", mock_path_cls),
+        patch("src.launchers.golf_launcher.Path", mock_path_cls),
     ):
         model = MockModel("custom_humanoid")
         launcher._launch_docker_container(model, MagicMock())

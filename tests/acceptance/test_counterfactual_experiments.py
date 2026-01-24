@@ -20,6 +20,22 @@ import pytest
 
 from src.shared.python.logging_config import get_logger
 
+# Check if pendulum engine dependencies are available
+try:
+    from src.engines.physics_engines.pendulum.python.pendulum_physics_engine import (
+        PendulumPhysicsEngine,
+    )
+
+    PENDULUM_ENGINE_AVAILABLE = True
+except ImportError:
+    PENDULUM_ENGINE_AVAILABLE = False
+
+if not PENDULUM_ENGINE_AVAILABLE:
+    pytest.skip(
+        "Pendulum engine dependencies not available (simpleeval)",
+        allow_module_level=True,
+    )
+
 if TYPE_CHECKING:
     from src.shared.python.interfaces import PhysicsEngine
 

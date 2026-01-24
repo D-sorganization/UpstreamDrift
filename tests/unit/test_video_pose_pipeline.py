@@ -7,6 +7,12 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
+from src.shared.python.engine_availability import MEDIAPIPE_AVAILABLE
+
+# Skip entire module if MediaPipe is not available
+if not MEDIAPIPE_AVAILABLE:
+    pytest.skip("MediaPipe not installed", allow_module_level=True)
+
 sys.path.insert(
     0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../shared/python"))
 )
@@ -16,10 +22,10 @@ sys.modules["cv2"] = MagicMock()
 
 # Mock shared.python.pose_estimation.mediapipe_estimator before import
 mock_mp_module = MagicMock()
-sys.modules["shared.python.pose_estimation.mediapipe_estimator"] = mock_mp_module
+sys.modules["src.shared.python.pose_estimation.mediapipe_estimator"] = mock_mp_module
 
 mock_op_module = MagicMock()
-sys.modules["shared.python.pose_estimation.openpose_estimator"] = mock_op_module
+sys.modules["src.shared.python.pose_estimation.openpose_estimator"] = mock_op_module
 
 
 from src.shared.python.pose_estimation.interface import (
@@ -39,7 +45,7 @@ def mock_cv2():
 
 @pytest.fixture
 def mock_output_manager():
-    with patch("shared.python.video_pose_pipeline.OutputManager") as mock:
+    with patch("src.shared.python.video_pose_pipeline.OutputManager") as mock:
         yield mock
 
 
