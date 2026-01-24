@@ -11,7 +11,7 @@ Usage:
 """
 
 import json
-import logging
+from src.shared.python.logging_config import get_logger
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -39,7 +39,7 @@ try:
 except ImportError:
     THEME_AVAILABLE = False
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Recent models storage
 RECENT_FILE = Path.home() / ".golf_modeling_suite" / "recent_models.json"

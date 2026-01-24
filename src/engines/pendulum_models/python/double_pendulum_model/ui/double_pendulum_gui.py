@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import contextlib
 import csv
-import logging
+from src.shared.python.logging_config import get_logger
 import math
 import tkinter as tk
 import typing
@@ -48,7 +48,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 TIME_STEP = 0.01
 

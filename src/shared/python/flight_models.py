@@ -13,7 +13,7 @@ All models implement the BallFlightModel protocol for interoperability.
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -33,7 +33,7 @@ from .physics_constants import (
     NUMERICAL_EPSILON,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # =============================================================================
 # Physical Constants (re-exported from centralized module for compatibility)

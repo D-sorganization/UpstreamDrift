@@ -5,7 +5,7 @@ Wraps the standalone DoublePendulumDynamics to implement the PhysicsEngine proto
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 
 import numpy as np
 
@@ -15,7 +15,7 @@ from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pen
 )
 from src.shared.python.interfaces import PhysicsEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class PendulumPhysicsEngine(PhysicsEngine):
@@ -57,7 +57,7 @@ class PendulumPhysicsEngine(PhysicsEngine):
     def load_from_path(self, path: str) -> None:
         """Load model from file path."""
         # Pendulum is a fixed model, but we could theoretically load params from JSON.
-        LOGGER.debug(
+        logger.debug(
             "PendulumPhysicsEngine is standalone. "
             "Model parameters are default. Path %s ignored.",
             path,
@@ -65,7 +65,7 @@ class PendulumPhysicsEngine(PhysicsEngine):
 
     def load_from_string(self, content: str, extension: str | None = None) -> None:
         """Load model from string."""
-        LOGGER.debug("PendulumPhysicsEngine ignores load_from_string.")
+        logger.debug("PendulumPhysicsEngine ignores load_from_string.")
 
     def reset(self) -> None:
         """Reset simulation state to initial configuration."""

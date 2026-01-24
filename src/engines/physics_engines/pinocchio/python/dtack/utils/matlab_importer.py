@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 import typing
 from pathlib import Path
 
@@ -27,7 +27,7 @@ except ImportError:
     EZC3D_AVAILABLE = False
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MATLABImporter:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 import typing
 from pathlib import Path
 
@@ -11,7 +11,7 @@ if typing.TYPE_CHECKING:
     import numpy.typing as npt
     import pinocchio as pin
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # PINK availability check
 try:

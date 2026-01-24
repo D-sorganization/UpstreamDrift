@@ -14,7 +14,7 @@ the Self-Contained Physics Testing Pattern from Assessment B-005.
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from typing import Any
 
 import numpy as np
@@ -23,7 +23,7 @@ import pytest
 from src.shared.python.constants import GRAVITY_M_S2
 from tests.fixtures.fixtures_lib import _check_mujoco_available
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Inline pendulum model for energy tests (XML-in-Python pattern)
 # Uses explicit inertial properties for accurate energy computation

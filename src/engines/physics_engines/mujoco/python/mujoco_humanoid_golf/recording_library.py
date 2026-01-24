@@ -14,7 +14,7 @@ from __future__ import annotations
 import contextlib
 import hashlib
 import json
-import logging
+from src.shared.python.logging_config import get_logger
 import re
 import shutil
 import sqlite3
@@ -24,7 +24,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 # PERFORMANCE FIX: Thread-local connection pool

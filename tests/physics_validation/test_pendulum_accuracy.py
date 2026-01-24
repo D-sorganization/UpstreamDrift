@@ -1,6 +1,6 @@
 """Physics validation tests verifying pendulum dynamics accuracy."""
 
-import logging
+from src.shared.python.logging_config import get_logger
 import sys
 from unittest.mock import MagicMock
 
@@ -15,7 +15,7 @@ from src.shared.python.constants import GRAVITY_M_S2
 from src.shared.python.engine_manager import EngineManager, EngineType
 from tests.physics_validation.analytical import AnalyticalPendulum
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def is_engine_available(engine_type: EngineType) -> bool:

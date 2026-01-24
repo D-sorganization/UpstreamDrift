@@ -11,7 +11,7 @@ Contains widgets and a dialog for advanced signal processing analysis:
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 
 import numpy as np
 from PyQt6 import QtWidgets
@@ -25,7 +25,7 @@ from src.shared.python.signal_processing import (
 )
 from src.shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Numerical constants for signal processing
 LOG_EPSILON = 1e-12  # Small epsilon to avoid log(0) in dB calculations
@@ -128,7 +128,7 @@ class SpectrogramTab(QtWidgets.QWidget):
 
         dim_idx = self.spin_dim.value()
         if not _validate_dimension_index(dim_idx, data):
-            LOGGER.warning(
+            logger.warning(
                 "Dimension index %d out of bounds for data shape %s, falling back to 0",
                 dim_idx,
                 data.shape,

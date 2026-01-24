@@ -11,12 +11,12 @@ Example:
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass, field
 
 from src.shared.python.ai.types import ExpertiseLevel
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

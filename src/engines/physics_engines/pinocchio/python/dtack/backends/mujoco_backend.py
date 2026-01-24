@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from pathlib import Path
 
 import mujoco
 import numpy as np  # noqa: TID253
 import numpy.typing as npt  # noqa: TID253
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MuJoCoBackend:

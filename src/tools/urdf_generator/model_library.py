@@ -17,13 +17,13 @@ Use BundledAssets from bundled_assets/ for local models.
 from __future__ import annotations
 
 import json
-import logging
+from src.shared.python.logging_config import get_logger
 import math
 import urllib.request
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Try to import bundled assets for local model access
 try:

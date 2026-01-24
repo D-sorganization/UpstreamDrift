@@ -6,7 +6,7 @@ scientific computations.
 Note: Logging setup now delegates to the centralized logging_config module.
 """
 
-import logging
+from src.shared.python.logging_config import get_logger
 import random
 
 from src.shared.python.engine_availability import PYTORCH_AVAILABLE
@@ -28,7 +28,7 @@ DEFAULT_SEED: int = 42  # Answer to everything
 LOG_FORMAT: str = DEFAULT_LOG_FORMAT
 LOG_LEVEL: int = logging.INFO
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def setup_logging(level: int = LOG_LEVEL, format_string: str = LOG_FORMAT) -> None:

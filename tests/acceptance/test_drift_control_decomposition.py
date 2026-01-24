@@ -5,7 +5,7 @@ Verifies that drift + control = full dynamics for all physics engines.
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from typing import Any
 
 import numpy as np
@@ -17,7 +17,7 @@ from src.shared.python.indexed_acceleration import (
     compute_indexed_acceleration_from_engine,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # TOLERANCE for superposition test
 SUPERPOSITION_TOLERANCE = 1e-5  # rad/s² or m/s²
@@ -104,11 +104,11 @@ class TestPinocchioDriftControl:
         a_reconstructed = a_drift + a_control
         residual = a_full - a_reconstructed
 
-        LOGGER.info("Pinocchio Superposition Test:")
-        LOGGER.info(f"  a_full = {a_full}")
-        LOGGER.info(f"  a_drift = {a_drift}")
-        LOGGER.info(f"  a_control = {a_control}")
-        LOGGER.info(f"  residual = {residual}")
+        logger.info("Pinocchio Superposition Test:")
+        logger.info(f"  a_full = {a_full}")
+        logger.info(f"  a_drift = {a_drift}")
+        logger.info(f"  a_control = {a_control}")
+        logger.info(f"  residual = {residual}")
 
         # Final guard against empty residual causing np.max() to fail
         if np.size(residual) == 0:
@@ -254,11 +254,11 @@ class TestMuJoCoDriftControl:
         a_reconstructed = a_drift + a_control
         residual = a_full - a_reconstructed
 
-        LOGGER.info("MuJoCo Superposition Test:")
-        LOGGER.info(f"  a_full = {a_full}")
-        LOGGER.info(f"  a_drift = {a_drift}")
-        LOGGER.info(f"  a_control = {a_control}")
-        LOGGER.info(f"  residual = {residual}")
+        logger.info("MuJoCo Superposition Test:")
+        logger.info(f"  a_full = {a_full}")
+        logger.info(f"  a_drift = {a_drift}")
+        logger.info(f"  a_control = {a_control}")
+        logger.info(f"  residual = {residual}")
 
         assert np.max(np.abs(residual)) < SUPERPOSITION_TOLERANCE, (
             f"MuJoCo drift-control superposition failed: "
@@ -346,7 +346,7 @@ class TestIndexedAccelerationClosure:
         # Verify percentages are non-negative and reasonable
         for component, percentage in percentages.items():
             assert percentage >= 0.0, f"{component} has negative percentage"
-            LOGGER.info(f"  {component}: {percentage:.1f}%")
+            logger.info(f"  {component}: {percentage:.1f}%")
 
 
 class TestCrossEngineDriftControl:
@@ -409,5 +409,5 @@ class TestCrossEngineDriftControl:
             ), f"{engine_name} returned empty control acceleration"
 
         except Exception as e:
-            LOGGER.warning(f"{engine_name} failed to load URDF: {e}")
+            logger.warning(f"{engine_name} failed to load URDF: {e}")
             # This is acceptable - we've at least verified the interface exists

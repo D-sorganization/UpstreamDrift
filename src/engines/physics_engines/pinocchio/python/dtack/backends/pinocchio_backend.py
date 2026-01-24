@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 import typing
 from pathlib import Path
 
@@ -58,7 +58,7 @@ except ImportError:
                 raise ImportError(msg)
 
     pin = DummyPin()
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class PinocchioBackend:

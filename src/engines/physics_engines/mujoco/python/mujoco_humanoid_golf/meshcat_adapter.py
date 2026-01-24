@@ -1,4 +1,4 @@
-import logging
+from src.shared.python.logging_config import get_logger
 import os
 import webbrowser
 from typing import Any
@@ -15,7 +15,7 @@ try:
 except ImportError:
     meshcat = None
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MuJoCoMeshcatAdapter:

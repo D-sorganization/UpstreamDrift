@@ -13,7 +13,7 @@ Tests:
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -22,7 +22,7 @@ import pytest
 if TYPE_CHECKING:
     from src.shared.python.interfaces import PhysicsEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Tolerance for numerical comparisons
 ACCELERATION_TOLERANCE = 1e-6  # [rad/s² or m/s²]

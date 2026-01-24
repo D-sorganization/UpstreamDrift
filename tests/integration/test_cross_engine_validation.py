@@ -9,7 +9,7 @@ of the Project Design Guidelines.
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from typing import Any
 
 import numpy as np
@@ -24,7 +24,7 @@ from tests.fixtures.fixtures_lib import (
     skip_if_insufficient_engines,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class TestCrossEngineValidator:

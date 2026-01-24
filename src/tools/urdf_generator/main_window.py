@@ -1,6 +1,6 @@
 """Main window for the Interactive URDF Generator."""
 
-import logging
+from src.shared.python.logging_config import get_logger
 import sys
 from pathlib import Path
 from typing import Any
@@ -22,7 +22,7 @@ from .segment_panel import SegmentPanel
 from .urdf_builder import URDFBuilder
 from .visualization_widget import VisualizationWidget
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class URDFGeneratorWindow(QMainWindow):

@@ -14,7 +14,7 @@ Example:
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -28,7 +28,7 @@ from src.shared.python.ai.types import ConversationContext, ExpertiseLevel, Tool
 
 UTC = timezone.utc  # noqa: UP017
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class StepStatus(Enum):

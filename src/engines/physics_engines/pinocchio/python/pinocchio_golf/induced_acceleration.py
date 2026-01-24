@@ -1,9 +1,9 @@
-import logging
+from src.shared.python.logging_config import get_logger
 
 import numpy as np
 import pinocchio as pin
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class InducedAccelerationAnalyzer:

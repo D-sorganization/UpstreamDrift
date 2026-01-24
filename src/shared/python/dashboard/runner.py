@@ -5,7 +5,7 @@ Handles the simulation loop, timing, and recording updates.
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 import time
 
 from PyQt6 import QtCore
@@ -13,7 +13,7 @@ from PyQt6 import QtCore
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
 from src.shared.python.interfaces import PhysicsEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class SimulationRunner(QtCore.QThread):
@@ -58,7 +58,7 @@ class SimulationRunner(QtCore.QThread):
         # Assuming engine handles its own timestep in step() if dt=None
         # But for synchronization we sleep.
 
-        LOGGER.info("Simulation started.")
+        logger.info("Simulation started.")
         self.status_message.emit("Simulation running...")
 
         while self.running and self.step_count < self.max_steps:
@@ -79,7 +79,7 @@ class SimulationRunner(QtCore.QThread):
                     self.frame_ready.emit()
 
                 except Exception as e:
-                    LOGGER.error("Simulation error: %s", e)
+                    logger.error("Simulation error: %s", e)
                     self.status_message.emit(f"Error: {e}")
                     break
 
@@ -94,7 +94,7 @@ class SimulationRunner(QtCore.QThread):
         self.running = False
         self.simulation_finished.emit()
         self.status_message.emit("Simulation finished.")
-        LOGGER.info("Simulation finished.")
+        logger.info("Simulation finished.")
 
     def stop(self) -> None:
         """Stop the simulation."""

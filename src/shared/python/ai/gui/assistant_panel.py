@@ -9,7 +9,7 @@ responses with markdown rendering.
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 
 # Python 3.10 compatibility: UTC was added in 3.11
 from datetime import datetime, timezone
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
 
 from src.shared.python.ai.types import ConversationContext, ExpertiseLevel
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MessageWidget(QFrame):

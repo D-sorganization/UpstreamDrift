@@ -15,7 +15,7 @@ Usage:
 """
 
 import json
-import logging
+from src.shared.python.logging_config import get_logger
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -47,7 +47,7 @@ try:
 except ImportError:
     THEME_AVAILABLE = False
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Default preferences file location
 PREFS_DIR = Path.home() / ".golf_modeling_suite"

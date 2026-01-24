@@ -9,13 +9,13 @@ design guidelines Section F. It decomposes motion and acceleration into:
 Reference: docs/assessments/project_design_guidelines.qmd Section F
 """
 
-import logging
+from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass
 
 import mujoco
 import numpy as np
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

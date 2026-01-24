@@ -1,10 +1,10 @@
 import json
-import logging
+from src.shared.python.logging_config import get_logger
 from pathlib import Path
 
 import mujoco
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class AdvancedGuiMethodsMixin:

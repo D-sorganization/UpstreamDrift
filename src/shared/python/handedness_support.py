@@ -20,7 +20,7 @@ which flips the Y coordinate.
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING
@@ -30,7 +30,7 @@ import numpy as np
 if TYPE_CHECKING:
     pass
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Threshold for determining if joint axis is aligned with Y-axis (mirror plane normal)
 # A value of 0.9 means ~25° from Y-axis is considered "aligned"
@@ -325,7 +325,7 @@ def detect_handedness_from_metadata(
         return Handedness.LEFT_HANDED
 
     # Default to right-handed
-    LOGGER.debug("No handedness metadata found, defaulting to right-handed")
+    logger.debug("No handedness metadata found, defaulting to right-handed")
     return Handedness.RIGHT_HANDED
 
 

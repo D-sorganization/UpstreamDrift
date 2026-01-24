@@ -13,7 +13,7 @@ Per Guideline O3:
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
@@ -22,7 +22,7 @@ import numpy as np
 if TYPE_CHECKING:
     from shared.python.interfaces import PhysicsEngine
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Conservation tolerances from Guideline O3
 ENERGY_DRIFT_TOLERANCE_PCT = 1.0  # [%]

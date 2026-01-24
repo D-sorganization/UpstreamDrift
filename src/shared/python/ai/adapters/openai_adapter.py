@@ -20,7 +20,7 @@ Example:
 from __future__ import annotations
 
 import json
-import logging
+from src.shared.python.logging_config import get_logger
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
@@ -42,7 +42,7 @@ from src.shared.python.ai.types import (
     ToolCall,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # OpenAI configuration defaults
 OPENAI_DEFAULT_MODEL = "gpt-4-turbo-preview"

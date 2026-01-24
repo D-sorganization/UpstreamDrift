@@ -19,7 +19,7 @@ Example:
 from __future__ import annotations
 
 import inspect
-import logging
+from src.shared.python.logging_config import get_logger
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum, auto
@@ -28,7 +28,7 @@ from typing import Any, get_type_hints
 from src.shared.python.ai.exceptions import ToolExecutionError
 from src.shared.python.ai.types import ToolResult
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ToolCategory(Enum):

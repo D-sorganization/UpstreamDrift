@@ -18,7 +18,7 @@ for shaft modeling. Physics engine integration is separate.
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum, auto
@@ -29,7 +29,7 @@ import numpy as np
 if TYPE_CHECKING:
     pass
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Standard golf shaft parameters
 SHAFT_LENGTH_DRIVER = 1.168  # [m] 46" driver shaft
@@ -546,7 +546,7 @@ def create_shaft_model(
         model = ModalShaftModel()
     else:
         # Finite element not yet fully implemented
-        LOGGER.warning("FE model not fully implemented, using modal")
+        logger.warning("FE model not fully implemented, using modal")
         model = ModalShaftModel()
 
     model.initialize(properties)

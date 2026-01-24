@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 import os
 from collections.abc import Callable
 from pathlib import Path
@@ -39,7 +39,7 @@ def get_cv2() -> Any:
     return CV2_LIB
 
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 MIN_CAMERA_DEPTH: Final[float] = 0.1
 FORCE_VISUALIZATION_THRESHOLD: Final[float] = 1e-5
 
@@ -129,7 +129,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
         try:
             self.meshcat_adapter = MuJoCoMeshcatAdapter()
         except Exception:
-            LOGGER.warning("Could not initialize Meshcat adapter")
+            logger.warning("Could not initialize Meshcat adapter")
 
         self.telemetry: TelemetryRecorder | None = None
 
@@ -226,7 +226,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             is_file: True if xml_source is a path, False if string content.
         """
         if self.loader_thread and self.loader_thread.isRunning():
-            LOGGER.warning("Model loading already in progress.")
+            logger.warning("Model loading already in progress.")
             return
 
         self.timer.stop()
@@ -243,7 +243,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
     def _on_model_loaded_async(self, model: Any, data: Any, error_msg: str) -> None:
         """Handle completion of async model loading."""
         if error_msg:
-            LOGGER.error("Async load failed: %s", error_msg)
+            logger.error("Async load failed: %s", error_msg)
             self.label.setText(f"Error loading model: {error_msg}")
             self.loading_finished.emit(False)
             return
@@ -252,7 +252,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             self._finalize_model_load(model, data)
             self.loading_finished.emit(True)
         except Exception as e:
-            LOGGER.error("Finalization failed: %s", e)
+            logger.error("Finalization failed: %s", e)
             self.label.setText(f"Error initializing renderer: {e}")
             self.loading_finished.emit(False)
 
@@ -316,7 +316,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             new_data = mujoco.MjData(new_model)
             self._finalize_model_load(new_model, new_data)
         except Exception as e:
-            LOGGER.error("Sync load failed: %s", e)
+            logger.error("Sync load failed: %s", e)
             raise
 
     def load_model_from_file(self, xml_path: str) -> None:
@@ -335,7 +335,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             new_data = mujoco.MjData(new_model)
             self._finalize_model_load(new_model, new_data)
         except Exception as e:
-            LOGGER.error("Sync load failed: %s", e)
+            logger.error("Sync load failed: %s", e)
             raise
 
     def reset_state(self) -> None:
@@ -782,7 +782,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
                 )
 
         except Exception as e:
-            LOGGER.warning(f"Failed to compute ellipsoids: {e}")
+            logger.warning(f"Failed to compute ellipsoids: {e}")
 
     # -------- Internal stepping / rendering --------
 
@@ -999,7 +999,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
         cv2 = get_cv2()
         if cv2 is None:
-            LOGGER.warning("OpenCV not installed, cannot draw force/torque overlays.")
+            logger.warning("OpenCV not installed, cannot draw force/torque overlays.")
             return rgb
 
         img = rgb.copy()
@@ -1337,7 +1337,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
 
             if body_id is not None:
                 body_name = self.manipulator.get_body_name(body_id)
-                LOGGER.debug("Selected body via mouse: %s (id=%s)", body_name, body_id)
+                logger.debug("Selected body via mouse: %s (id=%s)", body_name, body_id)
                 self._render_once()
             else:
                 self.last_mouse_pos = (x, y)
@@ -1448,7 +1448,7 @@ class MuJoCoSimWidget(QtWidgets.QWidget):
             body_name = self.manipulator.get_body_name(
                 self.manipulator.selected_body_id,
             )
-            LOGGER.debug("Released body via mouse: %s", body_name)
+            logger.debug("Released body via mouse: %s", body_name)
             self.manipulator.deselect_body()
             self._render_once()
 

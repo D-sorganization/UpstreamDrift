@@ -12,14 +12,14 @@ Refactored to use shared engine availability module (DRY principle).
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 
 import numpy as np
 import pytest
 
 from src.shared.python.engine_availability import MYOSUITE_AVAILABLE
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @pytest.fixture
@@ -52,12 +52,12 @@ class TestMyoSuiteMuscleAnalyzer:
 
             # Should have identified some muscles
             assert len(analyzer.muscle_names) > 0, "No muscles found"
-            LOGGER.info(
+            logger.info(
                 f"Found {len(analyzer.muscle_names)} muscles: {analyzer.muscle_names}"
             )
 
         except Exception as e:
-            LOGGER.warning(f"MyoSuite environment test failed: {e}")
+            logger.warning(f"MyoSuite environment test failed: {e}")
             pytest.skip("Could not load MyoSuite environment")
 
     def test_muscle_activation_extraction(self, myosuite_env_available):
@@ -83,7 +83,7 @@ class TestMyoSuiteMuscleAnalyzer:
             # Activations should be in [0, 1]
             assert np.all(activations >= 0.0) and np.all(activations <= 1.0)
 
-            LOGGER.info(f"Muscle activations: {activations}")
+            logger.info(f"Muscle activations: {activations}")
 
         except Exception as e:
             pytest.skip(f"Activation test failed: {e}")
@@ -115,7 +115,7 @@ class TestMyoSuiteMuscleAnalyzer:
             # At least some muscles should have non-zero force
             assert np.any(forces != 0.0), "All muscle forces are zero"
 
-            LOGGER.info(f"Muscle forces: {forces}")
+            logger.info(f"Muscle forces: {forces}")
 
         except Exception as e:
             pytest.skip(f"Force test failed: {e}")
@@ -143,7 +143,7 @@ class TestMyoSuiteMuscleAnalyzer:
 
             # Log moment arm values
             for muscle_name, r in list(moment_arms.items())[:3]:  # First 3 muscles
-                LOGGER.info(f"Moment arms for {muscle_name}: {r}")
+                logger.info(f"Moment arms for {muscle_name}: {r}")
 
         except Exception as e:
             pytest.skip(f"Moment arm test failed: {e}")
@@ -178,7 +178,7 @@ class TestMyoSuiteMuscleAnalyzer:
             non_zero_count = sum(1 for a in induced.values() if not np.allclose(a, 0.0))
             assert non_zero_count > 0, "All induced accelerations are zero"
 
-            LOGGER.info(
+            logger.info(
                 f"Non-zero induced accelerations: {non_zero_count}/{len(induced)}"
             )
 
@@ -216,10 +216,10 @@ class TestMyoSuiteMuscleAnalyzer:
             assert len(analysis.joint_torques) > 0
             assert len(analysis.total_muscle_torque) > 0
 
-            LOGGER.info("Analysis complete:")
-            LOGGER.info(f"  Muscles: {len(analysis.muscle_state.muscle_names)}")
-            LOGGER.info(f"  Total torque: {analysis.total_muscle_torque}")
-            LOGGER.info(
+            logger.info("Analysis complete:")
+            logger.info(f"  Muscles: {len(analysis.muscle_state.muscle_names)}")
+            logger.info(f"  Total torque: {analysis.total_muscle_torque}")
+            logger.info(
                 f"  Activation power: {list(analysis.activation_power.values())[:3]}"
             )
 
@@ -256,7 +256,7 @@ class TestMyoSuiteGripModel:
             # Get grip muscles
             grip_muscles = grip_model.get_grip_muscles()
 
-            LOGGER.info(f"Grip muscles found: {grip_muscles}")
+            logger.info(f"Grip muscles found: {grip_muscles}")
 
             # May or may not have grip muscles depending on model
             # Just verify interface works
@@ -295,7 +295,7 @@ class TestMyoSuiteGripModel:
             # Compute grip force
             total_force = grip_model.compute_total_grip_force()
 
-            LOGGER.info(f"Total grip force: {total_force:.1f} N")
+            logger.info(f"Total grip force: {total_force:.1f} N")
 
             # Should be positive with activation
             assert total_force >= 0.0
@@ -322,7 +322,7 @@ class TestMyoSuiteEngine:
 
             assert len(a_drift) > 0, "Drift acceleration is empty"
 
-            LOGGER.info(f"Drift acceleration: {a_drift}")
+            logger.info(f"Drift acceleration: {a_drift}")
 
             # Compute control
             nv = len(a_drift)
@@ -331,7 +331,7 @@ class TestMyoSuiteEngine:
 
             assert len(a_control) == nv
 
-            LOGGER.info(f"Control acceleration: {a_control}")
+            logger.info(f"Control acceleration: {a_control}")
 
         except Exception as e:
             pytest.skip(f"Drift-control test failed: {e}")
@@ -352,7 +352,7 @@ class TestMyoSuiteEngine:
             assert analyzer is not None, "Analyzer should be available"
             assert len(analyzer.muscle_names) > 0
 
-            LOGGER.info(f"Analyzer muscles: {analyzer.muscle_names}")
+            logger.info(f"Analyzer muscles: {analyzer.muscle_names}")
 
         except Exception as e:
             pytest.skip(f"Analyzer integration test failed: {e}")
@@ -381,7 +381,7 @@ class TestMyoSuiteEngine:
             muscle_name = analyzer.muscle_names[0]
             engine.set_muscle_activations({muscle_name: 0.8})
 
-            LOGGER.info(f"Set {muscle_name} activation to 0.8")
+            logger.info(f"Set {muscle_name} activation to 0.8")
 
             # Verify it was set (by checking control vector)
             if (
@@ -405,11 +405,11 @@ class TestCrossValidation:
         """Section K2: Compare MyoSuite vs OpenSim muscle forces."""
         # This test requires both engines with comparable models
         # Placeholder for future cross-validation
-        LOGGER.info("Cross-validation: Placeholder for MyoSuite ↔ OpenSim comparison")
+        logger.info("Cross-validation: Placeholder for MyoSuite ↔ OpenSim comparison")
         pytest.skip("Cross-validation test pending matching models")
 
     def test_grip_force_validation(self):
         """Section K1 + J1: Compare grip forces across engines."""
         # Grip force should agree within ±15% (Section K2)
-        LOGGER.info("Grip cross-validation: Placeholder")
+        logger.info("Grip cross-validation: Placeholder")
         pytest.skip("Pending multi-engine grip models")

@@ -1,6 +1,6 @@
 """Physics validation for complex (multi-body) models."""
 
-import logging
+from src.shared.python.logging_config import get_logger
 from pathlib import Path
 
 import numpy as np
@@ -8,7 +8,7 @@ import pytest
 
 from src.shared.python.engine_manager import EngineManager, EngineType
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Locate the repository root
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent

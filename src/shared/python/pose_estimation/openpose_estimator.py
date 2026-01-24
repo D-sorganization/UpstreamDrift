@@ -4,7 +4,7 @@ This module provides a production-ready wrapper around the pyopenpose library,
 implementing the standardized PoseEstimator interface.
 """
 
-import logging
+from src.shared.python.logging_config import get_logger
 import time
 from pathlib import Path
 from typing import Any, ClassVar
@@ -23,7 +23,7 @@ from src.shared.python.pose_estimation.interface import (
     PoseEstimator,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class OpenPoseEstimator(PoseEstimator):

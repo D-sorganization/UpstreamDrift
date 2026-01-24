@@ -6,13 +6,13 @@ Provides muscle-driven simulation capabilities matching OpenSim analysis.
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 try:
     import mujoco

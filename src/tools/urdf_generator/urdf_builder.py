@@ -1,6 +1,6 @@
 """URDF builder for creating and managing URDF content."""
 
-import logging
+from src.shared.python.logging_config import get_logger
 import math
 from enum import Enum
 from xml.etree.ElementTree import Element, SubElement, tostring
@@ -8,7 +8,7 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 import defusedxml.minidom as minidom
 import numpy as np
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Default moment of inertia value (kg·m²) used when inertia parameters are not specified.
 # This value (0.1 kg·m²) represents a reasonable default for small-to-medium rigid bodies

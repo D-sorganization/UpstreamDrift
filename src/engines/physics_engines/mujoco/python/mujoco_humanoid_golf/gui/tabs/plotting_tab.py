@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 import typing
 
 import numpy as np
@@ -12,7 +12,7 @@ from ...sim_widget import MuJoCoSimWidget
 if typing.TYPE_CHECKING:
     from ..advanced_gui import AdvancedGolfAnalysisWindow
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class PlottingTab(QtWidgets.QWidget):

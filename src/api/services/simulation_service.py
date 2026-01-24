@@ -1,6 +1,6 @@
 """Simulation service for Golf Modeling Suite API."""
 
-import logging
+from src.shared.python.logging_config import get_logger
 from typing import Any
 
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
@@ -10,7 +10,7 @@ from src.shared.python.engine_registry import EngineType
 from ..models.requests import SimulationRequest
 from ..models.responses import SimulationResponse
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class SimulationService:

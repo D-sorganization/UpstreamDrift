@@ -15,13 +15,13 @@ Usage:
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass, field
 from typing import Any
 
 import numpy as np
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -53,7 +53,7 @@ class MockPhysicsEngine:
         self._velocities = np.zeros(self.num_joints)
         self._accelerations = np.zeros(self.num_joints)
         self._torques = np.zeros(self.num_joints)
-        LOGGER.info("MockPhysicsEngine initialized with %d joints", self.num_joints)
+        logger.info("MockPhysicsEngine initialized with %d joints", self.num_joints)
 
     # =========================================================================
     # PhysicsEngine Protocol Implementation
@@ -65,7 +65,7 @@ class MockPhysicsEngine:
         Args:
             model_path: Path to model file (ignored in mock)
         """
-        LOGGER.info("MockPhysicsEngine: Loading model from %s", model_path)
+        logger.info("MockPhysicsEngine: Loading model from %s", model_path)
         self._is_loaded = True
         self.model_name = model_path
 
@@ -125,7 +125,7 @@ class MockPhysicsEngine:
         """
         self._positions = np.array(positions)
         self._velocities = np.array(velocities)
-        LOGGER.debug("State set: pos=%s, vel=%s", positions, velocities)
+        logger.debug("State set: pos=%s, vel=%s", positions, velocities)
 
     def set_joint_positions(self, positions: np.ndarray) -> None:
         """Set joint positions.
@@ -158,7 +158,7 @@ class MockPhysicsEngine:
                 idx = hash(joint_name) % self.num_joints
             self._torques[idx] = torque
         except (ValueError, IndexError) as e:
-            LOGGER.warning("Failed to apply torque to %s: %s", joint_name, e)
+            logger.warning("Failed to apply torque to %s: %s", joint_name, e)
 
     def set_control(self, torques: list[float] | np.ndarray) -> None:
         """Set control torques for all joints.
@@ -182,7 +182,7 @@ class MockPhysicsEngine:
         self._velocities = np.zeros(self.num_joints)
         self._accelerations = np.zeros(self.num_joints)
         self._torques = np.zeros(self.num_joints)
-        LOGGER.info("MockPhysicsEngine reset")
+        logger.info("MockPhysicsEngine reset")
 
     # =========================================================================
     # Additional Methods for Compatibility

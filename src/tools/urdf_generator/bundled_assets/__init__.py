@@ -16,11 +16,11 @@ Usage:
 from __future__ import annotations
 
 import json
-import logging
+from src.shared.python.logging_config import get_logger
 from pathlib import Path
 from typing import Any
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Directory containing bundled assets
 BUNDLED_ASSETS_DIR = Path(__file__).parent

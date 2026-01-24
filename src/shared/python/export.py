@@ -10,13 +10,13 @@ Supports:
 from __future__ import annotations
 
 import importlib.util
-import logging
+from src.shared.python.logging_config import get_logger
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Import optional dependencies with fallbacks
 try:
@@ -45,7 +45,7 @@ def export_to_matlab(
 ) -> bool:
     """Export recording to MATLAB .mat format."""
     if not SCIPY_AVAILABLE:
-        LOGGER.error("scipy required for MATLAB export (pip install scipy)")
+        logger.error("scipy required for MATLAB export (pip install scipy)")
         return False
 
     try:
@@ -83,7 +83,7 @@ def export_to_matlab(
         return True
 
     except Exception as e:
-        LOGGER.error(f"Failed to export to MATLAB: {e}")
+        logger.error(f"Failed to export to MATLAB: {e}")
         return False
 
 
@@ -94,7 +94,7 @@ def export_to_hdf5(
 ) -> bool:
     """Export recording to HDF5 format."""
     if not H5PY_AVAILABLE:
-        LOGGER.error("h5py required for HDF5 export (pip install h5py)")
+        logger.error("h5py required for HDF5 export (pip install h5py)")
         return False
 
     # Compression threshold: only compress arrays larger than this
@@ -145,7 +145,7 @@ def export_to_hdf5(
         return True
 
     except Exception as e:
-        LOGGER.error(f"Failed to export to HDF5: {e}")
+        logger.error(f"Failed to export to HDF5: {e}")
         return False
 
 
@@ -161,7 +161,7 @@ def export_to_c3d(
 ) -> bool:
     """Export recording to C3D motion capture format."""
     if not EZC3D_AVAILABLE and not C3D_AVAILABLE:
-        LOGGER.error("ezc3d or c3d required for C3D export (pip install ezc3d)")
+        logger.error("ezc3d or c3d required for C3D export (pip install ezc3d)")
         return False
 
     if units is None:
@@ -171,11 +171,11 @@ def export_to_c3d(
         # Implementation skipped for brevity in this generic transfer,
         # normally would import from the engine's implementation or replicate here.
         # For robustness, we return False if not implemented or fallback to a simple dummy.
-        LOGGER.warning("C3D export generic implementation pending.")
+        logger.warning("C3D export generic implementation pending.")
         return False
 
     except Exception as e:
-        LOGGER.error(f"Failed to export to C3D: {e}")
+        logger.error(f"Failed to export to C3D: {e}")
         return False
 
 
@@ -270,7 +270,7 @@ def export_recording_all_formats(
             results[fmt] = success
 
         except Exception as e:
-            LOGGER.error(f"Export format {fmt} failed: {e}")
+            logger.error(f"Export format {fmt} failed: {e}")
             results[fmt] = False
 
     return results

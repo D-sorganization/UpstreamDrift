@@ -9,7 +9,7 @@ Provides a unified interface for:
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
@@ -27,7 +27,7 @@ from src.shared.python.interfaces import PhysicsEngine
 from src.shared.python.plotting import GolfSwingPlotter, MplCanvas
 from src.shared.python.statistical_analysis import StatisticalAnalyzer
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class UnifiedDashboardWindow(QtWidgets.QMainWindow):
@@ -228,7 +228,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
                 if names:
                     return names
             except Exception as e:
-                LOGGER.warning(f"Failed to get joint names from engine: {e}")
+                logger.warning(f"Failed to get joint names from engine: {e}")
 
         return []
 
@@ -384,7 +384,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
         except Exception as e:
             ax = self.static_canvas.fig.add_subplot(111)
             ax.text(0.5, 0.5, f"Plot Error: {e}", ha="center", va="center")
-            LOGGER.error(f"Error generating static plot '{plot_type}': {e}")
+            logger.error(f"Error generating static plot '{plot_type}': {e}")
 
         self.static_canvas.draw()
 
@@ -395,7 +395,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
             self.runner.stop()
             self.runner.wait()
             self.status_label.setText("Simulation stopped for analysis.")
-            LOGGER.info("Stopped simulation for analysis safety.")
+            logger.info("Stopped simulation for analysis safety.")
 
         self.status_label.setText("Computing analysis... (may take a moment)")
         QtWidgets.QApplication.setOverrideCursor(QtCore.Qt.CursorShape.WaitCursor)
@@ -406,7 +406,7 @@ class UnifiedDashboardWindow(QtWidgets.QMainWindow):
             self.status_label.setText("Analysis complete.")
         except Exception as e:
             self.status_label.setText(f"Analysis failed: {e}")
-            LOGGER.error("Analysis error: %s", e)
+            logger.error("Analysis error: %s", e)
         finally:
             QtWidgets.QApplication.restoreOverrideCursor()
             self.btn_compute.setEnabled(True)

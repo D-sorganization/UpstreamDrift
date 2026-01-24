@@ -6,7 +6,7 @@ including human models and golf clubs.
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from typing import Any
 
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -24,7 +24,7 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ModelLoaderDialog(QDialog):

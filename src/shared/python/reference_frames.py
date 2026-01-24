@@ -12,7 +12,7 @@ Also includes Functional Swing Plane (FSP) computation for post-simulation analy
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import TYPE_CHECKING
@@ -22,7 +22,7 @@ import numpy as np
 if TYPE_CHECKING:
     pass
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Geometric computation tolerance
 GEOMETRIC_TOLERANCE = 1e-10  # [unitless] For near-zero vector magnitude checks
@@ -156,7 +156,7 @@ def fit_instantaneous_swing_plane(
     grip_to_club = clubhead_position - grip_position
     grip_axis_length = np.linalg.norm(grip_to_club)
     if grip_axis_length < GEOMETRIC_TOLERANCE:
-        LOGGER.warning("Grip and clubhead positions too close")
+        logger.warning("Grip and clubhead positions too close")
         grip_axis = np.array([0.0, 0.0, 1.0])
     else:
         grip_axis = grip_to_club / grip_axis_length
@@ -164,7 +164,7 @@ def fit_instantaneous_swing_plane(
     # In-plane X is the velocity direction (tangent to swing)
     vel_magnitude = np.linalg.norm(clubhead_velocity)
     if vel_magnitude < GEOMETRIC_TOLERANCE:
-        LOGGER.warning("Clubhead velocity too small for plane fitting")
+        logger.warning("Clubhead velocity too small for plane fitting")
         in_plane_x = np.array([1.0, 0.0, 0.0])
     else:
         in_plane_x = clubhead_velocity / vel_magnitude
@@ -174,7 +174,7 @@ def fit_instantaneous_swing_plane(
     normal_mag = np.linalg.norm(normal)
     if normal_mag < GEOMETRIC_TOLERANCE:
         # Velocity is parallel to shaft - degenerate case
-        LOGGER.warning("Degenerate swing plane: velocity parallel to shaft")
+        logger.warning("Degenerate swing plane: velocity parallel to shaft")
         normal = np.array([0.0, 1.0, 0.0])
     else:
         normal = normal / normal_mag
@@ -225,7 +225,7 @@ def fit_functional_swing_plane(
     window_points = clubhead_trajectory[mask]
 
     if len(window_points) < 3:
-        LOGGER.warning(
+        logger.warning(
             f"Only {len(window_points)} points in FSP window. "
             "Using all available points."
         )
@@ -295,7 +295,7 @@ def decompose_wrench_in_swing_plane(
             - torque_about_grip: Moment about grip axis [N·m]
     """
     if wrench.frame != ReferenceFrame.GLOBAL:
-        LOGGER.warning("Wrench should be in global frame for decomposition")
+        logger.warning("Wrench should be in global frame for decomposition")
 
     f = wrench.force
     tau = wrench.torque

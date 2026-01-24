@@ -7,7 +7,7 @@ Refactored to use shared engine availability module (DRY principle).
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 from typing import Any, cast
 
 import numpy as np
@@ -21,7 +21,7 @@ if PINOCCHIO_AVAILABLE:
 from src.shared.python import constants
 from src.shared.python.interfaces import PhysicsEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
 
@@ -57,7 +57,7 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         """Load model from file path (URDF)."""
         # Pinocchio typically loads URDFs
         if not path.endswith(".urdf"):
-            LOGGER.warning("Pinocchio loader expects URDF, got: %s", path)
+            logger.warning("Pinocchio loader expects URDF, got: %s", path)
 
         try:
             self.model = pin.buildModelFromUrdf(path)
@@ -73,13 +73,13 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             self.time = 0.0
 
         except Exception as e:
-            LOGGER.error("Failed to load Pinocchio model from path %s: %s", path, e)
+            logger.error("Failed to load Pinocchio model from path %s: %s", path, e)
             raise
 
     def load_from_string(self, content: str, extension: str | None = None) -> None:
         """Load model from string content."""
         if extension != "urdf":
-            LOGGER.warning("Pinocchio load_from_string mostly supports URDF.")
+            logger.warning("Pinocchio load_from_string mostly supports URDF.")
 
         try:
             self.model = pin.buildModelFromXML(content)
@@ -93,7 +93,7 @@ class PinocchioPhysicsEngine(PhysicsEngine):
             self.time = 0.0
 
         except Exception as e:
-            LOGGER.error("Failed to load Pinocchio model from string: %s", e)
+            logger.error("Failed to load Pinocchio model from string: %s", e)
             raise
 
     def reset(self) -> None:
@@ -282,7 +282,7 @@ class PinocchioPhysicsEngine(PhysicsEngine):
         # Pinocchio's standard forward dynamics doesn't handle contacts natively
         # without extra setup (e.g. Proximal or KKT).
 
-        LOGGER.warning(
+        logger.warning(
             "PinocchioPhysicsEngine.compute_contact_forces currently returns a "
             "placeholder zero GRF vector. Standard ABA dynamics in Pinocchio do "
             "not compute contact forces without a constraint solver. "
@@ -298,7 +298,7 @@ class PinocchioPhysicsEngine(PhysicsEngine):
 
         # Simplified lookup: Check frame existence first
         if not self.model.existFrame(body_name):
-            LOGGER.warning(f"Body/Frame '{body_name}' not found in Pinocchio model.")
+            logger.warning(f"Body/Frame '{body_name}' not found in Pinocchio model.")
             return None
 
         frame_id = self.model.getFrameId(body_name)

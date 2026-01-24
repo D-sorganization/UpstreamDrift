@@ -7,11 +7,11 @@ and that all required libraries are importable and functional.
 from __future__ import annotations
 
 import importlib
-import logging
+from src.shared.python.logging_config import get_logger
 
 import pytest
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def test_mujoco_import() -> None:

@@ -11,14 +11,14 @@ Refactored to use shared engine availability module (DRY principle).
 
 from __future__ import annotations
 
-import logging
+from src.shared.python.logging_config import get_logger
 
 import numpy as np
 import pytest
 
 from src.shared.python.engine_availability import OPENSIM_AVAILABLE
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Skip entire module if OpenSim not available
 if not OPENSIM_AVAILABLE:
@@ -112,7 +112,7 @@ class TestOpenSimMuscleModels:
 
         # At optimal length with full activation, force should be near maximum
         # (exact value depends on velocity and activation dynamics)
-        LOGGER.info(
+        logger.info(
             f"Muscle force at optimal length: {F_muscle:.1f} N (F_max={F_max:.1f} N)"
         )
 
@@ -143,7 +143,7 @@ class TestOpenSimMuscleModels:
         biceps.setActivation(state, 1.0)
         a_final = biceps.getActivation(state)
 
-        LOGGER.info(f"Activation: {a_initial:.3f} → {a_final:.3f}")
+        logger.info(f"Activation: {a_initial:.3f} → {a_final:.3f}")
 
         assert a_initial == 0.0
         assert a_final == 1.0
@@ -168,7 +168,7 @@ class TestOpenSimMuscleAnalysis:
         # Get muscle forces
         forces = analyzer.get_muscle_forces()
 
-        LOGGER.info(f"Muscle forces: {forces}")
+        logger.info(f"Muscle forces: {forces}")
 
         assert "biceps" in forces
         assert isinstance(forces["biceps"], float)
@@ -189,7 +189,7 @@ class TestOpenSimMuscleAnalysis:
         # Get moment arms
         moment_arms = analyzer.get_moment_arms()
 
-        LOGGER.info(f"Moment arms: {moment_arms}")
+        logger.info(f"Moment arms: {moment_arms}")
 
         assert "biceps" in moment_arms
         # Biceps should have moment arm about shoulder coordinate
@@ -217,7 +217,7 @@ class TestOpenSimMuscleAnalysis:
         # Compute induced accelerations
         induced_accel = analyzer.compute_muscle_induced_accelerations()
 
-        LOGGER.info(f"Induced accelerations: {induced_accel}")
+        logger.info(f"Induced accelerations: {induced_accel}")
 
         assert "biceps" in induced_accel
         assert isinstance(induced_accel["biceps"], np.ndarray)
@@ -240,10 +240,10 @@ class TestOpenSimMuscleAnalysis:
         # Run full analysis
         analysis = analyzer.analyze_all()
 
-        LOGGER.info("Muscle analysis complete:")
-        LOGGER.info(f"  Forces: {analysis.muscle_forces}")
-        LOGGER.info(f"  Activations: {analysis.activation_levels}")
-        LOGGER.info(f"  Total torque: {analysis.total_muscle_torque}")
+        logger.info("Muscle analysis complete:")
+        logger.info(f"  Forces: {analysis.muscle_forces}")
+        logger.info(f"  Activations: {analysis.activation_levels}")
+        logger.info(f"  Total torque: {analysis.total_muscle_torque}")
 
         # Verify all fields populated
         assert len(analysis.muscle_forces) > 0
@@ -324,7 +324,7 @@ class TestOpenSimEngine:
         # Should return non-empty array
         assert len(a_drift) > 0
 
-        LOGGER.info(f"Drift acceleration: {a_drift}")
+        logger.info(f"Drift acceleration: {a_drift}")
 
 
 class TestOpenSimGripModel:
@@ -367,7 +367,7 @@ class TestOpenSimGripModel:
                 radius=0.03,  # 3 cm radius (shaft + hand)
                 length=0.15,  # 15 cm
             )
-            LOGGER.info("Successfully added cylindrical wrap")
+            logger.info("Successfully added cylindrical wrap")
         except Exception as e:
-            LOGGER.info(f"Wrap addition failed (expected for simple model): {e}")
+            logger.info(f"Wrap addition failed (expected for simple model): {e}")
             # This is acceptable - we're testing the interface exists

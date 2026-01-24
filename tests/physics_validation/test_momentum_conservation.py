@@ -1,6 +1,6 @@
 """Physics validation tests verifying momentum conservation."""
 
-import logging
+from src.shared.python.logging_config import get_logger
 from unittest.mock import MagicMock
 
 import numpy as np
@@ -8,7 +8,7 @@ import pytest
 
 from src.shared.python.engine_manager import EngineManager, EngineType
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def is_engine_available(engine_type: EngineType) -> bool:

@@ -1,6 +1,6 @@
 """3D visualization widget for URDF preview."""
 
-import logging
+from src.shared.python.logging_config import get_logger
 import math
 
 from PyQt6.QtCore import QPointF, Qt, QTimer
@@ -8,7 +8,7 @@ from PyQt6.QtGui import QColor, QMouseEvent, QPainter, QPen, QWheelEvent
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class VisualizationWidget(QWidget):
