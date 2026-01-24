@@ -7,10 +7,17 @@ are properly migrated and functional.
 
 import importlib.util
 import sys
+from pathlib import Path
 
-from src.shared.python.path_utils import get_src_root
+# Add project root to path first (script is in scripts/ directory)
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_PROJECT_ROOT = _SCRIPT_DIR.parent
+sys.path.insert(0, str(_PROJECT_ROOT))
+sys.path.insert(0, str(_PROJECT_ROOT / "src"))
 
-# Add suite root to path (script is in scripts/ directory)
+from src.shared.python.path_utils import get_src_root  # noqa: E402
+
+# Add suite root to path
 SUITE_ROOT = get_src_root()
 sys.path.insert(0, str(SUITE_ROOT))
 
