@@ -289,8 +289,11 @@ def setup_import_paths(additional_paths: list[str | Path] | None = None) -> None
             logger.debug(f"Added to sys.path: {path}")
 
 
-def get_simscape_model_path() -> Path:
+def get_simscape_model_path(model_name: str = "3D_Golf_Model") -> Path:
     """Get the path to Simscape model directory.
+
+    Args:
+        model_name: Name of the model directory (default: "3D_Golf_Model")
 
     Returns:
         Path to Simscape model directory
@@ -298,7 +301,14 @@ def get_simscape_model_path() -> Path:
     Example:
         simscape_path = get_simscape_model_path()
     """
-    return get_src_root() / "engines" / "Simscape_Multibody_Models" / "3D_Golf_Model"
+    return (
+        get_src_root()
+        / "engines"
+        / "Simscape_Multibody_Models"
+        / model_name
+        / "python"
+        / "src"
+    )
 
 
 def get_pinocchio_python_root() -> Path:
