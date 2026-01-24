@@ -135,8 +135,8 @@ extend-exclude = '''
   | __pycache__
   | build
   | dist
-  | shared/models/opensim/opensim-models
-  | shared/models/myosuite/myo_sim
+  | shared/models/opensim
+  | shared/models/myosuite
 )/
 '''
 
@@ -157,6 +157,8 @@ exclude = [
     "**/legacy",
     "src/shared/models/opensim/opensim-models/",
     "src/shared/models/myosuite/myo_sim/",
+    "shared/models/opensim/",
+    "shared/models/myosuite/",
 ]
 
 [tool.ruff.lint]

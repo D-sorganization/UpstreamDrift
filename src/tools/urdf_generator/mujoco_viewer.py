@@ -347,13 +347,15 @@ class MuJoCoViewerWidget(QWidget):
         self._viewport = QLabel()
         self._viewport.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._viewport.setMinimumSize(320, 240)
-        self._viewport.setStyleSheet("""
+        self._viewport.setStyleSheet(
+            """
             QLabel {
                 background-color: #2a2a2a;
                 border: 1px solid #444;
                 border-radius: 4px;
             }
-        """)
+        """
+        )
         self._viewport.setMouseTracking(True)
         layout.addWidget(self._viewport, stretch=1)
 
