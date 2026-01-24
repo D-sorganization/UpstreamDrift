@@ -1,7 +1,8 @@
 name: Pragmatic Programmer Review
 
-# Weekly automated code review based on "The Pragmatic Programmer" principles
+# Daily automated code review based on "The Pragmatic Programmer" principles
 # by David Thomas and Andrew Hunt
+# This is a PRIMARY PRIORITY workflow - runs daily to track and address key issues
 
 on:
   workflow_call:
@@ -24,8 +25,8 @@ on:
           - 'false'
           - 'true'
   schedule:
-    # Run weekly on Sundays at 3:00 AM UTC
-    - cron: "0 3 * * 0"
+    # Run daily at 3:00 AM UTC - PRIMARY PRIORITY for tracking key repo issues
+    - cron: "0 3 * * *"
 
 permissions:
   contents: write
