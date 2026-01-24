@@ -257,22 +257,28 @@ def launch_c3d_viewer():
     logger.warning("launch_c3d_viewer is deprecated and removed.")
     return False
 
+
 def launch_gui_launcher():
     return launch_gui()
 
+
 def launch_local_launcher():
     from launchers.golf_suite_launcher import main as local_main
+
     try:
         local_main()
         return True
     except Exception:
         return False
 
+
 def launch_mujoco():
     return _launch_engine("mujoco")
 
+
 def launch_drake():
     return _launch_engine("drake")
+
 
 def launch_pinocchio():
     return _launch_engine("pinocchio")
