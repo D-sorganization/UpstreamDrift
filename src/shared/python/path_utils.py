@@ -102,11 +102,7 @@ def get_simscape_model_path(model_name: str) -> Path:
         ) from None
 
     return (
-        get_engines_root()
-        / "Simscape_Multibody_Models"
-        / model_name
-        / "python"
-        / "src"
+        get_engines_root() / "Simscape_Multibody_Models" / model_name / "python" / "src"
     )
 
 
