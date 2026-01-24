@@ -45,11 +45,11 @@ except ImportError:
             logger.setLevel(logging.INFO)
         return logger
 
-    def setup_logging(level: int = logging.INFO) -> None:
+    def setup_logging(level: int = logging.INFO) -> None:  # type: ignore[misc]
         """Setup basic logging configuration."""
         logging.basicConfig(level=level, format=LOG_FORMAT)
 
-    def set_seeds(seed: int = DEFAULT_SEED) -> None:
+    def set_seeds(seed: int = DEFAULT_SEED) -> None:  # type: ignore[misc]
         """Set random seeds for reproducibility."""
         if seed < 0:
             raise ValueError("expected non-negative integer for seed")
@@ -61,7 +61,7 @@ except ImportError:
         except ImportError:
             pass
 
-    def log_execution_time(func: F) -> F:
+    def log_execution_time(func: F) -> F:  # type: ignore[misc]
         """Decorator to log function execution time."""
         import functools
         import time
