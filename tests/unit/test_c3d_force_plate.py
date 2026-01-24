@@ -5,26 +5,18 @@ Implements Guideline E5: Ground Reaction Forces.
 
 from __future__ import annotations
 
-import sys
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from src.shared.python.path_utils import get_repo_root
+from src.shared.python.path_utils import get_simscape_model_path, setup_import_paths
 
-# Try direct import first; fall back to path manipulation if not in PYTHONPATH
-try:
-    from c3d_reader import C3DDataReader, C3DMetadata
-except ImportError:
-    # Development path when running tests directly
-    SRC_PATH = get_repo_root() / (
-        "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src"
-    )
-    if str(SRC_PATH) not in sys.path:
-        sys.path.insert(0, str(SRC_PATH))
-    from c3d_reader import C3DDataReader, C3DMetadata  # noqa: E402
+# Setup import path using centralized utility
+setup_import_paths(additional_paths=[get_simscape_model_path()])
+
+from c3d_reader import C3DDataReader, C3DMetadata  # noqa: E402
 
 
 class TestForcePlateChannelDetection:
