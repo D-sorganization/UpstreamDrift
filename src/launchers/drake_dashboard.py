@@ -26,7 +26,7 @@ def main() -> None:
 
     if not model_path:
         # Ensure QApplication exists for QFileDialog
-        app = get_qapp()
+        get_qapp()
 
         dialog = QFileDialog()
         dialog.setNameFilter("Model Files (*.urdf *.sdf *.xml)")

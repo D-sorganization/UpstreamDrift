@@ -9,12 +9,11 @@ These tests demonstrate proper integration testing:
 """
 
 import sys
-from pathlib import Path
-from src.shared.python.path_utils import get_repo_root, get_src_root
-
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+from src.shared.python.path_utils import get_repo_root, get_src_root
 
 # Add project root to path
 project_root = get_repo_root()

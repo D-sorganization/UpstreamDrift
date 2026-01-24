@@ -7,9 +7,8 @@ are properly migrated and functional.
 
 import importlib.util
 import sys
-from pathlib import Path
-from src.shared.python.path_utils import get_repo_root, get_src_root
 
+from src.shared.python.path_utils import get_src_root
 
 # Add suite root to path (script is in scripts/ directory)
 SUITE_ROOT = get_src_root()

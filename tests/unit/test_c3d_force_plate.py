@@ -6,14 +6,13 @@ Implements Guideline E5: Ground Reaction Forces.
 from __future__ import annotations
 
 import sys
-from pathlib import Path
-from src.shared.python.path_utils import get_repo_root, get_src_root
-
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
 import pytest
+
+from src.shared.python.path_utils import get_repo_root
 
 # Try direct import first; fall back to path manipulation if not in PYTHONPATH
 try:

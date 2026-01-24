@@ -7,13 +7,12 @@ instead of mocks to test actual integration.
 """
 
 import sys
-from pathlib import Path
-from src.shared.python.path_utils import get_repo_root, get_src_root
-
 from typing import Any
 from unittest.mock import Mock
 
 import pytest
+
+from src.shared.python.path_utils import get_repo_root
 
 # Add the project root to the path for imports
 project_root = get_repo_root()

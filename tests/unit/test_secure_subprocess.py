@@ -4,9 +4,9 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from src.shared.python.path_utils import get_repo_root, get_src_root
-
 from unittest.mock import MagicMock, patch
+
+from src.shared.python.path_utils import get_repo_root
 
 # Add project root to path
 project_root = get_repo_root()

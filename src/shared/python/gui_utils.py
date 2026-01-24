@@ -60,7 +60,7 @@ def get_qapp(args: list[str] | None = None) -> QApplication:
         app.exec()
     """
     app = get_qapp()
-        logger.debug("Created new QApplication instance")
+    logger.debug("Created new QApplication instance")
     return app
 
 

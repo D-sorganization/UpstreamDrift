@@ -7,10 +7,9 @@ Tests Docker container setup, PYTHONPATH configuration, and module accessibility
 
 import subprocess
 import unittest
-from pathlib import Path
-from src.shared.python.path_utils import get_repo_root, get_src_root
-
 from unittest.mock import MagicMock, Mock, patch
+
+from src.shared.python.path_utils import get_src_root
 
 
 def _is_docker_available() -> bool:

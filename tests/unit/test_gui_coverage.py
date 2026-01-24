@@ -16,6 +16,7 @@ from src.shared.python.engine_availability import (
     MUJOCO_AVAILABLE,
     PYQT6_AVAILABLE,
 )
+from src.shared.python.gui_utils import get_qapp
 
 if PYQT6_AVAILABLE:
     pass

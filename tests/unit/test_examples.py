@@ -1,10 +1,10 @@
 import importlib.util
 import sys
 from pathlib import Path
-from src.shared.python.path_utils import get_repo_root, get_src_root
-
 from typing import Any
 from unittest.mock import patch
+
+from src.shared.python.path_utils import get_repo_root
 
 # Add project root to path
 project_root = get_repo_root()

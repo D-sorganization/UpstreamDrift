@@ -6,6 +6,7 @@ scientific computations.
 Note: Logging setup now delegates to the centralized logging_config module.
 """
 
+import logging
 import random
 
 from src.shared.python.engine_availability import PYTORCH_AVAILABLE

@@ -15,6 +15,7 @@ from typing import Any
 from unittest.mock import MagicMock, Mock, patch
 
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.gui_utils import get_qapp
 from src.shared.python.path_utils import setup_import_paths
 
 # Setup import paths for testing
@@ -34,7 +35,7 @@ class TestDragDropFunctionality(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
-        app = get_qapp()  # Simplified with utility
+        get_qapp()  # Simplified with utility
 
     def setUp(self) -> None:
         """Set up test fixtures."""
@@ -188,7 +189,7 @@ class TestGridLayout(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         """Set up QApplication for GUI tests."""
-        app = get_qapp()  # Simplified with utility
+        get_qapp()  # Simplified with utility
 
     def test_grid_columns_constant(self) -> None:
         """Test that grid columns is set to 4."""

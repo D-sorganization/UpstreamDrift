@@ -7,9 +7,8 @@ import json
 import re
 import subprocess
 from datetime import datetime
-from pathlib import Path
-from src.shared.python.path_utils import get_repo_root, get_src_root
 
+from src.shared.python.path_utils import get_src_root
 
 # Setup paths
 REPO_ROOT = get_src_root()

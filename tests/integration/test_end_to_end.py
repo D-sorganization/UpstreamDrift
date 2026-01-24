@@ -7,11 +7,10 @@ ensuring the suite works in real-world scenarios.
 import importlib.util
 import subprocess
 import sys
-from pathlib import Path
-from src.shared.python.path_utils import get_repo_root, get_src_root
-
 
 import pytest
+
+from src.shared.python.path_utils import get_repo_root
 
 # Check PyQt6 availability for launcher tests
 PYQT6_AVAILABLE = importlib.util.find_spec("PyQt6") is not None

@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.gui_utils import get_qapp
 
 
 class TestSharedModuleLazyImports:
@@ -69,7 +70,7 @@ class TestPolynomialGeneratorLazyImport:
         from PyQt6.QtWidgets import QMainWindow
 
         # Ensure QApplication exists
-        app = get_qapp()
+        get_qapp()
 
         launcher = QMainWindow()
         # Use type ignore to avoid MyPy attribute errors

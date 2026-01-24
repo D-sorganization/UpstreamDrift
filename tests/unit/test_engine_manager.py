@@ -6,9 +6,9 @@ Unit tests for EngineManager functionality.
 import sys
 import tempfile
 from pathlib import Path
-from src.shared.python.path_utils import get_repo_root, get_src_root
-
 from unittest.mock import MagicMock, patch
+
+from src.shared.python.path_utils import get_repo_root
 
 project_root = get_repo_root()
 sys.path.insert(0, str(project_root))
