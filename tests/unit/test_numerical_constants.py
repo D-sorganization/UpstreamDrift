@@ -1,11 +1,9 @@
-import sys
-from pathlib import Path
+"""Unit tests for numerical constants.
 
-# Ensure repo root is in path
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[2]),
-)
+Refactored to use centralized conftest.py for path setup (DRY principle).
+"""
+
+# Path setup is now centralized in tests/conftest.py
 
 from src.shared.python.numerical_constants import (
     CONDITION_NUMBER_CRITICAL_THRESHOLD,

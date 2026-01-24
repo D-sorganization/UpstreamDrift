@@ -6,20 +6,16 @@ Tests all seven flight models for:
 3. Physical plausibility (carry, height, time bounds)
 4. Wind effects
 5. Model comparison consistency
+
+Refactored to use centralized conftest.py for path setup (DRY principle).
 """
 
 import math
-import sys
-from pathlib import Path
 
 import numpy as np
 import pytest
 
-# Add shared directory to path
-sys.path.insert(
-    0, str(Path(__file__).parent.parent.parent / "src" / "shared" / "python")
-)
-
+# Path setup is now centralized in tests/conftest.py
 from flight_models import (
     BallantyneModel,
     BallFlightModel,

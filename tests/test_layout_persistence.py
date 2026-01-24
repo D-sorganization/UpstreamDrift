@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
-"""
-Test suite for launcher layout persistence functionality.
+"""Test suite for launcher layout persistence functionality.
 
 Tests cover:
 - Layout saving and loading
 - Model order persistence
 - Window geometry persistence
 - Configuration file handling
+
+Refactored to use centralized conftest.py for path setup (DRY principle).
 """
 
 import json
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import Mock
 
-# Add shared modules to path for testing
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
+# Path setup is now centralized in tests/conftest.py
 
 try:
     # Check if PyQt6 is available for GUI tests

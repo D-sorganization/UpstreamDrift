@@ -1,9 +1,13 @@
+"""Unit tests for Drake physics engine wrapper.
+
+Refactored to use centralized conftest.py for path setup (DRY principle).
+"""
+
 import sys
 import unittest
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-# Mock pydrake structure before import
+# Mock pydrake structure before import (must happen before any imports that use pydrake)
 mock_pydrake = MagicMock()
 sys.modules["pydrake"] = mock_pydrake
 sys.modules["pydrake.systems"] = MagicMock()
@@ -16,8 +20,7 @@ sys.modules["pydrake.geometry"] = MagicMock()
 sys.modules["pydrake.math"] = MagicMock()
 sys.modules["pydrake.all"] = MagicMock()
 
-# Add repo root to path
-sys.path.insert(0, str(Path(__file__).parents[2]))
+# Path setup is now centralized in tests/conftest.py
 
 try:
     from src.engines.physics_engines.drake.python.drake_physics_engine import (

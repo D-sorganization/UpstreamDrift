@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
-"""
-Test suite for Pinocchio ecosystem integration (Pinocchio, Pink, Crocoddyl).
+"""Test suite for Pinocchio ecosystem integration (Pinocchio, Pink, Crocoddyl).
 
 Tests cover:
 - Package availability and imports
 - Basic functionality verification
 - Integration between packages
 - Docker environment compatibility
+
+Refactored to use centralized conftest.py for path setup (DRY principle).
 """
 
-import sys
 import unittest
 from pathlib import Path
 
-# Add shared modules to path for testing
-sys.path.insert(0, str(Path(__file__).parent.parent / "shared" / "python"))
+# Path setup is now centralized in tests/conftest.py
 
 
 class TestPinocchioEcosystem(unittest.TestCase):

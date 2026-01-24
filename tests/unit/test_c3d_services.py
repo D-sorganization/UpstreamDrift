@@ -1,11 +1,19 @@
-"""Unit tests for C3D services."""
+"""Unit tests for C3D services.
 
-import sys
+Refactored to use centralized conftest.py for path setup (DRY principle).
+"""
+
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
+
+# Path setup is now centralized in tests/conftest.py
+# PyQt6 availability can be checked via the pyqt6_available fixture
+
+# Get SRC_PATH for error messages (now provided by conftest)
+SRC_PATH = Path(__file__).resolve().parents[2] / "src" / "engines" / "Simscape_Multibody_Models" / "3D_Golf_Model" / "python" / "src"
 
 # Check for PyQt6 GUI library availability
 try:
@@ -14,22 +22,6 @@ try:
     PYQT6_AVAILABLE = True
 except (ImportError, OSError):
     PYQT6_AVAILABLE = False
-
-# Add source directory to path to handle "3D_Golf_Model" invalid identifier issue
-# Repo root is assumed to be current working directory of test runner
-REPO_ROOT = Path(__file__).resolve().parents[2]  # tests/unit -> tests -> root
-SRC_PATH = (
-    REPO_ROOT
-    / "src"
-    / "engines"
-    / "Simscape_Multibody_Models"
-    / "3D_Golf_Model"
-    / "python"
-    / "src"
-)
-
-if str(SRC_PATH) not in sys.path:
-    sys.path.insert(0, str(SRC_PATH))
 
 # Now we can import apps.*
 try:

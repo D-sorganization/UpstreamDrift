@@ -152,6 +152,36 @@ try:
 except ImportError:
     pass
 
+# Check PyArrow (for parquet support)
+PYARROW_AVAILABLE: bool = False
+try:
+    import pyarrow  # noqa: F401
+
+    PYARROW_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check FastParquet (alternative parquet support)
+FASTPARQUET_AVAILABLE: bool = False
+try:
+    import fastparquet  # noqa: F401
+
+    FASTPARQUET_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check tables/pytables (for HDF5 support)
+HDF5_AVAILABLE: bool = False
+try:
+    import tables  # noqa: F401
+
+    HDF5_AVAILABLE = True
+except ImportError:
+    pass
+
+# Convenience flags
+PARQUET_AVAILABLE: bool = PYARROW_AVAILABLE or FASTPARQUET_AVAILABLE
+
 # Mapping of engine names to availability flags
 _ENGINE_FLAGS: dict[str, bool] = {
     "mujoco": MUJOCO_AVAILABLE,
@@ -169,6 +199,11 @@ _ENGINE_FLAGS: dict[str, bool] = {
     "openpose": OPENPOSE_AVAILABLE,
     "scipy": SCIPY_AVAILABLE,
     "matplotlib": MATPLOTLIB_AVAILABLE,
+    "pyarrow": PYARROW_AVAILABLE,
+    "fastparquet": FASTPARQUET_AVAILABLE,
+    "parquet": PARQUET_AVAILABLE,
+    "hdf5": HDF5_AVAILABLE,
+    "tables": HDF5_AVAILABLE,  # Alias
 }
 
 

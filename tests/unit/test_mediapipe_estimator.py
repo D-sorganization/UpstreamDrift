@@ -1,4 +1,8 @@
-import sys
+"""Unit tests for MediaPipe pose estimator.
+
+Refactored to use centralized conftest.py for path setup (DRY principle).
+"""
+
 from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -6,11 +10,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-# Ensure repo root is in path
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[2]),
-)
+# Path setup is now centralized in tests/conftest.py
 
 # Skip entire module if cv2 is not available (optional dependency)
 cv2 = pytest.importorskip("cv2", reason="OpenCV (cv2) not installed")

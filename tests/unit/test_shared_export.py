@@ -1,5 +1,9 @@
+"""Unit tests for shared export functionality.
+
+Refactored to use centralized conftest.py for path setup (DRY principle).
+"""
+
 import json
-import sys
 from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -7,12 +11,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-# Ensure repo root is in path
-sys.path.insert(
-    0,
-    str(Path(__file__).resolve().parents[2]),
-)
-
+# Path setup is now centralized in tests/conftest.py
 from src.shared.python.export import (
     export_recording_all_formats,
     export_to_hdf5,

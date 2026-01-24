@@ -1,5 +1,6 @@
-"""
-Unit tests for shared.python.output_manager module.
+"""Unit tests for shared.python.output_manager module.
+
+Refactored to use shared engine_availability module (DRY principle).
 """
 
 import json
@@ -13,6 +14,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from src.shared.python.engine_availability import HDF5_AVAILABLE, PARQUET_AVAILABLE
 from src.shared.python.output_manager import (
     OutputFormat,
     OutputManager,
@@ -21,29 +23,15 @@ from src.shared.python.output_manager import (
 )
 
 
-def _has_parquet_support():
+# Use centralized availability checks (DRY principle)
+def _has_parquet_support() -> bool:
     """Check if parquet support is available."""
-    try:
-        import pyarrow  # noqa: F401
-
-        return True
-    except ImportError:
-        try:
-            import fastparquet  # noqa: F401
-
-            return True
-        except ImportError:
-            return False
+    return PARQUET_AVAILABLE
 
 
-def _has_hdf5_support():
+def _has_hdf5_support() -> bool:
     """Check if HDF5 support is available."""
-    try:
-        import tables  # noqa: F401
-
-        return True
-    except ImportError:
-        return False
+    return HDF5_AVAILABLE
 
 
 @pytest.fixture

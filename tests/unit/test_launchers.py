@@ -1,5 +1,6 @@
-"""
-Unit tests for launcher functionality.
+"""Unit tests for launcher functionality.
+
+Refactored to use centralized conftest.py for path setup (DRY principle).
 """
 
 import os
@@ -9,9 +10,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-# Add the project root to the path for imports
-project_root = Path(__file__).parent.parent.parent
-sys.path.insert(0, str(project_root))
+# Path setup is now centralized in tests/conftest.py
 
 
 class TestLauncherModule:

@@ -1,10 +1,10 @@
 """Integration tests for C3D workflow: Ingest -> Analysis -> GUI.
 
 TEST-004: Added @pytest.mark.integration markers for test categorization.
+
+Refactored to use centralized conftest.py for path setup (DRY principle).
 """
 
-import sys
-from pathlib import Path
 from unittest.mock import patch
 
 import numpy as np
@@ -14,19 +14,7 @@ import pytest
 # Mark all tests in this file as integration tests
 pytestmark: list[pytest.MarkDecorator] = [pytest.mark.integration]
 
-# Add source path for imports
-# Adjust based on repository root
-REPO_ROOT = Path(__file__).resolve().parents[2]
-SRC_PATH = (
-    REPO_ROOT
-    / "engines"
-    / "Simscape_Multibody_Models"
-    / "3D_Golf_Model"
-    / "python"
-    / "src"
-)
-if str(SRC_PATH) not in sys.path:
-    sys.path.insert(0, str(SRC_PATH))
+# Path setup is now centralized in tests/conftest.py
 
 try:
     from apps.c3d_viewer import C3DDataModel, C3DViewerMainWindow

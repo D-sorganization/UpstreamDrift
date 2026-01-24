@@ -31,10 +31,9 @@ if TYPE_CHECKING:
     from typing import Any
 
 from src.shared.python.engine_availability import MUJOCO_AVAILABLE
+from src.shared.python.physics_constants import GRAVITY_M_S2
 
 logger = logging.getLogger(__name__)
-
-GRAVITY_M_S2 = 9.810
 
 # MuJoCo is optional - gracefully handle missing
 if MUJOCO_AVAILABLE:
