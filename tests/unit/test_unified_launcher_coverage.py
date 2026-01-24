@@ -3,13 +3,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-# Check for PyQt6 GUI library availability
-try:
-    from PyQt6 import QtWidgets  # noqa: F401
-
-    PYQT6_AVAILABLE = True
-except (ImportError, OSError):
-    PYQT6_AVAILABLE = False
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
 
 pytestmark = pytest.mark.skipif(
     not PYQT6_AVAILABLE, reason="PyQt6 GUI libraries not available"

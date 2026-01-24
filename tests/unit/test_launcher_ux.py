@@ -1,28 +1,18 @@
 #!/usr/bin/env python3
-"""
-Test suite for Golf Modeling Suite UX improvements.
-"""
+"""Test suite for Golf Modeling Suite UX improvements."""
 
-import sys
 import unittest
-from pathlib import Path
 from typing import cast
 from unittest.mock import Mock, patch  # noqa: F401
 
-# Add repo root to sys.path to allow importing modules
-REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-sys.path.insert(0, str(REPO_ROOT))
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
 
-try:
+if PYQT6_AVAILABLE:
     from PyQt6.QtCore import Qt  # noqa: F401
     from PyQt6.QtWidgets import QApplication, QLabel, QPushButton, QWidget  # noqa: F401
 
-    PYQT_AVAILABLE = True
-except ImportError:
-    PYQT_AVAILABLE = False
 
-
-@unittest.skipUnless(PYQT_AVAILABLE, "PyQt6 not available")
+@unittest.skipUnless(PYQT6_AVAILABLE, "PyQt6 not available")
 class TestGolfLauncherUX(unittest.TestCase):
     """Test UX improvements in GolfLauncher."""
 

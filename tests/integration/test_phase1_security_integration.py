@@ -16,6 +16,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
 from src.shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,
@@ -25,12 +26,9 @@ from src.shared.python.secure_subprocess import (
 )
 
 # GolfLauncher requires PyQt6, import conditionally
-try:
+if PYQT6_AVAILABLE:
     from src.launchers.golf_launcher import GolfLauncher
-
-    PYQT6_AVAILABLE = True
-except (ImportError, OSError):
-    PYQT6_AVAILABLE = False
+else:
     GolfLauncher = None  # type: ignore[misc, assignment]
 
 
