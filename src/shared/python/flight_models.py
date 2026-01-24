@@ -22,29 +22,35 @@ from enum import Enum
 import numpy as np
 from scipy.integrate import solve_ivp
 
+from .physics_constants import (
+    AIR_DENSITY_SEA_LEVEL_KG_M3,
+    GOLF_BALL_CROSS_SECTIONAL_AREA_M2,
+    GOLF_BALL_DIAMETER_M,
+    GOLF_BALL_MASS_KG,
+    GOLF_BALL_RADIUS_M,
+    GRAVITY_M_S2,
+    MIN_SPEED_THRESHOLD_M_S,
+    NUMERICAL_EPSILON,
+)
+
 logger = logging.getLogger(__name__)
 
 # =============================================================================
-# Physical Constants
+# Physical Constants (re-exported from centralized module for compatibility)
 # =============================================================================
 
 # Golf ball physical properties (USGA regulations)
-GOLF_BALL_MASS = 0.0459  # [kg] Maximum mass
-GOLF_BALL_DIAMETER = 0.04267  # [m] Minimum diameter
-GOLF_BALL_RADIUS = GOLF_BALL_DIAMETER / 2  # [m]
-GOLF_BALL_AREA = math.pi * GOLF_BALL_RADIUS**2  # [m²] Cross-sectional area
+GOLF_BALL_MASS: float = float(GOLF_BALL_MASS_KG)
+GOLF_BALL_DIAMETER: float = float(GOLF_BALL_DIAMETER_M)
+GOLF_BALL_RADIUS: float = float(GOLF_BALL_RADIUS_M)
+GOLF_BALL_AREA: float = float(GOLF_BALL_CROSS_SECTIONAL_AREA_M2)
 
 # Standard atmospheric conditions
-STD_AIR_DENSITY = 1.225  # [kg/m³] At sea level, 15°C
-STD_GRAVITY = 9.81  # [m/s²]
+STD_AIR_DENSITY: float = float(AIR_DENSITY_SEA_LEVEL_KG_M3)
+STD_GRAVITY: float = float(GRAVITY_M_S2)
 
 # Numerical constants
-# Minimum speed threshold for aerodynamic calculations [m/s]
-# Below this speed, aerodynamic forces are negligible and we avoid division by zero.
-MIN_SPEED_THRESHOLD: float = 0.1  # [m/s]
-
-# Small epsilon for numerical stability in vector normalization
-NUMERICAL_EPSILON: float = 1e-10
+MIN_SPEED_THRESHOLD: float = float(MIN_SPEED_THRESHOLD_M_S)
 
 
 class FlightModelType(Enum):

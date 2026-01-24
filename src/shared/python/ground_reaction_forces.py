@@ -24,6 +24,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
+from .physics_constants import GRAVITY_M_S2
+
 if TYPE_CHECKING:
     from shared.python.interfaces import PhysicsEngine
 
@@ -34,8 +36,8 @@ GRF_MAGNITUDE_TOLERANCE = 0.05  # 5% relative tolerance
 COP_POSITION_TOLERANCE_MM = 10.0  # 10 mm absolute tolerance [mm]
 ANGULAR_IMPULSE_TOLERANCE = 0.10  # 10% relative tolerance
 
-# Physical constants
-GRAVITY_MAGNITUDE = 9.80665  # [m/s²] Source: WGS84 standard
+# Physical constants (re-exported from centralized module)
+GRAVITY_MAGNITUDE: float = float(GRAVITY_M_S2)
 
 
 class FootSide(Enum):

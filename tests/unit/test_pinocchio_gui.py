@@ -5,6 +5,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
+
+if PYQT6_AVAILABLE:
+    from PyQt6 import QtWidgets
+
 
 @pytest.fixture(autouse=True, scope="module")
 def mock_pinocchio_gui_dependencies():
@@ -22,17 +27,7 @@ def mock_pinocchio_gui_dependencies():
         yield
 
 
-# Import after mocking
-# Check if PyQt6 is available, else skip
-try:
-    from PyQt6 import QtWidgets
-
-    HAS_QT = True
-except ImportError:
-    HAS_QT = False
-
-
-@pytest.mark.skipif(not HAS_QT, reason="PyQt6 not available")
+@pytest.mark.skipif(not PYQT6_AVAILABLE, reason="PyQt6 not available")
 class TestPinocchioGUI:
     """Test Pinocchio GUI."""
 
