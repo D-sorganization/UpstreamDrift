@@ -14,8 +14,6 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from src.shared.python.engine_availability import PYQT6_AVAILABLE, skip_if_unavailable
 from src.shared.python.secure_subprocess import (
     SecureSubprocessError,

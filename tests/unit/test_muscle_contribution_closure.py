@@ -21,7 +21,10 @@ import typing
 import numpy as np
 import pytest
 
-from src.shared.python.engine_availability import MYOSUITE_AVAILABLE, skip_if_unavailable
+from src.shared.python.engine_availability import (
+    MYOSUITE_AVAILABLE,
+    skip_if_unavailable,
+)
 
 if MYOSUITE_AVAILABLE:
     from src.engines.physics_engines.myosuite.python.myosuite_physics_engine import (

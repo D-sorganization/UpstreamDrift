@@ -11,7 +11,7 @@ import numpy.typing as npt
 import pytest
 
 from src.c3d_reader import C3DDataReader, C3DEvent, load_tour_average_reader
-from src.shared.python.engine_availability import EZC3D_AVAILABLE, skip_if_unavailable
+from src.shared.python.engine_availability import skip_if_unavailable
 
 # Skip tests if ezc3d is not available (e.g., Python 3.9)
 pytestmark = skip_if_unavailable("ezc3d")
