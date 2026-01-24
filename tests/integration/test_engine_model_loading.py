@@ -67,7 +67,9 @@ def test_pinocchio_loads_default_model(
 
 
 @patch("src.shared.python.engine_probes.DrakeProbe.probe")
-@patch("src.engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine")
+@patch(
+    "src.engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine"
+)
 def test_drake_loads_default_model(
     mock_drake_engine_cls, mock_probe, mock_engine_manager
 ):

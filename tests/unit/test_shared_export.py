@@ -92,7 +92,9 @@ class TestSharedExport:
         self, tmp_path: Path, sample_data: dict[str, Any]
     ) -> None:
         """Test exception handling during export."""
-        with patch("src.shared.python.export.savemat", side_effect=Exception("Disk full")):
+        with patch(
+            "src.shared.python.export.savemat", side_effect=Exception("Disk full")
+        ):
             with patch("src.shared.python.export.SCIPY_AVAILABLE", True):
                 success = export_to_matlab(str(tmp_path / "test.mat"), sample_data)
                 assert success is False

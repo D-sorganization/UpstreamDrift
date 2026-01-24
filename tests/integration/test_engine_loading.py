@@ -80,7 +80,9 @@ def test_mujoco_loading_failure_missing_dependency(mock_probe, mock_engine_manag
         "pydrake.geometry": MagicMock(),
     },
 )
-@patch("src.engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine")
+@patch(
+    "src.engines.physics_engines.drake.python.drake_physics_engine.DrakePhysicsEngine"
+)
 @patch("src.shared.python.engine_probes.DrakeProbe.probe")
 def test_drake_loading_success(mock_probe, mock_drake_class, mock_engine_manager):
     """Test successful Drake loading."""

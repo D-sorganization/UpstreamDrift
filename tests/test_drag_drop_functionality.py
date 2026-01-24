@@ -352,7 +352,9 @@ class TestC3DViewerIntegration(unittest.TestCase):
             patch("src.launchers.golf_launcher.logger") as mock_logger,
             patch("src.launchers.golf_launcher.QMessageBox"),
             patch("src.launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
-            patch("src.shared.python.secure_subprocess.secure_popen") as mock_secure_popen,
+            patch(
+                "src.shared.python.secure_subprocess.secure_popen"
+            ) as mock_secure_popen,
         ):
             # Setup script path mock
             mock_script_path.exists.return_value = True
@@ -475,12 +477,16 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
 
         # Mock the URDF generator script path and subprocess
         with (
-            patch("src.shared.python.constants.URDF_GENERATOR_SCRIPT") as mock_script_path,
+            patch(
+                "src.shared.python.constants.URDF_GENERATOR_SCRIPT"
+            ) as mock_script_path,
             patch("src.launchers.golf_launcher.os.name", "nt"),
             patch("src.launchers.golf_launcher.logger") as mock_logger,
             patch("src.launchers.golf_launcher.QMessageBox"),
             patch("src.launchers.golf_launcher.CREATE_NEW_CONSOLE", 0x00000010),
-            patch("src.shared.python.secure_subprocess.secure_popen") as mock_secure_popen,
+            patch(
+                "src.shared.python.secure_subprocess.secure_popen"
+            ) as mock_secure_popen,
         ):
             # Setup script path mock
             mock_script_path.exists.return_value = True
