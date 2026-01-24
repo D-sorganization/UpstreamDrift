@@ -9,6 +9,10 @@ Usage:
         EngineNotAvailableError,
         ConfigurationError,
         ValidationError,
+        EnvironmentError,
+        IOError,
+        FileNotFoundIOError,
+        FileParseError,
         format_import_error,
         format_file_error,
     )
@@ -348,3 +352,170 @@ def handle_import_error(
         raise ImportError(message)
 
     return False
+
+
+# ============================================================================
+# Additional Exception Classes (consolidated from other modules)
+# ============================================================================
+
+
+class EnvironmentError(ConfigurationError):
+    """Raised when an environment variable is missing or invalid.
+
+    Consolidated from env_validator.py.
+    """
+
+    def __init__(
+        self,
+        var_name: str,
+        reason: str | None = None,
+        expected: str | None = None,
+        actual: str | None = None,
+    ):
+        super().__init__(
+            config_key=var_name,
+            reason=reason or "Environment variable not set or invalid",
+            expected=expected,
+            actual=actual,
+        )
+        self.var_name = var_name
+
+
+class IOError(GolfSuiteError):
+    """Base exception for I/O related errors.
+
+    Consolidated from io_utils.py.
+    """
+
+    def __init__(self, message: str, path: Path | str | None = None):
+        self.path = Path(path) if path else None
+        if self.path:
+            message = f"{message}: {self.path}"
+        super().__init__(message)
+
+
+class FileNotFoundIOError(IOError):
+    """Raised when a required file is not found.
+
+    Consolidated from io_utils.py.
+    """
+
+    def __init__(self, path: Path | str, context: str | None = None):
+        self.context = context
+        message = "File not found"
+        if context:
+            message = f"{context}: file not found"
+        super().__init__(message, path)
+
+
+class FileParseError(IOError):
+    """Raised when a file cannot be parsed.
+
+    Consolidated from io_utils.py.
+    """
+
+    def __init__(
+        self,
+        path: Path | str,
+        format_type: str,
+        details: str | None = None,
+    ):
+        self.format_type = format_type
+        self.details = details
+        message = f"Failed to parse {format_type} file"
+        if details:
+            message += f": {details}"
+        super().__init__(message, path)
+
+
+class PhysicalValidationError(ValidationError):
+    """Raised when physical plausibility validation fails.
+
+    Used for physics simulation parameter validation.
+    """
+
+    def __init__(
+        self,
+        field: str,
+        value: Any = None,
+        physical_constraint: str | None = None,
+    ):
+        super().__init__(
+            field=field,
+            value=value,
+            reason=physical_constraint or "Physical constraint violated",
+        )
+        self.physical_constraint = physical_constraint
+
+
+class DataFormatError(GolfSuiteError):
+    """Raised when data format is invalid or incompatible.
+
+    Consolidated from core.py and other modules.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        expected_format: str | None = None,
+        actual_format: str | None = None,
+    ):
+        self.expected_format = expected_format
+        self.actual_format = actual_format
+
+        if expected_format and actual_format:
+            message += f". Expected: {expected_format}, got: {actual_format}"
+        elif expected_format:
+            message += f". Expected format: {expected_format}"
+
+        super().__init__(message)
+
+
+class TimeoutError(GolfSuiteError):
+    """Raised when an operation times out.
+
+    Used for simulation and subprocess timeouts.
+    """
+
+    def __init__(
+        self,
+        operation: str,
+        timeout_seconds: float,
+        details: str | None = None,
+    ):
+        self.operation = operation
+        self.timeout_seconds = timeout_seconds
+        self.details = details
+
+        message = f"Operation '{operation}' timed out after {timeout_seconds}s"
+        if details:
+            message += f": {details}"
+
+        super().__init__(message)
+
+
+class ResourceError(GolfSuiteError):
+    """Raised when a required resource is unavailable.
+
+    Used for GPU, memory, or other resource allocation issues.
+    """
+
+    def __init__(
+        self,
+        resource_type: str,
+        reason: str | None = None,
+    ):
+        self.resource_type = resource_type
+        self.reason = reason
+
+        message = f"Resource '{resource_type}' unavailable"
+        if reason:
+            message += f": {reason}"
+
+        super().__init__(message)
+
+
+# Aliases for backwards compatibility
+EnvironmentValidationError = EnvironmentError
+IOUtilsError = IOError
+FileNotFoundError_ = FileNotFoundIOError  # Underscore to avoid shadowing builtin
