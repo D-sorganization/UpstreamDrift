@@ -10,12 +10,13 @@ It supports both Kinematic (J * J.T) and Dynamic (Mass-weighted) formulations.
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass
 from typing import Literal
 
 import mujoco
 import numpy as np
+
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

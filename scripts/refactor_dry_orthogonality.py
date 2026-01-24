@@ -22,7 +22,6 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple
 
 # Add repo root to path
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -95,7 +94,9 @@ class DRYRefactorer:
             if content != original_content:
                 file_path.write_text(content, encoding="utf-8")
                 self.changes_made += 1
-                logger.info(f"✓ Refactored logging in {file_path.relative_to(self.repo_root)}")
+                logger.info(
+                    f"✓ Refactored logging in {file_path.relative_to(self.repo_root)}"
+                )
                 return True
 
             return False
@@ -115,7 +116,10 @@ class DRYRefactorer:
             patterns = [
                 (r"Path\(__file__\)\.resolve\(\)\.parents\[3\]", "get_repo_root()"),
                 (r"Path\(__file__\)\.resolve\(\)\.parents\[2\]", "get_src_root()"),
-                (r"Path\(__file__\)\.parent\.parent\.parent\.resolve\(\)", "get_repo_root()"),
+                (
+                    r"Path\(__file__\)\.parent\.parent\.parent\.resolve\(\)",
+                    "get_repo_root()",
+                ),
                 (r"Path\(__file__\)\.parent\.parent\.resolve\(\)", "get_src_root()"),
             ]
 
@@ -125,11 +129,16 @@ class DRYRefactorer:
                     content = re.sub(pattern, replacement, content)
                     needs_import = True
 
-            if needs_import and "from src.shared.python.path_utils import" not in content:
+            if (
+                needs_import
+                and "from src.shared.python.path_utils import" not in content
+            ):
                 # Add import after other imports
                 import_line = "\nfrom src.shared.python.path_utils import get_repo_root, get_src_root\n"
                 # Find last import statement
-                import_match = list(re.finditer(r"^(?:from|import) .+$", content, re.MULTILINE))
+                import_match = list(
+                    re.finditer(r"^(?:from|import) .+$", content, re.MULTILINE)
+                )
                 if import_match:
                     last_import = import_match[-1]
                     insert_pos = last_import.end()
@@ -138,7 +147,9 @@ class DRYRefactorer:
             if content != original_content:
                 file_path.write_text(content, encoding="utf-8")
                 self.changes_made += 1
-                logger.info(f"✓ Refactored paths in {file_path.relative_to(self.repo_root)}")
+                logger.info(
+                    f"✓ Refactored paths in {file_path.relative_to(self.repo_root)}"
+                )
                 return True
 
             return False
@@ -179,7 +190,9 @@ def refactor_logging_phase(repo_root: Path) -> int:
     for directory in directories:
         if directory.exists():
             logger.info(f"\nProcessing {directory.relative_to(repo_root)}...")
-            changes = refactorer.process_directory(directory, refactorer.refactor_logging_imports)
+            changes = refactorer.process_directory(
+                directory, refactorer.refactor_logging_imports
+            )
             total_changes += changes
 
     logger.info(f"\n✓ Phase 1 complete: {total_changes} files refactored")
@@ -204,7 +217,9 @@ def refactor_paths_phase(repo_root: Path) -> int:
     for directory in directories:
         if directory.exists():
             logger.info(f"\nProcessing {directory.relative_to(repo_root)}...")
-            changes = refactorer.process_directory(directory, refactorer.refactor_path_patterns)
+            changes = refactorer.process_directory(
+                directory, refactorer.refactor_path_patterns
+            )
             total_changes += changes
 
     logger.info(f"\n✓ Phase 2 complete: {total_changes} files refactored")
@@ -213,7 +228,9 @@ def refactor_paths_phase(repo_root: Path) -> int:
 
 def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(description="Refactor DRY and orthogonality violations")
+    parser = argparse.ArgumentParser(
+        description="Refactor DRY and orthogonality violations"
+    )
     parser.add_argument(
         "--phase",
         choices=["all", "logging", "paths"],

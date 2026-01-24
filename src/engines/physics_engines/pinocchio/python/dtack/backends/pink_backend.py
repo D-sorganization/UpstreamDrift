@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 import typing
 from pathlib import Path
+
+from src.shared.python.logging_config import get_logger
 
 if typing.TYPE_CHECKING:
     import numpy as np

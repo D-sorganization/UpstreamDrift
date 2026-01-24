@@ -5,13 +5,13 @@ Handles the simulation loop, timing, and recording updates.
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 import time
 
 from PyQt6 import QtCore
 
 from src.shared.python.dashboard.recorder import GenericPhysicsRecorder
 from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

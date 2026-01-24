@@ -5,7 +5,6 @@ Verifies that drift + control = full dynamics for all physics engines.
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from typing import Any
 
 import numpy as np
@@ -16,6 +15,7 @@ from src.shared.python.indexed_acceleration import (
     AccelerationClosureError,
     compute_indexed_acceleration_from_engine,
 )
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

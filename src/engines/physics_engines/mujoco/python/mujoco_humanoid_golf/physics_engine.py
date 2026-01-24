@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 import os
 import tempfile
 from pathlib import Path
@@ -10,6 +9,7 @@ import mujoco
 import numpy as np
 
 from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.logging_config import get_logger
 from src.shared.python.security_utils import validate_path
 
 logger = get_logger(__name__)

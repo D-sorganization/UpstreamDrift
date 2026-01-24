@@ -7,12 +7,12 @@ Refactored to use shared engine availability module (DRY principle).
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from typing import Any, cast
 
 import numpy as np
 
 from src.shared.python.engine_availability import DRAKE_AVAILABLE
+from src.shared.python.logging_config import get_logger
 
 # Pydrake imports - only import if available
 if DRAKE_AVAILABLE:

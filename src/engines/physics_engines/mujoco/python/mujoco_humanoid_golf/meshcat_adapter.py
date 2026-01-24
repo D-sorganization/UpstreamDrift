@@ -1,4 +1,3 @@
-from src.shared.python.logging_config import get_logger
 import os
 import webbrowser
 from typing import Any
@@ -7,6 +6,7 @@ import mujoco
 import numpy as np
 
 from src.shared.python.biomechanics_data import BiomechanicalData
+from src.shared.python.logging_config import get_logger
 
 try:
     import meshcat

@@ -9,10 +9,11 @@ modifying existing code.
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
+
+from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

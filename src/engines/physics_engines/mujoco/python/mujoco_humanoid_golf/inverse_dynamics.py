@@ -13,12 +13,13 @@ torques from desired motion. Includes:
 from __future__ import annotations
 
 import csv
-from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass
 
 import mujoco
 import numpy as np
 from scipy.linalg import lstsq
+
+from src.shared.python.logging_config import get_logger
 
 from .kinematic_forces import KinematicForceAnalyzer, MjDataContext
 

@@ -5,7 +5,6 @@ Refactored to use shared engine availability module (DRY principle).
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 import os
 from typing import Any
 
@@ -13,6 +12,7 @@ import numpy as np
 
 from src.shared.python.engine_availability import OPENSIM_AVAILABLE
 from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.logging_config import get_logger
 
 # Configure logging
 logger = get_logger(__name__)

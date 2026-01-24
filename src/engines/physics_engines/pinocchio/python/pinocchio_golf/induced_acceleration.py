@@ -1,7 +1,7 @@
-from src.shared.python.logging_config import get_logger
-
 import numpy as np
 import pinocchio as pin
+
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

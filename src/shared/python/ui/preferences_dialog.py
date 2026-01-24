@@ -15,7 +15,6 @@ Usage:
 """
 
 import json
-from src.shared.python.logging_config import get_logger
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -35,6 +34,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
     from PyQt6.QtWidgets import QMainWindow

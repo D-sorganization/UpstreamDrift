@@ -1,11 +1,12 @@
 """Security utilities for authentication and authorization."""
 
-from src.shared.python.logging_config import get_logger
 import os
 import secrets
 
 # Python 3.10 compatibility: UTC was added in 3.11
 from datetime import datetime, timedelta, timezone
+
+from src.shared.python.logging_config import get_logger
 
 try:
     from datetime import UTC

@@ -6,7 +6,6 @@ There is NO demo or fallback mode - if OpenSim is not available,
 explicit errors will be raised to prevent displaying incorrect data.
 """
 
-from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -14,6 +13,7 @@ from typing import Any
 import numpy as np
 
 from src.shared.python import constants
+from src.shared.python.logging_config import get_logger
 
 # Configure logging
 logger = get_logger(__name__)

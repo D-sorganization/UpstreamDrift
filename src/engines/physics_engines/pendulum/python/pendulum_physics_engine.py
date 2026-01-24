@@ -5,8 +5,6 @@ Wraps the standalone DoublePendulumDynamics to implement the PhysicsEngine proto
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
-
 import numpy as np
 
 from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pendulum import (
@@ -14,6 +12,7 @@ from src.engines.pendulum_models.python.double_pendulum_model.physics.double_pen
     DoublePendulumState,
 )
 from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

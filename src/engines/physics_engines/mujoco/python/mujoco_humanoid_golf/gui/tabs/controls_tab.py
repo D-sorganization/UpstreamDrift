@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 import typing
 from collections.abc import Callable
 from datetime import datetime
@@ -8,6 +7,8 @@ from pathlib import Path
 from typing import Any
 
 from PyQt6 import QtCore, QtWidgets
+
+from src.shared.python.logging_config import get_logger
 
 from ...control_system import ControlSystem, ControlType
 from ...sim_widget import MuJoCoSimWidget

@@ -17,11 +17,12 @@ Use BundledAssets from bundled_assets/ for local models.
 from __future__ import annotations
 
 import json
-from src.shared.python.logging_config import get_logger
 import math
 import urllib.request
 from pathlib import Path
 from typing import Any
+
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

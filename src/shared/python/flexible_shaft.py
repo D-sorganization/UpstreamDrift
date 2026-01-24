@@ -18,13 +18,14 @@ for shaft modeling. Physics engine integration is separate.
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import TYPE_CHECKING
 
 import numpy as np
+
+from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
     pass

@@ -13,7 +13,6 @@ All models implement the BallFlightModel protocol for interoperability.
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -21,6 +20,8 @@ from enum import Enum
 
 import numpy as np
 from scipy.integrate import solve_ivp
+
+from src.shared.python.logging_config import get_logger
 
 from .physics_constants import (
     AIR_DENSITY_SEA_LEVEL_KG_M3,

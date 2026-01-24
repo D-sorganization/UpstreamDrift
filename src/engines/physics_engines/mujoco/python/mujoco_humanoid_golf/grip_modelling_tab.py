@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 import os
 import re
 from pathlib import Path
@@ -11,6 +10,8 @@ from typing import Any
 import mujoco
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
+
+from src.shared.python.logging_config import get_logger
 
 from .sim_widget import MuJoCoSimWidget
 

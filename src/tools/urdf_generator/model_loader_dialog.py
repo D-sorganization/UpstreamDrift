@@ -6,7 +6,6 @@ including human models and golf clubs.
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from typing import Any
 
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -23,6 +22,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 import typing
 from pathlib import Path
 
 import numpy as np  # noqa: TID253
 import numpy.typing as npt  # noqa: TID253
+
+from src.shared.python.logging_config import get_logger
 
 try:
     import pinocchio as pin

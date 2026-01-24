@@ -23,11 +23,12 @@ Reference:
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from typing import TYPE_CHECKING
 
 import numpy as np
 from scipy.optimize import newton
+
+from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
     from shared.python.hill_muscle import HillMuscleModel

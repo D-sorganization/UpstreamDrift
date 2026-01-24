@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from typing import TYPE_CHECKING
 
 import mujoco
 from PyQt6 import QtCore, QtGui, QtWidgets
+
+from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
     from ...sim_widget import MuJoCoSimWidget

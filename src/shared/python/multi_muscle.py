@@ -14,9 +14,10 @@ Reference:
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
+from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
     from shared.python.hill_muscle import HillMuscleModel

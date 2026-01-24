@@ -9,10 +9,10 @@ responses with markdown rendering.
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
-
 # Python 3.10 compatibility: UTC was added in 3.11
 from datetime import datetime, timezone
+
+from src.shared.python.logging_config import get_logger
 
 try:
     from datetime import UTC

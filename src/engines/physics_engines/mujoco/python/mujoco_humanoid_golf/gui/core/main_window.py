@@ -10,13 +10,13 @@ This module provides a comprehensive interface with:
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 import typing
 from pathlib import Path
 
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.dashboard.widgets import LivePlotWidget
+from src.shared.python.logging_config import get_logger
 
 from ...advanced_gui_methods import AdvancedGuiMethodsMixin
 from ...grip_modelling_tab import GripModellingTab

@@ -1,7 +1,8 @@
 """Engine loader functions."""
 
-from src.shared.python.logging_config import get_logger
 from pathlib import Path
+
+from src.shared.python.logging_config import get_logger
 
 from .common_utils import GolfModelingError
 from .engine_registry import EngineType

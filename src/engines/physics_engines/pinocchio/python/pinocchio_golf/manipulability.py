@@ -1,10 +1,11 @@
 """Manipulability Analysis Module for Pinocchio Engine."""
 
-from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass
 
 import numpy as np
 import pinocchio as pin
+
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

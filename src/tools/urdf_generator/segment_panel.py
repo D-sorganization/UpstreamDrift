@@ -1,7 +1,5 @@
 """Segment management panel for the URDF Generator."""
 
-from src.shared.python.logging_config import get_logger
-
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (
     QComboBox,
@@ -17,6 +15,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

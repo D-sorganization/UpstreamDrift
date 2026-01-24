@@ -1,8 +1,9 @@
 """Physics validation tests verifying pendulum dynamics accuracy."""
 
-from src.shared.python.logging_config import get_logger
 import sys
 from unittest.mock import MagicMock
+
+from src.shared.python.logging_config import get_logger
 
 # Mock pydrake tree if missing (before other imports potentially load it)
 if "pydrake.multibody.tree" not in sys.modules:

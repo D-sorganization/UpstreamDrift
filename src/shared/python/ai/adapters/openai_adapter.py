@@ -20,8 +20,9 @@ Example:
 from __future__ import annotations
 
 import json
-from src.shared.python.logging_config import get_logger
 from typing import TYPE_CHECKING, Any
+
+from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
     from collections.abc import Iterator

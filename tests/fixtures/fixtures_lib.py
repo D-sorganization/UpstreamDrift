@@ -9,7 +9,6 @@ and P3 (tolerance-based validation).
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -18,6 +17,7 @@ import numpy as np
 import pytest
 
 from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

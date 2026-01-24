@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 import os
 from collections.abc import Callable
 from pathlib import Path
@@ -13,6 +12,7 @@ import numpy as np
 from PyQt6 import QtCore, QtGui, QtWidgets
 
 from src.shared.python.biomechanics_data import BiomechanicalData
+from src.shared.python.logging_config import get_logger
 
 from .biomechanics import BiomechanicalAnalyzer, SwingRecorder
 from .control_system import ControlSystem, ControlType

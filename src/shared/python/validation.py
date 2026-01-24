@@ -16,12 +16,13 @@ Physical validity checks:
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from collections.abc import Callable
 from functools import wraps
 from typing import Any, TypeVar
 
 import numpy as np
+
+from src.shared.python.logging_config import get_logger
 
 from .error_utils import ValidationError
 

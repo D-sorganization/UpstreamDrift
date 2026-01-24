@@ -6,11 +6,12 @@ Allows users to inspect Force and Mobility matrices and visualize ellipsoids
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from typing import Any
 
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
+
+from src.shared.python.logging_config import get_logger
 
 from ..manipulability import ManipulabilityAnalyzer
 

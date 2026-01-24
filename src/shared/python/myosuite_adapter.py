@@ -24,12 +24,12 @@ Reference:
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from typing import Any
 
 import numpy as np
 
 from src.shared.python.engine_availability import MYOSUITE_AVAILABLE
+from src.shared.python.logging_config import get_logger
 from src.shared.python.multi_muscle import AntagonistPair, MuscleGroup
 
 logger = get_logger(__name__)

@@ -16,13 +16,14 @@ from __future__ import annotations
 
 import contextlib
 import csv
-from src.shared.python.logging_config import get_logger
 import math
 import tkinter as tk
 import typing
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+
+from src.shared.python.logging_config import get_logger
 
 if typing.TYPE_CHECKING:
     import numpy as np

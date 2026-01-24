@@ -9,8 +9,6 @@ Provides a unified interface for:
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
-
 import numpy as np
 from PyQt6 import QtCore, QtWidgets
 
@@ -24,6 +22,7 @@ from src.shared.python.export import (
     get_available_export_formats,
 )
 from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.logging_config import get_logger
 from src.shared.python.plotting import GolfSwingPlotter, MplCanvas
 from src.shared.python.statistical_analysis import StatisticalAnalyzer
 

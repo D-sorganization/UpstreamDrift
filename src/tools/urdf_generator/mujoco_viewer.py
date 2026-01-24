@@ -8,7 +8,6 @@ Provides real-time URDF preview via MJCF conversion.
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 import subprocess
 import sys
 import tempfile
@@ -26,6 +25,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
     from typing import Any

@@ -9,11 +9,12 @@ These are extracted from plotting.py for modularity.
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from typing import Protocol
 
 import numpy as np
 from matplotlib.figure import Figure
+
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

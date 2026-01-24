@@ -18,10 +18,11 @@ Reference:
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass
 
 import numpy as np
+
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

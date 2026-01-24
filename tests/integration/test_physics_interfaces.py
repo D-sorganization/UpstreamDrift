@@ -1,12 +1,13 @@
 """Verify physics engine implementations for ZTCF/ZVCF methods."""
 
-from src.shared.python.logging_config import get_logger
 import sys
 from typing import Any, cast
 from unittest.mock import MagicMock
 
 import numpy as np
 import pytest
+
+from src.shared.python.logging_config import get_logger
 
 # Mock modules if not available
 sys.modules["gym"] = MagicMock()

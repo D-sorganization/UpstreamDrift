@@ -1,9 +1,9 @@
 """Analysis service for Golf Modeling Suite API."""
 
-from src.shared.python.logging_config import get_logger
 from typing import Any
 
 from src.shared.python.engine_manager import EngineManager
+from src.shared.python.logging_config import get_logger
 
 from ..models.requests import AnalysisRequest
 from ..models.responses import AnalysisResponse

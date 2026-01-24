@@ -6,12 +6,12 @@ scientific computations.
 Note: Logging setup now delegates to the centralized logging_config module.
 """
 
-from src.shared.python.logging_config import get_logger
 import random
 
 from src.shared.python.engine_availability import PYTORCH_AVAILABLE
 from src.shared.python.logging_config import (
     DEFAULT_LOG_FORMAT,
+    get_logger,
 )
 from src.shared.python.logging_config import (
     get_logger as _get_logger,

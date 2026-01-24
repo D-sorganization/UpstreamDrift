@@ -11,12 +11,13 @@ These are MANDATORY features for causal interpretation of golf swing dynamics.
 Reference: docs/assessments/project_design_guidelines.qmd Section G
 """
 
-from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass
 from typing import Literal
 
 import mujoco
 import numpy as np
+
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

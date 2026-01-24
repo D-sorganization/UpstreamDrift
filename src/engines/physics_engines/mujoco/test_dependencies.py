@@ -7,9 +7,10 @@ and that all required libraries are importable and functional.
 from __future__ import annotations
 
 import importlib
-from src.shared.python.logging_config import get_logger
 
 import pytest
+
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 

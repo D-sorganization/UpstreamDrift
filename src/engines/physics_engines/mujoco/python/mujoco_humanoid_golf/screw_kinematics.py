@@ -12,11 +12,12 @@ Reference: docs/assessments/project_design_guidelines.qmd Section C3
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
+
+from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
     import mujoco

@@ -11,12 +11,11 @@ Contains widgets and a dialog for advanced signal processing analysis:
 
 from __future__ import annotations
 
-from src.shared.python.logging_config import get_logger
-
 import numpy as np
 from PyQt6 import QtWidgets
 
 from src.shared.python.interfaces import RecorderInterface
+from src.shared.python.logging_config import get_logger
 from src.shared.python.plotting import MplCanvas
 from src.shared.python.signal_processing import (
     compute_coherence,

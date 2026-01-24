@@ -7,7 +7,6 @@ This module provides a unified interface for all physics engines with:
 - Professional error handling and diagnostics
 """
 
-from src.shared.python.logging_config import get_logger
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +15,7 @@ import numpy as np
 from src.shared.python.engine_manager import EngineManager
 from src.shared.python.engine_registry import EngineType
 from src.shared.python.interfaces import PhysicsEngine
+from src.shared.python.logging_config import get_logger
 from src.shared.python.standard_models import StandardModelManager
 
 logger = get_logger(__name__)

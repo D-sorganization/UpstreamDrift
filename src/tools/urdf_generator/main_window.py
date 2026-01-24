@@ -1,6 +1,5 @@
 """Main window for the Interactive URDF Generator."""
 
-from src.shared.python.logging_config import get_logger
 import sys
 from pathlib import Path
 from typing import Any
@@ -17,6 +16,8 @@ from PyQt6.QtWidgets import (
     QStatusBar,
     QWidget,
 )
+
+from src.shared.python.logging_config import get_logger
 
 from .segment_panel import SegmentPanel
 from .urdf_builder import URDFBuilder
