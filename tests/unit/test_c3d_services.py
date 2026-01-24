@@ -1,33 +1,16 @@
 """Unit tests for C3D services."""
 
 import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pytest
 
-# Check for PyQt6 GUI library availability
-try:
-    from PyQt6 import QtWidgets  # noqa: F401
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.path_utils import get_simscape_model_path
 
-    PYQT6_AVAILABLE = True
-except (ImportError, OSError):
-    PYQT6_AVAILABLE = False
-
-# Add source directory to path to handle "3D_Golf_Model" invalid identifier issue
-# Repo root is assumed to be current working directory of test runner
-REPO_ROOT = Path(__file__).resolve().parents[2]  # tests/unit -> tests -> root
-SRC_PATH = (
-    REPO_ROOT
-    / "src"
-    / "engines"
-    / "Simscape_Multibody_Models"
-    / "3D_Golf_Model"
-    / "python"
-    / "src"
-)
-
+# Add source directory to path using centralized path utility
+SRC_PATH = get_simscape_model_path("3D_Golf_Model")
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 

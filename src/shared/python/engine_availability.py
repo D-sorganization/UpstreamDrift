@@ -48,6 +48,104 @@ OPENPOSE_AVAILABLE: bool = False
 SCIPY_AVAILABLE: bool = False
 MATPLOTLIB_AVAILABLE: bool = False
 
+# Data & I/O library flags
+NUMPY_AVAILABLE: bool = False
+PANDAS_AVAILABLE: bool = False
+PYARROW_AVAILABLE: bool = False
+FASTPARQUET_AVAILABLE: bool = False
+HDF5_AVAILABLE: bool = False
+EZC3D_AVAILABLE: bool = False
+YAML_AVAILABLE: bool = False
+
+# GUI library flags
+PYQT6_AVAILABLE: bool = False
+PYQT5_AVAILABLE: bool = False
+PYSIDE6_AVAILABLE: bool = False
+
+# Check NumPy (almost always available but good to check)
+try:
+    import numpy  # noqa: F401
+
+    NUMPY_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check Pandas
+try:
+    import pandas  # noqa: F401
+
+    PANDAS_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check PyArrow
+try:
+    import pyarrow  # noqa: F401
+
+    PYARROW_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check fastparquet
+try:
+    import fastparquet  # noqa: F401
+
+    FASTPARQUET_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check h5py (HDF5)
+try:
+    import h5py  # noqa: F401
+
+    HDF5_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check ezc3d (C3D file format)
+try:
+    import ezc3d  # noqa: F401
+
+    EZC3D_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check PyYAML
+try:
+    import yaml  # noqa: F401
+
+    YAML_AVAILABLE = True
+except ImportError:
+    pass
+
+# Check PyQt6
+try:
+    from PyQt6 import QtWidgets  # noqa: F401
+
+    PYQT6_AVAILABLE = True
+except (ImportError, OSError):
+    pass
+
+# Check PyQt5
+try:
+    from PyQt5 import QtWidgets  # noqa: F401
+
+    PYQT5_AVAILABLE = True
+except (ImportError, OSError):
+    pass
+
+# Check PySide6
+try:
+    from PySide6 import QtWidgets  # noqa: F401
+
+    PYSIDE6_AVAILABLE = True
+except (ImportError, OSError):
+    pass
+
+# Derived availability flags
+PARQUET_AVAILABLE: bool = PYARROW_AVAILABLE or FASTPARQUET_AVAILABLE
+QT_AVAILABLE: bool = PYQT6_AVAILABLE or PYQT5_AVAILABLE or PYSIDE6_AVAILABLE
+
 # Check MuJoCo
 try:
     import mujoco  # noqa: F401
@@ -154,21 +252,42 @@ except ImportError:
 
 # Mapping of engine names to availability flags
 _ENGINE_FLAGS: dict[str, bool] = {
+    # Physics engines
     "mujoco": MUJOCO_AVAILABLE,
     "pinocchio": PINOCCHIO_AVAILABLE,
     "drake": DRAKE_AVAILABLE,
     "opensim": OPENSIM_AVAILABLE,
     "myosuite": MYOSUITE_AVAILABLE,
-    "mediapipe": MEDIAPIPE_AVAILABLE,
     "dm_control": DM_CONTROL_AVAILABLE,
+    # ML frameworks
     "pytorch": PYTORCH_AVAILABLE,
     "torch": PYTORCH_AVAILABLE,  # Alias
     "tensorflow": TENSORFLOW_AVAILABLE,
     "tf": TENSORFLOW_AVAILABLE,  # Alias
+    # Pose estimation
+    "mediapipe": MEDIAPIPE_AVAILABLE,
     "myoconverter": MYOCONVERTER_AVAILABLE,
     "openpose": OPENPOSE_AVAILABLE,
+    # Scientific computing
     "scipy": SCIPY_AVAILABLE,
     "matplotlib": MATPLOTLIB_AVAILABLE,
+    "numpy": NUMPY_AVAILABLE,
+    "pandas": PANDAS_AVAILABLE,
+    # Data I/O
+    "pyarrow": PYARROW_AVAILABLE,
+    "fastparquet": FASTPARQUET_AVAILABLE,
+    "parquet": PARQUET_AVAILABLE,
+    "hdf5": HDF5_AVAILABLE,
+    "h5py": HDF5_AVAILABLE,  # Alias
+    "ezc3d": EZC3D_AVAILABLE,
+    "c3d": EZC3D_AVAILABLE,  # Alias
+    "yaml": YAML_AVAILABLE,
+    "pyyaml": YAML_AVAILABLE,  # Alias
+    # GUI frameworks
+    "pyqt6": PYQT6_AVAILABLE,
+    "pyqt5": PYQT5_AVAILABLE,
+    "pyside6": PYSIDE6_AVAILABLE,
+    "qt": QT_AVAILABLE,
 }
 
 

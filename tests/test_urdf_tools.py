@@ -1,25 +1,19 @@
 import os
 import sys
 import xml.etree.ElementTree as ET
-from pathlib import Path
 
 import pytest
 
-# Add repo root to path
-sys.path.insert(0, str(Path(__file__).parents[1]))
-
 from src.shared.python.common_utils import get_shared_urdf_path
+from src.shared.python.engine_availability import PYQT6_AVAILABLE
 
 # Check if display is available for Qt tests
 HAS_DISPLAY = os.environ.get("DISPLAY") is not None or sys.platform == "win32"
 
-# Try to import PyQt6 and URDFGenerator, skip tests if not available
-try:
+# Import URDFGenerator if PyQt6 is available
+if PYQT6_AVAILABLE:
     from src.tools.urdf_generator.main import URDFGenerator
-
-    PYQT6_AVAILABLE = True
-except ImportError:
-    PYQT6_AVAILABLE = False
+else:
     URDFGenerator = None  # type: ignore
 
 
