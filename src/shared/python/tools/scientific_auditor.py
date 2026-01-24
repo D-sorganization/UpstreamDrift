@@ -98,17 +98,17 @@ def run_audit(target_path: Path) -> list[dict[str, object]]:
 
 def main() -> None:
     if len(sys.argv) < 2:
-        print("Usage: python scientific_auditor.py <path>")
+        sys.stderr.write("Usage: python scientific_auditor.py <path>\n")
         sys.exit(1)
 
     target = Path(sys.argv[1])
     risks = run_audit(target)
 
     if risks:
-        print(json.dumps(risks, indent=2))
+        sys.stdout.write(json.dumps(risks, indent=2) + "\n")
         sys.exit(1)
     else:
-        print("[]")
+        sys.stdout.write("[]\n")
 
 
 if __name__ == "__main__":
