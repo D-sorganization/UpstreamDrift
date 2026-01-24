@@ -23,15 +23,43 @@ from typing import Any, TypeVar
 
 import numpy as np
 
+from .error_utils import ValidationError
+
 logger = logging.getLogger(__name__)
 
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-class PhysicalValidationError(ValueError):
-    """Raised when a physical parameter fails validation."""
+class PhysicalValidationError(ValidationError):
+    """Raised when a physical parameter fails validation.
 
-    pass
+    This class extends the base ValidationError for physics-specific validation.
+    It can be initialized with either a simple message string (for backward
+    compatibility) or with structured field/value/constraint parameters.
+    """
+
+    def __init__(
+        self,
+        message_or_field: str,
+        value: Any = None,
+        physical_constraint: str | None = None,
+    ):
+        # Support both old-style (single message) and new-style (field, value, constraint)
+        if value is None and physical_constraint is None:
+            # Old-style: message_or_field is the full error message
+            super().__init__(
+                field="physical_parameter",
+                value=None,
+                reason=message_or_field,
+            )
+        else:
+            # New-style: structured parameters
+            super().__init__(
+                field=message_or_field,
+                value=value,
+                reason=physical_constraint or "Physical constraint violated",
+            )
+        self.physical_constraint = physical_constraint
 
 
 def validate_mass(mass: float, param_name: str = "mass") -> None:
