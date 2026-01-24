@@ -385,6 +385,7 @@ def validate_all(*validations: tuple[Callable[..., None], tuple, dict]) -> None:
 
     if errors:
         raise ValidationError(
-            f"Validation failed with {len(errors)} error(s):\n"
-            + "\n".join(f"  - {error}" for error in errors)
+            "multiple_errors",
+            message=f"Validation failed with {len(errors)} error(s):\n"
+            + "\n".join(f"  - {error}" for error in errors),
         )

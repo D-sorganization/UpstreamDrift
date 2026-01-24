@@ -135,6 +135,9 @@ class MediaPipeEstimator(PoseEstimator):
         if not MEDIAPIPE_AVAILABLE:
             raise ImportError("MediaPipe module is not installed.")
 
+        if cv2 is None:
+            raise ImportError("OpenCV (cv2) is not installed.")
+
         try:
             mp_pose = mp.solutions.pose
             self.pose_detector = mp_pose.Pose(
