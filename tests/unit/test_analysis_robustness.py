@@ -6,7 +6,7 @@ import pytest
 from src.shared.python.path_utils import get_simscape_model_path, setup_import_paths
 
 # Setup import paths including Simscape model
-setup_import_paths(additional_paths=[get_simscape_model_path()])
+setup_import_paths(additional_paths=[get_simscape_model_path("3D_Golf_Model")])
 
 from apps.services.analysis import compute_marker_statistics  # noqa: E402
 

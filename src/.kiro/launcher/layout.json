@@ -1,0 +1,19 @@
+{
+  "model_order": [
+    "model_2",
+    "model_1",
+    "model_0",
+    "model_3"
+  ],
+  "selected_model": "model_0",
+  "window_geometry": {
+    "x": -300,
+    "y": 50,
+    "width": 1400,
+    "height": 900
+  },
+  "options": {
+    "live_visualization": true,
+    "gpu_acceleration": false
+  }
+}

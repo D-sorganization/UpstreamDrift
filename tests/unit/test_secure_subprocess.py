@@ -5,6 +5,10 @@ import unittest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+# Note: Import paths for the `src` package are configured at the test runner /
+# package level (e.g., via pyproject.toml or conftest.py), so no manual
+# sys.path manipulation is required in this module.
+
 from src.shared.python.secure_subprocess import (
     SecureSubprocessError,
     secure_popen,

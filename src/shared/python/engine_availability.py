@@ -488,7 +488,8 @@ _ENGINE_FLAGS: dict[str, bool] = {
     "hdf5": HDF5_AVAILABLE,
     "h5py": HDF5_AVAILABLE,  # Alias
     "ezc3d": EZC3D_AVAILABLE,
-    "c3d": C3D_AVAILABLE,  # c3d package (different from ezc3d)
+    "c3d": EZC3D_AVAILABLE,  # Alias for ezc3d (backwards compatible)
+    "c3d_pkg": C3D_AVAILABLE,  # c3d package (different from ezc3d)
     "c3d_any": EZC3D_AVAILABLE or C3D_AVAILABLE,  # Either C3D library
     "yaml": YAML_AVAILABLE,
     "pyyaml": YAML_AVAILABLE,  # Alias
