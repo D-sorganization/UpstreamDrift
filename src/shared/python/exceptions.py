@@ -24,9 +24,6 @@ from .error_utils import (
 )
 
 # Re-export with old names for backwards compatibility
-GolfModelingError = GolfSuiteError
-EngineNotFoundError = EngineNotAvailableError
-ValidationConstraintError = ValidationError
 
 
 class ArrayDimensionError(GolfSuiteError):
@@ -69,10 +66,6 @@ __all__ = [
     "DataFormatError",
     "ValidationError",
     "ArrayDimensionError",
-    # Old names (deprecated, for backwards compatibility)
-    "GolfModelingError",
-    "EngineNotFoundError",
-    "ValidationConstraintError",
 ]
 
 
@@ -89,6 +82,6 @@ def __getattr__(name: str) -> type[Exception]:
             DeprecationWarning,
             stacklevel=2,
         )
-        result: type[Exception] = globals()[name]
+        result: type[Exception] = globals()[deprecated_names[name]]
         return result
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
