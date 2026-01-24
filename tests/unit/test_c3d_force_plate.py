@@ -6,19 +6,20 @@ Implements Guideline E5: Ground Reaction Forces.
 from __future__ import annotations
 
 import sys
-from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
 import pandas as pd
 import pytest
 
+from src.shared.python.path_utils import get_repo_root
+
 # Try direct import first; fall back to path manipulation if not in PYTHONPATH
 try:
     from c3d_reader import C3DDataReader, C3DMetadata
 except ImportError:
     # Development path when running tests directly
-    SRC_PATH = Path(__file__).parent.parent.parent / (
+    SRC_PATH = get_repo_root() / (
         "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src"
     )
     if str(SRC_PATH) not in sys.path:

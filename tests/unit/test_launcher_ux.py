@@ -2,10 +2,10 @@
 """Test suite for Golf Modeling Suite UX improvements."""
 
 import unittest
-from typing import cast
 from unittest.mock import Mock, patch  # noqa: F401
 
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
+from src.shared.python.gui_utils import get_qapp
 
 if PYQT6_AVAILABLE:
     from PyQt6.QtCore import Qt  # noqa: F401
@@ -21,10 +21,7 @@ class TestGolfLauncherUX(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Set up QApplication for GUI tests."""
-        if not QApplication.instance():
-            cls.app = QApplication([])
-        else:
-            cls.app = cast(QApplication, QApplication.instance())
+        get_qapp()  # Simplified with utility
 
     def setUp(self):
         """Set up test fixtures."""

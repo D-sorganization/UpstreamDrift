@@ -9,7 +9,6 @@ and P3 (tolerance-based validation).
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -18,8 +17,9 @@ import numpy as np
 import pytest
 
 from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Fixture model paths
 FIXTURES_DIR = Path(__file__).parent / "models"

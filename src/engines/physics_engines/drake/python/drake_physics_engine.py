@@ -7,12 +7,12 @@ Refactored to use shared engine availability module (DRY principle).
 
 from __future__ import annotations
 
-import logging
 from typing import Any, cast
 
 import numpy as np
 
 from src.shared.python.engine_availability import DRAKE_AVAILABLE
+from src.shared.python.logging_config import get_logger
 
 # Pydrake imports - only import if available
 if DRAKE_AVAILABLE:
@@ -36,7 +36,7 @@ if DRAKE_AVAILABLE:
 from src.shared.python import constants
 from src.shared.python.interfaces import PhysicsEngine
 
-LOGGER = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 DEFAULT_TIME_STEP = float(constants.DEFAULT_TIME_STEP)
 
@@ -98,7 +98,7 @@ class DrakePhysicsEngine(PhysicsEngine):
             # Add model to plant
             parser.AddModels(path)
         except Exception as e:
-            LOGGER.error("Failed to load Drake model from path %s: %s", path, e)
+            logger.error("Failed to load Drake model from path %s: %s", path, e)
             raise
 
         # We don't finalize here immediately to allow adding more models if needed?
@@ -116,7 +116,7 @@ class DrakePhysicsEngine(PhysicsEngine):
             parser.AddModelsFromString(content, ext)
             self.model_name_str = "StringLoadedModel"
         except Exception as e:
-            LOGGER.error("Failed to load Drake model from string: %s", e)
+            logger.error("Failed to load Drake model from string: %s", e)
             raise
 
         self._ensure_finalized()
@@ -134,16 +134,16 @@ class DrakePhysicsEngine(PhysicsEngine):
             # Re-initialize the simulator with the reset state
             self.simulator.Initialize()
 
-            LOGGER.debug("Drake engine reset to initial state")
+            logger.debug("Drake engine reset to initial state")
         else:
-            LOGGER.warning("Attempted to reset Drake engine before initialization.")
+            logger.warning("Attempted to reset Drake engine before initialization.")
 
     def step(self, dt: float | None = None) -> None:
         """Advance the simulation by one time step."""
         self._ensure_finalized()
 
         if not self.simulator or not self.context:
-            LOGGER.error("Cannot step: Simulator not initialized.")
+            logger.error("Cannot step: Simulator not initialized.")
             return
 
         current_time = self.context.get_time()
@@ -153,7 +153,7 @@ class DrakePhysicsEngine(PhysicsEngine):
     def forward(self) -> None:
         """Compute forward kinematics/dynamics without advancing time."""
         if not self.plant_context:
-            LOGGER.warning(
+            logger.warning(
                 "Cannot compute forward dynamics: plant context not initialized"
             )
             return
@@ -175,15 +175,15 @@ class DrakePhysicsEngine(PhysicsEngine):
                     self.plant.MakeMultibodyForces(self.plant),
                 )
 
-            LOGGER.debug("Drake forward dynamics computation completed")
+            logger.debug("Drake forward dynamics computation completed")
         except Exception as e:
-            LOGGER.error("Failed to compute forward dynamics: %s", e)
+            logger.error("Failed to compute forward dynamics: %s", e)
             raise
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Get the current state (positions, velocities)."""
         if not self.plant_context:
-            LOGGER.debug("get_state called on uninitialized engine")
+            logger.debug("get_state called on uninitialized engine")
             return np.array([]), np.array([])
 
         q = self.plant.GetPositions(self.plant_context)
@@ -193,7 +193,7 @@ class DrakePhysicsEngine(PhysicsEngine):
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set the current state."""
         if not self.plant_context:
-            LOGGER.warning("set_state called on uninitialized engine")
+            logger.warning("set_state called on uninitialized engine")
             return
 
         self.plant.SetPositions(self.plant_context, q)
@@ -202,7 +202,7 @@ class DrakePhysicsEngine(PhysicsEngine):
     def set_control(self, u: np.ndarray) -> None:
         """Apply control inputs (torques/forces)."""
         if not self.plant_context:
-            LOGGER.warning("set_control called on uninitialized engine")
+            logger.warning("set_control called on uninitialized engine")
             return
 
         # We need to set the actuation input port.
@@ -348,7 +348,7 @@ class DrakePhysicsEngine(PhysicsEngine):
         # As a simplified proxy, we can inspect generalized contact forces if available
         # but that's in joint space.
 
-        LOGGER.warning(
+        logger.warning(
             "DrakePhysicsEngine.compute_contact_forces currently returns a "
             "placeholder zero GRF vector. Precise contact forces require querying "
             "ContactResults from a Simulator-managed Context, which is not exposed "

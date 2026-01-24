@@ -16,13 +16,14 @@ from __future__ import annotations
 
 import contextlib
 import csv
-import logging
 import math
 import tkinter as tk
 import typing
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
+
+from src.shared.python.logging_config import get_logger
 
 if typing.TYPE_CHECKING:
     import numpy as np
@@ -48,7 +49,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 TIME_STEP = 0.01
 

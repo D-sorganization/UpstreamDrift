@@ -2,17 +2,18 @@ from __future__ import annotations
 
 import csv
 import json
-import logging
 import typing
 
 from PyQt6 import QtCore, QtWidgets
+
+from src.shared.python.logging_config import get_logger
 
 from ...sim_widget import MuJoCoSimWidget
 
 if typing.TYPE_CHECKING:
     from ...advanced_gui import AdvancedGolfAnalysisWindow
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class AnalysisTab(QtWidgets.QWidget):

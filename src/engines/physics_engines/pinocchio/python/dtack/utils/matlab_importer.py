@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-import logging
 import typing
 from pathlib import Path
 
 from dtack.utils.gears_parser import GearsParser
+
+from src.shared.python.logging_config import get_logger
 
 if typing.TYPE_CHECKING:
     import numpy as np
@@ -27,7 +28,7 @@ except ImportError:
     EZC3D_AVAILABLE = False
 
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MATLABImporter:

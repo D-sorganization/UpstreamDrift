@@ -2,14 +2,15 @@
 
 from __future__ import annotations
 
-import logging
 import math
 import typing
 from pathlib import Path
 
 import yaml  # type: ignore[import-untyped]
 
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 # Maximum joint effort (torque) allowed in URDF export.

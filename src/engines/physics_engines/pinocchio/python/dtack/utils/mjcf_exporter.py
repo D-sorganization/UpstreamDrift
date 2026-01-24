@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import logging
 import math
 import typing
 from pathlib import Path
@@ -10,8 +9,9 @@ from pathlib import Path
 import yaml  # type: ignore[import-untyped]
 
 from src.shared.python.constants import GRAVITY_M_S2
+from src.shared.python.logging_config import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MJCFExporter:

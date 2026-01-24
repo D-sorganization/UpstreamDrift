@@ -11,7 +11,6 @@ Security:
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import TYPE_CHECKING
@@ -34,11 +33,13 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+from src.shared.python.logging_config import get_logger
+
 if TYPE_CHECKING:
     # Import removed to avoid circular dependency
     pass
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Settings keys
 SETTINGS_ORG = "GolfModelingSuite"

@@ -44,8 +44,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.path_utils import get_src_root
+
 # Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(get_src_root()))
 
 import bcrypt
 from sqlalchemy import create_engine

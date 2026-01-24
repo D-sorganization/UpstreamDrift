@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import contextlib
-import logging
 import typing
+
+from src.shared.python.logging_config import get_logger
 
 if typing.TYPE_CHECKING:
     import pinocchio as pin
@@ -22,7 +23,7 @@ with contextlib.suppress(ImportError):
 if typing.TYPE_CHECKING:
     import pinocchio as pin
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class GeppettoViewer:

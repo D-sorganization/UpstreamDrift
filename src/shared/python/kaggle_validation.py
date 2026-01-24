@@ -10,7 +10,6 @@ Columns:
 - Atmospheric: Air Density (g/L), Temperature (F), Air Pressure (kPA)
 """
 
-import logging
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
@@ -18,13 +17,14 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from src.shared.python.logging_config import get_logger
 from src.shared.python.physics_constants import (
     FEET_TO_METERS,
     MPH_TO_MPS,
     YARDS_TO_METERS,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

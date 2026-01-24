@@ -16,7 +16,6 @@ MplCanvas and RecorderInterface for import convenience.
 
 from __future__ import annotations
 
-import logging
 from typing import TYPE_CHECKING, Any, Protocol
 
 import matplotlib.backend_bases  # noqa: F401
@@ -29,9 +28,10 @@ from matplotlib.patches import Rectangle
 # Register 3D projection
 from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 
+from src.shared.python.logging_config import get_logger
 from src.shared.python.swing_plane_analysis import SwingPlaneAnalyzer
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 if TYPE_CHECKING:
     from shared.python.statistical_analysis import PCAResult

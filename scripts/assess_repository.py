@@ -7,10 +7,11 @@ import json
 import re
 import subprocess
 from datetime import datetime
-from pathlib import Path
+
+from src.shared.python.path_utils import get_src_root
 
 # Setup paths
-REPO_ROOT = Path(__file__).parent.parent
+REPO_ROOT = get_src_root()
 DOCS_DIR = REPO_ROOT / "docs" / "assessments"
 ISSUES_DIR = DOCS_DIR / "issues"
 

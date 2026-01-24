@@ -8,13 +8,14 @@ This module provides automated cross-engine validation to ensure MuJoCo, Drake,
 and Pinocchio produce consistent results within specified tolerances.
 """
 
-import logging
 from dataclasses import dataclass
 from typing import Literal
 
 import numpy as np
 
-logger = logging.getLogger(__name__)
+from src.shared.python.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 @dataclass
