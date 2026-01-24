@@ -41,7 +41,7 @@ class EngineConfig:
 
     name: str
     script_path: Path
-    module_name: str | None = None  # If set, run as module instead of script
+    module_name: str | None = None  # If set, use `python -m <module_name>` instead of executing script_path directly
     needs_validation: bool = True
     work_dir_offset: int = 2  # How many parents up from script to get work_dir
 
@@ -102,8 +102,8 @@ def _run_subprocess(
     script_path: Path,
     work_dir: Path,
     module_name: str | None = None,
-    env: dict | None = None,
-) -> None:
+    env: dict[str, str] | None = None,
+) -> int:
     """Run a subprocess with consistent error handling.
 
     Args:
@@ -111,13 +111,17 @@ def _run_subprocess(
         work_dir: Working directory for the subprocess.
         module_name: If provided, run as Python module instead of script.
         env: Optional environment variables.
+
+    Returns:
+        The subprocess return code.
     """
     if module_name:
         cmd = [sys.executable, "-m", module_name]
     else:
         cmd = [sys.executable, str(script_path)]
 
-    subprocess.run(cmd, cwd=str(work_dir), env=env)
+    result = subprocess.run(cmd, cwd=str(work_dir), env=env)
+    return result.returncode
 
 
 def _validate_engine(engine_key: str) -> bool:
@@ -191,8 +195,12 @@ def _launch_physics_engine(engine_key: str) -> bool:
         return False
 
 
-def launch_gui_launcher() -> int | None:
-    """Launch the GUI-based unified launcher."""
+def launch_gui_launcher() -> int | bool:
+    """Launch the GUI-based unified launcher.
+
+    Returns:
+        The mainloop return value on success, or False on error.
+    """
     try:
         from launchers.unified_launcher import UnifiedLauncher
 
@@ -202,10 +210,10 @@ def launch_gui_launcher() -> int | None:
     except ImportError as e:
         logger.error(f"Could not import GUI launcher: {e}")
         logger.info("Try: pip install PyQt6")
-        return None
+        return False
     except Exception as e:
         logger.error(f"Error launching GUI: {e}")
-        return None
+        return False
 
 
 def launch_local_launcher() -> bool:

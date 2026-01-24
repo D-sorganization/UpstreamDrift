@@ -55,7 +55,7 @@ def setup_script_logging(
     return logging.getLogger(name)
 
 
-def get_pythonpath_env(additional_paths: Sequence[Path] | None = None) -> dict:
+def get_pythonpath_env(additional_paths: Sequence[Path] | None = None) -> dict[str, str]:
     """Get environment dict with PYTHONPATH set correctly.
 
     Args:
@@ -80,7 +80,7 @@ def get_pythonpath_env(additional_paths: Sequence[Path] | None = None) -> dict:
 def run_command(
     cmd: Sequence[str],
     cwd: Path | None = None,
-    env: dict | None = None,
+    env: dict[str, str] | None = None,
     capture_output: bool = False,
     check: bool = False,
     logger: logging.Logger | None = None,
@@ -129,27 +129,32 @@ def run_pytest(
         verbose: Enable verbose output.
         markers: Pytest marker expression.
         extra_args: Additional pytest arguments.
-        logger: Optional logger for status messages.
+        logger: Optional logger for status messages (if None, no logging).
 
     Returns:
-        True if tests passed, False otherwise.
+        True if tests passed, False otherwise (including on exceptions).
     """
-    cmd = [sys.executable, "-m", "pytest"]
-    cmd.extend(str(p) for p in test_paths)
+    try:
+        cmd = [sys.executable, "-m", "pytest"]
+        cmd.extend(str(p) for p in test_paths)
 
-    if verbose:
-        cmd.append("-v")
-    if markers:
-        cmd.extend(["-m", markers])
-    if extra_args:
-        cmd.extend(extra_args)
+        if verbose:
+            cmd.append("-v")
+        if markers:
+            cmd.extend(["-m", markers])
+        if extra_args:
+            cmd.extend(extra_args)
 
-    result = run_command(cmd, logger=logger)
+        result = run_command(cmd, logger=logger)
 
-    if logger:
-        if result.returncode == 0:
-            logger.info("Tests PASSED")
-        else:
-            logger.error(f"Tests FAILED (Exit Code: {result.returncode})")
+        if logger:
+            if result.returncode == 0:
+                logger.info("Tests PASSED")
+            else:
+                logger.error(f"Tests FAILED (Exit Code: {result.returncode})")
 
-    return result.returncode == 0
+        return result.returncode == 0
+    except Exception as e:
+        if logger:
+            logger.error(f"Error running tests: {e}")
+        return False
