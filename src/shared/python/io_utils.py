@@ -31,39 +31,33 @@ from pathlib import Path
 from typing import Any
 
 from .engine_availability import YAML_AVAILABLE
+from .error_utils import (
+    FileNotFoundIOError,
+    FileParseError,
+)
+from .error_utils import (
+    IOError as IOUtilsError,
+)
 
 if YAML_AVAILABLE:
     import yaml
 
 
-class IOUtilsError(Exception):
-    """Base exception for I/O operations."""
-
-    pass
-
-
-class FileNotFoundIOError(IOUtilsError):
-    """File not found error with helpful message."""
-
-    def __init__(self, path: Path | str, operation: str = "read"):
-        self.path = Path(path)
-        self.operation = operation
-        super().__init__(
-            f"Cannot {operation} file: {self.path} does not exist. "
-            f"Please check the path and try again."
-        )
-
-
-class FileParseError(IOUtilsError):
-    """File parsing error with helpful message."""
-
-    def __init__(self, path: Path | str, format_type: str, details: str = ""):
-        self.path = Path(path)
-        self.format_type = format_type
-        detail_msg = f" Details: {details}" if details else ""
-        super().__init__(
-            f"Failed to parse {format_type} file: {self.path}.{detail_msg}"
-        )
+# Re-export for backwards compatibility
+__all__ = [
+    "IOUtilsError",
+    "FileNotFoundIOError",
+    "FileParseError",
+    "ensure_directory",
+    "load_json",
+    "save_json",
+    "load_yaml",
+    "save_yaml",
+    "read_text",
+    "write_text",
+    "file_exists",
+    "get_file_size",
+]
 
 
 def ensure_directory(path: Path | str, parents: bool = True) -> Path:
