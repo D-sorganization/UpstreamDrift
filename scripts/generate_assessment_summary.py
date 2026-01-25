@@ -55,15 +55,22 @@ def extract_issues_from_report(report_path: Path) -> list[dict[str, Any]]:
     issues = []
     try:
         content = report_path.read_text(encoding="utf-8", errors="ignore")
-        findings_section = re.search(r"## Findings\n(.*?)\n##", content, re.DOTALL)
+        findings_section = re.search(
+            r"## (?:Findings|Details)\s*\n(.*?)(?:\n##|\Z)", content, re.DOTALL
+        )
         if findings_section:
             findings_text = findings_section.group(1)
             for line in findings_text.split("\n"):
-                if line.strip().startswith("- "):
+                stripped = line.strip()
+                if stripped:
+                    # Handle both bullet points and plain text
+                    description = (
+                        stripped[2:] if stripped.startswith("- ") else stripped
+                    )
                     issues.append(
                         {
                             "severity": "MAJOR",
-                            "description": line.strip()[2:],
+                            "description": description,
                             "source": report_path.stem,
                         }
                     )
