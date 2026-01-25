@@ -128,28 +128,34 @@ class MessageWidget(QFrame):
     def _apply_style(self) -> None:
         """Apply styling based on role."""
         if self._role == "user":
-            self.setStyleSheet("""
+            self.setStyleSheet(
+                """
                 MessageWidget {
                     background-color: #e3f2fd;
                     border-radius: 8px;
                     margin-left: 40px;
                 }
-                """)
+                """
+            )
         elif self._role == "assistant":
-            self.setStyleSheet("""
+            self.setStyleSheet(
+                """
                 MessageWidget {
                     background-color: #f5f5f5;
                     border-radius: 8px;
                     margin-right: 40px;
                 }
-                """)
+                """
+            )
         elif self._role == "system":
-            self.setStyleSheet("""
+            self.setStyleSheet(
+                """
                 MessageWidget {
                     background-color: #fff3e0;
                     border-radius: 8px;
                 }
-                """)
+                """
+            )
 
     def _adjust_height(self) -> None:
         """Adjust height to fit content."""
@@ -275,7 +281,8 @@ class AIAssistantPanel(QWidget):
     def _create_header(self) -> QWidget:
         """Create the panel header."""
         header = QFrame()
-        header.setStyleSheet("""
+        header.setStyleSheet(
+            """
             QFrame {
                 background-color: #1976d2;
                 padding: 8px;
@@ -293,7 +300,8 @@ class AIAssistantPanel(QWidget):
             QPushButton:hover {
                 background-color: rgba(255, 255, 255, 0.2);
             }
-            """)
+            """
+        )
 
         layout = QHBoxLayout(header)
 
@@ -353,12 +361,14 @@ class AIAssistantPanel(QWidget):
     def _create_input_area(self) -> QWidget:
         """Create the message input area."""
         widget = QFrame()
-        widget.setStyleSheet("""
+        widget.setStyleSheet(
+            """
             QFrame {
                 background-color: #fafafa;
                 border-top: 1px solid #ddd;
             }
-            """)
+            """
+        )
 
         layout = QVBoxLayout(widget)
 
@@ -384,7 +394,8 @@ class AIAssistantPanel(QWidget):
         self._send_btn = QPushButton("Send")
         self._send_btn.setDefault(True)
         self._send_btn.clicked.connect(self._on_send)
-        self._send_btn.setStyleSheet("""
+        self._send_btn.setStyleSheet(
+            """
             QPushButton {
                 background-color: #1976d2;
                 color: white;
@@ -399,7 +410,8 @@ class AIAssistantPanel(QWidget):
             QPushButton:disabled {
                 background-color: #ccc;
             }
-            """)
+            """
+        )
         button_layout.addWidget(self._send_btn)
 
         layout.addLayout(button_layout)
