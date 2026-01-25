@@ -135,7 +135,7 @@ class TestPendulumEnergy:
 
         q_final, v_final = engine_obj.get_state()
         pe_final = mass_val * g_accel * length_val * (1 - np.cos(q_final[0]))
-        e_final = 0.5 * inertia_val * v_final[0]**2 + pe_final
+        e_final = 0.5 * inertia_val * v_final[0] ** 2 + pe_final
 
         drift_pct = abs(e_final - e_initial) / abs(e_initial) * 100
         assert drift_pct < 2.0, f"Energy drift {drift_pct:.2f}% too high"

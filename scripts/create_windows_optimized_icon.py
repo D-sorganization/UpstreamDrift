@@ -37,16 +37,20 @@ def create_windows_optimized_icons() -> int:
     windows_sizes = [16, 20, 24, 32, 40, 48, 64, 96, 128, 256]
 
     # Save multiple PNGs for testing/individual use
-    save_png_icons(img, assets_dir, "windows_optimized", 
-                   windows_sizes, mode="extreme")
+    save_png_icons(img, assets_dir, "windows_optimized", windows_sizes, mode="extreme")
 
     # Create the main optimized ICO
-    save_ico(img, assets_dir / "golf_robot_windows_optimized.ico",
-             sizes=windows_sizes, mode="extreme")
+    save_ico(
+        img,
+        assets_dir / "golf_robot_windows_optimized.ico",
+        sizes=windows_sizes,
+        mode="extreme",
+    )
 
     # Create main large PNG
-    save_png_icons(img, assets_dir, "golf_robot_windows_optimized", 
-                   [256], mode="extreme")
+    save_png_icons(
+        img, assets_dir, "golf_robot_windows_optimized", [256], mode="extreme"
+    )
 
     logger.info("Windows-optimized icons created successfully!")
     return 0

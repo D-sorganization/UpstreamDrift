@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
+
 from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
@@ -21,24 +22,27 @@ def _get_engine(engine_name: str):
     if engine_name == "pinocchio":
         try:
             import pinocchio as pin
+
             if not hasattr(pin, "__version__"):
                 pytest.skip("Pinocchio mocked")
             from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine import (
                 PinocchioPhysicsEngine,
             )
+
             return PinocchioPhysicsEngine()
         except ImportError:
             pytest.skip("Pinocchio not installed")
-            
+
     elif engine_name == "mujoco":
         try:
             from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.physics_engine import (
                 MuJoCoPhysicsEngine,
             )
+
             return MuJoCoPhysicsEngine()
         except ImportError:
             pytest.skip("MuJoCo not installed")
-            
+
     pytest.skip(f"Engine {engine_name} not available")
 
 
@@ -49,7 +53,7 @@ class TestDriftControlDecomposition:
     def test_superposition(self, engine_name, pendulum_urdf):
         """Verify drift + control = full dynamics. (Requirement F)"""
         engine = _get_engine(engine_name)
-        
+
         try:
             engine.load_from_path(pendulum_urdf)
         except Exception:
@@ -64,7 +68,7 @@ class TestDriftControlDecomposition:
             q_initial[0] = 0.1
             v_initial = np.zeros(engine.get_model().nv)
             v_initial[0] = 0.5
-            
+
         engine.set_state(q_initial, v_initial)
         tau_control = np.zeros(len(v_initial))
         tau_control[0] = 0.5
@@ -74,6 +78,7 @@ class TestDriftControlDecomposition:
         engine.forward()
         if engine_name == "pinocchio":
             import pinocchio as pin
+
             a_full = pin.aba(engine.model, engine.data, engine.q, engine.v, tau_control)
         else:
             a_full = engine.get_data().qacc.copy()
@@ -87,8 +92,9 @@ class TestDriftControlDecomposition:
         residual = a_full - a_reconstructed
         max_res = float(np.max(np.abs(residual)))
 
-        assert max_res < SUPERPOSITION_TOLERANCE, \
-            f"{engine_name}: Superposition failed (res={max_res:.2e})"
+        assert (
+            max_res < SUPERPOSITION_TOLERANCE
+        ), f"{engine_name}: Superposition failed (res={max_res:.2e})"
 
     def test_zero_control(self, engine_name, pendulum_urdf):
         """Verify full dynamics with tau=0 equals drift acceleration."""
@@ -104,15 +110,18 @@ class TestDriftControlDecomposition:
             q_initial[0] = 0.3
             v_initial = np.zeros(engine.get_model().nv)
             v_initial[0] = 0.2
-            
+
         engine.set_state(q_initial, v_initial)
         a_drift = engine.compute_drift_acceleration()
-        
+
         # Compute full with zero torque
         tau_zero = np.zeros(len(v_initial))
         if engine_name == "pinocchio":
             import pinocchio as pin
-            a_full_zero = pin.aba(engine.model, engine.data, engine.q, engine.v, tau_zero)
+
+            a_full_zero = pin.aba(
+                engine.model, engine.data, engine.q, engine.v, tau_zero
+            )
         else:
             engine.set_control(tau_zero)
             engine.forward()

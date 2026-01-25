@@ -1,6 +1,6 @@
 """Docker management components for the Golf Modeling Suite Launcher.
 
-This module encapsulates Docker build and check threads to improve the 
+This module encapsulates Docker build and check threads to improve the
 orthogonality of the main launcher application.
 """
 
@@ -18,6 +18,7 @@ from src.shared.python.secure_subprocess import SecureSubprocessError, secure_ru
 
 class DockerCheckThread(QThread):
     """Asynchronous thread to check for Docker availability."""
+
     result = pyqtSignal(bool)
 
     def run(self) -> None:
@@ -37,14 +38,15 @@ class DockerCheckThread(QThread):
 
 class DockerBuildThread(QThread):
     """Asynchronous thread to perform Docker builds with real-time logging."""
+
     log_signal = pyqtSignal(str)
     finished_signal = pyqtSignal(bool, str)
 
     def __init__(
-        self, 
-        target_stage: str = "all", 
+        self,
+        target_stage: str = "all",
         image_name: str = "robotics_env",
-        context_path: Path | None = None
+        context_path: Path | None = None,
     ) -> None:
         """Initialize the build thread."""
         super().__init__()
@@ -55,13 +57,20 @@ class DockerBuildThread(QThread):
     def run(self) -> None:
         """Run the docker build command."""
         if self.context_path is None or not self.context_path.exists():
-            self.finished_signal.emit(False, f"Invalid Docker context path: {self.context_path}")
+            self.finished_signal.emit(
+                False, f"Invalid Docker context path: {self.context_path}"
+            )
             return
 
         cmd = [
-            "docker", "build", "-t", self.image_name,
-            "--target", self.target_stage,
-            "--progress=plain", ".",
+            "docker",
+            "build",
+            "-t",
+            self.image_name,
+            "--target",
+            self.target_stage,
+            "--progress=plain",
+            ".",
         ]
 
         self.log_signal.emit(f"Starting build for target: {self.target_stage}")
@@ -71,7 +80,7 @@ class DockerBuildThread(QThread):
         try:
             env = os.environ.copy()
             env["PYTHONUNBUFFERED"] = "1"
-            
+
             # Windows-specific process flags
             creation_flags = 0
             if os.name == "nt":

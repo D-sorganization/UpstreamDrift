@@ -1,6 +1,6 @@
 """UI Components for the Golf Modeling Suite Launcher.
 
-This module provides specialized widgets and data containers to improve 
+This module provides specialized widgets and data containers to improve
 the modularity and maintainability of the launcher.
 """
 
@@ -9,9 +9,9 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from PyQt6.QtCore import QPoint, Qt, pyqtSignal
+from PyQt6.QtCore import QPoint, Qt
 from PyQt6.QtGui import QFont, QPixmap
-from PyQt6.QtWidgets import QFrame, QLabel, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QFrame, QLabel, QVBoxLayout
 
 
 class StartupResults:
@@ -40,25 +40,31 @@ class StartupResults:
 
 class DraggableModelCard(QFrame):
     """Draggable model card widget with reordering support.
-    
+
     Orthogonality: Encapsulates the visual representation and drag-and-drop
     behavior of a single model entry.
     """
 
-    def __init__(self, model: Any, parent_launcher: Any, assets_dir: Path, image_map: dict[str, str]):
+    def __init__(
+        self,
+        model: Any,
+        parent_launcher: Any,
+        assets_dir: Path,
+        image_map: dict[str, str],
+    ):
         super().__init__(parent_launcher)
         self.model = model
         self.parent_launcher = parent_launcher
         self.assets_dir = assets_dir
         self.image_map = image_map
-        
+
         # Match initial drag-and-drop state to the parent's mode
         self.setAcceptDrops(bool(getattr(parent_launcher, "layout_edit_mode", False)))
         self.setObjectName("ModelCard")
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
         self.drag_start_position = QPoint()
-        
+
         self._setup_ui()
 
     def _setup_ui(self) -> None:
@@ -84,7 +90,8 @@ class DraggableModelCard(QFrame):
         if img_path.exists():
             pixmap = QPixmap(str(img_path))
             pixmap = pixmap.scaled(
-                180, 180, 
+                180,
+                180,
                 Qt.AspectRatioMode.KeepAspectRatio,
                 Qt.TransformationMode.SmoothTransformation,
             )

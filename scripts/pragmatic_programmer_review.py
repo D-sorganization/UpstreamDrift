@@ -35,13 +35,6 @@ if str(_REPO_ROOT) not in sys.path:
 
 from scripts.script_utils import run_main, setup_script_logging
 from src.shared.python.assessment.constants import PRAGMATIC_PRINCIPLES as PRINCIPLES
-from src.shared.python.assessment.analysis import (
-    get_python_metrics,
-    get_detailed_function_metrics,
-    assess_error_handling_content,
-    assess_logging_content,
-    calculate_complexity,
-)
 
 # Configure logging using centralized utility
 logger = setup_script_logging(__name__)

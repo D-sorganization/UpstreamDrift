@@ -34,9 +34,12 @@ def create_high_quality_favicon() -> int:
     img = enhance_icon_source(img, contrast=1.15, sharpness=1.2)
 
     # Multi-size ICO
-    save_ico(img, assets_dir / "golf_robot_icon.ico", 
-             sizes=[16, 20, 24, 32, 40, 48, 64, 128, 256])
-    
+    save_ico(
+        img,
+        assets_dir / "golf_robot_icon.ico",
+        sizes=[16, 20, 24, 32, 40, 48, 64, 128, 256],
+    )
+
     # Sharp web favicon
     save_ico(img, assets_dir / "favicon.ico", sizes=[32])
 

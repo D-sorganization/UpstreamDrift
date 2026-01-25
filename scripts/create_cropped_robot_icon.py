@@ -38,13 +38,16 @@ def create_cropped_robot_icon() -> int:
     img = enhance_icon_source(img, contrast=1.2, sharpness=1.2, color=1.1)
 
     # 3. Save outputs
-    save_ico(img, assets_dir / "golf_robot_cropped_icon.ico",
-             sizes=[16, 20, 24, 32, 40, 48, 64, 128, 256])
-    
+    save_ico(
+        img,
+        assets_dir / "golf_robot_cropped_icon.ico",
+        sizes=[16, 20, 24, 32, 40, 48, 64, 128, 256],
+    )
+
     save_ico(img, assets_dir / "favicon_cropped.ico", sizes=[32])
-    
+
     save_png_icons(img, assets_dir, "golf_robot_cropped_icon", [256])
-    
+
     # Save cropped source for reference
     img.save(assets_dir / "golf_robot_cropped.png", "PNG", optimize=True)
 

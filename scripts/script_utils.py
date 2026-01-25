@@ -10,8 +10,6 @@ Principles:
 
 from __future__ import annotations
 
-import argparse
-import json
 import logging
 import subprocess
 import sys
@@ -57,10 +55,18 @@ def run_main(main_func: Callable[[], int | None], logger: logging.Logger) -> Non
 def find_python_files(root: Path | str = ".") -> list[Path]:
     """Find source Python files, excluding build and venv artifacts."""
     root_path = Path(root)
-    excluded = {".git", "__pycache__", ".venv", "venv", "node_modules", ".tox", "build", "dist"}
+    excluded = {
+        ".git",
+        "__pycache__",
+        ".venv",
+        "venv",
+        "node_modules",
+        ".tox",
+        "build",
+        "dist",
+    }
     return [
-        f for f in root_path.glob("**/*.py")
-        if not any(p in f.parts for p in excluded)
+        f for f in root_path.glob("**/*.py") if not any(p in f.parts for p in excluded)
     ]
 
 

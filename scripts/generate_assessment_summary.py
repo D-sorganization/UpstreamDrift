@@ -10,7 +10,6 @@ This script aggregates all A-O assessment results and creates:
 import argparse
 import json
 import re
-import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -162,11 +161,21 @@ def generate_summary(
     logger.info(f"Generating assessment summary from {len(input_reports)} reports...")
 
     categories = {
-        "A": "Code Structure", "B": "Documentation", "C": "Test Coverage",
-        "D": "Error Handling", "E": "Performance", "F": "Security",
-        "G": "Dependencies", "H": "CI/CD", "I": "Code Style",
-        "J": "API Design", "K": "Data Handling", "L": "Logging",
-        "M": "Configuration", "N": "Scalability", "O": "Maintainability",
+        "A": "Code Structure",
+        "B": "Documentation",
+        "C": "Test Coverage",
+        "D": "Error Handling",
+        "E": "Performance",
+        "F": "Security",
+        "G": "Dependencies",
+        "H": "CI/CD",
+        "I": "Code Style",
+        "J": "API Design",
+        "K": "Data Handling",
+        "L": "Logging",
+        "M": "Configuration",
+        "N": "Scalability",
+        "O": "Maintainability",
     }
 
     groups = {

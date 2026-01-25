@@ -25,7 +25,15 @@ def get_existing_issues() -> list[dict[str, Any]]:
     """Fetch existing GitHub issues via 'gh' CLI."""
     try:
         res = subprocess.run(
-            ["gh", "issue", "list", "--limit", "200", "--json", "number,title,state,labels"],
+            [
+                "gh",
+                "issue",
+                "list",
+                "--limit",
+                "200",
+                "--json",
+                "number,title,state,labels",
+            ],
             capture_output=True,
             text=True,
             check=True,
@@ -52,14 +60,18 @@ def create_issue(title: str, body: str, labels: list[str], dry_run: bool) -> boo
         return False
 
 
-def process_findings(path: Path, sevs: list[str], check_exist: bool, dry_run: bool) -> int:
+def process_findings(
+    path: Path, sevs: list[str], check_exist: bool, dry_run: bool
+) -> int:
     """Process findings from JSON and create corresponding issues."""
     if not path.exists():
         logger.error(f"Input file not found: {path}")
         return 1
 
     summary = json.loads(path.read_text())
-    criticals = [i for i in summary.get("critical_issues", []) if i.get("severity") in sevs]
+    criticals = [
+        i for i in summary.get("critical_issues", []) if i.get("severity") in sevs
+    ]
 
     existing = get_existing_issues() if check_exist else []
 
@@ -73,7 +85,9 @@ def process_findings(path: Path, sevs: list[str], check_exist: bool, dry_run: bo
 
         title = f"[GolfSuite] {severity} {cat}: {desc[:50]}..."
         if check_exist and any(
-            title.lower() in x["title"].lower() for x in existing if x["state"] == "OPEN"
+            title.lower() in x["title"].lower()
+            for x in existing
+            if x["state"] == "OPEN"
         ):
             logger.info(f"Skipping existing: {title}")
             continue

@@ -54,18 +54,20 @@ def diagnose_and_fix_icons() -> int:
         img = img.convert("RGBA")
 
     ultra_sharp_sizes = [16, 20, 24, 32, 48, 64, 128, 256]
-    
+
     # Save individual PNGs for testing
-    save_png_icons(img, assets_dir, "ultra_sharp", 
-                   ultra_sharp_sizes, mode="ultra")
+    save_png_icons(img, assets_dir, "ultra_sharp", ultra_sharp_sizes, mode="ultra")
 
     # Create the ultra-sharp ICO
-    save_ico(img, assets_dir / "golf_robot_ultra_sharp.ico",
-             sizes=ultra_sharp_sizes, mode="ultra")
+    save_ico(
+        img,
+        assets_dir / "golf_robot_ultra_sharp.ico",
+        sizes=ultra_sharp_sizes,
+        mode="ultra",
+    )
 
     # Save the main 256x256 ultra-sharp PNG
-    save_png_icons(img, assets_dir, "golf_robot_ultra_sharp", 
-                   [256], mode="ultra")
+    save_png_icons(img, assets_dir, "golf_robot_ultra_sharp", [256], mode="ultra")
 
     # 4. Analyze the new ultra-sharp icon
     logger.info("\n=== ULTRA-SHARP ICON ANALYSIS ===")

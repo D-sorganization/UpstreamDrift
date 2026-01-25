@@ -74,8 +74,7 @@ def _parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
 
 
 def _scan_completist_file(
-    source_key: str,
-    parser: Callable[[str], dict[str, Any] | None]
+    source_key: str, parser: Callable[[str], dict[str, Any] | None]
 ) -> list[dict[str, Any]]:
     """Generic helper to scan a completist data file and parse findings."""
     source_path = FILES_MAP.get(source_key)
@@ -110,7 +109,12 @@ def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
 
         for m_marker in fixme_markers:
             if re.search(r"\b" + m_marker + r"\b", content):
-                return {"file": filepath, "line": lineno, "text": content, "type": m_marker}
+                return {
+                    "file": filepath,
+                    "line": lineno,
+                    "text": content,
+                    "type": m_marker,
+                }
         return None
 
     all_markers = _scan_completist_file("MARKERS", _parser)
@@ -125,6 +129,7 @@ def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
 
 def analyze_stubs() -> list[dict[str, Any]]:
     """Analyze stub functions."""
+
     def _parser(line: str) -> dict[str, Any] | None:
         parts = line.strip().rsplit(" ", 1)
         if len(parts) < 2 or ":" not in parts[0]:
@@ -137,6 +142,7 @@ def analyze_stubs() -> list[dict[str, Any]]:
 
 def analyze_docs() -> list[dict[str, Any]]:
     """Analyze missing documentation."""
+
     def _parser(line: str) -> dict[str, Any] | None:
         parts = line.strip().rsplit(" ", 1)
         if len(parts) < 2 or ":" not in parts[0]:
@@ -162,6 +168,7 @@ def analyze_not_implemented() -> list[dict[str, Any]]:
 
 def analyze_abstract_methods() -> list[dict[str, Any]]:
     """Analyze Abstract Methods."""
+
     def _parser(line: str) -> dict[str, Any] | None:
         f_path, l_no, c_txt = _parse_grep_line(line)
         if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
@@ -176,11 +183,22 @@ def calculate_metrics(item: Mapping[str, Any]) -> tuple[int, int, int]:
     filepath = cast(str, item["file"])
     itype = cast(str, item.get("type", ""))
 
-    impact = 5 if any(x in filepath for x in ["shared/python", "engines/", "api/"]) else (3 if "tools/" in filepath else 1)
+    impact = (
+        5
+        if any(x in filepath for x in ["shared/python", "engines/", "api/"])
+        else (3 if "tools/" in filepath else 1)
+    )
     coverage = 5 if "tests/" in filepath else (3 if "shared/python" in filepath else 2)
 
     # Complexity mapping
-    comp_map = {"Stub": 4, "NotImplementedError": 4, "FIXME": 2, "TODO": 3, "DocGap": 1, "Abstract": 5}
+    comp_map = {
+        "Stub": 4,
+        "NotImplementedError": 4,
+        "FIXME": 2,
+        "TODO": 3,
+        "DocGap": 1,
+        "Abstract": 5,
+    }
     complexity = comp_map.get(itype, 3)
 
     return impact, coverage, complexity
@@ -269,13 +287,16 @@ def generate_report() -> None:
 
     for item in criticals[:50]:
         imp, cov, comp = calculate_metrics(item)
-        report.append(f"| `{item['file']}` | {item['line']} | {item['type']} | {imp} | {cov} | {comp} |")
+        report.append(
+            f"| `{item['file']}` | {item['line']} | {item['type']} | {imp} | {cov} | {comp} |"
+        )
 
     # Issue creation for High Impact items
     report.append("\n## Issues Created")
     max_id = 0
-    issues_glob = (glob.glob(os.path.join(ISSUES_DIR, "Issue_*.md")) +
-                   glob.glob(os.path.join(ISSUES_DIR, "ISSUE_*.md")))
+    issues_glob = glob.glob(os.path.join(ISSUES_DIR, "Issue_*.md")) + glob.glob(
+        os.path.join(ISSUES_DIR, "ISSUE_*.md")
+    )
     for issue_p in issues_glob:
         match_id = re.search(r"(\d+)", os.path.basename(issue_p))
         if match_id:

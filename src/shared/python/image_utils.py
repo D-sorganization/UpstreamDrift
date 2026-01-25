@@ -17,6 +17,7 @@ from src.shared.python.logging_config import get_logger
 
 try:
     from PIL import Image, ImageEnhance, ImageFilter, ImageOps
+
     PILLOW_AVAILABLE = True
 except ImportError:
     PILLOW_AVAILABLE = False
@@ -80,10 +81,7 @@ def auto_crop_to_content(img: Image.Image, padding: int = 50) -> Image.Image:
 
 
 def enhance_icon_source(
-    img: Image.Image,
-    contrast: float = 1.1,
-    sharpness: float = 1.1,
-    color: float = 1.05
+    img: Image.Image, contrast: float = 1.1, sharpness: float = 1.1, color: float = 1.05
 ) -> Image.Image:
     """Apply global enhancements to an image intended for icon use.
 
@@ -109,9 +107,7 @@ def enhance_icon_source(
 
 
 def create_optimized_icon(
-    img: Image.Image,
-    size: int,
-    mode: str = "standard"
+    img: Image.Image, size: int, mode: str = "standard"
 ) -> Image.Image:
     """Create a sharp icon at the specified size with adaptive sharpening.
 
@@ -185,7 +181,7 @@ def save_ico(
     img: Image.Image,
     output_path: Path,
     sizes: list[int] | None = None,
-    mode: str = "standard"
+    mode: str = "standard",
 ) -> None:
     """Save an image as an ICO file with multiple sizes.
 
@@ -215,7 +211,7 @@ def save_png_icons(
     assets_dir: Path,
     base_name: str,
     sizes: list[int],
-    mode: str = "standard"
+    mode: str = "standard",
 ) -> None:
     """Save multiple PNG icons at specified sizes."""
     ensure_pillow()

@@ -7,27 +7,28 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from datetime import datetime
 
 # Add project root to path for imports
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from src.shared.python.path_utils import get_repo_root
-from src.shared.python.assessment.constants import CATEGORIES, GROUP_MAPPING, GROUP_WEIGHTS
 from src.shared.python.assessment.analysis import (
-    get_python_metrics,
-    calculate_complexity,
     assess_error_handling_content,
     assess_logging_content,
+    calculate_complexity,
     count_files,
+    get_python_metrics,
     grep_count,
 )
-from src.shared.python.assessment.reporting import (
-    generate_markdown_report,
-    generate_issue_document,
+from src.shared.python.assessment.constants import (
+    CATEGORIES,
 )
+from src.shared.python.assessment.reporting import (
+    generate_issue_document,
+    generate_markdown_report,
+)
+from src.shared.python.path_utils import get_repo_root
 
 # Setup paths
 REPO_ROOT = get_repo_root()
@@ -55,7 +56,9 @@ def assess_A():
         findings.append("Engines directory found, indicating modular architecture.")
 
     recs = ["Ensure all new code follows the modular engine structure."]
-    return generate_markdown_report("A", CATEGORIES["A"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "A", CATEGORIES["A"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_B():
@@ -83,7 +86,9 @@ def assess_B():
         score -= 1
 
     recs = ["Expand documentation for individual engines."]
-    return generate_markdown_report("B", CATEGORIES["B"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "B", CATEGORIES["B"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_C():
@@ -102,7 +107,9 @@ def assess_C():
         score -= 3
 
     recs = ["Increase test coverage for shared modules.", "Add integration tests."]
-    return generate_markdown_report("C", CATEGORIES["C"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "C", CATEGORIES["C"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_D():
@@ -116,14 +123,18 @@ def assess_D():
         if "node_modules" in f.parts or "venv" in f.parts:
             continue
         try:
-            results = assess_error_handling_content(f.read_text(encoding="utf-8", errors="ignore"))
+            results = assess_error_handling_content(
+                f.read_text(encoding="utf-8", errors="ignore")
+            )
             try_count += results["try_count"]
             bare_except_count += results["bare_except_count"]
         except Exception:
             pass
 
     score = 7.0
-    findings.append(f"Found {try_count} try blocks and {bare_except_count} bare except blocks.")
+    findings.append(
+        f"Found {try_count} try blocks and {bare_except_count} bare except blocks."
+    )
 
     if bare_except_count > 5:
         score -= 2
@@ -131,7 +142,9 @@ def assess_D():
         score -= 3
 
     recs = ["Ensure specific exceptions are caught.", "Avoid bare except clauses."]
-    return generate_markdown_report("D", CATEGORIES["D"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "D", CATEGORIES["D"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_E():
@@ -147,7 +160,9 @@ def assess_E():
         findings.append("No explicit profiling code found.")
 
     recs = ["Implement performance benchmarks for physics engines."]
-    return generate_markdown_report("E", CATEGORIES["E"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "E", CATEGORIES["E"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_F():
@@ -168,7 +183,9 @@ def assess_F():
         "Run bandit security analysis regularly.",
         "Use environment variables for all secrets.",
     ]
-    return generate_markdown_report("F", CATEGORIES["F"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "F", CATEGORIES["F"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_G():
@@ -186,7 +203,9 @@ def assess_G():
         score -= 4
 
     recs = ["Pin dependency versions.", "Audit dependencies for vulnerabilities."]
-    return generate_markdown_report("G", CATEGORIES["G"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "G", CATEGORIES["G"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_H():
@@ -205,7 +224,9 @@ def assess_H():
         score -= 5
 
     recs = ["Ensure CI runs on all PRs.", "Add CD pipelines for releases."]
-    return generate_markdown_report("H", CATEGORIES["H"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "H", CATEGORIES["H"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_I():
@@ -221,7 +242,9 @@ def assess_I():
         score -= 1
 
     recs = ["Enforce linting in CI.", "Use black for formatting."]
-    return generate_markdown_report("I", CATEGORIES["I"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "I", CATEGORIES["I"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_J():
@@ -240,7 +263,9 @@ def assess_J():
         score -= 2
 
     recs = ["Document API endpoints using OpenAPI.", "Version API endpoints."]
-    return generate_markdown_report("J", CATEGORIES["J"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "J", CATEGORIES["J"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_K():
@@ -251,7 +276,9 @@ def assess_K():
     findings.append("Assessed data handling patterns.")
 
     recs = ["Validate input data schemas.", "Sanitize database inputs."]
-    return generate_markdown_report("K", CATEGORIES["K"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "K", CATEGORIES["K"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_L():
@@ -265,14 +292,18 @@ def assess_L():
         if "node_modules" in f.parts or "venv" in f.parts:
             continue
         try:
-            results = assess_logging_content(f.read_text(encoding="utf-8", errors="ignore"))
+            results = assess_logging_content(
+                f.read_text(encoding="utf-8", errors="ignore")
+            )
             logging_usage += results["logging_usage"]
             print_usage += results["print_usage"]
         except Exception:
             pass
 
     score = 7.0
-    findings.append(f"Found {logging_usage} logging calls and {print_usage} print calls.")
+    findings.append(
+        f"Found {logging_usage} logging calls and {print_usage} print calls."
+    )
 
     if print_usage > logging_usage:
         findings.append("High usage of print statements detected.")
@@ -282,7 +313,9 @@ def assess_L():
         "Replace print statements with structured logging.",
         "Configure log levels.",
     ]
-    return generate_markdown_report("L", CATEGORIES["L"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "L", CATEGORIES["L"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_M():
@@ -294,7 +327,9 @@ def assess_M():
     findings.append(f"Found {len(config_files)} configuration files (yaml/toml).")
 
     recs = ["Centralize configuration management.", "Use .env for local overrides."]
-    return generate_markdown_report("M", CATEGORIES["M"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "M", CATEGORIES["M"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_N():
@@ -308,7 +343,9 @@ def assess_N():
         "Consider async processing for heavy loads.",
         "Implement caching strategies.",
     ]
-    return generate_markdown_report("N", CATEGORIES["N"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "N", CATEGORIES["N"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_O():
@@ -332,7 +369,9 @@ def assess_O():
         score -= 2
 
     recs = ["Refactor large functions.", "Keep dependencies updated."]
-    return generate_markdown_report("O", CATEGORIES["O"], score, "\n".join(findings), recs, DOCS_DIR)
+    return generate_markdown_report(
+        "O", CATEGORIES["O"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def run_all_assessments():

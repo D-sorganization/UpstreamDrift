@@ -4,7 +4,6 @@ Run a specific assessment (A-O) on the repository using shared utilities.
 """
 
 import argparse
-import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -21,7 +20,10 @@ logger = setup_script_logging(__name__)
 
 ASSESSMENTS = {
     "A": {"name": "Architecture", "description": "Code structure and organization"},
-    "B": {"name": "Hygiene & Quality", "description": "Linting, formatting, code quality"},
+    "B": {
+        "name": "Hygiene & Quality",
+        "description": "Linting, formatting, code quality",
+    },
     "C": {"name": "Documentation", "description": "README, docstrings, comments"},
     "G": {"name": "Testing", "description": "Test coverage, test quality"},
 }
@@ -29,7 +31,9 @@ ASSESSMENTS = {
 
 def run_assessment(assessment_id: str, output_path: Path) -> int:
     """Run a specific assessment and generate report."""
-    assessment = ASSESSMENTS.get(assessment_id, {"name": "General", "description": "Manual review required"})
+    assessment = ASSESSMENTS.get(
+        assessment_id, {"name": "General", "description": "Manual review required"}
+    )
     logger.info(f"Running Assessment {assessment_id}: {assessment['name']}...")
 
     findings = []
@@ -53,7 +57,9 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
             f"- Ruff check: {'✓ passed' if ruff['exit_code'] == 0 else '✗ issues found'}",
             f"- Black formatting: {'✓ formatted' if black['exit_code'] == 0 else '✗ needs formatting'}",
         ]
-        score -= (0 if ruff["exit_code"] == 0 else 2) + (0 if black["exit_code"] == 0 else 1)
+        score -= (0 if ruff["exit_code"] == 0 else 2) + (
+            0 if black["exit_code"] == 0 else 1
+        )
 
     elif assessment_id == "C":
         docs = check_docs_status()
@@ -66,14 +72,20 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
 
     elif assessment_id == "G":
         cnt = count_test_files()
-        findings = [f"- Test files found: {cnt}", "- Test coverage: Run pytest --cov for details"]
-        score -= (5 if cnt == 0 else (2 if cnt < 5 else 0))
+        findings = [
+            f"- Test files found: {cnt}",
+            "- Test coverage: Run pytest --cov for details",
+        ]
+        score -= 5 if cnt == 0 else (2 if cnt < 5 else 0)
 
     else:
-        findings = [f"- Python files analyzed: {len(py_files)}", "- Manual review recommended"]
+        findings = [
+            f"- Python files analyzed: {len(py_files)}",
+            "- Manual review recommended",
+        ]
 
     score = max(0, min(10, score))
-    
+
     report = f"""# Assessment {assessment_id}: {assessment['name']}
 **Date**: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 **Score**: {score}/10
@@ -86,7 +98,9 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
 """
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(report)
-    logger.info(f"✓ Assessment {assessment_id} saved to {output_path} (Score: {score}/10)")
+    logger.info(
+        f"✓ Assessment {assessment_id} saved to {output_path} (Score: {score}/10)"
+    )
     return 0
 
 
