@@ -56,7 +56,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_draggable_card_initialization(self) -> None:
         """Test that draggable model cards initialize correctly."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.launchers.ui_components import DraggableModelCard
 
         # Case 1: Parent has layout_edit_mode = True
         self.mock_launcher.layout_edit_mode = True
@@ -78,7 +78,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_mouse_press_initializes_drag(self) -> None:
         """Test that mouse press initializes drag position."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.launchers.ui_components import DraggableModelCard
 
         self.mock_launcher.layout_edit_mode = True
         card = DraggableModelCard(self.mock_models[0], self.mock_launcher)
@@ -112,7 +112,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_drop_event_triggers_swap(self) -> None:
         """Test that drop events trigger model swapping."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.launchers.ui_components import DraggableModelCard
 
         self.mock_launcher.layout_edit_mode = True
         card = DraggableModelCard(self.mock_models[0], self.mock_launcher)
@@ -143,7 +143,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_drop_event_ignores_invalid_data(self) -> None:
         """Test that drop events ignore invalid mime data."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.launchers.ui_components import DraggableModelCard
 
         card = DraggableModelCard(self.mock_models[0], self.mock_launcher)
 
@@ -164,7 +164,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_double_click_launches_model(self) -> None:
         """Test that double-click launches the model."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.launchers.ui_components import DraggableModelCard
 
         self.mock_launcher.launch_simulation = Mock()
 
@@ -538,14 +538,14 @@ class TestModelImageHandling(unittest.TestCase):
 
     def test_urdf_generator_image_mapping(self) -> None:
         """Test that URDF generator has image mapping."""
-        from src.launchers.golf_launcher import MODEL_IMAGES
+        from src.launchers.ui_components import MODEL_IMAGES
 
         self.assertIn("URDF Generator", MODEL_IMAGES)
         self.assertEqual(MODEL_IMAGES["URDF Generator"], "urdf_icon.png")
 
     def test_c3d_viewer_image_mapping(self) -> None:
         """Test that C3D viewer has image mapping."""
-        from src.launchers.golf_launcher import MODEL_IMAGES
+        from src.launchers.ui_components import MODEL_IMAGES
 
         self.assertIn("C3D Motion Viewer", MODEL_IMAGES)
         self.assertEqual(MODEL_IMAGES["C3D Motion Viewer"], "c3d_icon.png")
@@ -562,7 +562,7 @@ class TestModelImageHandling(unittest.TestCase):
         mock_model.description = "Test"
 
         # The image selection logic should work
-        from src.launchers.golf_launcher import MODEL_IMAGES
+        from src.launchers.ui_components import MODEL_IMAGES
 
         # Direct lookup should work
         img_name = MODEL_IMAGES.get(mock_model.name)
