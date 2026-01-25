@@ -10,7 +10,6 @@ The launcher now features:
 - Pre-loaded resources passed to main window (no duplicate loading)
 """
 
-import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -49,7 +48,7 @@ class UnifiedLauncher:
                 "PyQt6 is required to run the launcher. Install it with: pip install PyQt6"
             )
 
-    def mainloop(self) -> int:
+    def mainloop(self) -> None:
         """Start the launcher main loop with async startup.
 
         This method delegates to golf_launcher.main() which implements:
@@ -58,12 +57,11 @@ class UnifiedLauncher:
         - Real progress updates during startup
         - Pre-loaded resources passed to main window
 
-        Returns:
-            Exit code from the application
+        Does not return, calls sys.exit().
         """
         from .golf_launcher import main as golf_main
 
-        return golf_main()
+        golf_main()
 
     def show_status(self) -> None:
         """Display suite status information.
@@ -134,7 +132,7 @@ class UnifiedLauncher:
 
 
 # Convenience function for CLI usage
-def launch() -> int:
+def launch() -> None:
     """Launch the Golf Modeling Suite GUI with async startup.
 
     This is the recommended entry point for launching the GUI.
@@ -143,17 +141,15 @@ def launch() -> int:
     - Heavy modules loaded in background
     - Progress updates shown during loading
     - No duplicate resource loading
-
-    Returns:
-        Exit code
     """
     if not PYQT6_AVAILABLE:
-        return 1
+        logger.warning("PyQt6 not available.")
+        return
 
     # Delegate directly to golf_launcher.main() for async startup
     from .golf_launcher import main as golf_main
 
-    return golf_main()
+    golf_main()
 
 
 def show_status() -> None:
@@ -164,4 +160,4 @@ def show_status() -> None:
 
 if __name__ == "__main__":
     # Allow running this module directly
-    sys.exit(launch())
+    launch()

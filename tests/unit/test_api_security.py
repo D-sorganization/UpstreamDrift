@@ -469,5 +469,27 @@ class TestSecurityBestPractices:
         assert ratio < 1.5, "Timing difference suggests vulnerability to timing attacks"
 
 
+class TestPrefixHashing:
+    """Test API key prefix hashing."""
+
+    def test_compute_prefix_hash(self) -> None:
+        """Test SHA256 prefix hashing."""
+        from src.api.auth.security import compute_prefix_hash
+
+        prefix = "abcdefgh"
+        hash1 = compute_prefix_hash(prefix)
+
+        # Same prefix should give same hash
+        assert hash1 == compute_prefix_hash(prefix)
+
+        # Different prefix should give different hash
+        assert hash1 != compute_prefix_hash("12345678")
+
+        # Verify format (SHA256 hex digest)
+        assert len(hash1) == 64
+        import re
+        assert re.match(r"^[0-9a-f]{64}$", hash1)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

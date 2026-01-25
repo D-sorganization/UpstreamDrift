@@ -42,7 +42,7 @@ if TYPE_CHECKING:
 
 # Import theme if available
 try:
-    from shared.python.theme import Colors, Sizes, Weights, get_qfont  # noqa: F401
+    from src.shared.python.theme import Colors, Sizes, Weights, get_qfont  # noqa: F401
 
     THEME_AVAILABLE = True
 except ImportError:

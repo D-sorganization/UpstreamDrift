@@ -13,12 +13,33 @@ from __future__ import annotations
 import importlib.util
 import os
 import sys
+from collections.abc import Callable
 from pathlib import Path
 
 from src.shared.python.logging_config import get_logger
 from src.shared.python.subprocess_utils import run_command
 
 logger = get_logger(__name__)
+
+
+def invoke_main(main_func: Callable[[], int | None]) -> None:
+    """Standardized entry point for launcher scripts.
+
+    Orthogonality: Decouples the command-line entry/exit mechanics from
+    the launcher's operational logic.
+
+    Args:
+        main_func: The main function to execute.
+    """
+    try:
+        result = main_func()
+        sys.exit(result if result is not None else 0)
+    except KeyboardInterrupt:
+        logger.info("Interrupted by user.")
+        sys.exit(0)
+    except Exception as e:
+        logger.critical(f"Fatal launcher error: {e}", exc_info=True)
+        sys.exit(1)
 
 
 def check_python_dependencies(
