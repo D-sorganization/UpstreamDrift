@@ -280,7 +280,6 @@ def main() -> None:
         sys.exit(1)
     else:
         # success silent for pre-commit usually, but ok to print
-        pass
         sys.exit(0)
 
 

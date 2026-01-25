@@ -26,7 +26,7 @@ from shared.python.constants import (
     PINOCCHIO_LAUNCHER_SCRIPT,
     URDF_GENERATOR_SCRIPT,
 )
-from shared.python.launcher_utils import get_repo_root
+from shared.python.launcher_utils import get_repo_root, invoke_main
 from shared.python.logging_config import get_logger, setup_logging
 from shared.python.subprocess_utils import run_command
 
@@ -229,40 +229,34 @@ def main() -> int:
 
     args = parser.parse_args()
 
-    try:
-        if args.status:
-            show_basic_status()
-        elif args.urdf_generator:
-            launch_urdf_generator()
-        elif args.engine:
-            _launch_engine(args.engine)
-        elif args.local:
-            # Simple wrapper for local launcher
-            from launchers.golf_suite_launcher import main as local_main
+    if args.status:
+        show_basic_status()
+    elif args.urdf_generator:
+        launch_urdf_generator()
+    elif args.engine:
+        _launch_engine(args.engine)
+    elif args.local:
+        # Simple wrapper for local launcher
+        from launchers.golf_suite_launcher import main as local_main
 
-            local_main()
-        else:
-            return launch_gui()
-    except KeyboardInterrupt:
-        logger.info("Interrupted by user.")
-    except Exception as e:
-        logger.error(f"Launcher error: {e}")
-        return 1
+        local_main()
+    else:
+        return launch_gui()
 
     return 0
 
 
 # Backward compatibility wrappers for testing
-def launch_c3d_viewer():
+def launch_c3d_viewer() -> bool:
     logger.warning("launch_c3d_viewer is deprecated and removed.")
     return False
 
 
-def launch_gui_launcher():
+def launch_gui_launcher() -> int:
     return launch_gui()
 
 
-def launch_local_launcher():
+def launch_local_launcher() -> bool:
     from launchers.golf_suite_launcher import main as local_main
 
     try:
@@ -272,17 +266,17 @@ def launch_local_launcher():
         return False
 
 
-def launch_mujoco():
+def launch_mujoco() -> bool:
     return _launch_engine("mujoco")
 
 
-def launch_drake():
+def launch_drake() -> bool:
     return _launch_engine("drake")
 
 
-def launch_pinocchio():
+def launch_pinocchio() -> bool:
     return _launch_engine("pinocchio")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    invoke_main(main)

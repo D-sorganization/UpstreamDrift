@@ -29,22 +29,16 @@ from contextlib import contextmanager
 _USING_FULL_IMPLEMENTATION = False
 
 try:
-    from src.shared.python.logging_config import (
-        DEFAULT_LOG_FORMAT as LOG_FORMAT,
-    )
-    from src.shared.python.logging_config import (
-        get_logger as _get_logger,
-    )
-    from src.shared.python.logging_config import (
-        setup_logging as _setup_logging,
-    )
+    from src.shared.python.logging_config import DEFAULT_LOG_FORMAT as LOG_FORMAT
+    from src.shared.python.logging_config import get_logger as _get_logger
+    from src.shared.python.logging_config import setup_logging as _setup_logging
     from src.shared.python.reproducibility import (
-        DEFAULT_SEED,
         log_execution_time,  # Context manager - re-export directly
     )
     from src.shared.python.reproducibility import (
-        set_seeds as _set_seeds,
+        DEFAULT_SEED,
     )
+    from src.shared.python.reproducibility import set_seeds as _set_seeds
 
     _USING_FULL_IMPLEMENTATION = True
 

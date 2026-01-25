@@ -279,7 +279,6 @@ class SmoothPlaybackController(QObject):
     def _on_position_changed(self, value: float):
         """Called by QPropertyAnimation on every frame update"""
         # Position property setter handles the interpolation
-        pass
 
     def _on_animation_finished(self):
         """Called when animation completes"""
@@ -510,7 +509,8 @@ class SimulinkModelTab(QWidget):
             "• Hand midpoint tracking analysis"
         )
         placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        placeholder.setStyleSheet("""
+        placeholder.setStyleSheet(
+            """
             QLabel {
                 font-size: 16px;
                 color: #666;
@@ -519,7 +519,8 @@ class SimulinkModelTab(QWidget):
                 border-radius: 10px;
                 background-color: #f9f9f9;
             }
-        """)
+        """
+        )
 
         layout.addWidget(placeholder)
         self.setLayout(layout)
@@ -546,7 +547,8 @@ class ComparisonTab(QWidget):
             "• Performance optimization feedback"
         )
         placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        placeholder.setStyleSheet("""
+        placeholder.setStyleSheet(
+            """
             QLabel {
                 font-size: 16px;
                 color: #666;
@@ -555,7 +557,8 @@ class ComparisonTab(QWidget):
                 border-radius: 10px;
                 background-color: #f9f9f9;
             }
-        """)
+        """
+        )
 
         layout.addWidget(placeholder)
         self.setLayout(layout)
@@ -1056,7 +1059,8 @@ class GolfVisualizerMainWindow(QMainWindow):
 
     def _apply_modern_style(self):
         """Apply modern white theme"""
-        self.setStyleSheet("""
+        self.setStyleSheet(
+            """
             QMainWindow {
                 background-color: #ffffff;
                 color: #333333;
@@ -1190,7 +1194,8 @@ class GolfVisualizerMainWindow(QMainWindow):
                 color: #333333;
                 border-top: 1px solid #cccccc;
             }
-        """)
+        """
+        )
 
     def _load_motion_capture_data(self):
         """Load motion capture data"""

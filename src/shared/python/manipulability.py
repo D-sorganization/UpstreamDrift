@@ -39,8 +39,6 @@ CATASTROPHIC_SINGULARITY_THRESHOLD = 1e12  # [dimensionless]
 class SingularityError(Exception):
     """Raised when Jacobian is catastrophically ill-conditioned (κ > 1e12)."""
 
-    pass
-
 
 def check_jacobian_conditioning(
     J: np.ndarray, body_name: str, warn: bool = True

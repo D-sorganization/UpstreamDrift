@@ -52,8 +52,6 @@ class ValidationLevel(Enum):
 class PhysicsValidationError(ValueError):
     """Raised when physics inputs fail validation."""
 
-    pass
-
 
 # Physical plausibility bounds (based on human biomechanics)
 # Source: Zatsiorsky "Kinetics of Human Motion" (2002), Winter "Biomechanics" (2009)

@@ -389,7 +389,6 @@ class VideoPosePipeline:
         # This would convert the pose estimation keypoints to the format
         # expected by the marker mapping system
         # Implementation depends on the specific marker mapping interface
-        pass
 
     def _export_results(self, result: VideoProcessingResult, output_dir: Path) -> None:
         """Export processing results to files."""
