@@ -488,6 +488,7 @@ class TestPrefixHashing:
         # Verify format (SHA256 hex digest)
         assert len(hash1) == 64
         import re
+
         assert re.match(r"^[0-9a-f]{64}$", hash1)
 
 
