@@ -1,0 +1,66 @@
+name: Jules Auto-Assign Issues
+
+# Automatically comments @jules on new issues to trigger the fix workflow
+# This enables fully automated issue resolution
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  auto-assign:
+    runs-on: ubuntu-latest
+    # Skip if issue was created by a bot to prevent loops
+    if: "!contains(github.event.issue.user.login, '[bot]') && !contains(github.event.issue.user.login, 'github-actions')"
+    steps:
+      - name: Check Issue Labels
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get issue labels
+          LABELS='${{ toJson(github.event.issue.labels) }}'
+
+          # Skip if labeled with 'no-jules', 'question', 'documentation', or 'wontfix'
+          SKIP_LABELS="no-jules question documentation wontfix duplicate invalid"
+
+          for label in $SKIP_LABELS; do
+            if echo "$LABELS" | jq -e ".[] | select(.name == \"$label\")" > /dev/null 2>&1; then
+              echo "Skipping - issue has '$label' label"
+              echo "should_assign=false" >> $GITHUB_OUTPUT
+              exit 0
+            fi
+          done
+
+          echo "should_assign=true" >> $GITHUB_OUTPUT
+
+      - name: Comment @jules
+        if: steps.check.outputs.should_assign == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --body "$(cat <<'EOF'
+          @jules Please analyze and fix this issue.
+
+          ---
+          *Auto-assigned by Jules Auto-Assign workflow*
+          EOF
+          )"
+
+          echo "Commented @jules on issue #$ISSUE_NUMBER"
+
+      - name: Add Jules Label
+        if: steps.check.outputs.should_assign == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          # Create label if it doesn't exist
+          gh label create "jules-assigned" --color "7057ff" --description "Issue assigned to Jules AI" 2>/dev/null || true
+
+          # Add label to issue
+          gh issue edit "$ISSUE_NUMBER" --add-label "jules-assigned" || true
