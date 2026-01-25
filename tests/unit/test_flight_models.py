@@ -367,7 +367,9 @@ class TestTrajectoryStructure:
             assert point.position.shape == (3,)
             assert point.velocity.shape == (3,)
             assert np.linalg.norm(point.velocity) >= 0
-            assert point.position[2] >= -0.1  # Allow small ground penetration in ODE solver
+            assert (
+                point.position[2] >= -0.1
+            )  # Allow small ground penetration in ODE solver
 
     def test_trajectory_time_monotonic(
         self, driver_launch: UnifiedLaunchConditions
