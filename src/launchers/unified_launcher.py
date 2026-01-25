@@ -142,7 +142,8 @@ def launch() -> None:
     - No duplicate resource loading
     """
     if not PYQT6_AVAILABLE:
-        return 1
+        print("PyQt6 not available.")
+        return
 
     # Delegate directly to golf_launcher.main() for async startup
     from .golf_launcher import main as golf_main
