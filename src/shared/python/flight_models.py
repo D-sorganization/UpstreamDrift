@@ -17,7 +17,7 @@ from enum import Enum
 from typing import cast
 
 import numpy as np
-from scipy.integrate import solve_ivp
+from scipy.integrate import solve_ivp  # type: ignore
 
 from src.shared.python.logging_config import get_logger
 

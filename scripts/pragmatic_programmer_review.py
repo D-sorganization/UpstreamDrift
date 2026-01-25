@@ -33,11 +33,12 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from scripts.script_utils import run_main, setup_script_logging  # noqa: E402
-from src.shared.python.assessment.analysis import (  # noqa: E402
+# noqa: E402 -- Required for local imports from project root in standalone scripts
+from scripts.script_utils import run_main, setup_script_logging
+from src.shared.python.assessment.analysis import (
     get_detailed_function_metrics,
 )
-from src.shared.python.assessment.constants import (  # noqa: E402
+from src.shared.python.assessment.constants import (
     PRAGMATIC_PRINCIPLES as PRINCIPLES,
 )
 
@@ -125,7 +126,7 @@ def check_dry_violations(files: list[Path]) -> list[dict]:
     reported_count = 0
     for _chunk_hash, locations in code_blocks.items():
         if len(locations) > 1 and reported_count < 50:
-            files_involved = sorted(list({str(loc[0]) for loc in locations}))
+            files_involved = sorted({str(loc[0]) for loc in locations})
             issues.append(
                 {
                     "principle": "DRY",

@@ -16,6 +16,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+# noqa: E402 -- Required for local imports from project root in standalone scripts
 from scripts.script_utils import run_main, setup_script_logging
 from src.shared.python.assessment.analysis import classify_assessment_category
 
