@@ -33,7 +33,6 @@ from typing import Any
 class GolfSuiteError(Exception):
     """Base exception for Golf Modeling Suite errors."""
 
-    pass
 
 
 class EngineNotAvailableError(GolfSuiteError):

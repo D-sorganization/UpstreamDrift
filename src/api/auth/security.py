@@ -281,7 +281,6 @@ class UsageTracker:
 
     def __init__(self) -> None:
         """Initialize usage tracker."""
-        pass
 
     def check_quota(self, user: User, resource_type: str) -> bool:
         """Check if user has quota remaining for a resource.

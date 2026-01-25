@@ -255,7 +255,6 @@ class MockEngine:
 
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Mock set state."""
-        pass
 
 
 def create_simple_pendulum_xml(

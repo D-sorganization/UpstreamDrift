@@ -44,7 +44,6 @@ class TestDrakeStrict:
 
             # Since we are in a fresh process (ideally), just importing might be enough.
             # But the 'mod' variable scope is what we need.
-            pass
 
         # Re-import to capture reference (it will use the sys.modules cache we just populated/patched?)
         # Actually, simpler: define the class execution *inside* the patch if possible,

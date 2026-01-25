@@ -22,13 +22,11 @@ logger = get_logger(__name__)
 class OpenSimNotInstalledError(Exception):
     """Raised when OpenSim is not installed but is required."""
 
-    pass
 
 
 class OpenSimModelLoadError(Exception):
     """Raised when an OpenSim model fails to load."""
 
-    pass
 
 
 @dataclass

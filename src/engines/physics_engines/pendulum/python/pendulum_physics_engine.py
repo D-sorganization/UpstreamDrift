@@ -92,7 +92,6 @@ class PendulumPhysicsEngine(PhysicsEngine):
         # Pendulum dynamics are computed on-the-fly in step or accessor methods.
         # No explicit forward() pass needed to update internal buffers,
         # but we adhere to protocol.
-        pass
 
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Get the current state (positions, velocities)."""

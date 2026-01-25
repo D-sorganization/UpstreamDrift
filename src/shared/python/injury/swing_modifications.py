@@ -168,7 +168,6 @@ class SwingModificationRecommender:
 
     def __init__(self) -> None:
         """Initialize the swing modification recommender."""
-        pass
 
     def recommend(
         self,

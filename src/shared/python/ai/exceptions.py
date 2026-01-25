@@ -96,7 +96,6 @@ class AIConnectionError(AIProviderError):
     issues, DNS failures, or server unavailability.
     """
 
-    pass
 
 
 class AIRateLimitError(AIProviderError):

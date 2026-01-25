@@ -139,7 +139,6 @@ class DataProcessor:
         """Numba-accelerated scaling calculation"""
         # This would be implemented with proper Numba-compatible data access
         # For now, using regular NumPy approach
-        pass
 
     def extract_frame_data(self, frame_idx: int, datasets: dict) -> FrameData:
         """Extract and process single frame data efficiently"""
@@ -359,7 +358,6 @@ class OpenGLRenderer:
     def _compile_ground_shaders(self):
         """Compile shaders for ground plane with grid"""
         # Implementation for ground grid rendering
-        pass
 
     def _setup_geometry(self):
         """Create optimized geometry for body segments and club"""
@@ -417,23 +415,19 @@ class OpenGLRenderer:
     def _create_sphere_geometry(self):
         """Create optimized sphere geometry"""
         # Icosphere generation for smooth spheres
-        pass
 
     def _create_club_geometry(self):
         """Create detailed club geometry"""
         # Shaft: Simple cylinder
         # Clubhead: More complex geometry with realistic proportions
-        pass
 
     def _create_arrow_geometry(self):
         """Create arrow geometry for force/torque vectors"""
         # Arrow shaft + arrowhead
-        pass
 
     def _setup_lighting(self):
         """Configure realistic lighting"""
         # Set up uniforms for lighting calculations
-        pass
 
     def render_frame(
         self,

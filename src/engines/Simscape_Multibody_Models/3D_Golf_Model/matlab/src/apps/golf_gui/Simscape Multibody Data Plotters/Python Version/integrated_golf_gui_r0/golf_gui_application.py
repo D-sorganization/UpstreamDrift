@@ -279,7 +279,6 @@ class SmoothPlaybackController(QObject):
     def _on_position_changed(self, value: float):
         """Called by QPropertyAnimation on every frame update"""
         # Position property setter handles the interpolation
-        pass
 
     def _on_animation_finished(self):
         """Called when animation completes"""

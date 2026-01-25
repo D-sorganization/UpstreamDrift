@@ -269,13 +269,11 @@ class AdvancedGuiMethodsMixin:
             # (full_body vs upper_body)
             # This is a best-effort mapping for standard models.
             # In a robust system, these would be defined in the model config/metadata.
-
             # Default mapping for full body / upper body models in this repo
             # Based on inspection of XMLs, joints are named.
             # We need to find the qvel index for specific joints.
             # joint_names = [mujoco.mj_id2name(model, mujoco.mjtObj.mjOBJ_JOINT, i) \
             #                for i in range(model.njnt)]
-
             # Helper to find index
             model = self.sim_widget.model
 
