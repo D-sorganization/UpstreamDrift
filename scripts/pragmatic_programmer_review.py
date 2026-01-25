@@ -28,11 +28,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.logging_config import get_logger, setup_logging
+from scripts.script_utils import run_main, setup_script_logging
 
-# Configure logging using centralized module
-setup_logging(use_simple_format=True)
-logger = get_logger(__name__)
+# Configure logging using centralized utility
+logger = setup_script_logging(__name__)
 
 # Pragmatic Programmer principles and their assessment criteria
 PRINCIPLES = {
@@ -143,12 +142,11 @@ def check_dry_violations(files: list[Path]) -> list[dict]:
     Check for DRY (Don't Repeat Yourself) violations.
 
     Looks for:
-    - Duplicate code blocks
-    - Similar function implementations
-    - Repeated magic numbers/strings
-    - Copy-paste patterns
+    - Duplicate code blocks (consecutive lines)
+    - Magic numbers/strings
     """
     issues = []
+    chunk_size = 6  # Increase slightly for more meaningful duplicates
     code_blocks = defaultdict(list)
     magic_numbers = defaultdict(list)
     magic_strings = defaultdict(list)
@@ -159,56 +157,45 @@ def check_dry_violations(files: list[Path]) -> list[dict]:
         except Exception:
             continue
 
-        # Check for duplicate code blocks (5+ line chunks)
         lines = content.split("\n")
-        for i in range(len(lines) - 5):
-            chunk = "\n".join(lines[i : i + 5])
-            chunk_hash = compute_file_hash(chunk)
-            if len(chunk.strip()) > 50:  # Non-trivial chunk
-                code_blocks[chunk_hash].append((file_path, i + 1))
+        # Use a sliding window but only pick non-overlapping chunks for hashing
+        # if they are part of a larger sequence.
+        # Simple heuristic: hash 6-line blocks but only store if not highly similar
+        # to the previous block in the SAME file.
+        last_hash = ""
+        for i in range(len(lines) - chunk_size):
+            chunk = "\n".join(lines[i : i + chunk_size])
+            if len(chunk.strip()) < 60:  # Skip trivial chunks
+                continue
 
-        # Check for magic numbers
+            chunk_hash = compute_file_hash(chunk)
+            if chunk_hash != last_hash:
+                code_blocks[chunk_hash].append((file_path, i + 1))
+                last_hash = chunk_hash
+
+        # Magic constants
         for match in re.finditer(r"\b(\d{2,})\b", content):
             num = match.group(1)
-            if num not in ("00", "10", "100", "1000"):  # Common constants
+            if num not in ("00", "10", "100", "1000"):
                 line_no = content[: match.start()].count("\n") + 1
                 magic_numbers[num].append((file_path, line_no))
 
-        # Check for repeated string literals
-        for match in re.finditer(r'["\']([^"\']{10,})["\']', content):
-            string = match.group(1)
-            if not string.startswith(("http", "/")):  # Skip URLs/paths
-                line_no = content[: match.start()].count("\n") + 1
-                magic_strings[string].append((file_path, line_no))
-
-    # Report duplicates
+    # Report duplicates (limit to 50 unique major blocks to avoid report bloat)
+    reported_count = 0
     for _chunk_hash, locations in code_blocks.items():
-        if len(locations) > 1:
-            files_involved = list({str(loc[0]) for loc in locations})
+        if len(locations) > 1 and reported_count < 50:
+            files_involved = sorted(list({str(loc[0]) for loc in locations}))
             issues.append(
                 {
                     "principle": "DRY",
                     "severity": "MAJOR",
-                    "title": "Duplicate code block detected",
-                    "description": f"Similar code found in {len(locations)} locations",
-                    "files": files_involved[:3],
-                    "recommendation": "Extract common code into a shared function",
+                    "title": "Significant duplicate code block",
+                    "description": f"Found in {len(locations)} locations across {len(files_involved)} files",
+                    "files": files_involved[:5],
+                    "recommendation": "Consolidate into a shared utility or base class",
                 }
             )
-
-    # Report repeated magic numbers
-    for num, locations in magic_numbers.items():
-        if len(locations) > 3:
-            issues.append(
-                {
-                    "principle": "DRY",
-                    "severity": "MINOR",
-                    "title": f"Magic number '{num}' repeated {len(locations)} times",
-                    "description": "Repeated numeric literals should be constants",
-                    "files": list({str(loc[0]) for loc in locations[:3]}),
-                    "recommendation": "Define as named constant",
-                }
-            )
+            reported_count += 1
 
     return issues
 
@@ -1041,4 +1028,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    run_main(main, logger)

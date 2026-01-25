@@ -26,7 +26,7 @@ from shared.python.constants import (
     PINOCCHIO_LAUNCHER_SCRIPT,
     URDF_GENERATOR_SCRIPT,
 )
-from shared.python.launcher_utils import get_repo_root
+from shared.python.launcher_utils import get_repo_root, invoke_main
 from shared.python.logging_config import get_logger, setup_logging
 from shared.python.subprocess_utils import run_command
 
@@ -229,25 +229,19 @@ def main() -> int:
 
     args = parser.parse_args()
 
-    try:
-        if args.status:
-            show_basic_status()
-        elif args.urdf_generator:
-            launch_urdf_generator()
-        elif args.engine:
-            _launch_engine(args.engine)
-        elif args.local:
-            # Simple wrapper for local launcher
-            from launchers.golf_suite_launcher import main as local_main
+    if args.status:
+        show_basic_status()
+    elif args.urdf_generator:
+        launch_urdf_generator()
+    elif args.engine:
+        _launch_engine(args.engine)
+    elif args.local:
+        # Simple wrapper for local launcher
+        from launchers.golf_suite_launcher import main as local_main
 
-            local_main()
-        else:
-            return launch_gui()
-    except KeyboardInterrupt:
-        logger.info("Interrupted by user.")
-    except Exception as e:
-        logger.error(f"Launcher error: {e}")
-        return 1
+        local_main()
+    else:
+        return launch_gui()
 
     return 0
 
@@ -285,4 +279,4 @@ def launch_pinocchio():
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    invoke_main(main)
