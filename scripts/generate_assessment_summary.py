@@ -14,7 +14,14 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from scripts.script_utils import run_main, setup_script_logging
+import sys
+
+# Add project root to path for imports
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from scripts.script_utils import run_main, setup_script_logging  # noqa: E402
 
 # Configure logging using centralized utility
 logger = setup_script_logging(__name__)
@@ -30,6 +37,7 @@ def extract_score_from_report(report_path: Path) -> float:
             r"Overall.*?(\d+\.?\d*)",
             r"Score.*?(\d+\.?\d*)",
             r"\*\*(\d+\.?\d*)\*\*.*?/10",
+            r"\*\*Grade\*\*: (\d+\.?\d*)/10",
         ]
 
         for pattern in patterns:
@@ -205,7 +213,7 @@ def generate_summary(
     )
     output_md.parent.mkdir(parents=True, exist_ok=True)
     output_md.write_text(md_content)
-    logger.info(f"✓ Markdown summary saved to {output_md}")
+    logger.info(f"[OK] Markdown summary saved to {output_md}")
 
     category_scores_json = {
         code: {"score": scores.get(code, 0.0), "name": name}
@@ -221,7 +229,7 @@ def generate_summary(
     }
 
     output_json.write_text(json.dumps(json_data, indent=2))
-    logger.info(f"✓ JSON metrics saved to {output_json}")
+    logger.info(f"[OK] JSON metrics saved to {output_json}")
 
     return 0
 

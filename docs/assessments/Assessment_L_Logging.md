@@ -1,14 +1,11 @@
-# Assessment L: Logging
+# Assessment: Logging
 
 **Date**: 2026-01-24
-**Score**: 7.0/10
+**Grade**: 7.0/10
 
-## Findings
-
-- Found 199 logging calls.
-- Found 124 print calls.
+## Details
+Found 1393 logging calls and 1292 print calls.
 
 ## Recommendations
-
 1. Replace print statements with structured logging.
-1. Configure log levels.
+2. Configure log levels.

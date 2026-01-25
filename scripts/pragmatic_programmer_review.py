@@ -33,12 +33,11 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-# noqa: E402 -- Required for local imports from project root in standalone scripts
-from scripts.script_utils import run_main, setup_script_logging
-from src.shared.python.assessment.analysis import (
+from scripts.script_utils import run_main, setup_script_logging  # noqa: E402
+from src.shared.python.assessment.analysis import (  # noqa: E402
     get_detailed_function_metrics,
 )
-from src.shared.python.assessment.constants import (
+from src.shared.python.assessment.constants import (  # noqa: E402
     PRAGMATIC_PRINCIPLES as PRINCIPLES,
 )
 

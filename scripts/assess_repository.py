@@ -13,8 +13,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-# noqa: E402 -- Required for local imports from project root in standalone scripts
-from src.shared.python.assessment.analysis import (
+from src.shared.python.assessment.analysis import (  # noqa: E402
     assess_error_handling_content,
     assess_logging_content,
     calculate_complexity,
@@ -22,14 +21,14 @@ from src.shared.python.assessment.analysis import (
     get_python_metrics,
     grep_count,
 )
-from src.shared.python.assessment.constants import (
+from src.shared.python.assessment.constants import (  # noqa: E402
     CATEGORIES,
 )
-from src.shared.python.assessment.reporting import (
+from src.shared.python.assessment.reporting import (  # noqa: E402
     generate_issue_document,
     generate_markdown_report,
 )
-from src.shared.python.path_utils import get_repo_root
+from src.shared.python.path_utils import get_repo_root  # noqa: E402
 
 # Setup paths
 REPO_ROOT = get_repo_root()
@@ -443,7 +442,7 @@ def main():
     input_reports = [str(p.relative_to(REPO_ROOT)) for p in reports]
 
     cmd = [
-        "python3",
+        sys.executable,
         str(REPO_ROOT / "scripts" / "generate_assessment_summary.py"),
         "--input",
         *input_reports,

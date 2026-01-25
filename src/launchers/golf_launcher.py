@@ -720,10 +720,10 @@ class GolfLauncher(QMainWindow):
 
         # --- Launcher Grid ---
         # Scroll Area for Grid
-        self.scroll = QScrollArea()
-        self.scroll.setWidgetResizable(True)
-        self.scroll.setFrameShape(QFrame.Shape.NoFrame)
-        self.scroll.setStyleSheet("QScrollArea { background: transparent; }")
+        self.scroll_area = QScrollArea()
+        self.scroll_area.setWidgetResizable(True)
+        self.scroll_area.setFrameShape(QFrame.Shape.NoFrame)
+        self.scroll_area.setStyleSheet("QScrollArea { background: transparent; }")
 
         # Container for Grid
         self.grid_container = QWidget()
@@ -732,8 +732,8 @@ class GolfLauncher(QMainWindow):
         self.grid_layout.setSpacing(20)
         self.grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
-        self.scroll.setWidget(self.grid_container)
-        main_layout.addWidget(self.scroll, 1)
+        self.scroll_area.setWidget(self.grid_container)
+        main_layout.addWidget(self.scroll_area, 1)
 
         # --- Bottom Bar ---
         bottom_bar = QHBoxLayout()
@@ -900,9 +900,10 @@ class GolfLauncher(QMainWindow):
         # Clean current layout
         while self.grid_layout.count():
             item = self.grid_layout.takeAt(0)
-            widget = item.widget()
-            if widget:
-                widget.setParent(None)
+            if item:
+                widget = item.widget()
+                if widget:
+                    widget.setParent(None)
 
         # Filter models if search is active
         filtered_order = []

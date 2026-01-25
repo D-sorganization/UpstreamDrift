@@ -1,13 +1,11 @@
-# Assessment D: Error Handling
+# Assessment: Error Handling
 
 **Date**: 2026-01-24
-**Score**: 7.0/10
+**Grade**: 7.0/10
 
-## Findings
-
-- Found 337 try blocks and 320 except blocks.
+## Details
+Found 1113 try blocks and 1 bare except blocks.
 
 ## Recommendations
-
 1. Ensure specific exceptions are caught.
-1. Avoid bare except clauses.
+2. Avoid bare except clauses.
