@@ -17,29 +17,12 @@ from sqlalchemy.orm import Session
 from src.api.database import get_db
 
 from .models import APIKey, User, UserRole
-from .security import RoleChecker, security_manager, usage_tracker
-
-
-def compute_prefix_hash(prefix: str) -> str:
-    """Compute SHA256 hash of a non-sensitive prefix for database indexing.
-
-    This function is used to create a database index for fast API key lookup.
-    It hashes ONLY the first 8 characters of the key (not the full secret).
-
-    Args:
-        prefix: Non-sensitive 8-character prefix from the API key
-
-    Returns:
-        SHA256 hash of the prefix for database indexing
-
-    Note:
-        This is NOT password hashing. The actual API key authentication
-        uses bcrypt (see security_manager.verify_api_key).
-    """
-    import hashlib
-
-    return hashlib.sha256(prefix.encode()).hexdigest()
-
+from .security import (
+    RoleChecker,
+    compute_prefix_hash,
+    security_manager,
+    usage_tracker,
+)
 
 # Security scheme
 security = HTTPBearer()

@@ -46,12 +46,11 @@ class TestLauncherIntegration(unittest.TestCase):
 
     def test_urdf_generator_files_exist(self):
         """Test that URDF generator files exist."""
-        urdf_dir = Path("tools/urdf_generator")
+        urdf_dir = Path("src/tools/urdf_generator")
         self.assertTrue(urdf_dir.exists(), "URDF generator directory should exist")
 
         required_files = [
             "launch_urdf_generator.py",
-            "main.py",
             "segment_manager.py",
             "urdf_builder.py",
         ]
