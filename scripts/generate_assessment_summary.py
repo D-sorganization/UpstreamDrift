@@ -56,7 +56,7 @@ def extract_issues_from_report(report_path: Path) -> list[dict[str, Any]]:
     try:
         content = report_path.read_text(encoding="utf-8", errors="ignore")
         findings_section = re.search(
-            r"## (?:Findings|Details)\n(.*?)\n##", content, re.DOTALL
+            r"## (?:Findings|Details)\s*\n(.*?)(?:\n##|\Z)", content, re.DOTALL
         )
         if findings_section:
             findings_text = findings_section.group(1)

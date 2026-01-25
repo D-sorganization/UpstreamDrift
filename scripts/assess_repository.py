@@ -253,7 +253,7 @@ def assess_J():
     score = 7.5
 
     api_dir = REPO_ROOT / "api"
-    if api_dir.exists():
+    if api_dir.exists() and api_dir.is_dir():
         findings.append("api/ directory exists.")
         fastapi = grep_count(REPO_ROOT, "FastAPI", "api/**/*.py")
         if fastapi > 0:
