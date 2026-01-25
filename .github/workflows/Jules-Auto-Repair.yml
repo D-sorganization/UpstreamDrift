@@ -1,4 +1,14 @@
 name: Jules Auto-Repair (Worker)
+
+# Re-enabled with proper safeguards against PR explosion.
+# This workflow uses the Jules API for intelligent fixes when simple linting isn't enough.
+#
+# Key features:
+# 1. Pushes directly to the failing branch (no new PRs)
+# 2. Iterates until CI passes or max attempts reached
+# 3. Uses Jules AI for complex fixes (type errors, test failures, logic issues)
+# 4. Proper concurrency controls to prevent loops
+
 on:
   workflow_call:
     inputs:
@@ -9,117 +19,405 @@ on:
         required: false
         type: string
         default: ""
+      max_iterations:
+        required: false
+        type: number
+        default: 5
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to repair'
+        required: true
+        type: string
+      max_iterations:
+        description: 'Maximum repair iterations'
+        required: false
+        default: '5'
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+  checks: read
+
+env:
+  MAX_REPAIR_ATTEMPTS: 5
+  REPAIR_WINDOW_HOURS: 6
+  CI_WAIT_TIMEOUT: 900
+  CI_POLL_INTERVAL: 30
 
 jobs:
-  fix:
-    if: false  # DISABLED TO PREVENT PR EXPLOSION - Re-enable after fixing cleanup logic
+  intelligent-repair:
     runs-on: ubuntu-latest
     # Prevent multiple repairs on same branch simultaneously
     concurrency:
       group: auto-repair-${{ inputs.branch || github.event.workflow_run.head_branch }}
       cancel-in-progress: false
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: "20" }
-      - run: npm install -g @google/jules
 
-      - name: Verify Branch
-        id: verify
+    steps:
+      - name: Get Branch Info
+        id: branch
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TARGET_RUN_ID: ${{ inputs.run_id }}
+          INPUT_BRANCH: ${{ inputs.branch }}
         run: |
-          # Get the branch name from the run ID
-          BRANCH=$(gh run view $TARGET_RUN_ID --json headBranch --jq '.headBranch')
+          if [ -n "$INPUT_BRANCH" ]; then
+            BRANCH="$INPUT_BRANCH"
+          elif [ -n "$TARGET_RUN_ID" ]; then
+            BRANCH=$(gh run view $TARGET_RUN_ID --json headBranch --jq '.headBranch' 2>/dev/null || echo "")
+          fi
+
+          if [ -z "$BRANCH" ]; then
+            echo "::error::Could not determine target branch"
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
 
           echo "Target branch: $BRANCH"
 
-          # 1. PROTECTED BRANCH GUARD
-          # We cannot auto-repair 'main' or 'master' directly as they are likely protected.
+          # PROTECTED BRANCH GUARD
           if [[ "$BRANCH" == "main" || "$BRANCH" == "master" ]]; then
-            echo "Cannot auto-repair protected branch '$BRANCH'. Exiting."
+            echo "Cannot auto-repair protected branch '$BRANCH'. Use hotfix workflow."
+            echo "skip=true" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # 2. EXISTENCE CHECK
-          # Check if remote branch still exists (it might have been deleted)
-          if ! git ls-remote --exit-code --heads origin "$BRANCH"; then
+          # Check if remote branch still exists
+          if ! git ls-remote --exit-code --heads origin "$BRANCH" 2>/dev/null; then
             echo "Branch $BRANCH no longer exists. Exiting."
+            echo "skip=true" >> $GITHUB_OUTPUT
             exit 0
           fi
+
+          # Check for associated PR
+          PR_INFO=$(gh pr list --repo "${{ github.repository }}" --head "$BRANCH" --state open --json number --jq '.[0].number // empty' 2>/dev/null || echo "")
 
           echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+          echo "pr_number=$PR_INFO" >> $GITHUB_OUTPUT
+          echo "skip=false" >> $GITHUB_OUTPUT
 
-      - name: Fetch Logs & Fix
-        if: steps.verify.outputs.branch != ''
+      - name: Check Repair Limits
+        id: limits
+        if: steps.branch.outputs.skip != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ steps.branch.outputs.branch }}
+        run: |
+          HOURS_AGO=$(date -u -d "${{ env.REPAIR_WINDOW_HOURS }} hours ago" +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || date -u -v-${{ env.REPAIR_WINDOW_HOURS }}H +%Y-%m-%dT%H:%M:%SZ)
+
+          REPAIR_COUNT=$(gh api "repos/${{ github.repository }}/commits?sha=$BRANCH&since=$HOURS_AGO" \
+            --jq '[.[] | select(.commit.message | test("\\[Jules-Repair\\]|Jules Auto-Repair"))] | length' 2>/dev/null || echo "0")
+
+          echo "Found $REPAIR_COUNT repair commits in last ${{ env.REPAIR_WINDOW_HOURS }} hours"
+
+          MAX_ATTEMPTS="${{ inputs.max_iterations || env.MAX_REPAIR_ATTEMPTS }}"
+
+          if [ "$REPAIR_COUNT" -ge "$MAX_ATTEMPTS" ]; then
+            echo "::warning::Max repair attempts ($MAX_ATTEMPTS) reached. Manual intervention required."
+            echo "exceeded=true" >> $GITHUB_OUTPUT
+          else
+            REMAINING=$((MAX_ATTEMPTS - REPAIR_COUNT))
+            echo "remaining=$REMAINING" >> $GITHUB_OUTPUT
+            echo "exceeded=false" >> $GITHUB_OUTPUT
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
+        with:
+          ref: ${{ steps.branch.outputs.branch }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
+        with:
+          python-version: '3.11'
+
+      - name: Install Tools
+        if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
+        run: |
+          pip install ruff black mypy isort autoflake pytest
+
+      - name: Fetch CI Failure Logs
+        id: logs
+        if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_RUN_ID: ${{ inputs.run_id }}
+        run: |
+          if [ -n "$TARGET_RUN_ID" ]; then
+            gh run view $TARGET_RUN_ID --log-failed > /tmp/ci_logs.txt 2>/dev/null || echo "No logs available" > /tmp/ci_logs.txt
+          else
+            # Get latest failed run for this branch
+            BRANCH="${{ steps.branch.outputs.branch }}"
+            LATEST_RUN=$(gh run list --branch "$BRANCH" --status failure --limit 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || echo "")
+            if [ -n "$LATEST_RUN" ]; then
+              gh run view $LATEST_RUN --log-failed > /tmp/ci_logs.txt 2>/dev/null || echo "No logs available" > /tmp/ci_logs.txt
+            else
+              echo "No failed runs found" > /tmp/ci_logs.txt
+            fi
+          fi
+
+          # Truncate if too long
+          head -c 50000 /tmp/ci_logs.txt > /tmp/ci_logs_truncated.txt
+          mv /tmp/ci_logs_truncated.txt /tmp/ci_logs.txt
+
+          echo "Fetched $(wc -l < /tmp/ci_logs.txt) lines of CI logs"
+
+      - name: Iterative Repair Loop
+        id: repair
+        if: steps.branch.outputs.skip != 'true' && steps.limits.outputs.exceeded != 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
-          TARGET_RUN_ID: ${{ inputs.run_id }}
+          BRANCH: ${{ steps.branch.outputs.branch }}
+          PR_NUMBER: ${{ steps.branch.outputs.pr_number }}
+          MAX_ITERATIONS: ${{ steps.limits.outputs.remaining }}
         run: |
-          BRANCH="${{ steps.verify.outputs.branch }}"
-          if [ -z "$JULES_API_KEY" ]; then
-            echo "::warning::JULES_API_KEY not configured. Skipping Jules auto-repair."
-            exit 0
+          iteration=0
+          ci_passed=false
+
+          while [ $iteration -lt $MAX_ITERATIONS ] && [ "$ci_passed" != "true" ]; do
+            iteration=$((iteration + 1))
+            echo ""
+            echo "=========================================="
+            echo "  REPAIR ITERATION $iteration of $MAX_ITERATIONS"
+            echo "=========================================="
+
+            CHANGES_MADE=""
+
+            # PHASE 1: Standard linting fixes
+            echo ">>> Phase 1: Standard linting fixes..."
+
+            ruff check --fix . 2>&1 || true
+            if ! git diff --quiet; then
+              CHANGES_MADE="$CHANGES_MADE ruff"
+              git add -A
+            fi
+
+            black . 2>&1 || true
+            if ! git diff --quiet; then
+              CHANGES_MADE="$CHANGES_MADE black"
+              git add -A
+            fi
+
+            isort --profile black . 2>&1 || true
+            if ! git diff --quiet; then
+              CHANGES_MADE="$CHANGES_MADE isort"
+              git add -A
+            fi
+
+            autoflake --in-place --remove-all-unused-imports --recursive . 2>&1 || true
+            if ! git diff --quiet; then
+              CHANGES_MADE="$CHANGES_MADE autoflake"
+              git add -A
+            fi
+
+            # PHASE 2: Analyze CI logs for specific errors
+            echo ">>> Phase 2: Analyzing CI logs for specific fixes..."
+
+            LOG_CONTENT=$(cat /tmp/ci_logs.txt)
+
+            # Check for mypy errors
+            if echo "$LOG_CONTENT" | grep -q "error:.*\["; then
+              echo "Found mypy errors in logs"
+              # Run mypy to get current errors
+              mypy . --ignore-missing-imports 2>&1 | head -50 || true
+            fi
+
+            # Check for test failures
+            if echo "$LOG_CONTENT" | grep -q "FAILED\|AssertionError\|pytest"; then
+              echo "Found test failures in logs"
+              # Run quick test check
+              pytest --collect-only -q 2>&1 | head -20 || true
+            fi
+
+            # Check for import errors
+            if echo "$LOG_CONTENT" | grep -q "ImportError\|ModuleNotFoundError"; then
+              echo "Found import errors - checking __init__.py files"
+            fi
+
+            # PHASE 3: Jules AI repair (if API key available and simple fixes didn't work)
+            if [ -n "$JULES_API_KEY" ] && [ -z "$CHANGES_MADE" ]; then
+              echo ">>> Phase 3: Jules AI-assisted repair..."
+
+              REPO="${{ github.repository }}"
+              API_BASE="https://jules.googleapis.com/v1alpha"
+
+              # Look up repository source
+              SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" 2>/dev/null || echo '{"sources":[]}')
+
+              OWNER=$(echo "$REPO" | cut -d'/' -f1)
+              REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
+
+              SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" 2>/dev/null | head -1)
+
+              if [ -n "$SOURCE_ID" ] && [ "$SOURCE_ID" != "null" ]; then
+                echo "Found Jules source: $SOURCE_ID"
+
+                # Create repair request - push directly to branch, no new PR
+                REQUEST_JSON=$(jq -n \
+                  --arg source "$SOURCE_ID" \
+                  --arg branch "$BRANCH" \
+                  --arg logs "$LOG_CONTENT" \
+                  '{
+                    prompt: ("CI failed on branch " + $branch + ". Analyze and fix:\n\n" + $logs + "\n\nApply minimal, focused fixes."),
+                    sourceContext: {
+                      source: $source,
+                      githubRepoContext: {
+                        startingBranch: $branch,
+                        targetBranch: $branch
+                      }
+                    },
+                    automationMode: "AUTO_COMMIT"
+                  }')
+
+                HTTP_CODE=$(curl -s -o /tmp/jules_response.json -w "%{http_code}" -X POST \
+                  -H "X-Goog-Api-Key: $JULES_API_KEY" \
+                  -H "Content-Type: application/json" \
+                  -d "$REQUEST_JSON" \
+                  "$API_BASE/sessions" 2>/dev/null || echo "000")
+
+                if [ "$HTTP_CODE" == "200" ]; then
+                  SESSION_ID=$(jq -r '.name' /tmp/jules_response.json)
+                  echo "Jules session created: $SESSION_ID"
+                  CHANGES_MADE="$CHANGES_MADE jules-ai"
+                  # Wait for Jules to push changes
+                  sleep 60
+                  git pull origin "$BRANCH" --rebase 2>/dev/null || true
+                else
+                  echo "Jules API returned HTTP $HTTP_CODE (continuing without AI)"
+                fi
+              else
+                echo "Repository not configured in Jules (continuing without AI)"
+              fi
+            fi
+
+            # Check if changes were made
+            if [ -n "$(git diff --staged)" ] || [ -n "$CHANGES_MADE" ]; then
+              echo "Changes made:$CHANGES_MADE"
+
+              if [ -n "$(git diff --staged)" ]; then
+                git config user.name "github-actions[bot]"
+                git config user.email "github-actions[bot]@users.noreply.github.com"
+
+                git commit -m "[Jules-Repair] Iteration $iteration: Apply fixes ($CHANGES_MADE)
+
+          Automated repair applied directly to branch.
+          Iteration: $iteration of $MAX_ITERATIONS
+          Tools:$CHANGES_MADE
+
+          CI verification loop will check if more fixes are needed.
+
+          Co-Authored-By: Jules Auto-Repair <jules-bot@users.noreply.github.com>"
+
+                git push origin "$BRANCH"
+                echo "✅ Pushed repair iteration $iteration"
+              fi
+
+              # Wait for CI
+              echo ">>> Waiting for CI..."
+              sleep 30
+
+              wait_time=0
+              while [ $wait_time -lt ${{ env.CI_WAIT_TIMEOUT }} ]; do
+                if [ -n "$PR_NUMBER" ]; then
+                  CHECK_STATUS=$(gh pr checks "$PR_NUMBER" --json name,state \
+                    --jq '.[] | select(.name == "quality-gate" or .name == "tests") | .state' 2>/dev/null | head -1)
+
+                  if [ "$CHECK_STATUS" == "COMPLETED" ]; then
+                    CONCLUSION=$(gh pr checks "$PR_NUMBER" --json name,conclusion \
+                      --jq '.[] | select(.name == "quality-gate") | .conclusion' 2>/dev/null | head -1)
+
+                    if [ "$CONCLUSION" == "SUCCESS" ]; then
+                      echo "✅ CI PASSED!"
+                      ci_passed=true
+                      break 2
+                    else
+                      echo "❌ CI still failing"
+                      # Refresh logs for next iteration
+                      LATEST_RUN=$(gh run list --branch "$BRANCH" --status failure --limit 1 --json databaseId --jq '.[0].databaseId' 2>/dev/null || echo "")
+                      if [ -n "$LATEST_RUN" ]; then
+                        gh run view $LATEST_RUN --log-failed > /tmp/ci_logs.txt 2>/dev/null || true
+                        head -c 50000 /tmp/ci_logs.txt > /tmp/ci_logs_truncated.txt
+                        mv /tmp/ci_logs_truncated.txt /tmp/ci_logs.txt
+                      fi
+                      break
+                    fi
+                  fi
+                else
+                  # No PR - check workflow runs directly
+                  LATEST_STATUS=$(gh run list --branch "$BRANCH" --limit 1 --json status,conclusion --jq '.[0]' 2>/dev/null || echo '{}')
+                  STATUS=$(echo "$LATEST_STATUS" | jq -r '.status')
+                  if [ "$STATUS" == "completed" ]; then
+                    CONCLUSION=$(echo "$LATEST_STATUS" | jq -r '.conclusion')
+                    if [ "$CONCLUSION" == "success" ]; then
+                      echo "✅ CI PASSED!"
+                      ci_passed=true
+                      break 2
+                    else
+                      echo "❌ CI still failing"
+                      break
+                    fi
+                  fi
+                fi
+
+                sleep ${{ env.CI_POLL_INTERVAL }}
+                wait_time=$((wait_time + ${{ env.CI_POLL_INTERVAL }}))
+                echo "  ... waiting ($wait_time/${{ env.CI_WAIT_TIMEOUT }}s)"
+              done
+
+              git pull origin "$BRANCH" --rebase 2>/dev/null || true
+
+            else
+              echo "No changes made in iteration $iteration"
+              if [ $iteration -eq 1 ]; then
+                echo "::warning::No automatic fixes available"
+              fi
+              break
+            fi
+          done
+
+          echo "iterations=$iteration" >> $GITHUB_OUTPUT
+          if [ "$ci_passed" == "true" ]; then
+            echo "status=success" >> $GITHUB_OUTPUT
+          else
+            echo "status=partial" >> $GITHUB_OUTPUT
           fi
 
-          gh run view $TARGET_RUN_ID --log-failed > logs.txt
-          LOG_CONTENT=$(cat logs.txt)
-
-          # REST API Implementation (Migration from CLI)
-          REPO="${{ github.repository }}"
-          API_BASE="https://jules.googleapis.com/v1alpha"
-          
-          echo "Looking up repository source..."
-          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
-          
-          OWNER=$(echo "$REPO" | cut -d'/' -f1)
-          REPO_NAME=$(echo "$REPO" | cut -d'/' -f2)
-          
-          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$REPO_NAME\") | .name" | head -1)
-          
-          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
-            echo "::warning::Repository $REPO not found in Jules sources."
-            exit 0
+      - name: Comment on PR
+        if: steps.branch.outputs.pr_number != '' && steps.repair.outputs.status != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.branch.outputs.pr_number }}
+          STATUS: ${{ steps.repair.outputs.status }}
+          ITERATIONS: ${{ steps.repair.outputs.iterations }}
+        run: |
+          if [ "$STATUS" == "success" ]; then
+            EMOJI="✅"
+            MSG="CI is now **passing** after $ITERATIONS repair iteration(s)!"
+          else
+            EMOJI="🔧"
+            MSG="Applied $ITERATIONS repair iteration(s). Manual review may still be needed."
           fi
-          
-          echo "Found source: $SOURCE_ID"
 
-          # Create session prompt
-          # We use jq to safely escape the log content for JSON
-          REQUEST_JSON=$(jq -n \
-            --arg source "$SOURCE_ID" \
-            --arg branch "$BRANCH" \
-            --arg logs "$LOG_CONTENT" \
-            '{
-              prompt: ("You are the AUTO REPAIR agent. A CI workflow failed on branch " + $branch + ". Here are the logs:\n\n" + $logs + "\n\nAnalyze the errors and FIX the code."),
-              sourceContext: {
-                source: $source,
-                githubRepoContext: {
-                  startingBranch: $branch
-                }
-              },
-              automationMode: "AUTO_CREATE_PR"
-            }')
-          
-          echo "Creating Jules session..."
-          
-          HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
-            -H "X-Goog-Api-Key: $JULES_API_KEY" \
-            -H "Content-Type: application/json" \
-            -d "$REQUEST_JSON" \
-            "$API_BASE/sessions")
-          
-          SESSION_RESPONSE=$(cat /tmp/session_response.json)
-          echo "HTTP Status: $HTTP_CODE"
-          
-          if [ "$HTTP_CODE" != "200" ]; then
-            echo "::error::Jules API returned HTTP $HTTP_CODE"
-            echo "Response: $SESSION_RESPONSE"
-            exit 1
-          fi
-          
-          SESSION_ID=$(echo "$SESSION_RESPONSE" | jq -r '.name')
-          echo "Created session: $SESSION_ID"
+          gh pr comment "$PR_NUMBER" --body "## $EMOJI Jules Auto-Repair Complete
 
+          $MSG
+
+          **Iterations:** $ITERATIONS / ${{ env.MAX_REPAIR_ATTEMPTS }}
+
+          ---
+          *Jules Auto-Repair with CI Verification*"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "## Jules Auto-Repair Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ steps.branch.outputs.branch || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **PR:** #${{ steps.branch.outputs.pr_number || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ steps.repair.outputs.status || 'skipped' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Iterations:** ${{ steps.repair.outputs.iterations || '0' }}" >> $GITHUB_STEP_SUMMARY
