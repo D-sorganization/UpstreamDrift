@@ -2,7 +2,7 @@
 
 **Repository**: Golf_Modeling_Suite
 **Date**: 2026-01-24
-**Files Analyzed**: 810
+**Files Analyzed**: 813
 
 ## Overall Score: 5.7/10
 
@@ -22,7 +22,7 @@
 ## Issue Summary
 
 - **Critical**: 0
-- **Major**: 694
+- **Major**: 691
 - **Minor**: 1
 
 ## Detailed Findings
@@ -68,6 +68,16 @@
   - Found in 2 locations across 2 files
   - Recommendation: Consolidate into a shared utility or base class
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\examples\03_injury_risk_tutorial.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\engines\physics_engines\mujoco\python\mujoco_humanoid_golf\__main__.py
+
+- [!] **Significant duplicate code block**
+  - Found in 2 locations across 1 files
+  - Recommendation: Consolidate into a shared utility or base class
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\analyze_completist_data.py
+
+- [!] **Significant duplicate code block**
+  - Found in 4 locations across 4 files
+  - Recommendation: Consolidate into a shared utility or base class
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\assess_repository.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\create_issues_from_assessment.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py
 
 - [!] **Significant duplicate code block**
   - Found in 3 locations across 2 files
@@ -155,6 +165,21 @@
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\create_favicon.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\create_high_quality_favicon.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\create_windows_optimized_icon.py
 
 - [!] **Significant duplicate code block**
+  - Found in 2 locations across 2 files
+  - Recommendation: Consolidate into a shared utility or base class
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\create_issues_from_assessment.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\shared\python\secure_subprocess.py
+
+- [!] **Significant duplicate code block**
+  - Found in 3 locations across 3 files
+  - Recommendation: Consolidate into a shared utility or base class
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\create_issues_from_assessment.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\pragmatic_programmer_review.py
+
+- [!] **Significant duplicate code block**
+  - Found in 3 locations across 3 files
+  - Recommendation: Consolidate into a shared utility or base class
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\create_issues_from_assessment.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\pragmatic_programmer_review.py
+
+- [!] **Significant duplicate code block**
   - Found in 3 locations across 3 files
   - Recommendation: Consolidate into a shared utility or base class
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\create_issues_from_assessment.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\pragmatic_programmer_review.py
@@ -172,15 +197,35 @@
 - [!] **Significant duplicate code block**
   - Found in 2 locations across 2 files
   - Recommendation: Consolidate into a shared utility or base class
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\pragmatic_programmer_review.py
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\shared\python\assessment\constants.py
 
 - [!] **Significant duplicate code block**
   - Found in 2 locations across 2 files
   - Recommendation: Consolidate into a shared utility or base class
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\pragmatic_programmer_review.py
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\shared\python\assessment\constants.py
 
 - [!] **Significant duplicate code block**
-  - Found in 304 locations across 142 files
+  - Found in 2 locations across 2 files
+  - Recommendation: Consolidate into a shared utility or base class
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\shared\python\assessment\constants.py
+
+- [!] **Significant duplicate code block**
+  - Found in 2 locations across 2 files
+  - Recommendation: Consolidate into a shared utility or base class
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\shared\python\assessment\constants.py
+
+- [!] **Significant duplicate code block**
+  - Found in 2 locations across 2 files
+  - Recommendation: Consolidate into a shared utility or base class
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\shared\python\assessment\constants.py
+
+- [!] **Significant duplicate code block**
+  - Found in 2 locations across 2 files
+  - Recommendation: Consolidate into a shared utility or base class
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\shared\python\assessment\constants.py
+
+- [!] **Significant duplicate code block**
+  - Found in 305 locations across 142 files
   - Recommendation: Consolidate into a shared utility or base class
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\maintain_workflows.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\api\server.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\engines\Simscape_Multibody_Models\3D_Golf_Model\matlab\src\apps\golf_gui\Simscape Multibody Data Plotters\Python Version\golf_gui_r0\golf_camera_system.py
 
@@ -234,51 +279,6 @@
   - Recommendation: Consolidate into a shared utility or base class
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\migrate_api_keys.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\api\auth\dependencies.py
 
-- [!] **Significant duplicate code block**
-  - Found in 2 locations across 2 files
-  - Recommendation: Consolidate into a shared utility or base class
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\migrate_api_keys.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\api\auth\dependencies.py
-
-- [!] **Significant duplicate code block**
-  - Found in 2 locations across 1 files
-  - Recommendation: Consolidate into a shared utility or base class
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\perform_phase_1_cleanup.py
-
-- [!] **Significant duplicate code block**
-  - Found in 2 locations across 1 files
-  - Recommendation: Consolidate into a shared utility or base class
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\pragmatic_programmer_review.py
-
-- [!] **Significant duplicate code block**
-  - Found in 2 locations across 1 files
-  - Recommendation: Consolidate into a shared utility or base class
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\pragmatic_programmer_review.py
-
-- [!] **Significant duplicate code block**
-  - Found in 2 locations across 1 files
-  - Recommendation: Consolidate into a shared utility or base class
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\pragmatic_programmer_review.py
-
-- [!] **Significant duplicate code block**
-  - Found in 2 locations across 1 files
-  - Recommendation: Consolidate into a shared utility or base class
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\pragmatic_programmer_review.py
-
-- [!] **Significant duplicate code block**
-  - Found in 32 locations across 32 files
-  - Recommendation: Consolidate into a shared utility or base class
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\refactor_dry_orthogonality.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\engines\physics_engines\mujoco\python\mujoco_humanoid_golf\advanced_gui_methods.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\src\engines\physics_engines\mujoco\python\mujoco_humanoid_golf\counterfactuals.py
-
-- [!] **Significant duplicate code block**
-  - Found in 5 locations across 1 files
-  - Recommendation: Consolidate into a shared utility or base class
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\refactor_dry_orthogonality.py
-
-- [!] **Significant duplicate code block**
-  - Found in 2 locations across 1 files
-  - Recommendation: Consolidate into a shared utility or base class
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\refactor_dry_orthogonality.py
-
 ### Orthogonality & Decoupling
 
 - [!] **God function: main (62 lines)**
@@ -296,7 +296,7 @@
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\examples\03_injury_risk_tutorial.py
 
-- [!] **God function: generate_report (61 lines)**
+- [!] **God function: generate_report (64 lines)**
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\analyze_completist_data.py
@@ -311,7 +311,7 @@
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\check_system_health.py
 
-- [!] **God function: diagnose_and_fix_icons (60 lines)**
+- [!] **God function: diagnose_and_fix_icons (62 lines)**
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\diagnose_icon_quality.py
@@ -326,7 +326,7 @@
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py
 
-- [!] **God function: generate_summary (62 lines)**
+- [!] **God function: generate_summary (72 lines)**
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\generate_assessment_summary.py
@@ -341,7 +341,7 @@
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\migrate_api_keys.py
 
-- [!] **God function: check_dry_violations (61 lines)**
+- [!] **God function: check_dry_violations (60 lines)**
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\pragmatic_programmer_review.py
@@ -426,7 +426,7 @@
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\refactor_dry_orthogonality.py
 
-- [!] **God function: run_assessment (61 lines)**
+- [!] **God function: run_assessment (73 lines)**
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\run_assessment.py
@@ -475,6 +475,11 @@
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\tests\test_docker_integration.py
+
+- [!] **God function: test_docker_launch_command_structure (53 lines)**
+  - Functions over 50 lines violate single responsibility
+  - Recommendation: Break into smaller, focused functions
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\tests\test_launcher_fixes.py
 
 - [!] **God function: test_layout_save_load_integration (51 lines)**
   - Functions over 50 lines violate single responsibility
@@ -656,35 +661,25 @@
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\api\server.py
 
-- [!] **God function: run (55 lines)**
+- [!] **God function: analyze_video (85 lines)**
+  - Functions over 50 lines violate single responsibility
+  - Recommendation: Break into smaller, focused functions
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\api\server.py
+
+- [!] **God function: analyze_video_async (53 lines)**
+  - Functions over 50 lines violate single responsibility
+  - Recommendation: Break into smaller, focused functions
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\api\server.py
+
+- [!] **God function: _process_video_background (60 lines)**
+  - Functions over 50 lines violate single responsibility
+  - Recommendation: Break into smaller, focused functions
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\api\server.py
+
+- [!] **God function: run (62 lines)**
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\docker_manager.py
-
-- [!] **God function: main (98 lines)**
-  - Functions over 50 lines violate single responsibility
-  - Recommendation: Break into smaller, focused functions
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
-
-- [!] **God function: drawContents (115 lines)**
-  - Functions over 50 lines violate single responsibility
-  - Recommendation: Break into smaller, focused functions
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
-
-- [!] **God function: setup_ui (113 lines)**
-  - Functions over 50 lines violate single responsibility
-  - Recommendation: Break into smaller, focused functions
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
-
-- [!] **God function: run (66 lines)**
-  - Functions over 50 lines violate single responsibility
-  - Recommendation: Break into smaller, focused functions
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
-
-- [!] **God function: setup_ui (96 lines)**
-  - Functions over 50 lines violate single responsibility
-  - Recommendation: Break into smaller, focused functions
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
 
 - [!] **God function: __init__ (107 lines)**
   - Functions over 50 lines violate single responsibility
@@ -701,47 +696,22 @@
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
 
-- [!] **God function: init_ui (179 lines)**
+- [!] **God function: init_ui (175 lines)**
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
 
-- [!] **God function: _rebuild_grid (75 lines)**
+- [!] **God function: update_launch_button (53 lines)**
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
 
-- [!] **God function: create_model_card (73 lines)**
+- [!] **God function: launch_simulation (60 lines)**
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
 
-- [!] **God function: _launch_urdf_generator (67 lines)**
-  - Functions over 50 lines violate single responsibility
-  - Recommendation: Break into smaller, focused functions
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
-
-- [!] **God function: _launch_c3d_viewer (77 lines)**
-  - Functions over 50 lines violate single responsibility
-  - Recommendation: Break into smaller, focused functions
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
-
-- [!] **God function: _launch_matlab_app (61 lines)**
-  - Functions over 50 lines violate single responsibility
-  - Recommendation: Break into smaller, focused functions
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
-
-- [!] **God function: apply_styles (78 lines)**
-  - Functions over 50 lines violate single responsibility
-  - Recommendation: Break into smaller, focused functions
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
-
-- [!] **God function: launch_simulation (87 lines)**
-  - Functions over 50 lines violate single responsibility
-  - Recommendation: Break into smaller, focused functions
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
-
-- [!] **God function: _launch_docker_container (112 lines)**
+- [!] **God function: _launch_docker_container (85 lines)**
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
@@ -765,6 +735,16 @@
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\shot_tracer.py
+
+- [!] **God function: drawContents (101 lines)**
+  - Functions over 50 lines violate single responsibility
+  - Recommendation: Break into smaller, focused functions
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\ui_components.py
+
+- [!] **God function: setup_ui (70 lines)**
+  - Functions over 50 lines violate single responsibility
+  - Recommendation: Break into smaller, focused functions
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\ui_components.py
 
 - [!] **God function: check_links (54 lines)**
   - Functions over 50 lines violate single responsibility
@@ -1051,7 +1031,7 @@
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\shared\python\ground_reaction_forces.py
 
-- [!] **God function: create_optimized_icon (71 lines)**
+- [!] **God function: create_optimized_icon (69 lines)**
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\shared\python\image_utils.py
@@ -3441,6 +3421,16 @@
   - Recommendation: Break into smaller, focused functions
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\engines\pendulum_models\python\double_pendulum_model\ui\pendulum_pyqt_app.py
 
+- [!] **God function: get_current_user_from_api_key (104 lines)**
+  - Functions over 50 lines violate single responsibility
+  - Recommendation: Break into smaller, focused functions
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\api\auth\dependencies.py
+
+- [!] **God function: run_simulation (86 lines)**
+  - Functions over 50 lines violate single responsibility
+  - Recommendation: Break into smaller, focused functions
+  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\api\services\simulation_service.py
+
 - [!] **God function: main (52 lines)**
   - Functions over 50 lines violate single responsibility
   - Recommendation: Break into smaller, focused functions
@@ -3467,11 +3457,6 @@
   - Configuration should be external, not hardcoded
   - Recommendation: Use environment variables or config files
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\api\server.py
-
-- [!] **Hardcoded port**
-  - Configuration should be external, not hardcoded
-  - Recommendation: Use environment variables or config files
-  - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\src\launchers\golf_launcher.py
 
 - [!] **Hardcoded API key**
   - Configuration should be external, not hardcoded
@@ -3506,7 +3491,7 @@
 
 ### Error Handling & Robustness
 
-- [!] **Overly broad exception handling (500 found)**
+- [!] **Overly broad exception handling (502 found)**
   - Catching 'Exception' hides specific errors
   - Recommendation: Catch specific exception types
   - Files: C:\Users\diete\Repositories\Golf_Modeling_Suite\launch_golf_suite.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\setup_golf_suite.py, C:\Users\diete\Repositories\Golf_Modeling_Suite\scripts\apply_quick_fixes.py

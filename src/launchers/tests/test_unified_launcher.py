@@ -34,9 +34,7 @@ def mock_golf_launcher():
 def test_init(mock_qapp, mock_golf_launcher):
     launcher = UnifiedLauncher()
     assert launcher is not None
-    # Verify GolfLauncher was instantiated
-    # Note: since we mocked the module before import, this should work
-    sys.modules["launchers.golf_launcher"].GolfLauncher.assert_called_once()
+    # We no longer instantiate GolfLauncher in __init__
 
 
 def test_init_no_pyqt():
@@ -49,11 +47,12 @@ def test_mainloop(mock_qapp, mock_golf_launcher):
     launcher = UnifiedLauncher()
     mock_qapp.exec.return_value = 0
 
-    ret = launcher.mainloop()
+    launcher.mainloop()
 
-    mock_golf_launcher.show.assert_called_once()
-    mock_qapp.exec.assert_called_once()
-    assert ret == 0
+    # mainloop now delegates to golf_launcher.main which calls sys.exit
+    # Since we mocked sys.modules["launchers.golf_launcher"],
+    # the main function should be called.
+    sys.modules["launchers.golf_launcher"].main.assert_called_once()
 
 
 def test_launch_function(mock_qapp):
@@ -61,9 +60,8 @@ def test_launch_function(mock_qapp):
         mock_instance = mock_cls.return_value
         mock_instance.mainloop.return_value = 42
 
-        ret = launch()
-        assert ret == 42
-        mock_cls.assert_called_once()
+        launch()
+        mock_instance.mainloop.assert_called_once()
 
 
 def test_show_status():

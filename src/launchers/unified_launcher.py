@@ -49,7 +49,7 @@ class UnifiedLauncher:
                 "PyQt6 is required to run the launcher. Install it with: pip install PyQt6"
             )
 
-    def mainloop(self) -> int:
+    def mainloop(self) -> None:
         """Start the launcher main loop with async startup.
 
         This method delegates to golf_launcher.main() which implements:
@@ -58,12 +58,11 @@ class UnifiedLauncher:
         - Real progress updates during startup
         - Pre-loaded resources passed to main window
 
-        Returns:
-            Exit code from the application
+        Does not return, calls sys.exit().
         """
         from .golf_launcher import main as golf_main
 
-        return golf_main()
+        golf_main()
 
     def show_status(self) -> None:
         """Display suite status information.
@@ -153,7 +152,8 @@ def launch() -> int:
     # Delegate directly to golf_launcher.main() for async startup
     from .golf_launcher import main as golf_main
 
-    return golf_main()
+    golf_main()
+    return 0
 
 
 def show_status() -> None:

@@ -247,16 +247,16 @@ def main() -> int:
 
 
 # Backward compatibility wrappers for testing
-def launch_c3d_viewer():
+def launch_c3d_viewer() -> bool:
     logger.warning("launch_c3d_viewer is deprecated and removed.")
     return False
 
 
-def launch_gui_launcher():
+def launch_gui_launcher() -> int:
     return launch_gui()
 
 
-def launch_local_launcher():
+def launch_local_launcher() -> bool:
     from launchers.golf_suite_launcher import main as local_main
 
     try:
@@ -266,15 +266,15 @@ def launch_local_launcher():
         return False
 
 
-def launch_mujoco():
+def launch_mujoco() -> bool:
     return _launch_engine("mujoco")
 
 
-def launch_drake():
+def launch_drake() -> bool:
     return _launch_engine("drake")
 
 
-def launch_pinocchio():
+def launch_pinocchio() -> bool:
     return _launch_engine("pinocchio")
 
 

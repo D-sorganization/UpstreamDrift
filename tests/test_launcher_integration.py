@@ -117,7 +117,8 @@ class TestLauncherIntegration(unittest.TestCase):
         the launcher UI code. Consider using setObjectName() in future refactors.
         """
         try:
-            from src.launchers.golf_launcher import GRID_COLUMNS, MODEL_IMAGES
+            from src.launchers.golf_launcher import GRID_COLUMNS
+            from src.launchers.ui_components import MODEL_IMAGES
 
             self.assertEqual(GRID_COLUMNS, 4, "Grid should be 3x4")
             self.assertIn(

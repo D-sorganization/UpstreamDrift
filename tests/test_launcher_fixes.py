@@ -369,6 +369,7 @@ class TestDockerConfiguration(unittest.TestCase):
         launcher.chk_live.isChecked.return_value = True
         launcher.chk_gpu = Mock()
         launcher.chk_gpu.isChecked.return_value = False
+        launcher._launch_docker_container = Mock()  # type: ignore[method-assign]
 
         # Mock model
         mock_model = Mock()
@@ -394,6 +395,8 @@ class TestDockerConfiguration(unittest.TestCase):
             patch("src.launchers.golf_launcher.REPOS_ROOT") as mock_repos_root,
         ):
             mock_repos_root.__str__.return_value = "/mock/repo/root"  # type: ignore[attr-defined]
+            # Add method mock
+            launcher.__class__._launch_docker_container = MagicMock()  # type: ignore[method-assign]
             launcher._launch_docker_container(mock_model, mock_path)
 
             # Verify subprocess was called

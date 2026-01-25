@@ -538,14 +538,14 @@ class TestModelImageHandling(unittest.TestCase):
 
     def test_urdf_generator_image_mapping(self) -> None:
         """Test that URDF generator has image mapping."""
-        from src.launchers.golf_launcher import MODEL_IMAGES
+        from src.launchers.ui_components import MODEL_IMAGES
 
         self.assertIn("URDF Generator", MODEL_IMAGES)
         self.assertEqual(MODEL_IMAGES["URDF Generator"], "urdf_icon.png")
 
     def test_c3d_viewer_image_mapping(self) -> None:
         """Test that C3D viewer has image mapping."""
-        from src.launchers.golf_launcher import MODEL_IMAGES
+        from src.launchers.ui_components import MODEL_IMAGES
 
         self.assertIn("C3D Motion Viewer", MODEL_IMAGES)
         self.assertEqual(MODEL_IMAGES["C3D Motion Viewer"], "c3d_icon.png")
@@ -562,7 +562,7 @@ class TestModelImageHandling(unittest.TestCase):
         mock_model.description = "Test"
 
         # The image selection logic should work
-        from src.launchers.golf_launcher import MODEL_IMAGES
+        from src.launchers.ui_components import MODEL_IMAGES
 
         # Direct lookup should work
         img_name = MODEL_IMAGES.get(mock_model.name)

@@ -4,7 +4,7 @@
 **Grade**: 7.0/10
 
 ## Details
-Found 1113 try blocks and 1 bare except blocks.
+Found 1114 try blocks and 1 bare except blocks.
 
 ## Recommendations
 1. Ensure specific exceptions are caught.
