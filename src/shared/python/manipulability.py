@@ -40,7 +40,6 @@ class SingularityError(Exception):
     """Raised when Jacobian is catastrophically ill-conditioned (κ > 1e12)."""
 
 
-
 def check_jacobian_conditioning(
     J: np.ndarray, body_name: str, warn: bool = True
 ) -> float:

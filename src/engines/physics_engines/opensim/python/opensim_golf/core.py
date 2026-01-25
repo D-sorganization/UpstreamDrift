@@ -23,10 +23,8 @@ class OpenSimNotInstalledError(Exception):
     """Raised when OpenSim is not installed but is required."""
 
 
-
 class OpenSimModelLoadError(Exception):
     """Raised when an OpenSim model fails to load."""
-
 
 
 @dataclass

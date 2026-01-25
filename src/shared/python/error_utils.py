@@ -34,7 +34,6 @@ class GolfSuiteError(Exception):
     """Base exception for Golf Modeling Suite errors."""
 
 
-
 class EngineNotAvailableError(GolfSuiteError):
     """Raised when a required physics engine is not available."""
 

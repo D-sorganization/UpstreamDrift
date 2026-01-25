@@ -262,4 +262,3 @@ class ConservationMonitor:
 
 class IntegrationFailureError(Exception):
     """Raised when energy drift indicates integration failure (>5% drift)."""
-

@@ -31,7 +31,6 @@ class BundledAssetNotFoundError(Exception):
     """Raised when a bundled asset is not found."""
 
 
-
 class BundledAssets:
     """Manager for bundled mesh and URDF assets.
 
