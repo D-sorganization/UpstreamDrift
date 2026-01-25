@@ -24,11 +24,11 @@ jobs:
     steps:
       - name: Check for @jules mention
         id: check
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
-          COMMENT_BODY="${{ github.event.comment.body }}"
-
-          # Check if @jules is mentioned (case insensitive)
-          if echo "$COMMENT_BODY" | grep -iq "@jules"; then
+          # Check if @jules is mentioned as a standalone word (case insensitive)
+          if echo "$COMMENT_BODY" | grep -iqE "(^|[^a-zA-Z0-9_])@jules([^a-zA-Z0-9_]|$)"; then
             echo "should_run=true" >> $GITHUB_OUTPUT
             echo "@jules mention detected!"
           else
@@ -66,6 +66,9 @@ jobs:
           JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -e
           REPO="${{ github.repository }}"
@@ -78,10 +81,8 @@ jobs:
             exit 0
           fi
 
-          # Get issue details
-          ISSUE_TITLE="${{ github.event.issue.title }}"
+          # Get issue details (ISSUE_TITLE and COMMENT_BODY are passed via env to prevent injection)
           ISSUE_BODY=$(gh issue view "$ISSUE_NUMBER" --json body -q '.body')
-          COMMENT_BODY="${{ github.event.comment.body }}"
 
           echo "Processing issue #$ISSUE_NUMBER: $ISSUE_TITLE"
 
@@ -127,24 +128,19 @@ jobs:
           PROMPT_EOF
           )
 
-          # Create branch name
-          BRANCH_NAME="jules/fix-issue-$ISSUE_NUMBER"
-
           echo "Creating Jules session..."
           REQUEST_JSON=$(jq -n \
             --arg prompt "$PROMPT" \
             --arg source "$SOURCE_ID" \
-            --arg branch "$BRANCH_NAME" \
+            --arg startBranch "$DEFAULT_BRANCH" \
             '{
               prompt: $prompt,
               sourceContext: {
                 source: $source,
                 githubRepoContext: {
-                  startingBranch: "main",
-                  targetBranch: $branch
+                  startingBranch: $startBranch
                 }
-              },
-              automationMode: "AUTO_CREATE_PR"
+              }
             }')
 
           HTTP_CODE=$(curl -s -o /tmp/session_response.json -w "%{http_code}" -X POST \
