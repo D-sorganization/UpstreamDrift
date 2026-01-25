@@ -10,11 +10,10 @@ This script aggregates all A-O assessment results and creates:
 import argparse
 import json
 import re
+import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-
-import sys
 
 # Add project root to path for imports
 _REPO_ROOT = Path(__file__).resolve().parent.parent
