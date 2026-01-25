@@ -633,6 +633,24 @@ class GolfLauncher(QMainWindow):
         main_layout.setContentsMargins(30, 30, 30, 30)
 
         # --- Top Bar ---
+        top_bar = self._setup_top_bar()
+        main_layout.addLayout(top_bar)
+
+        # --- Launcher Grid ---
+        self._setup_grid_area(main_layout)
+
+        # --- Bottom Bar ---
+        bottom_bar = self._setup_bottom_bar()
+        main_layout.addLayout(bottom_bar)
+
+        # Apply dark theme
+        self.apply_styles()
+
+        # Keyboard shortcuts
+        self._setup_search_shortcuts()
+
+    def _setup_top_bar(self) -> QHBoxLayout:
+        """Set up the top tool bar."""
         top_bar = QHBoxLayout()
 
         # Status Indicator
@@ -720,9 +738,10 @@ class GolfLauncher(QMainWindow):
         # Context Help Dock
         self._setup_context_help()
 
-        main_layout.addLayout(top_bar)
+        return top_bar
 
-        # --- Launcher Grid ---
+    def _setup_grid_area(self, layout: QVBoxLayout) -> None:
+        """Set up the scrollable grid area."""
         # Scroll Area for Grid
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
@@ -737,9 +756,10 @@ class GolfLauncher(QMainWindow):
         self.grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         self.scroll_area.setWidget(self.grid_container)
-        main_layout.addWidget(self.scroll_area, 1)
+        layout.addWidget(self.scroll_area, 1)
 
-        # --- Bottom Bar ---
+    def _setup_bottom_bar(self) -> QHBoxLayout:
+        """Set up the bottom configuration bar."""
         bottom_bar = QHBoxLayout()
 
         # Configuration options
@@ -787,12 +807,10 @@ class GolfLauncher(QMainWindow):
         self.btn_launch.setCursor(Qt.CursorShape.PointingHandCursor)
         bottom_bar.addWidget(self.btn_launch)
 
-        main_layout.addLayout(bottom_bar)
+        return bottom_bar
 
-        # Apply dark theme
-        self.apply_styles()
-
-        # Add Search Shortcut
+    def _setup_search_shortcuts(self) -> None:
+        """Setup keyboard shortcuts for search."""
         shortcut_search = QShortcut(QKeySequence("Ctrl+F"), self)
         shortcut_search.activated.connect(self._focus_search)
 

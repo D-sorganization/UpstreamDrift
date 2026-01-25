@@ -56,7 +56,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_draggable_card_initialization(self) -> None:
         """Test that draggable model cards initialize correctly."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.launchers.ui_components import DraggableModelCard
 
         # Case 1: Parent has layout_edit_mode = True
         self.mock_launcher.layout_edit_mode = True
@@ -78,7 +78,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_mouse_press_initializes_drag(self) -> None:
         """Test that mouse press initializes drag position."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.launchers.ui_components import DraggableModelCard
 
         self.mock_launcher.layout_edit_mode = True
         card = DraggableModelCard(self.mock_models[0], self.mock_launcher)
@@ -112,7 +112,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_drop_event_triggers_swap(self) -> None:
         """Test that drop events trigger model swapping."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.launchers.ui_components import DraggableModelCard
 
         self.mock_launcher.layout_edit_mode = True
         card = DraggableModelCard(self.mock_models[0], self.mock_launcher)
@@ -143,7 +143,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_drop_event_ignores_invalid_data(self) -> None:
         """Test that drop events ignore invalid mime data."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.launchers.ui_components import DraggableModelCard
 
         card = DraggableModelCard(self.mock_models[0], self.mock_launcher)
 
@@ -164,7 +164,7 @@ class TestDragDropFunctionality(unittest.TestCase):
 
     def test_double_click_launches_model(self) -> None:
         """Test that double-click launches the model."""
-        from src.launchers.golf_launcher import DraggableModelCard
+        from src.launchers.ui_components import DraggableModelCard
 
         self.mock_launcher.launch_simulation = Mock()
 

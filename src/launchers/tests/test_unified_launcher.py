@@ -55,13 +55,10 @@ def test_mainloop(mock_qapp, mock_golf_launcher):
     sys.modules["launchers.golf_launcher"].main.assert_called_once()
 
 
-def test_launch_function(mock_qapp):
-    with patch("launchers.unified_launcher.UnifiedLauncher") as mock_cls:
-        mock_instance = mock_cls.return_value
-        mock_instance.mainloop.return_value = 42
-
+def test_launch_function():
+    with patch("src.launchers.golf_launcher.main") as mock_main:
         launch()
-        mock_instance.mainloop.assert_called_once()
+        mock_main.assert_called_once()
 
 
 def test_show_status():
