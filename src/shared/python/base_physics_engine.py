@@ -160,7 +160,6 @@ class BasePhysicsEngine(PhysicsEngine):
         Args:
             path: Validated path to model file
         """
-        pass
 
     @abstractmethod
     def _load_from_string_impl(self, content: str, extension: str | None) -> None:
@@ -170,7 +169,6 @@ class BasePhysicsEngine(PhysicsEngine):
             content: Model content as string
             extension: File extension hint
         """
-        pass
 
     def get_model(self) -> Any:
         """Get the underlying model object."""

@@ -131,4 +131,3 @@ def test_mujoco_iaa_logic():
         # But we are computing acceleration from scratch.
         # Should sum to qacc if qacc was consistent with q,v,tau.
         # Here we didn't run forward dynamics to set qacc.
-        pass

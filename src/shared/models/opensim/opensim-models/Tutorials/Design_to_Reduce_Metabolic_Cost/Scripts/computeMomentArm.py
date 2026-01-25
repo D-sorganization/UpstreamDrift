@@ -33,8 +33,8 @@
 
 # Import required packages.
 import org.opensim.utils as utils
-from javax.swing import JButton,JComboBox,JFrame,JLabel
 from java.awt import BorderLayout
+from javax.swing import JButton, JComboBox, JFrame, JLabel
 
 
 # ------------------------------------------------------------------------------

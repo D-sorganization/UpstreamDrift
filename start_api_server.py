@@ -9,7 +9,6 @@ Refactored to address DRY and Orthogonality violations (Pragmatic Programmer).
 from __future__ import annotations
 
 import os
-import sys
 
 import uvicorn
 
@@ -18,6 +17,7 @@ from src.shared.python.launcher_utils import (
     check_python_dependencies,
     ensure_environment_var,
     get_repo_root,
+    invoke_main,
 )
 from src.shared.python.logging_config import get_logger, setup_logging
 
@@ -106,17 +106,10 @@ def main() -> int:
     print_server_info(host, port)
 
     # 4. Start uvicorn
-    try:
-        is_dev = os.getenv("ENVIRONMENT", "development").lower() == "development"
-        uvicorn.run(app, host=host, port=port, reload=is_dev, log_level="info")
-        return 0
-    except KeyboardInterrupt:
-        logger.info("Server stopped by user.")
-        return 0
-    except Exception as e:
-        logger.error(f"Server error: {e}")
-        return 1
+    is_dev = os.getenv("ENVIRONMENT", "development").lower() == "development"
+    uvicorn.run(app, host=host, port=port, reload=is_dev, log_level="info")
+    return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    invoke_main(main)

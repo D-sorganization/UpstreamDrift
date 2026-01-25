@@ -4,11 +4,31 @@ Assess repository against 15 categories (A-O) and generate reports.
 """
 
 import json
-import re
 import subprocess
-from datetime import datetime
+import sys
+from pathlib import Path
 
-from src.shared.python.path_utils import get_repo_root
+# Add project root to path for imports
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+from src.shared.python.assessment.analysis import (  # noqa: E402
+    assess_error_handling_content,
+    assess_logging_content,
+    calculate_complexity,
+    count_files,
+    get_python_metrics,
+    grep_count,
+)
+from src.shared.python.assessment.constants import (  # noqa: E402
+    CATEGORIES,
+)
+from src.shared.python.assessment.reporting import (  # noqa: E402
+    generate_issue_document,
+    generate_markdown_report,
+)
+from src.shared.python.path_utils import get_repo_root  # noqa: E402
 
 # Setup paths
 REPO_ROOT = get_repo_root()
@@ -17,72 +37,6 @@ ISSUES_DIR = DOCS_DIR / "issues"
 
 DOCS_DIR.mkdir(parents=True, exist_ok=True)
 ISSUES_DIR.mkdir(parents=True, exist_ok=True)
-
-CATEGORIES = {
-    "A": "Code Structure",
-    "B": "Documentation",
-    "C": "Test Coverage",
-    "D": "Error Handling",
-    "E": "Performance",
-    "F": "Security",
-    "G": "Dependencies",
-    "H": "CICD",
-    "I": "Code Style",
-    "J": "API Design",
-    "K": "Data Handling",
-    "L": "Logging",
-    "M": "Configuration",
-    "N": "Scalability",
-    "O": "Maintainability",
-}
-
-
-def count_files(pattern):
-    return len(list(REPO_ROOT.glob(pattern)))
-
-
-def grep_count(pattern, file_pattern="**/*.py"):
-    count = 0
-    regex = re.compile(pattern)
-    for p in REPO_ROOT.glob(file_pattern):
-        if p.is_file():
-            try:
-                with open(p, encoding="utf-8", errors="ignore") as f:
-                    content = f.read()
-                    if regex.search(content):
-                        count += 1
-            except Exception:
-                pass
-    return count
-
-
-def generate_report(category_code, category_name, score, findings, recommendations):
-    filename = f"Assessment_{category_code}_{category_name.replace(' ', '_')}.md"
-    filepath = DOCS_DIR / filename
-
-    content = f"""# Assessment {category_code}: {category_name}
-
-**Date**: {datetime.now().strftime("%Y-%m-%d")}
-**Score**: {score}/10
-
-## Findings
-
-"""
-    for finding in findings:
-        content += f"- {finding}\n"
-
-    content += """
-## Recommendations
-
-"""
-    for rec in recommendations:
-        content += f"1. {rec}\n"
-
-    with open(filepath, "w") as f:
-        f.write(content)
-
-    print(f"Generated {filepath}")
-    return filepath
 
 
 def assess_A():
@@ -102,7 +56,9 @@ def assess_A():
         findings.append("Engines directory found, indicating modular architecture.")
 
     recs = ["Ensure all new code follows the modular engine structure."]
-    return generate_report("A", CATEGORIES["A"], score, findings, recs)
+    return generate_markdown_report(
+        "A", CATEGORIES["A"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_B():
@@ -130,7 +86,9 @@ def assess_B():
         score -= 1
 
     recs = ["Expand documentation for individual engines."]
-    return generate_report("B", CATEGORIES["B"], score, findings, recs)
+    return generate_markdown_report(
+        "B", CATEGORIES["B"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_C():
@@ -140,7 +98,7 @@ def assess_C():
 
     tests_dir = REPO_ROOT / "tests"
     if tests_dir.exists():
-        test_files = count_files("tests/**/test_*.py")
+        test_files = count_files(REPO_ROOT, "tests/**/test_*.py")
         findings.append(f"Found {test_files} test files in tests/ directory.")
         if test_files < 5:
             score -= 2
@@ -149,25 +107,44 @@ def assess_C():
         score -= 3
 
     recs = ["Increase test coverage for shared modules.", "Add integration tests."]
-    return generate_report("C", CATEGORIES["C"], score, findings, recs)
+    return generate_markdown_report(
+        "C", CATEGORIES["C"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_D():
-    # Error Handling
+    """Error Handling assessment."""
     findings = []
+    py_files = REPO_ROOT.rglob("*.py")
+    try_count = 0
+    bare_except_count = 0
+
+    for f in py_files:
+        if "node_modules" in f.parts or "venv" in f.parts:
+            continue
+        try:
+            results = assess_error_handling_content(
+                f.read_text(encoding="utf-8", errors="ignore")
+            )
+            try_count += results["try_count"]
+            bare_except_count += results["bare_except_count"]
+        except Exception:
+            pass
+
     score = 7.0
+    findings.append(
+        f"Found {try_count} try blocks and {bare_except_count} bare except blocks."
+    )
 
-    try_count = grep_count(r"try:")
-    except_count = grep_count(r"except.*:")
-
-    findings.append(f"Found {try_count} try blocks and {except_count} except blocks.")
-
-    if try_count == 0:
+    if bare_except_count > 5:
         score -= 2
-        findings.append("Very little exception handling detected.")
+    if try_count == 0:
+        score -= 3
 
     recs = ["Ensure specific exceptions are caught.", "Avoid bare except clauses."]
-    return generate_report("D", CATEGORIES["D"], score, findings, recs)
+    return generate_markdown_report(
+        "D", CATEGORIES["D"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_E():
@@ -176,14 +153,16 @@ def assess_E():
     score = 7.5
 
     # Heuristic: check for performance profiling tools or imports
-    profiling = grep_count(r"cProfile|timeit")
+    profiling = grep_count(REPO_ROOT, r"cProfile|timeit")
     if profiling > 0:
         findings.append("Profiling tools usage detected.")
     else:
         findings.append("No explicit profiling code found.")
 
     recs = ["Implement performance benchmarks for physics engines."]
-    return generate_report("E", CATEGORIES["E"], score, findings, recs)
+    return generate_markdown_report(
+        "E", CATEGORIES["E"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_F():
@@ -191,7 +170,7 @@ def assess_F():
     findings = []
     score = 8.0
 
-    secrets = grep_count(r"password|secret|key\s*=", "**/*.py")
+    secrets = grep_count(REPO_ROOT, r"password|secret|key\s*=", "**/*.py")
     if secrets > 0:
         findings.append(
             f"Potential hardcoded secrets found in {secrets} files (needs verification)."
@@ -204,7 +183,9 @@ def assess_F():
         "Run bandit security analysis regularly.",
         "Use environment variables for all secrets.",
     ]
-    return generate_report("F", CATEGORIES["F"], score, findings, recs)
+    return generate_markdown_report(
+        "F", CATEGORIES["F"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_G():
@@ -222,7 +203,9 @@ def assess_G():
         score -= 4
 
     recs = ["Pin dependency versions.", "Audit dependencies for vulnerabilities."]
-    return generate_report("G", CATEGORIES["G"], score, findings, recs)
+    return generate_markdown_report(
+        "G", CATEGORIES["G"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_H():
@@ -241,7 +224,9 @@ def assess_H():
         score -= 5
 
     recs = ["Ensure CI runs on all PRs.", "Add CD pipelines for releases."]
-    return generate_report("H", CATEGORIES["H"], score, findings, recs)
+    return generate_markdown_report(
+        "H", CATEGORIES["H"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_I():
@@ -257,7 +242,9 @@ def assess_I():
         score -= 1
 
     recs = ["Enforce linting in CI.", "Use black for formatting."]
-    return generate_report("I", CATEGORIES["I"], score, findings, recs)
+    return generate_markdown_report(
+        "I", CATEGORIES["I"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_J():
@@ -266,9 +253,9 @@ def assess_J():
     score = 7.5
 
     api_dir = REPO_ROOT / "api"
-    if api_dir.exists():
+    if api_dir.exists() and api_dir.is_dir():
         findings.append("api/ directory exists.")
-        fastapi = grep_count("FastAPI", "api/**/*.py")
+        fastapi = grep_count(REPO_ROOT, "FastAPI", "api/**/*.py")
         if fastapi > 0:
             findings.append("FastAPI usage detected.")
     else:
@@ -276,7 +263,9 @@ def assess_J():
         score -= 2
 
     recs = ["Document API endpoints using OpenAPI.", "Version API endpoints."]
-    return generate_report("J", CATEGORIES["J"], score, findings, recs)
+    return generate_markdown_report(
+        "J", CATEGORIES["J"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_K():
@@ -287,19 +276,34 @@ def assess_K():
     findings.append("Assessed data handling patterns.")
 
     recs = ["Validate input data schemas.", "Sanitize database inputs."]
-    return generate_report("K", CATEGORIES["K"], score, findings, recs)
+    return generate_markdown_report(
+        "K", CATEGORIES["K"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_L():
-    # Logging
+    """Logging assessment."""
     findings = []
+    py_files = REPO_ROOT.rglob("*.py")
+    logging_usage = 0
+    print_usage = 0
+
+    for f in py_files:
+        if "node_modules" in f.parts or "venv" in f.parts:
+            continue
+        try:
+            results = assess_logging_content(
+                f.read_text(encoding="utf-8", errors="ignore")
+            )
+            logging_usage += results["logging_usage"]
+            print_usage += results["print_usage"]
+        except Exception:
+            pass
+
     score = 7.0
-
-    logging_usage = grep_count(r"logging\.|logger\.")
-    print_usage = grep_count(r"print\(")
-
-    findings.append(f"Found {logging_usage} logging calls.")
-    findings.append(f"Found {print_usage} print calls.")
+    findings.append(
+        f"Found {logging_usage} logging calls and {print_usage} print calls."
+    )
 
     if print_usage > logging_usage:
         findings.append("High usage of print statements detected.")
@@ -309,7 +313,9 @@ def assess_L():
         "Replace print statements with structured logging.",
         "Configure log levels.",
     ]
-    return generate_report("L", CATEGORIES["L"], score, findings, recs)
+    return generate_markdown_report(
+        "L", CATEGORIES["L"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_M():
@@ -321,7 +327,9 @@ def assess_M():
     findings.append(f"Found {len(config_files)} configuration files (yaml/toml).")
 
     recs = ["Centralize configuration management.", "Use .env for local overrides."]
-    return generate_report("M", CATEGORIES["M"], score, findings, recs)
+    return generate_markdown_report(
+        "M", CATEGORIES["M"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_N():
@@ -335,7 +343,9 @@ def assess_N():
         "Consider async processing for heavy loads.",
         "Implement caching strategies.",
     ]
-    return generate_report("N", CATEGORIES["N"], score, findings, recs)
+    return generate_markdown_report(
+        "N", CATEGORIES["N"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def assess_O():
@@ -343,10 +353,25 @@ def assess_O():
     findings = []
     score = 7.5
 
-    findings.append("Maintainability assessment.")
+    total_metrics = {"functions": 0, "branches": 0}
+    py_files = REPO_ROOT.rglob("*.py")
+    for f in py_files:
+        if "node_modules" in f.parts or "venv" in f.parts:
+            continue
+        metrics = get_python_metrics(f)
+        total_metrics["functions"] += metrics["functions"]
+        total_metrics["branches"] += metrics["branches"]
+
+    avg_complexity = calculate_complexity(total_metrics)
+    findings.append(f"Average complexity (branches/func): {avg_complexity:.2f}")
+
+    if avg_complexity > 5:
+        score -= 2
 
     recs = ["Refactor large functions.", "Keep dependencies updated."]
-    return generate_report("O", CATEGORIES["O"], score, findings, recs)
+    return generate_markdown_report(
+        "O", CATEGORIES["O"], score, "\n".join(findings), recs, DOCS_DIR
+    )
 
 
 def run_all_assessments():
@@ -390,33 +415,14 @@ def generate_issues_locally(json_path):
         for cat_code, info in category_scores.items():
             score = info.get("score", 10)
             if score < 5:
-                # Create issue
-                title = f"Low Score in Category {cat_code}: {info.get('name')}"
-                filename = f"ISSUE_Category_{cat_code}_Low_Score.md"
-                filepath = ISSUES_DIR / filename
-
-                content = f"""---
-title: {title}
-labels: jules:assessment, needs-attention
----
-
-# {title}
-
-**Score**: {score}/10
-**Category**: {cat_code} - {info.get("name")}
-
-## Description
-The assessment for this category returned a score below 5/10. This indicates significant issues that need to be addressed.
-
-## Action Items
-- Review the detailed assessment report: `docs/assessments/Assessment_{cat_code}_*.md`
-- Implement recommended improvements.
-- Re-run assessment.
-
-"""
-                with open(filepath, "w") as f:
-                    f.write(content)
-                print(f"Created issue file: {filepath}")
+                generate_issue_document(
+                    category_id=cat_code,
+                    category_name=info.get("name", CATEGORIES.get(cat_code, "Unknown")),
+                    grade=score,
+                    details="The assessment for this category returned a score below 5/10.",
+                    output_dir=ISSUES_DIR,
+                )
+                print(f"Created issue for category {cat_code}")
 
     except Exception as e:
         print(f"Error generating local issues: {e}")
@@ -436,7 +442,7 @@ def main():
     input_reports = [str(p.relative_to(REPO_ROOT)) for p in reports]
 
     cmd = [
-        "python3",
+        sys.executable,
         str(REPO_ROOT / "scripts" / "generate_assessment_summary.py"),
         "--input",
         *input_reports,

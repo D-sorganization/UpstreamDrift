@@ -144,6 +144,7 @@ class ImpactModel(ABC):
         Returns:
             Post-impact state
         """
+        raise NotImplementedError()
 
 
 class RigidBodyImpactModel(ImpactModel):

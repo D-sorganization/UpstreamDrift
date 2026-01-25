@@ -1,13 +1,11 @@
-# Assessment I: Code Style
+# Assessment: Code Style
 
 **Date**: 2026-01-24
-**Score**: 8.0/10
+**Grade**: 8.0/10
 
-## Findings
-
-- Ruff configuration found.
+## Details
+Ruff configuration found.
 
 ## Recommendations
-
 1. Enforce linting in CI.
-1. Use black for formatting.
+2. Use black for formatting.

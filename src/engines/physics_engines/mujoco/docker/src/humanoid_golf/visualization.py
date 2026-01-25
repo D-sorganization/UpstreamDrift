@@ -195,13 +195,11 @@ def add_visualization_overlays(viewer, physics, config, tracer):
 
                 # Note: Actual rendering depends on viewer type
                 # This is the data structure for force visualization
-                pass
 
     # Add joint torque indicators
     if show_torques:
         visualizer.get_joint_torques()
         # Torque visualization would show as colored joints or text overlays
-        pass
 
     # Render trajectory traces
     if show_tracers:

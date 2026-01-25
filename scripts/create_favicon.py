@@ -1,85 +1,50 @@
 #!/usr/bin/env python3
 """
-Create favicon and icon files from GolfingRobot.png
+Create favicon and icon files from GolfingRobot.png using shared utilities.
 """
 
-import logging
 from pathlib import Path
 
-try:
-    from PIL import Image
-except ImportError:
-    logging.error("PIL (Pillow) not installed. Install with: pip install Pillow")
-    exit(1)
+from scripts.script_utils import run_main, setup_script_logging
+from src.shared.python.image_utils import (
+    Image,
+    enhance_icon_source,
+    save_ico,
+    save_png_icons,
+)
+
+logger = setup_script_logging(__name__)
 
 
-def create_favicon() -> bool:
-    """Create favicon and icon files from GolfingRobot.png"""
-
-    # Paths
+def create_favicon() -> int:
+    """Create favicon and icon files from GolfingRobot.png."""
     source_image = Path("GolfingRobot.png")
-    assets_dir = Path("launchers/assets")
+    assets_dir = Path("src/launchers/assets")
 
     if not source_image.exists():
-        logging.error(f"Source image not found: {source_image}")
-        return False
+        logger.error(f"Source image not found: {source_image}")
+        return 1
 
     if not assets_dir.exists():
-        logging.error(f"Assets directory not found: {assets_dir}")
-        return False
+        logger.info(f"Creating assets directory: {assets_dir}")
+        assets_dir.mkdir(parents=True, exist_ok=True)
 
-    try:
-        # Load the source image
-        img = Image.open(source_image)
-        logging.info(f"Loaded image: {source_image} ({img.size})")
+    # Load and process
+    img = Image.open(source_image)
+    if img.mode != "RGBA":
+        img = img.convert("RGBA")
 
-        # Convert to RGBA if needed
-        if img.mode != "RGBA":
-            img = img.convert("RGBA")  # type: ignore[assignment]
+    # Enhance
+    img = enhance_icon_source(img)
 
-        # Create high-quality PNG icon (256x256)
-        png_icon = img.resize((256, 256), Image.Resampling.LANCZOS)
-        png_path = assets_dir / "golf_robot_icon.png"
-        png_icon.save(png_path, "PNG")
-        logging.info(f"Created PNG icon: {png_path}")
+    # Save outputs
+    save_ico(img, assets_dir / "golf_robot_icon.ico")
+    save_ico(img, assets_dir / "favicon.ico", sizes=[32])
+    save_png_icons(img, assets_dir, "golf_robot_icon", [256])
 
-        # Create ICO file with multiple sizes
-        ico_sizes = [16, 32, 48, 64, 128, 256]
-        ico_images = []
-
-        for size in ico_sizes:
-            resized = img.resize((size, size), Image.Resampling.LANCZOS)
-            ico_images.append(resized)
-
-        ico_path = assets_dir / "golf_robot_icon.ico"
-        ico_images[0].save(
-            ico_path,
-            format="ICO",
-            sizes=[(s, s) for s in ico_sizes],
-            append_images=ico_images[1:],
-        )
-        logging.info(f"Created ICO file: {ico_path}")
-
-        # Create web favicon (32x32)
-        favicon = img.resize((32, 32), Image.Resampling.LANCZOS)
-        favicon_path = assets_dir / "favicon.ico"
-        favicon.save(favicon_path, "ICO")
-        logging.info(f"Created web favicon: {favicon_path}")
-
-        return True
-
-    except Exception as e:
-        logging.error(f"Error creating icons: {e}")
-        return False
+    logger.info("Successfully created icon files!")
+    return 0
 
 
 if __name__ == "__main__":
-    from src.shared.python.logging_config import setup_logging
-
-    setup_logging(use_simple_format=True)
-
-    if create_favicon():
-        logging.info("Successfully created all icon files!")
-    else:
-        logging.error("Failed to create icon files")
-        exit(1)
+    run_main(create_favicon, logger)

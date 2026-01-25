@@ -12,18 +12,15 @@ import pytest
 class MockQThread:
     def __init__(self, parent=None):
         """Mock constructor."""
-        pass
 
     def start(self):
         self.run()
 
     def run(self):
         """Mock run."""
-        pass
 
     def wait(self):
         """Mock wait."""
-        pass
 
 
 def mock_pyqt_signal(*args):
@@ -46,37 +43,30 @@ class MockQWidget:
 
     def resize(self, w, h):
         """Mock resize."""
-        pass
 
     def setLayout(self, layout):
         """Mock setLayout."""
-        pass
 
 
 class MockQDialog(MockQWidget):
     def accept(self):
         """Mock accept."""
-        pass
 
 
 class MockQTextEdit(MockQWidget):
     def setReadOnly(self, b):
         """Mock setReadOnly."""
-        pass
 
     def setMarkdown(self, t):
         """Mock setMarkdown."""
-        pass
 
 
 class MockQVBoxLayout:
     def __init__(self, parent=None):
         """Mock constructor."""
-        pass
 
     def addWidget(self, w):
         """Mock addWidget."""
-        pass
 
 
 @pytest.fixture

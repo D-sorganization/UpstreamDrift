@@ -180,6 +180,66 @@ def _flight_dynamics_step(
 
 
 @jit(nopython=True, cache=True)
+def _compute_rk4_step(
+    curr: np.ndarray,
+    dt: float,
+    gravity_acc: np.ndarray,
+    wind_velocity: np.ndarray,
+    ball_radius: float,
+    const_term: float,
+    coeffs: tuple[float, float, float, float, float, float],
+    omega: float,
+    spin_axis: np.ndarray,
+) -> np.ndarray:
+    """Compute a single RK4 integration step.
+
+    Orthogonality: Isolates the mathematical core of the integration step.
+    """
+    k1 = _flight_dynamics_step(
+        curr,
+        gravity_acc,
+        wind_velocity,
+        ball_radius,
+        const_term,
+        coeffs,
+        omega,
+        spin_axis,
+    )
+    k2 = _flight_dynamics_step(
+        curr + 0.5 * dt * k1,
+        gravity_acc,
+        wind_velocity,
+        ball_radius,
+        const_term,
+        coeffs,
+        omega,
+        spin_axis,
+    )
+    k3 = _flight_dynamics_step(
+        curr + 0.5 * dt * k2,
+        gravity_acc,
+        wind_velocity,
+        ball_radius,
+        const_term,
+        coeffs,
+        omega,
+        spin_axis,
+    )
+    k4 = _flight_dynamics_step(
+        curr + dt * k3,
+        gravity_acc,
+        wind_velocity,
+        ball_radius,
+        const_term,
+        coeffs,
+        omega,
+        spin_axis,
+    )
+
+    return (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
+
+
+@jit(nopython=True, cache=True)
 def _solve_rk4_loop(
     initial_state: np.ndarray,
     dt: float,
@@ -192,7 +252,10 @@ def _solve_rk4_loop(
     omega: float,
     spin_axis: np.ndarray,
 ) -> np.ndarray:
-    """Numba-optimized RK4 loop."""
+    """Numba-optimized RK4 loop.
+
+    Refactored to improve orthogonality by delegating step math to a helper.
+    """
     out = np.empty((max_steps, 7))
     curr = initial_state.copy()
     t = 0.0
@@ -201,8 +264,9 @@ def _solve_rk4_loop(
     actual_steps = 1
 
     for i in range(1, max_steps):
-        k1 = _flight_dynamics_step(
+        step_delta = _compute_rk4_step(
             curr,
+            dt,
             gravity_acc,
             wind_velocity,
             ball_radius,
@@ -211,38 +275,7 @@ def _solve_rk4_loop(
             omega,
             spin_axis,
         )
-        k2 = _flight_dynamics_step(
-            curr + 0.5 * dt * k1,
-            gravity_acc,
-            wind_velocity,
-            ball_radius,
-            const_term,
-            coeffs,
-            omega,
-            spin_axis,
-        )
-        k3 = _flight_dynamics_step(
-            curr + 0.5 * dt * k2,
-            gravity_acc,
-            wind_velocity,
-            ball_radius,
-            const_term,
-            coeffs,
-            omega,
-            spin_axis,
-        )
-        k4 = _flight_dynamics_step(
-            curr + dt * k3,
-            gravity_acc,
-            wind_velocity,
-            ball_radius,
-            const_term,
-            coeffs,
-            omega,
-            spin_axis,
-        )
-
-        curr += (dt / 6.0) * (k1 + 2 * k2 + 2 * k3 + k4)
+        curr += step_delta
         t += dt
         out[i, 0], out[i, 1:] = t, curr
         actual_steps += 1

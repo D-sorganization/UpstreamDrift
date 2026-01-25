@@ -10,15 +10,9 @@ _C3DMetadata: Any = None
 _load_tour_average_reader: Any = None
 
 try:
-    from .c3d_reader import (
-        C3DDataReader as _C3DDataReader_imported,
-    )
-    from .c3d_reader import (
-        C3DEvent as _C3DEvent_imported,
-    )
-    from .c3d_reader import (
-        C3DMetadata as _C3DMetadata_imported,
-    )
+    from .c3d_reader import C3DDataReader as _C3DDataReader_imported
+    from .c3d_reader import C3DEvent as _C3DEvent_imported
+    from .c3d_reader import C3DMetadata as _C3DMetadata_imported
     from .c3d_reader import (
         load_tour_average_reader as _load_tour_average_reader_imported,
     )

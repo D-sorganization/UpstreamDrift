@@ -145,8 +145,6 @@ class IndexedAcceleration:
 class AccelerationClosureError(Exception):
     """Raised when indexed acceleration components do not sum to total (closure failure)."""
 
-    pass
-
 
 def compute_indexed_acceleration_from_engine(
     engine: Any,  # PhysicsEngine protocol (avoid circular import)

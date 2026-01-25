@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 # Import theme colors if available
 try:
-    from shared.python.theme import Colors, Sizes, Weights, get_qfont
+    from src.shared.python.theme import Colors, Sizes, Weights, get_qfont
 
     THEME_AVAILABLE = True
 except ImportError:

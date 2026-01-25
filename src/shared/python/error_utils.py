@@ -33,8 +33,6 @@ from typing import Any
 class GolfSuiteError(Exception):
     """Base exception for Golf Modeling Suite errors."""
 
-    pass
-
 
 class EngineNotAvailableError(GolfSuiteError):
     """Raised when a required physics engine is not available."""

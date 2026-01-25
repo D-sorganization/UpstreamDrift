@@ -38,7 +38,6 @@ def test_urdf_generation_logic(qtbot):
     and no longer exposes the direct links/joints/_generate_urdf_xml API.
     The test needs to be rewritten to match the current implementation.
     """
-    pass
 
 
 def test_urdf_scanning_logic():

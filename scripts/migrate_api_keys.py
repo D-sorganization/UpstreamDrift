@@ -36,7 +36,6 @@ Version: 1.0.0
 
 import argparse
 import os
-import secrets
 import sys
 
 # Python 3.10 compatibility: UTC was added in 3.11
@@ -49,41 +48,18 @@ from src.shared.python.path_utils import get_src_root
 # Add parent directory to path for imports
 sys.path.insert(0, str(get_src_root()))
 
-import bcrypt
 from sqlalchemy import create_engine
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.orm import Session, sessionmaker
 
 from src.api.auth.models import APIKey, User
+from src.api.auth.security import compute_prefix_hash, security_manager
 
 # Configure logging
 from src.shared.python.logging_config import get_logger, setup_logging
 
 setup_logging()
 logger = get_logger(__name__)
-
-# Bcrypt cost factor (12 is the recommended minimum for security)
-BCRYPT_ROUNDS = 12
-
-
-def compute_prefix_hash(prefix: str) -> str:
-    """Compute SHA256 hash of a non-sensitive prefix for database indexing.
-
-    This function is used to create a database index for fast API key lookup.
-    It hashes ONLY the first 8 characters of the key (not the full secret).
-
-    Args:
-        prefix: Non-sensitive 8-character prefix from the API key
-
-    Returns:
-        SHA256 hash of the prefix for database indexing
-
-    Note:
-        This is NOT password hashing. The actual API key is hashed with bcrypt.
-    """
-    import hashlib
-
-    return hashlib.sha256(prefix.encode()).hexdigest()
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -158,15 +134,6 @@ def get_database_session(database_url: str | None = None) -> Session:
     return SessionLocal()
 
 
-def generate_new_api_key() -> str:
-    """Generate a new cryptographically secure API key.
-
-    Returns:
-        New API key with gms_ prefix
-    """
-    return f"gms_{secrets.token_urlsafe(32)}"
-
-
 def migrate_api_keys(
     db_session: Session, dry_run: bool = False
 ) -> tuple[list[dict[str, Any]], list[str]]:
@@ -214,11 +181,10 @@ def migrate_api_keys(
         )
 
         # Generate new API key
-        new_raw_value = generate_new_api_key()
+        new_raw_value = security_manager.generate_api_key()
 
         # Hash with bcrypt
-        salt = bcrypt.gensalt(rounds=BCRYPT_ROUNDS)
-        new_hash = bcrypt.hashpw(new_raw_value.encode("utf-8"), salt).decode("utf-8")
+        new_hash = security_manager.hash_api_key(new_raw_value)
 
         # PERFORMANCE FIX: Compute prefix hash for fast lookup
         key_body = new_raw_value[4:]  # Remove "gms_" prefix

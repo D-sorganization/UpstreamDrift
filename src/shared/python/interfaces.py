@@ -25,7 +25,7 @@ class PhysicsEngine(Protocol):
     @abstractmethod
     def model_name(self) -> str:
         """Return the name of the currently loaded model."""
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def load_from_path(self, path: str) -> None:
@@ -34,7 +34,7 @@ class PhysicsEngine(Protocol):
         Args:
             path: Absolute path to the model file (.xml, .urdf, .sdf, .osim).
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def load_from_string(self, content: str, extension: str | None = None) -> None:
@@ -44,12 +44,12 @@ class PhysicsEngine(Protocol):
             content: The model definition string.
             extension: Optional hint for parsing (e.g., 'xml', 'urdf').
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def reset(self) -> None:
         """Reset the simulation to its initial state (time=0, q=q0, v=0)."""
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def step(self, dt: float | None = None) -> None:
@@ -58,7 +58,7 @@ class PhysicsEngine(Protocol):
         Args:
             dt: Optional time step to advance. If None, uses the model's default timestep.
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def forward(self) -> None:
@@ -67,7 +67,7 @@ class PhysicsEngine(Protocol):
         Using current positions and velocities, updates all derived quantities
         (accelerations, forces, derived kinematics).
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
@@ -78,7 +78,7 @@ class PhysicsEngine(Protocol):
             q: Generalized coordinates (n_q,).
             v: Generalized velocities (n_v,).
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
@@ -88,7 +88,7 @@ class PhysicsEngine(Protocol):
             q: Generalized coordinates.
             v: Generalized velocities.
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def set_control(self, u: np.ndarray) -> None:
@@ -97,12 +97,12 @@ class PhysicsEngine(Protocol):
         Args:
             u: Control vector (n_u,).
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def get_time(self) -> float:
         """Get the current simulation time."""
-        ...
+        raise NotImplementedError()
 
     def get_full_state(self) -> dict[str, Any]:
         """Get complete state in a single batched call (performance optimization).
@@ -147,7 +147,7 @@ class PhysicsEngine(Protocol):
         Returns:
             M: (n_v, n_v) mass matrix.
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def compute_bias_forces(self) -> np.ndarray:
@@ -156,7 +156,7 @@ class PhysicsEngine(Protocol):
         Returns:
             b: (n_v,) vector containing Coriolis, Centrifugal, and Gravity terms.
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def compute_gravity_forces(self) -> np.ndarray:
@@ -165,7 +165,7 @@ class PhysicsEngine(Protocol):
         Returns:
             g: (n_v,) gravity vector.
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
@@ -177,7 +177,7 @@ class PhysicsEngine(Protocol):
         Returns:
             tau: Required generalized forces (n_v,).
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
@@ -189,7 +189,7 @@ class PhysicsEngine(Protocol):
         Returns:
             Dictionary with keys 'linear', 'angular', 'spatial', or None if body not found.
         """
-        ...
+        raise NotImplementedError()
 
     def compute_contact_forces(self) -> np.ndarray:
         """Compute total contact forces (GRF).
@@ -221,7 +221,7 @@ class PhysicsEngine(Protocol):
             - compute_control_acceleration: Control-attributed component
             - Section F: Superposition requirement (drift + control = full)
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def compute_control_acceleration(self, tau: np.ndarray) -> np.ndarray:
@@ -241,7 +241,7 @@ class PhysicsEngine(Protocol):
         Note:
             For muscle-driven models, tau represents muscle-generated joint torques.
         """
-        ...
+        raise NotImplementedError()
 
     # -------- Section G: Counterfactual Experiments (Mandatory) --------
 
@@ -281,7 +281,7 @@ class PhysicsEngine(Protocol):
             - compute_zvcf: Zero-velocity counterfactual
             - Section G1: ZTCF definition in design guidelines
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
@@ -319,7 +319,7 @@ class PhysicsEngine(Protocol):
             - compute_ztcf: Zero-torque counterfactual
             - Section G2: ZVCF definition in design guidelines
         """
-        ...
+        raise NotImplementedError()
 
     # ---------------------------------------------------------------------------
     # Section B5: Flexible Beam Shaft (Optional Interface)
@@ -402,7 +402,7 @@ class RecorderInterface(Protocol):
             times: (N,) array of time timestamps.
             values: (N, D) array of data values.
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def get_induced_acceleration_series(
@@ -416,7 +416,7 @@ class RecorderInterface(Protocol):
         Returns:
             Tuple of (times, values).
         """
-        ...
+        raise NotImplementedError()
 
     @abstractmethod
     def set_analysis_config(self, config: dict[str, Any]) -> None:
@@ -425,4 +425,4 @@ class RecorderInterface(Protocol):
         Args:
             config: Dictionary of configuration flags (e.g. {'ztcf': True}).
         """
-        ...
+        raise NotImplementedError()

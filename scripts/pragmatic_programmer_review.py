@@ -28,55 +28,21 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.logging_config import get_logger, setup_logging
+# Add project root to path for imports
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
 
-# Configure logging using centralized module
-setup_logging(use_simple_format=True)
-logger = get_logger(__name__)
+from scripts.script_utils import run_main, setup_script_logging  # noqa: E402
+from src.shared.python.assessment.analysis import (  # noqa: E402
+    get_detailed_function_metrics,
+)
+from src.shared.python.assessment.constants import (  # noqa: E402
+    PRAGMATIC_PRINCIPLES as PRINCIPLES,
+)
 
-# Pragmatic Programmer principles and their assessment criteria
-PRINCIPLES = {
-    "DRY": {
-        "name": "Don't Repeat Yourself",
-        "description": "Every piece of knowledge must have a single, unambiguous representation",
-        "weight": 2.0,
-    },
-    "ORTHOGONALITY": {
-        "name": "Orthogonality & Decoupling",
-        "description": "Eliminate effects between unrelated things",
-        "weight": 1.5,
-    },
-    "REVERSIBILITY": {
-        "name": "Reversibility & Flexibility",
-        "description": "Make decisions reversible; avoid painting yourself into a corner",
-        "weight": 1.0,
-    },
-    "QUALITY": {
-        "name": "Code Quality & Craftsmanship",
-        "description": "Good enough software; know when to stop",
-        "weight": 1.5,
-    },
-    "ROBUSTNESS": {
-        "name": "Error Handling & Robustness",
-        "description": "Crash early; use assertions; handle errors gracefully",
-        "weight": 2.0,
-    },
-    "TESTING": {
-        "name": "Testing & Validation",
-        "description": "Test early, test often, test automatically",
-        "weight": 2.0,
-    },
-    "DOCUMENTATION": {
-        "name": "Documentation & Communication",
-        "description": "It's all writing; document the why, not just the what",
-        "weight": 1.0,
-    },
-    "AUTOMATION": {
-        "name": "Automation & Tooling",
-        "description": "Don't use manual procedures; automate everything",
-        "weight": 1.5,
-    },
-}
+# Configure logging using centralized utility
+logger = setup_script_logging(__name__)
 
 
 def find_python_files(root_path: Path) -> list[Path]:
@@ -113,45 +79,18 @@ def compute_file_hash(content: str) -> str:
     return hashlib.md5(normalized.encode(), usedforsecurity=False).hexdigest()
 
 
-def extract_functions(content: str) -> list[dict]:
-    """Extract function definitions from Python code."""
-    functions = []
-    try:
-        tree = ast.parse(content)
-        for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef):
-                functions.append(
-                    {
-                        "name": node.name,
-                        "lineno": node.lineno,
-                        "args": len(node.args.args),
-                        "body_lines": (
-                            node.end_lineno - node.lineno + 1
-                            if hasattr(node, "end_lineno")
-                            else 0
-                        ),
-                        "has_docstring": (ast.get_docstring(node) is not None),
-                    }
-                )
-    except SyntaxError:
-        pass
-    return functions
-
-
 def check_dry_violations(files: list[Path]) -> list[dict]:
     """
     Check for DRY (Don't Repeat Yourself) violations.
 
     Looks for:
-    - Duplicate code blocks
-    - Similar function implementations
-    - Repeated magic numbers/strings
-    - Copy-paste patterns
+    - Duplicate code blocks (consecutive lines)
+    - Magic numbers/strings
     """
     issues = []
+    chunk_size = 6  # Increase slightly for more meaningful duplicates
     code_blocks = defaultdict(list)
     magic_numbers = defaultdict(list)
-    magic_strings = defaultdict(list)
 
     for file_path in files:
         try:
@@ -159,56 +98,45 @@ def check_dry_violations(files: list[Path]) -> list[dict]:
         except Exception:
             continue
 
-        # Check for duplicate code blocks (5+ line chunks)
         lines = content.split("\n")
-        for i in range(len(lines) - 5):
-            chunk = "\n".join(lines[i : i + 5])
-            chunk_hash = compute_file_hash(chunk)
-            if len(chunk.strip()) > 50:  # Non-trivial chunk
-                code_blocks[chunk_hash].append((file_path, i + 1))
+        # Use a sliding window but only pick non-overlapping chunks for hashing
+        # if they are part of a larger sequence.
+        # Simple heuristic: hash 6-line blocks but only store if not highly similar
+        # to the previous block in the SAME file.
+        last_hash = ""
+        for i in range(len(lines) - chunk_size):
+            chunk = "\n".join(lines[i : i + chunk_size])
+            if len(chunk.strip()) < 60:  # Skip trivial chunks
+                continue
 
-        # Check for magic numbers
+            chunk_hash = compute_file_hash(chunk)
+            if chunk_hash != last_hash:
+                code_blocks[chunk_hash].append((file_path, i + 1))
+                last_hash = chunk_hash
+
+        # Magic constants
         for match in re.finditer(r"\b(\d{2,})\b", content):
             num = match.group(1)
-            if num not in ("00", "10", "100", "1000"):  # Common constants
+            if num not in ("00", "10", "100", "1000"):
                 line_no = content[: match.start()].count("\n") + 1
                 magic_numbers[num].append((file_path, line_no))
 
-        # Check for repeated string literals
-        for match in re.finditer(r'["\']([^"\']{10,})["\']', content):
-            string = match.group(1)
-            if not string.startswith(("http", "/")):  # Skip URLs/paths
-                line_no = content[: match.start()].count("\n") + 1
-                magic_strings[string].append((file_path, line_no))
-
-    # Report duplicates
+    # Report duplicates (limit to 50 unique major blocks to avoid report bloat)
+    reported_count = 0
     for _chunk_hash, locations in code_blocks.items():
-        if len(locations) > 1:
-            files_involved = list({str(loc[0]) for loc in locations})
+        if len(locations) > 1 and reported_count < 50:
+            files_involved = sorted({str(loc[0]) for loc in locations})
             issues.append(
                 {
                     "principle": "DRY",
                     "severity": "MAJOR",
-                    "title": "Duplicate code block detected",
-                    "description": f"Similar code found in {len(locations)} locations",
-                    "files": files_involved[:3],
-                    "recommendation": "Extract common code into a shared function",
+                    "title": "Significant duplicate code block",
+                    "description": f"Found in {len(locations)} locations across {len(files_involved)} files",
+                    "files": files_involved[:5],
+                    "recommendation": "Consolidate into a shared utility or base class",
                 }
             )
-
-    # Report repeated magic numbers
-    for num, locations in magic_numbers.items():
-        if len(locations) > 3:
-            issues.append(
-                {
-                    "principle": "DRY",
-                    "severity": "MINOR",
-                    "title": f"Magic number '{num}' repeated {len(locations)} times",
-                    "description": "Repeated numeric literals should be constants",
-                    "files": list({str(loc[0]) for loc in locations[:3]}),
-                    "recommendation": "Define as named constant",
-                }
-            )
+            reported_count += 1
 
     return issues
 
@@ -258,7 +186,7 @@ def check_orthogonality(files: list[Path]) -> list[dict]:
                     )
 
         # Check for god functions (too many lines)
-        functions = extract_functions(content)
+        functions = get_detailed_function_metrics(content)
         for func in functions:
             if func["body_lines"] > 50:
                 issues.append(
@@ -382,7 +310,7 @@ def check_quality(files: list[Path]) -> list[dict]:
                 fixmes.append((file_path, i, line.strip()))
 
         # Check for type hints in function definitions
-        functions = extract_functions(content)
+        functions = get_detailed_function_metrics(content)
         for func in functions:
             # Simple heuristic: check if 'def func(arg: type)' pattern exists
             func_pattern = rf"def\s+{func['name']}\s*\([^)]*:\s*\w+"
@@ -604,7 +532,7 @@ def check_documentation(root_path: Path, files: list[Path]) -> list[dict]:
     total_functions = 0
 
     for file_path in files:
-        functions = extract_functions(
+        functions = get_detailed_function_metrics(
             file_path.read_text(encoding="utf-8", errors="ignore")
         )
         for func in functions:
@@ -776,9 +704,9 @@ def run_review(root_path: Path) -> dict[str, Any]:
         scores[principle_id] = max(0.0, min(10.0, score))
 
     # Calculate weighted overall score
-    total_weight = sum(p["weight"] for p in PRINCIPLES.values())
-    overall = (
-        sum(scores[pid] * PRINCIPLES[pid]["weight"] for pid in PRINCIPLES)
+    total_weight: float = sum(float(p["weight"]) for p in PRINCIPLES.values())
+    overall: float = (
+        sum(float(scores[pid]) * float(PRINCIPLES[pid]["weight"]) for pid in PRINCIPLES)
         / total_weight
     )
 
@@ -1041,4 +969,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    run_main(main, logger)

@@ -72,6 +72,7 @@ class TestDockerLaunchCommands(unittest.TestCase):
         self.mock_launcher = Mock()
         self.mock_launcher.chk_live = Mock()
         self.mock_launcher.chk_gpu = Mock()
+        self.mock_launcher._launch_docker_container = Mock()
 
     @unittest.skipIf(sys.platform != "win32", "Windows-specific test")
     def test_mujoco_humanoid_command(self):

@@ -1,13 +1,11 @@
-# Assessment O: Maintainability
+# Assessment: Maintainability
 
 **Date**: 2026-01-24
-**Score**: 7.5/10
+**Grade**: 7.5/10
 
-## Findings
-
-- Maintainability assessment.
+## Details
+Average complexity (branches/func): 1.21
 
 ## Recommendations
-
 1. Refactor large functions.
-1. Keep dependencies updated.
+2. Keep dependencies updated.

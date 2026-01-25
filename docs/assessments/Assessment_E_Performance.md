@@ -1,12 +1,10 @@
-# Assessment E: Performance
+# Assessment: Performance
 
 **Date**: 2026-01-24
-**Score**: 7.5/10
+**Grade**: 7.5/10
 
-## Findings
-
-- Profiling tools usage detected.
+## Details
+Profiling tools usage detected.
 
 ## Recommendations
-
 1. Implement performance benchmarks for physics engines.

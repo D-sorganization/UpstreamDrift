@@ -140,7 +140,11 @@ class RemoteRecorder(RecorderInterface):
         return times, np.array([])
 
     def set_analysis_config(self, config: dict) -> None:
-        pass  # Config driven by simulation loop
+        """Configure which advanced metrics to record/compute.
+
+        Currently a stub as config is driven by the simulation loop.
+        """
+        raise NotImplementedError()
 
     def export_to_dict(self) -> dict[str, Any]:
         return self.data
@@ -219,12 +223,14 @@ class HumanoidLauncher(QMainWindow):
 
         # Tabs
         self.tabs = QTabWidget()
-        self.tabs.setStyleSheet("""
+        self.tabs.setStyleSheet(
+            """
             QTabWidget::pane { border: 1px solid #444; background: #2b2b2b; }
             QTabBar::tab { background: #333; color: #ccc; padding: 10px 20px; }
             QTabBar::tab:selected { background: #0078d4; color: white; }
             QTabBar::tab:hover { background: #444; }
-        """)
+        """
+        )
 
         self.setup_sim_tab()
         self.setup_appearance_tab()
@@ -726,7 +732,7 @@ class HumanoidLauncher(QMainWindow):
 
     def load_config(self) -> None:
         """Deprecated: Config is loaded in __init__. Kept for compatibility."""
-        pass
+        raise NotImplementedError()
 
     def save_config(self) -> None:
         """Save current configuration to file."""
@@ -1061,7 +1067,8 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
 
     # Global Stylesheet for Rounded Buttons and Modern Look
-    app.setStyleSheet("""
+    app.setStyleSheet(
+        """
         QPushButton {
             border-radius: 5px;
             padding: 5px;
@@ -1107,7 +1114,8 @@ if __name__ == "__main__":
         QMessageBox QLabel {
             color: white; /* White text on dark background */
         }
-    """)
+    """
+    )
 
     window = HumanoidLauncher()
     window.show()

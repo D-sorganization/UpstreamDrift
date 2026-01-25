@@ -1,13 +1,11 @@
-# Assessment M: Configuration
+# Assessment: Configuration
 
 **Date**: 2026-01-24
-**Score**: 7.5/10
+**Grade**: 7.5/10
 
-## Findings
-
-- Found 12 configuration files (yaml/toml).
+## Details
+Found 12 configuration files (yaml/toml).
 
 ## Recommendations
-
 1. Centralize configuration management.
-1. Use .env for local overrides.
+2. Use .env for local overrides.

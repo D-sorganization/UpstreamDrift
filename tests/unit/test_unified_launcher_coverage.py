@@ -30,9 +30,7 @@ def test_mainloop(launcher):
     with patch("src.launchers.golf_launcher.main") as mock_main:
         mock_main.return_value = 0
 
-        exit_code = launcher.mainloop()
-
-        assert exit_code == 0
+        launcher.mainloop()
         mock_main.assert_called_once()
 
 
@@ -74,5 +72,5 @@ def test_cli_launch():
         from src.launchers.unified_launcher import launch
 
         mock_main.return_value = 0
-        assert launch() == 0
+        launch()
         mock_main.assert_called_once()

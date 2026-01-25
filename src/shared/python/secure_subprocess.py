@@ -40,8 +40,6 @@ ALLOWED_EXECUTABLES = [
 class SecureSubprocessError(Exception):
     """Exception raised for subprocess security violations."""
 
-    pass
-
 
 def validate_script_path(script_path: Path, suite_root: Path) -> None:
     """Validate that a script path is safe to execute.

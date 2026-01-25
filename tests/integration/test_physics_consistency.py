@@ -13,11 +13,9 @@ class TestPhysicsConsistency:
         """Verify simple pendulum dynamics match between MuJoCo and Drake."""
         # Issue #126: Implement shared pendulum model loading and stepping
         # For now, this serves as the scaffold requested by Issue #126
-        pass
 
     @skip_if_unavailable("mujoco")
     @skip_if_unavailable("pinocchio")
     def test_pendulum_consistency_mujoco_pinocchio(self):
         """Verify simple pendulum dynamics match between MuJoCo and Pinocchio."""
         # Issue #126: Implement shared pendulum model loading and stepping
-        pass
