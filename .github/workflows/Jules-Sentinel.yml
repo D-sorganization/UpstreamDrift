@@ -3,8 +3,9 @@ name: Jules Sentinel (Security Audit)
 on:
   workflow_call:
   workflow_dispatch:
-  schedule:
-    - cron: "30 1 * * 1"  # Weekly on Mondays at 1:30 AM UTC (overnight window)
+  # Schedule disabled - orchestrated by Jules-Control-Tower.yml
+  # schedule:
+  #   - cron: "30 1 * * 1"  # Weekly on Mondays at 1:30 AM UTC (overnight window)
 
 permissions:
   contents: write

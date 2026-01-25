@@ -3,8 +3,9 @@ name: Jules Assessment Generator (Worker)
 on:
   workflow_call:
   workflow_dispatch:
-  schedule:
-    - cron: "0 0 * * *"  # Daily at midnight UTC (overnight window)
+  # Schedule disabled - orchestrated by Jules-Control-Tower.yml
+  # schedule:
+  #   - cron: "0 0 * * *"  # Daily at midnight UTC (overnight window)
 
 permissions:
   contents: write
