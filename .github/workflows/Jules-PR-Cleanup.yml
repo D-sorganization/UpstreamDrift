@@ -5,7 +5,7 @@ name: Jules PR Cleanup
 
 on:
   schedule:
-    - cron: "0 5 * * 0"  # Weekly on Sundays at 5 AM UTC
+    - cron: "0 13 * * 0"  # Weekly on Sundays at 5 AM PST (13 UTC)
   workflow_dispatch:
     inputs:
       dry_run:
