@@ -633,6 +633,24 @@ class GolfLauncher(QMainWindow):
         main_layout.setContentsMargins(30, 30, 30, 30)
 
         # --- Top Bar ---
+        top_bar = self._setup_top_bar()
+        main_layout.addLayout(top_bar)
+
+        # --- Launcher Grid ---
+        self._setup_grid_area(main_layout)
+
+        # --- Bottom Bar ---
+        bottom_bar = self._setup_bottom_bar()
+        main_layout.addLayout(bottom_bar)
+
+        # Apply dark theme
+        self.apply_styles()
+
+        # Keyboard shortcuts
+        self._setup_search_shortcuts()
+
+    def _setup_top_bar(self) -> QHBoxLayout:
+        """Set up the top tool bar."""
         top_bar = QHBoxLayout()
 
         # Status Indicator
@@ -716,9 +734,10 @@ class GolfLauncher(QMainWindow):
         # Context Help Dock
         self._setup_context_help()
 
-        main_layout.addLayout(top_bar)
+        return top_bar
 
-        # --- Launcher Grid ---
+    def _setup_grid_area(self, layout: QVBoxLayout) -> None:
+        """Set up the scrollable grid area."""
         # Scroll Area for Grid
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
@@ -733,9 +752,10 @@ class GolfLauncher(QMainWindow):
         self.grid_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         self.scroll_area.setWidget(self.grid_container)
-        main_layout.addWidget(self.scroll_area, 1)
+        layout.addWidget(self.scroll_area, 1)
 
-        # --- Bottom Bar ---
+    def _setup_bottom_bar(self) -> QHBoxLayout:
+        """Set up the bottom configuration bar."""
         bottom_bar = QHBoxLayout()
 
         # Configuration options
@@ -781,12 +801,10 @@ class GolfLauncher(QMainWindow):
         self.btn_launch.setCursor(Qt.CursorShape.PointingHandCursor)
         bottom_bar.addWidget(self.btn_launch)
 
-        main_layout.addLayout(bottom_bar)
+        return bottom_bar
 
-        # Apply dark theme
-        self.apply_styles()
-
-        # Add Search Shortcut
+    def _setup_search_shortcuts(self) -> None:
+        """Setup keyboard shortcuts for search."""
         shortcut_search = QShortcut(QKeySequence("Ctrl+F"), self)
         shortcut_search.activated.connect(self._focus_search)
 
@@ -1366,6 +1384,92 @@ class GolfLauncher(QMainWindow):
         """Launch the OpenPose GUI directly."""
         cwd = abs_repo_path.parent
         self._launch_script_process("OpenPose Analytics", abs_repo_path, cwd)
+
+    def _launch_docker_container(self, model: Any, repo_path: Path) -> None:
+        """Launch the model in a Docker container."""
+        try:
+            # Construct Docker command
+            cmd = [
+                "docker",
+                "run",
+                "--rm",
+                "-it",
+                "-v",
+                f"{REPOS_ROOT}:/workspace",
+                "-e",
+                "PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines",
+            ]
+
+            # Display configuration for GUI apps
+            if os.name == "nt":  # Windows
+                cmd.extend(
+                    [
+                        "-e",
+                        "DISPLAY=host.docker.internal:0",
+                        "-e",
+                        "MUJOCO_GL=glfw",
+                        "-e",
+                        "PYOPENGL_PLATFORM=glx",
+                        "-e",
+                        "QT_QPA_PLATFORM=xcb",
+                    ]
+                )
+            else:  # Linux
+                disp = os.environ.get("DISPLAY", ":0")
+                cmd.extend(
+                    [
+                        "-e",
+                        f"DISPLAY={disp}",
+                        "-v",
+                        "/tmp/.X11-unix:/tmp/.X11-unix",
+                    ]
+                )
+
+            # GPU Support
+            if self.chk_gpu.isChecked():
+                cmd.extend(["--gpus=all"])
+
+            # Port mapping for MeshCat (Drake/Pinocchio)
+            if model.type in ("drake", "pinocchio"):
+                cmd.extend(["-p", "7000:7000", "-e", "MESHCAT_HOST=0.0.0.0"])
+
+            # Working Directory
+            work_dir = (
+                f"/workspace/{repo_path.parent.relative_to(REPOS_ROOT).as_posix()}"
+            )
+            cmd.extend(["-w", work_dir])
+
+            # Python command
+            # Determine correct python launch command based on model type
+            if model.type == "drake":
+                cmd.extend(
+                    [
+                        "continuumio/miniconda3:latest",
+                        "python",
+                        "-m",
+                        "src.drake_gui_app",
+                    ]
+                )
+            elif model.type == "pinocchio":
+                cmd.extend(
+                    ["continuumio/miniconda3:latest", "python", "pinocchio_golf/gui.py"]
+                )
+            else:
+                cmd.extend(["continuumio/miniconda3:latest", "python", repo_path.name])
+
+            logger.info(f"Docker Launch: {' '.join(cmd)}")
+
+            process = subprocess.Popen(
+                cmd,
+                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
+            )
+            self.running_processes[model.name] = process
+            self.show_toast(f"{model.name} Launched (Docker)", "success")
+            self.lbl_status.setText(f"● {model.name} Running (Docker)")
+            self.lbl_status.setStyleSheet("color: #30D158;")
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to launch Docker container: {e}") from e
 
     def _launch_script_process(self, name: str, script_path: Path, cwd: Path) -> None:
         """Helper to launch python script in loose process."""
