@@ -20,9 +20,9 @@ jobs:
         id: check
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          LABELS: ${{ toJson(github.event.issue.labels) }}
         run: |
-          # Get issue labels
-          LABELS='${{ toJson(github.event.issue.labels) }}'
+          # LABELS is passed via env to prevent shell injection
 
           # Skip if labeled with 'no-jules', 'question', 'documentation', or 'wontfix'
           SKIP_LABELS="no-jules question documentation wontfix duplicate invalid"
@@ -42,8 +42,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
         run: |
-          gh issue comment "$ISSUE_NUMBER" --body "$(cat <<'EOF'
+          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "$(cat <<'EOF'
           @jules Please analyze and fix this issue.
 
           ---
@@ -58,9 +59,10 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
         run: |
           # Create label if it doesn't exist
-          gh label create "jules-assigned" --color "7057ff" --description "Issue assigned to Jules AI" 2>/dev/null || true
+          gh label create "jules-assigned" --repo "$REPO" --color "7057ff" --description "Issue assigned to Jules AI" 2>/dev/null || true
 
           # Add label to issue
-          gh issue edit "$ISSUE_NUMBER" --add-label "jules-assigned" || true
+          gh issue edit "$ISSUE_NUMBER" --repo "$REPO" --add-label "jules-assigned" || true
