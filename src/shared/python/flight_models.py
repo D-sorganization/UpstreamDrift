@@ -154,20 +154,23 @@ class BallFlightModel(ABC):
 
     @property
     @abstractmethod
-    def name(self) -> str: ...
+    def name(self) -> str:
+        raise NotImplementedError()
 
     @property
     @abstractmethod
-    def description(self) -> str: ...
+    def description(self) -> str:
+        raise NotImplementedError()
 
     @property
     @abstractmethod
-    def reference(self) -> str: ...
+    def reference(self) -> str:
+        raise NotImplementedError()
 
     @abstractmethod
     def simulate(
         self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
-    ) -> FlightResult: ...
+        raise NotImplementedError()
 
     def _compute_metrics(self, trajectory: list[TrajectoryPoint]) -> FlightResult:
         """Standardized metrics computation (Consolidated for DRY)."""

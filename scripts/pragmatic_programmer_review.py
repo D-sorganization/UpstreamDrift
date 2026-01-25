@@ -28,54 +28,23 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+# Add project root to path for imports
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
 from scripts.script_utils import run_main, setup_script_logging
+from src.shared.python.assessment.constants import PRAGMATIC_PRINCIPLES as PRINCIPLES
+from src.shared.python.assessment.analysis import (
+    get_python_metrics,
+    get_detailed_function_metrics,
+    assess_error_handling_content,
+    assess_logging_content,
+    calculate_complexity,
+)
 
 # Configure logging using centralized utility
 logger = setup_script_logging(__name__)
-
-# Pragmatic Programmer principles and their assessment criteria
-PRINCIPLES = {
-    "DRY": {
-        "name": "Don't Repeat Yourself",
-        "description": "Every piece of knowledge must have a single, unambiguous representation",
-        "weight": 2.0,
-    },
-    "ORTHOGONALITY": {
-        "name": "Orthogonality & Decoupling",
-        "description": "Eliminate effects between unrelated things",
-        "weight": 1.5,
-    },
-    "REVERSIBILITY": {
-        "name": "Reversibility & Flexibility",
-        "description": "Make decisions reversible; avoid painting yourself into a corner",
-        "weight": 1.0,
-    },
-    "QUALITY": {
-        "name": "Code Quality & Craftsmanship",
-        "description": "Good enough software; know when to stop",
-        "weight": 1.5,
-    },
-    "ROBUSTNESS": {
-        "name": "Error Handling & Robustness",
-        "description": "Crash early; use assertions; handle errors gracefully",
-        "weight": 2.0,
-    },
-    "TESTING": {
-        "name": "Testing & Validation",
-        "description": "Test early, test often, test automatically",
-        "weight": 2.0,
-    },
-    "DOCUMENTATION": {
-        "name": "Documentation & Communication",
-        "description": "It's all writing; document the why, not just the what",
-        "weight": 1.0,
-    },
-    "AUTOMATION": {
-        "name": "Automation & Tooling",
-        "description": "Don't use manual procedures; automate everything",
-        "weight": 1.5,
-    },
-}
 
 
 def find_python_files(root_path: Path) -> list[Path]:
@@ -110,31 +79,6 @@ def compute_file_hash(content: str) -> str:
             lines.append(line)
     normalized = "\n".join(lines)
     return hashlib.md5(normalized.encode(), usedforsecurity=False).hexdigest()
-
-
-def extract_functions(content: str) -> list[dict]:
-    """Extract function definitions from Python code."""
-    functions = []
-    try:
-        tree = ast.parse(content)
-        for node in ast.walk(tree):
-            if isinstance(node, ast.FunctionDef):
-                functions.append(
-                    {
-                        "name": node.name,
-                        "lineno": node.lineno,
-                        "args": len(node.args.args),
-                        "body_lines": (
-                            node.end_lineno - node.lineno + 1
-                            if hasattr(node, "end_lineno")
-                            else 0
-                        ),
-                        "has_docstring": (ast.get_docstring(node) is not None),
-                    }
-                )
-    except SyntaxError:
-        pass
-    return functions
 
 
 def check_dry_violations(files: list[Path]) -> list[dict]:
