@@ -35,9 +35,7 @@ from .error_utils import (
     FileNotFoundIOError,
     FileParseError,
 )
-from .error_utils import (
-    IOError as IOUtilsError,
-)
+from .error_utils import IOError as IOUtilsError
 
 if YAML_AVAILABLE:
     import yaml

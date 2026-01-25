@@ -194,7 +194,6 @@ class TestSignalProcessing:
 
         # Test with Numba disabled (mocking it if necessary, but tricky since it imports at top level)
         # We can test logic by trusting it runs whatever version is available.
-        pass
 
     def test_compute_dtw_path(self):
         """Test DTW path."""

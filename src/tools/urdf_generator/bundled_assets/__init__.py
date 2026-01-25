@@ -30,8 +30,6 @@ BUNDLED_ASSETS_DIR = Path(__file__).parent
 class BundledAssetNotFoundError(Exception):
     """Raised when a bundled asset is not found."""
 
-    pass
-
 
 class BundledAssets:
     """Manager for bundled mesh and URDF assets.

@@ -103,8 +103,6 @@ except ImportError:
     class GolfModelParams:  # type: ignore[no-redef]
         """Placeholder for golf model parameters."""
 
-        pass
-
     def build_golf_swing_diagram(
         params: GolfModelParams | None = None,
         urdf_path: str | None = None,

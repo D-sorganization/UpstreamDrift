@@ -1,13 +1,11 @@
-# Assessment G: Dependencies
+# Assessment: Dependencies
 
 **Date**: 2026-01-24
-**Score**: 8.5/10
+**Grade**: 8.5/10
 
-## Findings
-
-- Dependency definition files found.
+## Details
+Dependency definition files found.
 
 ## Recommendations
-
 1. Pin dependency versions.
-1. Audit dependencies for vulnerabilities.
+2. Audit dependencies for vulnerabilities.

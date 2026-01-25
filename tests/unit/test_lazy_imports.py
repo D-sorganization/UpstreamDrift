@@ -89,8 +89,8 @@ class TestPolynomialGeneratorLazyImport:
         """Test ImportError handling when polynomial generator unavailable."""
         # Try to import and handle expected ImportError
         try:
-            from mujoco_humanoid_golf.polynomial_generator import (
-                PolynomialGeneratorWidget,  # noqa: F401
+            from mujoco_humanoid_golf.polynomial_generator import (  # noqa: F401
+                PolynomialGeneratorWidget,
             )
 
             # If we got here, the import succeeded - skip the error handling test
@@ -129,7 +129,6 @@ class TestGracefulDegradation:
         """Verify launcher can start even if MuJoCo not installed."""
         # This would be an integration test
         # For now, we verify the pattern exists
-        pass
 
     def test_clear_error_messages(self):
         """Verify error messages are clear and helpful."""

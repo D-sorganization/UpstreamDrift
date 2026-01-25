@@ -61,6 +61,26 @@ REFRESH_TOKEN_EXPIRE_DAYS = 30
 BCRYPT_ROUNDS = 12
 
 
+def compute_prefix_hash(prefix: str) -> str:
+    """Compute SHA256 hash of a non-sensitive prefix for database indexing.
+
+    This function is used to create a database index for fast API key lookup.
+    It hashes ONLY the first 8 characters of the key (not the full secret).
+
+    Args:
+        prefix: Non-sensitive 8-character prefix from the API key
+
+    Returns:
+        SHA256 hash of the prefix for database indexing
+
+    Note:
+        This is NOT password hashing. The actual API key is hashed with bcrypt.
+    """
+    import hashlib
+
+    return hashlib.sha256(prefix.encode()).hexdigest()
+
+
 class SecurityManager:
     """Handles authentication and authorization security."""
 
@@ -261,7 +281,6 @@ class UsageTracker:
 
     def __init__(self) -> None:
         """Initialize usage tracker."""
-        pass
 
     def check_quota(self, user: User, resource_type: str) -> bool:
         """Check if user has quota remaining for a resource.
