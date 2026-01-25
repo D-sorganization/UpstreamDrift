@@ -444,7 +444,7 @@ class DraggableModelCard(QFrame):
 
     def dragEnterEvent(self, event: QDragEnterEvent | None) -> None:
         if not event:
-             return
+            return
 
         mime_data = event.mimeData()
         if (
@@ -456,7 +456,7 @@ class DraggableModelCard(QFrame):
 
     def dropEvent(self, event: QDropEvent | None) -> None:
         if not event:
-             return
+            return
 
         mime_data = event.mimeData()
         if mime_data and mime_data.hasText():

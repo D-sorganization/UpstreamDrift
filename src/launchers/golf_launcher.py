@@ -21,12 +21,8 @@ sys.path.append(str(Path(__file__).parent))
 
 from src.launchers.ui_components import (
     ASSETS_DIR,
-    DOCKER_IMAGE_NAME,
-    LAUNCH_FEEDBACK_DURATION_MS,
-    MODEL_IMAGES,
     AsyncStartupWorker,
     ContextHelpDock,
-    DockerBuildThread,
     DockerCheckThread,
     DraggableModelCard,
     EnvironmentDialog,
@@ -661,8 +657,7 @@ class GolfLauncher(QMainWindow):
         self.btn_modify_layout.setChecked(False)
         self.btn_modify_layout.setToolTip("Toggle to enable/disable tile rearrangement")
         self.btn_modify_layout.clicked.connect(self.toggle_layout_mode)
-        self.btn_modify_layout.setStyleSheet(
-            """
+        self.btn_modify_layout.setStyleSheet("""
             QPushButton {
                 background-color: #444444;
                 color: #cccccc;
@@ -672,8 +667,7 @@ class GolfLauncher(QMainWindow):
                 background-color: #007acc;
                 color: white;
             }
-            """
-        )
+            """)
         top_bar.addWidget(self.btn_modify_layout)
 
         self.btn_customize_tiles = QPushButton("🧩 Edit Tiles")
@@ -699,8 +693,7 @@ class GolfLauncher(QMainWindow):
             self.btn_ai.setToolTip("Open AI Assistant for help with analysis")
             self.btn_ai.setCheckable(True)
             self.btn_ai.clicked.connect(self.toggle_ai_assistant)
-            self.btn_ai.setStyleSheet(
-                """
+            self.btn_ai.setStyleSheet("""
                 QPushButton {
                     background-color: #1976d2;
                     color: white;
@@ -714,8 +707,7 @@ class GolfLauncher(QMainWindow):
                 QPushButton:checked {
                     background-color: #0d47a1;
                 }
-                """
-            )
+                """)
             top_bar.addWidget(self.btn_ai)
 
             # Setup AI Dock Widget (Hidden by default)
@@ -752,9 +744,7 @@ class GolfLauncher(QMainWindow):
 
         self.chk_live = QCheckBox("Live Visualization")
         self.chk_live.setChecked(True)
-        self.chk_live.setToolTip(
-            "Enable real-time 3D visualization during simulation"
-        )
+        self.chk_live.setToolTip("Enable real-time 3D visualization during simulation")
         config_group.addWidget(self.chk_live)
 
         self.chk_gpu = QCheckBox("GPU Acceleration")
@@ -772,8 +762,7 @@ class GolfLauncher(QMainWindow):
         self.btn_launch.setEnabled(False)
         self.btn_launch.setFixedHeight(50)
         self.btn_launch.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
-        self.btn_launch.setStyleSheet(
-            """
+        self.btn_launch.setStyleSheet("""
             QPushButton {
                 background-color: #2da44e;
                 color: white;
@@ -787,8 +776,7 @@ class GolfLauncher(QMainWindow):
             QPushButton:hover:!disabled {
                 background-color: #2c974b;
             }
-            """
-        )
+            """)
         self.btn_launch.clicked.connect(self.launch_simulation)
         self.btn_launch.setCursor(Qt.CursorShape.PointingHandCursor)
         bottom_bar.addWidget(self.btn_launch)
@@ -823,8 +811,7 @@ class GolfLauncher(QMainWindow):
 
         self.ai_dock = QDockWidget("AI Assistant", self)
         self.ai_dock.setAllowedAreas(
-            Qt.DockWidgetArea.RightDockWidgetArea
-            | Qt.DockWidgetArea.LeftDockWidgetArea
+            Qt.DockWidgetArea.RightDockWidgetArea | Qt.DockWidgetArea.LeftDockWidgetArea
         )
 
         # Create AI Panel
@@ -1017,8 +1004,8 @@ class GolfLauncher(QMainWindow):
             c3d_script = REPOS_ROOT / "tools" / "c3d_viewer_app.py"
 
         if not c3d_script.exists():
-             self.show_toast("C3D Viewer script not found.", "error")
-             return
+            self.show_toast("C3D Viewer script not found.", "error")
+            return
 
         if "c3d_viewer" in self.running_processes:
             if self.running_processes["c3d_viewer"].poll() is None:
@@ -1064,7 +1051,7 @@ class GolfLauncher(QMainWindow):
             process = secure_popen(
                 cmd,
                 cwd=str(Path(app_path).parent),
-                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0
+                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
             )
 
             self.running_processes[app.id] = process
@@ -1083,18 +1070,15 @@ class GolfLauncher(QMainWindow):
         # Update visual selection state
         for mid, card in self.model_cards.items():
             if mid == model_id:
-                card.setStyleSheet(
-                    """
+                card.setStyleSheet("""
                     QFrame#ModelCard {
                         background-color: #383838;
                         border: 2px solid #0A84FF;
                         border-radius: 12px;
                     }
-                    """
-                )
+                    """)
             else:
-                card.setStyleSheet(
-                    """
+                card.setStyleSheet("""
                     QFrame#ModelCard {
                         background-color: #2D2D2D;
                         border: 1px solid #3A3A3A;
@@ -1104,8 +1088,7 @@ class GolfLauncher(QMainWindow):
                         background-color: #333333;
                         border: 1px solid #555555;
                     }
-                    """
-                )
+                    """)
 
         # Update launch button
         model = self._get_model(model_id)
@@ -1121,15 +1104,13 @@ class GolfLauncher(QMainWindow):
         if not self.selected_model:
             self.btn_launch.setText("🚀 Select a Model")
             self.btn_launch.setEnabled(False)
-            self.btn_launch.setStyleSheet(
-                """
+            self.btn_launch.setStyleSheet("""
                 QPushButton {
                     background-color: #3a3a3a;
                     color: #888888;
                     border-radius: 6px;
                 }
-                """
-            )
+                """)
             return
 
         name = model_name or self.selected_model
@@ -1141,23 +1122,20 @@ class GolfLauncher(QMainWindow):
         if model and getattr(model, "requires_docker", False):
             if not self.docker_available:
                 self.btn_launch.setText("⚠️ Docker Required")
-                self.btn_launch.setStyleSheet(
-                    """
+                self.btn_launch.setStyleSheet("""
                     QPushButton {
                         background-color: #3a3a3a;
                         color: #ff453a;
                         border: 2px solid #ff453a;
                         border-radius: 6px;
                     }
-                    """
-                )
+                    """)
                 self.btn_launch.setEnabled(False)
                 return
 
         self.btn_launch.setText(f"🚀 Launch {name}")
         self.btn_launch.setEnabled(True)
-        self.btn_launch.setStyleSheet(
-            """
+        self.btn_launch.setStyleSheet("""
             QPushButton {
                 background-color: #2da44e;
                 color: white;
@@ -1167,8 +1145,7 @@ class GolfLauncher(QMainWindow):
             QPushButton:hover {
                 background-color: #2c974b;
             }
-            """
-        )
+            """)
 
     def _get_engine_type(self, model_type: str) -> _EngineType:
         """Map model type to EngineType."""
@@ -1190,8 +1167,7 @@ class GolfLauncher(QMainWindow):
     def apply_styles(self) -> None:
         """Apply custom stylesheets."""
         # Global dark theme
-        self.setStyleSheet(
-            """
+        self.setStyleSheet("""
             QMainWindow {
                 background-color: #1E1E1E;
             }
@@ -1221,8 +1197,7 @@ class GolfLauncher(QMainWindow):
             QPushButton:hover {
                 background-color: #3E3E42;
             }
-            """
-        )
+            """)
 
     def check_docker(self) -> None:
         """Start the docker check thread."""
@@ -1292,17 +1267,17 @@ class GolfLauncher(QMainWindow):
 
                 # If custom GUI app provided
                 if model.type == "custom_humanoid":
-                     self._custom_launch_humanoid(abs_repo_path)
+                    self._custom_launch_humanoid(abs_repo_path)
                 elif model.type == "custom_dashboard":
-                     self._custom_launch_comprehensive(abs_repo_path)
+                    self._custom_launch_comprehensive(abs_repo_path)
                 elif model.type == "drake":
-                     self._custom_launch_drake(abs_repo_path)
+                    self._custom_launch_drake(abs_repo_path)
                 elif model.type == "pinocchio":
-                     self._custom_launch_pinocchio(abs_repo_path)
+                    self._custom_launch_pinocchio(abs_repo_path)
                 elif model.type == "openpose":
-                     self._custom_launch_openpose(abs_repo_path)
+                    self._custom_launch_openpose(abs_repo_path)
                 elif model.type == "mjcf" or str(repo_path).endswith(".xml"):
-                     self._launch_generic_mjcf(abs_repo_path)
+                    self._launch_generic_mjcf(abs_repo_path)
                 else:
                     self.show_toast(f"Unknown launch type: {model.type}", "warning")
             else:
@@ -1329,18 +1304,27 @@ class GolfLauncher(QMainWindow):
             # Or use mujoco.viewer.launch_passive()
 
             # Better approach: Launch robust viewer script
-            viewer_script = REPOS_ROOT / "engines" / "physics_engines" / "mujoco" / "python" / "passive_viewer.py"
+            viewer_script = (
+                REPOS_ROOT
+                / "engines"
+                / "physics_engines"
+                / "mujoco"
+                / "python"
+                / "passive_viewer.py"
+            )
 
             if viewer_script.exists():
                 process = secure_popen(
                     [sys.executable, str(viewer_script), str(path)],
-                    creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0
+                    creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
                 )
                 self.running_processes[path.name] = process
                 self.show_toast("Launched Passive Viewer", "success")
             else:
                 # Fallback if script missing
-                self.show_toast("Viewer script missing, attempting direct launch...", "warning")
+                self.show_toast(
+                    "Viewer script missing, attempting direct launch...", "warning"
+                )
                 mujoco.viewer.launch(m, d)
 
         except Exception as e:
@@ -1385,15 +1369,15 @@ class GolfLauncher(QMainWindow):
     def _launch_script_process(self, name: str, script_path: Path, cwd: Path) -> None:
         """Helper to launch python script in loose process."""
         try:
-             process = secure_popen(
+            process = secure_popen(
                 [sys.executable, str(script_path)],
                 cwd=str(cwd),
-                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0
+                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
             )
-             self.running_processes[name] = process
-             self.show_toast(f"{name} Launched", "success")
-             self.lbl_status.setText(f"● {name} Running")
-             self.lbl_status.setStyleSheet("color: #30D158;")
+            self.running_processes[name] = process
+            self.show_toast(f"{name} Launched", "success")
+            self.lbl_status.setText(f"● {name} Running")
+            self.lbl_status.setStyleSheet("color: #30D158;")
 
         except Exception as e:
             raise RuntimeError(f"Failed to launch {name}: {e}") from e
@@ -1411,27 +1395,23 @@ class GolfLauncher(QMainWindow):
         self.layout_edit_mode = checked
         if checked:
             self.btn_modify_layout.setText("🔓 Edit Mode On")
-            self.btn_modify_layout.setStyleSheet(
-                """
+            self.btn_modify_layout.setStyleSheet("""
                 QPushButton {
                     background-color: #007acc;
                     color: white;
                     border: 1px solid #0099ff;
                 }
-                """
-            )
+                """)
             self.btn_customize_tiles.setEnabled(True)
             self.show_toast("Drag tiles to reorder. Double-click to launch.", "info")
         else:
             self.btn_modify_layout.setText("🔒 Layout Locked")
-            self.btn_modify_layout.setStyleSheet(
-                """
+            self.btn_modify_layout.setStyleSheet("""
                 QPushButton {
                     background-color: #444444;
                     color: #cccccc;
                 }
-                """
-            )
+                """)
             self.btn_customize_tiles.setEnabled(False)
 
         # Update all cards to accept/reject drops
@@ -1461,8 +1441,6 @@ class GolfLauncher(QMainWindow):
         if not self.running_processes:
             self.lbl_status.setText("● Ready")
             self.lbl_status.setStyleSheet("color: #aaaaaa;")
-
-
 
 
 def main() -> None:
