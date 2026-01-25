@@ -75,6 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated .gitignore to prevent future accumulation
 - Moved utility scripts from root to scripts/ directory
 - Archived pre-Jan11-2026 assessment documents
+- Closed test issue #858
 
 ### Fixed
 
