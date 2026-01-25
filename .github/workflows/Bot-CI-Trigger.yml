@@ -40,10 +40,12 @@ concurrency:
 jobs:
   check-and-trigger:
     runs-on: ubuntu-latest
-    # Only run for bot-authored PRs or scheduled/manual runs
+    # Run for: scheduled runs, manual triggers, bot-authored PRs, OR any PR synchronize event
+    # (synchronize = new commit pushed, which could be from a bot like autofix)
     if: |
       github.event_name == 'schedule' ||
       github.event_name == 'workflow_dispatch' ||
+      github.event.action == 'synchronize' ||
       (github.event_name == 'pull_request' &&
        (contains(github.event.pull_request.user.login, 'bot') ||
         contains(github.event.pull_request.user.login, 'github-actions') ||
@@ -76,6 +78,21 @@ jobs:
             echo "skip=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Check if Last Commit is from Bot
+        id: bot-commit-check
+        if: steps.loop-check.outputs.skip != 'true' && github.event.action == 'synchronize'
+        run: |
+          # Get the last commit author
+          LAST_COMMIT_AUTHOR=$(git log -1 --format='%an')
+          echo "Last commit author: $LAST_COMMIT_AUTHOR"
+
+          if [[ "$LAST_COMMIT_AUTHOR" == *"[bot]"* ]] || [[ "$LAST_COMMIT_AUTHOR" == *"github-actions"* ]]; then
+            echo "is_bot=true" >> $GITHUB_OUTPUT
+            echo "Bot commit detected - will trigger CI"
+          else
+            echo "is_bot=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Find Bot PRs Without CI
         id: find-prs
         if: steps.loop-check.outputs.skip != 'true'
@@ -83,6 +100,7 @@ jobs:
           GH_TOKEN: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
           INPUT_PR: ${{ inputs.pr_number }}
           FORCE: ${{ inputs.force }}
+          IS_BOT_COMMIT: ${{ steps.bot-commit-check.outputs.is_bot || 'false' }}
         run: |
           prs_to_trigger=""
 
@@ -93,15 +111,21 @@ jobs:
             # PR event - check this specific PR
             PR_NUMBER="${{ github.event.pull_request.number }}"
 
-            # Check if CI has already run
-            checks=$(gh pr checks "$PR_NUMBER" 2>/dev/null || echo "")
-
-            if [ -z "$checks" ] || [ "$FORCE" == "true" ]; then
+            # If last commit was from a bot, always trigger CI
+            if [ "$IS_BOT_COMMIT" == "true" ]; then
+              echo "Bot commit detected on PR #$PR_NUMBER - forcing CI trigger"
               prs_to_trigger="$PR_NUMBER"
             else
-              # Check if quality-gate or ci-standard passed/ran
-              if ! echo "$checks" | grep -qE "(quality-gate|ci-standard|CI Standard)"; then
+              # Check if CI has already run
+              checks=$(gh pr checks "$PR_NUMBER" 2>/dev/null || echo "")
+
+              if [ -z "$checks" ] || [ "$FORCE" == "true" ]; then
                 prs_to_trigger="$PR_NUMBER"
+              else
+                # Check if quality-gate or ci-standard passed/ran
+                if ! echo "$checks" | grep -qE "(quality-gate|ci-standard|CI Standard)"; then
+                  prs_to_trigger="$PR_NUMBER"
+                fi
               fi
             fi
           else
