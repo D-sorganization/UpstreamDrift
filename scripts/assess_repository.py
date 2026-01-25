@@ -13,6 +13,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
+# noqa: E402 -- Required for local imports from project root in standalone scripts
 from src.shared.python.assessment.analysis import (
     assess_error_handling_content,
     assess_logging_content,
@@ -115,7 +116,7 @@ def assess_C():
 def assess_D():
     """Error Handling assessment."""
     findings = []
-    py_files = list(REPO_ROOT.rglob("*.py"))
+    py_files = REPO_ROOT.rglob("*.py")
     try_count = 0
     bare_except_count = 0
 
@@ -284,7 +285,7 @@ def assess_K():
 def assess_L():
     """Logging assessment."""
     findings = []
-    py_files = list(REPO_ROOT.rglob("*.py"))
+    py_files = REPO_ROOT.rglob("*.py")
     logging_usage = 0
     print_usage = 0
 
@@ -354,7 +355,7 @@ def assess_O():
     score = 7.5
 
     total_metrics = {"functions": 0, "branches": 0}
-    py_files = list(REPO_ROOT.rglob("*.py"))
+    py_files = REPO_ROOT.rglob("*.py")
     for f in py_files:
         if "node_modules" in f.parts or "venv" in f.parts:
             continue

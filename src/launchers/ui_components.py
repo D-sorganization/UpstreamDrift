@@ -278,8 +278,7 @@ class AsyncStartupWorker(QThread):
             self.progress_signal.emit("Loading model registry...", 10)
             from src.shared.python.model_registry import ModelRegistry
 
-            registry = ModelRegistry()
-            registry.load(self.repos_root)
+            registry = ModelRegistry(self.repos_root / "config/models.yaml")
             self.results.registry = registry
 
             self.progress_signal.emit("Probing physics engines...", 30)
@@ -310,7 +309,7 @@ class DraggableModelCard(QFrame):
         super().__init__(parent_launcher)
         self.model = model
         self.parent_launcher = parent_launcher
-        
+
         # Match initial drag-and-drop state to the parent's mode
         self.setAcceptDrops(bool(getattr(parent_launcher, "layout_edit_mode", False)))
         self.setObjectName("ModelCard")
@@ -444,16 +443,24 @@ class DraggableModelCard(QFrame):
             self.parent_launcher.launch_model_direct(self.model.id)
 
     def dragEnterEvent(self, event: QDragEnterEvent | None) -> None:
+        if not event:
+             return
+
+        mime_data = event.mimeData()
         if (
-            event
-            and event.mimeData().hasText()
-            and event.mimeData().text().startswith("model_card:")
+            mime_data
+            and mime_data.hasText()
+            and mime_data.text().startswith("model_card:")
         ):
             event.acceptProposedAction()
 
     def dropEvent(self, event: QDropEvent | None) -> None:
-        if event and event.mimeData().hasText():
-            source_id = event.mimeData().text().split(":")[1]
+        if not event:
+             return
+
+        mime_data = event.mimeData()
+        if mime_data and mime_data.hasText():
+            source_id = mime_data.text().split(":")[1]
             if self.parent_launcher and source_id != self.model.id:
                 self.parent_launcher._swap_models(source_id, self.model.id)
             event.acceptProposedAction()
@@ -513,8 +520,11 @@ class DockerBuildThread(QThread):
                 bufsize=1,
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
-            for line in iter(process.stdout.readline, ""):
-                self.log_signal.emit(line.strip())
+
+            if process.stdout:
+                for line in iter(process.stdout.readline, ""):
+                    self.log_signal.emit(line.strip())
+
             process.wait()
             self.finished_signal.emit(process.returncode == 0, "Build finished.")
         except Exception as e:
@@ -555,34 +565,15 @@ class EnvironmentDialog(QDialog):
         build_layout.addWidget(self.console)
         tabs.addTab(tab_build, "Build Docker")
 
-        # Dependencies Tab
-        tab_deps = QWidget()
-        dep_layout = QVBoxLayout(tab_deps)
-        self.txt_deps = QTextEdit()
-        self.txt_deps.setReadOnly(True)
-        self.txt_deps.setHtml(
-            \"\"\"
-        <h3>Core Dependencies</h3>
-        <ul>
-            <li><b>MuJoCo:</b> Physics Engine (Latest)</li>
-            <li><b>dm_control:</b> DeepMind Control Suite</li>
-            <li><b>NumPy / SciPy:</b> Scientific Computing</li>
-            <li><b>PyQt6:</b> GUI Framework</li>
-        </ul>
-        \"\"\"
-        )
-        dep_layout.addWidget(self.txt_deps)
-        tabs.addTab(tab_deps, "Dependencies")
-
         close_btn = QPushButton("Close")
         close_btn.clicked.connect(self.accept)
         layout.addWidget(close_btn)
 
     def start_build(self) -> None:
         self.console.clear()
-        self.thread = DockerBuildThread(self.combo_stage.currentText())
-        self.thread.log_signal.connect(self.console.append)
-        self.thread.start()
+        self.build_thread = DockerBuildThread(self.combo_stage.currentText())
+        self.build_thread.log_signal.connect(self.console.append)
+        self.build_thread.start()
 
 
 class HelpDialog(QDialog):

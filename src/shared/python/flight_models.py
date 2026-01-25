@@ -170,6 +170,7 @@ class BallFlightModel(ABC):
     @abstractmethod
     def simulate(
         self, launch: UnifiedLaunchConditions, max_time: float = 10.0, dt: float = 0.01
+    ) -> FlightResult:
         raise NotImplementedError()
 
     def _compute_metrics(self, trajectory: list[TrajectoryPoint]) -> FlightResult:

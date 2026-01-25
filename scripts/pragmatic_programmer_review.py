@@ -33,8 +33,13 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from scripts.script_utils import run_main, setup_script_logging
-from src.shared.python.assessment.constants import PRAGMATIC_PRINCIPLES as PRINCIPLES
+from scripts.script_utils import run_main, setup_script_logging  # noqa: E402
+from src.shared.python.assessment.analysis import (  # noqa: E402
+    get_detailed_function_metrics,
+)
+from src.shared.python.assessment.constants import (  # noqa: E402
+    PRAGMATIC_PRINCIPLES as PRINCIPLES,
+)
 
 # Configure logging using centralized utility
 logger = setup_script_logging(__name__)
@@ -86,7 +91,6 @@ def check_dry_violations(files: list[Path]) -> list[dict]:
     chunk_size = 6  # Increase slightly for more meaningful duplicates
     code_blocks = defaultdict(list)
     magic_numbers = defaultdict(list)
-    magic_strings = defaultdict(list)
 
     for file_path in files:
         try:
@@ -182,7 +186,7 @@ def check_orthogonality(files: list[Path]) -> list[dict]:
                     )
 
         # Check for god functions (too many lines)
-        functions = extract_functions(content)
+        functions = get_detailed_function_metrics(content)
         for func in functions:
             if func["body_lines"] > 50:
                 issues.append(
@@ -306,7 +310,7 @@ def check_quality(files: list[Path]) -> list[dict]:
                 fixmes.append((file_path, i, line.strip()))
 
         # Check for type hints in function definitions
-        functions = extract_functions(content)
+        functions = get_detailed_function_metrics(content)
         for func in functions:
             # Simple heuristic: check if 'def func(arg: type)' pattern exists
             func_pattern = rf"def\s+{func['name']}\s*\([^)]*:\s*\w+"
@@ -528,7 +532,7 @@ def check_documentation(root_path: Path, files: list[Path]) -> list[dict]:
     total_functions = 0
 
     for file_path in files:
-        functions = extract_functions(
+        functions = get_detailed_function_metrics(
             file_path.read_text(encoding="utf-8", errors="ignore")
         )
         for func in functions:
@@ -700,9 +704,9 @@ def run_review(root_path: Path) -> dict[str, Any]:
         scores[principle_id] = max(0.0, min(10.0, score))
 
     # Calculate weighted overall score
-    total_weight = sum(p["weight"] for p in PRINCIPLES.values())
-    overall = (
-        sum(scores[pid] * PRINCIPLES[pid]["weight"] for pid in PRINCIPLES)
+    total_weight: float = sum(float(p["weight"]) for p in PRINCIPLES.values())
+    overall: float = (
+        sum(float(scores[pid]) * float(PRINCIPLES[pid]["weight"]) for pid in PRINCIPLES)
         / total_weight
     )
 

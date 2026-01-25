@@ -70,10 +70,16 @@ def get_detailed_function_metrics(content: str) -> list[dict[str, Any]]:
         tree = ast.parse(content)
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
-                body_lines = len(node.body)
+                body_lines = (
+                    node.end_lineno - node.lineno + 1
+                    if hasattr(node, "end_lineno")
+                    else 0
+                )
                 functions.append(
                     {
                         "name": node.name,
+                        "lineno": node.lineno,
+                        "args": len(node.args.args),
                         "body_lines": body_lines,
                         "has_docstring": ast.get_docstring(node) is not None,
                     }
