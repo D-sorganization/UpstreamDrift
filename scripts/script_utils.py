@@ -23,7 +23,7 @@ _REPO_ROOT = _SCRIPT_DIR.parent
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from src.shared.python.logging_config import get_logger, setup_logging
+from src.shared.python.logging_config import get_logger, setup_logging  # noqa: E402
 
 T = TypeVar("T")
 
