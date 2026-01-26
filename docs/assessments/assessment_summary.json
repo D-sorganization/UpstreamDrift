@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-01-24T18:39:39.949368",
-  "overall_score": 7.17,
+  "timestamp": "2026-01-26T08:14:39.460651",
+  "overall_score": 6.97,
   "category_scores": {
     "A": {
       "score": 8.0,
@@ -39,7 +39,7 @@
       "name": "Code Style"
     },
     "J": {
-      "score": 7.5,
+      "score": 5.5,
       "name": "API Design"
     },
     "K": {
@@ -70,8 +70,8 @@
     "Security": 7.0,
     "Performance": 7.25,
     "Ops & Config": 7.75,
-    "Design": 7.5
+    "Design": 5.5
   },
-  "total_issues": 0,
+  "total_issues": 17,
   "reports_analyzed": 15
 }

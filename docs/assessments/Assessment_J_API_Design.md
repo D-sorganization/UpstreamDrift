@@ -1,10 +1,10 @@
 # Assessment: API Design
 
-**Date**: 2026-01-24
-**Grade**: 7.5/10
+**Date**: 2026-01-26
+**Grade**: 5.5/10
 
 ## Details
-api/ directory exists.
+No api/ directory.
 
 ## Recommendations
 1. Document API endpoints using OpenAPI.
