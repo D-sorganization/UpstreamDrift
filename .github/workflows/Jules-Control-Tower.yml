@@ -49,6 +49,7 @@ permissions:
   actions: write
   issues: write
   security-events: write
+  checks: read
 
 jobs:
   triage:
