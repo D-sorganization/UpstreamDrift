@@ -157,6 +157,10 @@ exclude = [
     "**/legacy",
     "src/shared/models/opensim/opensim-models/",
     "src/shared/models/myosuite/myo_sim/",
+    "shared/models/opensim/opensim-models/",
+    "shared/models/myosuite/myo_sim/",
+    "shared/models/myosuite/myo_sim",
+    "shared/models/opensim/opensim-models",
 ]
 
 [tool.ruff.lint]
@@ -192,6 +196,7 @@ ignore = [
 "src/engines/physics_engines/mujoco/*.py" = ["T201"]
 "verification/*" = ["T201"]
 "src/shared/python/optimization/examples/*.py" = ["T201"]
+"src/launchers/**/*.py" = ["T201", "F841"]
 
 [tool.mypy]
 python_version = "3.11"

@@ -397,7 +397,9 @@ def resample_data(
         resampled_data = {}
         for col in data.columns:
             resampled_data[col] = np.interp(
-                new_time, time, data[col].values  # type: ignore[arg-type]
+                new_time,
+                time,
+                data[col].values,  # type: ignore[arg-type]
             )
 
         return pd.DataFrame(resampled_data, index=new_time)

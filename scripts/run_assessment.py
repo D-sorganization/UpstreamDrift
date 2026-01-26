@@ -86,7 +86,7 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
 
     score = max(0, min(10, score))
 
-    report = f"""# Assessment {assessment_id}: {assessment['name']}
+    report = f"""# Assessment {assessment_id}: {assessment["name"]}
 **Date**: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 **Score**: {score}/10
 

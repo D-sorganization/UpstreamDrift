@@ -81,9 +81,6 @@ def draw_rounded_rect_with_text(
     """Create a rounded rectangle with centered text."""
     pixels = []
 
-    # Background color with full alpha
-    bg_dark = (30, 30, 35, 255)  # Dark background
-
     for y in range(height):
         for x in range(width):
             # Check if inside rounded rectangle

@@ -11,7 +11,6 @@ setup_import_paths()
 # Use a patch for the import since mujoco might not be installed
 @patch.dict("sys.modules", {"mujoco": MagicMock()})
 def test_mujoco_iaa_logic():
-
     # Now we can import the module
     import mujoco
     from mujoco_humanoid_golf.rigid_body_dynamics.induced_acceleration import (
