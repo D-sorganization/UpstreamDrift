@@ -1,4 +1,77 @@
 models:
+  # =============================================================================
+  # PRIMARY LAUNCHER TILES - Main Physics Engines
+  # =============================================================================
+
+  - id: "mujoco_humanoid"
+    name: "MuJoCo Humanoid"
+    description: "MuJoCo humanoid golf swing simulation with full-body dynamics"
+    type: "custom_humanoid"
+    path: "src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
+    engine_type: "mujoco"
+
+  - id: "mujoco_dashboard"
+    name: "MuJoCo Dashboard"
+    description: "Comprehensive MuJoCo analysis dashboard with real-time visualization"
+    type: "custom_dashboard"
+    path: "src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf"
+    engine_type: "mujoco"
+
+  - id: "drake_golf"
+    name: "Drake Golf Model"
+    description: "Drake robotics framework with MeshCat visualization"
+    type: "drake"
+    path: "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
+    engine_type: "drake"
+
+  - id: "pinocchio_golf"
+    name: "Pinocchio Golf Model"
+    description: "Pinocchio rigid body dynamics with analytical derivatives"
+    type: "pinocchio"
+    path: "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
+    engine_type: "pinocchio"
+
+  - id: "opensim_golf"
+    name: "OpenSim Golf"
+    description: "OpenSim musculoskeletal modeling for biomechanics analysis"
+    type: "opensim"
+    path: "src/engines/physics_engines/opensim/python/opensim_gui.py"
+    engine_type: "opensim"
+
+  - id: "myosim_suite"
+    name: "MyoSim Suite"
+    description: "MyoSuite muscle-actuated simulation environment"
+    type: "myosim"
+    path: "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
+    engine_type: "myosuite"
+
+  - id: "openpose_analysis"
+    name: "OpenPose Analysis"
+    description: "Pose estimation and motion capture analysis"
+    type: "openpose"
+    path: "src/shared/python/pose_estimation/openpose_gui.py"
+    engine_type: "openpose"
+
+  # =============================================================================
+  # MATLAB/SIMSCAPE MODELS
+  # =============================================================================
+
+  - id: "simscape_2d"
+    name: "Matlab Simscape 2D"
+    description: "2D golf swing Simscape Multibody model"
+    type: "matlab_app"
+    path: "engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/Scripts/GolfSwingZVCF.slx"
+
+  - id: "simscape_3d"
+    name: "Matlab Simscape 3D"
+    description: "3D golf swing Simscape Multibody model"
+    type: "matlab_app"
+    path: "engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/Model/GolfSwing3D.slx"
+
+  # =============================================================================
+  # MUJOCO SPECIFIC MODELS (for engine selector)
+  # =============================================================================
+
   - id: "humanoid_2d"
     name: "2D Humanoid 3L"
     description: "Simplified planar model."
@@ -19,6 +92,10 @@ models:
     type: "engine_managed"
     path: "engines/physics_engines/mujoco/models/simple_pendulum.xml"
     engine_type: "mujoco"
+
+  # =============================================================================
+  # TOOLS AND UTILITIES
+  # =============================================================================
 
   - id: "urdf_generator"
     name: "URDF Generator"
