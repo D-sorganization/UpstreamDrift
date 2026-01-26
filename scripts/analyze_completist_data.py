@@ -288,6 +288,44 @@ def generate_report() -> None:
             f"| `{item['file']}` | {item['line']} | {item['type']} | {imp} | {cov} | {comp} |"
         )
 
+    # Feature Gap Matrix
+    report.append("\n## Feature Gap Matrix")
+    report.append("| Module | Feature Gap | Type |")
+    report.append("|---|---|---|")
+    for item in todos[:50]:
+        text = item.get("text", "").replace("|", "\\|")
+        report.append(f"| `{item['file']}` | {text[:100]} | {item['type']} |")
+
+    # Technical Debt Register
+    report.append("\n## Technical Debt Register")
+    report.append("| File | Line | Issue | Type |")
+    report.append("|---|---|---|---|")
+    for item in fixmes:
+        text = item.get("text", "").replace("|", "\\|")
+        report.append(
+            f"| `{item['file']}` | {item['line']} | {text[:100]} | {item['type']} |"
+        )
+
+    # Recommended Implementation Order
+    report.append("\n## Recommended Implementation Order")
+    report.append("Prioritized by Impact (High) and Complexity (Low).")
+    report.append("| Priority | File | Issue | Metrics (I/C/C) |")
+    report.append("|---|---|---|---|")
+
+    # Combined list for prioritization
+    all_items = criticals + todos
+
+    def priority_score(item: Mapping[str, Any]) -> int:
+        imp, _, comp = calculate_metrics(item)
+        return (imp * 10) - comp
+
+    all_items.sort(key=priority_score, reverse=True)
+
+    for i, item in enumerate(all_items[:20], 1):
+        imp, cov, comp = calculate_metrics(item)
+        desc = item.get("name", item.get("text", ""))[:80].replace("|", "\\|")
+        report.append(f"| {i} | `{item['file']}` | {desc} | {imp}/{cov}/{comp} |")
+
     # Issue creation for High Impact items
     report.append("\n## Issues Created")
     max_id = 0
