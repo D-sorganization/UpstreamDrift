@@ -33,6 +33,30 @@ def ensure_pillow() -> None:
         )
 
 
+def load_icon_source(path: str | Path) -> Image.Image:
+    """Load and prepare an image for icon generation.
+
+    Args:
+        path: Path to the source image.
+
+    Returns:
+        Loaded PIL Image in RGBA mode.
+
+    Raises:
+        FileNotFoundError: If path does not exist.
+        ImportError: If Pillow is not installed.
+    """
+    ensure_pillow()
+    p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(f"Source image not found: {p}")
+
+    img = Image.open(p)
+    if img.mode != "RGBA":
+        img = img.convert("RGBA")
+    return img
+
+
 def auto_crop_to_content(img: Image.Image, padding: int = 50) -> Image.Image:
     """Automatically crop the image to focus on the non-transparent content.
 

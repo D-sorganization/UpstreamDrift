@@ -8,9 +8,9 @@ from pathlib import Path
 
 from scripts.script_utils import run_main, setup_script_logging
 from src.shared.python.image_utils import (
-    Image,
     auto_crop_to_content,
     enhance_icon_source,
+    load_icon_source,
     save_ico,
     save_png_icons,
 )
@@ -23,13 +23,11 @@ def create_cropped_robot_icon() -> int:
     source_image = Path("GolfingRobot.png")
     assets_dir = Path("src/launchers/assets")
 
-    if not source_image.exists():
-        logger.error(f"Source image not found: {source_image}")
+    try:
+        img = load_icon_source(source_image)
+    except FileNotFoundError as e:
+        logger.error(str(e))
         return 1
-
-    img = Image.open(source_image)
-    if img.mode != "RGBA":
-        img = img.convert("RGBA")
 
     # 1. Auto-crop to focus on robot
     img = auto_crop_to_content(img, padding=50)
