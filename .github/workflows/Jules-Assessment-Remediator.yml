@@ -1,548 +1,286 @@
-name: Jules Assessment Remediator (Worker)
+name: Jules Assessment Remediator
 
-# Automated issue remediation workflow for assessment-identified issues
-# Creates PRs with automated fixes for the top N most impactful issues
+# Assigns Jules to remediate assessment-identified issues
+# with proper rate limiting and duplicate prevention
 
 on:
   workflow_dispatch:
     inputs:
-      issue_count:
-        description: 'Number of issues to fix (1-10)'
+      max_issues:
+        description: 'Maximum issues to process (1-3)'
         required: false
-        default: '5'
+        default: '1'
         type: choice
         options:
           - '1'
           - '2'
           - '3'
-          - '4'
-          - '5'
-          - '6'
-          - '7'
-          - '8'
-          - '9'
-          - '10'
       priority_filter:
         description: 'Priority filter'
         required: false
-        default: 'both'
+        default: 'all'
         type: choice
         options:
-          - 'P0'
-          - 'P1'
-          - 'both'
+          - 'critical'
+          - 'high'
+          - 'all'
       dry_run:
-        description: 'Dry run mode (show changes without creating PR)'
+        description: 'Dry run (preview only, no assignments)'
         required: false
         default: false
         type: boolean
+      specific_issue:
+        description: 'Specific issue number (overrides other filters)'
+        required: false
+        type: string
   schedule:
-    # Daily at 5 AM PST (13:00 UTC) - runs after overnight assessments complete
-    - cron: '0 13 * * *'
+    # Weekly on Monday at 6 AM UTC - conservative to prevent PR explosion
+    - cron: '0 6 * * 1'
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
   issues: write
 
-# Prevent multiple remediation runs simultaneously
+# Prevent concurrent runs
 concurrency:
   group: jules-assessment-remediator
   cancel-in-progress: false
 
 env:
-  MAX_ISSUES_PER_RUN: 10
-  DEFAULT_ISSUE_COUNT: 5
+  # Safety limits
+  MAX_ISSUES_PER_RUN: 3
+  MAX_ISSUES_PER_WEEK: 10
+  COOLDOWN_DAYS: 7
 
 jobs:
   remediate:
-    if: false  # DISABLED TO PREVENT PR EXPLOSION - Re-enable after fixing cleanup logic
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 10
 
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v6
-        with:
-          node-version: '20'
-
-      - name: Install Jules
-        run: |
-          npm install -g @google/jules
-          jules auth --token ${{ secrets.JULES_API_KEY }}
-
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.12'
-
-      - name: Install Python Dependencies
-        run: |
-          pip install PyGithub requests
-
-      # ===== ISSUE SELECTION PHASE =====
-      - name: Fetch and Select Issues
-        id: select
+      - name: Find and Assign Issues
+        id: assign
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ISSUE_COUNT: ${{ github.event.inputs.issue_count || env.DEFAULT_ISSUE_COUNT }}
-          PRIORITY_FILTER: ${{ github.event.inputs.priority_filter || 'both' }}
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
+          MAX_ISSUES: ${{ inputs.max_issues || '1' }}
+          PRIORITY_FILTER: ${{ inputs.priority_filter || 'all' }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          SPECIFIC_ISSUE: ${{ inputs.specific_issue || '' }}
+          REPO: ${{ github.repository }}
         run: |
-          echo "Fetching assessment issues..."
+          set -e
 
-          # Build label filter based on priority
-          LABEL_FILTER="assessment"
-          if [ "$PRIORITY_FILTER" = "P0" ]; then
-            LABEL_FILTER="$LABEL_FILTER,priority: critical"
-          elif [ "$PRIORITY_FILTER" = "P1" ]; then
-            LABEL_FILTER="$LABEL_FILTER,priority: high"
-          else
-            # Both P0 and P1
-            LABEL_FILTER="$LABEL_FILTER"
-          fi
+          echo "::group::Configuration"
+          echo "Max issues: $MAX_ISSUES"
+          echo "Priority filter: $PRIORITY_FILTER"
+          echo "Dry run: $DRY_RUN"
+          echo "Specific issue: $SPECIFIC_ISSUE"
+          echo "::endgroup::"
 
-          # Fetch open issues with assessment label
-          # Sort by priority (critical first) and creation date (oldest first)
-          ISSUES=$(gh issue list \
-            --state open \
-            --label "$LABEL_FILTER" \
-            --limit 50 \
-            --json number,title,labels,createdAt,body \
-            --jq 'sort_by(.createdAt) | reverse')
+          # Track results
+          assigned_issues=""
+          skipped_issues=""
+          processed_count=0
 
-          # Filter and prioritize
-          # P0 (priority: critical) issues first, then P1 (priority: high)
-          CRITICAL_ISSUES=$(echo "$ISSUES" | jq -r '[.[] | select(.labels[] | .name == "priority: critical")] | .[0:'"$ISSUE_COUNT"'] | .[] | .number' | tr '\n' ' ')
+          # If specific issue requested, handle it directly
+          if [ -n "$SPECIFIC_ISSUE" ]; then
+            echo "Processing specific issue #$SPECIFIC_ISSUE"
 
-          if [ -z "$CRITICAL_ISSUES" ] || [ $(echo "$CRITICAL_ISSUES" | wc -w) -lt "$ISSUE_COUNT" ]; then
-            REMAINING=$(( ISSUE_COUNT - $(echo "$CRITICAL_ISSUES" | wc -w) ))
-            HIGH_ISSUES=$(echo "$ISSUES" | jq -r '[.[] | select(.labels[] | .name == "priority: high")] | .[0:'"$REMAINING"'] | .[] | .number' | tr '\n' ' ')
-            SELECTED_ISSUES="$CRITICAL_ISSUES $HIGH_ISSUES"
-          else
-            SELECTED_ISSUES="$CRITICAL_ISSUES"
-          fi
+            # Check if issue exists and is open
+            if ! gh issue view "$SPECIFIC_ISSUE" --json state --jq '.state' 2>/dev/null | grep -q "OPEN"; then
+              echo "::error::Issue #$SPECIFIC_ISSUE is not open or does not exist"
+              exit 1
+            fi
 
-          # Trim whitespace
-          SELECTED_ISSUES=$(echo "$SELECTED_ISSUES" | xargs)
+            # Check if already assigned to jules
+            labels=$(gh issue view "$SPECIFIC_ISSUE" --json labels --jq '.labels[].name' 2>/dev/null || echo "")
+            if echo "$labels" | grep -q "jules-assigned"; then
+              echo "::warning::Issue #$SPECIFIC_ISSUE already has jules-assigned label"
+              skipped_issues="$SPECIFIC_ISSUE"
+            else
+              if [ "$DRY_RUN" = "true" ]; then
+                echo "DRY RUN: Would assign Jules to issue #$SPECIFIC_ISSUE"
+                assigned_issues="$SPECIFIC_ISSUE"
+                processed_count=$((processed_count + 1))
+              else
+                # Assign Jules
+                gh issue comment "$SPECIFIC_ISSUE" --repo "$REPO" --body "$(cat <<'COMMENT'
+          @jules Please analyze and remediate this assessment issue.
 
-          if [ -z "$SELECTED_ISSUES" ]; then
-            echo "No assessment issues found to remediate."
-            echo "selected=" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          echo "Selected issues: $SELECTED_ISSUES"
-          echo "selected=$SELECTED_ISSUES" >> $GITHUB_OUTPUT
-          echo "count=$(echo $SELECTED_ISSUES | wc -w)" >> $GITHUB_OUTPUT
-
-      # ===== ANALYSIS PHASE =====
-      - name: Analyze Issues and Extract Remediation Steps
-        if: steps.select.outputs.selected != ''
-        id: analyze
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SELECTED_ISSUES: ${{ steps.select.outputs.selected }}
-        run: |
-          echo "Analyzing selected issues..."
-
-          # Create analysis directory
-          mkdir -p /tmp/analysis
-
-          # Extract remediation context for each issue
-          for ISSUE_NUM in $SELECTED_ISSUES; do
-            echo "Analyzing issue #$ISSUE_NUM..."
-
-            gh issue view "$ISSUE_NUM" --json number,title,body,labels \
-              > "/tmp/analysis/issue_${ISSUE_NUM}.json"
-
-            # Extract affected files from evidence section if present
-            gh issue view "$ISSUE_NUM" --json body --jq '.body' | \
-              grep -oP '(?<=File: `)[^`]+' > "/tmp/analysis/issue_${ISSUE_NUM}_files.txt" 2>/dev/null || echo "" > "/tmp/analysis/issue_${ISSUE_NUM}_files.txt"
-          done
-
-          echo "Analysis complete. Files stored in /tmp/analysis/"
-          ls -la /tmp/analysis/
-
-      # ===== REMEDIATION PHASE =====
-      - name: Create Remediation Branch
-        if: steps.select.outputs.selected != '' && github.event.inputs.dry_run != 'true'
-        id: branch
-        run: |
-          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-          BRANCH_NAME="auto-fix/assessment-remediation-${TIMESTAMP}"
-
-          echo "Creating remediation branch: $BRANCH_NAME"
-          git checkout -b "$BRANCH_NAME"
-          git push -u origin "$BRANCH_NAME"
-
-          echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
-
-      - name: Apply Automated Fixes
-        if: steps.select.outputs.selected != ''
-        id: fixes
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SELECTED_ISSUES: ${{ steps.select.outputs.selected }}
-          BRANCH_NAME: ${{ steps.branch.outputs.branch || 'dry-run' }}
-          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
-        run: |
-          echo "Applying automated fixes..."
-
-          # Build comprehensive prompt from all selected issues
-          PROMPT="# Automated Assessment Remediation
-
-          You are tasked with remediating the following assessment issues. Apply safe, automated fixes where possible.
-
-          ## Issues to Remediate:
-          "
-
-          ISSUE_LINKS=""
-          for ISSUE_NUM in $SELECTED_ISSUES; do
-            ISSUE_DATA=$(cat "/tmp/analysis/issue_${ISSUE_NUM}.json")
-            ISSUE_TITLE=$(echo "$ISSUE_DATA" | jq -r '.title')
-            ISSUE_BODY=$(echo "$ISSUE_DATA" | jq -r '.body')
-
-            PROMPT="${PROMPT}
-          ### Issue #${ISSUE_NUM}: ${ISSUE_TITLE}
-          ${ISSUE_BODY}
+          Focus on:
+          1. Understanding the root cause
+          2. Implementing a safe, minimal fix
+          3. Adding tests if applicable
+          4. Documenting any manual steps needed
 
           ---
-          "
-            ISSUE_LINKS="${ISSUE_LINKS}Closes #${ISSUE_NUM}\n"
-          done
+          *Assigned by Jules Assessment Remediator*
+          COMMENT
+          )"
 
-          PROMPT="${PROMPT}
+                # Add tracking labels
+                gh issue edit "$SPECIFIC_ISSUE" --repo "$REPO" --add-label "jules-assigned" || true
 
-          ## Remediation Guidelines:
-
-          ### Safe Automated Fixes (Apply These):
-          1. **Missing Docstrings**: Add Google-style docstrings to functions/classes
-             - Template: Brief description, Args, Returns, Raises sections
-             - Use information from function signature and context
-
-          2. **Print to Logging**: Convert print() statements to proper logging
-             - Import logging module if needed
-             - Use appropriate log levels (info, warning, error, debug)
-             - Preserve message content and formatting
-
-          3. **Type Hints**: Add type hints to function signatures
-             - Use standard library types (str, int, float, list, dict, etc.)
-             - Import from typing as needed (Optional, Union, List, Dict, etc.)
-             - Mark return types, especially for public functions
-
-          4. **Missing README Files**: Create README.md from templates
-             - Include: Title, Description, Usage, Installation, Examples
-             - Auto-generate from directory/module structure
-             - Use existing code/comments for context
-
-          5. **Image Alt Text**: Add placeholder alt text to images
-             - Extract context from filename and surrounding code
-             - Use descriptive placeholders like 'Diagram of [topic]'
-
-          6. **Environment Files**: Update .env.example files
-             - Add missing environment variables found in code
-             - Use placeholder values (DO NOT include real secrets)
-             - Add comments describing each variable
-
-          7. **Code Formatting**: Apply consistent formatting
-             - Run black/ruff formatters
-             - Fix import ordering (isort --profile black)
-             - Remove trailing whitespace
-
-          8. **Linting Fixes**: Auto-fixable linting errors
-             - Run ruff check . --fix
-             - Fix unused imports, undefined names (if safe)
-             - Add # noqa comments only as last resort with explanation
-
-          ### Manual Steps (Document Only):
-          - Architectural changes requiring design decisions
-          - Complex refactoring across multiple modules
-          - Changes requiring domain knowledge
-          - Breaking API changes
-          - Performance optimizations requiring benchmarking
-
-          ## Execution Strategy:
-          1. Start with the safest, most mechanical fixes (formatting, imports)
-          2. Add docstrings and type hints using code context
-          3. Create missing documentation files
-          4. Document any issues requiring manual intervention
-          5. Run linters and formatters after each change
-          6. Verify no tests are broken
-
-          ## Safety Requirements:
-          - DO NOT change business logic or algorithms
-          - DO NOT modify test assertions
-          - DO NOT remove functionality
-          - DO NOT make breaking changes to public APIs
-          - ALWAYS preserve existing comments and documentation
-          - IF uncertain, document the issue instead of fixing
-
-          ## Output Requirements:
-          - Commit changes incrementally by issue
-          - Use descriptive commit messages: 'fix(assessment): [description] - fixes #N'
-          - Create a summary of all changes made
-          - List any issues requiring manual intervention
-
-          Please proceed with remediation."
-
-          # Store prompt for reference
-          echo "$PROMPT" > /tmp/remediation_prompt.txt
-
-          if [ "$DRY_RUN" = "true" ]; then
-            echo "DRY RUN MODE: Would execute Jules with the following prompt:"
-            echo "---"
-            cat /tmp/remediation_prompt.txt
-            echo "---"
-            echo "dry_run_executed=true" >> $GITHUB_OUTPUT
+                assigned_issues="$SPECIFIC_ISSUE"
+                processed_count=$((processed_count + 1))
+                echo "Assigned Jules to issue #$SPECIFIC_ISSUE"
+              fi
+            fi
           else
-            # Execute Jules remediation
-            echo "Executing Jules remediation on branch: $BRANCH_NAME"
-            jules task fix \
-              --branch "$BRANCH_NAME" \
-              --prompt "$PROMPT"
+            # Build label query based on priority
+            echo "::group::Finding assessment issues"
 
-            echo "fixes_applied=true" >> $GITHUB_OUTPUT
-            echo "$ISSUE_LINKS" > /tmp/issue_links.txt
-          fi
+            # Get assessment issues that are NOT already jules-assigned
+            # Sort by creation date (oldest first) to handle backlog fairly
+            all_issues=$(gh issue list \
+              --state open \
+              --label "assessment" \
+              --limit 50 \
+              --json number,title,labels,createdAt \
+              --jq 'sort_by(.createdAt) | .[] | select(.labels | map(.name) | index("jules-assigned") | not) | .number' \
+              2>/dev/null || echo "")
 
-      # ===== TESTING PHASE =====
-      - name: Run Linters and Tests
-        if: steps.fixes.outputs.fixes_applied == 'true' && github.event.inputs.dry_run != 'true'
-        id: test
-        continue-on-error: true
-        env:
-          BRANCH_NAME: ${{ steps.branch.outputs.branch }}
-        run: |
-          echo "Checking out remediation branch..."
-          git fetch origin "$BRANCH_NAME"
-          git checkout "$BRANCH_NAME"
+            if [ -z "$all_issues" ]; then
+              echo "No unassigned assessment issues found"
+              echo "::endgroup::"
+            else
+              echo "Found unassigned assessment issues: $all_issues"
+              echo "::endgroup::"
 
-          echo "Running code quality checks..."
+              # Filter by priority if specified
+              for issue_num in $all_issues; do
+                if [ "$processed_count" -ge "$MAX_ISSUES" ]; then
+                  echo "Reached max issues limit ($MAX_ISSUES)"
+                  break
+                fi
 
-          # Install linting tools
-          pip install ruff black isort
+                # Get issue labels
+                labels=$(gh issue view "$issue_num" --json labels --jq '.labels[].name' 2>/dev/null || echo "")
 
-          # Run formatters (auto-fix)
-          echo "Running formatters..."
-          black . || true
-          isort --profile black . || true
-          ruff check . --fix || true
+                # Apply priority filter
+                should_process=false
+                case "$PRIORITY_FILTER" in
+                  critical)
+                    if echo "$labels" | grep -qE "(priority: critical|P0|critical)"; then
+                      should_process=true
+                    fi
+                    ;;
+                  high)
+                    if echo "$labels" | grep -qE "(priority: high|P1|high)"; then
+                      should_process=true
+                    fi
+                    ;;
+                  all)
+                    should_process=true
+                    ;;
+                esac
 
-          # Commit formatting changes if any
-          if ! git diff --quiet; then
-            git config user.name "Jules Assessment Remediator"
-            git config user.email "jules-bot@github-actions"
-            git add .
-            git commit -m "style: apply automated formatting
+                if [ "$should_process" = "false" ]; then
+                  echo "Skipping issue #$issue_num (doesn't match priority filter)"
+                  continue
+                fi
 
-          Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>"
-            git push origin "$BRANCH_NAME"
-          fi
+                # Check cooldown - skip if recently commented by this workflow
+                recent_comment=$(gh issue view "$issue_num" --json comments \
+                  --jq '.comments | map(select(.body | contains("Jules Assessment Remediator"))) | last | .createdAt // ""' \
+                  2>/dev/null || echo "")
 
-          # Run linters (report only)
-          echo "Running linters..."
-          ruff check . > /tmp/lint_results.txt 2>&1 || true
+                if [ -n "$recent_comment" ]; then
+                  # Check if comment is within cooldown period
+                  comment_date=$(date -d "$recent_comment" +%s 2>/dev/null || echo "0")
+                  current_date=$(date +%s)
+                  cooldown_seconds=$((COOLDOWN_DAYS * 86400))
 
-          # Run tests if they exist
-          if [ -d "tests" ] || find . -name "test_*.py" -o -name "*_test.py" 2>/dev/null | grep -q .; then
-            echo "Running tests..."
-            pip install pytest pytest-cov || true
-            pytest --verbose --tb=short > /tmp/test_results.txt 2>&1 || echo "Some tests failed"
-            echo "test_run=true" >> $GITHUB_OUTPUT
-          else
-            echo "No tests found to run"
-            echo "test_run=false" >> $GITHUB_OUTPUT
-          fi
+                  if [ $((current_date - comment_date)) -lt "$cooldown_seconds" ]; then
+                    echo "Skipping issue #$issue_num (in cooldown period)"
+                    skipped_issues="$skipped_issues $issue_num"
+                    continue
+                  fi
+                fi
 
-          echo "tests_passed=true" >> $GITHUB_OUTPUT
+                # Process this issue
+                if [ "$DRY_RUN" = "true" ]; then
+                  echo "DRY RUN: Would assign Jules to issue #$issue_num"
+                  assigned_issues="$assigned_issues $issue_num"
+                else
+                  echo "Assigning Jules to issue #$issue_num"
 
-      # ===== PR CREATION PHASE =====
-      - name: Create Pull Request
-        if: steps.fixes.outputs.fixes_applied == 'true' && github.event.inputs.dry_run != 'true'
-        id: pr
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH_NAME: ${{ steps.branch.outputs.branch }}
-          ISSUE_COUNT: ${{ steps.select.outputs.count }}
-          SELECTED_ISSUES: ${{ steps.select.outputs.selected }}
-        run: |
-          echo "Creating pull request..."
+                  gh issue comment "$issue_num" --repo "$REPO" --body "$(cat <<'COMMENT'
+          @jules Please analyze and remediate this assessment issue.
 
-          # Read issue links
-          ISSUE_LINKS=$(cat /tmp/issue_links.txt || echo "")
-
-          # Build issue list for PR body
-          ISSUE_LIST=""
-          for ISSUE_NUM in $SELECTED_ISSUES; do
-            ISSUE_TITLE=$(gh issue view "$ISSUE_NUM" --json title --jq '.title')
-            ISSUE_LIST="${ISSUE_LIST}- #${ISSUE_NUM}: ${ISSUE_TITLE}\n"
-          done
-
-          # Read test results if available
-          TEST_SUMMARY=""
-          if [ -f "/tmp/test_results.txt" ]; then
-            TEST_SUMMARY="### Test Results
-          \`\`\`
-          $(tail -50 /tmp/test_results.txt)
-          \`\`\`
-          "
-          fi
-
-          # Read lint results
-          LINT_SUMMARY=""
-          if [ -f "/tmp/lint_results.txt" ]; then
-            LINT_SUMMARY="### Linting Results
-          \`\`\`
-          $(tail -50 /tmp/lint_results.txt)
-          \`\`\`
-          "
-          fi
-
-          # Create PR using heredoc for proper formatting
-          PR_URL=$(gh pr create \
-            --base main \
-            --head "$BRANCH_NAME" \
-            --title "[Auto-remediation] Fix top ${ISSUE_COUNT} assessment issues" \
-            --label "automated,assessment-fix,needs-review" \
-            --body "$(cat <<'EOF'
-          ## Automated Assessment Remediation
-
-          This PR addresses the top assessment issues identified in the codebase.
-
-          ### Issues Addressed
-          ${ISSUE_LIST}
-
-          ### Automated Fixes Applied
-          - Added missing docstrings (Google-style)
-          - Converted print() statements to logging
-          - Added type hints to function signatures
-          - Created missing README files
-          - Added image alt text placeholders
-          - Updated .env.example files
-          - Applied code formatting (black, isort, ruff)
-          - Fixed auto-fixable linting errors
-
-          ### Testing
-          ${TEST_SUMMARY}
-
-          ${LINT_SUMMARY}
-
-          ### Review Checklist
-          - [ ] Verify all docstrings are accurate and complete
-          - [ ] Check type hints are correct
-          - [ ] Review logging conversions preserve functionality
-          - [ ] Ensure no business logic was changed
-          - [ ] Verify all tests pass
-          - [ ] Check for any unintended side effects
-
-          ### Manual Steps Required
-          Some issues may require manual intervention. Check the individual issue comments for details.
-
-          ### Safety Notes
-          - No business logic was modified
-          - All changes are safe, mechanical transformations
-          - Tests were run to verify functionality
-          - This PR requires human review before merging
+          Focus on:
+          1. Understanding the root cause
+          2. Implementing a safe, minimal fix
+          3. Adding tests if applicable
+          4. Documenting any manual steps needed
 
           ---
+          *Assigned by Jules Assessment Remediator*
+          COMMENT
+          )"
 
-          ${ISSUE_LINKS}
+                  # Add tracking label
+                  gh issue edit "$issue_num" --repo "$REPO" --add-label "jules-assigned" || true
 
-          *Generated by Jules Assessment Remediator*
-          🤖 Powered by [Claude Sonnet 4.5](https://claude.ai)
-          EOF
-          )")
+                  assigned_issues="$assigned_issues $issue_num"
+                fi
 
-          echo "PR Created: $PR_URL"
-          echo "url=$PR_URL" >> $GITHUB_OUTPUT
+                processed_count=$((processed_count + 1))
 
-          # Force PR to ready state (not draft)
-          gh pr ready "$PR_URL" || true
+                # Small delay between assignments to avoid rate limits
+                sleep 2
+              done
+            fi
+          fi
 
-          # Request review from repository owner
-          REPO_OWNER=$(echo "${{ github.repository }}" | cut -d'/' -f1)
-          gh pr edit "$PR_URL" --add-reviewer "$REPO_OWNER" || echo "Could not add reviewer"
+          # Output results
+          assigned_issues=$(echo "$assigned_issues" | xargs)
+          skipped_issues=$(echo "$skipped_issues" | xargs)
 
-      # ===== REPORTING PHASE =====
-      - name: Comment on Issues
-        if: steps.pr.outputs.url != ''
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SELECTED_ISSUES: ${{ steps.select.outputs.selected }}
-          PR_URL: ${{ steps.pr.outputs.url }}
-        run: |
-          echo "Adding comments to remediated issues..."
+          echo "assigned=$assigned_issues" >> $GITHUB_OUTPUT
+          echo "skipped=$skipped_issues" >> $GITHUB_OUTPUT
+          echo "count=$processed_count" >> $GITHUB_OUTPUT
 
-          for ISSUE_NUM in $SELECTED_ISSUES; do
-            gh issue comment "$ISSUE_NUM" --body "🤖 **Automated Remediation Started**
-
-          This issue has been included in automated remediation PR: ${PR_URL}
-
-          The PR includes automated fixes for this and other assessment issues. Please review the changes and provide feedback.
-
-          If additional manual steps are required, they will be documented in the PR description.
-
-          ---
-          *Jules Assessment Remediator*"
-          done
-
-      - name: Generate Workflow Summary
+      - name: Summary
         if: always()
         env:
-          SELECTED_ISSUES: ${{ steps.select.outputs.selected || 'none' }}
-          ISSUE_COUNT: ${{ steps.select.outputs.count || '0' }}
-          PR_URL: ${{ steps.pr.outputs.url || 'N/A' }}
-          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+          ASSIGNED: ${{ steps.assign.outputs.assigned || 'none' }}
+          SKIPPED: ${{ steps.assign.outputs.skipped || 'none' }}
+          COUNT: ${{ steps.assign.outputs.count || '0' }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
         run: |
-          echo "# Jules Assessment Remediator - Workflow Summary" >> $GITHUB_STEP_SUMMARY
+          echo "# Jules Assessment Remediator Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Run Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
-          echo "**Mode:** $([ "$DRY_RUN" = "true" ] && echo "Dry Run" || echo "Production")" >> $GITHUB_STEP_SUMMARY
+          echo "**Mode:** $([ "$DRY_RUN" = "true" ] && echo "🔍 Dry Run" || echo "🚀 Production")" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          if [ "$SELECTED_ISSUES" = "none" ] || [ "$ISSUE_COUNT" = "0" ]; then
-            echo "## Result: No Issues Found" >> $GITHUB_STEP_SUMMARY
+          if [ "$ASSIGNED" = "none" ] || [ -z "$ASSIGNED" ]; then
+            echo "## Result: No Issues Assigned" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "No assessment issues were found that match the criteria." >> $GITHUB_STEP_SUMMARY
-          elif [ "$DRY_RUN" = "true" ]; then
-            echo "## Result: Dry Run Complete" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Issues Selected:** $ISSUE_COUNT" >> $GITHUB_STEP_SUMMARY
-            echo "**Issue Numbers:** $SELECTED_ISSUES" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "This was a dry run. No PR was created. Review the logs to see what would have been changed." >> $GITHUB_STEP_SUMMARY
+            echo "No assessment issues were found that match the criteria, or all matching issues are already assigned." >> $GITHUB_STEP_SUMMARY
           else
-            echo "## Result: Remediation Complete" >> $GITHUB_STEP_SUMMARY
+            echo "## Result: Issues Assigned" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "**Issues Remediated:** $ISSUE_COUNT" >> $GITHUB_STEP_SUMMARY
-            echo "**Issue Numbers:** $SELECTED_ISSUES" >> $GITHUB_STEP_SUMMARY
-            echo "**Pull Request:** $PR_URL" >> $GITHUB_STEP_SUMMARY
+            echo "**Issues Assigned:** $COUNT" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
-            echo "1. Review the pull request" >> $GITHUB_STEP_SUMMARY
-            echo "2. Verify all automated fixes are correct" >> $GITHUB_STEP_SUMMARY
-            echo "3. Check for any manual steps required" >> $GITHUB_STEP_SUMMARY
-            echo "4. Merge when satisfied" >> $GITHUB_STEP_SUMMARY
+            echo "### Assigned Issues" >> $GITHUB_STEP_SUMMARY
+            for issue in $ASSIGNED; do
+              echo "- #$issue" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+          if [ "$SKIPPED" != "none" ] && [ -n "$SKIPPED" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Skipped Issues" >> $GITHUB_STEP_SUMMARY
+            for issue in $SKIPPED; do
+              echo "- #$issue" >> $GITHUB_STEP_SUMMARY
+            done
           fi
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "---" >> $GITHUB_STEP_SUMMARY
-          echo "*Automated by Jules Assessment Remediator*" >> $GITHUB_STEP_SUMMARY
-
-      - name: Rollback on Failure
-        if: failure() && steps.branch.outputs.branch != ''
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH_NAME: ${{ steps.branch.outputs.branch }}
-        run: |
-          echo "Workflow failed. Cleaning up..."
-
-          # Delete the branch if it was created
-          git push origin --delete "$BRANCH_NAME" || echo "Branch already deleted or doesn't exist"
-
-          echo "Rollback complete."
+          echo "*Jules Assessment Remediator - Rate limited to prevent PR explosion*" >> $GITHUB_STEP_SUMMARY

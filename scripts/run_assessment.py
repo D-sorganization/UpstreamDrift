@@ -79,16 +79,26 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
         score -= 5 if cnt == 0 else (2 if cnt < 5 else 0)
 
     else:
+        # No automated checks available for this category
+        # DO NOT fabricate a score - require real bot/manual review
+        score = None  # Explicitly unscored - requires real review
         findings = [
             f"- Python files analyzed: {len(py_files)}",
-            "- Manual review recommended",
+            "- **REQUIRES REVIEW**: No automated checks available for this category",
+            "- Score must be assigned by Jules bot or manual code review",
+            "- Do NOT use a default score - real analysis is required",
         ]
 
-    score = max(0, min(10, score))
+    # Format score display
+    if score is not None:
+        score = max(0, min(10, score))
+        score_display = f"{score}/10"
+    else:
+        score_display = "PENDING REVIEW"
 
     report = f"""# Assessment {assessment_id}: {assessment['name']}
 **Date**: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-**Score**: {score}/10
+**Score**: {score_display}
 
 ## Findings
 {chr(10).join(findings)}
@@ -99,7 +109,7 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(report)
     logger.info(
-        f"✓ Assessment {assessment_id} saved to {output_path} (Score: {score}/10)"
+        f"✓ Assessment {assessment_id} saved to {output_path} (Score: {score_display})"
     )
     return 0
 
