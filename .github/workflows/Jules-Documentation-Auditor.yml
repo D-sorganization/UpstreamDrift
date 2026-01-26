@@ -1,0 +1,177 @@
+name: Jules Documentation Auditor (Worker)
+
+# Nightly documentation audit workflow
+# Scans codebase for missing docstrings, documentation gaps, and organization issues
+# Creates issues or PRs for documentation improvements
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  audit-documentation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Documentation Tools
+        run: |
+          pip install pydocstyle interrogate darglint
+
+      - name: Scan for Missing Docstrings
+        id: scan
+        run: |
+          echo "## Documentation Audit Report" > /tmp/doc_report.md
+          echo "" >> /tmp/doc_report.md
+          echo "**Generated**: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> /tmp/doc_report.md
+          echo "" >> /tmp/doc_report.md
+
+          # Run interrogate for docstring coverage
+          echo "### Docstring Coverage" >> /tmp/doc_report.md
+          echo "" >> /tmp/doc_report.md
+          echo '```' >> /tmp/doc_report.md
+          interrogate -v . --ignore-init-method --ignore-init-module --fail-under 0 2>&1 | head -100 >> /tmp/doc_report.md || true
+          echo '```' >> /tmp/doc_report.md
+          echo "" >> /tmp/doc_report.md
+
+          # Get coverage percentage
+          COVERAGE=$(interrogate . --ignore-init-method --ignore-init-module --fail-under 0 2>&1 | grep -oP '\d+\.\d+%' | head -1 || echo "0%")
+          echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
+
+          # Check for files with 0% documentation
+          echo "### Files Needing Documentation" >> /tmp/doc_report.md
+          echo "" >> /tmp/doc_report.md
+          interrogate -v . --ignore-init-method --ignore-init-module --fail-under 0 2>&1 | grep "0.0%" | head -20 >> /tmp/doc_report.md || echo "All files have some documentation!" >> /tmp/doc_report.md
+          echo "" >> /tmp/doc_report.md
+
+          # Run pydocstyle for style issues (limited output)
+          echo "### Documentation Style Issues" >> /tmp/doc_report.md
+          echo "" >> /tmp/doc_report.md
+          echo '```' >> /tmp/doc_report.md
+          pydocstyle --count --select=D100,D101,D102,D103 . 2>&1 | tail -20 >> /tmp/doc_report.md || echo "No major style issues found" >> /tmp/doc_report.md
+          echo '```' >> /tmp/doc_report.md
+
+          # Count issues
+          MISSING_MODULE=$(pydocstyle --count --select=D100 . 2>&1 | grep -oP '\d+$' || echo "0")
+          MISSING_CLASS=$(pydocstyle --count --select=D101 . 2>&1 | grep -oP '\d+$' || echo "0")
+          MISSING_METHOD=$(pydocstyle --count --select=D102 . 2>&1 | grep -oP '\d+$' || echo "0")
+          MISSING_FUNC=$(pydocstyle --count --select=D103 . 2>&1 | grep -oP '\d+$' || echo "0")
+
+          echo "" >> /tmp/doc_report.md
+          echo "### Summary" >> /tmp/doc_report.md
+          echo "" >> /tmp/doc_report.md
+          echo "- **Coverage**: $COVERAGE" >> /tmp/doc_report.md
+          echo "- **Missing Module Docs**: $MISSING_MODULE" >> /tmp/doc_report.md
+          echo "- **Missing Class Docs**: $MISSING_CLASS" >> /tmp/doc_report.md
+          echo "- **Missing Method Docs**: $MISSING_METHOD" >> /tmp/doc_report.md
+          echo "- **Missing Function Docs**: $MISSING_FUNC" >> /tmp/doc_report.md
+
+          echo "missing_module=$MISSING_MODULE" >> $GITHUB_OUTPUT
+          echo "missing_class=$MISSING_CLASS" >> $GITHUB_OUTPUT
+          echo "missing_method=$MISSING_METHOD" >> $GITHUB_OUTPUT
+          echo "missing_func=$MISSING_FUNC" >> $GITHUB_OUTPUT
+
+      - name: Check Documentation Organization
+        run: |
+          echo "" >> /tmp/doc_report.md
+          echo "### Documentation Organization" >> /tmp/doc_report.md
+          echo "" >> /tmp/doc_report.md
+
+          # Check for README
+          if [ -f "README.md" ]; then
+            README_SIZE=$(wc -c < README.md)
+            if [ "$README_SIZE" -lt 500 ]; then
+              echo "- ⚠️ README.md exists but is sparse ($README_SIZE bytes)" >> /tmp/doc_report.md
+            else
+              echo "- ✅ README.md exists and is substantial" >> /tmp/doc_report.md
+            fi
+          else
+            echo "- ❌ No README.md found" >> /tmp/doc_report.md
+          fi
+
+          # Check for docs directory
+          if [ -d "docs" ]; then
+            DOC_COUNT=$(find docs -name "*.md" | wc -l)
+            echo "- ✅ docs/ directory exists with $DOC_COUNT markdown files" >> /tmp/doc_report.md
+          else
+            echo "- ⚠️ No docs/ directory found" >> /tmp/doc_report.md
+          fi
+
+          # Check for CONTRIBUTING
+          if [ -f "CONTRIBUTING.md" ]; then
+            echo "- ✅ CONTRIBUTING.md exists" >> /tmp/doc_report.md
+          else
+            echo "- ⚠️ No CONTRIBUTING.md found" >> /tmp/doc_report.md
+          fi
+
+          # Check for CHANGELOG
+          if [ -f "CHANGELOG.md" ] || [ -f "HISTORY.md" ]; then
+            echo "- ✅ Changelog exists" >> /tmp/doc_report.md
+          else
+            echo "- ⚠️ No CHANGELOG.md or HISTORY.md found" >> /tmp/doc_report.md
+          fi
+
+      - name: Save Report
+        run: |
+          mkdir -p docs/assessments/documentation
+          DATE=$(date +%Y-%m-%d)
+          cp /tmp/doc_report.md "docs/assessments/documentation/audit_${DATE}.md"
+          cp /tmp/doc_report.md "docs/assessments/documentation/LATEST.md"
+
+      - name: Commit Report
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs(audit): Documentation audit report"
+          file_pattern: "docs/assessments/documentation/*"
+
+      - name: Create Issue for Low Coverage
+        if: ${{ steps.scan.outputs.coverage < '50%' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERAGE: ${{ steps.scan.outputs.coverage }}
+        run: |
+          # Check if issue already exists
+          EXISTING=$(gh issue list --state open --label "documentation" --search "Documentation Coverage" --json number --jq 'length')
+
+          if [ "$EXISTING" -eq 0 ]; then
+            gh issue create \
+              --title "[Doc Audit] Documentation Coverage Below 50% ($COVERAGE)" \
+              --body "$(cat /tmp/doc_report.md)
+
+---
+*Auto-generated by Documentation Auditor*" \
+              --label "documentation,automated-review" 2>/dev/null || \
+            gh issue create \
+              --title "[Doc Audit] Documentation Coverage Below 50% ($COVERAGE)" \
+              --body "Documentation coverage is at $COVERAGE. Please review the attached report." 2>/dev/null || \
+            echo "Could not create issue"
+          else
+            echo "Documentation issue already exists"
+          fi
+
+      - name: Generate Summary
+        run: |
+          echo "## Documentation Audit Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Coverage**: ${{ steps.scan.outputs.coverage }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Missing Module Docs**: ${{ steps.scan.outputs.missing_module }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Missing Class Docs**: ${{ steps.scan.outputs.missing_class }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Missing Method Docs**: ${{ steps.scan.outputs.missing_method }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Missing Function Docs**: ${{ steps.scan.outputs.missing_func }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "See full report in docs/assessments/documentation/LATEST.md" >> $GITHUB_STEP_SUMMARY
