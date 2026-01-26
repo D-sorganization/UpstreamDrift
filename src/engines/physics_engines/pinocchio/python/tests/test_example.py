@@ -11,11 +11,8 @@ import math
 
 import pytest
 
+import src.shared.python.logger_utils as logger_utils
 from src.shared.python import constants
-from src.shared.python.logging_config import get_logger
-
-# For backwards compatibility with tests using logger_utils
-logger_utils = type("logger_utils", (), {"get_logger": get_logger})()
 
 
 class TestConstants:

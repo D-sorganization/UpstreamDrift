@@ -10,32 +10,17 @@ Built on top of the existing EngineManager and PhysicsEngine protocol.
 """
 
 import os
-import tempfile
-import uuid
-
-# Python 3.10 compatibility: UTC was added in 3.11
-from datetime import datetime, timezone
-
-try:
-    from datetime import UTC
-except ImportError:
-    UTC = timezone.utc  # noqa: UP017
-
-from collections.abc import Awaitable, Callable
-from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import uvicorn
-from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import JSONResponse, Response
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from src.shared.python.engine_manager import EngineManager
-from src.shared.python.engine_registry import EngineType
 
 # Configure logging - use centralized logging config
 from src.shared.python.logging_config import get_logger, setup_logging
@@ -44,18 +29,17 @@ from src.shared.python.video_pose_pipeline import (
     VideoProcessingConfig,
 )
 
+from .config import get_allowed_hosts, get_cors_origins
 from .database import init_db
-from .models.requests import (
-    AnalysisRequest,
-    SimulationRequest,
-)
-from .models.responses import (
-    AnalysisResponse,
-    EngineStatusResponse,
-    SimulationResponse,
-    VideoAnalysisResponse,
-)
+from .middleware.security_headers import add_security_headers
+from .middleware.upload_limits import validate_upload_size
+from .routes import analysis as analysis_routes
 from .routes import auth as auth_routes
+from .routes import core as core_routes
+from .routes import engines as engine_routes
+from .routes import export as export_routes
+from .routes import simulation as simulation_routes
+from .routes import video as video_routes
 from .services.analysis_service import AnalysisService
 from .services.simulation_service import SimulationService
 
@@ -75,10 +59,7 @@ app = FastAPI(
 )
 
 # Security middleware
-# AUTO-FIXED: Make ALLOWED_HOSTS configurable via environment variable
-allowed_hosts = os.getenv(
-    "ALLOWED_HOSTS", "localhost,127.0.0.1,*.golfmodelingsuite.com"
-).split(",")
+allowed_hosts = get_allowed_hosts()
 app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=allowed_hosts,
@@ -87,212 +68,21 @@ app.add_middleware(
 # CORS middleware with restricted origins and headers
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",  # React development
-        "http://localhost:8080",  # Vue development
-        "https://app.golfmodelingsuite.com",  # Production frontend
-    ],
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     # SECURITY: Restrict headers - do NOT use "*"
     allow_headers=["Content-Type", "Authorization", "X-API-Key"],
 )
 
-# ============================================================================
-# API Configuration Constants
-# Centralized configuration to avoid magic numbers throughout the codebase
-# ============================================================================
-
-# Maximum file upload size: 10MB (10 * 1024 * 1024)
-MAX_UPLOAD_SIZE_BYTES = 10485760
-MAX_UPLOAD_SIZE_MB = MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)
-
-# HSTS (HTTP Strict Transport Security) max age in seconds (1 year)
-HSTS_MAX_AGE_SECONDS = 31536000
-
-# Default pagination limit for API responses
-DEFAULT_PAGINATION_LIMIT = 100
-
-# Maximum pose data entries to return in video analysis response
-MAX_POSE_DATA_ENTRIES = 100
-
-# Valid pose estimator types
-VALID_ESTIMATOR_TYPES = {"mediapipe", "openpose", "movenet"}
-
-# Valid export formats implementation currently supports
-VALID_EXPORT_FORMATS = {"json"}
-
-# Confidence score range
-MIN_CONFIDENCE = 0.0
-MAX_CONFIDENCE = 1.0
-DEFAULT_CONFIDENCE = 0.5
-
 # Rate limiting
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 
 
-# SECURITY: Security headers middleware (Issue #521)
-@app.middleware("http")
-async def add_security_headers(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
-    """Add security headers to all responses.
-
-    Implements OWASP recommended security headers to prevent:
-    - MIME-sniffing attacks (X-Content-Type-Options)
-    - Clickjacking (X-Frame-Options)
-    - XSS attacks (X-XSS-Protection)
-    - Referrer information leakage (Referrer-Policy)
-    - Downgrade attacks (Strict-Transport-Security)
-    """
-    response = await call_next(request)
-
-    # Prevent MIME-sniffing attacks
-    response.headers["X-Content-Type-Options"] = "nosniff"
-
-    # Prevent clickjacking
-    response.headers["X-Frame-Options"] = "DENY"
-
-    # XSS filter (legacy browsers)
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-
-    # Control referrer information
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-
-    # Force HTTPS (only for HTTPS connections)
-    if request.url.scheme == "https":
-        response.headers["Strict-Transport-Security"] = (
-            f"max-age={HSTS_MAX_AGE_SECONDS}; includeSubDomains"
-        )
-
-    return cast(Response, response)
-
-
-def _add_security_headers_to_response(response: Response, request: Request) -> Response:
-    """Add security headers to a response (used for early-return responses).
-
-    Args:
-        response: The response to add headers to
-        request: The original request (needed for HTTPS check)
-
-    Returns:
-        Response with security headers added
-    """
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    if request.url.scheme == "https":
-        response.headers["Strict-Transport-Security"] = (
-            f"max-age={HSTS_MAX_AGE_SECONDS}; includeSubDomains"
-        )
-    return response
-
-
-# SECURITY: Upload size limit middleware (Issue #545)
-@app.middleware("http")
-async def validate_upload_size(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
-    """Reject requests exceeding upload size limits.
-
-    Prevents DoS attacks via large file uploads by checking Content-Length
-    header before processing the request body.
-    """
-    content_length = request.headers.get("content-length")
-
-    if content_length:
-        try:
-            content_length_int = int(content_length)
-        except ValueError:
-            response = JSONResponse(
-                status_code=400,
-                content={"detail": "Invalid Content-Length header"},
-            )
-            return _add_security_headers_to_response(response, request)
-        if content_length_int > MAX_UPLOAD_SIZE_BYTES:
-            response = JSONResponse(
-                status_code=413,
-                content={
-                    "detail": f"Request too large. Maximum size is {MAX_UPLOAD_SIZE_MB}MB"
-                },
-            )
-            return _add_security_headers_to_response(response, request)
-
-    return cast(Response, await call_next(request))
-
-
-# SECURITY: Path validation to prevent path traversal attacks
-ALLOWED_MODEL_DIRS = [
-    Path("shared/models").resolve(),
-    Path("models").resolve(),
-    Path("data").resolve(),
-]
-
-
-def _validate_model_path(model_path: str) -> str:
-    """Validate model path to prevent path traversal attacks.
-
-    Args:
-        model_path: User-provided model path
-
-    Returns:
-        Validated absolute path string
-
-    Raises:
-        HTTPException: If path is invalid or contains traversal attempts
-    """
-    # SECURITY: Sanitize user input to prevent path traversal
-    try:
-        user_path = Path(model_path)
-    except TypeError as e:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid path format",
-        ) from e
-
-    # SECURITY: Reject absolute paths - user input must be relative
-    if user_path.is_absolute():
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid path: absolute paths are not allowed",
-        )
-
-    # SECURITY: Reject paths with parent directory references
-    if ".." in user_path.parts:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid path: parent directory references not allowed",
-        )
-
-    # Build candidate paths under each allowed directory and check them
-    for allowed_dir in ALLOWED_MODEL_DIRS:
-        try:
-            # SECURITY: Resolve to absolute path and validate it stays within allowed_dir
-            candidate = (allowed_dir / user_path).resolve()
-        except (ValueError, OSError) as e:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid path format",
-            ) from e
-
-        # SECURITY: Ensure the resolved path is still within the allowed directory
-        try:
-            candidate.relative_to(allowed_dir)
-        except ValueError:
-            # Path escaped the allowed directory (traversal attempt)
-            continue
-
-        # Check if this valid candidate exists
-        if candidate.exists():
-            # SECURITY: Return only the validated, sanitized path
-            return str(candidate)
-
-    raise HTTPException(
-        status_code=404,
-        detail="Model file not found in allowed directories",
-    )
+# SECURITY: middleware registration
+app.middleware("http")(add_security_headers)
+app.middleware("http")(validate_upload_size)
 
 
 # Global services
@@ -432,6 +222,13 @@ async def startup_event() -> None:
             )
             video_pipeline = None
 
+        core_routes.configure(engine_manager)
+        engine_routes.configure(engine_manager, logger)
+        simulation_routes.configure(simulation_service, active_tasks, logger)
+        analysis_routes.configure(analysis_service, logger)
+        video_routes.configure(video_pipeline, active_tasks, logger)
+        export_routes.configure(active_tasks)
+
         logger.info("Golf Modeling Suite API started successfully")
 
     except Exception as e:
@@ -439,411 +236,14 @@ async def startup_event() -> None:
         raise
 
 
-# Include authentication router (Issue #543)
+# Include routers
 app.include_router(auth_routes.router)
-
-
-@app.get("/")
-async def root() -> dict[str, str]:
-    """Root endpoint with API information."""
-    return {
-        "message": "Golf Modeling Suite API",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "status": "running",
-    }
-
-
-@app.get("/health")
-async def health_check() -> dict[str, str | int]:
-    """Health check endpoint."""
-    return {
-        "status": "healthy",
-        "engines_available": (
-            len(engine_manager.get_available_engines()) if engine_manager else 0
-        ),
-        "timestamp": "2026-01-12T00:00:00Z",
-    }
-
-
-# Engine Management Endpoints
-
-
-@app.get("/engines", response_model=list[EngineStatusResponse])
-async def get_engines() -> list[EngineStatusResponse]:
-    """Get status of all available physics engines."""
-    if not engine_manager:
-        raise HTTPException(status_code=500, detail="Engine manager not initialized")
-
-    engines = []
-    # PERFORMANCE FIX: Get available engines once before loop (was called 8+ times)
-    available_engines = engine_manager.get_available_engines()
-    for engine_type in EngineType:
-        status = engine_manager.get_engine_status(engine_type)
-        is_available = engine_type in available_engines
-
-        engines.append(
-            EngineStatusResponse(
-                engine_type=engine_type.value,
-                status=status.value,
-                is_available=is_available,
-                description=f"{engine_type.value} physics engine",
-            )
-        )
-
-    return engines
-
-
-@app.post("/engines/{engine_type}/load")
-async def load_engine(
-    engine_type: str, model_path: str | None = None
-) -> dict[str, str]:
-    """Load a specific physics engine with optional model."""
-    if not engine_manager:
-        raise HTTPException(status_code=500, detail="Engine manager not initialized")
-
-    try:
-        engine_enum = EngineType(engine_type.upper())
-        engine_manager._load_engine(
-            engine_enum
-        )  # This method doesn't return success status
-
-        # Check if engine was loaded successfully
-        engine = engine_manager.get_active_physics_engine()
-        if not engine:
-            raise HTTPException(
-                status_code=400, detail=f"Failed to load engine: {engine_type}"
-            )
-
-        # SECURITY: Validate model path to prevent path traversal
-        if model_path:
-            engine = engine_manager.get_active_physics_engine()
-            if engine:
-                # Validate path: no parent directory traversal, must exist
-                validated_path = _validate_model_path(model_path)
-                engine.load_from_path(validated_path)
-
-        return {"message": f"Engine {engine_type} loaded successfully"}
-
-    except ValueError as e:
-        raise HTTPException(
-            status_code=400, detail=f"Unknown engine type: {engine_type}"
-        ) from e
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error loading engine: {str(e)}"
-        ) from e
-
-
-# Simulation Endpoints
-
-
-@app.post("/simulate", response_model=SimulationResponse)
-async def run_simulation(request: SimulationRequest) -> SimulationResponse:
-    """Run a physics simulation."""
-    if not simulation_service:
-        raise HTTPException(
-            status_code=500, detail="Simulation service not initialized"
-        )
-
-    try:
-        result = await simulation_service.run_simulation(request)
-        return result
-    except Exception as e:
-        logger.error(f"Simulation error: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Simulation failed: {str(e)}"
-        ) from e
-
-
-@app.post("/simulate/async")
-async def run_simulation_async(
-    request: SimulationRequest, background_tasks: BackgroundTasks
-) -> dict[str, str]:
-    """Start an asynchronous simulation."""
-    if not simulation_service:
-        raise HTTPException(
-            status_code=500, detail="Simulation service not initialized"
-        )
-
-    task_id = str(uuid.uuid4())
-
-    # Initialize task with timestamp
-    active_tasks[task_id] = {
-        "status": "started",
-        "created_at": datetime.now(UTC),
-    }
-
-    # Add background task
-    background_tasks.add_task(
-        simulation_service.run_simulation_background,
-        task_id,
-        request,
-        active_tasks,  # type: ignore[arg-type]
-    )
-
-    return {"task_id": task_id, "status": "started"}
-
-
-@app.get("/simulate/status/{task_id}")
-async def get_simulation_status(task_id: str) -> dict[str, Any]:
-    """Get status of an asynchronous simulation."""
-    if task_id not in active_tasks:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    return dict(active_tasks[task_id])
-
-
-# Video Analysis Endpoints
-
-
-@app.post("/analyze/video", response_model=VideoAnalysisResponse)
-async def analyze_video(
-    file: UploadFile = File(...),
-    estimator_type: str = "mediapipe",
-    min_confidence: float = 0.5,
-    enable_smoothing: bool = True,
-) -> VideoAnalysisResponse:
-    """Analyze golf swing from uploaded video."""
-    if not video_pipeline:
-        raise HTTPException(status_code=500, detail="Video pipeline not initialized")
-
-    # INPUT VALIDATION: Validate estimator type
-    if estimator_type not in VALID_ESTIMATOR_TYPES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid estimator_type '{estimator_type}'. "
-            f"Must be one of: {', '.join(sorted(VALID_ESTIMATOR_TYPES))}",
-        )
-
-    # INPUT VALIDATION: Validate confidence range
-    if not (MIN_CONFIDENCE <= min_confidence <= MAX_CONFIDENCE):
-        raise HTTPException(
-            status_code=400,
-            detail=f"min_confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}",
-        )
-
-    # Validate file type
-    if not file.content_type or not file.content_type.startswith("video/"):
-        raise HTTPException(status_code=400, detail="File must be a video")
-
-    # SECURITY FIX: Use try/finally to ensure temp file cleanup even on exceptions
-    temp_path: Path | None = None
-    try:
-        # Save uploaded file temporarily
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
-            content = await file.read()
-            temp_file.write(content)
-            temp_path = Path(temp_file.name)
-
-        # Configure pipeline for this request
-        config = VideoProcessingConfig(
-            estimator_type=estimator_type,
-            min_confidence=min_confidence,
-            enable_temporal_smoothing=enable_smoothing,
-        )
-        pipeline = VideoPosePipeline(config)
-
-        # Process video
-        result = pipeline.process_video(temp_path)
-
-        # Convert to response format
-        response = VideoAnalysisResponse(
-            filename=file.filename or "unknown",
-            total_frames=result.total_frames,
-            valid_frames=result.valid_frames,
-            average_confidence=result.average_confidence,
-            quality_metrics=result.quality_metrics,
-            pose_data=[
-                {
-                    "timestamp": pose.timestamp,
-                    "confidence": pose.confidence,
-                    "joint_angles": pose.joint_angles,
-                    "keypoints": pose.raw_keypoints or {},
-                }
-                for pose in result.pose_results[
-                    :MAX_POSE_DATA_ENTRIES
-                ]  # Limit response size
-            ],
-        )
-
-        return response
-
-    except Exception as e:
-        logger.error(f"Video analysis error: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Video analysis failed: {str(e)}"
-        ) from e
-    finally:
-        # Ensure temp file is always cleaned up
-        if temp_path is not None and temp_path.exists():
-            try:
-                temp_path.unlink()
-            except OSError as cleanup_error:
-                logger.warning(
-                    f"Failed to clean up temp file {temp_path}: {cleanup_error}"
-                )
-
-
-@app.post("/analyze/video/async")
-async def analyze_video_async(
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(...),
-    estimator_type: str = "mediapipe",
-    min_confidence: float = 0.5,
-) -> dict[str, str]:
-    """Start asynchronous video analysis."""
-    if not video_pipeline:
-        raise HTTPException(status_code=500, detail="Video pipeline not initialized")
-
-    # INPUT VALIDATION: Validate estimator type
-    if estimator_type not in VALID_ESTIMATOR_TYPES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid estimator_type '{estimator_type}'. "
-            f"Must be one of: {', '.join(sorted(VALID_ESTIMATOR_TYPES))}",
-        )
-
-    # INPUT VALIDATION: Validate confidence range
-    if not (MIN_CONFIDENCE <= min_confidence <= MAX_CONFIDENCE):
-        raise HTTPException(
-            status_code=400,
-            detail=f"min_confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}",
-        )
-
-    # Validate file type
-    if not file.content_type or not file.content_type.startswith("video/"):
-        raise HTTPException(status_code=400, detail="File must be a video")
-
-    task_id = str(uuid.uuid4())
-
-    # Save file and add background task
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
-        content = await file.read()
-        temp_file.write(content)
-        temp_path = Path(temp_file.name)
-
-    # Initialize task with timestamp
-    active_tasks[task_id] = {
-        "status": "started",
-        "created_at": datetime.now(UTC),
-    }
-
-    background_tasks.add_task(
-        _process_video_background,
-        task_id,
-        temp_path,
-        file.filename or "unknown",
-        estimator_type,
-        min_confidence,
-    )
-
-    return {"task_id": task_id, "status": "started"}
-
-
-async def _process_video_background(
-    task_id: str,
-    video_path: Path,
-    filename: str,
-    estimator_type: str,
-    min_confidence: float,
-) -> None:
-    """Background task for video processing."""
-    try:
-        task_data = active_tasks.get(task_id)
-        if task_data is None:
-            task_data = {}
-        created_at = task_data.get("created_at", datetime.now(UTC))
-
-        active_tasks[task_id] = {
-            "status": "processing",
-            "progress": 0,
-            "created_at": created_at,
-        }
-
-        config = VideoProcessingConfig(
-            estimator_type=estimator_type, min_confidence=min_confidence
-        )
-        pipeline = VideoPosePipeline(config)
-
-        result = pipeline.process_video(video_path)
-
-        # Store result
-        task_data = active_tasks.get(task_id)
-        if task_data is None:
-            task_data = {}
-        created_at = task_data.get("created_at", datetime.now(UTC))
-
-        active_tasks[task_id] = {
-            "status": "completed",
-            "created_at": created_at,
-            "result": {
-                "filename": filename,
-                "total_frames": result.total_frames,
-                "valid_frames": result.valid_frames,
-                "average_confidence": result.average_confidence,
-                "quality_metrics": result.quality_metrics,
-            },
-        }
-
-    except Exception as e:
-        task_data = active_tasks.get(task_id)
-        if task_data is None:
-            task_data = {}
-        created_at = task_data.get("created_at", datetime.now(UTC))
-
-        active_tasks[task_id] = {
-            "status": "failed",
-            "error": str(e),
-            "created_at": created_at,
-        }
-    finally:
-        # Clean up temp file
-        if video_path.exists():
-            video_path.unlink()
-
-
-# Analysis Endpoints
-
-
-@app.post("/analyze/biomechanics", response_model=AnalysisResponse)
-async def analyze_biomechanics(request: AnalysisRequest) -> AnalysisResponse:
-    """Perform biomechanical analysis on simulation data."""
-    if not analysis_service:
-        raise HTTPException(status_code=500, detail="Analysis service not initialized")
-
-    try:
-        result = await analysis_service.analyze_biomechanics(request)
-        return result
-    except Exception as e:
-        logger.error(f"Analysis error: {e}")
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}") from e
-
-
-# Export Endpoints
-
-
-@app.get("/export/{task_id}")
-async def export_results(task_id: str, format: str = "json") -> JSONResponse:
-    """Export analysis results in specified format."""
-    # INPUT VALIDATION: Validate export format
-    if format not in VALID_EXPORT_FORMATS:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid format '{format}'. "
-            f"Must be one of: {', '.join(sorted(VALID_EXPORT_FORMATS))}",
-        )
-
-    if task_id not in active_tasks:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    task = active_tasks[task_id]
-    if task["status"] != "completed":
-        raise HTTPException(status_code=400, detail="Task not completed")
-
-    # Generate export file
-    # Implementation depends on specific export requirements
-    return JSONResponse(content=task["result"])
+app.include_router(core_routes.router)
+app.include_router(engine_routes.router)
+app.include_router(simulation_routes.router)
+app.include_router(video_routes.router)
+app.include_router(analysis_routes.router)
+app.include_router(export_routes.router)
 
 
 if __name__ == "__main__":
