@@ -1,0 +1,132 @@
+name: Jules Auto-Rebase (Worker)
+
+# Replaces Jules-Conflict-Fix workflow
+# Automatically rebases PRs that are behind main
+# Labels PRs that have actual merge conflicts for manual resolution
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-rebase-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Process PRs Behind Main
+        env:
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## Auto-Rebase Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Get all open PRs
+          PRS=$(gh pr list --state open --json number,headRefName,mergeable --jq '.[] | "\(.number)|\(.headRefName)|\(.mergeable)"')
+
+          if [ -z "$PRS" ]; then
+            echo "No open PRs found."
+            echo "No open PRs to process." >> $GITHUB_STEP_SUMMARY
+            exit 0
+          fi
+
+          REBASED=0
+          CONFLICTING=0
+          SKIPPED=0
+
+          while IFS='|' read -r PR_NUM BRANCH MERGEABLE; do
+            echo "Processing PR #$PR_NUM (branch: $BRANCH, mergeable: $MERGEABLE)"
+
+            # Skip if already mergeable
+            if [ "$MERGEABLE" == "MERGEABLE" ]; then
+              echo "  PR #$PR_NUM is already mergeable, skipping."
+              SKIPPED=$((SKIPPED + 1))
+              continue
+            fi
+
+            # Skip PRs from forks (can't push to them)
+            IS_FORK=$(gh pr view $PR_NUM --json isCrossRepository --jq '.isCrossRepository')
+            if [ "$IS_FORK" == "true" ]; then
+              echo "  PR #$PR_NUM is from a fork, skipping."
+              SKIPPED=$((SKIPPED + 1))
+              continue
+            fi
+
+            # Fetch the branch
+            git fetch origin "$BRANCH" 2>/dev/null || {
+              echo "  Could not fetch branch $BRANCH, skipping."
+              SKIPPED=$((SKIPPED + 1))
+              continue
+            }
+
+            git checkout "$BRANCH" 2>/dev/null || {
+              echo "  Could not checkout branch $BRANCH, skipping."
+              SKIPPED=$((SKIPPED + 1))
+              continue
+            }
+
+            # Try to rebase onto main
+            git fetch origin main
+            if git rebase origin/main 2>/dev/null; then
+              # Rebase succeeded, push the changes
+              if git push --force-with-lease origin "$BRANCH" 2>/dev/null; then
+                echo "  Successfully rebased PR #$PR_NUM"
+                gh pr comment $PR_NUM --body "Automatically rebased onto main by Auto-Rebase workflow."
+                REBASED=$((REBASED + 1))
+              else
+                echo "  Rebase succeeded but push failed for PR #$PR_NUM"
+                git rebase --abort 2>/dev/null || true
+                SKIPPED=$((SKIPPED + 1))
+              fi
+            else
+              # Rebase failed - has real conflicts
+              git rebase --abort 2>/dev/null || true
+              echo "  PR #$PR_NUM has merge conflicts that need manual resolution"
+
+              # Add conflict label if not already present
+              EXISTING_LABELS=$(gh pr view $PR_NUM --json labels --jq '.labels[].name' | tr '\n' ' ')
+              if [[ ! "$EXISTING_LABELS" =~ "conflict" ]]; then
+                gh pr edit $PR_NUM --add-label "conflict" 2>/dev/null || \
+                gh label create "conflict" --description "PR has merge conflicts" --color "d93f0b" 2>/dev/null && \
+                gh pr edit $PR_NUM --add-label "conflict" 2>/dev/null || true
+              fi
+
+              # Comment if not already commented about this conflict
+              LAST_COMMENT=$(gh pr view $PR_NUM --json comments --jq '.comments[-1].body // ""')
+              if [[ ! "$LAST_COMMENT" =~ "merge conflicts" ]]; then
+                gh pr comment $PR_NUM --body "This PR has merge conflicts that could not be automatically resolved. Please rebase manually:
+
+\`\`\`bash
+git checkout $BRANCH
+git fetch origin main
+git rebase origin/main
+# Resolve conflicts, then:
+git push --force-with-lease
+\`\`\`"
+              fi
+
+              CONFLICTING=$((CONFLICTING + 1))
+            fi
+
+            # Return to main for next iteration
+            git checkout main 2>/dev/null || true
+
+          done <<< "$PRS"
+
+          echo "### Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Rebased: $REBASED PRs" >> $GITHUB_STEP_SUMMARY
+          echo "- Conflicts (need manual fix): $CONFLICTING PRs" >> $GITHUB_STEP_SUMMARY
+          echo "- Skipped: $SKIPPED PRs" >> $GITHUB_STEP_SUMMARY
