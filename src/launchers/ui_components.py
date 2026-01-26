@@ -58,21 +58,30 @@ ASSETS_DIR = Path(__file__).parent / "assets"
 DOCKER_IMAGE_NAME = "robotics_env"
 LAUNCH_FEEDBACK_DURATION_MS = 2000
 
+# Tile image file names
+_IMG_SIMSCAPE = "simscape_multibody.png"
+
 # Metadata (mirrored from main launcher)
+# Maps display names to tile image files in assets/
 MODEL_IMAGES = {
+    # Physics Engines
     "MuJoCo Humanoid": "mujoco_humanoid.png",
     "MuJoCo Dashboard": "mujoco_hand.png",
     "Drake Golf Model": "drake.png",
     "Pinocchio Golf Model": "pinocchio.png",
-    "OpenSim Golf": "openpose.jpg",
+    "OpenSim Golf": "opensim.png",
     "MyoSim Suite": "myosim.png",
-    "OpenPose Analysis": "opensim.png",
-    "Matlab Simscape": "simscape_multibody.png",
+    "OpenPose Analysis": "openpose.jpg",
+    # MATLAB/Simscape
+    "Matlab Simscape": _IMG_SIMSCAPE,
+    "Matlab Simscape 2D": _IMG_SIMSCAPE,
+    "Matlab Simscape 3D": _IMG_SIMSCAPE,
+    "Dataset Generator GUI": _IMG_SIMSCAPE,
+    "Golf Swing Analysis GUI": _IMG_SIMSCAPE,
+    "MATLAB Code Analyzer": _IMG_SIMSCAPE,
+    # Tools
     "URDF Generator": "urdf_icon.png",
     "C3D Motion Viewer": "c3d_icon.png",
-    "Dataset Generator GUI": "simscape_multibody.png",
-    "Golf Swing Analysis GUI": "opensim.png",
-    "MATLAB Code Analyzer": "urdf_icon.png",
 }
 
 # Theme availability check
@@ -278,21 +287,27 @@ class AsyncStartupWorker(QThread):
             self.progress_signal.emit("Loading model registry...", 10)
             from src.shared.python.model_registry import ModelRegistry
 
-            registry = ModelRegistry(self.repos_root / "config/models.yaml")
+            registry = ModelRegistry(self.repos_root / "src/config/models.yaml")
             self.results.registry = registry
 
-            self.progress_signal.emit("Probing physics engines...", 30)
-            from src.shared.python.engine_manager import EngineManager
+            self.progress_signal.emit("Initializing engine manager...", 30)
+            try:
+                from src.shared.python.engine_manager import EngineManager
 
-            self.results.engine_manager = EngineManager(self.repos_root)
-            self.results.engine_manager.probe_all_engines()
+                self.results.engine_manager = EngineManager(self.repos_root)
+                # Skip probing to avoid hanging - engines will be probed on demand
+                # self.results.engine_manager.probe_all_engines()
+            except Exception as e:
+                logger.warning(f"Engine manager init failed: {e}")
+                self.results.engine_manager = None
 
             self.progress_signal.emit("Checking Docker status...", 60)
             try:
-                secure_run(["docker", "--version"], timeout=3.0, check=True)
+                secure_run(["docker", "--version"], timeout=2.0, check=True)
                 self.results.docker_available = True
             except Exception:
                 self.results.docker_available = False
+                logger.debug("Docker not available or timed out")
 
             self.progress_signal.emit("Ready", 100)
             time.sleep(0.5)
