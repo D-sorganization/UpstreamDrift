@@ -27,6 +27,7 @@ class PoseEstimator(ABC):
         Args:
             model_path: Path to model weights, or None for default.
         """
+        pass
 
     @abstractmethod
     def estimate_from_image(self, image: np.ndarray) -> PoseEstimationResult:
@@ -38,6 +39,7 @@ class PoseEstimator(ABC):
         Returns:
             PoseEstimationResult containing joint angles.
         """
+        pass
 
     @abstractmethod
     def estimate_from_video(self, video_path: Path) -> list[PoseEstimationResult]:
@@ -49,3 +51,4 @@ class PoseEstimator(ABC):
         Returns:
             List of results for each frame.
         """
+        pass

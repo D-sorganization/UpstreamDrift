@@ -198,9 +198,9 @@ class GolfLauncher(QMainWindow):
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []  # Track model order for drag-and-drop
         self.layout_edit_mode = False  # Track if layout editing is enabled
-        self.running_processes: dict[str, subprocess.Popen] = (
-            {}
-        )  # Track running instances
+        self.running_processes: dict[
+            str, subprocess.Popen
+        ] = {}  # Track running instances
         self.available_models: dict[str, Any] = {}
         self.special_app_lookup: dict[str, Any] = {}
         self.current_filter_text = ""
@@ -213,7 +213,7 @@ class GolfLauncher(QMainWindow):
             # Fallback to loading registry synchronously
             try:
                 MR = _lazy_load_model_registry()
-                self.registry = MR(REPOS_ROOT / "config/models.yaml")
+                self.registry = MR(REPOS_ROOT / "src/config/models.yaml")
             except (ImportError, Exception) as e:
                 logger.error(f"Failed to load ModelRegistry: {e}")
                 self.registry = None
@@ -1284,7 +1284,7 @@ class GolfLauncher(QMainWindow):
             if repo_path:
                 abs_repo_path = REPOS_ROOT / repo_path
 
-                # If custom GUI app provided
+                # Route to appropriate custom launcher based on model type
                 if model.type == "custom_humanoid":
                     self._custom_launch_humanoid(abs_repo_path)
                 elif model.type == "custom_dashboard":
@@ -1293,6 +1293,10 @@ class GolfLauncher(QMainWindow):
                     self._custom_launch_drake(abs_repo_path)
                 elif model.type == "pinocchio":
                     self._custom_launch_pinocchio(abs_repo_path)
+                elif model.type == "opensim":
+                    self._custom_launch_opensim(abs_repo_path)
+                elif model.type == "myosim":
+                    self._custom_launch_myosim(abs_repo_path)
                 elif model.type == "openpose":
                     self._custom_launch_openpose(abs_repo_path)
                 elif model.type == "mjcf" or str(repo_path).endswith(".xml"):
@@ -1350,40 +1354,136 @@ class GolfLauncher(QMainWindow):
             raise RuntimeError(f"Failed to launch MJCF: {e}") from e
 
     def _custom_launch_humanoid(self, abs_repo_path: Path) -> None:
-        """Launch the humanoid GUI directly."""
-        cwd = abs_repo_path.parent
-        self._launch_script_process("MuJoCo Humanoid", abs_repo_path, cwd)
+        """Launch the MuJoCo humanoid GUI directly."""
+        # Use hardcoded path to ensure we hit the correct script
+        script = REPOS_ROOT / "src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
+        if not script.exists():
+            QMessageBox.critical(
+                self, "Error", f"Humanoid launcher not found: {script}"
+            )
+            return
+        self._launch_script_process("MuJoCo Humanoid", script, script.parent)
 
     def _custom_launch_comprehensive(self, abs_repo_path: Path) -> None:
-        """Launch the comprehensive dashboard directly."""
-        cwd = abs_repo_path.parent
-        self._launch_script_process("Analysis Dashboard", abs_repo_path, cwd)
+        """Launch the comprehensive MuJoCo dashboard directly."""
+        python_dir = REPOS_ROOT / "src/engines/physics_engines/mujoco/python"
+        if not python_dir.exists():
+            QMessageBox.critical(
+                self, "Error", f"MuJoCo Python directory not found: {python_dir}"
+            )
+            return
+        logger.info(f"Launching MuJoCo Dashboard from {python_dir}")
+        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
+        try:
+            process = subprocess.Popen(
+                [sys.executable, "-m", "mujoco_humanoid_golf"],
+                cwd=str(python_dir),
+                creationflags=creation_flags,
+            )
+            self.running_processes["mujoco_dashboard"] = process
+        except Exception as e:
+            QMessageBox.critical(self, "Launch Error", str(e))
 
     def _custom_launch_drake(self, abs_repo_path: Path) -> None:
         """Launch the Drake GUI directly."""
-        # Ensure we point to the python script
-        cwd = abs_repo_path.parent
-        self._launch_script_process("Drake Engine", abs_repo_path, cwd)
+        python_dir = REPOS_ROOT / "src/engines/physics_engines/drake/python"
+        if not python_dir.exists():
+            QMessageBox.critical(
+                self, "Error", f"Drake Python directory not found: {python_dir}"
+            )
+            return
+        logger.info(f"Launching Drake GUI from {python_dir}")
+        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
+        try:
+            process = subprocess.Popen(
+                [sys.executable, "-m", "src.drake_gui_app"],
+                cwd=str(python_dir),
+                creationflags=creation_flags,
+            )
+            self.running_processes["drake_gui"] = process
+        except Exception as e:
+            QMessageBox.critical(self, "Launch Error", str(e))
 
     def _custom_launch_pinocchio(self, abs_repo_path: Path) -> None:
         """Launch the Pinocchio GUI directly."""
-        cwd = abs_repo_path.parent
-        self._launch_script_process("Pinocchio Engine", abs_repo_path, cwd)
+        python_dir = REPOS_ROOT / "src/engines/physics_engines/pinocchio/python"
+        script = python_dir / "pinocchio_golf" / "gui.py"
+        if not script.exists():
+            QMessageBox.critical(
+                self, "Error", f"Pinocchio GUI script not found: {script}"
+            )
+            return
+        logger.info(f"Launching Pinocchio GUI: {script}")
+        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
+        try:
+            process = subprocess.Popen(
+                [sys.executable, str(script)],
+                cwd=str(python_dir),
+                creationflags=creation_flags,
+            )
+            self.running_processes["pinocchio_gui"] = process
+        except Exception as e:
+            QMessageBox.critical(self, "Launch Error", str(e))
 
     def _custom_launch_opensim(self, abs_repo_path: Path) -> None:
         """Launch the OpenSim GUI directly."""
-        cwd = abs_repo_path.parent
-        self._launch_script_process("OpenSim Engine", abs_repo_path, cwd)
+        script = REPOS_ROOT / "src/engines/physics_engines/opensim/python/opensim_gui.py"
+        if not script.exists():
+            QMessageBox.critical(
+                self, "Error", f"OpenSim GUI script not found: {script}"
+            )
+            return
+        logger.info(f"Launching OpenSim GUI: {script}")
+        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
+        try:
+            process = subprocess.Popen(
+                [sys.executable, str(script)],
+                cwd=str(script.parent),
+                creationflags=creation_flags,
+            )
+            self.running_processes["opensim_gui"] = process
+        except Exception as e:
+            QMessageBox.critical(self, "Launch Error", str(e))
 
     def _custom_launch_myosim(self, abs_repo_path: Path) -> None:
         """Launch the MyoSim GUI directly."""
-        cwd = abs_repo_path.parent
-        self._launch_script_process("MyoSim Engine", abs_repo_path, cwd)
+        script = REPOS_ROOT / "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
+        if not script.exists():
+            QMessageBox.critical(
+                self, "Error", f"MyoSim script not found: {script}"
+            )
+            return
+        logger.info(f"Launching MyoSim: {script}")
+        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
+        try:
+            process = subprocess.Popen(
+                [sys.executable, str(script)],
+                cwd=str(script.parent),
+                creationflags=creation_flags,
+            )
+            self.running_processes["myosim_gui"] = process
+        except Exception as e:
+            QMessageBox.critical(self, "Launch Error", str(e))
 
     def _custom_launch_openpose(self, abs_repo_path: Path) -> None:
         """Launch the OpenPose GUI directly."""
-        cwd = abs_repo_path.parent
-        self._launch_script_process("OpenPose Analytics", abs_repo_path, cwd)
+        script = REPOS_ROOT / "src/shared/python/pose_estimation/openpose_gui.py"
+        if not script.exists():
+            QMessageBox.critical(
+                self, "Error", f"OpenPose GUI script not found: {script}"
+            )
+            return
+        logger.info(f"Launching OpenPose GUI: {script}")
+        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
+        try:
+            process = subprocess.Popen(
+                [sys.executable, str(script)],
+                cwd=str(script.parent),
+                creationflags=creation_flags,
+            )
+            self.running_processes["openpose_gui"] = process
+        except Exception as e:
+            QMessageBox.critical(self, "Launch Error", str(e))
 
     def _launch_docker_container(self, model: Any, repo_path: Path) -> None:
         """Launch the model in a Docker container."""
