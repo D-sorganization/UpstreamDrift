@@ -99,11 +99,12 @@ jobs:
             labels=$(gh issue view "$SPECIFIC_ISSUE" --json labels --jq '.labels[].name' 2>/dev/null || echo "")
             if echo "$labels" | grep -q "jules-assigned"; then
               echo "::warning::Issue #$SPECIFIC_ISSUE already has jules-assigned label"
-              skipped_issues="$SPECIFIC_ISSUE (already assigned)"
+              skipped_issues="$SPECIFIC_ISSUE"
             else
               if [ "$DRY_RUN" = "true" ]; then
                 echo "DRY RUN: Would assign Jules to issue #$SPECIFIC_ISSUE"
-                assigned_issues="$SPECIFIC_ISSUE (dry run)"
+                assigned_issues="$SPECIFIC_ISSUE"
+                processed_count=$((processed_count + 1))
               else
                 # Assign Jules
                 gh issue comment "$SPECIFIC_ISSUE" --repo "$REPO" --body "$(cat <<'COMMENT'
@@ -124,6 +125,7 @@ jobs:
                 gh issue edit "$SPECIFIC_ISSUE" --repo "$REPO" --add-label "jules-assigned" || true
 
                 assigned_issues="$SPECIFIC_ISSUE"
+                processed_count=$((processed_count + 1))
                 echo "Assigned Jules to issue #$SPECIFIC_ISSUE"
               fi
             fi
