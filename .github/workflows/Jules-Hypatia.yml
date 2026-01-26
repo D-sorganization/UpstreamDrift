@@ -2,7 +2,7 @@ name: Jules Hypatia (Librarian)
 
 on:
   schedule:
-    - cron: "0 0 1 * *" # Run once a month (1st day at midnight)
+    - cron: "0 9 1 * *"  # 1st of month at 1 AM PST (9 UTC)
   workflow_dispatch: # Allow manual trigger
 
 permissions:

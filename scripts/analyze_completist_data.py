@@ -11,12 +11,12 @@ Principles:
 from __future__ import annotations
 
 import glob
+import logging
 import os
 import re
-from collections import defaultdict
 from collections.abc import Callable, Mapping
 from datetime import datetime
-from typing import Any, TypedDict, cast
+from typing import Any, NotRequired, TypedDict, cast
 
 # Constants and Configuration
 DATA_DIR = ".jules/completist_data"
@@ -42,12 +42,15 @@ EXCLUDED_PATHS = [
 ]
 
 
+logger = logging.getLogger(__name__)
+
+
 class Finding(TypedDict):
     file: str
     line: str
-    text: str
-    name: str | None
-    type: str | None
+    type: str
+    text: NotRequired[str]
+    name: NotRequired[str]
 
 
 def is_excluded(filepath: str) -> bool:
@@ -74,14 +77,14 @@ def _parse_grep_line(line: str) -> tuple[str | None, str | None, str | None]:
 
 
 def _scan_completist_file(
-    source_key: str, parser: Callable[[str], dict[str, Any] | None]
-) -> list[dict[str, Any]]:
+    source_key: str, parser: Callable[[str], Finding | None]
+) -> list[Finding]:
     """Generic helper to scan a completist data file and parse findings."""
     source_path = FILES_MAP.get(source_key)
     if not source_path or not os.path.exists(source_path):
         return []
 
-    results = []
+    results: list[Finding] = []
     with open(source_path, encoding="utf-8", errors="replace") as f:
         for line in f:
             finding = parser(line)
@@ -90,16 +93,16 @@ def _scan_completist_file(
     return results
 
 
-def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+def analyze_todos() -> tuple[list[Finding], list[Finding]]:
     """Analyze TO-DO and FIX-ME markers."""
-    todos: list[dict[str, Any]] = []
-    fixmes: list[dict[str, Any]] = []
+    todos: list[Finding] = []
+    fixmes: list[Finding] = []
 
     # Obfuscate strings to avoid finding this script itself in greedy scans
     todo_str = "TO" + "DO"
     fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
 
-    def _parser(line: str) -> dict[str, Any] | None:
+    def _parser(line: str) -> Finding | None:
         filepath, lineno, content = _parse_grep_line(line)
         if not filepath or not lineno or content is None:
             return None
@@ -127,10 +130,10 @@ def analyze_todos() -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
     return todos, fixmes
 
 
-def analyze_stubs() -> list[dict[str, Any]]:
+def analyze_stubs() -> list[Finding]:
     """Analyze stub functions."""
 
-    def _parser(line: str) -> dict[str, Any] | None:
+    def _parser(line: str) -> Finding | None:
         parts = line.strip().rsplit(" ", 1)
         if len(parts) < 2 or ":" not in parts[0]:
             return None
@@ -140,10 +143,10 @@ def analyze_stubs() -> list[dict[str, Any]]:
     return _scan_completist_file("STUBS", _parser)
 
 
-def analyze_docs() -> list[dict[str, Any]]:
+def analyze_docs() -> list[Finding]:
     """Analyze missing documentation."""
 
-    def _parser(line: str) -> dict[str, Any] | None:
+    def _parser(line: str) -> Finding | None:
         parts = line.strip().rsplit(" ", 1)
         if len(parts) < 2 or ":" not in parts[0]:
             return None
@@ -153,11 +156,11 @@ def analyze_docs() -> list[dict[str, Any]]:
     return _scan_completist_file("DOCS", _parser)
 
 
-def analyze_not_implemented() -> list[dict[str, Any]]:
+def analyze_not_implemented() -> list[Finding]:
     """Analyze Not Implemented Error occurrences."""
     ni_str = "NotImplemented" + "Error"
 
-    def _parser(line: str) -> dict[str, Any] | None:
+    def _parser(line: str) -> Finding | None:
         f_path, l_no, c_txt = _parse_grep_line(line)
         if f_path and l_no and c_txt and ni_str in c_txt:
             return {"file": f_path, "line": l_no, "text": c_txt, "type": ni_str}
@@ -166,10 +169,10 @@ def analyze_not_implemented() -> list[dict[str, Any]]:
     return _scan_completist_file("NOT_IMPL", _parser)
 
 
-def analyze_abstract_methods() -> list[dict[str, Any]]:
+def analyze_abstract_methods() -> list[Finding]:
     """Analyze Abstract Methods."""
 
-    def _parser(line: str) -> dict[str, Any] | None:
+    def _parser(line: str) -> Finding | None:
         f_path, l_no, c_txt = _parse_grep_line(line)
         if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
             return {"file": f_path, "line": l_no, "text": c_txt, "type": "Abstract"}
@@ -265,12 +268,6 @@ def generate_report() -> None:
     criticals = [s for s in (stubs + ni_errors) if "test" not in s["file"].lower()]
     criticals.sort(key=lambda x: calculate_metrics(x)[0], reverse=True)
 
-    module_todos = defaultdict(list)
-    for todo_item in todos:
-        parts = todo_item["file"].replace("\\", "/").split("/")
-        mod = "/".join(parts[:3]) if len(parts) > 2 else (parts[0] if parts else "root")
-        module_todos[mod].append(todo_item)
-
     # Report Generation
     date_s = datetime.now().strftime("%Y-%m-%d")
     report = [
@@ -316,8 +313,9 @@ def generate_report() -> None:
     with open(latest_path, "w", encoding="utf-8") as f_out:
         f_out.write("\n".join(report))
 
-    print(f"Report generated: {report_path}")
+    logger.info("Report generated: %s", report_path)
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     generate_report()
