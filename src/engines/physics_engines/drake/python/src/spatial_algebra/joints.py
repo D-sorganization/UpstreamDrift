@@ -13,9 +13,7 @@ from src.shared.python.spatial_algebra.joints import (
     S_RY,
     S_RZ,
 )
-from src.shared.python.spatial_algebra.joints import (
-    jcalc as _shared_jcalc,
-)
+from src.shared.python.spatial_algebra.joints import jcalc as _shared_jcalc
 
 
 def jcalc(
