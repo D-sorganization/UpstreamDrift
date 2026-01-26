@@ -82,7 +82,6 @@ def draw_rounded_rect_with_text(
     pixels = []
 
     # Background color with full alpha
-    bg_dark = (30, 30, 35, 255)  # Dark background
 
     for y in range(height):
         for x in range(width):
@@ -97,7 +96,6 @@ def draw_rounded_rect_with_text(
                 (width - radius - 1, height - radius - 1),  # bottom-right
             ]
 
-            in_corner_region = False
             for cx, cy in corners:
                 if (
                     (x < radius and y < radius)
@@ -110,7 +108,6 @@ def draw_rounded_rect_with_text(
                     dy = abs(y - cy)
                     if dx * dx + dy * dy > radius * radius:
                         inside = False
-                    in_corner_region = True
                     break
 
             if inside:
@@ -249,7 +246,6 @@ def generate_all_tiles():
     """Generate all tile images."""
     size = 200  # 200x200 pixels
 
-    print("Generating launcher tile images...")
 
     for name, (color, text) in TILE_CONFIGS.items():
         filename = f"{name}.png"
@@ -262,7 +258,6 @@ def generate_all_tiles():
         with open(filepath, "wb") as f:
             f.write(png_data)
 
-        print(f"  Created: {filename}")
 
     # Create openpose.jpg as a copy of openpose.png
     # (MODEL_IMAGES references openpose.jpg)
@@ -271,8 +266,6 @@ def generate_all_tiles():
         # Just create it as PNG - the loader should handle both
         pass
 
-    print("\nDone! All tile images generated.")
-    print(f"Output directory: {ASSETS_DIR}")
 
 
 if __name__ == "__main__":
