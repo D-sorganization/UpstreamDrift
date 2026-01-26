@@ -7,6 +7,8 @@ used in rigid body dynamics.
 
 from __future__ import annotations
 
+import numbers
+
 import numpy as np
 import numpy.typing as npt
 
@@ -30,7 +32,7 @@ def mcI(
     com = np.asarray(com).ravel()
     i_com = np.asarray(I_com)
 
-    if not isinstance(mass, (int, float)) or mass <= 0:
+    if not isinstance(mass, numbers.Real) or mass <= 0:
         msg = f"mass must be positive scalar, got {mass}"
         raise ValueError(msg)
     if com.shape != (3,):
