@@ -33,6 +33,7 @@ on:
           - tech-custodian
           - issue-resolver
           - pr-compiler
+          - conflict-fix
 
 # SAFEGUARD: Maximum iterations to prevent infinite repair loops
 env:
@@ -274,4 +275,10 @@ jobs:
     needs: triage
     if: needs.triage.outputs.target == 'pr-compiler'
     uses: ./.github/workflows/Jules-PR-Compiler.yml
+    secrets: inherit
+
+  call-conflict-fix:
+    needs: triage
+    if: needs.triage.outputs.target == 'conflict-fix'
+    uses: ./.github/workflows/Jules-Conflict-Fix.yml
     secrets: inherit

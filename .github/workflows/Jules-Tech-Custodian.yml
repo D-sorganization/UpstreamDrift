@@ -36,7 +36,7 @@ jobs:
         env:
           TARGET: ${{ steps.target.outputs.file }}
         run: |
-          BRANCH_NAME="refactor/custodian-$(date +%Y%m%d)-$(basename "$TARGET")"
+          BRANCH_NAME="refactor/custodian-$(date +%Y%m%d%H%M%S)-$(basename "$TARGET")"
           git checkout -b $BRANCH_NAME
           git push -u origin $BRANCH_NAME
           # FIX: This output now belongs to step 'branch', not 'target'
