@@ -70,7 +70,8 @@ jobs:
           TARGET: ${{ steps.target.outputs.file }}
         run: |
           BASENAME=$(basename "$TARGET" .py)
-          BRANCH_NAME="refactor/auto-$(date +%Y%m%d)-${BASENAME}"
+          # Use timestamp for unique branch name
+          BRANCH_NAME="refactor/auto-$(date +%Y%m%d%H%M%S)-${BASENAME}"
           git checkout -b "$BRANCH_NAME"
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
