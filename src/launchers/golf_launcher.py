@@ -199,9 +199,9 @@ class GolfLauncher(QMainWindow):
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []  # Track model order for drag-and-drop
         self.layout_edit_mode = False  # Track if layout editing is enabled
-        self.running_processes: dict[
-            str, subprocess.Popen
-        ] = {}  # Track running instances
+        self.running_processes: dict[str, subprocess.Popen] = (
+            {}
+        )  # Track running instances
         self.available_models: dict[str, Any] = {}
         self.special_app_lookup: dict[str, Any] = {}
         self.current_filter_text = ""
