@@ -184,55 +184,131 @@ If sensitive data is accidentally committed:
 
 This section defines the active agents within the Jules "Control Tower" Architecture. All agents must operate within their defined scope.
 
+### Overview: Overnight Automation Schedule (PST)
+
+| Time (PST) | Agent | Purpose |
+|------------|-------|---------|
+| 12:00 AM | Assessment Generator | Generate code quality assessment reports |
+| 12:30 AM | Code Quality Reviewer | Review and fix code quality issues |
+| 1:00 AM | Completist | Find and fix incomplete implementations |
+| 1:30 AM | Documentation Auditor | Update and improve documentation |
+| 2:30 AM | Sentinel | Security scanning and vulnerability fixes |
+| 3:00 AM | Auto-Refactor | Apply DRY/orthogonality improvements |
+| 3:30 AM | Issue Resolver | Work on open GitHub issues |
+| 4:00 AM | PR Compiler | Consolidate multiple PRs into one |
+| 5:00 AM | Auto-Rebase | Rebase PRs onto main, resolve conflicts |
+
+---
+
 ### 1. The Control Tower (Orchestrator)
+
 **Role:** Air Traffic Controller
 **Workflow:** `.github/workflows/Jules-Control-Tower.yml`
 **Responsibilities:**
--  **Orchestrator:** Coordinates specialized agent workflows. Note that CI and Guard workflows run independently.
--  **Decision Maker:** Analyzes the event context (Triage) and dispatches the appropriate specialized worker.
--  **Loop Prevention:** Enforces `if: github.actor != 'jules-bot'` to prevent infinite recursion.
 
-### 2. Auto-Repair (Medic)
-**Role:** Fixer of Broken Builds
-**Workflow:** `.github/workflows/Jules-Auto-Repair.yml`
-**Triggered By:** CI Failure (Standard CI)
+- **Orchestrator:** Coordinates specialized agent workflows via scheduled cron jobs and event triggers.
+- **Decision Maker:** Analyzes the event context (Triage) and dispatches the appropriate specialized worker.
+- **Loop Prevention:** Enforces `if: github.actor != 'jules-bot'` to prevent infinite recursion.
+- **Schedule Router:** Routes scheduled jobs to the correct worker based on cron time.
+
+### 2. Assessment Generator (The Auditor)
+
+**Role:** Quality Assessment Reporter
+**Workflow:** `.github/workflows/Jules-Assessment-Generator.yml`
+**Schedule:** Midnight PST (0 8 * * * UTC)
 **Capabilities:**
--  **Read:** CI Failure Logs
--  **Write:** Fixes to syntax, imports, and simple logic errors.
--  **Constraint:** limited retries (max 3) to prevent "flailing".
 
-### 3. Test-Generator (Architect)
-**Role:** Quality Assurance Engineer
-**Workflow:** `.github/workflows/Jules-Test-Generator.yml`
-**Triggered By:** New PR with `.py` changes
+- **Read:** Entire codebase for quality analysis
+- **Write:** Assessment reports to `docs/assessments/`
+- **Constraint:** Read-only for source code; only writes reports.
+
+### 3. Code Quality Reviewer (The Inspector)
+
+**Role:** Code Quality Enforcer
+**Workflow:** `.github/workflows/Jules-Code-Quality-Reviewer.yml`
+**Schedule:** 12:30 AM PST (30 8 * * * UTC)
 **Capabilities:**
--  **Write:** New test files in `tests/`.
--  **Constraint:** Must not modify existing application code, only add tests.
 
-### 4. Doc-Scribe (Librarian)
+- **Read:** Linting results, type check outputs
+- **Write:** Fixes for style, formatting, and minor code issues
+- **Constraint:** Limited to auto-fixable issues (ruff, black, isort).
+
+### 4. Completist (The Finisher)
+
+**Role:** Incomplete Implementation Hunter
+**Workflow:** `.github/workflows/Jules-Completist.yml`
+**Schedule:** 1:00 AM PST (0 9 * * * UTC)
+**Capabilities:**
+
+- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
+- **Write:** Implementations for incomplete code
+- **Constraint:** Creates PRs for review; does not merge directly.
+
+### 5. Documentation Auditor (The Librarian)
+
 **Role:** Documentation Maintainer
-**Workflow:** `.github/workflows/Jules-Documentation-Scribe.yml`
-**Triggered By:** Push to `main`
+**Workflow:** `.github/workflows/Jules-Documentation-Auditor.yml`
+**Schedule:** 1:30 AM PST (30 9 * * * UTC)
 **Capabilities:**
--  **Write:** Updates to `docs/` and markdown files.
--  **Mode:** "CodeWiki" - treats the codebase as a living encyclopedia.
 
-### 5. Scientific-Auditor (The Professor)
-**Role:** Peer Reviewer
-**Workflow:** `.github/workflows/Jules-Scientific-Auditor.yml`
-**Triggered By:** Nightly Schedule
+- **Read:** Code and existing documentation
+- **Write:** Updates to `docs/`, README files, docstrings
+- **Mode:** "CodeWiki" - treats the codebase as a living encyclopedia.
+
+### 6. Sentinel (The Guardian)
+
+**Role:** Security Scanner
+**Workflow:** `.github/workflows/Jules-Sentinel.yml`
+**Schedule:** 2:30 AM PST (30 10 * * * UTC)
 **Capabilities:**
-- **Read/Write:** Analyzes mathematical correctness; can commit reports to `docs/assessments/` or open GitHub Issues.
-- **Justification:** This agent requires limited write access only to publish audit artifacts (reports and issues) so that all mathematical reviews are transparent, reproducible, and traceable over time. It remains strictly read-only with respect to source, configuration, and test code.
-- **Constraints:** MUST NOT modify application source code, configuration files, or tests; MAY ONLY create or update files under `docs/assessments/` and open or comment on GitHub Issues/PRs to recommend changes.
 
-### 6. Conflict-Fix (Diplomat)
+- **Read:** Codebase for security vulnerabilities (OWASP Top 10)
+- **Write:** Security fixes, dependency updates
+- **Constraint:** Focuses on high-priority security issues only.
+
+### 7. Auto-Refactor (The Architect)
+
+**Role:** Code Improvement Specialist
+**Workflow:** `.github/workflows/Jules-Auto-Refactor.yml`
+**Schedule:** 3:00 AM PST (0 11 * * * UTC)
+**Capabilities:**
+
+- **Read:** Codebase for DRY violations, code smells
+- **Write:** Refactoring improvements
+- **Constraint:** One file per PR; preserves behavior.
+
+### 8. Issue Resolver (The Fixer)
+
+**Role:** GitHub Issue Worker
+**Workflow:** `.github/workflows/Jules-Issue-Resolver.yml`
+**Schedule:** 3:30 AM PST (30 11 * * * UTC)
+**Capabilities:**
+
+- **Read:** Open GitHub issues with appropriate labels
+- **Write:** Code fixes, closes issues via PR
+- **Constraint:** Only works on issues labeled for automation.
+
+### 9. PR Compiler (The Consolidator)
+
+**Role:** Pull Request Merger
+**Workflow:** `.github/workflows/Jules-PR-Compiler.yml`
+**Schedule:** 4:00 AM PST (0 12 * * * UTC)
+**Capabilities:**
+
+- **Read:** All open PRs from automation
+- **Write:** Consolidated PRs combining multiple changes
+- **Constraint:** Only merges non-conflicting automation PRs.
+
+### 10. Auto-Rebase (The Diplomat)
+
 **Role:** Merge Conflict Resolver
-**Workflow:** `.github/workflows/Jules-Conflict-Fix.yml`
-**Triggered By:** Manual dispatch or specific conflict events (if configured)
+**Workflow:** `.github/workflows/Jules-Auto-Rebase.yml`
+**Schedule:** 5:00 AM PST (0 13 * * * UTC)
 **Capabilities:**
--  **Write:** Merge resolution commits.
--  **Constraint:** Prioritizes "Incoming" changes unless specified otherwise.
+
+- **Read:** PR branches, main branch
+- **Write:** Rebased branches, conflict resolutions
+- **Constraint:** Labels PRs with "conflict" if manual intervention needed.
 
 ---
 
