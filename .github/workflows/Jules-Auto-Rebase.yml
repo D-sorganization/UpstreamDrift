@@ -79,7 +79,12 @@ jobs:
             }
 
             # Try to rebase onto main
-            git fetch origin main
+            git fetch origin main 2>/dev/null || {
+              echo "  Could not fetch origin/main, skipping PR #$PR_NUM."
+              SKIPPED=$((SKIPPED + 1))
+              git checkout main 2>/dev/null || true
+              continue
+            }
             if git rebase origin/main 2>/dev/null; then
               # Rebase succeeded, push the changes
               if git push --force-with-lease origin "$BRANCH" 2>/dev/null; then
@@ -99,9 +104,10 @@ jobs:
               # Add conflict label if not already present
               EXISTING_LABELS=$(gh pr view $PR_NUM --json labels --jq '.labels[].name' | tr '\n' ' ')
               if [[ ! "$EXISTING_LABELS" =~ "conflict" ]]; then
-                gh pr edit $PR_NUM --add-label "conflict" 2>/dev/null || \
-                gh label create "conflict" --description "PR has merge conflicts" --color "d93f0b" 2>/dev/null && \
-                gh pr edit $PR_NUM --add-label "conflict" 2>/dev/null || true
+                gh pr edit $PR_NUM --add-label "conflict" 2>/dev/null || {
+                  gh label create "conflict" --description "PR has merge conflicts" --color "d93f0b" 2>/dev/null || true
+                  gh pr edit $PR_NUM --add-label "conflict" 2>/dev/null || true
+                }
               fi
 
               # Comment if not already commented about this conflict
