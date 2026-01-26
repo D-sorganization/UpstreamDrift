@@ -19,7 +19,7 @@ jobs:
       - name: Check Issue Labels
         id: check
         env:
-          GH_TOKEN: ${{ secrets.BOT_PAT }}
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
           LABELS: ${{ toJson(github.event.issue.labels) }}
         run: |
           # LABELS is passed via env to prevent shell injection
@@ -40,7 +40,7 @@ jobs:
       - name: Comment @jules
         if: steps.check.outputs.should_assign == 'true'
         env:
-          GH_TOKEN: ${{ secrets.BOT_PAT }}
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |
@@ -57,7 +57,7 @@ jobs:
       - name: Add Jules Label
         if: steps.check.outputs.should_assign == 'true'
         env:
-          GH_TOKEN: ${{ secrets.BOT_PAT }}
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |

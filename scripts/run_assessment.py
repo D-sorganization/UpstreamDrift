@@ -79,9 +79,12 @@ def run_assessment(assessment_id: str, output_path: Path) -> int:
         score -= 5 if cnt == 0 else (2 if cnt < 5 else 0)
 
     else:
+        # IMPORTANT: Use conservative score for categories without real checks
+        score = 7.0
         findings = [
             f"- Python files analyzed: {len(py_files)}",
-            "- Manual review recommended",
+            "- **NOTE**: This category requires manual review for accurate scoring",
+            "- Score is conservative estimate (7.0) - actual score may differ",
         ]
 
     score = max(0, min(10, score))
