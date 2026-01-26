@@ -10,30 +10,17 @@ Built on top of the existing EngineManager and PhysicsEngine protocol.
 """
 
 import os
-import uuid
-
-# Python 3.10 compatibility: UTC was added in 3.11
-from datetime import datetime, timezone
-
-try:
-    from datetime import UTC
-except ImportError:
-    UTC = timezone.utc  # noqa: UP017
-
-from pathlib import Path
 from typing import Any
 
 import uvicorn
-from fastapi import BackgroundTasks, FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 from src.shared.python.engine_manager import EngineManager
-from src.shared.python.engine_registry import EngineType
 
 # Configure logging - use centralized logging config
 from src.shared.python.logging_config import get_logger, setup_logging
@@ -42,16 +29,16 @@ from src.shared.python.video_pose_pipeline import (
     VideoProcessingConfig,
 )
 
-from .config import VALID_EXPORT_FORMATS, get_allowed_hosts, get_cors_origins
+from .config import get_allowed_hosts, get_cors_origins
 from .database import init_db
 from .middleware.security_headers import add_security_headers
 from .middleware.upload_limits import validate_upload_size
-from .models.requests import (
-    AnalysisRequest,
-    SimulationRequest,
-)
-from .models.responses import AnalysisResponse, EngineStatusResponse, SimulationResponse
+from .routes import analysis as analysis_routes
 from .routes import auth as auth_routes
+from .routes import core as core_routes
+from .routes import engines as engine_routes
+from .routes import export as export_routes
+from .routes import simulation as simulation_routes
 from .routes import video as video_routes
 from .services.analysis_service import AnalysisService
 from .services.simulation_service import SimulationService
@@ -96,78 +83,6 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty
 # SECURITY: middleware registration
 app.middleware("http")(add_security_headers)
 app.middleware("http")(validate_upload_size)
-
-
-# SECURITY: Path validation to prevent path traversal attacks
-ALLOWED_MODEL_DIRS = [
-    Path("shared/models").resolve(),
-    Path("models").resolve(),
-    Path("data").resolve(),
-]
-
-
-def _validate_model_path(model_path: str) -> str:
-    """Validate model path to prevent path traversal attacks.
-
-    Args:
-        model_path: User-provided model path
-
-    Returns:
-        Validated absolute path string
-
-    Raises:
-        HTTPException: If path is invalid or contains traversal attempts
-    """
-    # SECURITY: Sanitize user input to prevent path traversal
-    try:
-        user_path = Path(model_path)
-    except TypeError as e:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid path format",
-        ) from e
-
-    # SECURITY: Reject absolute paths - user input must be relative
-    if user_path.is_absolute():
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid path: absolute paths are not allowed",
-        )
-
-    # SECURITY: Reject paths with parent directory references
-    if ".." in user_path.parts:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid path: parent directory references not allowed",
-        )
-
-    # Build candidate paths under each allowed directory and check them
-    for allowed_dir in ALLOWED_MODEL_DIRS:
-        try:
-            # SECURITY: Resolve to absolute path and validate it stays within allowed_dir
-            candidate = (allowed_dir / user_path).resolve()
-        except (ValueError, OSError) as e:
-            raise HTTPException(
-                status_code=400,
-                detail="Invalid path format",
-            ) from e
-
-        # SECURITY: Ensure the resolved path is still within the allowed directory
-        try:
-            candidate.relative_to(allowed_dir)
-        except ValueError:
-            # Path escaped the allowed directory (traversal attempt)
-            continue
-
-        # Check if this valid candidate exists
-        if candidate.exists():
-            # SECURITY: Return only the validated, sanitized path
-            return str(candidate)
-
-    raise HTTPException(
-        status_code=404,
-        detail="Model file not found in allowed directories",
-    )
 
 
 # Global services
@@ -307,7 +222,12 @@ async def startup_event() -> None:
             )
             video_pipeline = None
 
+        core_routes.configure(engine_manager)
+        engine_routes.configure(engine_manager, logger)
+        simulation_routes.configure(simulation_service, active_tasks, logger)
+        analysis_routes.configure(analysis_service, logger)
         video_routes.configure(video_pipeline, active_tasks, logger)
+        export_routes.configure(active_tasks)
 
         logger.info("Golf Modeling Suite API started successfully")
 
@@ -318,201 +238,12 @@ async def startup_event() -> None:
 
 # Include routers
 app.include_router(auth_routes.router)
+app.include_router(core_routes.router)
+app.include_router(engine_routes.router)
+app.include_router(simulation_routes.router)
 app.include_router(video_routes.router)
-
-
-@app.get("/")
-async def root() -> dict[str, str]:
-    """Root endpoint with API information."""
-    return {
-        "message": "Golf Modeling Suite API",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "status": "running",
-    }
-
-
-@app.get("/health")
-async def health_check() -> dict[str, str | int]:
-    """Health check endpoint."""
-    return {
-        "status": "healthy",
-        "engines_available": (
-            len(engine_manager.get_available_engines()) if engine_manager else 0
-        ),
-        "timestamp": "2026-01-12T00:00:00Z",
-    }
-
-
-# Engine Management Endpoints
-
-
-@app.get("/engines", response_model=list[EngineStatusResponse])
-async def get_engines() -> list[EngineStatusResponse]:
-    """Get status of all available physics engines."""
-    if not engine_manager:
-        raise HTTPException(status_code=500, detail="Engine manager not initialized")
-
-    engines = []
-    # PERFORMANCE FIX: Get available engines once before loop (was called 8+ times)
-    available_engines = engine_manager.get_available_engines()
-    for engine_type in EngineType:
-        status = engine_manager.get_engine_status(engine_type)
-        is_available = engine_type in available_engines
-
-        engines.append(
-            EngineStatusResponse(
-                engine_type=engine_type.value,
-                status=status.value,
-                is_available=is_available,
-                description=f"{engine_type.value} physics engine",
-            )
-        )
-
-    return engines
-
-
-@app.post("/engines/{engine_type}/load")
-async def load_engine(
-    engine_type: str, model_path: str | None = None
-) -> dict[str, str]:
-    """Load a specific physics engine with optional model."""
-    if not engine_manager:
-        raise HTTPException(status_code=500, detail="Engine manager not initialized")
-
-    try:
-        engine_enum = EngineType(engine_type.upper())
-        engine_manager._load_engine(
-            engine_enum
-        )  # This method doesn't return success status
-
-        # Check if engine was loaded successfully
-        engine = engine_manager.get_active_physics_engine()
-        if not engine:
-            raise HTTPException(
-                status_code=400, detail=f"Failed to load engine: {engine_type}"
-            )
-
-        # SECURITY: Validate model path to prevent path traversal
-        if model_path:
-            engine = engine_manager.get_active_physics_engine()
-            if engine:
-                # Validate path: no parent directory traversal, must exist
-                validated_path = _validate_model_path(model_path)
-                engine.load_from_path(validated_path)
-
-        return {"message": f"Engine {engine_type} loaded successfully"}
-
-    except ValueError as e:
-        raise HTTPException(
-            status_code=400, detail=f"Unknown engine type: {engine_type}"
-        ) from e
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error loading engine: {str(e)}"
-        ) from e
-
-
-# Simulation Endpoints
-
-
-@app.post("/simulate", response_model=SimulationResponse)
-async def run_simulation(request: SimulationRequest) -> SimulationResponse:
-    """Run a physics simulation."""
-    if not simulation_service:
-        raise HTTPException(
-            status_code=500, detail="Simulation service not initialized"
-        )
-
-    try:
-        result = await simulation_service.run_simulation(request)
-        return result
-    except Exception as e:
-        logger.error(f"Simulation error: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Simulation failed: {str(e)}"
-        ) from e
-
-
-@app.post("/simulate/async")
-async def run_simulation_async(
-    request: SimulationRequest, background_tasks: BackgroundTasks
-) -> dict[str, str]:
-    """Start an asynchronous simulation."""
-    if not simulation_service:
-        raise HTTPException(
-            status_code=500, detail="Simulation service not initialized"
-        )
-
-    task_id = str(uuid.uuid4())
-
-    # Initialize task with timestamp
-    active_tasks[task_id] = {
-        "status": "started",
-        "created_at": datetime.now(UTC),
-    }
-
-    # Add background task
-    background_tasks.add_task(
-        simulation_service.run_simulation_background,
-        task_id,
-        request,
-        active_tasks,  # type: ignore[arg-type]
-    )
-
-    return {"task_id": task_id, "status": "started"}
-
-
-@app.get("/simulate/status/{task_id}")
-async def get_simulation_status(task_id: str) -> dict[str, Any]:
-    """Get status of an asynchronous simulation."""
-    if task_id not in active_tasks:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    return dict(active_tasks[task_id])
-
-
-# Analysis Endpoints
-
-
-@app.post("/analyze/biomechanics", response_model=AnalysisResponse)
-async def analyze_biomechanics(request: AnalysisRequest) -> AnalysisResponse:
-    """Perform biomechanical analysis on simulation data."""
-    if not analysis_service:
-        raise HTTPException(status_code=500, detail="Analysis service not initialized")
-
-    try:
-        result = await analysis_service.analyze_biomechanics(request)
-        return result
-    except Exception as e:
-        logger.error(f"Analysis error: {e}")
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}") from e
-
-
-# Export Endpoints
-
-
-@app.get("/export/{task_id}")
-async def export_results(task_id: str, format: str = "json") -> JSONResponse:
-    """Export analysis results in specified format."""
-    # INPUT VALIDATION: Validate export format
-    if format not in VALID_EXPORT_FORMATS:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid format '{format}'. "
-            f"Must be one of: {', '.join(sorted(VALID_EXPORT_FORMATS))}",
-        )
-
-    if task_id not in active_tasks:
-        raise HTTPException(status_code=404, detail="Task not found")
-
-    task = active_tasks[task_id]
-    if task["status"] != "completed":
-        raise HTTPException(status_code=400, detail="Task not completed")
-
-    # Generate export file
-    # Implementation depends on specific export requirements
-    return JSONResponse(content=task["result"])
+app.include_router(analysis_routes.router)
+app.include_router(export_routes.router)
 
 
 if __name__ == "__main__":
