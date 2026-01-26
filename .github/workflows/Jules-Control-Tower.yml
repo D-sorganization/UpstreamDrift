@@ -14,8 +14,9 @@ on:
     - cron: "30 8 * * *"  # 12:30 AM PST - Code Quality Reviewer
     - cron: "0 9 * * *"   # 1 AM PST - Completist (incomplete impl)
     - cron: "30 10 * * *" # 2:30 AM PST - Sentinel (security)
-    - cron: "0 11 * * *"  # 3 AM PST - Tech Custodian
+    - cron: "0 11 * * *"  # 3 AM PST - Auto-Refactor
     - cron: "30 11 * * *" # 3:30 AM PST - Issue Resolver (daily fix)
+    - cron: "0 13 * * *"  # 5 AM PST - Auto-Rebase
     - cron: "0 12 * * *"  # 4 AM PST - PR Compiler (consolidate PRs)
   workflow_dispatch:
     inputs:
@@ -30,7 +31,8 @@ on:
           - code-quality-reviewer
           - completist
           - sentinel
-          - tech-custodian
+          - auto-refactor
+          - auto-rebase
           - issue-resolver
           - pr-compiler
 
@@ -132,13 +134,16 @@ jobs:
                     target = "sentinel";
                     break;
                   case "0 11 * * *":
-                    target = "tech-custodian";
+                    target = "auto-refactor";
                     break;
                   case "30 11 * * *":
                     target = "issue-resolver";
                     break;
                   case "0 12 * * *":
                     target = "pr-compiler";
+                    break;
+                  case "0 13 * * *":
+                    target = "auto-rebase";
                     break;
                   default:
                     target = "none";
@@ -160,11 +165,13 @@ jobs:
                 } else if (hour === 10 && minute >= 30) {
                   target = "sentinel";
                 } else if (hour === 11 && minute < 30) {
-                  target = "tech-custodian";
+                  target = "auto-refactor";
                 } else if (hour === 11 && minute >= 30) {
                   target = "issue-resolver";
                 } else if (hour === 12) {
                   target = "pr-compiler";
+                } else if (hour === 13) {
+                  target = "auto-rebase";
                 } else {
                   target = "none";
                 }
@@ -228,10 +235,16 @@ jobs:
     uses: ./.github/workflows/Jules-Test-Generator.yml
     secrets: inherit
 
-  call-custodian:
+  call-auto-refactor:
     needs: triage
-    if: needs.triage.outputs.target == 'tech-custodian'
-    uses: ./.github/workflows/Jules-Tech-Custodian.yml
+    if: needs.triage.outputs.target == 'auto-refactor'
+    uses: ./.github/workflows/Jules-Auto-Refactor.yml
+    secrets: inherit
+
+  call-auto-rebase:
+    needs: triage
+    if: needs.triage.outputs.target == 'auto-rebase'
+    uses: ./.github/workflows/Jules-Auto-Rebase.yml
     secrets: inherit
 
   call-archivist:
