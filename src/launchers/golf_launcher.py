@@ -125,13 +125,9 @@ CREATE_NO_WINDOW: int
 CREATE_NEW_CONSOLE: int
 
 if os.name == "nt":
-    try:
-        # Pylance/mypy might not see these on non-Windows
-        CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0x08000000)
-        CREATE_NEW_CONSOLE = getattr(subprocess, "CREATE_NEW_CONSOLE", 0x00000010)
-    except AttributeError:
-        CREATE_NO_WINDOW = 0x08000000
-        CREATE_NEW_CONSOLE = 0x00000010
+    # Pylance/mypy might not see these on non-Windows
+    CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0x08000000)
+    CREATE_NEW_CONSOLE = getattr(subprocess, "CREATE_NEW_CONSOLE", 0x00000010)
 else:
     CREATE_NO_WINDOW = 0
     CREATE_NEW_CONSOLE = 0
