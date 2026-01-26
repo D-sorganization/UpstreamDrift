@@ -126,8 +126,9 @@ CREATE_NEW_CONSOLE: int
 
 if os.name == "nt":
     try:
-        CREATE_NO_WINDOW = subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
-        CREATE_NEW_CONSOLE = subprocess.CREATE_NEW_CONSOLE  # type: ignore[attr-defined]
+        # Pylance/mypy might not see these on non-Windows
+        CREATE_NO_WINDOW = getattr(subprocess, "CREATE_NO_WINDOW", 0x08000000)
+        CREATE_NEW_CONSOLE = getattr(subprocess, "CREATE_NEW_CONSOLE", 0x00000010)
     except AttributeError:
         CREATE_NO_WINDOW = 0x08000000
         CREATE_NEW_CONSOLE = 0x00000010
@@ -198,9 +199,9 @@ class GolfLauncher(QMainWindow):
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []  # Track model order for drag-and-drop
         self.layout_edit_mode = False  # Track if layout editing is enabled
-        self.running_processes: dict[str, subprocess.Popen] = (
-            {}
-        )  # Track running instances
+        self.running_processes: dict[
+            str, subprocess.Popen
+        ] = {}  # Track running instances
         self.available_models: dict[str, Any] = {}
         self.special_app_lookup: dict[str, Any] = {}
         self.current_filter_text = ""
