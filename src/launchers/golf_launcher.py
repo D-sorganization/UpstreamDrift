@@ -198,9 +198,9 @@ class GolfLauncher(QMainWindow):
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []  # Track model order for drag-and-drop
         self.layout_edit_mode = False  # Track if layout editing is enabled
-        self.running_processes: dict[
-            str, subprocess.Popen
-        ] = {}  # Track running instances
+        self.running_processes: dict[str, subprocess.Popen] = (
+            {}
+        )  # Track running instances
         self.available_models: dict[str, Any] = {}
         self.special_app_lookup: dict[str, Any] = {}
         self.current_filter_text = ""
@@ -1356,7 +1356,10 @@ class GolfLauncher(QMainWindow):
     def _custom_launch_humanoid(self, abs_repo_path: Path) -> None:
         """Launch the MuJoCo humanoid GUI directly."""
         # Use hardcoded path to ensure we hit the correct script
-        script = REPOS_ROOT / "src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
+        script = (
+            REPOS_ROOT
+            / "src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
+        )
         if not script.exists():
             QMessageBox.critical(
                 self, "Error", f"Humanoid launcher not found: {script}"
@@ -1427,7 +1430,9 @@ class GolfLauncher(QMainWindow):
 
     def _custom_launch_opensim(self, abs_repo_path: Path) -> None:
         """Launch the OpenSim GUI directly."""
-        script = REPOS_ROOT / "src/engines/physics_engines/opensim/python/opensim_gui.py"
+        script = (
+            REPOS_ROOT / "src/engines/physics_engines/opensim/python/opensim_gui.py"
+        )
         if not script.exists():
             QMessageBox.critical(
                 self, "Error", f"OpenSim GUI script not found: {script}"
@@ -1447,11 +1452,12 @@ class GolfLauncher(QMainWindow):
 
     def _custom_launch_myosim(self, abs_repo_path: Path) -> None:
         """Launch the MyoSim GUI directly."""
-        script = REPOS_ROOT / "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
+        script = (
+            REPOS_ROOT
+            / "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
+        )
         if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"MyoSim script not found: {script}"
-            )
+            QMessageBox.critical(self, "Error", f"MyoSim script not found: {script}")
             return
         logger.info(f"Launching MyoSim: {script}")
         creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0

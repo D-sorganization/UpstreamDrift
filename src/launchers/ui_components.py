@@ -293,6 +293,7 @@ class AsyncStartupWorker(QThread):
             self.progress_signal.emit("Initializing engine manager...", 30)
             try:
                 from src.shared.python.engine_manager import EngineManager
+
                 self.results.engine_manager = EngineManager(self.repos_root)
                 # Skip probing to avoid hanging - engines will be probed on demand
                 # self.results.engine_manager.probe_all_engines()
