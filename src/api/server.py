@@ -10,7 +10,6 @@ Built on top of the existing EngineManager and PhysicsEngine protocol.
 """
 
 import os
-import tempfile
 import uuid
 
 # Python 3.10 compatibility: UTC was added in 3.11
@@ -21,15 +20,14 @@ try:
 except ImportError:
     UTC = timezone.utc  # noqa: UP017
 
-from collections.abc import Awaitable, Callable
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import uvicorn
-from fastapi import BackgroundTasks, FastAPI, File, HTTPException, Request, UploadFile
+from fastapi import BackgroundTasks, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
@@ -44,18 +42,17 @@ from src.shared.python.video_pose_pipeline import (
     VideoProcessingConfig,
 )
 
+from .config import VALID_EXPORT_FORMATS, get_allowed_hosts, get_cors_origins
 from .database import init_db
+from .middleware.security_headers import add_security_headers
+from .middleware.upload_limits import validate_upload_size
 from .models.requests import (
     AnalysisRequest,
     SimulationRequest,
 )
-from .models.responses import (
-    AnalysisResponse,
-    EngineStatusResponse,
-    SimulationResponse,
-    VideoAnalysisResponse,
-)
+from .models.responses import AnalysisResponse, EngineStatusResponse, SimulationResponse
 from .routes import auth as auth_routes
+from .routes import video as video_routes
 from .services.analysis_service import AnalysisService
 from .services.simulation_service import SimulationService
 
@@ -75,10 +72,7 @@ app = FastAPI(
 )
 
 # Security middleware
-# AUTO-FIXED: Make ALLOWED_HOSTS configurable via environment variable
-allowed_hosts = os.getenv(
-    "ALLOWED_HOSTS", "localhost,127.0.0.1,*.golfmodelingsuite.com"
-).split(",")
+allowed_hosts = get_allowed_hosts()
 app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=allowed_hosts,
@@ -87,140 +81,21 @@ app.add_middleware(
 # CORS middleware with restricted origins and headers
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",  # React development
-        "http://localhost:8080",  # Vue development
-        "https://app.golfmodelingsuite.com",  # Production frontend
-    ],
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     # SECURITY: Restrict headers - do NOT use "*"
     allow_headers=["Content-Type", "Authorization", "X-API-Key"],
 )
 
-# ============================================================================
-# API Configuration Constants
-# Centralized configuration to avoid magic numbers throughout the codebase
-# ============================================================================
-
-# Maximum file upload size: 10MB (10 * 1024 * 1024)
-MAX_UPLOAD_SIZE_BYTES = 10485760
-MAX_UPLOAD_SIZE_MB = MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)
-
-# HSTS (HTTP Strict Transport Security) max age in seconds (1 year)
-HSTS_MAX_AGE_SECONDS = 31536000
-
-# Default pagination limit for API responses
-DEFAULT_PAGINATION_LIMIT = 100
-
-# Maximum pose data entries to return in video analysis response
-MAX_POSE_DATA_ENTRIES = 100
-
-# Valid pose estimator types
-VALID_ESTIMATOR_TYPES = {"mediapipe", "openpose", "movenet"}
-
-# Valid export formats implementation currently supports
-VALID_EXPORT_FORMATS = {"json"}
-
-# Confidence score range
-MIN_CONFIDENCE = 0.0
-MAX_CONFIDENCE = 1.0
-DEFAULT_CONFIDENCE = 0.5
-
 # Rate limiting
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
 
 
-# SECURITY: Security headers middleware (Issue #521)
-@app.middleware("http")
-async def add_security_headers(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
-    """Add security headers to all responses.
-
-    Implements OWASP recommended security headers to prevent:
-    - MIME-sniffing attacks (X-Content-Type-Options)
-    - Clickjacking (X-Frame-Options)
-    - XSS attacks (X-XSS-Protection)
-    - Referrer information leakage (Referrer-Policy)
-    - Downgrade attacks (Strict-Transport-Security)
-    """
-    response = await call_next(request)
-
-    # Prevent MIME-sniffing attacks
-    response.headers["X-Content-Type-Options"] = "nosniff"
-
-    # Prevent clickjacking
-    response.headers["X-Frame-Options"] = "DENY"
-
-    # XSS filter (legacy browsers)
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-
-    # Control referrer information
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-
-    # Force HTTPS (only for HTTPS connections)
-    if request.url.scheme == "https":
-        response.headers["Strict-Transport-Security"] = (
-            f"max-age={HSTS_MAX_AGE_SECONDS}; includeSubDomains"
-        )
-
-    return cast(Response, response)
-
-
-def _add_security_headers_to_response(response: Response, request: Request) -> Response:
-    """Add security headers to a response (used for early-return responses).
-
-    Args:
-        response: The response to add headers to
-        request: The original request (needed for HTTPS check)
-
-    Returns:
-        Response with security headers added
-    """
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-    if request.url.scheme == "https":
-        response.headers["Strict-Transport-Security"] = (
-            f"max-age={HSTS_MAX_AGE_SECONDS}; includeSubDomains"
-        )
-    return response
-
-
-# SECURITY: Upload size limit middleware (Issue #545)
-@app.middleware("http")
-async def validate_upload_size(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
-    """Reject requests exceeding upload size limits.
-
-    Prevents DoS attacks via large file uploads by checking Content-Length
-    header before processing the request body.
-    """
-    content_length = request.headers.get("content-length")
-
-    if content_length:
-        try:
-            content_length_int = int(content_length)
-        except ValueError:
-            response = JSONResponse(
-                status_code=400,
-                content={"detail": "Invalid Content-Length header"},
-            )
-            return _add_security_headers_to_response(response, request)
-        if content_length_int > MAX_UPLOAD_SIZE_BYTES:
-            response = JSONResponse(
-                status_code=413,
-                content={
-                    "detail": f"Request too large. Maximum size is {MAX_UPLOAD_SIZE_MB}MB"
-                },
-            )
-            return _add_security_headers_to_response(response, request)
-
-    return cast(Response, await call_next(request))
+# SECURITY: middleware registration
+app.middleware("http")(add_security_headers)
+app.middleware("http")(validate_upload_size)
 
 
 # SECURITY: Path validation to prevent path traversal attacks
@@ -432,6 +307,8 @@ async def startup_event() -> None:
             )
             video_pipeline = None
 
+        video_routes.configure(video_pipeline, active_tasks, logger)
+
         logger.info("Golf Modeling Suite API started successfully")
 
     except Exception as e:
@@ -439,8 +316,9 @@ async def startup_event() -> None:
         raise
 
 
-# Include authentication router (Issue #543)
+# Include routers
 app.include_router(auth_routes.router)
+app.include_router(video_routes.router)
 
 
 @app.get("/")
@@ -592,215 +470,6 @@ async def get_simulation_status(task_id: str) -> dict[str, Any]:
         raise HTTPException(status_code=404, detail="Task not found")
 
     return dict(active_tasks[task_id])
-
-
-# Video Analysis Endpoints
-
-
-@app.post("/analyze/video", response_model=VideoAnalysisResponse)
-async def analyze_video(
-    file: UploadFile = File(...),
-    estimator_type: str = "mediapipe",
-    min_confidence: float = 0.5,
-    enable_smoothing: bool = True,
-) -> VideoAnalysisResponse:
-    """Analyze golf swing from uploaded video."""
-    if not video_pipeline:
-        raise HTTPException(status_code=500, detail="Video pipeline not initialized")
-
-    # INPUT VALIDATION: Validate estimator type
-    if estimator_type not in VALID_ESTIMATOR_TYPES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid estimator_type '{estimator_type}'. "
-            f"Must be one of: {', '.join(sorted(VALID_ESTIMATOR_TYPES))}",
-        )
-
-    # INPUT VALIDATION: Validate confidence range
-    if not (MIN_CONFIDENCE <= min_confidence <= MAX_CONFIDENCE):
-        raise HTTPException(
-            status_code=400,
-            detail=f"min_confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}",
-        )
-
-    # Validate file type
-    if not file.content_type or not file.content_type.startswith("video/"):
-        raise HTTPException(status_code=400, detail="File must be a video")
-
-    # SECURITY FIX: Use try/finally to ensure temp file cleanup even on exceptions
-    temp_path: Path | None = None
-    try:
-        # Save uploaded file temporarily
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
-            content = await file.read()
-            temp_file.write(content)
-            temp_path = Path(temp_file.name)
-
-        # Configure pipeline for this request
-        config = VideoProcessingConfig(
-            estimator_type=estimator_type,
-            min_confidence=min_confidence,
-            enable_temporal_smoothing=enable_smoothing,
-        )
-        pipeline = VideoPosePipeline(config)
-
-        # Process video
-        result = pipeline.process_video(temp_path)
-
-        # Convert to response format
-        response = VideoAnalysisResponse(
-            filename=file.filename or "unknown",
-            total_frames=result.total_frames,
-            valid_frames=result.valid_frames,
-            average_confidence=result.average_confidence,
-            quality_metrics=result.quality_metrics,
-            pose_data=[
-                {
-                    "timestamp": pose.timestamp,
-                    "confidence": pose.confidence,
-                    "joint_angles": pose.joint_angles,
-                    "keypoints": pose.raw_keypoints or {},
-                }
-                for pose in result.pose_results[
-                    :MAX_POSE_DATA_ENTRIES
-                ]  # Limit response size
-            ],
-        )
-
-        return response
-
-    except Exception as e:
-        logger.error(f"Video analysis error: {e}")
-        raise HTTPException(
-            status_code=500, detail=f"Video analysis failed: {str(e)}"
-        ) from e
-    finally:
-        # Ensure temp file is always cleaned up
-        if temp_path is not None and temp_path.exists():
-            try:
-                temp_path.unlink()
-            except OSError as cleanup_error:
-                logger.warning(
-                    f"Failed to clean up temp file {temp_path}: {cleanup_error}"
-                )
-
-
-@app.post("/analyze/video/async")
-async def analyze_video_async(
-    background_tasks: BackgroundTasks,
-    file: UploadFile = File(...),
-    estimator_type: str = "mediapipe",
-    min_confidence: float = 0.5,
-) -> dict[str, str]:
-    """Start asynchronous video analysis."""
-    if not video_pipeline:
-        raise HTTPException(status_code=500, detail="Video pipeline not initialized")
-
-    # INPUT VALIDATION: Validate estimator type
-    if estimator_type not in VALID_ESTIMATOR_TYPES:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Invalid estimator_type '{estimator_type}'. "
-            f"Must be one of: {', '.join(sorted(VALID_ESTIMATOR_TYPES))}",
-        )
-
-    # INPUT VALIDATION: Validate confidence range
-    if not (MIN_CONFIDENCE <= min_confidence <= MAX_CONFIDENCE):
-        raise HTTPException(
-            status_code=400,
-            detail=f"min_confidence must be between {MIN_CONFIDENCE} and {MAX_CONFIDENCE}",
-        )
-
-    # Validate file type
-    if not file.content_type or not file.content_type.startswith("video/"):
-        raise HTTPException(status_code=400, detail="File must be a video")
-
-    task_id = str(uuid.uuid4())
-
-    # Save file and add background task
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_file:
-        content = await file.read()
-        temp_file.write(content)
-        temp_path = Path(temp_file.name)
-
-    # Initialize task with timestamp
-    active_tasks[task_id] = {
-        "status": "started",
-        "created_at": datetime.now(UTC),
-    }
-
-    background_tasks.add_task(
-        _process_video_background,
-        task_id,
-        temp_path,
-        file.filename or "unknown",
-        estimator_type,
-        min_confidence,
-    )
-
-    return {"task_id": task_id, "status": "started"}
-
-
-async def _process_video_background(
-    task_id: str,
-    video_path: Path,
-    filename: str,
-    estimator_type: str,
-    min_confidence: float,
-) -> None:
-    """Background task for video processing."""
-    try:
-        task_data = active_tasks.get(task_id)
-        if task_data is None:
-            task_data = {}
-        created_at = task_data.get("created_at", datetime.now(UTC))
-
-        active_tasks[task_id] = {
-            "status": "processing",
-            "progress": 0,
-            "created_at": created_at,
-        }
-
-        config = VideoProcessingConfig(
-            estimator_type=estimator_type, min_confidence=min_confidence
-        )
-        pipeline = VideoPosePipeline(config)
-
-        result = pipeline.process_video(video_path)
-
-        # Store result
-        task_data = active_tasks.get(task_id)
-        if task_data is None:
-            task_data = {}
-        created_at = task_data.get("created_at", datetime.now(UTC))
-
-        active_tasks[task_id] = {
-            "status": "completed",
-            "created_at": created_at,
-            "result": {
-                "filename": filename,
-                "total_frames": result.total_frames,
-                "valid_frames": result.valid_frames,
-                "average_confidence": result.average_confidence,
-                "quality_metrics": result.quality_metrics,
-            },
-        }
-
-    except Exception as e:
-        task_data = active_tasks.get(task_id)
-        if task_data is None:
-            task_data = {}
-        created_at = task_data.get("created_at", datetime.now(UTC))
-
-        active_tasks[task_id] = {
-            "status": "failed",
-            "error": str(e),
-            "created_at": created_at,
-        }
-    finally:
-        # Clean up temp file
-        if video_path.exists():
-            video_path.unlink()
 
 
 # Analysis Endpoints
