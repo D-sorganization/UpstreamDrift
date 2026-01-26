@@ -38,6 +38,7 @@
 ./.github/workflows/Jules-Auto-Repair.yml:121:            REMAINING=$((MAX_ATTEMPTS - REPAIR_COUNT))
 ./.github/workflows/Jules-Auto-Repair.yml:426:          **Iterations:** $ITERATIONS / ${{ env.MAX_REPAIR_ATTEMPTS }}
 ./.github/copilot-instructions.md:10:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
+./AGENTS.md:243:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
 ./scripts/analyze_completist_data.py:103:    fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
 ./scripts/analyze_completist_data.py:111:            return {"file": filepath, "line": lineno, "text": content, "type": "TODO"}
 ./scripts/analyze_completist_data.py:125:        if marker_item["type"] == "TODO":
