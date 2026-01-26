@@ -246,7 +246,6 @@ def generate_all_tiles():
     """Generate all tile images."""
     size = 200  # 200x200 pixels
 
-
     for name, (color, text) in TILE_CONFIGS.items():
         filename = f"{name}.png"
         filepath = ASSETS_DIR / filename
@@ -258,14 +257,12 @@ def generate_all_tiles():
         with open(filepath, "wb") as f:
             f.write(png_data)
 
-
     # Create openpose.jpg as a copy of openpose.png
     # (MODEL_IMAGES references openpose.jpg)
     openpose_png = ASSETS_DIR / "openpose.png"
     if openpose_png.exists():
         # Just create it as PNG - the loader should handle both
         pass
-
 
 
 if __name__ == "__main__":
