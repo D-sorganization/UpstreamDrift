@@ -47,6 +47,7 @@ jobs:
       (github.event_name == 'pull_request' &&
        (contains(github.event.pull_request.user.login, 'bot') ||
         contains(github.event.pull_request.user.login, 'github-actions') ||
+        contains(github.event.pull_request.user.login, 'google-labs-jules') ||
         github.event.pull_request.user.type == 'Bot'))
 
     steps:
@@ -116,7 +117,7 @@ jobs:
             done
 
             # Also check PRs from other bot-like authors
-            for author in "dependabot[bot]" "renovate[bot]" "claude[bot]"; do
+            for author in "dependabot[bot]" "renovate[bot]" "claude[bot]" "google-labs-jules[bot]"; do
               more_prs=$(gh pr list --author "$author" --state open --json number --jq '.[].number' 2>/dev/null || echo "")
               for pr in $more_prs; do
                 checks=$(gh pr checks "$pr" 2>/dev/null || echo "")
