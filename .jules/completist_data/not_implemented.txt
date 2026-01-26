@@ -1,25 +1,58 @@
-./tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./engines/Simscape_Multibody_Models/2D_Golf_Model/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./engines/Simscape_Multibody_Models/2D_Golf_Model/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./engines/Simscape_Multibody_Models/3D_Golf_Model/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./engines/Simscape_Multibody_Models/3D_Golf_Model/scripts/quality-check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:136:        """Test detection of NotImplementedError."""
-./engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:137:        lines = ["def function():\n", "    raise NotImplementedError\n"]
-./engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:142:        assert any("NotImplementedError" in issue[1] for issue in issues)
-./engines/pendulum_models/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./engines/pendulum_models/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./engines/physics_engines/opensim/python/opensim_gui.py:267:        except NotImplementedError as e:
-./engines/physics_engines/pinocchio/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./engines/physics_engines/drake/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./engines/physics_engines/drake/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
-./engines/physics_engines/mujoco/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
 ./.github/workflows/Jules-Completist.yml:45:          # Find NotImplementedError
 ./.github/workflows/Jules-Completist.yml:46:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
 ./.github/workflows/Jules-Completist.yml:113:          - not_implemented.txt - NotImplementedError and pass statements
 ./.github/workflows/Jules-Completist.yml:122:          - Raise NotImplementedError in core paths
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:94:          # Find NotImplementedError patterns
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:95:          echo "### NotImplementedError Placeholders" >> /tmp/incomplete_report.md
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:98:          grep -rn "raise NotImplementedError" --include="*.py" . 2>/dev/null | grep -v "__pycache__" | grep -v ".git" | head -30 >> /tmp/incomplete_report.md || echo "None found"
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:118:          NOT_IMPL_COUNT=$(grep -rc "raise NotImplementedError" --include="*.py" . 2>/dev/null | grep -v ":0$" | wc -l || echo "0")
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:307:          | NotImplementedError | ${NOT_IMPL:-0} | x5 | $(echo "$NOT_IMPL * 5" | bc) |
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:374:          3. **Incomplete Implementations**: Complete or remove NotImplementedError stubs
+./.github/workflows/Jules-Tech-Debt-Assessor.yml:429:          | NotImplementedError | x5 | Incomplete features affect stability |
 ./.github/copilot-instructions.md:10:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
-./pyproject.toml:290:    "raise NotImplementedError",
-./tests/integration/test_physics_interfaces.py:55:        except NotImplementedError:
-./tests/integration/test_physics_interfaces.py:56:            pytest.fail("MyoSuite ZTCF/ZVCF raised NotImplementedError")
-./tests/integration/test_physics_interfaces.py:98:        except NotImplementedError:
-./tests/integration/test_physics_interfaces.py:99:            pytest.fail("OpenSim ZTCF/ZVCF raised NotImplementedError")
+./pyproject.toml:306:    "raise NotImplementedError",
+./scripts/analyze_completist_data.py:199:        "NotImplementedError": 4,
+./reports/bandit.json:14133:      "code": "140 \n141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n",
+./reports/bandit.json:14153:      "code": "141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n143 \n",
+./tests/integration/test_physics_interfaces.py:56:        except NotImplementedError:
+./tests/integration/test_physics_interfaces.py:57:            pytest.fail("MyoSuite ZTCF/ZVCF raised NotImplementedError")
+./tests/integration/test_physics_interfaces.py:99:        except NotImplementedError:
+./tests/integration/test_physics_interfaces.py:100:            pytest.fail("OpenSim ZTCF/ZVCF raised NotImplementedError")
+./src/engines/pendulum_models/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./src/engines/Simscape_Multibody_Models/3D_Golf_Model/scripts/quality-check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:136:        """Test detection of NotImplementedError."""
+./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:137:        lines = ["def function():\n", "    raise NotImplementedError\n"]
+./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:142:        assert any("NotImplementedError" in issue[1] for issue in issues)
+./src/engines/Simscape_Multibody_Models/2D_Golf_Model/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./src/engines/physics_engines/opensim/python/opensim_gui.py:267:        except NotImplementedError as e:
+./src/engines/physics_engines/drake/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./src/engines/physics_engines/mujoco/python/humanoid_launcher.py:147:        raise NotImplementedError()
+./src/engines/physics_engines/mujoco/python/humanoid_launcher.py:733:        raise NotImplementedError()
+./src/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
+./src/shared/python/flight_models.py:158:        raise NotImplementedError()
+./src/shared/python/flight_models.py:163:        raise NotImplementedError()
+./src/shared/python/flight_models.py:168:        raise NotImplementedError()
+./src/shared/python/flight_models.py:174:        raise NotImplementedError()
+./src/shared/python/impact_model.py:147:        raise NotImplementedError()
+./src/shared/python/interfaces.py:28:        raise NotImplementedError()
+./src/shared/python/interfaces.py:37:        raise NotImplementedError()
+./src/shared/python/interfaces.py:47:        raise NotImplementedError()
+./src/shared/python/interfaces.py:52:        raise NotImplementedError()
+./src/shared/python/interfaces.py:61:        raise NotImplementedError()
+./src/shared/python/interfaces.py:70:        raise NotImplementedError()
+./src/shared/python/interfaces.py:81:        raise NotImplementedError()
+./src/shared/python/interfaces.py:91:        raise NotImplementedError()
+./src/shared/python/interfaces.py:100:        raise NotImplementedError()
+./src/shared/python/interfaces.py:105:        raise NotImplementedError()
+./src/shared/python/interfaces.py:150:        raise NotImplementedError()
+./src/shared/python/interfaces.py:159:        raise NotImplementedError()
+./src/shared/python/interfaces.py:168:        raise NotImplementedError()
+./src/shared/python/interfaces.py:180:        raise NotImplementedError()
+./src/shared/python/interfaces.py:192:        raise NotImplementedError()
+./src/shared/python/interfaces.py:224:        raise NotImplementedError()
+./src/shared/python/interfaces.py:244:        raise NotImplementedError()
+./src/shared/python/interfaces.py:284:        raise NotImplementedError()
+./src/shared/python/interfaces.py:322:        raise NotImplementedError()
+./src/shared/python/interfaces.py:405:        raise NotImplementedError()
+./src/shared/python/interfaces.py:419:        raise NotImplementedError()
+./src/shared/python/interfaces.py:428:        raise NotImplementedError()
