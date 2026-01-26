@@ -53,6 +53,17 @@ jobs:
           COVERAGE=$(interrogate . --ignore-init-method --ignore-init-module --fail-under 0 2>&1 | grep -oP '\d+\.\d+%' | head -1 || echo "0%")
           echo "coverage=$COVERAGE" >> $GITHUB_OUTPUT
 
+          # Numeric comparison for coverage threshold
+          COV_NUM=$(echo "$COVERAGE" | tr -d '%')
+          if [ -z "$COV_NUM" ]; then
+            COV_NUM="0"
+          fi
+          if awk "BEGIN {exit !($COV_NUM < 50)}"; then
+            echo "below_threshold=true" >> $GITHUB_OUTPUT
+          else
+            echo "below_threshold=false" >> $GITHUB_OUTPUT
+          fi
+
           # Check for files with 0% documentation
           echo "### Files Needing Documentation" >> /tmp/doc_report.md
           echo "" >> /tmp/doc_report.md
@@ -140,7 +151,7 @@ jobs:
           file_pattern: "docs/assessments/documentation/*"
 
       - name: Create Issue for Low Coverage
-        if: ${{ steps.scan.outputs.coverage < '50%' }}
+        if: ${{ steps.scan.outputs.below_threshold == 'true' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERAGE: ${{ steps.scan.outputs.coverage }}
