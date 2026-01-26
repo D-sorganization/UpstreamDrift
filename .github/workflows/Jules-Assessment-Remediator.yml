@@ -1,0 +1,284 @@
+name: Jules Assessment Remediator
+
+# Assigns Jules to remediate assessment-identified issues
+# with proper rate limiting and duplicate prevention
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_issues:
+        description: 'Maximum issues to process (1-3)'
+        required: false
+        default: '1'
+        type: choice
+        options:
+          - '1'
+          - '2'
+          - '3'
+      priority_filter:
+        description: 'Priority filter'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - 'critical'
+          - 'high'
+          - 'all'
+      dry_run:
+        description: 'Dry run (preview only, no assignments)'
+        required: false
+        default: false
+        type: boolean
+      specific_issue:
+        description: 'Specific issue number (overrides other filters)'
+        required: false
+        type: string
+  schedule:
+    # Weekly on Monday at 6 AM UTC - conservative to prevent PR explosion
+    - cron: '0 6 * * 1'
+
+permissions:
+  contents: read
+  issues: write
+
+# Prevent concurrent runs
+concurrency:
+  group: jules-assessment-remediator
+  cancel-in-progress: false
+
+env:
+  # Safety limits
+  MAX_ISSUES_PER_RUN: 3
+  MAX_ISSUES_PER_WEEK: 10
+  COOLDOWN_DAYS: 7
+
+jobs:
+  remediate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Find and Assign Issues
+        id: assign
+        env:
+          GH_TOKEN: ${{ secrets.BOT_PAT || secrets.GITHUB_TOKEN }}
+          MAX_ISSUES: ${{ inputs.max_issues || '1' }}
+          PRIORITY_FILTER: ${{ inputs.priority_filter || 'all' }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+          SPECIFIC_ISSUE: ${{ inputs.specific_issue || '' }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -e
+
+          echo "::group::Configuration"
+          echo "Max issues: $MAX_ISSUES"
+          echo "Priority filter: $PRIORITY_FILTER"
+          echo "Dry run: $DRY_RUN"
+          echo "Specific issue: $SPECIFIC_ISSUE"
+          echo "::endgroup::"
+
+          # Track results
+          assigned_issues=""
+          skipped_issues=""
+          processed_count=0
+
+          # If specific issue requested, handle it directly
+          if [ -n "$SPECIFIC_ISSUE" ]; then
+            echo "Processing specific issue #$SPECIFIC_ISSUE"
+
+            # Check if issue exists and is open
+            if ! gh issue view "$SPECIFIC_ISSUE" --json state --jq '.state' 2>/dev/null | grep -q "OPEN"; then
+              echo "::error::Issue #$SPECIFIC_ISSUE is not open or does not exist"
+              exit 1
+            fi
+
+            # Check if already assigned to jules
+            labels=$(gh issue view "$SPECIFIC_ISSUE" --json labels --jq '.labels[].name' 2>/dev/null || echo "")
+            if echo "$labels" | grep -q "jules-assigned"; then
+              echo "::warning::Issue #$SPECIFIC_ISSUE already has jules-assigned label"
+              skipped_issues="$SPECIFIC_ISSUE (already assigned)"
+            else
+              if [ "$DRY_RUN" = "true" ]; then
+                echo "DRY RUN: Would assign Jules to issue #$SPECIFIC_ISSUE"
+                assigned_issues="$SPECIFIC_ISSUE (dry run)"
+              else
+                # Assign Jules
+                gh issue comment "$SPECIFIC_ISSUE" --repo "$REPO" --body "$(cat <<'COMMENT'
+          @jules Please analyze and remediate this assessment issue.
+
+          Focus on:
+          1. Understanding the root cause
+          2. Implementing a safe, minimal fix
+          3. Adding tests if applicable
+          4. Documenting any manual steps needed
+
+          ---
+          *Assigned by Jules Assessment Remediator*
+          COMMENT
+          )"
+
+                # Add tracking labels
+                gh issue edit "$SPECIFIC_ISSUE" --repo "$REPO" --add-label "jules-assigned" || true
+
+                assigned_issues="$SPECIFIC_ISSUE"
+                echo "Assigned Jules to issue #$SPECIFIC_ISSUE"
+              fi
+            fi
+          else
+            # Build label query based on priority
+            echo "::group::Finding assessment issues"
+
+            # Get assessment issues that are NOT already jules-assigned
+            # Sort by creation date (oldest first) to handle backlog fairly
+            all_issues=$(gh issue list \
+              --state open \
+              --label "assessment" \
+              --limit 50 \
+              --json number,title,labels,createdAt \
+              --jq 'sort_by(.createdAt) | .[] | select(.labels | map(.name) | index("jules-assigned") | not) | .number' \
+              2>/dev/null || echo "")
+
+            if [ -z "$all_issues" ]; then
+              echo "No unassigned assessment issues found"
+              echo "::endgroup::"
+            else
+              echo "Found unassigned assessment issues: $all_issues"
+              echo "::endgroup::"
+
+              # Filter by priority if specified
+              for issue_num in $all_issues; do
+                if [ "$processed_count" -ge "$MAX_ISSUES" ]; then
+                  echo "Reached max issues limit ($MAX_ISSUES)"
+                  break
+                fi
+
+                # Get issue labels
+                labels=$(gh issue view "$issue_num" --json labels --jq '.labels[].name' 2>/dev/null || echo "")
+
+                # Apply priority filter
+                should_process=false
+                case "$PRIORITY_FILTER" in
+                  critical)
+                    if echo "$labels" | grep -qE "(priority: critical|P0|critical)"; then
+                      should_process=true
+                    fi
+                    ;;
+                  high)
+                    if echo "$labels" | grep -qE "(priority: high|P1|high)"; then
+                      should_process=true
+                    fi
+                    ;;
+                  all)
+                    should_process=true
+                    ;;
+                esac
+
+                if [ "$should_process" = "false" ]; then
+                  echo "Skipping issue #$issue_num (doesn't match priority filter)"
+                  continue
+                fi
+
+                # Check cooldown - skip if recently commented by this workflow
+                recent_comment=$(gh issue view "$issue_num" --json comments \
+                  --jq '.comments | map(select(.body | contains("Jules Assessment Remediator"))) | last | .createdAt // ""' \
+                  2>/dev/null || echo "")
+
+                if [ -n "$recent_comment" ]; then
+                  # Check if comment is within cooldown period
+                  comment_date=$(date -d "$recent_comment" +%s 2>/dev/null || echo "0")
+                  current_date=$(date +%s)
+                  cooldown_seconds=$((COOLDOWN_DAYS * 86400))
+
+                  if [ $((current_date - comment_date)) -lt "$cooldown_seconds" ]; then
+                    echo "Skipping issue #$issue_num (in cooldown period)"
+                    skipped_issues="$skipped_issues $issue_num"
+                    continue
+                  fi
+                fi
+
+                # Process this issue
+                if [ "$DRY_RUN" = "true" ]; then
+                  echo "DRY RUN: Would assign Jules to issue #$issue_num"
+                  assigned_issues="$assigned_issues $issue_num"
+                else
+                  echo "Assigning Jules to issue #$issue_num"
+
+                  gh issue comment "$issue_num" --repo "$REPO" --body "$(cat <<'COMMENT'
+          @jules Please analyze and remediate this assessment issue.
+
+          Focus on:
+          1. Understanding the root cause
+          2. Implementing a safe, minimal fix
+          3. Adding tests if applicable
+          4. Documenting any manual steps needed
+
+          ---
+          *Assigned by Jules Assessment Remediator*
+          COMMENT
+          )"
+
+                  # Add tracking label
+                  gh issue edit "$issue_num" --repo "$REPO" --add-label "jules-assigned" || true
+
+                  assigned_issues="$assigned_issues $issue_num"
+                fi
+
+                processed_count=$((processed_count + 1))
+
+                # Small delay between assignments to avoid rate limits
+                sleep 2
+              done
+            fi
+          fi
+
+          # Output results
+          assigned_issues=$(echo "$assigned_issues" | xargs)
+          skipped_issues=$(echo "$skipped_issues" | xargs)
+
+          echo "assigned=$assigned_issues" >> $GITHUB_OUTPUT
+          echo "skipped=$skipped_issues" >> $GITHUB_OUTPUT
+          echo "count=$processed_count" >> $GITHUB_OUTPUT
+
+      - name: Summary
+        if: always()
+        env:
+          ASSIGNED: ${{ steps.assign.outputs.assigned || 'none' }}
+          SKIPPED: ${{ steps.assign.outputs.skipped || 'none' }}
+          COUNT: ${{ steps.assign.outputs.count || '0' }}
+          DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          echo "# Jules Assessment Remediator Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Run Date:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "**Mode:** $([ "$DRY_RUN" = "true" ] && echo "🔍 Dry Run" || echo "🚀 Production")" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$ASSIGNED" = "none" ] || [ -z "$ASSIGNED" ]; then
+            echo "## Result: No Issues Assigned" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "No assessment issues were found that match the criteria, or all matching issues are already assigned." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## Result: Issues Assigned" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Issues Assigned:** $COUNT" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Assigned Issues" >> $GITHUB_STEP_SUMMARY
+            for issue in $ASSIGNED; do
+              echo "- #$issue" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+          if [ "$SKIPPED" != "none" ] && [ -n "$SKIPPED" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Skipped Issues" >> $GITHUB_STEP_SUMMARY
+            for issue in $SKIPPED; do
+              echo "- #$issue" >> $GITHUB_STEP_SUMMARY
+            done
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Jules Assessment Remediator - Rate limited to prevent PR explosion*" >> $GITHUB_STEP_SUMMARY
