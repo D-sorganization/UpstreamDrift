@@ -23,7 +23,6 @@ def mock_pinocchio_env():
 def test_create_joint_coupling_task(mock_pinocchio_env):
     """Verify that create_joint_coupling_task works as expected."""
     import pinocchio as pin  # This is the mocked pinocchio
-
     from engines.physics_engines.pinocchio.python.dtack.ik.tasks import (
         create_joint_coupling_task,
     )
