@@ -34,6 +34,7 @@ if DRAKE_AVAILABLE:
     )
 
 from src.shared.python import constants
+from src.shared.python.counterfactual_utils import preserve_state
 from src.shared.python.interfaces import PhysicsEngine
 
 logger = get_logger(__name__)
@@ -470,11 +471,18 @@ class DrakePhysicsEngine(PhysicsEngine):
         if not self.plant_context:
             return np.array([])
 
-        # Save current state
-        saved_q = self.plant.GetPositions(self.plant_context)
-        saved_v = self.plant.GetVelocities(self.plant_context)
+        def _save_state() -> tuple[np.ndarray, np.ndarray]:
+            return (
+                self.plant.GetPositions(self.plant_context).copy(),
+                self.plant.GetVelocities(self.plant_context).copy(),
+            )
 
-        try:
+        def _restore_state(state: tuple[np.ndarray, np.ndarray]) -> None:
+            saved_q, saved_v = state
+            self.plant.SetPositions(self.plant_context, saved_q)
+            self.plant.SetVelocities(self.plant_context, saved_v)
+
+        with preserve_state(_save_state, _restore_state):
             # Set to counterfactual state
             self.plant.SetPositions(self.plant_context, q)
             self.plant.SetVelocities(self.plant_context, v)
@@ -495,11 +503,6 @@ class DrakePhysicsEngine(PhysicsEngine):
             a_ztcf = -np.linalg.solve(M, bias)
 
             return cast(np.ndarray, a_ztcf)
-
-        finally:
-            # Restore original state
-            self.plant.SetPositions(self.plant_context, saved_q)
-            self.plant.SetVelocities(self.plant_context, saved_v)
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
@@ -522,14 +525,24 @@ class DrakePhysicsEngine(PhysicsEngine):
         if not self.plant_context:
             return np.array([])
 
-        # Save current state
-        saved_q = self.plant.GetPositions(self.plant_context)
-        saved_v = self.plant.GetVelocities(self.plant_context)
+        def _save_state() -> tuple[np.ndarray, np.ndarray]:
+            return (
+                self.plant.GetPositions(self.plant_context).copy(),
+                self.plant.GetVelocities(self.plant_context).copy(),
+            )
 
-        try:
+        def _restore_state(state: tuple[np.ndarray, np.ndarray]) -> None:
+            saved_q, saved_v = state
+            self.plant.SetPositions(self.plant_context, saved_q)
+            self.plant.SetVelocities(self.plant_context, saved_v)
+
+        with preserve_state(_save_state, _restore_state):
             # Set to counterfactual configuration with v=0
             self.plant.SetPositions(self.plant_context, q)
-            self.plant.SetVelocities(self.plant_context, np.zeros_like(saved_v))
+            self.plant.SetVelocities(
+                self.plant_context,
+                np.zeros(self.plant.num_velocities()),
+            )
 
             # Compute mass matrix at counterfactual configuration
             M = self.plant.CalcMassMatrixViaInverseDynamics(self.plant_context)
@@ -550,8 +563,3 @@ class DrakePhysicsEngine(PhysicsEngine):
             a_zvcf = np.linalg.solve(M, tau - g)
 
             return cast(np.ndarray, a_zvcf)
-
-        finally:
-            # Restore original state
-            self.plant.SetPositions(self.plant_context, saved_q)
-            self.plant.SetVelocities(self.plant_context, saved_v)

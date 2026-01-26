@@ -8,6 +8,7 @@ from typing import Any, cast  # noqa: F401
 import mujoco
 import numpy as np
 
+from src.shared.python.counterfactual_utils import preserve_state
 from src.shared.python.interfaces import PhysicsEngine
 from src.shared.python.logging_config import get_logger
 from src.shared.python.security_utils import validate_path
@@ -399,12 +400,23 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         if self.model is None or self.data is None:
             return np.array([])
 
-        # Save current state and control
-        saved_qpos = self.data.qpos.copy()
-        saved_qvel = self.data.qvel.copy()
-        saved_ctrl = self.data.ctrl.copy()
+        def _save_state() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+            return (
+                self.data.qpos.copy(),
+                self.data.qvel.copy(),
+                self.data.ctrl.copy(),
+            )
 
-        try:
+        def _restore_state(state: tuple[np.ndarray, np.ndarray, np.ndarray]) -> None:
+            saved_qpos, saved_qvel, saved_ctrl = state
+            self.data.qpos[:] = saved_qpos
+            self.data.qvel[:] = saved_qvel
+            self.data.ctrl[:] = saved_ctrl
+
+        def _forward() -> None:
+            mujoco.mj_forward(self.model, self.data)
+
+        with preserve_state(_save_state, _restore_state, restore_action=_forward):
             # Set to counterfactual state
             self.data.qpos[:] = q
             self.data.qvel[:] = v
@@ -419,13 +431,6 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             a_ztcf = self.data.qacc.copy()
 
             return cast(np.ndarray, a_ztcf)
-
-        finally:
-            # Restore original state and control
-            self.data.qpos[:] = saved_qpos
-            self.data.qvel[:] = saved_qvel
-            self.data.ctrl[:] = saved_ctrl
-            mujoco.mj_forward(self.model, self.data)
 
     def compute_zvcf(self, q: np.ndarray) -> np.ndarray:
         """Zero-Velocity Counterfactual (ZVCF) - Guideline G2.
@@ -450,11 +455,18 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
         if self.model is None or self.data is None:
             return np.array([])
 
-        # Save current state
-        saved_qpos = self.data.qpos.copy()
-        saved_qvel = self.data.qvel.copy()
+        def _save_state() -> tuple[np.ndarray, np.ndarray]:
+            return (self.data.qpos.copy(), self.data.qvel.copy())
 
-        try:
+        def _restore_state(state: tuple[np.ndarray, np.ndarray]) -> None:
+            saved_qpos, saved_qvel = state
+            self.data.qpos[:] = saved_qpos
+            self.data.qvel[:] = saved_qvel
+
+        def _forward() -> None:
+            mujoco.mj_forward(self.model, self.data)
+
+        with preserve_state(_save_state, _restore_state, restore_action=_forward):
             # Set to counterfactual configuration with v=0
             self.data.qpos[:] = q
             self.data.qvel[:] = 0  # ZVCF: zero velocity
@@ -468,12 +480,6 @@ class MuJoCoPhysicsEngine(PhysicsEngine):
             a_zvcf = self.data.qacc.copy()
 
             return cast(np.ndarray, a_zvcf)
-
-        finally:
-            # Restore original state
-            self.data.qpos[:] = saved_qpos
-            self.data.qvel[:] = saved_qvel
-            mujoco.mj_forward(self.model, self.data)
 
     # -------- Section B5: Flexible Beam Shaft --------
 

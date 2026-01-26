@@ -10,6 +10,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.counterfactual_utils import preserve_state
 from src.shared.python.engine_availability import OPENSIM_AVAILABLE
 from src.shared.python.interfaces import PhysicsEngine
 from src.shared.python.logging_config import get_logger
@@ -571,38 +572,36 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         if not self._model or not self._state:
             return np.array([])
 
-        try:
-            # Save current state and controls
+        def _save_state() -> tuple[np.ndarray, np.ndarray, opensim.Vector]:
             q_saved, v_saved = self.get_state()
             controls_saved = opensim.Vector(self._model.updControls(self._state))
+            return q_saved, v_saved, controls_saved
 
-            # Set desired state
-            self.set_state(q, v)
-
-            # Set zero control
-            n_controls = self._model.getNumControls()
-            zero_controls = np.zeros(n_controls)
-            self.set_control(zero_controls)
-
-            # Compute forward dynamics
-            # Note: realizeDynamics computes accelerations (udot) in the state
-            self._model.realizeDynamics(self._state)
-
-            # Extract accelerations
-            n_u = self._model.getNumSpeeds()
-            udot = self._state.getUDot()
-            a_ztcf = np.array([udot.get(i) for i in range(n_u)])
-
-            # Restore state and controls
-            # Restore controls first?
-            # self.set_control(controls_saved) # Need to convert Vector back to array if using set_control
-            # Or directly set:
+        def _restore_state(state: tuple[np.ndarray, np.ndarray, opensim.Vector]) -> None:
+            q_saved, v_saved, controls_saved = state
             self._model.updControls(self._state).update(controls_saved)
-
             self.set_state(q_saved, v_saved)
 
-            return a_ztcf
+        try:
+            with preserve_state(_save_state, _restore_state):
+                # Set desired state
+                self.set_state(q, v)
 
+                # Set zero control
+                n_controls = self._model.getNumControls()
+                zero_controls = np.zeros(n_controls)
+                self.set_control(zero_controls)
+
+                # Compute forward dynamics
+                # Note: realizeDynamics computes accelerations (udot) in the state
+                self._model.realizeDynamics(self._state)
+
+                # Extract accelerations
+                n_u = self._model.getNumSpeeds()
+                udot = self._state.getUDot()
+                a_ztcf = np.array([udot.get(i) for i in range(n_u)])
+
+                return a_ztcf
         except Exception as e:
             logger.error(f"Failed to compute ZTCF: {e}")
             return np.array([])
@@ -622,27 +621,28 @@ class OpenSimPhysicsEngine(PhysicsEngine):
         if not self._model or not self._state:
             return np.array([])
 
-        try:
-            # Save current state
-            q_saved, v_saved = self.get_state()
+        def _save_state() -> tuple[np.ndarray, np.ndarray]:
+            return self.get_state()
 
-            # Set state with zero velocity
-            n_u = self._model.getNumSpeeds()
-            self.set_state(q, np.zeros(n_u))
-
-            # Controls are preserved in state
-            # Compute forward dynamics
-            self._model.realizeDynamics(self._state)
-
-            # Extract accelerations
-            udot = self._state.getUDot()
-            a_zvcf = np.array([udot.get(i) for i in range(n_u)])
-
-            # Restore state
+        def _restore_state(state: tuple[np.ndarray, np.ndarray]) -> None:
+            q_saved, v_saved = state
             self.set_state(q_saved, v_saved)
 
-            return a_zvcf
+        try:
+            with preserve_state(_save_state, _restore_state):
+                # Set state with zero velocity
+                n_u = self._model.getNumSpeeds()
+                self.set_state(q, np.zeros(n_u))
 
+                # Controls are preserved in state
+                # Compute forward dynamics
+                self._model.realizeDynamics(self._state)
+
+                # Extract accelerations
+                udot = self._state.getUDot()
+                a_zvcf = np.array([udot.get(i) for i in range(n_u)])
+
+                return a_zvcf
         except Exception as e:
             logger.error(f"Failed to compute ZVCF: {e}")
             return np.array([])

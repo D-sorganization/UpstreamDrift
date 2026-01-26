@@ -12,6 +12,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.counterfactual_utils import preserve_state
 from src.shared.python.engine_availability import MYOSUITE_AVAILABLE
 from src.shared.python.interfaces import PhysicsEngine
 from src.shared.python.logging_config import get_logger
@@ -508,28 +509,30 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         if not self.sim:
             return np.array([])
 
-        try:
-            # Save current state
+        def _save_state() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
             q_saved, v_saved = self.get_state()
             ctrl_saved = self.sim.data.ctrl.copy()
+            return q_saved, v_saved, ctrl_saved
 
-            # Set desired state
-            self.set_state(q, v)
-
-            # Set zero control
-            self.sim.data.ctrl[:] = 0.0
-
-            # Compute forward dynamics
-            # Use self.sim.forward() to support MjSim
-            self.sim.forward()
-            a_ztcf = np.array(self.sim.data.qacc)
-
-            # Restore state and control
+        def _restore_state(state: tuple[np.ndarray, np.ndarray, np.ndarray]) -> None:
+            q_saved, v_saved, ctrl_saved = state
             self.sim.data.ctrl[:] = ctrl_saved
             self.set_state(q_saved, v_saved)
 
-            return a_ztcf
+        try:
+            with preserve_state(_save_state, _restore_state):
+                # Set desired state
+                self.set_state(q, v)
 
+                # Set zero control
+                self.sim.data.ctrl[:] = 0.0
+
+                # Compute forward dynamics
+                # Use self.sim.forward() to support MjSim
+                self.sim.forward()
+                a_ztcf = np.array(self.sim.data.qacc)
+
+                return a_ztcf
         except Exception as e:
             logger.error(f"Failed to compute ZTCF: {e}")
             return np.array([])
@@ -549,32 +552,33 @@ class MyoSuitePhysicsEngine(PhysicsEngine):
         if not self.sim:
             return np.array([])
 
+        def _save_state() -> tuple[np.ndarray, np.ndarray]:
+            return self.get_state()
+
+        def _restore_state(state: tuple[np.ndarray, np.ndarray]) -> None:
+            q_saved, v_saved_local = state
+            self.set_state(q_saved, v_saved_local)
+
         try:
-            # Save current state
-            q_saved, v_saved = self.get_state()
-
-            # Set state with zero velocity
-            try:
-                if hasattr(v_saved, "__len__"):
-                    n_v = len(v_saved)
-                else:
-                    # Fallback for scalar or mocked objects
+            with preserve_state(_save_state, _restore_state):
+                # Set state with zero velocity
+                try:
+                    if hasattr(self.sim.data.qvel, "__len__"):
+                        n_v = len(self.sim.data.qvel)
+                    else:
+                        # Fallback for scalar or mocked objects
+                        n_v = 1
+                except TypeError:
                     n_v = 1
-            except TypeError:
-                n_v = 1
 
-            self.set_state(q, np.zeros(n_v))
+                self.set_state(q, np.zeros(n_v))
 
-            # Controls are preserved in data.ctrl automatically unless we change them
-            # Compute forward dynamics
-            self.sim.forward()
-            a_zvcf = np.array(self.sim.data.qacc)
+                # Controls are preserved in data.ctrl automatically unless we change them
+                # Compute forward dynamics
+                self.sim.forward()
+                a_zvcf = np.array(self.sim.data.qacc)
 
-            # Restore state
-            self.set_state(q_saved, v_saved)
-
-            return a_zvcf
-
+                return a_zvcf
         except Exception as e:
             logger.error(f"Failed to compute ZVCF: {e}")
             return np.array([])
