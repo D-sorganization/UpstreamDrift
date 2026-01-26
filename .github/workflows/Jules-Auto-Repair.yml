@@ -191,26 +191,42 @@ jobs:
             # PHASE 1: Standard linting fixes
             echo ">>> Phase 1: Standard linting fixes..."
 
-            ruff check --fix . 2>&1 || true
-            if ! git diff --quiet; then
-              CHANGES_MADE="$CHANGES_MADE ruff"
+            # Run ruff with unsafe fixes for comprehensive repair (includes import sorting)
+            echo "Running ruff check --fix --unsafe-fixes..."
+            ruff check --fix --unsafe-fixes . 2>&1 || true
+            if [ -n "$(git status --porcelain)" ]; then
+              CHANGES_MADE="$CHANGES_MADE ruff-check"
               git add -A
             fi
 
-            black . 2>&1 || true
-            if ! git diff --quiet; then
-              CHANGES_MADE="$CHANGES_MADE black"
+            # Run ruff format for formatting fixes
+            echo "Running ruff format..."
+            ruff format . 2>&1 || true
+            if [ -n "$(git status --porcelain)" ]; then
+              CHANGES_MADE="$CHANGES_MADE ruff-format"
               git add -A
             fi
 
+            # Run isort as backup for import sorting
+            echo "Running isort..."
             isort --profile black . 2>&1 || true
-            if ! git diff --quiet; then
+            if [ -n "$(git status --porcelain)" ]; then
               CHANGES_MADE="$CHANGES_MADE isort"
               git add -A
             fi
 
+            # Run black as backup formatter
+            echo "Running black..."
+            black . 2>&1 || true
+            if [ -n "$(git status --porcelain)" ]; then
+              CHANGES_MADE="$CHANGES_MADE black"
+              git add -A
+            fi
+
+            # Remove unused imports
+            echo "Running autoflake..."
             autoflake --in-place --remove-all-unused-imports --recursive . 2>&1 || true
-            if ! git diff --quiet; then
+            if [ -n "$(git status --porcelain)" ]; then
               CHANGES_MADE="$CHANGES_MADE autoflake"
               git add -A
             fi
