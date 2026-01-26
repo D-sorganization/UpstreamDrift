@@ -107,15 +107,7 @@ jobs:
               # Comment if not already commented about this conflict
               LAST_COMMENT=$(gh pr view $PR_NUM --json comments --jq '.comments[-1].body // ""')
               if [[ ! "$LAST_COMMENT" =~ "merge conflicts" ]]; then
-                gh pr comment $PR_NUM --body "This PR has merge conflicts that could not be automatically resolved. Please rebase manually:
-
-\`\`\`bash
-git checkout $BRANCH
-git fetch origin main
-git rebase origin/main
-# Resolve conflicts, then:
-git push --force-with-lease
-\`\`\`"
+                gh pr comment $PR_NUM --body "This PR has merge conflicts that could not be automatically resolved. Please rebase manually onto main and force-push."
               fi
 
               CONFLICTING=$((CONFLICTING + 1))
