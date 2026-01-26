@@ -5,9 +5,14 @@ This script creates visually appealing tile images for each model/engine
 in the launcher grid. Images use a modern dark theme with colored accents.
 """
 
+import logging
 import struct
 import zlib
 from pathlib import Path
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(message)s")
+logger = logging.getLogger(__name__)
 
 # Output directory
 ASSETS_DIR = Path(__file__).parent
@@ -33,7 +38,11 @@ TILE_CONFIGS = {
 def hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
     """Convert hex color to RGB tuple."""
     hex_color = hex_color.lstrip("#")
-    return tuple(int(hex_color[i : i + 2], 16) for i in (0, 2, 4))
+    return (
+        int(hex_color[0:2], 16),
+        int(hex_color[2:4], 16),
+        int(hex_color[4:6], 16),
+    )
 
 
 def create_png(
@@ -94,7 +103,6 @@ def draw_rounded_rect_with_text(
                 (width - radius - 1, height - radius - 1),  # bottom-right
             ]
 
-            in_corner_region = False
             for cx, cy in corners:
                 if (
                     (x < radius and y < radius)
@@ -107,7 +115,6 @@ def draw_rounded_rect_with_text(
                     dy = abs(y - cy)
                     if dx * dx + dy * dy > radius * radius:
                         inside = False
-                    in_corner_region = True
                     break
 
             if inside:
@@ -143,7 +150,7 @@ def draw_rounded_rect_with_text(
     return pixels
 
 
-def draw_letter(pixels: list, width: int, x: int, y: int, size: int, char: str):
+def draw_letter(pixels: list, width: int, x: int, y: int, size: int, char: str) -> None:
     """Draw a simple blocky letter representation."""
     white = (255, 255, 255, 255)
     thickness = max(3, size // 6)
@@ -242,11 +249,11 @@ def draw_letter(pixels: list, width: int, x: int, y: int, size: int, char: str):
                         pixels[idx] = white
 
 
-def generate_all_tiles():
+def generate_all_tiles() -> None:
     """Generate all tile images."""
     size = 200  # 200x200 pixels
 
-    print("Generating launcher tile images...")
+    logger.info("Generating launcher tile images...")
 
     for name, (color, text) in TILE_CONFIGS.items():
         filename = f"{name}.png"
@@ -259,7 +266,7 @@ def generate_all_tiles():
         with open(filepath, "wb") as f:
             f.write(png_data)
 
-        print(f"  Created: {filename}")
+        logger.info(f"  Created: {filename}")
 
     # Create openpose.jpg as a copy of openpose.png
     # (MODEL_IMAGES references openpose.jpg)
@@ -268,8 +275,8 @@ def generate_all_tiles():
         # Just create it as PNG - the loader should handle both
         pass
 
-    print("\nDone! All tile images generated.")
-    print(f"Output directory: {ASSETS_DIR}")
+    logger.info("\nDone! All tile images generated.")
+    logger.info(f"Output directory: {ASSETS_DIR}")
 
 
 if __name__ == "__main__":
