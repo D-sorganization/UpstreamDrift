@@ -416,6 +416,77 @@ class AISettingsDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("AI Assistant Settings")
         self.setMinimumSize(500, 400)
+        
+        # Apply Dark Theme styling
+        self.setStyleSheet("""
+            QDialog, QWidget {
+                background-color: #1e1e1e;
+                color: #e0e0e0;
+            }
+            QTabWidget::pane {
+                border: 1px solid #3c3c3c;
+                background-color: #1e1e1e;
+            }
+            QTabBar::tab {
+                background-color: #2d2d2d;
+                color: #e0e0e0;
+                padding: 8px 16px;
+                border: 1px solid #3c3c3c;
+                border-bottom: none;
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+            }
+            QTabBar::tab:selected {
+                background-color: #1e1e1e;
+                border-bottom: 2px solid #FF8800; /* Gitpod Orange Accent */
+                font-weight: bold;
+            }
+            QGroupBox {
+                border: 1px solid #3c3c3c;
+                border-radius: 6px;
+                margin-top: 12px;
+                padding-top: 10px;
+                font-weight: bold;
+                color: #FF8800; /* Orange Title */
+            }
+            QGroupBox::title {
+                subcontrol-origin: margin;
+                subcontrol-position: top left;
+                padding: 0 4px;
+                left: 8px;
+            }
+            QLabel {
+                color: #e0e0e0;
+            }
+            QLineEdit, QComboBox {
+                background-color: #252526;
+                color: #e0e0e0;
+                border: 1px solid #3c3c3c;
+                border-radius: 4px;
+                padding: 4px;
+            }
+            QLineEdit:focus, QComboBox:focus {
+                border: 1px solid #FF8800;
+            }
+            QPushButton {
+                background-color: #0e639c; /* Blue default for buttons */
+                color: white;
+                border: none;
+                border-radius: 4px;
+                padding: 6px 12px;
+            }
+            QPushButton:hover {
+                background-color: #1177bb;
+            }
+            QCheckBox {
+                color: #e0e0e0;
+            }
+            /* Specific fix for QDialogButtonBox to look standard */
+            QDialogButtonBox QPushButton {
+                min-width: 60px;
+            }
+        """)
+
         self._settings = AISettings.load()
         self._setup_ui()
         self._load_settings()
