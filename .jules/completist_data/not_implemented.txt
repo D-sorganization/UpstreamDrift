@@ -10,8 +10,6 @@
 ./.github/workflows/Jules-Tech-Debt-Assessor.yml:374:          3. **Incomplete Implementations**: Complete or remove NotImplementedError stubs
 ./.github/workflows/Jules-Tech-Debt-Assessor.yml:429:          | NotImplementedError | x5 | Incomplete features affect stability |
 ./.github/copilot-instructions.md:10:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
-./pyproject.toml:306:    "raise NotImplementedError",
-./AGENTS.md:243:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
 ./scripts/analyze_completist_data.py:199:        "NotImplementedError": 4,
 ./reports/bandit.json:14133:      "code": "140 \n141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n",
 ./reports/bandit.json:14153:      "code": "141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n143 \n",
