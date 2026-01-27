@@ -7,23 +7,41 @@ Current fixes:
 """
 
 import os
+import sys
 from pathlib import Path
+
+# Add project root to path for imports
+_REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(_REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(_REPO_ROOT))
+
+try:
+    from src.shared.python.path_utils import get_repo_root
+except ImportError:
+    # Fallback if src import fails
+    def get_repo_root():
+        return _REPO_ROOT
 
 
 def add_missing_init_files():
     """Add missing __init__.py files to package directories."""
+    repo_root = get_repo_root()
 
-    # Target directories to scan for missing __init__.py
-    target_roots = ["engines", "shared", "api", "launchers"]
-
-    # Files to ignore (don't treat directories containing only these as packages)
+    # Target directories to scan for missing __init__.py (relative to repo root)
+    target_roots = [
+        "src/engines",
+        "src/shared",
+        "src/api",
+        "src/launchers",
+        "shared",  # Check root shared if it exists
+    ]
 
     fixed_count = 0
 
     print("Scanning for missing __init__.py files...")
 
-    for root_name in target_roots:
-        root_path = Path(root_name)
+    for root_rel in target_roots:
+        root_path = repo_root / root_rel
         if not root_path.exists():
             continue
 
@@ -34,8 +52,18 @@ def add_missing_init_files():
             if any(part.startswith(".") for part in path_obj.parts):
                 continue
 
-            # Skip directories that are not valid Python identifiers (e.g. contain spaces)
+            # Skip directories that are not valid Python identifiers (e.g. contain spaces or hyphens)
             if not path_obj.name.isidentifier():
+                continue
+
+            # Ensure all parent directories relative to root are also valid identifiers
+            # This prevents creating __init__.py in subdirectories of invalid packages (e.g., opensim-models/Geometry)
+            try:
+                rel_parts = path_obj.relative_to(root_path).parts
+                if not all(part.isidentifier() for part in rel_parts):
+                    continue
+            except ValueError:
+                # Should not happen as we are walking root_path
                 continue
 
             # Check if directory contains .py files
