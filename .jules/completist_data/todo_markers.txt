@@ -1,6 +1,6 @@
-./.github/workflows/ci-standard.yml:33:      # TODO detection now BLOCKING - Jules Auto-Repair will fix
-./.github/workflows/ci-standard.yml:38:              | xargs -0 grep -nE "TODO|FIXME" || true
-./.github/workflows/ci-standard.yml:42:            echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
+./.github/workflows/ci-standard.yml:34:      # TODO detection now BLOCKING - Jules Auto-Repair will fix
+./.github/workflows/ci-standard.yml:39:              | xargs -0 grep -nE "TODO|FIXME" || true
+./.github/workflows/ci-standard.yml:43:            echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
 ./.github/workflows/Jules-Conflict-Fix.yml:31:              ATTEMPTS=$(gh pr view $PR --json comments --jq '[.comments[] | select(.body | contains("conflict resolution attempt"))] | length')
 ./.github/workflows/Jules-Conflict-Fix.yml:34:              ATTEMPTS=${ATTEMPTS:-0}
 ./.github/workflows/Jules-Conflict-Fix.yml:36:              if [ "$ATTEMPTS" -gt 3 ]; then
@@ -38,6 +38,7 @@
 ./.github/workflows/Jules-Auto-Repair.yml:121:            REMAINING=$((MAX_ATTEMPTS - REPAIR_COUNT))
 ./.github/workflows/Jules-Auto-Repair.yml:426:          **Iterations:** $ITERATIONS / ${{ env.MAX_REPAIR_ATTEMPTS }}
 ./.github/copilot-instructions.md:10:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
+./AGENTS.md:243:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
 ./scripts/analyze_completist_data.py:103:    fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
 ./scripts/analyze_completist_data.py:111:            return {"file": filepath, "line": lineno, "text": content, "type": "TODO"}
 ./scripts/analyze_completist_data.py:125:        if marker_item["type"] == "TODO":
@@ -61,9 +62,6 @@
 ./shared/models/opensim/opensim-models/CMakeLists.txt:45:# TODO subject01_metabolics* files?
 ./shared/models/opensim/opensim-models/CMakeLists.txt:82:    # TODO should we copy over the OutputReference folder?
 ./shared/models/opensim/opensim-models/CMakeLists.txt:104:        PATTERN "addPrescribedMotion.py" EXCLUDE # TODO leave in or not?
-./src/engines/pendulum_models/JULES_ARCHITECTURE.md:140:- **Fixes applied:** Less aggressive Ruff, specific MyPy paths, fixed grep regex for TODOs.
-./src/engines/pendulum_models/JULES_ARCHITECTURE.md:172:      # FIX: Correct Regex for TODOs
-./src/engines/pendulum_models/JULES_ARCHITECTURE.md:175:          if grep -r "TODO\|FIXME" --include="*.py" src/; then
 ./src/engines/pendulum_models/tools/matlab_utilities/README.md:253:- TODO, FIXME, HACK, XXX placeholders
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab_utilities/README.md:253:- TODO, FIXME, HACK, XXX placeholders
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:32:        TEMPERATURE_C,
@@ -74,23 +72,8 @@
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_constants_file.py:254:            TEMPERATURE_C,
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/constants.py:23:    TEMPERATURE_C,
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/constants.py:47:    "TEMPERATURE_C",
-./src/engines/Simscape_Multibody_Models/3D_Golf_Model/JULES_ARCHITECTURE.md:140:- **Fixes applied:** Less aggressive Ruff, specific MyPy paths, fixed grep regex for TODOs.
-./src/engines/Simscape_Multibody_Models/3D_Golf_Model/JULES_ARCHITECTURE.md:172:      # FIX: Correct Regex for TODOs
-./src/engines/Simscape_Multibody_Models/3D_Golf_Model/JULES_ARCHITECTURE.md:175:          if grep -r "TODO\|FIXME" --include="*.py" src/; then
-./src/engines/Simscape_Multibody_Models/2D_Golf_Model/JULES_ARCHITECTURE.md:140:- **Fixes applied:** Less aggressive Ruff, specific MyPy paths, fixed grep regex for TODOs.
-./src/engines/Simscape_Multibody_Models/2D_Golf_Model/JULES_ARCHITECTURE.md:172:      # FIX: Correct Regex for TODOs
-./src/engines/Simscape_Multibody_Models/2D_Golf_Model/JULES_ARCHITECTURE.md:175:          if grep -r "TODO\|FIXME" --include="*.py" src/; then
-./src/engines/physics_engines/pinocchio/JULES_ARCHITECTURE.md:140:- **Fixes applied:** Less aggressive Ruff, specific MyPy paths, fixed grep regex for TODOs.
-./src/engines/physics_engines/pinocchio/JULES_ARCHITECTURE.md:172:      # FIX: Correct Regex for TODOs
-./src/engines/physics_engines/pinocchio/JULES_ARCHITECTURE.md:175:          if grep -r "TODO\|FIXME" --include="*.py" src/; then
 ./src/engines/physics_engines/pinocchio/tools/matlab_utilities/README.md:253:- TODO, FIXME, HACK, XXX placeholders
-./src/engines/physics_engines/drake/JULES_ARCHITECTURE.md:140:- **Fixes applied:** Less aggressive Ruff, specific MyPy paths, fixed grep regex for TODOs.
-./src/engines/physics_engines/drake/JULES_ARCHITECTURE.md:172:      # FIX: Correct Regex for TODOs
-./src/engines/physics_engines/drake/JULES_ARCHITECTURE.md:175:          if grep -r "TODO\|FIXME" --include="*.py" src/; then
 ./src/engines/physics_engines/drake/tools/matlab_utilities/README.md:253:- TODO, FIXME, HACK, XXX placeholders
-./src/engines/physics_engines/mujoco/JULES_ARCHITECTURE.md:140:- **Fixes applied:** Less aggressive Ruff, specific MyPy paths, fixed grep regex for TODOs.
-./src/engines/physics_engines/mujoco/JULES_ARCHITECTURE.md:172:      # FIX: Correct Regex for TODOs
-./src/engines/physics_engines/mujoco/JULES_ARCHITECTURE.md:175:          if grep -r "TODO\|FIXME" --include="*.py" src/; then
 ./src/tools/matlab_utilities/scripts/matlab_quality_check.py:74:            (r"\bTODO\b", "TODO placeholder found"),
 ./src/tools/matlab_utilities/scripts/matlab_quality_check.py:75:            (r"\bFIXME\b", "FIXME placeholder found"),
 ./src/tools/matlab_utilities/scripts/matlab_quality_check.py:76:            (r"\bHACK\b", "HACK comment found"),
