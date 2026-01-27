@@ -119,7 +119,7 @@ jobs:
               print(f"{'='*60}")
 
               # Create compiled branch name
-              date_str = datetime.now().strftime('%Y%m%d')
+              date_str = datetime.now().strftime('%Y-%m-%d')
               category_short = category.replace('jules:', '').replace('-', '_')
               compiled_branch = f"jules/compiled-{category_short}-{date_str}"
 
@@ -204,7 +204,7 @@ jobs:
 
                   result = subprocess.run([
                       'gh', 'pr', 'create',
-                      '--title', f"[Compiled] {category}: {len(merged_prs)} PRs - {date_str}",
+                      '--title', f"[{os.environ.get('GITHUB_REPOSITORY', '').split('/')[-1]}] [consolidate] {category} ({len(merged_prs)} PRs) - {date_str}",
                       '--body', body,
                       '--label', f'{category},jules:compiled'
                   ], capture_output=True, text=True)
