@@ -256,7 +256,12 @@ Implement missing logic or document the rationale for the gap.
     return filepath
 
 
-def generate_mermaid_charts(criticals: list[Finding], todos: list[Finding], fixmes: list[Finding], docs: list[Finding]) -> str:
+def generate_mermaid_charts(
+    criticals: list[Finding],
+    todos: list[Finding],
+    fixmes: list[Finding],
+    docs: list[Finding],
+) -> str:
     """Generate Mermaid charts for the report."""
     chart = []
     chart.append("## Visualization")
@@ -288,7 +293,7 @@ def generate_mermaid_charts(criticals: list[Finding], todos: list[Finding], fixm
         chart.append("```mermaid")
         chart.append("pie title Issues by Module")
         for mod, count in sorted_mods:
-             chart.append(f'    "{mod}" : {count}')
+            chart.append(f'    "{mod}" : {count}')
         chart.append("```")
 
     return "\n".join(chart)
