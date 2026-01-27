@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-24T18:39:39.949368",
+  "timestamp": "2026-01-27T08:20:57.122423",
   "overall_score": 7.17,
   "category_scores": {
     "A": {
@@ -72,6 +72,6 @@
     "Ops & Config": 7.75,
     "Design": 7.5
   },
-  "total_issues": 0,
+  "total_issues": 18,
   "reports_analyzed": 15
 }

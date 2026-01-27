@@ -253,18 +253,37 @@ def main():
 
     input_reports = []
     for pattern in args.input:
-        if "*" in str(pattern):
-            input_reports.extend(Path(".").glob(str(pattern)))
+        pattern_str = str(pattern)
+        if "*" in pattern_str:
+            # Try globbing relative to CWD
+            found = list(Path(".").glob(pattern_str))
+            if not found:
+                # Try globbing relative to REPO_ROOT
+                found = list(_REPO_ROOT.glob(pattern_str))
+            input_reports.extend(found)
         else:
-            input_reports.append(pattern)
+            path = Path(pattern)
+            if path.exists():
+                input_reports.append(path)
+            elif (_REPO_ROOT / path).exists():
+                input_reports.append(_REPO_ROOT / path)
+            else:
+                # Append anyway to let the filtering step handle it or warn
+                input_reports.append(path)
 
-    input_reports = [p for p in input_reports if p.exists() and p.is_file()]
+    # Filter for valid files and resolve to absolute paths
+    valid_reports = []
+    for p in input_reports:
+        if p.exists() and p.is_file():
+            valid_reports.append(p.resolve())
+        else:
+            logger.warning(f"Report file not found: {p}")
 
-    if not input_reports:
+    if not valid_reports:
         logger.error("No valid input reports found")
         return 1
 
-    return generate_summary(input_reports, args.output, args.json_output)
+    return generate_summary(valid_reports, args.output, args.json_output)
 
 
 if __name__ == "__main__":
