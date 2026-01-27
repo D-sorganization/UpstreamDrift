@@ -11,6 +11,7 @@
 ./.github/workflows/Jules-Tech-Debt-Assessor.yml:429:          | NotImplementedError | x5 | Incomplete features affect stability |
 ./.github/copilot-instructions.md:10:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
 ./pyproject.toml:306:    "raise NotImplementedError",
+./AGENTS.md:243:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
 ./scripts/analyze_completist_data.py:199:        "NotImplementedError": 4,
 ./reports/bandit.json:14133:      "code": "140 \n141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n",
 ./reports/bandit.json:14153:      "code": "141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n143 \n",
@@ -18,14 +19,11 @@
 ./tests/integration/test_physics_interfaces.py:57:            pytest.fail("MyoSuite ZTCF/ZVCF raised NotImplementedError")
 ./tests/integration/test_physics_interfaces.py:99:        except NotImplementedError:
 ./tests/integration/test_physics_interfaces.py:100:            pytest.fail("OpenSim ZTCF/ZVCF raised NotImplementedError")
-./src/engines/pendulum_models/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/scripts/quality-check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:136:        """Test detection of NotImplementedError."""
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:137:        lines = ["def function():\n", "    raise NotImplementedError\n"]
 ./src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/tests/test_quality_check.py:142:        assert any("NotImplementedError" in issue[1] for issue in issues)
-./src/engines/Simscape_Multibody_Models/2D_Golf_Model/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
 ./src/engines/physics_engines/opensim/python/opensim_gui.py:267:        except NotImplementedError as e:
-./src/engines/physics_engines/drake/scripts/quality_check.py:14:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),
 ./src/engines/physics_engines/mujoco/python/humanoid_launcher.py:147:        raise NotImplementedError()
 ./src/engines/physics_engines/mujoco/python/humanoid_launcher.py:733:        raise NotImplementedError()
 ./src/tools/code_quality_check.py:37:    (re.compile(r"NotImplementedError"), "NotImplementedError placeholder"),

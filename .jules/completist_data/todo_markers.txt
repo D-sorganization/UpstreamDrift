@@ -1,6 +1,6 @@
-./.github/workflows/ci-standard.yml:33:      # TODO detection now BLOCKING - Jules Auto-Repair will fix
-./.github/workflows/ci-standard.yml:38:              | xargs -0 grep -nE "TODO|FIXME" || true
-./.github/workflows/ci-standard.yml:42:            echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
+./.github/workflows/ci-standard.yml:34:      # TODO detection now BLOCKING - Jules Auto-Repair will fix
+./.github/workflows/ci-standard.yml:39:              | xargs -0 grep -nE "TODO|FIXME" || true
+./.github/workflows/ci-standard.yml:43:            echo "::error::Placeholders found. Remove TODOs/FIXMEs or create tracked GitHub issues."
 ./.github/workflows/Jules-Conflict-Fix.yml:31:              ATTEMPTS=$(gh pr view $PR --json comments --jq '[.comments[] | select(.body | contains("conflict resolution attempt"))] | length')
 ./.github/workflows/Jules-Conflict-Fix.yml:34:              ATTEMPTS=${ATTEMPTS:-0}
 ./.github/workflows/Jules-Conflict-Fix.yml:36:              if [ "$ATTEMPTS" -gt 3 ]; then
@@ -38,6 +38,7 @@
 ./.github/workflows/Jules-Auto-Repair.yml:121:            REMAINING=$((MAX_ATTEMPTS - REPAIR_COUNT))
 ./.github/workflows/Jules-Auto-Repair.yml:426:          **Iterations:** $ITERATIONS / ${{ env.MAX_REPAIR_ATTEMPTS }}
 ./.github/copilot-instructions.md:10:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
+./AGENTS.md:243:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
 ./scripts/analyze_completist_data.py:103:    fixme_markers = ["FIX" + "ME", "XXX", "HACK", "TEMP"]
 ./scripts/analyze_completist_data.py:111:            return {"file": filepath, "line": lineno, "text": content, "type": "TODO"}
 ./scripts/analyze_completist_data.py:125:        if marker_item["type"] == "TODO":
