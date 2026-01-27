@@ -201,7 +201,7 @@ jobs:
                       if comment_id in tracking['created_issues']:
                           continue
 
-                      issue_title = f"[{source}] {file_path}:{line} - Review feedback"
+                      issue_title = f"[review] [{source}] Feedback on {file_path}:{line}"
                       if len(issue_title) > 100:
                           issue_title = issue_title[:97] + "..."
 
