@@ -239,7 +239,7 @@ class TestGolfSuiteLauncher:
         args, kwargs = mock_subprocess.call_args
         cmd = args[0]
         assert cmd[0] == sys.executable
-        assert "advanced_gui.py" in str(cmd[1])
+        assert "humanoid_launcher.py" in str(cmd[1])
         # CWD is the python root, checks only for mujoco path component
         assert "mujoco" in str(kwargs["cwd"])
 
@@ -250,7 +250,7 @@ class TestGolfSuiteLauncher:
 
         mock_subprocess.assert_called_once()
         args, kwargs = mock_subprocess.call_args
-        assert "golf_gui.py" in str(args[0][1])
+        assert "drake_gui_app.py" in str(args[0][1])
 
     def test_launch_pinocchio(self, launcher_app, mock_subprocess):
         """Test launching Pinocchio engine."""
