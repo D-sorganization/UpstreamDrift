@@ -53,17 +53,20 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
             / "src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
         )
         self.drake_path = (
-            self.suite_root / "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
+            self.suite_root
+            / "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
         )
         self.pinocchio_path = (
             self.suite_root
             / "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
         )
         self.opensim_path = (
-            self.suite_root / "src/engines/physics_engines/opensim/python/opensim_gui.py"
+            self.suite_root
+            / "src/engines/physics_engines/opensim/python/opensim_gui.py"
         )
         self.myosim_path = (
-            self.suite_root / "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
+            self.suite_root
+            / "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
         )
         self.openpose_path = (
             self.suite_root / "src/shared/python/pose_estimation/openpose_gui.py"
@@ -159,7 +162,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         self.btn_urdf = QtWidgets.QPushButton("Launch &URDF Generator")
         self.btn_urdf.setMinimumHeight(40)
         self.btn_urdf.setIcon(
-            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_ToolBarHorizontalExtensionButton)
+            self.style().standardIcon(
+                QtWidgets.QStyle.StandardPixmap.SP_ToolBarHorizontalExtensionButton
+            )
         )
         self.btn_urdf.setToolTip("Launch Interactive URDF model builder")
         self.btn_urdf.setAccessibleName("Launch URDF Generator")

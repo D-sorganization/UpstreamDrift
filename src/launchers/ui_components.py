@@ -359,10 +359,10 @@ class DraggableModelCard(QFrame):
         lbl_img = QLabel()
         lbl_img.setFixedSize(200, 200)
         lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        
+
         # Enforce centering in the layout
         layout.setAlignment(lbl_img, Qt.AlignmentFlag.AlignCenter)
-        
+
         # Use transparent background, remove text-align as it's handled by setAlignment
         lbl_img.setStyleSheet("QLabel { border: none; background: transparent; }")
 
@@ -387,7 +387,7 @@ class DraggableModelCard(QFrame):
         img_layout.addStretch()
         img_layout.addWidget(lbl_img)
         img_layout.addStretch()
-        
+
         layout.addWidget(img_container)
 
         lbl_name = QLabel(self.model.name)
@@ -411,8 +411,10 @@ class DraggableModelCard(QFrame):
             f"background-color: {status_color}; color: {text_color}; padding: 2px 6px; border-radius: 4px;"
         )
         lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl_status.setMinimumWidth(80)  # Use minimum width instead of fixed width to prevent text cutoff
-        # lbl_status.setFixedWidth(80) 
+        lbl_status.setMinimumWidth(
+            80
+        )  # Use minimum width instead of fixed width to prevent text cutoff
+        # lbl_status.setFixedWidth(80)
 
         chip_layout = QHBoxLayout()
         chip_layout.addStretch()
