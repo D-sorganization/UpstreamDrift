@@ -9,15 +9,15 @@ responses with markdown rendering.
 
 from __future__ import annotations
 
-# Python 3.10 compatibility: UTC was added in 3.11
-from datetime import datetime, timezone
+# Python 3.10 compatibility: timezone.utc was added in 3.11
+from datetime import UTC, datetime, timezone
 
 from src.shared.python.logging_config import get_logger
 
 try:
-    from datetime import UTC
+    from datetime import timezone
 except ImportError:
-    UTC = timezone.utc  # noqa: UP017
+    timezone.utc = timezone.utc  # noqa: UP017
 from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal

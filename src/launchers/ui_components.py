@@ -69,9 +69,9 @@ MODEL_IMAGES = {
     "MuJoCo Dashboard": "mujoco_hand.png",
     "Drake Golf Model": "drake.png",
     "Pinocchio Golf Model": "pinocchio.png",
-    "OpenSim Golf": "opensim.png",
+    "OpenSim Golf": "openpose.jpg",
     "MyoSim Suite": "myosim.png",
-    "OpenPose Analysis": "openpose.jpg",
+    "OpenPose Analysis": "opensim.png",
     # MATLAB/Simscape
     "Matlab Simscape": _IMG_SIMSCAPE,
     "Matlab Simscape 2D": _IMG_SIMSCAPE,
@@ -350,14 +350,21 @@ class DraggableModelCard(QFrame):
                 img_name = "urdf_icon.png"
             elif "c3d" in self.model.id:
                 img_name = "c3d_icon.png"
+            # Fallback for engine types if ID didn't match
+            elif "engine_managed" in getattr(self.model, "type", ""):
+                if getattr(self.model, "engine_type", "") == "mujoco":
+                    img_name = "mujoco_humanoid.png"
 
         img_path = ASSETS_DIR / img_name if img_name else None
         lbl_img = QLabel()
         lbl_img.setFixedSize(200, 200)
         lbl_img.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl_img.setStyleSheet(
-            "QLabel { border: none; background: transparent; text-align: center; }"
-        )
+
+        # Enforce centering in the layout
+        layout.setAlignment(lbl_img, Qt.AlignmentFlag.AlignCenter)
+
+        # Use transparent background, remove text-align as it's handled by setAlignment
+        lbl_img.setStyleSheet("QLabel { border: none; background: transparent; }")
 
         if img_path and img_path.exists():
             pixmap = QPixmap(str(img_path))
@@ -371,10 +378,17 @@ class DraggableModelCard(QFrame):
         else:
             lbl_img.setText("No Image")
             lbl_img.setStyleSheet(
-                "QLabel { color: #666; font-style: italic; border: none; background: transparent; text-align: center; }"
+                "QLabel { color: #666; font-style: italic; border: none; background: transparent; }"
             )
 
-        layout.addWidget(lbl_img)
+        img_container = QWidget()
+        img_layout = QHBoxLayout(img_container)
+        img_layout.setContentsMargins(0, 0, 0, 0)
+        img_layout.addStretch()
+        img_layout.addWidget(lbl_img)
+        img_layout.addStretch()
+
+        layout.addWidget(img_container)
 
         lbl_name = QLabel(self.model.name)
         lbl_name.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
@@ -397,7 +411,10 @@ class DraggableModelCard(QFrame):
             f"background-color: {status_color}; color: {text_color}; padding: 2px 6px; border-radius: 4px;"
         )
         lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl_status.setFixedWidth(80)
+        lbl_status.setMinimumWidth(
+            80
+        )  # Use minimum width instead of fixed width to prevent text cutoff
+        # lbl_status.setFixedWidth(80)
 
         chip_layout = QHBoxLayout()
         chip_layout.addStretch()

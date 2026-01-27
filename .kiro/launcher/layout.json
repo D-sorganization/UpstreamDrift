@@ -1,10 +1,28 @@
 {
   "model_order": [
-    "model_2",
-    "model_1",
-    "model_0",
-    "model_3"
+    "mujoco_humanoid",
+    "mujoco_dashboard",
+    "drake_golf",
+    "pinocchio_golf",
+    "opensim_golf",
+    "myosim_suite",
+    "openpose_analysis",
+    "simscape_2d",
+    "simscape_3d",
+    "urdf_generator",
+    "c3d_viewer",
+    "matlab_dataset_gui",
+    "matlab_golf_gui"
   ],
-  "selected_model": "model_0",
+  "selected_model": null,
   "window_geometry": {
-    "x": 
+    "x": 0,
+    "y": 1026,
+    "width": 1400,
+    "height": 900
+  },
+  "options": {
+    "live_visualization": true,
+    "gpu_acceleration": false
+  }
+}

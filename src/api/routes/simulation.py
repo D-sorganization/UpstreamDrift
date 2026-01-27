@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from typing import Any
 
 try:
-    from datetime import UTC
+    from datetime import timezone
 except ImportError:
-    UTC = timezone.utc  # noqa: UP017
+    timezone.utc = timezone.utc  # noqa: UP017
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 

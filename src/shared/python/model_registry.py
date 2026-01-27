@@ -17,6 +17,7 @@ class ModelConfig:
     description: str
     type: str  # 'mjcf', 'urdf', 'matlab'
     path: str
+    engine_type: str | None = None
 
 
 class ModelRegistry:
