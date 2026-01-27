@@ -9,7 +9,7 @@ This module tests critical security implementations:
 
 import logging
 import secrets
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 
 # Shim for Python < 3.11
 try:
