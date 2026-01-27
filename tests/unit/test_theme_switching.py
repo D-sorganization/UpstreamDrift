@@ -1,18 +1,23 @@
-import pytest
-import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 # Mock PyQt6 if not available to ensure tests run in CI without GUI libs
 try:
-    from PyQt6.QtCore import QObject
+    pass
 except ImportError:
     # We rely on the fallback in theme_manager, but for tests we might want to ensure it works
     pass
 
-from src.shared.python.theme.colors import Colors, LIGHT_PALETTE, DARK_PALETTE, get_active_palette
-from src.shared.python.theme.theme_manager import ThemeManager
-from src.shared.python.theme.matplotlib_style import apply_golf_suite_style
 import matplotlib.pyplot as plt
+
+from src.shared.python.theme.colors import (
+    DARK_PALETTE,
+    LIGHT_PALETTE,
+    Colors,
+    get_active_palette,
+)
+from src.shared.python.theme.matplotlib_style import apply_golf_suite_style
+from src.shared.python.theme.theme_manager import ThemeManager
+
 
 def test_theme_switching_updates_colors():
     manager = ThemeManager.get_instance()
@@ -32,6 +37,7 @@ def test_theme_switching_updates_colors():
     manager.set_theme("Dark")
     assert get_active_palette() == DARK_PALETTE
     assert Colors.BG_BASE == DARK_PALETTE.BG_BASE
+
 
 def test_theme_switching_updates_matplotlib():
     manager = ThemeManager.get_instance()
@@ -53,6 +59,7 @@ def test_theme_switching_updates_matplotlib():
 
     # Colors.BG_BASE for Dark is #1A1A1A
     assert plt.rcParams["figure.facecolor"].lower() == DARK_PALETTE.BG_BASE.lower()
+
 
 def test_theme_signals():
     manager = ThemeManager.get_instance()

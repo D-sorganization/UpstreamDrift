@@ -6,6 +6,7 @@ Manages application-wide theme state and notifies components of theme changes.
 from typing import Any
 
 from src.shared.python.engine_availability import PYQT6_AVAILABLE
+
 from .colors import (
     DARK_PALETTE,
     HIGH_CONTRAST_PALETTE,
@@ -19,13 +20,19 @@ else:
     # Fallback stubs for non-GUI environments
     class QObject:  # type: ignore
         """Stub for QObject."""
-        pass
+
 
     class pyqtSignal:  # type: ignore
         """Stub for pyqtSignal."""
-        def __init__(self, *args: Any) -> None: pass
-        def emit(self, *args: Any) -> None: pass
-        def connect(self, func: Any) -> None: pass
+
+        def __init__(self, *args: Any) -> None:
+            pass
+
+        def emit(self, *args: Any) -> None:
+            pass
+
+        def connect(self, func: Any) -> None:
+            pass
 
 
 class ThemeManager(QObject):

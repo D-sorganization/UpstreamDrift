@@ -416,7 +416,7 @@ class AISettingsDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("AI Assistant Settings")
         self.setMinimumSize(500, 400)
-        
+
         # Apply Dark Theme styling
         self.setStyleSheet("""
             QDialog, QWidget {

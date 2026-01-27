@@ -20,10 +20,12 @@ logger = get_logger("GolfSuiteLauncher")
 
 if PYQT6_AVAILABLE:
     from PyQt6 import QtCore, QtGui, QtWidgets
+
     try:
         from src.shared.python.theme import Colors
         from src.shared.python.theme.theme_manager import ThemeManager
         from src.shared.python.ui.preferences_dialog import PreferencesDialog
+
         THEME_AVAILABLE = True
     except ImportError:
         THEME_AVAILABLE = False
@@ -54,6 +56,7 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
             # Load saved preferences
             try:
                 from src.shared.python.ui.preferences_dialog import UserPreferences
+
                 prefs = UserPreferences.load()
                 if prefs.theme:
                     # Convert to Title Case ("light" -> "Light")
@@ -287,7 +290,9 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
 
     def _show_preferences(self) -> None:
         if not THEME_AVAILABLE:
-            QtWidgets.QMessageBox.warning(self, "Warning", "Theme support not available.")
+            QtWidgets.QMessageBox.warning(
+                self, "Warning", "Theme support not available."
+            )
             return
 
         dlg = PreferencesDialog(self)

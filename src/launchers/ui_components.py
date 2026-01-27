@@ -30,7 +30,6 @@ from PyQt6.QtWidgets import (
     QDialogButtonBox,
     QDockWidget,
     QFrame,
-    QGroupBox,
     QHBoxLayout,
     QLabel,
     QListWidget,
@@ -94,7 +93,6 @@ try:
         get_display_font,
         get_qfont,
     )
-    from src.shared.python.theme.theme_manager import ThemeManager
 
     THEME_AVAILABLE = True
 except ImportError:

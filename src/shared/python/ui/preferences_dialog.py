@@ -176,8 +176,8 @@ class PreferencesDialog(QDialog):
 
         # Map preference string to combo item
         current_theme = self.prefs.theme.title()
-        if current_theme == "System": # Fallback if migrating
-             current_theme = "Light"
+        if current_theme == "System":  # Fallback if migrating
+            current_theme = "Light"
 
         self.theme_combo.setCurrentText(current_theme)
         theme_layout.addRow("Color theme:", self.theme_combo)
