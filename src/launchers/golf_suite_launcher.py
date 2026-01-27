@@ -50,15 +50,26 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         # Define paths to the GUI scripts in the new structure
         self.mujoco_path = (
             self.suite_root
-            / "engines/physics_engines/mujoco/python/mujoco_humanoid_golf"
-            / "advanced_gui.py"
+            / "src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
         )
         self.drake_path = (
-            self.suite_root / "engines/physics_engines/drake/python/src/golf_gui.py"
+            self.suite_root / "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
         )
         self.pinocchio_path = (
             self.suite_root
-            / "engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
+            / "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
+        )
+        self.opensim_path = (
+            self.suite_root / "src/engines/physics_engines/opensim/python/opensim_gui.py"
+        )
+        self.myosim_path = (
+            self.suite_root / "src/engines/physics_engines/myosuite/python/myosuite_physics_engine.py"
+        )
+        self.openpose_path = (
+            self.suite_root / "src/shared/python/pose_estimation/openpose_gui.py"
+        )
+        self.urdf_path = (
+            self.suite_root / "tools/urdf_generator/launch_urdf_generator.py"
         )
 
         self._setup_ui()
@@ -114,6 +125,46 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         self.btn_pinocchio.setAccessibleName("Launch Pinocchio")
         self.btn_pinocchio.clicked.connect(self._launch_pinocchio)
         layout.addWidget(self.btn_pinocchio)
+
+        self.btn_opensim = QtWidgets.QPushButton("Launch &OpenSim Golf")
+        self.btn_opensim.setMinimumHeight(40)
+        self.btn_opensim.setIcon(
+            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        )
+        self.btn_opensim.setToolTip("Launch OpenSim musculoskeletal modeling")
+        self.btn_opensim.setAccessibleName("Launch OpenSim")
+        self.btn_opensim.clicked.connect(self._launch_opensim)
+        layout.addWidget(self.btn_opensim)
+
+        self.btn_myosim = QtWidgets.QPushButton("Launch &MyoSim Suite")
+        self.btn_myosim.setMinimumHeight(40)
+        self.btn_myosim.setIcon(
+            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        )
+        self.btn_myosim.setToolTip("Launch MyoSuite muscle-actuated simulation")
+        self.btn_myosim.setAccessibleName("Launch MyoSim")
+        self.btn_myosim.clicked.connect(self._launch_myosim)
+        layout.addWidget(self.btn_myosim)
+
+        self.btn_openpose = QtWidgets.QPushButton("Launch Open&Pose Analysis")
+        self.btn_openpose.setMinimumHeight(40)
+        self.btn_openpose.setIcon(
+            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_MediaPlay)
+        )
+        self.btn_openpose.setToolTip("Launch Pose estimation and motion capture")
+        self.btn_openpose.setAccessibleName("Launch OpenPose")
+        self.btn_openpose.clicked.connect(self._launch_openpose)
+        layout.addWidget(self.btn_openpose)
+
+        self.btn_urdf = QtWidgets.QPushButton("Launch &URDF Generator")
+        self.btn_urdf.setMinimumHeight(40)
+        self.btn_urdf.setIcon(
+            self.style().standardIcon(QtWidgets.QStyle.StandardPixmap.SP_ToolBarHorizontalExtensionButton)
+        )
+        self.btn_urdf.setToolTip("Launch Interactive URDF model builder")
+        self.btn_urdf.setAccessibleName("Launch URDF Generator")
+        self.btn_urdf.clicked.connect(self._launch_urdf)
+        layout.addWidget(self.btn_urdf)
 
         layout.addSpacing(10)
 
@@ -299,6 +350,22 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         # CWD should be python/ directory of pinocchio engine
         cwd = self.pinocchio_path.parent.parent
         self._launch_script("Pinocchio", self.pinocchio_path, cwd)
+
+    def _launch_opensim(self) -> None:
+        cwd = self.opensim_path.parent.parent
+        self._launch_script("OpenSim", self.opensim_path, cwd)
+
+    def _launch_myosim(self) -> None:
+        cwd = self.myosim_path.parent.parent
+        self._launch_script("MyoSim", self.myosim_path, cwd)
+
+    def _launch_openpose(self) -> None:
+        cwd = self.openpose_path.parent
+        self._launch_script("OpenPose", self.openpose_path, cwd)
+
+    def _launch_urdf(self) -> None:
+        cwd = self.urdf_path.parent
+        self._launch_script("URDF Generator", self.urdf_path, cwd)
 
     def _launch_shot_tracer(self) -> None:
         # Shot tracer is in launchers/ directory

@@ -11,7 +11,9 @@ from PyQt6 import QtCore, QtWidgets
 from src.shared.python.logging_config import get_logger
 
 from ...control_system import ControlSystem, ControlType
+from ...control_system import ControlSystem, ControlType
 from ...sim_widget import MuJoCoSimWidget
+from ...polynomial_generator import PolynomialGeneratorWidget
 
 if typing.TYPE_CHECKING:
     from ..advanced_gui import AdvancedGolfAnalysisWindow
@@ -829,6 +831,13 @@ class ActuatorDetailDialog(QtWidgets.QDialog):
             col = (idx % 2) * 2
             poly_layout.addWidget(QtWidgets.QLabel(f"c{idx}:"), row, col)
             poly_layout.addWidget(spin, row, col + 1)
+
+        # Visual Editor Button
+        visual_btn = QtWidgets.QPushButton("📊 Visual Editor")
+        visual_btn.setToolTip("Draw and fit polynomial curve visually")
+        visual_btn.clicked.connect(self._open_visual_editor)
+        poly_layout.addWidget(visual_btn, 4, 0, 1, 4)  # Span all columns at bottom
+
         layout.addWidget(self.poly_widget)
 
         self.sine_widget = QtWidgets.QGroupBox("Sine Wave Parameters")
@@ -950,3 +959,34 @@ class ActuatorDetailDialog(QtWidgets.QDialog):
         self.poly_widget.setVisible(idx == 1)
         self.sine_widget.setVisible(idx == 2)
         self.step_widget.setVisible(idx == 3)
+
+    def _open_visual_editor(self) -> None:
+        """Open the visual polynomial generator."""
+        dialog = QtWidgets.QDialog(self)
+        dialog.setWindowTitle(f"Polynomial Generator - {self.windowTitle()}")
+        dialog.setMinimumSize(900, 700)
+        
+        layout = QtWidgets.QVBoxLayout(dialog)
+        
+        # Instantiate generator
+        generator = PolynomialGeneratorWidget(dialog)
+        generator.set_joints([self.control_system.actuator_names[self.actuator_index]])
+        
+        # Handle result
+        def on_generated(name: str, coeffs: list[float]) -> None:
+            # Update spinboxes
+            for i, val in enumerate(coeffs):
+                if i < len(self.poly_spinboxes):
+                    self.poly_spinboxes[i].setValue(val)
+            dialog.accept()
+            
+        generator.polynomial_generated.connect(on_generated)
+        
+        layout.addWidget(generator)
+        
+        # Close button
+        btn_close = QtWidgets.QPushButton("Cancel")
+        btn_close.clicked.connect(dialog.reject)
+        layout.addWidget(btn_close)
+        
+        dialog.exec()
