@@ -1,17 +1,19 @@
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
-from scripts.apply_quick_fixes import add_missing_init_files
-from scripts.assess_repository import assess_J, REPO_ROOT
+from scripts.assess_repository import assess_J
 from scripts.generate_assessment_summary import extract_score_from_report
+
 
 class TestAssessmentScripts(unittest.TestCase):
 
     def test_extract_score_from_report(self):
         # Create a dummy report file
         dummy_report = Path("dummy_report.md")
-        dummy_report.write_text("# Assessment: Test\n\n**Grade**: 8.5/10\n", encoding="utf-8")
+        dummy_report.write_text(
+            "# Assessment: Test\n\n**Grade**: 8.5/10\n", encoding="utf-8"
+        )
         try:
             score = extract_score_from_report(dummy_report)
             self.assertEqual(score, 8.5)
@@ -25,11 +27,11 @@ class TestAssessmentScripts(unittest.TestCase):
         # This assumes REPO_ROOT is set correctly in the imported module.
 
         # We need to mock generate_markdown_report to avoid writing files
-        with patch('scripts.assess_repository.generate_markdown_report') as mock_gen:
+        with patch("scripts.assess_repository.generate_markdown_report") as mock_gen:
             mock_gen.return_value = Path("dummy_output.md")
 
             # We also need to mock grep_count to avoid scanning the whole repo
-            with patch('scripts.assess_repository.grep_count') as mock_grep:
+            with patch("scripts.assess_repository.grep_count") as mock_grep:
                 mock_grep.return_value = 1
 
                 result = assess_J()
@@ -49,5 +51,6 @@ class TestAssessmentScripts(unittest.TestCase):
                 # Since we are running in the actual repo, src/api exists.
                 self.assertEqual(score, 7.5)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
