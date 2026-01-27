@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from typing import Any
 
 try:
@@ -69,7 +69,7 @@ async def run_simulation_async(
 
     _active_tasks[task_id] = {
         "status": "started",
-        "created_at": datetime.now(timezone.utc),
+        "created_at": datetime.now(UTC),
     }
 
     background_tasks.add_task(

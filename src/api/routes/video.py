@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import tempfile
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -163,7 +163,7 @@ async def analyze_video_async(
 
     _active_tasks[task_id] = {
         "status": "started",
-        "created_at": datetime.now(timezone.utc),
+        "created_at": datetime.now(UTC),
     }
 
     background_tasks.add_task(
@@ -188,7 +188,7 @@ async def _process_video_background(
     """Background task for video processing."""
     try:
         task_data = _active_tasks.get(task_id) or {}
-        created_at = task_data.get("created_at", datetime.now(timezone.utc))
+        created_at = task_data.get("created_at", datetime.now(UTC))
 
         _active_tasks[task_id] = {
             "status": "processing",
@@ -204,7 +204,7 @@ async def _process_video_background(
         result = pipeline.process_video(video_path)
 
         task_data = _active_tasks.get(task_id) or {}
-        created_at = task_data.get("created_at", datetime.now(timezone.utc))
+        created_at = task_data.get("created_at", datetime.now(UTC))
 
         _active_tasks[task_id] = {
             "status": "completed",
@@ -220,7 +220,7 @@ async def _process_video_background(
 
     except Exception as e:
         task_data = _active_tasks.get(task_id) or {}
-        created_at = task_data.get("created_at", datetime.now(timezone.utc))
+        created_at = task_data.get("created_at", datetime.now(UTC))
 
         _active_tasks[task_id] = {
             "status": "failed",

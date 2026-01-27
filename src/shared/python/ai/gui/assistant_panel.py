@@ -10,7 +10,7 @@ responses with markdown rendering.
 from __future__ import annotations
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
-from datetime import datetime, timezone
+from datetime import UTC, datetime, timezone
 
 from src.shared.python.logging_config import get_logger
 
@@ -66,7 +66,7 @@ class MessageWidget(QFrame):
         super().__init__(parent)
         self._role = role
         self._content = content
-        self._timestamp = timestamp or datetime.now(timezone.utc)
+        self._timestamp = timestamp or datetime.now(UTC)
         self._setup_ui()
         self._apply_style()
 
