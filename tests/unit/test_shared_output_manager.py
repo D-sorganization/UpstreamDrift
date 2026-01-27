@@ -2,7 +2,7 @@
 
 import shutil
 import unittest
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
 
@@ -140,7 +140,7 @@ class TestOutputManager(unittest.TestCase):
         # Mock now_local to return a future date so the file appears old
         # The cleanup function uses now_local() for cutoff calculation
         # Use timezone-aware datetime since now_local returns timezone-aware
-        fixed_now = datetime(2099, 1, 10, 12, 0, 0, tzinfo=UTC)
+        fixed_now = datetime(2099, 1, 10, 12, 0, 0, tzinfo=timezone.utc)
         with patch(
             "src.shared.python.output_manager.now_local", return_value=fixed_now
         ):
