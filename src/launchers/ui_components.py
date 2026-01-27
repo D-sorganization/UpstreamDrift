@@ -30,6 +30,7 @@ from PyQt6.QtWidgets import (
     QDialogButtonBox,
     QDockWidget,
     QFrame,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
     QListWidget,
@@ -93,6 +94,7 @@ try:
         get_display_font,
         get_qfont,
     )
+    from src.shared.python.theme.theme_manager import ThemeManager
 
     THEME_AVAILABLE = True
 except ImportError:
@@ -390,40 +392,67 @@ class DraggableModelCard(QFrame):
 
         layout.addWidget(img_container)
 
-        lbl_name = QLabel(self.model.name)
-        lbl_name.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
-        lbl_name.setWordWrap(True)
-        lbl_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(lbl_name)
+        self.lbl_name = QLabel(self.model.name)
+        self.lbl_name.setFont(QFont("Segoe UI", 11, QFont.Weight.Bold))
+        self.lbl_name.setWordWrap(True)
+        self.lbl_name.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.lbl_name)
 
-        lbl_desc = QLabel(self.model.description)
-        lbl_desc.setFont(QFont("Segoe UI", 9))
-        lbl_desc.setStyleSheet("color: #cccccc;")
-        lbl_desc.setWordWrap(True)
-        lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(lbl_desc)
+        self.lbl_desc = QLabel(self.model.description)
+        self.lbl_desc.setFont(QFont("Segoe UI", 9))
+        self.lbl_desc.setStyleSheet("color: #cccccc;")
+        self.lbl_desc.setWordWrap(True)
+        self.lbl_desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        layout.addWidget(self.lbl_desc)
 
         # Status Chip
         status_text, status_color, text_color = self._get_status_info()
-        lbl_status = QLabel(status_text)
-        lbl_status.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
-        lbl_status.setStyleSheet(
-            f"background-color: {status_color}; color: {text_color}; padding: 2px 6px; border-radius: 4px;"
-        )
-        lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        lbl_status.setMinimumWidth(
+        self.lbl_status = QLabel(status_text)
+        self.lbl_status.setFont(QFont("Segoe UI", 8, QFont.Weight.Bold))
+        self.lbl_status.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.lbl_status.setMinimumWidth(
             80
         )  # Use minimum width instead of fixed width to prevent text cutoff
-        # lbl_status.setFixedWidth(80)
+
+        # Apply initial styles
+        self._apply_styles(status_color, text_color)
 
         chip_layout = QHBoxLayout()
         chip_layout.addStretch()
-        chip_layout.addWidget(lbl_status)
+        chip_layout.addWidget(self.lbl_status)
         chip_layout.addStretch()
         layout.addLayout(chip_layout)
 
+    def _apply_styles(self, status_color: str, text_color: str) -> None:
+        """Apply styles to labels."""
+        self.lbl_status.setStyleSheet(
+            f"background-color: {status_color}; color: {text_color}; padding: 2px 6px; border-radius: 4px;"
+        )
+
+        if THEME_AVAILABLE:
+            self.lbl_desc.setStyleSheet(f"color: {Colors.TEXT_SECONDARY};")
+        else:
+            self.lbl_desc.setStyleSheet("color: #cccccc;")
+
+    def update_theme(self) -> None:
+        """Refresh theme styles."""
+        if not THEME_AVAILABLE:
+            return
+
+        _, status_color, text_color = self._get_status_info()
+        self._apply_styles(status_color, text_color)
+
     def _get_status_info(self) -> tuple[str, str, str]:
         t = getattr(self.model, "type", "").lower()
+
+        # Use Colors if available
+        success_color = Colors.SUCCESS if THEME_AVAILABLE else "#28a745"
+        info_color = Colors.CHART_CYAN if THEME_AVAILABLE else "#17a2b8"
+        external_color = Colors.CHART_PURPLE if THEME_AVAILABLE else "#6f42c1"
+        utility_color = Colors.TEXT_QUATERNARY if THEME_AVAILABLE else "#6c757d"
+        text_on_dark = "#000000"
+        text_on_light = "#ffffff"
+
         if t in [
             "custom_humanoid",
             "custom_dashboard",
@@ -431,19 +460,19 @@ class DraggableModelCard(QFrame):
             "pinocchio",
             "openpose",
         ]:
-            return "GUI Ready", "#28a745", "#000000"
+            return "GUI Ready", success_color, text_on_dark
 
         path_str = str(getattr(self.model, "path", ""))
         if t == "mjcf" or path_str.endswith(".xml"):
-            return "Viewer", "#17a2b8", "#000000"
+            return "Viewer", info_color, text_on_dark
         elif t in ["opensim", "myosim"]:
-            return "Engine Ready", "#28a745", "#000000"
+            return "Engine Ready", success_color, text_on_dark
         elif t in ["matlab", "matlab_app"]:
-            return "External", "#6f42c1", "#ffffff"
+            return "External", external_color, text_on_light
         elif t in ["urdf_generator", "c3d_viewer"]:
-            return "Utility", "#6c757d", "#ffffff"
+            return "Utility", utility_color, text_on_light
 
-        return "Unknown", "#6c757d", "#ffffff"
+        return "Unknown", utility_color, text_on_light
 
     def mousePressEvent(self, event: QMouseEvent | None) -> None:
         if event and event.button() == Qt.MouseButton.LeftButton:

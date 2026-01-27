@@ -43,6 +43,7 @@ if TYPE_CHECKING:
 # Import theme if available
 try:
     from src.shared.python.theme import Colors, Sizes, Weights, get_qfont  # noqa: F401
+    from src.shared.python.theme.theme_manager import ThemeManager
 
     THEME_AVAILABLE = True
 except ImportError:
@@ -60,7 +61,7 @@ class UserPreferences:
     """User preferences data structure."""
 
     # Appearance
-    theme: str = "dark"  # "dark", "light", "system"
+    theme: str = "light"  # "dark", "light", "high contrast", "system"
     font_size: int = 10
     show_tooltips: bool = True
     compact_mode: bool = False
@@ -171,8 +172,14 @@ class PreferencesDialog(QDialog):
         theme_layout = QFormLayout(theme_group)
 
         self.theme_combo = QComboBox()
-        self.theme_combo.addItems(["Dark", "Light", "System"])
-        self.theme_combo.setCurrentText(self.prefs.theme.capitalize())
+        self.theme_combo.addItems(["Light", "Dark", "High Contrast"])
+
+        # Map preference string to combo item
+        current_theme = self.prefs.theme.title()
+        if current_theme == "System": # Fallback if migrating
+             current_theme = "Light"
+
+        self.theme_combo.setCurrentText(current_theme)
         theme_layout.addRow("Color theme:", self.theme_combo)
 
         layout.addWidget(theme_group)
@@ -338,6 +345,14 @@ class PreferencesDialog(QDialog):
         """Apply current settings without closing."""
         self.prefs = self._collect_preferences()
         self.prefs.save()
+
+        # Apply theme immediately
+        if THEME_AVAILABLE:
+            # Convert "Light" -> "Light", "High contrast" -> "High Contrast"
+            # Combo items are Title Case. prefs.theme is lower case.
+            # ThemeManager expects Title Case or matching defined themes.
+            selected_theme = self.theme_combo.currentText()
+            ThemeManager.get_instance().set_theme(selected_theme)
 
     def _on_accept(self) -> None:
         """Accept and save settings."""

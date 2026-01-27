@@ -20,10 +20,18 @@ logger = get_logger("GolfSuiteLauncher")
 
 if PYQT6_AVAILABLE:
     from PyQt6 import QtCore, QtGui, QtWidgets
+    try:
+        from src.shared.python.theme import Colors
+        from src.shared.python.theme.theme_manager import ThemeManager
+        from src.shared.python.ui.preferences_dialog import PreferencesDialog
+        THEME_AVAILABLE = True
+    except ImportError:
+        THEME_AVAILABLE = False
 else:
     QtWidgets = None  # type: ignore
     QtCore = None  # type: ignore
     QtGui = None  # type: ignore
+    THEME_AVAILABLE = False
 
 # UI feedback timing constants
 LAUNCH_FEEDBACK_DURATION_MS = (
@@ -38,6 +46,25 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         super().__init__()
         self.setWindowTitle("Golf Modeling Suite - Local Launcher")
         self.resize(400, 300)
+
+        if THEME_AVAILABLE:
+            self.theme_manager = ThemeManager.get_instance()
+            self.theme_manager.theme_changed.connect(self.refresh_ui)
+
+            # Load saved preferences
+            try:
+                from src.shared.python.ui.preferences_dialog import UserPreferences
+                prefs = UserPreferences.load()
+                if prefs.theme:
+                    # Convert to Title Case ("light" -> "Light")
+                    theme_name = prefs.theme.title()
+                    if theme_name.lower() == "system":
+                        theme_name = "Light"
+                    self.theme_manager.set_theme(theme_name)
+            except (ImportError, Exception) as e:
+                logger.warning(f"Failed to load theme preference: {e}")
+        else:
+            self.theme_manager = None
 
         # Paths - UPDATED FOR GOLF_MODELING_SUITE
         # Script location: Golf_Modeling_Suite/launchers/golf_suite_launcher.py
@@ -78,6 +105,16 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         self._setup_ui()
 
     def _setup_ui(self) -> None:
+        # Menu Bar
+        menu_bar = self.menuBar()
+        settings_menu = menu_bar.addMenu("&Settings")
+
+        preferences_action = QtGui.QAction("&Preferences", self)
+        preferences_action.setShortcut("Ctrl+P")
+        preferences_action.setStatusTip("Configure application settings")
+        preferences_action.triggered.connect(self._show_preferences)
+        settings_menu.addAction(preferences_action)
+
         central = QtWidgets.QWidget()
         self.setCentralWidget(central)
         layout = QtWidgets.QVBoxLayout(central)
@@ -203,9 +240,13 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         self.log_text = QtWidgets.QTextEdit()
         self.log_text.setMaximumHeight(120)
         self.log_text.setReadOnly(True)
+
+        # Apply initial theme
+        bg = Colors.BG_SURFACE if THEME_AVAILABLE else "#2b2b2b"
+        fg = Colors.TEXT_PRIMARY if THEME_AVAILABLE else "#ffffff"
         self.log_text.setStyleSheet(
-            "background-color: #2b2b2b; "
-            "color: #ffffff; "
+            f"background-color: {bg}; "
+            f"color: {fg}; "
             "font-family: 'Consolas', monospace;"
         )
         log_layout.addWidget(self.log_text)
@@ -243,6 +284,30 @@ class GolfLauncher(QtWidgets.QMainWindow if PYQT6_AVAILABLE else object):  # typ
         self.status = QtWidgets.QLabel("Ready")
         self.status.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.status)
+
+    def _show_preferences(self) -> None:
+        if not THEME_AVAILABLE:
+            QtWidgets.QMessageBox.warning(self, "Warning", "Theme support not available.")
+            return
+
+        dlg = PreferencesDialog(self)
+        dlg.exec()
+
+    def refresh_ui(self, theme_name: str) -> None:
+        """Refresh UI when theme changes."""
+        if THEME_AVAILABLE:
+            # Apply global theme to application
+            self.theme_manager.apply_theme_to_app(QtWidgets.QApplication.instance())
+
+        # Update log text style
+        bg = Colors.BG_SURFACE if THEME_AVAILABLE else "#2b2b2b"
+        fg = Colors.TEXT_PRIMARY if THEME_AVAILABLE else "#ffffff"
+        self.log_text.setStyleSheet(
+            f"background-color: {bg}; "
+            f"color: {fg}; "
+            "font-family: 'Consolas', monospace;"
+        )
+        logger.info(f"Theme switched to {theme_name}")
 
     def log_message(self, message: str) -> None:
         """Add a timestamped message to the log area."""

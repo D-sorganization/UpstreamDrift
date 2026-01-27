@@ -24,90 +24,101 @@ from .colors import CHART_COLORS, Colors
 if TYPE_CHECKING:
     from matplotlib.figure import Figure
 
-# Golf Suite matplotlib style dictionary
-GOLF_SUITE_STYLE = {
-    # Figure
-    "figure.facecolor": Colors.BG_BASE,
-    "figure.edgecolor": Colors.BORDER_DEFAULT,
-    "figure.dpi": 100,
-    "figure.titlesize": 14,
-    "figure.titleweight": "bold",
-    # Axes
-    "axes.facecolor": Colors.BG_SURFACE,
-    "axes.edgecolor": Colors.BORDER_DEFAULT,
-    "axes.linewidth": 1.0,
-    "axes.grid": True,
-    "axes.grid.axis": "both",
-    "axes.axisbelow": True,  # Grid behind data
-    "axes.labelcolor": Colors.TEXT_SECONDARY,
-    "axes.labelsize": 10,
-    "axes.labelweight": "normal",
-    "axes.titlesize": 12,
-    "axes.titleweight": "semibold",
-    "axes.titlecolor": Colors.TEXT_PRIMARY,
-    "axes.titlepad": 12,
-    "axes.spines.top": False,
-    "axes.spines.right": False,
-    "axes.prop_cycle": plt.cycler("color", CHART_COLORS),
-    # Grid
-    "grid.color": Colors.GRID_LINE,
-    "grid.linestyle": "-",
-    "grid.linewidth": 0.5,
-    "grid.alpha": 0.4,
-    # Ticks
-    "xtick.color": Colors.TICK_COLOR,
-    "ytick.color": Colors.TICK_COLOR,
-    "xtick.labelcolor": Colors.TEXT_TERTIARY,
-    "ytick.labelcolor": Colors.TEXT_TERTIARY,
-    "xtick.labelsize": 9,
-    "ytick.labelsize": 9,
-    "xtick.direction": "out",
-    "ytick.direction": "out",
-    "xtick.major.size": 4,
-    "ytick.major.size": 4,
-    "xtick.minor.size": 2,
-    "ytick.minor.size": 2,
-    "xtick.major.width": 0.8,
-    "ytick.major.width": 0.8,
-    # Legend
-    "legend.facecolor": Colors.BG_ELEVATED,
-    "legend.edgecolor": Colors.BORDER_DEFAULT,
-    "legend.labelcolor": Colors.TEXT_SECONDARY,
-    "legend.fontsize": 9,
-    "legend.framealpha": 0.95,
-    "legend.borderpad": 0.5,
-    "legend.labelspacing": 0.4,
-    "legend.handlelength": 1.5,
-    "legend.handleheight": 0.7,
-    # Text
-    "text.color": Colors.TEXT_SECONDARY,
-    "font.family": "sans-serif",
-    "font.sans-serif": [
-        "Inter",
-        "SF Pro Display",
-        "Segoe UI",
-        "Roboto",
-        "Helvetica Neue",
-        "DejaVu Sans",
-        "sans-serif",
-    ],
-    "font.size": 10,
-    # Lines
-    "lines.linewidth": 1.5,
-    "lines.markersize": 6,
-    "lines.markeredgewidth": 0.5,
-    # Patches (bars, histograms, etc.)
-    "patch.linewidth": 0.5,
-    "patch.edgecolor": Colors.BORDER_SUBTLE,
-    # Scatter
-    "scatter.edgecolors": "none",
-    # Savefig
-    "savefig.facecolor": Colors.BG_BASE,
-    "savefig.edgecolor": "none",
-    "savefig.dpi": 150,
-    "savefig.bbox": "tight",
-    "savefig.pad_inches": 0.1,
-}
+
+def get_golf_suite_style() -> dict[str, Any]:
+    """Get the current matplotlib style dictionary based on active theme.
+
+    Returns:
+        Dictionary of rcParams suitable for matplotlib.rcParams.update()
+    """
+    return {
+        # Figure
+        "figure.facecolor": Colors.BG_BASE,
+        "figure.edgecolor": Colors.BORDER_DEFAULT,
+        "figure.dpi": 100,
+        "figure.titlesize": 14,
+        "figure.titleweight": "bold",
+        # Axes
+        "axes.facecolor": Colors.BG_SURFACE,
+        "axes.edgecolor": Colors.BORDER_DEFAULT,
+        "axes.linewidth": 1.0,
+        "axes.grid": True,
+        "axes.grid.axis": "both",
+        "axes.axisbelow": True,  # Grid behind data
+        "axes.labelcolor": Colors.TEXT_SECONDARY,
+        "axes.labelsize": 10,
+        "axes.labelweight": "normal",
+        "axes.titlesize": 12,
+        "axes.titleweight": "semibold",
+        "axes.titlecolor": Colors.TEXT_PRIMARY,
+        "axes.titlepad": 12,
+        "axes.spines.top": False,
+        "axes.spines.right": False,
+        "axes.prop_cycle": plt.cycler("color", CHART_COLORS),
+        # Grid
+        "grid.color": Colors.GRID_LINE,
+        "grid.linestyle": "-",
+        "grid.linewidth": 0.5,
+        "grid.alpha": 0.4,
+        # Ticks
+        "xtick.color": Colors.TICK_COLOR,
+        "ytick.color": Colors.TICK_COLOR,
+        "xtick.labelcolor": Colors.TEXT_TERTIARY,
+        "ytick.labelcolor": Colors.TEXT_TERTIARY,
+        "xtick.labelsize": 9,
+        "ytick.labelsize": 9,
+        "xtick.direction": "out",
+        "ytick.direction": "out",
+        "xtick.major.size": 4,
+        "ytick.major.size": 4,
+        "xtick.minor.size": 2,
+        "ytick.minor.size": 2,
+        "xtick.major.width": 0.8,
+        "ytick.major.width": 0.8,
+        # Legend
+        "legend.facecolor": Colors.BG_ELEVATED,
+        "legend.edgecolor": Colors.BORDER_DEFAULT,
+        "legend.labelcolor": Colors.TEXT_SECONDARY,
+        "legend.fontsize": 9,
+        "legend.framealpha": 0.95,
+        "legend.borderpad": 0.5,
+        "legend.labelspacing": 0.4,
+        "legend.handlelength": 1.5,
+        "legend.handleheight": 0.7,
+        # Text
+        "text.color": Colors.TEXT_SECONDARY,
+        "font.family": "sans-serif",
+        "font.sans-serif": [
+            "Inter",
+            "SF Pro Display",
+            "Segoe UI",
+            "Roboto",
+            "Helvetica Neue",
+            "DejaVu Sans",
+            "sans-serif",
+        ],
+        "font.size": 10,
+        # Lines
+        "lines.linewidth": 1.5,
+        "lines.markersize": 6,
+        "lines.markeredgewidth": 0.5,
+        # Patches (bars, histograms, etc.)
+        "patch.linewidth": 0.5,
+        "patch.edgecolor": Colors.BORDER_SUBTLE,
+        # Scatter
+        "scatter.edgecolors": "none",
+        # Savefig
+        "savefig.facecolor": Colors.BG_BASE,
+        "savefig.edgecolor": "none",
+        "savefig.dpi": 150,
+        "savefig.bbox": "tight",
+        "savefig.pad_inches": 0.1,
+    }
+
+
+# Initial static style (based on default/Dark theme)
+# Kept for backward compatibility
+GOLF_SUITE_STYLE = get_golf_suite_style()
 
 
 def apply_golf_suite_style(fig: Figure | None = None) -> None:
@@ -126,7 +137,12 @@ def apply_golf_suite_style(fig: Figure | None = None) -> None:
     """
     if fig is None:
         # Apply globally
-        plt.rcParams.update(GOLF_SUITE_STYLE)
+        # Fetch fresh style to ensure current theme
+        current_style = get_golf_suite_style()
+        plt.rcParams.update(current_style)
+
+        # Update legacy dict in place
+        GOLF_SUITE_STYLE.update(current_style)
     else:
         # Apply to specific figure
         fig.set_facecolor(Colors.BG_BASE)
@@ -224,4 +240,5 @@ __all__ = [
     "create_styled_figure",
     "get_chart_color",
     "style_for_export",
+    "get_golf_suite_style",
 ]

@@ -96,6 +96,9 @@ def _lazy_load_model_registry() -> Any:
 
 # Import unified theme system for consistent styling
 try:
+    from src.shared.python.theme import Colors
+    from src.shared.python.theme.theme_manager import ThemeManager
+
     THEME_AVAILABLE = True
 except ImportError:
     THEME_AVAILABLE = False
@@ -231,6 +234,12 @@ class GolfLauncher(QMainWindow):
                 logger.warning(f"Failed to initialize EngineManager: {e}")
                 self.engine_manager = None
 
+        if THEME_AVAILABLE:
+            self.theme_manager = ThemeManager.get_instance()
+            self.theme_manager.theme_changed.connect(self.refresh_ui)
+        else:
+            self.theme_manager = None
+
         self._build_available_models()
         self._initialize_model_order()
 
@@ -255,6 +264,22 @@ class GolfLauncher(QMainWindow):
         # Initialize UI components if available
         self.toast_manager: ToastManager | None = None
         self._init_ui_components()
+
+        # Load and apply preferences (Theme persistence)
+        if UI_COMPONENTS_AVAILABLE and THEME_AVAILABLE and self.theme_manager:
+            try:
+                from src.shared.python.ui.preferences_dialog import UserPreferences
+                prefs = UserPreferences.load()
+                if prefs.theme:
+                    # Convert to Title Case ("light" -> "Light")
+                    theme_name = prefs.theme.title()
+                    # Handle "System" fallback
+                    if theme_name.lower() == "system":
+                        theme_name = "Light"
+
+                    self.theme_manager.set_theme(theme_name)
+            except Exception as e:
+                logger.error(f"Failed to load theme preference: {e}")
 
         # Log startup performance
         if self._startup_time_ms > 0:
@@ -325,12 +350,16 @@ class GolfLauncher(QMainWindow):
             available: Whether Docker is available
         """
         self.docker_available = available
+
+        color_success = Colors.SUCCESS if THEME_AVAILABLE else "#30D158"
+        color_error = Colors.ERROR if THEME_AVAILABLE else "#FF375F"
+
         if available:
             self.lbl_status.setText("● System Ready")
-            self.lbl_status.setStyleSheet("color: #30D158; font-weight: bold;")
+            self.lbl_status.setStyleSheet(f"color: {color_success}; font-weight: bold;")
         else:
             self.lbl_status.setText("● Docker Not Found")
-            self.lbl_status.setStyleSheet("color: #FF375F; font-weight: bold;")
+            self.lbl_status.setStyleSheet(f"color: {color_error}; font-weight: bold;")
         self.update_launch_button()
 
     def _build_available_models(self) -> None:
@@ -700,6 +729,11 @@ class GolfLauncher(QMainWindow):
         btn_env.setToolTip("Manage Docker environment and dependencies")
         btn_env.clicked.connect(self.open_environment_manager)
         top_bar.addWidget(btn_env)
+
+        btn_settings = QPushButton("Settings")
+        btn_settings.setToolTip("Configure application preferences (Ctrl+,)")
+        btn_settings.clicked.connect(self._show_preferences)
+        top_bar.addWidget(btn_settings)
 
         btn_help = QPushButton("Help")
         btn_help.setToolTip("View documentation and user guide")
@@ -1091,30 +1125,46 @@ class GolfLauncher(QMainWindow):
         """Select a model and update UI."""
         self.selected_model = model_id
 
+        # Theme colors
+        if THEME_AVAILABLE:
+            bg_selected = Colors.BG_HIGHLIGHT
+            border_selected = Colors.BORDER_FOCUS
+            bg_normal = Colors.BG_ELEVATED
+            border_normal = Colors.BORDER_SUBTLE
+            bg_hover = Colors.BG_SURFACE
+            border_hover = Colors.BORDER_STRONG
+        else:
+            bg_selected = "#383838"
+            border_selected = "#0A84FF"
+            bg_normal = "#2D2D2D"
+            border_normal = "#3A3A3A"
+            bg_hover = "#333333"
+            border_hover = "#555555"
+
         # Update visual selection state
         for mid, card in self.model_cards.items():
             if mid == model_id:
                 card.setStyleSheet(
-                    """
-                    QFrame#ModelCard {
-                        background-color: #383838;
-                        border: 2px solid #0A84FF;
+                    f"""
+                    QFrame#ModelCard {{
+                        background-color: {bg_selected};
+                        border: 2px solid {border_selected};
                         border-radius: 12px;
-                    }
+                    }}
                     """
                 )
             else:
                 card.setStyleSheet(
-                    """
-                    QFrame#ModelCard {
-                        background-color: #2D2D2D;
-                        border: 1px solid #3A3A3A;
+                    f"""
+                    QFrame#ModelCard {{
+                        background-color: {bg_normal};
+                        border: 1px solid {border_normal};
                         border-radius: 12px;
-                    }
-                    QFrame#ModelCard:hover {
-                        background-color: #333333;
-                        border: 1px solid #555555;
-                    }
+                    }}
+                    QFrame#ModelCard:hover {{
+                        background-color: {bg_hover};
+                        border: 1px solid {border_hover};
+                    }}
                     """
                 )
 
@@ -1200,40 +1250,73 @@ class GolfLauncher(QMainWindow):
 
     def apply_styles(self) -> None:
         """Apply custom stylesheets."""
-        # Global dark theme
-        self.setStyleSheet(
-            """
-            QMainWindow {
-                background-color: #1E1E1E;
-            }
-            QWidget {
-                color: #FFFFFF;
-                font-family: 'Segoe UI', sans-serif;
-            }
-            QLineEdit {
-                background-color: #252526;
-                color: white;
-                border: 1px solid #3E3E42;
-                border-radius: 4px;
-                padding: 6px;
-            }
-            QLineEdit:focus {
-                border: 1px solid #007ACC;
-            }
-            QScrollArea {
-                border: none;
-            }
-            QPushButton {
-                background-color: #333333;
-                border: 1px solid #333333;
-                border-radius: 4px;
-                padding: 6px 12px;
-            }
-            QPushButton:hover {
-                background-color: #3E3E42;
-            }
-            """
-        )
+        if THEME_AVAILABLE:
+            # Apply global theme via manager
+            # We access instance via QApplication.instance()
+            app = QApplication.instance()
+            if app:
+                self.theme_manager.apply_theme_to_app(app)
+
+            # Additional overrides specific to this window if needed
+            # For now, global style covers mostly everything.
+            # But we might need to reset self.setStyleSheet if it was set previously
+            # to avoid conflicts.
+            # However, ThemeManager sets stylesheet on 'app', not 'self'.
+            # If 'self' has a stylesheet, it overrides 'app'.
+            # So we should clear 'self' stylesheet to let 'app' stylesheet take effect.
+            self.setStyleSheet("")
+
+        else:
+            # Global dark theme fallback
+            self.setStyleSheet(
+                """
+                QMainWindow {
+                    background-color: #1E1E1E;
+                }
+                QWidget {
+                    color: #FFFFFF;
+                    font-family: 'Segoe UI', sans-serif;
+                }
+                QLineEdit {
+                    background-color: #252526;
+                    color: white;
+                    border: 1px solid #3E3E42;
+                    border-radius: 4px;
+                    padding: 6px;
+                }
+                QLineEdit:focus {
+                    border: 1px solid #007ACC;
+                }
+                QScrollArea {
+                    border: none;
+                }
+                QPushButton {
+                    background-color: #333333;
+                    border: 1px solid #333333;
+                    border-radius: 4px;
+                    padding: 6px 12px;
+                }
+                QPushButton:hover {
+                    background-color: #3E3E42;
+                }
+                """
+            )
+
+    def refresh_ui(self, theme_name: str) -> None:
+        """Refresh UI when theme changes."""
+        self.apply_styles()
+
+        # Update model cards
+        for card in self.model_cards.values():
+            if hasattr(card, "update_theme"):
+                card.update_theme()
+
+        # Update status
+        self._apply_docker_status(self.docker_available)
+
+        # Re-apply selection style
+        if self.selected_model:
+            self.select_model(self.selected_model)
 
     def check_docker(self) -> None:
         """Start the docker check thread."""

@@ -10,97 +10,186 @@ Design principles:
 - Consistent accent colors across all components
 """
 
-from dataclasses import dataclass
-from typing import TYPE_CHECKING, ClassVar
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
     from PyQt6.QtGui import QColor
 
 
-@dataclass(frozen=True)
+@dataclass
 class ColorPalette:
-    """Immutable color palette for the Golf Modeling Suite.
+    """Color palette for the Golf Modeling Suite.
 
     All colors are hex strings suitable for Qt, CSS, and matplotlib.
     """
 
     # Primary accent - vibrant blue (more sophisticated than VS Code blue)
-    PRIMARY: ClassVar[str] = "#0A84FF"
-    PRIMARY_HOVER: ClassVar[str] = "#409CFF"
-    PRIMARY_PRESSED: ClassVar[str] = "#0066CC"
-    PRIMARY_MUTED: ClassVar[str] = "#0A84FF40"  # 25% opacity for backgrounds
+    PRIMARY: str = "#0A84FF"
+    PRIMARY_HOVER: str = "#409CFF"
+    PRIMARY_PRESSED: str = "#0066CC"
+    PRIMARY_MUTED: str = "#0A84FF40"  # 25% opacity for backgrounds
 
     # Secondary accent - success/positive actions
-    SUCCESS: ClassVar[str] = "#30D158"
-    SUCCESS_HOVER: ClassVar[str] = "#4AE371"
-    SUCCESS_MUTED: ClassVar[str] = "#30D15840"
+    SUCCESS: str = "#30D158"
+    SUCCESS_HOVER: str = "#4AE371"
+    SUCCESS_MUTED: str = "#30D15840"
 
     # Warning accent
-    WARNING: ClassVar[str] = "#FF9F0A"
-    WARNING_HOVER: ClassVar[str] = "#FFB340"
-    WARNING_MUTED: ClassVar[str] = "#FF9F0A40"
+    WARNING: str = "#FF9F0A"
+    WARNING_HOVER: str = "#FFB340"
+    WARNING_MUTED: str = "#FF9F0A40"
 
     # Error/danger accent
-    ERROR: ClassVar[str] = "#FF375F"
-    ERROR_HOVER: ClassVar[str] = "#FF6B8A"
-    ERROR_MUTED: ClassVar[str] = "#FF375F40"
+    ERROR: str = "#FF375F"
+    ERROR_HOVER: str = "#FF6B8A"
+    ERROR_MUTED: str = "#FF375F40"
 
     # Background hierarchy (depth perception - darker = deeper)
-    BG_DEEP: ClassVar[str] = "#0D0D0D"  # Deepest - splash screens, modals backdrop
-    BG_BASE: ClassVar[str] = "#1A1A1A"  # Main window background
-    BG_SURFACE: ClassVar[str] = "#242424"  # Cards, panels, elevated surfaces
-    BG_ELEVATED: ClassVar[str] = "#2D2D2D"  # Hover states, active items
-    BG_HIGHLIGHT: ClassVar[str] = "#383838"  # Strong highlight, selection
+    BG_DEEP: str = "#0D0D0D"  # Deepest - splash screens, modals backdrop
+    BG_BASE: str = "#1A1A1A"  # Main window background
+    BG_SURFACE: str = "#242424"  # Cards, panels, elevated surfaces
+    BG_ELEVATED: str = "#2D2D2D"  # Hover states, active items
+    BG_HIGHLIGHT: str = "#383838"  # Strong highlight, selection
 
     # Border colors
-    BORDER_SUBTLE: ClassVar[str] = "#2D2D2D"  # Subtle separation
-    BORDER_DEFAULT: ClassVar[str] = "#404040"  # Standard borders
-    BORDER_STRONG: ClassVar[str] = "#505050"  # Emphasized borders
-    BORDER_FOCUS: ClassVar[str] = "#0A84FF"  # Focus ring color
+    BORDER_SUBTLE: str = "#2D2D2D"  # Subtle separation
+    BORDER_DEFAULT: str = "#404040"  # Standard borders
+    BORDER_STRONG: str = "#505050"  # Emphasized borders
+    BORDER_FOCUS: str = "#0A84FF"  # Focus ring color
 
     # Text hierarchy
-    TEXT_PRIMARY: ClassVar[str] = "#FFFFFF"  # Headings, important text
-    TEXT_SECONDARY: ClassVar[str] = "#E0E0E0"  # Body text
-    TEXT_TERTIARY: ClassVar[str] = "#A0A0A0"  # Subtle text, labels
-    TEXT_QUATERNARY: ClassVar[str] = "#666666"  # Disabled, placeholder
-    TEXT_LINK: ClassVar[str] = "#0A84FF"  # Links
+    TEXT_PRIMARY: str = "#FFFFFF"  # Headings, important text
+    TEXT_SECONDARY: str = "#E0E0E0"  # Body text
+    TEXT_TERTIARY: str = "#A0A0A0"  # Subtle text, labels
+    TEXT_QUATERNARY: str = "#666666"  # Disabled, placeholder
+    TEXT_LINK: str = "#0A84FF"  # Links
 
     # Semantic colors for data visualization
     # Carefully selected for distinguishability and color-blind accessibility
-    CHART_BLUE: ClassVar[str] = "#0A84FF"
-    CHART_GREEN: ClassVar[str] = "#30D158"
-    CHART_ORANGE: ClassVar[str] = "#FF9F0A"
-    CHART_RED: ClassVar[str] = "#FF375F"
-    CHART_PURPLE: ClassVar[str] = "#BF5AF2"
-    CHART_CYAN: ClassVar[str] = "#64D2FF"
-    CHART_YELLOW: ClassVar[str] = "#FFD60A"
-    CHART_BROWN: ClassVar[str] = "#AC8E68"
+    CHART_BLUE: str = "#0A84FF"
+    CHART_GREEN: str = "#30D158"
+    CHART_ORANGE: str = "#FF9F0A"
+    CHART_RED: str = "#FF375F"
+    CHART_PURPLE: str = "#BF5AF2"
+    CHART_CYAN: str = "#64D2FF"
+    CHART_YELLOW: str = "#FFD60A"
+    CHART_BROWN: str = "#AC8E68"
 
     # Grid and axis colors for plots
-    GRID_LINE: ClassVar[str] = "#333333"
-    AXIS_LINE: ClassVar[str] = "#404040"
-    TICK_COLOR: ClassVar[str] = "#808080"
+    GRID_LINE: str = "#333333"
+    AXIS_LINE: str = "#404040"
+    TICK_COLOR: str = "#808080"
 
     # Shadows (for CSS box-shadow or Qt graphics effects)
-    SHADOW_LIGHT: ClassVar[str] = "rgba(0, 0, 0, 0.15)"
-    SHADOW_MEDIUM: ClassVar[str] = "rgba(0, 0, 0, 0.25)"
-    SHADOW_HEAVY: ClassVar[str] = "rgba(0, 0, 0, 0.40)"
+    SHADOW_LIGHT: str = "rgba(0, 0, 0, 0.15)"
+    SHADOW_MEDIUM: str = "rgba(0, 0, 0, 0.25)"
+    SHADOW_HEAVY: str = "rgba(0, 0, 0, 0.40)"
 
 
-# Convenience instance
-Colors = ColorPalette()
+# Define Palettes
+
+DARK_PALETTE = ColorPalette()
+
+LIGHT_PALETTE = ColorPalette(
+    # Invert backgrounds
+    BG_DEEP="#F2F2F7",
+    BG_BASE="#FFFFFF",
+    BG_SURFACE="#F2F2F7",
+    BG_ELEVATED="#FFFFFF",
+    BG_HIGHLIGHT="#E5E5EA",
+    # Invert text
+    TEXT_PRIMARY="#000000",
+    TEXT_SECONDARY="#3C3C43",
+    TEXT_TERTIARY="#8E8E93",
+    TEXT_QUATERNARY="#C7C7CC",
+    # Borders
+    BORDER_SUBTLE="#E5E5EA",
+    BORDER_DEFAULT="#C6C6C8",
+    BORDER_STRONG="#8E8E93",
+    # Grid/Axis
+    GRID_LINE="#E5E5EA",
+    AXIS_LINE="#C6C6C8",
+    TICK_COLOR="#8E8E93",
+    # Shadows
+    SHADOW_LIGHT="rgba(0, 0, 0, 0.05)",
+    SHADOW_MEDIUM="rgba(0, 0, 0, 0.1)",
+    SHADOW_HEAVY="rgba(0, 0, 0, 0.2)",
+)
+
+HIGH_CONTRAST_PALETTE = ColorPalette(
+    # Stark contrasts
+    BG_DEEP="#000000",
+    BG_BASE="#000000",
+    BG_SURFACE="#000000",
+    BG_ELEVATED="#1A1A1A",
+    BG_HIGHLIGHT="#333333",
+    # Text
+    TEXT_PRIMARY="#FFFFFF",
+    TEXT_SECONDARY="#FFFFFF",
+    TEXT_TERTIARY="#DDDDDD",
+    TEXT_QUATERNARY="#BBBBBB",
+    TEXT_LINK="#FFFF00",
+    # Accents
+    PRIMARY="#FFFF00",  # Yellow
+    PRIMARY_HOVER="#FFFFCC",
+    PRIMARY_PRESSED="#CCCC00",
+    PRIMARY_MUTED="#FFFF0040",
+    # Borders
+    BORDER_SUBTLE="#FFFFFF",
+    BORDER_DEFAULT="#FFFFFF",
+    BORDER_STRONG="#FFFFFF",
+    BORDER_FOCUS="#FFFF00",
+    # Grid
+    GRID_LINE="#FFFFFF",
+    AXIS_LINE="#FFFFFF",
+    TICK_COLOR="#FFFFFF",
+)
+
+
+# Global active palette
+_active_palette: ColorPalette = DARK_PALETTE
+
+
+def get_active_palette() -> ColorPalette:
+    """Get the currently active color palette."""
+    return _active_palette
+
+
+def set_active_palette(palette: ColorPalette) -> None:
+    """Set the active color palette."""
+    global _active_palette
+    _active_palette = palette
+
+
+class _ColorsProxy:
+    """Proxy object that delegates attribute access to the active palette."""
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(get_active_palette(), name)
+
+
+# Convenience instance (Proxy)
+Colors = _ColorsProxy()  # type: ignore
 
 
 # Chart color sequence for matplotlib and other plotting libraries
+# Note: These values are dynamic now if accessed via Colors, but CHART_COLORS
+# list itself is static. We should likely make it a property or dynamic too,
+# but for now we'll init it from the Default (Dark) palette or leave it as is.
+# Using the proxy Colors in the list won't work because lists store values.
+# So CHART_COLORS will reflect the palette active at import time (Dark).
+# This is a limitation, but acceptable if we assume Dark mode for charts
+# or if charts re-fetch colors.
 CHART_COLORS = [
-    Colors.CHART_BLUE,
-    Colors.CHART_GREEN,
-    Colors.CHART_ORANGE,
-    Colors.CHART_RED,
-    Colors.CHART_PURPLE,
-    Colors.CHART_CYAN,
-    Colors.CHART_YELLOW,
-    Colors.CHART_BROWN,
+    DARK_PALETTE.CHART_BLUE,
+    DARK_PALETTE.CHART_GREEN,
+    DARK_PALETTE.CHART_ORANGE,
+    DARK_PALETTE.CHART_RED,
+    DARK_PALETTE.CHART_PURPLE,
+    DARK_PALETTE.CHART_CYAN,
+    DARK_PALETTE.CHART_YELLOW,
+    DARK_PALETTE.CHART_BROWN,
 ]
 
 
@@ -145,7 +234,7 @@ def get_rgba(hex_color: str, alpha: float = 1.0) -> tuple[float, float, float, f
     Returns:
         Tuple of (r, g, b, a) with values 0-1 for matplotlib
     """
-    hex_color = hex_color.lstrip("#")
+    hex_color = str(hex_color).lstrip("#")
     if len(hex_color) == 8:  # Has alpha component
         r = int(hex_color[0:2], 16) / 255
         g = int(hex_color[2:4], 16) / 255
@@ -166,4 +255,9 @@ __all__ = [
     "DEFAULT_COLORS",
     "get_qcolor",
     "get_rgba",
+    "DARK_PALETTE",
+    "LIGHT_PALETTE",
+    "HIGH_CONTRAST_PALETTE",
+    "get_active_palette",
+    "set_active_palette",
 ]
