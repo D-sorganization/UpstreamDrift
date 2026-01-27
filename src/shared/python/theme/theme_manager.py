@@ -21,7 +21,6 @@ else:
     class QObject:  # type: ignore
         """Stub for QObject."""
 
-
     class pyqtSignal:  # type: ignore
         """Stub for pyqtSignal."""
 
