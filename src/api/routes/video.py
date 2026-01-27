@@ -9,9 +9,9 @@ from pathlib import Path
 from typing import Any
 
 try:
-    from datetime import UTC
+    from datetime import timezone
 except ImportError:
-    UTC = timezone.utc  # noqa: UP017
+    timezone.utc = timezone.utc  # noqa: UP017
 
 from fastapi import APIRouter, BackgroundTasks, File, HTTPException, UploadFile
 
@@ -163,7 +163,7 @@ async def analyze_video_async(
 
     _active_tasks[task_id] = {
         "status": "started",
-        "created_at": datetime.now(UTC),
+        "created_at": datetime.now(timezone.utc),
     }
 
     background_tasks.add_task(
@@ -188,7 +188,7 @@ async def _process_video_background(
     """Background task for video processing."""
     try:
         task_data = _active_tasks.get(task_id) or {}
-        created_at = task_data.get("created_at", datetime.now(UTC))
+        created_at = task_data.get("created_at", datetime.now(timezone.utc))
 
         _active_tasks[task_id] = {
             "status": "processing",
@@ -204,7 +204,7 @@ async def _process_video_background(
         result = pipeline.process_video(video_path)
 
         task_data = _active_tasks.get(task_id) or {}
-        created_at = task_data.get("created_at", datetime.now(UTC))
+        created_at = task_data.get("created_at", datetime.now(timezone.utc))
 
         _active_tasks[task_id] = {
             "status": "completed",
@@ -220,7 +220,7 @@ async def _process_video_background(
 
     except Exception as e:
         task_data = _active_tasks.get(task_id) or {}
-        created_at = task_data.get("created_at", datetime.now(UTC))
+        created_at = task_data.get("created_at", datetime.now(timezone.utc))
 
         _active_tasks[task_id] = {
             "status": "failed",

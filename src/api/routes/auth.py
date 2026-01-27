@@ -1,13 +1,13 @@
 """Authentication routes for user management."""
 
-# Python 3.10 compatibility: UTC was added in 3.11
+# Python 3.10 compatibility: timezone.utc was added in 3.11
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
 try:
-    from datetime import UTC
+    from datetime import timezone
 except ImportError:
-    UTC = timezone.utc  # noqa: UP017
+    timezone.utc = timezone.utc  # noqa: UP017
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from slowapi import Limiter
@@ -120,7 +120,7 @@ async def login(
     )
 
     # Update last login
-    user.last_login = datetime.now(UTC)  # type: ignore[assignment]
+    user.last_login = datetime.now(timezone.utc)  # type: ignore[assignment]
     db.commit()
 
     return LoginResponse(

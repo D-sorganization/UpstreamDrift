@@ -7,9 +7,9 @@ from datetime import datetime, timezone
 from typing import Any
 
 try:
-    from datetime import UTC
+    from datetime import timezone
 except ImportError:
-    UTC = timezone.utc  # noqa: UP017
+    timezone.utc = timezone.utc  # noqa: UP017
 
 from fastapi import APIRouter, BackgroundTasks, HTTPException
 
@@ -69,7 +69,7 @@ async def run_simulation_async(
 
     _active_tasks[task_id] = {
         "status": "started",
-        "created_at": datetime.now(UTC),
+        "created_at": datetime.now(timezone.utc),
     }
 
     background_tasks.add_task(

@@ -13,9 +13,9 @@ from datetime import datetime, timezone
 
 # Shim for Python < 3.11
 try:
-    from datetime import UTC
+    from datetime import timezone
 except ImportError:
-    UTC = timezone.utc  # noqa: UP017
+    timezone.utc = timezone.utc  # noqa: UP017
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -222,8 +222,8 @@ class TestTimezoneAwareJWT:
         assert isinstance(exp_timestamp, int | float)
 
         # Convert to datetime and verify it's in the future
-        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=UTC)
-        now = datetime.now(UTC)
+        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+        now = datetime.now(timezone.utc)
 
         assert exp_datetime > now, "Token expiration should be in the future"
         assert exp_datetime.tzinfo is not None, "Expiration should be timezone-aware"
@@ -247,8 +247,8 @@ class TestTimezoneAwareJWT:
 
         # Check expiration is timezone-aware
         exp_timestamp = payload["exp"]
-        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=UTC)
-        now = datetime.now(UTC)
+        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+        now = datetime.now(timezone.utc)
 
         assert exp_datetime > now
         assert exp_datetime.tzinfo is not None

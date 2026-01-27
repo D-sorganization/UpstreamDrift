@@ -9,15 +9,15 @@ responses with markdown rendering.
 
 from __future__ import annotations
 
-# Python 3.10 compatibility: UTC was added in 3.11
+# Python 3.10 compatibility: timezone.utc was added in 3.11
 from datetime import datetime, timezone
 
 from src.shared.python.logging_config import get_logger
 
 try:
-    from datetime import UTC
+    from datetime import timezone
 except ImportError:
-    UTC = timezone.utc  # noqa: UP017
+    timezone.utc = timezone.utc  # noqa: UP017
 from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
@@ -66,7 +66,7 @@ class MessageWidget(QFrame):
         super().__init__(parent)
         self._role = role
         self._content = content
-        self._timestamp = timestamp or datetime.now(UTC)
+        self._timestamp = timestamp or datetime.now(timezone.utc)
         self._setup_ui()
         self._apply_style()
 
