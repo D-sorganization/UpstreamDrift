@@ -15,7 +15,7 @@ Dimensionally, this is $[L/T^3] / [L/T^2] = [1/T] = \text{Frequency} (Hz)$. It i
 Standard "Dimensionless Jerk" metrics are usually calculated using the root-mean-square (RMS) jerk normalized by the movement duration and amplitude, for example:
 $$ DJ = - \ln \left( \frac{\int j(t)^2 dt \cdot D^5}{A^2} \right) $$
 or simply:
-$$ DJ = \frac{\text{Jerk}_{rms} \cdot D^2}{V_{peak}} $$ (Wait, $L/T^3 * T^2 / (L/T) = (L/T) / (L/T) = 1$)
+$$ DJ = \frac{\text{Jerk}_{rms} \cdot D^2}{V_{peak}} $$ (This formula is dimensionless: $[L/T^3] \cdot [T^2] / [L/T] = 1$)
 
 ## Impact
 - **Interpretation:** Users expecting a dimensionless index will be confused by the magnitude and unit dependence.
