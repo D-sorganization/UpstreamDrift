@@ -10,7 +10,7 @@ on:
     types: [completed]
   schedule:
     # OVERNIGHT SCHEDULE - All work done before morning (midnight-6 AM PST / 8 AM-2 PM UTC)
-    - cron: "0 8 * * *"   # Midnight PST - Assessment Generator
+    - cron: "0 8 */3 * *"   # Midnight PST - Assessment Generator
     - cron: "30 8 * * *"  # 12:30 AM PST - Code Quality Reviewer
     - cron: "0 9 * * *"   # 1 AM PST - Completist (incomplete impl)
     - cron: "30 10 * * *" # 2:30 AM PST - Sentinel (security)
