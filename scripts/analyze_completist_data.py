@@ -39,6 +39,8 @@ EXCLUDED_PATHS = [
     "CRITICAL_PROJECT_REVIEW.md",
     "WORKFLOW_AND_AGENTS_REPORT.md",
     "pyproject.toml",
+    "AGENTS.md",
+    "JULES_ARCHITECTURE.md",
 ]
 
 
