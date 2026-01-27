@@ -253,13 +253,29 @@ def assess_J():
     score = 7.5
 
     api_dir = REPO_ROOT / "api"
+    src_api_dir = REPO_ROOT / "src" / "api"
+
+    target_api_dir = None
     if api_dir.exists() and api_dir.is_dir():
+        target_api_dir = api_dir
         findings.append("api/ directory exists.")
-        fastapi = grep_count(REPO_ROOT, "FastAPI", "api/**/*.py")
+    elif src_api_dir.exists() and src_api_dir.is_dir():
+        target_api_dir = src_api_dir
+        findings.append("src/api/ directory exists.")
+
+    if target_api_dir:
+        # Check for FastAPI usage in the found directory relative to REPO_ROOT
+        # grep_count takes a root and a pattern. We need to grep inside the api dir.
+        # But grep_count implementation iterates glob from root.
+        # So we can pass REPO_ROOT and a pattern that matches the specific dir.
+
+        rel_path = target_api_dir.relative_to(REPO_ROOT)
+        fastapi = grep_count(REPO_ROOT, "FastAPI", f"{rel_path}/**/*.py")
+
         if fastapi > 0:
             findings.append("FastAPI usage detected.")
     else:
-        findings.append("No api/ directory.")
+        findings.append("No api/ or src/api/ directory.")
         score -= 2
 
     recs = ["Document API endpoints using OpenAPI.", "Version API endpoints."]
