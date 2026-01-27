@@ -260,7 +260,7 @@ def generate_mermaid_charts(criticals: list[Finding], todos: list[Finding], fixm
     """Generate Mermaid charts for the report."""
     chart = []
     chart.append("## Visualization")
-    
+
     # Pie Chart
     chart.append("### Status Overview")
     chart.append("```mermaid")
@@ -270,7 +270,7 @@ def generate_mermaid_charts(criticals: list[Finding], todos: list[Finding], fixm
     chart.append(f'    "Technical Debt (FIXME)" : {len(fixmes)}')
     chart.append(f'    "Doc Gaps" : {len(docs)}')
     chart.append("```")
-    
+
     # Breakdown by Top Modules (Bar Chart equivalent using pie or just text for now as mermaid bar is verbose)
     # Let's do a simple count by top-level dir
     counts = {}
@@ -280,9 +280,9 @@ def generate_mermaid_charts(criticals: list[Finding], todos: list[Finding], fixm
         if root in [".", "src"]:
             root = path_parts[1] if len(path_parts) > 1 else root
         counts[root] = counts.get(root, 0) + 1
-        
+
     sorted_mods = sorted(counts.items(), key=lambda x: x[1], reverse=True)[:5]
-    
+
     if sorted_mods:
         chart.append("\n### Top Impacted Modules")
         chart.append("```mermaid")
@@ -290,7 +290,7 @@ def generate_mermaid_charts(criticals: list[Finding], todos: list[Finding], fixm
         for mod, count in sorted_mods:
              chart.append(f'    "{mod}" : {count}')
         chart.append("```")
-        
+
     return "\n".join(chart)
 
 
@@ -316,7 +316,7 @@ def generate_report() -> None:
         f"- **Technical Debt**: {len(fixmes)}",
         f"- **Documentation Gaps**: {len(missing_docs)}\n",
     ]
-    
+
     # Insert Mermaid Visualization
     report.append(generate_mermaid_charts(criticals, todos, fixmes, missing_docs))
 

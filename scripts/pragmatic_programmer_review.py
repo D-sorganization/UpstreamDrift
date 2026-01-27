@@ -85,7 +85,7 @@ def get_detailed_function_metrics(content: str):
         tree = ast.parse(content)
     except SyntaxError:
         return []
-    
+
     funcs = []
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef):
@@ -185,7 +185,7 @@ def check_quality(files: list[Path]) -> list[dict]:
             if "TODO" in content:
                 todos.append(str(file_path))
         except: pass
-    
+
     if len(todos) > 10:
         issues.append({
             "principle": "QUALITY",
@@ -203,7 +203,7 @@ def check_testing(root_path: Path) -> list[dict]:
     test_files = list(root_path.rglob("test_*.py"))
     src_files = find_python_files(root_path)
     ratio = len(test_files) / max(len(src_files), 1)
-    
+
     if ratio < 0.2:
         issues.append({
             "principle": "TESTING",
@@ -219,14 +219,14 @@ def check_testing(root_path: Path) -> list[dict]:
 def run_review(root_path: Path):
     logger.info(f"Running Pragmatic Review on {root_path}")
     files = find_python_files(root_path)
-    
+
     all_issues = []
     all_issues.extend(check_dry_violations(files))
     all_issues.extend(check_orthogonality(files))
     all_issues.extend(check_reversibility(root_path))
     all_issues.extend(check_quality(files))
     all_issues.extend(check_testing(root_path))
-    
+
     return {
         "timestamp": datetime.now().isoformat(),
         "repository": root_path.name,
@@ -240,20 +240,20 @@ def generate_markdown_report(results, output_path):
     md.append(f"**Date**: {results['timestamp'][:10]}")
     md.append(f"**Files**: {results['files_analyzed']}")
     md.append("\n## Findings")
-    
+
     if not results["issues"]:
         md.append("No major issues found.")
-    
+
     for issue in results["issues"]:
         md.append(f"- **{issue['principle']}** [{issue['severity']}]: {issue['title']}")
         md.append(f"  - {issue['description']}")
         if issue.get('files'):
             md.append(f"  - Files: {', '.join(issue['files'][:3])}")
-    
+
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with open(output_path, "w") as f:
         f.write("\n".join(md))
-    
+
     # Save JSON too
     json_path = output_path.with_suffix('.json')
     with open(json_path, 'w') as f:
@@ -265,7 +265,7 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=Path, default=Path("docs/assessments/pragmatic_programmer/review.md"))
     parser.add_argument("--json-output", type=Path)
     args = parser.parse_args()
-    
+
     repo_root = Path.cwd()
     results = run_review(repo_root)
     generate_markdown_report(results, args.output)
