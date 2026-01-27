@@ -256,6 +256,44 @@ Implement missing logic or document the rationale for the gap.
     return filepath
 
 
+def generate_mermaid_charts(criticals: list[Finding], todos: list[Finding], fixmes: list[Finding], docs: list[Finding]) -> str:
+    """Generate Mermaid charts for the report."""
+    chart = []
+    chart.append("## Visualization")
+    
+    # Pie Chart
+    chart.append("### Status Overview")
+    chart.append("```mermaid")
+    chart.append("pie title Completion Status")
+    chart.append(f'    "Impl Gaps (Critical)" : {len(criticals)}')
+    chart.append(f'    "Feature Requests (TODO)" : {len(todos)}')
+    chart.append(f'    "Technical Debt (FIXME)" : {len(fixmes)}')
+    chart.append(f'    "Doc Gaps" : {len(docs)}')
+    chart.append("```")
+    
+    # Breakdown by Top Modules (Bar Chart equivalent using pie or just text for now as mermaid bar is verbose)
+    # Let's do a simple count by top-level dir
+    counts = {}
+    for item in criticals + todos + fixmes:
+        path_parts = item["file"].split("/")
+        root = path_parts[0] if path_parts else "unknown"
+        if root in [".", "src"]:
+            root = path_parts[1] if len(path_parts) > 1 else root
+        counts[root] = counts.get(root, 0) + 1
+        
+    sorted_mods = sorted(counts.items(), key=lambda x: x[1], reverse=True)[:5]
+    
+    if sorted_mods:
+        chart.append("\n### Top Impacted Modules")
+        chart.append("```mermaid")
+        chart.append("pie title Issues by Module")
+        for mod, count in sorted_mods:
+             chart.append(f'    "{mod}" : {count}')
+        chart.append("```")
+        
+    return "\n".join(chart)
+
+
 def generate_report() -> None:
     """Generate the structured completist status report."""
     stubs = analyze_stubs()
@@ -277,10 +315,15 @@ def generate_report() -> None:
         f"- **Feature Gaps (TODO)**: {len(todos)}",
         f"- **Technical Debt**: {len(fixmes)}",
         f"- **Documentation Gaps**: {len(missing_docs)}\n",
-        "## Critical Incomplete (Top 50)",
-        "| File | Line | Type | Impact | Coverage | Complexity |",
-        "|---|---|---|---|---|---|",
     ]
+    
+    # Insert Mermaid Visualization
+    report.append(generate_mermaid_charts(criticals, todos, fixmes, missing_docs))
+
+    # Critical Table
+    report.append("\n## Critical Incomplete (Top 50)")
+    report.append("| File | Line | Type | Impact | Coverage | Complexity |")
+    report.append("|---|---|---|---|---|---|")
 
     for item in criticals[:50]:
         imp, cov, comp = calculate_metrics(item)

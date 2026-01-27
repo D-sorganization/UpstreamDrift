@@ -1,0 +1,269 @@
+name: Jules Comprehensive Assessment
+
+on:
+  schedule:
+    - cron: "0 5 * * *"  # Daily at 5 AM UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  comprehensive-assessment:
+    name: Comprehensive Assessment & Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt || true
+          pip install tabulate || true
+          npm install -g @google/jules
+
+      # ---------------------------------------------------------
+      # Component 1: Pragmatic Programmer Review (Local)
+      # ---------------------------------------------------------
+      - name: Run Pragmatic Programmer Review
+        id: pragmatic
+        run: |
+          if [ -f "scripts/pragmatic_programmer_review.py" ]; then
+            echo "Running Pragmatic Programmer Review..."
+            mkdir -p docs/assessments/pragmatic_programmer
+            python scripts/pragmatic_programmer_review.py \
+              --output docs/assessments/pragmatic_programmer/review_$(date +%Y-%m-%d).md \
+              --json-output docs/assessments/pragmatic_programmer/review.json || echo "Script failed but continuing"
+          else
+            echo "Script not found, skipping."
+          fi
+
+      # ---------------------------------------------------------
+      # Component 2: Completist Audit (Data Collection)
+      # ---------------------------------------------------------
+      - name: Run Completist Data Collection
+        run: |
+          echo "Collecting incomplete implementation patterns..."
+          mkdir -p .jules/completist_data
+          
+          # Find TODO/FIXME markers
+          grep -rn "TODO\|FIXME\|XXX\|HACK\|TEMP" --include="*.py" --include="*.ts" --include="*.js" . \
+            --exclude-dir=".git" --exclude-dir="venv" --exclude-dir="node_modules" \
+            > .jules/completist_data/todo_markers.txt 2>/dev/null || true
+
+          # Find NotImplementedError
+          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
+            --exclude-dir=".git" --exclude-dir="venv" \
+            > .jules/completist_data/not_implemented.txt 2>/dev/null || true
+
+          # Find incomplete docstrings
+          grep -rn '""".*TODO\|""".*WIP\|# TODO:' --include="*.py" . \
+            --exclude-dir=".git" --exclude-dir="venv" \
+            > .jules/completist_data/incomplete_docs.txt 2>/dev/null || true
+
+          # Find abstract methods
+          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
+            --exclude-dir=".git" --exclude-dir="venv" \
+            > .jules/completist_data/abstract_methods.txt 2>/dev/null || true
+
+      # ---------------------------------------------------------
+      # Component 2b: Completist Analysis Script (Plot Gen)
+      # ---------------------------------------------------------
+      - name: Generate Completist Report & Plot
+        run: |
+            if [ -f "scripts/analyze_completist_data.py" ]; then
+               python scripts/analyze_completist_data.py || echo "Analysis script failed"
+            fi
+
+      # ---------------------------------------------------------
+      # Archive Old Data
+      # ---------------------------------------------------------
+      - name: Archive Existing Assessments
+        run: |
+          mkdir -p docs/assessments/archive
+          DATE=$(date +%Y-%m-%d)
+          for file in docs/assessments/Assessment_*.md; do
+            [ -f "$file" ] && mv "$file" "docs/assessments/archive/$(basename "$file" .md)_archived_$DATE.md" || true
+          done
+          if [ -f "docs/assessments/Comprehensive_Assessment.md" ]; then
+            mv "docs/assessments/Comprehensive_Assessment.md" \
+               "docs/assessments/archive/Comprehensive_Assessment_archived_$DATE.md"
+          fi
+
+      # ---------------------------------------------------------
+      # Commit Data for Agent Context
+      # ---------------------------------------------------------
+      - name: Commit Assessment Data
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs(assessment): pre-assessment data collection"
+          branch: "automation/assessment-$(date +%Y-%m-%d)"
+          create_branch: true
+          push_options: '--force'
+
+      # ---------------------------------------------------------
+      # Component 3: Jules Comprehensive Assessment (API)
+      # ---------------------------------------------------------
+      - name: Jules Comprehensive Analysis
+        env:
+          JULES_API_KEY: ${{ secrets.JULES_API_KEY }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          DATE=$(date +%Y-%m-%d)
+          REPO="${{ github.repository }}"
+          REPO_NAME="${{ github.event.repository.name }}"
+          API_BASE="https://jules.googleapis.com/v1alpha"
+
+          if [ -z "$JULES_API_KEY" ]; then
+            echo "::warning::JULES_API_KEY not configured."
+            exit 0
+          fi
+
+          # Resolve Source ID
+          SOURCES=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/sources" || echo '{"sources":[]}')
+          OWNER=$(echo "$REPO" | cut -d'/' -f1)
+          RNAME=$(echo "$REPO" | cut -d'/' -f2)
+          SOURCE_ID=$(echo "$SOURCES" | jq -r ".sources[] | select(.githubRepo.owner == \"$OWNER\" and .githubRepo.repo == \"$RNAME\") | .name" | head -1)
+
+          if [ -z "$SOURCE_ID" ] || [ "$SOURCE_ID" = "null" ]; then
+            echo "::warning::Source not found for $REPO"
+            exit 0
+          fi
+
+          # Construct Prompt
+          PROMPT=$(cat << 'PROMPT_EOF'
+          You are the COMPREHENSIVE ASSESSMENT AGENT.
+
+          ## Mission
+          Perform a thorough audit of the repository, combining General Code Quality (A-O), Completist Analysis, and Pragmatic Programmer review.
+          
+          ## Requirements
+          
+          ### 1. General Assessment (Categories A-O)
+          For EACH category from A to O:
+          1. **Read Reference**: Look for `docs/assessments/Assessment_Prompt_X.md` (where X is A, B, C...).
+          2. **Follow Instructions Exactly**: Follow the specific tables and criteria in those files.
+          3. **Output**: Save to `docs/assessments/Assessment_X_Category.md`.
+          
+          ### 2. Completist Audit
+          - **Read Reference**: `docs/assessments/Assessment_Prompt_Completist.md`.
+          - **Input Data**: Review `.jules/completist_data/` and the report in `docs/assessments/completist/`.
+          - **Output**: `docs/assessments/Assessment_Completist.md` (following the template).
+          
+          ### 3. Pragmatic Programmer Review
+          - **Read Reference**: `docs/assessments/Assessment_Prompt_Pragmatic_Programmer.md`.
+          - **Input Data**: Review `docs/assessments/pragmatic_programmer/`.
+          - **Output**: `docs/assessments/Assessment_Pragmatic_Programmer.md` (following the template).
+             
+          ### 4. Comprehensive Report
+          - Create `docs/assessments/Comprehensive_Assessment.md`.
+          - Include a unified scorecard.
+          
+          ## PR Title Instruction
+          The Pull Request Title MUST be exactly:
+          [REPO_NAME_PLACEHOLDER] [docs] Assessment Generation - DATE_PLACEHOLDER
+          
+          PROMPT_EOF
+          )
+          
+          # Inject Variables into Prompt
+          PROMPT="${PROMPT//REPO_NAME_PLACEHOLDER/$REPO_NAME}"
+          PROMPT="${PROMPT//DATE_PLACEHOLDER/$DATE}"
+
+          # Create Session
+          REQUEST_JSON=$(jq -n \
+            --arg prompt "$PROMPT" \
+            --arg source "$SOURCE_ID" \
+            --arg branch "automation/assessment-$DATE" \
+            '{
+              prompt: $prompt,
+              sourceContext: {
+                source: $source,
+                githubRepoContext: {
+                  startingBranch: $branch
+                }
+              },
+              automationMode: "AUTO_CREATE_PR"
+            }')
+
+          echo "Initiating Jules Session..."
+          HTTP_CODE=$(curl -s -o /tmp/response.json -w "%{http_code}" -X POST \
+            -H "X-Goog-Api-Key: $JULES_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "$REQUEST_JSON" \
+            "$API_BASE/sessions")
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::API Error $HTTP_CODE"
+            cat /tmp/response.json
+            exit 1
+          fi
+
+          SESSION_ID=$(cat /tmp/response.json | jq -r '.name')
+          echo "Session: $SESSION_ID"
+
+          # Poll Loop
+          MAX_WAIT=1800
+          POLL_INTERVAL=30
+          ELAPSED=0
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            STATUS_JSON=$(curl -sf -H "X-Goog-Api-Key: $JULES_API_KEY" "$API_BASE/$SESSION_ID")
+            STATE=$(echo "$STATUS_JSON" | jq -r '.state')
+            echo "State: $STATE ($ELAPSED s)"
+            
+            if [[ "$STATE" == "COMPLETED" || "$STATE" == "SUBMITTED" ]]; then
+              echo "Analysis Complete."
+              break
+            elif [[ "$STATE" == "FAILED" || "$STATE" == "CANCELLED" ]]; then
+              echo "::error::Session Failed"
+              exit 1
+            fi
+            sleep $POLL_INTERVAL
+            ELAPSED=$((ELAPSED + POLL_INTERVAL))
+          done
+
+      # ---------------------------------------------------------
+      # Ensure Consistent PR Title
+      # ---------------------------------------------------------
+      - name: Enforce PR Title
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          EXPECTED_TITLE="[${{ github.event.repository.name }}] [docs] Assessment Generation - $DATE"
+          BRANCH="automation/assessment-$DATE"
+          
+          echo "Looking for PR on branch $BRANCH or by app/jules..."
+          
+          # Try 1: By Branch
+          PR=$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number')
+          
+          # Try 2: By Author (Recent)
+          if [ -z "$PR" ]; then
+            # Wait a moment for creation if needed
+            sleep 5
+            PR=$(gh pr list --author "app/jules" --state open --sort created --limit 1 --json number --jq '.[0].number')
+          fi
+          
+          if [ -n "$PR" ]; then
+            echo "Found PR #$PR. Updating title..."
+            gh pr edit "$PR" --title "$EXPECTED_TITLE"
+          else
+            echo "::warning::Could not find generated PR to rename."
+          fi
