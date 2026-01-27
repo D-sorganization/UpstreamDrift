@@ -7,7 +7,7 @@ runs validation tests, and generates a detailed compliance report.
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
 import sys
-from datetime import datetime, timezone
+from datetime import timezone, datetime
 from pathlib import Path
 from typing import Any
 

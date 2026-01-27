@@ -3,7 +3,7 @@ name: Jules Assessment Auto-Fix
 on:
   schedule:
     # Daily at 5 AM PST (13:00 UTC) - runs after overnight assessments complete
-    - cron: '0 13 * * *'
+    - cron: '0 13 */3 * *'
   workflow_dispatch:
     inputs:
       assessment_type:

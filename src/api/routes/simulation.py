@@ -69,7 +69,7 @@ async def run_simulation_async(
 
     _active_tasks[task_id] = {
         "status": "started",
-        "created_at": datetime.now(UTC),
+        "created_at": datetime.now(timezone.utc),
     }
 
     background_tasks.add_task(

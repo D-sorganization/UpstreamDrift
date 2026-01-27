@@ -11,12 +11,12 @@ on:
   schedule:
     # OVERNIGHT SCHEDULE - All work done before morning (midnight-6 AM PST / 8 AM-2 PM UTC)
     - cron: "0 8 */3 * *"   # Midnight PST - Assessment Generator
-    - cron: "30 8 * * *"  # 12:30 AM PST - Code Quality Reviewer
-    - cron: "0 9 * * *"   # 1 AM PST - Completist (incomplete impl)
-    - cron: "30 10 * * *" # 2:30 AM PST - Sentinel (security)
-    - cron: "0 11 * * *"  # 3 AM PST - Tech Custodian
-    - cron: "30 11 * * *" # 3:30 AM PST - Issue Resolver (daily fix)
-    - cron: "0 12 * * *"  # 4 AM PST - PR Compiler (consolidate PRs)
+    - cron: "30 8 */3 * *"  # 12:30 AM PST - Code Quality Reviewer
+    - cron: "0 9 */3 * *"   # 1 AM PST - Completist (incomplete impl)
+    - cron: "30 10 */3 * *" # 2:30 AM PST - Sentinel (security)
+    - cron: "0 11 */3 * *"  # 3 AM PST - Tech Custodian
+    - cron: "30 11 */3 * *" # 3:30 AM PST - Issue Resolver (daily fix)
+    - cron: "0 12 */3 * *"  # 4 AM PST - PR Compiler (consolidate PRs)
   workflow_dispatch:
     inputs:
       target:

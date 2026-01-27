@@ -1,7 +1,7 @@
 """Authentication routes for user management."""
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
-from datetime import UTC, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 try:
@@ -120,7 +120,7 @@ async def login(
     )
 
     # Update last login
-    user.last_login = datetime.now(UTC)  # type: ignore[assignment]
+    user.last_login = datetime.now(timezone.utc)  # type: ignore[assignment]
     db.commit()
 
     return LoginResponse(

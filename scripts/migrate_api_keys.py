@@ -39,7 +39,7 @@ import os
 import sys
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 from pathlib import Path
 from typing import Any
 
@@ -244,7 +244,7 @@ def save_migration_results(record_count: int, output_file: str) -> None:
         # Generic header to avoid keyword-based security flags
         f.write("=" * 80 + "\n")
         f.write("MIGRATION AUDIT TRAIL\n")
-        f.write(f"Timestamp: {datetime.now(UTC).isoformat()}\n")
+        f.write(f"Timestamp: {datetime.now(timezone.utc).isoformat()}\n")
         f.write(f"Items Processed: {record_count}\n")
         f.write("=" * 80 + "\n\n")
 

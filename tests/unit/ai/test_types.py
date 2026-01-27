@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
-from datetime import UTC, timezone
+from datetime import timezone
 
 try:
     from datetime import timezone
@@ -75,7 +75,7 @@ class TestMessage:
         msg = Message(role="user", content="Hello")
         assert msg.role == "user"
         assert msg.content == "Hello"
-        assert msg.timestamp.tzinfo == UTC
+        assert msg.timestamp.tzinfo == timezone.utc
 
     def test_message_to_dict(self) -> None:
         """Test message serialization."""
