@@ -80,13 +80,13 @@ class MessageWidget(QFrame):
         header = QHBoxLayout()
 
         role_label = QLabel(self._get_role_display())
-        role_label.setStyleSheet("font-weight: bold;")
+        role_label.setStyleSheet("font-weight: bold; color: #e0e0e0;")
         header.addWidget(role_label)
 
         header.addStretch()
 
         time_label = QLabel(self._timestamp.strftime("%H:%M"))
-        time_label.setStyleSheet("color: #888; font-size: 11px;")
+        time_label.setStyleSheet("color: #888888; font-size: 11px;")
         header.addWidget(time_label)
 
         layout.addLayout(header)
@@ -106,6 +106,8 @@ class MessageWidget(QFrame):
             QSizePolicy.Policy.Minimum,
         )
         self._content_label.setMarkdown(self._content)
+        # Ensure text is visible on dark backgrounds
+        self._content_label.setStyleSheet("background-color: transparent; color: #e0e0e0;")
 
         # Auto-resize to content
         doc = self._content_label.document()
@@ -126,29 +128,41 @@ class MessageWidget(QFrame):
         return role_map.get(self._role, self._role.title())
 
     def _apply_style(self) -> None:
-        """Apply styling based on role."""
+        """Apply styling based on role.
+        
+        Using Gitpod-like Dark Theme:
+        - Background: #1e1e1e
+        - Orange Accent: #FF8800
+        - Text: #e0e0e0
+        """
         if self._role == "user":
             self.setStyleSheet("""
                 MessageWidget {
-                    background-color: #e3f2fd;
+                    background-color: #2d2d2d;
+                    border: 1px solid #3c3c3c;
                     border-radius: 8px;
                     margin-left: 40px;
                 }
+                QLabel { color: #FF8800; }
                 """)
         elif self._role == "assistant":
             self.setStyleSheet("""
                 MessageWidget {
-                    background-color: #f5f5f5;
+                    background-color: #252526;
+                    border: 1px solid #333333;
                     border-radius: 8px;
                     margin-right: 40px;
                 }
+                QLabel { color: #e0e0e0; }
                 """)
         elif self._role == "system":
             self.setStyleSheet("""
                 MessageWidget {
-                    background-color: #fff3e0;
+                    background-color: #332b00;
+                    border: 1px solid #665500;
                     border-radius: 8px;
                 }
+                QLabel { color: #FF8800; }
                 """)
 
     def _adjust_height(self) -> None:
@@ -256,6 +270,12 @@ class AIAssistantPanel(QWidget):
 
         # Splitter for messages and input
         splitter = QSplitter(Qt.Orientation.Vertical)
+        splitter.setHandleWidth(1)
+        splitter.setStyleSheet("""
+            QSplitter::handle {
+                background-color: #3c3c3c;
+            }
+        """)
 
         # Message area
         self._message_area = self._create_message_area()
@@ -275,23 +295,25 @@ class AIAssistantPanel(QWidget):
     def _create_header(self) -> QWidget:
         """Create the panel header."""
         header = QFrame()
+        # Gitpod Orange Header
         header.setStyleSheet("""
             QFrame {
-                background-color: #1976d2;
+                background-color: #FF8800; 
                 padding: 8px;
+                border-bottom: 1px solid #cc6d00;
             }
             QLabel {
-                color: white;
+                color: #000000;
             }
             QPushButton {
-                background-color: transparent;
-                color: white;
-                border: 1px solid white;
+                background-color: rgba(0, 0, 0, 0.1);
+                color: #000000;
+                border: 1px solid rgba(0, 0, 0, 0.2);
                 border-radius: 4px;
                 padding: 4px 8px;
             }
             QPushButton:hover {
-                background-color: rgba(255, 255, 255, 0.2);
+                background-color: rgba(0, 0, 0, 0.2);
             }
             """)
 
@@ -299,12 +321,12 @@ class AIAssistantPanel(QWidget):
 
         # Title
         title = QLabel("🤖 AI Assistant")
-        title.setStyleSheet("font-size: 14px; font-weight: bold;")
+        title.setStyleSheet("font-size: 14px; font-weight: bold; color: black;")
         layout.addWidget(title)
 
         # Status indicator
         self._status_label = QLabel("Ready")
-        self._status_label.setStyleSheet("font-size: 11px;")
+        self._status_label.setStyleSheet("font-size: 11px; color: #333;")
         layout.addWidget(self._status_label)
 
         layout.addStretch()
@@ -327,9 +349,31 @@ class AIAssistantPanel(QWidget):
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        
+        # Dark background for scroll area
+        scroll.setStyleSheet("""
+            QScrollArea {
+                background-color: #1e1e1e;
+                border: none;
+            }
+            QScrollBar:vertical {
+                background: #1e1e1e;
+                width: 10px;
+                margin: 0px 0px 0px 0px;
+            }
+            QScrollBar::handle:vertical {
+                background: #424242;
+                min-height: 20px;
+                border-radius: 5px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                background: none;
+            }
+        """)
 
         # Container for messages
         self._message_container = QWidget()
+        self._message_container.setStyleSheet("background-color: #1e1e1e;")
         self._message_layout = QVBoxLayout(self._message_container)
         self._message_layout.setContentsMargins(8, 8, 8, 8)
         self._message_layout.setSpacing(8)
@@ -355,8 +399,8 @@ class AIAssistantPanel(QWidget):
         widget = QFrame()
         widget.setStyleSheet("""
             QFrame {
-                background-color: #fafafa;
-                border-top: 1px solid #ddd;
+                background-color: #1e1e1e;
+                border-top: 1px solid #3c3c3c;
             }
             """)
 
@@ -368,6 +412,18 @@ class AIAssistantPanel(QWidget):
             "Type your message here... (Ctrl+Enter to send)"
         )
         self._input_edit.setMaximumHeight(100)
+        self._input_edit.setStyleSheet("""
+            QPlainTextEdit {
+                background-color: #252526;
+                color: #e0e0e0;
+                border: 1px solid #3c3c3c;
+                border-radius: 4px;
+                padding: 8px;
+            }
+            QPlainTextEdit:focus {
+                border: 1px solid #FF8800;
+            }
+        """)
         layout.addWidget(self._input_edit)
 
         # Buttons
@@ -375,7 +431,7 @@ class AIAssistantPanel(QWidget):
 
         # Expertise level indicator
         self._expertise_label = QLabel("Level: Beginner")
-        self._expertise_label.setStyleSheet("color: #666; font-size: 11px;")
+        self._expertise_label.setStyleSheet("color: #888888; font-size: 11px;")
         button_layout.addWidget(self._expertise_label)
 
         button_layout.addStretch()
@@ -386,18 +442,19 @@ class AIAssistantPanel(QWidget):
         self._send_btn.clicked.connect(self._on_send)
         self._send_btn.setStyleSheet("""
             QPushButton {
-                background-color: #1976d2;
-                color: white;
+                background-color: #FF8800;
+                color: black;
                 border: none;
                 border-radius: 4px;
                 padding: 8px 16px;
                 font-weight: bold;
             }
             QPushButton:hover {
-                background-color: #1565c0;
+                background-color: #cc6d00;
             }
             QPushButton:disabled {
-                background-color: #ccc;
+                background-color: #444444;
+                color: #888888;
             }
             """)
         button_layout.addWidget(self._send_btn)
