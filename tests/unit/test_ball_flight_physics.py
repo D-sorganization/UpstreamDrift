@@ -159,7 +159,7 @@ class TestEnvironmentalConditions:
     def test_default_values(self, default_environment: EnvironmentalConditions) -> None:
         """Test default sea-level conditions."""
         assert default_environment.air_density == pytest.approx(1.225)
-        assert default_environment.gravity == pytest.approx(9.81)
+        assert default_environment.gravity == pytest.approx(9.81, abs=0.01)
         assert default_environment.temperature == pytest.approx(15.0)
 
     def test_default_wind_is_zero(

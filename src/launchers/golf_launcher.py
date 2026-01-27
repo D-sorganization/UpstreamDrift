@@ -355,7 +355,6 @@ class GolfLauncher(QMainWindow):
                 "c3d_viewer",
                 "matlab_dataset_gui",
                 "matlab_golf_gui",
-                "matlab_code_analyzer",
             ]
         )
 
@@ -661,7 +660,7 @@ class GolfLauncher(QMainWindow):
 
         # Search Bar
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("🔍 Search models...")
+        self.search_input.setPlaceholderText("Search models...")
         self.search_input.setFixedWidth(200)
         self.search_input.setToolTip("Filter models by name or description (Ctrl+F)")
         self.search_input.setAccessibleName("Search models")
@@ -670,7 +669,7 @@ class GolfLauncher(QMainWindow):
         top_bar.addWidget(self.search_input)
 
         # Modify Layout toggle button
-        self.btn_modify_layout = QPushButton("🔒 Layout Locked")
+        self.btn_modify_layout = QPushButton("Layout: Locked")
         self.btn_modify_layout.setCheckable(True)
         self.btn_modify_layout.setChecked(False)
         self.btn_modify_layout.setToolTip("Toggle to enable/disable tile rearrangement")
@@ -688,26 +687,26 @@ class GolfLauncher(QMainWindow):
             """)
         top_bar.addWidget(self.btn_modify_layout)
 
-        self.btn_customize_tiles = QPushButton("🧩 Edit Tiles")
+        self.btn_customize_tiles = QPushButton("Edit Tiles")
         self.btn_customize_tiles.setEnabled(False)
         self.btn_customize_tiles.setToolTip("Add or remove launcher tiles in edit mode")
         self.btn_customize_tiles.clicked.connect(self.open_layout_manager)
         self.btn_customize_tiles.setCursor(Qt.CursorShape.PointingHandCursor)
         top_bar.addWidget(self.btn_customize_tiles)
 
-        btn_env = QPushButton("⚙️ Environment")
+        btn_env = QPushButton("Environment")
         btn_env.setToolTip("Manage Docker environment and dependencies")
         btn_env.clicked.connect(self.open_environment_manager)
         top_bar.addWidget(btn_env)
 
-        btn_help = QPushButton("📖 Help")
+        btn_help = QPushButton("Help")
         btn_help.setToolTip("View documentation and user guide")
         btn_help.clicked.connect(self.open_help)
         top_bar.addWidget(btn_help)
 
         # AI Assistant Button (if available)
         if AI_AVAILABLE:
-            self.btn_ai = QPushButton("🤖 AI Assistant")
+            self.btn_ai = QPushButton("AI Chat [...]")
             self.btn_ai.setToolTip("Open AI Assistant for help with analysis")
             self.btn_ai.setCheckable(True)
             self.btn_ai.clicked.connect(self.toggle_ai_assistant)
@@ -778,7 +777,7 @@ class GolfLauncher(QMainWindow):
         bottom_bar.addStretch()
 
         # Launch Button
-        self.btn_launch = QPushButton("🚀 Select a Model")
+        self.btn_launch = QPushButton("Select a Model")
         self.btn_launch.setEnabled(False)
         self.btn_launch.setFixedHeight(50)
         self.btn_launch.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
@@ -987,7 +986,7 @@ class GolfLauncher(QMainWindow):
                 # Bring to front logic if possible?
                 return
 
-        self.lbl_status.setText("● Launching URDF Generator...")
+        self.lbl_status.setText("> Launching URDF Generator...")
         self.lbl_status.setStyleSheet("color: #FFD60A;")
         QApplication.processEvents()
 
@@ -1003,13 +1002,13 @@ class GolfLauncher(QMainWindow):
 
             self.running_processes["urdf_generator"] = process
             self.show_toast("URDF Generator launched.", "success")
-            self.lbl_status.setText("● URDF Generator Running")
+            self.lbl_status.setText("> URDF Generator Running")
             self.lbl_status.setStyleSheet("color: #30D158;")
 
         except Exception as e:
             logger.error(f"Failed to launch URDF Generator: {e}")
             self.show_toast(f"Launch failed: {e}", "error")
-            self.lbl_status.setText("● Launch Error")
+            self.lbl_status.setText("! Launch Error")
             self.lbl_status.setStyleSheet("color: #FF375F;")
 
     def _launch_c3d_viewer(self) -> None:
@@ -1121,7 +1120,7 @@ class GolfLauncher(QMainWindow):
     def update_launch_button(self, model_name: str | None = None) -> None:
         """Update the launch button state."""
         if not self.selected_model:
-            self.btn_launch.setText("🚀 Select a Model")
+            self.btn_launch.setText("Select a Model")
             self.btn_launch.setEnabled(False)
             self.btn_launch.setStyleSheet("""
                 QPushButton {
@@ -1140,7 +1139,7 @@ class GolfLauncher(QMainWindow):
         # Check Docker dependency
         if model and getattr(model, "requires_docker", False):
             if not self.docker_available:
-                self.btn_launch.setText("⚠️ Docker Required")
+                self.btn_launch.setText("! Docker Required")
                 self.btn_launch.setStyleSheet("""
                     QPushButton {
                         background-color: #3a3a3a;
@@ -1152,7 +1151,7 @@ class GolfLauncher(QMainWindow):
                 self.btn_launch.setEnabled(False)
                 return
 
-        self.btn_launch.setText(f"🚀 Launch {name}")
+        self.btn_launch.setText(f"Launch {name} >")
         self.btn_launch.setEnabled(True)
         self.btn_launch.setStyleSheet("""
             QPushButton {
@@ -1272,7 +1271,7 @@ class GolfLauncher(QMainWindow):
             return
 
         # Handle Standard Physics Models
-        self.lbl_status.setText(f"● Launching {model.name}...")
+        self.lbl_status.setText(f"> Launching {model.name}...")
         self.lbl_status.setStyleSheet("color: #FFD60A;")
         QApplication.processEvents()
 
@@ -1309,7 +1308,7 @@ class GolfLauncher(QMainWindow):
         except Exception as e:
             logger.error(f"Launch failed: {e}")
             self.show_toast(f"Launch Failed: {e}", "error")
-            self.lbl_status.setText("● Ready")
+            self.lbl_status.setText("> Ready")
             self.lbl_status.setStyleSheet("color: #aaaaaa;")
 
     def _launch_generic_mjcf(self, path: Path) -> None:

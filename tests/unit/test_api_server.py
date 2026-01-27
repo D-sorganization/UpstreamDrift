@@ -32,7 +32,7 @@ except ImportError as e:
 @pytest.fixture
 def client() -> Generator[TestClient, None, None]:
     """Create a test client for the API."""
-    with TestClient(app) as test_client:
+    with TestClient(app, base_url="http://localhost") as test_client:
         yield test_client
 
 

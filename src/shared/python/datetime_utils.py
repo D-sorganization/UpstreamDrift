@@ -30,15 +30,8 @@ Usage:
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Literal
-
-# Python 3.10 compatibility: UTC was added in 3.11
-try:
-    from datetime import UTC
-except ImportError:
-    UTC = timezone.utc  # type: ignore[assignment]  # noqa: UP017
-
 
 # ============================================================================
 # Current Time Functions

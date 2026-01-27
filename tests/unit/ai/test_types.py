@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-# Python 3.10 compatibility: UTC was added in 3.11
-from datetime import timezone
+# Python 3.10 compatibility: timezone.utc was added in 3.11
+from datetime import UTC, timezone
 
 try:
-    from datetime import UTC
+    from datetime import timezone
 except ImportError:
-    UTC = timezone.utc  # noqa: UP017
+    timezone.utc = timezone.utc  # noqa: UP017
 
 from src.shared.python.ai.types import (
     AgentChunk,

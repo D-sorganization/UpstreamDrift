@@ -18,6 +18,7 @@ PyQt6>=6.7.0
 pygame>=2.0.0
 PyOpenGL>=3.1.5
 PyOpenGL_accelerate>=3.1.5
+opencv-python>=4.9.0
 
 # Web Applications
 flask>=3.0.0
