@@ -674,8 +674,7 @@ class GolfLauncher(QMainWindow):
         self.btn_modify_layout.setChecked(False)
         self.btn_modify_layout.setToolTip("Toggle to enable/disable tile rearrangement")
         self.btn_modify_layout.clicked.connect(self.toggle_layout_mode)
-        self.btn_modify_layout.setStyleSheet(
-            """
+        self.btn_modify_layout.setStyleSheet("""
             QPushButton {
                 background-color: #444444;
                 color: #cccccc;
@@ -685,8 +684,7 @@ class GolfLauncher(QMainWindow):
                 background-color: #007acc;
                 color: white;
             }
-            """
-        )
+            """)
         top_bar.addWidget(self.btn_modify_layout)
 
         self.btn_customize_tiles = QPushButton("Edit Tiles")
@@ -712,8 +710,7 @@ class GolfLauncher(QMainWindow):
             self.btn_ai.setToolTip("Open AI Assistant for help with analysis")
             self.btn_ai.setCheckable(True)
             self.btn_ai.clicked.connect(self.toggle_ai_assistant)
-            self.btn_ai.setStyleSheet(
-                """
+            self.btn_ai.setStyleSheet("""
                 QPushButton {
                     background-color: #1976d2;
                     color: white;
@@ -727,8 +724,7 @@ class GolfLauncher(QMainWindow):
                 QPushButton:checked {
                     background-color: #0d47a1;
                 }
-                """
-            )
+                """)
             top_bar.addWidget(self.btn_ai)
 
             # Setup AI Dock Widget (Hidden by default)
@@ -785,8 +781,7 @@ class GolfLauncher(QMainWindow):
         self.btn_launch.setEnabled(False)
         self.btn_launch.setFixedHeight(50)
         self.btn_launch.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
-        self.btn_launch.setStyleSheet(
-            """
+        self.btn_launch.setStyleSheet("""
             QPushButton {
                 background-color: #2da44e;
                 color: white;
@@ -800,8 +795,7 @@ class GolfLauncher(QMainWindow):
             QPushButton:hover:!disabled {
                 background-color: #2c974b;
             }
-            """
-        )
+            """)
         self.btn_launch.clicked.connect(self.launch_simulation)
         self.btn_launch.setCursor(Qt.CursorShape.PointingHandCursor)
         bottom_bar.addWidget(self.btn_launch)
@@ -1094,18 +1088,15 @@ class GolfLauncher(QMainWindow):
         # Update visual selection state
         for mid, card in self.model_cards.items():
             if mid == model_id:
-                card.setStyleSheet(
-                    """
+                card.setStyleSheet("""
                     QFrame#ModelCard {
                         background-color: #383838;
                         border: 2px solid #0A84FF;
                         border-radius: 12px;
                     }
-                    """
-                )
+                    """)
             else:
-                card.setStyleSheet(
-                    """
+                card.setStyleSheet("""
                     QFrame#ModelCard {
                         background-color: #2D2D2D;
                         border: 1px solid #3A3A3A;
@@ -1115,8 +1106,7 @@ class GolfLauncher(QMainWindow):
                         background-color: #333333;
                         border: 1px solid #555555;
                     }
-                    """
-                )
+                    """)
 
         # Update launch button
         model = self._get_model(model_id)
@@ -1132,15 +1122,13 @@ class GolfLauncher(QMainWindow):
         if not self.selected_model:
             self.btn_launch.setText("Select a Model")
             self.btn_launch.setEnabled(False)
-            self.btn_launch.setStyleSheet(
-                """
+            self.btn_launch.setStyleSheet("""
                 QPushButton {
                     background-color: #3a3a3a;
                     color: #888888;
                     border-radius: 6px;
                 }
-                """
-            )
+                """)
             return
 
         name = model_name or self.selected_model
@@ -1152,23 +1140,20 @@ class GolfLauncher(QMainWindow):
         if model and getattr(model, "requires_docker", False):
             if not self.docker_available:
                 self.btn_launch.setText("! Docker Required")
-                self.btn_launch.setStyleSheet(
-                    """
+                self.btn_launch.setStyleSheet("""
                     QPushButton {
                         background-color: #3a3a3a;
                         color: #ff453a;
                         border: 2px solid #ff453a;
                         border-radius: 6px;
                     }
-                    """
-                )
+                    """)
                 self.btn_launch.setEnabled(False)
                 return
 
         self.btn_launch.setText(f"Launch {name} >")
         self.btn_launch.setEnabled(True)
-        self.btn_launch.setStyleSheet(
-            """
+        self.btn_launch.setStyleSheet("""
             QPushButton {
                 background-color: #2da44e;
                 color: white;
@@ -1178,8 +1163,7 @@ class GolfLauncher(QMainWindow):
             QPushButton:hover {
                 background-color: #2c974b;
             }
-            """
-        )
+            """)
 
     def _get_engine_type(self, model_type: str) -> _EngineType:
         """Map model type to EngineType."""
@@ -1201,8 +1185,7 @@ class GolfLauncher(QMainWindow):
     def apply_styles(self) -> None:
         """Apply custom stylesheets."""
         # Global dark theme
-        self.setStyleSheet(
-            """
+        self.setStyleSheet("""
             QMainWindow {
                 background-color: #1E1E1E;
             }
@@ -1232,8 +1215,7 @@ class GolfLauncher(QMainWindow):
             QPushButton:hover {
                 background-color: #3E3E42;
             }
-            """
-        )
+            """)
 
     def check_docker(self) -> None:
         """Start the docker check thread."""
@@ -1623,27 +1605,23 @@ class GolfLauncher(QMainWindow):
         self.layout_edit_mode = checked
         if checked:
             self.btn_modify_layout.setText("🔓 Edit Mode On")
-            self.btn_modify_layout.setStyleSheet(
-                """
+            self.btn_modify_layout.setStyleSheet("""
                 QPushButton {
                     background-color: #007acc;
                     color: white;
                     border: 1px solid #0099ff;
                 }
-                """
-            )
+                """)
             self.btn_customize_tiles.setEnabled(True)
             self.show_toast("Drag tiles to reorder. Double-click to launch.", "info")
         else:
             self.btn_modify_layout.setText("🔒 Layout Locked")
-            self.btn_modify_layout.setStyleSheet(
-                """
+            self.btn_modify_layout.setStyleSheet("""
                 QPushButton {
                     background-color: #444444;
                     color: #cccccc;
                 }
-                """
-            )
+                """)
             self.btn_customize_tiles.setEnabled(False)
 
         # Update all cards to accept/reject drops
