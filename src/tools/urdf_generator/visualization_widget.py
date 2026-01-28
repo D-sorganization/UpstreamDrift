@@ -21,7 +21,7 @@ logger = get_logger(__name__)
 # Check MuJoCo availability
 MUJOCO_AVAILABLE = False
 try:
-    import mujoco
+    pass
 
     from .mujoco_viewer import MuJoCoViewerWidget
 
