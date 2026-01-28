@@ -112,7 +112,7 @@ class TestBallFlightPhysics:
         )
 
         # Run a short simulation
-        trajectory = simulator.simulate_trajectory(launch, max_time=0.1, dt=0.01)
+        trajectory = simulator.simulate_trajectory(launch, max_time=0.1, time_step=0.01)
 
         # Check consistency at each point
         for point in trajectory:

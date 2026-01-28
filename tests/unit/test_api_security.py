@@ -222,8 +222,8 @@ class TestTimezoneAwareJWT:
         assert isinstance(exp_timestamp, int | float)
 
         # Convert to datetime and verify it's in the future
-        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=UTC)
-        now = datetime.now(UTC)
+        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+        now = datetime.now(timezone.utc)
 
         assert exp_datetime > now, "Token expiration should be in the future"
         assert exp_datetime.tzinfo is not None, "Expiration should be timezone-aware"
@@ -247,8 +247,8 @@ class TestTimezoneAwareJWT:
 
         # Check expiration is timezone-aware
         exp_timestamp = payload["exp"]
-        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=UTC)
-        now = datetime.now(UTC)
+        exp_datetime = datetime.fromtimestamp(exp_timestamp, tz=timezone.utc)
+        now = datetime.now(timezone.utc)
 
         assert exp_datetime > now
         assert exp_datetime.tzinfo is not None
@@ -375,28 +375,17 @@ class TestSecretKeyValidation:
         """Test that secret key can be set via environment variable."""
         with patch.dict("os.environ", {"GOLF_API_SECRET_KEY": "x" * 64}):
             # Reload the module to pick up new environment variable
-            import importlib
             import os
             import sys
 
             # Verify env var is set correctly
             assert os.environ.get("GOLF_API_SECRET_KEY") == "x" * 64
 
-            # Force reload of the module
-            # We need to handle both potential module names
-            modules_to_remove = [
-                k for k in sys.modules if k.endswith("api.auth.security")
-            ]
-            for m in modules_to_remove:
-                del sys.modules[m]
+            # Avoid importlib.reload()
+            if "api.auth.security" in sys.modules:
+                del sys.modules["api.auth.security"]
 
             # Also ensure parent package doesn't hold stale reference
-            if "src.api.auth" in sys.modules:
-                import src.api.auth
-
-                if hasattr(src.api.auth, "security"):
-                    delattr(src.api.auth, "security")
-
             if "api.auth" in sys.modules:
                 import api.auth
 
@@ -404,8 +393,6 @@ class TestSecretKeyValidation:
                     delattr(api.auth, "security")
 
             from src.api.auth import security
-
-            importlib.reload(security)
 
             # Check it uses the environment variable
             assert security.SECRET_KEY == "x" * 64

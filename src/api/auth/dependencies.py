@@ -3,7 +3,7 @@
 from collections.abc import Callable
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
-from datetime import UTC, timezone
+from datetime import timezone
 
 try:
     from datetime import timezone
@@ -163,7 +163,7 @@ async def get_current_user_from_api_key(
     from datetime import datetime
 
     # SECURITY FIX: Use timezone-aware datetime instead of deprecated utcnow()
-    api_key_record.last_used = datetime.now(UTC)  # type: ignore[assignment]
+    api_key_record.last_used = datetime.now(timezone.utc)  # type: ignore[assignment]
     api_key_record.usage_count = int(api_key_record.usage_count) + 1  # type: ignore[assignment]
     db.commit()
 
