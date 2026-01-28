@@ -205,6 +205,8 @@ def _start_vcxsrv() -> bool:
     except Exception as e:
         logger.error(f"Failed to start VcXsrv: {e}")
         return False
+
+
 CONFIG_DIR = REPOS_ROOT / ".kiro" / "launcher"
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "layout.json"
 GRID_COLUMNS = 4  # Changed to 3x4 grid (12 tiles total)
