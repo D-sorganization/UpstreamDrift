@@ -16,10 +16,22 @@ Usage:
 from __future__ import annotations
 
 import json
+import logging
+import sys
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.logging_config import get_logger
+# Add project root to path for src imports when run as part of tool
+_project_root = Path(__file__).resolve().parent.parent.parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
+try:
+    from src.shared.python.logging_config import get_logger
+except ImportError:
+    # Fallback if logging module not available
+    def get_logger(name: str) -> logging.Logger:
+        return logging.getLogger(name)
 
 logger = get_logger(__name__)
 
