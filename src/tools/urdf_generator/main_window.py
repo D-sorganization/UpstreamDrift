@@ -318,11 +318,10 @@ class URDFGeneratorWindow(QMainWindow):
                                 f"Loaded golf club: {model_key}"
                             )
                     elif category == "human":
-                        # Load human model URDF
-                        model_dir = library.human_models_path / model_key
-                        urdf_path = model_dir / "model.urdf"
+                        # Load human model URDF (prefers bundled assets)
+                        urdf_path = library.get_human_model(model_key)
 
-                        if urdf_path.exists():
+                        if urdf_path and urdf_path.exists():
                             self._load_urdf_file(urdf_path)
                             self.status_bar.showMessage(
                                 f"Loaded human model: {model_key}"
@@ -330,10 +329,9 @@ class URDFGeneratorWindow(QMainWindow):
                         else:
                             QMessageBox.information(
                                 self,
-                                "Model Not Downloaded",
-                                "This model has not been downloaded yet.\n"
-                                "Please use the 'Download from human-gazebo' button "
-                                "in the model loader dialog.",
+                                "Model Not Available",
+                                "This model is not bundled or downloaded.\n"
+                                "Check bundled_assets/ for available models.",
                             )
 
         except Exception as e:
@@ -359,7 +357,10 @@ class URDFGeneratorWindow(QMainWindow):
             urdf_content = file_path.read_text(encoding="utf-8")
             # URDF parsing for segment panel population is a future enhancement
             # Currently loading for visualization only
-            self.visualization_widget.update_visualization(urdf_content)
+            # Pass file path for mesh resolution in MuJoCo
+            self.visualization_widget.update_visualization(
+                urdf_content, str(file_path)
+            )
             self.current_file_path = file_path
             self.setWindowTitle(f"Interactive URDF Generator - {file_path.name}")
             logger.info(f"URDF loaded: {file_path}")

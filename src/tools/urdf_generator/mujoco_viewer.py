@@ -72,9 +72,10 @@ class URDFToMJCFConverter:
         robot_name = root.get("name", "robot")
 
         # Build MJCF
+        gravity_val = float(GRAVITY_M_S2)
         mjcf_parts = [
             f'<mujoco model="{robot_name}">',
-            f'  <option gravity="0 0 -{GRAVITY_M_S2}" timestep="0.002"/>',
+            f'  <option gravity="0 0 -{gravity_val}" timestep="0.002"/>',
             '  <compiler angle="radian" inertiafromgeom="auto"/>',
             "",
             "  <worldbody>",
@@ -156,9 +157,10 @@ class URDFToMJCFConverter:
     @staticmethod
     def _get_default_mjcf() -> str:
         """Return a default MJCF scene for empty/invalid URDF."""
+        gravity_val = float(GRAVITY_M_S2)
         return f"""
 <mujoco model="default">
-  <option gravity="0 0 -{GRAVITY_M_S2}" timestep="0.002"/>
+  <option gravity="0 0 -{gravity_val}" timestep="0.002"/>
   <worldbody>
     <light name="light" pos="0 0 3" dir="0 0 -1"/>
     <geom type="plane" size="2 2 0.1" rgba="0.8 0.8 0.8 1"/>
@@ -197,6 +199,131 @@ class MuJoCoOffscreenRenderer:
         self.distance = 3.0
         self.lookat = np.array([0.0, 0.0, 0.5])
 
+    def load_urdf_file(self, urdf_path: str) -> bool:
+        """Load URDF model from file path.
+
+        This allows MuJoCo to resolve relative mesh paths correctly.
+        Preprocesses the URDF to fix zero/small mass and inertia values
+        that MuJoCo rejects.
+
+        Args:
+            urdf_path: Path to URDF file.
+
+        Returns:
+            True if loaded successfully.
+        """
+        if not MUJOCO_AVAILABLE:
+            logger.warning("MuJoCo not available")
+            return False
+
+        try:
+            from pathlib import Path
+            import re
+
+            # Read and preprocess URDF to fix small masses/inertias
+            urdf_content = Path(urdf_path).read_text(encoding="utf-8")
+            fixed_content = self._fix_urdf_inertials(urdf_content)
+
+            # Save to temp file in same directory for mesh resolution
+            urdf_dir = Path(urdf_path).parent
+            temp_urdf = urdf_dir / "_temp_fixed_model.urdf"
+            temp_urdf.write_text(fixed_content, encoding="utf-8")
+
+            try:
+                self._model = mujoco.MjModel.from_xml_path(str(temp_urdf))
+                self._data = mujoco.MjData(self._model)
+
+                # Use model's offscreen dimensions to avoid framebuffer mismatch
+                render_width = min(self.width, self._model.vis.global_.offwidth)
+                render_height = min(self.height, self._model.vis.global_.offheight)
+
+                # Create renderer with compatible dimensions
+                # Note: MuJoCo Renderer takes (model, height, width) not (model, width, height)
+                self._renderer = mujoco.Renderer(
+                    self._model, render_height, render_width
+                )
+
+                # Initialize persistent camera for efficiency
+                self._camera = mujoco.MjvCamera()
+
+                # Forward kinematics to set initial positions
+                mujoco.mj_forward(self._model, self._data)
+
+                logger.info(
+                    f"MuJoCo model loaded from file: {urdf_path} "
+                    f"(render size: {render_width}x{render_height})"
+                )
+                return True
+            finally:
+                # Clean up temp file
+                if temp_urdf.exists():
+                    temp_urdf.unlink()
+
+        except Exception as e:
+            logger.error(f"Failed to load URDF file: {e}")
+            self._model = None
+            self._data = None
+            return False
+
+    def _fix_urdf_inertials(self, urdf_content: str) -> str:
+        """Fix zero/small mass and inertia values in URDF.
+
+        MuJoCo requires minimum mass and inertia values (mjMINVAL).
+        Also adds MuJoCo visual settings for offscreen rendering.
+
+        Args:
+            urdf_content: Original URDF content.
+
+        Returns:
+            Fixed URDF content.
+        """
+        import re
+
+        min_mass = 0.001  # 1 gram minimum
+        min_inertia = 0.0001  # Minimum inertia value
+
+        # Fix small mass values
+        urdf_content = re.sub(
+            r'<mass\s+value="([^"]+)"',
+            lambda m: f'<mass value="{max(float(m.group(1)), min_mass)}"',
+            urdf_content,
+        )
+
+        # Fix zero inertia values
+        def fix_inertia_attr(attr: str, content: str) -> str:
+            pattern = rf'{attr}="([^"]+)"'
+
+            def replace(m: re.Match) -> str:
+                val = float(m.group(1))
+                # Only fix diagonal elements (ixx, iyy, izz)
+                if attr in ("ixx", "iyy", "izz") and val < min_inertia:
+                    return f'{attr}="{min_inertia}"'
+                return m.group(0)
+
+            return re.sub(pattern, replace, content)
+
+        for attr in ("ixx", "iyy", "izz"):
+            urdf_content = fix_inertia_attr(attr, urdf_content)
+
+        # Add MuJoCo extension for larger offscreen framebuffer
+        # This allows rendering at higher resolutions
+        mujoco_extension = """
+  <mujoco>
+    <visual>
+      <global offwidth="1024" offheight="1024"/>
+    </visual>
+  </mujoco>
+"""
+        # Insert mujoco extension after robot tag opening
+        urdf_content = re.sub(
+            r'(<robot[^>]*>)',
+            r'\1' + mujoco_extension,
+            urdf_content,
+            count=1,
+        )
+
+        return urdf_content
+
     def load_mjcf(self, mjcf_content: str) -> bool:
         """Load MJCF model from string.
 
@@ -214,8 +341,8 @@ class MuJoCoOffscreenRenderer:
             self._model = mujoco.MjModel.from_xml_string(mjcf_content)
             self._data = mujoco.MjData(self._model)
 
-            # Create renderer (args: model, width, height)
-            self._renderer = mujoco.Renderer(self._model, self.width, self.height)
+            # Create renderer (args: model, height, width)
+            self._renderer = mujoco.Renderer(self._model, self.height, self.width)
 
             # Initialize persistent camera for efficiency
             self._camera = mujoco.MjvCamera()
@@ -296,6 +423,7 @@ class MuJoCoViewerWidget(QWidget):
         super().__init__(parent)
 
         self._urdf_content = ""
+        self._urdf_path: str | None = None
         self._renderer: MuJoCoOffscreenRenderer | None = None
         self._last_mouse_pos: QPointF | None = None
         self._current_image: QImage | None = None
@@ -367,19 +495,24 @@ class MuJoCoViewerWidget(QWidget):
     def _setup_renderer(self) -> None:
         """Initialize the offscreen renderer."""
         if MUJOCO_AVAILABLE:
-            self._renderer = MuJoCoOffscreenRenderer(640, 480)
+            # Use larger framebuffer to avoid dimension mismatch errors
+            self._renderer = MuJoCoOffscreenRenderer(800, 800)
 
     def _update_placeholder(self, message: str) -> None:
         """Show a placeholder message."""
         self._viewport.setText(message)
 
-    def update_visualization(self, urdf_content: str) -> None:
+    def update_visualization(
+        self, urdf_content: str, urdf_path: str | None = None
+    ) -> None:
         """Update visualization with new URDF content.
 
         Args:
             urdf_content: URDF XML string.
+            urdf_path: Optional path to URDF file for mesh resolution.
         """
         self._urdf_content = urdf_content
+        self._urdf_path = urdf_path
 
         if not MUJOCO_AVAILABLE or not self._renderer:
             # Count elements for display
@@ -396,16 +529,23 @@ class MuJoCoViewerWidget(QWidget):
         if validation_errors:
             self.validation_error.emit("\n".join(validation_errors))
 
-        # Convert to MJCF
-        mjcf_content = URDFToMJCFConverter.convert(urdf_content)
+        # Try to load from file path first (for mesh resolution)
+        success = False
+        if urdf_path:
+            logger.info(f"Loading URDF from path: {urdf_path}")
+            success = self._renderer.load_urdf_file(urdf_path)
 
-        # Load model
-        success = self._renderer.load_mjcf(mjcf_content)
+        # Fallback to MJCF conversion if file loading fails
+        if not success:
+            logger.info("Falling back to MJCF conversion")
+            mjcf_content = URDFToMJCFConverter.convert(urdf_content)
+            success = self._renderer.load_mjcf(mjcf_content)
+
         self.model_loaded.emit(success)
 
+        link_count = urdf_content.count("<link")
+        joint_count = urdf_content.count("<joint")
         if success:
-            link_count = urdf_content.count("<link")
-            joint_count = urdf_content.count("<joint")
             self._status_label.setText(
                 f"✓ Model loaded: {link_count} links, {joint_count} joints"
             )

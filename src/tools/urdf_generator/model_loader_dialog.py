@@ -6,7 +6,15 @@ including human models and golf clubs.
 
 from __future__ import annotations
 
+import logging
+import sys
+from pathlib import Path
 from typing import Any
+
+# Add project root to path for src imports
+_project_root = Path(__file__).resolve().parent.parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
@@ -23,7 +31,11 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from src.shared.python.logging_config import get_logger
+try:
+    from src.shared.python.logging_config import get_logger
+except ImportError:
+    def get_logger(name: str) -> logging.Logger:
+        return logging.getLogger(name)
 
 logger = get_logger(__name__)
 
