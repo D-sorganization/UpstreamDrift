@@ -93,8 +93,7 @@ class TrajectoryExporter:
         format = format.lower()
         if format not in self.SUPPORTED_FORMATS:
             raise ValueError(
-                f"Unsupported format: {format}. "
-                f"Supported: {self.SUPPORTED_FORMATS}"
+                f"Unsupported format: {format}. " f"Supported: {self.SUPPORTED_FORMATS}"
             )
 
         exporters = {
@@ -111,12 +110,12 @@ class TrajectoryExporter:
     def _create_metadata(self, format: str) -> ExportMetadata:
         """Create export metadata."""
         return ExportMetadata(
-            source_file=str(
-                self.trajectory.events if self.trajectory else ""
-            ),
+            source_file=str(self.trajectory.events if self.trajectory else ""),
             model_name=self.model_name,
             num_frames=self.num_frames,
-            duration=float(self.times[-1] - self.times[0]) if len(self.times) > 0 else 0.0,
+            duration=(
+                float(self.times[-1] - self.times[0]) if len(self.times) > 0 else 0.0
+            ),
             timestep=float(self.timestep),
             num_dof=self.num_dof,
             convergence_rate=self.ik_result.convergence_rate,
@@ -149,11 +148,13 @@ class TrajectoryExporter:
         # Build keyframes
         keyframes = []
         for i in range(self.num_frames):
-            keyframes.append({
-                "time": float(self.times[i]),
-                "qpos": self.q_traj[i].tolist(),
-                "qvel": qvel[i].tolist(),
-            })
+            keyframes.append(
+                {
+                    "time": float(self.times[i]),
+                    "qpos": self.q_traj[i].tolist(),
+                    "qvel": qvel[i].tolist(),
+                }
+            )
 
         # Include club trajectory if available
         club_data = None

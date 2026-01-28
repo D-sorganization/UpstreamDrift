@@ -357,7 +357,9 @@ class ClubTrajectoryParser:
                     ]
                 )
                 face_x_axis = face_x_axis / (np.linalg.norm(face_x_axis) + 1e-8)
-                face_y_axis = face_y_axis - np.dot(face_y_axis, face_x_axis) * face_x_axis
+                face_y_axis = (
+                    face_y_axis - np.dot(face_y_axis, face_x_axis) * face_x_axis
+                )
                 face_y_axis = face_y_axis / (np.linalg.norm(face_y_axis) + 1e-8)
                 face_z_axis = np.cross(face_x_axis, face_y_axis)
                 face_rot = np.column_stack([face_x_axis, face_y_axis, face_z_axis])

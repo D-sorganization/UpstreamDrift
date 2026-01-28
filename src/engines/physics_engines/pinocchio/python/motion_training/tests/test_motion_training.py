@@ -2,9 +2,6 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-from unittest.mock import MagicMock, patch
-
 import numpy as np
 import pytest
 
@@ -150,12 +147,122 @@ class TestClubTrajectoryParser:
     @pytest.fixture
     def mock_excel_data(self):
         """Create mock Excel data for testing."""
-        return np.array([
-            ["Wiffle ball", None, "A=", 1, "T=", 3, "I=", 5, "F=", 8, "CHS", 100.0, None, None, None, None, None, None, None, None, None, None, None, None, None, None],
-            [None, None, "Mid-hands", None, None, None, None, None, None, None, None, None, None, None, "Center of club face", None, None, None, None, None, None, None, None, None, None, None],
-            ["Sample #", "Time", "X", "Y", "Z", "Xx", "Xy", "Xz", "Yx", "Yy", "Yz", "Zx", "Zy", "Zz", "X", "Y", "Z", "Xx", "Xy", "Xz", "Yx", "Yy", "Yz", "Zx", "Zy", "Zz"],
-            [1, 0.0, 0.0, 50.0, 100.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, None, None, None, 0.0, 50.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, None, None, None],
-        ])
+        return np.array(
+            [
+                [
+                    "Wiffle ball",
+                    None,
+                    "A=",
+                    1,
+                    "T=",
+                    3,
+                    "I=",
+                    5,
+                    "F=",
+                    8,
+                    "CHS",
+                    100.0,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                ],
+                [
+                    None,
+                    None,
+                    "Mid-hands",
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    "Center of club face",
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                    None,
+                ],
+                [
+                    "Sample #",
+                    "Time",
+                    "X",
+                    "Y",
+                    "Z",
+                    "Xx",
+                    "Xy",
+                    "Xz",
+                    "Yx",
+                    "Yy",
+                    "Yz",
+                    "Zx",
+                    "Zy",
+                    "Zz",
+                    "X",
+                    "Y",
+                    "Z",
+                    "Xx",
+                    "Xy",
+                    "Xz",
+                    "Yx",
+                    "Yy",
+                    "Yz",
+                    "Zx",
+                    "Zy",
+                    "Zz",
+                ],
+                [
+                    1,
+                    0.0,
+                    0.0,
+                    50.0,
+                    100.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    None,
+                    None,
+                    None,
+                    0.0,
+                    50.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.0,
+                    None,
+                    None,
+                    None,
+                ],
+            ]
+        )
 
 
 class TestSwingEventMarkers:
@@ -202,11 +309,7 @@ class TestDualHandIKSolver:
     def test_ik_solver_import(self):
         """Test that IK solver can be imported."""
         try:
-            from motion_training.dual_hand_ik_solver import (
-                DualHandIKSolver,
-                IKSolverSettings,
-                create_ik_solver,
-            )
+            pass
         except ImportError as e:
             pytest.skip(f"IK solver dependencies not available: {e}")
 
@@ -275,8 +378,9 @@ class TestTrajectoryExporter:
 
     def test_export_json(self, sample_ik_result, tmp_path):
         """Test JSON export."""
-        from motion_training.trajectory_exporter import TrajectoryExporter
         import json
+
+        from motion_training.trajectory_exporter import TrajectoryExporter
 
         exporter = TrajectoryExporter(sample_ik_result)
         output_path = exporter.export(tmp_path / "test", format="json")

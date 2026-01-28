@@ -327,10 +327,12 @@ class DualHandIKSolver:
                     f"converged={ik_result.converged}"
                 )
 
-        result.convergence_rate = num_converged / trajectory.num_frames if trajectory.num_frames > 0 else 0.0
+        result.convergence_rate = (
+            num_converged / trajectory.num_frames if trajectory.num_frames > 0 else 0.0
+        )
 
         if verbose:
-            print(f"\nTrajectory IK complete:")
+            print("\nTrajectory IK complete:")
             print(f"  Frames: {trajectory.num_frames}")
             print(f"  Convergence rate: {result.convergence_rate * 100:.1f}%")
             print(f"  Mean left error: {np.mean(result.left_hand_errors):.4f} m")
@@ -498,7 +500,9 @@ class DualHandIKSolverFallback:
             if verbose and (i + 1) % 50 == 0:
                 print(f"Frame {i + 1}/{trajectory.num_frames}")
 
-        result.convergence_rate = num_converged / trajectory.num_frames if trajectory.num_frames > 0 else 0.0
+        result.convergence_rate = (
+            num_converged / trajectory.num_frames if trajectory.num_frames > 0 else 0.0
+        )
         return result
 
 
@@ -520,9 +524,7 @@ def create_ik_solver(
         IK solver instance (Pink-based or fallback)
     """
     if PINK_AVAILABLE:
-        return DualHandIKSolver(
-            urdf_path, left_hand_frame, right_hand_frame, settings
-        )
+        return DualHandIKSolver(urdf_path, left_hand_frame, right_hand_frame, settings)
     else:
         print("Pink not available, using fallback damped least-squares solver")
         return DualHandIKSolverFallback(

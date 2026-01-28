@@ -99,7 +99,7 @@ def run_trajectory_analysis(trajectory_path: Path, sheet_name: str, output_dir: 
 
     print(f"Loaded trajectory: {trajectory.num_frames} frames")
     print(f"Duration: {trajectory.duration:.3f} seconds")
-    print(f"Events:")
+    print("Events:")
     print(f"  Address (A): frame {trajectory.events.address}")
     print(f"  Top (T): frame {trajectory.events.top}")
     print(f"  Impact (I): frame {trajectory.events.impact}")
@@ -117,6 +117,7 @@ def run_trajectory_analysis(trajectory_path: Path, sheet_name: str, output_dir: 
         print(f"\nSaved trajectory plot to: {output_dir / 'trajectory_3d.png'}")
 
         import matplotlib.pyplot as plt
+
         plt.show()
     except ImportError as e:
         print(f"Matplotlib not available: {e}")
@@ -149,7 +150,9 @@ def run_ik_demo(
     print("\n[1/5] Parsing club trajectory...")
     parser = ClubTrajectoryParser(trajectory_path)
     trajectory = parser.parse(sheet_name=sheet_name)
-    print(f"      Loaded {trajectory.num_frames} frames, {trajectory.duration:.2f}s duration")
+    print(
+        f"      Loaded {trajectory.num_frames} frames, {trajectory.duration:.2f}s duration"
+    )
 
     # Subsample for faster processing
     if subsample > 1:
@@ -225,6 +228,7 @@ def run_ik_demo(
         print(f"      Plots: {output_dir}/*.png")
 
         import matplotlib.pyplot as plt
+
         plt.close("all")
     except ImportError:
         print("      Matplotlib not available for plots")

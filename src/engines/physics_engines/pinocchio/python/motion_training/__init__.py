@@ -55,53 +55,47 @@ __all__ = [
 
 def __getattr__(name: str):
     """Lazy import for module components."""
-    if name in ("ClubTrajectory", "ClubTrajectoryParser", "ClubFrame",
-                "SwingEventMarkers", "compute_hand_positions"):
-        from motion_training.club_trajectory_parser import (
-            ClubFrame,
-            ClubTrajectory,
-            ClubTrajectoryParser,
-            SwingEventMarkers,
-            compute_hand_positions,
-        )
+    if name in (
+        "ClubTrajectory",
+        "ClubTrajectoryParser",
+        "ClubFrame",
+        "SwingEventMarkers",
+        "compute_hand_positions",
+    ):
+        pass
+
         return locals()[name]
 
-    if name in ("DualHandIKSolver", "DualHandIKSolverFallback", "IKSolverSettings",
-                "IKResult", "TrajectoryIKResult", "create_ik_solver"):
-        from motion_training.dual_hand_ik_solver import (
-            DualHandIKSolver,
-            DualHandIKSolverFallback,
-            IKResult,
-            IKSolverSettings,
-            TrajectoryIKResult,
-            create_ik_solver,
-        )
+    if name in (
+        "DualHandIKSolver",
+        "DualHandIKSolverFallback",
+        "IKSolverSettings",
+        "IKResult",
+        "TrajectoryIKResult",
+        "create_ik_solver",
+    ):
+        pass
+
         return locals()[name]
 
     if name in ("MotionVisualizer", "MatplotlibVisualizer", "VisualizerSettings"):
-        from motion_training.motion_visualizer import (
-            MatplotlibVisualizer,
-            MotionVisualizer,
-            VisualizerSettings,
-        )
+        pass
+
         return locals()[name]
 
-    if name in ("MotionTrainingPipeline", "PipelineConfig", "PipelineResult",
-                "run_motion_training"):
-        from motion_training.training_pipeline import (
-            MotionTrainingPipeline,
-            PipelineConfig,
-            PipelineResult,
-            run_motion_training,
-        )
+    if name in (
+        "MotionTrainingPipeline",
+        "PipelineConfig",
+        "PipelineResult",
+        "run_motion_training",
+    ):
+        pass
+
         return locals()[name]
 
     if name in ("TrajectoryExporter", "export_for_mujoco", "export_for_drake"):
-        from motion_training.trajectory_exporter import (
-            TrajectoryExporter,
-            export_for_drake,
-            export_for_mujoco,
-        )
+        pass
+
         return locals()[name]
 
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

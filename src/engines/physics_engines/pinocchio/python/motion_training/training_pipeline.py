@@ -119,10 +119,12 @@ class MotionTrainingPipeline:
         self.trajectory = self._parse_trajectory()
         print(f"      Loaded {self.trajectory.num_frames} frames")
         print(f"      Duration: {self.trajectory.duration:.3f} seconds")
-        print(f"      Events: A={self.trajectory.events.address}, "
-              f"T={self.trajectory.events.top}, "
-              f"I={self.trajectory.events.impact}, "
-              f"F={self.trajectory.events.finish}")
+        print(
+            f"      Events: A={self.trajectory.events.address}, "
+            f"T={self.trajectory.events.top}, "
+            f"I={self.trajectory.events.impact}, "
+            f"F={self.trajectory.events.finish}"
+        )
 
         # Step 2: Initialize IK solver
         print("\n[2/4] Initializing IK solver...")
@@ -134,8 +136,12 @@ class MotionTrainingPipeline:
         print("\n[3/4] Solving inverse kinematics...")
         self.ik_result = self._solve_ik()
         print(f"      Convergence rate: {self.ik_result.convergence_rate * 100:.1f}%")
-        print(f"      Mean left hand error: {np.mean(self.ik_result.left_hand_errors) * 1000:.2f} mm")
-        print(f"      Mean right hand error: {np.mean(self.ik_result.right_hand_errors) * 1000:.2f} mm")
+        print(
+            f"      Mean left hand error: {np.mean(self.ik_result.left_hand_errors) * 1000:.2f} mm"
+        )
+        print(
+            f"      Mean right hand error: {np.mean(self.ik_result.right_hand_errors) * 1000:.2f} mm"
+        )
 
         # Step 4: Save/visualize results
         print("\n[4/4] Processing results...")
@@ -165,7 +171,11 @@ class MotionTrainingPipeline:
 
         # Apply frame range
         start = self.config.start_frame
-        end = self.config.end_frame if self.config.end_frame > 0 else len(trajectory.frames)
+        end = (
+            self.config.end_frame
+            if self.config.end_frame > 0
+            else len(trajectory.frames)
+        )
         trajectory.frames = trajectory.frames[start:end]
 
         # Apply subsampling
@@ -209,7 +219,9 @@ class MotionTrainingPipeline:
 
         with open(output_dir / "joint_trajectory.csv", "w", newline="") as f:
             writer = csv.writer(f)
-            header = ["time"] + [f"q{i}" for i in range(self.ik_result.q_trajectory.shape[1])]
+            header = ["time"] + [
+                f"q{i}" for i in range(self.ik_result.q_trajectory.shape[1])
+            ]
             writer.writerow(header)
             for i, t in enumerate(self.ik_result.times):
                 row = [t] + list(self.ik_result.q_trajectory[i])
@@ -238,6 +250,7 @@ class MotionTrainingPipeline:
             fig.savefig(output_dir / "joint_trajectories.png", dpi=150)
 
             import matplotlib.pyplot as plt
+
             plt.close("all")
 
         except ImportError:

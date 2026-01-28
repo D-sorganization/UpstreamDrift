@@ -36,7 +36,6 @@ except ImportError:
 
 try:
     import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
 
     MATPLOTLIB_AVAILABLE = True
 except ImportError:
@@ -130,9 +129,7 @@ class MotionVisualizer:
             transparent=True,
         )
         self.viewer["ground"].set_object(ground, ground_material)
-        self.viewer["ground"].set_transform(
-            mctf.translation_matrix([0, 0, -0.005])
-        )
+        self.viewer["ground"].set_transform(mctf.translation_matrix([0, 0, -0.005]))
 
         # Coordinate frame at origin
         self._add_coordinate_frame("origin", size=0.3)
@@ -547,7 +544,9 @@ class MatplotlibVisualizer:
                 frame = trajectory.get_event_frame(event_name)
                 if frame:
                     pos = frame.grip_position
-                    ax.plot([pos[0]], [pos[1]], [pos[2]], marker, markersize=15, label=label)
+                    ax.plot(
+                        [pos[0]], [pos[1]], [pos[2]], marker, markersize=15, label=label
+                    )
 
         ax.set_xlabel("X (m)")
         ax.set_ylabel("Y (m)")
@@ -556,11 +555,13 @@ class MatplotlibVisualizer:
         ax.set_title("Golf Club Trajectory")
 
         # Equal aspect ratio
-        max_range = np.max([
-            grip_pos[:, 0].max() - grip_pos[:, 0].min(),
-            grip_pos[:, 1].max() - grip_pos[:, 1].min(),
-            grip_pos[:, 2].max() - grip_pos[:, 2].min(),
-        ])
+        max_range = np.max(
+            [
+                grip_pos[:, 0].max() - grip_pos[:, 0].min(),
+                grip_pos[:, 1].max() - grip_pos[:, 1].min(),
+                grip_pos[:, 2].max() - grip_pos[:, 2].min(),
+            ]
+        )
         mid = grip_pos.mean(axis=0)
         ax.set_xlim(mid[0] - max_range / 2, mid[0] + max_range / 2)
         ax.set_ylim(mid[1] - max_range / 2, mid[1] + max_range / 2)
@@ -592,11 +593,15 @@ class MatplotlibVisualizer:
         axes[0].axhline(y=0.001, color="k", linestyle="--", label="Tolerance")
         axes[0].set_ylabel("Position Error (m)")
         axes[0].legend()
-        axes[0].set_title(f"IK Tracking Errors (Convergence: {ik_result.convergence_rate * 100:.1f}%)")
+        axes[0].set_title(
+            f"IK Tracking Errors (Convergence: {ik_result.convergence_rate * 100:.1f}%)"
+        )
         axes[0].grid(True)
 
         # Combined error
-        combined = np.array(ik_result.left_hand_errors) + np.array(ik_result.right_hand_errors)
+        combined = np.array(ik_result.left_hand_errors) + np.array(
+            ik_result.right_hand_errors
+        )
         axes[1].plot(times, combined, "b-", label="Total Error")
         axes[1].set_xlabel("Time (s)")
         axes[1].set_ylabel("Combined Error (m)")
