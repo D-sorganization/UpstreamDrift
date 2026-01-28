@@ -2,7 +2,7 @@ name: Jules Comprehensive Assessment
 
 on:
   schedule:
-    - cron: "0 10 * * *"  # Daily at 5 AM UTC
+    - cron: "0 10 */3 * *"  # Every 3 days at 5 AM PST (10 UTC) - cost optimized
   workflow_dispatch:
 
 permissions:
@@ -20,6 +20,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set Date
+        id: date
+        run: echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -33,6 +37,7 @@ jobs:
       - name: Install Dependencies
         run: |
           pip install -r requirements.txt || true
+          # Install tabulate for reports if needed
           pip install tabulate || true
           npm install -g @google/jules
 
@@ -81,21 +86,13 @@ jobs:
             > .jules/completist_data/abstract_methods.txt 2>/dev/null || true
 
       # ---------------------------------------------------------
-      # Component 2b: Completist Analysis Script (Plot Gen)
-      # ---------------------------------------------------------
-      - name: Generate Completist Report & Plot
-        run: |
-            if [ -f "scripts/analyze_completist_data.py" ]; then
-               python scripts/analyze_completist_data.py || echo "Analysis script failed"
-            fi
-
-      # ---------------------------------------------------------
       # Archive Old Data
       # ---------------------------------------------------------
       - name: Archive Existing Assessments
         run: |
           mkdir -p docs/assessments/archive
           DATE=$(date +%Y-%m-%d)
+          # Archive top-level assessments
           for file in docs/assessments/Assessment_*.md; do
             [ -f "$file" ] && mv "$file" "docs/assessments/archive/$(basename "$file" .md)_archived_$DATE.md" || true
           done
@@ -111,7 +108,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "docs(assessment): pre-assessment data collection"
-          branch: "automation/assessment-$(date +%Y-%m-%d)"
+          branch: "automation/assessment-${{ steps.date.outputs.date }}"
           create_branch: true
           push_options: '--force'
 
@@ -154,25 +151,29 @@ jobs:
           
           ## Requirements
           
-          ### 1. General Assessment (Categories A-O)
+          ### 1. General Assessment (Categories A-O) - CRITICAL
+          **You must NOT perform a generic assessment.**
           For EACH category from A to O:
-          1. **Read Reference**: Look for `docs/assessments/Assessment_Prompt_X.md` (where X is A, B, C...).
-          2. **Follow Instructions Exactly**: Follow the specific tables and criteria in those files.
-          3. **Output**: Save to `docs/assessments/Assessment_X_Category.md`.
+          1. **Read the Reference Prompt**: Look for `docs/assessments/Assessment_Prompt_X.md` (where X is A, B, C...).
+          2. **Follow Instructions Exactly**: Each prompt file contains specific tables, scoring criteria, and output formats. You MUST follow them.
+          3. **Full Review**: Do not "lazy bypass". If the prompt asks for a "Critical Path Analysis", do it. If it asks for a "Findings Table" with specific columns, create it.
+          4. **Output**: Save the detailed report to `docs/assessments/Assessment_X_Category.md` (or matching the pattern in the prompt).
+          
+          If a specific prompt file is missing, perform a standard thorough assessment for that category, but prioritize the existing prompt files.
           
           ### 2. Completist Audit
-          - **Read Reference**: `docs/assessments/Assessment_Prompt_Completist.md`.
-          - **Input Data**: Review `.jules/completist_data/` and the report in `docs/assessments/completist/`.
-          - **Output**: `docs/assessments/Assessment_Completist.md` (following the template).
+          - Review data in `.jules/completist_data/` (todos, not_implemented, etc).
+          - Create `docs/assessments/completist/Completist_Report_DATE.md`.
+          - Summarize critical gaps and technical debt.
           
           ### 3. Pragmatic Programmer Review
-          - **Read Reference**: `docs/assessments/Assessment_Prompt_Pragmatic_Programmer.md`.
-          - **Input Data**: Review `docs/assessments/pragmatic_programmer/`.
-          - **Output**: `docs/assessments/Assessment_Pragmatic_Programmer.md` (following the template).
+          - I have already run a script to generate `docs/assessments/pragmatic_programmer/review_*.md`.
+          - Please READ this file if it exists and incorporate its findings into your Comprehensive Report.
              
           ### 4. Comprehensive Report
           - Create `docs/assessments/Comprehensive_Assessment.md`.
-          - Include a unified scorecard.
+          - Include a unified scorecard: General Grades + Completist Score + Pragmatic Score.
+          - Top 10 unified recommendations.
           
           ## PR Title Instruction
           The Pull Request Title MUST be exactly:
