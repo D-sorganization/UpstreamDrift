@@ -62,5 +62,7 @@ URDF_GENERATOR_SCRIPT: Path = Path("src/tools/urdf_generator/launch_urdf_generat
 C3D_VIEWER_SCRIPT: Path = Path(
     "src/engines/Simscape_Multibody_Models/3D_Golf_Model/python/src/apps/c3d_viewer.py"
 )
-GUI_LAUNCHER_SCRIPT: Path = Path("launchers/golf_launcher.py")
-LOCAL_LAUNCHER_SCRIPT: Path = Path("launchers/golf_suite_launcher.py")
+GUI_LAUNCHER_SCRIPT: Path = Path("src/launchers/golf_launcher.py")
+# LOCAL_LAUNCHER_SCRIPT is deprecated - use GUI_LAUNCHER_SCRIPT instead
+# The main launcher now supports both local and Docker modes
+LOCAL_LAUNCHER_SCRIPT: Path = Path("src/launchers/golf_launcher.py")

@@ -29,5 +29,29 @@ cryptography
 # Data Formats & Configuration
 pyyaml>=6.0.1
 
+# Logging & CLI
+structlog>=24.0.0
+colorama>=0.4.6
+
 # Web Automation & Testing
 playwright>=1.40.0
+
+# Physics Engines (Windows - install via pip)
+mujoco>=3.0.0
+
+# ============================================================================
+# WSL2/Linux Only Dependencies (not available on Windows via pip)
+# ============================================================================
+# For full Pinocchio/Drake/Crocoddyl support, use WSL2 with conda:
+#
+#   # Install Miniforge in WSL2 Ubuntu
+#   wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+#   bash Miniforge3-Linux-x86_64.sh
+#
+#   # Create environment with robotics packages
+#   conda create -n golf_suite python=3.11 pinocchio crocoddyl pink meshcat-python -c conda-forge
+#   conda activate golf_suite
+#   pip install drake mujoco PyQt6 structlog colorama
+#
+# See docs/wsl_setup.md for detailed instructions.
+# ============================================================================

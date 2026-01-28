@@ -109,4 +109,10 @@ models:
     type: "special_app"
     path: "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/main_scripts/golf_swing_analysis_gui.m"
 
+  - id: "shot_tracer"
+    name: "Shot Tracer"
+    description: "Ball flight visualization using Waterloo/Penner aerodynamics model"
+    type: "special_app"
+    path: "src/launchers/shot_tracer.py"
+
 

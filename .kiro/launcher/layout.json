@@ -12,7 +12,8 @@
     "urdf_generator",
     "c3d_viewer",
     "matlab_dataset_gui",
-    "matlab_golf_gui"
+    "matlab_golf_gui",
+    "shot_tracer"
   ],
   "selected_model": null,
   "window_geometry": {

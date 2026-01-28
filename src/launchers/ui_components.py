@@ -60,6 +60,7 @@ LAUNCH_FEEDBACK_DURATION_MS = 2000
 
 # Tile image file names
 _IMG_SIMSCAPE = "simscape_multibody.png"
+_IMG_MATLAB = "matlab_logo.png"
 
 # Metadata (mirrored from main launcher)
 # Maps display names to tile image files in assets/
@@ -72,16 +73,17 @@ MODEL_IMAGES = {
     "OpenSim Golf": "openpose.jpg",
     "MyoSim Suite": "myosim.png",
     "OpenPose Analysis": "opensim.png",
-    # MATLAB/Simscape
-    "Matlab Simscape": _IMG_SIMSCAPE,
-    "Matlab Simscape 2D": _IMG_SIMSCAPE,
-    "Matlab Simscape 3D": _IMG_SIMSCAPE,
-    "Dataset Generator GUI": _IMG_SIMSCAPE,
-    "Golf Swing Analysis GUI": _IMG_SIMSCAPE,
-    "MATLAB Code Analyzer": _IMG_SIMSCAPE,
+    # MATLAB/Simscape - Use official MATLAB logo
+    "Matlab Simscape": _IMG_MATLAB,
+    "Matlab Simscape 2D": _IMG_MATLAB,
+    "Matlab Simscape 3D": _IMG_MATLAB,
+    "Dataset Generator GUI": _IMG_MATLAB,
+    "Golf Swing Analysis GUI": _IMG_MATLAB,
+    "MATLAB Code Analyzer": _IMG_MATLAB,
     # Tools
     "URDF Generator": "urdf_icon.png",
     "C3D Motion Viewer": "c3d_icon.png",
+    "Shot Tracer": "golf_icon.png",  # Ball flight visualization
 }
 
 # Theme availability check

@@ -1,5 +1,10 @@
 """Unified Golf Suite Launcher (Local Python Version) - Golf Modeling Suite.
 
+.. deprecated::
+    This launcher is deprecated. Use `golf_launcher.py` instead, which supports
+    both local and Docker modes. This file is kept for backwards compatibility
+    but will be removed in a future version.
+
 Launches the MuJoCo, Drake, and Pinocchio golf model GUIs from a single interface.
 This version assumes all dependencies are installed in the local Python environment
 or accessible via `sys.executable`.
