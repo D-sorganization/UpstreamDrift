@@ -218,7 +218,6 @@ class MuJoCoOffscreenRenderer:
 
         try:
             from pathlib import Path
-            import re
 
             # Read and preprocess URDF to fix small masses/inertias
             urdf_content = Path(urdf_path).read_text(encoding="utf-8")
@@ -316,8 +315,8 @@ class MuJoCoOffscreenRenderer:
 """
         # Insert mujoco extension after robot tag opening
         urdf_content = re.sub(
-            r'(<robot[^>]*>)',
-            r'\1' + mujoco_extension,
+            r"(<robot[^>]*>)",
+            r"\1" + mujoco_extension,
             urdf_content,
             count=1,
         )

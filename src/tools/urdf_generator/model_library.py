@@ -32,8 +32,10 @@ if str(_project_root) not in sys.path:
 try:
     from src.shared.python.logging_config import get_logger
 except ImportError:
+
     def get_logger(name: str) -> logging.Logger:
         return logging.getLogger(name)
+
 
 logger = get_logger(__name__)
 

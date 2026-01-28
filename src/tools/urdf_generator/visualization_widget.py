@@ -21,8 +21,10 @@ logger = get_logger(__name__)
 # Check MuJoCo availability
 MUJOCO_AVAILABLE = False
 try:
-    import mujoco
+    pass
+
     from .mujoco_viewer import MuJoCoViewerWidget
+
     MUJOCO_AVAILABLE = True
     logger.info("MuJoCo 3D viewer available")
 except ImportError as e:
@@ -105,9 +107,7 @@ class VisualizationWidget(QWidget):
                 # Update MuJoCo viewer - pass path for mesh resolution
                 if self.mujoco_widget:
                     try:
-                        self.mujoco_widget.update_visualization(
-                            urdf_content, urdf_path
-                        )
+                        self.mujoco_widget.update_visualization(urdf_content, urdf_path)
                     except Exception as e:
                         logger.warning(f"Failed to render in MuJoCo: {e}")
                         self.info_label.setText(
@@ -131,7 +131,7 @@ class VisualizationWidget(QWidget):
         self.info_label.setText("No URDF content loaded")
         if self.use_mujoco and self.mujoco_widget:
             self.mujoco_widget.clear()
-        elif hasattr(self, 'gl_widget'):
+        elif hasattr(self, "gl_widget"):
             self.gl_widget.update()
         logger.info("Visualization cleared")
 
@@ -139,7 +139,7 @@ class VisualizationWidget(QWidget):
         """Reset the 3D view to default position."""
         if self.use_mujoco and self.mujoco_widget:
             self.mujoco_widget.reset_view()
-        elif hasattr(self, 'gl_widget'):
+        elif hasattr(self, "gl_widget"):
             self.gl_widget.reset_view()
         logger.info("View reset requested")
 

@@ -34,8 +34,10 @@ from PyQt6.QtWidgets import (
 try:
     from src.shared.python.logging_config import get_logger
 except ImportError:
+
     def get_logger(name: str) -> logging.Logger:
         return logging.getLogger(name)
+
 
 logger = get_logger(__name__)
 
