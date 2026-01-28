@@ -9,13 +9,7 @@ This module tests critical security implementations:
 
 import logging
 import secrets
-from datetime import UTC, datetime, timezone
-
-# Shim for Python < 3.11
-try:
-    from datetime import timezone
-except ImportError:
-    timezone.utc = timezone.utc  # noqa: UP017
+from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -265,7 +259,7 @@ class TestTimezoneAwareJWT:
         # Check for deprecated utcnow usage
         assert "datetime.utcnow()" not in source, (
             "Code should not use deprecated datetime.utcnow(). "
-            "Use datetime.now(timezone.utc) instead."
+            "Use datetime.now(UTC) instead."
         )
 
 

@@ -9,15 +9,7 @@ responses with markdown rendering.
 
 from __future__ import annotations
 
-# Python 3.10 compatibility: timezone.utc was added in 3.11
-from datetime import UTC, datetime, timezone
-
-from src.shared.python.logging_config import get_logger
-
-try:
-    from datetime import timezone
-except ImportError:
-    timezone.utc = timezone.utc  # noqa: UP017
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING, Any
 
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
@@ -35,6 +27,8 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+from src.shared.python.logging_config import get_logger
 
 if TYPE_CHECKING:
     from shared.python.ai.adapters.base import BaseAgentAdapter
@@ -107,9 +101,7 @@ class MessageWidget(QFrame):
         )
         self._content_label.setMarkdown(self._content)
         # Ensure text is visible on dark backgrounds
-        self._content_label.setStyleSheet(
-            "background-color: transparent; color: #e0e0e0;"
-        )
+        self._content_label.setStyleSheet("background-color: transparent; color: #e0e0e0;")
 
         # Auto-resize to content
         doc = self._content_label.document()
@@ -300,7 +292,7 @@ class AIAssistantPanel(QWidget):
         # Gitpod Orange Header
         header.setStyleSheet("""
             QFrame {
-                background-color: #FF8800; 
+                background-color: #FF8800;
                 padding: 8px;
                 border-bottom: 1px solid #cc6d00;
             }
