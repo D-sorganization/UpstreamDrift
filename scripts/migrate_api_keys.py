@@ -37,8 +37,6 @@ Version: 1.0.0
 import argparse
 import os
 import sys
-
-# Python 3.10 compatibility: timezone.utc was added in 3.11
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any

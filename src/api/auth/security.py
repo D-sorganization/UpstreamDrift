@@ -2,21 +2,14 @@
 
 import os
 import secrets
-
-# Python 3.10 compatibility: timezone.utc was added in 3.11
-from datetime import UTC, datetime, timedelta, timezone
-
-from src.shared.python.logging_config import get_logger
-
-try:
-    from datetime import timezone
-except ImportError:
-    timezone.utc = timezone.utc  # noqa: UP017
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import bcrypt
 import jwt
 from fastapi import HTTPException, status
+
+from src.shared.python.logging_config import get_logger
 
 from .models import User, UserRole
 
