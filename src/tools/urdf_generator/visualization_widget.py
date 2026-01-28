@@ -1,23 +1,39 @@
 """3D visualization widget for URDF preview."""
 
 import math
+import sys
+from pathlib import Path
 
 from PyQt6.QtCore import QPointF, Qt, QTimer
 from PyQt6.QtGui import QColor, QMouseEvent, QPainter, QPen, QWheelEvent
 from PyQt6.QtOpenGLWidgets import QOpenGLWidget
 from PyQt6.QtWidgets import QLabel, QVBoxLayout, QWidget
 
+# Add project root to path
+_project_root = Path(__file__).resolve().parent.parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
 from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
+
+# Check MuJoCo availability
+MUJOCO_AVAILABLE = False
+try:
+    import mujoco
+    from .mujoco_viewer import MuJoCoViewerWidget
+    MUJOCO_AVAILABLE = True
+    logger.info("MuJoCo 3D viewer available")
+except ImportError as e:
+    logger.info(f"MuJoCo not available, using fallback grid view: {e}")
 
 
 class VisualizationWidget(QWidget):
     """Widget for 3D visualization of URDF models.
 
     This widget provides a container for the visualization backend.
-    It currently uses a simple 2.5D grid visualization as a fallback.
-    For full 3D rendering, the MuJoCo viewer is recommended.
+    Uses MuJoCo viewer when available, falls back to simple grid view.
     """
 
     def __init__(self, parent: QWidget | None = None) -> None:
@@ -28,15 +44,28 @@ class VisualizationWidget(QWidget):
         """
         super().__init__(parent)
         self.urdf_content = ""
+        self.urdf_path: str | None = None
+        self.use_mujoco = MUJOCO_AVAILABLE
+        self.mujoco_widget: MuJoCoViewerWidget | None = None  # type: ignore[assignment]
         self._setup_ui()
 
     def _setup_ui(self) -> None:
         """Set up the user interface."""
         layout = QVBoxLayout(self)
 
-        # 3D Visualization Widget
-        self.gl_widget = Simple3DVisualizationWidget()
-        layout.addWidget(self.gl_widget)
+        # 3D Visualization Widget - use MuJoCo if available
+        if self.use_mujoco:
+            try:
+                self.mujoco_widget = MuJoCoViewerWidget()
+                layout.addWidget(self.mujoco_widget)
+                logger.info("Using MuJoCo 3D viewer")
+            except Exception as e:
+                logger.warning(f"Failed to create MuJoCo widget: {e}")
+                self.use_mujoco = False
+
+        if not self.use_mujoco:
+            self.gl_widget = Simple3DVisualizationWidget()
+            layout.addWidget(self.gl_widget)
 
         # Info Label (below the 3D view)
         self.info_label = QLabel("No URDF content loaded")
@@ -51,13 +80,17 @@ class VisualizationWidget(QWidget):
         """)
         layout.addWidget(self.info_label)
 
-    def update_visualization(self, urdf_content: str) -> None:
+    def update_visualization(
+        self, urdf_content: str, urdf_path: str | None = None
+    ) -> None:
         """Update the 3D visualization with new URDF content.
 
         Args:
             urdf_content: URDF XML content to visualize.
+            urdf_path: Optional path to URDF file for mesh resolution.
         """
         self.urdf_content = urdf_content
+        self.urdf_path = urdf_path
 
         # Update the status text
         if urdf_content.strip():
@@ -65,14 +98,28 @@ class VisualizationWidget(QWidget):
             link_count = urdf_content.count("<link")
             joint_count = urdf_content.count("<joint")
 
-            self.info_label.setText(
-                f"Links: {link_count} | Joints: {joint_count} (Grid View - Install MuJoCo for 3D)"
-            )
+            if self.use_mujoco:
+                self.info_label.setText(
+                    f"Links: {link_count} | Joints: {joint_count} (MuJoCo 3D View)"
+                )
+                # Update MuJoCo viewer - pass path for mesh resolution
+                if self.mujoco_widget:
+                    try:
+                        self.mujoco_widget.update_visualization(
+                            urdf_content, urdf_path
+                        )
+                    except Exception as e:
+                        logger.warning(f"Failed to render in MuJoCo: {e}")
+                        self.info_label.setText(
+                            f"Links: {link_count} | Joints: {joint_count} (MuJoCo render failed)"
+                        )
+            else:
+                self.info_label.setText(
+                    f"Links: {link_count} | Joints: {joint_count} (Grid View)"
+                )
+                self.gl_widget.update()
         else:
             self.info_label.setText("No URDF content loaded")
-
-        # Force update of the GL widget
-        self.gl_widget.update()
 
         logger.info(
             f"Visualization updated with URDF content ({len(urdf_content)} characters)"
@@ -82,12 +129,18 @@ class VisualizationWidget(QWidget):
         """Clear the visualization."""
         self.urdf_content = ""
         self.info_label.setText("No URDF content loaded")
-        self.gl_widget.update()
+        if self.use_mujoco and self.mujoco_widget:
+            self.mujoco_widget.clear()
+        elif hasattr(self, 'gl_widget'):
+            self.gl_widget.update()
         logger.info("Visualization cleared")
 
     def reset_view(self) -> None:
         """Reset the 3D view to default position."""
-        self.gl_widget.reset_view()
+        if self.use_mujoco and self.mujoco_widget:
+            self.mujoco_widget.reset_view()
+        elif hasattr(self, 'gl_widget'):
+            self.gl_widget.reset_view()
         logger.info("View reset requested")
 
 

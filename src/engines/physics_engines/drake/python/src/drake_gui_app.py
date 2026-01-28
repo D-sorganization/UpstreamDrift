@@ -8,6 +8,12 @@ import webbrowser
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+# Add project root to path for src imports when run as standalone script
+# Path: src/engines/physics_engines/drake/python/src/drake_gui_app.py -> need 7 parents
+_project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
 import numpy as np
 
 from src.shared.python.engine_availability import (

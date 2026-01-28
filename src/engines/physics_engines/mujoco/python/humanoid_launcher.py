@@ -10,6 +10,12 @@ from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
+# Add project root to path for src imports when run as standalone script
+# Path: src/engines/physics_engines/mujoco/python/humanoid_launcher.py -> need 6 parents
+_project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
 import numpy as np
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QColor, QPalette

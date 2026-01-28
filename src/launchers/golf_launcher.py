@@ -271,6 +271,15 @@ class GolfLauncher(QMainWindow):
         else:
             self.toast_manager = None
 
+    def _get_subprocess_env(self) -> dict[str, str]:
+        """Get environment dict with PYTHONPATH set for subprocess launches."""
+        env = os.environ.copy()
+        pythonpath = str(REPOS_ROOT)
+        if "PYTHONPATH" in env:
+            pythonpath = f"{pythonpath}{os.pathsep}{env['PYTHONPATH']}"
+        env["PYTHONPATH"] = pythonpath
+        return env
+
     def _setup_keyboard_shortcuts(self) -> None:
         """Set up global keyboard shortcuts."""
         # Ctrl+? or F1 for shortcuts overlay
@@ -1295,7 +1304,7 @@ class GolfLauncher(QMainWindow):
 
         try:
             # Determine launch strategy
-            repo_path = getattr(model, "repo_path", None)
+            repo_path = getattr(model, "path", None)
 
             # If path provided, use it
             if repo_path:
@@ -1398,6 +1407,7 @@ class GolfLauncher(QMainWindow):
             process = subprocess.Popen(
                 [sys.executable, "-m", "mujoco_humanoid_golf"],
                 cwd=str(python_dir),
+                env=self._get_subprocess_env(),
                 creationflags=creation_flags,
             )
             self.running_processes["mujoco_dashboard"] = process
@@ -1418,6 +1428,7 @@ class GolfLauncher(QMainWindow):
             process = subprocess.Popen(
                 [sys.executable, "-m", "src.drake_gui_app"],
                 cwd=str(python_dir),
+                env=self._get_subprocess_env(),
                 creationflags=creation_flags,
             )
             self.running_processes["drake_gui"] = process
@@ -1439,6 +1450,7 @@ class GolfLauncher(QMainWindow):
             process = subprocess.Popen(
                 [sys.executable, str(script)],
                 cwd=str(python_dir),
+                env=self._get_subprocess_env(),
                 creationflags=creation_flags,
             )
             self.running_processes["pinocchio_gui"] = process
@@ -1461,6 +1473,7 @@ class GolfLauncher(QMainWindow):
             process = subprocess.Popen(
                 [sys.executable, str(script)],
                 cwd=str(script.parent),
+                env=self._get_subprocess_env(),
                 creationflags=creation_flags,
             )
             self.running_processes["opensim_gui"] = process
@@ -1482,6 +1495,7 @@ class GolfLauncher(QMainWindow):
             process = subprocess.Popen(
                 [sys.executable, str(script)],
                 cwd=str(script.parent),
+                env=self._get_subprocess_env(),
                 creationflags=creation_flags,
             )
             self.running_processes["myosim_gui"] = process
@@ -1502,6 +1516,7 @@ class GolfLauncher(QMainWindow):
             process = subprocess.Popen(
                 [sys.executable, str(script)],
                 cwd=str(script.parent),
+                env=self._get_subprocess_env(),
                 creationflags=creation_flags,
             )
             self.running_processes["openpose_gui"] = process
@@ -1600,6 +1615,7 @@ class GolfLauncher(QMainWindow):
             process = secure_popen(
                 [sys.executable, str(script_path)],
                 cwd=str(cwd),
+                env=self._get_subprocess_env(),
                 creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
             )
             self.running_processes[name] = process

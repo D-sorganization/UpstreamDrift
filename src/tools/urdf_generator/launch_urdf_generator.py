@@ -2,14 +2,23 @@
 """Launch script for the Interactive URDF Generator."""
 
 import sys
+from pathlib import Path
+
+# Add project root to path for src imports when run as standalone script
+# Path: src/tools/urdf_generator/launch_urdf_generator.py -> need 4 parents
+_project_root = Path(__file__).resolve().parent.parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
+# CRITICAL: Import MuJoCo BEFORE any Qt imports to avoid DLL conflicts on Windows.
+# Qt's OpenGL context initialization conflicts with MuJoCo's plugin loading.
+try:
+    import mujoco  # noqa: F401
+except ImportError:
+    pass  # MuJoCo not installed, will fall back to grid view
 
 from src.shared.python.logging_config import configure_gui_logging, get_logger
-from src.shared.python.path_utils import setup_import_paths
-
-# Add the project root to the Python path
-setup_import_paths()
-
-from src.tools.urdf_generator.main_window import main  # noqa: E402
+from src.tools.urdf_generator.main_window import main
 
 if __name__ == "__main__":
     # Set up logging
