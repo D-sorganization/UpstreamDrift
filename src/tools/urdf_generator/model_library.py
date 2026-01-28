@@ -17,18 +17,29 @@ Use BundledAssets from bundled_assets/ for local models.
 from __future__ import annotations
 
 import json
+import logging
 import math
+import sys
 import urllib.request
 from pathlib import Path
 from typing import Any
 
-from src.shared.python.logging_config import get_logger
+# Add project root to path for src imports when run as standalone script
+_project_root = Path(__file__).resolve().parent.parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
+try:
+    from src.shared.python.logging_config import get_logger
+except ImportError:
+    def get_logger(name: str) -> logging.Logger:
+        return logging.getLogger(name)
 
 logger = get_logger(__name__)
 
 # Try to import bundled assets for local model access
 try:
-    from tools.urdf_generator.bundled_assets import (
+    from src.tools.urdf_generator.bundled_assets import (
         BundledAssetNotFoundError,
         BundledAssets,
     )

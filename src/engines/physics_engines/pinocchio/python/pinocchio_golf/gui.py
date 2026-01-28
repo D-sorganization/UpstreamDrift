@@ -5,6 +5,12 @@ import types
 from pathlib import Path
 from typing import Any
 
+# Add project root to path for src imports when run as standalone script
+# Path: src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py -> need 7 parents
+_project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
 import numpy as np
 import pinocchio as pin  # type: ignore
 from PyQt6 import QtCore, QtWidgets
