@@ -2,7 +2,7 @@
 
 > **A running log of scientific topics, research directions, and feature ideas for the Golf Modeling Suite.**
 >
-> Last Updated: 2026-01-21
+> Last Updated: 2026-01-26
 
 ---
 
@@ -10,7 +10,10 @@
 
 ### Kinematic Sequence Analysis
 - **X-Factor Stretch**: Quantifying hip-shoulder separation timing and its correlation with clubhead speed
+- **X-Factor Stretch Velocity**: Rate of separation change (stretch-shortening cycle speed) to quantify elastic energy storage
 - **Proximal-to-Distal Sequencing**: Measuring timing delays between pelvis, thorax, arm, and club rotation
+- **Speed Gain Factors**: Ratio of peak angular velocities between adjacent segments (transfer efficiency)
+- **Kinematic Deceleration Efficiency**: Quantifying the "braking" force of proximal segments to transfer momentum distally
 - **Ground Reaction Force Patterns**: Force plate data integration for weight transfer analysis
 - **Center of Pressure Migration**: Tracking pressure movement throughout the swing phases
 
@@ -34,13 +37,15 @@
 - **Dimple Pattern Effects**: How dimple geometry affects drag and lift coefficients
 - **Reynolds Number Regimes**: Transition between laminar and turbulent boundary layers
 - **Magnus Effect Quantification**: Spin-induced lift as function of spin rate and velocity
-- **Spin Decay Models**: Air resistance effects on spin rate during flight
+- **Spin Decay Modeling**: Exponential decay of spin rate due to air friction (currently constant in simulation)
+- **Wind Gradient Modeling**: Logarithmic vertical wind profiles and boundary layer effects
 
 ### Launch Conditions
 - **Optimal Launch Angle**: Mathematical derivation of maximum carry distance conditions
 - **Spin Loft Relationship**: How attack angle and dynamic loft affect spin rate
 - **Gear Effect Modeling**: Off-center hits and resulting spin axis tilt
 - **Smash Factor Physics**: Energy transfer efficiency from club to ball
+- **Bounce and Roll Physics**: Terrain interaction models including coefficient of restitution and rolling friction
 
 ### Environmental Factors
 - **Altitude Effects**: Air density variations and their impact on ball flight
@@ -54,6 +59,9 @@
 
 ### Club Dynamics
 - **Shaft Flex Modeling**: Bend profiles during downswing and impact
+- **Variable EI Profiles**: Modeling non-uniform stiffness to simulate Kick Points and Bend Profiles
+- **Finite Element Shaft Model**: Discrete element modeling for accurate higher-order mode analysis
+- **Shaft Anisotropy**: Modeling distinct torque (torsional) and bending stiffness (EI) properties
 - **Kick Point Effects**: How shaft flex point affects launch conditions
 - **Club Head MOI**: Moment of inertia effects on forgiveness and shot dispersion
 - **Face Bulge and Roll**: Curved face geometry effects on off-center hits
@@ -76,7 +84,9 @@
 
 ### Performance Metrics
 - **Strokes Gained Decomposition**: Statistical breakdown of performance by shot category
+- **Strokes Gained Baseline Generation**: Methodology for constructing baseline functions from large-scale shot data
 - **Dispersion Pattern Analysis**: Shot distribution modeling and consistency metrics
+- **Shot Dispersion Ellipses**: Confidence region covariance analysis (95% confidence ellipses)
 - **Miss Pattern Classification**: Identifying systematic vs random errors
 - **Pressure Performance**: Statistical analysis of performance under tournament conditions
 
@@ -97,6 +107,7 @@
 ## Simulation & Visualization
 
 ### Real-Time Rendering
+- **Physically Based Rendering (PBR)**: Realistic material shaders for club heads and balls
 - **Physics-Based Animation**: Accurate muscle and skeletal visualization during simulation
 - **Force Vector Display**: Visualizing joint forces and torques during swing
 - **Trajectory Prediction Overlay**: Real-time ball flight path visualization
@@ -122,6 +133,7 @@
 - **Minimum Effort Swings**: Energy-optimal motion planning for consistent ball striking
 - **Maximum Speed Swings**: Velocity-optimized trajectories with constraint handling
 - **Accuracy-Focused Control**: Minimizing endpoint variance in motion planning
+- **Impact Interval Control**: Optimizing for the duration of the "sweet spot" alignment (impact dwell time)
 - **Multi-Objective Pareto Fronts**: Trade-off analysis between speed, accuracy, and effort
 
 ### Motor Learning Models
@@ -186,6 +198,7 @@
 
 | Date | Entry Type | Description |
 |------|------------|-------------|
+| 2026-01-26 | Update | Augmented with new topics from gap analysis (Biomechanics, Physics, Equipment) |
 | 2026-01-21 | Initial | Created ideas document with foundational research topics |
 
 ---
