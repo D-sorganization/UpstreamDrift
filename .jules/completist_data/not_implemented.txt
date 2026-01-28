@@ -1,16 +1,5 @@
-./.github/workflows/Jules-Completist.yml:45:          # Find NotImplementedError
-./.github/workflows/Jules-Completist.yml:46:          grep -rn "NotImplementedError\|raise NotImplemented\|pass  #" --include="*.py" . \
-./.github/workflows/Jules-Completist.yml:113:          - not_implemented.txt - NotImplementedError and pass statements
-./.github/workflows/Jules-Completist.yml:122:          - Raise NotImplementedError in core paths
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:94:          # Find NotImplementedError patterns
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:95:          echo "### NotImplementedError Placeholders" >> /tmp/incomplete_report.md
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:98:          grep -rn "raise NotImplementedError" --include="*.py" . 2>/dev/null | grep -v "__pycache__" | grep -v ".git" | head -30 >> /tmp/incomplete_report.md || echo "None found"
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:118:          NOT_IMPL_COUNT=$(grep -rc "raise NotImplementedError" --include="*.py" . 2>/dev/null | grep -v ":0$" | wc -l || echo "0")
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:307:          | NotImplementedError | ${NOT_IMPL:-0} | x5 | $(echo "$NOT_IMPL * 5" | bc) |
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:374:          3. **Incomplete Implementations**: Complete or remove NotImplementedError stubs
-./.github/workflows/Jules-Tech-Debt-Assessor.yml:429:          | NotImplementedError | x5 | Incomplete features affect stability |
-./.github/copilot-instructions.md:10:- [ ] No `TODO`, `FIXME`, `pass`, `NotImplementedError` in maintained code.
-./scripts/analyze_completist_data.py:199:        "NotImplementedError": 4,
+./pyproject.toml:306:    "raise NotImplementedError",
+./AGENTS.md:243:- **Read:** Codebase for TODO, FIXME, NotImplementedError, pass statements
 ./reports/bandit.json:14133:      "code": "140 \n141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n",
 ./reports/bandit.json:14153:      "code": "141         assert len(issues) > 0\n142         assert any(\"NotImplementedError\" in issue[1] for issue in issues)\n143 \n",
 ./tests/integration/test_physics_interfaces.py:56:        except NotImplementedError:
