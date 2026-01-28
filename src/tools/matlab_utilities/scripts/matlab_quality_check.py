@@ -12,7 +12,7 @@ from __future__ import annotations
 import argparse
 import re
 import sys
-from datetime import UTC, datetime
+from datetime import timezone, datetime
 from pathlib import Path
 from typing import cast
 
@@ -32,7 +32,7 @@ class MATLABQualityChecker:
         self.project_root = project_root
         self.matlab_dir = project_root / "matlab"
         self.results: dict[str, object] = {
-            "timestamp": datetime.now(UTC).isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "total_files": 0,
             "issues": [],
             "passed": True,
