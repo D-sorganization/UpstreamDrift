@@ -356,8 +356,6 @@ class BallFlightSimulator:
     ) -> list[TrajectoryPoint]:
         """Convert raw integration data to rich TrajectoryPoint objects."""
         points = []
-        gravity_f = np.array([0.0, 0.0, -self.ball.mass * self.environment.gravity])
-        omega = launch.spin_rate * 2 * np.pi / 60
 
         for row in data:
             t, pos, vel = row[0], row[1:4], row[4:]
@@ -494,7 +492,7 @@ class BallFlightSimulator:
                 cross_mask = cross_norm > NUMERICAL_EPSILON
 
                 # Apply across
-                m_indices = np.where(mask)[0] # Indices where speed ok
+                # m_indices = np.where(mask)[0] # Indices where speed ok
                 # This is getting complicated to vectorize perfectly with numpy basic indexing inplace
                 # Let's simplify: if batch, iterate? No, performance.
                 # But for unit test 'TestCalculateForcesVectorized', we must support it.
