@@ -1,5 +1,3 @@
-./.github/workflows/Jules-Completist.yml:62:          grep -rn "@abstractmethod" -A 5 --include="*.py" . \
-./scripts/analyze_completist_data.py:177:        if f_path and l_no and c_txt and "@abstractmethod" in c_txt:
 ./src/shared/python/flight_models.py:156:    @abstractmethod
 ./src/shared/python/flight_models.py:161:    @abstractmethod
 ./src/shared/python/flight_models.py:166:    @abstractmethod
