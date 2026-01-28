@@ -369,10 +369,15 @@ class TestSetupImportPaths:
 
         src_root = str(get_src_root())
 
-        # Call twice
-        setup_import_paths()
-        setup_import_paths()
+        # Create a path that definitely doesn't have src_root
+        clean_path = [p for p in sys.path if p != src_root]
 
-        # Should only appear once
-        count = sys.path.count(src_root)
-        assert count == 1
+        # Patch sys.path to ensure clean state
+        with patch("sys.path", clean_path):
+            # Call twice
+            setup_import_paths()
+            setup_import_paths()
+
+            # Should only appear once
+            count = sys.path.count(src_root)
+            assert count == 1
