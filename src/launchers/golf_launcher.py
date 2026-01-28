@@ -548,6 +548,9 @@ except Exception as e:
                     "gpu_acceleration": (
                         self.chk_gpu.isChecked() if hasattr(self, "chk_gpu") else False
                     ),
+                    "docker_mode": (
+                        self.chk_docker.isChecked() if hasattr(self, "chk_docker") else False
+                    ),
                 },
             }
 
@@ -671,6 +674,11 @@ except Exception as e:
                 self.chk_live.setChecked(options.get("live_visualization", True))
             if hasattr(self, "chk_gpu"):
                 self.chk_gpu.setChecked(options.get("gpu_acceleration", False))
+            if hasattr(self, "chk_docker"):
+                # Only restore Docker mode if Docker is available
+                saved_docker = options.get("docker_mode", False)
+                if saved_docker and self.docker_available:
+                    self.chk_docker.setChecked(True)
 
             # Restore selected model
             saved_selection = layout_data.get("selected_model")
@@ -820,6 +828,40 @@ except Exception as e:
         self.lbl_status = QLabel("Checking Docker...")
         self.lbl_status.setStyleSheet("color: #aaaaaa; font-weight: bold;")
         top_bar.addWidget(self.lbl_status)
+
+        # Configuration options - moved here for visibility
+        self.chk_live = QCheckBox("Live Viz")
+        self.chk_live.setChecked(True)
+        self.chk_live.setToolTip("Enable real-time 3D visualization during simulation")
+        top_bar.addWidget(self.chk_live)
+
+        self.chk_gpu = QCheckBox("GPU")
+        self.chk_gpu.setChecked(False)
+        self.chk_gpu.setToolTip(
+            "Use GPU for physics computation (requires supported hardware)"
+        )
+        top_bar.addWidget(self.chk_gpu)
+
+        # Docker mode toggle
+        self.chk_docker = QCheckBox("Docker")
+        self.chk_docker.setChecked(False)
+        self.chk_docker.setToolTip(
+            "Run physics engines in Docker containers (requires Docker Desktop)\n"
+            "Use this for engines not installed locally (Drake, Pinocchio, etc.)"
+        )
+        self.chk_docker.stateChanged.connect(self._on_docker_mode_changed)
+        top_bar.addWidget(self.chk_docker)
+
+        # WSL mode toggle - for full Pinocchio/Drake/Crocoddyl support
+        self.chk_wsl = QCheckBox("WSL")
+        self.chk_wsl.setChecked(False)
+        self.chk_wsl.setToolTip(
+            "Run in WSL2 Ubuntu environment (full Pinocchio/Drake/Crocoddyl support)\n"
+            "Recommended for advanced robotics features not available on Windows"
+        )
+        self.chk_wsl.stateChanged.connect(self._on_wsl_mode_changed)
+        top_bar.addWidget(self.chk_wsl)
+
         top_bar.addStretch()
 
         # Search Bar
@@ -918,26 +960,8 @@ except Exception as e:
         layout.addWidget(self.scroll_area, 1)
 
     def _setup_bottom_bar(self) -> QHBoxLayout:
-        """Set up the bottom configuration bar."""
+        """Set up the bottom bar with launch button."""
         bottom_bar = QHBoxLayout()
-
-        # Configuration options
-        config_group = QHBoxLayout()
-        config_group.setSpacing(15)
-
-        self.chk_live = QCheckBox("Live Visualization")
-        self.chk_live.setChecked(True)
-        self.chk_live.setToolTip("Enable real-time 3D visualization during simulation")
-        config_group.addWidget(self.chk_live)
-
-        self.chk_gpu = QCheckBox("GPU Acceleration")
-        self.chk_gpu.setChecked(False)
-        self.chk_gpu.setToolTip(
-            "Use GPU for physics computation (requires supported hardware)"
-        )
-        config_group.addWidget(self.chk_gpu)
-
-        bottom_bar.addLayout(config_group)
         bottom_bar.addStretch()
 
         # Launch Button
@@ -1034,6 +1058,137 @@ except Exception as e:
             visible: Whether the dock is visible.
         """
         self.btn_ai.setChecked(visible)
+
+    def _on_docker_mode_changed(self, state: int) -> None:
+        """Handle Docker mode toggle change.
+
+        Args:
+            state: Qt checkbox state (0=unchecked, 2=checked)
+        """
+        use_docker = state == 2
+        if use_docker and not self.docker_available:
+            QMessageBox.warning(
+                self,
+                "Docker Not Available",
+                "Docker Desktop is not running or not installed.\n\n"
+                "Please start Docker Desktop and try again.\n\n"
+                "The launcher will continue in local mode.",
+            )
+            self.chk_docker.setChecked(False)
+            return
+
+        if use_docker:
+            logger.info("Docker mode enabled")
+            # Only show toast if UI is fully initialized
+            if hasattr(self, "toast_manager") and self.toast_manager:
+                self.show_toast("Docker mode enabled - engines will run in containers", "info")
+        else:
+            logger.info("Docker mode disabled")
+            if hasattr(self, "toast_manager") and self.toast_manager:
+                self.show_toast("Local mode - engines will run on host system", "info")
+
+        # Update launch button text if a model is selected
+        if hasattr(self, "btn_launch"):
+            self.update_launch_button()
+
+    def _on_wsl_mode_changed(self, state: int) -> None:
+        """Handle WSL mode toggle change.
+
+        Args:
+            state: Qt checkbox state (0=unchecked, 2=checked)
+        """
+        use_wsl = state == 2
+
+        if use_wsl:
+            # Disable Docker mode if WSL is enabled (mutually exclusive)
+            if hasattr(self, "chk_docker") and self.chk_docker.isChecked():
+                self.chk_docker.setChecked(False)
+
+            # Check if WSL is available
+            try:
+                result = subprocess.run(
+                    ["wsl", "--list", "--quiet"],
+                    capture_output=True,
+                    text=True,
+                    timeout=5,
+                    creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
+                )
+                if result.returncode != 0 or "Ubuntu" not in result.stdout:
+                    raise RuntimeError("Ubuntu not found in WSL")
+            except Exception as e:
+                QMessageBox.warning(
+                    self,
+                    "WSL Not Available",
+                    f"WSL2 with Ubuntu is not available.\n\n"
+                    f"Error: {e}\n\n"
+                    "Please install WSL2 and Ubuntu:\n"
+                    "  wsl --install -d Ubuntu-22.04",
+                )
+                self.chk_wsl.setChecked(False)
+                return
+
+            logger.info("WSL mode enabled")
+            if hasattr(self, "toast_manager") and self.toast_manager:
+                self.show_toast(
+                    "WSL mode - full Pinocchio/Drake/Crocoddyl support", "info"
+                )
+        else:
+            logger.info("WSL mode disabled")
+            if hasattr(self, "toast_manager") and self.toast_manager:
+                self.show_toast("Local Windows mode", "info")
+
+        # Update launch button text if a model is selected
+        if hasattr(self, "btn_launch"):
+            self.update_launch_button()
+
+    def _launch_in_wsl(self, script_path: str, args: list[str] | None = None) -> None:
+        """Launch a script in WSL2 Ubuntu environment.
+
+        Args:
+            script_path: Path to the Python script (Windows path will be converted)
+            args: Optional list of arguments to pass to the script
+        """
+        # Convert Windows path to WSL path
+        if script_path.startswith("C:") or script_path.startswith("c:"):
+            wsl_path = script_path.replace("\\", "/")
+            wsl_path = "/mnt/c" + wsl_path[2:]
+        else:
+            wsl_path = script_path.replace("\\", "/")
+
+        project_dir = "/mnt/c/Users/diete/Repositories/Golf_Modeling_Suite"
+
+        # Build the WSL command
+        wsl_cmd = f'''
+source ~/miniforge3/etc/profile.d/conda.sh
+conda activate golf_suite
+export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
+export PYTHONPATH="{project_dir}:$PYTHONPATH"
+cd "{project_dir}"
+python "{wsl_path}" {' '.join(args or [])}
+'''
+
+        cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
+
+        try:
+            logger.info(f"Launching in WSL: {script_path}")
+            if os.name == "nt":
+                # On Windows, create a new console window
+                subprocess.Popen(
+                    cmd,
+                    creationflags=CREATE_NEW_CONSOLE,
+                )
+            else:
+                subprocess.Popen(cmd)
+
+            if hasattr(self, "toast_manager") and self.toast_manager:
+                self.show_toast(f"Launched in WSL: {Path(script_path).name}", "success")
+        except Exception as e:
+            logger.error(f"Failed to launch in WSL: {e}")
+            QMessageBox.critical(
+                self,
+                "WSL Launch Error",
+                f"Failed to launch in WSL:\n{e}",
+            )
 
     def _open_ai_settings(self) -> None:
         """Open the AI settings dialog."""
@@ -1490,6 +1645,29 @@ except Exception as e:
             return
 
         # Handle Standard Physics Models
+        use_docker = hasattr(self, "chk_docker") and self.chk_docker.isChecked()
+
+        # Check if Docker mode is enabled
+        if use_docker and self.docker_available:
+            self.lbl_status.setText(f"> Launching {model.name} in Docker...")
+            self.lbl_status.setStyleSheet("color: #64b5f6;")
+            QApplication.processEvents()
+
+            try:
+                repo_path = getattr(model, "path", None)
+                if repo_path:
+                    self._launch_docker_container(model, REPOS_ROOT / repo_path)
+                else:
+                    self.show_toast("Model path missing for Docker launch.", "error")
+                return
+            except Exception as e:
+                logger.error(f"Docker launch failed: {e}")
+                self.show_toast(f"Docker Launch Failed: {e}", "error")
+                self.lbl_status.setText("> Ready")
+                self.lbl_status.setStyleSheet("color: #aaaaaa;")
+                return
+
+        # Local mode - check dependencies
         self.lbl_status.setText(f"> Checking {model.name} dependencies...")
         self.lbl_status.setStyleSheet("color: #FFD60A;")
         QApplication.processEvents()
@@ -1497,6 +1675,19 @@ except Exception as e:
         # Check dependencies before launching
         deps_ok, deps_error = self._check_module_dependencies(model.type)
         if not deps_ok:
+            # Offer Docker as alternative if available
+            if self.docker_available:
+                response = QMessageBox.question(
+                    self,
+                    "Local Dependencies Missing",
+                    f"{deps_error}\n\n"
+                    "Would you like to try launching in Docker mode instead?",
+                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                )
+                if response == QMessageBox.StandardButton.Yes:
+                    self.chk_docker.setChecked(True)
+                    self.launch_simulation()  # Retry with Docker
+                    return
             self._show_dependency_error(model.name, deps_error)
             self.lbl_status.setText("● Dependency Error")
             self.lbl_status.setStyleSheet("color: #FF375F;")
@@ -1584,7 +1775,6 @@ except Exception as e:
 
     def _custom_launch_humanoid(self, abs_repo_path: Path) -> None:
         """Launch the MuJoCo humanoid GUI directly."""
-        # Use hardcoded path to ensure we hit the correct script
         script = (
             REPOS_ROOT
             / "src/engines/physics_engines/mujoco/python/humanoid_launcher.py"
@@ -1594,7 +1784,8 @@ except Exception as e:
                 self, "Error", f"Humanoid launcher not found: {script}"
             )
             return
-        self._launch_script_process("MuJoCo Humanoid", script, script.parent)
+        logger.info(f"Launching MuJoCo Humanoid: {script}")
+        self._launch_script_process("MuJoCo Humanoid", script, REPOS_ROOT)
 
     def _custom_launch_comprehensive(self, abs_repo_path: Path) -> None:
         """Launch the comprehensive MuJoCo dashboard directly."""
@@ -1605,60 +1796,32 @@ except Exception as e:
             )
             return
         logger.info(f"Launching MuJoCo Dashboard from {python_dir}")
-        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
-        try:
-            process = subprocess.Popen(
-                [sys.executable, "-m", "mujoco_humanoid_golf"],
-                cwd=str(python_dir),
-                env=self._get_subprocess_env(),
-                creationflags=creation_flags,
-            )
-            self.running_processes["mujoco_dashboard"] = process
-        except Exception as e:
-            QMessageBox.critical(self, "Launch Error", str(e))
+        # Dashboard runs as a module from its directory
+        self._launch_module_process("MuJoCo Dashboard", "mujoco_humanoid_golf", python_dir)
 
     def _custom_launch_drake(self, abs_repo_path: Path) -> None:
         """Launch the Drake GUI directly."""
-        python_dir = REPOS_ROOT / "src/engines/physics_engines/drake/python"
-        if not python_dir.exists():
+        script = REPOS_ROOT / "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
+        if not script.exists():
             QMessageBox.critical(
-                self, "Error", f"Drake Python directory not found: {python_dir}"
+                self, "Error", f"Drake GUI not found: {script}"
             )
             return
-        logger.info(f"Launching Drake GUI from {python_dir}")
-        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
-        try:
-            process = subprocess.Popen(
-                [sys.executable, "-m", "src.drake_gui_app"],
-                cwd=str(python_dir),
-                env=self._get_subprocess_env(),
-                creationflags=creation_flags,
-            )
-            self.running_processes["drake_gui"] = process
-        except Exception as e:
-            QMessageBox.critical(self, "Launch Error", str(e))
+        logger.info(f"Launching Drake GUI: {script}")
+        self._launch_script_process("Drake", script, REPOS_ROOT)
 
     def _custom_launch_pinocchio(self, abs_repo_path: Path) -> None:
         """Launch the Pinocchio GUI directly."""
-        python_dir = REPOS_ROOT / "src/engines/physics_engines/pinocchio/python"
-        script = python_dir / "pinocchio_golf" / "gui.py"
+        script = (
+            REPOS_ROOT / "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
+        )
         if not script.exists():
             QMessageBox.critical(
                 self, "Error", f"Pinocchio GUI script not found: {script}"
             )
             return
         logger.info(f"Launching Pinocchio GUI: {script}")
-        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
-        try:
-            process = subprocess.Popen(
-                [sys.executable, str(script)],
-                cwd=str(python_dir),
-                env=self._get_subprocess_env(),
-                creationflags=creation_flags,
-            )
-            self.running_processes["pinocchio_gui"] = process
-        except Exception as e:
-            QMessageBox.critical(self, "Launch Error", str(e))
+        self._launch_script_process("Pinocchio", script, REPOS_ROOT)
 
     def _custom_launch_opensim(self, abs_repo_path: Path) -> None:
         """Launch the OpenSim GUI directly."""
@@ -1671,17 +1834,7 @@ except Exception as e:
             )
             return
         logger.info(f"Launching OpenSim GUI: {script}")
-        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
-        try:
-            process = subprocess.Popen(
-                [sys.executable, str(script)],
-                cwd=str(script.parent),
-                env=self._get_subprocess_env(),
-                creationflags=creation_flags,
-            )
-            self.running_processes["opensim_gui"] = process
-        except Exception as e:
-            QMessageBox.critical(self, "Launch Error", str(e))
+        self._launch_script_process("OpenSim", script, REPOS_ROOT)
 
     def _custom_launch_myosim(self, abs_repo_path: Path) -> None:
         """Launch the MyoSim GUI directly."""
@@ -1693,17 +1846,7 @@ except Exception as e:
             QMessageBox.critical(self, "Error", f"MyoSim script not found: {script}")
             return
         logger.info(f"Launching MyoSim: {script}")
-        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
-        try:
-            process = subprocess.Popen(
-                [sys.executable, str(script)],
-                cwd=str(script.parent),
-                env=self._get_subprocess_env(),
-                creationflags=creation_flags,
-            )
-            self.running_processes["myosim_gui"] = process
-        except Exception as e:
-            QMessageBox.critical(self, "Launch Error", str(e))
+        self._launch_script_process("MyoSim", script, REPOS_ROOT)
 
     def _custom_launch_openpose(self, abs_repo_path: Path) -> None:
         """Launch the OpenPose GUI directly."""
@@ -1714,17 +1857,7 @@ except Exception as e:
             )
             return
         logger.info(f"Launching OpenPose GUI: {script}")
-        creation_flags = CREATE_NEW_CONSOLE if os.name == "nt" else 0
-        try:
-            process = subprocess.Popen(
-                [sys.executable, str(script)],
-                cwd=str(script.parent),
-                env=self._get_subprocess_env(),
-                creationflags=creation_flags,
-            )
-            self.running_processes["openpose_gui"] = process
-        except Exception as e:
-            QMessageBox.critical(self, "Launch Error", str(e))
+        self._launch_script_process("OpenPose", script, REPOS_ROOT)
 
     def _launch_docker_container(self, model: Any, repo_path: Path) -> None:
         """Launch the model in a Docker container."""
@@ -1744,16 +1877,36 @@ except Exception as e:
                     if response != QMessageBox.StandardButton.Yes:
                         return
 
-            # Construct Docker command
+            # Check if Docker image exists
+            docker_image = "robotics_env:latest"
+            try:
+                check_result = subprocess.run(
+                    ["docker", "image", "inspect", docker_image],
+                    capture_output=True,
+                    timeout=10,
+                )
+                if check_result.returncode != 0:
+                    QMessageBox.warning(
+                        self,
+                        "Docker Image Not Found",
+                        f"The Docker image '{docker_image}' is not available.\n\n"
+                        "Build it first using:\n"
+                        "  docker build -t robotics_env .\n\n"
+                        "Or use the Environment dialog to build.",
+                    )
+                    return
+            except Exception as e:
+                logger.warning(f"Failed to check Docker image: {e}")
+
+            # Construct Docker command - no -it for GUI apps
             cmd = [
                 "docker",
                 "run",
                 "--rm",
-                "-it",
                 "-v",
                 f"{REPOS_ROOT}:/workspace",
                 "-e",
-                "PYTHONPATH=/workspace:/workspace/shared/python:/workspace/engines",
+                "PYTHONPATH=/workspace:/workspace/src:/workspace/src/shared/python",
             ]
 
             # Display configuration for GUI apps
@@ -1795,12 +1948,11 @@ except Exception as e:
             )
             cmd.extend(["-w", work_dir])
 
-            # Python command
-            # Determine correct python launch command based on model type
+            # Python command - determine correct launch command based on model type
             if model.type == "drake":
                 cmd.extend(
                     [
-                        "continuumio/miniconda3:latest",
+                        docker_image,
                         "python",
                         "-m",
                         "src.drake_gui_app",
@@ -1808,10 +1960,13 @@ except Exception as e:
                 )
             elif model.type == "pinocchio":
                 cmd.extend(
-                    ["continuumio/miniconda3:latest", "python", "pinocchio_golf/gui.py"]
+                    [docker_image, "python", "pinocchio_golf/gui.py"]
                 )
+            elif model.type in ("custom_humanoid", "custom_dashboard"):
+                # MuJoCo humanoid models
+                cmd.extend([docker_image, "python", repo_path.name])
             else:
-                cmd.extend(["continuumio/miniconda3:latest", "python", repo_path.name])
+                cmd.extend([docker_image, "python", repo_path.name])
 
             logger.info(f"Docker Launch: {' '.join(cmd)}")
 
@@ -1825,24 +1980,143 @@ except Exception as e:
             self.lbl_status.setStyleSheet("color: #30D158;")
 
         except Exception as e:
-            raise RuntimeError(f"Failed to launch Docker container: {e}") from e
+            logger.error(f"Failed to launch Docker container: {e}")
+            QMessageBox.critical(
+                self,
+                "Docker Launch Error",
+                f"Failed to launch {model.name} in Docker:\n\n{e}",
+            )
+            self.lbl_status.setText("● Docker Error")
+            self.lbl_status.setStyleSheet("color: #FF375F;")
 
     def _launch_script_process(self, name: str, script_path: Path, cwd: Path) -> None:
-        """Helper to launch python script in loose process."""
+        """Helper to launch python script with error visibility.
+
+        On Windows, uses cmd /k to keep the terminal open if the script crashes,
+        allowing users to see the error message.
+
+        If WSL mode is enabled, launches the script in WSL2 Ubuntu environment.
+        """
+        # Check if WSL mode is enabled
+        use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
+
+        if use_wsl:
+            self._launch_in_wsl(str(script_path))
+            self.lbl_status.setText(f"● {name} Running (WSL)")
+            self.lbl_status.setStyleSheet("color: #30D158;")
+            return
+
         try:
-            process = secure_popen(
-                [sys.executable, str(script_path)],
-                cwd=str(cwd),
-                env=self._get_subprocess_env(),
-                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
-            )
+            env = self._get_subprocess_env()
+
+            if os.name == "nt":
+                # Use cmd /k with a single string command to keep window open
+                cmd_str = f'cmd /k ""{sys.executable}" "{script_path}" & pause"'
+                process = subprocess.Popen(
+                    cmd_str,
+                    cwd=str(cwd),
+                    env=env,
+                    creationflags=CREATE_NEW_CONSOLE,
+                )
+            else:
+                process = subprocess.Popen(
+                    [sys.executable, str(script_path)],
+                    cwd=str(cwd),
+                    env=env,
+                )
+
             self.running_processes[name] = process
             self.show_toast(f"{name} Launched", "success")
             self.lbl_status.setText(f"● {name} Running")
             self.lbl_status.setStyleSheet("color: #30D158;")
 
         except Exception as e:
-            raise RuntimeError(f"Failed to launch {name}: {e}") from e
+            logger.error(f"Failed to launch {name}: {e}")
+            QMessageBox.critical(self, "Launch Error", f"Failed to launch {name}:\n\n{e}")
+
+    def _launch_module_process(self, name: str, module_name: str, cwd: Path) -> None:
+        """Helper to launch python module with error visibility.
+
+        Similar to _launch_script_process but uses -m to run a module.
+        If WSL mode is enabled, launches in WSL2 Ubuntu environment.
+        """
+        # Check if WSL mode is enabled
+        use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
+
+        if use_wsl:
+            # For WSL, we run the module using python -m
+            self._launch_module_in_wsl(module_name)
+            self.lbl_status.setText(f"● {name} Running (WSL)")
+            self.lbl_status.setStyleSheet("color: #30D158;")
+            return
+
+        try:
+            env = self._get_subprocess_env()
+
+            if os.name == "nt":
+                # Use cmd /k with a single string command to keep window open
+                cmd_str = f'cmd /k ""{sys.executable}" -m {module_name} & pause"'
+                process = subprocess.Popen(
+                    cmd_str,
+                    cwd=str(cwd),
+                    env=env,
+                    creationflags=CREATE_NEW_CONSOLE,
+                )
+            else:
+                process = subprocess.Popen(
+                    [sys.executable, "-m", module_name],
+                    cwd=str(cwd),
+                    env=env,
+                )
+
+            self.running_processes[name] = process
+            self.show_toast(f"{name} Launched", "success")
+            self.lbl_status.setText(f"● {name} Running")
+            self.lbl_status.setStyleSheet("color: #30D158;")
+
+        except Exception as e:
+            logger.error(f"Failed to launch {name}: {e}")
+            QMessageBox.critical(self, "Launch Error", f"Failed to launch {name}:\n\n{e}")
+
+    def _launch_module_in_wsl(self, module_name: str) -> None:
+        """Launch a Python module in WSL2 Ubuntu environment.
+
+        Args:
+            module_name: Python module name to run with -m flag
+        """
+        project_dir = "/mnt/c/Users/diete/Repositories/Golf_Modeling_Suite"
+
+        # Build the WSL command
+        wsl_cmd = f'''
+source ~/miniforge3/etc/profile.d/conda.sh
+conda activate golf_suite
+export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
+export PYTHONPATH="{project_dir}:$PYTHONPATH"
+cd "{project_dir}"
+python -m {module_name}
+'''
+
+        cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
+
+        try:
+            logger.info(f"Launching module in WSL: {module_name}")
+            if os.name == "nt":
+                subprocess.Popen(
+                    cmd,
+                    creationflags=CREATE_NEW_CONSOLE,
+                )
+            else:
+                subprocess.Popen(cmd)
+
+            if hasattr(self, "toast_manager") and self.toast_manager:
+                self.show_toast(f"Launched in WSL: {module_name}", "success")
+        except Exception as e:
+            logger.error(f"Failed to launch module in WSL: {e}")
+            QMessageBox.critical(
+                self,
+                "WSL Launch Error",
+                f"Failed to launch module in WSL:\n{e}",
+            )
 
     def open_layout_manager(self) -> None:
         """Open the layout customization dialog."""

@@ -192,18 +192,38 @@ PARQUET_AVAILABLE: bool = PYARROW_AVAILABLE or FASTPARQUET_AVAILABLE
 QT_AVAILABLE: bool = PYQT6_AVAILABLE or PYQT5_AVAILABLE or PYSIDE6_AVAILABLE
 
 # Check MuJoCo
-try:
-    import mujoco  # noqa: F401
+# On Windows with Python 3.13+, mujoco has DLL loading issues that cause crashes
+# We skip the import entirely in this case to prevent access violations
+import os as _os
+import sys as _sys
 
-    MUJOCO_AVAILABLE = True
-except ImportError:
-    pass
-except OSError as e:
-    # Handle DLL loading failures on Windows (e.g., plugin initialization errors)
-    # This can happen with Python 3.13 and certain mujoco versions
+_skip_mujoco = (
+    _sys.platform == "win32"
+    and _sys.version_info >= (3, 13)
+    and _os.environ.get("FORCE_MUJOCO_IMPORT", "").lower() != "true"
+)
+
+if _skip_mujoco:
     import logging
+    logging.getLogger(__name__).warning(
+        "Skipping MuJoCo import on Windows Python 3.13+ due to DLL issues. "
+        "Set FORCE_MUJOCO_IMPORT=true to override."
+    )
+else:
+    # Set plugin path before import to reduce plugin loading issues
+    if "MUJOCO_PLUGIN_PATH" not in _os.environ:
+        _os.environ["MUJOCO_PLUGIN_PATH"] = ""
 
-    logging.getLogger(__name__).warning(f"MuJoCo DLL loading failed: {e}")
+    try:
+        import mujoco  # noqa: F401
+
+        MUJOCO_AVAILABLE = True
+    except ImportError:
+        pass
+    except OSError as e:
+        # Handle DLL loading failures on Windows (e.g., plugin initialization errors)
+        import logging
+        logging.getLogger(__name__).warning(f"MuJoCo DLL loading failed: {e}")
 
 # Check Pinocchio
 try:

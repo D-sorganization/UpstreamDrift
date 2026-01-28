@@ -16,6 +16,9 @@ try:
     import mujoco  # noqa: F401
 except ImportError:
     pass  # MuJoCo not installed, will fall back to grid view
+except OSError:
+    # Handle DLL loading failures on Windows (e.g., Python 3.13 + mujoco 3.3.4)
+    pass  # Will fall back to grid view
 
 from src.shared.python.logging_config import configure_gui_logging, get_logger
 from src.tools.urdf_generator.main_window import main
