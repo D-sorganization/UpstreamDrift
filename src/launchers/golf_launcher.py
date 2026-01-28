@@ -140,8 +140,71 @@ configure_gui_logging()
 logger = get_logger(__name__)
 
 # Constants
-# Constants
 REPOS_ROOT = Path(__file__).parent.parent.parent.resolve()
+
+# VcXsrv paths for Windows X11 support
+VCXSRV_PATHS = [
+    Path("C:/Program Files/VcXsrv/vcxsrv.exe"),
+    Path("C:/Program Files (x86)/VcXsrv/vcxsrv.exe"),
+]
+
+
+def _is_vcxsrv_running() -> bool:
+    """Check if VcXsrv X server is running on Windows."""
+    if os.name != "nt":
+        return True  # Not needed on Linux/Mac
+    try:
+        result = subprocess.run(
+            ["tasklist", "/FI", "IMAGENAME eq vcxsrv.exe"],
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+        return "vcxsrv.exe" in result.stdout.lower()
+    except Exception:
+        return False
+
+
+def _start_vcxsrv() -> bool:
+    """Auto-start VcXsrv with Docker-compatible settings.
+
+    Returns:
+        True if VcXsrv was started or is already running, False otherwise.
+    """
+    if os.name != "nt":
+        return True  # Not needed on Linux/Mac
+
+    if _is_vcxsrv_running():
+        logger.info("VcXsrv is already running")
+        return True
+
+    # Find VcXsrv executable
+    vcxsrv_path = None
+    for path in VCXSRV_PATHS:
+        if path.exists():
+            vcxsrv_path = path
+            break
+
+    if not vcxsrv_path:
+        logger.warning("VcXsrv not found. Docker GUI apps may not work.")
+        return False
+
+    try:
+        # Start VcXsrv with settings for Docker:
+        # :0 = display 0
+        # -multiwindow = each X window gets its own Windows window
+        # -clipboard = enable clipboard sharing
+        # -wgl = use Windows OpenGL
+        # -ac = disable access control (allows Docker connections)
+        subprocess.Popen(
+            [str(vcxsrv_path), ":0", "-multiwindow", "-clipboard", "-wgl", "-ac"],
+            creationflags=CREATE_NO_WINDOW,
+        )
+        logger.info("VcXsrv X server started automatically")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to start VcXsrv: {e}")
+        return False
 CONFIG_DIR = REPOS_ROOT / ".kiro" / "launcher"
 LAYOUT_CONFIG_FILE = CONFIG_DIR / "layout.json"
 GRID_COLUMNS = 4  # Changed to 3x4 grid (12 tiles total)
@@ -1632,6 +1695,21 @@ except Exception as e:
     def _launch_docker_container(self, model: Any, repo_path: Path) -> None:
         """Launch the model in a Docker container."""
         try:
+            # Auto-start VcXsrv on Windows for GUI support
+            if os.name == "nt":
+                if not _start_vcxsrv():
+                    response = QMessageBox.question(
+                        self,
+                        "X Server Not Available",
+                        "VcXsrv X server is not running and could not be started.\n\n"
+                        "Docker GUI apps require an X server.\n\n"
+                        "Install VcXsrv from: https://vcxsrv.com\n\n"
+                        "Continue anyway?",
+                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                    )
+                    if response != QMessageBox.StandardButton.Yes:
+                        return
+
             # Construct Docker command
             cmd = [
                 "docker",
