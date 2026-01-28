@@ -116,7 +116,6 @@ class TrajectoryPoint:
 # ... (JIT functions skipped) ...
 
 
-
 @jit(nopython=True, cache=True)
 def _calculate_accel_core(
     rel_vel: np.ndarray,
@@ -361,11 +360,13 @@ class BallFlightSimulator:
 
         for row in data:
             t, pos, vel = row[0], row[1:4], row[4:]
-            
+
             # Use _calculate_forces helper (works for single vector too)
             forces = self._calculate_forces(vel, launch)
-            acc = (forces["gravity"] + forces["drag"] + forces["magnus"]) / self.ball.mass
-            
+            acc = (
+                forces["gravity"] + forces["drag"] + forces["magnus"]
+            ) / self.ball.mass
+
             points.append(
                 TrajectoryPoint(
                     t,
@@ -383,7 +384,7 @@ class BallFlightSimulator:
         if not trajectory:
             return 0.0
         last_pos = trajectory[-1].position
-        return float(np.sqrt(last_pos[0]**2 + last_pos[1]**2))
+        return float(np.sqrt(last_pos[0] ** 2 + last_pos[1] ** 2))
 
     def calculate_max_height(self, trajectory: list[TrajectoryPoint]) -> float:
         """Calculate maximum height achieved."""
@@ -401,13 +402,13 @@ class BallFlightSimulator:
         """Calculate landing angle in degrees."""
         if len(trajectory) < 2:
             return 0.0
-        
+
         v = trajectory[-1].velocity
         v_horiz = np.linalg.norm(v[:2])
-        
+
         if v_horiz < NUMERICAL_EPSILON:
-             return 90.0
-             
+            return 90.0
+
         # Angle with horizontal (positive for descent)
         return float(np.degrees(np.arctan2(-v[2], v_horiz)))
 
@@ -415,8 +416,8 @@ class BallFlightSimulator:
         """Calculate time to reach apex."""
         if not trajectory:
             return 0.0
-        
-        max_h = -float('inf')
+
+        max_h = -float("inf")
         apex_t = 0.0
         for p in trajectory:
             if p.position[2] > max_h:
@@ -432,17 +433,23 @@ class BallFlightSimulator:
             "flight_time": self.calculate_flight_time(trajectory),
             "landing_angle": self._calculate_landing_angle(trajectory),
             "apex_time": self._calculate_apex_time(trajectory),
-            "trajectory_points": len(trajectory)
+            "trajectory_points": len(trajectory),
         }
 
-    def _calculate_forces(self, vel: np.ndarray, launch: LaunchConditions) -> dict[str, np.ndarray]:
+    def _calculate_forces(
+        self, vel: np.ndarray, launch: LaunchConditions
+    ) -> dict[str, np.ndarray]:
         """Calculate forces on the ball (supports vectorized input)."""
         # Handle both single vector (3,) and batch (3, N)
         is_batch = vel.ndim > 1
-        
+
         if is_batch:
             # Broadcase wind to shape
-            wind = self.environment.wind_velocity.reshape(3, 1) if self.environment.wind_velocity.ndim == 1 else self.environment.wind_velocity
+            wind = (
+                self.environment.wind_velocity.reshape(3, 1)
+                if self.environment.wind_velocity.ndim == 1
+                else self.environment.wind_velocity
+            )
             rel_vel = vel - wind
             speed = np.sqrt(np.sum(rel_vel**2, axis=0))
         else:
@@ -450,15 +457,15 @@ class BallFlightSimulator:
             speed = float(np.linalg.norm(rel_vel))
 
         omega = launch.spin_rate * 2 * np.pi / 60
-        
+
         # Prepare outputs
         shape = vel.shape
         gravity = np.zeros(shape)
-        gravity[2, ...] = -self.ball.mass * self.environment.gravity # Set Z component
-        
+        gravity[2, ...] = -self.ball.mass * self.environment.gravity  # Set Z component
+
         drag = np.zeros(shape)
         magnus = np.zeros(shape)
-        
+
         # Avoid division by zero
         # Mask for speeds > threshold
         if is_batch:
@@ -466,56 +473,84 @@ class BallFlightSimulator:
             if np.any(mask):
                 valid_speed = speed[mask]
                 valid_rel_vel = rel_vel[:, mask]
-                
+
                 s_ratio = (omega * self.ball.radius) / valid_speed
-                
+
                 # Drag
-                # We need vectorized calculation of coefficients if possible, 
+                # We need vectorized calculation of coefficients if possible,
                 # but ball properties are scalar. We can map them.
                 # Assuming s_ratio is array.
                 cd = self.ball.cd0 + s_ratio * (self.ball.cd1 + s_ratio * self.ball.cd2)
-                
-                drag_force_mag = 0.5 * self.environment.air_density * self.ball.cross_sectional_area * cd * (valid_speed**2)
+
+                drag_force_mag = (
+                    0.5
+                    * self.environment.air_density
+                    * self.ball.cross_sectional_area
+                    * cd
+                    * (valid_speed**2)
+                )
                 drag[:, mask] = -drag_force_mag * (valid_rel_vel / valid_speed)
-                
+
                 # Magnus
                 cl = self.ball.cl0 + s_ratio * (self.ball.cl1 + s_ratio * self.ball.cl2)
                 # Clip CL? The original code had clip.
                 # Implementing simple cl calcs for now.
-                
-                magnus_force_mag = 0.5 * self.environment.air_density * self.ball.cross_sectional_area * cl * (valid_speed**2)
-                
+
+                magnus_force_mag = (
+                    0.5
+                    * self.environment.air_density
+                    * self.ball.cross_sectional_area
+                    * cl
+                    * (valid_speed**2)
+                )
+
                 # Cross product
                 # spin_axis is (3,)
                 axis = launch.spin_axis.reshape(3, 1)
-                cross = np.cross(axis, valid_rel_vel / valid_speed, axis=0) # Cross product along axis 0
+                cross = np.cross(
+                    axis, valid_rel_vel / valid_speed, axis=0
+                )  # Cross product along axis 0
                 cross_norm = np.sqrt(np.sum(cross**2, axis=0))
-                
+
                 cross_mask = cross_norm > NUMERICAL_EPSILON
-                
+
                 # Apply across
-                m_indices = np.where(mask)[0] # Indices where speed ok
+                m_indices = np.where(mask)[0]  # Indices where speed ok
                 # This is getting complicated to vectorize perfectly with numpy basic indexing inplace
                 # Let's simplify: if batch, iterate? No, performance.
                 # But for unit test 'TestCalculateForcesVectorized', we must support it.
-                
+
                 if np.any(cross_mask):
                     factor = magnus_force_mag[cross_mask] / cross_norm[cross_mask]
-                    magnus[:, np.where(mask)[0][cross_mask]] = cross[:, cross_mask] * factor
-                    
+                    magnus[:, np.where(mask)[0][cross_mask]] = (
+                        cross[:, cross_mask] * factor
+                    )
+
         else:
             if speed > MIN_SPEED_THRESHOLD:
                 s_ratio = (omega * self.ball.radius) / speed
                 cd = self.ball.calculate_cd(s_ratio)
                 cl = self.ball.calculate_cl(s_ratio)
-                
-                drag_mag = 0.5 * self.environment.air_density * self.ball.cross_sectional_area * cd * (speed**2)
+
+                drag_mag = (
+                    0.5
+                    * self.environment.air_density
+                    * self.ball.cross_sectional_area
+                    * cd
+                    * (speed**2)
+                )
                 drag = -drag_mag * (rel_vel / speed)
-                
+
                 cross = np.cross(launch.spin_axis, rel_vel / speed)
                 cross_norm = np.linalg.norm(cross)
                 if cross_norm > NUMERICAL_EPSILON:
-                     magnus_mag = 0.5 * self.environment.air_density * self.ball.cross_sectional_area * cl * (speed**2)
-                     magnus = magnus_mag * (cross / cross_norm)
+                    magnus_mag = (
+                        0.5
+                        * self.environment.air_density
+                        * self.ball.cross_sectional_area
+                        * cl
+                        * (speed**2)
+                    )
+                    magnus = magnus_mag * (cross / cross_norm)
 
         return {"gravity": gravity, "drag": drag, "magnus": magnus}
