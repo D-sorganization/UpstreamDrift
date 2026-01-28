@@ -4,7 +4,7 @@ import os
 import secrets
 
 # Python 3.10 compatibility: timezone.utc was added in 3.11
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta, timezone
 
 from src.shared.python.logging_config import get_logger
 
@@ -139,9 +139,9 @@ class SecurityManager:
 
         # SECURITY FIX: Use timezone-aware datetime instead of deprecated utcnow()
         if expires_delta:
-            expire = datetime.now(timezone.utc) + expires_delta
+            expire = datetime.now(UTC) + expires_delta
         else:
-            expire = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            expire = datetime.now(UTC) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
         to_encode.update({"exp": expire, "type": "access"})
         return str(jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm))
@@ -157,7 +157,7 @@ class SecurityManager:
         """
         to_encode = data.copy()
         # SECURITY FIX: Use timezone-aware datetime instead of deprecated utcnow()
-        expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+        expire = datetime.now(UTC) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
         to_encode.update({"exp": expire, "type": "refresh"})
         return str(jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm))
 

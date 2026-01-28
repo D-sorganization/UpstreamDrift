@@ -267,7 +267,11 @@ class TestModelComparison:
     ) -> None:
         """Test that all models agree on general trajectory direction."""
         # Only test implemented models
-        impl_models = [m for m in FlightModelRegistry.get_all_models() if "Placeholder" not in m.description]
+        impl_models = [
+            m
+            for m in FlightModelRegistry.get_all_models()
+            if "Placeholder" not in m.description
+        ]
         results = compare_models(driver_launch, impl_models)
 
         for name, result in results.items():
@@ -283,7 +287,11 @@ class TestModelComparison:
     ) -> None:
         """Test that models produce reasonably similar results."""
         # Only test implemented models
-        impl_models = [m for m in FlightModelRegistry.get_all_models() if "Placeholder" not in m.description]
+        impl_models = [
+            m
+            for m in FlightModelRegistry.get_all_models()
+            if "Placeholder" not in m.description
+        ]
         results = compare_models(driver_launch, impl_models)
         carries = [r.carry_distance for r in results.values()]
 
@@ -324,7 +332,11 @@ class TestPhysicalPlausibility:
         self, driver_launch: UnifiedLaunchConditions
     ) -> None:
         """Test that trajectory ends at ground level."""
-        models = [m for m in FlightModelRegistry.get_all_models() if not isinstance(m, PlaceholderModel)]
+        models = [
+            m
+            for m in FlightModelRegistry.get_all_models()
+            if not isinstance(m, PlaceholderModel)
+        ]
 
         for model in models:
             result = model.simulate(driver_launch)
@@ -337,7 +349,11 @@ class TestPhysicalPlausibility:
         self, driver_launch: UnifiedLaunchConditions
     ) -> None:
         """Test that landing angle is a descent (positive angle down)."""
-        models = [m for m in FlightModelRegistry.get_all_models() if not isinstance(m, PlaceholderModel)]
+        models = [
+            m
+            for m in FlightModelRegistry.get_all_models()
+            if not isinstance(m, PlaceholderModel)
+        ]
 
         for model in models:
             result = model.simulate(driver_launch)
