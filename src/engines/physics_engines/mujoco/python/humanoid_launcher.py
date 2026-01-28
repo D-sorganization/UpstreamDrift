@@ -1,11 +1,17 @@
+import os
+import sys
+
+# Fix MuJoCo DLL loading issue on Windows with Python 3.13
+# Must be set BEFORE any imports that might load mujoco
+if "MUJOCO_PLUGIN_PATH" not in os.environ:
+    os.environ["MUJOCO_PLUGIN_PATH"] = ""
+
 import csv
 import datetime
 import json
 import logging
-import os
 import platform
 import subprocess
-import sys
 from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
@@ -148,9 +154,12 @@ class RemoteRecorder(RecorderInterface):
     def set_analysis_config(self, config: dict) -> None:
         """Configure which advanced metrics to record/compute.
 
-        Currently a stub as config is driven by the simulation loop.
+        For RemoteRecorder, this is a no-op since configuration is driven by
+        the simulation process, not the GUI. The config is stored but not acted upon.
         """
-        raise NotImplementedError()
+        # Store config for potential future use, but don't act on it
+        # since the simulation process controls what metrics are computed.
+        self._analysis_config = config
 
     def export_to_dict(self) -> dict[str, Any]:
         return self.data
@@ -735,8 +744,12 @@ class HumanoidLauncher(QMainWindow):
             line_edit.setText(path)
 
     def load_config(self) -> None:
-        """Deprecated: Config is loaded in __init__. Kept for compatibility."""
-        raise NotImplementedError()
+        """Deprecated: Config is loaded in __init__. Kept for compatibility.
+
+        This method is a no-op since config is now loaded automatically during
+        __init__ via ConfigurationManager. Calling this method has no effect.
+        """
+        # No-op: config is loaded in __init__ via self.config_manager.load()
 
     def save_config(self) -> None:
         """Save current configuration to file."""
