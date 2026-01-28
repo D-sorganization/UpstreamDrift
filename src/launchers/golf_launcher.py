@@ -1055,10 +1055,12 @@ class GolfLauncher(QMainWindow):
             self.show_toast(f"Launch failed: {e}", "error")
 
     def _launch_matlab_app(self, app: Any) -> None:
-        """Launch a MATLAB-based application using batch mode."""
-        # This requires MATLAB to be installed and in PATH
-        # Or we use a specific batch script
+        """Launch a MATLAB-based application with proper desktop GUI.
 
+        This method launches MATLAB with its full desktop interface rather than
+        command-line mode, making it easier for users to interact with and close.
+        """
+        # This requires MATLAB to be installed and in PATH
         app_path = getattr(app, "path", None)
         if not app_path:
             self.show_toast("Invalid MATLAB configuration.", "error")
@@ -1067,19 +1069,40 @@ class GolfLauncher(QMainWindow):
         self.show_toast(f"Launching MATLAB: {app.name}...", "info")
 
         try:
-            # Construct command
-            # matlab -r "run('script.m');"
-            cmd = ["matlab", "-nosplash", "-nodesktop", "-r", f"run('{app_path}');"]
+            abs_path = REPOS_ROOT / app_path
+            path_str = str(abs_path).replace("\\", "/")  # MATLAB uses forward slashes
 
             # Check if using batch script wrapper
             if str(app_path).endswith(".bat") or str(app_path).endswith(".sh"):
-                cmd = [str(app_path)]
+                cmd = [str(abs_path)]
+                process = secure_popen(
+                    cmd,
+                    cwd=str(abs_path.parent),
+                    creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
+                )
+            else:
+                # Determine the appropriate MATLAB command based on file type
+                if str(app_path).endswith(".slx"):
+                    # Simulink model - use open_system
+                    matlab_cmd = f"open_system('{path_str}')"
+                elif str(app_path).endswith(".m"):
+                    # MATLAB script - use run with proper path
+                    matlab_cmd = f"cd('{str(abs_path.parent).replace(chr(92), '/')}'); run('{abs_path.name}')"
+                else:
+                    # Generic file - try to open
+                    matlab_cmd = f"open('{path_str}')"
 
-            process = secure_popen(
-                cmd,
-                cwd=str(Path(app_path).parent),
-                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
-            )
+                # Launch MATLAB with desktop (no -nodesktop flag) so user can close it normally
+                # Use -nosplash to speed up startup, but keep the desktop GUI
+                cmd = ["matlab", "-nosplash", "-r", matlab_cmd]
+
+                # Use CREATE_NO_WINDOW to hide the launcher's console window
+                # MATLAB will open its own proper GUI window
+                process = secure_popen(
+                    cmd,
+                    cwd=str(abs_path.parent),
+                    creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
+                )
 
             self.running_processes[app.id] = process
             self.show_toast(f"{app.name} launch initiated.", "success")
