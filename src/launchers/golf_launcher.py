@@ -278,7 +278,97 @@ class GolfLauncher(QMainWindow):
         if "PYTHONPATH" in env:
             pythonpath = f"{pythonpath}{os.pathsep}{env['PYTHONPATH']}"
         env["PYTHONPATH"] = pythonpath
+
+        # Fix for MuJoCo DLL loading issue on Windows with Python 3.13
+        # Setting empty MUJOCO_PLUGIN_PATH disables bundled plugin loading
+        # which can fail with "DLL initialization routine failed" errors
+        if "MUJOCO_PLUGIN_PATH" not in env:
+            env["MUJOCO_PLUGIN_PATH"] = ""
+
         return env
+
+    def _check_module_dependencies(self, model_type: str) -> tuple[bool, str]:
+        """Check if required dependencies for a module type are available.
+
+        Args:
+            model_type: The type of model to check dependencies for.
+
+        Returns:
+            Tuple of (success, error_message). If success is True, error_message is empty.
+        """
+        # Map model types to their required imports
+        dependency_checks = {
+            "custom_humanoid": ("mujoco", "MuJoCo"),
+            "custom_dashboard": ("mujoco", "MuJoCo"),
+            "mjcf": ("mujoco", "MuJoCo"),
+            "drake": ("pydrake", "Drake (pydrake)"),
+            "pinocchio": ("pinocchio", "Pinocchio"),
+            "opensim": ("opensim", "OpenSim"),
+            "myosim": ("myosuite", "MyoSuite"),
+        }
+
+        check = dependency_checks.get(model_type)
+        if not check:
+            return True, ""  # No specific dependency check needed
+
+        module_name, display_name = check
+
+        # Run import check in subprocess to avoid polluting our process
+        # Uses the same environment as launch (includes MUJOCO_PLUGIN_PATH fix)
+        import_check_code = f"""
+import sys
+import os
+# Ensure project root is in path for src imports
+sys.path.insert(0, os.getcwd())
+try:
+    import {module_name}
+    print("OK")
+except ImportError as e:
+    print(f"ImportError: {{e}}")
+except OSError as e:
+    print(f"OSError: {{e}}")
+except Exception as e:
+    print(f"Error: {{type(e).__name__}}: {{e}}")
+"""
+        try:
+            result = subprocess.run(
+                [sys.executable, "-c", import_check_code],
+                capture_output=True,
+                text=True,
+                timeout=10,
+                cwd=str(REPOS_ROOT),
+                env=self._get_subprocess_env(),
+            )
+            output = result.stdout.strip()
+            if output == "OK":
+                return True, ""
+            else:
+                return False, f"{display_name} dependency check failed:\n{output}"
+        except subprocess.TimeoutExpired:
+            return False, f"{display_name} dependency check timed out"
+        except Exception as e:
+            return False, f"Failed to check {display_name} dependencies: {e}"
+
+    def _show_dependency_error(self, model_name: str, error_msg: str) -> None:
+        """Show a dialog with dependency error information and suggestions."""
+        detailed_msg = f"Cannot launch {model_name}.\n\n{error_msg}\n\n"
+
+        # Add helpful suggestions based on error type
+        if "DLL" in error_msg or "OSError" in error_msg:
+            detailed_msg += (
+                "Suggestions:\n"
+                "• Try reinstalling the package: pip install --force-reinstall mujoco\n"
+                "• Ensure Visual C++ Redistributable is installed\n"
+                "• Check Python version compatibility (some packages may not support Python 3.13 yet)"
+            )
+        elif "ImportError" in error_msg or "ModuleNotFoundError" in error_msg:
+            detailed_msg += (
+                "Suggestions:\n"
+                "• Install the missing package using pip\n"
+                "• Check that you're using the correct Python environment"
+            )
+
+        QMessageBox.warning(self, "Dependency Error", detailed_msg)
 
     def _setup_keyboard_shortcuts(self) -> None:
         """Set up global keyboard shortcuts."""
@@ -1303,8 +1393,19 @@ class GolfLauncher(QMainWindow):
             return
 
         # Handle Standard Physics Models
-        self.lbl_status.setText(f"> Launching {model.name}...")
+        self.lbl_status.setText(f"> Checking {model.name} dependencies...")
         self.lbl_status.setStyleSheet("color: #FFD60A;")
+        QApplication.processEvents()
+
+        # Check dependencies before launching
+        deps_ok, deps_error = self._check_module_dependencies(model.type)
+        if not deps_ok:
+            self._show_dependency_error(model.name, deps_error)
+            self.lbl_status.setText("● Dependency Error")
+            self.lbl_status.setStyleSheet("color: #FF375F;")
+            return
+
+        self.lbl_status.setText(f"> Launching {model.name}...")
         QApplication.processEvents()
 
         try:

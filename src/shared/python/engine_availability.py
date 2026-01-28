@@ -198,6 +198,12 @@ try:
     MUJOCO_AVAILABLE = True
 except ImportError:
     pass
+except OSError as e:
+    # Handle DLL loading failures on Windows (e.g., plugin initialization errors)
+    # This can happen with Python 3.13 and certain mujoco versions
+    import logging
+
+    logging.getLogger(__name__).warning(f"MuJoCo DLL loading failed: {e}")
 
 # Check Pinocchio
 try:
