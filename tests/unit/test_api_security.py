@@ -384,22 +384,27 @@ class TestSecretKeyValidation:
 
             # Force reload of the module
             # We need to handle both potential module names
-            modules_to_remove = [k for k in sys.modules if k.endswith("api.auth.security")]
+            modules_to_remove = [
+                k for k in sys.modules if k.endswith("api.auth.security")
+            ]
             for m in modules_to_remove:
                 del sys.modules[m]
 
             # Also ensure parent package doesn't hold stale reference
             if "src.api.auth" in sys.modules:
                 import src.api.auth
+
                 if hasattr(src.api.auth, "security"):
                     delattr(src.api.auth, "security")
 
             if "api.auth" in sys.modules:
                 import api.auth
+
                 if hasattr(api.auth, "security"):
                     delattr(api.auth, "security")
 
             from src.api.auth import security
+
             importlib.reload(security)
 
             # Check it uses the environment variable
