@@ -205,6 +205,7 @@ _skip_mujoco = (
 
 if _skip_mujoco:
     import logging
+
     logging.getLogger(__name__).warning(
         "Skipping MuJoCo import on Windows Python 3.13+ due to DLL issues. "
         "Set FORCE_MUJOCO_IMPORT=true to override."
@@ -223,6 +224,7 @@ else:
     except OSError as e:
         # Handle DLL loading failures on Windows (e.g., plugin initialization errors)
         import logging
+
         logging.getLogger(__name__).warning(f"MuJoCo DLL loading failed: {e}")
 
 # Check Pinocchio

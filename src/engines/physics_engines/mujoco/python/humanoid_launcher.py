@@ -750,7 +750,6 @@ class HumanoidLauncher(QMainWindow):
         __init__ via ConfigurationManager. Calling this method has no effect.
         """
         # No-op: config is loaded in __init__ via self.config_manager.load()
-        pass
 
     def save_config(self) -> None:
         """Save current configuration to file."""

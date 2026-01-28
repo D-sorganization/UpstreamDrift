@@ -549,7 +549,9 @@ except Exception as e:
                         self.chk_gpu.isChecked() if hasattr(self, "chk_gpu") else False
                     ),
                     "docker_mode": (
-                        self.chk_docker.isChecked() if hasattr(self, "chk_docker") else False
+                        self.chk_docker.isChecked()
+                        if hasattr(self, "chk_docker")
+                        else False
                     ),
                 },
             }
@@ -1081,7 +1083,9 @@ except Exception as e:
             logger.info("Docker mode enabled")
             # Only show toast if UI is fully initialized
             if hasattr(self, "toast_manager") and self.toast_manager:
-                self.show_toast("Docker mode enabled - engines will run in containers", "info")
+                self.show_toast(
+                    "Docker mode enabled - engines will run in containers", "info"
+                )
         else:
             logger.info("Docker mode disabled")
             if hasattr(self, "toast_manager") and self.toast_manager:
@@ -1158,14 +1162,14 @@ except Exception as e:
         project_dir = "/mnt/c/Users/diete/Repositories/Golf_Modeling_Suite"
 
         # Build the WSL command
-        wsl_cmd = f'''
+        wsl_cmd = f"""
 source ~/miniforge3/etc/profile.d/conda.sh
 conda activate golf_suite
 export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
 export PYTHONPATH="{project_dir}:$PYTHONPATH"
 cd "{project_dir}"
 python "{wsl_path}" {' '.join(args or [])}
-'''
+"""
 
         cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
 
@@ -1797,15 +1801,17 @@ python "{wsl_path}" {' '.join(args or [])}
             return
         logger.info(f"Launching MuJoCo Dashboard from {python_dir}")
         # Dashboard runs as a module from its directory
-        self._launch_module_process("MuJoCo Dashboard", "mujoco_humanoid_golf", python_dir)
+        self._launch_module_process(
+            "MuJoCo Dashboard", "mujoco_humanoid_golf", python_dir
+        )
 
     def _custom_launch_drake(self, abs_repo_path: Path) -> None:
         """Launch the Drake GUI directly."""
-        script = REPOS_ROOT / "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
+        script = (
+            REPOS_ROOT / "src/engines/physics_engines/drake/python/src/drake_gui_app.py"
+        )
         if not script.exists():
-            QMessageBox.critical(
-                self, "Error", f"Drake GUI not found: {script}"
-            )
+            QMessageBox.critical(self, "Error", f"Drake GUI not found: {script}")
             return
         logger.info(f"Launching Drake GUI: {script}")
         self._launch_script_process("Drake", script, REPOS_ROOT)
@@ -1813,7 +1819,8 @@ python "{wsl_path}" {' '.join(args or [])}
     def _custom_launch_pinocchio(self, abs_repo_path: Path) -> None:
         """Launch the Pinocchio GUI directly."""
         script = (
-            REPOS_ROOT / "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
+            REPOS_ROOT
+            / "src/engines/physics_engines/pinocchio/python/pinocchio_golf/gui.py"
         )
         if not script.exists():
             QMessageBox.critical(
@@ -1959,9 +1966,7 @@ python "{wsl_path}" {' '.join(args or [])}
                     ]
                 )
             elif model.type == "pinocchio":
-                cmd.extend(
-                    [docker_image, "python", "pinocchio_golf/gui.py"]
-                )
+                cmd.extend([docker_image, "python", "pinocchio_golf/gui.py"])
             elif model.type in ("custom_humanoid", "custom_dashboard"):
                 # MuJoCo humanoid models
                 cmd.extend([docker_image, "python", repo_path.name])
@@ -2032,7 +2037,9 @@ python "{wsl_path}" {' '.join(args or [])}
 
         except Exception as e:
             logger.error(f"Failed to launch {name}: {e}")
-            QMessageBox.critical(self, "Launch Error", f"Failed to launch {name}:\n\n{e}")
+            QMessageBox.critical(
+                self, "Launch Error", f"Failed to launch {name}:\n\n{e}"
+            )
 
     def _launch_module_process(self, name: str, module_name: str, cwd: Path) -> None:
         """Helper to launch python module with error visibility.
@@ -2076,7 +2083,9 @@ python "{wsl_path}" {' '.join(args or [])}
 
         except Exception as e:
             logger.error(f"Failed to launch {name}: {e}")
-            QMessageBox.critical(self, "Launch Error", f"Failed to launch {name}:\n\n{e}")
+            QMessageBox.critical(
+                self, "Launch Error", f"Failed to launch {name}:\n\n{e}"
+            )
 
     def _launch_module_in_wsl(self, module_name: str) -> None:
         """Launch a Python module in WSL2 Ubuntu environment.
@@ -2087,14 +2096,14 @@ python "{wsl_path}" {' '.join(args or [])}
         project_dir = "/mnt/c/Users/diete/Repositories/Golf_Modeling_Suite"
 
         # Build the WSL command
-        wsl_cmd = f'''
+        wsl_cmd = f"""
 source ~/miniforge3/etc/profile.d/conda.sh
 conda activate golf_suite
 export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
 export PYTHONPATH="{project_dir}:$PYTHONPATH"
 cd "{project_dir}"
 python -m {module_name}
-'''
+"""
 
         cmd = ["wsl", "-d", "Ubuntu-22.04", "--", "bash", "-c", wsl_cmd]
 
