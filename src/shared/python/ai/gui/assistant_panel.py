@@ -107,9 +107,7 @@ class MessageWidget(QFrame):
         )
         self._content_label.setMarkdown(self._content)
         # Ensure text is visible on dark backgrounds
-        self._content_label.setStyleSheet(
-            "background-color: transparent; color: #e0e0e0;"
-        )
+        self._content_label.setStyleSheet("background-color: transparent; color: #e0e0e0;")
 
         # Auto-resize to content
         doc = self._content_label.document()
@@ -300,7 +298,7 @@ class AIAssistantPanel(QWidget):
         # Gitpod Orange Header
         header.setStyleSheet("""
             QFrame {
-                background-color: #FF8800; 
+                background-color: #FF8800;
                 padding: 8px;
                 border-bottom: 1px solid #cc6d00;
             }
