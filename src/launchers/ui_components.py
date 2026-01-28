@@ -83,6 +83,7 @@ MODEL_IMAGES = {
     # Tools
     "URDF Generator": "urdf_icon.png",
     "C3D Motion Viewer": "c3d_icon.png",
+    "Shot Tracer": "golf_icon.png",  # Ball flight visualization
 }
 
 # Theme availability check

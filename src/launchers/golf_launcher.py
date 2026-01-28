@@ -1209,6 +1209,35 @@ except Exception as e:
             logger.error(f"Failed to launch C3D Viewer: {e}")
             self.show_toast(f"Launch failed: {e}", "error")
 
+    def _launch_shot_tracer(self) -> None:
+        """Launch the Shot Tracer ball flight visualization."""
+        shot_tracer_script = REPOS_ROOT / "src" / "launchers" / "shot_tracer.py"
+
+        if not shot_tracer_script.exists():
+            self.show_toast("Shot Tracer script not found.", "error")
+            return
+
+        if "shot_tracer" in self.running_processes:
+            if self.running_processes["shot_tracer"].poll() is None:
+                self.show_toast("Shot Tracer is already running.", "warning")
+                return
+
+        try:
+            logger.info("Launching Shot Tracer: %s", shot_tracer_script)
+            process = secure_popen(
+                [sys.executable, str(shot_tracer_script)],
+                cwd=str(REPOS_ROOT),  # Run from project root for imports
+                env=self._get_subprocess_env(),
+                creationflags=CREATE_NEW_CONSOLE if os.name == "nt" else 0,
+            )
+
+            self.running_processes["shot_tracer"] = process
+            self.show_toast("Shot Tracer launched.", "success")
+
+        except Exception as e:
+            logger.error(f"Failed to launch Shot Tracer: {e}")
+            self.show_toast(f"Launch failed: {e}", "error")
+
     def _launch_matlab_app(self, app: Any) -> None:
         """Launch a MATLAB-based application with proper desktop GUI.
 
@@ -1446,6 +1475,9 @@ except Exception as e:
             return
         elif "c3d_viewer" in model_id:
             self._launch_c3d_viewer()
+            return
+        elif "shot_tracer" in model_id:
+            self._launch_shot_tracer()
             return
 
         model = self._get_model(model_id)
