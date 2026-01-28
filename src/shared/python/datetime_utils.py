@@ -30,9 +30,8 @@ Usage:
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Literal
-
 
 # ============================================================================
 # Current Time Functions
@@ -50,7 +49,7 @@ def now_utc() -> datetime:
         >>> dt.tzinfo
         datetime.timezone.utc
     """
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def now_local() -> datetime:
@@ -390,9 +389,9 @@ def time_ago(dt: datetime) -> str:
 
     # Ensure both are timezone-aware
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
     if now.tzinfo is None:
-        now = now.replace(tzinfo=timezone.utc)
+        now = now.replace(tzinfo=UTC)
 
     diff = now - dt
 
@@ -485,8 +484,8 @@ def is_expired(dt: datetime, ttl_seconds: float) -> bool:
 
     # Ensure both are timezone-aware
     if dt.tzinfo is None:
-        dt = dt.replace(tzinfo=timezone.utc)
+        dt = dt.replace(tzinfo=UTC)
     if now.tzinfo is None:
-        now = now.replace(tzinfo=timezone.utc)
+        now = now.replace(tzinfo=UTC)
 
     return (now - dt).total_seconds() > ttl_seconds
