@@ -49,6 +49,8 @@ ProfilePhoto.jpg
 !docs/**/*.jpg
 !launchers/assets/**/*.png
 !launchers/assets/**/*.jpg
+!src/launchers/assets/**/*.png
+!src/launchers/assets/**/*.jpg
 
 # Cache directories
 .ruff_cache/
