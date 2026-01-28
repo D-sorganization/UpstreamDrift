@@ -358,9 +358,7 @@ class URDFGeneratorWindow(QMainWindow):
             # URDF parsing for segment panel population is a future enhancement
             # Currently loading for visualization only
             # Pass file path for mesh resolution in MuJoCo
-            self.visualization_widget.update_visualization(
-                urdf_content, str(file_path)
-            )
+            self.visualization_widget.update_visualization(urdf_content, str(file_path))
             self.current_file_path = file_path
             self.setWindowTitle(f"Interactive URDF Generator - {file_path.name}")
             logger.info(f"URDF loaded: {file_path}")
