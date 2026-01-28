@@ -20,7 +20,7 @@ on:
 
   # Also run on a schedule to catch any missed PRs
   schedule:
-    - cron: '*/15 * * * *'  # Every 15 minutes
+    - cron: '0 */2 * * *'  # Every 2 hours (reduced from 15 min for cost control)
 
   workflow_dispatch:
     inputs:
@@ -61,14 +61,14 @@ jobs:
         run: |
           # Check recent commits for loop indicators
           loop_count=0
-          for msg in $(git log --format="%s" -n 5); do
+          while IFS= read -r msg; do
             if [[ "$msg" == *"[skip ci]"* ]] || [[ "$msg" == *"[ci skip]"* ]]; then
               continue
             fi
             if [[ "$msg" == *"trigger-ci"* ]] || [[ "$msg" == *"bot-ci-trigger"* ]]; then
               ((loop_count++))
             fi
-          done
+          done < <(git log --format="%s" -n 5)
 
           if [ $loop_count -ge 3 ]; then
             echo "skip=true" >> $GITHUB_OUTPUT
@@ -147,12 +147,10 @@ jobs:
             echo "Triggering CI for PR #$pr"
 
             # Method 1: Try to trigger workflow_dispatch on ci-standard
-            gh workflow run ci-standard.yml \
-              --ref "$(gh pr view $pr --json headRefName --jq '.headRefName')" \
-              2>/dev/null || true
-
             # Method 2: If workflow_dispatch fails, add empty commit to trigger
-            if [ $? -ne 0 ]; then
+            if ! gh workflow run ci-standard.yml \
+              --ref "$(gh pr view $pr --json headRefName --jq '.headRefName')" \
+              2>/dev/null; then
               echo "workflow_dispatch failed, trying empty commit method"
 
               # Get PR branch
@@ -161,6 +159,9 @@ jobs:
               git fetch origin "$branch"
               git checkout "$branch"
 
+              # Configure git identity for commit
+              git config user.name "github-actions[bot]"
+              git config user.email "github-actions[bot]@users.noreply.github.com"
               # Create empty commit with special marker
               git commit --allow-empty -m "chore: trigger CI checks [bot-ci-trigger]
 

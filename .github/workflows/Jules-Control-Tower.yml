@@ -13,9 +13,11 @@ on:
     - cron: "0 8 */3 * *"   # Midnight PST - Assessment Generator
     - cron: "30 8 */3 * *"  # 12:30 AM PST - Code Quality Reviewer
     - cron: "0 9 */3 * *"   # 1 AM PST - Completist (incomplete impl)
+    - cron: "30 9 */3 * *"  # 1:30 AM PST - Documentation Auditor
     - cron: "30 10 */3 * *" # 2:30 AM PST - Sentinel (security)
-    - cron: "0 11 */3 * *"  # 3 AM PST - Tech Custodian
+    - cron: "0 11 */3 * *"  # 3 AM PST - Auto-Refactor
     - cron: "30 11 */3 * *" # 3:30 AM PST - Issue Resolver (daily fix)
+    - cron: "0 13 */3 * *"  # 5 AM PST - Auto-Rebase
     - cron: "0 12 */3 * *"  # 4 AM PST - PR Compiler (consolidate PRs)
   workflow_dispatch:
     inputs:
@@ -29,11 +31,12 @@ on:
           - assessment-generator
           - code-quality-reviewer
           - completist
+          - documentation-auditor
           - sentinel
-          - tech-custodian
+          - auto-refactor
+          - auto-rebase
           - issue-resolver
           - pr-compiler
-          - conflict-fix
 
 # SAFEGUARD: Maximum iterations to prevent infinite repair loops
 env:
@@ -120,26 +123,32 @@ jobs:
               // Primary: Match exact cron pattern for deterministic routing
               if (schedule) {
                 switch (schedule) {
-                  case "0 8 * * *":
+                  case "0 8 */3 * *":
                     target = "assessment-generator";
                     break;
-                  case "30 8 * * *":
+                  case "30 8 */3 * *":
                     target = "code-quality-reviewer";
                     break;
-                  case "0 9 * * *":
+                  case "0 9 */3 * *":
                     target = "completist";
                     break;
-                  case "30 10 * * *":
+                  case "30 9 */3 * *":
+                    target = "documentation-auditor";
+                    break;
+                  case "30 10 */3 * *":
                     target = "sentinel";
                     break;
-                  case "0 11 * * *":
-                    target = "tech-custodian";
+                  case "0 11 */3 * *":
+                    target = "auto-refactor";
                     break;
-                  case "30 11 * * *":
+                  case "30 11 */3 * *":
                     target = "issue-resolver";
                     break;
-                  case "0 12 * * *":
+                  case "0 12 */3 * *":
                     target = "pr-compiler";
+                    break;
+                  case "0 13 */3 * *":
+                    target = "auto-rebase";
                     break;
                   default:
                     target = "none";
@@ -158,14 +167,18 @@ jobs:
                   target = "code-quality-reviewer";
                 } else if (hour === 9 && minute < 30) {
                   target = "completist";
+                } else if (hour === 9 && minute >= 30) {
+                  target = "documentation-auditor";
                 } else if (hour === 10 && minute >= 30) {
                   target = "sentinel";
                 } else if (hour === 11 && minute < 30) {
-                  target = "tech-custodian";
+                  target = "auto-refactor";
                 } else if (hour === 11 && minute >= 30) {
                   target = "issue-resolver";
                 } else if (hour === 12) {
                   target = "pr-compiler";
+                } else if (hour === 13) {
+                  target = "auto-rebase";
                 } else {
                   target = "none";
                 }
@@ -204,8 +217,8 @@ jobs:
     if: needs.triage.outputs.target == 'auto-repair'
     uses: ./.github/workflows/Jules-Auto-Repair.yml
     with:
-      run_id: ${{ github.event.workflow_run.id }}
-      branch: ${{ github.event.workflow_run.head_branch }}
+      run_id: ${{ format('{0}', github.event.workflow_run.id) }}
+      branch: ${{ github.event.workflow_run.head_branch || '' }}
     secrets: inherit
 
   call-hotfix-creator:
@@ -213,8 +226,8 @@ jobs:
     if: needs.triage.outputs.target == 'hotfix-creator'
     uses: ./.github/workflows/Jules-Hotfix-Creator.yml
     with:
-      run_id: ${{ github.event.workflow_run.id }}
-      failed_branch: ${{ github.event.workflow_run.head_branch }}
+      run_id: ${{ format('{0}', github.event.workflow_run.id) }}
+      failed_branch: ${{ github.event.workflow_run.head_branch || '' }}
     secrets: inherit
 
   call-scribe:
@@ -229,10 +242,16 @@ jobs:
     uses: ./.github/workflows/Jules-Test-Generator.yml
     secrets: inherit
 
-  call-custodian:
+  call-auto-refactor:
     needs: triage
-    if: needs.triage.outputs.target == 'tech-custodian'
-    uses: ./.github/workflows/Jules-Tech-Custodian.yml
+    if: needs.triage.outputs.target == 'auto-refactor'
+    uses: ./.github/workflows/Jules-Auto-Refactor.yml
+    secrets: inherit
+
+  call-auto-rebase:
+    needs: triage
+    if: needs.triage.outputs.target == 'auto-rebase'
+    uses: ./.github/workflows/Jules-Auto-Rebase.yml
     secrets: inherit
 
   call-archivist:
@@ -271,14 +290,14 @@ jobs:
     uses: ./.github/workflows/Jules-Completist.yml
     secrets: inherit
 
+  call-documentation-auditor:
+    needs: triage
+    if: needs.triage.outputs.target == 'documentation-auditor'
+    uses: ./.github/workflows/Jules-Documentation-Auditor.yml
+    secrets: inherit
+
   call-pr-compiler:
     needs: triage
     if: needs.triage.outputs.target == 'pr-compiler'
     uses: ./.github/workflows/Jules-PR-Compiler.yml
-    secrets: inherit
-
-  call-conflict-fix:
-    needs: triage
-    if: needs.triage.outputs.target == 'conflict-fix'
-    uses: ./.github/workflows/Jules-Conflict-Fix.yml
     secrets: inherit
