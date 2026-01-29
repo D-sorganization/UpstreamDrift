@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 from typing import Any
 
 import pytest
+
 from src.tools.model_explorer.urdf_builder import URDFBuilder
 
 
