@@ -287,14 +287,43 @@ class AIAssistantPanel(QWidget):
         self._current_assistant_message: MessageWidget | None = None
 
         # Tools & RAG
+        # Tools & RAG
         self._tools_registry = get_global_registry()
         self._rag_store = SimpleRAGStore()
+
+        # Persistence
+        self._history_file = Path.home() / ".golf_modeling_suite" / "chat_history.json"
+        self._load_history()
 
         # Initialize Core Tools
         self._init_tools()
 
         self._setup_ui()
-        # Note: No separate shortcuts needed as ChatInput handles Enter
+        # Restore messages to UI
+        self._restore_ui_messages()
+
+    def _load_history(self) -> None:
+        """Load conversation history from file."""
+        if self._history_file.exists():
+            try:
+                self._context = ConversationContext.load_from_file(self._history_file)
+                logger.info(f"Loaded chat history from {self._history_file}")
+            except Exception as e:
+                logger.error(f"Failed to load chat history: {e}")
+
+    def _save_history(self) -> None:
+        """Save conversation history to file."""
+        try:
+            self._context.save_to_file(self._history_file)
+        except Exception as e:
+            logger.warning(f"Failed to save chat history: {e}")
+
+    def _restore_ui_messages(self) -> None:
+        """Restore message widgets from context."""
+        # This must be called AFTER _setup_ui
+        for msg in self._context.messages:
+            if msg.role != "system":
+                self._add_message_to_ui(msg.role, msg.content, msg.timestamp)
 
     def _init_tools(self) -> None:
         """Initialize default tools."""
@@ -557,6 +586,10 @@ class AIAssistantPanel(QWidget):
         # Add user message
         self._add_message("user", message)
 
+        # Add to context immediately (so it's saved even if app crashes)
+        self._context.add_user_message(message)
+        self._save_history()
+
         # Emit signal
         self.message_sent.emit(message)
 
@@ -579,9 +612,6 @@ class AIAssistantPanel(QWidget):
         # Update status
         self._set_status("Thinking...")
         self._send_btn.setEnabled(False)
-
-        # Add context
-        self._context.add_user_message(message)
 
         # Create streaming worker
         self._current_worker = StreamWorker(
@@ -620,6 +650,7 @@ class AIAssistantPanel(QWidget):
             self._context.add_assistant_message(
                 self._current_assistant_message.get_content()
             )
+            self._save_history()
 
         self._current_assistant_message = None
         self._current_worker = None
@@ -639,13 +670,22 @@ class AIAssistantPanel(QWidget):
         self._current_assistant_message = None
         self._current_worker = None
 
+    def _add_message_to_ui(
+        self,
+        role: str,
+        content: str,
+        timestamp: datetime | None = None,
+    ) -> MessageWidget:
+        """Add a message to the UI (alias for internal usage)."""
+        return self._add_message(role, content, timestamp)
+
     def _add_message(
         self,
         role: str,
         content: str,
         timestamp: datetime | None = None,
     ) -> MessageWidget:
-        """Add a message to the conversation.
+        """Add a message to the conversation UI.
 
         Args:
             role: Message role.
@@ -673,6 +713,8 @@ class AIAssistantPanel(QWidget):
         Returns:
             The created MessageWidget.
         """
+        # Don't save system messages to history usually, or maybe we do?
+        # Context usually stores them.
         return self._add_message("system", content)
 
     def _scroll_to_bottom(self) -> None:
@@ -705,6 +747,7 @@ class AIAssistantPanel(QWidget):
 
         # Reset context
         self._context = ConversationContext()
+        self._save_history()
 
         # Add welcome back
         self._add_system_message("🔄 New chat started. How can I help you?")
