@@ -6,22 +6,22 @@ processing including IIR and FIR filters, smoothing, and specialized filters.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Callable
 
 import numpy as np
 from scipy import signal as scipy_signal
 from scipy.signal import (
+    bessel,
     butter,
     cheby1,
     cheby2,
     ellip,
-    bessel,
     filtfilt,
     lfilter,
-    savgol_filter,
     medfilt,
+    savgol_filter,
 )
 
 from src.shared.python.signal_toolkit.core import Signal
@@ -143,7 +143,11 @@ class FilterDesigner:
             wn = (cutoff[0] / nyquist, cutoff[1] / nyquist)
             btype = "bandstop"
         else:
-            wn = cutoff / nyquist if isinstance(cutoff, (int, float)) else cutoff[0] / nyquist
+            wn = (
+                cutoff / nyquist
+                if isinstance(cutoff, (int, float))
+                else cutoff[0] / nyquist
+            )
 
         b, a = butter(order, wn, btype=btype)
 
@@ -188,7 +192,11 @@ class FilterDesigner:
             if filter_type == FilterType.NOTCH:
                 btype = "bandstop"
         else:
-            wn = cutoff / nyquist if isinstance(cutoff, (int, float)) else cutoff[0] / nyquist
+            wn = (
+                cutoff / nyquist
+                if isinstance(cutoff, (int, float))
+                else cutoff[0] / nyquist
+            )
 
         b, a = cheby1(order, ripple_db, wn, btype=btype)
 
@@ -233,7 +241,11 @@ class FilterDesigner:
             if filter_type == FilterType.NOTCH:
                 btype = "bandstop"
         else:
-            wn = cutoff / nyquist if isinstance(cutoff, (int, float)) else cutoff[0] / nyquist
+            wn = (
+                cutoff / nyquist
+                if isinstance(cutoff, (int, float))
+                else cutoff[0] / nyquist
+            )
 
         b, a = cheby2(order, attenuation_db, wn, btype=btype)
 
@@ -280,7 +292,11 @@ class FilterDesigner:
             if filter_type == FilterType.NOTCH:
                 btype = "bandstop"
         else:
-            wn = cutoff / nyquist if isinstance(cutoff, (int, float)) else cutoff[0] / nyquist
+            wn = (
+                cutoff / nyquist
+                if isinstance(cutoff, (int, float))
+                else cutoff[0] / nyquist
+            )
 
         b, a = ellip(order, ripple_db, attenuation_db, wn, btype=btype)
 
@@ -323,7 +339,11 @@ class FilterDesigner:
             if filter_type == FilterType.NOTCH:
                 btype = "bandstop"
         else:
-            wn = cutoff / nyquist if isinstance(cutoff, (int, float)) else cutoff[0] / nyquist
+            wn = (
+                cutoff / nyquist
+                if isinstance(cutoff, (int, float))
+                else cutoff[0] / nyquist
+            )
 
         b, a = bessel(order, wn, btype=btype, norm="phase")
 
@@ -760,7 +780,7 @@ class AdaptiveFilter:
             # RLS update
             k = P @ x_window / (lam + x_window.T @ P @ x_window)
             P = (P - k @ x_window.T @ P) / lam
-            w += (k.flatten() * e[i])
+            w += k.flatten() * e[i]
 
         filtered = Signal(
             time=signal.time,

@@ -7,7 +7,6 @@ and adding disturbances to signals for simulation and testing.
 from __future__ import annotations
 
 from enum import Enum
-from typing import Callable
 
 import numpy as np
 
@@ -208,8 +207,12 @@ class NoiseGenerator:
         t = np.arange(n) / fs
         # Add some harmonics for realism
         values = amplitude * np.sin(2 * np.pi * frequency * t)
-        values += 0.3 * amplitude * np.sin(2 * np.pi * 2 * frequency * t)  # 2nd harmonic
-        values += 0.1 * amplitude * np.sin(2 * np.pi * 3 * frequency * t)  # 3rd harmonic
+        values += (
+            0.3 * amplitude * np.sin(2 * np.pi * 2 * frequency * t)
+        )  # 2nd harmonic
+        values += (
+            0.1 * amplitude * np.sin(2 * np.pi * 3 * frequency * t)
+        )  # 3rd harmonic
 
         return values
 

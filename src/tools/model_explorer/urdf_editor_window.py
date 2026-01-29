@@ -23,7 +23,6 @@ from PyQt6.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QTabWidget,
-    QVBoxLayout,
     QWidget,
 )
 
@@ -251,7 +250,9 @@ class URDFEditorWindow(QMainWindow):
         self.mesh_browser.urdf_modified.connect(self._on_urdf_modified)
 
         # Component library signals
-        self.component_library.component_edited.connect(self._on_component_edit_requested)
+        self.component_library.component_edited.connect(
+            self._on_component_edit_requested
+        )
 
         # Tab change
         self.central_tabs.currentChanged.connect(self._on_tab_changed)
@@ -295,7 +296,6 @@ class URDFEditorWindow(QMainWindow):
     def _on_joints_updated(self, positions: dict[str, float]) -> None:
         """Handle joint position updates for preview."""
         # This could update the 3D preview with new joint positions
-        pass
 
     def _on_component_edit_requested(self, component: Any) -> None:
         """Handle request to edit a component."""

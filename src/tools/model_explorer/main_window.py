@@ -665,7 +665,9 @@ class URDFGeneratorWindow(QMainWindow):
             self.status_bar.showMessage("Frankenstein mode closed")
         except Exception as e:
             logger.error(f"Failed to open Frankenstein mode: {e}")
-            QMessageBox.critical(self, "Error", f"Failed to open Frankenstein mode: {e}")
+            QMessageBox.critical(
+                self, "Error", f"Failed to open Frankenstein mode: {e}"
+            )
 
     def _open_code_editor(self) -> None:
         """Open the URDF code editor."""

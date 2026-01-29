@@ -8,15 +8,15 @@ into other applications.
 from __future__ import annotations
 
 import sys
-from functools import partial
 from pathlib import Path
-from typing import Callable
 
 import numpy as np
 
 try:
-    import matplotlib
-    from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg, NavigationToolbar2QT
+    from matplotlib.backends.backend_qtagg import (
+        FigureCanvasQTAgg,
+        NavigationToolbar2QT,
+    )
     from matplotlib.figure import Figure
 
     HAS_MATPLOTLIB = True
@@ -24,13 +24,12 @@ except ImportError:
     HAS_MATPLOTLIB = False
 
 try:
-    from PyQt6 import QtCore, QtWidgets
+    from PyQt6 import QtWidgets
     from PyQt6.QtCore import Qt, pyqtSignal
     from PyQt6.QtWidgets import (
         QApplication,
         QCheckBox,
         QComboBox,
-        QDialog,
         QDoubleSpinBox,
         QFileDialog,
         QGridLayout,
@@ -38,7 +37,6 @@ try:
         QHBoxLayout,
         QLabel,
         QLineEdit,
-        QMainWindow,
         QMessageBox,
         QPushButton,
         QScrollArea,
@@ -56,24 +54,23 @@ try:
 except ImportError:
     HAS_PYQT = False
 
-from src.shared.python.signal_toolkit.core import Signal, SignalGenerator
-from src.shared.python.signal_toolkit.fitting import FunctionFitter
-from src.shared.python.signal_toolkit.limits import SaturationMode, apply_saturation
 from src.shared.python.signal_toolkit.calculus import (
     Differentiator,
     Integrator,
     compute_tangent_line,
 )
-from src.shared.python.signal_toolkit.noise import NoiseType, add_noise_to_signal
+from src.shared.python.signal_toolkit.core import Signal, SignalGenerator
 from src.shared.python.signal_toolkit.filters import (
     FilterDesigner,
     FilterType,
     apply_filter,
-    apply_savgol,
     apply_moving_average,
+    apply_savgol,
 )
-from src.shared.python.signal_toolkit.io import SignalImporter, SignalExporter
-
+from src.shared.python.signal_toolkit.fitting import FunctionFitter
+from src.shared.python.signal_toolkit.io import SignalExporter, SignalImporter
+from src.shared.python.signal_toolkit.limits import SaturationMode, apply_saturation
+from src.shared.python.signal_toolkit.noise import NoiseType, add_noise_to_signal
 
 # Dark theme stylesheet
 DARK_STYLESHEET = """
@@ -343,18 +340,20 @@ if HAS_MATPLOTLIB and HAS_PYQT:
             type_layout = QVBoxLayout(type_group)
 
             self.signal_type_combo = QComboBox()
-            self.signal_type_combo.addItems([
-                "Sinusoid",
-                "Cosine",
-                "Polynomial",
-                "Exponential",
-                "Linear",
-                "Step",
-                "Chirp",
-                "Square",
-                "Triangle",
-                "Custom",
-            ])
+            self.signal_type_combo.addItems(
+                [
+                    "Sinusoid",
+                    "Cosine",
+                    "Polynomial",
+                    "Exponential",
+                    "Linear",
+                    "Step",
+                    "Chirp",
+                    "Square",
+                    "Triangle",
+                    "Custom",
+                ]
+            )
             type_layout.addWidget(self.signal_type_combo)
 
             layout.addWidget(type_group)
@@ -655,15 +654,17 @@ if HAS_MATPLOTLIB and HAS_PYQT:
             fit_layout = QVBoxLayout(fit_group)
 
             self.fit_type_combo = QComboBox()
-            self.fit_type_combo.addItems([
-                "Sinusoid",
-                "Cosine",
-                "Exponential Decay",
-                "Exponential Growth",
-                "Linear",
-                "Polynomial",
-                "Custom",
-            ])
+            self.fit_type_combo.addItems(
+                [
+                    "Sinusoid",
+                    "Cosine",
+                    "Exponential Decay",
+                    "Exponential Growth",
+                    "Linear",
+                    "Polynomial",
+                    "Custom",
+                ]
+            )
             fit_layout.addWidget(self.fit_type_combo)
 
             # Polynomial order for polynomial fit
@@ -690,9 +691,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
 
             # Fit button
             self.fit_btn = QPushButton("Fit Function")
-            self.fit_btn.setStyleSheet(
-                "background-color: #0078d4; font-weight: bold;"
-            )
+            self.fit_btn.setStyleSheet("background-color: #0078d4; font-weight: bold;")
             layout.addWidget(self.fit_btn)
 
             # Auto-fit button
@@ -725,15 +724,17 @@ if HAS_MATPLOTLIB and HAS_PYQT:
 
             sat_layout.addWidget(QLabel("Mode:"), 2, 0)
             self.sat_mode_combo = QComboBox()
-            self.sat_mode_combo.addItems([
-                "Hard",
-                "Soft",
-                "Tanh",
-                "Sigmoid",
-                "Atan",
-                "Cubic",
-                "Exponential",
-            ])
+            self.sat_mode_combo.addItems(
+                [
+                    "Hard",
+                    "Soft",
+                    "Tanh",
+                    "Sigmoid",
+                    "Atan",
+                    "Cubic",
+                    "Exponential",
+                ]
+            )
             self.sat_mode_combo.setCurrentIndex(2)  # Tanh default
             sat_layout.addWidget(self.sat_mode_combo, 2, 1)
 
@@ -849,26 +850,30 @@ if HAS_MATPLOTLIB and HAS_PYQT:
             type_layout = QVBoxLayout(type_group)
 
             self.filter_design_combo = QComboBox()
-            self.filter_design_combo.addItems([
-                "Butterworth",
-                "Chebyshev I",
-                "Chebyshev II",
-                "Elliptic",
-                "Bessel",
-                "Moving Average",
-                "Savitzky-Golay",
-                "Median",
-                "Gaussian",
-            ])
+            self.filter_design_combo.addItems(
+                [
+                    "Butterworth",
+                    "Chebyshev I",
+                    "Chebyshev II",
+                    "Elliptic",
+                    "Bessel",
+                    "Moving Average",
+                    "Savitzky-Golay",
+                    "Median",
+                    "Gaussian",
+                ]
+            )
             type_layout.addWidget(self.filter_design_combo)
 
             self.filter_type_combo = QComboBox()
-            self.filter_type_combo.addItems([
-                "Lowpass",
-                "Highpass",
-                "Bandpass",
-                "Bandstop",
-            ])
+            self.filter_type_combo.addItems(
+                [
+                    "Lowpass",
+                    "Highpass",
+                    "Bandpass",
+                    "Bandstop",
+                ]
+            )
             type_layout.addWidget(self.filter_type_combo)
 
             layout.addWidget(type_group)
@@ -927,16 +932,18 @@ if HAS_MATPLOTLIB and HAS_PYQT:
             type_layout = QVBoxLayout(type_group)
 
             self.noise_type_combo = QComboBox()
-            self.noise_type_combo.addItems([
-                "White (Gaussian)",
-                "Pink (1/f)",
-                "Brown (Brownian)",
-                "Blue",
-                "Violet",
-                "Uniform",
-                "Impulse",
-                "Periodic (60Hz)",
-            ])
+            self.noise_type_combo.addItems(
+                [
+                    "White (Gaussian)",
+                    "Pink (1/f)",
+                    "Brown (Brownian)",
+                    "Blue",
+                    "Violet",
+                    "Uniform",
+                    "Impulse",
+                    "Periodic (60Hz)",
+                ]
+            )
             type_layout.addWidget(self.noise_type_combo)
 
             layout.addWidget(type_group)
@@ -1174,7 +1181,9 @@ if HAS_MATPLOTLIB and HAS_PYQT:
                             "pi": np.pi,
                             "t": t,
                         }
-                        values = eval(expr, {"__builtins__": {}}, safe_dict)  # noqa: S307
+                        values = eval(
+                            expr, {"__builtins__": {}}, safe_dict
+                        )  # noqa: S307
                         self.current_signal = Signal(t, values, name="custom")
                     else:
                         return
@@ -1317,9 +1326,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
             )
 
             self.integral_signal = result.cumulative_signal
-            self.integral_value_label.setText(
-                f"Integral: {result.value:.4f}"
-            )
+            self.integral_value_label.setText(f"Integral: {result.value:.4f}")
 
             self._update_secondary_plot(self.integral_signal, "Integral")
 
@@ -1380,6 +1387,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
                         from src.shared.python.signal_toolkit.filters import (
                             apply_median_filter,
                         )
+
                         self.current_signal = apply_median_filter(
                             self.current_signal, window
                         )
@@ -1387,6 +1395,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
                         from src.shared.python.signal_toolkit.filters import (
                             apply_gaussian_smoothing,
                         )
+
                         self.current_signal = apply_gaussian_smoothing(
                             self.current_signal, window / 3
                         )
