@@ -16,16 +16,15 @@ Use BundledAssets from bundled_assets/ for local models.
 
 from __future__ import annotations
 
+import importlib
 import json
 import logging
 import math
-import importlib
 import os
-import re
 import sys
 import urllib.request
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 # Add project root to path for src imports when run as standalone script
 _project_root = Path(__file__).resolve().parent.parent.parent.parent
@@ -461,7 +460,7 @@ class ModelLibrary:
         """
         discovered = self.discover_repo_models()
         embedded = self.get_embedded_mujoco_models()
-        
+
         return {
             "human": list(self.HUMAN_MODELS.keys()),
             "golf_clubs": list(self.GOLF_CLUBS.keys()),
@@ -498,7 +497,7 @@ class ModelLibrary:
 
     def discover_repo_models(self) -> list[dict[str, Any]]:
         """Scan the repository for URDF and MJCF models.
-        
+
         Returns:
             List of dictionaries containing model info:
             {
@@ -511,80 +510,90 @@ class ModelLibrary:
         models = []
         # Use project root defined at module level
         src_root = _project_root / "src"
-        
+
         if not src_root.exists():
             logger.warning(f"Source root not found at {src_root}")
             return []
 
         # Walk through directory
         for root, _, files in os.walk(src_root):
-             # Skip bundled assets and cache dirs to avoid dupes/junk
+            # Skip bundled assets and cache dirs to avoid dupes/junk
             if "bundled_assets" in root or "__pycache__" in root:
                 continue
-                
+
             for file in files:
                 file_path = Path(root) / file
-                
+
                 # Check for URDF
                 if file.lower().endswith(".urdf"):
-                    models.append({
-                        "name": file,
-                        "description": f"URDF file at {file_path.relative_to(_project_root)}",
-                        "path": str(file_path),
-                        "type": "urdf",
-                        "config_key": f"urdf_{file}_{hash(str(file_path))}"
-                    })
-                
+                    models.append(
+                        {
+                            "name": file,
+                            "description": f"URDF file at {file_path.relative_to(_project_root)}",
+                            "path": str(file_path),
+                            "type": "urdf",
+                            "config_key": f"urdf_{file}_{hash(str(file_path))}",
+                        }
+                    )
+
                 # Check for MJCF (xml with <mujoco tag)
                 elif file.lower().endswith(".xml") or file.lower().endswith(".mjcf"):
                     try:
                         # Quick check for mujoco tag
-                        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                        with open(file_path, encoding="utf-8", errors="ignore") as f:
                             start = f.read(500)
                             if "<mujoco" in start or "<robot" in start:
                                 model_type = "mjcf" if "<mujoco" in start else "urdf"
-                                models.append({
-                                    "name": file,
-                                    "description": f"{model_type.upper()} file at {file_path.relative_to(_project_root)}",
-                                    "path": str(file_path),
-                                    "type": model_type,
-                                    "config_key": f"repo_{file}_{hash(str(file_path))}"
-                                })
+                                models.append(
+                                    {
+                                        "name": file,
+                                        "description": f"{model_type.upper()} file at {file_path.relative_to(_project_root)}",
+                                        "path": str(file_path),
+                                        "type": model_type,
+                                        "config_key": f"repo_{file}_{hash(str(file_path))}",
+                                    }
+                                )
                     except Exception:
-                        pass # reading error, skip
-                        
+                        pass  # reading error, skip
+
         return sorted(models, key=lambda x: x["name"])
 
     def get_embedded_mujoco_models(self) -> dict[str, dict[str, Any]]:
         """Retrieve MuJoCo models embedded in python code.
-        
+
         Target: src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.models
         """
         models = {}
         try:
             # Dynamic import to avoid hard dependency on non-tool code
-            module_name = "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.models"
+            module_name = (
+                "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.models"
+            )
             if module_name not in sys.modules:
                 importlib.import_module(module_name)
-            
+
             module = sys.modules[module_name]
-            
+
             # Scan module attributes
             for attr_name in dir(module):
                 if attr_name.endswith("_XML") and attr_name.isupper():
-                     content = getattr(module, attr_name)
-                     if isinstance(content, str) and "<mujoco" in content:
+                    content = getattr(module, attr_name)
+                    if isinstance(content, str) and "<mujoco" in content:
                         key = attr_name.lower().replace("_xml", "")
                         models[key] = {
-                            "name": attr_name.replace("_XML", "").replace("_", " ").title(),
+                            "name": attr_name.replace("_XML", "")
+                            .replace("_", " ")
+                            .title(),
                             "description": "Embedded MuJoCo model",
                             "content": content,
                             "type": "mjcf_string",
-                            "config_key": key
+                            "config_key": key,
                         }
         except ImportError:
-            logger.warning("Could not import mujoco_humanoid_golf.models - embedded models unavailable")
+            logger.warning(
+                "Could not import mujoco_humanoid_golf.models - embedded models unavailable"
+            )
         except Exception as e:
             logger.error(f"Error loading embedded models: {e}")
-            
+
         return models

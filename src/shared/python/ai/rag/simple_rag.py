@@ -18,7 +18,6 @@ logger = get_logger(__name__)
 
 # Check for sklearn availability
 try:
-    import numpy as np
     from sklearn.feature_extraction.text import TfidfVectorizer
     from sklearn.metrics.pairwise import cosine_similarity
 

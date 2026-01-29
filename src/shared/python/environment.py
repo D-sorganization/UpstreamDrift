@@ -471,4 +471,3 @@ def is_wsl() -> bool:
             return "microsoft" in f.read().lower()
     except FileNotFoundError:
         return False
-
