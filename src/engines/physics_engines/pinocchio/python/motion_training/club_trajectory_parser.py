@@ -149,7 +149,8 @@ class ClubTrajectoryParser:
     Expected Excel format:
     - Row 0: Metadata (ball type, event markers A=, T=, I=, F=, CHS=)
     - Row 1: Marker names (Mid-hands, Center of club face)
-    - Row 2: Column headers (Sample #, Time, X, Y, Z, Xx, Xy, Xz, Yx, Yy, Yz, Zx, Zy, Zz)
+    - Row 2: Column headers (Sample #, Time, X, Y, Z, Xx, Xy, Xz, Yx, Yy, Yz, Zx,
+      Zy, Zz)
     - Row 3+: Data
 
     Positions are in centimeters and converted to meters.
@@ -276,9 +277,14 @@ class ClubTrajectoryParser:
         """Parse a single data row into ClubFrame."""
         # Access by index (works for both pandas Series and list)
         if hasattr(row, "iloc"):
-            get = lambda i: row.iloc[i] if i < len(row) else None
+
+            def get(i):
+                return row.iloc[i] if i < len(row) else None
+
         else:
-            get = lambda i: row[i] if i < len(row) else None
+
+            def get(i):
+                return row[i] if i < len(row) else None
 
         # Skip header rows or invalid data
         sample = get(self.SAMPLE_COL)

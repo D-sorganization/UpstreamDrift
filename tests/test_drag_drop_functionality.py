@@ -446,7 +446,7 @@ class TestURDFGeneratorIntegration(unittest.TestCase):
     def test_urdf_generator_engine_support(self) -> None:
         """Test that URDF generator supports multiple engines."""
         try:
-            from src.tools.urdf_generator.segment_manager import SegmentManager
+            from src.tools.model_explorer.segment_manager import SegmentManager
 
             manager = SegmentManager()
 

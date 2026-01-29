@@ -107,7 +107,7 @@ def test_run_comparison_no_selection(widget, qtbot):
     with patch("PyQt6.QtWidgets.QMessageBox.warning") as mock_warning:
         widget._run_comparison()
         mock_warning.assert_called_once()
-        assert "No Models" in mock_warning.call_args[0][2]
+        assert "Please select" in mock_warning.call_args[0][2]
 
 
 def test_run_comparison_success(widget, mock_flight_models):
@@ -148,8 +148,21 @@ def test_clear_visualization(widget, mock_flight_models):
     # Populate data first
     mock_result = MagicMock()
     mock_result.to_position_array.return_value = [[0, 0, 0]]
+    # Set numeric values to satisfy f-string formatting
+    mock_result.carry_distance = 250.0
+    mock_result.max_height = 30.0
+    mock_result.flight_time = 5.0
+    mock_result.landing_angle = 45.0
     mock_compare.return_value = {"Test Model": mock_result}
-    widget._run_comparison()
+
+    with patch("PyQt6.QtWidgets.QMessageBox.warning") as mock_warning:
+        widget._run_comparison()
+
+        # Ensure no error occurred
+        if mock_warning.called:
+            # Create helpful failure message
+            args = mock_warning.call_args[0]
+            pytest.fail(f"Comparison failed with warning: {args[2]}")
 
     assert len(widget.results) > 0
     assert widget.results_table.rowCount() > 0

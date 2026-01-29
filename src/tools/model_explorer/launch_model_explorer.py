@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Launch script for the Interactive URDF Generator."""
+"""Launch script for the Model Explorer."""
 
 import sys
 from pathlib import Path
 
 # Add project root to path for src imports when run as standalone script
-# Path: src/tools/urdf_generator/launch_urdf_generator.py -> need 4 parents
+# Path: src/tools/model_explorer/launch_model_explorer.py -> need 4 parents
 _project_root = Path(__file__).resolve().parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
@@ -21,16 +21,16 @@ except OSError:
     pass  # Will fall back to grid view
 
 from src.shared.python.logging_config import configure_gui_logging, get_logger
-from src.tools.urdf_generator.main_window import main
+from src.tools.model_explorer.main_window import main
 
 if __name__ == "__main__":
     # Set up logging
     configure_gui_logging()
     logger = get_logger(__name__)
-    logger.info("Starting Interactive URDF Generator")
+    logger.info("Starting Model Explorer")
 
     try:
         main()
     except Exception as e:
-        logger.error(f"Failed to start URDF Generator: {e}")
+        logger.error(f"Failed to start Model Explorer: {e}")
         sys.exit(1)

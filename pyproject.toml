@@ -105,8 +105,11 @@ analysis = [
 optimization = [
     "casadi>=3.6.3",
 ]
+community = [
+    "robot_descriptions>=1.4.0",
+]
 all = [
-    "golf-modeling-suite[dev,engines,analysis,optimization]",
+    "golf-modeling-suite[dev,engines,analysis,optimization,community]",
 ]
 
 [project.scripts]
@@ -157,6 +160,8 @@ exclude = [
     "**/legacy",
     "src/shared/models/opensim/opensim-models/",
     "src/shared/models/myosuite/myo_sim/",
+    "shared/models/opensim/opensim-models/",
+    "shared/models/myosuite/myo_sim/",
 ]
 
 [tool.ruff.lint]
@@ -179,11 +184,12 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
 "test_*.py" = ["B011", "T201", "E402"]
-"tests/*" = ["T201", "E402"]
+"tests/**/*.py" = ["T201", "E402"]
 "scripts/*" = ["T201"]
-"tools/*" = ["T201"]
-"launchers/*" = ["T201"]
+"src/tools/**/*.py" = ["T201", "E402"]
+"src/launchers/**/*.py" = ["T201", "E402"]
 "*/examples/*" = ["T201"]
+"examples/*" = ["T201"]
 "validate_phase1_upgrades.py" = ["T201"]
 "validate_suite.py" = ["T201"]
 "check_system_health.py" = ["T201"]

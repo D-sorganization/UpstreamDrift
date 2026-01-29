@@ -247,7 +247,7 @@ class MotionVisualizer:
             "finish": (0x0000FF, trajectory.events.finish),  # Blue
         }
 
-        for name, (color, frame_idx) in events.items():
+        for name, (color, _frame_idx) in events.items():
             frame = trajectory.get_event_frame(name)
             if frame:
                 sphere = mcg.Sphere(self.settings.event_marker_radius)
