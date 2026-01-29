@@ -52,6 +52,31 @@ class URDFGeneratorWindow(QMainWindow):
 
         logger.info("URDF Generator window initialized")
 
+        # Load default model if configured
+        self._load_default_model()
+
+    def _load_default_model(self) -> None:
+        """Load default model from settings if configured."""
+        try:
+            from PyQt6.QtCore import QSettings
+            from .model_library import ModelLibrary
+
+            settings = QSettings("GolfModelingSuite", "URDFGenerator")
+            default_model = settings.value("default_human_model")
+
+            if default_model:
+                logger.info(f"Loading default model: {default_model}")
+                library = ModelLibrary()
+                urdf_path = library.get_human_model(str(default_model))
+                
+                if urdf_path and urdf_path.exists():
+                    self._load_urdf_file(urdf_path)
+                    self.status_bar.showMessage(f"Loaded default model: {default_model}")
+                else:
+                    logger.warning(f"Default model {default_model} not found")
+        except Exception as e:
+            logger.error(f"Failed to load default model: {e}")
+
     def _setup_ui(self) -> None:
         """Set up the user interface."""
         self.setWindowTitle("Interactive URDF Generator - Golf Modeling Suite")
@@ -333,6 +358,25 @@ class URDFGeneratorWindow(QMainWindow):
                                 "This model is not bundled or downloaded.\n"
                                 "Check bundled_assets/ for available models.",
                             )
+                    elif category == "discovered":
+                        model_info = library.get_model_info(category, model_key)
+                        if model_info:
+                            path = Path(model_info["path"])
+                            if path.exists():
+                                self._load_urdf_file(path)
+                                self.status_bar.showMessage(f"Loaded repository model: {model_info['name']}")
+                            else:
+                                QMessageBox.warning(self, "Error", f"File not found: {path}")
+
+                    elif category == "embedded":
+                        model_info = library.get_model_info(category, model_key)
+                        if model_info:
+                            content = model_info["content"]
+                            self.visualization_widget.update_visualization(content, None)
+                            self.current_file_path = None
+                            self.setWindowTitle(f"Interactive URDF Generator - {model_info['name']} (Embedded)")
+                            self.status_bar.showMessage(f"Loaded embedded model: {model_info['name']}")
+                            logger.info(f"Loaded embedded model: {model_info['name']}")
 
         except Exception as e:
             logger.error(f"Error loading from library: {e}")
