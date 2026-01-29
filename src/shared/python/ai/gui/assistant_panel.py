@@ -189,6 +189,15 @@ class MessageWidget(QFrame):
         self._content += text
         self._content_label.setMarkdown(self._content)
 
+    def set_content(self, text: str) -> None:
+        """Set message content.
+
+        Args:
+            text: New content.
+        """
+        self._content = text
+        self._content_label.setMarkdown(self._content)
+
     def get_content(self) -> str:
         """Get current content."""
         return self._content
@@ -624,8 +633,11 @@ class AIAssistantPanel(QWidget):
         self._current_worker.finished.connect(self._on_stream_finished)
         self._current_worker.error.connect(self._on_stream_error)
 
-        # Create empty assistant message
-        self._current_assistant_message = self._add_message("assistant", "")
+        # Create assistant message with placeholder
+        self._current_assistant_message = self._add_message(
+            "assistant", "*Thinking...*"
+        )
+        self._is_first_chunk = True
 
         # Start streaming
         self._current_worker.start()
@@ -637,7 +649,12 @@ class AIAssistantPanel(QWidget):
             content: Content chunk.
         """
         if self._current_assistant_message:
-            self._current_assistant_message.append_content(content)
+            if self._is_first_chunk:
+                self._current_assistant_message.set_content(content)
+                self._is_first_chunk = False
+            else:
+                self._current_assistant_message.append_content(content)
+
             self._scroll_to_bottom()
 
     def _on_stream_finished(self) -> None:
