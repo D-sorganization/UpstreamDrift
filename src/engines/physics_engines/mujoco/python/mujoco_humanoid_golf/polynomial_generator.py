@@ -155,8 +155,20 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
 
         # Left Panel: Controls
         left_panel = QtWidgets.QWidget()
-        left_layout = QtWidgets.QVBoxLayout(left_panel)
-        left_panel.setFixedWidth(300)
+        left_panel.setFixedWidth(320)  # Slightly wider for better readability
+        main_left_layout = QtWidgets.QVBoxLayout(left_panel)
+        main_left_layout.setContentsMargins(0, 0, 0, 0)
+
+        # Scroll Area for Controls (Fixes vertical smashing)
+        scroll = QtWidgets.QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
+        scroll.setStyleSheet("background: transparent;")
+
+        content_widget = QtWidgets.QWidget()
+        content_widget.setStyleSheet("background: transparent;")
+        content_layout = QtWidgets.QVBoxLayout(content_widget)
+        content_layout.setSpacing(10)
 
         # Joint Selection
         joint_group = QtWidgets.QGroupBox("Target Joint")
@@ -166,7 +178,7 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         self.joint_combo.setToolTip("Select the joint to generate the function for")
         self.joint_combo.setAccessibleName("Target Joint Selector")
         joint_layout.addWidget(self.joint_combo)
-        left_layout.addWidget(joint_group)
+        content_layout.addWidget(joint_group)
 
         # Plot Settings (Scale)
         scale_group = QtWidgets.QGroupBox("Plot Scale")
@@ -187,7 +199,7 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         self.apply_scale_btn = QtWidgets.QPushButton("Apply Scale")
         scale_layout.addWidget(self.apply_scale_btn, 2, 0, 1, 3)
 
-        left_layout.addWidget(scale_group)
+        content_layout.addWidget(scale_group)
 
         # Input Methods
         input_group = QtWidgets.QGroupBox("Input Method")
@@ -237,11 +249,21 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         radio_layout.addWidget(self.btn_drag, 1, 0, 1, 2)
         input_layout.addLayout(radio_layout)
 
-        left_layout.addWidget(input_group)
+        content_layout.addWidget(input_group)
 
         # Actions
-        action_group = QtWidgets.QGroupBox("Actions")
+        action_group = QtWidgets.QGroupBox("Fitting & Actions")
         action_layout = QtWidgets.QVBoxLayout(action_group)
+
+        # Polynomial Order Selector
+        order_layout = QtWidgets.QHBoxLayout()
+        order_layout.addWidget(QtWidgets.QLabel("Polynomial Order:"))
+        self.order_spin = QtWidgets.QSpinBox()
+        self.order_spin.setRange(1, 6)
+        self.order_spin.setValue(6)
+        self.order_spin.setToolTip("Degree of the polynomial to fit (1-6)")
+        order_layout.addWidget(self.order_spin)
+        action_layout.addLayout(order_layout)
 
         self.clear_btn = QtWidgets.QPushButton("Clear Points")
         self.clear_btn.setToolTip("Remove all points and reset the plot")
@@ -252,10 +274,10 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
                 style.standardIcon(QtWidgets.QStyle.StandardPixmap.SP_TrashIcon)
             )
 
-        self.fit_btn = QtWidgets.QPushButton("Fit Polynomial (6th Order)")
+        self.fit_btn = QtWidgets.QPushButton("Fit Polynomial")
         self.fit_btn.setObjectName("fitBtn")
         self.fit_btn.setToolTip(
-            "Calculate and plot a 6th-order polynomial fit for the current points"
+            "Calculate and plot a polynomial fit for the current points"
         )
         self.fit_btn.setAccessibleName("Fit polynomial to points")
         if style:
@@ -265,7 +287,7 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
 
         action_layout.addWidget(self.clear_btn)
         action_layout.addWidget(self.fit_btn)
-        left_layout.addWidget(action_group)
+        content_layout.addWidget(action_group)
 
         # Results
         result_group = QtWidgets.QGroupBox("Result")
@@ -273,10 +295,16 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         self.result_text = QtWidgets.QTextEdit()
         self.result_text.setReadOnly(True)
         self.result_text.setMaximumHeight(100)
+        self.result_text.setMinimumHeight(60)
         result_layout.addWidget(self.result_text)
-        left_layout.addWidget(result_group)
+        content_layout.addWidget(result_group)
 
-        left_layout.addStretch()
+        content_layout.addStretch()
+
+        # Add content to scroll area
+        scroll.setWidget(content_widget)
+        main_left_layout.addWidget(scroll)
+
         layout.addWidget(left_panel)
 
         # Right Panel: Plot
@@ -451,23 +479,27 @@ class PolynomialGeneratorWidget(QtWidgets.QWidget):
         Returns:
             bool: True if fit was successful, False otherwise.
         """
-        if len(self.current_points) < 7:
+        order = self.order_spin.value()
+        if len(self.current_points) < order + 1:
             return False
 
         try:
             xs, ys = zip(*self.current_points, strict=True)
-            # Fit 6th order
-            self.polynomial_coeffs = np.polyfit(xs, ys, 6)
+            # Fit selected order
+            self.polynomial_coeffs = np.polyfit(xs, ys, order)
             return True
         except Exception as e:
             logger.error(f"Fitting error: {e}")
             return False
 
     def _fit_polynomial(self) -> None:
-        """Fit a 6th order polynomial to the current points and update UI."""
-        if len(self.current_points) < 7:
+        """Fit a polynomial to the current points and update UI."""
+        order = self.order_spin.value()
+        if len(self.current_points) < order + 1:
             QtWidgets.QMessageBox.warning(
-                self, "Insufficient Data", "Need at least 7 points for a 6th order fit."
+                self,
+                "Insufficient Data",
+                f"Need at least {order + 1} points for a {order}th order fit.",
             )
             return
 

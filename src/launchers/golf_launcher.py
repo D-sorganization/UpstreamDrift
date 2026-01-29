@@ -36,9 +36,10 @@ from src.shared.python.logging_config import configure_gui_logging, get_logger
 if TYPE_CHECKING:
     from src.shared.python.ui import ToastManager
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, QUrl
 from PyQt6.QtGui import (
     QCloseEvent,
+    QDesktopServices,
     QFont,
     QIcon,
     QKeySequence,
@@ -263,9 +264,9 @@ class GolfLauncher(QMainWindow):
         self.model_cards: dict[str, Any] = {}
         self.model_order: list[str] = []  # Track model order for drag-and-drop
         self.layout_edit_mode = False  # Track if layout editing is enabled
-        self.running_processes: dict[str, subprocess.Popen] = (
-            {}
-        )  # Track running instances
+        self.running_processes: dict[
+            str, subprocess.Popen
+        ] = {}  # Track running instances
         self.available_models: dict[str, Any] = {}
         self.special_app_lookup: dict[str, Any] = {}
         self.current_filter_text = ""
@@ -864,6 +865,16 @@ except Exception as e:
         self.chk_wsl.stateChanged.connect(self._on_wsl_mode_changed)
         top_bar.addWidget(self.chk_wsl)
 
+        # Execution Mode Label
+        self.lbl_execution_mode = QLabel("Mode: Local (Windows)")
+        self.lbl_execution_mode.setStyleSheet(
+            "color: #FFD60A; font-weight: bold; margin-left: 10px;"
+        )
+        self.lbl_execution_mode.setToolTip(
+            "Current execution environment (Local, Docker, or WSL)"
+        )
+        top_bar.addWidget(self.lbl_execution_mode)
+
         top_bar.addStretch()
 
         # Search Bar
@@ -911,6 +922,23 @@ except Exception as e:
         btn_help.setToolTip("View documentation and user guide")
         btn_help.clicked.connect(self.open_help)
         top_bar.addWidget(btn_help)
+
+        btn_bug = QPushButton("Report Bug")
+        btn_bug.setStyleSheet("""
+            QPushButton {
+                background-color: #d32f2f;
+                color: white;
+                padding: 8px 16px;
+                border: none;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #b71c1c;
+            }
+        """)
+        btn_bug.setToolTip("Report a bug via email")
+        btn_bug.clicked.connect(self._report_bug)
+        top_bar.addWidget(btn_bug)
 
         # AI Assistant Button (if available)
         if AI_AVAILABLE:
@@ -1091,6 +1119,9 @@ except Exception as e:
             if hasattr(self, "toast_manager") and self.toast_manager:
                 self.show_toast("Local mode - engines will run on host system", "info")
 
+        # Update UI status
+        self.update_execution_status()
+
         # Update launch button text if a model is selected
         if hasattr(self, "btn_launch"):
             self.update_launch_button()
@@ -1141,9 +1172,47 @@ except Exception as e:
             if hasattr(self, "toast_manager") and self.toast_manager:
                 self.show_toast("Local Windows mode", "info")
 
+        # Update UI status
+        self.update_execution_status()
+
         # Update launch button text if a model is selected
         if hasattr(self, "btn_launch"):
             self.update_launch_button()
+
+    def _report_bug(self) -> None:
+        """Open default mail client to report a bug."""
+        subject = "Bug Report: Golf Modeling Suite"
+        body = "Please describe the issue you encountered:\n\n"
+
+        # Safely encode
+        from urllib.parse import quote
+
+        # Replace with actual support email if known, otherwise placeholder
+        email = "support@golfmodelingsuite.com"
+        mailto_url = f"mailto:{email}?subject={quote(subject)}&body={quote(body)}"
+
+        QDesktopServices.openUrl(QUrl(mailto_url))
+
+    def update_execution_status(self) -> None:
+        """Update the execution mode label based on current settings."""
+        if not hasattr(self, "lbl_execution_mode"):
+            return
+
+        if hasattr(self, "chk_wsl") and self.chk_wsl.isChecked():
+            self.lbl_execution_mode.setText("Mode: WSL (Ubuntu)")
+            self.lbl_execution_mode.setStyleSheet(
+                "color: #30D158; font-weight: bold; margin-left: 10px;"
+            )
+        elif hasattr(self, "chk_docker") and self.chk_docker.isChecked():
+            self.lbl_execution_mode.setText("Mode: Docker Container")
+            self.lbl_execution_mode.setStyleSheet(
+                "color: #30D158; font-weight: bold; margin-left: 10px;"
+            )
+        else:
+            self.lbl_execution_mode.setText("Mode: Local (Windows)")
+            self.lbl_execution_mode.setStyleSheet(
+                "color: #FFD60A; font-weight: bold; margin-left: 10px;"
+            )
 
     def _launch_in_wsl(self, script_path: str, args: list[str] | None = None) -> None:
         """Launch a script in WSL2 Ubuntu environment.
