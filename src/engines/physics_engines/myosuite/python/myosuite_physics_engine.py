@@ -18,11 +18,11 @@ _project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.pare
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-import numpy as np
+import numpy as np  # noqa: E402
 
-from src.shared.python.engine_availability import MYOSUITE_AVAILABLE
-from src.shared.python.interfaces import PhysicsEngine
-from src.shared.python.logging_config import get_logger
+from src.shared.python.engine_availability import MYOSUITE_AVAILABLE  # noqa: E402
+from src.shared.python.interfaces import PhysicsEngine  # noqa: E402
+from src.shared.python.logging_config import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
 

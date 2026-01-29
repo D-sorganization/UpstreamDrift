@@ -3,10 +3,7 @@
 Unified MuJoCo Launcher
 Hub for accessing MuJoCo Humanoid Simulation and Analysis Dashboard.
 """
-<<<<<<< Updated upstream
 
-=======
->>>>>>> Stashed changes
 import subprocess
 import sys
 from pathlib import Path
