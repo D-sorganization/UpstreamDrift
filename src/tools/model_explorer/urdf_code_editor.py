@@ -23,10 +23,8 @@ from PyQt6.QtGui import (
 from PyQt6.QtWidgets import (
     QCompleter,
     QDialog,
-    QDialogButtonBox,
     QHBoxLayout,
     QLabel,
-    QListWidget,
     QPlainTextEdit,
     QPushButton,
     QSplitter,
@@ -56,9 +54,7 @@ class XMLHighlighter(QSyntaxHighlighter):
         tag_format = QTextCharFormat()
         tag_format.setForeground(QColor("#0000FF"))
         tag_format.setFontWeight(QFont.Weight.Bold)
-        self.highlighting_rules.append(
-            (QRegularExpression(r"</?[\w:-]+"), tag_format)
-        )
+        self.highlighting_rules.append((QRegularExpression(r"</?[\w:-]+"), tag_format))
 
         # Attribute names (dark cyan)
         attr_format = QTextCharFormat()
@@ -70,9 +66,7 @@ class XMLHighlighter(QSyntaxHighlighter):
         # Attribute values (dark red/maroon)
         value_format = QTextCharFormat()
         value_format.setForeground(QColor("#8B0000"))
-        self.highlighting_rules.append(
-            (QRegularExpression(r'"[^"]*"'), value_format)
-        )
+        self.highlighting_rules.append((QRegularExpression(r'"[^"]*"'), value_format))
 
         # Comments (gray)
         comment_format = QTextCharFormat()
@@ -94,10 +88,29 @@ class XMLHighlighter(QSyntaxHighlighter):
         urdf_format.setForeground(QColor("#006400"))
         urdf_format.setFontWeight(QFont.Weight.Bold)
         urdf_keywords = [
-            "robot", "link", "joint", "visual", "collision", "inertial",
-            "geometry", "origin", "mass", "inertia", "material", "color",
-            "parent", "child", "axis", "limit", "dynamics", "transmission",
-            "box", "cylinder", "sphere", "mesh", "capsule",
+            "robot",
+            "link",
+            "joint",
+            "visual",
+            "collision",
+            "inertial",
+            "geometry",
+            "origin",
+            "mass",
+            "inertia",
+            "material",
+            "color",
+            "parent",
+            "child",
+            "axis",
+            "limit",
+            "dynamics",
+            "transmission",
+            "box",
+            "cylinder",
+            "sphere",
+            "mesh",
+            "capsule",
         ]
         for keyword in urdf_keywords:
             self.highlighting_rules.append(
@@ -123,7 +136,7 @@ class XMLHighlighter(QSyntaxHighlighter):
 class LineNumberArea(QWidget):
     """Widget displaying line numbers for the code editor."""
 
-    def __init__(self, editor: "URDFCodeEditor") -> None:
+    def __init__(self, editor: URDFCodeEditor) -> None:
         """Initialize the line number area."""
         super().__init__(editor)
         self.editor = editor
@@ -146,13 +159,53 @@ class URDFCodeEditor(QPlainTextEdit):
 
     # URDF tag completions
     URDF_COMPLETIONS = [
-        "robot", "link", "joint", "visual", "collision", "inertial",
-        "geometry", "origin", "mass", "inertia", "material", "color",
-        "parent", "child", "axis", "limit", "dynamics", "transmission",
-        "box", "cylinder", "sphere", "mesh", "capsule", "name", "type",
-        "xyz", "rpy", "value", "filename", "scale", "rgba", "ixx", "iyy",
-        "izz", "ixy", "ixz", "iyz", "lower", "upper", "effort", "velocity",
-        "fixed", "revolute", "prismatic", "continuous", "floating", "planar",
+        "robot",
+        "link",
+        "joint",
+        "visual",
+        "collision",
+        "inertial",
+        "geometry",
+        "origin",
+        "mass",
+        "inertia",
+        "material",
+        "color",
+        "parent",
+        "child",
+        "axis",
+        "limit",
+        "dynamics",
+        "transmission",
+        "box",
+        "cylinder",
+        "sphere",
+        "mesh",
+        "capsule",
+        "name",
+        "type",
+        "xyz",
+        "rpy",
+        "value",
+        "filename",
+        "scale",
+        "rgba",
+        "ixx",
+        "iyy",
+        "izz",
+        "ixy",
+        "ixz",
+        "iyz",
+        "lower",
+        "upper",
+        "effort",
+        "velocity",
+        "fixed",
+        "revolute",
+        "prismatic",
+        "continuous",
+        "floating",
+        "planar",
     ]
 
     def __init__(self, parent: QWidget | None = None) -> None:
@@ -259,7 +312,9 @@ class URDFCodeEditor(QPlainTextEdit):
 
         block = self.firstVisibleBlock()
         block_number = block.blockNumber()
-        top = round(self.blockBoundingGeometry(block).translated(self.contentOffset()).top())
+        top = round(
+            self.blockBoundingGeometry(block).translated(self.contentOffset()).top()
+        )
         bottom = top + round(self.blockBoundingRect(block).height())
 
         while block.isValid() and top <= event.rect().bottom():
@@ -395,7 +450,14 @@ class URDFCodeEditor(QPlainTextEdit):
             joint_type = joint.get("type")
 
             # Check joint type
-            valid_types = ["fixed", "revolute", "prismatic", "continuous", "floating", "planar"]
+            valid_types = [
+                "fixed",
+                "revolute",
+                "prismatic",
+                "continuous",
+                "floating",
+                "planar",
+            ]
             if joint_type not in valid_types:
                 errors.append(
                     f"Joint '{joint_name}' has invalid type '{joint_type}'. "
@@ -424,7 +486,9 @@ class URDFCodeEditor(QPlainTextEdit):
             if joint_type in ["revolute", "prismatic"]:
                 limit = joint.find("limit")
                 if limit is None:
-                    errors.append(f"Joint '{joint_name}' ({joint_type}) must have limits")
+                    errors.append(
+                        f"Joint '{joint_name}' ({joint_type}) must have limits"
+                    )
 
         is_valid = len(errors) == 0
         self.validation_result.emit(is_valid, errors)
@@ -462,7 +526,9 @@ class URDFCodeEditor(QPlainTextEdit):
 
         return self.find(text, flags)
 
-    def replace_text(self, find: str, replace: str, all_occurrences: bool = False) -> int:
+    def replace_text(
+        self, find: str, replace: str, all_occurrences: bool = False
+    ) -> int:
         """Replace text in the editor.
 
         Args:

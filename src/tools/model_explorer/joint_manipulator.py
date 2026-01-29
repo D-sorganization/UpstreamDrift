@@ -10,12 +10,10 @@ from __future__ import annotations
 import math
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from typing import Any
 
 from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
-    QCheckBox,
     QComboBox,
     QDoubleSpinBox,
     QFormLayout,
@@ -24,7 +22,6 @@ from PyQt6.QtWidgets import (
     QHeaderView,
     QLabel,
     QLineEdit,
-    QProgressBar,
     QPushButton,
     QScrollArea,
     QSlider,
@@ -60,7 +57,7 @@ class JointInfo:
     current_position: float = 0.0
 
     @classmethod
-    def from_element(cls, element: ET.Element) -> "JointInfo":
+    def from_element(cls, element: ET.Element) -> JointInfo:
         """Create JointInfo from XML element."""
         name = element.get("name", "unnamed")
         joint_type = element.get("type", "fixed")
@@ -270,9 +267,9 @@ class JointTableWidget(QWidget):
         # Table
         self.table = QTableWidget()
         self.table.setColumnCount(8)
-        self.table.setHorizontalHeaderLabels([
-            "Name", "Type", "Parent", "Child", "Lower", "Upper", "Axis", "Movable"
-        ])
+        self.table.setHorizontalHeaderLabels(
+            ["Name", "Type", "Parent", "Child", "Lower", "Upper", "Axis", "Movable"]
+        )
 
         header = self.table.horizontalHeader()
         if header:
@@ -303,7 +300,9 @@ class JointTableWidget(QWidget):
             self.table.setItem(row, 4, QTableWidgetItem(lower))
             self.table.setItem(row, 5, QTableWidgetItem(upper))
 
-            axis_str = f"({joint.axis[0]:.1f}, {joint.axis[1]:.1f}, {joint.axis[2]:.1f})"
+            axis_str = (
+                f"({joint.axis[0]:.1f}, {joint.axis[1]:.1f}, {joint.axis[2]:.1f})"
+            )
             self.table.setItem(row, 6, QTableWidgetItem(axis_str))
 
             movable = "Yes" if joint.is_movable() else "No"
@@ -352,9 +351,9 @@ class JointEditorPanel(QWidget):
         basic_layout.addRow("Name:", self.name_edit)
 
         self.type_combo = QComboBox()
-        self.type_combo.addItems([
-            "fixed", "revolute", "prismatic", "continuous", "floating", "planar"
-        ])
+        self.type_combo.addItems(
+            ["fixed", "revolute", "prismatic", "continuous", "floating", "planar"]
+        )
         basic_layout.addRow("Type:", self.type_combo)
 
         layout.addWidget(basic_group)
@@ -662,7 +661,9 @@ class JointManipulatorWidget(QWidget):
 
             slider_widget = JointSliderWidget(joint)
             slider_widget.value_changed.connect(self._on_joint_value_changed)
-            self.sliders_layout.insertWidget(self.sliders_layout.count() - 1, slider_widget)
+            self.sliders_layout.insertWidget(
+                self.sliders_layout.count() - 1, slider_widget
+            )
 
     def _on_filter_changed(self, filter_text: str) -> None:
         """Handle filter change."""

@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QAction, QColor, QDragEnterEvent, QDropEvent
+from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QDialog,
@@ -26,8 +26,6 @@ from PyQt6.QtWidgets import (
     QHeaderView,
     QLabel,
     QLineEdit,
-    QListWidget,
-    QListWidgetItem,
     QMenu,
     QMessageBox,
     QPushButton,
@@ -40,8 +38,6 @@ from PyQt6.QtWidgets import (
 )
 
 from src.shared.python.logging_config import get_logger
-
-from .component_library import ComponentLibrary, ComponentType, URDFComponent
 
 logger = get_logger(__name__)
 
@@ -59,16 +55,14 @@ class URDFModel:
     is_modified: bool = False
 
     @classmethod
-    def from_file(cls, file_path: Path) -> "URDFModel":
+    def from_file(cls, file_path: Path) -> URDFModel:
         """Load a URDF model from file."""
         tree = ET.parse(file_path)
         root = tree.getroot()
         return cls.from_element(root, file_path)
 
     @classmethod
-    def from_element(
-        cls, root: ET.Element, file_path: Path | None = None
-    ) -> "URDFModel":
+    def from_element(cls, root: ET.Element, file_path: Path | None = None) -> URDFModel:
         """Create model from XML element."""
         robot_name = root.get("name", "unnamed_robot")
 
@@ -98,7 +92,7 @@ class URDFModel:
         )
 
     @classmethod
-    def create_empty(cls, name: str = "new_robot") -> "URDFModel":
+    def create_empty(cls, name: str = "new_robot") -> URDFModel:
         """Create an empty URDF model."""
         return cls(
             file_path=None,
@@ -226,8 +220,9 @@ class URDFModel:
         for joint_name, joint in self.joints.items():
             parent = joint.find("parent")
             child = joint.find("child")
-            if (parent is not None and parent.get("link") == name) or \
-               (child is not None and child.get("link") == name):
+            if (parent is not None and parent.get("link") == name) or (
+                child is not None and child.get("link") == name
+            ):
                 joints_to_remove.append(joint_name)
 
         for joint_name in joints_to_remove:
@@ -507,7 +502,9 @@ class ModelPanel(QWidget):
             materials_item = QTreeWidgetItem(
                 ["Materials", "", f"({len(self.model.materials)})"]
             )
-            materials_item.setFlags(materials_item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
+            materials_item.setFlags(
+                materials_item.flags() & ~Qt.ItemFlag.ItemIsSelectable
+            )
             self.tree.addTopLevelItem(materials_item)
 
             for name, material in self.model.materials.items():
@@ -539,10 +536,14 @@ class ModelPanel(QWidget):
 
         try:
             if comp_type == "link":
-                new_name = name_prefix + element.get("name", "link") if name_prefix else None
+                new_name = (
+                    name_prefix + element.get("name", "link") if name_prefix else None
+                )
                 result = self.model.add_link(element, new_name)
             elif comp_type == "joint":
-                new_name = name_prefix + element.get("name", "joint") if name_prefix else None
+                new_name = (
+                    name_prefix + element.get("name", "joint") if name_prefix else None
+                )
                 result = self.model.add_joint(element, new_name)
             elif comp_type == "material":
                 result = self.model.add_material(element)
@@ -669,7 +670,9 @@ class FrankensteinEditor(QWidget):
         # Get the selected link
         link_name = current.text(0)
         copied_count = self._copy_link_chain(source_model, link_name)
-        self.status_label.setText(f"Copied chain starting from '{link_name}': {copied_count} components")
+        self.status_label.setText(
+            f"Copied chain starting from '{link_name}': {copied_count} components"
+        )
 
     def _copy_link_chain(
         self,
@@ -714,7 +717,9 @@ class FrankensteinEditor(QWidget):
                 if child is not None:
                     child_link = child.get("link")
                     if child_link and child_link in source_model.links:
-                        count += self._copy_link_chain(source_model, child_link, name_mapping)
+                        count += self._copy_link_chain(
+                            source_model, child_link, name_mapping
+                        )
 
         return count
 
@@ -807,7 +812,9 @@ class StealComponentDialog(QDialog):
 
         # Include related checkbox (for links)
         if comp_type == "link":
-            self.include_materials = QLabel("Note: Referenced materials will also be copied")
+            self.include_materials = QLabel(
+                "Note: Referenced materials will also be copied"
+            )
             layout.addWidget(self.include_materials)
 
         # Buttons

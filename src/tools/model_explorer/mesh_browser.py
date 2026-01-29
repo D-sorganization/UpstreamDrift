@@ -6,7 +6,6 @@ in URDFs and copying mesh references between models.
 
 from __future__ import annotations
 
-import copy
 import shutil
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
@@ -14,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QColor, QPixmap
+from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QComboBox,
@@ -27,17 +26,12 @@ from PyQt6.QtWidgets import (
     QHeaderView,
     QLabel,
     QLineEdit,
-    QListWidget,
-    QListWidgetItem,
     QMessageBox,
-    QProgressBar,
     QPushButton,
     QSplitter,
     QTableWidget,
     QTableWidgetItem,
     QTextEdit,
-    QTreeWidget,
-    QTreeWidgetItem,
     QVBoxLayout,
     QWidget,
 )
@@ -68,7 +62,7 @@ class MeshReference:
         link_name: str,
         context: str,
         urdf_dir: Path | None,
-    ) -> "MeshReference":
+    ) -> MeshReference:
         """Create MeshReference from a mesh XML element.
 
         Args:
@@ -250,9 +244,9 @@ class MeshBrowserPanel(QWidget):
         # Mesh table
         self.table = QTableWidget()
         self.table.setColumnCount(5)
-        self.table.setHorizontalHeaderLabels([
-            "Mesh File", "Link", "Type", "Size", "Status"
-        ])
+        self.table.setHorizontalHeaderLabels(
+            ["Mesh File", "Link", "Type", "Size", "Status"]
+        )
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
 
@@ -422,9 +416,7 @@ class CopyMeshDialog(QDialog):
 
         status = "Found" if mesh.exists else "Missing (file will need to be copied)"
         status_label = QLabel(status)
-        status_label.setStyleSheet(
-            "color: green;" if mesh.exists else "color: orange;"
-        )
+        status_label.setStyleSheet("color: green;" if mesh.exists else "color: orange;")
         source_layout.addRow("Status:", status_label)
 
         layout.addWidget(source_group)
@@ -476,8 +468,12 @@ class CopyMeshDialog(QDialog):
         return {
             "target_link": self.link_combo.currentText(),
             "context": self.context_combo.currentText(),
-            "copy_file": self.copy_file_check.isChecked() if self.copy_file_check else False,
-            "mesh_subdir": self.mesh_subdir_edit.text() if self.mesh_subdir_edit else "meshes",
+            "copy_file": (
+                self.copy_file_check.isChecked() if self.copy_file_check else False
+            ),
+            "mesh_subdir": (
+                self.mesh_subdir_edit.text() if self.mesh_subdir_edit else "meshes"
+            ),
         }
 
 
@@ -560,7 +556,9 @@ class MeshBrowserWidget(QWidget):
         details = f"File: {mesh.filename}\n"
         details += f"Link: {mesh.link_name}\n"
         details += f"Type: {mesh.context}\n"
-        details += f"Scale: ({mesh.scale[0]:.2f}, {mesh.scale[1]:.2f}, {mesh.scale[2]:.2f})\n"
+        details += (
+            f"Scale: ({mesh.scale[0]:.2f}, {mesh.scale[1]:.2f}, {mesh.scale[2]:.2f})\n"
+        )
         details += f"Exists: {'Yes' if mesh.exists else 'No'}\n"
         if mesh.exists:
             details += f"Size: {mesh.format_size()}\n"
@@ -654,8 +652,12 @@ class MeshBrowserWidget(QWidget):
 
             # Add origin
             origin = ET.SubElement(context_elem, "origin")
-            origin.set("xyz", f"{mesh.origin_xyz[0]} {mesh.origin_xyz[1]} {mesh.origin_xyz[2]}")
-            origin.set("rpy", f"{mesh.origin_rpy[0]} {mesh.origin_rpy[1]} {mesh.origin_rpy[2]}")
+            origin.set(
+                "xyz", f"{mesh.origin_xyz[0]} {mesh.origin_xyz[1]} {mesh.origin_xyz[2]}"
+            )
+            origin.set(
+                "rpy", f"{mesh.origin_rpy[0]} {mesh.origin_rpy[1]} {mesh.origin_rpy[2]}"
+            )
 
             # Add geometry with mesh
             geometry = ET.SubElement(context_elem, "geometry")
@@ -663,7 +665,9 @@ class MeshBrowserWidget(QWidget):
             mesh_elem.set("filename", new_filename)
 
             if mesh.scale != (1.0, 1.0, 1.0):
-                mesh_elem.set("scale", f"{mesh.scale[0]} {mesh.scale[1]} {mesh.scale[2]}")
+                mesh_elem.set(
+                    "scale", f"{mesh.scale[0]} {mesh.scale[1]} {mesh.scale[2]}"
+                )
 
         # Generate new URDF
         ET.indent(root, space="  ")
@@ -722,7 +726,9 @@ class MeshBrowserWidget(QWidget):
                 mesh_elem.set("filename", mesh.filename)
 
                 if mesh.scale != (1.0, 1.0, 1.0):
-                    mesh_elem.set("scale", f"{mesh.scale[0]} {mesh.scale[1]} {mesh.scale[2]}")
+                    mesh_elem.set(
+                        "scale", f"{mesh.scale[0]} {mesh.scale[1]} {mesh.scale[2]}"
+                    )
 
                 copied_count += 1
 
@@ -732,7 +738,9 @@ class MeshBrowserWidget(QWidget):
 
         self.right_panel.load_content(new_content, self.right_panel.get_urdf_path())
         self.urdf_modified.emit(new_content)
-        self.status_label.setText(f"Copied {copied_count} of {len(unique_meshes)} meshes")
+        self.status_label.setText(
+            f"Copied {copied_count} of {len(unique_meshes)} meshes"
+        )
 
     def _on_swap(self) -> None:
         """Swap the source and target models."""
