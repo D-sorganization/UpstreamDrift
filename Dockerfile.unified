@@ -1,0 +1,72 @@
+# Golf Modeling Suite - Unified Container
+# Includes all engines, web UI, ready to run
+
+# Stage 1: Build UI
+FROM node:20-slim AS ui-builder
+
+WORKDIR /app/ui
+COPY ui/package*.json ./
+RUN npm ci
+
+COPY ui/ ./
+RUN npm run build
+
+
+# Stage 2: Python runtime with all engines
+FROM mambaorg/micromamba:1.5-jammy AS runtime
+
+# Create non-root user
+ARG MAMBA_USER=golfer
+ARG MAMBA_USER_ID=1000
+ARG MAMBA_USER_GID=1000
+
+USER root
+
+# System dependencies for OpenGL and visualization
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    libegl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxrender1 \
+    libxext6 \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+USER $MAMBA_USER
+
+# Create conda environment with all engines
+COPY --chown=$MAMBA_USER:$MAMBA_USER environment.yml /tmp/environment.yml
+
+RUN micromamba create -y -f /tmp/environment.yml && \
+    micromamba clean --all --yes
+
+# Activate environment by default
+ARG MAMBA_DOCKERFILE_ACTIVATE=1
+ENV ENV_NAME=golf-suite
+
+WORKDIR /app
+
+# Copy application code
+COPY --chown=$MAMBA_USER:$MAMBA_USER src/ ./src/
+COPY --chown=$MAMBA_USER:$MAMBA_USER pyproject.toml ./
+COPY --chown=$MAMBA_USER:$MAMBA_USER launch_golf_suite.py ./
+COPY --chown=$MAMBA_USER:$MAMBA_USER build_hooks.py ./
+COPY --chown=$MAMBA_USER:$MAMBA_USER README.md ./
+
+# Copy pre-built UI
+# Note: we copy content to ui/dist in root, corresponding to how we might serve it
+COPY --from=ui-builder --chown=$MAMBA_USER:$MAMBA_USER /app/ui/dist ./ui/dist
+
+# Install package
+RUN micromamba run -n $ENV_NAME pip install -e .
+
+# Expose port
+EXPOSE 8000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/api/health || exit 1
+
+# Run server
+CMD ["micromamba", "run", "-n", "golf-suite", "golf-suite", "--no-browser"]

@@ -199,7 +199,9 @@ class SignalImporter:
         metadata = data.get("metadata", {})
         metadata["source_file"] = str(file_path)
 
-        return Signal(time=time, values=values, name=name, units=units, metadata=metadata)
+        return Signal(
+            time=time, values=values, name=name, units=units, metadata=metadata
+        )
 
     @staticmethod
     def from_dict(

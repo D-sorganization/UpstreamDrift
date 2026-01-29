@@ -32,10 +32,7 @@ from PyQt6.QtWidgets import (
     QListWidgetItem,
     QMessageBox,
     QPushButton,
-    QSpinBox,
     QSplitter,
-    QTreeWidget,
-    QTreeWidgetItem,
     QVBoxLayout,
     QWidget,
 )
@@ -52,11 +49,11 @@ class ChainNode:
     name: str
     link_element: ET.Element | None = None
     joint_to_parent: ET.Element | None = None
-    parent: "ChainNode | None" = None
-    children: list["ChainNode"] = field(default_factory=list)
+    parent: ChainNode | None = None
+    children: list[ChainNode] = field(default_factory=list)
     depth: int = 0
 
-    def get_chain_to_root(self) -> list["ChainNode"]:
+    def get_chain_to_root(self) -> list[ChainNode]:
         """Get the chain from this node to the root."""
         chain = [self]
         current = self.parent
@@ -65,7 +62,7 @@ class ChainNode:
             current = current.parent
         return list(reversed(chain))
 
-    def get_all_descendants(self) -> list["ChainNode"]:
+    def get_all_descendants(self) -> list[ChainNode]:
         """Get all descendant nodes."""
         descendants = []
         for child in self.children:
@@ -83,8 +80,16 @@ class ChainNode:
             return False
         lower_name = self.name.lower()
         end_effector_hints = [
-            "hand", "gripper", "tool", "effector", "finger",
-            "tip", "end", "head", "foot", "palm"
+            "hand",
+            "gripper",
+            "tool",
+            "effector",
+            "finger",
+            "tip",
+            "end",
+            "head",
+            "foot",
+            "palm",
         ]
         return any(hint in lower_name for hint in end_effector_hints)
 
@@ -143,7 +148,9 @@ class KinematicTree:
                     self.root = node
                 else:
                     # Multiple roots - use first one
-                    logger.warning(f"Multiple root links found. Using '{self.root.name}'")
+                    logger.warning(
+                        f"Multiple root links found. Using '{self.root.name}'"
+                    )
 
         # Calculate depths
         self._calculate_depths()
@@ -435,9 +442,7 @@ class InsertSegmentDialog(QDialog):
         joint_layout.addRow("Joint name:", self.joint_name_edit)
 
         self.joint_type_combo = QComboBox()
-        self.joint_type_combo.addItems(
-            ["fixed", "revolute", "prismatic", "continuous"]
-        )
+        self.joint_type_combo.addItems(["fixed", "revolute", "prismatic", "continuous"])
         joint_layout.addRow("Joint type:", self.joint_type_combo)
 
         # Axis
@@ -477,7 +482,9 @@ class InsertSegmentDialog(QDialog):
                     item = QListWidgetItem(child.name)
                     item.setSelected(True)  # Select all by default
                     self.reparent_list.addItem(item)
-                reparent_layout.addWidget(QLabel("Select children to re-parent to new link:"))
+                reparent_layout.addWidget(
+                    QLabel("Select children to re-parent to new link:")
+                )
                 reparent_layout.addWidget(self.reparent_list)
             else:
                 reparent_layout.addWidget(QLabel("No children to re-parent"))
@@ -605,7 +612,9 @@ class ChainManipulationWidget(QWidget):
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
 
-        right_layout.addWidget(QLabel("Chain Visualization (double-click to select insertion point):"))
+        right_layout.addWidget(
+            QLabel("Chain Visualization (double-click to select insertion point):")
+        )
 
         self.visualizer = ChainVisualizer()
         self.visualizer.setMinimumSize(400, 300)
@@ -714,8 +723,16 @@ class ChainManipulationWidget(QWidget):
         # Add inertial
         inertial = ET.SubElement(new_link, "inertial")
         ET.SubElement(inertial, "mass", value=str(config["mass"]))
-        ET.SubElement(inertial, "inertia", ixx="0.01", iyy="0.01", izz="0.01",
-                      ixy="0", ixz="0", iyz="0")
+        ET.SubElement(
+            inertial,
+            "inertia",
+            ixx="0.01",
+            iyy="0.01",
+            izz="0.01",
+            ixy="0",
+            ixz="0",
+            iyz="0",
+        )
 
         # Add visual
         visual = ET.SubElement(new_link, "visual")
@@ -746,8 +763,14 @@ class ChainManipulationWidget(QWidget):
         ET.SubElement(new_joint, "axis", xyz=f"{axis[0]} {axis[1]} {axis[2]}")
 
         if config["joint_type"] in ["revolute", "prismatic"]:
-            ET.SubElement(new_joint, "limit", lower="-3.14", upper="3.14",
-                          effort="100", velocity="10")
+            ET.SubElement(
+                new_joint,
+                "limit",
+                lower="-3.14",
+                upper="3.14",
+                effort="100",
+                velocity="10",
+            )
 
         root.append(new_joint)
 
@@ -757,9 +780,12 @@ class ChainManipulationWidget(QWidget):
             for joint in root.findall("joint"):
                 parent_elem = joint.find("parent")
                 child_elem = joint.find("child")
-                if (parent_elem is not None and child_elem is not None and
-                    parent_elem.get("link") == parent_link and
-                    child_elem.get("link") == child_name):
+                if (
+                    parent_elem is not None
+                    and child_elem is not None
+                    and parent_elem.get("link") == parent_link
+                    and child_elem.get("link") == child_name
+                ):
                     # Change the parent to the new link
                     parent_elem.set("link", link_name)
                     break
@@ -780,7 +806,7 @@ class ChainManipulationWidget(QWidget):
             self,
             "Remove Segment",
             "Select a segment in the visualizer to remove.\n"
-            "Children will be re-parented to the removed segment's parent."
+            "Children will be re-parented to the removed segment's parent.",
         )
 
     def _on_split_chain(self) -> None:
@@ -789,7 +815,7 @@ class ChainManipulationWidget(QWidget):
             self,
             "Split Chain",
             "Select a link to create a new branch point.\n"
-            "This will duplicate the selected link's children as a new branch."
+            "This will duplicate the selected link's children as a new branch.",
         )
 
     def _on_merge_chains(self) -> None:
@@ -798,7 +824,7 @@ class ChainManipulationWidget(QWidget):
             self,
             "Merge Chains",
             "Select two leaf nodes to merge into a single chain.\n"
-            "This will connect the end of one chain to the start of another."
+            "This will connect the end of one chain to the start of another.",
         )
 
     def get_urdf_content(self) -> str:

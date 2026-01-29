@@ -16,7 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QColor, QIcon
+from PyQt6.QtGui import QColor
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QDialog,
@@ -26,8 +26,6 @@ from PyQt6.QtWidgets import (
     QHeaderView,
     QLabel,
     QLineEdit,
-    QListWidget,
-    QListWidgetItem,
     QMessageBox,
     QPushButton,
     QSplitter,
@@ -91,7 +89,7 @@ class URDFComponent:
         element: ET.Element,
         source_file: Path | None = None,
         is_library: bool = False,
-    ) -> "URDFComponent":
+    ) -> URDFComponent:
         """Create component from XML element."""
         tag_to_type = {
             "link": ComponentType.LINK,
@@ -217,7 +215,9 @@ class ComponentLibrary:
                 self._working_components[component.name] = component
                 components.append(component)
 
-        logger.info(f"Loaded {len(components)} working components from {urdf_path.name}")
+        logger.info(
+            f"Loaded {len(components)} working components from {urdf_path.name}"
+        )
         return components
 
     def copy_to_working(
@@ -253,7 +253,9 @@ class ComponentLibrary:
         # Add to working components
         self._working_components[new_component.name] = new_component
 
-        logger.info(f"Copied library component '{library_key}' as '{new_component.name}'")
+        logger.info(
+            f"Copied library component '{library_key}' as '{new_component.name}'"
+        )
         return new_component
 
     def get_library_components(
@@ -288,7 +290,9 @@ class ComponentLibrary:
             components = [c for c in components if c.component_type == filter_type]
         return components
 
-    def get_component(self, name: str, from_library: bool = False) -> URDFComponent | None:
+    def get_component(
+        self, name: str, from_library: bool = False
+    ) -> URDFComponent | None:
         """Get a component by name.
 
         Args:
@@ -431,7 +435,9 @@ class ComponentLibraryWidget(QWidget):
         # Library tree
         self.library_tree = QTreeWidget()
         self.library_tree.setHeaderLabels(["Component", "Type", "Source"])
-        self.library_tree.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.library_tree.setSelectionMode(
+            QAbstractItemView.SelectionMode.SingleSelection
+        )
         header = self.library_tree.header()
         if header:
             header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
@@ -453,7 +459,9 @@ class ComponentLibraryWidget(QWidget):
         # Working tree
         self.working_tree = QTreeWidget()
         self.working_tree.setHeaderLabels(["Component", "Type", "Status"])
-        self.working_tree.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.working_tree.setSelectionMode(
+            QAbstractItemView.SelectionMode.SingleSelection
+        )
         header = self.working_tree.header()
         if header:
             header.setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
@@ -489,8 +497,12 @@ class ComponentLibraryWidget(QWidget):
         self.edit_btn.clicked.connect(self._on_edit_component)
         self.remove_btn.clicked.connect(self._on_remove_component)
 
-        self.library_tree.itemSelectionChanged.connect(self._on_library_selection_changed)
-        self.working_tree.itemSelectionChanged.connect(self._on_working_selection_changed)
+        self.library_tree.itemSelectionChanged.connect(
+            self._on_library_selection_changed
+        )
+        self.working_tree.itemSelectionChanged.connect(
+            self._on_working_selection_changed
+        )
 
     def _on_load_library(self) -> None:
         """Handle load library button click."""
@@ -568,7 +580,10 @@ class ComponentLibraryWidget(QWidget):
     def _on_library_selection_changed(self) -> None:
         """Handle library tree selection change."""
         current = self.library_tree.currentItem()
-        self.copy_btn.setEnabled(current is not None and current.data(0, Qt.ItemDataRole.UserRole) is not None)
+        self.copy_btn.setEnabled(
+            current is not None
+            and current.data(0, Qt.ItemDataRole.UserRole) is not None
+        )
 
         if current:
             library_key = current.data(0, Qt.ItemDataRole.UserRole)
@@ -613,11 +628,13 @@ class ComponentLibraryWidget(QWidget):
             self.library_tree.addTopLevelItem(source_item)
 
             for key, component in components:
-                item = QTreeWidgetItem([
-                    component.name,
-                    component.component_type.value,
-                    component.get_hash(),
-                ])
+                item = QTreeWidgetItem(
+                    [
+                        component.name,
+                        component.component_type.value,
+                        component.get_hash(),
+                    ]
+                )
                 item.setData(0, Qt.ItemDataRole.UserRole, key)
                 # Visual indication of read-only
                 item.setForeground(0, QColor(100, 100, 100))
@@ -643,11 +660,13 @@ class ComponentLibraryWidget(QWidget):
 
             for component in components:
                 status = "Modified" if not component.source_file else "Copied"
-                item = QTreeWidgetItem([
-                    component.name,
-                    component.component_type.value,
-                    status,
-                ])
+                item = QTreeWidgetItem(
+                    [
+                        component.name,
+                        component.component_type.value,
+                        status,
+                    ]
+                )
                 type_item.addChild(item)
 
             type_item.setExpanded(True)

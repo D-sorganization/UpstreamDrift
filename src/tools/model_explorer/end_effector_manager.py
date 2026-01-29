@@ -321,9 +321,7 @@ class AttachmentPointSelector(QDialog):
         attach_layout.addRow("Attach to link:", self.link_combo)
 
         self.joint_type_combo = QComboBox()
-        self.joint_type_combo.addItems(
-            ["fixed", "revolute", "prismatic", "continuous"]
-        )
+        self.joint_type_combo.addItems(["fixed", "revolute", "prismatic", "continuous"])
         attach_layout.addRow("Joint type:", self.joint_type_combo)
 
         layout.addWidget(attach_group)
@@ -399,7 +397,11 @@ class AttachmentPointSelector(QDialog):
         return {
             "parent_link": self.link_combo.currentText(),
             "joint_type": self.joint_type_combo.currentText(),
-            "offset": (self.offset_x.value(), self.offset_y.value(), self.offset_z.value()),
+            "offset": (
+                self.offset_x.value(),
+                self.offset_y.value(),
+                self.offset_z.value(),
+            ),
             "orientation": (self.roll.value(), self.pitch.value(), self.yaw.value()),
             "name_prefix": self.prefix_edit.text(),
         }
@@ -508,9 +510,15 @@ class EndEffectorManagerWidget(QWidget):
         self.import_from_file_btn.clicked.connect(self._on_import_from_file)
         self.attach_btn.clicked.connect(self._on_attach_end_effector)
 
-        self.current_list.itemSelectionChanged.connect(self._on_current_selection_changed)
-        self.builtin_list.itemSelectionChanged.connect(self._on_library_selection_changed)
-        self.custom_list.itemSelectionChanged.connect(self._on_library_selection_changed)
+        self.current_list.itemSelectionChanged.connect(
+            self._on_current_selection_changed
+        )
+        self.builtin_list.itemSelectionChanged.connect(
+            self._on_library_selection_changed
+        )
+        self.custom_list.itemSelectionChanged.connect(
+            self._on_library_selection_changed
+        )
 
     def _populate_builtin_list(self) -> None:
         """Populate the built-in end effectors list."""
@@ -732,7 +740,9 @@ class EndEffectorManagerWidget(QWidget):
                 item.setData(Qt.ItemDataRole.UserRole, key)
                 self.custom_list.addItem(item)
 
-                self.status_label.setText(f"Imported '{link_name}' from {Path(file_path).name}")
+                self.status_label.setText(
+                    f"Imported '{link_name}' from {Path(file_path).name}"
+                )
 
     def _select_from_list(
         self, title: str, label: str, items: list[str]
@@ -740,9 +750,7 @@ class EndEffectorManagerWidget(QWidget):
         """Show a simple selection dialog."""
         from PyQt6.QtWidgets import QInputDialog
 
-        item, ok = QInputDialog.getItem(
-            self, title, label, items, 0, False
-        )
+        item, ok = QInputDialog.getItem(self, title, label, items, 0, False)
         return item, ok
 
     def _on_attach_end_effector(self) -> None:
@@ -877,7 +885,9 @@ class EndEffectorManagerWidget(QWidget):
         self.urdf_content = new_content
         self._on_identify_end_effectors()
         self.urdf_modified.emit(new_content)
-        self.status_label.setText(f"Attached end effector '{ee.name}' to '{parent_link}'")
+        self.status_label.setText(
+            f"Attached end effector '{ee.name}' to '{parent_link}'"
+        )
 
     def get_urdf_content(self) -> str:
         """Get the current URDF content."""
