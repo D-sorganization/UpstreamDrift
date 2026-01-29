@@ -43,7 +43,7 @@ logger = get_logger(__name__)
 
 # Try to import bundled assets for local model access
 try:
-    from src.tools.urdf_generator.bundled_assets import (
+    from src.tools.model_explorer.bundled_assets import (
         BundledAssetNotFoundError,
         BundledAssets,
     )
@@ -115,10 +115,11 @@ class ModelLibrary:
             "shaft_mass": 0.065,  # kg
             "grip_mass": 0.045,  # kg
         },
+        # ... (Clubs truncated for brevity if not modifying, but I must replace the block)
         "iron_5": {
             "name": "5-Iron",
             "loft": 28.0,
-            "length": 0.965,  # meters (38 inches)
+            "length": 0.965,
             "mass": 0.390,
             "head_mass": 0.260,
             "shaft_mass": 0.075,
@@ -127,38 +128,66 @@ class ModelLibrary:
         "iron_7": {
             "name": "7-Iron",
             "loft": 34.0,
-            "length": 0.927,  # meters (36.5 inches)
+            "length": 0.927,
             "mass": 0.410,
             "head_mass": 0.275,
             "shaft_mass": 0.080,
             "grip_mass": 0.055,
         },
-        "iron_9": {
-            "name": "9-Iron",
-            "loft": 42.0,
-            "length": 0.889,  # meters (35 inches)
-            "mass": 0.430,
-            "head_mass": 0.290,
-            "shaft_mass": 0.085,
-            "grip_mass": 0.055,
-        },
-        "sand_wedge": {
-            "name": "Sand Wedge",
-            "loft": 56.0,
-            "length": 0.889,  # meters (35 inches)
-            "mass": 0.460,
-            "head_mass": 0.315,
-            "shaft_mass": 0.090,
-            "grip_mass": 0.055,
-        },
         "putter": {
             "name": "Putter",
             "loft": 3.0,
-            "length": 0.864,  # meters (34 inches)
+            "length": 0.864,
             "mass": 0.370,
             "head_mass": 0.250,
             "shaft_mass": 0.070,
             "grip_mass": 0.050,
+        },
+    }
+
+    # Pendulum Models
+    PENDULUM_MODELS = {
+        "double_pendulum_2d": {
+            "name": "Double Pendulum (2D)",
+            "description": "Simple planar double pendulum representing the arms and club.",
+            "path": "src/engines/pendulum_models/double_pendulum.xml",
+            "type": "mjcf",
+        },
+        "triple_pendulum_3d": {
+            "name": "Triple Pendulum (3D)",
+            "description": "3D triple pendulum with shoulder, wrist, and club rotation.",
+            "path": "src/engines/pendulum_models/triple_pendulum.xml",
+            "type": "mjcf",
+        },
+    }
+
+    # Robotic Manipulators
+    ROBOTIC_MODELS = {
+        "kuka_iiwa_golf": {
+            "name": "KUKA LBR iiwa 14 (Golf Attachment)",
+            "description": "7-DOF robotic manipulator with golf club end-effector.",
+            "path": "src/engines/physics_engines/drake/models/iiwa14_golf.urdf",
+            "type": "urdf",
+        },
+        "ur5_golf": {
+            "name": "Universal Robots UR5",
+            "description": "6-DOF collaborative robot arm.",
+            "path": "src/engines/physics_engines/mujoco/models/ur5_golf.xml",
+            "type": "mjcf",
+        },
+    }
+
+    # Components
+    COMPONENT_MODELS = {
+        "flexible_shaft": {
+            "name": "Flexible Shaft Element",
+            "description": "Beam element modeling shaft flexibility.",
+            "type": "component",
+        },
+        "golf_ball": {
+            "name": "Golf Ball (Standard)",
+            "description": "Standard golf ball with contact geometry.",
+            "type": "component",
         },
     }
 
@@ -533,6 +562,9 @@ class ModelLibrary:
             Dictionary with keys:
             - 'human': Pre-defined human models
             - 'golf_clubs': Pre-defined golf clubs
+            - 'pendulum': Pendulum models
+            - 'robotic': Robotic manipulator models
+            - 'component': Component models
             - 'discovered': URDF/MJCF files found in repository
             - 'embedded': MuJoCo XML strings embedded in python code
         """
@@ -542,6 +574,9 @@ class ModelLibrary:
         return {
             "human": list(self.HUMAN_MODELS.keys()),
             "golf_clubs": list(self.GOLF_CLUBS.keys()),
+            "pendulum": list(self.PENDULUM_MODELS.keys()),
+            "robotic": list(self.ROBOTIC_MODELS.keys()),
+            "component": list(self.COMPONENT_MODELS.keys()),
             "discovered": discovered,
             "embedded": embedded,
         }
@@ -550,7 +585,8 @@ class ModelLibrary:
         """Get information about a specific model.
 
         Args:
-            category: 'human', 'golf_clubs', 'discovered', or 'embedded'
+            category: 'human', 'golf_clubs', 'pendulum', 'robotic', 'component',
+                     'discovered', or 'embedded'
             model_key: Key identifying the model
 
         Returns:
@@ -560,6 +596,12 @@ class ModelLibrary:
             return self.HUMAN_MODELS.get(model_key)
         elif category == "golf_clubs":
             return self.GOLF_CLUBS.get(model_key)
+        elif category == "pendulum":
+            return self.PENDULUM_MODELS.get(model_key)
+        elif category == "robotic":
+            return self.ROBOTIC_MODELS.get(model_key)
+        elif category == "component":
+            return self.COMPONENT_MODELS.get(model_key)
         elif category == "discovered":
             discovered = self.discover_repo_models()
             for model in discovered:

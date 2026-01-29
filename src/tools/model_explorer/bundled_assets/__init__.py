@@ -7,7 +7,7 @@ Meshes are stored locally to ensure:
 3. Offline functionality
 
 Usage:
-    from tools.urdf_generator.bundled_assets import BundledAssets
+    from tools.model_explorer.bundled_assets import BundledAssets
 
     assets = BundledAssets()
     model_path = assets.get_model_path("human_subject_with_meshes")

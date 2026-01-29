@@ -84,30 +84,59 @@ class ModelLoaderDialog(QDialog):
         # Tabs
         self.tabs = QTabWidget()
 
-        # Tab 1: Bundled Models (Original UI)
-        bundled_tab = QWidget()
-        bundled_layout = QVBoxLayout(bundled_tab)
-
-        # Human Models Section
+        # Tab 1: Biomechanics (Human Models)
+        biomech_tab = QWidget()
+        biomech_layout = QVBoxLayout(biomech_tab)
         human_group = self._create_human_models_group()
-        bundled_layout.addWidget(human_group)
+        biomech_layout.addWidget(human_group)
+        biomech_layout.addStretch()
+        self.tabs.addTab(biomech_tab, "Biomechanics")
 
-        # Golf Clubs Section
+        # Tab 2: Equipment (Clubs & Components)
+        equipment_tab = QWidget()
+        equip_layout = QVBoxLayout(equipment_tab)
         golf_group = self._create_golf_clubs_group()
-        bundled_layout.addWidget(golf_group)
-        bundled_layout.addStretch()
+        equip_layout.addWidget(golf_group)
 
-        self.tabs.addTab(bundled_tab, "Bundled Assets")
+        # Components Group
+        component_group = self._create_components_group()
+        equip_layout.addWidget(component_group)
+        equip_layout.addStretch()
+        self.tabs.addTab(equipment_tab, "Equipment")
 
-        # Tab 2: Repository Models (Discovered)
+        # Tab 3: Robotics (Pendulums & Manipulators)
+        robotics_tab = QWidget()
+        robotics_layout = QVBoxLayout(robotics_tab)
+
+        # Pendulums
+        pendulum_group = self._create_model_group(
+            "Simplified Physics Models",
+            "pendulum",
+            "Simple pendulum models for understanding swing mechanics.",
+            "Load Physics Model",
+        )
+        robotics_layout.addWidget(pendulum_group)
+
+        # Manipulators
+        robot_group = self._create_model_group(
+            "Robotic Manipulators",
+            "robotic",
+            "Industrial robot arms with golf attachments.",
+            "Load Robot Model",
+        )
+        robotics_layout.addWidget(robot_group)
+        robotics_layout.addStretch()
+        self.tabs.addTab(robotics_tab, "Robotics")
+
+        # Tab 4: Repository Models (Discovered)
         repo_tab = QWidget()
         self._setup_repo_tab(repo_tab)
-        self.tabs.addTab(repo_tab, "Repository Models")
+        self.tabs.addTab(repo_tab, "Repository")
 
-        # Tab 3: Embedded Models (Python defined)
+        # Tab 5: Embedded Models (Python defined)
         embedded_tab = QWidget()
         self._setup_embedded_tab(embedded_tab)
-        self.tabs.addTab(embedded_tab, "Embedded Models")
+        self.tabs.addTab(embedded_tab, "Embedded")
 
         layout.addWidget(self.tabs)
 
@@ -340,11 +369,69 @@ class ModelLoaderDialog(QDialog):
 
         return group
 
+    def _create_components_group(self) -> QGroupBox:
+        """Create the components selection group."""
+        return self._create_model_group(
+            "Components",
+            "component",
+            "Individual simulation elements like balls and flexible shafts.",
+            "Load Component",
+        )
+
+    def _create_model_group(
+        self, title: str, category: str, description: str, btn_text: str
+    ) -> QGroupBox:
+        """Generic helper to create a model selection group.
+
+        Args:
+            title: Group box title
+            category: Model category key in library
+            description: Description text
+            btn_text: Button text
+
+        Returns:
+            Configured QGroupBox
+        """
+        group = QGroupBox(title)
+        layout = QVBoxLayout(group)
+
+        # Description
+        desc = QLabel(description)
+        desc.setWordWrap(True)
+        desc.setStyleSheet("color: #666; font-size: 9pt; margin: 5px;")
+        layout.addWidget(desc)
+
+        # Selector
+        selector_layout = QHBoxLayout()
+        selector_layout.addWidget(QLabel("Model:"))
+
+        combo = QComboBox()
+        available_models = self.library.list_available_models()
+
+        # Store reference to combo for this category
+        setattr(self, f"{category}_combo", combo)
+
+        for key in available_models.get(category, []):
+            info = self.library.get_model_info(category, key)
+            if info:
+                combo.addItem(info["name"], key)
+
+        combo.currentIndexChanged.connect(lambda: self._on_model_selected(category))
+        selector_layout.addWidget(combo)
+
+        load_btn = QPushButton(btn_text)
+        load_btn.clicked.connect(lambda: self._load_selected_model(category))
+        selector_layout.addWidget(load_btn)
+
+        layout.addLayout(selector_layout)
+        return group
+
     def _on_model_selected(self, category: str) -> None:
         """Handle model selection change.
 
         Args:
-            category: 'human', 'golf_clubs', 'discovered', or 'embedded'
+            category: 'human', 'golf_clubs', 'pendulum', 'robotic', 'component',
+                     'discovered', or 'embedded'
         """
         model_key = None
 
@@ -352,6 +439,10 @@ class ModelLoaderDialog(QDialog):
             model_key = self.human_combo.currentData()
         elif category == "golf_clubs":
             model_key = self.club_combo.currentData()
+        elif hasattr(self, f"{category}_combo"):
+            # Generic handling for pendulum, robotic, component
+            combo = getattr(self, f"{category}_combo")
+            model_key = combo.currentData()
         elif category == "discovered":
             item = self.repo_tree.currentItem()
             if item:
@@ -366,7 +457,7 @@ class ModelLoaderDialog(QDialog):
             if model_info:
                 self._display_model_info(category, model_key, model_info)
             self.selected_category = category
-            self.selected_model = model_key  # Track selection lightly for tab changes
+            self.selected_model = model_key
 
     def _display_model_info(
         self, category: str, model_key: str, model_info: dict[str, Any]
@@ -395,6 +486,14 @@ Total Mass: {model_info["mass"] * 1000:.1f} g
   - Grip: {model_info["grip_mass"] * 1000:.1f} g
 
 The URDF will be automatically generated with realistic geometry and inertial properties.
+"""
+        elif category in ["pendulum", "robotic", "component"]:
+            info_text = f"""Name: {model_info["name"]}
+Type: {model_info.get("type", "Unknown").upper()}
+Description: {model_info["description"]}
+Path: {model_info.get("path", "N/A")}
+
+Click 'Load' to view this model.
 """
         elif category == "discovered":
             info_text = f"""Name: {model_info["name"]}
@@ -459,12 +558,18 @@ Content Preview:
         """Load the selected model.
 
         Args:
-            category: 'human' or 'golf_clubs'
+            category: Model category key
         """
         if category == "human":
             model_key = self.human_combo.currentData()
-        else:
+        elif category == "golf_clubs":
             model_key = self.club_combo.currentData()
+        elif hasattr(self, f"{category}_combo"):
+            combo = getattr(self, f"{category}_combo")
+            model_key = combo.currentData()
+        else:
+            # Fallback for manual calls, though generic way is better
+            return
 
         if model_key:
             self.selected_category = category

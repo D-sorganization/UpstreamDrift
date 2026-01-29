@@ -9,10 +9,8 @@ from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (
     QApplication,
     QDockWidget,
-    QHBoxLayout,
     QMainWindow,
     QMessageBox,
-    QSplitter,
     QStatusBar,
     QWidget,
 )
@@ -86,43 +84,68 @@ class URDFGeneratorWindow(QMainWindow):
 
     def _setup_ui(self) -> None:
         """Set up the user interface."""
-        self.setWindowTitle("Interactive URDF Generator - Golf Modeling Suite")
+        self.setWindowTitle("Model Explorer - Golf Modeling Suite")
         self.setMinimumSize(1200, 800)
 
-        # Central widget with splitter
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
+        # Enable advanced docking features
+        self.setDockOptions(
+            QMainWindow.DockOption.AnimatedDocks
+            | QMainWindow.DockOption.AllowNestedDocks
+            | QMainWindow.DockOption.AllowTabbedDocks
+            | QMainWindow.DockOption.GroupedDragging
+        )
 
-        layout = QHBoxLayout(central_widget)
-        splitter = QSplitter(Qt.Orientation.Horizontal)
-        layout.addWidget(splitter)
+        # Remove central widget (we will use docks for everything)
+        # Note: We need a dummy central widget to prevent weird layout issues on some platforms
+        self.setCentralWidget(None)
 
-        # Left panel for segment management
+        # 1. Segments Panel (Dock)
         self.segment_panel = SegmentPanel()
-        splitter.addWidget(self.segment_panel)
+        self.segment_dock = QDockWidget("Model Segments", self)
+        self.segment_dock.setWidget(self.segment_panel)
+        self.segment_dock.setObjectName("SegmentDock")
+        self.segment_dock.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.segment_dock)
 
-        # Right panel for 3D visualization
+        # 2. Visualization (Dock)
         self.visualization_widget = VisualizationWidget()
-        splitter.addWidget(self.visualization_widget)
+        self.visualization_dock = QDockWidget("3D Viewport", self)
+        self.visualization_dock.setWidget(self.visualization_widget)
+        self.visualization_dock.setObjectName("ViewportDock")
+        self.visualization_dock.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
 
-        # Set splitter proportions (30% left, 70% right)
-        splitter.setSizes([360, 840])
+        # Make the viewport expanded by default
+        self.addDockWidget(
+            Qt.DockWidgetArea.RightDockWidgetArea, self.visualization_dock
+        )
 
-        # Properties dock widget
+        # 3. Properties (Dock)
         self._setup_properties_dock()
+
+        # Adjust initial sizes (give Viewport more space)
+        # We can't easily set exact pixel sizes for docks, but we can set splitters if shared
+        # This is handled by Qt's internal layout engine
 
     def _setup_properties_dock(self) -> None:
         """Set up the properties dock widget."""
-        dock = QDockWidget("Properties", self)
-        dock.setAllowedAreas(
-            Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea
-        )
+        self.properties_dock = QDockWidget("Properties", self)
+        self.properties_dock.setObjectName("PropertiesDock")
+        self.properties_dock.setAllowedAreas(Qt.DockWidgetArea.AllDockWidgetAreas)
 
         # Properties widget will be implemented later
         properties_widget = QWidget()
-        dock.setWidget(properties_widget)
+        self.properties_dock.setWidget(properties_widget)
 
-        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, dock)
+        self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.properties_dock)
+
+        # Tabify properties with segments or place below?
+        # Let's place it below Segments initially or tabbed with it
+        self.splitDockWidget(
+            self.segment_dock, self.properties_dock, Qt.Orientation.Vertical
+        )
+
+        # Ensure Viewport takes most space
+        # We can simulate this by resizing docks after show(), but for now let default handle it
 
     def _setup_menu_bar(self) -> None:
         """Set up the menu bar."""
@@ -365,19 +388,39 @@ class URDFGeneratorWindow(QMainWindow):
                                 "This model is not bundled or downloaded.\n"
                                 "Check bundled_assets/ for available models.",
                             )
-                    elif category == "discovered":
+                    elif category in ["pendulum", "robotic", "component", "discovered"]:
+                        # Generic handler for path-based models
                         model_info = library.get_model_info(category, model_key)
-                        if model_info:
-                            path = Path(model_info["path"])
+                        if model_info and "path" in model_info:
+                            # Resolve path relative to project root if needed
+                            # ModelLibrary paths are relative to repo root in definitions usually
+                            # but let's check if it exists absolute or relative
+                            raw_path = model_info["path"]
+                            path = Path(raw_path)
+
+                            # If not absolute, assume relative to project root
+                            if not path.is_absolute():
+                                from src.tools.model_explorer.model_library import (
+                                    _project_root,
+                                )
+
+                                path = _project_root / raw_path
+
                             if path.exists():
                                 self._load_urdf_file(path)
                                 self.status_bar.showMessage(
-                                    f"Loaded repository model: {model_info['name']}"
+                                    f"Loaded {category} model: {model_info['name']}"
                                 )
                             else:
                                 QMessageBox.warning(
                                     self, "Error", f"File not found: {path}"
                                 )
+                        else:
+                            QMessageBox.warning(
+                                self,
+                                "Error",
+                                f"Invalid model configuration for {category}",
+                            )
 
                     elif category == "embedded":
                         model_info = library.get_model_info(category, model_key)

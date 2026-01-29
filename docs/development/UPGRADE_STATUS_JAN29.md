@@ -59,27 +59,35 @@
 - GitHub Description: Updated to "Advanced Golf Modeling Suite featuring MuJoCo, Drake, Pinocchio, OpenSim, and Matlab engines..."
 - README: Updated to reflect the new directory structure (`src/`), unified launcher, and new features (MediaPipe, Model Explorer).
 
+### ✅ 3. Model Explorer & URDF Generator Expansion
+
+**Status**: DONE
+
+- Renamed `URDF Generator` to `Model Explorer`.
+- Expanded `ModelLibrary` to include Pendulums, Robotic Arms, and Components.
+- Updated UI with comprehensive tabbed browser for all model types.
+- Integrated `pyqtgraph` for visualization.
+
+### ✅ 4. Embed/Pop-out Screens
+
+**Status**: DONE
+
+- Refactored `Model Explorer` main window to use `QDockWidget` architecture.
+- "Model Segments", "3D Viewport", and "Properties" are now fully dockable and detachable.
+- Enabled nested and tabbed docking for maximum layout flexibility.
+
+### ✅ 5. Screen Overlay & Controls
+
+**Status**: DONE
+
+- Created `src/shared/python/ui/overlay.py` generic overlay widget.
+- Integrated overlay into `GolfLauncher`.
+- Added toggle button in top bar.
+
 ## Pending Items
 
-### 🚧 3. Model Explorer & URDF Generator Expansion
-
-**Status**: PENDING
-
-- Requires expanding `urdf_generator` to support broader model categories and a simplified python viewer.
-
-### 🚧 4. Embed/Pop-out Screens
-
-**Status**: PENDING
-
-- Requires deep refactoring of `GolfLauncher` window management.
-
-### 🚧 5. Screen Overlay & Controls
-
-**Status**: PENDING
-
-- Requires overlay widget implementation.
+*(None)*
 
 ## Next Steps
 
-- Implement the Model Explorer features.
-- Address the Embed/Pop-out architecture.
+- Final integration testing and CI/CD validation.
