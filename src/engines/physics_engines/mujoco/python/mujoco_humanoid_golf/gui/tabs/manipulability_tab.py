@@ -13,7 +13,7 @@ from PyQt6 import QtCore, QtWidgets
 
 from src.shared.python.logging_config import get_logger
 
-from ..manipulability import ManipulabilityAnalyzer
+from ...manipulability import ManipulabilityAnalyzer
 
 logger = get_logger(__name__)
 
