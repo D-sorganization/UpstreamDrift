@@ -429,6 +429,7 @@ class AISettingsDialog(QDialog):
     """Settings dialog for AI Assistant configuration."""
 
     settings_changed = pyqtSignal(AISettings)
+    rebuild_index_requested = pyqtSignal()
 
     def __init__(self, parent: QWidget | None = None) -> None:
         """Initialize settings dialog.
