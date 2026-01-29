@@ -5,6 +5,7 @@ import os
 CRITICAL_ITEMS_PATH = ".jules/completist_data/critical_items.json"
 ISSUES_DIR = "docs/assessments/issues"
 
+
 def main():
     if not os.path.exists(CRITICAL_ITEMS_PATH):
         print(f"No critical items file found at {CRITICAL_ITEMS_PATH}")
@@ -20,7 +21,7 @@ def main():
     # Group by file
     grouped = {}
     for item in items:
-        filepath = item['file']
+        filepath = item["file"]
         if filepath not in grouped:
             grouped[filepath] = []
         grouped[filepath].append(item)
@@ -30,7 +31,7 @@ def main():
     count = 0
     for filepath, file_items in grouped.items():
         filename = os.path.basename(filepath)
-        safe_filename = filename.replace('.', '_')
+        safe_filename = filename.replace(".", "_")
         issue_filename = f"ISSUE_COMPLETIST_Critical_{safe_filename}.md"
         issue_path = os.path.join(ISSUES_DIR, issue_filename)
 
@@ -64,8 +65,8 @@ The following critical incomplete implementations (stubs, placeholders, or NotIm
 |------|------------------|------------|
 """
         for item in file_items:
-            ctx = item.get('function', item.get('content', 'Unknown'))
-            source = item.get('source', 'Unknown')
+            ctx = item.get("function", item.get("content", "Unknown"))
+            source = item.get("source", "Unknown")
             content += f"| {item['line']} | `{ctx}` | {source} |\n"
 
         content += """
@@ -82,13 +83,14 @@ The following critical incomplete implementations (stubs, placeholders, or NotIm
 - Completist Audit Report ({today})
 """
 
-        with open(issue_path, 'w') as f:
+        with open(issue_path, "w") as f:
             f.write(content)
 
         print(f"Created issue: {issue_path}")
         count += 1
 
     print(f"Total issues created: {count}")
+
 
 if __name__ == "__main__":
     main()
