@@ -15,10 +15,10 @@
     "simscape_2d",
     "simscape_3d"
   ],
-  "selected_model": "matlab_dataset_gui",
+  "selected_model": "mujoco_dashboard",
   "window_geometry": {
     "x": 0,
-    "y": -8,
+    "y": 19,
     "width": 1920,
     "height": 1009
   },

@@ -65,6 +65,10 @@ class URDFGeneratorWindow(QMainWindow):
             settings = QSettings("GolfModelingSuite", "URDFGenerator")
             default_model = settings.value("default_human_model")
 
+            if not default_model:
+                # Fallback to MuJoCo Humanoid if no preference set
+                default_model = "mujoco_humanoid"
+
             if default_model:
                 logger.info(f"Loading default model: {default_model}")
                 library = ModelLibrary()

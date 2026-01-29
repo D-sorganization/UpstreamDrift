@@ -71,7 +71,16 @@ class ModelLibrary:
     )
 
     # Available human models
+    # Available human models
     HUMAN_MODELS = {
+        "mujoco_humanoid": {
+            "name": "MuJoCo Humanoid (Default)",
+            "description": "Full Body Golf Swing Model (Embedded)",
+            "type": "embedded",
+            "embedded_key": "full_body_golf_swing",
+            "license": "Internal",
+            "urdf_url": "",  # Not downloadable
+        },
         "human_with_meshes": {
             "name": "Human Subject with Meshes",
             "description": "Full human body model with detailed STL meshes",
@@ -178,6 +187,10 @@ class ModelLibrary:
         Returns:
             Path to the URDF file, or None if not available
         """
+        # Handle embedded MuJoCo Humanoid special case
+        if model_key == "mujoco_humanoid":
+            return self._get_cached_embedded_model("full_body_golf_swing")
+
         # First, try bundled assets (preferred)
         if BundledAssets is not None:
             try:
@@ -210,6 +223,40 @@ class ModelLibrary:
         )
         return None
 
+    def _get_cached_embedded_model(self, embedded_key: str) -> Path | None:
+        """Extract an embedded model and cache it to a file.
+
+        Args:
+            embedded_key: Key in get_embedded_mujoco_models()
+
+        Returns:
+            Path to the cached XML file
+        """
+        embedded = self.get_embedded_mujoco_models()
+        if embedded_key not in embedded:
+            logger.error(f"Embedded model key not found: {embedded_key}")
+            return None
+
+        content = embedded[embedded_key]["content"]
+
+        # Determine cache path
+        # Use a stable directory for this model
+        cache_dir = self.human_models_path / "mujoco_humanoid"
+        cache_dir.mkdir(parents=True, exist_ok=True)
+
+        # Save as XML
+        file_path = cache_dir / "model.xml"
+
+        # Write content if it changed or doesn't exist
+        # For simplicity, always write (it's fast)
+        try:
+            file_path.write_text(content, encoding="utf-8")
+            logger.info(f"Cached embedded model to: {file_path}")
+            return file_path
+        except Exception as e:
+            logger.error(f"Failed to cache embedded model: {e}")
+            return None
+
     def download_human_model(self, model_key: str, force: bool = False) -> Path | None:
         """Download a human URDF model and its meshes.
 
@@ -227,6 +274,11 @@ class ModelLibrary:
         if model_key not in self.HUMAN_MODELS:
             logger.error(f"Unknown human model: {model_key}")
             return None
+
+        # Skip download for embedded models (they are local)
+        if self.HUMAN_MODELS[model_key].get("type") == "embedded":
+            logger.info(f"Model {model_key} is embedded, skipping download.")
+            return self.get_human_model(model_key)
 
         # Warn about downloading
         logger.warning(
