@@ -66,7 +66,7 @@ def test_visualization_widget_reset_view(qtbot):
     if widget.use_mujoco:
         widget.use_mujoco = False
         widget._setup_ui()  # Re-setup
-    
+
     qtbot.addWidget(widget)
 
     # Modify camera state via the GL widget
