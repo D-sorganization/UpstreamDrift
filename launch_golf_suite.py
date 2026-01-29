@@ -16,7 +16,7 @@ import os
 import sys
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("golf_launcher")
 
 
@@ -73,17 +73,19 @@ Examples:
     elif args.classic:
         # Classic PyQt6 launcher
         try:
-             # Try new location first
-             from src.launchers.golf_launcher import main as classic_main
-             classic_main()
+            # Try new location first
+            from src.launchers.golf_launcher import main as classic_main
+
+            classic_main()
         except ImportError:
-             logger.error("Could not load classic launcher. Check installation.")
-             sys.exit(1)
+            logger.error("Could not load classic launcher. Check installation.")
+            sys.exit(1)
     elif args.api_only:
         # API server only
         os.environ["GOLF_NO_BROWSER"] = "true"
         os.environ["GOLF_PORT"] = str(args.port)
         from src.api.local_server import main as api_main
+
         api_main()
     else:
         # Default: Web UI (recommended)
@@ -91,6 +93,7 @@ Examples:
         if args.no_browser:
             os.environ["GOLF_NO_BROWSER"] = "true"
         from src.api.local_server import main as server_main
+
         server_main()
 
 
@@ -108,7 +111,7 @@ def launch_engine_directly(engine: str):
 
     try:
         module = importlib.import_module(engine_launchers[engine])
-        if hasattr(module, 'main'):
+        if hasattr(module, "main"):
             module.main()
         else:
             logger.error("Module %s has no main() function.", engine_launchers[engine])

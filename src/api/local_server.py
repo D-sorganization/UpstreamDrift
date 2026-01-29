@@ -6,7 +6,6 @@ This is the default mode - free, offline, no accounts needed.
 """
 
 import os
-import sys
 from pathlib import Path
 
 # Ensure we're running in local mode
@@ -18,10 +17,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from src.api.routes import engines, simulation, analysis, export, simulation_ws
+from src.api.routes import analysis, engines, export, simulation, simulation_ws
+
 # Note: EngineManager and Services will need to be properly imported from shared logic
 # Assuming these exist based on the plan, or we bridge them to existing managers
 from src.shared.python.engine_manager import EngineManager
+
 # We might need to wrap these or use existing services if they don't match exactly
 # For now we'll stub the missing ones or assume they'll be refactored
 
@@ -41,9 +42,9 @@ def create_local_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[
-            "http://localhost:3000",      # Vite dev server
-            "http://localhost:5173",      # Vite default
-            "http://localhost:8080",      # Production UI
+            "http://localhost:3000",  # Vite dev server
+            "http://localhost:5173",  # Vite default
+            "http://localhost:8080",  # Production UI
             "http://127.0.0.1:3000",
             "http://127.0.0.1:5173",
             "http://127.0.0.1:8080",
@@ -56,7 +57,7 @@ def create_local_app() -> FastAPI:
     # Initialize services (lazy loading)
     # Using the existing EngineManager we saw in src.shared.python
     engine_manager = EngineManager()
-    
+
     # Store in app state for dependency injection
     app.state.engine_manager = engine_manager
     # app.state.simulation_service = simulation_service # TODO: Implement service wrapper
@@ -66,7 +67,9 @@ def create_local_app() -> FastAPI:
     # Note: We need to ensure these routers are compatible with the new structure
     app.include_router(engines.router, prefix="/api/engines", tags=["Engines"])
     app.include_router(simulation.router, prefix="/api/simulation", tags=["Simulation"])
-    app.include_router(simulation_ws.router, tags=["Simulation"])  # WebSocket routes don't usually use prefix/tags the same way, but good for docs
+    app.include_router(
+        simulation_ws.router, tags=["Simulation"]
+    )  # WebSocket routes don't usually use prefix/tags the same way, but good for docs
     app.include_router(analysis.router, prefix="/api/analysis", tags=["Analysis"])
     app.include_router(export.router, prefix="/api/export", tags=["Export"])
 
@@ -77,7 +80,9 @@ def create_local_app() -> FastAPI:
             "status": "healthy",
             "mode": "local",
             "auth_required": False,
-            "engines": [e.value for e in engine_manager.get_available_engines()], # Adapted to existing method
+            "engines": [
+                e.value for e in engine_manager.get_available_engines()
+            ],  # Adapted to existing method
         }
 
     # Serve static UI files in production

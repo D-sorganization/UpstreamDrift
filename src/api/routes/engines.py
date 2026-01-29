@@ -68,10 +68,10 @@ async def load_engine(
         # Access protected method via public interface if possible, or refactor Manager later.
         # For now, we assume _load_engine is what we have access to or we use load_engine if public.
         # Checking previous file usage: it used _load_engine.
-        if hasattr(engine_manager, 'load_engine'):
-             engine_manager.load_engine(engine_enum)
+        if hasattr(engine_manager, "load_engine"):
+            engine_manager.load_engine(engine_enum)
         else:
-             engine_manager._load_engine(engine_enum)
+            engine_manager._load_engine(engine_enum)
 
         engine = engine_manager.get_active_physics_engine()
         if not engine:
@@ -80,19 +80,19 @@ async def load_engine(
             )
 
         if model_path:
-             validated_path = validate_model_path(model_path)
-             if hasattr(engine, 'load_from_path'):
+            validated_path = validate_model_path(model_path)
+            if hasattr(engine, "load_from_path"):
                 engine.load_from_path(validated_path)
 
         state = None
-        if hasattr(engine, 'get_state'):
+        if hasattr(engine, "get_state"):
             state = engine.get_state()
 
         return {
             "status": "loaded",
             "engine": engine_type,
             "model": model_path,
-            "state": state
+            "state": state,
         }
 
     except ValueError as exc:
@@ -114,11 +114,13 @@ async def unload_engine(
     """Unload a physics engine to free resources."""
     try:
         # Assuming unload_engine exists or we implement a wrapper
-        if hasattr(engine_manager, 'unload_engine'):
+        if hasattr(engine_manager, "unload_engine"):
             engine_manager.unload_engine(EngineType(engine_type.upper()))
         else:
             # Fallback if specific unload isn't implemented logic
             pass
         return {"status": "unloaded", "engine": engine_type}
     except ValueError as exc:
-         raise HTTPException(status_code=400, detail=f"Invalid engine type: {engine_type}") from exc
+        raise HTTPException(
+            status_code=400, detail=f"Invalid engine type: {engine_type}"
+        ) from exc

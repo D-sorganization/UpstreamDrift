@@ -7,8 +7,8 @@ discontinuities in control applications.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from enum import Enum
-from typing import Callable
 
 import numpy as np
 
@@ -355,9 +355,6 @@ def apply_hysteresis(
 
     if smooth:
         # Apply smoothing to the transitions
-        from src.shared.python.signal_toolkit.filters import (
-            create_moving_average_filter,
-        )
 
         kernel_size = max(3, int(smoothness))
         if kernel_size % 2 == 0:

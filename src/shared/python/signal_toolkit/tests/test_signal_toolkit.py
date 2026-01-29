@@ -18,51 +18,47 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from src.shared.python.signal_toolkit.core import Signal, SignalGenerator
-from src.shared.python.signal_toolkit.fitting import (
-    FunctionFitter,
-    LinearFitter,
-    PolynomialFitter,
-    SinusoidFitter,
-    ExponentialFitter,
-    CustomFunctionFitter,
-)
-from src.shared.python.signal_toolkit.limits import (
-    SaturationMode,
-    apply_saturation,
-    apply_rate_limiter,
-    apply_deadband,
-    apply_hysteresis,
-)
 from src.shared.python.signal_toolkit.calculus import (
+    DifferentiationMethod,
     Differentiator,
     Integrator,
     compute_derivative,
     compute_integral,
     compute_tangent_line,
-    DifferentiationMethod,
 )
-from src.shared.python.signal_toolkit.noise import (
-    NoiseGenerator,
-    NoiseType,
-    add_noise_to_signal,
-    DisturbanceSimulator,
-)
+from src.shared.python.signal_toolkit.core import Signal, SignalGenerator
 from src.shared.python.signal_toolkit.filters import (
     FilterDesigner,
     FilterType,
     apply_filter,
+    apply_median_filter,
     apply_moving_average,
     apply_savgol,
-    apply_median_filter,
+)
+from src.shared.python.signal_toolkit.fitting import (
+    ExponentialFitter,
+    FunctionFitter,
+    LinearFitter,
+    PolynomialFitter,
+    SinusoidFitter,
 )
 from src.shared.python.signal_toolkit.io import (
-    SignalImporter,
     SignalExporter,
-    import_from_csv,
-    export_to_csv,
+    SignalImporter,
 )
-
+from src.shared.python.signal_toolkit.limits import (
+    SaturationMode,
+    apply_deadband,
+    apply_hysteresis,
+    apply_rate_limiter,
+    apply_saturation,
+)
+from src.shared.python.signal_toolkit.noise import (
+    DisturbanceSimulator,
+    NoiseGenerator,
+    NoiseType,
+    add_noise_to_signal,
+)
 
 # =============================================================================
 # Core Signal Tests
@@ -193,7 +189,9 @@ class TestSignalGenerator:
         """Test step generation."""
         t = np.linspace(0, 10, 100)
 
-        signal = SignalGenerator.step(t, step_time=5.0, step_value=2.0, initial_value=0.0)
+        signal = SignalGenerator.step(
+            t, step_time=5.0, step_value=2.0, initial_value=0.0
+        )
 
         # Before step
         assert signal.values[0] == 0.0
@@ -311,7 +309,9 @@ class TestLimits:
         values = np.linspace(-2, 2, 100)
 
         signal = Signal(t, values)
-        saturated = apply_saturation(signal, lower=-1.0, upper=1.0, mode=SaturationMode.HARD)
+        saturated = apply_saturation(
+            signal, lower=-1.0, upper=1.0, mode=SaturationMode.HARD
+        )
 
         assert max(saturated.values) <= 1.0
         assert min(saturated.values) >= -1.0
@@ -322,7 +322,9 @@ class TestLimits:
         values = np.linspace(-5, 5, 100)
 
         signal = Signal(t, values)
-        saturated = apply_saturation(signal, lower=-1.0, upper=1.0, mode=SaturationMode.TANH)
+        saturated = apply_saturation(
+            signal, lower=-1.0, upper=1.0, mode=SaturationMode.TANH
+        )
 
         # Tanh smoothly approaches limits
         assert max(saturated.values) <= 1.0
@@ -525,7 +527,9 @@ class TestFilters:
 
         signal = Signal(t, values)
 
-        spec = FilterDesigner.butterworth(FilterType.LOWPASS, cutoff=5.0, fs=fs, order=4)
+        spec = FilterDesigner.butterworth(
+            FilterType.LOWPASS, cutoff=5.0, fs=fs, order=4
+        )
         filtered = apply_filter(signal, spec)
 
         # High frequency should be attenuated
@@ -540,7 +544,9 @@ class TestFilters:
 
         signal = Signal(t, values)
 
-        spec = FilterDesigner.butterworth(FilterType.HIGHPASS, cutoff=10.0, fs=fs, order=4)
+        spec = FilterDesigner.butterworth(
+            FilterType.HIGHPASS, cutoff=10.0, fs=fs, order=4
+        )
         filtered = apply_filter(signal, spec)
 
         # DC should be removed
@@ -551,7 +557,11 @@ class TestFilters:
         t = np.linspace(0, 10, 2000)
         fs = 200.0
         # Components at 5Hz, 15Hz, and 30Hz
-        values = np.sin(2 * np.pi * 5 * t) + np.sin(2 * np.pi * 15 * t) + np.sin(2 * np.pi * 30 * t)
+        values = (
+            np.sin(2 * np.pi * 5 * t)
+            + np.sin(2 * np.pi * 15 * t)
+            + np.sin(2 * np.pi * 30 * t)
+        )
 
         signal = Signal(t, values)
 
@@ -667,7 +677,9 @@ class TestIO:
             SignalExporter.to_npz(original, path)
 
             # Import
-            imported = SignalImporter.from_npz(path, time_key="time", value_key="npz_test")
+            imported = SignalImporter.from_npz(
+                path, time_key="time", value_key="npz_test"
+            )
 
             # Compare
             assert np.allclose(original.time, imported.time)
@@ -721,9 +733,7 @@ class TestIntegration:
         t = np.linspace(0, 10, 500)
 
         # Generate
-        signal = SignalGenerator.sinusoid(
-            t, amplitude=2.0, frequency=1.0, offset=0.5
-        )
+        signal = SignalGenerator.sinusoid(t, amplitude=2.0, frequency=1.0, offset=0.5)
 
         # Add noise
         noisy = add_noise_to_signal(signal, NoiseType.WHITE, snr_db=30, seed=42)
@@ -747,7 +757,9 @@ class TestIntegration:
         signal = SignalGenerator.sinusoid(t, amplitude=5.0, frequency=2.0)
 
         # Apply saturation
-        saturated = apply_saturation(signal, lower=-3.0, upper=3.0, mode=SaturationMode.TANH)
+        saturated = apply_saturation(
+            signal, lower=-3.0, upper=3.0, mode=SaturationMode.TANH
+        )
 
         # Add noise
         noisy = add_noise_to_signal(saturated, NoiseType.WHITE, snr_db=20)
