@@ -137,10 +137,12 @@ class MotionTrainingPipeline:
         self.ik_result = self._solve_ik()
         print(f"      Convergence rate: {self.ik_result.convergence_rate * 100:.1f}%")
         print(
-            f"      Mean left hand error: {np.mean(self.ik_result.left_hand_errors) * 1000:.2f} mm"
+            f"      Mean left hand error: "
+            f"{np.mean(self.ik_result.left_hand_errors) * 1000:.2f} mm"
         )
         print(
-            f"      Mean right hand error: {np.mean(self.ik_result.right_hand_errors) * 1000:.2f} mm"
+            f"      Mean right hand error: "
+            f"{np.mean(self.ik_result.right_hand_errors) * 1000:.2f} mm"
         )
 
         # Step 4: Save/visualize results

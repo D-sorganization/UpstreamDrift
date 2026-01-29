@@ -510,18 +510,16 @@ except Exception as e:
     def _initialize_model_order(self) -> None:
         """Set a sensible default grid ordering."""
 
-        default_ids: list[str] = []
-        if self.registry:
-            default_ids.extend([m.id for m in self.registry.get_all_models()[:10]])
-
-        default_ids.extend(
-            [
-                "urdf_generator",
-                "c3d_viewer",
-                "matlab_dataset_gui",
-                "matlab_golf_gui",
-            ]
-        )
+        default_ids = [
+            "mujoco_unified",
+            "drake_golf",
+            "pinocchio_golf",
+            "opensim_golf",
+            "myosim_suite",
+            "matlab_unified",
+            "motion_capture",
+            "model_explorer",
+        ]
 
         self.model_order = [
             model_id for model_id in default_ids if model_id in self.available_models
@@ -797,6 +795,21 @@ except Exception as e:
 
         super().closeEvent(event)
 
+    def _init_overlay(self) -> None:
+        """Initialize the screen overlay."""
+        try:
+            from src.shared.python.ui.overlay import OverlayWidget
+
+            self.overlay = OverlayWidget(self)
+            self.overlay.hide()
+        except ImportError:
+            logger.warning("OverlayWidget could not be imported.")
+
+    def _toggle_overlay(self) -> None:
+        """Toggle the screen overlay."""
+        if hasattr(self, "overlay"):
+            self.overlay.toggle()
+
     def init_ui(self) -> None:
         """Initialize the user interface."""
         # Main Widget
@@ -823,6 +836,9 @@ except Exception as e:
         # Keyboard shortcuts
         self._setup_search_shortcuts()
 
+        # Initialize Overlay
+        self._init_overlay()
+
     def _setup_top_bar(self) -> QHBoxLayout:
         """Set up the top tool bar."""
         top_bar = QHBoxLayout()
@@ -832,7 +848,7 @@ except Exception as e:
         self.lbl_status.setStyleSheet("color: #aaaaaa; font-weight: bold;")
         top_bar.addWidget(self.lbl_status)
 
-        # Configuration options - moved here for visibility
+        # Configuration options
         self.chk_live = QCheckBox("Live Viz")
         self.chk_live.setChecked(True)
         self.chk_live.setToolTip("Enable real-time 3D visualization during simulation")
@@ -840,6 +856,27 @@ except Exception as e:
 
         self.chk_gpu = QCheckBox("GPU")
         self.chk_gpu.setChecked(False)
+        top_bar.addWidget(
+            self.chk_gpu
+        )  # Assuming this existed or I just re-add it from my read
+
+        # Overlay Toggle
+        overlay_btn = QPushButton("Overlay")
+        overlay_btn.setCheckable(True)
+        overlay_btn.clicked.connect(self._toggle_overlay)
+        overlay_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #444; color: white; border: none;
+                padding: 5px 10px; border-radius: 4px;
+            }
+            QPushButton:checked {
+                background-color: #007ACC;
+            }
+            QPushButton:hover { background-color: #555; }
+        """)
+        top_bar.addWidget(overlay_btn)
+
+        return top_bar
         self.chk_gpu.setToolTip(
             "Use GPU for physics computation (requires supported hardware)"
         )

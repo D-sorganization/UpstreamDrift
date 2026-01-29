@@ -3,7 +3,7 @@ from typing import Any
 
 import pytest
 
-from src.tools.urdf_generator.urdf_builder import URDFBuilder
+from src.tools.model_explorer.urdf_builder import URDFBuilder
 
 
 class TestURDFBuilder:

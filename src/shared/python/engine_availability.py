@@ -194,8 +194,8 @@ QT_AVAILABLE: bool = PYQT6_AVAILABLE or PYQT5_AVAILABLE or PYSIDE6_AVAILABLE
 # Check MuJoCo
 # On Windows with Python 3.13+, mujoco has DLL loading issues that cause crashes
 # We skip the import entirely in this case to prevent access violations
-import os as _os
-import sys as _sys
+import os as _os  # noqa: E402
+import sys as _sys  # noqa: E402
 
 _skip_mujoco = (
     _sys.platform == "win32"
@@ -204,7 +204,7 @@ _skip_mujoco = (
 )
 
 if _skip_mujoco:
-    import logging
+    import logging  # noqa: E402
 
     logging.getLogger(__name__).warning(
         "Skipping MuJoCo import on Windows Python 3.13+ due to DLL issues. "
@@ -223,7 +223,7 @@ else:
         pass
     except OSError as e:
         # Handle DLL loading failures on Windows (e.g., plugin initialization errors)
-        import logging
+        import logging  # noqa: E402
 
         logging.getLogger(__name__).warning(f"MuJoCo DLL loading failed: {e}")
 

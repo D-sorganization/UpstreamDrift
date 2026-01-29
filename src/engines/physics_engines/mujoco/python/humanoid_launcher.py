@@ -22,10 +22,10 @@ _project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.pare
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-import numpy as np
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QColor, QPalette
-from PyQt6.QtWidgets import (
+import numpy as np  # noqa: E402
+from PyQt6.QtCore import Qt  # noqa: E402
+from PyQt6.QtGui import QColor, QPalette  # noqa: E402
+from PyQt6.QtWidgets import (  # noqa: E402
     QApplication,
     QCheckBox,
     QColorDialog,
@@ -49,13 +49,16 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from src.shared.python.configuration_manager import ConfigurationManager
-from src.shared.python.dashboard.widgets import LivePlotWidget
-from src.shared.python.engine_availability import MATPLOTLIB_AVAILABLE
-from src.shared.python.interfaces import RecorderInterface
-from src.shared.python.logging_config import configure_gui_logging, get_logger
-from src.shared.python.path_utils import get_repo_root
-from src.shared.python.process_worker import ProcessWorker
+from src.shared.python.configuration_manager import ConfigurationManager  # noqa: E402
+from src.shared.python.dashboard.widgets import LivePlotWidget  # noqa: E402
+from src.shared.python.engine_availability import MATPLOTLIB_AVAILABLE  # noqa: E402
+from src.shared.python.interfaces import RecorderInterface  # noqa: E402
+from src.shared.python.logging_config import (  # noqa: E402
+    configure_gui_logging,
+    get_logger,
+)
+from src.shared.python.path_utils import get_repo_root  # noqa: E402
+from src.shared.python.process_worker import ProcessWorker  # noqa: E402
 
 # Use centralized availability flag
 HAS_MATPLOTLIB = MATPLOTLIB_AVAILABLE

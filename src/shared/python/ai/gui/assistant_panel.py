@@ -412,7 +412,7 @@ class AIAssistantPanel(QWidget):
         # Gitpod Orange Header
         header.setStyleSheet("""
             QFrame {
-                background-color: #FF8800; 
+                background-color: #FF8800;
                 padding: 8px;
                 border-bottom: 1px solid #cc6d00;
             }
