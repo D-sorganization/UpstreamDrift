@@ -816,7 +816,7 @@ class ModelLibrary:
                             ) as f:
                                 if "<mujoco" in f.read(500):
                                     m_type = "mjcf"
-                        except:
+                        except Exception:
                             pass
 
                     models.append(
