@@ -4,9 +4,8 @@ Optional cloud client for Golf Modeling Suite.
 Cloud features are opt-in. The app works fully offline without this.
 """
 
-import os
 from pathlib import Path
-from typing import Optional
+
 import httpx
 
 CLOUD_API_URL = "https://api.golf-suite.io"
