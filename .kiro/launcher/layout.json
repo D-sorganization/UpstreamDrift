@@ -17,10 +17,10 @@
   ],
   "selected_model": "matlab_dataset_gui",
   "window_geometry": {
-    "x": 242,
-    "y": 29,
-    "width": 1593,
-    "height": 900
+    "x": 0,
+    "y": -8,
+    "width": 1920,
+    "height": 1009
   },
   "options": {
     "live_visualization": true,

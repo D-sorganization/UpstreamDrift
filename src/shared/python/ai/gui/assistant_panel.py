@@ -29,6 +29,7 @@ from PyQt6 import QtCore, QtGui
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtWidgets import (
+    QComboBox,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -432,14 +433,45 @@ class AIAssistantPanel(QWidget):
 
         layout = QHBoxLayout(header)
 
-        # Title
-        title = QLabel("🤖 AI Assistant")
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: black;")
-        layout.addWidget(title)
+        # Provider Icon & Title
+        self._provider_icon = QLabel("🤖")
+        self._provider_icon.setStyleSheet(
+            "font-size: 18px; color: black; background: transparent;"
+        )
+        layout.addWidget(self._provider_icon)
+
+        self._model_label = QLabel("AI Assistant")
+        self._model_label.setStyleSheet(
+            "font-size: 14px; font-weight: bold; color: black; background: transparent;"
+        )
+        layout.addWidget(self._model_label)
+
+        # Spacer
+        layout.addSpacing(10)
+
+        # Mode Selection (Ask, Plan, Agent)
+        self._mode_combo = QComboBox()
+        self._mode_combo.addItems(["Ask", "Plan", "Agent"])
+        self._mode_combo.setToolTip(
+            "Select AI Mode: Ask (Chat), Plan (Reasoning), Agent (Tools)"
+        )
+        self._mode_combo.setStyleSheet("""
+            QComboBox {
+                background-color: rgba(255, 255, 255, 0.3);
+                color: black;
+                border: 1px solid rgba(0, 0, 0, 0.2);
+                border-radius: 4px;
+                padding: 2px 8px;
+            }
+            QComboBox::drop-down { border: none; }
+        """)
+        layout.addWidget(self._mode_combo)
 
         # Status indicator
         self._status_label = QLabel("Ready")
-        self._status_label.setStyleSheet("font-size: 11px; color: #333;")
+        self._status_label.setStyleSheet(
+            "font-size: 11px; color: #333; background: transparent;"
+        )
         layout.addWidget(self._status_label)
 
         layout.addStretch()
@@ -801,6 +833,24 @@ class AIAssistantPanel(QWidget):
         """
         from shared.python.ai.gui.settings_dialog import AIProvider, get_api_key
         from shared.python.ai.types import ExpertiseLevel
+
+        # Update Header Icons
+        provider_icons = {
+            AIProvider.OLLAMA: "🦙",
+            AIProvider.OPENAI: "🧠",
+            AIProvider.ANTHROPIC: "🤖",
+            AIProvider.GEMINI: "✨",
+        }
+        icon = provider_icons.get(settings.provider, "🤖")
+        self._provider_icon.setText(icon)
+
+        # Update Model Label
+        self._model_label.setText(
+            f"{settings.provider.name.title()} ({settings.model})"
+        )
+        self._model_label.setToolTip(
+            f"Provider: {settings.provider.name}\nModel: {settings.model}"
+        )
 
         # Set expertise level
         level_map = {
