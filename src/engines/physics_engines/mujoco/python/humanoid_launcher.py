@@ -275,12 +275,18 @@ class HumanoidLauncher(QMainWindow):
         settings_layout = QGridLayout()
         settings_layout.setSpacing(10)
 
-        # Polynomial Generator Button (only shown for poly mode)
-        self.btn_poly_generator = QPushButton("📊 Configure Polynomial")
+        # Signal Generator Buttons (only shown for poly mode)
+        self.btn_poly_generator = QPushButton("📊 Polynomial Generator")
         self.btn_poly_generator.setStyleSheet(
             "background-color: #0078d4; color: white; padding: 8px; font-weight: bold;"
         )
         self.btn_poly_generator.clicked.connect(self.open_polynomial_generator)
+
+        self.btn_signal_toolkit = QPushButton("🔧 Signal Toolkit")
+        self.btn_signal_toolkit.setStyleSheet(
+            "background-color: #6b5b95; color: white; padding: 8px; font-weight: bold;"
+        )
+        self.btn_signal_toolkit.clicked.connect(self.open_signal_toolkit)
         # Helper for control mode help updates
         # Check initial state later
 
@@ -303,7 +309,8 @@ class HumanoidLauncher(QMainWindow):
         )
         settings_layout.addWidget(self.combo_control, 0, 1)
         settings_layout.addWidget(self.btn_poly_generator, 0, 2)
-        settings_layout.addWidget(self.mode_help_label, 1, 1, 1, 2)
+        settings_layout.addWidget(self.btn_signal_toolkit, 0, 3)
+        settings_layout.addWidget(self.mode_help_label, 1, 1, 1, 3)
 
         # Trigger initial update after button exists
         self.on_control_mode_changed(self.combo_control.currentText())
@@ -627,7 +634,7 @@ class HumanoidLauncher(QMainWindow):
             self.save_config()
 
     def on_control_mode_changed(self, mode: str) -> None:
-        """Update the help text and enable/disable polynomial generator button
+        """Update the help text and enable/disable signal generator buttons
         based on the selected control mode."""
         descriptions = {
             "pd": "Proportional-Derivative control (Target Pose tracking).",
@@ -636,6 +643,7 @@ class HumanoidLauncher(QMainWindow):
         }
         self.mode_help_label.setText(descriptions.get(mode, ""))
         self.btn_poly_generator.setEnabled(mode == "poly")
+        self.btn_signal_toolkit.setEnabled(mode == "poly")
 
     def open_polynomial_generator(self) -> None:
         """Open polynomial generator dialog."""
@@ -725,6 +733,75 @@ class HumanoidLauncher(QMainWindow):
         poly_widget.polynomial_generated.connect(on_polynomial_generated)
 
         layout.addWidget(poly_widget)
+
+        # Add close button
+        btn_close = QPushButton("Close")
+        btn_close.clicked.connect(dialog.accept)
+        layout.addWidget(btn_close)
+
+        dialog.exec()
+
+    def open_signal_toolkit(self) -> None:
+        """Open signal processing toolkit dialog."""
+        try:
+            from src.shared.python.signal_toolkit.widget import SignalToolkitWidget
+        except ImportError as e:
+            QMessageBox.warning(
+                self,
+                "Signal Toolkit Unavailable",
+                f"The signal toolkit widget is not available.\n\nError: {e}\n\n"
+                "Please ensure matplotlib and PyQt6 are installed.",
+            )
+            return
+        except Exception as e:
+            QMessageBox.warning(
+                self,
+                "Loading Error",
+                f"Failed to load signal toolkit widget.\n\nError: {e}",
+            )
+            return
+
+        # Create dialog
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Signal Processing Toolkit")
+        dialog.setMinimumSize(1200, 800)
+
+        layout = QVBoxLayout(dialog)
+
+        # Add signal toolkit widget
+        toolkit_widget = SignalToolkitWidget(dialog)
+
+        # Set available joints (humanoid joint names)
+        joints = [
+            "lowerbackrx",
+            "upperbackrx",
+            "rtibiarx",
+            "ltibiarx",
+            "rfemurrx",
+            "lfemurrx",
+            "rfootrx",
+            "lfootrx",
+            "rhumerusrx",
+            "lhumerusrx",
+            "rhumerusrz",
+            "lhumerusrz",
+            "rhumerusry",
+            "lhumerusry",
+            "rradiusrx",
+            "lradiusrx",
+        ]
+        toolkit_widget.set_joints(joints)
+
+        # Connect signal to save coefficients
+        def on_signal_generated(joint_name: str, coefficients: list[float]) -> None:
+            """Save generated polynomial coefficients to config."""
+            self.config.polynomial_coefficients[joint_name] = coefficients
+            self.save_config()
+            self.log(f"Signal generated for {joint_name}: {coefficients}")
+
+        toolkit_widget.signal_generated.connect(on_signal_generated)
+
+        layout.addWidget(toolkit_widget)
 
         # Add close button
         btn_close = QPushButton("Close")
