@@ -156,7 +156,6 @@ def run_ik_demo(
 
     # Subsample for faster processing
     if subsample > 1:
-        original_frames = trajectory.num_frames
         trajectory.frames = trajectory.frames[::subsample]
         print(f"      Subsampled to {trajectory.num_frames} frames (1/{subsample})")
 

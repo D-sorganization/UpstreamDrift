@@ -16,13 +16,16 @@ _project_root = (
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-import numpy as np
+import numpy as np  # noqa: E402
 
-from src.shared.python.engine_availability import (
+from src.shared.python.engine_availability import (  # noqa: E402
     MATPLOTLIB_AVAILABLE,
     PYQT6_AVAILABLE,
 )
-from src.shared.python.logging_config import configure_gui_logging, get_logger
+from src.shared.python.logging_config import (  # noqa: E402
+    configure_gui_logging,
+    get_logger,
+)
 
 # Use centralized availability flags
 HAS_QT = PYQT6_AVAILABLE

@@ -3,10 +3,7 @@
 Motion Capture & Analysis Launcher
 Central hub for C3D visualization and Markerless Pose Estimation.
 """
-<<<<<<< Updated upstream
 
-=======
->>>>>>> Stashed changes
 import subprocess
 import sys
 from pathlib import Path
