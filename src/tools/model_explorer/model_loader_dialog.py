@@ -138,7 +138,12 @@ class ModelLoaderDialog(QDialog):
         self._setup_community_tab(community_tab)
         self.tabs.addTab(community_tab, "Community")
 
-        # Tab 6: Embedded Models (Python defined)
+        # Tab 6: Imported Models (User managed)
+        imported_tab = QWidget()
+        self._setup_imported_tab(imported_tab)
+        self.tabs.addTab(imported_tab, "Imported")
+
+        # Tab 7: Embedded Models (Python defined)
         embedded_tab = QWidget()
 
         self._setup_embedded_tab(embedded_tab)
@@ -282,6 +287,119 @@ class ModelLoaderDialog(QDialog):
             lambda: self._load_selected_model("robot_descriptions")
         )
         layout.addWidget(load_btn)
+
+    def _setup_imported_tab(self, parent: QWidget) -> None:
+        from PyQt6.QtWidgets import QHeaderView, QTreeWidget
+
+        layout = QVBoxLayout(parent)
+        layout.addWidget(QLabel("User Imported models (Right-click to manage):"))
+
+        # Tree
+        self.imported_tree = QTreeWidget()
+        self.imported_tree.setHeaderLabels(["Name", "Type", "Path"])
+        self.imported_tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.imported_tree.customContextMenuRequested.connect(
+            self._on_imported_context_menu
+        )
+
+        header = self.imported_tree.header()
+        if header:
+            header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+
+        self.imported_tree.itemSelectionChanged.connect(
+            lambda: self._on_model_selected("imported")
+        )
+        layout.addWidget(self.imported_tree)
+
+        # Buttons
+        btn_layout = QHBoxLayout()
+        import_btn = QPushButton("Import URDF/MJCF...")
+        import_btn.clicked.connect(self._on_import_button)
+        btn_layout.addWidget(import_btn)
+
+        reload_btn = QPushButton("Reload")
+        reload_btn.clicked.connect(self._reload_imported_models)
+        btn_layout.addWidget(reload_btn)
+
+        layout.addLayout(btn_layout)
+
+        load_btn = QPushButton("Load Selected Imported Model")
+        load_btn.clicked.connect(lambda: self._load_selected_model("imported"))
+        layout.addWidget(load_btn)
+
+        self._reload_imported_models()
+
+    def _reload_imported_models(self) -> None:
+        from PyQt6.QtWidgets import QTreeWidgetItem
+
+        self.imported_tree.clear()
+        models = self.library.discover_imported_models()
+
+        for model in models:
+            item = QTreeWidgetItem(
+                [model["name"], model["type"].upper(), model["path"]]
+            )
+            item.setData(0, Qt.ItemDataRole.UserRole, model["config_key"])
+            item.setData(
+                0, Qt.ItemDataRole.UserRole + 1, model["path"]
+            )  # Store path for file ops
+            self.imported_tree.addTopLevelItem(item)
+
+    def _on_import_button(self) -> None:
+        from PyQt6.QtWidgets import QFileDialog
+
+        path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Import Model File",
+            "",
+            "Model Files (*.urdf *.xml *.mjcf);;All Files (*)",
+        )
+        if path:
+            if self.library.import_model(path):
+                self._reload_imported_models()
+                QMessageBox.information(self, "Success", "Model imported successfully.")
+            else:
+                QMessageBox.warning(self, "Error", "Failed to import model.")
+
+    def _on_imported_context_menu(self, pos: Any) -> None:
+        from PyQt6.QtWidgets import QInputDialog, QMenu
+
+        item = self.imported_tree.itemAt(pos)
+        if not item:
+            return
+
+        menu = QMenu(self)
+        rename_action = menu.addAction("Rename")
+        delete_action = menu.addAction("Delete")
+
+        action = menu.exec(self.imported_tree.viewport().mapToGlobal(pos))
+
+        model_path = item.data(0, Qt.ItemDataRole.UserRole + 1)
+
+        if action == rename_action:
+            old_name = item.text(0)
+            new_name, ok = QInputDialog.getText(
+                self, "Rename Model", "New name:", text=old_name
+            )
+            if ok and new_name and new_name != old_name:
+                if self.library.rename_imported_model(model_path, new_name):
+                    self._reload_imported_models()
+                else:
+                    QMessageBox.warning(self, "Error", "Failed to rename model.")
+
+        elif action == delete_action:
+            reply = QMessageBox.question(
+                self,
+                "Confirm Delete",
+                f"Are you sure you want to delete '{item.text(0)}'?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            )
+            if reply == QMessageBox.StandardButton.Yes:
+                if self.library.delete_imported_model(model_path):
+                    self._reload_imported_models()
+                else:
+                    QMessageBox.warning(self, "Error", "Failed to delete model.")
 
     def _on_accept(self) -> None:
         # Determine active tab and selected item
@@ -493,6 +611,10 @@ class ModelLoaderDialog(QDialog):
             comm_item = self.community_list.currentItem()
             if comm_item:
                 model_key = comm_item.data(Qt.ItemDataRole.UserRole)
+        elif category == "imported":
+            imp_item = self.imported_tree.currentItem()
+            if imp_item:
+                model_key = imp_item.data(0, Qt.ItemDataRole.UserRole)
 
         if model_key:
             model_info = self.library.get_model_info(category, model_key)
@@ -564,6 +686,13 @@ Package: {model_info.get("package", "robot_descriptions")}
 Path: {model_info["path"]}
 
 Description: {model_info["description"]}
+"""
+        elif category == "imported":
+            info_text = f"""Name: {model_info["name"]}
+Type: {model_info["type"].upper()}
+Path: {model_info["path"]}
+
+User imported model. Right-click in the list to Rename or Delete.
 """
         else:
             info_text = "No information available."

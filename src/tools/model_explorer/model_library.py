@@ -580,6 +580,7 @@ class ModelLibrary:
         discovered = self.discover_repo_models()
         embedded = self.get_embedded_mujoco_models()
         robot_descs = self.discover_robot_descriptions()
+        imported = self.discover_imported_models()
 
         return {
             "human": list(self.HUMAN_MODELS.keys()),
@@ -590,6 +591,7 @@ class ModelLibrary:
             "discovered": discovered,
             "embedded": embedded,
             "robot_descriptions": robot_descs,
+            "imported": imported,
         }
 
     def get_model_info(self, category: str, model_key: str) -> dict[str, Any] | None:
@@ -597,7 +599,7 @@ class ModelLibrary:
 
         Args:
             category: 'human', 'golf_clubs', 'pendulum', 'robotic', 'component',
-                     'discovered', or 'embedded'
+                     'discovered', 'embedded', 'robot_descriptions', or 'imported'
             model_key: Key identifying the model
 
         Returns:
@@ -624,6 +626,12 @@ class ModelLibrary:
             return embedded.get(model_key)
         elif category == "robot_descriptions":
             models = self.discover_robot_descriptions()
+            for model in models:
+                if model["config_key"] == model_key:
+                    return model
+            return None
+        elif category == "imported":
+            models = self.discover_imported_models()
             for model in models:
                 if model["config_key"] == model_key:
                     return model
@@ -775,3 +783,155 @@ class ModelLibrary:
             logger.error(f"Error loading embedded models: {e}")
 
         return models
+
+    def _get_imported_models_path(self) -> Path:
+        """Get the directory for user-imported models."""
+        path = self.base_path / "imported"
+        path.mkdir(parents=True, exist_ok=True)
+        return path
+
+    def discover_imported_models(self) -> list[dict[str, Any]]:
+        """Discover models in the 'imported' collection."""
+        models = []
+        import_dir = self._get_imported_models_path()
+
+        if not import_dir.exists():
+            return []
+
+        for root, _, files in os.walk(import_dir):
+            for file in files:
+                file_path = Path(root) / file
+                if (
+                    file.lower().endswith(".urdf")
+                    or file.lower().endswith(".xml")
+                    or file.lower().endswith(".mjcf")
+                ):
+                    # Determine type
+                    m_type = "urdf"
+                    if file.lower().endswith((".xml", ".mjcf")):
+                        # quick check
+                        try:
+                            with open(
+                                file_path, encoding="utf-8", errors="ignore"
+                            ) as f:
+                                if "<mujoco" in f.read(500):
+                                    m_type = "mjcf"
+                        except:
+                            pass
+
+                    models.append(
+                        {
+                            "name": file,
+                            "description": f"User imported model at {file_path.name}",
+                            "path": str(file_path),
+                            "type": m_type,
+                            "config_key": f"imported_{file}_{hash(str(file_path))}",
+                            "is_imported": True,
+                        }
+                    )
+        return sorted(models, key=lambda x: x["name"])
+
+    def import_model(self, source_path: str) -> Path | None:
+        """Import a URDF/MJCF file or directory into the library.
+
+        Args:
+            source_path: Path to the source file or directory.
+
+        Returns:
+            Path to the imported file, or None if failed.
+        """
+        import shutil
+
+        src = Path(source_path)
+        if not src.exists():
+            logger.error(f"Import source not found: {src}")
+            return None
+
+        import_root = self._get_imported_models_path()
+        dest_name = src.name
+        dest = import_root / dest_name
+
+        # Avoid overwrite collision by appending number
+        counter = 1
+        while dest.exists():
+            dest = import_root / f"{src.stem}_{counter}{src.suffix}"
+            counter += 1
+
+        try:
+            if src.is_dir():
+                shutil.copytree(src, dest)
+                # Find the main URDF/MJCF in the copied dir?
+                # For now just return the dir path, the discovery will find files inside.
+                logger.info(f"Imported directory to: {dest}")
+                return dest
+            else:
+                shutil.copy2(src, dest)
+                logger.info(f"Imported file to: {dest}")
+                return dest
+        except Exception as e:
+            logger.error(f"Failed to import model: {e}")
+            return None
+
+    def delete_imported_model(self, model_path: str) -> bool:
+        """Delete an imported model file or directory.
+
+        Args:
+            model_path: Absolute path to the file/dir to delete.
+
+        Returns:
+            True if successful.
+        """
+        path = Path(model_path)
+        import_root = self._get_imported_models_path()
+
+        # Security check: must be within imported directory
+        try:
+            path.relative_to(import_root)
+        except ValueError:
+            logger.error(f"Cannot delete file outside imported directory: {path}")
+            return False
+
+        try:
+            if path.is_file():
+                path.unlink()
+            elif path.is_dir():
+                import shutil
+
+                shutil.rmtree(path)
+            logger.info(f"Deleted imported model: {path}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to delete model: {e}")
+            return False
+
+    def rename_imported_model(self, model_path: str, new_name: str) -> Path | None:
+        """Rename an imported model file.
+
+        Args:
+            model_path: Current absolute path.
+            new_name: New filename (including extension).
+
+        Returns:
+            New path if successful, None otherwise.
+        """
+        path = Path(model_path)
+        import_root = self._get_imported_models_path()
+
+        try:
+            path.relative_to(import_root)
+        except ValueError:
+            logger.error("Cannot rename file outside imported directory")
+            return None
+
+        new_path = path.parent / new_name
+        if new_path.exists():
+            logger.error(f"Destination already exists: {new_path}")
+            return None
+
+        try:
+            path.rename(new_path)
+            logger.info(f"Renamed {path.name} to {new_name}")
+            return new_path
+        except Exception as e:
+            logger.error(f"Failed to rename model: {e}")
+            return None
