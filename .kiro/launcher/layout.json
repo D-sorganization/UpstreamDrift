@@ -6,24 +6,25 @@
     "pinocchio_golf",
     "opensim_golf",
     "myosim_suite",
-    "openpose_analysis",
-    "simscape_2d",
-    "simscape_3d",
     "urdf_generator",
+    "openpose_analysis",
     "c3d_viewer",
-    "matlab_dataset_gui",
+    "shot_tracer",
     "matlab_golf_gui",
-    "shot_tracer"
+    "matlab_dataset_gui",
+    "simscape_2d",
+    "simscape_3d"
   ],
-  "selected_model": null,
+  "selected_model": "matlab_dataset_gui",
   "window_geometry": {
-    "x": 0,
-    "y": 1026,
-    "width": 1400,
+    "x": 242,
+    "y": 29,
+    "width": 1593,
     "height": 900
   },
   "options": {
     "live_visualization": true,
-    "gpu_acceleration": false
+    "gpu_acceleration": false,
+    "docker_mode": false
   }
 }

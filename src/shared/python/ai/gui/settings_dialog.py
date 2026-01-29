@@ -57,6 +57,7 @@ class AIProvider(Enum):
     OLLAMA = auto()  # Free, local
     OPENAI = auto()  # GPT-4
     ANTHROPIC = auto()  # Claude
+    GEMINI = auto()  # Google Gemini
 
 
 # Provider display info - explicitly typed for mypy
@@ -87,6 +88,14 @@ PROVIDER_INFO: dict[AIProvider, dict[str, str | bool | list[str]]] = {
             "claude-3-sonnet-20240229",
             "claude-3-haiku-20240307",
         ],
+    },
+    AIProvider.GEMINI: {
+        "name": "Google Gemini",
+        "description": "Cloud-based Gemini Pro. Requires Google API key.",
+        "requires_key": True,
+        "key_service": "golf_suite_gemini_key",
+        "default_model": "gemini-pro",
+        "models": ["gemini-pro", "gemini-1.5-pro", "gemini-1.5-flash"],
     },
 }
 

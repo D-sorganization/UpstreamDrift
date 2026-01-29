@@ -442,3 +442,33 @@ def require_env(name: str) -> str:
     if result is None:
         raise EnvironmentError(name, "Required environment variable not set")
     return result
+
+
+def is_docker() -> bool:
+    """Check if running inside a Docker container.
+
+    Returns:
+        True if running in Docker.
+    """
+    path = "/proc/self/cgroup"
+    return (
+        os.path.exists("/.dockerenv")
+        or os.path.isfile(path)
+        and any("docker" in line for line in open(path))
+    )
+
+
+def is_wsl() -> bool:
+    """Check if running in Windows Subsystem for Linux (WSL).
+
+    Returns:
+        True if running in WSL.
+    """
+    if os.name != "posix":
+        return False
+    try:
+        with open("/proc/version") as f:
+            return "microsoft" in f.read().lower()
+    except FileNotFoundError:
+        return False
+

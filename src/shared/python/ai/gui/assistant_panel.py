@@ -20,6 +20,7 @@ except ImportError:
     timezone.utc = timezone.utc  # noqa: UP017
 from typing import TYPE_CHECKING, Any
 
+from PyQt6 import QtCore, QtGui
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtWidgets import (
@@ -233,6 +234,23 @@ class StreamWorker(QThread):
             self.finished.emit()
 
 
+class ChatInput(QPlainTextEdit):
+    """Custom input widget handling Send vs Newline."""
+
+    submit_requested = pyqtSignal()
+
+    def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
+        """Handle key press events."""
+        if (
+            event.key() == Qt.Key.Key_Return
+            and not event.modifiers() & Qt.KeyboardModifier.ShiftModifier
+        ):
+            event.accept()
+            self.submit_requested.emit()
+        else:
+            super().keyPressEvent(event)
+
+
 class AIAssistantPanel(QWidget):
     """Main AI Assistant conversation panel.
 
@@ -258,7 +276,7 @@ class AIAssistantPanel(QWidget):
         self._current_worker: StreamWorker | None = None
         self._current_assistant_message: MessageWidget | None = None
         self._setup_ui()
-        self._connect_signals()
+        # Note: No separate shortcuts needed as ChatInput handles Enter
 
     def _setup_ui(self) -> None:
         """Set up the panel UI."""
@@ -293,6 +311,18 @@ class AIAssistantPanel(QWidget):
         splitter.setStretchFactor(1, 1)
 
         layout.addWidget(splitter)
+
+        # Attempt to load settings immediately
+        QtCore.QTimer.singleShot(100, self._auto_load_settings)
+
+    def _auto_load_settings(self) -> None:
+        """Try to load settings and init adapter on startup."""
+        try:
+            from shared.python.ai.gui.settings_dialog import AISettings
+            settings = AISettings.load()
+            self.apply_settings(settings)
+        except Exception as e:
+            logger.warning(f"Failed to auto-load AI settings: {e}")
 
     def _create_header(self) -> QWidget:
         """Create the panel header."""
@@ -409,9 +439,9 @@ class AIAssistantPanel(QWidget):
         layout = QVBoxLayout(widget)
 
         # Input text area
-        self._input_edit = QPlainTextEdit()
+        self._input_edit = ChatInput()
         self._input_edit.setPlaceholderText(
-            "Type your message here... (Ctrl+Enter to send)"
+            "Type your message here... (Enter to send, Shift+Enter for new line)"
         )
         self._input_edit.setMaximumHeight(100)
         self._input_edit.setStyleSheet("""
@@ -426,6 +456,7 @@ class AIAssistantPanel(QWidget):
                 border: 1px solid #FF8800;
             }
         """)
+        self._input_edit.submit_requested.connect(self._on_send)
         layout.addWidget(self._input_edit)
 
         # Buttons
@@ -440,7 +471,7 @@ class AIAssistantPanel(QWidget):
 
         # Send button
         self._send_btn = QPushButton("Send")
-        self._send_btn.setDefault(True)
+        # No default, handled by Enter
         self._send_btn.clicked.connect(self._on_send)
         self._send_btn.setStyleSheet("""
             QPushButton {
@@ -704,6 +735,15 @@ class AIAssistantPanel(QWidget):
                 from shared.python.ai.adapters.anthropic_adapter import AnthropicAdapter
 
                 adapter = AnthropicAdapter(
+                    api_key=api_key,
+                    model=settings.model,
+                )
+        elif settings.provider == AIProvider.GEMINI:
+            api_key = get_api_key(AIProvider.GEMINI)
+            if api_key:
+                from shared.python.ai.adapters.gemini_adapter import GeminiAdapter
+
+                adapter = GeminiAdapter(
                     api_key=api_key,
                     model=settings.model,
                 )
