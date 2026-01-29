@@ -105,8 +105,11 @@ analysis = [
 optimization = [
     "casadi>=3.6.3",
 ]
+community = [
+    "robot_descriptions>=1.4.0",
+]
 all = [
-    "golf-modeling-suite[dev,engines,analysis,optimization]",
+    "golf-modeling-suite[dev,engines,analysis,optimization,community]",
 ]
 
 [project.scripts]

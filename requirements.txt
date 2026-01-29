@@ -39,6 +39,9 @@ playwright>=1.40.0
 # Physics Engines (Windows - install via pip)
 mujoco>=3.0.0
 
+# Community Models (Optional)
+# robot_descriptions>=1.4.0
+
 # ============================================================================
 # WSL2/Linux Only Dependencies (not available on Windows via pip)
 # ============================================================================

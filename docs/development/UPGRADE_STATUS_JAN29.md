@@ -65,6 +65,7 @@
 
 - Renamed `URDF Generator` to `Model Explorer`.
 - Expanded `ModelLibrary` to include Pendulums, Robotic Arms, and Components.
+- Added optional integration with `robot_descriptions` for community models.
 - Updated UI with comprehensive tabbed browser for all model types.
 - Integrated `pyqtgraph` for visualization.
 
