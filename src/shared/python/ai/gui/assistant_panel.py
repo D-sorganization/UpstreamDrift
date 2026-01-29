@@ -319,6 +319,7 @@ class AIAssistantPanel(QWidget):
         """Try to load settings and init adapter on startup."""
         try:
             from shared.python.ai.gui.settings_dialog import AISettings
+
             settings = AISettings.load()
             self.apply_settings(settings)
         except Exception as e:

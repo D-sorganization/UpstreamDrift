@@ -6,19 +6,17 @@ via the google-generativeai library.
 
 from __future__ import annotations
 
-import os
 from collections.abc import Iterator
 from typing import Any
 
-from src.shared.python.logging_config import get_logger
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
 from src.shared.python.ai.types import (
     AgentChunk,
     AgentResponse,
     ConversationContext,
     ProviderCapabilities,
-    Message,
 )
+from src.shared.python.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -27,6 +25,7 @@ try:
     import google.generativeai as genai
     from google.generativeai import GenerativeModel
     from google.generativeai.types import GenerateContentResponse
+
     HAS_GEMINI = True
 except ImportError:
     HAS_GEMINI = False
@@ -106,7 +105,7 @@ class GeminiAdapter(BaseAgentAdapter):
         try:
             if not HAS_GEMINI:
                 return False, "google-generativeai package missing"
-            
+
             # Simple prompt to test
             self._model.generate_content("Hello")
             return True, "Connected successfully"
@@ -120,5 +119,5 @@ class GeminiAdapter(BaseAgentAdapter):
         for msg in context.messages:
             role = "user" if msg.role == "user" else "model"
             history.append({"role": role, "parts": [msg.content]})
-        
+
         return self._model.start_chat(history=history)

@@ -59,6 +59,7 @@ class URDFGeneratorWindow(QMainWindow):
         """Load default model from settings if configured."""
         try:
             from PyQt6.QtCore import QSettings
+
             from .model_library import ModelLibrary
 
             settings = QSettings("GolfModelingSuite", "URDFGenerator")
@@ -68,10 +69,12 @@ class URDFGeneratorWindow(QMainWindow):
                 logger.info(f"Loading default model: {default_model}")
                 library = ModelLibrary()
                 urdf_path = library.get_human_model(str(default_model))
-                
+
                 if urdf_path and urdf_path.exists():
                     self._load_urdf_file(urdf_path)
-                    self.status_bar.showMessage(f"Loaded default model: {default_model}")
+                    self.status_bar.showMessage(
+                        f"Loaded default model: {default_model}"
+                    )
                 else:
                     logger.warning(f"Default model {default_model} not found")
         except Exception as e:
@@ -364,18 +367,28 @@ class URDFGeneratorWindow(QMainWindow):
                             path = Path(model_info["path"])
                             if path.exists():
                                 self._load_urdf_file(path)
-                                self.status_bar.showMessage(f"Loaded repository model: {model_info['name']}")
+                                self.status_bar.showMessage(
+                                    f"Loaded repository model: {model_info['name']}"
+                                )
                             else:
-                                QMessageBox.warning(self, "Error", f"File not found: {path}")
+                                QMessageBox.warning(
+                                    self, "Error", f"File not found: {path}"
+                                )
 
                     elif category == "embedded":
                         model_info = library.get_model_info(category, model_key)
                         if model_info:
                             content = model_info["content"]
-                            self.visualization_widget.update_visualization(content, None)
+                            self.visualization_widget.update_visualization(
+                                content, None
+                            )
                             self.current_file_path = None
-                            self.setWindowTitle(f"Interactive URDF Generator - {model_info['name']} (Embedded)")
-                            self.status_bar.showMessage(f"Loaded embedded model: {model_info['name']}")
+                            self.setWindowTitle(
+                                f"Interactive URDF Generator - {model_info['name']} (Embedded)"
+                            )
+                            self.status_bar.showMessage(
+                                f"Loaded embedded model: {model_info['name']}"
+                            )
                             logger.info(f"Loaded embedded model: {model_info['name']}")
 
         except Exception as e:
