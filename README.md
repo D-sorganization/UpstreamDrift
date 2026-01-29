@@ -33,7 +33,8 @@ For detailed documentation, please visit the **[Documentation Hub](docs/README.m
 
 ### 🎯 Advanced Analysis
 
-- **Motion Capture**: Load and retarget mocap data (CSV, JSON, C3D)
+- **Motion Capture**: Load and retarget mocap data (CSV, JSON, C3D) using OpenPose or MediaPipe.
+- **Model Explorer**: Interactive browser for Humanoid, Pendulum, and Robotic models.
 - **Inverse Kinematics**: Professional IK solver with nullspace optimization
 - **Inverse Dynamics**: Complete torque computation with force decomposition
 - **Kinematic Forces**: Coriolis, centrifugal, and gravitational force analysis
@@ -106,19 +107,15 @@ make format    # Format code with black and ruff
 
 ### Launching the Suite
 
+The suite now features a **Unified Launcher** that provides access to all engines and tools from a single interface.
+
 ```bash
 # Unified launcher (recommended) - select engine and model
-python3 launchers/golf_launcher.py
+python3 launch_golf_suite.py
 
-# MuJoCo-specific launcher with advanced GUI
-cd engines/physics_engines/mujoco/python
-python3 -m mujoco_golf_pendulum
-
-# Drake launcher
-python3 engines/physics_engines/drake/python/golf_swing_launcher.py
-
-# Pinocchio launcher
-python3 engines/physics_engines/pinocchio/python/golf_swing_launcher.py
+# Alternative: Direct launch of specific engines
+python3 src/engines/physics_engines/mujoco/python/humanoid_launcher.py
+python3 src/engines/physics_engines/drake/python/src/golf_gui.py
 ```
 
 ## Available Physics Engines
@@ -129,8 +126,8 @@ python3 engines/physics_engines/pinocchio/python/golf_swing_launcher.py
 - ✅ Contact dynamics (ground, ball)
 - ✅ 2-28 DOF models with flexible shafts
 - ✅ Advanced robotics features
-- ✅ Motion capture workflow
-- **See**: [engines/physics_engines/mujoco/README.md](engines/physics_engines/mujoco/README.md)
+- ✅ Motion capture workflow (OpenPose & MediaPipe)
+- **See**: [src/engines/physics_engines/mujoco/README.md](src/engines/physics_engines/mujoco/README.md)
 
 ### Drake (Model-Based Design)
 
@@ -138,7 +135,7 @@ python3 engines/physics_engines/pinocchio/python/golf_swing_launcher.py
 - ✅ Contact modeling
 - ✅ System analysis tools
 - ✅ URDF support
-- **See**: [engines/physics_engines/drake/README.md](engines/physics_engines/drake/README.md)
+- **See**: [src/engines/physics_engines/drake/README.md](src/engines/physics_engines/drake/README.md)
 
 ### Pinocchio (Fast Rigid Body Algorithms)
 
