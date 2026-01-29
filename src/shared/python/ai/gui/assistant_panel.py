@@ -9,9 +9,14 @@ responses with markdown rendering.
 
 from __future__ import annotations
 
-# Python 3.10 compatibility: timezone.utc was added in 3.11
 from datetime import UTC, datetime, timezone
+from pathlib import Path
 
+from src.shared.python.ai.gui.settings_dialog import AISettingsDialog
+from src.shared.python.ai.rag.indexer_worker import IndexerWorker
+from src.shared.python.ai.rag.simple_rag import SimpleRAGStore
+from src.shared.python.ai.tool_registry import ToolCategory, get_global_registry
+from src.shared.python.ai.tools.file_ops import register_file_tools
 from src.shared.python.logging_config import get_logger
 
 try:
@@ -20,9 +25,11 @@ except ImportError:
     timezone.utc = timezone.utc  # noqa: UP017
 from typing import TYPE_CHECKING, Any
 
+from PyQt6 import QtCore, QtGui
 from PyQt6.QtCore import Qt, QThread, pyqtSignal
 from PyQt6.QtGui import QKeySequence, QShortcut
 from PyQt6.QtWidgets import (
+    QComboBox,
     QFrame,
     QHBoxLayout,
     QLabel,
@@ -183,6 +190,15 @@ class MessageWidget(QFrame):
         self._content += text
         self._content_label.setMarkdown(self._content)
 
+    def set_content(self, text: str) -> None:
+        """Set message content.
+
+        Args:
+            text: New content.
+        """
+        self._content = text
+        self._content_label.setMarkdown(self._content)
+
     def get_content(self) -> str:
         """Get current content."""
         return self._content
@@ -219,10 +235,15 @@ class StreamWorker(QThread):
     def run(self) -> None:
         """Execute streaming in background thread."""
         try:
+            # Note: Adapter expects ToolDeclaration objects
+            # We need to convert registry tools to declarations if they aren't already
+            # But get_tools_for_provider returns dicts usually.
+            # The adapter protocol says `list[ToolDeclaration]`.
+            # Let's fix this in _process_message
             for chunk in self._adapter.stream_response(
                 self._message,
                 self._context,
-                self._tools,
+                self._tools,  # This should be compatible
             ):
                 if chunk.content:
                     self.chunk_received.emit(chunk.content)
@@ -231,6 +252,23 @@ class StreamWorker(QThread):
             self.error.emit(str(e))
         finally:
             self.finished.emit()
+
+
+class ChatInput(QPlainTextEdit):
+    """Custom input widget handling Send vs Newline."""
+
+    submit_requested = pyqtSignal()
+
+    def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
+        """Handle key press events."""
+        if (
+            event.key() == Qt.Key.Key_Return
+            and not event.modifiers() & Qt.KeyboardModifier.ShiftModifier
+        ):
+            event.accept()
+            self.submit_requested.emit()
+        else:
+            super().keyPressEvent(event)
 
 
 class AIAssistantPanel(QWidget):
@@ -257,8 +295,69 @@ class AIAssistantPanel(QWidget):
         self._adapter: BaseAgentAdapter | None = None
         self._current_worker: StreamWorker | None = None
         self._current_assistant_message: MessageWidget | None = None
+
+        # Tools & RAG
+        # Tools & RAG
+        self._tools_registry = get_global_registry()
+        self._rag_store = SimpleRAGStore()
+
+        # Persistence
+        self._history_file = Path.home() / ".golf_modeling_suite" / "chat_history.json"
+        self._load_history()
+
+        # Initialize Core Tools
+        self._init_tools()
+
         self._setup_ui()
-        self._connect_signals()
+        # Restore messages to UI
+        self._restore_ui_messages()
+
+    def _load_history(self) -> None:
+        """Load conversation history from file."""
+        if self._history_file.exists():
+            try:
+                self._context = ConversationContext.load_from_file(self._history_file)
+                logger.info(f"Loaded chat history from {self._history_file}")
+            except Exception as e:
+                logger.error(f"Failed to load chat history: {e}")
+
+    def _save_history(self) -> None:
+        """Save conversation history to file."""
+        try:
+            self._context.save_to_file(self._history_file)
+        except Exception as e:
+            logger.warning(f"Failed to save chat history: {e}")
+
+    def _restore_ui_messages(self) -> None:
+        """Restore message widgets from context."""
+        # This must be called AFTER _setup_ui
+        for msg in self._context.messages:
+            if msg.role != "system":
+                self._add_message_to_ui(msg.role, msg.content, msg.timestamp)
+
+    def _init_tools(self) -> None:
+        """Initialize default tools."""
+        # 1. File Ops
+        register_file_tools(self._tools_registry)
+
+        # 2. RAG Search Tool
+        @self._tools_registry.register(
+            name="search_knowledge_base",
+            description="Search the user's resource library/codebase for information.",
+            category=ToolCategory.ANALYSIS,
+        )
+        def search_knowledge_base(query: str) -> str:
+            results = self._rag_store.query(query)
+            if not results:
+                return "No relevant information found."
+
+            output = ["Found relevant documents:"]
+            for doc, score in results:
+                output.append(f"--- Document: {doc.id} (Score: {score:.2f}) ---")
+                output.append(
+                    doc.content[:500] + "..." if len(doc.content) > 500 else doc.content
+                )
+            return "\n\n".join(output)
 
     def _setup_ui(self) -> None:
         """Set up the panel UI."""
@@ -294,6 +393,19 @@ class AIAssistantPanel(QWidget):
 
         layout.addWidget(splitter)
 
+        # Attempt to load settings immediately
+        QtCore.QTimer.singleShot(100, self._auto_load_settings)
+
+    def _auto_load_settings(self) -> None:
+        """Try to load settings and init adapter on startup."""
+        try:
+            from shared.python.ai.gui.settings_dialog import AISettings
+
+            settings = AISettings.load()
+            self.apply_settings(settings)
+        except Exception as e:
+            logger.warning(f"Failed to auto-load AI settings: {e}")
+
     def _create_header(self) -> QWidget:
         """Create the panel header."""
         header = QFrame()
@@ -321,14 +433,45 @@ class AIAssistantPanel(QWidget):
 
         layout = QHBoxLayout(header)
 
-        # Title
-        title = QLabel("🤖 AI Assistant")
-        title.setStyleSheet("font-size: 14px; font-weight: bold; color: black;")
-        layout.addWidget(title)
+        # Provider Icon & Title
+        self._provider_icon = QLabel("🤖")
+        self._provider_icon.setStyleSheet(
+            "font-size: 18px; color: black; background: transparent;"
+        )
+        layout.addWidget(self._provider_icon)
+
+        self._model_label = QLabel("AI Assistant")
+        self._model_label.setStyleSheet(
+            "font-size: 14px; font-weight: bold; color: black; background: transparent;"
+        )
+        layout.addWidget(self._model_label)
+
+        # Spacer
+        layout.addSpacing(10)
+
+        # Mode Selection (Ask, Plan, Agent)
+        self._mode_combo = QComboBox()
+        self._mode_combo.addItems(["Ask", "Plan", "Agent"])
+        self._mode_combo.setToolTip(
+            "Select AI Mode: Ask (Chat), Plan (Reasoning), Agent (Tools)"
+        )
+        self._mode_combo.setStyleSheet("""
+            QComboBox {
+                background-color: rgba(255, 255, 255, 0.3);
+                color: black;
+                border: 1px solid rgba(0, 0, 0, 0.2);
+                border-radius: 4px;
+                padding: 2px 8px;
+            }
+            QComboBox::drop-down { border: none; }
+        """)
+        layout.addWidget(self._mode_combo)
 
         # Status indicator
         self._status_label = QLabel("Ready")
-        self._status_label.setStyleSheet("font-size: 11px; color: #333;")
+        self._status_label.setStyleSheet(
+            "font-size: 11px; color: #333; background: transparent;"
+        )
         layout.addWidget(self._status_label)
 
         layout.addStretch()
@@ -341,7 +484,7 @@ class AIAssistantPanel(QWidget):
         # Settings button
         settings_btn = QPushButton("⚙️")
         settings_btn.setToolTip("Settings")
-        settings_btn.clicked.connect(self.settings_requested.emit)
+        settings_btn.clicked.connect(self._show_settings)
         layout.addWidget(settings_btn)
 
         return header
@@ -409,9 +552,9 @@ class AIAssistantPanel(QWidget):
         layout = QVBoxLayout(widget)
 
         # Input text area
-        self._input_edit = QPlainTextEdit()
+        self._input_edit = ChatInput()
         self._input_edit.setPlaceholderText(
-            "Type your message here... (Ctrl+Enter to send)"
+            "Type your message here... (Enter to send, Shift+Enter for new line)"
         )
         self._input_edit.setMaximumHeight(100)
         self._input_edit.setStyleSheet("""
@@ -426,6 +569,7 @@ class AIAssistantPanel(QWidget):
                 border: 1px solid #FF8800;
             }
         """)
+        self._input_edit.submit_requested.connect(self._on_send)
         layout.addWidget(self._input_edit)
 
         # Buttons
@@ -440,7 +584,7 @@ class AIAssistantPanel(QWidget):
 
         # Send button
         self._send_btn = QPushButton("Send")
-        self._send_btn.setDefault(True)
+        # No default, handled by Enter
         self._send_btn.clicked.connect(self._on_send)
         self._send_btn.setStyleSheet("""
             QPushButton {
@@ -483,6 +627,10 @@ class AIAssistantPanel(QWidget):
         # Add user message
         self._add_message("user", message)
 
+        # Add to context immediately (so it's saved even if app crashes)
+        self._context.add_user_message(message)
+        self._save_history()
+
         # Emit signal
         self.message_sent.emit(message)
 
@@ -506,9 +654,6 @@ class AIAssistantPanel(QWidget):
         self._set_status("Thinking...")
         self._send_btn.setEnabled(False)
 
-        # Add context
-        self._context.add_user_message(message)
-
         # Create streaming worker
         self._current_worker = StreamWorker(
             self._adapter,
@@ -520,8 +665,11 @@ class AIAssistantPanel(QWidget):
         self._current_worker.finished.connect(self._on_stream_finished)
         self._current_worker.error.connect(self._on_stream_error)
 
-        # Create empty assistant message
-        self._current_assistant_message = self._add_message("assistant", "")
+        # Create assistant message with placeholder
+        self._current_assistant_message = self._add_message(
+            "assistant", "*Thinking...*"
+        )
+        self._is_first_chunk = True
 
         # Start streaming
         self._current_worker.start()
@@ -533,7 +681,12 @@ class AIAssistantPanel(QWidget):
             content: Content chunk.
         """
         if self._current_assistant_message:
-            self._current_assistant_message.append_content(content)
+            if self._is_first_chunk:
+                self._current_assistant_message.set_content(content)
+                self._is_first_chunk = False
+            else:
+                self._current_assistant_message.append_content(content)
+
             self._scroll_to_bottom()
 
     def _on_stream_finished(self) -> None:
@@ -546,6 +699,7 @@ class AIAssistantPanel(QWidget):
             self._context.add_assistant_message(
                 self._current_assistant_message.get_content()
             )
+            self._save_history()
 
         self._current_assistant_message = None
         self._current_worker = None
@@ -565,13 +719,22 @@ class AIAssistantPanel(QWidget):
         self._current_assistant_message = None
         self._current_worker = None
 
+    def _add_message_to_ui(
+        self,
+        role: str,
+        content: str,
+        timestamp: datetime | None = None,
+    ) -> MessageWidget:
+        """Add a message to the UI (alias for internal usage)."""
+        return self._add_message(role, content, timestamp)
+
     def _add_message(
         self,
         role: str,
         content: str,
         timestamp: datetime | None = None,
     ) -> MessageWidget:
-        """Add a message to the conversation.
+        """Add a message to the conversation UI.
 
         Args:
             role: Message role.
@@ -599,6 +762,8 @@ class AIAssistantPanel(QWidget):
         Returns:
             The created MessageWidget.
         """
+        # Don't save system messages to history usually, or maybe we do?
+        # Context usually stores them.
         return self._add_message("system", content)
 
     def _scroll_to_bottom(self) -> None:
@@ -631,6 +796,7 @@ class AIAssistantPanel(QWidget):
 
         # Reset context
         self._context = ConversationContext()
+        self._save_history()
 
         # Add welcome back
         self._add_system_message("🔄 New chat started. How can I help you?")
@@ -667,6 +833,24 @@ class AIAssistantPanel(QWidget):
         """
         from shared.python.ai.gui.settings_dialog import AIProvider, get_api_key
         from shared.python.ai.types import ExpertiseLevel
+
+        # Update Header Icons
+        provider_icons = {
+            AIProvider.OLLAMA: "🦙",
+            AIProvider.OPENAI: "🧠",
+            AIProvider.ANTHROPIC: "🤖",
+            AIProvider.GEMINI: "✨",
+        }
+        icon = provider_icons.get(settings.provider, "🤖")
+        self._provider_icon.setText(icon)
+
+        # Update Model Label
+        self._model_label.setText(
+            f"{settings.provider.name.title()} ({settings.model})"
+        )
+        self._model_label.setToolTip(
+            f"Provider: {settings.provider.name}\nModel: {settings.model}"
+        )
 
         # Set expertise level
         level_map = {
@@ -707,6 +891,15 @@ class AIAssistantPanel(QWidget):
                     api_key=api_key,
                     model=settings.model,
                 )
+        elif settings.provider == AIProvider.GEMINI:
+            api_key = get_api_key(AIProvider.GEMINI)
+            if api_key:
+                from shared.python.ai.adapters.gemini_adapter import GeminiAdapter
+
+                adapter = GeminiAdapter(
+                    api_key=api_key,
+                    model=settings.model,
+                )
 
         if adapter:
             self.set_adapter(adapter)
@@ -718,3 +911,43 @@ class AIAssistantPanel(QWidget):
                 f"⚠️ Could not connect to {settings.provider.name}. "
                 "Please check your settings."
             )
+
+    def _show_settings(self) -> None:
+        """Show the settings dialog."""
+        dialog = AISettingsDialog(self)
+        dialog.settings_changed.connect(self.apply_settings)
+        if hasattr(dialog, "rebuild_index_requested"):
+            dialog.rebuild_index_requested.connect(self._start_indexing)
+        dialog.open()
+
+    def _start_indexing(self) -> None:
+        """Start the codebase indexing process."""
+        self._set_status("Indexing codebase...")
+
+        # Safer: use CWD if it's the repo root, or try to find it.
+        # Let's assume repo root is .../Golf_Modeling_Suite
+        # and we want to index 'src'.
+
+        repo_root = Path(__file__).resolve().parent  # gui
+        while repo_root.name != "src" and repo_root.parent != repo_root:
+            repo_root = repo_root.parent
+
+        if repo_root.name == "src":
+            # We found src, let's index from here
+            src_path = repo_root
+        else:
+            # Fallback
+            src_path = Path("src").resolve()
+
+        if not src_path.exists():
+            logger.error(f"Could not find src directory to index at {src_path}")
+            self._set_status("Error: 'src' not found")
+            return
+
+        self._indexer_worker = IndexerWorker(src_path, self._rag_store)
+        self._indexer_worker.progress.connect(self._set_status)
+        self._indexer_worker.finished.connect(
+            lambda n: self._set_status(f"Ready ({n} docs indexed)")
+        )
+        self._indexer_worker.error.connect(lambda e: self._set_status(f"Error: {e}"))
+        self._indexer_worker.start()

@@ -55,7 +55,11 @@ class AdvancedGolfAnalysisWindow(QtWidgets.QMainWindow, AdvancedGuiMethodsMixin)
     def _load_stylesheet(self) -> None:
         """Load and apply the external QSS stylesheet."""
         try:
-            style_path = Path(__file__).parent / "gui" / "styles" / "dark_theme.qss"
+            # Navigate up from gui/core/main_window.py to gui/styles/dark_theme.qss
+            # __file__ is .../gui/core/main_window.py
+            # parent is .../gui/core
+            # parent.parent is .../gui
+            style_path = Path(__file__).parent.parent / "styles" / "dark_theme.qss"
             if style_path.exists():
                 with open(style_path) as f:
                     self.setStyleSheet(f.read())

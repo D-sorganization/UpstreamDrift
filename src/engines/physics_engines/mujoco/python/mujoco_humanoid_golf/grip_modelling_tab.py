@@ -134,7 +134,7 @@ class GripModellingTab(QtWidgets.QWidget):
         try:
             xml_content = self._prepare_scene_xml(scene_path, folder_path, is_both)
         except Exception:
-            logger.exception("Failed to prepare XML model")
+            logger.exception("Failed to prepare XML model from %s", scene_path)
             return
 
         # Load into widget
@@ -279,11 +279,16 @@ class GripModellingTab(QtWidgets.QWidget):
         offscreen_global = '<global offwidth="1920" offheight="1080"/>'
         if "<visual>" in xml_content:
             if "<global" in xml_content:
-                # Update existing global
+                # Update existing global: strip slash, remove old attrs, add new ones
+                def update_global_tag(m: re.Match) -> str:
+                    # m.group(1) usually contains 'azimuth="..." /'
+                    attrs = m.group(1).replace("/", "").strip()
+                    attrs = re.sub(r'offwidth="[^"]*"', "", attrs)
+                    attrs = re.sub(r'offheight="[^"]*"', "", attrs)
+                    return f'<global {attrs} offwidth="1920" offheight="1080"/>'
+
                 xml_content = re.sub(
-                    r"<global([^>]*)>",
-                    r'<global\1 offwidth="1920" offheight="1080">',
-                    xml_content,
+                    r"<global([^>]*)>", update_global_tag, xml_content, count=1
                 )
             else:
                 # Insert global into visual

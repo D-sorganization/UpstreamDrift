@@ -61,13 +61,12 @@ from .telemetry import TelemetryRecorder, TelemetryReport
 # GUI modules - optional, may fail in headless environments
 _has_gui = False
 try:
-    from . import advanced_gui, sim_widget
+    from . import sim_widget
 
     _has_gui = True
 except ImportError:
     # GUI not available (e.g., in headless CI environments)
     # Don't expose these in __all__ to avoid AttributeErrors
-    advanced_gui = None  # type: ignore[assignment]
     sim_widget = None  # type: ignore[assignment]
 
 __version__ = "2.1.0"
@@ -94,4 +93,4 @@ __all__ = [
 
 # Only include GUI modules in __all__ if they're available
 if _has_gui:
-    __all__ += ["advanced_gui", "sim_widget"]
+    __all__ += ["sim_widget"]

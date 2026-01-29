@@ -12,6 +12,7 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum, auto
+from pathlib import Path
 from typing import Any
 
 UTC = timezone.utc  # noqa: UP017
@@ -341,6 +342,102 @@ class ConversationContext:
             "active_workflow_id": self.active_workflow_id,
             "metadata": self.metadata,
         }
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> ConversationContext:
+        """Create from dictionary.
+
+        Args:
+            data: Dictionary representation.
+
+        Returns:
+            New ConversationContext instance.
+        """
+        # Reconstruct messages
+        messages = []
+        for m_data in data.get("messages", []):
+            timestamp_str = m_data.get("timestamp")
+            if timestamp_str:
+                try:
+                    timestamp = datetime.fromisoformat(timestamp_str)
+                except ValueError:
+                    timestamp = datetime.now(UTC)
+            else:
+                timestamp = datetime.now(UTC)
+
+            # Reconstruct tool calls
+            tool_calls = []
+            for tc_data in m_data.get("tool_calls", []):
+                tool_calls.append(
+                    ToolCall(
+                        id=tc_data["id"],
+                        name=tc_data["name"],
+                        arguments=tc_data["arguments"],
+                    )
+                )
+
+            messages.append(
+                Message(
+                    role=m_data["role"],
+                    content=m_data["content"],
+                    timestamp=timestamp,
+                    tool_calls=tool_calls,
+                    tool_call_id=m_data.get("tool_call_id"),
+                    metadata=m_data.get("metadata", {}),
+                )
+            )
+
+        # Expertise
+        try:
+            expertise = ExpertiseLevel[data.get("user_expertise", "BEGINNER")]
+        except KeyError:
+            expertise = ExpertiseLevel.BEGINNER
+
+        return cls(
+            session_id=data.get("session_id", ""),
+            messages=messages,
+            user_expertise=expertise,
+            active_workflow_id=data.get("active_workflow_id"),
+            metadata=data.get("metadata", {}),
+        )
+
+    def save_to_file(self, path: str | Path) -> None:
+        """Save context to a JSON file.
+
+        Args:
+            path: Path to save to.
+        """
+        import json
+        from pathlib import Path
+
+        path = Path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(self.to_dict(), f, indent=2)
+
+    @classmethod
+    def load_from_file(cls, path: str | Path) -> ConversationContext:
+        """Load context from a JSON file.
+
+        Args:
+            path: Path to load from.
+
+        Returns:
+            Loaded context, or new context if file not found.
+        """
+        if not path.exists():
+            return cls()
+
+        try:
+            import json
+
+            with open(path, encoding="utf-8") as f:
+                data = json.load(f)
+            return cls.from_dict(data)
+        except Exception:
+            # If load fails, return empty context
+            return cls()
 
 
 @dataclass

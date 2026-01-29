@@ -200,7 +200,7 @@ import sys as _sys
 _skip_mujoco = (
     _sys.platform == "win32"
     and _sys.version_info >= (3, 13)
-    and _os.environ.get("FORCE_MUJOCO_IMPORT", "").lower() != "true"
+    and _os.environ.get("SKIP_MUJOCO_IMPORT", "").lower() == "true"
 )
 
 if _skip_mujoco:

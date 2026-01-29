@@ -70,9 +70,9 @@ class ModelLoaderDialog(QDialog):
         """Set up the user interface."""
         # Update imports needed for UI changes
         from PyQt6.QtWidgets import (
-            QTabWidget, QTreeWidget, QTreeWidgetItem, QListWidget, QLineEdit, QHeaderView
+            QTabWidget,
         )
-        
+
         layout = QVBoxLayout(self)
 
         # Title
@@ -83,11 +83,11 @@ class ModelLoaderDialog(QDialog):
 
         # Tabs
         self.tabs = QTabWidget()
-        
+
         # Tab 1: Bundled Models (Original UI)
         bundled_tab = QWidget()
         bundled_layout = QVBoxLayout(bundled_tab)
-        
+
         # Human Models Section
         human_group = self._create_human_models_group()
         bundled_layout.addWidget(human_group)
@@ -96,7 +96,7 @@ class ModelLoaderDialog(QDialog):
         golf_group = self._create_golf_clubs_group()
         bundled_layout.addWidget(golf_group)
         bundled_layout.addStretch()
-        
+
         self.tabs.addTab(bundled_tab, "Bundled Assets")
 
         # Tab 2: Repository Models (Discovered)
@@ -133,10 +133,10 @@ class ModelLoaderDialog(QDialog):
         layout.addWidget(button_box)
 
     def _setup_repo_tab(self, parent: QWidget) -> None:
-        from PyQt6.QtWidgets import QTreeWidget, QTreeWidgetItem, QHeaderView, QLineEdit
-        
+        from PyQt6.QtWidgets import QHeaderView, QLineEdit, QTreeWidget
+
         layout = QVBoxLayout(parent)
-        
+
         # Search
         search_layout = QHBoxLayout()
         search_layout.addWidget(QLabel("Search:"))
@@ -145,21 +145,25 @@ class ModelLoaderDialog(QDialog):
         self.repo_search.textChanged.connect(self._filter_repo_list)
         search_layout.addWidget(self.repo_search)
         layout.addLayout(search_layout)
-        
+
         # Tree
         self.repo_tree = QTreeWidget()
         self.repo_tree.setHeaderLabels(["Name", "Type", "Path"])
-        self.repo_tree.header().setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
-        self.repo_tree.header().setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
+        self.repo_tree.header().setSectionResizeMode(
+            0, QHeaderView.ResizeMode.ResizeToContents
+        )
+        self.repo_tree.header().setSectionResizeMode(
+            1, QHeaderView.ResizeMode.ResizeToContents
+        )
         self.repo_tree.itemSelectionChanged.connect(
             lambda: self._on_model_selected("discovered")
         )
         layout.addWidget(self.repo_tree)
-        
+
         # Populate
         self.discovered_models = self.library.list_available_models()["discovered"]
         self._populate_repo_tree(self.discovered_models)
-        
+
         # Load button for this tab
         load_btn = QPushButton("Load Selected Repository Model")
         load_btn.clicked.connect(lambda: self._load_selected_model("discovered"))
@@ -167,41 +171,46 @@ class ModelLoaderDialog(QDialog):
 
     def _populate_repo_tree(self, models: list) -> None:
         from PyQt6.QtWidgets import QTreeWidgetItem
+
         self.repo_tree.clear()
         for model in models:
-            item = QTreeWidgetItem([model["name"], model["type"].upper(), model["path"]])
+            item = QTreeWidgetItem(
+                [model["name"], model["type"].upper(), model["path"]]
+            )
             item.setData(0, Qt.ItemDataRole.UserRole, model["config_key"])
             self.repo_tree.addTopLevelItem(item)
 
     def _filter_repo_list(self, text: str) -> None:
         text = text.lower()
         filtered = [
-            m for m in self.discovered_models 
+            m
+            for m in self.discovered_models
             if text in m["name"].lower() or text in m["path"].lower()
         ]
         self._populate_repo_tree(filtered)
 
     def _setup_embedded_tab(self, parent: QWidget) -> None:
         from PyQt6.QtWidgets import QListWidget
-        
+
         layout = QVBoxLayout(parent)
-        
+
         layout.addWidget(QLabel("Pre-defined MuJoCo XML models found in Python code:"))
-        
+
         self.embedded_list = QListWidget()
         self.embedded_list.itemSelectionChanged.connect(
             lambda: self._on_model_selected("embedded")
         )
         layout.addWidget(self.embedded_list)
-        
+
         # Populate
         embedded_models = self.library.list_available_models()["embedded"]
         for key, model in embedded_models.items():
             from PyQt6.QtWidgets import QListWidgetItem
+
             item = QListWidgetItem(f"{model['name']} (MJCF)")
             item.setData(Qt.ItemDataRole.UserRole, key)
             self.embedded_list.addItem(item)
-            
+
         # Load button
         load_btn = QPushButton("Load Selected Embedded Model")
         load_btn.clicked.connect(lambda: self._load_selected_model("embedded"))
@@ -210,16 +219,16 @@ class ModelLoaderDialog(QDialog):
     def _on_accept(self) -> None:
         # Determine active tab and selected item
         idx = self.tabs.currentIndex()
-        if idx == 0: # Bundled
-            pass 
-        
+        if idx == 0:  # Bundled
+            pass
+
         if self.selected_model:
             self.accept()
         else:
-             # Try to select from active tab
-             if idx == 1:
+            # Try to select from active tab
+            if idx == 1:
                 self._load_selected_model("discovered")
-             elif idx == 2:
+            elif idx == 2:
                 self._load_selected_model("embedded")
 
     def _create_human_models_group(self) -> QGroupBox:
@@ -265,6 +274,7 @@ class ModelLoaderDialog(QDialog):
 
         # Set as default checkbox
         from PyQt6.QtWidgets import QCheckBox
+
         self.default_human_chk = QCheckBox("Set as default human model")
         self.default_human_chk.setToolTip("Automatically load this model on startup")
         layout.addWidget(self.default_human_chk)
@@ -337,7 +347,7 @@ class ModelLoaderDialog(QDialog):
             category: 'human', 'golf_clubs', 'discovered', or 'embedded'
         """
         model_key = None
-        
+
         if category == "human":
             model_key = self.human_combo.currentData()
         elif category == "golf_clubs":
@@ -356,7 +366,7 @@ class ModelLoaderDialog(QDialog):
             if model_info:
                 self._display_model_info(category, model_key, model_info)
             self.selected_category = category
-            self.selected_model = model_key # Track selection lightly for tab changes
+            self.selected_model = model_key  # Track selection lightly for tab changes
 
     def _display_model_info(
         self, category: str, model_key: str, model_info: dict[str, Any]
@@ -387,14 +397,18 @@ Total Mass: {model_info["mass"] * 1000:.1f} g
 The URDF will be automatically generated with realistic geometry and inertial properties.
 """
         elif category == "discovered":
-             info_text = f"""Name: {model_info["name"]}
+            info_text = f"""Name: {model_info["name"]}
 Type: {model_info["type"].upper()}
 Path: {model_info["description"]}
 
 Click 'Load Selected Repository Model' to view.
 """
         elif category == "embedded":
-            content_preview = model_info["content"][:200] + "..." if len(model_info["content"]) > 200 else model_info["content"]
+            content_preview = (
+                model_info["content"][:200] + "..."
+                if len(model_info["content"]) > 200
+                else model_info["content"]
+            )
             info_text = f"""Name: {model_info["name"]}
 Type: Embedded MJCF
 Description: {model_info["description"]}
@@ -457,8 +471,13 @@ Content Preview:
             self.selected_model = model_key
 
             # Save as default if requested
-            if category == "human" and hasattr(self, "default_human_chk") and self.default_human_chk.isChecked():
+            if (
+                category == "human"
+                and hasattr(self, "default_human_chk")
+                and self.default_human_chk.isChecked()
+            ):
                 from PyQt6.QtCore import QSettings
+
                 settings = QSettings("GolfModelingSuite", "URDFGenerator")
                 settings.setValue("default_human_model", model_key)
                 logger.info(f"Set default human model to: {model_key}")

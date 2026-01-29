@@ -527,7 +527,7 @@ class DockerBuildThread(QThread):
         self.target_stage = target_stage
 
     def run(self) -> None:
-        mujoco_path = REPOS_ROOT / "engines/physics_engines/mujoco"
+        mujoco_path = REPOS_ROOT / "src/engines/physics_engines/mujoco"
         if not mujoco_path.exists():
             self.finished_signal.emit(False, f"Path not found: {mujoco_path}")
             return
