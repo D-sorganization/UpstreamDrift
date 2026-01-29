@@ -81,13 +81,25 @@ class ModelLibrary:
             "license": "Internal",
             "urdf_url": "",  # Not downloadable
         },
+        "human_with_meshes_local": {
+            "name": "Human Subject with Meshes (Local)",
+            "description": "Full body model with detailed STL meshes (from local human-gazebo)",
+            "type": "local_submodule",
+            "urdf_subpath": "src/shared/tools/human-gazebo/humanSubjectWithMeshes/humanSubjectWithMesh.urdf",
+        },
+        "human_with_spinal_cord_local": {
+            "name": "Human Subject with Spinal Cord (Local)",
+            "description": "Full body model with spinal cord meshes (from local human-gazebo)",
+            "type": "local_submodule",
+            "urdf_subpath": "src/shared/tools/human-gazebo/humanSubjectWithSpinalCordMeshes/humanSubjectWithSpinalCordMeshes.urdf",
+        },
         "human_with_meshes": {
-            "name": "Human Subject with Meshes",
-            "description": "Full human body model with detailed STL meshes",
+            "name": "Human Subject with Meshes (Remote)",
+            "description": "Full human body model with detailed STL meshes (Downloadable)",
             "urdf_url": f"{HUMAN_GAZEBO_BASE}/humanSubjectWithMeshes/humanSubjectWithMesh.urdf",
             "meshes_base": f"{HUMAN_GAZEBO_BASE}/humanSubjectWithMeshes/meshes",
             "license": "CC-BY-SA 2.0",
-            "commit_sha": HUMAN_GAZEBO_COMMIT,  # Track version
+            "commit_sha": HUMAN_GAZEBO_COMMIT,
             "upstream_repo": "https://github.com/gbionics/human-gazebo",
         },
     }
@@ -190,6 +202,20 @@ class ModelLibrary:
         # Handle embedded MuJoCo Humanoid special case
         if model_key == "mujoco_humanoid":
             return self._get_cached_embedded_model("full_body_golf_swing")
+
+        # Handle local submodule (repo-bundled via git submodule)
+        model_info = self.HUMAN_MODELS.get(model_key)
+        if model_info and model_info.get("type") == "local_submodule":
+            path = _project_root / model_info["urdf_subpath"]
+            if path.exists():
+                logger.info(f"Using local submodule model: {path}")
+                return path
+            else:
+                logger.warning(
+                    f"Local submodule model not found at {path}.\n"
+                    f"Ensure submodules are initialized: git submodule update --init --recursive"
+                )
+                return None
 
         # First, try bundled assets (preferred)
         if BundledAssets is not None:
