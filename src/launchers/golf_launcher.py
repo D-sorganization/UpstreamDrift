@@ -864,8 +864,7 @@ except Exception as e:
         overlay_btn = QPushButton("Overlay")
         overlay_btn.setCheckable(True)
         overlay_btn.clicked.connect(self._toggle_overlay)
-        overlay_btn.setStyleSheet(
-            """
+        overlay_btn.setStyleSheet("""
             QPushButton {
                 background-color: #444; color: white; border: none;
                 padding: 5px 10px; border-radius: 4px;
@@ -874,8 +873,7 @@ except Exception as e:
                 background-color: #007ACC;
             }
             QPushButton:hover { background-color: #555; }
-        """
-        )
+        """)
         top_bar.addWidget(overlay_btn)
 
         return top_bar
