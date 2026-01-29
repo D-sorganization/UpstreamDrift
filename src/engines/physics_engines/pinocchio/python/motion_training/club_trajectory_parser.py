@@ -277,11 +277,14 @@ class ClubTrajectoryParser:
         """Parse a single data row into ClubFrame."""
         # Access by index (works for both pandas Series and list)
         if hasattr(row, "iloc"):
+
             def get(i):
-                 return row.iloc[i] if i < len(row) else None
+                return row.iloc[i] if i < len(row) else None
+
         else:
+
             def get(i):
-                 return row[i] if i < len(row) else None
+                return row[i] if i < len(row) else None
 
         # Skip header rows or invalid data
         sample = get(self.SAMPLE_COL)

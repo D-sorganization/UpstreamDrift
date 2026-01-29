@@ -116,7 +116,6 @@ def check_dry_violations(files: list[Path]) -> list[dict]:
     chunk_size = 6
     code_blocks = defaultdict(list)
 
-
     for file_path in files:
         try:
             content = file_path.read_text(encoding="utf-8", errors="ignore")
