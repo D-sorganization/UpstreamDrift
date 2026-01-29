@@ -1,0 +1,194 @@
+[
+  {
+    "file": "./src/engines/physics_engines/pendulum/python/pendulum_physics_engine.py",
+    "line": 90,
+    "function": "forward",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/engines/physics_engines/mujoco/python/humanoid_launcher.py",
+    "line": 746,
+    "function": "load_config",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/pinocchio_interface.py",
+    "line": 154,
+    "function": "sync_pinocchio_to_mujoco",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py",
+    "line": 71,
+    "function": "control",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/examples_chaotic_pendulum.py",
+    "line": 75,
+    "function": "reset",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/engines/physics_engines/mujoco/python/mujoco_humanoid_golf/urdf_io.py",
+    "line": 514,
+    "function": "__init__",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/api/auth/security.py",
+    "line": 282,
+    "function": "__init__",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/tools/urdf_generator/visualization_widget.py",
+    "line": 176,
+    "function": "initializeGL",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/tools/urdf_generator/visualization_widget.py",
+    "line": 183,
+    "function": "resizeGL",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/plotting_core.py",
+    "line": 78,
+    "function": "get_time_series",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/plotting_core.py",
+    "line": 89,
+    "function": "get_induced_acceleration_series",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/plotting_core.py",
+    "line": 102,
+    "function": "get_counterfactual_series",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/process_worker.py",
+    "line": 18,
+    "function": "__init__",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/process_worker.py",
+    "line": 24,
+    "function": "run",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/process_worker.py",
+    "line": 27,
+    "function": "wait",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/process_worker.py",
+    "line": 31,
+    "function": "__init__",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/process_worker.py",
+    "line": 34,
+    "function": "emit",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/video_pose_pipeline.py",
+    "line": 385,
+    "function": "_convert_poses_to_markers",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/flexible_shaft.py",
+    "line": 336,
+    "function": "apply_load",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/comparative_analysis.py",
+    "line": 24,
+    "function": "get_time_series",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/injury/swing_modifications.py",
+    "line": 169,
+    "function": "__init__",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/plotting/base.py",
+    "line": 64,
+    "function": "get_time_series",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/plotting/base.py",
+    "line": 75,
+    "function": "get_induced_acceleration_series",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  },
+  {
+    "file": "./src/shared/python/plotting/base.py",
+    "line": 88,
+    "function": "get_counterfactual_series",
+    "category": "Critical",
+    "priority": 5,
+    "source": "Stub"
+  }
+]
