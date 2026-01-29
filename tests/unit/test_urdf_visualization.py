@@ -62,6 +62,11 @@ def test_visualization_widget_clear(qtbot):
 def test_visualization_widget_reset_view(qtbot):
     """Test resetting the view."""
     widget = VisualizationWidget()
+    # Force use_mujoco to False to ensure gl_widget is created for testing fallback
+    if widget.use_mujoco:
+        widget.use_mujoco = False
+        widget._setup_ui()  # Re-setup
+    
     qtbot.addWidget(widget)
 
     # Modify camera state via the GL widget
@@ -70,5 +75,7 @@ def test_visualization_widget_reset_view(qtbot):
 
     widget.reset_view()
 
+    # Reset sets back to 1.0 according to implementation
+    # The initial value in __init__ is 5.0, but reset_view() uses 1.0
     assert widget.gl_widget.camera_distance == 1.0
     assert widget.gl_widget.camera_rotation_x == 0.0

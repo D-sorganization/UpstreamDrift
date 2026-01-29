@@ -140,7 +140,7 @@ class TestURDFExporter:
     """Test suite for URDFExporter."""
 
     @patch(
-        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco.MjData"
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco.MjData"
     )
     def test_export_to_urdf(self, mock_mjdata_class, tmp_path):
         """Test exporting MJCF to URDF."""
@@ -176,7 +176,7 @@ class TestURDFExporter:
         # Use direct patching instead of sys.modules manipulation and reload
         # to prevent MuJoCo DLL/C-API corruption (Access Violation)
         with patch(
-            "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco",
+            "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.mujoco",
             mock_mujoco,
         ):
             from src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io import (
@@ -235,8 +235,9 @@ def test_convenience_functions(sample_urdf, mock_mujoco_model, tmp_path):
     # Export
     # We need to mock URDFExporter inside the function or pass a mock model that works
     # Using patch to avoid complexity of real exporter running on mock model
+    # Note: Use src. prefix to match how it's imported in the module/env
     with patch(
-        "engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.URDFExporter"
+        "src.engines.physics_engines.mujoco.python.mujoco_humanoid_golf.urdf_io.URDFExporter"
     ) as MockExporter:
         instance = MockExporter.return_value
         instance.export_to_urdf.return_value = "<robot></robot>"
