@@ -239,6 +239,28 @@ class URDFGeneratorWindow(QMainWindow):
         reset_view_action.triggered.connect(self.visualization_widget.reset_view)
         view_menu.addAction(reset_view_action)
 
+        # Tools menu
+        tools_menu = menubar.addMenu("&Tools")
+        if tools_menu is None:
+            return
+
+        advanced_editor_action = QAction("Advanced URDF &Editor...", self)
+        advanced_editor_action.setShortcut("Ctrl+E")
+        advanced_editor_action.triggered.connect(self._open_advanced_editor)
+        tools_menu.addAction(advanced_editor_action)
+
+        tools_menu.addSeparator()
+
+        frankenstein_action = QAction("&Frankenstein Mode...", self)
+        frankenstein_action.setToolTip("Combine components from multiple URDFs")
+        frankenstein_action.triggered.connect(self._open_frankenstein_mode)
+        tools_menu.addAction(frankenstein_action)
+
+        code_editor_action = QAction("&Code Editor...", self)
+        code_editor_action.setToolTip("Edit URDF XML directly with syntax highlighting")
+        code_editor_action.triggered.connect(self._open_code_editor)
+        tools_menu.addAction(code_editor_action)
+
         # Help menu
         help_menu = menubar.addMenu("&Help")
         if help_menu is None:
@@ -589,12 +611,87 @@ class URDFGeneratorWindow(QMainWindow):
         QMessageBox.about(
             self,
             "About URDF Generator",
-            "Interactive URDF Generator\n"
+            "Interactive URDF Generator v2.0\n"
             "Part of the Golf Modeling Suite\n\n"
             "Create and edit URDF files with support for\n"
             "parallel kinematic configurations.\n\n"
+            "New features in v2.0:\n"
+            "- Component library with read-only protection\n"
+            "- Frankenstein mode for combining URDFs\n"
+            "- Chain manipulation tools\n"
+            "- End effector swap system\n"
+            "- Joint auto-loader\n"
+            "- Mesh/STL browser\n\n"
             "Compatible with MuJoCo, Drake, and Pinocchio.",
         )
+
+    def _open_advanced_editor(self) -> None:
+        """Open the advanced URDF editor window."""
+        try:
+            from .urdf_editor_window import URDFEditorWindow
+
+            self._editor_window = URDFEditorWindow()
+
+            # Load current URDF if available
+            if self.current_file_path and self.current_file_path.exists():
+                self._editor_window.load_file(self.current_file_path)
+
+            self._editor_window.show()
+            self.status_bar.showMessage("Opened Advanced URDF Editor")
+        except Exception as e:
+            logger.error(f"Failed to open advanced editor: {e}")
+            QMessageBox.critical(self, "Error", f"Failed to open editor: {e}")
+
+    def _open_frankenstein_mode(self) -> None:
+        """Open Frankenstein mode for combining URDFs."""
+        try:
+            from PyQt6.QtWidgets import QDialog, QVBoxLayout
+
+            from .frankenstein_editor import FrankensteinEditor
+
+            dialog = QDialog(self)
+            dialog.setWindowTitle("Frankenstein Mode - Combine URDFs")
+            dialog.setMinimumSize(1200, 700)
+
+            layout = QVBoxLayout(dialog)
+            frankenstein = FrankensteinEditor()
+            layout.addWidget(frankenstein)
+
+            # Load current URDF as source if available
+            if self.current_file_path and self.current_file_path.exists():
+                frankenstein.load_source(self.current_file_path)
+
+            dialog.exec()
+            self.status_bar.showMessage("Frankenstein mode closed")
+        except Exception as e:
+            logger.error(f"Failed to open Frankenstein mode: {e}")
+            QMessageBox.critical(self, "Error", f"Failed to open Frankenstein mode: {e}")
+
+    def _open_code_editor(self) -> None:
+        """Open the URDF code editor."""
+        try:
+            from PyQt6.QtWidgets import QDialog, QVBoxLayout
+
+            from .urdf_code_editor import URDFCodeEditorWidget
+
+            dialog = QDialog(self)
+            dialog.setWindowTitle("URDF Code Editor")
+            dialog.setMinimumSize(800, 600)
+
+            layout = QVBoxLayout(dialog)
+            code_editor = URDFCodeEditorWidget()
+            layout.addWidget(code_editor)
+
+            # Load current URDF content if available
+            if self.current_file_path and self.current_file_path.exists():
+                content = self.current_file_path.read_text(encoding="utf-8")
+                code_editor.set_content(content, str(self.current_file_path))
+
+            dialog.exec()
+            self.status_bar.showMessage("Code editor closed")
+        except Exception as e:
+            logger.error(f"Failed to open code editor: {e}")
+            QMessageBox.critical(self, "Error", f"Failed to open code editor: {e}")
 
     def closeEvent(self, event: Any) -> None:
         """Handle window close event."""
