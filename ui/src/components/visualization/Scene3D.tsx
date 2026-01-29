@@ -1,8 +1,8 @@
 import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Grid, Environment } from '@react-three/drei';
+import { OrbitControls, Grid, Environment, Line } from '@react-three/drei';
 import * as THREE from 'three';
-import { SimulationFrame } from '../../api/client';
+import type { SimulationFrame } from '@/api/client';
 
 interface Props {
   engine: string;
@@ -15,10 +15,6 @@ function GolferModel({ frame }: { frame: SimulationFrame | null }) {
   // Update pose from simulation frame
   useFrame(() => {
     if (!frame?.state || !groupRef.current) return;
-
-    // Apply joint angles to skeleton
-    // This would map simulation state to Three.js bone rotations
-    // Placeholder logic for now
   });
 
   return (
@@ -42,27 +38,24 @@ function ClubTrajectory({ frame }: { frame: SimulationFrame | null }) {
   const points = useMemo(() => {
     if (!frame) return [];
     // TODO: Maintain history of points for trail
-    return [[0,0,0], [1,1,1]]; 
+    return [[0,0,0], [1,1,1]] as [number, number, number][]; 
   }, [frame]);
 
   if (points.length < 2) return null;
 
-  const geometry = useMemo(() => {
-      const geo = new THREE.BufferGeometry();
-      geo.setFromPoints(points.map(p => new THREE.Vector3(...p)));
-      return geo;
-  }, [points]);
-
   return (
-    <line geometry={geometry}>
-      <lineBasicMaterial color="#ffcc00" linewidth={2} />
-    </line>
+    <Line 
+      points={points}
+      color="#ffcc00"
+      lineWidth={2}
+    />
   );
 }
 
 export function Scene3D({ engine, frame }: Props) {
   return (
     <Canvas
+      key={engine}
       camera={{ position: [3, 2, 3], fov: 50 }}
       className="bg-gray-900 w-full h-full"
     >

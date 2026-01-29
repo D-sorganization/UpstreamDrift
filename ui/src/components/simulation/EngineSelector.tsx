@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchEngines } from '../../api/client';
+import { fetchEngines } from '@/api/client';
 
 interface Props {
   value: string;

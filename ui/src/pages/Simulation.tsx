@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useSimulation } from '../../api/client';
-import { EngineSelector } from '../../components/simulation/EngineSelector';
-import { SimulationControls } from '../../components/simulation/SimulationControls';
-import { Scene3D } from '../../components/visualization/Scene3D';
+import { useSimulation } from '@/api/client';
+import { EngineSelector } from '@/components/simulation/EngineSelector';
+import { SimulationControls } from '@/components/simulation/SimulationControls';
+import { Scene3D } from '@/components/visualization/Scene3D';
 // import { LivePlot } from '../components/analysis/LivePlot'; // To be implemented
 
 export function SimulationPage() {
