@@ -88,7 +88,8 @@ class MatlabLauncher(QMainWindow):
         row = 0
         for item in MATLAB_MODELS:
             btn_frame = QFrame()
-            btn_frame.setStyleSheet("""
+            btn_frame.setStyleSheet(
+                """
                 QFrame {
                     background-color: #f8f9fa;
                     border: 1px solid #dee2e6;
@@ -98,7 +99,8 @@ class MatlabLauncher(QMainWindow):
                     background-color: #e9ecef;
                     border-color: #adb5bd;
                 }
-            """)
+            """
+            )
             btn_layout = QVBoxLayout(btn_frame)
 
             lbl_name = QLabel(item["name"])
@@ -112,7 +114,8 @@ class MatlabLauncher(QMainWindow):
             lbl_desc.setWordWrap(True)
 
             btn_launch = QPushButton("Launch")
-            btn_launch.setStyleSheet("""
+            btn_launch.setStyleSheet(
+                """
                 QPushButton {
                     background-color: #007bff;
                     color: white;
@@ -121,7 +124,8 @@ class MatlabLauncher(QMainWindow):
                     border-radius: 4px;
                 }
                 QPushButton:hover { background-color: #0056b3; }
-            """)
+            """
+            )
             # Fix lambda closure early binding
             btn_launch.clicked.connect(
                 lambda checked, _p=item["path"]: self.launch_file(_p)

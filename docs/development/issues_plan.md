@@ -38,7 +38,7 @@ Consolidate "Matlab Simscape 2D", "Matlab Simscape 3D", "Dataset Generator GUI",
 
 **Feasibility:** High. Can use the same pattern as the Unified Launcher to create a "Matlab Launcher" window.
 
-## 3. Model Explorer & URDF Generator Expansion
+## 3. Model Explorer & URDF Generator Expansion [DONE]
 
 **Issue Title:** Expand URDF Generator into Model Explorer
 **Description:**
@@ -60,7 +60,7 @@ Rename "URDF Generator" to "Model Explorer". Expand its functionality to help us
 
 **Feasibility:** High. `src/tools/urdf_generator` can be expanded.
 
-## 4. Embed/Pop-out Screens
+## 4. Embed/Pop-out Screens [DONE]
 
 **Issue Title:** Implement Embed/Pop-out Functionality for Interfaces
 **Description:**
@@ -78,7 +78,7 @@ Enhance the main GUI (Unified Launcher) to allow running interfaces (like the Mu
 
 **Feasibility:** Medium. Requires refactoring `GolfLauncher` to manage `QDockWidget` vs `QMainWindow` instances dynamically.
 
-## 5. Screen Overlay & Controls
+## 5. Screen Overlay & Controls [DONE]
 
 **Issue Title:** Global Screen Overlay and Control Display
 **Description:**
