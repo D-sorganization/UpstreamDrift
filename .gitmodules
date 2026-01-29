@@ -4,3 +4,6 @@
 [submodule "shared/models/myosuite/myo_sim"]
 	path = shared/models/myosuite/myo_sim
 	url = https://github.com/MyoHub/myo_sim.git
+[submodule "src/shared/tools/human-gazebo"]
+	path = src/shared/tools/human-gazebo
+	url = https://github.com/gbionics/human-gazebo
