@@ -20,7 +20,7 @@ except Exception:
 
 from PyQt6 import QtCore, QtWidgets
 
-from .advanced_gui import AdvancedGolfAnalysisWindow
+from .gui.core.main_window import AdvancedGolfAnalysisWindow
 
 # Legacy simple window for backwards compatibility
 from .models import (

@@ -36,9 +36,10 @@ from src.shared.python.logging_config import configure_gui_logging, get_logger
 if TYPE_CHECKING:
     from src.shared.python.ui import ToastManager
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import Qt, QTimer, QUrl
 from PyQt6.QtGui import (
     QCloseEvent,
+    QDesktopServices,
     QFont,
     QIcon,
     QKeySequence,
@@ -864,6 +865,16 @@ except Exception as e:
         self.chk_wsl.stateChanged.connect(self._on_wsl_mode_changed)
         top_bar.addWidget(self.chk_wsl)
 
+        # Execution Mode Label
+        self.lbl_execution_mode = QLabel("Mode: Local (Windows)")
+        self.lbl_execution_mode.setStyleSheet(
+            "color: #FFD60A; font-weight: bold; margin-left: 10px;"
+        )
+        self.lbl_execution_mode.setToolTip(
+            "Current execution environment (Local, Docker, or WSL)"
+        )
+        top_bar.addWidget(self.lbl_execution_mode)
+
         top_bar.addStretch()
 
         # Search Bar
@@ -911,6 +922,23 @@ except Exception as e:
         btn_help.setToolTip("View documentation and user guide")
         btn_help.clicked.connect(self.open_help)
         top_bar.addWidget(btn_help)
+
+        btn_bug = QPushButton("Report Bug")
+        btn_bug.setStyleSheet("""
+            QPushButton {
+                background-color: #d32f2f;
+                color: white;
+                padding: 8px 16px;
+                border: none;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #b71c1c;
+            }
+        """)
+        btn_bug.setToolTip("Report a bug via email")
+        btn_bug.clicked.connect(self._report_bug)
+        top_bar.addWidget(btn_bug)
 
         # AI Assistant Button (if available)
         if AI_AVAILABLE:
@@ -1068,16 +1096,21 @@ except Exception as e:
             state: Qt checkbox state (0=unchecked, 2=checked)
         """
         use_docker = state == 2
-        if use_docker and not self.docker_available:
-            QMessageBox.warning(
-                self,
-                "Docker Not Available",
-                "Docker Desktop is not running or not installed.\n\n"
-                "Please start Docker Desktop and try again.\n\n"
-                "The launcher will continue in local mode.",
-            )
-            self.chk_docker.setChecked(False)
-            return
+        if use_docker:
+            # Disable WSL mode if Docker is enabled (mutually exclusive)
+            if hasattr(self, "chk_wsl") and self.chk_wsl.isChecked():
+                self.chk_wsl.setChecked(False)
+
+            if not self.docker_available:
+                QMessageBox.warning(
+                    self,
+                    "Docker Not Available",
+                    "Docker Desktop is not running or not installed.\n\n"
+                    "Please start Docker Desktop and try again.\n\n"
+                    "The launcher will continue in local mode.",
+                )
+                self.chk_docker.setChecked(False)
+                return
 
         if use_docker:
             logger.info("Docker mode enabled")
@@ -1090,6 +1123,9 @@ except Exception as e:
             logger.info("Docker mode disabled")
             if hasattr(self, "toast_manager") and self.toast_manager:
                 self.show_toast("Local mode - engines will run on host system", "info")
+
+        # Update UI status
+        self.update_execution_status()
 
         # Update launch button text if a model is selected
         if hasattr(self, "btn_launch"):
@@ -1110,14 +1146,21 @@ except Exception as e:
 
             # Check if WSL is available
             try:
+                # wsl.exe outputs UTF-16LE on Windows
                 result = subprocess.run(
                     ["wsl", "--list", "--quiet"],
                     capture_output=True,
-                    text=True,
                     timeout=5,
                     creationflags=CREATE_NO_WINDOW if os.name == "nt" else 0,
                 )
-                if result.returncode != 0 or "Ubuntu" not in result.stdout:
+
+                # Try decoding as UTF-16LE first (standard for wsl.exe), then fallback
+                try:
+                    output = result.stdout.decode("utf-16-le")
+                except UnicodeError:
+                    output = result.stdout.decode("utf-8", errors="ignore")
+
+                if result.returncode != 0 or "Ubuntu" not in output:
                     raise RuntimeError("Ubuntu not found in WSL")
             except Exception as e:
                 QMessageBox.warning(
@@ -1141,9 +1184,47 @@ except Exception as e:
             if hasattr(self, "toast_manager") and self.toast_manager:
                 self.show_toast("Local Windows mode", "info")
 
+        # Update UI status
+        self.update_execution_status()
+
         # Update launch button text if a model is selected
         if hasattr(self, "btn_launch"):
             self.update_launch_button()
+
+    def _report_bug(self) -> None:
+        """Open default mail client to report a bug."""
+        subject = "Bug Report: Golf Modeling Suite"
+        body = "Please describe the issue you encountered:\n\n"
+
+        # Safely encode
+        from urllib.parse import quote
+
+        # Replace with actual support email if known, otherwise placeholder
+        email = "support@golfmodelingsuite.com"
+        mailto_url = f"mailto:{email}?subject={quote(subject)}&body={quote(body)}"
+
+        QDesktopServices.openUrl(QUrl(mailto_url))
+
+    def update_execution_status(self) -> None:
+        """Update the execution mode label based on current settings."""
+        if not hasattr(self, "lbl_execution_mode"):
+            return
+
+        if hasattr(self, "chk_wsl") and self.chk_wsl.isChecked():
+            self.lbl_execution_mode.setText("Mode: WSL (Ubuntu)")
+            self.lbl_execution_mode.setStyleSheet(
+                "color: #30D158; font-weight: bold; margin-left: 10px;"
+            )
+        elif hasattr(self, "chk_docker") and self.chk_docker.isChecked():
+            self.lbl_execution_mode.setText("Mode: Docker Container")
+            self.lbl_execution_mode.setStyleSheet(
+                "color: #30D158; font-weight: bold; margin-left: 10px;"
+            )
+        else:
+            self.lbl_execution_mode.setText("Mode: Local (Windows)")
+            self.lbl_execution_mode.setStyleSheet(
+                "color: #FFD60A; font-weight: bold; margin-left: 10px;"
+            )
 
     def _launch_in_wsl(self, script_path: str, args: list[str] | None = None) -> None:
         """Launch a script in WSL2 Ubuntu environment.
@@ -1671,31 +1752,35 @@ python "{wsl_path}" {' '.join(args or [])}
                 self.lbl_status.setStyleSheet("color: #aaaaaa;")
                 return
 
-        # Local mode - check dependencies
-        self.lbl_status.setText(f"> Checking {model.name} dependencies...")
-        self.lbl_status.setStyleSheet("color: #FFD60A;")
-        QApplication.processEvents()
+        # Check if WSL mode is enabled
+        use_wsl = hasattr(self, "chk_wsl") and self.chk_wsl.isChecked()
 
-        # Check dependencies before launching
-        deps_ok, deps_error = self._check_module_dependencies(model.type)
-        if not deps_ok:
-            # Offer Docker as alternative if available
-            if self.docker_available:
-                response = QMessageBox.question(
-                    self,
-                    "Local Dependencies Missing",
-                    f"{deps_error}\n\n"
-                    "Would you like to try launching in Docker mode instead?",
-                    QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                )
-                if response == QMessageBox.StandardButton.Yes:
-                    self.chk_docker.setChecked(True)
-                    self.launch_simulation()  # Retry with Docker
-                    return
-            self._show_dependency_error(model.name, deps_error)
-            self.lbl_status.setText("● Dependency Error")
-            self.lbl_status.setStyleSheet("color: #FF375F;")
-            return
+        # Local mode - check dependencies (only if not using WSL)
+        if not use_wsl:
+            self.lbl_status.setText(f"> Checking {model.name} dependencies...")
+            self.lbl_status.setStyleSheet("color: #FFD60A;")
+            QApplication.processEvents()
+
+            # Check dependencies before launching
+            deps_ok, deps_error = self._check_module_dependencies(model.type)
+            if not deps_ok:
+                # Offer Docker as alternative if available
+                if self.docker_available:
+                    response = QMessageBox.question(
+                        self,
+                        "Local Dependencies Missing",
+                        f"{deps_error}\n\n"
+                        "Would you like to try launching in Docker mode instead?",
+                        QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                    )
+                    if response == QMessageBox.StandardButton.Yes:
+                        self.chk_docker.setChecked(True)
+                        self.launch_simulation()  # Retry with Docker
+                        return
+                self._show_dependency_error(model.name, deps_error)
+                self.lbl_status.setText("● Dependency Error")
+                self.lbl_status.setStyleSheet("color: #FF375F;")
+                return
 
         self.lbl_status.setText(f"> Launching {model.name}...")
         QApplication.processEvents()
@@ -2052,7 +2137,7 @@ python "{wsl_path}" {' '.join(args or [])}
 
         if use_wsl:
             # For WSL, we run the module using python -m
-            self._launch_module_in_wsl(module_name)
+            self._launch_module_in_wsl(module_name, cwd)
             self.lbl_status.setText(f"● {name} Running (WSL)")
             self.lbl_status.setStyleSheet("color: #30D158;")
             return
@@ -2060,7 +2145,21 @@ python "{wsl_path}" {' '.join(args or [])}
         try:
             env = self._get_subprocess_env()
 
+            # Ensure PYTHONPATH is set correctly for Windows
             if os.name == "nt":
+                current_pythonpath = env.get("PYTHONPATH", "")
+                repo_root_str = str(REPOS_ROOT)
+                src_dir_str = str(REPOS_ROOT / "src")
+
+                paths_to_add = []
+                if repo_root_str not in current_pythonpath:
+                    paths_to_add.append(repo_root_str)
+                if src_dir_str not in current_pythonpath:
+                    paths_to_add.append(src_dir_str)
+
+                if paths_to_add:
+                    env["PYTHONPATH"] = f"{';'.join(paths_to_add)};{current_pythonpath}"
+
                 # Use cmd /k with a single string command to keep window open
                 cmd_str = f'cmd /k ""{sys.executable}" -m {module_name} & pause"'
                 process = subprocess.Popen(
@@ -2087,13 +2186,24 @@ python "{wsl_path}" {' '.join(args or [])}
                 self, "Launch Error", f"Failed to launch {name}:\n\n{e}"
             )
 
-    def _launch_module_in_wsl(self, module_name: str) -> None:
+    def _launch_module_in_wsl(self, module_name: str, cwd: Path | None = None) -> None:
         """Launch a Python module in WSL2 Ubuntu environment.
 
         Args:
             module_name: Python module name to run with -m flag
+            cwd: Optional working directory (Windows Path)
         """
         project_dir = "/mnt/c/Users/diete/Repositories/Golf_Modeling_Suite"
+
+        # Determine working directory
+        work_dir = project_dir
+        if cwd:
+            # Convert Windows path to WSL path
+            s_cwd = str(cwd)
+            if len(s_cwd) > 1 and s_cwd[1] == ":":
+                drive = s_cwd[0].lower()
+                path_part = s_cwd[2:].replace("\\", "/")
+                work_dir = f"/mnt/{drive}{path_part}"
 
         # Build the WSL command
         wsl_cmd = f"""
@@ -2101,7 +2211,7 @@ source ~/miniforge3/etc/profile.d/conda.sh
 conda activate golf_suite
 export LD_LIBRARY_PATH="$CONDA_PREFIX/lib:$LD_LIBRARY_PATH"
 export PYTHONPATH="{project_dir}:$PYTHONPATH"
-cd "{project_dir}"
+cd "{work_dir}"
 python -m {module_name}
 """
 

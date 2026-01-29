@@ -658,8 +658,9 @@ class DrakeSimApp(QtWidgets.QMainWindow):  # type: ignore[misc, no-any-unimporte
         # Reset recorder
         if hasattr(self, "recorder"):
             self.recorder.reset()
-            self.lbl_rec_status.setText("Frames: 0")
-            if self.btn_record.isChecked():
+            if hasattr(self, "lbl_rec_status"):
+                self.lbl_rec_status.setText("Frames: 0")
+            if hasattr(self, "btn_record") and self.btn_record.isChecked():
                 self.btn_record.setChecked(False)
                 self.btn_record.setText("Record")
 
