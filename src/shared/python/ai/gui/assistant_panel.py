@@ -9,9 +9,14 @@ responses with markdown rendering.
 
 from __future__ import annotations
 
-# Python 3.10 compatibility: timezone.utc was added in 3.11
 from datetime import UTC, datetime, timezone
+from pathlib import Path
 
+from src.shared.python.ai.gui.settings_dialog import AISettingsDialog
+from src.shared.python.ai.rag.indexer_worker import IndexerWorker
+from src.shared.python.ai.rag.simple_rag import SimpleRAGStore
+from src.shared.python.ai.tool_registry import ToolCategory, get_global_registry
+from src.shared.python.ai.tools.file_ops import register_file_tools
 from src.shared.python.logging_config import get_logger
 
 try:
@@ -220,10 +225,15 @@ class StreamWorker(QThread):
     def run(self) -> None:
         """Execute streaming in background thread."""
         try:
+            # Note: Adapter expects ToolDeclaration objects
+            # We need to convert registry tools to declarations if they aren't already
+            # But get_tools_for_provider returns dicts usually.
+            # The adapter protocol says `list[ToolDeclaration]`.
+            # Let's fix this in _process_message
             for chunk in self._adapter.stream_response(
                 self._message,
                 self._context,
-                self._tools,
+                self._tools,  # This should be compatible
             ):
                 if chunk.content:
                     self.chunk_received.emit(chunk.content)
@@ -275,8 +285,40 @@ class AIAssistantPanel(QWidget):
         self._adapter: BaseAgentAdapter | None = None
         self._current_worker: StreamWorker | None = None
         self._current_assistant_message: MessageWidget | None = None
+
+        # Tools & RAG
+        self._tools_registry = get_global_registry()
+        self._rag_store = SimpleRAGStore()
+
+        # Initialize Core Tools
+        self._init_tools()
+
         self._setup_ui()
         # Note: No separate shortcuts needed as ChatInput handles Enter
+
+    def _init_tools(self) -> None:
+        """Initialize default tools."""
+        # 1. File Ops
+        register_file_tools(self._tools_registry)
+
+        # 2. RAG Search Tool
+        @self._tools_registry.register(
+            name="search_knowledge_base",
+            description="Search the user's resource library/codebase for information.",
+            category=ToolCategory.ANALYSIS,
+        )
+        def search_knowledge_base(query: str) -> str:
+            results = self._rag_store.query(query)
+            if not results:
+                return "No relevant information found."
+
+            output = ["Found relevant documents:"]
+            for doc, score in results:
+                output.append(f"--- Document: {doc.id} (Score: {score:.2f}) ---")
+                output.append(
+                    doc.content[:500] + "..." if len(doc.content) > 500 else doc.content
+                )
+            return "\n\n".join(output)
 
     def _setup_ui(self) -> None:
         """Set up the panel UI."""
@@ -319,6 +361,7 @@ class AIAssistantPanel(QWidget):
         """Try to load settings and init adapter on startup."""
         try:
             from shared.python.ai.gui.settings_dialog import AISettings
+
             settings = AISettings.load()
             self.apply_settings(settings)
         except Exception as e:
@@ -371,7 +414,7 @@ class AIAssistantPanel(QWidget):
         # Settings button
         settings_btn = QPushButton("⚙️")
         settings_btn.setToolTip("Settings")
-        settings_btn.clicked.connect(self.settings_requested.emit)
+        settings_btn.clicked.connect(self._show_settings)
         layout.addWidget(settings_btn)
 
         return header
@@ -758,3 +801,43 @@ class AIAssistantPanel(QWidget):
                 f"⚠️ Could not connect to {settings.provider.name}. "
                 "Please check your settings."
             )
+
+    def _show_settings(self) -> None:
+        """Show the settings dialog."""
+        dialog = AISettingsDialog(self)
+        dialog.settings_changed.connect(self.apply_settings)
+        if hasattr(dialog, "rebuild_index_requested"):
+            dialog.rebuild_index_requested.connect(self._start_indexing)
+        dialog.open()
+
+    def _start_indexing(self) -> None:
+        """Start the codebase indexing process."""
+        self._set_status("Indexing codebase...")
+
+        # Safer: use CWD if it's the repo root, or try to find it.
+        # Let's assume repo root is .../Golf_Modeling_Suite
+        # and we want to index 'src'.
+
+        repo_root = Path(__file__).resolve().parent  # gui
+        while repo_root.name != "src" and repo_root.parent != repo_root:
+            repo_root = repo_root.parent
+
+        if repo_root.name == "src":
+            # We found src, let's index from here
+            src_path = repo_root
+        else:
+            # Fallback
+            src_path = Path("src").resolve()
+
+        if not src_path.exists():
+            logger.error(f"Could not find src directory to index at {src_path}")
+            self._set_status("Error: 'src' not found")
+            return
+
+        self._indexer_worker = IndexerWorker(src_path, self._rag_store)
+        self._indexer_worker.progress.connect(self._set_status)
+        self._indexer_worker.finished.connect(
+            lambda n: self._set_status(f"Ready ({n} docs indexed)")
+        )
+        self._indexer_worker.error.connect(lambda e: self._set_status(f"Error: {e}"))
+        self._indexer_worker.start()

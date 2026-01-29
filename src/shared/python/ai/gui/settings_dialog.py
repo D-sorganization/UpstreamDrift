@@ -49,6 +49,7 @@ KEY_MODEL = "ai/model"
 KEY_EXPERTISE = "ai/expertise_level"
 KEY_OLLAMA_HOST = "ai/ollama_host"
 KEY_STREAMING = "ai/streaming_enabled"
+KEY_RAG_ENABLED = "ai/rag_enabled"
 
 
 class AIProvider(Enum):
@@ -67,7 +68,14 @@ PROVIDER_INFO: dict[AIProvider, dict[str, str | bool | list[str]]] = {
         "description": "Run AI locally on your computer. No API key needed.",
         "requires_key": False,
         "default_model": "llama3.1:8b",
-        "models": ["llama3.1:8b", "llama3.1:70b", "mistral", "codellama"],
+        "models": [
+            "llama3.1:8b",
+            "llama3.1:70b",
+            "mistral",
+            "codellama",
+            "opencodeinterpreter",
+            "deepseek-coder",
+        ],
     },
     AIProvider.OPENAI: {
         "name": "OpenAI (GPT-4)",
@@ -110,6 +118,7 @@ class AISettings:
         expertise_level: User's expertise level (1-4).
         ollama_host: Ollama server URL.
         streaming_enabled: Whether to stream responses.
+        rag_enabled: Whether to use RAG (Codebase awareness).
         api_keys: In-memory API keys (not persisted directly).
     """
 
@@ -118,6 +127,7 @@ class AISettings:
     expertise_level: int = 1
     ollama_host: str = "http://localhost:11434"
     streaming_enabled: bool = True
+    rag_enabled: bool = True
     api_keys: dict[AIProvider, str] = field(default_factory=dict)
 
     def save(self) -> None:
@@ -128,6 +138,7 @@ class AISettings:
         settings.setValue(KEY_EXPERTISE, self.expertise_level)
         settings.setValue(KEY_OLLAMA_HOST, self.ollama_host)
         settings.setValue(KEY_STREAMING, self.streaming_enabled)
+        settings.setValue(KEY_RAG_ENABLED, self.rag_enabled)
         # Note: API keys are stored separately in keyring
         logger.info("Saved AI settings: provider=%s", self.provider.name)
 
@@ -148,6 +159,7 @@ class AISettings:
             expertise_level=int(settings.value(KEY_EXPERTISE, 1)),
             ollama_host=settings.value(KEY_OLLAMA_HOST, "http://localhost:11434"),
             streaming_enabled=settings.value(KEY_STREAMING, True, type=bool),
+            rag_enabled=settings.value(KEY_RAG_ENABLED, True, type=bool),
         )
 
 
@@ -515,6 +527,10 @@ class AISettingsDialog(QDialog):
         prefs_tab = self._create_preferences_tab()
         tabs.addTab(prefs_tab, "Preferences")
 
+        # Knowledge tab
+        knowledge_tab = self._create_knowledge_tab()
+        tabs.addTab(knowledge_tab, "Knowledge Base")
+
         layout.addWidget(tabs)
 
         # Button box
@@ -618,6 +634,54 @@ class AISettingsDialog(QDialog):
         layout.addStretch()
         return widget
 
+    def _create_knowledge_tab(self) -> QWidget:
+        """Create the knowledge base (RAG) configuration tab."""
+        widget = QWidget()
+        layout = QVBoxLayout(widget)
+
+        # RAG Settings
+        rag_group = QGroupBox("Knowledge Base Settings")
+        rag_layout = QVBoxLayout(rag_group)
+
+        self._rag_enabled_check = QCheckBox("Enable Codebase Awareness (RAG)")
+        self._rag_enabled_check.setToolTip(
+            "Allow the AI to search your codebase and documents to answer questions."
+        )
+        rag_layout.addWidget(self._rag_enabled_check)
+
+        layout.addWidget(rag_group)
+
+        # Actions
+        actions_group = QGroupBox("Actions")
+        actions_layout = QVBoxLayout(actions_group)
+
+        rebuild_btn = QPushButton("Rebuild Knowledge Index")
+        rebuild_btn.setToolTip("Scan the codebase and rebuild the search index.")
+        rebuild_btn.clicked.connect(self._on_rebuild_index)
+        actions_layout.addWidget(rebuild_btn)
+
+        info_label = QLabel(
+            "Rebuilding the index analyses your 'src' directory. "
+            "This happens locally and no code is sent to the cloud during indexing."
+        )
+        info_label.setWordWrap(True)
+        info_label.setStyleSheet("color: #888888; font-size: 11px;")
+        actions_layout.addWidget(info_label)
+
+        layout.addWidget(actions_group)
+        layout.addStretch()
+
+        return widget
+
+    def _on_rebuild_index(self) -> None:
+        """Handle rebuild index button."""
+        self.rebuild_index_requested.emit()
+        QMessageBox.information(
+            self,
+            "Rebuild Started",
+            "Index rebuild started in background. The assistant will be updated shortly.",
+        )
+
     def _load_settings(self) -> None:
         """Load current settings into UI."""
         # Provider
@@ -642,6 +706,10 @@ class AISettingsDialog(QDialog):
 
         # Streaming
         self._streaming_check.setChecked(self._settings.streaming_enabled)
+
+        # RAG
+        if hasattr(self, "_rag_enabled_check"):
+            self._rag_enabled_check.setChecked(self._settings.rag_enabled)
 
     def _on_provider_changed(self, index: int) -> None:
         """Handle provider selection change."""
