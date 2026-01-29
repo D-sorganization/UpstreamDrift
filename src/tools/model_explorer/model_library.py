@@ -39,6 +39,15 @@ except ImportError:
         return logging.getLogger(name)
 
 
+try:
+    import robot_descriptions
+
+    # Try to get list of descriptions (simple heuristic: attributes ending in _description)
+    ROBOT_DESCRIPTIONS_AVAILABLE = True
+except ImportError:
+    robot_descriptions = None
+    ROBOT_DESCRIPTIONS_AVAILABLE = False
+
 logger = get_logger(__name__)
 
 # Try to import bundled assets for local model access
@@ -570,6 +579,7 @@ class ModelLibrary:
         """
         discovered = self.discover_repo_models()
         embedded = self.get_embedded_mujoco_models()
+        robot_descs = self.discover_robot_descriptions()
 
         return {
             "human": list(self.HUMAN_MODELS.keys()),
@@ -579,6 +589,7 @@ class ModelLibrary:
             "component": list(self.COMPONENT_MODELS.keys()),
             "discovered": discovered,
             "embedded": embedded,
+            "robot_descriptions": robot_descs,
         }
 
     def get_model_info(self, category: str, model_key: str) -> dict[str, Any] | None:
@@ -611,6 +622,12 @@ class ModelLibrary:
         elif category == "embedded":
             embedded = self.get_embedded_mujoco_models()
             return embedded.get(model_key)
+        elif category == "robot_descriptions":
+            models = self.discover_robot_descriptions()
+            for model in models:
+                if model["config_key"] == model_key:
+                    return model
+            return None
         else:
             logger.error(f"Unknown category: {category}")
             return None
@@ -675,6 +692,47 @@ class ModelLibrary:
                                 )
                     except Exception:
                         pass  # reading error, skip
+
+        return sorted(models, key=lambda x: x["name"])
+
+    def discover_robot_descriptions(self) -> list[dict[str, Any]]:
+        """Discover models available in the robot_descriptions package.
+
+        Returns:
+            List of model info dictionaries.
+        """
+        if not ROBOT_DESCRIPTIONS_AVAILABLE or not robot_descriptions:
+            return []
+
+        models = []
+        # Inspect module attributes
+        for attr in dir(robot_descriptions):
+            if attr.endswith("_description"):
+                try:
+                    module = getattr(robot_descriptions, attr)
+                    # Check for URDF_PATH or MJCF_PATH
+                    urdf_path = getattr(module, "URDF_PATH", None)
+                    mjcf_path = getattr(module, "MJCF_PATH", None)
+
+                    if urdf_path or mjcf_path:
+                        path = urdf_path if urdf_path else mjcf_path
+                        m_type = "urdf" if urdf_path else "mjcf"
+                        name = (
+                            attr.replace("_description", "").replace("_", " ").title()
+                        )
+
+                        models.append(
+                            {
+                                "name": name,
+                                "description": f"Community model from robot_descriptions ({m_type.upper()})",
+                                "path": str(path),
+                                "type": m_type,
+                                "config_key": attr,
+                                "package": "robot_descriptions",
+                            }
+                        )
+                except Exception:
+                    continue
 
         return sorted(models, key=lambda x: x["name"])
 

@@ -16,8 +16,8 @@ _project_root = Path(__file__).resolve().parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtWidgets import (
+from PyQt6.QtCore import Qt, pyqtSignal  # noqa: E402
+from PyQt6.QtWidgets import (  # noqa: E402
     QComboBox,
     QDialog,
     QDialogButtonBox,
@@ -133,8 +133,14 @@ class ModelLoaderDialog(QDialog):
         self._setup_repo_tab(repo_tab)
         self.tabs.addTab(repo_tab, "Repository")
 
-        # Tab 5: Embedded Models (Python defined)
+        # Tab 5: Community Models (robot_descriptions)
+        community_tab = QWidget()
+        self._setup_community_tab(community_tab)
+        self.tabs.addTab(community_tab, "Community")
+
+        # Tab 6: Embedded Models (Python defined)
         embedded_tab = QWidget()
+
         self._setup_embedded_tab(embedded_tab)
         self.tabs.addTab(embedded_tab, "Embedded")
 
@@ -178,12 +184,10 @@ class ModelLoaderDialog(QDialog):
         # Tree
         self.repo_tree = QTreeWidget()
         self.repo_tree.setHeaderLabels(["Name", "Type", "Path"])
-        self.repo_tree.header().setSectionResizeMode(
-            0, QHeaderView.ResizeMode.ResizeToContents
-        )
-        self.repo_tree.header().setSectionResizeMode(
-            1, QHeaderView.ResizeMode.ResizeToContents
-        )
+        header = self.repo_tree.header()
+        if header:
+            header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)
+            header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)
         self.repo_tree.itemSelectionChanged.connect(
             lambda: self._on_model_selected("discovered")
         )
@@ -243,6 +247,40 @@ class ModelLoaderDialog(QDialog):
         # Load button
         load_btn = QPushButton("Load Selected Embedded Model")
         load_btn.clicked.connect(lambda: self._load_selected_model("embedded"))
+        layout.addWidget(load_btn)
+
+    def _setup_community_tab(self, parent: QWidget) -> None:
+        from PyQt6.QtWidgets import QListWidget, QListWidgetItem
+
+        layout = QVBoxLayout(parent)
+        layout.addWidget(QLabel("Community models from 'robot_descriptions' library:"))
+
+        self.community_list = QListWidget()
+        self.community_list.itemSelectionChanged.connect(
+            lambda: self._on_model_selected("robot_descriptions")
+        )
+        layout.addWidget(self.community_list)
+
+        # Populate
+        community_models = self.library.list_available_models().get(
+            "robot_descriptions", []
+        )
+        if not community_models:
+            layout.addWidget(
+                QLabel(
+                    "No community models found.\nEnsure 'robot_descriptions' is installed."
+                )
+            )
+
+        for model in community_models:
+            item = QListWidgetItem(f"{model['name']} ({model['type'].upper()})")
+            item.setData(Qt.ItemDataRole.UserRole, model["config_key"])
+            self.community_list.addItem(item)
+
+        load_btn = QPushButton("Load Selected Community Model")
+        load_btn.clicked.connect(
+            lambda: self._load_selected_model("robot_descriptions")
+        )
         layout.addWidget(load_btn)
 
     def _on_accept(self) -> None:
@@ -444,13 +482,17 @@ class ModelLoaderDialog(QDialog):
             combo = getattr(self, f"{category}_combo")
             model_key = combo.currentData()
         elif category == "discovered":
-            item = self.repo_tree.currentItem()
-            if item:
-                model_key = item.data(0, Qt.ItemDataRole.UserRole)
+            repo_item = self.repo_tree.currentItem()
+            if repo_item:
+                model_key = repo_item.data(0, Qt.ItemDataRole.UserRole)
         elif category == "embedded":
-            item = self.embedded_list.currentItem()
-            if item:
-                model_key = item.data(Qt.ItemDataRole.UserRole)
+            embed_item = self.embedded_list.currentItem()
+            if embed_item:
+                model_key = embed_item.data(Qt.ItemDataRole.UserRole)
+        elif category == "robot_descriptions":
+            comm_item = self.community_list.currentItem()
+            if comm_item:
+                model_key = comm_item.data(Qt.ItemDataRole.UserRole)
 
         if model_key:
             model_info = self.library.get_model_info(category, model_key)
@@ -514,6 +556,14 @@ Description: {model_info["description"]}
 
 Content Preview:
 {content_preview}
+"""
+        elif category == "robot_descriptions":
+            info_text = f"""Name: {model_info["name"]}
+Type: {model_info["type"].upper()}
+Package: {model_info.get("package", "robot_descriptions")}
+Path: {model_info["path"]}
+
+Description: {model_info["description"]}
 """
         else:
             info_text = "No information available."
