@@ -3,16 +3,24 @@
 Matlab Unified Launcher
 Consolidates Simscape Models and Analysis Tools into a single interface.
 """
-import sys
+
 import os
 import subprocess
+import sys
 from pathlib import Path
+
+from PyQt6.QtGui import QFont
 from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QPushButton, 
-    QLabel, QGridLayout, QMessageBox, QFrame
+    QApplication,
+    QFrame,
+    QGridLayout,
+    QLabel,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QVBoxLayout,
+    QWidget,
 )
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QFont, QIcon
 
 # Constants for Paths
 REPO_ROOT = Path(__file__).parent.parent.parent.resolve()
@@ -21,27 +29,28 @@ MATLAB_MODELS = [
         "name": "Simscape 2D Model",
         "desc": "2D Simscape Multibody Golf Swing Model (.slx)",
         "path": "src/engines/Simscape_Multibody_Models/2D_Golf_Model/matlab/GolfSwingZVCF.slx",
-        "type": "model"
+        "type": "model",
     },
     {
         "name": "Simscape 3D Model",
         "desc": "3D Simscape Multibody Golf Swing Model (.slx)",
         "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/model/GolfSwing3D_Kinetic.slx",
-        "type": "model"
+        "type": "model",
     },
     {
         "name": "Dataset Generator",
         "desc": "Forward Dynamics Dataset Generator GUI (.m)",
         "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/scripts/dataset_generator/Dataset_GUI.m",
-        "type": "tool"
+        "type": "tool",
     },
     {
         "name": "Analysis GUI",
         "desc": "Golf Swing Analysis & Plotting Suite (.m)",
         "path": "src/engines/Simscape_Multibody_Models/3D_Golf_Model/matlab/src/apps/golf_gui/2D GUI/main_scripts/golf_swing_analysis_gui.m",
-        "type": "tool"
-    }
+        "type": "tool",
+    },
 ]
+
 
 class MatlabLauncher(QMainWindow):
     def __init__(self):
@@ -75,7 +84,7 @@ class MatlabLauncher(QMainWindow):
         # Grid of buttons
         grid_layout = QGridLayout()
         grid_layout.setSpacing(15)
-        
+
         row = 0
         for item in MATLAB_MODELS:
             btn_frame = QFrame()
@@ -91,13 +100,15 @@ class MatlabLauncher(QMainWindow):
                 }
             """)
             btn_layout = QVBoxLayout(btn_frame)
-            
+
             lbl_name = QLabel(item["name"])
             lbl_name.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
             lbl_name.setStyleSheet("border: none; background: transparent;")
-            
+
             lbl_desc = QLabel(item["desc"])
-            lbl_desc.setStyleSheet("color: #666; font-size: 11px; border: none; background: transparent;")
+            lbl_desc.setStyleSheet(
+                "color: #666; font-size: 11px; border: none; background: transparent;"
+            )
             lbl_desc.setWordWrap(True)
 
             btn_launch = QPushButton("Launch")
@@ -112,12 +123,14 @@ class MatlabLauncher(QMainWindow):
                 QPushButton:hover { background-color: #0056b3; }
             """)
             # Fix lambda closure early binding
-            btn_launch.clicked.connect(lambda checked, _p=item["path"]: self.launch_file(_p))
+            btn_launch.clicked.connect(
+                lambda checked, _p=item["path"]: self.launch_file(_p)
+            )
 
             btn_layout.addWidget(lbl_name)
             btn_layout.addWidget(lbl_desc)
             btn_layout.addWidget(btn_launch)
-            
+
             grid_layout.addWidget(btn_frame, row // 2, row % 2)
             row += 1
 
@@ -131,24 +144,26 @@ class MatlabLauncher(QMainWindow):
             return
 
         try:
-            if os.name == 'nt':
+            if os.name == "nt":
                 os.startfile(full_path)
-            elif sys.platform == 'darwin':
-                subprocess.run(['open', str(full_path)], check=True)
+            elif sys.platform == "darwin":
+                subprocess.run(["open", str(full_path)], check=True)
             else:
-                subprocess.run(['xdg-open', str(full_path)], check=True)
+                subprocess.run(["xdg-open", str(full_path)], check=True)
         except Exception as e:
             QMessageBox.critical(self, "Launch Failed", f"Could not launch file:\n{e}")
 
+
 def main():
     app = QApplication(sys.argv)
-    
+
     # Optional: Set stylesheet or theme
     app.setStyle("Fusion")
-    
+
     window = MatlabLauncher()
     window.show()
     sys.exit(app.exec())
+
 
 if __name__ == "__main__":
     main()

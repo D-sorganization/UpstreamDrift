@@ -5,6 +5,7 @@ A user interface for configuring and running MediaPipe pose estimation.
 """
 
 import sys
+
 from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (
     QApplication,
@@ -106,7 +107,7 @@ class MediaPipeGUI(QMainWindow):
     def update_progress(self) -> None:
         val: int = self.progress.value()
         if val < 100:
-            self.progress.setValue(val + 5) # Faster than OpenPose
+            self.progress.setValue(val + 5)  # Faster than OpenPose
             if val % 20 == 0:
                 self.log(f"Processing frame {val}...")
         else:
