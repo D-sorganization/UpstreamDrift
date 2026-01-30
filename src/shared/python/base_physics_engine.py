@@ -25,6 +25,7 @@ Usage:
 from __future__ import annotations
 
 from abc import abstractmethod
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -115,7 +116,7 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
         self.allowed_dirs = allowed_dirs or []
         self._is_initialized = False
 
-    def _get_invariants(self) -> list[tuple[callable, str]]:
+    def _get_invariants(self) -> list[tuple[Callable[[], bool], str]]:
         """Define class invariants for BasePhysicsEngine.
 
         Returns:
