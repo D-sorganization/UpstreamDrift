@@ -1,17 +1,25 @@
-# Golf Modeling Suite 🤖⛳
+# UpstreamDrift
 
-[![CI Standard](https://github.com/D-sorganization/Golf_Modeling_Suite/actions/workflows/ci-standard.yml/badge.svg)](https://github.com/D-sorganization/Golf_Modeling_Suite/actions/workflows/ci-standard.yml)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+<p align="center">
+  <img src="assets/branding/logo.png" alt="UpstreamDrift Logo" width="200"/>
+</p>
 
-**A unified platform for golf swing analysis across multiple physics engines and modeling approaches**
+<p align="center">
+  <a href="https://github.com/dieterolson/UpstreamDrift/actions/workflows/ci-standard.yml"><img src="https://github.com/dieterolson/UpstreamDrift/actions/workflows/ci-standard.yml/badge.svg" alt="CI Standard"></a>
+  <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.11+-blue.svg" alt="Python 3.11+"></a>
+  <a href="https://github.com/psf/black"><img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Code style: black"></a>
+  <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff"></a>
+</p>
 
-> ✅ **STABLE**: The codebase migration is complete. See [Migration Status](docs/plans/migration_status.md) for details.
+<p align="center">
+  <strong>A unified platform for golf swing analysis across multiple physics engines and modeling approaches</strong>
+</p>
+
+---
 
 ## Overview
 
-The Golf Modeling Suite consolidates multiple golf swing modeling implementations into a single, cohesive platform. This repository provides comprehensive biomechanical analysis capabilities through:
+UpstreamDrift (formerly Golf Modeling Suite) consolidates multiple golf swing modeling implementations into a single, cohesive platform. This repository provides comprehensive biomechanical analysis capabilities through:
 
 - **5 Physics Engines**: MuJoCo, Drake, Pinocchio, OpenSim, MyoSuite
 - **Multiple Model Complexities**: From 2-DOF educational pendulums to 290-muscle musculoskeletal models
@@ -67,8 +75,8 @@ For detailed documentation, please visit the **[Documentation Hub](docs/README.m
 **Recommended: Conda** (handles binary dependencies like MuJoCo)
 
 ```bash
-git clone https://github.com/D-sorganization/Golf_Modeling_Suite.git
-cd Golf_Modeling_Suite
+git clone https://github.com/dieterolson/UpstreamDrift.git
+cd UpstreamDrift
 git lfs install && git lfs pull
 
 # Create conda environment (most reliable)
@@ -179,7 +187,7 @@ python3 src/engines/physics_engines/drake/python/src/golf_gui.py
 ## Repository Structure
 
 ```
-Golf_Modeling_Suite/
+UpstreamDrift/
 ├── docs/                         # Comprehensive documentation
 │   ├── user_guide/              # User documentation
 │   ├── engines/                 # Engine-specific guides
@@ -217,11 +225,11 @@ We welcome contributions! Please see:
 If you use this software in your research, please cite:
 
 ```bibtex
-@software{golf_modeling_suite,
-  title = {Golf Modeling Suite: A Unified Platform for Biomechanical Golf Swing Analysis},
-  author = {[Authors]},
+@software{upstream_drift,
+  title = {UpstreamDrift: A Unified Platform for Biomechanical Golf Swing Analysis},
+  author = {Dieter Olson},
   year = {2026},
-  url = {https://github.com/D-sorganization/Golf_Modeling_Suite}
+  url = {https://github.com/dieterolson/UpstreamDrift}
 }
 ```
 

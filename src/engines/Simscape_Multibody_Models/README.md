@@ -359,7 +359,7 @@ If you use these models in research, please cite:
   author = {[Authors]},
   year = {2026},
   note = {Part of Golf Modeling Suite},
-  url = {https://github.com/D-sorganization/Golf_Modeling_Suite}
+  url = {https://github.com/dieterolson/UpstreamDrift}
 }
 ```
 
@@ -372,5 +372,5 @@ MIT License - See [LICENSE](../../LICENSE) for details.
 For Simscape-specific questions:
 - Review model-specific README files
 - Check MATLAB documentation: `doc simscape`
-- See [Golf Modeling Suite Issues](https://github.com/D-sorganization/Golf_Modeling_Suite/issues)
+- See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)
 - MATLAB Central forums for Simscape questions

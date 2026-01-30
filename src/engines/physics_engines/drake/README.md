@@ -470,4 +470,4 @@ For Drake-specific questions:
 - [Drake Slack Channel](https://drake.mit.edu/getting_help.html)
 
 For Golf Modeling Suite integration:
-- See [Golf Modeling Suite Issues](https://github.com/D-sorganization/Golf_Modeling_Suite/issues)
+- See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)

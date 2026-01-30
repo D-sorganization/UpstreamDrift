@@ -1,7 +1,7 @@
 # Ultra-Critical Python Project Review: Golf Modeling Suite
 
 **Review Date:** January 3, 2026
-**Repository:** `D-sorganization/Golf_Modeling_Suite`
+**Repository:** `dieterolson/UpstreamDrift`
 **Reviewed By:** Principal Python Engineer / Software Architect
 **Codebase Size:** ~480 Python files, ~114,000 lines of code
 
@@ -461,7 +461,7 @@ def get_registry() -> EngineRegistry:
 
 ```bash
 # Test on fresh Ubuntu 22.04
-git clone https://github.com/D-sorganization/Golf_Modeling_Suite.git
+git clone https://github.com/dieterolson/UpstreamDrift.git
 cd Golf_Modeling_Suite
 pip install -r requirements.txt  # Will install DIFFERENT versions each time!
 python launchers/golf_launcher.py  # May fail due to version mismatches

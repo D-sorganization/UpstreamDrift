@@ -2,7 +2,7 @@
 
 ## Project Context
 
-**Repository**: `Golf_Modeling_Suite` (https://github.com/D-sorganization/Golf_Modeling_Suite)
+**Repository**: `Golf_Modeling_Suite` (https://github.com/dieterolson/UpstreamDrift)
 
 **Objective**: Implement the reinforcement learning-based golf swing correction framework from Lee et al. (2026) "Reinforcement Learning-Based Golf Swing Correction Framework Incorporating Temporal Rhythm and Kinematic Stability" (Sensors, 26, 392).
 

@@ -8,7 +8,7 @@ This guide addresses common installation issues identified in the project assess
 
 ```bash
 # Clone the repository
-git clone https://github.com/D-sorganization/Golf_Modeling_Suite.git
+git clone https://github.com/dieterolson/UpstreamDrift.git
 cd Golf_Modeling_Suite
 
 # Create conda environment (handles binary dependencies)
@@ -295,7 +295,7 @@ docker run -p 8000:8000 golf-suite
 
 If issues persist:
 
-1. **Check GitHub Issues**: https://github.com/D-sorganization/Golf_Modeling_Suite/issues
+1. **Check GitHub Issues**: https://github.com/dieterolson/UpstreamDrift/issues
 2. **Create a new issue** with:
    - OS and version
    - Python version (`python --version`)

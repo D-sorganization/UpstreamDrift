@@ -376,7 +376,7 @@ pre-commit run --all-files
 
 If your issue isn't covered here:
 
-1. **Search existing issues:** [GitHub Issues](https://github.com/D-sorganization/Golf_Modeling_Suite/issues)
+1. **Search existing issues:** [GitHub Issues](https://github.com/dieterolson/UpstreamDrift/issues)
 2. **Check assessment documents:** `docs/assessments/`
 3. **Run diagnostics:** `python -c "from shared.python import EngineManager; print(EngineManager().get_diagnostic_report())"`
 4. **Open a new issue** with:

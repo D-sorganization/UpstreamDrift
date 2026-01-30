@@ -366,7 +366,7 @@ tau = Kp * (q_desired - q_actual) + Kd * (qdot_desired - qdot_actual)
 ## Contact
 
 For questions, bug reports, or contributions related to the Advanced Biomechanical Model:
-- GitHub Issues: [Project Issues](https://github.com/D-sorganization/MuJoCo_Golf_Swing_Model/issues)
+- GitHub Issues: [Project Issues](https://github.com/dieterolson/MuJoCo_Golf_Swing_Model/issues)
 - Tag: `advanced-model` or `biomechanics`
 
 ---

@@ -344,12 +344,12 @@ The models support:
 If you use these models in research, please cite:
 ```
 MuJoCo Golf Swing Models (2024)
-Repository: https://github.com/D-sorganization/MuJoCo_Golf_Swing_Model
+Repository: https://github.com/dieterolson/MuJoCo_Golf_Swing_Model
 License: MIT
 ```
 
 ## Contact
 
 For questions, issues, or contributions:
-- GitHub Issues: [Project Issues](https://github.com/D-sorganization/MuJoCo_Golf_Swing_Model/issues)
+- GitHub Issues: [Project Issues](https://github.com/dieterolson/MuJoCo_Golf_Swing_Model/issues)
 - Documentation: See `docs/` directory for additional guides

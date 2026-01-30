@@ -2,7 +2,7 @@
 
 **Date:** January 30, 2026
 **Reviewer:** Claude Code
-**Repository:** D-sorganization/Golf_Modeling_Suite
+**Repository:** dieterolson/UpstreamDrift
 **Version:** 2.0.0 (Post-Implementation)
 
 ---

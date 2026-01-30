@@ -408,4 +408,4 @@ For OpenSim-specific questions:
 - [OpenSim GitHub Issues](https://github.com/opensim-org/opensim-core/issues)
 
 For Golf Modeling Suite integration:
-- See [Golf Modeling Suite Issues](https://github.com/D-sorganization/Golf_Modeling_Suite/issues)
+- See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)

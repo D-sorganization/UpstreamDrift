@@ -440,4 +440,4 @@ MIT License - See [LICENSE](LICENSE)
 For questions about pendulum models:
 - Review example scripts
 - Check platform-specific READMEs (python/, matlab/, etc.)
-- See [Golf Modeling Suite Issues](https://github.com/D-sorganization/Golf_Modeling_Suite/issues)
+- See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)

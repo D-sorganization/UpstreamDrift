@@ -222,7 +222,7 @@ Before major releases:
 
 For security concerns: [Maintainer contact information]
 
-For general issues: https://github.com/D-sorganization/Golf_Modeling_Suite/issues
+For general issues: https://github.com/dieterolson/UpstreamDrift/issues
 
 ---
 
