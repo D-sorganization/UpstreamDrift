@@ -282,9 +282,7 @@ def apply_deadband(
     offset = values - center
 
     if smooth:
-        # Smooth deadband using tanh
-        # f(x) = x * tanh(k * (|x| - threshold)) / (|x| + epsilon) for |x| > threshold
-        epsilon = 1e-10
+        # Smooth deadband using tanh transition
         x_abs = np.abs(offset)
 
         # Smoothly transition from 0 to 1 as we leave the deadband
@@ -388,13 +386,21 @@ def apply_backlash(
 
     Args:
         signal: Input signal.
-        backlash_width: Total backlash width.
+        backlash_width: Total backlash width (must be non-negative).
         smooth: Whether to smooth transitions.
-        smoothness: Smoothness parameter.
+        smoothness: Smoothness parameter (must be positive).
 
     Returns:
         Signal with backlash applied.
+
+    Raises:
+        ValueError: If backlash_width is negative or smoothness is non-positive.
     """
+    if backlash_width < 0:
+        raise ValueError(f"backlash_width must be non-negative, got {backlash_width}")
+    if smoothness <= 0:
+        raise ValueError(f"smoothness must be positive, got {smoothness}")
+
     values = signal.values
     half_width = backlash_width / 2
     result = np.zeros_like(values)

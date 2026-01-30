@@ -799,32 +799,67 @@ class ChainManipulationWidget(QWidget):
         self.chain_modified.emit(new_content)
 
     def _on_remove_segment(self) -> None:
-        """Handle remove segment button."""
-        # This is a placeholder - full implementation would need
-        # to handle re-parenting children
+        """Handle remove segment button.
+
+        Note: This feature requires careful handling of child re-parenting
+        and is planned for a future release.
+        """
+        if not self.selected_node:
+            QMessageBox.warning(
+                self,
+                "No Selection",
+                "Please select a segment in the visualizer first.",
+            )
+            return
+
         QMessageBox.information(
             self,
-            "Remove Segment",
-            "Select a segment in the visualizer to remove.\n"
-            "Children will be re-parented to the removed segment's parent.",
+            "Feature Coming Soon",
+            "Remove Segment is planned for a future release.\n\n"
+            "This feature will:\n"
+            "• Remove the selected segment\n"
+            "• Re-parent children to the removed segment's parent\n"
+            "• Update all joint references automatically",
         )
 
     def _on_split_chain(self) -> None:
-        """Handle split chain button."""
+        """Handle split chain button.
+
+        Note: This feature creates branch points and is planned
+        for a future release.
+        """
+        if not self.selected_node:
+            QMessageBox.warning(
+                self,
+                "No Selection",
+                "Please select a link in the visualizer first.",
+            )
+            return
+
         QMessageBox.information(
             self,
-            "Split Chain",
-            "Select a link to create a new branch point.\n"
-            "This will duplicate the selected link's children as a new branch.",
+            "Feature Coming Soon",
+            "Split Chain is planned for a future release.\n\n"
+            "This feature will:\n"
+            "• Create a new branch point at the selected link\n"
+            "• Allow duplicating children as a new branch\n"
+            "• Support creating parallel kinematic chains",
         )
 
     def _on_merge_chains(self) -> None:
-        """Handle merge chains button."""
+        """Handle merge chains button.
+
+        Note: This feature merges leaf nodes and is planned
+        for a future release.
+        """
         QMessageBox.information(
             self,
-            "Merge Chains",
-            "Select two leaf nodes to merge into a single chain.\n"
-            "This will connect the end of one chain to the start of another.",
+            "Feature Coming Soon",
+            "Merge Chains is planned for a future release.\n\n"
+            "This feature will:\n"
+            "• Allow selecting two leaf nodes\n"
+            "• Connect the end of one chain to another\n"
+            "• Create closed kinematic loops if needed",
         )
 
     def get_urdf_content(self) -> str:

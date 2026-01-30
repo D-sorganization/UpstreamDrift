@@ -20,8 +20,11 @@ except OSError:
     # Handle DLL loading failures on Windows (e.g., Python 3.13 + mujoco 3.3.4)
     pass  # Will fall back to grid view
 
-from src.shared.python.logging_config import configure_gui_logging, get_logger
-from src.tools.model_explorer.main_window import main
+from src.shared.python.logging_config import (  # noqa: E402
+    configure_gui_logging,
+    get_logger,
+)
+from src.tools.model_explorer.main_window import main  # noqa: E402
 
 if __name__ == "__main__":
     # Set up logging
