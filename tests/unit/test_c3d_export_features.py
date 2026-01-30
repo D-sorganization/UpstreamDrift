@@ -146,9 +146,7 @@ class TestC3DExportFeatures:
         self, mock_reader, sample_dataframe, mock_project_root, tmp_path
     ):
         """Verify execution time is logged."""
-        with patch(
-            "src.shared.python.tools.c3d_reader.log_execution_time"
-        ) as mock_log_ctx:
+        with patch("src.shared.python.tools.c3d_reader.log_execution_time") as mock_log_ctx:
             # Setup context manager mock
             mock_ctx_instance = MagicMock()
             mock_log_ctx.return_value = mock_ctx_instance

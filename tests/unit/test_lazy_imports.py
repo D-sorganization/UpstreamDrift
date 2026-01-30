@@ -94,9 +94,7 @@ class TestPolynomialGeneratorLazyImport:
             )
 
             # If we got here, the import succeeded - skip the error handling test
-            pytest.skip(
-                "src.shared.python.tools.polynomial_generator is available, cannot test ImportError"
-            )
+            pytest.skip("src.shared.python.tools.polynomial_generator is available, cannot test ImportError")
         except ImportError as e:
             # This is the expected behavior in test environment
             assert "src.shared.python.tools.polynomial_generator" in str(e)
