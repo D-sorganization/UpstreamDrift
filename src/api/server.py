@@ -33,6 +33,7 @@ from .config import get_allowed_hosts, get_cors_origins
 from .database import init_db
 from .middleware.security_headers import add_security_headers
 from .middleware.upload_limits import validate_upload_size
+from .utils.tracing import RequestTracer
 from .routes import analysis as analysis_routes
 from .routes import auth as auth_routes
 from .routes import core as core_routes
@@ -83,6 +84,10 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty
 # SECURITY: middleware registration
 app.middleware("http")(add_security_headers)
 app.middleware("http")(validate_upload_size)
+
+# TRACEABILITY: Request tracing middleware for diagnostics
+_tracer = RequestTracer()
+app.middleware("http")(_tracer.trace_request)
 
 
 # Global services
@@ -202,6 +207,8 @@ async def startup_event() -> None:
 
         # Initialize engine manager
         engine_manager = EngineManager()
+        # ORTHOGONALITY FIX: Store in app.state for dependency injection
+        app.state.engine_manager = engine_manager
         logger.info("Engine manager initialized")
 
         # Initialize services
