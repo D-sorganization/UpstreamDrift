@@ -5,8 +5,15 @@ Runs entirely on localhost with NO authentication required.
 This is the default mode - free, offline, no accounts needed.
 """
 
+import mimetypes
 import os
 from pathlib import Path
+
+# Fix MIME types for JavaScript modules on Windows
+# Windows registry often has incorrect/missing MIME types for .js files
+mimetypes.add_type("application/javascript", ".js")
+mimetypes.add_type("text/css", ".css")
+mimetypes.add_type("image/svg+xml", ".svg")
 
 # Ensure we're running in local mode
 os.environ.setdefault("GOLF_SUITE_MODE", "local")
