@@ -15,7 +15,7 @@ pytestmark = skip_if_unavailable("mujoco")
 if MUJOCO_AVAILABLE:
     import mujoco
 
-from src.shared.python.marker_mapping import (
+from src.shared.python.marker_mapping import (  # noqa: E402
     MarkerMapping,
     MarkerToModelMapper,
 )

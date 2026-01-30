@@ -704,7 +704,7 @@ class FrankensteinEditor(QWidget):
                 count += 1
 
         # Find joints where this link is the parent
-        for joint_name, joint in source_model.joints.items():
+        for _joint_name, joint in source_model.joints.items():
             parent = joint.find("parent")
             if parent is not None and parent.get("link") == link_name:
                 # Copy the joint
@@ -743,17 +743,17 @@ class FrankensteinEditor(QWidget):
         count = 0
 
         # Copy all materials first
-        for name, material in source_model.materials.items():
+        for _name, material in source_model.materials.items():
             if self.right_panel.add_component("material", material):
                 count += 1
 
         # Copy all links
-        for name, link in source_model.links.items():
+        for _name, link in source_model.links.items():
             if self.right_panel.add_component("link", link):
                 count += 1
 
         # Copy all joints
-        for name, joint in source_model.joints.items():
+        for _name, joint in source_model.joints.items():
             if self.right_panel.add_component("joint", joint):
                 count += 1
 

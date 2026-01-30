@@ -85,7 +85,7 @@ class SinusoidFitter:
         # Frequency estimate using FFT
         n = len(t)
         dt = np.mean(np.diff(t))
-        fs = 1.0 / dt
+        1.0 / dt
 
         fft_vals = np.fft.rfft(y_centered)
         freqs = np.fft.rfftfreq(n, dt)

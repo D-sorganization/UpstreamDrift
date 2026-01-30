@@ -1,15 +1,14 @@
-"""test models in the distribution
-this script finds all osim files in the repo, instantiate opensim.Model from each
-then call initSystem on it, roundtrips save/restore to compare.
+""" test models in the distribution
+    this script finds all osim files in the repo, instantiate opensim.Model from each
+    then call initSystem on it, roundtrips save/restore to compare.
 """
-
 import os
 import sys
 from fnmatch import fnmatch
 
 import opensim
 
-# import opensim as opensim
+#import opensim as opensim
 root = os.getcwd()
 pattern = "*.osim"
 
@@ -37,15 +36,15 @@ for i in range(len(osimpaths)):
         sys.exit(1)
 
     # Print the 4.0 version to file and then read back into memory
-    filename_new = filename.replace(".osim", "_new.osim")
-    modelname_new = modelname.replace(".osim", "_new.osim")
+    filename_new = filename.replace('.osim','_new.osim')
+    modelname_new = modelname.replace('.osim','_new.osim')
     # Print the 4.0 model to file
     model.printToXML(filename_new)
     # Try and read back in the file
     try:
         reloadedModel = opensim.Model(filename_new)
         s2 = reloadedModel.initSystem()
-    except Exception as e:
+    except  Exception as e:
         print(f"Oops, 4.0 written Model '{modelname_new}' failed:\n{e.message}")
         sys.exit(1)
 
