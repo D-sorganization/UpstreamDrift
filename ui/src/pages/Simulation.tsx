@@ -11,6 +11,7 @@ export function SimulationPage() {
     isRunning,
     isPaused,
     currentFrame,
+    frames,
     start,
     stop,
     pause,
@@ -53,6 +54,7 @@ export function SimulationPage() {
           <Scene3D
             engine={selectedEngine}
             frame={currentFrame}
+            frames={frames}
           />
 
           {/* Overlay: Status */}
