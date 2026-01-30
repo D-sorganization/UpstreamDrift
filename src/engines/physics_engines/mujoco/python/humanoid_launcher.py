@@ -656,7 +656,12 @@ class HumanoidLauncher(QMainWindow):
             import importlib.util
 
             target_file = (
-                self.current_dir / "mujoco_humanoid_golf" / "polynomial_generator.py"
+                PROJECT_ROOT
+                / "src"
+                / "shared"
+                / "python"
+                / "tools"
+                / "polynomial_generator.py"
             )
             if not target_file.exists():
                 raise FileNotFoundError(f"File not found: {target_file}")
@@ -681,7 +686,7 @@ class HumanoidLauncher(QMainWindow):
                 self,
                 "Polynomial Generator Unavailable",
                 f"The polynomial generator widget is not available.\n\nError: {e}\n\n"
-                "Please ensure mujoco_humanoid_golf/polynomial_generator.py exists.",
+                "Please ensure src/shared/python/tools/polynomial_generator.py exists.",
             )
             return
         except Exception as e:

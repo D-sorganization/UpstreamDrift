@@ -31,7 +31,7 @@ def test_c3d_viewer_instantiation(qtbot):
     # We need to import the module inside the patch context or before
     # But since the module import executes code, we might want to patch imports *before* import
 
-    with patch.dict(sys.modules, {"c3d_reader": MagicMock()}):
+    with patch.dict(sys.modules, {"src.shared.python.tools.c3d_reader": MagicMock()}):
         c3d_viewer = import_c3d_viewer()
 
         if c3d_viewer is None:

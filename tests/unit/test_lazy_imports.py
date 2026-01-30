@@ -71,7 +71,7 @@ class TestPolynomialGeneratorLazyImport:
         # Remove modules to simulate fresh import
         modules_to_remove = [
             "engines.physics_engines.mujoco.python.humanoid_launcher",
-            "mujoco_humanoid_golf.polynomial_generator",
+            "src.shared.python.tools.polynomial_generator",
             "mujoco",
         ]
         for module in modules_to_remove:
@@ -89,15 +89,15 @@ class TestPolynomialGeneratorLazyImport:
         """Test ImportError handling when polynomial generator unavailable."""
         # Try to import and handle expected ImportError
         try:
-            from mujoco_humanoid_golf.polynomial_generator import (  # noqa: F401
+            from src.shared.python.tools.polynomial_generator import (  # noqa: F401
                 PolynomialGeneratorWidget,
             )
 
             # If we got here, the import succeeded - skip the error handling test
-            pytest.skip("mujoco_humanoid_golf is available, cannot test ImportError")
+            pytest.skip("src.shared.python.tools.polynomial_generator is available, cannot test ImportError")
         except ImportError as e:
             # This is the expected behavior in test environment
-            assert "mujoco_humanoid_golf" in str(e) or "mujoco" in str(e).lower()
+            assert "src.shared.python.tools.polynomial_generator" in str(e)
 
     def test_polynomial_generator_oserror_handling(self):
         """Test OSError handling for DLL initialization failures."""
@@ -110,7 +110,7 @@ class TestPolynomialGeneratorLazyImport:
     def test_polynomial_generator_successful_import(self):
         """Test successful import when dependencies are available."""
         try:
-            from mujoco_humanoid_golf.polynomial_generator import (
+            from src.shared.python.tools.polynomial_generator import (
                 PolynomialGeneratorWidget,
             )
 

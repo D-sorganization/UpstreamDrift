@@ -10,8 +10,12 @@ import numpy as np
 import numpy.typing as npt
 import pytest
 
-from src.c3d_reader import C3DDataReader, C3DEvent, load_tour_average_reader
 from src.shared.python.engine_availability import skip_if_unavailable
+from src.shared.python.tools.c3d_reader import (
+    C3DDataReader,
+    C3DEvent,
+    load_tour_average_reader,
+)
 
 # Skip tests if ezc3d is not available (e.g., Python 3.9)
 pytestmark = skip_if_unavailable("ezc3d")
@@ -25,8 +29,8 @@ EXPECTED_ANALOG_COUNT = 0
 
 def _tour_average_reader() -> C3DDataReader:
     """Create a C3DDataReader for the tour average test file."""
-    repository_root = Path(__file__).resolve().parents[2]
-    return load_tour_average_reader(repository_root)
+    # load_tour_average_reader uses get_repo_root() internally if no args
+    return load_tour_average_reader()
 
 
 def _stub_reader_with_points(

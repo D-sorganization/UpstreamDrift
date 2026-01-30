@@ -9,9 +9,9 @@ from typing import Any
 from PyQt6 import QtCore, QtWidgets
 
 from src.shared.python.logging_config import get_logger
+from src.shared.python.tools.polynomial_generator import PolynomialGeneratorWidget
 
 from ...control_system import ControlSystem, ControlType
-from ...polynomial_generator import PolynomialGeneratorWidget
 from ...sim_widget import MuJoCoSimWidget
 
 if typing.TYPE_CHECKING:

@@ -18,9 +18,14 @@ import numpy as np
 import pandas as pd
 
 try:
-    from .logger_utils import get_logger, log_execution_time
+    from src.shared.python.logger_utils import get_logger, log_execution_time
+    from src.shared.python.path_utils import get_repo_root
 except ImportError:
-    from logger_utils import get_logger, log_execution_time  # type: ignore[no-redef]
+    from shared.python.logger_utils import (  # type: ignore[no-redef]
+        get_logger,
+        log_execution_time,
+    )
+    from shared.python.path_utils import get_repo_root
 
 logger = get_logger(__name__)
 
@@ -822,8 +827,17 @@ def load_tour_average_reader(base_directory: Path | None = None) -> C3DDataReade
         A configured :class:`C3DDataReader` pointing to the Tour average capture file.
     """
 
-    base_path = base_directory or Path(__file__).resolve().parents[2]
+    base_path = base_directory or get_repo_root()
+    # Path inside Simscape model structure
     default_path = (
-        base_path / "matlab" / "Data" / "Gears C3D Files" / "C3DExport Tour average.c3d"
+        base_path
+        / "src"
+        / "engines"
+        / "Simscape_Multibody_Models"
+        / "3D_Golf_Model"
+        / "matlab"
+        / "Data"
+        / "Gears C3D Files"
+        / "C3DExport Tour average.c3d"
     )
     return C3DDataReader(default_path)

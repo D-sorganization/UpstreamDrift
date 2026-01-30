@@ -24,7 +24,8 @@ C3D_IMPORTS_AVAILABLE = False
 if PYQT6_AVAILABLE:
     try:
         from apps.c3d_viewer import C3DDataModel, C3DViewerMainWindow
-        from c3d_reader import C3DDataReader
+
+        from src.shared.python.tools.c3d_reader import C3DDataReader
 
         C3D_IMPORTS_AVAILABLE = True
     except (ImportError, OSError):
@@ -51,7 +52,7 @@ def mock_c3d_file(tmp_path):
 @pytest.fixture
 def mock_ezc3d():
     """Mock ezc3d module behavior."""
-    with patch("c3d_reader.ezc3d") as mock:
+    with patch("src.shared.python.tools.c3d_reader.ezc3d") as mock:
         # Construct a fake C3D structure
         # Points: (4, Nmarkers, Nframes)
         # Analogs: (1, Nchannels, Nframes) for 1 subframe per frame simple case

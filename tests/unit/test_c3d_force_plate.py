@@ -16,7 +16,7 @@ from src.shared.python.path_utils import get_simscape_model_path, setup_import_p
 # Setup import path using centralized utility
 setup_import_paths(additional_paths=[get_simscape_model_path()])
 
-from c3d_reader import C3DDataReader, C3DMetadata  # noqa: E402
+from src.shared.python.tools.c3d_reader import C3DDataReader, C3DMetadata  # noqa: E402
 
 
 class TestForcePlateChannelDetection:
