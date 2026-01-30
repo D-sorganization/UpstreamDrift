@@ -3,6 +3,21 @@
 This module defines the Protocol that all physics engines (MuJoCo, Drake, Pinocchio, etc.)
 must adhere to. This ensures that the GUI and Analytics layers can operate
 agnostic of the underlying solver.
+
+Design by Contract:
+    This interface defines contracts that all implementations must satisfy:
+
+    State Machine:
+        UNINITIALIZED -> [load_from_path/load_from_string] -> INITIALIZED
+        INITIALIZED -> [reset] -> INITIALIZED (t=0)
+        INITIALIZED -> [step] -> INITIALIZED (t+=dt)
+
+    Global Invariants (all implementations must maintain):
+        - After initialization: model is loaded and queryable
+        - Time is always non-negative
+        - State arrays (q, v) have consistent dimensions
+        - Mass matrix is always symmetric positive definite
+        - Superposition: a_full = a_drift + a_control (Section F)
 """
 
 from __future__ import annotations
@@ -19,20 +34,51 @@ class PhysicsEngine(Protocol):
 
     All implementations must be stateless wrappers around a Model/Data pair (or equivalent),
     or manage their own internal state consistently.
+
+    Design by Contract:
+        This protocol defines the contract between the simulation framework and
+        physics engine implementations. Each method documents its:
+        - Preconditions: What must be true before calling
+        - Postconditions: What will be true after successful return
+        - Invariants: What is preserved by the operation
     """
 
     @property
     @abstractmethod
     def model_name(self) -> str:
-        """Return the name of the currently loaded model."""
+        """Return the name of the currently loaded model.
+
+        Preconditions:
+            - None (can be called at any time)
+
+        Postconditions:
+            - Returns empty string if no model loaded
+            - Returns model identifier if model is loaded
+        """
         raise NotImplementedError()
 
     @abstractmethod
     def load_from_path(self, path: str) -> None:
         """Load a model from a file path.
 
+        Preconditions:
+            - path must be a valid file path
+            - path must point to an existing file
+            - file must be in a supported format (.xml, .urdf, .sdf, .osim)
+
+        Postconditions:
+            - Engine is in INITIALIZED state
+            - model_name returns valid identifier
+            - get_state() returns valid arrays
+            - Invariants are established
+
         Args:
             path: Absolute path to the model file (.xml, .urdf, .sdf, .osim).
+
+        Raises:
+            FileNotFoundError: If path does not exist
+            ValueError: If file format is not supported
+            StateError: If engine cannot be initialized
         """
         raise NotImplementedError()
 
@@ -40,23 +86,58 @@ class PhysicsEngine(Protocol):
     def load_from_string(self, content: str, extension: str | None = None) -> None:
         """Load a model from a string content.
 
+        Preconditions:
+            - content must be non-empty
+            - content must be valid model definition
+
+        Postconditions:
+            - Engine is in INITIALIZED state
+            - get_state() returns valid arrays
+
         Args:
             content: The model definition string.
             extension: Optional hint for parsing (e.g., 'xml', 'urdf').
+
+        Raises:
+            ValueError: If content is empty or invalid
         """
         raise NotImplementedError()
 
     @abstractmethod
     def reset(self) -> None:
-        """Reset the simulation to its initial state (time=0, q=q0, v=0)."""
+        """Reset the simulation to its initial state (time=0, q=q0, v=0).
+
+        Preconditions:
+            - Engine must be in INITIALIZED state
+
+        Postconditions:
+            - get_time() == 0.0
+            - State is at initial configuration
+
+        Raises:
+            StateError: If engine is not initialized
+        """
         raise NotImplementedError()
 
     @abstractmethod
     def step(self, dt: float | None = None) -> None:
         """Advance the simulation by one time step.
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+            - dt > 0 if provided
+
+        Postconditions:
+            - get_time() increased by dt
+            - State updated according to dynamics
+            - All derived quantities recomputed
+
         Args:
             dt: Optional time step to advance. If None, uses the model's default timestep.
+
+        Raises:
+            StateError: If engine is not initialized
+            ValueError: If dt <= 0
         """
         raise NotImplementedError()
 
@@ -64,8 +145,19 @@ class PhysicsEngine(Protocol):
     def forward(self) -> None:
         """Compute forward kinematics and dynamics without advancing time.
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+
+        Postconditions:
+            - All derived quantities updated (accelerations, forces)
+            - Time unchanged
+            - State (q, v) unchanged
+
         Using current positions and velocities, updates all derived quantities
         (accelerations, forces, derived kinematics).
+
+        Raises:
+            StateError: If engine is not initialized
         """
         raise NotImplementedError()
 
@@ -73,10 +165,21 @@ class PhysicsEngine(Protocol):
     def get_state(self) -> tuple[np.ndarray, np.ndarray]:
         """Get the current state (positions, velocities).
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+
+        Postconditions:
+            - Returns tuple of (q, v) numpy arrays
+            - q.shape == (n_q,), v.shape == (n_v,)
+            - Arrays contain finite values (no NaN/Inf)
+
         Returns:
             Tuple of (q, v) as numpy arrays.
             q: Generalized coordinates (n_q,).
             v: Generalized velocities (n_v,).
+
+        Raises:
+            StateError: If engine is not initialized
         """
         raise NotImplementedError()
 
@@ -84,9 +187,22 @@ class PhysicsEngine(Protocol):
     def set_state(self, q: np.ndarray, v: np.ndarray) -> None:
         """Set the current state.
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+            - q.shape == (n_q,), v.shape == (n_v,)
+            - Arrays must contain finite values
+
+        Postconditions:
+            - get_state() returns (q, v)
+            - Derived quantities updated via forward()
+
         Args:
             q: Generalized coordinates.
             v: Generalized velocities.
+
+        Raises:
+            StateError: If engine is not initialized
+            ValueError: If array dimensions don't match model
         """
         raise NotImplementedError()
 
@@ -94,14 +210,39 @@ class PhysicsEngine(Protocol):
     def set_control(self, u: np.ndarray) -> None:
         """Apply control inputs (torques/forces).
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+            - u.shape == (n_u,)
+            - Array must contain finite values
+
+        Postconditions:
+            - Control stored for next step/forward call
+
         Args:
             u: Control vector (n_u,).
+
+        Raises:
+            StateError: If engine is not initialized
+            ValueError: If array dimension doesn't match model
         """
         raise NotImplementedError()
 
     @abstractmethod
     def get_time(self) -> float:
-        """Get the current simulation time."""
+        """Get the current simulation time.
+
+        Preconditions:
+            - Engine must be in INITIALIZED state
+
+        Postconditions:
+            - Returns time >= 0.0
+
+        Returns:
+            Current simulation time in seconds.
+
+        Raises:
+            StateError: If engine is not initialized
+        """
         raise NotImplementedError()
 
     def get_full_state(self) -> dict[str, Any]:
@@ -144,8 +285,21 @@ class PhysicsEngine(Protocol):
     def compute_mass_matrix(self) -> np.ndarray:
         """Compute the dense inertia matrix M(q).
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+
+        Postconditions:
+            - Returns symmetric positive definite matrix
+            - M.shape == (n_v, n_v)
+            - All values are finite
+            - M == M.T (symmetric)
+            - All eigenvalues > 0 (positive definite)
+
         Returns:
             M: (n_v, n_v) mass matrix.
+
+        Raises:
+            StateError: If engine is not initialized
         """
         raise NotImplementedError()
 
@@ -153,8 +307,18 @@ class PhysicsEngine(Protocol):
     def compute_bias_forces(self) -> np.ndarray:
         """Compute bias forces C(q,v) + g(q).
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+
+        Postconditions:
+            - b.shape == (n_v,)
+            - All values are finite
+
         Returns:
             b: (n_v,) vector containing Coriolis, Centrifugal, and Gravity terms.
+
+        Raises:
+            StateError: If engine is not initialized
         """
         raise NotImplementedError()
 
@@ -162,8 +326,18 @@ class PhysicsEngine(Protocol):
     def compute_gravity_forces(self) -> np.ndarray:
         """Compute gravity forces g(q).
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+
+        Postconditions:
+            - g.shape == (n_v,)
+            - All values are finite
+
         Returns:
             g: (n_v,) gravity vector.
+
+        Raises:
+            StateError: If engine is not initialized
         """
         raise NotImplementedError()
 
@@ -171,11 +345,25 @@ class PhysicsEngine(Protocol):
     def compute_inverse_dynamics(self, qacc: np.ndarray) -> np.ndarray:
         """Compute inverse dynamics tau = ID(q, v, a).
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+            - qacc.shape == (n_v,)
+            - qacc must contain finite values
+
+        Postconditions:
+            - tau.shape == (n_v,)
+            - tau = M(q) @ qacc + C(q,v) @ v + g(q)
+            - All values are finite
+
         Args:
             qacc: Desired acceleration vector (n_v,).
 
         Returns:
             tau: Required generalized forces (n_v,).
+
+        Raises:
+            StateError: If engine is not initialized
+            ValueError: If qacc has wrong dimensions
         """
         raise NotImplementedError()
 
@@ -183,16 +371,34 @@ class PhysicsEngine(Protocol):
     def compute_jacobian(self, body_name: str) -> dict[str, np.ndarray] | None:
         """Compute spatial Jacobian for a specific body.
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+
+        Postconditions:
+            - Returns None if body_name not found
+            - Otherwise returns dict with 'linear' (3, n_v) and 'angular' (3, n_v)
+            - All values are finite
+
         Args:
             body_name: Name of the body frame.
 
         Returns:
             Dictionary with keys 'linear', 'angular', 'spatial', or None if body not found.
+
+        Raises:
+            StateError: If engine is not initialized
         """
         raise NotImplementedError()
 
     def compute_contact_forces(self) -> np.ndarray:
         """Compute total contact forces (GRF).
+
+        Preconditions:
+            - Engine must be in INITIALIZED state
+
+        Postconditions:
+            - f.shape == (3,) or (6,)
+            - All values are finite
 
         Returns:
             f: (3,) vector representing total ground reaction force,
@@ -214,8 +420,20 @@ class PhysicsEngine(Protocol):
 
         This is the answer to: "What would happen if all motors/muscles turned off right now?"
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+            - State (q, v) must be set
+
+        Postconditions:
+            - a_drift.shape == (n_v,)
+            - All values are finite
+            - CRITICAL CONTRACT: a_drift + a_control = a_full (superposition)
+
         Returns:
             q_ddot_drift: Drift acceleration vector (n_v,) [rad/s² or m/s²]
+
+        Raises:
+            StateError: If engine is not initialized
 
         See Also:
             - compute_control_acceleration: Control-attributed component
@@ -232,11 +450,25 @@ class PhysicsEngine(Protocol):
 
         Mathematically: q̈_control = M(q)⁻¹ · τ
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+            - tau.shape == (n_v,)
+            - tau must contain finite values
+
+        Postconditions:
+            - a_control.shape == (n_v,)
+            - All values are finite
+            - CRITICAL CONTRACT: a_drift + a_control = a_full (superposition)
+
         Args:
             tau: Applied generalized forces/torques (n_v,) [N·m or N]
 
         Returns:
             q_ddot_control: Control acceleration vector (n_v,) [rad/s² or m/s²]
+
+        Raises:
+            StateError: If engine is not initialized
+            ValueError: If tau has wrong dimensions
 
         Note:
             For muscle-driven models, tau represents muscle-generated joint torques.
@@ -261,6 +493,16 @@ class PhysicsEngine(Protocol):
             Δa_control = a_full - a_ZTCF
             This is the acceleration *attributed to* actuator torques.
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+            - q.shape == (n_q,), v.shape == (n_v,)
+            - q and v must contain finite values
+
+        Postconditions:
+            - a_ztcf.shape == (n_v,)
+            - All values are finite
+            - CRITICAL CONTRACT: At current state, ZTCF == drift acceleration
+
         **Example Use Case** (Golf Swing):
             At impact, compute ZTCF to determine how much clubhead acceleration
             is due to passive dynamics (arm falling under gravity + centrifugal)
@@ -272,6 +514,10 @@ class PhysicsEngine(Protocol):
 
         Returns:
             q̈_ZTCF: Acceleration under zero applied torque (n_v,) [rad/s² or m/s²]
+
+        Raises:
+            StateError: If engine is not initialized
+            ValueError: If array dimensions don't match model
 
         Note:
             State (q, v) is preserved; only applied control is zeroed.
@@ -300,6 +546,16 @@ class PhysicsEngine(Protocol):
             Δa_velocity = a_full - a_ZVCF
             This is the acceleration *attributed to* Coriolis/centrifugal effects.
 
+        Preconditions:
+            - Engine must be in INITIALIZED state
+            - q.shape == (n_q,)
+            - q must contain finite values
+
+        Postconditions:
+            - a_zvcf.shape == (n_v,)
+            - All values are finite
+            - No velocity-dependent terms in result
+
         **Example Use Case** (Golf Swing):
             During downswing, compute ZVCF to separate gravitational pull
             from centrifugal whip effect. At fast velocities, Coriolis dominates.
@@ -309,6 +565,10 @@ class PhysicsEngine(Protocol):
 
         Returns:
             q̈_ZVCF: Acceleration with v=0 (n_v,) [rad/s² or m/s²]
+
+        Raises:
+            StateError: If engine is not initialized
+            ValueError: If array dimensions don't match model
 
         Note:
             Only velocity is zeroed; configuration (q) and control (τ) preserved.
