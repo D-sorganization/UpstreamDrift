@@ -40,9 +40,9 @@ class CloudClient:
                 response = await client.post(
                     f"{CLOUD_API_URL}/auth/login",
                     json={"email": email, "password": password},
-                    timeout=5.0
+                    timeout=5.0,
                 )
-                
+
                 if response.status_code == 200:
                     data = response.json()
                     self.token = data.get("access_token")
@@ -57,10 +57,10 @@ class CloudClient:
         """Save token to local cache."""
         if not self.token:
             return
-            
+
         config_dir = Path.home() / ".golf-suite"
         config_dir.mkdir(exist_ok=True)
-        
+
         token_file = config_dir / "cloud_token"
         token_file.write_text(self.token)
 

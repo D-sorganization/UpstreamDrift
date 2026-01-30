@@ -20,7 +20,9 @@ class EngineStatusResponse(BaseModel):
     # Keep for backward compatibility
     engine_type: str = Field(..., description="Engine type identifier (deprecated)")
     status: str = Field(..., description="Current status")
-    is_available: bool = Field(..., description="Whether engine is available (deprecated)")
+    is_available: bool = Field(
+        ..., description="Whether engine is available (deprecated)"
+    )
     description: str = Field("", description="Engine description")
 
 
