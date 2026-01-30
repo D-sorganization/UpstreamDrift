@@ -355,7 +355,7 @@ class APIError:
         code: ErrorCode,
         message: str | None = None,
         details: dict[str, Any] | None = None,
-    ) -> "APIError":
+    ) -> APIError:
         """Create an APIError from an error code.
 
         Args:
