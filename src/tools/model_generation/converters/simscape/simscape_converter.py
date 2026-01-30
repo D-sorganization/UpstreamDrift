@@ -706,7 +706,9 @@ class SimscapeToURDFConverter:
         """Connect any orphan links to base with fixed joints."""
         # Find links that are not children of any joint
         child_links = {j.child for j in result.joints}
-        root_candidates = [link.name for link in result.links if link.name not in child_links]
+        root_candidates = [
+            link.name for link in result.links if link.name not in child_links
+        ]
 
         if len(root_candidates) <= 1:
             return  # One or zero roots is fine

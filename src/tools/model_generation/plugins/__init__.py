@@ -35,7 +35,6 @@ class ModelGenerationPlugin(ABC):
 
     def shutdown(self) -> None:  # noqa: B027
         """Clean up plugin resources."""
-        pass
 
 
 __all__ = ["ModelGenerationPlugin"]
