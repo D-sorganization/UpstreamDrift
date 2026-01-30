@@ -12,7 +12,6 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
 import numpy as np
-
 from model_generation.core.constants import (
     FLOAT_TOLERANCE,
     MIN_INERTIA_KG_M2,
@@ -246,9 +245,7 @@ class Validator:
         return result
 
     @classmethod
-    def validate_joint(
-        cls, joint: Joint, link_names: set[str]
-    ) -> ValidationResult:
+    def validate_joint(cls, joint: Joint, link_names: set[str]) -> ValidationResult:
         """
         Validate a joint definition.
 

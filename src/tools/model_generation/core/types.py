@@ -512,7 +512,9 @@ class JointDynamics:
 
     def to_urdf_string(self) -> str:
         """Generate URDF dynamics element string."""
-        return f'<dynamics damping="{self.damping:.6g}" friction="{self.friction:.6g}"/>'
+        return (
+            f'<dynamics damping="{self.damping:.6g}" friction="{self.friction:.6g}"/>'
+        )
 
 
 @dataclass

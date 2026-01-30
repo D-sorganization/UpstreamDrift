@@ -8,7 +8,6 @@ tensors of common geometric primitives.
 from __future__ import annotations
 
 import math
-from typing import Any
 
 
 def box_inertia(

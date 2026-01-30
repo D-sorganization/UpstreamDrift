@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
-
 from model_generation.core.constants import DEFAULT_DENSITY_KG_M3, DEFAULT_INERTIA_KG_M2
 from model_generation.core.types import Geometry, GeometryType, Inertia
 from model_generation.inertia.primitives import (
@@ -203,7 +202,10 @@ class InertiaCalculator:
             return self._compute_manual(source, mass)
         elif mode == InertiaMode.PRIMITIVE:
             return self._compute_primitive(source, mass, dimensions)
-        elif mode in (InertiaMode.MESH_UNIFORM_DENSITY, InertiaMode.MESH_SPECIFIED_MASS):
+        elif mode in (
+            InertiaMode.MESH_UNIFORM_DENSITY,
+            InertiaMode.MESH_SPECIFIED_MASS,
+        ):
             return self._compute_mesh(source, mass, density, mode)
         elif mode == InertiaMode.ANTHROPOMETRIC:
             return self._compute_anthropometric(source, mass, dimensions, **kwargs)
@@ -307,9 +309,7 @@ class InertiaCalculator:
 
         return InertiaMode.PRIMITIVE
 
-    def _compute_manual(
-        self, source: Any, mass: float | None
-    ) -> InertiaResult:
+    def _compute_manual(self, source: Any, mass: float | None) -> InertiaResult:
         """Compute from manual specification."""
         if isinstance(source, dict):
             data = source
@@ -356,9 +356,7 @@ class InertiaCalculator:
             # Use dimensions to create geometry
             geom = self._geometry_from_dimensions(dimensions)
         else:
-            raise ValueError(
-                "Primitive mode requires Geometry, dict, or dimensions"
-            )
+            raise ValueError("Primitive mode requires Geometry, dict, or dimensions")
 
         if mass is None:
             mass = 1.0
@@ -413,9 +411,7 @@ class InertiaCalculator:
         try:
             import trimesh
         except ImportError:
-            logger.warning(
-                "trimesh not available, falling back to default inertia"
-            )
+            logger.warning("trimesh not available, falling back to default inertia")
             return InertiaResult(
                 ixx=DEFAULT_INERTIA_KG_M2,
                 iyy=DEFAULT_INERTIA_KG_M2,
@@ -516,7 +512,9 @@ class InertiaCalculator:
         **kwargs: Any,
     ) -> InertiaResult:
         """Compute using anthropometric data."""
-        segment_name = kwargs.get("segment_name", source if isinstance(source, str) else None)
+        segment_name = kwargs.get(
+            "segment_name", source if isinstance(source, str) else None
+        )
         gender_factor = kwargs.get("gender_factor", 0.5)
         length = dimensions.get("length", 0.1) if dimensions else 0.1
 
@@ -554,9 +552,7 @@ class InertiaCalculator:
                 dimensions,
             )
 
-    def _geometry_from_dimensions(
-        self, dimensions: dict[str, float]
-    ) -> Geometry:
+    def _geometry_from_dimensions(self, dimensions: dict[str, float]) -> Geometry:
         """Create geometry from dimensions dict."""
         if "radius" in dimensions and "length" in dimensions:
             return Geometry.cylinder(dimensions["radius"], dimensions["length"])

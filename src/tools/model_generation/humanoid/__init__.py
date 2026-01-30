@@ -10,29 +10,11 @@ from __future__ import annotations
 # Import from humanoid_character_builder
 try:
     from humanoid_character_builder.core.body_parameters import (
-        AppearanceParameters,
         BodyParameters,
         BuildType,
         GenderModel,
-        SegmentParameters,
-    )
-    from humanoid_character_builder.core.anthropometry import (
-        DE_LEVA_DATA,
-        estimate_segment_dimensions,
-        estimate_segment_inertia_from_gyration,
-        estimate_segment_masses,
-        get_com_location,
-        get_segment_length_ratio,
-        get_segment_mass_ratio,
-    )
-    from humanoid_character_builder.core.segment_definitions import (
-        HUMANOID_SEGMENTS,
-        SegmentDefinition,
     )
     from humanoid_character_builder.presets.loader import (
-        PRESET_NAMES,
-        get_preset_info,
-        list_available_presets,
         load_body_preset,
     )
 

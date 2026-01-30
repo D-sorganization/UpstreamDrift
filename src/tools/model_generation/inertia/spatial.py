@@ -124,11 +124,16 @@ def spatial_inertia_to_urdf(
     mc_skew = spatial_inertia[:3, 3:]
 
     # Recover COM from skew matrix: c× = [0, -cz, cy; cz, 0, -cx; -cy, cx, 0]
-    com = np.array([
-        mc_skew[2, 1],   # cx = (m*c×)[2,1] / m
-        mc_skew[0, 2],   # cy = (m*c×)[0,2] / m
-        mc_skew[1, 0],   # cz = (m*c×)[1,0] / m
-    ]) / mass
+    com = (
+        np.array(
+            [
+                mc_skew[2, 1],  # cx = (m*c×)[2,1] / m
+                mc_skew[0, 2],  # cy = (m*c×)[0,2] / m
+                mc_skew[1, 0],  # cz = (m*c×)[1,0] / m
+            ]
+        )
+        / mass
+    )
 
     # Extract rotational inertia
     # I_rot = I_com - m * c× * c×, so I_com = I_rot + m * c× * c×
@@ -173,11 +178,14 @@ def urdf_to_spatial_inertia(
     Returns:
         6x6 spatial inertia matrix
     """
-    I_com = np.array([
-        [ixx, ixy, ixz],
-        [ixy, iyy, iyz],
-        [ixz, iyz, izz],
-    ], dtype=np.float64)
+    I_com = np.array(
+        [
+            [ixx, ixy, ixz],
+            [ixy, iyy, iyz],
+            [ixz, iyz, izz],
+        ],
+        dtype=np.float64,
+    )
 
     return mcI(mass, np.asarray(com), I_com)
 
@@ -223,11 +231,14 @@ def spatial_transform(
 def _skew(v: NDArray[np.float64]) -> NDArray[np.float64]:
     """Create skew-symmetric matrix from 3-vector."""
     v = np.asarray(v, dtype=np.float64).flatten()
-    return np.array([
-        [0, -v[2], v[1]],
-        [v[2], 0, -v[0]],
-        [-v[1], v[0], 0],
-    ], dtype=np.float64)
+    return np.array(
+        [
+            [0, -v[2], v[1]],
+            [v[2], 0, -v[0]],
+            [-v[1], v[0], 0],
+        ],
+        dtype=np.float64,
+    )
 
 
 def composite_rigid_body_inertia(

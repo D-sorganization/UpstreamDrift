@@ -11,9 +11,6 @@ from dataclasses import dataclass
 from typing import Any
 
 from model_generation.core.constants import (
-    DEFAULT_JOINT_DAMPING,
-    DEFAULT_JOINT_EFFORT,
-    DEFAULT_JOINT_VELOCITY,
     INTERMEDIATE_LINK_MASS,
     URDF_INDENT,
     URDF_XML_DECLARATION,
@@ -22,7 +19,6 @@ from model_generation.core.types import (
     Geometry,
     Inertia,
     Joint,
-    JointDynamics,
     JointLimits,
     JointType,
     Link,
@@ -88,9 +84,7 @@ class URDFWriter:
             lines.extend(self._write_link(link, 1))
 
         # Expand composite joints and write
-        expanded_links, expanded_joints = self._expand_composite_joints(
-            links, joints
-        )
+        expanded_links, expanded_joints = self._expand_composite_joints(links, joints)
 
         # Write any intermediate links from joint expansion
         for link in expanded_links:
@@ -258,9 +252,7 @@ class URDFWriter:
 
         return lines
 
-    def _write_material_definition(
-        self, material: Material, level: int
-    ) -> list[str]:
+    def _write_material_definition(self, material: Material, level: int) -> list[str]:
         """Generate XML for material definition."""
         lines: list[str] = []
         indent = self.indent * level
@@ -357,7 +349,9 @@ class URDFWriter:
                 new_joints.extend(revolute_joints)
             elif joint.joint_type == JointType.UNIVERSAL:
                 # Expand to 2 revolute joints
-                intermediate_links, revolute_joints = self._expand_universal_joint(joint)
+                intermediate_links, revolute_joints = self._expand_universal_joint(
+                    joint
+                )
                 new_links.extend(intermediate_links)
                 new_joints.extend(revolute_joints)
             else:
@@ -365,9 +359,7 @@ class URDFWriter:
 
         return new_links, new_joints
 
-    def _expand_gimbal_joint(
-        self, joint: Joint
-    ) -> tuple[list[Link], list[Joint]]:
+    def _expand_gimbal_joint(self, joint: Joint) -> tuple[list[Link], list[Joint]]:
         """Expand gimbal joint to 3 revolute joints."""
         # Default axes: Z-Y-X Euler sequence
         axes = joint.composite_axes or [(0, 0, 1), (0, 1, 0), (1, 0, 0)]
@@ -419,9 +411,7 @@ class URDFWriter:
 
         return intermediate_links, revolute_joints
 
-    def _expand_universal_joint(
-        self, joint: Joint
-    ) -> tuple[list[Link], list[Joint]]:
+    def _expand_universal_joint(self, joint: Joint) -> tuple[list[Link], list[Joint]]:
         """Expand universal joint to 2 revolute joints."""
         # Default axes: perpendicular
         axes = joint.composite_axes or [(1, 0, 0), (0, 1, 0)]
