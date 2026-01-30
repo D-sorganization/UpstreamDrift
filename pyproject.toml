@@ -78,3 +78,8 @@ exclude = [
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 ignore = ["E501", "B008"]
+
+[tool.black]
+line-length = 88
+# Exclude legacy OpenSim models (Python 2)
+exclude = "src/shared/models/opensim/opensim-models"
