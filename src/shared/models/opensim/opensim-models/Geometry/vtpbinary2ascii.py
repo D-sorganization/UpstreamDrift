@@ -2,8 +2,9 @@ import os
 
 import vtk
 
-for filename in os.listdir('.'):
-    if not filename.endswith('.vtp'): continue
+for filename in os.listdir("."):
+    if not filename.endswith(".vtp"):
+        continue
     with file(filename) as f:
         if 'format="appended"' in f.read():
             f.close()
@@ -12,7 +13,7 @@ for filename in os.listdir('.'):
             reader.SetFileName(filename)
 
             writer = vtk.vtkXMLPolyDataWriter()
-            #writer = vtk.vtkSTLWriter()
+            # writer = vtk.vtkSTLWriter()
             writer.SetFileName(filename)
             writer.SetInputConnection(reader.GetOutputPort())
             writer.SetDataModeToAscii()

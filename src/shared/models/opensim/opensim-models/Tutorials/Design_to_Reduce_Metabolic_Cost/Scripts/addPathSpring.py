@@ -23,17 +23,17 @@
 # Get a handle to the current model and create a new copy
 baseModel = getCurrentModel()
 pathSpringModel = baseModel.clone()
-pathSpringModel.setName(baseModel.getName()+'_path_spring')
+pathSpringModel.setName(baseModel.getName() + "_path_spring")
 
 # Create the spring we'll add to the model (a PathSpring in OpenSim)
-name = 'BiarticularSpringDamper'
+name = "BiarticularSpringDamper"
 restLength = 0.4
 stiffness = 10000.0
 dissipation = 0.01
-pathSpring = modeling.PathSpring(name,restLength,stiffness,dissipation)
+pathSpring = modeling.PathSpring(name, restLength, stiffness, dissipation)
 
 # Set geometry path for the path spring to match the gastrocnemius muscle
-gastroc = pathSpringModel.getMuscles().get('gastroc_r')
+gastroc = pathSpringModel.getMuscles().get("gastroc_r")
 pathSpring.set_GeometryPath(gastroc.getGeometryPath())
 
 # Add the spring to the model
@@ -44,5 +44,5 @@ loadModel(pathSpringModel)
 
 # Save the model to file
 fullPathName = baseModel.getInputFileName()
-newName = fullPathName.replace('.osim', '_path_spring.osim')
+newName = fullPathName.replace(".osim", "_path_spring.osim")
 pathSpringModel.print(newName)
