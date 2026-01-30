@@ -85,3 +85,13 @@ exclude = [
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 ignore = ["E501", "B008"]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+extend-exclude = '''
+/(
+  src/shared/models/opensim/opensim-models
+  | shared/models/opensim/opensim-models
+)/
+'''
