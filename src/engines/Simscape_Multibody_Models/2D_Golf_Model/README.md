@@ -401,7 +401,7 @@ fprintf('  Wrist start: %.3f s\n', optimal_params.wrist_start);
   author = {[Authors]},
   year = {2026},
   note = {Part of Golf Modeling Suite},
-  url = {https://github.com/D-sorganization/Golf_Modeling_Suite}
+  url = {https://github.com/dieterolson/UpstreamDrift}
 }
 ```
 
@@ -414,4 +414,4 @@ MIT License - See [LICENSE](../../../LICENSE)
 For 2D model questions:
 - Check this README
 - Review example scripts in `matlab/examples/`
-- See [Golf Modeling Suite Issues](https://github.com/D-sorganization/Golf_Modeling_Suite/issues)
+- See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)

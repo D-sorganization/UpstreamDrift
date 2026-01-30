@@ -1,7 +1,7 @@
 # PR Consolidation Report - Jan 13, 2026
 
 ## 1. Golf Modeling Suite
-**Consolidated PR**: [#412](https://github.com/D-sorganization/Golf_Modeling_Suite/pull/412)
+**Consolidated PR**: [#412](https://github.com/dieterolson/UpstreamDrift/pull/412)
 **Status**: Ready for Review (CI Passing)
 
 **Components Merged**:
@@ -19,7 +19,7 @@
     - Fixed linting (Line lengths, Imports) and Typing (Tests).
 
 ## 2. Gasification Model
-**Consolidated PR**: [#518](https://github.com/D-sorganization/Gasification_Model/pull/518)
+**Consolidated PR**: [#518](https://github.com/dieterolson/Gasification_Model/pull/518)
 **Status**: Ready for Review (Known Mypy Debt)
 
 **Components Merged**:

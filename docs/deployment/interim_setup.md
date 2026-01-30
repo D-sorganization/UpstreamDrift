@@ -15,7 +15,7 @@ This guide helps you deploy the Golf Modeling Suite for immediate use without co
 
 ### Clone and Setup
 ```bash
-git clone https://github.com/D-sorganization/Golf_Modeling_Suite.git
+git clone https://github.com/dieterolson/UpstreamDrift.git
 cd Golf_Modeling_Suite
 git lfs pull
 

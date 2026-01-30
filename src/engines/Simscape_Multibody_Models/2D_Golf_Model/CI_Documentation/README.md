@@ -1,13 +1,13 @@
 # CI/CD Documentation
 
-This directory contains supplementary CI/CD documentation for the 2D_Golf_Model repository and related D-sorganization projects.
+This directory contains supplementary CI/CD documentation for the 2D_Golf_Model repository and related dieterolson projects.
 
 ## Document Structure
 
 ### Main Documents
 
 - **[../UNIFIED_CI_APPROACH.md](../UNIFIED_CI_APPROACH.md)** - **START HERE**
-  - Central CI/CD documentation for all 15 D-sorganization repositories
+  - Central CI/CD documentation for all 15 dieterolson repositories
   - Unified standards for Python, MATLAB, JavaScript/TypeScript, and Shell scripts
   - Comprehensive workflow examples and best practices
   - Required reading for all CI/CD work

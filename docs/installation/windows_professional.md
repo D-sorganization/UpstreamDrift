@@ -71,7 +71,7 @@ where python
 
 ```powershell
 # Clone the repository with LFS support
-git clone https://github.com/D-sorganization/Golf_Modeling_Suite.git
+git clone https://github.com/dieterolson/UpstreamDrift.git
 cd Golf_Modeling_Suite
 
 # Pull large files (models, meshes)

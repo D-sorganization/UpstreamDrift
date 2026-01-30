@@ -29,6 +29,6 @@ python -c "from shared.python import EngineManager; print(EngineManager().get_di
 
 ### Still Need Help?
 
-1. Check [GitHub Issues](https://github.com/D-sorganization/Golf_Modeling_Suite/issues)
+1. Check [GitHub Issues](https://github.com/dieterolson/UpstreamDrift/issues)
 2. Review [assessment documents](../assessments/)
 3. Open a new issue with full details

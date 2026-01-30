@@ -1,8 +1,8 @@
-# Unified CI/CD Approach for D-sorganization Repositories
+# Unified CI/CD Approach for dieterolson Repositories
 
 **Last Updated:** 2025-11-29
 
-This document defines the **unified CI/CD standards** for all 15 repositories in the D-sorganization, covering Python, MATLAB, JavaScript/TypeScript, and Arduino projects.
+This document defines the **unified CI/CD standards** for all 15 repositories in the dieterolson, covering Python, MATLAB, JavaScript/TypeScript, and Arduino projects.
 
 ## Table of Contents
 

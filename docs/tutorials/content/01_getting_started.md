@@ -19,7 +19,7 @@ By the end of this tutorial, you will:
 
 ### Clone the Repository
 \`\`\`bash
-git clone https://github.com/D-sorganization/Golf_Modeling_Suite.git
+git clone https://github.com/dieterolson/UpstreamDrift.git
 cd Golf_Modeling_Suite
 git lfs install && git lfs pull
 \`\`\`

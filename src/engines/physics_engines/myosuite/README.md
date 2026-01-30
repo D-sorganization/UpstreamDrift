@@ -256,4 +256,4 @@ For MyoSuite-specific questions:
 - [MyoSuite Discussions](https://github.com/MyoHub/myosuite/discussions)
 
 For Golf Modeling Suite integration:
-- See [Golf Modeling Suite Issues](https://github.com/D-sorganization/Golf_Modeling_Suite/issues)
+- See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)

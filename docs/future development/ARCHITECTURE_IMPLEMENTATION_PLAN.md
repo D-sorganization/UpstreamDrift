@@ -1156,9 +1156,9 @@ all = ["golf-suite[all-engines,analysis,dev]"]
 golf-suite = "golf_suite.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/D-sorganization/Golf_Modeling_Suite"
+Homepage = "https://github.com/dieterolson/UpstreamDrift"
 Documentation = "https://golf-suite.readthedocs.io"
-Repository = "https://github.com/D-sorganization/Golf_Modeling_Suite"
+Repository = "https://github.com/dieterolson/UpstreamDrift"
 
 [build-system]
 requires = ["hatchling"]

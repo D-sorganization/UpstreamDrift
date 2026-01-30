@@ -46,7 +46,7 @@ Golf_Model/
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/D-sorganization/Golf_Model.git
+   git clone https://github.com/dieterolson/Golf_Model.git
    cd Golf_Model
    git lfs install
    git lfs pull
