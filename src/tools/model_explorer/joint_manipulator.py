@@ -653,7 +653,7 @@ class JointManipulatorWidget(QWidget):
         # Add sliders for movable joints
         filter_mode = self.filter_combo.currentText()
 
-        for name, joint in self.joints.items():
+        for _name, joint in self.joints.items():
             if filter_mode == "Movable Only" and not joint.is_movable():
                 continue
             if filter_mode == "Fixed Only" and joint.is_movable():

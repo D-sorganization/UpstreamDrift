@@ -1,14 +1,14 @@
 # Get a handle to the current model and create a new copy
 baseModel = getCurrentModel()
 ankleSpringModel = baseModel.clone()
-ankleSpringModel.setName(baseModel.getName() + "_ankle_spring")
+ankleSpringModel.setName(baseModel.getName()+'_ankle_spring')
 
 # Create the spring we'll add to the model (a CoordinateLimitForce in OpenSim)
 ankleSpring = modeling.CoordinateLimitForce()
 
 # Set the coordinate for the spring
-ankleSpring.set_coordinate("ankle_angle_r")
-ankleSpring.setName("AnkleLimitSpringDamper")
+ankleSpring.set_coordinate('ankle_angle_r')
+ankleSpring.setName('AnkleLimitSpringDamper')
 
 # Add the spring to the model
 ankleSpringModel.addForce(ankleSpring)
@@ -26,5 +26,5 @@ ankleSpring.setTransition(2.0)
 
 # Save the model to file
 fullPathName = baseModel.getInputFileName()
-newName = fullPathName.replace(".osim", "_spring.osim")
+newName = fullPathName.replace('.osim', '_spring.osim')
 ankleSpringModel.print(newName)

@@ -38,7 +38,7 @@ oldModel = getCurrentModel()
 # Create a fresh copy. Initialize and name the copy.
 myModel = modeling.Model(oldModel)
 myState = myModel.initSystem()
-myModel.setName(oldModel.getName() + "_probed")
+myModel.setName(oldModel.getName()+"_probed")
 
 # Open the data file containing slow-twitch ratios for common muscles. The
 # file must be formatted as follows:
@@ -49,9 +49,8 @@ myModel.setName(oldModel.getName() + "_probed")
 #     "-1" if the slow-twitch ratio is unknown for that muscle
 import org.opensim.utils as utils
 
-fn = utils.FileUtils.getInstance().browseForFilename(
-    ".txt", "Please select the file containing the slow-twitch fiber ratios", True
-)
+fn = utils.FileUtils.getInstance().browseForFilename(".txt",
+    "Please select the file containing the slow-twitch fiber ratios", True)
 f = open(fn)
 
 twitchRatios = {}
@@ -94,8 +93,7 @@ wholeBodyProbe = modeling.Umberger2010MuscleMetabolicsProbe(
     activationMaintenanceRateOn,
     shorteningRateOn,
     basalRateOn,
-    mechanicalWorkRateOn,
-)
+    mechanicalWorkRateOn,)
 wholeBodyProbe.setOperation("value")
 wholeBodyProbe.set_report_total_metabolics_only(reportTotalMetabolicsOnly)
 
@@ -120,11 +118,12 @@ for iMuscle in range(myModel.getMuscles().getSize()):
     # Add this muscle to the whole-body probe. The arguments are muscle
     # name, slow-twitch ratio, and muscle mass. Note that the muscle mass
     # is ignored unless we set useProvidedMass to True.
-    wholeBodyProbe.addMuscle(thisMuscle.getName(), slowTwitchRatio)
+    wholeBodyProbe.addMuscle(thisMuscle.getName(),
+                             slowTwitchRatio)
 
 # Save the new model to a file with the suffix "_probed".
 oldPathName = oldModel.getInputFileName()
-newPathName = oldPathName.replace(".osim", "_probed.osim")
+newPathName = oldPathName.replace('.osim', '_probed.osim')
 myModel.print(newPathName)
 
 # Add the new model to the GUI.
@@ -132,8 +131,8 @@ loadModel(newPathName)
 
 # Display the file name of the new model.
 win = swing.JFrame("Complete")
-dLabel = swing.JLabel("The probed model has been written to " + newPathName)
+dLabel = swing.JLabel("The probed model has been written to "+newPathName)
 win.getContentPane().add(dLabel)
 win.pack()
 win.show()
-win.setSize(1000, 100)
+win.setSize(1000,100)

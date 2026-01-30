@@ -71,6 +71,16 @@ path = "build_hooks.py"
 [tool.ruff]
 line-length = 88
 target-version = "py311"
+exclude = [
+    "src/shared/models/opensim/opensim-models/Tutorials",
+    "src/shared/models/opensim/opensim-models/Geometry",
+    "src/shared/models/opensim/opensim-models/test_models.py",
+    "src/shared/models/opensim/opensim-models/update_models.py",
+    "shared/models/opensim/opensim-models/Tutorials",
+    "shared/models/opensim/opensim-models/Geometry",
+    "shared/models/opensim/opensim-models/test_models.py",
+    "shared/models/opensim/opensim-models/update_models.py"
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

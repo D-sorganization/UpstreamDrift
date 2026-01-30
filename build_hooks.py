@@ -22,21 +22,27 @@ class UIBuildHook(BuildHookInterface):
         # Check if we need to build
         # We skip build if not in a git repo or if environment variable is set to skip
         if os.environ.get("SKIP_UI_BUILD"):
-            return
+             return
 
         if not dist_dir.exists() or self.config.get("force_ui_build"):
             print("Building UI...")
 
             try:
                 # Install dependencies
-                subprocess.run(["npm", "ci"], cwd=str(ui_dir), check=True, shell=True)
+                subprocess.run(
+                    ["npm", "ci"],
+                    cwd=str(ui_dir),
+                    check=True,
+                    shell=True
+                )
 
                 # Build production bundle
                 subprocess.run(
-                    ["npm", "run", "build"], cwd=str(ui_dir), check=True, shell=True
+                    ["npm", "run", "build"],
+                    cwd=str(ui_dir),
+                    check=True,
+                    shell=True
                 )
                 print(f"UI built successfully to {dist_dir}")
             except Exception as e:
-                print(
-                    f"Warning: UI build failed: {e}. continuing without fresh UI build."
-                )
+                print(f"Warning: UI build failed: {e}. continuing without fresh UI build.")

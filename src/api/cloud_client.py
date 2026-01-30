@@ -40,7 +40,7 @@ class CloudClient:
                 response = await client.post(
                     f"{CLOUD_API_URL}/auth/login",
                     json={"email": email, "password": password},
-                    timeout=5.0,
+                    timeout=5.0
                 )
 
                 if response.status_code == 200:
