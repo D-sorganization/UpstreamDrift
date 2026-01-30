@@ -760,16 +760,13 @@ class EndEffectorManagerWidget(QWidget):
         custom_item = self.custom_list.currentItem()
 
         ee: EndEffector | None = None
-        source = ""
 
         if builtin_item:
             key = builtin_item.data(Qt.ItemDataRole.UserRole)
             ee = self.library.get_builtin(key)
-            source = "built-in"
         elif custom_item:
             key = custom_item.data(Qt.ItemDataRole.UserRole)
             ee = self.library.end_effectors.get(key)
-            source = "library"
 
         if not ee:
             self.status_label.setText("Select an end effector from the library")

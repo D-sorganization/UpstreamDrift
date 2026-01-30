@@ -282,9 +282,7 @@ def apply_deadband(
     offset = values - center
 
     if smooth:
-        # Smooth deadband using tanh
-        # f(x) = x * tanh(k * (|x| - threshold)) / (|x| + epsilon) for |x| > threshold
-        epsilon = 1e-10
+        # Smooth deadband using tanh transition
         x_abs = np.abs(offset)
 
         # Smoothly transition from 0 to 1 as we leave the deadband
