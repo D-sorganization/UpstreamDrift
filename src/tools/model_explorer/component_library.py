@@ -400,6 +400,33 @@ class ComponentLibrary:
         """Get list of loaded source files."""
         return list(self._source_files)
 
+    def get_library_items(self) -> dict[str, URDFComponent]:
+        """Get all library components as a dictionary (key -> component).
+
+        Returns:
+            Dictionary mapping keys to library components.
+        """
+        return dict(self._library_components)
+
+    def get_working_items(self) -> dict[str, URDFComponent]:
+        """Get all working components as a dictionary (name -> component).
+
+        Returns:
+            Dictionary mapping names to working components.
+        """
+        return dict(self._working_components)
+
+    def get_library_component_by_key(self, key: str) -> URDFComponent | None:
+        """Get a library component by its key.
+
+        Args:
+            key: The library key (format: "source_file:component_name")
+
+        Returns:
+            Component if found, None otherwise.
+        """
+        return self._library_components.get(key)
+
 
 class ComponentLibraryWidget(QWidget):
     """Widget for browsing and managing component library."""
@@ -587,8 +614,8 @@ class ComponentLibraryWidget(QWidget):
 
         if current:
             library_key = current.data(0, Qt.ItemDataRole.UserRole)
-            if library_key and library_key in self.library._library_components:
-                component = self.library._library_components[library_key]
+            component = self.library.get_library_component_by_key(library_key)
+            if component:
                 self.preview_text.setPlainText(component.xml_content)
                 self.component_selected.emit(component)
         else:
@@ -616,7 +643,7 @@ class ComponentLibraryWidget(QWidget):
 
         # Group by source file
         by_source: dict[str, list[tuple[str, URDFComponent]]] = {}
-        for key, component in self.library._library_components.items():
+        for key, component in self.library.get_library_items().items():
             source = component.source_file.name if component.source_file else "Unknown"
             if source not in by_source:
                 by_source[source] = []
@@ -648,7 +675,7 @@ class ComponentLibraryWidget(QWidget):
 
         # Group by type
         by_type: dict[ComponentType, list[URDFComponent]] = {}
-        for component in self.library._working_components.values():
+        for component in self.library.get_working_items().values():
             if component.component_type not in by_type:
                 by_type[component.component_type] = []
             by_type[component.component_type].append(component)

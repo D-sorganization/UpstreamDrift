@@ -59,8 +59,7 @@ build-backend = "hatchling.build"
 # Include pre-built UI in the wheel
 include = [
     "src/**/*",
-    "src/golf_suite/ui/dist/**/*",  # Bundled web UI
-    "ui/dist/**/*", 
+    "ui/dist/**/*",  # Bundled web UI (built by build_hooks.py)
     "launch_golf_suite.py",
 ]
 
