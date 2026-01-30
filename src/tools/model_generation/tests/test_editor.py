@@ -164,7 +164,7 @@ class TestFrankensteinEditor:
         assert len(created) >= 1
 
         target = editor.get_model("target")
-        link_names = [l.name for l in target.links]
+        link_names = [link.name for link in target.links]
         assert "arm_link" in link_names or any("arm" in n for n in link_names)
 
     def test_delete_link(self):
@@ -181,7 +181,7 @@ class TestFrankensteinEditor:
         assert result is True
 
         model = editor.get_model("editable")
-        link_names = [l.name for l in model.links]
+        link_names = [link.name for link in model.links]
         assert "arm_link" not in link_names
 
     def test_rename_link(self):
@@ -196,7 +196,7 @@ class TestFrankensteinEditor:
         assert result is True
 
         model = editor.get_model("editable")
-        link_names = [l.name for l in model.links]
+        link_names = [link.name for link in model.links]
         assert "new_arm_name" in link_names
         assert "arm_link" not in link_names
 

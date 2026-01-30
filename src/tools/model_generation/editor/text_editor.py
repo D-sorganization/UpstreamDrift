@@ -434,7 +434,7 @@ class URDFTextEditor:
         links = {}
         joints = {}
 
-        for idx, link_elem in enumerate(root.findall("link")):
+        for _idx, link_elem in enumerate(root.findall("link")):
             name = link_elem.get("name")
             if not name:
                 line = self._find_element_line(link_elem)
@@ -504,7 +504,7 @@ class URDFTextEditor:
                                 )
                             )
 
-        for idx, joint_elem in enumerate(root.findall("joint")):
+        for _idx, joint_elem in enumerate(root.findall("joint")):
             name = joint_elem.get("name")
             if not name:
                 line = self._find_element_line(joint_elem)
@@ -653,7 +653,7 @@ class URDFTextEditor:
     def _find_element_line(self, elem: ET.Element) -> int:
         """Find the line number of an element (approximate)."""
         # This is a simple heuristic - search for element in content
-        elem_str = ET.tostring(elem, encoding="unicode")
+        ET.tostring(elem, encoding="unicode")
         tag_start = f"<{elem.tag}"
 
         # Find in content
@@ -827,7 +827,7 @@ class URDFTextEditor:
         result = []
         for opcode, i1, i2, j1, j2 in differ.get_opcodes():
             if opcode == "equal":
-                for i, j in zip(range(i1, i2), range(j1, j2)):
+                for i, j in zip(range(i1, i2), range(j1, j2), strict=False):
                     result.append((original_lines[i], modified_lines[j], "equal"))
             elif opcode == "insert":
                 for j in range(j1, j2):

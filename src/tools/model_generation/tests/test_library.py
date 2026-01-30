@@ -162,7 +162,7 @@ class TestRepository:
             "<robot name='robot2'></robot>"
         )
 
-        repo = LocalRepository("test_local", repo_dir)
+        repo = LocalRepository(repo_dir, name="test_local")
         models = repo.list_models()
 
         assert len(models) >= 2

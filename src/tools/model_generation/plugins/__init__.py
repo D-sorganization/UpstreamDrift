@@ -33,8 +33,9 @@ class ModelGenerationPlugin(ABC):
         """Initialize the plugin with context."""
         ...
 
-    def shutdown(self) -> None:
+    def shutdown(self) -> None:  # noqa: B027
         """Clean up plugin resources."""
+        pass
 
 
 __all__ = ["ModelGenerationPlugin"]

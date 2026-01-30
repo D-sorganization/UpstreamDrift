@@ -444,7 +444,7 @@ class FrankensteinEditor:
             "link_count": len(links),
             "joint_count": len(joints),
             "material_count": len(materials),
-            "link_names": [l.name for l in links],
+            "link_names": [link.name for link in links],
         }
 
     def clear_clipboard(self) -> None:
@@ -498,7 +498,7 @@ class FrankensteinEditor:
 
         # Build name mapping for renames
         name_map = {}
-        existing_links = {l.name for l in model.links}
+        existing_links = {link.name for link in model.links}
         existing_joints = {j.name for j in model.joints}
 
         # Generate unique names
@@ -672,7 +672,7 @@ class FrankensteinEditor:
                 self.delete_subtree(model_id, child)
 
         # Remove the link
-        model.links = [l for l in model.links if l.name != link_name]
+        model.links = [link for link in model.links if link.name != link_name]
 
         # Remove connecting joint
         model.joints = [j for j in model.joints if j.child != link_name]
@@ -708,7 +708,7 @@ class FrankensteinEditor:
         self._save_state()
 
         # Remove all links in subtree
-        model.links = [l for l in model.links if l.name not in subtree]
+        model.links = [link for link in model.links if link.name not in subtree]
 
         # Remove all joints connected to subtree
         model.joints = [
@@ -1117,7 +1117,7 @@ class FrankensteinEditor:
 
         # Build name map
         name_map = {}
-        existing_links = {l.name for l in model.links}
+        existing_links = {link.name for link in model.links}
 
         for link in links:
             new_name = mirror_name(link.name)
@@ -1318,8 +1318,8 @@ class FrankensteinEditor:
         if not model_a or not model_b:
             return {"error": "Model not found"}
 
-        links_a = {l.name for l in model_a.links}
-        links_b = {l.name for l in model_b.links}
+        links_a = {link.name for link in model_a.links}
+        links_b = {link.name for link in model_b.links}
 
         joints_a = {j.name for j in model_a.joints}
         joints_b = {j.name for j in model_b.joints}
@@ -1380,7 +1380,7 @@ class FrankensteinEditor:
         if not model:
             return {"error": "Model not found"}
 
-        total_mass = sum(l.inertia.mass for l in model.links)
+        total_mass = sum(link.inertia.mass for link in model.links)
 
         joint_types = {}
         for j in model.joints:

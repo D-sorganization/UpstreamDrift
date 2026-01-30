@@ -366,7 +366,7 @@ def parallel_axis(
         Inertia about new point
     """
     dx, dy, dz = offset
-    d_sq = dx**2 + dy**2 + dz**2
+    dx**2 + dy**2 + dz**2
 
     return {
         "ixx": inertia["ixx"] + mass * (dy**2 + dz**2),

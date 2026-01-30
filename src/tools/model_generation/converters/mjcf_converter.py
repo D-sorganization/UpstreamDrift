@@ -181,8 +181,8 @@ class MJCFConverter:
 
         # Assets (materials, meshes)
         if model.materials or any(
-            l.visual_geometry and l.visual_geometry.geometry_type == GeometryType.MESH
-            for l in model.links
+            link.visual_geometry and link.visual_geometry.geometry_type == GeometryType.MESH
+            for link in model.links
         ):
             lines.append("  <asset>")
             for mat in model.materials.values():
