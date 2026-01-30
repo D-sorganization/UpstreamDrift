@@ -1074,6 +1074,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
 
             # Filters
             self.apply_filter_btn.clicked.connect(self._apply_filter)
+            self.show_freq_response_btn.clicked.connect(self._show_frequency_response)
 
             # Noise
             self.add_noise_btn.clicked.connect(self._add_noise)
@@ -1296,9 +1297,36 @@ if HAS_MATPLOTLIB and HAS_PYQT:
 
         def _update_saturation_preview(self) -> None:
             """Update saturation preview if enabled."""
-            if self.sat_preview_check.isChecked() and self.original_signal:
+            if not self.original_signal:
+                return
+
+            if self.sat_preview_check.isChecked():
                 # Show preview without modifying current signal
-                pass
+                mode_map = {
+                    "Hard Clip": SaturationMode.HARD,
+                    "Soft Clip (tanh)": SaturationMode.SOFT_TANH,
+                    "Soft Clip (sigmoid)": SaturationMode.SOFT_SIGMOID,
+                    "Polynomial": SaturationMode.POLYNOMIAL,
+                }
+                mode = mode_map.get(
+                    self.sat_mode_combo.currentText(), SaturationMode.HARD
+                )
+
+                # Create preview signal
+                preview = apply_saturation(
+                    self.current_signal.copy() if self.current_signal else self.original_signal.copy(),
+                    lower=self.sat_lower.value(),
+                    upper=self.sat_upper.value(),
+                    mode=mode,
+                    smoothness=self.sat_smoothness.value(),
+                )
+
+                # Show on secondary plot
+                self._update_secondary_plot(preview, "Saturation Preview")
+            else:
+                # Clear preview
+                self.canvas2.axes.clear()
+                self.canvas2.draw()
 
         def _show_derivative(self) -> None:
             """Show the derivative of the current signal."""
@@ -1430,6 +1458,79 @@ if HAS_MATPLOTLIB and HAS_PYQT:
 
             except Exception as e:
                 QMessageBox.warning(self, "Filter Error", f"Failed: {e}")
+
+        def _show_frequency_response(self) -> None:
+            """Show frequency response of the current filter settings."""
+            if self.current_signal is None:
+                QMessageBox.information(
+                    self,
+                    "No Signal",
+                    "Please generate or load a signal first.",
+                )
+                return
+
+            design = self.filter_design_combo.currentText()
+
+            # Non-IIR filters don't have a traditional frequency response
+            if design in ("Moving Average", "Savitzky-Golay", "Median", "Gaussian"):
+                QMessageBox.information(
+                    self,
+                    "Frequency Response",
+                    f"{design} filters are FIR/smoothing filters.\n"
+                    "Use IIR filter designs (Butterworth, Chebyshev, etc.) "
+                    "to view frequency response.",
+                )
+                return
+
+            try:
+                from scipy import signal as scipy_signal
+
+                filter_type = self.filter_type_combo.currentText().lower()
+                fs = self.current_signal.fs
+                cutoff = self.filter_cutoff.value()
+                order = self.filter_order.value()
+
+                if filter_type in ("bandpass", "bandstop"):
+                    cutoff = (cutoff, self.filter_cutoff2.value())
+
+                ft = FilterType(filter_type)
+
+                # Get filter spec
+                if design == "Butterworth":
+                    spec = FilterDesigner.butterworth(ft, cutoff, fs, order)
+                elif design == "Chebyshev I":
+                    spec = FilterDesigner.chebyshev1(ft, cutoff, fs, order)
+                elif design == "Chebyshev II":
+                    spec = FilterDesigner.chebyshev2(ft, cutoff, fs, order)
+                elif design == "Elliptic":
+                    spec = FilterDesigner.elliptic(ft, cutoff, fs, order)
+                elif design == "Bessel":
+                    spec = FilterDesigner.bessel(ft, cutoff, fs, order)
+                else:
+                    return
+
+                # Calculate frequency response
+                w, h = scipy_signal.freqz(spec.b_coeffs, spec.a_coeffs, fs=fs)
+
+                # Plot on secondary canvas
+                self.canvas2.axes.clear()
+                self.canvas2.setup_dark_theme()
+
+                self.canvas2.axes.semilogy(
+                    w, np.abs(h), color="#4ecdc4", linewidth=1.5
+                )
+                self.canvas2.axes.set_title("Frequency Response", fontsize=10)
+                self.canvas2.axes.set_xlabel("Frequency (Hz)")
+                self.canvas2.axes.set_ylabel("Magnitude")
+                self.canvas2.axes.grid(True, alpha=0.3)
+                self.canvas2.draw()
+
+                self._log(f"Showing frequency response for {design} {filter_type}")
+
+            except Exception as e:
+                QMessageBox.warning(
+                    self, "Error", f"Failed to compute frequency response: {e}"
+                )
 
         def _add_noise(self) -> None:
             """Add noise to the signal."""

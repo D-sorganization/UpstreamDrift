@@ -8,12 +8,16 @@ from __future__ import annotations
 
 import csv
 import json
+import logging
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
 from src.shared.python.signal_toolkit.core import Signal
+
+logger = logging.getLogger(__name__)
 
 
 class SignalImporter:
@@ -585,13 +589,13 @@ class BatchProcessor:
             try:
                 signals[file_path.stem] = SignalLoader.load(file_path, **kwargs)
             except Exception as e:
-                print(f"Warning: Failed to load {file_path}: {e}")
+                logger.warning("Failed to load %s: %s", file_path, e)
 
         return signals
 
     def process_all(
         self,
-        processor: Any,  # Callable[[Signal], Signal]
+        processor: Callable[[Signal], Signal],
         pattern: str = "*.csv",
         output_dir: str | Path | None = None,
         output_format: str = "csv",

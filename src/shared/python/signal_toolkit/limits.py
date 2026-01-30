@@ -388,13 +388,23 @@ def apply_backlash(
 
     Args:
         signal: Input signal.
-        backlash_width: Total backlash width.
+        backlash_width: Total backlash width (must be non-negative).
         smooth: Whether to smooth transitions.
-        smoothness: Smoothness parameter.
+        smoothness: Smoothness parameter (must be positive).
 
     Returns:
         Signal with backlash applied.
+
+    Raises:
+        ValueError: If backlash_width is negative or smoothness is non-positive.
     """
+    if backlash_width < 0:
+        raise ValueError(
+            f"backlash_width must be non-negative, got {backlash_width}"
+        )
+    if smoothness <= 0:
+        raise ValueError(f"smoothness must be positive, got {smoothness}")
+
     values = signal.values
     half_width = backlash_width / 2
     result = np.zeros_like(values)

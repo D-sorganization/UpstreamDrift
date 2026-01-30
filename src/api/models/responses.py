@@ -8,10 +8,20 @@ from pydantic import BaseModel, Field
 class EngineStatusResponse(BaseModel):
     """Response model for engine status."""
 
-    engine_type: str = Field(..., description="Engine type identifier")
+    # Frontend-expected fields
+    name: str = Field(..., description="Engine name identifier")
+    available: bool = Field(..., description="Whether engine is available")
+    loaded: bool = Field(False, description="Whether engine is currently loaded")
+    version: str | None = Field(None, description="Engine version if available")
+    capabilities: list[str] = Field(
+        default_factory=list, description="Engine capabilities"
+    )
+
+    # Keep for backward compatibility
+    engine_type: str = Field(..., description="Engine type identifier (deprecated)")
     status: str = Field(..., description="Current status")
-    is_available: bool = Field(..., description="Whether engine is available")
-    description: str = Field(..., description="Engine description")
+    is_available: bool = Field(..., description="Whether engine is available (deprecated)")
+    description: str = Field("", description="Engine description")
 
 
 class SimulationResponse(BaseModel):

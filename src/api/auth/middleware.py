@@ -18,10 +18,12 @@ def is_local_mode() -> bool:
 class LocalUser:
     """Mock user for local mode - full access, no restrictions."""
 
-    id: str = "local-user"
-    email: str = "local@localhost"
-    role: str = "ADMIN"  # Full access locally
-    quota_remaining: float = float("inf")
+    def __init__(self) -> None:
+        """Initialize local user with full permissions."""
+        self.id: str = "local-user"
+        self.email: str = "local@localhost"
+        self.role: str = "ADMIN"  # Full access locally
+        self.quota_remaining: float = float("inf")
 
     def has_permission(self, permission: str) -> bool:
         return True  # Everything allowed locally
