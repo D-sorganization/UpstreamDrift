@@ -10,13 +10,13 @@ from humanoid_character_builder.mesh.inertia_calculator import (
     InertiaResult,
     MeshInertiaCalculator,
 )
-from humanoid_character_builder.mesh.primitive_inertia import (
-    PrimitiveInertiaCalculator,
-    PrimitiveShape,
-)
 from humanoid_character_builder.mesh.mesh_processor import (
     MeshProcessor,
     MeshSegmentResult,
+)
+from humanoid_character_builder.mesh.primitive_inertia import (
+    PrimitiveInertiaCalculator,
+    PrimitiveShape,
 )
 
 __all__ = [

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 from xml.dom import minidom
@@ -19,7 +19,6 @@ from humanoid_character_builder.core.anthropometry import (
     estimate_segment_dimensions,
     estimate_segment_masses,
     get_com_location,
-    estimate_segment_inertia_from_gyration,
 )
 from humanoid_character_builder.core.body_parameters import BodyParameters
 from humanoid_character_builder.core.segment_definitions import (
@@ -172,9 +171,7 @@ class HumanoidURDFGenerator:
         segment_dimensions = estimate_segment_dimensions(params.height_m, gender_factor)
 
         # Apply proportion factors
-        segment_dimensions = self._apply_proportion_factors(
-            segment_dimensions, params
-        )
+        segment_dimensions = self._apply_proportion_factors(segment_dimensions, params)
 
         # Generate materials
         self._generate_materials(params)
@@ -186,7 +183,9 @@ class HumanoidURDFGenerator:
                 segment_def,
                 params,
                 segment_masses.get(segment_name, 1.0),
-                segment_dimensions.get(segment_name, {"length": 0.1, "width": 0.05, "depth": 0.05}),
+                segment_dimensions.get(
+                    segment_name, {"length": 0.1, "width": 0.05, "depth": 0.05}
+                ),
                 gender_factor,
                 mesh_dir,
             )
@@ -364,7 +363,9 @@ class HumanoidURDFGenerator:
         width = dimensions.get("width", 0.05)
         depth = dimensions.get("depth", 0.05)
 
-        shape, shape_dims = estimate_segment_primitive(segment_name, length, width, depth)
+        shape, shape_dims = estimate_segment_primitive(
+            segment_name, length, width, depth
+        )
         return self.primitive_inertia_calc.compute(shape, mass, shape_dims)
 
     def _create_geometry_dict(
@@ -619,9 +620,7 @@ class HumanoidURDFGenerator:
             ET.SubElement(collision, "origin", xyz="0 0 0", rpy="0 0 0")
             self._add_geometry_element(collision, link.collision_geometry)
 
-    def _add_geometry_element(
-        self, parent: ET.Element, geom: dict[str, Any]
-    ) -> None:
+    def _add_geometry_element(self, parent: ET.Element, geom: dict[str, Any]) -> None:
         """Add geometry element."""
         geometry = ET.SubElement(parent, "geometry")
 
@@ -651,7 +650,9 @@ class HumanoidURDFGenerator:
 
     def _add_joint_element(self, root: ET.Element, joint: GeneratedJoint) -> None:
         """Add a joint element to the URDF."""
-        joint_elem = ET.SubElement(root, "joint", name=joint.name, type=joint.joint_type)
+        joint_elem = ET.SubElement(
+            root, "joint", name=joint.name, type=joint.joint_type
+        )
 
         ET.SubElement(joint_elem, "parent", link=joint.parent)
         ET.SubElement(joint_elem, "child", link=joint.child)

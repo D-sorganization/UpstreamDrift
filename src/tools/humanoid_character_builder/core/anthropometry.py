@@ -15,7 +15,6 @@ This module provides anthropometric ratios for computing:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 
 @dataclass
@@ -77,7 +76,9 @@ class AnthropometryData:
 
         # Linear interpolation
         return SegmentAnthropometry(
-            mass_ratio=_lerp(female_data.mass_ratio, male_data.mass_ratio, gender_factor),
+            mass_ratio=_lerp(
+                female_data.mass_ratio, male_data.mass_ratio, gender_factor
+            ),
             length_ratio=_lerp(
                 female_data.length_ratio, male_data.length_ratio, gender_factor
             ),
@@ -435,9 +436,7 @@ def get_anthropometry_key(segment_name: str) -> str:
     return _SEGMENT_NAME_MAP.get(segment_name, segment_name)
 
 
-def get_segment_mass_ratio(
-    segment_name: str, gender_factor: float = 0.5
-) -> float:
+def get_segment_mass_ratio(segment_name: str, gender_factor: float = 0.5) -> float:
     """
     Get segment mass as fraction of total body mass.
 
@@ -453,9 +452,7 @@ def get_segment_mass_ratio(
     return data.mass_ratio
 
 
-def get_segment_length_ratio(
-    segment_name: str, gender_factor: float = 0.5
-) -> float:
+def get_segment_length_ratio(segment_name: str, gender_factor: float = 0.5) -> float:
     """
     Get segment length as fraction of total height.
 

@@ -6,9 +6,7 @@ import tempfile
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
-import pytest
-
-from humanoid_character_builder.core.body_parameters import BodyParameters, BuildType
+from humanoid_character_builder.core.body_parameters import BodyParameters
 from humanoid_character_builder.generators.urdf_generator import (
     HumanoidURDFGenerator,
     URDFGeneratorConfig,

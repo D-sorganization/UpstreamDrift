@@ -137,7 +137,6 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
             )
 
         import trimesh
-
         from humanoid_character_builder.core.anthropometry import (
             estimate_segment_dimensions,
         )
@@ -171,9 +170,7 @@ class PrimitiveMeshGenerator(MeshGeneratorInterface):
                 geom_type = segment_def.visual_geometry.geometry_type
 
                 if geom_type == GeometryType.SPHERE:
-                    mesh = trimesh.creation.icosphere(
-                        radius=length / 2, subdivisions=2
-                    )
+                    mesh = trimesh.creation.icosphere(radius=length / 2, subdivisions=2)
                 elif geom_type == GeometryType.CYLINDER:
                     radius = (width + depth) / 4
                     mesh = trimesh.creation.cylinder(
@@ -295,9 +292,7 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
 
         return list(HUMANOID_SEGMENTS.keys())
 
-    def _convert_params_to_makehuman(
-        self, params: BodyParameters
-    ) -> dict[str, float]:
+    def _convert_params_to_makehuman(self, params: BodyParameters) -> dict[str, float]:
         """Convert BodyParameters to MakeHuman modifier values."""
         # MakeHuman uses modifiers in range [-1, 1] or [0, 1]
         modifiers = {}
@@ -310,7 +305,9 @@ class MakeHumanMeshGenerator(MeshGeneratorInterface):
         modifiers["macrodetails/Gender"] = params.get_effective_gender_factor()
 
         # Age (MakeHuman: range depends on modifier)
-        modifiers["macrodetails/Age"] = min(1.0, max(0.0, params.appearance.age_years / 80.0))
+        modifiers["macrodetails/Age"] = min(
+            1.0, max(0.0, params.appearance.age_years / 80.0)
+        )
 
         # Muscularity (MakeHuman: muscle definition)
         modifiers["macrodetails-universal/Muscle"] = params.muscularity

@@ -45,32 +45,21 @@ __version__ = "0.1.0"
 __author__ = "Golf Modeling Suite Contributors"
 
 # Core types - always available
-from humanoid_character_builder.core.body_parameters import (
-    BodyParameters,
-    SegmentParameters,
-    AppearanceParameters,
-)
-from humanoid_character_builder.core.segment_definitions import (
-    SegmentDefinition,
-    JointDefinition,
-    HUMANOID_SEGMENTS,
-    HUMANOID_JOINTS,
-)
 from humanoid_character_builder.core.anthropometry import (
     AnthropometryData,
-    get_segment_mass_ratio,
     get_segment_length_ratio,
+    get_segment_mass_ratio,
 )
-
-# Inertia calculation
-from humanoid_character_builder.mesh.inertia_calculator import (
-    InertiaMode,
-    InertiaResult,
-    MeshInertiaCalculator,
+from humanoid_character_builder.core.body_parameters import (
+    AppearanceParameters,
+    BodyParameters,
+    SegmentParameters,
 )
-from humanoid_character_builder.mesh.primitive_inertia import (
-    PrimitiveInertiaCalculator,
-    PrimitiveShape,
+from humanoid_character_builder.core.segment_definitions import (
+    HUMANOID_JOINTS,
+    HUMANOID_SEGMENTS,
+    JointDefinition,
+    SegmentDefinition,
 )
 
 # Generators
@@ -83,6 +72,17 @@ from humanoid_character_builder.generators.urdf_generator import (
 from humanoid_character_builder.interfaces.api import (
     CharacterBuilder,
     CharacterBuildResult,
+)
+
+# Inertia calculation
+from humanoid_character_builder.mesh.inertia_calculator import (
+    InertiaMode,
+    InertiaResult,
+    MeshInertiaCalculator,
+)
+from humanoid_character_builder.mesh.primitive_inertia import (
+    PrimitiveInertiaCalculator,
+    PrimitiveShape,
 )
 
 __all__ = [
