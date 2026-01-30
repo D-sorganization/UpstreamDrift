@@ -15,7 +15,7 @@ import zipfile
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -255,7 +255,9 @@ class GitHubRepository(Repository):
         destination.mkdir(parents=True, exist_ok=True)
 
         # Download URDF
-        urdf_url = f"{self.RAW_BASE}/{self._owner}/{self._repo}/{self._branch}/{model_path}"
+        urdf_url = (
+            f"{self.RAW_BASE}/{self._owner}/{self._repo}/{self._branch}/{model_path}"
+        )
         filename = Path(model_path).name
         local_path = destination / filename
 
@@ -276,7 +278,9 @@ class GitHubRepository(Repository):
     def _download_meshes(self, model_dir: str, destination: Path) -> None:
         """Download mesh files from model directory."""
         mesh_dir = f"{model_dir}/meshes"
-        api_url = f"{self.API_BASE}/repos/{self._owner}/{self._repo}/contents/{mesh_dir}"
+        api_url = (
+            f"{self.API_BASE}/repos/{self._owner}/{self._repo}/contents/{mesh_dir}"
+        )
 
         try:
             req = urllib.request.Request(api_url)
@@ -288,7 +292,10 @@ class GitHubRepository(Repository):
 
             for item in contents:
                 if item["type"] == "file":
-                    raw_url = item.get("download_url") or f"{self.RAW_BASE}/{self._owner}/{self._repo}/{self._branch}/{item['path']}"
+                    raw_url = (
+                        item.get("download_url")
+                        or f"{self.RAW_BASE}/{self._owner}/{self._repo}/{self._branch}/{item['path']}"
+                    )
                     local_file = local_mesh_dir / item["name"]
                     urllib.request.urlretrieve(raw_url, local_file)
 
@@ -297,7 +304,9 @@ class GitHubRepository(Repository):
 
     def download_archive(self, destination: Path) -> bool:
         """Download entire repository as archive."""
-        archive_url = f"https://github.com/{self._owner}/{self._repo}/archive/{self._branch}.zip"
+        archive_url = (
+            f"https://github.com/{self._owner}/{self._repo}/archive/{self._branch}.zip"
+        )
 
         try:
             with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as tmp:

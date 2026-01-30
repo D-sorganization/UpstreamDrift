@@ -15,11 +15,12 @@ import hashlib
 import logging
 import re
 import xml.etree.ElementTree as ET
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -532,7 +533,14 @@ class URDFTextEditor:
 
             # Check joint type
             joint_type = joint_elem.get("type")
-            valid_types = {"revolute", "continuous", "prismatic", "fixed", "floating", "planar"}
+            valid_types = {
+                "revolute",
+                "continuous",
+                "prismatic",
+                "fixed",
+                "floating",
+                "planar",
+            }
             if joint_type not in valid_types:
                 line = self._find_element_line(joint_elem)
                 messages.append(
@@ -984,7 +992,9 @@ class URDFTextEditor:
             return lines[line_number - 1]
         return None
 
-    def find_text(self, pattern: str, regex: bool = False) -> list[tuple[int, int, str]]:
+    def find_text(
+        self, pattern: str, regex: bool = False
+    ) -> list[tuple[int, int, str]]:
         """
         Find all occurrences of text.
 

@@ -270,7 +270,8 @@ class ModelCache:
             "total_size_bytes": total_size,
             "total_size_mb": total_size / (1024 * 1024),
             "max_size_mb": self.config.max_size_mb,
-            "usage_percent": (total_size / (self.config.max_size_mb * 1024 * 1024)) * 100,
+            "usage_percent": (total_size / (self.config.max_size_mb * 1024 * 1024))
+            * 100,
             "cache_dir": str(self.config.cache_dir),
         }
 
@@ -288,9 +289,7 @@ class ModelCache:
         logger.info("Running cache cleanup...")
 
         # Sort by last accessed (oldest first)
-        sorted_entries = sorted(
-            self._entries.values(), key=lambda e: e.last_accessed
-        )
+        sorted_entries = sorted(self._entries.values(), key=lambda e: e.last_accessed)
 
         min_age = time.time() - (self.config.min_age_days * 24 * 60 * 60)
         max_size = self.config.max_size_mb * 1024 * 1024

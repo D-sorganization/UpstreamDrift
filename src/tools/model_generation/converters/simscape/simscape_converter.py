@@ -316,9 +316,7 @@ class SimscapeToURDFConverter:
             # Reverse connection
             if conn.dest_block not in connection_map:
                 connection_map[conn.dest_block] = []
-            connection_map[conn.dest_block].append(
-                (conn.source_block, conn.dest_port)
-            )
+            connection_map[conn.dest_block].append((conn.source_block, conn.dest_port))
 
         return connection_map
 
@@ -456,7 +454,9 @@ class SimscapeToURDFConverter:
         if geometry.geometry_type == GeometryType.BOX:
             return Inertia.from_box(mass, *geometry.dimensions[:3])
         elif geometry.geometry_type == GeometryType.CYLINDER:
-            return Inertia.from_cylinder(mass, geometry.dimensions[0], geometry.dimensions[1])
+            return Inertia.from_cylinder(
+                mass, geometry.dimensions[0], geometry.dimensions[1]
+            )
         elif geometry.geometry_type == GeometryType.SPHERE:
             return Inertia.from_sphere(mass, geometry.dimensions[0])
         else:
@@ -471,9 +471,7 @@ class SimscapeToURDFConverter:
     ) -> Joint | None:
         """Convert a SimScape joint block to URDF Joint."""
         # Determine joint type
-        urdf_joint_type = self.JOINT_TYPE_MAP.get(
-            block.block_type, JointType.FIXED
-        )
+        urdf_joint_type = self.JOINT_TYPE_MAP.get(block.block_type, JointType.FIXED)
 
         # Find connected bodies (parent/child)
         connections = connection_map.get(block.full_path, [])

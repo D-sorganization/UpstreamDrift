@@ -7,14 +7,13 @@ Can be used with Flask, FastAPI, or other frameworks via adapters.
 
 from __future__ import annotations
 
-import io
-import json
 import logging
 import tempfile
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -321,7 +320,9 @@ class ModelGenerationAPI:
                     logger.exception("Error handling request")
                     return APIResponse.error(str(e), 500)
 
-        return APIResponse.not_found(f"No route for {request.method.value} {request.path}")
+        return APIResponse.not_found(
+            f"No route for {request.method.value} {request.path}"
+        )
 
     # ============================================================
     # Health/Info Handlers
@@ -395,7 +396,10 @@ class ModelGenerationAPI:
     def generate_from_params(self, request: APIRequest) -> APIResponse:
         """Generate URDF from detailed parameters."""
         from model_generation.builders.manual_builder import ManualBuilder
-        from model_generation.core.types import Link, Joint, Inertia, Geometry, Origin, JointType
+        from model_generation.core.types import (
+            Joint,
+            Link,
+        )
 
         body = request.body or {}
 
@@ -441,9 +445,8 @@ class ModelGenerationAPI:
     def convert_simscape_to_urdf(self, request: APIRequest) -> APIResponse:
         """Convert SimScape MDL/SLX to URDF."""
         from model_generation.converters.simscape import (
-            SimscapeToURDFConverter,
             ConversionConfig,
-            MDLParser,
+            SimscapeToURDFConverter,
         )
 
         body = request.body or {}
@@ -549,7 +552,10 @@ class ModelGenerationAPI:
 
     def validate_urdf(self, request: APIRequest) -> APIResponse:
         """Validate URDF content."""
-        from model_generation.editor.text_editor import URDFTextEditor, ValidationSeverity
+        from model_generation.editor.text_editor import (
+            URDFTextEditor,
+            ValidationSeverity,
+        )
 
         body = request.body or {}
 
@@ -651,7 +657,9 @@ class ModelGenerationAPI:
 
             elif shape == "cylinder":
                 if len(dimensions) != 2:
-                    return APIResponse.error("Cylinder requires 2 dimensions (radius, length)")
+                    return APIResponse.error(
+                        "Cylinder requires 2 dimensions (radius, length)"
+                    )
                 inertia = Inertia.from_cylinder(mass, dimensions[0], dimensions[1])
 
             elif shape == "sphere":
@@ -661,7 +669,9 @@ class ModelGenerationAPI:
 
             elif shape == "capsule":
                 if len(dimensions) != 2:
-                    return APIResponse.error("Capsule requires 2 dimensions (radius, length)")
+                    return APIResponse.error(
+                        "Capsule requires 2 dimensions (radius, length)"
+                    )
                 inertia = Inertia.from_capsule(mass, dimensions[0], dimensions[1])
 
             else:
@@ -763,7 +773,11 @@ class ModelGenerationAPI:
         category = request.query_params.get("category")
         source = request.query_params.get("source")
         search = request.query_params.get("search")
-        tags = request.query_params.get("tags", "").split(",") if request.query_params.get("tags") else None
+        tags = (
+            request.query_params.get("tags", "").split(",")
+            if request.query_params.get("tags")
+            else None
+        )
 
         models = library.list_models(
             category=category,
@@ -818,7 +832,7 @@ class ModelGenerationAPI:
 
     def library_add_model(self, request: APIRequest) -> APIResponse:
         """Add model to library."""
-        from model_generation.library import ModelLibrary, ModelCategory
+        from model_generation.library import ModelCategory, ModelLibrary
 
         body = request.body or {}
 
@@ -842,9 +856,7 @@ class ModelGenerationAPI:
         # Save to temp file and add
         library = ModelLibrary()
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".urdf", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".urdf", delete=False) as f:
             f.write(content)
             temp_path = f.name
 
@@ -1004,7 +1016,8 @@ class FlaskAdapter:
 
     def register(self, app: Any) -> None:
         """Register routes with Flask app."""
-        from flask import request as flask_request, jsonify, make_response
+        from flask import jsonify, make_response
+        from flask import request as flask_request
 
         for route in self.api.get_routes():
             endpoint = route.path.replace("/", "_").replace("{", "").replace("}", "")
@@ -1017,10 +1030,7 @@ class FlaskAdapter:
                         path=flask_request.path,
                         query_params={**flask_request.args, **kwargs},
                         body=flask_request.get_json(silent=True),
-                        files={
-                            k: v.read()
-                            for k, v in flask_request.files.items()
-                        },
+                        files={k: v.read() for k, v in flask_request.files.items()},
                         headers=dict(flask_request.headers),
                     )
 
@@ -1065,6 +1075,7 @@ class FastAPIAdapter:
         from fastapi.responses import JSONResponse
 
         for route in self.api.get_routes():
+
             async def make_handler(r: Route):
                 async def handler(request: Request, **kwargs):
                     body = None

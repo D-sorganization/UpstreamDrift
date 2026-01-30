@@ -9,11 +9,11 @@ from __future__ import annotations
 
 import copy
 import logging
-import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from model_generation.converters.urdf_parser import ParsedModel, URDFParser
 from model_generation.core.types import Joint, JointType, Link, Material, Origin
@@ -107,7 +107,9 @@ class FrankensteinEditor:
         """Initialize the Frankenstein editor."""
         self._models: dict[str, ParsedModel] = {}
         self._parser = URDFParser()
-        self._clipboard: list[tuple[ComponentType, list[Link], list[Joint], dict[str, Material]]] = []
+        self._clipboard: list[
+            tuple[ComponentType, list[Link], list[Joint], dict[str, Material]]
+        ] = []
         self._undo_stack: list[EditorState] = []
         self._redo_stack: list[EditorState] = []
         self._max_history = 50
@@ -277,9 +279,7 @@ class FrankensteinEditor:
             return []
         return model.get_subtree(root_link)
 
-    def get_connecting_joint(
-        self, model_id: str, link_name: str
-    ) -> Joint | None:
+    def get_connecting_joint(self, model_id: str, link_name: str) -> Joint | None:
         """
         Get the joint connecting a link to its parent.
 
@@ -533,7 +533,9 @@ class FrankensteinEditor:
 
             # Update material reference
             if new_link.visual_material:
-                new_link.visual_material.name = prefix + new_link.visual_material.name + suffix
+                new_link.visual_material.name = (
+                    prefix + new_link.visual_material.name + suffix
+                )
 
             model.links.append(new_link)
             created_links.append(new_link.name)
@@ -579,9 +581,7 @@ class FrankensteinEditor:
             )
             model.joints.append(attach_joint)
 
-        logger.info(
-            f"Pasted {len(created_links)} links to '{target_model_id}'"
-        )
+        logger.info(f"Pasted {len(created_links)} links to '{target_model_id}'")
         return created_links
 
     def paste_subtree(
@@ -1138,12 +1138,16 @@ class FrankensteinEditor:
             if new_link.visual_origin:
                 xyz = list(new_link.visual_origin.xyz)
                 xyz[axis_idx] = -xyz[axis_idx]
-                new_link.visual_origin = Origin(xyz=tuple(xyz), rpy=new_link.visual_origin.rpy)
+                new_link.visual_origin = Origin(
+                    xyz=tuple(xyz), rpy=new_link.visual_origin.rpy
+                )
 
             if new_link.collision_origin:
                 xyz = list(new_link.collision_origin.xyz)
                 xyz[axis_idx] = -xyz[axis_idx]
-                new_link.collision_origin = Origin(xyz=tuple(xyz), rpy=new_link.collision_origin.rpy)
+                new_link.collision_origin = Origin(
+                    xyz=tuple(xyz), rpy=new_link.collision_origin.rpy
+                )
 
             model.links.append(new_link)
             created_links.append(new_link.name)
@@ -1175,9 +1179,7 @@ class FrankensteinEditor:
 
             model.joints.append(new_joint)
 
-        logger.info(
-            f"Created mirrored subtree with {len(created_links)} links"
-        )
+        logger.info(f"Created mirrored subtree with {len(created_links)} links")
         return created_links
 
     # ============================================================

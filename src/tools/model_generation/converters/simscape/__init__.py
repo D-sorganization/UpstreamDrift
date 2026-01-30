@@ -9,14 +9,14 @@ from model_generation.converters.simscape.mdl_parser import (
     MDLParser,
     SimscapeBlock,
     SimscapeBlockType,
+    SimscapeConnection,
     SimscapeModel,
     SimscapeParameter,
-    SimscapeConnection,
 )
 from model_generation.converters.simscape.simscape_converter import (
-    SimscapeToURDFConverter,
     ConversionConfig,
     ConversionResult,
+    SimscapeToURDFConverter,
     convert_simscape_to_urdf,
 )
 
