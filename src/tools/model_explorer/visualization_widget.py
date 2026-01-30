@@ -8,7 +8,7 @@ _project_root = Path(__file__).resolve().parent.parent.parent.parent
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from src.shared.python.logging_config import get_logger  # noqa: E402
+from src.shared.python.logging_config import get_logger  # noqa: E402  # noqa: E402
 
 logger = get_logger(__name__)
 
@@ -17,7 +17,7 @@ MUJOCO_AVAILABLE = False
 try:
     pass
 
-    from .mujoco_viewer import MuJoCoViewerWidget  # noqa: F401
+    from .mujoco_viewer import MuJoCoViewerWidget  # noqa: F401  # noqa: F401
 
     MUJOCO_AVAILABLE = True
     logger.info("MuJoCo 3D viewer available")
