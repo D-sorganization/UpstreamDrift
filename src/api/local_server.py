@@ -100,9 +100,12 @@ def create_local_app() -> FastAPI:
     return app
 
 
-def print_logo():
-    """Print the Upstream Drift logo in orange."""
-    # ANSI escape codes for orange (256-color mode)
+def print_logo_animated():
+    """Print the Upstream Drift logo with scroll animation."""
+    import sys
+    import time
+
+    # ANSI escape codes
     ORANGE = "\033[38;5;208m"
     RESET = "\033[0m"
 
@@ -125,18 +128,61 @@ def print_logo():
     print()
     for line in logo:
         print(f"    {ORANGE}{line}{RESET}")
+        sys.stdout.flush()
+        time.sleep(0.03)  # Scroll effect
     print()
+
+
+def print_matrix_status(message: str, indent: int = 4):
+    """Print status message in matrix green style."""
+    GREEN = "\033[38;5;46m"  # Bright matrix green
+    RESET = "\033[0m"
+    print(f"{' ' * indent}{GREEN}>{RESET} {GREEN}{message}{RESET}")
+
+
+def print_server_info(host: str, port: int):
+    """Print server info box."""
+    CYAN = "\033[38;5;51m"
+    RESET = "\033[0m"
+
+    print(f"""
+{CYAN}    ┌─────────────────────────────────────────────────────────┐
+    │              Golf Modeling Suite - Local Server         │
+    ├─────────────────────────────────────────────────────────┤
+    │  Running at: http://{host}:{port:<5}                       │
+    │  API Docs:   http://{host}:{port}/api/docs               │
+    │                                                         │
+    │  Mode: LOCAL (no auth required)                         │
+    │  Press Ctrl+C to stop.                                  │
+    └─────────────────────────────────────────────────────────┘{RESET}
+    """)
 
 
 def main():
     """Launch local server with auto-open browser."""
+    import time
     import webbrowser
     from threading import Timer
+
+    DIM = "\033[2m"
+    RESET = "\033[0m"
+
+    print(f"\n{DIM}Initializing Golf Modeling Suite...{RESET}\n")
 
     app = create_local_app()
 
     host = "127.0.0.1"
     port = int(os.environ.get("GOLF_PORT", 8000))
+
+    # Print startup info in matrix green
+    print_matrix_status("Loading physics engine manager...")
+    time.sleep(0.1)
+    print_matrix_status("Registering API routes...")
+    time.sleep(0.1)
+    print_matrix_status("Configuring static file server...")
+    time.sleep(0.1)
+    print_matrix_status(f"Server ready on port {port}")
+    print()
 
     # Open browser after server starts
     def open_browser():
@@ -145,23 +191,13 @@ def main():
 
     Timer(1.5, open_browser).start()
 
-    print_logo()
+    # Print server info
+    print_server_info(host, port)
 
-    print(f"""
-    ╔═══════════════════════════════════════════════════════════════╗
-    ║           Golf Modeling Suite - Local Server                  ║
-    ╠═══════════════════════════════════════════════════════════════╣
-    ║                                                               ║
-    ║   Running at: http://{host}:{port:<5}                            ║
-    ║   API Docs:   http://{host}:{port}/api/docs                    ║
-    ║                                                               ║
-    ║   Mode: LOCAL (no authentication required)                    ║
-    ║   All features available. No account needed.                  ║
-    ║                                                               ║
-    ║   Press Ctrl+C to stop.                                       ║
-    ╚═══════════════════════════════════════════════════════════════╝
-    """)
+    # Logo last - stays visible at bottom of terminal
+    print_logo_animated()
 
+    # Start server (this blocks)
     uvicorn.run(app, host=host, port=port, log_level="info")
 
 
