@@ -32,14 +32,14 @@ For detailed documentation, please visit the **[Documentation Hub](docs/README.m
 
 ## Key Features
 
-### 🦾 Musculoskeletal Modeling
+### Musculoskeletal Modeling
 
 - **MyoSuite Integration**: Hill-type muscle models with 290 muscles (full body)
 - **OpenSim Integration**: Biomechanical model validation and analysis
 - **Muscle Dynamics**: Force-length-velocity relationships, activation dynamics
 - **Research-Grade**: Converted from validated OpenSim models (MoBL-ARMS, Rajagopal)
 
-### 🎯 Advanced Analysis
+### Advanced Analysis
 
 - **Motion Capture**: Load and retarget mocap data (CSV, JSON, C3D) using OpenPose or MediaPipe.
 - **Model Explorer**: Interactive browser for Humanoid, Pendulum, and Robotic models.
@@ -48,14 +48,14 @@ For detailed documentation, please visit the **[Documentation Hub](docs/README.m
 - **Kinematic Forces**: Coriolis, centrifugal, and gravitational force analysis
 - **Trajectory Optimization**: Generate optimal swings for speed, accuracy, or efficiency
 
-### 🎮 Control & Robotics
+### Control and Robotics
 
 - **Multiple Control Schemes**: Impedance, admittance, hybrid force-position, operational space
 - **Constraint Analysis**: Parallel mechanism analysis of two-handed grip
 - **Manipulability Analysis**: Singularity detection and workspace characterization
 - **Task-Space Control**: End-effector control with redundancy resolution
 
-### 📊 Visualization & Export
+### Visualization and Export
 
 - **Real-Time 3D Rendering**: Multiple camera views with force/torque vectors
 - **Comprehensive Plotting**: 10+ plot types including energy, phase diagrams, 3D trajectories
@@ -100,7 +100,7 @@ pip install -e .
 export GOLF_USE_MOCK_ENGINE=1
 ```
 
-📖 **Troubleshooting**: See [docs/troubleshooting/installation.md](docs/troubleshooting/installation.md) for common issues.
+**Troubleshooting**: See [docs/troubleshooting/installation.md](docs/troubleshooting/installation.md) for common issues.
 
 ### Development Setup
 
@@ -130,44 +130,44 @@ python3 src/engines/physics_engines/drake/python/src/golf_gui.py
 
 ### MuJoCo (Recommended for Biomechanics)
 
-- ✅ Full musculoskeletal models (MyoSuite integration)
-- ✅ Contact dynamics (ground, ball)
-- ✅ 2-28 DOF models with flexible shafts
-- ✅ Advanced robotics features
-- ✅ Motion capture workflow (OpenPose & MediaPipe)
+- Full musculoskeletal models (MyoSuite integration)
+- Contact dynamics (ground, ball)
+- 2-28 DOF models with flexible shafts
+- Advanced robotics features
+- Motion capture workflow (OpenPose & MediaPipe)
 - **See**: [src/engines/physics_engines/mujoco/README.md](src/engines/physics_engines/mujoco/README.md)
 
 ### Drake (Model-Based Design)
 
-- ✅ Trajectory optimization
-- ✅ Contact modeling
-- ✅ System analysis tools
-- ✅ URDF support
+- Trajectory optimization
+- Contact modeling
+- System analysis tools
+- URDF support
 - **See**: [src/engines/physics_engines/drake/README.md](src/engines/physics_engines/drake/README.md)
 
 ### Pinocchio (Fast Rigid Body Algorithms)
 
-- ✅ High-performance dynamics
-- ✅ Jacobians and derivatives
-- ✅ Constrained systems
-- ✅ PINK inverse kinematics
+- High-performance dynamics
+- Jacobians and derivatives
+- Constrained systems
+- PINK inverse kinematics
 - **See**: [engines/physics_engines/pinocchio/README.md](engines/physics_engines/pinocchio/README.md)
 
 ### OpenSim (Biomechanical Validation)
 
-- ✅ Model validation against OpenSim
-- ✅ Biomechanical analysis
-- ✅ Integration with established workflows
+- Model validation against OpenSim
+- Biomechanical analysis
+- Integration with established workflows
 - **See**: [engines/physics_engines/opensim/README.md](engines/physics_engines/opensim/README.md)
 
 ### MyoSuite (Muscle Modeling)
 
-- ✅ Realistic muscle dynamics
-- ✅ 290-muscle full body models
-- ✅ MuJoCo-based simulation
+- Realistic muscle dynamics
+- 290-muscle full body models
+- MuJoCo-based simulation
 - **See**: [engines/physics_engines/myosuite/README.md](engines/physics_engines/myosuite/README.md)
 
-📖 **See [Engine Selection Guide](docs/engine_selection_guide.md) for detailed comparison and use cases**.
+**See [Engine Selection Guide](docs/engine_selection_guide.md) for detailed comparison and use cases**.
 
 ## Documentation
 
