@@ -4,10 +4,8 @@ Tests for the CLI module.
 
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
-
 
 SIMPLE_URDF = """<?xml version="1.0"?>
 <robot name="test_robot">
@@ -72,9 +70,7 @@ class TestCLIParser:
         from model_generation.cli import create_parser
 
         parser = create_parser()
-        args = parser.parse_args(
-            ["diff", "file1.urdf", "file2.urdf", "--side-by-side"]
-        )
+        args = parser.parse_args(["diff", "file1.urdf", "file2.urdf", "--side-by-side"])
 
         assert args.command == "diff"
         assert args.file_a == "file1.urdf"
@@ -112,9 +108,7 @@ class TestCLIParser:
         from model_generation.cli import create_parser
 
         parser = create_parser()
-        args = parser.parse_args(
-            ["library", "list", "-c", "humanoid", "--json"]
-        )
+        args = parser.parse_args(["library", "list", "-c", "humanoid", "--json"])
 
         assert args.command == "library"
         assert args.lib_command == "list"
@@ -150,12 +144,11 @@ class TestCLICommands:
 
     def test_cmd_validate_valid_urdf(self):
         """Test validate command with valid URDF."""
-        from model_generation.cli.main import cmd_validate
         import argparse
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".urdf", delete=False
-        ) as f:
+        from model_generation.cli.main import cmd_validate
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".urdf", delete=False) as f:
             f.write(SIMPLE_URDF)
             temp_path = Path(f.name)
 
@@ -175,14 +168,13 @@ class TestCLICommands:
 
     def test_cmd_validate_invalid_urdf(self):
         """Test validate command with invalid URDF."""
-        from model_generation.cli.main import cmd_validate
         import argparse
+
+        from model_generation.cli.main import cmd_validate
 
         invalid_urdf = "<robot><invalid></robot>"
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".urdf", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".urdf", delete=False) as f:
             f.write(invalid_urdf)
             temp_path = Path(f.name)
 
@@ -202,12 +194,11 @@ class TestCLICommands:
 
     def test_cmd_info(self):
         """Test info command."""
-        from model_generation.cli.main import cmd_info
         import argparse
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".urdf", delete=False
-        ) as f:
+        from model_generation.cli.main import cmd_info
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".urdf", delete=False) as f:
             f.write(SIMPLE_URDF)
             temp_path = Path(f.name)
 
@@ -225,8 +216,9 @@ class TestCLICommands:
 
     def test_cmd_inertia_box(self):
         """Test inertia calculation for box."""
-        from model_generation.cli.main import cmd_inertia
         import argparse
+
+        from model_generation.cli.main import cmd_inertia
 
         args = argparse.Namespace(
             shape="box",
@@ -240,8 +232,9 @@ class TestCLICommands:
 
     def test_cmd_inertia_cylinder(self):
         """Test inertia calculation for cylinder."""
-        from model_generation.cli.main import cmd_inertia
         import argparse
+
+        from model_generation.cli.main import cmd_inertia
 
         args = argparse.Namespace(
             shape="cylinder",
@@ -255,8 +248,9 @@ class TestCLICommands:
 
     def test_cmd_inertia_sphere(self):
         """Test inertia calculation for sphere."""
-        from model_generation.cli.main import cmd_inertia
         import argparse
+
+        from model_generation.cli.main import cmd_inertia
 
         args = argparse.Namespace(
             shape="sphere",
@@ -270,21 +264,18 @@ class TestCLICommands:
 
     def test_cmd_diff(self):
         """Test diff command."""
-        from model_generation.cli.main import cmd_diff
         import argparse
+
+        from model_generation.cli.main import cmd_diff
 
         urdf_v1 = SIMPLE_URDF
         urdf_v2 = SIMPLE_URDF.replace("test_robot", "modified_robot")
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".urdf", delete=False
-        ) as f1:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".urdf", delete=False) as f1:
             f1.write(urdf_v1)
             path1 = Path(f1.name)
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".urdf", delete=False
-        ) as f2:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".urdf", delete=False) as f2:
             f2.write(urdf_v2)
             path2 = Path(f2.name)
 

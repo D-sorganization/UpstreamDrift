@@ -7,16 +7,16 @@ This module provides editors for URDF manipulation:
 """
 
 from model_generation.editor.frankenstein_editor import (
-    FrankensteinEditor,
-    ComponentType,
     ComponentReference,
+    ComponentType,
+    FrankensteinEditor,
 )
 from model_generation.editor.text_editor import (
+    DiffHunk,
+    DiffResult,
     URDFTextEditor,
     ValidationMessage,
     ValidationSeverity,
-    DiffResult,
-    DiffHunk,
 )
 
 __all__ = [

@@ -43,13 +43,13 @@ except ImportError:
 
 # REST API components
 from model_generation.api.rest_api import (
-    ModelGenerationAPI,
     APIRequest,
     APIResponse,
-    HTTPMethod,
-    Route,
-    FlaskAdapter,
     FastAPIAdapter,
+    FlaskAdapter,
+    HTTPMethod,
+    ModelGenerationAPI,
+    Route,
 )
 
 __all__ = [

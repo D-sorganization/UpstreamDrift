@@ -5,8 +5,6 @@ Tests for the model library module.
 import tempfile
 from pathlib import Path
 
-import pytest
-
 
 class TestModelLibrary:
     """Tests for ModelLibrary class."""
@@ -29,7 +27,7 @@ class TestModelLibrary:
 
     def test_add_local_model(self):
         """Test adding a local URDF model."""
-        from model_generation.library import ModelLibrary, ModelCategory
+        from model_generation.library import ModelCategory, ModelLibrary
 
         library = ModelLibrary()
 
@@ -45,9 +43,7 @@ class TestModelLibrary:
         </robot>
         """
 
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".urdf", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".urdf", delete=False) as f:
             f.write(urdf_content)
             temp_path = Path(f.name)
 
@@ -68,7 +64,7 @@ class TestModelLibrary:
 
     def test_list_models_with_filter(self):
         """Test filtering models by category."""
-        from model_generation.library import ModelLibrary, ModelCategory
+        from model_generation.library import ModelCategory, ModelLibrary
 
         library = ModelLibrary()
         models = library.list_models(category="humanoid")
@@ -83,7 +79,7 @@ class TestModelCache:
 
     def test_cache_creation(self):
         """Test cache instantiation."""
-        from model_generation.library.cache import ModelCache, CacheConfig
+        from model_generation.library.cache import CacheConfig, ModelCache
 
         config = CacheConfig(
             cache_dir=Path(tempfile.mkdtemp()),
@@ -94,7 +90,7 @@ class TestModelCache:
 
     def test_cache_put_get(self):
         """Test adding and retrieving from cache."""
-        from model_generation.library.cache import ModelCache, CacheConfig
+        from model_generation.library.cache import CacheConfig, ModelCache
 
         cache_dir = Path(tempfile.mkdtemp())
         config = CacheConfig(cache_dir=cache_dir, max_size_mb=100)
@@ -122,7 +118,7 @@ class TestModelCache:
 
     def test_cache_contains(self):
         """Test cache contains check."""
-        from model_generation.library.cache import ModelCache, CacheConfig
+        from model_generation.library.cache import CacheConfig, ModelCache
 
         cache_dir = Path(tempfile.mkdtemp())
         config = CacheConfig(cache_dir=cache_dir)
@@ -138,7 +134,7 @@ class TestModelCache:
 
     def test_cache_statistics(self):
         """Test cache statistics."""
-        from model_generation.library.cache import ModelCache, CacheConfig
+        from model_generation.library.cache import CacheConfig, ModelCache
 
         cache_dir = Path(tempfile.mkdtemp())
         config = CacheConfig(cache_dir=cache_dir)
@@ -162,7 +158,9 @@ class TestRepository:
         # Create some URDF files
         (repo_dir / "robot1.urdf").write_text("<robot name='robot1'></robot>")
         (repo_dir / "subdir").mkdir()
-        (repo_dir / "subdir" / "robot2.urdf").write_text("<robot name='robot2'></robot>")
+        (repo_dir / "subdir" / "robot2.urdf").write_text(
+            "<robot name='robot2'></robot>"
+        )
 
         repo = LocalRepository("test_local", repo_dir)
         models = repo.list_models()

@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-
 # Sample SimScape-like MDL content for testing
 SIMPLE_MDL = """
 Model {
@@ -97,7 +96,6 @@ class TestMDLParser:
         """Test parsing joint blocks."""
         from model_generation.converters.simscape import (
             MDLParser,
-            SimscapeBlockType,
         )
 
         parser = MDLParser()
@@ -156,8 +154,8 @@ class TestSimscapeConverter:
     def test_convert_with_config(self):
         """Test conversion with custom configuration."""
         from model_generation.converters.simscape import (
-            SimscapeToURDFConverter,
             ConversionConfig,
+            SimscapeToURDFConverter,
         )
 
         config = ConversionConfig(
@@ -200,8 +198,8 @@ class TestSimscapeConverter:
     def test_unit_conversion(self):
         """Test unit conversion factors."""
         from model_generation.converters.simscape import (
-            SimscapeToURDFConverter,
             ConversionConfig,
+            SimscapeToURDFConverter,
         )
 
         # Test mm to m conversion
@@ -255,16 +253,12 @@ class TestConvenienceFunction:
         from model_generation.converters.simscape import convert_simscape_to_urdf
 
         # Create temp MDL file
-        with tempfile.NamedTemporaryFile(
-            mode="w", suffix=".mdl", delete=False
-        ) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".mdl", delete=False) as f:
             f.write(SIMPLE_MDL)
             temp_path = Path(f.name)
 
         try:
-            result = convert_simscape_to_urdf(
-                temp_path, robot_name="test_robot"
-            )
+            result = convert_simscape_to_urdf(temp_path, robot_name="test_robot")
             assert result is not None
             assert result.robot_name == "test_robot"
         finally:

@@ -85,7 +85,9 @@ class SimscapeParameter:
         except (ValueError, TypeError):
             return default
 
-    def as_vector(self, default: tuple[float, ...] = (0.0, 0.0, 0.0)) -> tuple[float, ...]:
+    def as_vector(
+        self, default: tuple[float, ...] = (0.0, 0.0, 0.0)
+    ) -> tuple[float, ...]:
         """Convert to vector value."""
         try:
             val = self.value.strip()
@@ -293,7 +295,10 @@ class MDLParser:
                 # Find the model XML file
                 model_file = None
                 for name in zf.namelist():
-                    if name.endswith("blockdiagram.xml") or name == "simulink/blockdiagram.xml":
+                    if (
+                        name.endswith("blockdiagram.xml")
+                        or name == "simulink/blockdiagram.xml"
+                    ):
                         model_file = name
                         break
 
@@ -445,9 +450,7 @@ class MDLParser:
 
         # Parse blocks using regex (simplified parsing)
         block_pattern = re.compile(
-            r'Block\s*\{\s*'
-            r'BlockType\s+"?(\w+)"?\s*'
-            r'Name\s+"([^"]+)"',
+            r"Block\s*\{\s*" r'BlockType\s+"?(\w+)"?\s*' r'Name\s+"([^"]+)"',
             re.MULTILINE | re.DOTALL,
         )
 
@@ -490,7 +493,7 @@ class MDLParser:
 
         # Parse lines (connections) - simplified
         line_pattern = re.compile(
-            r'Line\s*\{\s*'
+            r"Line\s*\{\s*"
             r'SrcBlock\s+"([^"]+)"\s*'
             r'SrcPort\s+"?(\d+)"?\s*'
             r'DstBlock\s+"([^"]+)"\s*'
@@ -508,7 +511,9 @@ class MDLParser:
                 )
             )
 
-    def _get_block_type(self, block_type_str: str, source_block: str) -> SimscapeBlockType:
+    def _get_block_type(
+        self, block_type_str: str, source_block: str
+    ) -> SimscapeBlockType:
         """Determine SimscapeBlockType from strings."""
         # Check source block mapping first
         if source_block:

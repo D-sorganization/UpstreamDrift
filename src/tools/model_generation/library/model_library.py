@@ -10,10 +10,11 @@ from __future__ import annotations
 import json
 import logging
 import shutil
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Iterator
+from typing import Any
 
 from model_generation.converters.urdf_parser import ParsedModel, URDFParser
 
@@ -140,8 +141,12 @@ class LibraryConfig:
     """Configuration for the model library."""
 
     # Local storage paths
-    cache_dir: Path = field(default_factory=lambda: Path.home() / ".model_generation" / "cache")
-    index_file: Path = field(default_factory=lambda: Path.home() / ".model_generation" / "index.json")
+    cache_dir: Path = field(
+        default_factory=lambda: Path.home() / ".model_generation" / "cache"
+    )
+    index_file: Path = field(
+        default_factory=lambda: Path.home() / ".model_generation" / "index.json"
+    )
 
     # Repository settings
     default_repositories: list[dict[str, Any]] = field(default_factory=list)
@@ -392,7 +397,11 @@ class ModelLibrary:
             source=RepositorySource.LOCAL,
             source_path=str(urdf_path.parent),
             urdf_path=urdf_path,
-            mesh_dir=urdf_path.parent / "meshes" if (urdf_path.parent / "meshes").exists() else None,
+            mesh_dir=(
+                urdf_path.parent / "meshes"
+                if (urdf_path.parent / "meshes").exists()
+                else None
+            ),
             tags=tags or [],
             link_count=link_count,
             joint_count=joint_count,
@@ -529,7 +538,9 @@ class ModelLibrary:
                         with urllib.request.urlopen(subdir_url) as sub_response:
                             sub_contents = json.loads(sub_response.read().decode())
                         for sub_item in sub_contents:
-                            if sub_item["type"] == "file" and sub_item["name"].endswith(".urdf"):
+                            if sub_item["type"] == "file" and sub_item["name"].endswith(
+                                ".urdf"
+                            ):
                                 model_id = f"{repo_name}/{item['name']}"
                                 models.append(
                                     ModelEntry(

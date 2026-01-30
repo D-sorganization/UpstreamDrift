@@ -11,7 +11,6 @@ import json
 import logging
 import sys
 from pathlib import Path
-from typing import Any
 
 # Configure logging
 logging.basicConfig(
@@ -98,8 +97,8 @@ def cmd_convert(args: argparse.Namespace) -> int:
     try:
         if args.from_format == "simscape":
             from model_generation.converters.simscape import (
-                SimscapeToURDFConverter,
                 ConversionConfig,
+                SimscapeToURDFConverter,
             )
 
             config = ConversionConfig(robot_name=args.name)
@@ -118,7 +117,9 @@ def cmd_convert(args: argparse.Namespace) -> int:
             if not output_path:
                 print(result.urdf_string)
 
-            logger.info(f"Converted {len(result.links)} links, {len(result.joints)} joints")
+            logger.info(
+                f"Converted {len(result.links)} links, {len(result.joints)} joints"
+            )
 
         elif args.from_format == "mjcf" and args.to_format == "urdf":
             from model_generation.converters.mjcf_converter import MJCFConverter
@@ -139,7 +140,9 @@ def cmd_convert(args: argparse.Namespace) -> int:
                 print(mjcf_string)
 
         else:
-            logger.error(f"Unsupported conversion: {args.from_format} -> {args.to_format}")
+            logger.error(
+                f"Unsupported conversion: {args.from_format} -> {args.to_format}"
+            )
             return 1
 
     except Exception as e:
@@ -303,7 +306,9 @@ def cmd_info(args: argparse.Namespace) -> int:
                 print(f"  - {link.name} (mass: {link.inertia.mass:.3f} kg)")
             print("\nJoints:")
             for joint in model.joints:
-                print(f"  - {joint.name}: {joint.parent} -> {joint.child} ({joint.joint_type.value})")
+                print(
+                    f"  - {joint.name}: {joint.parent} -> {joint.child} ({joint.joint_type.value})"
+                )
 
         if model.warnings:
             print("\nWarnings:")
@@ -359,7 +364,7 @@ def cmd_library_list(args: argparse.Namespace) -> int:
 
 def cmd_library_add(args: argparse.Namespace) -> int:
     """Add a model to the library."""
-    from model_generation.library import ModelLibrary, ModelCategory
+    from model_generation.library import ModelCategory, ModelLibrary
 
     library = ModelLibrary()
     source_path = Path(args.input)
@@ -419,7 +424,6 @@ def cmd_library_download(args: argparse.Namespace) -> int:
 def cmd_edit_compose(args: argparse.Namespace) -> int:
     """Compose a model from multiple sources."""
     from model_generation.editor import FrankensteinEditor
-    from model_generation.core.types import JointType
 
     editor = FrankensteinEditor()
 
@@ -535,7 +539,7 @@ def cmd_inertia(args: argparse.Namespace) -> int:
         print(f"Shape: {args.shape}")
         print(f"Mass: {mass} kg")
         print(f"Dimensions: {args.dimensions}")
-        print(f"\nInertia tensor:")
+        print("\nInertia tensor:")
         print(f"  ixx: {inertia.ixx:.6g}")
         print(f"  iyy: {inertia.iyy:.6g}")
         print(f"  izz: {inertia.izz:.6g}")
@@ -543,7 +547,7 @@ def cmd_inertia(args: argparse.Namespace) -> int:
         print(f"  ixz: {inertia.ixz:.6g}")
         print(f"  iyz: {inertia.iyz:.6g}")
 
-        print(f"\nURDF element:")
+        print("\nURDF element:")
         print(f"  {inertia.to_urdf_string()}")
 
     return 0
@@ -561,9 +565,7 @@ def create_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "-q", "--quiet", action="store_true", help="Suppress non-error output"
     )
-    parser.add_argument(
-        "--version", action="version", version="model-gen 1.0.0"
-    )
+    parser.add_argument("--version", action="version", version="model-gen 1.0.0")
 
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
@@ -720,8 +722,10 @@ def main(argv: list[str] | None = None) -> int:
     parser = create_parser()
     args = parser.parse_args(argv)
 
-    setup_logging(args.verbose if hasattr(args, "verbose") else False,
-                  args.quiet if hasattr(args, "quiet") else False)
+    setup_logging(
+        args.verbose if hasattr(args, "verbose") else False,
+        args.quiet if hasattr(args, "quiet") else False,
+    )
 
     if not args.command:
         parser.print_help()

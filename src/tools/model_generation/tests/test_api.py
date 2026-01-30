@@ -2,9 +2,6 @@
 Tests for the REST API module.
 """
 
-import pytest
-
-
 SIMPLE_URDF = """<?xml version="1.0"?>
 <robot name="test_robot">
     <link name="base_link">
@@ -64,9 +61,7 @@ class TestAPIClasses:
         """Test APIResponse.file factory."""
         from model_generation.api import APIResponse
 
-        response = APIResponse.file(
-            "<robot/>", "robot.urdf", "application/xml"
-        )
+        response = APIResponse.file("<robot/>", "robot.urdf", "application/xml")
 
         assert response.status_code == 200
         assert response.content_type == "application/xml"
@@ -98,7 +93,7 @@ class TestModelGenerationAPI:
 
     def test_health_endpoint(self):
         """Test health check endpoint."""
-        from model_generation.api import ModelGenerationAPI, APIRequest, HTTPMethod
+        from model_generation.api import APIRequest, HTTPMethod, ModelGenerationAPI
 
         api = ModelGenerationAPI()
         request = APIRequest(
@@ -113,7 +108,7 @@ class TestModelGenerationAPI:
 
     def test_info_endpoint(self):
         """Test API info endpoint."""
-        from model_generation.api import ModelGenerationAPI, APIRequest, HTTPMethod
+        from model_generation.api import APIRequest, HTTPMethod, ModelGenerationAPI
 
         api = ModelGenerationAPI()
         request = APIRequest(
@@ -129,7 +124,7 @@ class TestModelGenerationAPI:
 
     def test_generate_humanoid_endpoint(self):
         """Test humanoid generation endpoint."""
-        from model_generation.api import ModelGenerationAPI, APIRequest, HTTPMethod
+        from model_generation.api import APIRequest, HTTPMethod, ModelGenerationAPI
 
         api = ModelGenerationAPI()
         request = APIRequest(
@@ -151,7 +146,7 @@ class TestModelGenerationAPI:
 
     def test_validate_endpoint_valid_urdf(self):
         """Test validation endpoint with valid URDF."""
-        from model_generation.api import ModelGenerationAPI, APIRequest, HTTPMethod
+        from model_generation.api import APIRequest, HTTPMethod, ModelGenerationAPI
 
         api = ModelGenerationAPI()
         request = APIRequest(
@@ -167,7 +162,7 @@ class TestModelGenerationAPI:
 
     def test_validate_endpoint_invalid_urdf(self):
         """Test validation endpoint with invalid URDF."""
-        from model_generation.api import ModelGenerationAPI, APIRequest, HTTPMethod
+        from model_generation.api import APIRequest, HTTPMethod, ModelGenerationAPI
 
         api = ModelGenerationAPI()
         request = APIRequest(
@@ -184,7 +179,7 @@ class TestModelGenerationAPI:
 
     def test_parse_endpoint(self):
         """Test URDF parsing endpoint."""
-        from model_generation.api import ModelGenerationAPI, APIRequest, HTTPMethod
+        from model_generation.api import APIRequest, HTTPMethod, ModelGenerationAPI
 
         api = ModelGenerationAPI()
         request = APIRequest(
@@ -202,7 +197,7 @@ class TestModelGenerationAPI:
 
     def test_inertia_calculation_endpoint(self):
         """Test inertia calculation endpoint."""
-        from model_generation.api import ModelGenerationAPI, APIRequest, HTTPMethod
+        from model_generation.api import APIRequest, HTTPMethod, ModelGenerationAPI
 
         api = ModelGenerationAPI()
         request = APIRequest(
@@ -224,7 +219,7 @@ class TestModelGenerationAPI:
 
     def test_inertia_sphere(self):
         """Test inertia calculation for sphere."""
-        from model_generation.api import ModelGenerationAPI, APIRequest, HTTPMethod
+        from model_generation.api import APIRequest, HTTPMethod, ModelGenerationAPI
 
         api = ModelGenerationAPI()
         request = APIRequest(
@@ -247,7 +242,7 @@ class TestModelGenerationAPI:
 
     def test_inertia_missing_shape(self):
         """Test inertia calculation with missing shape."""
-        from model_generation.api import ModelGenerationAPI, APIRequest, HTTPMethod
+        from model_generation.api import APIRequest, HTTPMethod, ModelGenerationAPI
 
         api = ModelGenerationAPI()
         request = APIRequest(
@@ -263,7 +258,7 @@ class TestModelGenerationAPI:
 
     def test_library_list_endpoint(self):
         """Test library listing endpoint."""
-        from model_generation.api import ModelGenerationAPI, APIRequest, HTTPMethod
+        from model_generation.api import APIRequest, HTTPMethod, ModelGenerationAPI
 
         api = ModelGenerationAPI()
         request = APIRequest(
@@ -279,7 +274,7 @@ class TestModelGenerationAPI:
 
     def test_diff_endpoint(self):
         """Test diff endpoint."""
-        from model_generation.api import ModelGenerationAPI, APIRequest, HTTPMethod
+        from model_generation.api import APIRequest, HTTPMethod, ModelGenerationAPI
 
         api = ModelGenerationAPI()
 
@@ -303,7 +298,7 @@ class TestModelGenerationAPI:
 
     def test_not_found_route(self):
         """Test handling of non-existent route."""
-        from model_generation.api import ModelGenerationAPI, APIRequest, HTTPMethod
+        from model_generation.api import APIRequest, HTTPMethod, ModelGenerationAPI
 
         api = ModelGenerationAPI()
         request = APIRequest(
@@ -317,7 +312,7 @@ class TestModelGenerationAPI:
 
     def test_generate_from_params_endpoint(self):
         """Test generation from detailed parameters."""
-        from model_generation.api import ModelGenerationAPI, APIRequest, HTTPMethod
+        from model_generation.api import APIRequest, HTTPMethod, ModelGenerationAPI
 
         api = ModelGenerationAPI()
         request = APIRequest(
@@ -370,7 +365,7 @@ class TestRoute:
 
     def test_route_creation(self):
         """Test Route creation."""
-        from model_generation.api import Route, HTTPMethod
+        from model_generation.api import HTTPMethod, Route
 
         def dummy_handler(request):
             return None
