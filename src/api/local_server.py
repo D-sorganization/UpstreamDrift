@@ -101,8 +101,9 @@ def create_local_app() -> FastAPI:
 
     # Store in app state for dependency injection
     app.state.engine_manager = engine_manager
-    # app.state.simulation_service = simulation_service # TODO: Implement service wrapper
-    # app.state.analysis_service = analysis_service   # TODO: Implement service wrapper
+    # Service wrappers: See docs/GITHUB_ISSUES_TRACKING.md Issue #2 for implementation plan
+    # app.state.simulation_service = simulation_service
+    # app.state.analysis_service = analysis_service
 
     # Register routes (no auth required in local mode)
     # Note: Routers already define their own paths (e.g., /engines), so prefix is just /api

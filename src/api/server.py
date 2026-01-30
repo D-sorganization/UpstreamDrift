@@ -42,6 +42,7 @@ from .routes import simulation as simulation_routes
 from .routes import video as video_routes
 from .services.analysis_service import AnalysisService
 from .services.simulation_service import SimulationService
+from .utils.tracing import RequestTracer
 
 setup_logging()
 logger = get_logger(__name__)
@@ -83,6 +84,10 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty
 # SECURITY: middleware registration
 app.middleware("http")(add_security_headers)
 app.middleware("http")(validate_upload_size)
+
+# TRACEABILITY: Request tracing middleware for diagnostics
+_tracer = RequestTracer()
+app.middleware("http")(_tracer.trace_request)
 
 
 # Global services
@@ -202,6 +207,8 @@ async def startup_event() -> None:
 
         # Initialize engine manager
         engine_manager = EngineManager()
+        # ORTHOGONALITY FIX: Store in app.state for dependency injection
+        app.state.engine_manager = engine_manager
         logger.info("Engine manager initialized")
 
         # Initialize services
