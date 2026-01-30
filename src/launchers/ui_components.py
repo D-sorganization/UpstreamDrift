@@ -65,25 +65,34 @@ _IMG_MATLAB = "matlab_logo.png"
 # Metadata (mirrored from main launcher)
 # Maps display names to tile image files in assets/
 MODEL_IMAGES = {
-    # Physics Engines
+    # Physics Engines - Current names from models.yaml
+    "MuJoCo": "mujoco_humanoid.png",
+    "Drake": "drake.png",
+    "Pinocchio": "pinocchio.png",
+    "OpenSim": "opensim.png",
+    "MyoSuite": "myosim.png",
+    # MATLAB/Simscape
+    "Matlab Models": _IMG_MATLAB,
+    # Tools
+    "Motion Capture": "c3d_icon.png",
+    "Model Explorer": "urdf_icon.png",
+    # Legacy names (backward compatibility)
     "MuJoCo Humanoid": "mujoco_humanoid.png",
     "MuJoCo Dashboard": "mujoco_hand.png",
     "Drake Golf Model": "drake.png",
     "Pinocchio Golf Model": "pinocchio.png",
-    "OpenSim Golf": "openpose.jpg",
+    "OpenSim Golf": "opensim.png",
     "MyoSim Suite": "myosim.png",
-    "OpenPose Analysis": "opensim.png",
-    # MATLAB/Simscape - Use official MATLAB logo
+    "OpenPose Analysis": "openpose.jpg",
     "Matlab Simscape": _IMG_MATLAB,
     "Matlab Simscape 2D": _IMG_MATLAB,
     "Matlab Simscape 3D": _IMG_MATLAB,
     "Dataset Generator GUI": _IMG_MATLAB,
     "Golf Swing Analysis GUI": _IMG_MATLAB,
     "MATLAB Code Analyzer": _IMG_MATLAB,
-    # Tools
     "URDF Generator": "urdf_icon.png",
     "C3D Motion Viewer": "c3d_icon.png",
-    "Shot Tracer": "golf_icon.png",  # Ball flight visualization
+    "Shot Tracer": "golf_icon.png",
 }
 
 # Theme availability check
@@ -342,16 +351,24 @@ class DraggableModelCard(QFrame):
 
         img_name = MODEL_IMAGES.get(self.model.name)
         if not img_name:
-            if "mujoco" in self.model.id:
+            # Fallback based on model ID
+            model_id = self.model.id.lower()
+            if "mujoco" in model_id:
                 img_name = "mujoco_humanoid.png"
-            elif "drake" in self.model.id:
+            elif "drake" in model_id:
                 img_name = "drake.png"
-            elif "pinocchio" in self.model.id:
+            elif "pinocchio" in model_id:
                 img_name = "pinocchio.png"
-            elif "urdf" in self.model.id:
-                img_name = "urdf_icon.png"
-            elif "c3d" in self.model.id:
+            elif "opensim" in model_id:
+                img_name = "opensim.png"
+            elif "myosim" in model_id or "myosuite" in model_id:
+                img_name = "myosim.png"
+            elif "matlab" in model_id:
+                img_name = "matlab_logo.png"
+            elif "motion" in model_id or "capture" in model_id or "c3d" in model_id:
                 img_name = "c3d_icon.png"
+            elif "model_explorer" in model_id or "urdf" in model_id:
+                img_name = "urdf_icon.png"
             # Fallback for engine types if ID didn't match
             elif "engine_managed" in getattr(self.model, "type", ""):
                 if getattr(self.model, "engine_type", "") == "mujoco":
