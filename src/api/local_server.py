@@ -95,7 +95,29 @@ def create_local_app() -> FastAPI:
     # Serve static UI files in production
     ui_path = Path(__file__).parent.parent.parent / "ui" / "dist"
     if ui_path.exists():
-        app.mount("/", StaticFiles(directory=str(ui_path), html=True), name="ui")
+        from fastapi.responses import FileResponse
+
+        # Mount static assets (JS, CSS, images) - these have specific paths
+        app.mount(
+            "/assets",
+            StaticFiles(directory=str(ui_path / "assets")),
+            name="static_assets",
+        )
+
+        # Serve other static files (favicon, etc.)
+        @app.get("/vite.svg")
+        async def serve_vite_svg():
+            return FileResponse(ui_path / "vite.svg")
+
+        # SPA fallback: serve index.html for all non-API routes
+        @app.get("/{full_path:path}")
+        async def serve_spa(full_path: str):
+            # Don't intercept API routes
+            if full_path.startswith("api/"):
+                from fastapi import HTTPException
+
+                raise HTTPException(status_code=404, detail="Not found")
+            return FileResponse(ui_path / "index.html")
 
     return app
 
