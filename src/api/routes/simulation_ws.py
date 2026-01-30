@@ -49,11 +49,10 @@ async def simulation_stream(
         # Load engine
         try:
             enum_type = EngineType(engine_type.upper())
-            # Use public interface if available, else private
-            if hasattr(engine_manager, "load_engine"):
-                engine_manager.load_engine(enum_type)
-            else:
-                engine_manager._load_engine(enum_type)
+            # Use switch_engine which is the public API
+            success = engine_manager.switch_engine(enum_type)
+            if not success:
+                raise ValueError("Could not load engine")
 
             engine = engine_manager.get_active_physics_engine()
             if not engine:
@@ -76,12 +75,20 @@ async def simulation_stream(
         # Run simulation, streaming frames
         time_elapsed = 0.0
         frame = 0
+        stopped = False
 
-        while time_elapsed < duration:
+        # Calculate frame skip for ~60fps UI updates
+        # timestep=0.002 means 500 steps/sec, so skip ~8 frames for 60fps
+        target_fps = 60
+        steps_per_second = 1.0 / timestep
+        frame_skip = max(1, int(steps_per_second / target_fps))
+
+        while time_elapsed < duration and not stopped:
             # Check for client commands (pause, stop, etc.)
             try:
                 msg = await asyncio.wait_for(websocket.receive_json(), timeout=0.001)
                 if msg.get("action") == "stop":
+                    stopped = True
                     break
                 if msg.get("action") == "pause":
                     await websocket.send_json({"status": "paused"})
@@ -91,7 +98,10 @@ async def simulation_stream(
                         if msg.get("action") == "resume":
                             break
                         if msg.get("action") == "stop":
-                            raise StopIteration
+                            stopped = True
+                            break
+                    if stopped:
+                        break
             except TimeoutError:
                 pass  # No message, continue simulation
 
@@ -102,8 +112,8 @@ async def simulation_stream(
             time_elapsed += timestep
             frame += 1
 
-            # Send frame data (throttle to 60fps for UI)
-            if frame % max(1, int(1 / (60 * timestep))) == 0:
+            # Send frame data (throttle to ~60fps for UI)
+            if frame % frame_skip == 0:
                 state = {}
                 if hasattr(engine, "get_state"):
                     state = engine.get_state()
@@ -142,8 +152,6 @@ async def simulation_stream(
 
     except WebSocketDisconnect:
         pass  # Client disconnected
-    except StopIteration:
-        await websocket.send_json({"status": "stopped"})
     except Exception as e:
         # Best effort error reporting
         try:

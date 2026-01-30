@@ -9,16 +9,15 @@ from src.shared.python.engine_availability import (
     MUJOCO_AVAILABLE,
     skip_if_unavailable,
 )
+from src.shared.python.marker_mapping import (
+    MarkerMapping,
+    MarkerToModelMapper,
+)
 
 pytestmark = skip_if_unavailable("mujoco")
 
 if MUJOCO_AVAILABLE:
     import mujoco
-
-from src.shared.python.marker_mapping import (
-    MarkerMapping,
-    MarkerToModelMapper,
-)
 
 
 @pytest.fixture
