@@ -1,27 +1,27 @@
 # Issue Tracking Summary
 
 **Last Updated:** January 24, 2026
-**Maintainer:** D-sorganization Team
+**Maintainer:** dieterolson Team
 
 ## Active GitHub Issues
 
 | Issue #                                                                                                          | Title                                              | Priority    | Status      |
 | ---------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ----------- | ----------- |
-| [#496](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/496)                                        | Fix module reload corruption in cross-engine tests | 🔴 Critical | Open        |
-| [#495](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/495)                                        | Add tests for Injury Analysis Module               | 🟢 Medium   | Open        |
-| [#494](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/494)                                        | Add tests for AI/Workflow Engine                   | 🟢 Medium   | Open        |
-| [#130](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/130)                                        | Phase 4.2: Lazy Import Implementation              | 🟢 Medium   | Open        |
-| [#129](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/129)                                        | Phase 4.1: Async Engine Loading                    | 🟡 High     | Open        |
-| [#128](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/128)                                        | Phase 3.3: Launcher Configuration Abstraction      | 🟢 Medium   | Open        |
-| [#127](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/127)                                        | Phase 3.2: Architecture Documentation              | 🟢 Low      | Open        |
-| [#126](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/126)                                        | Phase 3.1: Cross-Engine Integration Tests          | 🟡 High     | Open        |
-| [#125](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/125)                                        | Phase 2.3: Constants Normalization                 | 🟢 Low      | Open        |
-| [#124](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/124)                                        | Phase 2.2: Archive & Legacy Cleanup                | 🟡 High     | Open        |
-| [#123](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/123)                                        | Phase 2.1: GUI Refactoring (SRP)                   | 🟡 High     | Open        |
-| [#122](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/122)                                        | Phase 1.4: Fix Python Version Metadata             | 🟢 Low      | Open        |
-| [#121](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/121)                                        | Phase 1.3: Implement Duplicate File Prevention     | 🟢 Medium   | Open        |
-| [#120](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/120)                                        | Phase 1.2: Consolidate Dependency Management       | 🟡 High     | Open        |
-| [#119](https://github.com/D-sorganization/Golf_Modeling_Suite/issues/119)                                        | Phase 1.1: Fix Pytest Coverage Configuration       | 🟢 Medium   | Open        |
+| [#496](https://github.com/dieterolson/UpstreamDrift/issues/496)                                        | Fix module reload corruption in cross-engine tests | 🔴 Critical | Open        |
+| [#495](https://github.com/dieterolson/UpstreamDrift/issues/495)                                        | Add tests for Injury Analysis Module               | 🟢 Medium   | Open        |
+| [#494](https://github.com/dieterolson/UpstreamDrift/issues/494)                                        | Add tests for AI/Workflow Engine                   | 🟢 Medium   | Open        |
+| [#130](https://github.com/dieterolson/UpstreamDrift/issues/130)                                        | Phase 4.2: Lazy Import Implementation              | 🟢 Medium   | Open        |
+| [#129](https://github.com/dieterolson/UpstreamDrift/issues/129)                                        | Phase 4.1: Async Engine Loading                    | 🟡 High     | Open        |
+| [#128](https://github.com/dieterolson/UpstreamDrift/issues/128)                                        | Phase 3.3: Launcher Configuration Abstraction      | 🟢 Medium   | Open        |
+| [#127](https://github.com/dieterolson/UpstreamDrift/issues/127)                                        | Phase 3.2: Architecture Documentation              | 🟢 Low      | Open        |
+| [#126](https://github.com/dieterolson/UpstreamDrift/issues/126)                                        | Phase 3.1: Cross-Engine Integration Tests          | 🟡 High     | Open        |
+| [#125](https://github.com/dieterolson/UpstreamDrift/issues/125)                                        | Phase 2.3: Constants Normalization                 | 🟢 Low      | Open        |
+| [#124](https://github.com/dieterolson/UpstreamDrift/issues/124)                                        | Phase 2.2: Archive & Legacy Cleanup                | 🟡 High     | Open        |
+| [#123](https://github.com/dieterolson/UpstreamDrift/issues/123)                                        | Phase 2.1: GUI Refactoring (SRP)                   | 🟡 High     | Open        |
+| [#122](https://github.com/dieterolson/UpstreamDrift/issues/122)                                        | Phase 1.4: Fix Python Version Metadata             | 🟢 Low      | Open        |
+| [#121](https://github.com/dieterolson/UpstreamDrift/issues/121)                                        | Phase 1.3: Implement Duplicate File Prevention     | 🟢 Medium   | Open        |
+| [#120](https://github.com/dieterolson/UpstreamDrift/issues/120)                                        | Phase 1.2: Consolidate Dependency Management       | 🟡 High     | Open        |
+| [#119](https://github.com/dieterolson/UpstreamDrift/issues/119)                                        | Phase 1.1: Fix Pytest Coverage Configuration       | 🟢 Medium   | Open        |
 | [#500](c:/Users/diete/Repositories/Golf_Modeling_Suite/docs/assessments/issues/ISSUE_DRY_ORTHOGONAL_REFACTOR.md) | Comprehensive DRY & Orthogonality Overhaul         | 🔴 High     | In Progress |
 
 ---

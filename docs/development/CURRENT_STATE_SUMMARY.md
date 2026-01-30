@@ -106,7 +106,7 @@ All 8 implemented performance fixes are intact:
 
 ---
 
-**Repository**: D-sorganization/Golf_Modeling_Suite  
+**Repository**: dieterolson/UpstreamDrift  
 **PR**: #441  
 **Remote Branch**: origin/fix/trademark-swing-dna-jan14  
 **All changes pushed**: ✅ Yes

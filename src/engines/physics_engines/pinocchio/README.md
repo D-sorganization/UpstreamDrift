@@ -480,4 +480,4 @@ For Pinocchio-specific questions:
 - [Pinocchio Discussions](https://github.com/stack-of-tasks/pinocchio/discussions)
 
 For Golf Modeling Suite integration:
-- See [Golf Modeling Suite Issues](https://github.com/D-sorganization/Golf_Modeling_Suite/issues)
+- See [Golf Modeling Suite Issues](https://github.com/dieterolson/UpstreamDrift/issues)

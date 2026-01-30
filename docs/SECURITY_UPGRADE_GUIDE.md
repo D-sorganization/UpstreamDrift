@@ -267,7 +267,7 @@ After migration, verify:
 ## Questions?
 
 - Review: `/SECURITY.md`
-- Issues: https://github.com/D-sorganization/Golf_Modeling_Suite/issues
+- Issues: https://github.com/dieterolson/UpstreamDrift/issues
 - Security: [Maintainer contact]
 
 ---
