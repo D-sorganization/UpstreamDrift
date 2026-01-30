@@ -634,6 +634,7 @@ except Exception as e:
         try:
             if not LAYOUT_CONFIG_FILE.exists():
                 logger.info("No saved layout found, using default")
+                self._rebuild_grid()  # Still need to build grid with defaults
                 return
 
             with open(LAYOUT_CONFIG_FILE, encoding="utf-8") as f:
@@ -691,6 +692,7 @@ except Exception as e:
 
         except Exception as e:
             logger.error(f"Failed to load layout: {e}")
+            self._rebuild_grid()  # Still build grid with defaults on error
             self._center_window()
 
     def _center_window(self) -> None:
@@ -856,9 +858,10 @@ except Exception as e:
 
         self.chk_gpu = QCheckBox("GPU")
         self.chk_gpu.setChecked(False)
-        top_bar.addWidget(
-            self.chk_gpu
-        )  # Assuming this existed or I just re-add it from my read
+        self.chk_gpu.setToolTip(
+            "Use GPU for physics computation (requires supported hardware)"
+        )
+        top_bar.addWidget(self.chk_gpu)
 
         # Overlay Toggle
         overlay_btn = QPushButton("Overlay")
@@ -875,12 +878,6 @@ except Exception as e:
             QPushButton:hover { background-color: #555; }
         """)
         top_bar.addWidget(overlay_btn)
-
-        return top_bar
-        self.chk_gpu.setToolTip(
-            "Use GPU for physics computation (requires supported hardware)"
-        )
-        top_bar.addWidget(self.chk_gpu)
 
         # Docker mode toggle
         self.chk_docker = QCheckBox("Docker")
