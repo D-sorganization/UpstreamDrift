@@ -57,7 +57,7 @@ Successfully consolidated PR #441 and PR #442 into a single comprehensive PR tha
 ✅ Ruff checks: All passed
 ✅ Black formatting: Applied
 ✅ MyPy type checking: No issues in modified files
-✅ CI/CD pipeline: Running (CodeQL in progress)
+✅ CI/CD pipeline: Running
 
 ## Files Modified
 
@@ -87,7 +87,7 @@ Successfully consolidated PR #441 and PR #442 into a single comprehensive PR tha
 ## PR Status
 - **PR #441**: Open, updated with consolidated changes
 - **PR #442**: Closed with reference to #441
-- **CI/CD**: Checks running (CodeQL in progress)
+- **CI/CD**: Checks running
 
 ## Next Steps
 1. Wait for CI/CD checks to complete
