@@ -500,15 +500,27 @@ except Exception as e:
 
     def _build_available_models(self) -> None:
         """Collect all known models and auxiliary applications."""
+        logger.debug("Building available models from registry...")
 
         if self.registry:
-            for model in self.registry.get_all_models():
+            all_models = self.registry.get_all_models()
+            logger.info(f"Registry returned {len(all_models)} models")
+
+            for model in all_models:
                 self.available_models[model.id] = model
+                logger.debug(f"  Added model: {model.id} ({model.name})")
                 if model.type in ("special_app", "utility", "matlab_app"):
                     self.special_app_lookup[model.id] = model
 
+            logger.info(
+                f"Built available_models with {len(self.available_models)} entries"
+            )
+        else:
+            logger.warning("No registry available - no models will be loaded")
+
     def _initialize_model_order(self) -> None:
         """Set a sensible default grid ordering."""
+        logger.debug("Initializing model order...")
 
         default_ids = [
             "mujoco_unified",
@@ -521,9 +533,24 @@ except Exception as e:
             "model_explorer",
         ]
 
-        self.model_order = [
-            model_id for model_id in default_ids if model_id in self.available_models
-        ]
+        # Check which default IDs are available
+        available_ids = []
+        missing_ids = []
+        for model_id in default_ids:
+            if model_id in self.available_models:
+                available_ids.append(model_id)
+            else:
+                missing_ids.append(model_id)
+
+        self.model_order = available_ids
+
+        # Log diagnostic information
+        logger.info(
+            f"Model order initialized with {len(self.model_order)} of {len(default_ids)} tiles"
+        )
+        if missing_ids:
+            logger.warning(f"Missing models from defaults: {missing_ids}")
+            logger.warning(f"Available model IDs: {list(self.available_models.keys())}")
 
     def _save_layout(self) -> None:
         """Save the current model layout to configuration file."""
@@ -956,6 +983,23 @@ except Exception as e:
         btn_help.setToolTip("View documentation and user guide")
         btn_help.clicked.connect(self.open_help)
         top_bar.addWidget(btn_help)
+
+        btn_diagnostics = QPushButton("Diagnostics")
+        btn_diagnostics.setToolTip("Run diagnostics to troubleshoot launcher issues")
+        btn_diagnostics.setStyleSheet("""
+            QPushButton {
+                background-color: #6f42c1;
+                color: white;
+                border: none;
+                padding: 5px 10px;
+                border-radius: 4px;
+            }
+            QPushButton:hover {
+                background-color: #7c4dff;
+            }
+        """)
+        btn_diagnostics.clicked.connect(self.open_diagnostics)
+        top_bar.addWidget(btn_diagnostics)
 
         btn_bug = QPushButton("Report Bug")
         btn_bug.setStyleSheet("""
@@ -1730,6 +1774,112 @@ python "{wsl_path}" {' '.join(args or [])}
         """Toggle the help drawer."""
         help_dialog = HelpDialog(self)
         help_dialog.exec()
+
+    def open_diagnostics(self) -> None:
+        """Open the diagnostics dialog to troubleshoot launcher issues."""
+        try:
+            from src.launchers.launcher_diagnostics import LauncherDiagnostics
+
+            diag = LauncherDiagnostics()
+            results = diag.run_all_checks()
+
+            # Add runtime state information
+            results["runtime_state"] = {
+                "available_models_count": len(self.available_models),
+                "available_model_ids": list(self.available_models.keys()),
+                "model_order_count": len(self.model_order),
+                "model_order": self.model_order,
+                "model_cards_count": len(self.model_cards),
+                "selected_model": self.selected_model,
+                "docker_available": self.docker_available,
+                "registry_loaded": self.registry is not None,
+            }
+
+            # Create dialog
+            dialog = QMessageBox(self)
+            dialog.setWindowTitle("Launcher Diagnostics")
+            dialog.setIcon(QMessageBox.Icon.Information)
+
+            summary = results["summary"]
+            status_emoji = "✅" if summary["status"] == "healthy" else "⚠️"
+
+            text = f"""
+{status_emoji} Status: {summary['status'].upper()}
+
+Checks: {summary['passed']} passed, {summary['failed']} failed, {summary['warnings']} warnings
+
+Runtime State:
+• Available models: {results['runtime_state']['available_models_count']}
+• Model order (tiles): {results['runtime_state']['model_order_count']}
+• Model cards: {results['runtime_state']['model_cards_count']}
+• Registry loaded: {results['runtime_state']['registry_loaded']}
+
+Expected tiles: {summary['expected_tiles']}
+"""
+
+            # Add check details
+            for check in results["checks"]:
+                if check["status"] == "fail":
+                    text += f"\n❌ {check['name']}: {check['message']}"
+                elif check["status"] == "warning":
+                    text += f"\n⚠️ {check['name']}: {check['message']}"
+
+            # Add recommendations
+            text += "\n\nRecommendations:\n"
+            for rec in results["recommendations"][:5]:
+                text += f"• {rec}\n"
+
+            dialog.setText(text)
+
+            # Add reset button if layout issue detected
+            reset_btn = dialog.addButton(
+                "Reset Layout", QMessageBox.ButtonRole.ActionRole
+            )
+            dialog.addButton(QMessageBox.StandardButton.Ok)
+
+            dialog.exec()
+
+            # Handle reset button
+            if dialog.clickedButton() == reset_btn:
+                self._reset_layout_to_defaults()
+
+        except ImportError as e:
+            QMessageBox.warning(
+                self,
+                "Diagnostics Unavailable",
+                f"Could not load diagnostics module: {e}",
+            )
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Diagnostics Error",
+                f"Error running diagnostics: {e}",
+            )
+
+    def _reset_layout_to_defaults(self) -> None:
+        """Reset layout configuration to show all 8 default tiles."""
+        from pathlib import Path
+
+        config_file = Path.home() / ".golf_modeling_suite" / "launcher_layout.json"
+
+        try:
+            if config_file.exists():
+                # Backup existing config
+                backup_path = config_file.with_suffix(".json.bak")
+                config_file.rename(backup_path)
+                logger.info(f"Backed up existing config to {backup_path}")
+
+            # Re-initialize model order with all defaults
+            self._initialize_model_order()
+            self._sync_model_cards()
+            self._rebuild_grid()
+
+            self.show_toast("Layout reset to defaults with all 8 tiles", "success")
+            logger.info("Layout reset to defaults")
+
+        except Exception as e:
+            logger.error(f"Failed to reset layout: {e}")
+            self.show_toast(f"Failed to reset layout: {e}", "error")
 
     def open_environment_manager(self) -> None:
         """Open the environment manager dialog."""

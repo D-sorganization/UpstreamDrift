@@ -3,35 +3,69 @@ Local-first API server for Golf Modeling Suite.
 
 Runs entirely on localhost with NO authentication required.
 This is the default mode - free, offline, no accounts needed.
+
+Diagnostic Features:
+- /api/diagnostics - JSON diagnostic report
+- /api/diagnostics/html - Browser-friendly diagnostic page
+- /api/debug/routes - List all registered routes
+- /api/debug/static - Check static file configuration
 """
+
+from __future__ import annotations
 
 import mimetypes
 import os
+import time
 from pathlib import Path
+from typing import Any
 
 # Fix MIME types for JavaScript modules on Windows
 # Windows registry often has incorrect/missing MIME types for .js files
 mimetypes.add_type("application/javascript", ".js")
 mimetypes.add_type("text/css", ".css")
 mimetypes.add_type("image/svg+xml", ".svg")
+mimetypes.add_type("application/json", ".json")
+mimetypes.add_type("image/png", ".png")
+mimetypes.add_type("image/jpeg", ".jpg")
+mimetypes.add_type("image/x-icon", ".ico")
 
 # Ensure we're running in local mode
 os.environ.setdefault("GOLF_SUITE_MODE", "local")
 os.environ.setdefault("GOLF_AUTH_DISABLED", "true")
 
-import uvicorn
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
+# NOTE: These imports are placed after env setup intentionally
+# The environment variables must be set before FastAPI initialization
+import uvicorn  # noqa: E402
+from fastapi import FastAPI, Request  # noqa: E402
+from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
+from fastapi.responses import HTMLResponse, JSONResponse  # noqa: E402
+from fastapi.staticfiles import StaticFiles  # noqa: E402
 
-from src.api.routes import analysis, engines, export, simulation, simulation_ws
+from src.api.diagnostics import (  # noqa: E402
+    APIDiagnostics,
+    get_diagnostic_endpoint_html,
+)
+from src.api.routes import (  # noqa: E402
+    analysis,
+    engines,
+    export,
+    simulation,
+    simulation_ws,
+)
+from src.shared.python.engine_manager import EngineManager  # noqa: E402
+from src.shared.python.logging_config import get_logger  # noqa: E402
 
-# Note: EngineManager and Services will need to be properly imported from shared logic
-# Assuming these exist based on the plan, or we bridge them to existing managers
-from src.shared.python.engine_manager import EngineManager
+logger = get_logger(__name__)
 
-# We might need to wrap these or use existing services if they don't match exactly
-# For now we'll stub the missing ones or assume they'll be refactored
+
+# Track startup metrics for diagnostics
+_startup_metrics: dict[str, Any] = {
+    "startup_time": None,
+    "static_files_mounted": False,
+    "ui_path": None,
+    "engines_loaded": [],
+    "errors": [],
+}
 
 
 def create_local_app() -> FastAPI:
@@ -80,45 +114,233 @@ def create_local_app() -> FastAPI:
     app.include_router(analysis.router, prefix="/api", tags=["Analysis"])
     app.include_router(export.router, prefix="/api", tags=["Export"])
 
+    # Store engine manager for diagnostics
+    _startup_metrics["engines_loaded"] = [
+        e.value for e in engine_manager.get_available_engines()
+    ]
+
     # Health check
     @app.get("/api/health")
-    async def health_check():
+    async def health_check() -> dict[str, Any]:
         return {
             "status": "healthy",
             "mode": "local",
             "auth_required": False,
-            "engines": [
-                e.value for e in engine_manager.get_available_engines()
-            ],  # Adapted to existing method
+            "engines": [e.value for e in engine_manager.get_available_engines()],
+            "ui_available": _startup_metrics.get("static_files_mounted", False),
         }
+
+    # Diagnostic endpoints
+    @app.get("/api/diagnostics")
+    async def get_diagnostics() -> dict[str, Any]:
+        """Return comprehensive diagnostic information as JSON."""
+        diagnostics = APIDiagnostics(app)
+        results = diagnostics.run_all_checks()
+        results["startup_metrics"] = _startup_metrics
+        return results
+
+    @app.get("/api/diagnostics/html", response_class=HTMLResponse)
+    async def get_diagnostics_html() -> HTMLResponse:
+        """Return diagnostic information as an HTML page."""
+        diagnostics = APIDiagnostics(app)
+        results = diagnostics.run_all_checks()
+        results["startup_metrics"] = _startup_metrics
+        html_content = get_diagnostic_endpoint_html(results)
+        return HTMLResponse(content=html_content)
+
+    @app.get("/api/debug/routes")
+    async def debug_routes() -> dict[str, Any]:
+        """List all registered API routes for debugging."""
+        routes = []
+        for route in app.routes:
+            route_info = {
+                "path": getattr(route, "path", "unknown"),
+                "methods": list(getattr(route, "methods", [])),
+                "name": getattr(route, "name", "unnamed"),
+            }
+            routes.append(route_info)
+        return {
+            "total_routes": len(routes),
+            "routes": sorted(routes, key=lambda x: x["path"]),
+        }
+
+    @app.get("/api/debug/static")
+    async def debug_static() -> dict[str, Any]:
+        """Check static file configuration."""
+        ui_path = Path(__file__).parent.parent.parent / "ui" / "dist"
+        details: dict[str, Any] = {
+            "ui_path": str(ui_path),
+            "ui_exists": ui_path.exists(),
+            "startup_metrics": _startup_metrics,
+        }
+
+        if ui_path.exists():
+            details["index_html"] = (ui_path / "index.html").exists()
+            details["assets_dir"] = (ui_path / "assets").exists()
+            if (ui_path / "assets").exists():
+                js_files = list((ui_path / "assets").glob("*.js"))
+                css_files = list((ui_path / "assets").glob("*.css"))
+                details["js_files"] = [f.name for f in js_files]
+                details["css_files"] = [f.name for f in css_files]
+
+        return details
 
     # Serve static UI files in production
     ui_path = Path(__file__).parent.parent.parent / "ui" / "dist"
+    _startup_metrics["ui_path"] = str(ui_path)
+
     if ui_path.exists():
         from fastapi.responses import FileResponse
 
-        # Mount static assets (JS, CSS, images) - these have specific paths
-        app.mount(
-            "/assets",
-            StaticFiles(directory=str(ui_path / "assets")),
-            name="static_assets",
-        )
+        logger.info(f"UI build found at {ui_path}, mounting static files")
+        _startup_metrics["static_files_mounted"] = True
+
+        # Check if assets directory exists before mounting
+        assets_path = ui_path / "assets"
+        if assets_path.exists():
+            app.mount(
+                "/assets",
+                StaticFiles(directory=str(assets_path)),
+                name="static_assets",
+            )
+            logger.info(f"Mounted /assets from {assets_path}")
+        else:
+            logger.warning(f"Assets directory not found at {assets_path}")
+            _startup_metrics["errors"].append(
+                f"Assets directory missing: {assets_path}"
+            )
 
         # Serve other static files (favicon, etc.)
         @app.get("/vite.svg")
-        async def serve_vite_svg():
-            return FileResponse(ui_path / "vite.svg")
+        async def serve_vite_svg() -> FileResponse:
+            svg_path = ui_path / "vite.svg"
+            if svg_path.exists():
+                return FileResponse(svg_path)
+            # Return a placeholder if not found
+            from fastapi import HTTPException
+
+            raise HTTPException(status_code=404, detail="vite.svg not found")
 
         # SPA fallback: serve index.html for all non-API routes
         @app.get("/{full_path:path}")
-        async def serve_spa(full_path: str):
+        async def serve_spa(full_path: str) -> FileResponse:
             # Don't intercept API routes
             if full_path.startswith("api/"):
                 from fastapi import HTTPException
 
-                raise HTTPException(status_code=404, detail="Not found")
-            return FileResponse(ui_path / "index.html")
+                raise HTTPException(status_code=404, detail="API route not found")
 
+            index_path = ui_path / "index.html"
+            if index_path.exists():
+                return FileResponse(index_path)
+
+            from fastapi import HTTPException
+
+            raise HTTPException(
+                status_code=503,
+                detail="UI not available. Visit /api/diagnostics/html for troubleshooting.",
+            )
+
+    else:
+        logger.warning(
+            f"UI build not found at {ui_path}. Web UI will not be available."
+        )
+        logger.warning("Run 'cd ui && npm install && npm run build' to build the UI.")
+        _startup_metrics["errors"].append(f"UI build not found at {ui_path}")
+
+        # Provide a helpful error page when UI is not built
+        @app.get("/{full_path:path}")
+        async def serve_error_page(request: Request, full_path: str) -> HTMLResponse:
+            """Serve a helpful error page when UI is not built."""
+            if full_path.startswith("api/"):
+                return JSONResponse(
+                    status_code=404,
+                    content={"detail": "API route not found", "path": full_path},
+                )
+
+            error_html = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Golf Modeling Suite - Setup Required</title>
+                <style>
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+                        color: #f0f0f0;
+                        margin: 0;
+                        min-height: 100vh;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .container {
+                        text-align: center;
+                        padding: 40px;
+                        background: rgba(0,0,0,0.3);
+                        border-radius: 16px;
+                        max-width: 600px;
+                    }
+                    h1 { color: #0a84ff; margin-bottom: 10px; }
+                    .emoji { font-size: 4em; margin-bottom: 20px; }
+                    .code {
+                        background: #0d0d0d;
+                        padding: 15px 20px;
+                        border-radius: 8px;
+                        font-family: monospace;
+                        margin: 20px 0;
+                        text-align: left;
+                    }
+                    a {
+                        color: #0a84ff;
+                        text-decoration: none;
+                    }
+                    a:hover { text-decoration: underline; }
+                    .btn {
+                        display: inline-block;
+                        background: #0a84ff;
+                        color: white;
+                        padding: 12px 24px;
+                        border-radius: 8px;
+                        margin-top: 20px;
+                        text-decoration: none;
+                    }
+                    .btn:hover {
+                        background: #0066cc;
+                        text-decoration: none;
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    <div class="emoji">🏌️‍♂️</div>
+                    <h1>Golf Modeling Suite</h1>
+                    <h2>Web UI Setup Required</h2>
+                    <p>The web interface has not been built yet. Run these commands:</p>
+                    <div class="code">
+                        cd ui<br>
+                        npm install<br>
+                        npm run build
+                    </div>
+                    <p>Then restart the server.</p>
+                    <p style="color: #888; margin-top: 30px;">
+                        <strong>API is working!</strong> Check:
+                    </p>
+                    <p>
+                        <a href="/api/health">/api/health</a> |
+                        <a href="/api/docs">/api/docs</a> |
+                        <a href="/api/diagnostics/html">/api/diagnostics/html</a>
+                    </p>
+                    <a href="/api/diagnostics/html" class="btn">Run Diagnostics</a>
+                </div>
+            </body>
+            </html>
+            """
+            return HTMLResponse(content=error_html, status_code=503)
+
+    _startup_metrics["startup_time"] = time.strftime(
+        "%Y-%m-%dT%H:%M:%SZ", time.gmtime()
+    )
     return app
 
 
