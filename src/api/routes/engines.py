@@ -32,20 +32,39 @@ async def get_engines(
 ) -> EngineListResponse:
     """Get status of all available physics engines."""
     engines = []
-    # Note: get_available_engines returns list[EngineType]
     available_engines = engine_manager.get_available_engines()
+    current_engine = engine_manager.get_current_engine()
+
+    # Define capabilities for each engine type
+    engine_capabilities: dict[EngineType, list[str]] = {
+        EngineType.MUJOCO: ["physics", "contacts", "muscles", "tendons"],
+        EngineType.DRAKE: ["physics", "optimization", "control"],
+        EngineType.PINOCCHIO: ["kinematics", "dynamics", "collision"],
+        EngineType.OPENSIM: ["musculoskeletal", "biomechanics"],
+        EngineType.MYOSIM: ["muscle", "tendon", "control"],
+        EngineType.MATLAB_2D: ["2d-simulation", "simscape"],
+        EngineType.MATLAB_3D: ["3d-simulation", "simscape"],
+        EngineType.PENDULUM: ["pendulum", "educational"],
+    }
 
     for engine_type in EngineType:
         status = engine_manager.get_engine_status(engine_type)
         is_available = engine_type in available_engines
+        is_loaded = current_engine == engine_type
 
         engines.append(
             EngineStatusResponse(
+                # Frontend-expected fields
+                name=engine_type.value,
+                available=is_available,
+                loaded=is_loaded,
+                version=None,  # Could be populated from probe results
+                capabilities=engine_capabilities.get(engine_type, []),
+                # Backward compatibility fields
                 engine_type=engine_type.value,
                 status=status.value,
                 is_available=is_available,
                 description=f"{engine_type.value} physics engine",
-                # Add capabilities if the model supports it, otherwise default
             )
         )
 
@@ -65,27 +84,23 @@ async def load_engine(
     """Load a specific physics engine with optional model."""
     try:
         engine_enum = EngineType(engine_type.upper())
-        # Access protected method via public interface if possible, or refactor Manager later.
-        # For now, we assume _load_engine is what we have access to or we use load_engine if public.
-        # Checking previous file usage: it used _load_engine.
-        if hasattr(engine_manager, "load_engine"):
-            engine_manager.load_engine(engine_enum)
-        else:
-            engine_manager._load_engine(engine_enum)
 
-        engine = engine_manager.get_active_physics_engine()
-        if not engine:
+        # Use switch_engine which is the public API for loading engines
+        success = engine_manager.switch_engine(engine_enum)
+        if not success:
             raise HTTPException(
                 status_code=400, detail=f"Failed to load engine: {engine_type}"
             )
 
-        if model_path:
+        engine = engine_manager.get_active_physics_engine()
+
+        if model_path and engine:
             validated_path = validate_model_path(model_path)
             if hasattr(engine, "load_from_path"):
                 engine.load_from_path(validated_path)
 
         state = None
-        if hasattr(engine, "get_state"):
+        if engine and hasattr(engine, "get_state"):
             state = engine.get_state()
 
         return {
@@ -113,12 +128,14 @@ async def unload_engine(
 ) -> dict[str, str]:
     """Unload a physics engine to free resources."""
     try:
-        # Assuming unload_engine exists or we implement a wrapper
-        if hasattr(engine_manager, "unload_engine"):
-            engine_manager.unload_engine(EngineType(engine_type.upper()))
-        else:
-            # Fallback if specific unload isn't implemented logic
-            pass
+        engine_enum = EngineType(engine_type.upper())
+
+        # Check if this engine is currently loaded
+        current = engine_manager.get_current_engine()
+        if current == engine_enum:
+            # Use cleanup to unload current engine
+            engine_manager.cleanup()
+
         return {"status": "unloaded", "engine": engine_type}
     except ValueError as exc:
         raise HTTPException(
