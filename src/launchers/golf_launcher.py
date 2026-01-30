@@ -634,6 +634,7 @@ except Exception as e:
         try:
             if not LAYOUT_CONFIG_FILE.exists():
                 logger.info("No saved layout found, using default")
+                self._rebuild_grid()  # Still need to build grid with defaults
                 return
 
             with open(LAYOUT_CONFIG_FILE, encoding="utf-8") as f:
@@ -691,6 +692,7 @@ except Exception as e:
 
         except Exception as e:
             logger.error(f"Failed to load layout: {e}")
+            self._rebuild_grid()  # Still build grid with defaults on error
             self._center_window()
 
     def _center_window(self) -> None:
