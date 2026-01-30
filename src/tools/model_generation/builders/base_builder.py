@@ -187,7 +187,9 @@ class BaseURDFBuilder(ABC):
         from model_generation.builders.urdf_writer import URDFWriter
 
         writer = URDFWriter(pretty_print=pretty_print)
-        return writer.write(self._robot_name, self._links, self._joints, self._materials)
+        return writer.write(
+            self._robot_name, self._links, self._joints, self._materials
+        )
 
     def save(self, path: str | Path, pretty_print: bool = True) -> Path:
         """

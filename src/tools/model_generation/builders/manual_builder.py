@@ -17,14 +17,13 @@ from model_generation.core.types import (
     Geometry,
     Inertia,
     Joint,
-    JointDynamics,
     JointLimits,
     JointType,
     Link,
     Material,
     Origin,
 )
-from model_generation.core.validation import ValidationResult, Validator
+from model_generation.core.validation import Validator
 
 logger = logging.getLogger(__name__)
 
@@ -280,9 +279,7 @@ class ManualBuilder(BaseURDFBuilder):
             # Mirror visual origin
             new_xyz = list(link.visual_origin.xyz)
             new_xyz[axis_idx] = -new_xyz[axis_idx]
-            link.visual_origin = Origin(
-                xyz=tuple(new_xyz), rpy=link.visual_origin.rpy
-            )
+            link.visual_origin = Origin(xyz=tuple(new_xyz), rpy=link.visual_origin.rpy)
 
             # Mirror collision origin
             new_xyz = list(link.collision_origin.xyz)

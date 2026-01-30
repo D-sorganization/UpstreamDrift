@@ -12,7 +12,6 @@ import math
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
 
 from model_generation.core.types import (
     Geometry,
@@ -115,7 +114,9 @@ class ParsedModel:
             name=self.name,
             links=[Link.from_dict(l.to_dict()) for l in self.links],
             joints=[Joint.from_dict(j.to_dict()) for j in self.joints],
-            materials={k: Material.from_dict(v.to_dict()) for k, v in self.materials.items()},
+            materials={
+                k: Material.from_dict(v.to_dict()) for k, v in self.materials.items()
+            },
             original_xml=self.original_xml,
             source_path=self.source_path,
             warnings=self.warnings.copy(),
@@ -393,9 +394,7 @@ class URDFParser:
 
         return Origin(xyz=xyz, rpy=rpy)
 
-    def _parse_geometry(
-        self, elem: ET.Element, base_path: Path | None
-    ) -> Geometry:
+    def _parse_geometry(self, elem: ET.Element, base_path: Path | None) -> Geometry:
         """Parse geometry element."""
         # Box
         box_elem = elem.find("box")
@@ -460,9 +459,7 @@ class URDFParser:
 
         return Material(name=name, color=color, texture=texture)
 
-    def _resolve_mesh_path(
-        self, filename: str, base_path: Path
-    ) -> Path | None:
+    def _resolve_mesh_path(self, filename: str, base_path: Path) -> Path | None:
         """Resolve mesh file path."""
         # Handle package:// URLs
         if filename.startswith("package://"):

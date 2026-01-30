@@ -342,9 +342,7 @@ class ParametricBuilder(BaseURDFBuilder):
 
         # Arms (left and right)
         shoulder_width = (
-            self._height_m
-            * 0.23
-            * self._proportions.get("shoulder_width_factor", 1.0)
+            self._height_m * 0.23 * self._proportions.get("shoulder_width_factor", 1.0)
         )
 
         for side, y_sign in [("left", 1), ("right", -1)]:

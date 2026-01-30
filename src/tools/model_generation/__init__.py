@@ -46,6 +46,23 @@ __version__ = "0.1.0"
 __author__ = "Golf Modeling Suite"
 
 # Core types
+# Builders
+from model_generation.builders.base_builder import BaseURDFBuilder, BuildResult
+from model_generation.builders.manual_builder import Handedness, ManualBuilder
+from model_generation.builders.parametric_builder import (
+    ParametricBuilder,
+    ParametricConfig,
+)
+from model_generation.builders.urdf_writer import URDFWriter
+
+# Constants
+from model_generation.core.constants import (
+    DEFAULT_DENSITY_KG_M3,
+    DEFAULT_HEIGHT_M,
+    DEFAULT_INERTIA_KG_M2,
+    DEFAULT_MASS_KG,
+    GRAVITY_M_S2,
+)
 from model_generation.core.types import (
     Geometry,
     GeometryType,
@@ -67,15 +84,6 @@ from model_generation.core.validation import (
     Validator,
 )
 
-# Constants
-from model_generation.core.constants import (
-    DEFAULT_DENSITY_KG_M3,
-    DEFAULT_HEIGHT_M,
-    DEFAULT_INERTIA_KG_M2,
-    DEFAULT_MASS_KG,
-    GRAVITY_M_S2,
-)
-
 # Inertia calculation
 from model_generation.inertia.calculator import (
     InertiaCalculator,
@@ -88,12 +96,6 @@ from model_generation.inertia.primitives import (
     cylinder_inertia,
     sphere_inertia,
 )
-
-# Builders
-from model_generation.builders.base_builder import BaseURDFBuilder, BuildResult
-from model_generation.builders.manual_builder import Handedness, ManualBuilder
-from model_generation.builders.parametric_builder import ParametricBuilder, ParametricConfig
-from model_generation.builders.urdf_writer import URDFWriter
 
 # Public API will be imported when available
 # from model_generation.api.builder_api import ModelBuilder

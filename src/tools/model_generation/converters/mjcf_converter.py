@@ -7,7 +7,6 @@ This module provides bidirectional conversion between URDF and MJCF formats.
 from __future__ import annotations
 
 import logging
-import math
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
 from pathlib import Path
@@ -156,7 +155,7 @@ class MJCFConverter:
     def _build_mjcf(self, model: ParsedModel) -> str:
         """Build MJCF XML from parsed model."""
         lines = []
-        lines.append('<mujoco model="{0}">'.format(model.name))
+        lines.append(f'<mujoco model="{model.name}">')
 
         # Compiler
         lines.append("  <compiler")
@@ -198,9 +197,7 @@ class MJCFConverter:
                 ):
                     filename = link.visual_geometry.mesh_filename
                     mesh_name = Path(filename).stem if filename else link.name
-                    lines.append(
-                        f'    <mesh name="{mesh_name}" file="{filename}"/>'
-                    )
+                    lines.append(f'    <mesh name="{mesh_name}" file="{filename}"/>')
             lines.append("  </asset>")
 
         # Worldbody
@@ -287,9 +284,7 @@ class MJCFConverter:
 
         # Joint (if not root)
         if connecting_joint and connecting_joint.joint_type != JointType.FIXED:
-            mjcf_type = URDF_TO_MJCF_JOINT.get(
-                connecting_joint.joint_type, "hinge"
-            )
+            mjcf_type = URDF_TO_MJCF_JOINT.get(connecting_joint.joint_type, "hinge")
             axis = connecting_joint.axis
             axis_str = f"{axis[0]:.6g} {axis[1]:.6g} {axis[2]:.6g}"
 
@@ -313,7 +308,10 @@ class MJCFConverter:
         # Geometry (visual)
         if link.visual_geometry and self.config.include_visuals:
             geom_line = self._build_mjcf_geom(
-                link.visual_geometry, link.visual_origin, link.visual_material, indent + "  "
+                link.visual_geometry,
+                link.visual_origin,
+                link.visual_material,
+                indent + "  ",
             )
             lines.append(geom_line)
 
@@ -364,9 +362,7 @@ class MJCFConverter:
 
         elif geometry.geometry_type == GeometryType.MESH:
             mesh_name = (
-                Path(geometry.mesh_filename).stem
-                if geometry.mesh_filename
-                else "mesh"
+                Path(geometry.mesh_filename).stem if geometry.mesh_filename else "mesh"
             )
             return f'{indent}<geom type="mesh" mesh="{mesh_name}" pos="{pos_str}"/>'
 
