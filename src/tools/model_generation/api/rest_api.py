@@ -303,7 +303,7 @@ class ModelGenerationAPI:
 
             params = {}
             match = True
-            for rp, reqp in zip(route_parts, request_parts):
+            for rp, reqp in zip(route_parts, request_parts, strict=False):
                 if rp.startswith("{") and rp.endswith("}"):
                     param_name = rp[1:-1]
                     params[param_name] = reqp
@@ -365,20 +365,18 @@ class ModelGenerationAPI:
         mass = body.get("mass", 70.0)
 
         builder = ParametricBuilder(robot_name=robot_name)
-        builder.set_height(height)
-        builder.set_mass(mass)
 
-        # Apply proportions if provided
-        if "proportions" in body:
-            builder.set_proportions(**body["proportions"])
+        # Apply parameters including proportions if provided
+        proportions = body.get("proportions", {})
+        builder.set_parameters(height_m=height, mass_kg=mass, **proportions)
 
         builder.add_humanoid_segments()
         result = builder.build()
 
         if not result.success:
-            return APIResponse.error("; ".join(result.errors))
+            return APIResponse.error(result.error_message or "Build failed")
 
-        urdf_string = result.to_urdf()
+        urdf_string = result.urdf_xml
 
         # Return as file or JSON based on query param
         if request.query_params.get("download") == "true":
@@ -422,9 +420,9 @@ class ModelGenerationAPI:
         result = builder.build()
 
         if not result.success:
-            return APIResponse.error("; ".join(result.errors))
+            return APIResponse.error(result.error_message or "Build failed")
 
-        urdf_string = result.to_urdf()
+        urdf_string = result.urdf_xml
 
         if request.query_params.get("download") == "true":
             return APIResponse.file(urdf_string, f"{robot_name}.urdf")
@@ -625,7 +623,7 @@ class ModelGenerationAPI:
             {
                 "name": model.name,
                 "root_link": root.name if root else None,
-                "links": [l.to_dict() for l in model.links],
+                "links": [link.to_dict() for link in model.links],
                 "joints": [j.to_dict() for j in model.joints],
                 "materials": {k: v.to_dict() for k, v in model.materials.items()},
                 "warnings": model.warnings,
@@ -791,7 +789,7 @@ class ModelGenerationAPI:
                 "count": len(models),
                 "models": [
                     {
-                        "id": m.model_id,
+                        "id": m.id,
                         "name": m.name,
                         "category": m.category.value,
                         "source": m.source.value if m.source else None,
@@ -889,7 +887,7 @@ class ModelGenerationAPI:
         if not model_id:
             return APIResponse.error("Missing model_id")
 
-        library = ModelLibrary()
+        ModelLibrary()
 
         # Note: This would need implementation in ModelLibrary
         # For now, return not implemented

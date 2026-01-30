@@ -263,7 +263,9 @@ class SimscapeToURDFConverter:
             self._infer_links_from_joints(model, result, body_to_link)
 
         # Add world frame as base link if needed
-        if not any(l.name == "world" or l.name == "base_link" for l in result.links):
+        if not any(
+            link.name == "world" or link.name == "base_link" for link in result.links
+        ):
             base_link = Link(
                 name="base_link",
                 inertia=Inertia(ixx=0.001, iyy=0.001, izz=0.001, mass=0.001),
@@ -640,7 +642,7 @@ class SimscapeToURDFConverter:
         parent_link = None
         child_link = None
 
-        for connected_block, port in connections:
+        for connected_block, _port in connections:
             link_name = body_to_link.get(connected_block)
             if link_name:
                 if parent_link is None:
@@ -704,7 +706,7 @@ class SimscapeToURDFConverter:
         """Connect any orphan links to base with fixed joints."""
         # Find links that are not children of any joint
         child_links = {j.child for j in result.joints}
-        root_candidates = [l.name for l in result.links if l.name not in child_links]
+        root_candidates = [link.name for link in result.links if link.name not in child_links]
 
         if len(root_candidates) <= 1:
             return  # One or zero roots is fine

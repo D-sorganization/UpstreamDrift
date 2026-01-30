@@ -266,7 +266,7 @@ def cmd_info(args: argparse.Namespace) -> int:
     model = parser.parse(source_path)
 
     # Calculate statistics
-    total_mass = sum(l.inertia.mass for l in model.links)
+    total_mass = sum(link.inertia.mass for link in model.links)
     joint_types = {}
     for j in model.joints:
         jt = j.joint_type.value
@@ -284,7 +284,7 @@ def cmd_info(args: argparse.Namespace) -> int:
             "total_mass": total_mass,
             "root_link": root.name if root else None,
             "joint_types": joint_types,
-            "link_names": [l.name for l in model.links],
+            "link_names": [link.name for link in model.links],
             "joint_names": [j.name for j in model.joints],
         }
         if model.warnings:
@@ -480,7 +480,7 @@ def cmd_edit_compose(args: argparse.Namespace) -> int:
 
     # Export
     output_path = Path(args.output)
-    urdf_string = editor.export_model("output", output_path)
+    editor.export_model("output", output_path)
     logger.info(f"Wrote composed model to {output_path}")
 
     return 0

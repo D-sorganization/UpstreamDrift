@@ -112,7 +112,7 @@ class ParsedModel:
         """Create a deep copy."""
         return ParsedModel(
             name=self.name,
-            links=[Link.from_dict(l.to_dict()) for l in self.links],
+            links=[Link.from_dict(link.to_dict()) for link in self.links],
             joints=[Joint.from_dict(j.to_dict()) for j in self.joints],
             materials={
                 k: Material.from_dict(v.to_dict()) for k, v in self.materials.items()
@@ -175,7 +175,7 @@ class URDFParser:
         try:
             root = ET.fromstring(xml_string)
         except ET.ParseError as e:
-            raise ValueError(f"Invalid URDF XML: {e}")
+            raise ValueError(f"Invalid URDF XML: {e}") from e
 
         if root.tag != "robot":
             raise ValueError(f"Expected 'robot' root element, got '{root.tag}'")

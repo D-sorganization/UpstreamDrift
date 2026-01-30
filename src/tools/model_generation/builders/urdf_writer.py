@@ -88,7 +88,7 @@ class URDFWriter:
 
         # Write any intermediate links from joint expansion
         for link in expanded_links:
-            if link.name not in {l.name for l in sorted_links}:
+            if link.name not in {link.name for link in sorted_links}:
                 lines.extend(self._write_link(link, 1))
 
         # Write joints

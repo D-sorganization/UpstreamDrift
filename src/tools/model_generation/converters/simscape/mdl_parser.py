@@ -316,8 +316,8 @@ class MDLParser:
                 with zf.open(model_file) as f:
                     self._parse_slx_xml(f, model)
 
-        except zipfile.BadZipFile:
-            raise ValueError(f"Invalid SLX file: {path}")
+        except zipfile.BadZipFile as err:
+            raise ValueError(f"Invalid SLX file: {path}") from err
 
         return model
 

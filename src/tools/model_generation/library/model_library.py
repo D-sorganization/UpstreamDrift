@@ -500,7 +500,7 @@ class ModelLibrary:
 
         owner = config.get("owner")
         repo = config.get("repo")
-        branch = config.get("branch", "main")
+        config.get("branch", "main")
         subpath = config.get("path", "")
 
         if not owner or not repo:

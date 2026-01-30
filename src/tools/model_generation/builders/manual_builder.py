@@ -191,7 +191,9 @@ class ManualBuilder(BaseURDFBuilder):
             names_to_remove = {name} | descendants
 
             # Remove links
-            self._links = [l for l in self._links if l.name not in names_to_remove]
+            self._links = [
+                link for link in self._links if link.name not in names_to_remove
+            ]
 
             # Remove joints
             self._joints = [
@@ -201,7 +203,7 @@ class ManualBuilder(BaseURDFBuilder):
             ]
         else:
             # Just remove this link and joints connecting to it
-            self._links = [l for l in self._links if l.name != name]
+            self._links = [link for link in self._links if link.name != name]
             self._joints = [
                 j for j in self._joints if j.parent != name and j.child != name
             ]
