@@ -485,8 +485,8 @@ class LauncherDiagnostics:
 
         try:
             from PyQt6.QtCore import PYQT_VERSION_STR, QT_VERSION_STR
-            from PyQt6.QtWidgets import (
-                QApplication,  # noqa: F401 - needed for availability check
+            from PyQt6.QtWidgets import (  # noqa: F401 - needed for availability check
+                QApplication,
             )
 
             details["pyqt6_available"] = True
