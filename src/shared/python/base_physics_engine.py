@@ -3,6 +3,12 @@
 This module provides a base class that implements common patterns shared
 across all physics engine implementations, eliminating code duplication.
 
+Design by Contract:
+    This module enforces DbC principles through:
+    - Preconditions: State requirements before method execution
+    - Postconditions: Guarantees after method completion
+    - Invariants: Properties that must always hold
+
 Usage:
     from src.shared.python.base_physics_engine import BasePhysicsEngine
 
@@ -24,6 +30,15 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.contracts import (
+    ContractChecker,
+    StateError,
+    check_finite,
+    invariant_checked,
+    postcondition,
+    precondition,
+    require_state,
+)
 from src.shared.python.error_decorators import ErrorContext, log_errors
 from src.shared.python.interfaces import PhysicsEngine
 from src.shared.python.logging_config import get_logger
@@ -57,7 +72,7 @@ class EngineState:
         self.time = 0.0
 
 
-class BasePhysicsEngine(PhysicsEngine):
+class BasePhysicsEngine(ContractChecker, PhysicsEngine):
     """Base class for physics engines with common functionality.
 
     This class implements common patterns:
@@ -66,6 +81,21 @@ class BasePhysicsEngine(PhysicsEngine):
     - State management
     - Model name tracking
     - Logging
+    - Design by Contract enforcement
+
+    Design by Contract:
+        Preconditions:
+            - load_from_path: path must exist and be in allowed directories
+            - load_from_string: content must be non-empty
+            - step/forward/reset: engine must be initialized (model loaded)
+
+        Postconditions:
+            - load_from_path/load_from_string: _is_initialized becomes True
+            - get_state: returns valid (q, v) arrays
+
+        Invariants:
+            - If _is_initialized, then model is not None
+            - If state exists, q and v have matching dimensions
 
     Subclasses must implement:
     - _load_from_path_impl()
@@ -88,6 +118,31 @@ class BasePhysicsEngine(PhysicsEngine):
         self.allowed_dirs = allowed_dirs or []
         self._is_initialized = False
 
+    def _get_invariants(self) -> list[tuple[callable, str]]:
+        """Define class invariants for BasePhysicsEngine.
+
+        Returns:
+            List of (condition, message) tuples defining invariants.
+        """
+        return [
+            (
+                lambda: not self._is_initialized or self.model is not None,
+                "Initialized engine must have a loaded model",
+            ),
+            (
+                lambda: self.state is None
+                or (
+                    len(self.state.q) == len(self.state.v)
+                    or len(self.state.q) == len(self.state.v) + 1  # Quaternion case
+                ),
+                "State arrays q and v must have compatible dimensions",
+            ),
+            (
+                lambda: self.state is None or self.state.time >= 0.0,
+                "Simulation time must be non-negative",
+            ),
+        ]
+
     @property
     def model_name(self) -> str:
         """Return the name of the currently loaded model."""
@@ -96,8 +151,18 @@ class BasePhysicsEngine(PhysicsEngine):
         return self.model_name_str
 
     @log_errors("Failed to load model from path", reraise=True)
+    @invariant_checked
     def load_from_path(self, path: str) -> None:
         """Load model from file path with validation and error handling.
+
+        Preconditions:
+            - path must point to an existing file
+            - path must be in allowed directories (if configured)
+
+        Postconditions:
+            - self._is_initialized == True
+            - self.model is not None
+            - self.model_name returns valid string
 
         Args:
             path: Path to model file
@@ -107,12 +172,12 @@ class BasePhysicsEngine(PhysicsEngine):
             ValueError: If path is not in allowed directories
             Exception: If model loading fails
         """
-        # Validate path exists
+        # Validate path exists (Precondition)
         path_obj = Path(path)
         if not path_obj.exists():
             raise FileNotFoundError(f"Model file not found: {path}")
 
-        # Validate path is in allowed directories (if specified)
+        # Validate path is in allowed directories (Precondition)
         if self.allowed_dirs:
             validated_path = validate_path(path, self.allowed_dirs, strict=True)
             path = str(validated_path)
@@ -126,22 +191,35 @@ class BasePhysicsEngine(PhysicsEngine):
             self.model_path = path
             self._is_initialized = True
 
+        # Verify postconditions
+        assert self._is_initialized, "Postcondition: engine must be initialized after load"
+        assert self.model is not None, "Postcondition: model must be loaded"
+
         logger.info(f"Successfully loaded model: {self.model_name}")
 
     @log_errors("Failed to load model from string", reraise=True)
+    @invariant_checked
     def load_from_string(self, content: str, extension: str | None = None) -> None:
         """Load model from string content with error handling.
+
+        Preconditions:
+            - content must be non-empty
+
+        Postconditions:
+            - self._is_initialized == True
+            - self.model is not None
 
         Args:
             content: Model content as string
             extension: File extension hint (e.g., "urdf", "xml")
 
         Raises:
-            ValueError: If content is empty
+            ValueError: If content is empty (precondition violation)
             Exception: If model loading fails
         """
+        # Precondition: content must be non-empty
         if not content or not content.strip():
-            raise ValueError("Model content cannot be empty")
+            raise ValueError("Precondition violated: Model content cannot be empty")
 
         self.model_name_str = "StringLoadedModel"
 
@@ -150,6 +228,10 @@ class BasePhysicsEngine(PhysicsEngine):
             self._load_from_string_impl(content, extension)
             self.model_path = None
             self._is_initialized = True
+
+        # Verify postconditions
+        assert self._is_initialized, "Postcondition: engine must be initialized after load"
+        assert self.model is not None, "Postcondition: model must be loaded"
 
         logger.info("Successfully loaded model from string")
 
@@ -171,23 +253,73 @@ class BasePhysicsEngine(PhysicsEngine):
         """
 
     def get_model(self) -> Any:
-        """Get the underlying model object."""
+        """Get the underlying model object.
+
+        Returns:
+            The engine-specific model object, or None if not loaded.
+        """
         return self.model
 
     def get_data(self) -> Any:
-        """Get the underlying data object."""
+        """Get the underlying data object.
+
+        Returns:
+            The engine-specific data object, or None if not loaded.
+        """
         return self.data
 
     def is_initialized(self) -> bool:
-        """Check if engine is initialized with a model."""
+        """Check if engine is initialized with a model.
+
+        Returns:
+            True if a model has been successfully loaded.
+        """
         return self._is_initialized
 
+    def require_initialized(self, operation: str = "this operation") -> None:
+        """Verify engine is initialized, raising StateError if not.
+
+        This is an explicit precondition check that can be called by subclasses
+        at the start of methods that require initialization.
+
+        Args:
+            operation: Description of the operation being attempted.
+
+        Raises:
+            StateError: If engine is not initialized.
+        """
+        if not self._is_initialized:
+            raise StateError(
+                f"Cannot perform '{operation}' - engine not initialized. "
+                "Call load_from_path() or load_from_string() first.",
+                current_state="uninitialized",
+                required_state="initialized",
+                operation=operation,
+            )
+
+    @require_state(lambda self: self._is_initialized, "initialized")
     def get_state(self) -> EngineState | None:  # type: ignore[override]
-        """Get current engine state."""
+        """Get current engine state.
+
+        Preconditions:
+            - Engine must be initialized
+
+        Returns:
+            Current EngineState object.
+        """
         return self.state
 
+    @require_state(lambda self: self._is_initialized, "initialized")
+    @invariant_checked
     def set_state(self, state: EngineState) -> None:  # type: ignore[override]
-        """Set engine state."""
+        """Set engine state.
+
+        Preconditions:
+            - Engine must be initialized
+
+        Args:
+            state: New EngineState to set.
+        """
         self.state = state
 
     def __repr__(self) -> str:

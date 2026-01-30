@@ -522,3 +522,60 @@ class ResourceError(GolfSuiteError):
 EnvironmentValidationError = EnvironmentError
 IOUtilsError = IOError
 FileNotFoundError_ = FileNotFoundIOError  # Underscore to avoid shadowing builtin
+
+
+# ============================================================================
+# Design by Contract Errors (imported from contracts module)
+# ============================================================================
+
+# Import contract-related errors for re-export
+# These are defined in contracts.py but re-exported here for convenience
+from src.shared.python.contracts import (
+    ContractViolationError,
+    InvariantError,
+    PostconditionError,
+    PreconditionError,
+    StateError,
+)
+
+__all__ = [
+    # Base
+    "GolfSuiteError",
+    # Engine errors
+    "EngineNotAvailableError",
+    # Configuration
+    "ConfigurationError",
+    "EnvironmentError",
+    "EnvironmentValidationError",
+    # Validation
+    "ValidationError",
+    "PhysicalValidationError",
+    # Model/Simulation
+    "ModelError",
+    "SimulationError",
+    # I/O
+    "IOError",
+    "IOUtilsError",
+    "FileOperationError",
+    "FileNotFoundIOError",
+    "FileNotFoundError_",
+    "FileParseError",
+    # Data
+    "DataFormatError",
+    # Resource
+    "TimeoutError",
+    "ResourceError",
+    # Design by Contract
+    "ContractViolationError",
+    "PreconditionError",
+    "PostconditionError",
+    "InvariantError",
+    "StateError",
+    # Utility functions
+    "format_import_error",
+    "format_file_error",
+    "format_validation_error",
+    "format_type_error",
+    "format_range_error",
+    "handle_import_error",
+]
