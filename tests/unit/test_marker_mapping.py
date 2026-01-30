@@ -15,7 +15,6 @@ if MUJOCO_AVAILABLE:
     import mujoco
 
 
-
 @pytest.fixture
 def simple_model() -> mujoco.MjModel:
     """Simple model for testing."""

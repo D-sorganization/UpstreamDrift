@@ -1,17 +1,18 @@
-""" update models in this repository.
-    This script finds all osim files in the repo, instantiates an opensim.Model from each
-    then call initSystem on it, then overwrites the osim files.
-    It is used for the side-effect of writing the osim files in the format/version matching
-    the opensim+python version it's run in. For example to upgrade to 4.x format, run in environment of python+opensim4.x
+"""update models in this repository.
+This script finds all osim files in the repo, instantiates an opensim.Model from each
+then call initSystem on it, then overwrites the osim files.
+It is used for the side-effect of writing the osim files in the format/version matching
+the opensim+python version it's run in. For example to upgrade to 4.x format, run in environment of python+opensim4.x
 
 """
+
 import os
 import sys
 from fnmatch import fnmatch
 
 import opensim
 
-#import opensim as opensim
+# import opensim as opensim
 root = os.getcwd()
 pattern = "*.osim"
 
@@ -42,5 +43,5 @@ for i in range(len(osimpaths)):
     try:
         reloadedModel = opensim.Model(filename)
         s2 = reloadedModel.initSystem()
-    except  Exception:
+    except Exception:
         sys.exit(1)
