@@ -6,16 +6,13 @@ import tempfile
 from pathlib import Path
 
 import pytest
-
 from humanoid_character_builder.core.body_parameters import BodyParameters
 from humanoid_character_builder.interfaces.api import (
     CharacterBuilder,
-    CharacterBuildResult,
     ExportOptions,
     quick_build,
     quick_urdf,
 )
-from humanoid_character_builder.mesh.inertia_calculator import InertiaMode
 from humanoid_character_builder.presets.loader import (
     PRESET_NAMES,
     get_preset_info,

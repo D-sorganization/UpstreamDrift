@@ -72,9 +72,7 @@ class RGBA:
 
     def as_hex(self) -> str:
         """Return as hex color string."""
-        return "#{:02x}{:02x}{:02x}".format(
-            int(self.r * 255), int(self.g * 255), int(self.b * 255)
-        )
+        return f"#{int(self.r * 255):02x}{int(self.g * 255):02x}{int(self.b * 255):02x}"
 
 
 @dataclass
@@ -125,9 +123,7 @@ class AppearanceParameters:
     """
 
     # Skin tone (affects texture/material)
-    skin_tone: RGBA = field(
-        default_factory=lambda: RGBA(0.87, 0.72, 0.53, 1.0)
-    )
+    skin_tone: RGBA = field(default_factory=lambda: RGBA(0.87, 0.72, 0.53, 1.0))
 
     # Face parameters (for future MakeHuman integration)
     face_preset: str = "default"
@@ -142,15 +138,11 @@ class AppearanceParameters:
     body_hair: float = 0.0  # 0.0 = none, 1.0 = full
 
     # Eye color
-    eye_color: RGBA = field(
-        default_factory=lambda: RGBA(0.4, 0.3, 0.2, 1.0)
-    )
+    eye_color: RGBA = field(default_factory=lambda: RGBA(0.4, 0.3, 0.2, 1.0))
 
     # Hair parameters (for future use)
     hair_style: str = "none"
-    hair_color: RGBA = field(
-        default_factory=lambda: RGBA(0.2, 0.15, 0.1, 1.0)
-    )
+    hair_color: RGBA = field(default_factory=lambda: RGBA(0.2, 0.15, 0.1, 1.0))
 
 
 @dataclass
@@ -381,9 +373,7 @@ def create_average_body(
     )
 
 
-def create_heavy_body(
-    height_m: float = 1.78, mass_kg: float = 100.0
-) -> BodyParameters:
+def create_heavy_body(height_m: float = 1.78, mass_kg: float = 100.0) -> BodyParameters:
     """Create heavier body type parameters."""
     return BodyParameters(
         height_m=height_m,

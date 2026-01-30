@@ -8,7 +8,7 @@ and export capabilities.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -158,10 +158,7 @@ class MeshProcessor:
                 # Extract faces that use these vertices
                 vertex_set = set(vertex_indices)
                 face_mask = np.array(
-                    [
-                        all(v in vertex_set for v in face)
-                        for face in mesh.faces
-                    ]
+                    [all(v in vertex_set for v in face) for face in mesh.faces]
                 )
 
                 if not np.any(face_mask):
@@ -280,9 +277,7 @@ class MeshProcessor:
 
         return self.segment_by_vertex_groups(mesh, vertex_groups, output_dir, config)
 
-    def create_convex_hull(
-        self, mesh: Any, output_path: Path | None = None
-    ) -> Any:
+    def create_convex_hull(self, mesh: Any, output_path: Path | None = None) -> Any:
         """
         Create convex hull from mesh.
 
@@ -453,9 +448,7 @@ class MeshProcessor:
 class PrimitiveMeshGenerator:
     """Generate primitive meshes programmatically."""
 
-    def create_box(
-        self, size_x: float, size_y: float, size_z: float
-    ) -> Any:
+    def create_box(self, size_x: float, size_y: float, size_z: float) -> Any:
         """Create a box mesh."""
         if not self._check_trimesh():
             raise ImportError("trimesh is required")
@@ -464,16 +457,16 @@ class PrimitiveMeshGenerator:
 
         return trimesh.creation.box(extents=(size_x, size_y, size_z))
 
-    def create_cylinder(
-        self, radius: float, height: float, sections: int = 32
-    ) -> Any:
+    def create_cylinder(self, radius: float, height: float, sections: int = 32) -> Any:
         """Create a cylinder mesh."""
         if not self._check_trimesh():
             raise ImportError("trimesh is required")
 
         import trimesh
 
-        return trimesh.creation.cylinder(radius=radius, height=height, sections=sections)
+        return trimesh.creation.cylinder(
+            radius=radius, height=height, sections=sections
+        )
 
     def create_sphere(self, radius: float, subdivisions: int = 3) -> Any:
         """Create a sphere mesh."""
@@ -484,16 +477,16 @@ class PrimitiveMeshGenerator:
 
         return trimesh.creation.icosphere(radius=radius, subdivisions=subdivisions)
 
-    def create_capsule(
-        self, radius: float, height: float, sections: int = 32
-    ) -> Any:
+    def create_capsule(self, radius: float, height: float, sections: int = 32) -> Any:
         """Create a capsule mesh."""
         if not self._check_trimesh():
             raise ImportError("trimesh is required")
 
         import trimesh
 
-        return trimesh.creation.capsule(radius=radius, height=height, count=[sections, sections])
+        return trimesh.creation.capsule(
+            radius=radius, height=height, count=[sections, sections]
+        )
 
     def _check_trimesh(self) -> bool:
         """Check if trimesh is available."""

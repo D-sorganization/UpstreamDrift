@@ -14,9 +14,6 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any
-
-import numpy as np
 
 from humanoid_character_builder.mesh.inertia_calculator import (
     InertiaMode,
@@ -328,7 +325,9 @@ class PrimitiveInertiaCalculator:
             raise ValueError(f"Unknown shape: {shape}")
 
     @staticmethod
-    def _tuple_to_dict(shape: PrimitiveShape, dims: tuple[float, ...]) -> dict[str, float]:
+    def _tuple_to_dict(
+        shape: PrimitiveShape, dims: tuple[float, ...]
+    ) -> dict[str, float]:
         """Convert dimension tuple to dictionary."""
         if shape == PrimitiveShape.BOX:
             if len(dims) >= 3:
@@ -385,8 +384,7 @@ def estimate_segment_primitive(
 
     # Limb segments -> capsule
     if any(
-        x in segment_lower
-        for x in ["arm", "forearm", "thigh", "shin", "shank", "leg"]
+        x in segment_lower for x in ["arm", "forearm", "thigh", "shin", "shank", "leg"]
     ):
         radius = (width + depth) / 4  # Average of width/depth divided by 2
         cyl_length = max(0.01, length - 2 * radius)  # Subtract hemispherical caps

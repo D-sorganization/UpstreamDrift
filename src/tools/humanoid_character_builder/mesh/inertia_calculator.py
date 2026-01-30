@@ -430,7 +430,9 @@ class MeshInertiaCalculator:
             # Parallel axis: I_new = I_com + m * (d.d*I - d*d^T)
             # where d is vector from new origin to COM
             d_sq = np.dot(new_com, new_com)
-            I_translated = I_rotated + mass * (d_sq * np.eye(3) - np.outer(new_com, new_com))
+            I_translated = I_rotated + mass * (
+                d_sq * np.eye(3) - np.outer(new_com, new_com)
+            )
         else:
             I_translated = I_rotated
             new_com = com

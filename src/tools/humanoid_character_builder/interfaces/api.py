@@ -35,15 +35,12 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-
 from humanoid_character_builder.core.anthropometry import (
     estimate_segment_dimensions,
     estimate_segment_masses,
 )
 from humanoid_character_builder.core.body_parameters import (
     BodyParameters,
-    BuildType,
-    SegmentParameters,
 )
 from humanoid_character_builder.core.segment_definitions import (
     HUMANOID_SEGMENTS,
@@ -404,7 +401,9 @@ class CharacterBuilder:
         width = dimensions.get("width", 0.05)
         depth = dimensions.get("depth", 0.05)
 
-        shape, shape_dims = estimate_segment_primitive(segment_name, length, width, depth)
+        shape, shape_dims = estimate_segment_primitive(
+            segment_name, length, width, depth
+        )
         return self._primitive_inertia_calc.compute(shape, mass, shape_dims)
 
     def compute_all_inertias(
@@ -459,7 +458,9 @@ class CharacterBuilder:
         segments = {}
         for segment_name in HUMANOID_SEGMENTS:
             mass = masses.get(segment_name, 1.0)
-            dims = dimensions.get(segment_name, {"length": 0.1, "width": 0.05, "depth": 0.05})
+            dims = dimensions.get(
+                segment_name, {"length": 0.1, "width": 0.05, "depth": 0.05}
+            )
 
             # Get mesh paths if available
             visual_path = None
