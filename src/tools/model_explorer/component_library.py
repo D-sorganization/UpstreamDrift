@@ -304,7 +304,7 @@ class ComponentLibrary:
         """
         if from_library:
             # Search by name in library (could be multiple files)
-            for key, comp in self._library_components.items():
+            for comp in self._library_components.values():
                 if comp.name == name:
                     return comp
             return None
