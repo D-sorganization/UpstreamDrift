@@ -856,9 +856,10 @@ except Exception as e:
 
         self.chk_gpu = QCheckBox("GPU")
         self.chk_gpu.setChecked(False)
-        top_bar.addWidget(
-            self.chk_gpu
-        )  # Assuming this existed or I just re-add it from my read
+        self.chk_gpu.setToolTip(
+            "Use GPU for physics computation (requires supported hardware)"
+        )
+        top_bar.addWidget(self.chk_gpu)
 
         # Overlay Toggle
         overlay_btn = QPushButton("Overlay")
@@ -875,12 +876,6 @@ except Exception as e:
             QPushButton:hover { background-color: #555; }
         """)
         top_bar.addWidget(overlay_btn)
-
-        return top_bar
-        self.chk_gpu.setToolTip(
-            "Use GPU for physics computation (requires supported hardware)"
-        )
-        top_bar.addWidget(self.chk_gpu)
 
         # Docker mode toggle
         self.chk_docker = QCheckBox("Docker")
