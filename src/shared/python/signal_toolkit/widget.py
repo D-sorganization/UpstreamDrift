@@ -1314,7 +1314,11 @@ if HAS_MATPLOTLIB and HAS_PYQT:
 
                 # Create preview signal
                 preview = apply_saturation(
-                    self.current_signal.copy() if self.current_signal else self.original_signal.copy(),
+                    (
+                        self.current_signal.copy()
+                        if self.current_signal
+                        else self.original_signal.copy()
+                    ),
                     lower=self.sat_lower.value(),
                     upper=self.sat_upper.value(),
                     mode=mode,
@@ -1516,9 +1520,7 @@ if HAS_MATPLOTLIB and HAS_PYQT:
                 self.canvas2.axes.clear()
                 self.canvas2.setup_dark_theme()
 
-                self.canvas2.axes.semilogy(
-                    w, np.abs(h), color="#4ecdc4", linewidth=1.5
-                )
+                self.canvas2.axes.semilogy(w, np.abs(h), color="#4ecdc4", linewidth=1.5)
                 self.canvas2.axes.set_title("Frequency Response", fontsize=10)
                 self.canvas2.axes.set_xlabel("Frequency (Hz)")
                 self.canvas2.axes.set_ylabel("Magnitude")

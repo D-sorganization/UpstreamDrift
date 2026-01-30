@@ -399,9 +399,7 @@ def apply_backlash(
         ValueError: If backlash_width is negative or smoothness is non-positive.
     """
     if backlash_width < 0:
-        raise ValueError(
-            f"backlash_width must be non-negative, got {backlash_width}"
-        )
+        raise ValueError(f"backlash_width must be non-negative, got {backlash_width}")
     if smoothness <= 0:
         raise ValueError(f"smoothness must be positive, got {smoothness}")
 
