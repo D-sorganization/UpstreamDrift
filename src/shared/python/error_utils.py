@@ -29,6 +29,14 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from src.shared.python.contracts import (
+    ContractViolationError,
+    InvariantError,
+    PostconditionError,
+    PreconditionError,
+    StateError,
+)
+
 
 class GolfSuiteError(Exception):
     """Base exception for Golf Modeling Suite errors."""
@@ -530,13 +538,6 @@ FileNotFoundError_ = FileNotFoundIOError  # Underscore to avoid shadowing builti
 
 # Import contract-related errors for re-export
 # These are defined in contracts.py but re-exported here for convenience
-from src.shared.python.contracts import (
-    ContractViolationError,
-    InvariantError,
-    PostconditionError,
-    PreconditionError,
-    StateError,
-)
 
 __all__ = [
     # Base
