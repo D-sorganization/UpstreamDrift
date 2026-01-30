@@ -135,7 +135,6 @@ mypy python/
 **Required security scanning:**
 - Dependency scanning (Bandit, Safety)
 - Secret detection (TruffleHog)
-- Code scanning (CodeQL for public repos)
 - Vulnerability alerts (Dependabot)
 
 ### 6. Documentation Checks

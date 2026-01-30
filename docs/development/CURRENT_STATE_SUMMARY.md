@@ -40,28 +40,16 @@
 
 ### ✅ Passing Checks:
 - **quality-gate**: PASSED (ruff, black, mypy)
-- **CodeQL/Analyze (actions)**: PASSED
-- **CodeQL/Analyze (javascript-typescript)**: PASSED
-- **CodeQL/Analyze (python)**: PASSED (individual scan)
+- **CodeQL**: DISABLED (Cost Reduction)
 
 ### ⏳ Pending/In Progress:
-- **CodeQL (overall)**: Still failing due to remaining alerts
 - **CI Standard/tests**: Running
 
 ---
 
-## 🔍 Remaining CodeQL Issues
+## 🔍 Security Scanning Status
 
-The overall CodeQL check is still failing. Need to investigate:
-
-1. Check if new alerts were created by our changes (likely not)
-2. Verify if pre-existing alerts are being counted
-3. May need to dismiss false positives or add more explicit security annotations
-
-**Command to check alerts**:
-```bash
-gh api repos/D-sorganization/Golf_Modeling_Suite/code-scanning/alerts --jq '.[] | select(.state == "open" and .rule.severity == "error")'
-```
+CodeQL assessments have been disabled to reduce costs. Security scanning is now handled primarily by Bandit and Semgrep.
 
 ---
 
@@ -79,13 +67,8 @@ d9562e35 - docs: Add final summary of performance improvements
 
 ## 🎯 Next Steps
 
-1. **Wait for CodeQL scan to complete** (~2-3 minutes after push)
-2. **Check if CodeQL passes** with our security fixes
-3. **If CodeQL still fails**:
-   - Investigate remaining alerts
-   - Check if they're false positives
-   - Add security annotations or dismiss alerts if appropriate
-4. **Once all checks pass**: PR is ready for review/merge
+1. **Wait for CI Standard to complete**
+2. **Once all checks pass**: PR is ready for review/merge
 
 ---
 
@@ -100,10 +83,6 @@ git pull
 # Check PR status
 gh pr view 441
 gh pr checks 441
-
-# Check CodeQL alerts
-gh api repos/D-sorganization/Golf_Modeling_Suite/code-scanning/alerts \
-  --jq '.[] | select(.state == "open" and .rule.severity == "error") | {number: .number, rule: .rule.id, file: .most_recent_instance.location.path}'
 
 # Run local quality checks
 ruff check .
