@@ -64,14 +64,14 @@ def create_local_app() -> FastAPI:
     # app.state.analysis_service = analysis_service   # TODO: Implement service wrapper
 
     # Register routes (no auth required in local mode)
-    # Note: We need to ensure these routers are compatible with the new structure
-    app.include_router(engines.router, prefix="/api/engines", tags=["Engines"])
-    app.include_router(simulation.router, prefix="/api/simulation", tags=["Simulation"])
+    # Note: Routers already define their own paths (e.g., /engines), so prefix is just /api
+    app.include_router(engines.router, prefix="/api", tags=["Engines"])
+    app.include_router(simulation.router, prefix="/api", tags=["Simulation"])
     app.include_router(
-        simulation_ws.router, tags=["Simulation"]
-    )  # WebSocket routes don't usually use prefix/tags the same way, but good for docs
-    app.include_router(analysis.router, prefix="/api/analysis", tags=["Analysis"])
-    app.include_router(export.router, prefix="/api/export", tags=["Export"])
+        simulation_ws.router, prefix="/api", tags=["Simulation WebSocket"]
+    )
+    app.include_router(analysis.router, prefix="/api", tags=["Analysis"])
+    app.include_router(export.router, prefix="/api", tags=["Export"])
 
     # Health check
     @app.get("/api/health")
@@ -93,6 +93,34 @@ def create_local_app() -> FastAPI:
     return app
 
 
+def print_logo():
+    """Print the Upstream Drift logo in orange."""
+    # ANSI escape codes for orange (256-color mode)
+    ORANGE = "\033[38;5;208m"
+    RESET = "\033[0m"
+
+    logo = [
+        r"██╗   ██╗██████╗ ███████╗████████╗██████╗ ███████╗ █████╗ ███╗   ███╗",
+        r"██║   ██║██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔════╝██╔══██╗████╗ ████║",
+        r"██║   ██║██████╔╝███████╗   ██║   ██████╔╝█████╗  ███████║██╔████╔██║",
+        r"██║   ██║██╔═══╝ ╚════██║   ██║   ██╔══██╗██╔══╝  ██╔══██║██║╚██╔╝██║",
+        r"╚██████╔╝██║     ███████║   ██║   ██║  ██║███████╗██║  ██║██║ ╚═╝ ██║",
+        r" ╚═════╝ ╚═╝     ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝",
+        r"",
+        r"██████╗ ██████╗ ██╗███████╗████████╗",
+        r"██╔══██╗██╔══██╗██║██╔════╝╚══██╔══╝",
+        r"██║  ██║██████╔╝██║█████╗     ██║   ",
+        r"██║  ██║██╔══██╗██║██╔══╝     ██║   ",
+        r"██████╔╝██║  ██║██║██║        ██║   ",
+        r"╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝        ╚═╝   ",
+    ]
+
+    print()
+    for line in logo:
+        print(f"    {ORANGE}{line}{RESET}")
+    print()
+
+
 def main():
     """Launch local server with auto-open browser."""
     import webbrowser
@@ -109,6 +137,8 @@ def main():
             webbrowser.open(f"http://{host}:{port}")
 
     Timer(1.5, open_browser).start()
+
+    print_logo()
 
     print(f"""
     ╔═══════════════════════════════════════════════════════════════╗
