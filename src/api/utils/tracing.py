@@ -32,7 +32,7 @@ logger = get_logger(__name__)
 _request_id_var: contextvars.ContextVar[str] = contextvars.ContextVar(
     "request_id", default=""
 )
-_trace_context_var: contextvars.ContextVar["TraceContext | None"] = (
+_trace_context_var: contextvars.ContextVar[TraceContext | None] = (
     contextvars.ContextVar("trace_context", default=None)
 )
 

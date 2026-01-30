@@ -33,7 +33,6 @@ from .config import get_allowed_hosts, get_cors_origins
 from .database import init_db
 from .middleware.security_headers import add_security_headers
 from .middleware.upload_limits import validate_upload_size
-from .utils.tracing import RequestTracer
 from .routes import analysis as analysis_routes
 from .routes import auth as auth_routes
 from .routes import core as core_routes
@@ -43,6 +42,7 @@ from .routes import simulation as simulation_routes
 from .routes import video as video_routes
 from .services.analysis_service import AnalysisService
 from .services.simulation_service import SimulationService
+from .utils.tracing import RequestTracer
 
 setup_logging()
 logger = get_logger(__name__)
