@@ -684,3 +684,495 @@ def create_first_analysis_workflow() -> Workflow:
     )
 
     return workflow
+
+
+def create_c3d_import_workflow() -> Workflow:
+    """Create the 'c3d_import' workflow for importing motion capture data.
+
+    This workflow guides users through importing and validating
+    C3D motion capture files.
+
+    Returns:
+        Complete Workflow object.
+    """
+    workflow = Workflow(
+        id="c3d_import",
+        name="C3D Motion Capture Import",
+        description=(
+            "Import and validate C3D motion capture data. This workflow "
+            "guides you through loading, inspecting, and preparing motion "
+            "data for analysis."
+        ),
+        expertise_level=ExpertiseLevel.INTERMEDIATE,
+        estimated_duration=15,
+        tags=["c3d", "import", "motion-capture", "data-loading"],
+    )
+
+    # Step 1: Introduction
+    workflow.add_step(
+        WorkflowStep(
+            id="intro",
+            name="C3D Import Introduction",
+            description="Overview of the C3D import process",
+            educational_content={
+                "beginner": (
+                    "C3D (Coordinate 3D) is the standard format for motion "
+                    "capture data. It contains 3D marker positions recorded "
+                    "during movement.\n\n"
+                    "This workflow will help you:\n"
+                    "- Load a C3D file\n"
+                    "- Inspect its contents\n"
+                    "- Verify data quality"
+                ),
+                "intermediate": (
+                    "C3D files contain both analog and point data streams. "
+                    "We'll extract marker trajectories, check for gaps, and "
+                    "prepare the data for physics simulation."
+                ),
+            },
+        )
+    )
+
+    # Step 2: List available files
+    workflow.add_step(
+        WorkflowStep(
+            id="list_files",
+            name="Browse Available Files",
+            description="List available C3D files for import",
+            tool_name="list_sample_files",
+            educational_content={
+                "beginner": (
+                    "Sample files are included to help you learn. "
+                    "You can also import your own C3D files."
+                ),
+            },
+        )
+    )
+
+    # Step 3: Load the file
+    workflow.add_step(
+        WorkflowStep(
+            id="load_file",
+            name="Load C3D File",
+            description="Load the selected C3D file",
+            tool_name="load_c3d",
+            on_failure=RecoveryStrategy.ASK_USER,
+            educational_content={
+                "beginner": (
+                    "Loading extracts marker positions, frame rate, "
+                    "and other metadata from the file."
+                ),
+                "intermediate": (
+                    "The loader validates file structure, checks for "
+                    "corrupted frames, and converts units if necessary."
+                ),
+            },
+        )
+    )
+
+    # Step 4: Inspect markers
+    workflow.add_step(
+        WorkflowStep(
+            id="inspect_markers",
+            name="Inspect Marker Configuration",
+            description="Examine the markers present in the data",
+            tool_name="get_marker_info",
+            educational_content={
+                "beginner": (
+                    "Markers are reflective balls placed on the body. "
+                    "Each marker has a name and represents a specific "
+                    "body location."
+                ),
+                "intermediate": (
+                    "The marker set determines which body segments can "
+                    "be tracked. Common sets include Plug-in Gait and "
+                    "Cleveland Clinic marker sets."
+                ),
+            },
+        )
+    )
+
+    return workflow
+
+
+def create_inverse_dynamics_workflow() -> Workflow:
+    """Create the 'inverse_dynamics' workflow for full ID analysis.
+
+    This workflow performs complete inverse dynamics analysis
+    with detailed configuration options.
+
+    Returns:
+        Complete Workflow object.
+    """
+    workflow = Workflow(
+        id="inverse_dynamics",
+        name="Inverse Dynamics Analysis",
+        description=(
+            "Complete inverse dynamics analysis workflow. Calculate joint "
+            "torques, muscle contributions, and analyze movement patterns."
+        ),
+        expertise_level=ExpertiseLevel.INTERMEDIATE,
+        estimated_duration=45,
+        tags=["inverse-dynamics", "torques", "analysis", "biomechanics"],
+    )
+
+    # Step 1: Introduction
+    workflow.add_step(
+        WorkflowStep(
+            id="intro",
+            name="Inverse Dynamics Overview",
+            description="Introduction to inverse dynamics analysis",
+            educational_content={
+                "beginner": (
+                    "Inverse dynamics calculates the forces that caused "
+                    "a movement. Given how the body moved, we determine "
+                    "what muscle forces were required."
+                ),
+                "intermediate": (
+                    "Using Newton-Euler equations and measured kinematics, "
+                    "we solve for joint torques. This requires accurate "
+                    "segment inertial properties and kinematic data."
+                ),
+                "advanced": (
+                    "The inverse dynamics problem solves τ = M(q)q̈ + C(q,q̇)q̇ + g(q) "
+                    "where M is the mass matrix, C represents Coriolis/centrifugal "
+                    "effects, and g is the gravity vector."
+                ),
+            },
+        )
+    )
+
+    # Step 2: Select physics engine
+    workflow.add_step(
+        WorkflowStep(
+            id="select_engine",
+            name="Select Physics Engine",
+            description="Choose the physics engine for simulation",
+            tool_name="list_physics_engines",
+            educational_content={
+                "intermediate": (
+                    "Available engines:\n"
+                    "- MuJoCo: Fast, GPU-accelerated, good for muscle models\n"
+                    "- Drake: Robust, precise, good for contacts\n"
+                    "- Pinocchio: Efficient, analytical derivatives"
+                ),
+            },
+        )
+    )
+
+    # Step 3: Load data
+    workflow.add_step(
+        WorkflowStep(
+            id="load_data",
+            name="Load Motion Data",
+            description="Load C3D data for analysis",
+            tool_name="load_c3d",
+            on_failure=RecoveryStrategy.ASK_USER,
+        )
+    )
+
+    # Step 4: Run inverse dynamics
+    workflow.add_step(
+        WorkflowStep(
+            id="run_id",
+            name="Run Inverse Dynamics",
+            description="Execute inverse dynamics calculation",
+            tool_name="run_inverse_dynamics",
+            timeout=600.0,
+            on_failure=RecoveryStrategy.RETRY,
+            educational_content={
+                "beginner": (
+                    "The simulation is now calculating joint torques. "
+                    "This may take a few minutes depending on data length."
+                ),
+            },
+        )
+    )
+
+    # Step 5: Check energy
+    workflow.add_step(
+        WorkflowStep(
+            id="check_energy",
+            name="Verify Energy Conservation",
+            description="Check physical plausibility of results",
+            tool_name="check_energy_conservation",
+            educational_content={
+                "intermediate": (
+                    "Energy conservation is a key validation metric. "
+                    "Large energy violations indicate simulation errors."
+                ),
+            },
+        )
+    )
+
+    # Step 6: Interpret results
+    workflow.add_step(
+        WorkflowStep(
+            id="interpret",
+            name="Interpret Torque Results",
+            description="Analyze and interpret the calculated torques",
+            tool_name="interpret_torques",
+            educational_content={
+                "beginner": (
+                    "Joint torques tell us about muscle effort:\n"
+                    "- High torques = high muscle demands\n"
+                    "- Timing patterns reveal movement strategy\n"
+                    "- Asymmetries may indicate technique issues"
+                ),
+            },
+        )
+    )
+
+    return workflow
+
+
+def create_cross_engine_validation_workflow() -> Workflow:
+    """Create the 'cross_engine_validation' workflow.
+
+    This workflow validates results by comparing across multiple
+    physics engines to ensure robustness.
+
+    Returns:
+        Complete Workflow object.
+    """
+    workflow = Workflow(
+        id="cross_engine_validation",
+        name="Cross-Engine Validation",
+        description=(
+            "Validate simulation results by comparing outputs from multiple "
+            "physics engines. Ensures results are robust and not artifacts "
+            "of a specific engine implementation."
+        ),
+        expertise_level=ExpertiseLevel.ADVANCED,
+        estimated_duration=60,
+        tags=["validation", "cross-engine", "robustness", "quality-assurance"],
+    )
+
+    # Step 1: Introduction
+    workflow.add_step(
+        WorkflowStep(
+            id="intro",
+            name="Cross-Engine Validation Overview",
+            description="Why cross-engine validation matters",
+            educational_content={
+                "intermediate": (
+                    "Different physics engines use different algorithms. "
+                    "Comparing results helps identify numerical issues and "
+                    "ensures scientific validity."
+                ),
+                "advanced": (
+                    "Cross-validation detects:\n"
+                    "- Numerical instabilities\n"
+                    "- Integration method artifacts\n"
+                    "- Contact model discrepancies\n"
+                    "- Solver convergence issues"
+                ),
+            },
+        )
+    )
+
+    # Step 2: Check available engines
+    workflow.add_step(
+        WorkflowStep(
+            id="check_engines",
+            name="Check Available Engines",
+            description="Verify which physics engines are available",
+            tool_name="list_physics_engines",
+            educational_content={
+                "intermediate": (
+                    "At least two engines are needed for cross-validation. "
+                    "Results are compared based on:\n"
+                    "- Joint torque magnitudes\n"
+                    "- Peak timing\n"
+                    "- Energy conservation"
+                ),
+            },
+        )
+    )
+
+    # Step 3: Load data
+    workflow.add_step(
+        WorkflowStep(
+            id="load_data",
+            name="Load Motion Data",
+            description="Load C3D data for multi-engine analysis",
+            tool_name="load_c3d",
+        )
+    )
+
+    # Step 4: Run validation
+    workflow.add_step(
+        WorkflowStep(
+            id="run_validation",
+            name="Run Cross-Engine Validation",
+            description="Execute simulations on multiple engines and compare",
+            tool_name="validate_cross_engine",
+            timeout=900.0,  # 15 minutes for multiple engines
+            on_failure=RecoveryStrategy.ASK_USER,
+            educational_content={
+                "advanced": (
+                    "Validation metrics:\n"
+                    "- RMS error between engines\n"
+                    "- Correlation coefficient\n"
+                    "- Peak torque agreement\n"
+                    "- Energy drift comparison\n\n"
+                    "Acceptable agreement: RMS < 5%, r > 0.99"
+                ),
+            },
+        )
+    )
+
+    # Step 5: Energy conservation check
+    workflow.add_step(
+        WorkflowStep(
+            id="energy_check",
+            name="Energy Conservation Analysis",
+            description="Verify energy conservation across engines",
+            tool_name="check_energy_conservation",
+            educational_content={
+                "advanced": (
+                    "Energy conservation violations should be:\n"
+                    "- < 1% for constrained systems\n"
+                    "- < 5% for systems with contacts\n"
+                    "- Consistent across engines"
+                ),
+            },
+        )
+    )
+
+    return workflow
+
+
+def create_drift_control_decomposition_workflow() -> Workflow:
+    """Create the 'drift_control_decomposition' workflow.
+
+    This advanced workflow decomposes control contributions
+    into drift and corrective components.
+
+    Returns:
+        Complete Workflow object.
+    """
+    workflow = Workflow(
+        id="drift_control_decomposition",
+        name="Drift-Control Decomposition Analysis",
+        description=(
+            "Decompose joint torques into passive (drift) and active (control) "
+            "components. Advanced analysis for understanding movement control "
+            "strategies and neuromuscular coordination."
+        ),
+        expertise_level=ExpertiseLevel.EXPERT,
+        estimated_duration=90,
+        tags=["drift", "control", "decomposition", "expert", "neuromuscular"],
+    )
+
+    # Step 1: Introduction
+    workflow.add_step(
+        WorkflowStep(
+            id="intro",
+            name="Drift-Control Decomposition Overview",
+            description="Introduction to drift-control decomposition",
+            educational_content={
+                "advanced": (
+                    "Drift-control decomposition separates torques into:\n"
+                    "- Passive drift: gravity, inertial coupling\n"
+                    "- Active control: intentional muscle activation\n\n"
+                    "This reveals the control strategy used during movement."
+                ),
+                "expert": (
+                    "The decomposition solves:\n"
+                    "τ_total = τ_drift + τ_control\n\n"
+                    "where τ_drift = M(q)q̈_free + C(q,q̇)q̇ + g(q)\n"
+                    "represents the torques needed to allow natural motion, "
+                    "and τ_control represents active corrections."
+                ),
+            },
+        )
+    )
+
+    # Step 2: Load and prepare data
+    workflow.add_step(
+        WorkflowStep(
+            id="load_data",
+            name="Load Motion Data",
+            description="Load high-quality motion capture data",
+            tool_name="load_c3d",
+            on_failure=RecoveryStrategy.ASK_USER,
+            educational_content={
+                "expert": (
+                    "Drift-control analysis requires:\n"
+                    "- High sampling rate (≥200 Hz)\n"
+                    "- Low marker noise\n"
+                    "- Complete marker visibility\n"
+                    "- Accurate segment properties"
+                ),
+            },
+        )
+    )
+
+    # Step 3: Run inverse dynamics
+    workflow.add_step(
+        WorkflowStep(
+            id="run_id",
+            name="Compute Total Joint Torques",
+            description="Calculate total torques via inverse dynamics",
+            tool_name="run_inverse_dynamics",
+            timeout=600.0,
+        )
+    )
+
+    # Step 4: Compute drift component
+    workflow.add_step(
+        WorkflowStep(
+            id="compute_drift",
+            name="Calculate Drift Component",
+            description="Compute passive drift torques",
+            tool_name="run_inverse_dynamics",
+            tool_arguments={"mode": "drift_only"},
+            timeout=600.0,
+            educational_content={
+                "expert": (
+                    "Drift torques represent what happens if the nervous "
+                    "system provides no active control - the natural dynamics "
+                    "of the linked segment system under gravity."
+                ),
+            },
+        )
+    )
+
+    # Step 5: Energy verification
+    workflow.add_step(
+        WorkflowStep(
+            id="verify_energy",
+            name="Verify Energy Conservation",
+            description="Check energy conservation in decomposition",
+            tool_name="check_energy_conservation",
+            educational_content={
+                "expert": (
+                    "The control component should:\n"
+                    "- Add energy during acceleration phases\n"
+                    "- Remove energy during deceleration\n"
+                    "- Show minimal energy when coasting"
+                ),
+            },
+        )
+    )
+
+    # Step 6: Cross-validate
+    workflow.add_step(
+        WorkflowStep(
+            id="cross_validate",
+            name="Cross-Engine Validation",
+            description="Validate decomposition across physics engines",
+            tool_name="validate_cross_engine",
+            timeout=900.0,
+            on_failure=RecoveryStrategy.SKIP,
+            educational_content={
+                "expert": (
+                    "Cross-engine validation ensures the decomposition "
+                    "is robust to numerical implementation details."
+                ),
+            },
+        )
+    )
+
+    return workflow
