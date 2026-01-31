@@ -6,7 +6,6 @@ the same features and maintain consistent behavior.
 
 import json
 from pathlib import Path
-from typing import Any
 
 import pytest
 

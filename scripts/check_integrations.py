@@ -151,7 +151,7 @@ def check_frontend_tests() -> CheckResult:
             name="Frontend Tests",
             passed=False,
             message="No test script in package.json. Add Vitest configuration.",
-            fix_command='npm install -D vitest @testing-library/react jsdom',
+            fix_command="npm install -D vitest @testing-library/react jsdom",
         )
 
     # Check for vitest config
@@ -347,7 +347,7 @@ def main() -> int:
                 print(f"  Running: {result.fix_command}")
                 try:
                     subprocess.run(result.fix_command, shell=True, check=True)
-                    print(f"  Success!")
+                    print("  Success!")
                 except subprocess.CalledProcessError as e:
                     print(f"  Failed: {e}")
 

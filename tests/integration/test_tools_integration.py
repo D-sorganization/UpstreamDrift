@@ -6,7 +6,6 @@ packages (model_generation, signal_toolkit, humanoid_character_builder).
 
 import sys
 from pathlib import Path
-from typing import Any
 
 import pytest
 
@@ -51,8 +50,8 @@ class TestToolsRepoIntegration:
     def test_signal_toolkit_compatibility(self) -> None:
         """Verify signal_toolkit is compatible if installed."""
         try:
-            from signal_toolkit import Signal, SignalGenerator
             import numpy as np
+            from signal_toolkit import SignalGenerator
 
             # Basic signal generation test
             t = np.linspace(0, 1, 100)
@@ -65,7 +64,7 @@ class TestToolsRepoIntegration:
     def test_humanoid_builder_compatibility(self) -> None:
         """Verify humanoid_character_builder is compatible if installed."""
         try:
-            from humanoid_character_builder import BodyParameters, CharacterBuilder
+            from humanoid_character_builder import BodyParameters
 
             params = BodyParameters(height_m=1.75, mass_kg=70.0)
             assert params.height_m == 1.75
@@ -94,9 +93,9 @@ class TestCrossRepoImportPaths:
 
         content = pyproject_path.read_text()
         # Check for Tools repo reference
-        assert "Tools" in content or "tools" in content.lower(), (
-            "Tools integration not documented in pyproject.toml"
-        )
+        assert (
+            "Tools" in content or "tools" in content.lower()
+        ), "Tools integration not documented in pyproject.toml"
 
 
 class TestEngineModelCompatibility:
