@@ -274,3 +274,108 @@ class TestFirstAnalysisWorkflow:
         welcome_step = workflow.steps[0]
         assert "beginner" in welcome_step.educational_content
         assert len(welcome_step.educational_content["beginner"]) > 0
+
+
+class TestC3DImportWorkflow:
+    """Tests for the c3d_import workflow."""
+
+    def test_workflow_creation(self) -> None:
+        """Test creating the c3d_import workflow."""
+        from src.shared.python.ai.workflow_engine import create_c3d_import_workflow
+
+        workflow = create_c3d_import_workflow()
+        assert workflow.id == "c3d_import"
+        assert workflow.expertise_level == ExpertiseLevel.INTERMEDIATE
+        assert len(workflow.steps) == 4
+        assert "c3d" in workflow.tags
+
+    def test_workflow_steps(self) -> None:
+        """Test that workflow has expected steps."""
+        from src.shared.python.ai.workflow_engine import create_c3d_import_workflow
+
+        workflow = create_c3d_import_workflow()
+        step_ids = [s.id for s in workflow.steps]
+        assert "intro" in step_ids
+        assert "list_files" in step_ids
+        assert "load_file" in step_ids
+        assert "inspect_markers" in step_ids
+
+
+class TestInverseDynamicsWorkflow:
+    """Tests for the inverse_dynamics workflow."""
+
+    def test_workflow_creation(self) -> None:
+        """Test creating the inverse_dynamics workflow."""
+        from src.shared.python.ai.workflow_engine import (
+            create_inverse_dynamics_workflow,
+        )
+
+        workflow = create_inverse_dynamics_workflow()
+        assert workflow.id == "inverse_dynamics"
+        assert workflow.expertise_level == ExpertiseLevel.INTERMEDIATE
+        assert len(workflow.steps) == 6
+        assert "torques" in workflow.tags
+
+    def test_workflow_has_educational_content(self) -> None:
+        """Test that steps have educational content."""
+        from src.shared.python.ai.workflow_engine import (
+            create_inverse_dynamics_workflow,
+        )
+
+        workflow = create_inverse_dynamics_workflow()
+        intro_step = workflow.steps[0]
+        assert "beginner" in intro_step.educational_content
+        assert "intermediate" in intro_step.educational_content
+        assert "advanced" in intro_step.educational_content
+
+
+class TestCrossEngineValidationWorkflow:
+    """Tests for the cross_engine_validation workflow."""
+
+    def test_workflow_creation(self) -> None:
+        """Test creating the cross_engine_validation workflow."""
+        from src.shared.python.ai.workflow_engine import (
+            create_cross_engine_validation_workflow,
+        )
+
+        workflow = create_cross_engine_validation_workflow()
+        assert workflow.id == "cross_engine_validation"
+        assert workflow.expertise_level == ExpertiseLevel.ADVANCED
+        assert len(workflow.steps) == 5
+        assert "validation" in workflow.tags
+
+    def test_workflow_timeout(self) -> None:
+        """Test that validation step has extended timeout."""
+        from src.shared.python.ai.workflow_engine import (
+            create_cross_engine_validation_workflow,
+        )
+
+        workflow = create_cross_engine_validation_workflow()
+        validation_step = next(s for s in workflow.steps if s.id == "run_validation")
+        assert validation_step.timeout >= 600.0  # At least 10 minutes
+
+
+class TestDriftControlDecompositionWorkflow:
+    """Tests for the drift_control_decomposition workflow."""
+
+    def test_workflow_creation(self) -> None:
+        """Test creating the drift_control_decomposition workflow."""
+        from src.shared.python.ai.workflow_engine import (
+            create_drift_control_decomposition_workflow,
+        )
+
+        workflow = create_drift_control_decomposition_workflow()
+        assert workflow.id == "drift_control_decomposition"
+        assert workflow.expertise_level == ExpertiseLevel.EXPERT
+        assert len(workflow.steps) == 6
+        assert "expert" in workflow.tags
+
+    def test_workflow_has_expert_content(self) -> None:
+        """Test that expert workflow has expert-level content."""
+        from src.shared.python.ai.workflow_engine import (
+            create_drift_control_decomposition_workflow,
+        )
+
+        workflow = create_drift_control_decomposition_workflow()
+        intro_step = workflow.steps[0]
+        assert "expert" in intro_step.educational_content

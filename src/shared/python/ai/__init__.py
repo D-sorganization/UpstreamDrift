@@ -65,7 +65,11 @@ from src.shared.python.ai.workflow_engine import (
     WorkflowEngine,
     WorkflowExecution,
     WorkflowStep,
+    create_c3d_import_workflow,
+    create_cross_engine_validation_workflow,
+    create_drift_control_decomposition_workflow,
     create_first_analysis_workflow,
+    create_inverse_dynamics_workflow,
 )
 
 __all__ = [
@@ -94,7 +98,11 @@ __all__ = [
     "WorkflowEngine",
     "WorkflowExecution",
     "WorkflowStep",
+    "create_c3d_import_workflow",
+    "create_cross_engine_validation_workflow",
+    "create_drift_control_decomposition_workflow",
     "create_first_analysis_workflow",
+    "create_inverse_dynamics_workflow",
     # Education
     "EducationSystem",
     "GlossaryEntry",
