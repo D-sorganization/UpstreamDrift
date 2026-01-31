@@ -501,9 +501,9 @@ def validate_inertia_tensor(inertia_matrix: NDArray[np.float64]) -> list[str]:
     """
     errors = []
 
-    I = np.asarray(inertia_matrix)
+    inertia_tensor = np.asarray(inertia_matrix)
 
-    if I.shape != (3, 3):
+    if inertia_tensor.shape != (3, 3):
         errors.append(f"Inertia must be 3x3, got {I.shape}")
         return errors
 

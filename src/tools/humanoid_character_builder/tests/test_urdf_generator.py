@@ -258,7 +258,7 @@ class TestGenerateHumanoidURDF:
 
     def test_basic_call(self):
         params = BodyParameters()
-        urdf = generate_humanoid_urdf(params)
+        _ = generate_humanoid_urdf(params)
 
         assert urdf is not None
         assert "<robot" in urdf
@@ -267,7 +267,7 @@ class TestGenerateHumanoidURDF:
         params = BodyParameters()
         config = URDFGeneratorConfig(generate_collision=False)
 
-        urdf = generate_humanoid_urdf(params, config=config)
+        _ = generate_humanoid_urdf(params, config=config)
 
         assert "<collision>" not in urdf
 
@@ -276,7 +276,7 @@ class TestGenerateHumanoidURDF:
 
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = Path(tmpdir) / "humanoid.urdf"
-            urdf = generate_humanoid_urdf(params, output_path=output_path)
+            _ = generate_humanoid_urdf(params, output_path=output_path)
 
             assert output_path.exists()
 
