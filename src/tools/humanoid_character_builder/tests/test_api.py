@@ -55,7 +55,7 @@ class TestCharacterBuilder:
         builder = CharacterBuilder()
         params = BodyParameters()
 
-        _ = builder.generate_urdf(params)
+        urdf = builder.generate_urdf(params)
 
         assert urdf is not None
         assert "<robot" in urdf
