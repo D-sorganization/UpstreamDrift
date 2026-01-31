@@ -276,16 +276,16 @@ class Integrator:
 
         # Compute definite integral
         if self.method == IntegrationMethod.TRAPEZOID:
-            value = np.trapz(y_range, t_range)
+            value = np.trapezoid(y_range, t_range)
 
         elif self.method == IntegrationMethod.SIMPSON:
             if len(t_range) >= 3:
                 value = integrate.simpson(y_range, x=t_range)
             else:
-                value = np.trapz(y_range, t_range)
+                value = np.trapezoid(y_range, t_range)
 
         else:
-            value = np.trapz(y_range, t_range)
+            value = np.trapezoid(y_range, t_range)
 
         # Compute cumulative integral
         cumulative = integrate.cumulative_trapezoid(y, t, initial=initial_value)
@@ -297,8 +297,8 @@ class Integrator:
         )
 
         # Compute positive and negative areas
-        area_positive = np.trapz(np.maximum(y_range, 0), t_range)
-        area_negative = np.trapz(np.minimum(y_range, 0), t_range)
+        area_positive = np.trapezoid(np.maximum(y_range, 0), t_range)
+        area_negative = np.trapezoid(np.minimum(y_range, 0), t_range)
 
         return IntegralResult(
             value=value,
@@ -519,7 +519,7 @@ def compute_arc_length(
     # Arc length element: ds = sqrt(1 + (dy/dt)^2) * dt
     ds = np.sqrt(1 + y_prime**2)
 
-    return np.trapz(ds, signal.time)
+    return np.trapezoid(ds, signal.time)
 
 
 def find_extrema(

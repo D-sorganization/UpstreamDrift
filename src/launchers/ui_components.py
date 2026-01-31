@@ -569,7 +569,11 @@ class DockerBuildThread(QThread):
                 stderr=subprocess.STDOUT,
                 text=True,
                 bufsize=1,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
+                creationflags=(
+                    subprocess.CREATE_NO_WINDOW  # type: ignore[attr-defined]
+                    if os.name == "nt"
+                    else 0
+                ),
             )
 
             if process.stdout:

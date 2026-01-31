@@ -325,11 +325,12 @@ class EngineStateMixin:
             StateError: If engine is not in a required state
         """
         if self._lifecycle_state not in required_states:
+            required_names = ", ".join([s.name for s in required_states])
             raise StateError(
                 f"Cannot perform '{operation}' in state {self._lifecycle_state.name}. "
-                f"Required: {[s.name for s in required_states]}",
+                f"Required: {required_names}",
                 current_state=self._lifecycle_state.name,
-                required_state=[s.name for s in required_states],
+                required_state=required_names,
                 operation=operation,
             )
 
@@ -450,7 +451,9 @@ class ForceAccumulator:
         """
         if not self._sources:
             return np.zeros(3)
-        return sum(s.force for s in self._sources.values())
+        # Use np.sum for proper numpy array summation to avoid type ambiguity with sum()
+        forces = [s.force for s in self._sources.values()]
+        return np.sum(forces, axis=0)
 
     def get_total_torque(self) -> np.ndarray:
         """Get total Cartesian torque.
@@ -460,7 +463,9 @@ class ForceAccumulator:
         """
         if not self._sources:
             return np.zeros(3)
-        return sum(s.torque for s in self._sources.values())
+        # Use np.sum for proper numpy array summation
+        torques = [s.torque for s in self._sources.values()]
+        return np.sum(torques, axis=0)
 
     def get_total_generalized_force(self) -> np.ndarray:
         """Get total generalized force.
@@ -470,7 +475,9 @@ class ForceAccumulator:
         """
         if not self._generalized_forces:
             return np.zeros(self.nv)
-        return sum(self._generalized_forces.values())
+        # Use np.sum for proper numpy array summation
+        forces = list(self._generalized_forces.values())
+        return np.sum(forces, axis=0)
 
     def get_forces_by_source(self) -> dict[str, ForceSource]:
         """Get all force sources.

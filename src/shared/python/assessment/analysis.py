@@ -70,11 +70,11 @@ def get_detailed_function_metrics(content: str) -> list[dict[str, Any]]:
         tree = ast.parse(content)
         for node in ast.walk(tree):
             if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef):
-                body_lines = (
-                    node.end_lineno - node.lineno + 1
-                    if hasattr(node, "end_lineno")
-                    else 0
-                )
+                end_lineno = getattr(node, "end_lineno", None)
+                if end_lineno is not None:
+                    body_lines = end_lineno - node.lineno + 1
+                else:
+                    body_lines = 0
                 functions.append(
                     {
                         "name": node.name,

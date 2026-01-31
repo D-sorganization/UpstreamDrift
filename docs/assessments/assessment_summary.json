@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-28T08:10:16.796193",
+  "timestamp": "2026-01-31T08:12:17.854427",
   "overall_score": 7.17,
   "category_scores": {
     "A": {
@@ -73,5 +73,97 @@
     "Design": 7.5
   },
   "total_issues": 18,
+  "issues": [
+    {
+      "severity": "MAJOR",
+      "description": "Source directory structure exists (src/ or shared/).",
+      "source": "Assessment_A_Code_Structure"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Root README.md exists.",
+      "source": "Assessment_B_Documentation"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "README.md is reasonably detailed.",
+      "source": "Assessment_B_Documentation"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "docs/ directory exists.",
+      "source": "Assessment_B_Documentation"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Found 175 test files in tests/ directory.",
+      "source": "Assessment_C_Test_Coverage"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Found 1479 try blocks and 0 bare except blocks.",
+      "source": "Assessment_D_Error_Handling"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Profiling tools usage detected.",
+      "source": "Assessment_E_Performance"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Potential hardcoded secrets found in 79 files (needs verification).",
+      "source": "Assessment_F_Security"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Dependency definition files found.",
+      "source": "Assessment_G_Dependencies"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Found 59 GitHub Actions workflows.",
+      "source": "Assessment_H_CICD"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Ruff configuration found.",
+      "source": "Assessment_I_Code_Style"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "src/api/ directory exists.",
+      "source": "Assessment_J_API_Design"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "FastAPI usage detected.",
+      "source": "Assessment_J_API_Design"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Assessed data handling patterns.",
+      "source": "Assessment_K_Data_Handling"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Found 1809 logging calls and 1481 print calls.",
+      "source": "Assessment_L_Logging"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Found 12 configuration files (yaml/toml).",
+      "source": "Assessment_M_Configuration"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Scalability assessment based on architecture.",
+      "source": "Assessment_N_Scalability"
+    },
+    {
+      "severity": "MAJOR",
+      "description": "Average complexity (branches/func): 1.26",
+      "source": "Assessment_O_Maintainability"
+    }
+  ],
   "reports_analyzed": 15
 }

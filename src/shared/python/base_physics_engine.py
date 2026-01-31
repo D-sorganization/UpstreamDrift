@@ -31,6 +31,7 @@ from typing import Any
 
 import numpy as np
 
+from src.shared.python.checkpoint import StateCheckpoint
 from src.shared.python.contracts import (
     ContractChecker,
     StateError,
@@ -323,6 +324,67 @@ class BasePhysicsEngine(ContractChecker, PhysicsEngine):
             state: New EngineState to set.
         """
         self.state = state
+
+    @require_state(lambda self: self._is_initialized, "initialized")
+    def save_checkpoint(self) -> StateCheckpoint:
+        """Save current engine state to a checkpoint.
+
+        Returns:
+            StateCheckpoint object containing engine state and timestamp.
+        """
+        engine_state_dict = {}
+        timestamp = 0.0
+
+        if self.state:
+            timestamp = self.state.time
+            engine_state_dict = {
+                "q": self.state.q.copy(),
+                "v": self.state.v.copy(),
+                "a": self.state.a.copy(),
+                "tau": self.state.tau.copy(),
+                "t": self.state.time,
+            }
+        else:
+            # Fallback if state is managed differently
+            try:
+                timestamp = self.get_time()
+                engine_state_dict = self.get_full_state()
+            except (NotImplementedError, AttributeError):
+                pass
+
+        return StateCheckpoint(
+            timestamp=timestamp,
+            engine_state=engine_state_dict,
+        )
+
+    @require_state(lambda self: self._is_initialized, "initialized")
+    def restore_checkpoint(self, checkpoint: StateCheckpoint) -> None:
+        """Restore engine state from a checkpoint.
+
+        Args:
+            checkpoint: Checkpoint to restore from.
+        """
+        if not checkpoint.engine_state:
+            return
+
+        data = checkpoint.engine_state
+        q = data.get("q")
+        v = data.get("v")
+
+        if q is not None and v is not None:
+            nq = len(q)
+            nv = len(v)
+            new_state = EngineState(nq, nv)
+            new_state.q = np.array(q)
+            new_state.v = np.array(v)
+            new_state.time = data.get("t", checkpoint.timestamp)
+
+            if "a" in data:
+                new_state.a = np.array(data["a"])
+            if "tau" in data:
+                new_state.tau = np.array(data["tau"])
+
+            self.set_state(new_state)
 
     def __repr__(self) -> str:
         """String representation of engine."""

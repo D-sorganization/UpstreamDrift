@@ -271,6 +271,7 @@ class AerodynamicsCalculator:
         Returns:
             Drag coefficient (dimensionless)
         """
+        speed = float(speed)
         # Reynolds number
         Re = self.air.density * speed * (2 * self.ball.radius) / self.air.viscosity
 
@@ -294,6 +295,7 @@ class AerodynamicsCalculator:
         Returns:
             Lift coefficient (dimensionless)
         """
+        spin_ratio = float(spin_ratio)
         # Empirical relationship (Smits & Ogg)
         # Cl increases with spin ratio, saturating at high spin
         Cl_max = 0.4
@@ -308,6 +310,7 @@ class AerodynamicsCalculator:
         Returns:
             Magnus coefficient (dimensionless)
         """
+        spin_param = float(spin_param)
         # Robins-Magnus effect coefficient
         # Approximately linear for small spin_param
         return 0.4 * min(spin_param, 0.5)
@@ -322,7 +325,8 @@ class AerodynamicsCalculator:
         Returns:
             Spin ratio = ωR/v
         """
-        spin_mag = np.linalg.norm(spin)
+        speed = float(speed)
+        spin_mag = float(np.linalg.norm(spin))
         return self.ball.radius * spin_mag / (speed + 1e-10)
 
 

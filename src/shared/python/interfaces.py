@@ -27,9 +27,11 @@ from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
 
+from src.shared.python.checkpoint import Checkpointable
+
 
 @runtime_checkable
-class PhysicsEngine(Protocol):
+class PhysicsEngine(Checkpointable, Protocol):
     """Protocol defining the required interface for a Golf Modeling Suite physics engine.
 
     All implementations must be stateless wrappers around a Model/Data pair (or equivalent),

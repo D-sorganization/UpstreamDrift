@@ -66,10 +66,10 @@ class GeminiAdapter(BaseAgentAdapter):
         try:
             chat = self._build_chat_session(context)
             response = chat.send_message(message)
-            return AgentResponse(content=response.text, role="assistant")
+            return AgentResponse(content=response.text)
         except Exception as e:
             logger.error(f"Gemini API error: {e}")
-            return AgentResponse(content=f"Error: {e}", role="assistant")
+            return AgentResponse(content=f"Error: {e}")
 
     def stream_response(
         self,
@@ -94,10 +94,18 @@ class GeminiAdapter(BaseAgentAdapter):
 
     @property
     def capabilities(self) -> ProviderCapabilities:
+        from src.shared.python.ai.types import ProviderCapability
+
         return ProviderCapabilities(
-            streaming=True,
-            function_calling=False,  # Can add later
-            vision=True,  # Gemini supports vision
+            supported=frozenset(
+                {
+                    ProviderCapability.STREAMING,
+                    ProviderCapability.VISION,
+                }
+            ),
+            max_tokens=30720,  # Gemini 1.0 Pro context
+            model_name=self._model_name,
+            provider_name="google",
         )
 
     def validate_connection(self) -> tuple[bool, str]:

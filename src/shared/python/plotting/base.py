@@ -12,7 +12,6 @@ from __future__ import annotations
 from typing import Protocol
 
 import numpy as np
-from matplotlib.figure import Figure
 
 from src.shared.python.logging_config import get_logger
 
@@ -20,25 +19,7 @@ logger = get_logger(__name__)
 
 # Qt backend - optional for headless environments
 try:
-    try:
-        from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg
-    except ImportError:
-        from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-
-    class MplCanvas(FigureCanvasQTAgg):
-        """Matplotlib canvas for embedding in PyQt6."""
-
-        def __init__(self, width: float = 8, height: float = 6, dpi: int = 100) -> None:
-            """Initialize canvas with figure.
-
-            Args:
-                width: Figure width in inches
-                height: Figure height in inches
-                dpi: Dots per inch for rendering
-            """
-            self.fig = Figure(figsize=(width, height), dpi=dpi)
-            super().__init__(self.fig)
-
+    from src.shared.python.ui.qt.plotting import MplCanvas
 except ImportError:
     # Qt not available (e.g., in headless CI environments)
     class MplCanvas:  # type: ignore[no-redef]

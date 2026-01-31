@@ -231,6 +231,7 @@ def generate_summary(
         "category_scores": category_scores_json,
         "group_scores": group_scores,
         "total_issues": len(all_issues),
+        "issues": all_issues,
         "reports_analyzed": len(input_reports),
     }
 
