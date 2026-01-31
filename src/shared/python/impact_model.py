@@ -642,24 +642,26 @@ class ImpactRecorder:
         """
         events_data = []
         for event in self.events:
-            events_data.append({
-                "impact_id": event.impact_id,
-                "timestamp": event.timestamp,
-                "model_type": event.model_type.name,
-                "pre_impact": {
-                    "clubhead_velocity": event.pre_state.clubhead_velocity.tolist(),
-                    "ball_velocity": event.pre_state.ball_velocity.tolist(),
-                    "ball_spin": event.pre_state.ball_angular_velocity.tolist(),
-                },
-                "post_impact": {
-                    "ball_velocity": event.post_state.ball_velocity.tolist(),
-                    "ball_spin": event.post_state.ball_angular_velocity.tolist(),
-                    "clubhead_velocity": event.post_state.clubhead_velocity.tolist(),
-                    "contact_duration": event.post_state.contact_duration,
-                    "energy_transfer": event.post_state.energy_transfer,
-                },
-                "energy_balance": event.energy_balance,
-            })
+            events_data.append(
+                {
+                    "impact_id": event.impact_id,
+                    "timestamp": event.timestamp,
+                    "model_type": event.model_type.name,
+                    "pre_impact": {
+                        "clubhead_velocity": event.pre_state.clubhead_velocity.tolist(),
+                        "ball_velocity": event.pre_state.ball_velocity.tolist(),
+                        "ball_spin": event.pre_state.ball_angular_velocity.tolist(),
+                    },
+                    "post_impact": {
+                        "ball_velocity": event.post_state.ball_velocity.tolist(),
+                        "ball_spin": event.post_state.ball_angular_velocity.tolist(),
+                        "clubhead_velocity": event.post_state.clubhead_velocity.tolist(),
+                        "contact_duration": event.post_state.contact_duration,
+                        "energy_transfer": event.post_state.energy_transfer,
+                    },
+                    "energy_balance": event.energy_balance,
+                }
+            )
 
         return {
             "num_impacts": len(self.events),
@@ -827,8 +829,11 @@ class ImpactSolverAPI:
                 clubhead_angular_velocity=np.zeros(3),
                 clubhead_orientation=np.asarray(clubhead_orientation),
                 ball_position=np.zeros(3),
-                ball_velocity=np.asarray(ball_velocity) if ball_velocity is not None
-                else np.zeros(3),
+                ball_velocity=(
+                    np.asarray(ball_velocity)
+                    if ball_velocity is not None
+                    else np.zeros(3)
+                ),
                 ball_angular_velocity=np.zeros(3),
                 clubhead_mass=clubhead_mass,
             )
@@ -851,15 +856,17 @@ class ImpactSolverAPI:
 
         reports = []
         for event in self.recorder.events:
-            reports.append({
-                "impact_id": event.impact_id,
-                "timestamp": event.timestamp,
-                "ke_pre": event.energy_balance["total_ke_pre"],
-                "ke_post": event.energy_balance["total_ke_post"],
-                "energy_lost": event.energy_balance["energy_lost"],
-                "loss_ratio": event.energy_balance["energy_loss_ratio"],
-                "ball_speed": event.energy_balance["ball_launch_speed"],
-            })
+            reports.append(
+                {
+                    "impact_id": event.impact_id,
+                    "timestamp": event.timestamp,
+                    "ke_pre": event.energy_balance["total_ke_pre"],
+                    "ke_post": event.energy_balance["total_ke_post"],
+                    "energy_lost": event.energy_balance["energy_lost"],
+                    "loss_ratio": event.energy_balance["energy_loss_ratio"],
+                    "ball_speed": event.energy_balance["ball_launch_speed"],
+                }
+            )
 
         # Aggregate statistics
         total_ke_pre = sum(r["ke_pre"] for r in reports)
@@ -871,8 +878,7 @@ class ImpactSolverAPI:
             "total_ke_post": total_ke_post,
             "total_energy_lost": total_ke_pre - total_ke_post,
             "overall_loss_ratio": (
-                (total_ke_pre - total_ke_post) / total_ke_pre
-                if total_ke_pre > 0 else 0
+                (total_ke_pre - total_ke_post) / total_ke_pre if total_ke_pre > 0 else 0
             ),
         }
 
