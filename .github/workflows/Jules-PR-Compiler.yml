@@ -10,7 +10,7 @@ on:
         default: false
         type: boolean
   schedule:
-    - cron: "30 3 * * *"  # Daily at 3:30 AM UTC (overnight schedule)
+    - cron: "0 8 */3 * *"
 
 permissions:
   contents: write

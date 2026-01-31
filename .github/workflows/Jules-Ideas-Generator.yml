@@ -18,7 +18,7 @@ on:
           - simulation
           - control_theory
   schedule:
-    - cron: "0 3 * * 3"  # Wednesdays at 03:00 UTC (within the 00:00–04:00 UTC window)
+    - cron: "0 8 */3 * *"
 
 permissions:
   contents: write
