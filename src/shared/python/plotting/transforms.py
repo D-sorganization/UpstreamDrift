@@ -132,8 +132,6 @@ class DataManager:
             return self.recorder.get_club_induced_acceleration_series(source_name)  # type: ignore
         return np.array([]), np.array([])
 
-    def get_counterfactual_series(
-        self, cf_name: str
-    ) -> tuple[np.ndarray, np.ndarray]:
+    def get_counterfactual_series(self, cf_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Get counterfactual series (uncached)."""
         return self.recorder.get_counterfactual_series(cf_name)

@@ -652,9 +652,7 @@ class KineticsRenderer(BaseRenderer):
                     continue
 
             try:
-                times_c, acc_c = self.data.get_induced_acceleration_series(
-                    "control"
-                )
+                times_c, acc_c = self.data.get_induced_acceleration_series("control")
                 if len(times_c) > 0 and acc_c.size > 0 and joint_idx < acc_c.shape[1]:
                     ax.plot(
                         times_c,

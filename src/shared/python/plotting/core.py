@@ -105,7 +105,9 @@ class GolfSwingPlotter:
         ax: Axes | None = None,
     ) -> None:
         """Plot Angle-Angle diagram (Cyclogram) for two joints."""
-        self.kinematics.plot_angle_angle_diagram(fig, joint_idx_1, joint_idx_2, title, ax)
+        self.kinematics.plot_angle_angle_diagram(
+            fig, joint_idx_1, joint_idx_2, title, ax
+        )
 
     def plot_phase_diagram(self, fig: Figure, joint_idx: int = 0) -> None:
         """Plot phase diagram (angle vs angular velocity) for a joint."""
@@ -197,9 +199,7 @@ class GolfSwingPlotter:
         """Plot dynamic (time-varying) stiffness with R² quality metric."""
         self.kinetics.plot_dynamic_stiffness(fig, joint_idx, window_size)
 
-    def plot_activation_heatmap(
-        self, fig: Figure, data_type: str = "torque"
-    ) -> None:
+    def plot_activation_heatmap(self, fig: Figure, data_type: str = "torque") -> None:
         """Plot activation heatmap (Joints vs Time)."""
         self.kinetics.plot_activation_heatmap(fig, data_type)
 
@@ -390,9 +390,7 @@ class GolfSwingPlotter:
         analyzer_result: Any | None = None,
     ) -> None:
         """Plot kinematic sequence (normalized velocities)."""
-        self.coordination.plot_kinematic_sequence(
-            fig, segment_indices, analyzer_result
-        )
+        self.coordination.plot_kinematic_sequence(fig, segment_indices, analyzer_result)
 
     def plot_kinematic_sequence_bars(
         self,
@@ -405,9 +403,7 @@ class GolfSwingPlotter:
             fig, segment_indices, impact_time
         )
 
-    def plot_x_factor_cycle(
-        self, fig: Figure, shoulder_idx: int, hip_idx: int
-    ) -> None:
+    def plot_x_factor_cycle(self, fig: Figure, shoulder_idx: int, hip_idx: int) -> None:
         """Plot X-Factor Cycle (Stretch-Shortening Cycle)."""
         self.coordination.plot_x_factor_cycle(fig, shoulder_idx, hip_idx)
 
@@ -415,9 +411,7 @@ class GolfSwingPlotter:
         """Plot extracted muscle synergies (Weights and Activations)."""
         self.coordination.plot_muscle_synergies(fig, synergy_result)
 
-    def plot_correlation_matrix(
-        self, fig: Figure, data_type: str = "velocity"
-    ) -> None:
+    def plot_correlation_matrix(self, fig: Figure, data_type: str = "velocity") -> None:
         """Plot correlation matrix between joints."""
         self.coordination.plot_correlation_matrix(fig, data_type)
 
