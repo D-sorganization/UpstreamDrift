@@ -571,6 +571,8 @@ class EndEffectorManagerWidget(QWidget):
         self.current_end_effectors = []
 
         for name in links.keys():
+            if name is None:
+                continue
             is_leaf = name in end_effector_names
             has_hint = any(hint in name.lower() for hint in ee_hints)
 
@@ -751,7 +753,7 @@ class EndEffectorManagerWidget(QWidget):
         from PyQt6.QtWidgets import QInputDialog
 
         item, ok = QInputDialog.getItem(self, title, label, items, 0, False)
-        return item, ok
+        return item, bool(ok)
 
     def _on_attach_end_effector(self) -> None:
         """Attach selected library EE to the model."""

@@ -30,7 +30,10 @@ Usage:
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
+# Use timezone.utc for compatibility
+UTC = timezone.utc
 from typing import Literal
 
 # ============================================================================

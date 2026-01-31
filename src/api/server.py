@@ -29,7 +29,12 @@ from src.shared.python.video_pose_pipeline import (
     VideoProcessingConfig,
 )
 
-from .config import get_allowed_hosts, get_cors_origins
+from .config import (
+    get_allowed_hosts,
+    get_cors_origins,
+    get_server_host,
+    get_server_port,
+)
 from .database import init_db
 from .middleware.security_headers import add_security_headers
 from .middleware.upload_limits import validate_upload_size
@@ -264,8 +269,8 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "api.server:app",
-        host="0.0.0.0",
-        port=8000,
+        host=get_server_host(),
+        port=get_server_port(),
         reload=enable_reload,
         log_level="info",
     )

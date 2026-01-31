@@ -45,10 +45,19 @@ from src.shared.python.ai.types import (
 
 logger = get_logger(__name__)
 
-# Anthropic configuration defaults
-ANTHROPIC_DEFAULT_MODEL = "claude-3-sonnet-20240229"
-ANTHROPIC_DEFAULT_TIMEOUT = 60.0  # [s]
-ANTHROPIC_MAX_TOKENS = 200000  # Claude 3 context window
+# Import centralized configuration
+from src.shared.python.ai.config import (
+    DEFAULT_ANTHROPIC_MAX_TOKENS,
+    DEFAULT_ANTHROPIC_MODEL,
+    DEFAULT_ANTHROPIC_TIMEOUT,
+    get_anthropic_model,
+    get_anthropic_timeout,
+)
+
+# Backwards compatibility aliases
+ANTHROPIC_DEFAULT_MODEL = DEFAULT_ANTHROPIC_MODEL
+ANTHROPIC_DEFAULT_TIMEOUT = DEFAULT_ANTHROPIC_TIMEOUT
+ANTHROPIC_MAX_TOKENS = DEFAULT_ANTHROPIC_MAX_TOKENS
 
 
 class AnthropicAdapter(BaseAgentAdapter):
@@ -78,19 +87,23 @@ class AnthropicAdapter(BaseAgentAdapter):
     def __init__(
         self,
         api_key: str,
-        model: str = ANTHROPIC_DEFAULT_MODEL,
-        timeout: float = ANTHROPIC_DEFAULT_TIMEOUT,
+        model: str | None = None,
+        timeout: float | None = None,
     ) -> None:
         """Initialize Anthropic adapter.
 
+        Configuration is loaded from environment variables if not provided:
+            - ANTHROPIC_MODEL: Model name (default: claude-3-sonnet-20240229)
+            - ANTHROPIC_TIMEOUT: Timeout in seconds (default: 60.0)
+
         Args:
-            api_key: Anthropic API key.
-            model: Model name. Default: claude-3-sonnet-20240229
-            timeout: Request timeout [s]. Default: 60.0
+            api_key: Anthropic API key (required).
+            model: Model name. Uses ANTHROPIC_MODEL env var or default.
+            timeout: Request timeout [s]. Uses ANTHROPIC_TIMEOUT env var or default.
         """
         self._api_key = api_key
-        self._model = model
-        self._timeout = timeout
+        self._model = model or get_anthropic_model()
+        self._timeout = timeout if timeout is not None else get_anthropic_timeout()
         self._client: Any = None  # Lazy-loaded Anthropic client
 
         logger.info("Initialized AnthropicAdapter: model=%s", self._model)

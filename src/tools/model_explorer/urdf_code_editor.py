@@ -125,8 +125,10 @@ class XMLHighlighter(QSyntaxHighlighter):
             (QRegularExpression(r'"[\d\s\.\-e+]+(?=")|[\d\.]+'), number_format)
         )
 
-    def highlightBlock(self, text: str) -> None:
+    def highlightBlock(self, text: str | None) -> None:
         """Apply highlighting rules to a block of text."""
+        if text is None:
+            return
         for pattern, fmt in self.highlighting_rules:
             match_iterator = pattern.globalMatch(text)
             while match_iterator.hasNext():
@@ -295,7 +297,8 @@ class URDFCodeEditor(QPlainTextEdit):
                 0, rect.y(), self.line_number_area.width(), rect.height()
             )
 
-        if rect.contains(self.viewport().rect()):
+        viewport = self.viewport()
+        if viewport and rect.contains(viewport.rect()):
             self.update_line_number_area_width(0)
 
     def resizeEvent(self, event: Any) -> None:
@@ -338,7 +341,8 @@ class URDFCodeEditor(QPlainTextEdit):
 
     def keyPressEvent(self, event: Any) -> None:
         """Handle key press events for auto-completion."""
-        if self.completer.popup().isVisible():
+        popup = self.completer.popup()
+        if popup and popup.isVisible():
             if event.key() in (
                 Qt.Key.Key_Enter,
                 Qt.Key.Key_Return,
@@ -353,20 +357,22 @@ class URDFCodeEditor(QPlainTextEdit):
 
         # Trigger completion on typing
         completion_prefix = self._get_completion_prefix()
+        popup = self.completer.popup()
+        model = self.completer.completionModel()
         if len(completion_prefix) >= 2:
             if completion_prefix != self.completer.completionPrefix():
                 self.completer.setCompletionPrefix(completion_prefix)
-                popup = self.completer.popup()
-                popup.setCurrentIndex(self.completer.completionModel().index(0, 0))
+                if popup and model:
+                    popup.setCurrentIndex(model.index(0, 0))
 
             cr = self.cursorRect()
-            cr.setWidth(
-                self.completer.popup().sizeHintForColumn(0)
-                + self.completer.popup().verticalScrollBar().sizeHint().width()
-            )
+            if popup:
+                scrollbar = popup.verticalScrollBar()
+                scrollbar_width = scrollbar.sizeHint().width() if scrollbar else 0
+                cr.setWidth(popup.sizeHintForColumn(0) + scrollbar_width)
             self.completer.complete(cr)
-        else:
-            self.completer.popup().hide()
+        elif popup:
+            popup.hide()
 
     def _get_completion_prefix(self) -> str:
         """Get the current word being typed for completion."""
@@ -505,7 +511,10 @@ class URDFCodeEditor(QPlainTextEdit):
 
     def go_to_line(self, line: int) -> None:
         """Move cursor to a specific line."""
-        block = self.document().findBlockByLineNumber(line - 1)
+        doc = self.document()
+        if doc is None:
+            return
+        block = doc.findBlockByLineNumber(line - 1)
         cursor = self.textCursor()
         cursor.setPosition(block.position())
         self.setTextCursor(cursor)

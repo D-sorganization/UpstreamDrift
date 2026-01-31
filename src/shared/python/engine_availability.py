@@ -146,7 +146,7 @@ except ImportError:
 
 # Check PyYAML
 try:
-    import yaml  # noqa: F401
+    import yaml  # type: ignore  # noqa: F401
 
     YAML_AVAILABLE = True
 except ImportError:
@@ -421,7 +421,7 @@ except ImportError:
 
 # Check requests
 try:
-    import requests  # noqa: F401
+    import requests  # type: ignore  # noqa: F401
 
     REQUESTS_AVAILABLE = True
 except ImportError:
