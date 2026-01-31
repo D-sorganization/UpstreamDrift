@@ -159,9 +159,7 @@ def main():
 
     # Append General Assessment Summary
     md.append("### General Assessment (Categories A-O)")
-    md.append(
-        "See individual `docs/assessments/Assessment_X_Category.md` files for details."
-    )
+    md.append("See individual `docs/assessments/Assessment_X_Category.md` files for details.")
     md.append("")
 
     # Reconstruct the table from general data
