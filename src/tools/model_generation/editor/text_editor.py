@@ -247,14 +247,14 @@ class URDFTextEditor:
         self._add_to_history(description)
 
         # Notify change callbacks
-        for callback in self._change_callbacks:
-            callback(content)
+        for change_callback in self._change_callbacks:
+            change_callback(content)
 
-        messages = []
+        messages: list[ValidationMessage] = []
         if validate:
             messages = self.validate()
-            for callback in self._validation_callbacks:
-                callback(messages)
+            for validation_callback in self._validation_callbacks:
+                validation_callback(messages)
 
         return messages
 
@@ -399,7 +399,7 @@ class URDFTextEditor:
 
     def _validate_urdf(self) -> list[ValidationMessage]:
         """Validate URDF-specific rules."""
-        messages = []
+        messages: list[ValidationMessage] = []
 
         try:
             root = ET.fromstring(self._content)
@@ -633,9 +633,9 @@ class URDFTextEditor:
             if link_name not in child_links:
                 # This might be the root link
                 is_parent = any(
-                    j.find("parent").get("link") == link_name
+                    (parent := j.find("parent")) is not None
+                    and parent.get("link") == link_name
                     for j in root.findall("joint")
-                    if j.find("parent") is not None
                 )
                 if not is_parent and len(links) > 1:
                     messages.append(
@@ -735,8 +735,8 @@ class URDFTextEditor:
         unified_diff = "".join(diff_lines)
 
         # Parse hunks
-        hunks = []
-        current_hunk_lines = []
+        hunks: list[DiffHunk] = []
+        current_hunk_lines: list[str] = []
         old_start, old_count, new_start, new_count = 0, 0, 0, 0
         additions = 0
         deletions = 0
@@ -824,7 +824,7 @@ class URDFTextEditor:
 
         differ = difflib.SequenceMatcher(None, original_lines, modified_lines)
 
-        result = []
+        result: list[tuple[str | None, str | None, str]] = []
         for opcode, i1, i2, j1, j2 in differ.get_opcodes():
             if opcode == "equal":
                 for i, j in zip(range(i1, i2), range(j1, j2), strict=False):

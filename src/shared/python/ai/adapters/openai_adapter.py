@@ -22,12 +22,15 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING, Any
 
-from src.shared.python.logging_config import get_logger
-
-if TYPE_CHECKING:
-    from collections.abc import Iterator
-
 from src.shared.python.ai.adapters.base import BaseAgentAdapter, ToolDeclaration
+from src.shared.python.ai.config import (
+    DEFAULT_OPENAI_MAX_TOKENS,
+    DEFAULT_OPENAI_MODEL,
+    DEFAULT_OPENAI_TIMEOUT,
+    get_openai_model,
+    get_openai_organization,
+    get_openai_timeout,
+)
 from src.shared.python.ai.exceptions import (
     AIConnectionError,
     AIProviderError,
@@ -42,13 +45,17 @@ from src.shared.python.ai.types import (
     ProviderCapability,
     ToolCall,
 )
+from src.shared.python.logging_config import get_logger
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 logger = get_logger(__name__)
 
-# OpenAI configuration defaults
-OPENAI_DEFAULT_MODEL = "gpt-4-turbo-preview"
-OPENAI_DEFAULT_TIMEOUT = 60.0  # [s]
-OPENAI_MAX_TOKENS = 128000  # GPT-4 Turbo context window
+# Backwards compatibility aliases
+OPENAI_DEFAULT_MODEL = DEFAULT_OPENAI_MODEL
+OPENAI_DEFAULT_TIMEOUT = DEFAULT_OPENAI_TIMEOUT
+OPENAI_MAX_TOKENS = DEFAULT_OPENAI_MAX_TOKENS
 
 
 class OpenAIAdapter(BaseAgentAdapter):
@@ -80,22 +87,27 @@ class OpenAIAdapter(BaseAgentAdapter):
     def __init__(
         self,
         api_key: str,
-        model: str = OPENAI_DEFAULT_MODEL,
-        timeout: float = OPENAI_DEFAULT_TIMEOUT,
+        model: str | None = None,
+        timeout: float | None = None,
         organization: str | None = None,
     ) -> None:
         """Initialize OpenAI adapter.
 
+        Configuration is loaded from environment variables if not provided:
+            - OPENAI_MODEL: Model name (default: gpt-4-turbo-preview)
+            - OPENAI_TIMEOUT: Timeout in seconds (default: 60.0)
+            - OPENAI_ORGANIZATION: Organization ID (optional)
+
         Args:
-            api_key: OpenAI API key.
-            model: Model name. Default: gpt-4-turbo-preview
-            timeout: Request timeout [s]. Default: 60.0
-            organization: Optional OpenAI organization ID.
+            api_key: OpenAI API key (required).
+            model: Model name. Uses OPENAI_MODEL env var or default.
+            timeout: Request timeout [s]. Uses OPENAI_TIMEOUT env var or default.
+            organization: Organization ID. Uses OPENAI_ORGANIZATION env var if not set.
         """
         self._api_key = api_key
-        self._model = model
-        self._timeout = timeout
-        self._organization = organization
+        self._model = model or get_openai_model()
+        self._timeout = timeout if timeout is not None else get_openai_timeout()
+        self._organization = organization or get_openai_organization()
         self._client: Any = None  # Lazy-loaded OpenAI client
 
         logger.info("Initialized OpenAIAdapter: model=%s", self._model)

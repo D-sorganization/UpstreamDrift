@@ -236,7 +236,7 @@ class MJCFConverter:
         indent_level: int,
     ) -> list[str]:
         """Recursively build body element."""
-        lines = []
+        lines: list[str] = []
         indent = "  " * indent_level
 
         link = model.get_link(link_name)
@@ -374,9 +374,9 @@ class MJCFConverter:
         """Parse MJCF into ParsedModel."""
         model_name = root.get("model", "mjcf_model")
 
-        links = []
-        joints = []
-        materials = {}
+        links: list[Link] = []
+        joints: list[Joint] = []
+        materials: dict[str, Any] = {}
 
         # Parse assets
         asset_elem = root.find("asset")

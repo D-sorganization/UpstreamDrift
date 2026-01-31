@@ -111,7 +111,7 @@ class LocalRepository(Repository):
 
     def list_models(self) -> list[RepositoryModel]:
         """List all URDF models in the directory."""
-        models = []
+        models: list[RepositoryModel] = []
 
         if not self._path.exists():
             return models

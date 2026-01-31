@@ -426,7 +426,8 @@ class ConversationContext:
         Returns:
             Loaded context, or new context if file not found.
         """
-        if not path.exists():
+        path_obj = Path(path) if isinstance(path, str) else path
+        if not path_obj.exists():
             return cls()
 
         try:

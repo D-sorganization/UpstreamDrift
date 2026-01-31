@@ -63,7 +63,7 @@ class EditorState:
     """State of the Frankenstein editor for undo/redo."""
 
     models: dict[str, ParsedModel]
-    clipboard: list[ComponentReference]
+    clipboard: list[tuple[ComponentType, list[Link], list[Joint], dict[str, Material]]]
     operation_history: list[PendingOperation]
     timestamp: float = 0.0
 
@@ -1382,7 +1382,7 @@ class FrankensteinEditor:
 
         total_mass = sum(link.inertia.mass for link in model.links)
 
-        joint_types = {}
+        joint_types: dict[str, int] = {}
         for j in model.joints:
             jt = j.joint_type.value
             joint_types[jt] = joint_types.get(jt, 0) + 1

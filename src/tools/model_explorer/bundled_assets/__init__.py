@@ -30,7 +30,7 @@ try:
     from src.shared.python.logging_config import get_logger
 except ImportError:
     # Fallback if logging module not available
-    def get_logger(name: str) -> logging.Logger:
+    def get_logger(name: str | None = None) -> logging.Logger:
         return logging.getLogger(name)
 
 

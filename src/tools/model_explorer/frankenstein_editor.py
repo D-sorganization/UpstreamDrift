@@ -137,7 +137,7 @@ class URDFModel:
             The name used for the link
         """
         link_copy = copy.deepcopy(link)
-        name = new_name or link_copy.get("name", "unnamed_link")
+        name = new_name or link_copy.get("name") or "unnamed_link"
 
         # Ensure unique name
         original_name = name
@@ -168,7 +168,7 @@ class URDFModel:
             The name used for the joint
         """
         joint_copy = copy.deepcopy(joint)
-        name = new_name or joint_copy.get("name", "unnamed_joint")
+        name = new_name or joint_copy.get("name") or "unnamed_joint"
 
         # Ensure unique name
         original_name = name
@@ -268,20 +268,20 @@ class ModelPanel(QWidget):
         layout = QVBoxLayout(self)
 
         # Header
-        header = QHBoxLayout()
+        header_layout = QHBoxLayout()
         self.title_label = QLabel(self.title)
         self.title_label.setStyleSheet("font-weight: bold; font-size: 14px;")
-        header.addWidget(self.title_label)
+        header_layout.addWidget(self.title_label)
 
         self.load_btn = QPushButton("Load URDF")
         self.new_btn = QPushButton("New")
         self.save_btn = QPushButton("Save")
         self.save_btn.setEnabled(False)
 
-        header.addWidget(self.load_btn)
-        header.addWidget(self.new_btn)
-        header.addWidget(self.save_btn)
-        layout.addLayout(header)
+        header_layout.addWidget(self.load_btn)
+        header_layout.addWidget(self.new_btn)
+        header_layout.addWidget(self.save_btn)
+        layout.addLayout(header_layout)
 
         # File info
         self.file_label = QLabel("No file loaded")
