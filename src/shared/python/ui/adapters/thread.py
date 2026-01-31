@@ -240,14 +240,25 @@ class QtWorker(BackgroundWorker):
 
                 def run(self) -> None:
                     try:
+                        # Check for cancellation before starting
+                        if self._cancelled or self.isInterruptionRequested():
+                            return
                         result = self._target(*self._args, **self._kwargs)
-                        self.finished_signal.emit(result)
+                        # Check for cancellation before emitting result
+                        if not self._cancelled and not self.isInterruptionRequested():
+                            self.finished_signal.emit(result)
                     except Exception as e:
-                        self.error_signal.emit(e)
+                        if not self._cancelled and not self.isInterruptionRequested():
+                            self.error_signal.emit(e)
 
                 def cancel(self) -> None:
                     self._cancelled = True
                     self.requestInterruption()
+
+                @property
+                def is_cancelled(self) -> bool:
+                    """Check if cancellation was requested."""
+                    return self._cancelled or self.isInterruptionRequested()
 
             self._qthread = WorkerThread(target, args, kwargs or {})
             self._qthread.finished_signal.connect(self._handle_complete)

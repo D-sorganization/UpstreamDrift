@@ -151,9 +151,12 @@ function ClubTrajectory({ frames }: { frames?: SimulationFrame[] }) {
 }
 
 export function Scene3D({ engine, frame, frames }: Props) {
+  // Note: Using a stable key instead of key={engine} to avoid expensive Canvas recreation
+  // on engine changes. The Canvas persists and scene content updates based on new data.
+  // If a full reset is needed when switching engines, consider resetting frame/frames state
+  // in the parent component instead of remounting the entire Canvas.
   return (
     <Canvas
-      key={engine}
       camera={{ position: [3, 2, 3], fov: 50 }}
       className="bg-gray-900 w-full h-full"
     >

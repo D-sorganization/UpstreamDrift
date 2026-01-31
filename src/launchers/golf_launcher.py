@@ -36,7 +36,7 @@ from src.shared.python.logging_config import configure_gui_logging, get_logger
 if TYPE_CHECKING:
     from src.shared.python.ui import ToastManager
 
-from PyQt6.QtCore import Qt, QTimer, QUrl
+from PyQt6.QtCore import QEventLoop, Qt, QTimer, QUrl
 from PyQt6.QtGui import (
     QCloseEvent,
     QDesktopServices,
@@ -810,8 +810,20 @@ except Exception as e:
         self._save_layout()
 
         # Stop cleanup timer
-        if hasattr(self, "cleanup_timer"):
+        if hasattr(self, "cleanup_timer") and self.cleanup_timer is not None:
             self.cleanup_timer.stop()
+            self.cleanup_timer.deleteLater()
+            self.cleanup_timer = None
+
+        # Clean up docker checker thread
+        if hasattr(self, "docker_checker") and self.docker_checker is not None:
+            try:
+                self.docker_checker.result.disconnect(self.on_docker_check_complete)
+            except (TypeError, RuntimeError):
+                pass
+            if self.docker_checker.isRunning():
+                self.docker_checker.wait(1000)
+            self.docker_checker = None
 
         # Terminate running processes
         for key, process in list(self.running_processes.items()):
@@ -1451,7 +1463,8 @@ python "{wsl_path}" {' '.join(args or [])}
         """Selects and immediately launches the model (for double-click)."""
         self.select_model(model_id)
         # Process events to ensure UI updates before launch
-        QApplication.processEvents()
+        # Use ExcludeUserInputEvents to prevent re-entrancy from user clicks
+        QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
         self.launch_simulation()
 
     def _launch_urdf_generator(self) -> None:
@@ -1470,7 +1483,7 @@ python "{wsl_path}" {' '.join(args or [])}
 
         self.lbl_status.setText("> Launching URDF Generator...")
         self.lbl_status.setStyleSheet("color: #FFD60A;")
-        QApplication.processEvents()
+        QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
 
         try:
             logger.info("Launching URDF Generator: %s", script_path)
@@ -1754,14 +1767,15 @@ python "{wsl_path}" {' '.join(args or [])}
     def check_docker(self) -> None:
         """Start the docker check thread."""
         logger.info("Checking Docker status...")
-        # Since we moved DockerCheckThread to ui_components, we need to import or reimplement?
-        # Actually it's part of StartupWorker.
-        # But if we need standalone check:
-        # We can use a simple QThread here or use AsyncStartupWorker again?
-        # Let's verify if DockerCheckThread is in ui_components. It is not.
-        # But AsyncStartupWorker does check docker.
+        # Clean up any existing docker checker thread
+        if hasattr(self, "docker_checker") and self.docker_checker is not None:
+            if self.docker_checker.isRunning():
+                self.docker_checker.wait(1000)  # Wait up to 1 second
+            try:
+                self.docker_checker.result.disconnect(self.on_docker_check_complete)
+            except (TypeError, RuntimeError):
+                pass
 
-        # Let's perform a lightweight threaded check inline since it's simple
         self.docker_checker = DockerCheckThread()
         self.docker_checker.result.connect(self.on_docker_check_complete)
         self.docker_checker.start()
@@ -1920,7 +1934,7 @@ Expected tiles: {summary['expected_tiles']}
         if use_docker and self.docker_available:
             self.lbl_status.setText(f"> Launching {model.name} in Docker...")
             self.lbl_status.setStyleSheet("color: #64b5f6;")
-            QApplication.processEvents()
+            QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
 
             try:
                 repo_path = getattr(model, "path", None)
@@ -1943,7 +1957,7 @@ Expected tiles: {summary['expected_tiles']}
         if not use_wsl:
             self.lbl_status.setText(f"> Checking {model.name} dependencies...")
             self.lbl_status.setStyleSheet("color: #FFD60A;")
-            QApplication.processEvents()
+            QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
 
             # Check dependencies before launching
             deps_ok, deps_error = self._check_module_dependencies(model.type)
@@ -1967,7 +1981,7 @@ Expected tiles: {summary['expected_tiles']}
                 return
 
         self.lbl_status.setText(f"> Launching {model.name}...")
-        QApplication.processEvents()
+        QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
 
         try:
             # Determine launch strategy
@@ -2494,13 +2508,16 @@ def main() -> None:
     # Start async loading
     worker = AsyncStartupWorker(REPOS_ROOT)
 
-    # Create main window but don't show yet
-    # We pass the worker reference so it can be cleaned up
+    # Keep a reference to prevent garbage collection
+    main_window = None
 
     def on_startup_finished(results: StartupResults) -> None:
-        window = GolfLauncher(results)
-        window.show()
-        splash.finish(window)
+        nonlocal main_window
+        main_window = GolfLauncher(results)
+        main_window.show()
+        splash.finish(main_window)
+        # Clean up worker after startup is complete
+        worker.wait(1000)  # Wait for worker to finish
 
     def on_startup_progress(msg: str, percent: int) -> None:
         splash.show_message(msg, percent)
