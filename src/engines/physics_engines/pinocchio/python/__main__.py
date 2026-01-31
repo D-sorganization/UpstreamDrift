@@ -23,4 +23,4 @@ from src.engines.physics_engines.pinocchio.python.pinocchio_physics_engine impor
 from src.shared.python.dashboard.launcher import launch_dashboard
 
 if __name__ == "__main__":
-    launch_dashboard(PinocchioPhysicsEngine, title="Pinocchio Physics Engine")
+    launch_dashboard(PinocchioPhysicsEngine, title="Pinocchio Physics Engine")  # type: ignore[type-abstract]

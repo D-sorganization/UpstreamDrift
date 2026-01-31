@@ -74,7 +74,7 @@ def count_test_files(root: Path | str = ".") -> int:
     """Standardized count of test files using common naming patterns."""
     root_path = Path(root)
     patterns = ["**/test_*.py", "**/*_test.py", "**/tests/*.py"]
-    test_files = set()
+    test_files: set[Path] = set()
     for p in patterns:
         test_files.update(root_path.glob(p))
     return len(test_files)
@@ -87,6 +87,37 @@ def run_tool_check(cmd: list[str]) -> dict[str, Any]:
         return {"exit_code": res.returncode, "stdout": res.stdout, "stderr": res.stderr}
     except FileNotFoundError:
         return {"exit_code": -1, "stdout": "", "stderr": f"{cmd[0]} not found"}
+
+
+def run_command(
+    cmd: list[str],
+    cwd: Path | str | None = None,
+    logger: logging.Logger | None = None,
+) -> subprocess.CompletedProcess[str]:
+    """Execute a command and return the result.
+
+    Args:
+        cmd: Command to run as a list of strings
+        cwd: Optional working directory for the command
+        logger: Optional logger for output
+
+    Returns:
+        subprocess.CompletedProcess with returncode, stdout, stderr
+
+    Raises:
+        FileNotFoundError: If the command is not found
+    """
+    if logger:
+        logger.debug(f"Running command: {' '.join(cmd)}")
+
+    result = subprocess.run(cmd, capture_output=True, text=True, check=False, cwd=cwd)
+
+    if logger and result.stdout:
+        logger.debug(result.stdout)
+    if logger and result.stderr and result.returncode != 0:
+        logger.error(result.stderr)
+
+    return result
 
 
 def check_docs_status(root: Path | str = ".") -> dict[str, bool]:
