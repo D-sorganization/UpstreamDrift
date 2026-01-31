@@ -25,7 +25,7 @@ def test_create_joint_coupling_task(mock_pinocchio_env):
     # This is the mocked pinocchio
     import pinocchio as pin  # noqa: I001
 
-    from engines.physics_engines.pinocchio.python.dtack.ik.tasks import (
+    from engines.physics_engines.pinocchio.python.dtack.ik.tasks import (  # noqa: I001
         create_joint_coupling_task,
     )
 
