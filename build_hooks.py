@@ -35,7 +35,7 @@ class UIBuildHook(BuildHookInterface):
             try:
                 # Install dependencies
                 subprocess.run(
-                    [npm_cmd, "ci"],
+                    [npm_cmd, "install"],
                     cwd=str(ui_dir),
                     check=True,
                     capture_output=True,
