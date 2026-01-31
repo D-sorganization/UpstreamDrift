@@ -23,14 +23,14 @@ _project_root = (
 if str(_project_root) not in sys.path:
     sys.path.insert(0, str(_project_root))
 
-from src.shared.python.logging_config import get_logger
-from src.shared.python.pose_editor.core import (
+from src.shared.python.logging_config import get_logger  # noqa: E402
+from src.shared.python.pose_editor.core import (  # noqa: E402
     BasePoseEditor,
     JointInfo,
     JointType,
 )
-from src.shared.python.pose_editor.library import PoseLibrary, StoredPose
-from src.shared.python.pose_editor.widgets import (
+from src.shared.python.pose_editor.library import PoseLibrary, StoredPose  # noqa: E402
+from src.shared.python.pose_editor.widgets import (  # noqa: E402
     GravityControlWidget,
     JointSliderWidget,
     PoseLibraryWidget,
@@ -684,7 +684,7 @@ class PinocchioPoseEditorTab(QtWidgets.QWidget):  # type: ignore[misc]
         positions = self._editor.get_all_positions()
         velocities = self._editor.get_all_velocities()
 
-        named_positions = {}
+        named_positions: dict[str, float | list[float]] = {}
         for joint in self._editor.get_joint_info():
             if joint.is_single_dof():
                 named_positions[joint.name] = float(positions[joint.position_index])

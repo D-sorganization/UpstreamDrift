@@ -5,6 +5,7 @@ Provides reusable widgets for pose manipulation across all physics engines.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -90,6 +91,7 @@ class JointSliderWidget(QtWidgets.QWidget):  # type: ignore[misc]
         upper = self.joint_info.upper_limit
         if isinstance(lower, np.ndarray):
             lower = float(lower[0])
+        if isinstance(upper, np.ndarray):
             upper = float(upper[0])
 
         self.slider.setMinimum(int(lower * self.SLIDER_SCALE))
@@ -269,6 +271,9 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
 
         super().__init__("Pose Library", parent)
         self.library = library
+        # Callback functions that can be set externally
+        self._save_pose_callback: Callable[[str, str], None] | None = None
+        self._preset_load_callback: Callable[[str, dict[str, Any]], None] | None = None
         self._setup_ui()
         self._refresh_pose_list()
 
@@ -411,22 +416,23 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
             if reply != QtWidgets.QMessageBox.StandardButton.Yes:
                 return
 
-        # This will be connected externally to actually save the pose
-        self.save_pose_requested(name, self.txt_description.text().strip())
+        # Call the callback if set
+        if self._save_pose_callback:
+            self._save_pose_callback(name, self.txt_description.text().strip())
 
         self.txt_pose_name.clear()
         self.txt_description.clear()
         self._refresh_pose_list()
 
-    def save_pose_requested(self, name: str, description: str) -> None:
-        """Override this to handle pose saving.
+    def set_save_pose_callback(
+        self, callback: Callable[[str, str], None] | None
+    ) -> None:
+        """Set the callback for saving poses.
 
         Args:
-            name: Pose name
-            description: Pose description
+            callback: Function called with (name, description) when saving
         """
-        # Default implementation does nothing
-        # Should be connected to editor to get current positions
+        self._save_pose_callback = callback
 
     def _on_load_pose(self) -> None:
         """Handle load pose button click."""
@@ -539,17 +545,18 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
             return
 
         preset_data = get_preset_pose(preset_name)
-        if preset_data:
-            # Emit the preset data for the editor to apply
-            self.preset_load_requested(preset_name, preset_data)
+        if preset_data and self._preset_load_callback:
+            self._preset_load_callback(preset_name, preset_data)
 
-    def preset_load_requested(self, name: str, data: dict[str, Any]) -> None:
-        """Override this to handle preset loading.
+    def set_preset_load_callback(
+        self, callback: Callable[[str, dict[str, Any]], None] | None
+    ) -> None:
+        """Set the callback for loading presets.
 
         Args:
-            name: Preset name
-            data: Preset joint values
+            callback: Function called with (name, data) when loading preset
         """
+        self._preset_load_callback = callback
 
     def refresh(self) -> None:
         """Refresh the pose list from the library."""
@@ -582,7 +589,7 @@ class PoseEditorWidget(QtWidgets.QWidget):  # type: ignore[misc]
         super().__init__(parent)
         self._editor = editor
         self._joint_widgets: dict[int, JointSliderWidget] = {}
-        self._library = None
+        self._library: PoseLibrary | None = None
 
         self._setup_ui()
 
@@ -635,8 +642,8 @@ class PoseEditorWidget(QtWidgets.QWidget):  # type: ignore[misc]
         self.library_widget = PoseLibraryWidget(self._library)
         self.library_widget.pose_loaded.connect(self._on_pose_loaded)
         self.library_widget.interpolation_requested.connect(self._on_interpolation)
-        self.library_widget.save_pose_requested = self._save_current_pose
-        self.library_widget.preset_load_requested = self._load_preset
+        self.library_widget.set_save_pose_callback(self._save_current_pose)
+        self.library_widget.set_preset_load_callback(self._load_preset)
         main_layout.addWidget(self.library_widget)
 
         # Zero velocities button

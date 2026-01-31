@@ -13,6 +13,7 @@ Key Features:
 """
 
 from .core import (
+    BasePoseEditor,
     JointInfo,
     JointType,
     PoseEditorInterface,
@@ -25,15 +26,10 @@ from .library import (
     PresetPoseCategory,
     StoredPose,
 )
-from .widgets import (
-    GravityControlWidget,
-    JointSliderWidget,
-    PoseEditorWidget,
-    PoseLibraryWidget,
-)
 
 __all__ = [
     # Core types
+    "BasePoseEditor",
     "JointInfo",
     "JointType",
     "PoseEditorInterface",
@@ -44,9 +40,25 @@ __all__ = [
     "PoseInterpolator",
     "PresetPoseCategory",
     "PRESET_POSES",
-    # Widgets
-    "PoseEditorWidget",
-    "JointSliderWidget",
-    "PoseLibraryWidget",
-    "GravityControlWidget",
 ]
+
+# Conditionally import PyQt6-dependent widgets
+# Note: AttributeError catches the case when QtWidgets is None and
+# class definitions try to inherit from QtWidgets.QWidget
+try:
+    from .widgets import (
+        GravityControlWidget,
+        JointSliderWidget,
+        PoseEditorWidget,
+        PoseLibraryWidget,
+    )
+
+    __all__ += [
+        "PoseEditorWidget",
+        "JointSliderWidget",
+        "PoseLibraryWidget",
+        "GravityControlWidget",
+    ]
+except (ImportError, AttributeError):
+    # PyQt6 not available - widgets not exported
+    pass
