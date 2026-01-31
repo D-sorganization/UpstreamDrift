@@ -1,4 +1,4 @@
-"""FastAPI server for Golf Modeling Suite.
+"""FastAPI server for UpstreamDrift.
 
 Provides REST API endpoints for:
 - Physics engine management and simulation
@@ -52,9 +52,9 @@ limiter = Limiter(key_func=get_remote_address)
 
 # Initialize FastAPI app
 app = FastAPI(
-    title="Golf Modeling Suite API",
+    title="UpstreamDrift API",
     description="Professional biomechanical analysis and physics simulation API",
-    version="1.0.0",
+    version="2.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
