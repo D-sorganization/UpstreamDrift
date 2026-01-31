@@ -597,12 +597,18 @@ class FiniteElementShaftModel(ShaftModel):
         L2 = L * L
         L3 = L * L * L
 
-        k = EI / L3 * np.array([
-            [12,    6*L,   -12,    6*L  ],
-            [6*L,   4*L2,  -6*L,   2*L2 ],
-            [-12,  -6*L,   12,    -6*L  ],
-            [6*L,   2*L2,  -6*L,   4*L2 ],
-        ])
+        k = (
+            EI
+            / L3
+            * np.array(
+                [
+                    [12, 6 * L, -12, 6 * L],
+                    [6 * L, 4 * L2, -6 * L, 2 * L2],
+                    [-12, -6 * L, 12, -6 * L],
+                    [6 * L, 2 * L2, -6 * L, 4 * L2],
+                ]
+            )
+        )
 
         return k
 
@@ -624,12 +630,19 @@ class FiniteElementShaftModel(ShaftModel):
         L = element.length
         L2 = L * L
 
-        m = mu * L / 420 * np.array([
-            [156,    22*L,   54,    -13*L  ],
-            [22*L,   4*L2,   13*L,  -3*L2  ],
-            [54,     13*L,   156,   -22*L  ],
-            [-13*L, -3*L2,  -22*L,   4*L2  ],
-        ])
+        m = (
+            mu
+            * L
+            / 420
+            * np.array(
+                [
+                    [156, 22 * L, 54, -13 * L],
+                    [22 * L, 4 * L2, 13 * L, -3 * L2],
+                    [54, 13 * L, 156, -22 * L],
+                    [-13 * L, -3 * L2, -22 * L, 4 * L2],
+                ]
+            )
+        )
 
         return m
 
@@ -766,12 +779,14 @@ class FiniteElementShaftModel(ShaftModel):
         # Effective force vector
         f_eff = (
             self.f_ext
-            + self.M @ (
+            + self.M
+            @ (
                 1 / (beta * dt**2) * self.u
                 + 1 / (beta * dt) * self.v
                 + (1 / (2 * beta) - 1) * self.a
             )
-            + self.C @ (
+            + self.C
+            @ (
                 gamma / (beta * dt) * self.u
                 + (gamma / beta - 1) * self.v
                 + dt * (gamma / (2 * beta) - 1) * self.a
@@ -828,7 +843,9 @@ class FiniteElementShaftModel(ShaftModel):
 
         return frequencies
 
-    def compute_static_solution(self, load_position: float, load_force: float) -> ShaftState:
+    def compute_static_solution(
+        self, load_position: float, load_force: float
+    ) -> ShaftState:
         """Compute static deflection under point load.
 
         Args:

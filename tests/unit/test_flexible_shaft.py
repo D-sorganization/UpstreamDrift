@@ -299,7 +299,9 @@ class TestFiniteElementShaftModel:
         # 22 total - 2 fixed at node 0 = 20 free DOFs
         assert fe_model.n_free_dof == 20
 
-    def test_stiffness_matrix_symmetric(self, fe_model: FiniteElementShaftModel) -> None:
+    def test_stiffness_matrix_symmetric(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
         """Stiffness matrix should be symmetric."""
         K = fe_model.K
         np.testing.assert_allclose(K, K.T, rtol=1e-10)
