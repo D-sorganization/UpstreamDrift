@@ -150,8 +150,10 @@ function ClubTrajectory({ frames }: { frames?: SimulationFrame[] }) {
   );
 }
 
-export function Scene3D({ engine, frame, frames }: Props) {
-  // Note: Using a stable key instead of key={engine} to avoid expensive Canvas recreation
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function Scene3D({ engine: _engine, frame, frames }: Props) {
+  // Note: _engine prop is currently unused but kept in props for API compatibility.
+  // Using a stable key instead of key={engine} to avoid expensive Canvas recreation
   // on engine changes. The Canvas persists and scene content updates based on new data.
   // If a full reset is needed when switching engines, consider resetting frame/frames state
   // in the parent component instead of remounting the entire Canvas.
