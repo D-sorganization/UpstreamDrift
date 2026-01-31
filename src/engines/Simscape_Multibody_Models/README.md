@@ -69,7 +69,7 @@ end
 
 ### 1. Open MATLAB
 ```matlab
-cd /path/to/Golf_Modeling_Suite/engines/Simscape_Multibody_Models
+cd /path/to/UpstreamDrift/engines/Simscape_Multibody_Models
 ```
 
 ### 2. Choose Your Model

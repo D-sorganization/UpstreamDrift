@@ -5,7 +5,7 @@ from src.shared.python.logging_config import get_logger, setup_logging
 setup_logging(use_simple_format=True)
 logger = get_logger(__name__)
 
-repo_name = "Golf Modeling Suite"
+repo_name = "UpstreamDrift"
 date = "2026-01-22"
 
 categories = {
@@ -29,7 +29,7 @@ categories = {
 output_dir = Path("docs/assessments")
 output_dir.mkdir(parents=True, exist_ok=True)
 
-# Analysis findings for Golf_Modeling_Suite_Modeling_Suite
+# Analysis findings for UpstreamDrift_Modeling_Suite
 findings = {
     "A": "Good monorepo structure with engines/ and shared/. PyQt6 and Tkinter launchers present.",
     "B": "Ruff and Black configured. .gitignore updated to include coverage artifacts.",
@@ -51,4 +51,4 @@ Category: {cat_name}
     with open(output_dir / f"Assessment_{cat_id}_Results_{date}.md", "w") as f:
         f.write(content)
 
-logger.info("Generated A-O assessments for Golf_Modeling_Suite.")
+logger.info("Generated A-O assessments for UpstreamDrift.")

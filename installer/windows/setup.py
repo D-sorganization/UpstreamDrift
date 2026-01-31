@@ -1,4 +1,4 @@
-"""Windows MSI installer setup for Golf Modeling Suite.
+"""Windows MSI installer setup for UpstreamDrift.
 
 This script creates a professional Windows MSI installer with:
 - Modular physics engine selection
@@ -22,7 +22,7 @@ try:
     from shared.python.version import __description__, __version__
 except ImportError:
     __version__ = "1.0.0"
-    __description__ = "Golf Modeling Suite - Professional Biomechanical Analysis"
+    __description__ = "UpstreamDrift - Professional Biomechanical Analysis"
 
 # Define physics engine modules
 PHYSICS_ENGINES = {
@@ -104,17 +104,17 @@ build_exe_options = {
     ],
     "include_msvcrt": True,
     "optimize": 2,
-    "build_exe": "build/golf_modeling_suite",
+    "build_exe": "build/upstream_drift",
 }
 
 # MSI options
 bdist_msi_options = {
     "upgrade_code": "{12345678-1234-5678-9012-123456789012}",
     "add_to_path": True,
-    "initial_target_dir": r"[ProgramFilesFolder]\Golf Modeling Suite",
+    "initial_target_dir": r"[ProgramFilesFolder]\UpstreamDrift",
     "install_icon": str(project_root / "shared" / "icons" / "golf_robot.ico"),
     "summary_data": {
-        "author": "Golf Modeling Suite Team",
+        "author": "UpstreamDrift Team",
         "comments": "Professional biomechanical analysis software",
         "keywords": "golf, biomechanics, physics, simulation",
     },
@@ -127,7 +127,7 @@ executables = [
         base="Win32GUI",
         target_name="GolfModelingSuite.exe",
         icon=str(project_root / "shared" / "icons" / "golf_robot.ico"),
-        shortcut_name="Golf Modeling Suite",
+        shortcut_name="UpstreamDrift",
         shortcut_dir="DesktopFolder",
     ),
     Executable(
@@ -166,12 +166,12 @@ for engine_id in available_engines:
 
 # Setup configuration
 setup(
-    name="Golf Modeling Suite",
+    name="UpstreamDrift",
     version=__version__,
     description=__description__,
     long_description="""
-Golf Modeling Suite is a professional-grade biomechanical analysis platform
-for golf swing modeling and simulation. It provides:
+UpstreamDrift is a professional-grade biomechanical analysis platform
+for physics-based modeling and simulation. It provides:
 
 • Multiple physics engines (MuJoCo, Drake, Pinocchio, MyoSuite, OpenSim)
 • Video-based pose estimation with MediaPipe
@@ -180,12 +180,12 @@ for golf swing modeling and simulation. It provides:
 • Professional visualization and analysis tools
 • REST API for cloud integration
 
-Perfect for researchers, coaches, and equipment manufacturers seeking
+Perfect for researchers and engineers seeking
 research-grade biomechanical insights.
     """.strip(),
-    author="Golf Modeling Suite Team",
-    author_email="support@golfmodelingsuite.com",
-    url="https://github.com/D-sorganization/Golf_Modeling_Suite",
+    author="UpstreamDrift Team",
+    author_email="support@upstreamdrift.dev",
+    url="https://github.com/D-sorganization/UpstreamDrift",
     license="MIT",
     executables=executables,
     options={"build_exe": build_exe_options, "bdist_msi": bdist_msi_options},

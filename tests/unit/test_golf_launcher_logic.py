@@ -364,7 +364,7 @@ class TestGolfLauncherLogic:
                     # Verify volume mount path logic: args[5] should be the
                     # '-v REPOS_ROOT:/workspace' argument.
                     # We check that the project root is mounted.
-                    assert "Golf_Modeling_Suite" in args[5] or "workspace" in args[5]
+                    assert "UpstreamDrift" in args[5] or "workspace" in args[5]
                     # Also check working directory is set to /workspace
                     assert "-w" in args
                     idx = args.index("-w")

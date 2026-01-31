@@ -425,8 +425,8 @@ jobs:
 
           ### Clone the Repository
           \`\`\`bash
-          git clone https://github.com/D-sorganization/Golf_Modeling_Suite.git
-          cd Golf_Modeling_Suite
+          git clone https://github.com/D-sorganization/UpstreamDrift.git
+          cd UpstreamDrift
           git lfs install && git lfs pull
           \`\`\`
 
