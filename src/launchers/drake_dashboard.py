@@ -11,7 +11,7 @@ from src.engines.physics_engines.drake.python.drake_physics_engine import (
     DrakePhysicsEngine,
 )
 from src.shared.python.dashboard.launcher import launch_dashboard
-from src.shared.python.gui_utils import get_qapp
+from src.shared.python.ui.qt.utils import get_qapp
 
 
 def main() -> None:

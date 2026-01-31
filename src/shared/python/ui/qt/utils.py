@@ -4,7 +4,7 @@ This module provides reusable GUI patterns to eliminate repeated code
 across launcher and dashboard implementations.
 
 Usage:
-    from src.shared.python.gui_utils import (
+    from src.shared.python.ui.qt.utils import (
         get_qapp,
         BaseApplicationWindow,
         create_dialog,
