@@ -34,8 +34,9 @@ class UIBuildHook(BuildHookInterface):
 
             try:
                 # Install dependencies
+                # Use --legacy-peer-deps to handle potential React version conflicts
                 subprocess.run(
-                    [npm_cmd, "ci"],
+                    [npm_cmd, "ci", "--legacy-peer-deps"],
                     cwd=str(ui_dir),
                     check=True,
                     capture_output=True,
