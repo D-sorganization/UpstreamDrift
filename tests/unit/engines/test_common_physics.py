@@ -76,7 +76,6 @@ class TestAerodynamicsCalculator:
     def test_drag_opposes_velocity(self, aero: AerodynamicsCalculator) -> None:
         """Test drag force opposes velocity."""
         velocity = np.array([50.0, 0.0, 10.0])
-        spin = np.zeros(3)
 
         drag = aero.compute_drag(velocity)
 

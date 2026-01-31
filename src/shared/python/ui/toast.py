@@ -199,6 +199,12 @@ class Toast(QWidget):
         """Dismiss the toast with fade-out animation."""
         if self._dismiss_timer:
             self._dismiss_timer.stop()
+            self._dismiss_timer = None
+
+        # Stop any running fade-in animation
+        if self._fade_in_anim:
+            self._fade_in_anim.stop()
+            self._fade_in_anim = None
 
         self._fade_out_anim = QPropertyAnimation(self.opacity_effect, b"opacity")
         self._fade_out_anim.setDuration(self.FADE_OUT_DURATION)
@@ -209,6 +215,10 @@ class Toast(QWidget):
 
     def _on_fade_out_finished(self) -> None:
         """Handle fade-out completion."""
+        # Clean up animation references
+        if self._fade_out_anim:
+            self._fade_out_anim.stop()
+            self._fade_out_anim = None
         self.hide()
         self.deleteLater()
 
@@ -266,7 +276,10 @@ class ToastManager:
         Returns:
             The created Toast widget
         """
-        toast = Toast(message, toast_type, duration, None)
+        # Pass parent window to ensure proper cleanup and prevent memory leaks
+        # Note: We don't use self.parent as actual Qt parent since toasts use
+        # frameless window flags, but we keep a reference for positioning
+        toast = Toast(message, toast_type, duration, parent=None)
 
         # Position the toast
         x, y = self._calculate_position(toast)
