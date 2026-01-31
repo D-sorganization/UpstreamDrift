@@ -220,6 +220,8 @@ class VideoPosePipeline:
     ) -> RegistrationResult:
         """Fit pose estimates to a biomechanical model.
 
+        Implements Issue #754: End-to-end fitting with A3 pipeline.
+
         Args:
             pose_results: List of pose estimation results
             model_path: Path to URDF/XML model file
@@ -227,32 +229,74 @@ class VideoPosePipeline:
         Returns:
             Registration result with fitted parameters
         """
-        if self.mapper is None:
-            # Import here to avoid circular imports
-            from shared.python.marker_mapping import MarkerToModelMapper
-
-            self.mapper = MarkerToModelMapper(model_path)
+        from src.shared.python.marker_mapping import RegistrationResult
 
         # Convert pose keypoints to marker format
-        # markers_data = self._convert_poses_to_markers(pose_results)
-
-        # Perform registration - skeleton implementation
-        # NOTE: Marker-to-model registration requires MarkerToModelMapper implementation
-        from shared.python.marker_mapping import RegistrationResult
-
-        registration_result = RegistrationResult(
-            success=False,
-            transformation=np.eye(4),
-            residuals=np.array([]),
-            rms_error=0.0,
-            max_error=0.0,
-            outlier_indices=[],
-            fit_quality=0.0,
-            num_markers_used=0,
-            condition_number=0.0,
+        marker_positions, marker_names, timestamps = self._convert_poses_to_markers(
+            pose_results
         )
 
-        return registration_result  # type: ignore[no-any-return]
+        if len(marker_positions) == 0:
+            logger.warning("No marker data extracted from poses")
+            return RegistrationResult(
+                success=False,
+                transformation=np.eye(4),
+                residuals=np.array([]),
+                rms_error=float("inf"),
+                max_error=float("inf"),
+                outlier_indices=[],
+                fit_quality=0.0,
+                num_markers_used=0,
+                condition_number=float("inf"),
+            )
+
+        # Initialize A3 fitting pipeline
+        from src.shared.python.data_fitting import A3FittingPipeline
+
+        pipeline = A3FittingPipeline()
+
+        # Default subject mass if not known
+        default_mass = 75.0  # kg
+
+        # Fit parameters
+        try:
+            report = pipeline.fit_from_markers(
+                marker_positions,
+                marker_names,
+                timestamps,
+                subject_mass=default_mass,
+                subject_id=model_path.stem,
+            )
+
+            # Convert A3 result to RegistrationResult for compatibility
+            return RegistrationResult(
+                success=report.fit_result.success,
+                transformation=np.eye(4),  # A3 doesn't compute rigid transform
+                residuals=report.fit_result.residuals,
+                rms_error=report.fit_result.rms_error,
+                max_error=(
+                    float(np.max(np.abs(report.fit_result.residuals)))
+                    if len(report.fit_result.residuals) > 0
+                    else 0.0
+                ),
+                outlier_indices=[],
+                fit_quality=report.fit_result.r_squared,
+                num_markers_used=len(marker_names),
+                condition_number=report.fit_result.condition_number,
+            )
+        except Exception as e:
+            logger.error(f"A3 fitting failed: {e}")
+            return RegistrationResult(
+                success=False,
+                transformation=np.eye(4),
+                residuals=np.array([]),
+                rms_error=float("inf"),
+                max_error=float("inf"),
+                outlier_indices=[],
+                fit_quality=0.0,
+                num_markers_used=0,
+                condition_number=float("inf"),
+            )
 
     def _process_frames_individually(
         self, video_path: Path, max_frames: int
@@ -384,11 +428,78 @@ class VideoPosePipeline:
 
     def _convert_poses_to_markers(
         self, pose_results: list[PoseEstimationResult]
-    ) -> Any:
-        """Convert pose keypoints to marker format for model fitting."""
-        # This would convert the pose estimation keypoints to the format
-        # expected by the marker mapping system
-        # Implementation depends on the specific marker mapping interface
+    ) -> tuple[np.ndarray, list[str], np.ndarray]:
+        """Convert pose keypoints to marker format for model fitting.
+
+        Implements Issue #754: Complete marker conversion for A3 pipeline.
+
+        Args:
+            pose_results: List of pose estimation results
+
+        Returns:
+            Tuple of (marker_positions [frames x markers x 3],
+                      marker_names [M],
+                      timestamps [frames]).
+        """
+        from src.shared.python.data_fitting import convert_poses_to_markers
+
+        if not pose_results:
+            return np.array([]), [], np.array([])
+
+        # Get keypoint names from first valid result
+        first_valid = next(
+            (r for r in pose_results if r.raw_keypoints is not None),
+            None,
+        )
+
+        if first_valid is None or first_valid.raw_keypoints is None:
+            return np.array([]), [], np.array([])
+
+        # Infer keypoint names from raw_keypoints structure
+        # Assuming raw_keypoints is dict[str, tuple[x, y, confidence]]
+        keypoint_names = list(first_valid.raw_keypoints.keys())
+
+        # Convert each frame
+        all_positions = []
+        timestamps = []
+        marker_names: list[str] | None = None
+
+        for result in pose_results:
+            if result.raw_keypoints is None:
+                continue
+
+            # Extract positions from keypoints dict
+            positions = []
+            for name in keypoint_names:
+                if name in result.raw_keypoints:
+                    kp = result.raw_keypoints[name]
+                    if isinstance(kp, (list, tuple)) and len(kp) >= 2:
+                        positions.append([kp[0], kp[1], kp[2] if len(kp) > 2 else 0.0])
+                    else:
+                        positions.append([0.0, 0.0, 0.0])
+                else:
+                    positions.append([0.0, 0.0, 0.0])
+
+            # Convert to marker format
+            markers, names = convert_poses_to_markers(
+                np.array(positions),
+                keypoint_names,
+            )
+
+            if marker_names is None:
+                marker_names = names
+
+            all_positions.append(markers)
+            timestamps.append(result.timestamp)
+
+        if not all_positions:
+            return np.array([]), [], np.array([])
+
+        return (
+            np.array(all_positions),
+            marker_names or [],
+            np.array(timestamps),
+        )
 
     def _export_results(self, result: VideoProcessingResult, output_dir: Path) -> None:
         """Export processing results to files."""
