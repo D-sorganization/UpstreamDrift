@@ -729,7 +729,9 @@ class LODGenerator:
                 error_message=str(e),
             )
 
-    def estimate_memory_savings(self, lod_result: LODGenerationResult) -> dict[str, Any]:
+    def estimate_memory_savings(
+        self, lod_result: LODGenerationResult
+    ) -> dict[str, Any]:
         """Estimate memory savings from LOD generation.
 
         Args:
@@ -764,16 +766,18 @@ class LODGenerator:
                     "faces": level.face_count,
                     "vertices": level.vertex_count,
                     "estimated_bytes": total_bytes,
-                    "savings_percent": (1 - total_bytes / original_bytes) * 100
-                    if original_bytes > 0
-                    else 0,
+                    "savings_percent": (
+                        (1 - total_bytes / original_bytes) * 100
+                        if original_bytes > 0
+                        else 0
+                    ),
                 }
             )
 
         return {
             "original_mesh": str(lod_result.source_mesh),
             "levels": estimates,
-            "total_potential_savings_percent": estimates[-1]["savings_percent"]
-            if estimates
-            else 0,
+            "total_potential_savings_percent": (
+                estimates[-1]["savings_percent"] if estimates else 0
+            ),
         }
