@@ -494,3 +494,304 @@ def create_mujoco_grip_contacts(
             "cone": "pyramidal",  # Friction cone type
         },
     }
+
+
+@dataclass
+class GripContactTimestep:
+    """Contact data for a single timestep (for export).
+
+    Attributes:
+        timestamp: Simulation time [s]
+        total_normal_force: Total normal force [N]
+        total_tangent_force_mag: Magnitude of total tangent force [N]
+        num_contacts: Number of active contacts
+        num_slipping: Number of slipping contacts
+        num_sticking: Number of sticking contacts
+        slip_ratio: Ratio of slipping contacts
+        min_slip_margin: Minimum slip margin across contacts
+        mean_slip_margin: Mean slip margin across contacts
+        center_of_pressure: Center of pressure position [m] (3,)
+        max_pressure: Maximum contact pressure [Pa]
+        mean_pressure: Mean contact pressure [Pa]
+        contact_forces: Per-contact normal forces [N] (N,)
+        contact_positions: Per-contact positions [m] (N, 3)
+        slip_velocities: Per-contact slip velocity magnitudes [m/s] (N,)
+    """
+
+    timestamp: float
+    total_normal_force: float
+    total_tangent_force_mag: float
+    num_contacts: int
+    num_slipping: int
+    num_sticking: int
+    slip_ratio: float
+    min_slip_margin: float
+    mean_slip_margin: float
+    center_of_pressure: np.ndarray
+    max_pressure: float
+    mean_pressure: float
+    contact_forces: np.ndarray
+    contact_positions: np.ndarray
+    slip_velocities: np.ndarray
+
+
+class GripContactExporter:
+    """Export grip contact data per timestep.
+
+    Issue #757: Contact forces and slip metrics exported per timestep.
+    """
+
+    def __init__(self, model: GripContactModel) -> None:
+        """Initialize exporter with grip contact model.
+
+        Args:
+            model: GripContactModel to export data from
+        """
+        self.model = model
+        self.timesteps: list[GripContactTimestep] = []
+
+    def capture_timestep(self) -> GripContactTimestep | None:
+        """Capture current model state as exportable timestep.
+
+        Returns:
+            GripContactTimestep data or None if no current state
+        """
+        state = self.model.current_state
+        if state is None:
+            return None
+
+        # Get slip margins
+        margins = self.model.check_slip_margin()
+
+        # Get pressure distribution
+        pressures = self.model.get_pressure_distribution()
+
+        # Extract per-contact data
+        contact_forces = np.array(
+            [c.normal_force for c in state.contacts]
+        )
+        contact_positions = np.array(
+            [c.position for c in state.contacts]
+        ) if state.contacts else np.zeros((0, 3))
+        slip_velocities = np.array(
+            [np.linalg.norm(c.slip_velocity) for c in state.contacts]
+        )
+
+        timestep = GripContactTimestep(
+            timestamp=state.timestamp,
+            total_normal_force=state.total_normal_force,
+            total_tangent_force_mag=float(np.linalg.norm(state.total_tangent_force)),
+            num_contacts=len(state.contacts),
+            num_slipping=state.num_slipping,
+            num_sticking=state.num_sticking,
+            slip_ratio=(
+                state.num_slipping / len(state.contacts)
+                if state.contacts else 0.0
+            ),
+            min_slip_margin=margins["min_margin"],
+            mean_slip_margin=margins["mean_margin"],
+            center_of_pressure=state.center_of_pressure.copy(),
+            max_pressure=float(np.max(pressures)) if len(pressures) > 0 else 0.0,
+            mean_pressure=float(np.mean(pressures)) if len(pressures) > 0 else 0.0,
+            contact_forces=contact_forces,
+            contact_positions=contact_positions,
+            slip_velocities=slip_velocities,
+        )
+
+        self.timesteps.append(timestep)
+        return timestep
+
+    def export_to_dict(self) -> dict:
+        """Export all captured timesteps as dictionary.
+
+        Returns:
+            Dictionary with all timestep data for JSON/CSV export
+        """
+        return {
+            "metadata": {
+                "num_timesteps": len(self.timesteps),
+                "friction_static": self.model.params.static_friction,
+                "friction_dynamic": self.model.params.dynamic_friction,
+                "grip_diameter": self.model.params.grip_diameter,
+            },
+            "timesteps": [
+                {
+                    "timestamp": ts.timestamp,
+                    "total_normal_force": ts.total_normal_force,
+                    "total_tangent_force_mag": ts.total_tangent_force_mag,
+                    "num_contacts": ts.num_contacts,
+                    "num_slipping": ts.num_slipping,
+                    "num_sticking": ts.num_sticking,
+                    "slip_ratio": ts.slip_ratio,
+                    "min_slip_margin": ts.min_slip_margin,
+                    "mean_slip_margin": ts.mean_slip_margin,
+                    "center_of_pressure": ts.center_of_pressure.tolist(),
+                    "max_pressure": ts.max_pressure,
+                    "mean_pressure": ts.mean_pressure,
+                }
+                for ts in self.timesteps
+            ],
+        }
+
+    def export_to_csv_data(self) -> list[dict]:
+        """Export timesteps as list of flat dictionaries for CSV.
+
+        Returns:
+            List of dictionaries suitable for pandas DataFrame or CSV
+        """
+        return [
+            {
+                "timestamp": ts.timestamp,
+                "total_normal_force": ts.total_normal_force,
+                "total_tangent_force_mag": ts.total_tangent_force_mag,
+                "num_contacts": ts.num_contacts,
+                "num_slipping": ts.num_slipping,
+                "num_sticking": ts.num_sticking,
+                "slip_ratio": ts.slip_ratio,
+                "min_slip_margin": ts.min_slip_margin,
+                "mean_slip_margin": ts.mean_slip_margin,
+                "cop_x": ts.center_of_pressure[0],
+                "cop_y": ts.center_of_pressure[1],
+                "cop_z": ts.center_of_pressure[2],
+                "max_pressure": ts.max_pressure,
+                "mean_pressure": ts.mean_pressure,
+            }
+            for ts in self.timesteps
+        ]
+
+    def get_summary_statistics(self) -> dict:
+        """Compute summary statistics across all timesteps.
+
+        Returns:
+            Dictionary with summary statistics
+        """
+        if not self.timesteps:
+            return {"error": "No timesteps captured"}
+
+        forces = [ts.total_normal_force for ts in self.timesteps]
+        slip_ratios = [ts.slip_ratio for ts in self.timesteps]
+        margins = [ts.min_slip_margin for ts in self.timesteps]
+
+        return {
+            "duration": self.timesteps[-1].timestamp - self.timesteps[0].timestamp,
+            "num_timesteps": len(self.timesteps),
+            "force_mean": float(np.mean(forces)),
+            "force_max": float(np.max(forces)),
+            "force_std": float(np.std(forces)),
+            "slip_ratio_mean": float(np.mean(slip_ratios)),
+            "slip_ratio_max": float(np.max(slip_ratios)),
+            "any_slip_detected": any(sr > 0 for sr in slip_ratios),
+            "min_margin_ever": float(np.min(margins)),
+            "mean_margin": float(np.mean(margins)),
+        }
+
+    def reset(self) -> None:
+        """Clear captured timesteps."""
+        self.timesteps.clear()
+
+
+@dataclass
+class PressureVisualizationData:
+    """Data structure for pressure visualization.
+
+    Issue #757: Pressure distribution visualization in UI.
+
+    Attributes:
+        positions: Contact positions in local grip frame [m] (N, 3)
+        pressures: Pressure values [Pa] (N,)
+        normalized_pressures: Pressures normalized to [0, 1] for coloring (N,)
+        max_pressure: Maximum pressure value [Pa]
+        mean_pressure: Mean pressure value [Pa]
+        grip_axis_positions: Positions projected onto grip axis [m] (N,)
+        angular_positions: Angular positions around grip [rad] (N,)
+    """
+
+    positions: np.ndarray
+    pressures: np.ndarray
+    normalized_pressures: np.ndarray
+    max_pressure: float
+    mean_pressure: float
+    grip_axis_positions: np.ndarray
+    angular_positions: np.ndarray
+
+
+def compute_pressure_visualization(
+    contacts: list[ContactPoint],
+    grip_center: np.ndarray,
+    grip_axis: np.ndarray = np.array([0.0, 0.0, 1.0]),
+    contact_area: float = 0.01,
+) -> PressureVisualizationData:
+    """Compute pressure visualization data from contacts.
+
+    Transforms contact data into format suitable for 2D pressure map
+    visualization (unwrapped cylinder or heatmap).
+
+    Args:
+        contacts: List of contact points
+        grip_center: Center position of grip [m] (3,)
+        grip_axis: Direction of grip axis [unitless] (3,)
+        contact_area: Total contact area [m²]
+
+    Returns:
+        PressureVisualizationData for rendering
+    """
+    if not contacts:
+        return PressureVisualizationData(
+            positions=np.zeros((0, 3)),
+            pressures=np.array([]),
+            normalized_pressures=np.array([]),
+            max_pressure=0.0,
+            mean_pressure=0.0,
+            grip_axis_positions=np.array([]),
+            angular_positions=np.array([]),
+        )
+
+    n_contacts = len(contacts)
+    area_per_contact = contact_area / n_contacts if n_contacts > 0 else 1.0
+
+    # Extract positions and compute pressures
+    positions = np.array([c.position for c in contacts])
+    pressures = np.array([
+        c.normal_force / area_per_contact if area_per_contact > 0 else 0.0
+        for c in contacts
+    ])
+
+    max_pressure = float(np.max(pressures)) if len(pressures) > 0 else 0.0
+    mean_pressure = float(np.mean(pressures)) if len(pressures) > 0 else 0.0
+
+    # Normalize for visualization
+    if max_pressure > 0:
+        normalized_pressures = pressures / max_pressure
+    else:
+        normalized_pressures = np.zeros(n_contacts)
+
+    # Transform to grip coordinate system
+    grip_axis = grip_axis / np.linalg.norm(grip_axis)
+    relative_pos = positions - grip_center
+
+    # Position along grip axis
+    grip_axis_positions = np.dot(relative_pos, grip_axis)
+
+    # Angular position (project onto plane perpendicular to axis)
+    # Find perpendicular vectors
+    if abs(grip_axis[2]) < 0.9:
+        perp1 = np.cross(grip_axis, np.array([0, 0, 1]))
+    else:
+        perp1 = np.cross(grip_axis, np.array([1, 0, 0]))
+    perp1 = perp1 / np.linalg.norm(perp1)
+    perp2 = np.cross(grip_axis, perp1)
+
+    # Compute angles
+    x_proj = np.dot(relative_pos, perp1)
+    y_proj = np.dot(relative_pos, perp2)
+    angular_positions = np.arctan2(y_proj, x_proj)
+
+    return PressureVisualizationData(
+        positions=positions,
+        pressures=pressures,
+        normalized_pressures=normalized_pressures,
+        max_pressure=max_pressure,
+        mean_pressure=mean_pressure,
+        grip_axis_positions=grip_axis_positions,
+        angular_positions=angular_positions,
+    )
