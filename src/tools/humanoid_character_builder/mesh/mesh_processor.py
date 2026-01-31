@@ -496,3 +496,284 @@ class PrimitiveMeshGenerator:
             return True
         except ImportError:
             return False
+
+
+@dataclass
+class LODLevel:
+    """Represents a single level of detail."""
+
+    level: int  # 0 = highest detail, higher = lower detail
+    mesh_path: Path
+    face_count: int
+    vertex_count: int
+    reduction_ratio: float  # Original faces / this level's faces
+
+
+@dataclass
+class LODGenerationResult:
+    """Result of LOD generation for a mesh."""
+
+    success: bool
+    source_mesh: Path
+    levels: list[LODLevel]
+    error_message: str | None = None
+
+
+class LODGenerator:
+    """Generate multiple Levels of Detail for mesh assets.
+
+    Creates progressively simplified versions of meshes for:
+    - Real-time rendering optimization
+    - Collision mesh generation
+    - Physics simulation performance
+    """
+
+    # Default LOD ratios (fraction of original faces to keep)
+    DEFAULT_RATIOS = [1.0, 0.5, 0.25, 0.1, 0.05]
+
+    def __init__(self):
+        """Initialize the LOD generator."""
+        self._processor = MeshProcessor()
+
+    def generate_lods(
+        self,
+        mesh_path: Path | str,
+        output_dir: Path | str,
+        lod_ratios: list[float] | None = None,
+        output_format: str = "stl",
+        preserve_original: bool = True,
+    ) -> LODGenerationResult:
+        """Generate multiple LOD levels for a mesh.
+
+        Args:
+            mesh_path: Path to source mesh file
+            output_dir: Directory to save LOD meshes
+            lod_ratios: List of reduction ratios (e.g., [1.0, 0.5, 0.25])
+                        1.0 = original, 0.5 = half faces, etc.
+            output_format: Output file format (stl, obj, ply)
+            preserve_original: If True, LOD0 is the original mesh
+
+        Returns:
+            LODGenerationResult with all generated levels
+        """
+        if not self._processor._trimesh_available:
+            return LODGenerationResult(
+                success=False,
+                source_mesh=Path(mesh_path),
+                levels=[],
+                error_message="trimesh is required for LOD generation",
+            )
+
+        mesh_path = Path(mesh_path)
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        ratios = lod_ratios or self.DEFAULT_RATIOS
+
+        try:
+            # Load source mesh
+            mesh = self._processor.load_mesh(mesh_path)
+            original_faces = len(mesh.faces)
+            original_vertices = len(mesh.vertices)
+
+            levels: list[LODLevel] = []
+
+            for i, ratio in enumerate(ratios):
+                level_name = f"{mesh_path.stem}_lod{i}"
+                output_path = output_dir / f"{level_name}.{output_format}"
+
+                if ratio >= 1.0 and preserve_original:
+                    # LOD0 - copy original
+                    self._processor.export_mesh(
+                        mesh, output_path, MeshExportConfig(format=output_format)
+                    )
+                    levels.append(
+                        LODLevel(
+                            level=i,
+                            mesh_path=output_path,
+                            face_count=original_faces,
+                            vertex_count=original_vertices,
+                            reduction_ratio=1.0,
+                        )
+                    )
+                else:
+                    # Simplify to target
+                    target_faces = max(10, int(original_faces * ratio))
+                    simplified = self._processor.simplify_mesh(
+                        mesh, target_faces=target_faces, output_path=output_path
+                    )
+
+                    levels.append(
+                        LODLevel(
+                            level=i,
+                            mesh_path=output_path,
+                            face_count=len(simplified.faces),
+                            vertex_count=len(simplified.vertices),
+                            reduction_ratio=len(simplified.faces) / original_faces,
+                        )
+                    )
+
+            logger.info(
+                f"Generated {len(levels)} LOD levels for {mesh_path.name}: "
+                f"{[f'{lod.face_count} faces' for lod in levels]}"
+            )
+
+            return LODGenerationResult(
+                success=True, source_mesh=mesh_path, levels=levels
+            )
+
+        except Exception as e:
+            logger.error(f"LOD generation failed for {mesh_path}: {e}")
+            return LODGenerationResult(
+                success=False,
+                source_mesh=mesh_path,
+                levels=[],
+                error_message=str(e),
+            )
+
+    def generate_collision_lods(
+        self,
+        mesh_path: Path | str,
+        output_dir: Path | str,
+        output_format: str = "stl",
+    ) -> LODGenerationResult:
+        """Generate LODs optimized for collision detection.
+
+        Creates simplified meshes suitable for physics simulation:
+        - LOD0: Convex hull (fastest collision)
+        - LOD1: 10% of original faces
+        - LOD2: 5% of original faces
+
+        Args:
+            mesh_path: Path to source mesh
+            output_dir: Output directory
+            output_format: File format
+
+        Returns:
+            LODGenerationResult with collision-optimized LODs
+        """
+        if not self._processor._trimesh_available:
+            return LODGenerationResult(
+                success=False,
+                source_mesh=Path(mesh_path),
+                levels=[],
+                error_message="trimesh is required",
+            )
+
+        mesh_path = Path(mesh_path)
+        output_dir = Path(output_dir)
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        try:
+            mesh = self._processor.load_mesh(mesh_path)
+            original_faces = len(mesh.faces)
+            levels: list[LODLevel] = []
+
+            # LOD0: Convex hull
+            hull = self._processor.create_convex_hull(mesh)
+            hull_path = output_dir / f"{mesh_path.stem}_collision_hull.{output_format}"
+            self._processor.export_mesh(
+                hull, hull_path, MeshExportConfig(format=output_format)
+            )
+            levels.append(
+                LODLevel(
+                    level=0,
+                    mesh_path=hull_path,
+                    face_count=len(hull.faces),
+                    vertex_count=len(hull.vertices),
+                    reduction_ratio=len(hull.faces) / original_faces,
+                )
+            )
+
+            # LOD1: 10% simplified
+            simplified_10 = self._processor.simplify_mesh(mesh, ratio=0.1)
+            path_10 = output_dir / f"{mesh_path.stem}_collision_10pct.{output_format}"
+            self._processor.export_mesh(
+                simplified_10, path_10, MeshExportConfig(format=output_format)
+            )
+            levels.append(
+                LODLevel(
+                    level=1,
+                    mesh_path=path_10,
+                    face_count=len(simplified_10.faces),
+                    vertex_count=len(simplified_10.vertices),
+                    reduction_ratio=len(simplified_10.faces) / original_faces,
+                )
+            )
+
+            # LOD2: 5% simplified
+            simplified_5 = self._processor.simplify_mesh(mesh, ratio=0.05)
+            path_5 = output_dir / f"{mesh_path.stem}_collision_5pct.{output_format}"
+            self._processor.export_mesh(
+                simplified_5, path_5, MeshExportConfig(format=output_format)
+            )
+            levels.append(
+                LODLevel(
+                    level=2,
+                    mesh_path=path_5,
+                    face_count=len(simplified_5.faces),
+                    vertex_count=len(simplified_5.vertices),
+                    reduction_ratio=len(simplified_5.faces) / original_faces,
+                )
+            )
+
+            return LODGenerationResult(
+                success=True, source_mesh=mesh_path, levels=levels
+            )
+
+        except Exception as e:
+            return LODGenerationResult(
+                success=False,
+                source_mesh=mesh_path,
+                levels=[],
+                error_message=str(e),
+            )
+
+    def estimate_memory_savings(self, lod_result: LODGenerationResult) -> dict[str, Any]:
+        """Estimate memory savings from LOD generation.
+
+        Args:
+            lod_result: Result from LOD generation
+
+        Returns:
+            Dict with memory estimation details
+        """
+        if not lod_result.success or not lod_result.levels:
+            return {"error": "No LOD data available"}
+
+        original = lod_result.levels[0]
+
+        # Estimate bytes per vertex (3 floats * 4 bytes) + per face (3 indices * 4 bytes)
+        bytes_per_vertex = 12
+        bytes_per_face = 12
+
+        estimates = []
+        for level in lod_result.levels:
+            vertex_bytes = level.vertex_count * bytes_per_vertex
+            face_bytes = level.face_count * bytes_per_face
+            total_bytes = vertex_bytes + face_bytes
+
+            original_bytes = (
+                original.vertex_count * bytes_per_vertex
+                + original.face_count * bytes_per_face
+            )
+
+            estimates.append(
+                {
+                    "level": level.level,
+                    "faces": level.face_count,
+                    "vertices": level.vertex_count,
+                    "estimated_bytes": total_bytes,
+                    "savings_percent": (1 - total_bytes / original_bytes) * 100
+                    if original_bytes > 0
+                    else 0,
+                }
+            )
+
+        return {
+            "original_mesh": str(lod_result.source_mesh),
+            "levels": estimates,
+            "total_potential_savings_percent": estimates[-1]["savings_percent"]
+            if estimates
+            else 0,
+        }
