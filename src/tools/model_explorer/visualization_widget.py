@@ -2,9 +2,8 @@
 
 import math
 import sys
-from pathlib import Path
-
 import xml.etree.ElementTree as ET
+from pathlib import Path
 
 from PyQt6.QtCore import QPointF, Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QColor, QMouseEvent, QPainter, QPen, QWheelEvent
@@ -87,16 +86,14 @@ class VisualizationWidget(QWidget):
         # Info Label (below the 3D view)
         self.info_label = QLabel("No URDF content loaded")
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.info_label.setStyleSheet(
-            """
+        self.info_label.setStyleSheet("""
             QLabel {
                 background-color: #f5f5f5;
                 color: #333;
                 padding: 5px;
                 border-top: 1px solid #ddd;
             }
-        """
-        )
+        """)
         layout.addWidget(self.info_label)
 
     def update_visualization(
