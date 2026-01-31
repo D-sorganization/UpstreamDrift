@@ -3,11 +3,11 @@
 This package provides modular plotting components:
 
 - base: MplCanvas, RecorderInterface, color schemes
-- (future) kinematics: Joint angle/velocity plots
-- (future) kinetics: Torque/force plots
-- (future) energy: Energy analysis plots
-- (future) coordination: Phase diagrams, coordination patterns
-- (future) advanced: Wavelet, RQA, Lyapunov plots
+- kinematics: Joint angle/velocity plots
+- kinetics: Torque/force plots
+- energy: Energy analysis plots
+- coordination: Phase diagrams, coordination patterns
+- advanced: Wavelet, RQA, Lyapunov plots
 
 For backward compatibility, the main GolfSwingPlotter class
 and MplCanvas are still available via:
@@ -24,7 +24,7 @@ from src.shared.python.plotting.base import (
 )
 
 # Import main plotter class from core module
-from src.shared.python.plotting_core import GolfSwingPlotter
+from src.shared.python.plotting.core import GolfSwingPlotter
 
 __all__ = [
     "GolfSwingPlotter",
