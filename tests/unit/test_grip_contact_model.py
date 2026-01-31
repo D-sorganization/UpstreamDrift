@@ -422,7 +422,9 @@ class TestPressureVisualization:
         # Pressure = Force / Area = 100 / 0.01 = 10000 Pa
         assert data.max_pressure == pytest.approx(10000.0)
         assert len(data.normalized_pressures) == 1
-        assert data.normalized_pressures[0] == pytest.approx(1.0)  # Max is normalized to 1
+        assert data.normalized_pressures[0] == pytest.approx(
+            1.0
+        )  # Max is normalized to 1
 
     def test_multiple_contacts_pressure(self) -> None:
         """Should compute pressure distribution for multiple contacts."""
@@ -584,10 +586,12 @@ class TestDynamicSwingValidation:
         positions = np.array([[0.0, 0.0, 0.0], [0.01, 0.0, 0.0]])
         normals = np.array([[0.0, 0.0, 1.0], [0.0, 0.0, 1.0]])
         # First contact slipping (high tangent), second sticking
-        forces = np.array([
-            [100.0, 0.0, 100.0],  # Exceeds friction
-            [10.0, 0.0, 100.0],   # Within friction
-        ])
+        forces = np.array(
+            [
+                [100.0, 0.0, 100.0],  # Exceeds friction
+                [10.0, 0.0, 100.0],  # Within friction
+            ]
+        )
         velocities = np.zeros((2, 3))
 
         model.update_from_mujoco(

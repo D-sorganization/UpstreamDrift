@@ -43,10 +43,10 @@ class PressureVisualizationWidget(QtWidgets.QWidget):
 
         # Color map (blue -> green -> yellow -> red)
         self.color_stops = [
-            (0.0, QtGui.QColor(0, 0, 255)),      # Blue (low)
-            (0.33, QtGui.QColor(0, 255, 0)),    # Green
+            (0.0, QtGui.QColor(0, 0, 255)),  # Blue (low)
+            (0.33, QtGui.QColor(0, 255, 0)),  # Green
             (0.66, QtGui.QColor(255, 255, 0)),  # Yellow
-            (1.0, QtGui.QColor(255, 0, 0)),     # Red (high)
+            (1.0, QtGui.QColor(255, 0, 0)),  # Red (high)
         ]
 
     def update_pressure(self, data: PressureVisualizationData) -> None:
@@ -149,8 +149,12 @@ class PressureVisualizationWidget(QtWidgets.QWidget):
             t = i / legend_rect.height()
             color = self._get_color_for_value(1.0 - t)  # Flip so high is at top
             painter.setPen(color)
-            painter.drawLine(legend_rect.left(), legend_rect.top() + i,
-                           legend_rect.right(), legend_rect.top() + i)
+            painter.drawLine(
+                legend_rect.left(),
+                legend_rect.top() + i,
+                legend_rect.right(),
+                legend_rect.top() + i,
+            )
 
 
 class ContactMetricsWidget(QtWidgets.QWidget):
@@ -884,8 +888,12 @@ class GripModellingTab(QtWidgets.QWidget):
         timestamp = data.time
 
         state = self.grip_contact_model.update_from_mujoco(
-            positions_arr, normals_arr, forces_arr, velocities_arr,
-            body_names, timestamp
+            positions_arr,
+            normals_arr,
+            forces_arr,
+            velocities_arr,
+            body_names,
+            timestamp,
         )
 
         # Capture for export
@@ -897,8 +905,9 @@ class GripModellingTab(QtWidgets.QWidget):
         else:
             grip_center = np.zeros(3)
         pressure_data = compute_pressure_visualization(
-            state.contacts, grip_center,
-            contact_area=self.grip_contact_model.params.hand_contact_area
+            state.contacts,
+            grip_center,
+            contact_area=self.grip_contact_model.params.hand_contact_area,
         )
         self.pressure_widget.update_pressure(pressure_data)
 
@@ -920,14 +929,14 @@ class GripModellingTab(QtWidgets.QWidget):
         """Export captured contact data to file."""
         if not self.contact_exporter.timesteps:
             QtWidgets.QMessageBox.warning(
-                self, "No Data",
-                "No contact data captured. Enable contact monitoring first."
+                self,
+                "No Data",
+                "No contact data captured. Enable contact monitoring first.",
             )
             return
 
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(
-            self, "Export Contact Data", "",
-            "JSON Files (*.json);;CSV Files (*.csv)"
+            self, "Export Contact Data", "", "JSON Files (*.json);;CSV Files (*.csv)"
         )
 
         if not filename:
@@ -936,6 +945,7 @@ class GripModellingTab(QtWidgets.QWidget):
         try:
             if filename.endswith(".csv"):
                 import csv
+
                 data = self.contact_exporter.export_to_csv_data()
                 if data:
                     with open(filename, "w", newline="") as f:
@@ -944,6 +954,7 @@ class GripModellingTab(QtWidgets.QWidget):
                         writer.writerows(data)
             else:
                 import json
+
                 data = self.contact_exporter.export_to_dict()
                 with open(filename, "w") as f:
                     json.dump(data, f, indent=2)
@@ -951,12 +962,13 @@ class GripModellingTab(QtWidgets.QWidget):
             # Show summary
             summary = self.contact_exporter.get_summary_statistics()
             QtWidgets.QMessageBox.information(
-                self, "Export Complete",
+                self,
+                "Export Complete",
                 f"Contact data exported to {filename}\n\n"
                 f"Timesteps: {summary['num_timesteps']}\n"
                 f"Duration: {summary['duration']:.2f}s\n"
                 f"Mean Force: {summary['force_mean']:.1f}N\n"
-                f"Slip Detected: {'Yes' if summary['any_slip_detected'] else 'No'}"
+                f"Slip Detected: {'Yes' if summary['any_slip_detected'] else 'No'}",
             )
 
         except Exception as e:

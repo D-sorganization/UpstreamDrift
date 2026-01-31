@@ -567,12 +567,12 @@ class GripContactExporter:
         pressures = self.model.get_pressure_distribution()
 
         # Extract per-contact data
-        contact_forces = np.array(
-            [c.normal_force for c in state.contacts]
+        contact_forces = np.array([c.normal_force for c in state.contacts])
+        contact_positions = (
+            np.array([c.position for c in state.contacts])
+            if state.contacts
+            else np.zeros((0, 3))
         )
-        contact_positions = np.array(
-            [c.position for c in state.contacts]
-        ) if state.contacts else np.zeros((0, 3))
         slip_velocities = np.array(
             [np.linalg.norm(c.slip_velocity) for c in state.contacts]
         )
@@ -585,8 +585,7 @@ class GripContactExporter:
             num_slipping=state.num_slipping,
             num_sticking=state.num_sticking,
             slip_ratio=(
-                state.num_slipping / len(state.contacts)
-                if state.contacts else 0.0
+                state.num_slipping / len(state.contacts) if state.contacts else 0.0
             ),
             min_slip_margin=margins["min_margin"],
             mean_slip_margin=margins["mean_margin"],
@@ -751,10 +750,12 @@ def compute_pressure_visualization(
 
     # Extract positions and compute pressures
     positions = np.array([c.position for c in contacts])
-    pressures = np.array([
-        c.normal_force / area_per_contact if area_per_contact > 0 else 0.0
-        for c in contacts
-    ])
+    pressures = np.array(
+        [
+            c.normal_force / area_per_contact if area_per_contact > 0 else 0.0
+            for c in contacts
+        ]
+    )
 
     max_pressure = float(np.max(pressures)) if len(pressures) > 0 else 0.0
     mean_pressure = float(np.mean(pressures)) if len(pressures) > 0 else 0.0
