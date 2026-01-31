@@ -14,6 +14,7 @@ from src.shared.python.flexible_shaft import (
     SHAFT_LENGTH_DRIVER,
     STEEL_DENSITY,
     STEEL_E,
+    FiniteElementShaftModel,
     ModalShaftModel,
     RigidShaftModel,
     ShaftFlexModel,
@@ -265,8 +266,217 @@ class TestShaftModelFactory:
         model = create_shaft_model(ShaftFlexModel.MODAL)
         assert isinstance(model, ModalShaftModel)
 
-    def test_fe_falls_back_to_modal(self) -> None:
-        """FE model should fall back to modal (not fully implemented)."""
+    def test_creates_fe_model(self) -> None:
+        """Factory should create FE model."""
         model = create_shaft_model(ShaftFlexModel.FINITE_ELEMENT)
-        # Currently falls back to modal
-        assert isinstance(model, ModalShaftModel)
+        assert isinstance(model, FiniteElementShaftModel)
+
+    def test_creates_fe_model_with_custom_elements(self) -> None:
+        """Factory should respect n_elements parameter for FE model."""
+        model = create_shaft_model(ShaftFlexModel.FINITE_ELEMENT, n_elements=20)
+        assert isinstance(model, FiniteElementShaftModel)
+        assert model.n_elements == 20
+
+
+class TestFiniteElementShaftModel:
+    """Tests for finite element shaft model (Issue #756)."""
+
+    @pytest.fixture
+    def fe_model(self) -> FiniteElementShaftModel:
+        """Create initialized FE model."""
+        model = FiniteElementShaftModel(n_elements=10)
+        model.initialize(create_standard_shaft())
+        return model
+
+    def test_creates_correct_elements(self, fe_model: FiniteElementShaftModel) -> None:
+        """Should create requested number of elements."""
+        assert len(fe_model.elements) == 10
+        assert fe_model.n_nodes == 11
+        assert fe_model.n_dof == 22  # 2 DOF per node
+
+    def test_free_dof_after_bc(self, fe_model: FiniteElementShaftModel) -> None:
+        """Should have correct free DOFs after boundary conditions."""
+        # 22 total - 2 fixed at node 0 = 20 free DOFs
+        assert fe_model.n_free_dof == 20
+
+    def test_stiffness_matrix_symmetric(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
+        """Stiffness matrix should be symmetric."""
+        K = fe_model.K
+        np.testing.assert_allclose(K, K.T, rtol=1e-10)
+
+    def test_mass_matrix_symmetric(self, fe_model: FiniteElementShaftModel) -> None:
+        """Mass matrix should be symmetric."""
+        M = fe_model.M
+        np.testing.assert_allclose(M, M.T, rtol=1e-10)
+
+    def test_stiffness_matrix_positive_definite(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
+        """Stiffness matrix should be positive definite."""
+        eigenvalues = np.linalg.eigvalsh(fe_model.K)
+        assert np.all(eigenvalues > 0)
+
+    def test_mass_matrix_positive_definite(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
+        """Mass matrix should be positive definite."""
+        eigenvalues = np.linalg.eigvalsh(fe_model.M)
+        assert np.all(eigenvalues > 0)
+
+    def test_initial_state_zero(self, fe_model: FiniteElementShaftModel) -> None:
+        """Initial state should be zero deflection."""
+        state = fe_model.get_state()
+
+        np.testing.assert_allclose(state.deflections, 0.0)
+        np.testing.assert_allclose(state.velocities, 0.0)
+        np.testing.assert_allclose(state.rotations, 0.0)
+
+    def test_fixed_end_always_zero(self, fe_model: FiniteElementShaftModel) -> None:
+        """Fixed end (node 0) should always have zero displacement."""
+        # Apply load at tip
+        fe_model.apply_load(fe_model.properties.length, np.array([0, 10.0, 0]))
+        fe_model.step(0.001)
+
+        state = fe_model.get_state()
+        # First node (fixed end) should be zero
+        assert state.deflections[0] == pytest.approx(0.0, abs=1e-15)
+        assert state.rotations[0] == pytest.approx(0.0, abs=1e-15)
+
+    def test_step_advances_time(self, fe_model: FiniteElementShaftModel) -> None:
+        """Step should advance simulation time."""
+        initial_time = fe_model.time
+
+        fe_model.step(0.01)
+
+        assert fe_model.time == pytest.approx(initial_time + 0.01)
+
+    def test_load_produces_deflection(self, fe_model: FiniteElementShaftModel) -> None:
+        """Applied load should produce deflection."""
+        # Apply constant load and step several times
+        for _ in range(10):
+            fe_model.apply_load(fe_model.properties.length, np.array([0, 100.0, 0]))
+            fe_model.step(0.001)
+
+        state = fe_model.get_state()
+        # Tip (last node) should have non-zero deflection
+        assert abs(state.deflections[-1]) > 0
+
+    def test_static_solution_matches_analytical(self) -> None:
+        """Static solution should approximate analytical beam theory for uniform beam.
+
+        Note: For tapered beams, the FE model properly captures varying EI
+        while the analytical formula uses average EI, so they will differ.
+        This test uses a uniform beam for fair comparison.
+        """
+        # Create uniform shaft (constant diameter) for fair comparison
+        uniform_shaft = ShaftProperties(
+            length=1.0,
+            outer_diameter=np.full(11, 0.012),  # Constant 12mm diameter
+            wall_thickness=np.full(11, 0.001),  # Constant 1mm wall
+            station_positions=np.linspace(0, 1.0, 11),
+            youngs_modulus=GRAPHITE_E,
+            density=GRAPHITE_DENSITY,
+        )
+
+        model = FiniteElementShaftModel(n_elements=20)  # More elements for accuracy
+        model.initialize(uniform_shaft)
+
+        load_pos = uniform_shaft.length
+        load_force = 10.0
+
+        # FE static solution
+        fe_state = model.compute_static_solution(load_pos, load_force)
+
+        # Analytical solution
+        analytical = compute_static_deflection(uniform_shaft, load_pos, load_force)
+
+        # Interpolate FE to match analytical station positions
+        fe_positions = np.linspace(0, uniform_shaft.length, model.n_nodes)
+        fe_at_stations = np.interp(
+            uniform_shaft.station_positions, fe_positions, fe_state.deflections
+        )
+
+        # Should match within 5% for uniform beam with fine mesh
+        np.testing.assert_allclose(fe_at_stations, analytical, rtol=0.05)
+
+    def test_natural_frequencies_positive(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
+        """Natural frequencies should be positive."""
+        frequencies = fe_model.compute_natural_frequencies(n_modes=3)
+
+        assert len(frequencies) >= 1
+        for freq in frequencies:
+            assert freq > 0
+
+    def test_natural_frequencies_ascending(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
+        """Natural frequencies should be in ascending order."""
+        frequencies = fe_model.compute_natural_frequencies(n_modes=5)
+
+        assert frequencies == sorted(frequencies)
+
+    def test_first_frequency_in_physical_range(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
+        """First natural frequency should be in physical range for golf shaft."""
+        frequencies = fe_model.compute_natural_frequencies(n_modes=1)
+
+        # Golf shaft first bending mode typically 3-20 Hz
+        assert 1 < frequencies[0] < 100
+
+    def test_energy_decays_with_damping(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
+        """System energy should decay over time due to damping."""
+        # Give initial velocity
+        fe_model.v = np.ones(fe_model.n_free_dof) * 0.01
+
+        # Compute initial kinetic energy
+        initial_ke = 0.5 * fe_model.v @ fe_model.M @ fe_model.v
+
+        # Step forward
+        for _ in range(100):
+            fe_model.step(0.001)
+
+        # Compute final kinetic energy
+        final_ke = 0.5 * fe_model.v @ fe_model.M @ fe_model.v
+        final_pe = 0.5 * fe_model.u @ fe_model.K @ fe_model.u
+        final_total = final_ke + final_pe
+
+        # Total energy should have decreased
+        assert final_total < initial_ke
+
+    def test_newmark_integration_stable(
+        self, fe_model: FiniteElementShaftModel
+    ) -> None:
+        """Newmark integration should remain stable over many steps."""
+        # Apply impulse
+        fe_model.apply_load(fe_model.properties.length, np.array([0, 1000.0, 0]))
+        fe_model.step(0.0001)
+
+        # Run for many steps
+        max_deflection = 0.0
+        for _ in range(1000):
+            fe_model.step(0.0001)
+            state = fe_model.get_state()
+            max_deflection = max(max_deflection, np.max(np.abs(state.deflections)))
+
+        # Should not blow up (reasonable deflection magnitude)
+        assert max_deflection < 1.0  # Less than 1 meter
+
+    def test_different_element_counts(self) -> None:
+        """Model should work with different element counts."""
+        for n_elem in [5, 10, 20]:
+            model = FiniteElementShaftModel(n_elements=n_elem)
+            model.initialize(create_standard_shaft())
+
+            assert len(model.elements) == n_elem
+            assert model.n_nodes == n_elem + 1
+
+            # Should be able to compute solution
+            state = model.get_state()
+            assert len(state.deflections) == n_elem + 1
