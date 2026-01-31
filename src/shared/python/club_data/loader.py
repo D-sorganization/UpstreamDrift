@@ -285,9 +285,19 @@ class ClubDataLoader:
         "club_type": ["Type", "Club Type", "club_type", "type"],
         "number": ["Number", "Club Number", "number", "No."],
         "length_inches": ["Length (in)", "Length", "length_inches", "length"],
-        "head_mass_grams": ["Head Mass (g)", "Head Mass", "head_mass_grams", "head_mass"],
+        "head_mass_grams": [
+            "Head Mass (g)",
+            "Head Mass",
+            "head_mass_grams",
+            "head_mass",
+        ],
         "loft_degrees": ["Loft (deg)", "Loft", "loft_degrees", "loft"],
-        "lie_angle_degrees": ["Lie (deg)", "Lie Angle", "lie_angle_degrees", "lie_angle"],
+        "lie_angle_degrees": [
+            "Lie (deg)",
+            "Lie Angle",
+            "lie_angle_degrees",
+            "lie_angle",
+        ],
         "shaft_flexibility": ["Shaft Flex", "Flex", "shaft_flexibility", "flex"],
         "shaft_mass_grams": ["Shaft Mass (g)", "Shaft Mass", "shaft_mass_grams"],
         "grip_mass_grams": ["Grip Mass (g)", "Grip Mass", "grip_mass_grams"],
@@ -305,10 +315,18 @@ class ClubDataLoader:
             "club_head_speed_mph",
         ],
         "ball_speed_mph": ["Ball Speed (mph)", "Ball Speed", "ball_speed_mph"],
-        "launch_angle_degrees": ["Launch Angle", "Launch (deg)", "launch_angle_degrees"],
+        "launch_angle_degrees": [
+            "Launch Angle",
+            "Launch (deg)",
+            "launch_angle_degrees",
+        ],
         "spin_rate_rpm": ["Spin Rate", "Spin (rpm)", "spin_rate_rpm"],
         "carry_distance_yards": ["Carry (yds)", "Carry", "carry_distance_yards"],
-        "total_distance_yards": ["Total (yds)", "Total Distance", "total_distance_yards"],
+        "total_distance_yards": [
+            "Total (yds)",
+            "Total Distance",
+            "total_distance_yards",
+        ],
         "attack_angle_degrees": ["Attack Angle", "AoA (deg)", "attack_angle_degrees"],
         "club_path_degrees": ["Club Path", "Path (deg)", "club_path_degrees"],
         "face_angle_degrees": ["Face Angle", "Face (deg)", "face_angle_degrees"],
@@ -380,9 +398,7 @@ class ClubDataLoader:
             List of ProPlayerData objects
         """
         if not PANDAS_AVAILABLE or not OPENPYXL_AVAILABLE:
-            raise ImportError(
-                "pandas and openpyxl are required for Excel loading"
-            )
+            raise ImportError("pandas and openpyxl are required for Excel loading")
 
         file_path = Path(file_path)
         if not file_path.exists():
@@ -424,9 +440,7 @@ class ClubDataLoader:
             ProPlayerData with trajectory information
         """
         if not PANDAS_AVAILABLE or not OPENPYXL_AVAILABLE:
-            raise ImportError(
-                "pandas and openpyxl are required for Excel loading"
-            )
+            raise ImportError("pandas and openpyxl are required for Excel loading")
 
         file_path = Path(file_path)
         if not file_path.exists():
@@ -453,11 +467,13 @@ class ClubDataLoader:
         z_col = self._find_column(df, ["z", "pos_z", "position_z"])
 
         if x_col and y_col and z_col:
-            positions = np.column_stack([
-                df[x_col].values,
-                df[y_col].values,
-                df[z_col].values,
-            ])
+            positions = np.column_stack(
+                [
+                    df[x_col].values,
+                    df[y_col].values,
+                    df[z_col].values,
+                ]
+            )
 
         # Find velocity columns (optional)
         velocities = None
@@ -466,11 +482,13 @@ class ClubDataLoader:
         vz_col = self._find_column(df, ["vz", "vel_z", "velocity_z"])
 
         if vx_col and vy_col and vz_col:
-            velocities = np.column_stack([
-                df[vx_col].values,
-                df[vy_col].values,
-                df[vz_col].values,
-            ])
+            velocities = np.column_stack(
+                [
+                    df[vx_col].values,
+                    df[vy_col].values,
+                    df[vz_col].values,
+                ]
+            )
 
         player = ProPlayerData(
             player_name=player_name,
@@ -534,9 +552,7 @@ class ClubDataLoader:
         """Get all cached players."""
         return list(self._player_cache.values())
 
-    def _find_column(
-        self, df: Any, possible_names: list[str]
-    ) -> str | None:
+    def _find_column(self, df: Any, possible_names: list[str]) -> str | None:
         """Find a column by checking multiple possible names."""
         for name in possible_names:
             for col in df.columns:

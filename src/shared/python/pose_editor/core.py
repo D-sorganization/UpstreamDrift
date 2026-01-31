@@ -110,7 +110,11 @@ class PoseEditorState:
             selected_joint_index=self.selected_joint_index,
             selected_body_name=self.selected_body_name,
             ik_enabled=self.ik_enabled,
-            ik_target_position=self.ik_target_position.copy() if self.ik_target_position is not None else None,
+            ik_target_position=(
+                self.ik_target_position.copy()
+                if self.ik_target_position is not None
+                else None
+            ),
             ik_target_body=self.ik_target_body,
             constrained_bodies=self.constrained_bodies.copy(),
         )
@@ -304,12 +308,10 @@ class BasePoseEditor(ABC):
     @abstractmethod
     def set_gravity_enabled(self, enabled: bool) -> None:
         """Enable or disable gravity."""
-        pass
 
     @abstractmethod
     def _get_gravity_magnitude(self) -> float:
         """Get current gravity magnitude."""
-        pass
 
     def select_joint(self, joint_index: int) -> None:
         """Select a joint for editing.
@@ -334,22 +336,18 @@ class BasePoseEditor(ABC):
     @abstractmethod
     def set_joint_position(self, joint_index: int, value: float | np.ndarray) -> None:
         """Set a joint position."""
-        pass
 
     @abstractmethod
     def get_joint_position(self, joint_index: int) -> float | np.ndarray:
         """Get a joint position."""
-        pass
 
     @abstractmethod
     def get_all_positions(self) -> np.ndarray:
         """Get all joint positions."""
-        pass
 
     @abstractmethod
     def set_all_positions(self, positions: np.ndarray) -> None:
         """Set all joint positions."""
-        pass
 
     def zero_velocities(self) -> None:
         """Set all joint velocities to zero.
@@ -363,12 +361,10 @@ class BasePoseEditor(ABC):
     @abstractmethod
     def set_all_velocities(self, velocities: np.ndarray) -> None:
         """Set all joint velocities."""
-        pass
 
     @abstractmethod
     def update_visualization(self) -> None:
         """Update visualization to reflect current pose."""
-        pass
 
     def get_joint_by_name(self, name: str) -> JointInfo | None:
         """Get joint info by name.

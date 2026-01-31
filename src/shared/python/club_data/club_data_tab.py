@@ -7,9 +7,7 @@ club data and player targets across all physics engines.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable
-
-import numpy as np
+from typing import Any
 
 from src.shared.python.logging_config import get_logger
 
@@ -181,7 +179,9 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
         overlay_layout = QtWidgets.QVBoxLayout(overlay_group)
 
         # Enable toggle
-        self.chk_show_target = QtWidgets.QCheckBox("Show Target Trajectory in Visualization")
+        self.chk_show_target = QtWidgets.QCheckBox(
+            "Show Target Trajectory in Visualization"
+        )
         self.chk_show_target.setToolTip(
             "Display the target player's swing path in the 3D view"
         )
@@ -352,8 +352,12 @@ class ClubDataTab(QtWidgets.QWidget):  # type: ignore[misc]
 
     def _update_club_details(self, club: Any) -> None:
         """Update club details display."""
-        self.lbl_club_length.setText(f"{club.length_inches:.1f} in ({club.length_meters:.3f} m)")
-        self.lbl_club_mass.setText(f"{club.head_mass_grams:.0f} g ({club.head_mass_kg:.3f} kg)")
+        self.lbl_club_length.setText(
+            f"{club.length_inches:.1f} in ({club.length_meters:.3f} m)"
+        )
+        self.lbl_club_mass.setText(
+            f"{club.head_mass_grams:.0f} g ({club.head_mass_kg:.3f} kg)"
+        )
         self.lbl_club_loft.setText(f"{club.loft_degrees:.1f}\u00b0")
         self.lbl_club_lie.setText(f"{club.lie_angle_degrees:.1f}\u00b0")
         self.lbl_club_moi.setText(f"{club.moment_of_inertia:.0f} g\u00b7cm\u00b2")

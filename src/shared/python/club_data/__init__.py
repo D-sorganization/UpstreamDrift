@@ -5,6 +5,7 @@ from Excel files and other sources. This module serves as the single source
 of truth for club specifications across all physics engines (Drake, Pinocchio, MuJoCo).
 """
 
+from .display import ClubDataDisplayWidget, ClubTargetOverlay
 from .loader import (
     ClubDataLoader,
     ClubSpecification,
@@ -13,7 +14,6 @@ from .loader import (
     load_club_data,
     load_pro_player_data,
 )
-from .display import ClubDataDisplayWidget, ClubTargetOverlay
 from .targets import ClubTargetManager, TargetTrajectory
 
 __all__ = [

@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import numpy as np
 
@@ -28,13 +28,11 @@ from src.shared.python.pose_editor.core import (
     BasePoseEditor,
     JointInfo,
     JointType,
-    PoseEditorState,
 )
 from src.shared.python.pose_editor.library import PoseLibrary, StoredPose
 from src.shared.python.pose_editor.widgets import (
     GravityControlWidget,
     JointSliderWidget,
-    PoseEditorWidget,
     PoseLibraryWidget,
     SignalBlocker,
 )
@@ -55,11 +53,11 @@ except ImportError:
 # Drake imports
 try:
     from pydrake.all import (
+        Context,
         JointIndex,
         MultibodyPlant,
         PrismaticJoint,
         RevoluteJoint,
-        Context,
         RigidTransform,
     )
 
@@ -183,7 +181,9 @@ class DrakePoseEditor(BasePoseEditor):
         # Initialize state arrays
         if self._context:
             self._state.joint_positions = self._plant.GetPositions(self._context).copy()
-            self._state.joint_velocities = self._plant.GetVelocities(self._context).copy()
+            self._state.joint_velocities = self._plant.GetVelocities(
+                self._context
+            ).copy()
 
         logger.info("Initialized %d joints for pose editing", len(self._joint_info))
 
@@ -198,14 +198,22 @@ class DrakePoseEditor(BasePoseEditor):
         """
         name_lower = name.lower()
 
-        if any(x in name_lower for x in ["shoulder", "humerus", "elbow", "wrist", "arm"]):
-            if any(x in name_lower for x in ["l_", "left", "l"]) and name_lower[0] == "l":
+        if any(
+            x in name_lower for x in ["shoulder", "humerus", "elbow", "wrist", "arm"]
+        ):
+            if (
+                any(x in name_lower for x in ["l_", "left", "l"])
+                and name_lower[0] == "l"
+            ):
                 return "Left Arm"
             else:
                 return "Right Arm"
 
         if any(x in name_lower for x in ["hip", "knee", "ankle", "leg", "foot"]):
-            if any(x in name_lower for x in ["l_", "left", "l"]) and name_lower[0] == "l":
+            if (
+                any(x in name_lower for x in ["l_", "left", "l"])
+                and name_lower[0] == "l"
+            ):
                 return "Left Leg"
             else:
                 return "Right Leg"
@@ -242,7 +250,9 @@ class DrakePoseEditor(BasePoseEditor):
                 if info.num_positions == 1:
                     return float(positions[info.position_index])
                 else:
-                    return positions[info.position_index:info.position_index + info.num_positions]
+                    return positions[
+                        info.position_index : info.position_index + info.num_positions
+                    ]
 
         return 0.0
 
@@ -259,7 +269,9 @@ class DrakePoseEditor(BasePoseEditor):
                 if info.num_positions == 1:
                     positions[info.position_index] = float(value)
                 else:
-                    positions[info.position_index:info.position_index + info.num_positions] = value
+                    positions[
+                        info.position_index : info.position_index + info.num_positions
+                    ] = value
 
                 self._plant.SetPositions(self._context, positions)
                 self._state.joint_positions = positions

@@ -60,7 +60,11 @@ class StoredPose:
         return {
             "name": self.name,
             "joint_positions": self.joint_positions.tolist(),
-            "joint_velocities": self.joint_velocities.tolist() if self.joint_velocities is not None else None,
+            "joint_velocities": (
+                self.joint_velocities.tolist()
+                if self.joint_velocities is not None
+                else None
+            ),
             "description": self.description,
             "category": self.category.value,
             "created_at": self.created_at,
@@ -82,7 +86,11 @@ class StoredPose:
         return cls(
             name=data.get("name", "Unnamed"),
             joint_positions=np.array(data.get("joint_positions", [])),
-            joint_velocities=np.array(data["joint_velocities"]) if data.get("joint_velocities") else None,
+            joint_velocities=(
+                np.array(data["joint_velocities"])
+                if data.get("joint_velocities")
+                else None
+            ),
             description=data.get("description", ""),
             category=category,
             created_at=data.get("created_at", ""),
@@ -345,9 +353,7 @@ class PoseLibrary:
         """
         return list(self._poses.keys())
 
-    def list_poses_by_category(
-        self, category: PresetPoseCategory
-    ) -> list[StoredPose]:
+    def list_poses_by_category(self, category: PresetPoseCategory) -> list[StoredPose]:
         """Get all poses in a category.
 
         Args:

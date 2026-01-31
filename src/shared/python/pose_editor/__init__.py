@@ -19,17 +19,17 @@ from .core import (
     PoseEditorState,
 )
 from .library import (
-    PoseLibrary,
-    StoredPose,
-    PoseInterpolator,
-    PresetPoseCategory,
     PRESET_POSES,
+    PoseInterpolator,
+    PoseLibrary,
+    PresetPoseCategory,
+    StoredPose,
 )
 from .widgets import (
-    PoseEditorWidget,
-    JointSliderWidget,
-    PoseLibraryWidget,
     GravityControlWidget,
+    JointSliderWidget,
+    PoseEditorWidget,
+    PoseLibraryWidget,
 )
 
 __all__ = [

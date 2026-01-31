@@ -5,7 +5,7 @@ Provides reusable widgets for pose manipulation across all physics engines.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -249,7 +249,9 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
     """Widget for managing pose library (save/load/export/import)."""
 
     pose_loaded = QtCore.pyqtSignal(object)  # Emits StoredPose
-    interpolation_requested = QtCore.pyqtSignal(str, str, float)  # pose_a, pose_b, alpha
+    interpolation_requested = QtCore.pyqtSignal(
+        str, str, float
+    )  # pose_a, pose_b, alpha
 
     def __init__(
         self,
@@ -425,7 +427,6 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
         """
         # Default implementation does nothing
         # Should be connected to editor to get current positions
-        pass
 
     def _on_load_pose(self) -> None:
         """Handle load pose button click."""
@@ -468,9 +469,7 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
     def _on_export(self) -> None:
         """Handle export button click."""
         if len(self.library.list_poses()) == 0:
-            QtWidgets.QMessageBox.warning(
-                self, "No Poses", "No poses to export."
-            )
+            QtWidgets.QMessageBox.warning(self, "No Poses", "No poses to export.")
             return
 
         filename, _ = QtWidgets.QFileDialog.getSaveFileName(
@@ -551,7 +550,6 @@ class PoseLibraryWidget(QtWidgets.QGroupBox):  # type: ignore[misc]
             name: Preset name
             data: Preset joint values
         """
-        pass
 
     def refresh(self) -> None:
         """Refresh the pose list from the library."""

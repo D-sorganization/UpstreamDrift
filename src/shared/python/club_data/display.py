@@ -6,8 +6,7 @@ across all physics engines (Drake, Pinocchio, MuJoCo).
 
 from __future__ import annotations
 
-from pathlib import Path
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
@@ -325,8 +324,12 @@ class ClubDataDisplayWidget(QtWidgets.QWidget):  # type: ignore[misc]
             self.lbl_moi.setText("--")
             return
 
-        self.lbl_length.setText(f"{club.length_inches:.1f} in ({club.length_meters:.3f} m)")
-        self.lbl_head_mass.setText(f"{club.head_mass_grams:.0f} g ({club.head_mass_kg:.3f} kg)")
+        self.lbl_length.setText(
+            f"{club.length_inches:.1f} in ({club.length_meters:.3f} m)"
+        )
+        self.lbl_head_mass.setText(
+            f"{club.head_mass_grams:.0f} g ({club.head_mass_kg:.3f} kg)"
+        )
         self.lbl_loft.setText(f"{club.loft_degrees:.1f}\u00b0")
         self.lbl_lie_angle.setText(f"{club.lie_angle_degrees:.1f}\u00b0")
         self.lbl_total_mass.setText(
@@ -407,9 +410,7 @@ class ClubTargetOverlay:
         """Update overlay display options."""
         self._options.update(options)
 
-    def get_trajectory_points(
-        self, num_points: int = 100
-    ) -> np.ndarray | None:
+    def get_trajectory_points(self, num_points: int = 100) -> np.ndarray | None:
         """Get interpolated trajectory points for visualization.
 
         Returns:
