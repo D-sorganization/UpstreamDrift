@@ -1,11 +1,12 @@
 name: Jules Auto-Assign Issues
 
 # Automatically comments @jules on new issues to trigger the fix workflow
-# This enables fully automated issue resolution
+# IMPORTANT: Only triggers for AUTOMATED issues, NOT manually created ones
+# To manually request Jules help, add the 'jules-triage' label to an issue
 
 on:
   issues:
-    types: [opened]
+    types: [opened, labeled]
 
 permissions:
   issues: write
@@ -13,8 +14,13 @@ permissions:
 jobs:
   auto-assign:
     runs-on: ubuntu-latest
-    # Skip if issue was created by a bot to prevent loops
-    if: "!contains(github.event.issue.user.login, '[bot]') && !contains(github.event.issue.user.login, 'github-actions')"
+    # CHANGED: Only trigger for automated issues or explicit jules-triage label
+    # - Issues created by github-actions (from automated assessments)
+    # - Issues with 'jules-triage' or 'auto-generated' labels
+    # This prevents unwanted cascade of PRs when manually creating issues
+    if: |
+      (github.event.action == 'opened' && github.event.issue.user.login == 'github-actions[bot]') ||
+      (github.event.action == 'labeled' && (github.event.label.name == 'jules-triage' || github.event.label.name == 'auto-generated'))
     steps:
       - name: Check Issue Labels
         id: check
@@ -25,7 +31,7 @@ jobs:
           # LABELS is passed via env to prevent shell injection
 
           # Skip if labeled with 'no-jules', 'question', 'documentation', or 'wontfix'
-          SKIP_LABELS="no-jules question documentation wontfix duplicate invalid"
+          SKIP_LABELS="no-jules question documentation wontfix duplicate invalid jules-assigned"
 
           for label in $SKIP_LABELS; do
             if echo "$LABELS" | jq -e ".[] | select(.name == \"$label\")" > /dev/null 2>&1; then
