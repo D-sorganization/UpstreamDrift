@@ -11,6 +11,9 @@ from humanoid_character_builder.mesh.inertia_calculator import (
     MeshInertiaCalculator,
 )
 from humanoid_character_builder.mesh.mesh_processor import (
+    LODGenerationResult,
+    LODGenerator,
+    LODLevel,
     MeshProcessor,
     MeshSegmentResult,
 )
@@ -27,4 +30,7 @@ __all__ = [
     "PrimitiveShape",
     "MeshProcessor",
     "MeshSegmentResult",
+    "LODGenerator",
+    "LODLevel",
+    "LODGenerationResult",
 ]
