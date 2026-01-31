@@ -598,7 +598,7 @@ class FrankensteinEditor(QWidget):
 
         layout.addWidget(splitter)
 
-        # Transfer buttons
+        # Transfer buttons (left-to-right operations)
         transfer_layout = QHBoxLayout()
         transfer_layout.addStretch()
 
@@ -613,6 +613,34 @@ class FrankensteinEditor(QWidget):
 
         layout.addLayout(transfer_layout)
 
+        # Comparison/manipulation buttons
+        compare_layout = QHBoxLayout()
+        compare_layout.addStretch()
+
+        self.swap_btn = QPushButton("⇄ Swap Models")
+        self.swap_btn.setToolTip("Exchange left and right models")
+
+        self.copy_right_as_left_btn = QPushButton("← Copy Right as Source")
+        self.copy_right_as_left_btn.setToolTip(
+            "Load the working model into the source panel for comparison"
+        )
+
+        self.replace_subtree_btn = QPushButton("Replace Subtree")
+        self.replace_subtree_btn.setToolTip(
+            "Replace selected subtree in working model with source selection"
+        )
+
+        self.diff_btn = QPushButton("Show Diff")
+        self.diff_btn.setToolTip("Show differences between models")
+
+        compare_layout.addWidget(self.swap_btn)
+        compare_layout.addWidget(self.copy_right_as_left_btn)
+        compare_layout.addWidget(self.replace_subtree_btn)
+        compare_layout.addWidget(self.diff_btn)
+        compare_layout.addStretch()
+
+        layout.addLayout(compare_layout)
+
         # Status
         self.status_label = QLabel("Ready - Load URDFs to begin")
         self.status_label.setStyleSheet("color: #888;")
@@ -623,10 +651,16 @@ class FrankensteinEditor(QWidget):
         # Left panel signals (source)
         self.left_panel.component_double_clicked.connect(self._on_copy_to_right)
 
-        # Button signals
+        # Transfer button signals
         self.copy_selected_btn.clicked.connect(self._on_copy_selected)
         self.copy_chain_btn.clicked.connect(self._on_copy_chain)
         self.merge_all_btn.clicked.connect(self._on_merge_all)
+
+        # Comparison/manipulation button signals
+        self.swap_btn.clicked.connect(self._on_swap_models)
+        self.copy_right_as_left_btn.clicked.connect(self._on_copy_right_as_left)
+        self.replace_subtree_btn.clicked.connect(self._on_replace_subtree)
+        self.diff_btn.clicked.connect(self._on_show_diff)
 
     def _on_copy_to_right(self, comp_type: str, name: str, element: ET.Element) -> None:
         """Copy component from left to right panel."""
@@ -777,6 +811,248 @@ class FrankensteinEditor(QWidget):
         if model:
             return model.to_xml()
         return None
+
+    def _on_swap_models(self) -> None:
+        """Swap the left and right models."""
+        left_model = self.left_panel.get_model()
+        right_model = self.right_panel.get_model()
+
+        if not left_model and not right_model:
+            self.status_label.setText("No models to swap")
+            return
+
+        # Swap models
+        self.left_panel.model = right_model
+        self.right_panel.model = left_model
+
+        # Update file labels
+        if right_model and right_model.file_path:
+            self.left_panel.file_label.setText(f"File: {right_model.file_path.name}")
+        else:
+            self.left_panel.file_label.setText(
+                "No file" if not right_model else "New model"
+            )
+
+        if left_model and left_model.file_path:
+            self.right_panel.file_label.setText(f"File: {left_model.file_path.name}")
+        else:
+            self.right_panel.file_label.setText(
+                "No file" if not left_model else "New model"
+            )
+
+        # Refresh trees
+        self.left_panel._refresh_tree()
+        self.right_panel._refresh_tree()
+
+        # Update button states
+        self.left_panel.save_btn.setEnabled(left_model is not None)
+        self.right_panel.save_btn.setEnabled(right_model is not None)
+
+        self.status_label.setText("Models swapped")
+        logger.info("Swapped left and right models")
+
+    def _on_copy_right_as_left(self) -> None:
+        """Copy the working (right) model as the source (left) model."""
+        right_model = self.right_panel.get_model()
+
+        if not right_model:
+            self.status_label.setText("No working model to copy")
+            return
+
+        # Create a deep copy of the right model
+        left_model = URDFModel(
+            file_path=None,
+            robot_name=right_model.robot_name + "_copy",
+            links={k: copy.deepcopy(v) for k, v in right_model.links.items()},
+            joints={k: copy.deepcopy(v) for k, v in right_model.joints.items()},
+            materials={k: copy.deepcopy(v) for k, v in right_model.materials.items()},
+            other_elements=[copy.deepcopy(e) for e in right_model.other_elements],
+        )
+
+        self.left_panel.model = left_model
+        self.left_panel.file_label.setText("Copied from working model")
+        self.left_panel.save_btn.setEnabled(True)
+        self.left_panel._refresh_tree()
+
+        self.status_label.setText("Working model copied to source panel for comparison")
+        logger.info("Copied working model to source panel")
+
+    def _on_replace_subtree(self) -> None:
+        """Replace a subtree in the working model with one from the source."""
+        source_model = self.left_panel.get_model()
+        target_model = self.right_panel.get_model()
+
+        if not source_model or not target_model:
+            self.status_label.setText("Both models must be loaded to replace subtree")
+            return
+
+        # Get selected link from source
+        source_item = self.left_panel.tree.currentItem()
+        if not source_item:
+            self.status_label.setText("Select a link in the source model")
+            return
+
+        source_type = source_item.data(1, Qt.ItemDataRole.UserRole)
+        if source_type != "link":
+            self.status_label.setText("Please select a link (not a joint) from source")
+            return
+
+        source_link_name = source_item.text(0)
+
+        # Get selected link from target to replace
+        target_item = self.right_panel.tree.currentItem()
+        if not target_item:
+            self.status_label.setText("Select a link in the working model to replace")
+            return
+
+        target_type = target_item.data(1, Qt.ItemDataRole.UserRole)
+        if target_type != "link":
+            self.status_label.setText(
+                "Please select a link (not a joint) from working model"
+            )
+            return
+
+        target_link_name = target_item.text(0)
+
+        # Confirm replacement
+        reply = QMessageBox.question(
+            self,
+            "Replace Subtree",
+            f"Replace '{target_link_name}' subtree with '{source_link_name}' subtree?\n\n"
+            "This will remove the target link and all its children, then copy the source subtree.",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
+        # Remove target subtree
+        self._remove_subtree(target_model, target_link_name)
+
+        # Copy source subtree
+        count = self._copy_link_chain(source_model, source_link_name)
+
+        self.right_panel._refresh_tree()
+        self.status_label.setText(
+            f"Replaced '{target_link_name}' with '{source_link_name}' ({count} components)"
+        )
+        logger.info(f"Replaced subtree {target_link_name} -> {source_link_name}")
+
+    def _remove_subtree(self, model: URDFModel, link_name: str) -> int:
+        """Recursively remove a link and all its children.
+
+        Args:
+            model: Model to remove from
+            link_name: Root link name to remove
+
+        Returns:
+            Number of components removed
+        """
+        count = 0
+
+        # Find child links
+        child_links = []
+        joints_to_remove = []
+
+        for joint_name, joint in model.joints.items():
+            parent = joint.find("parent")
+            child = joint.find("child")
+
+            if parent is not None and parent.get("link") == link_name:
+                joints_to_remove.append(joint_name)
+                if child is not None:
+                    child_link = child.get("link")
+                    if child_link:
+                        child_links.append(child_link)
+
+        # Recursively remove children
+        for child_link in child_links:
+            count += self._remove_subtree(model, child_link)
+
+        # Remove joints
+        for joint_name in joints_to_remove:
+            if joint_name in model.joints:
+                del model.joints[joint_name]
+                count += 1
+
+        # Remove the link
+        if link_name in model.links:
+            del model.links[link_name]
+            count += 1
+
+        return count
+
+    def _on_show_diff(self) -> None:
+        """Show differences between source and working models."""
+        source_model = self.left_panel.get_model()
+        target_model = self.right_panel.get_model()
+
+        if not source_model or not target_model:
+            self.status_label.setText("Both models must be loaded to show diff")
+            return
+
+        # Calculate differences
+        source_links = set(source_model.links.keys())
+        target_links = set(target_model.links.keys())
+        source_joints = set(source_model.joints.keys())
+        target_joints = set(target_model.joints.keys())
+
+        links_only_source = source_links - target_links
+        links_only_target = target_links - source_links
+        links_both = source_links & target_links
+
+        joints_only_source = source_joints - target_joints
+        joints_only_target = target_joints - source_joints
+
+        # Build diff message
+        diff_lines = [
+            "=== Model Comparison ===",
+            "",
+            f"Source: {source_model.robot_name} ({len(source_links)} links, {len(source_joints)} joints)",
+            f"Working: {target_model.robot_name} ({len(target_links)} links, {len(target_joints)} joints)",
+            "",
+        ]
+
+        if links_only_source:
+            diff_lines.append(
+                f"Links only in source: {', '.join(sorted(links_only_source))}"
+            )
+        if links_only_target:
+            diff_lines.append(
+                f"Links only in working: {', '.join(sorted(links_only_target))}"
+            )
+        if links_both:
+            diff_lines.append(f"Links in both: {', '.join(sorted(links_both))}")
+
+        diff_lines.append("")
+
+        if joints_only_source:
+            diff_lines.append(
+                f"Joints only in source: {', '.join(sorted(joints_only_source))}"
+            )
+        if joints_only_target:
+            diff_lines.append(
+                f"Joints only in working: {', '.join(sorted(joints_only_target))}"
+            )
+
+        # Show in dialog
+        diff_dialog = QDialog(self)
+        diff_dialog.setWindowTitle("Model Comparison")
+        diff_dialog.setMinimumSize(500, 400)
+
+        layout = QVBoxLayout(diff_dialog)
+
+        diff_text = QTextEdit()
+        diff_text.setReadOnly(True)
+        diff_text.setPlainText("\n".join(diff_lines))
+        layout.addWidget(diff_text)
+
+        close_btn = QPushButton("Close")
+        close_btn.clicked.connect(diff_dialog.accept)
+        layout.addWidget(close_btn)
+
+        diff_dialog.exec()
+        self.status_label.setText("Diff comparison shown")
 
 
 class StealComponentDialog(QDialog):
