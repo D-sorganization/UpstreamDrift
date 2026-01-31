@@ -136,7 +136,9 @@ class CheckpointManager:
             )
 
         self.target.restore_checkpoint(closest)
-        logger.info(f"Restored checkpoint for t={timestamp} (found t={closest.timestamp})")
+        logger.info(
+            f"Restored checkpoint for t={timestamp} (found t={closest.timestamp})"
+        )
 
     def serialize(self, path: str | Path) -> None:
         """Save checkpoint history to disk.
