@@ -1934,7 +1934,9 @@ Expected tiles: {summary['expected_tiles']}
         if use_docker and self.docker_available:
             self.lbl_status.setText(f"> Launching {model.name} in Docker...")
             self.lbl_status.setStyleSheet("color: #64b5f6;")
-            QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
+            QApplication.processEvents(
+                QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents
+            )
 
             try:
                 repo_path = getattr(model, "path", None)
@@ -1957,7 +1959,9 @@ Expected tiles: {summary['expected_tiles']}
         if not use_wsl:
             self.lbl_status.setText(f"> Checking {model.name} dependencies...")
             self.lbl_status.setStyleSheet("color: #FFD60A;")
-            QApplication.processEvents(QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents)
+            QApplication.processEvents(
+                QEventLoop.ProcessEventsFlag.ExcludeUserInputEvents
+            )
 
             # Check dependencies before launching
             deps_ok, deps_error = self._check_module_dependencies(model.type)
