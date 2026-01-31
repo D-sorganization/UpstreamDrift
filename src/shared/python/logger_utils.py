@@ -33,10 +33,8 @@ try:
     from src.shared.python.logging_config import get_logger as _get_logger
     from src.shared.python.logging_config import setup_logging as _setup_logging
     from src.shared.python.reproducibility import (
-        log_execution_time,  # Context manager - re-export directly
-    )
-    from src.shared.python.reproducibility import (
         DEFAULT_SEED,
+        log_execution_time,  # Context manager - re-export directly
     )
     from src.shared.python.reproducibility import set_seeds as _set_seeds
 
