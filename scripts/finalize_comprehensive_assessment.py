@@ -29,7 +29,7 @@ def load_general_data():
     if not SUMMARY_JSON.exists():
         logger.error(f"Summary JSON not found: {SUMMARY_JSON}")
         return None
-    with open(SUMMARY_JSON) as f:
+    with open(SUMMARY_JSON, "r") as f:
         return json.load(f)
 
 
@@ -37,7 +37,7 @@ def load_pragmatic_data():
     if not PRAGMATIC_REPORT.exists():
         logger.warning(f"Pragmatic report not found: {PRAGMATIC_REPORT}")
         return {"issues": []}
-    with open(PRAGMATIC_REPORT) as f:
+    with open(PRAGMATIC_REPORT, "r") as f:
         return json.load(f)
 
 
@@ -68,7 +68,7 @@ def calculate_scores(general_data, critical_gaps, pragmatic_issues):
         "general": general_score,
         "completist": completist_score,
         "pragmatic": pragmatic_score,
-        "unified": unified_grade,
+        "unified": unified_grade
     }
 
 
@@ -78,23 +78,19 @@ def generate_recommendations(general_data, critical_gaps, pragmatic_issues):
     # General recommendations (from low scoring categories)
     for code, info in general_data.get("category_scores", {}).items():
         if info["score"] < 6.0:
-            recommendations.append(
-                {
-                    "source": "General Assessment",
-                    "text": f"Improve {info['name']} (Score: {info['score']}) - See Assessment {code}",
-                    "priority": 10 - info["score"],
-                }
-            )
+            recommendations.append({
+                "source": "General Assessment",
+                "text": f"Improve {info['name']} (Score: {info['score']}) - See Assessment {code}",
+                "priority": 10 - info["score"]
+            })
 
     # Completist recommendations
     if critical_gaps > 0:
-        recommendations.append(
-            {
-                "source": "Completist Audit",
-                "text": f"Address {critical_gaps} Critical Implementation Gaps",
-                "priority": 9.0,
-            }
-        )
+        recommendations.append({
+            "source": "Completist Audit",
+            "text": f"Address {critical_gaps} Critical Implementation Gaps",
+            "priority": 9.0
+        })
 
     # Pragmatic recommendations
     if pragmatic_issues:
@@ -105,13 +101,11 @@ def generate_recommendations(general_data, critical_gaps, pragmatic_issues):
             principles[p] = principles.get(p, 0) + 1
 
         for p, count in principles.items():
-            recommendations.append(
-                {
-                    "source": "Pragmatic Review",
-                    "text": f"Fix {count} violations of {p} principle",
-                    "priority": 8.0,
-                }
-            )
+            recommendations.append({
+                "source": "Pragmatic Review",
+                "text": f"Fix {count} violations of {p} principle",
+                "priority": 8.0
+            })
 
     # Sort by priority
     recommendations.sort(key=lambda x: x["priority"], reverse=True)
@@ -131,13 +125,11 @@ def main():
     critical_gaps = load_completist_data()
 
     scores = calculate_scores(general_data, critical_gaps, pragmatic_issues)
-    recommendations = generate_recommendations(
-        general_data, critical_gaps, pragmatic_issues
-    )
+    recommendations = generate_recommendations(general_data, critical_gaps, pragmatic_issues)
 
     # Generate Markdown
     md = [
-        "# Comprehensive Assessment Report",
+        f"# Comprehensive Assessment Report",
         f"**Date**: {datetime.now().strftime('%Y-%m-%d')}",
         f"**Unified Grade**: {scores['unified']:.1f}/10",
         "",
@@ -159,9 +151,7 @@ def main():
 
     # Append General Assessment Summary
     md.append("### General Assessment (Categories A-O)")
-    md.append(
-        "See individual `docs/assessments/Assessment_X_Category.md` files for details."
-    )
+    md.append("See individual `docs/assessments/Assessment_X_Category.md` files for details.")
     md.append("")
 
     # Reconstruct the table from general data
@@ -176,9 +166,7 @@ def main():
     # Append Completist Details
     md.append("### Completist Audit")
     md.append(f"- **Critical Gaps**: {critical_gaps}")
-    md.append(
-        "- See `docs/assessments/completist/COMPLETIST_LATEST.md` for full report."
-    )
+    md.append("- See `docs/assessments/completist/COMPLETIST_LATEST.md` for full report.")
     md.append("")
 
     # Append Pragmatic Details
@@ -188,9 +176,7 @@ def main():
         md.append("| Principle | Severity | Title |")
         md.append("|---|---|---|")
         for issue in pragmatic_issues[:10]:
-            md.append(
-                f"| {issue.get('principle')} | {issue.get('severity')} | {issue.get('title')} |"
-            )
+            md.append(f"| {issue.get('principle')} | {issue.get('severity')} | {issue.get('title')} |")
         if len(pragmatic_issues) > 10:
             md.append(f"\n*...and {len(pragmatic_issues) - 10} more issues.*")
 
