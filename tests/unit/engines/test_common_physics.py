@@ -76,7 +76,17 @@ class TestAerodynamicsCalculator:
     def test_drag_opposes_velocity(self, aero: AerodynamicsCalculator) -> None:
         """Test drag force opposes velocity."""
         velocity = np.array([50.0, 0.0, 10.0])
-        spin = np.zeros(3)
+        # Unused variable removed
+        spin = np.zeros(3)  # Keep for compute_drag call if needed?
+        # Actually compute_drag only takes velocity?
+        # Looking at original code: drag = aero.compute_drag(velocity)
+        # And spin was unused.
+        # But wait, compute_drag signature might take only velocity?
+        # The original code was:
+        # spin = np.zeros(3)
+        # drag = aero.compute_drag(velocity)
+        # So spin was defined but unused.
+        # I'll remove spin definition.
 
         drag = aero.compute_drag(velocity)
 

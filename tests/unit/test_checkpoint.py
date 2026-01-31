@@ -5,6 +5,7 @@ simulation reversibility.
 """
 
 import tempfile
+from dataclasses import FrozenInstanceError
 from pathlib import Path
 
 import numpy as np
@@ -88,7 +89,7 @@ class TestStateCheckpoint:
             timestamp=0.0,
         )
 
-        with pytest.raises(Exception):  # FrozenInstanceError
+        with pytest.raises(FrozenInstanceError):
             checkpoint.timestamp = 1.0  # type: ignore
 
     def test_get_arrays(self) -> None:
@@ -170,14 +171,15 @@ class TestCheckpointManager:
         # Save initial state
         engine.q = np.ones(7) * 5.0
         engine.time = 1.0
-        checkpoint_id = manager.save(engine)
+        manager.save(engine)
 
         # Modify state
         engine.q = np.zeros(7)
         engine.time = 2.0
 
-        # Restore
-        manager.restore(engine, checkpoint_id)
+        # Restore (get last saved)
+        last_cp = manager.list_checkpoints()[-1]["id"]
+        manager.restore(engine, last_cp)
 
         assert np.allclose(engine.q, np.ones(7) * 5.0)
         assert engine.time == 1.0
@@ -202,7 +204,7 @@ class TestCheckpointManager:
         """Test restoring to nearest time."""
         # Save checkpoint at t=1.0
         engine.time = 1.0
-        checkpoint_id = manager.save(engine)
+        manager.save(engine)
 
         # Modify engine
         engine.time = 5.0
