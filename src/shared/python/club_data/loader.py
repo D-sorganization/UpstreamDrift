@@ -522,7 +522,7 @@ class ClubDataLoader:
 
         clubs = []
         if isinstance(data, dict):
-            for club_id, club_data in data.items():
+            for _club_id, club_data in data.items():
                 if isinstance(club_data, dict):
                     club = ClubSpecification.from_dict(club_data)
                     clubs.append(club)
@@ -564,12 +564,12 @@ class ClubDataLoader:
         """Extract club data from a DataFrame row."""
         data: dict[str, Any] = {}
 
-        for field, possible_cols in self.CLUB_COLUMN_MAPPINGS.items():
+        for field_name, possible_cols in self.CLUB_COLUMN_MAPPINGS.items():
             for col in possible_cols:
                 if col in row.index:
                     value = row[col]
                     if pd.notna(value):
-                        data[field] = value
+                        data[field_name] = value
                     break
 
         # Must have at least a name
@@ -583,16 +583,16 @@ class ClubDataLoader:
         metrics_data: dict[str, float] = {}
         player_name = None
 
-        for field, possible_cols in self.PLAYER_COLUMN_MAPPINGS.items():
+        for field_name, possible_cols in self.PLAYER_COLUMN_MAPPINGS.items():
             for col in possible_cols:
                 if col in row.index:
                     value = row[col]
                     if pd.notna(value):
-                        if field == "player_name":
+                        if field_name == "player_name":
                             player_name = str(value)
                         else:
                             try:
-                                metrics_data[field] = float(value)
+                                metrics_data[field_name] = float(value)
                             except (ValueError, TypeError):
                                 pass
                     break
